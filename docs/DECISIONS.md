@@ -2,6 +2,70 @@
 
 Registro cronologico de decisoes confirmadas do Projeto Patty.
 
+## 2026-09-14 - Modelo conceitual inicial de identidade, clientes e autorizacao
+
+### DECISAO CONFIRMADA
+
+`auth.users` nao sera cadastro principal do cliente.
+
+### DECISAO CONFIRMADA
+
+Identidade, perfil da aplicacao e cliente da consultoria sao conceitos separados.
+
+### DECISAO CONFIRMADA
+
+Cliente pode existir sem conta Auth ativa.
+
+### DECISAO CONFIRMADA
+
+Historico de cliente nao depende da existencia permanente do login.
+
+### DECISAO CONFIRMADA
+
+RLS e obrigatoria.
+
+### DECISAO CONFIRMADA
+
+Autenticacao sozinha nao concede acesso a dados.
+
+### DECISAO CONFIRMADA
+
+Autorizacao client-scoped devera verificar vinculo com o cliente.
+
+### DECISAO CONFIRMADA
+
+Roles nao serao armazenados em `user_metadata`.
+
+### DECISAO CONFIRMADA
+
+Dados cadastrais sao separados de dados clinicos/operacionais.
+
+### DECISAO CONFIRMADA
+
+Cliente nao pode administrar papeis ou assignments.
+
+## 2026-09-14 - Inicializacao da aplicacao frontend
+
+### DECISAO CONFIRMADA
+
+Esta autorizada a criacao da aplicacao web Next.js dentro do repositorio do Projeto Patty.
+
+### DECISAO CONFIRMADA
+
+A aplicacao deve usar Next.js com App Router e TypeScript.
+
+### DECISAO CONFIRMADA
+
+A inicializacao deve ser minima e nao deve implementar funcionalidades de negocio, conectar ao Supabase, implementar autenticacao, criar regras clinicas, implementar IA, gerar dieta ou treino, instalar bibliotecas de UI sem necessidade, instalar bibliotecas de estado, formularios ou icones preventivamente, introduzir n8n ou LangGraph, ou utilizar dados reais de clientes.
+
+### DECISAO CONFIRMADA
+
+A estrutura deve permanecer simples e auditavel, permitir evolucao posterior para as areas `/admin` e `/cliente`, priorizar Server Components quando aplicavel e manter acessibilidade e responsividade como requisitos desde a fundacao.
+
+### DECISAO CONFIRMADA
+
+Documentos que afirmavam que nao deveria ser criada aplicacao, UI ou dependencias descreviam a fase anterior de documentacao. Essa restricao foi substituida exclusivamente quanto a inicializacao e fundacao do frontend.
+
 ## 2026-09-14 - Fundacao documental inicial
 
 ### DECISAO CONFIRMADA
