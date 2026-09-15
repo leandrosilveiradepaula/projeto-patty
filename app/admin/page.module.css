@@ -1,0 +1,58 @@
+.metricGrid {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+}
+
+.pendingList {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.supportGrid {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+}
+
+.areaCard {
+  display: grid;
+  gap: var(--space-4);
+  align-content: space-between;
+  min-width: 0;
+}
+
+.areaTitle {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+  font-size: var(--text-title-medium-size);
+  font-weight: var(--text-title-medium-weight);
+  line-height: var(--text-title-medium-line-height);
+}
+
+.areaDescription {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-medium-size);
+  line-height: var(--text-body-medium-line-height);
+  overflow-wrap: anywhere;
+}
+
+.areaLink {
+  width: fit-content;
+  max-width: 100%;
+  color: var(--color-brand-strong);
+  font-size: var(--text-label-medium-size);
+  font-weight: var(--text-label-medium-weight);
+  line-height: var(--text-label-medium-line-height);
+  overflow-wrap: anywhere;
+  text-decoration: none;
+}
+
+.areaLink:hover {
+  text-decoration: underline;
+}

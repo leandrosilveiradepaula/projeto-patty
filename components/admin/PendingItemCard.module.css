@@ -1,0 +1,78 @@
+.pendingCard {
+  display: grid;
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+.content {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.header {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.titleGroup {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.title {
+  min-width: 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+  font-size: var(--text-title-medium-size);
+  font-weight: var(--text-title-medium-weight);
+  line-height: var(--text-title-medium-line-height);
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  color: var(--color-text-muted);
+  font-size: var(--text-body-small-size);
+  line-height: var(--text-body-small-line-height);
+  overflow-wrap: anywhere;
+}
+
+.status {
+  display: flex;
+  flex: 0 0 auto;
+  max-width: 100%;
+}
+
+.description {
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-medium-size);
+  line-height: var(--text-body-medium-line-height);
+  overflow-wrap: anywhere;
+}
+
+.action {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  justify-content: flex-start;
+}
+
+@media (max-width: 767px) {
+  .header {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .status {
+    justify-self: start;
+  }
+
+  .action {
+    align-items: stretch;
+  }
+}

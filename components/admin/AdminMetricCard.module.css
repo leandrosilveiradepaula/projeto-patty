@@ -1,0 +1,59 @@
+.metricCard {
+  display: grid;
+  gap: var(--space-4);
+  align-content: start;
+  min-height: 100%;
+}
+
+.header {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.label {
+  min-width: 0;
+  color: var(--color-text-secondary);
+  font-family: var(--font-family-heading);
+  font-size: var(--text-label-medium-size);
+  font-weight: var(--text-label-medium-weight);
+  line-height: var(--text-label-medium-line-height);
+}
+
+.status {
+  display: flex;
+  flex: 0 0 auto;
+  max-width: 100%;
+}
+
+.value {
+  min-width: 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+  font-size: var(--text-display-size);
+  font-weight: var(--text-display-weight);
+  line-height: var(--text-display-line-height);
+  overflow-wrap: anywhere;
+}
+
+.description {
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-medium-size);
+  line-height: var(--text-body-medium-line-height);
+}
+
+.action {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+@media (max-width: 767px) {
+  .value {
+    font-size: var(--text-h1-size);
+    line-height: var(--text-h1-line-height);
+  }
+}

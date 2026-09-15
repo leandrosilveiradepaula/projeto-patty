@@ -1,0 +1,104 @@
+import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Section } from "@/components/ui/Section";
+import styles from "./page.module.css";
+
+export default function AdminClienteDetailPage() {
+  const overviewItems = [
+    {
+      description: "Estrutura destinada às informações cadastrais da cliente.",
+      title: "Cadastro",
+    },
+    {
+      description:
+        "Área prevista para concentrar informações operacionais do acompanhamento.",
+      title: "Acompanhamento",
+    },
+    {
+      description:
+        "Área prevista para referências a fotos, exames e documentos com acesso controlado.",
+      title: "Arquivos e documentos",
+    },
+  ];
+
+  const profileAreas = [
+    {
+      description:
+        "Área prevista para consulta das informações coletadas na anamnese.",
+      title: "Anamnese",
+    },
+    {
+      description: "Área prevista para histórico de avaliações e reavaliações.",
+      title: "Avaliações",
+    },
+    {
+      description: "Área prevista para acompanhamento histórico da evolução.",
+      title: "Evolução",
+    },
+    {
+      description:
+        "Área prevista para fotos, exames e documentos com acesso controlado.",
+      title: "Arquivos",
+    },
+    {
+      description: "Área prevista para versões de protocolos e seu histórico.",
+      title: "Protocolos",
+    },
+    {
+      description: "Área prevista para conteúdos liberados para a cliente.",
+      title: "Conteúdos",
+    },
+    {
+      description:
+        "Área prevista para registro cronológico de eventos relevantes do acompanhamento.",
+      title: "Histórico",
+    },
+  ];
+
+  return (
+    <>
+      <ClientSummaryHeader
+        actions={<Button variant="outline">Ação secundária</Button>}
+        meta="Identificador de demonstração"
+        name="Cliente Demonstração 001"
+        secondary="Registro sintético para validação da interface."
+        status={<Badge variant="neutral">Demonstração</Badge>}
+        visual={<span>01</span>}
+      />
+      <Section
+        action={<Badge variant="neutral">Dados sintéticos para validação da interface.</Badge>}
+        description="Blocos estruturais do cadastro individual, ainda sem dados integrados."
+        title="Visão geral"
+      >
+        <div className={styles.overviewGrid}>
+          {overviewItems.map((item) => (
+            <Card className={styles.infoCard} key={item.title}>
+              <h3 className={styles.cardTitle}>{item.title}</h3>
+              <p className={styles.cardDescription}>{item.description}</p>
+            </Card>
+          ))}
+        </div>
+      </Section>
+      <Section
+        description="Mapa visual das áreas previstas para o acompanhamento. Estes blocos ainda não são navegação nem abas."
+        title="Áreas do acompanhamento"
+      >
+        <div className={styles.areaGrid}>
+          {profileAreas.map((area) => (
+            <Card className={styles.infoCard} key={area.title} variant="subtle">
+              <h3 className={styles.cardTitle}>{area.title}</h3>
+              <p className={styles.cardDescription}>{area.description}</p>
+            </Card>
+          ))}
+        </div>
+      </Section>
+      <EmptyState
+        description="Dados operacionais ainda não integrados nesta etapa da interface."
+        title="Integração futura"
+      />
+    </>
+  );
+}

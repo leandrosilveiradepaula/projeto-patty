@@ -1,0 +1,36 @@
+.overviewGrid {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+}
+
+.areaGrid {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+}
+
+.infoCard {
+  display: grid;
+  gap: var(--space-3);
+  align-content: start;
+  min-width: 0;
+}
+
+.cardTitle {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+  font-size: var(--text-title-medium-size);
+  font-weight: var(--text-title-medium-weight);
+  line-height: var(--text-title-medium-line-height);
+  overflow-wrap: anywhere;
+}
+
+.cardDescription {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-medium-size);
+  line-height: var(--text-body-medium-line-height);
+  overflow-wrap: anywhere;
+}
