@@ -4,23 +4,27 @@ import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
+import Link from "next/link";
 import styles from "./page.module.css";
 
 const demoEvaluations = [
   {
     clientLabel: "Cliente Demonstração 001",
     evaluationDate: "12/09/2026",
+    href: "/admin/avaliacoes/demo-001",
     meta: "Registro sintético para validar a leitura do histórico.",
   },
   {
     clientLabel: "Cliente Demonstração 002",
     evaluationDate: "05/09/2026",
-    meta: "Item de demonstração sem interpretação operacional associada.",
+    href: "/admin/avaliacoes/demo-002",
+    meta: "Item de demonstração sem regra operacional associada.",
   },
   {
     clientLabel:
       "Cliente Demonstração 003 com identificação longa para validação responsiva",
     evaluationDate: "28/08/2026",
+    href: "/admin/avaliacoes/demo-003",
     meta: "Registro neutro para validar quebra de texto em telas estreitas.",
   },
 ];
@@ -47,6 +51,11 @@ export default function AdminAvaliacoesPage() {
                 clientLabel={evaluation.clientLabel}
                 evaluationDate={evaluation.evaluationDate}
                 meta={evaluation.meta}
+                action={
+                  <Link className={styles.actionLink} href={evaluation.href}>
+                    Ver avaliação
+                  </Link>
+                }
                 status={<Badge variant="neutral">Demo</Badge>}
               />
             </li>
