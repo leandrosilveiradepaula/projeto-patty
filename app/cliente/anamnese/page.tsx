@@ -1,6 +1,8 @@
 import { Card } from "@/components/ui/Card";
+import { FormField } from "@/components/ui/FormField";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
+import { TextInput } from "@/components/ui/TextInput";
 import Link from "next/link";
 import styles from "./page.module.css";
 
@@ -86,6 +88,25 @@ const anamneseSections = [
   },
 ];
 
+const cadastroFields = [
+  {
+    id: "anamnese-cidade",
+    label: "Cidade",
+  },
+  {
+    id: "anamnese-telefone",
+    label: "Telefone",
+  },
+  {
+    id: "anamnese-email",
+    label: "Email",
+  },
+  {
+    id: "anamnese-instagram",
+    label: "Instagram",
+  },
+];
+
 export default function ClienteAnamnesePage() {
   return (
     <>
@@ -133,9 +154,31 @@ export default function ClienteAnamnesePage() {
                   <p className={styles.sectionDescription}>
                     {section.description}
                   </p>
-                  <p className={styles.sectionState}>
-                    Os campos desta seção serão definidos em etapa posterior.
-                  </p>
+                  {section.id === "cadastro" ? (
+                    <>
+                      <p className={styles.prototypeNote}>
+                        Campos do formulário atual em validação para migração.
+                        Os dados preenchidos nesta versão não são salvos.
+                      </p>
+                      <div className={styles.cadastroGrid}>
+                        {cadastroFields.map((field) => (
+                          <FormField
+                            id={field.id}
+                            key={field.id}
+                            label={field.label}
+                          >
+                            {(fieldProps) => (
+                              <TextInput {...fieldProps} type="text" />
+                            )}
+                          </FormField>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <p className={styles.sectionState}>
+                      Os campos desta seção serão definidos em etapa posterior.
+                    </p>
+                  )}
                 </Card>
               ))}
             </div>
