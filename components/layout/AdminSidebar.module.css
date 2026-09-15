@@ -1,0 +1,131 @@
+.nav {
+  display: grid;
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+.brand {
+  color: var(--color-brand-strong);
+  font-family: var(--font-family-heading);
+  font-size: var(--text-title-medium-size);
+  font-weight: var(--text-title-medium-weight);
+  line-height: var(--text-title-medium-line-height);
+}
+
+.list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  border-radius: var(--radius-medium);
+  color: var(--color-text-secondary);
+  font-family: var(--font-family-heading);
+  font-size: var(--text-body-medium-size);
+  font-weight: var(--text-title-medium-weight);
+  line-height: var(--text-body-medium-line-height);
+  padding: var(--space-3) var(--space-4);
+  text-decoration: none;
+}
+
+.link:hover {
+  background: var(--color-surface-low);
+  color: var(--color-text-primary);
+}
+
+.link:focus-visible,
+.menuButton:focus-visible,
+.closeButton:focus-visible,
+.backdrop:focus-visible {
+  outline: 3px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+.link[data-active="true"] {
+  background: var(--color-surface-low);
+  color: var(--color-brand-strong);
+}
+
+.link[data-active="true"]::before {
+  position: absolute;
+  inset-block: var(--space-3);
+  left: var(--space-2);
+  width: 4px;
+  border-radius: var(--radius-full);
+  background: var(--color-brand);
+  content: "";
+}
+
+.mobileNavigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.menuButton,
+.closeButton {
+  min-height: 44px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  font-family: var(--font-family-heading);
+  font-size: var(--text-body-medium-size);
+  font-weight: var(--text-title-medium-weight);
+  line-height: var(--text-body-medium-line-height);
+  padding: var(--space-2) var(--space-4);
+}
+
+.menuButton:hover,
+.closeButton:hover {
+  background: var(--color-surface-low);
+}
+
+.drawerLayer {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  border: 0;
+  background: rgb(18 30 28 / 42%);
+  cursor: pointer;
+}
+
+.drawer {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  align-content: start;
+  gap: var(--space-6);
+  width: min(100vw, 320px);
+  max-height: 100svh;
+  overflow-y: auto;
+  border-right: 1px solid var(--color-border);
+  background: var(--color-surface);
+  padding: var(--space-5);
+}
+
+.closeButton {
+  justify-self: start;
+}
+
+@media (min-width: 1280px) {
+  .mobileNavigation {
+    display: none;
+  }
+}

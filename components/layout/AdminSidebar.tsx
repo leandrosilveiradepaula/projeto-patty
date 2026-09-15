@@ -1,0 +1,136 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useId, useState } from "react";
+import styles from "./AdminSidebar.module.css";
+
+type AdminNavigationItem = {
+  href: string;
+  label: string;
+};
+
+const adminNavigationItems: AdminNavigationItem[] = [
+  { href: "/admin", label: "Dashboard" },
+  { href: "/admin/clientes", label: "Clientes" },
+  { href: "/admin/avaliacoes", label: "Avaliações" },
+  { href: "/admin/protocolos", label: "Protocolos" },
+  { href: "/admin/conteudos", label: "Conteúdos" },
+  { href: "/admin/exercicios", label: "Exercícios" },
+  { href: "/admin/pendencias", label: "Pendências" },
+  { href: "/admin/configuracoes", label: "Configurações" },
+];
+
+export function isAdminNavigationItemActive(pathname: string, href: string) {
+  if (href === "/admin") {
+    return pathname === href;
+  }
+
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+type AdminSidebarProps = {
+  mode?: "desktop" | "mobile";
+};
+
+export function AdminSidebar({ mode = "desktop" }: AdminSidebarProps) {
+  const pathname = usePathname();
+  const drawerId = useId();
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen]);
+
+  if (mode === "mobile") {
+    return (
+      <div className={styles.mobileNavigation}>
+        <button
+          aria-controls={drawerId}
+          aria-expanded={isOpen}
+          className={styles.menuButton}
+          onClick={() => setIsOpen(true)}
+          type="button"
+        >
+          Abrir navegação
+        </button>
+        {isOpen ? (
+          <div className={styles.drawerLayer}>
+            <div
+              aria-label="Navegação administrativa"
+              className={styles.drawer}
+              id={drawerId}
+            >
+              <SidebarContent
+                onNavigate={() => setIsOpen(false)}
+                pathname={pathname}
+              />
+              <button
+                className={styles.closeButton}
+                onClick={() => setIsOpen(false)}
+                type="button"
+              >
+                Fechar navegação
+              </button>
+            </div>
+            <button
+              aria-label="Fechar ao clicar fora da navegação"
+              className={styles.backdrop}
+              onClick={() => setIsOpen(false)}
+              type="button"
+            />
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+
+  return <SidebarContent pathname={pathname} />;
+}
+
+type SidebarContentProps = {
+  onNavigate?: () => void;
+  pathname: string;
+};
+
+function SidebarContent({ onNavigate, pathname }: SidebarContentProps) {
+  return (
+    <nav aria-label="Navegação administrativa principal" className={styles.nav}>
+      <div className={styles.brand}>Corpo &amp; Mente</div>
+      <ul className={styles.list}>
+        {adminNavigationItems.map((item) => {
+          const isActive = isAdminNavigationItemActive(pathname, item.href);
+
+          return (
+            <li key={item.href}>
+              <Link
+                aria-current={isActive ? "page" : undefined}
+                className={styles.link}
+                data-active={isActive ? "true" : undefined}
+                href={item.href}
+                onClick={onNavigate}
+              >
+                {item.label}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
+  );
+}
