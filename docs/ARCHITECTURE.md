@@ -19,7 +19,13 @@ A arquitetura definida para o projeto e:
 
 Nao introduzir FastAPI ou outros servicos neste momento.
 
-Nao criar aplicacao, dependencias, banco, Supabase, APIs, UI ou IA nesta primeira tarefa.
+Esta autorizada a inicializacao minima da aplicacao web Next.js para a fundacao do frontend.
+
+Essa autorizacao nao inclui banco, Supabase, autenticacao, APIs de negocio, UI de negocio, IA, regras clinicas, n8n, LangGraph ou servicos adicionais.
+
+### DECISAO HISTORICA SUBSTITUIDA
+
+A restricao anterior de nao criar aplicacao, UI ou dependencias pertencia a fase inicial de documentacao e foi substituida em 2026-09-14 exclusivamente para a inicializacao e fundacao do frontend.
 
 ## Principios arquiteturais
 

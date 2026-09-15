@@ -1,0 +1,242 @@
+:root {
+  /* Core palette */
+  --color-brand-strong: #003e1c;
+  --color-brand: #1e5631;
+  --color-accent: #396a1d;
+  --color-text-primary: #121e1c;
+  --color-text-secondary: #414941;
+  --color-text-muted: #717970;
+  --color-canvas: #effcf9;
+  --color-surface: #ffffff;
+  --color-surface-low: #e9f7f3;
+  --color-surface-mid: #e3f1ed;
+  --color-surface-high: #ddebe8;
+  --color-border: #c0c9be;
+  --color-danger: #ba1a1a;
+  --color-danger-soft: #ffdad6;
+  --color-warning: #6b4f00;
+  --color-warning-soft: #fff3c4;
+  --color-info: #0f4f6a;
+  --color-info-soft: #d8f0f8;
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* Radius scale */
+  --radius-small: 8px;
+  --radius-medium: 12px;
+  --radius-large: 16px;
+  --radius-extra-large: 24px;
+  --radius-full: 999px;
+
+  /* Breakpoints: mobile < 768px, tablet 768px-1279px, desktop >= 1280px. */
+  --breakpoint-tablet: 768px;
+  --breakpoint-desktop: 1280px;
+
+  /* Typography families */
+  --font-family-body: var(--font-body), Inter, Arial, sans-serif;
+  --font-family-heading:
+    var(--font-heading), "Plus Jakarta Sans", Arial, sans-serif;
+
+  /* Typography scale */
+  --text-display-size: 2.75rem;
+  --text-display-line-height: 3.25rem;
+  --text-display-weight: 700;
+
+  --text-h1-size: 2rem;
+  --text-h1-line-height: 2.5rem;
+  --text-h1-weight: 600;
+
+  --text-h2-size: 1.5rem;
+  --text-h2-line-height: 2rem;
+  --text-h2-weight: 600;
+
+  --text-h3-size: 1.25rem;
+  --text-h3-line-height: 1.75rem;
+  --text-h3-weight: 600;
+
+  --text-title-large-size: 1.125rem;
+  --text-title-large-line-height: 1.625rem;
+  --text-title-large-weight: 600;
+
+  --text-title-medium-size: 1rem;
+  --text-title-medium-line-height: 1.5rem;
+  --text-title-medium-weight: 600;
+
+  --text-body-large-size: 1rem;
+  --text-body-large-line-height: 1.625rem;
+  --text-body-large-weight: 400;
+
+  --text-body-medium-size: 0.875rem;
+  --text-body-medium-line-height: 1.375rem;
+  --text-body-medium-weight: 400;
+
+  --text-body-small-size: 0.8125rem;
+  --text-body-small-line-height: 1.25rem;
+  --text-body-small-weight: 400;
+
+  --text-label-medium-size: 0.8125rem;
+  --text-label-medium-line-height: 1.125rem;
+  --text-label-medium-weight: 600;
+
+  --text-label-small-size: 0.75rem;
+  --text-label-small-line-height: 1rem;
+  --text-label-small-weight: 600;
+
+  color-scheme: light;
+  background: var(--color-canvas);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-body);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  background: var(--color-canvas);
+}
+
+body {
+  min-height: 100%;
+  margin: 0;
+  background: var(--color-canvas);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-body);
+  font-size: var(--text-body-large-size);
+  font-weight: var(--text-body-large-weight);
+  line-height: var(--text-body-large-line-height);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: inherit;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.18em;
+}
+
+img,
+picture,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+  letter-spacing: 0;
+}
+
+p {
+  margin: 0;
+}
+
+.page-shell {
+  display: grid;
+  min-height: 100svh;
+  place-items: center;
+  padding: var(--space-6);
+}
+
+.intro {
+  width: min(100%, 680px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-extra-large);
+  background: var(--color-surface);
+  padding: var(--space-8);
+}
+
+.eyebrow {
+  margin: 0 0 var(--space-3);
+  color: var(--color-brand);
+  font-family: var(--font-family-heading);
+  font-size: var(--text-label-medium-size);
+  font-weight: var(--text-label-medium-weight);
+  letter-spacing: 0;
+  text-transform: uppercase;
+  line-height: var(--text-label-medium-line-height);
+}
+
+h1 {
+  font-size: var(--text-display-size);
+  font-weight: var(--text-display-weight);
+  line-height: var(--text-display-line-height);
+}
+
+.intro p:not(.eyebrow) {
+  max-width: 62ch;
+  margin-top: var(--space-5);
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-large-size);
+  font-weight: var(--text-body-large-weight);
+  line-height: var(--text-body-large-line-height);
+}
+
+.token-note {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  margin-top: var(--space-8);
+  border-radius: var(--radius-full);
+  background: var(--color-surface-low);
+  color: var(--color-brand-strong);
+  font-family: var(--font-family-heading);
+  font-size: var(--text-label-small-size);
+  font-weight: var(--text-label-small-weight);
+  line-height: var(--text-label-small-line-height);
+  padding: var(--space-2) var(--space-3);
+}
+
+@media (max-width: 767px) {
+  .page-shell {
+    align-items: start;
+    padding: var(--space-4);
+  }
+
+  .intro {
+    padding: var(--space-6);
+  }
+
+  h1 {
+    font-size: var(--text-h1-size);
+    line-height: var(--text-h1-line-height);
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1279px) {
+  .intro {
+    padding: var(--space-10);
+  }
+}
+
+@media (min-width: 1280px) {
+  .intro {
+    padding: var(--space-12);
+  }
+}

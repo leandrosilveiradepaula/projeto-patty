@@ -14,23 +14,24 @@ O repositorio inicia com documentacao como fonte de verdade para orientar as pro
 
 ### DECISAO CONFIRMADA
 
-Esta primeira etapa cria somente a fundacao documental do repositorio.
+O repositorio iniciou com uma fundacao documental.
+
+Em 2026-09-14, foi aprovada a inicializacao minima da aplicacao frontend em Next.js, preservando a documentacao como fonte de verdade.
 
 ### FORA DE ESCOPO
 
-Nesta etapa nao devem ser criados:
+Continuam fora de escopo nesta etapa:
 
-- aplicacao Next.js;
 - banco de dados;
 - projeto Supabase;
 - migrations ou SQL;
 - Storage;
 - autenticacao;
-- UI;
 - APIs;
 - fluxos de IA;
 - configuracoes de n8n, LangGraph ou VPS;
-- dependencias de runtime.
+- regras clinicas, nutricionais, comportamentais ou de treino;
+- funcionalidades de negocio ainda nao especificadas.
 
 ## Fonte de verdade
 
@@ -56,6 +57,6 @@ Decisoes mais recentes, quando registradas na documentacao, prevalecem sobre con
 
 ### DECISAO CONFIRMADA
 
-O repositorio esta pronto para a proxima tarefa documental de modelo de dados e RLS.
+O repositorio esta autorizado a conter a aplicacao web Next.js minima para a fundacao visual do frontend.
 
-Nenhum codigo de aplicacao, dependencia, segredo ou dado real deve existir neste momento.
+Nenhum segredo, dado real, integracao Supabase, autenticacao, regra clinica, UI de negocio ou fluxo de IA deve existir neste momento.

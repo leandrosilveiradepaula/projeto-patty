@@ -1,0 +1,20 @@
+.card {
+  min-width: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
+  padding: var(--space-6);
+}
+
+.default {
+  background: var(--color-surface);
+}
+
+.subtle {
+  background: var(--color-surface-low);
+}
+
+@media (max-width: 767px) {
+  .card {
+    padding: var(--space-4);
+  }
+}
