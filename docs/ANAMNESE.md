@@ -51,10 +51,10 @@ Os codigos `ANAM-000` a `ANAM-046` identificam itens do inventario historico, na
 | codigo_provisorio | texto_formulario_atual | tipo_observado | opcoes_observadas | obrigatorio_no_formulario_atual | origem_evidencia | categoria_provisoria | sensibilidade | uso_ia | decisao_novo_app | observacoes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | ANAM-000 | Conteudo de abertura / onboarding do formulario atual | conteudo informativo | nao se aplica | nao confirmado | `a96b6227-31ff-4500-b872-68361b6c7043.png` | Historico de vida | baixa | nao necessario por padrao, decisao formal pendente | pendente de validacao | Nao e campo de resposta. Nao transformar automaticamente em texto do app. |
-| ANAM-001 | Cidade | resposta curta | nao observado | sim | `7d09fa22-01de-4c3c-aeb9-f87cd6e14446.png` | Cadastro | dado cadastral | a definir / nao necessario por padrao, decisao formal pendente | pendente de validacao | Obrigatoriedade registrada apenas como historico do Google Forms. |
-| ANAM-002 | Telefone | resposta curta | nao observado | sim | `7d09fa22-01de-4c3c-aeb9-f87cd6e14446.png` | Cadastro | dado cadastral pessoal | a definir / nao necessario por padrao, decisao formal pendente | pendente de validacao | Pode duplicar dados de perfil/cadastro; precisa de decisao propria. |
-| ANAM-003 | Email | resposta curta | nao observado | sim | `7d09fa22-01de-4c3c-aeb9-f87cd6e14446.png` | Cadastro | dado cadastral pessoal | a definir / nao necessario por padrao, decisao formal pendente | pendente de validacao | Pode duplicar identidade/autenticacao/perfil; precisa de decisao propria. |
-| ANAM-004 | Instagram | resposta curta | nao observado | sim | `7d09fa22-01de-4c3c-aeb9-f87cd6e14446.png`; `DATA_MODEL.md` | Cadastro | dado cadastral informativo | nao enviar por padrao | pendente de validacao | Produto confirma que Instagram e informativo e nao entra na IA por padrao. |
+| ANAM-001 | Cidade | resposta curta | nao observado | sim | `7d09fa22-01de-4c3c-aeb9-f87cd6e14446.png` | Cadastro | dado cadastral | a definir / nao necessario por padrao, decisao formal pendente | pendente de validacao | Obrigatoriedade registrada apenas como historico do Google Forms. Ownership conceitual: cadastro atual da cliente; eventual copia na anamnese sera snapshot historico, nao fonte mestre. UI final ainda pendente. |
+| ANAM-002 | Telefone | resposta curta | nao observado | sim | `7d09fa22-01de-4c3c-aeb9-f87cd6e14446.png` | Cadastro | dado cadastral pessoal | a definir / nao necessario por padrao, decisao formal pendente | pendente de validacao | Ownership conceitual: cadastro atual da cliente. Nao pertence primariamente ao Auth e nao implica WhatsApp. UI final ainda pendente. |
+| ANAM-003 | Email | resposta curta | nao observado | sim | `7d09fa22-01de-4c3c-aeb9-f87cd6e14446.png` | Cadastro | dado cadastral pessoal | a definir / nao necessario por padrao, decisao formal pendente | pendente de validacao | Distinguir email de autenticacao, pertencente ao Auth, de email de contato, pertencente ao cadastro da cliente. Eventual valor na anamnese sera snapshot historico. UI final ainda pendente. |
+| ANAM-004 | Instagram | resposta curta | nao observado | sim | `7d09fa22-01de-4c3c-aeb9-f87cd6e14446.png`; `DATA_MODEL.md` | Cadastro | dado cadastral informativo | nao enviar por padrao | pendente de validacao | Ownership conceitual: cadastro informativo da cliente. Produto confirma que Instagram e informativo e nao entra na IA por padrao. UI final ainda pendente. |
 | ANAM-005 | Ombros (toda circunferencia) | resposta curta/numerica nao confirmada | nao observado | sim | `5e9ed17c-bc01-4c01-989a-f74ffc05ef2e.png` | Medidas | dado corporal sensivel | a definir campo a campo | pendente de validacao | Decidir se pertence a resposta de anamnese, registro inicial de medicao/avaliacao, ou fluxo separado. |
 | ANAM-006 | Panturrilha | resposta curta/numerica nao confirmada | nao observado | sim | `5e9ed17c-bc01-4c01-989a-f74ffc05ef2e.png` | Medidas | dado corporal sensivel | a definir campo a campo | pendente de validacao | Decidir se pertence a resposta de anamnese, registro inicial de medicao/avaliacao, ou fluxo separado. |
 | ANAM-007 | Peso atual | resposta curta/numerica nao confirmada | nao observado | sim | `5e9ed17c-bc01-4c01-989a-f74ffc05ef2e.png` | Medidas | dado corporal sensivel | a definir campo a campo | pendente de validacao | Nao define regra de avaliacao ou evolucao. |
@@ -145,6 +145,19 @@ Os codigos `ANAM-000` a `ANAM-046` identificam itens do inventario historico, na
 - A pergunta de consumo diario de agua foi classificada provisoriamente em Rotina, sem criar regra de hidratacao.
 - Os uploads podem corresponder a fotos, exames ou documentos, mas a finalidade de cada arquivo ainda precisa ser identificada.
 
+## Prototipo atual da UI
+
+Os campos Cidade, Telefone, Email e Instagram atualmente demonstrados em `/cliente/anamnese` sao prototipo de migracao do formulario historico.
+
+Essa demonstracao nao define que:
+
+- a cliente editara seu cadastro definitivo dentro da anamnese;
+- os valores serao persistidos como respostas da anamnese;
+- todos os campos continuarao visiveis nessa tela na versao final;
+- email de autenticacao e email de contato serao sincronizados automaticamente.
+
+A UI podera ser reorganizada depois da decisao de fluxo. Qualquer alteracao do cadastro mestre deve ser uma operacao explicita sobre o cadastro da cliente, e nao efeito colateral silencioso da submissao da anamnese.
+
 ## Lacunas de evidencia
 
 - As capturas disponiveis sao parciais.
@@ -177,4 +190,4 @@ Os codigos `ANAM-000` a `ANAM-046` identificam itens do inventario historico, na
 - Definir quais campos podem ser enviados a IA.
 - Validar classificacao de cada campo.
 - Definir, com Patty, se havera alertas ou bloqueios de saude.
-- Resolver duplicacao entre autenticacao, perfil e anamnese, especialmente Email e dados cadastrais.
+- Definir em quais fluxos dados cadastrais precisarao coexistir entre Auth, cadastro da cliente ou snapshot de anamnese, especialmente Email.

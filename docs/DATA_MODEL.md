@@ -208,6 +208,77 @@ Endereco, escolaridade e Instagram sao dados informativos e nao devem ser enviad
 
 O formulario cadastral completo ainda nao sera definido nesta tarefa.
 
+## Ownership de dados cadastrais, Auth e anamnese
+
+### DECISAO CONFIRMADA
+
+Supabase Auth / `auth.users` e responsavel por identidade de autenticacao, credenciais, email usado para login quando aplicavel e metadados estritamente necessarios a autenticacao.
+
+`auth.users` nao e a fonte mestre do cadastro profissional ou operacional da cliente.
+
+### DECISAO CONFIRMADA
+
+`profiles` representa o usuario dentro da aplicacao e vincula a identidade autenticada ao modelo da aplicacao.
+
+`profiles` pode apoiar papeis, permissoes e atributos gerais necessarios a aplicacao, mas nao deve acumular dados clinicos nem duplicar indiscriminadamente o cadastro da cliente.
+
+### DECISAO CONFIRMADA
+
+`clients` representa a entidade de negocio da pessoa atendida pela consultoria.
+
+O cadastro atual da cliente e seus dados de contato pertencem ao dominio de cliente/cadastro de cliente, nao ao Auth e nao a anamnese como fonte mestre.
+
+### DECISAO CONFIRMADA
+
+A anamnese representa uma submissao ou versao historica de respostas fornecidas em um contexto especifico.
+
+A anamnese nao e fonte mestre dos dados cadastrais atuais da cliente.
+
+Se dados cadastrais forem preservados junto de uma submissao de anamnese para manter contexto historico, essa copia deve ser tratada como snapshot historico da submissao.
+
+Consequencias:
+
+- alterar o cadastro atual da cliente nao modifica uma anamnese ja submetida;
+- alterar ou corrigir uma anamnese historica nao modifica silenciosamente o cadastro atual;
+- nao existe sincronizacao bidirecional automatica entre cadastro atual e historico de anamnese;
+- dados historicos nao sao sobrescritos.
+
+### DECISAO CONFIRMADA
+
+Email de autenticacao e email de contato sao conceitos diferentes.
+
+O email de autenticacao pertence ao Auth quando for usado para identidade/login. O email de contato pertence ao cadastro da cliente como dado operacional de contato.
+
+Os dois valores podem inicialmente coincidir, mas nao devem ser tratados como uma unica fonte sem decisao propria de produto e modelagem.
+
+### DECISAO CONFIRMADA
+
+Duplicar um mesmo valor em estruturas diferentes so e aceitavel quando cada copia possui responsabilidade semantica diferente.
+
+Exemplo aceitavel:
+
+- Auth: email de autenticacao;
+- Cliente: email de contato.
+
+Nao criar copias redundantes apenas por conveniencia.
+
+### RECOMENDACAO TECNICA
+
+O relacionamento futuro entre identidade autenticada, perfil da aplicacao e cliente deve usar identificadores estaveis, nao email como chave de relacionamento.
+
+Nao criar schema fisico, tabela, coluna, trigger ou sincronizacao nesta documentacao.
+
+### MATRIZ CONCEITUAL DE OWNERSHIP
+
+| Dado | Fonte mestre atual | Observacao |
+| --- | --- | --- |
+| Cidade | Cliente / cadastro da cliente | Cadastro atual; nao pertence a `auth.users`. |
+| Telefone | Cliente / cadastro da cliente | Contato atual; nao assumir WhatsApp ou responsabilidade primaria de Auth. |
+| Email de autenticacao | Auth | Identidade/login quando essa for a estrategia adotada. |
+| Email de contato | Cliente / cadastro da cliente | Contato operacional; pode coincidir com o email de autenticacao sem ser o mesmo conceito. |
+| Instagram | Cliente / cadastro da cliente | Dado informativo; nao enviado a IA por padrao. |
+| Snapshot em anamnese | Historico da submissao | Copia contextual, se existir; nao e fonte mestre do cadastro atual. |
+
 ## Client assignments
 
 ### DECISAO CONFIRMADA

@@ -2,6 +2,34 @@
 
 Registro cronologico de decisoes confirmadas do Projeto Patty.
 
+## 2026-09-15 - Separacao entre autenticacao, cadastro do cliente e snapshot de anamnese
+
+### DECISAO CONFIRMADA
+
+Auth / `auth.users` nao e cadastro mestre da cliente. Auth e responsavel por identidade de autenticacao, credenciais, email de login quando aplicavel e metadados estritamente necessarios a autenticacao.
+
+### DECISAO CONFIRMADA
+
+Cidade, Telefone, Email de contato e Instagram pertencem ao cadastro atual da cliente.
+
+### DECISAO CONFIRMADA
+
+Email de autenticacao e email de contato sao conceitos diferentes. Eles podem inicialmente ter o mesmo valor, mas nao devem ser tratados como uma unica fonte sem decisao propria.
+
+### DECISAO CONFIRMADA
+
+A anamnese nao e fonte mestre dos dados cadastrais atuais da cliente.
+
+### DECISAO CONFIRMADA
+
+Eventual copia de dados cadastrais preservada junto de uma submissao de anamnese e snapshot historico daquele contexto.
+
+Alterar o cadastro atual nao altera anamneses ja submetidas, e alterar uma anamnese historica nao altera silenciosamente o cadastro atual.
+
+### DECISAO CONFIRMADA
+
+Nao existe sincronizacao bidirecional automatica entre cadastro atual da cliente e historico de anamnese.
+
 ## 2026-09-15 - Formulario atual como baseline de migracao, nao especificacao definitiva
 
 ### DECISAO CONFIRMADA

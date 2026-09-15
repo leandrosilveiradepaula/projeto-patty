@@ -100,6 +100,18 @@ Quais serao os valores definitivos de `clients.status`?
 
 Qual sera o formulario cadastral completo de `client_registration`?
 
+### QUESTAO ABERTA
+
+Como a cliente atualizara os dados cadastrais atuais: Perfil, fluxo dedicado de cadastro, confirmacao contextual durante a anamnese ou outro fluxo?
+
+### QUESTAO ABERTA
+
+Quem podera alterar cada dado cadastral atual da cliente, incluindo Cidade, Telefone, Email de contato e Instagram?
+
+### QUESTAO ABERTA
+
+Quais alteracoes cadastrais exigirao auditoria especifica?
+
 ## Anamnese
 
 ### QUESTAO ABERTA
@@ -160,7 +172,27 @@ Havera alertas ou bloqueios de saude derivados de respostas da anamnese? Se houv
 
 ### QUESTAO ABERTA
 
-Como evitar duplicacao entre autenticacao, perfil, cadastro e anamnese, especialmente para email e dados cadastrais?
+Em quais fluxos algum dado cadastral precisara coexistir semanticamente em Auth, cadastro da cliente ou snapshot de anamnese, especialmente no caso de email?
+
+### QUESTAO ABERTA
+
+A secao Cadastro continuara aparecendo dentro da anamnese final ou sera movida para outro fluxo de cadastro/perfil?
+
+### QUESTAO ABERTA
+
+Quais dados cadastrais precisam ser confirmados a cada nova anamnese?
+
+### QUESTAO ABERTA
+
+Qual representacao tecnica sera usada para eventual snapshot historico de dados cadastrais em uma submissao de anamnese?
+
+### QUESTAO ABERTA
+
+Quando o email de autenticacao e o email de contato devem iniciar com o mesmo valor?
+
+### QUESTAO ABERTA
+
+Havera alguma acao explicita para sincronizar email de autenticacao e email de contato, ou eles permanecerao independentes apos a criacao inicial?
 
 ## Dados e LGPD
 
