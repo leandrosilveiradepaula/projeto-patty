@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
+import Link from "next/link";
 import type { CSSProperties } from "react";
 
 const contentStackStyle: CSSProperties = {
@@ -25,6 +26,9 @@ export default function ClientePage() {
             <p>
               Conteúdo técnico de demonstração para validar leitura em telas
               pequenas, gutters confortáveis e composição vertical.
+            </p>
+            <p>
+              <Link href="/cliente/anamnese">Abrir anamnese</Link>
             </p>
           </Card>
           <Card variant="subtle">

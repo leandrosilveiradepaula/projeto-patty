@@ -4,9 +4,21 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Section } from "@/components/ui/Section";
+import Link from "next/link";
 import styles from "./page.module.css";
 
-export default function AdminClienteDetailPage() {
+type AdminClienteDetailPageProps = {
+  params: Promise<{
+    clienteId: string;
+  }>;
+};
+
+export default async function AdminClienteDetailPage({
+  params,
+}: AdminClienteDetailPageProps) {
+  const { clienteId } = await params;
+  const anamneseHref = `/admin/clientes/${clienteId}/anamnese`;
+
   const overviewItems = [
     {
       description: "Estrutura destinada às informações cadastrais da cliente.",
@@ -89,8 +101,19 @@ export default function AdminClienteDetailPage() {
         <div className={styles.areaGrid}>
           {profileAreas.map((area) => (
             <Card className={styles.infoCard} key={area.title} variant="subtle">
-              <h3 className={styles.cardTitle}>{area.title}</h3>
-              <p className={styles.cardDescription}>{area.description}</p>
+              {area.title === "Anamnese" ? (
+                <Link className={styles.cardLink} href={anamneseHref}>
+                  <h3 className={styles.cardTitle}>{area.title}</h3>
+                  <span className={styles.cardDescription}>
+                    {area.description}
+                  </span>
+                </Link>
+              ) : (
+                <>
+                  <h3 className={styles.cardTitle}>{area.title}</h3>
+                  <p className={styles.cardDescription}>{area.description}</p>
+                </>
+              )}
             </Card>
           ))}
         </div>
