@@ -100,6 +100,68 @@ Quais serao os valores definitivos de `clients.status`?
 
 Qual sera o formulario cadastral completo de `client_registration`?
 
+## Anamnese
+
+### QUESTAO ABERTA
+
+Qual e o mapa completo dos campos do formulario atual de anamnese, considerando que as evidencias disponiveis podem ser parciais?
+
+### QUESTAO ABERTA
+
+Quais perguntas do formulario atual devem ser mantidas, alteradas ou removidas no novo aplicativo?
+
+### QUESTAO ABERTA
+
+Qual sera a obrigatoriedade de cada campo da anamnese no novo aplicativo?
+
+### QUESTAO ABERTA
+
+Qual sera o tipo final de input de cada campo da anamnese?
+
+### QUESTAO ABERTA
+
+Perguntas compostas da anamnese atual devem permanecer juntas ou ser normalizadas em campos separados?
+
+### QUESTAO ABERTA
+
+Quais campos da anamnese serao condicionais e quais serao suas regras de exibicao?
+
+### QUESTAO ABERTA
+
+Qual sera a ordem e o agrupamento final dos campos da anamnese?
+
+### QUESTAO ABERTA
+
+Medidas informadas na anamnese pertencem a propria resposta de anamnese, criam tambem um registro inicial de medicao/avaliacao, ou devem ser movidas para um fluxo de avaliacao separado?
+
+### QUESTAO ABERTA
+
+Nos uploads ligados a anamnese, quais tipos, tamanhos maximos, quantidade maxima, substituicao e exclusao de arquivos serao permitidos no novo aplicativo?
+
+### QUESTAO ABERTA
+
+Como separar a finalidade dos arquivos enviados entre fotos, exames e documentos?
+
+### QUESTAO ABERTA
+
+Qual sera o texto definitivo, versao, base legal, data/hora, forma de aceite, possibilidade de revogacao, politica de retencao e relacao operacional entre consentimento e inicio do acompanhamento?
+
+### QUESTAO ABERTA
+
+Quais campos da anamnese poderao ser enviados a IA, campo a campo?
+
+### QUESTAO ABERTA
+
+Qual sera a classificacao definitiva de cada campo da anamnese nas categorias estruturais do produto?
+
+### QUESTAO ABERTA
+
+Havera alertas ou bloqueios de saude derivados de respostas da anamnese? Se houver, quais regras serao validadas pela Patty?
+
+### QUESTAO ABERTA
+
+Como evitar duplicacao entre autenticacao, perfil, cadastro e anamnese, especialmente para email e dados cadastrais?
+
 ## Dados e LGPD
 
 ### QUESTAO ABERTA

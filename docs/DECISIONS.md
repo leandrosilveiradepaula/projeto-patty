@@ -2,6 +2,28 @@
 
 Registro cronologico de decisoes confirmadas do Projeto Patty.
 
+## 2026-09-15 - Formulario atual como baseline de migracao, nao especificacao definitiva
+
+### DECISAO CONFIRMADA
+
+As capturas do formulario atual da Patty sao evidencia do processo existente e devem ser preservadas como referencia de levantamento e migracao.
+
+### DECISAO CONFIRMADA
+
+Campos, textos, obrigatoriedade, tipos de controle, opcoes, validacoes, ordem e agrupamento do formulario atual nao sao automaticamente aprovados como especificacao final do novo aplicativo.
+
+### DECISAO CONFIRMADA
+
+Um campo marcado como obrigatorio no Google Forms historico nao define `required` futuro, validacao obrigatoria ou bloqueio de submissao no novo aplicativo sem decisao propria.
+
+### DECISAO CONFIRMADA
+
+Restricoes tecnicas observadas no Google Forms, como quantidade de arquivos, tamanho maximo, tipos apresentados e impossibilidade de edicao/remocao apos envio, nao devem ser herdadas automaticamente pelo novo aplicativo.
+
+### DECISAO CONFIRMADA
+
+O uso de cada campo da anamnese pela IA exige decisao propria. O formulario atual nao autoriza envio automatico de todos os campos para analise por IA.
+
 ## 2026-09-14 - Modelo conceitual inicial de identidade, clientes e autorizacao
 
 ### DECISAO CONFIRMADA
