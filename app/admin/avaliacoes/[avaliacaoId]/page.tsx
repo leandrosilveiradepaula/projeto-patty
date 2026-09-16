@@ -1,5 +1,7 @@
 import { EvaluationMeasureList } from "@/components/admin/EvaluationMeasureList";
 import type { EvaluationMeasureListItem } from "@/components/admin/EvaluationMeasureList";
+import { EvaluationMeasureComparison } from "@/components/admin/EvaluationMeasureComparison";
+import type { EvaluationMeasureComparisonItem } from "@/components/admin/EvaluationMeasureComparison";
 import { EvaluationPhotoCollection } from "@/components/admin/EvaluationPhotoCollection";
 import type { EvaluationPhotoCollectionItem } from "@/components/admin/EvaluationPhotoCollection";
 import { Badge } from "@/components/ui/Badge";
@@ -20,6 +22,11 @@ const demoEvaluations: Record<
   string,
   {
     clientLabel: string;
+    comparison?: {
+      currentDate: string;
+      items: EvaluationMeasureComparisonItem[];
+      previousDate: string;
+    };
     evaluationDate: string;
     measures: EvaluationMeasureListItem[];
     photos: EvaluationPhotoCollectionItem[];
@@ -34,6 +41,29 @@ const demoEvaluations: Record<
       { label: "Altura", unit: "cm", value: "170" },
       { label: "Ombros", unit: "cm", value: "98" },
     ],
+    comparison: {
+      currentDate: "12/09/2026",
+      previousDate: "05/09/2026",
+      items: [
+        {
+          currentValue: "70",
+          label: "Peso",
+          previousValue: "72",
+          unit: "kg",
+        },
+        {
+          currentValue: "170",
+          label: "Altura",
+          previousValue: "170",
+          unit: "cm",
+        },
+        {
+          currentValue: "98",
+          label: "Ombros",
+          unit: "cm",
+        },
+      ],
+    },
     photos: [
       {
         id: "demo-001-photo-001",
@@ -59,6 +89,28 @@ const demoEvaluations: Record<
       { label: "Peso", unit: "kg", value: "64" },
       { label: "Altura", unit: "cm", value: "165" },
     ],
+    comparison: {
+      currentDate: "05/09/2026",
+      previousDate: "28/08/2026",
+      items: [
+        {
+          currentValue: "64",
+          label: "Peso",
+          previousValue: "65",
+          unit: "kg",
+        },
+        {
+          currentValue: "165",
+          label: "Altura",
+          unit: "cm",
+        },
+        {
+          label: "Ombros",
+          previousValue: "96",
+          unit: "cm",
+        },
+      ],
+    },
     photos: [
       {
         id: "demo-002-photo-001",
@@ -148,6 +200,25 @@ export default async function AdminAvaliacaoDetailPage({
             <EmptyState
               description="Esta avaliação demonstrativa não possui medidas registradas."
               title="Sem medidas registradas"
+            />
+          </Card>
+        )}
+      </Section>
+      <Section
+        description="Leitura factual de medidas entre duas avaliações demonstrativas."
+        title="Comparação com avaliação anterior"
+      >
+        {demoEvaluation.comparison ? (
+          <EvaluationMeasureComparison
+            currentDate={demoEvaluation.comparison.currentDate}
+            items={demoEvaluation.comparison.items}
+            previousDate={demoEvaluation.comparison.previousDate}
+          />
+        ) : (
+          <Card variant="subtle">
+            <EmptyState
+              description="Esta avaliação demonstrativa não possui avaliação anterior vinculada."
+              title="Sem avaliação anterior para comparação"
             />
           </Card>
         )}
