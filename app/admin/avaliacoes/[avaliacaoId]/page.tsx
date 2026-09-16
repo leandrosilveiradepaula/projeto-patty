@@ -1,5 +1,7 @@
 import { EvaluationMeasureList } from "@/components/admin/EvaluationMeasureList";
 import type { EvaluationMeasureListItem } from "@/components/admin/EvaluationMeasureList";
+import { EvaluationPhotoCollection } from "@/components/admin/EvaluationPhotoCollection";
+import type { EvaluationPhotoCollectionItem } from "@/components/admin/EvaluationPhotoCollection";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -20,6 +22,7 @@ const demoEvaluations: Record<
     clientLabel: string;
     evaluationDate: string;
     measures: EvaluationMeasureListItem[];
+    photos: EvaluationPhotoCollectionItem[];
     reference: string;
   }
 > = {
@@ -31,6 +34,22 @@ const demoEvaluations: Record<
       { label: "Altura", unit: "cm", value: "170" },
       { label: "Ombros", unit: "cm", value: "98" },
     ],
+    photos: [
+      {
+        id: "demo-001-photo-001",
+        label: "Foto Demonstração 001",
+        position: "Posição demonstrativa A",
+      },
+      {
+        id: "demo-001-photo-002",
+        label: "Foto Demonstração 002",
+        position: "Posição demonstrativa B",
+      },
+      {
+        id: "demo-001-photo-003",
+        label: "Foto Demonstração 003",
+      },
+    ],
     reference: "Registro demonstrativo 001",
   },
   "demo-002": {
@@ -40,6 +59,13 @@ const demoEvaluations: Record<
       { label: "Peso", unit: "kg", value: "64" },
       { label: "Altura", unit: "cm", value: "165" },
     ],
+    photos: [
+      {
+        id: "demo-002-photo-001",
+        label: "Foto Demonstração 001",
+        position: "Posição demonstrativa A",
+      },
+    ],
     reference: "Registro demonstrativo 002",
   },
   "demo-003": {
@@ -47,6 +73,7 @@ const demoEvaluations: Record<
       "Cliente Demonstração 003 com identificação longa para validação responsiva",
     evaluationDate: "28/08/2026",
     measures: [],
+    photos: [],
     reference: "Registro demonstrativo 003",
   },
 };
@@ -55,6 +82,7 @@ const fallbackEvaluation = {
   clientLabel: "Cliente Demonstração",
   evaluationDate: "Data demonstrativa",
   measures: [],
+  photos: [],
   reference: "Registro demonstrativo",
 };
 
@@ -125,15 +153,19 @@ export default async function AdminAvaliacaoDetailPage({
         )}
       </Section>
       <Section
-        description="Área reservada para futura coleção de fotos da avaliação."
+        description="Coleção demonstrativa de fotos associadas à avaliação."
         title="Fotos"
       >
-        <Card variant="subtle">
-          <EmptyState
-            description="A futura coleção poderá receber quantidade variável de fotos."
-            title="Sem fotos integradas"
-          />
-        </Card>
+        {demoEvaluation.photos.length > 0 ? (
+          <EvaluationPhotoCollection items={demoEvaluation.photos} />
+        ) : (
+          <Card variant="subtle">
+            <EmptyState
+              description="Esta avaliação demonstrativa não possui fotos registradas."
+              title="Sem fotos registradas"
+            />
+          </Card>
+        )}
       </Section>
       <Section
         description="Área administrativa de uso interno, não destinada à visualização pela cliente."
