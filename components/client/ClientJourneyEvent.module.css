@@ -1,0 +1,8 @@
+.event { display: grid; grid-template-columns: minmax(0, 92px) minmax(0, 1fr); gap: var(--space-3); min-width: 0; }
+.date { color: var(--color-text-muted); font-size: var(--text-label-small-size); font-weight: var(--text-label-small-weight); line-height: var(--text-label-small-line-height); }
+.content { display: grid; gap: var(--space-1); min-width: 0; border-left: 3px solid var(--color-brand); background: var(--color-surface-low); padding: var(--space-3) var(--space-4); }
+.type, .content h3, .description, .meta { margin: 0; overflow-wrap: anywhere; }
+.type, .meta { color: var(--color-text-muted); font-size: var(--text-label-small-size); font-weight: var(--text-label-small-weight); line-height: var(--text-label-small-line-height); }
+.content h3 { color: var(--color-text-primary); font-family: var(--font-family-heading); font-size: var(--text-label-medium-size); font-weight: var(--text-label-medium-weight); line-height: var(--text-label-medium-line-height); }
+.description { color: var(--color-text-secondary); font-size: var(--text-body-small-size); line-height: var(--text-body-small-line-height); }
+@media (max-width: 359px) { .event { grid-template-columns: 1fr; } }
