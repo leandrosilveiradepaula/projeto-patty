@@ -2,6 +2,7 @@ import { EvaluationMeasureList } from "@/components/admin/EvaluationMeasureList"
 import type { EvaluationMeasureListItem } from "@/components/admin/EvaluationMeasureList";
 import { EvaluationMeasureComparison } from "@/components/admin/EvaluationMeasureComparison";
 import type { EvaluationMeasureComparisonItem } from "@/components/admin/EvaluationMeasureComparison";
+import { EvaluationAdherenceDecision } from "@/components/admin/EvaluationAdherenceDecision";
 import { EvaluationInternalNote } from "@/components/admin/EvaluationInternalNote";
 import { EvaluationPhotoCollection } from "@/components/admin/EvaluationPhotoCollection";
 import type { EvaluationPhotoCollectionItem } from "@/components/admin/EvaluationPhotoCollection";
@@ -22,6 +23,11 @@ type AdminAvaliacaoDetailPageProps = {
 const demoEvaluations: Record<
   string,
   {
+    adherenceDecision?: {
+      clientDifficulty?: string;
+      decision?: string;
+      professionalObservation?: string;
+    };
     clientLabel: string;
     comparison?: {
       currentDate: string;
@@ -36,6 +42,11 @@ const demoEvaluations: Record<
   }
 > = {
   "demo-001": {
+    adherenceDecision: {
+      clientDifficulty: "Relato demonstrativo para validação da interface.",
+      professionalObservation: "Observação profissional demonstrativa.",
+      decision: "Manter",
+    },
     clientLabel: "Cliente Demonstração 001",
     evaluationDate: "12/09/2026",
     internalNote:
@@ -87,6 +98,11 @@ const demoEvaluations: Record<
     reference: "Registro demonstrativo 001",
   },
   "demo-002": {
+    adherenceDecision: {
+      clientDifficulty: "Dificuldade demonstrativa registrada para esta avaliação.",
+      professionalObservation: "Observação profissional sintética para leitura administrativa.",
+      decision: "Simplificar",
+    },
     clientLabel: "Cliente Demonstração 002",
     evaluationDate: "05/09/2026",
     internalNote:
@@ -243,6 +259,16 @@ export default async function AdminAvaliacaoDetailPage({
             />
           </Card>
         )}
+      </Section>
+      <Section
+        description="Registro administrativo de adesão e decisão profissional."
+        title="Adesão e decisão profissional"
+      >
+        <EvaluationAdherenceDecision
+          clientDifficulty={demoEvaluation.adherenceDecision?.clientDifficulty}
+          decision={demoEvaluation.adherenceDecision?.decision}
+          professionalObservation={demoEvaluation.adherenceDecision?.professionalObservation}
+        />
       </Section>
       <Section
         description="Área administrativa de uso interno, não destinada à visualização pela cliente."
