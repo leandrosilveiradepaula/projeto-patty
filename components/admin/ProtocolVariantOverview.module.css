@@ -1,0 +1,8 @@
+.overview { display: grid; gap: var(--space-4); min-width: 0; }
+.overview h3, .label, .description { margin: 0; overflow-wrap: anywhere; }
+.overview h3, .label { color: var(--color-text-primary); font-family: var(--font-family-heading); }
+.overview h3 { font-size: var(--text-title-small-size); font-weight: var(--text-title-small-weight); line-height: var(--text-title-small-line-height); }
+.list { display: grid; gap: var(--space-3); grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); margin: 0; padding: 0; list-style: none; }
+.item { display: grid; gap: var(--space-2); min-width: 0; border: 1px solid var(--color-border); border-radius: var(--radius-large); background: var(--color-surface); padding: var(--space-4); }
+.label { font-size: var(--text-label-medium-size); font-weight: var(--text-label-medium-weight); line-height: var(--text-label-medium-line-height); }
+.description { color: var(--color-text-secondary); font-size: var(--text-body-small-size); line-height: var(--text-body-small-line-height); }

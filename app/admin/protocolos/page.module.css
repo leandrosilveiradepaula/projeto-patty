@@ -1,0 +1,6 @@
+.demoNote { max-width: 72ch; margin: 0; color: var(--color-text-muted); font-size: var(--text-body-small-size); line-height: var(--text-body-small-line-height); overflow-wrap: anywhere; }
+.protocolList { display: grid; gap: var(--space-4); margin: 0; padding: 0; list-style: none; }
+.actionLink { display: inline-flex; min-height: 36px; align-items: center; justify-content: center; border: 1px solid var(--color-border); border-radius: var(--radius-full); padding: var(--space-2) var(--space-4); color: var(--color-text-primary); font-family: var(--font-family-heading); font-size: var(--text-label-medium-size); font-weight: var(--text-label-medium-weight); line-height: var(--text-label-medium-line-height); text-decoration: none; }
+.actionLink:hover { border-color: var(--color-brand); background: var(--color-surface-low); }
+.actionLink:focus { outline: none; }
+.actionLink:focus-visible { outline: 3px solid var(--color-accent); outline-offset: 3px; }
