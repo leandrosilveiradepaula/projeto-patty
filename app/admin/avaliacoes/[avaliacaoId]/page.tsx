@@ -2,6 +2,7 @@ import { EvaluationMeasureList } from "@/components/admin/EvaluationMeasureList"
 import type { EvaluationMeasureListItem } from "@/components/admin/EvaluationMeasureList";
 import { EvaluationMeasureComparison } from "@/components/admin/EvaluationMeasureComparison";
 import type { EvaluationMeasureComparisonItem } from "@/components/admin/EvaluationMeasureComparison";
+import { EvaluationInternalNote } from "@/components/admin/EvaluationInternalNote";
 import { EvaluationPhotoCollection } from "@/components/admin/EvaluationPhotoCollection";
 import type { EvaluationPhotoCollectionItem } from "@/components/admin/EvaluationPhotoCollection";
 import { Badge } from "@/components/ui/Badge";
@@ -28,6 +29,7 @@ const demoEvaluations: Record<
       previousDate: string;
     };
     evaluationDate: string;
+    internalNote?: string;
     measures: EvaluationMeasureListItem[];
     photos: EvaluationPhotoCollectionItem[];
     reference: string;
@@ -36,6 +38,8 @@ const demoEvaluations: Record<
   "demo-001": {
     clientLabel: "Cliente Demonstração 001",
     evaluationDate: "12/09/2026",
+    internalNote:
+      "Observação interna de demonstração para validação da interface administrativa.",
     measures: [
       { label: "Peso", unit: "kg", value: "70" },
       { label: "Altura", unit: "cm", value: "170" },
@@ -85,6 +89,8 @@ const demoEvaluations: Record<
   "demo-002": {
     clientLabel: "Cliente Demonstração 002",
     evaluationDate: "05/09/2026",
+    internalNote:
+      "Registro interno sintético para demonstrar leitura administrativa privada.",
     measures: [
       { label: "Peso", unit: "kg", value: "64" },
       { label: "Altura", unit: "cm", value: "165" },
@@ -242,12 +248,7 @@ export default async function AdminAvaliacaoDetailPage({
         description="Área administrativa de uso interno, não destinada à visualização pela cliente."
         title="Observações internas"
       >
-        <Card className={styles.internalCard} variant="subtle">
-          <EmptyState
-            description="Espaço reservado para registros administrativos futuros."
-            title="Uso interno da Patty/admin"
-          />
-        </Card>
+        <EvaluationInternalNote content={demoEvaluation.internalNote} />
       </Section>
     </>
   );
