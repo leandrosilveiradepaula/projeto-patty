@@ -1,0 +1,55 @@
+.details {
+  display: grid;
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+.group {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.group h3 {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+  font-size: var(--text-title-medium-size);
+  font-weight: var(--text-title-medium-weight);
+  line-height: var(--text-title-medium-line-height);
+  overflow-wrap: anywhere;
+}
+
+.list {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+}
+
+.item {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.item dt {
+  color: var(--color-text-muted);
+  font-family: var(--font-family-heading);
+  font-size: var(--text-label-small-size);
+  font-weight: var(--text-label-small-weight);
+  line-height: var(--text-label-small-line-height);
+}
+
+.item dd {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: var(--text-body-medium-size);
+  line-height: var(--text-body-medium-line-height);
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 640px) {
+  .list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

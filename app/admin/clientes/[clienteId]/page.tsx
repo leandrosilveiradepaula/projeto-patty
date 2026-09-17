@@ -1,6 +1,6 @@
+import { AdminClientRegistrationDetails } from "@/components/admin/AdminClientRegistrationDetails";
 import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Section } from "@/components/ui/Section";
@@ -73,7 +73,6 @@ export default async function AdminClienteDetailPage({
   return (
     <>
       <ClientSummaryHeader
-        actions={<Button variant="outline">Ação secundária</Button>}
         meta="Identificador de demonstração"
         name="Cliente Demonstração 001"
         secondary="Registro sintético para validação da interface."
@@ -93,6 +92,17 @@ export default async function AdminClienteDetailPage({
             </Card>
           ))}
         </div>
+      </Section>
+      <Section
+        description="Informações atuais de contato e cadastro, apresentadas separadamente da Anamnese e do acompanhamento."
+        title="Cadastro atual"
+      >
+        <AdminClientRegistrationDetails
+          city="Cidade demonstrativa"
+          contactEmail="contato.demo@exemplo.test"
+          loginEmail="cliente.demo@exemplo.test"
+          phone="(00) 00000-0000"
+        />
       </Section>
       <Section
         description="Mapa visual das áreas previstas para o acompanhamento. Estes blocos ainda não são navegação nem abas."
