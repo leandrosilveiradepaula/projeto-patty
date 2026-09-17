@@ -1,0 +1,9 @@
+.history, .list { display: grid; gap: var(--space-3); min-width: 0; }
+.context, .date, .item h3, .item p { margin: 0; overflow-wrap: anywhere; }
+.context, .date { color: var(--color-text-muted); font-size: var(--text-label-small-size); font-weight: var(--text-label-small-weight); line-height: var(--text-label-small-line-height); }
+.list { margin: 0; padding: 0; list-style: none; }
+.item { display: grid; grid-template-columns: minmax(0, 120px) minmax(0, 1fr); gap: var(--space-3); border-left: 3px solid var(--color-brand); background: var(--color-surface-low); padding: var(--space-3) var(--space-4); }
+.item div { display: grid; gap: var(--space-1); min-width: 0; }
+.item h3 { color: var(--color-text-primary); font-family: var(--font-family-heading); font-size: var(--text-label-medium-size); font-weight: var(--text-label-medium-weight); line-height: var(--text-label-medium-line-height); }
+.item div p { color: var(--color-text-secondary); font-size: var(--text-body-small-size); line-height: var(--text-body-small-line-height); }
+@media (max-width: 479px) { .item { grid-template-columns: 1fr; } }
