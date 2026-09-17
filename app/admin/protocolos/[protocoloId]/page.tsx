@@ -1,5 +1,9 @@
+import { ProtocolEquivalenceOverview } from "@/components/admin/ProtocolEquivalenceOverview";
+import { ProtocolHydrationOverview } from "@/components/admin/ProtocolHydrationOverview";
+import { ProtocolNutritionPlan } from "@/components/admin/ProtocolNutritionPlan";
 import { ProtocolVariantOverview } from "@/components/admin/ProtocolVariantOverview";
 import type { ProtocolVariantOverviewItem } from "@/components/admin/ProtocolVariantOverview";
+import type { ComponentProps } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -9,15 +13,30 @@ import Link from "next/link";
 import styles from "./page.module.css";
 
 type AdminProtocoloDetailPageProps = { params: Promise<{ protocoloId: string }>; };
-type DemoProtocol = { clientLabel: string; dateLabel: string; formatLabel: string; protocolLabel: string; status: string; strategyLabel: string; variants: ProtocolVariantOverviewItem[]; versionLabel: string; };
-
-const demoProtocols: Record<string, DemoProtocol> = {
-  "demo-001": { clientLabel: "Cliente Demonstração 001", dateLabel: "12/09/2026", formatLabel: "Linear", protocolLabel: "Protocolo Demonstração 001", status: "Publicado", strategyLabel: "Reconhecimento Metabólico", variants: [{ description: "Estrutura única demonstrativa do protocolo.", label: "Base" }], versionLabel: "Versão 1" },
-  "demo-002": { clientLabel: "Cliente Demonstração 002", dateLabel: "05/09/2026", formatLabel: "Dia 1 / Dia 2", protocolLabel: "Protocolo Demonstração 002", status: "Em revisão", strategyLabel: "Cutting 1 Dia 1 / Dia 2", variants: [{ description: "Primeira variante estrutural demonstrativa.", label: "Dia 1" }, { description: "Segunda variante estrutural demonstrativa.", label: "Dia 2" }], versionLabel: "Versão 2" },
-  "demo-003": { clientLabel: "Cliente Demonstração 003", dateLabel: "28/08/2026", formatLabel: "2 Low / 1 High", protocolLabel: "Protocolo Demonstração 003", status: "Substituído", strategyLabel: "Cutting 1 — 2 dias Low / 1 dia High", variants: [{ description: "Variante estrutural demonstrativa identificada como Low.", label: "Low" }, { description: "Variante estrutural demonstrativa identificada como High.", label: "High" }], versionLabel: "Versão 3" },
+type DemoProtocol = {
+  clientLabel: string;
+  dateLabel: string;
+  fastingGuidance?: string;
+  formatLabel: string;
+  hydrationGuidance?: string;
+  hydrationObservation?: string;
+  nutritionVariants: ComponentProps<typeof ProtocolNutritionPlan>["variants"];
+  protocolLabel: string;
+  registeredFoodRule?: string;
+  status: string;
+  strategyLabel: string;
+  variants: ProtocolVariantOverviewItem[];
+  versionLabel: string;
 };
 
-const fallbackProtocol: DemoProtocol = { clientLabel: "Cliente Demonstração", dateLabel: "Data demonstrativa", formatLabel: "Formato demonstrativo", protocolLabel: "Protocolo Demonstração", status: "Rascunho", strategyLabel: "Estratégia demonstrativa", variants: [{ description: "Estrutura demonstrativa sem dados integrados.", label: "Base" }], versionLabel: "Versão demonstrativa" };
+const demoProtocols: Record<string, DemoProtocol> = {
+  "demo-001": { clientLabel: "Cliente Demonstração 001", dateLabel: "12/09/2026", formatLabel: "Linear", hydrationGuidance: "Orientação de hidratação registrada para consulta neste protocolo demonstrativo.", hydrationObservation: "Sem fórmula, meta numérica ou cálculo nesta interface.", nutritionVariants: [{ label: "Base", meals: [{ doseGroups: [{ amountLabel: "1 dose", label: "Proteína" }, { amountLabel: "0,5 dose", label: "Carboidrato" }], label: "Café da manhã", order: 1, timingLabel: "Horário registrado: 08:00" }, { doseGroups: [{ amountLabel: "1,5 dose", label: "Proteína" }, { amountLabel: "1 dose", label: "Vegetais" }, { amountLabel: "0,5 dose", label: "Gordura" }], label: "Almoço", observation: "Observação registrada para esta refeição demonstrativa.", order: 2, timingLabel: "Janela registrada: 12:00–14:00" }, { doseGroups: [{ amountLabel: "1 dose", label: "Proteína" }], label: "Lanche", order: 3 }] }], protocolLabel: "Protocolo Demonstração 001", status: "Publicado", strategyLabel: "Reconhecimento Metabólico", variants: [{ description: "Estrutura única demonstrativa do protocolo.", label: "Base" }], versionLabel: "Versão 1" },
+  "demo-002": { clientLabel: "Cliente Demonstração 002", dateLabel: "05/09/2026", fastingGuidance: "Orientação registrada: até 12 horas entre primeira e última refeição.", formatLabel: "Dia 1 / Dia 2", nutritionVariants: [{ label: "Dia 1", meals: [{ doseGroups: [{ amountLabel: "1 dose", label: "Proteína" }, { amountLabel: "1 dose", label: "Carboidrato" }], label: "Refeição inicial", order: 1 }, { doseGroups: [{ amountLabel: "1 dose", label: "Proteína" }, { amountLabel: "1 dose", label: "Vegetais" }], label: "Refeição principal", order: 2, timingLabel: "Janela registrada: 13:00–15:00" }] }, { label: "Dia 2", meals: [{ doseGroups: [{ amountLabel: "0,5 dose", label: "Proteína" }], label: "Refeição inicial", order: 1, timingLabel: "Horário registrado: 09:00" }, { doseGroups: [{ amountLabel: "1,5 dose", label: "Carboidrato" }, { amountLabel: "1 dose", label: "Vegetais" }, { amountLabel: "0,5 dose", label: "Gordura" }], label: "Refeição principal", observation: "Observação registrada para a variante Dia 2.", order: 2 }, { doseGroups: [{ amountLabel: "1 dose", label: "Proteína" }], label: "Refeição final", order: 3 }] }], protocolLabel: "Protocolo Demonstração 002", status: "Em revisão", strategyLabel: "Cutting 1 Dia 1 / Dia 2", variants: [{ description: "Primeira variante estrutural demonstrativa.", label: "Dia 1" }, { description: "Segunda variante estrutural demonstrativa.", label: "Dia 2" }], versionLabel: "Versão 2" },
+  "demo-003": { clientLabel: "Cliente Demonstração 003", dateLabel: "28/08/2026", formatLabel: "2 Low / 1 High", nutritionVariants: [{ label: "Low", meals: [{ doseGroups: [{ amountLabel: "1 dose", label: "Proteína" }, { amountLabel: "1 dose", label: "Vegetais" }], label: "Refeição Low", order: 1 }, { doseGroups: [{ amountLabel: "1 dose", label: "Proteína" }, { amountLabel: "0,5 dose", label: "Gordura" }], label: "Refeição complementar", order: 2 }] }, { label: "High", meals: [{ doseGroups: [{ amountLabel: "1 dose", label: "Proteína" }, { amountLabel: "1,5 dose", label: "Carboidrato" }], label: "Refeição High", order: 1, timingLabel: "Janela registrada: 11:00–13:00" }, { doseGroups: [{ amountLabel: "1 dose", label: "Vegetais" }, { amountLabel: "0,5 dose", label: "Gordura" }], label: "Refeição complementar", order: 2 }, { doseGroups: [{ amountLabel: "0,5 dose", label: "Proteína" }], label: "Refeição final", order: 3 }] }], protocolLabel: "Protocolo Demonstração 003", status: "Substituído", strategyLabel: "Cutting 1 — 2 dias Low / 1 dia High", variants: [{ description: "Variante estrutural demonstrativa identificada como Low.", label: "Low" }, { description: "Variante estrutural demonstrativa identificada como High.", label: "High" }], versionLabel: "Versão 3" },
+  "demo-004": { clientLabel: "Cliente Demonstração 004", dateLabel: "20/08/2026", formatLabel: "Não registrado", nutritionVariants: [{ label: "Estrutura registrada", meals: [{ doseGroups: [{ amountLabel: "1 dose", label: "Proteína" }, { amountLabel: "1 dose", label: "Carboidrato" }], label: "Refeição demonstrativa", order: 1 }, { doseGroups: [{ amountLabel: "1 dose", label: "Vegetais" }, { amountLabel: "0,5 dose", label: "Gordura" }], label: "Refeição complementar", order: 2 }] }], protocolLabel: "Protocolo Demonstração 004", registeredFoodRule: "1 refeição livre por semana.", status: "Publicado", strategyLabel: "Up Metabólico", variants: [{ description: "Formato interno não registrado nesta interface demonstrativa.", label: "Estrutura registrada" }], versionLabel: "Versão 1" },
+};
+
+const fallbackProtocol: DemoProtocol = { clientLabel: "Cliente Demonstração", dateLabel: "Data demonstrativa", formatLabel: "Formato demonstrativo", nutritionVariants: [{ label: "Base", meals: [{ doseGroups: [{ amountLabel: "Dose demonstrativa", label: "Grupo demonstrativo" }], label: "Refeição demonstrativa", order: 1 }] }], protocolLabel: "Protocolo Demonstração", status: "Rascunho", strategyLabel: "Estratégia demonstrativa", variants: [{ description: "Estrutura demonstrativa sem dados integrados.", label: "Base" }], versionLabel: "Versão demonstrativa" };
 
 export default async function AdminProtocoloDetailPage({ params }: AdminProtocoloDetailPageProps) {
   const { protocoloId } = await params;
@@ -34,9 +53,10 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
       </dl></div><Badge variant="neutral">{protocol.status}</Badge>
     </section>
     <Section description="Estrutura interna demonstrativa do protocolo, sem calendário ou sequência automática." title="Formato do protocolo"><ProtocolVariantOverview items={protocol.variants} /></Section>
-    <Section description="Área estrutural destinada à organização alimentar por variante." title="Alimentação"><Card variant="subtle"><EmptyState description="A distribuição alimentar será integrada em tarefa própria, sem quantidade fixa de refeições." title="Estrutura alimentar futura" /></Card></Section>
+    <Section description="Distribuição alimentar registrada por variante, sem quantidade fixa de refeições ou cálculos." title="Alimentação"><ProtocolNutritionPlan fastingGuidance={protocol.fastingGuidance} registeredFoodRule={protocol.registeredFoodRule} variants={protocol.nutritionVariants} /></Section>
     <Section description="Área estrutural destinada ao plano de treino." title="Treino"><Card variant="subtle"><EmptyState description="Exercícios e organização de treino serão integrados em tarefa própria." title="Estrutura de treino futura" /></Card></Section>
-    <Section description="Área estrutural destinada à hidratação." title="Hidratação"><Card variant="subtle"><EmptyState description="Registros de hidratação serão integrados sem cálculo automático nesta etapa." title="Estrutura de hidratação futura" /></Card></Section>
+    <Section description="Orientação de hidratação registrada de forma independente, sem fórmula ou meta numérica inferida." title="Hidratação"><ProtocolHydrationOverview guidance={protocol.hydrationGuidance} observation={protocol.hydrationObservation} /></Section>
+    <Section description="Referências registradas separadamente da distribuição das refeições, sem cálculo de equivalência." title="Equivalências"><ProtocolEquivalenceOverview groups={[{ alternatives: [{ items: ["Opção demonstrativa A"], label: "Alternativa simples" }, { items: ["Item demonstrativo B1", "Item demonstrativo B2"], label: "Alternativa composta" }], label: "Grupo demonstrativo A", reference: "Referência demonstrativa" }]} /></Section>
     <Section description="Área estrutural destinada às orientações do protocolo." title="Orientações"><Card variant="subtle"><EmptyState description="Orientações serão integradas em tarefa própria, após definição do conteúdo aplicável." title="Orientações futuras" /></Card></Section>
     <Section description="Área estrutural destinada a versões e eventos administrativos do protocolo." title="Histórico"><Card variant="subtle"><EmptyState description="Versões e eventos administrativos serão integrados sem workflow nesta etapa." title="Histórico administrativo futuro" /></Card></Section>
   </>;

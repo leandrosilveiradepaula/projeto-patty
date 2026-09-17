@@ -11,6 +11,7 @@ const demoProtocols = [
   { clientLabel: "Cliente Demonstração 001", dateLabel: "12/09/2026", href: "/admin/protocolos/demo-001", protocolLabel: "Protocolo Demonstração 001", status: "Publicado", strategyLabel: "Reconhecimento Metabólico", versionLabel: "Versão 1" },
   { clientLabel: "Cliente Demonstração 002", dateLabel: "05/09/2026", href: "/admin/protocolos/demo-002", protocolLabel: "Protocolo Demonstração 002", status: "Em revisão", strategyLabel: "Cutting 1 Dia 1 / Dia 2", versionLabel: "Versão 2" },
   { clientLabel: "Cliente Demonstração 003", dateLabel: "28/08/2026", href: "/admin/protocolos/demo-003", protocolLabel: "Protocolo Demonstração 003", status: "Substituído", strategyLabel: "Cutting 1 — 2 dias Low / 1 dia High", versionLabel: "Versão 3" },
+  { clientLabel: "Cliente Demonstração 004", dateLabel: "20/08/2026", href: "/admin/protocolos/demo-004", protocolLabel: "Protocolo Demonstração 004", status: "Publicado", strategyLabel: "Up Metabólico", versionLabel: "Versão 1" },
 ];
 
 export default function AdminProtocolosPage() {

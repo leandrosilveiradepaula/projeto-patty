@@ -1,0 +1,9 @@
+.card { display: grid; gap: var(--space-2); min-width: 0; border: 1px solid var(--color-border); border-radius: var(--radius-large); background: var(--color-surface); padding: var(--space-4); }
+.order, .title, .timing, .observation, .dosesTitle { margin: 0; overflow-wrap: anywhere; }
+.order, .dosesTitle { color: var(--color-text-muted); font-size: var(--text-label-small-size); font-weight: var(--text-label-small-weight); line-height: var(--text-label-small-line-height); }
+.title { color: var(--color-text-primary); font-family: var(--font-family-heading); font-size: var(--text-title-small-size); font-weight: var(--text-title-small-weight); line-height: var(--text-title-small-line-height); }
+.timing, .observation { color: var(--color-text-secondary); font-size: var(--text-body-small-size); line-height: var(--text-body-small-line-height); }
+.doses { display: grid; gap: var(--space-2); padding-top: var(--space-2); border-top: 1px solid var(--color-border); }
+.doseList { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.doseItem { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-2); color: var(--color-text-secondary); font-size: var(--text-body-small-size); line-height: var(--text-body-small-line-height); }
+.doseItem span:last-child { color: var(--color-text-primary); font-weight: var(--text-label-small-weight); }
