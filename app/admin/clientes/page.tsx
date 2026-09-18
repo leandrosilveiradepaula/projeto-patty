@@ -1,8 +1,8 @@
 import { ClientListItem } from "@/components/admin/ClientListItem";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
+import Link from "next/link";
 import styles from "./page.module.css";
 
 export default function AdminClientesPage() {
@@ -20,7 +20,11 @@ export default function AdminClientesPage() {
         <ul className={styles.clientList}>
           <li>
             <ClientListItem
-              action={<Button variant="outline">Abrir</Button>}
+              action={
+                <Link className={styles.actionLink} href="/admin/clientes/demo-001">
+                  Abrir
+                </Link>
+              }
               meta="Registro de demonstração"
               name="Cliente Demonstração 001"
               secondary="Informação secundária sintética para validar composição."
@@ -30,6 +34,11 @@ export default function AdminClientesPage() {
           </li>
           <li>
             <ClientListItem
+              action={
+                <Link className={styles.actionLink} href="/admin/clientes/demo-002">
+                  Abrir
+                </Link>
+              }
               meta="Atualização de exemplo com texto mais longo para validar quebra em telas estreitas"
               name="Cliente Demonstração 002 com nome propositalmente longo para teste de layout"
               secondary="Descrição auxiliar de demonstração sem dado sensível."
@@ -39,7 +48,6 @@ export default function AdminClientesPage() {
           </li>
           <li>
             <ClientListItem
-              action={<Button variant="outline">Abrir</Button>}
               meta="Item sem status para validar composição opcional"
               name="Cliente Demonstração 003"
               secondary="Item técnico sem status visual."

@@ -4,7 +4,9 @@ import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Section } from "@/components/ui/Section";
+import { getDemoAnamnesisForClient, getDemoClient } from "@/lib/demo/anamnesis";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import styles from "./page.module.css";
 
 type AdminClienteDetailPageProps = {
@@ -17,7 +19,13 @@ export default async function AdminClienteDetailPage({
   params,
 }: AdminClienteDetailPageProps) {
   const { clienteId } = await params;
-  const anamneseHref = `/admin/clientes/${clienteId}/anamnese`;
+  const client = getDemoClient(clienteId);
+
+  if (!client) {
+    notFound();
+  }
+
+  const anamnesis = getDemoAnamnesisForClient(clienteId);
 
   const overviewItems = [
     {
@@ -74,10 +82,10 @@ export default async function AdminClienteDetailPage({
     <>
       <ClientSummaryHeader
         meta="Identificador de demonstração"
-        name="Cliente Demonstração 001"
+        name={client.label}
         secondary="Registro sintético para validação da interface."
         status={<Badge variant="neutral">Demonstração</Badge>}
-        visual={<span>01</span>}
+        visual={<span>{client.visualLabel}</span>}
       />
       <Section
         action={<Badge variant="neutral">Dados sintéticos para validação da interface.</Badge>}
@@ -111,8 +119,11 @@ export default async function AdminClienteDetailPage({
         <div className={styles.areaGrid}>
           {profileAreas.map((area) => (
             <Card className={styles.infoCard} key={area.title} variant="subtle">
-              {area.title === "Anamnese" ? (
-                <Link className={styles.cardLink} href={anamneseHref}>
+              {area.title === "Anamnese" && anamnesis ? (
+                <Link
+                  className={styles.cardLink}
+                  href={`/admin/clientes/${client.id}/anamnese`}
+                >
                   <h3 className={styles.cardTitle}>{area.title}</h3>
                   <span className={styles.cardDescription}>
                     {area.description}

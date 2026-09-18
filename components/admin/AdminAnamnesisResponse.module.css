@@ -1,0 +1,33 @@
+.response {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.response h3,
+.response dl,
+.response dt,
+.response dd {
+  margin: 0;
+}
+
+.response h3,
+.response dt {
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+}
+
+.response dl,
+.response dl > div {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.response dt {
+  font-size: var(--text-label-small-size);
+}
+
+.response dd {
+  color: var(--color-text-secondary);
+  line-height: var(--text-body-medium-line-height);
+}

@@ -26,6 +26,10 @@ export function isAdminNavigationItemActive(pathname: string, href: string) {
     return pathname === href;
   }
 
+  if (href === "/admin/clientes" && pathname.startsWith("/admin/anamneses/")) {
+    return pathname.endsWith("/revisao");
+  }
+
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 

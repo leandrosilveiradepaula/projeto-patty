@@ -1,0 +1,48 @@
+.section {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+  scroll-margin-top: var(--space-6);
+}
+
+.section h2,
+.description,
+.emptyMessage {
+  margin: 0;
+}
+
+.section h2 {
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+  font-size: var(--text-h2-size);
+  line-height: var(--text-h2-line-height);
+}
+
+.description,
+.emptyMessage {
+  color: var(--color-text-secondary);
+  line-height: var(--text-body-medium-line-height);
+}
+
+.registrationLink {
+  display: inline-block;
+  margin-top: var(--space-3);
+  color: var(--color-brand-strong);
+  font-family: var(--font-family-heading);
+}
+
+.registrationLink:focus-visible {
+  outline: 3px solid var(--color-brand);
+  outline-offset: 3px;
+}
+
+.responses {
+  display: grid;
+  gap: var(--space-4);
+}
+
+@media (min-width: 768px) {
+  .responses {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

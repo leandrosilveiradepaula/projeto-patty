@@ -1,29 +1,25 @@
-import { Card } from "@/components/ui/Card";
+import { ClientAnamnesisNavigation } from "@/components/client/ClientAnamnesisNavigation";
+import { ClientAnamnesisSection } from "@/components/client/ClientAnamnesisSection";
 import { PageHeader } from "@/components/ui/PageHeader";
-import Link from "next/link";
+import { anamnesisCategories } from "@/lib/anamnesis/catalog";
 import styles from "./page.module.css";
 
-type Question = { label: string; options?: string[] };
-type Category = { description: string; id: string; questions?: Question[]; title: string };
-
-const categories: Category[] = [
-  { id: "cadastro", title: "Cadastro", description: "Seus dados atuais de contato e cadastro ficam no Perfil." },
-  { id: "medidas", title: "Medidas", description: "Itens observados no formulário atual, sem cálculos.", questions: [{ label: "Ombros (toda circunferência)" }, { label: "Panturrilha" }, { label: "Peso atual" }, { label: "Altura" }] },
-  { id: "historico-de-vida", title: "Histórico de vida", description: "Estrutura reservada para itens que forem definidos em etapa posterior." },
-  { id: "historico-de-saude", title: "Histórico de saúde", description: "Perguntas documentadas, sem diagnóstico, alerta ou interpretação.", questions: ["Possui diabetes? Quanto tempo? Está controlado?", "Possui algum transtorno metabólico, como tireoide ou hipogonadismo? Qual(is), há quanto tempo e está controlado?", "Possui alguma doença crônica, como anemia, artrite, fibromialgia etc.?", "Já realizou alguma cirurgia? Qual(is)?", "Possui alergia a alguma medicação ou comida? Qual(is)?", "Já fraturou ou teve alguma lesão importante que deixou sequela? Qual(is)?", "Sente dor intensa em alguma parte do corpo?", "Possui alguma doença cardiovascular ou hipertensão arterial?", "Já sentiu dor no peito durante alguma atividade física?", "Já desmaiou alguma vez? Descrição e frequência."].map((label) => ({ label })) },
-  { id: "medicamentos-e-suplementacao", title: "Medicamentos e suplementação", description: "Informações relatadas, sem recomendação de uso.", questions: ["Já usou algum tipo de suplemento alimentar? Qual(is)?", "O que está administrando atualmente entre suplementos, fitoterápicos e medicamentos?", "Toma algum suplemento vitamínico? Qual(is)?"].map((label) => ({ label })) },
-  { id: "sono", title: "Sono", description: "Perguntas documentadas, sem classificação ou pontuação.", questions: ["Como está a qualidade e o tempo do seu sono?", "Demora a dormir?", "Acorda muitas vezes durante a noite?"].map((label) => ({ label })) },
-  { id: "comportamento", title: "Comportamento", description: "Coleta de informações, sem rótulos ou interpretações.", questions: [...["Como são suas relações sociais?", "Considera-se paciente?", "Já foi mais paciente do que é hoje?", "Como está seu humor?", "Sente-se muito cansado para levantar da cama pela manhã?"].map((label): Question => ({ label })), { label: "Possui algum vício (cigarro, bebidas alcoólicas, drogas ilícitas etc.)?", options: ["Sim", "Não"] }] },
-  { id: "rotina", title: "Rotina", description: "Pergunta documentada, sem meta ou regra de hidratação.", questions: [{ label: "Toma quantos litros de água por dia?", options: ["1L", "1,5L", "2L", "2,5L", "3L", "3,5L", "4L", "4,5L", "5L ou mais", "Não sei"] }] },
-  { id: "atividade-fisica", title: "Atividade física", description: "Informação documentada, sem orientação de treino.", questions: [{ label: "É atleta competitivo de fisiculturismo ou outro esporte? Qual(is)?" }] },
-  { id: "alimentacao", title: "Alimentação", description: "Coleta de informações, sem prescrição alimentar.", questions: ["3 alimentos preferidos", "3 alimentos que menos gostei", "Me fala um pouco como tu vê tua relação com a comida"].map((label) => ({ label })) },
-  { id: "objetivos", title: "Objetivos", description: "Pergunta documentada, sem cálculo de prazo ou meta automática.", questions: [{ label: "Quais são seus objetivos a curto (3 meses), médio (12 meses) e longo (5 anos) prazo?" }] },
-  { id: "autoimagem", title: "Autoimagem", description: "Perguntas documentadas, sem pontuação ou interpretação.", questions: ["Quando tu te olha no espelho, o que tu enxerga?", "E como acredita que as pessoas te veem?", "Me fala das tuas qualidades"].map((label) => ({ label })) },
-  { id: "fotos", title: "Fotos", description: "A possibilidade de anexar fotos foi observada, sem posições rígidas ou upload nesta interface." },
-  { id: "exames-e-documentos", title: "Exames e documentos", description: "Perguntas e anexos documentados, sem envio real de arquivos.", questions: [{ label: "Tem o costume de realizar exames de sangue?" }] },
-  { id: "consentimento", title: "Consentimento", description: "A existência de uma declaração de anuência foi documentada; conteúdo e forma final serão definidos depois." },
-];
-
 export default function ClienteAnamnesePage() {
-  return <><PageHeader description="Estrutura demonstrativa de perguntas documentadas no formulário atual. Esta interface ainda não registra respostas." eyebrow="Cliente" title="Anamnese" /><div className={styles.layout}><nav aria-label="Seções da anamnese" className={styles.navigation}><h2>Seções</h2><ul>{categories.map((category) => <li key={category.id}><a href={`#${category.id}`}>{category.title}</a></li>)}</ul></nav><div className={styles.sections}>{categories.map((category) => <section id={category.id} key={category.id}><h2>{category.title}</h2><p>{category.description}</p>{category.id === "cadastro" ? <Card><Link href="/cliente/perfil">Ver cadastro atual</Link></Card> : category.questions ? <div className={styles.questions}>{category.questions.map((question, index) => question.options ? <fieldset key={question.label}><legend>{question.label}</legend><div className={styles.options}>{question.options.map((option) => <label key={option}><input name={`${category.id}-${index}`} type="radio" value={option} /> {option}</label>)}</div></fieldset> : <div className={styles.question} key={question.label}><p>{question.label}</p><span>Resposta em estruturação</span></div>)}</div> : <Card><p>{category.id === "historico-de-vida" ? "Nenhuma pergunta documentada está disponível para esta seção nesta etapa." : "A estrutura desta categoria será definida em etapa posterior."}</p></Card>}</section>)}</div></div></>;
+  return (
+    <>
+      <PageHeader
+        description="Estrutura demonstrativa de perguntas documentadas no formulário atual. Esta interface ainda não registra respostas."
+        eyebrow="Cliente"
+        title="Anamnese"
+      />
+      <div className={styles.layout}>
+        <ClientAnamnesisNavigation categories={anamnesisCategories} />
+        <div className={styles.sections}>
+          {anamnesisCategories.map((category) => (
+            <ClientAnamnesisSection category={category} key={category.id} />
+          ))}
+        </div>
+      </div>
+    </>
+  );
 }

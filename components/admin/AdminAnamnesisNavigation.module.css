@@ -1,0 +1,23 @@
+.navigation {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.navigation a {
+  border-radius: var(--radius-medium);
+  padding: var(--space-2);
+  color: var(--color-brand-strong);
+  font-family: var(--font-family-heading);
+  text-decoration: none;
+}
+
+.navigation a:hover {
+  background: var(--color-surface-low);
+  text-decoration: underline;
+}
+
+.navigation a:focus-visible {
+  outline: 3px solid var(--color-brand);
+  outline-offset: 3px;
+}

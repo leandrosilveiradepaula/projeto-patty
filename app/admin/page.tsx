@@ -1,7 +1,6 @@
 import { AdminMetricCard } from "@/components/admin/AdminMetricCard";
 import { PendingItemCard } from "@/components/admin/PendingItemCard";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -55,7 +54,11 @@ export default function AdminPage() {
         <ul className={styles.pendingList}>
           <li>
             <PendingItemCard
-              action={<Button variant="outline">Revisar</Button>}
+              action={
+                <Link className={styles.areaLink} href="/admin/anamneses/demo-001/revisao">
+                  Revisar
+                </Link>
+              }
               description="Item técnico aguardando validação da interface."
               meta="Dados sintéticos"
               status={<Badge variant="warning">Pendente</Badge>}
