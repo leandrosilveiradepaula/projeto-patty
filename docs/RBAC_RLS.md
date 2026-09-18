@@ -169,9 +169,9 @@ Nao recomendar novas implementacoes baseadas nas chaves legadas `anon` e `servic
 
 ## Policies futuras
 
-### RECOMENDACAO TECNICA
+### DECISAO CONFIRMADA
 
-Para BACKEND-001:
+BACKEND-A1 aplica:
 
 - usar `TO authenticated` combinado com predicado real de autorizacao;
 - evitar `auth.role()`;
@@ -190,7 +190,7 @@ Se futuramente uma funcao `SECURITY DEFINER` for realmente necessaria:
 - deve ter `search_path` controlado;
 - deve passar por revisao de seguranca.
 
-Nao implementar funcoes nesta tarefa.
+Nao foram implementadas funcoes nesta fase.
 
 ## Auditoria
 
@@ -219,3 +219,24 @@ Ainda e necessario definir quais acoes sao consideradas criticas para auditoria.
 ### QUESTAO ABERTA
 
 Ainda e necessario definir regras de acesso para arquivos privados em Storage.
+
+## Implementacao BACKEND-A1
+
+### Grants
+
+`anon` nao recebe privilegios nas quatro tabelas. `authenticated` recebe somente `SELECT` em `profiles`, `user_roles`, `clients` e `client_assignments`; nao recebe `INSERT`, `UPDATE` ou `DELETE` nessas tabelas. O Supabase local tambem esta configurado com `auto_expose_new_tables = false`, exigindo grants explicitos para futuras tabelas.
+
+### Matriz de RLS
+
+| Tabela | Papel | SELECT | INSERT | UPDATE | DELETE |
+| --- | --- | --- | --- | --- | --- |
+| `profiles` | authenticated | propria conta; admin com assignment ativo para a cliente vinculada | negado | negado | negado |
+| `user_roles` | authenticated | somente os proprios roles | negado | negado | negado |
+| `clients` | authenticated | propria cliente; admin com assignment ativo | negado | negado | negado |
+| `client_assignments` | authenticated | somente assignments do proprio admin | negado | negado | negado |
+
+As policies usam `(select auth.uid())`, role relacional e assignment com `ended_at IS NULL`. Nenhuma policy depende somente de `TO authenticated`, `auth.role()`, JWT como fonte unica de papel ou `SECURITY DEFINER`.
+
+### Provisionamento administrativo
+
+O browser nao cria perfis, clientes, roles ou assignments nesta fase. O mecanismo de bootstrap de producao da Patty e a administracao futura de roles/assignments continuam pendentes e devem ocorrer por caminho administrativo controlado, ainda nao implementado. Fixtures pgTAP sinteticas existem apenas para provar isolamento local.

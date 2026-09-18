@@ -1,0 +1,2 @@
+-- This foundation deliberately provides no development records.
+-- Database tests create and roll back their own synthetic identities and clients.

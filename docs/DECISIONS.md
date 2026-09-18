@@ -2,6 +2,28 @@
 
 Registro cronologico de decisoes confirmadas do Projeto Patty.
 
+## 2026-09-18 - Fundacao operacional de identidade, clientes, RBAC e RLS
+
+### DECISAO CONFIRMADA
+
+A fundacao BACKEND-A1 implementa `profiles`, `user_roles`, `clients` e `client_assignments` como entidades separadas no Supabase local/versionado.
+
+### DECISAO CONFIRMADA
+
+O acesso a cliente e client-scoped: a propria cliente acessa somente o registro vinculado ao seu `profiles.id`; admin exige papel relacional `admin` e assignment ativo. Papel administrativo nao concede acesso global a clientes.
+
+### DECISAO CONFIRMADA
+
+`anon` nao recebe acesso a dados privados. Usuarios autenticados nao recebem escrita por browser em roles, assignments, clientes ou perfis nesta fase. A administracao desses vinculos aguardara mecanismo controlado proprio.
+
+### DECISAO CONFIRMADA
+
+Remover uma identidade Auth de cliente preserva o registro profissional e limpa somente `clients.profile_id`. Encerrar assignment preserva historico e remove sua permissao ativa.
+
+### QUESTAO ABERTA
+
+O bootstrap de producao do primeiro admin Patty e o caminho administrativo para criar, alterar ou encerrar roles e assignments continuam pendentes. Seeds e testes locais nao definem fluxo de producao.
+
 ## 2026-09-15 - Separacao entre autenticacao, cadastro do cliente e snapshot de anamnese
 
 ### DECISAO CONFIRMADA

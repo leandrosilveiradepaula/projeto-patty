@@ -262,11 +262,9 @@ Exemplo aceitavel:
 
 Nao criar copias redundantes apenas por conveniencia.
 
-### RECOMENDACAO TECNICA
+### DECISAO CONFIRMADA
 
-O relacionamento futuro entre identidade autenticada, perfil da aplicacao e cliente deve usar identificadores estaveis, nao email como chave de relacionamento.
-
-Nao criar schema fisico, tabela, coluna, trigger ou sincronizacao nesta documentacao.
+O relacionamento entre identidade autenticada, perfil da aplicacao e cliente usa identificadores UUID estaveis, nunca email como chave de relacionamento.
 
 ### MATRIZ CONCEITUAL DE OWNERSHIP
 
@@ -363,7 +361,7 @@ O modelo futuro deve diferenciar entidades de identidade, perfil e dominio clini
 
 Uma futura modelagem deve considerar versionamento para protocolos, interpretacoes de IA, ajustes da Patty e versoes aprovadas.
 
-A BACKEND-001 devera prever indices nas principais colunas usadas nas relacoes e em RLS, incluindo conceitualmente:
+BACKEND-A1 implementa indices nas principais colunas usadas nas relacoes e em RLS:
 
 - `clients.profile_id`;
 - `user_roles.profile_id`;
@@ -373,14 +371,16 @@ A BACKEND-001 devera prever indices nas principais colunas usadas nas relacoes e
 
 ## Schemas futuros
 
+### DECISAO CONFIRMADA
+
+A fundacao BACKEND-A1 usa `public` para as tabelas da aplicacao protegidas por RLS. Nao foram criados schemas privados, views, funcoes privilegiadas, Storage ou tabelas de dados clinicos nesta fase.
+
 ### RECOMENDACAO TECNICA
 
-Recomendacao inicial de schemas:
+Evolucoes futuras podem usar:
 
 - `public`: dados da aplicacao que precisam ser acessiveis pela Data API sob RLS;
 - schema privado futuro, por exemplo `private`: prompts, analises internas de IA, logs internos sensiveis, regras internas e dados nao destinados ao cliente.
-
-Nao criar schema nesta tarefa.
 
 Nao decidir ainda toda a distribuicao das tabelas futuras.
 
@@ -398,9 +398,9 @@ O sistema deve preservar:
 
 ## Limites desta documentacao
 
-### DECISAO CONFIRMADA
+### DECISAO HISTORICA SUBSTITUIDA
 
-Esta tarefa nao cria tabelas, SQL, migrations, schemas ou Supabase.
+A restricao anterior de nao criar tabelas, SQL, migrations, schemas ou Supabase pertencia a fase documental. Foi substituida para a fundacao operacional BACKEND-A1, limitada a `profiles`, `user_roles`, `clients` e `client_assignments`.
 
 ### QUESTAO ABERTA
 
@@ -413,3 +413,31 @@ Ainda e necessario definir quais campos serao obrigatorios em anamnese, medidas,
 ### QUESTAO ABERTA
 
 Ainda e necessario definir politica de retencao, arquivamento e exportacao de dados.
+
+## Implementacao BACKEND-A1
+
+### DECISAO CONFIRMADA
+
+A migration `20260918034107_create_identity_client_rbac_foundation.sql` implementa a fundacao fisica com `timestamptz`, UUIDs e RLS em todas as tabelas expostas:
+
+- `profiles.id` referencia `auth.users.id` com `ON DELETE CASCADE`;
+- `clients.profile_id` e opcional, unico e usa `ON DELETE SET NULL`, preservando o registro profissional quando uma identidade de cliente e removida;
+- `user_roles` usa o enum restrito `app_role` com apenas `admin` e `client`;
+- `client_assignments` preserva historico por `ended_at`; um indice unico parcial impede duplicacao de assignment ativo para o mesmo par cliente/profissional;
+- assignments protegem sua referencia ao profissional com `ON DELETE RESTRICT`, para evitar apagar historico silenciosamente.
+
+Os campos textuais `profiles.status` e `clients.status` foram mantidos opcionais e sem valores enumerados: os valores definitivos continuam questao aberta. Nenhuma aplicacao navegador recebe permissao de escrita para esses campos nesta fase.
+
+## Contrato minimo futuro para frontend
+
+### Profile
+
+O frontend autenticado pode consumir o proprio `id`, `display_name` e estado quando o fluxo de provisionamento o disponibilizar. Nao deve inferir autorizacao a partir de metadados JWT editaveis.
+
+### Client
+
+O frontend pode consumir um cliente somente quando a policy RLS permitir: a propria cliente vinculada ou um admin com assignment ativo. Email de login e dados de Cadastro Atual continuam fora desta fundacao.
+
+### Contexto do usuario atual
+
+O contexto futuro deve combinar sessao autenticada, perfil, roles que a propria conta pode ler e `client_id` quando houver vinculo. A API nao deve distinguir desnecessariamente recurso inexistente de recurso proibido para clientes.
