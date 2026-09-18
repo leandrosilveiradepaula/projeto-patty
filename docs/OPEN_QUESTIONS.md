@@ -248,6 +248,32 @@ Qual sera o limite de tamanho por arquivo?
 
 ### QUESTAO ABERTA
 
+Quem podera fazer upload de cada tipo de arquivo, por qual fluxo controlado e em que momento o metadado sera criado?
+
+### QUESTAO ABERTA
+
+Quem podera excluir arquivo, sob quais regras de retencao, arquivamento, anonimizacao e auditoria?
+
+### QUESTAO ABERTA
+
+Quais tipos de arquivo privados podem ser visualizados pela cliente e quais permanecem exclusivamente administrativos?
+
+## Avaliacoes e acompanhamento
+
+### QUESTAO ABERTA
+
+Qual e o catalogo profissional de medidas, quais unidades sao permitidas e quais campos serao obrigatorios em cada avaliacao?
+
+### QUESTAO ABERTA
+
+Qual e o fluxo auditavel para correcao de uma avaliacao ou medida historica sem sobrescrever o registro anterior?
+
+### QUESTAO ABERTA
+
+Qual e a origem da percepcao de aderencia e quais partes do acompanhamento profissional poderao futuramente ser exibidas para a cliente?
+
+### QUESTAO ABERTA
+
 Quais MIME types serao permitidos?
 
 ### QUESTAO ABERTA

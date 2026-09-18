@@ -258,3 +258,19 @@ Administradores com assignment ativo podem inserir review administrativa em seu 
 ### DECISAO CONFIRMADA
 
 Clientes nao possuem permissoes para criar, alterar, excluir ou publicar definicoes de Anamnese. O catalogo so pode ser lido quando uma versao estiver marcada como disponivel por `published_at`; nenhuma versao do inventario historico foi publicada nesta etapa.
+
+## Implementacao BACKEND-BUNDLE-02
+
+### DECISAO CONFIRMADA
+
+`client_files` possui RLS propria, separada de `storage.objects`. Cliente autenticada le somente metadados e objetos privados vinculados ao proprio `clients.profile_id`; Patty/admin le somente com role relacional `admin` e assignment ativo. `anon`, usuario sem vinculo, admin sem assignment e assignment encerrado nao recebem acesso.
+
+A policy de `storage.objects` restringe explicitamente o bucket `client-private` e exige correspondencia com metadado autorizado em `client_files`. Nao ha policy geral para `authenticated` no bucket inteiro, nem grant de INSERT, UPDATE ou DELETE para arquivos nesta etapa.
+
+### DECISAO CONFIRMADA
+
+Avaliacoes, medidas e associacoes de arquivo podem ser lidas somente por Patty/admin com assignment ativo. A visibilidade para a cliente permanece pendente e, por isso, nao recebe grant ou policy de leitura nesta etapa. Nenhuma escrita de avaliacao ou medida e liberada ao browser.
+
+### DECISAO CONFIRMADA
+
+`professional_follow_ups` e estritamente interno: cliente e `anon` nao o leem. Patty/admin com assignment ativo pode ler e inserir registro em proprio nome. Nao ha grant ou policy de UPDATE ou DELETE, preservando o historico append-only.

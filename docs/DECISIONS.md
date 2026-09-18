@@ -1,5 +1,19 @@
 # Decisoes
 
+## 2026-09-18 - Arquivos privados, avaliacoes e acompanhamento profissional
+
+### DECISAO CONFIRMADA
+
+Metadados de fotos, exames e documentos ficam em `client_files`, separados de `storage.objects`. O bucket previsto e privado e nenhum URL publico permanente ou signed URL persistida e armazenado no modelo de negocio.
+
+### DECISAO CONFIRMADA
+
+Avaliacoes e medidas sao historicas: reavaliacao cria novo registro, medidas pertencem a uma avaliacao e fotos podem ser relacionadas por referencia ao arquivo privado existente. Esta implementacao nao define catalogo clinico de medidas nem realiza interpretacao automatica.
+
+### DECISAO CONFIRMADA
+
+O acompanhamento profissional e append-only e interno. Registra dificuldade, percepcao de aderencia, observacao da Patty, decisao profissional e motivo. As decisoes implementadas sao `maintain`, `simplify`, `advance` e `return`; registrar uma decisao nao executa mudanca de fase, protocolo, dieta ou treino.
+
 Registro cronologico de decisoes confirmadas do Projeto Patty.
 
 ## 2026-09-18 - Cadastro Atual e Anamnese versionada

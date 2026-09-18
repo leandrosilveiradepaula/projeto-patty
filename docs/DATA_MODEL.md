@@ -485,3 +485,41 @@ Representa `id`, `clientId`, `formVersionId`, `createdAt`, `submittedAt`, estado
 ### AdminReview
 
 Representa uma nota administrativa separada com `id`, `submissionId`, `reviewerProfileId`, `note` e `createdAt`. Esse contrato e administrativo e nao deve ser combinado ao contrato de cliente.
+
+## Implementacao BACKEND-BUNDLE-02
+
+### DECISAO CONFIRMADA
+
+`client_files` e o registro operacional de arquivos privados. Ele referencia `clients`, mantem `file_kind` entre `photo`, `exam` e `document`, e registra `bucket_id` e `object_path` sem usar `storage.objects` como tabela de negocio.
+
+O caminho usa somente identificadores opacos no namespace `clients/<client_uuid>/<file_kind>/<file_uuid>.<ext>`. Ele nao usa email, nome, CPF, telefone ou Instagram. Cada novo upload representa novo registro; nao ha substituicao silenciosa de historico.
+
+### DECISAO CONFIRMADA
+
+`client_assessments` representa um evento historico de avaliacao. `assessment_measurements` guarda entradas de medida com chave estavel, valor `numeric(12,4)` e unidade separada. Nenhum catalogo clinico de medidas, unidade obrigatoria por medida, calculo, score ou interpretacao e introduzido nesta etapa.
+
+`assessment_files` permite relacionar um arquivo privado ja existente a uma avaliacao, preservando a consistencia de cliente entre avaliacao e arquivo.
+
+### DECISAO CONFIRMADA
+
+`professional_follow_ups` preserva historico interno de acompanhamento profissional. Cada registro pode conter dificuldade, percepcao de aderencia, observacao da Patty, decisao profissional e motivo. As chaves de decisao confirmadas nesta etapa sao `maintain`, `simplify`, `advance` e `return`.
+
+O registro nao executa protocolo, dieta, treino, mudanca de fase, diagnostico, score ou qualquer transicao automatica.
+
+### QUESTAO ABERTA
+
+Ainda nao foram definidos o catalogo profissional de medidas, suas unidades permitidas, a visibilidade de avaliacoes para a cliente, a correcao de avaliacao historica, a origem da percepcao de aderencia e quais partes futuras do acompanhamento poderao ser exibidas para a cliente.
+
+## Contratos conceituais futuros
+
+### ClientFile
+
+Representa `id`, `clientId`, `fileKind`, `originalFilename`, `mimeType`, `byteSize` e `createdAt`. O contrato nao persiste URL publica ou signed URL; a referencia de objeto permanece operacional e interna.
+
+### Assessment
+
+Representa `id`, `clientId`, `assessedAt`, medidas com `measurementKey`, `measurementValue` e `unit`, e arquivos relacionados quando permitidos. Nao inclui conclusao clinica ou observacao interna.
+
+### ProfessionalFollowUp
+
+Representa contrato administrativo interno com observacoes, decisao e motivo. Ele permanece separado de qualquer contrato futuro de cliente.
