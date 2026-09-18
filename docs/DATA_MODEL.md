@@ -441,3 +441,47 @@ O frontend pode consumir um cliente somente quando a policy RLS permitir: a prop
 ### Contexto do usuario atual
 
 O contexto futuro deve combinar sessao autenticada, perfil, roles que a propria conta pode ler e `client_id` quando houver vinculo. A API nao deve distinguir desnecessariamente recurso inexistente de recurso proibido para clientes.
+
+## Implementacao BACKEND-BUNDLE-01
+
+### DECISAO CONFIRMADA
+
+`client_registration` implementa o Cadastro Atual como estado 1:1 opcional de `clients`. Seus campos implementados sao `city`, `phone`, `contact_email` e `instagram`.
+
+`contact_email` pertence ao cadastro atual, nao e chave de relacionamento e nao possui sincronizacao automatica com o email de autenticacao. Nao foi criado historico/versionamento cadastral nesta etapa.
+
+### DECISAO CONFIRMADA
+
+A definicao de Anamnese e versionada por `anamnesis_forms`, `anamnesis_form_versions`, `anamnesis_sections` e `anamnesis_questions`.
+
+Sections e questions pertencem a uma versao especifica, usam chaves estaveis separadas de titulos/textos e mantem ordem explicita. `answer_type` permanece textual com validacoes basicas de preenchimento, para nao fechar tipos futuros sem decisao funcional. Opcoes, quando existirem, sao preservadas como `jsonb` da pergunta da versao correspondente.
+
+O inventario historico de 15 categorias e 36 perguntas nao foi publicado como catalogo do aplicativo: ele ainda depende das validacoes registradas em `ANAMNESE.md` e nas questoes abertas.
+
+### DECISAO CONFIRMADA
+
+`anamnesis_submissions` vincula cada preenchimento a um `client_id` e a uma `form_version_id`. `anamnesis_answers` preserva o valor original em `answer_value jsonb` e usa FKs compostas para impedir que uma resposta aponte para pergunta de outra versao.
+
+Uma submission com `submitted_at` preenchido e imutavel, assim como suas respostas. Definicoes de formulario que ja possuem submissions tambem nao sao alteradas ou removidas. Correcao futura deve criar nova submission ou seguir fluxo ainda pendente; esta etapa nao sobrescreve historico.
+
+### DECISAO CONFIRMADA
+
+`anamnesis_reviews` armazena notas administrativas separadamente da resposta original, com autoria e timestamp. Reviews nao contêm interpretacao de IA nesta etapa e nao sao visiveis para clientes.
+
+## Contratos conceituais futuros
+
+### CurrentRegistration
+
+Representa somente o cadastro atual permitido para a aplicacao: `clientId`, `city`, `phone`, `contactEmail` e `instagram`.
+
+### AnamnesisDefinition
+
+Representa um formulario logico e uma versao disponivel, com sections ordenadas e questions contendo `questionKey`, `label`, `answerType`, `required` e `options` quando aplicaveis. O contrato nao expoe regras profissionais, prompts, logica de IA ou notas internas.
+
+### AnamnesisSubmission
+
+Representa `id`, `clientId`, `formVersionId`, `createdAt`, `submittedAt`, estado derivado de `submittedAt` e respostas originais. Nao inclui reviews administrativos.
+
+### AdminReview
+
+Representa uma nota administrativa separada com `id`, `submissionId`, `reviewerProfileId`, `note` e `createdAt`. Esse contrato e administrativo e nao deve ser combinado ao contrato de cliente.

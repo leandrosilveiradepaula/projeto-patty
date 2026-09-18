@@ -2,6 +2,20 @@
 
 Registro cronologico de decisoes confirmadas do Projeto Patty.
 
+## 2026-09-18 - Cadastro Atual e Anamnese versionada
+
+### DECISAO CONFIRMADA
+
+`client_registration` e o Cadastro Atual 1:1 de `clients`, separado de Auth e de Anamnese. Nesta implementacao, seus campos sao Cidade, Telefone, Email de contato e Instagram.
+
+### DECISAO CONFIRMADA
+
+Definicoes de Anamnese sao versionadas e submissions preservam a versao exata utilizada. Respostas originais submetidas nao sao sobrescritas.
+
+### DECISAO CONFIRMADA
+
+Notas administrativas da Patty sao armazenadas separadamente das respostas originais e nao sao acessiveis pela cliente.
+
 ## 2026-09-18 - Fundacao operacional de identidade, clientes, RBAC e RLS
 
 ### DECISAO CONFIRMADA

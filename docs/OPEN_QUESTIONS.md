@@ -304,6 +304,28 @@ Quais sao as regras de alertas?
 
 Quais sao as regras de comportamento?
 
+## Cadastro e Anamnese
+
+### QUESTAO ABERTA
+
+Quem pode criar ou alterar o Cadastro Atual e por qual fluxo controlado?
+
+### QUESTAO ABERTA
+
+Como sera o preenchimento, salvamento de rascunho e submissao da Anamnese pela cliente, incluindo as permissoes de escrita correspondentes?
+
+### QUESTAO ABERTA
+
+Quando uma nova versao de formulario podera ser marcada como disponivel para preenchimento?
+
+### QUESTAO ABERTA
+
+Como ocorrera uma correcao posterior a uma submission enviada, sem sobrescrever a resposta original?
+
+### QUESTAO ABERTA
+
+Qual sera o workflow administrativo completo para revisao de Anamnese alem da criacao de notas append-only?
+
 ## Conteudo
 
 ### QUESTAO ABERTA

@@ -240,3 +240,21 @@ As policies usam `(select auth.uid())`, role relacional e assignment com `ended_
 ### Provisionamento administrativo
 
 O browser nao cria perfis, clientes, roles ou assignments nesta fase. O mecanismo de bootstrap de producao da Patty e a administracao futura de roles/assignments continuam pendentes e devem ocorrer por caminho administrativo controlado, ainda nao implementado. Fixtures pgTAP sinteticas existem apenas para provar isolamento local.
+
+## Implementacao BACKEND-BUNDLE-01
+
+### DECISAO CONFIRMADA
+
+`client_registration`, definicoes de Anamnese, submissions, answers e reviews usam RLS desde a criacao e privilegios minimos explicitos.
+
+Para Cadastro Atual, submission e answer, a cliente autenticada le somente recursos vinculados ao proprio `clients.profile_id`. Patty/admin le somente quando possui role relacional `admin` e assignment ativo para a cliente. `anon` nao recebe acesso.
+
+### DECISAO CONFIRMADA
+
+Nesta etapa, browser autenticado nao recebe `INSERT`, `UPDATE` ou `DELETE` em Cadastro Atual, definicoes, submissions ou answers. O fluxo definitivo de escrita permanece aberto e nao foi inferido a partir da UI.
+
+Administradores com assignment ativo podem inserir review administrativa em seu proprio nome e ler reviews da cliente sob sua responsabilidade. Clientes nao possuem grant ou policy para ler reviews.
+
+### DECISAO CONFIRMADA
+
+Clientes nao possuem permissoes para criar, alterar, excluir ou publicar definicoes de Anamnese. O catalogo so pode ser lido quando uma versao estiver marcada como disponivel por `published_at`; nenhuma versao do inventario historico foi publicada nesta etapa.
