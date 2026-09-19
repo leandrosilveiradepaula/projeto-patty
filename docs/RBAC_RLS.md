@@ -284,3 +284,13 @@ Protocolos e planos usam grants explicitos e RLS. Cliente nao recebe escrita e s
 Patty/admin precisa de role relacional `admin` e assignment ativo para leitura interna. A escrita de protocolo e plano e limitada ao draft; triggers tambem recusam mutacao apos submissao para revisao. `anon`, admin sem assignment e assignment encerrado nao recebem acesso.
 
 O catalogo de equivalentes continua interno: cliente nao recebe grant ou policy de leitura. Admin com role e ao menos um assignment ativo pode administra-lo; o mecanismo administrativo detalhado permanece aberto.
+
+## Implementacao BACKEND-BUNDLE-04
+
+### DECISAO CONFIRMADA
+
+Bibliotecas educacional e de exercicios sao definicoes globais: admin com role relacional `admin` pode gerencia-las sem depender de `client_assignment`. Cliente e `anon` nao recebem acesso geral a essas definicoes.
+
+Cliente le somente versao educacional vinculada a uma `client_content_release` propria. Patty/admin acessa release e progresso somente quando possui role `admin` e assignment ativo para a cliente. A cliente nao recebe escrita de progresso nesta etapa.
+
+Biblioteca de exercicios permanece interna: cliente nao recebe grant ou policy de leitura, mesmo autenticada.

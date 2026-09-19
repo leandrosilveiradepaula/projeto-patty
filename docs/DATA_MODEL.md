@@ -539,3 +539,19 @@ Uma versao submetida para revisao fica congelada. Aprovacao e publicacao nao alt
 ### DECISAO CONFIRMADA
 
 `food_equivalent_catalogs` possui versoes, grupos e itens. Um plano pode referenciar uma versao especifica do catalogo, sem usar o conceito de versao mais recente. O catalogo permanece vazio nesta etapa e nenhum alimento real foi publicado.
+
+## Implementacao BACKEND-BUNDLE-04
+
+### DECISAO CONFIRMADA
+
+`educational_contents` identifica um conteudo educacional logico e `educational_content_versions` preserva suas versoes. Titulo, ordem editorial explicita e chaves textuais opcionais de categoria, tipo e fase pertencem a versao. Essas chaves nao definem taxonomia, mecanismo de fase ou regra profissional.
+
+Versao publicada e imutavel. `client_content_releases` registra a liberacao explicita de uma versao publicada para uma cliente, com responsavel e timestamp. Uma nova versao nao altera releases existentes.
+
+### DECISAO CONFIRMADA
+
+`client_content_progress` e separado da release e armazena somente `first_opened_at` e `completed_at`. Nao ha score, regra de conclusao, liberacao automatica ou escrita pela cliente nesta etapa.
+
+### DECISAO CONFIRMADA
+
+`exercises` e `exercise_versions` formam uma biblioteca separada da biblioteca educacional. A versao armazena apenas nome, numero de versao e publicacao; nao inclui series, repeticoes, carga, descanso, progressao, musculos ou protocolo de treino.

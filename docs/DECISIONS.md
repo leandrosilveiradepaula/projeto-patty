@@ -200,6 +200,16 @@ O fluxo estrutural de protocolo separa versao, aprovacao humana e publicacao. Um
 
 Planos alimentares e catalogos de equivalentes sao versionados como estruturas de dados, sem catalogo real, calculo de doses, macros, fases ou regra metodologica. A referencia de um plano aponta uma versao especifica do catalogo.
 
+## 2026-09-19 - Bibliotecas e liberacao explicita de conteudo
+
+### DECISAO CONFIRMADA
+
+Conteudo educacional e exercicio sao dominios separados e ambos preservam versoes publicadas. A biblioteca de exercicios nao e exposta globalmente a clientes nesta etapa.
+
+### DECISAO CONFIRMADA
+
+Liberacao educacional e explicita, por cliente e por versao publicada. Nao existe liberacao automatica por fase, avaliacao, protocolo, aderencia ou tempo. Progresso nao e score e a cliente nao recebe escrita enquanto a regra de negocio correspondente permanecer pendente.
+
 ### DECISAO CONFIRMADA
 
 A arquitetura definida usa Next.js, Vercel e Supabase para PostgreSQL, Auth, Storage e RLS.

@@ -374,6 +374,30 @@ Quais conteudos do Drive podem ser migrados primeiro?
 
 Qual sera o processo de revisao, aprovacao e versionamento dos conteudos?
 
+### QUESTAO ABERTA
+
+Qual sera a taxonomia final de categoria, tipo, audiencia e fase como metadado da biblioteca educacional?
+
+### QUESTAO ABERTA
+
+Obrigatorio/opcional pertence a definicao global de conteudo ou a cada liberacao para cliente?
+
+### QUESTAO ABERTA
+
+Quem pode registrar abertura e conclusao de conteudo, o que caracteriza `completed_at` e qual historico adicional de progresso sera necessario?
+
+### QUESTAO ABERTA
+
+Quais regras futuras poderao justificar liberacao de conteudo por fase, sem criar automacao antes de validacao da Patty?
+
+### QUESTAO ABERTA
+
+Como ocorrera a migracao fisica do Google Drive, incluindo politica de arquivos educacionais e referencias de origem internas?
+
+### QUESTAO ABERTA
+
+Quando e como a biblioteca de exercicios podera ser exposta a cliente, e quais campos definitivos de exercicio serao necessarios sem antecipar programacao de treino?
+
 ## Protocolos e equivalentes
 
 ### QUESTAO ABERTA
