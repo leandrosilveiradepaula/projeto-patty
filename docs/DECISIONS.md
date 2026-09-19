@@ -194,6 +194,14 @@ A Patty sempre revisara e aprovara protocolos antes da publicacao.
 
 ### DECISAO CONFIRMADA
 
+O fluxo estrutural de protocolo separa versao, aprovacao humana e publicacao. Uma publication exige approval da mesma versao; a IA nao aprova nem publica. Conteudo submetido para revisao permanece historico e imutavel.
+
+### DECISAO CONFIRMADA
+
+Planos alimentares e catalogos de equivalentes sao versionados como estruturas de dados, sem catalogo real, calculo de doses, macros, fases ou regra metodologica. A referencia de um plano aponta uma versao especifica do catalogo.
+
+### DECISAO CONFIRMADA
+
 A arquitetura definida usa Next.js, Vercel e Supabase para PostgreSQL, Auth, Storage e RLS.
 
 ### DECISAO CONFIRMADA

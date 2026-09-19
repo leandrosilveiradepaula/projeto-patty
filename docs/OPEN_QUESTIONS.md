@@ -373,3 +373,17 @@ Quais conteudos do Drive podem ser migrados primeiro?
 ### QUESTAO ABERTA
 
 Qual sera o processo de revisao, aprovacao e versionamento dos conteudos?
+
+## Protocolos e equivalentes
+
+### QUESTAO ABERTA
+
+Quais campos, tipos de protocolo e elementos profissionais compoem um protocolo alem da estrutura versionada inicial?
+
+### QUESTAO ABERTA
+
+Quais regras profissionais definem a criacao, revisao e aprovacao de um plano alimentar, incluindo fases, reconhecimento metabolico, doses, limites, hidratacao, suplementacao, treino, cardio, alertas e comportamento?
+
+### QUESTAO ABERTA
+
+Qual catalogo de equivalentes sera validado, quem podera versiona-lo e qual parte, se alguma, podera ser exibida a cliente em um protocolo publicado?

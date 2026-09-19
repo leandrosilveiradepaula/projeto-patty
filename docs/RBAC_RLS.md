@@ -274,3 +274,13 @@ Avaliacoes, medidas e associacoes de arquivo podem ser lidas somente por Patty/a
 ### DECISAO CONFIRMADA
 
 `professional_follow_ups` e estritamente interno: cliente e `anon` nao o leem. Patty/admin com assignment ativo pode ler e inserir registro em proprio nome. Nao ha grant ou policy de UPDATE ou DELETE, preservando o historico append-only.
+
+## Implementacao BACKEND-BUNDLE-03
+
+### DECISAO CONFIRMADA
+
+Protocolos e planos usam grants explicitos e RLS. Cliente nao recebe escrita e so le o proprio protocolo e plano quando existe `protocol_publications` para a versao. Draft, revisao e aprovado sem publicacao nao ficam visiveis para a cliente.
+
+Patty/admin precisa de role relacional `admin` e assignment ativo para leitura interna. A escrita de protocolo e plano e limitada ao draft; triggers tambem recusam mutacao apos submissao para revisao. `anon`, admin sem assignment e assignment encerrado nao recebem acesso.
+
+O catalogo de equivalentes continua interno: cliente nao recebe grant ou policy de leitura. Admin com role e ao menos um assignment ativo pode administra-lo; o mecanismo administrativo detalhado permanece aberto.

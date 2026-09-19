@@ -523,3 +523,19 @@ Representa `id`, `clientId`, `assessedAt`, medidas com `measurementKey`, `measur
 ### ProfessionalFollowUp
 
 Representa contrato administrativo interno com observacoes, decisao e motivo. Ele permanece separado de qualquer contrato futuro de cliente.
+
+## Implementacao BACKEND-BUNDLE-03
+
+### DECISAO CONFIRMADA
+
+`protocols` identifica o protocolo logico de uma cliente; `protocol_versions` preserva cada versao. Uma versao pode indicar a versao anterior e possui numero unico dentro do protocolo. `protocol_version_approvals` registra a aprovacao humana separadamente de `protocol_publications`, cuja FK exige uma aprovacao da mesma versao e cliente.
+
+Uma versao submetida para revisao fica congelada. Aprovacao e publicacao nao alteram seu conteudo; uma mudanca posterior cria nova versao. A cliente so pode ler a propria versao efetivamente publicada.
+
+### DECISAO CONFIRMADA
+
+`meal_plan_versions` pertence a uma `protocol_version`. Variantes, ciclos opcionais, passos ordenados, refeicoes ordenadas e alocacoes de dose sao estruturas versionadas do plano. Horario de refeicao nao e obrigatorio estruturalmente. `dose_quantity` usa `numeric(12,4)` e os tipos estruturais sao somente `protein`, `carbohydrate` e `fat`; isso nao representa calculo, recomendacao ou regra profissional.
+
+### DECISAO CONFIRMADA
+
+`food_equivalent_catalogs` possui versoes, grupos e itens. Um plano pode referenciar uma versao especifica do catalogo, sem usar o conceito de versao mais recente. O catalogo permanece vazio nesta etapa e nenhum alimento real foi publicado.
