@@ -20,6 +20,10 @@
   list-style: none;
 }
 
+.logoutButton {
+  justify-self: start;
+}
+
 .link {
   position: relative;
   display: flex;

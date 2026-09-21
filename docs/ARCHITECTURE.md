@@ -63,6 +63,10 @@ Toda funcionalidade que exponha dados de clientes deve ser desenhada com verific
 
 A aplicacao Next.js usa clientes Supabase tipados, um para browser e outro para servidor, configurados com URL e publishable key. A sessao SSR usa cookies e `proxy.ts` no Next.js 16 para atualizar tokens. O codigo server-side verifica identidade com `getClaims()`; autorizacao de dados continua sob responsabilidade de grants e RLS, sem `service_role`, `user_metadata` ou papel local no browser.
 
+### DECISAO CONFIRMADA
+
+`/login` e uma rota publica de entrada por email e senha, sem cadastro publico. As areas `/admin/*` e `/cliente/*` exigem identidade validada com `getClaims()` e o papel relacional correspondente em `user_roles`; o `proxy.ts` continua responsavel somente pelo refresh da sessao e cookies.
+
 ## Questoes abertas
 
 ### QUESTAO ABERTA

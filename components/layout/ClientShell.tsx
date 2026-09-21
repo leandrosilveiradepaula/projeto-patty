@@ -4,6 +4,7 @@ import styles from "./ClientShell.module.css";
 export type ClientShellProps = HTMLAttributes<HTMLDivElement> & {
   children: ReactNode;
   header?: ReactNode;
+  headerAction?: ReactNode;
   navigation?: ReactNode;
 };
 
@@ -11,6 +12,7 @@ export function ClientShell({
   children,
   className,
   header,
+  headerAction,
   navigation,
   ...props
 }: ClientShellProps) {
@@ -21,7 +23,12 @@ export function ClientShell({
   return (
     <div {...props} className={classNames}>
       <div className={styles.frame}>
-        {header ? <header className={styles.header}>{header}</header> : null}
+        {header ? (
+          <header className={styles.header}>
+            <span>{header}</span>
+            {headerAction ? <span>{headerAction}</span> : null}
+          </header>
+        ) : null}
         <main className={styles.main}>{children}</main>
         {navigation ? (
           <div className={styles.navigation}>{navigation}</div>

@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useState } from "react";
+
+import { LogoutButton } from "@/components/auth/LogoutButton";
 import styles from "./AdminSidebar.module.css";
 
 type AdminNavigationItem = {
@@ -135,6 +137,7 @@ function SidebarContent({ onNavigate, pathname }: SidebarContentProps) {
           );
         })}
       </ul>
+      <LogoutButton className={styles.logoutButton} />
     </nav>
   );
 }
