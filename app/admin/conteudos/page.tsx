@@ -1,80 +1,49 @@
 import { ContentListItem } from "@/components/admin/ContentListItem";
 import { Badge } from "@/components/ui/Badge";
-import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
+import { listEducationalContentVersionsForCurrentAdmin } from "@/lib/supabase/data-access";
 import styles from "./page.module.css";
 
-const demoContents = [
-  {
-    category: "Metodologia",
-    meta: "Estrutura reservada para materiais educacionais validados futuramente.",
-    title: "Conteúdo Demonstração 001",
-    type: "Material educativo",
-  },
-  {
-    category: "Receitas",
-    meta: "Item sintético sem regra de liberação ou classificação operacional.",
-    title: "Conteúdo Demonstração 002",
-    type: "Referência textual",
-  },
-  {
-    category: "Orientações",
-    meta: "Registro de demonstração para validar leitura e quebra de texto.",
-    title:
-      "Conteúdo Demonstração 003 com título longo para validação responsiva",
-    type: "Orientação",
-  },
-];
+export default async function AdminConteudosPage() {
+  const contentVersions = await listEducationalContentVersionsForCurrentAdmin();
 
-export default function AdminConteudosPage() {
   return (
     <>
       <PageHeader
-        description="Estrutura inicial da biblioteca educacional, separada da biblioteca de exercícios."
+        description="Biblioteca educacional, separada da biblioteca de exercícios."
         eyebrow="Admin"
         title="Conteúdos"
       />
-      <p className={styles.demoNote}>
-        Dados sintéticos para validação da interface.
-      </p>
       <Section
-        description="Itens de demonstração para validar título, categoria, tipo e estado editorial sem regras de liberação."
+        description="As versões são exibidas individualmente para preservar o histórico editorial."
         title="Biblioteca educacional"
       >
-        <ul className={styles.contentList}>
-          {demoContents.map((content) => (
-            <li key={content.title}>
+        {contentVersions.length === 0 ? (
+          <EmptyState
+            description="As versões cadastradas aparecerão nesta biblioteca."
+            title="Nenhum conteúdo educacional cadastrado"
+          />
+        ) : (
+          <ul className={styles.contentList}>
+            {contentVersions.map((contentVersion) => (
+              <li key={contentVersion.id}>
               <ContentListItem
-                category={content.category}
-                meta={content.meta}
-                status={<Badge variant="neutral">Demo</Badge>}
-                title={content.title}
-                type={content.type}
+                category={contentVersion.category_key ?? "Não informado"}
+                meta={`Versão ${contentVersion.version_number}`}
+                status={
+                  <Badge variant="neutral">
+                    {contentVersion.published_at ? "Publicado" : "Não publicado"}
+                  </Badge>
+                }
+                title={contentVersion.title}
+                type={contentVersion.content_type_key ?? "Não informado"}
               />
-            </li>
-          ))}
-        </ul>
-      </Section>
-      <Section
-        description="Estados estruturais disponíveis para uso futuro, sem fluxo de criação, upload ou publicação nesta etapa."
-        title="Estado futuro"
-      >
-        <div className={styles.supportGrid}>
-          <Card variant="subtle">
-            <EmptyState
-              description="A integração com dados reais, permissões e publicação será definida em tarefas próprias."
-              title="Sem backend integrado"
-            />
-          </Card>
-          <Card variant="subtle">
-            <EmptyState
-              description="A biblioteca de exercícios permanece separada e não é representada nesta tela."
-              title="Exercícios fora desta biblioteca"
-            />
-          </Card>
-        </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </Section>
     </>
   );

@@ -117,3 +117,45 @@ export async function listAccessibleAnamnesisSubmissions(clientId: string) {
 
   return data;
 }
+
+export async function listEducationalContentVersionsForCurrentAdmin() {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("educational_content_versions")
+    .select(
+      "id, version_number, title, category_key, content_type_key, display_order, published_at",
+    )
+    .order("display_order", { ascending: true })
+    .order("version_number", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+async function listContentReleasesForClient(clientId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_content_releases")
+    .select(
+      "id, released_at, educational_content_versions(id, version_number, title, category_key, content_type_key), client_content_progress(first_opened_at, completed_at)",
+    )
+    .eq("client_id", clientId)
+    .order("released_at", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function listCurrentClientContentReleases(clientId: string) {
+  return listContentReleasesForClient(clientId);
+}
+
+export async function listContentReleasesForAccessibleClient(clientId: string) {
+  return listContentReleasesForClient(clientId);
+}

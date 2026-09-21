@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { Section } from "@/components/ui/Section";
 import { getAccessibleClient, getAccessibleClientRegistration } from "@/lib/supabase/data-access";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import styles from "./page.module.css";
 
 type AdminClienteDetailPageProps = {
@@ -69,7 +70,8 @@ export default async function AdminClienteDetailPage({
       title: "Protocolos",
     },
     {
-      description: "Área prevista para conteúdos liberados para a cliente.",
+      description: "Consulte os conteúdos liberados para esta cliente.",
+      href: `/admin/clientes/${client.id}/conteudos`,
       title: "Conteúdos",
     },
     {
@@ -122,14 +124,22 @@ export default async function AdminClienteDetailPage({
         title="Áreas do acompanhamento"
       >
         <div className={styles.areaGrid}>
-          {profileAreas.map((area) => (
-            <Card className={styles.infoCard} key={area.title} variant="subtle">
-              <>
+          {profileAreas.map((area) => {
+            const card = (
+              <Card className={styles.infoCard} variant="subtle">
                 <h3 className={styles.cardTitle}>{area.title}</h3>
                 <p className={styles.cardDescription}>{area.description}</p>
-              </>
-            </Card>
-          ))}
+              </Card>
+            );
+
+            return area.href ? (
+              <Link className={styles.cardLink} href={area.href} key={area.title}>
+                {card}
+              </Link>
+            ) : (
+              <div key={area.title}>{card}</div>
+            );
+          })}
         </div>
       </Section>
       <EmptyState
