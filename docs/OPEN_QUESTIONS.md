@@ -304,6 +304,10 @@ Quais sao as regras de doses?
 
 ### QUESTAO ABERTA
 
+Qual e a semantica validada de eventual limite de doses de proteina high-fat, incluindo input, maximo aplicavel e comportamento com doses fracionarias?
+
+### QUESTAO ABERTA
+
 Quais sao as regras de hidratacao?
 
 ### QUESTAO ABERTA

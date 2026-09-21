@@ -57,6 +57,12 @@ Dados reais nao devem ser usados no desenvolvimento inicial.
 
 Toda funcionalidade que exponha dados de clientes deve ser desenhada com verificacao explicita de autorizacao, logs de auditoria e testes de isolamento de acesso.
 
+## Integracao de aplicacao com Supabase
+
+### DECISAO CONFIRMADA
+
+A aplicacao Next.js usa clientes Supabase tipados, um para browser e outro para servidor, configurados com URL e publishable key. A sessao SSR usa cookies e `proxy.ts` no Next.js 16 para atualizar tokens. O codigo server-side verifica identidade com `getClaims()`; autorizacao de dados continua sob responsabilidade de grants e RLS, sem `service_role`, `user_metadata` ou papel local no browser.
+
 ## Questoes abertas
 
 ### QUESTAO ABERTA
