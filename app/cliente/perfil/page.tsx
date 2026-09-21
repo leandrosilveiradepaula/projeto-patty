@@ -1,16 +1,25 @@
 import { ClientProfileOverview } from "@/components/client/ClientProfileOverview";
 import { ClientRegistrationDetails } from "@/components/client/ClientRegistrationDetails";
 import { Card } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
+import {
+  getAccessibleClientRegistration,
+  getCurrentClient,
+  getCurrentUserProfile,
+} from "@/lib/supabase/data-access";
 import Link from "next/link";
 import styles from "./page.module.css";
 
-export default function ClientePerfilPage() {
+export default async function ClientePerfilPage() {
+  const [profile, client] = await Promise.all([getCurrentUserProfile(), getCurrentClient()]);
+  const registration = client ? await getAccessibleClientRegistration(client.id) : null;
+
   return (
     <>
       <PageHeader
-        description="Consulte as informações de acesso e o cadastro atual disponíveis nesta interface demonstrativa."
+        description="Consulte as informações de acesso e o cadastro atual disponíveis nesta área."
         eyebrow="Cliente"
         title="Perfil"
       />
@@ -19,19 +28,23 @@ export default function ClientePerfilPage() {
         title="Acesso à conta"
       >
         <ClientProfileOverview
-          displayName="Cliente Demonstração"
-          loginEmail="cliente.demo@exemplo.test"
+          displayName={profile?.display_name ?? undefined}
         />
       </Section>
       <Section
         description="Estas informações representam o cadastro atual de contato."
         title="Cadastro atual"
       >
-        <ClientRegistrationDetails
-          city="Cidade demonstrativa"
-          contactEmail="contato.demo@exemplo.test"
-          phone="(00) 00000-0000"
-        />
+        {registration ? (
+          <ClientRegistrationDetails
+            city={registration.city ?? undefined}
+            contactEmail={registration.contact_email ?? undefined}
+            instagram={registration.instagram ?? undefined}
+            phone={registration.phone ?? undefined}
+          />
+        ) : (
+          <EmptyState description="Seu cadastro atual ainda não foi informado." title="Cadastro atual indisponível" />
+        )}
       </Section>
       <Section
         description="A Anamnese reúne respostas e informações do acompanhamento em uma área separada."

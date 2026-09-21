@@ -1,9 +1,10 @@
+import { AdminClientRegistrationDetails } from "@/components/admin/AdminClientRegistrationDetails";
 import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Section } from "@/components/ui/Section";
-import { getAccessibleClient } from "@/lib/supabase/data-access";
+import { getAccessibleClient, getAccessibleClientRegistration } from "@/lib/supabase/data-access";
 import { notFound } from "next/navigation";
 import styles from "./page.module.css";
 
@@ -22,6 +23,8 @@ export default async function AdminClienteDetailPage({
   if (!client) {
     notFound();
   }
+
+  const registration = await getAccessibleClientRegistration(client.id);
 
   const displayName = client.profiles?.display_name?.trim();
 
@@ -98,6 +101,21 @@ export default async function AdminClienteDetailPage({
             </Card>
           ))}
         </div>
+      </Section>
+      <Section
+        description="Informações atuais de contato, separadas do acesso à conta e da Anamnese."
+        title="Cadastro atual"
+      >
+        {registration ? (
+          <AdminClientRegistrationDetails
+            city={registration.city ?? undefined}
+            contactEmail={registration.contact_email ?? undefined}
+            instagram={registration.instagram ?? undefined}
+            phone={registration.phone ?? undefined}
+          />
+        ) : (
+          <EmptyState description="O cadastro atual desta cliente ainda não foi informado." title="Cadastro atual indisponível" />
+        )}
       </Section>
       <Section
         description="Mapa visual das áreas previstas para o acompanhamento. Estes blocos ainda não são navegação nem abas."
