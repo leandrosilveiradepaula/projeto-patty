@@ -60,9 +60,26 @@ export async function listClientsAssignedToCurrentAdmin() {
   const { data, error } = await supabase
     .from("client_assignments")
     .select(
-      "client_id, assigned_at, clients(id, profile_id, status, started_at, ended_at)",
+      "client_id, assigned_at, clients(id, profile_id, status, started_at, ended_at, profiles(display_name))",
     )
     .is("ended_at", null);
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function getAccessibleClient(clientId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("clients")
+    .select(
+      "id, profile_id, status, started_at, ended_at, created_at, updated_at, profiles(display_name)",
+    )
+    .eq("id", clientId)
+    .maybeSingle();
 
   if (error) {
     throw error;

@@ -5,17 +5,27 @@ import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
+import {
+  getCurrentUserProfile,
+  listClientsAssignedToCurrentAdmin,
+} from "@/lib/supabase/data-access";
 import Link from "next/link";
 import styles from "./page.module.css";
 
-export default function AdminPage() {
+export default async function AdminPage() {
+  const [profile, assignments] = await Promise.all([
+    getCurrentUserProfile(),
+    listClientsAssignedToCurrentAdmin(),
+  ]);
+  const assignedCount = assignments?.length ?? 0;
+
   return (
     <>
       <PageHeader
-        actions={<Badge variant="neutral">Dados sintéticos para validação da interface.</Badge>}
+        actions={<Badge variant="neutral">Clientes atribuídos: {assignedCount}</Badge>}
         description="Visão estrutural do acompanhamento e das atividades administrativas."
         eyebrow="Admin"
-        title="Painel administrativo"
+        title={profile?.display_name?.trim() ? `Painel de ${profile.display_name.trim()}` : "Painel administrativo"}
         titleId="admin-title"
       />
       <Section
@@ -24,9 +34,9 @@ export default function AdminPage() {
       >
         <div className={styles.metricGrid}>
           <AdminMetricCard
-            description="Valor sintético para validar a composição visual do resumo."
-            label="Registros de demonstração"
-            value="12"
+            description="Total de clientes com atribuição ativa para este perfil."
+            label="Clientes atribuídos"
+            value={String(assignedCount)}
           />
           <AdminMetricCard
             description="Quantidade de exemplo sem regra de priorização associada."
