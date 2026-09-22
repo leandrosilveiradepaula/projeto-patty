@@ -595,6 +595,76 @@ export async function listAccessibleProtocolPublications(protocolVersionIds: str
 }
 
 
+export async function submitAccessibleProtocolVersionForReview(
+  protocolVersionId: string,
+) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("protocol_versions")
+    .update({ submitted_for_review_at: new Date().toISOString() })
+    .eq("id", protocolVersionId)
+    .is("submitted_for_review_at", null)
+    .select("id, protocol_id, client_id, submitted_for_review_at")
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function createAccessibleProtocolVersionApproval(input: {
+  approvedByProfileId: string;
+  clientId: string;
+  protocolVersionId: string;
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("protocol_version_approvals")
+    .insert({
+      approved_by_profile_id: input.approvedByProfileId,
+      client_id: input.clientId,
+      protocol_version_id: input.protocolVersionId,
+    })
+    .select("id, protocol_version_id, approved_by_profile_id, approved_at")
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function createAccessibleProtocolPublication(input: {
+  approvalId: string;
+  clientId: string;
+  protocolVersionId: string;
+  publishedByProfileId: string;
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("protocol_publications")
+    .insert({
+      approval_id: input.approvalId,
+      client_id: input.clientId,
+      protocol_version_id: input.protocolVersionId,
+      published_by_profile_id: input.publishedByProfileId,
+    })
+    .select(
+      "id, protocol_version_id, approval_id, published_by_profile_id, published_at",
+    )
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+
 export type AccessibleProtocolVersionMealPlan = {
   cycles: Array<{
     id: string;
