@@ -10,6 +10,7 @@ import {
   listAccessibleAnamnesisSubmissions,
   listAccessibleAssessmentsForClient,
   listAccessibleClientFiles,
+  listAccessibleProtocolsForClient,
   listContentReleasesForAccessibleClient,
 } from "@/lib/supabase/data-access";
 import Link from "next/link";
@@ -32,14 +33,21 @@ export default async function AdminClienteDetailPage({
     notFound();
   }
 
-  const [registration, anamneses, assessments, files, contentReleases] =
-    await Promise.all([
-      getAccessibleClientRegistration(client.id),
-      listAccessibleAnamnesisSubmissions(client.id),
-      listAccessibleAssessmentsForClient(client.id),
-      listAccessibleClientFiles(client.id),
-      listContentReleasesForAccessibleClient(client.id),
-    ]);
+  const [
+    registration,
+    anamneses,
+    assessments,
+    protocols,
+    files,
+    contentReleases,
+  ] = await Promise.all([
+    getAccessibleClientRegistration(client.id),
+    listAccessibleAnamnesisSubmissions(client.id),
+    listAccessibleAssessmentsForClient(client.id),
+    listAccessibleProtocolsForClient(client.id),
+    listAccessibleClientFiles(client.id),
+    listContentReleasesForAccessibleClient(client.id),
+  ]);
 
   const displayName = client.profiles?.display_name?.trim();
 
@@ -57,6 +65,13 @@ export default async function AdminClienteDetailPage({
         "Consulte avaliações, medidas, fotos vinculadas e histórico profissional disponível.",
       href: `/admin/clientes/${client.id}/avaliacoes`,
       title: "Avaliações",
+    },
+    {
+      count: protocols.length,
+      description:
+        "Consulte protocolos e o histórico factual de versões, aprovações e publicações.",
+      href: `/admin/clientes/${client.id}/protocolos`,
+      title: "Protocolos",
     },
     {
       count: files.length,
