@@ -87,7 +87,7 @@ Limites do MVP: fotos ate 10 MB; exames/documentos ate 20 MB por arquivo.
 
 Uploads privados devem usar paths gerados pelo sistema sem PII, nunca sobrescrever objetos existentes e nao permitir hard delete direto pelo browser. Substituicoes geram novo objeto e preservam historico.
 
-A cliente autenticada podera enviar bytes diretamente ao Supabase Storage sob grants/policies/RLS estritos, usando area privada temporaria. O servidor valida tamanho, extensao e tipo real/detectado antes de registrar/promover o arquivo como valido; objetos rejeitados sao removidos e nao ficam visiveis como recebidos.
+A cliente autenticada podera enviar bytes diretamente ao Supabase Storage sob grants/policies/RLS estritos, usando area privada temporaria. O servidor valida tamanho, extensao e tipo real/detectado antes de registrar/promover o arquivo como valido; objetos rejeitados sao removidos e nao ficam visiveis como recebidos. A autorizacao de upload e materializada em uma sessao temporaria vinculada ao proprio cliente, com path `pending/<client_id>/<session_id>.<ext>` gerado pelo banco e expiracao de 15 minutos. O browser recebe apenas INSERT no objeto temporario exato autorizado; nao recebe UPDATE, DELETE ou escolha livre de path.
 
 A Patty tambem podera enviar arquivos em nome da cliente, mas por fluxo administrativo server-side controlado. Esse fluxo deve registrar autoria administrativa e nunca atribuir o envio a cliente. As mesmas validacoes de formato, tamanho, path sem PII e imutabilidade se aplicam.
 
