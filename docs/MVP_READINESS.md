@@ -111,6 +111,8 @@ Os formatos e os limites de tamanho do MVP ja estao definidos: fotos em JPEG/PNG
 
 A Patty devera manter acesso aos arquivos mesmo sem assignment ativo, e signed URLs terao validade de 5 minutos. Hoje, porem, leitura/download administrativos ainda estao implementados sob assignment ativo e signed URLs de 60 segundos; essas diferencas sao pendencias de implementacao.
 
+Visualizacao e download administrativos de exames/documentos deverao gerar evento de auditoria sem conteudo do arquivo. Esse requisito esta decidido, mas ainda precisa ser implementado junto da reconciliacao das rotas/RLS de arquivos.
+
 Permanecem abertos quantidade maxima, eventual upload administrativo pela Patty, politica concreta de retencao/hard delete, antimalware e visibilidade da cliente.
 
 ### Acompanhamento profissional
