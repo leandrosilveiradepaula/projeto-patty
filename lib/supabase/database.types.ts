@@ -502,6 +502,44 @@ export type Database = {
           },
         ]
       }
+      client_file_access_events: {
+        Row: {
+          action: string
+          actor_profile_id: string
+          authorized: boolean
+          file_kind: Database["public"]["Enums"]["client_file_kind"] | null
+          id: string
+          recorded_at: string
+          requested_file_id: string
+        }
+        Insert: {
+          action: string
+          actor_profile_id: string
+          authorized: boolean
+          file_kind?: Database["public"]["Enums"]["client_file_kind"] | null
+          id?: string
+          recorded_at?: string
+          requested_file_id: string
+        }
+        Update: {
+          action?: string
+          actor_profile_id?: string
+          authorized?: boolean
+          file_kind?: Database["public"]["Enums"]["client_file_kind"] | null
+          id?: string
+          recorded_at?: string
+          requested_file_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_file_access_events_actor_profile_id_fkey"
+            columns: ["actor_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_files: {
         Row: {
           bucket_id: string
