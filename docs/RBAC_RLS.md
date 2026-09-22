@@ -18,6 +18,10 @@ Autenticacao nao e autorizacao.
 
 Para dados client-scoped, autorizacao deve verificar vinculo explicito com o cliente.
 
+### EXCECAO CONFIRMADA PARA ARQUIVOS PRIVADOS
+
+No MVP, a Patty e a unica administradora/profissional de negocio e pode acessar fotos, exames e documentos privados das clientes mesmo sem `client_assignment` ativo. Esta excecao nao autoriza acesso irrestrito aos demais dados client-scoped e deve ser reavaliada antes da introducao de qualquer outro admin ou profissional.
+
 ## Estrategia geral de RLS
 
 ### DECISAO CONFIRMADA
@@ -112,6 +116,8 @@ Para dados client-scoped, acesso administrativo deve considerar:
 3. assignment ativo ao cliente.
 
 Nao tratar simplesmente `role = admin` como autorizacao irrestrita para todos os dados.
+
+Excecao vigente no MVP: para `client_files` e os objetos correspondentes no Storage privado, a Patty pode acessar os arquivos sem assignment ativo. Essa excecao e especifica para arquivos e para o modelo atual de uma unica admin; nao deve ser copiada para outras tabelas client-scoped.
 
 Essa arquitetura protege contra ampliacao acidental de acesso quando futuramente existirem outros profissionais.
 
@@ -259,7 +265,9 @@ Clientes nao possuem permissoes para criar, alterar, excluir ou publicar definic
 
 ### DECISAO CONFIRMADA
 
-`client_files` possui RLS propria, separada de `storage.objects`. Cliente autenticada le somente metadados e objetos privados vinculados ao proprio `clients.profile_id`; Patty/admin le somente com role relacional `admin` e assignment ativo. `anon`, usuario sem vinculo, admin sem assignment e assignment encerrado nao recebem acesso.
+`client_files` possui RLS propria, separada de `storage.objects`. Na implementacao atual, cliente autenticada le somente metadados e objetos privados vinculados ao proprio `clients.profile_id`; Patty/admin le somente com role relacional `admin` e assignment ativo. `anon`, usuario sem vinculo, admin sem assignment e assignment encerrado nao recebem acesso.
+
+Essa descricao e fato de implementacao, mas esta parcialmente desalinhada com a decisao posterior de produto: a Patty deve manter acesso aos arquivos privados mesmo sem assignment ativo. A RLS de `client_files`, a policy correspondente de `storage.objects` e as rotas server-side de arquivo precisam ser reconciliadas antes de a decisao ser considerada implementada.
 
 A policy de `storage.objects` restringe explicitamente o bucket `client-private` e exige correspondencia com metadado autorizado em `client_files`. Nao ha policy geral para `authenticated` no bucket inteiro, nem grant de INSERT, UPDATE ou DELETE para arquivos nesta etapa.
 
