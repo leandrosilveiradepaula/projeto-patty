@@ -246,10 +246,6 @@ Como sera definida a relacao operacional "clientes sob responsabilidade da Patty
 
 Quais acoes serao consideradas criticas para auditoria?
 
-### QUESTAO ABERTA
-
-Quais serao as regras de acesso para arquivos privados em Storage?
-
 ## Supabase
 
 ### QUESTAO ABERTA
