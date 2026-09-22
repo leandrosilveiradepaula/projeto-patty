@@ -109,13 +109,13 @@ Ja existe:
 
 Os formatos e os limites de tamanho do MVP ja estao definidos: fotos em JPEG/PNG/WebP ate 10 MB; exames e documentos em PDF/JPEG/PNG ate 20 MB. A cliente podera fazer upload direto do browser para Storage privado sob RLS, usando area temporaria e validacao server-side antes de o arquivo ser considerado valido. Paths nao terao PII, objetos nao serao sobrescritos e hard delete direto pelo browser nao sera permitido.
 
-A Patty devera manter acesso aos arquivos mesmo sem assignment ativo, e as rotas administrativas ja usam signed URLs com validade de 5 minutos. A dependencia de assignment na RLS de arquivos foi corrigida na migration `20260922230034_private_file_access_visibility_foundation.sql`, que ainda precisa ser aplicada no Supabase SaaS para a implementacao remota ficar alinhada.
+A Patty mantem acesso aos arquivos mesmo sem assignment ativo, e as rotas administrativas usam signed URLs com validade de 5 minutos. A dependencia de assignment e a visibilidade por autoria/liberacao foram reconciliadas pela migration `20260922230034_private_file_access_visibility_foundation.sql`, aplicada e verificada no Supabase SaaS.
 
-Visualizacao e download administrativos de exames/documentos deverao gerar evento de auditoria sem conteudo do arquivo. Esse requisito esta decidido, mas ainda precisa ser implementado junto da reconciliacao das rotas/RLS de arquivos.
+Downloads administrativos de exames/documentos registram evento append-only em `client_file_access_events` antes da emissao da signed URL, sem copiar conteudo do arquivo. A migration `20260922230601_client_file_access_audit.sql` esta aplicada no Supabase SaaS; a rota registra ator, arquivo solicitado, acao, resultado da autorizacao e timestamp.
 
 O MVP nao tera limite rigido de quantidade de arquivos. A Patty tambem podera enviar arquivos em nome da cliente por fluxo administrativo server-side controlado, com autoria administrativa explicita. Arquivos enviados pela cliente ficam visiveis para ela por padrao; uploads da Patty ficam ocultos ate liberacao explicita. O primeiro MVP nao tera antimalware dedicado; esse risco permanece mitigado por allowlist fechada, validacao de tipo real, limites de tamanho, Storage privado e ausencia de execucao.
 
-A RLS/policy atual ainda nao diferencia visibilidade por autoria/liberacao, portanto essa reconciliacao e bloqueio de seguranca antes de habilitar upload administrativo. Permanece aberta a politica concreta de retencao/hard delete.
+A RLS/policy ja diferencia visibilidade para a cliente e acesso administrativo permanente da Patty. Os fluxos de upload e liberacao ainda nao estao implementados. Permanece aberta a politica concreta de retencao/hard delete.
 
 ### Acompanhamento profissional
 
