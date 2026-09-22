@@ -67,7 +67,7 @@ A implementacao deve registrar o evento na boundary controlada que autoriza a op
 
 Signed URLs para visualizacao ou download de fotos, exames e documentos privados terao validade de 5 minutos. Elas podem ser regeneradas quando necessario e nunca devem ser persistidas no banco.
 
-A implementacao administrativa atual ainda usa signed URLs de 60 segundos; essa diferenca e uma pendencia de implementacao, nao uma nova questao de produto.
+As rotas administrativas de visualizacao e download usam signed URLs com validade de 5 minutos, sem persistir a URL.
 
 ## 2026-09-22 - Acesso permanente da Patty a arquivos privados
 
