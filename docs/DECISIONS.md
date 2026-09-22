@@ -1,5 +1,17 @@
 # Decisoes
 
+## 2026-09-22 - Sem antimalware dedicado no primeiro MVP
+
+### DECISAO TECNICA E DE SEGURANCA
+
+O primeiro MVP nao tera servico dedicado de antivirus/antimalware para uploads privados.
+
+Essa decisao considera o conjunto de controles ja definido: allowlist fechada de formatos, validacao server-side de extensao e tipo real/detectado, limites de tamanho, Storage privado, ausencia de execucao de arquivos e fluxo de validacao em duas etapas.
+
+A ausencia de scanner dedicado nao transforma arquivos enviados em confiaveis nem autoriza execucao, conversao irrestrita ou exposicao publica. O sistema deve continuar tratando uploads como conteudo nao confiavel e manter validacao e isolamento.
+
+A necessidade de antimalware dedicado devera ser reavaliada se o produto passar a aceitar formatos mais amplos, integracoes externas, processamento adicional de arquivos ou se surgir requisito especifico de seguranca/compliance.
+
 ## 2026-09-22 - Upload administrativo de arquivos pela Patty
 
 ### DECISAO DE PRODUTO, SEGURANCA E AUDITORIA
@@ -63,7 +75,7 @@ O upload privado do MVP sera tratado em duas etapas:
 3. somente depois da validacao o arquivo e registrado/promovido como valido e disponivel;
 4. objetos invalidos sao removidos da area temporaria e nunca aparecem como documentos efetivamente recebidos.
 
-A analise antimalware continua como questao aberta separada.
+No primeiro MVP nao sera usado servico dedicado de antivirus/antimalware. Essa necessidade deve ser reavaliada se o risco ou o escopo de arquivos aumentar.
 
 ## 2026-09-22 - Upload direto do browser para Supabase Storage
 
@@ -133,7 +145,7 @@ Word, Excel, ZIP, executaveis e qualquer outro formato fora dessa allowlist nao 
 
 A validacao futura de upload deve conferir no servidor a extensao e o tipo real/detectado do arquivo; o nome do arquivo e o `Content-Type` informado pelo cliente nao sao suficientes por si so. Divergencia entre extensao e tipo detectado deve rejeitar o upload.
 
-Esta decisao fecha os formatos aceitos. Decisoes posteriores tambem fecharam limites de tamanho, upload da cliente, imutabilidade/substituicao, exclusao controlada, paths sem PII, validacao em duas etapas, acesso da Patty e validade de signed URLs. Permanecem abertas, entre outros pontos, politica concreta de retencao, analise antimalware e visibilidade de arquivos na UI da cliente. O MVP nao tera limite rigido de quantidade de arquivos, e a Patty podera fazer upload administrativo em nome da cliente.
+Esta decisao fecha os formatos aceitos. Decisoes posteriores tambem fecharam limites de tamanho, upload da cliente, imutabilidade/substituicao, exclusao controlada, paths sem PII, validacao em duas etapas, acesso da Patty e validade de signed URLs. Permanecem abertas, entre outros pontos, politica concreta de retencao e visibilidade de arquivos na UI da cliente. O MVP nao tera limite rigido de quantidade de arquivos, a Patty podera fazer upload administrativo em nome da cliente e nao havera antimalware dedicado no primeiro MVP.
 
 ## 2026-09-22 - Gestao de assignments no MVP
 
@@ -247,7 +259,6 @@ Decisoes posteriores passaram a definir upload da cliente, limites de tamanho, i
 Continuam abertos nesta area:
 
 - politica concreta de retencao e hard delete;
-- analise de arquivos maliciosos;
 - quais fotos, exames ou documentos devem ser exibidos na UI da cliente.
 
 ## 2026-09-22 - Reconciliacao documental das regras confirmadas do metodo
