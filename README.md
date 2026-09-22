@@ -116,4 +116,5 @@ O workflow roda em pull requests, pushes para `master` e execucao manual.
 - `docs/OPEN_QUESTIONS.md`
 - `docs/DECISIONS.md`
 - `docs/PATTY_DECISION_ROUND_1.md`
+- `docs/MVP_READINESS.md`
 - `AGENTS.md`
