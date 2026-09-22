@@ -1,5 +1,5 @@
 import { requireRole } from "@/lib/supabase/auth";
-import { getAccessiblePrivateFileForAdminDownload } from "@/lib/supabase/data-access";
+import {\n  getAccessiblePrivateFileForAdminDownload,\n  recordClientFileAccessEvent,\n} from "@/lib/supabase/data-access";
 import { createClient } from "@/lib/supabase/server";
 import { isUuid } from "@/lib/validation/uuid";
 
@@ -24,7 +24,33 @@ export async function GET(
   const file = await getAccessiblePrivateFileForAdminDownload(fileId);
 
   if (!file) {
+    try {
+      await recordClientFileAccessEvent({
+        action: "download",
+        actorProfileId: auth.profileId,
+        authorized: false,
+        fileKind: null,
+        requestedFileId: fileId,
+      });
+    } catch {
+      // A denied request still returns 404 without exposing audit failures.
+    }
+
     return new Response(null, { status: 404 });
+  }
+
+  if (file.file_kind === "exam" || file.file_kind === "document") {
+    try {
+      await recordClientFileAccessEvent({
+        action: "download",
+        actorProfileId: auth.profileId,
+        authorized: true,
+        fileKind: file.file_kind,
+        requestedFileId: fileId,
+      });
+    } catch {
+      return new Response(null, { status: 404 });
+    }
   }
 
   const supabase = await createClient();
