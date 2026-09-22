@@ -1,5 +1,13 @@
 # Decisoes
 
+## 2026-09-22 - Metodo principal de login
+
+### DECISAO DE PRODUTO E SEGURANCA
+
+O metodo principal de login no MVP sera email + senha para clientes e administradores. Contas administrativas continuam com MFA obrigatorio.
+
+Links enviados por email podem ser usados nos fluxos controlados de convite, ativacao e recuperacao de acesso, mas magic link nao sera o metodo normal de login no MVP.
+
 ## 2026-09-22 - Uso de LangGraph no MVP
 
 ### DECISAO TECNICA
