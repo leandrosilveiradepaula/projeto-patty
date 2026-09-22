@@ -432,6 +432,24 @@ export async function listAccessibleClientFiles(clientId: string) {
   return data;
 }
 
+export async function getAccessiblePrivateFileForCurrentClientDownload(
+  fileId: string,
+) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_files")
+    .select("id, bucket_id, object_path, original_filename, file_kind")
+    .eq("id", fileId)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+
 export async function getAccessiblePrivateFileForAdminDownload(fileId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
