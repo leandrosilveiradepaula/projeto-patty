@@ -1,6 +1,7 @@
 import { requireRole } from "@/lib/supabase/auth";
 import { getAccessiblePhotoFileForAdminViewing } from "@/lib/supabase/data-access";
 import { createClient } from "@/lib/supabase/server";
+import { isUuid } from "@/lib/validation/uuid";
 
 type AdminPhotoRouteProps = {
   params: Promise<{
@@ -15,6 +16,11 @@ export async function GET(
   await requireRole("admin");
 
   const { fileId } = await params;
+
+  if (!isUuid(fileId)) {
+    return new Response(null, { status: 404 });
+  }
+
   const file = await getAccessiblePhotoFileForAdminViewing(fileId);
 
   if (!file) {
