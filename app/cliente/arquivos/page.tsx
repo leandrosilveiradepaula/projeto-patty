@@ -9,6 +9,8 @@ import {
   listCurrentClientFiles,
 } from "@/lib/supabase/data-access";
 
+import Link from "next/link";
+
 import styles from "./page.module.css";
 
 const fileKindLabels: Record<string, string> = {
@@ -114,6 +116,12 @@ export default async function ClientFilesPage() {
                       <dd>{formatCreatedAt(file.created_at)}</dd>
                     </div>
                   </dl>
+                  <Link
+                    className={styles.downloadLink}
+                    href={`/cliente/arquivos/${file.id}`}
+                  >
+                    Baixar arquivo
+                  </Link>
                 </Card>
               </li>
             ))}
