@@ -207,6 +207,24 @@ export async function listAccessibleAnamnesisReviews(submissionId: string) {
   return data;
 }
 
+
+export async function createAccessibleAnamnesisReview(
+  submissionId: string,
+  reviewerProfileId: string,
+  note: string,
+) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("anamnesis_reviews").insert({
+    submission_id: submissionId,
+    reviewer_profile_id: reviewerProfileId,
+    note,
+  });
+
+  if (error) {
+    throw error;
+  }
+}
+
 export async function listEducationalContentVersionsForCurrentAdmin() {
   const supabase = await createClient();
   const { data, error } = await supabase

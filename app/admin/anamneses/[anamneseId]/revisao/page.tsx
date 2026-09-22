@@ -1,7 +1,9 @@
+import { AdminAnamnesisReviewForm } from "@/components/admin/AdminAnamnesisReviewForm";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { Section } from "@/components/ui/Section";
 import {
   getAccessibleAnamnesisSubmission,
   listAccessibleAnamnesisReviews,
@@ -63,37 +65,50 @@ export default async function AnamnesisReviewPage({
         Estas notas são registros profissionais append-only. Não alteram as
         respostas originais da cliente e não são exibidas para ela.
       </p>
-      {reviews.length === 0 ? (
-        <EmptyState
-          description="Nenhuma nota de revisão está registrada para esta submissão."
-          title="Sem revisões registradas"
-        />
-      ) : (
-        <ol className={styles.items}>
-          {reviews.map((review) => {
-            const reviewerName = review.profiles?.display_name?.trim();
+      <Section
+        description="A nova nota será registrada em seu perfil e preservada como histórico interno."
+        title="Adicionar nota interna"
+      >
+        <Card>
+          <AdminAnamnesisReviewForm submissionId={submission.id} />
+        </Card>
+      </Section>
+      <Section
+        description="Registros anteriores em ordem cronológica, sem edição ou sobrescrita."
+        title="Histórico de revisões"
+      >
+        {reviews.length === 0 ? (
+          <EmptyState
+            description="Nenhuma nota de revisão está registrada para esta submissão."
+            title="Sem revisões registradas"
+          />
+        ) : (
+          <ol className={styles.items}>
+            {reviews.map((review) => {
+              const reviewerName = review.profiles?.display_name?.trim();
 
-            return (
-              <li key={review.id}>
-                <Card className={styles.reviewCard}>
-                  <div className={styles.reviewHeader}>
-                    <div>
-                      <p className={styles.reviewMeta}>
-                        {formatDateTime(review.created_at)}
-                      </p>
-                      <p className={styles.reviewer}>
-                        {reviewerName || "Revisor identificado pelo sistema"}
-                      </p>
+              return (
+                <li key={review.id}>
+                  <Card className={styles.reviewCard}>
+                    <div className={styles.reviewHeader}>
+                      <div>
+                        <p className={styles.reviewMeta}>
+                          {formatDateTime(review.created_at)}
+                        </p>
+                        <p className={styles.reviewer}>
+                          {reviewerName || "Revisor identificado pelo sistema"}
+                        </p>
+                      </div>
+                      <Badge variant="neutral">Interno</Badge>
                     </div>
-                    <Badge variant="neutral">Interno</Badge>
-                  </div>
-                  <p className={styles.note}>{review.note}</p>
-                </Card>
-              </li>
-            );
-          })}
-        </ol>
-      )}
+                    <p className={styles.note}>{review.note}</p>
+                  </Card>
+                </li>
+              );
+            })}
+          </ol>
+        )}
+      </Section>
     </>
   );
 }
