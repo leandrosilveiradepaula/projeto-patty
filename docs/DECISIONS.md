@@ -1,5 +1,23 @@
 # Decisoes
 
+## 2026-09-22 - Autorizacao temporaria para upload da cliente
+
+### DECISAO TECNICA DE IMPLEMENTACAO
+
+O upload direto da cliente para o Storage usa uma sessao temporaria autorizada no banco antes do envio do objeto.
+
+A sessao:
+
+- pertence a propria cliente autenticada e ao respectivo `client_id`;
+- aceita somente foto, exame ou documento dentro da allowlist e dos limites de tamanho ja definidos;
+- gera o path temporario pelo banco em `pending/<client_id>/<session_id>.<ext>`, sem permitir que o browser escolha livremente o destino;
+- inicia em estado `pending`;
+- expira 15 minutos apos a criacao;
+- nao concede `UPDATE` ou `DELETE` ao browser;
+- autoriza somente `INSERT` no objeto temporario exato do bucket privado.
+
+A migration `20260922231426_client_file_upload_session_foundation.sql` esta aplicada no Supabase SaaS e deve ser preservada sem reescrita. Essa fundacao nao considera o arquivo recebido como valido: a promocao para `client_files` continua dependente da validacao server-side de tamanho, extensao e tipo real/detectado.
+
 ## 2026-09-22 - Visibilidade de arquivos privados para a cliente
 
 ### DECISAO DE PRODUTO E SEGURANCA
@@ -13,7 +31,7 @@ No MVP, a visibilidade de arquivos privados para a cliente depende da autoria do
 
 A visualizacao pela cliente continua exigindo autenticacao, autorizacao e signed URL temporaria. O sistema deve preservar quem enviou o arquivo e, quando houver liberacao administrativa, quem liberou e quando.
 
-A implementacao atual de `client_files` e Storage ainda nao diferencia essa regra de visibilidade por autoria/liberacao. Antes de habilitar upload administrativo em producao, RLS/policies e o fluxo server-side devem impedir que um arquivo enviado pela Patty apareca para a cliente sem liberacao explicita.
+A RLS de `client_files` e Storage ja diferencia a visibilidade para a cliente e o acesso administrativo permanente da Patty. Os fluxos de upload e de liberacao explicita ainda devem preservar essa regra ao materializar novos arquivos.
 
 ## 2026-09-22 - Sem antimalware dedicado no primeiro MVP
 

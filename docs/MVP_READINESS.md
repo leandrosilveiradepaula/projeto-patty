@@ -107,7 +107,7 @@ Ja existe:
 - download administrativo por signed URL curta, nao persistida;
 - rejeicao deterministica de identificadores de arquivo malformados antes de consulta ao banco.
 
-Os formatos e os limites de tamanho do MVP ja estao definidos: fotos em JPEG/PNG/WebP ate 10 MB; exames e documentos em PDF/JPEG/PNG ate 20 MB. A cliente podera fazer upload direto do browser para Storage privado sob RLS, usando area temporaria e validacao server-side antes de o arquivo ser considerado valido. Paths nao terao PII, objetos nao serao sobrescritos e hard delete direto pelo browser nao sera permitido. A validacao deterministica de formato/extensao, MIME detectado, tamanho e geracao de path com UUIDs internos esta implementada em `lib/validation/private-files.ts` e coberta por `test:validation`; ela ainda nao esta conectada a um fluxo de upload.
+Os formatos e os limites de tamanho do MVP ja estao definidos: fotos em JPEG/PNG/WebP ate 10 MB; exames e documentos em PDF/JPEG/PNG ate 20 MB. A cliente podera fazer upload direto do browser para Storage privado sob RLS, usando area temporaria e validacao server-side antes de o arquivo ser considerado valido. Paths nao terao PII, objetos nao serao sobrescritos e hard delete direto pelo browser nao sera permitido. A validacao deterministica de formato/extensao, MIME detectado, tamanho e geracao de path com UUIDs internos esta implementada em `lib/validation/private-files.ts` e coberta por `test:validation`. A fundacao remota de autorizacao usa `client_file_upload_sessions`, com path temporario gerado pelo banco, expiracao de 15 minutos e policy de INSERT limitada ao objeto `pending` exato; ainda falta conectar esse fluxo a UI e a finalizacao server-side.
 
 A Patty mantem acesso aos arquivos mesmo sem assignment ativo, e as rotas administrativas usam signed URLs com validade de 5 minutos. A dependencia de assignment e a visibilidade por autoria/liberacao foram reconciliadas pela migration `20260922230034_private_file_access_visibility_foundation.sql`, aplicada e verificada no Supabase SaaS.
 
@@ -115,7 +115,7 @@ Downloads administrativos de exames/documentos registram evento append-only em `
 
 O MVP nao tera limite rigido de quantidade de arquivos. A Patty tambem podera enviar arquivos em nome da cliente por fluxo administrativo server-side controlado, com autoria administrativa explicita. Arquivos enviados pela cliente ficam visiveis para ela por padrao; uploads da Patty ficam ocultos ate liberacao explicita. O primeiro MVP nao tera antimalware dedicado; esse risco permanece mitigado por allowlist fechada, validacao de tipo real, limites de tamanho, Storage privado e ausencia de execucao.
 
-A RLS/policy ja diferencia visibilidade para a cliente e acesso administrativo permanente da Patty. Os fluxos de upload e liberacao ainda nao estao implementados. Permanece aberta a politica concreta de retencao/hard delete.
+A RLS/policy ja diferencia visibilidade para a cliente e acesso administrativo permanente da Patty. A fundacao do upload da cliente usa `client_file_upload_sessions` e ja esta aplicada no Supabase SaaS; a finalizacao server-side, validacao do conteudo real, limpeza de temporarios, upload administrativo e liberacao para a cliente ainda nao estao implementados. Permanece aberta a politica concreta de retencao/hard delete.
 
 ### Acompanhamento profissional
 
