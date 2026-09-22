@@ -97,7 +97,7 @@ A aplicacao Next.js usa clientes Supabase tipados, um para browser e outro para 
 
 ### DECISAO CONFIRMADA
 
-`/login` e uma rota publica de entrada por email e senha, sem cadastro publico. As areas `/admin/*` e `/cliente/*` exigem identidade validada com `getClaims()` e o papel relacional correspondente em `user_roles`; o `proxy.ts` continua responsavel somente pelo refresh da sessao e cookies.
+`/login` e a rota publica de entrada por email e senha, que permanece como metodo principal de login no MVP para clientes e administradores, sem cadastro publico. Contas administrativas exigem MFA. Links enviados por email podem ser usados para convite, ativacao e recuperacao de acesso, mas magic link nao e o metodo normal de login. As areas `/admin/*` e `/cliente/*` exigem identidade validada com `getClaims()` e o papel relacional correspondente em `user_roles`; o `proxy.ts` continua responsavel somente pelo refresh da sessao e cookies.
 
 ## Questoes abertas
 
