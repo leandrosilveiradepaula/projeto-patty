@@ -442,6 +442,23 @@ export async function listAccessibleProtocols() {
   return data;
 }
 
+
+export async function listAccessibleProtocolsForClient(clientId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("protocols")
+    .select("id, client_id, protocol_type, created_at")
+    .eq("client_id", clientId)
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
 export async function getAccessibleProtocol(protocolId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
