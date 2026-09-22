@@ -35,7 +35,7 @@ Os detalhes operacionais de convite, expiracao, reenvio, ativacao, recuperacao e
 
 Nao introduzir FastAPI ou outros servicos neste momento.
 
-A VPS Hostinger nao sera usada na primeira versao operacional do MVP enquanto Vercel e Supabase atenderem aos requisitos confirmados. n8n tambem nao sera usado inicialmente e so deve ser introduzido quando uma automacao externa ou orquestracao concreta justificar a ferramenta. LangGraph so deve ser introduzido quando houver necessidade concreta e documentada.
+A VPS Hostinger nao sera usada na primeira versao operacional do MVP enquanto Vercel e Supabase atenderem aos requisitos confirmados. n8n tambem nao sera usado inicialmente e so deve ser introduzido quando uma automacao externa ou orquestracao concreta justificar a ferramenta. LangGraph nao sera usado inicialmente; a primeira integracao real de IA deve permanecer server-side, simples, explicita e auditavel, e LangGraph so entra se estado, multiplas etapas ou ramificacoes complexas realmente justificarem a ferramenta.
 
 ### FATO CONFIRMADO DE IMPLEMENTACAO
 
@@ -101,6 +101,3 @@ A aplicacao Next.js usa clientes Supabase tipados, um para browser e outro para 
 
 ## Questoes abertas
 
-### QUESTAO ABERTA
-
-Ainda e necessario definir quais fluxos de IA justificarao LangGraph.
