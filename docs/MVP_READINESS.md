@@ -109,7 +109,7 @@ Ja existe:
 
 Os formatos e os limites de tamanho do MVP ja estao definidos: fotos em JPEG/PNG/WebP ate 10 MB; exames e documentos em PDF/JPEG/PNG ate 20 MB. A cliente podera fazer upload direto do browser para Storage privado sob RLS, usando area temporaria e validacao server-side antes de o arquivo ser considerado valido. Paths nao terao PII, objetos nao serao sobrescritos e hard delete direto pelo browser nao sera permitido.
 
-A Patty devera manter acesso aos arquivos mesmo sem assignment ativo, e as rotas administrativas ja usam signed URLs com validade de 5 minutos. A dependencia de assignment na RLS de arquivos foi corrigida na migration `20260922224315_private_file_access_visibility_foundation.sql`, que ainda precisa ser aplicada no Supabase SaaS para a implementacao remota ficar alinhada.
+A Patty devera manter acesso aos arquivos mesmo sem assignment ativo, e as rotas administrativas ja usam signed URLs com validade de 5 minutos. A dependencia de assignment na RLS de arquivos foi corrigida na migration `20260922230034_private_file_access_visibility_foundation.sql`, que ainda precisa ser aplicada no Supabase SaaS para a implementacao remota ficar alinhada.
 
 Visualizacao e download administrativos de exames/documentos deverao gerar evento de auditoria sem conteudo do arquivo. Esse requisito esta decidido, mas ainda precisa ser implementado junto da reconciliacao das rotas/RLS de arquivos.
 
