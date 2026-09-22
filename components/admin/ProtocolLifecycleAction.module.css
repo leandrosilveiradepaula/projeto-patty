@@ -1,0 +1,39 @@
+.form {
+  display: grid;
+  gap: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-4);
+}
+
+.title,
+.description {
+  margin: 0;
+}
+
+.title {
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+  font-size: var(--text-title-small-size);
+  font-weight: var(--text-title-small-weight);
+  line-height: var(--text-title-small-line-height);
+}
+
+.description {
+  margin-top: var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-small-size);
+  line-height: var(--text-body-small-line-height);
+}
+
+.confirmation {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-small-size);
+  line-height: var(--text-body-small-line-height);
+}
+
+.confirmation input {
+  margin-top: 0.2em;
+}
