@@ -6,7 +6,6 @@ import { getCurrentAuthContext } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
 
 export type LoginState = { message: string | null };
-export const initialLoginState: LoginState = { message: null };
 
 export async function login(_: LoginState, formData: FormData): Promise<LoginState> {
   const email = formData.get("email");
