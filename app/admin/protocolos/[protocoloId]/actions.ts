@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { requireRole } from "@/lib/supabase/auth";
+import { getProtocolLifecycleAction } from "@/lib/protocol/lifecycle";
 import {
   createAccessibleProtocolPublication,
   createAccessibleProtocolVersionApproval,
@@ -18,7 +19,10 @@ export type ProtocolLifecycleFormState = {
   success: boolean;
 };
 
-async function getAccessibleVersion(protocolId: string, protocolVersionId: string) {
+async function getAccessibleVersionLifecycle(
+  protocolId: string,
+  protocolVersionId: string,
+) {
   const protocol = await getAccessibleProtocol(protocolId);
 
   if (!protocol) {
@@ -32,7 +36,25 @@ async function getAccessibleVersion(protocolId: string, protocolVersionId: strin
     return null;
   }
 
-  return { protocol, version };
+  const [approvals, publications] = await Promise.all([
+    listAccessibleProtocolVersionApprovals([version.id]),
+    listAccessibleProtocolPublications([version.id]),
+  ]);
+  const approval = approvals[0] ?? null;
+  const publication = publications[0] ?? null;
+  const lifecycleAction = getProtocolLifecycleAction({
+    hasApproval: Boolean(approval),
+    hasPublication: Boolean(publication),
+    submittedForReview: Boolean(version.submitted_for_review_at),
+  });
+
+  return {
+    approval,
+    lifecycleAction,
+    protocol,
+    publication,
+    version,
+  };
 }
 
 function revalidateProtocolPaths(protocolId: string, clientId: string) {
@@ -50,7 +72,10 @@ export async function submitProtocolVersionForReview(
 ): Promise<ProtocolLifecycleFormState> {
   await requireRole("admin");
 
-  const accessible = await getAccessibleVersion(protocolId, protocolVersionId);
+  const accessible = await getAccessibleVersionLifecycle(
+    protocolId,
+    protocolVersionId,
+  );
 
   if (!accessible) {
     return {
@@ -59,9 +84,10 @@ export async function submitProtocolVersionForReview(
     };
   }
 
-  if (accessible.version.submitted_for_review_at) {
+  if (accessible.lifecycleAction !== "submit") {
     return {
-      message: "Esta versão já foi submetida para revisão.",
+      message:
+        "Esta versão não está mais no estado de rascunho disponível para submissão.",
       success: false,
     };
   }
@@ -102,7 +128,10 @@ export async function approveProtocolVersion(
 ): Promise<ProtocolLifecycleFormState> {
   const context = await requireRole("admin");
 
-  const accessible = await getAccessibleVersion(protocolId, protocolVersionId);
+  const accessible = await getAccessibleVersionLifecycle(
+    protocolId,
+    protocolVersionId,
+  );
 
   if (!accessible) {
     return {
@@ -111,20 +140,10 @@ export async function approveProtocolVersion(
     };
   }
 
-  if (!accessible.version.submitted_for_review_at) {
+  if (accessible.lifecycleAction !== "approve") {
     return {
-      message: "A versão precisa ser submetida para revisão antes da aprovação.",
-      success: false,
-    };
-  }
-
-  const approvals = await listAccessibleProtocolVersionApprovals([
-    accessible.version.id,
-  ]);
-
-  if (approvals.length > 0) {
-    return {
-      message: "Esta versão já possui aprovação registrada.",
+      message:
+        "Esta versão não está no estado permitido para registrar aprovação.",
       success: false,
     };
   }
@@ -159,7 +178,10 @@ export async function publishProtocolVersion(
 ): Promise<ProtocolLifecycleFormState> {
   const context = await requireRole("admin");
 
-  const accessible = await getAccessibleVersion(protocolId, protocolVersionId);
+  const accessible = await getAccessibleVersionLifecycle(
+    protocolId,
+    protocolVersionId,
+  );
 
   if (!accessible) {
     return {
@@ -168,30 +190,17 @@ export async function publishProtocolVersion(
     };
   }
 
-  const [approvals, publications] = await Promise.all([
-    listAccessibleProtocolVersionApprovals([accessible.version.id]),
-    listAccessibleProtocolPublications([accessible.version.id]),
-  ]);
-
-  const approval = approvals[0] ?? null;
-
-  if (!approval) {
+  if (accessible.lifecycleAction !== "publish" || !accessible.approval) {
     return {
-      message: "A versão precisa de aprovação registrada antes da publicação.",
-      success: false,
-    };
-  }
-
-  if (publications.length > 0) {
-    return {
-      message: "Esta versão já foi publicada.",
+      message:
+        "Esta versão não está no estado permitido para publicação.",
       success: false,
     };
   }
 
   try {
     await createAccessibleProtocolPublication({
-      approvalId: approval.id,
+      approvalId: accessible.approval.id,
       clientId: accessible.protocol.client_id,
       protocolVersionId: accessible.version.id,
       publishedByProfileId: context.profileId,

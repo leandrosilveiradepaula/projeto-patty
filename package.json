@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "test:method": "node --experimental-strip-types --test lib/method/*.test.ts"
+    "test:method": "node --experimental-strip-types --test lib/method/*.test.ts",
+    "test:protocol": "node --experimental-strip-types --test lib/protocol/*.test.ts"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",

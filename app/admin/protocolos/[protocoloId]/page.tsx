@@ -10,6 +10,7 @@ import {
   listAccessibleProtocolVersionMealPlans,
   listAccessibleProtocolVersions,
 } from "@/lib/supabase/data-access";
+import { getProtocolLifecycleAction } from "@/lib/protocol/lifecycle";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import styles from "./page.module.css";
@@ -65,6 +66,11 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
               const approval = approvalsByVersionId.get(version.id);
               const publication = publicationsByVersionId.get(version.id);
               const mealPlan = mealPlansByVersionId.get(version.id) ?? null;
+              const lifecycleAction = getProtocolLifecycleAction({
+                hasApproval: Boolean(approval),
+                hasPublication: Boolean(publication),
+                submittedForReview: Boolean(version.submitted_for_review_at),
+              });
 
               return (
                 <li className={styles.versionItem} key={version.id}>
@@ -88,26 +94,14 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
                   </div>
                   <div className={styles.lifecycleAction}>
                     <h4>Próxima ação manual</h4>
-                    {publication ? (
+                    {lifecycleAction === "complete" ? (
                       <p className={styles.lifecycleComplete}>
                         Esta versão já foi publicada. Nenhuma ação adicional de
                         lifecycle está disponível para este registro.
                       </p>
-                    ) : approval ? (
-                      <ProtocolLifecycleAction
-                        kind="publish"
-                        protocolId={protocol.id}
-                        protocolVersionId={version.id}
-                      />
-                    ) : version.submitted_for_review_at ? (
-                      <ProtocolLifecycleAction
-                        kind="approve"
-                        protocolId={protocol.id}
-                        protocolVersionId={version.id}
-                      />
                     ) : (
                       <ProtocolLifecycleAction
-                        kind="submit"
+                        kind={lifecycleAction}
                         protocolId={protocol.id}
                         protocolVersionId={version.id}
                       />
