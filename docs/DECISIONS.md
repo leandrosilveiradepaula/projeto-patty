@@ -1,5 +1,22 @@
 # Decisoes
 
+## 2026-09-22 - Fluxos humanos de escrita ja operacionais
+
+### FATO CONFIRMADO DE IMPLEMENTACAO
+
+Os seguintes fluxos de escrita humana estao conectados na aplicacao usando sessao autenticada, grants e RLS existentes:
+
+- notas internas append-only de revisao de Anamnese;
+- acompanhamento profissional append-only ligado a avaliacao;
+- liberacao manual de uma versao publicada de conteudo educacional para uma cliente;
+- lifecycle manual de protocolo: submissao para revisao, aprovacao humana e publicacao explicita.
+
+No lifecycle de protocolo, cada etapa e independente. Submeter nao aprova; aprovar nao publica; publicar exige uma aprovacao existente da mesma versao. A aplicacao revalida acesso e estado atual antes da escrita, e o banco continua sendo a autoridade final por RLS, constraints, FKs, triggers e unicidade.
+
+### LIMITE DE ESCOPO
+
+Esses fluxos nao autorizam inferir outras operacoes administrativas ainda abertas, como criacao/encerramento de assignments, edicao do Cadastro Atual, upload/exclusao de arquivos, preenchimento final da Anamnese ou automacoes de protocolo.
+
 ## 2026-09-22 - Leitura administrativa de arquivos privados
 
 ### DECISAO TECNICA
