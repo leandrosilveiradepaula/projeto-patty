@@ -1,6 +1,6 @@
 begin;
 
-select plan(15);
+select plan(16);
 
 select has_table('public', 'client_file_upload_sessions');
 
