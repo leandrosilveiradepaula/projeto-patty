@@ -11,7 +11,7 @@ type ClientNavigationItem = {
 
 const clientNavigationItems: ClientNavigationItem[] = [
   { href: "/cliente", label: "Início" },
-  { href: "/cliente/jornada", label: "Jornada" },
+  { href: "/cliente/anamnese", label: "Anamnese" },
   { href: "/cliente/protocolo", label: "Protocolo" },
   { href: "/cliente/conteudos", label: "Conteúdos" },
   { href: "/cliente/perfil", label: "Perfil" },

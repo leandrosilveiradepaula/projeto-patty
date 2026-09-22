@@ -1,0 +1,112 @@
+.backLink {
+  color: var(--color-brand-strong);
+  font-family: var(--font-family-heading);
+  text-decoration: none;
+}
+
+.backLink:hover {
+  text-decoration: underline;
+}
+
+.metadata {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  margin: 0;
+}
+
+.metadata div {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.metadata dt,
+.sectionOrder,
+.answerLabel {
+  color: var(--color-text-muted);
+  font-size: var(--text-body-small-size);
+  font-weight: var(--text-label-small-weight);
+}
+
+.metadata dd,
+.sectionOrder,
+.answerLabel,
+.answerValue,
+.emptyText {
+  margin: 0;
+}
+
+.metadata dd,
+.answerValue,
+.emptyText {
+  color: var(--color-text-secondary);
+  line-height: var(--text-body-medium-line-height);
+  overflow-wrap: anywhere;
+}
+
+.sections {
+  display: grid;
+  gap: var(--space-8);
+}
+
+.anamnesisSection {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.sectionTitle,
+.questionLabel {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+}
+
+.sectionTitle {
+  margin-top: var(--space-1);
+  font-size: var(--text-h2-size);
+  line-height: var(--text-h2-line-height);
+}
+
+.questionList {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.questionCard {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.questionHeader {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: start;
+  justify-content: space-between;
+}
+
+.questionLabel {
+  font-size: var(--text-title-medium-size);
+  font-weight: var(--text-title-medium-weight);
+  line-height: var(--text-title-medium-line-height);
+  overflow-wrap: anywhere;
+}
+
+.answerLabel {
+  margin-bottom: var(--space-1);
+}
+
+.structuredAnswer {
+  overflow-x: auto;
+  margin: 0;
+  border-radius: var(--radius-medium);
+  background: var(--color-surface-low);
+  padding: var(--space-3);
+  color: var(--color-text-secondary);
+  font: inherit;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
