@@ -30,5 +30,11 @@ export async function GET(
     return new Response(null, { status: 404 });
   }
 
-  return Response.redirect(data.signedUrl, 307);
+  return new Response(null, {
+    status: 307,
+    headers: {
+      "Cache-Control": "private, no-store",
+      Location: data.signedUrl,
+    },
+  });
 }
