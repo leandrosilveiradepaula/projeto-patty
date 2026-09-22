@@ -39,13 +39,15 @@ Papeis conceituais conhecidos neste momento:
 - `admin`;
 - `client`.
 
+No MVP, a Patty e a unica administradora/profissional de negocio. Nao serao criados papeis operacionais para assistente, profissional parceiro ou suporte nesta primeira versao.
+
 Roles nao serao armazenados em `user_metadata`.
 
 Cliente nao pode administrar papeis.
 
-### QUESTAO ABERTA
+Acesso tecnico ao repositorio ou infraestrutura nao constitui automaticamente role de negocio da aplicacao e nao concede acesso client-scoped por si so.
 
-Ainda e necessario definir se existirao papeis adicionais, como assistente, profissional parceiro, suporte, auditor ou administrador tecnico.
+Papeis adicionais ficam fora do MVP e exigem decisao propria de escopo e permissoes antes de implementacao.
 
 ## Separacao de responsabilidades
 
