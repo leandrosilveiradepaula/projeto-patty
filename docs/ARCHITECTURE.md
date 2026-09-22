@@ -93,6 +93,8 @@ A Patty tambem podera enviar arquivos em nome da cliente, mas por fluxo administ
 
 Signed URLs sao temporarias, nao persistidas e terao validade de 5 minutos. No MVP, a Patty podera acessar arquivos privados mesmo sem assignment ativo; esta excecao e especifica para arquivos e nao altera a regra geral de autorizacao dos demais dados client-scoped.
 
+O primeiro MVP nao usara servico dedicado de antivirus/antimalware. Essa simplificacao depende de manter allowlist fechada, validacao de tipo real, limites de tamanho, Storage privado e ausencia de execucao de arquivos. A necessidade deve ser reavaliada se o escopo ou o risco dos uploads aumentar.
+
 Secrets nao devem ser armazenados no repositorio.
 
 Dados reais nao devem ser usados no desenvolvimento inicial.
