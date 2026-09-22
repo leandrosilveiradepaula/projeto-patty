@@ -104,10 +104,6 @@ Medidas informadas na anamnese pertencem a propria resposta de anamnese, criam t
 
 ### QUESTAO ABERTA
 
-Nos uploads ligados a anamnese, qual sera a quantidade maxima de arquivos por finalidade ou contexto? Formatos, limites de tamanho, imutabilidade de objetos, substituicao por novo upload e ausencia de hard delete direto pelo browser ja estao definidos.
-
-### QUESTAO ABERTA
-
 Como separar a finalidade dos arquivos enviados entre fotos, exames e documentos?
 
 ### QUESTAO ABERTA
@@ -209,10 +205,6 @@ Quais outras acoes, alem de visualizacao/download administrativo de exames e doc
 ## Supabase
 
 ## Storage
-
-### QUESTAO ABERTA
-
-Qual sera a quantidade maxima de arquivos por finalidade ou contexto?
 
 ### QUESTAO ABERTA
 
