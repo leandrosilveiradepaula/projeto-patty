@@ -1,4 +1,5 @@
 import { AdminProtocolVersionPlan } from "@/components/admin/AdminProtocolVersionPlan";
+import { ProtocolLifecycleAction } from "@/components/admin/ProtocolLifecycleAction";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
@@ -84,6 +85,33 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
                       de aprovação ou publicação.
                     </p>
                     <AdminProtocolVersionPlan plan={mealPlan} />
+                  </div>
+                  <div className={styles.lifecycleAction}>
+                    <h4>Próxima ação manual</h4>
+                    {publication ? (
+                      <p className={styles.lifecycleComplete}>
+                        Esta versão já foi publicada. Nenhuma ação adicional de
+                        lifecycle está disponível para este registro.
+                      </p>
+                    ) : approval ? (
+                      <ProtocolLifecycleAction
+                        kind="publish"
+                        protocolId={protocol.id}
+                        protocolVersionId={version.id}
+                      />
+                    ) : version.submitted_for_review_at ? (
+                      <ProtocolLifecycleAction
+                        kind="approve"
+                        protocolId={protocol.id}
+                        protocolVersionId={version.id}
+                      />
+                    ) : (
+                      <ProtocolLifecycleAction
+                        kind="submit"
+                        protocolId={protocol.id}
+                        protocolVersionId={version.id}
+                      />
+                    )}
                   </div>
                 </li>
               );
