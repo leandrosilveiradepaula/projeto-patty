@@ -4,9 +4,16 @@ import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Section } from "@/components/ui/Section";
-import { getAccessibleClient, getAccessibleClientRegistration } from "@/lib/supabase/data-access";
-import { notFound } from "next/navigation";
+import {
+  getAccessibleClient,
+  getAccessibleClientRegistration,
+  listAccessibleAnamnesisSubmissions,
+  listAccessibleAssessmentsForClient,
+  listAccessibleClientFiles,
+  listContentReleasesForAccessibleClient,
+} from "@/lib/supabase/data-access";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import styles from "./page.module.css";
 
 type AdminClienteDetailPageProps = {
@@ -25,61 +32,45 @@ export default async function AdminClienteDetailPage({
     notFound();
   }
 
-  const registration = await getAccessibleClientRegistration(client.id);
+  const [registration, anamneses, assessments, files, contentReleases] =
+    await Promise.all([
+      getAccessibleClientRegistration(client.id),
+      listAccessibleAnamnesisSubmissions(client.id),
+      listAccessibleAssessmentsForClient(client.id),
+      listAccessibleClientFiles(client.id),
+      listContentReleasesForAccessibleClient(client.id),
+    ]);
 
   const displayName = client.profiles?.display_name?.trim();
 
-  const overviewItems = [
+  const integratedAreas = [
     {
-      description: "Estrutura destinada às informações cadastrais da cliente.",
-      title: "Cadastro",
-    },
-    {
+      count: anamneses.length,
       description:
-        "Área prevista para concentrar informações operacionais do acompanhamento.",
-      title: "Acompanhamento",
-    },
-    {
-      description:
-        "Fotos, exames e documentos privados com leitura controlada por RLS e atribuição ativa.",
-      title: "Arquivos e documentos",
-    },
-  ];
-
-  const profileAreas = [
-    {
-      description:
-        "Área prevista para consulta das informações coletadas na anamnese.",
+        "Consulte o histórico de submissões e as respostas originais preservadas por versão.",
+      href: `/admin/clientes/${client.id}/anamnese`,
       title: "Anamnese",
     },
     {
-      description: "Área prevista para histórico de avaliações e reavaliações.",
+      count: assessments.length,
+      description:
+        "Consulte avaliações, medidas, fotos vinculadas e histórico profissional disponível.",
       href: `/admin/clientes/${client.id}/avaliacoes`,
       title: "Avaliações",
     },
     {
-      description: "Área prevista para acompanhamento histórico da evolução.",
-      title: "Evolução",
-    },
-    {
+      count: files.length,
       description:
-        "Consulte os metadados e baixe arquivos privados autorizados para esta cliente.",
+        "Consulte metadados e baixe fotos, exames e documentos privados autorizados.",
       href: `/admin/clientes/${client.id}/arquivos`,
       title: "Arquivos",
     },
     {
-      description: "Área prevista para versões de protocolos e seu histórico.",
-      title: "Protocolos",
-    },
-    {
-      description: "Consulte os conteúdos liberados para esta cliente.",
+      count: contentReleases.length,
+      description:
+        "Consulte as versões de conteúdo explicitamente liberadas para esta cliente.",
       href: `/admin/clientes/${client.id}/conteudos`,
       title: "Conteúdos",
-    },
-    {
-      description:
-        "Área prevista para registro cronológico de eventos relevantes do acompanhamento.",
-      title: "Histórico",
     },
   ];
 
@@ -90,21 +81,17 @@ export default async function AdminClienteDetailPage({
         name={displayName || "Cliente sem nome informado"}
         secondary={client.profile_id ? "Conta vinculada" : "Conta ainda não vinculada"}
         status={<Badge variant="neutral">Atribuição ativa</Badge>}
-        visual={<span>{displayName?.split(/\s+/).map((word) => word[0]).join("").slice(0, 2).toUpperCase() || "?"}</span>}
+        visual={
+          <span>
+            {displayName
+              ?.split(/\s+/)
+              .map((word) => word[0])
+              .join("")
+              .slice(0, 2)
+              .toUpperCase() || "?"}
+          </span>
+        }
       />
-      <Section
-        description="Resumo das áreas administrativas do cadastro e acompanhamento."
-        title="Visão geral"
-      >
-        <div className={styles.overviewGrid}>
-          {overviewItems.map((item) => (
-            <Card className={styles.infoCard} key={item.title}>
-              <h3 className={styles.cardTitle}>{item.title}</h3>
-              <p className={styles.cardDescription}>{item.description}</p>
-            </Card>
-          ))}
-        </div>
-      </Section>
       <Section
         description="Informações atuais de contato, separadas do acesso à conta e da Anamnese."
         title="Cadastro atual"
@@ -117,36 +104,30 @@ export default async function AdminClienteDetailPage({
             phone={registration.phone ?? undefined}
           />
         ) : (
-          <EmptyState description="O cadastro atual desta cliente ainda não foi informado." title="Cadastro atual indisponível" />
+          <EmptyState
+            description="O cadastro atual desta cliente ainda não foi informado."
+            title="Cadastro atual indisponível"
+          />
         )}
       </Section>
       <Section
-        description="Mapa visual das áreas previstas para o acompanhamento. Estes blocos ainda não são navegação nem abas."
-        title="Áreas do acompanhamento"
+        description="Somente áreas já conectadas ao backend real são exibidas como navegação."
+        title="Áreas integradas"
       >
         <div className={styles.areaGrid}>
-          {profileAreas.map((area) => {
-            const card = (
+          {integratedAreas.map((area) => (
+            <Link className={styles.cardLink} href={area.href} key={area.title}>
               <Card className={styles.infoCard} variant="subtle">
-                <h3 className={styles.cardTitle}>{area.title}</h3>
+                <div className={styles.cardHeader}>
+                  <h3 className={styles.cardTitle}>{area.title}</h3>
+                  <Badge variant="neutral">{area.count}</Badge>
+                </div>
                 <p className={styles.cardDescription}>{area.description}</p>
               </Card>
-            );
-
-            return area.href ? (
-              <Link className={styles.cardLink} href={area.href} key={area.title}>
-                {card}
-              </Link>
-            ) : (
-              <div key={area.title}>{card}</div>
-            );
-          })}
+            </Link>
+          ))}
         </div>
       </Section>
-      <EmptyState
-        description="Alguns fluxos do acompanhamento ainda permanecem em implementação e serão integrados sem enfraquecer as regras atuais de acesso."
-        title="Fluxos adicionais em construção"
-      />
     </>
   );
 }
