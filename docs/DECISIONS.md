@@ -1,5 +1,89 @@
 # Decisoes
 
+## 2026-09-22 - Primeira versao assistiva de IA
+
+### DECISAO DE PRODUTO CONFIRMADA
+
+A IA pode identificar respostas ausentes, contraditorias ou que precisam de esclarecimento, sugerir perguntas de acompanhamento para a Patty e auxiliar a preparacao de rascunhos completos de alimentacao e treino. A execucao continua assistiva, depende de revisao humana e so inicia quando a Patty a solicitar; nao ha execucao automatica em background por entrada de novos dados.
+
+Sugestoes de pendencia ou de perguntas para a cliente nao criam pendencia operacional nem sao enviadas diretamente. A Patty deve revisar, pode editar e deve confirmar antes de qualquer criacao ou envio.
+
+### DECISAO DE PRODUTO E PRIVACIDADE CONFIRMADA
+
+As respostas da Anamnese entram automaticamente no contexto de IA, exceto a condicao financeira, que so entra quando a Patty a selecionar explicitamente. Essa decisao inclui os dados de saude, medicamentos, suplementacao, sono, autoimagem, comportamento, habitos alimentares e saude reprodutiva ja existentes no questionario; nao autoriza inferir novos campos de Anamnese.
+
+Todas as medidas factuais registradas podem entrar automaticamente no contexto, sem autorizar diagnostico ou interpretacao diagnostica automatica. Fotos de avaliacao/evolucao, exames/documentos de saude, protocolos anteriores e historico de acompanhamento so entram quando a Patty selecionar explicitamente cada fonte ou registro.
+
+Cidade, Telefone e Email de contato nao entram automaticamente a partir do Cadastro Atual. Endereco, escolaridade e Instagram tambem permanecem fora do contexto padrao sem necessidade especifica.
+
+### DECISAO TECNICA E DE PRIVACIDADE CONFIRMADA
+
+Cada execucao futura deve registrar referencias das fontes usadas, sem duplicar automaticamente todo o conteudo original para auditoria, e registrar versao da instrucao/prompt, modelo e provider. O provider escolhido deve ter configuracao e condicoes verificaveis para que dados da Patty e das clientes nao sejam usados no treinamento de modelos.
+
+O historico de IA deve ser preservado junto ao historico da cliente, sem exclusao automatica: referencias de fontes, instrucao/prompt, modelo, provider, saida original, versoes editadas, autoria, timestamps e decisoes de aprovacao ou rejeicao quando aplicaveis. Essa decisao nao define politica legal geral de retencao.
+
+### DECISAO TECNICA APROVADA PARA FUNDACAO
+
+A fundacao futura usa `ai_prompt_versions`, `ai_executions`, `ai_execution_outputs`, `ai_execution_sources`, `ai_draft_versions` e `ai_hypotheses`. Sao entidades internas: a cliente nao as acessa. Prompts sao imutaveis e criados por deploy ou processo administrativo controlado, sem UI de gerenciamento na primeira versao.
+
+`ai_executions` registra lifecycle e metadados da execucao, mas nao a saida original. `ai_execution_outputs` preserva essa saida em relacao 1:1 imutavel e pode nao existir quando a execucao esta em andamento ou falhou. Versoes de rascunho da Patty sao append-only; eventual descarte pode alterar somente metadata restrita, nunca o conteudo da versao.
+
+As fontes de uma execucao usam FKs concretas mutuamente exclusivas, e nao uma referencia generica por tipo e UUID. A fundacao deve carregar `client_id` nas entidades internas client-scoped e validar propriedade da fonte por constraints compostas e validacoes estreitas na migration futura.
+
+### DECISAO DE PRODUTO CONFIRMADA
+
+A saida original da IA, cada versao editada pela Patty, a versao aprovada e a publicacao sao artefatos distintos. Nenhuma versao anterior deve ser sobrescrita silenciosamente. A rejeicao ou o descarte de uma analise/rascunho pode registrar motivo, mas esse motivo e opcional.
+
+Antes de gerar um rascunho, a Patty escolhe a fase/protocolo do metodo. A IA nao escolhe automaticamente a fase. Regras matematicas confirmadas permanecem em codigo deterministico e testavel; a IA recebe ou utiliza seus resultados, sem derivar formulas por raciocinio generativo.
+
+Quando faltar uma regra profissional confirmada, a IA pode apresentar sugestao provisoria marcada como HIPOTESE. A hipotese nao vira regra do metodo, nao pode ser baseada em exemplo historico individual como regra geral e exige confirmacao explicita da Patty antes de aprovacao ou publicacao. Uma aprovacao geral de protocolo nao pode ocultar hipotese pendente.
+
+Cliente nao acessa analises da IA, hipoteses, rascunhos, versoes internas ou comentarios internos da Patty. Ve somente conteudo aprovado/publicado para ela.
+
+`protocol_versions` continua sendo versao de protocolo e nunca rascunho de IA. A futura materializacao de um rascunho de IA deve usar entidade de ligacao propria, sem alterar agora a semantica de `protocol_versions`.
+
+## 2026-09-22 - Modelo tecnico para falhas de execution de IA
+
+### DECISAO TECNICA
+
+Uma `ai_execution` representa uma tentativa operacional explicitamente iniciada, vinculada a prompt, provider e modelo ja definidos, e pode realizar no maximo uma chamada ao provider. Ela pode terminar `failed` antes dessa chamada. Nova tentativa explicita cria nova execution; retry automatico e entidade `attempts` permanecem fora da v1.
+
+Quando prompt, provider e modelo estao definidos, mas falta configuracao operacional server-side, como credential, a execution pode ser criada e terminar `failed` com `failure_stage = preflight` e `failure_code = provider_not_configured`. Quando prompt, provider ou modelo ainda nao estao definidos, a execution nao deve ser criada e nao se usam valores ficticios para satisfazer campos obrigatorios.
+
+### DECISAO TECNICA
+
+O boundary transacional da execution separa persistencia curta de chamada externa. TX1 cria a execution `started` e registra suas sources, seguida de commit. A chamada ao provider ocorre sem transacao longa de banco aberta. Em TX2 de sucesso, a insercao do unico `ai_execution_output` valido e a transicao para `completed` ocorrem atomicamente. Em TX2 de resposta invalida, a insercao de `ai_execution_failure_responses`, os metadados de falha e a transicao para `failed` ocorrem atomicamente.
+
+O deferred constraint de output valido permanece: `completed` exige exatamente um `ai_execution_output`; `started` e `failed` exigem zero outputs validos. Output valido permanece imutavel, `failed` permanece terminal e descarte continua restrito a `completed`. Uma failure response nao e output valido.
+
+### DECISAO TECNICA
+
+A extensao futura de `ai_executions` usa `failure_stage`, `failure_code` e `failure_message` nullable somente quando `status = failed`. Stage e code sao obrigatorios na falha e os tres campos devem permanecer nulos nos demais estados. Apos terminalizacao, eles nao podem ser reescritos.
+
+`failure_message` e sanitizada pela aplicacao para diagnostico operacional interno, opcional e nao vazia quando presente. Nao contem resposta bruta do provider, stack trace completo, token, secret ou PII desnecessaria. Seu tamanho maximo permanece aberto.
+
+Os pares fechados da v1 sao `preflight` -> `provider_not_configured`, `provider_request` -> `provider_request_failed`, `output_parse` -> `invalid_json`, `output_validation` -> `invalid_output_schema` e `persistence` -> `persistence_failed`. A futura migration deve protege-los com CHECK ou constraint deterministica.
+
+### DECISAO TECNICA
+
+Quando uma execution `failed` for persistida com `invalid_json`, `invalid_output_schema` ou `persistence_failed`, ela deve ter exatamente uma failure response imutavel. `provider_not_configured` e `provider_request_failed` nao possuem failure response. Em `persistence_failed`, isso cobre somente o caso em que o banco permanece acessivel apos a falha de persistencia de sucesso.
+
+Se o banco ou a conexao estiver indisponivel apos o provider responder, nao e possivel garantir a persistencia da resposta, dos metadados de falha ou da transicao para `failed`; a execution previamente criada pode permanecer `started`. Esse estado nao reconciliado e uma limitacao operacional, nao uma execution `failed/persistence_failed` sem failure response.
+
+## 2026-09-22 - Limites confirmados para fundacao futura de IA
+
+### DECISAO CONFIRMADA
+
+A IA auxilia Patty; nao decide nem publica diretamente. Nao gera diagnostico automatico.
+
+### DECISAO CONFIRMADA
+
+Exemplos e historicos individuais nao podem ser transformados em regra geral do metodo profissional.
+
+### DECISAO CONFIRMADA
+
+Endereco, escolaridade e Instagram nao devem ser enviados ao contexto de IA sem necessidade especifica.
+
 ## 2026-09-18 - Arquivos privados, avaliacoes e acompanhamento profissional
 
 ### DECISAO CONFIRMADA
@@ -100,7 +184,7 @@ Restricoes tecnicas observadas no Google Forms, como quantidade de arquivos, tam
 
 ### DECISAO CONFIRMADA
 
-O uso de cada campo da anamnese pela IA exige decisao propria. O formulario atual nao autoriza envio automatico de todos os campos para analise por IA.
+A decisao de uso de dados da Anamnese pela IA depende de definicao de produto e privacidade, e nao da mera existencia do campo no formulario historico. A rodada de 2026-09-22 confirmou inclusao automatica das respostas de Anamnese, exceto condicao financeira, que exige selecao explicita da Patty.
 
 ## 2026-09-14 - Modelo conceitual inicial de identidade, clientes e autorizacao
 
@@ -199,6 +283,48 @@ O fluxo estrutural de protocolo separa versao, aprovacao humana e publicacao. Um
 ### DECISAO CONFIRMADA
 
 Planos alimentares e catalogos de equivalentes sao versionados como estruturas de dados, sem catalogo real, calculo de doses, macros, fases ou regra metodologica. A referencia de um plano aponta uma versao especifica do catalogo.
+
+## 2026-09-22 - Primeiro contrato operacional de IA para revisao de Anamnese
+
+### DECISAO TECNICA/PRODUTO
+
+O primeiro fluxo operacional de IA usa `purpose_key = anamnesis_review`, sem versao embutida. A versao pertence a `ai_prompt_versions`; provider e modelo pertencem a `ai_executions`.
+
+### DECISAO TECNICA/PRODUTO
+
+A revisao e iniciada somente por acao explicita de Patty/admin relacional autorizado, com assignment ativo da cliente e submission escolhida explicitamente. Nao existe execucao automatica ou em background nesta primeira versao.
+
+### DECISAO TECNICA/PRODUTO
+
+Cada execution `anamnesis_review` analisa uma submission selecionada. A mesma submission pode ter multiplas executions historicas por nova solicitacao explicita, versao de prompt ou modelo; nao existe unicidade submission -> execution.
+
+### DECISAO TECNICA/PRODUTO
+
+O contexto automatico da v1 limita-se a submission, `form_version_id`, `question_id`, `question_key`, `label` e `answer_value` original das answers selecionadas para envio da propria submission. A condicao financeira nao entra automaticamente: so pode ser incluida quando Patty a selecionar explicitamente para aquela execution. As demais answers autorizadas pelo contexto padrao permanecem automaticas. Fonte disponivel nao equivale necessariamente a fonte selecionada ou enviada. Cadastro Atual, avaliacoes, medidas, protocolos, follow-ups, fotos, exames, documentos, outros arquivos, endereco, escolaridade e Instagram ficam fora deste purpose. Essa minimizacao nao se generaliza automaticamente para outros purposes de IA.
+
+### DECISAO TECNICA/PRODUTO
+
+Na primeira implementacao, os findings permitidos sao somente `possible_contradiction` e `clarification_needed`. `missing_answer` continua objetivo do produto, mas fica bloqueado ate que obrigatoriedade e aplicabilidade condicional da Anamnese estejam formalizadas.
+
+`possible_contradiction` e uma sinalizacao de possivel incompatibilidade ou ambiguidade, nunca conclusao definitiva, e exige ao menos duas respostas existentes. `clarification_needed` sinaliza resposta existente ambigua ou insuficiente para revisao humana segura e exige ao menos uma resposta existente.
+
+Nenhum finding diagnostica, cria conclusao clinica, vira pendencia, e enviado a cliente, altera protocolo/fase ou publica conteudo automaticamente.
+
+### DECISAO TECNICA/PRODUTO
+
+Registrar em `ai_execution_sources` todas as `anamnesis_answers` efetivamente enviadas ao modelo, uma referencia por answer. Answers submetidas e suas definicoes versionadas sao protegidas contra alteracao/exclusao pelo schema atual; as referencias permitem reconstruir fontes utilizadas, mas nao constituem snapshot literal do payload enviado ao provider.
+
+### DECISAO TECNICA/PRODUTO
+
+O output valido original da IA permanece imutavel em `ai_execution_outputs`. Findings permanecem nesse output nesta versao e nao criam entidade operacional independente; tambem nao viram `ai_hypotheses` automaticamente.
+
+Revisao e edicao humana devem ser persistidas separadamente em `ai_draft_versions`, de forma append-only. Nunca sobrescrever o output original da IA. `ai_hypotheses` fica reservado para proposicoes que realmente exigirem confirmacao explicita antes de eventual aprovacao ou publicacao futura.
+
+### CONTRATO CONCEITUAL DE OUTPUT
+
+O contrato conceitual da v1 e um objeto com `findings`, que pode ser vazio. Cada finding possui `type` (`possible_contradiction` ou `clarification_needed`), `source_answer_ids`, `explanation` interna com incerteza explicita e `suggested_follow_up_question` opcional e interna.
+
+Propriedades extras devem ser rejeitadas na validacao futura. IDs devem pertencer a submission analisada e as sources da execution. O contrato nao e JSON Schema implementado nesta etapa e nao inclui score, diagnostico ou conclusao clinica.
 
 ## 2026-09-19 - Bibliotecas e liberacao explicita de conteudo
 

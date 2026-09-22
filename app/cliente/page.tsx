@@ -1,6 +1,8 @@
 import { Card } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
+import { getCurrentClient, getCurrentUserProfile } from "@/lib/supabase/data-access";
 import Link from "next/link";
 import type { CSSProperties } from "react";
 
@@ -9,11 +11,18 @@ const contentStackStyle: CSSProperties = {
   gap: "var(--space-4)",
 };
 
-export default function ClientePage() {
+export default async function ClientePage() {
+  const [profile, client] = await Promise.all([getCurrentUserProfile(), getCurrentClient()]);
+  const displayName = profile?.display_name?.trim();
+
+  if (!client) {
+    return <EmptyState description="Seu cadastro de cliente ainda não está configurado." title="Cadastro pendente" />;
+  }
+
   return (
     <>
       <PageHeader
-        description="Estrutura inicial da experiência da cliente, sem dados reais ou funcionalidades de produto."
+        description={displayName ? `Olá, ${displayName}.` : "Sua identificação está vinculada a esta área."}
         eyebrow="Cliente"
         title="Área da cliente"
       />
@@ -24,8 +33,7 @@ export default function ClientePage() {
         <div style={contentStackStyle}>
           <Card>
             <p>
-              Conteúdo técnico de demonstração para validar leitura em telas
-              pequenas, gutters confortáveis e composição vertical.
+              {displayName || "Cliente"}: sua conta está vinculada a este cadastro de cliente.
             </p>
             <p>
               <Link href="/cliente/anamnese">Abrir anamnese</Link>

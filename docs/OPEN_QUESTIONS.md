@@ -78,7 +78,7 @@ Quais fluxos de IA justificarao LangGraph?
 
 ### QUESTAO ABERTA
 
-Qual sera o modelo logico detalhado?
+Quais detalhes fisicos da migration da fundacao de IA ainda precisarao ser validados contra o schema vigente, incluindo constraints compostas, validacao das fontes e transicoes controladas de lifecycle?
 
 ### QUESTAO ABERTA
 
@@ -86,7 +86,7 @@ Quais campos serao obrigatorios em anamnese, medidas, fotos, exames, protocolos 
 
 ### QUESTAO ABERTA
 
-Qual sera a politica de retencao, arquivamento e exportacao de dados?
+Qual sera a politica geral de retencao, arquivamento e exportacao de dados fora das decisoes ja confirmadas para preservacao do historico de IA?
 
 ### QUESTAO ABERTA
 
@@ -160,7 +160,31 @@ Qual sera o texto definitivo, versao, base legal, data/hora, forma de aceite, po
 
 ### QUESTAO ABERTA
 
-Quais campos da anamnese poderao ser enviados a IA, campo a campo?
+Em quais finalidades especificas, e sob quais controles, Cidade, Telefone e Email de contato poderao ser selecionados para o contexto de IA? Eles nao entram automaticamente a partir do Cadastro Atual.
+
+### QUESTAO ABERTA
+
+Qual sera a identificacao tecnica estavel da condicao financeira em cada versao de Anamnese, para que sua exclusao automatica do contexto de IA seja verificavel?
+
+### QUESTAO ABERTA
+
+Qual provider e modelo concretos serao escolhidos, quais requisitos contratuais e tecnicos verificaveis garantirao que dados da Patty e das clientes nao sejam usados para treinamento, e qual sera a base legal ou o consentimento aplicavel? Antes da integracao real, tambem precisam ser definidos a politica de logs tecnicos, o tratamento de conteudo sensivel em erros e logs e o contrato estruturado definitivo do output.
+
+### QUESTAO ABERTA
+
+Qual sera a taxonomia final de `purpose_key` e o contrato estruturado final do output original da IA?
+
+### QUESTAO ABERTA
+
+Como uma edicao manual da Patty deve interagir com valor originado de calculo deterministico, sem sobrescrever silenciosamente o resultado ou atribuir esse calculo a IA?
+
+### QUESTAO ABERTA
+
+Quais consentimentos, bases legais e politicas legais de retencao, arquivamento, descarte e exportacao se aplicarao ao contexto e ao historico de IA?
+
+### QUESTAO ABERTA
+
+Como a futura entidade de materializacao entre rascunho de IA e `protocol_version` identificara hipoteses ainda presentes e impedira aprovacao/publicacao enquanto alguma permanecer sem confirmacao explicita da Patty?
 
 ### QUESTAO ABERTA
 
@@ -195,10 +219,6 @@ Quando o email de autenticacao e o email de contato devem iniciar com o mesmo va
 Havera alguma acao explicita para sincronizar email de autenticacao e email de contato, ou eles permanecerao independentes apos a criacao inicial?
 
 ## Dados e LGPD
-
-### QUESTAO ABERTA
-
-Qual sera a politica de retencao de dados?
 
 ### QUESTAO ABERTA
 
@@ -283,6 +303,34 @@ Havera necessidade de analise de arquivos maliciosos?
 ### QUESTAO ABERTA
 
 Qual sera a estrategia de analise de arquivos maliciosos, se necessaria?
+
+## IA e revisao de Anamnese
+
+### QUESTAO ABERTA
+
+Quais perguntas da Anamnese serao definitivamente obrigatorias, quais serao condicionais e quais regras determinam sua aplicabilidade? Ate essa definicao, `missing_answer` permanece bloqueado na primeira revisao operacional de IA.
+
+O contrato futuro de `missing_answer` devera usar `target_question_id` para a pergunta ausente e permitir `source_answer_ids` vazio; o target devera pertencer a mesma `form_version_id` da submission. Isso e conceito futuro, nao implementacao atual.
+
+### QUESTAO ABERTA
+
+Qual sera o limite maximo de `ai_execution_failure_responses.content` preservado como resposta bruta e o tamanho maximo de `failure_message` sanitizada? Nenhum limite sera cristalizado antes de decisao tecnica propria.
+
+### GAP OPERACIONAL ABERTO
+
+Se banco ou conexao ficar indisponivel apos resposta do provider, a execution previamente criada pode permanecer `started` sem persistir resposta bruta, metadados de falha ou transicao terminal. Definir mecanismo futuro de reconciliacao, timeout, watchdog ou recovery job, sem tratar esse estado como `failed/persistence_failed` sem failure response.
+
+### QUESTAO ABERTA
+
+Qual sera o caminho server-side confiavel para escrita nas entidades internas de IA, sem escrita direta do browser, sem secret no cliente e sem usar `SECURITY DEFINER` como atalho?
+
+### QUESTAO ABERTA
+
+Antes da migration que tornar `failure_stage` e `failure_code` obrigatorios em executions `failed`, verificar se ja existem linhas `ai_executions.status = failed` persistidas. Backfill permanece aberto ate conhecer esse estado; nao definir valor retroativo sem evidencia.
+
+### QUESTAO ABERTA
+
+Qual sera a UX e o processo humano para revisao de findings, edicao de follow-up, descarte, eventual transformacao manual em acao e eventual envio a cliente?
 
 ## Metodo profissional
 

@@ -4,9 +4,9 @@ import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Section } from "@/components/ui/Section";
-import { getDemoAnamnesisForClient, getDemoClient } from "@/lib/demo/anamnesis";
-import Link from "next/link";
+import { getAccessibleClient, getAccessibleClientRegistration } from "@/lib/supabase/data-access";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import styles from "./page.module.css";
 
 type AdminClienteDetailPageProps = {
@@ -19,13 +19,15 @@ export default async function AdminClienteDetailPage({
   params,
 }: AdminClienteDetailPageProps) {
   const { clienteId } = await params;
-  const client = getDemoClient(clienteId);
+  const client = await getAccessibleClient(clienteId);
 
   if (!client) {
     notFound();
   }
 
-  const anamnesis = getDemoAnamnesisForClient(clienteId);
+  const registration = await getAccessibleClientRegistration(client.id);
+
+  const displayName = client.profiles?.display_name?.trim();
 
   const overviewItems = [
     {
@@ -52,6 +54,7 @@ export default async function AdminClienteDetailPage({
     },
     {
       description: "Área prevista para histórico de avaliações e reavaliações.",
+      href: `/admin/clientes/${client.id}/avaliacoes`,
       title: "Avaliações",
     },
     {
@@ -68,7 +71,8 @@ export default async function AdminClienteDetailPage({
       title: "Protocolos",
     },
     {
-      description: "Área prevista para conteúdos liberados para a cliente.",
+      description: "Consulte os conteúdos liberados para esta cliente.",
+      href: `/admin/clientes/${client.id}/conteudos`,
       title: "Conteúdos",
     },
     {
@@ -81,11 +85,11 @@ export default async function AdminClienteDetailPage({
   return (
     <>
       <ClientSummaryHeader
-        meta="Identificador de demonstração"
-        name={client.label}
-        secondary="Registro sintético para validação da interface."
-        status={<Badge variant="neutral">Demonstração</Badge>}
-        visual={<span>{client.visualLabel}</span>}
+        meta="Cliente atribuído"
+        name={displayName || "Cliente sem nome informado"}
+        secondary={client.profile_id ? "Conta vinculada" : "Conta ainda não vinculada"}
+        status={<Badge variant="neutral">Atribuição ativa</Badge>}
+        visual={<span>{displayName?.split(/\s+/).map((word) => word[0]).join("").slice(0, 2).toUpperCase() || "?"}</span>}
       />
       <Section
         action={<Badge variant="neutral">Dados sintéticos para validação da interface.</Badge>}
@@ -102,41 +106,41 @@ export default async function AdminClienteDetailPage({
         </div>
       </Section>
       <Section
-        description="Informações atuais de contato e cadastro, apresentadas separadamente da Anamnese e do acompanhamento."
+        description="Informações atuais de contato, separadas do acesso à conta e da Anamnese."
         title="Cadastro atual"
       >
-        <AdminClientRegistrationDetails
-          city="Cidade demonstrativa"
-          contactEmail="contato.demo@exemplo.test"
-          loginEmail="cliente.demo@exemplo.test"
-          phone="(00) 00000-0000"
-        />
+        {registration ? (
+          <AdminClientRegistrationDetails
+            city={registration.city ?? undefined}
+            contactEmail={registration.contact_email ?? undefined}
+            instagram={registration.instagram ?? undefined}
+            phone={registration.phone ?? undefined}
+          />
+        ) : (
+          <EmptyState description="O cadastro atual desta cliente ainda não foi informado." title="Cadastro atual indisponível" />
+        )}
       </Section>
       <Section
         description="Mapa visual das áreas previstas para o acompanhamento. Estes blocos ainda não são navegação nem abas."
         title="Áreas do acompanhamento"
       >
         <div className={styles.areaGrid}>
-          {profileAreas.map((area) => (
-            <Card className={styles.infoCard} key={area.title} variant="subtle">
-              {area.title === "Anamnese" && anamnesis ? (
-                <Link
-                  className={styles.cardLink}
-                  href={`/admin/clientes/${client.id}/anamnese`}
-                >
-                  <h3 className={styles.cardTitle}>{area.title}</h3>
-                  <span className={styles.cardDescription}>
-                    {area.description}
-                  </span>
-                </Link>
-              ) : (
-                <>
-                  <h3 className={styles.cardTitle}>{area.title}</h3>
-                  <p className={styles.cardDescription}>{area.description}</p>
-                </>
-              )}
-            </Card>
-          ))}
+          {profileAreas.map((area) => {
+            const card = (
+              <Card className={styles.infoCard} variant="subtle">
+                <h3 className={styles.cardTitle}>{area.title}</h3>
+                <p className={styles.cardDescription}>{area.description}</p>
+              </Card>
+            );
+
+            return area.href ? (
+              <Link className={styles.cardLink} href={area.href} key={area.title}>
+                {card}
+              </Link>
+            ) : (
+              <div key={area.title}>{card}</div>
+            );
+          })}
         </div>
       </Section>
       <EmptyState

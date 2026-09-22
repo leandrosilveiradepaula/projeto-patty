@@ -396,6 +396,121 @@ O sistema deve preservar:
 - versao aprovada;
 - historico das versoes.
 
+### ESTADO ATUAL VERIFICADO
+
+Ainda nao existem entidades persistentes para prompts, execucoes de IA, analises de IA, rascunhos de IA, alertas ou pendencias estruturados, nem auditoria generica.
+
+As estruturas existentes que podem apoiar futura modelagem, sem constituir modelo de IA, sao:
+
+- `anamnesis_submissions`, `anamnesis_answers` e `anamnesis_reviews`;
+- `professional_follow_ups`;
+- `protocols`, `protocol_versions`, `protocol_version_approvals` e `protocol_publications`;
+- `client_assessments`, `assessment_measurements`, `assessment_files` e `client_files`.
+
+Essas estruturas nao eliminam a distincao necessaria:
+
+```text
+dado original
+!= interpretacao da IA
+!= rascunho
+!= alteracao da Patty
+!= versao aprovada
+!= publicacao
+```
+
+`protocol_versions.submitted_for_review_at IS NULL` representa somente um draft tecnico da versao de protocolo. Nao representa rascunho de IA.
+
+### DIVERGENCIA ATUAL DE UI
+
+A demonstracao de revisao de Anamnese usa o campo `aiAnalysis` em `lib/demo/anamnesis.ts`. Esse conteudo nao possui entidade persistente, RLS ou auditoria real e nao define contrato de IA.
+
+### MODELO TECNICO APROVADO PARA FUNDACAO
+
+Ainda nao existe modelo fisico implementado para IA. O desenho abaixo e uma decisao tecnica para uma migration futura; nao cria entidades, RLS, grants, triggers ou auditoria generica nesta etapa.
+
+#### `ai_prompt_versions`
+
+Mantem `prompt_key`, `version_number`, instrucao/conteudo e `created_at`. Cada versao e imutavel e identificada por `unique (prompt_key, version_number)`. Ela e criada por deploy ou processo administrativo controlado, sem UI de gerenciamento na v1.
+
+#### `ai_executions`
+
+Mantem `client_id`, `purpose_key`, `prompt_version_id`, `initiated_by_profile_id`, provider, modelo, lifecycle/status, timestamps e motivo opcional de descarte. A linha representa uma tentativa operacional explicitamente iniciada, vinculada a prompt, provider e modelo ja definidos, e pode realizar no maximo uma chamada ao provider. Ela nao contem output original e nao deve ser tratada como integralmente imutavel.
+
+Uma extensao futura deve adicionar `failure_stage`, `failure_code` e `failure_message` nullable. Os tres campos permanecem nulos quando o status nao e `failed`; em `failed`, stage e code sao obrigatorios e message permanece opcional. Stage, code e message sao fatos historicos e nao podem ser reescritos apos terminalizacao. Isso ainda nao esta implementado.
+
+#### `ai_execution_outputs`
+
+Mantem `execution_id`, `content jsonb` e `created_at`, em relacao 1:1 com `ai_executions`. E a saida original imutavel da IA. Pode nao existir quando a execucao ainda esta em andamento ou falhou.
+
+#### `ai_execution_failure_responses`
+
+Extensao futura aprovada, ainda nao implementada, para preservar conteudo efetivamente retornado pelo modelo que nao se tornou `ai_execution_output` valido. Mantem `execution_id`, `client_id`, `content`, `content_format` e `received_at`.
+
+`execution_id` deve ser a PK, permitindo no maximo uma linha por execution, e a relacao com `ai_executions` deve ser client-scoped por FK composta. `content` deve ser `text`, inclusive quando o conteudo recebido for JSON sintaticamente valido, para preservar literalmente a resposta original recebida. `content_format` usa apenas `text` ou `json`: `text` quando o conteudo nao e JSON sintaticamente valido e `json` quando e JSON valido, ainda que incompativel com o schema de output esperado. A tabela nao inclui `response_disposition`, porque essa classificacao e derivavel de `failure_stage` e `failure_code`.
+
+Essa entidade deve ser insert-only, sem UPDATE ou DELETE, e nao deve armazenar envelope HTTP completo, headers, tokens, credentials, request completo, stack trace ou telemetria irrelevante. O limite maximo de `content` ainda nao esta definido.
+
+#### `ai_execution_sources`
+
+Mantem `execution_id`, `client_id`, `source_kind` e FKs concretas nullable para a fonte efetivamente usada. Uma unica tabela usa `CHECK` para exigir exatamente um formato de fonte por linha; nao usa `source_type + source_id` generico sem FK.
+
+As fontes previstas sao `anamnesis_answers`, `assessment_measurements`, `client_files`, `protocol_versions` e `professional_follow_ups`. Para foto de avaliacao/evolucao, a fonte enviada e o `client_file` selecionado; `assessment_files` continua sendo somente a relacao existente entre arquivo e avaliacao quando aplicavel, sem duplicar a referencia de fonte.
+
+#### `ai_draft_versions`
+
+Mantem `execution_id`, `client_id`, `version_number`, `based_on_draft_version_id`, conteudo, `created_by_profile_id`, `created_at` e metadata opcional de descarte. O conteudo e o versionamento sao append-only: nenhuma versao anterior e sobrescrita. A versao 1 e a primeira edicao humana baseada no output original; cada edicao posterior cria uma nova linha. Se houver descarte, somente sua metadata pode sofrer transicao restrita, sem editar o conteudo.
+
+#### `ai_hypotheses`
+
+Mantem `execution_id`, `client_id`, conteudo original, `created_at`, `confirmed_by_profile_id` e `confirmed_at`. O conteudo e imutavel. A confirmacao e unica e irreversivel, preservando autoria e momento da decisao, sem transformar a hipotese em regra geral do metodo.
+
+#### Integridade das fontes
+
+Entidades internas client-scoped carregam `client_id`. A migration futura deve usar FKs compostas para impedir que uma execucao de uma cliente referencie fonte de outra. Para isso, deve validar novamente o schema vigente e adicionar somente se ainda necessarias:
+
+- `unique (id, client_id)` em `anamnesis_submissions`;
+- `unique (id, client_id)` em `professional_follow_ups`;
+- `unique (id, submission_id)` em `anamnesis_answers`;
+- `unique (id, assessment_id)` em `assessment_measurements`.
+
+A migration tambem deve realizar validacao estreita para aceitar somente respostas ligadas a submissao de Anamnese efetivamente submetida e para confirmar compatibilidade entre o tipo de `client_file` e a fonte de foto, exame ou documento selecionada. A implementacao dessa validacao nao esta definida nesta documentacao.
+
+#### Ownership, RLS e relacionamento com protocolos
+
+Admin acessa objetos internos somente com role relacional `admin` e assignment ativo da cliente. Cliente e `anon` recebem zero acesso a entidades internas de IA. Prompts permanecem internos a admin/deploy. Credenciais de provider ou secret nunca pertencem ao browser.
+
+`ai_execution_failure_responses` deve seguir o mesmo modelo: RLS obrigatoria; admin relacional com assignment ativo recebe somente SELECT client-scoped; cliente recebe zero linhas; `anon` nao recebe acesso; e `authenticated` nao recebe INSERT, UPDATE ou DELETE. A escrita fica restrita a caminho server-side confiavel ainda nao definido, sem `SECURITY DEFINER` como atalho e sem service role ou secret no browser.
+
+`protocol_versions` nao deve ser reutilizado como draft de IA. O fluxo previsto e:
+
+```text
+fontes
+-> ai_execution
+-> ai_execution_output
+-> ai_draft_versions
+-> ai_hypotheses e confirmacoes
+-> futura materializacao controlada
+-> protocol_version
+-> aprovacao
+-> publicacao
+```
+
+Uma futura materializacao deve preferir entidade de ligacao propria entre `ai_draft_versions` e `protocol_versions`, sem mudar agora a semantica de protocolo. Pendencias sugeridas, perguntas sugeridas, a materializacao, o enforcement final entre hipotese pendente e publicacao e a UI de prompts ficam adiados.
+
+#### Limites para uso em producao
+
+Nao ha bloqueio para modelar a fundacao. Antes de uso real em producao, permanecem pendentes provider/modelo concreto, garantia tecnica e contratual de no-training, consentimento/base legal, taxonomia final de `purpose_key`, contrato estruturado final do output, identificacao estavel da condicao financeira para exclusao automatica e enforcement entre hipotese pendente e publicacao.
+
+### DECISOES PARA MODELAGEM FUTURA
+
+Quando a fundacao for implementada, cada execucao devera manter referencias das fontes utilizadas, sem duplicar automaticamente todo o conteudo original, e registrar a versao da instrucao/prompt, o modelo e o provider.
+
+O contexto padrao de uma execucao inclui respostas de Anamnese, exceto condicao financeira, que exige selecao explicita da Patty, e todas as medidas factuais registradas. Fotos de avaliacao/evolucao, exames/documentos de saude, protocolos anteriores e historico de acompanhamento exigem selecao explicita da Patty. Cidade, Telefone e Email de contato nao entram automaticamente a partir do Cadastro Atual; Endereco, escolaridade e Instagram permanecem fora do contexto padrao sem necessidade especifica.
+
+Uma modelagem futura deve preservar separadamente a saida original da IA, cada versao editada pela Patty com autoria e data/hora, a versao aprovada e a publicacao. Deve tambem preservar referencias das fontes, instrucoes/prompts, modelo, provider e decisoes de aprovacao ou rejeicao, sem exclusao automatica do historico de IA. Isso nao cria entidades, RLS, auditoria generica ou politica legal de retencao nesta etapa.
+
+Analises, hipoteses, rascunhos, versoes internas e comentarios internos da Patty nao devem ser expostos a cliente. A escolha concreta de provider, modelo, modelo fisico, regras de acesso e controles contratuais/tecnicos para impedir uso dos dados em treinamento permanecem pendentes.
+
 ## Limites desta documentacao
 
 ### DECISAO HISTORICA SUBSTITUIDA

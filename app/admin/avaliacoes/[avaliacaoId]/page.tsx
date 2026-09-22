@@ -1,17 +1,15 @@
 import { EvaluationMeasureList } from "@/components/admin/EvaluationMeasureList";
-import type { EvaluationMeasureListItem } from "@/components/admin/EvaluationMeasureList";
-import { EvaluationMeasureComparison } from "@/components/admin/EvaluationMeasureComparison";
-import type { EvaluationMeasureComparisonItem } from "@/components/admin/EvaluationMeasureComparison";
-import { EvaluationAdherenceDecision } from "@/components/admin/EvaluationAdherenceDecision";
-import { EvaluationInternalNote } from "@/components/admin/EvaluationInternalNote";
-import { EvaluationPhotoCollection } from "@/components/admin/EvaluationPhotoCollection";
-import type { EvaluationPhotoCollectionItem } from "@/components/admin/EvaluationPhotoCollection";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
+import {
+  getAccessibleClientAssessment,
+  listAccessibleAssessmentMeasurements,
+} from "@/lib/supabase/data-access";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import styles from "./page.module.css";
 
 type AdminAvaliacaoDetailPageProps = {
@@ -20,151 +18,31 @@ type AdminAvaliacaoDetailPageProps = {
   }>;
 };
 
-const demoEvaluations: Record<
-  string,
-  {
-    adherenceDecision?: {
-      clientDifficulty?: string;
-      decision?: string;
-      professionalObservation?: string;
-    };
-    clientLabel: string;
-    comparison?: {
-      currentDate: string;
-      items: EvaluationMeasureComparisonItem[];
-      previousDate: string;
-    };
-    evaluationDate: string;
-    internalNote?: string;
-    measures: EvaluationMeasureListItem[];
-    photos: EvaluationPhotoCollectionItem[];
-    reference: string;
-  }
-> = {
-  "demo-001": {
-    adherenceDecision: {
-      clientDifficulty: "Relato demonstrativo para validação da interface.",
-      professionalObservation: "Observação profissional demonstrativa.",
-      decision: "Manter",
-    },
-    clientLabel: "Cliente Demonstração 001",
-    evaluationDate: "12/09/2026",
-    internalNote:
-      "Observação interna de demonstração para validação da interface administrativa.",
-    measures: [
-      { label: "Peso", unit: "kg", value: "70" },
-      { label: "Altura", unit: "cm", value: "170" },
-      { label: "Ombros", unit: "cm", value: "98" },
-    ],
-    comparison: {
-      currentDate: "12/09/2026",
-      previousDate: "05/09/2026",
-      items: [
-        {
-          currentValue: "70",
-          label: "Peso",
-          previousValue: "72",
-          unit: "kg",
-        },
-        {
-          currentValue: "170",
-          label: "Altura",
-          previousValue: "170",
-          unit: "cm",
-        },
-        {
-          currentValue: "98",
-          label: "Ombros",
-          unit: "cm",
-        },
-      ],
-    },
-    photos: [
-      {
-        id: "demo-001-photo-001",
-        label: "Foto Demonstração 001",
-        position: "Posição demonstrativa A",
-      },
-      {
-        id: "demo-001-photo-002",
-        label: "Foto Demonstração 002",
-        position: "Posição demonstrativa B",
-      },
-      {
-        id: "demo-001-photo-003",
-        label: "Foto Demonstração 003",
-      },
-    ],
-    reference: "Registro demonstrativo 001",
-  },
-  "demo-002": {
-    adherenceDecision: {
-      clientDifficulty: "Dificuldade demonstrativa registrada para esta avaliação.",
-      professionalObservation: "Observação profissional sintética para leitura administrativa.",
-      decision: "Simplificar",
-    },
-    clientLabel: "Cliente Demonstração 002",
-    evaluationDate: "05/09/2026",
-    internalNote:
-      "Registro interno sintético para demonstrar leitura administrativa privada.",
-    measures: [
-      { label: "Peso", unit: "kg", value: "64" },
-      { label: "Altura", unit: "cm", value: "165" },
-    ],
-    comparison: {
-      currentDate: "05/09/2026",
-      previousDate: "28/08/2026",
-      items: [
-        {
-          currentValue: "64",
-          label: "Peso",
-          previousValue: "65",
-          unit: "kg",
-        },
-        {
-          currentValue: "165",
-          label: "Altura",
-          unit: "cm",
-        },
-        {
-          label: "Ombros",
-          previousValue: "96",
-          unit: "cm",
-        },
-      ],
-    },
-    photos: [
-      {
-        id: "demo-002-photo-001",
-        label: "Foto Demonstração 001",
-        position: "Posição demonstrativa A",
-      },
-    ],
-    reference: "Registro demonstrativo 002",
-  },
-  "demo-003": {
-    clientLabel:
-      "Cliente Demonstração 003 com identificação longa para validação responsiva",
-    evaluationDate: "28/08/2026",
-    measures: [],
-    photos: [],
-    reference: "Registro demonstrativo 003",
-  },
-};
+function formatAssessmentDate(value: string) {
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(value));
+}
 
-const fallbackEvaluation = {
-  clientLabel: "Cliente Demonstração",
-  evaluationDate: "Data demonstrativa",
-  measures: [],
-  photos: [],
-  reference: "Registro demonstrativo",
-};
+function formatMeasurementValue(value: number) {
+  return String(value);
+}
 
 export default async function AdminAvaliacaoDetailPage({
   params,
 }: AdminAvaliacaoDetailPageProps) {
   const { avaliacaoId } = await params;
-  const demoEvaluation = demoEvaluations[avaliacaoId] ?? fallbackEvaluation;
+  const assessment = await getAccessibleClientAssessment(avaliacaoId);
+
+  if (!assessment) {
+    notFound();
+  }
+
+  const measurements = await listAccessibleAssessmentMeasurements(assessment.id);
+  const displayName = assessment.clients?.profiles?.display_name?.trim();
 
   return (
     <>
@@ -174,107 +52,102 @@ export default async function AdminAvaliacaoDetailPage({
             Voltar ao histórico
           </Link>
         }
-        description="Estrutura inicial do detalhe administrativo da avaliação."
+        description="Leitura administrativa de uma avaliação acessível conforme as atribuições ativas."
         eyebrow="Admin"
         title="Detalhe da avaliação"
       />
-      <p className={styles.demoNote}>
-        Dados sintéticos para validação da interface.
-      </p>
       <section className={styles.summaryHeader} aria-labelledby="evaluation-summary-title">
         <div className={styles.summaryContent}>
           <h2 className={styles.summaryTitle} id="evaluation-summary-title">
-            {demoEvaluation.clientLabel}
+            {displayName || "Cliente sem nome informado"}
           </h2>
           <dl className={styles.summaryDetails}>
             <div className={styles.summaryDetail}>
               <dt>Data</dt>
-              <dd>{demoEvaluation.evaluationDate}</dd>
+              <dd>{formatAssessmentDate(assessment.assessed_at)}</dd>
             </div>
             <div className={styles.summaryDetail}>
               <dt>Identificador</dt>
-              <dd>{avaliacaoId}</dd>
+              <dd>{assessment.id}</dd>
             </div>
           </dl>
         </div>
-        <Badge variant="neutral">Demo</Badge>
+        <Badge variant="neutral">Registrada</Badge>
       </section>
       <Section
-        description="Contexto estrutural do registro, sem regra operacional."
+        description="Campos factuais da avaliação disponível para consulta."
         title="Resumo"
       >
         <Card className={styles.infoCard}>
-          <h3 className={styles.cardTitle}>{demoEvaluation.reference}</h3>
           <p className={styles.cardDescription}>
-            Área destinada a apresentar informações gerais da avaliação quando
-            houver integração de dados.
+            Registro de avaliação associado à cliente conforme a atribuição ativa.
           </p>
         </Card>
       </Section>
       <Section
-        description="Coleção demonstrativa de medidas registradas nesta avaliação."
+        description="Chaves, valores e unidades exatamente como foram registrados."
         title="Medidas"
       >
-        {demoEvaluation.measures.length > 0 ? (
-          <EvaluationMeasureList items={demoEvaluation.measures} />
+        {measurements.length > 0 ? (
+          <EvaluationMeasureList
+            items={measurements.map((measurement) => ({
+              label: measurement.measurement_key,
+              unit: measurement.unit,
+              value: formatMeasurementValue(measurement.measurement_value),
+            }))}
+          />
         ) : (
           <Card variant="subtle">
             <EmptyState
-              description="Esta avaliação demonstrativa não possui medidas registradas."
+              description="Esta avaliação não possui medidas registradas."
               title="Sem medidas registradas"
             />
           </Card>
         )}
       </Section>
       <Section
-        description="Leitura factual de medidas entre duas avaliações demonstrativas."
+        description="A comparação automática entre avaliações não está disponível nesta etapa."
         title="Comparação com avaliação anterior"
       >
-        {demoEvaluation.comparison ? (
-          <EvaluationMeasureComparison
-            currentDate={demoEvaluation.comparison.currentDate}
-            items={demoEvaluation.comparison.items}
-            previousDate={demoEvaluation.comparison.previousDate}
+        <Card variant="subtle">
+          <EmptyState
+            description="Nenhum cálculo ou interpretação entre avaliações é exibido nesta área."
+            title="Comparação não disponível"
           />
-        ) : (
-          <Card variant="subtle">
-            <EmptyState
-              description="Esta avaliação demonstrativa não possui avaliação anterior vinculada."
-              title="Sem avaliação anterior para comparação"
-            />
-          </Card>
-        )}
+        </Card>
       </Section>
       <Section
-        description="Coleção demonstrativa de fotos associadas à avaliação."
+        description="Fotos e arquivos não são consultados nesta etapa."
         title="Fotos"
       >
-        {demoEvaluation.photos.length > 0 ? (
-          <EvaluationPhotoCollection items={demoEvaluation.photos} />
-        ) : (
-          <Card variant="subtle">
-            <EmptyState
-              description="Esta avaliação demonstrativa não possui fotos registradas."
-              title="Sem fotos registradas"
-            />
-          </Card>
-        )}
+        <Card variant="subtle">
+          <EmptyState
+            description="Nenhuma foto é exibida nesta visualização de leitura."
+            title="Fotos não disponíveis"
+          />
+        </Card>
       </Section>
       <Section
-        description="Registro administrativo de adesão e decisão profissional."
+        description="Registros de acompanhamento profissional não são consultados nesta etapa."
         title="Adesão e decisão profissional"
       >
-        <EvaluationAdherenceDecision
-          clientDifficulty={demoEvaluation.adherenceDecision?.clientDifficulty}
-          decision={demoEvaluation.adherenceDecision?.decision}
-          professionalObservation={demoEvaluation.adherenceDecision?.professionalObservation}
-        />
+        <Card variant="subtle">
+          <EmptyState
+            description="Nenhuma informação de acompanhamento profissional é exibida nesta visualização."
+            title="Registro não disponível"
+          />
+        </Card>
       </Section>
       <Section
-        description="Área administrativa de uso interno, não destinada à visualização pela cliente."
+        description="Observações internas não são consultadas nesta etapa."
         title="Observações internas"
       >
-        <EvaluationInternalNote content={demoEvaluation.internalNote} />
+        <Card variant="subtle">
+          <EmptyState
+            description="Nenhuma observação interna é exibida nesta visualização."
+            title="Registro não disponível"
+          />
+        </Card>
       </Section>
     </>
   );
