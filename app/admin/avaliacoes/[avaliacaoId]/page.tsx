@@ -1,4 +1,7 @@
+import { EvaluationAdherenceDecision } from "@/components/admin/EvaluationAdherenceDecision";
+import { EvaluationInternalNote } from "@/components/admin/EvaluationInternalNote";
 import { EvaluationMeasureList } from "@/components/admin/EvaluationMeasureList";
+import { EvaluationPhotoCollection } from "@/components/admin/EvaluationPhotoCollection";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -7,6 +10,8 @@ import { Section } from "@/components/ui/Section";
 import {
   getAccessibleClientAssessment,
   listAccessibleAssessmentMeasurements,
+  listAccessibleAssessmentPhotoFiles,
+  listAccessibleProfessionalFollowUpsForAssessment,
 } from "@/lib/supabase/data-access";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -18,6 +23,13 @@ type AdminAvaliacaoDetailPageProps = {
   }>;
 };
 
+const professionalDecisionLabels: Record<string, string> = {
+  advance: "Avançar",
+  maintain: "Manter",
+  return: "Retornar",
+  simplify: "Simplificar",
+};
+
 function formatAssessmentDate(value: string) {
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
@@ -27,8 +39,40 @@ function formatAssessmentDate(value: string) {
   }).format(new Date(value));
 }
 
+function formatRecordDateTime(value: string) {
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    month: "2-digit",
+    timeZone: "UTC",
+    year: "numeric",
+  }).format(new Date(value));
+}
+
 function formatMeasurementValue(value: number) {
   return String(value);
+}
+
+function formatFileMetadata(
+  mimeType: string | null,
+  byteSize: number | null,
+) {
+  const parts: string[] = [];
+
+  if (mimeType) {
+    parts.push(mimeType);
+  }
+
+  if (typeof byteSize === "number") {
+    parts.push(
+      new Intl.NumberFormat("pt-BR", {
+        maximumFractionDigits: 1,
+      }).format(byteSize / 1024) + " KB",
+    );
+  }
+
+  return parts.join(" · ");
 }
 
 export default async function AdminAvaliacaoDetailPage({
@@ -41,8 +85,16 @@ export default async function AdminAvaliacaoDetailPage({
     notFound();
   }
 
-  const measurements = await listAccessibleAssessmentMeasurements(assessment.id);
+  const [measurements, photoFiles, followUps] = await Promise.all([
+    listAccessibleAssessmentMeasurements(assessment.id),
+    listAccessibleAssessmentPhotoFiles(assessment.id),
+    listAccessibleProfessionalFollowUpsForAssessment(assessment.id),
+  ]);
+
   const displayName = assessment.clients?.profiles?.display_name?.trim();
+  const internalNotes = followUps.filter(
+    (followUp) => Boolean(followUp.patty_observation?.trim()),
+  );
 
   return (
     <>
@@ -106,7 +158,7 @@ export default async function AdminAvaliacaoDetailPage({
         )}
       </Section>
       <Section
-        description="A comparação automática entre avaliações não está disponível nesta etapa."
+        description="A comparação automática entre avaliações permanece fora desta etapa."
         title="Comparação com avaliação anterior"
       >
         <Card variant="subtle">
@@ -117,37 +169,78 @@ export default async function AdminAvaliacaoDetailPage({
         </Card>
       </Section>
       <Section
-        description="Fotos e arquivos não são consultados nesta etapa."
+        description="Metadados de fotos privadas vinculadas diretamente a esta avaliação."
         title="Fotos"
       >
-        <Card variant="subtle">
-          <EmptyState
-            description="Nenhuma foto é exibida nesta visualização de leitura."
-            title="Fotos não disponíveis"
+        {photoFiles.length > 0 ? (
+          <EvaluationPhotoCollection
+            items={photoFiles.map((file) => ({
+              id: file.id,
+              label: file.original_filename?.trim() || "Foto vinculada",
+              metadata: formatFileMetadata(file.mime_type, file.byte_size) || undefined,
+            }))}
           />
-        </Card>
+        ) : (
+          <Card variant="subtle">
+            <EmptyState
+              description="Nenhuma foto privada está vinculada a esta avaliação."
+              title="Sem fotos vinculadas"
+            />
+          </Card>
+        )}
       </Section>
       <Section
-        description="Registros de acompanhamento profissional não são consultados nesta etapa."
+        description="Histórico factual de acompanhamento profissional associado a esta avaliação. Registrar uma decisão não executa mudança automática de protocolo ou fase."
         title="Adesão e decisão profissional"
       >
-        <Card variant="subtle">
-          <EmptyState
-            description="Nenhuma informação de acompanhamento profissional é exibida nesta visualização."
-            title="Registro não disponível"
-          />
-        </Card>
+        {followUps.length > 0 ? (
+          <ol className={styles.recordList}>
+            {followUps.map((followUp) => (
+              <li className={styles.recordItem} key={followUp.id}>
+                <p className={styles.recordMeta}>
+                  Registrado em {formatRecordDateTime(followUp.recorded_at)}
+                </p>
+                <EvaluationAdherenceDecision
+                  adherencePerception={followUp.adherence_perception ?? undefined}
+                  clientDifficulty={followUp.difficulty ?? undefined}
+                  decision={
+                    professionalDecisionLabels[followUp.professional_decision] ??
+                    followUp.professional_decision
+                  }
+                  decisionReason={followUp.decision_reason}
+                />
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <Card variant="subtle">
+            <EmptyState
+              description="Nenhum acompanhamento profissional está associado a esta avaliação."
+              title="Sem acompanhamento registrado"
+            />
+          </Card>
+        )}
       </Section>
       <Section
-        description="Observações internas não são consultadas nesta etapa."
+        description="Observações da Patty preservadas no histórico profissional e não destinadas à visualização da cliente."
         title="Observações internas"
       >
-        <Card variant="subtle">
-          <EmptyState
-            description="Nenhuma observação interna é exibida nesta visualização."
-            title="Registro não disponível"
-          />
-        </Card>
+        {internalNotes.length > 0 ? (
+          <ol className={styles.recordList}>
+            {internalNotes.map((followUp) => (
+              <li className={styles.recordItem} key={followUp.id}>
+                <p className={styles.recordMeta}>
+                  Registrado em {formatRecordDateTime(followUp.recorded_at)}
+                </p>
+                <EvaluationInternalNote
+                  content={followUp.patty_observation ?? undefined}
+                />
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <EvaluationInternalNote />
+        )}
       </Section>
     </>
   );
