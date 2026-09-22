@@ -1,130 +1,158 @@
 import { AdminMetricCard } from "@/components/admin/AdminMetricCard";
-import { PendingItemCard } from "@/components/admin/PendingItemCard";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
-import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import {
   getCurrentUserProfile,
+  listAccessibleClientAssessments,
+  listAccessibleProtocols,
   listClientsAssignedToCurrentAdmin,
+  listEducationalContentVersionsForCurrentAdmin,
+  listExerciseVersionsVisibleToCurrentAdmin,
 } from "@/lib/supabase/data-access";
 import Link from "next/link";
 import styles from "./page.module.css";
 
 export default async function AdminPage() {
-  const [profile, assignments] = await Promise.all([
+  const [
+    profile,
+    assignments,
+    assessments,
+    protocols,
+    contentVersions,
+    exerciseVersions,
+  ] = await Promise.all([
     getCurrentUserProfile(),
     listClientsAssignedToCurrentAdmin(),
+    listAccessibleClientAssessments(),
+    listAccessibleProtocols(),
+    listEducationalContentVersionsForCurrentAdmin(),
+    listExerciseVersionsVisibleToCurrentAdmin(),
   ]);
-  const assignedCount = assignments?.length ?? 0;
+
+  const assignedCount = assignments.length;
+  const assessmentCount = assessments.length;
+  const protocolCount = protocols.length;
+  const contentVersionCount = contentVersions.length;
+  const exerciseVersionCount = exerciseVersions.length;
 
   return (
     <>
       <PageHeader
         actions={<Badge variant="neutral">Clientes atribuídos: {assignedCount}</Badge>}
-        description="Visão estrutural do acompanhamento e das atividades administrativas."
+        description="Visão factual dos registros acessíveis conforme seu perfil e suas atribuições ativas."
         eyebrow="Admin"
-        title={profile?.display_name?.trim() ? `Painel de ${profile.display_name.trim()}` : "Painel administrativo"}
+        title={
+          profile?.display_name?.trim()
+            ? `Painel de ${profile.display_name.trim()}`
+            : "Painel administrativo"
+        }
         titleId="admin-title"
       />
       <Section
-        description="Valores de exemplo recebidos prontos pela interface, sem cálculo de regra de domínio."
+        description="Contagens obtidas diretamente do backend. Nenhuma prioridade, adesão ou pendência é inferida automaticamente."
         title="Resumo operacional"
       >
         <div className={styles.metricGrid}>
           <AdminMetricCard
-            description="Total de clientes com atribuição ativa para este perfil."
+            action={
+              <Link className={styles.areaLink} href="/admin/clientes">
+                Ver clientes
+              </Link>
+            }
+            description="Clientes com atribuição ativa para este perfil administrativo."
             label="Clientes atribuídos"
             value={String(assignedCount)}
           />
           <AdminMetricCard
-            description="Quantidade de exemplo sem regra de priorização associada."
-            label="Itens aguardando ação"
-            status={<Badge variant="warning">Pendente</Badge>}
-            value="3"
+            action={
+              <Link className={styles.areaLink} href="/admin/avaliacoes">
+                Ver avaliações
+              </Link>
+            }
+            description="Avaliações acessíveis conforme as atribuições ativas."
+            label="Avaliações"
+            value={String(assessmentCount)}
           />
           <AdminMetricCard
-            description="Valor sintético para validar leitura em diferentes larguras."
-            label="Revisões de demonstração"
-            status={<Badge variant="info">Em revisão</Badge>}
-            value="2"
+            action={
+              <Link className={styles.areaLink} href="/admin/protocolos">
+                Ver protocolos
+              </Link>
+            }
+            description="Protocolos acessíveis conforme as regras atuais de autorização."
+            label="Protocolos"
+            value={String(protocolCount)}
           />
           <AdminMetricCard
-            description="Registro de exemplo para validar uma grade com quatro cartões."
-            label="Conteúdos de exemplo"
-            value="8"
+            action={
+              <Link className={styles.areaLink} href="/admin/conteudos">
+                Ver conteúdos
+              </Link>
+            }
+            description="Versões da biblioteca educacional visíveis para o perfil administrativo."
+            label="Versões de conteúdo"
+            value={String(contentVersionCount)}
           />
         </div>
       </Section>
       <Section
-        description="Itens sintéticos para validar leitura, status por composição e ações explícitas."
-        title="Aguardando ação"
-      >
-        <ul className={styles.pendingList}>
-          <li>
-            <PendingItemCard
-              action={
-                <Link className={styles.areaLink} href="/admin/anamneses/demo-001/revisao">
-                  Revisar
-                </Link>
-              }
-              description="Item técnico aguardando validação da interface."
-              meta="Dados sintéticos"
-              status={<Badge variant="warning">Pendente</Badge>}
-              title="Revisão de demonstração"
-            />
-          </li>
-          <li>
-            <PendingItemCard
-              description="Registro sintético disponível para revisão visual."
-              meta="Exemplo de conteúdo"
-              status={<Badge variant="info">Em revisão</Badge>}
-              title="Conteúdo de exemplo"
-            />
-          </li>
-          <li>
-            <PendingItemCard
-              description="Item de demonstração sem regra de prioridade."
-              meta="Sem cálculo automático"
-              status={<Badge variant="neutral">Demonstração</Badge>}
-              title="Validação estrutural"
-            />
-          </li>
-        </ul>
-      </Section>
-      <Section
-        description="Atalhos estruturais para superfícies já existentes ou previstas no shell, sem contadores reais."
-        title="Outras áreas"
+        description="Atalhos para áreas que já consultam dados reais do backend."
+        title="Áreas operacionais"
       >
         <div className={styles.supportGrid}>
           <Card className={styles.areaCard}>
             <div>
               <h3 className={styles.areaTitle}>Clientes</h3>
               <p className={styles.areaDescription}>
-                Lista estrutural com dados de demonstração da interface.
+                Consulte clientes atribuídos, cadastro, anamnese, avaliações e
+                conteúdos liberados.
               </p>
             </div>
             <Link className={styles.areaLink} href="/admin/clientes">
               Acessar clientes
             </Link>
           </Card>
-          <Card className={styles.areaCard} variant="subtle">
+          <Card className={styles.areaCard}>
             <div>
-              <h3 className={styles.areaTitle}>Pendências</h3>
+              <h3 className={styles.areaTitle}>Avaliações</h3>
               <p className={styles.areaDescription}>
-                Área reservada para organização futura de itens administrativos.
+                Consulte o histórico de avaliações e medidas registradas.
               </p>
             </div>
-            <Link className={styles.areaLink} href="/admin/pendencias">
-              Acessar pendências
+            <Link className={styles.areaLink} href="/admin/avaliacoes">
+              Acessar avaliações
             </Link>
           </Card>
-          <Card className={styles.areaCard} variant="subtle">
-            <EmptyState
-              description="Integrações e dados reais permanecem fora do escopo desta etapa."
-              title="Sem backend integrado"
-            />
+          <Card className={styles.areaCard}>
+            <div>
+              <h3 className={styles.areaTitle}>Protocolos</h3>
+              <p className={styles.areaDescription}>
+                Consulte versões, aprovações e publicações disponíveis no fluxo
+                controlado.
+              </p>
+            </div>
+            <Link className={styles.areaLink} href="/admin/protocolos">
+              Acessar protocolos
+            </Link>
+          </Card>
+          <Card className={styles.areaCard}>
+            <div>
+              <h3 className={styles.areaTitle}>Bibliotecas</h3>
+              <p className={styles.areaDescription}>
+                {contentVersionCount} versões de conteúdo e {exerciseVersionCount} versões
+                de exercício estão visíveis para administração.
+              </p>
+            </div>
+            <div className={styles.areaActions}>
+              <Link className={styles.areaLink} href="/admin/conteudos">
+                Conteúdos
+              </Link>
+              <Link className={styles.areaLink} href="/admin/exercicios">
+                Exercícios
+              </Link>
+            </div>
           </Card>
         </div>
       </Section>
