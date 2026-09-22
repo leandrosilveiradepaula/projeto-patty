@@ -1,0 +1,15 @@
+.form {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+  min-width: 0;
+}
+
+.description {
+  max-width: 720px;
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-small-size);
+  line-height: var(--text-body-small-line-height);
+  overflow-wrap: anywhere;
+}
