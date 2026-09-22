@@ -8,6 +8,7 @@ import {
   getCurrentUserProfile,
   listAccessibleAnamnesisSubmissions,
   listCurrentClientContentReleases,
+  listCurrentClientFiles,
   listPublishedProtocolsForCurrentClient,
 } from "@/lib/supabase/data-access";
 import Link from "next/link";
@@ -29,10 +30,11 @@ export default async function ClientePage() {
     );
   }
 
-  const [anamneses, protocols, contentReleases] = await Promise.all([
+  const [anamneses, protocols, contentReleases, files] = await Promise.all([
     listAccessibleAnamnesisSubmissions(client.id),
     listPublishedProtocolsForCurrentClient(client.id),
     listCurrentClientContentReleases(client.id),
+    listCurrentClientFiles(client.id),
   ]);
 
   const areas = [
@@ -59,6 +61,14 @@ export default async function ClientePage() {
       href: "/cliente/conteudos",
       label: "liberado(s)",
       title: "Conteúdos",
+    },
+    {
+      count: files.length,
+      description:
+        "Envie e acompanhe fotos, exames e documentos privados já validados.",
+      href: "/cliente/arquivos",
+      label: "arquivo(s)",
+      title: "Arquivos",
     },
   ];
 
