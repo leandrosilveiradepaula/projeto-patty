@@ -1,5 +1,29 @@
 # Decisoes
 
+## 2026-09-22 - Visualizacao administrativa de fotos privadas
+
+### DECISAO TECNICA
+
+Fotos privadas vinculadas a uma avaliacao podem ser exibidas no detalhe administrativo por uma rota server-side dedicada, sem tornar o bucket publico e sem persistir URL assinada.
+
+A rota exige role relacional `admin`, consulta o `client_file` sob as RLS existentes e cria sob a sessao atual uma signed URL com validade de 60 segundos para o objeto do bucket privado `client-private`. O redirecionamento nao deve ser armazenado em cache.
+
+A autorizacao continua dependendo de assignment ativo. Encerrar o assignment remove o acesso atual da Patty/admin; a rota nao usa `service_role` nem bypass de RLS.
+
+### LIMITE DE ESCOPO
+
+Esta decisao implementa somente visualizacao administrativa de fotos ja cadastradas e vinculadas a uma avaliacao.
+
+Ela nao define:
+
+- quem pode fazer upload;
+- substituicao ou exclusao de arquivos;
+- MIME types definitivos aceitos;
+- analise de arquivos maliciosos;
+- quais fotos, exames ou documentos devem ser exibidos na UI da cliente.
+
+Esses pontos permanecem abertos.
+
 ## 2026-09-22 - Reconciliacao documental das regras confirmadas do metodo
 
 ### DECISAO CONFIRMADA

@@ -216,10 +216,6 @@ Ainda e necessario definir a relacao operacional "clientes sob responsabilidade 
 
 Ainda e necessario definir quais acoes sao consideradas criticas para auditoria.
 
-### QUESTAO ABERTA
-
-Ainda e necessario definir regras de acesso para arquivos privados em Storage.
-
 ## Implementacao BACKEND-A1
 
 ### Grants

@@ -5,6 +5,7 @@ export type EvaluationPhotoCollectionItem = {
   id: string;
   label: string;
   metadata?: string;
+  src: string;
 };
 
 export type EvaluationPhotoCollectionProps = HTMLAttributes<HTMLUListElement> & {
@@ -24,8 +25,13 @@ export function EvaluationPhotoCollection({
     <ul {...props} className={classNames}>
       {items.map((item) => (
         <li className={styles.item} key={item.id}>
-          <div className={styles.mediaPlaceholder} aria-hidden="true">
-            <span className={styles.mediaMarker}>Arquivo privado</span>
+          <div className={styles.mediaFrame}>
+            <img
+              alt={item.label}
+              className={styles.media}
+              loading="lazy"
+              src={item.src}
+            />
           </div>
           <div className={styles.content}>
             <h3 className={styles.label}>{item.label}</h3>
@@ -33,8 +39,7 @@ export function EvaluationPhotoCollection({
               <p className={styles.position}>{item.metadata}</p>
             ) : null}
             <p className={styles.state}>
-              Foto vinculada à avaliação. A visualização do arquivo privado será
-              integrada em fluxo próprio.
+              Foto privada exibida por rota administrativa autorizada.
             </p>
           </div>
         </li>

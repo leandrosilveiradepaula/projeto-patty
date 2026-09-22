@@ -252,6 +252,23 @@ export async function listAccessibleAssessmentPhotoFiles(assessmentId: string) {
   return data;
 }
 
+
+export async function getAccessiblePhotoFileForAdminViewing(fileId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_files")
+    .select("id, bucket_id, object_path, file_kind")
+    .eq("id", fileId)
+    .eq("file_kind", "photo")
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
 export async function listAccessibleProfessionalFollowUpsForAssessment(
   assessmentId: string,
 ) {
