@@ -218,3 +218,18 @@ export async function listAccessibleAssessmentMeasurements(assessmentId: string)
 
   return data;
 }
+
+export async function listExerciseVersionsVisibleToCurrentAdmin() {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("exercise_versions")
+    .select("id, exercise_id, version_number, name, published_at, created_at")
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}

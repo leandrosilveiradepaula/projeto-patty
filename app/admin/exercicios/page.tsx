@@ -1,79 +1,62 @@
 import { ExerciseListItem } from "@/components/admin/ExerciseListItem";
 import { Badge } from "@/components/ui/Badge";
-import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
+import { listExerciseVersionsVisibleToCurrentAdmin } from "@/lib/supabase/data-access";
 import styles from "./page.module.css";
 
-const demoExercises = [
-  {
-    category: "Categoria a definir",
-    mediaType: "Vídeo",
-    meta: "Registro técnico de demonstração para validar a estrutura da biblioteca.",
-    name: "Exercício Demonstração 001",
-  },
-  {
-    category: "Categoria a definir",
-    mediaType: "Vídeo",
-    meta: "Item sintético sem regra operacional associada.",
-    name: "Exercício Demonstração 002",
-  },
-  {
-    category: "Categoria a definir",
-    mediaType: "Vídeo",
-    meta: "Registro com nome longo para validar quebra de texto em telas estreitas.",
-    name: "Exercício Demonstração 003 com nome longo para validação responsiva",
-  },
-];
+function formatPublishedDate(value: string) {
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(value));
+}
 
-export default function AdminExerciciosPage() {
+export default async function AdminExerciciosPage() {
+  const exerciseVersions = await listExerciseVersionsVisibleToCurrentAdmin();
+
   return (
     <>
       <PageHeader
-        description="Estrutura inicial da biblioteca técnica de exercícios, separada da área de conteúdos."
+        description="Biblioteca técnica de exercícios acessível ao seu perfil administrativo."
         eyebrow="Admin"
         title="Exercícios"
       />
-      <p className={styles.demoNote}>
-        Dados sintéticos para validação da interface.
-      </p>
       <Section
-        description="Itens de demonstração para validar nome, categoria, mídia e estado neutro."
+        description="Versões registradas em ordem da criação mais recente para a mais antiga."
         title="Biblioteca de exercícios"
       >
-        <ul className={styles.exerciseList}>
-          {demoExercises.map((exercise) => (
-            <li key={exercise.name}>
-              <ExerciseListItem
-                category={exercise.category}
-                mediaType={exercise.mediaType}
-                meta={exercise.meta}
-                name={exercise.name}
-                status={<Badge variant="neutral">Demo</Badge>}
-              />
-            </li>
-          ))}
-        </ul>
-      </Section>
-      <Section
-        description="Estados estruturais disponíveis para uso futuro, sem fluxo operacional nesta etapa."
-        title="Estado futuro"
-      >
-        <div className={styles.supportGrid}>
-          <Card variant="subtle">
-            <EmptyState
-              description="A integração com dados reais, arquivos e permissões será definida em tarefas próprias."
-              title="Sem backend integrado"
-            />
-          </Card>
-          <Card variant="subtle">
-            <EmptyState
-              description="A composição de acompanhamentos fica fora desta biblioteca estrutural."
-              title="Uso operacional separado"
-            />
-          </Card>
-        </div>
+        {exerciseVersions.length === 0 ? (
+          <EmptyState
+            description="As versões de exercícios visíveis ao seu perfil aparecerão nesta área."
+            title="Nenhum exercício disponível"
+          />
+        ) : (
+          <ul className={styles.exerciseList}>
+            {exerciseVersions.map((exerciseVersion) => {
+              const publishedMeta = exerciseVersion.published_at
+                ? `Publicado em ${formatPublishedDate(exerciseVersion.published_at)}.`
+                : "Não publicado.";
+
+              return (
+                <li key={exerciseVersion.id}>
+                  <ExerciseListItem
+                    meta={`Versão ${exerciseVersion.version_number}. ${publishedMeta}`}
+                    name={exerciseVersion.name}
+                    status={
+                      <Badge variant="neutral">
+                        {exerciseVersion.published_at ? "Publicado" : "Não publicado"}
+                      </Badge>
+                    }
+                  />
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </Section>
     </>
   );
