@@ -107,9 +107,98 @@ export async function listAccessibleAnamnesisSubmissions(clientId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("anamnesis_submissions")
-    .select("id, client_id, form_version_id, created_at, submitted_at")
+    .select(
+      "id, client_id, form_version_id, created_at, submitted_at, anamnesis_form_versions(version_number)",
+    )
     .eq("client_id", clientId)
     .order("created_at", { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function getAccessibleAnamnesisSubmission(submissionId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("anamnesis_submissions")
+    .select(
+      "id, client_id, form_version_id, created_at, submitted_at, clients(id, profiles(display_name)), anamnesis_form_versions(id, version_number, published_at)",
+    )
+    .eq("id", submissionId)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function listAccessibleAnamnesisSections(formVersionId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("anamnesis_sections")
+    .select("id, form_version_id, section_key, title, display_order")
+    .eq("form_version_id", formVersionId)
+    .order("display_order", { ascending: true })
+    .order("id", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function listAccessibleAnamnesisQuestions(formVersionId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("anamnesis_questions")
+    .select(
+      "id, form_version_id, section_id, question_key, label, display_order, answer_type, required, options",
+    )
+    .eq("form_version_id", formVersionId)
+    .order("display_order", { ascending: true })
+    .order("id", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function listAccessibleAnamnesisAnswers(submissionId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("anamnesis_answers")
+    .select(
+      "id, submission_id, form_version_id, question_id, answer_value, created_at, updated_at",
+    )
+    .eq("submission_id", submissionId)
+    .order("created_at", { ascending: true })
+    .order("id", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function listAccessibleAnamnesisReviews(submissionId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("anamnesis_reviews")
+    .select(
+      "id, submission_id, reviewer_profile_id, note, created_at, profiles(display_name)",
+    )
+    .eq("submission_id", submissionId)
+    .order("created_at", { ascending: true })
+    .order("id", { ascending: true });
 
   if (error) {
     throw error;
