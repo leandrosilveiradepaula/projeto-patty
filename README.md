@@ -46,6 +46,7 @@ Fluxos de escrita humana ja conectados e protegidos pelas RLS existentes incluem
 - acompanhamento profissional append-only de avaliacao;
 - liberacao manual de versao publicada de conteudo para cliente;
 - lifecycle manual de protocolo: submissao para revisao, aprovacao humana e publicacao explicita.
+- guarda deterministica e testada para a proxima acao permitida do lifecycle de protocolo.
 
 ## Seguranca
 
@@ -107,6 +108,7 @@ O repositorio executa em GitHub Actions:
 npm ci
 npm run typecheck
 npm run test:method
+npm run test:protocol
 npm run build
 ```
 
