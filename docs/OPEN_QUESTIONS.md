@@ -28,10 +28,6 @@ Qual sera o tratamento de conta Auth excluida quando for necessario manter histo
 
 ## Autorizacao
 
-### QUESTAO ABERTA
-
-Quem pode criar, alterar ou encerrar assignments?
-
 ### QUESTAO ABERTA POS-MVP
 
 Se futuramente forem introduzidos assistentes, profissionais parceiros ou suporte operacional, quais papeis e permissoes client-scoped serao necessarios?

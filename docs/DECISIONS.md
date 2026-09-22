@@ -1,5 +1,15 @@
 # Decisoes
 
+## 2026-09-22 - Gestao de assignments no MVP
+
+### DECISAO DE PRODUTO, SEGURANCA E OPERACAO
+
+No MVP, somente a Patty pode iniciar ou encerrar um `client_assignment`, por fluxo administrativo server-side controlado. O browser nao recebe privilegio direto para inserir, atualizar ou excluir assignments.
+
+O encerramento preserva o registro historico do assignment e remove apenas sua validade atual, usando o estado/tempo de encerramento previsto no modelo. Nao deve haver hard delete de assignment historico como operacao normal do produto.
+
+A operacao deve permanecer auditavel e nao pode conceder acesso client-scoped sem role relacional `admin` e assignment ativo. Fluxos futuros de transferencia, reatribuicao ou outros profissionais ficam fora desta decisao.
+
 ## 2026-09-22 - Bootstrap controlado da primeira conta admin
 
 ### DECISAO DE SEGURANCA E OPERACAO
@@ -10,7 +20,7 @@ Nao existira botao, endpoint publico, cadastro autonomo ou mecanismo de autoelev
 
 O procedimento deve usar privilegios administrativos somente durante o provisionamento necessario, ser executado de forma auditavel e nao alterar o principio de que o acesso client-scoped continua dependendo de role relacional e assignment ativo.
 
-Esta decisao resolve apenas o bootstrap inicial da Patty. O mecanismo futuro para criar, alterar ou encerrar assignments continua sendo uma decisao separada.
+Esta decisao resolve apenas o bootstrap inicial da Patty. A gestao de assignments no MVP esta definida separadamente: somente a Patty, por fluxo administrativo server-side controlado, pode iniciar ou encerrar assignments preservando historico.
 
 ## 2026-09-22 - Unica administradora/profissional de negocio no MVP
 
@@ -79,7 +89,7 @@ No lifecycle de protocolo, cada etapa e independente. Submeter nao aprova; aprov
 
 ### LIMITE DE ESCOPO
 
-Esses fluxos nao autorizam inferir outras operacoes administrativas ainda abertas, como criacao/encerramento de assignments, edicao do Cadastro Atual, upload/exclusao de arquivos, preenchimento final da Anamnese ou automacoes de protocolo.
+Esses fluxos nao autorizam inferir outras operacoes administrativas ainda abertas, como edicao do Cadastro Atual, upload/exclusao de arquivos, preenchimento final da Anamnese ou automacoes de protocolo. A gestao de assignments foi definida posteriormente como fluxo administrativo server-side controlado da Patty.
 
 ## 2026-09-22 - Leitura administrativa de arquivos privados
 
