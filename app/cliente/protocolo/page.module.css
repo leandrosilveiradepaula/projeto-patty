@@ -3,3 +3,67 @@
 .facts div { display: grid; gap: var(--space-1); min-width: 0; }
 .facts dt { color: var(--color-text-muted); font-size: var(--text-label-small-size); font-weight: var(--text-label-small-weight); line-height: var(--text-label-small-line-height); }
 .facts dd { margin: 0; color: var(--color-text-primary); font-size: var(--text-body-medium-size); line-height: var(--text-body-medium-line-height); overflow-wrap: anywhere; }
+
+.cycleBlock {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-4);
+}
+
+.cycleTitle,
+.cycleName,
+.cycleEmpty {
+  margin: 0;
+}
+
+.cycleTitle {
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+  font-size: var(--text-title-small-size);
+  font-weight: var(--text-title-small-weight);
+  line-height: var(--text-title-small-line-height);
+}
+
+.cycles,
+.cycleSteps {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cycle {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.cycleName {
+  color: var(--color-text-secondary);
+  font-weight: var(--text-label-medium-weight);
+}
+
+.cycleSteps li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: baseline;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: var(--space-2);
+  color: var(--color-text-secondary);
+}
+
+.cycleSteps strong {
+  color: var(--color-text-primary);
+  overflow-wrap: anywhere;
+}
+
+.cycleEmpty {
+  color: var(--color-text-muted);
+  font-size: var(--text-body-small-size);
+  line-height: var(--text-body-small-line-height);
+}
