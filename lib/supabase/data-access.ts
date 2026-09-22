@@ -233,3 +233,89 @@ export async function listExerciseVersionsVisibleToCurrentAdmin() {
 
   return data;
 }
+
+export async function listAccessibleProtocols() {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("protocols")
+    .select("id, client_id, protocol_type, created_at, clients(id, profiles(display_name))")
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function getAccessibleProtocol(protocolId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("protocols")
+    .select("id, client_id, protocol_type, created_at, clients(id, profiles(display_name))")
+    .eq("id", protocolId)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function listAccessibleProtocolVersions(protocolId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("protocol_versions")
+    .select(
+      "id, protocol_id, client_id, version_number, based_on_version_id, submitted_for_review_at, created_at",
+    )
+    .eq("protocol_id", protocolId)
+    .order("version_number", { ascending: false })
+    .order("id", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function listAccessibleProtocolVersionApprovals(protocolVersionIds: string[]) {
+  if (protocolVersionIds.length === 0) {
+    return [];
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("protocol_version_approvals")
+    .select("id, protocol_version_id, approved_by_profile_id, approved_at")
+    .in("protocol_version_id", protocolVersionIds)
+    .order("protocol_version_id", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function listAccessibleProtocolPublications(protocolVersionIds: string[]) {
+  if (protocolVersionIds.length === 0) {
+    return [];
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("protocol_publications")
+    .select("id, protocol_version_id, approval_id, published_by_profile_id, published_at")
+    .in("protocol_version_id", protocolVersionIds)
+    .order("protocol_version_id", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}

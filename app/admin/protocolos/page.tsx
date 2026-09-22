@@ -1,43 +1,32 @@
-import { ProtocolListItem } from "@/components/admin/ProtocolListItem";
-import { Badge } from "@/components/ui/Badge";
-import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
+import { listAccessibleProtocols } from "@/lib/supabase/data-access";
 import Link from "next/link";
 import styles from "./page.module.css";
 
-const demoProtocols = [
-  { clientLabel: "Cliente Demonstração 001", dateLabel: "12/09/2026", href: "/admin/protocolos/demo-001", protocolLabel: "Protocolo Demonstração 001", status: "Publicado", strategyLabel: "Reconhecimento Metabólico", versionLabel: "Versão 1" },
-  { clientLabel: "Cliente Demonstração 002", dateLabel: "05/09/2026", href: "/admin/protocolos/demo-002", protocolLabel: "Protocolo Demonstração 002", status: "Em revisão", strategyLabel: "Cutting 1 Dia 1 / Dia 2", versionLabel: "Versão 2" },
-  { clientLabel: "Cliente Demonstração 003", dateLabel: "28/08/2026", href: "/admin/protocolos/demo-003", protocolLabel: "Protocolo Demonstração 003", status: "Substituído", strategyLabel: "Cutting 1 — 2 dias Low / 1 dia High", versionLabel: "Versão 3" },
-  { clientLabel: "Cliente Demonstração 004", dateLabel: "20/08/2026", href: "/admin/protocolos/demo-004", protocolLabel: "Protocolo Demonstração 004", status: "Publicado", strategyLabel: "Up Metabólico", versionLabel: "Versão 1" },
-];
+export default async function AdminProtocolosPage() {
+  const protocols = await listAccessibleProtocols();
 
-export default function AdminProtocolosPage() {
   return (
     <>
-      <PageHeader description="Estrutura inicial para consulta do histórico administrativo de protocolos." eyebrow="Admin" title="Protocolos" />
-      <p className={styles.demoNote}>Dados sintéticos para validação da interface.</p>
-      <Section description="Registros demonstrativos para validar cliente, versão, estratégia e status administrativo." title="Histórico de protocolos">
-        <ul className={styles.protocolList}>
-          {demoProtocols.map((protocol) => (
-            <li key={protocol.href}>
-              <ProtocolListItem
-                action={<Link className={styles.actionLink} href={protocol.href}>Ver protocolo</Link>}
-                clientLabel={protocol.clientLabel}
-                meta={`Data do protocolo: ${protocol.dateLabel}`}
-                protocolLabel={protocol.protocolLabel}
-                status={<Badge variant="neutral">{protocol.status}</Badge>}
-                strategyLabel={protocol.strategyLabel}
-                versionLabel={protocol.versionLabel}
-              />
-            </li>
-          ))}
-        </ul>
-      </Section>
-      <Section description="Estado estrutural disponível para integrações futuras, sem fluxo operacional nesta etapa." title="Estado futuro">
-        <Card variant="subtle"><EmptyState description="A integração com dados, revisão e publicação será definida em tarefas próprias." title="Sem backend integrado" /></Card>
+      <PageHeader description="Consulta dos protocolos acessíveis para a administração atual." eyebrow="Admin" title="Protocolos" />
+      <Section description="Protocolos disponíveis conforme as atribuições administrativas ativas." title="Protocolos registrados">
+        {protocols.length === 0 ? (
+          <EmptyState description="Nenhum protocolo está acessível para a administração atual." title="Sem protocolos registrados" />
+        ) : (
+          <ul className={styles.protocolList}>
+            {protocols.map((protocol) => (
+              <li className={styles.protocolItem} key={protocol.id}>
+                <div>
+                  <p className={styles.clientLabel}>{protocol.clients?.profiles?.display_name ?? "Cliente sem nome de exibição"}</p>
+                  <dl className={styles.details}><div><dt>Tipo</dt><dd>{protocol.protocol_type}</dd></div></dl>
+                </div>
+                <Link className={styles.actionLink} href={`/admin/protocolos/${protocol.id}`}>Ver detalhes</Link>
+              </li>
+            ))}
+          </ul>
+        )}
       </Section>
     </>
   );
