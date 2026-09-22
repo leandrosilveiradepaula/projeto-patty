@@ -29,6 +29,10 @@ Contas de clientes sao criadas somente por convite ou ativacao controlada. Nao e
 
 Os detalhes operacionais de convite, expiracao, reenvio, ativacao, recuperacao e encerramento de conta permanecem abertos.
 
+### DECISAO DE SEGURANCA E OPERACAO
+
+A primeira conta admin da Patty sera criada por procedimento administrativo controlado e unico. Nao existe fluxo publico ou autenticado de autoelevacao para `admin`. O provisionamento vincula Auth, Profile e role relacional sem alterar o requisito de assignment ativo para acesso client-scoped.
+
 ## Restricoes atuais
 
 ### DECISAO CONFIRMADA
