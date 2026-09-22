@@ -2,6 +2,7 @@ import { EvaluationAdherenceDecision } from "@/components/admin/EvaluationAdhere
 import { EvaluationInternalNote } from "@/components/admin/EvaluationInternalNote";
 import { EvaluationMeasureList } from "@/components/admin/EvaluationMeasureList";
 import { EvaluationPhotoCollection } from "@/components/admin/EvaluationPhotoCollection";
+import { EvaluationProfessionalFollowUpForm } from "@/components/admin/EvaluationProfessionalFollowUpForm";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -189,6 +190,14 @@ export default async function AdminAvaliacaoDetailPage({
             />
           </Card>
         )}
+      </Section>
+      <Section
+        description="Registre um novo acompanhamento profissional sem sobrescrever o histórico existente."
+        title="Registrar acompanhamento"
+      >
+        <Card>
+          <EvaluationProfessionalFollowUpForm assessmentId={assessment.id} />
+        </Card>
       </Section>
       <Section
         description="Histórico factual de acompanhamento profissional associado a esta avaliação. Registrar uma decisão não executa mudança automática de protocolo ou fase."

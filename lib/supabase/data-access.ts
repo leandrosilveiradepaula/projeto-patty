@@ -430,6 +430,34 @@ export async function listAccessibleProfessionalFollowUpsForAssessment(
   return data;
 }
 
+
+export async function createAccessibleProfessionalFollowUp(input: {
+  adherencePerception: string | null;
+  assessmentId: string;
+  authorProfileId: string;
+  clientId: string;
+  decisionReason: string;
+  difficulty: string | null;
+  pattyObservation: string | null;
+  professionalDecision: "advance" | "maintain" | "return" | "simplify";
+}) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("professional_follow_ups").insert({
+    adherence_perception: input.adherencePerception,
+    assessment_id: input.assessmentId,
+    author_profile_id: input.authorProfileId,
+    client_id: input.clientId,
+    decision_reason: input.decisionReason,
+    difficulty: input.difficulty,
+    patty_observation: input.pattyObservation,
+    professional_decision: input.professionalDecision,
+  });
+
+  if (error) {
+    throw error;
+  }
+}
+
 export async function listExerciseVersionsVisibleToCurrentAdmin() {
   const supabase = await createClient();
   const { data, error } = await supabase
