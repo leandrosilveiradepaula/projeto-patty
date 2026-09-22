@@ -17,20 +17,20 @@
   padding: var(--space-4);
 }
 
-.mediaPlaceholder {
-  display: grid;
+.mediaFrame {
+  overflow: hidden;
   min-height: 128px;
-  place-items: center;
-  border: 1px dashed var(--color-border);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-medium);
   background: var(--color-surface-low);
 }
 
-.mediaMarker {
-  color: var(--color-text-muted);
-  font-size: var(--text-body-small-size);
-  line-height: var(--text-body-small-line-height);
-  overflow-wrap: anywhere;
+.media {
+  display: block;
+  width: 100%;
+  min-height: 128px;
+  max-height: 360px;
+  object-fit: contain;
 }
 
 .content {
