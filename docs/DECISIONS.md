@@ -1,5 +1,20 @@
 # Decisoes
 
+## 2026-09-22 - Formatos permitidos para arquivos privados no MVP
+
+### DECISAO DE PRODUTO E SEGURANCA
+
+O MVP usara allowlist fechada de formatos para uploads privados:
+
+- fotos: JPEG (`image/jpeg`, extensoes `.jpg`/`.jpeg`), PNG (`image/png`, `.png`) e WebP (`image/webp`, `.webp`);
+- exames/documentos: PDF (`application/pdf`, `.pdf`), JPEG (`image/jpeg`, `.jpg`/`.jpeg`) e PNG (`image/png`, `.png`).
+
+Word, Excel, ZIP, executaveis e qualquer outro formato fora dessa allowlist nao serao aceitos no MVP.
+
+A validacao futura de upload deve conferir no servidor a extensao e o tipo real/detectado do arquivo; o nome do arquivo e o `Content-Type` informado pelo cliente nao sao suficientes por si so. Divergencia entre extensao e tipo detectado deve rejeitar o upload.
+
+Esta decisao fecha apenas os formatos aceitos. Limite de tamanho, quantidade, quem pode fazer upload, substituicao/exclusao, analise antimalware e visibilidade para a cliente continuam pendentes.
+
 ## 2026-09-22 - Gestao de assignments no MVP
 
 ### DECISAO DE PRODUTO, SEGURANCA E OPERACAO
@@ -111,7 +126,6 @@ Ela nao define:
 
 - quem pode fazer upload;
 - substituicao ou exclusao de arquivos;
-- MIME types definitivos aceitos;
 - limite de tamanho como regra de produto;
 - analise de arquivos maliciosos;
 - quais fotos, exames ou documentos devem ser exibidos na UI da cliente.

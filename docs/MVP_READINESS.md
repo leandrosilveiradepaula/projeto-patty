@@ -60,7 +60,7 @@ Estados usados:
 | Cadastro Atual | leitura IMPLEMENTADA | nao | CI VALIDADO | definir quem pode alterar cada campo e auditoria |
 | Anamnese versionada | leitura IMPLEMENTADA | nota interna append-only | CI VALIDADO | fechar questionario e fluxo de preenchimento |
 | Avaliacoes / medidas | leitura IMPLEMENTADA | acompanhamento profissional append-only | CI VALIDADO; conjunto de decisoes profissionais tipado e testado | definir catalogo, unidades, obrigatoriedade e correcao |
-| Arquivos privados | leitura/download admin IMPLEMENTADOS | upload/delete nao | SAAS VALIDADO; IDs malformados rejeitados antes de lookup | Patty definir tipos, limites, upload, exclusao e visibilidade da cliente |
+| Arquivos privados | leitura/download admin IMPLEMENTADOS | upload/delete nao | SAAS VALIDADO; IDs malformados rejeitados antes de lookup; allowlist de formatos definida | definir limites, upload, exclusao, antimalware e visibilidade da cliente |
 | Protocolos | leitura + lifecycle manual IMPLEMENTADOS | submit/approve/publish | CI + SAAS VALIDADO; lifecycle com guarda determinística testada | criar/editar plano somente quando fluxo profissional estiver formalizado |
 | Plano alimentar publicado | cliente ve variantes, refeicoes, doses e ciclo | nao | CI VALIDADO | equivalentes visiveis continuam abertos |
 | Conteudo educacional | leitura admin/cliente por release IMPLEMENTADA | release manual | CI VALIDADO; elegibilidade de release testada | taxonomia, autoria/revisao e primeiro lote do Drive |
@@ -107,7 +107,7 @@ Ja existe:
 - download administrativo por signed URL curta, nao persistida;
 - rejeicao deterministica de identificadores de arquivo malformados antes de consulta ao banco.
 
-Nao existe upload porque regras de produto sobre tipo, tamanho, quantidade, substituicao, exclusao, MIME e visibilidade da cliente ainda nao estao fechadas.
+Os formatos aceitos no MVP ja estao definidos: fotos em JPEG/PNG/WebP; exames e documentos em PDF/JPEG/PNG, com validacao server-side de extensao e tipo real/detectado. O upload ainda nao existe porque tamanho, quantidade, autoria do upload, substituicao, exclusao, antimalware e visibilidade da cliente continuam abertos.
 
 ### Acompanhamento profissional
 
