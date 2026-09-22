@@ -108,10 +108,6 @@ Como separar a finalidade dos arquivos enviados entre fotos, exames e documentos
 
 ### QUESTAO ABERTA
 
-A Patty tambem precisara de um fluxo administrativo para enviar arquivos em nome da cliente, ou o upload do MVP sera apenas da cliente?
-
-### QUESTAO ABERTA
-
 Qual politica concreta de retencao define quando um arquivo inativado/substituido pode ser removido fisicamente, considerando referencias historicas e auditoria?
 
 ### QUESTAO ABERTA
@@ -205,10 +201,6 @@ Quais outras acoes, alem de visualizacao/download administrativo de exames e doc
 ## Supabase
 
 ## Storage
-
-### QUESTAO ABERTA
-
-A Patty tambem precisara de um fluxo administrativo para enviar arquivos em nome da cliente, ou o upload do MVP sera apenas da cliente?
 
 ### QUESTAO ABERTA
 
