@@ -105,3 +105,25 @@
     grid-template-columns: 1fr;
   }
 }
+
+.recordList {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.recordItem {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.recordMeta {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-body-small-size);
+  line-height: var(--text-body-small-line-height);
+  overflow-wrap: anywhere;
+}

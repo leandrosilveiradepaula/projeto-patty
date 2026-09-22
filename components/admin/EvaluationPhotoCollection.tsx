@@ -4,7 +4,7 @@ import styles from "./EvaluationPhotoCollection.module.css";
 export type EvaluationPhotoCollectionItem = {
   id: string;
   label: string;
-  position?: string;
+  metadata?: string;
 };
 
 export type EvaluationPhotoCollectionProps = HTMLAttributes<HTMLUListElement> & {
@@ -25,14 +25,17 @@ export function EvaluationPhotoCollection({
       {items.map((item) => (
         <li className={styles.item} key={item.id}>
           <div className={styles.mediaPlaceholder} aria-hidden="true">
-            <span className={styles.mediaMarker}>Mídia futura</span>
+            <span className={styles.mediaMarker}>Arquivo privado</span>
           </div>
           <div className={styles.content}>
             <h3 className={styles.label}>{item.label}</h3>
-            <p className={styles.position}>
-              {item.position ?? "Posição não informada"}
+            {item.metadata ? (
+              <p className={styles.position}>{item.metadata}</p>
+            ) : null}
+            <p className={styles.state}>
+              Foto vinculada à avaliação. A visualização do arquivo privado será
+              integrada em fluxo próprio.
             </p>
-            <p className={styles.state}>Registro demonstrativo sem arquivo integrado.</p>
           </div>
         </li>
       ))}
