@@ -267,6 +267,24 @@ export async function listContentReleasesForAccessibleClient(clientId: string) {
   return listContentReleasesForClient(clientId);
 }
 
+
+export async function createAccessibleClientContentRelease(
+  clientId: string,
+  educationalContentVersionId: string,
+  releasedByProfileId: string,
+) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("client_content_releases").insert({
+    client_id: clientId,
+    educational_content_version_id: educationalContentVersionId,
+    released_by_profile_id: releasedByProfileId,
+  });
+
+  if (error) {
+    throw error;
+  }
+}
+
 export async function listAccessibleClientAssessments() {
   const supabase = await createClient();
   const { data, error } = await supabase
