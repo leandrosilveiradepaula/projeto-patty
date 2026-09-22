@@ -81,6 +81,8 @@ RLS sera obrigatoria.
 
 Fotos, exames e documentos devem ser privados.
 
+Uploads privados do MVP usam allowlist fechada: fotos em JPEG/PNG/WebP; exames e documentos em PDF/JPEG/PNG. A validacao deve conferir extensao e tipo real/detectado no servidor e rejeitar formatos fora da allowlist ou divergencias de tipo.
+
 Secrets nao devem ser armazenados no repositorio.
 
 Dados reais nao devem ser usados no desenvolvimento inicial.
