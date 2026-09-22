@@ -33,6 +33,8 @@ Os detalhes operacionais de convite, expiracao, reenvio, ativacao, recuperacao e
 
 A primeira conta admin da Patty sera criada por procedimento administrativo controlado e unico. Nao existe fluxo publico ou autenticado de autoelevacao para `admin`. O provisionamento vincula Auth, Profile e role relacional sem alterar o requisito de assignment ativo para acesso client-scoped.
 
+No MVP, somente a Patty pode iniciar ou encerrar assignments, sempre por boundary server-side controlado. O browser nao recebe escrita direta em `client_assignments`; encerramentos preservam o registro historico e removem apenas o acesso atual.
+
 ## Restricoes atuais
 
 ### DECISAO CONFIRMADA
