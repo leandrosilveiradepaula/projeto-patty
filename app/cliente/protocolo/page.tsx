@@ -64,17 +64,53 @@ export default async function ClienteProtocoloPage() {
                     title="Estrutura alimentar indisponível"
                   />
                 ) : (
-                  <ClientProtocolNutrition
-                    variants={publication.mealPlan.variants.map((variant) => ({
-                      id: variant.id,
-                      label: variant.label ?? variant.variantKey,
-                      meals: variant.meals.map((meal) => ({
-                        doseGroups: meal.doseAllocations,
-                        label: meal.label ?? `Refeição ${meal.position}`,
-                        order: meal.position,
-                      })),
-                    }))}
-                  />
+                  <>
+                    <ClientProtocolNutrition
+                      variants={publication.mealPlan.variants.map((variant) => ({
+                        id: variant.id,
+                        label: variant.label ?? variant.variantKey,
+                        meals: variant.meals.map((meal) => ({
+                          doseGroups: meal.doseAllocations,
+                          label: meal.label ?? `Refeição ${meal.position}`,
+                          order: meal.position,
+                        })),
+                      }))}
+                    />
+                    <div className={styles.cycleBlock}>
+                      <h4 className={styles.cycleTitle}>Sequência do ciclo</h4>
+                      {publication.mealPlan.cycles.length === 0 ? (
+                        <p className={styles.cycleEmpty}>
+                          Nenhum ciclo foi registrado nesta publicação.
+                        </p>
+                      ) : (
+                        <ol className={styles.cycles}>
+                          {publication.mealPlan.cycles.map((cycle, cycleIndex) => (
+                            <li className={styles.cycle} key={cycle.id}>
+                              <p className={styles.cycleName}>
+                                Ciclo {cycleIndex + 1}
+                              </p>
+                              {cycle.steps.length === 0 ? (
+                                <p className={styles.cycleEmpty}>
+                                  Sem passos registrados.
+                                </p>
+                              ) : (
+                                <ol className={styles.cycleSteps}>
+                                  {cycle.steps.map((step) => (
+                                    <li key={`${cycle.id}-${step.position}`}>
+                                      <span>Passo {step.position}</span>
+                                      <strong>
+                                        {step.variantLabel ?? step.variantKey}
+                                      </strong>
+                                    </li>
+                                  ))}
+                                </ol>
+                              )}
+                            </li>
+                          ))}
+                        </ol>
+                      )}
+                    </div>
+                  </>
                 )}
               </Section>
             </Section>
