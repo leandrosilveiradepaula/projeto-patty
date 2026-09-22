@@ -417,7 +417,7 @@ export async function getAccessiblePrivateFileForAdminDownload(fileId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("client_files")
-    .select("id, bucket_id, object_path, original_filename")
+    .select("id, bucket_id, object_path, original_filename, file_kind")
     .eq("id", fileId)
     .maybeSingle();
 
@@ -426,6 +426,27 @@ export async function getAccessiblePrivateFileForAdminDownload(fileId: string) {
   }
 
   return data;
+}
+
+export async function recordClientFileAccessEvent(input: {
+  action: "download" | "view";
+  actorProfileId: string;
+  authorized: boolean;
+  fileKind: "document" | "exam" | null;
+  requestedFileId: string;
+}) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("client_file_access_events").insert({
+    action: input.action,
+    actor_profile_id: input.actorProfileId,
+    authorized: input.authorized,
+    file_kind: input.fileKind,
+    requested_file_id: input.requestedFileId,
+  });
+
+  if (error) {
+    throw error;
+  }
 }
 
 export async function listAccessibleProfessionalFollowUpsForAssessment(

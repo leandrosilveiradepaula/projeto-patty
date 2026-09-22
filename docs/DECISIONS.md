@@ -59,7 +59,7 @@ A trilha deve preservar apenas metadados necessarios para rastreabilidade, inclu
 
 Se no futuro outro papel receber acesso autorizado a exames/documentos, o mesmo requisito de auditoria se aplica a esse acesso.
 
-A implementacao deve registrar o evento na boundary controlada que autoriza a operacao e gera a signed URL. A emissao da signed URL nao deve ser interpretada como prova de que a transferencia do arquivo foi concluida pelo cliente.
+A implementacao registra o evento na boundary controlada que autoriza o download e gera a signed URL. A tabela append-only `client_file_access_events` preserva ator, arquivo solicitado, acao, resultado da autorizacao, tipo do arquivo quando autorizado e timestamp, sem armazenar o conteudo. A migration `20260922230601_client_file_access_audit.sql` esta aplicada no Supabase SaaS. A emissao da signed URL nao deve ser interpretada como prova de que a transferencia do arquivo foi concluida pelo cliente.
 
 ## 2026-09-22 - Validade das signed URLs de arquivos privados
 
