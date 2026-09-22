@@ -98,21 +98,22 @@ O MVP deve incluir avaliacoes:
 
 ### QUESTAO ABERTA
 
-Continuam pendentes de validacao da Patty, sem definicao como regra confirmada:
+Parte do metodo ja possui regras confirmadas e documentadas em `BUSINESS_RULES.md` e `DECISIONS.md`, incluindo Reconhecimento Metabolico, sequencia principal ate Cutting 2: 2 Low / 1 High, referencias iniciais de macros, conversoes de doses, limite do grupo de proteina com maior teor de gordura, regras confirmadas de Cutting Dia 1 / Dia 2 e a existencia da refeicao livre semanal no Up Metabolico.
 
-- nomes e funcionamento das fases;
-- reconhecimento metabolico;
-- doses e limites de alimentos;
+Continuam pendentes, sem automacao enquanto nao houver confirmacao documentada:
+
+- Fases 5 e 6 da Planilha Carb Cycle;
+- etapas posteriores ao Cutting 2;
+- Bulking detalhado;
+- Consolidacao;
 - hidratacao;
-- suplementacao;
-- montagem de treino;
-- volume e progressao;
-- cardio;
-- criterios de mudanca de fase;
-- regras de alertas/bloqueios;
-- criterios profissionais de avaliacao;
-- comportamento;
-- demais regras clinicas/metodologicas.
+- suplementacao e manipulados;
+- montagem e progressao definitiva de treino;
+- cardio quando nao coberto por regra confirmada;
+- criterios profissionais finais de avaliacao;
+- regras de alertas/bloqueios profissionais;
+- criterios completos de mudanca de fase alem do fluxo ja confirmado;
+- demais regras clinicas/metodologicas ainda nao formalizadas.
 
 Essas pendencias nao devem ser resolvidas por inferencia, exemplo individual ou recomendacao tecnica. Devem ser registradas e validadas pela Patty antes de virar regra do produto.
 
