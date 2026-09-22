@@ -594,6 +594,213 @@ export async function listAccessibleProtocolPublications(protocolVersionIds: str
   return data;
 }
 
+
+export type AccessibleProtocolVersionMealPlan = {
+  cycles: Array<{
+    id: string;
+    steps: Array<{
+      position: number;
+      variantId: string;
+      variantKey: string;
+      variantLabel: string | null;
+    }>;
+  }>;
+  foodEquivalentCatalogVersionId: string | null;
+  id: string;
+  protocolVersionId: string;
+  variants: Array<{
+    id: string;
+    label: string | null;
+    variantKey: string;
+    meals: Array<{
+      id: string;
+      label: string | null;
+      position: number;
+      doseAllocations: Array<{
+        doseQuantity: number;
+        doseType: string;
+        id: string;
+      }>;
+    }>;
+  }>;
+};
+
+export async function listAccessibleProtocolVersionMealPlans(
+  protocolVersionIds: string[],
+): Promise<AccessibleProtocolVersionMealPlan[]> {
+  if (protocolVersionIds.length === 0) {
+    return [];
+  }
+
+  const supabase = await createClient();
+  const { data: plans, error: plansError } = await supabase
+    .from("meal_plan_versions")
+    .select("id, protocol_version_id, food_equivalent_catalog_version_id")
+    .in("protocol_version_id", protocolVersionIds);
+
+  if (plansError) {
+    throw plansError;
+  }
+
+  const planIds = plans.map((plan) => plan.id);
+
+  if (planIds.length === 0) {
+    return [];
+  }
+
+  const [
+    { data: variants, error: variantsError },
+    { data: cycles, error: cyclesError },
+  ] = await Promise.all([
+    supabase
+      .from("meal_plan_variants")
+      .select("id, meal_plan_version_id, variant_key, label")
+      .in("meal_plan_version_id", planIds)
+      .order("variant_key", { ascending: true })
+      .order("id", { ascending: true }),
+    supabase
+      .from("meal_plan_cycles")
+      .select("id, meal_plan_version_id")
+      .in("meal_plan_version_id", planIds)
+      .order("created_at", { ascending: true })
+      .order("id", { ascending: true }),
+  ]);
+
+  if (variantsError) {
+    throw variantsError;
+  }
+
+  if (cyclesError) {
+    throw cyclesError;
+  }
+
+  const variantIds = variants.map((variant) => variant.id);
+  const cycleIds = cycles.map((cycle) => cycle.id);
+
+  const [
+    { data: meals, error: mealsError },
+    { data: cycleSteps, error: cycleStepsError },
+  ] = await Promise.all([
+    variantIds.length
+      ? supabase
+          .from("meals")
+          .select("id, meal_plan_variant_id, position, label")
+          .in("meal_plan_variant_id", variantIds)
+          .order("position", { ascending: true })
+          .order("id", { ascending: true })
+      : Promise.resolve({ data: [], error: null }),
+    cycleIds.length
+      ? supabase
+          .from("meal_plan_cycle_steps")
+          .select("cycle_id, meal_plan_version_id, variant_id, position")
+          .in("cycle_id", cycleIds)
+          .order("position", { ascending: true })
+      : Promise.resolve({ data: [], error: null }),
+  ]);
+
+  if (mealsError) {
+    throw mealsError;
+  }
+
+  if (cycleStepsError) {
+    throw cycleStepsError;
+  }
+
+  const mealIds = meals.map((meal) => meal.id);
+  const { data: doseAllocations, error: doseAllocationsError } =
+    mealIds.length > 0
+      ? await supabase
+          .from("meal_dose_allocations")
+          .select("id, meal_id, dose_type, dose_quantity")
+          .in("meal_id", mealIds)
+          .order("dose_type", { ascending: true })
+          .order("id", { ascending: true })
+      : { data: [], error: null };
+
+  if (doseAllocationsError) {
+    throw doseAllocationsError;
+  }
+
+  const variantsByPlanId = new Map<string, typeof variants>();
+  const mealsByVariantId = new Map<string, typeof meals>();
+  const dosesByMealId = new Map<string, typeof doseAllocations>();
+  const cyclesByPlanId = new Map<string, typeof cycles>();
+  const stepsByCycleId = new Map<string, typeof cycleSteps>();
+  const variantsById = new Map(variants.map((variant) => [variant.id, variant]));
+
+  for (const variant of variants) {
+    const entries = variantsByPlanId.get(variant.meal_plan_version_id) ?? [];
+    entries.push(variant);
+    variantsByPlanId.set(variant.meal_plan_version_id, entries);
+  }
+
+  for (const meal of meals) {
+    const entries = mealsByVariantId.get(meal.meal_plan_variant_id) ?? [];
+    entries.push(meal);
+    mealsByVariantId.set(meal.meal_plan_variant_id, entries);
+  }
+
+  for (const allocation of doseAllocations) {
+    const entries = dosesByMealId.get(allocation.meal_id) ?? [];
+    entries.push(allocation);
+    dosesByMealId.set(allocation.meal_id, entries);
+  }
+
+  for (const cycle of cycles) {
+    const entries = cyclesByPlanId.get(cycle.meal_plan_version_id) ?? [];
+    entries.push(cycle);
+    cyclesByPlanId.set(cycle.meal_plan_version_id, entries);
+  }
+
+  for (const step of cycleSteps) {
+    const entries = stepsByCycleId.get(step.cycle_id) ?? [];
+    entries.push(step);
+    stepsByCycleId.set(step.cycle_id, entries);
+  }
+
+  return plans.map((plan) => ({
+    cycles: (cyclesByPlanId.get(plan.id) ?? []).map((cycle) => ({
+      id: cycle.id,
+      steps: (stepsByCycleId.get(cycle.id) ?? []).flatMap((step) => {
+        const variant = variantsById.get(step.variant_id);
+
+        if (!variant) {
+          return [];
+        }
+
+        return [
+          {
+            position: step.position,
+            variantId: variant.id,
+            variantKey: variant.variant_key,
+            variantLabel: variant.label,
+          },
+        ];
+      }),
+    })),
+    foodEquivalentCatalogVersionId: plan.food_equivalent_catalog_version_id,
+    id: plan.id,
+    protocolVersionId: plan.protocol_version_id,
+    variants: (variantsByPlanId.get(plan.id) ?? []).map((variant) => ({
+      id: variant.id,
+      label: variant.label,
+      variantKey: variant.variant_key,
+      meals: (mealsByVariantId.get(variant.id) ?? []).map((meal) => ({
+        id: meal.id,
+        label: meal.label,
+        position: meal.position,
+        doseAllocations: (dosesByMealId.get(meal.id) ?? []).map(
+          (allocation) => ({
+            doseQuantity: allocation.dose_quantity,
+            doseType: allocation.dose_type,
+            id: allocation.id,
+          }),
+        ),
+      })),
+    })),
+  }));
+}
+
 export type CurrentClientPublishedProtocol = {
   id: string;
   protocolType: string;
