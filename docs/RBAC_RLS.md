@@ -132,9 +132,11 @@ A forma exata de administracao destas tabelas sera definida na camada administra
 
 Nao criar nesta tarefa uma policy generica que permita ao `admin` conceder permissoes arbitrariamente.
 
-### QUESTAO ABERTA
+### DECISAO DE SEGURANCA
 
-O mecanismo de bootstrap do primeiro admin Patty ainda precisa ser definido.
+O primeiro admin Patty sera provisionado por procedimento administrativo controlado e unico, sem autoelevacao pelo aplicativo, endpoint publico ou cadastro autonomo de role `admin`.
+
+O procedimento deve criar ou vincular a identidade Auth ao `profile` correto e registrar o role relacional `admin` com privilegios administrativos restritos ao provisionamento. Isso nao concede acesso client-scoped sem assignment ativo.
 
 ## GRANT e RLS
 
@@ -233,7 +235,7 @@ As policies usam `(select auth.uid())`, role relacional e assignment com `ended_
 
 ### Provisionamento administrativo
 
-O browser nao cria perfis, clientes, roles ou assignments nesta fase. O mecanismo de bootstrap de producao da Patty e a administracao futura de roles/assignments continuam pendentes e devem ocorrer por caminho administrativo controlado, ainda nao implementado. Fixtures pgTAP sinteticas existem apenas para provar isolamento local.
+O browser nao cria perfis, clientes, roles ou assignments nesta fase. O bootstrap de producao da Patty sera um procedimento administrativo controlado e unico, sem autoelevacao pela aplicacao. A administracao futura de assignments continua pendente e deve ocorrer por caminho administrativo controlado ainda nao implementado. Fixtures pgTAP sinteticas existem apenas para provar isolamento local.
 
 ## Implementacao BACKEND-BUNDLE-01
 
