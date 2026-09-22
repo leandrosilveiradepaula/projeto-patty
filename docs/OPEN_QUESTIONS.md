@@ -78,10 +78,6 @@ Quais fluxos de IA justificarao LangGraph?
 
 ### QUESTAO ABERTA
 
-Quais detalhes fisicos da migration da fundacao de IA ainda precisarao ser validados contra o schema vigente, incluindo constraints compostas, validacao das fontes e transicoes controladas de lifecycle?
-
-### QUESTAO ABERTA
-
 Quais campos serao obrigatorios em anamnese, medidas, fotos, exames, protocolos e avaliacoes?
 
 ### QUESTAO ABERTA
@@ -240,17 +236,9 @@ Como tratar conta excluida mantendo historico profissional necessario?
 
 ### QUESTAO ABERTA
 
-Como sera definida a relacao operacional "clientes sob responsabilidade da Patty/admin"?
-
-### QUESTAO ABERTA
-
 Quais acoes serao consideradas criticas para auditoria?
 
 ## Supabase
-
-### QUESTAO ABERTA
-
-Qual sera a regiao do projeto Supabase?
 
 ### QUESTAO ABERTA
 
