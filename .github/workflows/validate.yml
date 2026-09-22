@@ -41,5 +41,8 @@ jobs:
       - name: Protocol lifecycle tests
         run: npm run test:protocol
 
+      - name: Content release tests
+        run: npm run test:content
+
       - name: Build
         run: npm run build
