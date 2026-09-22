@@ -32,7 +32,7 @@ Estados usados:
 - biblioteca educacional e de exercicios em leitura administrativa;
 - liberacao manual de versao publicada de conteudo para cliente;
 - cliente ve conteudos explicitamente liberados;
-- CI de typecheck, testes determinísticos do método, testes do lifecycle de protocolo e build em pull requests e `master`;
+- CI de typecheck, testes determinísticos do método, lifecycle de protocolo, liberação de conteúdo e decisões de acompanhamento profissional, além do build, em pull requests e `master`;
 - fundacao auditavel de IA e tratamento de falhas no banco;
 - inventario inicial e manifesto machine-readable do Drive sem PII.
 
@@ -59,17 +59,17 @@ Estados usados:
 | Clients / assignments | IMPLEMENTADO | sem gestao administrativa de assignment | RLS existente | definir quem cria/altera/encerra assignments |
 | Cadastro Atual | leitura IMPLEMENTADA | nao | CI VALIDADO | definir quem pode alterar cada campo e auditoria |
 | Anamnese versionada | leitura IMPLEMENTADA | nota interna append-only | CI VALIDADO | fechar questionario e fluxo de preenchimento |
-| Avaliacoes / medidas | leitura IMPLEMENTADA | acompanhamento profissional append-only | CI VALIDADO | definir catalogo, unidades, obrigatoriedade e correcao |
+| Avaliacoes / medidas | leitura IMPLEMENTADA | acompanhamento profissional append-only | CI VALIDADO; conjunto de decisoes profissionais tipado e testado | definir catalogo, unidades, obrigatoriedade e correcao |
 | Arquivos privados | leitura/download admin IMPLEMENTADOS | upload/delete nao | SAAS VALIDADO | Patty definir tipos, limites, upload, exclusao e visibilidade da cliente |
 | Protocolos | leitura + lifecycle manual IMPLEMENTADOS | submit/approve/publish | CI + SAAS VALIDADO; lifecycle com guarda determinística testada | criar/editar plano somente quando fluxo profissional estiver formalizado |
 | Plano alimentar publicado | cliente ve variantes, refeicoes, doses e ciclo | nao | CI VALIDADO | equivalentes visiveis continuam abertos |
-| Conteudo educacional | leitura admin/cliente por release IMPLEMENTADA | release manual | CI VALIDADO | taxonomia, autoria/revisao e primeiro lote do Drive |
+| Conteudo educacional | leitura admin/cliente por release IMPLEMENTADA | release manual | CI VALIDADO; elegibilidade de release testada | taxonomia, autoria/revisao e primeiro lote do Drive |
 | Exercicios | leitura admin IMPLEMENTADA | nao | CI VALIDADO | definir exposicao a cliente e campos finais |
 | Progresso de conteudo | schema existe | fluxo nao implementado | PARCIAL | definir quem registra abertura/conclusao |
 | IA | fundacao de banco IMPLEMENTADA | provider real nao integrado | SAAS VALIDADO | escolher provider/modelo, contrato de output e boundary server-side |
 | Drive | INVENTARIADO | nenhuma migracao fisica | 89 itens no manifesto inicial | revisar direitos/taxonomia e escolher lote inicial |
 | Regras deterministicas do metodo | IMPLEMENTADO PARCIAL | sem automacao de protocolo | CI VALIDADO | ampliar somente com formulas exatas confirmadas/documentadas |
-| CI | IMPLEMENTADO | automatico no GitHub Actions | `npm ci` + typecheck + `test:method` + `test:protocol` + build | adicionar testes funcionais quando houver cenarios estaveis |
+| CI | IMPLEMENTADO | automatico no GitHub Actions | `npm ci` + typecheck + `test:method` + `test:protocol` + `test:content` + `test:follow-up` + build | adicionar testes funcionais quando houver cenarios estaveis |
 
 ## Regras deterministicas confirmadas
 
@@ -108,6 +108,10 @@ Ja existe:
 
 Nao existe upload porque regras de produto sobre tipo, tamanho, quantidade, substituicao, exclusao, MIME e visibilidade da cliente ainda nao estao fechadas.
 
+### Acompanhamento profissional
+
+As decisoes atualmente registraveis permanecem exatamente `maintain`, `simplify`, `advance` e `return`. O conjunto e compartilhado pela UI e pela validacao server-side e possui teste automatizado. Registrar a decisao continua sem executar mudanca de fase, protocolo, dieta ou treino.
+
 ### Protocolos
 
 O lifecycle manual atual e:
@@ -138,6 +142,8 @@ O Supabase SaaS estava com 0 registros nas quatro tabelas-base de biblioteca no 
 O Drive possui manifesto inicial com 89 arquivos claramente nao client-scoped. Nenhum deles foi importado.
 
 Antes da importacao e necessario resolver direitos/licenciamento, taxonomia e lote inicial.
+
+A liberacao manual ja implementada considera elegivel somente uma versao publicada ainda nao liberada para a mesma cliente. A UI e a server action compartilham a mesma guarda deterministica, enquanto RLS e unicidade no banco continuam sendo a autoridade final.
 
 ### IA
 

@@ -46,7 +46,9 @@ Fluxos de escrita humana ja conectados e protegidos pelas RLS existentes incluem
 - acompanhamento profissional append-only de avaliacao;
 - liberacao manual de versao publicada de conteudo para cliente;
 - lifecycle manual de protocolo: submissao para revisao, aprovacao humana e publicacao explicita.
-- guarda deterministica e testada para a proxima acao permitida do lifecycle de protocolo.
+- guarda deterministica e testada para a proxima acao permitida do lifecycle de protocolo;
+- elegibilidade deterministica e testada para liberacao manual de versao de conteudo;
+- conjunto tipado e testado das decisoes profissionais de acompanhamento, sem automacao de mudanca de fase.
 
 ## Seguranca
 
@@ -109,6 +111,8 @@ npm ci
 npm run typecheck
 npm run test:method
 npm run test:protocol
+npm run test:content
+npm run test:follow-up
 npm run build
 ```
 
