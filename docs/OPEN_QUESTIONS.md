@@ -54,10 +54,6 @@ Quais permissoes futuras esses profissionais terao?
 
 ## Arquitetura e automacoes
 
-### QUESTAO ABERTA
-
-Quais fluxos de IA justificarao LangGraph?
-
 ## Modelo de dados
 
 ### QUESTAO ABERTA
