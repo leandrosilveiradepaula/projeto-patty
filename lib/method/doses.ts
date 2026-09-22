@@ -27,12 +27,9 @@ export function gramsToDoses(type: DoseType, grams: number) {
 }
 
 export function maxHigherFatProteinDoses(totalProteinDoses: number) {
-  if (
-    !Number.isInteger(totalProteinDoses) ||
-    totalProteinDoses < 0
-  ) {
+  if (!Number.isFinite(totalProteinDoses) || totalProteinDoses < 0) {
     throw new RangeError(
-      "totalProteinDoses must be a non-negative integer",
+      "totalProteinDoses must be a finite non-negative number",
     );
   }
 
