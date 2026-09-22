@@ -42,11 +42,17 @@ test("limits higher-fat protein group to half, rounded up", () => {
   assert.equal(maxHigherFatProteinDoses(8), 4);
   assert.equal(maxHigherFatProteinDoses(7), 4);
   assert.equal(maxHigherFatProteinDoses(9), 5);
+  assert.equal(maxHigherFatProteinDoses(7.5), 4);
+  assert.equal(maxHigherFatProteinDoses(8.5), 5);
   assert.equal(maxHigherFatProteinDoses(0), 0);
   assert.equal(maxHigherFatProteinDoses(1), 1);
 });
 
-test("rejects fractional or negative total protein doses", () => {
-  assert.throws(() => maxHigherFatProteinDoses(7.5), RangeError);
+test("rejects negative or non-finite total protein doses", () => {
   assert.throws(() => maxHigherFatProteinDoses(-1), RangeError);
+  assert.throws(() => maxHigherFatProteinDoses(Number.NaN), RangeError);
+  assert.throws(
+    () => maxHigherFatProteinDoses(Number.POSITIVE_INFINITY),
+    RangeError,
+  );
 });
