@@ -113,7 +113,7 @@ A Patty devera manter acesso aos arquivos mesmo sem assignment ativo, e signed U
 
 Visualizacao e download administrativos de exames/documentos deverao gerar evento de auditoria sem conteudo do arquivo. Esse requisito esta decidido, mas ainda precisa ser implementado junto da reconciliacao das rotas/RLS de arquivos.
 
-Permanecem abertos quantidade maxima, eventual upload administrativo pela Patty, politica concreta de retencao/hard delete, antimalware e visibilidade da cliente.
+O MVP nao tera limite rigido de quantidade de arquivos. Permanecem abertos eventual upload administrativo pela Patty, politica concreta de retencao/hard delete, antimalware e visibilidade da cliente.
 
 ### Acompanhamento profissional
 
