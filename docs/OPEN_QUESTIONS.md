@@ -28,10 +28,6 @@ Quais operacoes administrativas a Patty precisa executar no primeiro painel?
 
 ### QUESTAO ABERTA
 
-O login inicial sera senha, magic link ou outra estrategia?
-
-### QUESTAO ABERTA
-
 Qual sera o tratamento de conta Auth excluida quando for necessario manter historico profissional?
 
 ## Autorizacao
