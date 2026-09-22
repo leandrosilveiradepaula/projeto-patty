@@ -115,7 +115,7 @@ Downloads administrativos de exames/documentos registram evento append-only em `
 
 O MVP nao tera limite rigido de quantidade de arquivos. A Patty tambem podera enviar arquivos em nome da cliente por fluxo administrativo server-side controlado, com autoria administrativa explicita. Arquivos enviados pela cliente ficam visiveis para ela por padrao; uploads da Patty ficam ocultos ate liberacao explicita. O primeiro MVP nao tera antimalware dedicado; esse risco permanece mitigado por allowlist fechada, validacao de tipo real, limites de tamanho, Storage privado e ausencia de execucao.
 
-A RLS/policy ja diferencia visibilidade para a cliente e acesso administrativo permanente da Patty. Os fluxos de upload e liberacao ainda nao estao implementados. Permanece aberta a politica concreta de retencao/hard delete.
+A RLS/policy ja diferencia visibilidade para a cliente e acesso administrativo permanente da Patty. A fundacao do upload da cliente usa `client_file_upload_sessions`: sessao propria, path temporario gerado pelo banco, allowlist/tamanho declarados por constraint, expiracao de 15 minutos e policy de Storage limitada ao objeto `pending` exato. A finalizacao server-side, validacao do conteudo real, limpeza de temporarios, upload administrativo e liberacao para a cliente ainda nao estao implementados. Permanece aberta a politica concreta de retencao/hard delete.
 
 ### Acompanhamento profissional
 
