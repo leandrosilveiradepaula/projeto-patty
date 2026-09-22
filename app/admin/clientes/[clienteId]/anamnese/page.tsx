@@ -1,13 +1,12 @@
-import { AdminAnamnesisNavigation } from "@/components/admin/AdminAnamnesisNavigation";
-import { AdminAnamnesisSection } from "@/components/admin/AdminAnamnesisSection";
 import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
 import { Badge } from "@/components/ui/Badge";
-import { PageHeader } from "@/components/ui/PageHeader";
-import { anamnesisCategories } from "@/lib/anamnesis/catalog";
+import { Card } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Section } from "@/components/ui/Section";
 import {
-  getDemoAnamnesisForClient,
-  getDemoClient,
-} from "@/lib/demo/anamnesis";
+  getAccessibleClient,
+  listAccessibleAnamnesisSubmissions,
+} from "@/lib/supabase/data-access";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import styles from "./page.module.css";
@@ -18,64 +17,109 @@ type AdminClienteAnamnesePageProps = {
   }>;
 };
 
+function formatDateTime(value: string) {
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    month: "2-digit",
+    timeZone: "UTC",
+    year: "numeric",
+  }).format(new Date(value));
+}
+
 export default async function AdminClienteAnamnesePage({
   params,
 }: AdminClienteAnamnesePageProps) {
   const { clienteId } = await params;
-  const client = getDemoClient(clienteId);
+  const client = await getAccessibleClient(clienteId);
 
   if (!client) {
     notFound();
   }
 
-  const anamnesis = getDemoAnamnesisForClient(clienteId);
-
-  if (!anamnesis) {
-    return (
-      <PageHeader
-        description="Nenhuma Anamnese demonstrativa está disponível para esta cliente."
-        eyebrow="Administração"
-        title="Anamnese"
-      />
-    );
-  }
+  const submissions = await listAccessibleAnamnesisSubmissions(client.id);
+  const displayName = client.profiles?.display_name?.trim();
 
   return (
     <>
       <ClientSummaryHeader
-        meta="Dados sintéticos para validação da interface."
-        name={client.label}
-        secondary="Leitura administrativa da Anamnese."
-        status={<Badge variant="neutral">Demonstração</Badge>}
-        visual={<span>{client.visualLabel}</span>}
-      />
-      <PageHeader
-        actions={
-          anamnesis.reviewEntries.length > 0 ? (
-            <Link
-              className={styles.reviewLink}
-              href={`/admin/anamneses/${anamnesis.id}/revisao`}
-            >
-              Revisar anamnese
-            </Link>
-          ) : null
+        meta="Cliente atribuído"
+        name={displayName || "Cliente sem nome informado"}
+        secondary="Histórico real de Anamnese"
+        status={<Badge variant="neutral">Atribuição ativa</Badge>}
+        visual={
+          <span>
+            {displayName
+              ?.split(/\s+/)
+              .map((word) => word[0])
+              .join("")
+              .slice(0, 2)
+              .toUpperCase() || "?"}
+          </span>
         }
-        description="Respostas originais demonstrativas organizadas pelas categorias documentadas."
-        eyebrow="Administração"
-        headingLevel={2}
-        title="Anamnese"
       />
-      <AdminAnamnesisNavigation categories={anamnesisCategories} />
-      <div className={styles.sections}>
-        {anamnesisCategories.map((category) => (
-          <AdminAnamnesisSection
-            answers={anamnesis.answers}
-            category={category}
-            clientId={client.id}
-            key={category.id}
+      <Section
+        action={<Badge variant="neutral">{submissions.length} registro(s)</Badge>}
+        description="Submissões preservadas no backend. Cada detalhe usa exatamente a versão de formulário vinculada ao registro."
+        title="Anamneses"
+      >
+        {submissions.length === 0 ? (
+          <EmptyState
+            description="Nenhuma submissão de Anamnese está registrada para esta cliente."
+            title="Sem Anamnese registrada"
           />
-        ))}
-      </div>
+        ) : (
+          <ol className={styles.submissionList}>
+            {submissions.map((submission) => {
+              const version = submission.anamnesis_form_versions;
+              const submitted = Boolean(submission.submitted_at);
+
+              return (
+                <li key={submission.id}>
+                  <Card className={styles.submissionCard}>
+                    <div className={styles.submissionHeader}>
+                      <div>
+                        <h2 className={styles.submissionTitle}>
+                          {version?.version_number
+                            ? `Anamnese · versão ${version.version_number}`
+                            : "Anamnese"}
+                        </h2>
+                        <p className={styles.submissionMeta}>
+                          Criada em {formatDateTime(submission.created_at)}
+                        </p>
+                      </div>
+                      <Badge variant="neutral">
+                        {submitted ? "Enviada" : "Rascunho"}
+                      </Badge>
+                    </div>
+                    <dl className={styles.submissionDetails}>
+                      <div>
+                        <dt>Envio</dt>
+                        <dd>
+                          {submission.submitted_at
+                            ? formatDateTime(submission.submitted_at)
+                            : "Ainda não enviado"}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>Identificador</dt>
+                        <dd>{submission.id}</dd>
+                      </div>
+                    </dl>
+                    <Link
+                      className={styles.detailLink}
+                      href={`/admin/anamneses/${submission.id}`}
+                    >
+                      Ver respostas originais
+                    </Link>
+                  </Card>
+                </li>
+              );
+            })}
+          </ol>
+        )}
+      </Section>
     </>
   );
 }

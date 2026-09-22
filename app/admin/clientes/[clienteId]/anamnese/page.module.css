@@ -1,27 +1,78 @@
-.reviewLink {
-  display: inline-flex;
-  min-height: 36px;
-  align-items: center;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-full);
-  padding: var(--space-2) var(--space-4);
+.submissionList {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.submissionCard {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.submissionHeader {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: start;
+  justify-content: space-between;
+}
+
+.submissionTitle,
+.submissionMeta {
+  margin: 0;
+}
+
+.submissionTitle {
   color: var(--color-text-primary);
   font-family: var(--font-family-heading);
+  font-size: var(--text-title-medium-size);
+  font-weight: var(--text-title-medium-weight);
+  line-height: var(--text-title-medium-line-height);
+}
+
+.submissionMeta {
+  margin-top: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--text-body-small-size);
+  line-height: var(--text-body-small-line-height);
+}
+
+.submissionDetails {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  margin: 0;
+}
+
+.submissionDetails div {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.submissionDetails dt {
+  color: var(--color-text-muted);
+  font-size: var(--text-body-small-size);
+  font-weight: var(--text-label-small-weight);
+}
+
+.submissionDetails dd {
+  margin: 0;
+  color: var(--color-text-secondary);
+  overflow-wrap: anywhere;
+}
+
+.detailLink {
+  width: fit-content;
+  color: var(--color-brand-strong);
+  font-size: var(--text-label-medium-size);
+  font-weight: var(--text-label-medium-weight);
   text-decoration: none;
 }
 
-.reviewLink:hover {
-  background: var(--color-surface-low);
+.detailLink:hover {
   text-decoration: underline;
-}
-
-.reviewLink:focus-visible {
-  outline: 3px solid var(--color-brand);
-  outline-offset: 3px;
-}
-
-.sections {
-  display: grid;
-  gap: var(--space-8);
-  margin-top: var(--space-8);
 }

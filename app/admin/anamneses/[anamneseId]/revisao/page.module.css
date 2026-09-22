@@ -16,14 +16,53 @@
 .notice {
   margin: var(--space-6) 0;
   color: var(--color-text-secondary);
+  line-height: var(--text-body-medium-line-height);
 }
 
 .items {
   display: grid;
-  gap: var(--space-6);
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.emptyState {
+.reviewCard {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.reviewHeader {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: start;
+  justify-content: space-between;
+}
+
+.reviewMeta,
+.reviewer,
+.note {
   margin: 0;
+}
+
+.reviewMeta {
+  color: var(--color-text-muted);
+  font-size: var(--text-body-small-size);
+  line-height: var(--text-body-small-line-height);
+}
+
+.reviewer {
+  margin-top: var(--space-1);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+  font-weight: var(--text-label-medium-weight);
+}
+
+.note {
   color: var(--color-text-secondary);
+  line-height: var(--text-body-medium-line-height);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
