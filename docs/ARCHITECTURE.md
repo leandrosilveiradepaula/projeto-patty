@@ -13,6 +13,22 @@ A arquitetura definida para o projeto e:
 - n8n disponivel para automacoes quando houver necessidade;
 - LangGraph somente para fluxos de IA que realmente justifiquem essa complexidade.
 
+## Ambientes e acesso administrativo
+
+### DECISAO TECNICA
+
+No MVP, os ambientes definidos sao somente desenvolvimento e producao. Nao ha staging nesta etapa; um terceiro ambiente so sera criado mediante necessidade concreta e documentada.
+
+### DECISAO DE SEGURANCA
+
+MFA e obrigatorio para contas administrativas, incluindo Patty/admin.
+
+### DECISAO DE PRODUTO E SEGURANCA
+
+Contas de clientes sao criadas somente por convite ou ativacao controlada. Nao existe cadastro publico/autonomo de clientes no MVP.
+
+Os detalhes operacionais de convite, expiracao, reenvio, ativacao, recuperacao e encerramento de conta permanecem abertos.
+
 ## Restricoes atuais
 
 ### DECISAO CONFIRMADA

@@ -1,6 +1,6 @@
 # Questoes Abertas
 
-Este documento concentra pontos ainda nao definidos. Nenhum item abaixo deve ser tratado como regra confirmada ate que seja validado pela Patty e registrado como decisao.
+Este documento concentra pontos ainda nao definidos. Cada item deve ser validado pelo responsavel adequado antes de virar decisao: regras do metodo e operacao profissional pela Patty; arquitetura, seguranca e produto tecnico pelo responsavel do projeto; temas juridicos/privacidade com validacao juridica quando aplicavel.
 
 ## Produto e usuarios
 
@@ -10,7 +10,7 @@ Havera outros papeis administrativos alem da Patty, como assistentes, profission
 
 ### QUESTAO ABERTA
 
-Como serao os fluxos de cadastro, convite, ativacao e encerramento de conta de clientes?
+Como serao os detalhes operacionais de convite, ativacao, recuperacao e encerramento de conta de clientes, considerando que o MVP nao tera cadastro publico/autonomo?
 
 ### QUESTAO ABERTA
 
@@ -28,15 +28,7 @@ Quais operacoes administrativas a Patty precisa executar no primeiro painel?
 
 ### QUESTAO ABERTA
 
-A criacao de conta sera por convite ou cadastro autonomo?
-
-### QUESTAO ABERTA
-
 O login inicial sera senha, magic link ou outra estrategia?
-
-### QUESTAO ABERTA
-
-MFA sera obrigatorio para Patty/admin?
 
 ### QUESTAO ABERTA
 
@@ -239,10 +231,6 @@ Como tratar conta excluida mantendo historico profissional necessario?
 Quais acoes serao consideradas criticas para auditoria?
 
 ## Supabase
-
-### QUESTAO ABERTA
-
-Havera ambientes definitivos alem de desenvolvimento e producao?
 
 ## Storage
 
