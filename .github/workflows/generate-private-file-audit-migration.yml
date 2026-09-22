@@ -1,0 +1,48 @@
+name: Generate private file audit migration
+
+on:
+  push:
+    branches:
+      - codex/private-file-access-audit
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: codex/private-file-access-audit
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create migration with project CLI
+        run: |
+          if find supabase/migrations -maxdepth 1 -type f -name '*_client_file_access_audit.sql' | grep -q .; then
+            exit 0
+          fi
+          ./node_modules/.bin/supabase migration new client_file_access_audit
+
+      - name: Commit generated migration
+        run: |
+          git add supabase/migrations
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: create client file access audit migration"
+          git push origin HEAD:codex/private-file-access-audit
