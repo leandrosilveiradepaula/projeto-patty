@@ -1,5 +1,19 @@
 # Decisoes
 
+## 2026-09-22 - Limites confirmados para fundacao futura de IA
+
+### DECISAO CONFIRMADA
+
+A IA auxilia Patty; nao decide nem publica diretamente. Nao gera diagnostico automatico.
+
+### DECISAO CONFIRMADA
+
+Exemplos e historicos individuais nao podem ser transformados em regra geral do metodo profissional.
+
+### DECISAO CONFIRMADA
+
+Endereco, escolaridade e Instagram nao devem ser enviados ao contexto de IA sem necessidade especifica.
+
 ## 2026-09-18 - Arquivos privados, avaliacoes e acompanhamento profissional
 
 ### DECISAO CONFIRMADA

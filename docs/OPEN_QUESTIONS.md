@@ -164,6 +164,22 @@ Quais campos da anamnese poderao ser enviados a IA, campo a campo?
 
 ### QUESTAO ABERTA
 
+Quais dados cadastrais ou privados poderao ser enviados a IA, se houver finalidade especifica? Isso inclui telefone, email de contato, cidade, arquivos privados, fotos, exames e documentos.
+
+### QUESTAO ABERTA
+
+Quais respostas brutas de Anamnese ou categorias sensiveis poderao ser usadas em contexto de IA, campo a campo? Isso inclui dados de saude, medicacao, suplementacao, sono e habitos, autoimagem, comportamento e condicao financeira.
+
+### QUESTAO ABERTA
+
+Qual sera a politica de minimizacao, retencao e descarte do contexto enviado a IA? Ainda devem ser definidos versao de prompt, identificacao de modelo ou provider e politica de logs internos.
+
+### QUESTAO ABERTA
+
+Qual sera o modelo auditavel que separa interpretacao da IA, rascunho, alteracoes da Patty, versao aprovada e publicacao, sem expor prompts ou logs internos a clientes?
+
+### QUESTAO ABERTA
+
 Qual sera a classificacao definitiva de cada campo da anamnese nas categorias estruturais do produto?
 
 ### QUESTAO ABERTA

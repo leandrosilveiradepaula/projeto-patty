@@ -396,6 +396,34 @@ O sistema deve preservar:
 - versao aprovada;
 - historico das versoes.
 
+### ESTADO ATUAL VERIFICADO
+
+Ainda nao existem entidades persistentes para prompts, execucoes de IA, analises de IA, rascunhos de IA, alertas ou pendencias estruturados, nem auditoria generica.
+
+As estruturas existentes que podem apoiar futura modelagem, sem constituir modelo de IA, sao:
+
+- `anamnesis_submissions`, `anamnesis_answers` e `anamnesis_reviews`;
+- `professional_follow_ups`;
+- `protocols`, `protocol_versions`, `protocol_version_approvals` e `protocol_publications`;
+- `client_assessments`, `assessment_measurements`, `assessment_files` e `client_files`.
+
+Essas estruturas nao eliminam a distincao necessaria:
+
+```text
+dado original
+!= interpretacao da IA
+!= rascunho
+!= alteracao da Patty
+!= versao aprovada
+!= publicacao
+```
+
+`protocol_versions.submitted_for_review_at IS NULL` representa somente um draft tecnico da versao de protocolo. Nao representa rascunho de IA.
+
+### DIVERGENCIA ATUAL DE UI
+
+A demonstracao de revisao de Anamnese usa o campo `aiAnalysis` em `lib/demo/anamnesis.ts`. Esse conteudo nao possui entidade persistente, RLS ou auditoria real e nao define contrato de IA.
+
 ## Limites desta documentacao
 
 ### DECISAO HISTORICA SUBSTITUIDA
