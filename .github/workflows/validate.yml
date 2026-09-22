@@ -44,5 +44,8 @@ jobs:
       - name: Content release tests
         run: npm run test:content
 
+      - name: Professional follow-up tests
+        run: npm run test:follow-up
+
       - name: Build
         run: npm run build

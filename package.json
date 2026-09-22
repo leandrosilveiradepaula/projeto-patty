@@ -9,7 +9,8 @@
     "typecheck": "tsc --noEmit",
     "test:method": "node --experimental-strip-types --test lib/method/*.test.ts",
     "test:protocol": "node --experimental-strip-types --test lib/protocol/*.test.ts",
-    "test:content": "node --experimental-strip-types --test lib/content/*.test.ts"
+    "test:content": "node --experimental-strip-types --test lib/content/*.test.ts",
+    "test:follow-up": "node --experimental-strip-types --test lib/follow-up/*.test.ts"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { isProfessionalDecision } from "@/lib/follow-up/professional-decisions";
 import { requireRole } from "@/lib/supabase/auth";
 import {
   createAccessibleProfessionalFollowUp,
@@ -12,13 +13,6 @@ export type ProfessionalFollowUpFormState = {
   message: string | null;
   success: boolean;
 };
-
-const allowedDecisions = new Set([
-  "advance",
-  "maintain",
-  "return",
-  "simplify",
-]);
 
 function optionalText(value: FormDataEntryValue | null) {
   if (typeof value !== "string") {
@@ -49,7 +43,7 @@ export async function addProfessionalFollowUp(
 
   if (
     typeof decisionValue !== "string" ||
-    !allowedDecisions.has(decisionValue)
+    !isProfessionalDecision(decisionValue)
   ) {
     return {
       message: "Selecione uma decisão profissional válida.",
@@ -73,11 +67,7 @@ export async function addProfessionalFollowUp(
       decisionReason: reasonValue.trim(),
       difficulty: optionalText(formData.get("difficulty")),
       pattyObservation: optionalText(formData.get("pattyObservation")),
-      professionalDecision: decisionValue as
-        | "advance"
-        | "maintain"
-        | "return"
-        | "simplify",
+      professionalDecision: decisionValue,
     });
   } catch {
     return {
