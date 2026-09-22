@@ -31,7 +31,7 @@ Os detalhes operacionais de convite, expiracao, reenvio, ativacao, recuperacao e
 
 ### DECISAO DE SEGURANCA E OPERACAO
 
-A primeira conta admin da Patty sera criada por procedimento administrativo controlado e unico. Nao existe fluxo publico ou autenticado de autoelevacao para `admin`. O provisionamento vincula Auth, Profile e role relacional sem alterar o requisito de assignment ativo para acesso client-scoped.
+A primeira conta admin da Patty sera criada por procedimento administrativo controlado e unico. Nao existe fluxo publico ou autenticado de autoelevacao para `admin`. O provisionamento vincula Auth, Profile e role relacional sem alterar a regra geral de assignment ativo para acesso client-scoped. Decisao posterior criou uma excecao especifica para arquivos privados: no MVP, a Patty pode acessa-los mesmo sem assignment ativo.
 
 No MVP, somente a Patty pode iniciar ou encerrar assignments, sempre por boundary server-side controlado. O browser nao recebe escrita direta em `client_assignments`; encerramentos preservam o registro historico e removem apenas o acesso atual.
 
@@ -53,7 +53,7 @@ Ja existem tambem boundaries server-side de escrita para notas internas de revis
 
 A rota raiz usa o contexto autenticado para encaminhar admin, cliente ou login.
 
-Esses fatos de implementacao nao significam que todos os fluxos de escrita estejam definidos. Preenchimento final da Anamnese, uploads, operacoes administrativas ainda abertas, automacoes e integracao real com provider de IA continuam sujeitos as decisoes e questoes abertas correspondentes.
+Esses fatos de implementacao nao significam que todos os fluxos de escrita estejam definidos. Preenchimento final da Anamnese, implementacao do upload privado em duas etapas, reconciliacao do acesso da Patty a arquivos com a RLS atual, operacoes administrativas ainda abertas, automacoes e integracao real com provider de IA continuam sujeitos as decisoes e questoes abertas correspondentes.
 
 ### DECISAO HISTORICA SUBSTITUIDA
 
@@ -82,6 +82,14 @@ RLS sera obrigatoria.
 Fotos, exames e documentos devem ser privados.
 
 Uploads privados do MVP usam allowlist fechada: fotos em JPEG/PNG/WebP; exames e documentos em PDF/JPEG/PNG. A validacao deve conferir extensao e tipo real/detectado no servidor e rejeitar formatos fora da allowlist ou divergencias de tipo.
+
+Limites do MVP: fotos ate 10 MB; exames/documentos ate 20 MB por arquivo.
+
+Uploads privados devem usar paths gerados pelo sistema sem PII, nunca sobrescrever objetos existentes e nao permitir hard delete direto pelo browser. Substituicoes geram novo objeto e preservam historico.
+
+A cliente autenticada podera enviar bytes diretamente ao Supabase Storage sob grants/policies/RLS estritos, usando area privada temporaria. O servidor valida tamanho, extensao e tipo real/detectado antes de registrar/promover o arquivo como valido; objetos rejeitados sao removidos e nao ficam visiveis como recebidos.
+
+Signed URLs sao temporarias, nao persistidas e terao validade de 5 minutos. No MVP, a Patty podera acessar arquivos privados mesmo sem assignment ativo; esta excecao e especifica para arquivos e nao altera a regra geral de autorizacao dos demais dados client-scoped.
 
 Secrets nao devem ser armazenados no repositorio.
 
