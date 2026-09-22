@@ -89,6 +89,8 @@ Uploads privados devem usar paths gerados pelo sistema sem PII, nunca sobrescrev
 
 A cliente autenticada podera enviar bytes diretamente ao Supabase Storage sob grants/policies/RLS estritos, usando area privada temporaria. O servidor valida tamanho, extensao e tipo real/detectado antes de registrar/promover o arquivo como valido; objetos rejeitados sao removidos e nao ficam visiveis como recebidos.
 
+A Patty tambem podera enviar arquivos em nome da cliente, mas por fluxo administrativo server-side controlado. Esse fluxo deve registrar autoria administrativa e nunca atribuir o envio a cliente. As mesmas validacoes de formato, tamanho, path sem PII e imutabilidade se aplicam.
+
 Signed URLs sao temporarias, nao persistidas e terao validade de 5 minutos. No MVP, a Patty podera acessar arquivos privados mesmo sem assignment ativo; esta excecao e especifica para arquivos e nao altera a regra geral de autorizacao dos demais dados client-scoped.
 
 Secrets nao devem ser armazenados no repositorio.
