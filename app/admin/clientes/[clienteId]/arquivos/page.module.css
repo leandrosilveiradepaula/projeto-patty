@@ -1,0 +1,94 @@
+.backLink {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  padding: var(--space-2) var(--space-4);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+  font-size: var(--text-label-medium-size);
+  font-weight: var(--text-label-medium-weight);
+  line-height: var(--text-label-medium-line-height);
+  text-decoration: none;
+}
+
+.backLink:hover,
+.downloadLink:hover {
+  text-decoration: underline;
+}
+
+.fileList {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fileCard {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.fileHeader {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: start;
+  justify-content: space-between;
+}
+
+.fileTitle {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+  font-size: var(--text-title-medium-size);
+  font-weight: var(--text-title-medium-weight);
+  line-height: var(--text-title-medium-line-height);
+  overflow-wrap: anywhere;
+}
+
+.fileKind {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-body-small-size);
+  line-height: var(--text-body-small-line-height);
+}
+
+.fileMeta {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  margin: 0;
+}
+
+.fileMeta div {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.fileMeta dt {
+  color: var(--color-text-muted);
+  font-size: var(--text-body-small-size);
+  font-weight: var(--text-label-small-weight);
+}
+
+.fileMeta dd {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-medium-size);
+  line-height: var(--text-body-medium-line-height);
+  overflow-wrap: anywhere;
+}
+
+.downloadLink {
+  width: fit-content;
+  color: var(--color-brand-strong);
+  font-size: var(--text-label-medium-size);
+  font-weight: var(--text-label-medium-weight);
+  text-decoration: none;
+}

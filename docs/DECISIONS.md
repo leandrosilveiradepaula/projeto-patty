@@ -1,24 +1,27 @@
 # Decisoes
 
-## 2026-09-22 - Visualizacao administrativa de fotos privadas
+## 2026-09-22 - Leitura administrativa de arquivos privados
 
 ### DECISAO TECNICA
 
-Fotos privadas vinculadas a uma avaliacao podem ser exibidas no detalhe administrativo por uma rota server-side dedicada, sem tornar o bucket publico e sem persistir URL assinada.
+Arquivos privados permanecem no bucket privado `client-private`, sem URL publica permanente e sem signed URL persistida.
 
-A rota exige role relacional `admin`, consulta o `client_file` sob as RLS existentes e cria sob a sessao atual uma signed URL com validade de 60 segundos para o objeto do bucket privado `client-private`. O redirecionamento nao deve ser armazenado em cache.
+Fotos privadas vinculadas a uma avaliacao podem ser exibidas no detalhe administrativo por uma rota server-side dedicada. A rota exige role relacional `admin`, consulta o `client_file` sob as RLS existentes e cria sob a sessao atual uma signed URL com validade de 60 segundos. O redirecionamento nao deve ser armazenado em cache.
 
-A autorizacao continua dependendo de assignment ativo. Encerrar o assignment remove o acesso atual da Patty/admin; a rota nao usa `service_role` nem bypass de RLS.
+A area administrativa da cliente pode listar metadados de `client_files` acessiveis pelas RLS existentes. Para download administrativo de fotos, exames ou documentos, uma rota server-side igualmente exige `admin`, resolve o arquivo sob RLS e cria signed URL de 60 segundos com comportamento de download forcado. Isso evita decidir renderizacao inline de exames ou documentos antes da definicao de MIME types e controles adicionais.
+
+A autorizacao continua dependendo de assignment ativo. Encerrar o assignment remove o acesso atual da Patty/admin; nenhuma dessas rotas usa `service_role` nem bypass de RLS.
 
 ### LIMITE DE ESCOPO
 
-Esta decisao implementa somente visualizacao administrativa de fotos ja cadastradas e vinculadas a uma avaliacao.
+Esta decisao implementa somente leitura e download administrativos de arquivos ja cadastrados.
 
 Ela nao define:
 
 - quem pode fazer upload;
 - substituicao ou exclusao de arquivos;
 - MIME types definitivos aceitos;
+- limite de tamanho como regra de produto;
 - analise de arquivos maliciosos;
 - quais fotos, exames ou documentos devem ser exibidos na UI da cliente.
 

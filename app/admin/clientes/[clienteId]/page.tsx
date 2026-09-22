@@ -41,7 +41,7 @@ export default async function AdminClienteDetailPage({
     },
     {
       description:
-        "Área prevista para referências a fotos, exames e documentos com acesso controlado.",
+        "Fotos, exames e documentos privados com leitura controlada por RLS e atribuição ativa.",
       title: "Arquivos e documentos",
     },
   ];
@@ -63,7 +63,8 @@ export default async function AdminClienteDetailPage({
     },
     {
       description:
-        "Área prevista para fotos, exames e documentos com acesso controlado.",
+        "Consulte os metadados e baixe arquivos privados autorizados para esta cliente.",
+      href: `/admin/clientes/${client.id}/arquivos`,
       title: "Arquivos",
     },
     {
@@ -92,8 +93,7 @@ export default async function AdminClienteDetailPage({
         visual={<span>{displayName?.split(/\s+/).map((word) => word[0]).join("").slice(0, 2).toUpperCase() || "?"}</span>}
       />
       <Section
-        action={<Badge variant="neutral">Dados sintéticos para validação da interface.</Badge>}
-        description="Blocos estruturais do cadastro individual, ainda sem dados integrados."
+        description="Resumo das áreas administrativas do cadastro e acompanhamento."
         title="Visão geral"
       >
         <div className={styles.overviewGrid}>
@@ -144,8 +144,8 @@ export default async function AdminClienteDetailPage({
         </div>
       </Section>
       <EmptyState
-        description="Dados operacionais ainda não integrados nesta etapa da interface."
-        title="Integração futura"
+        description="Alguns fluxos do acompanhamento ainda permanecem em implementação e serão integrados sem enfraquecer as regras atuais de acesso."
+        title="Fluxos adicionais em construção"
       />
     </>
   );
