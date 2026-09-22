@@ -224,14 +224,6 @@ Qual e o fluxo auditavel para correcao de uma avaliacao ou medida historica sem 
 
 Qual e a origem da percepcao de aderencia e quais partes do acompanhamento profissional poderao futuramente ser exibidas para a cliente?
 
-### QUESTAO ABERTA
-
-Havera necessidade de analise de arquivos maliciosos?
-
-### QUESTAO ABERTA
-
-Qual sera a estrategia de analise de arquivos maliciosos, se necessaria?
-
 ## IA e revisao de Anamnese
 
 ### QUESTAO ABERTA
