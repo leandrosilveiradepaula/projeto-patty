@@ -507,34 +507,43 @@ export type Database = {
           bucket_id: string
           byte_size: number | null
           client_id: string
+          client_visibility_set_by_profile_id: string | null
+          client_visible_at: string | null
           created_at: string
           file_kind: Database["public"]["Enums"]["client_file_kind"]
           id: string
           mime_type: string | null
           object_path: string
           original_filename: string | null
+          uploaded_by_profile_id: string
         }
         Insert: {
           bucket_id?: string
           byte_size?: number | null
           client_id: string
+          client_visibility_set_by_profile_id?: string | null
+          client_visible_at?: string | null
           created_at?: string
           file_kind: Database["public"]["Enums"]["client_file_kind"]
           id?: string
           mime_type?: string | null
           object_path: string
           original_filename?: string | null
+          uploaded_by_profile_id: string
         }
         Update: {
           bucket_id?: string
           byte_size?: number | null
           client_id?: string
+          client_visibility_set_by_profile_id?: string | null
+          client_visible_at?: string | null
           created_at?: string
           file_kind?: Database["public"]["Enums"]["client_file_kind"]
           id?: string
           mime_type?: string | null
           object_path?: string
           original_filename?: string | null
+          uploaded_by_profile_id?: string
         }
         Relationships: [
           {
@@ -542,6 +551,20 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_files_client_visibility_set_by_profile_id_fkey"
+            columns: ["client_visibility_set_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_files_uploaded_by_profile_id_fkey"
+            columns: ["uploaded_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
