@@ -169,7 +169,7 @@ export default async function AdminAvaliacaoDetailPage({
         </Card>
       </Section>
       <Section
-        description="Metadados de fotos privadas vinculadas diretamente a esta avaliação."
+        description="Fotos privadas vinculadas diretamente a esta avaliação, carregadas somente após autorização administrativa."
         title="Fotos"
       >
         {photoFiles.length > 0 ? (
@@ -178,6 +178,7 @@ export default async function AdminAvaliacaoDetailPage({
               id: file.id,
               label: file.original_filename?.trim() || "Foto vinculada",
               metadata: formatFileMetadata(file.mime_type, file.byte_size) || undefined,
+              src: `/admin/fotos/${file.id}`,
             }))}
           />
         ) : (
