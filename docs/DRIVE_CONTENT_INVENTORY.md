@@ -17,6 +17,22 @@ Este inventario:
 
 A origem principal identificada foi a pasta compartilhada `Consultoria Corpo e Mente`, ID `1faC7qUZ47E9lDZvSm9fSqrimH6mZxpab`.
 
+## Manifesto machine-readable
+
+Os mesmos 89 arquivos estao registrados em `drive_content_manifest.json` com:
+
+- ID do arquivo de origem;
+- ID e nome da pasta de origem;
+- titulo original;
+- MIME type;
+- tamanho em bytes;
+- data de modificacao quando informada pelo Drive;
+- biblioteca de destino confirmada apenas no nivel `educational` ou `exercise`;
+- `rights_status = unreviewed`;
+- `migration_status = inventory_only`.
+
+O manifesto existe para rastreabilidade e futura importacao controlada. Ele nao e tabela de publicacao, nao autoriza distribuicao e nao substitui a decisao ainda aberta sobre como referencias de origem serao persistidas no modelo de dados.
+
 ## Resumo da primeira passada
 
 Foram inventariados 89 arquivos em ramos claramente educacionais ou de exercicios:
