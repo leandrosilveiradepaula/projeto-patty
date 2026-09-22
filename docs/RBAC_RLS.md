@@ -208,6 +208,8 @@ Nao foram implementadas funcoes nesta fase.
 
 Acoes criticas devem ser auditadas.
 
+Visualizacao ou download administrativo de exames e documentos privados e acao auditavel no MVP. O registro deve conter apenas identificadores internos, acao, data/hora e resultado da autorizacao, sem copiar o conteudo do arquivo. A auditoria deve ocorrer na boundary controlada que autoriza a operacao/gera a signed URL.
+
 Preservar historico.
 
 Nao sobrescrever versoes antigas.
@@ -220,7 +222,7 @@ A futura especificacao de RLS deve incluir testes para provar isolamento entre c
 
 ### QUESTAO ABERTA
 
-Ainda e necessario definir quais acoes sao consideradas criticas para auditoria.
+Ainda e necessario definir as demais acoes consideradas criticas para auditoria. A visualizacao/download administrativo de exames e documentos privados ja esta definida como auditavel.
 
 ## Implementacao BACKEND-A1
 

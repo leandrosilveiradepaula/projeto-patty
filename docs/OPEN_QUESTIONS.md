@@ -204,7 +204,7 @@ Como tratar conta excluida mantendo historico profissional necessario?
 
 ### QUESTAO ABERTA
 
-Quais acoes serao consideradas criticas para auditoria?
+Quais outras acoes, alem de visualizacao/download administrativo de exames e documentos privados, serao consideradas criticas para auditoria?
 
 ## Supabase
 
@@ -212,15 +212,15 @@ Quais acoes serao consideradas criticas para auditoria?
 
 ### QUESTAO ABERTA
 
-Qual sera o limite de tamanho por arquivo?
+Qual sera a quantidade maxima de arquivos por finalidade ou contexto?
 
 ### QUESTAO ABERTA
 
-Quem podera fazer upload de cada tipo de arquivo, por qual fluxo controlado e em que momento o metadado sera criado?
+A Patty tambem precisara de um fluxo administrativo para enviar arquivos em nome da cliente, ou o upload do MVP sera apenas da cliente?
 
 ### QUESTAO ABERTA
 
-Quem podera excluir arquivo, sob quais regras de retencao, arquivamento, anonimizacao e auditoria?
+Qual politica concreta de retencao define quando um arquivo inativado/substituido pode ser removido fisicamente, considerando referencias historicas e auditoria?
 
 ### QUESTAO ABERTA
 

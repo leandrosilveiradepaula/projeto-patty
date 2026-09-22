@@ -99,6 +99,8 @@ Dados reais nao devem ser usados no desenvolvimento inicial.
 
 Toda funcionalidade que exponha dados de clientes deve ser desenhada com verificacao explicita de autorizacao, logs de auditoria e testes de isolamento de acesso.
 
+Para exames e documentos privados, a boundary server-side que autoriza visualizacao/download administrativo e gera a signed URL deve registrar evento de auditoria sem incluir o conteudo do arquivo. O evento deve registrar identificadores internos, acao, timestamp e resultado da autorizacao.
+
 ## Infraestrutura Supabase atual
 
 ### FATO CONFIRMADO DE INFRAESTRUTURA
