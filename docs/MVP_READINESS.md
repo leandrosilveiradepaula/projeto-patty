@@ -7,7 +7,7 @@ Este documento e um mapa operacional do estado atual. Ele nao substitui `MVP.md`
 Estados usados:
 
 - **IMPLEMENTADO**: codigo/schema existe no repositorio e esta integrado ao `master`;
-- **CI VALIDADO**: passou pelo workflow atual de `npm ci`, `npm run typecheck` e `npm run build`;
+- **CI VALIDADO**: passou pelo workflow atual de `npm ci`, `npm run typecheck`, testes determinísticos e `npm run build`;
 - **SAAS VALIDADO**: estado relevante foi conferido no Supabase SaaS;
 - **PARCIAL**: fundacao existe, mas falta fluxo necessario para o MVP;
 - **BLOQUEADO POR DECISAO**: nao implementar sem resposta/documentacao;
@@ -32,7 +32,7 @@ Estados usados:
 - biblioteca educacional e de exercicios em leitura administrativa;
 - liberacao manual de versao publicada de conteudo para cliente;
 - cliente ve conteudos explicitamente liberados;
-- CI de typecheck, testes determinísticos do método e build em pull requests e `master`;
+- CI de typecheck, testes determinísticos do método, testes do lifecycle de protocolo e build em pull requests e `master`;
 - fundacao auditavel de IA e tratamento de falhas no banco;
 - inventario inicial e manifesto machine-readable do Drive sem PII.
 
@@ -61,7 +61,7 @@ Estados usados:
 | Anamnese versionada | leitura IMPLEMENTADA | nota interna append-only | CI VALIDADO | fechar questionario e fluxo de preenchimento |
 | Avaliacoes / medidas | leitura IMPLEMENTADA | acompanhamento profissional append-only | CI VALIDADO | definir catalogo, unidades, obrigatoriedade e correcao |
 | Arquivos privados | leitura/download admin IMPLEMENTADOS | upload/delete nao | SAAS VALIDADO | Patty definir tipos, limites, upload, exclusao e visibilidade da cliente |
-| Protocolos | leitura + lifecycle manual IMPLEMENTADOS | submit/approve/publish | CI + SAAS VALIDADO | criar/editar plano somente quando fluxo profissional estiver formalizado |
+| Protocolos | leitura + lifecycle manual IMPLEMENTADOS | submit/approve/publish | CI + SAAS VALIDADO; lifecycle com guarda determinística testada | criar/editar plano somente quando fluxo profissional estiver formalizado |
 | Plano alimentar publicado | cliente ve variantes, refeicoes, doses e ciclo | nao | CI VALIDADO | equivalentes visiveis continuam abertos |
 | Conteudo educacional | leitura admin/cliente por release IMPLEMENTADA | release manual | CI VALIDADO | taxonomia, autoria/revisao e primeiro lote do Drive |
 | Exercicios | leitura admin IMPLEMENTADA | nao | CI VALIDADO | definir exposicao a cliente e campos finais |
@@ -69,7 +69,7 @@ Estados usados:
 | IA | fundacao de banco IMPLEMENTADA | provider real nao integrado | SAAS VALIDADO | escolher provider/modelo, contrato de output e boundary server-side |
 | Drive | INVENTARIADO | nenhuma migracao fisica | 89 itens no manifesto inicial | revisar direitos/taxonomia e escolher lote inicial |
 | Regras deterministicas do metodo | IMPLEMENTADO PARCIAL | sem automacao de protocolo | CI VALIDADO | ampliar somente com formulas exatas confirmadas/documentadas |
-| CI | IMPLEMENTADO | automatico no GitHub Actions | `npm ci` + typecheck + `test:method` + build | adicionar testes funcionais quando houver cenarios estaveis |
+| CI | IMPLEMENTADO | automatico no GitHub Actions | `npm ci` + typecheck + `test:method` + `test:protocol` + build | adicionar testes funcionais quando houver cenarios estaveis |
 
 ## Regras deterministicas confirmadas
 
@@ -121,6 +121,8 @@ draft
 ```
 
 Submeter nao aprova. Aprovar nao publica. Publicacao depende de aprovacao da mesma versao.
+
+A proxima acao permitida desse lifecycle e derivada por funcao deterministica compartilhada pela UI administrativa e pelas server actions, com cobertura automatizada no CI.
 
 Isso nao autoriza geracao automatica de protocolo nem escolha automatica de fase.
 
