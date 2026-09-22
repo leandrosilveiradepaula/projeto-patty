@@ -113,6 +113,7 @@ npm run test:method
 npm run test:protocol
 npm run test:content
 npm run test:follow-up
+npm run test:validation
 npm run build
 ```
 
