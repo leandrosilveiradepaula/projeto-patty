@@ -54,6 +54,7 @@ export default async function AdminClienteDetailPage({
     },
     {
       description: "Área prevista para histórico de avaliações e reavaliações.",
+      href: `/admin/clientes/${client.id}/avaliacoes`,
       title: "Avaliações",
     },
     {

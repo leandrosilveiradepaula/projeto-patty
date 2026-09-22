@@ -159,3 +159,62 @@ export async function listCurrentClientContentReleases(clientId: string) {
 export async function listContentReleasesForAccessibleClient(clientId: string) {
   return listContentReleasesForClient(clientId);
 }
+
+export async function listAccessibleClientAssessments() {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_assessments")
+    .select("id, client_id, assessed_at, clients(id, profiles(display_name))")
+    .order("assessed_at", { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function getAccessibleClientAssessment(assessmentId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_assessments")
+    .select("id, client_id, assessed_at, clients(id, profiles(display_name))")
+    .eq("id", assessmentId)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function listAccessibleAssessmentsForClient(clientId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_assessments")
+    .select("id, client_id, assessed_at")
+    .eq("client_id", clientId)
+    .order("assessed_at", { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function listAccessibleAssessmentMeasurements(assessmentId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("assessment_measurements")
+    .select("id, assessment_id, measurement_key, measurement_value, unit")
+    .eq("assessment_id", assessmentId)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
