@@ -326,33 +326,23 @@ Qual sera o caminho server-side confiavel para escrita nas entidades internas de
 
 ### QUESTAO ABERTA
 
-Antes da migration que tornar `failure_stage` e `failure_code` obrigatorios em executions `failed`, verificar se ja existem linhas `ai_executions.status = failed` persistidas. Backfill permanece aberto ate conhecer esse estado; nao definir valor retroativo sem evidencia.
-
-### QUESTAO ABERTA
-
 Qual sera a UX e o processo humano para revisao de findings, edicao de follow-up, descarte, eventual transformacao manual em acao e eventual envio a cliente?
 
 ## Metodo profissional
 
-### QUESTAO ABERTA
-
-Quais sao as regras de fases?
+As regras abaixo permanecem abertas somente onde a documentacao ainda nao registra confirmacao da Patty. O fluxo principal, o Reconhecimento Metabolico, as referencias iniciais de macros e doses, o limite do grupo de proteina com maior teor de gordura, o Cutting Dia 1 / Dia 2 e a refeicao livre semanal do Up Metabolico ja estao documentados como confirmados.
 
 ### QUESTAO ABERTA
 
-Quais sao as regras de reconhecimento metabolico?
+Quais sao as formulas e regras definitivas das Fases 5 e 6 da Planilha Carb Cycle?
 
 ### QUESTAO ABERTA
 
-Quais sao as regras de alimentacao?
+Quais etapas, se houver, seguem apos Cutting 2: 2 Low / 1 High?
 
 ### QUESTAO ABERTA
 
-Quais sao as regras de doses?
-
-### QUESTAO ABERTA
-
-Qual e a semantica validada de eventual limite de doses de proteina high-fat, incluindo input, maximo aplicavel e comportamento com doses fracionarias?
+Quais sao as regras detalhadas de Bulking e Consolidacao?
 
 ### QUESTAO ABERTA
 
@@ -360,27 +350,27 @@ Quais sao as regras de hidratacao?
 
 ### QUESTAO ABERTA
 
-Quais sao as regras de suplementacao?
+Quais sao as regras de suplementacao e manipulados?
 
 ### QUESTAO ABERTA
 
-Quais sao as regras de treino?
+Qual sera a montagem e progressao definitiva de treino, incluindo volume, progressao e cardio quando aplicavel?
 
 ### QUESTAO ABERTA
 
-Quais sao as regras de mudanca de fase?
+Quais criterios profissionais determinam avancar, simplificar ou retornar entre etapas alem do fluxo ja confirmado, sem criar score automatico de adesao?
 
 ### QUESTAO ABERTA
 
-Quais sao as regras de avaliacoes?
+Quais sao os criterios profissionais finais de avaliacao e reavaliacao?
 
 ### QUESTAO ABERTA
 
-Quais sao as regras de alertas?
+Quais alertas profissionais devem existir, quais sao apenas informativos e quais, se algum, bloqueiam uma acao?
 
 ### QUESTAO ABERTA
 
-Quais sao as regras de comportamento?
+Quais regras de comportamento ainda precisam ser formalizadas alem do principio confirmado de adaptar o protocolo a dificuldade relatada e priorizar adesao?
 
 ## Cadastro e Anamnese
 
@@ -458,7 +448,7 @@ Quais campos, tipos de protocolo e elementos profissionais compoem um protocolo 
 
 ### QUESTAO ABERTA
 
-Quais regras profissionais definem a criacao, revisao e aprovacao de um plano alimentar, incluindo fases, reconhecimento metabolico, doses, limites, hidratacao, suplementacao, treino, cardio, alertas e comportamento?
+Quais regras profissionais ainda pendentes devem completar a criacao, revisao e aprovacao de um plano alimentar, sem reabrir as regras do metodo ja confirmadas em `BUSINESS_RULES.md` e `DECISIONS.md`?
 
 ### QUESTAO ABERTA
 
