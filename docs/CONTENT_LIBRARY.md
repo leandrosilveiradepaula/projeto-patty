@@ -16,9 +16,15 @@ A biblioteca educacional deve ser separada da biblioteca de exercicios.
 
 ## Migracao gradual
 
+### FATO CONFIRMADO DE LEVANTAMENTO
+
+Uma primeira passada de inventario de metadados do Google Drive foi registrada em `DRIVE_CONTENT_INVENTORY.md`, separando materiais educacionais de exercicios e excluindo deliberadamente pastas client-scoped.
+
+O inventario nao representa autorizacao de migracao ou publicacao.
+
 ### RECOMENDACAO TECNICA
 
-Antes de migrar conteudos para o aplicativo, fazer inventario do Drive e classificar os materiais por tipo, publico, status de revisao, permissao de uso e relacao com protocolos.
+Antes de migrar conteudos para o aplicativo, completar o inventario do Drive e classificar os materiais por tipo, publico, status de revisao, permissao de uso e relacao com protocolos.
 
 Conteudos devem ser publicados no aplicativo apenas apos validacao da Patty quando envolverem orientacoes sensiveis ou metodo profissional.
 
