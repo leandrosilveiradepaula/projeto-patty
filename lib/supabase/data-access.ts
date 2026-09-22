@@ -877,6 +877,15 @@ export type CurrentClientPublishedProtocol = {
   publishedAt: string;
   versionNumber: number;
   mealPlan: {
+    cycles: Array<{
+      id: string;
+      steps: Array<{
+        position: number;
+        variantId: string;
+        variantKey: string;
+        variantLabel: string | null;
+      }>;
+    }>;
     variants: Array<{
       id: string;
       label: string | null;
@@ -949,18 +958,38 @@ export async function listPublishedProtocolsForCurrentClient(
     throw mealPlanVersionsError;
   }
 
-  const mealPlanVersionIds = mealPlanVersions.map((mealPlanVersion) => mealPlanVersion.id);
-  const { data: variants, error: variantsError } = mealPlanVersionIds.length
-    ? await supabase
-        .from("meal_plan_variants")
-        .select("id, meal_plan_version_id, variant_key, label")
-        .in("meal_plan_version_id", mealPlanVersionIds)
-        .order("variant_key", { ascending: true })
-        .order("id", { ascending: true })
-    : { data: [], error: null };
+  const mealPlanVersionIds = mealPlanVersions.map(
+    (mealPlanVersion) => mealPlanVersion.id,
+  );
+  const [
+    { data: variants, error: variantsError },
+    { data: cycles, error: cyclesError },
+  ] = mealPlanVersionIds.length
+    ? await Promise.all([
+        supabase
+          .from("meal_plan_variants")
+          .select("id, meal_plan_version_id, variant_key, label")
+          .in("meal_plan_version_id", mealPlanVersionIds)
+          .order("variant_key", { ascending: true })
+          .order("id", { ascending: true }),
+        supabase
+          .from("meal_plan_cycles")
+          .select("id, meal_plan_version_id")
+          .in("meal_plan_version_id", mealPlanVersionIds)
+          .order("created_at", { ascending: true })
+          .order("id", { ascending: true }),
+      ])
+    : [
+        { data: [], error: null },
+        { data: [], error: null },
+      ];
 
   if (variantsError) {
     throw variantsError;
+  }
+
+  if (cyclesError) {
+    throw cyclesError;
   }
 
   const variantIds = variants.map((variant) => variant.id);
@@ -978,17 +1007,34 @@ export async function listPublishedProtocolsForCurrentClient(
   }
 
   const mealIds = meals.map((meal) => meal.id);
-  const { data: doseAllocations, error: doseAllocationsError } = mealIds.length
-    ? await supabase
-        .from("meal_dose_allocations")
-        .select("id, meal_id, dose_type, dose_quantity")
-        .in("meal_id", mealIds)
-        .order("dose_type", { ascending: true })
-        .order("id", { ascending: true })
-    : { data: [], error: null };
+  const cycleIds = cycles.map((cycle) => cycle.id);
+  const [
+    { data: doseAllocations, error: doseAllocationsError },
+    { data: cycleSteps, error: cycleStepsError },
+  ] = await Promise.all([
+    mealIds.length
+      ? supabase
+          .from("meal_dose_allocations")
+          .select("id, meal_id, dose_type, dose_quantity")
+          .in("meal_id", mealIds)
+          .order("dose_type", { ascending: true })
+          .order("id", { ascending: true })
+      : Promise.resolve({ data: [], error: null }),
+    cycleIds.length
+      ? supabase
+          .from("meal_plan_cycle_steps")
+          .select("cycle_id, variant_id, position")
+          .in("cycle_id", cycleIds)
+          .order("position", { ascending: true })
+      : Promise.resolve({ data: [], error: null }),
+  ]);
 
   if (doseAllocationsError) {
     throw doseAllocationsError;
+  }
+
+  if (cycleStepsError) {
+    throw cycleStepsError;
   }
 
   const protocolsById = new Map(protocols.map((protocol) => [protocol.id, protocol]));
@@ -1002,6 +1048,9 @@ export async function listPublishedProtocolsForCurrentClient(
   const variantsByMealPlanVersionId = new Map<string, typeof variants>();
   const mealsByVariantId = new Map<string, typeof meals>();
   const dosesByMealId = new Map<string, typeof doseAllocations>();
+  const cyclesByMealPlanVersionId = new Map<string, typeof cycles>();
+  const stepsByCycleId = new Map<string, typeof cycleSteps>();
+  const variantsById = new Map(variants.map((variant) => [variant.id, variant]));
 
   for (const variant of variants) {
     const entries = variantsByMealPlanVersionId.get(variant.meal_plan_version_id) ?? [];
@@ -1019,6 +1068,19 @@ export async function listPublishedProtocolsForCurrentClient(
     const entries = dosesByMealId.get(doseAllocation.meal_id) ?? [];
     entries.push(doseAllocation);
     dosesByMealId.set(doseAllocation.meal_id, entries);
+  }
+
+  for (const cycle of cycles) {
+    const entries =
+      cyclesByMealPlanVersionId.get(cycle.meal_plan_version_id) ?? [];
+    entries.push(cycle);
+    cyclesByMealPlanVersionId.set(cycle.meal_plan_version_id, entries);
+  }
+
+  for (const step of cycleSteps) {
+    const entries = stepsByCycleId.get(step.cycle_id) ?? [];
+    entries.push(step);
+    stepsByCycleId.set(step.cycle_id, entries);
   }
 
   return publications.flatMap((publication) => {
@@ -1039,6 +1101,27 @@ export async function listPublishedProtocolsForCurrentClient(
         versionNumber: version.version_number,
         mealPlan: mealPlan
           ? {
+              cycles: (cyclesByMealPlanVersionId.get(mealPlan.id) ?? []).map(
+                (cycle) => ({
+                  id: cycle.id,
+                  steps: (stepsByCycleId.get(cycle.id) ?? []).flatMap((step) => {
+                    const variant = variantsById.get(step.variant_id);
+
+                    if (!variant) {
+                      return [];
+                    }
+
+                    return [
+                      {
+                        position: step.position,
+                        variantId: variant.id,
+                        variantKey: variant.variant_key,
+                        variantLabel: variant.label,
+                      },
+                    ];
+                  }),
+                }),
+              ),
               variants: (variantsByMealPlanVersionId.get(mealPlan.id) ?? []).map(
                 (variant) => ({
                   id: variant.id,
