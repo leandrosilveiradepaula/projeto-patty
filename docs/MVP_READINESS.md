@@ -32,7 +32,7 @@ Estados usados:
 - biblioteca educacional e de exercicios em leitura administrativa;
 - liberacao manual de versao publicada de conteudo para cliente;
 - cliente ve conteudos explicitamente liberados;
-- CI de typecheck e build em pull requests e `master`;
+- CI de typecheck, testes determinísticos do método e build em pull requests e `master`;
 - fundacao auditavel de IA e tratamento de falhas no banco;
 - inventario inicial e manifesto machine-readable do Drive sem PII.
 
@@ -68,7 +68,20 @@ Estados usados:
 | Progresso de conteudo | schema existe | fluxo nao implementado | PARCIAL | definir quem registra abertura/conclusao |
 | IA | fundacao de banco IMPLEMENTADA | provider real nao integrado | SAAS VALIDADO | escolher provider/modelo, contrato de output e boundary server-side |
 | Drive | INVENTARIADO | nenhuma migracao fisica | 89 itens no manifesto inicial | revisar direitos/taxonomia e escolher lote inicial |
-| CI | IMPLEMENTADO | automatico no GitHub Actions | `npm ci` + typecheck + build | adicionar testes funcionais quando houver cenarios estaveis |
+| Regras deterministicas do metodo | IMPLEMENTADO PARCIAL | sem automacao de protocolo | CI VALIDADO | ampliar somente com formulas exatas confirmadas/documentadas |
+| CI | IMPLEMENTADO | automatico no GitHub Actions | `npm ci` + typecheck + `test:method` + build | adicionar testes funcionais quando houver cenarios estaveis |
+
+## Regras deterministicas confirmadas
+
+Ja estao em codigo testavel, sem ligacao automatica com decisao de fase ou publicacao:
+
+- 1 dose de proteina = 15 g;
+- 1 dose de carboidrato = 12 g;
+- 1 dose de gordura = 6 g;
+- limite diario do grupo de proteina com maior teor de gordura = metade das doses totais de proteina, arredondando para cima;
+- referencia inicial geral do Reconhecimento Metabolico = 2 g/kg de proteina, 2 g/kg de carboidrato e 50 g/dia de gordura.
+
+A referencia do Reconhecimento pode ser individualizada. Cutting aproximado, redistribuicao carboidrato/gordura, fases 5/6 e demais regras abertas nao foram codificados.
 
 ## Observacoes por fluxo
 
