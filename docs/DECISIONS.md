@@ -1,5 +1,11 @@
 # Decisoes
 
+## 2026-09-22 - Uso de n8n no MVP
+
+### DECISAO TECNICA
+
+n8n nao sera usado inicialmente no MVP. A ferramenta so deve ser introduzida quando existir uma automacao externa ou orquestracao concreta, documentada e com beneficio claro sobre uma solucao mais simples dentro de Next.js, Vercel e Supabase.
+
 ## 2026-09-22 - Uso de VPS no MVP
 
 ### DECISAO TECNICA
