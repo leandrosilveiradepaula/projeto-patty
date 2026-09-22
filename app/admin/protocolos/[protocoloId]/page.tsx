@@ -11,18 +11,17 @@ import {
   listAccessibleProtocolVersions,
 } from "@/lib/supabase/data-access";
 import { getProtocolLifecycleAction } from "@/lib/protocol/lifecycle";
+import { isUuid } from "@/lib/validation/uuid";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import styles from "./page.module.css";
 
 type AdminProtocoloDetailPageProps = { params: Promise<{ protocoloId: string }> };
 
-const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
 export default async function AdminProtocoloDetailPage({ params }: AdminProtocoloDetailPageProps) {
   const { protocoloId } = await params;
 
-  if (!uuidPattern.test(protocoloId)) notFound();
+  if (!isUuid(protocoloId)) notFound();
 
   const protocol = await getAccessibleProtocol(protocoloId);
 
