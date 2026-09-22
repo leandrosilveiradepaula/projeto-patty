@@ -1,3 +1,5 @@
-.overview { display: grid; gap: var(--space-3); min-width: 0; }
-.overview p { margin: 0; color: var(--color-text-secondary); font-size: var(--text-body-medium-size); line-height: var(--text-body-medium-line-height); overflow-wrap: anywhere; }
-.overview strong { color: var(--color-text-primary); font-family: var(--font-family-heading); font-size: var(--text-title-small-size); font-weight: var(--text-title-small-weight); line-height: var(--text-title-small-line-height); }
+.publications { display: grid; gap: var(--space-8); min-width: 0; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)); gap: var(--space-4); margin: 0; }
+.facts div { display: grid; gap: var(--space-1); min-width: 0; }
+.facts dt { color: var(--color-text-muted); font-size: var(--text-label-small-size); font-weight: var(--text-label-small-weight); line-height: var(--text-label-small-line-height); }
+.facts dd { margin: 0; color: var(--color-text-primary); font-size: var(--text-body-medium-size); line-height: var(--text-body-medium-line-height); overflow-wrap: anywhere; }

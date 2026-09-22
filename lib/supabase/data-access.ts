@@ -319,3 +319,197 @@ export async function listAccessibleProtocolPublications(protocolVersionIds: str
 
   return data;
 }
+
+export type CurrentClientPublishedProtocol = {
+  id: string;
+  protocolType: string;
+  publishedAt: string;
+  versionNumber: number;
+  mealPlan: {
+    variants: Array<{
+      id: string;
+      label: string | null;
+      variantKey: string;
+      meals: Array<{
+        id: string;
+        label: string | null;
+        position: number;
+        doseAllocations: Array<{
+          doseQuantity: number;
+          doseType: string;
+          id: string;
+        }>;
+      }>;
+    }>;
+  } | null;
+};
+
+export async function listPublishedProtocolsForCurrentClient(
+  clientId: string,
+): Promise<CurrentClientPublishedProtocol[]> {
+  const supabase = await createClient();
+  const { data: publications, error: publicationsError } = await supabase
+    .from("protocol_publications")
+    .select("id, protocol_version_id, published_at")
+    .eq("client_id", clientId)
+    .order("published_at", { ascending: false })
+    .order("id", { ascending: true });
+
+  if (publicationsError) {
+    throw publicationsError;
+  }
+
+  const protocolVersionIds = publications.map(
+    (publication) => publication.protocol_version_id,
+  );
+
+  if (protocolVersionIds.length === 0) {
+    return [];
+  }
+
+  const { data: versions, error: versionsError } = await supabase
+    .from("protocol_versions")
+    .select("id, protocol_id, version_number")
+    .eq("client_id", clientId)
+    .in("id", protocolVersionIds);
+
+  if (versionsError) {
+    throw versionsError;
+  }
+
+  const protocolIds = versions.map((version) => version.protocol_id);
+  const { data: protocols, error: protocolsError } = await supabase
+    .from("protocols")
+    .select("id, protocol_type")
+    .eq("client_id", clientId)
+    .in("id", protocolIds);
+
+  if (protocolsError) {
+    throw protocolsError;
+  }
+
+  const { data: mealPlanVersions, error: mealPlanVersionsError } = await supabase
+    .from("meal_plan_versions")
+    .select("id, protocol_version_id")
+    .eq("client_id", clientId)
+    .in("protocol_version_id", protocolVersionIds);
+
+  if (mealPlanVersionsError) {
+    throw mealPlanVersionsError;
+  }
+
+  const mealPlanVersionIds = mealPlanVersions.map((mealPlanVersion) => mealPlanVersion.id);
+  const { data: variants, error: variantsError } = mealPlanVersionIds.length
+    ? await supabase
+        .from("meal_plan_variants")
+        .select("id, meal_plan_version_id, variant_key, label")
+        .in("meal_plan_version_id", mealPlanVersionIds)
+        .order("variant_key", { ascending: true })
+        .order("id", { ascending: true })
+    : { data: [], error: null };
+
+  if (variantsError) {
+    throw variantsError;
+  }
+
+  const variantIds = variants.map((variant) => variant.id);
+  const { data: meals, error: mealsError } = variantIds.length
+    ? await supabase
+        .from("meals")
+        .select("id, meal_plan_variant_id, position, label")
+        .in("meal_plan_variant_id", variantIds)
+        .order("position", { ascending: true })
+        .order("id", { ascending: true })
+    : { data: [], error: null };
+
+  if (mealsError) {
+    throw mealsError;
+  }
+
+  const mealIds = meals.map((meal) => meal.id);
+  const { data: doseAllocations, error: doseAllocationsError } = mealIds.length
+    ? await supabase
+        .from("meal_dose_allocations")
+        .select("id, meal_id, dose_type, dose_quantity")
+        .in("meal_id", mealIds)
+        .order("dose_type", { ascending: true })
+        .order("id", { ascending: true })
+    : { data: [], error: null };
+
+  if (doseAllocationsError) {
+    throw doseAllocationsError;
+  }
+
+  const protocolsById = new Map(protocols.map((protocol) => [protocol.id, protocol]));
+  const versionsById = new Map(versions.map((version) => [version.id, version]));
+  const mealPlansByProtocolVersionId = new Map(
+    mealPlanVersions.map((mealPlanVersion) => [
+      mealPlanVersion.protocol_version_id,
+      mealPlanVersion,
+    ]),
+  );
+  const variantsByMealPlanVersionId = new Map<string, typeof variants>();
+  const mealsByVariantId = new Map<string, typeof meals>();
+  const dosesByMealId = new Map<string, typeof doseAllocations>();
+
+  for (const variant of variants) {
+    const entries = variantsByMealPlanVersionId.get(variant.meal_plan_version_id) ?? [];
+    entries.push(variant);
+    variantsByMealPlanVersionId.set(variant.meal_plan_version_id, entries);
+  }
+
+  for (const meal of meals) {
+    const entries = mealsByVariantId.get(meal.meal_plan_variant_id) ?? [];
+    entries.push(meal);
+    mealsByVariantId.set(meal.meal_plan_variant_id, entries);
+  }
+
+  for (const doseAllocation of doseAllocations) {
+    const entries = dosesByMealId.get(doseAllocation.meal_id) ?? [];
+    entries.push(doseAllocation);
+    dosesByMealId.set(doseAllocation.meal_id, entries);
+  }
+
+  return publications.flatMap((publication) => {
+    const version = versionsById.get(publication.protocol_version_id);
+    const protocol = version ? protocolsById.get(version.protocol_id) : null;
+
+    if (!version || !protocol) {
+      return [];
+    }
+
+    const mealPlan = mealPlansByProtocolVersionId.get(version.id);
+
+    return [
+      {
+        id: publication.id,
+        protocolType: protocol.protocol_type,
+        publishedAt: publication.published_at,
+        versionNumber: version.version_number,
+        mealPlan: mealPlan
+          ? {
+              variants: (variantsByMealPlanVersionId.get(mealPlan.id) ?? []).map(
+                (variant) => ({
+                  id: variant.id,
+                  label: variant.label,
+                  variantKey: variant.variant_key,
+                  meals: (mealsByVariantId.get(variant.id) ?? []).map((meal) => ({
+                    id: meal.id,
+                    label: meal.label,
+                    position: meal.position,
+                    doseAllocations: (dosesByMealId.get(meal.id) ?? []).map(
+                      (doseAllocation) => ({
+                        id: doseAllocation.id,
+                        doseType: doseAllocation.dose_type,
+                        doseQuantity: doseAllocation.dose_quantity,
+                      }),
+                    ),
+                  })),
+                }),
+              ),
+            }
+          : null,
+      },
+    ];
+  });
+}
