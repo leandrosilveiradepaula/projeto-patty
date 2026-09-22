@@ -1,5 +1,20 @@
 # Decisoes
 
+## 2026-09-22 - Visibilidade de arquivos privados para a cliente
+
+### DECISAO DE PRODUTO E SEGURANCA
+
+No MVP, a visibilidade de arquivos privados para a cliente depende da autoria do upload:
+
+- arquivo enviado pela propria cliente fica visivel para ela por padrao;
+- arquivo enviado pela Patty em nome da cliente nao fica visivel automaticamente;
+- a Patty pode liberar explicitamente um arquivo administrativo para a cliente;
+- nenhum arquivo privado se torna publico por causa dessa liberacao.
+
+A visualizacao pela cliente continua exigindo autenticacao, autorizacao e signed URL temporaria. O sistema deve preservar quem enviou o arquivo e, quando houver liberacao administrativa, quem liberou e quando.
+
+A implementacao atual de `client_files` e Storage ainda nao diferencia essa regra de visibilidade por autoria/liberacao. Antes de habilitar upload administrativo em producao, RLS/policies e o fluxo server-side devem impedir que um arquivo enviado pela Patty apareca para a cliente sem liberacao explicita.
+
 ## 2026-09-22 - Sem antimalware dedicado no primeiro MVP
 
 ### DECISAO TECNICA E DE SEGURANCA
@@ -145,7 +160,7 @@ Word, Excel, ZIP, executaveis e qualquer outro formato fora dessa allowlist nao 
 
 A validacao futura de upload deve conferir no servidor a extensao e o tipo real/detectado do arquivo; o nome do arquivo e o `Content-Type` informado pelo cliente nao sao suficientes por si so. Divergencia entre extensao e tipo detectado deve rejeitar o upload.
 
-Esta decisao fecha os formatos aceitos. Decisoes posteriores tambem fecharam limites de tamanho, upload da cliente, imutabilidade/substituicao, exclusao controlada, paths sem PII, validacao em duas etapas, acesso da Patty e validade de signed URLs. Permanecem abertas, entre outros pontos, politica concreta de retencao e visibilidade de arquivos na UI da cliente. O MVP nao tera limite rigido de quantidade de arquivos, a Patty podera fazer upload administrativo em nome da cliente e nao havera antimalware dedicado no primeiro MVP.
+Esta decisao fecha os formatos aceitos. Decisoes posteriores tambem fecharam limites de tamanho, upload da cliente, imutabilidade/substituicao, exclusao controlada, paths sem PII, validacao em duas etapas, acesso da Patty e validade de signed URLs. Permanece aberta, entre outros pontos, a politica concreta de retencao. A visibilidade para a cliente ja esta definida por autoria/liberacao: uploads da propria cliente ficam visiveis por padrao; uploads administrativos da Patty exigem liberacao explicita. O MVP nao tera limite rigido de quantidade de arquivos, a Patty podera fazer upload administrativo em nome da cliente e nao havera antimalware dedicado no primeiro MVP.
 
 ## 2026-09-22 - Gestao de assignments no MVP
 
@@ -258,8 +273,7 @@ Decisoes posteriores passaram a definir upload da cliente, limites de tamanho, i
 
 Continuam abertos nesta area:
 
-- politica concreta de retencao e hard delete;
-- quais fotos, exames ou documentos devem ser exibidos na UI da cliente.
+- politica concreta de retencao e hard delete.
 
 ## 2026-09-22 - Reconciliacao documental das regras confirmadas do metodo
 

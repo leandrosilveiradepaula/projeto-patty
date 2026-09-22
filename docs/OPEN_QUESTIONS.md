@@ -206,10 +206,6 @@ Quais outras acoes, alem de visualizacao/download administrativo de exames e doc
 
 Qual politica concreta de retencao define quando um arquivo inativado/substituido pode ser removido fisicamente, considerando referencias historicas e auditoria?
 
-### QUESTAO ABERTA
-
-Quais tipos de arquivo privados podem ser visualizados pela cliente e quais permanecem exclusivamente administrativos?
-
 ## Avaliacoes e acompanhamento
 
 ### QUESTAO ABERTA

@@ -271,6 +271,8 @@ Clientes nao possuem permissoes para criar, alterar, excluir ou publicar definic
 
 `client_files` possui RLS propria, separada de `storage.objects`. Na implementacao atual, cliente autenticada le somente metadados e objetos privados vinculados ao proprio `clients.profile_id`; Patty/admin le somente com role relacional `admin` e assignment ativo. `anon`, usuario sem vinculo, admin sem assignment e assignment encerrado nao recebem acesso.
 
+A regra de produto posterior exige granularidade adicional para a cliente: arquivos enviados pela propria cliente ficam visiveis por padrao, enquanto arquivos enviados administrativamente pela Patty devem permanecer ocultos ate liberacao explicita. A RLS/policy atual nao representa essa distincao por autoria/liberacao e precisa ser reconciliada antes de o upload administrativo ser disponibilizado.
+
 Essa descricao e fato de implementacao, mas esta parcialmente desalinhada com a decisao posterior de produto: a Patty deve manter acesso aos arquivos privados mesmo sem assignment ativo. A RLS de `client_files`, a policy correspondente de `storage.objects` e as rotas server-side de arquivo precisam ser reconciliadas antes de a decisao ser considerada implementada.
 
 A policy de `storage.objects` restringe explicitamente o bucket `client-private` e exige correspondencia com metadado autorizado em `client_files`. Nao ha policy geral para `authenticated` no bucket inteiro, nem grant de INSERT, UPDATE ou DELETE para arquivos nesta etapa.

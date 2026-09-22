@@ -113,7 +113,9 @@ A Patty devera manter acesso aos arquivos mesmo sem assignment ativo, e signed U
 
 Visualizacao e download administrativos de exames/documentos deverao gerar evento de auditoria sem conteudo do arquivo. Esse requisito esta decidido, mas ainda precisa ser implementado junto da reconciliacao das rotas/RLS de arquivos.
 
-O MVP nao tera limite rigido de quantidade de arquivos. A Patty tambem podera enviar arquivos em nome da cliente por fluxo administrativo server-side controlado, com autoria administrativa explicita. O primeiro MVP nao tera antimalware dedicado; esse risco permanece mitigado por allowlist fechada, validacao de tipo real, limites de tamanho, Storage privado e ausencia de execucao. Permanecem abertos politica concreta de retencao/hard delete e visibilidade da cliente.
+O MVP nao tera limite rigido de quantidade de arquivos. A Patty tambem podera enviar arquivos em nome da cliente por fluxo administrativo server-side controlado, com autoria administrativa explicita. Arquivos enviados pela cliente ficam visiveis para ela por padrao; uploads da Patty ficam ocultos ate liberacao explicita. O primeiro MVP nao tera antimalware dedicado; esse risco permanece mitigado por allowlist fechada, validacao de tipo real, limites de tamanho, Storage privado e ausencia de execucao.
+
+A RLS/policy atual ainda nao diferencia visibilidade por autoria/liberacao, portanto essa reconciliacao e bloqueio de seguranca antes de habilitar upload administrativo. Permanece aberta a politica concreta de retencao/hard delete.
 
 ### Acompanhamento profissional
 

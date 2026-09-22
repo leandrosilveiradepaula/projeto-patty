@@ -91,6 +91,8 @@ A cliente autenticada podera enviar bytes diretamente ao Supabase Storage sob gr
 
 A Patty tambem podera enviar arquivos em nome da cliente, mas por fluxo administrativo server-side controlado. Esse fluxo deve registrar autoria administrativa e nunca atribuir o envio a cliente. As mesmas validacoes de formato, tamanho, path sem PII e imutabilidade se aplicam.
 
+Na camada de visibilidade, uploads feitos pela propria cliente ficam disponiveis para ela por padrao. Uploads administrativos feitos pela Patty permanecem ocultos para a cliente ate liberacao explicita. A liberacao nao torna o objeto publico: acesso continua autenticado e por signed URL temporaria. A implementacao deve preservar autoria do upload e autoria/timestamp da liberacao.
+
 Signed URLs sao temporarias, nao persistidas e terao validade de 5 minutos. No MVP, a Patty podera acessar arquivos privados mesmo sem assignment ativo; esta excecao e especifica para arquivos e nao altera a regra geral de autorizacao dos demais dados client-scoped.
 
 O primeiro MVP nao usara servico dedicado de antivirus/antimalware. Essa simplificacao depende de manter allowlist fechada, validacao de tipo real, limites de tamanho, Storage privado e ausencia de execucao de arquivos. A necessidade deve ser reavaliada se o escopo ou o risco dos uploads aumentar.
