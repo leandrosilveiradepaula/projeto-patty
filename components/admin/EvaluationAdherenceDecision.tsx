@@ -2,20 +2,24 @@ import type { HTMLAttributes } from "react";
 import styles from "./EvaluationAdherenceDecision.module.css";
 
 export type EvaluationAdherenceDecisionProps = HTMLAttributes<HTMLElement> & {
+  adherencePerception?: string;
   clientDifficulty?: string;
   decision?: string;
-  professionalObservation?: string;
+  decisionReason?: string;
 };
 
 export function EvaluationAdherenceDecision({
+  adherencePerception,
   className,
   clientDifficulty,
   decision,
-  professionalObservation,
+  decisionReason,
   ...props
 }: EvaluationAdherenceDecisionProps) {
   const classNames = [styles.record, className ?? ""].filter(Boolean).join(" ");
-  const hasRecord = Boolean(clientDifficulty || professionalObservation || decision);
+  const hasRecord = Boolean(
+    adherencePerception || clientDifficulty || decision || decisionReason,
+  );
 
   if (!hasRecord) {
     return (
@@ -36,16 +40,22 @@ export function EvaluationAdherenceDecision({
             <dd>{clientDifficulty}</dd>
           </div>
         ) : null}
-        {professionalObservation ? (
+        {adherencePerception ? (
           <div className={styles.item}>
-            <dt>Observação da Patty</dt>
-            <dd>{professionalObservation}</dd>
+            <dt>Percepção de adesão registrada</dt>
+            <dd>{adherencePerception}</dd>
           </div>
         ) : null}
         {decision ? (
           <div className={styles.item}>
             <dt>Decisão profissional</dt>
             <dd className={styles.decision}>{decision}</dd>
+          </div>
+        ) : null}
+        {decisionReason ? (
+          <div className={styles.item}>
+            <dt>Motivo da decisão</dt>
+            <dd>{decisionReason}</dd>
           </div>
         ) : null}
       </dl>
