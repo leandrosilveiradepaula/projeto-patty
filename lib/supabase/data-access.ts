@@ -219,6 +219,59 @@ export async function listAccessibleAssessmentMeasurements(assessmentId: string)
   return data;
 }
 
+
+export async function listAccessibleAssessmentPhotoFiles(assessmentId: string) {
+  const supabase = await createClient();
+  const { data: links, error: linksError } = await supabase
+    .from("assessment_files")
+    .select("client_file_id")
+    .eq("assessment_id", assessmentId);
+
+  if (linksError) {
+    throw linksError;
+  }
+
+  const fileIds = links.map((link) => link.client_file_id);
+
+  if (fileIds.length === 0) {
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from("client_files")
+    .select("id, file_kind, original_filename, mime_type, byte_size, created_at")
+    .in("id", fileIds)
+    .eq("file_kind", "photo")
+    .order("created_at", { ascending: true })
+    .order("id", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function listAccessibleProfessionalFollowUpsForAssessment(
+  assessmentId: string,
+) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("professional_follow_ups")
+    .select(
+      "id, assessment_id, difficulty, adherence_perception, patty_observation, professional_decision, decision_reason, recorded_at",
+    )
+    .eq("assessment_id", assessmentId)
+    .order("recorded_at", { ascending: true })
+    .order("id", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
 export async function listExerciseVersionsVisibleToCurrentAdmin() {
   const supabase = await createClient();
   const { data, error } = await supabase
