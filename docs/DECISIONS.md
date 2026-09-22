@@ -1,5 +1,21 @@
 # Decisoes
 
+## 2026-09-22 - Ambientes, MFA administrativo e onboarding de clientes
+
+### DECISAO TECNICA/PRODUTO
+
+No MVP, o projeto tera somente dois ambientes operacionais definidos: desenvolvimento e producao. Nao sera criado ambiente de staging neste momento. Um terceiro ambiente so deve ser introduzido se surgir necessidade concreta e documentada.
+
+### DECISAO DE SEGURANCA
+
+MFA sera obrigatorio para contas administrativas, incluindo Patty/admin.
+
+### DECISAO DE PRODUTO E SEGURANCA
+
+A criacao de conta de cliente no MVP sera somente por convite ou ativacao controlada. Nao havera cadastro publico/autonomo de clientes.
+
+Esta decisao nao fecha ainda os detalhes operacionais de envio do convite, expiracao, reenvio, ativacao, recuperacao ou encerramento de conta.
+
 ## 2026-09-22 - Fluxos humanos de escrita ja operacionais
 
 ### FATO CONFIRMADO DE IMPLEMENTACAO
