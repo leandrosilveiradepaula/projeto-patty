@@ -34,6 +34,13 @@ A fundacao backend ja existe para:
 
 A aplicacao ja possui leitura real do backend em areas administrativas e da cliente. Entre os fluxos atualmente conectados estao clientes atribuidos, Cadastro Atual, Anamnese, avaliacoes, protocolos, conteudos, exercicios e leitura administrativa de arquivos privados.
 
+Regras matematicas confirmadas do metodo ja com implementacao deterministica e testes incluem:
+- conversoes de doses de proteina, carboidrato e gordura;
+- limite do grupo de proteina com maior teor de gordura;
+- referencia inicial geral de macros do Reconhecimento Metabolico.
+
+Esses calculos nao escolhem fase, nao montam protocolo automaticamente e podem ser individualizados onde a regra documentada permitir.
+
 Fluxos de escrita humana ja conectados e protegidos pelas RLS existentes incluem:
 - notas append-only de revisao da Anamnese;
 - acompanhamento profissional append-only de avaliacao;
@@ -99,6 +106,7 @@ O repositorio executa em GitHub Actions:
 ```text
 npm ci
 npm run typecheck
+npm run test:method
 npm run build
 ```
 
