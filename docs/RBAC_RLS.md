@@ -119,6 +119,8 @@ Nao tratar simplesmente `role = admin` como autorizacao irrestrita para todos os
 
 Excecao vigente no MVP: para `client_files` e os objetos correspondentes no Storage privado, a Patty pode acessar os arquivos sem assignment ativo. Essa excecao e especifica para arquivos e para o modelo atual de uma unica admin; nao deve ser copiada para outras tabelas client-scoped.
 
+A Patty tambem podera criar uploads administrativos de arquivos em nome da cliente por boundary server-side controlada, com autoria administrativa registrada. O browser nao deve receber escrita privilegiada irrestrita em `client_files` ou `storage.objects`, e o fluxo nao pode mascarar o ator real do upload.
+
 Essa arquitetura protege contra ampliacao acidental de acesso quando futuramente existirem outros profissionais.
 
 ## User roles e client assignments
