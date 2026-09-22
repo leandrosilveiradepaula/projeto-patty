@@ -1,5 +1,15 @@
 # Decisoes
 
+## 2026-09-22 - Unica administradora/profissional de negocio no MVP
+
+### DECISAO DE PRODUTO E SEGURANCA
+
+No MVP, a Patty sera a unica administradora/profissional de negocio com acesso administrativo aos dados das clientes. Nao serao criados papeis operacionais para assistentes, profissionais parceiros ou suporte nesta primeira versao.
+
+Acesso tecnico ao repositorio, infraestrutura ou operacao da plataforma nao constitui papel de negocio dentro da aplicacao e nao deve, por si so, conceder acesso client-scoped na interface ou contornar RLS.
+
+Novos papeis de negocio so devem ser introduzidos quando houver necessidade operacional concreta, com permissoes e escopo definidos antes da implementacao.
+
 ## 2026-09-22 - Metodo principal de login
 
 ### DECISAO DE PRODUTO E SEGURANCA
