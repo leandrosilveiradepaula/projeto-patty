@@ -56,10 +56,6 @@ Quais permissoes futuras esses profissionais terao?
 
 ### QUESTAO ABERTA
 
-Havera necessidade real de VPS na primeira versao operacional?
-
-### QUESTAO ABERTA
-
 Quais automacoes justificarao n8n?
 
 ### QUESTAO ABERTA

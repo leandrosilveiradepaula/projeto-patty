@@ -1,5 +1,11 @@
 # Decisoes
 
+## 2026-09-22 - Uso de VPS no MVP
+
+### DECISAO TECNICA
+
+A VPS Hostinger nao sera usada na primeira versao operacional do MVP enquanto Vercel e Supabase atenderem aos requisitos confirmados. Ela so deve ser introduzida se surgir necessidade tecnica concreta e documentada que exija processo persistente, worker, servico de longa duracao ou componente que nao se encaixe adequadamente na arquitetura atual.
+
 ## 2026-09-22 - Ambientes, MFA administrativo e onboarding de clientes
 
 ### DECISAO TECNICA/PRODUTO
