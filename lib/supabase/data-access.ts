@@ -395,6 +395,25 @@ export async function getAccessiblePhotoFileForAdminViewing(fileId: string) {
 }
 
 
+export async function listCurrentClientFiles(clientId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_files")
+    .select(
+      "id, client_id, file_kind, original_filename, mime_type, byte_size, created_at",
+    )
+    .eq("client_id", clientId)
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+
 export async function listAccessibleClientFiles(clientId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
