@@ -1,5 +1,17 @@
 # Decisoes
 
+## 2026-09-22 - Upload administrativo de arquivos pela Patty
+
+### DECISAO DE PRODUTO, SEGURANCA E AUDITORIA
+
+No MVP, a Patty podera enviar fotos, exames e documentos em nome da cliente por um fluxo administrativo server-side controlado.
+
+O sistema deve registrar explicitamente a autoria administrativa do upload; um arquivo enviado pela Patty nao pode ser apresentado no historico como se tivesse sido enviado pela cliente.
+
+O fluxo administrativo deve respeitar a mesma allowlist de formatos, os mesmos limites de tamanho, paths sem PII, imutabilidade dos objetos e validacao em duas etapas definidos para uploads privados.
+
+A autorizacao da operacao segue a excecao ja confirmada para arquivos privados: no MVP, a Patty pode acessar e administrar esses arquivos mesmo sem assignment ativo. Nenhuma chave secreta deve ser exposta ao browser.
+
 ## 2026-09-22 - Sem limite rigido de quantidade de arquivos no MVP
 
 ### DECISAO DE PRODUTO
@@ -61,7 +73,7 @@ No MVP, a cliente autenticada podera enviar os bytes diretamente do browser para
 
 O upload deve ficar rigidamente limitado por grants/policies/RLS ao espaco autorizado da propria cliente. O caminho e os identificadores aceitos pelo Storage devem ser gerados ou validados pelo sistema; o browser nao recebe liberdade para gravar em paths arbitrarios.
 
-O registro de metadados e o vinculo do objeto ao recurso de negocio continuam sujeitos a validacao server-side e RLS. Esta decisao autoriza o fluxo da cliente; eventual upload administrativo pela Patty continua fora desta decisao.
+O registro de metadados e o vinculo do objeto ao recurso de negocio continuam sujeitos a validacao server-side e RLS. Esta decisao autoriza o fluxo da cliente. Decisao posterior tambem autorizou upload administrativo pela Patty por boundary server-side controlada, com autoria administrativa explicita.
 
 ## 2026-09-22 - Exclusao controlada de arquivos privados
 
@@ -121,7 +133,7 @@ Word, Excel, ZIP, executaveis e qualquer outro formato fora dessa allowlist nao 
 
 A validacao futura de upload deve conferir no servidor a extensao e o tipo real/detectado do arquivo; o nome do arquivo e o `Content-Type` informado pelo cliente nao sao suficientes por si so. Divergencia entre extensao e tipo detectado deve rejeitar o upload.
 
-Esta decisao fecha os formatos aceitos. Decisoes posteriores tambem fecharam limites de tamanho, upload da cliente, imutabilidade/substituicao, exclusao controlada, paths sem PII, validacao em duas etapas, acesso da Patty e validade de signed URLs. Permanecem abertas, entre outros pontos, eventual upload administrativo pela Patty, politica concreta de retencao, analise antimalware e visibilidade de arquivos na UI da cliente. O MVP nao tera limite rigido de quantidade de arquivos.
+Esta decisao fecha os formatos aceitos. Decisoes posteriores tambem fecharam limites de tamanho, upload da cliente, imutabilidade/substituicao, exclusao controlada, paths sem PII, validacao em duas etapas, acesso da Patty e validade de signed URLs. Permanecem abertas, entre outros pontos, politica concreta de retencao, analise antimalware e visibilidade de arquivos na UI da cliente. O MVP nao tera limite rigido de quantidade de arquivos, e a Patty podera fazer upload administrativo em nome da cliente.
 
 ## 2026-09-22 - Gestao de assignments no MVP
 
@@ -234,7 +246,6 @@ Decisoes posteriores passaram a definir upload da cliente, limites de tamanho, i
 
 Continuam abertos nesta area:
 
-- eventual upload administrativo pela Patty;
 - politica concreta de retencao e hard delete;
 - analise de arquivos maliciosos;
 - quais fotos, exames ou documentos devem ser exibidos na UI da cliente.
