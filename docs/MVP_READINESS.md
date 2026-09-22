@@ -60,7 +60,7 @@ Estados usados:
 | Cadastro Atual | leitura IMPLEMENTADA | nao | CI VALIDADO | definir quem pode alterar cada campo e auditoria |
 | Anamnese versionada | leitura IMPLEMENTADA | nota interna append-only | CI VALIDADO | fechar questionario e fluxo de preenchimento |
 | Avaliacoes / medidas | leitura IMPLEMENTADA | acompanhamento profissional append-only | CI VALIDADO; conjunto de decisoes profissionais tipado e testado | definir catalogo, unidades, obrigatoriedade e correcao |
-| Arquivos privados | leitura/download admin IMPLEMENTADOS | upload/delete nao | SAAS VALIDADO | Patty definir tipos, limites, upload, exclusao e visibilidade da cliente |
+| Arquivos privados | leitura/download admin IMPLEMENTADOS | upload/delete nao | SAAS VALIDADO; IDs malformados rejeitados antes de lookup | Patty definir tipos, limites, upload, exclusao e visibilidade da cliente |
 | Protocolos | leitura + lifecycle manual IMPLEMENTADOS | submit/approve/publish | CI + SAAS VALIDADO; lifecycle com guarda determinística testada | criar/editar plano somente quando fluxo profissional estiver formalizado |
 | Plano alimentar publicado | cliente ve variantes, refeicoes, doses e ciclo | nao | CI VALIDADO | equivalentes visiveis continuam abertos |
 | Conteudo educacional | leitura admin/cliente por release IMPLEMENTADA | release manual | CI VALIDADO; elegibilidade de release testada | taxonomia, autoria/revisao e primeiro lote do Drive |
@@ -69,7 +69,7 @@ Estados usados:
 | IA | fundacao de banco IMPLEMENTADA | provider real nao integrado | SAAS VALIDADO | escolher provider/modelo, contrato de output e boundary server-side |
 | Drive | INVENTARIADO | nenhuma migracao fisica | 89 itens no manifesto inicial | revisar direitos/taxonomia e escolher lote inicial |
 | Regras deterministicas do metodo | IMPLEMENTADO PARCIAL | sem automacao de protocolo | CI VALIDADO | ampliar somente com formulas exatas confirmadas/documentadas |
-| CI | IMPLEMENTADO | automatico no GitHub Actions | `npm ci` + typecheck + `test:method` + `test:protocol` + `test:content` + `test:follow-up` + build | adicionar testes funcionais quando houver cenarios estaveis |
+| CI | IMPLEMENTADO | automatico no GitHub Actions | `npm ci` + typecheck + `test:method` + `test:protocol` + `test:content` + `test:follow-up` + `test:validation` + build | adicionar testes funcionais quando houver cenarios estaveis |
 
 ## Regras deterministicas confirmadas
 
@@ -104,7 +104,8 @@ Ja existe:
 
 - leitura administrativa sob assignment ativo;
 - foto de avaliacao por rota server-side autorizada;
-- download administrativo por signed URL curta, nao persistida.
+- download administrativo por signed URL curta, nao persistida;
+- rejeicao deterministica de identificadores de arquivo malformados antes de consulta ao banco.
 
 Nao existe upload porque regras de produto sobre tipo, tamanho, quantidade, substituicao, exclusao, MIME e visibilidade da cliente ainda nao estao fechadas.
 
