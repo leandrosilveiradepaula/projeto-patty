@@ -1,11 +1,14 @@
+import { ClientContentReleaseForm } from "@/components/admin/ClientContentReleaseForm";
 import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
 import { ContentListItem } from "@/components/admin/ContentListItem";
 import { Badge } from "@/components/ui/Badge";
+import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Section } from "@/components/ui/Section";
 import {
   getAccessibleClient,
   listContentReleasesForAccessibleClient,
+  listEducationalContentVersionsForCurrentAdmin,
 } from "@/lib/supabase/data-access";
 import { notFound } from "next/navigation";
 import styles from "./page.module.css";
@@ -39,7 +42,20 @@ export default async function AdminClientContentPage({
     notFound();
   }
 
-  const releases = await listContentReleasesForAccessibleClient(client.id);
+  const [releases, contentVersions] = await Promise.all([
+    listContentReleasesForAccessibleClient(client.id),
+    listEducationalContentVersionsForCurrentAdmin(),
+  ]);
+  const releasedVersionIds = new Set(
+    releases.flatMap((release) =>
+      release.educational_content_versions?.id
+        ? [release.educational_content_versions.id]
+        : [],
+    ),
+  );
+  const availableVersions = contentVersions.filter(
+    (version) => version.published_at && !releasedVersionIds.has(version.id),
+  );
   const displayName = client.profiles?.display_name?.trim();
 
   return (
@@ -60,6 +76,28 @@ export default async function AdminClientContentPage({
           </span>
         }
       />
+      <Section
+        description="Liberação manual de uma versão publicada específica. Nenhuma fase libera conteúdo automaticamente."
+        title="Liberar conteúdo"
+      >
+        {availableVersions.length === 0 ? (
+          <EmptyState
+            description="Não há versão publicada disponível para uma nova liberação nesta cliente."
+            title="Nenhum conteúdo disponível para liberar"
+          />
+        ) : (
+          <Card>
+            <ClientContentReleaseForm
+              clientId={client.id}
+              options={availableVersions.map((version) => ({
+                id: version.id,
+                title: version.title,
+                versionNumber: version.version_number,
+              }))}
+            />
+          </Card>
+        )}
+      </Section>
       <Section
         description="Versões liberadas para esta cliente e fatos registrados de abertura e conclusão."
         title="Conteúdos liberados"
