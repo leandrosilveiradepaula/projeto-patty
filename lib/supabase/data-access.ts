@@ -543,7 +543,7 @@ export async function listAccessibleProtocolVersions(protocolId: string) {
   const { data, error } = await supabase
     .from("protocol_versions")
     .select(
-      "id, protocol_id, client_id, version_number, based_on_version_id, submitted_for_review_at, created_at",
+      "id, protocol_id, client_id, version_number, created_by_profile_id, based_on_version_id, submitted_for_review_at, created_at",
     )
     .eq("protocol_id", protocolId)
     .order("version_number", { ascending: false })
@@ -554,6 +554,85 @@ export async function listAccessibleProtocolVersions(protocolId: string) {
   }
 
   return data;
+}
+
+
+export async function getAccessibleProtocolVersion(
+  protocolId: string,
+  protocolVersionId: string,
+) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("protocol_versions")
+    .select(
+      "id, protocol_id, client_id, version_number, created_by_profile_id, submitted_for_review_at",
+    )
+    .eq("protocol_id", protocolId)
+    .eq("id", protocolVersionId)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function submitAccessibleProtocolVersionForReview(
+  protocolId: string,
+  protocolVersionId: string,
+) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("protocol_versions")
+    .update({ submitted_for_review_at: new Date().toISOString() })
+    .eq("protocol_id", protocolId)
+    .eq("id", protocolVersionId)
+    .is("submitted_for_review_at", null)
+    .select("id")
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return Boolean(data);
+}
+
+export async function createAccessibleProtocolVersionApproval(input: {
+  approvedByProfileId: string;
+  clientId: string;
+  protocolVersionId: string;
+}) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("protocol_version_approvals").insert({
+    approved_by_profile_id: input.approvedByProfileId,
+    client_id: input.clientId,
+    protocol_version_id: input.protocolVersionId,
+  });
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function createAccessibleProtocolPublication(input: {
+  approvalId: string;
+  clientId: string;
+  protocolVersionId: string;
+  publishedByProfileId: string;
+}) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("protocol_publications").insert({
+    approval_id: input.approvalId,
+    client_id: input.clientId,
+    protocol_version_id: input.protocolVersionId,
+    published_by_profile_id: input.publishedByProfileId,
+  });
+
+  if (error) {
+    throw error;
+  }
 }
 
 export async function listAccessibleProtocolVersionApprovals(protocolVersionIds: string[]) {
