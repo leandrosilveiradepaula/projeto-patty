@@ -6,10 +6,6 @@ Este documento concentra pontos ainda nao definidos. Cada item deve ser validado
 
 ### QUESTAO ABERTA
 
-Havera outros papeis administrativos alem da Patty, como assistentes, profissionais parceiros ou suporte operacional?
-
-### QUESTAO ABERTA
-
 Como serao os detalhes operacionais de convite, ativacao, recuperacao e encerramento de conta de clientes, considerando que o MVP nao tera cadastro publico/autonomo?
 
 ### QUESTAO ABERTA
@@ -40,13 +36,9 @@ Como sera criado/bootstrap do primeiro admin Patty?
 
 Quem pode criar, alterar ou encerrar assignments?
 
-### QUESTAO ABERTA
+### QUESTAO ABERTA POS-MVP
 
-Existirao outros profissionais no MVP ou somente Patty?
-
-### QUESTAO ABERTA
-
-Quais permissoes futuras esses profissionais terao?
+Se futuramente forem introduzidos assistentes, profissionais parceiros ou suporte operacional, quais papeis e permissoes client-scoped serao necessarios?
 
 ## Arquitetura e automacoes
 
