@@ -4,14 +4,6 @@
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
 }
 
-.pendingList {
-  display: grid;
-  gap: var(--space-4);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
 .supportGrid {
   display: grid;
   gap: var(--space-4);
@@ -40,6 +32,12 @@
   font-size: var(--text-body-medium-size);
   line-height: var(--text-body-medium-line-height);
   overflow-wrap: anywhere;
+}
+
+.areaActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
 }
 
 .areaLink {
