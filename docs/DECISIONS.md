@@ -22,6 +22,14 @@ Cada execucao futura deve registrar referencias das fontes usadas, sem duplicar 
 
 O historico de IA deve ser preservado junto ao historico da cliente, sem exclusao automatica: referencias de fontes, instrucao/prompt, modelo, provider, saida original, versoes editadas, autoria, timestamps e decisoes de aprovacao ou rejeicao quando aplicaveis. Essa decisao nao define politica legal geral de retencao.
 
+### DECISAO TECNICA APROVADA PARA FUNDACAO
+
+A fundacao futura usa `ai_prompt_versions`, `ai_executions`, `ai_execution_outputs`, `ai_execution_sources`, `ai_draft_versions` e `ai_hypotheses`. Sao entidades internas: a cliente nao as acessa. Prompts sao imutaveis e criados por deploy ou processo administrativo controlado, sem UI de gerenciamento na primeira versao.
+
+`ai_executions` registra lifecycle e metadados da execucao, mas nao a saida original. `ai_execution_outputs` preserva essa saida em relacao 1:1 imutavel e pode nao existir quando a execucao esta em andamento ou falhou. Versoes de rascunho da Patty sao append-only; eventual descarte pode alterar somente metadata restrita, nunca o conteudo da versao.
+
+As fontes de uma execucao usam FKs concretas mutuamente exclusivas, e nao uma referencia generica por tipo e UUID. A fundacao deve carregar `client_id` nas entidades internas client-scoped e validar propriedade da fonte por constraints compostas e validacoes estreitas na migration futura.
+
 ### DECISAO DE PRODUTO CONFIRMADA
 
 A saida original da IA, cada versao editada pela Patty, a versao aprovada e a publicacao sao artefatos distintos. Nenhuma versao anterior deve ser sobrescrita silenciosamente. A rejeicao ou o descarte de uma analise/rascunho pode registrar motivo, mas esse motivo e opcional.
@@ -31,6 +39,8 @@ Antes de gerar um rascunho, a Patty escolhe a fase/protocolo do metodo. A IA nao
 Quando faltar uma regra profissional confirmada, a IA pode apresentar sugestao provisoria marcada como HIPOTESE. A hipotese nao vira regra do metodo, nao pode ser baseada em exemplo historico individual como regra geral e exige confirmacao explicita da Patty antes de aprovacao ou publicacao. Uma aprovacao geral de protocolo nao pode ocultar hipotese pendente.
 
 Cliente nao acessa analises da IA, hipoteses, rascunhos, versoes internas ou comentarios internos da Patty. Ve somente conteudo aprovado/publicado para ela.
+
+`protocol_versions` continua sendo versao de protocolo e nunca rascunho de IA. A futura materializacao de um rascunho de IA deve usar entidade de ligacao propria, sem alterar agora a semantica de `protocol_versions`.
 
 ## 2026-09-22 - Limites confirmados para fundacao futura de IA
 

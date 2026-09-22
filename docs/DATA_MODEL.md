@@ -424,9 +424,74 @@ dado original
 
 A demonstracao de revisao de Anamnese usa o campo `aiAnalysis` em `lib/demo/anamnesis.ts`. Esse conteudo nao possui entidade persistente, RLS ou auditoria real e nao define contrato de IA.
 
+### MODELO TECNICO APROVADO PARA FUNDACAO
+
+Ainda nao existe modelo fisico implementado para IA. O desenho abaixo e uma decisao tecnica para uma migration futura; nao cria entidades, RLS, grants, triggers ou auditoria generica nesta etapa.
+
+#### `ai_prompt_versions`
+
+Mantem `prompt_key`, `version_number`, instrucao/conteudo e `created_at`. Cada versao e imutavel e identificada por `unique (prompt_key, version_number)`. Ela e criada por deploy ou processo administrativo controlado, sem UI de gerenciamento na v1.
+
+#### `ai_executions`
+
+Mantem `client_id`, `purpose_key`, `prompt_version_id`, `initiated_by_profile_id`, provider, modelo, lifecycle/status, timestamps e motivo opcional de descarte. A linha representa a execucao e pode passar por transicoes de lifecycle controladas; ela nao contem output original e nao deve ser tratada como integralmente imutavel.
+
+#### `ai_execution_outputs`
+
+Mantem `execution_id`, `content jsonb` e `created_at`, em relacao 1:1 com `ai_executions`. E a saida original imutavel da IA. Pode nao existir quando a execucao ainda esta em andamento ou falhou.
+
+#### `ai_execution_sources`
+
+Mantem `execution_id`, `client_id`, `source_kind` e FKs concretas nullable para a fonte efetivamente usada. Uma unica tabela usa `CHECK` para exigir exatamente um formato de fonte por linha; nao usa `source_type + source_id` generico sem FK.
+
+As fontes previstas sao `anamnesis_answers`, `assessment_measurements`, `client_files`, `protocol_versions` e `professional_follow_ups`. Para foto de avaliacao/evolucao, a fonte enviada e o `client_file` selecionado; `assessment_files` continua sendo somente a relacao existente entre arquivo e avaliacao quando aplicavel, sem duplicar a referencia de fonte.
+
+#### `ai_draft_versions`
+
+Mantem `execution_id`, `client_id`, `version_number`, `based_on_draft_version_id`, conteudo, `created_by_profile_id`, `created_at` e metadata opcional de descarte. O conteudo e o versionamento sao append-only: nenhuma versao anterior e sobrescrita. A versao 1 e a primeira edicao humana baseada no output original; cada edicao posterior cria uma nova linha. Se houver descarte, somente sua metadata pode sofrer transicao restrita, sem editar o conteudo.
+
+#### `ai_hypotheses`
+
+Mantem `execution_id`, `client_id`, conteudo original, `created_at`, `confirmed_by_profile_id` e `confirmed_at`. O conteudo e imutavel. A confirmacao e unica e irreversivel, preservando autoria e momento da decisao, sem transformar a hipotese em regra geral do metodo.
+
+#### Integridade das fontes
+
+Entidades internas client-scoped carregam `client_id`. A migration futura deve usar FKs compostas para impedir que uma execucao de uma cliente referencie fonte de outra. Para isso, deve validar novamente o schema vigente e adicionar somente se ainda necessarias:
+
+- `unique (id, client_id)` em `anamnesis_submissions`;
+- `unique (id, client_id)` em `professional_follow_ups`;
+- `unique (id, submission_id)` em `anamnesis_answers`;
+- `unique (id, assessment_id)` em `assessment_measurements`.
+
+A migration tambem deve realizar validacao estreita para aceitar somente respostas ligadas a submissao de Anamnese efetivamente submetida e para confirmar compatibilidade entre o tipo de `client_file` e a fonte de foto, exame ou documento selecionada. A implementacao dessa validacao nao esta definida nesta documentacao.
+
+#### Ownership, RLS e relacionamento com protocolos
+
+Admin acessa objetos internos somente com role relacional `admin` e assignment ativo da cliente. Cliente e `anon` recebem zero acesso a entidades internas de IA. Prompts permanecem internos a admin/deploy. Credenciais de provider ou secret nunca pertencem ao browser.
+
+`protocol_versions` nao deve ser reutilizado como draft de IA. O fluxo previsto e:
+
+```text
+fontes
+-> ai_execution
+-> ai_execution_output
+-> ai_draft_versions
+-> ai_hypotheses e confirmacoes
+-> futura materializacao controlada
+-> protocol_version
+-> aprovacao
+-> publicacao
+```
+
+Uma futura materializacao deve preferir entidade de ligacao propria entre `ai_draft_versions` e `protocol_versions`, sem mudar agora a semantica de protocolo. Pendencias sugeridas, perguntas sugeridas, a materializacao, o enforcement final entre hipotese pendente e publicacao e a UI de prompts ficam adiados.
+
+#### Limites para uso em producao
+
+Nao ha bloqueio para modelar a fundacao. Antes de uso real em producao, permanecem pendentes provider/modelo concreto, garantia tecnica e contratual de no-training, consentimento/base legal, taxonomia final de `purpose_key`, contrato estruturado final do output, identificacao estavel da condicao financeira para exclusao automatica e enforcement entre hipotese pendente e publicacao.
+
 ### DECISOES PARA MODELAGEM FUTURA
 
-Ainda nao existe modelo fisico para IA. Quando ele for definido, cada execucao devera manter referencias das fontes utilizadas, sem duplicar automaticamente todo o conteudo original, e registrar a versao da instrucao/prompt, o modelo e o provider.
+Quando a fundacao for implementada, cada execucao devera manter referencias das fontes utilizadas, sem duplicar automaticamente todo o conteudo original, e registrar a versao da instrucao/prompt, o modelo e o provider.
 
 O contexto padrao de uma execucao inclui respostas de Anamnese, exceto condicao financeira, que exige selecao explicita da Patty, e todas as medidas factuais registradas. Fotos de avaliacao/evolucao, exames/documentos de saude, protocolos anteriores e historico de acompanhamento exigem selecao explicita da Patty. Cidade, Telefone e Email de contato nao entram automaticamente a partir do Cadastro Atual; Endereco, escolaridade e Instagram permanecem fora do contexto padrao sem necessidade especifica.
 

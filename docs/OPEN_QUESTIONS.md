@@ -78,7 +78,7 @@ Quais fluxos de IA justificarao LangGraph?
 
 ### QUESTAO ABERTA
 
-Qual sera o modelo logico detalhado?
+Quais detalhes fisicos da migration da fundacao de IA ainda precisarao ser validados contra o schema vigente, incluindo constraints compostas, validacao das fontes e transicoes controladas de lifecycle?
 
 ### QUESTAO ABERTA
 
@@ -164,11 +164,15 @@ Em quais finalidades especificas, e sob quais controles, Cidade, Telefone e Emai
 
 ### QUESTAO ABERTA
 
-Qual sera a modelagem fisica auditavel de execucoes de IA, referencias de fontes, instrucoes/prompts, saida original, versoes editadas pela Patty, aprovacao, rejeicao e publicacao, sem expor conteudo interno a clientes?
+Qual sera a identificacao tecnica estavel da condicao financeira em cada versao de Anamnese, para que sua exclusao automatica do contexto de IA seja verificavel?
 
 ### QUESTAO ABERTA
 
 Qual provider e modelo serao escolhidos, e quais requisitos contratuais e tecnicos verificaveis garantirao que dados da Patty e das clientes nao sejam usados para treinamento?
+
+### QUESTAO ABERTA
+
+Qual sera a taxonomia final de `purpose_key` e o contrato estruturado final do output original da IA?
 
 ### QUESTAO ABERTA
 
@@ -177,6 +181,10 @@ Como uma edicao manual da Patty deve interagir com valor originado de calculo de
 ### QUESTAO ABERTA
 
 Quais consentimentos, bases legais e politicas legais de retencao, arquivamento, descarte e exportacao se aplicarao ao contexto e ao historico de IA?
+
+### QUESTAO ABERTA
+
+Como a futura entidade de materializacao entre rascunho de IA e `protocol_version` identificara hipoteses ainda presentes e impedira aprovacao/publicacao enquanto alguma permanecer sem confirmacao explicita da Patty?
 
 ### QUESTAO ABERTA
 
