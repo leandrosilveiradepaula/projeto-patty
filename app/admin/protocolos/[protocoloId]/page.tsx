@@ -1,7 +1,14 @@
+import { AdminProtocolVersionPlan } from "@/components/admin/AdminProtocolVersionPlan";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
-import { getAccessibleProtocol, listAccessibleProtocolPublications, listAccessibleProtocolVersionApprovals, listAccessibleProtocolVersions } from "@/lib/supabase/data-access";
+import {
+  getAccessibleProtocol,
+  listAccessibleProtocolPublications,
+  listAccessibleProtocolVersionApprovals,
+  listAccessibleProtocolVersionMealPlans,
+  listAccessibleProtocolVersions,
+} from "@/lib/supabase/data-access";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import styles from "./page.module.css";
@@ -21,12 +28,20 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
 
   const versions = await listAccessibleProtocolVersions(protocol.id);
   const versionIds = versions.map((version) => version.id);
-  const [approvals, publications] = await Promise.all([
+  const [approvals, publications, mealPlans] = await Promise.all([
     listAccessibleProtocolVersionApprovals(versionIds),
     listAccessibleProtocolPublications(versionIds),
+    listAccessibleProtocolVersionMealPlans(versionIds),
   ]);
-  const approvalsByVersionId = new Map(approvals.map((approval) => [approval.protocol_version_id, approval]));
-  const publicationsByVersionId = new Map(publications.map((publication) => [publication.protocol_version_id, publication]));
+  const approvalsByVersionId = new Map(
+    approvals.map((approval) => [approval.protocol_version_id, approval]),
+  );
+  const publicationsByVersionId = new Map(
+    publications.map((publication) => [publication.protocol_version_id, publication]),
+  );
+  const mealPlansByVersionId = new Map(
+    mealPlans.map((mealPlan) => [mealPlan.protocolVersionId, mealPlan]),
+  );
 
   return (
     <>
@@ -48,6 +63,7 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
             {versions.map((version) => {
               const approval = approvalsByVersionId.get(version.id);
               const publication = publicationsByVersionId.get(version.id);
+              const mealPlan = mealPlansByVersionId.get(version.id) ?? null;
 
               return (
                 <li className={styles.versionItem} key={version.id}>
@@ -61,6 +77,14 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
                     <div><dt>Publicação</dt><dd>{publication ? publication.published_at : "Não registrada"}</dd></div>
                     {publication ? <><div><dt>ID da publicação</dt><dd>{publication.id}</dd></div><div><dt>ID da aprovação publicada</dt><dd>{publication.approval_id}</dd></div><div><dt>Publicada por</dt><dd>{publication.published_by_profile_id}</dd></div></> : null}
                   </dl>
+                  <div className={styles.versionPlan}>
+                    <h4>Estrutura alimentar desta versão</h4>
+                    <p>
+                      Revisão factual do plano persistido antes de qualquer ação
+                      de aprovação ou publicação.
+                    </p>
+                    <AdminProtocolVersionPlan plan={mealPlan} />
+                  </div>
                 </li>
               );
             })}
