@@ -7,6 +7,7 @@ import {
   addProfessionalFollowUp,
 } from "@/app/admin/avaliacoes/[avaliacaoId]/actions";
 import { Alert } from "@/components/ui/Alert";
+import { PROFESSIONAL_DECISION_OPTIONS } from "@/lib/follow-up/professional-decisions";
 import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/FormField";
 import { Textarea } from "@/components/ui/Textarea";
@@ -96,10 +97,11 @@ export function EvaluationProfessionalFollowUpForm({
             <option disabled value="">
               Selecione
             </option>
-            <option value="maintain">Manter</option>
-            <option value="simplify">Simplificar</option>
-            <option value="advance">Avançar</option>
-            <option value="return">Retornar</option>
+            {PROFESSIONAL_DECISION_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
           </select>
         )}
       </FormField>
