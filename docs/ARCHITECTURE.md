@@ -27,6 +27,8 @@ A aplicacao Next.js ja esta integrada ao Supabase para Auth, PostgreSQL, Storage
 
 A UI de negocio ja possui leitura real do backend para areas administrativas e da cliente, incluindo clientes atribuidos, Cadastro Atual, Anamnese versionada, avaliacoes, protocolos publicados, conteudos, exercicios e arquivos privados administrativos.
 
+Ja existem tambem boundaries server-side de escrita para notas internas de revisao de Anamnese, acompanhamento profissional append-only, liberacao manual de conteudo e lifecycle manual de protocolos. Essas escritas reutilizam a sessao autenticada, grants, RLS e constraints existentes, sem `service_role` no browser e sem publicacao automatica.
+
 A rota raiz usa o contexto autenticado para encaminhar admin, cliente ou login.
 
 Esses fatos de implementacao nao significam que todos os fluxos de escrita estejam definidos. Preenchimento final da Anamnese, uploads, operacoes administrativas ainda abertas, automacoes e integracao real com provider de IA continuam sujeitos as decisoes e questoes abertas correspondentes.
