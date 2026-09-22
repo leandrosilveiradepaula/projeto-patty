@@ -540,6 +540,66 @@ export type Database = {
           },
         ]
       }
+      client_file_upload_sessions: {
+        Row: {
+          claimed_mime_type: string
+          client_id: string
+          created_at: string
+          declared_byte_size: number
+          expires_at: string
+          file_extension: string
+          file_kind: Database["public"]["Enums"]["client_file_kind"]
+          id: string
+          original_filename: string
+          requester_profile_id: string
+          status: string
+          temp_object_path: string
+        }
+        Insert: {
+          claimed_mime_type: string
+          client_id: string
+          created_at?: string
+          declared_byte_size: number
+          expires_at?: string
+          file_extension: string
+          file_kind: Database["public"]["Enums"]["client_file_kind"]
+          id?: string
+          original_filename: string
+          requester_profile_id: string
+          status?: string
+          temp_object_path?: never
+        }
+        Update: {
+          claimed_mime_type?: string
+          client_id?: string
+          created_at?: string
+          declared_byte_size?: number
+          expires_at?: string
+          file_extension?: string
+          file_kind?: Database["public"]["Enums"]["client_file_kind"]
+          id?: string
+          original_filename?: string
+          requester_profile_id?: string
+          status?: string
+          temp_object_path?: never
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_file_upload_sessions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_file_upload_sessions_requester_profile_id_fkey"
+            columns: ["requester_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_files: {
         Row: {
           bucket_id: string
