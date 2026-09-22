@@ -434,11 +434,21 @@ Mantem `prompt_key`, `version_number`, instrucao/conteudo e `created_at`. Cada v
 
 #### `ai_executions`
 
-Mantem `client_id`, `purpose_key`, `prompt_version_id`, `initiated_by_profile_id`, provider, modelo, lifecycle/status, timestamps e motivo opcional de descarte. A linha representa a execucao e pode passar por transicoes de lifecycle controladas; ela nao contem output original e nao deve ser tratada como integralmente imutavel.
+Mantem `client_id`, `purpose_key`, `prompt_version_id`, `initiated_by_profile_id`, provider, modelo, lifecycle/status, timestamps e motivo opcional de descarte. A linha representa uma tentativa operacional explicitamente iniciada, vinculada a prompt, provider e modelo ja definidos, e pode realizar no maximo uma chamada ao provider. Ela nao contem output original e nao deve ser tratada como integralmente imutavel.
+
+Uma extensao futura deve adicionar `failure_stage`, `failure_code` e `failure_message` nullable. Os tres campos permanecem nulos quando o status nao e `failed`; em `failed`, stage e code sao obrigatorios e message permanece opcional. Stage, code e message sao fatos historicos e nao podem ser reescritos apos terminalizacao. Isso ainda nao esta implementado.
 
 #### `ai_execution_outputs`
 
 Mantem `execution_id`, `content jsonb` e `created_at`, em relacao 1:1 com `ai_executions`. E a saida original imutavel da IA. Pode nao existir quando a execucao ainda esta em andamento ou falhou.
+
+#### `ai_execution_failure_responses`
+
+Extensao futura aprovada, ainda nao implementada, para preservar conteudo efetivamente retornado pelo modelo que nao se tornou `ai_execution_output` valido. Mantem `execution_id`, `client_id`, `content`, `content_format` e `received_at`.
+
+`execution_id` deve ser a PK, permitindo no maximo uma linha por execution, e a relacao com `ai_executions` deve ser client-scoped por FK composta. `content` deve ser `text`, inclusive quando o conteudo recebido for JSON sintaticamente valido, para preservar literalmente a resposta original recebida. `content_format` usa apenas `text` ou `json`: `text` quando o conteudo nao e JSON sintaticamente valido e `json` quando e JSON valido, ainda que incompativel com o schema de output esperado. A tabela nao inclui `response_disposition`, porque essa classificacao e derivavel de `failure_stage` e `failure_code`.
+
+Essa entidade deve ser insert-only, sem UPDATE ou DELETE, e nao deve armazenar envelope HTTP completo, headers, tokens, credentials, request completo, stack trace ou telemetria irrelevante. O limite maximo de `content` ainda nao esta definido.
 
 #### `ai_execution_sources`
 
@@ -468,6 +478,8 @@ A migration tambem deve realizar validacao estreita para aceitar somente respost
 #### Ownership, RLS e relacionamento com protocolos
 
 Admin acessa objetos internos somente com role relacional `admin` e assignment ativo da cliente. Cliente e `anon` recebem zero acesso a entidades internas de IA. Prompts permanecem internos a admin/deploy. Credenciais de provider ou secret nunca pertencem ao browser.
+
+`ai_execution_failure_responses` deve seguir o mesmo modelo: RLS obrigatoria; admin relacional com assignment ativo recebe somente SELECT client-scoped; cliente recebe zero linhas; `anon` nao recebe acesso; e `authenticated` nao recebe INSERT, UPDATE ou DELETE. A escrita fica restrita a caminho server-side confiavel ainda nao definido, sem `SECURITY DEFINER` como atalho e sem service role ou secret no browser.
 
 `protocol_versions` nao deve ser reutilizado como draft de IA. O fluxo previsto e:
 

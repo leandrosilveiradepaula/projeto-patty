@@ -312,13 +312,21 @@ Quais perguntas da Anamnese serao definitivamente obrigatorias, quais serao cond
 
 O contrato futuro de `missing_answer` devera usar `target_question_id` para a pergunta ausente e permitir `source_answer_ids` vazio; o target devera pertencer a mesma `form_version_id` da submission. Isso e conceito futuro, nao implementacao atual.
 
-### GAP REAL DE MODELO
+### QUESTAO ABERTA
 
-Uma execution `failed` nao pode possuir `ai_execution_output`. Assim, resposta recebida de provider que seja invalida como JSON ou incompatível com o contrato nao possui hoje local apropriado para preservacao imutavel sem ser tratada como output valido. E necessario decidir como persistir tentativa ou resposta bruta invalida de forma segura e append-only.
+Qual sera o limite maximo de `ai_execution_failure_responses.content` preservado como resposta bruta e o tamanho maximo de `failure_message` sanitizada? Nenhum limite sera cristalizado antes de decisao tecnica propria.
+
+### GAP OPERACIONAL ABERTO
+
+Se banco ou conexao ficar indisponivel apos resposta do provider, a execution previamente criada pode permanecer `started` sem persistir resposta bruta, metadados de falha ou transicao terminal. Definir mecanismo futuro de reconciliacao, timeout, watchdog ou recovery job, sem tratar esse estado como `failed/persistence_failed` sem failure response.
 
 ### QUESTAO ABERTA
 
-O schema atual nao possui campos estruturados para `failure_code`/tipo, etapa da falha ou mensagem tecnica sanitizada. Decidir se a necessidade futura exige extensao de `ai_executions` ou entidade especifica, sem registrar PII desnecessaria, resposta clinica completa, prompt sensivel, token ou secret.
+Qual sera o caminho server-side confiavel para escrita nas entidades internas de IA, sem escrita direta do browser, sem secret no cliente e sem usar `SECURITY DEFINER` como atalho?
+
+### QUESTAO ABERTA
+
+Antes da migration que tornar `failure_stage` e `failure_code` obrigatorios em executions `failed`, verificar se ja existem linhas `ai_executions.status = failed` persistidas. Backfill permanece aberto ate conhecer esse estado; nao definir valor retroativo sem evidencia.
 
 ### QUESTAO ABERTA
 

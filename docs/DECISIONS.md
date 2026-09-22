@@ -42,6 +42,34 @@ Cliente nao acessa analises da IA, hipoteses, rascunhos, versoes internas ou com
 
 `protocol_versions` continua sendo versao de protocolo e nunca rascunho de IA. A futura materializacao de um rascunho de IA deve usar entidade de ligacao propria, sem alterar agora a semantica de `protocol_versions`.
 
+## 2026-09-22 - Modelo tecnico para falhas de execution de IA
+
+### DECISAO TECNICA
+
+Uma `ai_execution` representa uma tentativa operacional explicitamente iniciada, vinculada a prompt, provider e modelo ja definidos, e pode realizar no maximo uma chamada ao provider. Ela pode terminar `failed` antes dessa chamada. Nova tentativa explicita cria nova execution; retry automatico e entidade `attempts` permanecem fora da v1.
+
+Quando prompt, provider e modelo estao definidos, mas falta configuracao operacional server-side, como credential, a execution pode ser criada e terminar `failed` com `failure_stage = preflight` e `failure_code = provider_not_configured`. Quando prompt, provider ou modelo ainda nao estao definidos, a execution nao deve ser criada e nao se usam valores ficticios para satisfazer campos obrigatorios.
+
+### DECISAO TECNICA
+
+O boundary transacional da execution separa persistencia curta de chamada externa. TX1 cria a execution `started` e registra suas sources, seguida de commit. A chamada ao provider ocorre sem transacao longa de banco aberta. Em TX2 de sucesso, a insercao do unico `ai_execution_output` valido e a transicao para `completed` ocorrem atomicamente. Em TX2 de resposta invalida, a insercao de `ai_execution_failure_responses`, os metadados de falha e a transicao para `failed` ocorrem atomicamente.
+
+O deferred constraint de output valido permanece: `completed` exige exatamente um `ai_execution_output`; `started` e `failed` exigem zero outputs validos. Output valido permanece imutavel, `failed` permanece terminal e descarte continua restrito a `completed`. Uma failure response nao e output valido.
+
+### DECISAO TECNICA
+
+A extensao futura de `ai_executions` usa `failure_stage`, `failure_code` e `failure_message` nullable somente quando `status = failed`. Stage e code sao obrigatorios na falha e os tres campos devem permanecer nulos nos demais estados. Apos terminalizacao, eles nao podem ser reescritos.
+
+`failure_message` e sanitizada pela aplicacao para diagnostico operacional interno, opcional e nao vazia quando presente. Nao contem resposta bruta do provider, stack trace completo, token, secret ou PII desnecessaria. Seu tamanho maximo permanece aberto.
+
+Os pares fechados da v1 sao `preflight` -> `provider_not_configured`, `provider_request` -> `provider_request_failed`, `output_parse` -> `invalid_json`, `output_validation` -> `invalid_output_schema` e `persistence` -> `persistence_failed`. A futura migration deve protege-los com CHECK ou constraint deterministica.
+
+### DECISAO TECNICA
+
+Quando uma execution `failed` for persistida com `invalid_json`, `invalid_output_schema` ou `persistence_failed`, ela deve ter exatamente uma failure response imutavel. `provider_not_configured` e `provider_request_failed` nao possuem failure response. Em `persistence_failed`, isso cobre somente o caso em que o banco permanece acessivel apos a falha de persistencia de sucesso.
+
+Se o banco ou a conexao estiver indisponivel apos o provider responder, nao e possivel garantir a persistencia da resposta, dos metadados de falha ou da transicao para `failed`; a execution previamente criada pode permanecer `started`. Esse estado nao reconciliado e uma limitacao operacional, nao uma execution `failed/persistence_failed` sem failure response.
+
 ## 2026-09-22 - Limites confirmados para fundacao futura de IA
 
 ### DECISAO CONFIRMADA
