@@ -1,6 +1,6 @@
 begin;
 
-select plan(41);
+select plan(43);
 
 select has_table('public', 'client_files');
 select has_table('public', 'client_assessments');
@@ -18,9 +18,18 @@ select is(
   (select count(*) from pg_policies
    where schemaname = 'storage'
      and tablename = 'objects'
-     and policyname = 'client_private_storage_objects_select_own_or_active_assignment'),
+     and policyname = 'client_private_storage_objects_select_visible_own_or_admin'),
   1::bigint,
   'private Storage select policy exists'
+);
+
+select is(
+  (select count(*) from pg_policies
+   where schemaname = 'public'
+     and tablename = 'client_files'
+     and policyname = 'client_files_select_visible_own_or_admin'),
+  1::bigint,
+  'client_files select policy reflects visibility and admin access'
 );
 
 insert into auth.users (id, email, raw_user_meta_data)
@@ -51,18 +60,71 @@ insert into public.client_assignments (id, client_id, staff_profile_id)
 values
   ('43000000-0000-0000-0000-000000000001', '42000000-0000-0000-0000-000000000001', '41000000-0000-0000-0000-000000000003');
 
-insert into public.client_files (id, client_id, file_kind, object_path, original_filename, mime_type, byte_size)
+insert into public.client_files (
+  id,
+  client_id,
+  file_kind,
+  object_path,
+  original_filename,
+  mime_type,
+  byte_size,
+  uploaded_by_profile_id,
+  client_visible_at,
+  client_visibility_set_by_profile_id
+)
 values
-  ('44000000-0000-0000-0000-000000000001', '42000000-0000-0000-0000-000000000001', 'photo', 'clients/42000000-0000-0000-0000-000000000001/photo/44000000-0000-0000-0000-000000000001.jpg', 'synthetic-a.jpg', 'image/jpeg', 100),
-  ('44000000-0000-0000-0000-000000000002', '42000000-0000-0000-0000-000000000002', 'document', 'clients/42000000-0000-0000-0000-000000000002/document/44000000-0000-0000-0000-000000000002.pdf', 'synthetic-b.pdf', 'application/pdf', 200);
+  (
+    '44000000-0000-0000-0000-000000000001',
+    '42000000-0000-0000-0000-000000000001',
+    'photo',
+    'clients/42000000-0000-0000-0000-000000000001/photo/44000000-0000-0000-0000-000000000001.jpg',
+    'synthetic-a.jpg',
+    'image/jpeg',
+    100,
+    '41000000-0000-0000-0000-000000000001',
+    '2026-09-01T08:00:00Z',
+    '41000000-0000-0000-0000-000000000001'
+  ),
+  (
+    '44000000-0000-0000-0000-000000000002',
+    '42000000-0000-0000-0000-000000000002',
+    'document',
+    'clients/42000000-0000-0000-0000-000000000002/document/44000000-0000-0000-0000-000000000002.pdf',
+    'synthetic-b.pdf',
+    'application/pdf',
+    200,
+    '41000000-0000-0000-0000-000000000004',
+    null,
+    null
+  );
 
 select throws_ok(
-  $$insert into public.client_files (client_id, file_kind, object_path) values ('42000000-0000-0000-0000-000000000001', 'photo', 'clients/42000000-0000-0000-0000-000000000002/photo/44000000-0000-0000-0000-000000000001.jpg')$$,
+  $$insert into public.client_files (client_id, file_kind, object_path, uploaded_by_profile_id) values ('42000000-0000-0000-0000-000000000001', 'photo', 'clients/42000000-0000-0000-0000-000000000002/photo/44000000-0000-0000-0000-000000000001.jpg', '41000000-0000-0000-0000-000000000001')$$,
   '23514', null, 'file path must use its own client namespace'
 );
 select throws_ok(
-  $$insert into public.client_files (client_id, file_kind, object_path) values ('42000000-0000-0000-0000-000000000001', 'photo', 'clients/42000000-0000-0000-0000-000000000001/photo/44000000-0000-0000-0000-000000000001.jpg')$$,
+  $$insert into public.client_files (client_id, file_kind, object_path, uploaded_by_profile_id) values ('42000000-0000-0000-0000-000000000001', 'photo', 'clients/42000000-0000-0000-0000-000000000001/photo/44000000-0000-0000-0000-000000000001.jpg', '41000000-0000-0000-0000-000000000001')$$,
   '23505', null, 'duplicate bucket and path are rejected'
+);
+
+select throws_ok(
+  $$insert into public.client_files (
+      client_id,
+      file_kind,
+      object_path,
+      uploaded_by_profile_id,
+      client_visible_at
+    )
+    values (
+      '42000000-0000-0000-0000-000000000001',
+      'photo',
+      'clients/42000000-0000-0000-0000-000000000001/photo/44000000-0000-0000-0000-000000000099.jpg',
+      '41000000-0000-0000-0000-000000000001',
+      now()
+    )$$,
+  '23514',
+  null,
+  'client visibility timestamp requires visibility setter'
 );
 
 insert into public.client_assessments (id, client_id, assessed_at)
@@ -106,11 +168,11 @@ select is((select count(*) from public.client_assessments), 0::bigint, 'client A
 select is((select count(*) from public.professional_follow_ups), 0::bigint, 'client A cannot read internal follow-ups');
 
 select set_config('request.jwt.claim.sub', '41000000-0000-0000-0000-000000000002', true);
-select is((select count(*) from public.client_files), 1::bigint, 'client B reads file metadata B only');
+select is((select count(*) from public.client_files), 0::bigint, 'client B cannot read Patty-uploaded file before release');
 select is((select count(*) from public.client_files where client_id = '42000000-0000-0000-0000-000000000001'), 0::bigint, 'client B cannot read file metadata A');
 
 select set_config('request.jwt.claim.sub', '41000000-0000-0000-0000-000000000003', true);
-select is((select count(*) from public.client_files), 1::bigint, 'assigned admin reads file metadata A');
+select is((select count(*) from public.client_files), 2::bigint, 'admin reads all file metadata regardless of assignment');
 select is((select count(*) from public.client_assessments), 2::bigint, 'assigned admin reads assessments A');
 select is((select count(*) from public.assessment_measurements), 2::bigint, 'assigned admin reads measurements A');
 select is((select count(*) from public.assessment_files), 1::bigint, 'assigned admin reads assessment files A');
@@ -120,7 +182,7 @@ values ('42000000-0000-0000-0000-000000000001', '41000000-0000-0000-0000-0000000
 select is((select count(*) from public.professional_follow_ups), 3::bigint, 'assigned admin can append own follow-up');
 
 select set_config('request.jwt.claim.sub', '41000000-0000-0000-0000-000000000004', true);
-select is((select count(*) from public.client_files), 0::bigint, 'unassigned admin cannot read file metadata');
+select is((select count(*) from public.client_files), 2::bigint, 'unassigned admin still reads file metadata');
 select is((select count(*) from public.client_assessments), 0::bigint, 'unassigned admin cannot read assessments');
 select is((select count(*) from public.professional_follow_ups), 0::bigint, 'unassigned admin cannot read follow-ups');
 select throws_ok(
@@ -134,7 +196,7 @@ set ended_at = now()
 where id = '43000000-0000-0000-0000-000000000001';
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '41000000-0000-0000-0000-000000000003', true);
-select is((select count(*) from public.client_files), 0::bigint, 'ended assignment removes file access');
+select is((select count(*) from public.client_files), 2::bigint, 'ended assignment does not remove admin file access');
 select is((select count(*) from public.client_assessments), 0::bigint, 'ended assignment removes assessment access');
 select is((select count(*) from public.professional_follow_ups), 0::bigint, 'ended assignment removes follow-up access');
 
