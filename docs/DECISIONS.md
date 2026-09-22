@@ -1,5 +1,11 @@
 # Decisoes
 
+## 2026-09-22 - Uso de LangGraph no MVP
+
+### DECISAO TECNICA
+
+LangGraph nao sera usado inicialmente no MVP. A primeira integracao real de IA deve usar um fluxo server-side simples, explicito e auditavel. LangGraph so deve ser introduzido se surgirem fluxos de IA com estado persistente, multiplas etapas, ramificacoes ou orquestracao complexa que nao sejam bem atendidos por uma implementacao mais simples.
+
 ## 2026-09-22 - Uso de n8n no MVP
 
 ### DECISAO TECNICA
