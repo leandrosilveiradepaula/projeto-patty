@@ -1,5 +1,73 @@
 # Decisoes
 
+## 2026-09-22 - Reconciliacao documental das regras confirmadas do metodo
+
+### DECISAO CONFIRMADA
+
+Esta secao registra no repositorio regras ja confirmadas pela Patty e elimina a classificacao antiga que tratava todo o metodo como indefinido.
+
+Todo acompanhamento comeca pelo Reconhecimento Metabolico, protocolo linear inicial.
+
+A sequencia atualmente confirmada do fluxo principal e:
+
+```text
+Reconhecimento Metabolico
+-> Cutting 1 Dia 1 / Dia 2
+-> Cutting 1: 2 Low / 1 High
+-> Up Metabolico
+-> Cutting 2 Linear
+-> Cutting 2 Dia 1 / Dia 2
+-> Cutting 2: 2 Low / 1 High
+```
+
+Nao inferir automaticamente etapas posteriores.
+
+### DECISAO CONFIRMADA
+
+O Reconhecimento Metabolico pode ser reutilizado em caso de baixa adesao, dificuldade de execucao ou retorno apos afastamento.
+
+Adesao e central. A Patty adapta o protocolo a dificuldade relatada e pode simplificar ou retornar antes de avancar.
+
+Nao criar score automatico de adesao.
+
+### DECISAO CONFIRMADA
+
+Nao existe numero fixo de refeicoes. A quantidade e adaptada a rotina e preferencia da cliente, com foco em adesao.
+
+Horarios individuais nao constituem regra geral. No jejum intermitente explicado pela Patty, normalmente sao usadas 3 refeicoes, com a ultima ate 12 horas apos a primeira e horarios internos flexiveis.
+
+### DECISAO CONFIRMADA
+
+A referencia inicial geral do Reconhecimento Metabolico e proteina 2 g/kg, carboidrato 2 g/kg e gordura 50 g/dia como referencia, com possibilidade de individualizacao.
+
+Conversoes confirmadas:
+
+- 1 dose de proteina = 15 g;
+- 1 dose de carboidrato = 12 g;
+- 1 dose de gordura = 6 g.
+
+Doses podem ser fracionadas. Parte das doses inicialmente associadas ao carboidrato pode ser redistribuida para gordura.
+
+### DECISAO CONFIRMADA
+
+Proteinas possuem grupo de maior teor de gordura e grupo de menor teor de gordura.
+
+O limite diario do grupo de maior teor de gordura e metade das doses totais de proteina, arredondando para cima. "Sem restricao" nao significa proteina ilimitada.
+
+### DECISAO CONFIRMADA
+
+No Cutting Dia 1 / Dia 2, a proteina permanece praticamente igual e o carboidrato e a principal variavel. O protocolo linear anterior e a referencia: Dia 1 usa aproximadamente metade do carboidrato e Dia 2 aproximadamente a quantidade do linear. A gordura pode permanecer ou diminuir.
+
+A etapa 2 Low / 1 High usa a Planilha Carb Cycle baseada no peso. Somente formulas confirmadas e documentadas podem ser implementadas em codigo deterministico. As Fases 5 e 6 continuam abertas.
+
+### DECISAO CONFIRMADA
+
+No fluxo confirmado, o Up Metabolico inclui uma refeicao livre semanal. Outras regras nao devem ser inferidas.
+
+### QUESTAO ABERTA
+
+Permanecem abertas, entre outros pontos: Fases 5 e 6 do Carb Cycle, etapas posteriores ao Cutting 2, Bulking detalhado, Consolidacao, hidratacao, suplementacao/manipulados, montagem e progressao definitiva de treino, alertas profissionais e criterios finais de avaliacao.
+
 ## 2026-09-22 - Primeira versao assistiva de IA
 
 ### DECISAO DE PRODUTO CONFIRMADA
