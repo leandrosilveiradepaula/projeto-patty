@@ -191,3 +191,17 @@ A UI podera ser reorganizada depois da decisao de fluxo. Qualquer alteracao do c
 - Validar classificacao de cada campo.
 - Definir, com Patty, se havera alertas ou bloqueios de saude.
 - Definir em quais fluxos dados cadastrais precisarao coexistir entre Auth, cadastro da cliente ou snapshot de anamnese, especialmente Email.
+
+## Revisao por IA da Anamnese
+
+### DECISAO TECNICA/PRODUTO
+
+A primeira revisao operacional de IA trabalha somente sobre respostas existentes de uma submission explicitamente selecionada. Submissions submetidas, answers e definicoes versionadas relacionadas sao protegidas contra alteracao ou exclusao pelo schema atual, preservando as fontes historicas referenciadas.
+
+Nesta primeira versao, a revisao pode sinalizar apenas possivel contradicao ou necessidade de esclarecimento para analise humana. Ela nao diagnostica, nao cria pendencia, nao fala com a cliente e nao substitui decisao profissional.
+
+### QUESTAO ABERTA
+
+`missing_answer` permanece bloqueado na primeira versao operacional. Embora `anamnesis_questions.required` exista estruturalmente, o questionario final, a obrigatoriedade definitiva e as regras de aplicabilidade condicional ainda nao foram validados. Pergunta condicional nao aplicavel nao pode ser tratada automaticamente como ausencia.
+
+Questionario/schema existente nao equivale a questionario final validado pela Patty.

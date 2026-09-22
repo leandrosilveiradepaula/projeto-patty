@@ -256,6 +256,48 @@ O fluxo estrutural de protocolo separa versao, aprovacao humana e publicacao. Um
 
 Planos alimentares e catalogos de equivalentes sao versionados como estruturas de dados, sem catalogo real, calculo de doses, macros, fases ou regra metodologica. A referencia de um plano aponta uma versao especifica do catalogo.
 
+## 2026-09-22 - Primeiro contrato operacional de IA para revisao de Anamnese
+
+### DECISAO TECNICA/PRODUTO
+
+O primeiro fluxo operacional de IA usa `purpose_key = anamnesis_review`, sem versao embutida. A versao pertence a `ai_prompt_versions`; provider e modelo pertencem a `ai_executions`.
+
+### DECISAO TECNICA/PRODUTO
+
+A revisao e iniciada somente por acao explicita de Patty/admin relacional autorizado, com assignment ativo da cliente e submission escolhida explicitamente. Nao existe execucao automatica ou em background nesta primeira versao.
+
+### DECISAO TECNICA/PRODUTO
+
+Cada execution `anamnesis_review` analisa uma submission selecionada. A mesma submission pode ter multiplas executions historicas por nova solicitacao explicita, versao de prompt ou modelo; nao existe unicidade submission -> execution.
+
+### DECISAO TECNICA/PRODUTO
+
+O contexto automatico da v1 limita-se a submission, `form_version_id`, `question_id`, `question_key`, `label` e `answer_value` original das answers selecionadas para envio da propria submission. A condicao financeira nao entra automaticamente: so pode ser incluida quando Patty a selecionar explicitamente para aquela execution. As demais answers autorizadas pelo contexto padrao permanecem automaticas. Fonte disponivel nao equivale necessariamente a fonte selecionada ou enviada. Cadastro Atual, avaliacoes, medidas, protocolos, follow-ups, fotos, exames, documentos, outros arquivos, endereco, escolaridade e Instagram ficam fora deste purpose. Essa minimizacao nao se generaliza automaticamente para outros purposes de IA.
+
+### DECISAO TECNICA/PRODUTO
+
+Na primeira implementacao, os findings permitidos sao somente `possible_contradiction` e `clarification_needed`. `missing_answer` continua objetivo do produto, mas fica bloqueado ate que obrigatoriedade e aplicabilidade condicional da Anamnese estejam formalizadas.
+
+`possible_contradiction` e uma sinalizacao de possivel incompatibilidade ou ambiguidade, nunca conclusao definitiva, e exige ao menos duas respostas existentes. `clarification_needed` sinaliza resposta existente ambigua ou insuficiente para revisao humana segura e exige ao menos uma resposta existente.
+
+Nenhum finding diagnostica, cria conclusao clinica, vira pendencia, e enviado a cliente, altera protocolo/fase ou publica conteudo automaticamente.
+
+### DECISAO TECNICA/PRODUTO
+
+Registrar em `ai_execution_sources` todas as `anamnesis_answers` efetivamente enviadas ao modelo, uma referencia por answer. Answers submetidas e suas definicoes versionadas sao protegidas contra alteracao/exclusao pelo schema atual; as referencias permitem reconstruir fontes utilizadas, mas nao constituem snapshot literal do payload enviado ao provider.
+
+### DECISAO TECNICA/PRODUTO
+
+O output valido original da IA permanece imutavel em `ai_execution_outputs`. Findings permanecem nesse output nesta versao e nao criam entidade operacional independente; tambem nao viram `ai_hypotheses` automaticamente.
+
+Revisao e edicao humana devem ser persistidas separadamente em `ai_draft_versions`, de forma append-only. Nunca sobrescrever o output original da IA. `ai_hypotheses` fica reservado para proposicoes que realmente exigirem confirmacao explicita antes de eventual aprovacao ou publicacao futura.
+
+### CONTRATO CONCEITUAL DE OUTPUT
+
+O contrato conceitual da v1 e um objeto com `findings`, que pode ser vazio. Cada finding possui `type` (`possible_contradiction` ou `clarification_needed`), `source_answer_ids`, `explanation` interna com incerteza explicita e `suggested_follow_up_question` opcional e interna.
+
+Propriedades extras devem ser rejeitadas na validacao futura. IDs devem pertencer a submission analisada e as sources da execution. O contrato nao e JSON Schema implementado nesta etapa e nao inclui score, diagnostico ou conclusao clinica.
+
 ## 2026-09-19 - Bibliotecas e liberacao explicita de conteudo
 
 ### DECISAO CONFIRMADA

@@ -168,7 +168,7 @@ Qual sera a identificacao tecnica estavel da condicao financeira em cada versao 
 
 ### QUESTAO ABERTA
 
-Qual provider e modelo serao escolhidos, e quais requisitos contratuais e tecnicos verificaveis garantirao que dados da Patty e das clientes nao sejam usados para treinamento?
+Qual provider e modelo concretos serao escolhidos, quais requisitos contratuais e tecnicos verificaveis garantirao que dados da Patty e das clientes nao sejam usados para treinamento, e qual sera a base legal ou o consentimento aplicavel? Antes da integracao real, tambem precisam ser definidos a politica de logs tecnicos, o tratamento de conteudo sensivel em erros e logs e o contrato estruturado definitivo do output.
 
 ### QUESTAO ABERTA
 
@@ -303,6 +303,26 @@ Havera necessidade de analise de arquivos maliciosos?
 ### QUESTAO ABERTA
 
 Qual sera a estrategia de analise de arquivos maliciosos, se necessaria?
+
+## IA e revisao de Anamnese
+
+### QUESTAO ABERTA
+
+Quais perguntas da Anamnese serao definitivamente obrigatorias, quais serao condicionais e quais regras determinam sua aplicabilidade? Ate essa definicao, `missing_answer` permanece bloqueado na primeira revisao operacional de IA.
+
+O contrato futuro de `missing_answer` devera usar `target_question_id` para a pergunta ausente e permitir `source_answer_ids` vazio; o target devera pertencer a mesma `form_version_id` da submission. Isso e conceito futuro, nao implementacao atual.
+
+### GAP REAL DE MODELO
+
+Uma execution `failed` nao pode possuir `ai_execution_output`. Assim, resposta recebida de provider que seja invalida como JSON ou incompatível com o contrato nao possui hoje local apropriado para preservacao imutavel sem ser tratada como output valido. E necessario decidir como persistir tentativa ou resposta bruta invalida de forma segura e append-only.
+
+### QUESTAO ABERTA
+
+O schema atual nao possui campos estruturados para `failure_code`/tipo, etapa da falha ou mensagem tecnica sanitizada. Decidir se a necessidade futura exige extensao de `ai_executions` ou entidade especifica, sem registrar PII desnecessaria, resposta clinica completa, prompt sensivel, token ou secret.
+
+### QUESTAO ABERTA
+
+Qual sera a UX e o processo humano para revisao de findings, edicao de follow-up, descarte, eventual transformacao manual em acao e eventual envio a cliente?
 
 ## Metodo profissional
 
