@@ -1,5 +1,17 @@
 # Decisoes
 
+## 2026-09-22 - Bootstrap controlado da primeira conta admin
+
+### DECISAO DE SEGURANCA E OPERACAO
+
+A primeira conta administrativa da Patty sera provisionada por procedimento administrativo controlado e unico. O provisionamento cria ou vincula a identidade Auth da Patty ao `profile` correspondente e registra o role relacional `admin` fora de qualquer fluxo publico de autoatendimento.
+
+Nao existira botao, endpoint publico, cadastro autonomo ou mecanismo de autoelevacao que permita a um usuario se tornar `admin` pelo aplicativo.
+
+O procedimento deve usar privilegios administrativos somente durante o provisionamento necessario, ser executado de forma auditavel e nao alterar o principio de que o acesso client-scoped continua dependendo de role relacional e assignment ativo.
+
+Esta decisao resolve apenas o bootstrap inicial da Patty. O mecanismo futuro para criar, alterar ou encerrar assignments continua sendo uma decisao separada.
+
 ## 2026-09-22 - Unica administradora/profissional de negocio no MVP
 
 ### DECISAO DE PRODUTO E SEGURANCA
@@ -298,7 +310,7 @@ Remover uma identidade Auth de cliente preserva o registro profissional e limpa 
 
 ### QUESTAO ABERTA
 
-O bootstrap de producao do primeiro admin Patty e o caminho administrativo para criar, alterar ou encerrar roles e assignments continuam pendentes. Seeds e testes locais nao definem fluxo de producao.
+O caminho administrativo para criar, alterar ou encerrar assignments continua pendente. O bootstrap inicial da conta admin da Patty foi definido como procedimento administrativo controlado e unico; seeds e testes locais nao definem esse procedimento de producao.
 
 ## 2026-09-15 - Separacao entre autenticacao, cadastro do cliente e snapshot de anamnese
 

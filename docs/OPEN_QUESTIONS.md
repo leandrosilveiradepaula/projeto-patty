@@ -30,10 +30,6 @@ Qual sera o tratamento de conta Auth excluida quando for necessario manter histo
 
 ### QUESTAO ABERTA
 
-Como sera criado/bootstrap do primeiro admin Patty?
-
-### QUESTAO ABERTA
-
 Quem pode criar, alterar ou encerrar assignments?
 
 ### QUESTAO ABERTA POS-MVP
