@@ -30,7 +30,7 @@ export async function GET(
   const supabase = await createClient();
   const { data, error } = await supabase.storage
     .from(file.bucket_id)
-    .createSignedUrl(file.object_path, 60);
+    .createSignedUrl(file.object_path, 300);
 
   if (error || !data?.signedUrl) {
     return new Response(null, { status: 404 });
