@@ -1,5 +1,17 @@
 # Decisoes
 
+## 2026-09-22 - Auditoria de acesso a exames e documentos privados
+
+### DECISAO DE SEGURANCA E AUDITORIA
+
+No MVP, acessos administrativos a exames e documentos privados devem gerar trilha de auditoria quando a Patty solicitar visualizacao ou download. O registro nao deve conter o conteudo do arquivo.
+
+A trilha deve preservar apenas metadados necessarios para rastreabilidade, incluindo identificador interno do usuario, identificador interno do arquivo, acao solicitada, data/hora e resultado da autorizacao.
+
+Se no futuro outro papel receber acesso autorizado a exames/documentos, o mesmo requisito de auditoria se aplica a esse acesso.
+
+A implementacao deve registrar o evento na boundary controlada que autoriza a operacao e gera a signed URL. A emissao da signed URL nao deve ser interpretada como prova de que a transferencia do arquivo foi concluida pelo cliente.
+
 ## 2026-09-22 - Validade das signed URLs de arquivos privados
 
 ### DECISAO DE PRODUTO E SEGURANCA
