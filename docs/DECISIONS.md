@@ -1,5 +1,15 @@
 # Decisoes
 
+## 2026-09-22 - Sem limite rigido de quantidade de arquivos no MVP
+
+### DECISAO DE PRODUTO
+
+O MVP nao tera um limite rigido de quantidade de fotos, exames ou documentos por cliente ou por finalidade.
+
+Continuam valendo os limites por arquivo ja definidos e os controles de formato, validacao, autorizacao, privacidade e armazenamento.
+
+Se volume, custo, abuso ou operacao demonstrarem necessidade de um teto quantitativo, uma regra futura devera ser baseada em uso observado e documentada antes de ser automatizada.
+
 ## 2026-09-22 - Auditoria de acesso a exames e documentos privados
 
 ### DECISAO DE SEGURANCA E AUDITORIA
@@ -111,7 +121,7 @@ Word, Excel, ZIP, executaveis e qualquer outro formato fora dessa allowlist nao 
 
 A validacao futura de upload deve conferir no servidor a extensao e o tipo real/detectado do arquivo; o nome do arquivo e o `Content-Type` informado pelo cliente nao sao suficientes por si so. Divergencia entre extensao e tipo detectado deve rejeitar o upload.
 
-Esta decisao fecha os formatos aceitos. Decisoes posteriores tambem fecharam limites de tamanho, upload da cliente, imutabilidade/substituicao, exclusao controlada, paths sem PII, validacao em duas etapas, acesso da Patty e validade de signed URLs. Permanecem abertas, entre outros pontos, quantidade maxima, eventual upload administrativo pela Patty, politica concreta de retencao, analise antimalware e visibilidade de arquivos na UI da cliente.
+Esta decisao fecha os formatos aceitos. Decisoes posteriores tambem fecharam limites de tamanho, upload da cliente, imutabilidade/substituicao, exclusao controlada, paths sem PII, validacao em duas etapas, acesso da Patty e validade de signed URLs. Permanecem abertas, entre outros pontos, eventual upload administrativo pela Patty, politica concreta de retencao, analise antimalware e visibilidade de arquivos na UI da cliente. O MVP nao tera limite rigido de quantidade de arquivos.
 
 ## 2026-09-22 - Gestao de assignments no MVP
 
@@ -224,7 +234,6 @@ Decisoes posteriores passaram a definir upload da cliente, limites de tamanho, i
 
 Continuam abertos nesta area:
 
-- quantidade maxima de arquivos;
 - eventual upload administrativo pela Patty;
 - politica concreta de retencao e hard delete;
 - analise de arquivos maliciosos;
