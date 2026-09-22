@@ -34,6 +34,12 @@ A fundacao backend ja existe para:
 
 A aplicacao ja possui leitura real do backend em areas administrativas e da cliente. Entre os fluxos atualmente conectados estao clientes atribuidos, Cadastro Atual, Anamnese, avaliacoes, protocolos, conteudos, exercicios e leitura administrativa de arquivos privados.
 
+Fluxos de escrita humana ja conectados e protegidos pelas RLS existentes incluem:
+- notas append-only de revisao da Anamnese;
+- acompanhamento profissional append-only de avaliacao;
+- liberacao manual de versao publicada de conteudo para cliente;
+- lifecycle manual de protocolo: submissao para revisao, aprovacao humana e publicacao explicita.
+
 ## Seguranca
 
 - Auth User, Profile e Client sao entidades diferentes;
@@ -109,4 +115,5 @@ O workflow roda em pull requests, pushes para `master` e execucao manual.
 - `docs/CONTENT_LIBRARY.md`
 - `docs/OPEN_QUESTIONS.md`
 - `docs/DECISIONS.md`
+- `docs/PATTY_DECISION_ROUND_1.md`
 - `AGENTS.md`
