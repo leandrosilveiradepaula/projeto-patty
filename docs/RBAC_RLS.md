@@ -210,10 +210,6 @@ A futura especificacao de RLS deve incluir testes para provar isolamento entre c
 
 ### QUESTAO ABERTA
 
-Ainda e necessario definir a relacao operacional "clientes sob responsabilidade da Patty/admin".
-
-### QUESTAO ABERTA
-
 Ainda e necessario definir quais acoes sao consideradas criticas para auditoria.
 
 ## Implementacao BACKEND-A1

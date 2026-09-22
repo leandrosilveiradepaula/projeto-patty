@@ -19,13 +19,21 @@ A arquitetura definida para o projeto e:
 
 Nao introduzir FastAPI ou outros servicos neste momento.
 
-Esta autorizada a inicializacao minima da aplicacao web Next.js para a fundacao do frontend.
+VPS, n8n e LangGraph so devem ser introduzidos quando houver necessidade concreta e documentada.
 
-Essa autorizacao nao inclui banco, Supabase, autenticacao, APIs de negocio, UI de negocio, IA, regras clinicas, n8n, LangGraph ou servicos adicionais.
+### FATO CONFIRMADO DE IMPLEMENTACAO
+
+A aplicacao Next.js ja esta integrada ao Supabase para Auth, PostgreSQL, Storage privado e RLS.
+
+A UI de negocio ja possui leitura real do backend para areas administrativas e da cliente, incluindo clientes atribuidos, Cadastro Atual, Anamnese versionada, avaliacoes, protocolos publicados, conteudos, exercicios e arquivos privados administrativos.
+
+A rota raiz usa o contexto autenticado para encaminhar admin, cliente ou login.
+
+Esses fatos de implementacao nao significam que todos os fluxos de escrita estejam definidos. Preenchimento final da Anamnese, uploads, operacoes administrativas ainda abertas, automacoes e integracao real com provider de IA continuam sujeitos as decisoes e questoes abertas correspondentes.
 
 ### DECISAO HISTORICA SUBSTITUIDA
 
-A restricao anterior de nao criar aplicacao, UI ou dependencias pertencia a fase inicial de documentacao e foi substituida em 2026-09-14 exclusivamente para a inicializacao e fundacao do frontend.
+As restricoes anteriores que limitavam o repositorio a documentacao ou apenas a fundacao visual pertencem a fases historicas do projeto e nao descrevem o estado atual da aplicacao.
 
 ## Principios arquiteturais
 
@@ -56,6 +64,12 @@ Dados reais nao devem ser usados no desenvolvimento inicial.
 ### RECOMENDACAO TECNICA
 
 Toda funcionalidade que exponha dados de clientes deve ser desenhada com verificacao explicita de autorizacao, logs de auditoria e testes de isolamento de acesso.
+
+## Infraestrutura Supabase atual
+
+### FATO CONFIRMADO DE INFRAESTRUTURA
+
+O projeto Supabase SaaS atual e `Projeto Corpo e Mente`, na regiao `us-west-2`.
 
 ## Integracao de aplicacao com Supabase
 
