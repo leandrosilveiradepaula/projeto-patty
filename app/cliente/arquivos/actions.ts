@@ -1,5 +1,7 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+
 import { requireRole } from "@/lib/supabase/auth";
 import { getCurrentClient } from "@/lib/supabase/data-access";
 import { finalizeClientFileUploadSession } from "@/lib/files/private-file-finalization";
@@ -94,6 +96,11 @@ export async function finalizeClientFileUploadSessionAction(sessionId: string) {
     requesterProfileId: auth.profileId,
     sessionId,
   });
+
+  if (result.status === "accepted") {
+    revalidatePath("/cliente");
+    revalidatePath("/cliente/arquivos");
+  }
 
   return {
     ok: true as const,
