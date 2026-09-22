@@ -104,7 +104,7 @@ Medidas informadas na anamnese pertencem a propria resposta de anamnese, criam t
 
 ### QUESTAO ABERTA
 
-Nos uploads ligados a anamnese, quais tipos, tamanhos maximos, quantidade maxima, substituicao e exclusao de arquivos serao permitidos no novo aplicativo?
+Nos uploads ligados a anamnese, quais tamanhos maximos, quantidade maxima, substituicao e exclusao de arquivos serao permitidos no novo aplicativo, considerando a allowlist de formatos ja definida para o MVP?
 
 ### QUESTAO ABERTA
 
@@ -231,10 +231,6 @@ Qual e o fluxo auditavel para correcao de uma avaliacao ou medida historica sem 
 ### QUESTAO ABERTA
 
 Qual e a origem da percepcao de aderencia e quais partes do acompanhamento profissional poderao futuramente ser exibidas para a cliente?
-
-### QUESTAO ABERTA
-
-Quais MIME types serao permitidos?
 
 ### QUESTAO ABERTA
 
