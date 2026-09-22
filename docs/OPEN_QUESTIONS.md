@@ -86,7 +86,7 @@ Quais campos serao obrigatorios em anamnese, medidas, fotos, exames, protocolos 
 
 ### QUESTAO ABERTA
 
-Qual sera a politica de retencao, arquivamento e exportacao de dados?
+Qual sera a politica geral de retencao, arquivamento e exportacao de dados fora das decisoes ja confirmadas para preservacao do historico de IA?
 
 ### QUESTAO ABERTA
 
@@ -160,23 +160,23 @@ Qual sera o texto definitivo, versao, base legal, data/hora, forma de aceite, po
 
 ### QUESTAO ABERTA
 
-Quais campos da anamnese poderao ser enviados a IA, campo a campo?
+Em quais finalidades especificas, e sob quais controles, Cidade, Telefone e Email de contato poderao ser selecionados para o contexto de IA? Eles nao entram automaticamente a partir do Cadastro Atual.
 
 ### QUESTAO ABERTA
 
-Quais dados cadastrais ou privados poderao ser enviados a IA, se houver finalidade especifica? Isso inclui telefone, email de contato, cidade, arquivos privados, fotos, exames e documentos.
+Qual sera a modelagem fisica auditavel de execucoes de IA, referencias de fontes, instrucoes/prompts, saida original, versoes editadas pela Patty, aprovacao, rejeicao e publicacao, sem expor conteudo interno a clientes?
 
 ### QUESTAO ABERTA
 
-Quais respostas brutas de Anamnese ou categorias sensiveis poderao ser usadas em contexto de IA, campo a campo? Isso inclui dados de saude, medicacao, suplementacao, sono e habitos, autoimagem, comportamento e condicao financeira.
+Qual provider e modelo serao escolhidos, e quais requisitos contratuais e tecnicos verificaveis garantirao que dados da Patty e das clientes nao sejam usados para treinamento?
 
 ### QUESTAO ABERTA
 
-Qual sera a politica de minimizacao, retencao e descarte do contexto enviado a IA? Ainda devem ser definidos versao de prompt, identificacao de modelo ou provider e politica de logs internos.
+Como uma edicao manual da Patty deve interagir com valor originado de calculo deterministico, sem sobrescrever silenciosamente o resultado ou atribuir esse calculo a IA?
 
 ### QUESTAO ABERTA
 
-Qual sera o modelo auditavel que separa interpretacao da IA, rascunho, alteracoes da Patty, versao aprovada e publicacao, sem expor prompts ou logs internos a clientes?
+Quais consentimentos, bases legais e politicas legais de retencao, arquivamento, descarte e exportacao se aplicarao ao contexto e ao historico de IA?
 
 ### QUESTAO ABERTA
 
@@ -211,10 +211,6 @@ Quando o email de autenticacao e o email de contato devem iniciar com o mesmo va
 Havera alguma acao explicita para sincronizar email de autenticacao e email de contato, ou eles permanecerao independentes apos a criacao inicial?
 
 ## Dados e LGPD
-
-### QUESTAO ABERTA
-
-Qual sera a politica de retencao de dados?
 
 ### QUESTAO ABERTA
 

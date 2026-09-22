@@ -424,6 +424,16 @@ dado original
 
 A demonstracao de revisao de Anamnese usa o campo `aiAnalysis` em `lib/demo/anamnesis.ts`. Esse conteudo nao possui entidade persistente, RLS ou auditoria real e nao define contrato de IA.
 
+### DECISOES PARA MODELAGEM FUTURA
+
+Ainda nao existe modelo fisico para IA. Quando ele for definido, cada execucao devera manter referencias das fontes utilizadas, sem duplicar automaticamente todo o conteudo original, e registrar a versao da instrucao/prompt, o modelo e o provider.
+
+O contexto padrao de uma execucao inclui respostas de Anamnese, exceto condicao financeira, que exige selecao explicita da Patty, e todas as medidas factuais registradas. Fotos de avaliacao/evolucao, exames/documentos de saude, protocolos anteriores e historico de acompanhamento exigem selecao explicita da Patty. Cidade, Telefone e Email de contato nao entram automaticamente a partir do Cadastro Atual; Endereco, escolaridade e Instagram permanecem fora do contexto padrao sem necessidade especifica.
+
+Uma modelagem futura deve preservar separadamente a saida original da IA, cada versao editada pela Patty com autoria e data/hora, a versao aprovada e a publicacao. Deve tambem preservar referencias das fontes, instrucoes/prompts, modelo, provider e decisoes de aprovacao ou rejeicao, sem exclusao automatica do historico de IA. Isso nao cria entidades, RLS, auditoria generica ou politica legal de retencao nesta etapa.
+
+Analises, hipoteses, rascunhos, versoes internas e comentarios internos da Patty nao devem ser expostos a cliente. A escolha concreta de provider, modelo, modelo fisico, regras de acesso e controles contratuais/tecnicos para impedir uso dos dados em treinamento permanecem pendentes.
+
 ## Limites desta documentacao
 
 ### DECISAO HISTORICA SUBSTITUIDA
