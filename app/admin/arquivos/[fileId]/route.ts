@@ -31,7 +31,7 @@ export async function GET(
   const downloadName = file.original_filename?.trim() || true;
   const { data, error } = await supabase.storage
     .from(file.bucket_id)
-    .createSignedUrl(file.object_path, 60, {
+    .createSignedUrl(file.object_path, 300, {
       download: downloadName,
     });
 
