@@ -39,7 +39,7 @@ Estados usados:
 ### Principais bloqueios atuais
 
 - questionario final e fluxo de preenchimento/submissao da Anamnese;
-- upload, substituicao e exclusao de arquivos privados;
+- implementar upload privado em duas etapas, reconciliar acesso da Patty/RLS e fechar quantidade, retencao final, antimalware e visibilidade da cliente;
 - criacao/ativacao/encerramento de contas de clientes;
 - administracao de roles e assignments;
 - edicao controlada do Cadastro Atual;
@@ -60,7 +60,7 @@ Estados usados:
 | Cadastro Atual | leitura IMPLEMENTADA | nao | CI VALIDADO | definir quem pode alterar cada campo e auditoria |
 | Anamnese versionada | leitura IMPLEMENTADA | nota interna append-only | CI VALIDADO | fechar questionario e fluxo de preenchimento |
 | Avaliacoes / medidas | leitura IMPLEMENTADA | acompanhamento profissional append-only | CI VALIDADO; conjunto de decisoes profissionais tipado e testado | definir catalogo, unidades, obrigatoriedade e correcao |
-| Arquivos privados | leitura/download admin IMPLEMENTADOS | upload/delete nao | SAAS VALIDADO; IDs malformados rejeitados antes de lookup; allowlist de formatos definida | definir limites, upload, exclusao, antimalware e visibilidade da cliente |
+| Arquivos privados | leitura/download admin IMPLEMENTADOS sob regra antiga de assignment; upload/delete nao | SAAS VALIDADO; IDs malformados rejeitados antes de lookup; allowlist + tamanho + ciclo de upload definidos | implementar upload em duas etapas; reconciliar RLS para acesso permanente da Patty; definir quantidade, retencao final, antimalware e visibilidade da cliente |
 | Protocolos | leitura + lifecycle manual IMPLEMENTADOS | submit/approve/publish | CI + SAAS VALIDADO; lifecycle com guarda determinística testada | criar/editar plano somente quando fluxo profissional estiver formalizado |
 | Plano alimentar publicado | cliente ve variantes, refeicoes, doses e ciclo | nao | CI VALIDADO | equivalentes visiveis continuam abertos |
 | Conteudo educacional | leitura admin/cliente por release IMPLEMENTADA | release manual | CI VALIDADO; elegibilidade de release testada | taxonomia, autoria/revisao e primeiro lote do Drive |
@@ -107,7 +107,11 @@ Ja existe:
 - download administrativo por signed URL curta, nao persistida;
 - rejeicao deterministica de identificadores de arquivo malformados antes de consulta ao banco.
 
-Os formatos aceitos no MVP ja estao definidos: fotos em JPEG/PNG/WebP; exames e documentos em PDF/JPEG/PNG, com validacao server-side de extensao e tipo real/detectado. O upload ainda nao existe porque tamanho, quantidade, autoria do upload, substituicao, exclusao, antimalware e visibilidade da cliente continuam abertos.
+Os formatos e os limites de tamanho do MVP ja estao definidos: fotos em JPEG/PNG/WebP ate 10 MB; exames e documentos em PDF/JPEG/PNG ate 20 MB. A cliente podera fazer upload direto do browser para Storage privado sob RLS, usando area temporaria e validacao server-side antes de o arquivo ser considerado valido. Paths nao terao PII, objetos nao serao sobrescritos e hard delete direto pelo browser nao sera permitido.
+
+A Patty devera manter acesso aos arquivos mesmo sem assignment ativo, e signed URLs terao validade de 5 minutos. Hoje, porem, leitura/download administrativos ainda estao implementados sob assignment ativo e signed URLs de 60 segundos; essas diferencas sao pendencias de implementacao.
+
+Permanecem abertos quantidade maxima, eventual upload administrativo pela Patty, politica concreta de retencao/hard delete, antimalware e visibilidade da cliente.
 
 ### Acompanhamento profissional
 

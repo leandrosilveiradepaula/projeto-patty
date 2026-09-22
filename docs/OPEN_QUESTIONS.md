@@ -104,11 +104,19 @@ Medidas informadas na anamnese pertencem a propria resposta de anamnese, criam t
 
 ### QUESTAO ABERTA
 
-Nos uploads ligados a anamnese, quais tamanhos maximos, quantidade maxima, substituicao e exclusao de arquivos serao permitidos no novo aplicativo, considerando a allowlist de formatos ja definida para o MVP?
+Nos uploads ligados a anamnese, qual sera a quantidade maxima de arquivos por finalidade ou contexto? Formatos, limites de tamanho, imutabilidade de objetos, substituicao por novo upload e ausencia de hard delete direto pelo browser ja estao definidos.
 
 ### QUESTAO ABERTA
 
 Como separar a finalidade dos arquivos enviados entre fotos, exames e documentos?
+
+### QUESTAO ABERTA
+
+A Patty tambem precisara de um fluxo administrativo para enviar arquivos em nome da cliente, ou o upload do MVP sera apenas da cliente?
+
+### QUESTAO ABERTA
+
+Qual politica concreta de retencao define quando um arquivo inativado/substituido pode ser removido fisicamente, considerando referencias historicas e auditoria?
 
 ### QUESTAO ABERTA
 

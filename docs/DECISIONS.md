@@ -1,5 +1,91 @@
 # Decisoes
 
+## 2026-09-22 - Validade das signed URLs de arquivos privados
+
+### DECISAO DE PRODUTO E SEGURANCA
+
+Signed URLs para visualizacao ou download de fotos, exames e documentos privados terao validade de 5 minutos. Elas podem ser regeneradas quando necessario e nunca devem ser persistidas no banco.
+
+A implementacao administrativa atual ainda usa signed URLs de 60 segundos; essa diferenca e uma pendencia de implementacao, nao uma nova questao de produto.
+
+## 2026-09-22 - Acesso permanente da Patty a arquivos privados
+
+### DECISAO DE PRODUTO E SEGURANCA
+
+No MVP, a Patty podera acessar fotos, exames e documentos privados das clientes mesmo sem `client_assignment` ativo.
+
+Esta e uma excecao especifica para arquivos privados e para a Patty, que e a unica administradora/profissional de negocio do MVP. A regra geral de assignment ativo continua valendo para os demais dados client-scoped, salvo decisao documentada posterior.
+
+Esta decisao substitui a regra anterior que removia o acesso da Patty aos arquivos quando o assignment era encerrado. A implementacao atual de RLS e das rotas de arquivos ainda depende de assignment ativo e deve ser reconciliada antes de esta decisao ser considerada implementada.
+
+## 2026-09-22 - Validacao de upload em duas etapas
+
+### DECISAO TECNICA E DE SEGURANCA
+
+O upload privado do MVP sera tratado em duas etapas:
+
+1. o browser envia o objeto para uma area privada temporaria e nao publicada;
+2. o servidor valida tamanho, extensao e tipo real/detectado do arquivo;
+3. somente depois da validacao o arquivo e registrado/promovido como valido e disponivel;
+4. objetos invalidos sao removidos da area temporaria e nunca aparecem como documentos efetivamente recebidos.
+
+A analise antimalware continua como questao aberta separada.
+
+## 2026-09-22 - Upload direto do browser para Supabase Storage
+
+### DECISAO TECNICA E DE SEGURANCA
+
+No MVP, a cliente autenticada podera enviar os bytes diretamente do browser para o Supabase Storage, sem encaminhar arquivos grandes pelo servidor Next.js e sem expor `service_role`/secret ao browser.
+
+O upload deve ficar rigidamente limitado por grants/policies/RLS ao espaco autorizado da propria cliente. O caminho e os identificadores aceitos pelo Storage devem ser gerados ou validados pelo sistema; o browser nao recebe liberdade para gravar em paths arbitrarios.
+
+O registro de metadados e o vinculo do objeto ao recurso de negocio continuam sujeitos a validacao server-side e RLS. Esta decisao autoriza o fluxo da cliente; eventual upload administrativo pela Patty continua fora desta decisao.
+
+## 2026-09-22 - Exclusao controlada de arquivos privados
+
+### DECISAO DE PRODUTO, SEGURANCA E OPERACAO
+
+A cliente nao podera apagar fisicamente um arquivo ja enviado por uma escrita direta do browser.
+
+Quando houver necessidade de remocao, o fluxo devera passar por boundary server-side controlado, verificar referencias e regras de retencao e registrar auditoria apropriada. Quando fizer sentido preservar historico, o registro podera ser inativado ou substituido logicamente sem destruicao imediata do objeto.
+
+A politica concreta de retencao e as condicoes para hard delete definitivo continuam pendentes.
+
+## 2026-09-22 - Imutabilidade dos objetos enviados
+
+### DECISAO DE SEGURANCA E AUDITORIA
+
+Um arquivo privado ja persistido nao sera sobrescrito no mesmo path. Correcao ou substituicao gera novo objeto com identificador proprio, preservando o historico e as referencias anteriores.
+
+O browser nao recebe permissao para sobrescrever diretamente um objeto existente.
+
+## 2026-09-22 - Paths de Storage sem PII
+
+### DECISAO DE PRIVACIDADE E SEGURANCA
+
+Paths de objetos privados nao devem conter nome, email, CPF, telefone ou outros dados pessoais legiveis.
+
+O sistema usara apenas identificadores internos/UUIDs no path. O nome original do arquivo pode ser preservado como metadado no banco quando houver necessidade de produto, mas nao deve determinar livremente o path do Storage.
+
+## 2026-09-22 - Armazenamento privado e referencia de objeto
+
+### DECISAO DE SEGURANCA
+
+Fotos, exames e documentos das clientes permanecem em Storage privado, sem URL publica permanente.
+
+O banco deve persistir apenas o identificador/path do objeto e os metadados necessarios. Signed URLs sao temporarias, regeneraveis e nao devem ser salvas como referencia permanente.
+
+## 2026-09-22 - Limites de tamanho para arquivos privados
+
+### DECISAO DE PRODUTO E SEGURANCA
+
+No MVP:
+
+- fotos: maximo de 10 MB por arquivo;
+- exames/documentos: maximo de 20 MB por arquivo.
+
+Arquivos acima do limite devem ser rejeitados. O registro definitivo em `client_files` e a disponibilizacao do arquivo so ocorrem apos validacao. Se a validacao em duas etapas exigir objeto temporario, qualquer objeto acima do limite ou invalido deve ser removido e nunca considerado upload aceito.
+
 ## 2026-09-22 - Formatos permitidos para arquivos privados no MVP
 
 ### DECISAO DE PRODUTO E SEGURANCA
@@ -13,7 +99,7 @@ Word, Excel, ZIP, executaveis e qualquer outro formato fora dessa allowlist nao 
 
 A validacao futura de upload deve conferir no servidor a extensao e o tipo real/detectado do arquivo; o nome do arquivo e o `Content-Type` informado pelo cliente nao sao suficientes por si so. Divergencia entre extensao e tipo detectado deve rejeitar o upload.
 
-Esta decisao fecha apenas os formatos aceitos. Limite de tamanho, quantidade, quem pode fazer upload, substituicao/exclusao, analise antimalware e visibilidade para a cliente continuam pendentes.
+Esta decisao fecha os formatos aceitos. Decisoes posteriores tambem fecharam limites de tamanho, upload da cliente, imutabilidade/substituicao, exclusao controlada, paths sem PII, validacao em duas etapas, acesso da Patty e validade de signed URLs. Permanecem abertas, entre outros pontos, quantidade maxima, eventual upload administrativo pela Patty, politica concreta de retencao, analise antimalware e visibilidade de arquivos na UI da cliente.
 
 ## 2026-09-22 - Gestao de assignments no MVP
 
@@ -23,7 +109,7 @@ No MVP, somente a Patty pode iniciar ou encerrar um `client_assignment`, por flu
 
 O encerramento preserva o registro historico do assignment e remove apenas sua validade atual, usando o estado/tempo de encerramento previsto no modelo. Nao deve haver hard delete de assignment historico como operacao normal do produto.
 
-A operacao deve permanecer auditavel e nao pode conceder acesso client-scoped sem role relacional `admin` e assignment ativo. Fluxos futuros de transferencia, reatribuicao ou outros profissionais ficam fora desta decisao.
+A operacao deve permanecer auditavel e, como regra geral, nao pode conceder acesso client-scoped sem role relacional `admin` e assignment ativo. Decisao posterior criou uma excecao especifica para o acesso da Patty a arquivos privados, sem generalizar essa excecao para os demais dados client-scoped. Fluxos futuros de transferencia, reatribuicao ou outros profissionais ficam fora desta decisao.
 
 ## 2026-09-22 - Bootstrap controlado da primeira conta admin
 
@@ -108,7 +194,7 @@ Esses fluxos nao autorizam inferir outras operacoes administrativas ainda aberta
 
 ## 2026-09-22 - Leitura administrativa de arquivos privados
 
-### DECISAO TECNICA
+### FATO CONFIRMADO DE IMPLEMENTACAO E DECISAO TECNICA HISTORICA
 
 Arquivos privados permanecem no bucket privado `client-private`, sem URL publica permanente e sem signed URL persistida.
 
@@ -116,21 +202,21 @@ Fotos privadas vinculadas a uma avaliacao podem ser exibidas no detalhe administ
 
 A area administrativa da cliente pode listar metadados de `client_files` acessiveis pelas RLS existentes. Para download administrativo de fotos, exames ou documentos, uma rota server-side igualmente exige `admin`, resolve o arquivo sob RLS e cria signed URL de 60 segundos com comportamento de download forcado. Isso evita decidir renderizacao inline de exames ou documentos antes da definicao de MIME types e controles adicionais.
 
-A autorizacao continua dependendo de assignment ativo. Encerrar o assignment remove o acesso atual da Patty/admin; nenhuma dessas rotas usa `service_role` nem bypass de RLS.
+Na implementacao atual, a autorizacao dessas rotas ainda depende de assignment ativo, e nenhuma delas usa `service_role` nem bypass de RLS. A decisao posterior de produto determina que a Patty mantenha acesso aos arquivos privados mesmo sem assignment ativo; portanto RLS/rotas atuais precisam ser alteradas antes de a implementacao estar alinhada com a decisao vigente.
 
 ### LIMITE DE ESCOPO
 
 Esta decisao implementa somente leitura e download administrativos de arquivos ja cadastrados.
 
-Ela nao define:
+Decisoes posteriores passaram a definir upload da cliente, limites de tamanho, imutabilidade/substituicao, exclusao controlada, validacao em duas etapas, acesso permanente da Patty e signed URLs de 5 minutos.
 
-- quem pode fazer upload;
-- substituicao ou exclusao de arquivos;
-- limite de tamanho como regra de produto;
+Continuam abertos nesta area:
+
+- quantidade maxima de arquivos;
+- eventual upload administrativo pela Patty;
+- politica concreta de retencao e hard delete;
 - analise de arquivos maliciosos;
 - quais fotos, exames ou documentos devem ser exibidos na UI da cliente.
-
-Esses pontos permanecem abertos.
 
 ## 2026-09-22 - Reconciliacao documental das regras confirmadas do metodo
 
