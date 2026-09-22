@@ -47,13 +47,13 @@ export default async function ClientePerfilPage() {
         )}
       </Section>
       <Section
-        description="A Anamnese reúne respostas e informações do acompanhamento em uma área separada."
+        description="A Anamnese permanece separada do Cadastro Atual e preserva seus registros por versão."
         title="Anamnese"
       >
         <Card className={styles.anamneseCard}>
-          <p>Consulte a estrutura disponível para a Anamnese nesta etapa da interface.</p>
+          <p>Consulte suas submissões e as respostas originais já registradas.</p>
           <Link className={styles.anamneseLink} href="/cliente/anamnese">
-            Abrir anamnese
+            Ver histórico da Anamnese
           </Link>
         </Card>
       </Section>
