@@ -56,10 +56,6 @@ Quais permissoes futuras esses profissionais terao?
 
 ### QUESTAO ABERTA
 
-Quais automacoes justificarao n8n?
-
-### QUESTAO ABERTA
-
 Quais fluxos de IA justificarao LangGraph?
 
 ## Modelo de dados
