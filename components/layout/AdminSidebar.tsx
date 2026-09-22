@@ -19,8 +19,6 @@ const adminNavigationItems: AdminNavigationItem[] = [
   { href: "/admin/protocolos", label: "Protocolos" },
   { href: "/admin/conteudos", label: "Conteúdos" },
   { href: "/admin/exercicios", label: "Exercícios" },
-  { href: "/admin/pendencias", label: "Pendências" },
-  { href: "/admin/configuracoes", label: "Configurações" },
 ];
 
 export function isAdminNavigationItemActive(pathname: string, href: string) {
@@ -29,7 +27,7 @@ export function isAdminNavigationItemActive(pathname: string, href: string) {
   }
 
   if (href === "/admin/clientes" && pathname.startsWith("/admin/anamneses/")) {
-    return pathname.endsWith("/revisao");
+    return true;
   }
 
   return pathname === href || pathname.startsWith(`${href}/`);
