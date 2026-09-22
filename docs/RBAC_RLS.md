@@ -128,9 +128,9 @@ Clientes nao podem:
 - alterar assignments;
 - encerrar assignments.
 
-A forma exata de administracao destas tabelas sera definida na camada administrativa/servidor.
+No MVP, somente a Patty pode iniciar ou encerrar `client_assignments`, por fluxo administrativo server-side controlado. O browser nao recebe `INSERT`, `UPDATE` ou `DELETE` direto nessa tabela. Encerrar um assignment preserva seu historico e remove somente o acesso atual; hard delete nao e operacao normal do produto.
 
-Nao criar nesta tarefa uma policy generica que permita ao `admin` conceder permissoes arbitrariamente.
+Nao criar policy generica que permita ao `admin` conceder permissoes arbitrariamente.
 
 ### DECISAO DE SEGURANCA
 
@@ -235,7 +235,7 @@ As policies usam `(select auth.uid())`, role relacional e assignment com `ended_
 
 ### Provisionamento administrativo
 
-O browser nao cria perfis, clientes, roles ou assignments nesta fase. O bootstrap de producao da Patty sera um procedimento administrativo controlado e unico, sem autoelevacao pela aplicacao. A administracao futura de assignments continua pendente e deve ocorrer por caminho administrativo controlado ainda nao implementado. Fixtures pgTAP sinteticas existem apenas para provar isolamento local.
+O browser nao cria perfis, clientes, roles ou assignments diretamente. O bootstrap de producao da Patty sera um procedimento administrativo controlado e unico, sem autoelevacao pela aplicacao. No MVP, a Patty podera iniciar ou encerrar assignments somente por boundary administrativo server-side controlado; o registro historico deve ser preservado. Fixtures pgTAP sinteticas existem apenas para provar isolamento local.
 
 ## Implementacao BACKEND-BUNDLE-01
 
