@@ -1,4 +1,5 @@
 import { ClientContentReleaseForm } from "@/components/admin/ClientContentReleaseForm";
+import { isContentVersionReleaseEligible } from "@/lib/content/release-eligibility";
 import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
 import { ContentListItem } from "@/components/admin/ContentListItem";
 import { Badge } from "@/components/ui/Badge";
@@ -53,8 +54,11 @@ export default async function AdminClientContentPage({
         : [],
     ),
   );
-  const availableVersions = contentVersions.filter(
-    (version) => version.published_at && !releasedVersionIds.has(version.id),
+  const availableVersions = contentVersions.filter((version) =>
+    isContentVersionReleaseEligible({
+      alreadyReleased: releasedVersionIds.has(version.id),
+      publishedAt: version.published_at,
+    }),
   );
   const displayName = client.profiles?.display_name?.trim();
 

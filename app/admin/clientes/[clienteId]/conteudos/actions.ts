@@ -2,10 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 
+import { isContentVersionReleaseEligible } from "@/lib/content/release-eligibility";
 import { requireRole } from "@/lib/supabase/auth";
 import {
   createAccessibleClientContentRelease,
   getAccessibleClient,
+  listContentReleasesForAccessibleClient,
   listEducationalContentVersionsForCurrentAdmin,
 } from "@/lib/supabase/data-access";
 
@@ -38,14 +40,29 @@ export async function releaseContentToClient(
     };
   }
 
-  const versions = await listEducationalContentVersionsForCurrentAdmin();
-  const selectedVersion = versions.find(
-    (version) => version.id === versionId && version.published_at,
+  const [versions, releases] = await Promise.all([
+    listEducationalContentVersionsForCurrentAdmin(),
+    listContentReleasesForAccessibleClient(client.id),
+  ]);
+  const releasedVersionIds = new Set(
+    releases.flatMap((release) =>
+      release.educational_content_versions?.id
+        ? [release.educational_content_versions.id]
+        : [],
+    ),
   );
+  const selectedVersion = versions.find((version) => version.id === versionId);
 
-  if (!selectedVersion) {
+  if (
+    !selectedVersion ||
+    !isContentVersionReleaseEligible({
+      alreadyReleased: releasedVersionIds.has(versionId),
+      publishedAt: selectedVersion.published_at,
+    })
+  ) {
     return {
-      message: "A versão selecionada não está publicada ou não está disponível.",
+      message:
+        "A versão selecionada não está publicada, não está disponível ou já foi liberada.",
       success: false,
     };
   }
