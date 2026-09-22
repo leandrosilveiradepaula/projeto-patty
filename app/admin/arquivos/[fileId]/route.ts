@@ -1,5 +1,8 @@
 import { requireRole } from "@/lib/supabase/auth";
-import {\n  getAccessiblePrivateFileForAdminDownload,\n  recordClientFileAccessEvent,\n} from "@/lib/supabase/data-access";
+import {
+  getAccessiblePrivateFileForAdminDownload,
+  recordClientFileAccessEvent,
+} from "@/lib/supabase/data-access";
 import { createClient } from "@/lib/supabase/server";
 import { isUuid } from "@/lib/validation/uuid";
 
@@ -13,7 +16,7 @@ export async function GET(
   _request: Request,
   { params }: AdminPrivateFileRouteProps,
 ) {
-  await requireRole("admin");
+  const auth = await requireRole("admin");
 
   const { fileId } = await params;
 
