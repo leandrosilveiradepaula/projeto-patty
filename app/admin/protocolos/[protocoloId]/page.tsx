@@ -1,9 +1,11 @@
 import { AdminProtocolVersionPlan } from "@/components/admin/AdminProtocolVersionPlan";
+import { ProtocolLifecycleAction } from "@/components/admin/ProtocolLifecycleAction";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import {
   getAccessibleProtocol,
+  getCurrentUserProfile,
   listAccessibleProtocolPublications,
   listAccessibleProtocolVersionApprovals,
   listAccessibleProtocolVersionMealPlans,
@@ -26,7 +28,10 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
 
   if (!protocol) notFound();
 
-  const versions = await listAccessibleProtocolVersions(protocol.id);
+  const [versions, currentProfile] = await Promise.all([
+    listAccessibleProtocolVersions(protocol.id),
+    getCurrentUserProfile(),
+  ]);
   const versionIds = versions.map((version) => version.id);
   const [approvals, publications, mealPlans] = await Promise.all([
     listAccessibleProtocolVersionApprovals(versionIds),
@@ -84,6 +89,37 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
                       de aprovação ou publicação.
                     </p>
                     <AdminProtocolVersionPlan plan={mealPlan} />
+                  </div>
+                  <div className={styles.lifecycle}>
+                    {publication ? (
+                      <p className={styles.lifecycleState}>
+                        Esta versão já foi publicada para a cliente.
+                      </p>
+                    ) : approval ? (
+                      <ProtocolLifecycleAction
+                        operation="publish"
+                        protocolId={protocol.id}
+                        versionId={version.id}
+                      />
+                    ) : version.submitted_for_review_at ? (
+                      <ProtocolLifecycleAction
+                        operation="approve"
+                        protocolId={protocol.id}
+                        versionId={version.id}
+                      />
+                    ) : currentProfile?.id === version.created_by_profile_id ? (
+                      <ProtocolLifecycleAction
+                        operation="submit"
+                        protocolId={protocol.id}
+                        versionId={version.id}
+                      />
+                    ) : (
+                      <p className={styles.lifecycleState}>
+                        A submissão desta versão não está disponível para este
+                        perfil: a política atual de UPDATE preserva o perfil
+                        criador da versão.
+                      </p>
+                    )}
                   </div>
                 </li>
               );
