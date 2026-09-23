@@ -9,6 +9,7 @@ Estados usados:
 - **IMPLEMENTADO**: codigo/schema existe no repositorio e esta integrado ao `master`;
 - **CI VALIDADO**: passou pelo workflow atual de `npm ci`, `npm run typecheck`, testes determinísticos e `npm run build`;
 - **SAAS VALIDADO**: estado relevante foi conferido no Supabase SaaS;
+- **PRODUCAO VALIDADA**: o commit correspondente esta efetivamente publicado na Vercel e o fluxo foi conferido no ambiente de producao;
 - **PARCIAL**: fundacao existe, mas falta fluxo necessario para o MVP;
 - **BLOQUEADO POR DECISAO**: nao implementar sem resposta/documentacao;
 - **INVENTARIADO**: levantamento existe, sem autorizacao de migracao/publicacao.
@@ -42,6 +43,7 @@ Estados usados:
 
 ### Principais bloqueios atuais
 
+- deployment de producao Vercel esta defasado por `build-rate-limit`; o ultimo merge de `master` publicado com sucesso e `b466accc8a5f`, portanto mudancas posteriores ainda nao podem ser marcadas como PRODUCAO VALIDADA;
 - questionario final e fluxo de preenchimento/submissao da Anamnese;
 - definir a politica final de retencao/hard delete de arquivos privados;
 - decidir infraestrutura/plano para habilitar `Leaked Password Protection`, recurso bloqueado no ambiente atual por exigir Pro ou superior;
@@ -105,7 +107,9 @@ No nivel de aplicacao, as boundaries de `/admin`, `/cliente`, Server Actions/Rou
 
 ### Seguranca da aplicacao e supply chain
 
-O Next.js esta pinado em `16.3.6`. O CI audita dependencias de producao para severidade alta/critica e usa `actions/checkout@v7` / `actions/setup-node@v7`. Headers globais incluem anti-framing, `nosniff`, `no-referrer`, Permissions Policy restritiva e CSP parcial segura para a arquitetura atual. A configuracao passou CI e build; a verificacao independente desses headers no deployment Vercel permanece sem evidencia nesta sessao porque o conector Vercel nao enxerga o projeto correspondente.
+O Next.js esta pinado em `16.3.6`. O CI audita dependencias de producao para severidade alta/critica e usa `actions/checkout@v7` / `actions/setup-node@v7`. Headers globais incluem anti-framing, `nosniff`, `no-referrer`, Permissions Policy restritiva e CSP parcial segura para a arquitetura atual.
+
+A configuracao de headers passou CI/build, mas ainda nao esta publicada no ambiente atual: GET real para `/login` confirmou ausencia desses headers, e o GitHub mostra que o ultimo merge de `master` publicado pela Vercel e anterior ao PR #94 que os adicionou. O `vercel.json` agora bloqueia previews de branches `codex/**` para reduzir consumo da cota de builds; falta um novo deployment de `master` quando o limite da Vercel permitir.
 
 ### Anamnese
 
@@ -120,7 +124,9 @@ O smoke de producao do rascunho identificou um bug operacional no DELETE privile
 
 A regra de preenchimento agora esta parcialmente fechada: todos os campos sao obrigatorios para o envio final; rascunho incompleto pode ser salvo e retomado; depois do envio, a cliente nao edita mais e somente a Patty pode registrar correcao historica sem sobrescrever a resposta original. A fundacao de escrita do rascunho esta aplicada pela migration `20260923113230_anamnesis_draft_write_foundation.sql`: um rascunho ativo por cliente/versao publicada, INSERT restrito da propria submission e INSERT/UPDATE apenas de `answer_value` das respostas do proprio rascunho. A boundary server-only em `lib/anamnesis/draft.ts` resolve a cliente pela sessao e persiste somente respostas pertencentes a mesma versao. A UI da cliente agora permite retomar um rascunho ja existente e salvar individualmente perguntas com `answer_type = text`; submissions enviadas e tipos nao suportados permanecem somente leitura. A UI nao cria uma nova Anamnese, nao escolhe versao publicada automaticamente, nao implementa autosave definitivo e nao envia a submission. A fundacao de correcoes esta aplicada pela migration `20260923114643_anamnesis_answer_corrections_foundation.sql`, com historico append-only, autoria, timestamp, assignment ativo e AAL2. O smoke pos-aplicacao confirmou criacao/edicao do proprio rascunho, isolamento entre clientes, bloqueio de `submitted_at`, correcao administrativa apenas em AAL2, preservacao da resposta original e bloqueio de UPDATE/DELETE das correcoes.
 
-A aplicacao administrativa agora expoe `/admin/anamneses/[id]/correcoes` somente para Anamneses ja enviadas. A tela mostra a resposta original, o historico cronologico de correcoes e permite acrescentar novo valor como JSON explicito. A Server Action exige `requireRole("admin")` e usa o cliente Supabase autenticado normal; RLS continua sendo a autoridade final para AAL2, assignment ativo, autoria e submission enviada. A cliente nao recebe leitura dessa tabela, e o fluxo nao altera nem remove resposta/correcao existente. A submissao final continua bloqueada ate fechar perguntas condicionais/aplicabilidade, tipos de input e ordem/agrupamento do formulario.
+A aplicacao administrativa agora expoe `/admin/anamneses/[id]/correcoes` somente para Anamneses ja enviadas. A tela mostra a resposta original, o historico cronologico de correcoes e permite acrescentar novo valor como JSON explicito. A Server Action exige `requireRole("admin")` e usa o cliente Supabase autenticado normal; RLS continua sendo a autoridade final para AAL2, assignment ativo, autoria e submission enviada. A cliente nao recebe leitura dessa tabela, e o fluxo nao altera nem remove resposta/correcao existente.
+
+Essa UI ainda nao pode ser marcada como PRODUCAO VALIDADA: o deployment atual e anterior ao PR #106 e o smoke recebeu 404 na rota de correcoes, coerente com a defasagem de deploy. A submissao final continua bloqueada ate fechar perguntas condicionais/aplicabilidade, tipos de input e ordem/agrupamento do formulario.
 
 ### Banco e performance
 
