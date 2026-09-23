@@ -13,7 +13,8 @@
     "test:follow-up": "node --experimental-strip-types --test lib/follow-up/*.test.ts",
     "test:ai": "node --experimental-strip-types --test lib/ai/*.test.ts",
     "test:e2e-helpers": "node --test e2e/helpers/*.test.mjs",
-    "test:validation": "node --experimental-strip-types --test lib/validation/*.test.ts"
+    "test:validation": "node --experimental-strip-types --test lib/validation/*.test.ts",
+    "test:assignments": "node --experimental-strip-types --test lib/assignments/*.test.ts"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",
