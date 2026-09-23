@@ -308,11 +308,13 @@ Quem pode criar ou alterar o Cadastro Atual e por qual fluxo controlado?
 
 ### PARCIALMENTE RESOLVIDO
 
-O salvamento de rascunho e as permissoes minimas de escrita ja possuem fundacao tecnica preparada: um rascunho ativo por cliente/versao publicada e escrita somente da propria submission/respostas enquanto nao enviada.
+O salvamento de rascunho e as permissoes minimas de escrita estao aplicados no SaaS: um rascunho ativo por cliente/versao publicada e escrita somente da propria submission/respostas enquanto nao enviada.
+
+A interface da cliente ja consegue retomar um rascunho existente e salvar respostas `text` individualmente. Isso e uma integracao parcial e deliberada; nao define qual versao inicia automaticamente, nao define os demais tipos de input, nao define autosave definitivo e nao implementa submissao final.
 
 ### QUESTAO ABERTA
 
-Como sera a submissao final da Anamnese considerando perguntas condicionais/aplicabilidade ainda nao definidas, e qual sera a UX definitiva de preenchimento/autosave?
+Como sera a submissao final da Anamnese considerando perguntas condicionais/aplicabilidade ainda nao definidas, qual sera a UX definitiva de preenchimento/autosave e qual mecanismo inicia uma nova submission a partir de uma versao publicada?
 
 ### QUESTAO ABERTA
 
