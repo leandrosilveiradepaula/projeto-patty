@@ -31,7 +31,9 @@ A Patty inicia o onboarding porque ja possui o email da cliente: ela envia um li
 
 O fluxo tecnico de ativacao do MVP usa convite administrativo do Supabase Auth. O backend provisiona identidade, profile, role `client`, cliente e assignment da Patty sem expor secret ao browser. A cliente abre o convite, a rota SSR `/auth/confirm` valida o token e cria a sessao, e `/ativar-conta` exige que ela defina a propria senha antes de seguir para a Anamnese. O login normal apos ativacao continua sendo email + senha.
 
-Como Auth e persistencia relacional nao compartilham uma unica transacao, falhas apos a criacao do usuario Auth exigem compensacao explicita para remover estado parcial. O template de convite hospedado no Supabase deve usar `TokenHash` e `type=invite` apontando para `/auth/confirm`; Site URL e redirects autorizados precisam ser configurados no ambiente de producao.
+Como Auth e persistencia relacional nao compartilham uma unica transacao, falhas apos a criacao do usuario Auth exigem compensacao explicita para remover estado parcial. O lifecycle tecnico foi validado por smoke E2E sintetico em producao: convite gerado sem inbox real, confirmacao SSR, criacao de senha, primeiro acesso, novo login e cleanup completo passaram. O Supabase SaaS confirmou zero residuos sinteticos apos o teste.
+
+O template de convite hospedado no Supabase deve usar `TokenHash` e `type=invite` apontando para `/auth/confirm`; Site URL e redirects autorizados precisam ser configurados e validados separadamente no ambiente de producao. O smoke sintetico nao substitui essa validacao do email real.
 
 Permanecem abertos expiracao/reenvio do convite, recuperacao de acesso e encerramento de conta.
 
