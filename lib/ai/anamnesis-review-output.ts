@@ -1,4 +1,4 @@
-import { isUuid } from "@/lib/validation/uuid";
+import { isUuid } from "../validation/uuid.ts";
 
 export type AnamnesisReviewFindingType =
   | "possible_contradiction"
