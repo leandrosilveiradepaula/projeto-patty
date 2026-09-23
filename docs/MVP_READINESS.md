@@ -1,6 +1,6 @@
 # Mapa de prontidao do MVP
 
-Data de referencia: 2026-09-23 (atualizado apos hardening de Anamnese/MFA e revisao dos advisors do Supabase).
+Data de referencia: 2026-09-23 (atualizado apos hardening de Anamnese/MFA, aplicacao e CI).
 
 Este documento e um mapa operacional do estado atual. Ele nao substitui `MVP.md`, `DECISIONS.md`, `BUSINESS_RULES.md` ou `OPEN_QUESTIONS.md`.
 
@@ -35,7 +35,8 @@ Estados usados:
 - biblioteca educacional e de exercicios em leitura administrativa;
 - liberacao manual de versao publicada de conteudo para cliente;
 - cliente ve conteudos explicitamente liberados;
-- CI de typecheck, testes determinísticos do método, lifecycle de protocolo, liberação de conteúdo e decisões de acompanhamento profissional, além do build, em pull requests e `master`;
+- CI de typecheck, audit de dependencias de producao, testes determinísticos, regressoes de boundaries de seguranca e build, em pull requests e `master`;
+- Next.js 16.3.6 e headers HTTP basicos de seguranca integrados ao `master`;
 - fundacao auditavel de IA e tratamento de falhas no banco;
 - inventario inicial e manifesto machine-readable do Drive sem PII.
 
@@ -74,7 +75,7 @@ Estados usados:
 | IA | fundacao de banco + validador deterministico de output `anamnesis_review` IMPLEMENTADOS | provider real e boundary de execution ainda nao integrados | SAAS VALIDADO; contrato de output coberto por testes determinísticos | definir provider/modelo, prompt versionado e boundary server-side de execution |
 | Drive | INVENTARIADO | nenhuma migracao fisica | 89 itens no manifesto inicial | revisar direitos/taxonomia e escolher lote inicial |
 | Regras deterministicas do metodo | IMPLEMENTADO PARCIAL | sem automacao de protocolo | CI VALIDADO | ampliar somente com formulas exatas confirmadas/documentadas |
-| CI | IMPLEMENTADO | automatico no GitHub Actions + smoke E2E manual de arquivos privados | `npm ci` + typecheck + `test:method` + `test:protocol` + `test:content` + `test:follow-up` + `test:anamnesis-draft` + `test:validation` + build; E2E de producao PASS | ampliar E2E somente para fluxos estaveis e sinteticos |
+| CI | IMPLEMENTADO | automatico no GitHub Actions + smoke E2E manual de arquivos privados | `npm ci` + audit high/critical de producao + typecheck + suites deterministicas + `test:security-boundaries` + build; core Actions em v7; E2E de producao PASS nos fluxos ja estabilizados | ampliar E2E somente para fluxos estaveis e sinteticos |
 
 ## Regras deterministicas confirmadas
 
@@ -99,6 +100,13 @@ A mesma guarda esta centralizada em `requireRole("admin")`, portanto cobre o lay
 O enforcement equivalente no banco/Storage foi preparado na migration `20260923113835_admin_mfa_rls_enforcement.sql`. Ela adiciona policies `RESTRICTIVE` que exigem `aal2` quando o usuario autenticado possui role relacional `admin`, preservando `user_roles` em `aal1` apenas para o roteamento ao MFA. O dry-run transacional no Supabase SaaS confirmou: admin `aal1` ve o proprio role, mas nao clientes/perfis protegidos; admin `aal2` recupera o acesso normal; cliente `aal1` nao e afetada. A migration ainda nao esta aplicada, portanto MFA fim a fim continua classificado como parcialmente concluido ate aplicacao e smoke remoto.
 
 O advisor de seguranca do Supabase tambem reporta `Leaked Password Protection` desativado no Auth. A habilitacao e uma pendencia de configuracao externa, separada do fluxo de MFA e sem dependencia de regra da Patty.
+
+No nivel de aplicacao, as boundaries de `/admin`, `/cliente`, Server Actions/Route Handlers e paginas de MFA agora possuem regressao automatica em CI. Helpers que usam o cliente administrativo derivam a identidade da sessao em vez de aceitar identidade administrativa do caller.
+
+
+### Seguranca da aplicacao e supply chain
+
+O Next.js esta pinado em `16.3.6`. O CI audita dependencias de producao para severidade alta/critica e usa `actions/checkout@v7` / `actions/setup-node@v7`. Headers globais incluem anti-framing, `nosniff`, `no-referrer`, Permissions Policy restritiva e CSP parcial segura para a arquitetura atual. A configuracao passou CI e build; a verificacao independente desses headers no deployment Vercel permanece sem evidencia nesta sessao porque o conector Vercel nao enxerga o projeto correspondente.
 
 ### Anamnese
 
