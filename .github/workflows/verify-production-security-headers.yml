@@ -1,0 +1,57 @@
+name: Verify production security headers
+
+on:
+  push:
+    branches:
+      - codex/verify-production-security-headers
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Verify production response headers
+        env:
+          E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$E2E_BASE_URL" || { echo "Missing E2E_BASE_URL"; exit 1; }
+
+          headers="$(mktemp)"
+          curl --fail --silent --show-error --location --head \
+            --output /dev/null \
+            --dump-header "$headers" \
+            "$E2E_BASE_URL/login"
+
+          normalize() {
+            tr -d '\r' < "$headers" | awk 'BEGIN{IGNORECASE=1} {print}'
+          }
+
+          csp="$(normalize | awk -F': ' 'tolower($1)=="content-security-policy"{print $2}' | tail -1)"
+          permissions="$(normalize | awk -F': ' 'tolower($1)=="permissions-policy"{print $2}' | tail -1)"
+          referrer="$(normalize | awk -F': ' 'tolower($1)=="referrer-policy"{print $2}' | tail -1)"
+          nosniff="$(normalize | awk -F': ' 'tolower($1)=="x-content-type-options"{print $2}' | tail -1)"
+          frame="$(normalize | awk -F': ' 'tolower($1)=="x-frame-options"{print $2}' | tail -1)"
+
+          [[ "$csp" == *"base-uri 'self'"* ]]
+          [[ "$csp" == *"frame-ancestors 'none'"* ]]
+          [[ "$csp" == *"form-action 'self'"* ]]
+          [[ "$permissions" == *"camera=()"* ]]
+          [[ "$permissions" == *"microphone=()"* ]]
+          [[ "$permissions" == *"geolocation=()"* ]]
+          [[ "$permissions" == *"browsing-topics=()"* ]]
+          test "$referrer" = "no-referrer"
+          test "$nosniff" = "nosniff"
+          test "$frame" = "DENY"
+
+          echo "Production CSP baseline: PASS"
+          echo "Production Permissions-Policy: PASS"
+          echo "Production Referrer-Policy: PASS"
+          echo "Production X-Content-Type-Options: PASS"
+          echo "Production X-Frame-Options: PASS"
