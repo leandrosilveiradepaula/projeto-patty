@@ -180,7 +180,7 @@ Ainda nao existe integracao real com provider/modelo nem boundary server-side qu
 
 ## Proxima rodada de decisoes da Patty
 
-Usar `PATTY_DECISION_ROUND_1.md` como primeira conversa curta.
+Usar `PATTY_DECISION_ROUND_2.md` como proxima conversa curta. A Rodada 1 fica preservada como historico de levantamento; varias perguntas dela ja foram resolvidas e nao devem ser repetidas.
 
 As respostas precisam ser reconciliadas em:
 
