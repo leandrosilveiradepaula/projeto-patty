@@ -33,6 +33,12 @@ As quatro foram aplicadas em 2026-09-23 pelo workflow manual `Deploy Supabase mi
 
 Os smokes pos-aplicacao, executados em transacao com `ROLLBACK`, confirmaram MFA AAL1/AAL2, isolamento entre clientes, persistencia de rascunho, correcoes append-only e preservacao do enforcement AAL2 apos a otimizacao das policies. O advisor deixou de reportar `auth_rls_initplan` para as policies de correcoes.
 
+Migration local atualmente pendente de aplicacao:
+
+- `20260923191554_fix_anamnesis_draft_delete_trigger.sql`
+
+Ela corrige somente a semantica de retorno do trigger `BEFORE DELETE` para rascunhos e ja passou dry-run transacional; submissions enviadas continuam imutaveis.
+
 ## Workflow
 
 O repositorio possui `.github/workflows/deploy-supabase-migrations.yml`.
