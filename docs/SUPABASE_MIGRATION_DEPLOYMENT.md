@@ -22,16 +22,18 @@ Nao usar SQL Editor, `execute_sql` ou MCP `apply_migration` para substituir esse
 
 ## Estado atual
 
-Ultimas migrations confirmadas no SaaS:
+Migrations relevantes confirmadas no SaaS nesta rodada:
 
-1. `20260923113230_anamnesis_draft_write_foundation.sql`
-2. `20260923113835_admin_mfa_rls_enforcement.sql`
-3. `20260923114643_anamnesis_answer_corrections_foundation.sql`
-4. `20260923150743_optimize_anamnesis_correction_rls.sql`
+1. `20260922160058_ai_execution_failure_handling.sql`
+2. `20260923113230_anamnesis_draft_write_foundation.sql`
+3. `20260923113835_admin_mfa_rls_enforcement.sql`
+4. `20260923114643_anamnesis_answer_corrections_foundation.sql`
+5. `20260923150743_optimize_anamnesis_correction_rls.sql`
+6. `20260923191554_fix_anamnesis_draft_delete_trigger.sql`
 
-As quatro foram aplicadas em 2026-09-23 pelo workflow manual `Deploy Supabase migrations`. O `migration list` pos-apply confirmou os mesmos timestamps local/remoto.
+O workflow manual `Deploy Supabase migrations` de 2026-09-23 confirmou `20260922160058` ja presente no historico remoto. Em seguida, o dry-run listou somente `20260923191554` como pendente; o apply aplicou essa migration e o `migration list` pos-apply confirmou os mesmos timestamps local/remoto.
 
-Os smokes pos-aplicacao, executados em transacao com `ROLLBACK`, confirmaram MFA AAL1/AAL2, isolamento entre clientes, persistencia de rascunho, correcoes append-only e preservacao do enforcement AAL2 apos a otimizacao das policies. O advisor deixou de reportar `auth_rls_initplan` para as policies de correcoes.
+Os smokes anteriores confirmaram MFA AAL1/AAL2, isolamento entre clientes, persistencia de rascunho, correcoes append-only e preservacao do enforcement AAL2 apos a otimizacao das policies. O advisor deixou de reportar `auth_rls_initplan` para as policies de correcoes. A correcao `20260923191554` esta aplicada, mas o smoke E2E especifico de rascunho ainda deve ser repetido antes de marcar essa correcao como validada em producao.
 
 Migration local atualmente pendente de aplicacao:
 
