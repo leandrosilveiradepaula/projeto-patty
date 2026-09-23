@@ -26,7 +26,7 @@ test("admin encerra assignment sintetico e cliente sai da lista atribuida", asyn
 
   await page.goto("/admin/clientes");
   await expect(
-    page.getByRole("heading", { name: "Clientes" }),
+    page.getByRole("heading", { name: "Clientes", exact: true }),
   ).toBeVisible();
 
   const clientRow = page
@@ -46,7 +46,12 @@ test("admin encerra assignment sintetico e cliente sai da lista atribuida", asyn
   await expect(
     page.getByRole("heading", { name: "E2E Client" }),
   ).toBeVisible();
-  await expect(page.getByText("Atribuição ativa", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Atribuição", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Encerrar atribuição" }),
+  ).toBeVisible();
 
   await page.getByRole("button", { name: "Encerrar atribuição" }).click();
 
