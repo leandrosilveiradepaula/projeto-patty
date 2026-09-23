@@ -27,10 +27,11 @@ Ultimas migrations confirmadas no SaaS:
 1. `20260923113230_anamnesis_draft_write_foundation.sql`
 2. `20260923113835_admin_mfa_rls_enforcement.sql`
 3. `20260923114643_anamnesis_answer_corrections_foundation.sql`
+4. `20260923150743_optimize_anamnesis_correction_rls.sql`
 
-As tres foram aplicadas em 2026-09-23 pelo workflow manual `Deploy Supabase migrations`. O `migration list` pos-apply confirmou os mesmos timestamps local/remoto.
+As quatro foram aplicadas em 2026-09-23 pelo workflow manual `Deploy Supabase migrations`. O `migration list` pos-apply confirmou os mesmos timestamps local/remoto.
 
-O smoke pos-aplicacao, executado em transacao com `ROLLBACK`, confirmou MFA AAL1/AAL2, isolamento entre clientes, persistencia de rascunho e correcoes append-only.
+Os smokes pos-aplicacao, executados em transacao com `ROLLBACK`, confirmaram MFA AAL1/AAL2, isolamento entre clientes, persistencia de rascunho, correcoes append-only e preservacao do enforcement AAL2 apos a otimizacao das policies. O advisor deixou de reportar `auth_rls_initplan` para as policies de correcoes.
 
 ## Workflow
 
@@ -73,7 +74,7 @@ Somente depois de revisar esse resultado executar novamente com:
 - `mode = apply`;
 - `confirmation = APPLY`.
 
-Apos o apply, o workflow executa `migration list` novamente. Depois disso, conferir pelo conector Supabase que os tres timestamps aparecem no historico remoto e rodar os smoke tests relevantes.
+Apos o apply, o workflow executa `migration list` novamente. Depois disso, conferir pelo conector Supabase que os timestamps esperados aparecem no historico remoto e rodar os smoke tests relevantes.
 
 ## Pos-aplicacao obrigatorio
 
