@@ -16,7 +16,8 @@
     "test:validation": "node --experimental-strip-types --test lib/validation/*.test.ts",
     "test:assignments": "node --experimental-strip-types --test lib/assignments/*.test.ts",
     "test:onboarding": "node --experimental-strip-types --test lib/onboarding/*.test.ts",
-    "test:anamnesis-draft": "node --experimental-strip-types --test lib/anamnesis/*.test.ts"
+    "test:anamnesis-draft": "node --experimental-strip-types --test lib/anamnesis/*.test.ts",
+    "test:security-boundaries": "node --test security/*.test.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",
