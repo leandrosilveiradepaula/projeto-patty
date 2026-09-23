@@ -168,6 +168,43 @@ test("Next.js keeps baseline security response headers", async () => {
   }
 });
 
+test("Supabase Auth hardening workflow stays manual and one-way", async () => {
+  const content = await readFile(
+    path.join(ROOT, ".github", "workflows", "harden-supabase-auth.yml"),
+    "utf8",
+  );
+
+  for (const required of [
+    "workflow_dispatch:",
+    "enable-hibp",
+    "confirmation:",
+    "SUPABASE_ACCESS_TOKEN",
+    "password_hibp_enabled",
+    '"password_hibp_enabled":true',
+    "inputs.confirmation == 'ENABLE'",
+    "github.ref == 'refs/heads/master'",
+  ]) {
+    assert.equal(
+      content.includes(required),
+      true,
+      "Auth hardening workflow must keep " + required,
+    );
+  }
+
+  for (const forbidden of [
+    '"password_hibp_enabled":false',
+    "schedule:",
+    "SUPABASE_SECRET_KEY",
+    "SUPABASE_DB_PASSWORD",
+  ]) {
+    assert.equal(
+      content.includes(forbidden),
+      false,
+      "Auth hardening workflow must not contain " + forbidden,
+    );
+  }
+});
+
 test("Supabase production migration workflow stays manual and non-destructive", async () => {
   const content = await readFile(
     path.join(ROOT, ".github", "workflows", "deploy-supabase-migrations.yml"),

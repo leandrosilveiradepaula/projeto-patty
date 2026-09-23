@@ -1,0 +1,112 @@
+name: Harden Supabase Auth
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Inspect current Auth security config or enable leaked password protection"
+        required: true
+        default: inspect
+        type: choice
+        options:
+          - inspect
+          - enable-hibp
+      confirmation:
+        description: "For enable-hibp mode, type ENABLE exactly"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supabase-auth-security
+  cancel-in-progress: false
+
+jobs:
+  harden:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SUPABASE_PROJECT_ID: hqanoskwjvpbgavppcud
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Validate access token
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$SUPABASE_ACCESS_TOKEN" || {
+            echo "Missing SUPABASE_ACCESS_TOKEN"
+            exit 1
+          }
+
+      - name: Require explicit enable confirmation
+        if: inputs.mode == 'enable-hibp'
+        env:
+          CONFIRMATION: ${{ inputs.confirmation }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$CONFIRMATION" = "ENABLE" || {
+            echo "enable-hibp mode requires confirmation=ENABLE"
+            exit 1
+          }
+
+      - name: Inspect current Auth security config
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail-with-body --silent --show-error             --header "Authorization: Bearer $SUPABASE_ACCESS_TOKEN"             "https://api.supabase.com/v1/projects/$SUPABASE_PROJECT_ID/config/auth"             > "$RUNNER_TEMP/auth-config.json"
+
+          node -e '
+            const fs = require("fs");
+            const config = JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + "/auth-config.json", "utf8"));
+            console.log(JSON.stringify({
+              password_hibp_enabled: config.password_hibp_enabled,
+              password_min_length: config.password_min_length,
+              password_required_characters: config.password_required_characters,
+              mfa_totp_enroll_enabled: config.mfa_totp_enroll_enabled,
+              mfa_totp_verify_enabled: config.mfa_totp_verify_enabled,
+              site_url: config.site_url,
+              uri_allow_list: config.uri_allow_list
+            }, null, 2));
+          '
+
+      - name: Enable leaked password protection
+        if: inputs.mode == 'enable-hibp' && inputs.confirmation == 'ENABLE'
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail-with-body --silent --show-error             --request PATCH             --header "Authorization: Bearer $SUPABASE_ACCESS_TOKEN"             --header "Content-Type: application/json"             --data '{"password_hibp_enabled":true}'             "https://api.supabase.com/v1/projects/$SUPABASE_PROJECT_ID/config/auth"             > "$RUNNER_TEMP/auth-config-after.json"
+
+      - name: Verify leaked password protection
+        if: inputs.mode == 'enable-hibp' && inputs.confirmation == 'ENABLE'
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail-with-body --silent --show-error             --header "Authorization: Bearer $SUPABASE_ACCESS_TOKEN"             "https://api.supabase.com/v1/projects/$SUPABASE_PROJECT_ID/config/auth"             > "$RUNNER_TEMP/auth-config-verify.json"
+
+          node -e '
+            const fs = require("fs");
+            const config = JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + "/auth-config-verify.json", "utf8"));
+            if (config.password_hibp_enabled !== true) {
+              console.error("Leaked password protection is still disabled.");
+              process.exit(1);
+            }
+            console.log("Leaked password protection enabled and verified.");
+          '
