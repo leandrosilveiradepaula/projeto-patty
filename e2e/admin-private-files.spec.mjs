@@ -120,10 +120,9 @@ test("admin envia arquivo oculto, libera explicitamente e cliente passa a ver", 
 
     await fileCard.getByRole("button", { name: "Liberar para cliente" }).click();
 
-    await expect(
-      fileCard.getByText("Arquivo liberado para a cliente.", { exact: true }),
-    ).toBeVisible({ timeout: 15_000 });
-
+    // The durable postcondition is the persisted visibility state. The
+    // transient action message may disappear when the server action
+    // revalidates the route, so do not use it as the E2E oracle.
     await adminPage.reload();
     fileHeading = adminPage.getByRole("heading", {
       exact: true,
