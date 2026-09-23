@@ -1,6 +1,7 @@
 import "server-only";
 
-import { createAdminClient } from "@/lib/supabase/admin";\nimport { getAssignmentStartStatus } from "@/lib/assignments/start-policy";
+import { getAssignmentStartStatus } from "@/lib/assignments/start-policy";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export type StartClientAssignmentResult =
   | {
