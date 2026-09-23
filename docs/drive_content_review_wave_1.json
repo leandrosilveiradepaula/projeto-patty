@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-23",
+  "scope": "first controlled content review wave; selected Drive items only",
+  "items": [
+    {
+      "source_file_id": "1z61DpJfwp-6DMhYMpCRNafkSwX6h9LBE",
+      "original_title": "MovaviClips_Video_20220217-143151.mp4",
+      "source_folder_title": "Como utilizar a BALANÇA DE ALIMENTOS",
+      "proposed_review_status": "candidate_after_human_review",
+      "content_access_performed": "visual_sampling_only",
+      "factual_observation": "Sampled frames show a presenter demonstrating a food scale with food packages, containers and weighed items.",
+      "authorship_status": "unconfirmed",
+      "rights_status": "unreviewed",
+      "professional_review_status": "required",
+      "migration_status": "not_authorized",
+      "publication_status": "not_authorized",
+      "blockers": [
+        "confirm authorship/ownership",
+        "review full audio/message",
+        "confirm current guidance",
+        "approve final title/category"
+      ]
+    },
+    {
+      "source_file_id": "1RLHtDaLd_Wl9UEovYfO5h4U1yDz_k-Ba",
+      "original_title": "Sugestao de refeições.xlsx",
+      "source_folder_title": "Sugestão de um cardápio visto pelos olhos da Corpo e Mente",
+      "proposed_review_status": "historical_example_only",
+      "content_access_performed": "text_extraction",
+      "factual_observation": "Spreadsheet contains a six-meal example with dose counts and specific food/quantity combinations.",
+      "authorship_status": "unconfirmed",
+      "rights_status": "unreviewed",
+      "professional_review_status": "required",
+      "migration_status": "not_authorized",
+      "publication_status": "not_authorized",
+      "blockers": [
+        "must not be generalized into a fixed meal-count rule",
+        "confirm whether the example is still useful/current",
+        "confirm authorship/rights",
+        "decide whether to preserve only as internal historical reference"
+      ]
+    },
+    {
+      "source_file_id": "1gro0ae5lKTCrY9Apy8gRgiDuncUdTTOS",
+      "original_title": "Fórmulas.pptx",
+      "source_folder_title": "Fórmulas by Patty Torres",
+      "proposed_review_status": "professional_hold",
+      "content_access_performed": "text_extraction",
+      "factual_observation": "Deck presents named manipulated/supplement formulas, health/body-composition claims and pharmacy contact information.",
+      "authorship_status": "historical_title_suggests_patty_but_unconfirmed",
+      "rights_status": "unreviewed",
+      "professional_review_status": "required_high_priority",
+      "migration_status": "not_authorized",
+      "publication_status": "not_authorized",
+      "blockers": [
+        "supplementation/manipulados rules remain open",
+        "review current professional/health claims",
+        "review commercial/pharmacy references",
+        "confirm authorship/rights",
+        "explicit Patty approval required before any client distribution"
+      ]
+    }
+  ]
+}
