@@ -3,7 +3,7 @@ import "server-only";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
 import type { Database } from "@/lib/supabase/database.types";
-import { getSupabaseSecretConfig } from "@/lib/supabase/env";
+import { getSupabaseSecretConfig } from "@/lib/supabase/admin-env";
 
 export function createAdminClient() {
   const { secretKey, url } = getSupabaseSecretConfig();
