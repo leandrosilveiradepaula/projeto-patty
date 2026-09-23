@@ -1,8 +1,10 @@
+import { ClientAnamnesisDraftTextAnswerForm } from "@/components/client/ClientAnamnesisDraftTextAnswerForm";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
+import { canEditDraftTextAnswer } from "@/lib/anamnesis/draft-policy";
 import {
   getAccessibleAnamnesisSubmission,
   getCurrentClient,
@@ -90,7 +92,11 @@ export default async function ClienteAnamneseDetailPage({
             Voltar ao histórico
           </Link>
         }
-        description="Suas respostas originais registradas nesta versão da Anamnese."
+        description={
+          submission.submitted_at
+            ? "Suas respostas originais registradas nesta versão da Anamnese."
+            : "Este rascunho ainda não foi enviado. Respostas de texto já podem ser salvas individualmente."
+        }
         eyebrow="Cliente"
         title="Detalhe da Anamnese"
       />
@@ -169,6 +175,30 @@ export default async function ClienteAnamneseDetailPage({
                         const formattedAnswer = answer
                           ? formatAnswerValue(answerValue)
                           : "Não respondida";
+                        const editableTextDraft = canEditDraftTextAnswer({
+                          answerType: question.answer_type,
+                          answerValue,
+                          hasAnswer: Boolean(answer),
+                          submittedAt: submission.submitted_at,
+                        });
+
+                        if (editableTextDraft) {
+                          return (
+                            <Card className={styles.questionCard} key={question.id}>
+                              <ClientAnamnesisDraftTextAnswerForm
+                                initialValue={
+                                  typeof answerValue === "string"
+                                    ? answerValue
+                                    : ""
+                                }
+                                label={question.label}
+                                questionId={question.id}
+                                required={question.required}
+                                submissionId={submission.id}
+                              />
+                            </Card>
+                          );
+                        }
 
                         return (
                           <Card className={styles.questionCard} key={question.id}>
