@@ -1,6 +1,6 @@
 # Mapa de prontidao do MVP
 
-Data de referencia: 2026-09-22.
+Data de referencia: 2026-09-22 (atualizado apos smoke E2E de producao).
 
 Este documento e um mapa operacional do estado atual. Ele nao substitui `MVP.md`, `DECISIONS.md`, `BUSINESS_RULES.md` ou `OPEN_QUESTIONS.md`.
 
@@ -24,6 +24,7 @@ Estados usados:
 - avaliacoes e medidas em leitura;
 - acompanhamento profissional append-only;
 - fotos privadas de avaliacao para admin;
+- upload, listagem e download de arquivos privados pela cliente, com smoke E2E de producao aprovado;
 - listagem/download administrativo de arquivos privados;
 - protocolos versionados em leitura;
 - revisao administrativa da estrutura alimentar persistida;
@@ -39,7 +40,8 @@ Estados usados:
 ### Principais bloqueios atuais
 
 - questionario final e fluxo de preenchimento/submissao da Anamnese;
-- implementar upload privado em duas etapas, reconciliar acesso da Patty/RLS e fechar quantidade, retencao final, antimalware e visibilidade da cliente;
+- concluir upload administrativo da Patty e liberacao explicita para a cliente;
+- definir a politica final de retencao/hard delete de arquivos privados;
 - criacao/ativacao/encerramento de contas de clientes;
 - administracao de roles e assignments;
 - edicao controlada do Cadastro Atual;
@@ -60,7 +62,7 @@ Estados usados:
 | Cadastro Atual | leitura IMPLEMENTADA | nao | CI VALIDADO | definir quem pode alterar cada campo e auditoria |
 | Anamnese versionada | leitura IMPLEMENTADA | nota interna append-only | CI VALIDADO | fechar questionario e fluxo de preenchimento |
 | Avaliacoes / medidas | leitura IMPLEMENTADA | acompanhamento profissional append-only | CI VALIDADO; conjunto de decisoes profissionais tipado e testado | definir catalogo, unidades, obrigatoriedade e correcao |
-| Arquivos privados | leitura/download admin IMPLEMENTADOS sob regra antiga de assignment; upload/delete nao | SAAS VALIDADO; IDs malformados rejeitados antes de lookup; allowlist + tamanho + ciclo de upload definidos | implementar upload em duas etapas; reconciliar RLS para acesso permanente da Patty; definir quantidade, retencao final, antimalware e visibilidade da cliente |
+| Arquivos privados | upload/listagem/download da cliente IMPLEMENTADOS; acesso admin permanente reconciliado; upload admin/liberacao ainda pendentes | smoke E2E de producao PASS com conta sintetica; SAAS VALIDADO; allowlist, tamanho e ciclo de upload validados | configurar/validar cron de limpeza de temporarios; implementar upload admin e liberacao; definir retencao/hard delete |
 | Protocolos | leitura + lifecycle manual IMPLEMENTADOS | submit/approve/publish | CI + SAAS VALIDADO; lifecycle com guarda determinística testada | criar/editar plano somente quando fluxo profissional estiver formalizado |
 | Plano alimentar publicado | cliente ve variantes, refeicoes, doses e ciclo | nao | CI VALIDADO | equivalentes visiveis continuam abertos |
 | Conteudo educacional | leitura admin/cliente por release IMPLEMENTADA | release manual | CI VALIDADO; elegibilidade de release testada | taxonomia, autoria/revisao e primeiro lote do Drive |
@@ -69,7 +71,7 @@ Estados usados:
 | IA | fundacao de banco IMPLEMENTADA | provider real nao integrado | SAAS VALIDADO | escolher provider/modelo, contrato de output e boundary server-side |
 | Drive | INVENTARIADO | nenhuma migracao fisica | 89 itens no manifesto inicial | revisar direitos/taxonomia e escolher lote inicial |
 | Regras deterministicas do metodo | IMPLEMENTADO PARCIAL | sem automacao de protocolo | CI VALIDADO | ampliar somente com formulas exatas confirmadas/documentadas |
-| CI | IMPLEMENTADO | automatico no GitHub Actions | `npm ci` + typecheck + `test:method` + `test:protocol` + `test:content` + `test:follow-up` + `test:validation` + build | adicionar testes funcionais quando houver cenarios estaveis |
+| CI | IMPLEMENTADO | automatico no GitHub Actions + smoke E2E manual de arquivos privados | `npm ci` + typecheck + `test:method` + `test:protocol` + `test:content` + `test:follow-up` + `test:validation` + build; E2E de producao PASS | ampliar E2E somente para fluxos estaveis e sinteticos |
 
 ## Regras deterministicas confirmadas
 
@@ -107,7 +109,7 @@ Ja existe:
 - download administrativo por signed URL curta, nao persistida;
 - rejeicao deterministica de identificadores de arquivo malformados antes de consulta ao banco.
 
-Os formatos e os limites de tamanho do MVP ja estao definidos: fotos em JPEG/PNG/WebP ate 10 MB; exames e documentos em PDF/JPEG/PNG ate 20 MB. A cliente podera fazer upload direto do browser para Storage privado sob RLS, usando area temporaria e validacao server-side antes de o arquivo ser considerado valido. Paths nao terao PII, objetos nao serao sobrescritos e hard delete direto pelo browser nao sera permitido. A validacao deterministica de formato/extensao, MIME detectado, tamanho e geracao de path com UUIDs internos esta implementada em `lib/validation/private-files.ts` e coberta por `test:validation`. A fundacao remota de autorizacao usa `client_file_upload_sessions`, com path temporario gerado pelo banco, expiracao de 15 minutos e policy de INSERT limitada ao objeto `pending` exato; ainda falta conectar esse fluxo a UI e a finalizacao server-side.
+Os formatos e os limites de tamanho do MVP estao definidos: fotos em JPEG/PNG/WebP ate 10 MB; exames e documentos em PDF/JPEG/PNG ate 20 MB. A cliente faz upload direto do browser para Storage privado sob RLS, usando area temporaria e validacao server-side antes de o arquivo ser considerado valido. Paths nao contem PII, objetos nao sao sobrescritos e hard delete direto pelo browser nao e permitido. A validacao deterministica de formato/extensao, MIME detectado, tamanho e geracao de path com UUIDs internos esta implementada em `lib/validation/private-files.ts` e coberta por `test:validation`. A autorizacao remota usa `client_file_upload_sessions`, com path temporario gerado pelo banco, expiracao de 15 minutos e policy de INSERT limitada ao objeto `pending` exato.
 
 A Patty mantem acesso aos arquivos mesmo sem assignment ativo, e as rotas administrativas usam signed URLs com validade de 5 minutos. A dependencia de assignment e a visibilidade por autoria/liberacao foram reconciliadas pela migration `20260922230034_private_file_access_visibility_foundation.sql`, aplicada e verificada no Supabase SaaS.
 
@@ -115,7 +117,7 @@ Downloads administrativos de exames/documentos registram evento append-only em `
 
 O MVP nao tera limite rigido de quantidade de arquivos. A Patty tambem podera enviar arquivos em nome da cliente por fluxo administrativo server-side controlado, com autoria administrativa explicita. Arquivos enviados pela cliente ficam visiveis para ela por padrao; uploads da Patty ficam ocultos ate liberacao explicita. O primeiro MVP nao tera antimalware dedicado; esse risco permanece mitigado por allowlist fechada, validacao de tipo real, limites de tamanho, Storage privado e ausencia de execucao.
 
-A RLS/policy ja diferencia visibilidade para a cliente e acesso administrativo permanente da Patty. A fundacao do upload da cliente usa `client_file_upload_sessions` e ja esta aplicada no Supabase SaaS. A boundary de criacao/finalizacao server-side valida declaracao antes da sessao, detecta assinatura binaria no objeto temporario, revalida tamanho/formato, promove para `client_files` e usa compensacao em falhas. A UI da cliente em `/cliente/arquivos` ja esta conectada a esse fluxo: cria a sessao, envia o byte diretamente ao Storage privado, finaliza no servidor, atualiza o historico e permite download somente de arquivos visiveis pela RLS, via signed URL de 5 minutos. Existe um smoke E2E manual versionado em `e2e/client-private-files.spec.mjs`, acionado por `.github/workflows/e2e-private-files.yml`, mas ele ainda nao foi executado contra producao; depende de conta sintetica e dos secrets `E2E_BASE_URL`, `E2E_CLIENT_EMAIL` e `E2E_CLIENT_PASSWORD`. Limpeza de sessoes/objetos abandonados, upload administrativo e liberacao para a cliente ainda nao estao implementados. Permanece aberta a politica concreta de retencao/hard delete.
+A RLS/policy diferencia visibilidade para a cliente e acesso administrativo permanente da Patty. A fundacao do upload da cliente usa `client_file_upload_sessions` e esta aplicada no Supabase SaaS. A boundary de criacao/finalizacao server-side valida declaracao antes da sessao, reserva a sessao em `validating`, detecta assinatura binaria no objeto temporario, revalida tamanho/formato, promove para `client_files` e usa compensacao em falhas. A UI da cliente em `/cliente/arquivos` cria a sessao, envia o byte diretamente ao Storage privado, finaliza no servidor, atualiza o historico e permite download somente de arquivos visiveis pela RLS, via signed URL de 5 minutos. O smoke E2E manual em `e2e/client-private-files.spec.mjs`, acionado por `.github/workflows/e2e-private-files.yml`, foi executado em producao com conta sintetica e passou em login, upload, validacao/finalizacao, historico e download. A limpeza de temporarios expirados foi implementada sem apagar linhas historicas de sessao: o cron marca sessoes `pending` expiradas como `expired` e remove somente objetos no namespace `pending/`. A ativacao operacional do cron depende de `CRON_SECRET` no ambiente de producao da Vercel e ainda precisa ser validada apos deploy. Upload administrativo e liberacao explicita para a cliente continuam pendentes. Permanece aberta a politica concreta de retencao/hard delete dos arquivos aceitos.
 
 ### Acompanhamento profissional
 
