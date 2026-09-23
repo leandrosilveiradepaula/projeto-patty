@@ -48,9 +48,11 @@ Deve existir um painel administrativo para a Patty.
 
 Ainda e necessario definir se havera outros papeis administrativos alem da Patty, como assistentes, profissionais parceiros ou suporte operacional.
 
-### QUESTAO ABERTA
+### DECISAO CONFIRMADA E QUESTOES REMANESCENTES
 
-Ainda e necessario definir os fluxos detalhados de cadastro, convite, ativacao e encerramento de conta de clientes.
+No MVP, a Patty inicia o onboarding com o email da cliente e envia um link de convite/ativacao. Nao existe cadastro publico/autonomo. A cliente define a senha no fluxo de ativacao e o login posterior usa email + senha.
+
+Continuam abertas somente as regras operacionais ainda nao fechadas, como expiracao/reenvio do convite, recuperacao de acesso, encerramento da conta e a infraestrutura definitiva do email real de convite.
 
 ## Substituicao gradual do Drive
 
