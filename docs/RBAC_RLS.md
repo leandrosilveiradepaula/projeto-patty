@@ -83,7 +83,9 @@ Cliente pode acessar somente seu proprio `client_registration`.
 
 Futuramente, cliente podera acessar somente seus proprios dados client-scoped.
 
-Para Anamnese em rascunho, a fundacao de escrita segue privilegio minimo: a cliente pode criar somente a propria submission para versao publicada e inserir/atualizar somente o valor das respostas enquanto a submission continua sem `submitted_at`. A identidade da resposta (`submission_id`, `form_version_id`, `question_id`) nao recebe UPDATE. A submissao final ainda nao e liberada nesta etapa.
+Para Anamnese em rascunho, a fundacao de escrita segue privilegio minimo: a cliente pode criar somente a propria submission para versao publicada e inserir/atualizar somente o valor das respostas enquanto a submission continua sem `submitted_at`. A identidade da resposta (`submission_id`, `form_version_id`, `question_id`) nao recebe UPDATE.
+
+A regra de produto da submissao final ja esta definida: todos os campos aplicaveis devem estar preenchidos. A submissao final, porem, ainda nao esta implementada/liberada para a cliente porque as regras de aplicabilidade das perguntas condicionais e a UX final do envio continuam pendentes. Nao confundir regra definida com funcionalidade implementada.
 
 Depois da submissao, a cliente nao recebe escrita nas respostas nem acesso a `anamnesis_answer_corrections`. Correcoes estruturadas sao administrativas, exigem assignment ativo e AAL2, e sao append-only.
 
@@ -105,7 +107,7 @@ A estrategia e aditiva: policies `RESTRICTIVE` verificam o claim confiavel `aal`
 
 `user_roles` permanece fora dessa restricao para permitir que uma sessao administrativa em `aal1` descubra o proprio role e seja encaminhada ao fluxo de MFA. Os demais recursos administrativos protegidos exigem `aal2`. Clientes em `aal1` continuam sujeitas somente as policies normais de ownership e nao passam a exigir MFA.
 
-A migration `20260923113835_admin_mfa_rls_enforcement.sql` esta preparada e validada por dry-run transacional, mas ainda nao aplicada no SaaS.
+A migration `20260923113835_admin_mfa_rls_enforcement.sql` foi aplicada no Supabase SaaS em 2026-09-23. O smoke pos-aplicacao documentado confirmou admin em AAL1 bloqueado, admin em AAL2 autorizado quando as demais policies permitem e cliente em AAL1 sem regressao.
 
 ## Acesso Patty/admin
 
@@ -218,7 +220,7 @@ Se futuramente uma funcao `SECURITY DEFINER` for realmente necessaria:
 - deve ter `search_path` controlado;
 - deve passar por revisao de seguranca.
 
-Nao foram implementadas funcoes nesta fase.
+A afirmacao acima descreve a fase inicial. Fases posteriores introduziram funcoes e boundaries controladas documentadas em `DECISIONS.md`; qualquer avaliacao atual deve usar o estado mais recente, nao esta restricao historica.
 
 ## Auditoria
 
@@ -271,9 +273,11 @@ O browser nao cria perfis, clientes, roles ou assignments diretamente. O bootstr
 
 Para Cadastro Atual, submission e answer, a cliente autenticada le somente recursos vinculados ao proprio `clients.profile_id`. Patty/admin le somente quando possui role relacional `admin` e assignment ativo para a cliente. `anon` nao recebe acesso.
 
-### DECISAO CONFIRMADA
+### DECISAO HISTORICA PARCIALMENTE SUBSTITUIDA
 
-Nesta etapa, browser autenticado nao recebe `INSERT`, `UPDATE` ou `DELETE` em Cadastro Atual, definicoes, submissions ou answers. O fluxo definitivo de escrita permanece aberto e nao foi inferido a partir da UI.
+A fundacao original nao concedia escrita de browser em Cadastro Atual, definicoes, submissions ou answers. Essa descricao foi parcialmente substituida para Anamnese em rascunho.
+
+Na implementacao atual, a cliente autenticada pode criar somente a propria submission de rascunho para versao publicada e inserir/atualizar somente o valor das proprias respostas enquanto `submitted_at IS NULL`, sob RLS e privilegios minimos. A submissao final continua nao liberada. Cadastro Atual e definicoes de formulario nao receberam escrita ampla pelo browser por causa dessa mudanca.
 
 Administradores com assignment ativo podem inserir review administrativa em seu proprio nome e ler reviews da cliente sob sua responsabilidade. Clientes nao possuem grant ou policy para ler reviews.
 
