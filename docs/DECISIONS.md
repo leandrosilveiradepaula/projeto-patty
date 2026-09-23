@@ -49,7 +49,7 @@ No MVP, a visibilidade de arquivos privados para a cliente depende da autoria do
 
 A visualizacao pela cliente continua exigindo autenticacao, autorizacao e signed URL temporaria. O sistema deve preservar quem enviou o arquivo e, quando houver liberacao administrativa, quem liberou e quando.
 
-A RLS de `client_files` e Storage ja diferencia a visibilidade para a cliente e o acesso administrativo permanente da Patty. Os fluxos de upload e de liberacao explicita ainda devem preservar essa regra ao materializar novos arquivos.
+A RLS de `client_files` e Storage diferencia a visibilidade para a cliente e o acesso administrativo permanente da Patty. O fluxo administrativo implementado cria sessao server-side, autoriza somente o path temporario por signed upload token, finaliza com validacao do conteudo real e registra o arquivo com `client_visible_at` nulo. A liberacao posterior e explicita e grava `client_visibility_set_by_profile_id` e `client_visible_at`.
 
 ## 2026-09-22 - Sem antimalware dedicado no primeiro MVP
 
@@ -73,7 +73,7 @@ O sistema deve registrar explicitamente a autoria administrativa do upload; um a
 
 O fluxo administrativo deve respeitar a mesma allowlist de formatos, os mesmos limites de tamanho, paths sem PII, imutabilidade dos objetos e validacao em duas etapas definidos para uploads privados.
 
-A autorizacao da operacao segue a excecao ja confirmada para arquivos privados: no MVP, a Patty pode acessar e administrar esses arquivos mesmo sem assignment ativo. Nenhuma chave secreta deve ser exposta ao browser.
+A autorizacao da operacao segue a excecao ja confirmada para arquivos privados: no MVP, a Patty pode acessar e administrar esses arquivos mesmo sem assignment ativo. A implementacao usa boundary server-side para criar a sessao e o signed upload token do path exato; o browser nao recebe chave secreta. O arquivo administrativo permanece oculto para a cliente ate liberacao explicita.
 
 ## 2026-09-22 - Sem limite rigido de quantidade de arquivos no MVP
 
