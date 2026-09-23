@@ -24,17 +24,17 @@ Nenhuma branch foi apagada nesta tarefa.
 
 ### `codex/reconcile-documentation-master`
 
-Estado: **ATIVA / PRESERVAR**
+Estado: **MERGEADA / HISTORICA**
 
-Foi criada diretamente do `master` para incorporar apenas mudancas documentais ainda validas e fatos operacionais descobertos durante a reconciliacao.
+O pacote documental foi incorporado ao `master` pelo PR #120 em 2026-09-23.
 
-Nao reutilizar esta branch para nova implementacao depois que seu pacote documental for encerrado. Nova tarefa deve partir do HEAD atual do `master`, salvo instrucao explicita diferente.
+A branch nao deve ser reutilizada para nova implementacao. Depois de eventual tarefa administrativa explicita de limpeza, ela e candidata a exclusao como branch historica ja incorporada.
 
 ## Classificacao das 14 excecoes da auditoria original
 
 | Branch | Estado | Evidencia | Acao recomendada |
 | --- | --- | --- | --- |
-| `codex/document-existing-draft-ui` | **SUPERADA PELA RECONCILIACAO ATUAL** | O PR #113 havia sido mergeado, mas a branch recebeu novos commits documentais e ficou 12 commits a frente e 26 atras do `master`. O conteudo documental valido foi reconciliado na branch limpa `codex/reconcile-documentation-master`. | Preservar apenas ate revisar/mergear a reconciliacao atual; depois candidata a limpeza. Nao usar como base de codigo. |
+| `codex/document-existing-draft-ui` | **SUPERADA / HISTORICA** | O PR #113 havia sido mergeado, mas a branch recebeu novos commits documentais e ficou 12 commits a frente e 26 atras do `master`. O conteudo documental valido foi reconciliado e incorporado ao `master` pelo PR #120. | Candidata a limpeza administrativa futura. Nao usar como base de codigo. |
 | `codex/admin-mfa-enrollment-hygiene` | **REJEITADA** | PR #76 foi encerrado sem merge porque a abordagem tentava localizar fator MFA `unverified` por uma API/tipagem que nao oferecia esse comportamento. | Candidata a exclusao futura; nao reaproveitar codigo. |
 | `codex/client-file-upload-session-foundation` | **SUBSTITUIDA** | PR #55 foi encerrado sem merge; a fundacao aplicada foi posteriormente reconciliada por PR #57 e evoluida por fluxos seguintes. | Candidata a exclusao futura. |
 | `codex/e2e-admin-anamnesis-corrections` | **SUBSTITUIDA** | PR #107 foi encerrado explicitamente como substituido por branch limpa; PR #111 foi mergeado. | Candidata a exclusao futura. |

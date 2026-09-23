@@ -43,7 +43,7 @@ Estados usados:
 
 ### Principais bloqueios atuais
 
-- deployment de producao Vercel esta defasado por `build-rate-limit`; o ultimo merge de `master` publicado com sucesso e `b466accc8a5f`, portanto mudancas posteriores ainda nao podem ser marcadas como PRODUCAO VALIDADA;
+- o bloqueio de `build-rate-limit` foi superado para o merge do PR #120: o commit `602c6d5129b093fc092f7b87209f21d1eab574ca` recebeu status Vercel `success`; ainda faltam os gates de runtime de headers e E2E antes de marcar os fluxos recentes como PRODUCAO VALIDADA;
 - questionario final e fluxo de preenchimento/submissao da Anamnese;
 - definir a politica final de retencao/hard delete de arquivos privados;
 - decidir infraestrutura/plano para habilitar `Leaked Password Protection`, recurso bloqueado no ambiente atual por exigir Pro ou superior;
@@ -109,7 +109,7 @@ No nivel de aplicacao, as boundaries de `/admin`, `/cliente`, Server Actions/Rou
 
 O Next.js esta pinado em `16.3.6`. O CI audita dependencias de producao para severidade alta/critica e usa `actions/checkout@v7` / `actions/setup-node@v7`. Headers globais incluem anti-framing, `nosniff`, `no-referrer`, Permissions Policy restritiva e CSP parcial segura para a arquitetura atual.
 
-A configuracao de headers passou CI/build, mas ainda nao esta publicada no ambiente atual: GET real para `/login` confirmou ausencia desses headers, e o GitHub mostra que o ultimo merge de `master` publicado pela Vercel e anterior ao PR #94 que os adicionou. O `vercel.json` agora bloqueia previews de branches `codex/**` para reduzir consumo da cota de builds; falta um novo deployment de `master` quando o limite da Vercel permitir.
+A configuracao de headers passou CI/build. O deployment do commit `602c6d5129b093fc092f7b87209f21d1eab574ca`, que ja inclui o hardening posterior ao PR #94, recebeu status Vercel `success`. Falta agora repetir a verificacao GET real contra `/login` para confirmar os headers no runtime publicado. O `vercel.json` continua bloqueando previews de branches `codex/**` para reduzir consumo desnecessario de builds.
 
 ### Anamnese
 

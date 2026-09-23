@@ -37,6 +37,19 @@ Permanece aberta somente a parte ainda nao definida do workflow administrativo c
 
 A pergunta generica sobre campos obrigatorios tambem foi ajustada para nao contradizer a regra confirmada de que todos os campos aplicaveis da Anamnese sao obrigatorios no envio final. O mapa final de campos e a aplicabilidade condicional continuam abertos.
 
+## 2026-09-23 - Recuperacao do deployment de producao Vercel
+
+### FATO OPERACIONAL CONFIRMADO
+
+O merge do PR #120, commit `602c6d5129b093fc092f7b87209f21d1eab574ca`, recebeu status Vercel `success` com a descricao `Deployment has completed`.
+
+Isso encerra a condicao anterior em que o `master` estava necessariamente atras da producao por `build-rate-limit`. O status de deployment bem-sucedido, isoladamente, nao prova os comportamentos de runtime. Permanecem como gates:
+- GET real em `/login` para confirmar headers HTTP;
+- smoke E2E de correcoes administrativas;
+- smoke E2E do rascunho da Anamnese.
+
+O gate versionado correspondente esta em `VERCEL_PRODUCTION_GATE.md`.
+
 ## 2026-09-23 - Controle de previews Vercel e divergencia temporaria de producao
 
 ### FATO OPERACIONAL CONFIRMADO

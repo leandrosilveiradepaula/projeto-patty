@@ -23,12 +23,17 @@ Antes de iniciar:
 
 ## Gate 1 - confirmar deployment
 
-Depois que a Vercel aceitar o build:
+### PASS EM 2026-09-23
 
-1. registrar o SHA exato publicado;
-2. confirmar que o SHA publicado corresponde ao `master` esperado;
-3. registrar status READY/sucesso;
-4. nao prosseguir para conclusoes de runtime se o SHA publicado estiver atrasado.
+O merge do PR #120 publicou o commit:
+
+`602c6d5129b093fc092f7b87209f21d1eab574ca`
+
+O GitHub recebeu do contexto Vercel:
+- estado: `success`;
+- descricao: `Deployment has completed`.
+
+Isso confirma a recuperacao do pipeline de producao para esse SHA. Os gates abaixo continuam independentes e ainda precisam de validacao de runtime.
 
 ## Gate 2 - headers HTTP
 
