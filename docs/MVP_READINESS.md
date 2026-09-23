@@ -122,7 +122,7 @@ A RLS/policy diferencia visibilidade para a cliente e acesso administrativo perm
 
 A regra de gestao esta confirmada: somente a Patty pode iniciar ou encerrar assignments por fluxo administrativo server-side controlado. O encerramento de uma atribuicao ativa esta implementado no detalhe administrativo da cliente. A action exige role relacional `admin`, usa a identidade autenticada como `staff_profile_id`, atualiza somente assignments ativos dessa mesma Patty/cliente e preenche `ended_at` sem apagar a linha historica. Apos o encerramento, os demais dados client-scoped deixam de ser acessiveis pelas RLS normais; a excecao de arquivos privados permanece separada.
 
-O inicio de assignment ainda nao tem UI. Essa parte deve ser integrada ao onboarding controlado da cliente, cujos detalhes de convite/ativacao ainda estao abertos. Nao sera criada listagem privilegiada de clientes nao atribuidas nem bypass generico de RLS apenas para facilitar essa etapa.
+O inicio de assignment ainda nao tem UI. Essa parte deve ser integrada ao onboarding controlado da cliente, cujos detalhes de convite/ativacao ainda estao abertos. Nao sera criada listagem privilegiada de clientes nao atribuidas nem bypass generico de RLS apenas para facilitar essa etapa. O smoke E2E manual do encerramento esta versionado em `e2e/end-client-assignment.spec.mjs` e `.github/workflows/e2e-end-client-assignment.yml`; ainda precisa ser executado em producao com o assignment sintetico preparado.
 
 ### Acompanhamento profissional
 
