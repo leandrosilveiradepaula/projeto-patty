@@ -73,7 +73,7 @@ Isso confirma que um deployment de producao voltou a ser aceito para o estado in
 | RBAC / RLS / assignments | SIM | SIM | Smokes documentados | Fundacao e fluxos administrativos principais operacionais | Novos papeis ficam fora do MVP; assignment continua regra geral para dados client-scoped |
 | Cadastro Atual | SIM como entidade separada | SIM | Fundacao testada | Backend existente | Fluxo final de edicao cadastral pela cliente/Patty ainda aberto |
 | Anamnese versionada | SIM | SIM | Fundacao testada | Backend existente | Questionario final, tipos de input, condicionais e aplicabilidade |
-| Rascunho da Anamnese | SIM | PARCIAL | Smoke transacional pos-apply PASS; CI e smokes anteriores existentes | Persistencia aplicada; `20260923191554` aplicada e validada no banco | E2E de UI depende de deployment Vercel atualizado; depois continuar inicio automatico, tipos, autosave e submissao |
+| Rascunho da Anamnese | SIM | PARCIAL | Smoke transacional pos-apply PASS; CI e smokes anteriores existentes | Persistencia aplicada; inicio seguro preparado por chave canonica, sem usar fixtures E2E | Publicar a versao oficial com `form_key = client-anamnesis`; depois validar inicio no runtime e continuar tipos/autosave/submissao |
 | Obrigatoriedade da Anamnese | SIM | Regra refletida na fundacao | N/A | Todos os campos aplicaveis sao obrigatorios no envio final | Formalizar aplicabilidade de perguntas condicionais |
 | Correcao pos-envio da Anamnese | SIM | SIM | Smoke administrativo documentado | `anamnesis_answer_corrections` aplicada no SaaS | Workflow administrativo completo alem de notas/correcoes |
 | Arquivos privados | SIM | PARCIAL/AVANCADO | Smokes cliente/admin + auditoria estatica | Acesso da Patty sem assignment confirmado em RLS/Storage/rotas, com MFA AAL2 | Politica de retencao/hard delete |
@@ -114,6 +114,9 @@ Resumo:
 
 ## Anamnese: regras que nao devem ser reabertas
 
+- o inicio de uma nova Anamnese da cliente usa exclusivamente o formulario canonico `form_key = client-anamnesis`; nao selecionar genericamente qualquer versao publicada, porque fixtures E2E podem existir no mesmo schema;
+- entre as versoes publicadas desse formulario canonico, o inicio usa a maior `version_number` e reaproveita um draft ativo da mesma versao quando existir;
+- enquanto o formulario canonico nao estiver publicado, a UI nao oferece criacao de novo rascunho;
 - todos os campos **aplicaveis** sao obrigatorios para o envio final;
 - rascunho pode permanecer incompleto e ser retomado;
 - depois do envio final, a cliente nao altera as respostas;
@@ -186,8 +189,8 @@ Nesta reconciliacao de 2026-09-23, incorporada ao `master` pelo PR #120:
 Ordem operacional sugerida, sujeita a revalidacao do HEAD:
 
 1. executar os gates de runtime no deployment Vercel atual: headers HTTP, correcoes administrativas e rascunho da Anamnese;
-2. concluir aplicabilidade/condicionais e questionario final da Anamnese;
-3. concluir fluxo de submissao final da Anamnese;
+2. concluir aplicabilidade/condicionais e questionario final da Anamnese e publicar a primeira versao canonica `client-anamnesis`;
+3. validar o inicio de novo rascunho contra essa versao e concluir fluxo de submissao final da Anamnese;
 4. resolver infraestrutura do email real de convite;
 5. continuar integracao UI <-> backend real;
 6. preparar execution real de IA com provider/modelo explicitamente definidos;
