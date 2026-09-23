@@ -4,7 +4,7 @@ import test from "node:test";
 import {
   parseCorrectionJson,
   serializeCorrectionJson,
-} from "./corrections.js";
+} from "./corrections.ts";
 
 test("parseCorrectionJson accepts every JSON top-level shape", () => {
   const cases = [
