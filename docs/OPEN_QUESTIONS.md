@@ -240,7 +240,7 @@ Qual e a origem da percepcao de aderencia e quais partes do acompanhamento profi
 
 ### QUESTAO ABERTA
 
-Quais perguntas da Anamnese serao definitivamente obrigatorias, quais serao condicionais e quais regras determinam sua aplicabilidade? Ate essa definicao, `missing_answer` permanece bloqueado na primeira revisao operacional de IA.
+Como sera formalizada a aplicabilidade das perguntas condicionais da Anamnese para que `missing_answer` possa distinguir ausencia real de pergunta nao aplicavel? A obrigatoriedade geral ja esta confirmada: todos os campos aplicaveis da versao devem estar preenchidos no envio final.
 
 O contrato futuro de `missing_answer` devera usar `target_question_id` para a pergunta ausente e permitir `source_answer_ids` vazio; o target devera pertencer a mesma `form_version_id` da submission. Isso e conceito futuro, nao implementacao atual.
 
