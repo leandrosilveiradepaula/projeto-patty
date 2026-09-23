@@ -20,7 +20,7 @@ export async function inviteClient(
   _: InviteClientState,
   formData: FormData,
 ): Promise<InviteClientState> {
-  const auth = await requireRole("admin");
+  await requireRole("admin");
   const emailValue = formData.get("email");
   const email = typeof emailValue === "string" ? emailValue : "";
   const validation = validateInvitationEmail(email);
@@ -32,7 +32,6 @@ export async function inviteClient(
   try {
     await inviteAndProvisionClient({
       email: normalizeInvitationEmail(email),
-      staffProfileId: auth.profileId,
     });
   } catch (error) {
     if (error instanceof ClientInvitationProvisionError) {
