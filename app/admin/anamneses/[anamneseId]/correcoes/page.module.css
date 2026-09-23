@@ -1,0 +1,124 @@
+.backLink {
+  color: var(--color-brand-strong);
+  font-family: var(--font-family-heading);
+  text-decoration: none;
+}
+
+.backLink:hover {
+  text-decoration: underline;
+}
+
+.backLink:focus-visible {
+  outline: 3px solid var(--color-brand);
+  outline-offset: 3px;
+}
+
+.notice,
+.noCorrections,
+.valueLabel,
+.questionKey,
+.correctionMeta {
+  margin: 0;
+}
+
+.notice {
+  margin: var(--space-6) 0;
+  color: var(--color-text-secondary);
+  line-height: var(--text-body-medium-line-height);
+}
+
+.answerList {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.answerCard {
+  display: grid;
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+.answerHeader {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: start;
+  justify-content: space-between;
+}
+
+.questionKey,
+.valueLabel,
+.correctionMeta {
+  color: var(--color-text-muted);
+  font-size: var(--text-body-small-size);
+  line-height: var(--text-body-small-line-height);
+}
+
+.questionLabel,
+.historyTitle {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+}
+
+.questionLabel {
+  margin-top: var(--space-1);
+  font-size: var(--text-title-medium-size);
+  line-height: var(--text-title-medium-line-height);
+}
+
+.valueLabel {
+  margin-bottom: var(--space-1);
+  font-weight: var(--text-label-small-weight);
+}
+
+.jsonValue {
+  overflow-x: auto;
+  margin: 0;
+  border-radius: var(--radius-medium);
+  background: var(--color-surface-low);
+  padding: var(--space-3);
+  color: var(--color-text-secondary);
+  font: inherit;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.history,
+.formArea {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.historyTitle {
+  font-size: var(--text-title-small-size);
+  line-height: var(--text-title-small-line-height);
+}
+
+.correctionList {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.correctionList li {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.correctionMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.noCorrections {
+  color: var(--color-text-secondary);
+}
+
+.formArea {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-4);
+}
