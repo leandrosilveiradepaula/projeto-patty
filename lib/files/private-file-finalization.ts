@@ -37,7 +37,7 @@ async function rejectUploadSession(input: {
     .from("client_file_upload_sessions")
     .update({ status: "rejected" })
     .eq("id", input.sessionId)
-    .eq("status", "pending");
+    .eq("status", "validating");
 
   if (error) {
     throw error;
@@ -83,6 +83,23 @@ export async function finalizeClientFileUploadSession(input: {
 
     await removeObjectBestEffort(session.temp_object_path);
     return { reason: "expired", status: "rejected" };
+  }
+
+  const { data: claimedSession, error: claimError } = await admin
+    .from("client_file_upload_sessions")
+    .update({ status: "validating" })
+    .eq("id", session.id)
+    .eq("status", "pending")
+    .gt("expires_at", new Date().toISOString())
+    .select("id")
+    .maybeSingle();
+
+  if (claimError) {
+    throw claimError;
+  }
+
+  if (!claimedSession) {
+    throw new Error("Upload session is unavailable for finalization");
   }
 
   const { data: blob, error: downloadError } = await admin.storage
@@ -161,7 +178,7 @@ export async function finalizeClientFileUploadSession(input: {
         .from("client_file_upload_sessions")
         .update({ status: "rejected" })
         .eq("id", session.id)
-        .eq("status", "pending");
+        .eq("status", "validating");
     }
 
     throw insertError;
@@ -171,7 +188,7 @@ export async function finalizeClientFileUploadSession(input: {
     .from("client_file_upload_sessions")
     .update({ status: "accepted" })
     .eq("id", session.id)
-    .eq("status", "pending");
+    .eq("status", "validating");
 
   if (acceptError) {
     await admin.from("client_files").delete().eq("id", fileId);
@@ -186,7 +203,7 @@ export async function finalizeClientFileUploadSession(input: {
         .from("client_file_upload_sessions")
         .update({ status: "rejected" })
         .eq("id", session.id)
-        .eq("status", "pending");
+        .eq("status", "validating");
     }
 
     throw acceptError;
