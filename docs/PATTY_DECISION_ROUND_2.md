@@ -49,11 +49,7 @@ Ja esta decidido, entre outros pontos:
 
 11. Quais mudancas cadastrais precisam ficar registradas em historico/auditoria? Por exemplo: troca de telefone ou email de contato.
 
-12. Quando uma cliente nova entra no sistema, qual fluxo operacional voce prefere?
-   - Patty cria/seleciona a cliente e envia convite;
-   - a cliente recebe o convite, cria a senha e ativa a conta;
-   - outro fluxo.
-   Descreva apenas as etapas humanas que voce espera executar.
+12. **RESPONDIDA em 2026-09-23.** A Patty ja possui o email da cliente e envia um link para esse endereco. O link abre a interface do aplicativo onde a cliente responde as perguntas que antes eram respondidas no formulario externo. O detalhe de criacao/ativacao da credencial de login e senha fica como decisao tecnica/produto separada.
 
 13. Quando o acompanhamento termina, o login da cliente deve ser desativado imediatamente, permanecer ativo apenas para consulta do historico publicado, ou seguir outra regra?
 
