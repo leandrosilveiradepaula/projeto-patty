@@ -104,7 +104,7 @@ A aplicacao preserva:
 - respostas originais;
 - notas internas separadas.
 
-A regra de preenchimento agora esta parcialmente fechada: todos os campos sao obrigatorios para o envio final; rascunho incompleto pode ser salvo e retomado; depois do envio, a cliente nao edita mais e somente a Patty pode registrar correcao historica sem sobrescrever a resposta original. Ainda faltam o mapa final de perguntas, tipos de input, condicionais e ordem/agrupamento antes de implementar o formulario definitivo.
+A regra de preenchimento agora esta parcialmente fechada: todos os campos sao obrigatorios para o envio final; rascunho incompleto pode ser salvo e retomado; depois do envio, a cliente nao edita mais e somente a Patty pode registrar correcao historica sem sobrescrever a resposta original. A fundacao de escrita do rascunho esta preparada na migration `20260923113230_anamnesis_draft_write_foundation.sql`: um rascunho ativo por cliente/versao publicada, INSERT restrito da propria submission e INSERT/UPDATE apenas de `answer_value` das respostas do proprio rascunho. O dry-run transacional no Supabase SaaS passou, mas a migration ainda nao foi aplicada. A submissao final continua bloqueada ate fechar perguntas condicionais/aplicabilidade, tipos de input e ordem/agrupamento do formulario.
 
 ### Arquivos privados
 
