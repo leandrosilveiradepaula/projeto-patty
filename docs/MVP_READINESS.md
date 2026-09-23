@@ -38,7 +38,7 @@ Estados usados:
 - CI de typecheck, audit de dependencias de producao, testes determinísticos, regressoes de boundaries de seguranca e build, em pull requests e `master`;
 - Next.js 16.3.6 e headers HTTP basicos de seguranca integrados ao `master`;
 - fundacao auditavel de IA e tratamento de falhas no banco;
-- inventario inicial e manifesto machine-readable do Drive sem PII.
+- inventario inicial, manifesto e triagem machine-readable do Drive sem PII; nenhuma migracao/publicacao autorizada.
 
 ### Principais bloqueios atuais
 
@@ -73,7 +73,7 @@ Estados usados:
 | Exercicios | leitura admin IMPLEMENTADA | nao | CI VALIDADO | definir exposicao a cliente e campos finais |
 | Progresso de conteudo | schema existe | fluxo nao implementado | PARCIAL | definir quem registra abertura/conclusao |
 | IA | fundacao de banco + validador deterministico de output `anamnesis_review` IMPLEMENTADOS | provider real e boundary de execution ainda nao integrados | SAAS VALIDADO; contrato de output coberto por testes determinísticos | definir provider/modelo, prompt versionado e boundary server-side de execution |
-| Drive | INVENTARIADO | nenhuma migracao fisica | 89 itens no manifesto inicial | revisar direitos/taxonomia e escolher lote inicial |
+| Drive | INVENTARIADO + TRIADO POR METADADOS | nenhuma migracao fisica | 89 itens; 16 grupos de possiveis duplicidades; 9 videos com titulo generico; direitos ainda nao revisados | revisar direitos/taxonomia e escolher lote inicial |
 | Regras deterministicas do metodo | IMPLEMENTADO PARCIAL | sem automacao de protocolo | CI VALIDADO | ampliar somente com formulas exatas confirmadas/documentadas |
 | CI | IMPLEMENTADO | automatico no GitHub Actions + smoke E2E manual de arquivos privados | `npm ci` + audit high/critical de producao + typecheck + suites deterministicas + `test:security-boundaries` + build; core Actions em v7; E2E de producao PASS nos fluxos ja estabilizados | ampliar E2E somente para fluxos estaveis e sinteticos |
 
@@ -182,6 +182,8 @@ O Supabase SaaS estava com 0 registros nas quatro tabelas-base de biblioteca no 
 - `exercise_versions`.
 
 O Drive possui manifesto inicial com 89 arquivos claramente nao client-scoped. Nenhum deles foi importado.
+
+Uma triagem somente por metadados cobre todos os itens em `drive_content_triage.json`. Ela identificou 16 grupos de possiveis duplicidades por nome normalizado entre as pastas historicas de exercicios e 9 videos com nomes genericos que exigem inspecao do conteudo antes de receber titulo final. As categorias registradas sao hipoteses, os rotulos historicos "masculino/feminino" nao sao regra de produto e todos os itens continuam com direitos nao revisados e migracao/publicacao nao autorizadas.
 
 Antes da importacao e necessario resolver direitos/licenciamento, taxonomia e lote inicial.
 
