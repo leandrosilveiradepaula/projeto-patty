@@ -34,7 +34,7 @@ async function cleanupDraft(submissionId) {
 
 async function lockSyntheticClient(userId) {
   const updated = await admin.auth.admin.updateUserById(userId, {
-    password: randomBytes(64).toString("base64url"),
+    password: randomBytes(48).toString("base64url"),
   });
 
   if (updated.error) throw updated.error;
