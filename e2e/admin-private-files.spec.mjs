@@ -1,8 +1,11 @@
 import { expect, test } from "@playwright/test";
 
+import { loginAdminWithMfa } from "./helpers/admin-auth.mjs";
+
 const baseUrl = process.env.E2E_BASE_URL?.replace(/\/$/, "");
 const adminEmail = process.env.E2E_ADMIN_EMAIL;
 const adminPassword = process.env.E2E_ADMIN_PASSWORD;
+const adminTotpSecret = process.env.E2E_ADMIN_TOTP_SECRET;
 const clientEmail = process.env.E2E_CLIENT_EMAIL;
 const clientPassword = process.env.E2E_CLIENT_PASSWORD;
 
@@ -10,11 +13,12 @@ if (
   !baseUrl ||
   !adminEmail ||
   !adminPassword ||
+  !adminTotpSecret ||
   !clientEmail ||
   !clientPassword
 ) {
   throw new Error(
-    "Missing E2E_BASE_URL, E2E_ADMIN_EMAIL, E2E_ADMIN_PASSWORD, E2E_CLIENT_EMAIL or E2E_CLIENT_PASSWORD",
+    "Missing E2E_BASE_URL, E2E_ADMIN_EMAIL, E2E_ADMIN_PASSWORD, E2E_ADMIN_TOTP_SECRET, E2E_CLIENT_EMAIL or E2E_CLIENT_PASSWORD",
   );
 }
 
@@ -24,7 +28,7 @@ const syntheticPng = Buffer.from(
   "base64",
 );
 
-async function login(page, email, password) {
+async function loginClient(page, email, password) {
   await page.goto("/login");
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Senha").fill(password);
@@ -40,7 +44,11 @@ test("admin envia arquivo oculto, libera explicitamente e cliente passa a ver", 
   });
   const adminPage = await adminContext.newPage();
 
-  await login(adminPage, adminEmail, adminPassword);
+  await loginAdminWithMfa(adminPage, {
+    email: adminEmail,
+    password: adminPassword,
+    totpSecret: adminTotpSecret,
+  });
   await expect(adminPage).toHaveURL(/\/admin\/?$/);
 
   await adminPage.goto("/admin/arquivos");
@@ -99,7 +107,7 @@ test("admin envia arquivo oculto, libera explicitamente e cliente passa a ver", 
   });
   const clientPage = await clientContext.newPage();
 
-  await login(clientPage, clientEmail, clientPassword);
+  await loginClient(clientPage, clientEmail, clientPassword);
   await expect(clientPage).toHaveURL(/\/cliente\/?$/);
   await clientPage.goto("/cliente/arquivos");
   await expect(
