@@ -59,13 +59,11 @@ Ja esta decidido, entre outros pontos:
 
 ## 3. Avaliacoes e medidas
 
-14. Quais medidas fazem parte do conjunto padrao de uma avaliacao no seu metodo?
+14. Quais medidas fazem parte do conjunto padrao de uma avaliacao no seu metodo e qual unidade deve ser usada para cada uma?
 
-15. Qual unidade deve ser usada para cada medida?
+15. Alguma medida e obrigatoria para considerar uma avaliacao completa, ou isso varia caso a caso?
 
-16. Alguma medida e obrigatoria para considerar uma avaliacao completa, ou isso varia caso a caso?
-
-17. Se uma medida antiga foi registrada errada, voce prefere:
+16. Se uma medida antiga foi registrada errada, voce prefere:
    - registrar uma correcao com historico;
    - criar nova avaliacao;
    - permitir editar o valor antigo;
@@ -73,9 +71,9 @@ Ja esta decidido, entre outros pontos:
 
 ## 4. Conteudos e exercicios
 
-18. Quais conteudos educacionais do material atual voce considera prioridade para o primeiro lote no aplicativo? Pode responder por tema/categoria, sem listar todos os arquivos.
+17. Quais conteudos educacionais do material atual voce considera prioridade para o primeiro lote no aplicativo? Pode responder por tema/categoria, sem listar todos os arquivos.
 
-19. A biblioteca de exercicios deve aparecer para a cliente de que forma no MVP?
+18. A biblioteca de exercicios deve aparecer para a cliente de que forma no MVP?
    - nenhum exercicio visivel ainda;
    - somente exercicios liberados manualmente pela Patty;
    - todos os exercicios publicados;
@@ -83,9 +81,9 @@ Ja esta decidido, entre outros pontos:
 
 ## 5. Arquivos e proxima formalizacao do metodo
 
-20. Em quais situacoes um arquivo privado ja aceito poderia ser removido fisicamente no futuro? Exemplos para decidir: arquivo enviado por engano, substituicao, pedido da cliente, fim do acompanhamento. Se voce nao quiser definir isso agora, diga explicitamente que prefere preservar tudo ate uma politica posterior.
+19. Em quais situacoes um arquivo privado ja aceito poderia ser removido fisicamente no futuro? Exemplos para decidir: arquivo enviado por engano, substituicao, pedido da cliente, fim do acompanhamento. Se voce nao quiser definir isso agora, diga explicitamente que prefere preservar tudo ate uma politica posterior.
 
-21. Depois de fechar Anamnese, Cadastro e Avaliacoes, qual tema profissional deve ser formalizado primeiro?
+20. Depois de fechar Anamnese, Cadastro e Avaliacoes, qual tema profissional deve ser formalizado primeiro?
    - Fases 5 e 6 do Carb Cycle;
    - etapas posteriores ao Cutting 2;
    - Bulking;
