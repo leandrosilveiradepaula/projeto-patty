@@ -26,6 +26,8 @@ Uma triagem adicional somente por metadados foi registrada em `DRIVE_CONTENT_TRI
 
 A triagem identificou 16 grupos de possiveis duplicidades por nome normalizado entre as pastas historicas de exercicios e 9 videos com nomes genericos que exigem inspecao antes ate mesmo da definicao do titulo final.
 
+Uma segunda passada de metadados em 2026-09-23 revalidou os 89 itens originais sem divergencias e identificou 21 arquivos adicionais, totalizando 110 arquivos conhecidos por metadado no escopo revisado. Os 21 adicionais incluem 8 videos candidatos educacionais, 6 imagens operacionais que exigem revisao de privacidade/likeness e 7 PDFs em `Livros` que devem permanecer em hold de direitos antes de qualquer distribuicao. Consultar `DRIVE_CONTENT_INVENTORY_REVIEW.md`.
+
 ### RECOMENDACAO TECNICA
 
 Antes de migrar conteudos para o aplicativo, completar o inventario do Drive e classificar os materiais por tipo, publico, status de revisao, permissao de uso e relacao com protocolos.
