@@ -37,7 +37,7 @@ async function rejectUploadSession(input: {
     .from("client_file_upload_sessions")
     .update({ status: "rejected" })
     .eq("id", input.sessionId)
-    .eq("status", "pending");
+    .eq("status", "validating");
 
   if (error) {
     throw error;
@@ -85,11 +85,32 @@ export async function finalizeClientFileUploadSession(input: {
     return { reason: "expired", status: "rejected" };
   }
 
+  const { data: claimedSession, error: claimError } = await admin
+    .from("client_file_upload_sessions")
+    .update({ status: "validating" })
+    .eq("id", session.id)
+    .eq("status", "pending")
+    .gt("expires_at", new Date().toISOString())
+    .select("id")
+    .maybeSingle();
+
+  if (claimError) {
+    throw claimError;
+  }
+
+  if (!claimedSession) {
+    throw new Error("Upload session is unavailable for finalization");
+  }
+
   const { data: blob, error: downloadError } = await admin.storage
     .from(PRIVATE_FILE_BUCKET)
     .download(session.temp_object_path);
 
   if (downloadError || !blob) {
+    await rejectUploadSession({
+      sessionId: session.id,
+      tempObjectPath: session.temp_object_path,
+    });
     throw downloadError ?? new Error("Temporary upload object is unavailable");
   }
 
@@ -132,6 +153,10 @@ export async function finalizeClientFileUploadSession(input: {
     .move(session.temp_object_path, finalObjectPath);
 
   if (moveError) {
+    await rejectUploadSession({
+      sessionId: session.id,
+      tempObjectPath: session.temp_object_path,
+    });
     throw moveError;
   }
 
@@ -161,19 +186,26 @@ export async function finalizeClientFileUploadSession(input: {
         .from("client_file_upload_sessions")
         .update({ status: "rejected" })
         .eq("id", session.id)
-        .eq("status", "pending");
+        .eq("status", "validating");
+    } else {
+      await rejectUploadSession({
+        sessionId: session.id,
+        tempObjectPath: session.temp_object_path,
+      });
     }
 
     throw insertError;
   }
 
-  const { error: acceptError } = await admin
+  const { data: acceptedSession, error: acceptError } = await admin
     .from("client_file_upload_sessions")
     .update({ status: "accepted" })
     .eq("id", session.id)
-    .eq("status", "pending");
+    .eq("status", "validating")
+    .select("id")
+    .maybeSingle();
 
-  if (acceptError) {
+  if (acceptError || !acceptedSession) {
     await admin.from("client_files").delete().eq("id", fileId);
 
     const { error: rollbackMoveError } = await admin.storage
@@ -186,10 +218,15 @@ export async function finalizeClientFileUploadSession(input: {
         .from("client_file_upload_sessions")
         .update({ status: "rejected" })
         .eq("id", session.id)
-        .eq("status", "pending");
+        .eq("status", "validating");
+    } else {
+      await rejectUploadSession({
+        sessionId: session.id,
+        tempObjectPath: session.temp_object_path,
+      });
     }
 
-    throw acceptError;
+    throw acceptError ?? new Error("Upload session acceptance failed");
   }
 
   return { fileId, status: "accepted" };

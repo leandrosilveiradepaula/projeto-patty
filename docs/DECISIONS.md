@@ -1,5 +1,23 @@
 # Decisoes
 
+## 2026-09-22 - Limpeza de temporarios expirados de upload privado
+
+### DECISAO TECNICA DE IMPLEMENTACAO
+
+A expiracao de uma sessao de upload privado nao autoriza apagar o registro historico da sessao nem qualquer arquivo ja aceito em `client_files`.
+
+A limpeza operacional deve atuar somente no namespace temporario `pending/`:
+
+- sessoes `pending` com `expires_at <= now()` podem ser marcadas como `expired`;
+- o objeto temporario correspondente pode ser removido do bucket privado;
+- linhas de `client_file_upload_sessions` sao preservadas;
+- arquivos aceitos e seus objetos finais nao entram nessa limpeza;
+- a politica concreta de retencao/hard delete dos arquivos aceitos continua aberta.
+
+Para evitar corrida entre finalizacao e limpeza, a finalizacao reserva uma sessao valida mudando `pending -> validating` antes de ler/mover o objeto. Somente uma sessao ainda `pending` e nao expirada pode ser reservada.
+
+No deploy Vercel, a limpeza e acionada por rota server-side autenticada com `CRON_SECRET`. O secret nao e exposto ao browser nem armazenado no repositorio.
+
 ## 2026-09-22 - Autorizacao temporaria para upload da cliente
 
 ### DECISAO TECNICA DE IMPLEMENTACAO
