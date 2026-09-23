@@ -1,5 +1,32 @@
 # Decisoes
 
+## 2026-09-23 - Retomada parcial de rascunho da Anamnese na UI da cliente
+
+### DECISAO TECNICA/PRODUTO
+
+A UI da cliente pode editar somente um rascunho de Anamnese que ja exista e pertença a propria cliente.
+
+Nesta etapa:
+- apenas perguntas com `answer_type = text` sao editaveis;
+- cada resposta e salva individualmente no rascunho;
+- resposta vazia continua permitida no rascunho, pois obrigatoriedade vale para o envio final;
+- submission enviada permanece somente leitura;
+- valor estruturado inesperado em pergunta `text` nao e sobrescrito pela UI;
+- a Server Action exige role `client`, ownership do rascunho, mesma `form_version_id` e tipo esperado `text`.
+
+A UI **nao**:
+- cria uma nova submission automaticamente;
+- escolhe a versao publicada que deve ser preenchida;
+- implementa os tipos finais de input;
+- define autosave definitivo;
+- envia a Anamnese.
+
+Esses pontos continuam dependentes das definicoes finais do questionario e da regra de disponibilidade de versao.
+
+### FATO DE TESTE
+
+O formulario persistente `e2e-correction-*` e os perfis `E2E Correction ...` existentes no SaaS pertencem ao smoke administrativo de correcoes. Eles sao fixture sintetica de teste e nao representam uma versao real de Anamnese do produto. Nenhum fluxo de cliente deve selecionar automaticamente uma versao apenas por ela estar publicada.
+
 ## 2026-09-23 - Configuracao de Auth de producao auditada e parcialmente endurecida
 
 ### FATO TECNICO VALIDADO
