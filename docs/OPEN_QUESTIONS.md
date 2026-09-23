@@ -48,9 +48,13 @@ Se futuramente forem introduzidos assistentes, profissionais parceiros ou suport
 
 ## Modelo de dados
 
+### PARCIALMENTE RESOLVIDO
+
+Na Anamnese, todos os campos aplicaveis ao preenchimento final sao obrigatorios. Ainda falta fechar o mapa final de campos e as regras de aplicabilidade condicional.
+
 ### QUESTAO ABERTA
 
-Quais campos serao obrigatorios em anamnese, medidas, fotos, exames, protocolos e avaliacoes?
+Quais campos definitivos existirao em medidas, fotos, exames, protocolos e avaliacoes, e quais deles serao obrigatorios em cada fluxo?
 
 ### QUESTAO ABERTA
 
@@ -320,13 +324,19 @@ Como sera a submissao final da Anamnese considerando perguntas condicionais/apli
 
 Quando uma nova versao de formulario podera ser marcada como disponivel para preenchimento?
 
+### FATO JA RESOLVIDO
+
+A correcao posterior de uma submission enviada esta implementada sem sobrescrever a resposta original. As correcoes sao registros append-only em `anamnesis_answer_corrections`, com autoria e timestamp; UPDATE/DELETE sao bloqueados e a cliente nao recebe acesso a esse historico.
+
+A aplicacao administrativa ja possui uma rota dedicada para visualizar a resposta original, listar o historico cronologico de correcoes e acrescentar uma nova correcao, sempre sob AAL2, assignment ativo e RLS.
+
+### PARCIALMENTE RESOLVIDO
+
+A revisao administrativa ja possui notas append-only e correcoes append-only separadas da resposta original.
+
 ### QUESTAO ABERTA
 
-Como ocorrera uma correcao posterior a uma submission enviada, sem sobrescrever a resposta original?
-
-### QUESTAO ABERTA
-
-Qual sera o workflow administrativo completo para revisao de Anamnese alem da criacao de notas append-only?
+Qual sera o workflow administrativo completo de revisao da Anamnese alem de notas e correcoes, incluindo eventual estado de revisao, pendencias, findings de IA, conclusao da revisao e qualquer acao subsequente permitida?
 
 ## Conteudo
 

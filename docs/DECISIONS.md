@@ -1,5 +1,19 @@
 # Decisoes
 
+## 2026-09-23 - Reconciliacao de questoes abertas da Anamnese
+
+### FATO DOCUMENTAL
+
+`OPEN_QUESTIONS.md` foi reconciliado com implementacoes e decisoes ja existentes.
+
+Deixam de ser tratadas como questoes abertas:
+- a forma de registrar correcao posterior sem sobrescrever a resposta original;
+- a existencia de uma UI administrativa para visualizar e acrescentar correcoes historicas.
+
+Permanece aberta somente a parte ainda nao definida do workflow administrativo completo de revisao da Anamnese.
+
+A pergunta generica sobre campos obrigatorios tambem foi ajustada para nao contradizer a regra confirmada de que todos os campos aplicaveis da Anamnese sao obrigatorios no envio final. O mapa final de campos e a aplicabilidade condicional continuam abertos.
+
 ## 2026-09-23 - Controle de previews Vercel e divergencia temporaria de producao
 
 ### FATO OPERACIONAL CONFIRMADO
