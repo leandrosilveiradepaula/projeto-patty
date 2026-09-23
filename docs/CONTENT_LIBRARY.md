@@ -22,6 +22,10 @@ Uma primeira passada de inventario de metadados do Google Drive foi registrada e
 
 O inventario nao representa autorizacao de migracao ou publicacao.
 
+Uma triagem adicional somente por metadados foi registrada em `DRIVE_CONTENT_TRIAGE.md` e `drive_content_triage.json`. Ela cobre os 89 itens individualmente, mas suas categorias sao apenas hipoteses derivadas de nome de arquivo/pasta. Direitos continuam `unreviewed`, nenhuma migracao foi autorizada e nenhum rótulo historico de audiencia foi promovido a taxonomia do produto.
+
+A triagem identificou 16 grupos de possiveis duplicidades por nome normalizado entre as pastas historicas de exercicios e 9 videos com nomes genericos que exigem inspecao antes ate mesmo da definicao do titulo final.
+
 ### RECOMENDACAO TECNICA
 
 Antes de migrar conteudos para o aplicativo, completar o inventario do Drive e classificar os materiais por tipo, publico, status de revisao, permissao de uso e relacao com protocolos.
