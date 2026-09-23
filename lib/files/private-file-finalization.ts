@@ -69,7 +69,7 @@ export async function finalizeClientFileUploadSession(input: {
     throw new Error("Upload session is unavailable for finalization");
   }
 
-  if (!tempObjectPath) {
+  if (!session.temp_object_path) {
     throw new Error("Upload session temporary object path is unavailable");
   }
 
