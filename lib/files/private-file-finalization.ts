@@ -69,6 +69,11 @@ export async function finalizeClientFileUploadSession(input: {
     throw new Error("Upload session is unavailable for finalization");
   }
 
+  if (!tempObjectPath) {
+    throw new Error("Upload session temporary object path is unavailable");
+  }
+
+  const tempObjectPath = session.temp_object_path;
   const admin = createAdminClient();
 
   if (new Date(session.expires_at).getTime() <= Date.now()) {
@@ -82,7 +87,7 @@ export async function finalizeClientFileUploadSession(input: {
       throw expireError;
     }
 
-    await removeObjectBestEffort(session.temp_object_path);
+    await removeObjectBestEffort(tempObjectPath);
     return { reason: "expired", status: "rejected" };
   }
 
@@ -105,12 +110,12 @@ export async function finalizeClientFileUploadSession(input: {
 
   const { data: blob, error: downloadError } = await admin.storage
     .from(PRIVATE_FILE_BUCKET)
-    .download(session.temp_object_path);
+    .download(tempObjectPath);
 
   if (downloadError || !blob) {
     await rejectUploadSession({
       sessionId: session.id,
-      tempObjectPath: session.temp_object_path,
+      tempObjectPath: tempObjectPath,
     });
     throw downloadError ?? new Error("Temporary upload object is unavailable");
   }
@@ -121,7 +126,7 @@ export async function finalizeClientFileUploadSession(input: {
   if (!detectedMimeType) {
     await rejectUploadSession({
       sessionId: session.id,
-      tempObjectPath: session.temp_object_path,
+      tempObjectPath: tempObjectPath,
     });
     return { reason: "invalid_content", status: "rejected" };
   }
@@ -136,7 +141,7 @@ export async function finalizeClientFileUploadSession(input: {
   if (!validation.ok) {
     await rejectUploadSession({
       sessionId: session.id,
-      tempObjectPath: session.temp_object_path,
+      tempObjectPath: tempObjectPath,
     });
     return { reason: "invalid_content", status: "rejected" };
   }
@@ -151,12 +156,12 @@ export async function finalizeClientFileUploadSession(input: {
 
   const { error: moveError } = await admin.storage
     .from(PRIVATE_FILE_BUCKET)
-    .move(session.temp_object_path, finalObjectPath);
+    .move(tempObjectPath, finalObjectPath);
 
   if (moveError) {
     await rejectUploadSession({
       sessionId: session.id,
-      tempObjectPath: session.temp_object_path,
+      tempObjectPath: tempObjectPath,
     });
     throw moveError;
   }
@@ -181,7 +186,7 @@ export async function finalizeClientFileUploadSession(input: {
   if (insertError) {
     const { error: rollbackMoveError } = await admin.storage
       .from(PRIVATE_FILE_BUCKET)
-      .move(finalObjectPath, session.temp_object_path);
+      .move(finalObjectPath, tempObjectPath);
 
     if (rollbackMoveError) {
       await removeObjectBestEffort(finalObjectPath);
@@ -193,7 +198,7 @@ export async function finalizeClientFileUploadSession(input: {
     } else {
       await rejectUploadSession({
         sessionId: session.id,
-        tempObjectPath: session.temp_object_path,
+        tempObjectPath: tempObjectPath,
       });
     }
 
@@ -213,7 +218,7 @@ export async function finalizeClientFileUploadSession(input: {
 
     const { error: rollbackMoveError } = await admin.storage
       .from(PRIVATE_FILE_BUCKET)
-      .move(finalObjectPath, session.temp_object_path);
+      .move(finalObjectPath, tempObjectPath);
 
     if (rollbackMoveError) {
       await removeObjectBestEffort(finalObjectPath);
@@ -225,7 +230,7 @@ export async function finalizeClientFileUploadSession(input: {
     } else {
       await rejectUploadSession({
         sessionId: session.id,
-        tempObjectPath: session.temp_object_path,
+        tempObjectPath: tempObjectPath,
       });
     }
 
