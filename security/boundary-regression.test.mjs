@@ -261,6 +261,35 @@ test("Supabase Auth hardening workflow stays manual and one-way", async () => {
   }
 });
 
+test("Vercel skips codex preview deployments while preserving production eligibility", async () => {
+  const config = JSON.parse(
+    await readFile(path.join(ROOT, "vercel.json"), "utf8"),
+  );
+
+  assert.equal(
+    config.git?.deploymentEnabled?.["codex/**"],
+    false,
+    "codex/* branches must not consume Vercel preview builds",
+  );
+
+  assert.notEqual(
+    config.git?.deploymentEnabled?.master,
+    false,
+    "master must remain eligible for production deployment",
+  );
+
+  assert.deepEqual(
+    config.crons,
+    [
+      {
+        path: "/api/cron/private-file-upload-cleanup",
+        schedule: "17 3 * * *",
+      },
+    ],
+    "Vercel cron configuration must be preserved",
+  );
+});
+
 test("Supabase production migration workflow stays manual and non-destructive", async () => {
   const content = await readFile(
     path.join(ROOT, ".github", "workflows", "deploy-supabase-migrations.yml"),
