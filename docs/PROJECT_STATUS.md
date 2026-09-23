@@ -27,17 +27,15 @@ Antes de propor ou executar qualquer tarefa:
 
 ## Referencia atual de repositorio
 
-`master` verificado no inicio desta reconciliacao:
+A reconciliacao documental foi incorporada ao `master` pelo PR #120 em 2026-09-23.
 
-`71420369c9a4c6ead1ad0782e7f6d554411118a1`
+Merge commit:
 
-A reconciliacao documental atual esta em:
+`602c6d5129b093fc092f7b87209f21d1eab574ca`
 
-`codex/reconcile-documentation-master`
+A partir desse merge, novos chats devem usar `master` como referencia inicial para `AGENTS.md`, `docs/PROJECT_STATUS.md` e os demais documentos de fonte de verdade.
 
-Essa branch foi criada diretamente do `master` acima. Na verificacao final desta rodada ela estava **0 commits atras do master de referencia**, contendo somente alteracoes documentais. O numero de commits a frente pode aumentar enquanto este proprio pacote documental e finalizado; por isso, nao deve ser usado como identificador de estado.
-
-Enquanto esse pacote nao estiver mergeado, novos chats devem ler a documentacao dessa branch para obter o handoff mais recente, mas qualquer nova implementacao deve revalidar primeiro o HEAD atual do `master`.
+Antes de qualquer nova implementacao, revalidar o HEAD atual do `master` porque novos commits podem ter sido incorporados depois desse merge.
 
 ## Legenda de estado
 
@@ -169,7 +167,7 @@ Nao automatizar esses pontos antes de confirmacao da Patty e atualizacao documen
 
 ## Tarefas/documentacao recentes
 
-Nesta reconciliacao de 2026-09-23:
+Nesta reconciliacao de 2026-09-23, incorporada ao `master` pelo PR #120:
 - `AGENTS.md` passou a exigir leitura e manutencao deste handoff;
 - `ANAMNESE.md` foi alinhado a obrigatoriedade confirmada e ao limite de `missing_answer`;
 - `DATA_MODEL.md` foi alinhado ao historico append-only de correcoes;
