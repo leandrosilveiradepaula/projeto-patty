@@ -1,5 +1,26 @@
 # Decisoes
 
+## 2026-09-23 - Avisos de foreign keys sem indice nao geram migration automatica
+
+### DECISAO TECNICA
+
+O advisor de performance do Supabase reportou 22 foreign keys sem indice de cobertura exata. Esses avisos foram revisados individualmente antes de qualquer alteracao de schema.
+
+Nao sera criada uma migration apenas para zerar o advisor neste momento.
+
+Motivos:
+- cinco dos 22 casos ja possuem indice ou chave primaria cujo primeiro campo corresponde ao primeiro campo da foreign key, oferecendo seletividade util para o acesso atual;
+- a maior parte dos demais avisos esta na fundacao de IA, cujas tabelas estao vazias no SaaS e ainda nao possuem workload real;
+- varios relacionamentos apontam para registros historicos que o produto deliberadamente preserva e nao costuma apagar, reduzindo o beneficio imediato de indices criados apenas para verificacao de `ON DELETE RESTRICT`;
+- o mesmo advisor reporta 37 indices atualmente sem uso observado, portanto adicionar mais indices preventivos sem workload seria ruido e custo de escrita/armazenamento;
+- indices novos devem responder a query, RLS, integridade ou volume observado, nao apenas a um lint informativo.
+
+A decisao deve ser reavaliada quando a IA real, progresso de conteudo ou outro fluxo gerar volume mensuravel, ou quando planos de execucao mostrarem scans relevantes.
+
+### FATO TECNICO
+
+O advisor de seguranca do mesmo levantamento reportou `Leaked Password Protection` desativado no Supabase Auth. Isso e uma configuracao externa de seguranca e permanece pendente de habilitacao/validacao no ambiente, sem exigir nova regra profissional da Patty.
+
 ## 2026-09-23 - Correcoes historicas da Patty na Anamnese
 
 ### REGRA CONFIRMADA PELA PATTY
