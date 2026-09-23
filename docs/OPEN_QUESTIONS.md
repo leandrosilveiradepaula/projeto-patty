@@ -50,7 +50,7 @@ Se futuramente forem introduzidos assistentes, profissionais parceiros ou suport
 
 ### QUESTAO ABERTA
 
-Quais campos serao obrigatorios em anamnese, medidas, fotos, exames, protocolos e avaliacoes?
+Quais campos serao obrigatorios em medidas, fotos, exames, protocolos e avaliacoes? A Anamnese ja possui regra confirmada: todos os campos da versao aplicavel sao obrigatorios para o envio final; a aplicabilidade de perguntas condicionais continua sendo definida separadamente.
 
 ### QUESTAO ABERTA
 
@@ -236,7 +236,7 @@ Qual e a origem da percepcao de aderencia e quais partes do acompanhamento profi
 
 ### QUESTAO ABERTA
 
-Quais perguntas da Anamnese serao definitivamente obrigatorias, quais serao condicionais e quais regras determinam sua aplicabilidade? Ate essa definicao, `missing_answer` permanece bloqueado na primeira revisao operacional de IA.
+Como sera formalizada a aplicabilidade das perguntas condicionais da Anamnese para que `missing_answer` possa distinguir ausencia real de pergunta nao aplicavel? A obrigatoriedade geral ja esta confirmada: todos os campos aplicaveis da versao devem estar preenchidos no envio final.
 
 O contrato futuro de `missing_answer` devera usar `target_question_id` para a pergunta ausente e permitir `source_answer_ids` vazio; o target devera pertencer a mesma `form_version_id` da submission. Isso e conceito futuro, nao implementacao atual.
 
@@ -320,13 +320,13 @@ Como sera a submissao final da Anamnese considerando perguntas condicionais/apli
 
 Quando uma nova versao de formulario podera ser marcada como disponivel para preenchimento?
 
+### FATO JA CONFIRMADO
+
+Depois do envio final, somente a Patty pode registrar correcoes posteriores. A correcao e append-only em `anamnesis_answer_corrections`, preserva `anamnesis_answers.answer_value` como resposta original e registra valor corrigido, autoria e timestamp. A cliente nao pode editar a submission enviada nem acessar o historico administrativo de correcoes.
+
 ### QUESTAO ABERTA
 
-Como ocorrera uma correcao posterior a uma submission enviada, sem sobrescrever a resposta original?
-
-### QUESTAO ABERTA
-
-Qual sera o workflow administrativo completo para revisao de Anamnese alem da criacao de notas append-only?
+Qual sera o workflow administrativo completo para revisao de Anamnese alem das notas e correcoes append-only ja implementadas?
 
 ## Conteudo
 
