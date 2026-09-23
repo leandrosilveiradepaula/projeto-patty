@@ -6,7 +6,11 @@ Este documento concentra pontos ainda nao definidos. Cada item deve ser validado
 
 ### QUESTAO ABERTA
 
-Como serao os detalhes operacionais de convite, ativacao, recuperacao e encerramento de conta de clientes, considerando que o MVP nao tera cadastro publico/autonomo?
+Como sera finalizado o fluxo tecnico de ativacao da conta apos o link enviado pela Patty, incluindo definicao inicial de senha, expiracao/reenvio do link, recuperacao de acesso e encerramento da conta?
+
+### FATO JA CONFIRMADO
+
+A Patty ja possui o email da cliente e inicia o onboarding enviando um link para esse endereco. O link abre a interface do aplicativo onde a cliente respondera as perguntas que antes eram respondidas no formulario externo. Nao existe cadastro publico/autonomo.
 
 ### QUESTAO ABERTA
 
