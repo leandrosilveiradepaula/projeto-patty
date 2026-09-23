@@ -1,4 +1,5 @@
 import { ClientListItem } from "@/components/admin/ClientListItem";
+import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
@@ -11,7 +12,16 @@ function getInitials(displayName: string | null | undefined) {
   return words.map((word) => word[0]).join("").slice(0, 2).toUpperCase() || "?";
 }
 
-export default async function AdminClientesPage() {
+type AdminClientesPageProps = {
+  searchParams: Promise<{
+    assignment?: string;
+  }>;
+};
+
+export default async function AdminClientesPage({
+  searchParams,
+}: AdminClientesPageProps) {
+  const { assignment } = await searchParams;
   const assignments = await listClientsAssignedToCurrentAdmin();
   const clients = assignments?.flatMap((assignment) => assignment.clients ? [assignment.clients] : []) ?? [];
 
@@ -22,6 +32,22 @@ export default async function AdminClientesPage() {
         eyebrow="Admin"
         title="Clientes"
       />
+      {assignment === "ended" ? (
+        <Alert live="polite" title="Atribuição encerrada" variant="success">
+          O vínculo atual foi encerrado e o histórico do assignment foi
+          preservado.
+        </Alert>
+      ) : assignment === "unavailable" ? (
+        <Alert live="assertive" title="Atribuição indisponível" variant="warning">
+          Não havia uma atribuição ativa deste perfil administrativo para
+          encerrar.
+        </Alert>
+      ) : assignment === "invalid" ? (
+        <Alert live="assertive" title="Cliente inválida" variant="critical">
+          Não foi possível identificar a cliente informada.
+        </Alert>
+      ) : null}
+
       <Section
         description="A lista respeita as atribuições ativas e as permissões de acesso vigentes."
         title="Clientes atribuídos"

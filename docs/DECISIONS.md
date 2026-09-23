@@ -206,6 +206,12 @@ No MVP, somente a Patty pode iniciar ou encerrar um `client_assignment`, por flu
 
 O encerramento preserva o registro historico do assignment e remove apenas sua validade atual, usando o estado/tempo de encerramento previsto no modelo. Nao deve haver hard delete de assignment historico como operacao normal do produto.
 
+### FATO DE IMPLEMENTACAO
+
+O encerramento de assignment ativo esta implementado por boundary server-side. A operacao exige a sessao atual com role relacional `admin`, limita a escrita a `client_id` + `staff_profile_id` da Patty autenticada, preenche somente `ended_at` de linhas ainda ativas e preserva integralmente os registros historicos. Nenhum `INSERT`, `UPDATE` ou `DELETE` direto em `client_assignments` foi concedido ao browser.
+
+O inicio de assignment continua sem UI e deve ser ligado ao onboarding controlado; os detalhes operacionais de convite/ativacao permanecem abertos e nao foram inferidos.
+
 A operacao deve permanecer auditavel e, como regra geral, nao pode conceder acesso client-scoped sem role relacional `admin` e assignment ativo. Decisao posterior criou uma excecao especifica para o acesso da Patty a arquivos privados, sem generalizar essa excecao para os demais dados client-scoped. Fluxos futuros de transferencia, reatribuicao ou outros profissionais ficam fora desta decisao.
 
 ## 2026-09-22 - Bootstrap controlado da primeira conta admin
