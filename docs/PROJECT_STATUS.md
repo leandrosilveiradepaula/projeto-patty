@@ -52,15 +52,15 @@ Antes de qualquer nova implementacao, revalidar o HEAD atual do `master` porque 
 
 ### FATO OPERACIONAL
 
-O `master` esta a frente do deployment de producao usado por `E2E_BASE_URL`.
+O bloqueio temporario de `build-rate-limit` deixou de ser o estado atual.
 
-A documentacao registra como ultimo merge de `master` publicado com sucesso pela Vercel:
+O merge do PR #120, commit:
 
-`b466accc8a5f`
+`602c6d5129b093fc092f7b87209f21d1eab574ca`
 
-Merges posteriores encontraram `build-rate-limit`. Portanto, codigo mergeado depois desse SHA pode estar **IMPLEMENTADO/CI VALIDADO** sem estar **PUBLICADO/VALIDADO EM PRODUCAO**.
+recebeu status Vercel `success` com a descricao `Deployment has completed` em 2026-09-23.
 
-Nao interpretar 404 ou ausencia de headers no deployment antigo como regressao do codigo atual sem primeiro confirmar o SHA publicado.
+Isso confirma que um deployment de producao voltou a ser aceito para o estado incorporado ao `master`. Ainda nao marcar headers, correcoes administrativas ou rascunho como PRODUCAO VALIDADA apenas com esse status: os gates de runtime correspondentes permanecem pendentes.
 
 ## Estado operacional resumido
 
@@ -185,15 +185,14 @@ Nesta reconciliacao de 2026-09-23, incorporada ao `master` pelo PR #120:
 
 Ordem operacional sugerida, sujeita a revalidacao do HEAD:
 
-1. publicar um `master` atualizado quando a Vercel permitir e validar headers e E2E de runtime, incluindo o rascunho;
+1. executar os gates de runtime no deployment Vercel atual: headers HTTP, correcoes administrativas e rascunho da Anamnese;
 2. concluir aplicabilidade/condicionais e questionario final da Anamnese;
 3. concluir fluxo de submissao final da Anamnese;
-4. concluir fluxo de submissao final da Anamnese;
-5. resolver infraestrutura do email real de convite;
-6. continuar integracao UI <-> backend real;
-7. preparar execution real de IA com provider/modelo explicitamente definidos;
-8. migrar conteudos do Drive gradualmente, apos direitos/taxonomia;
-9. ampliar automacao de alimentacao/treino somente depois das regras profissionais correspondentes estarem documentadas.
+4. resolver infraestrutura do email real de convite;
+5. continuar integracao UI <-> backend real;
+6. preparar execution real de IA com provider/modelo explicitamente definidos;
+7. migrar conteudos do Drive gradualmente, apos direitos/taxonomia;
+8. ampliar automacao de alimentacao/treino somente depois das regras profissionais correspondentes estarem documentadas.
 
 ## Regra de manutencao deste arquivo
 
