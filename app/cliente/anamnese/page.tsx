@@ -7,7 +7,10 @@ import {
   getCurrentClient,
   listAccessibleAnamnesisSubmissions,
 } from "@/lib/supabase/data-access";
+import { getCurrentClientAnamnesisStartAvailability } from "@/lib/anamnesis/start";
+import { Button } from "@/components/ui/Button";
 import Link from "next/link";
+import { startClientAnamnesisDraft } from "./actions";
 import styles from "./page.module.css";
 
 function formatDateTime(value: string) {
@@ -23,9 +26,20 @@ function formatDateTime(value: string) {
 
 export default async function ClienteAnamnesePage() {
   const client = await getCurrentClient();
-  const submissions = client
-    ? await listAccessibleAnamnesisSubmissions(client.id)
-    : null;
+  const [submissions, startAvailability] = client
+    ? await Promise.all([
+        listAccessibleAnamnesisSubmissions(client.id),
+        getCurrentClientAnamnesisStartAvailability(),
+      ])
+    : [null, { available: false } as const];
+
+  const hasCurrentDraft =
+    startAvailability.available &&
+    submissions?.some(
+      (submission) =>
+        submission.form_version_id === startAvailability.formVersionId &&
+        submission.submitted_at === null,
+    );
 
   return (
     <>
@@ -34,6 +48,26 @@ export default async function ClienteAnamnesePage() {
         eyebrow="Cliente"
         title="Anamnese"
       />
+      {client && startAvailability.available && !hasCurrentDraft ? (
+        <Section
+          description="O rascunho será vinculado à versão oficial publicada da Anamnese. Você poderá salvar e continuar depois."
+          title="Começar Anamnese"
+        >
+          <Card className={styles.startCard}>
+            <div>
+              <h2 className={styles.submissionTitle}>
+                Anamnese · versão {startAvailability.versionNumber}
+              </h2>
+              <p className={styles.submissionStatus}>
+                O envio final ainda não está disponível. Nesta etapa, você inicia o rascunho e salva as respostas compatíveis com a interface atual.
+              </p>
+            </div>
+            <form action={startClientAnamnesisDraft}>
+              <Button type="submit">Começar Anamnese</Button>
+            </form>
+          </Card>
+        </Section>
+      ) : null}
       <Section
         description="Cada registro preserva a versão de formulário usada no momento da submissão."
         title="Histórico"

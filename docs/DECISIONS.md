@@ -1,5 +1,29 @@
 # Decisoes
 
+## 2026-09-23 - Inicio seguro do rascunho da Anamnese
+
+### DECISAO TECNICA
+
+O fluxo da cliente para iniciar uma nova Anamnese nao pode selecionar genericamente a ultima versao publicada do banco.
+
+Motivo: o mesmo schema pode conter fixtures sinteticas publicadas para E2E. Na verificacao do Supabase SaaS desta tarefa, a unica versao publicada encontrada tinha `form_key` sintetica `e2e-correction-*`.
+
+Foi definida a chave tecnica canonica:
+
+`client-anamnesis`
+
+O fluxo preparado:
+- procura somente `anamnesis_forms.form_key = client-anamnesis`;
+- considera apenas versoes com `published_at`;
+- escolhe a maior `version_number`;
+- cria draft para a cliente autenticada via sessao normal/RLS;
+- reaproveita draft ativo da mesma cliente/versao, inclusive em corrida de unique violation;
+- nao habilita submissao final;
+- nao cria nem publica definicao de Anamnese automaticamente.
+
+Enquanto o formulario canonico nao existir com versao publicada, a UI permanece sem acao de inicio. Isso e bloqueio seguro, nao erro de produto.
+
+
 ## 2026-09-23 - Apply da correcao de DELETE do rascunho e confirmacao do failure handling
 
 ### FATO OPERACIONAL CONFIRMADO

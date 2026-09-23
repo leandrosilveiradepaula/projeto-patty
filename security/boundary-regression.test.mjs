@@ -20,6 +20,7 @@ const ENTRYPOINT_RULES = new Map([
   ["app/ativar-conta/actions.ts", "client-identity"],
   ["app/auth/confirm/route.ts", "public-auth"],
   ["app/cliente/anamnese/[anamneseId]/actions.ts", "client"],
+  ["app/cliente/anamnese/actions.ts", "client"],
   ["app/cliente/arquivos/[fileId]/route.ts", "client"],
   ["app/cliente/arquivos/actions.ts", "client"],
   ["app/login/actions.ts", "public-auth"],

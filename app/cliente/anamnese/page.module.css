@@ -57,3 +57,17 @@
 .detailLink:hover {
   text-decoration: underline;
 }
+
+
+.startCard {
+  display: grid;
+  gap: var(--space-4);
+  align-items: start;
+}
+
+@media (min-width: 48rem) {
+  .startCard {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+}
