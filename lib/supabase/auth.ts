@@ -2,6 +2,7 @@ import "server-only";
 
 import { redirect } from "next/navigation";
 
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 export type AppRole = "admin" | "client";
@@ -20,7 +21,12 @@ export async function getCurrentAuthContext(): Promise<AuthContext | null> {
 
   if (claimsError || typeof profileId !== "string") return null;
 
-  const { data: roles, error: rolesError } = await supabase
+  // Role lookup must remain available before an admin reaches aal2 so the
+  // application can route an authenticated admin into MFA enrollment/challenge.
+  // The profile id comes from verified Auth claims; the privileged client stays
+  // server-only and the query is restricted to that exact profile id.
+  const admin = createAdminClient();
+  const { data: roles, error: rolesError } = await admin
     .from("user_roles")
     .select("role")
     .eq("profile_id", profileId);
