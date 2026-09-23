@@ -1,0 +1,48 @@
+name: Generate anamnesis draft write migration
+
+on:
+  push:
+    branches:
+      - codex/anamnesis-draft-write-foundation
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: codex/anamnesis-draft-write-foundation
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create migration with project CLI
+        run: |
+          if find supabase/migrations -maxdepth 1 -type f -name '*_anamnesis_draft_write_foundation.sql' | grep -q .; then
+            exit 0
+          fi
+          ./node_modules/.bin/supabase migration new anamnesis_draft_write_foundation
+
+      - name: Commit generated migration
+        run: |
+          git add supabase/migrations
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: create anamnesis draft write migration"
+          git push origin HEAD:codex/anamnesis-draft-write-foundation
