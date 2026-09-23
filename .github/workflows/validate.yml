@@ -50,6 +50,9 @@ jobs:
       - name: AI contract tests
         run: npm run test:ai
 
+      - name: E2E helper tests
+        run: npm run test:e2e-helpers
+
       - name: Boundary validation tests
         run: npm run test:validation
 
