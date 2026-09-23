@@ -1,0 +1,97 @@
+name: Temporary admin corrections production smoke
+
+on:
+  push:
+    branches:
+      - codex/run-admin-corrections-production-smoke
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Validate required secrets
+        shell: bash
+        env:
+          E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
+          E2E_SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.E2E_SUPABASE_SECRET_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "$E2E_BASE_URL"
+          test -n "$E2E_SUPABASE_SECRET_KEY"
+
+      - name: Inspect production headers with GET
+        shell: bash
+        env:
+          E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location \
+            --dump-header "$RUNNER_TEMP/headers.txt" \
+            --output /dev/null \
+            "$E2E_BASE_URL/login"
+
+          node - <<'NODE'
+          const fs = require("fs");
+          const raw = fs.readFileSync(process.env.RUNNER_TEMP + "/headers.txt", "utf8");
+          const blocks = raw
+            .split(/\r?\n\r?\n/)
+            .map((block) => block.trim())
+            .filter((block) => block.startsWith("HTTP/"));
+          const finalBlock = blocks.at(-1) ?? "";
+          const lines = finalBlock.split(/\r?\n/);
+          const headers = new Map();
+
+          for (const line of lines.slice(1)) {
+            const index = line.indexOf(":");
+            if (index < 1) continue;
+            headers.set(
+              line.slice(0, index).trim().toLowerCase(),
+              line.slice(index + 1).trim(),
+            );
+          }
+
+          console.log("final-status: " + (lines[0] ?? "<missing>"));
+          for (const name of [
+            "content-security-policy",
+            "permissions-policy",
+            "referrer-policy",
+            "x-content-type-options",
+            "x-frame-options",
+            "server",
+            "x-vercel-id",
+          ]) {
+            console.log(name + ": " + (headers.get(name) ?? "<missing>"));
+          }
+          NODE
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright test runner
+        run: npm install --no-save --package-lock=false @playwright/test@1.55.0
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run admin Anamnesis corrections smoke
+        env:
+          E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
+          E2E_SUPABASE_URL: "https://hqanoskwjvpbgavppcud.supabase.co"
+          E2E_SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.E2E_SUPABASE_SECRET_KEY }}
+        run: npx playwright test e2e/admin-anamnesis-corrections.spec.mjs --reporter=line
