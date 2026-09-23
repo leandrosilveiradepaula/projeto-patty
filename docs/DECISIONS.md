@@ -1,5 +1,31 @@
 # Decisoes
 
+## 2026-09-23 - Correcao do trigger de exclusao de rascunho da Anamnese
+
+### FATO TECNICO IDENTIFICADO
+
+O smoke de producao do rascunho sintetico revelou um comportamento incorreto no trigger `anamnesis_submissions_immutable_after_submit`.
+
+A funcao `reject_submitted_anamnesis_submission_mutation()` retornava `NEW` para qualquer operacao permitida. Em um trigger `BEFORE DELETE`, `NEW` e nulo; portanto, a exclusao de uma submission ainda nao enviada era cancelada silenciosamente, sem erro. Isso deixou um rascunho sintetico residual e o indice unico corretamente bloqueou a tentativa posterior de criar um segundo rascunho da mesma cliente/versao.
+
+### DECISAO TECNICA
+
+A migration `20260923191554_fix_anamnesis_draft_delete_trigger.sql` altera apenas o retorno da funcao:
+
+- submission com `submitted_at IS NOT NULL` continua rejeitando UPDATE/DELETE com SQLSTATE `55000`;
+- em `DELETE` de rascunho, a funcao retorna `OLD`;
+- em `UPDATE` permitido de rascunho, retorna `NEW`.
+
+Isso nao concede DELETE a cliente. Grants e RLS continuam sem permitir exclusao de submission pelo browser; a mudanca apenas faz funcionar corretamente uma exclusao privilegiada/operacional de rascunho.
+
+### VALIDACAO
+
+Dry-run transacional no Supabase SaaS com `ROLLBACK` confirmou:
+- exclusao privilegiada de rascunho: PASS;
+- exclusao de submission enviada continua bloqueada com `55000`: PASS.
+
+A migration esta versionada e validada, mas ainda nao aplicada no SaaS.
+
 ## 2026-09-23 - Retomada parcial de rascunho da Anamnese na UI da cliente
 
 ### DECISAO TECNICA/PRODUTO

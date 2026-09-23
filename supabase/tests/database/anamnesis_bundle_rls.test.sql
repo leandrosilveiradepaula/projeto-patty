@@ -1,6 +1,6 @@
 begin;
 
-select plan(49);
+select plan(51);
 
 select has_table('public', 'client_registration');
 select has_table('public', 'anamnesis_forms');
@@ -213,6 +213,34 @@ select is(
   'other client cannot read draft answers'
 );
 
+reset role;
+
+delete from public.anamnesis_answers
+where question_id = '33000000-0000-0000-0000-000000000003';
+
+delete from public.anamnesis_submissions
+where client_id = '20000000-0000-0000-0000-000000000001'
+  and form_version_id = '31000000-0000-0000-0000-000000000003'
+  and submitted_at is null;
+
+select is(
+  (
+    select count(*)
+    from public.anamnesis_submissions
+    where client_id = '20000000-0000-0000-0000-000000000001'
+      and form_version_id = '31000000-0000-0000-0000-000000000003'
+      and submitted_at is null
+  ),
+  0::bigint,
+  'privileged cleanup can delete an unsubmitted Anamnesis draft'
+);
+
+select throws_ok(
+  $delete from public.anamnesis_submissions where id = '34000000-0000-0000-0000-000000000001'$,
+  '55000', null, 'submitted Anamnesis submission remains immutable on delete'
+);
+
+set local role authenticated;
 select set_config('request.jwt.claim.sub', '10000000-0000-0000-0000-000000000002', true);
 select is((select count(*) from public.anamnesis_submissions), 1::bigint, 'B reads submission B');
 select is((select count(*) from public.anamnesis_submissions where id = '34000000-0000-0000-0000-000000000001'), 0::bigint, 'B cannot read submission A');
