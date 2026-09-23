@@ -6,7 +6,9 @@
 
 A documentacao deste repositorio e a fonte de verdade do Projeto Patty.
 
-Antes de propor ou implementar mudancas, leia os documentos relevantes em `docs/` e este `AGENTS.md`.
+Antes de propor ou implementar mudancas, leia este `AGENTS.md`, depois `docs/PROJECT_STATUS.md` e, em seguida, os documentos relevantes em `docs/`.
+
+`docs/PROJECT_STATUS.md` e o ponto de entrada operacional e deve apontar para as fontes de verdade detalhadas; ele nao substitui os documentos normativos.
 
 Decisoes mais recentes registradas na documentacao prevalecem sobre conversas antigas.
 
@@ -82,3 +84,5 @@ Ao finalizar uma tarefa, relatar:
 - itens propositalmente fora de escopo;
 - verificacoes executadas;
 - estado do Git quando relevante.
+
+Quando a tarefa alterar materialmente o estado do projeto, atualizar tambem `docs/PROJECT_STATUS.md` antes de considerar a tarefa concluida. Exemplos incluem nova decisao, regra confirmada, questao resolvida, migration criada/aplicada, fluxo implementado, teste relevante, bloqueio, prioridade ou merge/publicacao.
