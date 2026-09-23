@@ -68,7 +68,7 @@ Estados usados:
 | Conteudo educacional | leitura admin/cliente por release IMPLEMENTADA | release manual | CI VALIDADO; elegibilidade de release testada | taxonomia, autoria/revisao e primeiro lote do Drive |
 | Exercicios | leitura admin IMPLEMENTADA | nao | CI VALIDADO | definir exposicao a cliente e campos finais |
 | Progresso de conteudo | schema existe | fluxo nao implementado | PARCIAL | definir quem registra abertura/conclusao |
-| IA | fundacao de banco IMPLEMENTADA | provider real nao integrado | SAAS VALIDADO | escolher provider/modelo, contrato de output e boundary server-side |
+| IA | fundacao de banco + validador deterministico de output `anamnesis_review` IMPLEMENTADOS | provider real e boundary de execution ainda nao integrados | SAAS VALIDADO; contrato de output coberto por testes determinísticos | definir provider/modelo, prompt versionado e boundary server-side de execution |
 | Drive | INVENTARIADO | nenhuma migracao fisica | 89 itens no manifesto inicial | revisar direitos/taxonomia e escolher lote inicial |
 | Regras deterministicas do metodo | IMPLEMENTADO PARCIAL | sem automacao de protocolo | CI VALIDADO | ampliar somente com formulas exatas confirmadas/documentadas |
 | CI | IMPLEMENTADO | automatico no GitHub Actions + smoke E2E manual de arquivos privados | `npm ci` + typecheck + `test:method` + `test:protocol` + `test:content` + `test:follow-up` + `test:validation` + build; E2E de producao PASS | ampliar E2E somente para fluxos estaveis e sinteticos |
@@ -174,7 +174,9 @@ A liberacao manual ja implementada considera elegivel somente uma versao publica
 
 A fundacao de banco preserva lifecycle, sources, output original, drafts, hypotheses e falhas de execution.
 
-Ainda nao existe integracao real com provider/modelo. Isso continua bloqueado por decisoes de privacidade, contrato estruturado, provider/modelo e caminho server-side de escrita.
+O contrato estrutural do primeiro purpose `anamnesis_review` agora possui validador deterministico em codigo e testes. O validador aceita apenas os dois finding types confirmados, rejeita propriedades extras, exige sources autorizadas da execution e nao permite score/diagnostico/conclusao clinica. Ele nao decide se um finding e verdadeiro e nao substitui revisao humana.
+
+Ainda nao existe integracao real com provider/modelo nem boundary server-side que crie execution, monte contexto minimizado, chame provider e persista sucesso/falha. Esses pontos continuam separados para evitar acoplamento prematuro a um provider.
 
 ## Proxima rodada de decisoes da Patty
 
