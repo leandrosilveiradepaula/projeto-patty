@@ -21,7 +21,9 @@ Toda categoria registrada em `drive_content_triage.json` tem status `hypothesis_
 
 ## Resultado objetivo
 
-Foram triados os mesmos 89 itens do inventário:
+Foram triados os mesmos 89 itens do inventário original. Uma segunda passada posterior identificou 21 arquivos adicionais; eles ainda nao fazem parte desta triagem e estao registrados separadamente em `DRIVE_CONTENT_INVENTORY_REVIEW.md` e `drive_content_inventory_review.json`.
+
+Resultado desta triagem original:
 
 - 15 itens educacionais;
 - 74 vídeos de exercícios;
