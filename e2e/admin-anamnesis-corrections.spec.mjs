@@ -159,7 +159,7 @@ async function lockSyntheticAdmin(userId) {
   await clearAdminFactors(userId);
 
   const locked = await admin.auth.admin.updateUserById(userId, {
-    password: randomBytes(64).toString("base64url"),
+    password: randomBytes(48).toString("base64url"),
   });
 
   if (locked.error) throw locked.error;
