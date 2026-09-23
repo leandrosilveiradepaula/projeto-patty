@@ -64,6 +64,7 @@ begin
     'meal_plan_versions',
     'meals',
     'professional_follow_ups',
+    'profiles',
     'protocol_publications',
     'protocol_version_approvals',
     'protocol_versions',
@@ -78,19 +79,6 @@ begin
 end;
 $$;
 
-create policy profiles_admin_mfa_aal2_required
-  on public.profiles
-  as restrictive
-  for all
-  to authenticated
-  using (
-    id = (select auth.uid())
-    or (select public.current_user_admin_mfa_satisfied())
-  )
-  with check (
-    id = (select auth.uid())
-    or (select public.current_user_admin_mfa_satisfied())
-  );
 
 create policy storage_objects_admin_mfa_aal2_required
   on storage.objects
