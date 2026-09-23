@@ -33,6 +33,8 @@ Os mesmos 89 arquivos estao registrados em `drive_content_manifest.json` com:
 
 O manifesto existe para rastreabilidade e futura importacao controlada. Ele nao e tabela de publicacao, nao autoriza distribuicao e nao substitui a decisao ainda aberta sobre como referencias de origem serao persistidas no modelo de dados.
 
+A triagem posterior baseada exclusivamente nesses metadados esta documentada em `DRIVE_CONTENT_TRIAGE.md` e `drive_content_triage.json`. Ela nao le o conteudo dos arquivos nem altera `rights_status` ou `migration_status`.
+
 ## Resumo da primeira passada
 
 Foram inventariados 89 arquivos em ramos claramente educacionais ou de exercicios:
