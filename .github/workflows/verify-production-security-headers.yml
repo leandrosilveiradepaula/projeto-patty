@@ -24,7 +24,7 @@ jobs:
           test -n "$E2E_BASE_URL" || { echo "Missing E2E_BASE_URL"; exit 1; }
 
           headers="$(mktemp)"
-          curl --fail --silent --show-error --location --head \
+          curl --fail --silent --show-error --location \
             --output /dev/null \
             --dump-header "$headers" \
             "$E2E_BASE_URL/login"
