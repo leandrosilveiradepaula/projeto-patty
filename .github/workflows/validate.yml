@@ -53,6 +53,9 @@ jobs:
       - name: Onboarding tests
         run: npm run test:onboarding
 
+      - name: Anamnesis draft tests
+        run: npm run test:anamnesis-draft
+
       - name: AI contract tests
         run: npm run test:ai
 
