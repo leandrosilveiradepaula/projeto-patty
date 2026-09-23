@@ -1,0 +1,50 @@
+.stack {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.text {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-medium-size);
+  line-height: var(--text-body-medium-line-height);
+}
+
+.qrPanel {
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  padding: var(--space-4);
+  background: white;
+}
+
+.qrCode {
+  display: block;
+  width: min(100%, 280px);
+  height: auto;
+}
+
+.secretPanel {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.secretLabel {
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-small-size);
+}
+
+.secret {
+  overflow-wrap: anywhere;
+  border-radius: var(--radius-small);
+  padding: var(--space-3);
+  background: var(--color-surface-low);
+  color: var(--color-text-primary);
+}
+
+.form {
+  display: grid;
+  gap: var(--space-4);
+}
