@@ -33,7 +33,7 @@ Migrations relevantes confirmadas no SaaS nesta rodada:
 
 O workflow manual `Deploy Supabase migrations` de 2026-09-23 confirmou `20260922160058` ja presente no historico remoto. Em seguida, o dry-run listou somente `20260923191554` como pendente; o apply aplicou essa migration e o `migration list` pos-apply confirmou os mesmos timestamps local/remoto.
 
-Os smokes anteriores confirmaram MFA AAL1/AAL2, isolamento entre clientes, persistencia de rascunho, correcoes append-only e preservacao do enforcement AAL2 apos a otimizacao das policies. O advisor deixou de reportar `auth_rls_initplan` para as policies de correcoes. A correcao `20260923191554` esta aplicada, mas o smoke E2E especifico de rascunho ainda deve ser repetido antes de marcar essa correcao como validada em producao.
+Os smokes anteriores confirmaram MFA AAL1/AAL2, isolamento entre clientes, persistencia de rascunho, correcoes append-only e preservacao do enforcement AAL2 apos a otimizacao das policies. O advisor deixou de reportar `auth_rls_initplan` para as policies de correcoes. Para `20260923191554`, um smoke transacional pos-apply com dados sinteticos e `ROLLBACK` confirmou DELETE real de draft nao submetido, bloqueio `55000` para submission enviada e isolamento RLS entre clientes. O E2E de UI deve ser repetido quando o deployment Vercel estiver atualizado.
 
 Migration local atualmente pendente de aplicacao:
 
