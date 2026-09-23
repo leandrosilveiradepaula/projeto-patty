@@ -17,7 +17,8 @@ export type AnamnesisDraftPersistenceErrorCode =
   | "draft_not_found"
   | "form_version_not_available"
   | "invalid_identifier"
-  | "question_not_available";
+  | "question_not_available"
+  | "unsupported_answer_type";
 
 export class AnamnesisDraftPersistenceError extends Error {
   constructor(public readonly code: AnamnesisDraftPersistenceErrorCode) {
@@ -143,6 +144,7 @@ async function updateDraftAnswer(input: {
 
 export async function saveCurrentClientAnamnesisDraftAnswer(input: {
   answerValue: Json;
+  expectedAnswerType?: string;
   questionId: string;
   submissionId: string;
 }) {
@@ -170,7 +172,7 @@ export async function saveCurrentClientAnamnesisDraftAnswer(input: {
 
   const { data: question, error: questionError } = await supabase
     .from("anamnesis_questions")
-    .select("id")
+    .select("id, answer_type")
     .eq("id", input.questionId)
     .eq("form_version_id", submission.form_version_id)
     .maybeSingle();
@@ -181,6 +183,13 @@ export async function saveCurrentClientAnamnesisDraftAnswer(input: {
 
   if (!question) {
     throw new AnamnesisDraftPersistenceError("question_not_available");
+  }
+
+  if (
+    input.expectedAnswerType &&
+    question.answer_type !== input.expectedAnswerType
+  ) {
+    throw new AnamnesisDraftPersistenceError("unsupported_answer_type");
   }
 
   const { data: existingAnswer, error: existingAnswerError } = await supabase
