@@ -113,6 +113,29 @@ test("classified protected entrypoints contain the expected authentication bound
   }
 });
 
+test("Next.js keeps baseline security response headers", async () => {
+  const content = await readFile(path.join(ROOT, "next.config.ts"), "utf8");
+
+  for (const required of [
+    "Content-Security-Policy",
+    "frame-ancestors 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "Permissions-Policy",
+    "Referrer-Policy",
+    "X-Content-Type-Options",
+    "nosniff",
+    "X-Frame-Options",
+    "DENY",
+  ]) {
+    assert.equal(
+      content.includes(required),
+      true,
+      "next.config.ts must keep " + required,
+    );
+  }
+});
+
 test("database migrations avoid unsafe authorization shortcuts", async () => {
   const migrationDirectory = path.join(ROOT, "supabase", "migrations");
   const migrationFiles = (await readdir(migrationDirectory))
