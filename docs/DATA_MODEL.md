@@ -529,7 +529,7 @@ Ainda e necessario definir o modelo logico detalhado.
 
 ### QUESTAO ABERTA
 
-Ainda e necessario definir quais campos serao obrigatorios em anamnese, medidas, fotos, exames, protocolos e avaliacoes.
+Ainda e necessario definir quais campos serao obrigatorios em medidas, fotos, exames, protocolos e avaliacoes. Para Anamnese, a regra geral ja esta confirmada: todos os campos aplicaveis da versao devem estar preenchidos no envio final; rascunhos podem permanecer incompletos.
 
 ### QUESTAO ABERTA
 
@@ -583,7 +583,9 @@ O inventario historico de 15 categorias e 36 perguntas nao foi publicado como ca
 
 `anamnesis_submissions` vincula cada preenchimento a um `client_id` e a uma `form_version_id`. `anamnesis_answers` preserva o valor original em `answer_value jsonb` e usa FKs compostas para impedir que uma resposta aponte para pergunta de outra versao.
 
-Uma submission com `submitted_at` preenchido e imutavel, assim como suas respostas. Definicoes de formulario que ja possuem submissions tambem nao sao alteradas ou removidas. Correcao futura deve criar nova submission ou seguir fluxo ainda pendente; esta etapa nao sobrescreve historico.
+Uma submission com `submitted_at` preenchido e imutavel, assim como suas respostas. Definicoes de formulario que ja possuem submissions tambem nao sao alteradas ou removidas.
+
+Correcoes posteriores nao criam sobrescrita da resposta original: somente a Patty/admin autorizado pode acrescentar registros append-only em `anamnesis_answer_corrections`, preservando `anamnesis_answers.answer_value`, autoria e timestamp. A cliente nao edita respostas depois do envio final.
 
 ### DECISAO CONFIRMADA
 

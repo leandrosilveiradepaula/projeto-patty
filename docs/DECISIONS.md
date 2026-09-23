@@ -1,5 +1,28 @@
 # Decisoes
 
+## 2026-09-23 - Apply da correcao de DELETE do rascunho e confirmacao do failure handling
+
+### FATO OPERACIONAL CONFIRMADO
+
+O workflow manual `Deploy Supabase migrations` executado no `master` em 2026-09-23 confirmou no `migration list` remoto que `20260922160058_ai_execution_failure_handling.sql` ja constava aplicada no Supabase SaaS.
+
+No mesmo fluxo, o dry-run listou apenas `20260923191554_fix_anamnesis_draft_delete_trigger.sql` como pendente. O apply seguinte aplicou essa migration com sucesso e o `migration list` pos-apply confirmou `20260923191554` presente local e remoto.
+
+Isso separa dois estados:
+- failure handling de IA: migration presente no repositorio e confirmada no historico remoto;
+- correcao do DELETE de rascunho: migration aplicada no SaaS e validada no banco por smoke transacional; a validacao E2E de UI continua dependente de um deployment Vercel atualizado.
+
+### VERIFICACAO POS-APPLY
+
+Um smoke transacional no Supabase SaaS, usando somente dados sinteticos e finalizado com `ROLLBACK`, confirmou:
+- exclusao privilegiada de submission nao enviada remove a linha de fato;
+- tentativa de excluir submission enviada continua falhando com SQLSTATE `55000`;
+- a submission enviada permanece presente apos a tentativa bloqueada;
+- cliente A nao consegue ler a submission da cliente B sob RLS.
+
+A primeira tentativa do smoke foi abortada corretamente pelo trigger de imutabilidade porque a fixture tentou inserir uma resposta depois de marcar a submission como enviada. O teste foi corrigido para respeitar o lifecycle valido: resposta primeiro, `submitted_at` depois.
+
+
 ## 2026-09-23 - Reconciliacao de questoes abertas da Anamnese
 
 ### FATO DOCUMENTAL

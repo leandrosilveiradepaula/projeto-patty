@@ -83,7 +83,9 @@ Cliente pode acessar somente seu proprio `client_registration`.
 
 Futuramente, cliente podera acessar somente seus proprios dados client-scoped.
 
-Para Anamnese em rascunho, a fundacao de escrita segue privilegio minimo: a cliente pode criar somente a propria submission para versao publicada e inserir/atualizar somente o valor das respostas enquanto a submission continua sem `submitted_at`. A identidade da resposta (`submission_id`, `form_version_id`, `question_id`) nao recebe UPDATE. A submissao final ainda nao e liberada nesta etapa.
+Para Anamnese em rascunho, a fundacao de escrita segue privilegio minimo: a cliente pode criar somente a propria submission para versao publicada e inserir/atualizar somente o valor das respostas enquanto a submission continua sem `submitted_at`. A identidade da resposta (`submission_id`, `form_version_id`, `question_id`) nao recebe UPDATE.
+
+A regra de produto da submissao final ja esta definida: todos os campos aplicaveis devem estar preenchidos. A submissao final, porem, ainda nao esta implementada/liberada para a cliente porque as regras de aplicabilidade das perguntas condicionais e a UX final do envio continuam pendentes. Nao confundir regra definida com funcionalidade implementada.
 
 Depois da submissao, a cliente nao recebe escrita nas respostas nem acesso a `anamnesis_answer_corrections`. Correcoes estruturadas sao administrativas, exigem assignment ativo e AAL2, e sao append-only.
 
@@ -105,7 +107,7 @@ A estrategia e aditiva: policies `RESTRICTIVE` verificam o claim confiavel `aal`
 
 `user_roles` permanece fora dessa restricao para permitir que uma sessao administrativa em `aal1` descubra o proprio role e seja encaminhada ao fluxo de MFA. Os demais recursos administrativos protegidos exigem `aal2`. Clientes em `aal1` continuam sujeitas somente as policies normais de ownership e nao passam a exigir MFA.
 
-A migration `20260923113835_admin_mfa_rls_enforcement.sql` esta preparada e validada por dry-run transacional, mas ainda nao aplicada no SaaS.
+A migration `20260923113835_admin_mfa_rls_enforcement.sql` foi aplicada no Supabase SaaS em 2026-09-23. O smoke pos-aplicacao documentado confirmou admin em AAL1 bloqueado, admin em AAL2 autorizado quando as demais policies permitem e cliente em AAL1 sem regressao.
 
 ## Acesso Patty/admin
 
@@ -218,7 +220,7 @@ Se futuramente uma funcao `SECURITY DEFINER` for realmente necessaria:
 - deve ter `search_path` controlado;
 - deve passar por revisao de seguranca.
 
-Nao foram implementadas funcoes nesta fase.
+A afirmacao acima descreve a fase inicial. Fases posteriores introduziram funcoes e boundaries controladas documentadas em `DECISIONS.md`; qualquer avaliacao atual deve usar o estado mais recente, nao esta restricao historica.
 
 ## Auditoria
 
@@ -271,9 +273,11 @@ O browser nao cria perfis, clientes, roles ou assignments diretamente. O bootstr
 
 Para Cadastro Atual, submission e answer, a cliente autenticada le somente recursos vinculados ao proprio `clients.profile_id`. Patty/admin le somente quando possui role relacional `admin` e assignment ativo para a cliente. `anon` nao recebe acesso.
 
-### DECISAO CONFIRMADA
+### DECISAO HISTORICA PARCIALMENTE SUBSTITUIDA
 
-Nesta etapa, browser autenticado nao recebe `INSERT`, `UPDATE` ou `DELETE` em Cadastro Atual, definicoes, submissions ou answers. O fluxo definitivo de escrita permanece aberto e nao foi inferido a partir da UI.
+A fundacao original nao concedia escrita de browser em Cadastro Atual, definicoes, submissions ou answers. Essa descricao foi parcialmente substituida para Anamnese em rascunho.
+
+Na implementacao atual, a cliente autenticada pode criar somente a propria submission de rascunho para versao publicada e inserir/atualizar somente o valor das proprias respostas enquanto `submitted_at IS NULL`, sob RLS e privilegios minimos. A submissao final continua nao liberada. Cadastro Atual e definicoes de formulario nao receberam escrita ampla pelo browser por causa dessa mudanca.
 
 Administradores com assignment ativo podem inserir review administrativa em seu proprio nome e ler reviews da cliente sob sua responsabilidade. Clientes nao possuem grant ou policy para ler reviews.
 
@@ -283,15 +287,21 @@ Clientes nao possuem permissoes para criar, alterar, excluir ou publicar definic
 
 ## Implementacao BACKEND-BUNDLE-02
 
-### DECISAO CONFIRMADA
+### DECISAO HISTORICA SUBSTITUIDA E ESTADO ATUAL
 
-`client_files` possui RLS propria, separada de `storage.objects`. Na implementacao atual, cliente autenticada le somente metadados e objetos privados vinculados ao proprio `clients.profile_id`; Patty/admin le somente com role relacional `admin` e assignment ativo. `anon`, usuario sem vinculo, admin sem assignment e assignment encerrado nao recebem acesso.
+A implementacao inicial de `client_files` exigia assignment ativo para acesso administrativo. Essa regra foi substituida especificamente para arquivos privados pela migration `20260922230034_private_file_access_visibility_foundation.sql`.
 
-A regra de produto posterior exige granularidade adicional para a cliente: arquivos enviados pela propria cliente ficam visiveis por padrao, enquanto arquivos enviados administrativamente pela Patty devem permanecer ocultos ate liberacao explicita. A RLS/policy atual nao representa essa distincao por autoria/liberacao e precisa ser reconciliada antes de o upload administrativo ser disponibilizado.
+No estado atual:
+- cliente autenticada le somente arquivos proprios liberados por `client_visible_at`;
+- Patty/admin com role relacional `admin` pode ler `client_files` sem depender de assignment ativo;
+- `storage.objects` no bucket `client-private` aplica a mesma excecao administrativa e exige correspondencia com metadado autorizado em `client_files`;
+- uploads administrativos permanecem ocultos para a cliente ate liberacao explicita;
+- a policy transversal de MFA continua `RESTRICTIVE`, portanto admin precisa de AAL2 mesmo nesta excecao;
+- a excecao nao se estende aos demais dados client-scoped.
 
-Essa descricao e fato de implementacao, mas esta parcialmente desalinhada com a decisao posterior de produto: a Patty deve manter acesso aos arquivos privados mesmo sem assignment ativo. A RLS de `client_files`, a policy correspondente de `storage.objects` e as rotas server-side de arquivo precisam ser reconciliadas antes de a decisao ser considerada implementada.
+A auditoria estatica de 2026-09-23 confirmou que as rotas de listagem, download, upload administrativo e liberacao nao reintroduzem requisito de assignment. As Server Actions exigem `requireRole("admin")`, e leitura/download com sessao normal continua sujeita a RLS. O smoke E2E administrativo documentado cobre upload, ocultacao inicial, liberacao explicita, visibilidade para cliente e download.
 
-A policy de `storage.objects` restringe explicitamente o bucket `client-private` e exige correspondencia com metadado autorizado em `client_files`. Nao ha policy geral para `authenticated` no bucket inteiro, nem grant de INSERT, UPDATE ou DELETE para arquivos nesta etapa.
+Nao ha policy geral para `authenticated` no bucket inteiro. Escritas temporarias de upload permanecem limitadas aos fluxos especificos autorizados e aos paths gerados pelo sistema.
 
 ### DECISAO CONFIRMADA
 
