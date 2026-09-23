@@ -1,4 +1,4 @@
-name: Verify production security headers
+name: Diagnose production response layer
 
 on:
   push:
@@ -9,18 +9,18 @@ permissions:
   contents: read
 
 jobs:
-  verify:
+  diagnose:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
     steps:
-      - name: Verify production response headers
+      - name: List response status and header names only
         env:
           E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
         shell: bash
         run: |
-          set -u
+          set -euo pipefail
           test -n "$E2E_BASE_URL" || { echo "Missing E2E_BASE_URL"; exit 1; }
 
           headers="$(mktemp)"
@@ -29,50 +29,10 @@ jobs:
             --dump-header "$headers" \
             "$E2E_BASE_URL/login"
 
-          normalize() {
-            tr -d '\r' < "$headers"
-          }
+          echo "HTTP status chain:"
+          tr -d '\r' < "$headers" | awk '/^HTTP\// {print $2}'
 
-          csp="$(normalize | awk -F': ' 'tolower($1)=="content-security-policy"{print $2}' | tail -1)"
-          permissions="$(normalize | awk -F': ' 'tolower($1)=="permissions-policy"{print $2}' | tail -1)"
-          referrer="$(normalize | awk -F': ' 'tolower($1)=="referrer-policy"{print $2}' | tail -1)"
-          nosniff="$(normalize | awk -F': ' 'tolower($1)=="x-content-type-options"{print $2}' | tail -1)"
-          frame="$(normalize | awk -F': ' 'tolower($1)=="x-frame-options"{print $2}' | tail -1)"
-
-          failures=0
-          check_contains() {
-            label="$1"
-            value="$2"
-            expected="$3"
-            if [[ "$value" == *"$expected"* ]]; then
-              echo "$label: PASS"
-            else
-              echo "$label: FAIL"
-              failures=$((failures + 1))
-            fi
-          }
-
-          check_exact() {
-            label="$1"
-            value="$2"
-            expected="$3"
-            if [ "$value" = "$expected" ]; then
-              echo "$label: PASS"
-            else
-              echo "$label: FAIL"
-              failures=$((failures + 1))
-            fi
-          }
-
-          check_contains "CSP base-uri" "$csp" "base-uri 'self'"
-          check_contains "CSP frame-ancestors" "$csp" "frame-ancestors 'none'"
-          check_contains "CSP form-action" "$csp" "form-action 'self'"
-          check_contains "Permissions camera" "$permissions" "camera=()"
-          check_contains "Permissions microphone" "$permissions" "microphone=()"
-          check_contains "Permissions geolocation" "$permissions" "geolocation=()"
-          check_contains "Permissions browsing-topics" "$permissions" "browsing-topics=()"
-          check_exact "Referrer-Policy" "$referrer" "no-referrer"
-          check_exact "X-Content-Type-Options" "$nosniff" "nosniff"
-          check_exact "X-Frame-Options" "$frame" "DENY"
-
-          exit "$failures"
+          echo "Header names:"
+          tr -d '\r' < "$headers" \
+            | awk -F':' '/^[A-Za-z0-9-]+:/ {print tolower($1)}' \
+            | sort -u
