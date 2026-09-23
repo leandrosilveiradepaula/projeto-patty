@@ -29,7 +29,11 @@ Contas de clientes sao criadas somente por convite ou ativacao controlada. Nao e
 
 A Patty inicia o onboarding porque ja possui o email da cliente: ela envia um link para esse endereco e a cliente entra por esse link na interface do aplicativo para responder as perguntas que antes estavam no formulario externo.
 
-Permanece aberto o detalhe tecnico de ativacao da credencial: quando a senha inicial e definida, expiracao/reenvio do link, recuperacao de acesso e encerramento de conta. O login normal apos ativacao continua sendo email + senha.
+O fluxo tecnico de ativacao do MVP usa convite administrativo do Supabase Auth. O backend provisiona identidade, profile, role `client`, cliente e assignment da Patty sem expor secret ao browser. A cliente abre o convite, a rota SSR `/auth/confirm` valida o token e cria a sessao, e `/ativar-conta` exige que ela defina a propria senha antes de seguir para a Anamnese. O login normal apos ativacao continua sendo email + senha.
+
+Como Auth e persistencia relacional nao compartilham uma unica transacao, falhas apos a criacao do usuario Auth exigem compensacao explicita para remover estado parcial. O template de convite hospedado no Supabase deve usar `TokenHash` e `type=invite` apontando para `/auth/confirm`; Site URL e redirects autorizados precisam ser configurados no ambiente de producao.
+
+Permanecem abertos expiracao/reenvio do convite, recuperacao de acesso e encerramento de conta.
 
 ### DECISAO DE SEGURANCA E OPERACAO
 

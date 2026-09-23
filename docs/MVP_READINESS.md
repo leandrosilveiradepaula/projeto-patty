@@ -42,8 +42,8 @@ Estados usados:
 - questionario final e fluxo de preenchimento/submissao da Anamnese;
 - definir a politica final de retencao/hard delete de arquivos privados;
 - enforcement MFA administrativo tambem em RLS/Data API/Storage;
-- criacao/ativacao/encerramento de contas de clientes;
-- administracao de roles e inicio de assignments ligado ao onboarding controlado;
+- validar em producao o convite/ativacao de contas de clientes e configurar template SSR do Supabase;
+- definir expiracao/reenvio, recuperacao e encerramento de contas de clientes;
 - edicao controlada do Cadastro Atual;
 - catalogo e regras finais de avaliacao/medidas;
 - processo de autoria/revisao/publicacao das bibliotecas;
@@ -58,7 +58,7 @@ Estados usados:
 | --- | --- | --- | --- | --- |
 | Auth / sessao | login por email/senha IMPLEMENTADO; MFA administrativo TOTP IMPLEMENTADO na aplicacao | admin exige `aal2` em SSR, rotas e server actions; clientes permanecem em fluxo normal | CI pendente nesta branch; RLS ainda nao exige `aal2` para admin | fechar enforcement MFA em RLS e validar E2E administrativo com TOTP |
 | Profiles / roles | IMPLEMENTADO | sem UI administrativa de gestao | RLS existente | definir bootstrap/admin e quem gerencia roles |
-| Clients / assignments | leitura + encerramento de assignment IMPLEMENTADOS | Patty pode encerrar assignment ativo por boundary server-side; inicio ainda sem fluxo operacional | CI + smoke E2E de producao PASS; historico preservado em `client_assignments` | integrar inicio de assignment ao onboarding controlado sem ampliar acesso a clientes nao atribuidas |
+| Clients / assignments | leitura + encerramento + inicio de assignment no onboarding IMPLEMENTADOS | Patty inicia onboarding por convite server-side; provisionamento cria vinculos relacionais e assignment com compensacao em falha | CI pendente nesta branch; encerramento E2E em producao PASS | validar convite/ativacao em producao e configurar template SSR do Supabase |
 | Cadastro Atual | leitura IMPLEMENTADA | nao | CI VALIDADO | definir quem pode alterar cada campo e auditoria |
 | Anamnese versionada | leitura IMPLEMENTADA | nota interna append-only | CI VALIDADO | fechar questionario e fluxo de preenchimento |
 | Avaliacoes / medidas | leitura IMPLEMENTADA | acompanhamento profissional append-only | CI VALIDADO; conjunto de decisoes profissionais tipado e testado | definir catalogo, unidades, obrigatoriedade e correcao |
