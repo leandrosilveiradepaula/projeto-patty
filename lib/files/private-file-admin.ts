@@ -77,6 +77,10 @@ export async function createAdminPrivateFileUploadSession(input: {
     throw sessionError;
   }
 
+  if (!session.temp_object_path) {
+    throw new Error("Upload session did not generate a temporary object path");
+  }
+
   const { data: signedUpload, error: signedUploadError } = await admin.storage
     .from(PRIVATE_FILE_BUCKET)
     .createSignedUploadUrl(session.temp_object_path, {
