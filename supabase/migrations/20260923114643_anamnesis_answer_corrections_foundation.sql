@@ -35,6 +35,14 @@ alter table public.anamnesis_answer_corrections enable row level security;
 revoke all on table public.anamnesis_answer_corrections from anon, authenticated;
 grant select, insert on table public.anamnesis_answer_corrections to authenticated;
 
+create policy admin_mfa_aal2_required
+  on public.anamnesis_answer_corrections
+  as restrictive
+  for all
+  to authenticated
+  using ((select public.current_user_admin_mfa_satisfied()))
+  with check ((select public.current_user_admin_mfa_satisfied()));
+
 create policy "anamnesis_answer_corrections_select_active_assignment_admin_aal2"
   on public.anamnesis_answer_corrections
   for select
