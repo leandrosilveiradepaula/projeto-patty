@@ -22,17 +22,15 @@ Nao usar SQL Editor, `execute_sql` ou MCP `apply_migration` para substituir esse
 
 ## Estado atual
 
-Ultima migration confirmada no SaaS:
-
-`20260922231426_client_file_upload_session_foundation.sql`
-
-Migrations locais pendentes:
+Ultimas migrations confirmadas no SaaS:
 
 1. `20260923113230_anamnesis_draft_write_foundation.sql`
 2. `20260923113835_admin_mfa_rls_enforcement.sql`
 3. `20260923114643_anamnesis_answer_corrections_foundation.sql`
 
-As tres ja foram executadas em conjunto dentro de transacao com `ROLLBACK` contra o SaaS e tiveram os cenarios funcionais esperados validados. Elas ainda nao estao aplicadas.
+As tres foram aplicadas em 2026-09-23 pelo workflow manual `Deploy Supabase migrations`. O `migration list` pos-apply confirmou os mesmos timestamps local/remoto.
+
+O smoke pos-aplicacao, executado em transacao com `ROLLBACK`, confirmou MFA AAL1/AAL2, isolamento entre clientes, persistencia de rascunho e correcoes append-only.
 
 ## Workflow
 
@@ -79,13 +77,11 @@ Apos o apply, o workflow executa `migration list` novamente. Depois disso, confe
 
 ## Pos-aplicacao obrigatorio
 
-Depois das migrations atuais:
+Depois de cada apply:
 
 1. conferir `list_migrations`;
-2. rodar advisors de seguranca;
-3. validar admin `aal1` bloqueado e admin `aal2` permitido;
-4. validar cliente `aal1` sem regressao;
-5. validar criacao/retomada de rascunho da Anamnese;
-6. validar que correcao administrativa permanece append-only e exige submission enviada.
+2. rodar advisors de seguranca e performance;
+3. executar smoke especifico das invariantes alteradas;
+4. registrar a evidencia na documentacao antes de considerar a migration concluida operacionalmente.
 
 Nenhuma UI final de submissao da Anamnese e liberada por esse deploy.
