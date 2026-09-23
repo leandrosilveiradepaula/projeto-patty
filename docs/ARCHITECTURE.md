@@ -33,7 +33,7 @@ O fluxo tecnico de ativacao do MVP usa convite administrativo do Supabase Auth. 
 
 Como Auth e persistencia relacional nao compartilham uma unica transacao, falhas apos a criacao do usuario Auth exigem compensacao explicita para remover estado parcial. O lifecycle tecnico foi validado por smoke E2E sintetico em producao: convite gerado sem inbox real, confirmacao SSR, criacao de senha, primeiro acesso, novo login e cleanup completo passaram. O Supabase SaaS confirmou zero residuos sinteticos apos o teste.
 
-O template de convite hospedado no Supabase deve usar `TokenHash` e `type=invite` apontando para `/auth/confirm`; Site URL e redirects autorizados precisam ser configurados e validados separadamente no ambiente de producao. O smoke sintetico nao substitui essa validacao do email real.
+O template de convite hospedado no Supabase deve usar `TokenHash` e `type=invite` apontando para `/auth/confirm`. A Site URL e a redirect allowlist ja foram alinhadas com a origem de producao. O template ainda nao esta configurado: a Management API retornou que projetos Free usando o provedor de email padrao nao podem modificar templates e exigem upgrade ou SMTP customizado. O smoke sintetico nao substitui a validacao do email real.
 
 Permanecem abertos expiracao/reenvio do convite, recuperacao de acesso e encerramento de conta.
 
@@ -61,7 +61,7 @@ Ja existem tambem boundaries server-side de escrita para notas internas de revis
 
 A rota raiz usa o contexto autenticado para encaminhar admin, cliente ou login.
 
-Esses fatos de implementacao nao significam que todos os fluxos de escrita estejam definidos. A UI e a submissao final da Anamnese continuam dependentes das definicoes finais do questionario; as migrations de rascunho, MFA administrativo em RLS e correcoes historicas estao versionadas e validadas por dry-run, mas ainda nao aplicadas no SaaS. Retencao/hard delete de arquivos, operacoes administrativas ainda abertas, automacoes e integracao real com provider de IA continuam sujeitos as decisoes e questoes abertas correspondentes.
+Esses fatos de implementacao nao significam que todos os fluxos de escrita estejam definidos. A UI e a submissao final da Anamnese continuam dependentes das definicoes finais do questionario; as migrations de rascunho, MFA administrativo em RLS e correcoes historicas estao aplicadas e validadas no SaaS. Retencao/hard delete de arquivos, operacoes administrativas ainda abertas, automacoes e integracao real com provider de IA continuam sujeitos as decisoes e questoes abertas correspondentes.
 
 ### DECISAO HISTORICA SUBSTITUIDA
 

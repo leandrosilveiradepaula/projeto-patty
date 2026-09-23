@@ -1,5 +1,40 @@
 # Decisoes
 
+## 2026-09-23 - Configuracao de Auth de producao auditada e parcialmente endurecida
+
+### FATO TECNICO VALIDADO
+
+A configuracao hospedada do Supabase Auth foi auditada pela Management API usando somente campos nao secretos.
+
+O estado encontrado antes do ajuste era:
+- `password_min_length = 6`;
+- `password_hibp_enabled = false`;
+- Site URL diferente da URL de producao usada pelos smokes;
+- redirect allowlist sem a URL de producao;
+- template de convite sem o link SSR por `TokenHash`;
+- nenhum SMTP customizado configurado.
+
+### DECISAO TECNICA APLICADA
+
+A validacao server-side da aplicacao ja exigia senha com no minimo 8 caracteres. O Supabase Auth foi alinhado para `password_min_length = 8`, sem introduzir nova regra de composicao de senha.
+
+A Site URL do Supabase Auth foi alinhada com a URL de producao ja usada em `E2E_BASE_URL`, e essa mesma origem foi incluida na redirect allowlist preservando entradas existentes.
+
+### LIMITACAO EXTERNA CONFIRMADA
+
+A tentativa de habilitar `password_hibp_enabled` retornou HTTP 402. A documentacao atual do Supabase informa que Leaked Password Protection esta disponivel no plano Pro e superiores. O advisor continua reportando esse unico warning de seguranca enquanto o projeto permanecer sem esse recurso.
+
+A tentativa de alterar `mailer_templates_invite_content` retornou HTTP 400 com mensagem explicita de que projetos Free usando o provedor de email padrao nao podem modificar templates. A propria API informa duas alternativas tecnicas: upgrade de plano ou configuracao de SMTP customizado.
+
+Portanto:
+- Site URL e redirect allowlist estao corrigidos;
+- senha minima do Auth esta alinhada em 8;
+- HIBP permanece bloqueado pelo plano;
+- o template real de convite SSR continua bloqueado pela combinacao Free + email provider padrao;
+- o E2E sintetico de onboarding continua valido como teste do lifecycle tecnico, mas nao prova entrega/consumo do email real.
+
+Nenhum fallback inseguro foi introduzido para contornar essas limitacoes.
+
 ## 2026-09-23 - Otimizacao das policies de correcoes da Anamnese aplicada
 
 ### DECISAO TECNICA DE PERFORMANCE
@@ -83,7 +118,7 @@ A decisao deve ser reavaliada quando a IA real, progresso de conteudo ou outro f
 
 ### FATO TECNICO
 
-O advisor de seguranca do mesmo levantamento reportou `Leaked Password Protection` desativado no Supabase Auth. Isso e uma configuracao externa de seguranca e permanece pendente de habilitacao/validacao no ambiente, sem exigir nova regra profissional da Patty.
+O advisor de seguranca reportou `Leaked Password Protection` desativado. A tentativa posterior de habilitacao pela Management API retornou HTTP 402; a documentacao do Supabase limita o recurso ao plano Pro e superiores. A pendencia passa a ser de plano/infraestrutura, nao de implementacao do aplicativo.
 
 ## 2026-09-23 - Correcoes historicas da Patty na Anamnese
 
@@ -176,7 +211,7 @@ No primeiro acesso do MVP, o link enviado pela Patty funciona como convite de at
 
 Ao abrir um convite valido, a cliente entra em uma sessao de ativacao e deve criar a propria senha antes de seguir para a area de Anamnese. A Patty nao define, recebe nem armazena senha provisoria. Depois da ativacao, o metodo normal de acesso permanece email + senha em `/login`.
 
-Para SSR, o template de email de convite do Supabase deve apontar para `/auth/confirm` usando `TokenHash` e tipo `invite`; a rota troca o token por sessao e redireciona para `/ativar-conta`. A configuracao do template e Site URL/redirect allowlist no Supabase SaaS e gate de deploy, nao regra profissional.
+Para SSR, o template de email de convite do Supabase deve apontar para `/auth/confirm` usando `TokenHash` e tipo `invite`; a rota troca o token por sessao e redireciona para `/ativar-conta`. Site URL e redirect allowlist ja foram alinhados com a producao. O template ainda nao pode ser alterado no ambiente atual: a Management API confirmou que projetos Free com o provedor de email padrao precisam de upgrade ou SMTP customizado para modificar templates.
 
 Expiracao/reenvio do convite, recuperacao de acesso e encerramento da conta continuam pendentes.
 

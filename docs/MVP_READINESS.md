@@ -44,8 +44,8 @@ Estados usados:
 
 - questionario final e fluxo de preenchimento/submissao da Anamnese;
 - definir a politica final de retencao/hard delete de arquivos privados;
-- habilitar e validar `Leaked Password Protection` no Supabase Auth;
-- configurar e validar o template real de email `Invite user`/Site URL do Supabase; o lifecycle sintetico de convite/ativacao ja passou E2E em producao;
+- decidir infraestrutura/plano para habilitar `Leaked Password Protection`, recurso bloqueado no ambiente atual por exigir Pro ou superior;
+- decidir entre upgrade ou SMTP customizado para permitir o template real `Invite user`; Site URL e redirect allowlist ja estao alinhados e o lifecycle sintetico de convite/ativacao passou E2E em producao;
 - definir expiracao/reenvio, recuperacao e encerramento de contas de clientes;
 - edicao controlada do Cadastro Atual;
 - catalogo e regras finais de avaliacao/medidas;
@@ -59,9 +59,9 @@ Estados usados:
 
 | Area | Estado atual | Escrita operacional | Validacao | Principal proximo gate |
 | --- | --- | --- | --- | --- |
-| Auth / sessao | login por email/senha IMPLEMENTADO; MFA administrativo TOTP IMPLEMENTADO na aplicacao; enforcement RLS AAL2 aplicado no SaaS | admin exige `aal2` em SSR, rotas, server actions, Data API/RLS e Storage | CI + SAAS VALIDADO; smoke pos-apply PASS para AAL1/AAL2 | habilitar Leaked Password Protection e manter smoke E2E de MFA |
+| Auth / sessao | login por email/senha IMPLEMENTADO; MFA administrativo TOTP IMPLEMENTADO; RLS AAL2 aplicado; senha minima Auth alinhada em 8 | admin exige `aal2` em SSR, rotas, server actions, Data API/RLS e Storage | CI + SAAS VALIDADO; smoke pos-apply PASS; Auth config auditado | HIBP depende de Pro+; manter smoke E2E de MFA |
 | Profiles / roles | IMPLEMENTADO | sem UI administrativa de gestao | RLS existente | definir bootstrap/admin e quem gerencia roles |
-| Clients / assignments | leitura + encerramento + inicio de assignment no onboarding IMPLEMENTADOS | Patty inicia onboarding por convite server-side; provisionamento cria vinculos relacionais e assignment com compensacao em falha | CI VALIDADO; encerramento E2E PASS; onboarding/ativacao sintetico E2E PASS em producao com cleanup verificado | configurar e validar o template real de email do Supabase/Site URL |
+| Clients / assignments | leitura + encerramento + inicio de assignment no onboarding IMPLEMENTADOS | Patty inicia onboarding por convite server-side; provisionamento cria vinculos relacionais e assignment com compensacao em falha | CI VALIDADO; encerramento E2E PASS; onboarding sintetico E2E PASS; Site URL/allowlist alinhados | template SSR real exige upgrade ou SMTP customizado; depois validar email real |
 | Cadastro Atual | leitura IMPLEMENTADA | nao | CI VALIDADO | definir quem pode alterar cada campo e auditoria |
 | Anamnese versionada | leitura IMPLEMENTADA; boundary server-only de rascunho/autosave IMPLEMENTADA | nota interna append-only; schema de rascunho e correcoes aplicado no SaaS | CI + SAAS VALIDADO; smoke pos-apply PASS para rascunho, isolamento e correcoes append-only | UI/submissao final continuam bloqueadas pelas definicoes finais do questionario |
 | Avaliacoes / medidas | leitura IMPLEMENTADA | acompanhamento profissional append-only | CI VALIDADO; conjunto de decisoes profissionais tipado e testado | definir catalogo, unidades, obrigatoriedade e correcao |
@@ -98,7 +98,7 @@ A mesma guarda esta centralizada em `requireRole("admin")`, portanto cobre o lay
 
 O enforcement equivalente no banco/Storage esta aplicado pela migration `20260923113835_admin_mfa_rls_enforcement.sql`. Ela adiciona policies `RESTRICTIVE` que exigem `aal2` quando o usuario autenticado possui role relacional `admin`, preservando `user_roles` em `aal1` apenas para o roteamento ao MFA. O smoke pos-aplicacao confirmou: admin `aal1` ve o proprio role, mas nao clientes/perfis protegidos; admin `aal2` recupera o acesso normal; cliente `aal1` nao e afetada.
 
-O advisor de seguranca do Supabase tambem reporta `Leaked Password Protection` desativado no Auth. A habilitacao e uma pendencia de configuracao externa, separada do fluxo de MFA e sem dependencia de regra da Patty.
+O Auth hospedado foi auditado via Management API. A senha minima foi alinhada de 6 para 8 caracteres, igualando a validacao server-side ja existente. `Leaked Password Protection` continua desativado: a tentativa de habilitacao retornou HTTP 402 e a documentacao atual limita o recurso a Pro+. Nao foi criada regra adicional de composicao de senha.
 
 No nivel de aplicacao, as boundaries de `/admin`, `/cliente`, Server Actions/Route Handlers e paginas de MFA agora possuem regressao automatica em CI. Helpers que usam o cliente administrativo derivam a identidade da sessao em vez de aceitar identidade administrativa do caller.
 
@@ -149,7 +149,7 @@ A RLS/policy diferencia visibilidade para a cliente e acesso administrativo perm
 
 A regra de gestao esta confirmada: somente a Patty pode iniciar ou encerrar assignments por fluxo administrativo server-side controlado. O encerramento de uma atribuicao ativa esta implementado no detalhe administrativo da cliente. A action exige role relacional `admin`, usa a identidade autenticada como `staff_profile_id`, atualiza somente assignments ativos dessa mesma Patty/cliente e preenche `ended_at` sem apagar a linha historica. Apos o encerramento, os demais dados client-scoped deixam de ser acessiveis pelas RLS normais; a excecao de arquivos privados permanece separada.
 
-O inicio de assignment esta integrado ao onboarding controlado por convite administrativo, sem listagem privilegiada de clientes nao atribuidas nem bypass generico de RLS. O smoke sintetico de onboarding/ativacao foi executado em producao e passou; o cleanup posterior confirmou ausencia de residuos sinteticos. A configuracao do template real de email continua separada desse teste. O smoke E2E manual em `e2e/end-client-assignment.spec.mjs`, acionado por `.github/workflows/e2e-end-client-assignment.yml`, foi executado em producao com contas sinteticas e passou. O teste confirmou login administrativo, presenca da `E2E Client` na lista atribuida antes da acao, encerramento pela UI, redirecionamento de sucesso e ausencia da cliente na lista ativa depois da operacao. O Supabase confirmou que o mesmo registro historico foi preservado e recebeu `ended_at`, sem hard delete.
+O inicio de assignment esta integrado ao onboarding controlado por convite administrativo, sem listagem privilegiada de clientes nao atribuidas nem bypass generico de RLS. O smoke sintetico de onboarding/ativacao foi executado em producao e passou; o cleanup posterior confirmou ausencia de residuos sinteticos. A Site URL e a redirect allowlist do Supabase foram alinhadas com a producao. O template SSR real continua separado desse teste e esta bloqueado no ambiente atual: a API do Supabase exige upgrade do plano Free ou SMTP customizado para permitir alteracao do template. O smoke E2E manual em `e2e/end-client-assignment.spec.mjs`, acionado por `.github/workflows/e2e-end-client-assignment.yml`, foi executado em producao com contas sinteticas e passou. O teste confirmou login administrativo, presenca da `E2E Client` na lista atribuida antes da acao, encerramento pela UI, redirecionamento de sucesso e ausencia da cliente na lista ativa depois da operacao. O Supabase confirmou que o mesmo registro historico foi preservado e recebeu `ended_at`, sem hard delete.
 
 ### Acompanhamento profissional
 
