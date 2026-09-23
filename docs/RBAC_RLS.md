@@ -83,6 +83,8 @@ Cliente pode acessar somente seu proprio `client_registration`.
 
 Futuramente, cliente podera acessar somente seus proprios dados client-scoped.
 
+Para Anamnese em rascunho, a fundacao de escrita segue privilegio minimo: a cliente pode criar somente a propria submission para versao publicada e inserir/atualizar somente o valor das respostas enquanto a submission continua sem `submitted_at`. A identidade da resposta (`submission_id`, `form_version_id`, `question_id`) nao recebe UPDATE. A submissao final ainda nao e liberada nesta etapa.
+
 Cliente nunca pode acessar dados de outra cliente.
 
 Cliente nao pode modificar `user_roles`.
