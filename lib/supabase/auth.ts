@@ -9,8 +9,8 @@ export type AppRole = "admin" | "client";
 export type AuthContext = { profileId: string; role: AppRole | null };
 
 export type AuthenticatorAssuranceState = {
-  currentLevel: "aal1" | "aal2" | null;
-  nextLevel: "aal1" | "aal2" | null;
+  currentLevel: string | null;
+  nextLevel: string | null;
 };
 
 export async function getCurrentAuthContext(): Promise<AuthContext | null> {
