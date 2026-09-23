@@ -1,3 +1,5 @@
+import { randomBytes } from "node:crypto";
+
 import { expect, test } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 
@@ -134,7 +136,7 @@ async function loadStableFixture() {
     );
   }
 
-  const password = `E2E-Corrections-${Date.now()}-Aa1!`;
+  const password = randomBytes(48).toString("base64url");
   const updated = await admin.auth.admin.updateUserById(adminProfileId, {
     password,
   });
@@ -151,6 +153,16 @@ async function loadStableFixture() {
     submissionId: submission.data.id,
     totpSecret,
   };
+}
+
+async function lockSyntheticAdmin(userId) {
+  await clearAdminFactors(userId);
+
+  const locked = await admin.auth.admin.updateUserById(userId, {
+    password: randomBytes(64).toString("base64url"),
+  });
+
+  if (locked.error) throw locked.error;
 }
 
 test.use({ baseURL: baseUrl });
@@ -199,6 +211,6 @@ test("admin sintetico acessa correcoes e JSON invalido nao cria historico", asyn
     if (correctionRows.error) throw correctionRows.error;
     expect(correctionRows.count).toBe(0);
   } finally {
-    await clearAdminFactors(fixture.adminProfileId);
+    await lockSyntheticAdmin(fixture.adminProfileId);
   }
 });
