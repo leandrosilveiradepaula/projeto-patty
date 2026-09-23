@@ -41,6 +41,7 @@ Estados usados:
 
 - questionario final e fluxo de preenchimento/submissao da Anamnese;
 - definir a politica final de retencao/hard delete de arquivos privados;
+- enforcement MFA administrativo tambem em RLS/Data API/Storage;
 - criacao/ativacao/encerramento de contas de clientes;
 - administracao de roles e inicio de assignments ligado ao onboarding controlado;
 - edicao controlada do Cadastro Atual;
@@ -55,7 +56,7 @@ Estados usados:
 
 | Area | Estado atual | Escrita operacional | Validacao | Principal proximo gate |
 | --- | --- | --- | --- | --- |
-| Auth / sessao | IMPLEMENTADO | login por email/senha | CI VALIDADO | decidir onboarding, convite/cadastro, MFA |
+| Auth / sessao | login por email/senha IMPLEMENTADO; MFA administrativo TOTP IMPLEMENTADO na aplicacao | admin exige `aal2` em SSR, rotas e server actions; clientes permanecem em fluxo normal | CI pendente nesta branch; RLS ainda nao exige `aal2` para admin | fechar enforcement MFA em RLS e validar E2E administrativo com TOTP |
 | Profiles / roles | IMPLEMENTADO | sem UI administrativa de gestao | RLS existente | definir bootstrap/admin e quem gerencia roles |
 | Clients / assignments | leitura + encerramento de assignment IMPLEMENTADOS | Patty pode encerrar assignment ativo por boundary server-side; inicio ainda sem fluxo operacional | CI + smoke E2E de producao PASS; historico preservado em `client_assignments` | integrar inicio de assignment ao onboarding controlado sem ampliar acesso a clientes nao atribuidas |
 | Cadastro Atual | leitura IMPLEMENTADA | nao | CI VALIDADO | definir quem pode alterar cada campo e auditoria |
@@ -85,6 +86,14 @@ Ja estao em codigo testavel, sem ligacao automatica com decisao de fase ou publi
 A referencia do Reconhecimento pode ser individualizada. Cutting aproximado, redistribuicao carboidrato/gordura, fases 5/6 e demais regras abertas nao foram codificados.
 
 ## Observacoes por fluxo
+
+### Autenticacao e MFA
+
+A decisao de MFA obrigatorio para contas administrativas esta parcialmente materializada. O fluxo de login identifica o AAL da sessao apos email/senha. Admin sem fator verificado e direcionado para enrollment TOTP; admin com fator verificado e sessao em `aal1` e direcionado para challenge; apenas `aal2` entra em `/admin`.
+
+A mesma guarda esta centralizada em `requireRole("admin")`, portanto cobre o layout administrativo e as server actions/rotas administrativas que ja usam essa boundary. O fluxo da cliente nao foi alterado e nao exige MFA.
+
+Ainda falta o enforcement equivalente no banco/Storage por RLS restritiva para que um token administrativo `aal1` nao possa usar diretamente a Data API fora da UI. Ate esse gate ser aplicado e testado, o requisito de MFA permanece classificado como implementado parcialmente, nao concluido fim a fim.
 
 ### Anamnese
 
