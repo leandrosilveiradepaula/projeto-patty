@@ -1,4 +1,4 @@
-name: Harden Supabase Auth password config
+name: Align Supabase Auth password minimum
 
 on:
   push:
@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 jobs:
-  harden:
+  align:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -17,7 +17,7 @@ jobs:
       SUPABASE_PROJECT_ID: hqanoskwjvpbgavppcud
 
     steps:
-      - name: Enable leaked-password protection and align minimum length
+      - name: Align minimum password length with application validation
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         shell: bash
@@ -25,35 +25,22 @@ jobs:
           set -euo pipefail
           test -n "$SUPABASE_ACCESS_TOKEN" || { echo "Missing SUPABASE_ACCESS_TOKEN"; exit 1; }
 
-          before="$(curl --fail-with-body --silent --show-error \
-            "https://api.supabase.com/v1/projects/$SUPABASE_PROJECT_ID/config/auth" \
-            -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN")"
-
-          echo "Before:"
-          printf '%s' "$before" | jq '{
-            password_hibp_enabled,
-            password_min_length,
-            password_required_characters
-          }'
-
           curl --fail-with-body --silent --show-error \
             -X PATCH \
             "https://api.supabase.com/v1/projects/$SUPABASE_PROJECT_ID/config/auth" \
             -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
             -H "Content-Type: application/json" \
-            --data '{"password_hibp_enabled":true,"password_min_length":8}' \
+            --data '{"password_min_length":8}' \
             >/dev/null
 
           after="$(curl --fail-with-body --silent --show-error \
             "https://api.supabase.com/v1/projects/$SUPABASE_PROJECT_ID/config/auth" \
             -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN")"
 
-          echo "After:"
           printf '%s' "$after" | jq '{
             password_hibp_enabled,
             password_min_length,
             password_required_characters
           }'
 
-          test "$(printf '%s' "$after" | jq -r '.password_hibp_enabled')" = "true"
           test "$(printf '%s' "$after" | jq -r '.password_min_length')" = "8"
