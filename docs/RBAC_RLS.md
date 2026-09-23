@@ -287,15 +287,21 @@ Clientes nao possuem permissoes para criar, alterar, excluir ou publicar definic
 
 ## Implementacao BACKEND-BUNDLE-02
 
-### DECISAO CONFIRMADA
+### DECISAO HISTORICA SUBSTITUIDA E ESTADO ATUAL
 
-`client_files` possui RLS propria, separada de `storage.objects`. Na implementacao atual, cliente autenticada le somente metadados e objetos privados vinculados ao proprio `clients.profile_id`; Patty/admin le somente com role relacional `admin` e assignment ativo. `anon`, usuario sem vinculo, admin sem assignment e assignment encerrado nao recebem acesso.
+A implementacao inicial de `client_files` exigia assignment ativo para acesso administrativo. Essa regra foi substituida especificamente para arquivos privados pela migration `20260922230034_private_file_access_visibility_foundation.sql`.
 
-A regra de produto posterior exige granularidade adicional para a cliente: arquivos enviados pela propria cliente ficam visiveis por padrao, enquanto arquivos enviados administrativamente pela Patty devem permanecer ocultos ate liberacao explicita. A RLS/policy atual nao representa essa distincao por autoria/liberacao e precisa ser reconciliada antes de o upload administrativo ser disponibilizado.
+No estado atual:
+- cliente autenticada le somente arquivos proprios liberados por `client_visible_at`;
+- Patty/admin com role relacional `admin` pode ler `client_files` sem depender de assignment ativo;
+- `storage.objects` no bucket `client-private` aplica a mesma excecao administrativa e exige correspondencia com metadado autorizado em `client_files`;
+- uploads administrativos permanecem ocultos para a cliente ate liberacao explicita;
+- a policy transversal de MFA continua `RESTRICTIVE`, portanto admin precisa de AAL2 mesmo nesta excecao;
+- a excecao nao se estende aos demais dados client-scoped.
 
-Essa descricao e fato de implementacao, mas esta parcialmente desalinhada com a decisao posterior de produto: a Patty deve manter acesso aos arquivos privados mesmo sem assignment ativo. A RLS de `client_files`, a policy correspondente de `storage.objects` e as rotas server-side de arquivo precisam ser reconciliadas antes de a decisao ser considerada implementada.
+A auditoria estatica de 2026-09-23 confirmou que as rotas de listagem, download, upload administrativo e liberacao nao reintroduzem requisito de assignment. As Server Actions exigem `requireRole("admin")`, e leitura/download com sessao normal continua sujeita a RLS. O smoke E2E administrativo documentado cobre upload, ocultacao inicial, liberacao explicita, visibilidade para cliente e download.
 
-A policy de `storage.objects` restringe explicitamente o bucket `client-private` e exige correspondencia com metadado autorizado em `client_files`. Nao ha policy geral para `authenticated` no bucket inteiro, nem grant de INSERT, UPDATE ou DELETE para arquivos nesta etapa.
+Nao ha policy geral para `authenticated` no bucket inteiro. Escritas temporarias de upload permanecem limitadas aos fluxos especificos autorizados e aos paths gerados pelo sistema.
 
 ### DECISAO CONFIRMADA
 
