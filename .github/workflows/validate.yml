@@ -65,5 +65,8 @@ jobs:
       - name: Boundary validation tests
         run: npm run test:validation
 
+      - name: Security boundary regression tests
+        run: npm run test:security-boundaries
+
       - name: Build
         run: npm run build
