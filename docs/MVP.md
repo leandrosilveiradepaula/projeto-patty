@@ -94,6 +94,26 @@ O MVP deve incluir avaliacoes:
 - preservacao das avaliacoes anteriores;
 - possibilidade de criacao de nova versao de protocolo.
 
+## Estado operacional do MVP em 2026-09-23
+
+### FATO TECNICO/OPERACIONAL
+
+O escopo acima descreve o que o MVP deve contemplar; ele nao significa que todos os itens ja estejam concluidos.
+
+Estado resumido nesta data:
+- autenticacao, identidade, clientes, RBAC/RLS e assignments possuem fundacao operacional;
+- login por email + senha esta definido e o lifecycle sintetico de onboarding/ativacao passou E2E;
+- MFA administrativo esta implementado e o enforcement em RLS foi aplicado no Supabase SaaS;
+- Anamnese versionada possui fundacao de backend;
+- rascunho da Anamnese possui persistencia no SaaS e integracao parcial de UI para retomar rascunho existente e salvar respostas `text`;
+- submissao final da Anamnese ainda nao esta implementada/liberada, embora a regra de produto ja esteja definida: todos os campos aplicaveis sao obrigatorios no envio final;
+- correcoes posteriores da Anamnese pela Patty estao implementadas como historico append-only, sem sobrescrever a resposta original;
+- arquivos privados possuem fundacao avancada de upload, validacao, visualizacao/download e auditoria, mas ainda ha pendencias operacionais e de retencao;
+- avaliacoes, protocolos, conteudos e exercicios possuem fundacoes de backend, mas seus fluxos completos do MVP ainda nao estao concluidos;
+- a IA permanece assistiva; a fundacao interna e partes deterministicas existem, mas a integracao real com provider e o fluxo completo de revisao/publicacao ainda nao estao concluidos.
+
+Para o estado operacional detalhado e os bloqueios atuais, consultar `PROJECT_STATUS.md`.
+
 ## Regras e detalhes pendentes da Patty
 
 ### QUESTAO ABERTA
