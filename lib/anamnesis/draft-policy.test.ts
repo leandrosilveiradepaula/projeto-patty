@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   getDraftAnswerWriteMode,
   getDraftCreationMode,
+  canEditDraftTextAnswer,
   isUniqueViolationCode,
 } from "./draft-policy.ts";
 
@@ -30,4 +31,57 @@ test("recognizes the PostgreSQL unique violation used for race recovery", () => 
   assert.equal(isUniqueViolationCode("23505"), true);
   assert.equal(isUniqueViolationCode("42501"), false);
   assert.equal(isUniqueViolationCode(undefined), false);
+});
+
+
+test("edits only text answers that still belong to an active draft", () => {
+  assert.equal(
+    canEditDraftTextAnswer({
+      answerType: "text",
+      answerValue: "resposta",
+      hasAnswer: true,
+      submittedAt: null,
+    }),
+    true,
+  );
+
+  assert.equal(
+    canEditDraftTextAnswer({
+      answerType: "text",
+      answerValue: undefined,
+      hasAnswer: false,
+      submittedAt: null,
+    }),
+    true,
+  );
+
+  assert.equal(
+    canEditDraftTextAnswer({
+      answerType: "text",
+      answerValue: "resposta",
+      hasAnswer: true,
+      submittedAt: "2026-09-23T00:00:00.000Z",
+    }),
+    false,
+  );
+
+  assert.equal(
+    canEditDraftTextAnswer({
+      answerType: "select",
+      answerValue: "opcao",
+      hasAnswer: true,
+      submittedAt: null,
+    }),
+    false,
+  );
+
+  assert.equal(
+    canEditDraftTextAnswer({
+      answerType: "text",
+      answerValue: { unexpected: true },
+      hasAnswer: true,
+      submittedAt: null,
+    }),
+    false,
+  );
 });
