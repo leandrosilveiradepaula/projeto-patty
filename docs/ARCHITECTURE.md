@@ -27,7 +27,9 @@ MFA e obrigatorio para contas administrativas, incluindo Patty/admin.
 
 Contas de clientes sao criadas somente por convite ou ativacao controlada. Nao existe cadastro publico/autonomo de clientes no MVP.
 
-Os detalhes operacionais de convite, expiracao, reenvio, ativacao, recuperacao e encerramento de conta permanecem abertos.
+A Patty inicia o onboarding porque ja possui o email da cliente: ela envia um link para esse endereco e a cliente entra por esse link na interface do aplicativo para responder as perguntas que antes estavam no formulario externo.
+
+Permanece aberto o detalhe tecnico de ativacao da credencial: quando a senha inicial e definida, expiracao/reenvio do link, recuperacao de acesso e encerramento de conta. O login normal apos ativacao continua sendo email + senha.
 
 ### DECISAO DE SEGURANCA E OPERACAO
 

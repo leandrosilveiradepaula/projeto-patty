@@ -1,5 +1,21 @@
 # Decisoes
 
+## 2026-09-23 - Inicio do onboarding da cliente por link enviado pela Patty
+
+### REGRA OPERACIONAL CONFIRMADA PELA PATTY
+
+Quando uma cliente nova entra no sistema, a Patty ja possui o endereco de email da cliente e inicia o onboarding enviando um link para esse email.
+
+O link leva a cliente para a interface do aplicativo onde ela respondera as perguntas que antes eram respondidas no formulario externo.
+
+Nao existe cadastro publico/autonomo. A cliente nao inicia o proprio cadastro informando um email qualquer; o primeiro acesso nasce de uma acao explicita da Patty para o email que ela ja possui.
+
+### PENDENCIA TECNICA/PRODUTO
+
+Ainda precisa ser fechado como o primeiro acesso cria/ativa a credencial de login da cliente, incluindo quando a senha e definida, expiracao/reenvio do link, recuperacao de acesso e tratamento do encerramento da conta.
+
+O metodo principal de login apos a ativacao continua sendo email + senha, conforme decisao anterior.
+
 ## 2026-09-22 - Limpeza de temporarios expirados de upload privado
 
 ### DECISAO TECNICA DE IMPLEMENTACAO
@@ -210,7 +226,9 @@ O encerramento preserva o registro historico do assignment e remove apenas sua v
 
 O encerramento de assignment ativo esta implementado por boundary server-side. A operacao exige a sessao atual com role relacional `admin`, limita a escrita a `client_id` + `staff_profile_id` da Patty autenticada, preenche somente `ended_at` de linhas ainda ativas e preserva integralmente os registros historicos. Nenhum `INSERT`, `UPDATE` ou `DELETE` direto em `client_assignments` foi concedido ao browser.
 
-O inicio de assignment continua sem UI e deve ser ligado ao onboarding controlado; os detalhes operacionais de convite/ativacao permanecem abertos e nao foram inferidos.
+O inicio de assignment possui agora uma boundary server-only preparada para o onboarding controlado. Ela recebe apenas `client_id` e o `staff_profile_id` da Patty autenticada, reutiliza o indice parcial que garante no maximo um assignment ativo para o mesmo par e trata chamadas repetidas/concorrentes de forma idempotente. Nenhuma UI de onboarding, criacao de conta Auth, criacao automatica de `client`, envio de convite ou ativacao foi inferida nesta etapa.
+
+Os detalhes operacionais de convite/ativacao permanecem abertos. A boundary de inicio somente deve ser acionada por uma futura server action que exija `requireRole("admin")` e parta de uma cliente identificada por um fluxo de onboarding ja confirmado/documentado.
 
 A operacao deve permanecer auditavel e, como regra geral, nao pode conceder acesso client-scoped sem role relacional `admin` e assignment ativo. Decisao posterior criou uma excecao especifica para o acesso da Patty a arquivos privados, sem generalizar essa excecao para os demais dados client-scoped. Fluxos futuros de transferencia, reatribuicao ou outros profissionais ficam fora desta decisao.
 
