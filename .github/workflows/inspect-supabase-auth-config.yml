@@ -1,4 +1,4 @@
-name: Align Supabase Auth production URLs
+name: Configure Supabase invite template
 
 on:
   push:
@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 jobs:
-  align:
+  configure:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -17,34 +17,16 @@ jobs:
       SUPABASE_PROJECT_ID: hqanoskwjvpbgavppcud
 
     steps:
-      - name: Align Site URL and redirect allowlist
+      - name: Configure SSR-safe invite template
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
         shell: bash
         run: |
           set -euo pipefail
           test -n "$SUPABASE_ACCESS_TOKEN" || { echo "Missing SUPABASE_ACCESS_TOKEN"; exit 1; }
-          test -n "$E2E_BASE_URL" || { echo "Missing E2E_BASE_URL"; exit 1; }
 
-          config="$(curl --fail-with-body --silent --show-error \
-            "https://api.supabase.com/v1/projects/$SUPABASE_PROJECT_ID/config/auth" \
-            -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN")"
-
-          current_allow="$(printf '%s' "$config" | jq -r '.uri_allow_list // ""')"
-
-          if printf '%s' "$current_allow" | tr ',' '\n' | sed 's/^ *//;s/ *$//' | grep -Fxq "$E2E_BASE_URL"; then
-            new_allow="$current_allow"
-          elif [ -n "$current_allow" ]; then
-            new_allow="$current_allow,$E2E_BASE_URL"
-          else
-            new_allow="$E2E_BASE_URL"
-          fi
-
-          body="$(jq -n \
-            --arg site_url "$E2E_BASE_URL" \
-            --arg uri_allow_list "$new_allow" \
-            '{site_url:$site_url, uri_allow_list:$uri_allow_list}')"
+          template='<h2>Ative sua conta</h2><p>Use o link abaixo para ativar seu acesso.</p><p><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=invite">Ativar conta</a></p>'
+          body="$(jq -n --arg template "$template" '{mailer_templates_invite_content:$template}')"
 
           curl --fail-with-body --silent --show-error \
             -X PATCH \
@@ -58,11 +40,12 @@ jobs:
             "https://api.supabase.com/v1/projects/$SUPABASE_PROJECT_ID/config/auth" \
             -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN")"
 
-          site_url="$(printf '%s' "$after" | jq -r '.site_url // ""')"
-          uri_allow_list="$(printf '%s' "$after" | jq -r '.uri_allow_list // ""')"
+          invite_template="$(printf '%s' "$after" | jq -r '.mailer_templates_invite_content // ""')"
 
-          test "$site_url" = "$E2E_BASE_URL"
-          printf '%s' "$uri_allow_list" | tr ',' '\n' | sed 's/^ *//;s/ *$//' | grep -Fxq "$E2E_BASE_URL"
+          [[ "$invite_template" == *".TokenHash"* ]]
+          [[ "$invite_template" == *"/auth/confirm"* ]]
+          [[ "$invite_template" == *"type=invite"* ]]
 
-          echo "Site URL matches production: true"
-          echo "Redirect allowlist contains production: true"
+          echo "Invite template uses TokenHash: true"
+          echo "Invite template points to /auth/confirm: true"
+          echo "Invite template sets type=invite: true"
