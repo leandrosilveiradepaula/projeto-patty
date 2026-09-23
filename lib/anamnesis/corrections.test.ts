@@ -7,7 +7,7 @@ import {
 } from "./corrections.ts";
 
 test("parseCorrectionJson accepts every JSON top-level shape", () => {
-  const cases = [
+  const cases: Array<[string, unknown]> = [
     ['"texto"', "texto"],
     ["42", 42],
     ["true", true],
