@@ -55,6 +55,12 @@ A VPS Hostinger nao sera usada na primeira versao operacional do MVP enquanto Ve
 
 A aplicacao Next.js ja esta integrada ao Supabase para Auth, PostgreSQL, Storage privado e RLS.
 
+### FATO OPERACIONAL DE DEPLOYMENT
+
+O repositorio e o deployment de producao podem divergir. Em 2026-09-23, o ultimo merge de `master` com deploy Vercel bem-sucedido foi `b466accc8a5f`; merges posteriores foram bloqueados por `build-rate-limit`. Portanto, implementacao/CI nao deve ser tratada como publicacao ate existir status de deploy bem-sucedido para o commit correspondente.
+
+Para reduzir consumo de build, previews Vercel de branches `codex/**` foram desabilitados em `vercel.json`; `master` continua elegivel para producao.
+
 A UI de negocio ja possui leitura real do backend para areas administrativas e da cliente, incluindo clientes atribuidos, Cadastro Atual, Anamnese versionada, avaliacoes, protocolos publicados, conteudos, exercicios e arquivos privados administrativos.
 
 Ja existem tambem boundaries server-side de escrita para notas internas de revisao de Anamnese, criacao/retomada e autosave de rascunho da Anamnese, correcoes historicas append-only da Anamnese pela Patty, acompanhamento profissional append-only, liberacao manual de conteudo e lifecycle manual de protocolos. Essas escritas reutilizam a sessao autenticada, grants, RLS e constraints existentes, sem `service_role` no browser e sem publicacao automatica.
