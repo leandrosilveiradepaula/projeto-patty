@@ -1,6 +1,6 @@
 # Mapa de prontidao do MVP
 
-Data de referencia: 2026-09-22 (atualizado apos smoke E2E de producao).
+Data de referencia: 2026-09-23 (atualizado apos hardening de Anamnese/MFA e revisao dos advisors do Supabase).
 
 Este documento e um mapa operacional do estado atual. Ele nao substitui `MVP.md`, `DECISIONS.md`, `BUSINESS_RULES.md` ou `OPEN_QUESTIONS.md`.
 
@@ -21,6 +21,8 @@ Estados usados:
 - leitura real de clientes atribuidos e Cadastro Atual;
 - Anamnese versionada em leitura para admin e cliente;
 - notas internas append-only de revisao da Anamnese;
+- boundary server-only de criacao/retomada e autosave do rascunho da Anamnese, ainda sem UI final;
+- fundacao append-only para correcoes posteriores da Patty, versionada em migration ainda nao aplicada no SaaS;
 - avaliacoes e medidas em leitura;
 - acompanhamento profissional append-only;
 - fotos privadas de avaliacao para admin;
@@ -41,7 +43,8 @@ Estados usados:
 
 - questionario final e fluxo de preenchimento/submissao da Anamnese;
 - definir a politica final de retencao/hard delete de arquivos privados;
-- enforcement MFA administrativo tambem em RLS/Data API/Storage;
+- aplicar e validar no SaaS a migration de MFA administrativo em RLS/Data API/Storage ja integrada ao `master`;
+- habilitar e validar `Leaked Password Protection` no Supabase Auth;
 - validar em producao o convite/ativacao de contas de clientes e configurar template SSR do Supabase;
 - definir expiracao/reenvio, recuperacao e encerramento de contas de clientes;
 - edicao controlada do Cadastro Atual;
@@ -56,11 +59,11 @@ Estados usados:
 
 | Area | Estado atual | Escrita operacional | Validacao | Principal proximo gate |
 | --- | --- | --- | --- | --- |
-| Auth / sessao | login por email/senha IMPLEMENTADO; MFA administrativo TOTP IMPLEMENTADO na aplicacao | admin exige `aal2` em SSR, rotas e server actions; clientes permanecem em fluxo normal | CI pendente nesta branch; RLS ainda nao exige `aal2` para admin | fechar enforcement MFA em RLS e validar E2E administrativo com TOTP |
+| Auth / sessao | login por email/senha IMPLEMENTADO; MFA administrativo TOTP IMPLEMENTADO na aplicacao; enforcement RLS versionado no `master` | admin exige `aal2` em SSR, rotas e server actions; migration RLS restritiva preparada, ainda nao aplicada | CI VALIDADO; dry-run SaaS PASS para AAL1/AAL2 | aplicar a migration de MFA, validar smoke remoto com TOTP e habilitar Leaked Password Protection |
 | Profiles / roles | IMPLEMENTADO | sem UI administrativa de gestao | RLS existente | definir bootstrap/admin e quem gerencia roles |
-| Clients / assignments | leitura + encerramento + inicio de assignment no onboarding IMPLEMENTADOS | Patty inicia onboarding por convite server-side; provisionamento cria vinculos relacionais e assignment com compensacao em falha | CI pendente nesta branch; encerramento E2E em producao PASS | validar convite/ativacao em producao e configurar template SSR do Supabase |
+| Clients / assignments | leitura + encerramento + inicio de assignment no onboarding IMPLEMENTADOS | Patty inicia onboarding por convite server-side; provisionamento cria vinculos relacionais e assignment com compensacao em falha | CI VALIDADO; encerramento E2E em producao PASS | validar convite/ativacao em producao e configurar template SSR do Supabase |
 | Cadastro Atual | leitura IMPLEMENTADA | nao | CI VALIDADO | definir quem pode alterar cada campo e auditoria |
-| Anamnese versionada | leitura IMPLEMENTADA | nota interna append-only | CI VALIDADO | fechar questionario e fluxo de preenchimento |
+| Anamnese versionada | leitura IMPLEMENTADA; boundary server-only de rascunho/autosave IMPLEMENTADA | nota interna append-only; schema de rascunho e correcoes versionado, ainda nao aplicado | CI VALIDADO; sequencia de migrations validada por dry-run com rollback | aplicar migrations pendentes; UI/submissao final continuam bloqueadas pelas definicoes finais do questionario |
 | Avaliacoes / medidas | leitura IMPLEMENTADA | acompanhamento profissional append-only | CI VALIDADO; conjunto de decisoes profissionais tipado e testado | definir catalogo, unidades, obrigatoriedade e correcao |
 | Arquivos privados | upload/listagem/download da cliente IMPLEMENTADOS; acesso admin permanente, upload administrativo e liberacao explicita IMPLEMENTADOS | smoke E2E da cliente PASS; smoke E2E administrativo PASS em producao; cron de temporarios VALIDADO; SAAS VALIDADO | definir retencao/hard delete |
 | Protocolos | leitura + lifecycle manual IMPLEMENTADOS | submit/approve/publish | CI + SAAS VALIDADO; lifecycle com guarda determinística testada | criar/editar plano somente quando fluxo profissional estiver formalizado |
@@ -71,7 +74,7 @@ Estados usados:
 | IA | fundacao de banco + validador deterministico de output `anamnesis_review` IMPLEMENTADOS | provider real e boundary de execution ainda nao integrados | SAAS VALIDADO; contrato de output coberto por testes determinísticos | definir provider/modelo, prompt versionado e boundary server-side de execution |
 | Drive | INVENTARIADO | nenhuma migracao fisica | 89 itens no manifesto inicial | revisar direitos/taxonomia e escolher lote inicial |
 | Regras deterministicas do metodo | IMPLEMENTADO PARCIAL | sem automacao de protocolo | CI VALIDADO | ampliar somente com formulas exatas confirmadas/documentadas |
-| CI | IMPLEMENTADO | automatico no GitHub Actions + smoke E2E manual de arquivos privados | `npm ci` + typecheck + `test:method` + `test:protocol` + `test:content` + `test:follow-up` + `test:validation` + build; E2E de producao PASS | ampliar E2E somente para fluxos estaveis e sinteticos |
+| CI | IMPLEMENTADO | automatico no GitHub Actions + smoke E2E manual de arquivos privados | `npm ci` + typecheck + `test:method` + `test:protocol` + `test:content` + `test:follow-up` + `test:anamnesis-draft` + `test:validation` + build; E2E de producao PASS | ampliar E2E somente para fluxos estaveis e sinteticos |
 
 ## Regras deterministicas confirmadas
 
@@ -95,6 +98,8 @@ A mesma guarda esta centralizada em `requireRole("admin")`, portanto cobre o lay
 
 O enforcement equivalente no banco/Storage foi preparado na migration `20260923113835_admin_mfa_rls_enforcement.sql`. Ela adiciona policies `RESTRICTIVE` que exigem `aal2` quando o usuario autenticado possui role relacional `admin`, preservando `user_roles` em `aal1` apenas para o roteamento ao MFA. O dry-run transacional no Supabase SaaS confirmou: admin `aal1` ve o proprio role, mas nao clientes/perfis protegidos; admin `aal2` recupera o acesso normal; cliente `aal1` nao e afetada. A migration ainda nao esta aplicada, portanto MFA fim a fim continua classificado como parcialmente concluido ate aplicacao e smoke remoto.
 
+O advisor de seguranca do Supabase tambem reporta `Leaked Password Protection` desativado no Auth. A habilitacao e uma pendencia de configuracao externa, separada do fluxo de MFA e sem dependencia de regra da Patty.
+
 ### Anamnese
 
 A aplicacao preserva:
@@ -105,6 +110,10 @@ A aplicacao preserva:
 - notas internas separadas.
 
 A regra de preenchimento agora esta parcialmente fechada: todos os campos sao obrigatorios para o envio final; rascunho incompleto pode ser salvo e retomado; depois do envio, a cliente nao edita mais e somente a Patty pode registrar correcao historica sem sobrescrever a resposta original. A fundacao de escrita do rascunho esta preparada na migration `20260923113230_anamnesis_draft_write_foundation.sql`: um rascunho ativo por cliente/versao publicada, INSERT restrito da propria submission e INSERT/UPDATE apenas de `answer_value` das respostas do proprio rascunho. A boundary server-only em `lib/anamnesis/draft.ts` resolve a cliente pela sessao, cria/reutiliza o rascunho e insere/atualiza somente a resposta da pergunta pertencente a mesma versao; ela ainda nao esta conectada a UI. A fundacao de correcoes esta preparada na migration `20260923114643_anamnesis_answer_corrections_foundation.sql`, com historico append-only, autoria, timestamp, assignment ativo e AAL2. A sequencia de migrations pendentes foi validada em conjunto por dry-run com rollback, mas nenhuma delas foi aplicada. A submissao final continua bloqueada ate fechar perguntas condicionais/aplicabilidade, tipos de input e ordem/agrupamento do formulario.
+
+### Banco e performance
+
+O advisor de performance reportou 22 foreign keys sem indice de cobertura exata e 37 indices sem uso observado. A revisao mostrou que parte dos avisos de foreign key ja possui indice seletivo pelo primeiro campo e que a maioria restante pertence a tabelas historicas/IA ainda vazias. Nenhum indice novo foi criado apenas para zerar o lint. A politica e adicionar indice quando houver workload, RLS, integridade ou plano de execucao que justifique o custo.
 
 ### Arquivos privados
 
