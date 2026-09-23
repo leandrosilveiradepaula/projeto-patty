@@ -30,7 +30,7 @@ export default async function ClienteAnamnesePage() {
   return (
     <>
       <PageHeader
-        description="Consulte suas submissões de Anamnese já registradas. O preenchimento e a edição ainda não estão disponíveis nesta interface."
+        description="Consulte suas submissões de Anamnese já registradas. Rascunhos existentes podem ser retomados sem criar uma nova versão automaticamente."
         eyebrow="Cliente"
         title="Anamnese"
       />
@@ -80,7 +80,9 @@ export default async function ClienteAnamnesePage() {
                       className={styles.detailLink}
                       href={`/cliente/anamnese/${submission.id}`}
                     >
-                      Ver respostas
+                      {submission.submitted_at
+                        ? "Ver respostas"
+                        : "Continuar rascunho"}
                     </Link>
                   </Card>
                 </li>
