@@ -168,6 +168,33 @@ test("Next.js keeps baseline security response headers", async () => {
   }
 });
 
+test("GitHub workflows pin the runner image instead of following ubuntu-latest", async () => {
+  const workflowDirectory = path.join(ROOT, ".github", "workflows");
+  const files = (await readdir(workflowDirectory))
+    .filter((file) => file.endsWith(".yml"))
+    .sort();
+
+  const offenders = [];
+
+  for (const file of files) {
+    const content = await readFile(path.join(workflowDirectory, file), "utf8");
+
+    if (content.includes("runs-on: ubuntu-latest")) {
+      offenders.push(file);
+    }
+
+    if (content.includes("runs-on: ubuntu-24.04") === false) {
+      offenders.push(file + ":missing-ubuntu-24.04");
+    }
+  }
+
+  assert.deepEqual(
+    offenders,
+    [],
+    "Workflows must pin Ubuntu 24.04 until runner migration is reviewed explicitly.",
+  );
+});
+
 test("Supabase Auth hardening workflow stays manual and one-way", async () => {
   const content = await readFile(
     path.join(ROOT, ".github", "workflows", "harden-supabase-auth.yml"),
