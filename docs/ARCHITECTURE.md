@@ -57,11 +57,11 @@ A aplicacao Next.js ja esta integrada ao Supabase para Auth, PostgreSQL, Storage
 
 A UI de negocio ja possui leitura real do backend para areas administrativas e da cliente, incluindo clientes atribuidos, Cadastro Atual, Anamnese versionada, avaliacoes, protocolos publicados, conteudos, exercicios e arquivos privados administrativos.
 
-Ja existem tambem boundaries server-side de escrita para notas internas de revisao de Anamnese, criacao/retomada e autosave de rascunho da Anamnese, acompanhamento profissional append-only, liberacao manual de conteudo e lifecycle manual de protocolos. Essas escritas reutilizam a sessao autenticada, grants, RLS e constraints existentes, sem `service_role` no browser e sem publicacao automatica.
+Ja existem tambem boundaries server-side de escrita para notas internas de revisao de Anamnese, criacao/retomada e autosave de rascunho da Anamnese, correcoes historicas append-only da Anamnese pela Patty, acompanhamento profissional append-only, liberacao manual de conteudo e lifecycle manual de protocolos. Essas escritas reutilizam a sessao autenticada, grants, RLS e constraints existentes, sem `service_role` no browser e sem publicacao automatica.
 
 A rota raiz usa o contexto autenticado para encaminhar admin, cliente ou login.
 
-Esses fatos de implementacao nao significam que todos os fluxos de escrita estejam definidos. A UI e a submissao final da Anamnese continuam dependentes das definicoes finais do questionario; as migrations de rascunho, MFA administrativo em RLS e correcoes historicas estao aplicadas e validadas no SaaS. Retencao/hard delete de arquivos, operacoes administrativas ainda abertas, automacoes e integracao real com provider de IA continuam sujeitos as decisoes e questoes abertas correspondentes.
+Esses fatos de implementacao nao significam que todos os fluxos de escrita estejam definidos. A UI e a submissao final da Anamnese continuam dependentes das definicoes finais do questionario; as migrations de rascunho, MFA administrativo em RLS e correcoes historicas estao aplicadas e validadas no SaaS. A UI administrativa de correcoes esta conectada ao backend real sem service role: exibe a resposta original e o historico separado, e somente acrescenta uma nova linha de correcao sob RLS/AAL2. Retencao/hard delete de arquivos, operacoes administrativas ainda abertas, automacoes e integracao real com provider de IA continuam sujeitos as decisoes e questoes abertas correspondentes.
 
 ### DECISAO HISTORICA SUBSTITUIDA
 
