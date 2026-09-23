@@ -4,13 +4,21 @@ Este documento concentra pontos ainda nao definidos. Cada item deve ser validado
 
 ## Produto e usuarios
 
-### QUESTAO ABERTA
-
-Como sera finalizado o fluxo tecnico de ativacao da conta apos o link enviado pela Patty, incluindo definicao inicial de senha, expiracao/reenvio do link, recuperacao de acesso e encerramento da conta?
-
 ### FATO JA CONFIRMADO
 
-A Patty ja possui o email da cliente e inicia o onboarding enviando um link para esse endereco. O link abre a interface do aplicativo onde a cliente respondera as perguntas que antes eram respondidas no formulario externo. Nao existe cadastro publico/autonomo.
+A Patty ja possui o email da cliente e inicia o onboarding enviando um link para esse endereco. Nao existe cadastro publico/autonomo. O lifecycle tecnico de ativacao, definicao inicial de senha e login posterior esta implementado e passou E2E sintetico em producao. Site URL e redirect allowlist tambem estao alinhados.
+
+### PENDENCIA DE INFRAESTRUTURA
+
+O template real de convite SSR ainda nao pode ser configurado no ambiente atual. A Management API do Supabase informou que projetos Free usando o provedor de email padrao precisam de upgrade ou SMTP customizado para modificar templates.
+
+### QUESTAO ABERTA
+
+Qual alternativa de infraestrutura sera adotada para o email real de convite: upgrade do plano Supabase ou SMTP customizado?
+
+### QUESTAO ABERTA
+
+Quais serao as regras de expiracao/reenvio do convite, recuperacao de acesso e encerramento da conta?
 
 ### QUESTAO ABERTA
 
