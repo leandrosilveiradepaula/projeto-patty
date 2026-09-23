@@ -1,12 +1,15 @@
 import { expect, test } from "@playwright/test";
 
+import { loginAdminWithMfa } from "./helpers/admin-auth.mjs";
+
 const baseUrl = process.env.E2E_BASE_URL?.replace(/\/$/, "");
 const adminEmail = process.env.E2E_ADMIN_EMAIL;
 const adminPassword = process.env.E2E_ADMIN_PASSWORD;
+const adminTotpSecret = process.env.E2E_ADMIN_TOTP_SECRET;
 
-if (!baseUrl || !adminEmail || !adminPassword) {
+if (!baseUrl || !adminEmail || !adminPassword || !adminTotpSecret) {
   throw new Error(
-    "Missing E2E_BASE_URL, E2E_ADMIN_EMAIL or E2E_ADMIN_PASSWORD",
+    "Missing E2E_BASE_URL, E2E_ADMIN_EMAIL, E2E_ADMIN_PASSWORD or E2E_ADMIN_TOTP_SECRET",
   );
 }
 
@@ -17,10 +20,11 @@ test.use({
 test("admin encerra assignment sintetico e cliente sai da lista atribuida", async ({
   page,
 }) => {
-  await page.goto("/login");
-  await page.getByLabel("Email").fill(adminEmail);
-  await page.getByLabel("Senha").fill(adminPassword);
-  await page.getByRole("button", { name: "Entrar" }).click();
+  await loginAdminWithMfa(page, {
+    email: adminEmail,
+    password: adminPassword,
+    totpSecret: adminTotpSecret,
+  });
 
   await expect(page).toHaveURL(/\/admin\/?$/);
 
