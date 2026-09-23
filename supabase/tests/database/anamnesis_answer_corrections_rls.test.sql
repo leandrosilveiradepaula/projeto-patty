@@ -1,6 +1,6 @@
 begin;
 
-select plan(11);
+select plan(12);
 
 select is(
   (
@@ -209,6 +209,21 @@ select is(
   ),
   1::bigint,
   'corrections inherit restrictive admin MFA policy'
+);
+
+select is(
+  (
+    select count(*)
+    from pg_policies
+    where schemaname='public'
+      and tablename='anamnesis_answer_corrections'
+      and (
+        coalesce(qual,'') ilike '%auth.jwt()%'
+        or coalesce(with_check,'') ilike '%auth.jwt()%'
+      )
+  ),
+  0::bigint,
+  'correction policies rely on restrictive MFA policy without redundant direct auth.jwt checks'
 );
 
 select * from finish();

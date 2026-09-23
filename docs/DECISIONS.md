@@ -86,7 +86,7 @@ Somente admin com assignment ativo para a cliente, sessao `aal2` e Anamnese ja s
 
 UPDATE e DELETE sao bloqueados por privilegios e por trigger de imutabilidade, inclusive para proteger contra ampliacoes futuras de grants.
 
-A migration `20260923114643_anamnesis_answer_corrections_foundation.sql` foi preparada e validada em dry-run juntamente com as migrations pendentes anteriores. Todos os cenarios de autorizacao, historico e imutabilidade passaram; nada foi aplicado no Supabase SaaS.
+A migration `20260923114643_anamnesis_answer_corrections_foundation.sql` foi aplicada no Supabase SaaS em 2026-09-23. O smoke pos-aplicacao confirmou: AAL1 bloqueado, AAL2 permitido com assignment ativo, resposta original preservada e UPDATE/DELETE de correcoes bloqueados.
 
 ## 2026-09-23 - Enforcement de MFA administrativo em RLS
 
@@ -106,7 +106,7 @@ A migration `20260923113835_admin_mfa_rls_enforcement.sql` adiciona uma segunda 
 
 O dry-run transacional no Supabase SaaS confirmou que admin em `aal1` ainda le o proprio `user_roles`, mas nao le clientes nem perfis protegidos; em `aal2`, o acesso normal volta sujeito as policies preexistentes; cliente em `aal1` nao e afetada.
 
-A migration foi preparada e validada com rollback e ainda nao esta aplicada no Supabase SaaS.
+A migration foi aplicada no Supabase SaaS em 2026-09-23 via `supabase db push`. O smoke pos-aplicacao confirmou AAL1 bloqueado, AAL2 permitido e cliente AAL1 sem regressao.
 
 ## 2026-09-23 - Fundacao de persistencia do rascunho da Anamnese
 
@@ -123,7 +123,7 @@ A escrita de rascunho deve usar privilegios minimos:
 
 A submissao final continua fora desta fundacao. Embora todos os campos sejam obrigatorios para o envio, as regras de perguntas condicionais/aplicabilidade ainda nao estao fechadas; portanto, `submitted_at` nao recebe permissao de escrita da cliente nesta etapa.
 
-A migration `20260923113230_anamnesis_draft_write_foundation.sql` foi preparada e validada por dry-run transacional no Supabase SaaS, mas ainda nao esta aplicada.
+A migration `20260923113230_anamnesis_draft_write_foundation.sql` foi aplicada no Supabase SaaS em 2026-09-23. O smoke pos-aplicacao confirmou criacao/edicao do proprio rascunho, isolamento entre clientes e ausencia de privilegio para atualizar `submitted_at`.
 
 ## 2026-09-23 - Obrigatoriedade, rascunho e correcao da Anamnese
 

@@ -22,7 +22,7 @@ Estados usados:
 - Anamnese versionada em leitura para admin e cliente;
 - notas internas append-only de revisao da Anamnese;
 - boundary server-only de criacao/retomada e autosave do rascunho da Anamnese, ainda sem UI final;
-- fundacao append-only para correcoes posteriores da Patty, versionada em migration ainda nao aplicada no SaaS;
+- fundacao append-only para correcoes posteriores da Patty, aplicada e validada no Supabase SaaS;
 - avaliacoes e medidas em leitura;
 - acompanhamento profissional append-only;
 - fotos privadas de avaliacao para admin;
@@ -44,7 +44,6 @@ Estados usados:
 
 - questionario final e fluxo de preenchimento/submissao da Anamnese;
 - definir a politica final de retencao/hard delete de arquivos privados;
-- configurar as credenciais CLI do GitHub e usar o workflow manual de `db push` para aplicar/validar as tres migrations pendentes, incluindo MFA administrativo em RLS/Data API/Storage;
 - habilitar e validar `Leaked Password Protection` no Supabase Auth;
 - configurar e validar o template real de email `Invite user`/Site URL do Supabase; o lifecycle sintetico de convite/ativacao ja passou E2E em producao;
 - definir expiracao/reenvio, recuperacao e encerramento de contas de clientes;
@@ -60,11 +59,11 @@ Estados usados:
 
 | Area | Estado atual | Escrita operacional | Validacao | Principal proximo gate |
 | --- | --- | --- | --- | --- |
-| Auth / sessao | login por email/senha IMPLEMENTADO; MFA administrativo TOTP IMPLEMENTADO na aplicacao; enforcement RLS versionado no `master` | admin exige `aal2` em SSR, rotas e server actions; migration RLS restritiva preparada, ainda nao aplicada | CI VALIDADO; dry-run SaaS PASS para AAL1/AAL2; workflow manual de deploy preparado | configurar credenciais CLI, executar dry-run/db push, validar smoke remoto com TOTP e habilitar Leaked Password Protection |
+| Auth / sessao | login por email/senha IMPLEMENTADO; MFA administrativo TOTP IMPLEMENTADO na aplicacao; enforcement RLS AAL2 aplicado no SaaS | admin exige `aal2` em SSR, rotas, server actions, Data API/RLS e Storage | CI + SAAS VALIDADO; smoke pos-apply PASS para AAL1/AAL2 | habilitar Leaked Password Protection e manter smoke E2E de MFA |
 | Profiles / roles | IMPLEMENTADO | sem UI administrativa de gestao | RLS existente | definir bootstrap/admin e quem gerencia roles |
 | Clients / assignments | leitura + encerramento + inicio de assignment no onboarding IMPLEMENTADOS | Patty inicia onboarding por convite server-side; provisionamento cria vinculos relacionais e assignment com compensacao em falha | CI VALIDADO; encerramento E2E PASS; onboarding/ativacao sintetico E2E PASS em producao com cleanup verificado | configurar e validar o template real de email do Supabase/Site URL |
 | Cadastro Atual | leitura IMPLEMENTADA | nao | CI VALIDADO | definir quem pode alterar cada campo e auditoria |
-| Anamnese versionada | leitura IMPLEMENTADA; boundary server-only de rascunho/autosave IMPLEMENTADA | nota interna append-only; schema de rascunho e correcoes versionado, ainda nao aplicado | CI VALIDADO; sequencia validada por rollback; workflow manual de db push preparado | configurar credenciais CLI e aplicar as migrations; UI/submissao final continuam bloqueadas pelas definicoes finais do questionario |
+| Anamnese versionada | leitura IMPLEMENTADA; boundary server-only de rascunho/autosave IMPLEMENTADA | nota interna append-only; schema de rascunho e correcoes aplicado no SaaS | CI + SAAS VALIDADO; smoke pos-apply PASS para rascunho, isolamento e correcoes append-only | UI/submissao final continuam bloqueadas pelas definicoes finais do questionario |
 | Avaliacoes / medidas | leitura IMPLEMENTADA | acompanhamento profissional append-only | CI VALIDADO; conjunto de decisoes profissionais tipado e testado | definir catalogo, unidades, obrigatoriedade e correcao |
 | Arquivos privados | upload/listagem/download da cliente IMPLEMENTADOS; acesso admin permanente, upload administrativo e liberacao explicita IMPLEMENTADOS | smoke E2E da cliente PASS; smoke E2E administrativo PASS em producao; cron de temporarios VALIDADO; SAAS VALIDADO | definir retencao/hard delete |
 | Protocolos | leitura + lifecycle manual IMPLEMENTADOS | submit/approve/publish | CI + SAAS VALIDADO; lifecycle com guarda determinística testada | criar/editar plano somente quando fluxo profissional estiver formalizado |
@@ -97,7 +96,7 @@ A decisao de MFA obrigatorio para contas administrativas esta parcialmente mater
 
 A mesma guarda esta centralizada em `requireRole("admin")`, portanto cobre o layout administrativo e as server actions/rotas administrativas que ja usam essa boundary. O fluxo da cliente nao foi alterado e nao exige MFA.
 
-O enforcement equivalente no banco/Storage foi preparado na migration `20260923113835_admin_mfa_rls_enforcement.sql`. Ela adiciona policies `RESTRICTIVE` que exigem `aal2` quando o usuario autenticado possui role relacional `admin`, preservando `user_roles` em `aal1` apenas para o roteamento ao MFA. O dry-run transacional no Supabase SaaS confirmou: admin `aal1` ve o proprio role, mas nao clientes/perfis protegidos; admin `aal2` recupera o acesso normal; cliente `aal1` nao e afetada. A migration ainda nao esta aplicada, portanto MFA fim a fim continua classificado como parcialmente concluido ate aplicacao e smoke remoto.
+O enforcement equivalente no banco/Storage esta aplicado pela migration `20260923113835_admin_mfa_rls_enforcement.sql`. Ela adiciona policies `RESTRICTIVE` que exigem `aal2` quando o usuario autenticado possui role relacional `admin`, preservando `user_roles` em `aal1` apenas para o roteamento ao MFA. O smoke pos-aplicacao confirmou: admin `aal1` ve o proprio role, mas nao clientes/perfis protegidos; admin `aal2` recupera o acesso normal; cliente `aal1` nao e afetada.
 
 O advisor de seguranca do Supabase tambem reporta `Leaked Password Protection` desativado no Auth. A habilitacao e uma pendencia de configuracao externa, separada do fluxo de MFA e sem dependencia de regra da Patty.
 
@@ -117,7 +116,7 @@ A aplicacao preserva:
 - respostas originais;
 - notas internas separadas.
 
-A regra de preenchimento agora esta parcialmente fechada: todos os campos sao obrigatorios para o envio final; rascunho incompleto pode ser salvo e retomado; depois do envio, a cliente nao edita mais e somente a Patty pode registrar correcao historica sem sobrescrever a resposta original. A fundacao de escrita do rascunho esta preparada na migration `20260923113230_anamnesis_draft_write_foundation.sql`: um rascunho ativo por cliente/versao publicada, INSERT restrito da propria submission e INSERT/UPDATE apenas de `answer_value` das respostas do proprio rascunho. A boundary server-only em `lib/anamnesis/draft.ts` resolve a cliente pela sessao, cria/reutiliza o rascunho e insere/atualiza somente a resposta da pergunta pertencente a mesma versao; ela ainda nao esta conectada a UI. A fundacao de correcoes esta preparada na migration `20260923114643_anamnesis_answer_corrections_foundation.sql`, com historico append-only, autoria, timestamp, assignment ativo e AAL2. A sequencia de migrations pendentes foi validada em conjunto por dry-run com rollback, mas nenhuma delas foi aplicada. A submissao final continua bloqueada ate fechar perguntas condicionais/aplicabilidade, tipos de input e ordem/agrupamento do formulario.
+A regra de preenchimento agora esta parcialmente fechada: todos os campos sao obrigatorios para o envio final; rascunho incompleto pode ser salvo e retomado; depois do envio, a cliente nao edita mais e somente a Patty pode registrar correcao historica sem sobrescrever a resposta original. A fundacao de escrita do rascunho esta aplicada pela migration `20260923113230_anamnesis_draft_write_foundation.sql`: um rascunho ativo por cliente/versao publicada, INSERT restrito da propria submission e INSERT/UPDATE apenas de `answer_value` das respostas do proprio rascunho. A boundary server-only em `lib/anamnesis/draft.ts` resolve a cliente pela sessao, cria/reutiliza o rascunho e insere/atualiza somente a resposta da pergunta pertencente a mesma versao; ela ainda nao esta conectada a UI. A fundacao de correcoes esta aplicada pela migration `20260923114643_anamnesis_answer_corrections_foundation.sql`, com historico append-only, autoria, timestamp, assignment ativo e AAL2. O smoke pos-aplicacao confirmou criacao/edicao do proprio rascunho, isolamento entre clientes, bloqueio de `submitted_at`, correcao administrativa apenas em AAL2, preservacao da resposta original e bloqueio de UPDATE/DELETE das correcoes. A submissao final continua bloqueada ate fechar perguntas condicionais/aplicabilidade, tipos de input e ordem/agrupamento do formulario.
 
 ### Banco e performance
 
