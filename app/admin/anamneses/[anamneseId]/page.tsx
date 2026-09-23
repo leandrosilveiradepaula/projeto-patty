@@ -101,6 +101,14 @@ export default async function AdminAnamnesisDetailPage({
             >
               Revisões ({reviews.length})
             </Link>
+            {submission.submitted_at ? (
+              <Link
+                className={styles.backLink}
+                href={`/admin/anamneses/${submission.id}/correcoes`}
+              >
+                Correções
+              </Link>
+            ) : null}
           </div>
         }
         description="Leitura administrativa das respostas originais preservadas no backend, sem interpretação automática."
