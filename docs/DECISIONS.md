@@ -1,5 +1,29 @@
 # Decisoes
 
+## 2026-09-23 - Correcoes historicas da Patty na Anamnese
+
+### REGRA CONFIRMADA PELA PATTY
+
+Depois do envio final, a cliente nao pode editar respostas. Somente a Patty pode registrar correcoes posteriores, sem apagar a resposta originalmente enviada.
+
+### DECISAO TECNICA/PRODUTO
+
+As correcoes posteriores sao modeladas como registros append-only em `anamnesis_answer_corrections`, vinculados a uma resposta original.
+
+Cada correcao preserva:
+- `answer_id`;
+- valor corrigido separado em `corrected_answer_value`;
+- `corrected_by_profile_id`;
+- `created_at`.
+
+A resposta em `anamnesis_answers.answer_value` nunca e sobrescrita pela correcao. Mais de uma correcao pode existir para a mesma resposta, preservando a sequencia historica.
+
+Somente admin com assignment ativo para a cliente, sessao `aal2` e Anamnese ja submetida pode inserir correcao. A cliente nao recebe leitura nem escrita dessa tabela nesta fundacao.
+
+UPDATE e DELETE sao bloqueados por privilegios e por trigger de imutabilidade, inclusive para proteger contra ampliacoes futuras de grants.
+
+A migration `20260923114643_anamnesis_answer_corrections_foundation.sql` foi preparada e validada em dry-run juntamente com as migrations pendentes anteriores. Todos os cenarios de autorizacao, historico e imutabilidade passaram; nada foi aplicado no Supabase SaaS.
+
 ## 2026-09-23 - Enforcement de MFA administrativo em RLS
 
 ### DECISAO TECNICA DE SEGURANCA

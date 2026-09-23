@@ -247,6 +247,8 @@ Consequencias:
 - depois da submissao, a cliente nao altera as respostas;
 - correcao posterior e exclusiva da Patty e deve ser modelada sem sobrescrever a resposta original, preservando ator e timestamp da correcao.
 
+A fundacao tecnica usa `anamnesis_answer_corrections` como historico append-only por resposta. `anamnesis_answers.answer_value` permanece como resposta original enviada pela cliente; cada correcao adiciona um novo `corrected_answer_value` com autoria e timestamp. Multiplas correcoes nao substituem registros anteriores.
+
 ### DECISAO CONFIRMADA
 
 Email de autenticacao e email de contato sao conceitos diferentes.

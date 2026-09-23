@@ -85,6 +85,8 @@ Futuramente, cliente podera acessar somente seus proprios dados client-scoped.
 
 Para Anamnese em rascunho, a fundacao de escrita segue privilegio minimo: a cliente pode criar somente a propria submission para versao publicada e inserir/atualizar somente o valor das respostas enquanto a submission continua sem `submitted_at`. A identidade da resposta (`submission_id`, `form_version_id`, `question_id`) nao recebe UPDATE. A submissao final ainda nao e liberada nesta etapa.
 
+Depois da submissao, a cliente nao recebe escrita nas respostas nem acesso a `anamnesis_answer_corrections`. Correcoes estruturadas sao administrativas, exigem assignment ativo e AAL2, e sao append-only.
+
 Cliente nunca pode acessar dados de outra cliente.
 
 Cliente nao pode modificar `user_roles`.
