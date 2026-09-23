@@ -57,7 +57,7 @@ Estados usados:
 | --- | --- | --- | --- | --- |
 | Auth / sessao | IMPLEMENTADO | login por email/senha | CI VALIDADO | decidir onboarding, convite/cadastro, MFA |
 | Profiles / roles | IMPLEMENTADO | sem UI administrativa de gestao | RLS existente | definir bootstrap/admin e quem gerencia roles |
-| Clients / assignments | leitura + encerramento de assignment IMPLEMENTADOS | Patty pode encerrar assignment ativo por boundary server-side; inicio ainda sem fluxo operacional | RLS existente; historico preservado em `client_assignments` | integrar inicio de assignment ao onboarding controlado sem ampliar acesso a clientes nao atribuidas |
+| Clients / assignments | leitura + encerramento de assignment IMPLEMENTADOS | Patty pode encerrar assignment ativo por boundary server-side; inicio ainda sem fluxo operacional | CI + smoke E2E de producao PASS; historico preservado em `client_assignments` | integrar inicio de assignment ao onboarding controlado sem ampliar acesso a clientes nao atribuidas |
 | Cadastro Atual | leitura IMPLEMENTADA | nao | CI VALIDADO | definir quem pode alterar cada campo e auditoria |
 | Anamnese versionada | leitura IMPLEMENTADA | nota interna append-only | CI VALIDADO | fechar questionario e fluxo de preenchimento |
 | Avaliacoes / medidas | leitura IMPLEMENTADA | acompanhamento profissional append-only | CI VALIDADO; conjunto de decisoes profissionais tipado e testado | definir catalogo, unidades, obrigatoriedade e correcao |
@@ -122,7 +122,7 @@ A RLS/policy diferencia visibilidade para a cliente e acesso administrativo perm
 
 A regra de gestao esta confirmada: somente a Patty pode iniciar ou encerrar assignments por fluxo administrativo server-side controlado. O encerramento de uma atribuicao ativa esta implementado no detalhe administrativo da cliente. A action exige role relacional `admin`, usa a identidade autenticada como `staff_profile_id`, atualiza somente assignments ativos dessa mesma Patty/cliente e preenche `ended_at` sem apagar a linha historica. Apos o encerramento, os demais dados client-scoped deixam de ser acessiveis pelas RLS normais; a excecao de arquivos privados permanece separada.
 
-O inicio de assignment ainda nao tem UI. Essa parte deve ser integrada ao onboarding controlado da cliente, cujos detalhes de convite/ativacao ainda estao abertos. Nao sera criada listagem privilegiada de clientes nao atribuidas nem bypass generico de RLS apenas para facilitar essa etapa. O smoke E2E manual do encerramento esta versionado em `e2e/end-client-assignment.spec.mjs` e `.github/workflows/e2e-end-client-assignment.yml`; ainda precisa ser executado em producao com o assignment sintetico preparado.
+O inicio de assignment ainda nao tem UI. Essa parte deve ser integrada ao onboarding controlado da cliente, cujos detalhes de convite/ativacao ainda estao abertos. Nao sera criada listagem privilegiada de clientes nao atribuidas nem bypass generico de RLS apenas para facilitar essa etapa. O smoke E2E manual em `e2e/end-client-assignment.spec.mjs`, acionado por `.github/workflows/e2e-end-client-assignment.yml`, foi executado em producao com contas sinteticas e passou. O teste confirmou login administrativo, presenca da `E2E Client` na lista atribuida antes da acao, encerramento pela UI, redirecionamento de sucesso e ausencia da cliente na lista ativa depois da operacao. O Supabase confirmou que o mesmo registro historico foi preservado e recebeu `ended_at`, sem hard delete.
 
 ### Acompanhamento profissional
 
