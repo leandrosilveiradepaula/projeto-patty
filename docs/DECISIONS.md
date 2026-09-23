@@ -1,5 +1,25 @@
 # Decisoes
 
+## 2026-09-23 - E2E sintetico de onboarding/ativacao aprovado
+
+### FATO TECNICO VALIDADO
+
+O workflow manual `E2E client onboarding activation smoke` foi executado em producao contra o `master` e concluiu com sucesso.
+
+O teste sintetico validou o lifecycle tecnico sem depender de inbox real:
+- geracao de convite administrativo sintetico;
+- provisionamento de identidade/profile/role/client/assignment;
+- consumo do token pela rota SSR `/auth/confirm`;
+- sessao de ativacao em `/ativar-conta`;
+- criacao da senha pela propria cliente;
+- acesso subsequente a `/cliente/anamnese`;
+- novo login por email + senha em sessao separada;
+- cleanup do estado sintetico ao final.
+
+A verificacao posterior no Supabase SaaS confirmou zero residuos do usuario sintetico em `auth.users`, `profiles`, `clients` e `client_assignments`.
+
+Este PASS nao valida o template real de email do Supabase nem a Site URL/redirect allowlist. A configuracao/validacao do template `Invite user` continua como gate operacional separado.
+
 ## 2026-09-23 - Hardening de aplicacao e CI independente de regras profissionais
 
 ### DECISAO TECNICA DE SEGURANCA
