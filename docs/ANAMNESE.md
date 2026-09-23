@@ -164,10 +164,10 @@ A UI podera ser reorganizada depois da decisao de fluxo. Qualquer alteracao do c
 - Paginas podem possuir campos acima ou abaixo dos trechos capturados.
 - Nao ha evidencia suficiente para declarar que a lista e completa.
 - Nem todos os campos podem ser classificados definitivamente nas 15 categorias.
-- Obrigatoriedade do formulario atual nao esta validada para o app.
+- A marcacao de obrigatoriedade do Google Forms historico nao define a regra do app. A regra atual confirmada e: todos os campos aplicaveis da versao da Anamnese sao obrigatorios para o envio final; rascunhos podem permanecer incompletos.
 - Tipos finais de input nao estao aprovados.
-- Validacoes nao estao aprovadas.
-- Campos condicionais nao foram mapeados.
+- Validacoes especificas por campo nao estao aprovadas.
+- Campos condicionais e suas regras de aplicabilidade ainda nao foram mapeados.
 - Ordem final nao esta aprovada.
 - Regras de visibilidade nao estao aprovadas.
 - Quais dados irao para IA precisam ser definidos campo a campo.
@@ -178,7 +178,7 @@ A UI podera ser reorganizada depois da decisao de fluxo. Qualquer alteracao do c
 
 - Confirmar o mapa completo de campos do formulario atual.
 - Decidir manter, alterar ou remover cada pergunta.
-- Definir obrigatoriedade por campo no novo app.
+- Formalizar quais perguntas sao condicionais e suas regras de aplicabilidade; a obrigatoriedade geral para envio final ja esta confirmada para todos os campos aplicaveis.
 - Definir tipo final de input por campo.
 - Decidir se perguntas compostas permanecem juntas ou sao normalizadas em campos separados.
 - Mapear campos condicionais.
@@ -200,8 +200,10 @@ A primeira revisao operacional de IA trabalha somente sobre respostas existentes
 
 Nesta primeira versao, a revisao pode sinalizar apenas possivel contradicao ou necessidade de esclarecimento para analise humana. Ela nao diagnostica, nao cria pendencia, nao fala com a cliente e nao substitui decisao profissional.
 
-### QUESTAO ABERTA
+### REGRA CONFIRMADA E LIMITE OPERACIONAL
 
-`missing_answer` permanece bloqueado na primeira versao operacional. Embora `anamnesis_questions.required` exista estruturalmente, o questionario final, a obrigatoriedade definitiva e as regras de aplicabilidade condicional ainda nao foram validados. Pergunta condicional nao aplicavel nao pode ser tratada automaticamente como ausencia.
+Todos os campos aplicaveis da versao da Anamnese sao obrigatorios para o envio final. Rascunhos podem permanecer incompletos e ser retomados posteriormente.
+
+`missing_answer` permanece bloqueado na primeira versao operacional porque as regras de aplicabilidade das perguntas condicionais ainda nao foram formalizadas. Pergunta condicional nao aplicavel nao pode ser tratada automaticamente como ausencia.
 
 Questionario/schema existente nao equivale a questionario final validado pela Patty.
