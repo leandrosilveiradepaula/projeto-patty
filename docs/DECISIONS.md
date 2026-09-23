@@ -1,5 +1,26 @@
 # Decisoes
 
+## 2026-09-23 - Otimizacao das policies de correcoes da Anamnese aplicada
+
+### DECISAO TECNICA DE PERFORMANCE
+
+A migration `20260923150743_optimize_anamnesis_correction_rls.sql` foi aplicada no Supabase SaaS pelo workflow manual de migrations.
+
+Ela remove checks diretos redundantes de `auth.jwt()->>'aal'` das policies especificas de `anamnesis_answer_corrections`.
+
+A exigencia de MFA nao foi removida: continua sendo imposta pela policy transversal `RESTRICTIVE admin_mfa_aal2_required`. As policies especificas continuam responsaveis por role relacional `admin`, assignment ativo, autoria da correcao e submission enviada.
+
+### VALIDACAO POS-APLICACAO
+
+Foram confirmados:
+- `migration list` local/remoto com `20260923150743` presente nos dois lados;
+- admin em `aal1` continua bloqueado;
+- admin em `aal2` continua autorizado quando o assignment esta ativo;
+- zero chamadas diretas a `auth.jwt()` nas policies especificas de correcoes;
+- os warnings `auth_rls_initplan` deixaram de aparecer no advisor de performance.
+
+Os avisos restantes do advisor continuam sendo os 22 foreign keys sem indice de cobertura exata e indices sem uso observado. A decisao documentada de nao criar/remover indices mecanicamente permanece valida.
+
 ## 2026-09-23 - E2E sintetico de onboarding/ativacao aprovado
 
 ### FATO TECNICO VALIDADO

@@ -120,7 +120,9 @@ A regra de preenchimento agora esta parcialmente fechada: todos os campos sao ob
 
 ### Banco e performance
 
-O advisor de performance reportou 22 foreign keys sem indice de cobertura exata e 37 indices sem uso observado. A revisao mostrou que parte dos avisos de foreign key ja possui indice seletivo pelo primeiro campo e que a maioria restante pertence a tabelas historicas/IA ainda vazias. Nenhum indice novo foi criado apenas para zerar o lint. A politica e adicionar indice quando houver workload, RLS, integridade ou plano de execucao que justifique o custo.
+O advisor de performance reporta 22 foreign keys sem indice de cobertura exata e indices sem uso observado. A revisao mostrou que parte dos avisos de foreign key ja possui indice seletivo pelo primeiro campo e que a maioria restante pertence a tabelas historicas/IA ainda vazias. Nenhum indice novo foi criado apenas para zerar o lint. A politica e adicionar indice quando houver workload, RLS, integridade ou plano de execucao que justifique o custo.
+
+Os dois warnings `auth_rls_initplan` introduzidos nas policies de `anamnesis_answer_corrections` foram resolvidos pela migration `20260923150743_optimize_anamnesis_correction_rls.sql`, aplicada e validada no SaaS. AAL1 continua bloqueado e AAL2 permitido pela policy MFA `RESTRICTIVE` transversal.
 
 ### Arquivos privados
 
