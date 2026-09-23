@@ -181,6 +181,7 @@ Nesta reconciliacao de 2026-09-23:
 - `SUPABASE_MIGRATION_DEPLOYMENT.md` foi atualizado com as migrations confirmadas;
 - `DECISIONS.md` registra o apply mais recente e a confirmacao remota do failure handling;
 - `BRANCH_INVENTORY.md` registra a auditoria de branches e a estrategia de higiene.
+- `VERCEL_PRODUCTION_GATE.md` registra o checklist de recuperacao de producao sem disparar build adicional nesta rodada.
 
 ## Proximas frentes recomendadas
 
