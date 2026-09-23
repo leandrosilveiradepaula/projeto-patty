@@ -1,5 +1,28 @@
 # Decisoes
 
+## 2026-09-23 - Hardening de aplicacao e CI independente de regras profissionais
+
+### DECISAO TECNICA DE SEGURANCA
+
+A camada de aplicacao e o CI devem impedir regressao de autorizacao e dependencias vulneraveis sem depender de revisao manual recorrente.
+
+Foram incorporados ao `master`:
+
+- Next.js pinado em `16.3.6`, patch de seguranca upstream aplicado em substituicao a `16.3.5`;
+- configuracao publica do Supabase separada fisicamente da leitura de `SUPABASE_SECRET_KEY`, que permanece em modulo `server-only`;
+- secrets dos workflows E2E limitados aos passos que efetivamente os usam;
+- regressao automatica para classificar toda `route.ts`/`actions.ts` e exigir as guards esperadas;
+- regressao automatica das guards dos layouts `/admin`, `/cliente` e paginas de MFA;
+- bloqueio em migrations novas de `auth.role()`, metadata editavel de usuario e `SECURITY DEFINER` sem revisao explicita;
+- helpers privilegiados de assignment/onboarding derivam a identidade administrativa da sessao AAL2, sem aceitar `staffProfileId` do caller;
+- headers HTTP basicos: anti-framing, `nosniff`, `no-referrer`, Permissions Policy restritiva e CSP parcial para `base-uri`, `frame-ancestors` e `form-action`;
+- CI com `npm audit --omit=dev --audit-level=high`, bloqueando vulnerabilidades high/critical em dependencias de producao;
+- workflows atualizados para `actions/checkout@v7` e `actions/setup-node@v7`, mantendo Node 22 como runtime do projeto.
+
+A CSP permanece deliberadamente parcial. Restricoes completas de `script-src`, `style-src`, `img-src` e `connect-src` so devem ser introduzidas com teste de runtime para nao quebrar hidratacao Next.js, Supabase Auth ou MFA.
+
+A configuracao dos headers passou typecheck, regressao de seguranca e build no CI. A verificacao independente dos headers no deployment de producao nao foi concluida porque o conector Vercel disponivel nesta sessao nao enxerga o time/projeto correspondente; isso e uma pendencia operacional de evidencia, nao falha conhecida do codigo.
+
 ## 2026-09-23 - Avisos de foreign keys sem indice nao geram migration automatica
 
 ### DECISAO TECNICA
