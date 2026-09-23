@@ -115,7 +115,7 @@ export default async function AdminClientFilesPage({
                           ? "Enviado pela cliente"
                           : "Upload administrativo"}
                       </Badge>
-                      <Badge variant={file.client_visible_at ? "success" : "neutral"}>
+                      <Badge variant={file.client_visible_at ? "positive" : "neutral"}>
                         {file.client_visible_at
                           ? "Visível para cliente"
                           : "Oculto para cliente"}
