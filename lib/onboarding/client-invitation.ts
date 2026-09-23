@@ -2,6 +2,7 @@ import "server-only";
 
 import { startCurrentAdminClientAssignment } from "@/lib/assignments/client-assignment-start";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireRole } from "@/lib/supabase/auth";
 
 export type ClientInvitationProvisionErrorCode =
   | "cleanup_failed"
@@ -70,8 +71,8 @@ async function cleanupFailedProvision(input: {
 
 export async function inviteAndProvisionClient(input: {
   email: string;
-  staffProfileId: string;
 }) {
+  const auth = await requireRole("admin");
   const admin = createAdminClient();
   const invitation = await admin.auth.admin.inviteUserByEmail(input.email);
 
@@ -116,7 +117,6 @@ export async function inviteAndProvisionClient(input: {
 
     await startCurrentAdminClientAssignment({
       clientId,
-      staffProfileId: input.staffProfileId,
     });
 
     return {
@@ -126,7 +126,7 @@ export async function inviteAndProvisionClient(input: {
   } catch {
     const cleaned = await cleanupFailedProvision({
       clientId,
-      staffProfileId: input.staffProfileId,
+      staffProfileId: auth.profileId,
       userId,
     });
 
