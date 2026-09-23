@@ -2,6 +2,8 @@ import "server-only";
 
 import { getAssignmentStartStatus } from "@/lib/assignments/start-policy";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireRole } from "@/lib/supabase/auth";
+import { isUuid } from "@/lib/validation/uuid";
 
 export type StartClientAssignmentResult =
   | {
@@ -35,9 +37,18 @@ async function getActiveAssignmentId(input: {
 
 export async function startCurrentAdminClientAssignment(input: {
   clientId: string;
-  staffProfileId: string;
 }): Promise<StartClientAssignmentResult> {
-  const existingAssignmentId = await getActiveAssignmentId(input);
+  const auth = await requireRole("admin");
+
+  if (!isUuid(input.clientId)) {
+    throw new Error("Invalid client id");
+  }
+
+  const scopedInput = {
+    clientId: input.clientId,
+    staffProfileId: auth.profileId,
+  };
+  const existingAssignmentId = await getActiveAssignmentId(scopedInput);
 
   if (getAssignmentStartStatus(existingAssignmentId) === "already_active") {
     return {
@@ -51,7 +62,7 @@ export async function startCurrentAdminClientAssignment(input: {
     .from("client_assignments")
     .insert({
       client_id: input.clientId,
-      staff_profile_id: input.staffProfileId,
+      staff_profile_id: auth.profileId,
     })
     .select("id")
     .single();
@@ -68,7 +79,7 @@ export async function startCurrentAdminClientAssignment(input: {
   // between the read above and this insert; in that case, resolve the now
   // active row and return an idempotent result.
   if (error.code === "23505") {
-    const concurrentAssignmentId = await getActiveAssignmentId(input);
+    const concurrentAssignmentId = await getActiveAssignmentId(scopedInput);
 
     if (concurrentAssignmentId) {
       return {
