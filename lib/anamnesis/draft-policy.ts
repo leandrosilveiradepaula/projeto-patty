@@ -16,3 +16,17 @@ export function getDraftAnswerWriteMode(
 export function isUniqueViolationCode(code: string | undefined) {
   return code === "23505";
 }
+
+
+export function canEditDraftTextAnswer(input: {
+  answerType: string;
+  answerValue: unknown;
+  hasAnswer: boolean;
+  submittedAt: string | null;
+}) {
+  return (
+    input.submittedAt === null &&
+    input.answerType === "text" &&
+    (!input.hasAnswer || typeof input.answerValue === "string")
+  );
+}
