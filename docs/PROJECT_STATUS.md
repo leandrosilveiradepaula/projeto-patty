@@ -25,11 +25,11 @@ Antes de propor ou executar qualquer tarefa:
 7. nao transformar exemplo historico em regra;
 8. separar decisao, implementacao, teste, aplicacao, commit, push e publicacao.
 
-Enquanto este estado ainda nao estiver incorporado ao `master`, a referencia documental desta rodada e a branch:
+Enquanto este estado ainda nao estiver incorporado ao `master`, a referencia documental desta rodada continua sendo:
 
 `codex/document-existing-draft-ui`
 
-Um novo agente deve resolver o HEAD atual dessa branch antes de trabalhar. Nao assumir que o `master` contem as decisoes mais recentes.
+**ATENCAO:** essa branch e referencia documental, nao base atual de codigo. Na auditoria de 2026-09-23 ela estava 12 commits a frente e 26 atras do `master`. Um novo agente deve ler os documentos dessa branch para contexto, mas qualquer implementacao deve partir do `master` atual e reconciliar deliberadamente a documentacao exclusiva. Consultar tambem `BRANCH_INVENTORY.md`.
 
 ## Legenda de estado
 
@@ -133,6 +133,7 @@ Nao automatizar esses pontos antes de confirmacao da Patty e atualizacao documen
 ## Tarefas/documentacao recentes
 
 Nesta rodada documental de 2026-09-23:
+- `BRANCH_INVENTORY.md` foi criado para classificar 127 branches nao-`master`: 113 com tip exatamente igual ao head de PR ja mergeado e 14 excecoes revisadas individualmente; nenhuma branch foi apagada.
 - `BUSINESS_RULES.md` ja contem as regras confirmadas do metodo;
 - `OPEN_QUESTIONS.md` foi reconciliado para nao reabrir obrigatoriedade e correcao da Anamnese;
 - `ANAMNESE.md` distingue inventario historico da regra atual de obrigatoriedade;
