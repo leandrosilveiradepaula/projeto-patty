@@ -42,7 +42,7 @@ Estados usados:
 - questionario final e fluxo de preenchimento/submissao da Anamnese;
 - definir a politica final de retencao/hard delete de arquivos privados;
 - criacao/ativacao/encerramento de contas de clientes;
-- administracao de roles e assignments;
+- administracao de roles e inicio de assignments ligado ao onboarding controlado;
 - edicao controlada do Cadastro Atual;
 - catalogo e regras finais de avaliacao/medidas;
 - processo de autoria/revisao/publicacao das bibliotecas;
@@ -57,7 +57,7 @@ Estados usados:
 | --- | --- | --- | --- | --- |
 | Auth / sessao | IMPLEMENTADO | login por email/senha | CI VALIDADO | decidir onboarding, convite/cadastro, MFA |
 | Profiles / roles | IMPLEMENTADO | sem UI administrativa de gestao | RLS existente | definir bootstrap/admin e quem gerencia roles |
-| Clients / assignments | IMPLEMENTADO | sem gestao administrativa de assignment | RLS existente | definir quem cria/altera/encerra assignments |
+| Clients / assignments | leitura + encerramento de assignment IMPLEMENTADOS | Patty pode encerrar assignment ativo por boundary server-side; inicio ainda sem fluxo operacional | RLS existente; historico preservado em `client_assignments` | integrar inicio de assignment ao onboarding controlado sem ampliar acesso a clientes nao atribuidas |
 | Cadastro Atual | leitura IMPLEMENTADA | nao | CI VALIDADO | definir quem pode alterar cada campo e auditoria |
 | Anamnese versionada | leitura IMPLEMENTADA | nota interna append-only | CI VALIDADO | fechar questionario e fluxo de preenchimento |
 | Avaliacoes / medidas | leitura IMPLEMENTADA | acompanhamento profissional append-only | CI VALIDADO; conjunto de decisoes profissionais tipado e testado | definir catalogo, unidades, obrigatoriedade e correcao |
@@ -117,6 +117,12 @@ Downloads administrativos de exames/documentos registram evento append-only em `
 O MVP nao tera limite rigido de quantidade de arquivos. A Patty tambem podera enviar arquivos em nome da cliente por fluxo administrativo server-side controlado, com autoria administrativa explicita. Arquivos enviados pela cliente ficam visiveis para ela por padrao; uploads da Patty ficam ocultos ate liberacao explicita. O primeiro MVP nao tera antimalware dedicado; esse risco permanece mitigado por allowlist fechada, validacao de tipo real, limites de tamanho, Storage privado e ausencia de execucao.
 
 A RLS/policy diferencia visibilidade para a cliente e acesso administrativo permanente da Patty. A fundacao do upload da cliente usa `client_file_upload_sessions` e esta aplicada no Supabase SaaS. A boundary de criacao/finalizacao server-side valida declaracao antes da sessao, reserva a sessao em `validating`, detecta assinatura binaria no objeto temporario, revalida tamanho/formato, promove para `client_files` e usa compensacao em falhas. A UI da cliente em `/cliente/arquivos` cria a sessao, envia o byte diretamente ao Storage privado, finaliza no servidor, atualiza o historico e permite download somente de arquivos visiveis pela RLS, via signed URL de 5 minutos. O smoke E2E manual em `e2e/client-private-files.spec.mjs`, acionado por `.github/workflows/e2e-private-files.yml`, foi executado em producao com conta sintetica e passou em login, upload, validacao/finalizacao, historico e download. A limpeza de temporarios expirados foi implementada sem apagar linhas historicas de sessao: o cron marca sessoes `pending` expiradas como `expired` e remove somente objetos no namespace `pending/`. O `CRON_SECRET` foi configurado em Production e o redeploy correspondente ficou READY; a execucao real do cron ainda esta sob validacao por sessao sintetica expirada. O fluxo administrativo usa uma sessao server-side e `createSignedUploadUrl` para autorizar apenas o path temporario gerado; o browser recebe somente token temporario e envia direto ao Storage privado. A finalizacao usa a mesma validacao real do fluxo da cliente, grava autoria administrativa e mantem `client_visible_at` nulo. A Patty pode liberar explicitamente o arquivo depois, gravando ator e timestamp de visibilidade. Existe uma entrada dedicada em `/admin/arquivos`, limitada ao dominio de arquivos, para manter a excecao de acesso permanente sem ampliar os demais modulos client-scoped. O smoke E2E administrativo em `e2e/admin-private-files.spec.mjs`, acionado pelo workflow manual `.github/workflows/e2e-admin-private-files.yml`, foi executado em producao com contas sinteticas e passou. O teste confirmou login administrativo, selecao da cliente sintetica, upload administrativo, autoria administrativa, liberacao explicita, visibilidade subsequente para a cliente e download. O Supabase confirmou o arquivo sintetico com `uploaded_by_profile_id` e `client_visibility_set_by_profile_id` do admin sintetico e `client_visible_at` preenchido. Permanece aberta a politica concreta de retencao/hard delete dos arquivos aceitos.
+
+### Assignments
+
+A regra de gestao esta confirmada: somente a Patty pode iniciar ou encerrar assignments por fluxo administrativo server-side controlado. O encerramento de uma atribuicao ativa esta implementado no detalhe administrativo da cliente. A action exige role relacional `admin`, usa a identidade autenticada como `staff_profile_id`, atualiza somente assignments ativos dessa mesma Patty/cliente e preenche `ended_at` sem apagar a linha historica. Apos o encerramento, os demais dados client-scoped deixam de ser acessiveis pelas RLS normais; a excecao de arquivos privados permanece separada.
+
+O inicio de assignment ainda nao tem UI. Essa parte deve ser integrada ao onboarding controlado da cliente, cujos detalhes de convite/ativacao ainda estao abertos. Nao sera criada listagem privilegiada de clientes nao atribuidas nem bypass generico de RLS apenas para facilitar essa etapa.
 
 ### Acompanhamento profissional
 
