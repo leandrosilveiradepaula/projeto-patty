@@ -8,7 +8,7 @@ import { requireRole } from "@/lib/supabase/auth";
 import { isUuid } from "@/lib/validation/uuid";
 
 export async function endClientAssignmentAction(clientId: string) {
-  const auth = await requireRole("admin");
+  await requireRole("admin");
 
   if (!isUuid(clientId)) {
     redirect("/admin/clientes?assignment=invalid");
@@ -16,7 +16,6 @@ export async function endClientAssignmentAction(clientId: string) {
 
   const result = await endCurrentAdminClientAssignments({
     clientId,
-    staffProfileId: auth.profileId,
   });
 
   revalidatePath("/admin/clientes");
