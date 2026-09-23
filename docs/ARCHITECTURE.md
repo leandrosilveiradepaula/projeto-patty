@@ -105,7 +105,13 @@ Signed URLs sao temporarias, nao persistidas e terao validade de 5 minutos. No M
 
 O primeiro MVP nao usara servico dedicado de antivirus/antimalware. Essa simplificacao depende de manter allowlist fechada, validacao de tipo real, limites de tamanho, Storage privado e ausencia de execucao de arquivos. A necessidade deve ser reavaliada se o escopo ou o risco dos uploads aumentar.
 
-Secrets nao devem ser armazenados no repositorio.
+Secrets nao devem ser armazenados no repositorio. A configuracao administrativa do Supabase e isolada em modulo `server-only`; workflows E2E injetam credenciais somente nos passos que realmente precisam delas.
+
+A aplicacao define headers HTTP basicos globalmente: bloqueio de framing, `nosniff`, `no-referrer`, Permissions Policy restritiva e CSP parcial limitada a `base-uri`, `frame-ancestors` e `form-action`. Uma CSP completa exige teste especifico de runtime antes de ser adotada.
+
+O CI possui regressao explicita das boundaries de routes/actions, layouts admin/cliente, paginas MFA e uso do cliente Supabase administrativo. Migrations novas sao verificadas contra atalhos de autorizacao nao aceitos pela arquitetura atual.
+
+Dependencias de producao passam por `npm audit --omit=dev --audit-level=high` no CI. O Next.js esta pinado em `16.3.6`.
 
 Dados reais nao devem ser usados no desenvolvimento inicial.
 
