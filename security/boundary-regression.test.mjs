@@ -6,6 +6,7 @@ import test from "node:test";
 const ROOT = process.cwd();
 
 const ENTRYPOINT_RULES = new Map([
+  ["app/admin/anamneses/[anamneseId]/correcoes/actions.ts", "admin"],
   ["app/admin/anamneses/[anamneseId]/revisao/actions.ts", "admin"],
   ["app/admin/arquivos/[fileId]/route.ts", "admin"],
   ["app/admin/avaliacoes/[avaliacaoId]/actions.ts", "admin"],

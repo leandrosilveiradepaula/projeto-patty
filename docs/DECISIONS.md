@@ -144,6 +144,12 @@ UPDATE e DELETE sao bloqueados por privilegios e por trigger de imutabilidade, i
 
 A migration `20260923114643_anamnesis_answer_corrections_foundation.sql` foi aplicada no Supabase SaaS em 2026-09-23. O smoke pos-aplicacao confirmou: AAL1 bloqueado, AAL2 permitido com assignment ativo, resposta original preservada e UPDATE/DELETE de correcoes bloqueados.
 
+### FATO DE IMPLEMENTACAO
+
+A aplicacao administrativa possui uma rota dedicada de correcoes para Anamneses enviadas. Ela apresenta separadamente a resposta original e todas as correcoes historicas em ordem cronologica e permite somente acrescentar uma nova correcao.
+
+O valor corrigido e informado como JSON explicito para preservar o tipo estrutural sem inferir regra da pergunta. A Server Action exige admin autenticado em AAL2 por `requireRole("admin")`, valida que a resposta pertence a mesma submission e que ela ja foi enviada, e faz INSERT com o cliente Supabase autenticado normal. RLS, assignment ativo e as constraints/trigger append-only permanecem como autoridade final. Nao existe UPDATE/DELETE na UI e a cliente nao recebe acesso ao historico de correcoes.
+
 ## 2026-09-23 - Enforcement de MFA administrativo em RLS
 
 ### DECISAO TECNICA DE SEGURANCA

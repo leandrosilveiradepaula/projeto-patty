@@ -1,5 +1,6 @@
 import "server-only";
 
+import type { Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 
 async function getVerifiedProfileId() {
@@ -187,6 +188,66 @@ export async function listAccessibleAnamnesisAnswers(submissionId: string) {
   }
 
   return data;
+}
+
+export async function getAccessibleAnamnesisAnswer(answerId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("anamnesis_answers")
+    .select(
+      "id, submission_id, form_version_id, question_id, answer_value, created_at, updated_at",
+    )
+    .eq("id", answerId)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function listAccessibleAnamnesisAnswerCorrections(
+  answerIds: string[],
+) {
+  if (answerIds.length === 0) {
+    return [];
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("anamnesis_answer_corrections")
+    .select(
+      "id, answer_id, corrected_answer_value, corrected_by_profile_id, created_at, profiles(display_name)",
+    )
+    .in("answer_id", answerIds)
+    .order("created_at", { ascending: true })
+    .order("id", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function createAccessibleAnamnesisAnswerCorrection(input: {
+  answerId: string;
+  correctedAnswerValue: Json;
+  correctedByProfileId: string;
+}) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("anamnesis_answer_corrections")
+    .insert({
+      answer_id: input.answerId,
+      corrected_answer_value: input.correctedAnswerValue,
+      corrected_by_profile_id: input.correctedByProfileId,
+    });
+
+  if (error) {
+    throw error;
+  }
 }
 
 export async function listAccessibleAnamnesisReviews(submissionId: string) {

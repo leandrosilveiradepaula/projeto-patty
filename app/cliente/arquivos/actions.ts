@@ -72,6 +72,10 @@ export async function createClientFileUploadSessionAction(
     throw error;
   }
 
+  if (!data.temp_object_path) {
+    throw new Error("Upload session did not generate a temporary object path");
+  }
+
   return {
     ok: true as const,
     session: {
