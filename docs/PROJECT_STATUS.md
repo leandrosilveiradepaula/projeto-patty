@@ -137,7 +137,8 @@ Nesta rodada documental de 2026-09-23:
 - `ANAMNESE.md` distingue inventario historico da regra atual de obrigatoriedade;
 - `DATA_MODEL.md` foi alinhado ao modelo append-only de correcoes;
 - `PRODUCT.md` foi alinhado ao onboarding por convite, ativacao e login por email + senha;
-- `MVP.md` e `RBAC_RLS.md` devem permanecer alinhados a este estado e as decisoes mais recentes.
+- `MVP.md` foi reconciliado para separar escopo do MVP de estado operacional.
+- `RBAC_RLS.md` foi reconciliado com MFA aplicado, escrita restrita de rascunho e separacao entre regra de submissao e funcionalidade ainda nao implementada.
 
 ## Tarefa bloqueada conhecida
 
@@ -157,14 +158,13 @@ Antes de retomar:
 Ordem operacional sugerida, sujeita a revalidacao pelo HEAD e pelas decisoes mais recentes:
 
 1. manter documentacao coerente e este arquivo atualizado;
-2. concluir reconciliacao de `MVP.md` e `RBAC_RLS.md`;
-3. concluir fluxo de submissao final da Anamnese quando condicionais/aplicabilidade estiverem formalizadas;
-4. fechar questionario final da Anamnese;
-5. resolver infraestrutura do email real de convite;
-6. retomar failure handling de IA quando o ambiente de desenvolvimento estiver acessivel;
-7. continuar integracao UI <-> backend real;
-8. migrar conteudos do Drive gradualmente;
-9. ampliar automacao de alimentacao/treino somente depois das regras profissionais correspondentes estarem documentadas.
+2. concluir fluxo de submissao final da Anamnese quando condicionais/aplicabilidade estiverem formalizadas;
+3. fechar questionario final da Anamnese;
+4. resolver infraestrutura do email real de convite;
+5. retomar failure handling de IA quando o ambiente de desenvolvimento estiver acessivel;
+6. continuar integracao UI <-> backend real;
+7. migrar conteudos do Drive gradualmente;
+8. ampliar automacao de alimentacao/treino somente depois das regras profissionais correspondentes estarem documentadas.
 
 ## Regra de manutencao deste arquivo
 
