@@ -5,5 +5,10 @@
       "path": "/api/cron/private-file-upload-cleanup",
       "schedule": "17 3 * * *"
     }
-  ]
+  ],
+  "git": {
+    "deploymentEnabled": {
+      "codex/**": false
+    }
+  }
 }
