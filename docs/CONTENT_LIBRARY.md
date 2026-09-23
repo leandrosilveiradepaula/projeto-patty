@@ -28,6 +28,13 @@ A triagem identificou 16 grupos de possiveis duplicidades por nome normalizado e
 
 Uma segunda passada de metadados em 2026-09-23 revalidou os 89 itens originais sem divergencias e identificou 21 arquivos adicionais, totalizando 110 arquivos conhecidos por metadado no escopo revisado. Os 21 adicionais incluem 8 videos candidatos educacionais, 6 imagens operacionais que exigem revisao de privacidade/likeness e 7 PDFs em `Livros` que devem permanecer em hold de direitos antes de qualquer distribuicao. Consultar `DRIVE_CONTENT_INVENTORY_REVIEW.md`.
 
+Uma primeira onda de revisao controlada foi registrada em `DRIVE_CONTENT_REVIEW_WAVE_1.md` e `drive_content_review_wave_1.json`. Ela revisou somente tres itens selecionados:
+- video de uso da balanca: candidato apos revisao humana, ainda sem autorizacao;
+- planilha `Sugestao de refeicoes`: referencia historica, nao regra atual de numero de refeicoes;
+- `Fórmulas.pptx`: hold profissional porque suplementacao/manipulados continuam abertos e o material contem afirmacoes sensiveis/comerciais.
+
+Nenhum dos tres foi autorizado para migracao ou publicacao.
+
 ### RECOMENDACAO TECNICA
 
 Antes de migrar conteudos para o aplicativo, completar o inventario do Drive e classificar os materiais por tipo, publico, status de revisao, permissao de uso e relacao com protocolos.
