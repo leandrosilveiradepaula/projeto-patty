@@ -272,6 +272,14 @@ No MVP, o projeto tera somente dois ambientes operacionais definidos: desenvolvi
 
 MFA sera obrigatorio para contas administrativas, incluindo Patty/admin.
 
+### FATO DE IMPLEMENTACAO PARCIAL
+
+A camada da aplicacao exige `aal2` para acesso administrativo. Depois do login por email/senha, uma conta `admin` sem fator verificado e direcionada ao enrollment TOTP; uma conta com fator verificado, mas sessao ainda em `aal1`, e direcionada ao challenge. Paginas, rotas server-side e server actions que usam `requireRole("admin")` nao prosseguem sem `aal2`.
+
+O enrollment/challenge usa as APIs nativas de MFA do Supabase Auth. A chave secreta TOTP exibida no enrollment pertence ao usuario autenticado e nao e persistida pela aplicacao.
+
+Esta implementacao ainda nao encerra a decisao de MFA por completo: a protecao equivalente em RLS, para impedir uso direto de um token administrativo `aal1` contra a Data API/Storage, permanece como gate tecnico separado antes de considerar MFA plenamente aplicado fim a fim.
+
 ### DECISAO DE PRODUTO E SEGURANCA
 
 A criacao de conta de cliente no MVP sera somente por convite ou ativacao controlada. Nao havera cadastro publico/autonomo de clientes.
