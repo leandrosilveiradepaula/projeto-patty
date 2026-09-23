@@ -1,4 +1,4 @@
-name: Configure Supabase invite template
+name: Diagnose Supabase invite template update
 
 on:
   push:
@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 jobs:
-  configure:
+  diagnose:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -17,7 +17,7 @@ jobs:
       SUPABASE_PROJECT_ID: hqanoskwjvpbgavppcud
 
     steps:
-      - name: Configure SSR-safe invite template
+      - name: Capture template update API error
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         shell: bash
@@ -27,25 +27,19 @@ jobs:
 
           template='<h2>Ative sua conta</h2><p>Use o link abaixo para ativar seu acesso.</p><p><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=invite">Ativar conta</a></p>'
           body="$(jq -n --arg template "$template" '{mailer_templates_invite_content:$template}')"
+          response_file="$(mktemp)"
 
-          curl --fail-with-body --silent --show-error \
+          status="$(curl --silent --show-error \
+            -o "$response_file" \
+            -w '%{http_code}' \
             -X PATCH \
             "https://api.supabase.com/v1/projects/$SUPABASE_PROJECT_ID/config/auth" \
             -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
             -H "Content-Type: application/json" \
-            --data "$body" \
-            >/dev/null
+            --data "$body")"
 
-          after="$(curl --fail-with-body --silent --show-error \
-            "https://api.supabase.com/v1/projects/$SUPABASE_PROJECT_ID/config/auth" \
-            -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN")"
+          echo "HTTP status: $status"
+          echo "API response:"
+          jq '{message, error, code}' "$response_file" 2>/dev/null || cat "$response_file"
 
-          invite_template="$(printf '%s' "$after" | jq -r '.mailer_templates_invite_content // ""')"
-
-          [[ "$invite_template" == *".TokenHash"* ]]
-          [[ "$invite_template" == *"/auth/confirm"* ]]
-          [[ "$invite_template" == *"type=invite"* ]]
-
-          echo "Invite template uses TokenHash: true"
-          echo "Invite template points to /auth/confirm: true"
-          echo "Invite template sets type=invite: true"
+          test "$status" = "200"
