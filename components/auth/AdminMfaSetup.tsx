@@ -49,6 +49,26 @@ export function AdminMfaSetup() {
         return;
       }
 
+      const unverifiedTotp = factors.data.totp.filter(
+        (factor) => factor.status === "unverified",
+      );
+
+      for (const factor of unverifiedTotp) {
+        const { error: unenrollError } = await supabase.auth.mfa.unenroll({
+          factorId: factor.id,
+        });
+
+        if (unenrollError) {
+          if (!cancelled) {
+            setMessage(
+              "Não foi possível limpar uma configuração MFA incompleta. Saia e tente novamente.",
+            );
+            setIsPending(false);
+          }
+          return;
+        }
+      }
+
       const { data, error } = await supabase.auth.mfa.enroll({
         factorType: "totp",
         friendlyName: "Corpo e Mente Admin",
