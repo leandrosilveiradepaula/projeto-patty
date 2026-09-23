@@ -14,6 +14,448 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_draft_versions: {
+        Row: {
+          based_on_draft_version_id: string | null
+          client_id: string
+          content: Json
+          created_at: string
+          created_by_profile_id: string
+          discard_reason: string | null
+          discarded_at: string | null
+          discarded_by_profile_id: string | null
+          execution_id: string
+          id: string
+          version_number: number
+        }
+        Insert: {
+          based_on_draft_version_id?: string | null
+          client_id: string
+          content: Json
+          created_at?: string
+          created_by_profile_id: string
+          discard_reason?: string | null
+          discarded_at?: string | null
+          discarded_by_profile_id?: string | null
+          execution_id: string
+          id?: string
+          version_number: number
+        }
+        Update: {
+          based_on_draft_version_id?: string | null
+          client_id?: string
+          content?: Json
+          created_at?: string
+          created_by_profile_id?: string
+          discard_reason?: string | null
+          discarded_at?: string | null
+          discarded_by_profile_id?: string | null
+          execution_id?: string
+          id?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_draft_versions_created_by_profile_id_fkey"
+            columns: ["created_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_draft_versions_discarded_by_profile_id_fkey"
+            columns: ["discarded_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_draft_versions_execution_client_fkey"
+            columns: ["execution_id", "client_id"]
+            isOneToOne: false
+            referencedRelation: "ai_executions"
+            referencedColumns: ["id", "client_id"]
+          },
+          {
+            foreignKeyName: "ai_draft_versions_parent_fkey"
+            columns: ["based_on_draft_version_id", "execution_id", "client_id"]
+            isOneToOne: false
+            referencedRelation: "ai_draft_versions"
+            referencedColumns: ["id", "execution_id", "client_id"]
+          },
+        ]
+      }
+      ai_execution_failure_responses: {
+        Row: {
+          client_id: string
+          content: string
+          content_format: string
+          execution_id: string
+          received_at: string
+        }
+        Insert: {
+          client_id: string
+          content: string
+          content_format: string
+          execution_id: string
+          received_at: string
+        }
+        Update: {
+          client_id?: string
+          content?: string
+          content_format?: string
+          execution_id?: string
+          received_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_execution_failure_responses_execution_client_fkey"
+            columns: ["execution_id", "client_id"]
+            isOneToOne: false
+            referencedRelation: "ai_executions"
+            referencedColumns: ["id", "client_id"]
+          },
+        ]
+      }
+      ai_execution_outputs: {
+        Row: {
+          client_id: string
+          content: Json
+          created_at: string
+          execution_id: string
+        }
+        Insert: {
+          client_id: string
+          content: Json
+          created_at?: string
+          execution_id: string
+        }
+        Update: {
+          client_id?: string
+          content?: Json
+          created_at?: string
+          execution_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_execution_outputs_execution_client_fkey"
+            columns: ["execution_id", "client_id"]
+            isOneToOne: false
+            referencedRelation: "ai_executions"
+            referencedColumns: ["id", "client_id"]
+          },
+        ]
+      }
+      ai_execution_sources: {
+        Row: {
+          anamnesis_answer_id: string | null
+          anamnesis_submission_id: string | null
+          assessment_id: string | null
+          assessment_measurement_id: string | null
+          client_file_id: string | null
+          client_id: string
+          created_at: string
+          execution_id: string
+          id: string
+          professional_follow_up_id: string | null
+          protocol_version_id: string | null
+          source_kind: string
+        }
+        Insert: {
+          anamnesis_answer_id?: string | null
+          anamnesis_submission_id?: string | null
+          assessment_id?: string | null
+          assessment_measurement_id?: string | null
+          client_file_id?: string | null
+          client_id: string
+          created_at?: string
+          execution_id: string
+          id?: string
+          professional_follow_up_id?: string | null
+          protocol_version_id?: string | null
+          source_kind: string
+        }
+        Update: {
+          anamnesis_answer_id?: string | null
+          anamnesis_submission_id?: string | null
+          assessment_id?: string | null
+          assessment_measurement_id?: string | null
+          client_file_id?: string | null
+          client_id?: string
+          created_at?: string
+          execution_id?: string
+          id?: string
+          professional_follow_up_id?: string | null
+          protocol_version_id?: string | null
+          source_kind?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_execution_sources_answer_submission_fkey"
+            columns: ["anamnesis_answer_id", "anamnesis_submission_id"]
+            isOneToOne: false
+            referencedRelation: "anamnesis_answers"
+            referencedColumns: ["id", "submission_id"]
+          },
+          {
+            foreignKeyName: "ai_execution_sources_assessment_client_fkey"
+            columns: ["assessment_id", "client_id"]
+            isOneToOne: false
+            referencedRelation: "client_assessments"
+            referencedColumns: ["id", "client_id"]
+          },
+          {
+            foreignKeyName: "ai_execution_sources_execution_client_fkey"
+            columns: ["execution_id", "client_id"]
+            isOneToOne: false
+            referencedRelation: "ai_executions"
+            referencedColumns: ["id", "client_id"]
+          },
+          {
+            foreignKeyName: "ai_execution_sources_file_client_fkey"
+            columns: ["client_file_id", "client_id"]
+            isOneToOne: false
+            referencedRelation: "client_files"
+            referencedColumns: ["id", "client_id"]
+          },
+          {
+            foreignKeyName: "ai_execution_sources_follow_up_client_fkey"
+            columns: ["professional_follow_up_id", "client_id"]
+            isOneToOne: false
+            referencedRelation: "professional_follow_ups"
+            referencedColumns: ["id", "client_id"]
+          },
+          {
+            foreignKeyName: "ai_execution_sources_measurement_assessment_fkey"
+            columns: ["assessment_measurement_id", "assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_measurements"
+            referencedColumns: ["id", "assessment_id"]
+          },
+          {
+            foreignKeyName: "ai_execution_sources_protocol_version_client_fkey"
+            columns: ["protocol_version_id", "client_id"]
+            isOneToOne: false
+            referencedRelation: "protocol_versions"
+            referencedColumns: ["id", "client_id"]
+          },
+          {
+            foreignKeyName: "ai_execution_sources_submission_client_fkey"
+            columns: ["anamnesis_submission_id", "client_id"]
+            isOneToOne: false
+            referencedRelation: "anamnesis_submissions"
+            referencedColumns: ["id", "client_id"]
+          },
+        ]
+      }
+      ai_executions: {
+        Row: {
+          client_id: string
+          completed_at: string | null
+          created_at: string
+          discard_reason: string | null
+          discarded_at: string | null
+          discarded_by_profile_id: string | null
+          failed_at: string | null
+          failure_code: string | null
+          failure_message: string | null
+          failure_stage: string | null
+          id: string
+          initiated_by_profile_id: string
+          model_identifier: string
+          prompt_version_id: string
+          provider: string
+          purpose_key: string
+          status: string
+        }
+        Insert: {
+          client_id: string
+          completed_at?: string | null
+          created_at?: string
+          discard_reason?: string | null
+          discarded_at?: string | null
+          discarded_by_profile_id?: string | null
+          failed_at?: string | null
+          failure_code?: string | null
+          failure_message?: string | null
+          failure_stage?: string | null
+          id?: string
+          initiated_by_profile_id: string
+          model_identifier: string
+          prompt_version_id: string
+          provider: string
+          purpose_key: string
+          status?: string
+        }
+        Update: {
+          client_id?: string
+          completed_at?: string | null
+          created_at?: string
+          discard_reason?: string | null
+          discarded_at?: string | null
+          discarded_by_profile_id?: string | null
+          failed_at?: string | null
+          failure_code?: string | null
+          failure_message?: string | null
+          failure_stage?: string | null
+          id?: string
+          initiated_by_profile_id?: string
+          model_identifier?: string
+          prompt_version_id?: string
+          provider?: string
+          purpose_key?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_executions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_executions_discarded_by_profile_id_fkey"
+            columns: ["discarded_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_executions_initiated_by_profile_id_fkey"
+            columns: ["initiated_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_executions_prompt_version_id_fkey"
+            columns: ["prompt_version_id"]
+            isOneToOne: false
+            referencedRelation: "ai_prompt_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_hypotheses: {
+        Row: {
+          client_id: string
+          confirmed_at: string | null
+          confirmed_by_profile_id: string | null
+          content: Json
+          created_at: string
+          execution_id: string
+          id: string
+        }
+        Insert: {
+          client_id: string
+          confirmed_at?: string | null
+          confirmed_by_profile_id?: string | null
+          content: Json
+          created_at?: string
+          execution_id: string
+          id?: string
+        }
+        Update: {
+          client_id?: string
+          confirmed_at?: string | null
+          confirmed_by_profile_id?: string | null
+          content?: Json
+          created_at?: string
+          execution_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_hypotheses_confirmed_by_profile_id_fkey"
+            columns: ["confirmed_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_hypotheses_execution_client_fkey"
+            columns: ["execution_id", "client_id"]
+            isOneToOne: false
+            referencedRelation: "ai_executions"
+            referencedColumns: ["id", "client_id"]
+          },
+        ]
+      }
+      ai_prompt_versions: {
+        Row: {
+          content: Json
+          created_at: string
+          created_by_profile_id: string | null
+          id: string
+          prompt_key: string
+          version_number: number
+        }
+        Insert: {
+          content: Json
+          created_at?: string
+          created_by_profile_id?: string | null
+          id?: string
+          prompt_key: string
+          version_number: number
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          created_by_profile_id?: string | null
+          id?: string
+          prompt_key?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_prompt_versions_created_by_profile_id_fkey"
+            columns: ["created_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      anamnesis_answer_corrections: {
+        Row: {
+          answer_id: string
+          corrected_answer_value: Json
+          corrected_by_profile_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          answer_id: string
+          corrected_answer_value: Json
+          corrected_by_profile_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          answer_id?: string
+          corrected_answer_value?: Json
+          corrected_by_profile_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "anamnesis_answer_corrections_answer_id_fkey"
+            columns: ["answer_id"]
+            isOneToOne: false
+            referencedRelation: "anamnesis_answers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "anamnesis_answer_corrections_corrected_by_profile_id_fkey"
+            columns: ["corrected_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       anamnesis_answers: {
         Row: {
           answer_value: Json
@@ -553,7 +995,7 @@ export type Database = {
           original_filename: string
           requester_profile_id: string
           status: string
-          temp_object_path: string
+          temp_object_path: string | null
         }
         Insert: {
           claimed_mime_type: string
@@ -567,7 +1009,7 @@ export type Database = {
           original_filename: string
           requester_profile_id: string
           status?: string
-          temp_object_path?: never
+          temp_object_path?: string | null
         }
         Update: {
           claimed_mime_type?: string
@@ -581,7 +1023,7 @@ export type Database = {
           original_filename?: string
           requester_profile_id?: string
           status?: string
-          temp_object_path?: never
+          temp_object_path?: string | null
         }
         Relationships: [
           {
@@ -1460,6 +1902,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      current_user_admin_mfa_satisfied: { Args: never; Returns: boolean }
       current_user_is_assigned_admin: { Args: never; Returns: boolean }
       meal_plan_version_is_draft: {
         Args: { p_meal_plan_version_id: string }
