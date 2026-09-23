@@ -28,7 +28,7 @@ Ja esta decidido, entre outros pontos:
 
 3. Quais perguntas precisam ser reformuladas antes de entrar no aplicativo? Se possivel, diga a pergunta atual e como voce prefere perguntar.
 
-4. Quais perguntas devem ser obrigatorias para permitir o envio da Anamnese?
+4. **RESPONDIDA em 2026-09-23.** Todos os campos da Anamnese sao obrigatorios para permitir o envio final. O rascunho pode permanecer incompleto e ser retomado depois.
 
 5. Quais perguntas devem aparecer somente quando uma resposta anterior tornar aquela pergunta relevante? Para cada uma, qual resposta deve disparar a pergunta seguinte?
 
@@ -39,7 +39,7 @@ Ja esta decidido, entre outros pontos:
    - criar tambem uma avaliacao inicial;
    - ou sair da Anamnese e ficar somente em Avaliacoes?
 
-8. Depois de enviada, a cliente podera corrigir uma resposta da Anamnese? Se sim, voce prefere uma nova versao/correcao historica sem apagar a resposta original?
+8. **RESPONDIDA em 2026-09-23.** Depois de enviada, a cliente nao pode corrigir respostas. Somente a Patty pode registrar correcao posterior, preservando a resposta original e o historico da correcao.
 
 ## 2. Cadastro Atual e conta da cliente
 

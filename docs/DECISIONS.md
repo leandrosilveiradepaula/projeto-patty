@@ -1,5 +1,19 @@
 # Decisoes
 
+## 2026-09-23 - Obrigatoriedade, rascunho e correcao da Anamnese
+
+### REGRA CONFIRMADA PELA PATTY
+
+Todos os campos da Anamnese sao obrigatorios para permitir o envio final.
+
+Depois de enviada, a cliente nao pode corrigir nem sobrescrever respostas da Anamnese. Correcoes posteriores podem ser feitas somente pela Patty.
+
+### DECISAO TECNICA/PRODUTO
+
+Para permitir que a cliente preencha a Anamnese em mais de uma sessao, o sistema deve aceitar um rascunho incompleto e permitir retomada posterior. A exigencia de todos os campos preenchidos se aplica ao envio final, nao ao salvamento do rascunho.
+
+Uma correcao feita pela Patty depois do envio nao deve apagar nem sobrescrever a resposta original. O sistema deve preservar a resposta originalmente enviada e registrar separadamente a correcao, o ator e o momento da alteracao, em coerencia com a regra geral de preservacao de historico.
+
 ## 2026-09-23 - Inicio do onboarding da cliente por link enviado pela Patty
 
 ### REGRA OPERACIONAL CONFIRMADA PELA PATTY

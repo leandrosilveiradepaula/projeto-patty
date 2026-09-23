@@ -82,9 +82,9 @@ Qual e o mapa completo dos campos do formulario atual de anamnese, considerando 
 
 Quais perguntas do formulario atual devem ser mantidas, alteradas ou removidas no novo aplicativo?
 
-### QUESTAO ABERTA
+### FATO JA CONFIRMADO
 
-Qual sera a obrigatoriedade de cada campo da anamnese no novo aplicativo?
+Todos os campos da Anamnese sao obrigatorios para permitir o envio final. Rascunhos podem permanecer incompletos ate a cliente finalizar o preenchimento.
 
 ### QUESTAO ABERTA
 
