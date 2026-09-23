@@ -35,6 +35,8 @@ O manifesto existe para rastreabilidade e futura importacao controlada. Ele nao 
 
 A triagem posterior baseada exclusivamente nesses metadados esta documentada em `DRIVE_CONTENT_TRIAGE.md` e `drive_content_triage.json`. Ela nao le o conteudo dos arquivos nem altera `rights_status` ou `migration_status`.
 
+Uma revisao de segunda passada em 2026-09-23 revalidou os 89 itens sem divergencias e identificou 21 arquivos adicionais em outras pastas nao client-scoped aparentes da raiz. Essa revisao esta em `DRIVE_CONTENT_INVENTORY_REVIEW.md` e `drive_content_inventory_review.json`. O manifesto original foi preservado para manter a proveniencia da primeira passada.
+
 ## Resumo da primeira passada
 
 Foram inventariados 89 arquivos em ramos claramente educacionais ou de exercicios:
@@ -86,6 +88,14 @@ Nao foi feita nesta etapa avaliacao tecnica do movimento, prescricao, progressao
 - upload para Supabase Storage;
 - criacao automatica de registros em `educational_contents` ou `exercises`;
 - definicao de release para clientes.
+
+## Estado apos revisao de segunda passada
+
+Os 89 itens deste inventario continuam consistentes com o Drive atual para as pastas originalmente cobertas.
+
+A segunda passada acrescentou 21 arquivos conhecidos por metadado, elevando a cobertura conhecida para 110 arquivos. Esses 21 itens nao foram incorporados ao manifesto original porque possuem gates distintos de privacidade, finalidade, direitos ou revisao profissional.
+
+Consultar `DRIVE_CONTENT_INVENTORY_REVIEW.md`.
 
 ## Proximos gates antes da migracao
 
