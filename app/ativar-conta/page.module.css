@@ -1,0 +1,19 @@
+.shell {
+  display: grid;
+  min-height: 100svh;
+  place-items: center;
+  padding: var(--space-6);
+}
+
+.content {
+  display: grid;
+  gap: var(--space-6);
+  width: min(100%, 480px);
+}
+
+@media (max-width: 767px) {
+  .shell {
+    align-items: start;
+    padding: var(--space-4);
+  }
+}

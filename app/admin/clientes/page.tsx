@@ -15,13 +15,14 @@ function getInitials(displayName: string | null | undefined) {
 type AdminClientesPageProps = {
   searchParams: Promise<{
     assignment?: string;
+    onboarding?: string;
   }>;
 };
 
 export default async function AdminClientesPage({
   searchParams,
 }: AdminClientesPageProps) {
-  const { assignment } = await searchParams;
+  const { assignment, onboarding } = await searchParams;
   const assignments = await listClientsAssignedToCurrentAdmin();
   const clients = assignments?.flatMap((assignment) => assignment.clients ? [assignment.clients] : []) ?? [];
 
@@ -32,7 +33,11 @@ export default async function AdminClientesPage({
         eyebrow="Admin"
         title="Clientes"
       />
-      {assignment === "ended" ? (
+      {onboarding === "invited" ? (
+        <Alert live="polite" title="Convite enviado" variant="success">
+          A conta inicial da cliente foi provisionada e o convite de ativação foi enviado.
+        </Alert>
+      ) : assignment === "ended" ? (
         <Alert live="polite" title="Atribuição encerrada" variant="success">
           O vínculo atual foi encerrado e o histórico do assignment foi
           preservado.
@@ -49,6 +54,11 @@ export default async function AdminClientesPage({
       ) : null}
 
       <Section
+        action={
+          <Link className={styles.actionLink} href="/admin/clientes/nova">
+            Convidar cliente
+          </Link>
+        }
         description="A lista respeita as atribuições ativas e as permissões de acesso vigentes."
         title="Clientes atribuídos"
       >

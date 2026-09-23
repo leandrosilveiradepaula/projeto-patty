@@ -24,11 +24,15 @@ O link leva a cliente para a interface do aplicativo onde ela respondera as perg
 
 Nao existe cadastro publico/autonomo. A cliente nao inicia o proprio cadastro informando um email qualquer; o primeiro acesso nasce de uma acao explicita da Patty para o email que ela ja possui.
 
-### PENDENCIA TECNICA/PRODUTO
+### DECISAO TECNICA/PRODUTO
 
-Ainda precisa ser fechado como o primeiro acesso cria/ativa a credencial de login da cliente, incluindo quando a senha e definida, expiracao/reenvio do link, recuperacao de acesso e tratamento do encerramento da conta.
+No primeiro acesso do MVP, o link enviado pela Patty funciona como convite de ativacao, nao como metodo normal de login. O convite administrativo cria a identidade Auth e o backend provisiona `profile`, role `client`, `client` e assignment ativo da Patty. Se o provisionamento relacional falhar apos a criacao da identidade Auth, a aplicacao executa compensacao para remover o estado parcial e nao considera o acesso configurado.
 
-O metodo principal de login apos a ativacao continua sendo email + senha, conforme decisao anterior.
+Ao abrir um convite valido, a cliente entra em uma sessao de ativacao e deve criar a propria senha antes de seguir para a area de Anamnese. A Patty nao define, recebe nem armazena senha provisoria. Depois da ativacao, o metodo normal de acesso permanece email + senha em `/login`.
+
+Para SSR, o template de email de convite do Supabase deve apontar para `/auth/confirm` usando `TokenHash` e tipo `invite`; a rota troca o token por sessao e redireciona para `/ativar-conta`. A configuracao do template e Site URL/redirect allowlist no Supabase SaaS e gate de deploy, nao regra profissional.
+
+Expiracao/reenvio do convite, recuperacao de acesso e encerramento da conta continuam pendentes.
 
 ## 2026-09-22 - Limpeza de temporarios expirados de upload privado
 

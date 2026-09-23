@@ -50,6 +50,9 @@ jobs:
       - name: Assignment tests
         run: npm run test:assignments
 
+      - name: Onboarding tests
+        run: npm run test:onboarding
+
       - name: AI contract tests
         run: npm run test:ai
 
