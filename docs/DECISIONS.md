@@ -1,5 +1,22 @@
 # Decisoes
 
+## 2026-09-23 - Fundacao de persistencia do rascunho da Anamnese
+
+### DECISAO TECNICA/PRODUTO
+
+A cliente podera manter no maximo um rascunho ativo por versao publicada da Anamnese. O rascunho pertence exclusivamente ao proprio `client_id` autenticado e pode permanecer incompleto.
+
+A escrita de rascunho deve usar privilegios minimos:
+- a cliente pode criar a propria submission apenas com `client_id` e `form_version_id`;
+- a cliente nao pode definir `submitted_at` na criacao;
+- respostas podem ser inseridas no proprio rascunho e somente `answer_value` pode ser atualizado;
+- a cliente nao pode trocar `submission_id`, `form_version_id` ou `question_id` de uma resposta existente;
+- RLS continua impedindo leitura ou escrita em rascunhos de outra cliente.
+
+A submissao final continua fora desta fundacao. Embora todos os campos sejam obrigatorios para o envio, as regras de perguntas condicionais/aplicabilidade ainda nao estao fechadas; portanto, `submitted_at` nao recebe permissao de escrita da cliente nesta etapa.
+
+A migration `20260923113230_anamnesis_draft_write_foundation.sql` foi preparada e validada por dry-run transacional no Supabase SaaS, mas ainda nao esta aplicada.
+
 ## 2026-09-23 - Obrigatoriedade, rascunho e correcao da Anamnese
 
 ### REGRA CONFIRMADA PELA PATTY

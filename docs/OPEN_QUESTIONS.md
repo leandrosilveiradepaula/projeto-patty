@@ -298,9 +298,13 @@ Quais regras de comportamento ainda precisam ser formalizadas alem do principio 
 
 Quem pode criar ou alterar o Cadastro Atual e por qual fluxo controlado?
 
+### PARCIALMENTE RESOLVIDO
+
+O salvamento de rascunho e as permissoes minimas de escrita ja possuem fundacao tecnica preparada: um rascunho ativo por cliente/versao publicada e escrita somente da propria submission/respostas enquanto nao enviada.
+
 ### QUESTAO ABERTA
 
-Como sera o preenchimento, salvamento de rascunho e submissao da Anamnese pela cliente, incluindo as permissoes de escrita correspondentes?
+Como sera a submissao final da Anamnese considerando perguntas condicionais/aplicabilidade ainda nao definidas, e qual sera a UX definitiva de preenchimento/autosave?
 
 ### QUESTAO ABERTA
 
