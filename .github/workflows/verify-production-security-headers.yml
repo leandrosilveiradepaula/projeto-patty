@@ -20,7 +20,7 @@ jobs:
           E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
         shell: bash
         run: |
-          set -euo pipefail
+          set -u
           test -n "$E2E_BASE_URL" || { echo "Missing E2E_BASE_URL"; exit 1; }
 
           headers="$(mktemp)"
@@ -30,7 +30,7 @@ jobs:
             "$E2E_BASE_URL/login"
 
           normalize() {
-            tr -d '\r' < "$headers" | awk 'BEGIN{IGNORECASE=1} {print}'
+            tr -d '\r' < "$headers"
           }
 
           csp="$(normalize | awk -F': ' 'tolower($1)=="content-security-policy"{print $2}' | tail -1)"
@@ -39,19 +39,40 @@ jobs:
           nosniff="$(normalize | awk -F': ' 'tolower($1)=="x-content-type-options"{print $2}' | tail -1)"
           frame="$(normalize | awk -F': ' 'tolower($1)=="x-frame-options"{print $2}' | tail -1)"
 
-          [[ "$csp" == *"base-uri 'self'"* ]]
-          [[ "$csp" == *"frame-ancestors 'none'"* ]]
-          [[ "$csp" == *"form-action 'self'"* ]]
-          [[ "$permissions" == *"camera=()"* ]]
-          [[ "$permissions" == *"microphone=()"* ]]
-          [[ "$permissions" == *"geolocation=()"* ]]
-          [[ "$permissions" == *"browsing-topics=()"* ]]
-          test "$referrer" = "no-referrer"
-          test "$nosniff" = "nosniff"
-          test "$frame" = "DENY"
+          failures=0
+          check_contains() {
+            label="$1"
+            value="$2"
+            expected="$3"
+            if [[ "$value" == *"$expected"* ]]; then
+              echo "$label: PASS"
+            else
+              echo "$label: FAIL"
+              failures=$((failures + 1))
+            fi
+          }
 
-          echo "Production CSP baseline: PASS"
-          echo "Production Permissions-Policy: PASS"
-          echo "Production Referrer-Policy: PASS"
-          echo "Production X-Content-Type-Options: PASS"
-          echo "Production X-Frame-Options: PASS"
+          check_exact() {
+            label="$1"
+            value="$2"
+            expected="$3"
+            if [ "$value" = "$expected" ]; then
+              echo "$label: PASS"
+            else
+              echo "$label: FAIL"
+              failures=$((failures + 1))
+            fi
+          }
+
+          check_contains "CSP base-uri" "$csp" "base-uri 'self'"
+          check_contains "CSP frame-ancestors" "$csp" "frame-ancestors 'none'"
+          check_contains "CSP form-action" "$csp" "form-action 'self'"
+          check_contains "Permissions camera" "$permissions" "camera=()"
+          check_contains "Permissions microphone" "$permissions" "microphone=()"
+          check_contains "Permissions geolocation" "$permissions" "geolocation=()"
+          check_contains "Permissions browsing-topics" "$permissions" "browsing-topics=()"
+          check_exact "Referrer-Policy" "$referrer" "no-referrer"
+          check_exact "X-Content-Type-Options" "$nosniff" "nosniff"
+          check_exact "X-Frame-Options" "$frame" "DENY"
+
+          exit "$failures"
