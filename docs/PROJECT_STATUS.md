@@ -75,7 +75,7 @@ Nao interpretar 404 ou ausencia de headers no deployment antigo como regressao d
 | RBAC / RLS / assignments | SIM | SIM | Smokes documentados | Fundacao e fluxos administrativos principais operacionais | Novos papeis ficam fora do MVP; assignment continua regra geral para dados client-scoped |
 | Cadastro Atual | SIM como entidade separada | SIM | Fundacao testada | Backend existente | Fluxo final de edicao cadastral pela cliente/Patty ainda aberto |
 | Anamnese versionada | SIM | SIM | Fundacao testada | Backend existente | Questionario final, tipos de input, condicionais e aplicabilidade |
-| Rascunho da Anamnese | SIM | PARCIAL | Smokes anteriores + CI; novo smoke ainda pendente | Persistencia aplicada; `20260923191554` aplicada no SaaS | Repetir smoke E2E do rascunho; depois continuar inicio automatico, tipos, autosave e submissao |
+| Rascunho da Anamnese | SIM | PARCIAL | Smoke transacional pos-apply PASS; CI e smokes anteriores existentes | Persistencia aplicada; `20260923191554` aplicada e validada no banco | E2E de UI depende de deployment Vercel atualizado; depois continuar inicio automatico, tipos, autosave e submissao |
 | Obrigatoriedade da Anamnese | SIM | Regra refletida na fundacao | N/A | Todos os campos aplicaveis sao obrigatorios no envio final | Formalizar aplicabilidade de perguntas condicionais |
 | Correcao pos-envio da Anamnese | SIM | SIM | Smoke administrativo documentado | `anamnesis_answer_corrections` aplicada no SaaS | Workflow administrativo completo alem de notas/correcoes |
 | Arquivos privados | SIM | PARCIAL/AVANCADO | Smokes cliente/admin + auditoria estatica | Acesso da Patty sem assignment confirmado em RLS/Storage/rotas, com MFA AAL2 | Politica de retencao/hard delete |
@@ -100,7 +100,7 @@ Nesta rodada, o workflow versionado confirmou no historico remoto:
 - `20260923150743_optimize_anamnesis_correction_rls.sql`;
 - `20260923191554_fix_anamnesis_draft_delete_trigger.sql`.
 
-O apply de `20260923191554` terminou com sucesso e o `migration list` pos-apply mostrou o mesmo timestamp local/remoto. O smoke E2E especifico do rascunho ainda precisa ser repetido.
+O apply de `20260923191554` terminou com sucesso e o `migration list` pos-apply mostrou o mesmo timestamp local/remoto. Em seguida, um smoke transacional com dados sinteticos e `ROLLBACK` confirmou: draft nao submetido pode ser excluido; submission enviada continua bloqueada com SQLSTATE `55000`; cliente A nao consegue ler submission da cliente B. O E2E de UI ainda depende de um deployment Vercel atualizado para validar o fluxo publicado.
 
 ## Regras profissionais que nao devem ser reabertas
 
@@ -186,9 +186,9 @@ Nesta reconciliacao de 2026-09-23:
 
 Ordem operacional sugerida, sujeita a revalidacao do HEAD:
 
-1. repetir o smoke E2E do rascunho apos a migration `20260923191554`;
-2. publicar um `master` atualizado quando a Vercel permitir e validar os gates de runtime;
-3. concluir aplicabilidade/condicionais e questionario final da Anamnese;
+1. publicar um `master` atualizado quando a Vercel permitir e validar headers e E2E de runtime, incluindo o rascunho;
+2. concluir aplicabilidade/condicionais e questionario final da Anamnese;
+3. concluir fluxo de submissao final da Anamnese;
 4. concluir fluxo de submissao final da Anamnese;
 5. resolver infraestrutura do email real de convite;
 6. continuar integracao UI <-> backend real;
