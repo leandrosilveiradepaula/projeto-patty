@@ -21,6 +21,7 @@ function decodeBase32(value) {
     while (bitCount >= 8) {
       bitCount -= 8;
       bytes.push((bits >> bitCount) & 0xff);
+      bits &= bitCount === 0 ? 0 : (1 << bitCount) - 1;
     }
   }
 
