@@ -167,6 +167,46 @@ test("Next.js keeps baseline security response headers", async () => {
   }
 });
 
+test("Supabase production migration workflow stays manual and non-destructive", async () => {
+  const content = await readFile(
+    path.join(ROOT, ".github", "workflows", "deploy-supabase-migrations.yml"),
+    "utf8",
+  );
+
+  for (const required of [
+    "workflow_dispatch:",
+    "mode:",
+    "dry-run",
+    "confirmation:",
+    "SUPABASE_ACCESS_TOKEN",
+    "SUPABASE_DB_PASSWORD",
+    'github.ref == \'refs/heads/master\'',
+    "npx supabase migration list",
+    "npx supabase db push --dry-run",
+    "inputs.mode == 'apply'",
+    "inputs.confirmation == 'APPLY'",
+    "npx supabase db push",
+  ]) {
+    assert.equal(
+      content.includes(required),
+      true,
+      "migration deploy workflow must keep " + required,
+    );
+  }
+
+  for (const forbidden of [
+    "supabase db reset",
+    "--include-seed",
+    "schedule:",
+  ]) {
+    assert.equal(
+      content.includes(forbidden),
+      false,
+      "migration deploy workflow must not contain " + forbidden,
+    );
+  }
+});
+
 test("database migrations avoid unsafe authorization shortcuts", async () => {
   const migrationDirectory = path.join(ROOT, "supabase", "migrations");
   const migrationFiles = (await readdir(migrationDirectory))
