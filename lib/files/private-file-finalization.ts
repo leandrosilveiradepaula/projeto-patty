@@ -47,6 +47,7 @@ async function rejectUploadSession(input: {
 }
 
 export async function finalizeClientFileUploadSession(input: {
+  clientVisibleOnAccept: boolean;
   requesterProfileId: string;
   sessionId: string;
 }): Promise<ClientFileFinalizationResult> {
@@ -160,12 +161,14 @@ export async function finalizeClientFileUploadSession(input: {
     throw moveError;
   }
 
-  const visibleAt = new Date().toISOString();
+  const visibleAt = input.clientVisibleOnAccept ? new Date().toISOString() : null;
   const { error: insertError } = await admin.from("client_files").insert({
     bucket_id: PRIVATE_FILE_BUCKET,
     byte_size: bytes.byteLength,
     client_id: session.client_id,
-    client_visibility_set_by_profile_id: input.requesterProfileId,
+    client_visibility_set_by_profile_id: input.clientVisibleOnAccept
+      ? input.requesterProfileId
+      : null,
     client_visible_at: visibleAt,
     file_kind: session.file_kind,
     id: fileId,
