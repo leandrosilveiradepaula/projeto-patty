@@ -55,13 +55,13 @@ Um novo agente deve resolver o HEAD atual dessa branch antes de trabalhar. Nao a
 | Rascunho da Anamnese | SIM | PARCIAL | Smoke de persistencia documentado | Migration aplicada no SaaS; UI retoma rascunho existente e salva respostas `text` | Criacao/inicio automatico da submission, demais tipos de input, autosave definitivo e submissao final |
 | Obrigatoriedade da Anamnese | SIM | Regra refletida na fundacao | N/A | Todos os campos aplicaveis sao obrigatorios apenas no envio final | Formalizar aplicabilidade de perguntas condicionais |
 | Correcao pos-envio da Anamnese | SIM | SIM | Smoke administrativo documentado | `anamnesis_answer_corrections` aplicada no SaaS | Workflow administrativo completo de revisao alem de notas/correcoes |
-| Arquivos privados | SIM | PARCIAL/AVANCADO | Ha smokes e decisoes de upload/download | Storage privado e varias migrations/rotas operacionais documentadas | Politica de retencao/hard delete; confirmar estado final da excecao de acesso da Patty sem assignment em todas as RLS/rotas |
+| Arquivos privados | SIM | PARCIAL/AVANCADO | Smokes da cliente e administrativo documentados; auditoria estatica concluida | Acesso da Patty sem assignment confirmado em `client_files`, `storage.objects` e rotas administrativas, com MFA AAL2 preservado | Politica de retencao/hard delete |
 | Avaliacoes e medidas | Fundacao definida | SIM na fundacao | Parcial | Backend existente | Catalogo profissional, unidades, obrigatoriedade e fluxo de correcao |
 | Protocolos versionados | SIM | Fundacao existente | Parcial | Backend existente | Completar fluxos reais e regras profissionais ainda abertas |
 | Conteudo educacional / exercicios | SIM como dominios separados | Fundacao existente | Parcial | Backend existente | Migracao gradual do Drive, taxonomias e regras finais de progresso/liberacao |
 | Metodo da Patty | PARCIALMENTE DEFINIDO | Apenas regras matematicas confirmadas podem ser automatizadas | N/A | Regras confirmadas documentadas | Fases 5/6, etapas posteriores ao Cutting 2, Bulking, Consolidacao, hidratacao, suplementacao, treino, alertas e criterios finais |
 | IA assistiva | SIM como principio e arquitetura | PARCIAL | Validador deterministico de output documentado | Fundacao interna existente | Integracao real com provider, UX de revisao e demais boundaries operacionais |
-| Failure handling de IA | Contrato tecnico definido | PENDENTE | Static gates anteriores documentados em tarefas relacionadas | NAO considerar migration final aplicada | Criar/aplicar migration de `failure_stage`, `failure_code`, `failure_message` e failure response conforme contrato mais recente |
+| Failure handling de IA | Contrato tecnico definido | Migration `20260922160058_ai_execution_failure_handling.sql` existe no repositorio | Static gates anteriores documentados; SQL atual conferido nesta rodada | NAO considerar aplicada no SaaS sem evidencia explicita | Confirmar historico remoto e, se pendente, aplicar a migration existente pelo workflow versionado; nao recriar a migration |
 | n8n | SIM: nao usar inicialmente | N/A | N/A | Nao usado | Introduzir somente com caso concreto |
 | LangGraph | SIM: nao usar inicialmente | N/A | N/A | Nao usado | Introduzir somente se fluxo de IA realmente justificar |
 | VPS Hostinger | SIM: nao usar inicialmente | N/A | N/A | Nao usada | Introduzir somente por necessidade tecnica concreta |
@@ -110,8 +110,9 @@ Estado resumido:
    - nao criar fallback inseguro.
 
 3. **Failure handling de IA**
-   - migration final permanece pendente;
-   - nao assumir aplicada ate verificacao explicita de migrations local/remoto e SaaS.
+   - a migration `20260922160058_ai_execution_failure_handling.sql` ja existe na branch de referencia e contem o contrato atual, incluindo `persistence_failed` e `received_at timestamptz NOT NULL`;
+   - nao assumir que ela foi aplicada no SaaS ate verificacao explicita do historico remoto;
+   - se estiver pendente, aplicar o arquivo existente pelo workflow versionado; nao criar migration duplicada.
 
 ## Pendencias profissionais principais
 
@@ -139,19 +140,23 @@ Nesta rodada documental de 2026-09-23:
 - `PRODUCT.md` foi alinhado ao onboarding por convite, ativacao e login por email + senha;
 - `MVP.md` foi reconciliado para separar escopo do MVP de estado operacional.
 - `RBAC_RLS.md` foi reconciliado com MFA aplicado, escrita restrita de rascunho e separacao entre regra de submissao e funcionalidade ainda nao implementada.
+- a auditoria estatica confirmou a excecao de acesso da Patty a arquivos privados sem assignment em RLS/Storage e nas rotas administrativas atuais.
+- `MVP_READINESS.md` foi reconciliado para separar migration de failure handling existente no repositorio de aplicacao ainda nao comprovada no SaaS.
 
 ## Tarefa bloqueada conhecida
 
 ### Failure handling de IA
 
-O contrato tecnico esta documentado, mas a migration final nao deve ser considerada criada/aplicada apenas com base em conversa.
+O contrato tecnico esta documentado e a migration `20260922160058_ai_execution_failure_handling.sql` existe na branch de referencia. O estado de aplicacao no SaaS ainda nao esta comprovado pela documentacao atual.
 
 Antes de retomar:
 - verificar HEAD/branch;
-- verificar migrations locais/remotas;
-- confirmar schema atual de `ai_executions` e entidades relacionadas;
+- comparar migrations locais/remotas;
+- confirmar se `20260922160058` consta no historico remoto;
+- se nao constar, usar o workflow versionado de migrations com dry-run antes do apply;
+- confirmar schema atual de `ai_executions` e entidades relacionadas apos o deploy;
 - preservar triggers, RLS, grants e imutabilidade;
-- nao alterar migrations ja aplicadas.
+- nao recriar nem alterar migration ja aplicada.
 
 ## Proximas frentes recomendadas
 
