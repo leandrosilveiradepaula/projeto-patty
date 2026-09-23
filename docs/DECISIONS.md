@@ -1,5 +1,40 @@
 # Decisoes
 
+## 2026-09-23 - Controle de previews Vercel e divergencia temporaria de producao
+
+### FATO OPERACIONAL CONFIRMADO
+
+O ultimo merge de `master` com status Vercel `success` e `b466accc8a5f` (PR #88, 2026-09-23 13:00 UTC).
+
+Todos os merges posteriores consultados ate o estado atual do repositorio receberam status Vercel `failure` com destino indicando `upgradeToPro=build-rate-limit`.
+
+Consequentemente, `master` esta a frente do deployment de producao usado por `E2E_BASE_URL`. Codigo mergeado depois de `b466accc8a5f` deve ser tratado como IMPLEMENTADO/CI VALIDADO, mas nao como PUBLICADO/VALIDADO EM PRODUCAO ate novo deploy bem-sucedido.
+
+### EVIDENCIA DE RUNTIME
+
+Requests GET reais para `/login` no ambiente de producao retornaram HTTP 200 pela Vercel, mas sem os headers adicionados no PR #94, que foi mergeado depois do ultimo deploy de `master` bem-sucedido.
+
+O smoke administrativo de correcoes da Anamnese recebeu HTTP 404 em `/admin/anamneses/[id]/correcoes`. Essa rota foi mergeada no PR #106, tambem posterior ao ultimo deploy de producao bem-sucedido.
+
+Esses resultados confirmam defasagem do deployment e nao devem ser interpretados como regressao funcional do codigo atual.
+
+### DECISAO TECNICA APLICADA
+
+O `vercel.json` passa a desabilitar deployments de preview para branches `codex/**`, preservando o cron existente e deixando `master` elegivel para producao.
+
+Objetivo: evitar que branches tecnicas consumam a cota de builds antes do deployment de `master`.
+
+Essa mudanca reduz consumo futuro, mas nao publica retroativamente o `master` enquanto o limite da conta continuar impedindo novos builds.
+
+### GATE OPERACIONAL
+
+Quando a Vercel voltar a aceitar build de producao:
+1. confirmar o SHA efetivamente publicado;
+2. validar headers HTTP por GET;
+3. repetir smoke administrativo de correcoes da Anamnese;
+4. depois de aplicar a migration pendente do trigger de draft, repetir smoke da cliente para retomada de rascunho;
+5. somente entao marcar esses fluxos como validados em producao.
+
 ## 2026-09-23 - Correcao do trigger de exclusao de rascunho da Anamnese
 
 ### FATO TECNICO IDENTIFICADO
