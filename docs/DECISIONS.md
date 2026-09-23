@@ -717,7 +717,22 @@ Revisao e edicao humana devem ser persistidas separadamente em `ai_draft_version
 
 O contrato conceitual da v1 e um objeto com `findings`, que pode ser vazio. Cada finding possui `type` (`possible_contradiction` ou `clarification_needed`), `source_answer_ids`, `explanation` interna com incerteza explicita e `suggested_follow_up_question` opcional e interna.
 
-Propriedades extras devem ser rejeitadas na validacao futura. IDs devem pertencer a submission analisada e as sources da execution. O contrato nao e JSON Schema implementado nesta etapa e nao inclui score, diagnostico ou conclusao clinica.
+Propriedades extras devem ser rejeitadas. IDs devem pertencer a submission analisada e as sources da execution. O contrato nao inclui score, diagnostico ou conclusao clinica.
+
+### FATO DE IMPLEMENTACAO
+
+O primeiro validador deterministico deste contrato esta implementado em `lib/ai/anamnesis-review-output.ts` e nao depende de provider/modelo. Ele:
+
+- aceita somente o objeto top-level `{ findings }`;
+- rejeita propriedades extras no top-level e nos findings;
+- aceita somente `possible_contradiction` e `clarification_needed`;
+- exige UUIDs validos, distintos e presentes na allowlist de answers efetivamente autorizadas para a execution;
+- exige ao menos duas sources para `possible_contradiction` e ao menos uma para `clarification_needed`;
+- exige `explanation` nao vazia e, quando presente, `suggested_follow_up_question` nao vazia;
+- aceita `findings: []`;
+- nao cria score, diagnostico, conclusao clinica, pendencia, hipotese ou publicacao.
+
+A validacao estrutural nao tenta inferir semanticamente se o texto da `explanation` expressa incerteza suficiente. Essa qualidade permanece responsabilidade do prompt, da revisao humana e de testes futuros baseados em contrato; nao sera implementada por heuristica lexical fragil.
 
 ## 2026-09-19 - Bibliotecas e liberacao explicita de conteudo
 
