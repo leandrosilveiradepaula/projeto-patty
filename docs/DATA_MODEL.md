@@ -241,7 +241,11 @@ Consequencias:
 - alterar o cadastro atual da cliente nao modifica uma anamnese ja submetida;
 - alterar ou corrigir uma anamnese historica nao modifica silenciosamente o cadastro atual;
 - nao existe sincronizacao bidirecional automatica entre cadastro atual e historico de anamnese;
-- dados historicos nao sao sobrescritos.
+- dados historicos nao sao sobrescritos;
+- um rascunho pode estar incompleto e ser retomado posteriormente;
+- a submissao final exige todos os campos da Anamnese preenchidos;
+- depois da submissao, a cliente nao altera as respostas;
+- correcao posterior e exclusiva da Patty e deve ser modelada sem sobrescrever a resposta original, preservando ator e timestamp da correcao.
 
 ### DECISAO CONFIRMADA
 

@@ -24,6 +24,18 @@ Registrar auditoria de acoes criticas.
 
 Nao usar dados reais no desenvolvimento inicial.
 
+## Anamnese
+
+### DECISAO CONFIRMADA
+
+Todos os campos da Anamnese sao obrigatorios para o envio final.
+
+A cliente pode interromper o preenchimento antes do envio final e continuar depois a partir de um rascunho salvo. Um rascunho incompleto nao e uma Anamnese submetida.
+
+Depois do envio final, a cliente nao pode alterar as respostas. Somente a Patty pode registrar uma correcao posterior.
+
+A correcao nao apaga nem sobrescreve a resposta originalmente enviada. Devem ser preservados separadamente o valor original, a correcao da Patty, o ator e o momento da correcao.
+
 ## Fluxo futuro de IA
 
 ### DECISAO CONFIRMADA

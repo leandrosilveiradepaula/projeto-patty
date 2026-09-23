@@ -104,7 +104,7 @@ A aplicacao preserva:
 - respostas originais;
 - notas internas separadas.
 
-Nao existe ainda fluxo final para a cliente preencher/salvar rascunho/submeter porque obrigatoriedade, campos condicionais, ordem final e demais regras continuam abertas.
+A regra de preenchimento agora esta parcialmente fechada: todos os campos sao obrigatorios para o envio final; rascunho incompleto pode ser salvo e retomado; depois do envio, a cliente nao edita mais e somente a Patty pode registrar correcao historica sem sobrescrever a resposta original. Ainda faltam o mapa final de perguntas, tipos de input, condicionais e ordem/agrupamento antes de implementar o formulario definitivo.
 
 ### Arquivos privados
 
