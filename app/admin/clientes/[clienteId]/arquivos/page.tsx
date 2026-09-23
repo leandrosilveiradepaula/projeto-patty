@@ -1,12 +1,12 @@
+import { AdminPrivateFileReleaseForm } from "@/components/admin/AdminPrivateFileReleaseForm";
+import { AdminPrivateFileUploadForm } from "@/components/admin/AdminPrivateFileUploadForm";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
-import {
-  getAccessibleClient,
-  listAccessibleClientFiles,
-} from "@/lib/supabase/data-access";
+import { getClientForPrivateFileAdministration } from "@/lib/files/private-file-admin";
+import { listAccessibleClientFiles } from "@/lib/supabase/data-access";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import styles from "./page.module.css";
@@ -53,7 +53,7 @@ export default async function AdminClientFilesPage({
 }: AdminClientFilesPageProps) {
   const { clienteId } = await params;
   const [client, files] = await Promise.all([
-    getAccessibleClient(clienteId),
+    getClientForPrivateFileAdministration(clienteId),
     listAccessibleClientFiles(clienteId),
   ]);
 
@@ -67,14 +67,21 @@ export default async function AdminClientFilesPage({
     <>
       <PageHeader
         actions={
-          <Link className={styles.backLink} href={`/admin/clientes/${client.id}`}>
-            Voltar à cliente
+          <Link className={styles.backLink} href="/admin/arquivos">
+            Voltar a arquivos
           </Link>
         }
-        description="Fotos, exames e documentos privados acessíveis conforme a atribuição ativa."
+        description="Fotos, exames e documentos privados sob administração da Patty, inclusive após encerramento de assignment."
         eyebrow="Admin"
         title={displayName ? `Arquivos de ${displayName}` : "Arquivos privados"}
       />
+      <Section
+        description="O upload administrativo usa autorização temporária para um path privado gerado pelo servidor. O arquivo fica oculto para a cliente até liberação explícita."
+        title="Enviar arquivo em nome da cliente"
+      >
+        <AdminPrivateFileUploadForm clientId={client.id} />
+      </Section>
+
       <Section
         action={<Badge variant="neutral">{files.length} arquivo(s)</Badge>}
         description="Metadados reais do bucket privado. O download é autorizado no momento da solicitação e usa URL assinada curta, nunca persistida."
@@ -99,9 +106,21 @@ export default async function AdminClientFilesPage({
                         {fileKindLabels[file.file_kind] ?? file.file_kind}
                       </p>
                     </div>
-                    <Badge variant="neutral">
-                      {fileKindLabels[file.file_kind] ?? file.file_kind}
-                    </Badge>
+                    <div className={styles.badges}>
+                      <Badge variant="neutral">
+                        {fileKindLabels[file.file_kind] ?? file.file_kind}
+                      </Badge>
+                      <Badge variant="neutral">
+                        {file.uploaded_by_profile_id === client.profile_id
+                          ? "Enviado pela cliente"
+                          : "Upload administrativo"}
+                      </Badge>
+                      <Badge variant={file.client_visible_at ? "success" : "neutral"}>
+                        {file.client_visible_at
+                          ? "Visível para cliente"
+                          : "Oculto para cliente"}
+                      </Badge>
+                    </div>
                   </div>
                   <dl className={styles.fileMeta}>
                     <div>
@@ -117,9 +136,17 @@ export default async function AdminClientFilesPage({
                       <dd>{formatCreatedAt(file.created_at)}</dd>
                     </div>
                   </dl>
-                  <Link className={styles.downloadLink} href={`/admin/arquivos/${file.id}`}>
-                    Baixar arquivo
-                  </Link>
+                  <div className={styles.fileActions}>
+                    <Link className={styles.downloadLink} href={`/admin/arquivos/${file.id}`}>
+                      Baixar arquivo
+                    </Link>
+                    {!file.client_visible_at ? (
+                      <AdminPrivateFileReleaseForm
+                        clientId={client.id}
+                        fileId={file.id}
+                      />
+                    ) : null}
+                  </div>
                 </Card>
               </li>
             ))}
