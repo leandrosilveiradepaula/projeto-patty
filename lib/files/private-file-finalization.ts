@@ -107,6 +107,10 @@ export async function finalizeClientFileUploadSession(input: {
     .download(session.temp_object_path);
 
   if (downloadError || !blob) {
+    await rejectUploadSession({
+      sessionId: session.id,
+      tempObjectPath: session.temp_object_path,
+    });
     throw downloadError ?? new Error("Temporary upload object is unavailable");
   }
 
@@ -149,6 +153,10 @@ export async function finalizeClientFileUploadSession(input: {
     .move(session.temp_object_path, finalObjectPath);
 
   if (moveError) {
+    await rejectUploadSession({
+      sessionId: session.id,
+      tempObjectPath: session.temp_object_path,
+    });
     throw moveError;
   }
 
@@ -179,18 +187,25 @@ export async function finalizeClientFileUploadSession(input: {
         .update({ status: "rejected" })
         .eq("id", session.id)
         .eq("status", "validating");
+    } else {
+      await rejectUploadSession({
+        sessionId: session.id,
+        tempObjectPath: session.temp_object_path,
+      });
     }
 
     throw insertError;
   }
 
-  const { error: acceptError } = await admin
+  const { data: acceptedSession, error: acceptError } = await admin
     .from("client_file_upload_sessions")
     .update({ status: "accepted" })
     .eq("id", session.id)
-    .eq("status", "validating");
+    .eq("status", "validating")
+    .select("id")
+    .maybeSingle();
 
-  if (acceptError) {
+  if (acceptError || !acceptedSession) {
     await admin.from("client_files").delete().eq("id", fileId);
 
     const { error: rollbackMoveError } = await admin.storage
@@ -204,9 +219,14 @@ export async function finalizeClientFileUploadSession(input: {
         .update({ status: "rejected" })
         .eq("id", session.id)
         .eq("status", "validating");
+    } else {
+      await rejectUploadSession({
+        sessionId: session.id,
+        tempObjectPath: session.temp_object_path,
+      });
     }
 
-    throw acceptError;
+    throw acceptError ?? new Error("Upload session acceptance failed");
   }
 
   return { fileId, status: "accepted" };
