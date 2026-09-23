@@ -1,6 +1,8 @@
+import { endClientAssignmentAction } from "@/app/admin/clientes/[clienteId]/actions";
 import { AdminClientRegistrationDetails } from "@/components/admin/AdminClientRegistrationDetails";
 import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
 import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Section } from "@/components/ui/Section";
@@ -107,6 +109,27 @@ export default async function AdminClienteDetailPage({
           </span>
         }
       />
+      <Section
+        description="Encerrar a atribuição remove o acesso administrativo normal aos dados client-scoped desta cliente e preserva o histórico do assignment. Arquivos privados continuam seguindo a exceção específica já documentada."
+        title="Atribuição"
+      >
+        <div className={styles.assignmentPanel}>
+          <div>
+            <p className={styles.assignmentTitle}>Atribuição ativa</p>
+            <p className={styles.assignmentDescription}>
+              Esta operação não apaga a cliente nem seus dados históricos. Ela
+              apenas encerra o vínculo atual da Patty com os dados
+              client-scoped protegidos por assignment.
+            </p>
+          </div>
+          <form action={endClientAssignmentAction.bind(null, client.id)}>
+            <Button type="submit" variant="danger">
+              Encerrar atribuição
+            </Button>
+          </form>
+        </div>
+      </Section>
+
       <Section
         description="Informações atuais de contato, separadas do acesso à conta e da Anamnese."
         title="Cadastro atual"
