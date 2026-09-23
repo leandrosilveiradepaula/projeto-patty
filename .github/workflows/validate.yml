@@ -47,6 +47,9 @@ jobs:
       - name: Professional follow-up tests
         run: npm run test:follow-up
 
+      - name: AI contract tests
+        run: npm run test:ai
+
       - name: Boundary validation tests
         run: npm run test:validation
 
