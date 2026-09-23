@@ -91,8 +91,8 @@
 }
 
 .historyTitle {
-  font-size: var(--text-title-small-size);
-  line-height: var(--text-title-small-line-height);
+  font-size: var(--text-title-medium-size);
+  line-height: var(--text-title-medium-line-height);
 }
 
 .correctionList {
