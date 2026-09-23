@@ -167,7 +167,14 @@ test("admin sintetico acessa correcoes e JSON invalido nao cria historico", asyn
       totpSecret: fixture.totpSecret,
     });
 
-    await page.goto(`/admin/anamneses/${fixture.submissionId}/correcoes`);
+    const correctionsResponse = await page.goto(
+      `/admin/anamneses/${fixture.submissionId}/correcoes`,
+    );
+    console.log(
+      "corrections-route-status",
+      correctionsResponse?.status() ?? null,
+      new URL(page.url()).pathname,
+    );
 
     await expect(
       page.getByRole("heading", { name: "Correções da Anamnese" }),
