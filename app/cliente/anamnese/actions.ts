@@ -15,6 +15,11 @@ export async function startClientAnamnesisDraft() {
 
   try {
     const result = await startCurrentClientAnamnesisDraft();
+
+    if (!result.draft) {
+      throw new AnamnesisDraftPersistenceError("draft_not_found");
+    }
+
     submissionId = result.draft.id;
   } catch (error) {
     if (
