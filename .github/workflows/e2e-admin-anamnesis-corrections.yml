@@ -7,7 +7,7 @@ permissions:
   contents: read
 
 jobs:
-  admin-anamnesis-corrections-smoke:
+  smoke:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -27,14 +27,11 @@ jobs:
         shell: bash
         env:
           E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
-          E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
-          E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
-          E2E_ADMIN_TOTP_SECRET: ${{ secrets.E2E_ADMIN_TOTP_SECRET }}
           E2E_SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.E2E_SUPABASE_SECRET_KEY }}
         run: |
           set -euo pipefail
           missing=0
-          for name in E2E_BASE_URL E2E_ADMIN_EMAIL E2E_ADMIN_PASSWORD E2E_ADMIN_TOTP_SECRET E2E_SUPABASE_SECRET_KEY; do
+          for name in E2E_BASE_URL E2E_SUPABASE_SECRET_KEY; do
             if [ -z "${!name}" ]; then
               echo "::error::Missing required secret: ${name}"
               missing=1
@@ -54,9 +51,6 @@ jobs:
       - name: Run production admin anamnesis corrections smoke
         env:
           E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
-          E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
-          E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
-          E2E_ADMIN_TOTP_SECRET: ${{ secrets.E2E_ADMIN_TOTP_SECRET }}
           E2E_SUPABASE_URL: "https://hqanoskwjvpbgavppcud.supabase.co"
           E2E_SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.E2E_SUPABASE_SECRET_KEY }}
         run: npx playwright test e2e/admin-anamnesis-corrections.spec.mjs --reporter=line
