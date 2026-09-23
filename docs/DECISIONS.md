@@ -1,5 +1,25 @@
 # Decisoes
 
+## 2026-09-23 - Enforcement de MFA administrativo em RLS
+
+### DECISAO TECNICA DE SEGURANCA
+
+A exigencia de MFA da Patty/admin nao deve existir apenas na UI ou em server actions. Um token administrativo em `aal1` tambem deve ser bloqueado pela camada de RLS/Data API e pelo Storage privado.
+
+A migration `20260923113835_admin_mfa_rls_enforcement.sql` adiciona uma segunda trava, sem substituir as policies atuais de role, ownership ou assignment:
+
+- `user_roles` continua legivel pelo proprio usuario em `aal1`, pois o aplicativo precisa descobrir que a sessao pertence a um admin e encaminha-la para enrollment/challenge MFA;
+- para usuarios sem role `admin`, a nova trava e neutra e o acesso continua dependendo das policies existentes;
+- para role relacional `admin`, recursos protegidos exigem JWT com `aal = aal2`;
+- a regra e adicionada como policy `RESTRICTIVE`, portanto nao concede acesso por si so e nao amplia nenhuma policy permissiva;
+- `profiles` tambem exige AAL2 para admin; o fluxo de MFA nao depende dessa tabela;
+- `storage.objects` recebe a mesma trava restritiva;
+- a funcao auxiliar `current_user_admin_mfa_satisfied()` e `SECURITY INVOKER`, nao usa metadata editavel pelo usuario e nao e executavel por `anon`.
+
+O dry-run transacional no Supabase SaaS confirmou que admin em `aal1` ainda le o proprio `user_roles`, mas nao le clientes nem perfis protegidos; em `aal2`, o acesso normal volta sujeito as policies preexistentes; cliente em `aal1` nao e afetada.
+
+A migration foi preparada e validada com rollback e ainda nao esta aplicada no Supabase SaaS.
+
 ## 2026-09-23 - Fundacao de persistencia do rascunho da Anamnese
 
 ### DECISAO TECNICA/PRODUTO

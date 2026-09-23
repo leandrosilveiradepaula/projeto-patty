@@ -93,6 +93,18 @@ Cliente nao pode criar ou modificar `client_assignments`.
 
 Nao criar excecoes genericas.
 
+## MFA administrativo na camada de dados
+
+### DECISAO DE SEGURANCA
+
+MFA obrigatorio para `admin` deve ser aplicado tambem em RLS, nao apenas na navegacao do aplicativo.
+
+A estrategia e aditiva: policies `RESTRICTIVE` verificam o claim confiavel `aal` do JWT por meio de `auth.jwt()`. Elas nao substituem ownership, role ou assignment e nao transformam AAL2 em autorizacao suficiente por si so.
+
+`user_roles` permanece fora dessa restricao para permitir que uma sessao administrativa em `aal1` descubra o proprio role e seja encaminhada ao fluxo de MFA. Os demais recursos administrativos protegidos exigem `aal2`. Clientes em `aal1` continuam sujeitas somente as policies normais de ownership e nao passam a exigir MFA.
+
+A migration `20260923113835_admin_mfa_rls_enforcement.sql` esta preparada e validada por dry-run transacional, mas ainda nao aplicada no SaaS.
+
 ## Acesso Patty/admin
 
 ### DECISAO CONFIRMADA

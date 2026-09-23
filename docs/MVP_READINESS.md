@@ -93,7 +93,7 @@ A decisao de MFA obrigatorio para contas administrativas esta parcialmente mater
 
 A mesma guarda esta centralizada em `requireRole("admin")`, portanto cobre o layout administrativo e as server actions/rotas administrativas que ja usam essa boundary. O fluxo da cliente nao foi alterado e nao exige MFA.
 
-Ainda falta o enforcement equivalente no banco/Storage por RLS restritiva para que um token administrativo `aal1` nao possa usar diretamente a Data API fora da UI. Ate esse gate ser aplicado e testado, o requisito de MFA permanece classificado como implementado parcialmente, nao concluido fim a fim.
+O enforcement equivalente no banco/Storage foi preparado na migration `20260923113835_admin_mfa_rls_enforcement.sql`. Ela adiciona policies `RESTRICTIVE` que exigem `aal2` quando o usuario autenticado possui role relacional `admin`, preservando `user_roles` em `aal1` apenas para o roteamento ao MFA. O dry-run transacional no Supabase SaaS confirmou: admin `aal1` ve o proprio role, mas nao clientes/perfis protegidos; admin `aal2` recupera o acesso normal; cliente `aal1` nao e afetada. A migration ainda nao esta aplicada, portanto MFA fim a fim continua classificado como parcialmente concluido ate aplicacao e smoke remoto.
 
 ### Anamnese
 
