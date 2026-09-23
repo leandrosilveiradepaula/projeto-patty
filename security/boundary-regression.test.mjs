@@ -113,6 +113,38 @@ test("classified protected entrypoints contain the expected authentication bound
   }
 });
 
+test("database migrations avoid unsafe authorization shortcuts", async () => {
+  const migrationDirectory = path.join(ROOT, "supabase", "migrations");
+  const migrationFiles = (await readdir(migrationDirectory))
+    .filter((file) => file.endsWith(".sql"))
+    .sort();
+
+  const violations = [];
+
+  for (const file of migrationFiles) {
+    const content = await readFile(path.join(migrationDirectory, file), "utf8");
+    const normalized = content.toLowerCase();
+
+    if (/auth\.role\s*\(/.test(normalized)) {
+      violations.push(`${file}: auth.role()`);
+    }
+
+    if (/\b(raw_)?user_metadata\b/.test(normalized)) {
+      violations.push(`${file}: user-editable metadata in authorization/schema logic`);
+    }
+
+    if (/security\s+definer/.test(normalized)) {
+      violations.push(`${file}: SECURITY DEFINER requires explicit security review`);
+    }
+  }
+
+  assert.deepEqual(
+    violations,
+    [],
+    "Migrations must not introduce deprecated/user-editable authorization or implicit RLS bypass.",
+  );
+});
+
 test("any module that uses the Supabase administrative client is server-only", async () => {
   const roots = ["app", "lib"];
   const sourceFiles = [];
