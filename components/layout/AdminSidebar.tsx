@@ -15,6 +15,7 @@ type AdminNavigationItem = {
 const adminNavigationItems: AdminNavigationItem[] = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/clientes", label: "Clientes" },
+  { href: "/admin/arquivos", label: "Arquivos" },
   { href: "/admin/avaliacoes", label: "Avaliações" },
   { href: "/admin/protocolos", label: "Protocolos" },
   { href: "/admin/conteudos", label: "Conteúdos" },
@@ -26,8 +27,24 @@ export function isAdminNavigationItemActive(pathname: string, href: string) {
     return pathname === href;
   }
 
-  if (href === "/admin/clientes" && pathname.startsWith("/admin/anamneses/")) {
-    return true;
+  if (href === "/admin/arquivos") {
+    if (
+      pathname === href ||
+      pathname.startsWith(`${href}/`) ||
+      /^\/admin\/clientes\/[^/]+\/arquivos(?:\/|$)/.test(pathname)
+    ) {
+      return true;
+    }
+  }
+
+  if (href === "/admin/clientes") {
+    if (/^\/admin\/clientes\/[^/]+\/arquivos(?:\/|$)/.test(pathname)) {
+      return false;
+    }
+
+    if (pathname.startsWith("/admin/anamneses/")) {
+      return true;
+    }
   }
 
   return pathname === href || pathname.startsWith(`${href}/`);

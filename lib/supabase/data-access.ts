@@ -400,7 +400,7 @@ export async function listCurrentClientFiles(clientId: string) {
   const { data, error } = await supabase
     .from("client_files")
     .select(
-      "id, client_id, file_kind, original_filename, mime_type, byte_size, created_at",
+      "id, client_id, file_kind, original_filename, mime_type, byte_size, created_at, uploaded_by_profile_id, client_visible_at, client_visibility_set_by_profile_id",
     )
     .eq("client_id", clientId)
     .order("created_at", { ascending: false })
@@ -419,7 +419,7 @@ export async function listAccessibleClientFiles(clientId: string) {
   const { data, error } = await supabase
     .from("client_files")
     .select(
-      "id, client_id, file_kind, original_filename, mime_type, byte_size, created_at",
+      "id, client_id, file_kind, original_filename, mime_type, byte_size, created_at, uploaded_by_profile_id, client_visible_at, client_visibility_set_by_profile_id",
     )
     .eq("client_id", clientId)
     .order("created_at", { ascending: false })

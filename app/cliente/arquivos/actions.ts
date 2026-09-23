@@ -93,6 +93,7 @@ export async function finalizeClientFileUploadSessionAction(sessionId: string) {
   }
 
   const result = await finalizeClientFileUploadSession({
+    clientVisibleOnAccept: true,
     requesterProfileId: auth.profileId,
     sessionId,
   });
