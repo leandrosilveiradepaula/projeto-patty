@@ -1,5 +1,3 @@
-import { randomUUID } from "node:crypto";
-
 import { expect, test } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 
@@ -28,41 +26,30 @@ function createUserClient() {
   });
 }
 
-async function removeRows(table, column, value) {
-  if (!value) return;
-  const { error } = await admin.from(table).delete().eq(column, value);
-  if (error) throw error;
+async function listAdminFactors(userId) {
+  const result = await admin.auth.admin.mfa.listFactors({ userId });
+  if (result.error) throw result.error;
+  return result.data.factors ?? [];
 }
 
-async function cleanupFixture(fixture) {
-  await removeRows("anamnesis_answers", "submission_id", fixture.submissionId);
-  await removeRows("anamnesis_submissions", "id", fixture.submissionId);
-  await removeRows("anamnesis_questions", "id", fixture.questionId);
-  await removeRows("anamnesis_sections", "id", fixture.sectionId);
-  await removeRows("anamnesis_form_versions", "id", fixture.formVersionId);
-  await removeRows("anamnesis_forms", "id", fixture.formId);
-  await removeRows("client_assignments", "client_id", fixture.clientId);
-  await removeRows("clients", "id", fixture.clientId);
-  await removeRows("user_roles", "profile_id", fixture.clientProfileId);
-  await removeRows("profiles", "id", fixture.clientProfileId);
-  await removeRows("user_roles", "profile_id", fixture.adminProfileId);
-  await removeRows("profiles", "id", fixture.adminProfileId);
-
-  for (const userId of [fixture.clientProfileId, fixture.adminProfileId]) {
-    if (!userId) continue;
-    const { error } = await admin.auth.admin.deleteUser(userId);
-    if (error) throw error;
+async function clearAdminFactors(userId) {
+  for (const factor of await listAdminFactors(userId)) {
+    const deleted = await admin.auth.admin.mfa.deleteFactor({
+      id: factor.id,
+      userId,
+    });
+    if (deleted.error) throw deleted.error;
   }
 }
 
-async function enrollSyntheticAdminMfa(email, password) {
+async function enrollAdminMfa(email, password) {
   const userClient = createUserClient();
   const signedIn = await userClient.auth.signInWithPassword({ email, password });
   if (signedIn.error) throw signedIn.error;
 
   const enrolled = await userClient.auth.mfa.enroll({
     factorType: "totp",
-    friendlyName: "E2E synthetic admin",
+    friendlyName: "E2E corrections smoke",
   });
   if (enrolled.error) throw enrolled.error;
 
@@ -82,135 +69,88 @@ async function enrollSyntheticAdminMfa(email, password) {
   return secret;
 }
 
-async function createFixture() {
-  const unique = Date.now();
-  const adminEmail = `e2e-correction-admin-${unique}@example.invalid`;
-  const adminPassword = `E2E-Correction-${unique}-Aa1!`;
-  const clientEmail = `e2e-correction-client-${unique}@example.invalid`;
+async function loadStableFixture() {
+  const profiles = await admin
+    .from("profiles")
+    .select("id")
+    .eq("display_name", "E2E Correction Client")
+    .limit(2);
 
-  const adminUser = await admin.auth.admin.createUser({
-    email: adminEmail,
-    email_confirm: true,
-    password: adminPassword,
-  });
-  if (adminUser.error) throw adminUser.error;
-
-  const clientUser = await admin.auth.admin.createUser({
-    email: clientEmail,
-    email_confirm: true,
-  });
-  if (clientUser.error) {
-    await admin.auth.admin.deleteUser(adminUser.data.user.id);
-    throw clientUser.error;
-  }
-
-  const fixture = {
-    adminEmail,
-    adminPassword,
-    adminProfileId: adminUser.data.user.id,
-    answerId: randomUUID(),
-    clientId: randomUUID(),
-    clientProfileId: clientUser.data.user.id,
-    formId: randomUUID(),
-    formVersionId: randomUUID(),
-    questionId: randomUUID(),
-    sectionId: randomUUID(),
-    submissionId: randomUUID(),
-    totpSecret: null,
-  };
-
-  try {
-    let result = await admin.from("profiles").insert([
-      { display_name: "E2E Correction Admin", id: fixture.adminProfileId },
-      { display_name: "E2E Correction Client", id: fixture.clientProfileId },
-    ]);
-    if (result.error) throw result.error;
-
-    result = await admin.from("user_roles").insert([
-      { profile_id: fixture.adminProfileId, role: "admin" },
-      { profile_id: fixture.clientProfileId, role: "client" },
-    ]);
-    if (result.error) throw result.error;
-
-    result = await admin.from("clients").insert({
-      id: fixture.clientId,
-      profile_id: fixture.clientProfileId,
-    });
-    if (result.error) throw result.error;
-
-    result = await admin.from("client_assignments").insert({
-      client_id: fixture.clientId,
-      staff_profile_id: fixture.adminProfileId,
-    });
-    if (result.error) throw result.error;
-
-    result = await admin.from("anamnesis_forms").insert({
-      form_key: `e2e-correction-${unique}`,
-      id: fixture.formId,
-    });
-    if (result.error) throw result.error;
-
-    result = await admin.from("anamnesis_form_versions").insert({
-      form_id: fixture.formId,
-      id: fixture.formVersionId,
-      published_at: new Date().toISOString(),
-      version_number: 1,
-    });
-    if (result.error) throw result.error;
-
-    result = await admin.from("anamnesis_sections").insert({
-      display_order: 1,
-      form_version_id: fixture.formVersionId,
-      id: fixture.sectionId,
-      section_key: "e2e_section",
-      title: "E2E Section",
-    });
-    if (result.error) throw result.error;
-
-    result = await admin.from("anamnesis_questions").insert({
-      answer_type: "text",
-      display_order: 1,
-      form_version_id: fixture.formVersionId,
-      id: fixture.questionId,
-      label: "E2E correction question",
-      question_key: "e2e_correction_question",
-      required: true,
-      section_id: fixture.sectionId,
-    });
-    if (result.error) throw result.error;
-
-    result = await admin.from("anamnesis_submissions").insert({
-      client_id: fixture.clientId,
-      form_version_id: fixture.formVersionId,
-      id: fixture.submissionId,
-    });
-    if (result.error) throw result.error;
-
-    result = await admin.from("anamnesis_answers").insert({
-      answer_value: "Original E2E answer",
-      form_version_id: fixture.formVersionId,
-      id: fixture.answerId,
-      question_id: fixture.questionId,
-      submission_id: fixture.submissionId,
-    });
-    if (result.error) throw result.error;
-
-    result = await admin
-      .from("anamnesis_submissions")
-      .update({ submitted_at: new Date().toISOString() })
-      .eq("id", fixture.submissionId);
-    if (result.error) throw result.error;
-
-    fixture.totpSecret = await enrollSyntheticAdminMfa(
-      fixture.adminEmail,
-      fixture.adminPassword,
+  if (profiles.error) throw profiles.error;
+  if (profiles.data.length !== 1) {
+    throw new Error(
+      "Expected exactly one persistent E2E Correction Client fixture.",
     );
-
-    return fixture;
-  } catch (error) {
-    await cleanupFixture(fixture);
-    throw error;
   }
+
+  const clientProfileId = profiles.data[0].id;
+  const client = await admin
+    .from("clients")
+    .select("id")
+    .eq("profile_id", clientProfileId)
+    .single();
+  if (client.error) throw client.error;
+
+  const assignment = await admin
+    .from("client_assignments")
+    .select("staff_profile_id")
+    .eq("client_id", client.data.id)
+    .is("ended_at", null)
+    .single();
+  if (assignment.error) throw assignment.error;
+
+  const adminProfileId = assignment.data.staff_profile_id;
+  const authUser = await admin.auth.admin.getUserById(adminProfileId);
+  if (authUser.error) throw authUser.error;
+
+  const email = authUser.data.user.email;
+  if (!email) {
+    throw new Error("Persistent E2E Correction Admin has no Auth email.");
+  }
+
+  const submission = await admin
+    .from("anamnesis_submissions")
+    .select("id, submitted_at")
+    .eq("client_id", client.data.id)
+    .not("submitted_at", "is", null)
+    .single();
+  if (submission.error) throw submission.error;
+
+  const answer = await admin
+    .from("anamnesis_answers")
+    .select("id, answer_value")
+    .eq("submission_id", submission.data.id)
+    .single();
+  if (answer.error) throw answer.error;
+
+  const existingCorrections = await admin
+    .from("anamnesis_answer_corrections")
+    .select("id", { count: "exact", head: true })
+    .eq("answer_id", answer.data.id);
+  if (existingCorrections.error) throw existingCorrections.error;
+  if ((existingCorrections.count ?? 0) !== 0) {
+    throw new Error(
+      "Persistent E2E correction fixture must not contain correction history.",
+    );
+  }
+
+  const password = `E2E-Corrections-${Date.now()}-Aa1!`;
+  const updated = await admin.auth.admin.updateUserById(adminProfileId, {
+    password,
+  });
+  if (updated.error) throw updated.error;
+
+  await clearAdminFactors(adminProfileId);
+  const totpSecret = await enrollAdminMfa(email, password);
+
+  return {
+    adminProfileId,
+    answerId: answer.data.id,
+    email,
+    password,
+    submissionId: submission.data.id,
+    totpSecret,
+  };
 }
 
 test.use({ baseURL: baseUrl });
@@ -218,12 +158,12 @@ test.use({ baseURL: baseUrl });
 test("admin sintetico acessa correcoes e JSON invalido nao cria historico", async ({
   page,
 }) => {
-  const fixture = await createFixture();
+  const fixture = await loadStableFixture();
 
   try {
     await loginAdminWithMfa(page, {
-      email: fixture.adminEmail,
-      password: fixture.adminPassword,
+      email: fixture.email,
+      password: fixture.password,
       totpSecret: fixture.totpSecret,
     });
 
@@ -252,6 +192,6 @@ test("admin sintetico acessa correcoes e JSON invalido nao cria historico", asyn
     if (correctionRows.error) throw correctionRows.error;
     expect(correctionRows.count).toBe(0);
   } finally {
-    await cleanupFixture(fixture);
+    await clearAdminFactors(fixture.adminProfileId);
   }
 });
