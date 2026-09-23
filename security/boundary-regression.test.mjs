@@ -168,6 +168,34 @@ test("Next.js keeps baseline security response headers", async () => {
   }
 });
 
+test("GitHub workflows pin core actions by immutable commit SHA", async () => {
+  const workflowDirectory = path.join(ROOT, ".github", "workflows");
+  const files = (await readdir(workflowDirectory))
+    .filter((file) => file.endsWith(".yml"))
+    .sort();
+
+  const mutableRefs = [];
+
+  for (const file of files) {
+    const content = await readFile(path.join(workflowDirectory, file), "utf8");
+
+    for (const line of content.split("\n")) {
+      if (
+        line.includes("uses: actions/checkout@v") ||
+        line.includes("uses: actions/setup-node@v")
+      ) {
+        mutableRefs.push(file + ": " + line.trim());
+      }
+    }
+  }
+
+  assert.deepEqual(
+    mutableRefs,
+    [],
+    "Core GitHub Actions must use immutable commit SHAs, not mutable version tags.",
+  );
+});
+
 test("GitHub workflows pin the runner image instead of following ubuntu-latest", async () => {
   const workflowDirectory = path.join(ROOT, ".github", "workflows");
   const files = (await readdir(workflowDirectory))
