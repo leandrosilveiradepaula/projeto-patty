@@ -113,6 +113,37 @@ test("classified protected entrypoints contain the expected authentication bound
   }
 });
 
+test("protected layouts and MFA pages keep their authentication guards", async () => {
+  const checks = [
+    {
+      file: "app/admin/layout.tsx",
+      required: 'requireRole("admin")',
+    },
+    {
+      file: "app/cliente/layout.tsx",
+      required: 'requireRole("client")',
+    },
+    {
+      file: "app/mfa/admin/setup/page.tsx",
+      required: 'requireRoleIdentity("admin")',
+    },
+    {
+      file: "app/mfa/admin/challenge/page.tsx",
+      required: 'requireRoleIdentity("admin")',
+    },
+  ];
+
+  for (const check of checks) {
+    const content = await readFile(path.join(ROOT, check.file), "utf8");
+
+    assert.equal(
+      content.includes(check.required),
+      true,
+      check.file + " must keep " + check.required,
+    );
+  }
+});
+
 test("Next.js keeps baseline security response headers", async () => {
   const content = await readFile(path.join(ROOT, "next.config.ts"), "utf8");
 
