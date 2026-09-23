@@ -183,7 +183,6 @@ async function createFixture() {
       client_id: fixture.clientId,
       form_version_id: fixture.formVersionId,
       id: fixture.submissionId,
-      submitted_at: new Date().toISOString(),
     });
     if (result.error) throw result.error;
 
@@ -194,6 +193,12 @@ async function createFixture() {
       question_id: fixture.questionId,
       submission_id: fixture.submissionId,
     });
+    if (result.error) throw result.error;
+
+    result = await admin
+      .from("anamnesis_submissions")
+      .update({ submitted_at: new Date().toISOString() })
+      .eq("id", fixture.submissionId);
     if (result.error) throw result.error;
 
     fixture.totpSecret = await enrollSyntheticAdminMfa(
