@@ -1,4 +1,4 @@
-name: Align Supabase Auth password minimum
+name: Inspect Supabase invite Auth config
 
 on:
   push:
@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 jobs:
-  align:
+  inspect:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -17,30 +17,40 @@ jobs:
       SUPABASE_PROJECT_ID: hqanoskwjvpbgavppcud
 
     steps:
-      - name: Align minimum password length with application validation
+      - name: Inspect invite URL and template configuration
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
         shell: bash
         run: |
           set -euo pipefail
           test -n "$SUPABASE_ACCESS_TOKEN" || { echo "Missing SUPABASE_ACCESS_TOKEN"; exit 1; }
+          test -n "$E2E_BASE_URL" || { echo "Missing E2E_BASE_URL"; exit 1; }
 
-          curl --fail-with-body --silent --show-error \
-            -X PATCH \
-            "https://api.supabase.com/v1/projects/$SUPABASE_PROJECT_ID/config/auth" \
-            -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
-            -H "Content-Type: application/json" \
-            --data '{"password_min_length":8}' \
-            >/dev/null
-
-          after="$(curl --fail-with-body --silent --show-error \
+          config="$(curl --fail-with-body --silent --show-error \
             "https://api.supabase.com/v1/projects/$SUPABASE_PROJECT_ID/config/auth" \
             -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN")"
 
-          printf '%s' "$after" | jq '{
-            password_hibp_enabled,
-            password_min_length,
-            password_required_characters
-          }'
+          echo "Invite-related config keys:"
+          printf '%s' "$config" | jq -r 'keys[] | select(test("invite|site_url|uri_allow_list|smtp"; "i"))'
 
-          test "$(printf '%s' "$after" | jq -r '.password_min_length')" = "8"
+          site_url="$(printf '%s' "$config" | jq -r '.site_url // ""')"
+          uri_allow_list="$(printf '%s' "$config" | jq -r '.uri_allow_list // ""')"
+          invite_template="$(printf '%s' "$config" | jq -r '.mailer_templates_invite_content // ""')"
+          smtp_host="$(printf '%s' "$config" | jq -r '.smtp_host // ""')"
+
+          jq -n \
+            --argjson site_url_matches "$([ "$site_url" = "$E2E_BASE_URL" ] && echo true || echo false)" \
+            --argjson allow_list_contains "$([[ ",$uri_allow_list," == *",$E2E_BASE_URL,"* ]] && echo true || echo false)" \
+            --argjson token_hash "$([[ "$invite_template" == *".TokenHash"* ]] && echo true || echo false)" \
+            --argjson auth_confirm "$([[ "$invite_template" == *"/auth/confirm"* ]] && echo true || echo false)" \
+            --argjson type_invite "$([[ "$invite_template" == *"type=invite"* ]] && echo true || echo false)" \
+            --argjson custom_smtp "$([ -n "$smtp_host" ] && echo true || echo false)" \
+            '{
+              site_url_matches_e2e_base: $site_url_matches,
+              allow_list_contains_e2e_base: $allow_list_contains,
+              invite_template_uses_token_hash: $token_hash,
+              invite_template_points_to_auth_confirm: $auth_confirm,
+              invite_template_sets_type_invite: $type_invite,
+              custom_smtp_configured: $custom_smtp
+            }'
