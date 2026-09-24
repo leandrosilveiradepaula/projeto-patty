@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "product_approved_except_consent_not_publishable",
+  "status": "product_approved_publishable",
   "canonical_form_key": "client-anamnesis",
   "generated_from": "docs/ANAMNESE.md",
   "design_rules": {
@@ -1320,27 +1320,26 @@
       "observed_options": "concordancia; nao concordancia",
       "historical_required": "sim",
       "source_category": "Consentimento",
-      "disposition": "consent_pending",
+      "disposition": "include_candidate",
       "section": "consentimento",
       "fields": [
         {
           "question_key_candidate": "consent_acceptance",
-          "label_candidate": "Declaracao de Anuencia",
+          "label_candidate": "Concordo com o tratamento das informações fornecidas nesta Anamnese, inclusive dados de saúde, para realização do meu acompanhamento pela Consultoria Corpo & Mente.",
           "answer_type_candidate": "single_choice",
-          "ui_control_candidate": "consent_choice",
+          "ui_control_candidate": "consent_checkbox",
           "required_when_applicable": true,
-          "current_client_ui_support": "not_implemented",
+          "current_client_ui_support": "supported_on_final_submit",
           "options_candidate": [
-            "concordancia",
-            "nao concordancia"
+            "Concordo"
           ],
           "applicability_candidate": null,
-          "type_basis": "historical_accept_reject",
-          "legal_status": "pending_final_text_and_versioning",
-          "product_status": "legal_pending"
+          "type_basis": "product_decision_explicit_consent_checkbox",
+          "legal_status": "mvp_consent_checkbox_confirmed",
+          "product_status": "approved_v1"
         }
       ],
-      "status": "legal_pending"
+      "status": "product_approved"
     }
   ]
 }
