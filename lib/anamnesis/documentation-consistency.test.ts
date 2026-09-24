@@ -39,17 +39,15 @@ test("Anamnesis authoritative docs do not reopen product decisions already close
   }
 });
 
-test("Anamnesis docs preserve the actual remaining publication blocker", () => {
+test("Anamnesis docs preserve the resolved consent decision and next operational gate", () => {
   const openQuestions = load("docs/OPEN_QUESTIONS.md");
   const projectStatus = load("docs/PROJECT_STATUS.md");
 
-  assert.match(openQuestions, /ANAM-046/);
-  assert.match(
-    openQuestions,
-    /bloqueador restante para materializar\/publicar a primeira versao canonica/i,
-  );
+  assert.match(openQuestions, /FATO RESOLVIDO — ANAM-046/);
+  assert.match(openQuestions, /checkbox obrigatorio no envio final/i);
+  assert.match(projectStatus, /ANAM-046 simplificado e definido/i);
   assert.match(
     projectStatus,
-    /ANAM-046[\s\S]*materializar\/publicar/i,
+    /materializar a v1, validar e publicar explicitamente/i,
   );
 });
