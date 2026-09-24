@@ -96,7 +96,8 @@ Nesta rodada, o workflow versionado confirmou no historico remoto:
 - `20260923150743_optimize_anamnesis_correction_rls.sql`;
 - `20260923191554_fix_anamnesis_draft_delete_trigger.sql`;
 - `20260924105003_add_anamnesis_question_applicability_foundation.sql`;
-- `20260924142453_anamnesis_final_submission_foundation.sql`.
+- `20260924142453_anamnesis_final_submission_foundation.sql`;
+- `20260924153808_create_anamnesis_clarification_flow.sql`.
 
 O apply de `20260923191554` terminou com sucesso e o `migration list` pos-apply mostrou o mesmo timestamp local/remoto. Em seguida, um smoke transacional com dados sinteticos e `ROLLBACK` confirmou: draft nao submetido pode ser excluido; submission enviada continua bloqueada com SQLSTATE `55000`; cliente A nao consegue ler submission da cliente B. Em 2026-09-24, o E2E de producao confirmou a retomada e persistencia de um rascunho existente no runtime publicado. A criacao inicial de nova Anamnese continua separada e depende da primeira versao canonica `client-anamnesis`.
 
@@ -198,7 +199,7 @@ Ordem operacional sugerida, sujeita a revalidacao do HEAD:
 1. obter e documentar as respostas do gate `ANAMNESE_CONSENT_GATE.md` para fechar ANAM-046;
 2. materializar a primeira `client-anamnesis`, revisar, publicar explicitamente e validar inicio, preenchimento condicional e envio final E2E;
 3. resolver infraestrutura do email real de convite;
-4. aplicar/validar a migration de esclarecimentos pos-Anamnese e validar o fluxo admin <-> cliente com fixture sintetica;
+4. mergear/publicar a UI de esclarecimentos pos-Anamnese e validar o fluxo admin <-> cliente com fixture sintetica em producao;
 5. preparar execution real de IA com provider/modelo explicitamente definidos;
 6. decidir a infraestrutura de midia educacional para arquivos acima de 50 MB; depois preparar a migracao controlada do video aprovado da balanca;
 7. ampliar automacao de alimentacao/treino somente depois das regras profissionais correspondentes estarem documentadas.
@@ -260,4 +261,4 @@ Escopo:
 - criacao administrativa exige assignment ativo + AAL2;
 - sem estado formal, prazo, expiracao ou notificacao automatica.
 
-O schema foi validado previamente no Supabase SaaS em transacao com `ROLLBACK`. Aplicacao definitiva, smoke pos-apply e validacao de producao continuam etapas separadas.
+A migration `20260924153808_create_anamnesis_clarification_flow.sql` foi aplicada no Supabase SaaS em 2026-09-24 e o historico remoto foi confirmado com o mesmo version ID. O smoke pos-apply com fixture sintetica e `ROLLBACK` confirmou request AAL2, resposta da cliente correta, isolamento entre clientes, multiplos complementos, resposta original inalterada e imutabilidade. A UI passou CI/build; merge/publicacao e validacao de producao continuam etapas separadas.
