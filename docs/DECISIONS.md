@@ -1,5 +1,29 @@
 # Decisoes
 
+## 2026-09-24 - Anamnese enviada entra diretamente em analise
+
+### REGRA CONFIRMADA PELA PATTY
+
+Depois que a cliente finaliza e envia a Anamnese, ela entra diretamente na analise profissional da Patty.
+
+Nao sao necessarios estados intermediarios de workflow como:
+- recebida;
+- em revisao;
+- pendencias;
+- concluida.
+
+### LIMITE
+
+Essa decisao simplifica o lifecycle administrativo da Anamnese, mas nao elimina a possibilidade de:
+- notas internas;
+- findings de IA;
+- pedidos pontuais de esclarecimento;
+- correcoes append-only;
+- outras acoes internas que venham a ser confirmadas.
+
+Essas acoes, se existirem, nao devem ser modeladas como estados obrigatorios de uma maquina de workflow sem decisao posterior.
+
+
 ## 2026-09-24 - Perguntas atuais da Anamnese permanecem como base
 
 ### REGRA CONFIRMADA PELA PATTY
