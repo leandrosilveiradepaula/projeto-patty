@@ -43,13 +43,21 @@ insert into public.educational_content_versions (
   title,
   display_order
 )
-values (
-  'a4000000-0000-4000-8000-000000000001',
-  'a3000000-0000-4000-8000-000000000001',
-  1,
-  'Synthetic media content',
-  1
-);
+values
+  (
+    'a4000000-0000-4000-8000-000000000001',
+    'a3000000-0000-4000-8000-000000000001',
+    1,
+    'Synthetic media content',
+    1
+  ),
+  (
+    'a4000000-0000-4000-8000-000000000002',
+    'a3000000-0000-4000-8000-000000000001',
+    2,
+    'Synthetic media draft',
+    2
+  );
 
 insert into public.educational_content_assets (
   id,
@@ -201,7 +209,7 @@ select throws_ok(
       byte_size,
       sha256_hex
     ) values (
-      'a4000000-0000-4000-8000-000000000001',
+      'a4000000-0000-4000-8000-000000000002',
       'other_provider',
       'x',
       'video/mp4',
