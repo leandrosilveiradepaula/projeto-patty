@@ -199,7 +199,7 @@ Ordem operacional sugerida, sujeita a revalidacao do HEAD:
 1. obter e documentar as respostas do gate `ANAMNESE_CONSENT_GATE.md` para fechar ANAM-046;
 2. materializar a primeira `client-anamnesis`, revisar, publicar explicitamente e validar inicio, preenchimento condicional e envio final E2E;
 3. resolver infraestrutura do email real de convite;
-4. mergear/publicar a UI de esclarecimentos pos-Anamnese e validar o fluxo admin <-> cliente com fixture sintetica em producao;
+4. validar futuramente o fluxo autenticado admin <-> cliente de esclarecimentos com fixture sintetica sem transformar esse teste em fonte de regra;
 5. preparar execution real de IA com provider/modelo explicitamente definidos;
 6. decidir a infraestrutura de midia educacional para arquivos acima de 50 MB; depois preparar a migracao controlada do video aprovado da balanca;
 7. ampliar automacao de alimentacao/treino somente depois das regras profissionais correspondentes estarem documentadas.
@@ -261,4 +261,4 @@ Escopo:
 - criacao administrativa exige assignment ativo + AAL2;
 - sem estado formal, prazo, expiracao ou notificacao automatica.
 
-A migration `20260924153808_create_anamnesis_clarification_flow.sql` foi aplicada no Supabase SaaS em 2026-09-24 e o historico remoto foi confirmado com o mesmo version ID. O smoke pos-apply com fixture sintetica e `ROLLBACK` confirmou request AAL2, resposta da cliente correta, isolamento entre clientes, multiplos complementos, resposta original inalterada e imutabilidade. A UI passou CI/build; merge/publicacao e validacao de producao continuam etapas separadas.
+A migration `20260924153808_create_anamnesis_clarification_flow.sql` foi aplicada no Supabase SaaS em 2026-09-24 e o historico remoto foi confirmado com o mesmo version ID. O smoke pos-apply com fixture sintetica e `ROLLBACK` confirmou request AAL2, resposta da cliente correta, isolamento entre clientes, multiplos complementos, resposta original inalterada e imutabilidade. A UI passou CI/build, foi mergeada no PR #146 e o deployment de producao do commit `492a7ab` ficou `READY`. Nao foi executado E2E autenticado de producao do fluxo completo; os logs de runtime do deployment nao registraram erro/fatal na janela conferida.
