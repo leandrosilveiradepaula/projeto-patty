@@ -2,11 +2,13 @@ import { isUuid } from "../validation/uuid.ts";
 
 export type AnamnesisReviewFindingType =
   | "possible_contradiction"
-  | "clarification_needed";
+  | "clarification_needed"
+  | "missing_answer";
 
 export type AnamnesisReviewFinding = {
   type: AnamnesisReviewFindingType;
   source_answer_ids: string[];
+  target_question_id?: string;
   explanation: string;
   suggested_follow_up_question?: string;
 };
@@ -24,6 +26,8 @@ export type AnamnesisReviewOutputValidationErrorCode =
   | "invalid_finding_type"
   | "invalid_source_answer_ids"
   | "source_answer_not_allowed"
+  | "invalid_target_question_id"
+  | "target_question_not_missing_or_applicable"
   | "insufficient_sources"
   | "invalid_explanation"
   | "invalid_follow_up_question";
@@ -42,6 +46,7 @@ const TOP_LEVEL_KEYS = new Set(["findings"]);
 const FINDING_KEYS = new Set([
   "type",
   "source_answer_ids",
+  "target_question_id",
   "explanation",
   "suggested_follow_up_question",
 ]);
@@ -59,7 +64,9 @@ function hasOnlyKeys(
 
 function isFindingType(value: unknown): value is AnamnesisReviewFindingType {
   return (
-    value === "possible_contradiction" || value === "clarification_needed"
+    value === "possible_contradiction" ||
+    value === "clarification_needed" ||
+    value === "missing_answer"
   );
 }
 
@@ -73,6 +80,7 @@ function normalizeNonBlankText(value: unknown) {
 }
 
 export function validateAnamnesisReviewOutput(input: {
+  allowedMissingTargetQuestionIds?: ReadonlySet<string>;
   allowedSourceAnswerIds: ReadonlySet<string>;
   value: unknown;
 }): AnamnesisReviewOutputValidationResult {
@@ -105,7 +113,6 @@ export function validateAnamnesisReviewOutput(input: {
 
     if (
       !Array.isArray(rawFinding.source_answer_ids) ||
-      rawFinding.source_answer_ids.length === 0 ||
       !rawFinding.source_answer_ids.every(
         (value): value is string => typeof value === "string" && isUuid(value),
       )
@@ -128,10 +135,40 @@ export function validateAnamnesisReviewOutput(input: {
     }
 
     const minimumSources =
-      rawFinding.type === "possible_contradiction" ? 2 : 1;
+      rawFinding.type === "possible_contradiction"
+        ? 2
+        : rawFinding.type === "clarification_needed"
+          ? 1
+          : 0;
 
     if (sourceAnswerIds.length < minimumSources) {
       return { ok: false, error: "insufficient_sources" };
+    }
+
+    let targetQuestionId: string | undefined;
+
+    if (rawFinding.type === "missing_answer") {
+      if (
+        typeof rawFinding.target_question_id !== "string" ||
+        !isUuid(rawFinding.target_question_id)
+      ) {
+        return { ok: false, error: "invalid_target_question_id" };
+      }
+
+      if (
+        !input.allowedMissingTargetQuestionIds?.has(
+          rawFinding.target_question_id,
+        )
+      ) {
+        return {
+          ok: false,
+          error: "target_question_not_missing_or_applicable",
+        };
+      }
+
+      targetQuestionId = rawFinding.target_question_id;
+    } else if ("target_question_id" in rawFinding) {
+      return { ok: false, error: "invalid_target_question_id" };
     }
 
     const explanation = normalizeNonBlankText(rawFinding.explanation);
@@ -157,6 +194,7 @@ export function validateAnamnesisReviewOutput(input: {
     findings.push({
       type: rawFinding.type,
       source_answer_ids: sourceAnswerIds,
+      ...(targetQuestionId ? { target_question_id: targetQuestionId } : {}),
       explanation,
       ...(suggestedFollowUpQuestion
         ? { suggested_follow_up_question: suggestedFollowUpQuestion }
