@@ -11,6 +11,7 @@ import {
   AnamnesisSubmissionError,
   submitCurrentClientAnamnesisDraft,
 } from "@/lib/anamnesis/submission";
+import { isAnamnesisConsentAccepted } from "@/lib/anamnesis/consent-policy";
 
 export type ClientAnamnesisDraftAnswerFormState = {
   message: string | null;
@@ -133,12 +134,22 @@ export type ClientAnamnesisSubmitFormState = {
 export async function submitClientAnamnesis(
   submissionId: string,
   _state: ClientAnamnesisSubmitFormState,
-  _formData: FormData,
+  formData: FormData,
 ): Promise<ClientAnamnesisSubmitFormState> {
   await requireRole("client");
 
+  if (!isAnamnesisConsentAccepted(formData.get("consentAccepted"))) {
+    return {
+      message:
+        "Marque a concordância com o tratamento das informações desta Anamnese antes de enviar.",
+      success: false,
+    };
+  }
+
   try {
-    await submitCurrentClientAnamnesisDraft(submissionId);
+    await submitCurrentClientAnamnesisDraft(submissionId, {
+      consentAccepted: true,
+    });
   } catch (error) {
     if (error instanceof AnamnesisSubmissionError) {
       if (error.code === "incomplete_or_invalid_answers") {
