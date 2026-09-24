@@ -18,6 +18,7 @@ export type PreparedAnamnesisReviewExecution = {
   clientId: string;
   formVersionId: string;
   initiatedByProfileId: string;
+  missingTargets: ReturnType<typeof buildAnamnesisReviewContext>["missingTargets"];
   sources: ReturnType<typeof buildAnamnesisReviewContext>["sources"];
   submissionId: string;
 };
