@@ -48,8 +48,11 @@ export type AnamnesisReviewContextBuildErrorCode =
   | "explicit_source_not_applicable";
 
 export class AnamnesisReviewContextBuildError extends Error {
-  constructor(public readonly code: AnamnesisReviewContextBuildErrorCode) {
+  readonly code: AnamnesisReviewContextBuildErrorCode;
+
+  constructor(code: AnamnesisReviewContextBuildErrorCode) {
     super(code);
+    this.code = code;
     this.name = "AnamnesisReviewContextBuildError";
   }
 }
