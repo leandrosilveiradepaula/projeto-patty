@@ -2,10 +2,10 @@ import { getApplicableAnamnesisQuestionIds } from "../anamnesis/applicability.ts
 import { ANAMNESIS_QUESTION_KEYS } from "../anamnesis/question-keys.ts";
 import type { Json } from "@/lib/supabase/database.types";
 
-const ALWAYS_EXCLUDED_QUESTION_KEYS = new Set([
+const ALWAYS_EXCLUDED_QUESTION_KEYS = new Set<string>([
   ANAMNESIS_QUESTION_KEYS.instagram,
 ]);
-const EXPLICIT_ONLY_QUESTION_KEYS = new Set([
+const EXPLICIT_ONLY_QUESTION_KEYS = new Set<string>([
   ANAMNESIS_QUESTION_KEYS.financialCapacityForSupplements,
 ]);
 
