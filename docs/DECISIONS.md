@@ -1814,3 +1814,13 @@ A primeira versao canonica publicada passou por smoke transacional completo no S
 A validacao utilizou dados sinteticos, preencheu todas as perguntas aplicaveis, preservou 10 condicionais como nao aplicaveis quando suas controladoras receberam `Nao`, gravou ANAM-046 como `Concordo` e concluiu `submitted_at`.
 
 Nenhum registro do smoke foi preservado apos o `ROLLBACK`.
+
+## 2026-09-24 - Validacao de producao do consentimento canonico
+
+### FATO DE TESTE
+
+O consentimento ANAM-046 da `client-anamnesis` v1 foi validado no browser contra producao pelo run GitHub Actions `36072067063`.
+
+O teste confirmou a UI de checkbox obrigatorio, ausencia de persistencia sem aceite, persistencia de `Concordo` quando marcado, manutencao do draft quando outro campo obrigatorio permanece vazio e cleanup completo da fixture sintetica.
+
+Esse resultado encerra o gate funcional de consentimento da v1.
