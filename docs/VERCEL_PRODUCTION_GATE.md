@@ -1,6 +1,6 @@
 # Gate de recuperacao da producao Vercel
 
-Data de referencia: 2026-09-23.
+Data de referencia: 2026-09-24.
 
 Este checklist deve ser usado quando a Vercel voltar a aceitar um build de producao do `master`.
 
@@ -10,6 +10,23 @@ Ele existe para separar:
 - validacao de runtime.
 
 Nao considerar um fluxo como PRODUCAO VALIDADA apenas porque o PR foi mergeado ou o build de CI passou.
+
+
+## Resultado da validacao de 2026-09-24
+
+O `master` no commit `19d216bf2148e983d452f0555a2d1e740e1027ca` esta publicado na Vercel com deployment de producao `READY`.
+
+Os gates executados contra a producao atual tiveram o seguinte resultado:
+
+- **Gate 1 - deployment:** PASS; SHA publicado corresponde ao `master` atual.
+- **Gate 2 - headers HTTP:** PASS em `/login`; CSP, Permissions-Policy, `Referrer-Policy: no-referrer`, `X-Content-Type-Options: nosniff` e `X-Frame-Options: DENY` presentes.
+- **Gate 3 - rascunho da Anamnese:** PASS no smoke de producao apos correcao de um seletor Playwright ambiguo. Login sintetico, retomada do rascunho, INSERT/UPDATE da resposta e cleanup passaram.
+- **Gate 4 - correcoes administrativas:** PASS no smoke de producao apos escopo mais preciso do seletor da resposta original. A rota respondeu `200`, MFA/admin funcionou, a resposta original foi lida e o caso de JSON invalido nao criou historico.
+- **Residuos sinteticos:** consulta pos-smoke confirmou `0` drafts E2E ativos e `0` correcoes E2E.
+
+Evidencia operacional do run final: GitHub Actions run `35985899621`, conclusao `success`.
+
+O Gate 5 continua coberto pelas regressões de seguranca ja existentes e nao foi enfraquecido por esta correcao, que alterou somente seletores de teste.
 
 ## Pre-condicoes
 
@@ -33,7 +50,7 @@ O GitHub recebeu do contexto Vercel:
 - estado: `success`;
 - descricao: `Deployment has completed`.
 
-Isso confirma a recuperacao do pipeline de producao para esse SHA. Os gates abaixo continuam independentes e ainda precisam de validacao de runtime.
+Isso confirmou a recuperacao do pipeline de producao para esse SHA. Em 2026-09-24, os gates de runtime de headers, rascunho e correcoes administrativas foram executados novamente contra a producao atual e passaram.
 
 ## Gate 2 - headers HTTP
 
