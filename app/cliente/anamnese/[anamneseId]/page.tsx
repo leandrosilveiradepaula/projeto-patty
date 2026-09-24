@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
+import { getApplicableAnamnesisQuestionIds } from "@/lib/anamnesis/applicability";
 import {
   canEditDraftSingleChoiceAnswer,
   canEditDraftTextAnswer,
@@ -81,9 +82,25 @@ export default async function ClienteAnamneseDetailPage({
   const answersByQuestionId = new Map(
     answers.map((answer) => [answer.question_id, answer]),
   );
+  const applicableQuestionIds = getApplicableAnamnesisQuestionIds(
+    questions.map((question) => ({
+      id: question.id,
+      applicability_source_question_id:
+        question.applicability_source_question_id,
+      applicability_expected_answer: question.applicability_expected_answer,
+    })),
+    answers.map((answer) => ({
+      question_id: answer.question_id,
+      answer_value: answer.answer_value,
+    })),
+  );
   const questionsBySectionId = new Map<string, typeof questions>();
 
   for (const question of questions) {
+    if (!applicableQuestionIds.has(question.id)) {
+      continue;
+    }
+
     const sectionQuestions = questionsBySectionId.get(question.section_id) ?? [];
     sectionQuestions.push(question);
     questionsBySectionId.set(question.section_id, sectionQuestions);
@@ -100,7 +117,7 @@ export default async function ClienteAnamneseDetailPage({
         description={
           submission.submitted_at
             ? "Suas respostas originais registradas nesta versão da Anamnese."
-            : "Este rascunho ainda não foi enviado. Respostas de texto e de seleção única compatíveis podem ser salvas individualmente."
+            : "Este rascunho ainda não foi enviado. Perguntas condicionais são exibidas somente quando a resposta controladora torna o campo aplicável."
         }
         eyebrow="Cliente"
         title="Detalhe da Anamnese"
