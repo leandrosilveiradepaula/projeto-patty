@@ -50,6 +50,6 @@ test("Anamnesis docs preserve the actual remaining publication blocker", () => {
   );
   assert.match(
     projectStatus,
-    /ANAM-046 juridico antes de materializar\/publicar a primeira versao/i,
+    /ANAM-046[\s\S]*materializar\/publicar/i,
   );
 });

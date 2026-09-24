@@ -70,7 +70,7 @@ Nao existe bloqueio atual de deployment Vercel para o `master`.
 | MFA administrativo | SIM | SIM | Smoke AAL1/AAL2 documentado | Enforcement RLS aplicado no SaaS | Leaked Password Protection bloqueada pelo plano atual |
 | RBAC / RLS / assignments | SIM | SIM | Smokes documentados | Fundacao e fluxos administrativos principais operacionais | Novos papeis ficam fora do MVP; assignment continua regra geral para dados client-scoped |
 | Cadastro Atual | SIM como entidade separada | SIM | Fundacao testada | Backend existente | Fluxo final de edicao cadastral pela cliente/Patty ainda aberto |
-| Anamnese versionada | SIM | SIM + aplicabilidade + `single_choice` + mapa nao juridico v1 + submissao final | CI + smoke SQL pos-apply PASS | Tipos nao juridicos, 10 condicionais, ordem, ANAM-044 e envio final definidos/aplicados | ANAM-046 juridico antes de materializar/publicar a primeira versao |
+| Anamnese versionada | SIM | SIM + aplicabilidade + `single_choice` + mapa nao juridico v1 + submissao final | CI + smoke SQL pos-apply PASS | Tipos nao juridicos, 10 condicionais, ordem, ANAM-044 e envio final definidos/aplicados | ANAM-046 isolado em gate juridico objetivo (`ANAMNESE_CONSENT_GATE.md`) antes de materializar/publicar |
 | Rascunho da Anamnese | SIM | SIM para salvar/retomar/enviar dentro dos tipos v1 suportados | Smoke pos-apply PASS; E2E anterior PASS para retomada `text`; UI final passou CI/build | Migration `20260924142453` aplicada; producao Vercel do commit `6b88dce` READY | ANAM-046 e publicacao da versao canonica para E2E completo |
 | Obrigatoriedade da Anamnese | SIM | Regra + UI + validacao deterministica no banco | CI + smoke pos-apply PASS | `20260924142453` aplicada no SaaS; campo nao aplicavel nao bloqueia; incompleto aplicavel bloqueia | Validar E2E completo quando a primeira `client-anamnesis` for publicada |
 | Correcao pos-envio da Anamnese | SIM | SIM | E2E administrativo de producao PASS em 2026-09-24 | Schema aplicado e rota/UI publicadas e validadas em producao | Apos envio, entra direto em analise; falta definir UX/lifecycle do pedido de esclarecimento a cliente |
@@ -195,7 +195,7 @@ Nesta reconciliacao de 2026-09-23, incorporada ao `master` pelo PR #120:
 
 Ordem operacional sugerida, sujeita a revalidacao do HEAD:
 
-1. fechar ANAM-046 / consentimento juridico;
+1. obter e documentar as respostas do gate `ANAMNESE_CONSENT_GATE.md` para fechar ANAM-046;
 2. materializar a primeira `client-anamnesis`, revisar, publicar explicitamente e validar inicio, preenchimento condicional e envio final E2E;
 3. resolver infraestrutura do email real de convite;
 4. continuar integracao UI <-> backend real;
