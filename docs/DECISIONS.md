@@ -1824,3 +1824,13 @@ O consentimento ANAM-046 da `client-anamnesis` v1 foi validado no browser contra
 O teste confirmou a UI de checkbox obrigatorio, ausencia de persistencia sem aceite, persistencia de `Concordo` quando marcado, manutencao do draft quando outro campo obrigatorio permanece vazio e cleanup completo da fixture sintetica.
 
 Esse resultado encerra o gate funcional de consentimento da v1.
+
+## 2026-09-24 - Validacao de producao do inicio da Anamnese canonica
+
+### FATO DE TESTE
+
+O fluxo de inicio e retomada da `client-anamnesis` v1 foi validado no browser contra producao pelo run GitHub Actions `36074218960`.
+
+O teste confirmou criacao do draft da versao publicada, vinculo correto a cliente, manutencao de `submitted_at = null`, substituicao da acao de inicio por `Continuar rascunho`, retomada do mesmo registro e cleanup sem residuo.
+
+Esse resultado encerra o gate funcional de inicio/retomada da v1.

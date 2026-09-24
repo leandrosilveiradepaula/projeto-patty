@@ -405,3 +405,19 @@ Estado: **WORKFLOW VERSIONADO / EXECUCAO MANUAL PENDENTE**
 O workflow `E2E canonical Anamnesis start smoke` valida que uma cliente sintetica inicia um draft da versao canônica v1 publicada e depois retoma exatamente o mesmo registro.
 
 O teste nao conclui envio final e limpa o draft no final, evitando historico sintetico permanente. O envio/consentimento ja possui validacoes separadas.
+
+## Anamnese canonica v1 - inicio e retomada validados
+
+Estado: **PRODUCAO VALIDADA**
+
+O workflow `E2E canonical Anamnesis start smoke` passou no run `36074218960` com `1 passed (15.2s)`.
+
+Foram validados no browser contra producao:
+- descoberta da versao publicada;
+- criacao do draft;
+- vinculo a cliente e form version corretas;
+- retomada do mesmo draft;
+- cleanup completo;
+- 0 drafts canonicos residuais ao final.
+
+O consentimento e o envio completo possuem evidencias separadas ja aprovadas.

@@ -562,3 +562,22 @@ O teste:
 - confirma 0 drafts canonicos residuais ao final.
 
 A copia antiga dizendo que o envio final nao estava disponivel tambem foi removida da tela do cliente.
+
+## 2026-09-24 - E2E de inicio da Anamnese canonica aprovado
+
+### PRODUCAO VALIDADA
+
+O workflow `E2E canonical Anamnesis start smoke` passou em producao no run `36074218960`, sobre o `master` `aa6969a174e67312ddcd3e23c41a114fa00dd45e`.
+
+Resultado:
+- job `smoke`: SUCCESS;
+- Playwright: `1 passed (15.2s)`;
+- `Começar Anamnese` criou draft da `client-anamnesis` v1 publicada;
+- o draft foi vinculado a cliente sintetica e a form version canonica corretas;
+- `submitted_at` permaneceu nulo;
+- a lista passou a oferecer `Continuar rascunho`;
+- o mesmo draft foi retomado;
+- cleanup removeu o draft e respostas sinteticas;
+- consulta pos-run confirmou 0 drafts canonicos residuais.
+
+Com isso, o fluxo de inicio e retomada da primeira Anamnese canonica esta validado no runtime de producao.
