@@ -36,6 +36,8 @@ Ele e o primeiro conteudo atualmente elegivel para migracao controlada. Elegivel
 
 A Patty confirmou tambem que a planilha historica `Sugestao de refeicoes` deve ser transformada em **conteudo educacional revisado** para clientes. O arquivo historico pode servir como fonte editorial, mas a versao publicada no aplicativo nao deve cristalizar seis refeicoes como regra, porque o metodo confirmado nao possui numero fixo de refeicoes.
 
+Conteudos sobre formulas/manipulados tambem foram confirmados pela Patty como parte do aplicativo. O arquivo historico `Fórmulas.pptx` nao esta autorizado para publicacao direta: ele deve passar por revisao profissional completa, atualizacao de alegacoes, validacao de referencias comerciais e confirmacao de direitos antes de gerar uma versao publicavel.
+
 ### RECOMENDACAO TECNICA
 
 Antes de migrar os demais conteudos para o aplicativo, completar a classificacao por tipo, publico, status de revisao, permissao de uso e relacao com protocolos.
