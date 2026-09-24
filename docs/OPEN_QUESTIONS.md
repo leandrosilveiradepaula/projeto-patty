@@ -110,7 +110,11 @@ Perguntas compostas da anamnese atual devem permanecer juntas ou ser normalizada
 
 ### PARCIALMENTE RESOLVIDO
 
-A regra geral de exibicao condicional esta confirmada: pergunta dependente nao aplicavel fica oculta e nao obrigatoria. Ainda falta identificar no questionario final quais campos sao condicionais e quais respostas determinam sua aplicabilidade.
+A regra geral de exibicao condicional esta confirmada: pergunta dependente nao aplicavel fica oculta e nao obrigatoria.
+
+A fundacao tecnica versionada foi preparada para armazenar uma condicao exata por pergunta dependente, referenciando uma pergunta controladora da mesma versao. A migration ainda precisa ser aplicada no SaaS depois do merge.
+
+Continua aberto o ponto profissional/produto: identificar no questionario final quais campos sao condicionais e quais respostas determinam sua aplicabilidade.
 
 ### PARCIALMENTE RESOLVIDO
 
@@ -256,7 +260,7 @@ A Patty confirmou a regra geral de aplicabilidade: quando uma pergunta nao se ap
 
 A obrigatoriedade geral permanece: todos os campos aplicaveis da versao devem estar preenchidos no envio final.
 
-Ainda falta mapear, pergunta a pergunta, quais dependencias existem e quais respostas ativam ou desativam cada campo condicional.
+Ainda falta mapear, pergunta a pergunta, quais dependencias existem e quais respostas ativam ou desativam cada campo condicional. A fundacao de armazenamento nao deve ser confundida com esse mapa.
 
 O contrato futuro de `missing_answer` devera usar `target_question_id` para a pergunta ausente e permitir `source_answer_ids` vazio; o target devera pertencer a mesma `form_version_id` da submission. O finding so podera considerar ausencia quando a pergunta estiver aplicavel segundo o mapa condicional da versao.
 
