@@ -294,3 +294,13 @@ A migration `20260924210600_create_educational_content_assets.sql` esta aplicada
 O PR #157 foi mergeado no commit `857daed` e publicado em deployment `READY`. Nenhum erro/fatal foi observado na janela consultada.
 
 Ainda nao existe Blob store conectado nem arquivo fisico migrado. O video aprovado da balanca continua no Drive ate a operacao controlada de criacao/conexao do store, upload, verificacao de hash e publicacao/release.
+
+## Midia educacional - lote 1 preparado
+
+Estado: **PREPARADO / BLOQUEADO NO STORE**
+
+A fundacao de metadata no Supabase permanece aplicada e vazia em producao. O primeiro lote controlado foi definido em `docs/educational_media_migration_batch_1.json` e possui teste de invariantes no CI.
+
+O lote contem somente o video da balanca aprovado pela Patty e permanece deliberadamente sem `storage_path`, SHA-256, registros de conteudo/versao/asset, publicacao ou release enquanto o Vercel Private Blob store nao estiver criado/conectado.
+
+A integracao Vercel usada nesta sessao nao oferece operacao de Storage, portanto a criacao/conexao do store e uma pendencia operacional manual. Isso nao bloqueia outras frentes tecnicas do MVP e nao autoriza migracao dos demais arquivos do Drive.
