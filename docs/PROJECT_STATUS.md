@@ -428,3 +428,21 @@ Foi removida a divergencia entre trechos antigos que ainda tratavam provider, pr
 Para `anamnesis_review`, OpenAI, prompt v1, Structured Outputs, aliases efemeros, contrato v1 de findings, boundary server-side e failure handling ja existem. O modelo `gpt-5.6-terra` com reasoning `medium` permanece configuracao tecnica inicial, ainda sujeita a avaliacao sintetica antes de qualquer liberacao com dados reais.
 
 O gate de dados de saude continua fechado.
+
+## 2026-09-24 - Hardening de retencao de falhas de IA no banco
+
+### APLICADO NO SUPABASE SAAS
+
+A migration `20260924215415_add_ai_failure_retention_constraints` foi aplicada e confirmada no historico remoto.
+
+Ela adiciona defesa em profundidade no banco para os limites ja existentes no boundary server-side:
+- `ai_execution_failure_responses.content`: no maximo 131072 bytes via `octet_length`;
+- `ai_executions.failure_message`: no maximo 1024 caracteres via `char_length`.
+
+Antes do apply existiam 0 failure responses e 0 failure messages reais, portanto nao houve transformacao retroativa.
+
+Pos-apply:
+- constraints confirmadas por introspeccao;
+- advisor de seguranca sem novo finding alem do warning conhecido de Leaked Password Protection;
+- advisor de performance lista FKs sem indice preexistentes como frente separada.
+

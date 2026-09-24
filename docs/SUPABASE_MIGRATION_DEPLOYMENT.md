@@ -206,3 +206,21 @@ Estado:
 - provider v1 `vercel_blob`: PASS;
 - advisor de seguranca: nenhum finding novo; HIBP permanece conhecido;
 - advisor de performance: indice novo ainda sem uso observado; nenhuma alteracao criada apenas para zerar lint sem workload.
+
+## Migration 20260924215415 - limites de retencao de falhas de IA
+
+Status: **APLICADA / VALIDADA NO SAAS**
+
+Migration:
+`20260924215415_add_ai_failure_retention_constraints.sql`
+
+Alteracoes:
+- CHECK `ai_execution_failure_responses_content_size_check`: `octet_length(content) <= 131072`;
+- CHECK `ai_executions_failure_message_size_check`: `failure_message is null or char_length(failure_message) <= 1024`.
+
+Validacao pos-apply:
+- historico remoto contem a migration;
+- introspeccao de `pg_constraint` confirmou ambas as definicoes;
+- nao existiam failure responses/failure messages reais antes do apply;
+- advisor de seguranca sem finding novo causado pela migration.
+

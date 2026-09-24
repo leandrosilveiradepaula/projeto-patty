@@ -1,6 +1,6 @@
 begin;
 
-select plan(10);
+select plan(12);
 
 insert into auth.users (id,email,raw_user_meta_data)
 values
@@ -244,6 +244,34 @@ select is(
      and p.prosecdef),
   0::bigint,
   'internal AI RPCs are SECURITY INVOKER'
+);
+
+select ok(
+  exists (
+    select 1
+    from pg_constraint c
+    join pg_class t on t.oid=c.conrelid
+    join pg_namespace n on n.oid=t.relnamespace
+    where n.nspname='public'
+      and t.relname='ai_execution_failure_responses'
+      and c.conname='ai_execution_failure_responses_content_size_check'
+      and pg_get_constraintdef(c.oid) ilike '%octet_length(content) <= 131072%'
+  ),
+  'failure response raw content has a 128 KiB database check constraint'
+);
+
+select ok(
+  exists (
+    select 1
+    from pg_constraint c
+    join pg_class t on t.oid=c.conrelid
+    join pg_namespace n on n.oid=t.relnamespace
+    where n.nspname='public'
+      and t.relname='ai_executions'
+      and c.conname='ai_executions_failure_message_size_check'
+      and pg_get_constraintdef(c.oid) ilike '%char_length(failure_message) <= 1024%'
+  ),
+  'failure message has a 1024-character database check constraint'
 );
 
 select * from finish();
