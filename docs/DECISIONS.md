@@ -25,7 +25,7 @@ Criar a tabela de metadata nao significa que o Blob store exista nem que o video
 
 ### ESTADO OPERACIONAL
 
-A migration `20260924210600_create_educational_content_assets.sql` foi aplicada no Supabase SaaS em 2026-09-24 e passou smoke pos-apply sintetico com `ROLLBACK`. Nenhum Blob store foi criado e nenhum arquivo foi migrado nesta etapa.
+A migration `20260924210600_create_educational_content_assets.sql` foi aplicada no Supabase SaaS em 2026-09-24 e passou smoke pos-apply sintetico com `ROLLBACK`. O PR #157 foi mergeado no commit `857daed` e o deployment correspondente ficou `READY` em producao. Nenhum Blob store foi criado e nenhum arquivo foi migrado nesta etapa.
 
 ## 2026-09-24 - Gmail da Patty como SMTP do MVP
 
