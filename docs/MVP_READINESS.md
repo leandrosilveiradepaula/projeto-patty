@@ -39,7 +39,7 @@ Estados usados:
 - cliente ve conteudos explicitamente liberados;
 - CI de typecheck, audit de dependencias de producao, testes determinísticos, regressoes de boundaries de seguranca e build, em pull requests e `master`;
 - Next.js 16.3.6 e headers HTTP basicos de seguranca integrados ao `master`;
-- fundacao auditavel de IA e tratamento de falhas no banco; a migration `20260922160058_ai_execution_failure_handling.sql` consta no historico remoto do Supabase;
+- fundacao auditavel de IA, provider OpenAI gated, observabilidade de executions nao terminais e tratamento de falhas com limites na aplicacao e no banco; migrations de IA correspondentes constam no historico remoto do Supabase;
 - inventario inicial, manifesto e triagem machine-readable do Drive sem PII; nenhuma migracao/publicacao autorizada.
 
 ### Principais bloqueios atuais
@@ -74,7 +74,7 @@ Estados usados:
 | Exercicios | leitura admin IMPLEMENTADA | nao | CI VALIDADO | definir exposicao a cliente e campos finais |
 | Progresso de conteudo | schema existe | fluxo nao implementado | PARCIAL | definir quem registra abertura/conclusao |
 | IA | fundacao de banco + failure handling + boundary server-side + provider OpenAI + Structured Outputs + aliases + contrato `anamnesis_review` IMPLEMENTADOS | execucao externa continua bloqueada para dados reais | prompt v1 aplicado; CI cobre adapter/contrato/boundaries; failure handling confirmado no SaaS | executar avaliacao sintetica com credencial de ambiente e concluir `OPENAI_HEALTH_DATA_GATE.md` |
-| Drive | INVENTARIADO + revisao controlada iniciada | nenhuma migracao fisica | video da balanca aprovado pela Patty; arquivo original ~117,6 MiB excede limite atual de 50 MB do Supabase Free | decidir infraestrutura de midia e somente depois migrar/versionar o primeiro item |
+| Drive | INVENTARIADO + revisao controlada iniciada | nenhuma migracao fisica | video da balanca aprovado; Vercel Private Blob definido; lote 1 machine-readable preparado | criar/conectar o store privado e somente depois migrar/verificar/versionar o primeiro item |
 | Regras deterministicas do metodo | IMPLEMENTADO PARCIAL | sem automacao de protocolo | CI VALIDADO | ampliar somente com formulas exatas confirmadas/documentadas |
 | CI | IMPLEMENTADO | automatico no GitHub Actions + smoke E2E manual de arquivos privados | `npm ci` + audit high/critical de producao + typecheck + suites deterministicas + `test:security-boundaries` + build; core Actions em v7; E2E de producao PASS nos fluxos ja estabilizados | ampliar E2E somente para fluxos estaveis e sinteticos |
 

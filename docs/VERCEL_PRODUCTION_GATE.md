@@ -14,7 +14,7 @@ Nao considerar um fluxo como PRODUCAO VALIDADA apenas porque o PR foi mergeado o
 
 ## Resultado da validacao de 2026-09-24
 
-Os gates funcionais foram executados com o codigo de aplicacao do commit `19d216bf2148e983d452f0555a2d1e740e1027ca`, que permanece contido no `master`. Merges exclusivamente documentais posteriores nao alteram essa evidencia de runtime. O deployment de producao do `master` permanece `READY`.
+Os gates funcionais detalhados abaixo permanecem evidencias validas dos fluxos correspondentes. Alem deles, o deployment do `master` `17876bfe33d49a037bf0aaf62bbcfe893f51941f` foi confirmado `READY` em producao em 2026-09-24, sem logs `error`/`fatal` na janela consultada.
 
 Os gates executados contra a producao atual tiveram o seguinte resultado:
 

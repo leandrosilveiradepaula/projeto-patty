@@ -27,15 +27,11 @@ Antes de propor ou executar qualquer tarefa:
 
 ## Referencia atual de repositorio
 
-A reconciliacao documental foi incorporada ao `master` pelo PR #120 em 2026-09-23.
+O HEAD confirmado do `master` nesta atualizacao e:
 
-Merge commit:
+`17876bfe33d49a037bf0aaf62bbcfe893f51941f`
 
-`602c6d5129b093fc092f7b87209f21d1eab574ca`
-
-A partir desse merge, novos chats devem usar `master` como referencia inicial para `AGENTS.md`, `docs/PROJECT_STATUS.md` e os demais documentos de fonte de verdade.
-
-Antes de qualquer nova implementacao, revalidar o HEAD atual do `master` porque novos commits podem ter sido incorporados depois desse merge.
+Esse commit incorpora o PR #165, que adiciona observabilidade central de executions de IA nao terminais. Novos chats devem sempre revalidar o HEAD remoto antes de implementar qualquer mudanca.
 
 ## Legenda de estado
 
@@ -98,7 +94,11 @@ Nesta rodada, o workflow versionado confirmou no historico remoto:
 - `20260923191554_fix_anamnesis_draft_delete_trigger.sql`;
 - `20260924105003_add_anamnesis_question_applicability_foundation.sql`;
 - `20260924142453_anamnesis_final_submission_foundation.sql`;
-- `20260924153808_create_anamnesis_clarification_flow.sql`.
+- `20260924153808_create_anamnesis_clarification_flow.sql`;
+- `20260924165942_harden_ai_execution_boundary.sql`;
+- `20260924193339_seed_openai_anamnesis_review_prompt.sql`;
+- `20260924210600_create_educational_content_assets.sql`;
+- `20260924215415_add_ai_failure_retention_constraints.sql`.
 
 O apply de `20260923191554` terminou com sucesso e o `migration list` pos-apply mostrou o mesmo timestamp local/remoto. Em seguida, um smoke transacional com dados sinteticos e `ROLLBACK` confirmou: draft nao submetido pode ser excluido; submission enviada continua bloqueada com SQLSTATE `55000`; cliente A nao consegue ler submission da cliente B. Em 2026-09-24, o E2E de producao confirmou a retomada e persistencia de um rascunho existente no runtime publicado. A criacao inicial de nova Anamnese continua separada e depende da primeira versao canonica `client-anamnesis`.
 
