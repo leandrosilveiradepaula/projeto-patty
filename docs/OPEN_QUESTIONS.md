@@ -379,6 +379,8 @@ A Patty confirmou que o video historico `Como utilizar a BALANCA DE ALIMENTOS`:
 
 Esse video passa a ser o primeiro conteudo elegivel para um lote de migracao controlada. A migracao fisica, versionamento e release ainda precisam ser executados separadamente; essa confirmacao nao significa que o arquivo ja foi copiado ou publicado.
 
+A Patty tambem confirmou que a planilha historica `Sugestao de refeicoes` deve ser transformada em **conteudo educacional revisado para clientes**. A estrutura historica de seis refeicoes permanece exemplo e nao deve ser convertida em regra fixa de numero de refeicoes.
+
 Os demais conteudos continuam sujeitos a revisao individual.
 
 ### QUESTAO ABERTA
