@@ -2,9 +2,11 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  canEditDraftSingleChoiceAnswer,
+  canEditDraftTextAnswer,
   getDraftAnswerWriteMode,
   getDraftCreationMode,
-  canEditDraftTextAnswer,
+  getDraftSingleChoiceOptions,
   isUniqueViolationCode,
 } from "./draft-policy.ts";
 
@@ -80,6 +82,83 @@ test("edits only text answers that still belong to an active draft", () => {
       answerType: "text",
       answerValue: { unexpected: true },
       hasAnswer: true,
+      submittedAt: null,
+    }),
+    false,
+  );
+});
+
+test("accepts only stable non-empty string options for single-choice drafts", () => {
+  assert.deepEqual(getDraftSingleChoiceOptions(["Sim", "Nao"]), ["Sim", "Nao"]);
+  assert.equal(getDraftSingleChoiceOptions(null), null);
+  assert.equal(getDraftSingleChoiceOptions(["Sim"]), null);
+  assert.equal(getDraftSingleChoiceOptions(["Sim", ""]), null);
+  assert.equal(getDraftSingleChoiceOptions(["Sim", 1]), null);
+  assert.equal(getDraftSingleChoiceOptions(["Sim", "Sim"]), null);
+});
+
+test("edits single-choice answers only in active drafts with a valid persisted option", () => {
+  assert.equal(
+    canEditDraftSingleChoiceAnswer({
+      answerType: "single_choice",
+      answerValue: undefined,
+      hasAnswer: false,
+      options: ["Sim", "Nao"],
+      submittedAt: null,
+    }),
+    true,
+  );
+
+  assert.equal(
+    canEditDraftSingleChoiceAnswer({
+      answerType: "single_choice",
+      answerValue: "Sim",
+      hasAnswer: true,
+      options: ["Sim", "Nao"],
+      submittedAt: null,
+    }),
+    true,
+  );
+
+  assert.equal(
+    canEditDraftSingleChoiceAnswer({
+      answerType: "single_choice",
+      answerValue: "Talvez",
+      hasAnswer: true,
+      options: ["Sim", "Nao"],
+      submittedAt: null,
+    }),
+    false,
+  );
+
+  assert.equal(
+    canEditDraftSingleChoiceAnswer({
+      answerType: "single_choice",
+      answerValue: "Sim",
+      hasAnswer: true,
+      options: ["Sim", "Nao"],
+      submittedAt: "2026-09-24T00:00:00.000Z",
+    }),
+    false,
+  );
+
+  assert.equal(
+    canEditDraftSingleChoiceAnswer({
+      answerType: "text",
+      answerValue: "Sim",
+      hasAnswer: true,
+      options: ["Sim", "Nao"],
+      submittedAt: null,
+    }),
+    false,
+  );
+
+  assert.equal(
+    canEditDraftSingleChoiceAnswer({
+      answerType: "single_choice",
+      answerValue: "Sim",
+      hasAnswer: true,
+      options: ["Sim"],
       submittedAt: null,
     }),
     false,

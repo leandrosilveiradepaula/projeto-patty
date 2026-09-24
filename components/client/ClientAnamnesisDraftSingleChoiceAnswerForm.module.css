@@ -1,0 +1,70 @@
+.form {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.fieldset {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+
+.legend {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+  font-size: var(--text-label-medium-size);
+  font-weight: var(--text-label-medium-weight);
+  line-height: var(--text-label-medium-line-height);
+}
+
+.required {
+  color: var(--color-danger);
+}
+
+.description {
+  max-width: 62ch;
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-body-small-size);
+  line-height: var(--text-body-small-line-height);
+}
+
+.optionList {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.option {
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+  align-items: flex-start;
+  gap: var(--space-2);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  line-height: var(--text-body-medium-line-height);
+}
+
+.option input {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
+  margin: 0.2rem 0 0;
+  accent-color: var(--color-brand-strong);
+}
+
+.option span {
+  overflow-wrap: anywhere;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-start;
+}
