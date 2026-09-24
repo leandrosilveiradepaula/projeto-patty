@@ -70,7 +70,7 @@ Nao existe bloqueio atual de deployment Vercel para o `master`.
 | MFA administrativo | SIM | SIM | Smoke AAL1/AAL2 documentado | Enforcement RLS aplicado no SaaS | Leaked Password Protection bloqueada pelo plano atual |
 | RBAC / RLS / assignments | SIM | SIM | Smokes documentados | Fundacao e fluxos administrativos principais operacionais | Novos papeis ficam fora do MVP; assignment continua regra geral para dados client-scoped |
 | Cadastro Atual | SIM como entidade separada | SIM | Fundacao testada | Backend existente | Fluxo final de edicao cadastral pela cliente/Patty ainda aberto |
-| Anamnese versionada | SIM | SIM | Fundacao testada | Backend existente | Perguntas atuais confirmadas como base; falta fechar agrupamento, tipos de input e mapa condicional pergunta-a-pergunta |
+| Anamnese versionada | SIM | SIM | Fundacao testada | Backend existente | Especificacao candidata v1 documentada em `ANAMNESE_CANONICAL_V1_CANDIDATE.md`; falta fechar mapa condicional, tipos finais, perguntas compostas, arquivos e consentimento antes de publicar |
 | Rascunho da Anamnese | SIM | PARCIAL | Smoke transacional PASS + E2E de producao PASS em 2026-09-24 | Persistencia aplicada e retomada/edicao de rascunho existente validada em producao; inicio seguro preparado por chave canonica | Publicar a versao oficial `client-anamnesis`; validar criacao inicial e concluir tipos/autosave/submissao |
 | Obrigatoriedade da Anamnese | SIM | Regra refletida na fundacao | N/A | Todos os campos aplicaveis sao obrigatorios no envio final; campos dependentes nao aplicaveis ficam ocultos e nao obrigatorios | Mapear dependencias pergunta-a-pergunta no questionario final |
 | Correcao pos-envio da Anamnese | SIM | SIM | E2E administrativo de producao PASS em 2026-09-24 | Schema aplicado e rota/UI publicadas e validadas em producao | Apos envio, entra direto em analise; falta definir UX/lifecycle do pedido de esclarecimento a cliente |
@@ -147,6 +147,12 @@ Resumo:
    - tentativa de habilitacao retornou limitacao de plano;
    - nao criar fallback inseguro.
 
+4. **Higiene de branches / protecao do master**
+   - a limpeza administrativa das branches historicas foi autorizada, mas o conector GitHub atual nao expoe exclusao de branch;
+   - nao mover refs nem usar force-update como substituto de delete;
+   - o `master` permanece sem protecao ativa observavel;
+   - a consulta de rulesets retornou que esse recurso exige GitHub Pro para este repositorio privado, e a integracao atual tambem nao possui permissao administrativa para gravar branch protection.
+
 ## Pendencias profissionais principais
 
 A lista autoritativa esta em `OPEN_QUESTIONS.md`.
@@ -187,7 +193,7 @@ Nesta reconciliacao de 2026-09-23, incorporada ao `master` pelo PR #120:
 
 Ordem operacional sugerida, sujeita a revalidacao do HEAD:
 
-1. concluir aplicabilidade/condicionais e organizacao final da Anamnese e publicar a primeira versao canonica `client-anamnesis`;
+1. fechar os bloqueios documentados em `ANAMNESE_CANONICAL_V1_CANDIDATE.md` e somente entao publicar a primeira versao canonica `client-anamnesis`;
 2. validar o inicio de novo rascunho contra essa versao e concluir fluxo de submissao final da Anamnese;
 3. resolver infraestrutura do email real de convite;
 4. continuar integracao UI <-> backend real;
