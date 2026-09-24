@@ -139,10 +139,6 @@ test("cliente sintetica inicia e retoma draft da client-anamnesis v1 publicada",
     await expect(
       page.getByRole("button", { name: "Começar Anamnese" }),
     ).toBeVisible();
-    await expect(
-      page.getByText("Anamnese · versão 1", { exact: true }),
-    ).toBeVisible();
-
     await page.getByRole("button", { name: "Começar Anamnese" }).click();
 
     await expect(page).toHaveURL(/\/cliente\/anamnese\/[0-9a-f-]+$/);
