@@ -478,3 +478,20 @@ Quais regras profissionais ainda pendentes devem completar a criacao, revisao e 
 ### QUESTAO ABERTA
 
 Qual catalogo de equivalentes sera validado, quem podera versiona-lo e qual parte, se alguma, podera ser exibida a cliente em um protocolo publicado?
+
+
+## OpenAI — modelo e controles de dados
+
+### FATO CONFIRMADO
+
+O provider do primeiro fluxo `anamnesis_review` sera OpenAI.
+
+### QUESTOES/OPERACOES AINDA ABERTAS
+
+- definir e validar o model ID inicial de producao por avaliacao sintetica; `gpt-5.6-terra` e somente candidato tecnico;
+- configurar `OPENAI_API_KEY` fora do repositorio;
+- configurar `OPENAI_MODEL`;
+- revisar e documentar os controles organizacionais de retencao/processamento aplicaveis ao caso de uso de dados de saude;
+- somente depois habilitar `OPENAI_HEALTH_DATA_PROCESSING_ENABLED=true`.
+
+A escolha do provider nao autoriza por si so o envio de dados reais.
