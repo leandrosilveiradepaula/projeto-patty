@@ -1,5 +1,26 @@
 # Decisoes
 
+## 2026-09-24 - Planilha historica de refeicoes vira conteudo educacional revisado
+
+### REGRA CONFIRMADA PELA PATTY
+
+A Patty confirmou que a planilha historica `Sugestao de refeicoes` deve ser transformada em conteudo educacional revisado para clientes.
+
+### LIMITE PROFISSIONAL
+
+O arquivo historico possui um exemplo com seis refeicoes. Isso nao se torna regra do metodo.
+
+Permanece a regra ja confirmada:
+- nao existe numero fixo de refeicoes;
+- a quantidade de refeicoes e adaptada a rotina/preferencia com foco em adesao.
+
+Portanto, a versao educacional futura deve reaproveitar conceitos/exemplos uteis sem apresentar seis refeicoes como obrigatorias ou padrao universal.
+
+### CONSEQUENCIA DE PRODUTO
+
+O arquivo original permanece preservado como fonte historica. A publicacao para clientes deve ocorrer por uma nova versao educacional revisada, sujeita a revisao e aprovacao da Patty antes de release.
+
+
 ## 2026-09-24 - Video de uso da balanca aprovado para disponibilizacao
 
 ### REGRA CONFIRMADA PELA PATTY
