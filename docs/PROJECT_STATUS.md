@@ -78,7 +78,7 @@ Nao existe bloqueio atual de deployment Vercel para o `master`.
 | Arquivos privados | SIM | PARCIAL/AVANCADO | Smokes cliente/admin + auditoria estatica | Acesso da Patty sem assignment confirmado em RLS/Storage/rotas, com MFA AAL2 | Politica de retencao/hard delete |
 | Avaliacoes e medidas | Fundacao + cadencia profissional parcial definida | SIM na fundacao | Parcial | Backend existente | Quinzenal: cintura/abdomen/quadril/peso; mensal: todas as medidas + peso + fotos; falta catalogo mensal completo, unidades e correcao |
 | Protocolos versionados | SIM | Lifecycle manual implementado | CI/validacoes existentes | Backend/SaaS correspondente existente | Criacao/edicao profissional completa conforme regras ainda abertas |
-| Conteudo educacional / exercicios | SIM como dominios separados | Fundacao e releases parciais | Inventario original 89/89 revalidado; segunda passada metadata-only concluida | Video da balanca aprovado, mas arquivo original tem ~117,6 MiB e excede limite de 50 MB do Supabase Free; nenhuma migracao fisica feita | Decidir infraestrutura de midia educacional; depois copiar/versionar/publicar explicitamente |
+| Conteudo educacional / exercicios | SIM como dominios separados | Fundacao/release + metadata de asset preparada | Inventario 89/89 revalidado; smoke transacional de assets PASS | Vercel Private Blob definido para midia; store/upload ainda nao executados | Criar/conectar store privado, migrar video aprovado, verificar hash e publicar/liberar explicitamente |
 | Metodo da Patty | PARCIALMENTE DEFINIDO | Regras matematicas confirmadas em codigo testavel | CI | Fluxo confirmado agora inclui Cutting 3 Linear apos Cutting 2: 2 Low / 1 High | Fases 5/6, regras internas/pos-Cutting 3, Bulking, Consolidacao, hidratacao, suplementacao, treino, alertas e criterios finais |
 | IA assistiva | SIM como principio e arquitetura; provider OpenAI confirmado | PARCIAL/AVANCADO | Adapter OpenAI + Structured Outputs + aliases + UI de revisao humana; default tecnico `gpt-5.6-terra` / reasoning `medium` | Prompt v1 aplicado; PR #151 publicado READY; chamada externa bloqueada | Credencial OpenAI, avaliacao sintetica e conclusao do gate de dados de saude |
 | Failure handling de IA | SIM | SIM no schema versionado | Static gate aprovado | `20260922160058` confirmada no historico remoto do Supabase | Integrar execution real com provider sem quebrar invariantes |
@@ -202,7 +202,7 @@ Ordem operacional sugerida, sujeita a revalidacao do HEAD:
 3. RETOMAR quando houver acesso operacional: configurar Gmail Custom SMTP e validar convite real;
 4. CONCLUIDO: fluxo autenticado admin <-> cliente de esclarecimentos validado em producao com fixture sintetica no run `36053370894`;
 5. preparar execution real de IA somente quando provider/modelo, prompt operacional e controles juridicos aplicaveis forem explicitamente definidos;
-6. decidir a infraestrutura de midia educacional para arquivos acima de 50 MB; depois preparar a migracao controlada do video aprovado da balanca;
+6. infraestrutura de midia educacional DEFINIDA como Vercel Private Blob; proximo passo operacional e criar/conectar store privado e migrar controladamente o video aprovado da balanca;
 7. ampliar automacao de alimentacao/treino somente depois das regras profissionais correspondentes estarem documentadas.
 
 ## Regra de manutencao deste arquivo
@@ -327,3 +327,21 @@ Pendente operacional:
 - manter App Password fora de repositorio/chat/logs.
 
 Detalhes: `docs/GMAIL_SMTP_SETUP.md`.
+
+
+## Midia educacional >50 MB
+
+A escolha tecnica foi fechada: Vercel Private Blob privado para binarios educacionais, mantendo Supabase para metadata/versionamento/releases/autorizacao.
+
+A branch atual prepara `educational_content_assets` com imutabilidade apos publicacao, RLS por release e metadata de integridade. Smoke transacional com `ROLLBACK` confirmou:
+- asset somente em versao draft;
+- bloqueio de mutacao/delete apos publicacao;
+- bloqueio de novo asset apos publicacao;
+- cliente liberada le metadata;
+- outra cliente nao le;
+- admin AAL1 e bloqueado;
+- admin AAL2 le;
+- anon nao le;
+- provider diferente de `vercel_blob` e rejeitado.
+
+Criar o Blob store e copiar o video continuam operacoes separadas.
