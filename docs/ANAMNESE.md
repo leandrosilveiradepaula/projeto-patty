@@ -186,7 +186,7 @@ A UI podera ser reorganizada depois da decisao de fluxo. Qualquer alteracao do c
 
 A primeira revisao operacional de IA trabalha somente sobre respostas existentes de uma submission explicitamente selecionada. Submissions submetidas, answers e definicoes versionadas relacionadas sao protegidas contra alteracao ou exclusao pelo schema atual, preservando as fontes historicas referenciadas.
 
-Nesta primeira versao, a revisao pode sinalizar apenas possivel contradicao ou necessidade de esclarecimento para analise humana. Ela nao diagnostica, nao cria pendencia, nao fala com a cliente e nao substitui decisao profissional.
+Nesta primeira versao, o contrato deterministico pode representar possivel contradicao, necessidade de esclarecimento e ausencia de resposta aplicavel para analise humana. `missing_answer` nao cria pendencia operacional por si so, nao fala com a cliente e so e valido para perguntas previamente verificadas como aplicaveis e sem resposta. A revisao nao diagnostica e nao substitui decisao profissional.
 
 ### REGRA CONFIRMADA E LIMITE OPERACIONAL
 
@@ -194,6 +194,6 @@ Todos os campos aplicaveis da versao da Anamnese sao obrigatorios para o envio f
 
 A Patty confirmou a regra geral para perguntas condicionais: quando uma pergunta nao se aplica a cliente, seus campos dependentes devem ficar ocultos e deixam de ser obrigatorios.
 
-`missing_answer` nao esta mais bloqueado por falta de mapa de aplicabilidade: a v1 possui definicao versionada para as 10 dependencias aprovadas. Qualquer implementacao futura desse finding deve consultar a aplicabilidade da versao e nunca tratar campo oculto como ausente. Pergunta condicional nao aplicavel nao pode ser tratada automaticamente como ausencia.
+`missing_answer` possui contrato deterministico no validador: exige `target_question_id` e so aceita targets presentes na allowlist preparada pelo caller com perguntas da mesma versao que ja foram verificadas como aplicaveis e sem resposta. `source_answer_ids` pode ser vazio nesse tipo. Campo condicional nao aplicavel nunca entra nessa allowlist e nao pode ser tratado como ausencia.
 
 Questionario/schema existente nao equivale a questionario final validado pela Patty.

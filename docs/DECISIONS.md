@@ -1472,9 +1472,9 @@ O contexto automatico da v1 limita-se a submission, `form_version_id`, `question
 
 ### DECISAO TECNICA/PRODUTO
 
-Na primeira implementacao, os findings permitidos sao somente `possible_contradiction` e `clarification_needed`. `missing_answer` continua objetivo do produto, mas fica bloqueado ate que obrigatoriedade e aplicabilidade condicional da Anamnese estejam formalizadas.
+Os findings permitidos no contrato deterministico sao `possible_contradiction`, `clarification_needed` e `missing_answer`.
 
-`possible_contradiction` e uma sinalizacao de possivel incompatibilidade ou ambiguidade, nunca conclusao definitiva, e exige ao menos duas respostas existentes. `clarification_needed` sinaliza resposta existente ambigua ou insuficiente para revisao humana segura e exige ao menos uma resposta existente.
+`possible_contradiction` e uma sinalizacao de possivel incompatibilidade ou ambiguidade, nunca conclusao definitiva, e exige ao menos duas respostas existentes. `clarification_needed` sinaliza resposta existente ambigua ou insuficiente para revisao humana segura e exige ao menos uma resposta existente. `missing_answer` exige `target_question_id`, pode ter `source_answer_ids` vazio e so e aceito quando o caller inclui o target numa allowlist de perguntas da execution previamente verificadas como aplicaveis e sem resposta.
 
 Nenhum finding diagnostica, cria conclusao clinica, vira pendencia, e enviado a cliente, altera protocolo/fase ou publica conteudo automaticamente.
 
@@ -1490,7 +1490,7 @@ Revisao e edicao humana devem ser persistidas separadamente em `ai_draft_version
 
 ### CONTRATO CONCEITUAL DE OUTPUT
 
-O contrato conceitual da v1 e um objeto com `findings`, que pode ser vazio. Cada finding possui `type` (`possible_contradiction` ou `clarification_needed`), `source_answer_ids`, `explanation` interna com incerteza explicita e `suggested_follow_up_question` opcional e interna.
+O contrato conceitual da v1 e um objeto com `findings`, que pode ser vazio. Cada finding possui `type` (`possible_contradiction`, `clarification_needed` ou `missing_answer`), `source_answer_ids`, `explanation` interna com incerteza explicita e `suggested_follow_up_question` opcional e interna. `missing_answer` inclui ainda `target_question_id`.
 
 Propriedades extras devem ser rejeitadas. IDs devem pertencer a submission analisada e as sources da execution. O contrato nao inclui score, diagnostico ou conclusao clinica.
 
@@ -1500,9 +1500,10 @@ O primeiro validador deterministico deste contrato esta implementado em `lib/ai/
 
 - aceita somente o objeto top-level `{ findings }`;
 - rejeita propriedades extras no top-level e nos findings;
-- aceita somente `possible_contradiction` e `clarification_needed`;
+- aceita `possible_contradiction`, `clarification_needed` e `missing_answer`;
 - exige UUIDs validos, distintos e presentes na allowlist de answers efetivamente autorizadas para a execution;
-- exige ao menos duas sources para `possible_contradiction` e ao menos uma para `clarification_needed`;
+- exige ao menos duas sources para `possible_contradiction`, ao menos uma para `clarification_needed` e permite zero para `missing_answer`;
+- em `missing_answer`, exige `target_question_id` presente na allowlist deterministica de perguntas aplicaveis e sem resposta;
 - exige `explanation` nao vazia e, quando presente, `suggested_follow_up_question` nao vazia;
 - aceita `findings: []`;
 - nao cria score, diagnostico, conclusao clinica, pendencia, hipotese ou publicacao.
