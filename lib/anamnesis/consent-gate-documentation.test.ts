@@ -5,35 +5,22 @@ import test from "node:test";
 
 const gatePath = join(process.cwd(), "docs", "ANAMNESE_CONSENT_GATE.md");
 
-test("ANAM-046 consent gate preserves the external-decision boundary", () => {
+test("ANAM-046 documentation preserves the resolved MVP checkbox contract", () => {
   const gate = readFileSync(gatePath, "utf8");
 
-  const requiredSections = [
-    "Texto juridico oficial",
-    "Identificacao de versao",
-    "Base legal e finalidade",
-    "Efeito da nao concordancia",
-    "Revogacao ou retirada",
-    "Retencao do registro de aceite",
-    "Evidencia tecnica minima do aceite",
-    "Reconsentimento",
-    "Relacao com dados sensiveis e IA",
-  ];
-
-  for (const section of requiredSections) {
-    assert.match(gate, new RegExp(section));
-  }
-
-  assert.match(gate, /nao redige texto juridico/i);
-  assert.match(gate, /NAO PUBLICAR/);
-  assert.match(gate, /nao assumir[\s\S]*autoriza envio de dados para IA/i);
+  assert.match(gate, /DEFINIDO PARA O MVP/);
+  assert.match(gate, /checkbox obrigatorio/i);
+  assert.match(gate, /question_key = consent_acceptance/);
+  assert.match(gate, /options = \["Concordo"\]/);
+  assert.match(gate, /nao pode executar o envio final/i);
+  assert.match(gate, /nao coletar IP, device fingerprint, localizacao/i);
 });
 
-test("ANAM-046 gate requires documentation before implementation", () => {
+test("ANAM-046 documentation keeps AI authorization separate", () => {
   const gate = readFileSync(gatePath, "utf8");
 
-  assert.match(gate, /DECISIONS\.md/);
-  assert.match(gate, /OPEN_QUESTIONS\.md/);
-  assert.match(gate, /Somente depois:/);
-  assert.match(gate, /publicar explicitamente/);
+  assert.match(gate, /nao libera automaticamente/i);
+  assert.match(gate, /OPENAI_HEALTH_DATA_PROCESSING_ENABLED/);
+  assert.match(gate, /OPENAI_HEALTH_DATA_GATE\.md/);
+  assert.match(gate, /publicacao continua explicita/i);
 });
