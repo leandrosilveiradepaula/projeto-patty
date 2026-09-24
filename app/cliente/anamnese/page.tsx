@@ -59,7 +59,7 @@ export default async function ClienteAnamnesePage() {
                 Anamnese · versão {startAvailability.versionNumber}
               </h2>
               <p className={styles.submissionStatus}>
-                O envio final ainda não está disponível. Nesta etapa, você inicia o rascunho e salva as respostas compatíveis com a interface atual.
+                Você pode iniciar o rascunho, salvar as respostas e enviar a Anamnese quando todos os campos obrigatórios aplicáveis estiverem preenchidos e o consentimento final estiver marcado.
               </p>
             </div>
             <form action={startClientAnamnesisDraft}>
