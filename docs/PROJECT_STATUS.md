@@ -403,3 +403,18 @@ A regra fica em modulo `server-only` e e coberta por testes unitarios e regressa
 ### ESTADO DO SAAS ANTES DA MUDANCA
 
 A consulta ao Supabase SaaS encontrou 0 registros em `ai_execution_failure_responses` e 0 `failure_message` nao nulas. Nenhuma migration ou transformacao retroativa foi necessaria.
+
+## 2026-09-24 - Identidade estavel da pergunta financeira
+
+### IMPLEMENTADO
+
+A pergunta historica ANAM-033 passa a ter sua identidade tecnica tratada por contrato unico no codigo:
+
+- source code: `ANAM-033`;
+- `question_key`: `financial_capacity_for_supplements`;
+- default para IA: excluido;
+- inclusao somente por selecao explicita da Patty.
+
+O mesmo identificador agora e reutilizado pelo construtor de contexto da IA e pela UI administrativa. Um teste liga a constante ao mapa machine-readable da Anamnese v1 para detectar drift futuro.
+
+Nenhuma migration ou mudanca de schema foi necessaria; o schema ja garante `unique(form_version_id, question_key)`.

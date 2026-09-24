@@ -1726,3 +1726,13 @@ Para reduzir retencao excessiva de conteudo sensivel em cenarios de erro sem per
 - se a resposta original exceder o limite, o trecho retido e marcado como truncado e armazenado com `content_format = text`, mesmo quando a resposta original foi informada como JSON.
 
 Esses limites sao controles tecnicos de minimizacao e nao alteram o lifecycle da execution, nao publicam resultados e nao substituem a politica juridica/organizacional de retencao.
+
+## 2026-09-24 - Identidade estavel para ANAM-033 no contexto de IA
+
+### DECISAO TECNICA
+
+Para identificar a pergunta de condicao financeira entre versoes da Anamnese, usar o `question_key` semantico e versionado `financial_capacity_for_supplements`, associado a `ANAM-033` na proveniencia do mapa v1.
+
+Nao usar label textual, posicao visual ou UUID de uma versao como identificador semantico. O UUID continua identificando a instancia da pergunta naquela versao; o `question_key` identifica o significado funcional dentro da definicao versionada.
+
+A politica de IA permanece: excluir por padrao e permitir somente opt-in explicito da Patty para aquela execution.

@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import { getOpenAiProviderReadiness } from "@/lib/ai/openai-provider";
+import { ANAMNESIS_QUESTION_KEYS } from "@/lib/anamnesis/question-keys";
 import { requiresAiExecutionRecoveryReview } from "@/lib/ai/execution-lifecycle";
 import type { Json } from "@/lib/supabase/database.types";
 import {
@@ -112,7 +113,8 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
   );
   const financialQuestion = questions.find(
     (question) =>
-      question.question_key === "financial_capacity_for_supplements",
+      question.question_key ===
+      ANAMNESIS_QUESTION_KEYS.financialCapacityForSupplements,
   );
   const financialAnswer = financialQuestion
     ? answers.find((answer) => answer.question_id === financialQuestion.id)
