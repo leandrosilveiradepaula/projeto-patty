@@ -94,7 +94,7 @@ Consequencia:
 | ANAM-043 | Quais sao seus objetivos a curto (3 meses), medio (12 meses) e longo (5 anos) prazo? | include_candidate | - | `short_medium_long_term_goals` — textarea | - | keep_compound_candidate |
 | ANAM-044 | Upload de arquivos | files_integration_pending | - | - | - | integration_pending |
 | ANAM-045 | Por que optou por este plano? | include_candidate | - | `plan_choice_reason` — textarea | - | product_candidate |
-| ANAM-046 | Declaracao de Anuencia | consent_pending | - | `consent_acceptance` — consent_choice [Concordo/Nao concordo] | - | legal_pending |
+| ANAM-046 | Declaracao de Anuencia | consent_pending | - | `consent_acceptance` — consent_choice [concordancia/nao concordancia] | - | legal_pending |
 
 ## Condicionais candidatas
 
@@ -138,7 +138,7 @@ Nao vira `anamnesis_answer` nesta etapa. O app ja possui dominio privado de arqu
 
 ### ANAM-046 - consentimento
 
-Continua sem texto final, versao juridica e operacao definitiva. Nao publicar texto historico diretamente.
+Continua sem texto final, versao juridica e operacao definitiva. As opcoes candidatas preservam literalmente a evidencia historica `concordancia` / `nao concordancia`; isso nao define a redacao final do app.
 
 ### UI de tipos
 
