@@ -226,3 +226,23 @@ Nao marcar um item como:
 - publicado apenas porque foi merged.
 
 A atualizacao deve ser curta e apontar para os documentos detalhados em vez de duplicar regras extensas.
+
+
+## Smoke E2E de condicionalidade e envio final
+
+Existe um smoke manual dedicado em `e2e/client-anamnesis-conditional-submit.spec.mjs`, acionado por `.github/workflows/e2e-client-anamnesis-conditional-submit.yml`.
+
+O teste usa somente a cliente sintetica persistente de E2E e cria uma definicao temporaria publicada com:
+- uma pergunta `single_choice`;
+- uma pergunta `text` dependente de resposta exata `"Sim"`;
+- um campo obrigatorio adicional que garante que a tentativa de envio permaneça bloqueada e a submission continue eliminavel no cleanup.
+
+O smoke valida no runtime:
+- persistencia de `single_choice`;
+- pergunta dependente oculta com `Nao`;
+- pergunta dependente visivel com `Sim`;
+- mensagem de bloqueio no envio incompleto;
+- `submitted_at` permanece nulo;
+- cleanup completo da fixture temporaria.
+
+O caminho de envio completo continua coberto pelo smoke SQL transacional pos-apply, que pode usar `ROLLBACK` sem deixar submission enviada imutavel como residuo.
