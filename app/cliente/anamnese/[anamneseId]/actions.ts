@@ -138,20 +138,30 @@ export async function submitClientAnamnesis(
 ): Promise<ClientAnamnesisSubmitFormState> {
   await requireRole("client");
 
-  if (!isAnamnesisConsentAccepted(formData.get("consentAccepted"))) {
-    return {
-      message:
-        "Marque a concordância com o tratamento das informações desta Anamnese antes de enviar.",
-      success: false,
-    };
-  }
-
   try {
     await submitCurrentClientAnamnesisDraft(submissionId, {
-      consentAccepted: true,
+      consentAccepted: isAnamnesisConsentAccepted(
+        formData.get("consentAccepted"),
+      ),
     });
   } catch (error) {
     if (error instanceof AnamnesisSubmissionError) {
+      if (error.code === "consent_required") {
+        return {
+          message:
+            "Marque a concordância com o tratamento das informações desta Anamnese antes de enviar.",
+          success: false,
+        };
+      }
+
+      if (error.code === "consent_question_not_available") {
+        return {
+          message:
+            "O consentimento desta versão da Anamnese não está disponível. Atualize a página ou entre em contato com a Consultoria.",
+          success: false,
+        };
+      }
+
       if (error.code === "incomplete_or_invalid_answers") {
         return {
           message:
