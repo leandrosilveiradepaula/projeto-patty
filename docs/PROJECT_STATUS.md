@@ -79,7 +79,7 @@ Nao existe bloqueio atual de deployment Vercel para o `master`.
 | Protocolos versionados | SIM | Lifecycle manual implementado | CI/validacoes existentes | Backend/SaaS correspondente existente | Criacao/edicao profissional completa conforme regras ainda abertas |
 | Conteudo educacional / exercicios | SIM como dominios separados | Fundacao e releases parciais | Inventario original 89/89 revalidado; segunda passada metadata-only concluida | Video da balanca aprovado, mas arquivo original tem ~117,6 MiB e excede limite de 50 MB do Supabase Free; nenhuma migracao fisica feita | Decidir infraestrutura de midia educacional; depois copiar/versionar/publicar explicitamente |
 | Metodo da Patty | PARCIALMENTE DEFINIDO | Regras matematicas confirmadas em codigo testavel | CI | Fluxo confirmado agora inclui Cutting 3 Linear apos Cutting 2: 2 Low / 1 High | Fases 5/6, regras internas/pos-Cutting 3, Bulking, Consolidacao, hidratacao, suplementacao, treino, alertas e criterios finais |
-| IA assistiva | SIM como principio e arquitetura | PARCIAL | Validador deterministico de output com contradicao, esclarecimento e `missing_answer` | Fundacao de banco existente | Provider/modelo, execution boundary, montagem server-side das allowlists e UX de revisao |
+| IA assistiva | SIM como principio e arquitetura | PARCIAL/AVANCADO | Validador de output + contexto minimizado + execution boundary testada em smoke transacional | Hardening preparado em migration/branch; ainda nao aplicado | Provider/modelo, prompt operacional, chamada real ao provider e UX de revisao |
 | Failure handling de IA | SIM | SIM no schema versionado | Static gate aprovado | `20260922160058` confirmada no historico remoto do Supabase | Integrar execution real com provider sem quebrar invariantes |
 | n8n | SIM: nao usar inicialmente | N/A | N/A | Nao usado | Introduzir somente com caso concreto |
 | LangGraph | SIM: nao usar inicialmente | N/A | N/A | Nao usado | Introduzir somente se fluxo de IA justificar |
@@ -200,7 +200,7 @@ Ordem operacional sugerida, sujeita a revalidacao do HEAD:
 2. materializar a primeira `client-anamnesis`, revisar, publicar explicitamente e validar inicio, preenchimento condicional e envio final E2E;
 3. resolver infraestrutura do email real de convite;
 4. validar futuramente o fluxo autenticado admin <-> cliente de esclarecimentos com fixture sintetica sem transformar esse teste em fonte de regra;
-5. preparar execution real de IA com provider/modelo explicitamente definidos;
+5. aplicar/validar o hardening da execution boundary de IA; depois preparar execution real somente quando provider/modelo forem explicitamente definidos;
 6. decidir a infraestrutura de midia educacional para arquivos acima de 50 MB; depois preparar a migracao controlada do video aprovado da balanca;
 7. ampliar automacao de alimentacao/treino somente depois das regras profissionais correspondentes estarem documentadas.
 
@@ -262,3 +262,17 @@ Escopo:
 - sem estado formal, prazo, expiracao ou notificacao automatica.
 
 A migration `20260924153808_create_anamnesis_clarification_flow.sql` foi aplicada no Supabase SaaS em 2026-09-24 e o historico remoto foi confirmado com o mesmo version ID. O smoke pos-apply com fixture sintetica e `ROLLBACK` confirmou request AAL2, resposta da cliente correta, isolamento entre clientes, multiplos complementos, resposta original inalterada e imutabilidade. A UI passou CI/build, foi mergeada no PR #146 e o deployment de producao do commit `492a7ab` ficou `READY`. Nao foi executado E2E autenticado de producao do fluxo completo; os logs de runtime do deployment nao registraram erro/fatal na janela conferida.
+
+
+## Hardening da execution boundary de IA
+
+A branch de hardening prepara:
+- vinculo direto `ai_executions -> anamnesis_submission` para `anamnesis_review`;
+- prompt key compativel com o purpose;
+- sources restritas a answers da submission selecionada;
+- congelamento de sources apos estado terminal;
+- RPCs `SECURITY INVOKER` exclusivas de `service_role` para start/complete/fail atomicos;
+- construtor deterministico de contexto com aplicabilidade e minimizacao;
+- identidade administrativa derivada de sessao AAL2 em camada `server-only`.
+
+O desenho passou smoke transacional no Supabase SaaS com `ROLLBACK`. Migration definitiva, CI, apply e publicacao permanecem estados separados.
