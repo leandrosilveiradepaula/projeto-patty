@@ -1,5 +1,31 @@
 # Decisoes
 
+## 2026-09-24 - Esclarecimento pos-Anamnese deve voltar para a cliente
+
+### REGRA CONFIRMADA PELA PATTY
+
+Durante a analise da Anamnese, quando faltar uma informacao importante ou uma resposta estiver pouco clara, a Patty deve solicitar o esclarecimento a cliente dentro do aplicativo.
+
+A Patty nao deve completar silenciosamente a resposta original da cliente por conta propria.
+
+### CONSEQUENCIA DE PRODUTO
+
+O produto deve preservar separadamente:
+- resposta original enviada pela cliente;
+- pedido de esclarecimento;
+- resposta posterior da cliente ao esclarecimento;
+- eventuais notas/correcoes administrativas da Patty.
+
+### LIMITE
+
+Ainda precisam ser definidos:
+- como a cliente sera notificada;
+- como o pedido aparece na interface;
+- se existe prazo/expiracao;
+- como fica o estado visual da pendencia;
+- como a resposta complementar entra no contexto de IA e no historico.
+
+
 ## 2026-09-24 - Anamnese enviada entra diretamente em analise
 
 ### REGRA CONFIRMADA PELA PATTY
