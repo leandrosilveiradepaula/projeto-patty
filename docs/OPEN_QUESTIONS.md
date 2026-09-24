@@ -170,9 +170,9 @@ Havera alertas ou bloqueios de saude derivados de respostas da anamnese? Se houv
 
 Em quais fluxos algum dado cadastral precisara coexistir semanticamente em Auth, cadastro da cliente ou snapshot de anamnese, especialmente no caso de email?
 
-### QUESTAO ABERTA
+### FATO JA CONFIRMADO
 
-A secao Cadastro continuara aparecendo dentro da anamnese final ou sera movida para outro fluxo de cadastro/perfil?
+A Patty confirmou que os dados cadastrais podem permanecer dentro da Anamnese final. Essa decisao e de apresentacao/fluxo e nao elimina a separacao tecnica entre Cadastro Atual e snapshot historico da Anamnese.
 
 ### QUESTAO ABERTA
 
