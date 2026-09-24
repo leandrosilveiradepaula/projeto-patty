@@ -168,7 +168,7 @@ test("cliente sintetica retoma rascunho text e persiste insert/update", async ({
 
     await page.goto("/cliente/anamnese");
     await expect(
-      page.getByRole("heading", { name: "Anamnese" }),
+      page.getByRole("heading", { name: "Anamnese", exact: true }),
     ).toBeVisible();
 
     const resumeLink = page.getByRole("link", { name: "Continuar rascunho" });
