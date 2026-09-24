@@ -9,6 +9,7 @@ const EXPLICIT_ONLY_QUESTION_KEYS = new Set([
 export type AnamnesisReviewContextQuestion = {
   applicability_expected_answer: Json | null;
   applicability_source_question_id: string | null;
+  form_version_id: string;
   id: string;
   label: string;
   question_key: string;
@@ -60,6 +61,14 @@ export function buildAnamnesisReviewContext(input: {
   questions: AnamnesisReviewContextQuestion[];
   submissionId: string;
 }): AnamnesisReviewContext {
+  for (const question of input.questions) {
+    if (question.form_version_id !== input.formVersionId) {
+      throw new AnamnesisReviewContextBuildError(
+        "question_form_version_mismatch",
+      );
+    }
+  }
+
   const questionsById = new Map(
     input.questions.map((question) => [question.id, question]),
   );
