@@ -1,6 +1,10 @@
 import "server-only";
 
 import type { Json } from "@/lib/supabase/database.types";
+import {
+  retainAiFailureResponse,
+  sanitizeAiFailureMessage,
+} from "@/lib/ai/failure-retention";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export type InternalAiFailureInput = {
@@ -59,14 +63,18 @@ export async function completeInternalAiExecution(
 }
 
 export async function failInternalAiExecution(input: InternalAiFailureInput) {
+  const retainedResponse = retainAiFailureResponse({
+    content: input.responseContent ?? null,
+    contentFormat: input.responseContentFormat ?? null,
+  });
   const supabase = createAdminClient();
   const { error } = await supabase.rpc("fail_ai_execution", {
     p_execution_id: input.executionId,
     p_failure_code: input.failureCode,
-    p_failure_message: input.failureMessage,
+    p_failure_message: sanitizeAiFailureMessage(input.failureMessage),
     p_failure_stage: input.failureStage,
-    p_response_content: input.responseContent ?? null,
-    p_response_content_format: input.responseContentFormat ?? null,
+    p_response_content: retainedResponse.content,
+    p_response_content_format: retainedResponse.contentFormat,
     p_response_received_at: input.responseReceivedAt ?? null,
   });
 
