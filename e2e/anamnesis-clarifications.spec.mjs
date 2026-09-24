@@ -259,9 +259,13 @@ test("fluxo autenticado admin-cliente-admin preserva historico e isolamento", as
     await expect(
       adminPage.getByText("Pedido de esclarecimento registrado para a cliente."),
     ).toBeVisible();
-    await expect(adminPage.getByText(requestText, { exact: true })).toBeVisible();
+    const adminRequestCard = adminPage
+      .getByText(requestText, { exact: true })
+      .locator("..");
+
+    await expect(adminRequestCard).toBeVisible();
     await expect(
-      adminPage.getByText(fixture.questionLabel, { exact: true }),
+      adminRequestCard.getByText(fixture.questionLabel, { exact: true }),
     ).toBeVisible();
 
     const requestRow = await admin
