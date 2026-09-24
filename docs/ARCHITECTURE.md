@@ -33,7 +33,11 @@ O fluxo tecnico de ativacao do MVP usa convite administrativo do Supabase Auth. 
 
 Como Auth e persistencia relacional nao compartilham uma unica transacao, falhas apos a criacao do usuario Auth exigem compensacao explicita para remover estado parcial. O lifecycle tecnico foi validado por smoke E2E sintetico em producao: convite gerado sem inbox real, confirmacao SSR, criacao de senha, primeiro acesso, novo login e cleanup completo passaram. O Supabase SaaS confirmou zero residuos sinteticos apos o teste.
 
-O template de convite hospedado no Supabase deve usar `TokenHash` e `type=invite` apontando para `/auth/confirm`. A Site URL e a redirect allowlist ja foram alinhadas com a origem de producao. O template ainda nao esta configurado: a Management API retornou que projetos Free usando o provedor de email padrao nao podem modificar templates e exigem upgrade ou SMTP customizado. O smoke sintetico nao substitui a validacao do email real.
+O template de convite hospedado no Supabase deve usar `TokenHash` e `type=invite` apontando para `/auth/confirm`. A Site URL e a redirect allowlist ja foram alinhadas com a origem de producao.
+
+Para o MVP, o Custom SMTP sera o Gmail pessoal da Patty, via `smtp.gmail.com`, usando verificacao em duas etapas e App Password exclusiva. A aplicacao continua chamando o Supabase Auth; nao envia email diretamente por Gmail. A credencial SMTP fica somente no Supabase e nunca no browser/repositorio.
+
+O template real e a entrega por inbox ainda precisam ser configurados e validados. O smoke sintetico anterior nao substitui a validacao do email real.
 
 Permanecem abertos expiracao/reenvio do convite, recuperacao de acesso e encerramento de conta.
 
