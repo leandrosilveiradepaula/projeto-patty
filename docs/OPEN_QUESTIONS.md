@@ -278,9 +278,11 @@ Qual sera a UX e o processo humano para revisao de findings, edicao de follow-up
 
 As regras abaixo permanecem abertas somente onde a documentacao ainda nao registra confirmacao da Patty. O fluxo principal, o Reconhecimento Metabolico, as referencias iniciais de macros e doses, o limite do grupo de proteina com maior teor de gordura, o Cutting Dia 1 / Dia 2 e a refeicao livre semanal do Up Metabolico ja estao documentados como confirmados.
 
-### QUESTAO ABERTA
+### QUESTAO ABERTA — PENDENCIA RECONFIRMADA PELA PATTY
 
-Quais sao as formulas e regras definitivas das Fases 5 e 6 da Planilha Carb Cycle?
+A Patty confirmou em 2026-09-24 que as Fases 5 e 6 da Planilha Carb Cycle continuam **pendentes**.
+
+Nao implementar, inferir ou reaproveitar formulas de outras fases para preencher essa lacuna ate nova confirmacao explicita.
 
 ### PARCIALMENTE RESOLVIDO
 
