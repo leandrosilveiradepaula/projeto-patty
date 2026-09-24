@@ -370,9 +370,16 @@ Qual sera a taxonomia da biblioteca educacional?
 
 Qual sera a taxonomia da biblioteca de exercicios?
 
-### QUESTAO ABERTA
+### PARCIALMENTE RESOLVIDO
 
-Quais conteudos do Drive podem ser migrados primeiro?
+A Patty confirmou que o video historico `Como utilizar a BALANCA DE ALIMENTOS`:
+- e material da Consultoria/Patty;
+- continua atual;
+- pode ser disponibilizado as clientes no aplicativo.
+
+Esse video passa a ser o primeiro conteudo elegivel para um lote de migracao controlada. A migracao fisica, versionamento e release ainda precisam ser executados separadamente; essa confirmacao nao significa que o arquivo ja foi copiado ou publicado.
+
+Os demais conteudos continuam sujeitos a revisao individual.
 
 ### QUESTAO ABERTA
 
