@@ -1,5 +1,26 @@
 # Decisoes
 
+## 2026-09-24 - Perguntas atuais da Anamnese permanecem como base
+
+### REGRA CONFIRMADA PELA PATTY
+
+A Patty confirmou que as perguntas do formulario atual devem ser mantidas como base da Anamnese no aplicativo.
+
+A intencao nesta etapa e **organizar melhor a experiencia**, e nao realizar uma revisao ampla com remocao/adicao de varias perguntas.
+
+### LIMITE
+
+Essa confirmacao preserva o conteudo-base, mas ainda permite e exige decisoes de produto sobre:
+- agrupamento e ordem;
+- tipos de input;
+- separacao ou manutencao de perguntas compostas;
+- logica condicional;
+- apresentacao de dados cadastrais;
+- exclusao das medidas corporais da Anamnese para fluxo proprio de Avaliacao/Medidas.
+
+Nenhuma reorganizacao deve alterar silenciosamente o sentido profissional da pergunta original.
+
+
 ## 2026-09-24 - Cadencia confirmada de avaliacoes corporais
 
 ### REGRA CONFIRMADA PELA PATTY
