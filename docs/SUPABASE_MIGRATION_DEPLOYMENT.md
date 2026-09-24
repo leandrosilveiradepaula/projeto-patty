@@ -1,6 +1,6 @@
 # Deploy de migrations do Supabase SaaS
 
-Data de referencia: 2026-09-23.
+Data de referencia: 2026-09-24.
 
 ## Objetivo
 
@@ -35,11 +35,20 @@ O workflow manual `Deploy Supabase migrations` de 2026-09-23 confirmou `20260922
 
 Os smokes anteriores confirmaram MFA AAL1/AAL2, isolamento entre clientes, persistencia de rascunho, correcoes append-only e preservacao do enforcement AAL2 apos a otimizacao das policies. O advisor deixou de reportar `auth_rls_initplan` para as policies de correcoes. Para `20260923191554`, um smoke transacional pos-apply com dados sinteticos e `ROLLBACK` confirmou DELETE real de draft nao submetido, bloqueio `55000` para submission enviada e isolamento RLS entre clientes. O E2E de UI deve ser repetido quando o deployment Vercel estiver atualizado.
 
-Migration local atualmente pendente de aplicacao:
+Migration mais recente aplicada:
 
-- `20260923191554_fix_anamnesis_draft_delete_trigger.sql`
+- `20260924105003_add_anamnesis_question_applicability_foundation.sql`
 
-Ela corrige somente a semantica de retorno do trigger `BEFORE DELETE` para rascunhos e ja passou dry-run transacional; submissions enviadas continuam imutaveis.
+O dry-run listou somente essa migration como pendente. O apply foi concluido com sucesso e o `migration list` pos-apply mostrou o mesmo timestamp local/remoto: `20260924105003`.
+
+O smoke pos-apply confirmou:
+- armazenamento de uma condicao valida;
+- rejeicao de par fonte/valor incompleto;
+- rejeicao de referencia a pergunta de outra versao;
+- rejeicao de auto-referencia;
+- rejeicao de `json null` como valor esperado;
+- RLS de `anamnesis_questions` preservada;
+- 0 residuos sinteticos apos rollback.
 
 ## Workflow
 

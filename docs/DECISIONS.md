@@ -30,7 +30,22 @@ O SQL foi executado em transacao no Supabase SaaS com `ROLLBACK`. Foram verifica
 
 A migration foi gerada pelo Supabase CLI 2.117.0 com o nome `20260924105003_add_anamnesis_question_applicability_foundation.sql`.
 
-Estado desta decisao: **IMPLEMENTACAO PREPARADA / NAO APLICADA NO SAAS**.
+Estado desta decisao: **APLICADA E VERIFICADA NO SAAS**.
+
+### EVIDENCIA POS-APPLY
+
+Em 2026-09-24, o fluxo de deploy do Supabase confirmou:
+- dry-run listando somente `20260924105003_add_anamnesis_question_applicability_foundation.sql`;
+- apply concluido com sucesso;
+- `migration list` pos-apply com `20260924105003` presente local e remoto;
+- duas colunas novas presentes em `anamnesis_questions`;
+- quatro constraints de aplicabilidade presentes;
+- indice parcial presente;
+- RLS de `anamnesis_questions` continuou habilitada;
+- smoke transacional pos-apply validou regra aceita e rejeicoes esperadas;
+- `0` formularios sinteticos `e2e-applicability-*` restantes apos rollback.
+
+Os advisors de seguranca nao apontaram novo problema relacionado a esta migration. O unico warning de seguranca continua sendo Leaked Password Protection desabilitada por limitacao de plano/configuracao ja conhecida.
 
 
 ## 2026-09-24 - Gates de producao da Anamnese validados

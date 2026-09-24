@@ -141,7 +141,7 @@ A versao canonica deve preservar o sentido original. Separar em campos menores p
 
 A regra geral de ocultar dependencias nao aplicaveis esta confirmada, mas as relacoes pergunta-a-pergunta ainda nao estao fechadas.
 
-A fundacao tecnica proposta em `20260924105003_add_anamnesis_question_applicability_foundation.sql` permite uma condicao exata por pergunta dependente, sempre ligada a uma pergunta controladora da mesma versao. Isso resolve **onde** armazenar a regra, mas nao decide **quais** regras profissionais existem.
+A fundacao tecnica `20260924105003_add_anamnesis_question_applicability_foundation.sql` esta aplicada e verificada no Supabase SaaS. Ela permite uma condicao exata por pergunta dependente, sempre ligada a uma pergunta controladora da mesma versao. Isso resolve **onde** armazenar a regra, mas nao decide **quais** regras profissionais existem.
 
 Perguntas que claramente **podem exigir** uma resposta-base antes de detalhes, sem assumir ainda a regra exata:
 
