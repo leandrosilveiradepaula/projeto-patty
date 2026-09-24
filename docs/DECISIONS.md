@@ -1746,3 +1746,16 @@ O primeiro purpose `anamnesis_review` nao deve mais ser descrito como aguardando
 A configuracao `gpt-5.6-terra` + reasoning `medium` continua sendo configuracao tecnica inicial, nao uma aprovacao definitiva de qualidade. A avaliacao sintetica e o gate de dados de saude continuam pre-condicoes para uso com dados reais.
 
 A taxonomia de futuros `purpose_key` e seus contratos permanece aberta e nao altera o contrato v1 de `anamnesis_review`.
+
+## 2026-09-24 - Defesa em profundidade para retencao de falhas de IA
+
+### DECISAO TECNICA
+
+Os limites de retencao de falhas de IA nao ficam apenas na aplicacao. O banco tambem rejeita:
+- `ai_execution_failure_responses.content` acima de 131072 bytes;
+- `ai_executions.failure_message` acima de 1024 caracteres.
+
+A migration aplicada e `20260924215415_add_ai_failure_retention_constraints`.
+
+Essa camada adicional nao substitui sanitizacao/truncamento server-side; ela existe como fail-safe de integridade.
+
