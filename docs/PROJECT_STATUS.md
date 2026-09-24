@@ -541,3 +541,24 @@ Resultado:
 - consulta pos-run confirmou 0 drafts canonicos residuais.
 
 Com isso, o consentimento da `client-anamnesis` v1 esta validado no runtime de producao.
+
+## 2026-09-24 - E2E de inicio da Anamnese canonica preparado
+
+### IMPLEMENTADO / EXECUCAO MANUAL PENDENTE
+
+Foi versionado o workflow `E2E canonical Anamnesis start smoke` para validar o fluxo inicial da `client-anamnesis` v1 publicada.
+
+O teste:
+- usa apenas a cliente sintetica persistente;
+- remove previamente qualquer draft canonico residual dessa fixture;
+- confirma que a tela oferece `Começar Anamnese` para a versao 1 publicada;
+- cria o draft via UI;
+- confirma no Supabase que o draft pertence a cliente sintetica e a form version canonica v1;
+- confirma `submitted_at = null`;
+- volta a lista e comprova que a acao passa de criar para `Continuar rascunho`;
+- reabre exatamente o mesmo draft;
+- remove o draft no `finally`;
+- rotaciona a senha sintetica;
+- confirma 0 drafts canonicos residuais ao final.
+
+A copia antiga dizendo que o envio final nao estava disponivel tambem foi removida da tela do cliente.
