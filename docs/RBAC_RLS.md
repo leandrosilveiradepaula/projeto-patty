@@ -380,3 +380,12 @@ As tabelas internas de IA permanecem sem INSERT/UPDATE/DELETE para `authenticate
 Escritas de execution usam exclusivamente RPCs internas `SECURITY INVOKER` com EXECUTE revogado de `public`, `anon` e `authenticated` e concedido apenas a `service_role`.
 
 O uso de `service_role` fica restrito a modulo `server-only`. Antes da chamada privilegiada, a aplicacao deriva a identidade da sessao com `requireRole("admin")` e consulta submission/fontes pelo cliente Supabase autenticado normal, mantendo RLS como primeira verificacao. Triggers e FKs do banco repetem as invariantes de assignment, client scope, submission e lifecycle.
+
+
+## OpenAI e segredo de provider
+
+`OPENAI_API_KEY` e segredo exclusivamente server-side e nunca pode ser exposto ao browser, logs ou payloads de UI.
+
+O browser aciona somente Server Action administrativa protegida por `requireRole("admin")`/AAL2. O adapter OpenAI e `server-only`.
+
+A execucao nao envia IDs internos de answer/question ao provider; usa aliases efemeros e remapeamento posterior. O output recebido passa pelo validador deterministico antes de qualquer persistencia como `completed`.
