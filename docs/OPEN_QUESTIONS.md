@@ -356,6 +356,13 @@ Qual sera a taxonomia da biblioteca de exercicios?
 
 Quais conteudos do Drive podem ser migrados primeiro?
 
+Primeira onda ja preparada para confirmacao da Patty:
+- video `Como utilizar a BALANCA DE ALIMENTOS`: confirmar autoria/ownership, atualidade e permissao de distribuicao;
+- planilha `Sugestao de refeicoes`: decidir se fica apenas como referencia historica interna ou se deve ser transformada em conteudo educacional revisado;
+- `Fórmulas.pptx`: decidir se esse material ainda deve existir no aplicativo; se sim, exige revisao profissional completa, autoria/direitos e revisao das referencias comerciais.
+
+Nenhum desses itens esta autorizado para migracao/publicacao sem resposta explicita.
+
 ### QUESTAO ABERTA
 
 Qual sera o processo de revisao, aprovacao e versionamento dos conteudos?
