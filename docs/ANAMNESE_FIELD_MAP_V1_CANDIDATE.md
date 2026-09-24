@@ -2,7 +2,7 @@
 
 Data de referencia: 2026-09-24.
 
-Status: **MAPA DE PRODUTO V1 ACEITO / NAO PUBLICAR AINDA — ANAM-046 PENDENTE**.
+Status: **MAPA DE PRODUTO V1 ACEITO / ANAM-046 DEFINIDO**.
 
 Fonte estruturada: `docs/anamnesis_field_map_v1_candidate.json`.
 
@@ -18,7 +18,7 @@ Resumo:
 - 4 medidas corporais explicitamente fora da Anamnese;
 - 1 item de abertura tratado como conteudo de UI;
 - 1 item de upload tratado como integracao com o dominio de arquivos privados;
-- 1 consentimento ainda bloqueado por texto/versionamento juridico.
+- 1 consentimento versionado exibido como checkbox obrigatorio na finalizacao.
 
 ## Regra de desenho usada
 
@@ -42,8 +42,8 @@ Consequencia:
 - campos `text`: base de UI existe;
 - campos `single_choice`: controle generico de rascunho existe, sem aprovar automaticamente os tipos candidatos deste mapa;
 - condicionais: ainda precisam de aplicabilidade concreta aceita e comportamento de UI;
-- consentimento: continua exigindo controle proprio e decisao juridica/operacional;
-- este mapa nao autoriza publicacao enquanto os bloqueios restantes nao estiverem resolvidos.
+- consentimento: possui controle proprio de checkbox no envio final e valor versionado `Concordo`;
+- o mapa esta pronto para materializacao controlada da v1.
 
 ## Mapa completo
 
@@ -95,7 +95,7 @@ Consequencia:
 | ANAM-043 | Quais sao seus objetivos a curto (3 meses), medio (12 meses) e longo (5 anos) prazo? | include_candidate | - | `short_medium_long_term_goals` — textarea | - | keep_compound_candidate |
 | ANAM-044 | Upload de arquivos | files_integration_pending | - | - | - | integration_pending |
 | ANAM-045 | Por que optou por este plano? | include_candidate | - | `plan_choice_reason` — textarea | - | product_candidate |
-| ANAM-046 | Declaracao de Anuencia | consent_pending | - | `consent_acceptance` — consent_choice [concordancia/nao concordancia] | - | legal_pending |
+| ANAM-046 | Consentimento para tratamento das informacoes da Anamnese | include_candidate | consentimento | `consent_acceptance` — consent_checkbox [Concordo] | - | product_approved |
 
 ## Condicionais candidatas
 
@@ -139,7 +139,7 @@ Resolvido para a v1: nao vira `anamnesis_answer`. A secao Arquivos orienta e lev
 
 ### ANAM-046 - consentimento
 
-Continua sem texto final, versao juridica e operacao definitiva. As opcoes candidatas preservam literalmente a evidencia historica `concordancia` / `nao concordancia`; isso nao define a redacao final do app.
+Resolvido para a v1: checkbox obrigatorio no envio final, texto versionado na definicao da pergunta e valor persistido `Concordo`. O aceite nao cobre automaticamente uso de dados reais por IA.
 
 ### UI de tipos
 
