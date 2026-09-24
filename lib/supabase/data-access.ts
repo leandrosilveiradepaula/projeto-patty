@@ -104,6 +104,43 @@ export async function getAccessibleClientRegistration(clientId: string) {
   return data;
 }
 
+export async function listAccessibleAiAnamnesisExecutions(submissionId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("ai_executions")
+    .select(
+      "id, anamnesis_submission_id, provider, model_identifier, status, prompt_version_id, created_at, completed_at, failed_at, failure_stage, failure_code, failure_message",
+    )
+    .eq("purpose_key", "anamnesis_review")
+    .eq("anamnesis_submission_id", submissionId)
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function listAccessibleAiExecutionOutputs(executionIds: string[]) {
+  if (executionIds.length === 0) {
+    return [];
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("ai_execution_outputs")
+    .select("execution_id, content, created_at")
+    .in("execution_id", executionIds);
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
 export async function getLatestAccessibleAiPromptVersion(promptKey: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
