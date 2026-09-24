@@ -31,9 +31,16 @@ export type AnamnesisReviewSourcePayload = {
   source_answer_id: string;
 };
 
+export type AnamnesisReviewMissingTarget = {
+  label: string;
+  question_id: string;
+  question_key: string;
+};
+
 export type AnamnesisReviewContext = {
   allowedMissingTargetQuestionIds: ReadonlySet<string>;
   allowedSourceAnswerIds: ReadonlySet<string>;
+  missingTargets: AnamnesisReviewMissingTarget[];
   sources: AnamnesisReviewSourcePayload[];
 };
 
@@ -163,14 +170,20 @@ export function buildAnamnesisReviewContext(input: {
     });
   }
 
+  const missingTargets = input.questions
+    .filter(
+      (question) =>
+        applicableQuestionIds.has(question.id) &&
+        !answersByQuestionId.has(question.id),
+    )
+    .map((question) => ({
+      label: question.label,
+      question_id: question.id,
+      question_key: question.question_key,
+    }));
+
   const allowedMissingTargetQuestionIds = new Set(
-    input.questions
-      .filter(
-        (question) =>
-          applicableQuestionIds.has(question.id) &&
-          !answersByQuestionId.has(question.id),
-      )
-      .map((question) => question.id),
+    missingTargets.map((target) => target.question_id),
   );
 
   return {
@@ -178,6 +191,7 @@ export function buildAnamnesisReviewContext(input: {
     allowedSourceAnswerIds: new Set(
       sources.map((source) => source.source_answer_id),
     ),
+    missingTargets,
     sources,
   };
 }

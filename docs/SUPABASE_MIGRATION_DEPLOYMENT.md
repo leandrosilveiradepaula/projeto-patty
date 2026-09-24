@@ -173,3 +173,18 @@ Validacoes:
 - RPCs internas `SECURITY INVOKER`: PASS;
 - advisor de seguranca sem novo finding; permanece apenas HIBP ja conhecido;
 - advisor de performance informa a nova FK composta de `ai_executions` sem indice de cobertura exata. Nenhum indice extra foi criado apenas para zerar lint sem workload, conforme decisao de performance vigente.
+
+
+## 2026-09-24 — prompt OpenAI para revisao de Anamnese
+
+Migration remota:
+
+`20260924193339_seed_openai_anamnesis_review_prompt`
+
+A migration apenas cria de forma idempotente o prompt versionado `anamnesis_review` v1. Ela nao chama provider e nao cria execution.
+
+Validacao pos-apply:
+- prompt v1: exatamente 1;
+- `schema_version = 1`;
+- instructions nao vazias;
+- `ai_executions = 0`.

@@ -1,3 +1,34 @@
+## 2026-09-24 - Provider OpenAI para revisao assistida da Anamnese
+
+### REGRA CONFIRMADA PELO PROJETO
+
+O provider do primeiro fluxo de IA assistiva sera a OpenAI.
+
+### DECISAO TECNICA
+
+A integracao usa a Responses API diretamente por HTTPS no backend Next.js/Vercel, sem expor chave no browser e sem introduzir n8n/LangGraph. As chamadas usam `store: false` e Structured Outputs com JSON Schema.
+
+O default tecnico inicial e `gpt-5.6-terra`, escolhido por equilibrio entre inteligencia e custo para este fluxo de revisao. `OPENAI_MODEL` pode sobrescrever o default em avaliacao/rollout sem alterar regra profissional. O reasoning effort inicial e `medium`, sujeito a avaliacao sintetica de qualidade, custo e latencia.
+
+A chamada externa so fica habilitada quando:
+- `OPENAI_API_KEY` estiver configurada;
+- `OPENAI_MODEL` estiver configurado;
+- `OPENAI_HEALTH_DATA_PROCESSING_ENABLED=true` estiver explicitamente habilitado depois da revisao operacional de privacidade/dados.
+
+### MINIMIZACAO
+
+IDs internos de answers/questions nao sao enviados ao provider. A execucao cria aliases efemeros como `A1` e `Q1`, mapeados de volta server-side antes da validacao deterministica.
+
+`instagram` permanece excluido. Capacidade financeira permanece opt-in explicito por execution. Campos nao aplicaveis continuam fora do contexto.
+
+### REVISAO HUMANA
+
+A resposta da OpenAI entra somente como output interno de `anamnesis_review`. Achados nao criam esclarecimento, diagnostico, pendencia, protocolo, publicacao ou mensagem para cliente automaticamente.
+
+### ESTADO OPERACIONAL
+
+A migration `20260924193339_seed_openai_anamnesis_review_prompt.sql` foi aplicada no Supabase SaaS em 2026-09-24. O prompt v1 existe exatamente uma vez e nenhuma execution foi criada durante apply/validacao. A chamada externa permanece desabilitada por feature gate.
+
 ## 2026-09-24 - Fundacao de esclarecimentos pos-Anamnese
 
 ### DECISAO TECNICA/PRODUTO

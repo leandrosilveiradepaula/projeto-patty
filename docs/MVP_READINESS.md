@@ -241,3 +241,21 @@ A migration `20260924165942_harden_ai_execution_boundary.sql` esta aplicada no S
 O codigo correspondente foi mergeado pelo PR #149 e publicado no deployment READY do commit `9b7bbba`. A verificacao de runtime consultada nao mostrou logs `error/fatal` na janela observada.
 
 Isso nao significa integracao de provider pronta. Provider/modelo, prompt operacional, politica juridica aplicavel, chamada externa e UX humana dos findings continuam gates separados.
+
+
+## OpenAI — revisao assistida da Anamnese
+
+Provider confirmado: OpenAI.
+
+Estado atual:
+- adapter server-side para Responses API implementado;
+- `store: false`;
+- Structured Outputs;
+- aliases efemeros no payload externo;
+- default tecnico `gpt-5.6-terra`, reasoning `medium`;
+- prompt v1 aplicado em `20260924193339_seed_openai_anamnesis_review_prompt.sql`;
+- verificacao pos-apply: 1 prompt v1 e 0 executions;
+- UI administrativa de revisao humana implementada;
+- chamada externa bloqueada por padrao.
+
+Antes de dados reais: configurar `OPENAI_API_KEY`, executar avaliacao sintetica representativa e revisar/habilitar explicitamente `OPENAI_HEALTH_DATA_PROCESSING_ENABLED=true`.

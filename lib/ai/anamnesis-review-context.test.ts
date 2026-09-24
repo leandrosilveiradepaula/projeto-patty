@@ -161,6 +161,13 @@ test("missing targets include only applicable unanswered questions", () => {
     [...context.allowedMissingTargetQuestionIds],
     [questions[0].id],
   );
+  assert.deepEqual(context.missingTargets, [
+    {
+      label: "Ordinary",
+      question_id: questions[0].id,
+      question_key: "ordinary",
+    },
+  ]);
   assert.equal(
     context.allowedMissingTargetQuestionIds.has(questions[4].id),
     false,
