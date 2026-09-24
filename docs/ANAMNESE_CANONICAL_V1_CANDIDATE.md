@@ -2,7 +2,7 @@
 
 Data de referencia: 2026-09-24.
 
-Status: **CANDIDATA / NAO PUBLICAR AINDA**.
+Status: **PRODUTO V1 DEFINIDO / NAO PUBLICAR AINDA — ANAM-046 PENDENTE**.
 
 
 Manifesto machine-readable correspondente: `docs/anamnesis_canonical_v1_candidate.json`.
@@ -11,7 +11,7 @@ Mapa completo de campos candidato:
 - `docs/ANAMNESE_FIELD_MAP_V1_CANDIDATE.md`;
 - `docs/anamnesis_field_map_v1_candidate.json`.
 
-O mapa cobre todos os 47 itens historicos e propoe 51 campos de resposta, incluindo 10 dependencias Sim/Nao + detalhe. Essas propostas sao decisoes de produto candidatas, nao regras profissionais confirmadas.
+O mapa cobre todos os 47 itens historicos e 51 campos de resposta. Tipos nao juridicos, os 10 desdobramentos/condicionais, ANAM-044 e a ordem foram aceitos como decisoes de produto da v1. ANAM-046 continua pendente. Nenhuma dessas decisoes cria regra profissional.
 
 O manifesto e coberto por teste de invariantes para garantir:
 - cobertura exata de `ANAM-000..ANAM-046`;
@@ -72,22 +72,17 @@ Entram como candidatos de conteudo, preservando o texto historico ate revisao ed
 
 ### Upload historico
 
-`ANAM-044` nao deve ser transformado automaticamente em uma pergunta generica de upload.
+`ANAM-044` nao vira pergunta nem `anamnesis_answer`. Na v1, a secao Arquivos orienta a cliente e aponta para `/cliente/arquivos`. A finalidade do arquivo permanece no dominio privado por `file_kind` (`photo`, `exam` ou `document`).
 
-O produto ja possui dominio separado de arquivos privados. Antes da versao canonica, precisa ser definido se a Anamnese apenas:
-- solicita/explica quais arquivos sao necessarios;
-- aponta para o fluxo privado de arquivos;
-- ou registra referencias a arquivos ja enviados.
+A Anamnese nao duplica upload, bytes, metadados ou referencias como resposta. Sem nova regra profissional confirmada, upload nao bloqueia o envio final.
 
-Nao duplicar upload nem armazenar arquivo dentro de `anamnesis_answers`.
+## Ordem de secoes definida para a v1
 
-## Agrupamento candidato de secoes
-
-O agrupamento abaixo e decisao de produto candidata, baseada somente nas categorias ja documentadas. Nao altera o sentido das perguntas.
+O agrupamento abaixo e a decisao de produto da v1, baseada somente nas categorias ja documentadas. Nao altera o sentido profissional das perguntas.
 
 1. **Cadastro**
    - ANAM-001 a ANAM-004
-   - ANAM-010 pode permanecer aqui ou em Saude conforme decisao final de organizacao.
+   - ANAM-010 permanece aqui na v1.
 
 2. **Historico de saude e exames**
    - ANAM-009
@@ -119,7 +114,7 @@ O agrupamento abaixo e decisao de produto candidata, baseada somente nas categor
    - ANAM-045
 
 9. **Arquivos**
-   - referencia ao fluxo privado de arquivos, dependendo da decisao de ANAM-044.
+   - orientacao e link para `/cliente/arquivos`; sem `anamnesis_answer`.
 
 10. **Consentimento**
    - ANAM-046, depois de texto/versionamento juridico aprovados.
@@ -221,12 +216,9 @@ Instagram e outros dados informativos nao devem ser enviados a IA sem necessidad
 
 A primeira versao canonica **nao deve ser publicada** ate fechar:
 
-1. revisar/aceitar ou ajustar as 10 condicionais candidatas do mapa de campos;
-2. revisar/aceitar ou ajustar os tipos de input candidatos;
-3. revisar/aceitar ou ajustar o tratamento candidato das perguntas compostas;
-4. comportamento de ANAM-044 / arquivos;
-5. texto, versionamento e operacao de ANAM-046 / consentimento;
-6. ordem final das secoes/perguntas.
+1. texto, versionamento e operacao de ANAM-046 / consentimento;
+2. fluxo tecnico de submissao final com validacao dos campos aplicaveis;
+3. materializacao, revisao e publicacao explicita da definicao completa.
 
 A cobertura historica deixou de ser um bloqueio tecnico: o mapa candidato e seus testes garantem representacao exata de ANAM-000..046 e preservam ANAM-005..008 fora da Anamnese.
 
