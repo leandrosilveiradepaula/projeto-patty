@@ -108,7 +108,7 @@ No nivel de aplicacao, as boundaries de `/admin`, `/cliente`, Server Actions/Rou
 
 O Next.js esta pinado em `16.3.6`. O CI audita dependencias de producao para severidade alta/critica e usa `actions/checkout@v7` / `actions/setup-node@v7`. Headers globais incluem anti-framing, `nosniff`, `no-referrer`, Permissions Policy restritiva e CSP parcial segura para a arquitetura atual.
 
-A configuracao de headers passou CI/build e foi validada no runtime em 2026-09-24 contra `/login`: CSP, Permissions-Policy, `no-referrer`, `nosniff` e `DENY` estavam presentes. O `master` `19d216bf2148e983d452f0555a2d1e740e1027ca` esta em deployment de producao `READY`. O `vercel.json` continua bloqueando previews de branches `codex/**` para reduzir consumo desnecessario de builds.
+A configuracao de headers passou CI/build e foi validada no runtime em 2026-09-24 contra `/login`: CSP, Permissions-Policy, `no-referrer`, `nosniff` e `DENY` estavam presentes. A evidencia funcional foi obtida com o codigo de aplicacao do commit `19d216bf2148e983d452f0555a2d1e740e1027ca`, ainda contido no `master`; merges documentais posteriores nao mudam o resultado. O deployment de producao do `master` permanece `READY`. O `vercel.json` continua bloqueando previews de branches `codex/**` para reduzir consumo desnecessario de builds.
 
 ### Anamnese
 
