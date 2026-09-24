@@ -24,7 +24,7 @@ Estados usados:
 - notas internas append-only de revisao da Anamnese;
 - boundary server-only de criacao/retomada do rascunho e UI parcial para editar respostas `text` e `single_choice` de rascunhos ja existentes; escolhas unicas sao revalidadas no servidor contra `options` da pergunta versionada;
 - correcoes historicas append-only da Patty aplicadas no SaaS e integradas a uma UI administrativa que preserva a resposta original;
-- fundacao de esclarecimentos pos-Anamnese aplicada no SaaS: pedidos da Patty e complementos da cliente ficam separados da resposta original, com RLS client-scoped e AAL2 administrativo;
+- esclarecimentos pos-Anamnese aplicados e validados em producao: Patty/admin cria pedido sob MFA, cliente correta responde, outra cliente permanece isolada e resposta original nao e alterada;
 - avaliacoes e medidas em leitura;
 - acompanhamento profissional append-only;
 - fotos privadas de avaliacao para admin;
@@ -65,7 +65,7 @@ Estados usados:
 | Profiles / roles | IMPLEMENTADO | sem UI administrativa de gestao | RLS existente | definir bootstrap/admin e quem gerencia roles |
 | Clients / assignments | leitura + encerramento + inicio de assignment no onboarding IMPLEMENTADOS | Patty inicia onboarding por convite server-side; provisionamento cria vinculos relacionais e assignment com compensacao em falha | CI VALIDADO; encerramento E2E PASS; onboarding sintetico E2E PASS; Site URL/allowlist alinhados | template SSR real exige upgrade ou SMTP customizado; depois validar email real |
 | Cadastro Atual | leitura IMPLEMENTADA | nao | CI VALIDADO | definir quem pode alterar cada campo e auditoria |
-| Anamnese versionada | leitura, rascunho e submissao final IMPLEMENTADOS; mapa nao juridico v1 DEFINIDO; esclarecimentos pos-envio com schema aplicado | cliente salva `text`/`single_choice`; aplicabilidade oculta dependentes; envio explicito; Patty cria pedido de esclarecimento e cliente adiciona complementos append-only | CI + smoke SQL pos-apply PASS; schema de esclarecimentos SAAS VALIDADO; UI publicada no commit `492a7ab` | ANAM-046 para primeira versao canonica; E2E autenticado futuro dos esclarecimentos |
+| Anamnese versionada | leitura, rascunho e submissao final IMPLEMENTADOS; mapa nao juridico v1 DEFINIDO; esclarecimentos pos-envio IMPLEMENTADOS | cliente salva `text`/`single_choice`; aplicabilidade oculta dependentes; envio explicito; Patty cria pedido de esclarecimento e cliente adiciona complementos append-only | CI + smoke SQL pos-apply PASS; esclarecimentos E2E autenticado de producao PASS no run `36053370894` | ANAM-046 para primeira versao canonica |
 | Avaliacoes / medidas | leitura IMPLEMENTADA | acompanhamento profissional append-only | CI VALIDADO; conjunto de decisoes profissionais tipado e testado | definir catalogo, unidades, obrigatoriedade e correcao |
 | Arquivos privados | upload/listagem/download da cliente IMPLEMENTADOS; acesso admin permanente sem assignment, upload administrativo e liberacao explicita IMPLEMENTADOS | smoke E2E da cliente PASS; smoke E2E administrativo PASS em producao; cron de temporarios VALIDADO; auditoria estatica confirmou RLS/rotas coerentes com a excecao da Patty | definir retencao/hard delete |
 | Protocolos | leitura + lifecycle manual IMPLEMENTADOS | submit/approve/publish | CI + SAAS VALIDADO; lifecycle com guarda determinística testada | criar/editar plano somente quando fluxo profissional estiver formalizado |
