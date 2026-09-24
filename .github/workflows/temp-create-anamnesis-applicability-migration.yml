@@ -1,0 +1,39 @@
+name: Temp create anamnesis applicability migration
+
+on:
+  push:
+    branches:
+      - codex/anamnesis-question-applicability-foundation
+
+permissions:
+  contents: write
+
+jobs:
+  create-migration:
+    if: github.event.head_commit.message != 'chore: create applicability migration'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create migration with Supabase CLI
+        run: npx supabase migration new add_anamnesis_question_applicability_foundation
+
+      - name: Commit generated migration
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add supabase/migrations
+          git commit -m "chore: create applicability migration"
+          git push
