@@ -1787,3 +1787,20 @@ ANAM-046:
 Nao criar tabela juridica paralela para o MVP. O aceite usa a estrutura versionada existente de `anamnesis_questions` + `anamnesis_answers`, preservando cliente, submission, form version, pergunta, resposta e timestamps.
 
 A UI renderiza a unica opcao valida `Concordo` como checkbox, enquanto o backend revalida a definicao versionada antes de concluir a submission.
+
+## 2026-09-24 - Publicacao da primeira client-anamnesis
+
+### FATO OPERACIONAL
+
+A primeira definicao canonica `client-anamnesis`, versao 1, foi publicada no Supabase SaaS pela migration `20260924230322_publish_canonical_anamnesis_v1`.
+
+A definicao publicada deriva do field map v1 aprovado e contem 10 secoes, 51 perguntas e 10 condicionais.
+
+ANAM-046 integra a mesma versao:
+- `question_key = consent_acceptance`;
+- obrigatorio;
+- `single_choice`;
+- unica opcao `Concordo`;
+- UI propria de checkbox na finalizacao.
+
+A definicao nao deve ser alterada in-place. Mudancas futuras exigem nova versao.

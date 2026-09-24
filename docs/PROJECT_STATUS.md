@@ -465,3 +465,23 @@ O consentimento do MVP sera um checkbox obrigatorio na finalizacao da Anamnese. 
 A evidencia usa a propria resposta versionada da Anamnese, sem IP, fingerprint ou tabela juridica adicional. O aceite nao libera OpenAI com dados reais.
 
 Com isso, ANAM-046 deixa de bloquear a materializacao da primeira `client-anamnesis`. A proxima etapa e materializar a v1, validar e publicar explicitamente.
+
+## 2026-09-24 - Primeira client-anamnesis publicada
+
+### APLICADO / PUBLICADO NO SUPABASE SAAS
+
+A primeira versao canonica `form_key = client-anamnesis`, versao 1, foi materializada e publicada pela migration `20260924230322_publish_canonical_anamnesis_v1`.
+
+Validacao pos-apply:
+- 1 versao canonica publicada;
+- 10 secoes;
+- 51 perguntas;
+- 10 condicionais;
+- 1 ANAM-046 obrigatorio com `answer_type = single_choice` e `options = ["Concordo"]`;
+- advisor de seguranca sem novo finding alem do warning conhecido de Leaked Password Protection.
+
+A UI do checkbox ja estava publicada na Vercel antes do apply do formulario canonico.
+
+### PROXIMO GATE
+
+Executar o E2E sintetico completo de criacao inicial, preenchimento, condicionais, consentimento e envio final contra a versao canonica publicada.

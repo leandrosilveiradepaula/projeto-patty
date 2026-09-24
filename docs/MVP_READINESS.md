@@ -360,3 +360,17 @@ Estado: **DEFINIDO / IMPLEMENTACAO EM VALIDACAO**
 ANAM-046 e um checkbox obrigatorio apenas no envio final da Anamnese canonica. O valor persistido e `Concordo`; o texto pertence a versao da pergunta. Rascunhos continuam salvaveis sem aceite.
 
 Nao ha tabela juridica separada, IP ou fingerprint. O uso de dados reais pela OpenAI continua submetido a gate proprio.
+
+## Anamnese canonica v1 publicada
+
+Estado: **SAAS VALIDADO / E2E COMPLETO PENDENTE**
+
+A primeira `client-anamnesis` versao 1 esta publicada no Supabase SaaS pela migration `20260924230322_publish_canonical_anamnesis_v1`.
+
+Estrutura confirmada:
+- 10 secoes;
+- 51 perguntas;
+- 10 condicionais;
+- ANAM-046 como checkbox obrigatorio no envio final, persistindo `Concordo`.
+
+A proxima validacao e o E2E sintetico completo no runtime publicado.

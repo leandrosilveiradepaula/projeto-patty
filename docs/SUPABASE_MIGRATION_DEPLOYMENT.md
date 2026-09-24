@@ -224,3 +224,20 @@ Validacao pos-apply:
 - nao existiam failure responses/failure messages reais antes do apply;
 - advisor de seguranca sem finding novo causado pela migration.
 
+## Migration 20260924230322 - publicacao da Anamnese canonica v1
+
+Status: **APLICADA / VALIDADA NO SAAS**
+
+Migration:
+`20260924230322_publish_canonical_anamnesis_v1.sql`
+
+Resultado:
+- cria `anamnesis_forms.form_key = client-anamnesis`;
+- cria versao 1;
+- cria 10 secoes;
+- cria 51 perguntas;
+- configura 10 regras de aplicabilidade;
+- inclui ANAM-046 obrigatorio com opcao `Concordo`;
+- publica explicitamente a versao ao final da migration.
+
+Antes do apply, o mesmo SQL foi validado em transacao com `ROLLBACK`, confirmando as invariantes. Pos-apply, a estrutura foi reconsultada e confirmou 10/51/10/1.
