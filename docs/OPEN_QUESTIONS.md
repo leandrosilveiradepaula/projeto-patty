@@ -224,9 +224,17 @@ Qual politica concreta de retencao define quando um arquivo inativado/substituid
 
 ## Avaliacoes e acompanhamento
 
-### QUESTAO ABERTA
+### PARCIALMENTE RESOLVIDO
 
-Qual e o catalogo profissional de medidas, quais unidades sao permitidas e quais campos serao obrigatorios em cada avaliacao?
+A Patty confirmou duas rotinas de avaliacao:
+- **quinzenal**: cintura, abdomen, quadril e peso;
+- **mensal**: avaliacao completa com todas as medidas, peso e fotos.
+
+Continuam abertos:
+- o catalogo exato de todas as medidas da avaliacao mensal;
+- as unidades permitidas;
+- eventuais campos adicionais;
+- como a avaliacao mensal se relaciona operacionalmente com a ocorrencia quinzenal quando as datas coincidirem.
 
 ### QUESTAO ABERTA
 
