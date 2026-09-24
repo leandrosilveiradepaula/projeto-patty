@@ -389,3 +389,11 @@ Foram validados em conjunto:
 - preservacao da evidencia de aceite.
 
 Ainda falta apenas o E2E de browser completo contra producao para classificar esse fluxo como PRODUCAO VALIDADA.
+
+## E2E canônico de consentimento
+
+Estado: **WORKFLOW VERSIONADO / EXECUCAO MANUAL PENDENTE**
+
+Existe um smoke de browser dedicado a ANAM-046 na `client-anamnesis` v1 publicada. O desenho evita criar historico sintetico imutavel: uma pergunta obrigatoria permanece vazia, de modo que a tentativa com consentimento marcado persiste `Concordo` mas a submission continua rascunho e pode ser removida no cleanup.
+
+O envio completo da mesma versao ja passou em smoke SQL transacional com `ROLLBACK`.
