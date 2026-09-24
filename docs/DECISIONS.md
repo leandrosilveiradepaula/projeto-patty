@@ -1705,3 +1705,11 @@ O manifesto nao cria store, nao baixa nem envia o arquivo, nao cria conteudo/ver
 ### FATO DE CAPACIDADE DA SESSAO
 
 A integracao Vercel disponivel na sessao de 2026-09-24 nao expoe operacoes de Blob Storage. A criacao/conexao do store privado permanece uma pendencia operacional externa a esta implementacao. Nenhum token de Storage deve ser enviado por chat ou armazenado no repositorio.
+
+## 2026-09-24 - Tratamento conservador de execution de IA nao terminal
+
+### DECISAO TECNICA
+
+Enquanto nao houver mecanismo de recovery explicitamente definido, uma execution `started` sem `completed_at`/ `failed_at` deve ser tratada como **nao terminal e pendente de reconciliacao**, nunca inferida como `failed` apenas por idade.
+
+A aplicacao pode sinalizar esse estado para o admin, mas nao deve inventar timeout, failure response ou retry automatico. Essa regra evita transformar indisponibilidade de persistencia em um fato de falha que nao foi gravado.

@@ -370,3 +370,18 @@ Estado preservado:
 - os demais arquivos do Drive continuam fora deste lote.
 
 A proxima operacao de midia continua dependendo da criacao/conexao manual de um Blob store privado ao projeto Vercel. Depois disso, o lote deve seguir a ordem registrada no manifesto, sem pular verificacoes de integridade ou gates humanos.
+
+## 2026-09-24 - Visibilidade de executions de IA sem estado terminal
+
+### IMPLEMENTADO NA APLICACAO
+
+A tela administrativa de revisao assistida passa a sinalizar executions que permanecem `started` sem `completed_at` e sem `failed_at`. A classificacao e deterministica e possui teste unitario.
+
+A mitigacao e somente de observabilidade:
+- nao define timeout;
+- nao converte `started` em `failed`;
+- nao cria failure response;
+- nao dispara retry automatico;
+- nao publica resultado.
+
+A consulta ao Supabase SaaS nesta rodada encontrou 0 executions `started` sem output/failure response. O mecanismo futuro de recovery/watchdog continua aberto.
