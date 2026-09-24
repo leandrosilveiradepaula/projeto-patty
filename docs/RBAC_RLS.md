@@ -354,3 +354,18 @@ Um trigger deterministico no banco valida o envio antes da transicao:
 O banco substitui o timestamp enviado pelo caller por `statement_timestamp()`. Depois da transicao, os triggers de imutabilidade ja existentes impedem novas alteracoes na submission e nas respostas originais.
 
 A validacao da UI serve somente para experiencia; o banco permanece a autoridade final contra bypass direto da Data API.
+
+
+## Esclarecimentos pos-Anamnese
+
+### DECISAO DE SEGURANCA
+
+- `anon` nao recebe acesso;
+- cliente autenticada le pedidos e complementos somente de suas proprias submissions enviadas;
+- cliente insere somente complemento em proprio nome;
+- cliente nao cria pedido, nao atualiza e nao exclui historico;
+- Patty/admin com assignment ativo e AAL2 le o historico e cria pedido em proprio nome;
+- admin nao responde em nome da cliente;
+- pedidos so podem existir para submission enviada;
+- vinculo opcional a resposta original deve pertencer a mesma submission;
+- triggers preservam imutabilidade mesmo sob acesso privilegiado.
