@@ -17,7 +17,7 @@ const fieldMapPath = path.resolve(
 
 test("financial capacity keeps a stable versioned question key tied to ANAM-033", () => {
   const fieldMap = JSON.parse(fs.readFileSync(fieldMapPath, "utf8"));
-  const item = fieldMap.items.find(
+  const item = fieldMap.entries.find(
     (candidate: { code?: string }) =>
       candidate.code === ANAMNESIS_SOURCE_CODES.financialCapacityForSupplements,
   );
