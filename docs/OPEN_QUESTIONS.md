@@ -106,9 +106,9 @@ Qual sera o tipo final de input de cada campo da anamnese?
 
 Perguntas compostas da anamnese atual devem permanecer juntas ou ser normalizadas em campos separados?
 
-### QUESTAO ABERTA
+### PARCIALMENTE RESOLVIDO
 
-Quais campos da anamnese serao condicionais e quais serao suas regras de exibicao?
+A regra geral de exibicao condicional esta confirmada: pergunta dependente nao aplicavel fica oculta e nao obrigatoria. Ainda falta identificar no questionario final quais campos sao condicionais e quais respostas determinam sua aplicabilidade.
 
 ### QUESTAO ABERTA
 
@@ -246,11 +246,15 @@ Qual e a origem da percepcao de aderencia e quais partes do acompanhamento profi
 
 ## IA e revisao de Anamnese
 
-### QUESTAO ABERTA
+### PARCIALMENTE RESOLVIDO
 
-Como sera formalizada a aplicabilidade das perguntas condicionais da Anamnese para que `missing_answer` possa distinguir ausencia real de pergunta nao aplicavel? A obrigatoriedade geral ja esta confirmada: todos os campos aplicaveis da versao devem estar preenchidos no envio final.
+A Patty confirmou a regra geral de aplicabilidade: quando uma pergunta nao se aplica a cliente, as perguntas dependentes devem ficar ocultas e deixam de ser obrigatorias.
 
-O contrato futuro de `missing_answer` devera usar `target_question_id` para a pergunta ausente e permitir `source_answer_ids` vazio; o target devera pertencer a mesma `form_version_id` da submission. Isso e conceito futuro, nao implementacao atual.
+A obrigatoriedade geral permanece: todos os campos aplicaveis da versao devem estar preenchidos no envio final.
+
+Ainda falta mapear, pergunta a pergunta, quais dependencias existem e quais respostas ativam ou desativam cada campo condicional.
+
+O contrato futuro de `missing_answer` devera usar `target_question_id` para a pergunta ausente e permitir `source_answer_ids` vazio; o target devera pertencer a mesma `form_version_id` da submission. O finding so podera considerar ausencia quando a pergunta estiver aplicavel segundo o mapa condicional da versao.
 
 ### QUESTAO ABERTA
 
