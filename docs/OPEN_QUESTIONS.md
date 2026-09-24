@@ -112,9 +112,11 @@ Perguntas compostas da anamnese atual devem permanecer juntas ou ser normalizada
 
 A regra geral de exibicao condicional esta confirmada: pergunta dependente nao aplicavel fica oculta e nao obrigatoria. Ainda falta identificar no questionario final quais campos sao condicionais e quais respostas determinam sua aplicabilidade.
 
-### QUESTAO ABERTA
+### PARCIALMENTE RESOLVIDO
 
-Qual sera a ordem e o agrupamento final dos campos da anamnese?
+`ANAMNESE_CANONICAL_V1_CANDIDATE.md` propoe um agrupamento candidato baseado exclusivamente nas categorias e decisoes ja documentadas, sem alterar o sentido profissional das perguntas.
+
+Ainda falta validar a ordem final dentro de cada secao e fechar os pontos bloqueadores listados na especificacao candidata.
 
 ### FATO JA CONFIRMADO
 
@@ -338,7 +340,16 @@ A interface da cliente ja consegue retomar um rascunho existente e salvar respos
 
 ### QUESTAO ABERTA
 
-Como sera a submissao final da Anamnese considerando perguntas condicionais/aplicabilidade ainda nao definidas, qual sera a UX definitiva de preenchimento/autosave e qual mecanismo inicia uma nova submission a partir de uma versao publicada?
+A especificacao candidata da primeira Anamnese canonica esta em `ANAMNESE_CANONICAL_V1_CANDIDATE.md`.
+
+Antes da submissao final e da publicacao da primeira versao ainda precisam ser fechados:
+- mapa pergunta-a-pergunta de condicionais;
+- tipos finais de input;
+- tratamento das perguntas compostas;
+- integracao do item historico de upload com o dominio de arquivos privados;
+- texto/versionamento do consentimento;
+- ordem final;
+- UX definitiva de autosave/submissao.
 
 ### QUESTAO ABERTA
 
