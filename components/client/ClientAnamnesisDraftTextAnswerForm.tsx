@@ -51,7 +51,7 @@ export function ClientAnamnesisDraftTextAnswerForm({
         </Alert>
       ) : null}
       <FormField
-        description="Você pode salvar esta resposta e continuar o restante em outro momento. O envio final ainda não está disponível."
+        description="Você pode salvar esta resposta e continuar o restante em outro momento. Quando terminar todos os campos aplicáveis, use a seção de finalização para enviar a Anamnese."
         id={`anamnesis-draft-answer-${questionId}`}
         label={label}
         required={required}
