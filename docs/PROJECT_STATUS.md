@@ -79,7 +79,7 @@ Isso confirma que um deployment de producao voltou a ser aceito para o estado in
 | Arquivos privados | SIM | PARCIAL/AVANCADO | Smokes cliente/admin + auditoria estatica | Acesso da Patty sem assignment confirmado em RLS/Storage/rotas, com MFA AAL2 | Politica de retencao/hard delete |
 | Avaliacoes e medidas | Fundacao + cadencia profissional parcial definida | SIM na fundacao | Parcial | Backend existente | Quinzenal: cintura/abdomen/quadril/peso; mensal: todas as medidas + peso + fotos; falta catalogo mensal completo, unidades e correcao |
 | Protocolos versionados | SIM | Lifecycle manual implementado | CI/validacoes existentes | Backend/SaaS correspondente existente | Criacao/edicao profissional completa conforme regras ainda abertas |
-| Conteudo educacional / exercicios | SIM como dominios separados | Fundacao e releases parciais | Inventario original 89/89 revalidado; segunda passada metadata-only concluida | 110 arquivos conhecidos; video da balanca aprovado para migracao controlada; planilha de refeicoes aprovada para revisao educacional; conteudos de formulas/manipulados confirmados no app, ainda em hold profissional | Revisar profissionalmente formulas/alegacoes e referencias comerciais; preparar versoes publicaveis separadas |
+| Conteudo educacional / exercicios | SIM como dominios separados | Fundacao e releases parciais | Inventario original 89/89 revalidado; segunda passada metadata-only concluida | Video da balanca aprovado, mas arquivo original tem ~117,6 MiB e excede limite de 50 MB do Supabase Free; nenhuma migracao fisica feita | Decidir infraestrutura de midia educacional; depois copiar/versionar/publicar explicitamente |
 | Metodo da Patty | PARCIALMENTE DEFINIDO | Regras matematicas confirmadas em codigo testavel | CI | Fluxo confirmado agora inclui Cutting 3 Linear apos Cutting 2: 2 Low / 1 High | Fases 5/6, regras internas/pos-Cutting 3, Bulking, Consolidacao, hidratacao, suplementacao, treino, alertas e criterios finais |
 | IA assistiva | SIM como principio e arquitetura | PARCIAL | Validador deterministico de output | Fundacao de banco existente | Provider/modelo, execution boundary, UX de revisao |
 | Failure handling de IA | SIM | SIM no schema versionado | Static gate aprovado | `20260922160058` confirmada no historico remoto do Supabase | Integrar execution real com provider sem quebrar invariantes |
@@ -196,7 +196,7 @@ Ordem operacional sugerida, sujeita a revalidacao do HEAD:
 4. resolver infraestrutura do email real de convite;
 5. continuar integracao UI <-> backend real;
 6. preparar execution real de IA com provider/modelo explicitamente definidos;
-7. preparar a migracao controlada do video aprovado de uso da balanca e continuar a revisao dos demais candidatos do Drive;
+7. decidir a infraestrutura de midia educacional para arquivos acima de 50 MB; depois preparar a migracao controlada do video aprovado da balanca;
 8. ampliar automacao de alimentacao/treino somente depois das regras profissionais correspondentes estarem documentadas.
 
 ## Regra de manutencao deste arquivo
