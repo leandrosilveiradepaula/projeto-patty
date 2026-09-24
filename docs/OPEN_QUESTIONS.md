@@ -289,9 +289,15 @@ O contrato deterministico de `missing_answer` esta implementado no validador: us
 
 A montagem server-side da allowlist foi implementada de forma deterministica a partir da submission, perguntas versionadas, answers e aplicabilidade. Continuam separados e abertos: provider/modelo, prompt version operacional e a UX humana dos findings.
 
-### QUESTAO ABERTA
+### FATO RESOLVIDO
 
-Qual sera o limite maximo de `ai_execution_failure_responses.content` preservado como resposta bruta e o tamanho maximo de `failure_message` sanitizada? Nenhum limite sera cristalizado antes de decisao tecnica propria.
+O boundary server-side de persistencia de falhas limita:
+- `ai_execution_failure_responses.content` a 128 KiB medidos em bytes UTF-8;
+- `failure_message` a 1.024 code points apos normalizacao de whitespace;
+- caracteres NUL sao substituidos antes da persistencia;
+- quando a resposta bruta precisa ser truncada, ela passa a ser armazenada como `text`, com marcador explicito contendo tamanho original e formato informado, para nao representar um JSON truncado como JSON valido.
+
+O limite e aplicado antes do RPC privilegiado, no modulo `server-only`, e possui testes determinísticos. O SaaS foi verificado antes da mudanca e nao continha failure responses nem failure messages reais a migrar.
 
 ### GAP OPERACIONAL PARCIALMENTE MITIGADO
 
