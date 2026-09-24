@@ -20,9 +20,11 @@ Qual alternativa de infraestrutura sera adotada para o email real de convite: up
 
 Quais serao as regras de expiracao/reenvio do convite, recuperacao de acesso e encerramento da conta?
 
-### QUESTAO ABERTA
+### PARCIALMENTE RESOLVIDO
 
-Quais modulos entram no primeiro MVP operacional?
+O escopo preliminar confirmado do MVP ja esta registrado em `MVP.md`: fundacao segura, Anamnese/acompanhamento inicial, arquivos privados, avaliacoes, protocolos com controle humano, bibliotecas de conteudo/exercicios e IA assistiva em etapa posterior.
+
+O que continua aberto nao e mais a lista macro de modulos, e sim o **recorte operacional exato do primeiro lancamento** diante dos bloqueios restantes.
 
 ### QUESTAO ABERTA
 
