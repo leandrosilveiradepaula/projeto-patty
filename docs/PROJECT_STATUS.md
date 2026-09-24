@@ -523,3 +523,21 @@ O teste usa somente a fixture sintetica persistente. Ele cria um draft temporari
 - a credencial sintetica e rotacionada ao final.
 
 A execucao continua manual via `workflow_dispatch`; o conector GitHub desta sessao nao expoe acao para iniciar workflows manuais.
+
+## 2026-09-24 - E2E canônico de consentimento aprovado
+
+### PRODUCAO VALIDADA
+
+O workflow `E2E canonical Anamnesis consent smoke` passou em producao no run `36072067063`, sobre o `master` `abadca9eb71447ca6fd7eca482ff83b1e0763e61`.
+
+Resultado:
+- job `smoke`: SUCCESS;
+- Playwright: `1 passed (15.3s)`;
+- ANAM-046 renderizado como checkbox obrigatorio;
+- sem marcar, nenhuma resposta de consentimento e persistida;
+- marcado, `Concordo` e persistido pela boundary server-side;
+- submission incompleta permanece rascunho;
+- cleanup removeu o draft/answers sinteticos;
+- consulta pos-run confirmou 0 drafts canonicos residuais.
+
+Com isso, o consentimento da `client-anamnesis` v1 esta validado no runtime de producao.
