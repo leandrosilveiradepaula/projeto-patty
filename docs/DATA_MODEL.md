@@ -726,3 +726,16 @@ Versao publicada e imutavel. `client_content_releases` registra a liberacao expl
 `anamnesis_clarification_responses` preserva complementos textuais da cliente em ordem cronologica. Pedido e complemento sao append-only; nao existe UPDATE/DELETE operacional.
 
 O modelo nao cria estado de workflow. A existencia de zero, uma ou varias respostas e um fato historico, nao um status profissional de resolucao.
+
+
+## IA — hardening da execution boundary
+
+### Vinculo de execution de Anamnese
+
+`ai_executions.anamnesis_submission_id` referencia `anamnesis_submissions(id, client_id)`.
+
+Para `purpose_key = anamnesis_review`, o campo e obrigatorio e a submission deve estar enviada. A execution registra diretamente qual Anamnese foi analisada, em vez de depender apenas das rows em `ai_execution_sources`.
+
+`ai_execution_sources` continua preservando exatamente as answers efetivamente enviadas ao modelo. Para `anamnesis_review`, essas sources devem pertencer a mesma submission e so podem ser inseridas enquanto a execution estiver `started`.
+
+As transicoes `started -> completed` e `started -> failed` usam RPCs transacionais para preservar de forma atomica output/failure response e estado terminal.
