@@ -52,6 +52,9 @@ jobs:
       - name: Drive triage invariants
         run: npm run test:drive-triage
 
+      - name: Educational media migration invariants
+        run: npm run test:media-migration
+
       - name: Professional follow-up tests
         run: npm run test:follow-up
 
