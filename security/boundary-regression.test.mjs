@@ -7,6 +7,7 @@ const ROOT = process.cwd();
 
 const ENTRYPOINT_RULES = new Map([
   ["app/admin/anamneses/[anamneseId]/correcoes/actions.ts", "admin"],
+  ["app/admin/anamneses/[anamneseId]/esclarecimentos/actions.ts", "admin"],
   ["app/admin/anamneses/[anamneseId]/revisao/actions.ts", "admin"],
   ["app/admin/arquivos/[fileId]/route.ts", "admin"],
   ["app/admin/avaliacoes/[avaliacaoId]/actions.ts", "admin"],
@@ -20,6 +21,7 @@ const ENTRYPOINT_RULES = new Map([
   ["app/ativar-conta/actions.ts", "client-identity"],
   ["app/auth/confirm/route.ts", "public-auth"],
   ["app/cliente/anamnese/[anamneseId]/actions.ts", "client"],
+  ["app/cliente/anamnese/[anamneseId]/esclarecimentos/actions.ts", "client"],
   ["app/cliente/anamnese/actions.ts", "client"],
   ["app/cliente/arquivos/[fileId]/route.ts", "client"],
   ["app/cliente/arquivos/actions.ts", "client"],
