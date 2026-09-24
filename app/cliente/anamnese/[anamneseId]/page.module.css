@@ -1,3 +1,9 @@
+.headerActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
 .backLink {
   color: var(--color-brand-strong);
   font-family: var(--font-family-heading);
