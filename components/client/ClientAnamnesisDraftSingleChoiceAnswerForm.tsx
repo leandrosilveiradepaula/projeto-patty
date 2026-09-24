@@ -62,7 +62,8 @@ export function ClientAnamnesisDraftSingleChoiceAnswerForm({
         </legend>
         <p className={styles.description} id={descriptionId}>
           Selecione uma opção para esta resposta. Você pode salvar e continuar o
-          restante em outro momento; o envio final ainda não está disponível.
+          restante em outro momento. Quando terminar todos os campos aplicáveis,
+          use a seção de finalização para enviar a Anamnese.
         </p>
         <div
           aria-describedby={descriptionId}
