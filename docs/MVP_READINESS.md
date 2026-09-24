@@ -336,3 +336,12 @@ Estado: **IMPLEMENTADO TECNICAMENTE / GATE EXTERNO FECHADO**
 O primeiro purpose `anamnesis_review` ja possui provider OpenAI, configuracao tecnica inicial de modelo/effort, prompt versionado, Structured Outputs, minimizacao de contexto, aliases efemeros, validacao deterministica, persistencia auditavel e revisao humana.
 
 Nao confundir fundacao tecnica pronta com liberacao para dados reais. Ainda faltam credencial de ambiente, avaliacao sintetica aprovada e conclusao humana do gate de processamento de dados de saude.
+
+## IA - limites de falha tambem protegidos no banco
+
+Estado: **SAAS VALIDADO**
+
+A migration `20260924215415_add_ai_failure_retention_constraints` aplica no Postgres os mesmos tetos do boundary da aplicacao: 128 KiB para resposta bruta e 1024 caracteres para `failure_message`.
+
+Isso cria defesa em profundidade contra futuras escritas privilegiadas que contornem acidentalmente o helper server-side. Nenhuma RLS ou politica de acesso foi alterada.
+
