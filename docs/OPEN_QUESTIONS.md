@@ -352,7 +352,9 @@ A revisao administrativa ja possui notas append-only e correcoes append-only sep
 
 A Patty confirmou que, apos o envio final da Anamnese, a cliente entra diretamente em analise profissional. Nao sao necessarios estados intermediarios como "recebida", "em revisao" ou "pendencias" para iniciar o trabalho da Patty.
 
-Continuam abertos somente os detalhes das acoes dentro da analise, incluindo findings de IA, follow-up e eventual comunicacao com a cliente.
+A Patty tambem confirmou que, quando faltar informacao importante ou uma resposta estiver pouco clara, o esclarecimento deve ser solicitado a cliente dentro do aplicativo, em vez de a Patty completar a resposta original por conta propria.
+
+Continuam abertos os detalhes de UX, notificacao e lifecycle desse pedido de esclarecimento, alem dos findings de IA.
 
 ## Conteudo
 
