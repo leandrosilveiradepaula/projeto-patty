@@ -4,7 +4,7 @@
 
 ### FATO OPERACIONAL CONFIRMADO
 
-O `master` no commit `19d216bf2148e983d452f0555a2d1e740e1027ca` foi publicado na Vercel como deployment de producao `READY`.
+Os gates foram executados com o codigo de aplicacao do commit `19d216bf2148e983d452f0555a2d1e740e1027ca`, publicado na Vercel como deployment de producao `READY`. Esse commit permanece contido no `master`; merges exclusivamente documentais posteriores nao invalidam a evidencia.
 
 A validacao de runtime confirmou:
 - GET real de `/login` com CSP, Permissions-Policy, `no-referrer`, `nosniff` e `X-Frame-Options: DENY`;
