@@ -43,7 +43,6 @@ Estados usados:
 
 ### Principais bloqueios atuais
 
-- o bloqueio de `build-rate-limit` foi superado para o merge do PR #120: o commit `602c6d5129b093fc092f7b87209f21d1eab574ca` recebeu status Vercel `success`; ainda faltam os gates de runtime de headers e E2E antes de marcar os fluxos recentes como PRODUCAO VALIDADA;
 - questionario final e fluxo de preenchimento/submissao da Anamnese;
 - definir a politica final de retencao/hard delete de arquivos privados;
 - decidir infraestrutura/plano para habilitar `Leaked Password Protection`, recurso bloqueado no ambiente atual por exigir Pro ou superior;
@@ -65,7 +64,7 @@ Estados usados:
 | Profiles / roles | IMPLEMENTADO | sem UI administrativa de gestao | RLS existente | definir bootstrap/admin e quem gerencia roles |
 | Clients / assignments | leitura + encerramento + inicio de assignment no onboarding IMPLEMENTADOS | Patty inicia onboarding por convite server-side; provisionamento cria vinculos relacionais e assignment com compensacao em falha | CI VALIDADO; encerramento E2E PASS; onboarding sintetico E2E PASS; Site URL/allowlist alinhados | template SSR real exige upgrade ou SMTP customizado; depois validar email real |
 | Cadastro Atual | leitura IMPLEMENTADA | nao | CI VALIDADO | definir quem pode alterar cada campo e auditoria |
-| Anamnese versionada | leitura IMPLEMENTADA; rascunho persistente + retomada parcial IMPLEMENTADOS | cliente pode salvar individualmente respostas `text` em rascunho existente; nota interna append-only; UI admin de correcoes append-only; schema aplicado no SaaS | CI + SAAS VALIDADO; smoke pos-apply PASS; retomada de rascunho `text` coberta por testes/boundary CI | iniciar nova Anamnese, tipos finais, autosave definitivo e submissao final continuam bloqueados pelas definicoes finais |
+| Anamnese versionada | leitura IMPLEMENTADA; rascunho persistente + retomada parcial IMPLEMENTADOS; UI admin de correcoes IMPLEMENTADA | cliente pode salvar individualmente respostas `text` em rascunho existente; nota interna append-only; correcoes append-only; schema aplicado no SaaS | CI + SAAS + PRODUCAO VALIDADA para retomada/edicao de rascunho existente e rota de correcoes; run `35985899621` PASS | iniciar nova Anamnese, tipos finais, autosave definitivo e submissao final continuam dependentes das definicoes finais |
 | Avaliacoes / medidas | leitura IMPLEMENTADA | acompanhamento profissional append-only | CI VALIDADO; conjunto de decisoes profissionais tipado e testado | definir catalogo, unidades, obrigatoriedade e correcao |
 | Arquivos privados | upload/listagem/download da cliente IMPLEMENTADOS; acesso admin permanente sem assignment, upload administrativo e liberacao explicita IMPLEMENTADOS | smoke E2E da cliente PASS; smoke E2E administrativo PASS em producao; cron de temporarios VALIDADO; auditoria estatica confirmou RLS/rotas coerentes com a excecao da Patty | definir retencao/hard delete |
 | Protocolos | leitura + lifecycle manual IMPLEMENTADOS | submit/approve/publish | CI + SAAS VALIDADO; lifecycle com guarda determinística testada | criar/editar plano somente quando fluxo profissional estiver formalizado |
