@@ -459,16 +459,24 @@ O primeiro video aprovado pela Patty, `Como utilizar a BALANCA DE ALIMENTOS`, po
 
 O projeto Supabase atual esta no plano Free, cujo limite global de upload do Storage e 50 MB. O unico bucket existente hoje e `client-private`, destinado a arquivos privados de clientes e que nao deve ser reutilizado para a biblioteca educacional.
 
-Portanto, a migracao fisica desse video esta bloqueada ate decisao tecnica propria entre alternativas como:
-- upgrade do Supabase para um plano que suporte o tamanho original;
-- armazenamento de midia educacional em outro servico apropriado;
-- criacao de uma versao de midia reduzida/transcodificada, somente se isso for explicitamente aprovado como politica de conteudo.
+### FATO RESOLVIDO — INFRAESTRUTURA
 
-Nao criar bucket de conteudo nem alterar o arquivo original apenas para contornar o limite.
+A infraestrutura tecnica escolhida para a midia educacional binaria e Vercel Private Blob. O Supabase continua sendo fonte de verdade de metadata, versoes, releases e RLS.
+
+O bucket `client-private` nao sera reutilizado e o original nao sera reduzido apenas para contornar limite.
+
+### PENDENCIA OPERACIONAL
+
+Ainda falta:
+- criar/conectar o Blob store privado ao projeto Vercel;
+- migrar o arquivo original aprovado;
+- conferir tamanho, MIME e SHA-256;
+- registrar o asset na versao draft;
+- revisar/publicar/liberar explicitamente.
 
 ### QUESTAO ABERTA
 
-Como ocorrera a migracao fisica do Google Drive, incluindo politica de arquivos educacionais, referencias de origem internas e a escolha de infraestrutura de midia para arquivos acima do limite atual do Supabase Free?
+Como ocorrera a migracao fisica dos demais arquivos do Google Drive, incluindo referencias de origem internas, lotes, direitos e revisao individual?
 
 ### QUESTAO ABERTA
 
