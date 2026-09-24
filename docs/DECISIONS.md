@@ -1,5 +1,38 @@
 # Decisoes
 
+## 2026-09-24 - Fundacao versionada de aplicabilidade da Anamnese
+
+### DECISAO TECNICA
+
+A primeira fundacao de perguntas condicionais usa duas colunas opcionais na propria `anamnesis_questions`:
+- `applicability_source_question_id`;
+- `applicability_expected_answer`.
+
+Sem fonte/valor esperado, a pergunta e aplicavel por padrao. Com regra, a aplicabilidade e satisfeita somente quando a resposta da pergunta controladora corresponde exatamente ao JSON esperado.
+
+A fonte obrigatoriamente pertence a mesma `form_version_id`, nao pode ser a propria pergunta dependente e o par fonte/valor deve existir em conjunto.
+
+### LIMITE
+
+Essa decisao define somente a representacao tecnica. Nao define nenhuma dependencia profissional concreta do questionario e nao autoriza inferir condicionais a partir do texto historico.
+
+A v1 nao suporta AND/OR, range, negacao ou operadores clinicos.
+
+### VALIDACAO
+
+O SQL foi executado em transacao no Supabase SaaS com `ROLLBACK`. Foram verificados:
+- regra valida aceita;
+- fonte sem valor esperado rejeitada;
+- fonte de outra versao rejeitada;
+- auto-referencia rejeitada;
+- `json null` rejeitado;
+- nenhuma coluna persistida apos rollback.
+
+A migration foi gerada pelo Supabase CLI 2.117.0 com o nome `20260924105003_add_anamnesis_question_applicability_foundation.sql`.
+
+Estado desta decisao: **IMPLEMENTACAO PREPARADA / NAO APLICADA NO SAAS**.
+
+
 ## 2026-09-24 - Gates de producao da Anamnese validados
 
 ### FATO OPERACIONAL CONFIRMADO
