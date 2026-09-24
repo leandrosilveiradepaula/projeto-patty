@@ -62,3 +62,13 @@ Todos os itens abaixo precisam estar explicitamente concluídos antes de definir
 - nao habilitar o gate apenas porque a API key existe;
 - nao transformar achado da IA em diagnostico ou decisao automatica;
 - nao publicar resposta da IA diretamente para cliente.
+
+## Limites locais de falha
+
+Independentemente da politica de retencao do provider, a aplicacao limita localmente o que pode ser persistido quando uma resposta do provider falha na validacao:
+
+- resposta bruta: no maximo 128 KiB UTF-8;
+- `failure_message`: no maximo 1.024 code points;
+- resposta truncada e identificada explicitamente e armazenada como texto.
+
+Esse controle reduz persistencia excessiva em erro, mas nao altera o status deste gate: dados reais continuam proibidos enquanto o checklist de liberacao nao estiver concluido.
