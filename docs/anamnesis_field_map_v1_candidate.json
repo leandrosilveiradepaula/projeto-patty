@@ -1,0 +1,1290 @@
+{
+  "schema_version": 1,
+  "status": "candidate_not_publishable",
+  "canonical_form_key": "client-anamnesis",
+  "generated_from": "docs/ANAMNESE.md",
+  "design_rules": {
+    "preserve_historical_meaning": true,
+    "all_applicable_answer_fields_required_on_final_submit": true,
+    "split_only_explicit_yes_no_plus_detail_compounds": true,
+    "keep_open_compounds_together_by_default": true,
+    "no_new_clinical_alerts_or_rules": true,
+    "no_automatic_publication": true,
+    "current_ui_support_note": "Only answer_type=text is currently editable in client draft UI; single_choice and consent controls require implementation before publication."
+  },
+  "counts": {
+    "source_entries": 47,
+    "candidate_answer_fields": 51,
+    "conditional_candidate_fields": 10,
+    "excluded_to_assessment": 4,
+    "special_non_question_items": 2
+  },
+  "entries": [
+    {
+      "code": "ANAM-000",
+      "source_text": "Conteudo de abertura / onboarding do formulario atual",
+      "observed_type": "conteudo informativo",
+      "observed_options": "nao se aplica",
+      "historical_required": "nao confirmado",
+      "source_category": "Historico de vida",
+      "disposition": "ui_content_not_question",
+      "section": null,
+      "fields": [],
+      "status": "not_question"
+    },
+    {
+      "code": "ANAM-001",
+      "source_text": "Cidade",
+      "observed_type": "resposta curta",
+      "observed_options": "nao observado",
+      "historical_required": "sim",
+      "source_category": "Cadastro",
+      "disposition": "include_candidate",
+      "section": "cadastro",
+      "fields": [
+        {
+          "question_key_candidate": "city",
+          "label_candidate": "Cidade",
+          "answer_type_candidate": "text",
+          "ui_control_candidate": "text_input",
+          "required_when_applicable": true,
+          "current_client_ui_support": "supported_for_draft",
+          "options_candidate": null,
+          "applicability_candidate": null
+        }
+      ],
+      "status": "product_candidate"
+    },
+    {
+      "code": "ANAM-002",
+      "source_text": "Telefone",
+      "observed_type": "resposta curta",
+      "observed_options": "nao observado",
+      "historical_required": "sim",
+      "source_category": "Cadastro",
+      "disposition": "include_candidate",
+      "section": "cadastro",
+      "fields": [
+        {
+          "question_key_candidate": "contact_phone",
+          "label_candidate": "Telefone",
+          "answer_type_candidate": "text",
+          "ui_control_candidate": "tel_input",
+          "required_when_applicable": true,
+          "current_client_ui_support": "supported_for_draft",
+          "options_candidate": null,
+          "applicability_candidate": null
+        }
+      ],
+      "status": "product_candidate"
+    },
+    {
+      "code": "ANAM-003",
+      "source_text": "Email",
+      "observed_type": "resposta curta",
+      "observed_options": "nao observado",
+      "historical_required": "sim",
+      "source_category": "Cadastro",
+      "disposition": "include_candidate",
+      "section": "cadastro",
+      "fields": [
+        {
+          "question_key_candidate": "contact_email",
+          "label_candidate": "Email",
+          "answer_type_candidate": "text",
+          "ui_control_candidate": "email_input",
+          "required_when_applicable": true,
+          "current_client_ui_support": "supported_for_draft",
+          "options_candidate": null,
+          "applicability_candidate": null
+        }
+      ],
+      "status": "product_candidate"
+    },
+    {
+      "code": "ANAM-004",
+      "source_text": "Instagram",
+      "observed_type": "resposta curta",
+      "observed_options": "nao observado",
+      "historical_required": "sim",
+      "source_category": "Cadastro",
+      "disposition": "include_candidate",
+      "section": "cadastro",
+      "fields": [
+        {
+          "question_key_candidate": "instagram",
+          "label_candidate": "Instagram",
+          "answer_type_candidate": "text",
+          "ui_control_candidate": "text_input",
+          "required_when_applicable": true,
+          "current_client_ui_support": "supported_for_draft",
+          "options_candidate": null,
+          "applicability_candidate": null,
+          "ai_default": "exclude"
+        }
+      ],
+      "status": "product_candidate"
+    },
+    {
+      "code": "ANAM-005",
+      "source_text": "Ombros (toda circunferencia)",
+      "observed_type": "resposta curta/numerica nao confirmada",
+      "observed_options": "nao observado",
+      "historical_required": "sim",
+      "source_category": "Medidas",
+      "disposition": "exclude_to_assessment",
+      "section": null,
+      "fields": [],
+      "status": "confirmed_by_patty"
+    },
+    {
+      "code": "ANAM-006",
+      "source_text": "Panturrilha",
+      "observed_type": "resposta curta/numerica nao confirmada",
+      "observed_options": "nao observado",
+      "historical_required": "sim",
+      "source_category": "Medidas",
+      "disposition": "exclude_to_assessment",
+      "section": null,
+      "fields": [],
+      "status": "confirmed_by_patty"
+    },
+    {
+      "code": "ANAM-007",
+      "source_text": "Peso atual",
+      "observed_type": "resposta curta/numerica nao confirmada",
+      "observed_options": "nao observado",
+      "historical_required": "sim",
+      "source_category": "Medidas",
+      "disposition": "exclude_to_assessment",
+      "section": null,
+      "fields": [],
+      "status": "confirmed_by_patty"
+    },
+    {
+      "code": "ANAM-008",
+      "source_text": "Altura",
+      "observed_type": "resposta curta/numerica nao confirmada",
+      "observed_options": "nao observado",
+      "historical_required": "sim",
+      "source_category": "Medidas",
+      "disposition": "exclude_to_assessment",
+      "section": null,
+      "fields": [],
+      "status": "confirmed_by_patty"
+    },
+    {
+      "code": "ANAM-009",
+      "source_text": "Tem o costume de realizar exames de sangue?",
+      "observed_type": "pergunta textual",
+      "observed_options": "nao observado",
+      "historical_required": "nao confirmado",
+      "source_category": "Exames e documentos",
+      "disposition": "include_candidate",
+      "section": "historico-saude-exames",
+      "fields": [
+        {
+          "question_key_candidate": "blood_test_habit",
+          "label_candidate": "Tem o costume de realizar exames de sangue?",
+          "answer_type_candidate": "single_choice",
+          "ui_control_candidate": "radio_group",
+          "required_when_applicable": true,
+          "current_client_ui_support": "not_implemented",
+          "options_candidate": [
+            "Sim",
+            "Nao"
+          ],
+          "applicability_candidate": null,
+          "type_basis": "candidate_from_yes_no_wording"
+        }
+      ],
+      "status": "product_candidate"
+    },
+    {
+      "code": "ANAM-010",
+      "source_text": "Possui plano de saude? Qual?",
+      "observed_type": "pergunta textual composta",
+      "observed_options": "nao observado",
+      "historical_required": "nao confirmado",
+      "source_category": "Cadastro",
+      "disposition": "include_candidate",
+      "section": "cadastro",
+      "fields": [
+        {
+          "question_key_candidate": "has_health_plan",
+          "label_candidate": "Possui plano de saude?",
+          "answer_type_candidate": "single_choice",
+          "ui_control_candidate": "radio_group",
+          "required_when_applicable": true,
+          "current_client_ui_support": "not_implemented",
+          "options_candidate": [
+            "Sim",
+            "Nao"
+          ],
+          "applicability_candidate": null,
+          "type_basis": "candidate_from_compound_wording"
+        },
+        {
+          "question_key_candidate": "health_plan_details",
+          "label_candidate": "Qual plano de saude?",
+          "answer_type_candidate": "text",
+          "ui_control_candidate": "text_input",
+          "required_when_applicable": true,
+          "current_client_ui_support": "supported_for_draft",
+          "options_candidate": null,
+          "applicability_candidate": {
+            "source_field_key": "has_health_plan",
+            "operator": "json_equals",
+            "expected_answer": "Sim",
+            "status": "candidate_from_explicit_compound_wording"
+          }
+        }
+      ],
+      "status": "split_candidate"
+    },
+    {
+      "code": "ANAM-011",
+      "source_text": "Possui diabetes? Quanto tempo? Esta controlado?",
+      "observed_type": "pergunta textual composta",
+      "observed_options": "nao observado",
+      "historical_required": "nao confirmado",
+      "source_category": "Historico de saude",
+      "disposition": "include_candidate",
+      "section": "historico-saude-exames",
+      "fields": [
+        {
+          "question_key_candidate": "has_diabetes",
+          "label_candidate": "Possui diabetes?",
+          "answer_type_candidate": "single_choice",
+          "ui_control_candidate": "radio_group",
+          "required_when_applicable": true,
+          "current_client_ui_support": "not_implemented",
+          "options_candidate": [
+            "Sim",
+            "Nao"
+          ],
+          "applicability_candidate": null,
+          "type_basis": "candidate_from_compound_wording"
+        },
+        {
+          "question_key_candidate": "diabetes_details",
+          "label_candidate": "Quanto tempo? Esta controlado?",
+          "answer_type_candidate": "text",
+          "ui_control_candidate": "textarea",
+          "required_when_applicable": true,
+          "current_client_ui_support": "supported_for_draft",
+          "options_candidate": null,
+          "applicability_candidate": {
+            "source_field_key": "has_diabetes",
+            "operator": "json_equals",
+            "expected_answer": "Sim",
+            "status": "candidate_from_explicit_compound_wording"
+          }
+        }
+      ],
+      "status": "split_candidate"
+    },
+    {
+      "code": "ANAM-012",
+      "source_text": "Possui algum transtorno metabolico, como tireoide ou hipogonadismo? Qual(is), ha quanto tempo e esta controlado?",
+      "observed_type": "pergunta textual composta",
+      "observed_options": "nao observado",
+      "historical_required": "nao confirmado",
+      "source_category": "Historico de saude",
+      "disposition": "include_candidate",
+      "section": "historico-saude-exames",
+      "fields": [
+        {
+          "question_key_candidate": "has_metabolic_disorder",
+          "label_candidate": "Possui algum transtorno metabolico, como tireoide ou hipogonadismo?",
+          "answer_type_candidate": "single_choice",
+          "ui_control_candidate": "radio_group",
+          "required_when_applicable": true,
+          "current_client_ui_support": "not_implemented",
+          "options_candidate": [
+            "Sim",
+            "Nao"
+          ],
+          "applicability_candidate": null,
+          "type_basis": "candidate_from_compound_wording"
+        },
+        {
+          "question_key_candidate": "metabolic_disorder_details",
+          "label_candidate": "Qual(is), ha quanto tempo e esta controlado?",
+          "answer_type_candidate": "text",
+          "ui_control_candidate": "textarea",
+          "required_when_applicable": true,
+          "current_client_ui_support": "supported_for_draft",
+          "options_candidate": null,
+          "applicability_candidate": {
+            "source_field_key": "has_metabolic_disorder",
+            "operator": "json_equals",
+            "expected_answer": "Sim",
+            "status": "candidate_from_explicit_compound_wording"
+          }
+        }
+      ],
+      "status": "split_candidate"
+    },
+    {
+      "code": "ANAM-013",
+      "source_text": "Possui alguma doenca cronica, como anemia, artrite, fibromialgia etc.?",
+      "observed_type": "pergunta textual",
+      "observed_options": "nao observado",
+      "historical_required": "nao confirmado",
+      "source_category": "Historico de saude",
+      "disposition": "include_candidate",
+      "section": "historico-saude-exames",
+      "fields": [
+        {
+          "question_key_candidate": "chronic_disease",
+          "label_candidate": "Possui alguma doenca cronica, como anemia, artrite, fibromialgia etc.?",
+          "answer_type_candidate": "text",
+          "ui_control_candidate": "textarea",
+          "required_when_applicable": true,
+          "current_client_ui_support": "supported_for_draft",
+          "options_candidate": null,
+          "applicability_candidate": null,
+          "type_basis": "preserve_open_capacity_no_detail_child_added"
+        }
+      ],
+      "status": "product_candidate"
+    },
+    {
+      "code": "ANAM-014",
+      "source_text": "Ja realizou alguma cirurgia? Qual(is)?",
+      "observed_type": "pergunta textual composta",
+      "observed_options": "nao observado",
+      "historical_required": "nao confirmado",
+      "source_category": "Historico de saude",
+      "disposition": "include_candidate",
+      "section": "historico-saude-exames",
+      "fields": [
+        {
+          "question_key_candidate": "had_surgery",
+          "label_candidate": "Ja realizou alguma cirurgia?",
+          "answer_type_candidate": "single_choice",
+          "ui_control_candidate": "radio_group",
+          "required_when_applicable": true,
+          "current_client_ui_support": "not_implemented",
+          "options_candidate": [
+            "Sim",
+            "Nao"
+          ],
+          "applicability_candidate": null,
+          "type_basis": "candidate_from_compound_wording"
+        },
+        {
+          "question_key_candidate": "surgery_details",
+          "label_candidate": "Qual(is)?",
+          "answer_type_candidate": "text",
+          "ui_control_candidate": "textarea",
+          "required_when_applicable": true,
+          "current_client_ui_support": "supported_for_draft",
+          "options_candidate": null,
+          "applicability_candidate": {
+            "source_field_key": "had_surgery",
+            "operator": "json_equals",
+            "expected_answer": "Sim",
+            "status": "candidate_from_explicit_compound_wording"
+          }
+        }
+      ],
+      "status": "split_candidate"
+    },
+    {
+      "code": "ANAM-015",
+      "source_text": "Possui alergia a alguma medicacao ou comida? Qual(is)?",
+      "observed_type": "pergunta textual composta",
+      "observed_options": "nao observado",
+      "historical_required": "nao confirmado",
+      "source_category": "Historico de saude",
+      "disposition": "include_candidate",
+      "section": "historico-saude-exames",
+      "fields": [
+        {
+          "question_key_candidate": "has_allergy",
+          "label_candidate": "Possui alergia a alguma medicacao ou comida?",
+          "answer_type_candidate": "single_choice",
+          "ui_control_candidate": "radio_group",
+          "required_when_applicable": true,
+          "current_client_ui_support": "not_implemented",
+          "options_candidate": [
+            "Sim",
+            "Nao"
+          ],
+          "applicability_candidate": null,
+          "type_basis": "candidate_from_compound_wording"
+        },
+        {
+          "question_key_candidate": "allergy_details",
+          "label_candidate": "Qual(is)?",
+          "answer_type_candidate": "text",
+          "ui_control_candidate": "textarea",
+          "required_when_applicable": true,
+          "current_client_ui_support": "supported_for_draft",
+          "options_candidate": null,
+          "applicability_candidate": {
+            "source_field_key": "has_allergy",
+            "operator": "json_equals",
+            "expected_answer": "Sim",
+            "status": "candidate_from_explicit_compound_wording"
+          }
+        }
+      ],
+      "status": "split_candidate"
+    },
+    {
+      "code": "ANAM-016",
+      "source_text": "Ja fraturou ou teve alguma lesao importante que deixou sequela? Qual(is)?",
+      "observed_type": "pergunta textual composta",
+      "observed_options": "nao observado",
+      "historical_required": "nao confirmado",
+      "source_category": "Historico de saude",
+      "disposition": "include_candidate",
+      "section": "historico-saude-exames",
+      "fields": [
+        {
+          "question_key_candidate": "had_fracture_or_sequela",
+          "label_candidate": "Ja fraturou ou teve alguma lesao importante que deixou sequela?",
+          "answer_type_candidate": "single_choice",
+          "ui_control_candidate": "radio_group",
+          "required_when_applicable": true,
+          "current_client_ui_support": "not_implemented",
+          "options_candidate": [
+            "Sim",
+            "Nao"
+          ],
+          "applicability_candidate": null,
+          "type_basis": "candidate_from_compound_wording"
+        },
+        {
+          "question_key_candidate": "fracture_or_injury_details",
+          "label_candidate": "Qual(is)?",
+          "answer_type_candidate": "text",
+          "ui_control_candidate": "textarea",
+          "required_when_applicable": true,
+          "current_client_ui_support": "supported_for_draft",
+          "options_candidate": null,
+          "applicability_candidate": {
+            "source_field_key": "had_fracture_or_sequela",
+            "operator": "json_equals",
+            "expected_answer": "Sim",
+            "status": "candidate_from_explicit_compound_wording"
+          }
+        }
+      ],
+      "status": "split_candidate"
+    },
+    {
+      "code": "ANAM-017",
+      "source_text": "Sente dor intensa em alguma parte do corpo?",
+      "observed_type": "pergunta textual",
+      "observed_options": "nao observado",
+      "historical_required": "nao confirmado",
+      "source_category": "Historico de saude",
+      "disposition": "include_candidate",
+      "section": "historico-saude-exames",
+      "fields": [
+        {
+          "question_key_candidate": "intense_body_pain",
+          "label_candidate": "Sente dor intensa em alguma parte do corpo?",
+          "answer_type_candidate": "text",
+          "ui_control_candidate": "textarea",
+          "required_when_applicable": true,
+          "current_client_ui_support": "supported_for_draft",
+          "options_candidate": null,
+          "applicability_candidate": null,
+          "type_basis": "preserve_open_capacity"
+        }
+      ],
+      "status": "product_candidate"
+    },
+    {
+      "code": "ANAM-018",
+      "source_text": "Possui alguma doenca cardiovascular ou hipertensao arterial?",
+      "observed_type": "pergunta textual",
+      "observed_options": "nao observado",
+      "historical_required": "nao confirmado",
+      "source_category": "Historico de saude",
+      "disposition": "include_candidate",
+      "section": "historico-saude-exames",
+      "fields": [
+        {
+          "question_key_candidate": "cardiovascular_or_hypertension",
+          "label_candidate": "Possui alguma doenca cardiovascular ou hipertensao arterial?",
+          "answer_type_candidate": "text",
+          "ui_control_candidate": "textarea",
+          "required_when_applicable": true,
+          "current_client_ui_support": "supported_for_draft",
+          "options_candidate": null,
+          "applicability_candidate": null,
+          "type_basis": "preserve_open_capacity"
+        }
+      ],
+      "status": "product_candidate"
+    },
+    {
+      "code": "ANAM-019",
+      "source_text": "Ja sentiu dor no peito durante alguma atividade fisica?",
+      "observed_type": "pergunta textual",
+      "observed_options": "nao observado",
+      "historical_required": "nao confirmado",
+      "source_category": "Historico de saude",
+      "disposition": "include_candidate",
+      "section": "historico-saude-exames",
+      "fields": [
+        {
+          "question_key_candidate": "chest_pain_during_activity",
+          "label_candidate": "Ja sentiu dor no peito durante alguma atividade fisica?",
+          "answer_type_candidate": "single_choice",
+          "ui_control_candidate": "radio_group",
+          "required_when_applicable": true,
+          "current_client_ui_support": "not_implemented",
+          "options_candidate": [
+            "Sim",
+            "Nao"
+          ],
+          "applicability_candidate": null,
+          "type_basis": "candidate_from_yes_no_wording"
+        }
+      ],
+      "status": "product_candidate"
+    },
+    {
+      "code": "ANAM-020",
+      "source_text": "Ja desmaiou alguma vez? Descricao e frequencia.",
+      "observed_type": "pergunta textual composta",
+      "observed_options": "nao observado",
+      "historical_required": "nao confirmado",
+      "source_category": "Historico de saude",
+      "disposition": "include_candidate",
+      "section": "historico-saude-exames",
+      "fields": [
+        {
+          "question_key_candidate": "has_fainted",
+          "label_candidate": "Ja desmaiou alguma vez?",
+          "answer_type_candidate": "single_choice",
+          "ui_control_candidate": "radio_group",
+          "required_when_applicable": true,
+          "current_client_ui_support": "not_implemented",
+          "options_candidate": [
+            "Sim",
+            "Nao"
+          ],
+          "applicability_candidate": null,
+          "type_basis": "candidate_from_compound_wording"
+        },
+        {
+          "question_key_candidate": "fainting_details",
+          "label_candidate": "Descricao e frequencia.",
+          "answer_type_candidate": "text",
+          "ui_control_candidate": "textarea",
+          "required_when_applicable": true,
+          "current_client_ui_support": "supported_for_draft",
+          "options_candidate": null,
+          "applicability_candidate": {
+            "source_field_key": "has_fainted",
+            "operator": "json_equals",
+            "expected_answer": "Sim",
+            "status": "candidate_from_explicit_compound_wording"
+          }
+        }
+      ],
+      "status": "split_candidate"
+    },
+    {
+      "code": "ANAM-021",
+      "source_text": "Ja usou algum tipo de suplemento alimentar? Qual(is)?",
+      "observed_type": "pergunta textual composta",
+      "observed_options": "nao observado",
+      "historical_required": "nao confirmado",
+      "source_category": "Medicamentos e suplementacao",
+      "disposition": "include_candidate",
+      "section": "medicamentos-suplementacao",
+      "fields": [
+        {
+          "question_key_candidate": "used_supplement_before",
+          "label_candidate": "Ja usou algum tipo de suplemento alimentar?",
+          "answer_type_candidate": "single_choice",
+          "ui_control_candidate": "radio_group",
+          "required_when_applicable": true,
+          "current_client_ui_support": "not_implemented",
+          "options_candidate": [
+            "Sim",
+            "Nao"
+          ],
+          "applicability_candidate": null,
+          "type_basis": "candidate_from_compound_wording"
+        },
+        {
+          "question_key_candidate": "past_supplement_details",
+          "label_candidate": "Qual(is)?",
+          "answer_type_candidate": "text",
+          "ui_control_candidate": "textarea",
+          "required_when_applicable": true,
+          "current_client_ui_support": "supported_for_draft",
+          "options_candidate": null,
+          "applicability_candidate": {
+            "source_field_key": "used_supplement_before",
+            "operator": "json_equals",
+            "expected_answer": "Sim",
+            "status": "candidate_from_explicit_compound_wording"
+          }
+        }
+      ],
+      "status": "split_candidate"
+    },
+    {
+      "code": "ANAM-022",
+      "source_text": "O que esta administrando atualmente entre suplementos, fitoterapicos e medicamentos?",
+      "observed_type": "pergunta textual",
+      "observed_options": "nao observado",
+      "historical_required": "nao confirmado",
+      "source_category": "Medicamentos e suplementacao",
+      "disposition": "include_candidate",
+      "section": "medicamentos-suplementacao",
+      "fields": [
+        {
+          "question_key_candidate": "current_supplements_medicines",
+          "label_candidate": "O que esta administrando atualmente entre suplementos, fitoterapicos e medicamentos?",
+          "answer_type_candidate": "text",
+          "ui_control_candidate": "textarea",
+          "required_when_applicable": true,
+          "current_client_ui_support": "supported_for_draft",
+          "options_candidate": null,
+          "applicability_candidate": null
+        }
+      ],
+      "status": "product_candidate"
+    },
+    {
+      "code": "ANAM-023",
+      "source_text": "Como esta sua libido?",
+      "observed_type": "pergunta textual",
+      "observed_options": "nao observado",
+      "historical_required": "nao confirmado",
+      "source_category": "Historico de saude",
+      "disposition": "include_candidate",
+      "section": "historico-saude-exames",
+      "fields": [
+        {
+          "question_key_candidate": "libido",
+          "label_candidate": "Como esta sua libido?",
+          "answer_type_candidate": "text",
+          "ui_control_candidate": "textarea",
+          "required_when_applicable": true,
+          "current_client_ui_support": "supported_for_draft",
+          "options_candidate": null,
+          "applicability_candidate": null
+        }
+      ],
+      "status": "product_candidate"
+    },
+    {
+      "code": "ANAM-024",
+      "source_text": "Toma algum suplemento vitaminico? Qual(is)?",
+      "observed_type": "pergunta textual composta",
+      "observed_options": "nao observado",
+      "historical_required": "nao confirmado",
+      "source_category": "Medicamentos e suplementacao",
+      "disposition": "include_candidate",
+      "section": "medicamentos-suplementacao",
+      "fields": [
+        {
+          "question_key_candidate": "uses_vitamin_supplement",
+          "label_candidate": "Toma algum suplemento vitaminico?",
+          "answer_type_candidate": "single_choice",
+          "ui_control_candidate": "radio_group",
+          "required_when_applicable": true,
+          "current_client_ui_support": "not_implemented",
+          "options_candidate": [
+            "Sim",
+            "Nao"
+          ],
+          "applicability_candidate": null,
+          "type_basis": "candidate_from_compound_wording"
+        },
+        {
+          "question_key_candidate": "vitamin_supplement_details",
+          "label_candidate": "Qual(is)?",
+          "answer_type_candidate": "text",
+          "ui_control_candidate": "textarea",
+          "required_when_applicable": true,
+          "current_client_ui_support": "supported_for_draft",
+          "options_candidate": null,
+          "applicability_candidate": {
+            "source_field_key": "uses_vitamin_supplement",
+            "operator": "json_equals",
+            "expected_answer": "Sim",
+            "status": "candidate_from_explicit_compound_wording"
+          }
+        }
+      ],
+      "status": "split_candidate"
+    },
+    {
+      "code": "ANAM-025",
+      "source_text": "Como esta a qualidade e o tempo do seu sono?",
+      "observed_type": "pergunta textual composta",
+      "observed_options": "nao observado",
+      "historical_required": "nao confirmado",
+      "source_category": "Sono",
+      "disposition": "include_candidate",
+      "section": "sono-rotina",
+      "fields": [
+        {
+          "question_key_candidate": "sleep_quality_and_duration",
+          "label_candidate": "Como esta a qualidade e o tempo do seu sono?",
+          "answer_type_candidate": "text",
+          "ui_control_candidate": "textarea",
+          "required_when_applicable": true,
+          "current_client_ui_support": "supported_for_draft",
+          "options_candidate": null,
+          "applicability_candidate": null,
+          "normalization_decision": "keep_together_for_v1_candidate"
+        }
+      ],
+      "status": "keep_compound_candidate"
+    },
+    {
+      "code": "ANAM-026",
+      "source_text": "Demora a dormir?",
+      "observed_type": "pergunta textual",
+      "observed_options": "nao observado",
+      "historical_required": "nao confirmado",
+      "source_category": "Sono",
+      "disposition": "include_candidate",
+      "section": "sono-rotina",
+      "fields": [
+        {
+          "question_key_candidate": "takes_long_to_sleep",
+          "label_candidate": "Demora a dormir?",
+          "answer_type_candidate": "single_choice",
+          "ui_control_candidate": "radio_group",
+          "required_when_applicable": true,
+          "current_client_ui_support": "not_implemented",
+          "options_candidate": [
+            "Sim",
+            "Nao"
+          ],
+          "applicability_candidate": null,
+          "type_basis": "candidate_from_yes_no_wording"
+        }
+      ],
+      "status": "product_candidate"
+    },
+    {
+      "code": "ANAM-027",
+      "source_text": "Acorda muitas vezes durante a noite?",
+      "observed_type": "pergunta textual",
+      "observed_options": "nao observado",
+      "historical_required": "nao confirmado",
+      "source_category": "Sono",
+      "disposition": "include_candidate",
+      "section": "sono-rotina",
+      "fields": [
+        {
+          "question_key_candidate": "wakes_often_at_night",
+          "label_candidate": "Acorda muitas vezes durante a noite?",
+          "answer_type_candidate": "single_choice",
+          "ui_control_candidate": "radio_group",
+          "required_when_applicable": true,
+          "current_client_ui_support": "not_implemented",
+          "options_candidate": [
+            "Sim",
+            "Nao"
+          ],
+          "applicability_candidate": null,
+          "type_basis": "candidate_from_yes_no_wording"
+        }
+      ],
+      "status": "product_candidate"
+    },
+    {
+      "code": "ANAM-028",
+      "source_text": "Como sao suas relacoes sociais?",
+      "observed_type": "pergunta textual",
+      "observed_options": "nao observado",
+      "historical_required": "nao confirmado",
+      "source_category": "Comportamento",
+      "disposition": "include_candidate",
+      "section": "comportamento-contexto",
+      "fields": [
+        {
+          "question_key_candidate": "social_relationships",
+          "label_candidate": "Como sao suas relacoes sociais?",
+          "answer_type_candidate": "text",
+          "ui_control_candidate": "textarea",
+          "required_when_applicable": true,
+          "current_client_ui_support": "supported_for_draft",
+          "options_candidate": null,
+          "applicability_candidate": null
+        }
+      ],
+      "status": "product_candidate"
+    },
+    {
+      "code": "ANAM-029",
+      "source_text": "Considera-se paciente?",
+      "observed_type": "pergunta textual",
+      "observed_options": "nao observado",
+      "historical_required": "nao confirmado",
+      "source_category": "Comportamento",
+      "disposition": "include_candidate",
+      "section": "comportamento-contexto",
+      "fields": [
+        {
+          "question_key_candidate": "considers_self_patient",
+          "label_candidate": "Considera-se paciente?",
+          "answer_type_candidate": "single_choice",
+          "ui_control_candidate": "radio_group",
+          "required_when_applicable": true,
+          "current_client_ui_support": "not_implemented",
+          "options_candidate": [
+            "Sim",
+            "Nao"
+          ],
+          "applicability_candidate": null,
+          "type_basis": "candidate_from_yes_no_wording"
+        }
+      ],
+      "status": "product_candidate"
+    },
+    {
+      "code": "ANAM-030",
+      "source_text": "Ja foi mais paciente do que e hoje?",
+      "observed_type": "pergunta textual",
+      "observed_options": "nao observado",
+      "historical_required": "nao confirmado",
+      "source_category": "Comportamento",
+      "disposition": "include_candidate",
+      "section": "comportamento-contexto",
+      "fields": [
+        {
+          "question_key_candidate": "was_more_patient_before",
+          "label_candidate": "Ja foi mais paciente do que e hoje?",
+          "answer_type_candidate": "single_choice",
+          "ui_control_candidate": "radio_group",
+          "required_when_applicable": true,
+          "current_client_ui_support": "not_implemented",
+          "options_candidate": [
+            "Sim",
+            "Nao"
+          ],
+          "applicability_candidate": null,
+          "type_basis": "candidate_from_yes_no_wording"
+        }
+      ],
+      "status": "product_candidate"
+    },
+    {
+      "code": "ANAM-031",
+      "source_text": "Como esta seu humor?",
+      "observed_type": "pergunta textual",
+      "observed_options": "nao observado",
+      "historical_required": "nao confirmado",
+      "source_category": "Comportamento",
+      "disposition": "include_candidate",
+      "section": "comportamento-contexto",
+      "fields": [
+        {
+          "question_key_candidate": "mood",
+          "label_candidate": "Como esta seu humor?",
+          "answer_type_candidate": "text",
+          "ui_control_candidate": "textarea",
+          "required_when_applicable": true,
+          "current_client_ui_support": "supported_for_draft",
+          "options_candidate": null,
+          "applicability_candidate": null
+        }
+      ],
+      "status": "product_candidate"
+    },
+    {
+      "code": "ANAM-032",
+      "source_text": "Sente-se muito cansado para levantar da cama pela manha?",
+      "observed_type": "pergunta textual",
+      "observed_options": "nao observado",
+      "historical_required": "nao confirmado",
+      "source_category": "Comportamento",
+      "disposition": "include_candidate",
+      "section": "comportamento-contexto",
+      "fields": [
+        {
+          "question_key_candidate": "too_tired_to_get_up",
+          "label_candidate": "Sente-se muito cansado para levantar da cama pela manha?",
+          "answer_type_candidate": "single_choice",
+          "ui_control_candidate": "radio_group",
+          "required_when_applicable": true,
+          "current_client_ui_support": "not_implemented",
+          "options_candidate": [
+            "Sim",
+            "Nao"
+          ],
+          "applicability_candidate": null,
+          "type_basis": "candidate_from_yes_no_wording"
+        }
+      ],
+      "status": "product_candidate"
+    },
+    {
+      "code": "ANAM-033",
+      "source_text": "Tem condicao financeira para gastos com suplementos/medicamentos?",
+      "observed_type": "multipla escolha",
+      "observed_options": "Sim; Nao; Talvez",
+      "historical_required": "nao confirmado",
+      "source_category": "CLASSIFICACAO_PROVISORIA",
+      "disposition": "include_candidate",
+      "section": "comportamento-contexto",
+      "fields": [
+        {
+          "question_key_candidate": "financial_capacity_for_supplements",
+          "label_candidate": "Tem condicao financeira para gastos com suplementos/medicamentos?",
+          "answer_type_candidate": "single_choice",
+          "ui_control_candidate": "radio_group",
+          "required_when_applicable": true,
+          "current_client_ui_support": "not_implemented",
+          "options_candidate": [
+            "Sim",
+            "Nao",
+            "Talvez"
+          ],
+          "applicability_candidate": null,
+          "type_basis": "observed_options",
+          "ai_default": "exclude"
+        }
+      ],
+      "status": "observed_choice_candidate"
+    },
+    {
+      "code": "ANAM-034",
+      "source_text": "Toma quantos litros de agua por dia?",
+      "observed_type": "multipla escolha",
+      "observed_options": "1L; 1,5L; 2L; 2,5L; 3L; 3,5L; 4L; 4,5L; 5L ou mais; Nao sei",
+      "historical_required": "nao confirmado",
+      "source_category": "Rotina",
+      "disposition": "include_candidate",
+      "section": "sono-rotina",
+      "fields": [
+        {
+          "question_key_candidate": "daily_water_intake",
+          "label_candidate": "Toma quantos litros de agua por dia?",
+          "answer_type_candidate": "single_choice",
+          "ui_control_candidate": "radio_group",
+          "required_when_applicable": true,
+          "current_client_ui_support": "not_implemented",
+          "options_candidate": [
+            "1L",
+            "1,5L",
+            "2L",
+            "2,5L",
+            "3L",
+            "3,5L",
+            "4L",
+            "4,5L",
+            "5L ou mais",
+            "Nao sei"
+          ],
+          "applicability_candidate": null,
+          "type_basis": "observed_options"
+        }
+      ],
+      "status": "observed_choice_candidate"
+    },
+    {
+      "code": "ANAM-035",
+      "source_text": "3 alimentos preferidos",
+      "observed_type": "pergunta textual",
+      "observed_options": "nao observado",
+      "historical_required": "nao confirmado",
+      "source_category": "Alimentacao",
+      "disposition": "include_candidate",
+      "section": "alimentacao",
+      "fields": [
+        {
+          "question_key_candidate": "favorite_foods",
+          "label_candidate": "3 alimentos preferidos",
+          "answer_type_candidate": "text",
+          "ui_control_candidate": "textarea",
+          "required_when_applicable": true,
+          "current_client_ui_support": "supported_for_draft",
+          "options_candidate": null,
+          "applicability_candidate": null
+        }
+      ],
+      "status": "product_candidate"
+    },
+    {
+      "code": "ANAM-036",
+      "source_text": "3 alimentos que menos gostei",
+      "observed_type": "pergunta textual",
+      "observed_options": "nao observado",
+      "historical_required": "nao confirmado",
+      "source_category": "Alimentacao",
+      "disposition": "include_candidate",
+      "section": "alimentacao",
+      "fields": [
+        {
+          "question_key_candidate": "least_favorite_foods",
+          "label_candidate": "3 alimentos que menos gostei",
+          "answer_type_candidate": "text",
+          "ui_control_candidate": "textarea",
+          "required_when_applicable": true,
+          "current_client_ui_support": "supported_for_draft",
+          "options_candidate": null,
+          "applicability_candidate": null
+        }
+      ],
+      "status": "product_candidate"
+    },
+    {
+      "code": "ANAM-037",
+      "source_text": "Me fala um pouco como tu ve tua relacao com a comida",
+      "observed_type": "pergunta textual",
+      "observed_options": "nao observado",
+      "historical_required": "nao confirmado",
+      "source_category": "Alimentacao",
+      "disposition": "include_candidate",
+      "section": "alimentacao",
+      "fields": [
+        {
+          "question_key_candidate": "relationship_with_food",
+          "label_candidate": "Me fala um pouco como tu ve tua relacao com a comida",
+          "answer_type_candidate": "text",
+          "ui_control_candidate": "textarea",
+          "required_when_applicable": true,
+          "current_client_ui_support": "supported_for_draft",
+          "options_candidate": null,
+          "applicability_candidate": null
+        }
+      ],
+      "status": "product_candidate"
+    },
+    {
+      "code": "ANAM-038",
+      "source_text": "Quando tu te olha no espelho, o que tu enxerga?",
+      "observed_type": "pergunta textual",
+      "observed_options": "nao observado",
+      "historical_required": "nao confirmado",
+      "source_category": "Autoimagem",
+      "disposition": "include_candidate",
+      "section": "autoimagem",
+      "fields": [
+        {
+          "question_key_candidate": "self_image_in_mirror",
+          "label_candidate": "Quando tu te olha no espelho, o que tu enxerga?",
+          "answer_type_candidate": "text",
+          "ui_control_candidate": "textarea",
+          "required_when_applicable": true,
+          "current_client_ui_support": "supported_for_draft",
+          "options_candidate": null,
+          "applicability_candidate": null
+        }
+      ],
+      "status": "product_candidate"
+    },
+    {
+      "code": "ANAM-039",
+      "source_text": "E como acredita que as pessoas te veem?",
+      "observed_type": "pergunta textual",
+      "observed_options": "nao observado",
+      "historical_required": "nao confirmado",
+      "source_category": "Autoimagem",
+      "disposition": "include_candidate",
+      "section": "autoimagem",
+      "fields": [
+        {
+          "question_key_candidate": "perceived_external_image",
+          "label_candidate": "E como acredita que as pessoas te veem?",
+          "answer_type_candidate": "text",
+          "ui_control_candidate": "textarea",
+          "required_when_applicable": true,
+          "current_client_ui_support": "supported_for_draft",
+          "options_candidate": null,
+          "applicability_candidate": null
+        }
+      ],
+      "status": "product_candidate"
+    },
+    {
+      "code": "ANAM-040",
+      "source_text": "Me fala das tuas qualidades",
+      "observed_type": "pergunta textual",
+      "observed_options": "nao observado",
+      "historical_required": "nao confirmado",
+      "source_category": "Autoimagem",
+      "disposition": "include_candidate",
+      "section": "autoimagem",
+      "fields": [
+        {
+          "question_key_candidate": "self_qualities",
+          "label_candidate": "Me fala das tuas qualidades",
+          "answer_type_candidate": "text",
+          "ui_control_candidate": "textarea",
+          "required_when_applicable": true,
+          "current_client_ui_support": "supported_for_draft",
+          "options_candidate": null,
+          "applicability_candidate": null
+        }
+      ],
+      "status": "product_candidate"
+    },
+    {
+      "code": "ANAM-041",
+      "source_text": "Possui algum vicio (cigarro, bebidas alcoolicas, drogas ilicitas etc.)?",
+      "observed_type": "multipla escolha",
+      "observed_options": "Sim; Nao",
+      "historical_required": "nao confirmado",
+      "source_category": "Comportamento",
+      "disposition": "include_candidate",
+      "section": "comportamento-contexto",
+      "fields": [
+        {
+          "question_key_candidate": "has_addiction",
+          "label_candidate": "Possui algum vicio (cigarro, bebidas alcoolicas, drogas ilicitas etc.)?",
+          "answer_type_candidate": "single_choice",
+          "ui_control_candidate": "radio_group",
+          "required_when_applicable": true,
+          "current_client_ui_support": "not_implemented",
+          "options_candidate": [
+            "Sim",
+            "Nao"
+          ],
+          "applicability_candidate": null,
+          "type_basis": "observed_options"
+        }
+      ],
+      "status": "observed_choice_candidate"
+    },
+    {
+      "code": "ANAM-042",
+      "source_text": "E atleta competitivo de fisiculturismo ou outro esporte? Qual(is)?",
+      "observed_type": "pergunta textual composta",
+      "observed_options": "nao observado",
+      "historical_required": "nao confirmado",
+      "source_category": "Atividade fisica",
+      "disposition": "include_candidate",
+      "section": "atividade-objetivos",
+      "fields": [
+        {
+          "question_key_candidate": "is_competitive_athlete",
+          "label_candidate": "E atleta competitivo de fisiculturismo ou outro esporte?",
+          "answer_type_candidate": "single_choice",
+          "ui_control_candidate": "radio_group",
+          "required_when_applicable": true,
+          "current_client_ui_support": "not_implemented",
+          "options_candidate": [
+            "Sim",
+            "Nao"
+          ],
+          "applicability_candidate": null,
+          "type_basis": "candidate_from_compound_wording"
+        },
+        {
+          "question_key_candidate": "competitive_sport_details",
+          "label_candidate": "Qual(is)?",
+          "answer_type_candidate": "text",
+          "ui_control_candidate": "textarea",
+          "required_when_applicable": true,
+          "current_client_ui_support": "supported_for_draft",
+          "options_candidate": null,
+          "applicability_candidate": {
+            "source_field_key": "is_competitive_athlete",
+            "operator": "json_equals",
+            "expected_answer": "Sim",
+            "status": "candidate_from_explicit_compound_wording"
+          }
+        }
+      ],
+      "status": "split_candidate"
+    },
+    {
+      "code": "ANAM-043",
+      "source_text": "Quais sao seus objetivos a curto (3 meses), medio (12 meses) e longo (5 anos) prazo?",
+      "observed_type": "pergunta textual composta",
+      "observed_options": "nao observado",
+      "historical_required": "nao confirmado",
+      "source_category": "Objetivos",
+      "disposition": "include_candidate",
+      "section": "atividade-objetivos",
+      "fields": [
+        {
+          "question_key_candidate": "short_medium_long_term_goals",
+          "label_candidate": "Quais sao seus objetivos a curto (3 meses), medio (12 meses) e longo (5 anos) prazo?",
+          "answer_type_candidate": "text",
+          "ui_control_candidate": "textarea",
+          "required_when_applicable": true,
+          "current_client_ui_support": "supported_for_draft",
+          "options_candidate": null,
+          "applicability_candidate": null,
+          "normalization_decision": "keep_together_for_v1_candidate"
+        }
+      ],
+      "status": "keep_compound_candidate"
+    },
+    {
+      "code": "ANAM-044",
+      "source_text": "Upload de arquivos",
+      "observed_type": "upload de arquivo no Google Forms",
+      "observed_options": "ate 10 arquivos; tipos apresentados incluem PDF/documento/imagem; maximo apresentado de 10 MB por arquivo; apos envio, arquivos nao podem ser editados/removidos",
+      "historical_required": "nao confirmado",
+      "source_category": "Fotos; Exames e documentos",
+      "disposition": "files_integration_pending",
+      "section": "arquivos",
+      "fields": [],
+      "status": "integration_pending"
+    },
+    {
+      "code": "ANAM-045",
+      "source_text": "Por que optou por este plano?",
+      "observed_type": "pergunta textual",
+      "observed_options": "nao observado",
+      "historical_required": "nao confirmado",
+      "source_category": "CLASSIFICACAO_PROVISORIA",
+      "disposition": "include_candidate",
+      "section": "atividade-objetivos",
+      "fields": [
+        {
+          "question_key_candidate": "plan_choice_reason",
+          "label_candidate": "Por que optou por este plano?",
+          "answer_type_candidate": "text",
+          "ui_control_candidate": "textarea",
+          "required_when_applicable": true,
+          "current_client_ui_support": "supported_for_draft",
+          "options_candidate": null,
+          "applicability_candidate": null
+        }
+      ],
+      "status": "product_candidate"
+    },
+    {
+      "code": "ANAM-046",
+      "source_text": "Declaracao de Anuencia",
+      "observed_type": "aceite/nao aceite",
+      "observed_options": "concordancia; nao concordancia",
+      "historical_required": "sim",
+      "source_category": "Consentimento",
+      "disposition": "consent_pending",
+      "section": "consentimento",
+      "fields": [
+        {
+          "question_key_candidate": "consent_acceptance",
+          "label_candidate": "Declaracao de Anuencia",
+          "answer_type_candidate": "single_choice",
+          "ui_control_candidate": "consent_choice",
+          "required_when_applicable": true,
+          "current_client_ui_support": "not_implemented",
+          "options_candidate": [
+            "Concordo",
+            "Nao concordo"
+          ],
+          "applicability_candidate": null,
+          "type_basis": "historical_accept_reject",
+          "legal_status": "pending_final_text_and_versioning"
+        }
+      ],
+      "status": "legal_pending"
+    }
+  ]
+}
