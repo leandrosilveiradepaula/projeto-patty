@@ -125,3 +125,31 @@ Validacoes pos-apply:
 - policy e trigger: presentes;
 - advisor de seguranca: nenhum novo finding da migration; permanece apenas Leaked Password Protection, ja bloqueada pelo plano;
 - advisor de performance: avisos historicos, sem novo indice criado apenas para zerar lint.
+
+
+## Excecao operacional de 2026-09-24 — esclarecimentos pos-Anamnese
+
+O procedimento padrao continua sendo GitHub Actions + `supabase db push`. A integracao GitHub desta sessao nao expoe inicio de `workflow_dispatch`.
+
+Para evitar merge/publicacao de rotas que dependem de tabelas ainda inexistentes, a migration de esclarecimentos foi aplicada antes do merge por meio da operacao oficial `apply_migration` do Supabase, depois de:
+- smoke transacional previo com `ROLLBACK`;
+- CI do PR verde em typecheck, testes e build;
+- revisao de RLS, AAL2 e imutabilidade.
+
+O Supabase registrou a migration como:
+
+`20260924153808_create_anamnesis_clarification_flow`
+
+O arquivo do repositorio foi imediatamente alinhado ao mesmo version ID remoto antes do merge.
+
+Validacoes pos-apply:
+- `list_migrations`: version ID local/remoto alinhado;
+- smoke sintetico com `ROLLBACK`: PASS;
+- request administrativo AAL2 + assignment: PASS;
+- leitura/resposta da propria cliente: PASS;
+- isolamento de outra cliente: PASS;
+- multiplos complementos append-only: PASS;
+- resposta original preservada: PASS;
+- UPDATE/DELETE privilegiado bloqueado pelos triggers: PASS;
+- advisor de seguranca: nenhum novo finding; permanece apenas Leaked Password Protection ja conhecido/bloqueado pelo plano;
+- advisor de performance: sem novo foreign key sem indice de cobertura nas tabelas de esclarecimentos; indices novos aparecem inicialmente como sem uso, esperado antes de workload.
