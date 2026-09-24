@@ -74,6 +74,7 @@ Nao existe bloqueio atual de deployment Vercel para o `master`.
 | Rascunho da Anamnese | SIM | SIM para salvar/retomar/enviar dentro dos tipos v1 suportados | Smoke pos-apply PASS; E2E anterior PASS para retomada `text`; UI final passou CI/build | Migration `20260924142453` aplicada; producao Vercel do commit `6b88dce` READY | ANAM-046 e publicacao da versao canonica para E2E completo |
 | Obrigatoriedade da Anamnese | SIM | Regra + UI + validacao deterministica no banco | CI + smoke pos-apply PASS | `20260924142453` aplicada no SaaS; campo nao aplicavel nao bloqueia; incompleto aplicavel bloqueia | Validar E2E completo quando a primeira `client-anamnesis` for publicada |
 | Correcao pos-envio da Anamnese | SIM | SIM | E2E administrativo de producao PASS em 2026-09-24 | Schema aplicado e rota/UI publicadas e validadas em producao | Resposta original continua separada de correcoes e esclarecimentos |
+| Esclarecimentos pos-Anamnese | SIM | SIM | E2E autenticado admin -> cliente -> admin PASS no run `36053370894` | Schema e UI publicados; workflow E2E versionado no PR #155 | Lifecycle sem estado formal/prazo/notificacao continua aberto |
 | Arquivos privados | SIM | PARCIAL/AVANCADO | Smokes cliente/admin + auditoria estatica | Acesso da Patty sem assignment confirmado em RLS/Storage/rotas, com MFA AAL2 | Politica de retencao/hard delete |
 | Avaliacoes e medidas | Fundacao + cadencia profissional parcial definida | SIM na fundacao | Parcial | Backend existente | Quinzenal: cintura/abdomen/quadril/peso; mensal: todas as medidas + peso + fotos; falta catalogo mensal completo, unidades e correcao |
 | Protocolos versionados | SIM | Lifecycle manual implementado | CI/validacoes existentes | Backend/SaaS correspondente existente | Criacao/edicao profissional completa conforme regras ainda abertas |
@@ -199,7 +200,7 @@ Ordem operacional sugerida, sujeita a revalidacao do HEAD:
 1. obter e documentar as respostas do gate `ANAMNESE_CONSENT_GATE.md` para fechar ANAM-046;
 2. materializar a primeira `client-anamnesis`, revisar, publicar explicitamente e validar inicio, preenchimento condicional e envio final E2E;
 3. RETOMAR quando houver acesso operacional: configurar Gmail Custom SMTP e validar convite real;
-4. PROXIMA TAREFA DESBLOQUEADA: validar o fluxo autenticado admin <-> cliente de esclarecimentos com fixture sintetica sem transformar esse teste em fonte de regra;
+4. CONCLUIDO: fluxo autenticado admin <-> cliente de esclarecimentos validado em producao com fixture sintetica no run `36053370894`;
 5. preparar execution real de IA somente quando provider/modelo, prompt operacional e controles juridicos aplicaveis forem explicitamente definidos;
 6. decidir a infraestrutura de midia educacional para arquivos acima de 50 MB; depois preparar a migracao controlada do video aprovado da balanca;
 7. ampliar automacao de alimentacao/treino somente depois das regras profissionais correspondentes estarem documentadas.
@@ -261,7 +262,9 @@ Escopo:
 - criacao administrativa exige assignment ativo + AAL2;
 - sem estado formal, prazo, expiracao ou notificacao automatica.
 
-A migration `20260924153808_create_anamnesis_clarification_flow.sql` foi aplicada no Supabase SaaS em 2026-09-24 e o historico remoto foi confirmado com o mesmo version ID. O smoke pos-apply com fixture sintetica e `ROLLBACK` confirmou request AAL2, resposta da cliente correta, isolamento entre clientes, multiplos complementos, resposta original inalterada e imutabilidade. A UI passou CI/build, foi mergeada no PR #146 e o deployment de producao do commit `492a7ab` ficou `READY`. Nao foi executado E2E autenticado de producao do fluxo completo; os logs de runtime do deployment nao registraram erro/fatal na janela conferida.
+A migration `20260924153808_create_anamnesis_clarification_flow.sql` foi aplicada no Supabase SaaS em 2026-09-24 e o historico remoto foi confirmado com o mesmo version ID. O smoke pos-apply com fixture sintetica e `ROLLBACK` confirmou request AAL2, resposta da cliente correta, isolamento entre clientes, multiplos complementos, resposta original inalterada e imutabilidade. A UI passou CI/build, foi mergeada no PR #146 e o deployment de producao do commit `492a7ab` ficou `READY`.
+
+O E2E autenticado completo passou em producao no workflow `E2E anamnesis clarification flow`, run `36053370894`: Patty/admin com MFA criou pedido vinculado a resposta original; a cliente correta leu e registrou complemento; outra cliente recebeu isolamento/404; a Patty releu o complemento; e a verificacao direta confirmou que a resposta original permaneceu `"Original E2E answer"`. O teste foi versionado pelo PR #155. A primeira tentativa do smoke falhou somente por seletor Playwright ambiguo depois de criar um pedido sintetico; esse pedido permanece no historico E2E sem complemento porque o dominio e append-only, sem impacto em dados reais.
 
 
 ## Hardening da execution boundary de IA
