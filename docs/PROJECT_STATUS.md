@@ -66,7 +66,7 @@ Nao existe bloqueio atual de deployment Vercel para o `master`.
 | --- | --- | --- | --- | --- | --- |
 | Identidade Auth / Profile / Client | SIM | SIM | SIM em fluxos sinteticos relevantes | Fundacao operacional | Preservar separacao entre Auth, profile, client, Cadastro Atual e Anamnese |
 | Login | SIM | SIM | E2E sintetico de login posterior aprovado | Email + senha | Recuperacao de acesso ainda precisa de regras operacionais completas |
-| Onboarding por convite | SIM | SIM | E2E sintetico de ativacao aprovado | PARCIAL | Gmail da Patty definido como Custom SMTP do MVP; falta configurar App Password/SMTP/template e validar entrega real; expiracao/reenvio continuam abertos |
+| Onboarding por convite | SIM | SIM | E2E sintetico de ativacao aprovado | PARCIAL / BLOQUEADO OPERACIONALMENTE | Gmail da Patty definido como Custom SMTP do MVP; configuracao manual de 2FA/App Password/SMTP/template ficou PENDENTE; validar entrega real depois; expiracao/reenvio continuam abertos |
 | MFA administrativo | SIM | SIM | Smoke AAL1/AAL2 documentado | Enforcement RLS aplicado no SaaS | Leaked Password Protection bloqueada pelo plano atual |
 | RBAC / RLS / assignments | SIM | SIM | Smokes documentados | Fundacao e fluxos administrativos principais operacionais | Novos papeis ficam fora do MVP; assignment continua regra geral para dados client-scoped |
 | Cadastro Atual | SIM como entidade separada | SIM | Fundacao testada | Backend existente | Fluxo final de edicao cadastral pela cliente/Patty ainda aberto |
@@ -198,8 +198,8 @@ Ordem operacional sugerida, sujeita a revalidacao do HEAD:
 
 1. obter e documentar as respostas do gate `ANAMNESE_CONSENT_GATE.md` para fechar ANAM-046;
 2. materializar a primeira `client-anamnesis`, revisar, publicar explicitamente e validar inicio, preenchimento condicional e envio final E2E;
-3. resolver infraestrutura do email real de convite;
-4. validar futuramente o fluxo autenticado admin <-> cliente de esclarecimentos com fixture sintetica sem transformar esse teste em fonte de regra;
+3. RETOMAR quando houver acesso operacional: configurar Gmail Custom SMTP e validar convite real;
+4. PROXIMA TAREFA DESBLOQUEADA: validar o fluxo autenticado admin <-> cliente de esclarecimentos com fixture sintetica sem transformar esse teste em fonte de regra;
 5. preparar execution real de IA somente quando provider/modelo, prompt operacional e controles juridicos aplicaveis forem explicitamente definidos;
 6. decidir a infraestrutura de midia educacional para arquivos acima de 50 MB; depois preparar a migracao controlada do video aprovado da balanca;
 7. ampliar automacao de alimentacao/treino somente depois das regras profissionais correspondentes estarem documentadas.
@@ -308,6 +308,8 @@ Foi criado `docs/OPENAI_HEALTH_DATA_GATE.md` como checklist operacional antes de
 
 
 ## Gmail SMTP do MVP
+
+Status atual: **PENDENTE / BLOQUEADO OPERACIONALMENTE** porque a configuracao manual no Google/Supabase nao pode ser concluida nesta sessao.
 
 A infraestrutura de email real do onboarding foi definida: Gmail pessoal da Patty via Custom SMTP do Supabase Auth.
 
