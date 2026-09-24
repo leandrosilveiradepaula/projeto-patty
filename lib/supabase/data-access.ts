@@ -104,6 +104,26 @@ export async function getAccessibleClientRegistration(clientId: string) {
   return data;
 }
 
+export async function listAccessibleNonterminalAiExecutions() {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("ai_executions")
+    .select(
+      "id, client_id, purpose_key, anamnesis_submission_id, provider, model_identifier, status, created_at, completed_at, failed_at, clients(id, profiles(display_name))",
+    )
+    .eq("status", "started")
+    .is("completed_at", null)
+    .is("failed_at", null)
+    .order("created_at", { ascending: true })
+    .order("id", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
 export async function listAccessibleAiAnamnesisExecutions(submissionId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
