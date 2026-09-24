@@ -1,3 +1,25 @@
+## 2026-09-24 - Gmail da Patty como SMTP do MVP
+
+### DECISAO TECNICA/OPERACIONAL
+
+No MVP, os emails de autenticacao e convite serao enviados pelo Gmail pessoal da Patty via Custom SMTP do Supabase Auth.
+
+A escolha considera o baixo volume previsto nesta etapa e evita introduzir um provedor transacional adicional antes de existir necessidade operacional.
+
+O fluxo de onboarding continua usando `admin.auth.admin.inviteUserByEmail`; o codigo da aplicacao nao envia email diretamente pelo Gmail.
+
+### SEGURANCA
+
+A conta Google deve usar verificacao em duas etapas e uma App Password exclusiva para o SMTP. A senha principal da Patty nao sera usada.
+
+A App Password deve ser digitada diretamente na configuracao SMTP do Supabase e nao pode ser colocada no repositorio, em migrations, logs, screenshots, chat ou variaveis publicas.
+
+### LIMITE
+
+Gmail e a escolha atual do MVP, nao uma dependencia permanente da arquitetura. Se volume, entregabilidade, observabilidade ou confiabilidade exigirem, o Custom SMTP pode ser trocado por provedor transacional sem alterar o lifecycle de onboarding.
+
+A configuracao operacional esta descrita em `docs/GMAIL_SMTP_SETUP.md`.
+
 ## 2026-09-24 - Rollout OpenAI permanece opt-in
 
 ### DECISAO TECNICA/OPERACIONAL
