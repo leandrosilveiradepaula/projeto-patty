@@ -1,5 +1,28 @@
 # Decisoes
 
+## 2026-09-24 - Conteudos de formulas/manipulados fazem parte do aplicativo
+
+### REGRA CONFIRMADA PELA PATTY
+
+A Patty confirmou que conteudos sobre formulas/manipulados devem fazer parte do aplicativo.
+
+### LIMITE PROFISSIONAL E DE PUBLICACAO
+
+Essa confirmacao nao autoriza publicar diretamente o arquivo historico `Fórmulas.pptx`.
+
+Antes de qualquer disponibilizacao a clientes, o material deve passar por:
+- revisao profissional completa;
+- confirmacao de que as orientacoes ainda representam a pratica atual da Patty;
+- revisao das alegacoes de efeito/beneficio;
+- revisao de referencias comerciais e contato de farmacia;
+- confirmacao de autoria/direitos de distribuicao;
+- criacao de nova versao publicavel e aprovacao explicita da Patty.
+
+### CONSEQUENCIA DE PRODUTO
+
+O tema deixa de ser apenas um artefato historico do Drive e passa a fazer parte do escopo da biblioteca educacional, mas suas **regras profissionais concretas de suplementacao/manipulados continuam abertas** ate documentacao especifica.
+
+
 ## 2026-09-24 - Planilha historica de refeicoes vira conteudo educacional revisado
 
 ### REGRA CONFIRMADA PELA PATTY
