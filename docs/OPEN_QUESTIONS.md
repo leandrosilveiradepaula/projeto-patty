@@ -355,7 +355,7 @@ Quem pode criar ou alterar o Cadastro Atual e por qual fluxo controlado?
 
 O salvamento de rascunho e as permissoes minimas de escrita estao aplicados no SaaS: um rascunho ativo por cliente/versao publicada e escrita somente da propria submission/respostas enquanto nao enviada.
 
-A interface da cliente ja consegue retomar um rascunho existente e salvar respostas `text` individualmente. Isso e uma integracao parcial e deliberada; nao define qual versao inicia automaticamente, nao define os demais tipos de input, nao define autosave definitivo e nao implementa submissao final.
+A interface da cliente ja consegue retomar um rascunho existente e salvar respostas `text` e `single_choice` individualmente. Para `single_choice`, a opcao e validada novamente no servidor contra `anamnesis_questions.options`. Isso e uma integracao parcial e deliberada: nao aprova os tipos candidatos do mapa, nao implementa a logica das condicionais, nao define autosave definitivo e nao implementa submissao final.
 
 ### QUESTAO ABERTA
 

@@ -1,10 +1,15 @@
+import { ClientAnamnesisDraftSingleChoiceAnswerForm } from "@/components/client/ClientAnamnesisDraftSingleChoiceAnswerForm";
 import { ClientAnamnesisDraftTextAnswerForm } from "@/components/client/ClientAnamnesisDraftTextAnswerForm";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
-import { canEditDraftTextAnswer } from "@/lib/anamnesis/draft-policy";
+import {
+  canEditDraftSingleChoiceAnswer,
+  canEditDraftTextAnswer,
+  getDraftSingleChoiceOptions,
+} from "@/lib/anamnesis/draft-policy";
 import {
   getAccessibleAnamnesisSubmission,
   getCurrentClient,
@@ -95,7 +100,7 @@ export default async function ClienteAnamneseDetailPage({
         description={
           submission.submitted_at
             ? "Suas respostas originais registradas nesta versão da Anamnese."
-            : "Este rascunho ainda não foi enviado. Respostas de texto já podem ser salvas individualmente."
+            : "Este rascunho ainda não foi enviado. Respostas de texto e de seleção única compatíveis podem ser salvas individualmente."
         }
         eyebrow="Cliente"
         title="Detalhe da Anamnese"
@@ -181,6 +186,17 @@ export default async function ClienteAnamneseDetailPage({
                           hasAnswer: Boolean(answer),
                           submittedAt: submission.submitted_at,
                         });
+                        const singleChoiceOptions = getDraftSingleChoiceOptions(
+                          question.options,
+                        );
+                        const editableSingleChoiceDraft =
+                          canEditDraftSingleChoiceAnswer({
+                            answerType: question.answer_type,
+                            answerValue,
+                            hasAnswer: Boolean(answer),
+                            options: question.options,
+                            submittedAt: submission.submitted_at,
+                          });
 
                         if (editableTextDraft) {
                           return (
@@ -192,6 +208,28 @@ export default async function ClienteAnamneseDetailPage({
                                     : ""
                                 }
                                 label={question.label}
+                                questionId={question.id}
+                                required={question.required}
+                                submissionId={submission.id}
+                              />
+                            </Card>
+                          );
+                        }
+
+                        if (
+                          editableSingleChoiceDraft &&
+                          singleChoiceOptions !== null
+                        ) {
+                          return (
+                            <Card className={styles.questionCard} key={question.id}>
+                              <ClientAnamnesisDraftSingleChoiceAnswerForm
+                                initialValue={
+                                  typeof answerValue === "string"
+                                    ? answerValue
+                                    : null
+                                }
+                                label={question.label}
+                                options={singleChoiceOptions}
                                 questionId={question.id}
                                 required={question.required}
                                 submissionId={submission.id}

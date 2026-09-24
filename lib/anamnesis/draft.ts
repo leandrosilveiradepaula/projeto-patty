@@ -9,6 +9,7 @@ import { isUuid } from "@/lib/validation/uuid";
 import {
   getDraftAnswerWriteMode,
   getDraftCreationMode,
+  getDraftSingleChoiceOptions,
   isUniqueViolationCode,
 } from "./draft-policy";
 
@@ -16,6 +17,7 @@ export type AnamnesisDraftPersistenceErrorCode =
   | "client_not_found"
   | "draft_not_found"
   | "form_version_not_available"
+  | "invalid_answer_value"
   | "invalid_identifier"
   | "question_not_available"
   | "unsupported_answer_type";
@@ -172,7 +174,7 @@ export async function saveCurrentClientAnamnesisDraftAnswer(input: {
 
   const { data: question, error: questionError } = await supabase
     .from("anamnesis_questions")
-    .select("id, answer_type")
+    .select("id, answer_type, options")
     .eq("id", input.questionId)
     .eq("form_version_id", submission.form_version_id)
     .maybeSingle();
@@ -190,6 +192,18 @@ export async function saveCurrentClientAnamnesisDraftAnswer(input: {
     question.answer_type !== input.expectedAnswerType
   ) {
     throw new AnamnesisDraftPersistenceError("unsupported_answer_type");
+  }
+
+  if (question.answer_type === "single_choice") {
+    const options = getDraftSingleChoiceOptions(question.options);
+
+    if (
+      options === null ||
+      typeof input.answerValue !== "string" ||
+      !options.includes(input.answerValue)
+    ) {
+      throw new AnamnesisDraftPersistenceError("invalid_answer_value");
+    }
   }
 
   const { data: existingAnswer, error: existingAnswerError } = await supabase
