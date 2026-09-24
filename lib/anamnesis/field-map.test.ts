@@ -109,7 +109,7 @@ test("all conditional candidates reference another candidate field and use exact
   }
 });
 
-test("single-choice candidates always define non-empty options", () => {
+test("single-choice candidates define valid options and consent stays checkbox-only", () => {
   const map = loadFieldMap();
   const singleChoiceFields = map.entries
     .flatMap((entry) => entry.fields)
@@ -119,7 +119,12 @@ test("single-choice candidates always define non-empty options", () => {
 
   for (const field of singleChoiceFields) {
     assert.ok(Array.isArray(field.options_candidate));
-    assert.ok((field.options_candidate?.length ?? 0) >= 2);
+
+    if (field.question_key_candidate === "consent_acceptance") {
+      assert.deepEqual(field.options_candidate, ["Concordo"]);
+    } else {
+      assert.ok((field.options_candidate?.length ?? 0) >= 2);
+    }
   }
 });
 
