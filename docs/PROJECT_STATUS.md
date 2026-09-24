@@ -72,15 +72,15 @@ Isso confirma que um deployment de producao voltou a ser aceito para o estado in
 | MFA administrativo | SIM | SIM | Smoke AAL1/AAL2 documentado | Enforcement RLS aplicado no SaaS | Leaked Password Protection bloqueada pelo plano atual |
 | RBAC / RLS / assignments | SIM | SIM | Smokes documentados | Fundacao e fluxos administrativos principais operacionais | Novos papeis ficam fora do MVP; assignment continua regra geral para dados client-scoped |
 | Cadastro Atual | SIM como entidade separada | SIM | Fundacao testada | Backend existente | Fluxo final de edicao cadastral pela cliente/Patty ainda aberto |
-| Anamnese versionada | SIM | SIM | Fundacao testada | Backend existente | Questionario final, tipos de input, condicionais e aplicabilidade |
+| Anamnese versionada | SIM | SIM | Fundacao testada | Backend existente | Perguntas atuais confirmadas como base; falta fechar agrupamento, tipos de input e mapa condicional pergunta-a-pergunta |
 | Rascunho da Anamnese | SIM | PARCIAL | Smoke transacional pos-apply PASS; CI e smokes anteriores existentes | Persistencia aplicada; inicio seguro preparado por chave canonica, sem usar fixtures E2E | Publicar a versao oficial com `form_key = client-anamnesis`; depois validar inicio no runtime e continuar tipos/autosave/submissao |
-| Obrigatoriedade da Anamnese | SIM | Regra refletida na fundacao | N/A | Todos os campos aplicaveis sao obrigatorios no envio final | Formalizar aplicabilidade de perguntas condicionais |
-| Correcao pos-envio da Anamnese | SIM | SIM | Smoke administrativo documentado | `anamnesis_answer_corrections` aplicada no SaaS | Workflow administrativo completo alem de notas/correcoes |
+| Obrigatoriedade da Anamnese | SIM | Regra refletida na fundacao | N/A | Todos os campos aplicaveis sao obrigatorios no envio final; campos dependentes nao aplicaveis ficam ocultos e nao obrigatorios | Mapear dependencias pergunta-a-pergunta no questionario final |
+| Correcao pos-envio da Anamnese | SIM | SIM | Smoke administrativo documentado | `anamnesis_answer_corrections` aplicada no SaaS | Apos envio, entra direto em analise; informacao faltante/ambigua deve ser solicitada a cliente no app; falta definir UX/lifecycle desse esclarecimento |
 | Arquivos privados | SIM | PARCIAL/AVANCADO | Smokes cliente/admin + auditoria estatica | Acesso da Patty sem assignment confirmado em RLS/Storage/rotas, com MFA AAL2 | Politica de retencao/hard delete |
-| Avaliacoes e medidas | Fundacao definida | SIM na fundacao | Parcial | Backend existente | Catalogo profissional, unidades, obrigatoriedade e correcao |
+| Avaliacoes e medidas | Fundacao + cadencia profissional parcial definida | SIM na fundacao | Parcial | Backend existente | Quinzenal: cintura/abdomen/quadril/peso; mensal: todas as medidas + peso + fotos; falta catalogo mensal completo, unidades e correcao |
 | Protocolos versionados | SIM | Lifecycle manual implementado | CI/validacoes existentes | Backend/SaaS correspondente existente | Criacao/edicao profissional completa conforme regras ainda abertas |
-| Conteudo educacional / exercicios | SIM como dominios separados | Fundacao e releases parciais | Inventario original 89/89 revalidado; segunda passada metadata-only + primeira onda controlada de conteudo concluida | 110 arquivos conhecidos; 3 itens revisados em wave 1 e nenhum autorizado para migracao/publicacao | Patty confirmar balanca/refeicoes/formulas; depois direitos/autoria e escolha explicita do primeiro lote |
-| Metodo da Patty | PARCIALMENTE DEFINIDO | Regras matematicas confirmadas em codigo testavel | CI | Regras confirmadas documentadas | Fases 5/6, pos-Cutting 2, Bulking, Consolidacao, hidratacao, suplementacao, treino, alertas e criterios finais |
+| Conteudo educacional / exercicios | SIM como dominios separados | Fundacao e releases parciais | Inventario original 89/89 revalidado; segunda passada metadata-only concluida | 110 arquivos conhecidos; video da balanca aprovado para migracao controlada; planilha de refeicoes aprovada para revisao educacional; conteudos de formulas/manipulados confirmados no app, ainda em hold profissional | Revisar profissionalmente formulas/alegacoes e referencias comerciais; preparar versoes publicaveis separadas |
+| Metodo da Patty | PARCIALMENTE DEFINIDO | Regras matematicas confirmadas em codigo testavel | CI | Fluxo confirmado agora inclui Cutting 3 Linear apos Cutting 2: 2 Low / 1 High | Fases 5/6, regras internas/pos-Cutting 3, Bulking, Consolidacao, hidratacao, suplementacao, treino, alertas e criterios finais |
 | IA assistiva | SIM como principio e arquitetura | PARCIAL | Validador deterministico de output | Fundacao de banco existente | Provider/modelo, execution boundary, UX de revisao |
 | Failure handling de IA | SIM | SIM no schema versionado | Static gate aprovado | `20260922160058` confirmada no historico remoto do Supabase | Integrar execution real com provider sem quebrar invariantes |
 | n8n | SIM: nao usar inicialmente | N/A | N/A | Nao usado | Introduzir somente com caso concreto |
@@ -106,7 +106,7 @@ Consultar `BUSINESS_RULES.md` para detalhes.
 
 Resumo:
 - todo acompanhamento comeca pelo Reconhecimento Metabolico;
-- o fluxo principal confirmado vai ate Cutting 2: 2 Low / 1 High;
+- o fluxo principal confirmado agora segue ate Cutting 3 Linear;
 - existem regras confirmadas de refeicoes/jejum, macros/doses, grupos de proteina, Cutting Dia 1/Dia 2 e refeicao livre do Up Metabolico;
 - adesao e central e nao existe score automatico de adesao;
 - exemplos historicos individuais nao viram regra geral;
@@ -156,7 +156,7 @@ A lista autoritativa esta em `OPEN_QUESTIONS.md`.
 
 Entre as principais:
 - Fases 5 e 6 da Planilha Carb Cycle;
-- etapas posteriores ao Cutting 2;
+- regras detalhadas do Cutting 3 Linear e etapas posteriores a ele;
 - Bulking detalhado;
 - Consolidacao;
 - hidratacao;
@@ -184,7 +184,7 @@ Nesta reconciliacao de 2026-09-23, incorporada ao `master` pelo PR #120:
 - `BRANCH_INVENTORY.md` registra a auditoria de branches e a estrategia de higiene.
 - `VERCEL_PRODUCTION_GATE.md` registra o checklist de recuperacao de producao sem disparar build adicional nesta rodada.
 - `DRIVE_CONTENT_INVENTORY_REVIEW.md` revalidou os 89 itens originais sem divergencias e registrou um delta de 21 arquivos/158,9 MiB; livros de terceiros ficaram em hold de direitos, imagens operacionais ficaram pendentes de privacidade/likeness e nenhum item novo foi autorizado para migracao.
-- `DRIVE_CONTENT_REVIEW_WAVE_1.md` revisou tres materiais selecionados: balanca como candidato condicionado a revisao/rights, planilha de refeicoes como referencia historica e formulas em hold profissional; nenhum item foi migrado ou publicado.
+- `DRIVE_CONTENT_REVIEW_WAVE_1.md` registrou a primeira revisao controlada de balanca, sugestao de refeicoes e formulas; as respostas posteriores da Patty atualizaram o status desses tres itens sem alterar o historico da triagem.
 
 ## Proximas frentes recomendadas
 
@@ -196,7 +196,7 @@ Ordem operacional sugerida, sujeita a revalidacao do HEAD:
 4. resolver infraestrutura do email real de convite;
 5. continuar integracao UI <-> backend real;
 6. preparar execution real de IA com provider/modelo explicitamente definidos;
-7. obter as tres confirmacoes da Patty da primeira onda do Drive, depois fechar direitos/autoria do lote aprovado e somente entao migrar gradualmente;
+7. preparar a migracao controlada do video aprovado de uso da balanca e continuar a revisao dos demais candidatos do Drive;
 8. ampliar automacao de alimentacao/treino somente depois das regras profissionais correspondentes estarem documentadas.
 
 ## Regra de manutencao deste arquivo
