@@ -54,7 +54,7 @@ Antes de qualquer nova implementacao, revalidar o HEAD atual do `master` porque 
 
 O bloqueio temporario de `build-rate-limit` deixou de ser o estado atual.
 
-O `master` atual `19d216bf2148e983d452f0555a2d1e740e1027ca` esta publicado na Vercel com deployment de producao `READY`.
+Os gates funcionais foram executados com o codigo de aplicacao do commit `19d216bf2148e983d452f0555a2d1e740e1027ca`, que permanece contido no `master`. Merges exclusivamente documentais posteriores nao alteram essa evidencia. O deployment de producao do `master` permanece `READY`.
 
 Em 2026-09-24, a validacao runtime contra `/login` confirmou os headers de seguranca esperados. O smoke E2E de producao do rascunho da Anamnese e o smoke administrativo de correcoes tambem passaram no run `35985899621`, depois de corrigidos dois seletores Playwright ambiguos. Consulta pos-smoke no Supabase confirmou `0` drafts E2E ativos e `0` correcoes E2E residuais.
 
