@@ -397,3 +397,11 @@ Estado: **PRODUCAO VALIDADA**
 Existe um smoke de browser dedicado a ANAM-046 na `client-anamnesis` v1 publicada. O desenho evita criar historico sintetico imutavel: uma pergunta obrigatoria permanece vazia, de modo que a tentativa com consentimento marcado persiste `Concordo` mas a submission continua rascunho e pode ser removida no cleanup.
 
 O envio completo da mesma versao passou em smoke SQL transacional com `ROLLBACK`. O E2E de browser foi executado no run `36072067063` e passou com `1 passed (15.3s)`, sem residuo de draft canonico apos o cleanup.
+
+## Anamnese canonica v1 - inicio e retomada
+
+Estado: **WORKFLOW VERSIONADO / EXECUCAO MANUAL PENDENTE**
+
+O workflow `E2E canonical Anamnesis start smoke` valida que uma cliente sintetica inicia um draft da versao canônica v1 publicada e depois retoma exatamente o mesmo registro.
+
+O teste nao conclui envio final e limpa o draft no final, evitando historico sintetico permanente. O envio/consentimento ja possui validacoes separadas.
