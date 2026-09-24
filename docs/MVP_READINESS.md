@@ -43,7 +43,7 @@ Estados usados:
 
 ### Principais bloqueios atuais
 
-- ANAM-046 / consentimento juridico antes da primeira publicacao canonica da Anamnese;
+- ANAM-046 / consentimento juridico, agora isolado no gate objetivo `ANAMNESE_CONSENT_GATE.md`, antes da primeira publicacao canonica da Anamnese;
 - definir a politica final de retencao/hard delete de arquivos privados;
 - decidir infraestrutura/plano para habilitar `Leaked Password Protection`, recurso bloqueado no ambiente atual por exigir Pro ou superior;
 - decidir entre upgrade ou SMTP customizado para permitir o template real `Invite user`; Site URL e redirect allowlist ja estao alinhados e o lifecycle sintetico de convite/ativacao passou E2E em producao;

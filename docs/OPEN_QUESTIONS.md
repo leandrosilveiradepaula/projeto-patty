@@ -144,9 +144,13 @@ ANAM-044 usa o dominio privado existente. A Anamnese orienta e aponta para `/cli
 
 Qual politica concreta de retencao define quando um arquivo inativado/substituido pode ser removido fisicamente, considerando referencias historicas e auditoria?
 
-### QUESTAO ABERTA
+### BLOQUEIO EXTERNO — ANAM-046
 
-Qual sera o texto definitivo, versao, base legal, data/hora, forma de aceite, possibilidade de revogacao, politica de retencao e relacao operacional entre consentimento e inicio do acompanhamento?
+O gate objetivo esta documentado em `ANAMNESE_CONSENT_GATE.md`.
+
+Continuam pendentes de validacao juridica/operacional: texto oficial, versao/vigencia, base legal/finalidade, efeito da recusa, revogacao/retirada, retencao, evidencia tecnica minima, reconsentimento e relacao com IA.
+
+A engenharia nao deve materializar nem publicar ANAM-046 antes de todas essas respostas estarem documentadas.
 
 ### QUESTAO ABERTA
 
