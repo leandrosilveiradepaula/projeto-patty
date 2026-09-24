@@ -283,6 +283,10 @@ Administradores com assignment ativo podem inserir review administrativa em seu 
 
 ### DECISAO CONFIRMADA
 
+A fundacao de aplicabilidade de perguntas nao altera a superficie de autorizacao: as colunas de condicionalidade pertencem a `anamnesis_questions`, portanto seguem os mesmos grants, RLS, publicacao por versao e imutabilidade das definicoes ja existentes. Nenhum grant de INSERT/UPDATE/DELETE de definicao e aberto para cliente ou browser administrativo por essa fundacao.
+
+### DECISAO CONFIRMADA
+
 Clientes nao possuem permissoes para criar, alterar, excluir ou publicar definicoes de Anamnese. O catalogo so pode ser lido quando uma versao estiver marcada como disponivel por `published_at`; nenhuma versao do inventario historico foi publicada nesta etapa.
 
 ## Implementacao BACKEND-BUNDLE-02

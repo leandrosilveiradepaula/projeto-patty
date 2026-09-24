@@ -70,7 +70,7 @@ Nao existe bloqueio atual de deployment Vercel para o `master`.
 | MFA administrativo | SIM | SIM | Smoke AAL1/AAL2 documentado | Enforcement RLS aplicado no SaaS | Leaked Password Protection bloqueada pelo plano atual |
 | RBAC / RLS / assignments | SIM | SIM | Smokes documentados | Fundacao e fluxos administrativos principais operacionais | Novos papeis ficam fora do MVP; assignment continua regra geral para dados client-scoped |
 | Cadastro Atual | SIM como entidade separada | SIM | Fundacao testada | Backend existente | Fluxo final de edicao cadastral pela cliente/Patty ainda aberto |
-| Anamnese versionada | SIM | SIM | Fundacao testada | Backend existente | Especificacao candidata v1 documentada em `ANAMNESE_CANONICAL_V1_CANDIDATE.md` + manifesto machine-readable com invariantes em CI; falta fechar mapa condicional, tipos finais, perguntas compostas, arquivos e consentimento antes de publicar |
+| Anamnese versionada | SIM | SIM + fundacao de aplicabilidade preparada | Fundacao testada; migration de aplicabilidade dry-run PASS com ROLLBACK | Backend existente; applicability ainda NAO aplicada no SaaS | Especificacao candidata + manifesto existem; falta aplicar migration e fechar mapa concreto, tipos finais, perguntas compostas, arquivos e consentimento antes de publicar |
 | Rascunho da Anamnese | SIM | PARCIAL | Smoke transacional PASS + E2E de producao PASS em 2026-09-24 | Persistencia aplicada e retomada/edicao de rascunho existente validada em producao; inicio seguro preparado por chave canonica | Publicar a versao oficial `client-anamnesis`; validar criacao inicial e concluir tipos/autosave/submissao |
 | Obrigatoriedade da Anamnese | SIM | Regra refletida na fundacao | N/A | Todos os campos aplicaveis sao obrigatorios no envio final; campos dependentes nao aplicaveis ficam ocultos e nao obrigatorios | Mapear dependencias pergunta-a-pergunta no questionario final |
 | Correcao pos-envio da Anamnese | SIM | SIM | E2E administrativo de producao PASS em 2026-09-24 | Schema aplicado e rota/UI publicadas e validadas em producao | Apos envio, entra direto em analise; falta definir UX/lifecycle do pedido de esclarecimento a cliente |
@@ -193,7 +193,7 @@ Nesta reconciliacao de 2026-09-23, incorporada ao `master` pelo PR #120:
 
 Ordem operacional sugerida, sujeita a revalidacao do HEAD:
 
-1. fechar os bloqueios documentados em `ANAMNESE_CANONICAL_V1_CANDIDATE.md` e somente entao publicar a primeira versao canonica `client-anamnesis`;
+1. revisar/mergear e aplicar a fundacao de aplicabilidade; depois fechar os bloqueios restantes de `ANAMNESE_CANONICAL_V1_CANDIDATE.md` antes de publicar `client-anamnesis`;
 2. validar o inicio de novo rascunho contra essa versao e concluir fluxo de submissao final da Anamnese;
 3. resolver infraestrutura do email real de convite;
 4. continuar integracao UI <-> backend real;

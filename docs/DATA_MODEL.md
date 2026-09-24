@@ -390,6 +390,43 @@ Evolucoes futuras podem usar:
 
 Nao decidir ainda toda a distribuicao das tabelas futuras.
 
+## Aplicabilidade versionada da Anamnese
+
+### DECISAO TECNICA
+
+A primeira fundacao de condicionalidade da Anamnese usa a propria definicao versionada da pergunta.
+
+Cada `anamnesis_questions` pode permanecer:
+- sem regra de aplicabilidade, caso em que e aplicavel por padrao;
+- ou vinculada a **uma** pergunta controladora da mesma `form_version_id`, com um unico valor JSON esperado.
+
+Campos propostos na migration `20260924105003_add_anamnesis_question_applicability_foundation.sql`:
+- `applicability_source_question_id uuid nullable`;
+- `applicability_expected_answer jsonb nullable`.
+
+Invariantes:
+- fonte e valor esperado aparecem juntos ou ambos ficam nulos;
+- `json null` nao e um valor esperado valido nesta fundacao;
+- a pergunta nao pode depender dela mesma;
+- a fonte deve pertencer a mesma versao da pergunta dependente;
+- nenhuma nova permissao de escrita de definicao e concedida.
+
+### LIMITE
+
+Esta fundacao representa somente comparacao exata de um valor por pergunta dependente.
+
+Nao modela nesta etapa:
+- AND/OR entre varias condicoes;
+- operadores numericos ou ranges;
+- negacao;
+- condicoes clinicas;
+- regras de alerta;
+- inferencia automatica do mapa.
+
+O mapa pergunta-a-pergunta continua dependendo da especificacao final da Anamnese.
+
+A migration foi validada em transacao com `ROLLBACK` no Supabase SaaS antes do commit: regra valida aceitou, par incompleto/cross-version/self-reference/json-null foram rejeitados e nenhuma coluna persistiu.
+
 ## IA e versionamento
 
 ### DECISAO CONFIRMADA
