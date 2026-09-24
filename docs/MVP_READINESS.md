@@ -1,6 +1,6 @@
 # Mapa de prontidao do MVP
 
-Data de referencia: 2026-09-23 (atualizado apos hardening de Anamnese/MFA, aplicacao e CI).
+Data de referencia: 2026-09-24 (atualizado apos validacao runtime da Anamnese e headers).
 
 Este documento e um mapa operacional do estado atual. Ele nao substitui `MVP.md`, `DECISIONS.md`, `BUSINESS_RULES.md` ou `OPEN_QUESTIONS.md`.
 
@@ -43,7 +43,6 @@ Estados usados:
 
 ### Principais bloqueios atuais
 
-- o bloqueio de `build-rate-limit` foi superado para o merge do PR #120: o commit `602c6d5129b093fc092f7b87209f21d1eab574ca` recebeu status Vercel `success`; ainda faltam os gates de runtime de headers e E2E antes de marcar os fluxos recentes como PRODUCAO VALIDADA;
 - questionario final e fluxo de preenchimento/submissao da Anamnese;
 - definir a politica final de retencao/hard delete de arquivos privados;
 - decidir infraestrutura/plano para habilitar `Leaked Password Protection`, recurso bloqueado no ambiente atual por exigir Pro ou superior;
@@ -65,7 +64,7 @@ Estados usados:
 | Profiles / roles | IMPLEMENTADO | sem UI administrativa de gestao | RLS existente | definir bootstrap/admin e quem gerencia roles |
 | Clients / assignments | leitura + encerramento + inicio de assignment no onboarding IMPLEMENTADOS | Patty inicia onboarding por convite server-side; provisionamento cria vinculos relacionais e assignment com compensacao em falha | CI VALIDADO; encerramento E2E PASS; onboarding sintetico E2E PASS; Site URL/allowlist alinhados | template SSR real exige upgrade ou SMTP customizado; depois validar email real |
 | Cadastro Atual | leitura IMPLEMENTADA | nao | CI VALIDADO | definir quem pode alterar cada campo e auditoria |
-| Anamnese versionada | leitura IMPLEMENTADA; rascunho persistente + retomada parcial IMPLEMENTADOS | cliente pode salvar individualmente respostas `text` em rascunho existente; nota interna append-only; UI admin de correcoes append-only; schema aplicado no SaaS | CI + SAAS VALIDADO; smoke pos-apply PASS; retomada de rascunho `text` coberta por testes/boundary CI | iniciar nova Anamnese, tipos finais, autosave definitivo e submissao final continuam bloqueados pelas definicoes finais |
+| Anamnese versionada | leitura IMPLEMENTADA; rascunho persistente + retomada parcial IMPLEMENTADOS; UI admin de correcoes IMPLEMENTADA | cliente pode salvar individualmente respostas `text` em rascunho existente; nota interna append-only; correcoes append-only; schema aplicado no SaaS | CI + SAAS + PRODUCAO VALIDADA para retomada/edicao de rascunho existente e rota de correcoes; run `35985899621` PASS | iniciar nova Anamnese, tipos finais, autosave definitivo e submissao final continuam dependentes das definicoes finais |
 | Avaliacoes / medidas | leitura IMPLEMENTADA | acompanhamento profissional append-only | CI VALIDADO; conjunto de decisoes profissionais tipado e testado | definir catalogo, unidades, obrigatoriedade e correcao |
 | Arquivos privados | upload/listagem/download da cliente IMPLEMENTADOS; acesso admin permanente sem assignment, upload administrativo e liberacao explicita IMPLEMENTADOS | smoke E2E da cliente PASS; smoke E2E administrativo PASS em producao; cron de temporarios VALIDADO; auditoria estatica confirmou RLS/rotas coerentes com a excecao da Patty | definir retencao/hard delete |
 | Protocolos | leitura + lifecycle manual IMPLEMENTADOS | submit/approve/publish | CI + SAAS VALIDADO; lifecycle com guarda determinística testada | criar/editar plano somente quando fluxo profissional estiver formalizado |
@@ -109,7 +108,7 @@ No nivel de aplicacao, as boundaries de `/admin`, `/cliente`, Server Actions/Rou
 
 O Next.js esta pinado em `16.3.6`. O CI audita dependencias de producao para severidade alta/critica e usa `actions/checkout@v7` / `actions/setup-node@v7`. Headers globais incluem anti-framing, `nosniff`, `no-referrer`, Permissions Policy restritiva e CSP parcial segura para a arquitetura atual.
 
-A configuracao de headers passou CI/build. O deployment do commit `602c6d5129b093fc092f7b87209f21d1eab574ca`, que ja inclui o hardening posterior ao PR #94, recebeu status Vercel `success`. Falta agora repetir a verificacao GET real contra `/login` para confirmar os headers no runtime publicado. O `vercel.json` continua bloqueando previews de branches `codex/**` para reduzir consumo desnecessario de builds.
+A configuracao de headers passou CI/build e foi validada no runtime em 2026-09-24 contra `/login`: CSP, Permissions-Policy, `no-referrer`, `nosniff` e `DENY` estavam presentes. O `master` `19d216bf2148e983d452f0555a2d1e740e1027ca` esta em deployment de producao `READY`. O `vercel.json` continua bloqueando previews de branches `codex/**` para reduzir consumo desnecessario de builds.
 
 ### Anamnese
 
@@ -120,13 +119,13 @@ A aplicacao preserva:
 - respostas originais;
 - notas internas separadas.
 
-O smoke de producao do rascunho identificou um bug operacional no DELETE privilegiado de drafts: o trigger de imutabilidade retornava `NEW` em `BEFORE DELETE`, cancelando silenciosamente a exclusao de rascunhos. A migration `20260923191554_fix_anamnesis_draft_delete_trigger.sql` corrige o retorno para `OLD` em DELETE, preservando o bloqueio `55000` para submissions enviadas. O workflow de migrations aplicou essa migration no Supabase SaaS em 2026-09-23 e o `migration list` pos-apply confirmou o mesmo timestamp local/remoto. Um smoke transacional pos-apply com dados sinteticos e `ROLLBACK` confirmou a exclusao real de draft nao submetido, a preservacao de submission enviada com bloqueio `55000` e o isolamento RLS entre clientes. O E2E de UI continua pendente de deployment Vercel atualizado para validar o runtime publicado.
+O smoke de producao do rascunho identificou um bug operacional no DELETE privilegiado de drafts: o trigger de imutabilidade retornava `NEW` em `BEFORE DELETE`, cancelando silenciosamente a exclusao de rascunhos. A migration `20260923191554_fix_anamnesis_draft_delete_trigger.sql` corrige o retorno para `OLD` em DELETE, preservando o bloqueio `55000` para submissions enviadas. O workflow de migrations aplicou essa migration no Supabase SaaS em 2026-09-23 e o `migration list` pos-apply confirmou o mesmo timestamp local/remoto. Um smoke transacional pos-apply com dados sinteticos e `ROLLBACK` confirmou a exclusao real de draft nao submetido, a preservacao de submission enviada com bloqueio `55000` e o isolamento RLS entre clientes. Em 2026-09-24, o E2E de producao confirmou login da cliente sintetica, retomada do rascunho, INSERT/UPDATE da resposta `text` e cleanup sem residuo.
 
 A regra de preenchimento agora esta parcialmente fechada: todos os campos sao obrigatorios para o envio final; rascunho incompleto pode ser salvo e retomado; depois do envio, a cliente nao edita mais e somente a Patty pode registrar correcao historica sem sobrescrever a resposta original. A fundacao de escrita do rascunho esta aplicada pela migration `20260923113230_anamnesis_draft_write_foundation.sql`: um rascunho ativo por cliente/versao publicada, INSERT restrito da propria submission e INSERT/UPDATE apenas de `answer_value` das respostas do proprio rascunho. A boundary server-only em `lib/anamnesis/draft.ts` resolve a cliente pela sessao e persiste somente respostas pertencentes a mesma versao. A UI da cliente agora permite retomar um rascunho ja existente e salvar individualmente perguntas com `answer_type = text`; submissions enviadas e tipos nao suportados permanecem somente leitura. A UI nao cria uma nova Anamnese, nao escolhe versao publicada automaticamente, nao implementa autosave definitivo e nao envia a submission. A fundacao de correcoes esta aplicada pela migration `20260923114643_anamnesis_answer_corrections_foundation.sql`, com historico append-only, autoria, timestamp, assignment ativo e AAL2. O smoke pos-aplicacao confirmou criacao/edicao do proprio rascunho, isolamento entre clientes, bloqueio de `submitted_at`, correcao administrativa apenas em AAL2, preservacao da resposta original e bloqueio de UPDATE/DELETE das correcoes.
 
 A aplicacao administrativa agora expoe `/admin/anamneses/[id]/correcoes` somente para Anamneses ja enviadas. A tela mostra a resposta original, o historico cronologico de correcoes e permite acrescentar novo valor como JSON explicito. A Server Action exige `requireRole("admin")` e usa o cliente Supabase autenticado normal; RLS continua sendo a autoridade final para AAL2, assignment ativo, autoria e submission enviada. A cliente nao recebe leitura dessa tabela, e o fluxo nao altera nem remove resposta/correcao existente.
 
-Essa UI ainda nao pode ser marcada como PRODUCAO VALIDADA: o deployment atual e anterior ao PR #106 e o smoke recebeu 404 na rota de correcoes, coerente com a defasagem de deploy. A submissao final continua bloqueada ate fechar perguntas condicionais/aplicabilidade, tipos de input e ordem/agrupamento do formulario.
+A UI de correcoes foi validada em producao em 2026-09-24: a rota respondeu `200`, o fluxo administrativo com MFA carregou a resposta original e o caso de JSON invalido nao criou historico. A consulta pos-smoke confirmou ausencia de correcoes E2E residuais. A submissao final continua bloqueada ate fechar o mapa pergunta-a-pergunta de condicionais/aplicabilidade, tipos de input e organizacao final do formulario.
 
 ### Banco e performance
 

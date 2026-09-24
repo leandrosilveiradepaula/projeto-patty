@@ -1,6 +1,6 @@
 # Estado Atual do Projeto Patty
 
-Ultima atualizacao documental: 2026-09-23.
+Ultima atualizacao documental: 2026-09-24.
 
 Este arquivo e o ponto de entrada operacional para novos chats e agentes. Ele resume o estado do projeto e aponta para as fontes de verdade detalhadas.
 
@@ -54,13 +54,11 @@ Antes de qualquer nova implementacao, revalidar o HEAD atual do `master` porque 
 
 O bloqueio temporario de `build-rate-limit` deixou de ser o estado atual.
 
-O merge do PR #120, commit:
+O `master` atual `19d216bf2148e983d452f0555a2d1e740e1027ca` esta publicado na Vercel com deployment de producao `READY`.
 
-`602c6d5129b093fc092f7b87209f21d1eab574ca`
+Em 2026-09-24, a validacao runtime contra `/login` confirmou os headers de seguranca esperados. O smoke E2E de producao do rascunho da Anamnese e o smoke administrativo de correcoes tambem passaram no run `35985899621`, depois de corrigidos dois seletores Playwright ambiguos. Consulta pos-smoke no Supabase confirmou `0` drafts E2E ativos e `0` correcoes E2E residuais.
 
-recebeu status Vercel `success` com a descricao `Deployment has completed` em 2026-09-23.
-
-Isso confirma que um deployment de producao voltou a ser aceito para o estado incorporado ao `master`. Ainda nao marcar headers, correcoes administrativas ou rascunho como PRODUCAO VALIDADA apenas com esse status: os gates de runtime correspondentes permanecem pendentes.
+Nao existe bloqueio atual de deployment Vercel para o `master`.
 
 ## Estado operacional resumido
 
@@ -73,9 +71,9 @@ Isso confirma que um deployment de producao voltou a ser aceito para o estado in
 | RBAC / RLS / assignments | SIM | SIM | Smokes documentados | Fundacao e fluxos administrativos principais operacionais | Novos papeis ficam fora do MVP; assignment continua regra geral para dados client-scoped |
 | Cadastro Atual | SIM como entidade separada | SIM | Fundacao testada | Backend existente | Fluxo final de edicao cadastral pela cliente/Patty ainda aberto |
 | Anamnese versionada | SIM | SIM | Fundacao testada | Backend existente | Perguntas atuais confirmadas como base; falta fechar agrupamento, tipos de input e mapa condicional pergunta-a-pergunta |
-| Rascunho da Anamnese | SIM | PARCIAL | Smoke transacional pos-apply PASS; CI e smokes anteriores existentes | Persistencia aplicada; inicio seguro preparado por chave canonica, sem usar fixtures E2E | Publicar a versao oficial com `form_key = client-anamnesis`; depois validar inicio no runtime e continuar tipos/autosave/submissao |
+| Rascunho da Anamnese | SIM | PARCIAL | Smoke transacional PASS + E2E de producao PASS em 2026-09-24 | Persistencia aplicada e retomada/edicao de rascunho existente validada em producao; inicio seguro preparado por chave canonica | Publicar a versao oficial `client-anamnesis`; validar criacao inicial e concluir tipos/autosave/submissao |
 | Obrigatoriedade da Anamnese | SIM | Regra refletida na fundacao | N/A | Todos os campos aplicaveis sao obrigatorios no envio final; campos dependentes nao aplicaveis ficam ocultos e nao obrigatorios | Mapear dependencias pergunta-a-pergunta no questionario final |
-| Correcao pos-envio da Anamnese | SIM | SIM | Smoke administrativo documentado | `anamnesis_answer_corrections` aplicada no SaaS | Apos envio, entra direto em analise; informacao faltante/ambigua deve ser solicitada a cliente no app; falta definir UX/lifecycle desse esclarecimento |
+| Correcao pos-envio da Anamnese | SIM | SIM | E2E administrativo de producao PASS em 2026-09-24 | Schema aplicado e rota/UI publicadas e validadas em producao | Apos envio, entra direto em analise; falta definir UX/lifecycle do pedido de esclarecimento a cliente |
 | Arquivos privados | SIM | PARCIAL/AVANCADO | Smokes cliente/admin + auditoria estatica | Acesso da Patty sem assignment confirmado em RLS/Storage/rotas, com MFA AAL2 | Politica de retencao/hard delete |
 | Avaliacoes e medidas | Fundacao + cadencia profissional parcial definida | SIM na fundacao | Parcial | Backend existente | Quinzenal: cintura/abdomen/quadril/peso; mensal: todas as medidas + peso + fotos; falta catalogo mensal completo, unidades e correcao |
 | Protocolos versionados | SIM | Lifecycle manual implementado | CI/validacoes existentes | Backend/SaaS correspondente existente | Criacao/edicao profissional completa conforme regras ainda abertas |
@@ -98,7 +96,7 @@ Nesta rodada, o workflow versionado confirmou no historico remoto:
 - `20260923150743_optimize_anamnesis_correction_rls.sql`;
 - `20260923191554_fix_anamnesis_draft_delete_trigger.sql`.
 
-O apply de `20260923191554` terminou com sucesso e o `migration list` pos-apply mostrou o mesmo timestamp local/remoto. Em seguida, um smoke transacional com dados sinteticos e `ROLLBACK` confirmou: draft nao submetido pode ser excluido; submission enviada continua bloqueada com SQLSTATE `55000`; cliente A nao consegue ler submission da cliente B. O E2E de UI ainda depende de um deployment Vercel atualizado para validar o fluxo publicado.
+O apply de `20260923191554` terminou com sucesso e o `migration list` pos-apply mostrou o mesmo timestamp local/remoto. Em seguida, um smoke transacional com dados sinteticos e `ROLLBACK` confirmou: draft nao submetido pode ser excluido; submission enviada continua bloqueada com SQLSTATE `55000`; cliente A nao consegue ler submission da cliente B. Em 2026-09-24, o E2E de producao confirmou a retomada e persistencia de um rascunho existente no runtime publicado. A criacao inicial de nova Anamnese continua separada e depende da primeira versao canonica `client-anamnesis`.
 
 ## Regras profissionais que nao devem ser reabertas
 
@@ -138,8 +136,7 @@ Resumo:
 ## Pendencias de infraestrutura conhecidas
 
 1. **Deployment Vercel**
-   - `master` esta a frente do deployment atual por limite de builds;
-   - quando a Vercel voltar a aceitar build, confirmar SHA publicado e repetir gates de runtime relevantes.
+   - RESOLVIDO nesta rodada: `master` atual publicado como `READY`, headers validados e smokes de rascunho/correcoes aprovados em producao.
 
 2. **Email real de convite**
    - lifecycle tecnico e E2E sintetico existem;
@@ -190,14 +187,13 @@ Nesta reconciliacao de 2026-09-23, incorporada ao `master` pelo PR #120:
 
 Ordem operacional sugerida, sujeita a revalidacao do HEAD:
 
-1. executar os gates de runtime no deployment Vercel atual: headers HTTP, correcoes administrativas e rascunho da Anamnese;
-2. concluir aplicabilidade/condicionais e questionario final da Anamnese e publicar a primeira versao canonica `client-anamnesis`;
-3. validar o inicio de novo rascunho contra essa versao e concluir fluxo de submissao final da Anamnese;
-4. resolver infraestrutura do email real de convite;
-5. continuar integracao UI <-> backend real;
-6. preparar execution real de IA com provider/modelo explicitamente definidos;
-7. decidir a infraestrutura de midia educacional para arquivos acima de 50 MB; depois preparar a migracao controlada do video aprovado da balanca;
-8. ampliar automacao de alimentacao/treino somente depois das regras profissionais correspondentes estarem documentadas.
+1. concluir aplicabilidade/condicionais e organizacao final da Anamnese e publicar a primeira versao canonica `client-anamnesis`;
+2. validar o inicio de novo rascunho contra essa versao e concluir fluxo de submissao final da Anamnese;
+3. resolver infraestrutura do email real de convite;
+4. continuar integracao UI <-> backend real;
+5. preparar execution real de IA com provider/modelo explicitamente definidos;
+6. decidir a infraestrutura de midia educacional para arquivos acima de 50 MB; depois preparar a migracao controlada do video aprovado da balanca;
+7. ampliar automacao de alimentacao/treino somente depois das regras profissionais correspondentes estarem documentadas.
 
 ## Regra de manutencao deste arquivo
 

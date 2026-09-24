@@ -1,5 +1,35 @@
 # Decisoes
 
+## 2026-09-24 - Gates de producao da Anamnese validados
+
+### FATO OPERACIONAL CONFIRMADO
+
+O `master` no commit `19d216bf2148e983d452f0555a2d1e740e1027ca` foi publicado na Vercel como deployment de producao `READY`.
+
+A validacao de runtime confirmou:
+- GET real de `/login` com CSP, Permissions-Policy, `no-referrer`, `nosniff` e `X-Frame-Options: DENY`;
+- smoke E2E da cliente para retomada de rascunho e INSERT/UPDATE de resposta `text`;
+- smoke E2E administrativo da rota de correcoes com MFA e leitura da resposta original;
+- caso de JSON invalido sem criacao de historico;
+- cleanup sem residuos: `0` drafts E2E ativos e `0` correcoes E2E residuais.
+
+O run final de producao foi `35985899621` e concluiu com `success`.
+
+### CORRECAO DE TESTE
+
+As falhas imediatamente anteriores eram de seletores Playwright ambiguos, nao de runtime:
+- heading `Anamnese` passou a exigir match exato;
+- a resposta original administrativa passou a ser localizada dentro do bloco `Resposta original`.
+
+Nenhuma regra de negocio, schema, RLS ou comportamento de producao foi alterado para obter o PASS.
+
+### LIMITE
+
+Isso valida o fluxo de **retomada/edicao de rascunho existente** e a **UI administrativa de correcoes**.
+
+A criacao inicial de nova Anamnese ainda depende da primeira versao canonica publicada com `form_key = client-anamnesis`. A submissao final continua separada e depende do fechamento do questionario/tipos/condicionais.
+
+
 ## 2026-09-24 - Fases 5 e 6 do Carb Cycle permanecem pendentes
 
 ### CONFIRMACAO DA PATTY
