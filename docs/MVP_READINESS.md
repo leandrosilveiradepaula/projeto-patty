@@ -54,7 +54,7 @@ Estados usados:
 - processo de autoria/revisao/publicacao das bibliotecas;
 - taxonomia e direitos/licenciamento para migracao do Drive;
 - exposicao da biblioteca de exercicios a cliente;
-- provider/modelo e fluxo server-side real de IA;
+- avaliacao sintetica do modelo/effort, credencial de ambiente e conclusao do gate de dados de saude da OpenAI;
 - regras profissionais ainda abertas do metodo.
 
 ## Matriz operacional
@@ -73,7 +73,7 @@ Estados usados:
 | Conteudo educacional | leitura admin/cliente por release IMPLEMENTADA | release manual | CI VALIDADO; elegibilidade de release testada | taxonomia, autoria/revisao e primeiro lote do Drive |
 | Exercicios | leitura admin IMPLEMENTADA | nao | CI VALIDADO | definir exposicao a cliente e campos finais |
 | Progresso de conteudo | schema existe | fluxo nao implementado | PARCIAL | definir quem registra abertura/conclusao |
-| IA | fundacao de banco + failure handling + validador deterministico de output `anamnesis_review` IMPLEMENTADOS | provider real e boundary de execution ainda nao integrados | migration `20260922160058_ai_execution_failure_handling.sql` confirmada no historico remoto; contrato de output coberto por testes determinísticos | definir provider/modelo, prompt versionado e boundary server-side de execution |
+| IA | fundacao de banco + failure handling + boundary server-side + provider OpenAI + Structured Outputs + aliases + contrato `anamnesis_review` IMPLEMENTADOS | execucao externa continua bloqueada para dados reais | prompt v1 aplicado; CI cobre adapter/contrato/boundaries; failure handling confirmado no SaaS | executar avaliacao sintetica com credencial de ambiente e concluir `OPENAI_HEALTH_DATA_GATE.md` |
 | Drive | INVENTARIADO + revisao controlada iniciada | nenhuma migracao fisica | video da balanca aprovado pela Patty; arquivo original ~117,6 MiB excede limite atual de 50 MB do Supabase Free | decidir infraestrutura de midia e somente depois migrar/versionar o primeiro item |
 | Regras deterministicas do metodo | IMPLEMENTADO PARCIAL | sem automacao de protocolo | CI VALIDADO | ampliar somente com formulas exatas confirmadas/documentadas |
 | CI | IMPLEMENTADO | automatico no GitHub Actions + smoke E2E manual de arquivos privados | `npm ci` + audit high/critical de producao + typecheck + suites deterministicas + `test:security-boundaries` + build; core Actions em v7; E2E de producao PASS nos fluxos ja estabilizados | ampliar E2E somente para fluxos estaveis e sinteticos |
@@ -328,3 +328,11 @@ Estado: **IMPLEMENTADO / TESTAVEL**
 A condicao financeira usa o `question_key` estavel `financial_capacity_for_supplements`, associado a ANAM-033. A resposta continua excluida da IA por padrao e so entra mediante inclusao explicita da Patty por execution.
 
 O contrato e centralizado no runtime e verificado contra o field map v1 por teste automatizado.
+
+## IA - reconciliacao de prontidao do primeiro fluxo
+
+Estado: **IMPLEMENTADO TECNICAMENTE / GATE EXTERNO FECHADO**
+
+O primeiro purpose `anamnesis_review` ja possui provider OpenAI, configuracao tecnica inicial de modelo/effort, prompt versionado, Structured Outputs, minimizacao de contexto, aliases efemeros, validacao deterministica, persistencia auditavel e revisao humana.
+
+Nao confundir fundacao tecnica pronta com liberacao para dados reais. Ainda faltam credencial de ambiente, avaliacao sintetica aprovada e conclusao humana do gate de processamento de dados de saude.

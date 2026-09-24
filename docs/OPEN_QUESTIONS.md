@@ -175,13 +175,30 @@ O schema garante unicidade de `question_key` dentro de cada `form_version_id`. O
 
 Regra preservada: essa resposta fica fora do contexto de IA por padrao e somente pode entrar por inclusao explicita da Patty na execution.
 
-### QUESTAO ABERTA
+### PARCIALMENTE RESOLVIDO — PRIMEIRO FLUXO DE IA
 
-Qual provider e modelo concretos serao escolhidos, quais requisitos contratuais e tecnicos verificaveis garantirao que dados da Patty e das clientes nao sejam usados para treinamento, e qual sera a base legal ou o consentimento aplicavel? Antes da integracao real, tambem precisam ser definidos a politica de logs tecnicos, o tratamento de conteudo sensivel em erros e logs e o contrato estruturado definitivo do output.
+Para o primeiro fluxo `anamnesis_review`:
+- provider confirmado: OpenAI;
+- adapter server-side implementado sobre Responses API;
+- modelo tecnico inicial: `gpt-5.6-terra`, sobrescrevivel por `OPENAI_MODEL`;
+- reasoning inicial: `medium`;
+- prompt v1 versionado e aplicado;
+- Structured Outputs, aliases efemeros e validacao deterministica do output implementados;
+- `purpose_key = anamnesis_review` e o contrato v1 de findings estao definidos;
+- persistencia de falhas e limites locais de retencao estao implementados;
+- revisao humana continua obrigatoria e a IA nao publica diretamente.
 
-### QUESTAO ABERTA
+Continuam abertos antes de dados reais:
+- avaliacao sintetica do modelo/effort com credencial de ambiente;
+- controles organizacionais de retencao/processamento da OpenAI;
+- base legal/consentimento aplicavel;
+- conclusao explicita do checklist `OPENAI_HEALTH_DATA_GATE.md`.
 
-Qual sera a taxonomia final de `purpose_key` e o contrato estruturado final do output original da IA?
+O modelo inicial ainda nao deve ser tratado como escolha definitiva enquanto a avaliacao sintetica nao for aprovada.
+
+### QUESTAO ABERTA — EXPANSAO FUTURA
+
+A taxonomia global de `purpose_key` para futuros usos de IA e os contratos de output desses outros purposes continuam abertos. Isso nao reabre o contrato v1 ja definido para `anamnesis_review`.
 
 ### QUESTAO ABERTA
 

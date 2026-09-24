@@ -1736,3 +1736,13 @@ Para identificar a pergunta de condicao financeira entre versoes da Anamnese, us
 Nao usar label textual, posicao visual ou UUID de uma versao como identificador semantico. O UUID continua identificando a instancia da pergunta naquela versao; o `question_key` identifica o significado funcional dentro da definicao versionada.
 
 A politica de IA permanece: excluir por padrao e permitir somente opt-in explicito da Patty para aquela execution.
+
+## 2026-09-24 - Reconciliacao de escopo do primeiro purpose de IA
+
+### FATO DOCUMENTAL
+
+O primeiro purpose `anamnesis_review` nao deve mais ser descrito como aguardando escolha de provider, definicao de prompt ou contrato de output: esses elementos ja foram implementados e documentados.
+
+A configuracao `gpt-5.6-terra` + reasoning `medium` continua sendo configuracao tecnica inicial, nao uma aprovacao definitiva de qualidade. A avaliacao sintetica e o gate de dados de saude continuam pre-condicoes para uso com dados reais.
+
+A taxonomia de futuros `purpose_key` e seus contratos permanece aberta e nao altera o contrato v1 de `anamnesis_review`.
