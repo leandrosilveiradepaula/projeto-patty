@@ -385,3 +385,21 @@ A mitigacao e somente de observabilidade:
 - nao publica resultado.
 
 A consulta ao Supabase SaaS nesta rodada encontrou 0 executions `started` sem output/failure response. O mecanismo futuro de recovery/watchdog continua aberto.
+
+## 2026-09-24 - Limites de retencao de falhas de IA
+
+### IMPLEMENTADO NA APLICACAO
+
+A persistencia interna de falhas de IA passou a aplicar limites determinísticos antes do RPC privilegiado:
+
+- resposta bruta recebida do provider: maximo de 128 KiB em bytes UTF-8;
+- mensagem sanitizada de falha: maximo de 1.024 code points;
+- whitespace de `failure_message` e normalizado;
+- caracteres NUL sao substituidos;
+- resposta truncada deixa de ser rotulada como JSON e recebe marcador explicito de truncamento.
+
+A regra fica em modulo `server-only` e e coberta por testes unitarios e regressao de seguranca.
+
+### ESTADO DO SAAS ANTES DA MUDANCA
+
+A consulta ao Supabase SaaS encontrou 0 registros em `ai_execution_failure_responses` e 0 `failure_message` nao nulas. Nenhuma migration ou transformacao retroativa foi necessaria.

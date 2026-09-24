@@ -1713,3 +1713,16 @@ A integracao Vercel disponivel na sessao de 2026-09-24 nao expoe operacoes de Bl
 Enquanto nao houver mecanismo de recovery explicitamente definido, uma execution `started` sem `completed_at`/ `failed_at` deve ser tratada como **nao terminal e pendente de reconciliacao**, nunca inferida como `failed` apenas por idade.
 
 A aplicacao pode sinalizar esse estado para o admin, mas nao deve inventar timeout, failure response ou retry automatico. Essa regra evita transformar indisponibilidade de persistencia em um fato de falha que nao foi gravado.
+
+## 2026-09-24 - Limite tecnico de retencao para falhas de IA
+
+### DECISAO TECNICA
+
+Para reduzir retencao excessiva de conteudo sensivel em cenarios de erro sem perder capacidade minima de auditoria:
+
+- `ai_execution_failure_responses.content`: maximo de 128 KiB em bytes UTF-8;
+- `ai_executions.failure_message`: maximo de 1.024 code points apos sanitizacao;
+- NUL e substituido antes da persistencia;
+- se a resposta original exceder o limite, o trecho retido e marcado como truncado e armazenado com `content_format = text`, mesmo quando a resposta original foi informada como JSON.
+
+Esses limites sao controles tecnicos de minimizacao e nao alteram o lifecycle da execution, nao publicam resultados e nao substituem a politica juridica/organizacional de retencao.
