@@ -485,3 +485,21 @@ A UI do checkbox ja estava publicada na Vercel antes do apply do formulario cano
 ### PROXIMO GATE
 
 Executar o E2E sintetico completo de criacao inicial, preenchimento, condicionais, consentimento e envio final contra a versao canonica publicada.
+
+## 2026-09-24 - Smoke transacional da Anamnese canonica v1
+
+### TESTADO NO SUPABASE SAAS
+
+A versao publicada `client-anamnesis` v1 passou por smoke transacional com dados sinteticos e `ROLLBACK`.
+
+Cenario exercitado:
+- cliente sintetica existente;
+- nova submission da versao canonica publicada;
+- respostas validas para todas as perguntas aplicaveis;
+- controladoras das 10 condicionais respondidas com valores que mantiveram os detalhes nao aplicaveis;
+- ANAM-046 persistido como `Concordo`;
+- update de `submitted_at` concluido pelo fluxo de validacao do banco;
+- evidencia de consentimento presente na submission enviada;
+- `ROLLBACK` ao final, sem residuo.
+
+Esse smoke valida a definicao canônica e o trigger de envio final em conjunto. O E2E de browser completo continua um gate separado.
