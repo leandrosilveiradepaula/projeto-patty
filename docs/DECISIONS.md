@@ -1,3 +1,28 @@
+## 2026-09-24 - Vercel Private Blob para midia educacional
+
+### DECISAO TECNICA
+
+A midia binaria da biblioteca educacional usara Vercel Blob com acesso privado na primeira versao operacional.
+
+Motivos:
+- o primeiro video aprovado possui ~117,6 MiB e excede o limite atual de 50 MB do Supabase Free;
+- o aplicativo ja esta hospedado na Vercel;
+- Vercel Blob suporta objetos privados, uploads grandes/multipart e URLs assinadas;
+- a arquitetura pode usar OIDC no runtime Vercel, evitando secret estatico de longa duracao quando o store estiver conectado ao projeto;
+- nao e necessario introduzir outro fornecedor apenas para o primeiro lote.
+
+O Supabase continua sendo a fonte de verdade de metadados, versionamento, releases e autorizacao. O bucket `client-private` nao sera reutilizado.
+
+### DECISAO DE MODELO
+
+`educational_content_assets` liga um asset a uma versao exata de conteudo. A v1 registra provider, path, MIME, tamanho e SHA-256. Asset de versao publicada e imutavel.
+
+Cliente so pode ler metadata de asset quando a mesma versao estiver explicitamente liberada para ela. O acesso ao blob privado sera mediado server-side/signed URL apos autorizacao no Supabase.
+
+### LIMITE
+
+Criar a tabela de metadata nao significa que o Blob store exista nem que o video tenha sido copiado. Criacao do store, upload do arquivo original, verificacao de hash e publicacao permanecem passos operacionais separados.
+
 ## 2026-09-24 - Gmail da Patty como SMTP do MVP
 
 ### DECISAO TECNICA/OPERACIONAL
