@@ -1,0 +1,74 @@
+.executionList {
+  display: grid;
+  gap: 1rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.executionCard {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.executionMain {
+  display: grid;
+  gap: 0.875rem;
+  min-width: 0;
+}
+
+.executionHeading {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.executionTitle {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.executionMeta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 1.25rem;
+  margin: 0;
+}
+
+.executionMeta div {
+  min-width: 0;
+}
+
+.executionMeta dt {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.executionMeta dd {
+  margin: 0.2rem 0 0;
+  overflow-wrap: anywhere;
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.8rem;
+}
+
+.actionLink {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 720px) {
+  .executionCard {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .executionMeta {
+    grid-template-columns: 1fr;
+  }
+}
