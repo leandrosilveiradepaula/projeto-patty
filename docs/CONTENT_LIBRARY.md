@@ -79,3 +79,25 @@ O video `Como utilizar a BALANCA DE ALIMENTOS` e o primeiro item aprovado pela P
 ### QUESTAO ABERTA
 
 Ainda e necessario definir processo de revisao, aprovacao e versionamento dos conteudos.
+
+## Primeiro lote de migracao controlada
+
+### FATO DE IMPLEMENTACAO
+
+O primeiro lote tecnico foi materializado em `educational_media_migration_batch_1.json` e possui teste automatizado de invariantes.
+
+O lote contem somente:
+- Drive file ID `1z61DpJfwp-6DMhYMpCRNafkSwX6h9LBE`;
+- `MovaviClips_Video_20220217-143151.mp4`;
+- `video/mp4`;
+- 123.262.796 bytes;
+- destino `vercel_blob` privado;
+- asset `primary`.
+
+O arquivo original deve permanecer preservado no Drive. O path final deve ser opaco e sem PII. Tamanho, MIME e SHA-256 devem ser conferidos a partir dos bytes reais antes do registro de `educational_content_assets`.
+
+### PENDENCIA OPERACIONAL
+
+Nenhum Blob store foi criado/conectado nesta tarefa porque a integracao Vercel disponivel nao expoe operacoes de Storage. Nenhum download, upload, registro no Supabase, publicacao ou release foi executado.
+
+O manifesto permanece `blocked_store_pending` ate essa configuracao existir.

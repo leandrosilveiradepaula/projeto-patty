@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-24",
+  "batch_key": "educational_media_batch_1_food_scale",
+  "scope": "single approved educational media source; no upload, publication, or client release is performed by this manifest",
+  "batch_status": "blocked_store_pending",
+  "items": [
+    {
+      "source": {
+        "file_id": "1z61DpJfwp-6DMhYMpCRNafkSwX6h9LBE",
+        "folder_id": "1UPCZshVCGtiTYOsdp3F3kxeV7BO9XQZ7",
+        "folder_title": "Como utilizar a BALANÇA DE ALIMENTOS",
+        "original_title": "MovaviClips_Video_20220217-143151.mp4",
+        "mime_type": "video/mp4",
+        "size_bytes": 123262796,
+        "modified_time": "2022-02-17T17:41:55.259Z",
+        "preserve_original": true
+      },
+      "approval": {
+        "consultoria_material_status": "confirmed_by_patty",
+        "current_guidance_status": "confirmed_by_patty",
+        "client_distribution_status": "confirmed_by_patty"
+      },
+      "target": {
+        "library": "educational",
+        "storage_provider": "vercel_blob",
+        "blob_access": "private",
+        "asset_key": "primary",
+        "storage_path": null,
+        "storage_path_policy": "system_generated_opaque_no_pii",
+        "content_type": "video/mp4"
+      },
+      "integrity": {
+        "expected_size_bytes": 123262796,
+        "sha256_hex": null,
+        "sha256_status": "pending_source_download"
+      },
+      "supabase": {
+        "educational_content_id": null,
+        "educational_content_version_id": null,
+        "educational_content_asset_id": null,
+        "draft_version_status": "not_created"
+      },
+      "operation": {
+        "blob_store_status": "pending_manual_creation_or_connection",
+        "source_download_status": "not_started",
+        "blob_upload_status": "not_started",
+        "asset_registration_status": "not_started",
+        "publication_status": "not_started",
+        "client_release_status": "not_started"
+      }
+    }
+  ],
+  "required_sequence": [
+    "create_or_connect_private_vercel_blob_store",
+    "download_exact_approved_source_without_modifying_drive_original",
+    "verify_source_size_and_mime",
+    "calculate_sha256",
+    "create_or_select_unpublished_educational_content_version",
+    "generate_opaque_storage_path_without_pii",
+    "upload_private_blob",
+    "verify_uploaded_size_mime_and_sha256",
+    "register_educational_content_asset_while_version_is_draft",
+    "human_review",
+    "explicit_publication",
+    "explicit_client_release"
+  ]
+}

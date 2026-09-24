@@ -349,3 +349,24 @@ O advisor de seguranca nao trouxe finding novo; permanece apenas Leaked Password
 O PR #157 foi mergeado no commit `857daed` e o deployment correspondente ficou `READY` em producao. A consulta de runtime `error/fatal` da janela observada nao retornou eventos.
 
 Criar/conectar o Blob store e copiar o video continuam operacoes separadas.
+
+## 2026-09-24 - Preparacao controlada do primeiro lote de midia educacional
+
+### FATO DE IMPLEMENTACAO
+
+O primeiro lote de migracao fisica foi preparado de forma machine-readable em `docs/educational_media_migration_batch_1.json`, limitado exclusivamente ao video aprovado `MovaviClips_Video_20220217-143151.mp4` (Drive file ID `1z61DpJfwp-6DMhYMpCRNafkSwX6h9LBE`, `video/mp4`, 123.262.796 bytes).
+
+O manifesto preserva o original, exige path opaco sem PII, armazenamento `vercel_blob` privado, verificacao de tamanho/MIME/SHA-256 e a sequencia explicita draft -> asset -> revisao humana -> publicacao -> release. Um teste deterministico compara os metadados da fonte com o inventario original e falha fechado enquanto store, SHA-256, asset, publicacao e release nao existirem.
+
+### PENDENCIA OPERACIONAL / BLOQUEADA NESTA SESSAO
+
+A integracao Vercel disponivel nesta sessao permite consultar projeto, deployments, logs e documentacao, mas nao expoe operacao de criacao/listagem/conexao de Blob stores. Portanto, nenhum Vercel Private Blob store foi criado ou conectado por esta tarefa.
+
+Estado preservado:
+- nenhum arquivo do Drive foi copiado;
+- nenhum Blob foi enviado;
+- nenhum `educational_content`, versao, asset ou release foi criado no Supabase;
+- nenhuma publicacao foi realizada;
+- os demais arquivos do Drive continuam fora deste lote.
+
+A proxima operacao de midia continua dependendo da criacao/conexao manual de um Blob store privado ao projeto Vercel. Depois disso, o lote deve seguir a ordem registrada no manifesto, sem pular verificacoes de integridade ou gates humanos.
