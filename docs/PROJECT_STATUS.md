@@ -333,7 +333,7 @@ Detalhes: `docs/GMAIL_SMTP_SETUP.md`.
 
 A escolha tecnica foi fechada: Vercel Private Blob privado para binarios educacionais, mantendo Supabase para metadata/versionamento/releases/autorizacao.
 
-A branch atual prepara `educational_content_assets` com imutabilidade apos publicacao, RLS por release e metadata de integridade. Smoke transacional com `ROLLBACK` confirmou:
+A migration `20260924210600_create_educational_content_assets.sql` foi aplicada no Supabase SaaS. Smoke pos-apply com `ROLLBACK` confirmou:
 - asset somente em versao draft;
 - bloqueio de mutacao/delete apos publicacao;
 - bloqueio de novo asset apos publicacao;
@@ -343,5 +343,7 @@ A branch atual prepara `educational_content_assets` com imutabilidade apos publi
 - admin AAL2 le;
 - anon nao le;
 - provider diferente de `vercel_blob` e rejeitado.
+
+O advisor de seguranca nao trouxe finding novo; permanece apenas Leaked Password Protection ja conhecido. O advisor de performance marcou o novo indice como ainda nao usado, esperado antes de workload.
 
 Criar o Blob store e copiar o video continuam operacoes separadas.
