@@ -114,9 +114,9 @@ Quais campos da anamnese serao condicionais e quais serao suas regras de exibica
 
 Qual sera a ordem e o agrupamento final dos campos da anamnese?
 
-### QUESTAO ABERTA
+### FATO JA CONFIRMADO
 
-Medidas informadas na anamnese pertencem a propria resposta de anamnese, criam tambem um registro inicial de medicao/avaliacao, ou devem ser movidas para um fluxo de avaliacao separado?
+A Patty confirmou que as medidas corporais podem ser separadas da Anamnese e tratadas em um fluxo proprio de Avaliacao/Medidas. O catalogo definitivo de medidas, unidades, obrigatoriedade e fluxo de correcao continuam abertos.
 
 ### QUESTAO ABERTA
 
