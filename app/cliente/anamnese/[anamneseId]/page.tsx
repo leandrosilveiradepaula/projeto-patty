@@ -1,5 +1,6 @@
 import { ClientAnamnesisDraftSingleChoiceAnswerForm } from "@/components/client/ClientAnamnesisDraftSingleChoiceAnswerForm";
 import { ClientAnamnesisDraftTextAnswerForm } from "@/components/client/ClientAnamnesisDraftTextAnswerForm";
+import { ClientAnamnesisSubmitForm } from "@/components/client/ClientAnamnesisSubmitForm";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -292,6 +293,16 @@ export default async function ClienteAnamneseDetailPage({
           </div>
         )}
       </Section>
+      {submission.submitted_at === null ? (
+        <Section
+          description="O banco valida novamente todas as respostas obrigatórias aplicáveis antes de concluir o envio."
+          title="Finalizar Anamnese"
+        >
+          <Card>
+            <ClientAnamnesisSubmitForm submissionId={submission.id} />
+          </Card>
+        </Section>
+      ) : null}
     </>
   );
 }

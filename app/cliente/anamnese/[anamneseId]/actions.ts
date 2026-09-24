@@ -7,6 +7,10 @@ import {
   AnamnesisDraftPersistenceError,
   saveCurrentClientAnamnesisDraftAnswer,
 } from "@/lib/anamnesis/draft";
+import {
+  AnamnesisSubmissionError,
+  submitCurrentClientAnamnesisDraft,
+} from "@/lib/anamnesis/submission";
 
 export type ClientAnamnesisDraftAnswerFormState = {
   message: string | null;
@@ -116,6 +120,58 @@ export async function saveClientAnamnesisDraftSingleChoiceAnswer(
 
   return {
     message: "Resposta salva no rascunho.",
+    success: true,
+  };
+}
+
+
+export type ClientAnamnesisSubmitFormState = {
+  message: string | null;
+  success: boolean;
+};
+
+export async function submitClientAnamnesis(
+  submissionId: string,
+  _state: ClientAnamnesisSubmitFormState,
+  _formData: FormData,
+): Promise<ClientAnamnesisSubmitFormState> {
+  await requireRole("client");
+
+  try {
+    await submitCurrentClientAnamnesisDraft(submissionId);
+  } catch (error) {
+    if (error instanceof AnamnesisSubmissionError) {
+      if (error.code === "incomplete_or_invalid_answers") {
+        return {
+          message:
+            "Preencha todas as perguntas obrigatórias que se aplicam a você antes de enviar.",
+          success: false,
+        };
+      }
+
+      if (
+        error.code === "draft_not_found" ||
+        error.code === "client_not_found" ||
+        error.code === "invalid_identifier"
+      ) {
+        return {
+          message:
+            "Este rascunho não está mais disponível para envio. Atualize a página.",
+          success: false,
+        };
+      }
+    }
+
+    return {
+      message: "Não foi possível enviar a Anamnese. Tente novamente.",
+      success: false,
+    };
+  }
+
+  revalidateAnamnesisDraft(submissionId);
+
+  return {
+    message: "Sua Anamnese foi enviada para análise da Patty.",
     success: true,
   };
 }

@@ -334,3 +334,23 @@ Bibliotecas educacional e de exercicios sao definicoes globais: admin com role r
 Cliente le somente versao educacional vinculada a uma `client_content_release` propria. Patty/admin acessa release e progresso somente quando possui role `admin` e assignment ativo para a cliente. A cliente nao recebe escrita de progresso nesta etapa.
 
 Biblioteca de exercicios permanece interna: cliente nao recebe grant ou policy de leitura, mesmo autenticada.
+
+
+## Submissao final da Anamnese
+
+### DECISAO DE SEGURANCA
+
+A cliente pode atualizar somente a coluna `submitted_at` da propria submission enquanto ela ainda e rascunho. A policy de UPDATE exige ownership por `clients.profile_id = auth.uid()`; nenhuma coluna de identidade, cliente ou versao recebe privilegio de UPDATE por esse fluxo.
+
+Um trigger deterministico no banco valida o envio antes da transicao:
+- a versao precisa estar publicada;
+- o grafo de aplicabilidade precisa ser resolvivel integralmente;
+- toda pergunta aplicavel e marcada como obrigatoria precisa possuir resposta valida;
+- `text` exige string nao vazia;
+- `single_choice` exige opcoes validas e resposta pertencente a essas opcoes;
+- pergunta nao aplicavel nao bloqueia o envio;
+- tipos nao suportados falham fechados quando obrigatorios.
+
+O banco substitui o timestamp enviado pelo caller por `statement_timestamp()`. Depois da transicao, os triggers de imutabilidade ja existentes impedem novas alteracoes na submission e nas respostas originais.
+
+A validacao da UI serve somente para experiencia; o banco permanece a autoridade final contra bypass direto da Data API.
