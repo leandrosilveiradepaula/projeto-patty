@@ -422,6 +422,8 @@ test("AI execution boundary keeps privileged persistence server-only", async () 
   assert.match(persistenceBoundary, /\.rpc\(\s*["']start_anamnesis_review_execution["']/);
   assert.match(persistenceBoundary, /\.rpc\(\s*["']complete_ai_execution["']/);
   assert.match(persistenceBoundary, /\.rpc\(\s*["']fail_ai_execution["']/);
+  assert.match(persistenceBoundary, /sanitizeAiFailureMessage/);
+  assert.match(persistenceBoundary, /retainAiFailureResponse/);
 });
 
 
