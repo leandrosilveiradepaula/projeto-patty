@@ -26,7 +26,7 @@ test("ANAM-046 consent gate preserves the external-decision boundary", () => {
 
   assert.match(gate, /nao redige texto juridico/i);
   assert.match(gate, /NAO PUBLICAR/);
-  assert.match(gate, /nao assumir.*autoriza envio de dados para IA/is);
+  assert.match(gate, /nao assumir[\s\S]*autoriza envio de dados para IA/i);
 });
 
 test("ANAM-046 gate requires documentation before implementation", () => {
