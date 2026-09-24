@@ -361,9 +361,9 @@ A interface da cliente ja consegue retomar rascunho e salvar respostas `text` e 
 
 A especificacao da primeira Anamnese canonica permanece em `ANAMNESE_CANONICAL_V1_CANDIDATE.md`.
 
-Tipos nao juridicos, 10 condicionais, perguntas compostas, ANAM-044, ordem e UX de salvamento estao definidos. Continuam bloqueadores:
-- texto/versionamento/operacao juridica de ANAM-046;
-- implementacao e validacao do envio final explicito, aplicando obrigatoriedade somente aos campos aplicaveis.
+Tipos nao juridicos, 10 condicionais, perguntas compostas, ANAM-044, ordem, UX de salvamento e submissao final estao definidos e implementados. O envio final e revalidado deterministicamente no banco e a migration correspondente esta aplicada.
+
+O bloqueador restante para materializar/publicar a primeira versao canonica e o texto/versionamento/operacao juridica de ANAM-046.
 
 ### DECISAO DE PRODUTO
 

@@ -70,9 +70,9 @@ Nao existe bloqueio atual de deployment Vercel para o `master`.
 | MFA administrativo | SIM | SIM | Smoke AAL1/AAL2 documentado | Enforcement RLS aplicado no SaaS | Leaked Password Protection bloqueada pelo plano atual |
 | RBAC / RLS / assignments | SIM | SIM | Smokes documentados | Fundacao e fluxos administrativos principais operacionais | Novos papeis ficam fora do MVP; assignment continua regra geral para dados client-scoped |
 | Cadastro Atual | SIM como entidade separada | SIM | Fundacao testada | Backend existente | Fluxo final de edicao cadastral pela cliente/Patty ainda aberto |
-| Anamnese versionada | SIM | SIM + aplicabilidade + `single_choice` + mapa nao juridico v1 definido | Migration/engine/mapa cobertos em CI | Tipos nao juridicos, 10 condicionais, ordem e ANAM-044 definidos; 4 medidas excluidas | ANAM-046 juridico e envio final antes de publicar |
-| Rascunho da Anamnese | SIM | PARCIAL + submissao final implementada na branch | Smoke de submissao em transacao/ROLLBACK PASS; E2E de producao anterior PASS para `text` | Persistencia de rascunho aplicada; migration de envio final ainda pendente de apply | ANAM-046 e apply/validacao runtime da submissao final |
-| Obrigatoriedade da Anamnese | SIM | Regra + UI + validacao deterministica de envio no banco preparada | Engine/UI em CI; smoke SQL com ROLLBACK PASS | Migration de envio final ainda nao aplicada | Aplicar migration e validar runtime |
+| Anamnese versionada | SIM | SIM + aplicabilidade + `single_choice` + mapa nao juridico v1 + submissao final | CI + smoke SQL pos-apply PASS | Tipos nao juridicos, 10 condicionais, ordem, ANAM-044 e envio final definidos/aplicados | ANAM-046 juridico antes de materializar/publicar a primeira versao |
+| Rascunho da Anamnese | SIM | SIM para salvar/retomar/enviar dentro dos tipos v1 suportados | Smoke pos-apply PASS; E2E anterior PASS para retomada `text`; UI final passou CI/build | Migration `20260924142453` aplicada; producao Vercel do commit `d545f5a` READY | ANAM-046 e publicacao da versao canonica para E2E completo |
+| Obrigatoriedade da Anamnese | SIM | Regra + UI + validacao deterministica no banco | CI + smoke pos-apply PASS | `20260924142453` aplicada no SaaS; campo nao aplicavel nao bloqueia; incompleto aplicavel bloqueia | Validar E2E completo quando a primeira `client-anamnesis` for publicada |
 | Correcao pos-envio da Anamnese | SIM | SIM | E2E administrativo de producao PASS em 2026-09-24 | Schema aplicado e rota/UI publicadas e validadas em producao | Apos envio, entra direto em analise; falta definir UX/lifecycle do pedido de esclarecimento a cliente |
 | Arquivos privados | SIM | PARCIAL/AVANCADO | Smokes cliente/admin + auditoria estatica | Acesso da Patty sem assignment confirmado em RLS/Storage/rotas, com MFA AAL2 | Politica de retencao/hard delete |
 | Avaliacoes e medidas | Fundacao + cadencia profissional parcial definida | SIM na fundacao | Parcial | Backend existente | Quinzenal: cintura/abdomen/quadril/peso; mensal: todas as medidas + peso + fotos; falta catalogo mensal completo, unidades e correcao |
@@ -94,7 +94,9 @@ Nesta rodada, o workflow versionado confirmou no historico remoto:
 - `20260923113835_admin_mfa_rls_enforcement.sql`;
 - `20260923114643_anamnesis_answer_corrections_foundation.sql`;
 - `20260923150743_optimize_anamnesis_correction_rls.sql`;
-- `20260923191554_fix_anamnesis_draft_delete_trigger.sql`.
+- `20260923191554_fix_anamnesis_draft_delete_trigger.sql`;
+- `20260924105003_add_anamnesis_question_applicability_foundation.sql`;
+- `20260924142453_anamnesis_final_submission_foundation.sql`.
 
 O apply de `20260923191554` terminou com sucesso e o `migration list` pos-apply mostrou o mesmo timestamp local/remoto. Em seguida, um smoke transacional com dados sinteticos e `ROLLBACK` confirmou: draft nao submetido pode ser excluido; submission enviada continua bloqueada com SQLSTATE `55000`; cliente A nao consegue ler submission da cliente B. Em 2026-09-24, o E2E de producao confirmou a retomada e persistencia de um rascunho existente no runtime publicado. A criacao inicial de nova Anamnese continua separada e depende da primeira versao canonica `client-anamnesis`.
 
@@ -193,8 +195,8 @@ Nesta reconciliacao de 2026-09-23, incorporada ao `master` pelo PR #120:
 
 Ordem operacional sugerida, sujeita a revalidacao do HEAD:
 
-1. fechar ANAM-046 / consentimento juridico e implementar o envio final deterministico da Anamnese;
-2. materializar a primeira `client-anamnesis`, revisar, publicar explicitamente e validar inicio de novo rascunho;
+1. fechar ANAM-046 / consentimento juridico;
+2. materializar a primeira `client-anamnesis`, revisar, publicar explicitamente e validar inicio, preenchimento condicional e envio final E2E;
 3. resolver infraestrutura do email real de convite;
 4. continuar integracao UI <-> backend real;
 5. preparar execution real de IA com provider/modelo explicitamente definidos;
