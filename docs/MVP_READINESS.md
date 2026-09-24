@@ -421,3 +421,17 @@ Foram validados no browser contra producao:
 - 0 drafts canonicos residuais ao final.
 
 O consentimento e o envio completo possuem evidencias separadas ja aprovadas.
+
+## Anamnese canonica v1 - edicao e condicionais
+
+Estado: **WORKFLOW VERSIONADO / EXECUCAO MANUAL PENDENTE**
+
+O workflow `E2E canonical Anamnesis draft edit smoke` cobre, contra producao, persistencia e atualizacao de respostas da propria v1 publicada e uma condicional real do formulario.
+
+Escopo do gate:
+- insert/update de resposta textual;
+- single_choice real;
+- exibicao/ocultacao de campo condicional;
+- persistencia do detalhe quando aplicavel;
+- draft continua nao enviado;
+- cleanup sem historico sintetico permanente.
