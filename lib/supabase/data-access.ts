@@ -159,7 +159,7 @@ export async function listAccessibleAnamnesisQuestions(formVersionId: string) {
   const { data, error } = await supabase
     .from("anamnesis_questions")
     .select(
-      "id, form_version_id, section_id, question_key, label, display_order, answer_type, required, options",
+      "id, form_version_id, section_id, question_key, label, display_order, answer_type, required, options, applicability_source_question_id, applicability_expected_answer",
     )
     .eq("form_version_id", formVersionId)
     .order("display_order", { ascending: true })
