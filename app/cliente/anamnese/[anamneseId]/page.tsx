@@ -111,9 +111,19 @@ export default async function ClienteAnamneseDetailPage({
     <>
       <PageHeader
         actions={
-          <Link className={styles.backLink} href="/cliente/anamnese">
-            Voltar ao histórico
-          </Link>
+          <div className={styles.headerActions}>
+            <Link className={styles.backLink} href="/cliente/anamnese">
+              Voltar ao histórico
+            </Link>
+            {submission.submitted_at ? (
+              <Link
+                className={styles.backLink}
+                href={`/cliente/anamnese/${submission.id}/esclarecimentos`}
+              >
+                Esclarecimentos
+              </Link>
+            ) : null}
+          </div>
         }
         description={
           submission.submitted_at

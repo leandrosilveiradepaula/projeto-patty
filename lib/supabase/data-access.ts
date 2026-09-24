@@ -250,6 +250,72 @@ export async function createAccessibleAnamnesisAnswerCorrection(input: {
   }
 }
 
+export async function listAccessibleAnamnesisClarificationRequests(submissionId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("anamnesis_clarification_requests")
+    .select("id, submission_id, source_answer_id, requested_by_profile_id, request_text, created_at")
+    .eq("submission_id", submissionId)
+    .order("created_at", { ascending: true })
+    .order("id", { ascending: true });
+  if (error) throw error;
+  return data;
+}
+
+export async function getAccessibleAnamnesisClarificationRequest(requestId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("anamnesis_clarification_requests")
+    .select("id, submission_id, source_answer_id, requested_by_profile_id, request_text, created_at")
+    .eq("id", requestId)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+export async function listAccessibleAnamnesisClarificationResponses(requestIds: string[]) {
+  if (requestIds.length === 0) return [];
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("anamnesis_clarification_responses")
+    .select("id, clarification_request_id, responder_profile_id, response_text, created_at")
+    .in("clarification_request_id", requestIds)
+    .order("created_at", { ascending: true })
+    .order("id", { ascending: true });
+  if (error) throw error;
+  return data;
+}
+
+export async function createAccessibleAnamnesisClarificationRequest(input: {
+  requestText: string;
+  requestedByProfileId: string;
+  sourceAnswerId: string | null;
+  submissionId: string;
+}) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("anamnesis_clarification_requests").insert({
+    request_text: input.requestText,
+    requested_by_profile_id: input.requestedByProfileId,
+    source_answer_id: input.sourceAnswerId,
+    submission_id: input.submissionId,
+  });
+  if (error) throw error;
+}
+
+export async function createAccessibleAnamnesisClarificationResponse(input: {
+  clarificationRequestId: string;
+  responderProfileId: string;
+  responseText: string;
+}) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("anamnesis_clarification_responses").insert({
+    clarification_request_id: input.clarificationRequestId,
+    responder_profile_id: input.responderProfileId,
+    response_text: input.responseText,
+  });
+  if (error) throw error;
+}
+
 export async function listAccessibleAnamnesisReviews(submissionId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase

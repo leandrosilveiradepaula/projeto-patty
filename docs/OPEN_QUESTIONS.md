@@ -384,7 +384,14 @@ A Patty confirmou que, apos o envio final da Anamnese, a cliente entra diretamen
 
 A Patty tambem confirmou que, quando faltar informacao importante ou uma resposta estiver pouco clara, o esclarecimento deve ser solicitado a cliente dentro do aplicativo, em vez de a Patty completar a resposta original por conta propria.
 
-Continuam abertos os detalhes de UX, notificacao e lifecycle desse pedido de esclarecimento, alem dos findings de IA.
+A fundacao minima de UX/historico foi definida e implementada: pedido textual da Patty, vinculo opcional a resposta original, complementos textuais append-only da cliente e visualizacao nas duas interfaces.
+
+Continuam abertos:
+- notificacao fora da tela de Anamnese;
+- prazo/expiracao;
+- eventual estado formal de aberto/resolvido;
+- regras de encerramento ou reabertura;
+- como os complementos entram no contexto de IA e no historico de findings.
 
 ## Conteudo
 

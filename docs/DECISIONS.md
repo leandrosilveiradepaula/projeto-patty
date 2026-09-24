@@ -1,3 +1,28 @@
+## 2026-09-24 - Fundacao de esclarecimentos pos-Anamnese
+
+### DECISAO TECNICA/PRODUTO
+
+O pedido de esclarecimento confirmado pela Patty passa a ter uma fundacao append-only propria, separada de resposta original, correcoes administrativas e notas internas.
+
+A primeira versao suporta:
+- pedido textual da Patty apenas para Anamnese ja enviada;
+- vinculo opcional a uma resposta original da mesma submission;
+- resposta textual complementar da propria cliente;
+- multiplos complementos preservados cronologicamente;
+- nenhuma edicao ou exclusao de pedido/resposta pelo fluxo normal;
+- AAL2 + assignment ativo para criacao/leitura administrativa;
+- cliente le somente pedidos da propria Anamnese e escreve somente complementos em proprio nome.
+
+Nao existe estado formal de aberto/resolvido, prazo, expiracao ou notificacao automatica nesta fundacao. Esses pontos continuam abertos.
+
+### LIMITE
+
+Complemento da cliente nao altera a resposta original e nao e tratado automaticamente como correcao. A inclusao futura em contexto de IA permanece decisao separada.
+
+### ESTADO OPERACIONAL
+
+A migration `20260924153808_create_anamnesis_clarification_flow.sql` foi aplicada no Supabase SaaS em 2026-09-24. Smoke pos-apply com dados sinteticos e `ROLLBACK` confirmou as invariantes de autoria, isolamento, append-only e preservacao da resposta original. A UI passou CI/build no PR #146; publicacao e E2E de producao permanecem separados.
+
 # Decisoes
 
 ## 2026-09-24 - Submissao final deterministica da Anamnese aplicada

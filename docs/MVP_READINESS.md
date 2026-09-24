@@ -24,6 +24,7 @@ Estados usados:
 - notas internas append-only de revisao da Anamnese;
 - boundary server-only de criacao/retomada do rascunho e UI parcial para editar respostas `text` e `single_choice` de rascunhos ja existentes; escolhas unicas sao revalidadas no servidor contra `options` da pergunta versionada;
 - correcoes historicas append-only da Patty aplicadas no SaaS e integradas a uma UI administrativa que preserva a resposta original;
+- fundacao de esclarecimentos pos-Anamnese aplicada no SaaS: pedidos da Patty e complementos da cliente ficam separados da resposta original, com RLS client-scoped e AAL2 administrativo;
 - avaliacoes e medidas em leitura;
 - acompanhamento profissional append-only;
 - fotos privadas de avaliacao para admin;
@@ -64,7 +65,7 @@ Estados usados:
 | Profiles / roles | IMPLEMENTADO | sem UI administrativa de gestao | RLS existente | definir bootstrap/admin e quem gerencia roles |
 | Clients / assignments | leitura + encerramento + inicio de assignment no onboarding IMPLEMENTADOS | Patty inicia onboarding por convite server-side; provisionamento cria vinculos relacionais e assignment com compensacao em falha | CI VALIDADO; encerramento E2E PASS; onboarding sintetico E2E PASS; Site URL/allowlist alinhados | template SSR real exige upgrade ou SMTP customizado; depois validar email real |
 | Cadastro Atual | leitura IMPLEMENTADA | nao | CI VALIDADO | definir quem pode alterar cada campo e auditoria |
-| Anamnese versionada | leitura, rascunho e submissao final IMPLEMENTADOS; mapa nao juridico v1 DEFINIDO | cliente salva `text`/`single_choice`; aplicabilidade oculta dependentes; envio explicito e revalidado no banco | CI + smoke SQL pos-apply PASS; producao do codigo READY | ANAM-046 e depois materializacao/publicacao + E2E da primeira versao |
+| Anamnese versionada | leitura, rascunho e submissao final IMPLEMENTADOS; mapa nao juridico v1 DEFINIDO; esclarecimentos pos-envio com schema aplicado | cliente salva `text`/`single_choice`; aplicabilidade oculta dependentes; envio explicito; Patty cria pedido de esclarecimento e cliente adiciona complementos append-only | CI + smoke SQL pos-apply PASS; schema de esclarecimentos SAAS VALIDADO; UI de esclarecimentos CI VALIDADA | ANAM-046 para primeira versao canonica; publicar/validar UI de esclarecimentos |
 | Avaliacoes / medidas | leitura IMPLEMENTADA | acompanhamento profissional append-only | CI VALIDADO; conjunto de decisoes profissionais tipado e testado | definir catalogo, unidades, obrigatoriedade e correcao |
 | Arquivos privados | upload/listagem/download da cliente IMPLEMENTADOS; acesso admin permanente sem assignment, upload administrativo e liberacao explicita IMPLEMENTADOS | smoke E2E da cliente PASS; smoke E2E administrativo PASS em producao; cron de temporarios VALIDADO; auditoria estatica confirmou RLS/rotas coerentes com a excecao da Patty | definir retencao/hard delete |
 | Protocolos | leitura + lifecycle manual IMPLEMENTADOS | submit/approve/publish | CI + SAAS VALIDADO; lifecycle com guarda determinística testada | criar/editar plano somente quando fluxo profissional estiver formalizado |
@@ -125,7 +126,11 @@ A regra de preenchimento esta fechada para a v1 nao juridica: todos os campos ap
 
 A aplicacao administrativa agora expoe `/admin/anamneses/[id]/correcoes` somente para Anamneses ja enviadas. A tela mostra a resposta original, o historico cronologico de correcoes e permite acrescentar novo valor como JSON explicito. A Server Action exige `requireRole("admin")` e usa o cliente Supabase autenticado normal; RLS continua sendo a autoridade final para AAL2, assignment ativo, autoria e submission enviada. A cliente nao recebe leitura dessa tabela, e o fluxo nao altera nem remove resposta/correcao existente.
 
-A UI de correcoes foi validada em producao em 2026-09-24: a rota respondeu `200`, o fluxo administrativo com MFA carregou a resposta original e o caso de JSON invalido nao criou historico. A consulta pos-smoke confirmou ausencia de correcoes E2E residuais. Tipos nao juridicos, 10 condicionais, ordem e submissao final da v1 ja estao fechados. O bloqueio para materializar/publicar a primeira `client-anamnesis` e ANAM-046.
+A UI de correcoes foi validada em producao em 2026-09-24: a rota respondeu `200`, o fluxo administrativo com MFA carregou a resposta original e o caso de JSON invalido nao criou historico. A consulta pos-smoke confirmou ausencia de correcoes E2E residuais.
+
+A migration `20260924153808_create_anamnesis_clarification_flow.sql` esta aplicada no SaaS. O smoke pos-apply confirmou request administrativo sob AAL2/assignment, leitura e resposta pela propria cliente, isolamento de outra cliente, multiplos complementos append-only e preservacao da resposta original. A UI correspondente passou typecheck, security boundaries e build no PR #146; producao ainda precisa ser validada apos merge/deploy.
+
+Tipos nao juridicos, 10 condicionais, ordem e submissao final da v1 ja estao fechados. O bloqueio para materializar/publicar a primeira `client-anamnesis` e ANAM-046.
 
 ### Banco e performance
 

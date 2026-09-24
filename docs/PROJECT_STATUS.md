@@ -73,7 +73,7 @@ Nao existe bloqueio atual de deployment Vercel para o `master`.
 | Anamnese versionada | SIM | SIM + aplicabilidade + `single_choice` + mapa nao juridico v1 + submissao final | CI + smoke SQL pos-apply PASS | Tipos nao juridicos, 10 condicionais, ordem, ANAM-044 e envio final definidos/aplicados | ANAM-046 isolado em gate juridico objetivo (`ANAMNESE_CONSENT_GATE.md`) antes de materializar/publicar |
 | Rascunho da Anamnese | SIM | SIM para salvar/retomar/enviar dentro dos tipos v1 suportados | Smoke pos-apply PASS; E2E anterior PASS para retomada `text`; UI final passou CI/build | Migration `20260924142453` aplicada; producao Vercel do commit `6b88dce` READY | ANAM-046 e publicacao da versao canonica para E2E completo |
 | Obrigatoriedade da Anamnese | SIM | Regra + UI + validacao deterministica no banco | CI + smoke pos-apply PASS | `20260924142453` aplicada no SaaS; campo nao aplicavel nao bloqueia; incompleto aplicavel bloqueia | Validar E2E completo quando a primeira `client-anamnesis` for publicada |
-| Correcao pos-envio da Anamnese | SIM | SIM | E2E administrativo de producao PASS em 2026-09-24 | Schema aplicado e rota/UI publicadas e validadas em producao | Apos envio, entra direto em analise; falta definir UX/lifecycle do pedido de esclarecimento a cliente |
+| Correcao pos-envio da Anamnese | SIM | SIM | E2E administrativo de producao PASS em 2026-09-24 | Schema aplicado e rota/UI publicadas e validadas em producao | Resposta original continua separada de correcoes e esclarecimentos |
 | Arquivos privados | SIM | PARCIAL/AVANCADO | Smokes cliente/admin + auditoria estatica | Acesso da Patty sem assignment confirmado em RLS/Storage/rotas, com MFA AAL2 | Politica de retencao/hard delete |
 | Avaliacoes e medidas | Fundacao + cadencia profissional parcial definida | SIM na fundacao | Parcial | Backend existente | Quinzenal: cintura/abdomen/quadril/peso; mensal: todas as medidas + peso + fotos; falta catalogo mensal completo, unidades e correcao |
 | Protocolos versionados | SIM | Lifecycle manual implementado | CI/validacoes existentes | Backend/SaaS correspondente existente | Criacao/edicao profissional completa conforme regras ainda abertas |
@@ -96,7 +96,8 @@ Nesta rodada, o workflow versionado confirmou no historico remoto:
 - `20260923150743_optimize_anamnesis_correction_rls.sql`;
 - `20260923191554_fix_anamnesis_draft_delete_trigger.sql`;
 - `20260924105003_add_anamnesis_question_applicability_foundation.sql`;
-- `20260924142453_anamnesis_final_submission_foundation.sql`.
+- `20260924142453_anamnesis_final_submission_foundation.sql`;
+- `20260924153808_create_anamnesis_clarification_flow.sql`.
 
 O apply de `20260923191554` terminou com sucesso e o `migration list` pos-apply mostrou o mesmo timestamp local/remoto. Em seguida, um smoke transacional com dados sinteticos e `ROLLBACK` confirmou: draft nao submetido pode ser excluido; submission enviada continua bloqueada com SQLSTATE `55000`; cliente A nao consegue ler submission da cliente B. Em 2026-09-24, o E2E de producao confirmou a retomada e persistencia de um rascunho existente no runtime publicado. A criacao inicial de nova Anamnese continua separada e depende da primeira versao canonica `client-anamnesis`.
 
@@ -198,7 +199,7 @@ Ordem operacional sugerida, sujeita a revalidacao do HEAD:
 1. obter e documentar as respostas do gate `ANAMNESE_CONSENT_GATE.md` para fechar ANAM-046;
 2. materializar a primeira `client-anamnesis`, revisar, publicar explicitamente e validar inicio, preenchimento condicional e envio final E2E;
 3. resolver infraestrutura do email real de convite;
-4. continuar integracao UI <-> backend real;
+4. mergear/publicar a UI de esclarecimentos pos-Anamnese e validar o fluxo admin <-> cliente com fixture sintetica em producao;
 5. preparar execution real de IA com provider/modelo explicitamente definidos;
 6. decidir a infraestrutura de midia educacional para arquivos acima de 50 MB; depois preparar a migracao controlada do video aprovado da balanca;
 7. ampliar automacao de alimentacao/treino somente depois das regras profissionais correspondentes estarem documentadas.
@@ -246,3 +247,18 @@ O smoke valida no runtime:
 - cleanup completo da fixture temporaria.
 
 O caminho de envio completo continua coberto pelo smoke SQL transacional pos-apply, que pode usar `ROLLBACK` sem deixar submission enviada imutavel como residuo.
+
+
+## Esclarecimentos pos-Anamnese
+
+A fundacao foi preparada no repositorio para preservar separadamente pedido da Patty e complementos da cliente, sem alterar a resposta original.
+
+Escopo:
+- pedido textual em Anamnese enviada;
+- vinculo opcional a resposta original;
+- complementos textuais append-only;
+- leitura client-scoped;
+- criacao administrativa exige assignment ativo + AAL2;
+- sem estado formal, prazo, expiracao ou notificacao automatica.
+
+A migration `20260924153808_create_anamnesis_clarification_flow.sql` foi aplicada no Supabase SaaS em 2026-09-24 e o historico remoto foi confirmado com o mesmo version ID. O smoke pos-apply com fixture sintetica e `ROLLBACK` confirmou request AAL2, resposta da cliente correta, isolamento entre clientes, multiplos complementos, resposta original inalterada e imutabilidade. A UI passou CI/build; merge/publicacao e validacao de producao continuam etapas separadas.
