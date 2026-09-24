@@ -90,9 +90,11 @@ Quais alteracoes cadastrais exigirao auditoria especifica?
 
 Qual e o mapa completo dos campos do formulario atual de anamnese, considerando que as evidencias disponiveis podem ser parciais?
 
-### QUESTAO ABERTA
+### FATO JA CONFIRMADO
 
-Quais perguntas do formulario atual devem ser mantidas, alteradas ou removidas no novo aplicativo?
+A Patty confirmou que as perguntas do formulario atual devem ser mantidas como base de conteudo. Nesta etapa, o objetivo e organizar melhor a experiencia no aplicativo, nao fazer uma revisao ampla removendo ou acrescentando varias perguntas.
+
+A reorganizacao pode alterar apresentacao, agrupamento, tipos de input e logica condicional sem mudar silenciosamente o sentido profissional das perguntas.
 
 ### FATO JA CONFIRMADO
 
