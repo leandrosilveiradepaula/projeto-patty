@@ -381,6 +381,8 @@ Esse video passa a ser o primeiro conteudo elegivel para um lote de migracao con
 
 A Patty tambem confirmou que a planilha historica `Sugestao de refeicoes` deve ser transformada em **conteudo educacional revisado para clientes**. A estrutura historica de seis refeicoes permanece exemplo e nao deve ser convertida em regra fixa de numero de refeicoes.
 
+A Patty confirmou ainda que conteudos sobre **formulas/manipulados** devem fazer parte do aplicativo. O arquivo historico `Fórmulas.pptx` permanece bloqueado para publicacao ate revisao profissional completa das alegacoes, confirmacao de atualidade, autoria/direitos e revisao de referencias comerciais/farmacia.
+
 Os demais conteudos continuam sujeitos a revisao individual.
 
 ### QUESTAO ABERTA
