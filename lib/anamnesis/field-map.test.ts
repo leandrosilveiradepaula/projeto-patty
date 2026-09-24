@@ -14,6 +14,7 @@ type CandidateField = {
   answer_type_candidate: string;
   required_when_applicable: boolean;
   options_candidate: unknown[] | null;
+  ui_control_candidate?: string;
   applicability_candidate: Applicability | null;
   product_status?: string;
 };
