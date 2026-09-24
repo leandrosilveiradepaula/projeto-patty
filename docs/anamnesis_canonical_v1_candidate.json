@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "product_approved_except_consent_not_publishable",
+  "status": "product_approved_publishable",
   "canonical_form_key": "client-anamnesis",
   "source_inventory": "docs/ANAMNESE.md",
   "source_codes_expected": "ANAM-000..ANAM-046",
@@ -13,10 +13,7 @@
       "ANAM-007",
       "ANAM-008"
     ],
-    "do_not_publish_until": [
-      "consent_text_and_versioning_resolved",
-      "final_submission_flow_implemented_and_validated"
-    ],
+    "do_not_publish_until": [],
     "draft_save_mode": "explicit_per_answer",
     "final_submit_requires_explicit_client_action": true,
     "files_integration_mode": "link_to_private_files_flow"
@@ -449,11 +446,11 @@
     {
       "source_code": "ANAM-046",
       "source_label": "Declaracao de Anuencia",
-      "disposition": "consent_pending",
+      "disposition": "include_v1",
       "candidate_section": "consentimento",
       "composite_question": false,
       "conditional_candidate": false,
-      "final_input_type": "legal_pending"
+      "final_input_type": "resolved_in_field_map"
     }
   ]
 }
