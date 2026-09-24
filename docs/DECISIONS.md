@@ -1,5 +1,33 @@
 # Decisoes
 
+## 2026-09-24 - Submissao final deterministica da Anamnese aplicada
+
+### DECISAO TECNICA E FATO OPERACIONAL
+
+A cliente finaliza a propria Anamnese por uma acao explicita que altera somente `submitted_at` da submission em rascunho. A migration remota `20260924142453_anamnesis_final_submission_foundation` esta aplicada no Supabase SaaS.
+
+O banco e a autoridade final para a transicao:
+- RLS limita UPDATE a submission propria ainda nao enviada;
+- o papel `authenticated` recebe UPDATE somente da coluna `submitted_at`;
+- a versao precisa estar publicada;
+- o grafo versionado de aplicabilidade precisa ser resolvivel;
+- pergunta aplicavel e obrigatoria precisa possuir resposta valida;
+- `text` exige string nao vazia;
+- `single_choice` exige valor pertencente as opcoes versionadas;
+- pergunta nao aplicavel nao bloqueia;
+- o banco normaliza o timestamp com `statement_timestamp()`;
+- depois do envio, os guards de imutabilidade existentes continuam bloqueando alteracoes da submission e das respostas originais.
+
+### VALIDACAO
+
+O SQL foi validado antes do apply em transacao com `ROLLBACK` e repetido apos o apply. O smoke sintetico confirmou dependente oculto aceito, dependente aplicavel ausente bloqueado, submissao completa aceita e timestamp do caller substituido.
+
+A auditoria pos-apply confirmou que `authenticated` pode atualizar `submitted_at`, mas nao `client_id` nem `form_version_id`; a policy de UPDATE e o trigger de validacao existem.
+
+### LIMITE
+
+ANAM-046 continua juridicamente pendente. A existencia da submissao final tecnica nao autoriza publicar a primeira `client-anamnesis` antes do fechamento do consentimento.
+
 ## 2026-09-24 - Fechamento de produto da Anamnese v1, exceto consentimento juridico
 
 ### DECISAO DE PRODUTO

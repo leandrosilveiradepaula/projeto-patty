@@ -7,7 +7,7 @@ const migrationPath = join(
   process.cwd(),
   "supabase",
   "migrations",
-  "20260924141700_anamnesis_final_submission_foundation.sql",
+  "20260924142453_anamnesis_final_submission_foundation.sql",
 );
 
 function loadMigration() {

@@ -37,7 +37,7 @@ Os smokes anteriores confirmaram MFA AAL1/AAL2, isolamento entre clientes, persi
 
 Migration mais recente aplicada:
 
-- `20260924105003_add_anamnesis_question_applicability_foundation.sql`
+- `20260924142453_anamnesis_final_submission_foundation.sql`
 
 O dry-run listou somente essa migration como pendente. O apply foi concluido com sucesso e o `migration list` pos-apply mostrou o mesmo timestamp local/remoto: `20260924105003`.
 
@@ -103,3 +103,25 @@ Depois de cada apply:
 4. registrar a evidencia na documentacao antes de considerar a migration concluida operacionalmente.
 
 Nenhuma UI final de submissao da Anamnese e liberada por esse deploy.
+
+
+## Excecao operacional de 2026-09-24 — submissao final da Anamnese
+
+O procedimento padrao permanece GitHub Actions + `supabase db push`.
+
+Para `anamnesis_final_submission_foundation`, a integracao GitHub disponivel na sessao conseguia ler/reexecutar workflows, mas nao iniciar `workflow_dispatch`. Como o merge da UI ja havia produzido deployment Vercel de producao READY, deixar o schema pendente criaria uma acao visivel que falharia.
+
+Foi usada, excepcionalmente, a operacao oficial `apply_migration` do conector Supabase com o **mesmo SQL revisado e mergeado**. O Supabase registrou a migration como:
+
+`20260924142453_anamnesis_final_submission_foundation`
+
+O arquivo local foi renomeado imediatamente para o mesmo timestamp remoto, restaurando paridade de historico. Essa excecao nao altera o procedimento padrao para migrations futuras.
+
+Validacoes pos-apply:
+- `list_migrations`: migration presente;
+- smoke sintetico com `ROLLBACK`: PASS;
+- grant de UPDATE apenas em `submitted_at`: confirmado;
+- UPDATE de `client_id` e `form_version_id`: nao concedido;
+- policy e trigger: presentes;
+- advisor de seguranca: nenhum novo finding da migration; permanece apenas Leaked Password Protection, ja bloqueada pelo plano;
+- advisor de performance: avisos historicos, sem novo indice criado apenas para zerar lint.

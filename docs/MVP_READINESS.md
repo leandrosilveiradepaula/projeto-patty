@@ -43,7 +43,7 @@ Estados usados:
 
 ### Principais bloqueios atuais
 
-- questionario final e fluxo de preenchimento/submissao da Anamnese;
+- ANAM-046 / consentimento juridico antes da primeira publicacao canonica da Anamnese;
 - definir a politica final de retencao/hard delete de arquivos privados;
 - decidir infraestrutura/plano para habilitar `Leaked Password Protection`, recurso bloqueado no ambiente atual por exigir Pro ou superior;
 - decidir entre upgrade ou SMTP customizado para permitir o template real `Invite user`; Site URL e redirect allowlist ja estao alinhados e o lifecycle sintetico de convite/ativacao passou E2E em producao;
@@ -64,7 +64,7 @@ Estados usados:
 | Profiles / roles | IMPLEMENTADO | sem UI administrativa de gestao | RLS existente | definir bootstrap/admin e quem gerencia roles |
 | Clients / assignments | leitura + encerramento + inicio de assignment no onboarding IMPLEMENTADOS | Patty inicia onboarding por convite server-side; provisionamento cria vinculos relacionais e assignment com compensacao em falha | CI VALIDADO; encerramento E2E PASS; onboarding sintetico E2E PASS; Site URL/allowlist alinhados | template SSR real exige upgrade ou SMTP customizado; depois validar email real |
 | Cadastro Atual | leitura IMPLEMENTADA | nao | CI VALIDADO | definir quem pode alterar cada campo e auditoria |
-| Anamnese versionada | leitura + rascunho IMPLEMENTADOS; mapa nao juridico v1 DEFINIDO; submissao final preparada na branch | cliente salva `text`/`single_choice`; aplicabilidade oculta dependentes; envio explicito revalidado no banco | smoke SQL da submissao PASS com ROLLBACK; aplicacao/runtime ainda pendentes | ANAM-046, apply da migration e depois materializacao/publicacao da primeira versao |
+| Anamnese versionada | leitura, rascunho e submissao final IMPLEMENTADOS; mapa nao juridico v1 DEFINIDO | cliente salva `text`/`single_choice`; aplicabilidade oculta dependentes; envio explicito e revalidado no banco | CI + smoke SQL pos-apply PASS; producao do codigo READY | ANAM-046 e depois materializacao/publicacao + E2E da primeira versao |
 | Avaliacoes / medidas | leitura IMPLEMENTADA | acompanhamento profissional append-only | CI VALIDADO; conjunto de decisoes profissionais tipado e testado | definir catalogo, unidades, obrigatoriedade e correcao |
 | Arquivos privados | upload/listagem/download da cliente IMPLEMENTADOS; acesso admin permanente sem assignment, upload administrativo e liberacao explicita IMPLEMENTADOS | smoke E2E da cliente PASS; smoke E2E administrativo PASS em producao; cron de temporarios VALIDADO; auditoria estatica confirmou RLS/rotas coerentes com a excecao da Patty | definir retencao/hard delete |
 | Protocolos | leitura + lifecycle manual IMPLEMENTADOS | submit/approve/publish | CI + SAAS VALIDADO; lifecycle com guarda determinística testada | criar/editar plano somente quando fluxo profissional estiver formalizado |
