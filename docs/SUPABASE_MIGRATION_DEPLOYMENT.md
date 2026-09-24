@@ -153,3 +153,23 @@ Validacoes pos-apply:
 - UPDATE/DELETE privilegiado bloqueado pelos triggers: PASS;
 - advisor de seguranca: nenhum novo finding; permanece apenas Leaked Password Protection ja conhecido/bloqueado pelo plano;
 - advisor de performance: sem novo foreign key sem indice de cobertura nas tabelas de esclarecimentos; indices novos aparecem inicialmente como sem uso, esperado antes de workload.
+
+
+## 2026-09-24 — hardening da execution boundary de IA
+
+A migration aplicada foi registrada remotamente como:
+
+`20260924165942_harden_ai_execution_boundary`
+
+Validacoes:
+- historico remoto confirmado com o mesmo version ID;
+- smoke pos-apply sintetico com `ROLLBACK`: PASS;
+- submission vinculada diretamente a `anamnesis_review`: PASS;
+- sources de outra submission bloqueadas: PASS;
+- sources congeladas apos estado terminal: PASS;
+- completion/output atomicos: PASS;
+- failure metadata/failure response atomicos: PASS;
+- `anon`/`authenticated` sem EXECUTE nas RPCs internas: PASS;
+- RPCs internas `SECURITY INVOKER`: PASS;
+- advisor de seguranca sem novo finding; permanece apenas HIBP ja conhecido;
+- advisor de performance informa a nova FK composta de `ai_executions` sem indice de cobertura exata. Nenhum indice extra foi criado apenas para zerar lint sem workload, conforme decisao de performance vigente.
