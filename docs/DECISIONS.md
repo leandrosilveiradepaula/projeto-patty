@@ -1,5 +1,21 @@
 # Decisoes
 
+## 2026-09-24 - Fases 5 e 6 do Carb Cycle permanecem pendentes
+
+### CONFIRMACAO DA PATTY
+
+A Patty confirmou explicitamente que as regras das Fases 5 e 6 da Planilha Carb Cycle continuam pendentes.
+
+### CONSEQUENCIA
+
+Nenhuma formula, criterio ou comportamento dessas fases deve ser:
+- inferido a partir das fases anteriores;
+- implementado em codigo;
+- usado em rascunho automatico como se fosse regra confirmada.
+
+Qualquer uso futuro depende de nova confirmacao profissional e atualizacao documental previa.
+
+
 ## 2026-09-24 - Cutting 3 Linear e a etapa seguinte confirmada
 
 ### REGRA CONFIRMADA PELA PATTY
