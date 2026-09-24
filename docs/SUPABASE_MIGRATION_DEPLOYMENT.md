@@ -188,3 +188,21 @@ Validacao pos-apply:
 - `schema_version = 1`;
 - instructions nao vazias;
 - `ai_executions = 0`.
+
+
+## 2026-09-24 — assets de midia educacional
+
+Migration remota:
+
+`20260924210600_create_educational_content_assets`
+
+Estado:
+- apply: PASS;
+- historico remoto confirmado;
+- smoke pos-apply sintetico com `ROLLBACK`: PASS;
+- RLS por release: PASS;
+- AAL2 admin: PASS;
+- imutabilidade apos publicacao: PASS;
+- provider v1 `vercel_blob`: PASS;
+- advisor de seguranca: nenhum finding novo; HIBP permanece conhecido;
+- advisor de performance: indice novo ainda sem uso observado; nenhuma alteracao criada apenas para zerar lint sem workload.
