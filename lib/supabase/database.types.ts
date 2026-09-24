@@ -1296,6 +1296,50 @@ export type Database = {
           },
         ]
       }
+      educational_content_assets: {
+        Row: {
+          asset_key: string
+          byte_size: number
+          content_type: string
+          created_at: string
+          educational_content_version_id: string
+          id: string
+          sha256_hex: string
+          storage_path: string
+          storage_provider: string
+        }
+        Insert: {
+          asset_key?: string
+          byte_size: number
+          content_type: string
+          created_at?: string
+          educational_content_version_id: string
+          id?: string
+          sha256_hex: string
+          storage_path: string
+          storage_provider: string
+        }
+        Update: {
+          asset_key?: string
+          byte_size?: number
+          content_type?: string
+          created_at?: string
+          educational_content_version_id?: string
+          id?: string
+          sha256_hex?: string
+          storage_path?: string
+          storage_provider?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "educational_content_assets_educational_content_version_id_fkey"
+            columns: ["educational_content_version_id"]
+            isOneToOne: false
+            referencedRelation: "educational_content_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       educational_content_versions: {
         Row: {
           category_key: string | null

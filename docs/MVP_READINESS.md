@@ -277,3 +277,18 @@ Cobertura comprovada:
 - historico append-only mantido.
 
 O smoke usa exclusivamente fixtures sinteticas persistentes. Nao existe cleanup que apague request/response porque isso violaria a imutabilidade intencional do dominio.
+
+
+## Midia educacional privada
+
+A infraestrutura binaria foi definida como Vercel Private Blob, mantendo Supabase como fonte de verdade de metadata, versionamento, releases e autorizacao.
+
+A migration `20260924210600_create_educational_content_assets.sql` esta aplicada no SaaS. O smoke pos-apply sintetico confirmou:
+- asset somente em versao draft;
+- imutabilidade de asset apos publicacao;
+- leitura client-scoped somente para versao explicitamente liberada;
+- admin AAL1 bloqueado e AAL2 autorizado;
+- anon bloqueado;
+- provider v1 restrito a `vercel_blob`.
+
+Ainda nao existe Blob store conectado nem arquivo fisico migrado. O video aprovado da balanca continua no Drive ate a operacao controlada de criacao/conexao do store, upload, verificacao de hash e publicacao/release.
