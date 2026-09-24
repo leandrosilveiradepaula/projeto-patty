@@ -12,6 +12,7 @@ const VERSION = "20000000-0000-4000-8000-000000000001";
 const questions = [
   {
     id: "30000000-0000-4000-8000-000000000001",
+    form_version_id: VERSION,
     question_key: "ordinary",
     label: "Ordinary",
     applicability_source_question_id: null,
@@ -19,6 +20,7 @@ const questions = [
   },
   {
     id: "30000000-0000-4000-8000-000000000002",
+    form_version_id: VERSION,
     question_key: "instagram",
     label: "Instagram",
     applicability_source_question_id: null,
@@ -26,6 +28,7 @@ const questions = [
   },
   {
     id: "30000000-0000-4000-8000-000000000003",
+    form_version_id: VERSION,
     question_key: "financial_capacity_for_supplements",
     label: "Financial",
     applicability_source_question_id: null,
@@ -33,6 +36,7 @@ const questions = [
   },
   {
     id: "30000000-0000-4000-8000-000000000004",
+    form_version_id: VERSION,
     question_key: "has_condition",
     label: "Has condition",
     applicability_source_question_id: null,
@@ -40,6 +44,7 @@ const questions = [
   },
   {
     id: "30000000-0000-4000-8000-000000000005",
+    form_version_id: VERSION,
     question_key: "condition_details",
     label: "Condition details",
     applicability_source_question_id:
