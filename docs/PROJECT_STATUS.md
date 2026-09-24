@@ -72,7 +72,7 @@ Isso confirma que um deployment de producao voltou a ser aceito para o estado in
 | MFA administrativo | SIM | SIM | Smoke AAL1/AAL2 documentado | Enforcement RLS aplicado no SaaS | Leaked Password Protection bloqueada pelo plano atual |
 | RBAC / RLS / assignments | SIM | SIM | Smokes documentados | Fundacao e fluxos administrativos principais operacionais | Novos papeis ficam fora do MVP; assignment continua regra geral para dados client-scoped |
 | Cadastro Atual | SIM como entidade separada | SIM | Fundacao testada | Backend existente | Fluxo final de edicao cadastral pela cliente/Patty ainda aberto |
-| Anamnese versionada | SIM | SIM | Fundacao testada | Backend existente | Questionario final, tipos de input, condicionais e aplicabilidade |
+| Anamnese versionada | SIM | SIM | Fundacao testada | Backend existente | Perguntas atuais confirmadas como base; falta fechar agrupamento, tipos de input e mapa condicional pergunta-a-pergunta |
 | Rascunho da Anamnese | SIM | PARCIAL | Smoke transacional pos-apply PASS; CI e smokes anteriores existentes | Persistencia aplicada; inicio seguro preparado por chave canonica, sem usar fixtures E2E | Publicar a versao oficial com `form_key = client-anamnesis`; depois validar inicio no runtime e continuar tipos/autosave/submissao |
 | Obrigatoriedade da Anamnese | SIM | Regra refletida na fundacao | N/A | Todos os campos aplicaveis sao obrigatorios no envio final; campos dependentes nao aplicaveis ficam ocultos e nao obrigatorios | Mapear dependencias pergunta-a-pergunta no questionario final |
 | Correcao pos-envio da Anamnese | SIM | SIM | Smoke administrativo documentado | `anamnesis_answer_corrections` aplicada no SaaS | Workflow administrativo completo alem de notas/correcoes |
