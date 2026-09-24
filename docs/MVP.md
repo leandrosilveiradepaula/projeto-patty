@@ -94,7 +94,7 @@ O MVP deve incluir avaliacoes:
 - preservacao das avaliacoes anteriores;
 - possibilidade de criacao de nova versao de protocolo.
 
-## Estado operacional do MVP em 2026-09-23
+## Estado operacional do MVP em 2026-09-24
 
 ### FATO TECNICO/OPERACIONAL
 
@@ -104,15 +104,14 @@ Estado resumido nesta data:
 - autenticacao, identidade, clientes, RBAC/RLS e assignments possuem fundacao operacional;
 - login por email + senha esta definido e o lifecycle sintetico de onboarding/ativacao passou E2E;
 - MFA administrativo esta implementado e o enforcement em RLS foi aplicado no Supabase SaaS;
-- Anamnese versionada possui fundacao de backend;
-- rascunho da Anamnese possui persistencia no SaaS e integracao parcial de UI para retomar rascunho existente e salvar respostas `text`;
-- a migration `20260923191554_fix_anamnesis_draft_delete_trigger.sql` existe e passou dry-run, mas ainda precisa ser aplicada no SaaS antes de repetir o smoke de rascunho;
-- submissao final da Anamnese ainda nao esta implementada/liberada, embora a regra de produto ja esteja definida: todos os campos aplicaveis sao obrigatorios no envio final;
+- a Anamnese versionada possui rascunho persistente, `text`, `single_choice`, aplicabilidade condicional versionada e submissao final deterministica aplicados;
+- a migration `20260924142453_anamnesis_final_submission_foundation.sql` consta no historico remoto; smoke pos-apply confirmou bloqueio de incompletude aplicavel e aceite de campo oculto;
+- a primeira `client-anamnesis` ainda nao pode ser materializada/publicada porque ANAM-046 depende do gate juridico `ANAMNESE_CONSENT_GATE.md`;
 - correcoes posteriores da Anamnese pela Patty estao implementadas como historico append-only, sem sobrescrever a resposta original;
 - arquivos privados possuem upload, validacao, visualizacao/download e auditoria; a excecao de acesso da Patty sem assignment esta implementada e a politica de retencao/hard delete continua aberta;
 - avaliacoes, protocolos, conteudos e exercicios possuem fundacoes de backend, mas seus fluxos completos do MVP ainda nao estao concluidos;
-- a IA permanece assistiva; a fundacao interna e partes deterministicas existem, mas a integracao real com provider e o fluxo completo de revisao/publicacao ainda nao estao concluidos;
-- o `master` esta a frente do deployment de producao da Vercel por limite de builds; mudancas posteriores ao ultimo deploy bem-sucedido nao devem ser tratadas como publicadas/validadas em producao.
+- a IA permanece assistiva; a fundacao interna e partes deterministicas existem, mas provider/modelo, boundary real de execution e UX completa de revisao ainda nao estao definidos;
+- o `master` atual esta publicado como deployment de producao `READY`; merges exclusivamente documentais posteriores devem continuar distinguindo merge de validacao funcional em runtime.
 
 Para o estado operacional detalhado e os bloqueios atuais, consultar `PROJECT_STATUS.md`.
 
@@ -120,12 +119,12 @@ Para o estado operacional detalhado e os bloqueios atuais, consultar `PROJECT_ST
 
 ### QUESTAO ABERTA
 
-Parte do metodo ja possui regras confirmadas e documentadas em `BUSINESS_RULES.md` e `DECISIONS.md`, incluindo Reconhecimento Metabolico, sequencia principal ate Cutting 2: 2 Low / 1 High, referencias iniciais de macros, conversoes de doses, limite do grupo de proteina com maior teor de gordura, regras confirmadas de Cutting Dia 1 / Dia 2 e a existencia da refeicao livre semanal no Up Metabolico.
+Parte do metodo ja possui regras confirmadas e documentadas em `BUSINESS_RULES.md` e `DECISIONS.md`, incluindo Reconhecimento Metabolico, sequencia principal confirmada ate Cutting 3 Linear, referencias iniciais de macros, conversoes de doses, limite do grupo de proteina com maior teor de gordura, regras confirmadas de Cutting Dia 1 / Dia 2 e a existencia da refeicao livre semanal no Up Metabolico.
 
 Continuam pendentes, sem automacao enquanto nao houver confirmacao documentada:
 
 - Fases 5 e 6 da Planilha Carb Cycle;
-- etapas posteriores ao Cutting 2;
+- regras detalhadas do Cutting 3 Linear e etapas posteriores a ele;
 - Bulking detalhado;
 - Consolidacao;
 - hidratacao;
