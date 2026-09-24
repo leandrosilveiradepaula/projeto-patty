@@ -238,4 +238,6 @@ Enquanto as respostas da Patty nao chegam, continuar apenas em tarefas que:
 
 A migration `20260924165942_harden_ai_execution_boundary.sql` esta aplicada no SaaS e passou smoke pos-apply com dados sinteticos. A fundacao agora possui vinculo direto da execution com a submission, minimizacao deterministica de contexto, sources congeladas no lifecycle e persistencia atomica de completion/failure por RPC interna `SECURITY INVOKER` exclusiva de `service_role`.
 
+O codigo correspondente foi mergeado pelo PR #149 e publicado no deployment READY do commit `9b7bbba`. A verificacao de runtime consultada nao mostrou logs `error/fatal` na janela observada.
+
 Isso nao significa integracao de provider pronta. Provider/modelo, prompt operacional, politica juridica aplicavel, chamada externa e UX humana dos findings continuam gates separados.
