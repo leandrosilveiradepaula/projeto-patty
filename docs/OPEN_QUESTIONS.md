@@ -563,3 +563,16 @@ Enquanto o store nao existir:
 - nao criar release.
 
 Depois da criacao/conexao do store, seguir a ordem deterministica do manifesto e manter os demais arquivos do Drive fora do lote.
+
+### GAP OPERACIONAL — OBSERVABILIDADE CENTRAL IMPLEMENTADA
+
+Executions acessiveis que permanecem `started` sem `completed_at` e sem `failed_at` agora aparecem em uma visao administrativa central em `/admin/ia`, alem do alerta contextual na revisao da Anamnese.
+
+A tela:
+- respeita assignment ativo e RLS existentes;
+- nao define timeout;
+- nao altera status;
+- nao sintetiza failure response;
+- nao dispara retry.
+
+Continua aberto apenas o mecanismo futuro de recovery/watchdog, caso seja necessario.

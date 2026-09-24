@@ -9,6 +9,7 @@ import {
   listAccessibleProtocols,
   listClientsAssignedToCurrentAdmin,
   listEducationalContentVersionsForCurrentAdmin,
+  listAccessibleNonterminalAiExecutions,
   listExerciseVersionsVisibleToCurrentAdmin,
 } from "@/lib/supabase/data-access";
 import Link from "next/link";
@@ -22,6 +23,7 @@ export default async function AdminPage() {
     protocols,
     contentVersions,
     exerciseVersions,
+    nonterminalAiExecutions,
   ] = await Promise.all([
     getCurrentUserProfile(),
     listClientsAssignedToCurrentAdmin(),
@@ -29,6 +31,7 @@ export default async function AdminPage() {
     listAccessibleProtocols(),
     listEducationalContentVersionsForCurrentAdmin(),
     listExerciseVersionsVisibleToCurrentAdmin(),
+    listAccessibleNonterminalAiExecutions(),
   ]);
 
   const assignedCount = assignments.length;
@@ -36,6 +39,7 @@ export default async function AdminPage() {
   const protocolCount = protocols.length;
   const contentVersionCount = contentVersions.length;
   const exerciseVersionCount = exerciseVersions.length;
+  const nonterminalAiExecutionCount = nonterminalAiExecutions.length;
 
   return (
     <>
@@ -94,6 +98,16 @@ export default async function AdminPage() {
             description="Versões da biblioteca educacional visíveis para o perfil administrativo."
             label="Versões de conteúdo"
             value={String(contentVersionCount)}
+          />
+          <AdminMetricCard
+            action={
+              <Link className={styles.areaLink} href="/admin/ia">
+                Ver operações de IA
+              </Link>
+            }
+            description="Executions acessíveis que permanecem started sem estado terminal registrado."
+            label="IA sem estado terminal"
+            value={String(nonterminalAiExecutionCount)}
           />
         </div>
       </Section>

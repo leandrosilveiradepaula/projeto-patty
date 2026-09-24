@@ -345,3 +345,10 @@ A migration `20260924215415_add_ai_failure_retention_constraints` aplica no Post
 
 Isso cria defesa em profundidade contra futuras escritas privilegiadas que contornem acidentalmente o helper server-side. Nenhuma RLS ou politica de acesso foi alterada.
 
+## IA - observabilidade de execution nao terminal
+
+Estado: **IMPLEMENTADO**
+
+A administracao possui uma visao central de executions `started` sem estado terminal e uma contagem no dashboard. A listagem segue RLS/assignment e permite navegar para a revisao da Anamnese quando a execution estiver vinculada a uma submission.
+
+Recovery/watchdog automatico continua fora do escopo atual.

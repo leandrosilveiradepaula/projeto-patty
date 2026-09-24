@@ -1759,3 +1759,10 @@ A migration aplicada e `20260924215415_add_ai_failure_retention_constraints`.
 
 Essa camada adicional nao substitui sanitizacao/truncamento server-side; ela existe como fail-safe de integridade.
 
+## 2026-09-24 - Observabilidade central de execution nao terminal
+
+### DECISAO TECNICA
+
+Executions de IA nao terminais devem ser visiveis de forma central para a Patty/admin, mas a observabilidade nao pode alterar o significado do estado persistido.
+
+A area `/admin/ia` lista apenas registros acessiveis por RLS que continuam `started` sem `completed_at`/ `failed_at`. Nenhum timeout, retry ou transicao de estado e inferido.

@@ -20,6 +20,7 @@ const adminNavigationItems: AdminNavigationItem[] = [
   { href: "/admin/protocolos", label: "Protocolos" },
   { href: "/admin/conteudos", label: "Conteúdos" },
   { href: "/admin/exercicios", label: "Exercícios" },
+  { href: "/admin/ia", label: "IA" },
 ];
 
 export function isAdminNavigationItemActive(pathname: string, href: string) {
