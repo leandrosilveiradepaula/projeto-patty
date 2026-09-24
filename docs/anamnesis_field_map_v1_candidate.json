@@ -1276,8 +1276,8 @@
           "required_when_applicable": true,
           "current_client_ui_support": "not_implemented",
           "options_candidate": [
-            "Concordo",
-            "Nao concordo"
+            "concordancia",
+            "nao concordancia"
           ],
           "applicability_candidate": null,
           "type_basis": "historical_accept_reject",
