@@ -1,5 +1,31 @@
 # Decisoes
 
+## 2026-09-24 - Video de uso da balanca aprovado para disponibilizacao
+
+### REGRA CONFIRMADA PELA PATTY
+
+A Patty confirmou que o video historico `Como utilizar a BALANCA DE ALIMENTOS`, arquivo de origem do Drive `1z61DpJfwp-6DMhYMpCRNafkSwX6h9LBE`:
+- e material da Consultoria/Patty;
+- continua atual;
+- esta autorizado para disponibilizacao as clientes no aplicativo.
+
+### CONSEQUENCIA DE PRODUTO
+
+Esse item passa a ser o primeiro conteudo elegivel para migracao controlada do Drive.
+
+### LIMITE
+
+A confirmacao profissional nao equivale a migracao tecnica nem publicacao. Continuam separadas:
+1. origem aprovada;
+2. copia para armazenamento do aplicativo;
+3. registro/versionamento do conteudo;
+4. revisao tecnica da versao criada;
+5. publicacao;
+6. release explicito para cliente.
+
+Nenhuma dessas etapas posteriores deve ser marcada como concluida ate ser executada e verificada.
+
+
 ## 2026-09-24 - Esclarecimento pos-Anamnese deve voltar para a cliente
 
 ### REGRA CONFIRMADA PELA PATTY
