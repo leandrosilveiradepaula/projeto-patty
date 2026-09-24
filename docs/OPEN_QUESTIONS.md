@@ -90,9 +90,11 @@ Quais alteracoes cadastrais exigirao auditoria especifica?
 
 Qual e o mapa completo dos campos do formulario atual de anamnese, considerando que as evidencias disponiveis podem ser parciais?
 
-### QUESTAO ABERTA
+### FATO JA CONFIRMADO
 
-Quais perguntas do formulario atual devem ser mantidas, alteradas ou removidas no novo aplicativo?
+A Patty confirmou que as perguntas do formulario atual devem ser mantidas como base de conteudo. Nesta etapa, o objetivo e organizar melhor a experiencia no aplicativo, nao fazer uma revisao ampla removendo ou acrescentando varias perguntas.
+
+A reorganizacao pode alterar apresentacao, agrupamento, tipos de input e logica condicional sem mudar silenciosamente o sentido profissional das perguntas.
 
 ### FATO JA CONFIRMADO
 
@@ -106,17 +108,17 @@ Qual sera o tipo final de input de cada campo da anamnese?
 
 Perguntas compostas da anamnese atual devem permanecer juntas ou ser normalizadas em campos separados?
 
-### QUESTAO ABERTA
+### PARCIALMENTE RESOLVIDO
 
-Quais campos da anamnese serao condicionais e quais serao suas regras de exibicao?
+A regra geral de exibicao condicional esta confirmada: pergunta dependente nao aplicavel fica oculta e nao obrigatoria. Ainda falta identificar no questionario final quais campos sao condicionais e quais respostas determinam sua aplicabilidade.
 
 ### QUESTAO ABERTA
 
 Qual sera a ordem e o agrupamento final dos campos da anamnese?
 
-### QUESTAO ABERTA
+### FATO JA CONFIRMADO
 
-Medidas informadas na anamnese pertencem a propria resposta de anamnese, criam tambem um registro inicial de medicao/avaliacao, ou devem ser movidas para um fluxo de avaliacao separado?
+A Patty confirmou que as medidas corporais podem ser separadas da Anamnese e tratadas em um fluxo proprio de Avaliacao/Medidas. O catalogo definitivo de medidas, unidades, obrigatoriedade e fluxo de correcao continuam abertos.
 
 ### QUESTAO ABERTA
 
@@ -170,9 +172,9 @@ Havera alertas ou bloqueios de saude derivados de respostas da anamnese? Se houv
 
 Em quais fluxos algum dado cadastral precisara coexistir semanticamente em Auth, cadastro da cliente ou snapshot de anamnese, especialmente no caso de email?
 
-### QUESTAO ABERTA
+### FATO JA CONFIRMADO
 
-A secao Cadastro continuara aparecendo dentro da anamnese final ou sera movida para outro fluxo de cadastro/perfil?
+A Patty confirmou que os dados cadastrais podem permanecer dentro da Anamnese final. Essa decisao e de apresentacao/fluxo e nao elimina a separacao tecnica entre Cadastro Atual e snapshot historico da Anamnese.
 
 ### QUESTAO ABERTA
 
@@ -224,9 +226,17 @@ Qual politica concreta de retencao define quando um arquivo inativado/substituid
 
 ## Avaliacoes e acompanhamento
 
-### QUESTAO ABERTA
+### PARCIALMENTE RESOLVIDO
 
-Qual e o catalogo profissional de medidas, quais unidades sao permitidas e quais campos serao obrigatorios em cada avaliacao?
+A Patty confirmou duas rotinas de avaliacao:
+- **quinzenal**: cintura, abdomen, quadril e peso;
+- **mensal**: avaliacao completa com todas as medidas, peso e fotos.
+
+Continuam abertos:
+- o catalogo exato de todas as medidas da avaliacao mensal;
+- as unidades permitidas;
+- eventuais campos adicionais;
+- como a avaliacao mensal se relaciona operacionalmente com a ocorrencia quinzenal quando as datas coincidirem.
 
 ### QUESTAO ABERTA
 
@@ -238,11 +248,15 @@ Qual e a origem da percepcao de aderencia e quais partes do acompanhamento profi
 
 ## IA e revisao de Anamnese
 
-### QUESTAO ABERTA
+### PARCIALMENTE RESOLVIDO
 
-Como sera formalizada a aplicabilidade das perguntas condicionais da Anamnese para que `missing_answer` possa distinguir ausencia real de pergunta nao aplicavel? A obrigatoriedade geral ja esta confirmada: todos os campos aplicaveis da versao devem estar preenchidos no envio final.
+A Patty confirmou a regra geral de aplicabilidade: quando uma pergunta nao se aplica a cliente, as perguntas dependentes devem ficar ocultas e deixam de ser obrigatorias.
 
-O contrato futuro de `missing_answer` devera usar `target_question_id` para a pergunta ausente e permitir `source_answer_ids` vazio; o target devera pertencer a mesma `form_version_id` da submission. Isso e conceito futuro, nao implementacao atual.
+A obrigatoriedade geral permanece: todos os campos aplicaveis da versao devem estar preenchidos no envio final.
+
+Ainda falta mapear, pergunta a pergunta, quais dependencias existem e quais respostas ativam ou desativam cada campo condicional.
+
+O contrato futuro de `missing_answer` devera usar `target_question_id` para a pergunta ausente e permitir `source_answer_ids` vazio; o target devera pertencer a mesma `form_version_id` da submission. O finding so podera considerar ausencia quando a pergunta estiver aplicavel segundo o mapa condicional da versao.
 
 ### QUESTAO ABERTA
 
@@ -264,13 +278,19 @@ Qual sera a UX e o processo humano para revisao de findings, edicao de follow-up
 
 As regras abaixo permanecem abertas somente onde a documentacao ainda nao registra confirmacao da Patty. O fluxo principal, o Reconhecimento Metabolico, as referencias iniciais de macros e doses, o limite do grupo de proteina com maior teor de gordura, o Cutting Dia 1 / Dia 2 e a refeicao livre semanal do Up Metabolico ja estao documentados como confirmados.
 
-### QUESTAO ABERTA
+### QUESTAO ABERTA — PENDENCIA RECONFIRMADA PELA PATTY
 
-Quais sao as formulas e regras definitivas das Fases 5 e 6 da Planilha Carb Cycle?
+A Patty confirmou em 2026-09-24 que as Fases 5 e 6 da Planilha Carb Cycle continuam **pendentes**.
 
-### QUESTAO ABERTA
+Nao implementar, inferir ou reaproveitar formulas de outras fases para preencher essa lacuna ate nova confirmacao explicita.
 
-Quais etapas, se houver, seguem apos Cutting 2: 2 Low / 1 High?
+### PARCIALMENTE RESOLVIDO
+
+A Patty confirmou que, apos `Cutting 2: 2 Low / 1 High`, a etapa seguinte e **Cutting 3 com protocolo linear**.
+
+Continuam abertas:
+- as regras detalhadas do Cutting 3 Linear;
+- quais etapas, se houver, seguem depois dele.
 
 ### QUESTAO ABERTA
 
@@ -334,9 +354,13 @@ A aplicacao administrativa ja possui uma rota dedicada para visualizar a respost
 
 A revisao administrativa ja possui notas append-only e correcoes append-only separadas da resposta original.
 
-### QUESTAO ABERTA
+### PARCIALMENTE RESOLVIDO
 
-Qual sera o workflow administrativo completo de revisao da Anamnese alem de notas e correcoes, incluindo eventual estado de revisao, pendencias, findings de IA, conclusao da revisao e qualquer acao subsequente permitida?
+A Patty confirmou que, apos o envio final da Anamnese, a cliente entra diretamente em analise profissional. Nao sao necessarios estados intermediarios como "recebida", "em revisao" ou "pendencias" para iniciar o trabalho da Patty.
+
+A Patty tambem confirmou que, quando faltar informacao importante ou uma resposta estiver pouco clara, o esclarecimento deve ser solicitado a cliente dentro do aplicativo, em vez de a Patty completar a resposta original por conta propria.
+
+Continuam abertos os detalhes de UX, notificacao e lifecycle desse pedido de esclarecimento, alem dos findings de IA.
 
 ## Conteudo
 
@@ -352,16 +376,20 @@ Qual sera a taxonomia da biblioteca educacional?
 
 Qual sera a taxonomia da biblioteca de exercicios?
 
-### QUESTAO ABERTA
+### PARCIALMENTE RESOLVIDO
 
-Quais conteudos do Drive podem ser migrados primeiro?
+A Patty confirmou que o video historico `Como utilizar a BALANCA DE ALIMENTOS`:
+- e material da Consultoria/Patty;
+- continua atual;
+- pode ser disponibilizado as clientes no aplicativo.
 
-Primeira onda ja preparada para confirmacao da Patty:
-- video `Como utilizar a BALANCA DE ALIMENTOS`: confirmar autoria/ownership, atualidade e permissao de distribuicao;
-- planilha `Sugestao de refeicoes`: decidir se fica apenas como referencia historica interna ou se deve ser transformada em conteudo educacional revisado;
-- `Fórmulas.pptx`: decidir se esse material ainda deve existir no aplicativo; se sim, exige revisao profissional completa, autoria/direitos e revisao das referencias comerciais.
+Esse video passa a ser o primeiro conteudo elegivel para um lote de migracao controlada. A migracao fisica, versionamento e release ainda precisam ser executados separadamente; essa confirmacao nao significa que o arquivo ja foi copiado ou publicado.
 
-Nenhum desses itens esta autorizado para migracao/publicacao sem resposta explicita.
+A Patty tambem confirmou que a planilha historica `Sugestao de refeicoes` deve ser transformada em **conteudo educacional revisado para clientes**. A estrutura historica de seis refeicoes permanece exemplo e nao deve ser convertida em regra fixa de numero de refeicoes.
+
+A Patty confirmou ainda que conteudos sobre **formulas/manipulados** devem fazer parte do aplicativo. O arquivo historico `Fórmulas.pptx` permanece bloqueado para publicacao ate revisao profissional completa das alegacoes, confirmacao de atualidade, autoria/direitos e revisao de referencias comerciais/farmacia.
+
+Os demais conteudos continuam sujeitos a revisao individual.
 
 ### QUESTAO ABERTA
 

@@ -28,16 +28,21 @@ A triagem identificou 16 grupos de possiveis duplicidades por nome normalizado e
 
 Uma segunda passada de metadados em 2026-09-23 revalidou os 89 itens originais sem divergencias e identificou 21 arquivos adicionais, totalizando 110 arquivos conhecidos por metadado no escopo revisado. Os 21 adicionais incluem 8 videos candidatos educacionais, 6 imagens operacionais que exigem revisao de privacidade/likeness e 7 PDFs em `Livros` que devem permanecer em hold de direitos antes de qualquer distribuicao. Consultar `DRIVE_CONTENT_INVENTORY_REVIEW.md`.
 
-Uma primeira onda de revisao controlada foi registrada em `DRIVE_CONTENT_REVIEW_WAVE_1.md` e `drive_content_review_wave_1.json`. Ela revisou somente tres itens selecionados:
-- video de uso da balanca: candidato apos revisao humana, ainda sem autorizacao;
-- planilha `Sugestao de refeicoes`: referencia historica, nao regra atual de numero de refeicoes;
-- `Fórmulas.pptx`: hold profissional porque suplementacao/manipulados continuam abertos e o material contem afirmacoes sensiveis/comerciais.
+Uma primeira onda de revisao controlada foi registrada em `DRIVE_CONTENT_REVIEW_WAVE_1.md` e `drive_content_review_wave_1.json`. Naquele momento, os tres itens ainda estavam sem autorizacao final; as confirmacoes posteriores da Patty registradas abaixo substituem esse estado de triagem inicial.
 
-Nenhum dos tres foi autorizado para migracao ou publicacao.
+### REGRA CONFIRMADA PELA PATTY
+
+O video `Como utilizar a BALANCA DE ALIMENTOS` foi confirmado pela Patty como material da Consultoria/Patty, atual e autorizado para disponibilizacao as clientes.
+
+Ele e o primeiro conteudo atualmente elegivel para migracao controlada. Elegivel nao significa migrado ou publicado: o arquivo ainda precisa passar pela operacao tecnica de copia para o aplicativo, registro/versionamento e liberacao explicita.
+
+A Patty confirmou tambem que a planilha historica `Sugestao de refeicoes` deve ser transformada em **conteudo educacional revisado** para clientes. O arquivo historico pode servir como fonte editorial, mas a versao publicada no aplicativo nao deve cristalizar seis refeicoes como regra, porque o metodo confirmado nao possui numero fixo de refeicoes.
+
+Conteudos sobre formulas/manipulados tambem foram confirmados pela Patty como parte do aplicativo. O arquivo historico `Fórmulas.pptx` nao esta autorizado para publicacao direta: ele deve passar por revisao profissional completa, atualizacao de alegacoes, validacao de referencias comerciais e confirmacao de direitos antes de gerar uma versao publicavel.
 
 ### RECOMENDACAO TECNICA
 
-Antes de migrar conteudos para o aplicativo, completar o inventario do Drive e classificar os materiais por tipo, publico, status de revisao, permissao de uso e relacao com protocolos.
+Antes de migrar os demais conteudos para o aplicativo, completar a classificacao por tipo, publico, status de revisao, permissao de uso e relacao com protocolos.
 
 Conteudos devem ser publicados no aplicativo apenas apos validacao da Patty quando envolverem orientacoes sensiveis ou metodo profissional.
 
@@ -59,9 +64,9 @@ Ainda e necessario definir a taxonomia da biblioteca educacional.
 
 Ainda e necessario definir a taxonomia da biblioteca de exercicios.
 
-### QUESTAO ABERTA
+### PARCIALMENTE RESOLVIDO
 
-Ainda e necessario definir quais conteudos do Drive podem ser migrados primeiro.
+O video `Como utilizar a BALANCA DE ALIMENTOS` e o primeiro item aprovado pela Patty para migracao controlada. Ainda e necessario decidir os proximos itens e o tamanho/ordem dos lotes seguintes.
 
 ### QUESTAO ABERTA
 

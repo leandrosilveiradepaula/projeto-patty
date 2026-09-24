@@ -76,9 +76,10 @@ Reconhecimento Metabolico
 -> Cutting 2 Linear
 -> Cutting 2 Dia 1 / Dia 2
 -> Cutting 2: 2 Low / 1 High
+-> Cutting 3 Linear
 ```
 
-Nao inferir etapas posteriores enquanto nao houver confirmacao documentada.
+A Patty confirmou apenas que a etapa seguinte e **Cutting 3 com protocolo linear**. Nao inferir regras internas dessa etapa nem etapas posteriores enquanto nao houver confirmacao documentada.
 
 ### DECISAO CONFIRMADA
 
@@ -178,4 +179,4 @@ Exemplos historicos individuais nao viram regra geral.
 
 Regra nao confirmada deve permanecer como `QUESTAO ABERTA`.
 
-Nao automatizar hidratacao, suplementacao, manipulados, progressao definitiva de treino, alertas profissionais, criterios finais de avaliacao, fases 5 e 6 do Carb Cycle, etapas posteriores ao Cutting 2, Bulking ou Consolidacao antes de confirmacao documentada.
+Nao automatizar hidratacao, suplementacao, manipulados, progressao definitiva de treino, alertas profissionais, criterios finais de avaliacao, fases 5 e 6 do Carb Cycle, regras ainda nao documentadas do Cutting 3, etapas posteriores ao Cutting 3 Linear, Bulking ou Consolidacao antes de confirmacao documentada.
