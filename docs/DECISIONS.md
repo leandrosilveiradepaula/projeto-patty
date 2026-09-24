@@ -1452,6 +1452,34 @@ O fluxo estrutural de protocolo separa versao, aprovacao humana e publicacao. Um
 
 Planos alimentares e catalogos de equivalentes sao versionados como estruturas de dados, sem catalogo real, calculo de doses, macros, fases ou regra metodologica. A referencia de um plano aponta uma versao especifica do catalogo.
 
+## 2026-09-24 - Hardening da execution boundary de IA
+
+### DECISAO TECNICA DE SEGURANCA
+
+A persistencia interna de IA usa uma boundary server-side explicita. O browser e roles `anon`/`authenticated` nao recebem escrita nas tabelas internas de IA nem EXECUTE nas RPCs de persistencia.
+
+As operacoes internas `start_anamnesis_review_execution`, `complete_ai_execution` e `fail_ai_execution` sao `SECURITY INVOKER`, executaveis somente por `service_role`. O acesso privilegiado fica encapsulado em modulo `server-only`; a identidade da Patty/admin e derivada por `requireRole("admin")`, incluindo AAL2, e nunca e aceita como parametro vindo do browser.
+
+### DECISAO TECNICA DE INTEGRIDADE
+
+Cada execution com `purpose_key = anamnesis_review` fica vinculada diretamente a uma `anamnesis_submission` enviada da mesma cliente. O prompt deve ter `prompt_key = anamnesis_review`.
+
+Sources desse purpose aceitam apenas `anamnesis_answer`, pertencem a submission selecionada e so podem ser acrescentadas enquanto a execution esta `started`. Conclusao e falha sao persistidas atomicamente por RPC.
+
+### DECISAO TECNICA DE MINIMIZACAO
+
+A camada deterministica de contexto usa aplicabilidade versionada antes de selecionar sources. Respostas de perguntas ocultas nao entram no contexto.
+
+`instagram` permanece sempre fora do purpose `anamnesis_review`. `financial_capacity_for_supplements` permanece fora por padrao e so entra mediante selecao explicita da Patty para aquela execution. A allowlist de `missing_answer` e derivada somente de perguntas aplicaveis sem resposta.
+
+### LIMITE
+
+Este hardening nao escolhe provider/modelo, nao chama provider, nao cria execucao automatica, nao publica findings e nao altera o requisito de revisao humana.
+
+### ESTADO OPERACIONAL
+
+A migration `20260924165942_harden_ai_execution_boundary.sql` foi aplicada no Supabase SaaS em 2026-09-24. Smoke pos-apply sintetico com `ROLLBACK` confirmou as invariantes da boundary e os privilegios das RPCs. O codigo de aplicacao passou CI antes do apply; merge/publicacao permanecem etapas separadas.
+
 ## 2026-09-22 - Primeiro contrato operacional de IA para revisao de Anamnese
 
 ### DECISAO TECNICA/PRODUTO

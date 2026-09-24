@@ -369,3 +369,14 @@ A validacao da UI serve somente para experiencia; o banco permanece a autoridade
 - pedidos so podem existir para submission enviada;
 - vinculo opcional a resposta original deve pertencer a mesma submission;
 - triggers preservam imutabilidade mesmo sob acesso privilegiado.
+
+
+## Escrita interna de IA
+
+### DECISAO DE SEGURANCA
+
+As tabelas internas de IA permanecem sem INSERT/UPDATE/DELETE para `authenticated`; administradores autenticados recebem somente SELECT quando permitido por RLS, assignment ativo e MFA AAL2.
+
+Escritas de execution usam exclusivamente RPCs internas `SECURITY INVOKER` com EXECUTE revogado de `public`, `anon` e `authenticated` e concedido apenas a `service_role`.
+
+O uso de `service_role` fica restrito a modulo `server-only`. Antes da chamada privilegiada, a aplicacao deriva a identidade da sessao com `requireRole("admin")` e consulta submission/fontes pelo cliente Supabase autenticado normal, mantendo RLS como primeira verificacao. Triggers e FKs do banco repetem as invariantes de assignment, client scope, submission e lifecycle.

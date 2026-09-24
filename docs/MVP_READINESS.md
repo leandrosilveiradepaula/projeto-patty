@@ -232,3 +232,10 @@ Enquanto as respostas da Patty nao chegam, continuar apenas em tarefas que:
 - nao exponham arquivos/dados alem do que ja foi autorizado;
 - melhorem rastreabilidade, leitura factual, validacao ou documentacao;
 - possam ser validadas por CI ou pelo Supabase SaaS.
+
+
+## IA — execution boundary
+
+A migration `20260924165942_harden_ai_execution_boundary.sql` esta aplicada no SaaS e passou smoke pos-apply com dados sinteticos. A fundacao agora possui vinculo direto da execution com a submission, minimizacao deterministica de contexto, sources congeladas no lifecycle e persistencia atomica de completion/failure por RPC interna `SECURITY INVOKER` exclusiva de `service_role`.
+
+Isso nao significa integracao de provider pronta. Provider/modelo, prompt operacional, politica juridica aplicavel, chamada externa e UX humana dos findings continuam gates separados.

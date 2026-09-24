@@ -400,3 +400,25 @@ test("any module that uses the Supabase administrative client is server-only", a
     "Administrative Supabase access must remain in server-only modules.",
   );
 });
+
+
+test("AI execution boundary keeps privileged persistence server-only", async () => {
+  const executionBoundary = await readFile(
+    path.join(ROOT, "lib", "ai", "anamnesis-review-execution.ts"),
+    "utf8",
+  );
+  const persistenceBoundary = await readFile(
+    path.join(ROOT, "lib", "ai", "ai-execution-persistence.ts"),
+    "utf8",
+  );
+
+  assert.match(executionBoundary, /^import ["']server-only["'];/m);
+  assert.match(executionBoundary, /requireRole\(["']admin["']\)/);
+  assert.doesNotMatch(executionBoundary, /createAdminClient\s*\(/);
+
+  assert.match(persistenceBoundary, /^import ["']server-only["'];/m);
+  assert.match(persistenceBoundary, /createAdminClient\s*\(/);
+  assert.match(persistenceBoundary, /\.rpc\(\s*["']start_anamnesis_review_execution["']/);
+  assert.match(persistenceBoundary, /\.rpc\(\s*["']complete_ai_execution["']/);
+  assert.match(persistenceBoundary, /\.rpc\(\s*["']fail_ai_execution["']/);
+});

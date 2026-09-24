@@ -278,7 +278,7 @@ A obrigatoriedade geral permanece: todos os campos aplicaveis da versao devem es
 
 O contrato deterministico de `missing_answer` esta implementado no validador: usa `target_question_id`, permite `source_answer_ids` vazio e exige que o target esteja na allowlist de perguntas previamente verificadas como aplicaveis e sem resposta para a mesma execution/submission.
 
-Continuam separados e abertos: a montagem server-side dessa allowlist no futuro execution boundary, o provider/modelo e a UX humana dos findings.
+A montagem server-side da allowlist foi implementada de forma deterministica a partir da submission, perguntas versionadas, answers e aplicabilidade. Continuam separados e abertos: provider/modelo, prompt version operacional e a UX humana dos findings.
 
 ### QUESTAO ABERTA
 
@@ -288,9 +288,9 @@ Qual sera o limite maximo de `ai_execution_failure_responses.content` preservado
 
 Se banco ou conexao ficar indisponivel apos resposta do provider, a execution previamente criada pode permanecer `started` sem persistir resposta bruta, metadados de falha ou transicao terminal. Definir mecanismo futuro de reconciliacao, timeout, watchdog ou recovery job, sem tratar esse estado como `failed/persistence_failed` sem failure response.
 
-### QUESTAO ABERTA
+### FATO RESOLVIDO
 
-Qual sera o caminho server-side confiavel para escrita nas entidades internas de IA, sem escrita direta do browser, sem secret no cliente e sem usar `SECURITY DEFINER` como atalho?
+A escrita interna de IA usa RPCs `SECURITY INVOKER` exclusivas de `service_role`, chamadas somente por modulo `server-only`. A identidade administrativa e derivada da sessao por `requireRole("admin")`/AAL2; o browser nao fornece `initiated_by_profile_id` e roles `anon`/`authenticated` nao recebem escrita nem EXECUTE nessas RPCs.
 
 ### QUESTAO ABERTA
 
