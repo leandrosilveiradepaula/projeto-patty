@@ -291,4 +291,6 @@ A migration `20260924210600_create_educational_content_assets.sql` esta aplicada
 - anon bloqueado;
 - provider v1 restrito a `vercel_blob`.
 
+O PR #157 foi mergeado no commit `857daed` e publicado em deployment `READY`. Nenhum erro/fatal foi observado na janela consultada.
+
 Ainda nao existe Blob store conectado nem arquivo fisico migrado. O video aprovado da balanca continua no Drive ate a operacao controlada de criacao/conexao do store, upload, verificacao de hash e publicacao/release.
