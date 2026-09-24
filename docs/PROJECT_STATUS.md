@@ -446,3 +446,12 @@ Pos-apply:
 - advisor de seguranca sem novo finding alem do warning conhecido de Leaked Password Protection;
 - advisor de performance lista FKs sem indice preexistentes como frente separada.
 
+## 2026-09-24 - Observabilidade central de executions de IA
+
+### IMPLEMENTADO
+
+Foi adicionada a area administrativa `/admin/ia` para listar, em um unico lugar, executions acessiveis que permanecem `started` sem timestamps terminais.
+
+O dashboard administrativo tambem exibe a contagem atual. A consulta usa o cliente normal do Supabase e depende das policies de RLS/assignment existentes; nao usa `service_role`.
+
+A funcionalidade e somente observacional: nao altera status, nao define timeout e nao dispara retry.
