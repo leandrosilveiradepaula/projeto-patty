@@ -8,7 +8,7 @@ O provider do primeiro fluxo de IA assistiva sera a OpenAI.
 
 A integracao usa a Responses API diretamente por HTTPS no backend Next.js/Vercel, sem expor chave no browser e sem introduzir n8n/LangGraph. As chamadas usam `store: false` e Structured Outputs com JSON Schema.
 
-O model ID e configurado por ambiente em `OPENAI_MODEL`; a escolha do modelo especifico ainda nao e regra confirmada da Patty. `gpt-5.6-terra` e apenas candidato tecnico inicial de custo/qualidade, nao decisao automatizada.
+O default tecnico inicial e `gpt-5.6-terra`, escolhido por equilibrio entre inteligencia e custo para este fluxo de revisao. `OPENAI_MODEL` pode sobrescrever o default em avaliacao/rollout sem alterar regra profissional. O reasoning effort inicial e `medium`, sujeito a avaliacao sintetica de qualidade, custo e latencia.
 
 A chamada externa so fica habilitada quando:
 - `OPENAI_API_KEY` estiver configurada;
