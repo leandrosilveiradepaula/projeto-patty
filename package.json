@@ -18,7 +18,8 @@
     "test:onboarding": "node --experimental-strip-types --test lib/onboarding/*.test.ts",
     "test:anamnesis-draft": "node --experimental-strip-types --test lib/anamnesis/*.test.ts",
     "test:security-boundaries": "node --test security/*.test.mjs",
-    "test:drive-triage": "node --test lib/content/drive-triage.test.mjs"
+    "test:drive-triage": "node --test lib/content/drive-triage.test.mjs",
+    "eval:ai:openai": "node --experimental-strip-types scripts/eval-openai-anamnesis-review.ts"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",
