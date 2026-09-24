@@ -1,3 +1,5 @@
+import type { AnamnesisReviewContext } from "../lib/ai/anamnesis-review-context.ts";
+import type { AnamnesisReviewFindingType } from "../lib/ai/anamnesis-review-output.ts";
 import {
   buildOpenAiAnamnesisReviewRequest,
   extractOpenAiStructuredOutput,
@@ -28,7 +30,11 @@ const ids = {
   qm: "99999999-9999-4999-8999-999999999999",
 };
 
-const scenarios = [
+const scenarios: Array<{
+  name: string;
+  expectedType: AnamnesisReviewFindingType | null;
+  context: AnamnesisReviewContext;
+}> = [
   {
     name: "clear_no_findings",
     expectedType: null,
