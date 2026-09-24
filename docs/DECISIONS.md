@@ -1,3 +1,13 @@
+## 2026-09-24 - Rollout OpenAI permanece opt-in
+
+### DECISAO TECNICA/OPERACIONAL
+
+Publicar o adapter OpenAI nao habilita processamento externo. O envio de dados reais depende simultaneamente de credencial server-side e do feature gate `OPENAI_HEALTH_DATA_PROCESSING_ENABLED=true`.
+
+A avaliacao inicial do modelo deve usar apenas fixtures sinteticas por meio de `npm run eval:ai:openai`.
+
+O checklist de liberacao fica versionado em `docs/OPENAI_HEALTH_DATA_GATE.md`.
+
 ## 2026-09-24 - Provider OpenAI para revisao assistida da Anamnese
 
 ### REGRA CONFIRMADA PELO PROJETO
