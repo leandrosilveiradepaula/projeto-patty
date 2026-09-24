@@ -35,14 +35,15 @@ Para reduzir risco de alterar o sentido do formulario:
 
 ## Suporte atual da interface
 
-O schema aceita `answer_type` como string nao vazia, mas a interface atual da cliente so edita rascunhos `answer_type = text`.
+A interface de rascunho possui suporte generico para `answer_type = text` e `answer_type = single_choice`. Para `single_choice`, a UI so habilita edicao quando `options` e uma lista valida de strings e a persistencia revalida server-side que o valor enviado pertence as opcoes versionadas da pergunta.
 
 Consequencia:
 
-- campos `text`: base de UI ja existe;
-- campos `single_choice`: ainda precisam de componente e persistencia na UI;
-- consentimento: ainda precisa de componente proprio e decisao juridica;
-- este mapa nao autoriza publicacao enquanto esses pontos nao estiverem resolvidos.
+- campos `text`: base de UI existe;
+- campos `single_choice`: controle generico de rascunho existe, sem aprovar automaticamente os tipos candidatos deste mapa;
+- condicionais: ainda precisam de aplicabilidade concreta aceita e comportamento de UI;
+- consentimento: continua exigindo controle proprio e decisao juridica/operacional;
+- este mapa nao autoriza publicacao enquanto os bloqueios restantes nao estiverem resolvidos.
 
 ## Mapa completo
 
@@ -142,7 +143,7 @@ Continua sem texto final, versao juridica e operacao definitiva. As opcoes candi
 
 ### UI de tipos
 
-A cliente ainda precisa de suporte a `single_choice` e ao controle de consentimento.
+O suporte generico a `single_choice` para rascunho foi implementado e validado em CI, com validacao server-side das opcoes. Isso nao aceita os tipos candidatos nem resolve as condicionais. O controle de consentimento continua separado e pendente.
 
 ## Proximo criterio de pronto
 
@@ -152,7 +153,7 @@ Antes de gerar a primeira versao draft `client-anamnesis`, revisar este mapa e f
 2. aceitar ou ajustar os 10 desdobramentos Sim/Nao + detalhe;
 3. definir ANAM-044;
 4. definir ANAM-046;
-5. implementar os controles de UI que ainda nao existem;
+5. implementar o comportamento de UI das condicionais e o controle especifico de consentimento;
 6. revisar a ordem final.
 
 Enquanto isso, o mapa permanece especificacao candidata e nao deve ser persistido como formulario publicado.

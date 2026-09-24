@@ -22,7 +22,7 @@ Estados usados:
 - leitura real de clientes atribuidos e Cadastro Atual;
 - Anamnese versionada em leitura para admin e cliente;
 - notas internas append-only de revisao da Anamnese;
-- boundary server-only de criacao/retomada do rascunho e UI parcial para editar respostas `text` de rascunhos ja existentes;
+- boundary server-only de criacao/retomada do rascunho e UI parcial para editar respostas `text` e `single_choice` de rascunhos ja existentes; escolhas unicas sao revalidadas no servidor contra `options` da pergunta versionada;
 - correcoes historicas append-only da Patty aplicadas no SaaS e integradas a uma UI administrativa que preserva a resposta original;
 - avaliacoes e medidas em leitura;
 - acompanhamento profissional append-only;
@@ -64,7 +64,7 @@ Estados usados:
 | Profiles / roles | IMPLEMENTADO | sem UI administrativa de gestao | RLS existente | definir bootstrap/admin e quem gerencia roles |
 | Clients / assignments | leitura + encerramento + inicio de assignment no onboarding IMPLEMENTADOS | Patty inicia onboarding por convite server-side; provisionamento cria vinculos relacionais e assignment com compensacao em falha | CI VALIDADO; encerramento E2E PASS; onboarding sintetico E2E PASS; Site URL/allowlist alinhados | template SSR real exige upgrade ou SMTP customizado; depois validar email real |
 | Cadastro Atual | leitura IMPLEMENTADA | nao | CI VALIDADO | definir quem pode alterar cada campo e auditoria |
-| Anamnese versionada | leitura IMPLEMENTADA; rascunho persistente + retomada parcial IMPLEMENTADOS; UI admin de correcoes IMPLEMENTADA | cliente pode salvar individualmente respostas `text` em rascunho existente; nota interna append-only; correcoes append-only; schema aplicado no SaaS | CI + SAAS + PRODUCAO VALIDADA para retomada/edicao de rascunho existente e rota de correcoes; run `35985899621` PASS | iniciar nova Anamnese, tipos finais, autosave definitivo e submissao final continuam dependentes das definicoes finais |
+| Anamnese versionada | leitura IMPLEMENTADA; rascunho persistente + retomada parcial IMPLEMENTADOS; UI admin de correcoes IMPLEMENTADA | cliente pode salvar individualmente respostas `text` e `single_choice` em rascunho existente; `single_choice` e revalidado server-side contra as opcoes versionadas; nota interna e correcoes permanecem append-only | PRODUCAO VALIDADA para `text`/retomada e correcoes; suporte generico `single_choice` validado em CI na branch atual | iniciar nova Anamnese, aceitar tipos/condicionais finais, validar `single_choice` em runtime, autosave definitivo e submissao final |
 | Avaliacoes / medidas | leitura IMPLEMENTADA | acompanhamento profissional append-only | CI VALIDADO; conjunto de decisoes profissionais tipado e testado | definir catalogo, unidades, obrigatoriedade e correcao |
 | Arquivos privados | upload/listagem/download da cliente IMPLEMENTADOS; acesso admin permanente sem assignment, upload administrativo e liberacao explicita IMPLEMENTADOS | smoke E2E da cliente PASS; smoke E2E administrativo PASS em producao; cron de temporarios VALIDADO; auditoria estatica confirmou RLS/rotas coerentes com a excecao da Patty | definir retencao/hard delete |
 | Protocolos | leitura + lifecycle manual IMPLEMENTADOS | submit/approve/publish | CI + SAAS VALIDADO; lifecycle com guarda determinística testada | criar/editar plano somente quando fluxo profissional estiver formalizado |
