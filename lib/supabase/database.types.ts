@@ -263,6 +263,7 @@ export type Database = {
           id: string
           initiated_by_profile_id: string
           model_identifier: string
+          anamnesis_submission_id: string | null
           prompt_version_id: string
           provider: string
           purpose_key: string
@@ -282,6 +283,7 @@ export type Database = {
           id?: string
           initiated_by_profile_id: string
           model_identifier: string
+          anamnesis_submission_id?: string | null
           prompt_version_id: string
           provider: string
           purpose_key: string
@@ -301,6 +303,7 @@ export type Database = {
           id?: string
           initiated_by_profile_id?: string
           model_identifier?: string
+          anamnesis_submission_id?: string | null
           prompt_version_id?: string
           provider?: string
           purpose_key?: string
@@ -327,6 +330,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_executions_anamnesis_submission_client_fkey"
+            columns: ["anamnesis_submission_id", "client_id"]
+            isOneToOne: false
+            referencedRelation: "anamnesis_submissions"
+            referencedColumns: ["id", "client_id"]
           },
           {
             foreignKeyName: "ai_executions_prompt_version_id_fkey"
@@ -2003,8 +2013,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      complete_ai_execution: {
+        Args: { p_content: Json; p_execution_id: string }
+        Returns: undefined
+      }
       current_user_admin_mfa_satisfied: { Args: never; Returns: boolean }
       current_user_is_assigned_admin: { Args: never; Returns: boolean }
+      fail_ai_execution: {
+        Args: {
+          p_execution_id: string
+          p_failure_code: string
+          p_failure_message: string | null
+          p_failure_stage: string
+          p_response_content: string | null
+          p_response_content_format: string | null
+          p_response_received_at: string | null
+        }
+        Returns: undefined
+      }
       meal_plan_version_is_draft: {
         Args: { p_meal_plan_version_id: string }
         Returns: boolean
@@ -2012,6 +2038,18 @@ export type Database = {
       meal_plan_version_is_published_for_current_client: {
         Args: { p_meal_plan_version_id: string }
         Returns: boolean
+      }
+      start_anamnesis_review_execution: {
+        Args: {
+          p_answer_ids: string[]
+          p_client_id: string
+          p_initiated_by_profile_id: string
+          p_model_identifier: string
+          p_prompt_version_id: string
+          p_provider: string
+          p_submission_id: string
+        }
+        Returns: string
       }
     }
     Enums: {
