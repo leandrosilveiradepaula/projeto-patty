@@ -211,7 +211,7 @@ test("requires at least one source for clarification needed", () => {
         ],
       },
     }),
-    { ok: false, error: "invalid_source_answer_ids" },
+    { ok: false, error: "insufficient_sources" },
   );
 });
 
