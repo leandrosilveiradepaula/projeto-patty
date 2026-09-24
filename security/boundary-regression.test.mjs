@@ -8,6 +8,7 @@ const ROOT = process.cwd();
 const ENTRYPOINT_RULES = new Map([
   ["app/admin/anamneses/[anamneseId]/correcoes/actions.ts", "admin"],
   ["app/admin/anamneses/[anamneseId]/esclarecimentos/actions.ts", "admin"],
+  ["app/admin/anamneses/[anamneseId]/ia/actions.ts", "admin"],
   ["app/admin/anamneses/[anamneseId]/revisao/actions.ts", "admin"],
   ["app/admin/arquivos/[fileId]/route.ts", "admin"],
   ["app/admin/avaliacoes/[avaliacaoId]/actions.ts", "admin"],
@@ -421,4 +422,25 @@ test("AI execution boundary keeps privileged persistence server-only", async () 
   assert.match(persistenceBoundary, /\.rpc\(\s*["']start_anamnesis_review_execution["']/);
   assert.match(persistenceBoundary, /\.rpc\(\s*["']complete_ai_execution["']/);
   assert.match(persistenceBoundary, /\.rpc\(\s*["']fail_ai_execution["']/);
+});
+
+
+test("OpenAI Anamnesis review remains server-only and stateless", async () => {
+  const provider = await readFile(
+    path.join(ROOT, "lib", "ai", "openai-provider.ts"),
+    "utf8",
+  );
+  const adapter = await readFile(
+    path.join(ROOT, "lib", "ai", "openai-anamnesis-review.ts"),
+    "utf8",
+  );
+
+  assert.match(provider, /^import ["']server-only["'];/m);
+  assert.match(provider, /OPENAI_HEALTH_DATA_PROCESSING_ENABLED/);
+  assert.match(provider, /OPENAI_API_KEY/);
+  assert.match(provider, /OPENAI_MODEL/);
+  assert.doesNotMatch(provider, /console\.(log|error|warn)/);
+
+  assert.match(adapter, /store:\s*false/);
+  assert.doesNotMatch(adapter, /source_answer_id.*JSON\.stringify/);
 });
