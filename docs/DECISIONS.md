@@ -1,5 +1,31 @@
 # Decisoes
 
+## 2026-09-24 - Fechamento de produto da Anamnese v1, exceto consentimento juridico
+
+### DECISAO DE PRODUTO
+
+A reorganizacao nao juridica da primeira Anamnese canonica esta aceita para a v1. Esta decisao organiza o formulario historico confirmado pela Patty e nao cria regra clinica, diagnostico, alerta, score ou criterio profissional.
+
+Ficam definidos:
+- tipos `text` e `single_choice` do mapa para todos os campos nao juridicos;
+- os 10 desdobramentos explicitos Sim/Nao + detalhe, com o detalhe aplicavel somente quando a pergunta-base possui resposta JSON exata `"Sim"`;
+- ANAM-025 e ANAM-043 permanecem juntas;
+- a ordem de secoes/perguntas descrita na especificacao v1, com ANAM-010 em Cadastro;
+- salvamento explicito por resposta; autosave nao e requisito do MVP;
+- envio final por acao explicita da cliente.
+
+### DECISAO DE PRODUTO — ANAM-044
+
+ANAM-044 nao cria `anamnesis_answer`. A secao Arquivos orienta e aponta para `/cliente/arquivos`, usando o dominio privado existente. A finalidade fica em `file_kind`: `photo`, `exam` ou `document`.
+
+Nao duplicar bytes, metadados ou referencias em respostas da Anamnese. Sem nova regra profissional confirmada, a existencia de upload nao bloqueia o envio final.
+
+### LIMITE JURIDICO
+
+ANAM-046 continua pendente. Texto definitivo, versao, base legal, forma de aceite, revogacao, retencao e impacto da recusa exigem validacao juridica/operacional.
+
+Enquanto ANAM-046 nao estiver resolvido, a primeira `client-anamnesis` permanece **NAO PUBLICAVEL**.
+
 ## 2026-09-24 - Fundacao versionada de aplicabilidade da Anamnese
 
 ### DECISAO TECNICA

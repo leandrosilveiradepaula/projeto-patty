@@ -2,7 +2,7 @@
 
 Data de referencia: 2026-09-24.
 
-Status: **CANDIDATO / NAO PUBLICAR AINDA**.
+Status: **MAPA DE PRODUTO V1 ACEITO / NAO PUBLICAR AINDA — ANAM-046 PENDENTE**.
 
 Fonte estruturada: `docs/anamnesis_field_map_v1_candidate.json`.
 
@@ -135,7 +135,7 @@ Esses tipos sao recomendacao de UX candidata. Se a revisao final preferir respos
 
 ### ANAM-044 - arquivos
 
-Nao vira `anamnesis_answer` nesta etapa. O app ja possui dominio privado de arquivos. Falta decidir a relacao da Anamnese com fotos, exames e documentos enviados.
+Resolvido para a v1: nao vira `anamnesis_answer`. A secao Arquivos orienta e leva a cliente a `/cliente/arquivos`; cada arquivo e classificado no dominio privado como `photo`, `exam` ou `document`.
 
 ### ANAM-046 - consentimento
 
@@ -143,17 +143,13 @@ Continua sem texto final, versao juridica e operacao definitiva. As opcoes candi
 
 ### UI de tipos
 
-O suporte generico a `single_choice` para rascunho foi implementado e validado em CI, com validacao server-side das opcoes. Isso nao aceita os tipos candidatos nem resolve as condicionais. O controle de consentimento continua separado e pendente.
+O suporte generico a `single_choice` e a engine de aplicabilidade foram implementados e validados em CI. Os tipos nao juridicos e as 10 condicionais do mapa estao aceitos como decisoes de produto da v1. O controle de ANAM-046 continua separado e pendente.
 
 ## Proximo criterio de pronto
 
-Antes de gerar a primeira versao draft `client-anamnesis`, revisar este mapa e fechar somente:
-
-1. aceitar ou ajustar os tipos `single_choice` candidatos;
-2. aceitar ou ajustar os 10 desdobramentos Sim/Nao + detalhe;
-3. definir ANAM-044;
-4. definir ANAM-046;
-5. implementar o comportamento de UI das condicionais e o controle especifico de consentimento;
-6. revisar a ordem final.
+Antes de publicar a primeira `client-anamnesis`, falta:
+1. definir ANAM-046 juridicamente e operacionalmente;
+2. implementar e validar o envio final explicito da cliente;
+3. materializar, revisar e publicar explicitamente a definicao completa.
 
 Enquanto isso, o mapa permanece especificacao candidata e nao deve ser persistido como formulario publicado.

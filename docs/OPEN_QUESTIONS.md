@@ -50,7 +50,7 @@ Se futuramente forem introduzidos assistentes, profissionais parceiros ou suport
 
 ### PARCIALMENTE RESOLVIDO
 
-Na Anamnese, todos os campos aplicaveis ao preenchimento final sao obrigatorios. Ainda falta fechar o mapa final de campos e as regras de aplicabilidade condicional.
+Na Anamnese, todos os campos aplicaveis ao preenchimento final sao obrigatorios. O mapa nao juridico da v1, tipos, ordem e as 10 regras de aplicabilidade estao definidos; ANAM-046 continua pendente.
 
 ### QUESTAO ABERTA
 
@@ -141,9 +141,9 @@ Ainda falta validar a ordem final dentro de cada secao e fechar os pontos bloque
 
 A Patty confirmou que as medidas corporais podem ser separadas da Anamnese e tratadas em um fluxo proprio de Avaliacao/Medidas. O catalogo definitivo de medidas, unidades, obrigatoriedade e fluxo de correcao continuam abertos.
 
-### QUESTAO ABERTA
+### FATO RESOLVIDO
 
-Como separar a finalidade dos arquivos enviados entre fotos, exames e documentos?
+ANAM-044 usa o dominio privado existente. A Anamnese orienta e aponta para `/cliente/arquivos`; cada arquivo e classificado por `file_kind` como `photo`, `exam` ou `document`. Nao existe upload duplicado nem `anamnesis_answer` de arquivo.
 
 ### QUESTAO ABERTA
 
@@ -355,24 +355,19 @@ Quem pode criar ou alterar o Cadastro Atual e por qual fluxo controlado?
 
 O salvamento de rascunho e as permissoes minimas de escrita estao aplicados no SaaS: um rascunho ativo por cliente/versao publicada e escrita somente da propria submission/respostas enquanto nao enviada.
 
-A interface da cliente ja consegue retomar um rascunho existente e salvar respostas `text` e `single_choice` individualmente. Para `single_choice`, a opcao e validada novamente no servidor contra `anamnesis_questions.options`. A UI tambem aplica genericamente `applicability_source_question_id` + `applicability_expected_answer`: a dependente so aparece quando a fonte tambem esta aplicavel e sua resposta corresponde ao valor esperado. Ciclos ou definicoes inconsistentes falham fechados. Isso ainda nao aprova as 10 dependencias candidatas, nao define autosave definitivo e nao implementa submissao final.
+A interface da cliente ja consegue retomar rascunho e salvar respostas `text` e `single_choice`. A UI aplica genericamente a aplicabilidade versionada. As 10 dependencias v1 estao aceitas. A v1 usa salvamento explicito por resposta; autosave nao e requisito. A submissao final ainda nao esta implementada.
 
 ### QUESTAO ABERTA
 
-A especificacao candidata da primeira Anamnese canonica esta em `ANAMNESE_CANONICAL_V1_CANDIDATE.md`.
+A especificacao da primeira Anamnese canonica permanece em `ANAMNESE_CANONICAL_V1_CANDIDATE.md`.
 
-Antes da submissao final e da publicacao da primeira versao ainda precisam ser fechados:
-- revisar/aceitar ou ajustar o mapa candidato das 10 condicionais;
-- revisar/aceitar ou ajustar os tipos de input candidatos;
-- revisar/aceitar ou ajustar o tratamento candidato das perguntas compostas;
-- integracao do item historico de upload com o dominio de arquivos privados;
-- texto/versionamento do consentimento;
-- ordem final;
-- UX definitiva de autosave/submissao.
+Tipos nao juridicos, 10 condicionais, perguntas compostas, ANAM-044, ordem e UX de salvamento estao definidos. Continuam bloqueadores:
+- texto/versionamento/operacao juridica de ANAM-046;
+- implementacao e validacao do envio final explicito, aplicando obrigatoriedade somente aos campos aplicaveis.
 
-### QUESTAO ABERTA
+### DECISAO DE PRODUTO
 
-Quando uma nova versao de formulario podera ser marcada como disponivel para preenchimento?
+Uma versao so fica disponivel por publicacao explicita depois de possuir definicao deterministica completa, consentimento aplicavel resolvido, integridade validada e revisao humana. Criar uma versao em draft nao a torna disponivel.
 
 ### FATO JA RESOLVIDO
 

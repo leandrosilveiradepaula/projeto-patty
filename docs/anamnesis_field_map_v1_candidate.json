@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "candidate_not_publishable",
+  "status": "product_approved_except_consent_not_publishable",
   "canonical_form_key": "client-anamnesis",
   "generated_from": "docs/ANAMNESE.md",
   "design_rules": {
@@ -10,7 +10,12 @@
     "keep_open_compounds_together_by_default": true,
     "no_new_clinical_alerts_or_rules": true,
     "no_automatic_publication": true,
-    "current_ui_support_note": "Client draft UI supports text and generic single_choice answers; single_choice values are validated against versioned options. Candidate types remain unapproved, conditional behavior is pending, and consent requires its own control."
+    "current_ui_support_note": "Client draft UI supports text, generic single_choice and versioned conditional visibility. Non-legal v1 types and the 10 explicit conditions are product-approved; ANAM-046 remains legally pending.",
+    "non_legal_input_types_approved_v1": true,
+    "explicit_yes_no_detail_conditions_approved_v1": true,
+    "files_integration_mode": "link_to_private_files_flow",
+    "draft_save_mode": "explicit_per_answer",
+    "final_submit_requires_explicit_client_action": true
   },
   "counts": {
     "source_entries": 47,
@@ -50,7 +55,8 @@
           "required_when_applicable": true,
           "current_client_ui_support": "supported_for_draft",
           "options_candidate": null,
-          "applicability_candidate": null
+          "applicability_candidate": null,
+          "product_status": "approved_v1"
         }
       ],
       "status": "product_candidate"
@@ -73,7 +79,8 @@
           "required_when_applicable": true,
           "current_client_ui_support": "supported_for_draft",
           "options_candidate": null,
-          "applicability_candidate": null
+          "applicability_candidate": null,
+          "product_status": "approved_v1"
         }
       ],
       "status": "product_candidate"
@@ -96,7 +103,8 @@
           "required_when_applicable": true,
           "current_client_ui_support": "supported_for_draft",
           "options_candidate": null,
-          "applicability_candidate": null
+          "applicability_candidate": null,
+          "product_status": "approved_v1"
         }
       ],
       "status": "product_candidate"
@@ -120,7 +128,8 @@
           "current_client_ui_support": "supported_for_draft",
           "options_candidate": null,
           "applicability_candidate": null,
-          "ai_default": "exclude"
+          "ai_default": "exclude",
+          "product_status": "approved_v1"
         }
       ],
       "status": "product_candidate"
@@ -195,7 +204,8 @@
             "Nao"
           ],
           "applicability_candidate": null,
-          "type_basis": "candidate_from_yes_no_wording"
+          "type_basis": "candidate_from_yes_no_wording",
+          "product_status": "approved_v1"
         }
       ],
       "status": "product_candidate"
@@ -222,7 +232,8 @@
             "Nao"
           ],
           "applicability_candidate": null,
-          "type_basis": "candidate_from_compound_wording"
+          "type_basis": "candidate_from_compound_wording",
+          "product_status": "approved_v1"
         },
         {
           "question_key_candidate": "health_plan_details",
@@ -236,8 +247,9 @@
             "source_field_key": "has_health_plan",
             "operator": "json_equals",
             "expected_answer": "Sim",
-            "status": "candidate_from_explicit_compound_wording"
-          }
+            "status": "approved_product_v1_from_explicit_compound_wording"
+          },
+          "product_status": "approved_v1"
         }
       ],
       "status": "split_candidate"
@@ -264,7 +276,8 @@
             "Nao"
           ],
           "applicability_candidate": null,
-          "type_basis": "candidate_from_compound_wording"
+          "type_basis": "candidate_from_compound_wording",
+          "product_status": "approved_v1"
         },
         {
           "question_key_candidate": "diabetes_details",
@@ -278,8 +291,9 @@
             "source_field_key": "has_diabetes",
             "operator": "json_equals",
             "expected_answer": "Sim",
-            "status": "candidate_from_explicit_compound_wording"
-          }
+            "status": "approved_product_v1_from_explicit_compound_wording"
+          },
+          "product_status": "approved_v1"
         }
       ],
       "status": "split_candidate"
@@ -306,7 +320,8 @@
             "Nao"
           ],
           "applicability_candidate": null,
-          "type_basis": "candidate_from_compound_wording"
+          "type_basis": "candidate_from_compound_wording",
+          "product_status": "approved_v1"
         },
         {
           "question_key_candidate": "metabolic_disorder_details",
@@ -320,8 +335,9 @@
             "source_field_key": "has_metabolic_disorder",
             "operator": "json_equals",
             "expected_answer": "Sim",
-            "status": "candidate_from_explicit_compound_wording"
-          }
+            "status": "approved_product_v1_from_explicit_compound_wording"
+          },
+          "product_status": "approved_v1"
         }
       ],
       "status": "split_candidate"
@@ -345,7 +361,8 @@
           "current_client_ui_support": "supported_for_draft",
           "options_candidate": null,
           "applicability_candidate": null,
-          "type_basis": "preserve_open_capacity_no_detail_child_added"
+          "type_basis": "preserve_open_capacity_no_detail_child_added",
+          "product_status": "approved_v1"
         }
       ],
       "status": "product_candidate"
@@ -372,7 +389,8 @@
             "Nao"
           ],
           "applicability_candidate": null,
-          "type_basis": "candidate_from_compound_wording"
+          "type_basis": "candidate_from_compound_wording",
+          "product_status": "approved_v1"
         },
         {
           "question_key_candidate": "surgery_details",
@@ -386,8 +404,9 @@
             "source_field_key": "had_surgery",
             "operator": "json_equals",
             "expected_answer": "Sim",
-            "status": "candidate_from_explicit_compound_wording"
-          }
+            "status": "approved_product_v1_from_explicit_compound_wording"
+          },
+          "product_status": "approved_v1"
         }
       ],
       "status": "split_candidate"
@@ -414,7 +433,8 @@
             "Nao"
           ],
           "applicability_candidate": null,
-          "type_basis": "candidate_from_compound_wording"
+          "type_basis": "candidate_from_compound_wording",
+          "product_status": "approved_v1"
         },
         {
           "question_key_candidate": "allergy_details",
@@ -428,8 +448,9 @@
             "source_field_key": "has_allergy",
             "operator": "json_equals",
             "expected_answer": "Sim",
-            "status": "candidate_from_explicit_compound_wording"
-          }
+            "status": "approved_product_v1_from_explicit_compound_wording"
+          },
+          "product_status": "approved_v1"
         }
       ],
       "status": "split_candidate"
@@ -456,7 +477,8 @@
             "Nao"
           ],
           "applicability_candidate": null,
-          "type_basis": "candidate_from_compound_wording"
+          "type_basis": "candidate_from_compound_wording",
+          "product_status": "approved_v1"
         },
         {
           "question_key_candidate": "fracture_or_injury_details",
@@ -470,8 +492,9 @@
             "source_field_key": "had_fracture_or_sequela",
             "operator": "json_equals",
             "expected_answer": "Sim",
-            "status": "candidate_from_explicit_compound_wording"
-          }
+            "status": "approved_product_v1_from_explicit_compound_wording"
+          },
+          "product_status": "approved_v1"
         }
       ],
       "status": "split_candidate"
@@ -495,7 +518,8 @@
           "current_client_ui_support": "supported_for_draft",
           "options_candidate": null,
           "applicability_candidate": null,
-          "type_basis": "preserve_open_capacity"
+          "type_basis": "preserve_open_capacity",
+          "product_status": "approved_v1"
         }
       ],
       "status": "product_candidate"
@@ -519,7 +543,8 @@
           "current_client_ui_support": "supported_for_draft",
           "options_candidate": null,
           "applicability_candidate": null,
-          "type_basis": "preserve_open_capacity"
+          "type_basis": "preserve_open_capacity",
+          "product_status": "approved_v1"
         }
       ],
       "status": "product_candidate"
@@ -546,7 +571,8 @@
             "Nao"
           ],
           "applicability_candidate": null,
-          "type_basis": "candidate_from_yes_no_wording"
+          "type_basis": "candidate_from_yes_no_wording",
+          "product_status": "approved_v1"
         }
       ],
       "status": "product_candidate"
@@ -573,7 +599,8 @@
             "Nao"
           ],
           "applicability_candidate": null,
-          "type_basis": "candidate_from_compound_wording"
+          "type_basis": "candidate_from_compound_wording",
+          "product_status": "approved_v1"
         },
         {
           "question_key_candidate": "fainting_details",
@@ -587,8 +614,9 @@
             "source_field_key": "has_fainted",
             "operator": "json_equals",
             "expected_answer": "Sim",
-            "status": "candidate_from_explicit_compound_wording"
-          }
+            "status": "approved_product_v1_from_explicit_compound_wording"
+          },
+          "product_status": "approved_v1"
         }
       ],
       "status": "split_candidate"
@@ -615,7 +643,8 @@
             "Nao"
           ],
           "applicability_candidate": null,
-          "type_basis": "candidate_from_compound_wording"
+          "type_basis": "candidate_from_compound_wording",
+          "product_status": "approved_v1"
         },
         {
           "question_key_candidate": "past_supplement_details",
@@ -629,8 +658,9 @@
             "source_field_key": "used_supplement_before",
             "operator": "json_equals",
             "expected_answer": "Sim",
-            "status": "candidate_from_explicit_compound_wording"
-          }
+            "status": "approved_product_v1_from_explicit_compound_wording"
+          },
+          "product_status": "approved_v1"
         }
       ],
       "status": "split_candidate"
@@ -653,7 +683,8 @@
           "required_when_applicable": true,
           "current_client_ui_support": "supported_for_draft",
           "options_candidate": null,
-          "applicability_candidate": null
+          "applicability_candidate": null,
+          "product_status": "approved_v1"
         }
       ],
       "status": "product_candidate"
@@ -676,7 +707,8 @@
           "required_when_applicable": true,
           "current_client_ui_support": "supported_for_draft",
           "options_candidate": null,
-          "applicability_candidate": null
+          "applicability_candidate": null,
+          "product_status": "approved_v1"
         }
       ],
       "status": "product_candidate"
@@ -703,7 +735,8 @@
             "Nao"
           ],
           "applicability_candidate": null,
-          "type_basis": "candidate_from_compound_wording"
+          "type_basis": "candidate_from_compound_wording",
+          "product_status": "approved_v1"
         },
         {
           "question_key_candidate": "vitamin_supplement_details",
@@ -717,8 +750,9 @@
             "source_field_key": "uses_vitamin_supplement",
             "operator": "json_equals",
             "expected_answer": "Sim",
-            "status": "candidate_from_explicit_compound_wording"
-          }
+            "status": "approved_product_v1_from_explicit_compound_wording"
+          },
+          "product_status": "approved_v1"
         }
       ],
       "status": "split_candidate"
@@ -742,7 +776,8 @@
           "current_client_ui_support": "supported_for_draft",
           "options_candidate": null,
           "applicability_candidate": null,
-          "normalization_decision": "keep_together_for_v1_candidate"
+          "normalization_decision": "keep_together_for_v1_candidate",
+          "product_status": "approved_v1"
         }
       ],
       "status": "keep_compound_candidate"
@@ -769,7 +804,8 @@
             "Nao"
           ],
           "applicability_candidate": null,
-          "type_basis": "candidate_from_yes_no_wording"
+          "type_basis": "candidate_from_yes_no_wording",
+          "product_status": "approved_v1"
         }
       ],
       "status": "product_candidate"
@@ -796,7 +832,8 @@
             "Nao"
           ],
           "applicability_candidate": null,
-          "type_basis": "candidate_from_yes_no_wording"
+          "type_basis": "candidate_from_yes_no_wording",
+          "product_status": "approved_v1"
         }
       ],
       "status": "product_candidate"
@@ -819,7 +856,8 @@
           "required_when_applicable": true,
           "current_client_ui_support": "supported_for_draft",
           "options_candidate": null,
-          "applicability_candidate": null
+          "applicability_candidate": null,
+          "product_status": "approved_v1"
         }
       ],
       "status": "product_candidate"
@@ -846,7 +884,8 @@
             "Nao"
           ],
           "applicability_candidate": null,
-          "type_basis": "candidate_from_yes_no_wording"
+          "type_basis": "candidate_from_yes_no_wording",
+          "product_status": "approved_v1"
         }
       ],
       "status": "product_candidate"
@@ -873,7 +912,8 @@
             "Nao"
           ],
           "applicability_candidate": null,
-          "type_basis": "candidate_from_yes_no_wording"
+          "type_basis": "candidate_from_yes_no_wording",
+          "product_status": "approved_v1"
         }
       ],
       "status": "product_candidate"
@@ -896,7 +936,8 @@
           "required_when_applicable": true,
           "current_client_ui_support": "supported_for_draft",
           "options_candidate": null,
-          "applicability_candidate": null
+          "applicability_candidate": null,
+          "product_status": "approved_v1"
         }
       ],
       "status": "product_candidate"
@@ -923,7 +964,8 @@
             "Nao"
           ],
           "applicability_candidate": null,
-          "type_basis": "candidate_from_yes_no_wording"
+          "type_basis": "candidate_from_yes_no_wording",
+          "product_status": "approved_v1"
         }
       ],
       "status": "product_candidate"
@@ -952,7 +994,8 @@
           ],
           "applicability_candidate": null,
           "type_basis": "observed_options",
-          "ai_default": "exclude"
+          "ai_default": "exclude",
+          "product_status": "approved_v1"
         }
       ],
       "status": "observed_choice_candidate"
@@ -987,7 +1030,8 @@
             "Nao sei"
           ],
           "applicability_candidate": null,
-          "type_basis": "observed_options"
+          "type_basis": "observed_options",
+          "product_status": "approved_v1"
         }
       ],
       "status": "observed_choice_candidate"
@@ -1010,7 +1054,8 @@
           "required_when_applicable": true,
           "current_client_ui_support": "supported_for_draft",
           "options_candidate": null,
-          "applicability_candidate": null
+          "applicability_candidate": null,
+          "product_status": "approved_v1"
         }
       ],
       "status": "product_candidate"
@@ -1033,7 +1078,8 @@
           "required_when_applicable": true,
           "current_client_ui_support": "supported_for_draft",
           "options_candidate": null,
-          "applicability_candidate": null
+          "applicability_candidate": null,
+          "product_status": "approved_v1"
         }
       ],
       "status": "product_candidate"
@@ -1056,7 +1102,8 @@
           "required_when_applicable": true,
           "current_client_ui_support": "supported_for_draft",
           "options_candidate": null,
-          "applicability_candidate": null
+          "applicability_candidate": null,
+          "product_status": "approved_v1"
         }
       ],
       "status": "product_candidate"
@@ -1079,7 +1126,8 @@
           "required_when_applicable": true,
           "current_client_ui_support": "supported_for_draft",
           "options_candidate": null,
-          "applicability_candidate": null
+          "applicability_candidate": null,
+          "product_status": "approved_v1"
         }
       ],
       "status": "product_candidate"
@@ -1102,7 +1150,8 @@
           "required_when_applicable": true,
           "current_client_ui_support": "supported_for_draft",
           "options_candidate": null,
-          "applicability_candidate": null
+          "applicability_candidate": null,
+          "product_status": "approved_v1"
         }
       ],
       "status": "product_candidate"
@@ -1125,7 +1174,8 @@
           "required_when_applicable": true,
           "current_client_ui_support": "supported_for_draft",
           "options_candidate": null,
-          "applicability_candidate": null
+          "applicability_candidate": null,
+          "product_status": "approved_v1"
         }
       ],
       "status": "product_candidate"
@@ -1152,7 +1202,8 @@
             "Nao"
           ],
           "applicability_candidate": null,
-          "type_basis": "observed_options"
+          "type_basis": "observed_options",
+          "product_status": "approved_v1"
         }
       ],
       "status": "observed_choice_candidate"
@@ -1179,7 +1230,8 @@
             "Nao"
           ],
           "applicability_candidate": null,
-          "type_basis": "candidate_from_compound_wording"
+          "type_basis": "candidate_from_compound_wording",
+          "product_status": "approved_v1"
         },
         {
           "question_key_candidate": "competitive_sport_details",
@@ -1193,8 +1245,9 @@
             "source_field_key": "is_competitive_athlete",
             "operator": "json_equals",
             "expected_answer": "Sim",
-            "status": "candidate_from_explicit_compound_wording"
-          }
+            "status": "approved_product_v1_from_explicit_compound_wording"
+          },
+          "product_status": "approved_v1"
         }
       ],
       "status": "split_candidate"
@@ -1218,7 +1271,8 @@
           "current_client_ui_support": "supported_for_draft",
           "options_candidate": null,
           "applicability_candidate": null,
-          "normalization_decision": "keep_together_for_v1_candidate"
+          "normalization_decision": "keep_together_for_v1_candidate",
+          "product_status": "approved_v1"
         }
       ],
       "status": "keep_compound_candidate"
@@ -1230,10 +1284,10 @@
       "observed_options": "ate 10 arquivos; tipos apresentados incluem PDF/documento/imagem; maximo apresentado de 10 MB por arquivo; apos envio, arquivos nao podem ser editados/removidos",
       "historical_required": "nao confirmado",
       "source_category": "Fotos; Exames e documentos",
-      "disposition": "files_integration_pending",
+      "disposition": "files_flow_link",
       "section": "arquivos",
       "fields": [],
-      "status": "integration_pending"
+      "status": "product_approved"
     },
     {
       "code": "ANAM-045",
@@ -1253,7 +1307,8 @@
           "required_when_applicable": true,
           "current_client_ui_support": "supported_for_draft",
           "options_candidate": null,
-          "applicability_candidate": null
+          "applicability_candidate": null,
+          "product_status": "approved_v1"
         }
       ],
       "status": "product_candidate"
@@ -1281,7 +1336,8 @@
           ],
           "applicability_candidate": null,
           "type_basis": "historical_accept_reject",
-          "legal_status": "pending_final_text_and_versioning"
+          "legal_status": "pending_final_text_and_versioning",
+          "product_status": "legal_pending"
         }
       ],
       "status": "legal_pending"

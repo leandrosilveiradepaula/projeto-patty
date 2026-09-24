@@ -15,6 +15,7 @@ type CandidateField = {
   required_when_applicable: boolean;
   options_candidate: unknown[] | null;
   applicability_candidate: Applicability | null;
+  product_status?: string;
 };
 
 type Entry = {
@@ -47,7 +48,7 @@ function loadFieldMap(): FieldMap {
 test("field map covers the full historical inventory exactly once", () => {
   const map = loadFieldMap();
 
-  assert.equal(map.status, "candidate_not_publishable");
+  assert.equal(map.status, "product_approved_except_consent_not_publishable");
   assert.equal(map.canonical_form_key, "client-anamnesis");
   assert.equal(map.entries.length, 47);
   assert.equal(map.counts.source_entries, 47);
@@ -122,12 +123,17 @@ test("single-choice candidates always define non-empty options", () => {
   }
 });
 
-test("files and consent remain explicitly unresolved", () => {
+test("non-legal fields are product-approved while files are integrated and consent remains pending", () => {
   const map = loadFieldMap();
   const files = map.entries.find((entry) => entry.code === "ANAM-044");
   const consent = map.entries.find((entry) => entry.code === "ANAM-046");
+  const nonLegalFields = map.entries
+    .filter((entry) => entry.code !== "ANAM-046")
+    .flatMap((entry) => entry.fields);
 
-  assert.equal(files?.disposition, "files_integration_pending");
+  assert.equal(files?.disposition, "files_flow_link");
   assert.equal(files?.fields.length, 0);
   assert.equal(consent?.disposition, "consent_pending");
+  assert.ok(nonLegalFields.every((field) => field.product_status === "approved_v1"));
+  assert.ok(consent?.fields.every((field) => field.product_status === "legal_pending"));
 });
