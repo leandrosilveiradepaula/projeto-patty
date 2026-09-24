@@ -155,13 +155,13 @@ ANAM-044 usa o dominio privado existente. A Anamnese orienta e aponta para `/cli
 
 Qual politica concreta de retencao define quando um arquivo inativado/substituido pode ser removido fisicamente, considerando referencias historicas e auditoria?
 
-### BLOQUEIO EXTERNO — ANAM-046
+### FATO RESOLVIDO — ANAM-046
 
-O gate objetivo esta documentado em `ANAMNESE_CONSENT_GATE.md`.
+ANAM-046 foi definido para o MVP como checkbox obrigatorio no envio final da Anamnese canonica.
 
-Continuam pendentes de validacao juridica/operacional: texto oficial, versao/vigencia, base legal/finalidade, efeito da recusa, revogacao/retirada, retencao, evidencia tecnica minima, reconsentimento e relacao com IA.
+Texto v1: "Concordo com o tratamento das informações fornecidas nesta Anamnese, inclusive dados de saúde, para realização do meu acompanhamento pela Consultoria Corpo & Mente."
 
-A engenharia nao deve materializar nem publicar ANAM-046 antes de todas essas respostas estarem documentadas.
+O valor versionado persistido e `Concordo`. Sem marcar, a cliente pode continuar salvando o rascunho, mas nao pode enviar a Anamnese. O aceite nao autoriza automaticamente uso de dados reais por IA. A especificacao completa esta em `ANAMNESE_CONSENT_GATE.md`.
 
 ### QUESTAO ABERTA
 
