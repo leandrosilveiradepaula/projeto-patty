@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { isAnamnesisQuestionApplicable } from "./applicability";
+import { isAnamnesisQuestionApplicable } from "./applicability.ts";
 
 test("question without applicability rule is applicable", () => {
   assert.equal(
