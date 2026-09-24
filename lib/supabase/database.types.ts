@@ -554,6 +554,8 @@ export type Database = {
       anamnesis_questions: {
         Row: {
           answer_type: string
+          applicability_expected_answer: Json | null
+          applicability_source_question_id: string | null
           created_at: string
           display_order: number
           form_version_id: string
@@ -566,6 +568,8 @@ export type Database = {
         }
         Insert: {
           answer_type: string
+          applicability_expected_answer?: Json | null
+          applicability_source_question_id?: string | null
           created_at?: string
           display_order: number
           form_version_id: string
@@ -578,6 +582,8 @@ export type Database = {
         }
         Update: {
           answer_type?: string
+          applicability_expected_answer?: Json | null
+          applicability_source_question_id?: string | null
           created_at?: string
           display_order?: number
           form_version_id?: string
@@ -589,6 +595,13 @@ export type Database = {
           section_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "anamnesis_questions_applicability_source_version_fkey"
+            columns: ["applicability_source_question_id", "form_version_id"]
+            isOneToOne: false
+            referencedRelation: "anamnesis_questions"
+            referencedColumns: ["id", "form_version_id"]
+          },
           {
             foreignKeyName: "anamnesis_questions_form_version_id_fkey"
             columns: ["form_version_id"]
