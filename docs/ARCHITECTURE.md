@@ -162,3 +162,20 @@ Fluxo de seguranca:
 O secret do Supabase nunca entra no browser. A camada privilegiada nao consulta identidade fornecida pelo request; recebe a identidade derivada da sessao administrativa ja validada.
 
 As RPCs internas agrupam transicoes que precisam ser atomicas. Elas nao substituem as constraints/triggers do banco; apenas fornecem uma unidade transacional confiavel para a aplicacao.
+
+
+## Provider OpenAI
+
+### DECISAO TECNICA
+
+O primeiro adapter externo usa a OpenAI Responses API no backend Next.js/Vercel.
+
+A implementacao inicial usa `fetch` nativo do runtime, em vez de adicionar uma camada de SDK/agent framework, para manter a dependencia pequena e auditavel. A troca por SDK pode ser feita depois se trouxer beneficio concreto.
+
+Fluxo:
+
+`sessao admin AAL2 -> contexto minimizado/RLS -> execution started -> OpenAI Responses API (store=false, Structured Outputs) -> alias mapping -> validacao deterministica -> output completed OU failure auditada`
+
+Nenhum identificador interno de answer/question precisa sair do sistema: aliases efemeros sao enviados e remapeados no servidor.
+
+A chamada externa permanece feature-gated por configuracao de processamento de dados de saude. Ausencia de credencial/modelo/gate nao deve degradar para provider alternativo.
