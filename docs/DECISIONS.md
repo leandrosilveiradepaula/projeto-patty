@@ -1804,3 +1804,13 @@ ANAM-046 integra a mesma versao:
 - UI propria de checkbox na finalizacao.
 
 A definicao nao deve ser alterada in-place. Mudancas futuras exigem nova versao.
+
+## 2026-09-24 - Evidencia de envio completo da client-anamnesis v1
+
+### FATO DE TESTE
+
+A primeira versao canonica publicada passou por smoke transacional completo no Supabase SaaS com `ROLLBACK`.
+
+A validacao utilizou dados sinteticos, preencheu todas as perguntas aplicaveis, preservou 10 condicionais como nao aplicaveis quando suas controladoras receberam `Nao`, gravou ANAM-046 como `Concordo` e concluiu `submitted_at`.
+
+Nenhum registro do smoke foi preservado apos o `ROLLBACK`.

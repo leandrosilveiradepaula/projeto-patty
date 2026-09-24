@@ -374,3 +374,18 @@ Estrutura confirmada:
 - ANAM-046 como checkbox obrigatorio no envio final, persistindo `Concordo`.
 
 A proxima validacao e o E2E sintetico completo no runtime publicado.
+
+## Anamnese canonica v1 - smoke de envio completo
+
+Estado: **SAAS VALIDADO**
+
+A `client-anamnesis` v1 publicada passou por um envio completo transacional no Supabase SaaS com `ROLLBACK`, usando somente dados sinteticos.
+
+Foram validados em conjunto:
+- perguntas obrigatorias aplicaveis;
+- condicionais;
+- ANAM-046 = `Concordo`;
+- finalizacao da submission;
+- preservacao da evidencia de aceite.
+
+Ainda falta apenas o E2E de browser completo contra producao para classificar esse fluxo como PRODUCAO VALIDADA.
