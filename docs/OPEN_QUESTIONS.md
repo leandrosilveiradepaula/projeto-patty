@@ -112,7 +112,7 @@ Perguntas compostas da anamnese atual devem permanecer juntas ou ser normalizada
 
 A regra geral de exibicao condicional esta confirmada: pergunta dependente nao aplicavel fica oculta e nao obrigatoria.
 
-A fundacao tecnica versionada foi preparada para armazenar uma condicao exata por pergunta dependente, referenciando uma pergunta controladora da mesma versao. A migration ainda precisa ser aplicada no SaaS depois do merge.
+A fundacao tecnica versionada para armazenar uma condicao exata por pergunta dependente foi aplicada e verificada no Supabase SaaS em 2026-09-24. O ponto que continua aberto nao e mais de infraestrutura: falta apenas definir o mapa concreto pergunta-a-pergunta.
 
 Continua aberto o ponto profissional/produto: identificar no questionario final quais campos sao condicionais e quais respostas determinam sua aplicabilidade.
 
