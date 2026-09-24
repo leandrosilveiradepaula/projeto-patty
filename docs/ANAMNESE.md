@@ -2,7 +2,7 @@
 
 Este documento registra o inventario funcional da anamnese atual da Patty e serve como base documental para migracao e especificacao futura do modulo.
 
-O formulario atual da Patty e evidencia do processo existente e referencia de migracao. Ele nao define automaticamente a versao final do formulario no aplicativo.
+O formulario atual da Patty e evidencia do processo existente e referencia de migracao. A Patty confirmou em 2026-09-24 que suas perguntas devem ser mantidas como base de conteudo e reorganizadas no aplicativo, sem uma revisao ampla de perguntas nesta etapa. Isso nao torna automaticamente aprovados os tipos de input, agrupamento, ordem, validacoes ou condicionalidade historicos.
 
 Portanto:
 
@@ -177,7 +177,6 @@ A UI podera ser reorganizada depois da decisao de fluxo. Qualquer alteracao do c
 ## Pendencias para especificacao futura
 
 - Confirmar o mapa completo de campos do formulario atual.
-- Decidir manter, alterar ou remover cada pergunta.
 - Formalizar quais perguntas sao condicionais e suas regras de aplicabilidade; a obrigatoriedade geral para envio final ja esta confirmada para todos os campos aplicaveis.
 - Definir tipo final de input por campo.
 - Decidir se perguntas compostas permanecem juntas ou sao normalizadas em campos separados.
