@@ -503,3 +503,23 @@ Cenario exercitado:
 - `ROLLBACK` ao final, sem residuo.
 
 Esse smoke valida a definicao canônica e o trigger de envio final em conjunto. O E2E de browser completo continua um gate separado.
+
+## 2026-09-24 - E2E canônico de consentimento preparado
+
+### IMPLEMENTADO / AINDA NAO EXECUTADO
+
+Foi versionado um smoke E2E manual para a `client-anamnesis` v1 publicada:
+
+- workflow: `.github/workflows/e2e-client-anamnesis-canonical-consent.yml`;
+- spec: `e2e/client-anamnesis-canonical-consent.spec.mjs`.
+
+O teste usa somente a fixture sintetica persistente. Ele cria um draft temporario da versao canonica, preenche programaticamente todas as perguntas aplicaveis exceto um campo obrigatorio de guarda e o consentimento, e valida no browser:
+
+- ANAM-046 aparece como checkbox obrigatorio;
+- sem marcar, nenhuma resposta de consentimento e persistida;
+- marcado, `Concordo` e persistido pela boundary server-side;
+- o campo obrigatorio de guarda impede `submitted_at`, mantendo o registro limpavel;
+- cleanup remove answers e draft no `finally`;
+- a credencial sintetica e rotacionada ao final.
+
+A execucao continua manual via `workflow_dispatch`; o conector GitHub desta sessao nao expoe acao para iniciar workflows manuais.
