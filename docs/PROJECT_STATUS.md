@@ -581,3 +581,25 @@ Resultado:
 - consulta pos-run confirmou 0 drafts canonicos residuais.
 
 Com isso, o fluxo de inicio e retomada da primeira Anamnese canonica esta validado no runtime de producao.
+
+## 2026-09-24 - E2E de edicao do draft canonico preparado
+
+### IMPLEMENTADO / EXECUCAO MANUAL PENDENTE
+
+Foi versionado o workflow `E2E canonical Anamnesis draft edit smoke` para validar edicao real da `client-anamnesis` v1 publicada.
+
+O teste usa somente a fixture sintetica persistente e valida no browser:
+- criacao de um draft temporario da versao canonica;
+- resposta textual real `city`;
+- insert inicial e update da mesma resposta sem duplicacao;
+- condicional real `has_health_plan -> health_plan_details`;
+- detalhe oculto antes da resposta controladora;
+- detalhe exibido apos `Sim`;
+- persistencia de `health_plan_details`;
+- detalhe oculto novamente apos alterar a controladora para `Nao`;
+- `submitted_at` permanece nulo;
+- cleanup remove answers e draft;
+- senha sintetica e rotacionada;
+- 0 drafts canonicos residuais ao final.
+
+Nenhuma migration ou politica RLS e alterada nesta tarefa.
