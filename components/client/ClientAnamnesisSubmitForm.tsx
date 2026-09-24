@@ -40,6 +40,19 @@ export function ClientAnamnesisSubmitForm({
         Antes de enviar, confira as respostas. Após o envio, suas respostas
         originais ficam preservadas e não poderão mais ser editadas por você.
       </p>
+      <label className={styles.consent}>
+        <input
+          name="consentAccepted"
+          required
+          type="checkbox"
+          value="Concordo"
+        />
+        <span>
+          Concordo com o tratamento das informações fornecidas nesta Anamnese,
+          inclusive dados de saúde, para realização do meu acompanhamento pela
+          Consultoria Corpo &amp; Mente.
+        </span>
+      </label>
       <Button loading={isPending} type="submit">
         Enviar Anamnese
       </Button>
