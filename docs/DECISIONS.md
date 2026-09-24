@@ -1478,7 +1478,7 @@ Este hardening nao escolhe provider/modelo, nao chama provider, nao cria execuca
 
 ### ESTADO OPERACIONAL
 
-A migration `20260924165942_harden_ai_execution_boundary.sql` foi aplicada no Supabase SaaS em 2026-09-24. Smoke pos-apply sintetico com `ROLLBACK` confirmou as invariantes da boundary e os privilegios das RPCs. O codigo de aplicacao passou CI antes do apply; merge/publicacao permanecem etapas separadas.
+A migration `20260924165942_harden_ai_execution_boundary.sql` foi aplicada no Supabase SaaS em 2026-09-24. Smoke pos-apply sintetico com `ROLLBACK` confirmou as invariantes da boundary e os privilegios das RPCs. O PR #149 passou CI final, foi mergeado no commit `9b7bbba` e o deployment de producao correspondente ficou `READY`.
 
 ## 2026-09-22 - Primeiro contrato operacional de IA para revisao de Anamnese
 
