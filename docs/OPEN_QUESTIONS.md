@@ -86,9 +86,13 @@ Quais alteracoes cadastrais exigirao auditoria especifica?
 
 ## Anamnese
 
-### QUESTAO ABERTA
+### PARCIALMENTE RESOLVIDO
 
-Qual e o mapa completo dos campos do formulario atual de anamnese, considerando que as evidencias disponiveis podem ser parciais?
+O inventario conhecido `ANAM-000..046` agora possui mapa completo fonte -> destino em `ANAMNESE_FIELD_MAP_V1_CANDIDATE.md` e `anamnesis_field_map_v1_candidate.json`.
+
+O mapa cobre exatamente 47 entradas historicas, propoe 51 campos candidatos e preserva as 4 medidas fora da Anamnese.
+
+Isso fecha a lacuna de mapeamento do inventario conhecido, mas nao prova que evidencias historicas externas inexistentes nao contenham outros campos.
 
 ### FATO JA CONFIRMADO
 
@@ -100,13 +104,22 @@ A reorganizacao pode alterar apresentacao, agrupamento, tipos de input e logica 
 
 Todos os campos da Anamnese sao obrigatorios para permitir o envio final. Rascunhos podem permanecer incompletos ate a cliente finalizar o preenchimento.
 
-### QUESTAO ABERTA
+### PARCIALMENTE RESOLVIDO
 
-Qual sera o tipo final de input de cada campo da anamnese?
+O mapa v1 candidato propoe tipos para todos os campos:
+- `text` para respostas abertas;
+- `single_choice` para opcoes observadas ou perguntas claramente Sim/Nao;
+- controle especifico de consentimento ainda pendente.
 
-### QUESTAO ABERTA
+Esses tipos sao decisoes de produto candidatas e precisam de revisao final antes da publicacao.
 
-Perguntas compostas da anamnese atual devem permanecer juntas ou ser normalizadas em campos separados?
+### PARCIALMENTE RESOLVIDO
+
+O mapa v1 candidato propoe:
+- separar 10 perguntas compostas explicitas do formato Sim/Nao + detalhe;
+- manter juntas, por enquanto, as compostas abertas de sono e objetivos para reduzir alteracao sem necessidade.
+
+A proposta ainda precisa ser aceita ou ajustada antes da versao publicada.
 
 ### PARCIALMENTE RESOLVIDO
 
@@ -114,7 +127,9 @@ A regra geral de exibicao condicional esta confirmada: pergunta dependente nao a
 
 A fundacao tecnica versionada para armazenar uma condicao exata por pergunta dependente foi aplicada e verificada no Supabase SaaS em 2026-09-24. O ponto que continua aberto nao e mais de infraestrutura: falta apenas definir o mapa concreto pergunta-a-pergunta.
 
-Continua aberto o ponto profissional/produto: identificar no questionario final quais campos sao condicionais e quais respostas determinam sua aplicabilidade.
+O mapa v1 candidato agora identifica 10 dependencias derivadas apenas de perguntas compostas explicitas Sim/Nao + detalhe. Todas usam igualdade exata com `Sim`.
+
+Continua aberto aceitar/ajustar esse mapa antes de trata-lo como definicao final. Nenhuma dependencia adicional deve ser inferida.
 
 ### PARCIALMENTE RESOLVIDO
 
@@ -347,9 +362,9 @@ A interface da cliente ja consegue retomar um rascunho existente e salvar respos
 A especificacao candidata da primeira Anamnese canonica esta em `ANAMNESE_CANONICAL_V1_CANDIDATE.md`.
 
 Antes da submissao final e da publicacao da primeira versao ainda precisam ser fechados:
-- mapa pergunta-a-pergunta de condicionais;
-- tipos finais de input;
-- tratamento das perguntas compostas;
+- revisar/aceitar ou ajustar o mapa candidato das 10 condicionais;
+- revisar/aceitar ou ajustar os tipos de input candidatos;
+- revisar/aceitar ou ajustar o tratamento candidato das perguntas compostas;
 - integracao do item historico de upload com o dominio de arquivos privados;
 - texto/versionamento do consentimento;
 - ordem final;
