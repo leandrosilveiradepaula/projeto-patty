@@ -282,9 +282,13 @@ As regras abaixo permanecem abertas somente onde a documentacao ainda nao regist
 
 Quais sao as formulas e regras definitivas das Fases 5 e 6 da Planilha Carb Cycle?
 
-### QUESTAO ABERTA
+### PARCIALMENTE RESOLVIDO
 
-Quais etapas, se houver, seguem apos Cutting 2: 2 Low / 1 High?
+A Patty confirmou que, apos `Cutting 2: 2 Low / 1 High`, a etapa seguinte e **Cutting 3 com protocolo linear**.
+
+Continuam abertas:
+- as regras detalhadas do Cutting 3 Linear;
+- quais etapas, se houver, seguem depois dele.
 
 ### QUESTAO ABERTA
 
