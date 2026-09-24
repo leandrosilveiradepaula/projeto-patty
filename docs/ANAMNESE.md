@@ -102,7 +102,7 @@ Os codigos `ANAM-000` a `ANAM-046` identificam itens do inventario historico, na
 
 | categoria | evidencia do formulario atual | confirmacao de produto/documentacao | incompletude e pendencias |
 | --- | --- | --- | --- |
-| Cadastro | Cidade; Telefone; Email; Instagram; Possui plano de saude? Qual? | `client_registration` existe como conceito; dados cadastrais ficam separados de dados clinicos/operacionais. | Formulario cadastral completo, duplicidade com Auth/perfil e uso de IA campo a campo ainda precisam ser definidos. |
+| Cadastro | Cidade; Telefone; Email; Instagram; Possui plano de saude? Qual? | A Patty confirmou que os dados cadastrais podem continuar aparecendo dentro da Anamnese. `client_registration` continua existindo como conceito tecnico separado; eventual valor preservado na Anamnese e snapshot historico, nao nova fonte mestre. | Formulario cadastral completo, duplicidade com Auth/perfil e uso de IA campo a campo ainda precisam ser definidos. |
 | Medidas | Ombros; Panturrilha; Peso atual; Altura. | Produto preve medidas e avaliacoes. | Definir se medidas ficam na anamnese, criam avaliacao inicial ou migram para fluxo separado. |
 | Historico de vida | Apenas conteudo de abertura/onboarding foi registrado como item historico nao-campo. | Categoria usada na estrutura de UI da anamnese. | Campos especificos ainda nao completamente identificados nas evidencias disponiveis. |
 | Historico de saude | Diabetes; transtorno metabolico; doenca cronica; cirurgia; alergia; fratura/lesao; dor intensa; cardiovascular/hipertensao; dor no peito; desmaio; libido. | Dados de saude sao sensiveis. | Lista completa, campos condicionais, obrigatoriedade, tipo final, alertas e bloqueios dependem da Patty. |
