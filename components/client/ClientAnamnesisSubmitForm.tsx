@@ -16,10 +16,12 @@ const initialState: ClientAnamnesisSubmitFormState = {
 };
 
 type ClientAnamnesisSubmitFormProps = {
+  consentText?: string | null;
   submissionId: string;
 };
 
 export function ClientAnamnesisSubmitForm({
+  consentText,
   submissionId,
 }: ClientAnamnesisSubmitFormProps) {
   const action = submitClientAnamnesis.bind(null, submissionId);
@@ -40,6 +42,17 @@ export function ClientAnamnesisSubmitForm({
         Antes de enviar, confira as respostas. Após o envio, suas respostas
         originais ficam preservadas e não poderão mais ser editadas por você.
       </p>
+      {consentText ? (
+        <label className={styles.consent}>
+          <input
+            name="consentAccepted"
+            required
+            type="checkbox"
+            value="Concordo"
+          />
+          <span>{consentText}</span>
+        </label>
+      ) : null}
       <Button loading={isPending} type="submit">
         Enviar Anamnese
       </Button>

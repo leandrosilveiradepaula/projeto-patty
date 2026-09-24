@@ -2,7 +2,7 @@
 
 Este documento registra o inventario funcional da anamnese atual da Patty e serve como base documental para migracao e especificacao futura do modulo.
 
-O formulario atual da Patty e evidencia do processo existente e referencia de migracao. A Patty confirmou em 2026-09-24 que suas perguntas devem ser mantidas como base de conteudo e reorganizadas no aplicativo, sem uma revisao ampla de perguntas nesta etapa. As evidencias historicas nao aprovam automaticamente controles do Google Forms; entretanto, decisoes posteriores documentadas ja fecharam para a v1 os tipos nao juridicos, a ordem, os 10 desdobramentos/condicionais, ANAM-044 e a submissao final. ANAM-046 continua pendente juridicamente.
+O formulario atual da Patty e evidencia do processo existente e referencia de migracao. A Patty confirmou em 2026-09-24 que suas perguntas devem ser mantidas como base de conteudo e reorganizadas no aplicativo, sem uma revisao ampla de perguntas nesta etapa. As evidencias historicas nao aprovam automaticamente controles do Google Forms; entretanto, decisoes posteriores documentadas ja fecharam para a v1 os tipos nao juridicos, a ordem, os 10 desdobramentos/condicionais, ANAM-044 e a submissao final. ANAM-046 foi definido para o MVP como checkbox obrigatorio no envio final, com texto versionado na propria definicao da Anamnese.
 
 Portanto:
 
@@ -169,11 +169,11 @@ A UI podera ser reorganizada depois da decisao de fluxo. Qualquer alteracao do c
 - Validacoes semanticas/clinicas especificas por campo nao estao aprovadas e nao devem ser inferidas.
 - Quais dados irao para IA ainda precisam ser definidos campo a campo.
 - Alertas e bloqueios de saude continuam pendentes da Patty.
-- ANAM-046 continua pendente de texto/versionamento/operacao juridica.
+- ANAM-046 esta definido para o MVP como checkbox obrigatorio no envio final, com texto versionado e valor `Concordo`.
 
 ## Pendencias para especificacao futura
 
-- Resolver ANAM-046: texto definitivo, versao, base legal aplicavel, data/hora, forma de aceite, possibilidade/regras de revogacao, retencao e relacao entre consentimento e inicio do acompanhamento.
+- Materializar a primeira `client-anamnesis`, validar o checkbox ANAM-046 e publicar explicitamente a versao canonica.
 - Definir quais campos podem ser enviados a IA e sob quais finalidades/controles.
 - Validar a classificacao estrutural definitiva dos campos que ainda permanecem provisoria.
 - Definir, com a Patty, se havera alertas ou bloqueios de saude.

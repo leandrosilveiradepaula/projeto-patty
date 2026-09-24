@@ -14,6 +14,7 @@ type CandidateField = {
   answer_type_candidate: string;
   required_when_applicable: boolean;
   options_candidate: unknown[] | null;
+  ui_control_candidate?: string;
   applicability_candidate: Applicability | null;
   product_status?: string;
 };
@@ -48,7 +49,7 @@ function loadFieldMap(): FieldMap {
 test("field map covers the full historical inventory exactly once", () => {
   const map = loadFieldMap();
 
-  assert.equal(map.status, "product_approved_except_consent_not_publishable");
+  assert.equal(map.status, "product_approved_publishable");
   assert.equal(map.canonical_form_key, "client-anamnesis");
   assert.equal(map.entries.length, 47);
   assert.equal(map.counts.source_entries, 47);
@@ -109,7 +110,7 @@ test("all conditional candidates reference another candidate field and use exact
   }
 });
 
-test("single-choice candidates always define non-empty options", () => {
+test("single-choice candidates define valid options and consent stays checkbox-only", () => {
   const map = loadFieldMap();
   const singleChoiceFields = map.entries
     .flatMap((entry) => entry.fields)
@@ -119,11 +120,16 @@ test("single-choice candidates always define non-empty options", () => {
 
   for (const field of singleChoiceFields) {
     assert.ok(Array.isArray(field.options_candidate));
-    assert.ok((field.options_candidate?.length ?? 0) >= 2);
+
+    if (field.question_key_candidate === "consent_acceptance") {
+      assert.deepEqual(field.options_candidate, ["Concordo"]);
+    } else {
+      assert.ok((field.options_candidate?.length ?? 0) >= 2);
+    }
   }
 });
 
-test("non-legal fields are product-approved while files are integrated and consent remains pending", () => {
+test("all v1 fields are product-approved while files remain integrated outside answers", () => {
   const map = loadFieldMap();
   const files = map.entries.find((entry) => entry.code === "ANAM-044");
   const consent = map.entries.find((entry) => entry.code === "ANAM-046");
@@ -133,7 +139,9 @@ test("non-legal fields are product-approved while files are integrated and conse
 
   assert.equal(files?.disposition, "files_flow_link");
   assert.equal(files?.fields.length, 0);
-  assert.equal(consent?.disposition, "consent_pending");
+  assert.equal(consent?.disposition, "include_candidate");
   assert.ok(nonLegalFields.every((field) => field.product_status === "approved_v1"));
-  assert.ok(consent?.fields.every((field) => field.product_status === "legal_pending"));
+  assert.deepEqual(consent?.fields[0]?.options_candidate, ["Concordo"]);
+  assert.equal(consent?.fields[0]?.ui_control_candidate, "consent_checkbox");
+  assert.ok(consent?.fields.every((field) => field.product_status === "approved_v1"));
 });

@@ -66,8 +66,8 @@ Nao existe bloqueio atual de deployment Vercel para o `master`.
 | MFA administrativo | SIM | SIM | Smoke AAL1/AAL2 documentado | Enforcement RLS aplicado no SaaS | Leaked Password Protection bloqueada pelo plano atual |
 | RBAC / RLS / assignments | SIM | SIM | Smokes documentados | Fundacao e fluxos administrativos principais operacionais | Novos papeis ficam fora do MVP; assignment continua regra geral para dados client-scoped |
 | Cadastro Atual | SIM como entidade separada | SIM | Fundacao testada | Backend existente | Fluxo final de edicao cadastral pela cliente/Patty ainda aberto |
-| Anamnese versionada | SIM | SIM + aplicabilidade + `single_choice` + mapa nao juridico v1 + submissao final | CI + smoke SQL pos-apply PASS | Tipos nao juridicos, 10 condicionais, ordem, ANAM-044 e envio final definidos/aplicados | ANAM-046 isolado em gate juridico objetivo (`ANAMNESE_CONSENT_GATE.md`) antes de materializar/publicar |
-| Rascunho da Anamnese | SIM | SIM para salvar/retomar/enviar dentro dos tipos v1 suportados | Smoke pos-apply PASS; E2E anterior PASS para retomada `text`; UI final passou CI/build | Migration `20260924142453` aplicada; producao Vercel do commit `6b88dce` READY | ANAM-046 e publicacao da versao canonica para E2E completo |
+| Anamnese versionada | SIM | SIM + aplicabilidade + `single_choice` + mapa v1 + submissao final + consentimento checkbox | CI + smoke SQL pos-apply PASS; checkbox em validacao | Produto v1 definido; ANAM-046 resolvido | Materializar, validar e publicar explicitamente a primeira `client-anamnesis` |
+| Rascunho da Anamnese | SIM | SIM para salvar/retomar/enviar dentro dos tipos v1 suportados | Smoke pos-apply PASS; E2E anterior PASS para retomada `text`; UI final passou CI/build | Migration `20260924142453` aplicada | Publicar a versao canonica e executar E2E completo com consentimento |
 | Obrigatoriedade da Anamnese | SIM | Regra + UI + validacao deterministica no banco | CI + smoke pos-apply PASS | `20260924142453` aplicada no SaaS; campo nao aplicavel nao bloqueia; incompleto aplicavel bloqueia | Validar E2E completo quando a primeira `client-anamnesis` for publicada |
 | Correcao pos-envio da Anamnese | SIM | SIM | E2E administrativo de producao PASS em 2026-09-24 | Schema aplicado e rota/UI publicadas e validadas em producao | Resposta original continua separada de correcoes e esclarecimentos |
 | Esclarecimentos pos-Anamnese | SIM | SIM | E2E autenticado admin -> cliente -> admin PASS no run `36053370894` | Schema e UI publicados; workflow E2E versionado no PR #155 | Lifecycle sem estado formal/prazo/notificacao continua aberto |
@@ -455,3 +455,13 @@ Foi adicionada a area administrativa `/admin/ia` para listar, em um unico lugar,
 O dashboard administrativo tambem exibe a contagem atual. A consulta usa o cliente normal do Supabase e depende das policies de RLS/assignment existentes; nao usa `service_role`.
 
 A funcionalidade e somente observacional: nao altera status, nao define timeout e nao dispara retry.
+
+## 2026-09-24 - ANAM-046 simplificado e definido
+
+### REGRA CONFIRMADA
+
+O consentimento do MVP sera um checkbox obrigatorio na finalizacao da Anamnese. Rascunho pode ser salvo sem aceite; envio final exige o checkbox.
+
+A evidencia usa a propria resposta versionada da Anamnese, sem IP, fingerprint ou tabela juridica adicional. O aceite nao libera OpenAI com dados reais.
+
+Com isso, ANAM-046 deixa de bloquear a materializacao da primeira `client-anamnesis`. A proxima etapa e materializar a v1, validar e publicar explicitamente.

@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import { getApplicableAnamnesisQuestionIds } from "@/lib/anamnesis/applicability";
+import { ANAMNESIS_QUESTION_KEYS } from "@/lib/anamnesis/question-keys";
 import {
   canEditDraftSingleChoiceAnswer,
   canEditDraftTextAnswer,
@@ -95,10 +96,21 @@ export default async function ClienteAnamneseDetailPage({
       answer_value: answer.answer_value,
     })),
   );
+  const consentQuestion = questions.find(
+    (question) =>
+      question.question_key === ANAMNESIS_QUESTION_KEYS.consentAcceptance,
+  );
   const questionsBySectionId = new Map<string, typeof questions>();
 
   for (const question of questions) {
     if (!applicableQuestionIds.has(question.id)) {
+      continue;
+    }
+
+    if (
+      submission.submitted_at === null &&
+      question.question_key === ANAMNESIS_QUESTION_KEYS.consentAcceptance
+    ) {
       continue;
     }
 
@@ -309,7 +321,10 @@ export default async function ClienteAnamneseDetailPage({
           title="Finalizar Anamnese"
         >
           <Card>
-            <ClientAnamnesisSubmitForm submissionId={submission.id} />
+            <ClientAnamnesisSubmitForm
+              consentText={consentQuestion?.label ?? null}
+              submissionId={submission.id}
+            />
           </Card>
         </Section>
       ) : null}

@@ -11,6 +11,7 @@ import {
   AnamnesisSubmissionError,
   submitCurrentClientAnamnesisDraft,
 } from "@/lib/anamnesis/submission";
+import { isAnamnesisConsentAccepted } from "@/lib/anamnesis/consent-policy";
 
 export type ClientAnamnesisDraftAnswerFormState = {
   message: string | null;
@@ -133,14 +134,34 @@ export type ClientAnamnesisSubmitFormState = {
 export async function submitClientAnamnesis(
   submissionId: string,
   _state: ClientAnamnesisSubmitFormState,
-  _formData: FormData,
+  formData: FormData,
 ): Promise<ClientAnamnesisSubmitFormState> {
   await requireRole("client");
 
   try {
-    await submitCurrentClientAnamnesisDraft(submissionId);
+    await submitCurrentClientAnamnesisDraft(submissionId, {
+      consentAccepted: isAnamnesisConsentAccepted(
+        formData.get("consentAccepted"),
+      ),
+    });
   } catch (error) {
     if (error instanceof AnamnesisSubmissionError) {
+      if (error.code === "consent_required") {
+        return {
+          message:
+            "Marque a concordância com o tratamento das informações desta Anamnese antes de enviar.",
+          success: false,
+        };
+      }
+
+      if (error.code === "consent_question_not_available") {
+        return {
+          message:
+            "O consentimento desta versão da Anamnese não está disponível. Atualize a página ou entre em contato com a Consultoria.",
+          success: false,
+        };
+      }
+
       if (error.code === "incomplete_or_invalid_answers") {
         return {
           message:

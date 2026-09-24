@@ -1766,3 +1766,24 @@ Essa camada adicional nao substitui sanitizacao/truncamento server-side; ela exi
 Executions de IA nao terminais devem ser visiveis de forma central para a Patty/admin, mas a observabilidade nao pode alterar o significado do estado persistido.
 
 A area `/admin/ia` lista apenas registros acessiveis por RLS que continuam `started` sem `completed_at`/ `failed_at`. Nenhum timeout, retry ou transicao de estado e inferido.
+
+## 2026-09-24 - ANAM-046 como checkbox obrigatorio no envio final
+
+### REGRA CONFIRMADA
+
+No MVP, o consentimento da Anamnese sera simples e integrado ao envio final.
+
+ANAM-046:
+- aparece como checkbox obrigatorio antes do envio da `client-anamnesis`;
+- usa o texto versionado: "Concordo com o tratamento das informações fornecidas nesta Anamnese, inclusive dados de saúde, para realização do meu acompanhamento pela Consultoria Corpo & Mente.";
+- persiste o valor `Concordo` na resposta versionada;
+- nao impede salvar/retomar rascunho quando ainda nao marcado;
+- bloqueia o envio final quando nao marcado;
+- nao exige IP, device fingerprint, localizacao ou metadados adicionais;
+- nao autoriza automaticamente uso de dados reais pela OpenAI.
+
+### DECISAO TECNICA
+
+Nao criar tabela juridica paralela para o MVP. O aceite usa a estrutura versionada existente de `anamnesis_questions` + `anamnesis_answers`, preservando cliente, submission, form version, pergunta, resposta e timestamps.
+
+A UI renderiza a unica opcao valida `Concordo` como checkbox, enquanto o backend revalida a definicao versionada antes de concluir a submission.
