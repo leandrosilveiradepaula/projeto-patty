@@ -183,3 +183,18 @@ Fluxo:
 Nenhum identificador interno de answer/question precisa sair do sistema: aliases efemeros sao enviados e remapeados no servidor.
 
 A chamada externa permanece feature-gated por configuracao de processamento de dados de saude. Ausencia de credencial/modelo/gate nao deve degradar para provider alternativo.
+
+
+## Midia educacional privada
+
+### DECISAO TECNICA
+
+A biblioteca educacional separa autorizacao/metadados de armazenamento binario:
+
+`Supabase (conteudo/version/release/RLS) -> boundary server-side -> Vercel Private Blob`
+
+O Supabase continua decidindo se a versao foi publicada e liberada para a cliente. O Blob nao substitui RLS nem vira fonte de verdade de negocio.
+
+O acesso futuro ao binario deve ocorrer somente depois de validar a sessao e a release no Supabase. Preferir OIDC do runtime Vercel e URL assinada curta; nao expor token read-write ao browser.
+
+Uploads grandes devem usar multipart quando necessario. Paths nao devem conter PII.
