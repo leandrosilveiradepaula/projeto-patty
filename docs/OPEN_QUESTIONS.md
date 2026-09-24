@@ -490,6 +490,7 @@ O provider do primeiro fluxo `anamnesis_review` sera OpenAI.
 
 - validar `gpt-5.6-terra` + reasoning `medium` com avaliacao sintetica antes de enviar dados reais; o model ID pode ser sobrescrito por `OPENAI_MODEL`;
 - configurar `OPENAI_API_KEY` fora do repositorio;
+- executar avaliacao sintetica representativa de `gpt-5.6-terra` / reasoning `medium`;
 - revisar e documentar os controles organizacionais de retencao/processamento aplicaveis ao caso de uso de dados de saude;
 - somente depois habilitar `OPENAI_HEALTH_DATA_PROCESSING_ENABLED=true`.
 
