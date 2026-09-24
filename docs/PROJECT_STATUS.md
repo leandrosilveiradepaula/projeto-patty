@@ -79,7 +79,7 @@ Nao existe bloqueio atual de deployment Vercel para o `master`.
 | Protocolos versionados | SIM | Lifecycle manual implementado | CI/validacoes existentes | Backend/SaaS correspondente existente | Criacao/edicao profissional completa conforme regras ainda abertas |
 | Conteudo educacional / exercicios | SIM como dominios separados | Fundacao e releases parciais | Inventario original 89/89 revalidado; segunda passada metadata-only concluida | Video da balanca aprovado, mas arquivo original tem ~117,6 MiB e excede limite de 50 MB do Supabase Free; nenhuma migracao fisica feita | Decidir infraestrutura de midia educacional; depois copiar/versionar/publicar explicitamente |
 | Metodo da Patty | PARCIALMENTE DEFINIDO | Regras matematicas confirmadas em codigo testavel | CI | Fluxo confirmado agora inclui Cutting 3 Linear apos Cutting 2: 2 Low / 1 High | Fases 5/6, regras internas/pos-Cutting 3, Bulking, Consolidacao, hidratacao, suplementacao, treino, alertas e criterios finais |
-| IA assistiva | SIM como principio e arquitetura; provider OpenAI confirmado | PARCIAL/AVANCADO | Adapter OpenAI + Structured Outputs + aliases + UI de revisao humana preparados na branch | Boundary anterior aplicada/publicada; prompt/provider novos ainda aguardam CI/apply/merge | Model ID final, credencial OpenAI e gate operacional de dados de saude |
+| IA assistiva | SIM como principio e arquitetura; provider OpenAI confirmado | PARCIAL/AVANCADO | Adapter OpenAI + Structured Outputs + aliases + UI de revisao humana preparados; default tecnico `gpt-5.6-terra` / reasoning `medium` | Boundary anterior aplicada/publicada; prompt/provider novos ainda aguardam apply/merge | Credencial OpenAI, avaliacao sintetica e gate operacional de dados de saude |
 | Failure handling de IA | SIM | SIM no schema versionado | Static gate aprovado | `20260922160058` confirmada no historico remoto do Supabase | Integrar execution real com provider sem quebrar invariantes |
 | n8n | SIM: nao usar inicialmente | N/A | N/A | Nao usado | Introduzir somente com caso concreto |
 | LangGraph | SIM: nao usar inicialmente | N/A | N/A | Nao usado | Introduzir somente se fluxo de IA justificar |
@@ -293,4 +293,4 @@ A branch atual prepara:
 - opt-in explicito da capacidade financeira;
 - nenhuma acao automatica sobre cliente/protocolo.
 
-A chamada externa continua bloqueada por padrao. Para producao ainda faltam credencial, model ID e habilitacao explicita do gate `OPENAI_HEALTH_DATA_PROCESSING_ENABLED` apos revisao de privacidade/retencao aplicavel.
+A chamada externa continua bloqueada por padrao. O default tecnico e `gpt-5.6-terra` com reasoning `medium`; para uso com dados reais ainda faltam credencial, avaliacao sintetica e habilitacao explicita do gate `OPENAI_HEALTH_DATA_PROCESSING_ENABLED` apos revisao de privacidade/retencao aplicavel.
