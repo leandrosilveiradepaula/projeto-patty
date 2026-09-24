@@ -80,7 +80,7 @@ Isso confirma que um deployment de producao voltou a ser aceito para o estado in
 | Avaliacoes e medidas | Fundacao + cadencia profissional parcial definida | SIM na fundacao | Parcial | Backend existente | Quinzenal: cintura/abdomen/quadril/peso; mensal: todas as medidas + peso + fotos; falta catalogo mensal completo, unidades e correcao |
 | Protocolos versionados | SIM | Lifecycle manual implementado | CI/validacoes existentes | Backend/SaaS correspondente existente | Criacao/edicao profissional completa conforme regras ainda abertas |
 | Conteudo educacional / exercicios | SIM como dominios separados | Fundacao e releases parciais | Inventario original 89/89 revalidado; segunda passada metadata-only concluida | 110 arquivos conhecidos; video da balanca aprovado para migracao controlada; planilha de refeicoes aprovada para revisao educacional; conteudos de formulas/manipulados confirmados no app, ainda em hold profissional | Revisar profissionalmente formulas/alegacoes e referencias comerciais; preparar versoes publicaveis separadas |
-| Metodo da Patty | PARCIALMENTE DEFINIDO | Regras matematicas confirmadas em codigo testavel | CI | Regras confirmadas documentadas | Fases 5/6, pos-Cutting 2, Bulking, Consolidacao, hidratacao, suplementacao, treino, alertas e criterios finais |
+| Metodo da Patty | PARCIALMENTE DEFINIDO | Regras matematicas confirmadas em codigo testavel | CI | Fluxo confirmado agora inclui Cutting 3 Linear apos Cutting 2: 2 Low / 1 High | Fases 5/6, regras internas/pos-Cutting 3, Bulking, Consolidacao, hidratacao, suplementacao, treino, alertas e criterios finais |
 | IA assistiva | SIM como principio e arquitetura | PARCIAL | Validador deterministico de output | Fundacao de banco existente | Provider/modelo, execution boundary, UX de revisao |
 | Failure handling de IA | SIM | SIM no schema versionado | Static gate aprovado | `20260922160058` confirmada no historico remoto do Supabase | Integrar execution real com provider sem quebrar invariantes |
 | n8n | SIM: nao usar inicialmente | N/A | N/A | Nao usado | Introduzir somente com caso concreto |
@@ -106,7 +106,7 @@ Consultar `BUSINESS_RULES.md` para detalhes.
 
 Resumo:
 - todo acompanhamento comeca pelo Reconhecimento Metabolico;
-- o fluxo principal confirmado vai ate Cutting 2: 2 Low / 1 High;
+- o fluxo principal confirmado agora segue ate Cutting 3 Linear;
 - existem regras confirmadas de refeicoes/jejum, macros/doses, grupos de proteina, Cutting Dia 1/Dia 2 e refeicao livre do Up Metabolico;
 - adesao e central e nao existe score automatico de adesao;
 - exemplos historicos individuais nao viram regra geral;
@@ -156,7 +156,7 @@ A lista autoritativa esta em `OPEN_QUESTIONS.md`.
 
 Entre as principais:
 - Fases 5 e 6 da Planilha Carb Cycle;
-- etapas posteriores ao Cutting 2;
+- regras detalhadas do Cutting 3 Linear e etapas posteriores a ele;
 - Bulking detalhado;
 - Consolidacao;
 - hidratacao;
