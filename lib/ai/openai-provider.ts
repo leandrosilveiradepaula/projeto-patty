@@ -16,6 +16,7 @@ import { startAnamnesisReviewExecutionRecord } from "@/lib/ai/anamnesis-review-e
 import { getLatestAccessibleAiPromptVersion } from "@/lib/supabase/data-access";
 
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
+export const OPENAI_DEFAULT_MODEL = "gpt-5.6-terra";
 
 export type OpenAiProviderReadiness =
   | {
@@ -27,8 +28,7 @@ export type OpenAiProviderReadiness =
       ready: false;
       reason:
         | "health_data_processing_not_enabled"
-        | "api_key_missing"
-        | "model_missing";
+        | "api_key_missing";
       provider: typeof OPENAI_PROVIDER_KEY;
     };
 
@@ -68,17 +68,9 @@ export function getOpenAiProviderReadiness(): OpenAiProviderReadiness {
     };
   }
 
-  if (!process.env.OPENAI_MODEL?.trim()) {
-    return {
-      ready: false,
-      provider: OPENAI_PROVIDER_KEY,
-      reason: "model_missing",
-    };
-  }
-
   return {
     ready: true,
-    model: process.env.OPENAI_MODEL.trim(),
+    model: process.env.OPENAI_MODEL?.trim() || OPENAI_DEFAULT_MODEL,
     provider: OPENAI_PROVIDER_KEY,
   };
 }
