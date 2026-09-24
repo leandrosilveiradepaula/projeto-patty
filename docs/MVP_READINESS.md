@@ -320,3 +320,11 @@ Estado: **IMPLEMENTADO / TESTADO NO BOUNDARY DA APLICACAO**
 A aplicacao limita a resposta bruta de falha a 128 KiB UTF-8 e a mensagem sanitizada a 1.024 code points antes da chamada ao RPC interno. Respostas truncadas passam a `text` com marcador explicito, evitando persistir JSON truncado como se fosse estruturalmente valido.
 
 Nenhuma migration foi necessaria nesta etapa porque o SaaS nao continha failure responses ou failure messages reais. O gate de envio de dados reais para OpenAI permanece fechado e independente desta mudanca.
+
+## Anamnese/IA - identidade da condicao financeira
+
+Estado: **IMPLEMENTADO / TESTAVEL**
+
+A condicao financeira usa o `question_key` estavel `financial_capacity_for_supplements`, associado a ANAM-033. A resposta continua excluida da IA por padrao e so entra mediante inclusao explicita da Patty por execution.
+
+O contrato e centralizado no runtime e verificado contra o field map v1 por teste automatizado.
