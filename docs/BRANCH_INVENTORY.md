@@ -1,6 +1,6 @@
 # Inventario de branches
 
-Data de referencia: 2026-09-23.
+Data de referencia: 2026-09-24.
 
 Este documento registra uma auditoria conservadora das branches remotas do repositorio. Ele nao autoriza exclusao automatica de branch, merge, rebase, force push ou alteracao de refs.
 
@@ -68,6 +68,19 @@ Motivos:
 - evita que um nome aparentemente historico vire fonte parcial de mudancas recentes.
 
 Branches temporarias criadas apenas para executar smoke ou diagnostico nao devem ser mergeadas. Depois de a evidencia relevante estar documentada, podem ser removidas em tarefa administrativa separada e explicitamente autorizada.
+
+## Atualizacao operacional de 2026-09-24
+
+A limpeza administrativa foi explicitamente autorizada nesta rodada, mas **nao foi executada** porque a integracao GitHub disponivel nao expoe operacao de exclusao de branch.
+
+Nao usar `update_ref`, force push ou movimento de refs como simulacao de exclusao.
+
+A verificacao do `master` mostrou `protected: false`. A API de rulesets retornou que rulesets para este repositorio privado exigem GitHub Pro ou repositorio publico, e a integracao atual nao possui permissao administrativa para configurar branch protection.
+
+Consequencia:
+- branches historicas continuam candidatas a remocao manual pelo GitHub;
+- protecao do `master` continua pendente de capacidade/plano administrativo adequado;
+- nenhuma dessas limitacoes justifica enfraquecer o fluxo de PR + CI usado atualmente.
 
 ## Limites desta auditoria
 
