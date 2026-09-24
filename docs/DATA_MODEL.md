@@ -739,3 +739,23 @@ Para `purpose_key = anamnesis_review`, o campo e obrigatorio e a submission deve
 `ai_execution_sources` continua preservando exatamente as answers efetivamente enviadas ao modelo. Para `anamnesis_review`, essas sources devem pertencer a mesma submission e so podem ser inseridas enquanto a execution estiver `started`.
 
 As transicoes `started -> completed` e `started -> failed` usam RPCs transacionais para preservar de forma atomica output/failure response e estado terminal.
+
+
+## Midia educacional
+
+### Assets de conteudo educacional
+
+`educational_content_assets` pertence a `educational_content_versions`.
+
+Campos v1:
+- `asset_key`: identifica o papel do asset dentro da versao, inicialmente `primary`;
+- `storage_provider`: v1 aceita somente `vercel_blob`;
+- `storage_path`: path opaco sem PII;
+- `content_type`;
+- `byte_size`;
+- `sha256_hex`;
+- `created_at`.
+
+Ha unicidade por `(educational_content_version_id, asset_key)` e por `(storage_provider, storage_path)`.
+
+Asset so pode ser anexado enquanto a versao estiver em draft. Depois que a versao for publicada, INSERT/UPDATE/DELETE de assets daquela versao sao bloqueados.
