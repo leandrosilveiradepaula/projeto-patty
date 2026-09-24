@@ -74,7 +74,7 @@ Estados usados:
 | Exercicios | leitura admin IMPLEMENTADA | nao | CI VALIDADO | definir exposicao a cliente e campos finais |
 | Progresso de conteudo | schema existe | fluxo nao implementado | PARCIAL | definir quem registra abertura/conclusao |
 | IA | fundacao de banco + failure handling + validador deterministico de output `anamnesis_review` IMPLEMENTADOS | provider real e boundary de execution ainda nao integrados | migration `20260922160058_ai_execution_failure_handling.sql` confirmada no historico remoto; contrato de output coberto por testes determinísticos | definir provider/modelo, prompt versionado e boundary server-side de execution |
-| Drive | INVENTARIADO + TRIADO POR METADADOS | nenhuma migracao fisica | 89 itens; 16 grupos de possiveis duplicidades; 9 videos com titulo generico; direitos ainda nao revisados | revisar direitos/taxonomia e escolher lote inicial |
+| Drive | INVENTARIADO + revisao controlada iniciada | nenhuma migracao fisica | video da balanca aprovado pela Patty; arquivo original ~117,6 MiB excede limite atual de 50 MB do Supabase Free | decidir infraestrutura de midia e somente depois migrar/versionar o primeiro item |
 | Regras deterministicas do metodo | IMPLEMENTADO PARCIAL | sem automacao de protocolo | CI VALIDADO | ampliar somente com formulas exatas confirmadas/documentadas |
 | CI | IMPLEMENTADO | automatico no GitHub Actions + smoke E2E manual de arquivos privados | `npm ci` + audit high/critical de producao + typecheck + suites deterministicas + `test:security-boundaries` + build; core Actions em v7; E2E de producao PASS nos fluxos ja estabilizados | ampliar E2E somente para fluxos estaveis e sinteticos |
 
@@ -196,7 +196,7 @@ O Drive possui manifesto inicial com 89 arquivos claramente nao client-scoped. N
 
 Uma triagem somente por metadados cobre todos os itens em `drive_content_triage.json`. Ela identificou 16 grupos de possiveis duplicidades por nome normalizado entre as pastas historicas de exercicios e 9 videos com nomes genericos que exigem inspecao do conteudo antes de receber titulo final. As categorias registradas sao hipoteses, os rotulos historicos "masculino/feminino" nao sao regra de produto e todos os itens continuam com direitos nao revisados e migracao/publicacao nao autorizadas.
 
-Antes da importacao e necessario resolver direitos/licenciamento, taxonomia e lote inicial.
+A Patty ja aprovou o video de uso da balanca como primeiro item elegivel, mas sua migracao fisica esta bloqueada pela infraestrutura atual: o arquivo original possui ~117,6 MiB e excede o limite de 50 MB do Supabase Free. O bucket `client-private` nao deve ser reutilizado para conteudo educacional. E necessario decidir infraestrutura de midia antes de criar o fluxo fisico de importacao.
 
 A liberacao manual ja implementada considera elegivel somente uma versao publicada ainda nao liberada para a mesma cliente. A UI e a server action compartilham a mesma guarda deterministica, enquanto RLS e unicidade no banco continuam sendo a autoridade final.
 

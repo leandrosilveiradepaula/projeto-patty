@@ -411,9 +411,22 @@ Quem pode registrar abertura e conclusao de conteudo, o que caracteriza `complet
 
 Quais regras futuras poderao justificar liberacao de conteudo por fase, sem criar automacao antes de validacao da Patty?
 
+### BLOQUEIO TECNICO IDENTIFICADO
+
+O primeiro video aprovado pela Patty, `Como utilizar a BALANCA DE ALIMENTOS`, possui 123.262.796 bytes (~117,6 MiB).
+
+O projeto Supabase atual esta no plano Free, cujo limite global de upload do Storage e 50 MB. O unico bucket existente hoje e `client-private`, destinado a arquivos privados de clientes e que nao deve ser reutilizado para a biblioteca educacional.
+
+Portanto, a migracao fisica desse video esta bloqueada ate decisao tecnica propria entre alternativas como:
+- upgrade do Supabase para um plano que suporte o tamanho original;
+- armazenamento de midia educacional em outro servico apropriado;
+- criacao de uma versao de midia reduzida/transcodificada, somente se isso for explicitamente aprovado como politica de conteudo.
+
+Nao criar bucket de conteudo nem alterar o arquivo original apenas para contornar o limite.
+
 ### QUESTAO ABERTA
 
-Como ocorrera a migracao fisica do Google Drive, incluindo politica de arquivos educacionais e referencias de origem internas?
+Como ocorrera a migracao fisica do Google Drive, incluindo politica de arquivos educacionais, referencias de origem internas e a escolha de infraestrutura de midia para arquivos acima do limite atual do Supabase Free?
 
 ### QUESTAO ABERTA
 

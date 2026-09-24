@@ -36,6 +36,12 @@ O video `Como utilizar a BALANCA DE ALIMENTOS` foi confirmado pela Patty como ma
 
 Ele e o primeiro conteudo atualmente elegivel para migracao controlada. Elegivel nao significa migrado ou publicado: o arquivo ainda precisa passar pela operacao tecnica de copia para o aplicativo, registro/versionamento e liberacao explicita.
 
+### BLOQUEIO TECNICO DE MIDIA
+
+O arquivo aprovado da balanca possui 123.262.796 bytes (~117,6 MiB). O Supabase atual esta no plano Free e nao aceita uploads acima de 50 MB. Alem disso, o bucket `client-private` e exclusivo do dominio de arquivos privados de clientes e nao deve ser reaproveitado para conteudo educacional.
+
+Assim, a fundacao de midia educacional nao sera criada apenas para aparentar progresso enquanto o primeiro arquivo aprovado nao cabe na infraestrutura atual. Antes da migracao fisica, deve ser escolhida a estrategia de armazenamento de midia.
+
 A Patty confirmou tambem que a planilha historica `Sugestao de refeicoes` deve ser transformada em **conteudo educacional revisado** para clientes. O arquivo historico pode servir como fonte editorial, mas a versao publicada no aplicativo nao deve cristalizar seis refeicoes como regra, porque o metodo confirmado nao possui numero fixo de refeicoes.
 
 Conteudos sobre formulas/manipulados tambem foram confirmados pela Patty como parte do aplicativo. O arquivo historico `Fórmulas.pptx` nao esta autorizado para publicacao direta: ele deve passar por revisao profissional completa, atualizacao de alegacoes, validacao de referencias comerciais e confirmacao de direitos antes de gerar uma versao publicavel.
