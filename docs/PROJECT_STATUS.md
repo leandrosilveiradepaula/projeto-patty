@@ -189,11 +189,11 @@ Ordem operacional sugerida, sujeita a revalidacao do HEAD:
 
 1. concluir aplicabilidade/condicionais e organizacao final da Anamnese e publicar a primeira versao canonica `client-anamnesis`;
 2. validar o inicio de novo rascunho contra essa versao e concluir fluxo de submissao final da Anamnese;
-4. resolver infraestrutura do email real de convite;
-5. continuar integracao UI <-> backend real;
-6. preparar execution real de IA com provider/modelo explicitamente definidos;
-7. decidir a infraestrutura de midia educacional para arquivos acima de 50 MB; depois preparar a migracao controlada do video aprovado da balanca;
-8. ampliar automacao de alimentacao/treino somente depois das regras profissionais correspondentes estarem documentadas.
+3. resolver infraestrutura do email real de convite;
+4. continuar integracao UI <-> backend real;
+5. preparar execution real de IA com provider/modelo explicitamente definidos;
+6. decidir a infraestrutura de midia educacional para arquivos acima de 50 MB; depois preparar a migracao controlada do video aprovado da balanca;
+7. ampliar automacao de alimentacao/treino somente depois das regras profissionais correspondentes estarem documentadas.
 
 ## Regra de manutencao deste arquivo
 
