@@ -104,38 +104,33 @@ A reorganizacao pode alterar apresentacao, agrupamento, tipos de input e logica 
 
 Todos os campos da Anamnese sao obrigatorios para permitir o envio final. Rascunhos podem permanecer incompletos ate a cliente finalizar o preenchimento.
 
-### PARCIALMENTE RESOLVIDO
+### DECISAO DE PRODUTO
 
-O mapa v1 candidato propoe tipos para todos os campos:
+Os tipos nao juridicos da v1 estao definidos no mapa aceito:
 - `text` para respostas abertas;
-- `single_choice` para opcoes observadas ou perguntas claramente Sim/Nao;
-- controle especifico de consentimento ainda pendente.
+- `single_choice` para opcoes observadas ou perguntas explicitamente binarias aprovadas no mapa.
 
-Esses tipos sao decisoes de produto candidatas e precisam de revisao final antes da publicacao.
+ANAM-046 permanece fora desse fechamento e exige controle proprio depois da definicao juridica.
 
-### PARCIALMENTE RESOLVIDO
+### DECISAO DE PRODUTO
 
-O mapa v1 candidato propoe:
-- separar 10 perguntas compostas explicitas do formato Sim/Nao + detalhe;
-- manter juntas, por enquanto, as compostas abertas de sono e objetivos para reduzir alteracao sem necessidade.
+A v1 separa exatamente as 10 perguntas compostas explicitas do formato Sim/Nao + detalhe documentadas no mapa. ANAM-025 e ANAM-043 permanecem juntas.
 
-A proposta ainda precisa ser aceita ou ajustada antes da versao publicada.
+Nenhuma separacao adicional deve ser inferida sem nova decisao.
 
-### PARCIALMENTE RESOLVIDO
+### DECISAO DE PRODUTO E ESTADO APLICADO
 
 A regra geral de exibicao condicional esta confirmada: pergunta dependente nao aplicavel fica oculta e nao obrigatoria.
 
-A fundacao tecnica versionada para armazenar uma condicao exata por pergunta dependente foi aplicada e verificada no Supabase SaaS em 2026-09-24. O ponto que continua aberto nao e mais de infraestrutura: falta apenas definir o mapa concreto pergunta-a-pergunta.
+A fundacao tecnica versionada esta aplicada no Supabase SaaS e a v1 possui exatamente 10 dependencias aprovadas no mapa, todas derivadas das perguntas compostas explicitas Sim/Nao + detalhe e ativadas por igualdade JSON exata com `"Sim"`.
 
-O mapa v1 candidato agora identifica 10 dependencias derivadas apenas de perguntas compostas explicitas Sim/Nao + detalhe. Todas usam igualdade exata com `Sim`.
+A UI e a validacao de envio final usam a aplicabilidade versionada. Nenhuma dependencia adicional deve ser inferida.
 
-Continua aberto aceitar/ajustar esse mapa antes de trata-lo como definicao final. Nenhuma dependencia adicional deve ser inferida.
+### DECISAO DE PRODUTO
 
-### PARCIALMENTE RESOLVIDO
+A ordem e o agrupamento descritos em `ANAMNESE_CANONICAL_V1_CANDIDATE.md` estao aceitos para a v1, com ANAM-010 em Cadastro.
 
-`ANAMNESE_CANONICAL_V1_CANDIDATE.md` propoe um agrupamento candidato baseado exclusivamente nas categorias e decisoes ja documentadas, sem alterar o sentido profissional das perguntas.
-
-Ainda falta validar a ordem final dentro de cada secao e fechar os pontos bloqueadores listados na especificacao candidata.
+O nome do arquivo preserva o sufixo `CANDIDATE` por historico; o conteudo nao juridico correspondente ja foi promovido a decisao de produto. ANAM-046 continua sendo o bloqueio de publicacao.
 
 ### FATO JA CONFIRMADO
 
@@ -271,13 +266,11 @@ Qual e a origem da percepcao de aderencia e quais partes do acompanhamento profi
 
 ### PARCIALMENTE RESOLVIDO
 
-A Patty confirmou a regra geral de aplicabilidade: quando uma pergunta nao se aplica a cliente, as perguntas dependentes devem ficar ocultas e deixam de ser obrigatorias.
+A Patty confirmou a regra geral de aplicabilidade e o mapa v1 de 10 dependencias esta definido, versionado e consumido pela UI/validacao de envio.
 
 A obrigatoriedade geral permanece: todos os campos aplicaveis da versao devem estar preenchidos no envio final.
 
-Ainda falta mapear, pergunta a pergunta, quais dependencias existem e quais respostas ativam ou desativam cada campo condicional. A fundacao de armazenamento nao deve ser confundida com esse mapa.
-
-O contrato futuro de `missing_answer` devera usar `target_question_id` para a pergunta ausente e permitir `source_answer_ids` vazio; o target devera pertencer a mesma `form_version_id` da submission. O finding so podera considerar ausencia quando a pergunta estiver aplicavel segundo o mapa condicional da versao.
+O contrato futuro de `missing_answer` devera usar `target_question_id` para a pergunta ausente e permitir `source_answer_ids` vazio; o target devera pertencer a mesma `form_version_id` da submission. O finding so podera considerar ausencia quando a pergunta estiver aplicavel segundo a definicao versionada. O mapa nao e mais bloqueio; a implementacao do finding/IA continua separada.
 
 ### QUESTAO ABERTA
 
@@ -351,11 +344,11 @@ Quais regras de comportamento ainda precisam ser formalizadas alem do principio 
 
 Quem pode criar ou alterar o Cadastro Atual e por qual fluxo controlado?
 
-### PARCIALMENTE RESOLVIDO
+### FATO RESOLVIDO
 
-O salvamento de rascunho e as permissoes minimas de escrita estao aplicados no SaaS: um rascunho ativo por cliente/versao publicada e escrita somente da propria submission/respostas enquanto nao enviada.
+O salvamento de rascunho, as permissoes minimas de escrita e a submissao final estao aplicados no SaaS.
 
-A interface da cliente ja consegue retomar rascunho e salvar respostas `text` e `single_choice`. A UI aplica genericamente a aplicabilidade versionada. As 10 dependencias v1 estao aceitas. A v1 usa salvamento explicito por resposta; autosave nao e requisito. A submissao final ainda nao esta implementada.
+A cliente pode retomar rascunho, salvar respostas `text` e `single_choice`, receber a visibilidade condicional versionada e enviar explicitamente a Anamnese. O banco revalida todos os campos obrigatorios aplicaveis antes de aceitar o envio. Autosave nao e requisito da v1.
 
 ### QUESTAO ABERTA
 

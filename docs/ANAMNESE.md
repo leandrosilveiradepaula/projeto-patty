@@ -2,7 +2,7 @@
 
 Este documento registra o inventario funcional da anamnese atual da Patty e serve como base documental para migracao e especificacao futura do modulo.
 
-O formulario atual da Patty e evidencia do processo existente e referencia de migracao. A Patty confirmou em 2026-09-24 que suas perguntas devem ser mantidas como base de conteudo e reorganizadas no aplicativo, sem uma revisao ampla de perguntas nesta etapa. Isso nao torna automaticamente aprovados os tipos de input, agrupamento, ordem, validacoes ou condicionalidade historicos.
+O formulario atual da Patty e evidencia do processo existente e referencia de migracao. A Patty confirmou em 2026-09-24 que suas perguntas devem ser mantidas como base de conteudo e reorganizadas no aplicativo, sem uma revisao ampla de perguntas nesta etapa. As evidencias historicas nao aprovam automaticamente controles do Google Forms; entretanto, decisoes posteriores documentadas ja fecharam para a v1 os tipos nao juridicos, a ordem, os 10 desdobramentos/condicionais, ANAM-044 e a submissao final. ANAM-046 continua pendente juridicamente.
 
 Portanto:
 
@@ -46,7 +46,7 @@ Foram analisadas evidencias do formulario atual armazenadas no acervo do projeto
 
 ## Inventario dos itens observados
 
-Os codigos `ANAM-000` a `ANAM-046` identificam itens do inventario historico, nao campos finais do aplicativo. Perguntas compostas observadas no formulario atual continuam marcadas como compostas e dependem de decisao futura antes de qualquer normalizacao em campos separados.
+Os codigos `ANAM-000` a `ANAM-046` identificam itens do inventario historico, nao campos finais do aplicativo. A coluna `decisao_novo_app` preserva o estado do inventario no momento do levantamento e nao substitui o mapa v1 posterior. O estado atual de produto esta em `ANAMNESE_FIELD_MAP_V1_CANDIDATE.md`, `anamnesis_field_map_v1_candidate.json` e `DECISIONS.md`.
 
 | codigo_provisorio | texto_formulario_atual | tipo_observado | opcoes_observadas | obrigatorio_no_formulario_atual | origem_evidencia | categoria_provisoria | sensibilidade | uso_ia | decisao_novo_app | observacoes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -139,11 +139,11 @@ Os codigos `ANAM-000` a `ANAM-046` identificam itens do inventario historico, na
 
 ## Hipoteses e classificacoes provisorias
 
-- Algumas perguntas compostas podem vir a ser separadas em campos especificos, mas isso ainda exige decisao.
+- A v1 separa somente as 10 perguntas compostas explicitas aprovadas no mapa; nenhuma separacao adicional deve ser inferida.
 - `Por que optou por este plano?` pode se relacionar a objetivos, motivacao, cadastro comercial ou acompanhamento.
 - A pergunta sobre condicao financeira para suplementos/medicamentos ainda nao possui categoria definitiva.
 - A pergunta de consumo diario de agua foi classificada provisoriamente em Rotina, sem criar regra de hidratacao.
-- Os uploads podem corresponder a fotos, exames ou documentos, mas a finalidade de cada arquivo ainda precisa ser identificada.
+- ANAM-044 foi resolvido como orientacao/link para o dominio privado de arquivos; classificacao de cada arquivo permanece no proprio dominio por `file_kind`.
 
 ## Prototipo atual da UI
 
@@ -162,33 +162,23 @@ A UI podera ser reorganizada depois da decisao de fluxo. Qualquer alteracao do c
 
 - As capturas disponiveis sao parciais.
 - Paginas podem possuir campos acima ou abaixo dos trechos capturados.
-- Nao ha evidencia suficiente para declarar que a lista e completa.
-- Nem todos os campos podem ser classificados definitivamente nas 15 categorias.
-- A marcacao de obrigatoriedade do Google Forms historico nao define a regra do app. A regra atual confirmada e: todos os campos aplicaveis da versao da Anamnese sao obrigatorios para o envio final; rascunhos podem permanecer incompletos.
-- Tipos finais de input nao estao aprovados.
-- Validacoes especificas por campo nao estao aprovadas.
-- A Patty confirmou a regra geral de condicionalidade: campos dependentes nao aplicaveis ficam ocultos e deixam de ser obrigatorios. O mapa pergunta-a-pergunta de dependencias ainda precisa ser fechado.
-- Ordem final nao esta aprovada.
-- Regras de visibilidade nao estao aprovadas.
-- Quais dados irao para IA precisam ser definidos campo a campo.
+- O inventario historico nao prova que fontes externas inexistentes nao contenham outros itens.
+- Nem todos os campos estao classificados definitivamente nas 15 categorias estruturais.
+- A marcacao de obrigatoriedade do Google Forms historico nao define a regra do app. A regra atual confirmada e: todos os campos aplicaveis da versao sao obrigatorios para o envio final; rascunhos podem permanecer incompletos.
+- Tipos nao juridicos, ordem, visibilidade e as 10 dependencias da v1 ja estao definidos no mapa de produto.
+- Validacoes semanticas/clinicas especificas por campo nao estao aprovadas e nao devem ser inferidas.
+- Quais dados irao para IA ainda precisam ser definidos campo a campo.
 - Alertas e bloqueios de saude continuam pendentes da Patty.
-- O mapa completo dos arquivos solicitados na pagina de upload ainda nao esta identificado.
+- ANAM-046 continua pendente de texto/versionamento/operacao juridica.
 
 ## Pendencias para especificacao futura
 
-- Confirmar o mapa completo de campos do formulario atual.
-- Formalizar quais perguntas sao condicionais e suas regras de aplicabilidade; a obrigatoriedade geral para envio final ja esta confirmada para todos os campos aplicaveis.
-- Definir tipo final de input por campo.
-- Decidir se perguntas compostas permanecem juntas ou sao normalizadas em campos separados.
-- Mapear campos condicionais.
-- Definir ordem e agrupamento final.
-- Definir uploads: tipo, tamanho, quantidade, substituicao e exclusao.
-- Separar finalidade de foto, exame e documento.
-- Definir consentimento: texto definitivo, versao, base legal aplicavel, data/hora, forma de aceite, possibilidade/regras de revogacao, retencao e relacao entre consentimento e inicio do acompanhamento.
-- Definir quais campos podem ser enviados a IA.
-- Validar classificacao de cada campo.
-- Definir, com Patty, se havera alertas ou bloqueios de saude.
-- Definir em quais fluxos dados cadastrais precisarao coexistir entre Auth, cadastro da cliente ou snapshot de anamnese, especialmente Email.
+- Resolver ANAM-046: texto definitivo, versao, base legal aplicavel, data/hora, forma de aceite, possibilidade/regras de revogacao, retencao e relacao entre consentimento e inicio do acompanhamento.
+- Definir quais campos podem ser enviados a IA e sob quais finalidades/controles.
+- Validar a classificacao estrutural definitiva dos campos que ainda permanecem provisoria.
+- Definir, com a Patty, se havera alertas ou bloqueios de saude.
+- Definir a representacao de eventual snapshot cadastral historico e os fluxos em que dados cadastrais coexistem entre Auth, Cadastro Atual e Anamnese, especialmente Email.
+- Completar o catalogo/operacao de Avaliacoes e Medidas fora da Anamnese, sem reintroduzir as quatro medidas excluidas no formulario canonico.
 
 ## Revisao por IA da Anamnese
 
@@ -204,6 +194,6 @@ Todos os campos aplicaveis da versao da Anamnese sao obrigatorios para o envio f
 
 A Patty confirmou a regra geral para perguntas condicionais: quando uma pergunta nao se aplica a cliente, seus campos dependentes devem ficar ocultos e deixam de ser obrigatorios.
 
-`missing_answer` permanece bloqueado ate o mapa pergunta-a-pergunta de aplicabilidade estar documentado. Pergunta condicional nao aplicavel nao pode ser tratada automaticamente como ausencia.
+`missing_answer` nao esta mais bloqueado por falta de mapa de aplicabilidade: a v1 possui definicao versionada para as 10 dependencias aprovadas. Qualquer implementacao futura desse finding deve consultar a aplicabilidade da versao e nunca tratar campo oculto como ausente. Pergunta condicional nao aplicavel nao pode ser tratada automaticamente como ausencia.
 
 Questionario/schema existente nao equivale a questionario final validado pela Patty.
