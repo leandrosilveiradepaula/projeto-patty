@@ -1,5 +1,25 @@
 # Decisoes
 
+## 2026-09-24 - Cadencia confirmada de avaliacoes corporais
+
+### REGRA CONFIRMADA PELA PATTY
+
+A Patty confirmou a seguinte rotina de avaliacao:
+
+- **quinzenalmente**: cintura, abdomen, quadril e peso;
+- **mensalmente**: avaliacao completa com todas as medidas, peso e fotos.
+
+### LIMITE
+
+Ainda nao foram definidos/documentados nesta resposta:
+- quais campos compoem exatamente "todas as medidas" da avaliacao mensal;
+- as unidades de cada medida;
+- se a avaliacao mensal substitui ou acumula com a ocorrencia quinzenal quando coincidirem;
+- o fluxo auditavel de correcao historica.
+
+Esses pontos permanecem abertos e nao devem ser inferidos.
+
+
 ## 2026-09-24 - Medidas corporais separadas da Anamnese
 
 ### REGRA CONFIRMADA PELA PATTY
