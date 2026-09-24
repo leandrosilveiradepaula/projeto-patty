@@ -1691,3 +1691,17 @@ A biblioteca educacional deve ser separada da biblioteca de exercicios.
 ### DECISAO CONFIRMADA
 
 O aplicativo substituira gradualmente o Drive para os clientes.
+
+## 2026-09-24 - Primeiro lote controlado de migracao de midia educacional
+
+### FATO OPERACIONAL
+
+Sem alterar a decisao tecnica de usar Vercel Private Blob, foi preparado um manifesto machine-readable para a primeira migracao controlada.
+
+O lote inclui exclusivamente o video `MovaviClips_Video_20220217-143151.mp4`, ja confirmado pela Patty como material da Consultoria, atual e autorizado para disponibilizacao a clientes.
+
+O manifesto nao cria store, nao baixa nem envia o arquivo, nao cria conteudo/versao/asset no Supabase, nao publica e nao libera para cliente. Ele congela apenas a identidade da fonte e a ordem operacional ja decidida, com verificacao posterior obrigatoria de MIME, tamanho e SHA-256.
+
+### FATO DE CAPACIDADE DA SESSAO
+
+A integracao Vercel disponivel na sessao de 2026-09-24 nao expoe operacoes de Blob Storage. A criacao/conexao do store privado permanece uma pendencia operacional externa a esta implementacao. Nenhum token de Storage deve ser enviado por chat ou armazenado no repositorio.
