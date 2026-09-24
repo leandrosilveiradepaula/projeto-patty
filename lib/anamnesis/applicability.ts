@@ -1,5 +1,10 @@
 import type { Json } from "@/lib/supabase/database.types";
 
+export type AnamnesisApplicabilityRule = {
+  sourceQuestionId: string;
+  expectedAnswer: unknown;
+};
+
 export type AnamnesisQuestionApplicabilityDefinition = {
   applicability_expected_answer: Json | null;
   applicability_source_question_id: string | null;
@@ -11,54 +16,37 @@ export type AnamnesisAnswerForApplicability = {
   question_id: string;
 };
 
-function isJsonRecord(value: Json): value is { [key: string]: Json | undefined } {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
+function stableJson(value: unknown): string {
+  if (value === null || typeof value !== "object") {
+    return JSON.stringify(value);
+  }
+
+  if (Array.isArray(value)) {
+    return `[${value.map((item) => stableJson(item)).join(",")}]`;
+  }
+
+  const entries = Object.entries(value as Record<string, unknown>)
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([key, item]) => `${JSON.stringify(key)}:${stableJson(item)}`);
+
+  return `{${entries.join(",")}}`;
 }
 
-export function areJsonValuesEqual(left: Json, right: Json): boolean {
-  if (left === right) {
+export function isAnamnesisQuestionApplicable(
+  rule: AnamnesisApplicabilityRule | null,
+  answersByQuestionId: ReadonlyMap<string, unknown>,
+): boolean {
+  if (!rule) {
     return true;
   }
 
-  if (Array.isArray(left) || Array.isArray(right)) {
-    if (!Array.isArray(left) || !Array.isArray(right)) {
-      return false;
-    }
-
-    return (
-      left.length === right.length &&
-      left.every((value, index) => areJsonValuesEqual(value, right[index] as Json))
-    );
+  if (!answersByQuestionId.has(rule.sourceQuestionId)) {
+    return false;
   }
 
-  if (isJsonRecord(left) || isJsonRecord(right)) {
-    if (!isJsonRecord(left) || !isJsonRecord(right)) {
-      return false;
-    }
+  const actualAnswer = answersByQuestionId.get(rule.sourceQuestionId);
 
-    const leftKeys = Object.keys(left).sort();
-    const rightKeys = Object.keys(right).sort();
-
-    if (
-      leftKeys.length !== rightKeys.length ||
-      !leftKeys.every((key, index) => key === rightKeys[index])
-    ) {
-      return false;
-    }
-
-    return leftKeys.every((key) => {
-      const leftValue = left[key];
-      const rightValue = right[key];
-
-      return (
-        leftValue !== undefined &&
-        rightValue !== undefined &&
-        areJsonValuesEqual(leftValue, rightValue)
-      );
-    });
-  }
-
-  return false;
+  return stableJson(actualAnswer) === stableJson(rule.expectedAnswer);
 }
 
 export function getApplicableAnamnesisQuestionIds(
@@ -101,11 +89,15 @@ export function getApplicableAnamnesisQuestionIds(
     visiting.add(questionId);
 
     const sourceApplicable = isApplicable(sourceQuestionId);
-    const sourceAnswer = answersByQuestionId.get(sourceQuestionId);
     const applicable =
       sourceApplicable &&
-      sourceAnswer !== undefined &&
-      areJsonValuesEqual(sourceAnswer, expectedAnswer);
+      isAnamnesisQuestionApplicable(
+        {
+          sourceQuestionId,
+          expectedAnswer,
+        },
+        answersByQuestionId,
+      );
 
     visiting.delete(questionId);
     memo.set(questionId, applicable);

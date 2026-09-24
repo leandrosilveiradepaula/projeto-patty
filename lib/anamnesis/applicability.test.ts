@@ -2,22 +2,69 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
-  areJsonValuesEqual,
   getApplicableAnamnesisQuestionIds,
+  isAnamnesisQuestionApplicable,
 } from "./applicability.ts";
 
-test("compares JSON values with jsonb-style object key order independence", () => {
-  assert.equal(areJsonValuesEqual("Sim", "Sim"), true);
-  assert.equal(areJsonValuesEqual("Sim", "Nao"), false);
-  assert.equal(areJsonValuesEqual([1, "a"], [1, "a"]), true);
-  assert.equal(areJsonValuesEqual([1, "a"], ["a", 1]), false);
+test("question without applicability rule is applicable", () => {
+  assert.equal(isAnamnesisQuestionApplicable(null, new Map()), true);
+});
+
+test("conditional question is not applicable before source answer exists", () => {
   assert.equal(
-    areJsonValuesEqual({ b: 2, a: { x: true } }, { a: { x: true }, b: 2 }),
+    isAnamnesisQuestionApplicable(
+      { sourceQuestionId: "q-source", expectedAnswer: "Sim" },
+      new Map(),
+    ),
+    false,
+  );
+});
+
+test("conditional question is applicable on exact scalar JSON match", () => {
+  assert.equal(
+    isAnamnesisQuestionApplicable(
+      { sourceQuestionId: "q-source", expectedAnswer: "Sim" },
+      new Map([["q-source", "Sim"]]),
+    ),
+    true,
+  );
+
+  assert.equal(
+    isAnamnesisQuestionApplicable(
+      { sourceQuestionId: "q-source", expectedAnswer: "Sim" },
+      new Map([["q-source", "sim"]]),
+    ),
+    false,
+  );
+});
+
+test("object answers compare structurally instead of by property insertion order", () => {
+  assert.equal(
+    isAnamnesisQuestionApplicable(
+      {
+        sourceQuestionId: "q-source",
+        expectedAnswer: { selected: true, note: "x" },
+      },
+      new Map([["q-source", { note: "x", selected: true }]]),
+    ),
     true,
   );
 });
 
-test("keeps unconditional questions applicable", () => {
+test("array order remains significant", () => {
+  assert.equal(
+    isAnamnesisQuestionApplicable(
+      {
+        sourceQuestionId: "q-source",
+        expectedAnswer: ["A", "B"],
+      },
+      new Map([["q-source", ["B", "A"]]]),
+    ),
+    false,
+  );
+});
+
+test("unconditional questions remain visible in the version-level evaluator", () => {
   const applicable = getApplicableAnamnesisQuestionIds(
     [
       {
@@ -32,7 +79,7 @@ test("keeps unconditional questions applicable", () => {
   assert.deepEqual([...applicable], ["base"]);
 });
 
-test("shows a dependent question only when its applicable source answer matches", () => {
+test("dependent visibility follows the persisted source answer", () => {
   const questions = [
     {
       id: "base",
@@ -46,10 +93,7 @@ test("shows a dependent question only when its applicable source answer matches"
     },
   ];
 
-  assert.deepEqual(
-    [...getApplicableAnamnesisQuestionIds(questions, [])],
-    ["base"],
-  );
+  assert.deepEqual([...getApplicableAnamnesisQuestionIds(questions, [])], ["base"]);
   assert.deepEqual(
     [
       ...getApplicableAnamnesisQuestionIds(questions, [
@@ -68,7 +112,7 @@ test("shows a dependent question only when its applicable source answer matches"
   );
 });
 
-test("requires the source question itself to remain applicable", () => {
+test("a dependent requires its source question to remain applicable", () => {
   const questions = [
     {
       id: "root",
@@ -95,7 +139,7 @@ test("requires the source question itself to remain applicable", () => {
   assert.deepEqual([...applicable], ["root"]);
 });
 
-test("fails closed for malformed pairs, missing sources and cycles", () => {
+test("malformed pairs, missing sources and cycles fail closed", () => {
   const applicable = getApplicableAnamnesisQuestionIds(
     [
       {
