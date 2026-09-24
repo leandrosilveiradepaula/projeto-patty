@@ -276,7 +276,9 @@ A Patty confirmou a regra geral de aplicabilidade e o mapa v1 de 10 dependencias
 
 A obrigatoriedade geral permanece: todos os campos aplicaveis da versao devem estar preenchidos no envio final.
 
-O contrato futuro de `missing_answer` devera usar `target_question_id` para a pergunta ausente e permitir `source_answer_ids` vazio; o target devera pertencer a mesma `form_version_id` da submission. O finding so podera considerar ausencia quando a pergunta estiver aplicavel segundo a definicao versionada. O mapa nao e mais bloqueio; a implementacao do finding/IA continua separada.
+O contrato deterministico de `missing_answer` esta implementado no validador: usa `target_question_id`, permite `source_answer_ids` vazio e exige que o target esteja na allowlist de perguntas previamente verificadas como aplicaveis e sem resposta para a mesma execution/submission.
+
+Continuam separados e abertos: a montagem server-side dessa allowlist no futuro execution boundary, o provider/modelo e a UX humana dos findings.
 
 ### QUESTAO ABERTA
 
