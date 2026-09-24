@@ -66,7 +66,7 @@ Nao existe bloqueio atual de deployment Vercel para o `master`.
 | --- | --- | --- | --- | --- | --- |
 | Identidade Auth / Profile / Client | SIM | SIM | SIM em fluxos sinteticos relevantes | Fundacao operacional | Preservar separacao entre Auth, profile, client, Cadastro Atual e Anamnese |
 | Login | SIM | SIM | E2E sintetico de login posterior aprovado | Email + senha | Recuperacao de acesso ainda precisa de regras operacionais completas |
-| Onboarding por convite | SIM | SIM | E2E sintetico de ativacao aprovado | PARCIAL | Email real de convite depende de upgrade Supabase ou SMTP customizado; expiracao/reenvio continuam abertos |
+| Onboarding por convite | SIM | SIM | E2E sintetico de ativacao aprovado | PARCIAL | Gmail da Patty definido como Custom SMTP do MVP; falta configurar App Password/SMTP/template e validar entrega real; expiracao/reenvio continuam abertos |
 | MFA administrativo | SIM | SIM | Smoke AAL1/AAL2 documentado | Enforcement RLS aplicado no SaaS | Leaked Password Protection bloqueada pelo plano atual |
 | RBAC / RLS / assignments | SIM | SIM | Smokes documentados | Fundacao e fluxos administrativos principais operacionais | Novos papeis ficam fora do MVP; assignment continua regra geral para dados client-scoped |
 | Cadastro Atual | SIM como entidade separada | SIM | Fundacao testada | Backend existente | Fluxo final de edicao cadastral pela cliente/Patty ainda aberto |
@@ -305,3 +305,20 @@ O PR #151 foi mergeado no commit `3412c4f` e o deployment correspondente ficou `
 A chamada real continua desabilitada sem `OPENAI_API_KEY` e sem `OPENAI_HEALTH_DATA_PROCESSING_ENABLED=true`.
 
 Foi criado `docs/OPENAI_HEALTH_DATA_GATE.md` como checklist operacional antes de dados reais e `npm run eval:ai:openai` como avaliacao do modelo usando somente fixtures sinteticas.
+
+
+## Gmail SMTP do MVP
+
+A infraestrutura de email real do onboarding foi definida: Gmail pessoal da Patty via Custom SMTP do Supabase Auth.
+
+O codigo de convite existente ja usa `admin.auth.admin.inviteUserByEmail`, portanto nao exige mudanca de provider no codigo. O envio passara automaticamente pelo Gmail quando o Custom SMTP estiver configurado.
+
+Pendente operacional:
+- habilitar 2FA na conta Google, se ainda nao estiver habilitado;
+- gerar App Password exclusiva;
+- configurar `smtp.gmail.com` no Supabase;
+- configurar o template `Invite user` com `TokenHash` / `type=invite` para `/auth/confirm`;
+- validar convite real com conta sintetica;
+- manter App Password fora de repositorio/chat/logs.
+
+Detalhes: `docs/GMAIL_SMTP_SETUP.md`.
