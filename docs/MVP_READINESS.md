@@ -259,3 +259,21 @@ Estado atual:
 - chamada externa bloqueada por padrao.
 
 Antes de dados reais: configurar `OPENAI_API_KEY`, executar avaliacao sintetica representativa e revisar/habilitar explicitamente `OPENAI_HEALTH_DATA_PROCESSING_ENABLED=true`.
+
+
+## Esclarecimentos — E2E autenticado
+
+Em 2026-09-24, o workflow `E2E anamnesis clarification flow` passou em producao no run `36053370894`.
+
+Cobertura comprovada:
+- login admin com MFA AAL2;
+- criacao do pedido pela Patty/admin;
+- vinculo opcional a resposta original;
+- login da cliente correta;
+- leitura do pedido e registro do complemento;
+- isolamento de outra cliente com 404;
+- releitura do complemento pela Patty/admin;
+- resposta original da Anamnese preservada;
+- historico append-only mantido.
+
+O smoke usa exclusivamente fixtures sinteticas persistentes. Nao existe cleanup que apague request/response porque isso violaria a imutabilidade intencional do dominio.
