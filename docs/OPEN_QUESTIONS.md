@@ -400,13 +400,21 @@ O salvamento de rascunho, as permissoes minimas de escrita e a submissao final e
 
 A cliente pode retomar rascunho, salvar respostas `text` e `single_choice`, receber a visibilidade condicional versionada e enviar explicitamente a Anamnese. O banco revalida todos os campos obrigatorios aplicaveis antes de aceitar o envio. Autosave nao e requisito da v1.
 
-### QUESTAO ABERTA
+### FATO RESOLVIDO
 
-A especificacao da primeira Anamnese canonica permanece em `ANAMNESE_CANONICAL_V1_CANDIDATE.md`.
+A primeira Anamnese canonica `client-anamnesis` v1 esta materializada e publicada no Supabase SaaS.
 
-Tipos nao juridicos, 10 condicionais, perguntas compostas, ANAM-044, ordem, UX de salvamento e submissao final estao definidos e implementados. O envio final e revalidado deterministicamente no banco e a migration correspondente esta aplicada.
+Estado validado:
+- 10 secoes;
+- 51 perguntas;
+- 10 condicionais;
+- ANAM-044 preservado fora de `anamnesis_answers` conforme decisao de produto;
+- ANAM-046 versionado como checkbox obrigatorio no envio final;
+- valor de aceite persistido: `Concordo`;
+- envio completo validado em smoke transacional com `ROLLBACK`;
+- E2E de browser do consentimento canônico aprovado no run `36072067063`.
 
-O bloqueador restante para materializar/publicar a primeira versao canonica e o texto/versionamento/operacao juridica de ANAM-046.
+ANAM-046 nao e mais bloqueio para a v1 publicada.
 
 ### DECISAO DE PRODUTO
 
