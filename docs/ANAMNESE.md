@@ -167,7 +167,7 @@ A UI podera ser reorganizada depois da decisao de fluxo. Qualquer alteracao do c
 - A marcacao de obrigatoriedade do Google Forms historico nao define a regra do app. A regra atual confirmada e: todos os campos aplicaveis da versao da Anamnese sao obrigatorios para o envio final; rascunhos podem permanecer incompletos.
 - Tipos finais de input nao estao aprovados.
 - Validacoes especificas por campo nao estao aprovadas.
-- Campos condicionais e suas regras de aplicabilidade ainda nao foram mapeados.
+- A Patty confirmou a regra geral de condicionalidade: campos dependentes nao aplicaveis ficam ocultos e deixam de ser obrigatorios. O mapa pergunta-a-pergunta de dependencias ainda precisa ser fechado.
 - Ordem final nao esta aprovada.
 - Regras de visibilidade nao estao aprovadas.
 - Quais dados irao para IA precisam ser definidos campo a campo.
@@ -203,6 +203,8 @@ Nesta primeira versao, a revisao pode sinalizar apenas possivel contradicao ou n
 
 Todos os campos aplicaveis da versao da Anamnese sao obrigatorios para o envio final. Rascunhos podem permanecer incompletos e ser retomados posteriormente.
 
-`missing_answer` permanece bloqueado na primeira versao operacional porque as regras de aplicabilidade das perguntas condicionais ainda nao foram formalizadas. Pergunta condicional nao aplicavel nao pode ser tratada automaticamente como ausencia.
+A Patty confirmou a regra geral para perguntas condicionais: quando uma pergunta nao se aplica a cliente, seus campos dependentes devem ficar ocultos e deixam de ser obrigatorios.
+
+`missing_answer` permanece bloqueado ate o mapa pergunta-a-pergunta de aplicabilidade estar documentado. Pergunta condicional nao aplicavel nao pode ser tratada automaticamente como ausencia.
 
 Questionario/schema existente nao equivale a questionario final validado pela Patty.
