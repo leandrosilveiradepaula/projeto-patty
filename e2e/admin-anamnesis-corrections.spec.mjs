@@ -192,7 +192,11 @@ test("admin sintetico acessa correcoes e JSON invalido nao cria historico", asyn
       page.getByRole("heading", { name: "Correções da Anamnese" }),
     ).toBeVisible();
     await expect(page.getByText("E2E correction question")).toBeVisible();
-    await expect(page.getByText('"Original E2E answer"')).toBeVisible();
+    const originalAnswer = page
+      .getByText("Resposta original", { exact: true })
+      .locator("..")
+      .getByText('"Original E2E answer"', { exact: true });
+    await expect(originalAnswer).toBeVisible();
 
     await page.getByLabel("Novo valor corrigido").fill("{");
     await page.getByRole("button", { name: "Registrar correção" }).click();
