@@ -25,6 +25,10 @@ IDs internos de answers/questions nao sao enviados ao provider. A execucao cria 
 
 A resposta da OpenAI entra somente como output interno de `anamnesis_review`. Achados nao criam esclarecimento, diagnostico, pendencia, protocolo, publicacao ou mensagem para cliente automaticamente.
 
+### ESTADO OPERACIONAL
+
+A migration `20260924193339_seed_openai_anamnesis_review_prompt.sql` foi aplicada no Supabase SaaS em 2026-09-24. O prompt v1 existe exatamente uma vez e nenhuma execution foi criada durante apply/validacao. A chamada externa permanece desabilitada por feature gate.
+
 ## 2026-09-24 - Fundacao de esclarecimentos pos-Anamnese
 
 ### DECISAO TECNICA/PRODUTO
