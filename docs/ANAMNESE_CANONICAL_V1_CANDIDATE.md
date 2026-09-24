@@ -2,7 +2,7 @@
 
 Data de referencia: 2026-09-24.
 
-Status: **PRODUTO V1 DEFINIDO / NAO PUBLICAR AINDA — ANAM-046 PENDENTE**.
+Status: **PRODUTO V1 DEFINIDO / PRONTO PARA MATERIALIZACAO E PUBLICACAO CONTROLADA**.
 
 
 Manifesto machine-readable correspondente: `docs/anamnesis_canonical_v1_candidate.json`.
@@ -11,7 +11,7 @@ Mapa completo de campos candidato:
 - `docs/ANAMNESE_FIELD_MAP_V1_CANDIDATE.md`;
 - `docs/anamnesis_field_map_v1_candidate.json`.
 
-O mapa cobre todos os 47 itens historicos e 51 campos de resposta. Tipos nao juridicos, os 10 desdobramentos/condicionais, ANAM-044 e a ordem foram aceitos como decisoes de produto da v1. ANAM-046 continua pendente. Nenhuma dessas decisoes cria regra profissional.
+O mapa cobre todos os 47 itens historicos e 51 campos de resposta. Tipos nao juridicos, os 10 desdobramentos/condicionais, ANAM-044, a ordem e ANAM-046 foram aceitos como decisoes de produto da v1. Nenhuma dessas decisoes cria regra profissional.
 
 O manifesto e coberto por teste de invariantes para garantir:
 - cobertura exata de `ANAM-000..ANAM-046`;
@@ -117,7 +117,7 @@ O agrupamento abaixo e a decisao de produto da v1, baseada somente nas categoria
    - orientacao e link para `/cliente/arquivos`; sem `anamnesis_answer`.
 
 10. **Consentimento**
-   - ANAM-046, depois de texto/versionamento juridico aprovados.
+   - ANAM-046 como checkbox obrigatorio na finalizacao; valor persistido `Concordo`.
 
 ## Perguntas compostas
 
@@ -214,11 +214,13 @@ Instagram e outros dados informativos nao devem ser enviados a IA sem necessidad
 
 ## Bloqueios para publicar a primeira `client-anamnesis`
 
-A primeira versao canonica **nao deve ser publicada** ate fechar:
+Os bloqueios funcionais de produto da v1 estao fechados. A sequencia restante e operacional:
 
-1. texto, versionamento e operacao de ANAM-046 / consentimento;
-2. fluxo tecnico de submissao final com validacao dos campos aplicaveis;
-3. materializacao, revisao e publicacao explicita da definicao completa.
+1. materializar a definicao completa como versao draft;
+2. validar integridade/RLS e o checkbox ANAM-046;
+3. revisar a versao materializada;
+4. publicar explicitamente;
+5. executar E2E sintetico do fluxo completo.
 
 A cobertura historica deixou de ser um bloqueio tecnico: o mapa candidato e seus testes garantem representacao exata de ANAM-000..046 e preservam ANAM-005..008 fora da Anamnese.
 
