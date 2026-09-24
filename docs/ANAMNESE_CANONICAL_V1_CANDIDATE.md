@@ -7,6 +7,12 @@ Status: **CANDIDATA / NAO PUBLICAR AINDA**.
 
 Manifesto machine-readable correspondente: `docs/anamnesis_canonical_v1_candidate.json`.
 
+Mapa completo de campos candidato:
+- `docs/ANAMNESE_FIELD_MAP_V1_CANDIDATE.md`;
+- `docs/anamnesis_field_map_v1_candidate.json`.
+
+O mapa cobre todos os 47 itens historicos e propoe 51 campos de resposta, incluindo 10 dependencias Sim/Nao + detalhe. Essas propostas sao decisoes de produto candidatas, nao regras profissionais confirmadas.
+
 O manifesto e coberto por teste de invariantes para garantir:
 - cobertura exata de `ANAM-000..ANAM-046`;
 - manutencao de ANAM-005..008 fora da Anamnese;
@@ -215,13 +221,14 @@ Instagram e outros dados informativos nao devem ser enviados a IA sem necessidad
 
 A primeira versao canonica **nao deve ser publicada** ate fechar:
 
-1. mapa pergunta-a-pergunta de condicionais (a fundacao tecnica existe, mas as regras concretas continuam pendentes);
-2. tipo final de input de cada pergunta;
-3. tratamento das perguntas compostas;
+1. revisar/aceitar ou ajustar as 10 condicionais candidatas do mapa de campos;
+2. revisar/aceitar ou ajustar os tipos de input candidatos;
+3. revisar/aceitar ou ajustar o tratamento candidato das perguntas compostas;
 4. comportamento de ANAM-044 / arquivos;
 5. texto, versionamento e operacao de ANAM-046 / consentimento;
-6. ordem final das secoes/perguntas;
-7. revisao de que nenhuma pergunta historica foi perdida, exceto as medidas explicitamente separadas.
+6. ordem final das secoes/perguntas.
+
+A cobertura historica deixou de ser um bloqueio tecnico: o mapa candidato e seus testes garantem representacao exata de ANAM-000..046 e preservam ANAM-005..008 fora da Anamnese.
 
 ## Criterio de pronto para publicacao
 
