@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { requireRole } from "@/lib/supabase/auth";
 import {
   executeOpenAiAnamnesisReview,
   OpenAiAnamnesisReviewExecutionError,
@@ -17,6 +18,7 @@ export async function runAdminAnamnesisAiReview(
   _state: AdminAiReviewFormState,
   formData: FormData,
 ): Promise<AdminAiReviewFormState> {
+  await requireRole("admin");
   const financialAnswerId = formData.get("financialAnswerId");
   const explicitlyIncludedAnswerIds =
     typeof financialAnswerId === "string" && financialAnswerId
