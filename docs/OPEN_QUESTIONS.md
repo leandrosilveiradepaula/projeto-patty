@@ -12,7 +12,9 @@ A Patty ja possui o email da cliente e inicia o onboarding enviando um link para
 
 O MVP usara o Gmail pessoal da Patty via Custom SMTP do Supabase Auth. A escolha de infraestrutura do email real de convite esta resolvida.
 
-### PENDENCIA OPERACIONAL
+### PENDENCIA OPERACIONAL — BLOQUEADA NESTA SESSAO
+
+A configuracao foi explicitamente adiada em 2026-09-24 por indisponibilidade operacional momentanea. Retomar quando houver acesso aos paineis Google/Supabase.
 
 Ainda falta configurar no Google/Supabase:
 - verificacao em duas etapas na conta Google;
