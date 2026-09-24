@@ -50,6 +50,7 @@ test("builds a stateless structured OpenAI request without database ids in provi
 
   assert.equal(request.body.store, false);
   assert.equal(request.body.model, "gpt-test");
+  assert.deepEqual(request.body.reasoning, { effort: "medium" });
   assert.equal(request.body.text.format.type, "json_schema");
   assert.equal(request.body.text.format.strict, true);
   assert.equal(request.body.input.includes(ANSWER_A), false);
