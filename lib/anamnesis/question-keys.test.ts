@@ -31,6 +31,17 @@ test("financial capacity keeps a stable versioned question key tied to ANAM-033"
   assert.equal(item.fields[0].ai_default, "exclude");
 });
 
+test("ANAM-046 keeps the stable consent question key", () => {
+  assert.equal(
+    ANAMNESIS_SOURCE_CODES.consentAcceptance,
+    "ANAM-046",
+  );
+  assert.equal(
+    ANAMNESIS_QUESTION_KEYS.consentAcceptance,
+    "consent_acceptance",
+  );
+});
+
 test("sensitive informational keys remain distinct", () => {
   assert.notEqual(
     ANAMNESIS_QUESTION_KEYS.financialCapacityForSupplements,
