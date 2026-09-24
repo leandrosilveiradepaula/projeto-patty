@@ -515,3 +515,18 @@ A escolha do provider nao autoriza por si so o envio de dados reais.
 
 
 O checklist operacional esta em `OPENAI_HEALTH_DATA_GATE.md`. O gate permanece fechado ate conclusao humana explicita dos itens aplicaveis.
+
+### PENDENCIA OPERACIONAL — VERCEL PRIVATE BLOB STORE
+
+O primeiro lote controlado de midia esta definido em `docs/educational_media_migration_batch_1.json` e cobre somente o video aprovado da balanca.
+
+Ainda falta criar/conectar um Vercel Private Blob store ao projeto. A integracao Vercel disponivel na sessao de 2026-09-24 nao expoe operacao de Storage, portanto essa etapa nao foi executada automaticamente.
+
+Enquanto o store nao existir:
+- nao baixar/copiar o arquivo apenas para adiantar a migracao;
+- nao preencher `storage_path` ou SHA-256 por estimativa;
+- nao criar asset;
+- nao publicar versao;
+- nao criar release.
+
+Depois da criacao/conexao do store, seguir a ordem deterministica do manifesto e manter os demais arquivos do Drive fora do lote.
