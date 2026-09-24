@@ -1,5 +1,20 @@
 # Decisoes
 
+## 2026-09-24 - Dados cadastrais permanecem visiveis dentro da Anamnese
+
+### REGRA CONFIRMADA PELA PATTY
+
+A Patty confirmou que os dados cadastrais podem permanecer dentro da Anamnese final.
+
+### LIMITE TECNICO
+
+Essa confirmacao define o fluxo/apresentacao da Anamnese e nao altera as separacoes ja documentadas:
+- Auth User continua diferente de Profile, Client e Cadastro Atual;
+- `client_registration` continua sendo o Cadastro Atual;
+- valores cadastrais preservados em uma submission de Anamnese sao snapshot historico daquele contexto;
+- alterar cadastro atual nao altera silenciosamente anamneses historicas e vice-versa.
+
+
 ## 2026-09-23 - Inicio seguro do rascunho da Anamnese
 
 ### DECISAO TECNICA
