@@ -91,6 +91,7 @@ export function buildOpenAiAnamnesisReviewRequest(input: {
     } satisfies OpenAiAnamnesisReviewAliases,
     body: {
       model: input.model,
+      reasoning: { effort: "medium" },
       store: false,
       instructions: input.instructions,
       input: JSON.stringify({
