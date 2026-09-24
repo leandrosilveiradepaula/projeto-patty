@@ -1,5 +1,237 @@
 # Decisoes
 
+## 2026-09-24 - Fases 5 e 6 do Carb Cycle permanecem pendentes
+
+### CONFIRMACAO DA PATTY
+
+A Patty confirmou explicitamente que as regras das Fases 5 e 6 da Planilha Carb Cycle continuam pendentes.
+
+### CONSEQUENCIA
+
+Nenhuma formula, criterio ou comportamento dessas fases deve ser:
+- inferido a partir das fases anteriores;
+- implementado em codigo;
+- usado em rascunho automatico como se fosse regra confirmada.
+
+Qualquer uso futuro depende de nova confirmacao profissional e atualizacao documental previa.
+
+
+## 2026-09-24 - Cutting 3 Linear e a etapa seguinte confirmada
+
+### REGRA CONFIRMADA PELA PATTY
+
+A Patty confirmou que, depois de `Cutting 2: 2 Low / 1 High`, a etapa seguinte do metodo e:
+
+`Cutting 3 Linear`
+
+### LIMITE
+
+A resposta confirma somente a existencia e o tipo linear dessa etapa.
+
+Ainda nao estao confirmados/documentados:
+- macros ou doses do Cutting 3;
+- duracao;
+- criterios de entrada/saida;
+- eventual Dia 1/Dia 2 ou Carb Cycle posterior;
+- etapas seguintes.
+
+Nenhuma dessas regras deve ser inferida a partir dos Cuttings anteriores.
+
+
+## 2026-09-24 - Conteudos de formulas/manipulados fazem parte do aplicativo
+
+### REGRA CONFIRMADA PELA PATTY
+
+A Patty confirmou que conteudos sobre formulas/manipulados devem fazer parte do aplicativo.
+
+### LIMITE PROFISSIONAL E DE PUBLICACAO
+
+Essa confirmacao nao autoriza publicar diretamente o arquivo historico `Fórmulas.pptx`.
+
+Antes de qualquer disponibilizacao a clientes, o material deve passar por:
+- revisao profissional completa;
+- confirmacao de que as orientacoes ainda representam a pratica atual da Patty;
+- revisao das alegacoes de efeito/beneficio;
+- revisao de referencias comerciais e contato de farmacia;
+- confirmacao de autoria/direitos de distribuicao;
+- criacao de nova versao publicavel e aprovacao explicita da Patty.
+
+### CONSEQUENCIA DE PRODUTO
+
+O tema deixa de ser apenas um artefato historico do Drive e passa a fazer parte do escopo da biblioteca educacional, mas suas **regras profissionais concretas de suplementacao/manipulados continuam abertas** ate documentacao especifica.
+
+
+## 2026-09-24 - Planilha historica de refeicoes vira conteudo educacional revisado
+
+### REGRA CONFIRMADA PELA PATTY
+
+A Patty confirmou que a planilha historica `Sugestao de refeicoes` deve ser transformada em conteudo educacional revisado para clientes.
+
+### LIMITE PROFISSIONAL
+
+O arquivo historico possui um exemplo com seis refeicoes. Isso nao se torna regra do metodo.
+
+Permanece a regra ja confirmada:
+- nao existe numero fixo de refeicoes;
+- a quantidade de refeicoes e adaptada a rotina/preferencia com foco em adesao.
+
+Portanto, a versao educacional futura deve reaproveitar conceitos/exemplos uteis sem apresentar seis refeicoes como obrigatorias ou padrao universal.
+
+### CONSEQUENCIA DE PRODUTO
+
+O arquivo original permanece preservado como fonte historica. A publicacao para clientes deve ocorrer por uma nova versao educacional revisada, sujeita a revisao e aprovacao da Patty antes de release.
+
+
+## 2026-09-24 - Video de uso da balanca aprovado para disponibilizacao
+
+### REGRA CONFIRMADA PELA PATTY
+
+A Patty confirmou que o video historico `Como utilizar a BALANCA DE ALIMENTOS`, arquivo de origem do Drive `1z61DpJfwp-6DMhYMpCRNafkSwX6h9LBE`:
+- e material da Consultoria/Patty;
+- continua atual;
+- esta autorizado para disponibilizacao as clientes no aplicativo.
+
+### CONSEQUENCIA DE PRODUTO
+
+Esse item passa a ser o primeiro conteudo elegivel para migracao controlada do Drive.
+
+### LIMITE
+
+A confirmacao profissional nao equivale a migracao tecnica nem publicacao. Continuam separadas:
+1. origem aprovada;
+2. copia para armazenamento do aplicativo;
+3. registro/versionamento do conteudo;
+4. revisao tecnica da versao criada;
+5. publicacao;
+6. release explicito para cliente.
+
+Nenhuma dessas etapas posteriores deve ser marcada como concluida ate ser executada e verificada.
+
+
+## 2026-09-24 - Esclarecimento pos-Anamnese deve voltar para a cliente
+
+### REGRA CONFIRMADA PELA PATTY
+
+Durante a analise da Anamnese, quando faltar uma informacao importante ou uma resposta estiver pouco clara, a Patty deve solicitar o esclarecimento a cliente dentro do aplicativo.
+
+A Patty nao deve completar silenciosamente a resposta original da cliente por conta propria.
+
+### CONSEQUENCIA DE PRODUTO
+
+O produto deve preservar separadamente:
+- resposta original enviada pela cliente;
+- pedido de esclarecimento;
+- resposta posterior da cliente ao esclarecimento;
+- eventuais notas/correcoes administrativas da Patty.
+
+### LIMITE
+
+Ainda precisam ser definidos:
+- como a cliente sera notificada;
+- como o pedido aparece na interface;
+- se existe prazo/expiracao;
+- como fica o estado visual da pendencia;
+- como a resposta complementar entra no contexto de IA e no historico.
+
+
+## 2026-09-24 - Anamnese enviada entra diretamente em analise
+
+### REGRA CONFIRMADA PELA PATTY
+
+Depois que a cliente finaliza e envia a Anamnese, ela entra diretamente na analise profissional da Patty.
+
+Nao sao necessarios estados intermediarios de workflow como:
+- recebida;
+- em revisao;
+- pendencias;
+- concluida.
+
+### LIMITE
+
+Essa decisao simplifica o lifecycle administrativo da Anamnese, mas nao elimina a possibilidade de:
+- notas internas;
+- findings de IA;
+- pedidos pontuais de esclarecimento;
+- correcoes append-only;
+- outras acoes internas que venham a ser confirmadas.
+
+Essas acoes, se existirem, nao devem ser modeladas como estados obrigatorios de uma maquina de workflow sem decisao posterior.
+
+
+## 2026-09-24 - Perguntas atuais da Anamnese permanecem como base
+
+### REGRA CONFIRMADA PELA PATTY
+
+A Patty confirmou que as perguntas do formulario atual devem ser mantidas como base da Anamnese no aplicativo.
+
+A intencao nesta etapa e **organizar melhor a experiencia**, e nao realizar uma revisao ampla com remocao/adicao de varias perguntas.
+
+### LIMITE
+
+Essa confirmacao preserva o conteudo-base, mas ainda permite e exige decisoes de produto sobre:
+- agrupamento e ordem;
+- tipos de input;
+- separacao ou manutencao de perguntas compostas;
+- logica condicional;
+- apresentacao de dados cadastrais;
+- exclusao das medidas corporais da Anamnese para fluxo proprio de Avaliacao/Medidas.
+
+Nenhuma reorganizacao deve alterar silenciosamente o sentido profissional da pergunta original.
+
+
+## 2026-09-24 - Cadencia confirmada de avaliacoes corporais
+
+### REGRA CONFIRMADA PELA PATTY
+
+A Patty confirmou a seguinte rotina de avaliacao:
+
+- **quinzenalmente**: cintura, abdomen, quadril e peso;
+- **mensalmente**: avaliacao completa com todas as medidas, peso e fotos.
+
+### LIMITE
+
+Ainda nao foram definidos/documentados nesta resposta:
+- quais campos compoem exatamente "todas as medidas" da avaliacao mensal;
+- as unidades de cada medida;
+- se a avaliacao mensal substitui ou acumula com a ocorrencia quinzenal quando coincidirem;
+- o fluxo auditavel de correcao historica.
+
+Esses pontos permanecem abertos e nao devem ser inferidos.
+
+
+## 2026-09-24 - Medidas corporais separadas da Anamnese
+
+### REGRA CONFIRMADA PELA PATTY
+
+A Patty confirmou que as medidas corporais podem ser separadas da Anamnese e tratadas em um fluxo proprio de Avaliacao/Medidas.
+
+### LIMITE
+
+Essa confirmacao resolve a separacao de fluxo, mas nao define automaticamente:
+- catalogo definitivo de medidas;
+- unidades permitidas;
+- campos obrigatorios;
+- criterios de avaliacao/evolucao;
+- fluxo auditavel de correcao de medidas historicas.
+
+Os campos de medidas observados no formulario historico permanecem como evidencia de origem e nao devem ser promovidos automaticamente para a Anamnese final.
+
+
+## 2026-09-24 - Dados cadastrais permanecem visiveis dentro da Anamnese
+
+### REGRA CONFIRMADA PELA PATTY
+
+A Patty confirmou que os dados cadastrais podem permanecer dentro da Anamnese final.
+
+### LIMITE TECNICO
+
+Essa confirmacao define o fluxo/apresentacao da Anamnese e nao altera as separacoes ja documentadas:
+- Auth User continua diferente de Profile, Client e Cadastro Atual;
+- `client_registration` continua sendo o Cadastro Atual;
+- valores cadastrais preservados em uma submission de Anamnese sao snapshot historico daquele contexto;
+- alterar cadastro atual nao altera silenciosamente anamneses historicas e vice-versa.
+
+
 ## 2026-09-23 - Inicio seguro do rascunho da Anamnese
 
 ### DECISAO TECNICA
@@ -728,9 +960,10 @@ Reconhecimento Metabolico
 -> Cutting 2 Linear
 -> Cutting 2 Dia 1 / Dia 2
 -> Cutting 2: 2 Low / 1 High
+-> Cutting 3 Linear
 ```
 
-Nao inferir automaticamente etapas posteriores.
+Nao inferir automaticamente regras internas do Cutting 3 nem etapas posteriores.
 
 ### DECISAO CONFIRMADA
 
@@ -776,7 +1009,7 @@ No fluxo confirmado, o Up Metabolico inclui uma refeicao livre semanal. Outras r
 
 ### QUESTAO ABERTA
 
-Permanecem abertas, entre outros pontos: Fases 5 e 6 do Carb Cycle, etapas posteriores ao Cutting 2, Bulking detalhado, Consolidacao, hidratacao, suplementacao/manipulados, montagem e progressao definitiva de treino, alertas profissionais e criterios finais de avaliacao.
+Permanecem abertas, entre outros pontos: Fases 5 e 6 do Carb Cycle, regras detalhadas do Cutting 3 Linear e etapas posteriores a ele, Bulking detalhado, Consolidacao, hidratacao, suplementacao/manipulados, montagem e progressao definitiva de treino, alertas profissionais e criterios finais de avaliacao.
 
 ## 2026-09-22 - Primeira versao assistiva de IA
 
