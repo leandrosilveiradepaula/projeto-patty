@@ -105,6 +105,12 @@ export default async function AdminAnamnesisDetailPage({
               <>
                 <Link
                   className={styles.backLink}
+                  href={`/admin/anamneses/${submission.id}/ia`}
+                >
+                  Análise IA
+                </Link>
+                <Link
+                  className={styles.backLink}
                   href={`/admin/anamneses/${submission.id}/esclarecimentos`}
                 >
                   Esclarecimentos
