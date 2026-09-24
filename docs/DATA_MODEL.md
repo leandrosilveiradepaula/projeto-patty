@@ -715,3 +715,14 @@ Versao publicada e imutavel. `client_content_releases` registra a liberacao expl
 ### DECISAO CONFIRMADA
 
 `exercises` e `exercise_versions` formam uma biblioteca separada da biblioteca educacional. A versao armazena apenas nome, numero de versao e publicacao; nao inclui series, repeticoes, carga, descanso, progressao, musculos ou protocolo de treino.
+
+
+## Esclarecimentos pos-Anamnese
+
+### DECISAO TECNICA/PRODUTO
+
+`anamnesis_clarification_requests` preserva cada pedido da Patty para uma `anamnesis_submission` enviada. O pedido pode opcionalmente apontar para um `anamnesis_answer` da mesma submission, sem alterar essa resposta.
+
+`anamnesis_clarification_responses` preserva complementos textuais da cliente em ordem cronologica. Pedido e complemento sao append-only; nao existe UPDATE/DELETE operacional.
+
+O modelo nao cria estado de workflow. A existencia de zero, uma ou varias respostas e um fato historico, nao um status profissional de resolucao.
