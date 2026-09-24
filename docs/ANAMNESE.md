@@ -2,7 +2,7 @@
 
 Este documento registra o inventario funcional da anamnese atual da Patty e serve como base documental para migracao e especificacao futura do modulo.
 
-O formulario atual da Patty e evidencia do processo existente e referencia de migracao. Ele nao define automaticamente a versao final do formulario no aplicativo.
+O formulario atual da Patty e evidencia do processo existente e referencia de migracao. A Patty confirmou em 2026-09-24 que suas perguntas devem ser mantidas como base de conteudo e reorganizadas no aplicativo, sem uma revisao ampla de perguntas nesta etapa. Isso nao torna automaticamente aprovados os tipos de input, agrupamento, ordem, validacoes ou condicionalidade historicos.
 
 Portanto:
 
@@ -55,10 +55,10 @@ Os codigos `ANAM-000` a `ANAM-046` identificam itens do inventario historico, na
 | ANAM-002 | Telefone | resposta curta | nao observado | sim | `7d09fa22-01de-4c3c-aeb9-f87cd6e14446.png` | Cadastro | dado cadastral pessoal | a definir / nao necessario por padrao, decisao formal pendente | pendente de validacao | Ownership conceitual: cadastro atual da cliente. Nao pertence primariamente ao Auth e nao implica WhatsApp. UI final ainda pendente. |
 | ANAM-003 | Email | resposta curta | nao observado | sim | `7d09fa22-01de-4c3c-aeb9-f87cd6e14446.png` | Cadastro | dado cadastral pessoal | a definir / nao necessario por padrao, decisao formal pendente | pendente de validacao | Distinguir email de autenticacao, pertencente ao Auth, de email de contato, pertencente ao cadastro da cliente. Eventual valor na anamnese sera snapshot historico. UI final ainda pendente. |
 | ANAM-004 | Instagram | resposta curta | nao observado | sim | `7d09fa22-01de-4c3c-aeb9-f87cd6e14446.png`; `DATA_MODEL.md` | Cadastro | dado cadastral informativo | nao enviar por padrao | pendente de validacao | Ownership conceitual: cadastro informativo da cliente. Produto confirma que Instagram e informativo e nao entra na IA por padrao. UI final ainda pendente. |
-| ANAM-005 | Ombros (toda circunferencia) | resposta curta/numerica nao confirmada | nao observado | sim | `5e9ed17c-bc01-4c01-989a-f74ffc05ef2e.png` | Medidas | dado corporal sensivel | a definir campo a campo | pendente de validacao | Decidir se pertence a resposta de anamnese, registro inicial de medicao/avaliacao, ou fluxo separado. |
-| ANAM-006 | Panturrilha | resposta curta/numerica nao confirmada | nao observado | sim | `5e9ed17c-bc01-4c01-989a-f74ffc05ef2e.png` | Medidas | dado corporal sensivel | a definir campo a campo | pendente de validacao | Decidir se pertence a resposta de anamnese, registro inicial de medicao/avaliacao, ou fluxo separado. |
-| ANAM-007 | Peso atual | resposta curta/numerica nao confirmada | nao observado | sim | `5e9ed17c-bc01-4c01-989a-f74ffc05ef2e.png` | Medidas | dado corporal sensivel | a definir campo a campo | pendente de validacao | Nao define regra de avaliacao ou evolucao. |
-| ANAM-008 | Altura | resposta curta/numerica nao confirmada | nao observado | sim | `5e9ed17c-bc01-4c01-989a-f74ffc05ef2e.png` | Medidas | dado corporal sensivel | a definir campo a campo | pendente de validacao | Nao define regra de avaliacao ou evolucao. |
+| ANAM-005 | Ombros (toda circunferencia) | resposta curta/numerica nao confirmada | nao observado | sim | `5e9ed17c-bc01-4c01-989a-f74ffc05ef2e.png` | Medidas | dado corporal sensivel | a definir campo a campo | historico do formulario atual | A Patty confirmou que medidas corporais podem ser separadas da Anamnese e tratadas em fluxo proprio de Avaliacao/Medidas. Nao promover este campo automaticamente para a Anamnese final. |
+| ANAM-006 | Panturrilha | resposta curta/numerica nao confirmada | nao observado | sim | `5e9ed17c-bc01-4c01-989a-f74ffc05ef2e.png` | Medidas | dado corporal sensivel | a definir campo a campo | historico do formulario atual | A Patty confirmou que medidas corporais podem ser separadas da Anamnese e tratadas em fluxo proprio de Avaliacao/Medidas. Nao promover este campo automaticamente para a Anamnese final. |
+| ANAM-007 | Peso atual | resposta curta/numerica nao confirmada | nao observado | sim | `5e9ed17c-bc01-4c01-989a-f74ffc05ef2e.png` | Medidas | dado corporal sensivel | a definir campo a campo | historico do formulario atual | A Patty confirmou separacao para fluxo proprio de Avaliacao/Medidas. Nao define regra de avaliacao ou evolucao. |
+| ANAM-008 | Altura | resposta curta/numerica nao confirmada | nao observado | sim | `5e9ed17c-bc01-4c01-989a-f74ffc05ef2e.png` | Medidas | dado corporal sensivel | a definir campo a campo | historico do formulario atual | A Patty confirmou separacao para fluxo proprio de Avaliacao/Medidas. Nao define regra de avaliacao ou evolucao. |
 | ANAM-009 | Tem o costume de realizar exames de sangue? | pergunta textual | nao observado | nao confirmado | `201e1425-ae4e-4b08-9c9a-b91df8f21613.png` | Exames e documentos | dado de saude sensivel | a definir campo a campo | pendente de validacao | Nao define obrigatoriedade de exame no app. |
 | ANAM-010 | Possui plano de saude? Qual? | pergunta textual composta | nao observado | nao confirmado | `201e1425-ae4e-4b08-9c9a-b91df8f21613.png` | Cadastro | dado cadastral/sensivel a revisar | a definir campo a campo | pendente de validacao | Classificacao definitiva pendente. |
 | ANAM-011 | Possui diabetes? Quanto tempo? Esta controlado? | pergunta textual composta | nao observado | nao confirmado | `201e1425-ae4e-4b08-9c9a-b91df8f21613.png` | Historico de saude | dado de saude sensivel | a definir campo a campo | pendente de validacao | Nao criar alerta, bloqueio ou interpretacao clinica. |
@@ -102,8 +102,8 @@ Os codigos `ANAM-000` a `ANAM-046` identificam itens do inventario historico, na
 
 | categoria | evidencia do formulario atual | confirmacao de produto/documentacao | incompletude e pendencias |
 | --- | --- | --- | --- |
-| Cadastro | Cidade; Telefone; Email; Instagram; Possui plano de saude? Qual? | `client_registration` existe como conceito; dados cadastrais ficam separados de dados clinicos/operacionais. | Formulario cadastral completo, duplicidade com Auth/perfil e uso de IA campo a campo ainda precisam ser definidos. |
-| Medidas | Ombros; Panturrilha; Peso atual; Altura. | Produto preve medidas e avaliacoes. | Definir se medidas ficam na anamnese, criam avaliacao inicial ou migram para fluxo separado. |
+| Cadastro | Cidade; Telefone; Email; Instagram; Possui plano de saude? Qual? | A Patty confirmou que os dados cadastrais podem continuar aparecendo dentro da Anamnese. `client_registration` continua existindo como conceito tecnico separado; eventual valor preservado na Anamnese e snapshot historico, nao nova fonte mestre. | Formulario cadastral completo, duplicidade com Auth/perfil e uso de IA campo a campo ainda precisam ser definidos. |
+| Medidas | Ombros; Panturrilha; Peso atual; Altura. | A Patty confirmou que medidas corporais podem ser separadas da Anamnese e tratadas em fluxo proprio de Avaliacao/Medidas. | Definir catalogo definitivo, unidades, obrigatoriedade e fluxo operacional/correcao das medidas. |
 | Historico de vida | Apenas conteudo de abertura/onboarding foi registrado como item historico nao-campo. | Categoria usada na estrutura de UI da anamnese. | Campos especificos ainda nao completamente identificados nas evidencias disponiveis. |
 | Historico de saude | Diabetes; transtorno metabolico; doenca cronica; cirurgia; alergia; fratura/lesao; dor intensa; cardiovascular/hipertensao; dor no peito; desmaio; libido. | Dados de saude sao sensiveis. | Lista completa, campos condicionais, obrigatoriedade, tipo final, alertas e bloqueios dependem da Patty. |
 | Medicamentos e suplementacao | Uso anterior de suplemento; administracao atual de suplementos/fitoterapicos/medicamentos; suplemento vitaminico. | Regras de suplementacao permanecem pendentes em `BUSINESS_RULES.md`. | Uso de IA e regras de suplementacao nao devem ser inferidos. |
@@ -167,7 +167,7 @@ A UI podera ser reorganizada depois da decisao de fluxo. Qualquer alteracao do c
 - A marcacao de obrigatoriedade do Google Forms historico nao define a regra do app. A regra atual confirmada e: todos os campos aplicaveis da versao da Anamnese sao obrigatorios para o envio final; rascunhos podem permanecer incompletos.
 - Tipos finais de input nao estao aprovados.
 - Validacoes especificas por campo nao estao aprovadas.
-- Campos condicionais e suas regras de aplicabilidade ainda nao foram mapeados.
+- A Patty confirmou a regra geral de condicionalidade: campos dependentes nao aplicaveis ficam ocultos e deixam de ser obrigatorios. O mapa pergunta-a-pergunta de dependencias ainda precisa ser fechado.
 - Ordem final nao esta aprovada.
 - Regras de visibilidade nao estao aprovadas.
 - Quais dados irao para IA precisam ser definidos campo a campo.
@@ -177,13 +177,11 @@ A UI podera ser reorganizada depois da decisao de fluxo. Qualquer alteracao do c
 ## Pendencias para especificacao futura
 
 - Confirmar o mapa completo de campos do formulario atual.
-- Decidir manter, alterar ou remover cada pergunta.
 - Formalizar quais perguntas sao condicionais e suas regras de aplicabilidade; a obrigatoriedade geral para envio final ja esta confirmada para todos os campos aplicaveis.
 - Definir tipo final de input por campo.
 - Decidir se perguntas compostas permanecem juntas ou sao normalizadas em campos separados.
 - Mapear campos condicionais.
 - Definir ordem e agrupamento final.
-- Decidir se medidas informadas na anamnese pertencem a resposta de anamnese, criam registro inicial de medicao/avaliacao ou migram para fluxo separado.
 - Definir uploads: tipo, tamanho, quantidade, substituicao e exclusao.
 - Separar finalidade de foto, exame e documento.
 - Definir consentimento: texto definitivo, versao, base legal aplicavel, data/hora, forma de aceite, possibilidade/regras de revogacao, retencao e relacao entre consentimento e inicio do acompanhamento.
@@ -204,6 +202,8 @@ Nesta primeira versao, a revisao pode sinalizar apenas possivel contradicao ou n
 
 Todos os campos aplicaveis da versao da Anamnese sao obrigatorios para o envio final. Rascunhos podem permanecer incompletos e ser retomados posteriormente.
 
-`missing_answer` permanece bloqueado na primeira versao operacional porque as regras de aplicabilidade das perguntas condicionais ainda nao foram formalizadas. Pergunta condicional nao aplicavel nao pode ser tratada automaticamente como ausencia.
+A Patty confirmou a regra geral para perguntas condicionais: quando uma pergunta nao se aplica a cliente, seus campos dependentes devem ficar ocultos e deixam de ser obrigatorios.
+
+`missing_answer` permanece bloqueado ate o mapa pergunta-a-pergunta de aplicabilidade estar documentado. Pergunta condicional nao aplicavel nao pode ser tratada automaticamente como ausencia.
 
 Questionario/schema existente nao equivale a questionario final validado pela Patty.
