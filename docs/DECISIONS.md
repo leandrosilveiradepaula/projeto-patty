@@ -1,5 +1,23 @@
 # Decisoes
 
+## 2026-09-24 - Medidas corporais separadas da Anamnese
+
+### REGRA CONFIRMADA PELA PATTY
+
+A Patty confirmou que as medidas corporais podem ser separadas da Anamnese e tratadas em um fluxo proprio de Avaliacao/Medidas.
+
+### LIMITE
+
+Essa confirmacao resolve a separacao de fluxo, mas nao define automaticamente:
+- catalogo definitivo de medidas;
+- unidades permitidas;
+- campos obrigatorios;
+- criterios de avaliacao/evolucao;
+- fluxo auditavel de correcao de medidas historicas.
+
+Os campos de medidas observados no formulario historico permanecem como evidencia de origem e nao devem ser promovidos automaticamente para a Anamnese final.
+
+
 ## 2026-09-24 - Dados cadastrais permanecem visiveis dentro da Anamnese
 
 ### REGRA CONFIRMADA PELA PATTY
