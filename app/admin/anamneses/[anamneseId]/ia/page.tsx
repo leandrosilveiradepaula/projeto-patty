@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import { getOpenAiProviderReadiness } from "@/lib/ai/openai-provider";
+import { requiresAiExecutionRecoveryReview } from "@/lib/ai/execution-lifecycle";
 import type { Json } from "@/lib/supabase/database.types";
 import {
   getAccessibleAnamnesisSubmission,
@@ -182,6 +183,22 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
                   <p className={styles.meta}>
                     Iniciada em {formatDateTime(execution.created_at)}
                   </p>
+
+                  {requiresAiExecutionRecoveryReview({
+                    status: execution.status,
+                    completedAt: execution.completed_at,
+                    failedAt: execution.failed_at,
+                  }) ? (
+                    <Alert
+                      title="Execução sem estado terminal"
+                      variant="warning"
+                    >
+                      Esta execução permanece iniciada e não foi convertida
+                      automaticamente em falha. Nenhum resultado deve ser
+                      presumido; se este estado persistir, ele exige
+                      reconciliação operacional antes de uma nova tentativa.
+                    </Alert>
+                  ) : null}
 
                   {execution.status === "failed" ? (
                     <Alert title="Execução falhou" variant="warning">
