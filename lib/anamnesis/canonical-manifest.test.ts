@@ -36,7 +36,7 @@ test("canonical anamnesis candidate preserves the full historical inventory", ()
   const manifest = loadManifest();
 
   assert.equal(manifest.canonical_form_key, "client-anamnesis");
-  assert.equal(manifest.status, "candidate_not_publishable");
+  assert.equal(manifest.status, "product_approved_except_consent_not_publishable");
   assert.equal(manifest.items.length, 47);
 
   const expectedCodes = Array.from(
@@ -67,19 +67,24 @@ test("body measurements remain outside the canonical anamnesis", () => {
   }
 });
 
-test("candidate cannot become publishable before unresolved definition work is closed", () => {
+test("product-approved manifest remains blocked only by explicit remaining gates", () => {
   const manifest = loadManifest();
 
-  assert.ok(manifest.rules.do_not_publish_until.length > 0);
+  assert.deepEqual(manifest.rules.do_not_publish_until, [
+    "consent_text_and_versioning_resolved",
+    "final_submission_flow_implemented_and_validated",
+  ]);
   assert.ok(
     manifest.items
-      .filter((item) => item.disposition === "include_candidate")
-      .every((item) => item.final_input_type === "pending"),
+      .filter((item) => item.disposition === "include_v1")
+      .every((item) => item.final_input_type === "resolved_in_field_map"),
   );
 
   const files = manifest.items.find((item) => item.source_code === "ANAM-044");
   const consent = manifest.items.find((item) => item.source_code === "ANAM-046");
 
-  assert.equal(files?.disposition, "files_integration_pending");
+  assert.equal(files?.disposition, "files_flow_link");
+  assert.equal(files?.final_input_type, "not_an_answer");
   assert.equal(consent?.disposition, "consent_pending");
+  assert.equal(consent?.final_input_type, "legal_pending");
 });
