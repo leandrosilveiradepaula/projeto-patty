@@ -348,9 +348,11 @@ A aplicacao administrativa ja possui uma rota dedicada para visualizar a respost
 
 A revisao administrativa ja possui notas append-only e correcoes append-only separadas da resposta original.
 
-### QUESTAO ABERTA
+### PARCIALMENTE RESOLVIDO
 
-Qual sera o workflow administrativo completo de revisao da Anamnese alem de notas e correcoes, incluindo eventual estado de revisao, pendencias, findings de IA, conclusao da revisao e qualquer acao subsequente permitida?
+A Patty confirmou que, apos o envio final da Anamnese, a cliente entra diretamente em analise profissional. Nao sao necessarios estados intermediarios como "recebida", "em revisao" ou "pendencias" para iniciar o trabalho da Patty.
+
+Continuam abertos somente os detalhes das acoes dentro da analise, incluindo findings de IA, follow-up e eventual comunicacao com a cliente.
 
 ## Conteudo
 
