@@ -456,6 +456,94 @@ export type Database = {
           },
         ]
       }
+      anamnesis_clarification_requests: {
+        Row: {
+          created_at: string
+          id: string
+          request_text: string
+          requested_by_profile_id: string
+          source_answer_id: string | null
+          submission_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          request_text: string
+          requested_by_profile_id: string
+          source_answer_id?: string | null
+          submission_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          request_text?: string
+          requested_by_profile_id?: string
+          source_answer_id?: string | null
+          submission_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "anamnesis_clarification_requests_requested_by_profile_id_fkey"
+            columns: ["requested_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "anamnesis_clarification_requests_source_answer_id_fkey"
+            columns: ["source_answer_id"]
+            isOneToOne: false
+            referencedRelation: "anamnesis_answers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "anamnesis_clarification_requests_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "anamnesis_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      anamnesis_clarification_responses: {
+        Row: {
+          clarification_request_id: string
+          created_at: string
+          id: string
+          responder_profile_id: string
+          response_text: string
+        }
+        Insert: {
+          clarification_request_id: string
+          created_at?: string
+          id?: string
+          responder_profile_id: string
+          response_text: string
+        }
+        Update: {
+          clarification_request_id?: string
+          created_at?: string
+          id?: string
+          responder_profile_id?: string
+          response_text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "anamnesis_clarification_responses_clarification_request_id_fkey"
+            columns: ["clarification_request_id"]
+            isOneToOne: false
+            referencedRelation: "anamnesis_clarification_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "anamnesis_clarification_responses_responder_profile_id_fkey"
+            columns: ["responder_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       anamnesis_answers: {
         Row: {
           answer_value: Json
