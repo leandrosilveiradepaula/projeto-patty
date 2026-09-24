@@ -1,5 +1,27 @@
 # Decisoes
 
+## 2026-09-24 - Cutting 3 Linear e a etapa seguinte confirmada
+
+### REGRA CONFIRMADA PELA PATTY
+
+A Patty confirmou que, depois de `Cutting 2: 2 Low / 1 High`, a etapa seguinte do metodo e:
+
+`Cutting 3 Linear`
+
+### LIMITE
+
+A resposta confirma somente a existencia e o tipo linear dessa etapa.
+
+Ainda nao estao confirmados/documentados:
+- macros ou doses do Cutting 3;
+- duracao;
+- criterios de entrada/saida;
+- eventual Dia 1/Dia 2 ou Carb Cycle posterior;
+- etapas seguintes.
+
+Nenhuma dessas regras deve ser inferida a partir dos Cuttings anteriores.
+
+
 ## 2026-09-24 - Conteudos de formulas/manipulados fazem parte do aplicativo
 
 ### REGRA CONFIRMADA PELA PATTY
@@ -922,9 +944,10 @@ Reconhecimento Metabolico
 -> Cutting 2 Linear
 -> Cutting 2 Dia 1 / Dia 2
 -> Cutting 2: 2 Low / 1 High
+-> Cutting 3 Linear
 ```
 
-Nao inferir automaticamente etapas posteriores.
+Nao inferir automaticamente regras internas do Cutting 3 nem etapas posteriores.
 
 ### DECISAO CONFIRMADA
 
@@ -970,7 +993,7 @@ No fluxo confirmado, o Up Metabolico inclui uma refeicao livre semanal. Outras r
 
 ### QUESTAO ABERTA
 
-Permanecem abertas, entre outros pontos: Fases 5 e 6 do Carb Cycle, etapas posteriores ao Cutting 2, Bulking detalhado, Consolidacao, hidratacao, suplementacao/manipulados, montagem e progressao definitiva de treino, alertas profissionais e criterios finais de avaliacao.
+Permanecem abertas, entre outros pontos: Fases 5 e 6 do Carb Cycle, regras detalhadas do Cutting 3 Linear e etapas posteriores a ele, Bulking detalhado, Consolidacao, hidratacao, suplementacao/manipulados, montagem e progressao definitiva de treino, alertas profissionais e criterios finais de avaliacao.
 
 ## 2026-09-22 - Primeira versao assistiva de IA
 
