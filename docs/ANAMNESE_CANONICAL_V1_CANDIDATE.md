@@ -4,6 +4,14 @@ Data de referencia: 2026-09-24.
 
 Status: **CANDIDATA / NAO PUBLICAR AINDA**.
 
+
+Manifesto machine-readable correspondente: `docs/anamnesis_canonical_v1_candidate.json`.
+
+O manifesto e coberto por teste de invariantes para garantir:
+- cobertura exata de `ANAM-000..ANAM-046`;
+- manutencao de ANAM-005..008 fora da Anamnese;
+- bloqueio explicito de publicacao enquanto tipos/condicionais/arquivos/consentimento estiverem pendentes.
+
 Esta especificacao organiza o formulario atual confirmado pela Patty sem reescrever seu sentido profissional e sem criar regras novas.
 
 ## Objetivo

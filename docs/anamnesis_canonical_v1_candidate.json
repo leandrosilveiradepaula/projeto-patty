@@ -1,0 +1,450 @@
+{
+  "schema_version": 1,
+  "status": "candidate_not_publishable",
+  "canonical_form_key": "client-anamnesis",
+  "source_inventory": "docs/ANAMNESE.md",
+  "source_codes_expected": "ANAM-000..ANAM-046",
+  "rules": {
+    "all_applicable_questions_required_on_final_submit": true,
+    "non_applicable_dependent_questions_hidden_and_not_required": true,
+    "measurements_live_outside_anamnesis": [
+      "ANAM-005",
+      "ANAM-006",
+      "ANAM-007",
+      "ANAM-008"
+    ],
+    "do_not_publish_until": [
+      "conditional_map_closed",
+      "final_input_types_closed",
+      "composite_questions_resolved",
+      "files_integration_resolved",
+      "consent_text_and_versioning_resolved",
+      "final_order_reviewed"
+    ]
+  },
+  "items": [
+    {
+      "source_code": "ANAM-000",
+      "source_label": "Conteudo de abertura / onboarding do formulario atual",
+      "disposition": "ui_content",
+      "candidate_section": null,
+      "composite_question": false,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-001",
+      "source_label": "Cidade",
+      "disposition": "include_candidate",
+      "candidate_section": "cadastro",
+      "composite_question": false,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-002",
+      "source_label": "Telefone",
+      "disposition": "include_candidate",
+      "candidate_section": "cadastro",
+      "composite_question": false,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-003",
+      "source_label": "Email",
+      "disposition": "include_candidate",
+      "candidate_section": "cadastro",
+      "composite_question": false,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-004",
+      "source_label": "Instagram",
+      "disposition": "include_candidate",
+      "candidate_section": "cadastro",
+      "composite_question": false,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-005",
+      "source_label": "Ombros (toda circunferencia)",
+      "disposition": "exclude_to_assessment",
+      "candidate_section": null,
+      "composite_question": false,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-006",
+      "source_label": "Panturrilha",
+      "disposition": "exclude_to_assessment",
+      "candidate_section": null,
+      "composite_question": false,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-007",
+      "source_label": "Peso atual",
+      "disposition": "exclude_to_assessment",
+      "candidate_section": null,
+      "composite_question": false,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-008",
+      "source_label": "Altura",
+      "disposition": "exclude_to_assessment",
+      "candidate_section": null,
+      "composite_question": false,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-009",
+      "source_label": "Tem o costume de realizar exames de sangue?",
+      "disposition": "include_candidate",
+      "candidate_section": "historico-saude-exames",
+      "composite_question": false,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-010",
+      "source_label": "Possui plano de saude? Qual?",
+      "disposition": "include_candidate",
+      "candidate_section": "cadastro",
+      "composite_question": true,
+      "conditional_candidate": true,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-011",
+      "source_label": "Possui diabetes? Quanto tempo? Esta controlado?",
+      "disposition": "include_candidate",
+      "candidate_section": "historico-saude-exames",
+      "composite_question": true,
+      "conditional_candidate": true,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-012",
+      "source_label": "Possui algum transtorno metabolico, como tireoide ou hipogonadismo? Qual(is), ha quanto tempo e esta controlado?",
+      "disposition": "include_candidate",
+      "candidate_section": "historico-saude-exames",
+      "composite_question": true,
+      "conditional_candidate": true,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-013",
+      "source_label": "Possui alguma doenca cronica, como anemia, artrite, fibromialgia etc.?",
+      "disposition": "include_candidate",
+      "candidate_section": "historico-saude-exames",
+      "composite_question": false,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-014",
+      "source_label": "Ja realizou alguma cirurgia? Qual(is)?",
+      "disposition": "include_candidate",
+      "candidate_section": "historico-saude-exames",
+      "composite_question": true,
+      "conditional_candidate": true,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-015",
+      "source_label": "Possui alergia a alguma medicacao ou comida? Qual(is)?",
+      "disposition": "include_candidate",
+      "candidate_section": "historico-saude-exames",
+      "composite_question": true,
+      "conditional_candidate": true,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-016",
+      "source_label": "Ja fraturou ou teve alguma lesao importante que deixou sequela? Qual(is)?",
+      "disposition": "include_candidate",
+      "candidate_section": "historico-saude-exames",
+      "composite_question": true,
+      "conditional_candidate": true,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-017",
+      "source_label": "Sente dor intensa em alguma parte do corpo?",
+      "disposition": "include_candidate",
+      "candidate_section": "historico-saude-exames",
+      "composite_question": false,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-018",
+      "source_label": "Possui alguma doenca cardiovascular ou hipertensao arterial?",
+      "disposition": "include_candidate",
+      "candidate_section": "historico-saude-exames",
+      "composite_question": false,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-019",
+      "source_label": "Ja sentiu dor no peito durante alguma atividade fisica?",
+      "disposition": "include_candidate",
+      "candidate_section": "historico-saude-exames",
+      "composite_question": false,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-020",
+      "source_label": "Ja desmaiou alguma vez? Descricao e frequencia.",
+      "disposition": "include_candidate",
+      "candidate_section": "historico-saude-exames",
+      "composite_question": true,
+      "conditional_candidate": true,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-021",
+      "source_label": "Ja usou algum tipo de suplemento alimentar? Qual(is)?",
+      "disposition": "include_candidate",
+      "candidate_section": "medicamentos-suplementacao",
+      "composite_question": true,
+      "conditional_candidate": true,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-022",
+      "source_label": "O que esta administrando atualmente entre suplementos, fitoterapicos e medicamentos?",
+      "disposition": "include_candidate",
+      "candidate_section": "medicamentos-suplementacao",
+      "composite_question": false,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-023",
+      "source_label": "Como esta sua libido?",
+      "disposition": "include_candidate",
+      "candidate_section": "medicamentos-suplementacao",
+      "composite_question": false,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-024",
+      "source_label": "Toma algum suplemento vitaminico? Qual(is)?",
+      "disposition": "include_candidate",
+      "candidate_section": "medicamentos-suplementacao",
+      "composite_question": true,
+      "conditional_candidate": true,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-025",
+      "source_label": "Como esta a qualidade e o tempo do seu sono?",
+      "disposition": "include_candidate",
+      "candidate_section": "sono-rotina",
+      "composite_question": true,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-026",
+      "source_label": "Demora a dormir?",
+      "disposition": "include_candidate",
+      "candidate_section": "sono-rotina",
+      "composite_question": false,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-027",
+      "source_label": "Acorda muitas vezes durante a noite?",
+      "disposition": "include_candidate",
+      "candidate_section": "sono-rotina",
+      "composite_question": false,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-028",
+      "source_label": "Como sao suas relacoes sociais?",
+      "disposition": "include_candidate",
+      "candidate_section": "comportamento-contexto",
+      "composite_question": false,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-029",
+      "source_label": "Considera-se paciente?",
+      "disposition": "include_candidate",
+      "candidate_section": "comportamento-contexto",
+      "composite_question": false,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-030",
+      "source_label": "Ja foi mais paciente do que e hoje?",
+      "disposition": "include_candidate",
+      "candidate_section": "comportamento-contexto",
+      "composite_question": false,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-031",
+      "source_label": "Como esta seu humor?",
+      "disposition": "include_candidate",
+      "candidate_section": "comportamento-contexto",
+      "composite_question": false,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-032",
+      "source_label": "Sente-se muito cansado para levantar da cama pela manha?",
+      "disposition": "include_candidate",
+      "candidate_section": "comportamento-contexto",
+      "composite_question": false,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-033",
+      "source_label": "Tem condicao financeira para gastos com suplementos/medicamentos?",
+      "disposition": "include_candidate",
+      "candidate_section": "comportamento-contexto",
+      "composite_question": false,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-034",
+      "source_label": "Toma quantos litros de agua por dia?",
+      "disposition": "include_candidate",
+      "candidate_section": "sono-rotina",
+      "composite_question": false,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-035",
+      "source_label": "3 alimentos preferidos",
+      "disposition": "include_candidate",
+      "candidate_section": "alimentacao",
+      "composite_question": false,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-036",
+      "source_label": "3 alimentos que menos gostei",
+      "disposition": "include_candidate",
+      "candidate_section": "alimentacao",
+      "composite_question": false,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-037",
+      "source_label": "Me fala um pouco como tu ve tua relacao com a comida",
+      "disposition": "include_candidate",
+      "candidate_section": "alimentacao",
+      "composite_question": false,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-038",
+      "source_label": "Quando tu te olha no espelho, o que tu enxerga?",
+      "disposition": "include_candidate",
+      "candidate_section": "autoimagem",
+      "composite_question": false,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-039",
+      "source_label": "E como acredita que as pessoas te veem?",
+      "disposition": "include_candidate",
+      "candidate_section": "autoimagem",
+      "composite_question": false,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-040",
+      "source_label": "Me fala das tuas qualidades",
+      "disposition": "include_candidate",
+      "candidate_section": "autoimagem",
+      "composite_question": false,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-041",
+      "source_label": "Possui algum vicio (cigarro, bebidas alcoolicas, drogas ilicitas etc.)?",
+      "disposition": "include_candidate",
+      "candidate_section": "comportamento-contexto",
+      "composite_question": false,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-042",
+      "source_label": "E atleta competitivo de fisiculturismo ou outro esporte? Qual(is)?",
+      "disposition": "include_candidate",
+      "candidate_section": "atividade-objetivos",
+      "composite_question": true,
+      "conditional_candidate": true,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-043",
+      "source_label": "Quais sao seus objetivos a curto (3 meses), medio (12 meses) e longo (5 anos) prazo?",
+      "disposition": "include_candidate",
+      "candidate_section": "atividade-objetivos",
+      "composite_question": true,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-044",
+      "source_label": "Upload de arquivos",
+      "disposition": "files_integration_pending",
+      "candidate_section": "arquivos",
+      "composite_question": false,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-045",
+      "source_label": "Por que optou por este plano?",
+      "disposition": "include_candidate",
+      "candidate_section": "atividade-objetivos",
+      "composite_question": false,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    },
+    {
+      "source_code": "ANAM-046",
+      "source_label": "Declaracao de Anuencia",
+      "disposition": "consent_pending",
+      "candidate_section": "consentimento",
+      "composite_question": false,
+      "conditional_candidate": false,
+      "final_input_type": "pending"
+    }
+  ]
+}
