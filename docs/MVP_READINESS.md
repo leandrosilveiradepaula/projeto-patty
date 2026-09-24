@@ -312,3 +312,11 @@ Estado: **VISIBILIDADE IMPLEMENTADA / RECOVERY AINDA ABERTO**
 A UI administrativa identifica executions que permanecem `started` sem timestamp terminal e informa que exigem reconciliacao operacional. Nenhum timeout ou estado de falha e inferido automaticamente.
 
 O Supabase SaaS foi consultado em 2026-09-24 e nao possui residuo atual desse tipo. Recovery/watchdog automatico permanece fora desta entrega.
+
+## IA - retencao de falhas limitada
+
+Estado: **IMPLEMENTADO / TESTADO NO BOUNDARY DA APLICACAO**
+
+A aplicacao limita a resposta bruta de falha a 128 KiB UTF-8 e a mensagem sanitizada a 1.024 code points antes da chamada ao RPC interno. Respostas truncadas passam a `text` com marcador explicito, evitando persistir JSON truncado como se fosse estruturalmente valido.
+
+Nenhuma migration foi necessaria nesta etapa porque o SaaS nao continha failure responses ou failure messages reais. O gate de envio de dados reais para OpenAI permanece fechado e independente desta mudanca.
