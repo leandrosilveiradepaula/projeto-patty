@@ -79,7 +79,7 @@ Nao existe bloqueio atual de deployment Vercel para o `master`.
 | Protocolos versionados | SIM | Lifecycle manual implementado | CI/validacoes existentes | Backend/SaaS correspondente existente | Criacao/edicao profissional completa conforme regras ainda abertas |
 | Conteudo educacional / exercicios | SIM como dominios separados | Fundacao e releases parciais | Inventario original 89/89 revalidado; segunda passada metadata-only concluida | Video da balanca aprovado, mas arquivo original tem ~117,6 MiB e excede limite de 50 MB do Supabase Free; nenhuma migracao fisica feita | Decidir infraestrutura de midia educacional; depois copiar/versionar/publicar explicitamente |
 | Metodo da Patty | PARCIALMENTE DEFINIDO | Regras matematicas confirmadas em codigo testavel | CI | Fluxo confirmado agora inclui Cutting 3 Linear apos Cutting 2: 2 Low / 1 High | Fases 5/6, regras internas/pos-Cutting 3, Bulking, Consolidacao, hidratacao, suplementacao, treino, alertas e criterios finais |
-| IA assistiva | SIM como principio e arquitetura | PARCIAL/AVANCADO | Validador de output + contexto minimizado + execution boundary testada em smoke transacional | Hardening preparado em migration/branch; ainda nao aplicado | Provider/modelo, prompt operacional, chamada real ao provider e UX de revisao |
+| IA assistiva | SIM como principio e arquitetura | PARCIAL/AVANCADO | Validador de output + contexto minimizado + execution boundary com CI e smoke pos-apply PASS | Migration `20260924165942` aplicada no SaaS; codigo aguardando merge/publicacao | Provider/modelo, prompt operacional, chamada real ao provider e UX de revisao |
 | Failure handling de IA | SIM | SIM no schema versionado | Static gate aprovado | `20260922160058` confirmada no historico remoto do Supabase | Integrar execution real com provider sem quebrar invariantes |
 | n8n | SIM: nao usar inicialmente | N/A | N/A | Nao usado | Introduzir somente com caso concreto |
 | LangGraph | SIM: nao usar inicialmente | N/A | N/A | Nao usado | Introduzir somente se fluxo de IA justificar |
@@ -200,7 +200,7 @@ Ordem operacional sugerida, sujeita a revalidacao do HEAD:
 2. materializar a primeira `client-anamnesis`, revisar, publicar explicitamente e validar inicio, preenchimento condicional e envio final E2E;
 3. resolver infraestrutura do email real de convite;
 4. validar futuramente o fluxo autenticado admin <-> cliente de esclarecimentos com fixture sintetica sem transformar esse teste em fonte de regra;
-5. aplicar/validar o hardening da execution boundary de IA; depois preparar execution real somente quando provider/modelo forem explicitamente definidos;
+5. mergear/publicar o hardening da execution boundary de IA; depois preparar execution real somente quando provider/modelo forem explicitamente definidos;
 6. decidir a infraestrutura de midia educacional para arquivos acima de 50 MB; depois preparar a migracao controlada do video aprovado da balanca;
 7. ampliar automacao de alimentacao/treino somente depois das regras profissionais correspondentes estarem documentadas.
 
@@ -275,4 +275,4 @@ A branch de hardening prepara:
 - construtor deterministico de contexto com aplicabilidade e minimizacao;
 - identidade administrativa derivada de sessao AAL2 em camada `server-only`.
 
-O desenho passou smoke transacional no Supabase SaaS com `ROLLBACK`. Migration definitiva, CI, apply e publicacao permanecem estados separados.
+A migration `20260924165942_harden_ai_execution_boundary.sql` foi aplicada no Supabase SaaS. O smoke pos-apply com dados sinteticos e `ROLLBACK` confirmou vinculo da submission, deduplicacao de sources, bloqueio cross-submission, congelamento pos-terminal, completion/failure atomicos, preservacao de resposta bruta quando aplicavel e RPCs inacessiveis a `anon`/`authenticated`. O advisor de seguranca nao trouxe finding novo; permanece apenas Leaked Password Protection ja conhecido. O advisor de performance passou a listar a nova FK composta de `ai_executions` como sem indice de cobertura exata; nenhuma migration extra foi criada apenas para zerar esse lint sem workload.
