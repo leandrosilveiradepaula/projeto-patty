@@ -346,4 +346,6 @@ A migration `20260924210600_create_educational_content_assets.sql` foi aplicada 
 
 O advisor de seguranca nao trouxe finding novo; permanece apenas Leaked Password Protection ja conhecido. O advisor de performance marcou o novo indice como ainda nao usado, esperado antes de workload.
 
-Criar o Blob store e copiar o video continuam operacoes separadas.
+O PR #157 foi mergeado no commit `857daed` e o deployment correspondente ficou `READY` em producao. A consulta de runtime `error/fatal` da janela observada nao retornou eventos.
+
+Criar/conectar o Blob store e copiar o video continuam operacoes separadas.
