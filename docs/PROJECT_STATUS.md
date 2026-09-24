@@ -79,7 +79,7 @@ Nao existe bloqueio atual de deployment Vercel para o `master`.
 | Protocolos versionados | SIM | Lifecycle manual implementado | CI/validacoes existentes | Backend/SaaS correspondente existente | Criacao/edicao profissional completa conforme regras ainda abertas |
 | Conteudo educacional / exercicios | SIM como dominios separados | Fundacao e releases parciais | Inventario original 89/89 revalidado; segunda passada metadata-only concluida | Video da balanca aprovado, mas arquivo original tem ~117,6 MiB e excede limite de 50 MB do Supabase Free; nenhuma migracao fisica feita | Decidir infraestrutura de midia educacional; depois copiar/versionar/publicar explicitamente |
 | Metodo da Patty | PARCIALMENTE DEFINIDO | Regras matematicas confirmadas em codigo testavel | CI | Fluxo confirmado agora inclui Cutting 3 Linear apos Cutting 2: 2 Low / 1 High | Fases 5/6, regras internas/pos-Cutting 3, Bulking, Consolidacao, hidratacao, suplementacao, treino, alertas e criterios finais |
-| IA assistiva | SIM como principio e arquitetura | PARCIAL | Validador deterministico de output | Fundacao de banco existente | Provider/modelo, execution boundary, UX de revisao |
+| IA assistiva | SIM como principio e arquitetura | PARCIAL | Validador deterministico de output com contradicao, esclarecimento e `missing_answer` | Fundacao de banco existente | Provider/modelo, execution boundary, montagem server-side das allowlists e UX de revisao |
 | Failure handling de IA | SIM | SIM no schema versionado | Static gate aprovado | `20260922160058` confirmada no historico remoto do Supabase | Integrar execution real com provider sem quebrar invariantes |
 | n8n | SIM: nao usar inicialmente | N/A | N/A | Nao usado | Introduzir somente com caso concreto |
 | LangGraph | SIM: nao usar inicialmente | N/A | N/A | Nao usado | Introduzir somente se fluxo de IA justificar |
@@ -123,7 +123,7 @@ Resumo:
 - depois do envio final, a cliente nao altera as respostas;
 - somente a Patty pode registrar correcao posterior;
 - correcao nao sobrescreve a resposta original;
-- `missing_answer` so pode ser implementado consultando a aplicabilidade versionada ja formalizada; campo oculto nao pode ser tratado como ausente;
+- `missing_answer` possui validador deterministico e so aceita target previamente classificado pelo caller como aplicavel e sem resposta; campo oculto nao pode ser tratado como ausente;
 - resposta original, interpretacao de IA, notas/correcoes e artefatos posteriores permanecem separados.
 
 ## Onboarding e autenticacao: regras que nao devem ser reabertas
