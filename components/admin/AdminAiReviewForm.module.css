@@ -1,0 +1,29 @@
+.form {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.checkboxRow {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  color: var(--color-text-secondary);
+  line-height: var(--text-body-medium-line-height);
+}
+
+.checkboxRow input {
+  margin-top: 0.2rem;
+}
+
+.actions {
+  display: grid;
+  gap: var(--space-2);
+  justify-items: start;
+}
+
+.help {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-body-small-size);
+  line-height: var(--text-body-small-line-height);
+}
