@@ -22,8 +22,10 @@ test("accepts an empty findings array", () => {
   );
 });
 
-test("accepts the two confirmed finding types with valid sources", () => {
+test("accepts the supported finding types with deterministic source and target allowlists", () => {
+  const missingQuestion = "55555555-5555-4555-8555-555555555555";
   const result = validateAnamnesisReviewOutput({
+    allowedMissingTargetQuestionIds: new Set([missingQuestion]),
     allowedSourceAnswerIds,
     value: {
       findings: [
@@ -40,12 +42,20 @@ test("accepts the two confirmed finding types with valid sources", () => {
             "A resposta pode ser insuficiente para uma interpretação segura.",
           suggested_follow_up_question: "Você pode detalhar esta resposta?",
         },
+        {
+          type: "missing_answer",
+          source_answer_ids: [],
+          target_question_id: missingQuestion,
+          explanation:
+            "A pergunta aplicável não possui resposta registrada.",
+          suggested_follow_up_question: "Você pode responder esta pergunta?",
+        },
       ],
     },
   });
 
   assert.equal(result.ok, true);
-  assert.equal(result.ok && result.value.findings.length, 2);
+  assert.equal(result.ok && result.value.findings.length, 3);
 });
 
 test("rejects extra top-level properties", () => {
@@ -77,21 +87,79 @@ test("rejects extra finding properties such as scores or diagnoses", () => {
   );
 });
 
-test("rejects unsupported finding types including missing_answer", () => {
+test("missing_answer requires an applicable unanswered target question", () => {
+  const target = "55555555-5555-4555-8555-555555555555";
+
+  assert.deepEqual(
+    validateAnamnesisReviewOutput({
+      allowedMissingTargetQuestionIds: new Set([target]),
+      allowedSourceAnswerIds,
+      value: {
+        findings: [
+          {
+            type: "missing_answer",
+            source_answer_ids: [],
+            explanation: "Resposta ausente.",
+          },
+        ],
+      },
+    }),
+    { ok: false, error: "invalid_target_question_id" },
+  );
+
+  assert.deepEqual(
+    validateAnamnesisReviewOutput({
+      allowedMissingTargetQuestionIds: new Set(),
+      allowedSourceAnswerIds,
+      value: {
+        findings: [
+          {
+            type: "missing_answer",
+            source_answer_ids: [],
+            target_question_id: target,
+            explanation: "Resposta ausente.",
+          },
+        ],
+      },
+    }),
+    { ok: false, error: "target_question_not_missing_or_applicable" },
+  );
+
+  assert.deepEqual(
+    validateAnamnesisReviewOutput({
+      allowedMissingTargetQuestionIds: new Set([target]),
+      allowedSourceAnswerIds,
+      value: {
+        findings: [
+          {
+            type: "missing_answer",
+            source_answer_ids: [],
+            target_question_id: "not-a-uuid",
+            explanation: "Resposta ausente.",
+          },
+        ],
+      },
+    }),
+    { ok: false, error: "invalid_target_question_id" },
+  );
+});
+
+test("non-missing findings cannot carry a target question id", () => {
   assert.deepEqual(
     validateAnamnesisReviewOutput({
       allowedSourceAnswerIds,
       value: {
         findings: [
           {
-            type: "missing_answer",
+            type: "clarification_needed",
             source_answer_ids: [ANSWER_A],
-            explanation: "Resposta ausente.",
+            target_question_id: "55555555-5555-4555-8555-555555555555",
+            explanation: "Pode precisar de esclarecimento.",
           },
         ],
       },
     }),
-    { ok: false, error: "invalid_finding_type" },
+    { ok: false, error: "invalid_target_question_id" },
   );
 });
 
