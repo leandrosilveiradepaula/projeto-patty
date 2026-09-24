@@ -147,3 +147,18 @@ A aplicacao Next.js usa clientes Supabase tipados, um para browser e outro para 
 
 ## Questoes abertas
 
+
+
+## Boundary server-side de IA
+
+### DECISAO TECNICA
+
+O primeiro fluxo `anamnesis_review` permanece dentro do backend Next.js/Vercel. Nao existe servico FastAPI, n8n ou LangGraph para esta etapa.
+
+Fluxo de seguranca:
+
+`acao server-side futura -> requireRole("admin") / AAL2 -> contexto minimizado via Supabase autenticado/RLS -> modulo server-only -> RPC SECURITY INVOKER exclusiva de service_role -> tabelas internas de IA`
+
+O secret do Supabase nunca entra no browser. A camada privilegiada nao consulta identidade fornecida pelo request; recebe a identidade derivada da sessao administrativa ja validada.
+
+As RPCs internas agrupam transicoes que precisam ser atomicas. Elas nao substituem as constraints/triggers do banco; apenas fornecem uma unidade transacional confiavel para a aplicacao.
