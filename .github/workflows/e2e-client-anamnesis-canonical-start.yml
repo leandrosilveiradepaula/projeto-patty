@@ -54,3 +54,10 @@ jobs:
           E2E_SUPABASE_URL: "https://hqanoskwjvpbgavppcud.supabase.co"
           E2E_SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.E2E_SUPABASE_SECRET_KEY }}
         run: npx playwright test e2e/client-anamnesis-canonical-start.spec.mjs --reporter=line
+
+      - name: Run production canonical Anamnesis draft edit smoke
+        env:
+          E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
+          E2E_SUPABASE_URL: "https://hqanoskwjvpbgavppcud.supabase.co"
+          E2E_SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.E2E_SUPABASE_SECRET_KEY }}
+        run: npx playwright test e2e/client-anamnesis-canonical-draft-edit.spec.mjs --reporter=line
