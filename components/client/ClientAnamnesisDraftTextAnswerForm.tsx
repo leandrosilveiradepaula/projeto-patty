@@ -45,7 +45,7 @@ export function ClientAnamnesisDraftTextAnswerForm({
     if (state.success) {
       router.refresh();
     }
-  }, [router, state]);
+  }, [router, state.success]);
 
   return (
     <form action={formAction} className={styles.form}>
