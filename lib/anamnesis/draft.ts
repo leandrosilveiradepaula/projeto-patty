@@ -125,11 +125,15 @@ export async function getOrCreateCurrentClientAnamnesisDraft(
   throw error;
 }
 
-async function updateDraftAnswer(input: {
-  answerId: string;
-  answerValue: Json;
-}) {
-  const supabase = await createClient();
+type ServerSupabaseClient = Awaited<ReturnType<typeof createClient>>;
+
+async function updateDraftAnswer(
+  supabase: ServerSupabaseClient,
+  input: {
+    answerId: string;
+    answerValue: Json;
+  },
+) {
   const { data, error } = await supabase
     .from("anamnesis_answers")
     .update({ answer_value: input.answerValue })
@@ -222,7 +226,7 @@ export async function saveCurrentClientAnamnesisDraftAnswer(input: {
     existingAnswer
   ) {
     return {
-      answer: await updateDraftAnswer({
+      answer: await updateDraftAnswer(supabase, {
         answerId: existingAnswer.id,
         answerValue: input.answerValue,
       }),
@@ -262,7 +266,7 @@ export async function saveCurrentClientAnamnesisDraftAnswer(input: {
 
     if (concurrent) {
       return {
-        answer: await updateDraftAnswer({
+        answer: await updateDraftAnswer(supabase, {
           answerId: concurrent.id,
           answerValue: input.answerValue,
         }),
