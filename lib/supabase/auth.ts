@@ -13,8 +13,11 @@ export type AuthenticatorAssuranceState = {
   nextLevel: string | null;
 };
 
-export async function getCurrentAuthContext(): Promise<AuthContext | null> {
-  const supabase = await createClient();
+type ServerSupabaseClient = Awaited<ReturnType<typeof createClient>>;
+
+export async function getAuthContextFromClient(
+  supabase: ServerSupabaseClient,
+): Promise<AuthContext | null> {
   const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
   const profileId = claimsData?.claims?.sub;
 
@@ -33,8 +36,14 @@ export async function getCurrentAuthContext(): Promise<AuthContext | null> {
     : { profileId, role: null };
 }
 
-export async function getAuthenticatorAssuranceState(): Promise<AuthenticatorAssuranceState> {
+export async function getCurrentAuthContext(): Promise<AuthContext | null> {
   const supabase = await createClient();
+  return getAuthContextFromClient(supabase);
+}
+
+export async function getAuthenticatorAssuranceStateFromClient(
+  supabase: ServerSupabaseClient,
+): Promise<AuthenticatorAssuranceState> {
   const { data, error } =
     await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
 
@@ -46,6 +55,11 @@ export async function getAuthenticatorAssuranceState(): Promise<AuthenticatorAss
     currentLevel: data.currentLevel,
     nextLevel: data.nextLevel,
   };
+}
+
+export async function getAuthenticatorAssuranceState(): Promise<AuthenticatorAssuranceState> {
+  const supabase = await createClient();
+  return getAuthenticatorAssuranceStateFromClient(supabase);
 }
 
 export async function requireRoleIdentity(role: AppRole) {
