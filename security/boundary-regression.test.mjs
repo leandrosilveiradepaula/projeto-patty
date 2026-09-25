@@ -265,6 +265,27 @@ test("Supabase Auth hardening workflow stays manual and one-way", async () => {
   }
 });
 
+test("Anamnesis draft updates reuse the authenticated Supabase client", async () => {
+  const content = await readFile(
+    path.join(ROOT, "lib", "anamnesis", "draft.ts"),
+    "utf8",
+  );
+
+  assert.match(
+    content,
+    /async function updateDraftAnswer\(\s*supabase: ServerSupabaseClient,/,
+    "Draft answer update helper must receive the already-authenticated Supabase client.",
+  );
+
+  assert.equal(
+    /async function updateDraftAnswer[\s\S]*?const supabase = await createClient\(\)/.test(
+      content,
+    ),
+    false,
+    "Draft answer update helper must not create a second request-scoped Supabase client.",
+  );
+});
+
 test("Supabase SSR proxy preserves session cookies and cache-control headers", async () => {
   const content = await readFile(
     path.join(ROOT, "lib", "supabase", "proxy.ts"),
