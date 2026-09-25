@@ -111,6 +111,14 @@ async function loadAnswer(submissionId, questionId) {
   return answer.data;
 }
 
+function draftTextField(page, questionId) {
+  return page.locator(`#anamnesis-draft-answer-${questionId}`);
+}
+
+function formContaining(page, locator) {
+  return page.locator("form").filter({ has: locator });
+}
+
 test.use({ baseURL: baseUrl });
 
 test("cliente percorre start, resume, edita e aplica condicional da Anamnese canonica v1", async ({
@@ -178,8 +186,10 @@ test("cliente percorre start, resume, edita e aplica condicional da Anamnese can
     });
 
     await test.step("insere e atualiza Cidade sem duplicar resposta", async () => {
-      const city = page.getByLabel(canonical.city.label, { exact: true });
-      const cityForm = city.locator("xpath=ancestor::form");
+      const city = draftTextField(page, canonical.city.id);
+      const cityForm = formContaining(page, city);
+
+      await expect(city).toBeVisible();
 
       await city.fill("Porto Alegre E2E");
       await cityForm
@@ -193,12 +203,12 @@ test("cliente percorre start, resume, edita e aplica condicional da Anamnese can
         }, { timeout: 20_000 })
         .toEqual(["Porto Alegre E2E"]);
 
-      await page.getByLabel(canonical.city.label, { exact: true }).fill(
-        "Cidade E2E atualizada",
-      );
-      await page
-        .getByLabel(canonical.city.label, { exact: true })
-        .locator("xpath=ancestor::form")
+      const refreshedCity = draftTextField(page, canonical.city.id);
+      const refreshedCityForm = formContaining(page, refreshedCity);
+
+      await expect(refreshedCity).toBeVisible();
+      await refreshedCity.fill("Cidade E2E atualizada");
+      await refreshedCityForm
         .getByRole("button", { name: "Salvar no rascunho" })
         .click();
 
@@ -212,7 +222,7 @@ test("cliente percorre start, resume, edita e aplica condicional da Anamnese can
 
     await test.step("ativa a pergunta condicional com Sim", async () => {
       await expect(
-        page.getByLabel(canonical.detail.label, { exact: true }),
+        draftTextField(page, canonical.detail.id),
       ).toHaveCount(0);
 
       const sourceForm = page
@@ -236,13 +246,15 @@ test("cliente percorre start, resume, edita e aplica condicional da Anamnese can
         { timeout: 20_000 },
       );
       await expect(
-        page.getByLabel(canonical.detail.label, { exact: true }),
+        draftTextField(page, canonical.detail.id),
       ).toBeVisible({ timeout: 20_000 });
     });
 
     await test.step("salva o detalhe condicional", async () => {
-      const detail = page.getByLabel(canonical.detail.label, { exact: true });
-      const detailForm = detail.locator("xpath=ancestor::form");
+      const detail = draftTextField(page, canonical.detail.id);
+      const detailForm = formContaining(page, detail);
+
+      await expect(detail).toBeVisible();
 
       await detail.fill("Plano E2E");
       await detailForm
@@ -279,7 +291,7 @@ test("cliente percorre start, resume, edita e aplica condicional da Anamnese can
         { timeout: 20_000 },
       );
       await expect(
-        page.getByLabel(canonical.detail.label, { exact: true }),
+        draftTextField(page, canonical.detail.id),
       ).toHaveCount(0, { timeout: 20_000 });
     });
 
