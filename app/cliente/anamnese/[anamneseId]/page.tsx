@@ -247,6 +247,11 @@ export default async function ClienteAnamneseDetailPage({
                             options: question.options,
                             submittedAt: submission.submitted_at,
                           });
+                        const controlsApplicability = questions.some(
+                          (candidate) =>
+                            candidate.applicability_source_question_id ===
+                            question.id,
+                        );
 
                         if (editableTextDraft) {
                           return (
@@ -259,6 +264,7 @@ export default async function ClienteAnamneseDetailPage({
                                 }
                                 label={question.label}
                                 questionId={question.id}
+                                reloadPageOnSuccess={controlsApplicability}
                                 required={question.required}
                                 submissionId={submission.id}
                               />
