@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 
 import {
   getAuthenticatorAssuranceStateFromClient,
-  getAuthContextFromClient,
+  getAuthContextForProfileId,
 } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
 
@@ -19,10 +19,13 @@ export async function login(_: LoginState, formData: FormData): Promise<LoginSta
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-  if (error) return { message: "Email ou senha inválidos." };
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: email.trim(),
+    password,
+  });
+  if (error || !data.user) return { message: "Email ou senha inválidos." };
 
-  const context = await getAuthContextFromClient(supabase);
+  const context = await getAuthContextForProfileId(supabase, data.user.id);
 
   if (context?.role === "admin") {
     const assurance = await getAuthenticatorAssuranceStateFromClient(supabase);

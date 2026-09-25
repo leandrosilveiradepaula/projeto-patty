@@ -15,14 +15,10 @@ export type AuthenticatorAssuranceState = {
 
 type ServerSupabaseClient = Awaited<ReturnType<typeof createClient>>;
 
-export async function getAuthContextFromClient(
+export async function getAuthContextForProfileId(
   supabase: ServerSupabaseClient,
-): Promise<AuthContext | null> {
-  const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
-  const profileId = claimsData?.claims?.sub;
-
-  if (claimsError || typeof profileId !== "string") return null;
-
+  profileId: string,
+): Promise<AuthContext> {
   const { data: roles, error: rolesError } = await supabase
     .from("user_roles")
     .select("role")
@@ -34,6 +30,17 @@ export async function getAuthContextFromClient(
   return role === "admin" || role === "client"
     ? { profileId, role }
     : { profileId, role: null };
+}
+
+export async function getAuthContextFromClient(
+  supabase: ServerSupabaseClient,
+): Promise<AuthContext | null> {
+  const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
+  const profileId = claimsData?.claims?.sub;
+
+  if (claimsError || typeof profileId !== "string") return null;
+
+  return getAuthContextForProfileId(supabase, profileId);
 }
 
 export async function getCurrentAuthContext(): Promise<AuthContext | null> {

@@ -265,6 +265,53 @@ test("Supabase Auth hardening workflow stays manual and one-way", async () => {
   }
 });
 
+test("Supabase SSR proxy preserves session cookies and cache-control headers", async () => {
+  const content = await readFile(
+    path.join(ROOT, "lib", "supabase", "proxy.ts"),
+    "utf8",
+  );
+
+  for (const required of [
+    "setAll(cookiesToSet, headers)",
+    "request.cookies.set(name, value)",
+    "response.cookies.set(name, value, options)",
+    "Object.entries(headers)",
+    "response.headers.set(key, value)",
+    "supabase.auth.getClaims()",
+  ]) {
+    assert.equal(
+      content.includes(required),
+      true,
+      "Supabase SSR proxy must keep " + required,
+    );
+  }
+});
+
+test("password login routes from the user returned by the successful sign-in", async () => {
+  const content = await readFile(
+    path.join(ROOT, "app", "login", "actions.ts"),
+    "utf8",
+  );
+
+  for (const required of [
+    "signInWithPassword",
+    "data.user",
+    "getAuthContextForProfileId(supabase, data.user.id)",
+  ]) {
+    assert.equal(
+      content.includes(required),
+      true,
+      "Login action must keep deterministic post-auth routing via " + required,
+    );
+  }
+
+  assert.equal(
+    content.includes("getCurrentAuthContext()"),
+    false,
+    "Login action must not re-read auth context through a new request-scoped client.",
+  );
+});
+
 test("Vercel skips codex preview deployments while preserving production eligibility", async () => {
   const config = JSON.parse(
     await readFile(path.join(ROOT, "vercel.json"), "utf8"),
