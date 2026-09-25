@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 import {
   type ClientAnamnesisDraftAnswerFormState,
@@ -38,6 +39,13 @@ export function ClientAnamnesisDraftTextAnswerForm({
     questionId,
   );
   const [state, formAction, isPending] = useActionState(action, initialState);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isPending && state.success) {
+      router.refresh();
+    }
+  }, [isPending, router, state.success]);
 
   return (
     <form action={formAction} className={styles.form}>
