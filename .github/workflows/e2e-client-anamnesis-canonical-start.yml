@@ -42,6 +42,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Create ephemeral canonical E2E client
+        env:
+          E2E_SUPABASE_URL: "https://hqanoskwjvpbgavppcud.supabase.co"
+          E2E_SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.E2E_SUPABASE_SECRET_KEY }}
+        run: node e2e/setup-canonical-anamnesis-client.mjs
+
       - name: Install Playwright test runner
         run: npm install --no-save --package-lock=false @playwright/test@1.55.0
 
@@ -62,9 +68,9 @@ jobs:
           E2E_SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.E2E_SUPABASE_SECRET_KEY }}
         run: npx playwright test e2e/client-anamnesis-canonical-draft-edit.spec.mjs --reporter=line
 
-      - name: Cleanup canonical synthetic drafts
+      - name: Cleanup ephemeral canonical E2E client
         if: always()
         env:
           E2E_SUPABASE_URL: "https://hqanoskwjvpbgavppcud.supabase.co"
           E2E_SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.E2E_SUPABASE_SECRET_KEY }}
-        run: node e2e/cleanup-canonical-anamnesis-drafts.mjs
+        run: node e2e/cleanup-canonical-anamnesis-client.mjs

@@ -21,6 +21,7 @@ type ClientAnamnesisDraftSingleChoiceAnswerFormProps = {
   label: string;
   options: string[];
   questionId: string;
+  reloadPageOnSuccess?: boolean;
   required: boolean;
   submissionId: string;
 };
@@ -30,6 +31,7 @@ export function ClientAnamnesisDraftSingleChoiceAnswerForm({
   label,
   options,
   questionId,
+  reloadPageOnSuccess = false,
   required,
   submissionId,
 }: ClientAnamnesisDraftSingleChoiceAnswerFormProps) {
@@ -42,10 +44,17 @@ export function ClientAnamnesisDraftSingleChoiceAnswerForm({
   const router = useRouter();
 
   useEffect(() => {
-    if (state.success) {
-      router.refresh();
+    if (!state.success) {
+      return;
     }
-  }, [router, state.success]);
+
+    if (reloadPageOnSuccess) {
+      window.location.reload();
+      return;
+    }
+
+    router.refresh();
+  }, [reloadPageOnSuccess, router, state.success]);
 
   const descriptionId = `anamnesis-draft-choice-${questionId}-description`;
 

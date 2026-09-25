@@ -1,5 +1,3 @@
-import { randomBytes } from "node:crypto";
-
 import { expect, test } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 
@@ -17,57 +15,26 @@ const admin = createClient(supabaseUrl, supabaseSecretKey, {
   auth: { autoRefreshToken: false, persistSession: false },
 });
 
-async function lockSyntheticClient(userId) {
-  const updated = await admin.auth.admin.updateUserById(userId, {
-    password: randomBytes(48).toString("base64url"),
-  });
+const canonicalEmail = process.env.E2E_CANONICAL_EMAIL;
+const canonicalPassword = process.env.E2E_CANONICAL_PASSWORD;
+const canonicalProfileId = process.env.E2E_CANONICAL_PROFILE_ID;
+const canonicalClientId = process.env.E2E_CANONICAL_CLIENT_ID;
 
-  if (updated.error) throw updated.error;
+if (
+  !canonicalEmail ||
+  !canonicalPassword ||
+  !canonicalProfileId ||
+  !canonicalClientId
+) {
+  throw new Error("Missing ephemeral canonical E2E client environment.");
 }
 
-async function loadSyntheticClient() {
-  const profiles = await admin
-    .from("profiles")
-    .select("id")
-    .eq("display_name", "E2E Correction Client")
-    .limit(2);
-
-  if (profiles.error) throw profiles.error;
-  if (profiles.data.length !== 1) {
-    throw new Error(
-      "Expected exactly one persistent E2E Correction Client fixture.",
-    );
-  }
-
-  const profileId = profiles.data[0].id;
-  const client = await admin
-    .from("clients")
-    .select("id")
-    .eq("profile_id", profileId)
-    .single();
-
-  if (client.error) throw client.error;
-
-  const authUser = await admin.auth.admin.getUserById(profileId);
-  if (authUser.error) throw authUser.error;
-
-  const email = authUser.data.user.email;
-  if (!email) throw new Error("Persistent E2E client has no Auth email.");
-
-  const password = randomBytes(48).toString("base64url");
-  const updated = await admin.auth.admin.updateUserById(profileId, {
-    password,
-  });
-
-  if (updated.error) throw updated.error;
-
-  return {
-    clientId: client.data.id,
-    email,
-    password,
-    profileId,
-  };
-}
+const syntheticClient = {
+  clientId: canonicalClientId,
+  email: canonicalEmail,
+  password: canonicalPassword,
+  profileId: canonicalProfileId,
+};
 
 async function loadCanonicalV1() {
   const form = await admin
@@ -122,7 +89,7 @@ test.use({ baseURL: baseUrl });
 test("cliente sintetica inicia e retoma draft da client-anamnesis v1 publicada", async ({
   page,
 }) => {
-  const client = await loadSyntheticClient();
+  const client = syntheticClient;
   const canonical = await loadCanonicalV1();
 
   await cleanupCanonicalDraft(client.clientId, canonical.id);
@@ -177,7 +144,6 @@ test("cliente sintetica inicia e retoma draft da client-anamnesis v1 publicada",
     );
   } finally {
     await cleanupCanonicalDraft(client.clientId, canonical.id);
-    await lockSyntheticClient(client.profileId);
   }
 
   const residue = await admin
