@@ -27,6 +27,7 @@ const created = await admin.auth.admin.createUser({
 if (created.error) throw created.error;
 
 const profileId = created.data.user.id;
+let clientId = null;
 
 try {
   const profile = await admin.from("profiles").insert({
@@ -52,15 +53,34 @@ try {
     .select("id")
     .single();
   if (client.error) throw client.error;
+  clientId = client.data.id;
 
   const verifier = createClient(url, secret, {
     auth: { autoRefreshToken: false, persistSession: false },
   });
-  const signedIn = await verifier.auth.signInWithPassword({ email, password });
-  if (signedIn.error) {
-    throw new Error(`Ephemeral client login preflight failed: ${signedIn.error.message}`);
+  let loginError = null;
+
+  for (let attempt = 1; attempt <= 5; attempt += 1) {
+    const signedIn = await verifier.auth.signInWithPassword({ email, password });
+
+    if (!signedIn.error) {
+      loginError = null;
+      await verifier.auth.signOut();
+      break;
+    }
+
+    loginError = signedIn.error;
+
+    if (attempt < 5) {
+      await new Promise((resolve) => setTimeout(resolve, attempt * 500));
+    }
   }
-  await verifier.auth.signOut();
+
+  if (loginError) {
+    throw new Error(
+      `Ephemeral client login preflight failed after retries: ${loginError.message}`,
+    );
+  }
 
   await appendFile(
     githubEnv,
@@ -68,13 +88,16 @@ try {
       `E2E_CANONICAL_EMAIL=${email}`,
       `E2E_CANONICAL_PASSWORD=${password}`,
       `E2E_CANONICAL_PROFILE_ID=${profileId}`,
-      `E2E_CANONICAL_CLIENT_ID=${client.data.id}`,
+      `E2E_CANONICAL_CLIENT_ID=${clientId}`,
       "",
     ].join("\n"),
   );
 
   console.log("Ephemeral canonical E2E client created and login preflight passed.");
 } catch (error) {
+  if (clientId) {
+    await admin.from("clients").delete().eq("id", clientId);
+  }
   await admin.from("user_roles").delete().eq("profile_id", profileId);
   await admin.from("profiles").delete().eq("id", profileId);
   await admin.auth.admin.deleteUser(profileId);
