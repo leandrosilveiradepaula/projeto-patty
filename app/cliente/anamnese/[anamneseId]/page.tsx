@@ -1,6 +1,7 @@
 import { ClientAnamnesisDraftSingleChoiceAnswerForm } from "@/components/client/ClientAnamnesisDraftSingleChoiceAnswerForm";
 import { ClientAnamnesisDraftTextAnswerForm } from "@/components/client/ClientAnamnesisDraftTextAnswerForm";
 import { ClientAnamnesisSubmitForm } from "@/components/client/ClientAnamnesisSubmitForm";
+import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -27,6 +28,9 @@ import styles from "./page.module.css";
 type ClienteAnamneseDetailPageProps = {
   params: Promise<{
     anamneseId: string;
+  }>;
+  searchParams: Promise<{
+    saved?: string;
   }>;
 };
 
@@ -63,8 +67,9 @@ function isStructuredAnswer(value: unknown) {
 
 export default async function ClienteAnamneseDetailPage({
   params,
+  searchParams,
 }: ClienteAnamneseDetailPageProps) {
-  const { anamneseId } = await params;
+  const [{ anamneseId }, query] = await Promise.all([params, searchParams]);
   const [client, submission] = await Promise.all([
     getCurrentClient(),
     getAccessibleAnamnesisSubmission(anamneseId),
@@ -145,6 +150,11 @@ export default async function ClienteAnamneseDetailPage({
         eyebrow="Cliente"
         title="Detalhe da Anamnese"
       />
+      {query.saved === "1" ? (
+        <Alert title="Rascunho salvo" variant="success">
+          Resposta salva no rascunho.
+        </Alert>
+      ) : null}
       <Section
         action={
           <Badge variant="neutral">
