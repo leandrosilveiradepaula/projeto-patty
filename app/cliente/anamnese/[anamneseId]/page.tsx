@@ -264,7 +264,6 @@ export default async function ClienteAnamneseDetailPage({
                                 }
                                 label={question.label}
                                 questionId={question.id}
-                                reloadPageOnSuccess={controlsApplicability}
                                 required={question.required}
                                 submissionId={submission.id}
                               />
@@ -287,6 +286,7 @@ export default async function ClienteAnamneseDetailPage({
                                 label={question.label}
                                 options={singleChoiceOptions}
                                 questionId={question.id}
+                                reloadPageOnSuccess={controlsApplicability}
                                 required={question.required}
                                 submissionId={submission.id}
                               />
