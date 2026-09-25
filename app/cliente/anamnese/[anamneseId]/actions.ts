@@ -1,6 +1,6 @@
 "use server";
 
-import { refresh, revalidatePath } from "next/cache";
+import { revalidatePath } from "next/cache";
 
 import { requireRole } from "@/lib/supabase/auth";
 import {
@@ -79,7 +79,6 @@ export async function saveClientAnamnesisDraftTextAnswer(
   }
 
   revalidateAnamnesisDraft(submissionId);
-  refresh();
 
   return {
     message: "Resposta salva no rascunho.",
@@ -119,7 +118,6 @@ export async function saveClientAnamnesisDraftSingleChoiceAnswer(
   }
 
   revalidateAnamnesisDraft(submissionId);
-  refresh();
 
   return {
     message: "Resposta salva no rascunho.",
