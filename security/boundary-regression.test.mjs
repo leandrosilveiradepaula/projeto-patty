@@ -277,10 +277,15 @@ test("Anamnesis draft updates reuse the authenticated Supabase client", async ()
     "Draft answer update helper must receive the already-authenticated Supabase client.",
   );
 
+  const helperStart = content.indexOf("async function updateDraftAnswer");
+  const helperEnd = content.indexOf(
+    "export async function saveCurrentClientAnamnesisDraftAnswer",
+    helperStart,
+  );
+  const helperBody = content.slice(helperStart, helperEnd);
+
   assert.equal(
-    /async function updateDraftAnswer[\s\S]*?const supabase = await createClient\(\)/.test(
-      content,
-    ),
+    helperBody.includes("createClient()"),
     false,
     "Draft answer update helper must not create a second request-scoped Supabase client.",
   );
