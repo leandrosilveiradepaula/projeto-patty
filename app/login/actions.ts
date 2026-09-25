@@ -3,8 +3,8 @@
 import { redirect } from "next/navigation";
 
 import {
-  getAuthenticatorAssuranceState,
-  getCurrentAuthContext,
+  getAuthenticatorAssuranceStateFromClient,
+  getAuthContextFromClient,
 } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
 
@@ -22,10 +22,10 @@ export async function login(_: LoginState, formData: FormData): Promise<LoginSta
   const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
   if (error) return { message: "Email ou senha inválidos." };
 
-  const context = await getCurrentAuthContext();
+  const context = await getAuthContextFromClient(supabase);
 
   if (context?.role === "admin") {
-    const assurance = await getAuthenticatorAssuranceState();
+    const assurance = await getAuthenticatorAssuranceStateFromClient(supabase);
 
     if (assurance.currentLevel === "aal2") {
       redirect("/admin");
