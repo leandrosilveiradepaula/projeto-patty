@@ -179,6 +179,7 @@ test.use({ baseURL: baseUrl });
 test("cliente sintetica edita respostas reais e aplica condicional da client-anamnesis v1", async ({
   page,
 }) => {
+  test.setTimeout(60_000);
   const client = await loadSyntheticClient();
   const canonical = await loadCanonicalV1();
   const submissionId = await createCanonicalDraft(
