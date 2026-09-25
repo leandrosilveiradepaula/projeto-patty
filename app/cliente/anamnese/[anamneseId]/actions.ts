@@ -1,7 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { refresh, revalidatePath } from "next/cache";
 
 import { requireRole } from "@/lib/supabase/auth";
 import {
@@ -80,7 +79,12 @@ export async function saveClientAnamnesisDraftTextAnswer(
   }
 
   revalidateAnamnesisDraft(submissionId);
-  redirect(`/cliente/anamnese/${submissionId}?saved=1`);
+  refresh();
+
+  return {
+    message: "Resposta salva no rascunho.",
+    success: true,
+  };
 }
 
 export async function saveClientAnamnesisDraftSingleChoiceAnswer(
@@ -115,7 +119,12 @@ export async function saveClientAnamnesisDraftSingleChoiceAnswer(
   }
 
   revalidateAnamnesisDraft(submissionId);
-  redirect(`/cliente/anamnese/${submissionId}?saved=1`);
+  refresh();
+
+  return {
+    message: "Resposta salva no rascunho.",
+    success: true,
+  };
 }
 
 
