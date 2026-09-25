@@ -1,7 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useActionState } from "react";
 
 import {
   type ClientAnamnesisDraftAnswerFormState,
@@ -39,13 +38,6 @@ export function ClientAnamnesisDraftSingleChoiceAnswerForm({
     questionId,
   );
   const [state, formAction, isPending] = useActionState(action, initialState);
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!isPending && state.success) {
-      router.refresh();
-    }
-  }, [isPending, router, state.success]);
   const descriptionId = `anamnesis-draft-choice-${questionId}-description`;
 
   return (
