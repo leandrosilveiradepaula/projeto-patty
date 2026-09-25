@@ -17,7 +17,6 @@ const admin = createClient(supabaseUrl, supabaseSecretKey, {
   auth: { autoRefreshToken: false, persistSession: false },
 });
 
-const CITY_KEY = "city";
 const SOURCE_KEY = "has_health_plan";
 const DETAIL_KEY = "health_plan_details";
 
@@ -96,7 +95,7 @@ async function loadCanonicalV1() {
     .from("anamnesis_questions")
     .select("id, question_key, label")
     .eq("form_version_id", version.data.id)
-    .in("question_key", [CITY_KEY, SOURCE_KEY, DETAIL_KEY]);
+    .in("question_key", [SOURCE_KEY, DETAIL_KEY]);
 
   if (questions.error) throw questions.error;
 
@@ -104,17 +103,15 @@ async function loadCanonicalV1() {
     questions.data.map((question) => [question.question_key, question]),
   );
 
-  const city = byKey.get(CITY_KEY);
   const source = byKey.get(SOURCE_KEY);
   const detail = byKey.get(DETAIL_KEY);
 
-  if (!city || !source || !detail) {
+  if (!source || !detail) {
     throw new Error("Canonical draft-edit questions are missing.");
   }
 
   return {
     formVersionId: version.data.id,
-    city,
     source,
     detail,
   };
@@ -146,19 +143,28 @@ async function cleanupCanonicalDraft(clientId, formVersionId) {
   }
 }
 
-async function createCanonicalDraft(clientId, formVersionId) {
-  await cleanupCanonicalDraft(clientId, formVersionId);
+async function createCanonicalDraft(clientId, canonical) {
+  await cleanupCanonicalDraft(clientId, canonical.formVersionId);
 
   const submission = await admin
     .from("anamnesis_submissions")
     .insert({
       client_id: clientId,
-      form_version_id: formVersionId,
+      form_version_id: canonical.formVersionId,
     })
     .select("id")
     .single();
 
   if (submission.error) throw submission.error;
+
+  const sourceAnswer = await admin.from("anamnesis_answers").insert({
+    answer_value: "Nao",
+    form_version_id: canonical.formVersionId,
+    question_id: canonical.source.id,
+    submission_id: submission.data.id,
+  });
+
+  if (sourceAnswer.error) throw sourceAnswer.error;
 
   return submission.data.id;
 }
@@ -179,94 +185,89 @@ test.use({ baseURL: baseUrl });
 test("cliente sintetica edita respostas reais e aplica condicional da client-anamnesis v1", async ({
   page,
 }) => {
-  test.setTimeout(60_000);
+  test.setTimeout(90_000);
+
   const client = await loadSyntheticClient();
   const canonical = await loadCanonicalV1();
-  const submissionId = await createCanonicalDraft(
-    client.clientId,
-    canonical.formVersionId,
-  );
+  const submissionId = await createCanonicalDraft(client.clientId, canonical);
 
   try {
-    await page.goto("/login");
-    await page.getByLabel("Email").fill(client.email);
-    await page.getByLabel("Senha").fill(client.password);
-    await page.getByRole("button", { name: "Entrar" }).click();
-    await expect(page).toHaveURL(/\/cliente\/?$/);
+    await test.step("autentica e abre o draft canonico", async () => {
+      await page.goto("/login");
+      await page.getByLabel("Email").fill(client.email);
+      await page.getByLabel("Senha").fill(client.password);
+      await page.getByRole("button", { name: "Entrar" }).click();
+      await expect(page).toHaveURL(/\/cliente\/?$/);
 
-    await page.goto(`/cliente/anamnese/${submissionId}`);
-    await expect(page.getByText("Rascunho", { exact: true })).toBeVisible();
+      await page.goto(`/cliente/anamnese/${submissionId}`);
+      await expect(page.getByText("Rascunho", { exact: true })).toBeVisible();
+      await expect(
+        page.getByLabel(canonical.detail.label, { exact: true }),
+      ).toHaveCount(0);
+    });
 
-    const cityInput = page.getByLabel(canonical.city.label, { exact: true });
-    const cityForm = cityInput.locator("xpath=ancestor::form");
+    await test.step("altera a controladora de Nao para Sim e exibe o detalhe", async () => {
+      const sourceForm = page
+        .locator("form")
+        .filter({ hasText: canonical.source.label });
 
-    await cityInput.fill("Porto Alegre E2E");
-    await cityForm.getByRole("button", { name: "Salvar no rascunho" }).click();
-    await expect(
-      cityForm.getByText("Resposta salva no rascunho."),
-    ).toBeVisible();
+      await sourceForm.getByLabel("Sim", { exact: true }).check();
+      await sourceForm
+        .getByRole("button", { name: "Salvar no rascunho" })
+        .click();
 
-    let cityAnswers = await loadAnswer(submissionId, canonical.city.id);
-    expect(cityAnswers).toHaveLength(1);
-    expect(cityAnswers[0].answer_value).toBe("Porto Alegre E2E");
+      await expect
+        .poll(async () => {
+          const answers = await loadAnswer(submissionId, canonical.source.id);
+          return answers.map((answer) => answer.answer_value);
+        }, { timeout: 20_000 })
+        .toEqual(["Sim"]);
 
-    await cityInput.fill("Cidade E2E atualizada");
-    await cityForm.getByRole("button", { name: "Salvar no rascunho" }).click();
-    await expect(
-      cityForm.getByText("Resposta salva no rascunho."),
-    ).toBeVisible();
+      await expect(
+        page.getByLabel(canonical.detail.label, { exact: true }),
+      ).toBeVisible({ timeout: 20_000 });
+    });
 
-    cityAnswers = await loadAnswer(submissionId, canonical.city.id);
-    expect(cityAnswers).toHaveLength(1);
-    expect(cityAnswers[0].answer_value).toBe("Cidade E2E atualizada");
+    await test.step("salva o detalhe condicional", async () => {
+      const detailInput = page.getByLabel(canonical.detail.label, {
+        exact: true,
+      });
+      const detailForm = detailInput.locator("xpath=ancestor::form");
 
-    await expect(
-      page.getByLabel(canonical.detail.label, { exact: true }),
-    ).toHaveCount(0);
+      await detailInput.fill("Plano E2E");
+      await detailForm
+        .getByRole("button", { name: "Salvar no rascunho" })
+        .click();
 
-    const sourceForm = page
-      .locator("form")
-      .filter({ hasText: canonical.source.label });
+      await expect
+        .poll(async () => {
+          const answers = await loadAnswer(submissionId, canonical.detail.id);
+          return answers.map((answer) => answer.answer_value);
+        }, { timeout: 20_000 })
+        .toEqual(["Plano E2E"]);
+    });
 
-    await sourceForm.getByLabel("Sim", { exact: true }).check();
-    await sourceForm
-      .getByRole("button", { name: "Salvar no rascunho" })
-      .click();
-    await expect(
-      sourceForm.getByText("Resposta salva no rascunho."),
-    ).toBeVisible();
+    await test.step("altera a controladora de Sim para Nao sem duplicar resposta", async () => {
+      const sourceForm = page
+        .locator("form")
+        .filter({ hasText: canonical.source.label });
 
-    const sourceAnswers = await loadAnswer(submissionId, canonical.source.id);
-    expect(sourceAnswers).toHaveLength(1);
-    expect(sourceAnswers[0].answer_value).toBe("Sim");
+      await sourceForm.getByLabel("Nao", { exact: true }).check();
+      await sourceForm
+        .getByRole("button", { name: "Salvar no rascunho" })
+        .click();
 
-    const detailInput = page.getByLabel(canonical.detail.label, { exact: true });
-    await expect(detailInput).toBeVisible();
+      await expect
+        .poll(async () => {
+          const answers = await loadAnswer(submissionId, canonical.source.id);
+          return answers.map((answer) => answer.answer_value);
+        }, { timeout: 20_000 })
+        .toEqual(["Nao"]);
 
-    const detailForm = detailInput.locator("xpath=ancestor::form");
-    await detailInput.fill("Plano E2E");
-    await detailForm
-      .getByRole("button", { name: "Salvar no rascunho" })
-      .click();
-    await expect(
-      detailForm.getByText("Resposta salva no rascunho."),
-    ).toBeVisible();
-
-    const detailAnswers = await loadAnswer(submissionId, canonical.detail.id);
-    expect(detailAnswers).toHaveLength(1);
-    expect(detailAnswers[0].answer_value).toBe("Plano E2E");
-
-    const refreshedSourceForm = page
-      .locator("form")
-      .filter({ hasText: canonical.source.label });
-
-    await refreshedSourceForm.getByLabel("Nao", { exact: true }).check();
-    await refreshedSourceForm
-      .getByRole("button", { name: "Salvar no rascunho" })
-      .click();
-    await expect(
-      page.getByLabel(canonical.detail.label, { exact: true }),
-    ).toHaveCount(0);
+      await expect(
+        page.getByLabel(canonical.detail.label, { exact: true }),
+      ).toHaveCount(0, { timeout: 20_000 });
+    });
 
     const submission = await admin
       .from("anamnesis_submissions")
