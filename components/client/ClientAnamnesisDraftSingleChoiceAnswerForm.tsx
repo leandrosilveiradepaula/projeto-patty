@@ -49,12 +49,12 @@ export function ClientAnamnesisDraftSingleChoiceAnswerForm({
     }
 
     if (reloadPageOnSuccess) {
-      window.location.reload();
+      window.location.assign(`/cliente/anamnese/${submissionId}`);
       return;
     }
 
     router.refresh();
-  }, [reloadPageOnSuccess, router, state.success]);
+  }, [reloadPageOnSuccess, router, state.success, submissionId]);
 
   const descriptionId = `anamnesis-draft-choice-${questionId}-description`;
 
