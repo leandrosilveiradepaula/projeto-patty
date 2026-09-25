@@ -147,6 +147,19 @@ async function loadAnswer(submissionId, questionId) {
   return answer.data;
 }
 
+async function createUserScopedClient(email, password) {
+  const client = createClient(supabaseUrl, supabaseSecretKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+
+  const signedIn = await client.auth.signInWithPassword({ email, password });
+  if (signedIn.error) {
+    throw new Error(`User-scoped RLS preflight failed: ${signedIn.error.message}`);
+  }
+
+  return client;
+}
+
 test.use({ baseURL: baseUrl });
 
 test("cliente sintetica edita respostas reais e aplica condicional da client-anamnesis v1", async ({
@@ -157,6 +170,7 @@ test("cliente sintetica edita respostas reais e aplica condicional da client-ana
   const client = syntheticClient;
   const canonical = await loadCanonicalV1();
   const submissionId = await createCanonicalDraft(client.clientId, canonical);
+  const userScoped = await createUserScopedClient(client.email, client.password);
 
   try {
     await test.step("autentica e abre o draft canonico", async () => {
@@ -190,11 +204,18 @@ test("cliente sintetica edita respostas reais e aplica condicional da client-ana
         }, { timeout: 20_000 })
         .toEqual(["Sim"]);
 
-      const detail = page.getByLabel(canonical.detail.label, { exact: true });
+      const userVisibleSourceAnswer = await userScoped
+        .from("anamnesis_answers")
+        .select("answer_value")
+        .eq("submission_id", submissionId)
+        .eq("question_id", canonical.source.id)
+        .single();
 
-      if ((await detail.count()) === 0) {
-        await page.reload();
+      if (userVisibleSourceAnswer.error) {
+        throw userVisibleSourceAnswer.error;
       }
+
+      expect(userVisibleSourceAnswer.data.answer_value).toBe("Sim");
 
       await expect(
         page.getByLabel(canonical.detail.label, { exact: true }),
@@ -251,6 +272,7 @@ test("cliente sintetica edita respostas reais e aplica condicional da client-ana
     if (submission.error) throw submission.error;
     expect(submission.data.submitted_at).toBeNull();
   } finally {
+    await userScoped.auth.signOut();
     await cleanupCanonicalDraft(client.clientId, canonical.formVersionId);
   }
 
