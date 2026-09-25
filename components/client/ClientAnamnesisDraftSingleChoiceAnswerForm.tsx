@@ -45,7 +45,7 @@ export function ClientAnamnesisDraftSingleChoiceAnswerForm({
     if (state.success) {
       router.refresh();
     }
-  }, [router, state]);
+  }, [router, state.success]);
 
   const descriptionId = `anamnesis-draft-choice-${questionId}-description`;
 
