@@ -532,6 +532,25 @@ test("immutable-history Anamnesis E2E workflows stay manual-only", async () => {
   }
 });
 
+test("all production E2E workflows are restricted to master", async () => {
+  const workflowDirectory = path.join(ROOT, ".github", "workflows");
+  const files = (await readdir(workflowDirectory))
+    .filter((file) => file.startsWith("e2e-") && file.endsWith(".yml"))
+    .sort();
+
+  assert.ok(files.length > 0, "Expected production E2E workflows.");
+
+  for (const file of files) {
+    const content = await readFile(path.join(workflowDirectory, file), "utf8");
+
+    assert.equal(
+      content.includes("github.ref == 'refs/heads/master'"),
+      true,
+      file + " must refuse production E2E execution from non-master refs.",
+    );
+  }
+});
+
 test("Supabase SSR proxy preserves session cookies and cache-control headers", async () => {
   const content = await readFile(
     path.join(ROOT, "lib", "supabase", "proxy.ts"),
