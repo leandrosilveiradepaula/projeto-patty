@@ -759,3 +759,19 @@ Campos v1:
 Ha unicidade por `(educational_content_version_id, asset_key)` e por `(storage_provider, storage_path)`.
 
 Asset so pode ser anexado enquanto a versao estiver em draft. Depois que a versao for publicada, INSERT/UPDATE/DELETE de assets daquela versao sao bloqueados.
+## Solicitacao de treino
+
+`client_training_requests` registra de forma append-only que a cliente solicitou o servico de treino.
+
+Campos principais:
+- `id`;
+- `client_id`;
+- `recorded_by_profile_id`;
+- `requested_at`;
+- `note` opcional;
+- `created_at`.
+
+A ausencia de registro significa que nao ha solicitacao estruturada registrada. O registro nao cria prescricao, exercicio, protocolo, publicacao ou progressao automatica.
+
+UPDATE e DELETE sao bloqueados por trigger; novos fatos sao novos registros.
+
