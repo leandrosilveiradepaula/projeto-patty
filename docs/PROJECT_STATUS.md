@@ -746,5 +746,5 @@ As seis frentes autorizadas foram implementadas sem ampliar regras profissionais
 5. area de atencao comportamental para revisao humana, sem score, severidade ou diagnostico;
 6. contexto de saude + exames/documentos recentes na revisao administrativa, sem recomendacao automatica.
 
-A migration nova desta rodada e `20260926231500_create_client_training_requests.sql`. Ela ainda precisa seguir o gate normal de merge/CI antes de aplicacao no Supabase SaaS.
+As migrations desta rodada estao aplicadas no Supabase SaaS e alinhadas ao historico remoto: `20260926233725_create_client_training_requests.sql` e `20260926233849_optimize_client_training_request_rls.sql`. A primeira cria o historico append-only; a segunda remove a reavaliacao por linha de `auth.jwt()` das policies permissivas, mantendo AAL2 na policy `RESTRICTIVE` transversal. O advisor deixou de reportar `auth_rls_initplan` para `client_training_requests`.
 
