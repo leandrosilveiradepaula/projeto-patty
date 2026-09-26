@@ -1850,7 +1850,7 @@ Relatos de alimentacao emocional, culpa, compulsao ou restricao merecem atencao 
 
 ### LIMITE DA CONFIRMACAO
 
-A mesma rodada trouxe afirmacoes que ainda nao possuem definicao operacional suficiente para automacao: contagem conjunta de gordura/legumes com carboidrato, relacao de doses de legumes, orientacao de ausencia de gordura saturada, magnesio/allo/manipulados, criterios de encaminhamento por doenca, minimo de treino, estagnacao e revisao em 30 dias.
+A mesma rodada trouxe afirmacoes que ainda nao possuem definicao operacional suficiente para automacao: contagem conjunta de gordura/legumes com carboidrato, relacao de doses de legumes, orientacao de ausencia de gordura saturada, magnesio/alho/manipulados, criterios de encaminhamento por doenca, minimo de treino, estagnacao e revisao em 30 dias.
 
 Esses pontos foram mantidos como questoes abertas. Nenhuma formula, alerta, recomendacao de suplemento, bloqueio de saude ou gerador automatico de treino deve ser criado a partir deles sem nova formalizacao.
 
