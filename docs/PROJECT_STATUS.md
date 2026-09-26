@@ -631,3 +631,20 @@ O teste usa somente a fixture sintetica persistente e valida no browser:
 - 0 drafts canonicos residuais ao final.
 
 Nenhuma migration ou politica RLS e alterada nesta tarefa.
+
+## 2026-09-26 - Auditoria de seguranca de producao e credenciais E2E
+
+### AUDITADO / HARDENING PREPARADO
+
+Auditoria sem mudanca de schema confirmou:
+- nenhuma tabela `public` sem RLS;
+- nenhum bucket Supabase Storage publico;
+- nenhum grant de escrita para `anon` nas tabelas publicas;
+- unica funcao `SECURITY DEFINER` em `public` = `rls_auto_enable`, executavel apenas por `postgres`/`service_role`;
+- Vercel sem runtime errors na janela observada de 24 horas;
+- advisor de seguranca sem finding novo alem de Leaked Password Protection ja conhecido;
+- lints de performance continuam informativos; nenhuma migration de indice deve ser criada apenas para zerar lint sem evidencia de workload.
+
+Foi identificado um ponto de hardening no setup do smoke canonico: email e senha da fixture efemera eram exportados por `GITHUB_ENV` antes de estarem registrados como valores mascarados do GitHub Actions. Embora a conta seja sintetica, efemera e removida no cleanup, credenciais nao devem aparecer em logs.
+
+A branch `codex/mask-ephemeral-e2e-credentials` adiciona `::add-mask::` para email e senha antes do export e uma regressao estatica que exige essa ordem. Nenhuma alteracao de banco, RLS, segredo persistente ou fluxo de produto.

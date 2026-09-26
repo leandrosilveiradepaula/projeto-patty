@@ -339,6 +339,39 @@ test("Anamnesis draft forms do not refresh stale values after ordinary saves", a
   );
 });
 
+test("canonical E2E setup masks ephemeral credentials before exporting them", async () => {
+  const content = await readFile(
+    path.join(ROOT, "e2e", "setup-canonical-anamnesis-client.mjs"),
+    "utf8",
+  );
+
+  for (const required of [
+    "console.log(`::add-mask::${email}`)",
+    "console.log(`::add-mask::${password}`)",
+    "`E2E_CANONICAL_EMAIL=${email}`",
+    "`E2E_CANONICAL_PASSWORD=${password}`",
+  ]) {
+    assert.equal(
+      content.includes(required),
+      true,
+      "Canonical E2E setup must keep credential masking/export boundary: " + required,
+    );
+  }
+
+  assert.equal(
+    content.indexOf("console.log(`::add-mask::${email}`)") <
+      content.indexOf("`E2E_CANONICAL_EMAIL=${email}`"),
+    true,
+    "Ephemeral email must be masked before it is exported to later steps.",
+  );
+  assert.equal(
+    content.indexOf("console.log(`::add-mask::${password}`)") <
+      content.indexOf("`E2E_CANONICAL_PASSWORD=${password}`"),
+    true,
+    "Ephemeral password must be masked before it is exported to later steps.",
+  );
+});
+
 test("Supabase SSR proxy preserves session cookies and cache-control headers", async () => {
   const content = await readFile(
     path.join(ROOT, "lib", "supabase", "proxy.ts"),
