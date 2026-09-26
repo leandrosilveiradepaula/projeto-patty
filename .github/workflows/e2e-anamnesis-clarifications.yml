@@ -2,12 +2,19 @@ name: E2E anamnesis clarification flow
 
 on:
   workflow_dispatch:
+    inputs:
+      confirmation:
+        description: "Type CREATE_E2E_HISTORY to confirm permanent synthetic clarification history"
+        required: true
+        default: ""
+        type: string
 
 permissions:
   contents: read
 
 jobs:
   smoke:
+    if: github.ref == 'refs/heads/master' && inputs.confirmation == 'CREATE_E2E_HISTORY'
     runs-on: ubuntu-24.04
     timeout-minutes: 12
 
