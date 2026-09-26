@@ -1834,3 +1834,27 @@ O fluxo de inicio e retomada da `client-anamnesis` v1 foi validado no browser co
 O teste confirmou criacao do draft da versao publicada, vinculo correto a cliente, manutencao de `submitted_at = null`, substituicao da acao de inicio por `Continuar rascunho`, retomada do mesmo registro e cleanup sem residuo.
 
 Esse resultado encerra o gate funcional de inicio/retomada da v1.
+## 2026-09-26 - Levantamento ampliado do metodo da Patty
+
+### REGRA CONFIRMADA PELA PATTY
+
+A leitura da Anamnese e holistica: a Patty considera o conjunto das respostas, rotina, alimentacao, peso/medidas/fotos, horario de maior fome, comportamento e fatores de adesao. Nao existe peso fixo universal para uma pergunta isolada.
+
+A quantidade de refeicoes continua adaptada ao habito/rotina da cliente. Preferencias e substituicoes usam as tabelas/catalogos permitidos.
+
+Treino e prescrito somente quando a cliente solicita esse servico. A montagem considera pratica previa, frequencia pretendida, limitacoes e evolucao.
+
+Na avaliacao corporal, visual e medidas podem ter mais peso profissional do que a balanca isolada. A cadencia quinzenal/mensal ja documentada foi reconfirmada e peito foi citado como medida adicional relevante.
+
+Relatos de alimentacao emocional, culpa, compulsao ou restricao merecem atencao profissional especial.
+
+### LIMITE DA CONFIRMACAO
+
+A mesma rodada trouxe afirmacoes que ainda nao possuem definicao operacional suficiente para automacao: contagem conjunta de gordura/legumes com carboidrato, relacao de doses de legumes, orientacao de ausencia de gordura saturada, magnesio/alho/manipulados, criterios de encaminhamento por doenca, minimo de treino, estagnacao e revisao em 30 dias.
+
+Esses pontos foram mantidos como questoes abertas. Nenhuma formula, alerta, recomendacao de suplemento, bloqueio de saude ou gerador automatico de treino deve ser criado a partir deles sem nova formalizacao.
+
+### FONTE
+
+A rodada esta preservada em `docs/PATTY_METHOD_SURVEY_20260926.md`. As secoes de acompanhamento, formato do protocolo, excecoes, definicao de bom resultado e caso real ficaram sem resposta e permanecem abertas.
+

@@ -388,6 +388,48 @@ Quais alertas profissionais devem existir, quais sao apenas informativos e quais
 
 Quais regras de comportamento ainda precisam ser formalizadas alem do principio confirmado de adaptar o protocolo a dificuldade relatada e priorizar adesao?
 
+### QUESTAO ABERTA — FORMULAS/CONVERSOES ALIMENTARES DA RODADA 2026-09-26
+
+A Patty relatou que gordura e legumes entram na contagem de carboidrato e citou a relacao "1 dose de carbo para 2 de legumes".
+
+Antes de qualquer implementacao, esclarecer:
+- se essa e uma conversao de doses, equivalencia de tabela ou apenas orientacao pratica;
+- como ela convive com a referencia separada de gordura em gramas/doses ja documentada;
+- em quais fases/protocolos se aplica;
+- como tratar fracionamento e arredondamento;
+- se existe excecao por alimento/grupo.
+
+Nao alterar calculos atuais ate essa regra estar formalizada.
+
+### QUESTAO ABERTA — GORDURA SATURADA E REFEICOES FORA
+
+A Patty descreveu a alimentacao como "totalmente sem gordura saturada" e orientou priorizar refeicoes preparadas pela propria cliente, deixando refeicoes fora para refeicoes livres ou situacoes esporadicas.
+
+Definir o significado operacional dessa orientacao, limites/excecoes e se e regra de protocolo ou recomendacao geral. Nao criar bloqueio alimentar automatico enquanto isso estiver aberto.
+
+### QUESTAO ABERTA — SUPLEMENTACAO/MANIPULADOS
+
+A rodada trouxe exemplos adicionais de pratica profissional: magnesio antes de dormir, possibilidade de alho, manipulados ou encaminhamento conforme exames.
+
+Ainda faltam criterios de elegibilidade, dose, forma, duracao, contraindicacoes, interacoes, grupos excluidos e necessidade de avaliacao externa. Esses exemplos nao viram recomendacao automatica.
+
+### QUESTAO ABERTA — TREINO
+
+A Patty confirmou que prescreve treino somente quando solicitado e relatou como pratica atual minimo de 3x por semana / cerca de 1 hora.
+
+Ainda falta definir se esse minimo admite excecoes e formalizar intensidade, volume, progressao, cardio, ajustes por limitacao e criterios de avaliacao complementar.
+
+### QUESTAO ABERTA — ALERTAS/ENCAMINHAMENTO
+
+A Patty indicou que doencas ou alteracoes relevantes em exames podem levar a busca de outro profissional e que relatos de alimentacao emocional, culpa, compulsao ou restricao merecem atencao especial.
+
+Ainda falta definir quais condicoes geram destaque informativo, revisao obrigatoria, pedido de esclarecimento, encaminhamento ou eventual bloqueio. Nao inferir esses niveis automaticamente.
+
+### QUESTAO ABERTA — ACOMPANHAMENTO, RESULTADO E EXCECOES
+
+As secoes do roteiro sobre acompanhamento apos protocolo inicial, criterios formais para alterar dieta/treino, sinais de sucesso/insucesso, diferenca entre estrategia inadequada e baixa adesao, formato final do protocolo, excecoes e definicao de bom resultado ficaram sem resposta.
+
+Esses temas permanecem abertos e devem ser retomados em rodada posterior.
 ## Cadastro e Anamnese
 
 ### QUESTAO ABERTA

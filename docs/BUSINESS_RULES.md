@@ -180,3 +180,71 @@ Exemplos historicos individuais nao viram regra geral.
 Regra nao confirmada deve permanecer como `QUESTAO ABERTA`.
 
 Nao automatizar hidratacao, suplementacao, manipulados, progressao definitiva de treino, alertas profissionais, criterios finais de avaliacao, fases 5 e 6 do Carb Cycle, regras ainda nao documentadas do Cutting 3, etapas posteriores ao Cutting 3 Linear, Bulking ou Consolidacao antes de confirmacao documentada.
+## Leitura profissional da Anamnese
+
+### DECISAO CONFIRMADA
+
+A Patty analisa a Anamnese como um conjunto. Nao existe uma resposta isolada com peso fixo universal.
+
+Na leitura profissional, devem ser considerados em conjunto, entre outros dados ja existentes no produto:
+- rotina e horarios;
+- como a cliente se alimenta;
+- peso, medidas e fotos;
+- horario de maior fome;
+- comportamento, autoimagem e aspectos psicologicos relatados;
+- fatores que possam dificultar ou facilitar adesao.
+
+Isso nao autoriza score automatico, diagnostico psicologico ou classificacao clinica automatica.
+
+## Alimentacao - rotina, escolhas e reavaliacao
+
+### DECISAO CONFIRMADA
+
+A quantidade de refeicoes deve, quando possivel, preservar o habito e a rotina da cliente. Os horarios internos sao ajustados pela propria cliente conforme sua rotina, respeitando as regras do protocolo aplicavel.
+
+Preferencias e substituicoes alimentares sao atendidas por meio das tabelas/catalogos permitidos, sem transformar um numero historico de refeicoes em regra fixa.
+
+A referencia de 2 g/kg de proteina e 2 g/kg de carboidrato foi reconfirmada como ponto de partida frequente, mantendo a possibilidade de individualizacao ja documentada.
+
+A Patty relatou que deficit, manutencao ou superavit dependem do objetivo e da resposta da cliente. O uso de deficit como inicio frequente e a revisao por volta de 30 dias descrevem pratica atual, nao prazo ou formula automatica universal.
+
+## Treino
+
+### DECISAO CONFIRMADA
+
+A Patty prescreve treino somente para clientes que solicitam esse servico.
+
+Na montagem do treino, ela considera pratica previa, disponibilidade/frequencia pretendida, limitacoes relatadas e evolucao.
+
+A orientacao atual citada de no minimo 3 treinos por semana com cerca de 1 hora por sessao nao deve ser transformada em regra automatica universal enquanto excecoes, intensidade, volume, progressao e cardio nao estiverem formalizados.
+
+## Avaliacao corporal e evolucao
+
+### DECISAO CONFIRMADA
+
+Na interpretacao profissional, visual e medidas podem ter mais peso do que o numero isolado da balanca.
+
+Cintura, abdomen e quadril permanecem medidas centrais na rotina quinzenal. Peito foi confirmado como medida adicional relevante para a leitura de perda de gordura, sem encerrar o catalogo mensal completo.
+
+Fotos sao usadas principalmente para comparacao de evolucao. Em contexto de ganho de massa, tambem ajudam a considerar regioes que a cliente deseja desenvolver.
+
+A cadencia permanece:
+- a cada 15 dias: peso, cintura, abdomen e quadril;
+- a cada 30 dias: avaliacao completa, peso e fotos.
+
+## Comportamento e relacao com comida
+
+### DECISAO CONFIRMADA
+
+Relatos de alimentacao emocional, culpa, compulsao ou restricao merecem atencao profissional especial.
+
+Essa confirmacao nao define alerta automatico, severidade, diagnostico, bloqueio ou encaminhamento. O comportamento de sistema continua pendente de formalizacao.
+
+## Limite adicional desta rodada
+
+### DECISAO CONFIRMADA
+
+As respostas de 2026-09-26 nao autorizam automatizar suplementacao/manipulados, encaminhamento por doenca, regras de gordura/legumes, restricao absoluta de gordura saturada, progressao de treino ou criterio de estagnacao.
+
+Esses temas permanecem como `QUESTAO ABERTA` ate formalizacao suficiente para implementacao deterministica e revisavel.
+
