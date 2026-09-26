@@ -58,6 +58,10 @@ jobs:
       - name: Professional follow-up tests
         run: npm run test:follow-up
 
+      - name: Evaluation view tests
+        run: npm run test:evaluations
+
+
       - name: Assignment tests
         run: npm run test:assignments
 
