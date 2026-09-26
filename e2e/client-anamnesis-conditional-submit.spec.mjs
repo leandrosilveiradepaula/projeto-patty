@@ -6,82 +6,26 @@ import { createClient } from "@supabase/supabase-js";
 const baseUrl = process.env.E2E_BASE_URL?.replace(/\/$/, "");
 const supabaseUrl = process.env.E2E_SUPABASE_URL;
 const supabaseSecretKey = process.env.E2E_SUPABASE_SECRET_KEY;
+const canonicalEmail = process.env.E2E_CANONICAL_EMAIL;
+const canonicalPassword = process.env.E2E_CANONICAL_PASSWORD;
+const canonicalClientId = process.env.E2E_CANONICAL_CLIENT_ID;
 
-if (!baseUrl || !supabaseUrl || !supabaseSecretKey) {
+if (
+  !baseUrl ||
+  !supabaseUrl ||
+  !supabaseSecretKey ||
+  !canonicalEmail ||
+  !canonicalPassword ||
+  !canonicalClientId
+) {
   throw new Error(
-    "Missing E2E_BASE_URL, E2E_SUPABASE_URL or E2E_SUPABASE_SECRET_KEY",
+    "Missing conditional-submit E2E environment.",
   );
 }
 
 const admin = createClient(supabaseUrl, supabaseSecretKey, {
   auth: { autoRefreshToken: false, persistSession: false },
 });
-
-async function lockSyntheticClient(userId) {
-  const updated = await admin.auth.admin.updateUserById(userId, {
-    password: randomBytes(48).toString("base64url"),
-  });
-
-  if (updated.error) throw updated.error;
-}
-
-async function loadSyntheticClient() {
-  const profiles = await admin
-    .from("profiles")
-    .select("id")
-    .eq("display_name", "E2E Correction Client")
-    .limit(2);
-
-  if (profiles.error) throw profiles.error;
-  if (profiles.data.length !== 1) {
-    throw new Error(
-      "Expected exactly one persistent E2E Correction Client fixture.",
-    );
-  }
-
-  const profileId = profiles.data[0].id;
-
-  const client = await admin
-    .from("clients")
-    .select("id")
-    .eq("profile_id", profileId)
-    .single();
-
-  if (client.error) throw client.error;
-
-  const role = await admin
-    .from("user_roles")
-    .select("role")
-    .eq("profile_id", profileId)
-    .single();
-
-  if (role.error) throw role.error;
-  if (role.data.role !== "client") {
-    throw new Error("Persistent E2E Correction Client must have client role.");
-  }
-
-  const authUser = await admin.auth.admin.getUserById(profileId);
-  if (authUser.error) throw authUser.error;
-
-  const email = authUser.data.user.email;
-  if (!email) {
-    throw new Error("Persistent E2E Correction Client has no Auth email.");
-  }
-
-  const password = randomBytes(48).toString("base64url");
-  const updated = await admin.auth.admin.updateUserById(profileId, {
-    password,
-  });
-
-  if (updated.error) throw updated.error;
-
-  return {
-    clientId: client.data.id,
-    email,
-    password,
-    profileId,
-  };
-}
 
 async function createTemporaryAnamnesisFixture(clientId) {
   const suffix = randomBytes(8).toString("hex");
@@ -249,13 +193,12 @@ test.use({ baseURL: baseUrl });
 test("cliente sintetica usa single_choice, condicional e envio incompleto permanece rascunho", async ({
   page,
 }) => {
-  const client = await loadSyntheticClient();
-  const fixture = await createTemporaryAnamnesisFixture(client.clientId);
+  const fixture = await createTemporaryAnamnesisFixture(canonicalClientId);
 
   try {
     await page.goto("/login");
-    await page.getByLabel("Email").fill(client.email);
-    await page.getByLabel("Senha").fill(client.password);
+    await page.getByLabel("Email").fill(canonicalEmail);
+    await page.getByLabel("Senha").fill(canonicalPassword);
     await page.getByRole("button", { name: "Entrar" }).click();
 
     await expect(page).toHaveURL(/\/cliente\/?$/);
@@ -310,6 +253,5 @@ test("cliente sintetica usa single_choice, condicional e envio incompleto perman
     expect(sourceAnswer.data.answer_value).toBe("Sim");
   } finally {
     await cleanupTemporaryAnamnesisFixture(fixture);
-    await lockSyntheticClient(client.profileId);
   }
 });

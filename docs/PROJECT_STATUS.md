@@ -644,3 +644,13 @@ Auditoria sem mudanca de schema confirmou:
 Foi identificado um ponto de hardening no setup do smoke canonico: email e senha da fixture efemera eram exportados por `GITHUB_ENV` antes de estarem registrados como valores mascarados do GitHub Actions. Embora a conta seja sintetica, efemera e removida no cleanup, credenciais nao devem aparecer em logs.
 
 A branch `codex/mask-ephemeral-e2e-credentials` adiciona `::add-mask::` para email e senha antes do export e uma regressao estatica que exige essa ordem. Nenhuma alteracao de banco, RLS, segredo persistente ou fluxo de produto.
+
+## 2026-09-26 - Conditional submit usa fixture efemera
+
+### HARDENING DE E2E
+
+O smoke `E2E client anamnesis conditional submit smoke` foi preservado porque cobre uma verificacao distinta: tentativa de envio incompleto permanece bloqueada e a submission continua em draft.
+
+A implementacao antiga dependia da fixture persistente `E2E Correction Client` e rotacionava senha. O workflow/spec foram migrados para reutilizar `setup-canonical-anamnesis-client.mjs` e `cleanup-canonical-anamnesis-client.mjs`, com cliente Auth/profile/client efemero por run, credenciais mascaradas e cleanup `always()`.
+
+Nenhuma regra de submissao, migration, schema ou RLS foi alterada.

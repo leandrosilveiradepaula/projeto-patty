@@ -372,6 +372,51 @@ test("canonical E2E setup masks ephemeral credentials before exporting them", as
   );
 });
 
+test("conditional submit E2E uses only the ephemeral canonical client", async () => {
+  const workflow = await readFile(
+    path.join(
+      ROOT,
+      ".github",
+      "workflows",
+      "e2e-client-anamnesis-conditional-submit.yml",
+    ),
+    "utf8",
+  );
+  const spec = await readFile(
+    path.join(ROOT, "e2e", "client-anamnesis-conditional-submit.spec.mjs"),
+    "utf8",
+  );
+
+  for (const required of [
+    "node e2e/setup-canonical-anamnesis-client.mjs",
+    "node e2e/cleanup-canonical-anamnesis-client.mjs",
+    "if: always()",
+    "E2E_CANONICAL_EMAIL",
+    "E2E_CANONICAL_PASSWORD",
+    "E2E_CANONICAL_CLIENT_ID",
+  ]) {
+    assert.equal(
+      workflow.includes(required) || spec.includes(required),
+      true,
+      "Conditional submit E2E must keep ephemeral-client boundary: " + required,
+    );
+  }
+
+  for (const forbidden of [
+    "E2E Correction Client",
+    "updateUserById",
+    "lockSyntheticClient",
+    "loadSyntheticClient",
+  ]) {
+    assert.equal(
+      spec.includes(forbidden),
+      false,
+      "Conditional submit E2E must not depend on persistent fixture behavior: " +
+        forbidden,
+    );
+  }
+});
+
 test("Supabase SSR proxy preserves session cookies and cache-control headers", async () => {
   const content = await readFile(
     path.join(ROOT, "lib", "supabase", "proxy.ts"),
