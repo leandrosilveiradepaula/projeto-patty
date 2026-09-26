@@ -85,7 +85,7 @@ Futuramente, cliente podera acessar somente seus proprios dados client-scoped.
 
 Para Anamnese em rascunho, a fundacao de escrita segue privilegio minimo: a cliente pode criar somente a propria submission para versao publicada e inserir/atualizar somente o valor das respostas enquanto a submission continua sem `submitted_at`. A identidade da resposta (`submission_id`, `form_version_id`, `question_id`) nao recebe UPDATE.
 
-A regra de produto da submissao final ja esta definida: todos os campos aplicaveis devem estar preenchidos. A submissao final, porem, ainda nao esta implementada/liberada para a cliente porque as regras de aplicabilidade das perguntas condicionais e a UX final do envio continuam pendentes. Nao confundir regra definida com funcionalidade implementada.
+A regra de produto da submissao final esta definida e implementada: todos os campos aplicaveis obrigatorios devem estar preenchidos, perguntas nao aplicaveis nao bloqueiam e o consentimento versionado precisa estar aceito. A cliente pode concluir o envio final pela boundary existente; depois disso, respostas e submission ficam protegidas contra edicao pela cliente.
 
 Depois da submissao, a cliente nao recebe escrita nas respostas nem acesso a `anamnesis_answer_corrections`. Correcoes estruturadas sao administrativas, exigem assignment ativo e AAL2, e sao append-only.
 
@@ -277,7 +277,7 @@ Para Cadastro Atual, submission e answer, a cliente autenticada le somente recur
 
 A fundacao original nao concedia escrita de browser em Cadastro Atual, definicoes, submissions ou answers. Essa descricao foi parcialmente substituida para Anamnese em rascunho.
 
-Na implementacao atual, a cliente autenticada pode criar somente a propria submission de rascunho para versao publicada e inserir/atualizar somente o valor das proprias respostas enquanto `submitted_at IS NULL`, sob RLS e privilegios minimos. A submissao final continua nao liberada. Cadastro Atual e definicoes de formulario nao receberam escrita ampla pelo browser por causa dessa mudanca.
+Na implementacao atual, a cliente autenticada pode criar somente a propria submission de rascunho para versao publicada e inserir/atualizar somente o valor das proprias respostas enquanto `submitted_at IS NULL`, sob RLS e privilegios minimos. O envio final e permitido somente pela transicao controlada de `submitted_at`, validada deterministicamente no banco. Cadastro Atual e definicoes de formulario nao receberam escrita ampla pelo browser por causa dessa mudanca.
 
 Administradores com assignment ativo podem inserir review administrativa em seu proprio nome e ler reviews da cliente sob sua responsabilidade. Clientes nao possuem grant ou policy para ler reviews.
 
@@ -287,7 +287,7 @@ A fundacao de aplicabilidade de perguntas nao altera a superficie de autorizacao
 
 ### DECISAO CONFIRMADA
 
-Clientes nao possuem permissoes para criar, alterar, excluir ou publicar definicoes de Anamnese. O catalogo so pode ser lido quando uma versao estiver marcada como disponivel por `published_at`; nenhuma versao do inventario historico foi publicada nesta etapa.
+Clientes nao possuem permissoes para criar, alterar, excluir ou publicar definicoes de Anamnese. O catalogo so pode ser lido quando uma versao estiver marcada como disponivel por `published_at`. A `client-anamnesis` v1 canonica foi publicada pela migration `20260924230322_publish_canonical_anamnesis_v1`.
 
 ## Implementacao BACKEND-BUNDLE-02
 
