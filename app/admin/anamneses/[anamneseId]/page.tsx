@@ -1,4 +1,7 @@
-import { buildProfessionalReviewGroups } from "@/lib/anamnesis/professional-review";
+import {
+  buildProfessionalAttentionItems,
+  buildProfessionalReviewGroups,
+} from "@/lib/anamnesis/professional-review";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -75,6 +78,7 @@ export default async function AdminAnamnesisDetailPage({
     answers.map((answer) => [answer.question_id, answer]),
   );
   const professionalReviewGroups = buildProfessionalReviewGroups(questions, answers);
+  const professionalAttentionItems = buildProfessionalAttentionItems(questions, answers);
   const questionsBySectionId = new Map<
     string,
     typeof questions
@@ -199,6 +203,39 @@ export default async function AdminAnamnesisDetailPage({
           </div>
         )}
       </Section>
+      <Section
+        action={<Badge variant="neutral">Revisão humana</Badge>}
+        description="Respostas comportamentais e de autoimagem separadas para atenção da Patty. O sistema não infere compulsão, culpa, restrição, severidade ou diagnóstico."
+        title="Atenção para revisão da Patty"
+      >
+        {professionalAttentionItems.length > 0 ? (
+          <>
+            <div className={styles.attentionList}>
+              {professionalAttentionItems.map((item) => (
+                <Card key={item.questionKey} variant="subtle">
+                  <p className={styles.answerLabel}>{item.label}</p>
+                  <p className={styles.answerValue}>
+                    {formatAnswerValue(item.answerValue) || "Resposta vazia"}
+                  </p>
+                </Card>
+              ))}
+            </div>
+            <p className={styles.attentionNote}>
+              Se houver necessidade de registrar interpretação profissional,
+              use uma nota interna append-only em{" "}
+              <Link href={`/admin/anamneses/${submission.id}/revisao`}>
+                Revisões da Anamnese
+              </Link>.
+            </p>
+          </>
+        ) : (
+          <EmptyState
+            description="Nenhuma resposta dos campos selecionados para revisão comportamental está disponível."
+            title="Sem contexto comportamental disponível"
+          />
+        )}
+      </Section>
+
       <Section
         description="Seções e perguntas carregadas da versão exata registrada na submissão. Ausência de resposta é exibida como fato, sem inferência."
         title="Respostas originais"
