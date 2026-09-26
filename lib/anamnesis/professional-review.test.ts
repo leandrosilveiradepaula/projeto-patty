@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { buildProfessionalReviewGroups } from "./professional-review.ts";
+import {
+  buildProfessionalAttentionItems,
+  buildProfessionalReviewGroups,
+} from "./professional-review.ts";
 
 test("professional review groups only preserve existing original answers", () => {
   const groups = buildProfessionalReviewGroups(
@@ -50,3 +53,29 @@ test("professional review grouping does not create scores, diagnoses or syntheti
 
   assert.equal(groups[0]?.items[0]?.answerValue, "Como por ansiedade");
 });
+
+test("professional attention view selects designated original answers without classifying them", () => {
+  const items = buildProfessionalAttentionItems(
+    [
+      { id: "q1", question_key: "relationship_with_food", label: "Relação com comida" },
+      { id: "q2", question_key: "mood", label: "Humor" },
+      { id: "q3", question_key: "has_diabetes", label: "Diabetes" },
+    ],
+    [
+      { question_id: "q1", answer_value: "Como quando estou ansiosa" },
+      { question_id: "q2", answer_value: "Bem" },
+      { question_id: "q3", answer_value: "Nao" },
+    ],
+  );
+
+  assert.deepEqual(
+    items.map((item) => item.questionKey),
+    ["relationship_with_food", "mood"],
+  );
+
+  const serialized = JSON.stringify(items).toLowerCase();
+  for (const forbidden of ["score", "severity", "diagnosis", "diagnostico", "compulsao_detectada"]) {
+    assert.equal(serialized.includes(forbidden), false);
+  }
+});
+
