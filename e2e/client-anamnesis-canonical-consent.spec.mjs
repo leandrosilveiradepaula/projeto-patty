@@ -6,11 +6,19 @@ import { createClient } from "@supabase/supabase-js";
 const baseUrl = process.env.E2E_BASE_URL?.replace(/\/$/, "");
 const supabaseUrl = process.env.E2E_SUPABASE_URL;
 const supabaseSecretKey = process.env.E2E_SUPABASE_SECRET_KEY;
+const canonicalEmail = process.env.E2E_CANONICAL_EMAIL;
+const canonicalPassword = process.env.E2E_CANONICAL_PASSWORD;
+const canonicalClientId = process.env.E2E_CANONICAL_CLIENT_ID;
 
-if (!baseUrl || !supabaseUrl || !supabaseSecretKey) {
-  throw new Error(
-    "Missing E2E_BASE_URL, E2E_SUPABASE_URL or E2E_SUPABASE_SECRET_KEY",
-  );
+if (
+  !baseUrl ||
+  !supabaseUrl ||
+  !supabaseSecretKey ||
+  !canonicalEmail ||
+  !canonicalPassword ||
+  !canonicalClientId
+) {
+  throw new Error("Missing canonical consent E2E environment.");
 }
 
 const admin = createClient(supabaseUrl, supabaseSecretKey, {
@@ -19,58 +27,6 @@ const admin = createClient(supabaseUrl, supabaseSecretKey, {
 
 const CONSENT_KEY = "consent_acceptance";
 const GUARD_KEY = "city";
-
-async function lockSyntheticClient(userId) {
-  const updated = await admin.auth.admin.updateUserById(userId, {
-    password: randomBytes(48).toString("base64url"),
-  });
-
-  if (updated.error) throw updated.error;
-}
-
-async function loadSyntheticClient() {
-  const profiles = await admin
-    .from("profiles")
-    .select("id")
-    .eq("display_name", "E2E Correction Client")
-    .limit(2);
-
-  if (profiles.error) throw profiles.error;
-  if (profiles.data.length !== 1) {
-    throw new Error(
-      "Expected exactly one persistent E2E Correction Client fixture.",
-    );
-  }
-
-  const profileId = profiles.data[0].id;
-  const client = await admin
-    .from("clients")
-    .select("id")
-    .eq("profile_id", profileId)
-    .single();
-
-  if (client.error) throw client.error;
-
-  const authUser = await admin.auth.admin.getUserById(profileId);
-  if (authUser.error) throw authUser.error;
-
-  const email = authUser.data.user.email;
-  if (!email) throw new Error("Persistent E2E client has no Auth email.");
-
-  const password = randomBytes(48).toString("base64url");
-  const updated = await admin.auth.admin.updateUserById(profileId, {
-    password,
-  });
-
-  if (updated.error) throw updated.error;
-
-  return {
-    clientId: client.data.id,
-    email,
-    password,
-    profileId,
-  };
-}
 
 async function loadCanonicalVersion() {
   const form = await admin
@@ -249,13 +205,12 @@ test.use({ baseURL: baseUrl });
 test("cliente sintetica ve checkbox canonico e consentimento fica auditavel sem concluir envio incompleto", async ({
   page,
 }) => {
-  const client = await loadSyntheticClient();
-  const fixture = await createCanonicalDraftFixture(client.clientId);
+  const fixture = await createCanonicalDraftFixture(canonicalClientId);
 
   try {
     await page.goto("/login");
-    await page.getByLabel("Email").fill(client.email);
-    await page.getByLabel("Senha").fill(client.password);
+    await page.getByLabel("Email").fill(canonicalEmail);
+    await page.getByLabel("Senha").fill(canonicalPassword);
     await page.getByRole("button", { name: "Entrar" }).click();
     await expect(page).toHaveURL(/\/cliente\/?$/);
 
@@ -315,6 +270,5 @@ test("cliente sintetica ve checkbox canonico e consentimento fica auditavel sem 
     expect(guardAnswer.data).toHaveLength(0);
   } finally {
     await cleanupDraft(fixture);
-    await lockSyntheticClient(client.profileId);
   }
 });
