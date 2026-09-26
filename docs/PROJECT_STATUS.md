@@ -697,4 +697,4 @@ A consulta ao Supabase SaaS encontrou 2 pedidos E2E e 1 resposta E2E historicos 
 
 O workflow `.github/workflows/e2e-anamnesis-clarifications.yml` deixou de disparar em `pull_request` e passa a aceitar apenas `workflow_dispatch`. Uma regressao de seguranca rejeita `pull_request`, `push` ou `schedule` nesse workflow.
 
-Nao executar esse smoke como rotina de CI. Nova execucao manual so deve ocorrer quando houver mudanca material no fluxo de esclarecimentos que justifique novo historico sintetico permanente.
+Nao executar esse smoke como rotina de CI. Nova execucao manual so deve ocorrer no `master`, quando houver mudanca material no fluxo de esclarecimentos que justifique novo historico sintetico permanente, e exige digitar `CREATE_E2E_HISTORY` no input de confirmacao do workflow.

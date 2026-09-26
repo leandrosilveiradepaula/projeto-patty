@@ -516,6 +516,20 @@ test("immutable-history Anamnesis E2E workflows stay manual-only", async () => {
         forbidden,
     );
   }
+
+  for (const required of [
+    "confirmation:",
+    "CREATE_E2E_HISTORY",
+    "github.ref == 'refs/heads/master'",
+    "inputs.confirmation == 'CREATE_E2E_HISTORY'",
+  ]) {
+    assert.equal(
+      clarificationWorkflow.includes(required),
+      true,
+      "Immutable-history clarification E2E must require explicit production confirmation: " +
+        required,
+    );
+  }
 });
 
 test("Supabase SSR proxy preserves session cookies and cache-control headers", async () => {
