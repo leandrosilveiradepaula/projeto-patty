@@ -55,3 +55,38 @@ test("Anamnesis docs preserve the resolved consent decision and current publishe
     /a proxima etapa e materializar a v1, validar e publicar explicitamente/i,
   );
 });
+
+test("MVP readiness and open questions do not reopen resolved Anamnesis or AI gates", () => {
+  const readiness = load("docs/MVP_READINESS.md");
+  const openQuestions = load("docs/OPEN_QUESTIONS.md");
+  const readme = load("README.md");
+
+  for (const stale of [
+    "O bloqueio para materializar/publicar a primeira `client-anamnesis` e ANAM-046.",
+    "Continuam separados e abertos: provider/modelo, prompt version operacional",
+    "integracao real com provider/modelo de IA",
+    "regras definitivas de MIME types e controles adicionais de arquivos",
+  ]) {
+    assert.equal(
+      [readiness, openQuestions, readme].some((content) =>
+        content.includes(stale),
+      ),
+      false,
+      `resolved project state must not be reopened: ${stale}`,
+    );
+  }
+
+  assert.match(
+    readiness,
+    /primeira `client-anamnesis` ja foi materializada, publicada e validada em producao/i,
+  );
+  assert.match(
+    openQuestions,
+    /Provider OpenAI, configuracao tecnica inicial de modelo\/effort, prompt v1/i,
+  );
+  assert.match(
+    readme,
+    /avaliacao sintetica do primeiro fluxo OpenAI e conclusao do gate de processamento de dados de saude/i,
+  );
+});
+
