@@ -10,7 +10,16 @@ const migration = fs.readFileSync(
     root,
     "supabase",
     "migrations",
-    "20260926231500_create_client_training_requests.sql",
+    "20260926233725_create_client_training_requests.sql",
+  ),
+  "utf8",
+);
+const optimizationMigration = fs.readFileSync(
+  path.join(
+    root,
+    "supabase",
+    "migrations",
+    "20260926233849_optimize_client_training_request_rls.sql",
   ),
   "utf8",
 );
@@ -36,4 +45,18 @@ test("training request access requires admin, active assignment and aal2", () =>
   assert.match(migration, /user_roles\.role = 'admin'/i);
   assert.match(migration, /client_assignments\.ended_at is null/i);
   assert.match(migration, /recorded_by_profile_id = \(select auth\.uid\(\)\)/i);
+});
+
+
+test("training request RLS optimization relies on the restrictive MFA policy", () => {
+  assert.match(migration, /create policy admin_mfa_aal2_required/i);
+  assert.doesNotMatch(optimizationMigration, /auth\.jwt\(\)/i);
+  assert.match(
+    optimizationMigration,
+    /user_roles\.profile_id = \(select auth\.uid\(\)\)/i,
+  );
+  assert.match(
+    optimizationMigration,
+    /client_assignments\.ended_at is null/i,
+  );
 });

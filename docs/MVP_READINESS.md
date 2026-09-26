@@ -438,3 +438,15 @@ Escopo do gate:
 - persistencia do detalhe quando aplicavel;
 - draft continua nao enviado;
 - cleanup sem historico sintetico permanente.
+## Solicitacao de treino estruturada
+
+Estado: **SAAS APLICADO / UI IMPLEMENTADA**
+
+A Patty confirmou que so prescreve treino para clientes que solicitam esse servico. O sistema agora registra esse fato em `client_training_requests`, de forma append-only, sob admin relacional + AAL2 + assignment ativo.
+
+Migrations aplicadas:
+- `20260926233725_create_client_training_requests`;
+- `20260926233849_optimize_client_training_request_rls`.
+
+O registro nao cria treino, nao escolhe exercicios, nao altera protocolo e nao publica nada. Progressao, intensidade, volume, cardio e eventual retirada/cancelamento da solicitacao continuam abertos.
+
