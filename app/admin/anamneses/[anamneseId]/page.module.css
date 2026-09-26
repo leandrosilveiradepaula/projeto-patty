@@ -184,3 +184,19 @@
   white-space: pre-wrap;
 }
 
+.attentionList {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.attentionNote {
+  margin: var(--space-4) 0 0;
+  color: var(--color-text-secondary);
+  line-height: var(--text-body-medium-line-height);
+}
+
+.attentionNote a {
+  color: var(--color-text-primary);
+  font-weight: var(--text-label-medium-weight);
+}
+
