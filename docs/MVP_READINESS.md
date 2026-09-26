@@ -306,7 +306,7 @@ A fundacao de metadata no Supabase permanece aplicada e vazia em producao. O pri
 
 O lote contem somente o video da balanca aprovado pela Patty e permanece deliberadamente sem `storage_path`, SHA-256, registros de conteudo/versao/asset, publicacao ou release enquanto o Vercel Private Blob store nao estiver criado/conectado.
 
-A integracao Vercel usada nesta sessao nao oferece operacao de Storage, portanto a criacao/conexao do store e uma pendencia operacional manual. Isso nao bloqueia outras frentes tecnicas do MVP e nao autoriza migracao dos demais arquivos do Drive.
+A integracao Vercel usada nesta sessao nao oferece operacao de Storage, portanto a criacao/conexao do store continua uma pendencia operacional manual. O procedimento seguro foi versionado em `docs/VERCEL_BLOB_SETUP.md`. Isso nao bloqueia outras frentes tecnicas do MVP e nao autoriza migracao dos demais arquivos do Drive.
 
 ## IA - execution nao terminal
 
