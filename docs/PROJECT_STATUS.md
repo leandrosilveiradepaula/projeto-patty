@@ -610,6 +610,14 @@ Resultado:
 
 Com isso, o fluxo de inicio e retomada da primeira Anamnese canonica esta validado no runtime de producao.
 
+## 2026-09-26 - Smoke legado de rascunho removido
+
+### COBERTURA CONSOLIDADA
+
+O workflow `E2E client anamnesis draft smoke` e o spec `e2e/client-anamnesis-draft.spec.mjs` foram removidos. Eles dependiam da antiga fixture sintetica persistente e de rotacao de senha, enquanto a cobertura equivalente de start/resume, INSERT, UPDATE e cleanup ja esta no smoke canonico consolidado com fixture efemera.
+
+A evidencia operacional permanece o run `36257567841`, que validou o fluxo atual em producao. A remocao reduz duplicidade e evita retorno acidental ao modelo persistente de fixture.
+
 ## 2026-09-26 - E2E de edicao consolidado no smoke canonico
 
 ### PRODUCAO VALIDADA / WORKFLOW ANTIGO REMOVIDO
