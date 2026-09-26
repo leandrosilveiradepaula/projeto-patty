@@ -31,13 +31,15 @@ export function buildFactualMeasurementComparison(
 
   return current.map((measurement) => {
     const previousMeasurement = previousByKey.get(measurement.measurement_key);
+    const previousValue =
+      previousMeasurement && previousMeasurement.unit === measurement.unit
+        ? String(previousMeasurement.measurement_value)
+        : undefined;
 
     return {
       currentValue: String(measurement.measurement_value),
       label: formatProfessionalMeasurementLabel(measurement.measurement_key),
-      previousValue: previousMeasurement
-        ? String(previousMeasurement.measurement_value)
-        : undefined,
+      previousValue,
       unit: measurement.unit,
     };
   });
