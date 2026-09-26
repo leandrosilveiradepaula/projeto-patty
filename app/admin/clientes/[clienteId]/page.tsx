@@ -1,5 +1,6 @@
 import { endClientAssignmentAction } from "@/app/admin/clientes/[clienteId]/actions";
 import { AdminClientRegistrationDetails } from "@/components/admin/AdminClientRegistrationDetails";
+import { AdminTrainingRequestForm } from "@/components/admin/AdminTrainingRequestForm";
 import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -12,6 +13,7 @@ import {
   listAccessibleAnamnesisSubmissions,
   listAccessibleAssessmentsForClient,
   listAccessibleClientFiles,
+  listAccessibleClientTrainingRequests,
   listAccessibleProtocolsForClient,
   listContentReleasesForAccessibleClient,
 } from "@/lib/supabase/data-access";
@@ -24,6 +26,18 @@ type AdminClienteDetailPageProps = {
     clienteId: string;
   }>;
 };
+
+
+function formatDateTime(value: string) {
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    month: "2-digit",
+    timeZone: "UTC",
+    year: "numeric",
+  }).format(new Date(value));
+}
 
 export default async function AdminClienteDetailPage({
   params,
@@ -42,6 +56,7 @@ export default async function AdminClienteDetailPage({
     protocols,
     files,
     contentReleases,
+    trainingRequests,
   ] = await Promise.all([
     getAccessibleClientRegistration(client.id),
     listAccessibleAnamnesisSubmissions(client.id),
@@ -49,6 +64,7 @@ export default async function AdminClienteDetailPage({
     listAccessibleProtocolsForClient(client.id),
     listAccessibleClientFiles(client.id),
     listContentReleasesForAccessibleClient(client.id),
+    listAccessibleClientTrainingRequests(client.id),
   ]);
 
   const displayName = client.profiles?.display_name?.trim();
@@ -148,6 +164,51 @@ export default async function AdminClienteDetailPage({
           />
         )}
       </Section>
+      <Section
+        description="A Patty prescreve treino somente quando a cliente solicita o serviço. O histórico abaixo registra essa solicitação sem gerar treino automaticamente."
+        title="Solicitação de treino"
+      >
+        <div className={styles.trainingGrid}>
+          <Card className={styles.infoCard}>
+            <div className={styles.cardHeader}>
+              <h3 className={styles.cardTitle}>Estado atual</h3>
+              <Badge variant="neutral">
+                {trainingRequests.length > 0
+                  ? "Solicitação registrada"
+                  : "Sem solicitação registrada"}
+              </Badge>
+            </div>
+            <p className={styles.cardDescription}>
+              {trainingRequests.length > 0
+                ? "Existe ao menos um registro histórico de solicitação de treino para esta cliente."
+                : "Enquanto não houver solicitação registrada, o sistema não deve tratar treino como serviço solicitado."}
+            </p>
+          </Card>
+          <Card className={styles.infoCard}>
+            <AdminTrainingRequestForm clientId={client.id} />
+          </Card>
+        </div>
+        {trainingRequests.length > 0 ? (
+          <ol className={styles.trainingHistory}>
+            {trainingRequests.map((request) => (
+              <li key={request.id}>
+                <Card variant="subtle">
+                  <p className={styles.trainingMeta}>
+                    Solicitado em {formatDateTime(request.requested_at)}
+                    {request.profiles?.display_name?.trim()
+                      ? ` · registrado por ${request.profiles.display_name.trim()}`
+                      : ""}
+                  </p>
+                  <p className={styles.cardDescription}>
+                    {request.note?.trim() || "Sem observação adicional."}
+                  </p>
+                </Card>
+              </li>
+            ))}
+          </ol>
+        ) : null}
+      </Section>
+
       <Section
         description="Somente áreas já conectadas ao backend real são exibidas como navegação."
         title="Áreas integradas"
