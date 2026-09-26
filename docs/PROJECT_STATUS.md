@@ -1,6 +1,6 @@
 # Estado Atual do Projeto Patty
 
-Ultima atualizacao documental: 2026-09-24.
+Ultima atualizacao documental: 2026-09-26.
 
 Este arquivo e o ponto de entrada operacional para novos chats e agentes. Ele resume o estado do projeto e aponta para as fontes de verdade detalhadas.
 
@@ -29,9 +29,9 @@ Antes de propor ou executar qualquer tarefa:
 
 O HEAD confirmado do `master` nesta atualizacao e:
 
-`17876bfe33d49a037bf0aaf62bbcfe893f51941f`
+`bf49254edb9292801eb9ed80a83e1d68262b7b11`
 
-Esse commit incorpora o PR #165, que adiciona observabilidade central de executions de IA nao terminais. Novos chats devem sempre revalidar o HEAD remoto antes de implementar qualquer mudanca.
+Esse commit incorpora o PR #189, que elimina a corrida de refresh que podia reenviar o valor antigo em um segundo save de resposta do draft canonico. O CI do PR e o CI do push ao `master` passaram; o deployment de producao correspondente ficou `READY`.
 
 ## Legenda de estado
 
@@ -48,11 +48,11 @@ Esse commit incorpora o PR #165, que adiciona observabilidade central de executi
 
 ### FATO OPERACIONAL
 
-O bloqueio temporario de `build-rate-limit` deixou de ser o estado atual.
+O deployment de producao correspondente ao `master` `bf49254edb9292801eb9ed80a83e1d68262b7b11` e `dpl_BVK9vpL7t4cGyoFjrv393xWPxHsb` e esta `READY`.
 
-Os gates funcionais foram executados com o codigo de aplicacao do commit `19d216bf2148e983d452f0555a2d1e740e1027ca`, que permanece contido no `master`. Merges exclusivamente documentais posteriores nao alteram essa evidencia. O deployment de producao do `master` permanece `READY`.
+Em 2026-09-26, o workflow manual `E2E canonical Anamnesis start smoke`, run `36257567841` (run number 16), executou contra esse mesmo SHA e terminou `SUCCESS`. O teste consolidado validou um unico login com fixture sintetica efemera, criacao e retomada do mesmo draft, INSERT de Cidade, UPDATE da mesma resposta sem duplicacao, ativacao/desativacao de pergunta condicional, persistencia do detalhe quando aplicavel e permanencia da submission como draft. O cleanup efemero tambem terminou `SUCCESS`.
 
-Em 2026-09-24, a validacao runtime contra `/login` confirmou os headers de seguranca esperados. O smoke E2E de producao do rascunho da Anamnese e o smoke administrativo de correcoes tambem passaram no run `35985899621`, depois de corrigidos dois seletores Playwright ambiguos. Consulta pos-smoke no Supabase confirmou `0` drafts E2E ativos e `0` correcoes E2E residuais.
+O fail anterior do run `36170455838` foi diagnosticado como corrida de UI: o segundo PATCH autenticado chegava ao Supabase com HTTP 200, mas carregava novamente o valor antigo porque um `router.refresh()` assincrono podia remontar o formulario entre o primeiro save e a segunda edicao. O PR #189 removeu refresh pos-save de respostas comuns e manteve navegacao explicita somente para perguntas controladoras de aplicabilidade. PostgreSQL, grants, RLS e schema nao precisaram ser alterados.
 
 Nao existe bloqueio atual de deployment Vercel para o `master`.
 
@@ -66,9 +66,9 @@ Nao existe bloqueio atual de deployment Vercel para o `master`.
 | MFA administrativo | SIM | SIM | Smoke AAL1/AAL2 documentado | Enforcement RLS aplicado no SaaS | Leaked Password Protection bloqueada pelo plano atual |
 | RBAC / RLS / assignments | SIM | SIM | Smokes documentados | Fundacao e fluxos administrativos principais operacionais | Novos papeis ficam fora do MVP; assignment continua regra geral para dados client-scoped |
 | Cadastro Atual | SIM como entidade separada | SIM | Fundacao testada | Backend existente | Fluxo final de edicao cadastral pela cliente/Patty ainda aberto |
-| Anamnese versionada | SIM | SIM + aplicabilidade + `single_choice` + mapa v1 + submissao final + consentimento checkbox | CI + smoke SQL pos-apply PASS; checkbox em validacao | Produto v1 definido; ANAM-046 resolvido | Materializar, validar e publicar explicitamente a primeira `client-anamnesis` |
-| Rascunho da Anamnese | SIM | SIM para salvar/retomar/enviar dentro dos tipos v1 suportados | Smoke pos-apply PASS; E2E anterior PASS para retomada `text`; UI final passou CI/build | Migration `20260924142453` aplicada | Publicar a versao canonica e executar E2E completo com consentimento |
-| Obrigatoriedade da Anamnese | SIM | Regra + UI + validacao deterministica no banco | CI + smoke pos-apply PASS | `20260924142453` aplicada no SaaS; campo nao aplicavel nao bloqueia; incompleto aplicavel bloqueia | Validar E2E completo quando a primeira `client-anamnesis` for publicada |
+| Anamnese versionada | SIM | SIM + aplicabilidade + `single_choice` + mapa v1 + submissao final + consentimento checkbox | Smoke SQL completo + consent E2E `36072067063` + start/resume E2E `36074218960` + fluxo consolidado E2E `36257567841` | `client-anamnesis` v1 publicada pela migration `20260924230322`; runtime atual validado | Evolucoes futuras exigem nova versao e nao podem inferir regras abertas |
+| Rascunho da Anamnese | SIM | SIM para salvar/retomar/editar/enviar dentro dos tipos v1 suportados | E2E consolidado `36257567841` PASS para start/resume/INSERT/UPDATE/condicional + cleanup | Publicado no deployment `dpl_BVK9vpL7t4cGyoFjrv393xWPxHsb` | Nao repetir smoke sem nova evidencia; manter fixture efemera e um unico login |
+| Obrigatoriedade da Anamnese | SIM | Regra + UI + validacao deterministica no banco | Smoke SQL completo PASS; consentimento browser PASS no run `36072067063` | `20260924142453` + definicao canonica v1 aplicadas; campo nao aplicavel nao bloqueia | Alteracoes futuras de questionario/consentimento devem ser versionadas |
 | Correcao pos-envio da Anamnese | SIM | SIM | E2E administrativo de producao PASS em 2026-09-24 | Schema aplicado e rota/UI publicadas e validadas em producao | Resposta original continua separada de correcoes e esclarecimentos |
 | Esclarecimentos pos-Anamnese | SIM | SIM | E2E autenticado admin -> cliente -> admin PASS no run `36053370894` | Schema e UI publicados; workflow E2E versionado no PR #155 | Lifecycle sem estado formal/prazo/notificacao continua aberto |
 | Arquivos privados | SIM | PARCIAL/AVANCADO | Smokes cliente/admin + auditoria estatica | Acesso da Patty sem assignment confirmado em RLS/Storage/rotas, com MFA AAL2 | Politica de retencao/hard delete |
@@ -98,9 +98,34 @@ Nesta rodada, o workflow versionado confirmou no historico remoto:
 - `20260924165942_harden_ai_execution_boundary.sql`;
 - `20260924193339_seed_openai_anamnesis_review_prompt.sql`;
 - `20260924210600_create_educational_content_assets.sql`;
-- `20260924215415_add_ai_failure_retention_constraints.sql`.
+- `20260924215415_add_ai_failure_retention_constraints.sql`;
+- `20260924230322_publish_canonical_anamnesis_v1.sql`.
 
-O apply de `20260923191554` terminou com sucesso e o `migration list` pos-apply mostrou o mesmo timestamp local/remoto. Em seguida, um smoke transacional com dados sinteticos e `ROLLBACK` confirmou: draft nao submetido pode ser excluido; submission enviada continua bloqueada com SQLSTATE `55000`; cliente A nao consegue ler submission da cliente B. Em 2026-09-24, o E2E de producao confirmou a retomada e persistencia de um rascunho existente no runtime publicado. A criacao inicial de nova Anamnese continua separada e depende da primeira versao canonica `client-anamnesis`.
+O apply de `20260923191554` terminou com sucesso e o `migration list` pos-apply mostrou o mesmo timestamp local/remoto. Em seguida, um smoke transacional com dados sinteticos e `ROLLBACK` confirmou: draft nao submetido pode ser excluido; submission enviada continua bloqueada com SQLSTATE `55000`; cliente A nao consegue ler submission da cliente B. Em 2026-09-24, o E2E de producao confirmou a retomada e persistencia de um rascunho existente no runtime publicado. A criacao inicial da Anamnese canonica v1 esta publicada e foi validada em producao; o run `36257567841` confirmou criacao, retomada e edicao do draft sem residuo.
+
+## 2026-09-26 - Update do draft canonico corrigido e validado
+
+### PRODUCAO VALIDADA
+
+O fail do run `36170455838` foi investigado antes de novo rerun. Os logs do Supabase mostraram que o UPDATE nao era bloqueado por RLS: houve `PATCH 200` autenticado para `anamnesis_answers`, mas o payload tinha o mesmo tamanho do valor antigo. O codigo da UI confirmou uma corrida entre a segunda edicao e o `router.refresh()` disparado apos o primeiro save.
+
+O PR #189:
+- removeu refresh pos-save do formulario de texto;
+- removeu refresh pos-save de `single_choice` comum;
+- manteve navegacao explicita somente para perguntas que controlam aplicabilidade;
+- adicionou regressao para impedir reintroducao do refresh assincrono nesses saves;
+- nao alterou migration, schema, RLS ou grants.
+
+Evidencia final:
+- CI do PR #189: PASS;
+- merge no `master`: `bf49254edb9292801eb9ed80a83e1d68262b7b11`;
+- deployment: `dpl_BVK9vpL7t4cGyoFjrv393xWPxHsb`, `READY`;
+- workflow: `E2E canonical Anamnesis start smoke`;
+- run: `36257567841`;
+- Playwright: `1 passed (25.7s)`;
+- cleanup da fixture efemera: SUCCESS.
+
+Nao existe justificativa para novo rerun desse smoke sem nova evidencia de regressao.
 
 ## Regras profissionais que nao devem ser reabertas
 
@@ -140,7 +165,7 @@ Resumo:
 ## Pendencias de infraestrutura conhecidas
 
 1. **Deployment Vercel**
-   - RESOLVIDO nesta rodada: `master` atual publicado como `READY`, headers validados e smokes de rascunho/correcoes aprovados em producao.
+   - RESOLVIDO: `master` `bf49254edb9292801eb9ed80a83e1d68262b7b11` publicado como `READY`; smoke canonico consolidado `36257567841` aprovado em producao.
 
 2. **Email real de convite**
    - lifecycle tecnico e E2E sintetico existem;
@@ -197,13 +222,14 @@ Nesta reconciliacao de 2026-09-23, incorporada ao `master` pelo PR #120:
 
 Ordem operacional sugerida, sujeita a revalidacao do HEAD:
 
-1. obter e documentar as respostas do gate `ANAMNESE_CONSENT_GATE.md` para fechar ANAM-046;
-2. materializar a primeira `client-anamnesis`, revisar, publicar explicitamente e validar inicio, preenchimento condicional e envio final E2E;
-3. RETOMAR quando houver acesso operacional: configurar Gmail Custom SMTP e validar convite real;
-4. CONCLUIDO: fluxo autenticado admin <-> cliente de esclarecimentos validado em producao com fixture sintetica no run `36053370894`;
-5. executar a avaliacao sintetica do fluxo OpenAI quando houver credencial de ambiente; provider, prompt v1 e contrato `anamnesis_review` ja estao implementados, mas dados reais continuam bloqueados pelo `OPENAI_HEALTH_DATA_GATE.md`;
-6. infraestrutura de midia educacional DEFINIDA como Vercel Private Blob; proximo passo operacional e criar/conectar store privado e migrar controladamente o video aprovado da balanca;
-7. ampliar automacao de alimentacao/treino somente depois das regras profissionais correspondentes estarem documentadas.
+1. CONCLUIDO: ANAM-046 definido, versionado e validado no browser no run `36072067063`.
+2. CONCLUIDO: primeira `client-anamnesis` v1 publicada e fluxo de inicio/retomada/edicao/condicionais validado em producao; run consolidado `36257567841` PASS no `master` `bf49254edb9292801eb9ed80a83e1d68262b7b11`.
+3. RETOMAR quando houver acesso operacional: configurar Gmail Custom SMTP e validar convite real.
+4. CONCLUIDO: fluxo autenticado admin <-> cliente de esclarecimentos validado em producao com fixture sintetica no run `36053370894`.
+5. Executar a avaliacao sintetica do fluxo OpenAI quando houver credencial de ambiente; provider, prompt v1 e contrato `anamnesis_review` ja estao implementados, mas dados reais continuam bloqueados pelo `OPENAI_HEALTH_DATA_GATE.md`.
+6. Infraestrutura de midia educacional DEFINIDA como Vercel Private Blob; proximo passo operacional e criar/conectar store privado e migrar controladamente o video aprovado da balanca.
+7. Fechar apenas as lacunas reais ainda abertas da Anamnese/Avaliacoes sem reabrir consentimento, publicacao da v1 ou o fluxo de draft ja validados.
+8. Ampliar automacao de alimentacao/treino somente depois das regras profissionais correspondentes estarem documentadas.
 
 ## Regra de manutencao deste arquivo
 
