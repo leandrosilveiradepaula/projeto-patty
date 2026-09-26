@@ -22,6 +22,14 @@ export type ProfessionalReviewGroup = {
   title: string;
 };
 
+const ATTENTION_KEYS = [
+  "relationship_with_food",
+  "self_image_in_mirror",
+  "perceived_external_image",
+  "mood",
+  "social_relationships",
+] as const;
+
 const GROUPS = [
   {
     id: "rotina-alimentacao",
@@ -138,3 +146,38 @@ export function buildProfessionalReviewGroups(
     }),
   })).filter((group) => group.items.length > 0);
 }
+
+export function buildProfessionalAttentionItems(
+  questions: ProfessionalReviewQuestion[],
+  answers: ProfessionalReviewAnswer[],
+): ProfessionalReviewItem[] {
+  const questionsByKey = new Map(
+    questions.map((question) => [question.question_key, question]),
+  );
+  const answersByQuestionId = new Map(
+    answers.map((answer) => [answer.question_id, answer]),
+  );
+
+  return ATTENTION_KEYS.flatMap((questionKey) => {
+    const question = questionsByKey.get(questionKey);
+
+    if (!question) {
+      return [];
+    }
+
+    const answer = answersByQuestionId.get(question.id);
+
+    if (!answer) {
+      return [];
+    }
+
+    return [
+      {
+        answerValue: answer.answer_value,
+        label: question.label,
+        questionKey: question.question_key,
+      },
+    ];
+  });
+}
+
