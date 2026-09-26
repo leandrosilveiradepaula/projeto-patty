@@ -1,7 +1,6 @@
 "use client";
 
 import { useActionState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 
 import {
   type ClientAnamnesisDraftAnswerFormState,
@@ -41,20 +40,12 @@ export function ClientAnamnesisDraftSingleChoiceAnswerForm({
     questionId,
   );
   const [state, formAction, isPending] = useActionState(action, initialState);
-  const router = useRouter();
 
   useEffect(() => {
-    if (!state.success) {
-      return;
-    }
-
-    if (reloadPageOnSuccess) {
+    if (state.success && reloadPageOnSuccess) {
       window.location.assign(`/cliente/anamnese/${submissionId}`);
-      return;
     }
-
-    router.refresh();
-  }, [reloadPageOnSuccess, router, state.success, submissionId]);
+  }, [reloadPageOnSuccess, state.success, submissionId]);
 
   const descriptionId = `anamnesis-draft-choice-${questionId}-description`;
 
