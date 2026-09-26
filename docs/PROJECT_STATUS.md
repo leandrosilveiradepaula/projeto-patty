@@ -610,27 +610,15 @@ Resultado:
 
 Com isso, o fluxo de inicio e retomada da primeira Anamnese canonica esta validado no runtime de producao.
 
-## 2026-09-24 - E2E de edicao do draft canonico preparado
+## 2026-09-26 - E2E de edicao consolidado no smoke canonico
 
-### IMPLEMENTADO / EXECUCAO MANUAL PENDENTE
+### PRODUCAO VALIDADA / WORKFLOW ANTIGO REMOVIDO
 
-Foi versionado o workflow `E2E canonical Anamnesis draft edit smoke` para validar edicao real da `client-anamnesis` v1 publicada.
+A cobertura de edicao do draft canonico foi incorporada ao workflow `E2E canonical Anamnesis start smoke`, usando uma unica fixture efemera e um unico login. O run `36257567841` validou start/resume, INSERT/UPDATE de `city`, condicional `has_health_plan -> health_plan_details`, persistencia do detalhe quando aplicavel e cleanup sem residuo.
 
-O teste usa somente a fixture sintetica persistente e valida no browser:
-- criacao de um draft temporario da versao canonica;
-- resposta textual real `city`;
-- insert inicial e update da mesma resposta sem duplicacao;
-- condicional real `has_health_plan -> health_plan_details`;
-- detalhe oculto antes da resposta controladora;
-- detalhe exibido apos `Sim`;
-- persistencia de `health_plan_details`;
-- detalhe oculto novamente apos alterar a controladora para `Nao`;
-- `submitted_at` permanece nulo;
-- cleanup remove answers e draft;
-- senha sintetica e rotacionada;
-- 0 drafts canonicos residuais ao final.
+O antigo workflow separado `E2E canonical Anamnesis draft edit smoke` ficou orfao depois da remocao do spec duplicado `e2e/client-anamnesis-canonical-draft-edit.spec.mjs`. O arquivo `.github/workflows/e2e-client-anamnesis-canonical-draft-edit.yml` foi removido para evitar uma Action manual quebrada e cobertura duplicada.
 
-Nenhuma migration ou politica RLS e alterada nesta tarefa.
+Nenhuma migration, policy RLS ou regra de produto foi alterada.
 
 ## 2026-09-26 - Auditoria de seguranca de producao e credenciais E2E
 
