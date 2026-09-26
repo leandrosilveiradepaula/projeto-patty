@@ -130,3 +130,129 @@
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+
+.reviewGrid {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+}
+
+.reviewGroup {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.reviewGroupTitle {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+  font-size: var(--text-title-medium-size);
+  font-weight: var(--text-title-medium-weight);
+}
+
+.reviewGroupDescription {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-secondary);
+  line-height: var(--text-body-medium-line-height);
+}
+
+.reviewItems {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.reviewItems div {
+  display: grid;
+  gap: var(--space-1);
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-3);
+}
+
+.reviewItems dt {
+  color: var(--color-text-muted);
+  font-size: var(--text-body-small-size);
+  font-weight: var(--text-label-small-weight);
+}
+
+.reviewItems dd {
+  margin: 0;
+  color: var(--color-text-secondary);
+  line-height: var(--text-body-medium-line-height);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.attentionList {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.attentionNote {
+  margin: var(--space-4) 0 0;
+  color: var(--color-text-secondary);
+  line-height: var(--text-body-medium-line-height);
+}
+
+.attentionNote a {
+  color: var(--color-text-primary);
+  font-weight: var(--text-label-medium-weight);
+}
+
+.healthGrid {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
+}
+
+.healthFileList {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.healthFileList li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: start;
+  justify-content: space-between;
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-3);
+}
+
+.healthFileList li div {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.healthFileList strong {
+  color: var(--color-text-primary);
+  overflow-wrap: anywhere;
+}
+
+.healthFileList span {
+  color: var(--color-text-muted);
+  font-size: var(--text-body-small-size);
+}
+
+.healthFileList a,
+.healthFilesLink {
+  color: var(--color-brand-strong);
+  font-weight: var(--text-label-medium-weight);
+  text-decoration: none;
+}
+
+.healthFileList a:hover,
+.healthFilesLink:hover {
+  text-decoration: underline;
+}
+
+.healthFilesLink {
+  width: fit-content;
+}
+

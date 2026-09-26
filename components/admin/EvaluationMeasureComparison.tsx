@@ -38,7 +38,7 @@ export function EvaluationMeasureComparison({
     <div {...props} className={classNames}>
       <table className={styles.table}>
         <caption className={styles.caption}>
-          Comparação factual entre avaliações demonstrativas.
+          Comparação factual entre avaliações registradas.
         </caption>
         <thead>
           <tr>

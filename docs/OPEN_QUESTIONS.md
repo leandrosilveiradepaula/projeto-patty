@@ -370,7 +370,9 @@ Quais sao as regras de suplementacao e manipulados?
 
 ### QUESTAO ABERTA
 
-Qual sera a montagem e progressao definitiva de treino, incluindo volume, progressao e cardio quando aplicavel?
+A solicitacao de treino pela cliente ja possui registro estruturado append-only e nao autoriza geracao automatica. Continua aberta a montagem e progressao definitiva de treino, incluindo excecoes de frequencia/duracao, intensidade, volume, progressao e cardio quando aplicavel.
+
+Tambem permanece aberto como representar eventual retirada/cancelamento posterior da solicitacao de treino; nao inferir cancelamento nem apagar o registro historico.
 
 ### QUESTAO ABERTA
 

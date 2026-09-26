@@ -1857,4 +1857,13 @@ Esses pontos foram mantidos como questoes abertas. Nenhuma formula, alerta, reco
 ### FONTE
 
 A rodada esta preservada em `docs/PATTY_METHOD_SURVEY_20260926.md`. As secoes de acompanhamento, formato do protocolo, excecoes, definicao de bom resultado e caso real ficaram sem resposta e permanecem abertas.
+## 2026-09-26 - Solicitacao de treino como gate explicito
+
+### DECISAO DE PRODUTO/TECNICA
+
+Como a Patty confirmou que so prescreve treino para clientes que solicitam o servico, o sistema passa a preservar essa solicitacao como fato estruturado append-only em `client_training_requests`.
+
+A Patty registra o fato sob admin/AAL2/assignment ativo. O registro nao gera treino, nao seleciona exercicios, nao altera protocolo e nao publica nada.
+
+A progressao definitiva de treino continua aberta e nao e inferida desta decisao.
 
