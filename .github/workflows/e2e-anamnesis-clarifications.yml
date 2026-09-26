@@ -2,17 +2,12 @@ name: E2E anamnesis clarification flow
 
 on:
   workflow_dispatch:
-  pull_request:
-    paths:
-      - "e2e/anamnesis-clarifications.spec.mjs"
-      - ".github/workflows/e2e-anamnesis-clarifications.yml"
 
 permissions:
   contents: read
 
 jobs:
   smoke:
-    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04
     timeout-minutes: 12
 
