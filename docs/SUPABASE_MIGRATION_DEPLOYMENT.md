@@ -241,3 +241,25 @@ Resultado:
 - publica explicitamente a versao ao final da migration.
 
 Antes do apply, o mesmo SQL foi validado em transacao com `ROLLBACK`, confirmando as invariantes. Pos-apply, a estrutura foi reconsultada e confirmou 10/51/10/1.
+## Excecao operacional de 2026-09-26 — solicitacao de treino
+
+O procedimento padrao continua sendo GitHub Actions + `supabase db push`, preservando o timestamp versionado.
+
+A migration de solicitacao de treino foi validada previamente com o SQL completo dentro de `BEGIN`/`ROLLBACK`, passou CI/build no PR #207 e foi aplicada excepcionalmente pelo conector Supabase imediatamente apos o merge para evitar publicar UI dependente de tabela inexistente.
+
+O Supabase registrou:
+- `20260926233725_create_client_training_requests`;
+- `20260926233849_optimize_client_training_request_rls`.
+
+O primeiro apply havia partido de um arquivo local com timestamp anterior ao version ID gerado pelo conector. O repositorio foi imediatamente reconciliado para os dois version IDs remotos acima, sem alterar o SQL ja aplicado.
+
+Validacoes pos-apply:
+- `list_migrations`: ambas presentes;
+- RLS: habilitada em `client_training_requests`;
+- grants de browser: somente `SELECT` e `INSERT` para `authenticated`; nenhum grant para `anon`; sem UPDATE/DELETE;
+- policy `RESTRICTIVE` de MFA AAL2: presente;
+- policies de SELECT/INSERT: admin relacional + assignment ativo; autoria do INSERT = `auth.uid()`;
+- trigger append-only: UPDATE/DELETE bloqueados;
+- advisor de seguranca: nenhum finding novo; permanece apenas Leaked Password Protection ja conhecido;
+- advisor de performance: os dois `auth_rls_initplan` introduzidos pela migration inicial desapareceram apos a migration de otimizacao; lints restantes sao historicos/informativos.
+
