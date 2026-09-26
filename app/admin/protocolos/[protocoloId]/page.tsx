@@ -1,3 +1,4 @@
+import { AdminMealDraftGuidance } from "@/components/admin/AdminMealDraftGuidance";
 import { AdminProtocolVersionPlan } from "@/components/admin/AdminProtocolVersionPlan";
 import { ProtocolLifecycleAction } from "@/components/admin/ProtocolLifecycleAction";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -5,11 +6,18 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import {
   getAccessibleProtocol,
+  listAccessibleAnamnesisAnswers,
+  listAccessibleAnamnesisQuestions,
+  listAccessibleAnamnesisSubmissions,
   listAccessibleProtocolPublications,
   listAccessibleProtocolVersionApprovals,
   listAccessibleProtocolVersionMealPlans,
   listAccessibleProtocolVersions,
 } from "@/lib/supabase/data-access";
+import {
+  buildMealDraftAnamnesisContext,
+  summarizeMealDraftPlan,
+} from "@/lib/protocol/meal-draft-guidance";
 import { getProtocolLifecycleAction } from "@/lib/protocol/lifecycle";
 import { isUuid } from "@/lib/validation/uuid";
 import Link from "next/link";
@@ -27,7 +35,23 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
 
   if (!protocol) notFound();
 
-  const versions = await listAccessibleProtocolVersions(protocol.id);
+  const [versions, anamneses] = await Promise.all([
+    listAccessibleProtocolVersions(protocol.id),
+    listAccessibleAnamnesisSubmissions(protocol.client_id),
+  ]);
+  const latestSubmittedAnamnesis =
+    anamneses.find((submission) => Boolean(submission.submitted_at)) ?? null;
+  const [foodQuestions, foodAnswers] = latestSubmittedAnamnesis
+    ? await Promise.all([
+        listAccessibleAnamnesisQuestions(latestSubmittedAnamnesis.form_version_id),
+        listAccessibleAnamnesisAnswers(latestSubmittedAnamnesis.id),
+      ])
+    : [[], []];
+  const foodContext = buildMealDraftAnamnesisContext(
+    foodQuestions,
+    foodAnswers,
+  );
+
   const versionIds = versions.map((version) => version.id);
   const [approvals, publications, mealPlans] = await Promise.all([
     listAccessibleProtocolVersionApprovals(versionIds),
@@ -83,6 +107,18 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
                     <div><dt>Publicação</dt><dd>{publication ? publication.published_at : "Não registrada"}</dd></div>
                     {publication ? <><div><dt>ID da publicação</dt><dd>{publication.id}</dd></div><div><dt>ID da aprovação publicada</dt><dd>{publication.approval_id}</dd></div><div><dt>Publicada por</dt><dd>{publication.published_by_profile_id}</dd></div></> : null}
                   </dl>
+                  <div className={styles.versionPlan}>
+                    <h4>Apoio ao rascunho alimentar</h4>
+                    <p>
+                      Orientação profissional baseada apenas em regras confirmadas,
+                      contexto alimentar da última Anamnese enviada e estrutura já
+                      persistida nesta versão.
+                    </p>
+                    <AdminMealDraftGuidance
+                      foodContext={foodContext}
+                      variantSummaries={summarizeMealDraftPlan(mealPlan)}
+                    />
+                  </div>
                   <div className={styles.versionPlan}>
                     <h4>Estrutura alimentar desta versão</h4>
                     <p>
