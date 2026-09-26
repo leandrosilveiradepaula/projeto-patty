@@ -61,7 +61,7 @@ Se futuramente forem introduzidos assistentes, profissionais parceiros ou suport
 
 ### PARCIALMENTE RESOLVIDO
 
-Na Anamnese, todos os campos aplicaveis ao preenchimento final sao obrigatorios. O mapa nao juridico da v1, tipos, ordem e as 10 regras de aplicabilidade estao definidos; ANAM-046 continua pendente.
+Na Anamnese, todos os campos aplicaveis ao preenchimento final sao obrigatorios. O mapa nao juridico da v1, tipos, ordem e as 10 regras de aplicabilidade estao definidos. ANAM-046 tambem foi resolvido para o MVP como checkbox obrigatorio versionado no envio final.
 
 ### QUESTAO ABERTA
 
@@ -121,7 +121,7 @@ Os tipos nao juridicos da v1 estao definidos no mapa aceito:
 - `text` para respostas abertas;
 - `single_choice` para opcoes observadas ou perguntas explicitamente binarias aprovadas no mapa.
 
-ANAM-046 permanece fora desse fechamento e exige controle proprio depois da definicao juridica.
+ANAM-046 ja foi resolvido separadamente para o MVP e permanece versionado como consentimento obrigatorio no envio final.
 
 ### DECISAO DE PRODUTO
 
@@ -141,7 +141,7 @@ A UI e a validacao de envio final usam a aplicabilidade versionada. Nenhuma depe
 
 A ordem e o agrupamento descritos em `ANAMNESE_CANONICAL_V1_CANDIDATE.md` estao aceitos para a v1, com ANAM-010 em Cadastro.
 
-O nome do arquivo preserva o sufixo `CANDIDATE` por historico; o conteudo nao juridico correspondente ja foi promovido a decisao de produto. ANAM-046 continua sendo o bloqueio de publicacao.
+O nome do arquivo preserva o sufixo `CANDIDATE` por historico; o conteudo correspondente ja foi promovido a decisao de produto. ANAM-046 foi resolvido e a `client-anamnesis` v1 ja foi publicada e validada em producao.
 
 ### FATO JA CONFIRMADO
 

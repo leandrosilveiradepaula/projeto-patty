@@ -25,13 +25,15 @@ Antes de propor ou executar qualquer tarefa:
 7. nao transformar exemplo historico em regra;
 8. separar decisao, implementacao, teste, aplicacao, commit, push, merge e publicacao.
 
-## Referencia atual de repositorio
+## Referencia de repositorio e baseline validada
 
-O HEAD confirmado do `master` nesta atualizacao e:
+A baseline de **codigo de aplicacao** validada em producao para o fluxo canonico da Anamnese e:
 
 `bf49254edb9292801eb9ed80a83e1d68262b7b11`
 
-Esse commit incorpora o PR #189, que elimina a corrida de refresh que podia reenviar o valor antigo em um segundo save de resposta do draft canonico. O CI do PR e o CI do push ao `master` passaram; o deployment de producao correspondente ficou `READY`.
+Esse commit incorpora o PR #189, que elimina a corrida de refresh que podia reenviar o valor antigo em um segundo save de resposta do draft canonico. O CI do PR, o CI do push ao `master`, o deployment correspondente e o smoke de producao passaram.
+
+Nao tratar esse SHA como o HEAD permanente do repositorio: merges documentais posteriores podem avancar `master` sem alterar a baseline de aplicacao. Todo novo chat deve revalidar o HEAD remoto antes de implementar qualquer mudanca.
 
 ## Legenda de estado
 
