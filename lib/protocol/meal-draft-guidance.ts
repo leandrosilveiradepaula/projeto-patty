@@ -71,6 +71,7 @@ export function summarizeMealDraftPlan(plan: MealDraftPlan | null) {
     }
 
     return {
+      key: variant.variantKey,
       label: variant.label ?? variant.variantKey,
       mealCount: variant.meals.length,
       doseTotals: [...totals.entries()]
