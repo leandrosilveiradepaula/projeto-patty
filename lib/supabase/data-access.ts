@@ -104,6 +104,47 @@ export async function getAccessibleClientRegistration(clientId: string) {
   return data;
 }
 
+export async function listAccessibleClientTrainingRequests(clientId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_training_requests")
+    .select(
+      "id, client_id, recorded_by_profile_id, requested_at, note, created_at, profiles(display_name)",
+    )
+    .eq("client_id", clientId)
+    .order("requested_at", { ascending: false })
+    .order("id", { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function createAccessibleClientTrainingRequest(input: {
+  clientId: string;
+  note: string | null;
+  recordedByProfileId: string;
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_training_requests")
+    .insert({
+      client_id: input.clientId,
+      note: input.note,
+      recorded_by_profile_id: input.recordedByProfileId,
+    })
+    .select("id, client_id, recorded_by_profile_id, requested_at, note, created_at")
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
 export async function listAccessibleNonterminalAiExecutions() {
   const supabase = await createClient();
   const { data, error } = await supabase
