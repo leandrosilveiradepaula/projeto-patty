@@ -654,3 +654,13 @@ O smoke `E2E client anamnesis conditional submit smoke` foi preservado porque co
 A implementacao antiga dependia da fixture persistente `E2E Correction Client` e rotacionava senha. O workflow/spec foram migrados para reutilizar `setup-canonical-anamnesis-client.mjs` e `cleanup-canonical-anamnesis-client.mjs`, com cliente Auth/profile/client efemero por run, credenciais mascaradas e cleanup `always()`.
 
 Nenhuma regra de submissao, migration, schema ou RLS foi alterada.
+
+## 2026-09-26 - Consent smoke usa fixture efemera
+
+### HARDENING DE E2E
+
+O smoke `E2E canonical Anamnesis consent smoke` foi migrado da antiga fixture persistente `E2E Correction Client` para o mesmo cliente efemero usado pelo smoke canonico principal.
+
+O workflow agora cria Auth user/profile/client efemero por run, mascara email/senha antes do export, executa o spec com `E2E_CANONICAL_*` e sempre chama `cleanup-canonical-anamnesis-client.mjs` em `always()`. O spec nao faz mais lookup por `display_name` nem rotacao de senha.
+
+A evidencia historica do run `36072067063` permanece valida para o comportamento de consentimento; esta mudanca endurece apenas a fixture do teste. Nenhuma migration, schema/RLS ou regra de produto foi alterada.
