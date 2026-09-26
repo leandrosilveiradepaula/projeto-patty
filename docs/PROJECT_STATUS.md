@@ -664,3 +664,13 @@ O smoke `E2E canonical Anamnesis consent smoke` foi migrado da antiga fixture pe
 O workflow agora cria Auth user/profile/client efemero por run, mascara email/senha antes do export, executa o spec com `E2E_CANONICAL_*` e sempre chama `cleanup-canonical-anamnesis-client.mjs` em `always()`. O spec nao faz mais lookup por `display_name` nem rotacao de senha.
 
 A evidencia historica do run `36072067063` permanece valida para o comportamento de consentimento; esta mudanca endurece apenas a fixture do teste. Nenhuma migration, schema/RLS ou regra de produto foi alterada.
+
+## 2026-09-26 - Helper legado de cleanup removido
+
+### LIMPEZA DE E2E
+
+O helper `e2e/cleanup-canonical-anamnesis-drafts.mjs` foi removido porque nao era mais referenciado por workflows, scripts de pacote ou documentacao ativa. Ele dependia da antiga fixture persistente `E2E Correction Client`.
+
+Os smokes canonicos atuais usam `cleanup-canonical-anamnesis-client.mjs`, que remove drafts/answers do cliente efemero, client/profile/role e Auth user do proprio run, recusando cleanup destrutivo se encontrar submission ja enviada.
+
+Nenhuma migration, schema/RLS ou regra de produto foi alterada.
