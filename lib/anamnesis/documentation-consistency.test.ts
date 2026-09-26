@@ -39,7 +39,7 @@ test("Anamnesis authoritative docs do not reopen product decisions already close
   }
 });
 
-test("Anamnesis docs preserve the resolved consent decision and next operational gate", () => {
+test("Anamnesis docs preserve the resolved consent decision and current published state", () => {
   const openQuestions = load("docs/OPEN_QUESTIONS.md");
   const projectStatus = load("docs/PROJECT_STATUS.md");
 
@@ -48,6 +48,10 @@ test("Anamnesis docs preserve the resolved consent decision and next operational
   assert.match(projectStatus, /ANAM-046 simplificado e definido/i);
   assert.match(
     projectStatus,
-    /materializar a v1, validar e publicar explicitamente/i,
+    /a v1 ja foi materializada, publicada e validada em producao/i,
+  );
+  assert.doesNotMatch(
+    projectStatus,
+    /a proxima etapa e materializar a v1, validar e publicar explicitamente/i,
   );
 });
