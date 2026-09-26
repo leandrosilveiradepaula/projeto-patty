@@ -358,7 +358,7 @@ Recovery/watchdog automatico continua fora do escopo atual.
 
 ## Anamnese - consentimento do MVP
 
-Estado: **DEFINIDO / IMPLEMENTACAO EM VALIDACAO**
+Estado: **PRODUCAO VALIDADA**
 
 ANAM-046 e um checkbox obrigatorio apenas no envio final da Anamnese canonica. O valor persistido e `Concordo`; o texto pertence a versao da pergunta. Rascunhos continuam salvaveis sem aceite.
 
@@ -366,7 +366,7 @@ Nao ha tabela juridica separada, IP ou fingerprint. O uso de dados reais pela Op
 
 ## Anamnese canonica v1 publicada
 
-Estado: **SAAS VALIDADO / E2E COMPLETO PENDENTE**
+Estado: **PRODUCAO VALIDADA POR GATES COMPLEMENTARES**
 
 A primeira `client-anamnesis` versao 1 esta publicada no Supabase SaaS pela migration `20260924230322_publish_canonical_anamnesis_v1`.
 
@@ -376,7 +376,7 @@ Estrutura confirmada:
 - 10 condicionais;
 - ANAM-046 como checkbox obrigatorio no envio final, persistindo `Concordo`.
 
-A proxima validacao e o E2E sintetico completo no runtime publicado.
+A validacao de runtime esta fechada por gates complementares: browser para inicio/retomada/edicao/condicionais e consentimento; SQL transacional com `ROLLBACK` para o submit final completo. Essa estrategia evita criar historico sintetico imutavel apenas para teste.
 
 ## Anamnese canonica v1 - smoke de envio completo
 
@@ -391,7 +391,7 @@ Foram validados em conjunto:
 - finalizacao da submission;
 - preservacao da evidencia de aceite.
 
-Ainda falta apenas o E2E de browser completo contra producao para classificar esse fluxo como PRODUCAO VALIDADA.
+Nao executar submit final sintetico apenas para obter um E2E de browser: uma submission enviada e historica/imutavel e deixaria residuo artificial em producao. O submit final completo permanece validado pelo smoke transacional com `ROLLBACK`, enquanto o browser cobre os fluxos editaveis e o consentimento.
 
 ## E2E canônico de consentimento
 
@@ -403,7 +403,7 @@ O envio completo da mesma versao passou em smoke SQL transacional com `ROLLBACK`
 
 ## Anamnese canonica v1 - inicio e retomada
 
-Estado: **WORKFLOW VERSIONADO / EXECUCAO MANUAL PENDENTE**
+Estado: **PRODUCAO VALIDADA**
 
 O workflow `E2E canonical Anamnesis start smoke` valida que uma cliente sintetica inicia um draft da versao canônica v1 publicada e depois retoma exatamente o mesmo registro.
 
@@ -427,9 +427,9 @@ O consentimento e o envio completo possuem evidencias separadas ja aprovadas.
 
 ## Anamnese canonica v1 - edicao e condicionais
 
-Estado: **WORKFLOW VERSIONADO / EXECUCAO MANUAL PENDENTE**
+Estado: **PRODUCAO VALIDADA**
 
-O workflow `E2E canonical Anamnesis draft edit smoke` cobre, contra producao, persistencia e atualizacao de respostas da propria v1 publicada e uma condicional real do formulario.
+O workflow consolidado `E2E canonical Anamnesis start smoke` cobre, contra producao, inicio/retomada, persistencia e atualizacao de respostas da propria v1 publicada e uma condicional real do formulario. O run `36257567841` passou com `1 passed (25.7s)` e cleanup efemero `SUCCESS`.
 
 Escopo do gate:
 - insert/update de resposta textual;
