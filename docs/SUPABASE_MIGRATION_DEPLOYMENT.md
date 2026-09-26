@@ -262,4 +262,5 @@ Validacoes pos-apply:
 - trigger append-only: UPDATE/DELETE bloqueados;
 - advisor de seguranca: nenhum finding novo; permanece apenas Leaked Password Protection ja conhecido;
 - advisor de performance: os dois `auth_rls_initplan` introduzidos pela migration inicial desapareceram apos a migration de otimizacao; lints restantes sao historicos/informativos.
+- smoke sintetico pos-apply com `ROLLBACK`: admin AAL2 + assignment ativo INSERT/SELECT PASS; admin AAL1 SELECT bloqueado; admin AAL2 sem assignment para a cliente SELECT bloqueado; 0 residuos.
 
