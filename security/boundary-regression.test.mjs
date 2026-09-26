@@ -291,6 +291,54 @@ test("Anamnesis draft updates reuse the authenticated Supabase client", async ()
   );
 });
 
+test("Anamnesis draft forms do not refresh stale values after ordinary saves", async () => {
+  const textForm = await readFile(
+    path.join(
+      ROOT,
+      "components",
+      "client",
+      "ClientAnamnesisDraftTextAnswerForm.tsx",
+    ),
+    "utf8",
+  );
+  const singleChoiceForm = await readFile(
+    path.join(
+      ROOT,
+      "components",
+      "client",
+      "ClientAnamnesisDraftSingleChoiceAnswerForm.tsx",
+    ),
+    "utf8",
+  );
+
+  assert.doesNotMatch(
+    textForm,
+    /router\.refresh\s*\(/,
+    "Text draft saves must preserve the live form value instead of racing an async router refresh.",
+  );
+  assert.doesNotMatch(
+    textForm,
+    /useRouter/,
+    "Text draft form must not install a navigation refresh solely after save.",
+  );
+
+  assert.doesNotMatch(
+    singleChoiceForm,
+    /router\.refresh\s*\(/,
+    "Ordinary single-choice saves must not race an async router refresh.",
+  );
+  assert.match(
+    singleChoiceForm,
+    /state\.success\s*&&\s*reloadPageOnSuccess/,
+    "Only applicability-controller saves should trigger a post-save navigation.",
+  );
+  assert.match(
+    singleChoiceForm,
+    /window\.location\.assign\(/,
+    "Applicability-controller saves must keep deterministic navigation so dependent fields refresh.",
+  );
+});
+
 test("Supabase SSR proxy preserves session cookies and cache-control headers", async () => {
   const content = await readFile(
     path.join(ROOT, "lib", "supabase", "proxy.ts"),
