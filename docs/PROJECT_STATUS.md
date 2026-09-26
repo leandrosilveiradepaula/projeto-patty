@@ -492,7 +492,7 @@ O consentimento do MVP sera um checkbox obrigatorio na finalizacao da Anamnese. 
 
 A evidencia usa a propria resposta versionada da Anamnese, sem IP, fingerprint ou tabela juridica adicional. O aceite nao libera OpenAI com dados reais.
 
-Com isso, ANAM-046 deixa de bloquear a materializacao da primeira `client-anamnesis`. A proxima etapa e materializar a v1, validar e publicar explicitamente.
+Com isso, ANAM-046 deixou de bloquear a materializacao da primeira `client-anamnesis`. Estado atual: a v1 ja foi materializada, publicada e validada em producao.
 
 ## 2026-09-24 - Primeira client-anamnesis publicada
 
@@ -541,14 +541,14 @@ Foi versionado um smoke E2E manual para a `client-anamnesis` v1 publicada:
 - workflow: `.github/workflows/e2e-client-anamnesis-canonical-consent.yml`;
 - spec: `e2e/client-anamnesis-canonical-consent.spec.mjs`.
 
-O teste usa somente a fixture sintetica persistente. Ele cria um draft temporario da versao canonica, preenche programaticamente todas as perguntas aplicaveis exceto um campo obrigatorio de guarda e o consentimento, e valida no browser:
+A versao inicial do teste usava fixture sintetica persistente. Estado atual: o workflow cria Auth user/profile/client efemero por run e limpa tudo em `always()`. O teste cria um draft temporario da versao canonica, preenche programaticamente todas as perguntas aplicaveis exceto um campo obrigatorio de guarda e o consentimento, e valida no browser:
 
 - ANAM-046 aparece como checkbox obrigatorio;
 - sem marcar, nenhuma resposta de consentimento e persistida;
 - marcado, `Concordo` e persistido pela boundary server-side;
 - o campo obrigatorio de guarda impede `submitted_at`, mantendo o registro limpavel;
 - cleanup remove answers e draft no `finally`;
-- a credencial sintetica e rotacionada ao final.
+- o cliente efemero completo e removido pelo cleanup compartilhado ao final.
 
 A execucao continua manual via `workflow_dispatch`; o conector GitHub desta sessao nao expoe acao para iniciar workflows manuais.
 
@@ -577,7 +577,7 @@ Com isso, o consentimento da `client-anamnesis` v1 esta validado no runtime de p
 Foi versionado o workflow `E2E canonical Anamnesis start smoke` para validar o fluxo inicial da `client-anamnesis` v1 publicada.
 
 O teste:
-- usa apenas a cliente sintetica persistente;
+- estado atual: usa cliente sintetica efemera por run;
 - remove previamente qualquer draft canonico residual dessa fixture;
 - confirma que a tela oferece `Começar Anamnese` para a versao 1 publicada;
 - cria o draft via UI;
@@ -586,7 +586,7 @@ O teste:
 - volta a lista e comprova que a acao passa de criar para `Continuar rascunho`;
 - reabre exatamente o mesmo draft;
 - remove o draft no `finally`;
-- rotaciona a senha sintetica;
+- remove Auth user/profile/client efemeros no cleanup `always()`;
 - confirma 0 drafts canonicos residuais ao final.
 
 A copia antiga dizendo que o envio final nao estava disponivel tambem foi removida da tela do cliente.
