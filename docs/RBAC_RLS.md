@@ -389,3 +389,14 @@ O uso de `service_role` fica restrito a modulo `server-only`. Antes da chamada p
 O browser aciona somente Server Action administrativa protegida por `requireRole("admin")`/AAL2. O adapter OpenAI e `server-only`.
 
 A execucao nao envia IDs internos de answer/question ao provider; usa aliases efemeros e remapeamento posterior. O output recebido passa pelo validador deterministico antes de qualquer persistencia como `completed`.
+## Client training requests
+
+`client_training_requests` e historico interno de negocio.
+
+- `anon`: nenhum acesso;
+- cliente: nenhum acesso direto nesta etapa;
+- admin/Patty: SELECT e INSERT somente com role relacional `admin`, sessao AAL2 e assignment ativo para a cliente;
+- UPDATE/DELETE: sem grants para browser e bloqueados por trigger append-only.
+
+O ator gravado deve ser `auth.uid()`. Service role continua reservado a operacoes server-side controladas e nao deve ser exposto ao browser.
+
