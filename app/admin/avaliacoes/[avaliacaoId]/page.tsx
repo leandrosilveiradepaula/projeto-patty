@@ -1,8 +1,13 @@
 import { EvaluationAdherenceDecision } from "@/components/admin/EvaluationAdherenceDecision";
 import { EvaluationInternalNote } from "@/components/admin/EvaluationInternalNote";
+import { EvaluationMeasureComparison } from "@/components/admin/EvaluationMeasureComparison";
 import { EvaluationMeasureList } from "@/components/admin/EvaluationMeasureList";
 import { EvaluationPhotoCollection } from "@/components/admin/EvaluationPhotoCollection";
 import { EvaluationProfessionalFollowUpForm } from "@/components/admin/EvaluationProfessionalFollowUpForm";
+import {
+  buildFactualMeasurementComparison,
+  formatProfessionalMeasurementLabel,
+} from "@/lib/evaluations/professional-view";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -12,6 +17,7 @@ import {
   getAccessibleClientAssessment,
   listAccessibleAssessmentMeasurements,
   listAccessibleAssessmentPhotoFiles,
+  listAccessibleAssessmentsForClient,
   listAccessibleProfessionalFollowUpsForAssessment,
 } from "@/lib/supabase/data-access";
 import Link from "next/link";
@@ -86,11 +92,27 @@ export default async function AdminAvaliacaoDetailPage({
     notFound();
   }
 
-  const [measurements, photoFiles, followUps] = await Promise.all([
+  const [measurements, photoFiles, followUps, clientAssessments] = await Promise.all([
     listAccessibleAssessmentMeasurements(assessment.id),
     listAccessibleAssessmentPhotoFiles(assessment.id),
     listAccessibleProfessionalFollowUpsForAssessment(assessment.id),
+    listAccessibleAssessmentsForClient(assessment.client_id),
   ]);
+
+  const currentAssessmentIndex = clientAssessments.findIndex(
+    (item) => item.id === assessment.id,
+  );
+  const previousAssessment =
+    currentAssessmentIndex >= 0
+      ? clientAssessments[currentAssessmentIndex + 1] ?? null
+      : null;
+  const previousMeasurements = previousAssessment
+    ? await listAccessibleAssessmentMeasurements(previousAssessment.id)
+    : [];
+  const factualComparison = buildFactualMeasurementComparison(
+    measurements,
+    previousMeasurements,
+  );
 
   const displayName = assessment.clients?.profiles?.display_name?.trim();
   const internalNotes = followUps.filter(
@@ -138,13 +160,31 @@ export default async function AdminAvaliacaoDetailPage({
         </Card>
       </Section>
       <Section
+        description="Referência operacional confirmada pela Patty. Não define sozinho se uma avaliação está completa."
+        title="Cadência de acompanhamento corporal"
+      >
+        <Card className={styles.infoCard}>
+          <ul className={styles.cadenceList}>
+            <li>
+              <strong>Quinzenal:</strong> peso, cintura, abdômen e quadril.
+            </li>
+            <li>
+              <strong>Mensal:</strong> avaliação completa, peso e fotos.
+            </li>
+            <li>
+              <strong>Leitura profissional:</strong> visual e medidas podem ter mais peso do que a balança isolada; peito é uma medida adicional relevante, sem encerrar o catálogo mensal.
+            </li>
+          </ul>
+        </Card>
+      </Section>
+      <Section
         description="Chaves, valores e unidades exatamente como foram registrados."
         title="Medidas"
       >
         {measurements.length > 0 ? (
           <EvaluationMeasureList
             items={measurements.map((measurement) => ({
-              label: measurement.measurement_key,
+              label: formatProfessionalMeasurementLabel(measurement.measurement_key),
               unit: measurement.unit,
               value: formatMeasurementValue(measurement.measurement_value),
             }))}
@@ -159,15 +199,23 @@ export default async function AdminAvaliacaoDetailPage({
         )}
       </Section>
       <Section
-        description="A comparação automática entre avaliações permanece fora desta etapa."
+        description="Comparação factual dos mesmos measurement_key entre a avaliação atual e a imediatamente anterior. Não calcula tendência, sucesso, estagnação ou recomendação."
         title="Comparação com avaliação anterior"
       >
-        <Card variant="subtle">
-          <EmptyState
-            description="Nenhum cálculo ou interpretação entre avaliações é exibido nesta área."
-            title="Comparação não disponível"
+        {previousAssessment && factualComparison.length > 0 ? (
+          <EvaluationMeasureComparison
+            currentDate={formatAssessmentDate(assessment.assessed_at)}
+            items={factualComparison}
+            previousDate={formatAssessmentDate(previousAssessment.assessed_at)}
           />
-        </Card>
+        ) : (
+          <Card variant="subtle">
+            <EmptyState
+              description="Não há avaliação anterior comparável ou medidas registradas nesta avaliação."
+              title="Comparação não disponível"
+            />
+          </Card>
+        )}
       </Section>
       <Section
         description="Fotos privadas vinculadas diretamente a esta avaliação, carregadas somente após autorização administrativa."
