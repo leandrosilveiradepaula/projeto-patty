@@ -1258,6 +1258,48 @@ export type Database = {
           },
         ]
       }
+      client_training_requests: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          note: string | null
+          recorded_by_profile_id: string
+          requested_at: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          recorded_by_profile_id: string
+          requested_at?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          recorded_by_profile_id?: string
+          requested_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_training_requests_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_training_requests_recorded_by_profile_id_fkey"
+            columns: ["recorded_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           created_at: string
