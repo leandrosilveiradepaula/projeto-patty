@@ -131,9 +131,9 @@ A aplicacao administrativa agora expoe `/admin/anamneses/[id]/correcoes` somente
 
 A UI de correcoes foi validada em producao em 2026-09-24: a rota respondeu `200`, o fluxo administrativo com MFA carregou a resposta original e o caso de JSON invalido nao criou historico. A consulta pos-smoke confirmou ausencia de correcoes E2E residuais.
 
-A migration `20260924153808_create_anamnesis_clarification_flow.sql` esta aplicada no SaaS. O smoke pos-apply confirmou request administrativo sob AAL2/assignment, leitura e resposta pela propria cliente, isolamento de outra cliente, multiplos complementos append-only e preservacao da resposta original. A UI correspondente passou typecheck, security boundaries e build no PR #146 e foi publicada no deployment READY do commit `492a7ab`. Ainda nao ha E2E autenticado de producao desse fluxo; a verificacao de runtime do deployment nao mostrou erro/fatal na janela observada.
+A migration `20260924153808_create_anamnesis_clarification_flow.sql` esta aplicada no SaaS. O smoke pos-apply confirmou request administrativo sob AAL2/assignment, leitura e resposta pela propria cliente, isolamento de outra cliente, multiplos complementos append-only e preservacao da resposta original. A UI correspondente passou typecheck, security boundaries e build no PR #146 e foi publicada no deployment READY do commit `492a7ab`. O E2E autenticado de producao passou no run `36053370894`; por criar historico append-only sintetico, esse workflow agora e manual-only, restrito ao `master` e exige confirmacao explicita `CREATE_E2E_HISTORY`.
 
-Tipos nao juridicos, 10 condicionais, ordem e submissao final da v1 ja estao fechados. O bloqueio para materializar/publicar a primeira `client-anamnesis` e ANAM-046.
+Tipos nao juridicos, 10 condicionais, ordem, consentimento ANAM-046 e submissao final da v1 estao fechados. A primeira `client-anamnesis` ja foi materializada, publicada e validada em producao; mudancas futuras devem ocorrer por nova versao.
 
 ### Banco e performance
 

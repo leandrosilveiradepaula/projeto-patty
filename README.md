@@ -87,18 +87,18 @@ Dado original, interpretacao da IA, rascunho, alteracoes humanas, versao aprovad
 
 Continuam dependentes de decisao ou validacao, entre outros pontos:
 
-- questionario final e fluxo de preenchimento da Anamnese;
-- upload, substituicao e exclusao de arquivos privados;
-- regras definitivas de MIME types e controles adicionais de arquivos;
-- operacoes administrativas de escrita ainda nao formalizadas;
+- evolucoes futuras da Anamnese por nova versao, incluindo campos enviados a IA, alertas e criterios ainda nao formalizados;
+- politica concreta de retencao/hard delete de arquivos privados;
+- edicao controlada do Cadastro Atual e outras operacoes administrativas ainda nao formalizadas;
+- catalogo e regras finais de avaliacao/medidas;
 - criterios profissionais ainda abertos;
 - fases 5 e 6 do Carb Cycle;
-- etapas posteriores ao Cutting 2;
+- regras detalhadas do Cutting 3 Linear e etapas posteriores;
 - Bulking e Consolidacao detalhados;
 - hidratacao, suplementacao e manipulados;
 - progressao definitiva de treino;
-- integracao real com provider/modelo de IA;
-- migracao gradual do conteudo atual do Google Drive.
+- avaliacao sintetica do primeiro fluxo OpenAI e conclusao do gate de processamento de dados de saude antes de dados reais;
+- criacao/conexao do Vercel Private Blob e migracao gradual do conteudo atual do Google Drive.
 
 Consulte `docs/OPEN_QUESTIONS.md` para a lista vigente.
 

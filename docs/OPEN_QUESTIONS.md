@@ -308,7 +308,7 @@ A obrigatoriedade geral permanece: todos os campos aplicaveis da versao devem es
 
 O contrato deterministico de `missing_answer` esta implementado no validador: usa `target_question_id`, permite `source_answer_ids` vazio e exige que o target esteja na allowlist de perguntas previamente verificadas como aplicaveis e sem resposta para a mesma execution/submission.
 
-A montagem server-side da allowlist foi implementada de forma deterministica a partir da submission, perguntas versionadas, answers e aplicabilidade. Continuam separados e abertos: provider/modelo, prompt version operacional e a UX humana dos findings.
+A montagem server-side da allowlist foi implementada de forma deterministica a partir da submission, perguntas versionadas, answers e aplicabilidade. Provider OpenAI, configuracao tecnica inicial de modelo/effort, prompt v1 e contrato de output de `anamnesis_review` ja estao definidos. Continuam abertos a avaliacao sintetica antes de dados reais, o gate de processamento de dados de saude e a UX/processo humano dos findings.
 
 ### FATO RESOLVIDO
 
