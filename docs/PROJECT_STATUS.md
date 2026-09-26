@@ -512,7 +512,7 @@ A UI do checkbox ja estava publicada na Vercel antes do apply do formulario cano
 
 ### PROXIMO GATE
 
-Executar o E2E sintetico completo de criacao inicial, preenchimento, condicionais, consentimento e envio final contra a versao canonica publicada.
+Validacao operacional concluida por gates complementares: browser para inicio/retomada/edicao/condicionais e consentimento; SQL transacional com `ROLLBACK` para o envio final completo. Nao criar submission sintetica enviada apenas para um E2E, porque o historico submetido e intencionalmente imutavel.
 
 ## 2026-09-24 - Smoke transacional da Anamnese canonica v1
 
@@ -530,7 +530,7 @@ Cenario exercitado:
 - evidencia de consentimento presente na submission enviada;
 - `ROLLBACK` ao final, sem residuo.
 
-Esse smoke valida a definicao canônica e o trigger de envio final em conjunto. O E2E de browser completo continua um gate separado.
+Esse smoke valida a definicao canonica e o trigger de envio final em conjunto. O browser cobre separadamente os fluxos que podem ser limpos sem residuo. Um submit final sintetico em producao nao e exigido como gate adicional porque deixaria historico artificial imutavel.
 
 ## 2026-09-24 - E2E canônico de consentimento preparado
 
