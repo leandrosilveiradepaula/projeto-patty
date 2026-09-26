@@ -55,6 +55,7 @@ test("meal plan summary totals persisted doses without redistributing them", () 
 
   assert.deepEqual(summary, [
     {
+      key: "linear",
       label: "Linear",
       mealCount: 2,
       doseTotals: [
