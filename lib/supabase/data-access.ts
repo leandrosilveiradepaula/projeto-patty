@@ -562,7 +562,8 @@ export async function listAccessibleAssessmentsForClient(clientId: string) {
     .from("client_assessments")
     .select("id, client_id, assessed_at")
     .eq("client_id", clientId)
-    .order("assessed_at", { ascending: false });
+    .order("assessed_at", { ascending: false })
+    .order("id", { ascending: true });
 
   if (error) {
     throw error;
