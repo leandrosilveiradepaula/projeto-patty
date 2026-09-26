@@ -721,4 +721,17 @@ Foram promovidos como regras/praticas confirmadas apenas os pontos suficientemen
 Permaneceram explicitamente abertas e nao automatizaveis as afirmacoes sobre contagem de gordura/legumes, gordura saturada, suplementacao/manipulados, criterios de encaminhamento, minimo de treino, estagnacao e revisao em 30 dias.
 
 A fonte interpretada desta rodada esta em `docs/PATTY_METHOD_SURVEY_20260926.md`.
+## 2026-09-26 - Visao profissional da Anamnese
+
+### IMPLEMENTADO
+
+A leitura administrativa da Anamnese ganhou uma visao de trabalho agrupada conforme a pratica confirmada pela Patty:
+- rotina, sono e alimentacao;
+- saude, exames e uso de substancias;
+- comportamento, contexto e autoimagem;
+- atividade e objetivos.
+
+A organizacao usa somente perguntas/respostas originais ja persistidas. Nao cria score, diagnostico, severidade, alerta clinico ou interpretacao automatica. A secao original completa continua disponivel abaixo da visao de trabalho.
+
+A logica de agrupamento esta isolada em `lib/anamnesis/professional-review.ts` e possui teste deterministico.
 
