@@ -1,6 +1,6 @@
 # Mapa de prontidao do MVP
 
-Data de referencia: 2026-09-24 (atualizado apos validacao runtime da Anamnese e headers).
+Data de referencia: 2026-09-26 (atualizado apos validacao do update do draft canonico em producao).
 
 Este documento e um mapa operacional do estado atual. Ele nao substitui `MVP.md`, `DECISIONS.md`, `BUSINESS_RULES.md` ou `OPEN_QUESTIONS.md`.
 
@@ -44,7 +44,7 @@ Estados usados:
 
 ### Principais bloqueios atuais
 
-- primeira `client-anamnesis` ainda precisa ser materializada, validada e publicada explicitamente; ANAM-046 ja esta definido como checkbox obrigatorio no envio final;
+- primeira `client-anamnesis` v1 ja esta publicada e validada; consentimento, inicio/retomada, INSERT/UPDATE de resposta e condicionalidade possuem evidencia de producao;
 - definir a politica final de retencao/hard delete de arquivos privados;
 - decidir infraestrutura/plano para habilitar `Leaked Password Protection`, recurso bloqueado no ambiente atual por exigir Pro ou superior;
 - decidir entre upgrade ou SMTP customizado para permitir o template real `Invite user`; Site URL e redirect allowlist ja estao alinhados e o lifecycle sintetico de convite/ativacao passou E2E em producao;
@@ -65,7 +65,7 @@ Estados usados:
 | Profiles / roles | IMPLEMENTADO | sem UI administrativa de gestao | RLS existente | definir bootstrap/admin e quem gerencia roles |
 | Clients / assignments | leitura + encerramento + inicio de assignment no onboarding IMPLEMENTADOS | Patty inicia onboarding por convite server-side; provisionamento cria vinculos relacionais e assignment com compensacao em falha | CI VALIDADO; encerramento E2E PASS; onboarding sintetico E2E PASS; Site URL/allowlist alinhados | template SSR real exige upgrade ou SMTP customizado; depois validar email real |
 | Cadastro Atual | leitura IMPLEMENTADA | nao | CI VALIDADO | definir quem pode alterar cada campo e auditoria |
-| Anamnese versionada | leitura, rascunho e submissao final IMPLEMENTADOS; mapa v1 + consentimento checkbox DEFINIDOS; esclarecimentos pos-envio IMPLEMENTADOS | cliente salva `text`/`single_choice`; aplicabilidade oculta dependentes; envio explicito exige ANAM-046 na forma canonica | CI + smoke SQL pos-apply PASS; esclarecimentos E2E autenticado de producao PASS no run `36053370894` | materializar/publicar a primeira versao canonica e executar E2E completo |
+| Anamnese versionada | leitura, rascunho e submissao final IMPLEMENTADOS; mapa v1 + consentimento checkbox DEFINIDOS; esclarecimentos pos-envio IMPLEMENTADOS | cliente salva `text`/`single_choice`; aplicabilidade oculta dependentes; envio explicito exige ANAM-046 na forma canonica | CI + smoke SQL PASS; consent E2E `36072067063`; start/resume `36074218960`; fluxo consolidado de draft `36257567841` PASS; esclarecimentos `36053370894` PASS | manter versionamento para mudancas futuras e nao reabrir gates ja validados sem nova evidencia |
 | Avaliacoes / medidas | leitura IMPLEMENTADA | acompanhamento profissional append-only | CI VALIDADO; conjunto de decisoes profissionais tipado e testado | definir catalogo, unidades, obrigatoriedade e correcao |
 | Arquivos privados | upload/listagem/download da cliente IMPLEMENTADOS; acesso admin permanente sem assignment, upload administrativo e liberacao explicita IMPLEMENTADOS | smoke E2E da cliente PASS; smoke E2E administrativo PASS em producao; cron de temporarios VALIDADO; auditoria estatica confirmou RLS/rotas coerentes com a excecao da Patty | definir retencao/hard delete |
 | Protocolos | leitura + lifecycle manual IMPLEMENTADOS | submit/approve/publish | CI + SAAS VALIDADO; lifecycle com guarda determinística testada | criar/editar plano somente quando fluxo profissional estiver formalizado |
@@ -113,6 +113,9 @@ A configuracao de headers passou CI/build e foi validada no runtime em 2026-09-2
 
 ### Anamnese
 
+Run `36257567841` (`E2E canonical Anamnesis start smoke`) terminou `SUCCESS` em 2026-09-26 no `master` `bf49254edb9292801eb9ed80a83e1d68262b7b11`, com `1 passed (25.7s)` e cleanup efemero `SUCCESS`. O fail anterior `36170455838` foi fechado como corrida de UI por `router.refresh()` apos save comum; o PR #189 removeu esse refresh dos saves comuns e manteve navegacao apenas para controladores de aplicabilidade. Nenhuma alteracao de schema/RLS/grants foi necessaria.
+
+
 A aplicacao preserva:
 
 - definicao versionada;
@@ -120,7 +123,7 @@ A aplicacao preserva:
 - respostas originais;
 - notas internas separadas.
 
-O smoke de producao do rascunho identificou um bug operacional no DELETE privilegiado de drafts: o trigger de imutabilidade retornava `NEW` em `BEFORE DELETE`, cancelando silenciosamente a exclusao de rascunhos. A migration `20260923191554_fix_anamnesis_draft_delete_trigger.sql` corrige o retorno para `OLD` em DELETE, preservando o bloqueio `55000` para submissions enviadas. O workflow de migrations aplicou essa migration no Supabase SaaS em 2026-09-23 e o `migration list` pos-apply confirmou o mesmo timestamp local/remoto. Um smoke transacional pos-apply com dados sinteticos e `ROLLBACK` confirmou a exclusao real de draft nao submetido, a preservacao de submission enviada com bloqueio `55000` e o isolamento RLS entre clientes. Em 2026-09-24, o E2E de producao confirmou login da cliente sintetica, retomada do rascunho, INSERT/UPDATE da resposta `text` e cleanup sem residuo.
+O smoke de producao do rascunho identificou um bug operacional no DELETE privilegiado de drafts: o trigger de imutabilidade retornava `NEW` em `BEFORE DELETE`, cancelando silenciosamente a exclusao de rascunhos. A migration `20260923191554_fix_anamnesis_draft_delete_trigger.sql` corrige o retorno para `OLD` em DELETE, preservando o bloqueio `55000` para submissions enviadas. O workflow de migrations aplicou essa migration no Supabase SaaS em 2026-09-23 e o `migration list` pos-apply confirmou o mesmo timestamp local/remoto. Um smoke transacional pos-apply com dados sinteticos e `ROLLBACK` confirmou a exclusao real de draft nao submetido, a preservacao de submission enviada com bloqueio `55000` e o isolamento RLS entre clientes. Em 2026-09-24, o E2E de producao confirmou login da cliente sintetica e retomada do rascunho. Em 2026-09-26, o run `36257567841` validou em producao o fluxo consolidado de start/resume, INSERT e UPDATE da mesma resposta `text`, condicionalidade e cleanup efemero sem residuo, sobre o `master` `bf49254edb9292801eb9ed80a83e1d68262b7b11`.
 
 A regra de preenchimento esta fechada para a v1 nao juridica: todos os campos aplicaveis sao obrigatorios para o envio final; rascunho incompleto pode ser salvo e retomado; depois do envio, a cliente nao edita mais e somente a Patty pode registrar correcao historica sem sobrescrever a resposta original. A fundacao de escrita do rascunho esta aplicada pela migration `20260923113230_anamnesis_draft_write_foundation.sql`, e a UI suporta `text`, `single_choice` e visibilidade condicional versionada com salvamento explicito por resposta. A submissao final esta aplicada pela migration `20260924142453_anamnesis_final_submission_foundation.sql`: o banco revalida versao publicada, grafo de aplicabilidade e respostas obrigatorias aplicaveis, normaliza `submitted_at` e preserva a imutabilidade posterior. A fundacao de correcoes segue aplicada pela migration `20260923114643_anamnesis_answer_corrections_foundation.sql`, com historico append-only, autoria, timestamp, assignment ativo e AAL2.
 

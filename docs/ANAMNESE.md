@@ -173,7 +173,7 @@ A UI podera ser reorganizada depois da decisao de fluxo. Qualquer alteracao do c
 
 ## Pendencias para especificacao futura
 
-- Materializar a primeira `client-anamnesis`, validar o checkbox ANAM-046 e publicar explicitamente a versao canonica.
+- A primeira `client-anamnesis` v1 ja foi materializada, publicada e validada em producao; mudancas futuras devem ocorrer por nova versao.
 - Definir quais campos podem ser enviados a IA e sob quais finalidades/controles.
 - Validar a classificacao estrutural definitiva dos campos que ainda permanecem provisoria.
 - Definir, com a Patty, se havera alertas ou bloqueios de saude.
@@ -197,3 +197,22 @@ A Patty confirmou a regra geral para perguntas condicionais: quando uma pergunta
 `missing_answer` possui contrato deterministico no validador: exige `target_question_id` e so aceita targets presentes na allowlist preparada pelo caller com perguntas da mesma versao que ja foram verificadas como aplicaveis e sem resposta. `source_answer_ids` pode ser vazio nesse tipo. Campo condicional nao aplicavel nunca entra nessa allowlist e nao pode ser tratado como ausencia.
 
 Questionario/schema existente nao equivale a questionario final validado pela Patty.
+
+## 2026-09-26 - Validacao consolidada do draft canonico
+
+### FATO OPERACIONAL
+
+O workflow `E2E canonical Anamnesis start smoke`, run `36257567841`, terminou `SUCCESS` sobre o `master` `bf49254edb9292801eb9ed80a83e1d68262b7b11` e o deployment de producao `dpl_BVK9vpL7t4cGyoFjrv393xWPxHsb`.
+
+O teste consolidado confirmou com cliente sintetica efemera e um unico login:
+- criacao e retomada do mesmo draft da `client-anamnesis` v1;
+- INSERT da resposta Cidade;
+- UPDATE da mesma resposta sem duplicacao;
+- exibicao e ocultacao de `health_plan_details` conforme `has_health_plan`;
+- persistencia do detalhe quando aplicavel;
+- manutencao de `submitted_at = null`;
+- cleanup completo da fixture efemera.
+
+O fail anterior `36170455838` nao era bloqueio de RLS/PostgreSQL. Os logs mostraram `PATCH 200` autenticado enviando novamente o valor antigo; a causa foi uma corrida de UI provocada por `router.refresh()` apos saves comuns. O PR #189 removeu esse refresh dos saves comuns e manteve navegacao explicita apenas para perguntas que controlam aplicabilidade.
+
+Nao reabrir schema, RLS ou grants para esse problema sem nova evidencia.
