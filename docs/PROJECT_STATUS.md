@@ -686,3 +686,15 @@ Depois da migracao dos smokes canonicos para fixtures efemeras, o uso da fixture
 Esses dois casos nao devem ser convertidos ingenuamente para cliente efemero, porque criar uma submission final sintetica apenas para o teste deixaria historico artificial permanente em producao. Uma regressao de seguranca falha se qualquer outro spec E2E voltar a usar `E2E Correction Client` ou rotacao de senha.
 
 Essa excecao nao transforma fixture persistente em padrao; novos E2E devem usar fixture efemera sempre que o dominio permitir cleanup completo.
+
+## 2026-09-26 - Esclarecimentos E2E restrito a execucao manual
+
+### HARDENING DE HISTORICO IMUTAVEL
+
+A auditoria do `e2e/anamnesis-clarifications.spec.mjs` confirmou que o fluxo grava `anamnesis_clarification_requests` e `anamnesis_clarification_responses` ligados a uma Anamnese ja submetida. Esses registros representam historico append-only e nao sao removidos no cleanup de credenciais.
+
+A consulta ao Supabase SaaS encontrou 2 pedidos E2E e 1 resposta E2E historicos existentes. Eles foram preservados; nenhum hard delete foi executado.
+
+O workflow `.github/workflows/e2e-anamnesis-clarifications.yml` deixou de disparar em `pull_request` e passa a aceitar apenas `workflow_dispatch`. Uma regressao de seguranca rejeita `pull_request`, `push` ou `schedule` nesse workflow.
+
+Nao executar esse smoke como rotina de CI. Nova execucao manual so deve ocorrer quando houver mudanca material no fluxo de esclarecimentos que justifique novo historico sintetico permanente.
