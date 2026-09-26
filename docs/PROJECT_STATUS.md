@@ -710,3 +710,15 @@ Motivo: um workflow manual disparado a partir de branch de desenvolvimento faria
 Uma regressao de seguranca varre todos os workflows E2E e falha se algum deixar de conter o gate de `master`.
 
 Nenhuma migration, schema/RLS ou regra de produto foi alterada.
+## 2026-09-26 - Rodada ampliada do metodo da Patty incorporada
+
+### DOCUMENTACAO PROFISSIONAL ATUALIZADA
+
+O roteiro `Metodo de Atendimento e Tomada de Decisao` preenchido pela Patty em 2026-09-26 foi reconciliado com a documentacao oficial.
+
+Foram promovidos como regras/praticas confirmadas apenas os pontos suficientemente claros sobre leitura holistica da Anamnese, adaptacao de refeicoes, solicitacao de treino, uso de medidas/fotos e atencao a comportamento/relacao com comida.
+
+Permaneceram explicitamente abertas e nao automatizaveis as afirmacoes sobre contagem de gordura/legumes, gordura saturada, suplementacao/manipulados, criterios de encaminhamento, minimo de treino, estagnacao e revisao em 30 dias.
+
+A fonte interpretada desta rodada esta em `docs/PATTY_METHOD_SURVEY_20260926.md`.
+
