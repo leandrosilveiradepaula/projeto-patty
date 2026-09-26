@@ -462,6 +462,35 @@ test("canonical consent E2E uses only the ephemeral canonical client", async () 
   }
 });
 
+test("persistent Anamnesis E2E fixture usage stays limited to immutable-history flows", async () => {
+  const e2eDirectory = path.join(ROOT, "e2e");
+  const files = (await readdir(e2eDirectory))
+    .filter((file) => file.endsWith(".mjs"))
+    .sort();
+
+  const persistentFixtureFiles = [];
+
+  for (const file of files) {
+    const content = await readFile(path.join(e2eDirectory, file), "utf8");
+
+    if (
+      content.includes("E2E Correction Client") ||
+      content.includes("updateUserById")
+    ) {
+      persistentFixtureFiles.push(file);
+    }
+  }
+
+  assert.deepEqual(
+    persistentFixtureFiles,
+    [
+      "admin-anamnesis-corrections.spec.mjs",
+      "anamnesis-clarifications.spec.mjs",
+    ],
+    "Persistent fixture/password rotation is allowed only where a submitted immutable Anamnesis history is required.",
+  );
+});
+
 test("Supabase SSR proxy preserves session cookies and cache-control headers", async () => {
   const content = await readFile(
     path.join(ROOT, "lib", "supabase", "proxy.ts"),

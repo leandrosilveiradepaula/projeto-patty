@@ -674,3 +674,15 @@ O helper `e2e/cleanup-canonical-anamnesis-drafts.mjs` foi removido porque nao er
 Os smokes canonicos atuais usam `cleanup-canonical-anamnesis-client.mjs`, que remove drafts/answers do cliente efemero, client/profile/role e Auth user do proprio run, recusando cleanup destrutivo se encontrar submission ja enviada.
 
 Nenhuma migration, schema/RLS ou regra de produto foi alterada.
+
+## 2026-09-26 - Excecoes persistentes de E2E delimitadas
+
+### REGRA TECNICA DE TESTE
+
+Depois da migracao dos smokes canonicos para fixtures efemeras, o uso da fixture persistente `E2E Correction Client` fica restrito a dois fluxos que precisam de uma Anamnese ja submetida e portanto historica/imutavel:
+- `e2e/admin-anamnesis-corrections.spec.mjs`;
+- `e2e/anamnesis-clarifications.spec.mjs`.
+
+Esses dois casos nao devem ser convertidos ingenuamente para cliente efemero, porque criar uma submission final sintetica apenas para o teste deixaria historico artificial permanente em producao. Uma regressao de seguranca falha se qualquer outro spec E2E voltar a usar `E2E Correction Client` ou rotacao de senha.
+
+Essa excecao nao transforma fixture persistente em padrao; novos E2E devem usar fixture efemera sempre que o dominio permitir cleanup completo.
