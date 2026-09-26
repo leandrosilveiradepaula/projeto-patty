@@ -734,4 +734,17 @@ A leitura administrativa da Anamnese ganhou uma visao de trabalho agrupada confo
 A organizacao usa somente perguntas/respostas originais ja persistidas. Nao cria score, diagnostico, severidade, alerta clinico ou interpretacao automatica. A secao original completa continua disponivel abaixo da visao de trabalho.
 
 A logica de agrupamento esta isolada em `lib/anamnesis/professional-review.ts` e possui teste deterministico.
+## 2026-09-26 - Evolucao operacional a partir da rodada da Patty
+
+### IMPLEMENTADO NA BRANCH DE PRODUTO
+
+As seis frentes autorizadas foram implementadas sem ampliar regras profissionais abertas:
+1. visao profissional agrupada da Anamnese, preservando respostas originais;
+2. cadencia corporal confirmada + comparacao factual com a avaliacao anterior, sem interpretar tendencia/estagnacao;
+3. historico append-only de solicitacao de treino, com admin/AAL2/assignment ativo e sem geracao automatica;
+4. apoio ao rascunho alimentar com contexto alimentar da Anamnese e resumo das doses ja persistidas, sem redistribuicao automatica;
+5. area de atencao comportamental para revisao humana, sem score, severidade ou diagnostico;
+6. contexto de saude + exames/documentos recentes na revisao administrativa, sem recomendacao automatica.
+
+A migration nova desta rodada e `20260926231500_create_client_training_requests.sql`. Ela ainda precisa seguir o gate normal de merge/CI antes de aplicacao no Supabase SaaS.
 
