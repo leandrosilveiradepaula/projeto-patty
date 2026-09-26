@@ -1,0 +1,39 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+import test from "node:test";
+import { fileURLToPath } from "node:url";
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+const migration = fs.readFileSync(
+  path.join(
+    root,
+    "supabase",
+    "migrations",
+    "20260926231500_create_client_training_requests.sql",
+  ),
+  "utf8",
+);
+
+test("training request history is append-only and browser writes are minimal", () => {
+  assert.match(migration, /create table public\.client_training_requests/i);
+  assert.match(migration, /enable row level security/i);
+  assert.match(
+    migration,
+    /grant select, insert on table public\.client_training_requests to authenticated/i,
+  );
+  assert.doesNotMatch(
+    migration,
+    /grant[^;]*(update|delete)[^;]*client_training_requests/i,
+  );
+  assert.match(migration, /before update or delete/i);
+  assert.match(migration, /append-only/i);
+});
+
+test("training request access requires admin, active assignment and aal2", () => {
+  assert.match(migration, /current_user_admin_mfa_satisfied/i);
+  assert.match(migration, /auth\.jwt\(\) ->> 'aal'\) = 'aal2'/i);
+  assert.match(migration, /user_roles\.role = 'admin'/i);
+  assert.match(migration, /client_assignments\.ended_at is null/i);
+  assert.match(migration, /recorded_by_profile_id = \(select auth\.uid\(\)\)/i);
+});
