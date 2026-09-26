@@ -491,6 +491,33 @@ test("persistent Anamnesis E2E fixture usage stays limited to immutable-history 
   );
 });
 
+test("immutable-history Anamnesis E2E workflows stay manual-only", async () => {
+  const clarificationWorkflow = await readFile(
+    path.join(
+      ROOT,
+      ".github",
+      "workflows",
+      "e2e-anamnesis-clarifications.yml",
+    ),
+    "utf8",
+  );
+
+  assert.match(
+    clarificationWorkflow,
+    /on:\s*\n\s*workflow_dispatch:/,
+    "Clarification E2E must keep an explicit manual trigger.",
+  );
+
+  for (const forbidden of ["pull_request:", "push:", "schedule:"]) {
+    assert.equal(
+      clarificationWorkflow.includes(forbidden),
+      false,
+      "Immutable-history clarification E2E must not run automatically via " +
+        forbidden,
+    );
+  }
+});
+
 test("Supabase SSR proxy preserves session cookies and cache-control headers", async () => {
   const content = await readFile(
     path.join(ROOT, "lib", "supabase", "proxy.ts"),
