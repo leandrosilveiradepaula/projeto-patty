@@ -8,6 +8,7 @@ type FoodContext = {
 };
 
 type VariantSummary = {
+  key: string;
   label: string;
   mealCount: number;
   doseTotals: Array<{
@@ -89,7 +90,7 @@ export function AdminMealDraftGuidance({
         {variantSummaries.length > 0 ? (
           <ul className={styles.variants}>
             {variantSummaries.map((variant) => (
-              <li key={variant.label}>
+              <li key={variant.key}>
                 <strong>{variant.label}</strong>
                 <span>{variant.mealCount} refeição(ões) registrada(s)</span>
                 {variant.doseTotals.length > 0 ? (
