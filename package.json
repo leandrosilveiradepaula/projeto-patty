@@ -21,7 +21,8 @@
     "test:drive-triage": "node --test lib/content/drive-triage.test.mjs",
     "eval:ai:openai": "node --experimental-strip-types scripts/eval-openai-anamnesis-review.ts",
     "test:media-migration": "node --test lib/content/educational-media-migration.test.mjs",
-    "test:evaluations": "node --experimental-strip-types --test lib/evaluations/*.test.ts"
+    "test:evaluations": "node --experimental-strip-types --test lib/evaluations/*.test.ts",
+    "test:training": "node --experimental-strip-types --test lib/training/*.test.ts"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",
