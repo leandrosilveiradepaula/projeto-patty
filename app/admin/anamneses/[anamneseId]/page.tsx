@@ -1,3 +1,4 @@
+import { buildProfessionalReviewGroups } from "@/lib/anamnesis/professional-review";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -73,6 +74,7 @@ export default async function AdminAnamnesisDetailPage({
   const answersByQuestionId = new Map(
     answers.map((answer) => [answer.question_id, answer]),
   );
+  const professionalReviewGroups = buildProfessionalReviewGroups(questions, answers);
   const questionsBySectionId = new Map<
     string,
     typeof questions
@@ -166,6 +168,36 @@ export default async function AdminAnamnesisDetailPage({
             </div>
           </dl>
         </Card>
+      </Section>
+      <Section
+        description="Organização determinística das respostas já existentes conforme a forma de leitura profissional confirmada pela Patty. Não cria score, diagnóstico, alerta clínico nem interpretação automática."
+        title="Visão de trabalho da Patty"
+      >
+        {professionalReviewGroups.length === 0 ? (
+          <EmptyState
+            description="Não há respostas disponíveis para os agrupamentos de revisão profissional."
+            title="Sem dados agrupados"
+          />
+        ) : (
+          <div className={styles.reviewGrid}>
+            {professionalReviewGroups.map((group) => (
+              <Card className={styles.reviewGroup} key={group.id}>
+                <div>
+                  <h3 className={styles.reviewGroupTitle}>{group.title}</h3>
+                  <p className={styles.reviewGroupDescription}>{group.description}</p>
+                </div>
+                <dl className={styles.reviewItems}>
+                  {group.items.map((item) => (
+                    <div key={item.questionKey}>
+                      <dt>{item.label}</dt>
+                      <dd>{formatAnswerValue(item.answerValue) || "Resposta vazia"}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </Card>
+            ))}
+          </div>
+        )}
       </Section>
       <Section
         description="Seções e perguntas carregadas da versão exata registrada na submissão. Ausência de resposta é exibida como fato, sem inferência."
