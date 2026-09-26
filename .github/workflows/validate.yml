@@ -61,6 +61,9 @@ jobs:
       - name: Evaluation view tests
         run: npm run test:evaluations
 
+      - name: Training request tests
+        run: npm run test:training
+
 
       - name: Assignment tests
         run: npm run test:assignments
