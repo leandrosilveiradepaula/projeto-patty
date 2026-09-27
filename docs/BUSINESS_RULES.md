@@ -124,7 +124,27 @@ A Patty confirmou apenas que a etapa seguinte e **Cutting 3 com protocolo linear
 
 O Reconhecimento Metabolico pode ser reutilizado quando houver baixa adesao, dificuldade de execucao ou retorno apos afastamento.
 
-Adesao e central para a decisao profissional. A Patty pode simplificar ou retornar antes de avancar conforme a dificuldade relatada.
+A progressao do protocolo segue a sequencia profissional confirmada e **nao e automatica**.
+
+A adesao e um gate central para avancar para a etapa seguinte:
+- quando a cliente esta conseguindo aderir ao protocolo e a evolucao permite continuidade, a Patty pode seguir a sequencia;
+- quando a cliente nao esta aderindo adequadamente, a progressao deve ser interrompida para revisao profissional;
+- quando a cliente nao esta apresentando o resultado esperado, a Patty tambem interrompe a progressao e define manualmente os proximos passos.
+
+Nao inferir automaticamente a causa de ausencia de resultado. Falta de resultado nao deve ser tratada pelo sistema como prova de baixa adesao.
+
+Nao criar score automatico de adesao, regra automatica de estagnacao ou mudanca automatica de fase.
+
+### CUTTING 2 - RELACAO COM O CUTTING 1
+
+Depois do Up Metabolico, o Cutting 2 reinicia a mesma estrutura de progressao ja confirmada:
+- Cutting 2 Linear;
+- Cutting 2 Dia 1 / Dia 2;
+- Cutting 2: 2 Low / 1 High.
+
+A Patty confirmou que o Cutting 2 trabalha com **menos doses de macros** em relacao ao ciclo anterior. A quantidade exata de reducao, quais macros sao reduzidos em cada transicao e as formulas correspondentes ainda precisam ser formalizadas antes de qualquer calculo automatico.
+
+A confirmacao desta resposta nao revoga a etapa posterior ja documentada de **Cutting 3 Linear**; suas regras internas continuam abertas.
 
 Nao criar score automatico de adesao.
 
