@@ -74,7 +74,7 @@ Nao existe bloqueio atual de deployment Vercel para o `master`.
 | Correcao pos-envio da Anamnese | SIM | SIM | E2E administrativo de producao PASS em 2026-09-24 | Schema aplicado e rota/UI publicadas e validadas em producao | Resposta original continua separada de correcoes e esclarecimentos |
 | Esclarecimentos pos-Anamnese | SIM | SIM | E2E autenticado admin -> cliente -> admin PASS no run `36053370894` | Schema e UI publicados; workflow E2E versionado no PR #155 | Lifecycle sem estado formal/prazo/notificacao continua aberto |
 | Arquivos privados | SIM | PARCIAL/AVANCADO | Smokes cliente/admin + auditoria estatica | Acesso da Patty sem assignment confirmado em RLS/Storage/rotas, com MFA AAL2 | Politica de retencao/hard delete |
-| Avaliacoes e medidas | Fundacao + cadencia profissional parcial definida | SIM na fundacao | Parcial | Backend existente | Quinzenal: cintura/abdomen/quadril/peso; mensal: todas as medidas + peso + fotos; falta catalogo mensal completo, unidades e correcao |
+| Avaliacoes e medidas | Fundacao + cadencia profissional parcial definida | Lifecycle operacional de rascunho/finalizacao implementado na branch | Migration validada com `ROLLBACK`; testes deterministas adicionados | APLICACAO SAAS PENDENTE DE MERGE/CI | Quinzenal: cintura/abdomen/quadril/peso; mensal: todas as medidas + peso + fotos; catalogo mensal, unidades e correcao pos-finalizacao continuam abertos |
 | Protocolos versionados | SIM | Lifecycle manual implementado | CI/validacoes existentes | Backend/SaaS correspondente existente | Criacao/edicao profissional completa conforme regras ainda abertas |
 | Conteudo educacional / exercicios | SIM como dominios separados | Fundacao/release + metadata de asset preparada | Inventario 89/89 revalidado; smoke transacional de assets PASS | Vercel Private Blob definido para midia; store/upload ainda nao executados | Criar/conectar store privado, migrar video aprovado, verificar hash e publicar/liberar explicitamente |
 | Metodo da Patty | PARCIALMENTE DEFINIDO | Regras matematicas confirmadas em codigo testavel | CI | Fluxo confirmado agora inclui Cutting 3 Linear apos Cutting 2: 2 Low / 1 High | Fases 5/6, regras internas/pos-Cutting 3, Bulking, Consolidacao, hidratacao, suplementacao, treino, alertas e criterios finais |
@@ -748,3 +748,21 @@ As seis frentes autorizadas foram implementadas sem ampliar regras profissionais
 
 As migrations desta rodada estao aplicadas no Supabase SaaS e alinhadas ao historico remoto: `20260926233725_create_client_training_requests.sql` e `20260926233849_optimize_client_training_request_rls.sql`. A primeira cria o historico append-only; a segunda remove a reavaliacao por linha de `auth.jwt()` das policies permissivas, mantendo AAL2 na policy `RESTRICTIVE` transversal. O advisor deixou de reportar `auth_rls_initplan` para `client_training_requests`. Smoke transacional pos-apply com fixtures sinteticas e `ROLLBACK` confirmou: admin AAL2 com assignment ativo consegue inserir/ler; AAL1 nao enxerga a linha; outro admin AAL2 sem assignment para a cliente nao enxerga a linha; residuos finais = 0.
 
+
+## 2026-09-26 - Lifecycle operacional de Avaliacoes
+
+### IMPLEMENTADO NA BRANCH / SAAS AINDA NAO ALTERADO
+
+Foi implementado o fluxo `rascunho -> finalizada` para Avaliacoes:
+- criacao de rascunho quinzenal ou mensal por admin atribuido;
+- ajuste de data/tipo enquanto draft;
+- inclusao/atualizacao/remocao de medidas com chave e unidade explicitas;
+- vinculo/desvinculo de fotos privadas existentes sem apagar o arquivo original;
+- finalizacao explicita com imutabilidade posterior;
+- decisoes profissionais vinculadas a avaliacao somente depois da finalizacao.
+
+A migration `20260927001500_create_assessment_draft_lifecycle.sql` passou em transacao com `ROLLBACK` no Supabase SaaS. Nenhuma alteracao foi aplicada nesta etapa pre-merge.
+
+Registros historicos existentes serao preservados como finalizados sem inventar `created_by_profile_id` ou `finalized_by_profile_id` quando esses atores historicos nao forem conhecidos.
+
+O sistema nao valida automaticamente a completude quinzenal/mensal por chaves, porque catalogo mensal e unidades continuam abertos.
