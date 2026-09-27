@@ -471,7 +471,9 @@ O schema/runtime ainda usa os identificadores tecnicos historicos de tipo; esta 
 
 O catalogo e as unidades da Avaliacao Completa estao confirmados: peso (kg); cintura, abdomen, coxa, biceps, quadril, ombros e panturrilhas (cm), alem da medida do torax em cm - nomeada **busto para mulher** e **peito para homem** - e das fotos. Para medidas unilaterais, utiliza-se somente o lado direito do corpo.
 
-Continuam abertos: regra para datas-ancora 29/30/31 em meses sem o mesmo dia e fluxo de correcao historica depois da finalizacao.
+A correcao historica de uma avaliacao finalizada foi definida: cria-se uma nova avaliacao corrigida, preservando a anterior, e a cliente visualiza a avaliacao corrigida.
+
+Continua aberto: regra para datas-ancora 29/30/31 em meses sem o mesmo dia e se a avaliacao original tambem permanece visivel para a cliente depois da correcao.
 
 ## Cadastro Atual - edicao controlada
 
