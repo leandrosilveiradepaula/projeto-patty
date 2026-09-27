@@ -607,6 +607,25 @@ Quais regras profissionais ainda pendentes devem completar a criacao, revisao e 
 Qual catalogo de equivalentes sera validado, quem podera versiona-lo e qual parte, se alguma, podera ser exibida a cliente em um protocolo publicado?
 
 
+### PARCIALMENTE RESOLVIDO
+
+A Patty confirmou que a cliente deve visualizar a rotina alimentar publicada e, quando houver treino prescrito, a rotina de treinos. A cliente nao precisa registrar execucao dentro do protocolo publicado.
+
+### QUESTAO ABERTA - CHECK-IN
+
+A Patty sugeriu como funcionalidade desejavel um check-in separado para liquidos consumidos e atividade fisica/treino realizado.
+
+Ainda faltam confirmar:
+- frequencia do check-in;
+- unidade/campos para liquidos;
+- o que caracteriza atividade realizada;
+- se ha meta, lembrete ou alerta;
+- o que a Patty visualiza e pode editar;
+- se registros anteriores podem ser corrigidos;
+- se e escopo do primeiro lancamento.
+
+Nao inferir score de adesao nem meta de hidratacao.
+
 ## OpenAI — modelo e controles de dados
 
 ### FATO CONFIRMADO
