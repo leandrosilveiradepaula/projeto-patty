@@ -125,16 +125,18 @@ Doses podem ser fracionadas pela cliente.
 
 Parte das doses inicialmente associadas ao carboidrato pode ser redistribuida para gordura.
 
-## Proteinas
+## Proteinas e equivalentes
 
 ### DECISAO CONFIRMADA
 
-Existem dois grupos de proteina:
+A cliente pode escolher livremente as substituicoes de alimentos **dentro do grupo de equivalentes permitido pelo protocolo**.
 
-- maior teor de gordura;
-- menor teor de gordura.
+Na proteina existem duas tabelas/grupos:
 
-O grupo de maior teor de gordura possui limite diario. "Sem restricao" nao significa proteina ilimitada.
+- proteinas com maior teor de gordura;
+- proteinas com menor teor de gordura.
+
+O grupo de maior teor de gordura possui limite diario. A justificativa profissional informada pela Patty e controlar o excesso de gordura da alimentacao e considerar cuidados relacionados a saude e colesterol.
 
 O limite diario do grupo de maior teor de gordura e metade das doses totais de proteina, arredondando para cima.
 
@@ -143,6 +145,10 @@ Exemplos:
 - 8 doses -> maximo 4;
 - 7 doses -> maximo 4;
 - 9 doses -> maximo 5.
+
+Enquanto ainda houver saldo dentro desse limite, a cliente pode escolher livremente entre os alimentos da tabela de maior teor de gordura. Depois de atingir o limite diario desse grupo, as doses de proteina restantes do dia devem ser escolhidas na tabela de menor teor de gordura.
+
+Na tabela de menor teor de gordura, "livre escolha" significa liberdade para escolher entre os alimentos listados **dentro do total de doses de proteina do protocolo**. Nao significa consumo ilimitado de proteina.
 
 ## Cutting e carb cycle
 
