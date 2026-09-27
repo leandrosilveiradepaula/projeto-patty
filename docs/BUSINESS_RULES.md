@@ -144,7 +144,8 @@ Exemplos:
 
 - 8 doses -> maximo 4;
 - 7 doses -> maximo 4;
-- 9 doses -> maximo 5.
+- 9 doses -> maximo 5;
+- 10 doses -> maximo 5 da tabela de maior teor de gordura e as 5 restantes obrigatoriamente da tabela de menor teor de gordura.
 
 Enquanto ainda houver saldo dentro desse limite, a cliente pode escolher livremente entre os alimentos da tabela de maior teor de gordura. Depois de atingir o limite diario desse grupo, as doses de proteina restantes do dia devem ser escolhidas na tabela de menor teor de gordura.
 
