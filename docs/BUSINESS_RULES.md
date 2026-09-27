@@ -218,6 +218,34 @@ Na montagem do treino, ela considera pratica previa, disponibilidade/frequencia 
 
 A orientacao atual citada de no minimo 3 treinos por semana com cerca de 1 hora por sessao nao deve ser transformada em regra automatica universal enquanto excecoes, intensidade, volume, progressao e cardio nao estiverem formalizados.
 
+## Edicao profissional de protocolos
+
+### DECISAO CONFIRMADA
+
+Ao montar ou ajustar o acompanhamento de uma cliente, a Patty precisa conseguir editar manualmente, quando aplicavel:
+
+- fase/protocolo;
+- quantidade total de proteina;
+- quantidade total de carboidrato;
+- quantidade de gordura;
+- numero de refeicoes;
+- distribuicao das doses entre as refeicoes;
+- alimentos e equivalentes;
+- configuracao de dias Low/High quando o protocolo usar esse ciclo;
+- refeicao livre quando aplicavel;
+- observacoes;
+- data de inicio;
+- orientacoes especificas;
+- area de treino, quando a Patty estiver prescrevendo treino para a cliente;
+- area de suplementacao;
+- area de manipulados.
+
+Esses campos/blocos devem permanecer sob controle manual da Patty para que ela possa ajustar o plano individualmente.
+
+A confirmacao de que um campo deve ser editavel **nao cria regra automatica para preencher esse campo**. Regras ainda abertas de treino, suplementacao, manipulados, progressao, doses, contraindicacoes, formulas ou criterios profissionais continuam abertas e nao devem ser inferidas.
+
+A prescricao de treino continua condicionada a regra ja confirmada de que a Patty prescreve treino somente para clientes que solicitam esse servico.
+
 ## Avaliacao corporal e evolucao
 
 ### DECISAO CONFIRMADA
