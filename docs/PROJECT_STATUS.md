@@ -1,3 +1,5 @@
+> Escopo atual: **sistema completo, de ponta a ponta**. O projeto nao e mais conduzido como MVP. Referencias historicas a MVP devem ser lidas como legado documental, nao como reducao de escopo.
+
 # Estado Atual do Projeto Patty
 
 Ultima atualizacao documental: 2026-09-26.
