@@ -1,5 +1,5 @@
 import { endClientAssignmentAction } from "@/app/admin/clientes/[clienteId]/actions";
-import { AdminClientRegistrationDetails } from "@/components/admin/AdminClientRegistrationDetails";
+import { AdminClientRegistrationEditForm } from "@/components/admin/AdminClientRegistrationEditForm";
 import { AdminTrainingRequestForm } from "@/components/admin/AdminTrainingRequestForm";
 import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
 import { Badge } from "@/components/ui/Badge";
@@ -150,19 +150,13 @@ export default async function AdminClienteDetailPage({
         description="Informações atuais de contato, separadas do acesso à conta e da Anamnese."
         title="Cadastro atual"
       >
-        {registration ? (
-          <AdminClientRegistrationDetails
-            city={registration.city ?? undefined}
-            contactEmail={registration.contact_email ?? undefined}
-            instagram={registration.instagram ?? undefined}
-            phone={registration.phone ?? undefined}
-          />
-        ) : (
-          <EmptyState
-            description="O cadastro atual desta cliente ainda não foi informado."
-            title="Cadastro atual indisponível"
-          />
-        )}
+        <AdminClientRegistrationEditForm
+          city={registration?.city ?? undefined}
+          clientId={client.id}
+          contactEmail={registration?.contact_email ?? undefined}
+          instagram={registration?.instagram ?? undefined}
+          phone={registration?.phone ?? undefined}
+        />
       </Section>
       <Section
         description="A Patty prescreve treino somente quando a cliente solicita o serviço. O histórico abaixo registra essa solicitação sem gerar treino automaticamente."
