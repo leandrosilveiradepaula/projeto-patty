@@ -794,4 +794,13 @@ Enquanto `finalized_at IS NULL`, a Patty/admin com assignment ativo e AAL2 pode:
 Depois da finalizacao, triggers bloqueiam mutacao da avaliacao, medidas e vinculos de foto. O arquivo privado original nunca e apagado ao desvincular uma foto do rascunho.
 
 O fluxo de correcao historica depois da finalizacao continua aberto e nao e implementado como overwrite.
+### Clonagem de versao de protocolo
+
+Uma versao submetida/congelada pode servir de base para um novo rascunho.
+
+A operacao preserva `based_on_version_id` e copia a arvore versionada de plano alimentar de forma atomica. IDs sao novos; `version_number` e o proximo numero do protocolo; `created_by_profile_id` e o admin autenticado.
+
+Aprovacoes e publicacoes pertencem a versao original e nunca sao copiadas para a nova versao.
+
+A operacao nao interpreta o metodo, recalcula doses nem avanca fase.
 
