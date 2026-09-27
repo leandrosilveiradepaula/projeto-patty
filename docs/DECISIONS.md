@@ -8,7 +8,7 @@ Na Avaliacao Completa, sao solicitados:
 - abdomen, em centimetros (cm);
 - coxa, em centimetros (cm);
 - biceps, em centimetros (cm);
-- busto, em centimetros (cm);
+- busto para mulher ou peito para homem, em centimetros (cm);
 - quadril, em centimetros (cm);
 - ombros, em centimetros (cm);
 - panturrilhas, em centimetros (cm);
@@ -16,7 +16,7 @@ Na Avaliacao Completa, sao solicitados:
 
 Para medidas unilaterais, deve ser utilizado somente o lado direito do corpo.
 
-A lista acima substitui referencias anteriores incompletas ao catalogo da avaliacao completa. O termo vigente e **busto**; a mencao historica a "peito" nao cria uma medida adicional separada.
+A lista acima substitui referencias anteriores incompletas ao catalogo da avaliacao completa. Para a medida do torax, a nomenclatura confirmada e **busto para mulher** e **peito para homem**. Trata-se da mesma posicao no catalogo; nao criar duas medidas separadas na mesma avaliacao apenas pela diferenca de nomenclatura.
 
 ### LIMITE
 
