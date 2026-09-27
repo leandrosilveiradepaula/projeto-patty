@@ -1,3 +1,31 @@
+## 2026-09-27 - Projeto passa a ter escopo de sistema completo
+
+### DECISAO DE PRODUTO CONFIRMADA
+
+O Projeto Patty nao esta mais sendo conduzido como um MVP com recortes de primeira/segunda fase.
+
+O objetivo atual e construir o **sistema completo, de ponta a ponta**, cobrindo integralmente os fluxos da Patty e das clientes que ja foram definidos para o produto.
+
+Consequencias:
+- perguntas do tipo "o que entra no primeiro lancamento?" ou "o que pode ficar para depois?" deixam de ser perguntas de escopo;
+- quando a Patty responder "todos os itens" em listas de funcionalidades da cliente ou do admin, todos os itens passam a compor o escopo do sistema completo;
+- funcionalidades ja confirmadas, como check-ins de liquidos e atividade fisica, tambem fazem parte do sistema completo;
+- nao usar "MVP", "segunda fase" ou "fora do MVP" para excluir funcionalidade ja confirmada do produto;
+- ainda e valido priorizar tecnicamente a ordem de implementacao, desde que isso nao seja confundido com retirada de escopo.
+
+### REGRA DE CONTINUIDADE
+
+Continuam valendo as distincioes entre:
+- confirmado x aberto;
+- implementado x testado x aplicado x publicado;
+- automacao autorizada x regra profissional ainda pendente.
+
+Construir o sistema completo nao autoriza inventar regras profissionais ainda nao confirmadas.
+
+### DOCUMENTACAO
+
+Os arquivos historicos `MVP.md` e `MVP_READINESS.md` permanecem com esses nomes para evitar quebrar referencias existentes, mas passam a representar, respectivamente, o **escopo completo do sistema** e o **mapa de prontidao do sistema completo**.
+
 ## 2026-09-27 - Escopo obrigatorio da Patty antes do uso real
 
 ### DEFINICAO DE PRODUTO
