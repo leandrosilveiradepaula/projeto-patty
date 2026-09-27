@@ -50,6 +50,14 @@ export async function addProfessionalFollowUp(
     };
   }
 
+  if (!assessment.finalized_at) {
+    return {
+      message:
+        "Finalize a avaliação antes de registrar uma decisão profissional.",
+      success: false,
+    };
+  }
+
   const decisionValue = formData.get("professionalDecision");
   const reasonValue = formData.get("decisionReason");
 
@@ -229,6 +237,7 @@ export async function deleteAssessmentMeasurementAction(
   assessmentId: string,
   measurementId: string,
   _state: AssessmentDraftActionState,
+  _formData: FormData,
 ): Promise<AssessmentDraftActionState> {
   await requireRole("admin");
   const { assessment, message } = await getDraftAssessment(assessmentId);
@@ -316,6 +325,7 @@ export async function unlinkAssessmentPhotoAction(
   assessmentId: string,
   clientFileId: string,
   _state: AssessmentDraftActionState,
+  _formData: FormData,
 ): Promise<AssessmentDraftActionState> {
   await requireRole("admin");
   const { assessment, message } = await getDraftAssessment(assessmentId);
