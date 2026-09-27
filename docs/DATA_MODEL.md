@@ -774,4 +774,22 @@ Campos principais:
 A ausencia de registro significa que nao ha solicitacao estruturada registrada. O registro nao cria prescricao, exercicio, protocolo, publicacao ou progressao automatica.
 
 UPDATE e DELETE sao bloqueados por trigger; novos fatos sao novos registros.
+## Lifecycle operacional de Avaliacoes
+
+`client_assessments` passa a distinguir rascunho de registro finalizado:
+- `assessment_kind`: `fortnightly` ou `monthly` para novos registros; historicos anteriores podem permanecer nulos;
+- `created_by_profile_id`: autoria do novo rascunho;
+- `finalized_at`: nulo enquanto editavel;
+- `finalized_by_profile_id`: ator da finalizacao.
+
+Registros historicos existentes sao preservados como finalizados durante a migration, sem reabertura para edicao.
+
+Enquanto `finalized_at IS NULL`, a Patty/admin com assignment ativo e AAL2 pode:
+- ajustar data/tipo;
+- inserir/atualizar/remover `assessment_measurements`;
+- vincular/desvincular `assessment_files`.
+
+Depois da finalizacao, triggers bloqueiam mutacao da avaliacao, medidas e vinculos de foto. O arquivo privado original nunca e apagado ao desvincular uma foto do rascunho.
+
+O fluxo de correcao historica depois da finalizacao continua aberto e nao e implementado como overwrite.
 
