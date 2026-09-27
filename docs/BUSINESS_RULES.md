@@ -258,21 +258,27 @@ Depois de revisado e publicado pela Patty, a cliente deve conseguir visualizar n
 
 A cliente nao precisa registrar execucao diretamente dentro do protocolo alimentar ou do treino publicado. O protocolo permanece como orientacao publicada e versionada.
 
-### IDEIA DE PRODUTO AINDA NAO FORMALIZADA
+### DECISAO DE PRODUTO CONFIRMADA
 
-A Patty demonstrou interesse em um check-in separado para a cliente registrar:
-- quantidade de liquidos consumida no dia;
-- realizacao de atividade fisica/treino.
+O produto deve prever um check-in de acompanhamento para servir tambem como estimulo a cliente.
 
-A finalidade citada e apoiar acompanhamento e incentivo. Ainda nao estao definidos:
-- formato e frequencia do check-in;
-- unidade e campos de liquidos;
-- definicao do que conta como atividade realizada;
-- metas, lembretes ou alertas;
-- visibilidade e acoes da Patty sobre os registros;
-- possibilidade de editar registros anteriores.
+O check-in deve permitir:
+- registrar a quantidade de liquidos consumida ao longo do dia;
+- acompanhar progresso em relacao a uma meta de liquidos;
+- receber lembretes relacionados ao consumo de liquidos;
+- registrar a frequencia/realizacao de atividade fisica ou ida a academia;
+- acompanhar o progresso dessas metas de forma visivel para a cliente.
 
-Esse check-in nao autoriza score automatico de adesao nem meta automatica de hidratacao.
+A existencia de metas e lembretes esta confirmada como comportamento desejado do produto. Ainda nao estao definidos:
+- quem define cada meta;
+- formula ou valor da meta de liquidos;
+- unidade operacional definitiva para o registro;
+- meta/frequencia esperada de academia ou atividade;
+- horarios e cadencia dos lembretes;
+- o que a Patty visualiza ou pode corrigir;
+- politica de edicao de check-ins anteriores.
+
+Nao inferir valor de hidratacao, frequencia ideal de treino ou score automatico de adesao a partir desta confirmacao.
 
 ## Avaliacao corporal e evolucao
 
