@@ -224,13 +224,20 @@ A orientacao atual citada de no minimo 3 treinos por semana com cerca de 1 hora 
 
 Na interpretacao profissional, visual e medidas podem ter mais peso do que o numero isolado da balanca.
 
-Cintura, abdomen e quadril permanecem medidas centrais na rotina quinzenal. Peito foi confirmado como medida adicional relevante para a leitura de perda de gordura, sem encerrar o catalogo mensal completo.
+Cintura, abdomen e quadril permanecem medidas centrais na **Avaliacao Basica**. Peito foi confirmado como medida adicional relevante para a leitura de perda de gordura, sem encerrar o catalogo da **Avaliacao Completa**.
 
 Fotos sao usadas principalmente para comparacao de evolucao. Em contexto de ganho de massa, tambem ajudam a considerar regioes que a cliente deseja desenvolver.
 
-A cadencia permanece:
-- a cada 15 dias: peso, cintura, abdomen e quadril;
-- a cada 30 dias: avaliacao completa, peso e fotos.
+A nomenclatura profissional confirmada passa a ser:
+- **Avaliacao Completa**: substitui o nome historico "mensal";
+- **Avaliacao Basica**: substitui o nome historico "quinzenal".
+
+A cadencia e ancorada na data de inicio do acompanhamento da cliente:
+- a Avaliacao Completa ocorre mensalmente no mesmo dia do mes correspondente ao inicio do processo;
+- a Avaliacao Basica ocorre no meio do intervalo entre duas Avaliacoes Completas;
+- exemplo confirmado pela Patty: Avaliacao Completa no dia 2 -> Avaliacao Basica no dia 17.
+
+Nao inferir ainda a regra para datas de inicio que nao existem em todos os meses, como dias 29, 30 ou 31.
 
 ## Comportamento e relacao com comida
 
