@@ -479,6 +479,24 @@ O runtime atual torna avaliacao/medidas finalizadas imutaveis, portanto a forma 
 
 Continua aberto: regra para datas-ancora 29/30/31 em meses sem o mesmo dia e desenho tecnico da correcao auditavel pos-finalizacao.
 
+## Protocolos - escopo de edicao manual confirmado
+
+Estado: **REGRA DE PRODUTO CONFIRMADA / IMPLEMENTACAO PARCIAL**
+
+A Patty precisa conseguir editar manualmente no acompanhamento, quando aplicavel:
+- fase/protocolo;
+- proteina, carboidrato e gordura;
+- numero de refeicoes e distribuicao de doses;
+- alimentos/equivalentes;
+- ciclo Low/High;
+- refeicao livre;
+- observacoes, data de inicio e orientacoes;
+- treino quando o cliente solicitar;
+- suplementacao;
+- manipulados.
+
+Isso define escopo de UI/autoria humana, nao regras automaticas. Treino, suplementacao e manipulados continuam sem formulas/criterios automatizaveis confirmados.
+
 ## Cadastro Atual - edicao controlada
 
 Estado: **IMPLEMENTADO / SEM AMPLIAR GRANTS DO BROWSER**
