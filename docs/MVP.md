@@ -94,6 +94,29 @@ O MVP deve incluir avaliacoes:
 - preservacao das avaliacoes anteriores;
 - possibilidade de criacao de nova versao de protocolo.
 
+## Primeiro lancamento - escopo obrigatorio da cliente
+
+### DECISAO CONFIRMADA
+
+No primeiro lancamento, a experiencia da cliente deve incluir todos os seguintes itens:
+
+- Perfil/Cadastro Atual;
+- Anamnese;
+- fotos;
+- exames e documentos;
+- avaliacoes e medidas;
+- protocolo alimentar publicado;
+- conteudos educacionais;
+- biblioteca de exercicios;
+- solicitacao de treino;
+- visualizacao do treino quando houver prescricao;
+- pedidos/respostas de esclarecimento no aplicativo;
+- visualizacao da evolucao.
+
+Nenhum desses itens deve ser adiado para uma segunda fase do primeiro lancamento.
+
+O check-in de liquidos e atividade fisica e uma funcionalidade adicional confirmada em respostas posteriores; sua inclusao obrigatoria no primeiro lancamento continua em decisao separada.
+
 ## Estado operacional do MVP em 2026-09-24
 
 ### FATO TECNICO/OPERACIONAL
