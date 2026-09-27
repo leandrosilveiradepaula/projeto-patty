@@ -594,7 +594,9 @@ Quando e como a biblioteca de exercicios podera ser exposta a cliente, e quais c
 
 A Patty confirmou que o protocolo/acompanhamento precisa permitir edicao manual de fase, macros, numero de refeicoes, distribuicao de doses, alimentos/equivalentes, Low/High, refeicao livre, observacoes, data de inicio, orientacoes, treino quando solicitado, suplementacao e manipulados.
 
-Continuam abertas as regras internas e os campos detalhados necessarios para treino, suplementacao e manipulados, bem como qualquer automacao desses blocos.
+Quando houver regra previamente confirmada, documentada e deterministica, o sistema pode montar rascunhos automaticamente para revisao da Patty, inclusive macros da fase e treino predefinido aplicavel.
+
+Continuam abertas as regras internas e os campos detalhados necessarios para treino, suplementacao e manipulados onde essas regras ainda nao estiverem formalizadas.
 
 ### QUESTAO ABERTA
 
