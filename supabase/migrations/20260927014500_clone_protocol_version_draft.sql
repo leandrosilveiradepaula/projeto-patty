@@ -12,12 +12,9 @@ declare
   v_new_version_id uuid;
   v_new_version_number integer;
   v_new_plan_id uuid;
-  v_variant record;
-  v_new_variant_id uuid;
-  v_meal record;
-  v_new_meal_id uuid;
-  v_cycle record;
-  v_new_cycle_id uuid;
+  v_variant_map jsonb := '{}'::jsonb;
+  v_meal_map jsonb := '{}'::jsonb;
+  v_cycle_map jsonb := '{}'::jsonb;
 begin
   select *
   into v_source
@@ -64,110 +61,121 @@ begin
   from public.meal_plan_versions
   where protocol_version_id = v_source.id;
 
-  if found then
-    insert into public.meal_plan_versions (
-      protocol_version_id,
-      client_id,
-      food_equivalent_catalog_version_id
-    )
-    values (
-      v_new_version_id,
-      v_source.client_id,
-      v_source_plan.food_equivalent_catalog_version_id
-    )
-    returning id into v_new_plan_id;
-
-    for v_variant in
-      select id, variant_key, label
-      from public.meal_plan_variants
-      where meal_plan_version_id = v_source_plan.id
-      order by variant_key, id
-    loop
-      insert into public.meal_plan_variants (
-        meal_plan_version_id,
-        client_id,
-        variant_key,
-        label
-      )
-      values (
-        v_new_plan_id,
-        v_source.client_id,
-        v_variant.variant_key,
-        v_variant.label
-      )
-      returning id into v_new_variant_id;
-
-      for v_meal in
-        select id, position, label
-        from public.meals
-        where meal_plan_variant_id = v_variant.id
-        order by position, id
-      loop
-        insert into public.meals (
-          meal_plan_variant_id,
-          position,
-          label
-        )
-        values (
-          v_new_variant_id,
-          v_meal.position,
-          v_meal.label
-        )
-        returning id into v_new_meal_id;
-
-        insert into public.meal_dose_allocations (
-          meal_id,
-          dose_type,
-          dose_quantity
-        )
-        select
-          v_new_meal_id,
-          dose_type,
-          dose_quantity
-        from public.meal_dose_allocations
-        where meal_id = v_meal.id
-        order by dose_type, id;
-      end loop;
-    end loop;
-
-    for v_cycle in
-      select id
-      from public.meal_plan_cycles
-      where meal_plan_version_id = v_source_plan.id
-      order by created_at, id
-    loop
-      insert into public.meal_plan_cycles (
-        meal_plan_version_id,
-        client_id
-      )
-      values (
-        v_new_plan_id,
-        v_source.client_id
-      )
-      returning id into v_new_cycle_id;
-
-      insert into public.meal_plan_cycle_steps (
-        cycle_id,
-        meal_plan_version_id,
-        variant_id,
-        position
-      )
-      select
-        v_new_cycle_id,
-        v_new_plan_id,
-        new_variant.id,
-        source_step.position
-      from public.meal_plan_cycle_steps source_step
-      join public.meal_plan_variants source_variant
-        on source_variant.id = source_step.variant_id
-       and source_variant.meal_plan_version_id = v_source_plan.id
-      join public.meal_plan_variants new_variant
-        on new_variant.meal_plan_version_id = v_new_plan_id
-       and new_variant.variant_key = source_variant.variant_key
-      where source_step.cycle_id = v_cycle.id
-      order by source_step.position;
-    end loop;
+  if not found then
+    return v_new_version_id;
   end if;
+
+  insert into public.meal_plan_versions (
+    protocol_version_id,
+    client_id,
+    food_equivalent_catalog_version_id
+  )
+  values (
+    v_new_version_id,
+    v_source.client_id,
+    v_source_plan.food_equivalent_catalog_version_id
+  )
+  returning id into v_new_plan_id;
+
+  select coalesce(
+    jsonb_object_agg(id::text, pg_catalog.gen_random_uuid()::text),
+    '{}'::jsonb
+  )
+  into v_variant_map
+  from public.meal_plan_variants
+  where meal_plan_version_id = v_source_plan.id;
+
+  insert into public.meal_plan_variants (
+    id,
+    meal_plan_version_id,
+    client_id,
+    variant_key,
+    label
+  )
+  select
+    (v_variant_map ->> source_variant.id::text)::uuid,
+    v_new_plan_id,
+    v_source.client_id,
+    source_variant.variant_key,
+    source_variant.label
+  from public.meal_plan_variants source_variant
+  where source_variant.meal_plan_version_id = v_source_plan.id;
+
+  select coalesce(
+    jsonb_object_agg(source_meal.id::text, pg_catalog.gen_random_uuid()::text),
+    '{}'::jsonb
+  )
+  into v_meal_map
+  from public.meals source_meal
+  join public.meal_plan_variants source_variant
+    on source_variant.id = source_meal.meal_plan_variant_id
+  where source_variant.meal_plan_version_id = v_source_plan.id;
+
+  insert into public.meals (
+    id,
+    meal_plan_variant_id,
+    position,
+    label
+  )
+  select
+    (v_meal_map ->> source_meal.id::text)::uuid,
+    (v_variant_map ->> source_meal.meal_plan_variant_id::text)::uuid,
+    source_meal.position,
+    source_meal.label
+  from public.meals source_meal
+  join public.meal_plan_variants source_variant
+    on source_variant.id = source_meal.meal_plan_variant_id
+  where source_variant.meal_plan_version_id = v_source_plan.id;
+
+  insert into public.meal_dose_allocations (
+    meal_id,
+    dose_type,
+    dose_quantity
+  )
+  select
+    (v_meal_map ->> source_allocation.meal_id::text)::uuid,
+    source_allocation.dose_type,
+    source_allocation.dose_quantity
+  from public.meal_dose_allocations source_allocation
+  join public.meals source_meal
+    on source_meal.id = source_allocation.meal_id
+  join public.meal_plan_variants source_variant
+    on source_variant.id = source_meal.meal_plan_variant_id
+  where source_variant.meal_plan_version_id = v_source_plan.id;
+
+  select coalesce(
+    jsonb_object_agg(id::text, pg_catalog.gen_random_uuid()::text),
+    '{}'::jsonb
+  )
+  into v_cycle_map
+  from public.meal_plan_cycles
+  where meal_plan_version_id = v_source_plan.id;
+
+  insert into public.meal_plan_cycles (
+    id,
+    meal_plan_version_id,
+    client_id
+  )
+  select
+    (v_cycle_map ->> source_cycle.id::text)::uuid,
+    v_new_plan_id,
+    v_source.client_id
+  from public.meal_plan_cycles source_cycle
+  where source_cycle.meal_plan_version_id = v_source_plan.id;
+
+  insert into public.meal_plan_cycle_steps (
+    cycle_id,
+    meal_plan_version_id,
+    variant_id,
+    position
+  )
+  select
+    (v_cycle_map ->> source_step.cycle_id::text)::uuid,
+    v_new_plan_id,
+    (v_variant_map ->> source_step.variant_id::text)::uuid,
+    source_step.position
+  from public.meal_plan_cycle_steps source_step
+  where source_step.meal_plan_version_id = v_source_plan.id;
 
   return v_new_version_id;
 end;
