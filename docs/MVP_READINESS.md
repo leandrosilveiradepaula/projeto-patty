@@ -513,7 +513,7 @@ O produto deve prever check-in separado para:
 - registrar frequencia/realizacao de atividade fisica ou academia;
 - visualizar progresso como estimulo.
 
-Ainda faltam os parametros profissionais e de produto para implementacao: definicao das metas, unidades, frequencia dos lembretes, visibilidade/correcao pela Patty e escopo do primeiro lancamento.
+As metas/configuracoes individuais podem ser definidas na entrega do primeiro protocolo da cliente. Ainda faltam os parametros profissionais e de produto para implementacao como padrao: formulas/valores, unidades, frequencia dos lembretes, visibilidade/correcao pela Patty e escopo do primeiro lancamento.
 
 Nao tratar o check-in como score automatico de adesao nem inferir regra de hidratacao.
 
