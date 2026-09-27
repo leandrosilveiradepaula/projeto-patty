@@ -1,3 +1,21 @@
+## 2026-09-27 - Revisao humana dos findings de IA
+
+### REGRA CONFIRMADA PELA PATTY
+
+Para um finding/achado produzido pela IA:
+- a Patty pode aceita-lo como **observacao interna**;
+- a Patty pode transforma-lo em uma **anotacao propria**;
+- aceitar ou transformar o achado nao publica nem envia nada para a cliente;
+- nenhum conteudo originado da IA pode chegar a cliente sem **aprovacao explicita previa da Patty**.
+
+### REGRA DE AUDITORIA
+
+O sistema deve preservar separadamente o output original da IA, a decisao humana sobre o achado, a anotacao profissional resultante quando houver e qualquer versao posteriormente aprovada para comunicacao/publicacao.
+
+### QUESTOES DE UX AINDA ABERTAS
+
+Esta resposta nao definiu, por si so, todas as demais acoes da interface sobre findings, como editar o texto do finding, descartar explicitamente ou converter diretamente em pedido de esclarecimento. Essas acoes nao devem ser inferidas apenas desta confirmacao.
+
 ## 2026-09-27 - Fluxo de esclarecimento e lembrete de 24 horas
 
 ### REGRA CONFIRMADA PELA PATTY
