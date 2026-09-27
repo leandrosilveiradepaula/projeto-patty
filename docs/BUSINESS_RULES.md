@@ -259,9 +259,12 @@ A cadencia e ancorada na data de inicio do acompanhamento da cliente:
 
 Nao inferir ainda a regra para datas de inicio que nao existem em todos os meses, como dias 29, 30 ou 31.
 
-Quando uma Avaliacao ja finalizada precisar de correcao, a Patty nao altera nem sobrescreve o registro finalizado. Deve ser criada uma **nova avaliacao corrigida**, preservando a avaliacao anterior no historico. A cliente deve visualizar a avaliacao corrigida.
+A Patty distinguiu dois cenarios:
 
-A resposta atual nao define se a avaliacao original tambem permanece visivel para a cliente; nao inferir essa regra de apresentacao.
+1. **Nova avaliacao de acompanhamento**: a avaliacao anterior e sempre mantida no historico e uma nova avaliacao e criada com sua propria data.
+2. **Correcao de erro de lancamento**: se um dado de uma avaliacao foi registrado incorretamente, a Patty precisa voltar a essa avaliacao, corrigir o dado e remover o valor incorreto da visao valida.
+
+A forma tecnica de preservar auditoria dessa correcao sem manter o valor errado como dado ativo ainda deve ser definida separadamente. Nao transformar automaticamente um erro de digitacao em uma nova avaliacao de acompanhamento.
 
 ## Comportamento e relacao com comida
 
