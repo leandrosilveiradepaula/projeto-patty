@@ -509,11 +509,16 @@ A Patty tambem confirmou que, quando faltar informacao importante ou uma respost
 
 A fundacao minima de UX/historico foi definida e implementada: pedido textual da Patty, vinculo opcional a resposta original, complementos textuais append-only da cliente e visualizacao nas duas interfaces.
 
+A Patty confirmou:
+- a resposta da cliente nao resolve automaticamente;
+- a Patty precisa ler e marcar manualmente como resolvido;
+- se ainda houver duvida, pode questionar novamente;
+- nao existe prazo/expiracao para resposta;
+- enquanto estiver aguardando resposta da cliente, o sistema deve enviar lembrete a cada 24 horas.
+
 Continuam abertos:
-- notificacao fora da tela de Anamnese;
-- prazo/expiracao;
-- eventual estado formal de aberto/resolvido;
-- regras de encerramento ou reabertura;
+- o canal tecnico da notificacao de 24 horas;
+- o desenho tecnico do estado aberto/resolvido e do novo questionamento preservando historico;
 - como os complementos entram no contexto de IA e no historico de findings.
 
 ## Conteudo
