@@ -209,18 +209,23 @@ Nao criar diagnostico, score ou bloqueio automatico.
 
 ## 9. Secoes sem resposta nesta rodada
 
-O roteiro nao definiu nesta rodada:
-- funcionamento detalhado do acompanhamento apos o protocolo inicial;
+A rodada de fechamento de 2026-09-27 acrescentou confirmacoes sobre acompanhamento:
+- o protocolo segue a sequencia profissional ja documentada;
+- adesao e resultado funcionam como gates de progressao;
+- quando a cliente nao adere adequadamente ou nao apresenta o resultado esperado, a Patty interrompe a progressao e redefine manualmente os proximos passos;
+- o Cutting 2 reinicia a estrutura do Cutting com menos doses de macros em relacao ao ciclo anterior.
+
+Continuam abertos:
 - frequencia e conteudo de cada retorno alem da cadencia corporal ja confirmada;
 - criterios completos para alterar dieta;
 - criterios completos para alterar treino;
-- sinais formais de estrategia funcionando/nao funcionando;
-- criterio para diferenciar estrategia inadequada de baixa adesao;
+- definicoes objetivas de adesao suficiente/insuficiente e de resultado suficiente/insuficiente;
+- definicao operacional de estagnacao;
+- formula exata da reducao de macros no Cutting 2;
 - formato final do protocolo entregue;
 - canais finais de entrega/acompanhamento;
 - tratamento de excecoes como atletas, vegetarianos/veganos e doencas cronicas;
 - criterios finais de bom resultado;
-- avaliacao formal de adesao;
 - exercicio pratico completo com caso real.
 
 Esses pontos permanecem abertos.
