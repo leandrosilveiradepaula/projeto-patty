@@ -67,3 +67,16 @@ test("measurements and photo links can mutate only while the assessment is draft
   assert.match(migration, /assessment_files_draft_guard/i);
   assert.match(migration, /ca\.finalized_at is null/i);
 });
+
+test("assessment photos and professional decisions enforce semantic lifecycle boundaries", () => {
+  assert.match(migration, /cf\.file_kind = 'photo'/i);
+  assert.match(
+    migration,
+    /professional follow-up requires finalized assessment/i,
+  );
+  assert.match(
+    migration,
+    /professional_follow_ups_finalized_assessment_guard/i,
+  );
+});
+
