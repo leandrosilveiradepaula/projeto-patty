@@ -455,13 +455,21 @@ O registro nao cria treino, nao escolhe exercicios, nao altera protocolo e nao p
 
 Estado: **APLICADO NO SAAS / UI IMPLEMENTADA**
 
-O fluxo operacional permite criar avaliacao quinzenal/mensal em rascunho, editar data/tipo, medidas e vinculos de fotos privadas existentes e finalizar explicitamente.
+O fluxo operacional permite criar avaliacao em rascunho, editar data/tipo, medidas e vinculos de fotos privadas existentes e finalizar explicitamente.
+
+A nomenclatura profissional confirmada passa a ser:
+- **Avaliacao Completa**: ancora mensal definida pela data de inicio do acompanhamento;
+- **Avaliacao Basica**: avaliacao intermediaria entre duas Completas.
+
+Exemplo confirmado: Avaliacao Completa no dia 2 -> Avaliacao Basica no dia 17.
 
 Depois da finalizacao, triggers bloqueiam mutacao da avaliacao, medidas e vinculos. Acompanhamentos profissionais ligados a uma avaliacao exigem que ela esteja finalizada.
 
 A migration foi validada em transacao com `ROLLBACK`, o PR #210 passou CI/build e o Supabase SaaS registrou `20260927002227_create_assessment_draft_lifecycle`. O smoke pos-apply confirmou o lifecycle completo com fixture sintetica e `ROLLBACK`, incluindo isolamento AAL1/cross-assignment e imutabilidade depois da finalizacao, com 0 residuos.
 
-Continuam abertos: catalogo mensal completo, unidades permitidas/obrigatorias e fluxo de correcao historica depois da finalizacao.
+O schema/runtime ainda usa os identificadores tecnicos historicos de tipo; esta atualizacao documental nao autoriza migration de enum/constraint sem tarefa tecnica separada.
+
+Continuam abertos: catalogo completo da Avaliacao Completa, unidades permitidas/obrigatorias, regra para datas-ancora 29/30/31 em meses sem o mesmo dia e fluxo de correcao historica depois da finalizacao.
 
 ## Cadastro Atual - edicao controlada
 
