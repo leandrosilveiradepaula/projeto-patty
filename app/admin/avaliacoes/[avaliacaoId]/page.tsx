@@ -148,15 +148,16 @@ export default async function AdminAvaliacaoDetailPage({
     (followUp) => Boolean(followUp.patty_observation?.trim()),
   );
   const assessmentKind = assessment.assessment_kind;
-  const finalizationReadiness = isAssessmentKind(assessmentKind)
-    ? buildAssessmentFinalizationReadiness({
+  const finalizationReadiness =
+    typeof assessmentKind === "string" && isAssessmentKind(assessmentKind)
+      ? buildAssessmentFinalizationReadiness({
         assessmentKind,
         measurementKeys: measurements.map(
           (measurement) => measurement.measurement_key,
         ),
-        photoCount: photoFiles.length,
-      })
-    : null;
+          photoCount: photoFiles.length,
+        })
+      : null;
 
   return (
     <>
