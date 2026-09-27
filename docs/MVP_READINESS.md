@@ -471,9 +471,13 @@ O schema/runtime ainda usa os identificadores tecnicos historicos de tipo; esta 
 
 O catalogo e as unidades da Avaliacao Completa estao confirmados: peso (kg); cintura, abdomen, coxa, biceps, quadril, ombros e panturrilhas (cm), alem da medida do torax em cm - nomeada **busto para mulher** e **peito para homem** - e das fotos. Para medidas unilaterais, utiliza-se somente o lado direito do corpo.
 
-A correcao historica de uma avaliacao finalizada foi definida: cria-se uma nova avaliacao corrigida, preservando a anterior, e a cliente visualiza a avaliacao corrigida.
+A Patty distinguiu nova avaliacao de acompanhamento de correcao de erro:
+- nova avaliacao sempre preserva a anterior e recebe nova data;
+- erro de lancamento deve ser corrigido na avaliacao existente, fazendo o valor incorreto deixar de ser o dado valido.
 
-Continua aberto: regra para datas-ancora 29/30/31 em meses sem o mesmo dia e se a avaliacao original tambem permanece visivel para a cliente depois da correcao.
+O runtime atual torna avaliacao/medidas finalizadas imutaveis, portanto a forma auditavel de permitir essa correcao ainda exige tarefa tecnica separada antes de ser considerada implementada.
+
+Continua aberto: regra para datas-ancora 29/30/31 em meses sem o mesmo dia e desenho tecnico da correcao auditavel pos-finalizacao.
 
 ## Cadastro Atual - edicao controlada
 
