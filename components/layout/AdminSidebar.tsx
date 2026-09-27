@@ -15,6 +15,7 @@ type AdminNavigationItem = {
 const adminNavigationItems: AdminNavigationItem[] = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/clientes", label: "Clientes" },
+  { href: "/admin/pendencias", label: "Pendências" },
   { href: "/admin/arquivos", label: "Arquivos" },
   { href: "/admin/avaliacoes", label: "Avaliações" },
   { href: "/admin/protocolos", label: "Protocolos" },
