@@ -1,3 +1,28 @@
+## 2026-09-27 - Escopo obrigatorio da cliente no primeiro lancamento
+
+### DECISAO DE PRODUTO CONFIRMADA PELA PATTY
+
+Todos os itens listados na pergunta 7 da rodada de fechamento sao obrigatorios no primeiro lancamento para a cliente:
+
+- Perfil/Cadastro Atual;
+- Anamnese;
+- envio e visualizacao de fotos;
+- envio e visualizacao de exames/documentos;
+- avaliacoes e medidas;
+- visualizacao do protocolo alimentar publicado;
+- conteudos educacionais;
+- biblioteca de exercicios;
+- solicitacao de treino;
+- visualizacao do treino quando houver prescricao;
+- pedidos/respostas de esclarecimento dentro do aplicativo;
+- visualizacao da evolucao.
+
+Nenhum desses itens deve ser adiado para uma segunda fase do lancamento inicial.
+
+### LIMITE
+
+O check-in de liquidos e atividade fisica foi definido em respostas posteriores a pergunta 5 e nao fazia parte da lista original da pergunta 7. Seu recorte exato no primeiro lancamento continua sendo tratado separadamente ate decisao explicita.
+
 ## 2026-09-27 - Substituicoes dentro dos Grupos de Proteina
 
 ### REGRA CONFIRMADA PELA PATTY
