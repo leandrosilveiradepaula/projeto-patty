@@ -1922,4 +1922,16 @@ Estados inicialmente incluidos:
 - IA `started` sem estado terminal.
 
 Nao inferir prioridade, prazo, urgencia, adesao, estagnacao ou decisao profissional a partir desses estados. Novas categorias so podem entrar quando houver estado objetivo documentado que as sustente.
+## 2026-09-27 - Finalizacao de avaliacao respeita a cadencia confirmada
+
+### DECISAO DE PRODUTO/TECNICA
+
+A finalizacao de uma avaliacao em rascunho deve falhar fechado quando faltarem itens minimos ja confirmados pela Patty.
+
+- quinzenal: peso, cintura, abdomen e quadril;
+- mensal: peso e pelo menos uma foto vinculada.
+
+O catalogo mensal completo continua aberto. Por isso, a finalizacao mensal exige uma confirmacao humana explicita de que a Patty revisou o conjunto completo de medidas, em vez de o sistema inventar ou congelar esse catalogo.
+
+Essa decisao nao cria score, criterio de sucesso, estagnacao ou interpretacao automatica.
 
