@@ -68,7 +68,7 @@ Estados usados:
 | Anamnese versionada | leitura, rascunho e submissao final IMPLEMENTADOS; mapa v1 + consentimento checkbox DEFINIDOS; esclarecimentos pos-envio IMPLEMENTADOS | cliente salva `text`/`single_choice`; aplicabilidade oculta dependentes; envio explicito exige ANAM-046 na forma canonica | CI + smoke SQL PASS; consent E2E `36072067063`; start/resume `36074218960`; fluxo consolidado de draft `36257567841` PASS; esclarecimentos `36053370894` PASS | manter versionamento para mudancas futuras e nao reabrir gates ja validados sem nova evidencia |
 | Avaliacoes / medidas | leitura + autoria operacional de rascunho/finalizacao IMPLEMENTADAS | draft editavel; finalizacao imutavel; acompanhamento profissional somente apos finalizacao | CI/build PASS + pre-apply `ROLLBACK` PASS + schema aplicado | `20260927002227` aplicada; definir catalogo, unidades, obrigatoriedade e correcao historica pos-finalizacao |
 | Arquivos privados | upload/listagem/download da cliente IMPLEMENTADOS; acesso admin permanente sem assignment, upload administrativo e liberacao explicita IMPLEMENTADOS | smoke E2E da cliente PASS; smoke E2E administrativo PASS em producao; cron de temporarios VALIDADO; auditoria estatica confirmou RLS/rotas coerentes com a excecao da Patty | definir retencao/hard delete |
-| Protocolos | leitura + lifecycle manual IMPLEMENTADOS | submit/approve/publish | CI + SAAS VALIDADO; lifecycle com guarda determinística testada | criar/editar plano somente quando fluxo profissional estiver formalizado |
+| Protocolos | leitura + lifecycle manual + comparacao factual por `based_on_version_id` IMPLEMENTADOS | submit/approve/publish; diff nao altera estado | CI + SAAS VALIDADO; lifecycle e diff deterministico testados | autoria/edicao estrutural continua limitada pelas regras profissionais ainda abertas |
 | Plano alimentar publicado | cliente ve variantes, refeicoes, doses e ciclo | nao | CI VALIDADO | equivalentes visiveis continuam abertos |
 | Conteudo educacional | leitura admin/cliente por release IMPLEMENTADA | release manual | CI VALIDADO; elegibilidade de release testada | taxonomia, autoria/revisao e primeiro lote do Drive |
 | Exercicios | leitura admin IMPLEMENTADA | nao | CI VALIDADO | definir exposicao a cliente e campos finais |
@@ -493,4 +493,14 @@ Ficam deliberadamente fora:
 - avaliacao de estagnacao;
 - obrigacao de prescrever treino a partir de uma solicitacao;
 - inferencia de acao profissional a partir de arquivo recebido.
+
+## Protocolos - comparacao de versoes
+
+Estado: **IMPLEMENTADO COMO APOIO DE REVISAO**
+
+Quando uma versao registra `based_on_version_id`, a administracao compara a estrutura alimentar persistida com a base explicita.
+
+Nao existe fallback para "versao anterior", porque isso inventaria linhagem nao registrada.
+
+O diff e factual e nao executa mudanca de lifecycle, dose, fase ou publicacao.
 
