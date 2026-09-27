@@ -64,7 +64,7 @@ Estados usados:
 | Auth / sessao | login por email/senha IMPLEMENTADO; MFA administrativo TOTP IMPLEMENTADO; RLS AAL2 aplicado; senha minima Auth alinhada em 8 | admin exige `aal2` em SSR, rotas, server actions, Data API/RLS e Storage | CI + SAAS VALIDADO; smoke pos-apply PASS; Auth config auditado | HIBP depende de Pro+; manter smoke E2E de MFA |
 | Profiles / roles | IMPLEMENTADO | sem UI administrativa de gestao | RLS existente | definir bootstrap/admin e quem gerencia roles |
 | Clients / assignments | leitura + encerramento + inicio de assignment no onboarding IMPLEMENTADOS | Patty inicia onboarding por convite server-side; provisionamento cria vinculos relacionais e assignment com compensacao em falha | CI VALIDADO; encerramento E2E PASS; onboarding sintetico E2E PASS; Site URL/allowlist alinhados | template SSR real exige upgrade ou SMTP customizado; depois validar email real |
-| Cadastro Atual | leitura IMPLEMENTADA | nao | CI VALIDADO | definir quem pode alterar cada campo e auditoria |
+| Cadastro Atual | leitura + edicao controlada IMPLEMENTADAS | cliente edita proprio estado atual; Patty/admin edita sob AAL2 + assignment ativo; login email permanece separado | CI cobre validacao e boundary privilegiada server-only | sem migration nova; formulario ampliado/historico cadastral permanecem fora do escopo atual |
 | Anamnese versionada | leitura, rascunho e submissao final IMPLEMENTADOS; mapa v1 + consentimento checkbox DEFINIDOS; esclarecimentos pos-envio IMPLEMENTADOS | cliente salva `text`/`single_choice`; aplicabilidade oculta dependentes; envio explicito exige ANAM-046 na forma canonica | CI + smoke SQL PASS; consent E2E `36072067063`; start/resume `36074218960`; fluxo consolidado de draft `36257567841` PASS; esclarecimentos `36053370894` PASS | manter versionamento para mudancas futuras e nao reabrir gates ja validados sem nova evidencia |
 | Avaliacoes / medidas | leitura + autoria operacional de rascunho/finalizacao IMPLEMENTADAS | draft editavel; finalizacao imutavel; acompanhamento profissional somente apos finalizacao | CI/build PASS + pre-apply `ROLLBACK` PASS + schema aplicado | `20260927002227` aplicada; definir catalogo, unidades, obrigatoriedade e correcao historica pos-finalizacao |
 | Arquivos privados | upload/listagem/download da cliente IMPLEMENTADOS; acesso admin permanente sem assignment, upload administrativo e liberacao explicita IMPLEMENTADOS | smoke E2E da cliente PASS; smoke E2E administrativo PASS em producao; cron de temporarios VALIDADO; auditoria estatica confirmou RLS/rotas coerentes com a excecao da Patty | definir retencao/hard delete |
@@ -462,3 +462,18 @@ Depois da finalizacao, triggers bloqueiam mutacao da avaliacao, medidas e vincul
 A migration foi validada em transacao com `ROLLBACK`, o PR #210 passou CI/build e o Supabase SaaS registrou `20260927002227_create_assessment_draft_lifecycle`. O smoke pos-apply confirmou o lifecycle completo com fixture sintetica e `ROLLBACK`, incluindo isolamento AAL1/cross-assignment e imutabilidade depois da finalizacao, com 0 residuos.
 
 Continuam abertos: catalogo mensal completo, unidades permitidas/obrigatorias e fluxo de correcao historica depois da finalizacao.
+
+## Cadastro Atual - edicao controlada
+
+Estado: **IMPLEMENTADO / SEM AMPLIAR GRANTS DO BROWSER**
+
+Os campos atuais `city`, `phone`, `contact_email` e `instagram` podem ser criados/atualizados pela propria cliente em Perfil e pela Patty/admin na tela da cliente.
+
+A escrita usa boundary server-side privilegiada apenas depois de:
+- cliente: `requireRole("client")` + resolucao do proprio `client_id`;
+- admin: `requireRole("admin")` (AAL2) + leitura da cliente sob assignment ativo/RLS.
+
+`authenticated` continua sem INSERT/UPDATE direto em `client_registration`.
+
+Nao existe sincronizacao automatica com email de login nem com snapshots historicos da Anamnese.
+
