@@ -2116,7 +2116,10 @@ export type Database = {
         Returns: undefined
       }
       clone_protocol_version_draft: {
-        Args: { p_source_protocol_version_id: string }
+        Args: {
+          p_plan_snapshot: Json | null
+          p_source_protocol_version_id: string
+        }
         Returns: string
       }
       current_user_admin_mfa_satisfied: { Args: never; Returns: boolean }
