@@ -139,6 +139,13 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
                     </p>
                     <AdminProtocolVersionPlan plan={mealPlan} />
                   </div>
+                  {baseVersion ? (
+                    <ProtocolVersionComparison
+                      baseVersionNumber={baseVersion.version_number}
+                      currentVersionNumber={version.version_number}
+                      rows={buildProtocolPlanComparison(mealPlan, baseMealPlan)}
+                    />
+                  ) : null}
                   {version.submitted_for_review_at ? (
                     <div className={styles.cloneAction}>
                       <h4>Nova versão de trabalho</h4>
