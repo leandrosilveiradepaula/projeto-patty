@@ -497,6 +497,19 @@ A Patty precisa conseguir editar manualmente no acompanhamento, quando aplicavel
 
 Isso define escopo de UI/autoria humana, nao regras automaticas. Treino, suplementacao e manipulados continuam sem formulas/criterios automatizaveis confirmados.
 
+## Protocolos - equivalentes de proteina
+
+Estado: **REGRA DE SELECAO CONFIRMADA / CATALOGO COMPLETO AINDA PENDENTE**
+
+A cliente pode escolher livremente substituicoes dentro do grupo permitido pelo protocolo.
+
+Para proteinas:
+- grupo de maior teor de gordura: possui limite diario igual a metade das doses totais, arredondado para cima;
+- ao atingir esse limite, as doses restantes devem ser escolhidas no grupo de menor teor de gordura;
+- "livre escolha" no grupo de menor teor de gordura continua limitada ao total de doses de proteina do protocolo.
+
+Ainda falta fechar o catalogo/versionamento completo de equivalentes e suas regras de exibicao.
+
 ## Cliente - protocolo publicado e check-in
 
 Estado: **VISIBILIDADE E OBJETIVO DO CHECK-IN CONFIRMADOS / PARAMETROS AINDA ABERTOS**
