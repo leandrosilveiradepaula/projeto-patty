@@ -7,6 +7,7 @@ import {
   parseAssessmentDate,
   parseMeasurementDraft,
 } from "@/lib/evaluations/assessment-draft";
+import { buildAssessmentFinalizationReadiness } from "@/lib/evaluations/assessment-readiness";
 import { isProfessionalDecision } from "@/lib/follow-up/professional-decisions";
 import { requireRole } from "@/lib/supabase/auth";
 import {
@@ -15,6 +16,8 @@ import {
   finalizeAccessibleClientAssessment,
   getAccessibleClientAssessment,
   linkAccessibleAssessmentPhoto,
+  listAccessibleAssessmentMeasurements,
+  listAccessibleAssessmentPhotoFiles,
   listAccessibleClientFiles,
   unlinkAccessibleAssessmentPhoto,
   updateAccessibleClientAssessmentDraft,
@@ -370,6 +373,46 @@ export async function finalizeAssessmentAction(
     return {
       message:
         "Confirme que revisou os dados antes de finalizar. Depois disso o registro fica imutável.",
+      success: false,
+    };
+  }
+
+  if (!assessment.assessment_kind || !isAssessmentKind(assessment.assessment_kind)) {
+    return {
+      message: "Defina se a avaliação é quinzenal ou mensal antes de finalizar.",
+      success: false,
+    };
+  }
+
+  const [measurements, photoFiles] = await Promise.all([
+    listAccessibleAssessmentMeasurements(assessment.id),
+    listAccessibleAssessmentPhotoFiles(assessment.id),
+  ]);
+  const readiness = buildAssessmentFinalizationReadiness({
+    assessmentKind: assessment.assessment_kind,
+    measurementKeys: measurements.map((measurement) => measurement.measurement_key),
+    photoCount: photoFiles.length,
+  });
+
+  if (!readiness.canFinalizeDeterministically) {
+    const missing = readiness.items
+      .filter((item) => !item.present)
+      .map((item) => item.label)
+      .join(", ");
+
+    return {
+      message: `Antes de finalizar, registre os itens mínimos desta cadência: ${missing}.`,
+      success: false,
+    };
+  }
+
+  if (
+    readiness.requiresMonthlyManualConfirmation &&
+    formData.get("confirmMonthlyMeasures") !== "yes"
+  ) {
+    return {
+      message:
+        "Na avaliação mensal, confirme que revisou o conjunto completo de medidas. O catálogo mensal ainda não é validado automaticamente.",
       success: false,
     };
   }
