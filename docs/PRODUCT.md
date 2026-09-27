@@ -26,6 +26,16 @@ O produto tera suporte a:
 - exercicios;
 - painel administrativo da Patty.
 
+## Escopo atual do produto
+
+### DECISAO CONFIRMADA
+
+O objetivo atual e construir o **sistema completo, de ponta a ponta**. O projeto nao esta mais sendo tratado como um MVP com funcionalidades deliberadamente adiadas para uma segunda fase.
+
+Todos os modulos e fluxos confirmados para Patty e clientes fazem parte do escopo do sistema completo. A ordem de implementacao pode ser priorizada tecnicamente, mas prioridade nao reduz escopo.
+
+Regras profissionais ainda abertas continuam bloqueadas para automacao ate confirmacao e documentacao.
+
 ## Papel da IA
 
 ### DECISAO CONFIRMADA
@@ -50,7 +60,7 @@ Ainda e necessario definir se havera outros papeis administrativos alem da Patty
 
 ### DECISAO CONFIRMADA E QUESTOES REMANESCENTES
 
-No MVP, a Patty inicia o onboarding com o email da cliente e envia um link de convite/ativacao. Nao existe cadastro publico/autonomo. A cliente define a senha no fluxo de ativacao e o login posterior usa email + senha.
+No sistema, a Patty inicia o onboarding com o email da cliente e envia um link de convite/ativacao. Nao existe cadastro publico/autonomo. A cliente define a senha no fluxo de ativacao e o login posterior usa email + senha.
 
 Continuam abertas somente as regras operacionais ainda nao fechadas, como expiracao/reenvio do convite, recuperacao de acesso, encerramento da conta e a infraestrutura definitiva do email real de convite.
 
