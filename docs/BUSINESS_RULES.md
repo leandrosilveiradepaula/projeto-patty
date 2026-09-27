@@ -224,7 +224,27 @@ A orientacao atual citada de no minimo 3 treinos por semana com cerca de 1 hora 
 
 Na interpretacao profissional, visual e medidas podem ter mais peso do que o numero isolado da balanca.
 
-Cintura, abdomen e quadril permanecem medidas centrais na **Avaliacao Basica**. Peito foi confirmado como medida adicional relevante para a leitura de perda de gordura, sem encerrar o catalogo da **Avaliacao Completa**.
+A **Avaliacao Basica** permanece composta por:
+- peso, em quilogramas (kg);
+- cintura, em centimetros (cm);
+- abdomen, em centimetros (cm);
+- quadril, em centimetros (cm).
+
+O catalogo confirmado da **Avaliacao Completa** e:
+- peso, em quilogramas (kg);
+- cintura, em centimetros (cm);
+- abdomen, em centimetros (cm);
+- coxa, em centimetros (cm);
+- biceps, em centimetros (cm);
+- busto, em centimetros (cm);
+- quadril, em centimetros (cm);
+- ombros, em centimetros (cm);
+- panturrilhas, em centimetros (cm);
+- fotos de avaliacao, conforme regra ja confirmada.
+
+Para qualquer medida corporal unilateral, a Patty pede que seja utilizado somente o **lado direito do corpo**. Nao criar registro bilateral por inferencia.
+
+O termo **busto** e o nome confirmado no catalogo atual da Avaliacao Completa; a mencao historica a "peito" nao deve ser tratada como uma medida adicional separada sem nova confirmacao.
 
 Fotos sao usadas principalmente para comparacao de evolucao. Em contexto de ganho de massa, tambem ajudam a considerar regioes que a cliente deseja desenvolver.
 
