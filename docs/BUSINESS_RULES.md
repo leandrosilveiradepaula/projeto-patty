@@ -240,9 +240,13 @@ Ao montar ou ajustar o acompanhamento de uma cliente, a Patty precisa conseguir 
 - area de suplementacao;
 - area de manipulados.
 
-Esses campos/blocos devem permanecer sob controle manual da Patty para que ela possa ajustar o plano individualmente.
+Esses campos/blocos devem permanecer editaveis pela Patty para que ela possa revisar e ajustar o plano individualmente.
 
-A confirmacao de que um campo deve ser editavel **nao cria regra automatica para preencher esse campo**. Regras ainda abertas de treino, suplementacao, manipulados, progressao, doses, contraindicacoes, formulas ou criterios profissionais continuam abertas e nao devem ser inferidas.
+Quando existir regra previamente confirmada, documentada e deterministica para uma fase, o sistema pode montar automaticamente o rascunho correspondente. Isso pode incluir quantidades em gramas de proteina, carboidrato e gordura, estrutura alimentar derivada dessas regras e treino predefinido quando houver passo a passo de exercicios previamente confirmado e aplicavel.
+
+A Patty deve visualizar o rascunho gerado, revisar todos os campos, corrigir o que for necessario e somente depois aprovar/publicar.
+
+Automacao so e autorizada para regras previamente confirmadas e documentadas. Regras ainda abertas de treino, suplementacao, manipulados, progressao, doses, contraindicacoes, formulas ou criterios profissionais continuam abertas e nao devem ser inferidas.
 
 A prescricao de treino continua condicionada a regra ja confirmada de que a Patty prescreve treino somente para clientes que solicitam esse servico.
 
