@@ -508,12 +508,12 @@ A cliente deve visualizar:
 Ela nao precisa registrar execucao dentro do protocolo publicado.
 
 O produto deve prever check-in separado para:
-- registrar liquidos ao longo do dia e acompanhar uma meta;
+- registrar liquidos ao longo do dia e acompanhar uma meta baseada no peso da cliente;
 - receber lembretes relacionados a essa meta;
-- registrar frequencia/realizacao de atividade fisica ou academia;
+- registrar diariamente se fez ou nao fez atividade fisica, independentemente do treino prescrito;
 - visualizar progresso como estimulo.
 
-As metas/configuracoes individuais podem ser definidas na entrega do primeiro protocolo da cliente. Ainda faltam os parametros profissionais e de produto para implementacao como padrao: formulas/valores, unidades, frequencia dos lembretes, visibilidade/correcao pela Patty e escopo do primeiro lancamento.
+As metas/configuracoes individuais podem ser definidas na entrega do primeiro protocolo da cliente. Ainda faltam os parametros profissionais e de produto para implementacao como padrao: formula/unidade da meta de liquidos, regra de recalculo por peso, frequencia dos lembretes, visibilidade/correcao pela Patty e escopo do primeiro lancamento.
 
 Nao tratar o check-in como score automatico de adesao nem inferir regra de hidratacao.
 
