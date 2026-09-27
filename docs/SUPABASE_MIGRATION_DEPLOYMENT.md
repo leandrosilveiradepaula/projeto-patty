@@ -263,4 +263,24 @@ Validacoes pos-apply:
 - advisor de seguranca: nenhum finding novo; permanece apenas Leaked Password Protection ja conhecido;
 - advisor de performance: os dois `auth_rls_initplan` introduzidos pela migration inicial desapareceram apos a migration de otimizacao; lints restantes sao historicos/informativos.
 - smoke sintetico pos-apply com `ROLLBACK`: admin AAL2 + assignment ativo INSERT/SELECT PASS; admin AAL1 SELECT bloqueado; admin AAL2 sem assignment para a cliente SELECT bloqueado; 0 residuos.
+## Excecao operacional de 2026-09-27 — lifecycle de Avaliacoes
+
+O procedimento padrao continua sendo GitHub Actions + `supabase db push` com preservacao do timestamp versionado.
+
+A migration do lifecycle de Avaliacoes foi validada integralmente com `BEGIN`/`ROLLBACK`, passou CI/build no PR #210 e, imediatamente depois do merge, foi aplicada pelo conector Supabase para evitar publicar a UI dependente de colunas/policies ainda ausentes.
+
+O Supabase registrou:
+- `20260927002227_create_assessment_draft_lifecycle`.
+
+O arquivo revisado no PR possuia timestamp local anterior ao version ID gerado pelo conector. O repositorio foi reconciliado imediatamente para `20260927002227`, preservando exatamente o SQL aplicado e sem editar migration historica ja aplicada.
+
+Validacoes pos-apply registradas:
+- RLS permanece habilitada em `client_assessments`;
+- `client_assessments`: browser autenticado possui somente `SELECT`, `INSERT`, `UPDATE`; sem `DELETE`;
+- `assessment_measurements`: `SELECT`, `INSERT`, `UPDATE`, `DELETE`, cercados por draft + admin/assignment + MFA transversal;
+- `assessment_files`: `SELECT`, `INSERT`, `DELETE`, com vinculo somente a foto da mesma cliente;
+- triggers de draft/finalizacao e guarda de follow-up finalizado presentes;
+- advisor de seguranca sem finding novo; permanece apenas Leaked Password Protection ja conhecido;
+- advisor de performance sem novo `auth_rls_initplan`; indices novos aparecem apenas como `unused_index` imediatamente apos criacao, sem justificar remocao.
+- smoke sintetico pos-apply com `ROLLBACK`: admin AAL2 + assignment ativo criou/alterou draft, atualizou medida, vinculou foto e finalizou; AAL1 e admin sem assignment nao leram o registro; follow-up antes da finalizacao foi bloqueado; mutacao da avaliacao/medida apos finalizacao foi bloqueada por `55000`; 0 residuos.
 

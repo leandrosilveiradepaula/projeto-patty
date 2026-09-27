@@ -10,7 +10,7 @@ const migration = fs.readFileSync(
     root,
     "supabase",
     "migrations",
-    "20260927001500_create_assessment_draft_lifecycle.sql",
+    "20260927002227_create_assessment_draft_lifecycle.sql",
   ),
   "utf8",
 );
