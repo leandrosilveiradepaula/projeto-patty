@@ -35,9 +35,11 @@ O escopo preliminar confirmado do MVP ja esta registrado em `MVP.md`: fundacao s
 
 O que continua aberto nao e mais a lista macro de modulos, e sim o **recorte operacional exato do primeiro lancamento** diante dos bloqueios restantes.
 
-### QUESTAO ABERTA
+### RESOLVIDO
 
-Quais fluxos precisam estar disponiveis para clientes no primeiro lancamento?
+Todos os fluxos listados para a cliente na pergunta 7 da rodada de fechamento devem estar disponiveis no primeiro lancamento: Perfil/Cadastro Atual, Anamnese, fotos, exames/documentos, avaliacoes/medidas, protocolo alimentar, conteudos educacionais, biblioteca de exercicios, solicitacao de treino, visualizacao do treino quando houver prescricao, esclarecimentos no aplicativo e evolucao.
+
+O check-in de liquidos/atividade fisica foi definido em resposta posterior e seu recorte de primeiro lancamento continua separado ate decisao explicita.
 
 ### QUESTAO ABERTA
 
