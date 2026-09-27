@@ -1,3 +1,26 @@
+## 2026-09-27 - Escopo de Edicao Manual da Patty
+
+### REGRA CONFIRMADA PELA PATTY
+
+Ao montar ou ajustar um protocolo/acompanhamento, a Patty precisa poder editar manualmente:
+- fase/protocolo;
+- totais de proteina, carboidrato e gordura;
+- numero de refeicoes;
+- distribuicao de doses entre refeicoes;
+- alimentos/equivalentes;
+- dias Low/High, quando aplicavel;
+- refeicao livre, quando aplicavel;
+- observacoes;
+- data de inicio;
+- orientacoes especificas;
+- treino, quando o cliente solicitar esse servico;
+- suplementacao;
+- manipulados.
+
+### LIMITE
+
+Editabilidade manual nao autoriza preenchimento automatico. Regras de treino, suplementacao, manipulados, doses, progressao, contraindicacoes e criterios profissionais continuam abertas ate confirmacao especifica.
+
 ## 2026-09-27 - Historico de Avaliacoes e Correcao de Erro
 
 ### REGRA CONFIRMADA PELA PATTY
