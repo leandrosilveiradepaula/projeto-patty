@@ -309,9 +309,11 @@ Continuam abertos:
 
 ### PARCIALMENTE RESOLVIDO
 
-A Patty confirmou que uma avaliacao finalizada nao deve ser editada. A correcao acontece por criacao de uma nova avaliacao corrigida, preservando a avaliacao anterior no historico, e a cliente deve visualizar a versao corrigida.
+A Patty confirmou dois cenarios distintos:
+- nova avaliacao de acompanhamento: preserva a anterior e cria uma nova avaliacao com nova data;
+- erro de lancamento: a Patty volta a avaliacao existente, corrige o dado e o valor incorreto deixa de ser o dado valido.
 
-Permanece aberta apenas a regra de apresentacao sobre a avaliacao original para a cliente depois da correcao.
+Permanece aberta a implementacao tecnica/auditavel dessa correcao depois da finalizacao, porque o lifecycle atual torna avaliacao e medidas imutaveis. A solucao deve permitir corrigir o dado valido sem apagar rastreabilidade nem transformar erro de digitacao em nova avaliacao.
 
 ### QUESTAO ABERTA
 
