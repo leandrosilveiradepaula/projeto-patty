@@ -259,6 +259,10 @@ A cadencia e ancorada na data de inicio do acompanhamento da cliente:
 
 Nao inferir ainda a regra para datas de inicio que nao existem em todos os meses, como dias 29, 30 ou 31.
 
+Quando uma Avaliacao ja finalizada precisar de correcao, a Patty nao altera nem sobrescreve o registro finalizado. Deve ser criada uma **nova avaliacao corrigida**, preservando a avaliacao anterior no historico. A cliente deve visualizar a avaliacao corrigida.
+
+A resposta atual nao define se a avaliacao original tambem permanece visivel para a cliente; nao inferir essa regra de apresentacao.
+
 ## Comportamento e relacao com comida
 
 ### DECISAO CONFIRMADA
