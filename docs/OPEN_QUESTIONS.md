@@ -307,9 +307,11 @@ Continuam abertos:
 - a regra de calendario quando a data de inicio cai em 29, 30 ou 31 e o mes seguinte nao possui esse dia;
 - o fluxo auditavel de correcao de uma avaliacao ou medida historica depois da finalizacao.
 
-### QUESTAO ABERTA
+### PARCIALMENTE RESOLVIDO
 
-Qual e o fluxo auditavel para correcao de uma avaliacao ou medida historica sem sobrescrever o registro anterior?
+A Patty confirmou que uma avaliacao finalizada nao deve ser editada. A correcao acontece por criacao de uma nova avaliacao corrigida, preservando a avaliacao anterior no historico, e a cliente deve visualizar a versao corrigida.
+
+Permanece aberta apenas a regra de apresentacao sobre a avaliacao original para a cliente depois da correcao.
 
 ### QUESTAO ABERTA
 
