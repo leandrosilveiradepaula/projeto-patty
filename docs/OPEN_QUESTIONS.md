@@ -29,17 +29,17 @@ A App Password deve ser inserida diretamente no Supabase e nao deve ser comparti
 
 Quais serao as regras de expiracao/reenvio do convite, recuperacao de acesso e encerramento da conta?
 
-### PARCIALMENTE RESOLVIDO
+### RESOLVIDO
 
-O escopo preliminar confirmado do MVP ja esta registrado em `MVP.md`: fundacao segura, Anamnese/acompanhamento inicial, arquivos privados, avaliacoes, protocolos com controle humano, bibliotecas de conteudo/exercicios e IA assistiva em etapa posterior.
+O projeto nao esta mais sendo conduzido como MVP. O objetivo atual e construir o **sistema completo, de ponta a ponta**.
 
-O que continua aberto nao e mais a lista macro de modulos, e sim o **recorte operacional exato do primeiro lancamento** diante dos bloqueios restantes.
+Todos os modulos e fluxos confirmados para Patty e clientes fazem parte do escopo. A ordem de implementacao pode ser priorizada tecnicamente, mas nao existe mais uma decisao de produto sobre "o que fica para depois" entre funcionalidades ja confirmadas.
 
 ### RESOLVIDO
 
 Todos os fluxos listados para a cliente na pergunta 7 da rodada de fechamento devem estar disponiveis no primeiro lancamento: Perfil/Cadastro Atual, Anamnese, fotos, exames/documentos, avaliacoes/medidas, protocolo alimentar, conteudos educacionais, biblioteca de exercicios, solicitacao de treino, visualizacao do treino quando houver prescricao, esclarecimentos no aplicativo e evolucao.
 
-O check-in de liquidos/atividade fisica foi definido em resposta posterior e seu recorte de primeiro lancamento continua separado ate decisao explicita.
+O check-in de liquidos/atividade fisica tambem faz parte do sistema completo. Seus parametros ainda abertos continuam sendo tratados como questoes de regra/implementacao, nao de retirada de escopo.
 
 ### RESOLVIDO
 
@@ -639,7 +639,7 @@ Ainda faltam formalizar:
 - horarios e cadencia dos lembretes;
 - o que a Patty visualiza e pode corrigir;
 - se registros anteriores podem ser editados;
-- se a primeira versao do check-in entra no primeiro lancamento.
+- parametros funcionais restantes necessarios para implementar o check-in completo.
 
 Nao inferir score de adesao, hidratacao recomendada ou frequencia ideal de treino.
 
