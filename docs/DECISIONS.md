@@ -1,4 +1,4 @@
-## 2026-09-27 - Visibilidade do Protocolo e Ideia de Check-in
+## 2026-09-27 - Visibilidade do Protocolo e Check-in de Metas
 
 ### REGRA CONFIRMADA PELA PATTY
 
@@ -7,15 +7,25 @@ Depois de revisado e publicado:
 - quando houver treino prescrito, deve visualizar sua rotina de treinos;
 - a cliente nao precisa registrar execucao diretamente dentro do protocolo alimentar ou do treino publicado.
 
-### IDEIA DE PRODUTO AINDA NAO FORMALIZADA
+O produto deve prever um check-in de acompanhamento e incentivo para:
+- registrar liquidos consumidos ao longo do dia;
+- acompanhar progresso em relacao a uma meta de liquidos;
+- receber lembretes para apoiar o cumprimento da meta;
+- registrar realizacao/frequencia de atividade fisica ou academia;
+- acompanhar progresso dessas metas.
 
-A Patty considera interessante um check-in separado para:
-- quantidade de liquidos consumida no dia;
-- realizacao de atividade fisica/treino.
+### QUESTOES AINDA ABERTAS
 
-O objetivo citado e acompanhamento e incentivo. Ainda nao estao definidos formato, frequencia, metas, unidades, lembretes, alertas, edicao de registros ou acoes decorrentes.
+Ainda precisam ser definidos:
+- quem define cada meta;
+- valor/formula da meta de liquidos;
+- unidade operacional;
+- meta de frequencia de atividade/academia;
+- horarios e cadencia dos lembretes;
+- visibilidade e poderes de correcao da Patty;
+- politica de edicao de check-ins passados.
 
-Nao criar score automatico de adesao nem meta automatica de hidratacao a partir dessa ideia.
+Nao criar score automatico de adesao nem inferir meta de hidratacao ou frequencia ideal de treino.
 
 ## 2026-09-27 - Escopo de Edicao Manual da Patty
 
