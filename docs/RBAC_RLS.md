@@ -277,7 +277,7 @@ Para Cadastro Atual, submission e answer, a cliente autenticada le somente recur
 
 A fundacao original nao concedia escrita de browser em Cadastro Atual, definicoes, submissions ou answers. Essa descricao foi parcialmente substituida para Anamnese em rascunho.
 
-Na implementacao atual, a cliente autenticada pode criar somente a propria submission de rascunho para versao publicada e inserir/atualizar somente o valor das proprias respostas enquanto `submitted_at IS NULL`, sob RLS e privilegios minimos. O envio final e permitido somente pela transicao controlada de `submitted_at`, validada deterministicamente no banco. Cadastro Atual e definicoes de formulario nao receberam escrita ampla pelo browser por causa dessa mudanca.
+Na implementacao atual, a cliente autenticada pode criar somente a propria submission de rascunho para versao publicada e inserir/atualizar somente o valor das proprias respostas enquanto `submitted_at IS NULL`, sob RLS e privilegios minimos. O envio final e permitido somente pela transicao controlada de `submitted_at`, validada deterministicamente no banco. Cadastro Atual e definicoes de formulario nao receberam escrita ampla pelo browser por causa dessa mudanca. Posteriormente, o Cadastro Atual recebeu edicao controlada exclusivamente por Server Actions: cliente resolve o proprio `client_id`; admin exige AAL2 e valida cliente sob assignment ativo; somente depois uma boundary `server-only` privilegiada executa o upsert. `authenticated` continua com grant direto apenas de SELECT em `client_registration`.
 
 Administradores com assignment ativo podem inserir review administrativa em seu proprio nome e ler reviews da cliente sob sua responsabilidade. Clientes nao possuem grant ou policy para ler reviews.
 
