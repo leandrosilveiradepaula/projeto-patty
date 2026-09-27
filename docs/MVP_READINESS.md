@@ -459,6 +459,6 @@ O fluxo operacional permite criar avaliacao quinzenal/mensal em rascunho, editar
 
 Depois da finalizacao, triggers bloqueiam mutacao da avaliacao, medidas e vinculos. Acompanhamentos profissionais ligados a uma avaliacao exigem que ela esteja finalizada.
 
-A migration foi validada em transacao com `ROLLBACK`, o PR #210 passou CI/build e o Supabase SaaS registrou `20260927002227_create_assessment_draft_lifecycle`.
+A migration foi validada em transacao com `ROLLBACK`, o PR #210 passou CI/build e o Supabase SaaS registrou `20260927002227_create_assessment_draft_lifecycle`. O smoke pos-apply confirmou o lifecycle completo com fixture sintetica e `ROLLBACK`, incluindo isolamento AAL1/cross-assignment e imutabilidade depois da finalizacao, com 0 residuos.
 
 Continuam abertos: catalogo mensal completo, unidades permitidas/obrigatorias e fluxo de correcao historica depois da finalizacao.
