@@ -250,6 +250,30 @@ Automacao so e autorizada para regras previamente confirmadas e documentadas. Re
 
 A prescricao de treino continua condicionada a regra ja confirmada de que a Patty prescreve treino somente para clientes que solicitam esse servico.
 
+## Visibilidade do protocolo para a cliente
+
+### DECISAO CONFIRMADA
+
+Depois de revisado e publicado pela Patty, a cliente deve conseguir visualizar no aplicativo sua **rotina de alimentacao** e, quando houver treino prescrito, sua **rotina de treinos**.
+
+A cliente nao precisa registrar execucao diretamente dentro do protocolo alimentar ou do treino publicado. O protocolo permanece como orientacao publicada e versionada.
+
+### IDEIA DE PRODUTO AINDA NAO FORMALIZADA
+
+A Patty demonstrou interesse em um check-in separado para a cliente registrar:
+- quantidade de liquidos consumida no dia;
+- realizacao de atividade fisica/treino.
+
+A finalidade citada e apoiar acompanhamento e incentivo. Ainda nao estao definidos:
+- formato e frequencia do check-in;
+- unidade e campos de liquidos;
+- definicao do que conta como atividade realizada;
+- metas, lembretes ou alertas;
+- visibilidade e acoes da Patty sobre os registros;
+- possibilidade de editar registros anteriores.
+
+Esse check-in nao autoriza score automatico de adesao nem meta automatica de hidratacao.
+
 ## Avaliacao corporal e evolucao
 
 ### DECISAO CONFIRMADA
