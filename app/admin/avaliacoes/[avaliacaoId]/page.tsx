@@ -12,7 +12,11 @@ import { EvaluationMeasureComparison } from "@/components/admin/EvaluationMeasur
 import { EvaluationMeasureList } from "@/components/admin/EvaluationMeasureList";
 import { EvaluationPhotoCollection } from "@/components/admin/EvaluationPhotoCollection";
 import { EvaluationProfessionalFollowUpForm } from "@/components/admin/EvaluationProfessionalFollowUpForm";
-import { assessmentKindLabel } from "@/lib/evaluations/assessment-draft";
+import {
+  assessmentKindLabel,
+  isAssessmentKind,
+} from "@/lib/evaluations/assessment-draft";
+import { buildAssessmentFinalizationReadiness } from "@/lib/evaluations/assessment-readiness";
 import {
   buildFactualMeasurementComparison,
   formatProfessionalMeasurementLabel,
@@ -143,6 +147,17 @@ export default async function AdminAvaliacaoDetailPage({
   const internalNotes = followUps.filter(
     (followUp) => Boolean(followUp.patty_observation?.trim()),
   );
+  const finalizationReadiness = isAssessmentKind(
+    assessment.assessment_kind ?? "",
+  )
+    ? buildAssessmentFinalizationReadiness({
+        assessmentKind: assessment.assessment_kind,
+        measurementKeys: measurements.map(
+          (measurement) => measurement.measurement_key,
+        ),
+        photoCount: photoFiles.length,
+      })
+    : null;
 
   return (
     <>
@@ -322,11 +337,15 @@ export default async function AdminAvaliacaoDetailPage({
       </Section>
       {isDraft ? (
         <Section
-          description="Finalizar congela data, tipo, medidas e vínculos de foto. O catálogo mensal ainda não é validado automaticamente; a revisão humana da Patty continua obrigatória."
+          description="Finalizar congela data, tipo, medidas e vínculos de foto. A cadência quinzenal exige os quatro itens confirmados; na mensal, peso e foto são mínimos determinísticos e o conjunto completo de medidas continua sob revisão humana."
           title="Finalizar avaliação"
         >
           <Card>
-            <AssessmentFinalizeForm assessmentId={assessment.id} />
+            <AssessmentFinalizeForm
+              assessmentId={assessment.id}
+              isMonthly={assessment.assessment_kind === "monthly"}
+              readinessItems={finalizationReadiness?.items ?? []}
+            />
           </Card>
         </Section>
       ) : null}
