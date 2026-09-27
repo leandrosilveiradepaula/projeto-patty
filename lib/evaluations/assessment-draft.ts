@@ -24,7 +24,10 @@ export function parseAssessmentDate(value: FormDataEntryValue | null) {
 
   const date = new Date(`${value}T12:00:00.000Z`);
 
-  if (Number.isNaN(date.getTime())) {
+  if (
+    Number.isNaN(date.getTime()) ||
+    date.toISOString().slice(0, 10) !== value
+  ) {
     return null;
   }
 
