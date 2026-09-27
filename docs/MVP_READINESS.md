@@ -493,4 +493,13 @@ Ficam deliberadamente fora:
 - avaliacao de estagnacao;
 - obrigacao de prescrever treino a partir de uma solicitacao;
 - inferencia de acao profissional a partir de arquivo recebido.
+## Clonagem de versao de protocolo
+
+Estado: **IMPLEMENTADA NA APLICACAO / MIGRATION PENDENTE**
+
+A UI administrativa permite criar novo draft a partir de versao submetida/congelada. A operacao de banco e atomica e copia somente conteudo versionado, sem aprovacao/publicacao.
+
+Antes de classificar como SaaS aplicado, a migration `20260927014500_clone_protocol_version_draft.sql` precisa passar pelo workflow oficial de migrations apos merge.
+
+Edicao detalhada do novo draft ainda permanece uma frente separada.
 
