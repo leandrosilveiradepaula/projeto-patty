@@ -66,7 +66,7 @@ Estados usados:
 | Clients / assignments | leitura + encerramento + inicio de assignment no onboarding IMPLEMENTADOS | Patty inicia onboarding por convite server-side; provisionamento cria vinculos relacionais e assignment com compensacao em falha | CI VALIDADO; encerramento E2E PASS; onboarding sintetico E2E PASS; Site URL/allowlist alinhados | template SSR real exige upgrade ou SMTP customizado; depois validar email real |
 | Cadastro Atual | leitura IMPLEMENTADA | nao | CI VALIDADO | definir quem pode alterar cada campo e auditoria |
 | Anamnese versionada | leitura, rascunho e submissao final IMPLEMENTADOS; mapa v1 + consentimento checkbox DEFINIDOS; esclarecimentos pos-envio IMPLEMENTADOS | cliente salva `text`/`single_choice`; aplicabilidade oculta dependentes; envio explicito exige ANAM-046 na forma canonica | CI + smoke SQL PASS; consent E2E `36072067063`; start/resume `36074218960`; fluxo consolidado de draft `36257567841` PASS; esclarecimentos `36053370894` PASS | manter versionamento para mudancas futuras e nao reabrir gates ja validados sem nova evidencia |
-| Avaliacoes / medidas | leitura + autoria operacional de rascunho/finalizacao IMPLEMENTADAS NA BRANCH | draft editavel; finalizacao imutavel; acompanhamento profissional somente apos finalizacao | migration validada com `ROLLBACK`; CI do PR ainda pendente | aplicar migration apos merge; definir catalogo, unidades, obrigatoriedade e correcao historica pos-finalizacao |
+| Avaliacoes / medidas | leitura + autoria operacional de rascunho/finalizacao IMPLEMENTADAS | draft editavel; finalizacao imutavel; acompanhamento profissional somente apos finalizacao | CI/build PASS + pre-apply `ROLLBACK` PASS + schema aplicado | `20260927002227` aplicada; definir catalogo, unidades, obrigatoriedade e correcao historica pos-finalizacao |
 | Arquivos privados | upload/listagem/download da cliente IMPLEMENTADOS; acesso admin permanente sem assignment, upload administrativo e liberacao explicita IMPLEMENTADOS | smoke E2E da cliente PASS; smoke E2E administrativo PASS em producao; cron de temporarios VALIDADO; auditoria estatica confirmou RLS/rotas coerentes com a excecao da Patty | definir retencao/hard delete |
 | Protocolos | leitura + lifecycle manual IMPLEMENTADOS | submit/approve/publish | CI + SAAS VALIDADO; lifecycle com guarda determinística testada | criar/editar plano somente quando fluxo profissional estiver formalizado |
 | Plano alimentar publicado | cliente ve variantes, refeicoes, doses e ciclo | nao | CI VALIDADO | equivalentes visiveis continuam abertos |
@@ -453,12 +453,12 @@ O registro nao cria treino, nao escolhe exercicios, nao altera protocolo e nao p
 
 ## Avaliacoes - lifecycle de rascunho
 
-Estado: **IMPLEMENTADO NA BRANCH / APLICACAO PENDENTE**
+Estado: **APLICADO NO SAAS / UI IMPLEMENTADA**
 
 O fluxo operacional permite criar avaliacao quinzenal/mensal em rascunho, editar data/tipo, medidas e vinculos de fotos privadas existentes e finalizar explicitamente.
 
 Depois da finalizacao, triggers bloqueiam mutacao da avaliacao, medidas e vinculos. Acompanhamentos profissionais ligados a uma avaliacao exigem que ela esteja finalizada.
 
-A migration foi validada em transacao com `ROLLBACK`; o SaaS ainda nao foi alterado nesta etapa.
+A migration foi validada em transacao com `ROLLBACK`, o PR #210 passou CI/build e o Supabase SaaS registrou `20260927002227_create_assessment_draft_lifecycle`.
 
 Continuam abertos: catalogo mensal completo, unidades permitidas/obrigatorias e fluxo de correcao historica depois da finalizacao.
