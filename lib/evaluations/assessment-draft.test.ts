@@ -22,6 +22,7 @@ test("assessment date is normalized without inferring time from the client timez
     "2026-09-27T12:00:00.000Z",
   );
   assert.equal(parseAssessmentDate("27/09/2026"), null);
+  assert.equal(parseAssessmentDate("2026-02-31"), null);
 });
 
 test("measurement draft preserves freeform key and unit while validating numeric value", () => {
