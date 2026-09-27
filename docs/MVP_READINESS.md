@@ -499,7 +499,7 @@ Isso define escopo de UI/autoria humana, nao regras automaticas. Treino, supleme
 
 ## Cliente - protocolo publicado e check-in
 
-Estado: **VISIBILIDADE CONFIRMADA / CHECK-IN AINDA ABERTO**
+Estado: **VISIBILIDADE E OBJETIVO DO CHECK-IN CONFIRMADOS / PARAMETROS AINDA ABERTOS**
 
 A cliente deve visualizar:
 - sua rotina de alimentacao publicada;
@@ -507,7 +507,15 @@ A cliente deve visualizar:
 
 Ela nao precisa registrar execucao dentro do protocolo publicado.
 
-A ideia de check-in para liquidos e atividade fisica foi levantada pela Patty, mas ainda nao possui contrato funcional suficiente para implementacao. Nao tratar como score de adesao ou regra de hidratacao.
+O produto deve prever check-in separado para:
+- registrar liquidos ao longo do dia e acompanhar uma meta;
+- receber lembretes relacionados a essa meta;
+- registrar frequencia/realizacao de atividade fisica ou academia;
+- visualizar progresso como estimulo.
+
+Ainda faltam os parametros profissionais e de produto para implementacao: definicao das metas, unidades, frequencia dos lembretes, visibilidade/correcao pela Patty e escopo do primeiro lancamento.
+
+Nao tratar o check-in como score automatico de adesao nem inferir regra de hidratacao.
 
 ## Cadastro Atual - edicao controlada
 
