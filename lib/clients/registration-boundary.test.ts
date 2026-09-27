@@ -38,7 +38,7 @@ test("Cadastro Atual edit forms keep login identity and Anamnesis history separa
   const adminForm = read("components/admin/AdminClientRegistrationEditForm.tsx");
 
   assert.match(clientForm, /Cadastro Atual/);
-  assert.match(clientForm, /não modifica[\\s\\S]*Anamnese/i);
+  assert.match(clientForm, /não modifica[\s\S]*Anamnese/i);
   assert.match(clientForm, /nem o email usado para entrar na conta/i);
 
   assert.match(adminForm, /Cadastro Atual/);
