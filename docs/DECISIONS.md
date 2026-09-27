@@ -17,9 +17,18 @@ Ao montar ou ajustar um protocolo/acompanhamento, a Patty precisa poder editar m
 - suplementacao;
 - manipulados.
 
+### AUTOMACAO PERMITIDA QUANDO A REGRA EXISTIR
+
+Quando houver regra previamente confirmada, documentada e deterministica, o sistema pode montar automaticamente um rascunho para revisao da Patty. Isso pode incluir, por exemplo:
+- gramas de proteina, carboidrato e gordura previstas para determinada fase;
+- estrutura alimentar derivada dessas regras;
+- treino predefinido quando existir passo a passo de exercicios previamente confirmado e aplicavel.
+
+A Patty deve visualizar o rascunho, revisar, corrigir se necessario e somente depois aprovar/publicar.
+
 ### LIMITE
 
-Editabilidade manual nao autoriza preenchimento automatico. Regras de treino, suplementacao, manipulados, doses, progressao, contraindicacoes e criterios profissionais continuam abertas ate confirmacao especifica.
+Nenhuma regra ausente pode ser inferida. Regras de treino, suplementacao, manipulados, doses, progressao, contraindicacoes e criterios profissionais continuam abertas onde ainda nao houver confirmacao especifica.
 
 ## 2026-09-27 - Historico de Avaliacoes e Correcao de Erro
 
