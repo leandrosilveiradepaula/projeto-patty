@@ -290,6 +290,8 @@ Continuam abertos:
 - eventuais campos adicionais;
 - como a avaliacao mensal se relaciona operacionalmente com a ocorrencia quinzenal quando as datas coincidirem.
 
+O gate de finalizacao ja usa apenas o minimo confirmado: quinzenal exige peso/cintura/abdomen/quadril; mensal exige peso + foto e confirmacao humana sobre o conjunto completo. Isso nao fecha o catalogo mensal nem as unidades.
+
 ### QUESTAO ABERTA
 
 Qual e o fluxo auditavel para correcao de uma avaliacao ou medida historica sem sobrescrever o registro anterior?
