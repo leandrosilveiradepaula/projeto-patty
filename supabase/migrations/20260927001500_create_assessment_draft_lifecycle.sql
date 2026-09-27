@@ -277,6 +277,13 @@ create policy "assessment_files_insert_draft_active_assignment_admin"
         and ca.client_id = assessment_files.client_id
         and ca.finalized_at is null
     )
+    and exists (
+      select 1
+      from public.client_files cf
+      where cf.id = assessment_files.client_file_id
+        and cf.client_id = assessment_files.client_id
+        and cf.file_kind = 'photo'
+    )
   );
 
 create policy "assessment_files_delete_draft_active_assignment_admin"
@@ -299,3 +306,33 @@ create policy "assessment_files_delete_draft_active_assignment_admin"
         and ca.finalized_at is null
     )
   );
+
+create function public.require_finalized_assessment_for_follow_up()
+returns trigger
+language plpgsql
+set search_path = pg_catalog
+as $$
+begin
+  if new.assessment_id is not null
+     and not exists (
+       select 1
+       from public.client_assessments ca
+       where ca.id = new.assessment_id
+         and ca.client_id = new.client_id
+         and ca.finalized_at is not null
+     ) then
+    raise exception 'professional follow-up requires finalized assessment'
+      using errcode = '55000';
+  end if;
+
+  return new;
+end;
+$$;
+
+revoke execute on function public.require_finalized_assessment_for_follow_up()
+  from public, anon, authenticated;
+
+create trigger professional_follow_ups_finalized_assessment_guard
+before insert on public.professional_follow_ups
+for each row execute function public.require_finalized_assessment_for_follow_up();
+
