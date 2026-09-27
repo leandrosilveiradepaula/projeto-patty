@@ -477,3 +477,20 @@ A escrita usa boundary server-side privilegiada apenas depois de:
 
 Nao existe sincronizacao automatica com email de login nem com snapshots historicos da Anamnese.
 
+## Painel de pendencias operacionais
+
+Estado: **IMPLEMENTADO SEM SCORE OU PRIORIZACAO AUTOMATICA**
+
+A administracao possui uma area consolidada de estados operacionais abertos em Anamnese, esclarecimentos, avaliacoes, protocolos e IA.
+
+O painel deriva os itens dos registros reais e respeita o RLS/assignment ja existente. Nao existe tabela paralela de pendencias e nenhum item altera automaticamente o fluxo que representa.
+
+Ficam deliberadamente fora:
+- classificacao por urgencia;
+- atraso inferido por tempo;
+- score de adesao;
+- interpretacao clinica;
+- avaliacao de estagnacao;
+- obrigacao de prescrever treino a partir de uma solicitacao;
+- inferencia de acao profissional a partir de arquivo recebido.
+

@@ -785,3 +785,23 @@ Email de login e email de contato permanecem independentes; editar Cadastro Atua
 
 Nenhuma migration foi necessaria.
 
+## 2026-09-27 - Painel de pendencias operacionais
+
+### IMPLEMENTADO NA BRANCH
+
+A rota `/admin/pendencias` passa a consolidar somente estados operacionais explicitamente demonstraveis pelo backend acessivel a Patty/admin:
+
+- Anamnese criada sem `submitted_at`;
+- Anamnese enviada sem nota interna de revisao registrada;
+- pedido de esclarecimento sem resposta registrada;
+- avaliacao ainda em rascunho;
+- versao de protocolo submetida sem aprovacao;
+- versao de protocolo aprovada sem publicacao;
+- execution de IA em `started` sem estado terminal.
+
+Os itens sao ordenados pela data factual mais antiga primeiro, apenas para navegacao. Essa ordem nao representa prioridade profissional.
+
+O painel nao calcula atraso, adesao, estagnacao, urgencia, risco clinico ou prioridade; nao transforma solicitacao de treino ou arquivo recebido em pendencia por inferencia.
+
+A montagem usa somente consultas RLS ja existentes sob as atribuicoes ativas da Patty. Nao usa service role, nao cria tabela de pendencias e nao duplica estado derivavel.
+

@@ -1904,3 +1904,22 @@ Os quatro campos continuam opcionais nesta etapa; a obrigatoriedade de um formul
 
 Nao foi criado historico/versionamento do Cadastro Atual nesta etapa. `updated_at` representa somente o estado corrente; snapshots historicos continuam pertencendo aos dominios historicos correspondentes.
 
+## 2026-09-27 - Pendencias operacionais sao fatos derivados
+
+### DECISAO TECNICA/PRODUTO
+
+O painel administrativo de pendencias nao possui tabela propria nesta etapa.
+
+Cada item e derivado de um estado objetivo ja persistido e autorizado pelo RLS existente. O painel e uma visao de trabalho, nao uma nova fonte de verdade.
+
+Estados inicialmente incluidos:
+- Anamnese em draft;
+- Anamnese enviada sem revisao registrada;
+- esclarecimento sem resposta;
+- avaliacao em draft;
+- protocolo submetido sem aprovacao;
+- protocolo aprovado sem publicacao;
+- IA `started` sem estado terminal.
+
+Nao inferir prioridade, prazo, urgencia, adesao, estagnacao ou decisao profissional a partir desses estados. Novas categorias so podem entrar quando houver estado objetivo documentado que as sustente.
+
