@@ -266,17 +266,21 @@ O check-in deve permitir:
 - registrar a quantidade de liquidos consumida ao longo do dia;
 - acompanhar progresso em relacao a uma meta de liquidos;
 - receber lembretes relacionados ao consumo de liquidos;
-- registrar a frequencia/realizacao de atividade fisica ou ida a academia;
+- realizar um check-in diario de atividade fisica, registrando se fez ou nao fez atividade naquele dia;
 - acompanhar o progresso dessas metas de forma visivel para a cliente.
+
+A meta de liquidos deve poder ser pre-determinada a partir do **peso da cliente**. A formula exata ainda precisa ser confirmada e documentada antes de qualquer calculo automatico.
+
+O check-in diario de atividade fisica e independente do treino prescrito ou de qualquer rotina previamente definida para a cliente. O registro diario pode ser usado posteriormente para derivar frequencia, sem criar score automatico de adesao.
 
 A existencia de metas e lembretes esta confirmada como comportamento desejado do produto.
 
 Esses parametros podem ser definidos individualmente **na entrega do primeiro protocolo da cliente**, junto com a revisao/publicacao inicial do acompanhamento.
 
 Ainda nao estao formalizados como regra geral:
-- formula ou valor padrao da meta de liquidos;
+- formula exata da meta de liquidos por peso;
 - unidade operacional definitiva para o registro;
-- meta/frequencia padrao de academia ou atividade;
+- se/quando a meta de liquidos deve ser recalculada apos mudanca de peso;
 - horarios e cadencia padrao dos lembretes;
 - o que a Patty visualiza ou pode corrigir;
 - politica de edicao de check-ins anteriores.
