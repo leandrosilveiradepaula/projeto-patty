@@ -5,7 +5,6 @@ import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { EmptyState } from "@/components/ui/EmptyState";
 import { Section } from "@/components/ui/Section";
 import {
   getAccessibleClient,
