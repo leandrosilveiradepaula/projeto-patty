@@ -1,3 +1,18 @@
+### PARCIALMENTE RESOLVIDO - PROGRESSAO DO PROTOCOLO
+
+A Patty confirmou que a progressao segue a sequencia do protocolo, mas depende de adesao e resultado. Se a cliente nao estiver aderindo adequadamente ou nao estiver apresentando resultado, a progressao e interrompida e os proximos passos sao definidos manualmente pela Patty.
+
+Tambem confirmou que o Cutting 2 reinicia a estrutura de Cutting com menos doses de macros em relacao ao ciclo anterior.
+
+Continuam abertos:
+- criterio objetivo de adesao suficiente/insuficiente;
+- criterio objetivo de resultado suficiente/insuficiente;
+- definicao operacional de estagnacao;
+- quanto e quais macros diminuem em cada transicao do Cutting 2;
+- quando simplificar, retornar, manter ou trocar estrategia em cada caso.
+
+Nao criar score automatico de adesao, estagnacao automatica ou mudanca automatica de fase.
+
 # Questoes Abertas
 
 Este documento concentra pontos ainda nao definidos. Cada item deve ser validado pelo responsavel adequado antes de virar decisao: regras do metodo e operacao profissional pela Patty; arquitetura, seguranca e produto tecnico pelo responsavel do projeto; temas juridicos/privacidade com validacao juridica quando aplicavel.
