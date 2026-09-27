@@ -203,7 +203,7 @@ export async function saveAssessmentMeasurementAction(
     value: formData.get("measurementValue"),
   });
 
-  if ("error" in parsed) {
+  if ("error" in parsed && parsed.error) {
     return {
       message: parsed.error,
       success: false,
