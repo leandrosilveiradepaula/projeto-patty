@@ -81,15 +81,15 @@ Quais serao os valores definitivos de `clients.status`?
 
 ### QUESTAO ABERTA
 
-Qual sera o formulario cadastral completo de `client_registration`?
+Quais campos adicionais, se houver, devem ser incorporados futuramente ao `client_registration` alem de Cidade, Telefone, Email de contato e Instagram? O fluxo atual edita somente esses quatro campos ja existentes.
 
 ### QUESTAO ABERTA
 
-Como a cliente atualizara os dados cadastrais atuais: Perfil, fluxo dedicado de cadastro, confirmacao contextual durante a anamnese ou outro fluxo?
+FATO RESOLVIDO: a cliente atualiza Cidade, Telefone, Email de contato e Instagram em `/cliente/perfil`, sem alterar Auth ou Anamnese historica.
 
 ### QUESTAO ABERTA
 
-Quem podera alterar cada dado cadastral atual da cliente, incluindo Cidade, Telefone, Email de contato e Instagram?
+FATO RESOLVIDO: a propria cliente pode atualizar seus quatro campos atuais; Patty/admin pode atualizar os mesmos campos somente para cliente acessivel por assignment ativo e sessao administrativa AAL2.
 
 ### QUESTAO ABERTA
 
@@ -242,7 +242,7 @@ Quando o email de autenticacao e o email de contato devem iniciar com o mesmo va
 
 ### QUESTAO ABERTA
 
-Havera alguma acao explicita para sincronizar email de autenticacao e email de contato, ou eles permanecerao independentes apos a criacao inicial?
+FATO RESOLVIDO: email de autenticacao e email de contato permanecem independentes; editar Cadastro Atual nao altera o email de login e nao existe sincronizacao bidirecional automatica.
 
 ## Dados e LGPD
 
@@ -436,7 +436,7 @@ Esses temas permanecem abertos e devem ser retomados em rodada posterior.
 
 ### QUESTAO ABERTA
 
-Quem pode criar ou alterar o Cadastro Atual e por qual fluxo controlado?
+FATO RESOLVIDO: a cliente cria/atualiza o proprio Cadastro Atual pela area de Perfil; Patty/admin cria/atualiza pela tela da cliente sob assignment ativo + AAL2. A persistencia usa boundary server-side privilegiada e o browser continua sem INSERT/UPDATE direto em `client_registration`.
 
 ### FATO RESOLVIDO
 
