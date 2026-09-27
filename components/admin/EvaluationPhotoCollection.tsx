@@ -1,7 +1,8 @@
-import type { HTMLAttributes } from "react";
+import type { HTMLAttributes, ReactNode } from "react";
 import styles from "./EvaluationPhotoCollection.module.css";
 
 export type EvaluationPhotoCollectionItem = {
+  action?: ReactNode;
   id: string;
   label: string;
   metadata?: string;
@@ -41,6 +42,7 @@ export function EvaluationPhotoCollection({
             <p className={styles.state}>
               Foto privada exibida por rota administrativa autorizada.
             </p>
+            {item.action ? <div className={styles.action}>{item.action}</div> : null}
           </div>
         </li>
       ))}
