@@ -1,3 +1,22 @@
+## 2026-09-27 - Fluxo de esclarecimento e lembrete de 24 horas
+
+### REGRA CONFIRMADA PELA PATTY
+
+No fluxo de esclarecimentos pos-Anamnese:
+
+- a cliente responde ao pedido dentro do aplicativo;
+- a resposta nao encerra automaticamente o esclarecimento;
+- a Patty precisa ler e marcar manualmente como **resolvido**;
+- se ainda houver duvida, a Patty pode questionar novamente;
+- nao existe prazo/expiracao para resposta;
+- enquanto estiver aguardando resposta da cliente, o sistema deve enviar lembrete a cada **24 horas** para que ela responda.
+
+### LIMITE TECNICO
+
+Ainda nao foi definido o canal da notificacao de 24 horas. A regra funcional esta confirmada, mas a implementacao nao deve escolher silenciosamente entre notificacao in-app, email, push ou outro canal.
+
+O modelo tecnico tambem deve preservar o historico quando houver novo questionamento, sem sobrescrever pedidos/respostas anteriores.
+
 ## 2026-09-27 - Projeto passa a ter escopo de sistema completo
 
 ### DECISAO DE PRODUTO CONFIRMADA
