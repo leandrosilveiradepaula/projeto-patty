@@ -1,5 +1,6 @@
 import { AdminMealDraftGuidance } from "@/components/admin/AdminMealDraftGuidance";
 import { AdminProtocolVersionPlan } from "@/components/admin/AdminProtocolVersionPlan";
+import { ProtocolCloneVersionAction } from "@/components/admin/ProtocolCloneVersionAction";
 import { ProtocolLifecycleAction } from "@/components/admin/ProtocolLifecycleAction";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -127,6 +128,16 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
                     </p>
                     <AdminProtocolVersionPlan plan={mealPlan} />
                   </div>
+                  {version.submitted_for_review_at ? (
+                    <div className={styles.cloneAction}>
+                      <h4>Nova versão de trabalho</h4>
+                      <ProtocolCloneVersionAction
+                        protocolId={protocol.id}
+                        sourceProtocolVersionId={version.id}
+                        sourceVersionNumber={version.version_number}
+                      />
+                    </div>
+                  ) : null}
                   <div className={styles.lifecycleAction}>
                     <h4>Próxima ação manual</h4>
                     {lifecycleAction === "complete" ? (
