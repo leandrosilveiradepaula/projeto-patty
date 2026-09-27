@@ -824,5 +824,7 @@ A RPC `clone_protocol_version_draft` e `SECURITY INVOKER`, executavel apenas por
 
 A migration `20260927014500_clone_protocol_version_draft.sql` foi validada no Supabase SaaS dentro de `BEGIN`/`ROLLBACK`; nenhum schema remoto foi alterado durante essa validacao.
 
+A tela tambem compara factual e deterministicamente a versao derivada com sua versao-base por contagens estruturais e totais de doses persistidos. Isso nao classifica melhora, piora, progressao ou adequacao profissional.
+
 Edicao profissional completa do novo draft continua fora desta tarefa.
 
