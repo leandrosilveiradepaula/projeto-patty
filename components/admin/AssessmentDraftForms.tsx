@@ -292,8 +292,16 @@ export function AssessmentPhotoUnlinkButton({
 
 export function AssessmentFinalizeForm({
   assessmentId,
+  isMonthly,
+  readinessItems,
 }: {
   assessmentId: string;
+  isMonthly: boolean;
+  readinessItems: Array<{
+    key: string;
+    label: string;
+    present: boolean;
+  }>;
 }) {
   const action = finalizeAssessmentAction.bind(null, assessmentId);
   const [state, formAction, isPending] = useActionState(action, initialState);
@@ -301,6 +309,37 @@ export function AssessmentFinalizeForm({
   return (
     <form action={formAction} className={styles.form}>
       <ActionAlert state={state} />
+
+      <div className={styles.readiness}>
+        <p className={styles.notice}>
+          Itens mínimos reconhecidos para esta cadência:
+        </p>
+        <ul className={styles.readinessList}>
+          {readinessItems.map((item) => (
+            <li key={item.key}>
+              <span aria-hidden="true">{item.present ? "✓" : "○"}</span>
+              <span>{item.label}</span>
+              <strong>{item.present ? "Registrado" : "Pendente"}</strong>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {isMonthly ? (
+        <label className={styles.confirmation}>
+          <input
+            name="confirmMonthlyMeasures"
+            required
+            type="checkbox"
+            value="yes"
+          />
+          <span>
+            Revisei o conjunto completo de medidas da avaliação mensal. O
+            catálogo mensal definitivo ainda está aberto e, por isso, essa
+            completude depende de revisão humana.
+          </span>
+        </label>
+      ) : null}
 
       <label className={styles.confirmation}>
         <input name="confirmFinalization" required type="checkbox" value="yes" />
