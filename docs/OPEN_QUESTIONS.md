@@ -590,9 +590,11 @@ Quando e como a biblioteca de exercicios podera ser exposta a cliente, e quais c
 
 ## Protocolos e equivalentes
 
-### QUESTAO ABERTA
+### PARCIALMENTE RESOLVIDO
 
-Quais campos, tipos de protocolo e elementos profissionais compoem um protocolo alem da estrutura versionada inicial?
+A Patty confirmou que o protocolo/acompanhamento precisa permitir edicao manual de fase, macros, numero de refeicoes, distribuicao de doses, alimentos/equivalentes, Low/High, refeicao livre, observacoes, data de inicio, orientacoes, treino quando solicitado, suplementacao e manipulados.
+
+Continuam abertas as regras internas e os campos detalhados necessarios para treino, suplementacao e manipulados, bem como qualquer automacao desses blocos.
 
 ### QUESTAO ABERTA
 
