@@ -1,5 +1,6 @@
 create function public.clone_protocol_version_draft(
-  p_source_protocol_version_id uuid
+  p_source_protocol_version_id uuid,
+  p_plan_snapshot jsonb
 )
 returns uuid
 language plpgsql
@@ -8,18 +9,20 @@ set search_path = pg_catalog
 as $$
 declare
   v_source public.protocol_versions%rowtype;
-  v_source_plan public.meal_plan_versions%rowtype;
   v_new_version_id uuid;
   v_new_version_number integer;
   v_new_plan_id uuid;
-  v_variants jsonb := '[]'::jsonb;
-  v_meals jsonb := '[]'::jsonb;
-  v_doses jsonb := '[]'::jsonb;
-  v_cycles jsonb := '[]'::jsonb;
-  v_steps jsonb := '[]'::jsonb;
-  v_source_variant_ids uuid[] := '{}'::uuid[];
-  v_source_meal_ids uuid[] := '{}'::uuid[];
-  v_source_cycle_ids uuid[] := '{}'::uuid[];
+  v_new_variant_id uuid;
+  v_new_meal_id uuid;
+  v_new_cycle_id uuid;
+  v_variant_map jsonb := '{}'::jsonb;
+  v_variant jsonb;
+  v_meal jsonb;
+  v_dose jsonb;
+  v_cycle jsonb;
+  v_step jsonb;
+  v_step_variant_id uuid;
+  v_catalog_version_id uuid;
 begin
   select *
   into v_source
@@ -36,97 +39,11 @@ begin
       using errcode = '55000';
   end if;
 
-  select *
-  into v_source_plan
-  from public.meal_plan_versions
-  where protocol_version_id = v_source.id;
-
-  if found then
-    select
-      coalesce(array_agg(id order by variant_key, id), '{}'::uuid[]),
-      coalesce(
-        jsonb_agg(
-          jsonb_build_object(
-            'source_id', id,
-            'new_id', pg_catalog.gen_random_uuid(),
-            'variant_key', variant_key,
-            'label', label
-          )
-          order by variant_key, id
-        ),
-        '[]'::jsonb
-      )
-    into v_source_variant_ids, v_variants
-    from public.meal_plan_variants
-    where meal_plan_version_id = v_source_plan.id;
-
-    select
-      coalesce(
-        array_agg(id order by meal_plan_variant_id, position, id),
-        '{}'::uuid[]
-      ),
-      coalesce(
-        jsonb_agg(
-          jsonb_build_object(
-            'source_id', id,
-            'new_id', pg_catalog.gen_random_uuid(),
-            'source_variant_id', meal_plan_variant_id,
-            'position', position,
-            'label', label
-          )
-          order by meal_plan_variant_id, position, id
-        ),
-        '[]'::jsonb
-      )
-    into v_source_meal_ids, v_meals
-    from public.meals
-    where meal_plan_variant_id = any(v_source_variant_ids);
-
-    select coalesce(
-      jsonb_agg(
-        jsonb_build_object(
-          'source_meal_id', meal_id,
-          'dose_type', dose_type,
-          'dose_quantity', dose_quantity
-        )
-        order by meal_id, dose_type, id
-      ),
-      '[]'::jsonb
-    )
-    into v_doses
-    from public.meal_dose_allocations
-    where meal_id = any(v_source_meal_ids);
-
-    select
-      coalesce(array_agg(id order by created_at, id), '{}'::uuid[]),
-      coalesce(
-        jsonb_agg(
-          jsonb_build_object(
-            'source_id', id,
-            'new_id', pg_catalog.gen_random_uuid()
-          )
-          order by created_at, id
-        ),
-        '[]'::jsonb
-      )
-    into v_source_cycle_ids, v_cycles
-    from public.meal_plan_cycles
-    where meal_plan_version_id = v_source_plan.id;
-
-    select coalesce(
-      jsonb_agg(
-        jsonb_build_object(
-          'source_cycle_id', cycle_id,
-          'source_variant_id', variant_id,
-          'position', position
-        )
-        order by cycle_id, position
-      ),
-      '[]'::jsonb
-    )
-    into v_steps
-    from public.meal_plan_cycle_steps
-    where cycle_id = any(v_source_cycle_ids);
+  if p_plan_snapshot is not null
+    and jsonb_typeof(p_plan_snapshot) <> 'object'
+  then
+    raise exception 'protocol plan snapshot must be a JSON object'
+      using errcode = '22023';
   end if;
 
   perform pg_catalog.pg_advisory_xact_lock(
@@ -154,8 +71,16 @@ begin
   )
   returning id into v_new_version_id;
 
-  if v_source_plan.id is null then
+  if p_plan_snapshot is null then
     return v_new_version_id;
+  end if;
+
+  if p_plan_snapshot ? 'foodEquivalentCatalogVersionId'
+    and p_plan_snapshot ->> 'foodEquivalentCatalogVersionId' is not null
+    and length(trim(p_plan_snapshot ->> 'foodEquivalentCatalogVersionId')) > 0
+  then
+    v_catalog_version_id :=
+      (p_plan_snapshot ->> 'foodEquivalentCatalogVersionId')::uuid;
   end if;
 
   insert into public.meal_plan_versions (
@@ -166,127 +91,122 @@ begin
   values (
     v_new_version_id,
     v_source.client_id,
-    v_source_plan.food_equivalent_catalog_version_id
+    v_catalog_version_id
   )
   returning id into v_new_plan_id;
 
-  insert into public.meal_plan_variants (
-    id,
-    meal_plan_version_id,
-    client_id,
-    variant_key,
-    label
-  )
-  select
-    variant_row.new_id,
-    v_new_plan_id,
-    v_source.client_id,
-    variant_row.variant_key,
-    variant_row.label
-  from jsonb_to_recordset(v_variants) as variant_row(
-    source_id uuid,
-    new_id uuid,
-    variant_key text,
-    label text
-  );
+  for v_variant in
+    select value
+    from jsonb_array_elements(
+      coalesce(p_plan_snapshot -> 'variants', '[]'::jsonb)
+    )
+  loop
+    insert into public.meal_plan_variants (
+      meal_plan_version_id,
+      client_id,
+      variant_key,
+      label
+    )
+    values (
+      v_new_plan_id,
+      v_source.client_id,
+      v_variant ->> 'variantKey',
+      nullif(v_variant ->> 'label', '')
+    )
+    returning id into v_new_variant_id;
 
-  insert into public.meals (
-    id,
-    meal_plan_variant_id,
-    position,
-    label
-  )
-  select
-    meal_row.new_id,
-    variant_row.new_id,
-    meal_row.position,
-    meal_row.label
-  from jsonb_to_recordset(v_meals) as meal_row(
-    source_id uuid,
-    new_id uuid,
-    source_variant_id uuid,
-    position integer,
-    label text
-  )
-  join jsonb_to_recordset(v_variants) as variant_row(
-    source_id uuid,
-    new_id uuid,
-    variant_key text,
-    label text
-  )
-    on variant_row.source_id = meal_row.source_variant_id;
+    v_variant_map :=
+      v_variant_map ||
+      jsonb_build_object(v_variant ->> 'variantKey', v_new_variant_id::text);
 
-  insert into public.meal_dose_allocations (
-    meal_id,
-    dose_type,
-    dose_quantity
-  )
-  select
-    meal_row.new_id,
-    dose_row.dose_type,
-    dose_row.dose_quantity
-  from jsonb_to_recordset(v_doses) as dose_row(
-    source_meal_id uuid,
-    dose_type text,
-    dose_quantity numeric
-  )
-  join jsonb_to_recordset(v_meals) as meal_row(
-    source_id uuid,
-    new_id uuid,
-    source_variant_id uuid,
-    position integer,
-    label text
-  )
-    on meal_row.source_id = dose_row.source_meal_id;
+    for v_meal in
+      select value
+      from jsonb_array_elements(
+        coalesce(v_variant -> 'meals', '[]'::jsonb)
+      )
+    loop
+      insert into public.meals (
+        meal_plan_variant_id,
+        position,
+        label
+      )
+      values (
+        v_new_variant_id,
+        (v_meal ->> 'position')::integer,
+        nullif(v_meal ->> 'label', '')
+      )
+      returning id into v_new_meal_id;
 
-  insert into public.meal_plan_cycles (
-    id,
-    meal_plan_version_id,
-    client_id
-  )
-  select
-    cycle_row.new_id,
-    v_new_plan_id,
-    v_source.client_id
-  from jsonb_to_recordset(v_cycles) as cycle_row(
-    source_id uuid,
-    new_id uuid
-  );
+      for v_dose in
+        select value
+        from jsonb_array_elements(
+          coalesce(v_meal -> 'doseAllocations', '[]'::jsonb)
+        )
+      loop
+        insert into public.meal_dose_allocations (
+          meal_id,
+          dose_type,
+          dose_quantity
+        )
+        values (
+          v_new_meal_id,
+          v_dose ->> 'doseType',
+          (v_dose ->> 'doseQuantity')::numeric
+        );
+      end loop;
+    end loop;
+  end loop;
 
-  insert into public.meal_plan_cycle_steps (
-    cycle_id,
-    meal_plan_version_id,
-    variant_id,
-    position
-  )
-  select
-    cycle_row.new_id,
-    v_new_plan_id,
-    variant_row.new_id,
-    step_row.position
-  from jsonb_to_recordset(v_steps) as step_row(
-    source_cycle_id uuid,
-    source_variant_id uuid,
-    position integer
-  )
-  join jsonb_to_recordset(v_cycles) as cycle_row(
-    source_id uuid,
-    new_id uuid
-  )
-    on cycle_row.source_id = step_row.source_cycle_id
-  join jsonb_to_recordset(v_variants) as variant_row(
-    source_id uuid,
-    new_id uuid,
-    variant_key text,
-    label text
-  )
-    on variant_row.source_id = step_row.source_variant_id;
+  for v_cycle in
+    select value
+    from jsonb_array_elements(
+      coalesce(p_plan_snapshot -> 'cycles', '[]'::jsonb)
+    )
+  loop
+    insert into public.meal_plan_cycles (
+      meal_plan_version_id,
+      client_id
+    )
+    values (
+      v_new_plan_id,
+      v_source.client_id
+    )
+    returning id into v_new_cycle_id;
+
+    for v_step in
+      select value
+      from jsonb_array_elements(
+        coalesce(v_cycle -> 'steps', '[]'::jsonb)
+      )
+    loop
+      v_step_variant_id :=
+        nullif(v_variant_map ->> (v_step ->> 'variantKey'), '')::uuid;
+
+      if v_step_variant_id is null then
+        raise exception 'cycle step references unknown variant key'
+          using errcode = '23514';
+      end if;
+
+      insert into public.meal_plan_cycle_steps (
+        cycle_id,
+        meal_plan_version_id,
+        variant_id,
+        position
+      )
+      values (
+        v_new_cycle_id,
+        v_new_plan_id,
+        v_step_variant_id,
+        (v_step ->> 'position')::integer
+      );
+    end loop;
+  end loop;
 
   return v_new_version_id;
 end;
 $$;
 
-revoke all on function public.clone_protocol_version_draft(uuid)
+revoke all on function public.clone_protocol_version_draft(uuid, jsonb)
   from public, anon;
-grant execute on function public.clone_protocol_version_draft(uuid)
+grant execute on function public.clone_protocol_version_draft(uuid, jsonb)
   to authenticated;
