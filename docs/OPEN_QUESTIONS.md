@@ -618,10 +618,11 @@ A Patty confirmou que o produto deve prever check-ins com metas e lembretes para
 - frequencia/realizacao de atividade fisica ou academia;
 - visualizacao do progresso pela cliente como estimulo adicional.
 
-Ainda faltam confirmar:
-- quem define cada meta;
-- formula/valor e unidade da meta de liquidos;
-- meta esperada de atividade/academia;
+A Patty confirmou que as metas/configuracoes individuais podem ser definidas na entrega do primeiro protocolo.
+
+Ainda faltam formalizar:
+- formula/valor e unidade padrao da meta de liquidos;
+- meta padrao de atividade/academia;
 - horarios e cadencia dos lembretes;
 - o que a Patty visualiza e pode corrigir;
 - se registros anteriores podem ser editados;
