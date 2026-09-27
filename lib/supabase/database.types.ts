@@ -903,20 +903,32 @@ export type Database = {
       client_assessments: {
         Row: {
           assessed_at: string
+          assessment_kind: string | null
           client_id: string
           created_at: string
+          created_by_profile_id: string | null
+          finalized_at: string | null
+          finalized_by_profile_id: string | null
           id: string
         }
         Insert: {
           assessed_at: string
+          assessment_kind?: string | null
           client_id: string
           created_at?: string
+          created_by_profile_id?: string | null
+          finalized_at?: string | null
+          finalized_by_profile_id?: string | null
           id?: string
         }
         Update: {
           assessed_at?: string
+          assessment_kind?: string | null
           client_id?: string
           created_at?: string
+          created_by_profile_id?: string | null
+          finalized_at?: string | null
+          finalized_by_profile_id?: string | null
           id?: string
         }
         Relationships: [
