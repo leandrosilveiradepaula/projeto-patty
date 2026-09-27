@@ -9,32 +9,12 @@ alter table public.client_assessments
   add constraint client_assessments_finalization_actor_consistent check (
     (finalized_at is null and finalized_by_profile_id is null)
     or
-    (finalized_at is not null and finalized_by_profile_id is not null)
+    finalized_at is not null
   );
 
 update public.client_assessments
-set finalized_at = created_at,
-    finalized_by_profile_id = (
-      select ur.profile_id
-      from public.user_roles ur
-      join public.client_assignments ca
-        on ca.staff_profile_id = ur.profile_id
-       and ca.client_id = client_assessments.client_id
-      where ur.role = 'admin'
-      order by ca.assigned_at asc, ca.id asc
-      limit 1
-    )
+set finalized_at = created_at
 where finalized_at is null;
-
-alter table public.client_assessments
-  drop constraint client_assessments_finalization_actor_consistent;
-
-alter table public.client_assessments
-  add constraint client_assessments_finalization_actor_consistent check (
-    (finalized_at is null and finalized_by_profile_id is null)
-    or
-    finalized_at is not null
-  );
 
 create index client_assessments_client_id_finalized_at_assessed_at_idx
   on public.client_assessments (client_id, finalized_at, assessed_at);
@@ -73,6 +53,10 @@ begin
   if new.finalized_at is not null and new.finalized_by_profile_id is null then
     raise exception 'finalized assessment requires finalization actor'
       using errcode = '23514';
+  end if;
+
+  if old.finalized_at is null and new.finalized_at is not null then
+    new.finalized_at := now();
   end if;
 
   return new;
