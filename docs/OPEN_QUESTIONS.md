@@ -568,6 +568,12 @@ Como ocorrera a migracao fisica dos demais arquivos do Google Drive, incluindo r
 Quando e como a biblioteca de exercicios podera ser exposta a cliente, e quais campos definitivos de exercicio serao necessarios sem antecipar programacao de treino?
 
 ## Protocolos e equivalentes
+### PARCIALMENTE RESOLVIDO — AUTORIA DE VERSAO
+
+A clonagem de uma versao congelada para um novo draft ja esta implementada de forma atomica e nao copia aprovacao/publicacao.
+
+Continua aberta a UX completa de edicao profissional do draft: criacao/edicao de variantes, refeicoes, doses, ciclos e equivalentes sem transformar regras profissionais abertas em automacao.
+
 
 ### QUESTAO ABERTA
 
