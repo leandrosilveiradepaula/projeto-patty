@@ -67,7 +67,7 @@ Nao existe bloqueio atual de deployment Vercel para o `master`.
 | Onboarding por convite | SIM | SIM | E2E sintetico de ativacao aprovado | PARCIAL / BLOQUEADO OPERACIONALMENTE | Gmail da Patty definido como Custom SMTP do MVP; configuracao manual de 2FA/App Password/SMTP/template ficou PENDENTE; validar entrega real depois; expiracao/reenvio continuam abertos |
 | MFA administrativo | SIM | SIM | Smoke AAL1/AAL2 documentado | Enforcement RLS aplicado no SaaS | Leaked Password Protection bloqueada pelo plano atual |
 | RBAC / RLS / assignments | SIM | SIM | Smokes documentados | Fundacao e fluxos administrativos principais operacionais | Novos papeis ficam fora do MVP; assignment continua regra geral para dados client-scoped |
-| Cadastro Atual | SIM como entidade separada | SIM | Fundacao testada | Backend existente | Fluxo final de edicao cadastral pela cliente/Patty ainda aberto |
+| Cadastro Atual | SIM como entidade separada | leitura + edicao controlada cliente/Patty IMPLEMENTADAS | validacao deterministica + boundary server-only no CI | Backend existente; sem migration nova | formulario ampliado/historico cadastral continuam fora do escopo atual |
 | Anamnese versionada | SIM | SIM + aplicabilidade + `single_choice` + mapa v1 + submissao final + consentimento checkbox | Smoke SQL completo + consent E2E `36072067063` + start/resume E2E `36074218960` + fluxo consolidado E2E `36257567841` | `client-anamnesis` v1 publicada pela migration `20260924230322`; runtime atual validado | Evolucoes futuras exigem nova versao e nao podem inferir regras abertas |
 | Rascunho da Anamnese | SIM | SIM para salvar/retomar/editar/enviar dentro dos tipos v1 suportados | E2E consolidado `36257567841` PASS para start/resume/INSERT/UPDATE/condicional + cleanup | Publicado no deployment `dpl_BVK9vpL7t4cGyoFjrv393xWPxHsb` | Nao repetir smoke sem nova evidencia; manter fixture efemera e um unico login |
 | Obrigatoriedade da Anamnese | SIM | Regra + UI + validacao deterministica no banco | Smoke SQL completo PASS; consentimento browser PASS no run `36072067063` | `20260924142453` + definicao canonica v1 aplicadas; campo nao aplicavel nao bloqueia | Alteracoes futuras de questionario/consentimento devem ser versionadas |
@@ -766,3 +766,22 @@ A migration passou em transacao com `ROLLBACK` antes do merge, o PR #210 fechou 
 Registros historicos existentes serao preservados como finalizados sem inventar `created_by_profile_id` ou `finalized_by_profile_id` quando esses atores historicos nao forem conhecidos.
 
 O sistema nao valida automaticamente a completude quinzenal/mensal por chaves, porque catalogo mensal e unidades continuam abertos.
+
+## 2026-09-27 - Cadastro Atual editavel
+
+### IMPLEMENTADO
+
+O fluxo de Cadastro Atual foi fechado para os quatro campos ja existentes:
+- Cidade;
+- Telefone;
+- Email de contato;
+- Instagram.
+
+A cliente edita o proprio cadastro em `/cliente/perfil`. Patty/admin edita pela tela administrativa da cliente, mantendo assignment ativo + MFA AAL2 como pre-condicao.
+
+A tabela `client_registration` continua com grant direto apenas de SELECT para `authenticated`. INSERT/UPDATE nao foram liberados ao browser. A escrita passa por Server Actions que primeiro resolvem ownership/assignment com o cliente autenticado normal e so depois usam uma boundary privilegiada `server-only`.
+
+Email de login e email de contato permanecem independentes; editar Cadastro Atual nao altera Auth nem Anamnese historica.
+
+Nenhuma migration foi necessaria.
+

@@ -1,19 +1,23 @@
 import { ClientProfileOverview } from "@/components/client/ClientProfileOverview";
-import { ClientRegistrationDetails } from "@/components/client/ClientRegistrationDetails";
+import { ClientRegistrationEditForm } from "@/components/client/ClientRegistrationEditForm";
 import { Card } from "@/components/ui/Card";
-import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import {
   getAccessibleClientRegistration,
   getCurrentClient,
+  getCurrentLoginEmail,
   getCurrentUserProfile,
 } from "@/lib/supabase/data-access";
 import Link from "next/link";
 import styles from "./page.module.css";
 
 export default async function ClientePerfilPage() {
-  const [profile, client] = await Promise.all([getCurrentUserProfile(), getCurrentClient()]);
+  const [profile, client, loginEmail] = await Promise.all([
+    getCurrentUserProfile(),
+    getCurrentClient(),
+    getCurrentLoginEmail(),
+  ]);
   const registration = client ? await getAccessibleClientRegistration(client.id) : null;
 
   return (
@@ -29,22 +33,19 @@ export default async function ClientePerfilPage() {
       >
         <ClientProfileOverview
           displayName={profile?.display_name ?? undefined}
+          loginEmail={loginEmail ?? undefined}
         />
       </Section>
       <Section
         description="Estas informações representam o cadastro atual de contato."
         title="Cadastro atual"
       >
-        {registration ? (
-          <ClientRegistrationDetails
-            city={registration.city ?? undefined}
-            contactEmail={registration.contact_email ?? undefined}
-            instagram={registration.instagram ?? undefined}
-            phone={registration.phone ?? undefined}
-          />
-        ) : (
-          <EmptyState description="Seu cadastro atual ainda não foi informado." title="Cadastro atual indisponível" />
-        )}
+        <ClientRegistrationEditForm
+          city={registration?.city ?? undefined}
+          contactEmail={registration?.contact_email ?? undefined}
+          instagram={registration?.instagram ?? undefined}
+          phone={registration?.phone ?? undefined}
+        />
       </Section>
       <Section
         description="A Anamnese permanece separada do Cadastro Atual e preserva seus registros por versão."

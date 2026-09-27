@@ -608,6 +608,8 @@ O contexto futuro deve combinar sessao autenticada, perfil, roles que a propria 
 
 `contact_email` pertence ao cadastro atual, nao e chave de relacionamento e nao possui sincronizacao automatica com o email de autenticacao. Nao foi criado historico/versionamento cadastral nesta etapa.
 
+O estado corrente pode ser criado/atualizado pela propria cliente ou pela Patty/admin em fluxos controlados da aplicacao. O browser permanece sem grant direto de INSERT/UPDATE: a escrita ocorre em Server Action apos validacao de ownership ou assignment ativo/AAL2 e usa boundary privilegiada `server-only`.
+
 ### DECISAO CONFIRMADA
 
 A definicao de Anamnese e versionada por `anamnesis_forms`, `anamnesis_form_versions`, `anamnesis_sections` e `anamnesis_questions`.

@@ -64,6 +64,9 @@ jobs:
       - name: Training request tests
         run: npm run test:training
 
+      - name: Client domain tests
+        run: npm run test:clients
+
 
       - name: Assignment tests
         run: npm run test:assignments

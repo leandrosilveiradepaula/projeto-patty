@@ -14,6 +14,18 @@ async function getVerifiedProfileId() {
   return typeof data?.claims?.sub === "string" ? data.claims.sub : null;
 }
 
+export async function getCurrentLoginEmail() {
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.getClaims();
+
+  if (error) {
+    throw error;
+  }
+
+  const email = data?.claims?.email;
+  return typeof email === "string" ? email : null;
+}
+
 export async function getCurrentUserProfile() {
   const profileId = await getVerifiedProfileId();
 

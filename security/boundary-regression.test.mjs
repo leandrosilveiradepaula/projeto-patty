@@ -27,6 +27,7 @@ const ENTRYPOINT_RULES = new Map([
   ["app/cliente/anamnese/actions.ts", "client"],
   ["app/cliente/arquivos/[fileId]/route.ts", "client"],
   ["app/cliente/arquivos/actions.ts", "client"],
+  ["app/cliente/perfil/actions.ts", "client"],
   ["app/login/actions.ts", "public-auth"],
 ]);
 
