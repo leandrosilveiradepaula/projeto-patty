@@ -135,6 +135,17 @@ A migration `20260924153808_create_anamnesis_clarification_flow.sql` esta aplica
 
 Tipos nao juridicos, 10 condicionais, ordem, consentimento ANAM-046 e submissao final da v1 estao fechados. A primeira `client-anamnesis` ja foi materializada, publicada e validada em producao; mudancas futuras devem ocorrer por nova versao.
 
+### Esclarecimentos - lifecycle ainda incompleto
+
+A regra profissional esta fechada:
+- resposta da cliente nao encerra automaticamente;
+- Patty le e marca como resolvido;
+- Patty pode questionar novamente;
+- nao existe prazo de expiracao;
+- enquanto aguarda resposta da cliente, deve haver lembrete a cada 24 horas.
+
+A fundacao atual e append-only e ja suporta pedido/resposta, mas ainda nao implementa estado formal resolvido, re-questionamento como lifecycle operacional nem lembrete recorrente de 24 horas. O canal da notificacao tambem permanece aberto.
+
 ### Banco e performance
 
 O advisor de performance reporta 22 foreign keys sem indice de cobertura exata e indices sem uso observado. A revisao mostrou que parte dos avisos de foreign key ja possui indice seletivo pelo primeiro campo e que a maioria restante pertence a tabelas historicas/IA ainda vazias. Nenhum indice novo foi criado apenas para zerar o lint. A politica e adicionar indice quando houver workload, RLS, integridade ou plano de execucao que justifique o custo.
