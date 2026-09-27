@@ -1880,3 +1880,27 @@ A classificacao quinzenal/mensal registra a cadencia confirmada, mas o banco nao
 
 Decisoes profissionais de acompanhamento associadas a uma avaliacao so podem ser registradas depois da finalizacao.
 
+## 2026-09-27 - Edicao controlada do Cadastro Atual
+
+### DECISAO DE PRODUTO/TECNICA
+
+O Cadastro Atual continua sendo estado corrente 1:1 de `clients`, separado de Auth, Profile e Anamnese historica.
+
+Campos atualmente editaveis:
+- Cidade;
+- Telefone;
+- Email de contato;
+- Instagram.
+
+Fluxos:
+- cliente: edita o proprio Cadastro Atual em `/cliente/perfil`;
+- Patty/admin: edita o Cadastro Atual da cliente pela tela administrativa, somente quando a cliente esta acessivel pelo assignment ativo e a sessao administrativa ja passou por MFA AAL2.
+
+A escrita nao foi aberta diretamente ao browser/Data API. As Server Actions validam identidade/escopo com o cliente Supabase autenticado normal e somente depois chamam uma boundary `server-only` privilegiada para fazer o upsert de `client_registration`.
+
+Email de login e email de contato permanecem conceitos independentes. Alterar `contact_email` nao chama Admin Auth, nao altera `auth.users` e nao sincroniza a Anamnese.
+
+Os quatro campos continuam opcionais nesta etapa; a obrigatoriedade de um formulario cadastral ampliado permanece fora desta decisao.
+
+Nao foi criado historico/versionamento do Cadastro Atual nesta etapa. `updated_at` representa somente o estado corrente; snapshots historicos continuam pertencendo aos dominios historicos correspondentes.
+
