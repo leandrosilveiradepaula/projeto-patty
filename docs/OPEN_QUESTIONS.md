@@ -63,9 +63,9 @@ Se futuramente forem introduzidos assistentes, profissionais parceiros ou suport
 
 Na Anamnese, todos os campos aplicaveis ao preenchimento final sao obrigatorios. O mapa nao juridico da v1, tipos, ordem e as 10 regras de aplicabilidade estao definidos. ANAM-046 tambem foi resolvido para o MVP como checkbox obrigatorio versionado no envio final.
 
-### QUESTAO ABERTA
+### PARCIALMENTE RESOLVIDO
 
-Quais campos definitivos existirao em medidas, fotos, exames, protocolos e avaliacoes, e quais deles serao obrigatorios em cada fluxo?
+O catalogo e as unidades das medidas da Avaliacao Completa foram confirmados pela Patty em 2026-09-27. Permanecem abertas as definicoes de campos/obrigatoriedade que nao foram cobertas por essa resposta, especialmente para exames, protocolos e outros fluxos ainda nao formalizados.
 
 ### QUESTAO ABERTA
 
@@ -289,11 +289,23 @@ A Patty corrigiu a nomenclatura e a logica operacional:
 
 Nao existem duas avaliacoes concorrentes na mesma data como regra normal do fluxo.
 
+O catalogo da Avaliacao Completa esta confirmado:
+- peso (kg);
+- cintura (cm);
+- abdomen (cm);
+- coxa (cm);
+- biceps (cm);
+- busto (cm);
+- quadril (cm);
+- ombros (cm);
+- panturrilhas (cm);
+- fotos de avaliacao.
+
+Para medidas unilaterais, utiliza-se somente o lado direito do corpo.
+
 Continuam abertos:
-- o catalogo exato de todas as medidas da Avaliacao Completa;
-- as unidades permitidas;
-- eventuais campos adicionais;
-- a regra de calendario quando a data de inicio cai em 29, 30 ou 31 e o mes seguinte nao possui esse dia.
+- a regra de calendario quando a data de inicio cai em 29, 30 ou 31 e o mes seguinte nao possui esse dia;
+- o fluxo auditavel de correcao de uma avaliacao ou medida historica depois da finalizacao.
 
 ### QUESTAO ABERTA
 
