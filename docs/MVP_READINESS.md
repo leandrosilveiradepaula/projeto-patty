@@ -530,6 +530,28 @@ As metas/configuracoes individuais podem ser definidas na entrega do primeiro pr
 
 Nao tratar o check-in como score automatico de adesao nem inferir regra de hidratacao.
 
+## Primeiro lancamento - Patty/admin
+
+Estado: **ESCOPO CONFIRMADO / PRONTIDAO TECNICA A RECONCILIAR**
+
+"Primeiro lancamento" significa a primeira versao pronta para uso real no atendimento.
+
+A Patty confirmou que todas as operacoes da pergunta 8 sao obrigatorias antes desse marco:
+- convite/cadastro de cliente;
+- edicao do Cadastro Atual;
+- leitura e correcao historica da Anamnese;
+- solicitacao de esclarecimentos;
+- acesso a arquivos privados autorizados;
+- criacao e comparacao de avaliacoes;
+- criacao/edicao/versionamento de protocolos;
+- revisao, aprovacao e publicacao;
+- liberacao de conteudos;
+- administracao de solicitacoes de treino;
+- painel de pendencias;
+- assistencia de IA na revisao da Anamnese.
+
+Esta decisao nao altera o estado tecnico de cada fluxo; implementado, testado, aplicado e publicado continuam estados separados.
+
 ## Primeiro lancamento - cliente
 
 Estado: **ESCOPO CONFIRMADO / IMPLEMENTACAO AINDA A RECONCILIAR**
