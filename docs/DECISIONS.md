@@ -1,3 +1,29 @@
+## 2026-09-27 - Catalogo da Avaliacao Completa
+
+### REGRA CONFIRMADA PELA PATTY
+
+Na Avaliacao Completa, sao solicitados:
+- peso, em quilogramas (kg);
+- cintura, em centimetros (cm);
+- abdomen, em centimetros (cm);
+- coxa, em centimetros (cm);
+- biceps, em centimetros (cm);
+- busto, em centimetros (cm);
+- quadril, em centimetros (cm);
+- ombros, em centimetros (cm);
+- panturrilhas, em centimetros (cm);
+- fotos de avaliacao.
+
+Para medidas unilaterais, deve ser utilizado somente o lado direito do corpo.
+
+A lista acima substitui referencias anteriores incompletas ao catalogo da avaliacao completa. O termo vigente e **busto**; a mencao historica a "peito" nao cria uma medida adicional separada.
+
+### LIMITE
+
+Esta resposta fecha catalogo e unidades da Avaliacao Completa, mas nao resolve:
+- calendario para datas-ancora 29, 30 ou 31 em meses sem o mesmo dia;
+- correcao auditavel de avaliacao finalizada.
+
 ## 2026-09-27 - Avaliacao Basica e Avaliacao Completa
 
 ### REGRA CONFIRMADA PELA PATTY
