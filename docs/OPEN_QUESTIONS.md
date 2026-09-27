@@ -280,15 +280,20 @@ Qual politica concreta de retencao define quando um arquivo inativado/substituid
 
 ### PARCIALMENTE RESOLVIDO
 
-A Patty confirmou duas rotinas de avaliacao:
-- **quinzenal**: cintura, abdomen, quadril e peso;
-- **mensal**: avaliacao completa com todas as medidas, peso e fotos.
+A Patty corrigiu a nomenclatura e a logica operacional:
+- **Avaliacao Completa** substitui o nome historico "mensal";
+- **Avaliacao Basica** substitui o nome historico "quinzenal";
+- a data da Avaliacao Completa fica ancorada no dia do mes em que a cliente iniciou o acompanhamento;
+- a Avaliacao Basica ocorre no meio do intervalo entre duas Avaliacoes Completas;
+- exemplo confirmado: Avaliacao Completa no dia 2 -> Avaliacao Basica no dia 17.
+
+Nao existem duas avaliacoes concorrentes na mesma data como regra normal do fluxo.
 
 Continuam abertos:
-- o catalogo exato de todas as medidas da avaliacao mensal;
+- o catalogo exato de todas as medidas da Avaliacao Completa;
 - as unidades permitidas;
 - eventuais campos adicionais;
-- como a avaliacao mensal se relaciona operacionalmente com a ocorrencia quinzenal quando as datas coincidirem.
+- a regra de calendario quando a data de inicio cai em 29, 30 ou 31 e o mes seguinte nao possui esse dia.
 
 ### QUESTAO ABERTA
 
