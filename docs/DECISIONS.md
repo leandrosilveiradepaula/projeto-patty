@@ -1922,4 +1922,13 @@ Estados inicialmente incluidos:
 - IA `started` sem estado terminal.
 
 Nao inferir prioridade, prazo, urgencia, adesao, estagnacao ou decisao profissional a partir desses estados. Novas categorias so podem entrar quando houver estado objetivo documentado que as sustente.
+## 2026-09-27 - Nova versao de protocolo por copia controlada
+
+### DECISAO TECNICA/PRODUTO
+
+Depois que uma versao de protocolo e submetida e congelada, uma mudanca posterior deve ocorrer em nova versao.
+
+Para reduzir retrabalho sem sobrescrever historico, a Patty pode criar um novo draft copiando exatamente a estrutura persistida da versao congelada.
+
+A copia nao carrega aprovacao/publicacao e nao executa nenhuma regra profissional automatica.
 
