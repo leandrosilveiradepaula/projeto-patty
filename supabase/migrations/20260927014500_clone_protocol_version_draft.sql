@@ -15,6 +15,8 @@ declare
   v_variant_map jsonb := '{}'::jsonb;
   v_meal_map jsonb := '{}'::jsonb;
   v_cycle_map jsonb := '{}'::jsonb;
+  v_source_variant_ids uuid[] := '{}'::uuid[];
+  v_source_meal_ids uuid[] := '{}'::uuid[];
 begin
   select *
   into v_source
@@ -77,11 +79,13 @@ begin
   )
   returning id into v_new_plan_id;
 
-  select coalesce(
-    jsonb_object_agg(id::text, pg_catalog.gen_random_uuid()::text),
-    '{}'::jsonb
-  )
-  into v_variant_map
+  select
+    coalesce(array_agg(id order by variant_key, id), '{}'::uuid[]),
+    coalesce(
+      jsonb_object_agg(id::text, pg_catalog.gen_random_uuid()::text),
+      '{}'::jsonb
+    )
+  into v_source_variant_ids, v_variant_map
   from public.meal_plan_variants
   where meal_plan_version_id = v_source_plan.id;
 
@@ -101,15 +105,15 @@ begin
   from public.meal_plan_variants source_variant
   where source_variant.meal_plan_version_id = v_source_plan.id;
 
-  select coalesce(
-    jsonb_object_agg(source_meal.id::text, pg_catalog.gen_random_uuid()::text),
-    '{}'::jsonb
-  )
-  into v_meal_map
-  from public.meals source_meal
-  join public.meal_plan_variants source_variant
-    on source_variant.id = source_meal.meal_plan_variant_id
-  where source_variant.meal_plan_version_id = v_source_plan.id;
+  select
+    coalesce(array_agg(id order by meal_plan_variant_id, position, id), '{}'::uuid[]),
+    coalesce(
+      jsonb_object_agg(id::text, pg_catalog.gen_random_uuid()::text),
+      '{}'::jsonb
+    )
+  into v_source_meal_ids, v_meal_map
+  from public.meals
+  where meal_plan_variant_id = any(v_source_variant_ids);
 
   insert into public.meals (
     id,
@@ -123,9 +127,7 @@ begin
     source_meal.position,
     source_meal.label
   from public.meals source_meal
-  join public.meal_plan_variants source_variant
-    on source_variant.id = source_meal.meal_plan_variant_id
-  where source_variant.meal_plan_version_id = v_source_plan.id;
+  where source_meal.id = any(v_source_meal_ids);
 
   insert into public.meal_dose_allocations (
     meal_id,
@@ -137,11 +139,7 @@ begin
     source_allocation.dose_type,
     source_allocation.dose_quantity
   from public.meal_dose_allocations source_allocation
-  join public.meals source_meal
-    on source_meal.id = source_allocation.meal_id
-  join public.meal_plan_variants source_variant
-    on source_variant.id = source_meal.meal_plan_variant_id
-  where source_variant.meal_plan_version_id = v_source_plan.id;
+  where source_allocation.meal_id = any(v_source_meal_ids);
 
   select coalesce(
     jsonb_object_agg(id::text, pg_catalog.gen_random_uuid()::text),
