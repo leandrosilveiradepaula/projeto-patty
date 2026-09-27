@@ -611,20 +611,23 @@ Qual catalogo de equivalentes sera validado, quem podera versiona-lo e qual part
 
 A Patty confirmou que a cliente deve visualizar a rotina alimentar publicada e, quando houver treino prescrito, a rotina de treinos. A cliente nao precisa registrar execucao dentro do protocolo publicado.
 
-### QUESTAO ABERTA - CHECK-IN
+### PARCIALMENTE RESOLVIDO - CHECK-IN
 
-A Patty sugeriu como funcionalidade desejavel um check-in separado para liquidos consumidos e atividade fisica/treino realizado.
+A Patty confirmou que o produto deve prever check-ins com metas e lembretes para:
+- liquidos consumidos ao longo do dia;
+- frequencia/realizacao de atividade fisica ou academia;
+- visualizacao do progresso pela cliente como estimulo adicional.
 
 Ainda faltam confirmar:
-- frequencia do check-in;
-- unidade/campos para liquidos;
-- o que caracteriza atividade realizada;
-- se ha meta, lembrete ou alerta;
-- o que a Patty visualiza e pode editar;
-- se registros anteriores podem ser corrigidos;
-- se e escopo do primeiro lancamento.
+- quem define cada meta;
+- formula/valor e unidade da meta de liquidos;
+- meta esperada de atividade/academia;
+- horarios e cadencia dos lembretes;
+- o que a Patty visualiza e pode corrigir;
+- se registros anteriores podem ser editados;
+- se a primeira versao do check-in entra no primeiro lancamento.
 
-Nao inferir score de adesao nem meta de hidratacao.
+Nao inferir score de adesao, hidratacao recomendada ou frequencia ideal de treino.
 
 ## OpenAI — modelo e controles de dados
 
