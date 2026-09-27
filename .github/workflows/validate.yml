@@ -67,6 +67,9 @@ jobs:
       - name: Client domain tests
         run: npm run test:clients
 
+      - name: Operational pending tests
+        run: npm run test:operations
+
 
       - name: Assignment tests
         run: npm run test:assignments
