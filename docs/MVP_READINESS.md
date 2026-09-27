@@ -502,6 +502,21 @@ O runtime atual torna avaliacao/medidas finalizadas imutaveis, portanto a forma 
 
 Continua aberto: regra para datas-ancora 29/30/31 em meses sem o mesmo dia e desenho tecnico da correcao auditavel pos-finalizacao.
 
+## Protocolos - progressao profissional
+
+Estado: **REGRA DE PROGRESSAO CONFIRMADA / CRITERIOS OBJETIVOS AINDA ABERTOS**
+
+A sequencia profissional deve ser preservada, mas nenhuma mudanca de fase e automatica.
+
+A adesao e o resultado observado pela Patty funcionam como gates:
+- se a cliente adere e a evolucao permite, a sequencia pode continuar;
+- se nao ha adesao adequada, a progressao para e exige decisao profissional;
+- se nao ha resultado esperado, a progressao tambem para e exige decisao profissional.
+
+O Cutting 2 reinicia a estrutura de Cutting com menos doses de macros que o ciclo anterior. A reducao exata ainda nao esta formalizada.
+
+Nao implementar score automatico de adesao, deteccao automatica de estagnacao ou mudanca automatica de fase.
+
 ## Protocolos - escopo de edicao manual confirmado
 
 Estado: **REGRA DE PRODUTO CONFIRMADA / IMPLEMENTACAO PARCIAL**
