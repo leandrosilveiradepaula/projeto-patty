@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { endCurrentAdminClientAssignments } from "@/lib/assignments/client-assignment-admin";
+import { upsertClientRegistrationPrivileged } from "@/lib/clients/registration-admin";
+import { parseClientRegistrationForm } from "@/lib/clients/registration";
 import { requireRole } from "@/lib/supabase/auth";
 import {
   createAccessibleClientTrainingRequest,
@@ -91,6 +93,64 @@ export async function recordTrainingRequestAction(
 
   return {
     message: "Solicitação de treino registrada no histórico.",
+    success: true,
+  };
+}
+
+export type AdminClientRegistrationFormState = {
+  message: string | null;
+  success: boolean;
+};
+
+export async function updateAdminClientRegistrationAction(
+  clientId: string,
+  _state: AdminClientRegistrationFormState,
+  formData: FormData,
+): Promise<AdminClientRegistrationFormState> {
+  await requireRole("admin");
+
+  if (!isUuid(clientId)) {
+    return {
+      message: "Cliente inválida para atualizar o cadastro.",
+      success: false,
+    };
+  }
+
+  const client = await getAccessibleClient(clientId);
+
+  if (!client) {
+    return {
+      message: "Esta cliente não está acessível para sua atribuição atual.",
+      success: false,
+    };
+  }
+
+  const parsed = parseClientRegistrationForm(formData);
+
+  if (!parsed.ok) {
+    return {
+      message: parsed.message,
+      success: false,
+    };
+  }
+
+  try {
+    await upsertClientRegistrationPrivileged({
+      clientId: client.id,
+      registration: parsed.value,
+    });
+  } catch {
+    return {
+      message:
+        "Não foi possível atualizar o Cadastro Atual. Confirme seu acesso e MFA e tente novamente.",
+      success: false,
+    };
+  }
+
+  revalidatePath(`/admin/clientes/${client.id}`);
+
+  return {
+    message: "Cadastro atual atualizado com sucesso.",
     success: true,
   };
 }
