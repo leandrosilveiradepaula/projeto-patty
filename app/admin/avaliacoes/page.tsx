@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
+import { assessmentKindLabel } from "@/lib/evaluations/assessment-draft";
 import { listAccessibleClientAssessments } from "@/lib/supabase/data-access";
 import Link from "next/link";
 import styles from "./page.module.css";
@@ -53,8 +54,12 @@ export default async function AdminAvaliacoesPage() {
                     }
                     clientLabel={displayName || "Cliente sem nome informado"}
                     evaluationDate={formatAssessmentDate(assessment.assessed_at)}
-                    meta={`Identificador: ${assessment.id}`}
-                    status={<Badge variant="neutral">Registrada</Badge>}
+                    meta={`${assessmentKindLabel(assessment.assessment_kind)} · Identificador: ${assessment.id}`}
+                    status={
+                      <Badge variant={assessment.finalized_at ? "neutral" : "warning"}>
+                        {assessment.finalized_at ? "Finalizada" : "Rascunho"}
+                      </Badge>
+                    }
                   />
                 </li>
               );

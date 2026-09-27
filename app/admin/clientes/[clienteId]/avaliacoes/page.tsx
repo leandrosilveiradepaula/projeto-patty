@@ -1,8 +1,11 @@
+import { AssessmentCreateForm } from "@/components/admin/AssessmentCreateForm";
 import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
 import { EvaluationListItem } from "@/components/admin/EvaluationListItem";
 import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { Card } from "@/components/ui/Card";
 import { Section } from "@/components/ui/Section";
+import { assessmentKindLabel } from "@/lib/evaluations/assessment-draft";
 import {
   getAccessibleClient,
   listAccessibleAssessmentsForClient,
@@ -58,6 +61,14 @@ export default async function AdminClientAssessmentsPage({
         }
       />
       <Section
+        description="Crie uma avaliação em rascunho. O registro permanece editável até a finalização explícita."
+        title="Nova avaliação"
+      >
+        <Card>
+          <AssessmentCreateForm clientId={client.id} />
+        </Card>
+      </Section>
+      <Section
         description="Registros desta cliente em ordem da avaliação mais recente para a mais antiga."
         title="Avaliações"
       >
@@ -81,8 +92,12 @@ export default async function AdminClientAssessmentsPage({
                   }
                   clientLabel={displayName || "Cliente sem nome informado"}
                   evaluationDate={formatAssessmentDate(assessment.assessed_at)}
-                  meta={`Identificador: ${assessment.id}`}
-                  status={<Badge variant="neutral">Registrada</Badge>}
+                  meta={`${assessmentKindLabel(assessment.assessment_kind)} · Identificador: ${assessment.id}`}
+                  status={
+                    <Badge variant={assessment.finalized_at ? "neutral" : "warning"}>
+                      {assessment.finalized_at ? "Finalizada" : "Rascunho"}
+                    </Badge>
+                  }
                 />
               </li>
             ))}

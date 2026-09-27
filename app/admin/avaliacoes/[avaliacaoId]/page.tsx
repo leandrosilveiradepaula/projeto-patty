@@ -1,9 +1,18 @@
+import {
+  AssessmentDeleteMeasurementButton,
+  AssessmentDraftMetadataForm,
+  AssessmentFinalizeForm,
+  AssessmentMeasurementForm,
+  AssessmentPhotoLinkForm,
+  AssessmentPhotoUnlinkButton,
+} from "@/components/admin/AssessmentDraftForms";
 import { EvaluationAdherenceDecision } from "@/components/admin/EvaluationAdherenceDecision";
 import { EvaluationInternalNote } from "@/components/admin/EvaluationInternalNote";
 import { EvaluationMeasureComparison } from "@/components/admin/EvaluationMeasureComparison";
 import { EvaluationMeasureList } from "@/components/admin/EvaluationMeasureList";
 import { EvaluationPhotoCollection } from "@/components/admin/EvaluationPhotoCollection";
 import { EvaluationProfessionalFollowUpForm } from "@/components/admin/EvaluationProfessionalFollowUpForm";
+import { assessmentKindLabel } from "@/lib/evaluations/assessment-draft";
 import {
   buildFactualMeasurementComparison,
   formatProfessionalMeasurementLabel,
@@ -18,6 +27,7 @@ import {
   listAccessibleAssessmentMeasurements,
   listAccessibleAssessmentPhotoFiles,
   listAccessibleAssessmentsForClient,
+  listAccessibleClientFiles,
   listAccessibleProfessionalFollowUpsForAssessment,
 } from "@/lib/supabase/data-access";
 import Link from "next/link";
@@ -92,20 +102,24 @@ export default async function AdminAvaliacaoDetailPage({
     notFound();
   }
 
-  const [measurements, photoFiles, followUps, clientAssessments] = await Promise.all([
-    listAccessibleAssessmentMeasurements(assessment.id),
-    listAccessibleAssessmentPhotoFiles(assessment.id),
-    listAccessibleProfessionalFollowUpsForAssessment(assessment.id),
-    listAccessibleAssessmentsForClient(assessment.client_id),
-  ]);
+  const isDraft = !assessment.finalized_at;
+  const [measurements, photoFiles, followUps, clientAssessments, clientFiles] =
+    await Promise.all([
+      listAccessibleAssessmentMeasurements(assessment.id),
+      listAccessibleAssessmentPhotoFiles(assessment.id),
+      listAccessibleProfessionalFollowUpsForAssessment(assessment.id),
+      listAccessibleAssessmentsForClient(assessment.client_id),
+      isDraft ? listAccessibleClientFiles(assessment.client_id) : Promise.resolve([]),
+    ]);
 
-  const currentAssessmentIndex = clientAssessments.findIndex(
-    (item) => item.id === assessment.id,
-  );
   const previousAssessment =
-    currentAssessmentIndex >= 0
-      ? clientAssessments[currentAssessmentIndex + 1] ?? null
-      : null;
+    clientAssessments.find(
+      (item) =>
+        item.id !== assessment.id &&
+        Boolean(item.finalized_at) &&
+        new Date(item.assessed_at).getTime() <
+          new Date(assessment.assessed_at).getTime(),
+    ) ?? null;
   const previousMeasurements = previousAssessment
     ? await listAccessibleAssessmentMeasurements(previousAssessment.id)
     : [];
@@ -114,6 +128,17 @@ export default async function AdminAvaliacaoDetailPage({
     previousMeasurements,
   );
 
+  const linkedPhotoIds = new Set(photoFiles.map((file) => file.id));
+  const availablePhotos = clientFiles
+    .filter(
+      (file) => file.file_kind === "photo" && !linkedPhotoIds.has(file.id),
+    )
+    .map((file) => ({
+      id: file.id,
+      label:
+        file.original_filename?.trim() ||
+        `Foto de ${formatAssessmentDate(file.created_at)}`,
+    }));
   const displayName = assessment.clients?.profiles?.display_name?.trim();
   const internalNotes = followUps.filter(
     (followUp) => Boolean(followUp.patty_observation?.trim()),
@@ -142,12 +167,18 @@ export default async function AdminAvaliacaoDetailPage({
               <dd>{formatAssessmentDate(assessment.assessed_at)}</dd>
             </div>
             <div className={styles.summaryDetail}>
+              <dt>Tipo</dt>
+              <dd>{assessmentKindLabel(assessment.assessment_kind)}</dd>
+            </div>
+            <div className={styles.summaryDetail}>
               <dt>Identificador</dt>
               <dd>{assessment.id}</dd>
             </div>
           </dl>
         </div>
-        <Badge variant="neutral">Registrada</Badge>
+        <Badge variant={isDraft ? "warning" : "neutral"}>
+          {isDraft ? "Rascunho" : "Finalizada"}
+        </Badge>
       </section>
       <Section
         description="Campos factuais da avaliação disponível para consulta."
@@ -159,6 +190,20 @@ export default async function AdminAvaliacaoDetailPage({
           </p>
         </Card>
       </Section>
+      {isDraft ? (
+        <Section
+          description="Data, tipo, medidas e vínculos de foto podem ser ajustados enquanto esta avaliação estiver em rascunho."
+          title="Editar rascunho"
+        >
+          <Card>
+            <AssessmentDraftMetadataForm
+              assessedAt={assessment.assessed_at}
+              assessmentId={assessment.id}
+              assessmentKind={assessment.assessment_kind}
+            />
+          </Card>
+        </Section>
+      ) : null}
       <Section
         description="Referência operacional confirmada pela Patty. Não define sozinho se uma avaliação está completa."
         title="Cadência de acompanhamento corporal"
@@ -177,6 +222,16 @@ export default async function AdminAvaliacaoDetailPage({
           </ul>
         </Card>
       </Section>
+      {isDraft ? (
+        <Section
+          description="Cadastre ou atualize uma medida no rascunho. O catálogo de chaves e unidades continua aberto; por isso o sistema não impõe nomes ou unidades não confirmados."
+          title="Adicionar ou atualizar medida"
+        >
+          <Card>
+            <AssessmentMeasurementForm assessmentId={assessment.id} />
+          </Card>
+        </Section>
+      ) : null}
       <Section
         description="Chaves, valores e unidades exatamente como foram registrados."
         title="Medidas"
@@ -184,6 +239,13 @@ export default async function AdminAvaliacaoDetailPage({
         {measurements.length > 0 ? (
           <EvaluationMeasureList
             items={measurements.map((measurement) => ({
+              action: isDraft ? (
+                <AssessmentDeleteMeasurementButton
+                  assessmentId={assessment.id}
+                  measurementId={measurement.id}
+                />
+              ) : undefined,
+              id: measurement.id,
               label: formatProfessionalMeasurementLabel(measurement.measurement_key),
               unit: measurement.unit,
               value: formatMeasurementValue(measurement.measurement_value),
@@ -217,6 +279,19 @@ export default async function AdminAvaliacaoDetailPage({
           </Card>
         )}
       </Section>
+      {isDraft ? (
+        <Section
+          description="Vincule uma foto privada já cadastrada para esta cliente. Desvincular remove apenas o vínculo com a avaliação e preserva o arquivo original."
+          title="Vincular foto ao rascunho"
+        >
+          <Card>
+            <AssessmentPhotoLinkForm
+              assessmentId={assessment.id}
+              photos={availablePhotos}
+            />
+          </Card>
+        </Section>
+      ) : null}
       <Section
         description="Fotos privadas vinculadas diretamente a esta avaliação, carregadas somente após autorização administrativa."
         title="Fotos"
@@ -224,6 +299,12 @@ export default async function AdminAvaliacaoDetailPage({
         {photoFiles.length > 0 ? (
           <EvaluationPhotoCollection
             items={photoFiles.map((file) => ({
+              action: isDraft ? (
+                <AssessmentPhotoUnlinkButton
+                  assessmentId={assessment.id}
+                  clientFileId={file.id}
+                />
+              ) : undefined,
               id: file.id,
               label: file.original_filename?.trim() || "Foto vinculada",
               metadata: formatFileMetadata(file.mime_type, file.byte_size) || undefined,
@@ -239,13 +320,32 @@ export default async function AdminAvaliacaoDetailPage({
           </Card>
         )}
       </Section>
+      {isDraft ? (
+        <Section
+          description="Finalizar congela data, tipo, medidas e vínculos de foto. O catálogo mensal ainda não é validado automaticamente; a revisão humana da Patty continua obrigatória."
+          title="Finalizar avaliação"
+        >
+          <Card>
+            <AssessmentFinalizeForm assessmentId={assessment.id} />
+          </Card>
+        </Section>
+      ) : null}
       <Section
-        description="Registre um novo acompanhamento profissional sem sobrescrever o histórico existente."
+        description="Decisões profissionais são registradas somente depois que a coleta da avaliação foi finalizada."
         title="Registrar acompanhamento"
       >
-        <Card>
-          <EvaluationProfessionalFollowUpForm assessmentId={assessment.id} />
-        </Card>
+        {isDraft ? (
+          <Card variant="subtle">
+            <EmptyState
+              description="Finalize a avaliação antes de registrar uma decisão profissional."
+              title="Avaliação ainda em rascunho"
+            />
+          </Card>
+        ) : (
+          <Card>
+            <EvaluationProfessionalFollowUpForm assessmentId={assessment.id} />
+          </Card>
+        )}
       </Section>
       <Section
         description="Histórico factual de acompanhamento profissional associado a esta avaliação. Registrar uma decisão não executa mudança automática de protocolo ou fase."

@@ -16,7 +16,6 @@
   gap: var(--space-4);
   align-items: center;
   min-width: 0;
-  margin: 0;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-large);
   background: var(--color-surface);
@@ -62,11 +61,31 @@
 }
 
 @media (max-width: 479px) {
-  .measure {
+  .measure,
+  .measureData {
     grid-template-columns: 1fr;
+  }
+
+  .action {
+    justify-content: flex-start;
   }
 
   .valueGroup {
     justify-content: flex-start;
   }
+}
+
+
+.measureData {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-4);
+  align-items: center;
+  min-width: 0;
+  margin: 0;
+}
+
+.action {
+  display: flex;
+  justify-content: flex-end;
 }

@@ -399,4 +399,17 @@ A execucao nao envia IDs internos de answer/question ao provider; usa aliases ef
 - UPDATE/DELETE: sem grants para browser e bloqueados por trigger append-only.
 
 O ator gravado deve ser `auth.uid()`. Service role continua reservado a operacoes server-side controladas e nao deve ser exposto ao browser.
+## Assessment draft writes
+
+As tabelas de avaliacao continuam protegidas pela policy `RESTRICTIVE` administrativa de MFA AAL2.
+
+Para novos rascunhos:
+- `client_assessments`: `SELECT`, `INSERT`, `UPDATE` para `authenticated`; sem `DELETE`; escrita exige role relacional `admin` + assignment ativo; INSERT grava `created_by_profile_id = auth.uid()`;
+- `assessment_measurements`: `SELECT`, `INSERT`, `UPDATE`, `DELETE` somente quando a avaliacao pai esta em rascunho e o admin possui assignment ativo;
+- `assessment_files`: `SELECT`, `INSERT`, `DELETE` somente para rascunho, cliente correspondente e assignment ativo;
+- `anon`: sem acesso.
+
+Triggers de banco tornam avaliacao, medidas e vinculos imutaveis depois de `finalized_at`.
+
+A finalizacao deve gravar `finalized_by_profile_id = auth.uid()`. Nao existe bypass de RLS para facilitar a UI.
 
