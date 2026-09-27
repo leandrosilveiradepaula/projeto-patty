@@ -236,7 +236,7 @@ O catalogo confirmado da **Avaliacao Completa** e:
 - abdomen, em centimetros (cm);
 - coxa, em centimetros (cm);
 - biceps, em centimetros (cm);
-- busto, em centimetros (cm);
+- busto para mulher ou peito para homem, em centimetros (cm);
 - quadril, em centimetros (cm);
 - ombros, em centimetros (cm);
 - panturrilhas, em centimetros (cm);
@@ -244,7 +244,7 @@ O catalogo confirmado da **Avaliacao Completa** e:
 
 Para qualquer medida corporal unilateral, a Patty pede que seja utilizado somente o **lado direito do corpo**. Nao criar registro bilateral por inferencia.
 
-O termo **busto** e o nome confirmado no catalogo atual da Avaliacao Completa; a mencao historica a "peito" nao deve ser tratada como uma medida adicional separada sem nova confirmacao.
+Para essa medida do torax, a nomenclatura confirmada pela Patty varia conforme o cliente: **busto para mulher** e **peito para homem**. Nao criar duas medidas separadas na mesma avaliacao por causa dessa diferenca de nome. A forma tecnica de determinar/apresentar esse rotulo no produto deve respeitar os dados cadastrais disponiveis e nao deve ser inferida sem regra de produto documentada.
 
 Fotos sao usadas principalmente para comparacao de evolucao. Em contexto de ganho de massa, tambem ajudam a considerar regioes que a cliente deseja desenvolver.
 
