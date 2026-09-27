@@ -531,7 +531,7 @@ export async function listAccessibleClientAssessments() {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("client_assessments")
-    .select("id, client_id, assessed_at, clients(id, profiles(display_name))")
+    .select("id, client_id, assessed_at, assessment_kind, created_by_profile_id, finalized_at, finalized_by_profile_id, clients(id, profiles(display_name))")
     .order("assessed_at", { ascending: false });
 
   if (error) {
@@ -556,11 +556,168 @@ export async function getAccessibleClientAssessment(assessmentId: string) {
   return data;
 }
 
+export async function createAccessibleClientAssessment(input: {
+  assessedAt: string;
+  assessmentKind: "fortnightly" | "monthly";
+  clientId: string;
+  createdByProfileId: string;
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_assessments")
+    .insert({
+      assessed_at: input.assessedAt,
+      assessment_kind: input.assessmentKind,
+      client_id: input.clientId,
+      created_by_profile_id: input.createdByProfileId,
+    })
+    .select(
+      "id, client_id, assessed_at, assessment_kind, created_by_profile_id, finalized_at, finalized_by_profile_id",
+    )
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function updateAccessibleClientAssessmentDraft(input: {
+  assessedAt: string;
+  assessmentId: string;
+  assessmentKind: "fortnightly" | "monthly";
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_assessments")
+    .update({
+      assessed_at: input.assessedAt,
+      assessment_kind: input.assessmentKind,
+    })
+    .eq("id", input.assessmentId)
+    .is("finalized_at", null)
+    .select(
+      "id, client_id, assessed_at, assessment_kind, created_by_profile_id, finalized_at, finalized_by_profile_id",
+    )
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function finalizeAccessibleClientAssessment(input: {
+  assessmentId: string;
+  finalizedByProfileId: string;
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_assessments")
+    .update({
+      finalized_at: new Date().toISOString(),
+      finalized_by_profile_id: input.finalizedByProfileId,
+    })
+    .eq("id", input.assessmentId)
+    .is("finalized_at", null)
+    .select(
+      "id, client_id, assessed_at, assessment_kind, created_by_profile_id, finalized_at, finalized_by_profile_id",
+    )
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function upsertAccessibleAssessmentMeasurement(input: {
+  assessmentId: string;
+  key: string;
+  unit: string;
+  value: number;
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("assessment_measurements")
+    .upsert(
+      {
+        assessment_id: input.assessmentId,
+        measurement_key: input.key,
+        measurement_value: input.value,
+        unit: input.unit,
+      },
+      {
+        onConflict: "assessment_id,measurement_key",
+      },
+    )
+    .select("id, assessment_id, measurement_key, measurement_value, unit")
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function deleteAccessibleAssessmentMeasurement(input: {
+  assessmentId: string;
+  measurementId: string;
+}) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("assessment_measurements")
+    .delete()
+    .eq("id", input.measurementId)
+    .eq("assessment_id", input.assessmentId);
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function linkAccessibleAssessmentPhoto(input: {
+  assessmentId: string;
+  clientFileId: string;
+  clientId: string;
+}) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("assessment_files").insert({
+    assessment_id: input.assessmentId,
+    client_file_id: input.clientFileId,
+    client_id: input.clientId,
+  });
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function unlinkAccessibleAssessmentPhoto(input: {
+  assessmentId: string;
+  clientFileId: string;
+}) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("assessment_files")
+    .delete()
+    .eq("assessment_id", input.assessmentId)
+    .eq("client_file_id", input.clientFileId);
+
+  if (error) {
+    throw error;
+  }
+}
+
 export async function listAccessibleAssessmentsForClient(clientId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("client_assessments")
-    .select("id, client_id, assessed_at")
+    .select("id, client_id, assessed_at, assessment_kind, created_by_profile_id, finalized_at, finalized_by_profile_id")
     .eq("client_id", clientId)
     .order("assessed_at", { ascending: false })
     .order("id", { ascending: true });
