@@ -602,9 +602,15 @@ Continuam abertas as regras internas e os campos detalhados necessarios para tre
 
 Quais regras profissionais ainda pendentes devem completar a criacao, revisao e aprovacao de um plano alimentar, sem reabrir as regras do metodo ja confirmadas em `BUSINESS_RULES.md` e `DECISIONS.md`?
 
-### QUESTAO ABERTA
+### PARCIALMENTE RESOLVIDO
 
-Qual catalogo de equivalentes sera validado, quem podera versiona-lo e qual parte, se alguma, podera ser exibida a cliente em um protocolo publicado?
+A Patty confirmou que a cliente pode escolher livremente substituicoes dentro do grupo de equivalentes permitido pelo protocolo. Na proteina, o grupo de maior teor de gordura possui limite diario e, depois de atingi-lo, as doses restantes devem vir do grupo de menor teor de gordura. "Livre escolha" nao significa proteina ilimitada.
+
+Continuam abertos:
+- catalogo completo e versionado de equivalentes;
+- governanca de quem pode alterar/versionar o catalogo;
+- regras de exibicao detalhada do catalogo para a cliente;
+- regras equivalentes para grupos de carboidratos/gorduras quando ainda nao formalizadas.
 
 
 ### PARCIALMENTE RESOLVIDO
