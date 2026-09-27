@@ -1923,3 +1923,13 @@ Estados inicialmente incluidos:
 
 Nao inferir prioridade, prazo, urgencia, adesao, estagnacao ou decisao profissional a partir desses estados. Novas categorias so podem entrar quando houver estado objetivo documentado que as sustente.
 
+## 2026-09-27 - Diff de protocolo respeita linhagem explicita
+
+### DECISAO TECNICA
+
+A comparacao administrativa entre versoes de protocolo usa exclusivamente `protocol_versions.based_on_version_id`.
+
+Se a versao nao declarar base, a UI mostra que nao existe linhagem explicita para comparar. Nao inferir a base pelo numero da versao, data de criacao ou versao imediatamente anterior.
+
+O diff compara apenas fatos persistidos de estrutura alimentar e nao produz avaliacao profissional.
+
