@@ -1028,9 +1028,11 @@ export async function listAccessibleProtocolVersions(protocolId: string) {
 
 export async function cloneAccessibleProtocolVersionDraft(
   sourceProtocolVersionId: string,
+  planSnapshot: Json | null,
 ) {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("clone_protocol_version_draft", {
+    p_plan_snapshot: planSnapshot,
     p_source_protocol_version_id: sourceProtocolVersionId,
   });
 
