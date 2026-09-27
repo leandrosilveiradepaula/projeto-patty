@@ -118,6 +118,18 @@ export default async function AdminPage() {
         <div className={styles.supportGrid}>
           <Card className={styles.areaCard}>
             <div>
+              <h3 className={styles.areaTitle}>Pendências</h3>
+              <p className={styles.areaDescription}>
+                Consulte estados operacionais abertos derivados diretamente do
+                lifecycle já registrado, sem prioridade automática.
+              </p>
+            </div>
+            <Link className={styles.areaLink} href="/admin/pendencias">
+              Acessar pendências
+            </Link>
+          </Card>
+          <Card className={styles.areaCard}>
+            <div>
               <h3 className={styles.areaTitle}>Clientes</h3>
               <p className={styles.areaDescription}>
                 Consulte clientes atribuídos, cadastro, anamnese, avaliações e
