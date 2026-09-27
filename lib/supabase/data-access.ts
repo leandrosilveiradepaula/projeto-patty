@@ -545,7 +545,7 @@ export async function getAccessibleClientAssessment(assessmentId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("client_assessments")
-    .select("id, client_id, assessed_at, clients(id, profiles(display_name))")
+    .select("id, client_id, assessed_at, assessment_kind, created_by_profile_id, finalized_at, finalized_by_profile_id, clients(id, profiles(display_name))")
     .eq("id", assessmentId)
     .maybeSingle();
 
