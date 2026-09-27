@@ -29,6 +29,11 @@ begin
       using errcode = 'P0002';
   end if;
 
+  if v_source.submitted_for_review_at is null then
+    raise exception 'source protocol version must be frozen before cloning'
+      using errcode = '55000';
+  end if;
+
   perform pg_catalog.pg_advisory_xact_lock(
     pg_catalog.hashtextextended(v_source.protocol_id::text, 0)
   );
