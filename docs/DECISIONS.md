@@ -1866,4 +1866,17 @@ Como a Patty confirmou que so prescreve treino para clientes que solicitam o ser
 A Patty registra o fato sob admin/AAL2/assignment ativo. O registro nao gera treino, nao seleciona exercicios, nao altera protocolo e nao publica nada.
 
 A progressao definitiva de treino continua aberta e nao e inferida desta decisao.
+## 2026-09-26 - Avaliacao em rascunho antes da consolidacao
+
+### DECISAO DE PRODUTO/TECNICA
+
+A autoria operacional de Avaliacoes usa lifecycle `rascunho -> finalizada`.
+
+Enquanto em rascunho, a Patty pode ajustar data/tipo, medidas e vinculos de fotos privadas. A finalizacao e explicita e torna esses dados imutaveis.
+
+A escolha evita sobrescrever historico depois da consolidacao e permite fechar o fluxo operacional sem inventar o catalogo mensal completo ou unidades ainda abertas.
+
+A classificacao quinzenal/mensal registra a cadencia confirmada, mas o banco nao infere completude por chaves de medida enquanto catalogo/unidades nao forem formalizados.
+
+Decisoes profissionais de acompanhamento associadas a uma avaliacao so podem ser registradas depois da finalizacao.
 
