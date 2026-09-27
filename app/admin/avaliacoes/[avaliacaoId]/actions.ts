@@ -2,11 +2,23 @@
 
 import { revalidatePath } from "next/cache";
 
+import {
+  isAssessmentKind,
+  parseAssessmentDate,
+  parseMeasurementDraft,
+} from "@/lib/evaluations/assessment-draft";
 import { isProfessionalDecision } from "@/lib/follow-up/professional-decisions";
 import { requireRole } from "@/lib/supabase/auth";
 import {
   createAccessibleProfessionalFollowUp,
+  deleteAccessibleAssessmentMeasurement,
+  finalizeAccessibleClientAssessment,
   getAccessibleClientAssessment,
+  linkAccessibleAssessmentPhoto,
+  listAccessibleClientFiles,
+  unlinkAccessibleAssessmentPhoto,
+  updateAccessibleClientAssessmentDraft,
+  upsertAccessibleAssessmentMeasurement,
 } from "@/lib/supabase/data-access";
 
 export type ProfessionalFollowUpFormState = {
@@ -84,3 +96,294 @@ export async function addProfessionalFollowUp(
     success: true,
   };
 }
+
+export type AssessmentDraftActionState = {
+  message: string | null;
+  success: boolean;
+};
+
+async function getDraftAssessment(assessmentId: string) {
+  const assessment = await getAccessibleClientAssessment(assessmentId);
+
+  if (!assessment) {
+    return {
+      assessment: null,
+      message: "Esta avaliação não está acessível para sua atribuição atual.",
+    };
+  }
+
+  if (assessment.finalized_at) {
+    return {
+      assessment: null,
+      message: "Esta avaliação já foi finalizada e não pode mais ser editada.",
+    };
+  }
+
+  return {
+    assessment,
+    message: null,
+  };
+}
+
+export async function updateAssessmentDraftAction(
+  assessmentId: string,
+  _state: AssessmentDraftActionState,
+  formData: FormData,
+): Promise<AssessmentDraftActionState> {
+  await requireRole("admin");
+  const { assessment, message } = await getDraftAssessment(assessmentId);
+
+  if (!assessment) {
+    return { message, success: false };
+  }
+
+  const kindValue = formData.get("assessmentKind");
+  const assessedAt = parseAssessmentDate(formData.get("assessedAt"));
+
+  if (typeof kindValue !== "string" || !isAssessmentKind(kindValue)) {
+    return {
+      message: "Selecione se a avaliação é quinzenal ou mensal.",
+      success: false,
+    };
+  }
+
+  if (!assessedAt) {
+    return {
+      message: "Informe uma data de avaliação válida.",
+      success: false,
+    };
+  }
+
+  try {
+    await updateAccessibleClientAssessmentDraft({
+      assessedAt,
+      assessmentId: assessment.id,
+      assessmentKind: kindValue,
+    });
+  } catch {
+    return {
+      message:
+        "Não foi possível atualizar o rascunho. Confirme seu acesso e MFA e tente novamente.",
+      success: false,
+    };
+  }
+
+  revalidatePath(`/admin/avaliacoes/${assessment.id}`);
+  revalidatePath(`/admin/clientes/${assessment.client_id}/avaliacoes`);
+
+  return {
+    message: "Dados do rascunho atualizados.",
+    success: true,
+  };
+}
+
+export async function saveAssessmentMeasurementAction(
+  assessmentId: string,
+  _state: AssessmentDraftActionState,
+  formData: FormData,
+): Promise<AssessmentDraftActionState> {
+  await requireRole("admin");
+  const { assessment, message } = await getDraftAssessment(assessmentId);
+
+  if (!assessment) {
+    return { message, success: false };
+  }
+
+  const parsed = parseMeasurementDraft({
+    key: formData.get("measurementKey"),
+    unit: formData.get("unit"),
+    value: formData.get("measurementValue"),
+  });
+
+  if ("error" in parsed) {
+    return {
+      message: parsed.error,
+      success: false,
+    };
+  }
+
+  try {
+    await upsertAccessibleAssessmentMeasurement({
+      assessmentId: assessment.id,
+      key: parsed.data.key,
+      unit: parsed.data.unit,
+      value: parsed.data.value,
+    });
+  } catch {
+    return {
+      message:
+        "Não foi possível salvar a medida. Confirme o rascunho e seu acesso atual.",
+      success: false,
+    };
+  }
+
+  revalidatePath(`/admin/avaliacoes/${assessment.id}`);
+
+  return {
+    message: "Medida salva no rascunho.",
+    success: true,
+  };
+}
+
+export async function deleteAssessmentMeasurementAction(
+  assessmentId: string,
+  measurementId: string,
+  _state: AssessmentDraftActionState,
+): Promise<AssessmentDraftActionState> {
+  await requireRole("admin");
+  const { assessment, message } = await getDraftAssessment(assessmentId);
+
+  if (!assessment) {
+    return { message, success: false };
+  }
+
+  try {
+    await deleteAccessibleAssessmentMeasurement({
+      assessmentId: assessment.id,
+      measurementId,
+    });
+  } catch {
+    return {
+      message: "Não foi possível remover a medida do rascunho.",
+      success: false,
+    };
+  }
+
+  revalidatePath(`/admin/avaliacoes/${assessment.id}`);
+
+  return {
+    message: "Medida removida do rascunho.",
+    success: true,
+  };
+}
+
+export async function linkAssessmentPhotoAction(
+  assessmentId: string,
+  _state: AssessmentDraftActionState,
+  formData: FormData,
+): Promise<AssessmentDraftActionState> {
+  await requireRole("admin");
+  const { assessment, message } = await getDraftAssessment(assessmentId);
+
+  if (!assessment) {
+    return { message, success: false };
+  }
+
+  const fileId = formData.get("clientFileId");
+
+  if (typeof fileId !== "string" || !fileId) {
+    return {
+      message: "Selecione uma foto privada para vincular.",
+      success: false,
+    };
+  }
+
+  const files = await listAccessibleClientFiles(assessment.client_id);
+  const photo = files.find(
+    (file) => file.id === fileId && file.file_kind === "photo",
+  );
+
+  if (!photo) {
+    return {
+      message: "A foto selecionada não está disponível para esta cliente.",
+      success: false,
+    };
+  }
+
+  try {
+    await linkAccessibleAssessmentPhoto({
+      assessmentId: assessment.id,
+      clientFileId: photo.id,
+      clientId: assessment.client_id,
+    });
+  } catch {
+    return {
+      message:
+        "Não foi possível vincular a foto. Ela pode já estar vinculada a esta avaliação.",
+      success: false,
+    };
+  }
+
+  revalidatePath(`/admin/avaliacoes/${assessment.id}`);
+
+  return {
+    message: "Foto vinculada ao rascunho.",
+    success: true,
+  };
+}
+
+export async function unlinkAssessmentPhotoAction(
+  assessmentId: string,
+  clientFileId: string,
+  _state: AssessmentDraftActionState,
+): Promise<AssessmentDraftActionState> {
+  await requireRole("admin");
+  const { assessment, message } = await getDraftAssessment(assessmentId);
+
+  if (!assessment) {
+    return { message, success: false };
+  }
+
+  try {
+    await unlinkAccessibleAssessmentPhoto({
+      assessmentId: assessment.id,
+      clientFileId,
+    });
+  } catch {
+    return {
+      message: "Não foi possível desvincular a foto do rascunho.",
+      success: false,
+    };
+  }
+
+  revalidatePath(`/admin/avaliacoes/${assessment.id}`);
+
+  return {
+    message: "Foto desvinculada do rascunho. O arquivo privado foi preservado.",
+    success: true,
+  };
+}
+
+export async function finalizeAssessmentAction(
+  assessmentId: string,
+  _state: AssessmentDraftActionState,
+  formData: FormData,
+): Promise<AssessmentDraftActionState> {
+  const context = await requireRole("admin");
+  const { assessment, message } = await getDraftAssessment(assessmentId);
+
+  if (!assessment) {
+    return { message, success: false };
+  }
+
+  if (formData.get("confirmFinalization") !== "yes") {
+    return {
+      message:
+        "Confirme que revisou os dados antes de finalizar. Depois disso o registro fica imutável.",
+      success: false,
+    };
+  }
+
+  try {
+    await finalizeAccessibleClientAssessment({
+      assessmentId: assessment.id,
+      finalizedByProfileId: context.profileId,
+    });
+  } catch {
+    return {
+      message:
+        "Não foi possível finalizar a avaliação. Confirme seu acesso e MFA e tente novamente.",
+      success: false,
+    };
+  }
+
+  revalidatePath(`/admin/avaliacoes/${assessment.id}`);
+  revalidatePath(`/admin/clientes/${assessment.client_id}/avaliacoes`);
+  revalidatePath("/admin/avaliacoes");
+
+  return {
+    message: "Avaliação finalizada. Medidas e vínculos agora são imutáveis.",
+    success: true,
+  };
+}
+
