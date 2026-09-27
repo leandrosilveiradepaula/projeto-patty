@@ -55,7 +55,15 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
     (submission) => Boolean(submission.submitted_at),
   );
   const reviewsBySubmission = new Map<string, number>();
-  const clarificationRequests = [];
+  const clarificationRequests: Array<{
+    clientId: string;
+    created_at: string;
+    id: string;
+    request_text: string;
+    requested_by_profile_id: string;
+    source_answer_id: string | null;
+    submission_id: string;
+  }> = [];
 
   await Promise.all(
     submitted.map(async (submission) => {
