@@ -12,6 +12,8 @@ O grupo de maior teor de gordura possui limite diario. A justificativa profissio
 
 O limite permanece sendo metade das doses totais de proteina, arredondando para cima.
 
+Exemplo confirmado: com 10 doses totais de proteina, no maximo 5 podem vir do grupo de maior teor de gordura; as 5 restantes devem vir do grupo de menor teor de gordura.
+
 Ao atingir esse limite, as doses restantes de proteina do dia devem ser escolhidas no grupo de menor teor de gordura.
 
 "Libre escolha" no grupo de menor teor de gordura significa escolha entre os alimentos permitidos dentro do total de doses de proteina do protocolo; nao significa proteina ilimitada.
