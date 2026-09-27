@@ -319,6 +319,18 @@ O lote contem somente o video da balanca aprovado pela Patty e permanece deliber
 
 A integracao Vercel usada nesta sessao nao oferece operacao de Storage, portanto a criacao/conexao do store continua uma pendencia operacional manual. O procedimento seguro foi versionado em `docs/VERCEL_BLOB_SETUP.md`. Isso nao bloqueia outras frentes tecnicas do sistema completo e nao autoriza migracao dos demais arquivos do Drive.
 
+## IA - revisao humana de findings
+
+Estado: **REGRA DE PRODUTO CONFIRMADA / UX OPERACIONAL PARCIAL**
+
+A Patty pode aceitar um finding como observacao interna ou transforma-lo em anotacao propria.
+
+Nenhum conteudo originado da IA pode ser enviado, publicado ou exibido para a cliente sem aprovacao explicita previa da Patty.
+
+O sistema deve preservar separadamente o output original da IA, a decisao humana sobre o achado, a anotacao profissional resultante e eventual conteudo aprovado para comunicacao/publicacao.
+
+A UX completa das demais acoes sobre findings ainda precisa ser fechada e implementada.
+
 ## IA - execution nao terminal
 
 Estado: **VISIBILIDADE IMPLEMENTADA / RECOVERY AINDA ABERTO**
