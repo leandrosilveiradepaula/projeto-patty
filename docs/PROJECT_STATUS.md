@@ -804,4 +804,25 @@ Os itens sao ordenados pela data factual mais antiga primeiro, apenas para naveg
 O painel nao calcula atraso, adesao, estagnacao, urgencia, risco clinico ou prioridade; nao transforma solicitacao de treino ou arquivo recebido em pendencia por inferencia.
 
 A montagem usa somente consultas RLS ja existentes sob as atribuicoes ativas da Patty. Nao usa service role, nao cria tabela de pendencias e nao duplica estado derivavel.
+## 2026-09-27 - Clonagem atomica de versao de protocolo
+
+### IMPLEMENTADO NA BRANCH / MIGRATION PENDENTE DE APPLY
+
+A administracao ganhou uma acao para criar um novo rascunho a partir de uma versao ja submetida/congelada.
+
+A clonagem e atomica no Postgres e copia somente o conteudo versionado persistido:
+- protocol version com `based_on_version_id` apontando para a fonte;
+- meal plan version;
+- variantes;
+- refeicoes;
+- doses;
+- ciclos e passos.
+
+Aprovacao e publicacao nao sao copiadas. A nova versao nasce em draft.
+
+A RPC `clone_protocol_version_draft` e `SECURITY INVOKER`, executavel apenas por `authenticated`, e continua subordinada as RLS, assignment ativo e MFA AAL2 existentes.
+
+A migration `20260927014500_clone_protocol_version_draft.sql` foi validada no Supabase SaaS dentro de `BEGIN`/`ROLLBACK`; nenhum schema remoto foi alterado durante essa validacao.
+
+Edicao profissional completa do novo draft continua fora desta tarefa.
 
