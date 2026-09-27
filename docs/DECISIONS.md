@@ -1,3 +1,36 @@
+## 2026-09-27 - Escopo obrigatorio da Patty antes do uso real
+
+### DEFINICAO DE PRODUTO
+
+Nesta rodada, **primeiro lancamento** significa a primeira versao do aplicativo considerada pronta para uso real no atendimento pela Patty e pelas clientes. Nao significa o primeiro dia de uma cliente nem o primeiro acesso ao sistema.
+
+### DECISAO DE PRODUTO CONFIRMADA PELA PATTY
+
+Todos os itens listados na pergunta 8 devem estar disponiveis para a Patty antes de o aplicativo entrar em uso real:
+
+- convidar/cadastrar cliente;
+- editar Cadastro Atual;
+- ler a Anamnese;
+- registrar correcao posterior da Anamnese preservando historico;
+- solicitar esclarecimento a cliente;
+- acessar fotos, exames e documentos privados autorizados;
+- criar e trabalhar com avaliacoes;
+- comparar avaliacoes/evolucao;
+- criar/editar protocolo;
+- criar nova versao de protocolo;
+- revisar e aprovar protocolo;
+- publicar protocolo para a cliente;
+- liberar conteudos;
+- visualizar/administrar solicitacao de treino;
+- usar o painel de pendencias;
+- usar a assistencia de IA para revisao da Anamnese, respeitando os gates de privacidade e revisao humana.
+
+Nenhum desses itens deve ser planejado como funcionalidade de uma segunda fase posterior ao inicio do uso real.
+
+### LIMITE
+
+Esta decisao define **escopo obrigatorio**, nao declara que todos os itens ja estejam implementados, testados, aplicados ou publicados. A prontidao tecnica de cada fluxo continua devendo ser verificada separadamente.
+
 ## 2026-09-27 - Escopo obrigatorio da cliente no primeiro lancamento
 
 ### DECISAO DE PRODUTO CONFIRMADA PELA PATTY
