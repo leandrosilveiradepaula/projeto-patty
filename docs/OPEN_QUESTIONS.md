@@ -145,7 +145,7 @@ O nome do arquivo preserva o sufixo `CANDIDATE` por historico; o conteudo corres
 
 ### FATO JA CONFIRMADO
 
-A Patty confirmou que as medidas corporais podem ser separadas da Anamnese e tratadas em um fluxo proprio de Avaliacao/Medidas. O catalogo definitivo de medidas, unidades, obrigatoriedade e fluxo de correcao continuam abertos.
+A Patty confirmou que as medidas corporais podem ser separadas da Anamnese e tratadas em um fluxo proprio de Avaliacao/Medidas. O lifecycle operacional `rascunho -> finalizada` ja esta definido para autoria. O catalogo definitivo de medidas, unidades, obrigatoriedade e o fluxo de correcao historica depois da finalizacao continuam abertos.
 
 ### FATO RESOLVIDO
 
