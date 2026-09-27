@@ -14,10 +14,13 @@ O produto deve prever um check-in de acompanhamento e incentivo para:
 - registrar realizacao/frequencia de atividade fisica ou academia;
 - acompanhar progresso dessas metas.
 
+### MOMENTO DE DEFINICAO CONFIRMADO
+
+As metas e configuracoes individuais do check-in podem ser definidas na entrega do primeiro protocolo da cliente.
+
 ### QUESTOES AINDA ABERTAS
 
-Ainda precisam ser definidos:
-- quem define cada meta;
+Ainda precisam ser formalizados como padrao/regra:
 - valor/formula da meta de liquidos;
 - unidade operacional;
 - meta de frequencia de atividade/academia;
