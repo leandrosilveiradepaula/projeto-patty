@@ -1,3 +1,31 @@
+## 2026-09-27 - Progressao do protocolo por sequencia, adesao e resultado
+
+### REGRA CONFIRMADA PELA PATTY
+
+O acompanhamento segue a sequencia profissional ja confirmada:
+Reconhecimento Metabolico -> Cutting 1 Dia 1/Dia 2 -> Cutting 1 2 Low/1 High -> Up Metabolico -> Cutting 2 Linear -> Cutting 2 Dia 1/Dia 2 -> Cutting 2 2 Low/1 High -> Cutting 3 Linear.
+
+A progressao entre etapas nao deve ser automatica.
+
+A adesao ao protocolo e um criterio central para decidir se a cliente pode continuar a sequencia. Se a cliente nao estiver aderindo adequadamente, a Patty interrompe a progressao e redefine os proximos passos.
+
+Se a cliente nao estiver trazendo o resultado esperado, a Patty tambem interrompe a progressao para decidir manualmente o que fazer a seguir.
+
+Nao inferir que ausencia de resultado significa automaticamente baixa adesao.
+
+### CUTTING 2
+
+Depois do Up Metabolico, o Cutting 2 reinicia a estrutura de progressao do Cutting com menos doses de macros em relacao ao ciclo anterior.
+
+Ainda nao estao formalizados:
+- quanto cada macro diminui;
+- quais macros diminuem em cada transicao;
+- formula exata dessa reducao;
+- criterio objetivo de adesao suficiente;
+- criterio objetivo de resultado suficiente/insuficiente.
+
+Nenhuma dessas lacunas autoriza score de adesao, deteccao automatica de estagnacao ou mudanca automatica de fase.
+
 ## 2026-09-27 - Revisao humana dos findings de IA
 
 ### REGRA CONFIRMADA PELA PATTY
