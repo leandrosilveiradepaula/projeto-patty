@@ -615,14 +615,15 @@ A Patty confirmou que a cliente deve visualizar a rotina alimentar publicada e, 
 
 A Patty confirmou que o produto deve prever check-ins com metas e lembretes para:
 - liquidos consumidos ao longo do dia;
-- frequencia/realizacao de atividade fisica ou academia;
+- meta de liquidos baseada no peso da cliente;
+- check-in diario de atividade fisica com registro "fez / nao fez", independente do treino prescrito;
 - visualizacao do progresso pela cliente como estimulo adicional.
 
 A Patty confirmou que as metas/configuracoes individuais podem ser definidas na entrega do primeiro protocolo.
 
 Ainda faltam formalizar:
-- formula/valor e unidade padrao da meta de liquidos;
-- meta padrao de atividade/academia;
+- formula exata e unidade da meta de liquidos por peso;
+- regra de recalculo apos mudanca de peso;
 - horarios e cadencia dos lembretes;
 - o que a Patty visualiza e pode corrigir;
 - se registros anteriores podem ser editados;
