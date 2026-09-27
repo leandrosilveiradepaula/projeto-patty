@@ -147,11 +147,10 @@ export default async function AdminAvaliacaoDetailPage({
   const internalNotes = followUps.filter(
     (followUp) => Boolean(followUp.patty_observation?.trim()),
   );
-  const finalizationReadiness = isAssessmentKind(
-    assessment.assessment_kind ?? "",
-  )
+  const assessmentKind = assessment.assessment_kind;
+  const finalizationReadiness = isAssessmentKind(assessmentKind)
     ? buildAssessmentFinalizationReadiness({
-        assessmentKind: assessment.assessment_kind,
+        assessmentKind,
         measurementKeys: measurements.map(
           (measurement) => measurement.measurement_key,
         ),
