@@ -1,3 +1,24 @@
+## 2026-09-27 - Avaliacao Basica e Avaliacao Completa
+
+### REGRA CONFIRMADA PELA PATTY
+
+A nomenclatura profissional de avaliacao corporal passa a ser:
+- **Avaliacao Completa**: substitui o nome historico "mensal";
+- **Avaliacao Basica**: substitui o nome historico "quinzenal".
+
+A cadencia e individual e fica ancorada na data de inicio do acompanhamento:
+- a Avaliacao Completa ocorre mensalmente no mesmo dia do mes correspondente ao inicio do processo;
+- a Avaliacao Basica ocorre no meio do intervalo entre duas Avaliacoes Completas;
+- exemplo fornecido pela Patty: Avaliacao Completa no dia 2 -> Avaliacao Basica no dia 17.
+
+Portanto, o desenho normal nao cria uma avaliacao "mensal" e outra "quinzenal" concorrentes na mesma data. A Basica e uma ocorrencia intermediaria dentro do ciclo entre Completas.
+
+### LIMITE
+
+Ainda nao esta definida a regra de calendario para clientes cuja data-ancora seja 29, 30 ou 31 em meses que nao possuam o mesmo dia.
+
+O catalogo completo de medidas e unidades da Avaliacao Completa tambem permanece aberto.
+
 ## 2026-09-24 - Vercel Private Blob para midia educacional
 
 ### DECISAO TECNICA
