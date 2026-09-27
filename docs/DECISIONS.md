@@ -1,3 +1,17 @@
+## 2026-09-27 - Correcao de Avaliacao Finalizada
+
+### REGRA CONFIRMADA PELA PATTY
+
+Quando uma avaliacao ja finalizada precisar de correcao:
+- a avaliacao original nao e editada nem sobrescrita;
+- deve ser criada uma nova avaliacao corrigida;
+- a avaliacao anterior permanece preservada no historico;
+- a cliente deve visualizar a avaliacao corrigida.
+
+### QUESTAO AINDA ABERTA
+
+A resposta nao definiu se a avaliacao original tambem continuara visivel para a cliente depois da correcao. Essa apresentacao nao deve ser inferida.
+
 ## 2026-09-27 - Catalogo da Avaliacao Completa
 
 ### REGRA CONFIRMADA PELA PATTY
