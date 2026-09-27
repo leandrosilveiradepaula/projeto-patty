@@ -1,3 +1,21 @@
+## 2026-09-27 - Substituicoes dentro dos Grupos de Proteina
+
+### REGRA CONFIRMADA PELA PATTY
+
+A cliente pode escolher livremente substituicoes de alimentos dentro do grupo de equivalentes permitido pelo protocolo.
+
+Na proteina existem dois grupos:
+- maior teor de gordura;
+- menor teor de gordura.
+
+O grupo de maior teor de gordura possui limite diario. A justificativa profissional informada pela Patty e evitar excesso de gordura na alimentacao e considerar cuidados relacionados a saude e colesterol.
+
+O limite permanece sendo metade das doses totais de proteina, arredondando para cima.
+
+Ao atingir esse limite, as doses restantes de proteina do dia devem ser escolhidas no grupo de menor teor de gordura.
+
+"Libre escolha" no grupo de menor teor de gordura significa escolha entre os alimentos permitidos dentro do total de doses de proteina do protocolo; nao significa proteina ilimitada.
+
 ## 2026-09-27 - Visibilidade do Protocolo e Check-in de Metas
 
 ### REGRA CONFIRMADA PELA PATTY
