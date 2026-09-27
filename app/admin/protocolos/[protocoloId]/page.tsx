@@ -1,4 +1,5 @@
 import { AdminMealDraftGuidance } from "@/components/admin/AdminMealDraftGuidance";
+import { AdminProtocolVersionDiff } from "@/components/admin/AdminProtocolVersionDiff";
 import { AdminProtocolVersionPlan } from "@/components/admin/AdminProtocolVersionPlan";
 import { ProtocolLifecycleAction } from "@/components/admin/ProtocolLifecycleAction";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -19,6 +20,7 @@ import {
   summarizeMealDraftPlan,
 } from "@/lib/protocol/meal-draft-guidance";
 import { getProtocolLifecycleAction } from "@/lib/protocol/lifecycle";
+import { buildProtocolVersionPlanDiff } from "@/lib/protocol/version-diff";
 import { isUuid } from "@/lib/validation/uuid";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -67,6 +69,9 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
   const mealPlansByVersionId = new Map(
     mealPlans.map((mealPlan) => [mealPlan.protocolVersionId, mealPlan]),
   );
+  const versionsById = new Map(
+    versions.map((version) => [version.id, version]),
+  );
 
   return (
     <>
@@ -94,6 +99,16 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
                 hasPublication: Boolean(publication),
                 submittedForReview: Boolean(version.submitted_for_review_at),
               });
+              const baseVersion = version.based_on_version_id
+                ? versionsById.get(version.based_on_version_id) ?? null
+                : null;
+              const baseMealPlan = version.based_on_version_id
+                ? mealPlansByVersionId.get(version.based_on_version_id) ?? null
+                : null;
+              const planDiff = buildProtocolVersionPlanDiff(
+                baseMealPlan,
+                mealPlan,
+              );
 
               return (
                 <li className={styles.versionItem} key={version.id}>
@@ -126,6 +141,19 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
                       de aprovação ou publicação.
                     </p>
                     <AdminProtocolVersionPlan plan={mealPlan} />
+                  </div>
+                  <div className={styles.versionPlan}>
+                    <h4>Comparação com a base explícita</h4>
+                    <p>
+                      Diferenças factuais entre esta versão e o
+                      based_on_version_id registrado. Nenhuma versão é escolhida
+                      automaticamente como base.
+                    </p>
+                    <AdminProtocolVersionDiff
+                      baseVersionId={version.based_on_version_id}
+                      baseVersionNumber={baseVersion?.version_number}
+                      diff={planDiff}
+                    />
                   </div>
                   <div className={styles.lifecycleAction}>
                     <h4>Próxima ação manual</h4>
