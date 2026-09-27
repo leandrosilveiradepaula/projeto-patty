@@ -1,8 +1,8 @@
-# Mapa de prontidao do MVP
+# Mapa de prontidao do sistema completo
 
 Data de referencia: 2026-09-26 (atualizado apos validacao do update do draft canonico em producao).
 
-Este documento e um mapa operacional do estado atual. Ele nao substitui `MVP.md`, `DECISIONS.md`, `BUSINESS_RULES.md` ou `OPEN_QUESTIONS.md`.
+Este documento e um mapa operacional do estado atual. Ele nao substitui `sistema completo.md`, `DECISIONS.md`, `BUSINESS_RULES.md` ou `OPEN_QUESTIONS.md`.
 
 Estados usados:
 
@@ -10,7 +10,7 @@ Estados usados:
 - **CI VALIDADO**: passou pelo workflow atual de `npm ci`, `npm run typecheck`, testes determinísticos e `npm run build`;
 - **SAAS VALIDADO**: estado relevante foi conferido no Supabase SaaS;
 - **PRODUCAO VALIDADA**: o commit correspondente esta efetivamente publicado na Vercel e o fluxo foi conferido no ambiente de producao;
-- **PARCIAL**: fundacao existe, mas falta fluxo necessario para o MVP;
+- **PARCIAL**: fundacao existe, mas falta fluxo necessario para o sistema completo;
 - **BLOQUEADO POR DECISAO**: nao implementar sem resposta/documentacao;
 - **INVENTARIADO**: levantamento existe, sem autorizacao de migracao/publicacao.
 
@@ -152,13 +152,13 @@ Ja existe:
 - download administrativo por signed URL curta, nao persistida;
 - rejeicao deterministica de identificadores de arquivo malformados antes de consulta ao banco.
 
-Os formatos e os limites de tamanho do MVP estao definidos: fotos em JPEG/PNG/WebP ate 10 MB; exames e documentos em PDF/JPEG/PNG ate 20 MB. A cliente faz upload direto do browser para Storage privado sob RLS, usando area temporaria e validacao server-side antes de o arquivo ser considerado valido. Paths nao contem PII, objetos nao sao sobrescritos e hard delete direto pelo browser nao e permitido. A validacao deterministica de formato/extensao, MIME detectado, tamanho e geracao de path com UUIDs internos esta implementada em `lib/validation/private-files.ts` e coberta por `test:validation`. A autorizacao remota usa `client_file_upload_sessions`, com path temporario gerado pelo banco, expiracao de 15 minutos e policy de INSERT limitada ao objeto `pending` exato.
+Os formatos e os limites de tamanho do sistema completo estao definidos: fotos em JPEG/PNG/WebP ate 10 MB; exames e documentos em PDF/JPEG/PNG ate 20 MB. A cliente faz upload direto do browser para Storage privado sob RLS, usando area temporaria e validacao server-side antes de o arquivo ser considerado valido. Paths nao contem PII, objetos nao sao sobrescritos e hard delete direto pelo browser nao e permitido. A validacao deterministica de formato/extensao, MIME detectado, tamanho e geracao de path com UUIDs internos esta implementada em `lib/validation/private-files.ts` e coberta por `test:validation`. A autorizacao remota usa `client_file_upload_sessions`, com path temporario gerado pelo banco, expiracao de 15 minutos e policy de INSERT limitada ao objeto `pending` exato.
 
 A Patty mantem acesso aos arquivos mesmo sem assignment ativo, e as rotas administrativas usam signed URLs com validade de 5 minutos. A dependencia de assignment e a visibilidade por autoria/liberacao foram reconciliadas pela migration `20260922230034_private_file_access_visibility_foundation.sql`, aplicada e verificada no Supabase SaaS.
 
 Downloads administrativos de exames/documentos registram evento append-only em `client_file_access_events` antes da emissao da signed URL, sem copiar conteudo do arquivo. A migration `20260922230601_client_file_access_audit.sql` esta aplicada no Supabase SaaS; a rota registra ator, arquivo solicitado, acao, resultado da autorizacao e timestamp.
 
-O MVP nao tera limite rigido de quantidade de arquivos. A Patty tambem podera enviar arquivos em nome da cliente por fluxo administrativo server-side controlado, com autoria administrativa explicita. Arquivos enviados pela cliente ficam visiveis para ela por padrao; uploads da Patty ficam ocultos ate liberacao explicita. O primeiro MVP nao tera antimalware dedicado; esse risco permanece mitigado por allowlist fechada, validacao de tipo real, limites de tamanho, Storage privado e ausencia de execucao.
+O sistema completo nao tera limite rigido de quantidade de arquivos. A Patty tambem podera enviar arquivos em nome da cliente por fluxo administrativo server-side controlado, com autoria administrativa explicita. Arquivos enviados pela cliente ficam visiveis para ela por padrao; uploads da Patty ficam ocultos ate liberacao explicita. O primeiro sistema completo nao tera antimalware dedicado; esse risco permanece mitigado por allowlist fechada, validacao de tipo real, limites de tamanho, Storage privado e ausencia de execucao.
 
 A RLS/policy diferencia visibilidade para a cliente e acesso administrativo permanente da Patty. A auditoria estatica de 2026-09-23 confirmou que `client_files` e `storage.objects` permitem leitura administrativa por role `admin` sem assignment ativo, enquanto a policy MFA `RESTRICTIVE` continua exigindo AAL2. As rotas de listagem, download, upload administrativo e liberacao nao reintroduzem requisito de assignment. A fundacao do upload da cliente usa `client_file_upload_sessions` e esta aplicada no Supabase SaaS. Os tipos TypeScript foram regenerados a partir do schema real; como o Postgres expõe o campo gerado `temp_object_path` como anulavel no metadata, todos os pontos que o usam em Storage agora validam explicitamente sua existencia antes de prosseguir. A boundary de criacao/finalizacao server-side valida declaracao antes da sessao, reserva a sessao em `validating`, detecta assinatura binaria no objeto temporario, revalida tamanho/formato, promove para `client_files` e usa compensacao em falhas. A UI da cliente em `/cliente/arquivos` cria a sessao, envia o byte diretamente ao Storage privado, finaliza no servidor, atualiza o historico e permite download somente de arquivos visiveis pela RLS, via signed URL de 5 minutos. O smoke E2E manual em `e2e/client-private-files.spec.mjs`, acionado por `.github/workflows/e2e-private-files.yml`, foi executado em producao com conta sintetica e passou em login, upload, validacao/finalizacao, historico e download. A limpeza de temporarios expirados foi implementada sem apagar linhas historicas de sessao: o cron marca sessoes `pending` expiradas como `expired` e remove somente objetos no namespace `pending/`. O `CRON_SECRET` foi configurado em Production e o redeploy correspondente ficou READY. Em 2026-09-23, apos a janela agendada do cron, a validacao funcional da limpeza passou no Supabase SaaS: a sessao sintetica vencida estava `expired`, o objeto temporario correspondente nao existia mais em `storage.objects` e nao havia sessoes `pending` vencidas. O fluxo administrativo usa uma sessao server-side e `createSignedUploadUrl` para autorizar apenas o path temporario gerado; o browser recebe somente token temporario e envia direto ao Storage privado. A finalizacao usa a mesma validacao real do fluxo da cliente, grava autoria administrativa e mantem `client_visible_at` nulo. A Patty pode liberar explicitamente o arquivo depois, gravando ator e timestamp de visibilidade. Existe uma entrada dedicada em `/admin/arquivos`, limitada ao dominio de arquivos, para manter a excecao de acesso permanente sem ampliar os demais modulos client-scoped. O smoke E2E administrativo em `e2e/admin-private-files.spec.mjs`, acionado pelo workflow manual `.github/workflows/e2e-admin-private-files.yml`, foi executado em producao com contas sinteticas e passou. O teste confirmou login administrativo, selecao da cliente sintetica, upload administrativo, autoria administrativa, liberacao explicita, visibilidade subsequente para a cliente e download. O Supabase confirmou o arquivo sintetico com `uploaded_by_profile_id` e `client_visibility_set_by_profile_id` do admin sintetico e `client_visible_at` preenchido. Permanece aberta a politica concreta de retencao/hard delete dos arquivos aceitos.
 
@@ -306,7 +306,7 @@ A fundacao de metadata no Supabase permanece aplicada e vazia em producao. O pri
 
 O lote contem somente o video da balanca aprovado pela Patty e permanece deliberadamente sem `storage_path`, SHA-256, registros de conteudo/versao/asset, publicacao ou release enquanto o Vercel Private Blob store nao estiver criado/conectado.
 
-A integracao Vercel usada nesta sessao nao oferece operacao de Storage, portanto a criacao/conexao do store continua uma pendencia operacional manual. O procedimento seguro foi versionado em `docs/VERCEL_BLOB_SETUP.md`. Isso nao bloqueia outras frentes tecnicas do MVP e nao autoriza migracao dos demais arquivos do Drive.
+A integracao Vercel usada nesta sessao nao oferece operacao de Storage, portanto a criacao/conexao do store continua uma pendencia operacional manual. O procedimento seguro foi versionado em `docs/VERCEL_BLOB_SETUP.md`. Isso nao bloqueia outras frentes tecnicas do sistema completo e nao autoriza migracao dos demais arquivos do Drive.
 
 ## IA - execution nao terminal
 
@@ -356,7 +356,7 @@ A administracao possui uma visao central de executions `started` sem estado term
 
 Recovery/watchdog automatico continua fora do escopo atual.
 
-## Anamnese - consentimento do MVP
+## Anamnese - consentimento do sistema completo
 
 Estado: **PRODUCAO VALIDADA**
 
@@ -526,15 +526,15 @@ O produto deve prever check-in separado para:
 - registrar diariamente se fez ou nao fez atividade fisica, independentemente do treino prescrito;
 - visualizar progresso como estimulo.
 
-As metas/configuracoes individuais podem ser definidas na entrega do primeiro protocolo da cliente. Ainda faltam os parametros profissionais e de produto para implementacao como padrao: formula/unidade da meta de liquidos, regra de recalculo por peso, frequencia dos lembretes, visibilidade/correcao pela Patty e escopo do primeiro lancamento.
+As metas/configuracoes individuais podem ser definidas na entrega do primeiro protocolo da cliente. Ainda faltam os parametros profissionais e de produto para implementacao como padrao: formula/unidade da meta de liquidos, regra de recalculo por peso, frequencia dos lembretes, visibilidade/correcao pela Patty e escopo do sistema completo.
 
 Nao tratar o check-in como score automatico de adesao nem inferir regra de hidratacao.
 
-## Primeiro lancamento - Patty/admin
+## Escopo completo - Patty/admin
 
 Estado: **ESCOPO CONFIRMADO / PRONTIDAO TECNICA A RECONCILIAR**
 
-"Primeiro lancamento" significa a primeira versao pronta para uso real no atendimento.
+"Sistema completo" significa a primeira versao pronta para uso real no atendimento.
 
 A Patty confirmou que todas as operacoes da pergunta 8 sao obrigatorias antes desse marco:
 - convite/cadastro de cliente;
@@ -552,11 +552,11 @@ A Patty confirmou que todas as operacoes da pergunta 8 sao obrigatorias antes de
 
 Esta decisao nao altera o estado tecnico de cada fluxo; implementado, testado, aplicado e publicado continuam estados separados.
 
-## Primeiro lancamento - cliente
+## Escopo completo - cliente
 
 Estado: **ESCOPO CONFIRMADO / IMPLEMENTACAO AINDA A RECONCILIAR**
 
-A Patty confirmou que todos os itens da pergunta 7 sao obrigatorios no primeiro lancamento para a cliente:
+A Patty confirmou que todos os itens da pergunta 7 sao obrigatorios no sistema completo para a cliente:
 - Perfil/Cadastro Atual;
 - Anamnese;
 - fotos;
