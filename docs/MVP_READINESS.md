@@ -497,7 +497,7 @@ Ficam deliberadamente fora:
 
 Estado: **IMPLEMENTADA NA APLICACAO / MIGRATION PENDENTE**
 
-A UI administrativa permite criar novo draft a partir de versao submetida/congelada. A operacao de banco e atomica e copia somente conteudo versionado, sem aprovacao/publicacao.
+A UI administrativa permite criar novo draft a partir de versao submetida/congelada. A operacao de banco e atomica e copia somente conteudo versionado, sem aprovacao/publicacao. A revisao administrativa tambem exibe comparacao factual com a versao-base (estrutura e totais de doses), sem interpretar resultado.
 
 Antes de classificar como SaaS aplicado, a migration `20260927014500_clone_protocol_version_draft.sql` precisa passar pelo workflow oficial de migrations apos merge.
 
