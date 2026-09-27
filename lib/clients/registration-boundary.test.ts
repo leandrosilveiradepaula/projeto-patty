@@ -33,13 +33,15 @@ test("Cadastro Atual actions resolve identity and client scope before privileged
   assert.match(adminAction, /upsertClientRegistrationPrivileged/);
 });
 
-test("Cadastro Atual edit forms never claim to update login email or Anamnesis history", () => {
+test("Cadastro Atual edit forms keep login identity and Anamnesis history separate", () => {
   const clientForm = read("components/client/ClientRegistrationEditForm.tsx");
   const adminForm = read("components/admin/AdminClientRegistrationEditForm.tsx");
 
-  for (const content of [clientForm, adminForm]) {
-    assert.match(content, /Cadastro Atual/);
-    assert.match(content, /não.*email.*login|não altera o email de login/i);
-    assert.match(content, /Anamnese|Anamneses históricas/i);
-  }
+  assert.match(clientForm, /Cadastro Atual/);
+  assert.match(clientForm, /não modifica.*Anamnese/i);
+  assert.match(clientForm, /nem o email usado para entrar na conta/i);
+
+  assert.match(adminForm, /Cadastro Atual/);
+  assert.match(adminForm, /Anamneses históricas/i);
+  assert.match(adminForm, /não altera o email de login/i);
 });
