@@ -76,6 +76,29 @@ O sistema deve preservar:
 - versao aprovada;
 - historico das versoes.
 
+## Revisao humana dos achados de IA
+
+### DECISAO CONFIRMADA
+
+Um achado gerado pela IA permanece **interno** ate decisao explicita da Patty.
+
+A Patty pode:
+- aceitar o achado como uma observacao interna;
+- transformar o achado em uma anotacao propria/profissional.
+
+Esses atos nao autorizam comunicacao automatica com a cliente.
+
+Nenhuma resposta, orientacao, mensagem, observacao ou outro conteudo originado da IA pode ser enviado, publicado ou exibido para a cliente sem **aprovacao explicita previa da Patty**.
+
+Preservar separadamente:
+- output original da IA;
+- observacao interna aceita;
+- anotacao criada/editada pela Patty;
+- eventual conteudo aprovado para comunicacao a cliente;
+- evento de aprovacao/publicacao.
+
+Nao sobrescrever o output original da IA quando a Patty criar sua propria anotacao.
+
 ## Metodo da Patty - regras confirmadas
 
 ### DECISAO CONFIRMADA
