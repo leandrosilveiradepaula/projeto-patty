@@ -36,6 +36,22 @@ Depois do envio final, a cliente nao pode alterar as respostas. Somente a Patty 
 
 A correcao nao apaga nem sobrescreve a resposta originalmente enviada. Devem ser preservados separadamente o valor original, a correcao da Patty, o ator e o momento da correcao.
 
+## Esclarecimentos pos-Anamnese
+
+### DECISAO CONFIRMADA
+
+Quando a Patty solicitar um esclarecimento a cliente:
+
+- a resposta da cliente **nao resolve automaticamente** o pedido;
+- a Patty precisa ler a resposta e marcar manualmente o esclarecimento como **resolvido**;
+- se ainda houver duvida, a Patty pode fazer novo questionamento;
+- nao existe prazo de expiracao para a cliente responder;
+- enquanto o esclarecimento estiver aguardando resposta da cliente, o sistema deve enviar um **lembrete a cada 24 horas** solicitando a resposta.
+
+O canal tecnico da notificacao ainda precisa ser definido. Nao inferir email, push, WhatsApp ou outro canal sem decisao de produto.
+
+O historico de pedidos e respostas deve permanecer preservado; novo questionamento nao deve sobrescrever a pergunta ou resposta anterior.
+
 ## Fluxo futuro de IA
 
 ### DECISAO CONFIRMADA
