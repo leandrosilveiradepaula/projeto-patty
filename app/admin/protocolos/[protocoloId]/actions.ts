@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { requireRole } from "@/lib/supabase/auth";
+import { buildProtocolCloneSnapshot } from "@/lib/protocol/clone-snapshot";
 import { getProtocolLifecycleAction } from "@/lib/protocol/lifecycle";
 import {
   cloneAccessibleProtocolVersionDraft,
@@ -11,6 +12,7 @@ import {
   getAccessibleProtocol,
   listAccessibleProtocolPublications,
   listAccessibleProtocolVersionApprovals,
+  listAccessibleProtocolVersionMealPlans,
   listAccessibleProtocolVersions,
   submitAccessibleProtocolVersionForReview,
 } from "@/lib/supabase/data-access";
@@ -251,8 +253,15 @@ export async function cloneProtocolVersionDraft(
   }
 
   try {
+    const sourcePlans = await listAccessibleProtocolVersionMealPlans([
+      accessible.version.id,
+    ]);
+    const sourcePlan = sourcePlans[0] ?? null;
+    const snapshot = buildProtocolCloneSnapshot(sourcePlan);
+
     const newVersionId = await cloneAccessibleProtocolVersionDraft(
       accessible.version.id,
+      snapshot,
     );
 
     if (!newVersionId) {
