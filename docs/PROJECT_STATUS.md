@@ -805,3 +805,20 @@ O painel nao calcula atraso, adesao, estagnacao, urgencia, risco clinico ou prio
 
 A montagem usa somente consultas RLS ja existentes sob as atribuicoes ativas da Patty. Nao usa service role, nao cria tabela de pendencias e nao duplica estado derivavel.
 
+## 2026-09-27 - Comparacao factual de versoes de protocolo
+
+### IMPLEMENTADO NA BRANCH
+
+A tela administrativa de protocolo ganhou comparacao deterministica entre uma versao e sua base somente quando `based_on_version_id` estiver explicitamente registrado.
+
+A comparacao mostra:
+- catalogo de equivalentes antes/depois;
+- variantes adicionadas, removidas, alteradas ou sem alteracao;
+- quantidade de refeicoes por variante;
+- totais persistidos por tipo de dose;
+- sequencia factual dos ciclos registrados.
+
+O sistema nao escolhe a versao anterior como base quando `based_on_version_id` estiver ausente.
+
+A comparacao nao conclui melhora, piora, adequacao, estagnacao, proxima fase ou recomendacao. Ela e apenas apoio de revisao humana antes do lifecycle manual existente.
+
