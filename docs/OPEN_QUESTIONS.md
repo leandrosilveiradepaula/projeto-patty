@@ -295,7 +295,7 @@ O catalogo da Avaliacao Completa esta confirmado:
 - abdomen (cm);
 - coxa (cm);
 - biceps (cm);
-- busto (cm);
+- busto para mulher ou peito para homem (cm);
 - quadril (cm);
 - ombros (cm);
 - panturrilhas (cm);
