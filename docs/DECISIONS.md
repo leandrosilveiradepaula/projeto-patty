@@ -1,16 +1,23 @@
-## 2026-09-27 - Correcao de Avaliacao Finalizada
+## 2026-09-27 - Historico de Avaliacoes e Correcao de Erro
 
 ### REGRA CONFIRMADA PELA PATTY
 
-Quando uma avaliacao ja finalizada precisar de correcao:
-- a avaliacao original nao e editada nem sobrescrita;
-- deve ser criada uma nova avaliacao corrigida;
-- a avaliacao anterior permanece preservada no historico;
-- a cliente deve visualizar a avaliacao corrigida.
+A Patty distinguiu dois cenarios:
 
-### QUESTAO AINDA ABERTA
+1. **Nova avaliacao de acompanhamento**
+   - a avaliacao anterior e sempre mantida;
+   - uma nova avaliacao e criada;
+   - a nova avaliacao recebe sua propria data;
+   - o historico de avaliacoes anteriores permanece preservado.
 
-A resposta nao definiu se a avaliacao original tambem continuara visivel para a cliente depois da correcao. Essa apresentacao nao deve ser inferida.
+2. **Correcao de erro de lancamento**
+   - se algum dado foi registrado incorretamente em uma avaliacao, a Patty precisa voltar a essa avaliacao;
+   - o dado incorreto deve ser corrigido;
+   - o valor errado nao deve continuar como dado valido da avaliacao.
+
+### QUESTAO TECNICA ABERTA
+
+A regra profissional exige que o dado errado deixe de valer, mas ainda precisa ser definida a forma auditavel de implementar essa correcao no banco sem perder rastreabilidade. Nao criar nova avaliacao apenas para corrigir erro de digitacao.
 
 ## 2026-09-27 - Catalogo da Avaliacao Completa
 
