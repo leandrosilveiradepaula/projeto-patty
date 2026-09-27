@@ -206,6 +206,12 @@ O modelo inicial ainda nao deve ser tratado como escolha definitiva enquanto a a
 
 A taxonomia global de `purpose_key` para futuros usos de IA e os contratos de output desses outros purposes continuam abertos. Isso nao reabre o contrato v1 ja definido para `anamnesis_review`.
 
+### PARCIALMENTE RESOLVIDO - UX DE FINDINGS DE IA
+
+A Patty confirmou que um finding pode ser aceito como observacao interna ou transformado em anotacao propria. Nenhum conteudo originado da IA pode chegar a cliente sem aprovacao explicita previa da Patty.
+
+Continuam abertas apenas as demais acoes de UX ainda nao confirmadas, como editar o texto do finding, descartar explicitamente ou converter diretamente em pedido de esclarecimento.
+
 ### QUESTAO ABERTA
 
 Como uma edicao manual da Patty deve interagir com valor originado de calculo deterministico, sem sobrescrever silenciosamente o resultado ou atribuir esse calculo a IA?
