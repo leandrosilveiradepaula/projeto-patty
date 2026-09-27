@@ -1,0 +1,11 @@
+.form {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.description {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-small-size);
+  line-height: var(--text-body-small-line-height);
+}
