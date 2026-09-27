@@ -145,6 +145,53 @@ export async function createAccessibleClientTrainingRequest(input: {
   return data;
 }
 
+export async function listAccessibleAnamnesisSubmissionsForAdminPending() {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("anamnesis_submissions")
+    .select("id, client_id, created_at, submitted_at")
+    .order("created_at", { ascending: true })
+    .order("id", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function listAccessibleClarificationRequestsForAdminPending() {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("anamnesis_clarification_requests")
+    .select("id, submission_id, created_at")
+    .order("created_at", { ascending: true })
+    .order("id", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function listAccessibleProtocolVersionsForAdminPending() {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("protocol_versions")
+    .select(
+      "id, protocol_id, client_id, version_number, submitted_for_review_at, created_at",
+    )
+    .order("created_at", { ascending: true })
+    .order("id", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
 export async function listAccessibleNonterminalAiExecutions() {
   const supabase = await createClient();
   const { data, error } = await supabase
