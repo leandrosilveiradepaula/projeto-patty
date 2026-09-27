@@ -804,4 +804,16 @@ Os itens sao ordenados pela data factual mais antiga primeiro, apenas para naveg
 O painel nao calcula atraso, adesao, estagnacao, urgencia, risco clinico ou prioridade; nao transforma solicitacao de treino ou arquivo recebido em pendencia por inferencia.
 
 A montagem usa somente consultas RLS ja existentes sob as atribuicoes ativas da Patty. Nao usa service role, nao cria tabela de pendencias e nao duplica estado derivavel.
+## 2026-09-27 - Gate de finalizacao por cadencia de avaliacao
+
+### IMPLEMENTADO NA BRANCH
+
+A finalizacao de avaliacao passa a validar somente o que ja esta confirmado:
+- quinzenal: peso, cintura, abdomen e quadril sao obrigatorios antes de finalizar;
+- mensal: peso e pelo menos uma foto vinculada sao minimos deterministicas;
+- mensal: como o catalogo completo de medidas ainda esta aberto, a Patty precisa confirmar explicitamente que revisou o conjunto completo antes da finalizacao.
+
+Chaves conhecidas de cadencia (`peso`, `cintura`, `abdomen`, `quadril` e aliases ja suportados) sao normalizadas ao salvar. Chaves ainda nao formalizadas continuam livres e nao sao descartadas.
+
+O sistema nao infere qualidade da avaliacao, tendencia, estagnacao ou resultado profissional.
 
