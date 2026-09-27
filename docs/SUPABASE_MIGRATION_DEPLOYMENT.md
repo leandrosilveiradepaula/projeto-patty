@@ -282,4 +282,5 @@ Validacoes pos-apply registradas:
 - triggers de draft/finalizacao e guarda de follow-up finalizado presentes;
 - advisor de seguranca sem finding novo; permanece apenas Leaked Password Protection ja conhecido;
 - advisor de performance sem novo `auth_rls_initplan`; indices novos aparecem apenas como `unused_index` imediatamente apos criacao, sem justificar remocao.
+- smoke sintetico pos-apply com `ROLLBACK`: admin AAL2 + assignment ativo criou/alterou draft, atualizou medida, vinculou foto e finalizou; AAL1 e admin sem assignment nao leram o registro; follow-up antes da finalizacao foi bloqueado; mutacao da avaliacao/medida apos finalizacao foi bloqueada por `55000`; 0 residuos.
 
