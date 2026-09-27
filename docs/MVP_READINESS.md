@@ -497,6 +497,18 @@ A Patty precisa conseguir editar manualmente no acompanhamento, quando aplicavel
 
 Isso define escopo de UI/autoria humana, nao regras automaticas. Treino, suplementacao e manipulados continuam sem formulas/criterios automatizaveis confirmados.
 
+## Cliente - protocolo publicado e check-in
+
+Estado: **VISIBILIDADE CONFIRMADA / CHECK-IN AINDA ABERTO**
+
+A cliente deve visualizar:
+- sua rotina de alimentacao publicada;
+- sua rotina de treinos, quando houver treino prescrito.
+
+Ela nao precisa registrar execucao dentro do protocolo publicado.
+
+A ideia de check-in para liquidos e atividade fisica foi levantada pela Patty, mas ainda nao possui contrato funcional suficiente para implementacao. Nao tratar como score de adesao ou regra de hidratacao.
+
 ## Cadastro Atual - edicao controlada
 
 Estado: **IMPLEMENTADO / SEM AMPLIAR GRANTS DO BROWSER**
