@@ -94,6 +94,33 @@ O MVP deve incluir avaliacoes:
 - preservacao das avaliacoes anteriores;
 - possibilidade de criacao de nova versao de protocolo.
 
+## Definicao de primeiro lancamento
+
+### DECISAO CONFIRMADA
+
+Neste documento, **primeiro lancamento** significa a primeira versao do aplicativo considerada pronta para uso real no atendimento pela Patty e pelas clientes. Nao significa o primeiro dia de uma cliente nem o primeiro acesso ao aplicativo.
+
+## Primeiro lancamento - escopo obrigatorio da Patty
+
+### DECISAO CONFIRMADA
+
+Antes do uso real, a Patty deve conseguir executar todos os fluxos administrativos listados na rodada de fechamento:
+
+- convidar/cadastrar cliente;
+- editar Cadastro Atual;
+- ler e corrigir historicamente a Anamnese;
+- solicitar esclarecimentos;
+- acessar arquivos privados autorizados;
+- criar e comparar avaliacoes;
+- criar/editar/versionar protocolos;
+- revisar, aprovar e publicar protocolos;
+- liberar conteudos;
+- administrar solicitacoes de treino;
+- usar o painel de pendencias;
+- usar a assistencia de IA para revisao da Anamnese dentro dos gates aplicaveis.
+
+Nenhum desses fluxos deve ser tratado como segunda fase posterior ao inicio do uso real.
+
 ## Primeiro lancamento - escopo obrigatorio da cliente
 
 ### DECISAO CONFIRMADA
