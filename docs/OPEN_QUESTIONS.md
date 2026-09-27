@@ -41,9 +41,13 @@ Todos os fluxos listados para a cliente na pergunta 7 da rodada de fechamento de
 
 O check-in de liquidos/atividade fisica foi definido em resposta posterior e seu recorte de primeiro lancamento continua separado ate decisao explicita.
 
-### QUESTAO ABERTA
+### RESOLVIDO
 
-Quais operacoes administrativas a Patty precisa executar no primeiro painel?
+Para esta rodada, "primeiro lancamento" significa a primeira versao pronta para uso real no atendimento, e nao o primeiro dia/acesso de uma cliente.
+
+A Patty confirmou que **todas** as operacoes administrativas listadas na pergunta 8 devem estar disponiveis antes do uso real: onboarding/convite, Cadastro Atual, Anamnese e correcao historica, esclarecimentos, arquivos privados, avaliacoes/comparacao, protocolos/versionamento/aprovacao/publicacao, liberacao de conteudos, solicitacao de treino, painel de pendencias e assistencia de IA na revisao da Anamnese.
+
+A prontidao tecnica de cada item permanece sendo acompanhada separadamente.
 
 ## Autenticacao
 
