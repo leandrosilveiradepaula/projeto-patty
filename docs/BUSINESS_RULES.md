@@ -269,12 +269,15 @@ O check-in deve permitir:
 - registrar a frequencia/realizacao de atividade fisica ou ida a academia;
 - acompanhar o progresso dessas metas de forma visivel para a cliente.
 
-A existencia de metas e lembretes esta confirmada como comportamento desejado do produto. Ainda nao estao definidos:
-- quem define cada meta;
-- formula ou valor da meta de liquidos;
+A existencia de metas e lembretes esta confirmada como comportamento desejado do produto.
+
+Esses parametros podem ser definidos individualmente **na entrega do primeiro protocolo da cliente**, junto com a revisao/publicacao inicial do acompanhamento.
+
+Ainda nao estao formalizados como regra geral:
+- formula ou valor padrao da meta de liquidos;
 - unidade operacional definitiva para o registro;
-- meta/frequencia esperada de academia ou atividade;
-- horarios e cadencia dos lembretes;
+- meta/frequencia padrao de academia ou atividade;
+- horarios e cadencia padrao dos lembretes;
 - o que a Patty visualiza ou pode corrigir;
 - politica de edicao de check-ins anteriores.
 
