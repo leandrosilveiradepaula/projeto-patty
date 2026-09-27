@@ -530,6 +530,26 @@ As metas/configuracoes individuais podem ser definidas na entrega do primeiro pr
 
 Nao tratar o check-in como score automatico de adesao nem inferir regra de hidratacao.
 
+## Primeiro lancamento - cliente
+
+Estado: **ESCOPO CONFIRMADO / IMPLEMENTACAO AINDA A RECONCILIAR**
+
+A Patty confirmou que todos os itens da pergunta 7 sao obrigatorios no primeiro lancamento para a cliente:
+- Perfil/Cadastro Atual;
+- Anamnese;
+- fotos;
+- exames/documentos;
+- avaliacoes/medidas;
+- protocolo alimentar;
+- conteudos educacionais;
+- biblioteca de exercicios;
+- solicitacao de treino;
+- visualizacao do treino quando houver prescricao;
+- esclarecimentos no aplicativo;
+- evolucao.
+
+Nenhum desses itens deve ser tratado como segunda fase do lancamento inicial. A prontidao tecnica de cada fluxo deve ser avaliada individualmente; esta decisao de escopo nao transforma item pendente em implementado.
+
 ## Cadastro Atual - edicao controlada
 
 Estado: **IMPLEMENTADO / SEM AMPLIAR GRANTS DO BROWSER**
