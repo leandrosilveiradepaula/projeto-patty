@@ -761,7 +761,7 @@ Foi implementado o fluxo `rascunho -> finalizada` para Avaliacoes:
 - finalizacao explicita com imutabilidade posterior;
 - decisoes profissionais vinculadas a avaliacao somente depois da finalizacao.
 
-A migration passou em transacao com `ROLLBACK` antes do merge, o PR #210 fechou CI/build totalmente verde e o Supabase registrou o apply como `20260927002227_create_assessment_draft_lifecycle`. O arquivo local foi imediatamente reconciliado para esse version ID remoto, sem alterar o SQL aplicado.
+A migration passou em transacao com `ROLLBACK` antes do merge, o PR #210 fechou CI/build totalmente verde e o Supabase registrou o apply como `20260927002227_create_assessment_draft_lifecycle`. O arquivo local foi imediatamente reconciliado para esse version ID remoto, sem alterar o SQL aplicado. O smoke transacional pos-apply com `ROLLBACK` confirmou: admin AAL2 + assignment ativo cria/edita rascunho, atualiza medida, vincula foto e finaliza; AAL1 ve 0; outro admin AAL2 sem assignment ve 0; follow-up ligado a draft e bloqueado; avaliacao e medida finalizadas ficam imutaveis; residuos finais = 0.
 
 Registros historicos existentes serao preservados como finalizados sem inventar `created_by_profile_id` ou `finalized_by_profile_id` quando esses atores historicos nao forem conhecidos.
 
