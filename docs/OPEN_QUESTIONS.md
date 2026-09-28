@@ -1,13 +1,20 @@
 ### PARCIALMENTE RESOLVIDO - PROGRESSAO DO PROTOCOLO
 
-A Patty confirmou que a progressao segue a sequencia do protocolo, mas depende de adesao e resultado. Se a cliente nao estiver aderindo adequadamente ou nao estiver apresentando resultado, a progressao e interrompida e os proximos passos sao definidos manualmente pela Patty.
+A Patty confirmou que a progressao segue a sequencia do protocolo, mas depende de adesao e resultado. Se a cliente nao estiver aderindo adequadamente ou se o resultado nao for considerado valido, a progressao e interrompida e os proximos passos sao definidos manualmente pela Patty.
+
+A leitura profissional de resultado esta parcialmente resolvida:
+- qualquer resultado e valido quando ha mudanca nos indicadores numericos e essa evolucao nao esta indo contra o objetivo que a propria cliente buscou;
+- o resultado nao e considerado valido quando a evolucao vai contra o objetivo buscado pela cliente ou quando os numeros, no geral, permanecem estagnados.
 
 Tambem confirmou que o Cutting 2 reinicia a estrutura de Cutting com menos doses de macros em relacao ao ciclo anterior.
 
 Continuam abertos:
 - criterio objetivo de adesao suficiente/insuficiente;
-- criterio objetivo de resultado suficiente/insuficiente;
-- definicao operacional de estagnacao;
+- quais indicadores numericos entram na leitura de resultado;
+- janela de tempo para caracterizar estagnacao;
+- limiar de variacao para distinguir mudanca real de ruido;
+- como combinar peso e medidas quando mudam em direcoes diferentes;
+- direcao esperada dos indicadores conforme o objetivo especifico da cliente;
 - quanto e quais macros diminuem em cada transicao do Cutting 2;
 - quando simplificar, retornar, manter ou trocar estrategia em cada caso.
 
