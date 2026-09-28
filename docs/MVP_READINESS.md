@@ -525,7 +525,13 @@ A leitura esta mais formalizada, mas ainda nao esta pronta para automacao comple
 
 O Cutting 2 reinicia a estrutura de Cutting com menos doses de macros que o ciclo anterior. A reducao exata ainda nao esta formalizada.
 
-O Cutting 3 tambem teve sua estrutura confirmada: Linear -> Dia 1/Dia 2 -> 2 Low/1 High -> Up Metabolico. As quantidades diminuem conforme o peso da cliente com base em tabelas Excel de proteina e carboidrato. Os valores e formulas exatos dessas tabelas ainda precisam ser reconciliados antes de qualquer implementacao deterministica.
+O Cutting 3 tambem teve sua estrutura confirmada: Linear -> Dia 1/Dia 2 -> 2 Low/1 High -> Up Metabolico. As quantidades diminuem conforme o peso da cliente com base na Planilha Carb Cycle.
+
+A planilha fonte foi localizada, e a Patty confirmou que:
+- suas Fases 1 a 4 pertencem ao conjunto dos Cuttings 1, 2 e 3 atuais;
+- a coluna Media corresponde ao valor do protocolo Linear.
+
+Ainda nao esta pronta a selecao automatica da fase pelo nome do Cutting, porque existem quatro fases numeradas para tres Cuttings nomeados e o pareamento individual ainda nao foi explicitado.
 
 Nao implementar score automatico de adesao, deteccao automatica de estagnacao ou mudanca automatica de fase.
 
