@@ -128,10 +128,26 @@ A progressao do protocolo segue a sequencia profissional confirmada e **nao e au
 
 A adesao e um gate central para avancar para a etapa seguinte:
 - quando a cliente esta conseguindo aderir ao protocolo e a evolucao permite continuidade, a Patty pode seguir a sequencia;
-- quando a cliente nao esta aderindo adequadamente, a progressao deve ser interrompida para revisao profissional;
-- quando a cliente nao esta apresentando o resultado esperado, a Patty tambem interrompe a progressao e define manualmente os proximos passos.
+- quando a cliente nao esta aderindo adequadamente, a progressao deve ser interrompida para revisao profissional.
 
-Nao inferir automaticamente a causa de ausencia de resultado. Falta de resultado nao deve ser tratada pelo sistema como prova de baixa adesao.
+### LEITURA PROFISSIONAL DE RESULTADO
+
+A Patty confirmou que, para a decisao de continuidade, **qualquer resultado e valido quando ha mudanca nos indicadores numericos e essa evolucao nao esta indo contra o objetivo que a propria cliente buscou**.
+
+O resultado nao e considerado valido quando:
+- a evolucao esta indo contra o objetivo buscado pela cliente; ou
+- os numeros, no geral, permanecem estagnados.
+
+Quando o resultado nao e considerado valido, a progressao deve parar para decisao manual da Patty sobre os proximos passos.
+
+Essa regra profissional **nao define um algoritmo automatico de estagnacao ou sucesso**. Continuam abertos:
+- quais indicadores numericos entram nessa leitura;
+- qual janela de tempo deve ser usada para considerar estagnacao;
+- qual variacao conta como mudanca real em vez de ruido;
+- como combinar peso e medidas quando mudam em direcoes diferentes;
+- qual direcao e esperada para cada objetivo especifico da cliente.
+
+Nao inferir automaticamente a causa de ausencia de resultado. Resultado nao valido nao deve ser tratado pelo sistema como prova de baixa adesao.
 
 Nao criar score automatico de adesao, regra automatica de estagnacao ou mudanca automatica de fase.
 
@@ -413,7 +429,7 @@ Essa confirmacao nao define alerta automatico, severidade, diagnostico, bloqueio
 
 ### DECISAO CONFIRMADA
 
-As respostas de 2026-09-26 nao autorizam automatizar suplementacao/manipulados, encaminhamento por doenca, regras de gordura/legumes, restricao absoluta de gordura saturada, progressao de treino ou criterio de estagnacao.
+As respostas de 2026-09-26 nao autorizam automatizar suplementacao/manipulados, encaminhamento por doenca, regras de gordura/legumes, restricao absoluta de gordura saturada, progressao de treino ou criterio **automatizavel** de estagnacao.
 
 Esses temas permanecem como `QUESTAO ABERTA` ate formalizacao suficiente para implementacao deterministica e revisavel.
 
