@@ -1,3 +1,17 @@
+## 2026-09-27 - Planilha Carb Cycle: coluna Media corresponde ao Linear
+
+### REGRA CONFIRMADA PELA PATTY
+
+A Patty confirmou que as Fases 1, 2, 3 e 4 da Planilha Carb Cycle sao usadas no conjunto dos Cuttings 1, 2 e 3 do metodo atual.
+
+Tambem confirmou explicitamente que a coluna **Media** da planilha e o valor utilizado no **protocolo Linear** da fase correspondente.
+
+### LIMITE AINDA ABERTO
+
+A resposta nao explicita como as quatro fases numeradas (1, 2, 3 e 4) se distribuem individualmente entre os tres Cuttings nomeados (Cutting 1, Cutting 2 e Cutting 3).
+
+Nao inferir esse pareamento. A planilha pode ser tratada como fonte matematica das fases confirmadas, mas a associacao fase numerada -> Cutting deve ser fechada antes de automatizar a selecao da fase pelo nome do protocolo.
+
 ## 2026-09-27 - Legumes na contagem de carboidrato
 
 ### REGRA CONFIRMADA PELA PATTY
