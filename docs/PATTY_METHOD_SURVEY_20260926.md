@@ -88,18 +88,29 @@ A Patty relatou que a decisao entre deficit, manutencao e superavit depende do o
 
 Ela citou revisao apos aproximadamente 30 dias como pratica comum, nao como prazo deterministico universal.
 
-### QUESTOES ABERTAS
+### ESCLARECIMENTO CONFIRMADO EM 2026-09-27
 
-As afirmacoes abaixo precisam de formalizacao antes de qualquer regra em codigo:
-- "a gordura entra na contagem do carboidrato";
-- "legumes tambem entram na contagem do carboidrato";
-- "para cada 1 dose de carbo sao 2 de legumes";
-- como essas afirmacoes convivem com a referencia ja documentada de gordura em doses/gramas separadas;
+A relacao antes ambigua entre legumes e carboidrato foi esclarecida:
+
+- **2 doses de legumes contabilizam 1 dose de carboidrato** no total do protocolo.
+
+Exemplo dado pela Patty:
+- cliente com 6 doses totais de carboidrato;
+- 2 doses de legumes no almoco contabilizam 1 dose de carboidrato;
+- 2 doses de legumes no jantar contabilizam outra dose de carboidrato;
+- restam 4 doses, que podem ser distribuidas entre carboidrato e gordura.
+
+### QUESTOES AINDA ABERTAS
+
+Ainda precisam de formalizacao:
+- conversao exata entre o saldo de carboidrato e gordura;
+- abrangencia da alocacao almoco/jantar entre fases/protocolos;
+- excecoes especificas;
 - o que significa operacionalmente "alimentacao totalmente sem gordura saturada";
 - excecoes para refeicoes fora de casa;
 - se a revisao em 30 dias e regra, referencia ou apenas exemplo de pratica.
 
-Nao alterar as formulas deterministicas atuais com base apenas nesta rodada.
+Nao ampliar formulas automaticas alem do que foi explicitamente confirmado.
 
 ## 5. Treino e atividade fisica
 
