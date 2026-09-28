@@ -260,7 +260,11 @@ Continuam abertos:
 
 A Patty confirmou que as Fases 1, 2, 3 e 4 da Planilha Carb Cycle pertencem aos Cuttings 1, 2 e 3 do metodo atual e que a coluna **Media** corresponde ao valor usado no protocolo **Linear**.
 
-Como ha quatro fases numeradas na planilha e tres Cuttings nomeados, permanece aberta a associacao individual entre cada numero de fase e cada Cutting. Essa associacao nao deve ser inferida.
+A Patty esclareceu posteriormente que dificilmente chega as Fases 4, 5 e 6. A pratica mais frequente e trabalhar com as Fases 1, 2 e 3, alternar um cutting prolongado com um periodo de bulking para ganho de massa muscular e, ao retornar ao cutting, reiniciar novamente 1, 2 e 3.
+
+Isso torna as Fases 4 a 6 excepcionais para a pratica atual, mas nao as elimina da planilha nem define automaticamente seus criterios.
+
+Continuam abertas a associacao individual completa entre fase numerada e nome do Cutting quando nao explicitada e as regras deterministicas de transicao cutting/bulking.
 
 ### META DE LIQUIDOS — CONFIRMACAO POSTERIOR
 
