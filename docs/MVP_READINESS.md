@@ -523,6 +523,8 @@ Essa regra esta documentada para apoio a decisao humana, mas ainda nao esta pron
 
 O Cutting 2 reinicia a estrutura de Cutting com menos doses de macros que o ciclo anterior. A reducao exata ainda nao esta formalizada.
 
+O Cutting 3 tambem teve sua estrutura confirmada: Linear -> Dia 1/Dia 2 -> 2 Low/1 High -> Up Metabolico. As quantidades diminuem conforme o peso da cliente com base em tabelas Excel de proteina e carboidrato. Os valores e formulas exatos dessas tabelas ainda precisam ser reconciliados antes de qualquer implementacao deterministica.
+
 Nao implementar score automatico de adesao, deteccao automatica de estagnacao ou mudanca automatica de fase.
 
 ## Protocolos - escopo de edicao manual confirmado
