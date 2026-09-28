@@ -416,9 +416,14 @@ A Patty confirmou posteriormente que:
 - as Fases 1, 2, 3 e 4 da planilha pertencem ao conjunto de fases usado nos Cuttings 1, 2 e 3 do metodo atual;
 - a coluna **Media** e o valor utilizado no protocolo **Linear** da fase correspondente.
 
-Permanece aberta apenas a correspondencia individual entre as quatro fases numeradas da planilha e os tres Cuttings nomeados. Nao inferir esse pareamento.
+A Patty esclareceu que o uso pratico mais frequente nao depende de avancar indefinidamente na numeracao da planilha: ela normalmente trabalha com as Fases 1, 2 e 3, intercala um periodo de bulking e depois reinicia novamente 1, 2 e 3 ao retornar ao cutting.
 
-As Fases 5 e 6 continuam **pendentes** conforme confirmacao anterior da Patty e nao devem ser implementadas ate nova validacao explicita.
+As Fases 4, 5 e 6 sao pouco usadas e deixam de ser bloqueio para a primeira automacao do fluxo principal, mas suas regras continuam abertas.
+
+Continuam abertos:
+- pareamento individual completo fase numerada -> nome do Cutting quando nao estiver explicitado;
+- criterios profissionais de transicao cutting -> bulking -> cutting;
+- regras detalhadas das Fases 4, 5 e 6.
 
 ### PARCIALMENTE RESOLVIDO — CUTTING 3
 
@@ -440,9 +445,19 @@ Continuam abertos:
 
 Nao automatizar a selecao pelo nome do Cutting enquanto o pareamento individual nao estiver confirmado.
 
-### QUESTAO ABERTA
+### PARCIALMENTE RESOLVIDO — BULKING
 
-Quais sao as regras detalhadas de Bulking e Consolidacao?
+A Patty confirmou que costuma alternar um cutting prolongado com um periodo de bulking para trabalho de massa muscular e, ao retornar ao cutting, reinicia o ciclo pelas Fases 1, 2 e 3.
+
+Continuam abertos:
+- criterio para iniciar bulking;
+- estrutura de macros/doses do bulking;
+- duracao;
+- criterios de ajuste/encerramento;
+- criterio para retornar ao cutting;
+- regras detalhadas de Consolidacao.
+
+Nao automatizar bulking apenas com base nessa confirmacao de fluxo geral.
 
 ### PARCIALMENTE RESOLVIDO — HIDRATACAO/CHECK-IN DE LIQUIDOS
 
