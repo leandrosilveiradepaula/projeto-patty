@@ -298,7 +298,7 @@ Exemplos historicos individuais nao viram regra geral.
 
 Regra nao confirmada deve permanecer como `QUESTAO ABERTA`.
 
-Nao automatizar hidratacao, suplementacao, manipulados, progressao definitiva de treino, criterios finais de avaliacao, fases 5 e 6 do Carb Cycle, valores/formulas ainda nao reconciliados do Cutting 3, etapas posteriores ao Up Metabolico confirmado apos o Cutting 3, Bulking ou Consolidacao antes de confirmacao documentada.
+Nao automatizar regras de hidratacao alem da formula confirmada de 60 mL/kg e da composicao geral agua predominante + complemento zero calorias; suplementacao, manipulados, progressao definitiva de treino, criterios finais de avaliacao, fases 5 e 6 do Carb Cycle, valores/formulas ainda nao reconciliados do Cutting 3, etapas posteriores ao Up Metabolico confirmado apos o Cutting 3, Bulking ou Consolidacao permanecem dependentes de confirmacao documentada.
 ## Leitura profissional da Anamnese
 
 ### DECISAO CONFIRMADA
@@ -388,7 +388,27 @@ O check-in deve permitir:
 - realizar um check-in diario de atividade fisica, registrando se fez ou nao fez atividade naquele dia;
 - acompanhar o progresso dessas metas de forma visivel para a cliente.
 
-A meta de liquidos deve poder ser pre-determinada a partir do **peso da cliente**. A formula exata ainda precisa ser confirmada e documentada antes de qualquer calculo automatico.
+### META DE LIQUIDOS
+
+### DECISAO CONFIRMADA
+
+A referencia usada pela Patty para a meta diaria de liquidos e:
+
+- **60 mL por kg de peso corporal por dia**.
+
+Formula deterministica:
+
+`meta_liquidos_ml = peso_kg * 60`
+
+Exemplo confirmado:
+- cliente com 60 kg -> 3.600 mL/dia = 3,6 L/dia.
+
+Na composicao dessa meta:
+- a maior parte deve ser consumida como **agua pura**;
+- o restante pode ser complementado, em menor quantidade, com outros liquidos **zero calorias**, como cha, chimarrao, suco zero ou refrigerante zero;
+- a soma deve atingir a meta diaria calculada.
+
+A Patty descreveu essa formula como uma referencia media do seu metodo. Nao tratar essa regra do metodo como recomendacao medica geral fora do acompanhamento profissional.
 
 O check-in diario de atividade fisica e independente do treino prescrito ou de qualquer rotina previamente definida para a cliente. O registro diario pode ser usado posteriormente para derivar frequencia, sem criar score automatico de adesao.
 
@@ -397,14 +417,13 @@ A existencia de metas e lembretes esta confirmada como comportamento desejado do
 Esses parametros podem ser definidos individualmente **na entrega do primeiro protocolo da cliente**, junto com a revisao/publicacao inicial do acompanhamento.
 
 Ainda nao estao formalizados como regra geral:
-- formula exata da meta de liquidos por peso;
-- unidade operacional definitiva para o registro;
-- se/quando a meta de liquidos deve ser recalculada apos mudanca de peso;
+- proporcao minima/exata da meta que deve ser agua pura;
+- se/quando a meta deve ser recalculada apos mudanca de peso;
 - horarios e cadencia padrao dos lembretes;
 - o que a Patty visualiza ou pode corrigir;
 - politica de edicao de check-ins anteriores.
 
-Nao inferir valor de hidratacao, frequencia ideal de treino ou score automatico de adesao a partir desta confirmacao.
+A formula de 60 mL/kg esta confirmada e pode ser tratada como calculo deterministico do metodo. Nao criar score automatico de adesao a partir do check-in.
 
 ## Avaliacao corporal e evolucao
 
