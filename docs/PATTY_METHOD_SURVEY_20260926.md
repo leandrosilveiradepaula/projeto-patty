@@ -224,7 +224,9 @@ A rodada de fechamento de 2026-09-27 acrescentou confirmacoes sobre acompanhamen
 - qualquer resultado e valido quando ha mudanca nos indicadores numericos e essa evolucao nao esta indo contra o objetivo que a propria cliente buscou;
 - o resultado nao e considerado valido quando a evolucao vai contra o objetivo buscado pela cliente ou quando os numeros, no geral, permanecem estagnados;
 - quando o resultado nao e considerado valido, a Patty interrompe a progressao e redefine manualmente os proximos passos;
-- o Cutting 2 reinicia a estrutura do Cutting com menos doses de macros em relacao ao ciclo anterior.
+- o Cutting 2 reinicia a estrutura do Cutting com menos doses de macros em relacao ao ciclo anterior;
+- o Cutting 3 segue Linear -> Dia 1/Dia 2 -> 2 Low/1 High -> Up Metabolico;
+- no Cutting 3, proteina e carboidrato diminuem progressivamente conforme o peso da cliente, com base em tabelas existentes em Excel.
 
 Continuam abertos:
 - frequencia e conteudo de cada retorno alem da cadencia corporal ja confirmada;
@@ -237,6 +239,7 @@ Continuam abertos:
 - como combinar peso e medidas quando mudam em direcoes diferentes;
 - direcao esperada dos indicadores conforme o objetivo especifico da cliente;
 - formula exata da reducao de macros no Cutting 2;
+- valores/formulas exatos das tabelas por peso usadas no Cutting 3;
 - formato final do protocolo entregue;
 - canais finais de entrega/acompanhamento;
 - tratamento de excecoes como atletas, vegetarianos/veganos e doencas cronicas;
