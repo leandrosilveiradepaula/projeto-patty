@@ -153,6 +153,14 @@ Na avaliacao corporal, a Patty considera especialmente:
 
 Visual e medidas podem ter mais peso profissional do que o numero isolado da balanca.
 
+Em esclarecimento posterior, a Patty confirmou que, para emagrecimento/reducao de gordura:
+- reducao de cintura e abdomen e sempre lida como resultado positivo;
+- busto/peito tambem e uma referencia forte;
+- peso estavel nao significa ausencia de evolucao;
+- a comparacao visual positiva entre fotos de antes e depois pode confirmar evolucao mesmo sem queda de peso.
+
+A justificativa profissional relatada pela Patty e que mudancas de composicao corporal podem ocorrer sem alteracao proporcional do peso; por isso, medidas e visual sao centrais na leitura.
+
 Fotos sao usadas principalmente para comparacao de evolucao. Em objetivo de ganho de massa, tambem ajudam a considerar regioes que a cliente deseja desenvolver para harmonia corporal.
 
 Cadencia reconfirmada:
@@ -163,7 +171,7 @@ Cadencia reconfirmada:
 
 O catalogo completo da avaliacao mensal e as unidades continuam pendentes.
 
-A estagnacao geral dos numeros foi posteriormente confirmada em 2026-09-27 como uma das condicoes em que o resultado nao e considerado valido. Ainda nao existe definicao operacional suficiente para automatizar essa leitura.
+A estagnacao geral dos numeros foi posteriormente confirmada em 2026-09-27 como uma das condicoes em que o resultado nao e considerado valido. Os indicadores de emagrecimento foram parcialmente esclarecidos (cintura, abdomen, busto/peito e visual), mas ainda nao existe definicao operacional suficiente para automatizar janela de estagnacao, tolerancia a ruido ou todas as combinacoes de indicadores.
 
 ## 7. Exames, medicamentos, suplementos e hormonios
 
