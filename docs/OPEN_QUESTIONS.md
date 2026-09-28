@@ -10,13 +10,22 @@ Tambem confirmou que o Cutting 2 reinicia a estrutura de Cutting com menos doses
 
 Continuam abertos:
 - criterio objetivo de adesao suficiente/insuficiente;
-- quais indicadores numericos entram na leitura de resultado;
 - janela de tempo para caracterizar estagnacao;
-- limiar de variacao para distinguir mudanca real de ruido;
-- como combinar peso e medidas quando mudam em direcoes diferentes;
-- direcao esperada dos indicadores conforme o objetivo especifico da cliente;
+- limiar de variacao em medidas para distinguir mudanca real de ruido;
+- tratamento de combinacoes conflitantes de indicadores alem dos casos confirmados;
+- criterios de resultado para objetivos diferentes de emagrecimento/reducao de gordura;
 - quanto e quais macros diminuem em cada transicao do Cutting 2;
 - quando simplificar, retornar, manter ou trocar estrategia em cada caso.
+
+### RESOLVIDO PARCIALMENTE — INDICADORES DE RESULTADO
+
+Para emagrecimento/reducao de gordura:
+- reducao de cintura e abdomen e resultado positivo;
+- busto/peito e referencia adicional forte;
+- melhora visual nas fotos pode representar evolucao mesmo com peso estavel;
+- peso isolado nao invalida evolucao quando medidas e/ou visual melhoram.
+
+Nao converter automaticamente essa leitura em score ou decisao de fase enquanto janela, tolerancia a ruido e demais combinacoes nao estiverem formalizadas.
 
 Nao criar score automatico de adesao, estagnacao automatica ou mudanca automatica de fase.
 
