@@ -429,9 +429,23 @@ Nao implementar os numeros sem reconciliar a planilha fonte.
 
 Quais sao as regras detalhadas de Bulking e Consolidacao?
 
-### QUESTAO ABERTA
+### PARCIALMENTE RESOLVIDO — HIDRATACAO/CHECK-IN DE LIQUIDOS
 
-Quais sao as regras de hidratacao?
+A Patty confirmou a formula usada no metodo:
+
+- **60 mL por kg de peso corporal por dia**;
+- exemplo: 60 kg -> 3.600 mL/dia = 3,6 L/dia.
+
+A maior parte da meta deve ser agua pura. O restante pode ser complementado, em menor quantidade, por liquidos zero calorias, como cha, chimarrao, suco zero ou refrigerante zero.
+
+Continuam abertos:
+- proporcao minima/exata que deve ser agua pura;
+- regra de recalculo quando o peso muda;
+- horarios/cadencia dos lembretes;
+- poderes de correcao da Patty;
+- edicao de registros anteriores.
+
+A formula pode ser implementada deterministicamente quando a tarefa tecnica correspondente for aprovada.
 
 ### QUESTAO ABERTA
 
@@ -695,15 +709,17 @@ A Patty confirmou que o produto deve prever check-ins com metas e lembretes para
 
 A Patty confirmou que as metas/configuracoes individuais podem ser definidas na entrega do primeiro protocolo.
 
+A formula e a unidade da meta estao resolvidas: 60 mL/kg/dia.
+
 Ainda faltam formalizar:
-- formula exata e unidade da meta de liquidos por peso;
+- proporcao minima/exata de agua pura dentro da meta;
 - regra de recalculo apos mudanca de peso;
 - horarios e cadencia dos lembretes;
 - o que a Patty visualiza e pode corrigir;
 - se registros anteriores podem ser editados;
 - parametros funcionais restantes necessarios para implementar o check-in completo.
 
-Nao inferir score de adesao, hidratacao recomendada ou frequencia ideal de treino.
+Nao inferir score de adesao ou frequencia ideal de treino.
 
 ## OpenAI — modelo e controles de dados
 
