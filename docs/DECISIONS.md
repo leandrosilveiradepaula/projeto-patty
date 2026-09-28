@@ -1,3 +1,21 @@
+## 2026-09-27 - Sem alertas automaticos na etapa inicial
+
+### REGRA CONFIRMADA PELA PATTY
+
+Ao receber inicialmente relatos como alimentacao emocional, culpa, compulsao, restricao, doencas informadas ou alteracoes em exames, a Patty **nao espera que o sistema execute uma acao automatica especifica** apenas por causa desses dados.
+
+O acompanhamento deve ser iniciado normalmente e a Patty observa, ao longo do processo, como a cliente se comporta e responde.
+
+Portanto, a presenca inicial desses dados nao gera automaticamente:
+- destaque especial;
+- revisao obrigatoria;
+- pedido de esclarecimento;
+- encaminhamento;
+- bloqueio de protocolo/acao;
+- diagnostico ou classificacao clinica.
+
+Qualquer intervencao posterior continua sendo decisao humana da Patty conforme a evolucao do caso. Isso nao revoga a possibilidade de encaminhamento manual a outro profissional quando a Patty julgar necessario; apenas exclui uma regra automatica inicial do sistema.
+
 ## 2026-09-27 - Progressao do protocolo por sequencia, adesao e resultado
 
 ### REGRA CONFIRMADA PELA PATTY
