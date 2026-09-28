@@ -247,13 +247,20 @@ Continuam abertos:
 - como combinar peso e medidas quando mudam em direcoes diferentes;
 - direcao esperada dos indicadores conforme o objetivo especifico da cliente;
 - formula exata da reducao de macros no Cutting 2;
-- valores/formulas exatos das tabelas por peso usadas no Cutting 3;
+- pareamento individual entre as Fases 1/2/3/4 da Planilha Carb Cycle e os Cuttings 1/2/3;
+- semantica do bloco final de conversao da Planilha Carb Cycle antes de trata-lo como doses/porcoes;
 - proporcao minima/exata de agua pura dentro da meta de liquidos, regra de recalculo por peso e cadencia dos lembretes;
 - formato final do protocolo entregue;
 - canais finais de entrega/acompanhamento;
 - tratamento de excecoes como atletas, vegetarianos/veganos e doencas cronicas;
 - criterios operacionais restantes para avaliar resultado de forma automatizavel;
 - exercicio pratico completo com caso real.
+
+### PLANILHA CARB CYCLE — CONFIRMACAO POSTERIOR
+
+A Patty confirmou que as Fases 1, 2, 3 e 4 da Planilha Carb Cycle pertencem aos Cuttings 1, 2 e 3 do metodo atual e que a coluna **Media** corresponde ao valor usado no protocolo **Linear**.
+
+Como ha quatro fases numeradas na planilha e tres Cuttings nomeados, permanece aberta a associacao individual entre cada numero de fase e cada Cutting. Essa associacao nao deve ser inferida.
 
 ### META DE LIQUIDOS — CONFIRMACAO POSTERIOR
 
