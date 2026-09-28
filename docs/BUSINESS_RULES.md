@@ -200,6 +200,30 @@ Doses podem ser fracionadas pela cliente.
 
 Parte das doses inicialmente associadas ao carboidrato pode ser redistribuida para gordura.
 
+### LEGUMES NA CONTAGEM DE CARBOIDRATO
+
+### DECISAO CONFIRMADA
+
+Para efeito da contagem total do protocolo:
+
+- **2 doses de legumes contabilizam 1 dose de carboidrato**.
+
+Exemplo confirmado pela Patty para uma cliente com 6 doses totais de carboidrato:
+- almoco: 2 doses de legumes, contabilizadas como 1 dose de carboidrato;
+- jantar: 2 doses de legumes, contabilizadas como 1 dose de carboidrato;
+- essas duas alocacoes consomem 2 das 6 doses totais de carboidrato;
+- restam 4 doses do total diario;
+- as 4 doses restantes podem ser distribuidas entre carboidrato e gordura.
+
+Os legumes, portanto, nao entram por fora do total: entram na contagem do carboidrato conforme a equivalencia acima.
+
+Esta confirmacao ainda nao define:
+- a conversao exata entre o saldo de doses de carboidrato e doses de gordura;
+- se almoco e jantar devem sempre receber essa alocacao em todas as fases/protocolos;
+- excecoes especificas por fase ou alimento.
+
+Nao inferir essas partes restantes.
+
 ## Proteinas e equivalentes
 
 ### DECISAO CONFIRMADA
