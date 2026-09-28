@@ -560,7 +560,7 @@ Ainda falta fechar o catalogo/versionamento completo de equivalentes e suas regr
 
 ## Cliente - protocolo publicado e check-in
 
-Estado: **VISIBILIDADE E OBJETIVO DO CHECK-IN CONFIRMADOS / PARAMETROS AINDA ABERTOS**
+Estado: **FORMULA DE LIQUIDOS CONFIRMADA / CHECK-IN AINDA PARCIALMENTE ABERTO**
 
 A cliente deve visualizar:
 - sua rotina de alimentacao publicada;
@@ -574,9 +574,13 @@ O produto deve prever check-in separado para:
 - registrar diariamente se fez ou nao fez atividade fisica, independentemente do treino prescrito;
 - visualizar progresso como estimulo.
 
-As metas/configuracoes individuais podem ser definidas na entrega do primeiro protocolo da cliente. Ainda faltam os parametros profissionais e de produto para implementacao como padrao: formula/unidade da meta de liquidos, regra de recalculo por peso, frequencia dos lembretes, visibilidade/correcao pela Patty e escopo do sistema completo.
+As metas/configuracoes individuais podem ser definidas na entrega do primeiro protocolo da cliente.
 
-Nao tratar o check-in como score automatico de adesao nem inferir regra de hidratacao.
+A formula profissional confirmada para liquidos e **60 mL/kg/dia**. Exemplo: 60 kg -> 3.600 mL/dia. A maior parte deve ser agua pura e o restante pode ser complementado, em menor quantidade, por liquidos zero calorias.
+
+Ainda faltam parametros de produto: proporcao minima/exata de agua pura, regra de recalculo por peso, frequencia dos lembretes e visibilidade/correcao pela Patty.
+
+Nao tratar o check-in como score automatico de adesao.
 
 ## Escopo completo - Patty/admin
 
