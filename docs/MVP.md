@@ -131,22 +131,24 @@ Para o estado operacional detalhado e os bloqueios atuais, consultar `PROJECT_ST
 
 ### QUESTAO ABERTA
 
-Parte do metodo ja possui regras confirmadas e documentadas em `BUSINESS_RULES.md` e `DECISIONS.md`, incluindo Reconhecimento Metabolico, sequencia principal confirmada ate Cutting 3 Linear, referencias iniciais de macros, conversoes de doses, limite do grupo de proteina com maior teor de gordura, regras confirmadas de Cutting Dia 1 / Dia 2 e a existencia da refeicao livre semanal no Up Metabolico.
+Parte do metodo ja possui regras confirmadas e documentadas em `BUSINESS_RULES.md` e `DECISIONS.md`, incluindo Reconhecimento Metabolico, sequencia principal confirmada ate Cutting 3: Linear -> Dia 1/Dia 2 -> 2 Low/1 High -> Up Metabolico, referencias iniciais de macros, conversoes de doses, limite do grupo de proteina com maior teor de gordura, equivalencia de legumes na contagem de carboidrato, regras confirmadas de Cutting Dia 1 / Dia 2, meta de liquidos de 60 mL/kg/dia e a existencia da refeicao livre semanal no Up Metabolico.
 
-Continuam pendentes, sem automacao enquanto nao houver confirmacao documentada:
+Tambem esta confirmado que, no inicio do acompanhamento, relatos de comportamento, doencas informadas ou alteracoes em exames nao disparam alerta, bloqueio, encaminhamento ou revisao obrigatoria automaticamente; a Patty inicia o processo normalmente e decide intervencoes posteriores por julgamento humano.
+
+Continuam pendentes, sem automacao alem do que ja foi explicitamente confirmado:
 
 - Fases 5 e 6 da Planilha Carb Cycle;
-- regras detalhadas do Cutting 3 Linear e etapas posteriores a ele;
+- valores/formulas exatos das tabelas por peso do Cutting 3 e etapas posteriores ao Up Metabolico que o sucede;
 - Bulking detalhado;
 - Consolidacao;
-- hidratacao;
+- proporcao minima de agua pura, regra de recalculo da meta de liquidos e cadencia dos lembretes;
 - suplementacao e manipulados;
 - montagem e progressao definitiva de treino;
 - cardio quando nao coberto por regra confirmada;
-- criterios profissionais finais de avaliacao;
-- regras de alertas/bloqueios profissionais;
+- janela/limiar de estagnacao e combinacoes conflitantes de indicadores;
+- criterios de resultado para objetivos diferentes de emagrecimento/reducao de gordura;
 - criterios completos de mudanca de fase alem do fluxo ja confirmado;
-- demais regras clinicas/metodologicas ainda nao formalizadas.
+- demais regras profissionais ainda nao formalizadas.
 
 Essas pendencias nao devem ser resolvidas por inferencia, exemplo individual ou recomendacao tecnica. Devem ser registradas e validadas pela Patty antes de virar regra do produto.
 
