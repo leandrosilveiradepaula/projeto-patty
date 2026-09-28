@@ -232,7 +232,15 @@ O produto deve prever um check-in de acompanhamento e incentivo para:
 - realizar um check-in diario de atividade fisica, registrando se fez ou nao fez atividade naquele dia;
 - acompanhar progresso dessas metas.
 
-A meta de liquidos deve poder ser pre-determinada a partir do **peso da cliente**. A formula exata ainda precisa ser confirmada antes de qualquer calculo automatico.
+A meta diaria de liquidos foi confirmada posteriormente pela Patty como **60 mL por kg de peso corporal**.
+
+Formula do metodo:
+
+`meta_liquidos_ml = peso_kg * 60`
+
+Exemplo: 60 kg -> 3.600 mL/dia (3,6 L/dia).
+
+A Patty orienta que a maior parte da meta seja agua pura. O restante pode ser complementado, em menor quantidade, por liquidos zero calorias, como cha, chimarrao, suco zero ou refrigerante zero.
 
 O check-in diario de atividade fisica e independente do treino prescrito ou de qualquer rotina previamente definida. A frequencia pode ser derivada depois dos registros diarios.
 
@@ -243,14 +251,13 @@ As metas e configuracoes individuais do check-in podem ser definidas na entrega 
 ### QUESTOES AINDA ABERTAS
 
 Ainda precisam ser formalizados como padrao/regra:
-- formula exata da meta de liquidos por peso;
-- unidade operacional;
+- proporcao minima/exata de agua pura dentro da meta;
 - se/quando recalcular a meta apos mudanca de peso;
 - horarios e cadencia dos lembretes;
 - visibilidade e poderes de correcao da Patty;
 - politica de edicao de check-ins passados.
 
-Nao criar score automatico de adesao nem inferir meta de hidratacao ou frequencia ideal de treino.
+A formula 60 mL/kg esta confirmada como regra deterministica do metodo. Nao criar score automatico de adesao a partir do check-in.
 
 ## 2026-09-27 - Escopo de Edicao Manual da Patty
 
