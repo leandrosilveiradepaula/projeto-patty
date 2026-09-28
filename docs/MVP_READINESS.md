@@ -531,7 +531,9 @@ A planilha fonte foi localizada, e a Patty confirmou que:
 - suas Fases 1 a 4 pertencem ao conjunto dos Cuttings 1, 2 e 3 atuais;
 - a coluna Media corresponde ao valor do protocolo Linear.
 
-Ainda nao esta pronta a selecao automatica da fase pelo nome do Cutting, porque existem quatro fases numeradas para tres Cuttings nomeados e o pareamento individual ainda nao foi explicitado.
+A Patty esclareceu que o uso operacional mais frequente se concentra nas Fases 1, 2 e 3. Fases 4, 5 e 6 sao pouco utilizadas. Na pratica, ela costuma alternar um cutting prolongado com um bulking para ganho de massa muscular e, ao retornar ao cutting, reinicia novamente pelas Fases 1, 2 e 3.
+
+Isso reduz a prioridade das Fases 4 a 6 para a primeira automacao, mas nao autoriza transicao automatica entre cutting e bulking. Ainda faltam os criterios de entrada/saida do bulking e o pareamento individual completo entre fase numerada e nome do Cutting quando nao explicitado.
 
 Nao implementar score automatico de adesao, deteccao automatica de estagnacao ou mudanca automatica de fase.
 
