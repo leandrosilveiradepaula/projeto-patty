@@ -56,15 +56,15 @@ A Patty relatou que normalmente so precisa pedir informacao adicional quando o p
 
 Ela tambem relatou que doencas ou alteracoes relevantes verificadas em exames podem justificar encaminhamento a outro profissional de saude.
 
-### QUESTAO ABERTA
+### REGRA CONFIRMADA EM 2026-09-27
 
-Ainda nao existem criterios suficientemente concretos para:
-- quais doencas/achados exigem encaminhamento;
-- quais respostas sao apenas destaque;
-- quais exigem revisao obrigatoria;
-- se alguma resposta deve bloquear uma acao.
+A Patty esclareceu posteriormente que, no inicio do acompanhamento, **nao espera que o sistema execute nenhuma acao automatica** apenas pela presenca de doencas relatadas, alteracoes em exames ou outros sinais dessa natureza.
 
-Nao criar alerta ou bloqueio automatico a partir desta rodada.
+O processo deve ser iniciado normalmente e a cliente e observada ao longo do acompanhamento.
+
+Nao criar automaticamente destaque, revisao obrigatoria, pedido de esclarecimento, encaminhamento ou bloqueio apenas com base nesses dados iniciais.
+
+A possibilidade de a Patty decidir manualmente por esclarecimento, ajuste ou encaminhamento em momento posterior continua existindo e depende de julgamento profissional.
 
 ## 4. Alimentacao
 
@@ -194,18 +194,15 @@ A Patty considera:
 - motivacao;
 - confianca para seguir o processo.
 
-Relatos de alimentacao emocional, culpa, compulsao ou restricao merecem atencao profissional especial.
+Relatos de alimentacao emocional, culpa, compulsao ou restricao continuam sendo informacoes consideradas pela Patty na leitura profissional.
 
-### QUESTAO ABERTA
+### REGRA CONFIRMADA EM 2026-09-27
 
-Ainda precisa ser definido como essa "atencao especial" aparece no sistema:
-- destaque informativo;
-- revisao obrigatoria;
-- pedido de esclarecimento;
-- encaminhamento;
-- ou outro fluxo.
+Esses relatos nao devem, por si so, disparar um fluxo automatico especial no inicio do acompanhamento.
 
-Nao criar diagnostico, score ou bloqueio automatico.
+A Patty prefere iniciar o processo normalmente e observar como a cliente se comporta ao longo do acompanhamento. Qualquer intervencao posterior permanece sob julgamento humano.
+
+Nao criar diagnostico, score, destaque, revisao obrigatoria, encaminhamento ou bloqueio automatico a partir desses relatos iniciais.
 
 ## 9. Secoes sem resposta nesta rodada
 
