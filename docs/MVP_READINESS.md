@@ -628,6 +628,16 @@ A escrita usa boundary server-side privilegiada apenas depois de:
 
 Nao existe sincronizacao automatica com email de login nem com snapshots historicos da Anamnese.
 
+## Alertas profissionais iniciais
+
+Estado: **REGRA CONFIRMADA / NENHUMA AUTOMACAO INICIAL NECESSARIA**
+
+Relatos iniciais de alimentacao emocional, culpa, compulsao, restricao, doencas ou alteracoes em exames nao geram automaticamente destaque especial, revisao obrigatoria, esclarecimento, encaminhamento ou bloqueio.
+
+O acompanhamento inicia normalmente e a Patty observa a evolucao da cliente. Eventuais intervencoes posteriores permanecem decisoes humanas e nao constituem um gate tecnico pendente para o comportamento inicial do sistema.
+
+Se no futuro houver desejo de automatizar algum alerta especifico, sera necessaria nova regra profissional documentada.
+
 ## Painel de pendencias operacionais
 
 Estado: **IMPLEMENTADO SEM SCORE OU PRIORIZACAO AUTOMATICA**
