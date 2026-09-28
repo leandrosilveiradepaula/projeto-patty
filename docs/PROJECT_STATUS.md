@@ -79,7 +79,7 @@ Nao existe bloqueio atual de deployment Vercel para o `master`.
 | Avaliacoes e medidas | Fundacao + cadencia profissional parcial definida | Lifecycle operacional de rascunho/finalizacao implementado | CI/build PASS no PR #210 + pre-apply `ROLLBACK` PASS | `20260927002227_create_assessment_draft_lifecycle` APLICADA NO SAAS | Quinzenal: cintura/abdomen/quadril/peso; mensal: todas as medidas + peso + fotos; catalogo mensal, unidades e correcao pos-finalizacao continuam abertos |
 | Protocolos versionados | SIM | Lifecycle manual implementado | CI/validacoes existentes | Backend/SaaS correspondente existente | Criacao/edicao profissional completa conforme regras ainda abertas |
 | Conteudo educacional / exercicios | SIM como dominios separados | Fundacao/release + metadata de asset preparada | Inventario 89/89 revalidado; smoke transacional de assets PASS | Vercel Private Blob definido para midia; store/upload ainda nao executados | Criar/conectar store privado, migrar video aprovado, verificar hash e publicar/liberar explicitamente |
-| Metodo da Patty | PARCIALMENTE DEFINIDO | Regras matematicas confirmadas em codigo testavel | CI | Fluxo confirmado agora inclui Cutting 3 Linear apos Cutting 2: 2 Low / 1 High | Fases 5/6, regras internas/pos-Cutting 3, Bulking, Consolidacao, hidratacao, suplementacao, treino, alertas e criterios finais |
+| Metodo da Patty | PARCIALMENTE DEFINIDO | Regras matematicas confirmadas em codigo testavel; documentacao em reconciliacao | CI | Fluxo confirmado inclui Cutting 3 Linear -> Dia 1/Dia 2 -> 2 Low/1 High -> Up Metabolico; meta de liquidos 60 mL/kg e equivalencia 2 doses de legumes = 1 dose de carbo confirmadas | Fases 5/6, numeros da planilha por peso do Cutting 3, pos-Up Metabolico, Bulking, Consolidacao, suplementacao, treino, parametros restantes do check-in e criterios objetivos de estagnacao |
 | IA assistiva | SIM como principio e arquitetura; provider OpenAI confirmado | PARCIAL/AVANCADO | Adapter OpenAI + Structured Outputs + aliases + UI de revisao humana; default tecnico `gpt-5.6-terra` / reasoning `medium` | Prompt v1 aplicado; PR #151 publicado READY; chamada externa bloqueada | Credencial OpenAI, avaliacao sintetica e conclusao do gate de dados de saude |
 | Failure handling de IA | SIM | SIM no schema + boundary server-side | CI + invariantes deterministicas | `20260922160058` aplicada; provider adapter publicado, mas chamada real segue gated | Manter gate fechado ate avaliacao sintetica/controles de dados; recovery automatico segue aberto |
 | n8n | SIM: nao usar inicialmente | N/A | N/A | Nao usado | Introduzir somente com caso concreto |
@@ -137,8 +137,10 @@ Consultar `BUSINESS_RULES.md` para detalhes.
 
 Resumo:
 - todo acompanhamento comeca pelo Reconhecimento Metabolico;
-- o fluxo principal confirmado agora segue ate Cutting 3 Linear;
-- existem regras confirmadas de refeicoes/jejum, macros/doses, grupos de proteina, Cutting Dia 1/Dia 2 e refeicao livre do Up Metabolico;
+- o fluxo principal confirmado agora segue ate Cutting 3 Linear -> Dia 1/Dia 2 -> 2 Low/1 High -> Up Metabolico;
+- existem regras confirmadas de refeicoes/jejum, macros/doses, grupos de proteina, legumes na contagem de carboidrato, Cutting Dia 1/Dia 2, meta de liquidos 60 mL/kg/dia e refeicao livre do Up Metabolico;
+- no inicio, relatos de saude/comportamento nao geram alerta, bloqueio ou encaminhamento automatico;
+- para emagrecimento/reducao de gordura, cintura e abdomen sao referencias fortes e fotos podem confirmar evolucao mesmo com peso estavel;
 - adesao e central e nao existe score automatico de adesao;
 - exemplos historicos individuais nao viram regra geral;
 - formulas so entram em codigo quando confirmadas e documentadas.
@@ -192,14 +194,15 @@ A lista autoritativa esta em `OPEN_QUESTIONS.md`.
 
 Entre as principais:
 - Fases 5 e 6 da Planilha Carb Cycle;
-- regras detalhadas do Cutting 3 Linear e etapas posteriores a ele;
+- valores/formulas exatos das tabelas por peso usadas no Cutting 3;
+- etapas posteriores ao Up Metabolico que sucede o Cutting 3;
 - Bulking detalhado;
 - Consolidacao;
-- hidratacao;
+- proporcao minima de agua pura, recalculo por mudanca de peso e cadencia dos lembretes;
 - suplementacao/manipulados;
 - montagem/progressao definitiva de treino e cardio ainda nao coberto por regra confirmada;
-- criterios profissionais finais de avaliacao/reavaliacao;
-- alertas profissionais;
+- janela/limiar de estagnacao e combinacoes conflitantes de indicadores;
+- criterios de resultado para objetivos diferentes de emagrecimento/reducao de gordura;
 - demais regras ainda nao formalizadas.
 
 Nao automatizar esses pontos antes de confirmacao da Patty e atualizacao documental.
