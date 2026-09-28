@@ -88,7 +88,11 @@ Ja estao em codigo testavel, sem ligacao automatica com decisao de fase ou publi
 - limite diario do grupo de proteina com maior teor de gordura = metade das doses totais de proteina, arredondando para cima;
 - referencia inicial geral do Reconhecimento Metabolico = 2 g/kg de proteina, 2 g/kg de carboidrato e 50 g/dia de gordura.
 
-A referencia do Reconhecimento pode ser individualizada. Cutting aproximado, redistribuicao carboidrato/gordura, fases 5/6 e demais regras abertas nao foram codificados.
+A referencia do Reconhecimento pode ser individualizada.
+
+A equivalencia **2 doses de legumes = 1 dose de carboidrato na contagem total** esta confirmada documentalmente. Exemplo: em 6 doses totais, 2 doses de legumes no almoco contabilizam 1 dose de carboidrato e 2 doses de legumes no jantar contabilizam outra, restando 4 doses para distribuicao entre carboidrato e gordura.
+
+Ainda nao esta pronta para automacao completa a redistribuicao do saldo entre carboidrato e gordura, porque a conversao exata permanece aberta. Cutting aproximado, fases 5/6 e demais regras abertas tambem nao foram codificados.
 
 ## Observacoes por fluxo
 
