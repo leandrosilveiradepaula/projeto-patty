@@ -240,13 +240,25 @@ Continuam abertos:
 - direcao esperada dos indicadores conforme o objetivo especifico da cliente;
 - formula exata da reducao de macros no Cutting 2;
 - valores/formulas exatos das tabelas por peso usadas no Cutting 3;
+- proporcao minima/exata de agua pura dentro da meta de liquidos, regra de recalculo por peso e cadencia dos lembretes;
 - formato final do protocolo entregue;
 - canais finais de entrega/acompanhamento;
 - tratamento de excecoes como atletas, vegetarianos/veganos e doencas cronicas;
 - criterios operacionais restantes para avaliar resultado de forma automatizavel;
 - exercicio pratico completo com caso real.
 
-Esses pontos permanecem abertos.
+### META DE LIQUIDOS — CONFIRMACAO POSTERIOR
+
+A Patty confirmou em 2026-09-27 a referencia de **60 mL/kg/dia** para a meta de liquidos.
+
+Exemplo:
+- 60 kg -> 3.600 mL/dia = 3,6 L/dia.
+
+A maior parte deve ser agua pura. O restante pode ser complementado, em menor quantidade, por liquidos zero calorias, como cha, chimarrao, suco zero ou refrigerante zero.
+
+Permanecem abertos a proporcao minima/exata de agua pura, o momento de recalculo por mudanca de peso e a cadencia dos lembretes.
+
+Esses pontos permanecem abertos onde indicado.
 
 ## Consequencia para automacao
 
