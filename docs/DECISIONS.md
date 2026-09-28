@@ -1,3 +1,22 @@
+## 2026-09-27 - Legumes na contagem de carboidrato
+
+### REGRA CONFIRMADA PELA PATTY
+
+Para a contagem total do protocolo, **2 doses de legumes contabilizam 1 dose de carboidrato**.
+
+Exemplo confirmado:
+- total diario: 6 doses de carboidrato;
+- almoco: 2 doses de legumes = 1 dose contabilizada de carboidrato;
+- jantar: 2 doses de legumes = 1 dose contabilizada de carboidrato;
+- saldo restante: 4 doses do total diario;
+- esse saldo pode ser distribuido entre carboidrato e gordura.
+
+Assim, os legumes consomem parte do total de doses de carboidrato; nao sao adicionais ao total.
+
+### AINDA ABERTO
+
+A resposta nao formaliza a conversao exata entre o saldo de carboidrato e gordura nem confirma que a mesma alocacao almoco/jantar vale para todas as fases/protocolos.
+
 ## 2026-09-27 - Sem alertas automaticos na etapa inicial
 
 ### REGRA CONFIRMADA PELA PATTY
