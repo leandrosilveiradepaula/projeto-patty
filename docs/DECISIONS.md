@@ -40,7 +40,7 @@ Qualquer intervencao posterior continua sendo decisao humana da Patty conforme a
 ### REGRA CONFIRMADA PELA PATTY
 
 O acompanhamento segue a sequencia profissional ja confirmada:
-Reconhecimento Metabolico -> Cutting 1 Dia 1/Dia 2 -> Cutting 1 2 Low/1 High -> Up Metabolico -> Cutting 2 Linear -> Cutting 2 Dia 1/Dia 2 -> Cutting 2 2 Low/1 High -> Cutting 3 Linear.
+Reconhecimento Metabolico -> Cutting 1 Dia 1/Dia 2 -> Cutting 1 2 Low/1 High -> Up Metabolico -> Cutting 2 Linear -> Cutting 2 Dia 1/Dia 2 -> Cutting 2 2 Low/1 High -> Cutting 3 Linear -> Cutting 3 Dia 1/Dia 2 -> Cutting 3 2 Low/1 High -> Up Metabolico.
 
 A progressao entre etapas nao deve ser automatica.
 
@@ -619,26 +619,27 @@ Nenhuma formula, criterio ou comportamento dessas fases deve ser:
 Qualquer uso futuro depende de nova confirmacao profissional e atualizacao documental previa.
 
 
-## 2026-09-24 - Cutting 3 Linear e a etapa seguinte confirmada
+## 2026-09-24 - Cutting 3 Linear e etapa seguinte
 
-### REGRA CONFIRMADA PELA PATTY
+### DECISAO SUPERADA PARCIALMENTE POR CONFIRMACAO DE 2026-09-27
 
-A Patty confirmou que, depois de `Cutting 2: 2 Low / 1 High`, a etapa seguinte do metodo e:
+A confirmacao anterior registrava apenas a existencia de `Cutting 3 Linear`.
 
-`Cutting 3 Linear`
+A Patty confirmou posteriormente que o Cutting 3 segue a mesma estrutura de progressao:
+- Cutting 3 Linear;
+- Cutting 3 Dia 1 / Dia 2;
+- Cutting 3: 2 Low / 1 High;
+- depois, Up Metabolico.
 
-### LIMITE
+No Cutting 3, as quantidades de proteina e carboidrato diminuem de acordo com o peso da cliente, com base em tabelas existentes em Excel.
 
-A resposta confirma somente a existencia e o tipo linear dessa etapa.
+Ainda permanecem pendentes de reconciliacao documental:
+- valores exatos das tabelas por peso;
+- formulas/calculos derivados dessas tabelas;
+- duracao e criterios de encerramento;
+- etapas posteriores ao Up Metabolico que sucede o Cutting 3.
 
-Ainda nao estao confirmados/documentados:
-- macros ou doses do Cutting 3;
-- duracao;
-- criterios de entrada/saida;
-- eventual Dia 1/Dia 2 ou Carb Cycle posterior;
-- etapas seguintes.
-
-Nenhuma dessas regras deve ser inferida a partir dos Cuttings anteriores.
+Nao implementar os numeros sem conferir a planilha fonte.
 
 
 ## 2026-09-24 - Conteudos de formulas/manipulados fazem parte do aplicativo
