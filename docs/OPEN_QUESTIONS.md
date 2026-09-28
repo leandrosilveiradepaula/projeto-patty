@@ -449,18 +449,24 @@ Quais alertas profissionais devem existir, quais sao apenas informativos e quais
 
 Quais regras de comportamento ainda precisam ser formalizadas alem do principio confirmado de adaptar o protocolo a dificuldade relatada e priorizar adesao?
 
-### QUESTAO ABERTA — FORMULAS/CONVERSOES ALIMENTARES DA RODADA 2026-09-26
+### PARCIALMENTE RESOLVIDO — FORMULAS/CONVERSOES ALIMENTARES
 
-A Patty relatou que gordura e legumes entram na contagem de carboidrato e citou a relacao "1 dose de carbo para 2 de legumes".
+A relacao entre legumes e a contagem total de carboidrato foi confirmada:
 
-Antes de qualquer implementacao, esclarecer:
-- se essa e uma conversao de doses, equivalencia de tabela ou apenas orientacao pratica;
-- como ela convive com a referencia separada de gordura em gramas/doses ja documentada;
-- em quais fases/protocolos se aplica;
-- como tratar fracionamento e arredondamento;
-- se existe excecao por alimento/grupo.
+- **2 doses de legumes = 1 dose de carboidrato para efeito da contagem total**.
 
-Nao alterar calculos atuais ate essa regra estar formalizada.
+Exemplo confirmado:
+- 6 doses totais de carboidrato;
+- 2 doses de legumes no almoco contabilizam 1 dose de carboidrato;
+- 2 doses de legumes no jantar contabilizam mais 1 dose de carboidrato;
+- restam 4 doses do total diario, que podem ser distribuidas entre carboidrato e gordura.
+
+Ficam abertos:
+- a conversao exata entre doses do saldo de carboidrato e gordura;
+- se a alocacao de legumes no almoco e jantar vale para todas as fases/protocolos;
+- excecoes especificas.
+
+A equivalencia dos legumes pode ser documentada, mas nao ampliar a automacao para a redistribuicao carboidrato/gordura enquanto a conversao restante nao estiver formalizada.
 
 ### QUESTAO ABERTA — GORDURA SATURADA E REFEICOES FORA
 
