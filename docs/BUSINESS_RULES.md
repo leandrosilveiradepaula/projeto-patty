@@ -153,12 +153,25 @@ O resultado nao e considerado valido quando:
 
 Quando o resultado nao e considerado valido, a progressao deve parar para decisao manual da Patty sobre os proximos passos.
 
+### INDICADORES DE EVOLUCAO CONFIRMADOS
+
+Para objetivo de emagrecimento/reducao de gordura, a Patty confirmou como referencias fortes:
+- reducao de cintura;
+- reducao de abdomen;
+- reducao de busto/peito como referencia adicional relevante;
+- comparacao visual positiva entre fotos de antes e depois.
+
+A reducao de cintura e abdomen e considerada resultado positivo pela Patty.
+
+O peso isolado na balanca **nao determina ausencia de evolucao**. A cliente pode manter o mesmo peso e ainda assim ser considerada em evolucao quando as medidas e/ou o visual melhoram.
+
+Na leitura profissional da Patty, a possibilidade de alteracao de composicao corporal faz com que medidas e fotos tenham mais peso do que a balanca isoladamente.
+
 Essa regra profissional **nao define um algoritmo automatico de estagnacao ou sucesso**. Continuam abertos:
-- quais indicadores numericos entram nessa leitura;
 - qual janela de tempo deve ser usada para considerar estagnacao;
-- qual variacao conta como mudanca real em vez de ruido;
-- como combinar peso e medidas quando mudam em direcoes diferentes;
-- qual direcao e esperada para cada objetivo especifico da cliente.
+- qual variacao em centimetros conta como mudanca real em vez de ruido de medicao;
+- como tratar indicadores que se movem em direcoes diferentes alem dos casos agora confirmados;
+- criterios especificos para objetivos diferentes de emagrecimento/reducao de gordura.
 
 Nao inferir automaticamente a causa de ausencia de resultado. Resultado nao valido nao deve ser tratado pelo sistema como prova de baixa adesao.
 
