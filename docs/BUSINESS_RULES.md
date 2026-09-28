@@ -417,13 +417,29 @@ A Patty distinguiu dois cenarios:
 
 A forma tecnica de preservar auditoria dessa correcao sem manter o valor errado como dado ativo ainda deve ser definida separadamente. Nao transformar automaticamente um erro de digitacao em uma nova avaliacao de acompanhamento.
 
-## Comportamento e relacao com comida
+## Comportamento, saude e alertas iniciais
 
 ### DECISAO CONFIRMADA
 
-Relatos de alimentacao emocional, culpa, compulsao ou restricao merecem atencao profissional especial.
+Relatos de alimentacao emocional, culpa, compulsao ou restricao continuam sendo informacoes relevantes para a leitura profissional da Patty.
 
-Essa confirmacao nao define alerta automatico, severidade, diagnostico, bloqueio ou encaminhamento. O comportamento de sistema continua pendente de formalizacao.
+Na etapa inicial, porem, esses relatos, assim como doencas informadas ou alteracoes em exames, **nao devem disparar comportamento automatico do sistema** por si so.
+
+O fluxo inicial permanece:
+- registrar/preservar as informacoes fornecidas;
+- iniciar o acompanhamento normalmente;
+- observar como a cliente se comporta e responde ao processo;
+- deixar qualquer intervencao posterior para decisao profissional da Patty conforme o acompanhamento evolui.
+
+Nao criar automaticamente, apenas pela presenca inicial desses dados:
+- destaque especial;
+- revisao obrigatoria;
+- pedido de esclarecimento;
+- encaminhamento;
+- bloqueio de protocolo ou de outra acao;
+- diagnostico ou classificacao clinica.
+
+Essa regra nao impede que a Patty, mais adiante e por julgamento humano, solicite esclarecimento, ajuste a estrategia ou oriente procura de outro profissional quando considerar necessario. Ela apenas confirma que o **sistema nao toma essa decisao automaticamente no inicio**.
 
 ## Limite adicional desta rodada
 
