@@ -301,11 +301,25 @@ A Patty confirmou que:
 
 Portanto, o Linear nao deve ser calculado por uma formula inventada fora da planilha quando houver fase da Planilha Carb Cycle aplicavel: a referencia confirmada e a coluna Media.
 
-Ainda nao inferir o pareamento individual entre cada uma das quatro fases numeradas da planilha e os tres Cuttings nomeados, porque essa correspondencia um-a-um nao foi explicitada nesta resposta.
+### USO PRATICO DAS FASES DA PLANILHA
+
+A Patty confirmou que, na pratica, **dificilmente chega as Fases 4, 5 e 6** da planilha.
+
+O padrao profissional mais frequente e:
+- trabalhar repetidamente com as Fases 1, 2 e 3;
+- realizar um periodo de cutting mais prolongado;
+- intercalar com um periodo de bulking voltado ao trabalho de massa muscular;
+- depois reiniciar novamente o ciclo pelas Fases 1, 2 e 3 quando voltar ao cutting.
+
+Isso descreve a pratica profissional atual e **nao cria uma transicao automatica** entre cutting e bulking. Os criterios de quando interromper cutting, iniciar bulking, encerrar bulking e retornar ao cutting continuam dependentes de decisao da Patty.
+
+As Fases 4, 5 e 6 permanecem validas como possibilidades historicas/metodologicas, mas nao devem ser tratadas como caminho padrao nem como requisito para a primeira automacao do fluxo.
+
+Ainda nao inferir o pareamento individual completo entre cada fase numerada da planilha e os nomes de Cutting quando isso nao estiver explicitado.
 
 Essa logica deve ser deterministica. Somente formulas confirmadas e documentadas podem ser implementadas.
 
-As Fases 5 e 6 da Planilha Carb Cycle continuam abertas.
+As regras detalhadas das Fases 4, 5 e 6 continuam abertas.
 
 ## Up Metabolico
 
