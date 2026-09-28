@@ -509,9 +509,13 @@ Estado: **REGRA DE PROGRESSAO CONFIRMADA / CRITERIOS OBJETIVOS AINDA ABERTOS**
 A sequencia profissional deve ser preservada, mas nenhuma mudanca de fase e automatica.
 
 A adesao e o resultado observado pela Patty funcionam como gates:
-- se a cliente adere e a evolucao permite, a sequencia pode continuar;
+- se a cliente adere e o resultado e considerado valido, a sequencia pode continuar;
 - se nao ha adesao adequada, a progressao para e exige decisao profissional;
-- se nao ha resultado esperado, a progressao tambem para e exige decisao profissional.
+- se o resultado nao e considerado valido, a progressao tambem para e exige decisao profissional.
+
+A Patty considera valido qualquer resultado em que existam mudancas nos indicadores numericos e a evolucao nao esteja indo contra o objetivo buscado pela propria cliente. Nao considera valido quando a evolucao vai contra esse objetivo ou quando os numeros, no geral, permanecem estagnados.
+
+Essa regra esta documentada para apoio a decisao humana, mas ainda nao esta pronta para automacao. Permanecem abertos os indicadores usados, a janela de estagnacao, o limiar de ruido, a combinacao entre peso/medidas e a direcao esperada por objetivo.
 
 O Cutting 2 reinicia a estrutura de Cutting com menos doses de macros que o ciclo anterior. A reducao exata ainda nao esta formalizada.
 
