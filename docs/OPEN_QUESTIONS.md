@@ -410,11 +410,15 @@ Qual sera a UX e o processo humano para revisao de findings, edicao de follow-up
 
 As regras abaixo permanecem abertas somente onde a documentacao ainda nao registra confirmacao da Patty. O fluxo principal, o Reconhecimento Metabolico, as referencias iniciais de macros e doses, o limite do grupo de proteina com maior teor de gordura, o Cutting Dia 1 / Dia 2 e a refeicao livre semanal do Up Metabolico ja estao documentados como confirmados.
 
-### QUESTAO ABERTA — PENDENCIA RECONFIRMADA PELA PATTY
+### PARCIALMENTE RESOLVIDO — PLANILHA CARB CYCLE
 
-A Patty confirmou em 2026-09-24 que as Fases 5 e 6 da Planilha Carb Cycle continuam **pendentes**.
+A Patty confirmou posteriormente que:
+- as Fases 1, 2, 3 e 4 da planilha pertencem ao conjunto de fases usado nos Cuttings 1, 2 e 3 do metodo atual;
+- a coluna **Media** e o valor utilizado no protocolo **Linear** da fase correspondente.
 
-Nao implementar, inferir ou reaproveitar formulas de outras fases para preencher essa lacuna ate nova confirmacao explicita.
+Permanece aberta apenas a correspondencia individual entre as quatro fases numeradas da planilha e os tres Cuttings nomeados. Nao inferir esse pareamento.
+
+As Fases 5 e 6 continuam **pendentes** conforme confirmacao anterior da Patty e nao devem ser implementadas ate nova validacao explicita.
 
 ### PARCIALMENTE RESOLVIDO — CUTTING 3
 
@@ -426,13 +430,15 @@ A Patty confirmou que, apos `Cutting 2: 2 Low / 1 High`, o Cutting 3 segue esta 
 
 Tambem confirmou que as quantidades de proteina e carboidrato diminuem progressivamente conforme o peso da cliente e usam tabelas em Excel como referencia.
 
+A planilha fonte foi localizada e a Patty confirmou que suas Fases 1 a 4 pertencem aos Cuttings atuais e que a coluna Media corresponde ao Linear.
+
 Continuam abertos:
-- valores exatos das tabelas por peso;
-- formulas/calculos que derivam dessas tabelas;
+- o pareamento individual fase 1/2/3/4 -> Cutting 1/2/3;
+- a semantica do bloco final de conversao da planilha antes de trata-lo como doses/porcoes;
 - duracao e criterio de encerramento do Cutting 3;
 - etapas posteriores ao Up Metabolico que sucede o Cutting 3.
 
-Nao implementar os numeros sem reconciliar a planilha fonte.
+Nao automatizar a selecao pelo nome do Cutting enquanto o pareamento individual nao estiver confirmado.
 
 ### QUESTAO ABERTA
 
