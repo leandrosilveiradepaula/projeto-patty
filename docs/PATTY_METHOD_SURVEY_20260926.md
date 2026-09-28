@@ -152,7 +152,7 @@ Cadencia reconfirmada:
 
 O catalogo completo da avaliacao mensal e as unidades continuam pendentes.
 
-"Estagnacao" foi citada como motivo para mudar a estrategia, mas ainda nao possui definicao objetiva/documentada.
+A estagnacao geral dos numeros foi posteriormente confirmada em 2026-09-27 como uma das condicoes em que o resultado nao e considerado valido. Ainda nao existe definicao operacional suficiente para automatizar essa leitura.
 
 ## 7. Exames, medicamentos, suplementos e hormonios
 
@@ -212,20 +212,27 @@ Nao criar diagnostico, score ou bloqueio automatico.
 A rodada de fechamento de 2026-09-27 acrescentou confirmacoes sobre acompanhamento:
 - o protocolo segue a sequencia profissional ja documentada;
 - adesao e resultado funcionam como gates de progressao;
-- quando a cliente nao adere adequadamente ou nao apresenta o resultado esperado, a Patty interrompe a progressao e redefine manualmente os proximos passos;
+- quando a cliente nao adere adequadamente, a Patty interrompe a progressao e redefine manualmente os proximos passos;
+- qualquer resultado e valido quando ha mudanca nos indicadores numericos e essa evolucao nao esta indo contra o objetivo que a propria cliente buscou;
+- o resultado nao e considerado valido quando a evolucao vai contra o objetivo buscado pela cliente ou quando os numeros, no geral, permanecem estagnados;
+- quando o resultado nao e considerado valido, a Patty interrompe a progressao e redefine manualmente os proximos passos;
 - o Cutting 2 reinicia a estrutura do Cutting com menos doses de macros em relacao ao ciclo anterior.
 
 Continuam abertos:
 - frequencia e conteudo de cada retorno alem da cadencia corporal ja confirmada;
 - criterios completos para alterar dieta;
 - criterios completos para alterar treino;
-- definicoes objetivas de adesao suficiente/insuficiente e de resultado suficiente/insuficiente;
-- definicao operacional de estagnacao;
+- definicao objetiva de adesao suficiente/insuficiente;
+- quais indicadores numericos entram na leitura de resultado;
+- janela de tempo para caracterizar estagnacao;
+- limiar de variacao para distinguir mudanca real de ruido;
+- como combinar peso e medidas quando mudam em direcoes diferentes;
+- direcao esperada dos indicadores conforme o objetivo especifico da cliente;
 - formula exata da reducao de macros no Cutting 2;
 - formato final do protocolo entregue;
 - canais finais de entrega/acompanhamento;
 - tratamento de excecoes como atletas, vegetarianos/veganos e doencas cronicas;
-- criterios finais de bom resultado;
+- criterios operacionais restantes para avaliar resultado de forma automatizavel;
 - exercicio pratico completo com caso real.
 
 Esses pontos permanecem abertos.
