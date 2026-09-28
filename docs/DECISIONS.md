@@ -6,11 +6,23 @@ A Patty confirmou que as Fases 1, 2, 3 e 4 da Planilha Carb Cycle sao usadas no 
 
 Tambem confirmou explicitamente que a coluna **Media** da planilha e o valor utilizado no **protocolo Linear** da fase correspondente.
 
-### LIMITE AINDA ABERTO
+### PRATICA PROFISSIONAL CONFIRMADA POSTERIORMENTE
 
-A resposta nao explicita como as quatro fases numeradas (1, 2, 3 e 4) se distribuem individualmente entre os tres Cuttings nomeados (Cutting 1, Cutting 2 e Cutting 3).
+A Patty esclareceu que dificilmente utiliza as Fases 4, 5 e 6. A pratica mais frequente e repetir as Fases 1, 2 e 3, alternando periodos prolongados de cutting com periodos de bulking voltados ao ganho de massa muscular.
 
-Nao inferir esse pareamento. A planilha pode ser tratada como fonte matematica das fases confirmadas, mas a associacao fase numerada -> Cutting deve ser fechada antes de automatizar a selecao da fase pelo nome do protocolo.
+Ao retornar ao cutting, o ciclo costuma reiniciar pelas Fases 1, 2 e 3.
+
+### LIMITE
+
+Isso confirma uma pratica recorrente, nao uma maquina de estados automatica. Continuam sem criterio deterministico confirmado:
+- quando encerrar um cutting;
+- quando iniciar bulking;
+- duracao/criterio de encerramento do bulking;
+- quando retornar ao cutting;
+- regras detalhadas das Fases 4, 5 e 6;
+- pareamento individual completo entre fases numeradas e nomes de Cutting quando nao explicitado.
+
+Nao automatizar essas transicoes sem nova regra confirmada.
 
 ## 2026-09-27 - Legumes na contagem de carboidrato
 
