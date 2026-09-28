@@ -407,13 +407,23 @@ A Patty confirmou em 2026-09-24 que as Fases 5 e 6 da Planilha Carb Cycle contin
 
 Nao implementar, inferir ou reaproveitar formulas de outras fases para preencher essa lacuna ate nova confirmacao explicita.
 
-### PARCIALMENTE RESOLVIDO
+### PARCIALMENTE RESOLVIDO — CUTTING 3
 
-A Patty confirmou que, apos `Cutting 2: 2 Low / 1 High`, a etapa seguinte e **Cutting 3 com protocolo linear**.
+A Patty confirmou que, apos `Cutting 2: 2 Low / 1 High`, o Cutting 3 segue esta sequencia:
+- Cutting 3 Linear;
+- Cutting 3 Dia 1 / Dia 2;
+- Cutting 3: 2 Low / 1 High;
+- depois, Up Metabolico.
 
-Continuam abertas:
-- as regras detalhadas do Cutting 3 Linear;
-- quais etapas, se houver, seguem depois dele.
+Tambem confirmou que as quantidades de proteina e carboidrato diminuem progressivamente conforme o peso da cliente e usam tabelas em Excel como referencia.
+
+Continuam abertos:
+- valores exatos das tabelas por peso;
+- formulas/calculos que derivam dessas tabelas;
+- duracao e criterio de encerramento do Cutting 3;
+- etapas posteriores ao Up Metabolico que sucede o Cutting 3.
+
+Nao implementar os numeros sem reconciliar a planilha fonte.
 
 ### QUESTAO ABERTA
 
