@@ -250,9 +250,13 @@ Como a futura entidade de materializacao entre rascunho de IA e `protocol_versio
 
 Qual sera a classificacao definitiva de cada campo da anamnese nas categorias estruturais do produto?
 
-### QUESTAO ABERTA
+### RESOLVIDO — ALERTAS/BLOQUEIOS INICIAIS
 
-Havera alertas ou bloqueios de saude derivados de respostas da anamnese? Se houver, quais regras serao validadas pela Patty?
+A Patty confirmou que respostas iniciais da Anamnese, doencas relatadas, alteracoes em exames ou relatos comportamentais nao devem gerar alerta, bloqueio, encaminhamento, revisao obrigatoria ou outro fluxo automatico apenas por sua presenca.
+
+O acompanhamento inicia normalmente e a Patty observa a evolucao da cliente. Eventual intervencao posterior continua sendo julgamento humano.
+
+Se futuramente a Patty quiser automatizar algum alerta especifico, isso exigira nova regra explicitamente confirmada e documentada.
 
 ### QUESTAO ABERTA
 
@@ -476,11 +480,20 @@ A Patty confirmou que prescreve treino somente quando solicitado e relatou como 
 
 Ainda falta definir se esse minimo admite excecoes e formalizar intensidade, volume, progressao, cardio, ajustes por limitacao e criterios de avaliacao complementar.
 
-### QUESTAO ABERTA — ALERTAS/ENCAMINHAMENTO
+### RESOLVIDO PARA O COMPORTAMENTO INICIAL — ALERTAS/ENCAMINHAMENTO
 
-A Patty indicou que doencas ou alteracoes relevantes em exames podem levar a busca de outro profissional e que relatos de alimentacao emocional, culpa, compulsao ou restricao merecem atencao especial.
+A Patty confirmou que o sistema nao deve fazer nada automaticamente no inicio apenas porque foram relatadas alimentacao emocional, culpa, compulsao, restricao, doenca ou alteracao em exame.
 
-Ainda falta definir quais condicoes geram destaque informativo, revisao obrigatoria, pedido de esclarecimento, encaminhamento ou eventual bloqueio. Nao inferir esses niveis automaticamente.
+O acompanhamento e iniciado normalmente e a Patty observa como a cliente se comporta ao longo do processo.
+
+Nao ha regra inicial automatica de:
+- destaque;
+- revisao obrigatoria;
+- pedido de esclarecimento;
+- encaminhamento;
+- bloqueio.
+
+Permanece humano o julgamento posterior da Patty sobre necessidade de esclarecimento, ajuste ou encaminhamento. Se algum desses comportamentos vier a ser automatizado no futuro, sera necessaria nova confirmacao especifica.
 
 ### QUESTAO ABERTA — ACOMPANHAMENTO, RESULTADO E EXCECOES
 
