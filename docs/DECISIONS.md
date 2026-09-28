@@ -9,9 +9,15 @@ A progressao entre etapas nao deve ser automatica.
 
 A adesao ao protocolo e um criterio central para decidir se a cliente pode continuar a sequencia. Se a cliente nao estiver aderindo adequadamente, a Patty interrompe a progressao e redefine os proximos passos.
 
-Se a cliente nao estiver trazendo o resultado esperado, a Patty tambem interrompe a progressao para decidir manualmente o que fazer a seguir.
+A Patty confirmou tambem a leitura profissional de resultado para esse gate:
+- qualquer resultado e valido quando ha mudanca nos indicadores numericos e essa evolucao nao esta indo contra o objetivo que a propria cliente buscou;
+- o resultado nao e considerado valido quando a evolucao vai contra o objetivo buscado pela cliente ou quando os numeros, no geral, permanecem estagnados.
 
-Nao inferir que ausencia de resultado significa automaticamente baixa adesao.
+Quando o resultado nao e considerado valido, a progressao para e a Patty decide manualmente o que fazer a seguir.
+
+Nao inferir que resultado nao valido significa automaticamente baixa adesao.
+
+Essa confirmacao nao define deteccao automatica de estagnacao nem sucesso.
 
 ### CUTTING 2
 
@@ -22,7 +28,11 @@ Ainda nao estao formalizados:
 - quais macros diminuem em cada transicao;
 - formula exata dessa reducao;
 - criterio objetivo de adesao suficiente;
-- criterio objetivo de resultado suficiente/insuficiente.
+- quais indicadores numericos entram na leitura de resultado;
+- janela de tempo para caracterizar estagnacao;
+- limiar de variacao para distinguir mudanca real de ruido;
+- como combinar peso e medidas quando mudam em direcoes diferentes;
+- direcao esperada dos indicadores conforme o objetivo especifico da cliente.
 
 Nenhuma dessas lacunas autoriza score de adesao, deteccao automatica de estagnacao ou mudanca automatica de fase.
 
@@ -2163,7 +2173,7 @@ Esses pontos foram mantidos como questoes abertas. Nenhuma formula, alerta, reco
 
 ### FONTE
 
-A rodada esta preservada em `docs/PATTY_METHOD_SURVEY_20260926.md`. As secoes de acompanhamento, formato do protocolo, excecoes, definicao de bom resultado e caso real ficaram sem resposta e permanecem abertas.
+A rodada esta preservada em `docs/PATTY_METHOD_SURVEY_20260926.md`. As secoes de acompanhamento, formato do protocolo, excecoes e caso real ficaram sem resposta naquela rodada. A definicao de bom resultado foi parcialmente esclarecida em 2026-09-27: mudanca numerica coerente com o objetivo e valida; evolucao contra o objetivo ou numeros em geral estagnados nao sao considerados resultado valido. Os criterios operacionais para automatizar essa leitura continuam abertos.
 ## 2026-09-26 - Solicitacao de treino como gate explicito
 
 ### DECISAO DE PRODUTO/TECNICA
