@@ -291,6 +291,18 @@ No Cutting Dia 1 / Dia 2:
 
 A etapa 2 Low / 1 High usa a Planilha Carb Cycle baseada no peso.
 
+### RELACAO ENTRE PLANILHA CARB CYCLE E PROTOCOLO LINEAR
+
+### DECISAO CONFIRMADA
+
+A Patty confirmou que:
+- as **Fases 1, 2, 3 e 4** da Planilha Carb Cycle pertencem ao conjunto de fases usado nos **Cuttings 1, 2 e 3** do metodo atual;
+- a coluna **Media** da planilha corresponde ao valor utilizado no **protocolo Linear** da fase correspondente.
+
+Portanto, o Linear nao deve ser calculado por uma formula inventada fora da planilha quando houver fase da Planilha Carb Cycle aplicavel: a referencia confirmada e a coluna Media.
+
+Ainda nao inferir o pareamento individual entre cada uma das quatro fases numeradas da planilha e os tres Cuttings nomeados, porque essa correspondencia um-a-um nao foi explicitada nesta resposta.
+
 Essa logica deve ser deterministica. Somente formulas confirmadas e documentadas podem ser implementadas.
 
 As Fases 5 e 6 da Planilha Carb Cycle continuam abertas.
