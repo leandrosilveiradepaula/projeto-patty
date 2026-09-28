@@ -519,7 +519,9 @@ A adesao e o resultado observado pela Patty funcionam como gates:
 
 A Patty considera valido qualquer resultado em que existam mudancas nos indicadores numericos e a evolucao nao esteja indo contra o objetivo buscado pela propria cliente. Nao considera valido quando a evolucao vai contra esse objetivo ou quando os numeros, no geral, permanecem estagnados.
 
-Essa regra esta documentada para apoio a decisao humana, mas ainda nao esta pronta para automacao. Permanecem abertos os indicadores usados, a janela de estagnacao, o limiar de ruido, a combinacao entre peso/medidas e a direcao esperada por objetivo.
+Para emagrecimento/reducao de gordura, cintura e abdomen sao referencias fortes: sua reducao caracteriza resultado positivo. Busto/peito tambem e referencia relevante. A comparacao visual positiva das fotos pode caracterizar evolucao mesmo quando o peso permanece estavel; a balanca isolada nao e suficiente para negar evolucao.
+
+A leitura esta mais formalizada, mas ainda nao esta pronta para automacao completa. Permanecem abertas a janela de estagnacao, a tolerancia a ruido/variacao de medicao, combinacoes conflitantes de indicadores e criterios para outros objetivos.
 
 O Cutting 2 reinicia a estrutura de Cutting com menos doses de macros que o ciclo anterior. A reducao exata ainda nao esta formalizada.
 
