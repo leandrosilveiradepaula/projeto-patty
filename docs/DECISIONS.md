@@ -48,6 +48,10 @@ A adesao ao protocolo e um criterio central para decidir se a cliente pode conti
 
 A Patty confirmou tambem a leitura profissional de resultado para esse gate:
 - qualquer resultado e valido quando ha mudanca nos indicadores numericos e essa evolucao nao esta indo contra o objetivo que a propria cliente buscou;
+- para emagrecimento/reducao de gordura, reducao de cintura e abdomen e resultado positivo;
+- busto/peito e outra referencia forte de reducao de gordura;
+- comparacao visual positiva das fotos tambem caracteriza evolucao, mesmo quando o peso se mantem;
+- o peso isolado nao e criterio suficiente para concluir ausencia de evolucao;
 - o resultado nao e considerado valido quando a evolucao vai contra o objetivo buscado pela cliente ou quando os numeros, no geral, permanecem estagnados.
 
 Quando o resultado nao e considerado valido, a progressao para e a Patty decide manualmente o que fazer a seguir.
@@ -65,11 +69,10 @@ Ainda nao estao formalizados:
 - quais macros diminuem em cada transicao;
 - formula exata dessa reducao;
 - criterio objetivo de adesao suficiente;
-- quais indicadores numericos entram na leitura de resultado;
 - janela de tempo para caracterizar estagnacao;
 - limiar de variacao para distinguir mudanca real de ruido;
-- como combinar peso e medidas quando mudam em direcoes diferentes;
-- direcao esperada dos indicadores conforme o objetivo especifico da cliente.
+- como tratar combinacoes conflitantes de indicadores alem dos casos confirmados;
+- criterios por objetivo diferente de emagrecimento/reducao de gordura.
 
 Nenhuma dessas lacunas autoriza score de adesao, deteccao automatica de estagnacao ou mudanca automatica de fase.
 
