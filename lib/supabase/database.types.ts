@@ -560,6 +560,42 @@ export type Database = {
           },
         ]
       }
+      anamnesis_clarification_resolutions: {
+        Row: {
+          clarification_request_id: string
+          id: string
+          resolved_at: string
+          resolved_by_profile_id: string
+        }
+        Insert: {
+          clarification_request_id: string
+          id?: string
+          resolved_at?: string
+          resolved_by_profile_id: string
+        }
+        Update: {
+          clarification_request_id?: string
+          id?: string
+          resolved_at?: string
+          resolved_by_profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "anamnesis_clarification_resolutio_clarification_request_id_fkey"
+            columns: ["clarification_request_id"]
+            isOneToOne: true
+            referencedRelation: "anamnesis_clarification_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "anamnesis_clarification_resolutions_resolved_by_profile_id_fkey"
+            columns: ["resolved_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       anamnesis_clarification_responses: {
         Row: {
           clarification_request_id: string
