@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 import { requireRole } from "@/lib/supabase/auth";
 import {
@@ -48,6 +49,7 @@ export async function addLiquidIntakeAction(formData: FormData) {
 
   revalidatePath("/cliente");
   revalidatePath("/cliente/checkins");
+  redirect("/cliente/checkins?liquid=recorded");
 }
 
 export async function recordActivityCheckinAction(formData: FormData) {
@@ -73,4 +75,5 @@ export async function recordActivityCheckinAction(formData: FormData) {
 
   revalidatePath("/cliente");
   revalidatePath("/cliente/checkins");
+  redirect("/cliente/checkins?activity=recorded");
 }

@@ -48,6 +48,11 @@ export function AdminPrivateFileReleaseForm({
         </Alert>
       ) : null}
 
+      <label className={styles.confirmation}>
+        <input name="confirmRelease" required type="checkbox" value="yes" />
+        <span>Confirme que este arquivo pode ficar visível para a cliente.</span>
+      </label>
+
       <Button loading={isPending} type="submit" variant="secondary">
         Liberar para cliente
       </Button>

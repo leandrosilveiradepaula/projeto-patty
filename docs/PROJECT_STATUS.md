@@ -877,3 +877,22 @@ Conclusao operacional: a falha nao esta demonstrada no YAML nem no label do runn
 - o primeiro video educacional aprovado continua bloqueado ate criacao/conexao de Vercel Private Blob, operacao nao exposta pela integracao disponivel;
 - Leaked Password Protection permanece dependente da configuracao/plano do Supabase;
 - canal real dos lembretes de esclarecimento continua sem decisao.
+
+
+## Auditoria de UX e navegabilidade — 2026-09-30
+
+O primeiro lote de melhoria de interface foi implementado no PR #239, sem migration, schema ou alteração de RLS.
+
+Principais ajustes:
+- linguagem operacional simplificada nas áreas da Patty e da cliente;
+- busca por nome na lista de clientes;
+- feedback e estado de envio nos check-ins;
+- retorno explícito ao início em Arquivos e Check-ins da cliente;
+- confirmações UI + server-side para ações críticas de protocolo, encerramento de atribuição e liberação de arquivo;
+- datas revisadas exibidas no fuso `America/Sao_Paulo`;
+- remoção de UUIDs e detalhes de implementação onde não agregavam valor operacional;
+- contexto de marca melhorado no menu administrativo mobile.
+
+A rota administrativa de Configurações e a Jornada da cliente continuam propositalmente fora da navegação principal enquanto não oferecem um fluxo funcional definido.
+
+Auditoria detalhada: `docs/UI_UX_AUDIT_20260930.md`.
