@@ -142,7 +142,11 @@ export default async function AdminClienteDetailPage({
               Esta operação não apaga a cliente nem seus dados. Ela encerra apenas o vínculo atual de acompanhamento.
             </p>
           </div>
-          <form action={endClientAssignmentAction.bind(null, client.id)}>
+          <form action={endClientAssignmentAction.bind(null, client.id)} className={styles.dangerForm}>
+            <label className={styles.dangerConfirmation}>
+              <input name="confirmEndAssignment" required type="checkbox" value="yes" />
+              <span>Confirmo que quero encerrar a atribuição ativa desta cliente.</span>
+            </label>
             <Button type="submit" variant="danger">
               Encerrar atribuição
             </Button>
