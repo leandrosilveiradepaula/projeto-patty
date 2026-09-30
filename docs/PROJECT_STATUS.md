@@ -79,7 +79,7 @@ Nao existe bloqueio atual de deployment Vercel para o `master`.
 | Avaliacoes e medidas | Fundacao + cadencia profissional parcial definida | Lifecycle operacional de rascunho/finalizacao implementado | CI/build PASS no PR #210 + pre-apply `ROLLBACK` PASS | `20260927002227_create_assessment_draft_lifecycle` APLICADA NO SAAS | Quinzenal: cintura/abdomen/quadril/peso; mensal: todas as medidas + peso + fotos; catalogo mensal, unidades e correcao pos-finalizacao continuam abertos |
 | Protocolos versionados | SIM | Lifecycle manual implementado | CI/validacoes existentes | Backend/SaaS correspondente existente | Criacao/edicao profissional completa conforme regras ainda abertas |
 | Conteudo educacional / exercicios | SIM como dominios separados | Fundacao/release + metadata de asset preparada | Inventario 89/89 revalidado; smoke transacional de assets PASS | Vercel Private Blob definido para midia; store/upload ainda nao executados | Criar/conectar store privado, migrar video aprovado, verificar hash e publicar/liberar explicitamente |
-| Metodo da Patty | PARCIALMENTE DEFINIDO | Regras matematicas confirmadas em codigo testavel; documentacao em reconciliacao | CI | Fluxo confirmado inclui Cutting 3 Linear -> Dia 1/Dia 2 -> 2 Low/1 High -> Up Metabolico; meta de liquidos 60 mL/kg e equivalencia 2 doses de legumes = 1 dose de carbo confirmadas | Fases 5/6, numeros da planilha por peso do Cutting 3, pos-Up Metabolico, Bulking, Consolidacao, suplementacao, treino, parametros restantes do check-in e criterios objetivos de estagnacao |
+| Metodo da Patty | PARCIALMENTE DEFINIDO | Motor determinístico existente/parcial; regras profissionais devem migrar para configuração versionada e editável | CI | Fluxo confirmado inclui Cutting 3 Linear -> Dia 1/Dia 2 -> 2 Low/1 High -> Up Metabolico; meta de liquidos 60 mL/kg e equivalencia 2 doses de legumes = 1 dose de carbo confirmadas | Fases 5/6, numeros da planilha por peso do Cutting 3, pos-Up Metabolico, Bulking, Consolidacao, suplementacao, treino, parametros restantes do check-in e criterios objetivos de estagnacao |
 | IA assistiva | SIM como principio e arquitetura; provider OpenAI confirmado | PARCIAL/AVANCADO | Adapter OpenAI + Structured Outputs + aliases + UI de revisao humana; default tecnico `gpt-5.6-terra` / reasoning `medium` | Prompt v1 aplicado; PR #151 publicado READY; chamada externa bloqueada | Credencial OpenAI, avaliacao sintetica e conclusao do gate de dados de saude |
 | Failure handling de IA | SIM | SIM no schema + boundary server-side | CI + invariantes deterministicas | `20260922160058` aplicada; provider adapter publicado, mas chamada real segue gated | Manter gate fechado ate avaliacao sintetica/controles de dados; recovery automatico segue aberto |
 | n8n | SIM: nao usar inicialmente | N/A | N/A | Nao usado | Introduzir somente com caso concreto |
@@ -143,7 +143,7 @@ Resumo:
 - para emagrecimento/reducao de gordura, cintura e abdomen sao referencias fortes e fotos podem confirmar evolucao mesmo com peso estavel;
 - adesao e central e nao existe score automatico de adesao;
 - exemplos historicos individuais nao viram regra geral;
-- formulas so entram em codigo quando confirmadas e documentadas.
+- fórmulas profissionais confirmadas entram como configuração versionada; o código contém o motor determinístico, não os valores do método.
 
 ## Anamnese: regras que nao devem ser reabertas
 
@@ -877,3 +877,30 @@ Conclusao operacional: a falha nao esta demonstrada no YAML nem no label do runn
 - o primeiro video educacional aprovado continua bloqueado ate criacao/conexao de Vercel Private Blob, operacao nao exposta pela integracao disponivel;
 - Leaked Password Protection permanece dependente da configuracao/plano do Supabase;
 - canal real dos lembretes de esclarecimento continua sem decisao.
+
+
+## Sistema totalmente parametrizável - 2026-09-30
+
+### DECISÃO CONFIRMADA
+
+O sistema deve ser totalmente parametrizável para regras de negócio, método, cálculos, templates e workflows.
+
+Os valores atuais dos Excels e das regras confirmadas passam a ser templates iniciais versionados.
+
+A Patty deve poder alterar esses valores globalmente e também sobrescrevê-los por cliente/protocolo/treino.
+
+Exemplo:
+- template: 3 séries x 12 repetições;
+- cliente A: override para 4 x 12;
+- cliente B continua usando o template vigente.
+
+Exemplo:
+- template: 1 g a cada 5 kg;
+- Patty pode criar nova versão com 1,5 g a cada 5 kg;
+- históricos anteriores continuam vinculados à versão usada.
+
+Documento de referência: `docs/CONFIGURABLE_RULES.md`.
+
+### CONSEQUÊNCIA TÉCNICA
+
+Será necessário inventariar regras profissionais hoje hardcoded e migrá-las gradualmente para a camada configurável, preservando comportamento e histórico até a transição estar validada.
