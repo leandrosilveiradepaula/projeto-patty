@@ -63,16 +63,3 @@
   }
 }
 
-.metricGrid :global([class*="AdminMetricCard_metricCard"]) {
-  gap: var(--space-3);
-  min-height: auto;
-}
-
-.metricGrid :global([class*="AdminMetricCard_value"]) {
-  font-size: var(--text-h1-size);
-  line-height: var(--text-h1-line-height);
-}
-
-.metricGrid :global([class*="Card_card"]) {
-  padding: var(--space-4);
-}
