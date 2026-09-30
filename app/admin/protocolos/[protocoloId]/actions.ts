@@ -127,9 +127,16 @@ export async function approveProtocolVersion(
   protocolId: string,
   protocolVersionId: string,
   _state: ProtocolLifecycleFormState,
-  _formData: FormData,
+  formData: FormData,
 ): Promise<ProtocolLifecycleFormState> {
   const context = await requireRole("admin");
+
+  if (formData.get("confirmPublication") !== "yes") {
+    return {
+      message: "Confirme explicitamente a publicação desta versão.",
+      success: false,
+    };
+  }
 
   const accessible = await getAccessibleVersionLifecycle(
     protocolId,
