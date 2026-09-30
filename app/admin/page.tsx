@@ -58,6 +58,7 @@ export default async function AdminPage() {
       >
         <div className={styles.metricGrid}>
           <AdminMetricCard
+            compact
             action={
               <Link className={styles.metricLink} href="/admin/clientes">
                 Ver clientes
@@ -67,6 +68,7 @@ export default async function AdminPage() {
             value={String(assignedCount)}
           />
           <AdminMetricCard
+            compact
             action={
               <Link className={styles.metricLink} href="/admin/pendencias">
                 Ver pendências
@@ -79,6 +81,7 @@ export default async function AdminPage() {
             value={String(pendingCount)}
           />
           <AdminMetricCard
+            compact
             action={
               <Link className={styles.metricLink} href="/admin/avaliacoes">
                 Ver avaliações
@@ -88,6 +91,7 @@ export default async function AdminPage() {
             value={String(assessmentCount)}
           />
           <AdminMetricCard
+            compact
             action={
               <Link className={styles.metricLink} href="/admin/protocolos">
                 Ver protocolos
