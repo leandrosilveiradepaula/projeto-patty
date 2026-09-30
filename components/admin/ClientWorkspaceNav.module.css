@@ -31,7 +31,7 @@
 }
 
 .activeLink {
-  background: var(--color-brand-soft);
+  background: var(--color-surface-low);
   color: var(--color-brand-strong);
 }
 
