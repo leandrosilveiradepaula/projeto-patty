@@ -1,0 +1,1798 @@
+{
+  "schema_version": 1,
+  "status": "historical_exercise_source_review_required",
+  "publishable": false,
+  "source": "docs/drive_content_triage.json",
+  "scope_note": "Metadata-only source queue. It does not validate exercise technique, prescription, progression, audience, authorship, rights, or publication.",
+  "summary": {
+    "source_items": 74,
+    "generic_titles_requiring_visual_review": 9,
+    "possible_duplicate_groups": 16,
+    "possible_duplicate_items": 32
+  },
+  "items": [
+    {
+      "source_file_id": "19uvwxo9qOaxSGB1iisQokadw3TdteJuv",
+      "original_title": "Abs infra.mp4",
+      "proposed_normalized_title": "Abs infra",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "19t6qrm1kMYOU63W6hZ-4aa2PFGWneFF_",
+      "original_title": "Abs supra.mp4",
+      "proposed_normalized_title": "Abs supra",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1XE9r23GvRZyToLaob6HjKL3uFqzlS9Io",
+      "original_title": "Afundo (pé da frente + alto).mp4",
+      "proposed_normalized_title": "Afundo (pé da frente + alto)",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1BL6b0aJ9iyE5vi3vexknyAavYNTdKeun",
+      "original_title": "Agachamento búlgaro.mp4",
+      "proposed_normalized_title": "Agachamento búlgaro",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": "exercise-title:agachamento bulgaro",
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy",
+        "possible_duplicate_across_historical_folders"
+      ]
+    },
+    {
+      "source_file_id": "1ETFEgtpbYsXox-dZd41zpY3zZVP-MDqA",
+      "original_title": "Agachamento isométrico.mp4",
+      "proposed_normalized_title": "Agachamento isométrico",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": "exercise-title:agachamento isometrico",
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy",
+        "possible_duplicate_across_historical_folders"
+      ]
+    },
+    {
+      "source_file_id": "1KHACKJuz-81XWSTGTY38UQ8mPwxeWRKZ",
+      "original_title": "Agachamento Taça.mp4",
+      "proposed_normalized_title": "Agachamento Taça",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "19bpmUsxSNVf7XMBZKbWp5B3-rhKCYayS",
+      "original_title": "Agachamento.mp4",
+      "proposed_normalized_title": "Agachamento",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": "exercise-title:agachamento",
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy",
+        "possible_duplicate_across_historical_folders"
+      ]
+    },
+    {
+      "source_file_id": "1KFeqXyU32kW95EyNV5PazvoFvAe2EmSv",
+      "original_title": "Coice.mp4",
+      "proposed_normalized_title": "Coice",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": "exercise-title:coice",
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy",
+        "possible_duplicate_across_historical_folders"
+      ]
+    },
+    {
+      "source_file_id": "1AU-0wSaCU8RLm8Mayt9Gw3vicAWktjay",
+      "original_title": "Desenvolvimento Arnold.mp4",
+      "proposed_normalized_title": "Desenvolvimento Arnold",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": "exercise-title:desenvolvimento arnold",
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy",
+        "possible_duplicate_across_historical_folders"
+      ]
+    },
+    {
+      "source_file_id": "1AeO5HDf27n1O2-BmDhvHCLz1t9yScyTA",
+      "original_title": "Desenvolvimento.mp4",
+      "proposed_normalized_title": "Desenvolvimento",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": "exercise-title:desenvolvimento",
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy",
+        "possible_duplicate_across_historical_folders"
+      ]
+    },
+    {
+      "source_file_id": "1K7k7WcPO0O4XusEUk5PTUXxmvHtH5QUC",
+      "original_title": "Elevação Frontal.mp4",
+      "proposed_normalized_title": "Elevação Frontal",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1ARCm9H9zlbC8rSwZyHzGLnBuEScSxGv1",
+      "original_title": "Elevação lateral frontal.mp4",
+      "proposed_normalized_title": "Elevação lateral frontal",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": "exercise-title:elevacao lateral frontal",
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy",
+        "possible_duplicate_across_historical_folders"
+      ]
+    },
+    {
+      "source_file_id": "1KI3qfNaANym8yydtrbfYZyHAtfKyaTL8",
+      "original_title": "Elevação Lateral.mp4",
+      "proposed_normalized_title": "Elevação Lateral",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1AtHm1bLTN_uBgO38Bo9orLJorzvex2kI",
+      "original_title": "Elevação pélvica.mp4",
+      "proposed_normalized_title": "Elevação pélvica",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1AEcNjPZQuvMsotJUSw2PuRRui-gCoQQh",
+      "original_title": "Elevação posterior de ombros.mp4",
+      "proposed_normalized_title": "Elevação posterior de ombros",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": "exercise-title:elevacao posterior de ombros",
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy",
+        "possible_duplicate_across_historical_folders"
+      ]
+    },
+    {
+      "source_file_id": "1KFjHXVg2hcXHmle0CfG6z0qs0F0fCqMQ",
+      "original_title": "Extensão de Quadril.mp4",
+      "proposed_normalized_title": "Extensão de Quadril",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1B8SEWbrGFI9M_RIBu5IfMR1RaYXW_m8R",
+      "original_title": "Extensor.mp4",
+      "proposed_normalized_title": "Extensor",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1EU0h6hW-Yl3eXAVImz9POJIybZlLNKYf",
+      "original_title": "Flexor deitado.mp4",
+      "proposed_normalized_title": "Flexor deitado",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": "exercise-title:flexor deitado",
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy",
+        "possible_duplicate_across_historical_folders"
+      ]
+    },
+    {
+      "source_file_id": "19yfZpsDfjpb7Qgj3yscBxWmhY-3xmLNb",
+      "original_title": "Flexor em pe.mp4",
+      "proposed_normalized_title": "Flexor em pe",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": "exercise-title:flexor em pe",
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy",
+        "possible_duplicate_across_historical_folders"
+      ]
+    },
+    {
+      "source_file_id": "1JmUJlZr6aLovtz7L3DZ-eEbklyco6WLA",
+      "original_title": "Leg Press.mp4",
+      "proposed_normalized_title": "Leg Press",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1ArrZKBfLCAFll_4LR9OjqJBwztVmkaCj",
+      "original_title": "Meio terra.mp4",
+      "proposed_normalized_title": "Meio terra",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": "exercise-title:meio terra",
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy",
+        "possible_duplicate_across_historical_folders"
+      ]
+    },
+    {
+      "source_file_id": "1Asm2VqDFMMtBshYwYEH06bxX2Ci0E_gu",
+      "original_title": "Panturrilhas.mp4",
+      "proposed_normalized_title": "Panturrilhas",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": "exercise-title:panturrilhas",
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy",
+        "possible_duplicate_across_historical_folders"
+      ]
+    },
+    {
+      "source_file_id": "1BC7C2Tq1IPmvjQEWHALw6K8gIukS76VO",
+      "original_title": "Passada c/ênfase glúteos.mp4",
+      "proposed_normalized_title": "Passada c/ênfase glúteos",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "19dO9PGJ6RYzeTAlGfwb86RN-LDsCc5HJ",
+      "original_title": "Passada no lugar.mp4",
+      "proposed_normalized_title": "Passada no lugar",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1BI8xqSYm7SV6jKd_PEtj9DqNo-JnrPqW",
+      "original_title": "Passada tronco vertical quadriceps.mp4",
+      "proposed_normalized_title": "Passada tronco vertical quadriceps",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1AjAzBsDDDUnlS902-KaXLC_dCl77ITvV",
+      "original_title": "Pull over.mp4",
+      "proposed_normalized_title": "Pull over",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": "exercise-title:pull over",
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy",
+        "possible_duplicate_across_historical_folders"
+      ]
+    },
+    {
+      "source_file_id": "1K5nms8F9u7P1lx8N419xAvD57P6EYory",
+      "original_title": "Pulldown.mp4",
+      "proposed_normalized_title": "Pulldown",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1AlLLNalH6gSu6v5-Uye0YGhpEB5-inei",
+      "original_title": "Remada curvada.mp4",
+      "proposed_normalized_title": "Remada curvada",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1KGtcHPS2Uv6QYgKgCZZQLKBhbHu4BtT4",
+      "original_title": "Rosca Alternada.mp4",
+      "proposed_normalized_title": "Rosca Alternada",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1A3g827yaEAV2LVpupwAofBpAmpHBg5e-",
+      "original_title": "Rosca direta.mp4",
+      "proposed_normalized_title": "Rosca direta",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": "exercise-title:rosca direta",
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy",
+        "possible_duplicate_across_historical_folders"
+      ]
+    },
+    {
+      "source_file_id": "1AzhHXOL25ryCPxizCjIQjgAbY-dELscE",
+      "original_title": "Sapinho.mp4",
+      "proposed_normalized_title": "Sapinho",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1AkIHYdkbrHQQmT7XPCwbd1t78oQOtiy7",
+      "original_title": "Serrote.mp4",
+      "proposed_normalized_title": "Serrote",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": "exercise-title:serrote",
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy",
+        "possible_duplicate_across_historical_folders"
+      ]
+    },
+    {
+      "source_file_id": "1JncGYq-aDE5m7vVOouGi2V2PnWWjNwym",
+      "original_title": "Sissi.mp4",
+      "proposed_normalized_title": "Sissi",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "19gajSJLCC4sKdYagG9lnt5gb-K6dcQxu",
+      "original_title": "Stiff.mp4",
+      "proposed_normalized_title": "Stiff",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": "exercise-title:stiff",
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy",
+        "possible_duplicate_across_historical_folders"
+      ]
+    },
+    {
+      "source_file_id": "1EUNVTEuoHM_QZYvATIBV-7C-lpDkOI5g",
+      "original_title": "Subidano banco.mp4",
+      "proposed_normalized_title": "Subidano banco",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1Ar_alUOjTK6v70OUgA6ersCqxlcMmH2b",
+      "original_title": "Tipos de pegada.mp4",
+      "proposed_normalized_title": "Tipos de pegada",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1A-T527OMOpammoBpbz9G3a084GB4sHIk",
+      "original_title": "Tríceps francês.mp4",
+      "proposed_normalized_title": "Tríceps francês",
+      "source_folder_title": "TREINO FEMININO",
+      "historical_audience_label": "female_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1KSgdBhr149t_Hz7DtyYDGzrAau-1M9Mv",
+      "original_title": "20200330_192124_1.mp4",
+      "proposed_normalized_title": null,
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_video_unclassified_title",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "title_normalization_requires_content_review",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1KgjDO3VR3l6h9BVs7oaV3hhRyvr5MNOy",
+      "original_title": "20200330_192124_2.mp4",
+      "proposed_normalized_title": null,
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_video_unclassified_title",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "title_normalization_requires_content_review",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1KKVpxmrzKfA0M6ME0HSSxYwwqWnyrYam",
+      "original_title": "20200330_192537.mp4",
+      "proposed_normalized_title": null,
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_video_unclassified_title",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "title_normalization_requires_content_review",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1KKnfIGrVJaa1PKOPlxGXNYJrpR5hhvBs",
+      "original_title": "20200330_193829_1.mp4",
+      "proposed_normalized_title": null,
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_video_unclassified_title",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "title_normalization_requires_content_review",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1KMnUUS7Ot_utUv1EBOk7Vna-AxhQtuN-",
+      "original_title": "20200330_194100_1.mp4",
+      "proposed_normalized_title": null,
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_video_unclassified_title",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "title_normalization_requires_content_review",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1KNB0eH9oDRiTbxh7q6HfTqjqgyZowVOp",
+      "original_title": "20200330_195541_1.mp4",
+      "proposed_normalized_title": null,
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_video_unclassified_title",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "title_normalization_requires_content_review",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1KRiGBvfYzrsmTj5IK2rKGJUrDtpggBjA",
+      "original_title": "20200330_195910_1.mp4",
+      "proposed_normalized_title": null,
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_video_unclassified_title",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "title_normalization_requires_content_review",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1KSEHwsIF_T1RbXZMlpVWUGOx1oOVHyRh",
+      "original_title": "20200330_200123_1.mp4",
+      "proposed_normalized_title": null,
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_video_unclassified_title",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "title_normalization_requires_content_review",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1KSb0dR7EWoqky3XMx7y63tgpZWTtmrAt",
+      "original_title": "20200330_200241_1.mp4",
+      "proposed_normalized_title": null,
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_video_unclassified_title",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "title_normalization_requires_content_review",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1BiQIgIM90xKtUW5WkpsjbEtKIJMcWBNf",
+      "original_title": "Agachamento búlgaro.mp4",
+      "proposed_normalized_title": "Agachamento búlgaro",
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": "exercise-title:agachamento bulgaro",
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy",
+        "possible_duplicate_across_historical_folders"
+      ]
+    },
+    {
+      "source_file_id": "1BhsRTC5giW7BPCLGSpdwxXT3qeAVR552",
+      "original_title": "Agachamento isométrico.mp4",
+      "proposed_normalized_title": "Agachamento isométrico",
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": "exercise-title:agachamento isometrico",
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy",
+        "possible_duplicate_across_historical_folders"
+      ]
+    },
+    {
+      "source_file_id": "1B_e-5rvZYdo_b2AA-1IIeNkHf7ssWJUK",
+      "original_title": "Agachamento.mp4",
+      "proposed_normalized_title": "Agachamento",
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": "exercise-title:agachamento",
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy",
+        "possible_duplicate_across_historical_folders"
+      ]
+    },
+    {
+      "source_file_id": "1B_bsuX-70zptVkrpRNus0e2I7r5kyvGV",
+      "original_title": "Apoio declinado.mp4",
+      "proposed_normalized_title": "Apoio declinado",
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1DWKi3Rt2-sH9rHvnznsG5SZmOjCwXKug",
+      "original_title": "Apoio inclinado.mp4",
+      "proposed_normalized_title": "Apoio inclinado",
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1DWz-UtUHwpYR0-dvt00CchJiw6zj2uWx",
+      "original_title": "Apoio.mp4",
+      "proposed_normalized_title": "Apoio",
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1DNaOHhC5fehU5LbIA2GNzLyoLQzcwt0F",
+      "original_title": "Coice.mp4",
+      "proposed_normalized_title": "Coice",
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": "exercise-title:coice",
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy",
+        "possible_duplicate_across_historical_folders"
+      ]
+    },
+    {
+      "source_file_id": "1COL1gGwz328Ol2se95ai-q4tBTiHexxI",
+      "original_title": "Desenvolvimento Arnold.mp4",
+      "proposed_normalized_title": "Desenvolvimento Arnold",
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": "exercise-title:desenvolvimento arnold",
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy",
+        "possible_duplicate_across_historical_folders"
+      ]
+    },
+    {
+      "source_file_id": "1CKOCnT2aVOzpt7LhuNeAmUW2NWhFgxln",
+      "original_title": "Desenvolvimento.mp4",
+      "proposed_normalized_title": "Desenvolvimento",
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": "exercise-title:desenvolvimento",
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy",
+        "possible_duplicate_across_historical_folders"
+      ]
+    },
+    {
+      "source_file_id": "1CQz53XtYKrxnt3JV14xjju2Zi1l3BrVs",
+      "original_title": "Elevação lateral frontal.mp4",
+      "proposed_normalized_title": "Elevação lateral frontal",
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": "exercise-title:elevacao lateral frontal",
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy",
+        "possible_duplicate_across_historical_folders"
+      ]
+    },
+    {
+      "source_file_id": "1CcnDi4u0YIzOqXG6V_tOY4HZF1WYIz4k",
+      "original_title": "Elevação posterior de ombros.mp4",
+      "proposed_normalized_title": "Elevação posterior de ombros",
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": "exercise-title:elevacao posterior de ombros",
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy",
+        "possible_duplicate_across_historical_folders"
+      ]
+    },
+    {
+      "source_file_id": "1ByNsypz37_lkuyGrqL-SP65zljsAj1Ms",
+      "original_title": "Flexor deitado.mp4",
+      "proposed_normalized_title": "Flexor deitado",
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": "exercise-title:flexor deitado",
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy",
+        "possible_duplicate_across_historical_folders"
+      ]
+    },
+    {
+      "source_file_id": "1C3-MBfGtL87cbnZTVN13ZstVTkw5xobq",
+      "original_title": "Flexor em pé.mp4",
+      "proposed_normalized_title": "Flexor em pé",
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": "exercise-title:flexor em pe",
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy",
+        "possible_duplicate_across_historical_folders"
+      ]
+    },
+    {
+      "source_file_id": "1DBzCEn5EatsnPrXc34RWsCEplgfLsgT9",
+      "original_title": "Francês.mp4",
+      "proposed_normalized_title": "Francês",
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1C8Peeoh-uOSRPdFYUpUsblB-hwVV2b4j",
+      "original_title": "Meio terra.mp4",
+      "proposed_normalized_title": "Meio terra",
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": "exercise-title:meio terra",
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy",
+        "possible_duplicate_across_historical_folders"
+      ]
+    },
+    {
+      "source_file_id": "1DAwwET7TZX5TWvPKm2muSi8fhxOzxfUS",
+      "original_title": "Mergulho.mp4",
+      "proposed_normalized_title": "Mergulho",
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1BmBLXFpgXwazDtBKrJAJhfvakO_bprfZ",
+      "original_title": "Movimento extensor.mp4",
+      "proposed_normalized_title": "Movimento extensor",
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1C4NuO46tEMHe7i2LeO_77SGM2KWAvN3_",
+      "original_title": "Panturrilhas.mp4",
+      "proposed_normalized_title": "Panturrilhas",
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": "exercise-title:panturrilhas",
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy",
+        "possible_duplicate_across_historical_folders"
+      ]
+    },
+    {
+      "source_file_id": "1DfHxw6-8HgxhCry9JdEiNlsSDclA_yKG",
+      "original_title": "Passada sem sair do lugar.mp4",
+      "proposed_normalized_title": "Passada sem sair do lugar",
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1CGU2JcGf8G0y_o2_te1ti2NInAV1HttG",
+      "original_title": "Pull over.mp4",
+      "proposed_normalized_title": "Pull over",
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": "exercise-title:pull over",
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy",
+        "possible_duplicate_across_historical_folders"
+      ]
+    },
+    {
+      "source_file_id": "1CsXgyMB7bkkEi89_pOdyq9WGXNEGHvmW",
+      "original_title": "Rosca concentrada.mp4",
+      "proposed_normalized_title": "Rosca concentrada",
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1Cs5p_htlgxhPZZSQG5uKFA-uWmnWdViX",
+      "original_title": "Rosca direta.mp4",
+      "proposed_normalized_title": "Rosca direta",
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": "exercise-title:rosca direta",
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy",
+        "possible_duplicate_across_historical_folders"
+      ]
+    },
+    {
+      "source_file_id": "1D-3ayUnmdl3-fYiC_tmc-JcpcfvHJhqK",
+      "original_title": "Scott.mp4",
+      "proposed_normalized_title": "Scott",
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1CCq2rHWktxBX_d4henrezxIA339bZXiN",
+      "original_title": "Serrote.mp4",
+      "proposed_normalized_title": "Serrote",
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": "exercise-title:serrote",
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy",
+        "possible_duplicate_across_historical_folders"
+      ]
+    },
+    {
+      "source_file_id": "1BwLDI3gBGSKHdR5dOS8DfL_OvOVh6AHB",
+      "original_title": "Stiff.mp4",
+      "proposed_normalized_title": "Stiff",
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": "exercise-title:stiff",
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy",
+        "possible_duplicate_across_historical_folders"
+      ]
+    },
+    {
+      "source_file_id": "1C28cBwRNOgFAfcFbunrbmqFTeQEDWD1-",
+      "original_title": "subida no banco.mp4",
+      "proposed_normalized_title": "subida no banco",
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1DXY4OihTh5YFLqAHLbTdKwzM8k_5Cdi4",
+      "original_title": "Supino.mp4",
+      "proposed_normalized_title": "Supino",
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    },
+    {
+      "source_file_id": "1DEHj044wrS6ySbVbYecVlDxNcjSsIbbo",
+      "original_title": "Tríceps testa.mp4",
+      "proposed_normalized_title": "Tríceps testa",
+      "source_folder_title": "TREINO MASCULINO",
+      "historical_audience_label": "male_historical_folder",
+      "historical_audience_status": "source_folder_only_not_product_rule",
+      "proposed_category": "exercise_demonstration",
+      "proposed_category_status": "hypothesis_from_metadata",
+      "possible_duplicate_group": null,
+      "authorship_status": "unreviewed",
+      "rights_status": "unreviewed",
+      "technical_review_status": "required",
+      "migration_status": "inventory_only",
+      "publication_status": "not_authorized",
+      "review_flags": [
+        "rights_unreviewed",
+        "human_content_review_required",
+        "exercise_technical_review_required",
+        "historical_audience_folder_is_not_product_taxonomy"
+      ]
+    }
+  ],
+  "duplicate_groups": [
+    {
+      "group_key": "exercise-title:agachamento bulgaro",
+      "source_file_ids": [
+        "1BL6b0aJ9iyE5vi3vexknyAavYNTdKeun",
+        "1BiQIgIM90xKtUW5WkpsjbEtKIJMcWBNf"
+      ]
+    },
+    {
+      "group_key": "exercise-title:agachamento isometrico",
+      "source_file_ids": [
+        "1ETFEgtpbYsXox-dZd41zpY3zZVP-MDqA",
+        "1BhsRTC5giW7BPCLGSpdwxXT3qeAVR552"
+      ]
+    },
+    {
+      "group_key": "exercise-title:agachamento",
+      "source_file_ids": [
+        "19bpmUsxSNVf7XMBZKbWp5B3-rhKCYayS",
+        "1B_e-5rvZYdo_b2AA-1IIeNkHf7ssWJUK"
+      ]
+    },
+    {
+      "group_key": "exercise-title:coice",
+      "source_file_ids": [
+        "1KFeqXyU32kW95EyNV5PazvoFvAe2EmSv",
+        "1DNaOHhC5fehU5LbIA2GNzLyoLQzcwt0F"
+      ]
+    },
+    {
+      "group_key": "exercise-title:desenvolvimento arnold",
+      "source_file_ids": [
+        "1AU-0wSaCU8RLm8Mayt9Gw3vicAWktjay",
+        "1COL1gGwz328Ol2se95ai-q4tBTiHexxI"
+      ]
+    },
+    {
+      "group_key": "exercise-title:desenvolvimento",
+      "source_file_ids": [
+        "1AeO5HDf27n1O2-BmDhvHCLz1t9yScyTA",
+        "1CKOCnT2aVOzpt7LhuNeAmUW2NWhFgxln"
+      ]
+    },
+    {
+      "group_key": "exercise-title:elevacao lateral frontal",
+      "source_file_ids": [
+        "1ARCm9H9zlbC8rSwZyHzGLnBuEScSxGv1",
+        "1CQz53XtYKrxnt3JV14xjju2Zi1l3BrVs"
+      ]
+    },
+    {
+      "group_key": "exercise-title:elevacao posterior de ombros",
+      "source_file_ids": [
+        "1AEcNjPZQuvMsotJUSw2PuRRui-gCoQQh",
+        "1CcnDi4u0YIzOqXG6V_tOY4HZF1WYIz4k"
+      ]
+    },
+    {
+      "group_key": "exercise-title:flexor deitado",
+      "source_file_ids": [
+        "1EU0h6hW-Yl3eXAVImz9POJIybZlLNKYf",
+        "1ByNsypz37_lkuyGrqL-SP65zljsAj1Ms"
+      ]
+    },
+    {
+      "group_key": "exercise-title:flexor em pe",
+      "source_file_ids": [
+        "19yfZpsDfjpb7Qgj3yscBxWmhY-3xmLNb",
+        "1C3-MBfGtL87cbnZTVN13ZstVTkw5xobq"
+      ]
+    },
+    {
+      "group_key": "exercise-title:meio terra",
+      "source_file_ids": [
+        "1ArrZKBfLCAFll_4LR9OjqJBwztVmkaCj",
+        "1C8Peeoh-uOSRPdFYUpUsblB-hwVV2b4j"
+      ]
+    },
+    {
+      "group_key": "exercise-title:panturrilhas",
+      "source_file_ids": [
+        "1Asm2VqDFMMtBshYwYEH06bxX2Ci0E_gu",
+        "1C4NuO46tEMHe7i2LeO_77SGM2KWAvN3_"
+      ]
+    },
+    {
+      "group_key": "exercise-title:pull over",
+      "source_file_ids": [
+        "1AjAzBsDDDUnlS902-KaXLC_dCl77ITvV",
+        "1CGU2JcGf8G0y_o2_te1ti2NInAV1HttG"
+      ]
+    },
+    {
+      "group_key": "exercise-title:rosca direta",
+      "source_file_ids": [
+        "1A3g827yaEAV2LVpupwAofBpAmpHBg5e-",
+        "1Cs5p_htlgxhPZZSQG5uKFA-uWmnWdViX"
+      ]
+    },
+    {
+      "group_key": "exercise-title:serrote",
+      "source_file_ids": [
+        "1AkIHYdkbrHQQmT7XPCwbd1t78oQOtiy7",
+        "1CCq2rHWktxBX_d4henrezxIA339bZXiN"
+      ]
+    },
+    {
+      "group_key": "exercise-title:stiff",
+      "source_file_ids": [
+        "19gajSJLCC4sKdYagG9lnt5gb-K6dcQxu",
+        "1BwLDI3gBGSKHdR5dOS8DfL_OvOVh6AHB"
+      ]
+    }
+  ]
+}
