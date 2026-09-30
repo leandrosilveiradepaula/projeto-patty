@@ -19,12 +19,12 @@ export async function endClientAssignmentAction(
 ) {
   await requireRole("admin");
 
-  if (formData.get("confirmEndAssignment") !== "yes") {
-    redirect(`/admin/clientes/${clientId}`);
-  }
-
   if (!isUuid(clientId)) {
     redirect("/admin/clientes?assignment=invalid");
+  }
+
+  if (formData.get("confirmEndAssignment") !== "yes") {
+    redirect(`/admin/clientes/${clientId}`);
   }
 
   const result = await endCurrentAdminClientAssignments({
