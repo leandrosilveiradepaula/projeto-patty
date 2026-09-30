@@ -198,3 +198,25 @@ O Supabase continua decidindo se a versao foi publicada e liberada para a client
 O acesso futuro ao binario deve ocorrer somente depois de validar a sessao e a release no Supabase. Preferir OIDC do runtime Vercel e URL assinada curta; nao expor token read-write ao browser.
 
 Uploads grandes devem usar multipart quando necessario. Paths nao devem conter PII.
+
+
+## Motor parametrizável de regras e workflows
+
+### DECISÃO CONFIRMADA - 2026-09-30
+
+Regras profissionais, valores, fórmulas, coeficientes e workflows não devem ficar hardcoded na aplicação.
+
+A arquitetura passa a separar:
+
+- **configuração versionada**: valores, fórmulas estruturadas, templates e workflows;
+- **motor determinístico**: avaliação dos operadores, unidades, validações e resolução de escopo;
+- **override por cliente**: ajustes individuais feitos pela Patty;
+- **snapshot**: parâmetros efetivamente usados em protocolo/treino publicado.
+
+Os Excels existentes são fonte de migração para templates iniciais e dados históricos, não runtime permanente.
+
+A configuração profissional pode mudar sem alteração de código, mas não pode executar código arbitrário.
+
+RLS, Auth, MFA, secrets, constraints e demais invariantes de segurança/integridade continuam fora da camada de configuração profissional.
+
+Ver `CONFIGURABLE_RULES.md`.
