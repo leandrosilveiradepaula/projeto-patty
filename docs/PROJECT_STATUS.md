@@ -2,7 +2,7 @@
 
 # Estado Atual do Projeto Patty
 
-Ultima atualizacao documental: 2026-09-26.
+Ultima atualizacao documental: 2026-09-30.
 
 Este arquivo e o ponto de entrada operacional para novos chats e agentes. Ele resume o estado do projeto e aponta para as fontes de verdade detalhadas.
 
@@ -824,3 +824,56 @@ A montagem usa somente consultas RLS ja existentes sob as atribuicoes ativas da 
 - GitHub Actions continua com falha operacional de runner: jobs encerram sem steps; nao tratar como falha de codigo;
 - Vercel do master `b1986e7` estava READY antes desta branch e sem erros de runtime nas ultimas 24h;
 - advisor de seguranca do Supabase continua sem novo finding alem do warning conhecido de Leaked Password Protection.
+
+
+## Atualizacao operacional consolidada - 2026-09-30
+
+### PRODUCAO
+
+- `master` atual desta reconciliacao parte do commit `c56d6752c119ee873fcc39bb2b3d4c3af73cb224`;
+- deployment Vercel correspondente `dpl_BiMMHaAutcYZJBpxQzwCdcv9LScz`: `READY`;
+- consulta de erros de runtime nas ultimas 24 horas: nenhum cluster encontrado;
+- nenhuma PR permanece aberta apos a rodada operacional.
+
+### SUPABASE SAAS
+
+Migrations novas aplicadas nesta rodada:
+- `20260930131848_clone_protocol_version_draft`;
+- `20260930132221_create_client_checkins`;
+- `20260930132354_add_anamnesis_clarification_resolutions`;
+- `20260930134443_create_assessment_measurement_corrections`;
+- `20260930151722_create_ai_finding_actions`;
+- `20260930152158_harden_ai_finding_action_boundary`;
+- `20260930152248_enforce_single_ai_finding_action`.
+
+Advisor de seguranca apos os applies:
+- nenhum novo finding de RLS/boundary;
+- permanece somente o warning conhecido `auth_leaked_password_protection`.
+
+### FUNCIONALIDADES EVOLUIDAS
+
+- clonagem de versao de protocolo para novo draft sem copiar aprovacao/publicacao;
+- Avaliacao Basica/Completa alinhadas aos nomes e catalogos confirmados;
+- correcao append-only de medidas finalizadas, preservando valor original;
+- check-in de liquidos com meta snapshot de `60 mL/kg`, eventos de ingestao e check-in diario de atividade fisica;
+- resolucao manual append-only de esclarecimentos;
+- indicador factual de primeiro lembrete devido em `created_at + 24h`, sem inferir canal ou envio;
+- calculador isolado da Planilha Carb Cycle para fases numericas confirmadas, sem selecao automatica de Cutting;
+- acoes humanas auditaveis de finding de IA: observacao interna ou anotacao propria, sem comunicacao automatica com cliente;
+- snapshot historico alimentar desidentificado + validador fail-closed, sem importacao no catalogo ativo;
+- fila historica de revisao da biblioteca de exercicios: 74 videos, 9 titulos genericos e 16 grupos de possivel duplicidade, todos ainda nao autorizados para publicacao.
+
+### GITHUB ACTIONS - BLOQUEIO EXTERNO CONFIRMADO
+
+O workflow `Validate application` continua sendo criado, mas o job encerra antes de receber runner e retorna `steps: null`.
+
+Foi feito um diagnostico controlado no PR #236 trocando somente `ubuntu-24.04` por `ubuntu-latest`. O run `36737265951` apresentou exatamente o mesmo comportamento e o PR foi fechado sem merge.
+
+Conclusao operacional: a falha nao esta demonstrada no YAML nem no label do runner; depende de intervencao de conta/quota/alocacao do GitHub Actions. Nao fazer reruns cegos.
+
+### BLOQUEIOS EXTERNOS QUE PERMANECEM
+
+- avaliacao sintetica real da OpenAI exige `OPENAI_API_KEY` em ambiente apropriado e conclusao do gate de dados de saude antes de dados reais;
+- o primeiro video educacional aprovado continua bloqueado ate criacao/conexao de Vercel Private Blob, operacao nao exposta pela integracao disponivel;
+- Leaked Password Protection permanece dependente da configuracao/plano do Supabase;
+- canal real dos lembretes de esclarecimento continua sem decisao.
