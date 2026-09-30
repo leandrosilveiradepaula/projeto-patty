@@ -57,6 +57,7 @@ export default async function ClientCheckinsPage() {
   ]);
 
   const target = targets[0] ?? null;
+  const targetMl = target?.target_ml ?? null;
   const todayLiquidEvents = recentLiquidEvents.filter(
     (event) => saoPauloDate(event.recorded_at) === today,
   );
@@ -69,8 +70,8 @@ export default async function ClientCheckinsPage() {
     .reduce((sum, event) => sum + event.amount_ml, 0);
   const latestActivity = activityEvents[0] ?? null;
   const progress =
-    target && target.target_ml > 0
-      ? Math.min(100, Math.round((totalMl / target.target_ml) * 100))
+    targetMl !== null && targetMl > 0
+      ? Math.min(100, Math.round((totalMl / targetMl) * 100))
       : null;
 
   return (
@@ -104,7 +105,7 @@ export default async function ClientCheckinsPage() {
               </div>
               <div>
                 <dt>Meta atual</dt>
-                <dd>{target ? formatMl(target.target_ml) : "Nao definida"}</dd>
+                <dd>{targetMl !== null ? formatMl(targetMl) : "Nao definida"}</dd>
               </div>
             </dl>
             {target ? (
