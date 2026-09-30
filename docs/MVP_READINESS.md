@@ -697,3 +697,83 @@ Ainda aberto:
 - E2E autenticado desta nova UI quando o runner/ambiente de testes permitir.
 
 Nenhum score automatico de adesao foi introduzido.
+
+
+## Atualizacao de prontidao - 2026-09-30
+
+### Avaliacoes
+
+Estado: **IMPLEMENTADO / APLICADO / PUBLICADO**
+
+- nomenclatura de UI alinhada para Avaliacao Basica e Avaliacao Completa;
+- Basica exige peso, cintura, abdomen e quadril;
+- Completa exige o catalogo corporal confirmado + pelo menos uma foto;
+- busto/peito representam a mesma posicao logica de torax;
+- correcao pos-finalizacao usa historico append-only e preserva o valor original;
+- valor corrigido mais recente e usado como dado factual vigente nas leituras/comparacoes.
+
+Permanece aberta apenas a regra profissional/calendario para ancoras 29/30/31 e demais criterios profissionais explicitamente listados em `OPEN_QUESTIONS.md`.
+
+### Protocolos
+
+Estado: **CLONAGEM/COMPARACAO IMPLEMENTADAS E APLICADAS**
+
+A RPC `clone_protocol_version_draft` esta aplicada. Clonar:
+- exige origem submetida/congelada;
+- cria novo draft;
+- preserva `based_on_version_id`;
+- copia a estrutura alimentar/ciclos existente;
+- nao copia aprovacao/publicacao;
+- nao recalcula macros;
+- nao muda fase automaticamente.
+
+### Check-ins
+
+Estado: **FUNDACAO IMPLEMENTADA / APLICADA / PUBLICADA**
+
+- meta de liquidos calculada por `peso_kg * 60` e persistida como snapshot;
+- mudanca futura de peso nao recalcula silenciosamente snapshot anterior;
+- eventos de liquidos sao append-only;
+- atividade fisica possui check-in diario sim/nao independente do treino prescrito;
+- nao existe score automatico de adesao.
+
+Continuam abertas proporcao minima de agua pura, politica profissional de recalculo, lembretes de hidratacao e regras de correcao/edicao que dependam de decisao profissional.
+
+### Esclarecimentos
+
+Estado: **LIFECYCLE MANUAL IMPLEMENTADO / CANAL DE LEMBRETE ABERTO**
+
+- resposta da cliente nao resolve automaticamente;
+- Patty registra resolucao manual separada;
+- historico permanece preservado;
+- painel calcula o primeiro marco factual de 24h para pedido ainda sem resposta;
+- nenhum canal/envio real e inferido.
+
+### IA - revisao humana de findings
+
+Estado: **ACOES CONFIRMADAS IMPLEMENTADAS / DADOS REAIS AINDA GATED**
+
+- output original permanece imutavel;
+- finding pode receber uma decisao humana append-only;
+- opcoes atualmente implementadas: observacao interna OU anotacao propria da Patty;
+- uma unica dessas decisoes e permitida por finding;
+- anotacao propria e persistida separadamente como revisao profissional;
+- nenhum desses atos publica conteudo para cliente.
+
+O gate de dados de saude/OpenAI permanece fechado ate avaliacao sintetica e controles organizacionais aplicaveis.
+
+### Fontes historicas de alimentacao e exercicios
+
+Estado: **INVENTARIO/VALIDACAO FAIL-CLOSED / NAO PUBLICADO**
+
+- snapshot desidentificado do `Macros.xlsx` validado estruturalmente e sempre `publishable: false`;
+- nenhuma fonte historica foi inserida como catalogo alimentar aprovado;
+- fila historica de exercicios derivada de metadados possui 74 videos, 9 titulos genericos e 16 grupos de possivel duplicidade;
+- nenhum exercicio foi promovido a regra, prescricao ou publicacao.
+
+### CI e publicacao
+
+- Vercel do master validado como `READY`;
+- sem cluster de erro de runtime nas ultimas 24h na verificacao desta rodada;
+- GitHub Actions permanece bloqueado antes dos steps por runner/alocacao externa;
+- diagnostico com `ubuntu-latest` reproduziu `steps: null`, portanto nao alterar workflow para mascarar o problema.
