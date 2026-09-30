@@ -34,7 +34,7 @@ test("measurement draft preserves freeform key and unit while validating numeric
     }),
     {
       data: {
-        key: "Cintura",
+        key: "cintura",
         unit: "cm",
         value: 74.5,
       },
@@ -49,5 +49,38 @@ test("measurement draft preserves freeform key and unit while validating numeric
         value: "10",
       }),
     true,
+  );
+});
+
+
+test("unknown measurement keys remain freeform while confirmed cadence keys are canonicalized", () => {
+  assert.deepEqual(
+    parseMeasurementDraft({
+      key: " WAIST ",
+      unit: "cm",
+      value: "70",
+    }),
+    {
+      data: {
+        key: "cintura",
+        unit: "cm",
+        value: 70,
+      },
+    },
+  );
+
+  assert.deepEqual(
+    parseMeasurementDraft({
+      key: " Braço direito ",
+      unit: "cm",
+      value: "31",
+    }),
+    {
+      data: {
+        key: "Braço direito",
+        unit: "cm",
+        value: 31,
+      },
+    },
   );
 });
