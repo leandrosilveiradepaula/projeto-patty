@@ -20,7 +20,7 @@ function formatCreatedAt(value: string) {
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     month: "2-digit",
-    timeZone: "UTC",
+    timeZone: "America/Sao_Paulo",
     year: "numeric",
   }).format(new Date(value));
 }
@@ -58,7 +58,7 @@ export default async function AdminClientProtocolsPage({
       />
       <Section
         action={<Badge variant="neutral">{protocols.length} protocolo(s)</Badge>}
-        description="Protocolos desta cliente acessíveis conforme a atribuição administrativa ativa."
+        description="Consulte o histórico de protocolos desta cliente."
         title="Protocolos"
       >
         {protocols.length === 0 ? (
