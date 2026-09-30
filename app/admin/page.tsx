@@ -45,7 +45,7 @@ export default async function AdminPage() {
     <>
       <PageHeader
         actions={<Badge variant="neutral">Clientes atribuídos: {assignedCount}</Badge>}
-        description="Visão factual dos registros acessíveis conforme seu perfil e suas atribuições ativas."
+        description="Acompanhe clientes, avaliações, protocolos e tarefas que precisam da sua atenção."
         eyebrow="Admin"
         title={
           profile?.display_name?.trim()
@@ -55,7 +55,7 @@ export default async function AdminPage() {
         titleId="admin-title"
       />
       <Section
-        description="Contagens obtidas diretamente do backend. Nenhuma prioridade, adesão ou pendência é inferida automaticamente."
+        description="Um resumo rápido do que está disponível no seu atendimento."
         title="Resumo operacional"
       >
         <div className={styles.metricGrid}>
@@ -65,7 +65,7 @@ export default async function AdminPage() {
                 Ver clientes
               </Link>
             }
-            description="Clientes com atribuição ativa para este perfil administrativo."
+            description="Clientes atualmente vinculadas ao seu atendimento."
             label="Clientes atribuídos"
             value={String(assignedCount)}
           />
@@ -75,7 +75,7 @@ export default async function AdminPage() {
                 Ver avaliações
               </Link>
             }
-            description="Avaliações acessíveis conforme as atribuições ativas."
+            description="Avaliações disponíveis para acompanhamento."
             label="Avaliações"
             value={String(assessmentCount)}
           />
@@ -85,7 +85,7 @@ export default async function AdminPage() {
                 Ver protocolos
               </Link>
             }
-            description="Protocolos acessíveis conforme as regras atuais de autorização."
+            description="Protocolos disponíveis para revisão e acompanhamento."
             label="Protocolos"
             value={String(protocolCount)}
           />
@@ -95,7 +95,7 @@ export default async function AdminPage() {
                 Ver conteúdos
               </Link>
             }
-            description="Versões da biblioteca educacional visíveis para o perfil administrativo."
+            description="Conteúdos educacionais disponíveis na biblioteca."
             label="Versões de conteúdo"
             value={String(contentVersionCount)}
           />
@@ -105,14 +105,14 @@ export default async function AdminPage() {
                 Ver operações de IA
               </Link>
             }
-            description="Executions acessíveis que permanecem started sem estado terminal registrado."
-            label="IA sem estado terminal"
+            description="Operações de IA que ainda não possuem conclusão registrada."
+            label="IA em andamento"
             value={String(nonterminalAiExecutionCount)}
           />
         </div>
       </Section>
       <Section
-        description="Atalhos para áreas que já consultam dados reais do backend."
+        description="Acesse rapidamente as principais áreas de trabalho."
         title="Áreas operacionais"
       >
         <div className={styles.supportGrid}>
@@ -120,8 +120,7 @@ export default async function AdminPage() {
             <div>
               <h3 className={styles.areaTitle}>Pendências operacionais</h3>
               <p className={styles.areaDescription}>
-                Consulte estados factuais abertos de Anamnese, esclarecimentos,
-                avaliações, protocolos e operações de IA.
+                Veja registros que ainda precisam de acompanhamento, como esclarecimentos, avaliações, protocolos e operações de IA.
               </p>
             </div>
             <Link className={styles.areaLink} href="/admin/pendencias">
