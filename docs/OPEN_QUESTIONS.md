@@ -797,3 +797,22 @@ A tela:
 - nao dispara retry.
 
 Continua aberto apenas o mecanismo futuro de recovery/watchdog, caso seja necessario.
+
+
+## Atualizacao 2026-09-30 - check-ins e esclarecimentos
+
+### RESOLVIDO TECNICAMENTE
+
+- formula e unidade da meta de liquidos: 60 mL/kg/dia;
+- persistencia da meta como snapshot, sem sobrescrever historico;
+- ingestao e atividade fisica com eventos append-only;
+- resposta a esclarecimento nao resolve automaticamente;
+- resolucao manual da Patty possui registro separado e auditavel.
+
+### AINDA ABERTO
+
+- proporcao minima/exata de agua pura;
+- criterio para criar uma nova meta quando o peso muda;
+- canal de notificacao para o lembrete de 24 horas;
+- detalhes de eventual correcao/estorno de eventos alem de adicionar novo evento;
+- nenhum desses pontos abertos autoriza score de adesao ou notificacao por canal inferido.
