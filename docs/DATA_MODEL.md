@@ -812,3 +812,12 @@ Nenhuma dessas entidades armazena score de adesao.
 ### Resolucao de esclarecimentos
 
 `anamnesis_clarification_resolutions` registra, em entidade separada e append-only, a decisao humana da Patty de encerrar um pedido. A existencia de resposta da cliente nao cria automaticamente uma resolucao. O pedido, as respostas e a resolucao permanecem entidades historicas separadas.
+
+
+## Correcoes de medidas de Avaliacao
+
+`assessment_measurement_corrections` referencia uma linha original de `assessment_measurements` e armazena `corrected_measurement_value`, `corrected_unit`, autoria, nota opcional e data.
+
+A tabela e append-only. A medida original nao e atualizada ou removida. Para leitura operacional, a correcao cronologicamente mais recente e o valor vigente; todas as anteriores continuam historicas.
+
+Somente avaliacao finalizada pode receber esse tipo de correcao. Em rascunho, a medida continua sendo editada diretamente pelo lifecycle ja existente.

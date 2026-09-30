@@ -11,6 +11,7 @@ import { buildAssessmentFinalizationReadiness } from "@/lib/evaluations/assessme
 import { isProfessionalDecision } from "@/lib/follow-up/professional-decisions";
 import { requireRole } from "@/lib/supabase/auth";
 import {
+  createAccessibleAssessmentMeasurementCorrection,
   createAccessibleProfessionalFollowUp,
   deleteAccessibleAssessmentMeasurement,
   finalizeAccessibleClientAssessment,
@@ -440,3 +441,81 @@ export async function finalizeAssessmentAction(
   };
 }
 
+
+
+export async function correctFinalizedAssessmentMeasurementAction(
+  assessmentId: string,
+  measurementId: string,
+  _state: AssessmentDraftActionState,
+  formData: FormData,
+): Promise<AssessmentDraftActionState> {
+  const context = await requireRole("admin");
+  const assessment = await getAccessibleClientAssessment(assessmentId);
+
+  if (!assessment || !assessment.finalized_at) {
+    return {
+      message: "A correcao historica exige uma avaliacao finalizada e acessivel.",
+      success: false,
+    };
+  }
+
+  const measurements = await listAccessibleAssessmentMeasurements(assessment.id);
+  const measurement = measurements.find((item) => item.id === measurementId);
+
+  if (!measurement) {
+    return {
+      message: "A medida selecionada nao pertence a esta avaliacao.",
+      success: false,
+    };
+  }
+
+  const rawValue = formData.get("correctedMeasurementValue");
+  const rawUnit = formData.get("correctedUnit");
+  const rawNote = formData.get("correctionNote");
+  const value =
+    typeof rawValue === "string"
+      ? Number(rawValue.trim().replace(",", "."))
+      : Number.NaN;
+  const unit = typeof rawUnit === "string" ? rawUnit.trim() : "";
+  const note =
+    typeof rawNote === "string" && rawNote.trim() ? rawNote.trim() : null;
+
+  if (!Number.isFinite(value)) {
+    return {
+      message: "Informe um valor numerico valido para a correcao.",
+      success: false,
+    };
+  }
+
+  if (!unit || unit.length > 40) {
+    return {
+      message: "Informe uma unidade valida com ate 40 caracteres.",
+      success: false,
+    };
+  }
+
+  try {
+    await createAccessibleAssessmentMeasurementCorrection({
+      correctedByProfileId: context.profileId,
+      correctedUnit: unit,
+      correctedValue: value,
+      measurementId: measurement.id,
+      note,
+    });
+  } catch {
+    return {
+      message:
+        "Nao foi possivel registrar a correcao. Confirme seu acesso e MFA e tente novamente.",
+      success: false,
+    };
+  }
+
+  revalidatePath("/admin/avaliacoes/" + assessment.id);
+  revalidatePath("/admin/clientes/" + assessment.client_id + "/avaliacoes");
+
+  return {
+    message:
+      "Correcao registrada. O valor original foi preservado no historico.",
+    success: true,
+  };
+}

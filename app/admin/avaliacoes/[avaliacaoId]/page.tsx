@@ -2,6 +2,7 @@ import {
   AssessmentDeleteMeasurementButton,
   AssessmentDraftMetadataForm,
   AssessmentFinalizeForm,
+  AssessmentMeasurementCorrectionForm,
   AssessmentMeasurementForm,
   AssessmentPhotoLinkForm,
   AssessmentPhotoUnlinkButton,
@@ -17,6 +18,7 @@ import {
   isAssessmentKind,
 } from "@/lib/evaluations/assessment-draft";
 import { buildAssessmentFinalizationReadiness } from "@/lib/evaluations/assessment-readiness";
+import { applyAssessmentMeasurementCorrections } from "@/lib/evaluations/measurement-corrections";
 import {
   buildFactualMeasurementComparison,
   formatProfessionalMeasurementLabel,
@@ -28,6 +30,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import {
   getAccessibleClientAssessment,
+  listAccessibleAssessmentMeasurementCorrections,
   listAccessibleAssessmentMeasurements,
   listAccessibleAssessmentPhotoFiles,
   listAccessibleAssessmentsForClient,
@@ -107,7 +110,7 @@ export default async function AdminAvaliacaoDetailPage({
   }
 
   const isDraft = !assessment.finalized_at;
-  const [measurements, photoFiles, followUps, clientAssessments, clientFiles] =
+  const [rawMeasurements, photoFiles, followUps, clientAssessments, clientFiles] =
     await Promise.all([
       listAccessibleAssessmentMeasurements(assessment.id),
       listAccessibleAssessmentPhotoFiles(assessment.id),
@@ -115,6 +118,13 @@ export default async function AdminAvaliacaoDetailPage({
       listAccessibleAssessmentsForClient(assessment.client_id),
       isDraft ? listAccessibleClientFiles(assessment.client_id) : Promise.resolve([]),
     ]);
+  const measurementCorrections = await listAccessibleAssessmentMeasurementCorrections(
+    rawMeasurements.map((measurement) => measurement.id),
+  );
+  const measurements = applyAssessmentMeasurementCorrections(
+    rawMeasurements,
+    measurementCorrections,
+  );
 
   const previousAssessment =
     clientAssessments.find(
@@ -124,9 +134,19 @@ export default async function AdminAvaliacaoDetailPage({
         new Date(item.assessed_at).getTime() <
           new Date(assessment.assessed_at).getTime(),
     ) ?? null;
-  const previousMeasurements = previousAssessment
+  const previousRawMeasurements = previousAssessment
     ? await listAccessibleAssessmentMeasurements(previousAssessment.id)
     : [];
+  const previousCorrections =
+    previousRawMeasurements.length > 0
+      ? await listAccessibleAssessmentMeasurementCorrections(
+          previousRawMeasurements.map((measurement) => measurement.id),
+        )
+      : [];
+  const previousMeasurements = applyAssessmentMeasurementCorrections(
+    previousRawMeasurements,
+    previousCorrections,
+  );
   const factualComparison = buildFactualMeasurementComparison(
     measurements,
     previousMeasurements,
@@ -259,9 +279,18 @@ export default async function AdminAvaliacaoDetailPage({
                   assessmentId={assessment.id}
                   measurementId={measurement.id}
                 />
-              ) : undefined,
+              ) : (
+                <AssessmentMeasurementCorrectionForm
+                  assessmentId={assessment.id}
+                  currentUnit={measurement.unit}
+                  currentValue={measurement.measurement_value}
+                  measurementId={measurement.id}
+                />
+              ),
               id: measurement.id,
-              label: formatProfessionalMeasurementLabel(measurement.measurement_key),
+              label:
+                formatProfessionalMeasurementLabel(measurement.measurement_key) +
+                (measurement.correction_count > 0 ? " · corrigida" : ""),
               unit: measurement.unit,
               value: formatMeasurementValue(measurement.measurement_value),
             }))}
@@ -275,6 +304,45 @@ export default async function AdminAvaliacaoDetailPage({
           </Card>
         )}
       </Section>
+      {!isDraft && measurementCorrections.length > 0 ? (
+        <Section
+          description="Cada correção preserva o lançamento original e acrescenta um novo fato histórico. A correção mais recente é o valor vigente na leitura e na comparação."
+          title="Histórico de correções"
+        >
+          <ol className={styles.recordList}>
+            {measurementCorrections.map((correction) => {
+              const original = rawMeasurements.find(
+                (measurement) =>
+                  measurement.id === correction.assessment_measurement_id,
+              );
+              return (
+                <li className={styles.recordItem} key={correction.id}>
+                  <Card variant="subtle">
+                    <p className={styles.recordMeta}>
+                      {original
+                        ? formatProfessionalMeasurementLabel(
+                            original.measurement_key,
+                          )
+                        : "Medida"}{" "}
+                      · {formatRecordDateTime(correction.created_at)}
+                    </p>
+                    <p className={styles.cardDescription}>
+                      Corrigido para{" "}
+                      {formatMeasurementValue(
+                        correction.corrected_measurement_value,
+                      )}{" "}
+                      {correction.corrected_unit}.
+                      {correction.note?.trim()
+                        ? " Observação: " + correction.note.trim()
+                        : ""}
+                    </p>
+                  </Card>
+                </li>
+              );
+            })}
+          </ol>
+        </Section>
+      ) : null}
       <Section
         description="Comparação factual dos mesmos measurement_key entre a avaliação atual e a imediatamente anterior. Não calcula tendência, sucesso, estagnação ou recomendação."
         title="Comparação com avaliação anterior"
