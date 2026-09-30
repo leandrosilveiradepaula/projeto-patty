@@ -1,3 +1,5 @@
+import { canonicalizeKnownAssessmentMeasurementKey } from "./assessment-readiness.ts";
+
 export const ASSESSMENT_KIND_OPTIONS = [
   { label: "Quinzenal", value: "fortnightly" },
   { label: "Mensal", value: "monthly" },
@@ -39,7 +41,8 @@ export function parseMeasurementDraft(input: {
   unit: FormDataEntryValue | null;
   value: FormDataEntryValue | null;
 }) {
-  const key = typeof input.key === "string" ? input.key.trim() : "";
+  const rawKey = typeof input.key === "string" ? input.key.trim() : "";
+  const key = rawKey ? canonicalizeKnownAssessmentMeasurementKey(rawKey) : "";
   const unit = typeof input.unit === "string" ? input.unit.trim() : "";
   const rawValue = typeof input.value === "string" ? input.value.trim() : "";
 
