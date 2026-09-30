@@ -153,7 +153,7 @@ export async function updateAssessmentDraftAction(
 
   if (typeof kindValue !== "string" || !isAssessmentKind(kindValue)) {
     return {
-      message: "Selecione se a avaliação é quinzenal ou mensal.",
+      message: "Selecione se a avaliação é Básica ou Completa.",
       success: false,
     };
   }
@@ -379,7 +379,7 @@ export async function finalizeAssessmentAction(
 
   if (!assessment.assessment_kind || !isAssessmentKind(assessment.assessment_kind)) {
     return {
-      message: "Defina se a avaliação é quinzenal ou mensal antes de finalizar.",
+      message: "Defina se a avaliação é Básica ou Completa antes de finalizar.",
       success: false,
     };
   }
@@ -401,18 +401,7 @@ export async function finalizeAssessmentAction(
       .join(", ");
 
     return {
-      message: `Antes de finalizar, registre os itens mínimos desta cadência: ${missing}.`,
-      success: false,
-    };
-  }
-
-  if (
-    readiness.requiresMonthlyManualConfirmation &&
-    formData.get("confirmMonthlyMeasures") !== "yes"
-  ) {
-    return {
-      message:
-        "Na avaliação mensal, confirme que revisou o conjunto completo de medidas. O catálogo mensal ainda não é validado automaticamente.",
+      message: `Antes de finalizar, registre os itens obrigatórios desta avaliação: ${missing}.`,
       success: false,
     };
   }
