@@ -2,6 +2,7 @@ import { endClientAssignmentAction } from "@/app/admin/clientes/[clienteId]/acti
 import { AdminClientRegistrationEditForm } from "@/components/admin/AdminClientRegistrationEditForm";
 import { AdminTrainingRequestForm } from "@/components/admin/AdminTrainingRequestForm";
 import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
+import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -131,6 +132,7 @@ export default async function AdminClienteDetailPage({
           </span>
         }
       />
+      <ClientWorkspaceNav clientId={client.id} />
       <Section
         description="Use esta ação quando o vínculo atual de acompanhamento precisar ser encerrado. O histórico da cliente é preservado."
         title="Atribuição"
