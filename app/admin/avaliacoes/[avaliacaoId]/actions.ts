@@ -446,27 +446,20 @@ export async function finalizeAssessmentAction(
 export async function correctFinalizedAssessmentMeasurementAction(
   assessmentId: string,
   measurementId: string,
-  _state: AssessmentDraftActionState,
   formData: FormData,
-): Promise<AssessmentDraftActionState> {
+): Promise<void> {
   const context = await requireRole("admin");
   const assessment = await getAccessibleClientAssessment(assessmentId);
 
   if (!assessment || !assessment.finalized_at) {
-    return {
-      message: "A correcao historica exige uma avaliacao finalizada e acessivel.",
-      success: false,
-    };
+    throw new Error("A correcao historica exige uma avaliacao finalizada e acessivel.");
   }
 
   const measurements = await listAccessibleAssessmentMeasurements(assessment.id);
   const measurement = measurements.find((item) => item.id === measurementId);
 
   if (!measurement) {
-    return {
-      message: "A medida selecionada nao pertence a esta avaliacao.",
-      success: false,
-    };
+    throw new Error("A medida selecionada nao pertence a esta avaliacao.");
   }
 
   const rawValue = formData.get("correctedMeasurementValue");
@@ -481,41 +474,21 @@ export async function correctFinalizedAssessmentMeasurementAction(
     typeof rawNote === "string" && rawNote.trim() ? rawNote.trim() : null;
 
   if (!Number.isFinite(value)) {
-    return {
-      message: "Informe um valor numerico valido para a correcao.",
-      success: false,
-    };
+    throw new Error("Informe um valor numerico valido para a correcao.");
   }
 
   if (!unit || unit.length > 40) {
-    return {
-      message: "Informe uma unidade valida com ate 40 caracteres.",
-      success: false,
-    };
+    throw new Error("Informe uma unidade valida com ate 40 caracteres.");
   }
 
-  try {
-    await createAccessibleAssessmentMeasurementCorrection({
-      correctedByProfileId: context.profileId,
-      correctedUnit: unit,
-      correctedValue: value,
-      measurementId: measurement.id,
-      note,
-    });
-  } catch {
-    return {
-      message:
-        "Nao foi possivel registrar a correcao. Confirme seu acesso e MFA e tente novamente.",
-      success: false,
-    };
-  }
+  await createAccessibleAssessmentMeasurementCorrection({
+    correctedByProfileId: context.profileId,
+    correctedUnit: unit,
+    correctedValue: value,
+    measurementId: measurement.id,
+    note,
+  });
 
   revalidatePath("/admin/avaliacoes/" + assessment.id);
   revalidatePath("/admin/clientes/" + assessment.client_id + "/avaliacoes");
-
-  return {
-    message:
-      "Correcao registrada. O valor original foi preservado no historico.",
-    success: true,
-  };
 }
