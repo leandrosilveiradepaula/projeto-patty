@@ -71,9 +71,16 @@ export async function submitProtocolVersionForReview(
   protocolId: string,
   protocolVersionId: string,
   _state: ProtocolLifecycleFormState,
-  _formData: FormData,
+  formData: FormData,
 ): Promise<ProtocolLifecycleFormState> {
   await requireRole("admin");
+
+  if (formData.get("confirmSubmission") !== "yes") {
+    return {
+      message: "Confirme que a versão está pronta para ser congelada e revisada.",
+      success: false,
+    };
+  }
 
   const accessible = await getAccessibleVersionLifecycle(
     protocolId,
@@ -127,9 +134,16 @@ export async function approveProtocolVersion(
   protocolId: string,
   protocolVersionId: string,
   _state: ProtocolLifecycleFormState,
-  _formData: FormData,
+  formData: FormData,
 ): Promise<ProtocolLifecycleFormState> {
   const context = await requireRole("admin");
+
+  if (formData.get("confirmApproval") !== "yes") {
+    return {
+      message: "Confirme explicitamente sua aprovação desta versão.",
+      success: false,
+    };
+  }
 
   const accessible = await getAccessibleVersionLifecycle(
     protocolId,
