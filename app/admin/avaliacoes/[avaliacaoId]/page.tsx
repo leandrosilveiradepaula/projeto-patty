@@ -337,13 +337,12 @@ export default async function AdminAvaliacaoDetailPage({
       </Section>
       {isDraft ? (
         <Section
-          description="Finalizar congela data, tipo, medidas e vínculos de foto. A cadência quinzenal exige os quatro itens confirmados; na mensal, peso e foto são mínimos determinísticos e o conjunto completo de medidas continua sob revisão humana."
+          description="Finalizar congela data, tipo, medidas e vínculos de foto. A Básica exige peso, cintura, abdômen e quadril; a Completa exige o catálogo corporal confirmado e pelo menos uma foto."
           title="Finalizar avaliação"
         >
           <Card>
             <AssessmentFinalizeForm
               assessmentId={assessment.id}
-              isMonthly={assessment.assessment_kind === "monthly"}
               readinessItems={finalizationReadiness?.items ?? []}
             />
           </Card>
