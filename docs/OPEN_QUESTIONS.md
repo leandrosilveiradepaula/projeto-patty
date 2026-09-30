@@ -816,3 +816,18 @@ Continua aberto apenas o mecanismo futuro de recovery/watchdog, caso seja necess
 - canal de notificacao para o lembrete de 24 horas;
 - detalhes de eventual correcao/estorno de eventos alem de adicionar novo evento;
 - nenhum desses pontos abertos autoriza score de adesao ou notificacao por canal inferido.
+
+
+## Atualizacao 2026-09-30 - correcao de Avaliacao
+
+### RESOLVIDO PARA VALOR/UNIDADE DE MEDIDA
+
+Erro de lancamento em valor/unidade de medida de uma avaliacao finalizada agora possui mecanismo auditavel append-only. O valor original e preservado e a correcao mais recente e usada como valor vigente.
+
+### AINDA ABERTO SOMENTE SE HOUVER NECESSIDADE REAL
+
+- correcao historica de chave/nome da medida;
+- alteracao historica da data ou tipo da avaliacao;
+- correcao de vinculo de foto depois da finalizacao.
+
+Nao ampliar o mecanismo sem caso profissional confirmado.
