@@ -127,8 +127,16 @@ export async function releaseAdminPrivateFileToClientAction(
   clientId: string,
   fileId: string,
   _state: AdminPrivateFileReleaseState,
+  formData: FormData,
 ): Promise<AdminPrivateFileReleaseState> {
   const auth = await requireRole("admin");
+
+  if (formData.get("confirmRelease") !== "yes") {
+    return {
+      message: "Confirme explicitamente a liberação deste arquivo.",
+      success: false,
+    };
+  }
 
   if (!isUuid(clientId) || !isUuid(fileId)) {
     return {
