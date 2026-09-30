@@ -33,7 +33,7 @@ function formatDateTime(value: string) {
     hour: "2-digit",
     minute: "2-digit",
     month: "2-digit",
-    timeZone: "UTC",
+    timeZone: "America/Sao_Paulo",
     year: "numeric",
   }).format(new Date(value));
 }
@@ -144,7 +144,11 @@ export default async function AdminClienteDetailPage({
               client-scoped protegidos por assignment.
             </p>
           </div>
-          <form action={endClientAssignmentAction.bind(null, client.id)}>
+          <form action={endClientAssignmentAction.bind(null, client.id)} className={styles.dangerForm}>
+            <label className={styles.dangerConfirmation}>
+              <input name="confirmEndAssignment" required type="checkbox" value="yes" />
+              <span>Confirmo que quero encerrar a atribuição ativa desta cliente.</span>
+            </label>
             <Button type="submit" variant="danger">
               Encerrar atribuição
             </Button>
