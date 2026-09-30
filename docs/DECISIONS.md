@@ -2345,3 +2345,25 @@ RLS permanece obrigatoria: cliente acessa somente os proprios check-ins; Patty/a
 - quando a Patty deseja criar novo snapshot de hidratacao apos mudanca de peso;
 - canal e mecanismo de envio do lembrete de 24 horas;
 - politica de edicao/correcao de eventos alem do modelo append-only atual.
+
+
+## 2026-09-30 - Correcao auditavel de medida em avaliacao finalizada
+
+### DECISAO TECNICA APLICADA
+
+A regra profissional confirmada de corrigir um erro de lancamento na avaliacao existente foi implementada sem tornar a avaliacao finalizada mutavel.
+
+- `assessment_measurements` continua imutavel apos finalizacao;
+- `assessment_measurement_corrections` preserva cada correcao como fato append-only;
+- o valor e a unidade originalmente lancados permanecem preservados;
+- a correcao mais recente passa a ser o valor vigente para exibicao e comparacao factual;
+- multiplas correcoes permanecem auditaveis em ordem historica;
+- a insercao exige Patty/admin com assignment ativo e MFA AAL2;
+- nenhuma correcao cria nova avaliacao;
+- nenhuma correcao altera automaticamente protocolo, fase, adesao ou interpretacao profissional.
+
+A migration aplicada no Supabase SaaS e `20260930134443_create_assessment_measurement_corrections.sql`.
+
+### LIMITE
+
+Esta primeira materializacao corrige valor e unidade de uma medida existente. Alteracao historica de `measurement_key`, data/tipo da avaliacao ou vinculo de foto continua fora deste fluxo e exige desenho separado se vier a ser necessario.
