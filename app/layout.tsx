@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
@@ -14,7 +14,39 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: "Projeto Patty",
-  description: "Aplicacao web da Consultoria Corpo e Mente.",
+  applicationName: "Corpo & Mente",
+  description: "Aplicação web da Consultoria Corpo e Mente.",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Corpo & Mente",
+  },
+  icons: {
+    icon: [
+      {
+        url: "/icon-192x192.png",
+        sizes: "192x192",
+        type: "image/png",
+      },
+      {
+        url: "/icon-512x512.png",
+        sizes: "512x512",
+        type: "image/png",
+      },
+    ],
+    apple: [
+      {
+        url: "/apple-touch-icon.png",
+        sizes: "180x180",
+        type: "image/png",
+      },
+    ],
+  },
+};
+
+export const viewport: Viewport = {
+  colorScheme: "light",
+  themeColor: "#003e1c",
 };
 
 export default function RootLayout({
