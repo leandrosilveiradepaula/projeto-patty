@@ -132,16 +132,14 @@ export default async function AdminClienteDetailPage({
         }
       />
       <Section
-        description="Encerrar a atribuição remove o acesso administrativo normal aos dados client-scoped desta cliente e preserva o histórico do assignment. Arquivos privados continuam seguindo a exceção específica já documentada."
+        description="Use esta ação quando o vínculo atual de acompanhamento precisar ser encerrado. O histórico da cliente é preservado."
         title="Atribuição"
       >
         <div className={styles.assignmentPanel}>
           <div>
             <p className={styles.assignmentTitle}>Atribuição ativa</p>
             <p className={styles.assignmentDescription}>
-              Esta operação não apaga a cliente nem seus dados históricos. Ela
-              apenas encerra o vínculo atual da Patty com os dados
-              client-scoped protegidos por assignment.
+              Esta operação não apaga a cliente nem seus dados. Ela encerra apenas o vínculo atual de acompanhamento.
             </p>
           </div>
           <form action={endClientAssignmentAction.bind(null, client.id)} className={styles.dangerForm}>
@@ -214,8 +212,8 @@ export default async function AdminClienteDetailPage({
       </Section>
 
       <Section
-        description="Somente áreas já conectadas ao backend real são exibidas como navegação."
-        title="Áreas integradas"
+        description="Acesse as principais informações e ações desta cliente."
+        title="Acompanhamento"
       >
         <div className={styles.areaGrid}>
           {integratedAreas.map((area) => (
