@@ -48,6 +48,7 @@ export default async function AdminClientCheckinsPage({ params }: PageProps) {
   ]);
 
   const currentTarget = targets[0] ?? null;
+  const currentTargetMl = currentTarget?.target_ml ?? null;
   const recentLiquidEvents = liquidEvents.slice(0, 30);
   const recentActivityEvents = activityEvents.slice(0, 30);
 
@@ -73,7 +74,7 @@ export default async function AdminClientCheckinsPage({ params }: PageProps) {
             <div className={styles.header}>
               <h3 className={styles.title}>Meta atual</h3>
               <Badge variant="neutral">
-                {currentTarget ? formatMl(currentTarget.target_ml) : "Nao definida"}
+                {currentTargetMl !== null ? formatMl(currentTargetMl) : "Nao definida"}
               </Badge>
             </div>
             <p className={styles.description}>
