@@ -14,28 +14,56 @@ export type AssessmentReadinessItem = {
 
 export type AssessmentFinalizationReadiness = {
   canFinalizeDeterministically: boolean;
-  requiresMonthlyManualConfirmation: boolean;
   items: AssessmentReadinessItem[];
 };
 
 const KNOWN_ALIASES: Record<string, string> = {
   abdominal: "abdomen",
   abdomen: "abdomen",
+  biceps: "biceps",
+  bust: "torax",
+  busto: "torax",
+  chest: "torax",
+  coxa: "coxa",
   cintura: "cintura",
   hip: "quadril",
+  ombro: "ombros",
+  ombros: "ombros",
+  panturrilha: "panturrilhas",
+  panturrilhas: "panturrilhas",
+  peito: "torax",
   peso: "peso",
   quadril: "quadril",
+  thigh: "coxa",
   waist: "cintura",
   weight: "peso",
 };
 
 const LABELS: Record<string, string> = {
   abdomen: "Abdômen",
+  biceps: "Bíceps direito",
   cintura: "Cintura",
+  coxa: "Coxa direita",
   foto: "Foto vinculada",
+  ombros: "Ombros",
+  panturrilhas: "Panturrilha direita",
   peso: "Peso",
   quadril: "Quadril",
+  torax: "Busto/peito",
 };
+
+const BASIC_KEYS = ["peso", "cintura", "abdomen", "quadril"] as const;
+const COMPLETE_KEYS = [
+  "peso",
+  "cintura",
+  "abdomen",
+  "coxa",
+  "biceps",
+  "torax",
+  "quadril",
+  "ombros",
+  "panturrilhas",
+] as const;
 
 export function normalizeAssessmentMeasurementKey(value: string) {
   const normalized = value
@@ -66,11 +94,8 @@ export function buildAssessmentFinalizationReadiness({
   const presentKeys = new Set(
     measurementKeys.map((key) => normalizeAssessmentMeasurementKey(key)),
   );
-
   const requiredKeys =
-    assessmentKind === "fortnightly"
-      ? ["peso", "cintura", "abdomen", "quadril"]
-      : ["peso"];
+    assessmentKind === "fortnightly" ? BASIC_KEYS : COMPLETE_KEYS;
 
   const items: AssessmentReadinessItem[] = requiredKeys.map((key) => ({
     key,
@@ -88,7 +113,6 @@ export function buildAssessmentFinalizationReadiness({
 
   return {
     canFinalizeDeterministically: items.every((item) => item.present),
-    requiresMonthlyManualConfirmation: assessmentKind === "monthly",
     items,
   };
 }

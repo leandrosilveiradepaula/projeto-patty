@@ -7,18 +7,22 @@ import {
   normalizeAssessmentMeasurementKey,
 } from "./assessment-readiness.ts";
 
-test("known assessment aliases normalize without closing the open catalog", () => {
+test("known assessment aliases normalize to the confirmed catalog", () => {
   assert.equal(normalizeAssessmentMeasurementKey("Cintura"), "cintura");
   assert.equal(normalizeAssessmentMeasurementKey("WAIST"), "cintura");
   assert.equal(normalizeAssessmentMeasurementKey("Abdômen"), "abdomen");
   assert.equal(normalizeAssessmentMeasurementKey("hip"), "quadril");
+  assert.equal(normalizeAssessmentMeasurementKey("Busto"), "torax");
+  assert.equal(normalizeAssessmentMeasurementKey("Peito"), "torax");
+  assert.equal(normalizeAssessmentMeasurementKey("Coxa"), "coxa");
+  assert.equal(normalizeAssessmentMeasurementKey("Panturrilha"), "panturrilhas");
   assert.equal(
     canonicalizeKnownAssessmentMeasurementKey("Braço direito"),
     "Braço direito",
   );
 });
 
-test("fortnightly finalization requires the four confirmed measurements", () => {
+test("basic finalization requires weight waist abdomen and hip", () => {
   const readiness = buildAssessmentFinalizationReadiness({
     assessmentKind: "fortnightly",
     measurementKeys: ["Peso", "waist", "abdômen", "quadril"],
@@ -26,7 +30,6 @@ test("fortnightly finalization requires the four confirmed measurements", () => 
   });
 
   assert.equal(readiness.canFinalizeDeterministically, true);
-  assert.equal(readiness.requiresMonthlyManualConfirmation, false);
   assert.deepEqual(
     readiness.items.map((item) => [item.key, item.present]),
     [
@@ -38,22 +41,53 @@ test("fortnightly finalization requires the four confirmed measurements", () => 
   );
 });
 
-test("monthly finalization requires weight and at least one photo, while full measure catalog stays human-reviewed", () => {
-  const missingPhoto = buildAssessmentFinalizationReadiness({
+test("complete finalization requires the confirmed complete catalog and a photo", () => {
+  const readiness = buildAssessmentFinalizationReadiness({
     assessmentKind: "monthly",
-    measurementKeys: ["peso", "cintura"],
-    photoCount: 0,
-  });
-
-  assert.equal(missingPhoto.canFinalizeDeterministically, false);
-  assert.equal(missingPhoto.requiresMonthlyManualConfirmation, true);
-
-  const ready = buildAssessmentFinalizationReadiness({
-    assessmentKind: "monthly",
-    measurementKeys: ["weight"],
+    measurementKeys: [
+      "weight",
+      "cintura",
+      "abdomen",
+      "coxa",
+      "biceps",
+      "busto",
+      "quadril",
+      "ombros",
+      "panturrilha",
+    ],
     photoCount: 1,
   });
 
-  assert.equal(ready.canFinalizeDeterministically, true);
-  assert.equal(ready.requiresMonthlyManualConfirmation, true);
+  assert.equal(readiness.canFinalizeDeterministically, true);
+  assert.equal(
+    readiness.items.find((item) => item.key === "torax")?.present,
+    true,
+  );
+  assert.equal(
+    readiness.items.find((item) => item.key === "foto")?.present,
+    true,
+  );
+});
+
+test("complete finalization fails closed when a confirmed item is missing", () => {
+  const readiness = buildAssessmentFinalizationReadiness({
+    assessmentKind: "monthly",
+    measurementKeys: [
+      "peso",
+      "cintura",
+      "abdomen",
+      "coxa",
+      "biceps",
+      "peito",
+      "quadril",
+      "ombros",
+    ],
+    photoCount: 1,
+  });
+
+  assert.equal(readiness.canFinalizeDeterministically, false);
+  assert.equal(
+    readiness.items.find((item) => item.key === "panturrilhas")?.present,
+    false,
+  );
 });

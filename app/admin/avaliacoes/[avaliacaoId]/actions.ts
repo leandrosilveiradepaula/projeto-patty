@@ -8,6 +8,7 @@ import {
   parseMeasurementDraft,
 } from "@/lib/evaluations/assessment-draft";
 import { buildAssessmentFinalizationReadiness } from "@/lib/evaluations/assessment-readiness";
+import { createAccessibleAssessmentMeasurementCorrection } from "@/lib/evaluations/measurement-correction-store";
 import { isProfessionalDecision } from "@/lib/follow-up/professional-decisions";
 import { requireRole } from "@/lib/supabase/auth";
 import {
@@ -153,7 +154,7 @@ export async function updateAssessmentDraftAction(
 
   if (typeof kindValue !== "string" || !isAssessmentKind(kindValue)) {
     return {
-      message: "Selecione se a avaliação é quinzenal ou mensal.",
+      message: "Selecione se a avaliação é Básica ou Completa.",
       success: false,
     };
   }
@@ -379,7 +380,7 @@ export async function finalizeAssessmentAction(
 
   if (!assessment.assessment_kind || !isAssessmentKind(assessment.assessment_kind)) {
     return {
-      message: "Defina se a avaliação é quinzenal ou mensal antes de finalizar.",
+      message: "Defina se a avaliação é Básica ou Completa antes de finalizar.",
       success: false,
     };
   }
@@ -401,18 +402,7 @@ export async function finalizeAssessmentAction(
       .join(", ");
 
     return {
-      message: `Antes de finalizar, registre os itens mínimos desta cadência: ${missing}.`,
-      success: false,
-    };
-  }
-
-  if (
-    readiness.requiresMonthlyManualConfirmation &&
-    formData.get("confirmMonthlyMeasures") !== "yes"
-  ) {
-    return {
-      message:
-        "Na avaliação mensal, confirme que revisou o conjunto completo de medidas. O catálogo mensal ainda não é validado automaticamente.",
+      message: `Antes de finalizar, registre os itens obrigatórios desta avaliação: ${missing}.`,
       success: false,
     };
   }
@@ -438,5 +428,57 @@ export async function finalizeAssessmentAction(
     message: "Avaliação finalizada. Medidas e vínculos agora são imutáveis.",
     success: true,
   };
+}
+
+export async function correctFinalizedAssessmentMeasurementAction(
+  assessmentId: string,
+  measurementId: string,
+  formData: FormData,
+): Promise<void> {
+  const context = await requireRole("admin");
+  const assessment = await getAccessibleClientAssessment(assessmentId);
+
+  if (!assessment || !assessment.finalized_at) {
+    throw new Error(
+      "A correção histórica exige uma avaliação finalizada e acessível.",
+    );
+  }
+
+  const measurements = await listAccessibleAssessmentMeasurements(assessment.id);
+  const measurement = measurements.find((item) => item.id === measurementId);
+
+  if (!measurement) {
+    throw new Error("A medida selecionada não pertence a esta avaliação.");
+  }
+
+  const rawValue = formData.get("correctedMeasurementValue");
+  const rawUnit = formData.get("correctedUnit");
+  const rawNote = formData.get("correctionNote");
+  const value =
+    typeof rawValue === "string"
+      ? Number(rawValue.trim().replace(",", "."))
+      : Number.NaN;
+  const unit = typeof rawUnit === "string" ? rawUnit.trim() : "";
+  const note =
+    typeof rawNote === "string" && rawNote.trim() ? rawNote.trim() : null;
+
+  if (!Number.isFinite(value)) {
+    throw new Error("Informe um valor numérico válido para a correção.");
+  }
+
+  if (!unit || unit.length > 40) {
+    throw new Error("Informe uma unidade válida com até 40 caracteres.");
+  }
+
+  await createAccessibleAssessmentMeasurementCorrection({
+    correctedByProfileId: context.profileId,
+    correctedUnit: unit,
+    correctedValue: value,
+    measurementId: measurement.id,
+    note,
+  });
+
+  revalidatePath("/admin/avaliacoes/" + assessment.id);
+  revalidatePath("/admin/clientes/" + assessment.client_id + "/avaliacoes");
 }
 
