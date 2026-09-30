@@ -5,6 +5,7 @@ import { buildOperationalPendingItems } from "./pending.ts";
 
 test("operational pending builder emits only explicit backend states", () => {
   const items = buildOperationalPendingItems({
+    referenceNow: "2026-09-27T12:00:00Z",
     anamnesisSubmissions: [
       {
         id: "draft-1",
@@ -159,4 +160,56 @@ test("operational pending builder excludes already resolved states", () => {
   });
 
   assert.deepEqual(items, []);
+});
+
+test("clarification reminder becomes factually due after 24 hours without response", () => {
+  const items = buildOperationalPendingItems({
+    referenceNow: "2026-09-24T10:00:00Z",
+    anamnesisSubmissions: [],
+    clarificationRequests: [
+      {
+        id: "clarification-due",
+        submissionId: "submission-1",
+        clientId: "client-1",
+        clientLabel: "Cliente 1",
+        createdAt: "2026-09-23T10:00:00Z",
+        responseCount: 0,
+        resolved: false,
+      },
+      {
+        id: "clarification-not-due",
+        submissionId: "submission-2",
+        clientId: "client-2",
+        clientLabel: "Cliente 2",
+        createdAt: "2026-09-23T11:00:00Z",
+        responseCount: 0,
+        resolved: false,
+      },
+      {
+        id: "clarification-answered",
+        submissionId: "submission-3",
+        clientId: "client-3",
+        clientLabel: "Cliente 3",
+        createdAt: "2026-09-20T10:00:00Z",
+        responseCount: 1,
+        resolved: false,
+      },
+    ],
+    assessments: [],
+    protocolVersions: [],
+    aiExecutions: [],
+  });
+
+  const due = items.find((item) => item.id === "clarification:clarification-due");
+  const notDue = items.find(
+    (item) => item.id === "clarification:clarification-not-due",
+  );
+  const answered = items.find(
+    (item) => item.id === "clarification-review:clarification-answered",
+  );
+
+  assert.equal(due?.statusLabel, "Lembrete de 24h devido");
+  assert.match(due?.description ?? "", /não prova que qualquer mensagem foi enviada/);
+  assert.equal(notDue?.statusLabel, "Sem resposta");
+  assert.equal(answered?.statusLabel, "Resposta recebida");
 });

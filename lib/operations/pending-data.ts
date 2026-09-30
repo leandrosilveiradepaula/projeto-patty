@@ -138,6 +138,7 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
   }
 
   return buildOperationalPendingItems({
+    referenceNow: new Date().toISOString(),
     anamnesisSubmissions: submissions.map((submission) => ({
       clientId: submission.client_id,
       clientLabel:
