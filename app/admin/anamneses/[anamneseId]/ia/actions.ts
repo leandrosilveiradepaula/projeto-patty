@@ -82,7 +82,7 @@ export async function acceptAiFindingAsInternalObservation(
   executionId: string,
   findingIndex: number,
 ) {
-  await requireRole("admin");
+  const auth = await requireRole("admin");
 
   if (!Number.isInteger(findingIndex) || findingIndex < 0) {
     throw new Error("Índice de achado inválido.");
@@ -90,6 +90,7 @@ export async function acceptAiFindingAsInternalObservation(
 
   await recordAiFindingAction({
     action: "accepted_internal_observation",
+    actedByProfileId: auth.profileId,
     executionId,
     findingIndex,
   });
@@ -103,7 +104,7 @@ export async function createPattyNoteFromAiFinding(
   findingIndex: number,
   formData: FormData,
 ) {
-  await requireRole("admin");
+  const auth = await requireRole("admin");
 
   if (!Number.isInteger(findingIndex) || findingIndex < 0) {
     throw new Error("Índice de achado inválido.");
@@ -122,6 +123,7 @@ export async function createPattyNoteFromAiFinding(
 
   await recordAiFindingAction({
     action: "converted_to_patty_note",
+    actedByProfileId: auth.profileId,
     executionId,
     findingIndex,
     note,
