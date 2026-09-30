@@ -121,14 +121,12 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
   );
   const findingActionsByKey = new Map<
     string,
-    Set<"accepted_internal_observation" | "converted_to_patty_note">
+    "accepted_internal_observation" | "converted_to_patty_note"
   >();
 
   for (const action of findingActions) {
     const key = action.execution_id + ":" + action.finding_index;
-    const current = findingActionsByKey.get(key) ?? new Set();
-    current.add(action.action);
-    findingActionsByKey.set(key, current);
+    findingActionsByKey.set(key, action.action);
   }
   const financialQuestion = questions.find(
     (question) =>
@@ -237,14 +235,12 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
 
                   {findings.map((finding, index) => {
                     const actionKey = execution.id + ":" + index;
-                    const recordedActions =
-                      findingActionsByKey.get(actionKey) ?? new Set();
-                    const acceptedAsObservation = recordedActions.has(
-                      "accepted_internal_observation",
-                    );
-                    const convertedToNote = recordedActions.has(
-                      "converted_to_patty_note",
-                    );
+                    const recordedAction =
+                      findingActionsByKey.get(actionKey) ?? null;
+                    const acceptedAsObservation =
+                      recordedAction === "accepted_internal_observation";
+                    const convertedToNote =
+                      recordedAction === "converted_to_patty_note";
                     const sourceLabels = finding.source_answer_ids.map(
                       (answerId) => {
                         const answer = answersById.get(answerId);
@@ -296,49 +292,57 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
                             <Badge variant="positive">
                               Aceito como observação interna
                             </Badge>
-                          ) : (
-                            <form
-                              action={acceptAiFindingAsInternalObservation.bind(
-                                null,
-                                submission.id,
-                                execution.id,
-                                index,
-                              )}
-                            >
-                              <Button size="compact" type="submit" variant="secondary">
-                                Aceitar como observação interna
-                              </Button>
-                            </form>
-                          )}
+                          ) : null}
 
                           {convertedToNote ? (
                             <Badge variant="positive">
                               Anotação profissional criada
                             </Badge>
-                          ) : (
-                            <form
-                              action={createPattyNoteFromAiFinding.bind(
-                                null,
-                                submission.id,
-                                execution.id,
-                                index,
-                              )}
-                              className={styles.noteForm}
-                            >
-                              <label>
-                                <span>Anotação da Patty</span>
-                                <textarea
-                                  maxLength={4000}
-                                  name="pattyNote"
-                                  placeholder="Escreva com suas próprias palavras."
-                                  required
-                                />
-                              </label>
-                              <Button size="compact" type="submit">
-                                Salvar como anotação da Patty
-                              </Button>
-                            </form>
-                          )}
+                          ) : null}
+
+                          {!recordedAction ? (
+                            <>
+                              <form
+                                action={acceptAiFindingAsInternalObservation.bind(
+                                  null,
+                                  submission.id,
+                                  execution.id,
+                                  index,
+                                )}
+                              >
+                                <Button
+                                  size="compact"
+                                  type="submit"
+                                  variant="secondary"
+                                >
+                                  Aceitar como observação interna
+                                </Button>
+                              </form>
+
+                              <form
+                                action={createPattyNoteFromAiFinding.bind(
+                                  null,
+                                  submission.id,
+                                  execution.id,
+                                  index,
+                                )}
+                                className={styles.noteForm}
+                              >
+                                <label>
+                                  <span>Anotação da Patty</span>
+                                  <textarea
+                                    maxLength={4000}
+                                    name="pattyNote"
+                                    placeholder="Escreva com suas próprias palavras."
+                                    required
+                                  />
+                                </label>
+                                <Button size="compact" type="submit">
+                                  Salvar como anotação da Patty
+                                </Button>
+                              </form>
+                            </>
+                          ) : null}
                         </div>
                       </div>
                     );
