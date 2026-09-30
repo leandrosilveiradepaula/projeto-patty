@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 export type AiFindingActionRow = {
@@ -31,9 +32,10 @@ type FindingActionsDatabase = {
     };
     Views: Record<string, never>;
     Functions: {
-      record_ai_finding_action: {
+      record_ai_finding_action_server: {
         Args: {
           p_action: string;
+          p_acted_by_profile_id: string;
           p_execution_id: string;
           p_finding_index: number;
           p_note?: string | null;
@@ -51,6 +53,11 @@ type FindingActionsDatabase = {
 
 async function createFindingActionsClient() {
   const client = await createClient();
+  return client as unknown as SupabaseClient<FindingActionsDatabase>;
+}
+
+function createFindingActionsAdminClient() {
+  const client = createAdminClient();
   return client as unknown as SupabaseClient<FindingActionsDatabase>;
 }
 
@@ -78,13 +85,15 @@ export async function listAccessibleAiFindingActions(executionIds: string[]) {
 
 export async function recordAiFindingAction(input: {
   action: "accepted_internal_observation" | "converted_to_patty_note";
+  actedByProfileId: string;
   executionId: string;
   findingIndex: number;
   note?: string | null;
 }) {
-  const supabase = await createFindingActionsClient();
-  const { data, error } = await supabase.rpc("record_ai_finding_action", {
+  const supabase = createFindingActionsAdminClient();
+  const { data, error } = await supabase.rpc("record_ai_finding_action_server", {
     p_action: input.action,
+    p_acted_by_profile_id: input.actedByProfileId,
     p_execution_id: input.executionId,
     p_finding_index: input.findingIndex,
     p_note: input.note ?? null,
