@@ -1026,6 +1026,23 @@ export async function listAccessibleProtocolVersions(protocolId: string) {
   return data;
 }
 
+export async function cloneAccessibleProtocolVersionDraft(
+  sourceProtocolVersionId: string,
+  planSnapshot: Json | null,
+) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("clone_protocol_version_draft", {
+    p_plan_snapshot: planSnapshot,
+    p_source_protocol_version_id: sourceProtocolVersionId,
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
 export async function listAccessibleProtocolVersionApprovals(protocolVersionIds: string[]) {
   if (protocolVersionIds.length === 0) {
     return [];

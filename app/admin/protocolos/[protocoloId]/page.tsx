@@ -1,5 +1,7 @@
 import { AdminMealDraftGuidance } from "@/components/admin/AdminMealDraftGuidance";
 import { AdminProtocolVersionPlan } from "@/components/admin/AdminProtocolVersionPlan";
+import { ProtocolCloneVersionAction } from "@/components/admin/ProtocolCloneVersionAction";
+import { ProtocolVersionComparison } from "@/components/admin/ProtocolVersionComparison";
 import { ProtocolLifecycleAction } from "@/components/admin/ProtocolLifecycleAction";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -19,6 +21,7 @@ import {
   summarizeMealDraftPlan,
 } from "@/lib/protocol/meal-draft-guidance";
 import { getProtocolLifecycleAction } from "@/lib/protocol/lifecycle";
+import { buildProtocolPlanComparison } from "@/lib/protocol/version-diff";
 import { isUuid } from "@/lib/validation/uuid";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -67,6 +70,9 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
   const mealPlansByVersionId = new Map(
     mealPlans.map((mealPlan) => [mealPlan.protocolVersionId, mealPlan]),
   );
+  const versionsById = new Map(
+    versions.map((version) => [version.id, version]),
+  );
 
   return (
     <>
@@ -89,6 +95,12 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
               const approval = approvalsByVersionId.get(version.id);
               const publication = publicationsByVersionId.get(version.id);
               const mealPlan = mealPlansByVersionId.get(version.id) ?? null;
+              const baseVersion = version.based_on_version_id
+                ? versionsById.get(version.based_on_version_id) ?? null
+                : null;
+              const baseMealPlan = baseVersion
+                ? mealPlansByVersionId.get(baseVersion.id) ?? null
+                : null;
               const lifecycleAction = getProtocolLifecycleAction({
                 hasApproval: Boolean(approval),
                 hasPublication: Boolean(publication),
@@ -127,6 +139,23 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
                     </p>
                     <AdminProtocolVersionPlan plan={mealPlan} />
                   </div>
+                  {baseVersion ? (
+                    <ProtocolVersionComparison
+                      baseVersionNumber={baseVersion.version_number}
+                      currentVersionNumber={version.version_number}
+                      rows={buildProtocolPlanComparison(mealPlan, baseMealPlan)}
+                    />
+                  ) : null}
+                  {version.submitted_for_review_at ? (
+                    <div className={styles.cloneAction}>
+                      <h4>Nova versão de trabalho</h4>
+                      <ProtocolCloneVersionAction
+                        protocolId={protocol.id}
+                        sourceProtocolVersionId={version.id}
+                        sourceVersionNumber={version.version_number}
+                      />
+                    </div>
+                  ) : null}
                   <div className={styles.lifecycleAction}>
                     <h4>Próxima ação manual</h4>
                     {lifecycleAction === "complete" ? (
