@@ -6,6 +6,7 @@ import {
   executeOpenAiAnamnesisReview,
   OpenAiAnamnesisReviewExecutionError,
 } from "@/lib/ai/openai-provider";
+import { recordAiFindingAction } from "@/lib/ai/finding-actions";
 
 export type AdminAiReviewFormState = {
   executionId?: string;
@@ -73,4 +74,61 @@ export async function runAdminAnamnesisAiReview(
       success: false,
     };
   }
+}
+
+
+export async function acceptAiFindingAsInternalObservation(
+  submissionId: string,
+  executionId: string,
+  findingIndex: number,
+) {
+  const auth = await requireRole("admin");
+
+  if (!Number.isInteger(findingIndex) || findingIndex < 0) {
+    throw new Error("Índice de achado inválido.");
+  }
+
+  await recordAiFindingAction({
+    action: "accepted_internal_observation",
+    actedByProfileId: auth.profileId,
+    executionId,
+    findingIndex,
+  });
+
+  revalidatePath("/admin/anamneses/" + submissionId + "/ia");
+}
+
+export async function createPattyNoteFromAiFinding(
+  submissionId: string,
+  executionId: string,
+  findingIndex: number,
+  formData: FormData,
+) {
+  const auth = await requireRole("admin");
+
+  if (!Number.isInteger(findingIndex) || findingIndex < 0) {
+    throw new Error("Índice de achado inválido.");
+  }
+
+  const rawNote = formData.get("pattyNote");
+  const note = typeof rawNote === "string" ? rawNote.trim() : "";
+
+  if (!note) {
+    throw new Error("Escreva a anotação profissional antes de salvar.");
+  }
+
+  if (note.length > 4000) {
+    throw new Error("A anotação profissional deve ter no máximo 4.000 caracteres.");
+  }
+
+  await recordAiFindingAction({
+    action: "converted_to_patty_note",
+    actedByProfileId: auth.profileId,
+    executionId,
+    findingIndex,
+    note,
+  });
+
+  revalidatePath("/admin/anamneses/" + submissionId);
+  revalidatePath("/admin/anamneses/" + submissionId + "/ia");
 }

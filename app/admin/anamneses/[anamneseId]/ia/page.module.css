@@ -57,3 +57,32 @@
   color: var(--color-text-primary);
   font-weight: var(--text-label-medium-weight);
 }
+
+.findingActions {
+  display: grid;
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+}
+
+.noteForm {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.noteForm textarea {
+  width: 100%;
+  min-height: 88px;
+  resize: vertical;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-small);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  padding: var(--space-3);
+  font: inherit;
+}
+
+.actionStatus {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-small-size);
+}
