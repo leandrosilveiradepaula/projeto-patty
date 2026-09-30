@@ -675,3 +675,25 @@ Ficam deliberadamente fora:
 - obrigacao de prescrever treino a partir de uma solicitacao;
 - inferencia de acao profissional a partir de arquivo recebido.
 
+
+
+## Check-ins - estado tecnico em 2026-09-30
+
+Estado: **FUNDACAO + UI IMPLEMENTADAS NA BRANCH / SCHEMA APLICADO**
+
+Ja existe:
+- snapshot de meta de liquidos com formula 60 mL/kg no banco;
+- historico append-only de ingestao;
+- historico append-only de atividade fisica diaria;
+- area da cliente para registrar e acompanhar;
+- area administrativa client-scoped para Patty registrar nova meta e consultar eventos;
+- RLS com ownership para cliente e assignment ativo + AAL2 para admin;
+- resolucao manual de esclarecimentos e pendencia factual para resposta recebida aguardando revisao.
+
+Ainda aberto:
+- proporcao minima exata de agua pura;
+- criterio/momento profissional para novo snapshot quando o peso muda;
+- canal de notificacao e envio recorrente do lembrete de 24h;
+- E2E autenticado desta nova UI quando o runner/ambiente de testes permitir.
+
+Nenhum score automatico de adesao foi introduzido.
