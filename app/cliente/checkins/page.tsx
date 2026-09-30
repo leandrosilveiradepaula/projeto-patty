@@ -53,7 +53,7 @@ export default async function ClientCheckinsPage({
   if (!client) {
     return (
       <EmptyState
-        description="Seu cadastro de cliente ainda não esta configurado."
+        description="Seu cadastro de cliente ainda não está configurado."
         title="Cadastro pendente"
       />
     );
@@ -110,8 +110,8 @@ export default async function ClientCheckinsPage({
       ) : null}
 
       <Section
-        description="A meta e definida pela Patty a partir do peso usado naquele momento. Mudancas de peso não recalculam esta meta automaticamente."
-        title="Liquidos"
+        description="A meta é definida pela Patty a partir do peso usado naquele momento. Mudanças de peso não recalculam esta meta automaticamente."
+        title="Líquidos"
       >
         <div className={styles.grid}>
           <Card className={styles.summaryCard}>
@@ -132,14 +132,14 @@ export default async function ClientCheckinsPage({
               </div>
               <div>
                 <dt>Meta atual</dt>
-                <dd>{targetMl !== null ? formatMl(targetMl) : "Nao definida"}</dd>
+                <dd>{targetMl !== null ? formatMl(targetMl) : "Não definida"}</dd>
               </div>
             </dl>
             {target ? (
               <p className={styles.note}>
                 Meta registrada com base em{" "}
                 {Number(target.weight_kg).toLocaleString("pt-BR")} kg.
-                A maior parte deve ser agua pura; outros líquidos zero calorias
+                A maior parte deve ser água pura; outros líquidos zero calorias
                 podem complementar em menor quantidade.
               </p>
             ) : (
@@ -150,7 +150,7 @@ export default async function ClientCheckinsPage({
           </Card>
 
           <Card className={styles.formCard}>
-            <h3 className={styles.cardTitle}>Adicionar liquido</h3>
+            <h3 className={styles.cardTitle}>Adicionar líquido</h3>
             <form action={addLiquidIntakeAction} className={styles.form}>
               <label className={styles.field}>
                 <span>Quantidade em mL</span>
@@ -161,7 +161,7 @@ export default async function ClientCheckinsPage({
                 <select defaultValue="water" name="liquidKind">
                   <option value="water">Água pura</option>
                   <option value="zero_calorie_other">
-                    Outro liquido zero calorias
+                    Outro líquido zero calorias
                   </option>
                 </select>
               </label>
@@ -172,17 +172,17 @@ export default async function ClientCheckinsPage({
       </Section>
 
       <Section
-        description="O check-in e independente do treino prescrito. Se precisar corrigir a resposta do dia, um novo registro preserva o histórico anterior."
+        description="O check-in é independente do treino prescrito. Se precisar corrigir a resposta do dia, um novo registro preserva o histórico anterior."
         title="Atividade física"
       >
         <Card className={styles.formCard}>
           <div className={styles.summaryHeader}>
-            <h3 className={styles.cardTitle}>Voce fez atividade física hoje?</h3>
+            <h3 className={styles.cardTitle}>Você fez atividade física hoje?</h3>
             <Badge variant="neutral">
               {latestActivity
                 ? latestActivity.did_activity
-                  ? "Ultimo registro: sim"
-                  : "Ultimo registro: não"
+                  ? "Último registro: sim"
+                  : "Último registro: não"
                 : "Ainda não registrado"}
             </Badge>
           </div>
