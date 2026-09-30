@@ -1,11 +1,17 @@
+import {
+  acceptAiFindingAsInternalObservation,
+  createPattyNoteFromAiFinding,
+} from "@/app/admin/anamneses/[anamneseId]/ia/actions";
 import { AdminAiReviewForm } from "@/components/admin/AdminAiReviewForm";
 import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import { getOpenAiProviderReadiness } from "@/lib/ai/openai-provider";
+import { listAccessibleAiFindingActions } from "@/lib/ai/finding-actions";
 import { ANAMNESIS_QUESTION_KEYS } from "@/lib/anamnesis/question-keys";
 import { requiresAiExecutionRecoveryReview } from "@/lib/ai/execution-lifecycle";
 import type { Json } from "@/lib/supabase/database.types";
@@ -100,9 +106,11 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
     listAccessibleAnamnesisAnswers(submission.id),
     listAccessibleAiAnamnesisExecutions(submission.id),
   ]);
-  const outputs = await listAccessibleAiExecutionOutputs(
-    executions.map((execution) => execution.id),
-  );
+  const executionIds = executions.map((execution) => execution.id);
+  const [outputs, findingActions] = await Promise.all([
+    listAccessibleAiExecutionOutputs(executionIds),
+    listAccessibleAiFindingActions(executionIds),
+  ]);
   const readiness = getOpenAiProviderReadiness();
   const questionsById = new Map(
     questions.map((question) => [question.id, question]),
@@ -111,6 +119,17 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
   const outputsByExecutionId = new Map(
     outputs.map((output) => [output.execution_id, output]),
   );
+  const findingActionsByKey = new Map<
+    string,
+    Set<"accepted_internal_observation" | "converted_to_patty_note">
+  >();
+
+  for (const action of findingActions) {
+    const key = action.execution_id + ":" + action.finding_index;
+    const current = findingActionsByKey.get(key) ?? new Set();
+    current.add(action.action);
+    findingActionsByKey.set(key, current);
+  }
   const financialQuestion = questions.find(
     (question) =>
       question.question_key ===
@@ -217,6 +236,15 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
                   ) : null}
 
                   {findings.map((finding, index) => {
+                    const actionKey = execution.id + ":" + index;
+                    const recordedActions =
+                      findingActionsByKey.get(actionKey) ?? new Set();
+                    const acceptedAsObservation = recordedActions.has(
+                      "accepted_internal_observation",
+                    );
+                    const convertedToNote = recordedActions.has(
+                      "converted_to_patty_note",
+                    );
                     const sourceLabels = finding.source_answer_ids.map(
                       (answerId) => {
                         const answer = answersById.get(answerId);
@@ -257,6 +285,61 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
                             {finding.suggested_follow_up_question}
                           </p>
                         ) : null}
+
+                        <div className={styles.findingActions}>
+                          <p className={styles.actionStatus}>
+                            O achado original permanece imutável. As ações abaixo
+                            registram uma decisão humana separada.
+                          </p>
+
+                          {acceptedAsObservation ? (
+                            <Badge variant="positive">
+                              Aceito como observação interna
+                            </Badge>
+                          ) : (
+                            <form
+                              action={acceptAiFindingAsInternalObservation.bind(
+                                null,
+                                submission.id,
+                                execution.id,
+                                index,
+                              )}
+                            >
+                              <Button size="compact" type="submit" variant="secondary">
+                                Aceitar como observação interna
+                              </Button>
+                            </form>
+                          )}
+
+                          {convertedToNote ? (
+                            <Badge variant="positive">
+                              Anotação profissional criada
+                            </Badge>
+                          ) : (
+                            <form
+                              action={createPattyNoteFromAiFinding.bind(
+                                null,
+                                submission.id,
+                                execution.id,
+                                index,
+                              )}
+                              className={styles.noteForm}
+                            >
+                              <label>
+                                <span>Anotação da Patty</span>
+                                <textarea
+                                  maxLength={4000}
+                                  name="pattyNote"
+                                  placeholder="Escreva com suas próprias palavras."
+                                  required
+                                />
+                              </label>
+                              <Button size="compact" type="submit">
+                                Salvar como anotação da Patty
+                              </Button>
+                            </form>
+                          )}
+                        </div>
                       </div>
                     );
                   })}
