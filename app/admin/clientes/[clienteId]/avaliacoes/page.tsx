@@ -25,7 +25,7 @@ function formatAssessmentDate(value: string) {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
-    timeZone: "UTC",
+    timeZone: "America/Sao_Paulo",
   }).format(new Date(value));
 }
 
@@ -92,7 +92,7 @@ export default async function AdminClientAssessmentsPage({
                   }
                   clientLabel={displayName || "Cliente sem nome informado"}
                   evaluationDate={formatAssessmentDate(assessment.assessed_at)}
-                  meta={`${assessmentKindLabel(assessment.assessment_kind)} · Identificador: ${assessment.id}`}
+                  meta={assessmentKindLabel(assessment.assessment_kind)}
                   status={
                     <Badge variant={assessment.finalized_at ? "neutral" : "warning"}>
                       {assessment.finalized_at ? "Finalizada" : "Rascunho"}
