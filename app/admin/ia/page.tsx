@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -18,6 +17,14 @@ function formatExecutionDate(value: string) {
   }).format(new Date(value));
 }
 
+function purposeLabel(value: string) {
+  if (value === "anamnesis_review") {
+    return "Revisão de Anamnese";
+  }
+
+  return "Análise assistiva";
+}
+
 export default async function AdminAiPage() {
   const executions = await listAccessibleNonterminalAiExecutions();
 
@@ -26,28 +33,22 @@ export default async function AdminAiPage() {
       <PageHeader
         actions={
           <Badge variant={executions.length > 0 ? "warning" : "neutral"}>
-            {executions.length} sem estado terminal
+            {executions.length} em andamento
           </Badge>
         }
-        description="Visão operacional das executions de IA acessíveis ao seu perfil que permanecem iniciadas sem conclusão ou falha registrada."
+        description="Acompanhe análises assistivas que ainda não foram concluídas."
         eyebrow="Admin"
-        title="Operações de IA"
+        title="Análises da IA"
       />
 
-      <Alert title="Somente observabilidade" variant="info">
-        Esta área não infere timeout, não altera status, não cria failure
-        response e não dispara retry. Uma execution exibida aqui precisa ser
-        reconciliada operacionalmente antes de qualquer nova tentativa.
-      </Alert>
-
       <Section
-        description="Somente registros visíveis pelas regras atuais de assignment e RLS aparecem nesta lista."
-        title="Executions não terminais"
+        description="Abra uma análise para revisar o resultado e decidir os próximos passos."
+        title="Análises em andamento"
       >
         {executions.length === 0 ? (
           <EmptyState
-            description="Não há executions acessíveis com status started sem completed_at ou failed_at."
-            title="Nenhuma execution não terminal"
+            description="Não há análises aguardando conclusão ou revisão neste momento."
+            title="Nenhuma análise em andamento"
           />
         ) : (
           <ul className={styles.executionList}>
@@ -63,27 +64,18 @@ export default async function AdminAiPage() {
                         <h2 className={styles.executionTitle}>
                           {displayName || "Cliente sem nome informado"}
                         </h2>
-                        <Badge variant="warning">Sem estado terminal</Badge>
+                        <Badge variant="warning">Em andamento</Badge>
                       </div>
                       <dl className={styles.executionMeta}>
                         <div>
-                          <dt>Purpose</dt>
-                          <dd>{execution.purpose_key}</dd>
-                        </div>
-                        <div>
-                          <dt>Provider / modelo</dt>
-                          <dd>
-                            {execution.provider} / {execution.model_identifier}
-                          </dd>
+                          <dt>Tipo de análise</dt>
+                          <dd>{purposeLabel(execution.purpose_key)}</dd>
                         </div>
                         <div>
                           <dt>Iniciada em</dt>
                           <dd>{formatExecutionDate(execution.created_at)}</dd>
                         </div>
-                        <div>
-                          <dt>Execution ID</dt>
-                          <dd className={styles.mono}>{execution.id}</dd>
-                        </div>
+
                       </dl>
                     </div>
 
