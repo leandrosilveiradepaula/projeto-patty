@@ -241,6 +241,12 @@ A taxonomia global de `purpose_key` para futuros usos de IA e os contratos de ou
 
 A Patty confirmou que um finding pode ser aceito como observacao interna ou transformado em anotacao propria. Nenhum conteudo originado da IA pode chegar a cliente sem aprovacao explicita previa da Patty.
 
+As duas acoes confirmadas foram implementadas em 2026-09-30:
+- aceitar como observacao interna;
+- transformar em anotacao propria da Patty.
+
+O output original permanece imutavel e a decisao humana fica em registro separado, append-only. Cada finding aceita uma unica decisao humana dessas duas alternativas. Quando vira anotacao, a nota da Patty e criada separadamente em `anamnesis_reviews`.
+
 Continuam abertas apenas as demais acoes de UX ainda nao confirmadas, como editar o texto do finding, descartar explicitamente ou converter diretamente em pedido de esclarecimento.
 
 ### QUESTAO ABERTA
@@ -350,9 +356,10 @@ O catalogo da Avaliacao Completa esta confirmado:
 
 Para medidas unilaterais, utiliza-se somente o lado direito do corpo.
 
-Continuam abertos:
-- a regra de calendario quando a data de inicio cai em 29, 30 ou 31 e o mes seguinte nao possui esse dia;
-- o fluxo auditavel de correcao de uma avaliacao ou medida historica depois da finalizacao.
+Continua aberta:
+- a regra de calendario quando a data de inicio cai em 29, 30 ou 31 e o mes seguinte nao possui esse dia.
+
+O fluxo tecnico de correcao de medida historica apos finalizacao foi resolvido em 2026-09-30 com registro append-only: o lancamento original permanece preservado, cada correcao registra ator/momento/valor/unidade e a correcao mais recente passa a ser o valor factual vigente na leitura e comparacao.
 
 ### PARCIALMENTE RESOLVIDO
 
@@ -360,7 +367,9 @@ A Patty confirmou dois cenarios distintos:
 - nova avaliacao de acompanhamento: preserva a anterior e cria uma nova avaliacao com nova data;
 - erro de lancamento: a Patty volta a avaliacao existente, corrige o dado e o valor incorreto deixa de ser o dado valido.
 
-Permanece aberta a implementacao tecnica/auditavel dessa correcao depois da finalizacao, porque o lifecycle atual torna avaliacao e medidas imutaveis. A solucao deve permitir corrigir o dado valido sem apagar rastreabilidade nem transformar erro de digitacao em nova avaliacao.
+### RESOLVIDO TECNICAMENTE EM 2026-09-30
+
+A implementacao auditavel foi materializada em `assessment_measurement_corrections`. A medida original permanece imutavel e cada ajuste e append-only. O runtime administrativo usa a correcao mais recente como valor vigente sem apagar o original nem criar nova avaliacao apenas por erro de digitacao.
 
 ### QUESTAO ABERTA
 
@@ -617,9 +626,13 @@ A Patty confirmou:
 - nao existe prazo/expiracao para resposta;
 - enquanto estiver aguardando resposta da cliente, o sistema deve enviar lembrete a cada 24 horas.
 
+O estado aberto/resolvido foi materializado tecnicamente em 2026-09-30: a resposta da cliente nao resolve o pedido, e a resolucao manual da Patty fica em registro append-only separado.
+
+O painel operacional tambem calcula de forma deterministica o primeiro marco de 24 horas para pedidos ainda sem resposta. Quando esse marco passa, exibe `Lembrete de 24h devido`; isso nao registra nem presume que uma mensagem tenha sido enviada.
+
 Continuam abertos:
 - o canal tecnico da notificacao de 24 horas;
-- o desenho tecnico do estado aberto/resolvido e do novo questionamento preservando historico;
+- o registro/execucao de cada envio real e a recorrencia subsequente enquanto continuar sem resposta;
 - como os complementos entram no contexto de IA e no historico de findings.
 
 ## Conteudo
@@ -719,10 +732,12 @@ Quais regras profissionais ainda pendentes devem completar a criacao, revisao e 
 A Patty confirmou que a cliente pode escolher livremente substituicoes dentro do grupo de equivalentes permitido pelo protocolo. Na proteina, o grupo de maior teor de gordura possui limite diario e, depois de atingi-lo, as doses restantes devem vir do grupo de menor teor de gordura. "Livre escolha" nao significa proteina ilimitada.
 
 Continuam abertos:
-- catalogo completo e versionado de equivalentes;
+- catalogo completo e versionado **aprovado** de equivalentes;
 - governanca de quem pode alterar/versionar o catalogo;
 - regras de exibicao detalhada do catalogo para a cliente;
 - regras equivalentes para grupos de carboidratos/gorduras quando ainda nao formalizadas.
+
+Em 2026-09-30 foi criado apenas um snapshot historico desidentificado do `Macros.xlsx` e um validador fail-closed. A fonte preserva grupos/quantidades observados, verifica as referencias confirmadas de doses e permanece explicitamente `publishable: false`. Nada foi inserido nas tabelas ativas de catalogo e nenhuma linha historica foi promovida a regra atual.
 
 
 ### PARCIALMENTE RESOLVIDO
