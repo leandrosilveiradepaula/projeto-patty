@@ -877,3 +877,22 @@ Conclusao operacional: a falha nao esta demonstrada no YAML nem no label do runn
 - o primeiro video educacional aprovado continua bloqueado ate criacao/conexao de Vercel Private Blob, operacao nao exposta pela integracao disponivel;
 - Leaked Password Protection permanece dependente da configuracao/plano do Supabase;
 - canal real dos lembretes de esclarecimento continua sem decisao.
+
+
+## PWA instalável - 2026-09-30
+
+### IMPLEMENTADO EM BRANCH / AINDA NAO PUBLICADO
+
+Branch: `codex/installable-pwa`.
+
+Fundação preparada:
+
+- `app/manifest.ts` com nome, start URL, modo standalone e theme/background;
+- ícones PWA 192x192, 512x512 e maskable gerados pelo próprio Next.js;
+- `apple-icon.tsx` para ícone de tela inicial no ecossistema Apple;
+- metadados `appleWebApp` e viewport/theme;
+- rotas de metadata/ícones excluídas do proxy de atualização de sessão;
+- sem service worker, sem cache offline de dados privados e sem push notification nesta etapa.
+
+Status operacional: **não mergear/publicar até existir capacidade de build novamente na Vercel**. Em 2026-09-30 a Vercel bloqueou novos deployments por build-rate-limit por aproximadamente 24 horas. A validação de build precisa ocorrer antes de tratar esta fundação como PUBLICADA.
+
