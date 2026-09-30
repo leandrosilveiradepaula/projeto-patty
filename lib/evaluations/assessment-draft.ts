@@ -1,8 +1,8 @@
 import { canonicalizeKnownAssessmentMeasurementKey } from "./assessment-readiness.ts";
 
 export const ASSESSMENT_KIND_OPTIONS = [
-  { label: "Quinzenal", value: "fortnightly" },
-  { label: "Mensal", value: "monthly" },
+  { label: "Básica", value: "fortnightly" },
+  { label: "Completa", value: "monthly" },
 ] as const;
 
 export type AssessmentKind =
