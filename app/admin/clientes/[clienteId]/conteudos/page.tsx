@@ -29,7 +29,7 @@ function formatRecordedDate(value: string | null) {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
-    timeZone: "America/Sao_Paulo",
+    timeZone: "UTC",
   }).format(new Date(value));
 }
 
@@ -81,7 +81,7 @@ export default async function AdminClientContentPage({
         }
       />
       <Section
-        description="Escolha a versão publicada que deve ficar disponível para esta cliente."
+        description="Liberação manual de uma versão publicada específica. Nenhuma fase libera conteúdo automaticamente."
         title="Liberar conteúdo"
       >
         {availableVersions.length === 0 ? (
@@ -103,7 +103,7 @@ export default async function AdminClientContentPage({
         )}
       </Section>
       <Section
-        description="Conteúdos já liberados e registros de abertura ou conclusão."
+        description="Versões liberadas para esta cliente e fatos registrados de abertura e conclusão."
         title="Conteúdos liberados"
       >
         {releases.length === 0 ? (

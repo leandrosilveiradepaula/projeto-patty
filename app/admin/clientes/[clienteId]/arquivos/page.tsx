@@ -43,7 +43,7 @@ function formatCreatedAt(value: string) {
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     month: "2-digit",
-    timeZone: "America/Sao_Paulo",
+    timeZone: "UTC",
     year: "numeric",
   }).format(new Date(value));
 }
@@ -71,12 +71,12 @@ export default async function AdminClientFilesPage({
             Voltar a arquivos
           </Link>
         }
-        description="Fotos, exames e documentos privados desta cliente."
+        description="Fotos, exames e documentos privados sob administração da Patty, inclusive após encerramento de assignment."
         eyebrow="Admin"
         title={displayName ? `Arquivos de ${displayName}` : "Arquivos privados"}
       />
       <Section
-        description="Arquivos enviados pela Patty ficam ocultos para a cliente até serem liberados explicitamente."
+        description="O upload administrativo usa autorização temporária para um path privado gerado pelo servidor. O arquivo fica oculto para a cliente até liberação explícita."
         title="Enviar arquivo em nome da cliente"
       >
         <AdminPrivateFileUploadForm clientId={client.id} />
@@ -84,7 +84,7 @@ export default async function AdminClientFilesPage({
 
       <Section
         action={<Badge variant="neutral">{files.length} arquivo(s)</Badge>}
-        description="Consulte os arquivos privados e controle quais uploads administrativos podem ser vistos pela cliente."
+        description="Metadados reais do bucket privado. O download é autorizado no momento da solicitação e usa URL assinada curta, nunca persistida."
         title="Arquivos"
       >
         {files.length === 0 ? (

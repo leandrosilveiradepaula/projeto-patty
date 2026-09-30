@@ -13,18 +13,11 @@ import {
 } from "@/lib/supabase/data-access";
 import { isUuid } from "@/lib/validation/uuid";
 
-export async function endClientAssignmentAction(
-  clientId: string,
-  formData: FormData,
-) {
+export async function endClientAssignmentAction(clientId: string) {
   await requireRole("admin");
 
   if (!isUuid(clientId)) {
     redirect("/admin/clientes?assignment=invalid");
-  }
-
-  if (formData.get("confirmEndAssignment") !== "yes") {
-    redirect(`/admin/clientes/${clientId}`);
   }
 
   const result = await endCurrentAdminClientAssignments({

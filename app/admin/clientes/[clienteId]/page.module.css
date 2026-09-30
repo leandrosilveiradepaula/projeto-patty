@@ -95,26 +95,3 @@
   line-height: var(--text-body-small-line-height);
 }
 
-
-.dangerForm {
-  display: grid;
-  gap: var(--space-3);
-  justify-items: start;
-  max-width: 420px;
-}
-
-.dangerConfirmation {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: var(--space-3);
-  align-items: start;
-  color: var(--color-text-primary);
-  font-size: var(--text-body-small-size);
-  line-height: var(--text-body-small-line-height);
-}
-
-.dangerConfirmation input {
-  width: 18px;
-  height: 18px;
-  margin-top: 2px;
-}

@@ -84,9 +84,7 @@ export function AdminSidebar({ displayName, mode = "desktop" }: AdminSidebarProp
   if (mode === "mobile") {
     return (
       <div className={styles.mobileNavigation}>
-        <span className={styles.mobileBrand}>Corpo &amp; Mente</span>
         <button
-          aria-label="Abrir navegação administrativa"
           aria-controls={drawerId}
           aria-expanded={isOpen}
           className={styles.menuButton}

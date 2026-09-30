@@ -1,9 +1,7 @@
 import { ClientListItem } from "@/components/admin/ClientListItem";
 import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { TextInput } from "@/components/ui/TextInput";
 import { Section } from "@/components/ui/Section";
 import { listClientsAssignedToCurrentAdmin } from "@/lib/supabase/data-access";
 import Link from "next/link";
@@ -14,37 +12,19 @@ function getInitials(displayName: string | null | undefined) {
   return words.map((word) => word[0]).join("").slice(0, 2).toUpperCase() || "?";
 }
 
-function normalizeSearchValue(value: string) {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLocaleLowerCase("pt-BR")
-    .trim();
-}
-
 type AdminClientesPageProps = {
   searchParams: Promise<{
     assignment?: string;
     onboarding?: string;
-    q?: string;
   }>;
 };
 
 export default async function AdminClientesPage({
   searchParams,
 }: AdminClientesPageProps) {
-  const { assignment, onboarding, q } = await searchParams;
+  const { assignment, onboarding } = await searchParams;
   const assignments = await listClientsAssignedToCurrentAdmin();
   const clients = assignments?.flatMap((assignment) => assignment.clients ? [assignment.clients] : []) ?? [];
-  const searchTerm = q?.trim() ?? "";
-  const normalizedSearchTerm = normalizeSearchValue(searchTerm);
-  const filteredClients = normalizedSearchTerm
-    ? clients.filter((client) =>
-        normalizeSearchValue(client.profiles?.display_name ?? "").includes(
-          normalizedSearchTerm,
-        ),
-      )
-    : clients;
 
   return (
     <>
@@ -79,45 +59,14 @@ export default async function AdminClientesPage({
             Convidar cliente
           </Link>
         }
-        description="Encontre rapidamente uma cliente pelo nome."
+        description="A lista respeita as atribuições ativas e as permissões de acesso vigentes."
         title="Clientes atribuídos"
       >
-        <form action="/admin/clientes" className={styles.searchForm} method="get">
-          <label className={styles.searchLabel} htmlFor="client-search">
-            Buscar cliente
-          </label>
-          <div className={styles.searchRow}>
-            <TextInput
-              defaultValue={searchTerm}
-              id="client-search"
-              name="q"
-              placeholder="Digite o nome da cliente"
-              type="search"
-            />
-            <Button type="submit" variant="secondary">
-              Buscar
-            </Button>
-            {searchTerm ? (
-              <Link className={styles.clearLink} href="/admin/clientes">
-                Limpar
-              </Link>
-            ) : null}
-          </div>
-        </form>
-
         {clients.length === 0 ? (
           <p className={styles.emptyMessage}>Nenhuma cliente está atribuída ao seu perfil no momento.</p>
-        ) : filteredClients.length === 0 ? (
-          <p className={styles.emptyMessage}>Nenhuma cliente encontrada para “{searchTerm}”.</p>
         ) : (
-          <>
-            {searchTerm ? (
-              <p className={styles.resultCount}>
-                {filteredClients.length} de {clients.length} cliente(s) encontrada(s).
-              </p>
-            ) : null}
-            <ul className={styles.clientList}>
-            {filteredClients.map((client) => {
+          <ul className={styles.clientList}>
+            {clients.map((client) => {
               const displayName = client.profiles?.display_name?.trim();
               return (
                 <li key={client.id}>
@@ -132,8 +81,7 @@ export default async function AdminClientesPage({
                 </li>
               );
             })}
-            </ul>
-          </>
+          </ul>
         )}
       </Section>
     </>

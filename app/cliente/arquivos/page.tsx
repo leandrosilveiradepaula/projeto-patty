@@ -63,11 +63,6 @@ export default async function ClientFilesPage() {
       <PageHeader
         description="Envie fotos, exames e documentos privados para o seu acompanhamento."
         eyebrow="Cliente"
-        primaryAction={
-          <Link className={styles.backLink} href="/cliente">
-            Voltar ao início
-          </Link>
-        }
         title="Meus arquivos"
       />
 

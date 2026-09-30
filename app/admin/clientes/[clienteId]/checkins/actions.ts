@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 
 import { requireRole } from "@/lib/supabase/auth";
 import {
@@ -45,5 +44,4 @@ export async function createHydrationTargetAction(
   revalidatePath("/admin/clientes/" + clientId);
   revalidatePath("/admin/clientes/" + clientId + "/checkins");
   revalidatePath("/cliente/checkins");
-  redirect("/admin/clientes/" + clientId + "/checkins?target=recorded");
 }

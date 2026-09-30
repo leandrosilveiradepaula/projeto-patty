@@ -1,12 +1,10 @@
 import { addLiquidIntakeAction, recordActivityCheckinAction } from "@/app/cliente/checkins/actions";
-import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
-import { FormSubmitButton } from "@/components/ui/FormSubmitButton";
+import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
-import Link from "next/link";
 import {
   getCurrentClient,
   listAccessibleClientActivityCheckinEvents,
@@ -37,23 +35,13 @@ function formatMl(value: number) {
   return new Intl.NumberFormat("pt-BR").format(value) + " mL";
 }
 
-type ClientCheckinsPageProps = {
-  searchParams: Promise<{
-    activity?: string;
-    liquid?: string;
-  }>;
-};
-
-export default async function ClientCheckinsPage({
-  searchParams,
-}: ClientCheckinsPageProps) {
-  const { activity, liquid } = await searchParams;
+export default async function ClientCheckinsPage() {
   const client = await getCurrentClient();
 
   if (!client) {
     return (
       <EmptyState
-        description="Seu cadastro de cliente ainda não está configurado."
+        description="Seu cadastro de cliente ainda nao esta configurado."
         title="Cadastro pendente"
       />
     );
@@ -89,36 +77,21 @@ export default async function ClientCheckinsPage({
   return (
     <>
       <PageHeader
-        description="Registre seus líquidos ao longo do dia e informe se realizou atividade física."
+        description="Registre seus liquidos ao longo do dia e informe se realizou atividade fisica. Esses registros nao geram score automatico de adesao."
         eyebrow="Cliente"
-        primaryAction={
-          <Link className={styles.backLink} href="/cliente">
-            Voltar ao início
-          </Link>
-        }
-        title="Check-ins diários"
+        title="Check-ins diarios"
       />
 
-      {liquid === "recorded" ? (
-        <Alert live="polite" title="Líquido registrado" variant="success">
-          O registro foi adicionado ao total de hoje.
-        </Alert>
-      ) : activity === "recorded" ? (
-        <Alert live="polite" title="Atividade registrada" variant="success">
-          Sua resposta de hoje foi registrada.
-        </Alert>
-      ) : null}
-
       <Section
-        description="A meta é definida pela Patty a partir do peso usado naquele momento. Mudanças de peso não recalculam esta meta automaticamente."
-        title="Líquidos"
+        description="A meta e definida pela Patty a partir do peso usado naquele momento. Mudancas de peso nao recalculam esta meta automaticamente."
+        title="Liquidos"
       >
         <div className={styles.grid}>
           <Card className={styles.summaryCard}>
             <div className={styles.summaryHeader}>
               <h3 className={styles.cardTitle}>Hoje</h3>
               <Badge variant="neutral">
-                {progress === null ? "Meta ainda não definida" : String(progress) + "%"}
+                {progress === null ? "Meta ainda nao definida" : String(progress) + "%"}
               </Badge>
             </div>
             <dl className={styles.metrics}>
@@ -127,30 +100,30 @@ export default async function ClientCheckinsPage({
                 <dd>{formatMl(totalMl)}</dd>
               </div>
               <div>
-                <dt>Água pura</dt>
+                <dt>Agua pura</dt>
                 <dd>{formatMl(waterMl)}</dd>
               </div>
               <div>
                 <dt>Meta atual</dt>
-                <dd>{targetMl !== null ? formatMl(targetMl) : "Não definida"}</dd>
+                <dd>{targetMl !== null ? formatMl(targetMl) : "Nao definida"}</dd>
               </div>
             </dl>
             {target ? (
               <p className={styles.note}>
                 Meta registrada com base em{" "}
                 {Number(target.weight_kg).toLocaleString("pt-BR")} kg.
-                A maior parte deve ser água pura; outros líquidos zero calorias
+                A maior parte deve ser agua pura; outros liquidos zero calorias
                 podem complementar em menor quantidade.
               </p>
             ) : (
               <p className={styles.note}>
-                A Patty ainda não registrou uma meta de líquidos para você.
+                A Patty ainda nao registrou uma meta de liquidos para voce.
               </p>
             )}
           </Card>
 
           <Card className={styles.formCard}>
-            <h3 className={styles.cardTitle}>Adicionar líquido</h3>
+            <h3 className={styles.cardTitle}>Adicionar liquido</h3>
             <form action={addLiquidIntakeAction} className={styles.form}>
               <label className={styles.field}>
                 <span>Quantidade em mL</span>
@@ -159,47 +132,48 @@ export default async function ClientCheckinsPage({
               <label className={styles.field}>
                 <span>Tipo</span>
                 <select defaultValue="water" name="liquidKind">
-                  <option value="water">Água pura</option>
+                  <option value="water">Agua pura</option>
                   <option value="zero_calorie_other">
-                    Outro líquido zero calorias
+                    Outro liquido zero calorias
                   </option>
                 </select>
               </label>
-              <FormSubmitButton>Registrar líquido</FormSubmitButton>
+              <Button type="submit">Registrar liquido</Button>
             </form>
           </Card>
         </div>
       </Section>
 
       <Section
-        description="O check-in é independente do treino prescrito. Se precisar corrigir a resposta do dia, um novo registro preserva o histórico anterior."
-        title="Atividade física"
+        description="O check-in e independente do treino prescrito. Se precisar corrigir a resposta do dia, um novo registro preserva o historico anterior."
+        title="Atividade fisica"
       >
         <Card className={styles.formCard}>
           <div className={styles.summaryHeader}>
-            <h3 className={styles.cardTitle}>Você fez atividade física hoje?</h3>
+            <h3 className={styles.cardTitle}>Voce fez atividade fisica hoje?</h3>
             <Badge variant="neutral">
               {latestActivity
                 ? latestActivity.did_activity
-                  ? "Último registro: sim"
-                  : "Último registro: não"
-                : "Ainda não registrado"}
+                  ? "Ultimo registro: sim"
+                  : "Ultimo registro: nao"
+                : "Ainda nao registrado"}
             </Badge>
           </div>
           <form
             action={recordActivityCheckinAction}
             className={styles.activityActions}
           >
-            <FormSubmitButton name="didActivity" value="yes">
+            <Button name="didActivity" type="submit" value="yes">
               Sim
-            </FormSubmitButton>
-            <FormSubmitButton
+            </Button>
+            <Button
               name="didActivity"
+              type="submit"
               value="no"
               variant="secondary"
             >
-              Não
-            </FormSubmitButton>
+              Nao
+            </Button>
           </form>
         </Card>
       </Section>

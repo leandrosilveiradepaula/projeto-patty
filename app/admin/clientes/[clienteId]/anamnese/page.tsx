@@ -23,7 +23,7 @@ function formatDateTime(value: string) {
     hour: "2-digit",
     minute: "2-digit",
     month: "2-digit",
-    timeZone: "America/Sao_Paulo",
+    timeZone: "UTC",
     year: "numeric",
   }).format(new Date(value));
 }
@@ -61,7 +61,7 @@ export default async function AdminClienteAnamnesePage({
       />
       <Section
         action={<Badge variant="neutral">{submissions.length} registro(s)</Badge>}
-        description="Cada envio preserva as respostas e a versão da Anamnese usada naquele momento."
+        description="Submissões preservadas no backend. Cada detalhe usa exatamente a versão de formulário vinculada ao registro."
         title="Anamneses"
       >
         {submissions.length === 0 ? (
@@ -101,6 +101,10 @@ export default async function AdminClienteAnamnesePage({
                             ? formatDateTime(submission.submitted_at)
                             : "Ainda não enviado"}
                         </dd>
+                      </div>
+                      <div>
+                        <dt>Identificador</dt>
+                        <dd>{submission.id}</dd>
                       </div>
                     </dl>
                     <Link

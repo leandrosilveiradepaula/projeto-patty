@@ -41,7 +41,7 @@ export default async function ClientePage() {
     {
       count: anamneses.length,
       description:
-        "Consulte sua Anamnese e as respostas que você já enviou.",
+        "Consulte suas submissões de Anamnese e as respostas originais já registradas.",
       href: "/cliente/anamnese",
       label: "registro(s)",
       title: "Anamnese",
@@ -49,7 +49,7 @@ export default async function ClientePage() {
     {
       count: protocols.length,
       description:
-        "Consulte o protocolo que a Patty já revisou e liberou para você.",
+        "Consulte somente versões de protocolo que já foram aprovadas e publicadas para você.",
       href: "/cliente/protocolo",
       label: "publicado(s)",
       title: "Protocolos",
@@ -57,7 +57,7 @@ export default async function ClientePage() {
     {
       count: contentReleases.length,
       description:
-        "Acesse os conteúdos educacionais que a Patty liberou para você.",
+        "Consulte as versões de conteúdo educacional explicitamente liberadas para sua conta.",
       href: "/cliente/conteudos",
       label: "liberado(s)",
       title: "Conteúdos",
@@ -65,7 +65,7 @@ export default async function ClientePage() {
     {
       count: files.length,
       description:
-        "Envie e consulte suas fotos, exames e documentos com acesso privado.",
+        "Envie e acompanhe fotos, exames e documentos privados já validados.",
       href: "/cliente/arquivos",
       label: "arquivo(s)",
       title: "Arquivos",
@@ -85,15 +85,15 @@ export default async function ClientePage() {
       <PageHeader
         description={
           displayName
-            ? `Olá, ${displayName}. Acompanhe por aqui as principais áreas do seu atendimento.`
-            : "Acompanhe por aqui as principais áreas do seu atendimento."
+            ? `Olá, ${displayName}. Consulte aqui os registros já disponíveis para sua conta.`
+            : "Consulte aqui os registros já disponíveis para sua conta."
         }
         eyebrow="Cliente"
         title="Área da cliente"
       />
       <Section
-        description="Escolha uma área para continuar."
-        title="Seu acompanhamento"
+        description="Somente áreas já conectadas ao backend real são exibidas neste resumo."
+        title="Resumo"
       >
         <div className={styles.areaGrid}>
           {areas.map((area) => (

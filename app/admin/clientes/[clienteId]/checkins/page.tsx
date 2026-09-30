@@ -1,7 +1,6 @@
 import { createHydrationTargetAction } from "@/app/admin/clientes/[clienteId]/checkins/actions";
-import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
-import { FormSubmitButton } from "@/components/ui/FormSubmitButton";
+import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
@@ -18,7 +17,6 @@ import styles from "./page.module.css";
 
 type PageProps = {
   params: Promise<{ clienteId: string }>;
-  searchParams: Promise<{ target?: string }>;
 };
 
 function formatMl(value: number) {
@@ -35,11 +33,8 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
-export default async function AdminClientCheckinsPage({
-  params,
-  searchParams,
-}: PageProps) {
-  const [{ clienteId }, { target }] = await Promise.all([params, searchParams]);
+export default async function AdminClientCheckinsPage({ params }: PageProps) {
+  const { clienteId } = await params;
   const client = await getAccessibleClient(clienteId);
 
   if (!client) {
@@ -65,27 +60,21 @@ export default async function AdminClientCheckinsPage({
             Voltar a cliente
           </Link>
         }
-        description="Acompanhe a meta de líquidos e os registros diários desta cliente."
-        eyebrow="Administração"
+        description="Acompanhe registros factuais. O sistema nao calcula adesao, prioridade ou sucesso automaticamente."
+        eyebrow="Administracao"
         title={"Check-ins · " + (client.profiles?.display_name?.trim() || "Cliente")}
       />
 
-      {target === "recorded" ? (
-        <Alert live="polite" title="Meta registrada" variant="success">
-          A nova meta de líquidos foi registrada e a meta anterior permaneceu no histórico.
-        </Alert>
-      ) : null}
-
       <Section
-        description="Cada nova meta preserva a anterior. Alterações futuras de peso não mudam metas já registradas."
-        title="Meta de líquidos"
+        description="Cada nova meta preserva a anterior. O peso usado fica congelado no registro; mudanca de peso nao recalcula automaticamente metas antigas."
+        title="Meta de liquidos"
       >
         <div className={styles.grid}>
           <Card className={styles.card}>
             <div className={styles.header}>
               <h3 className={styles.title}>Meta atual</h3>
               <Badge variant="neutral">
-                {currentTargetMl !== null ? formatMl(currentTargetMl) : "Não definida"}
+                {currentTargetMl !== null ? formatMl(currentTargetMl) : "Nao definida"}
               </Badge>
             </div>
             <p className={styles.description}>
@@ -95,7 +84,7 @@ export default async function AdminClientCheckinsPage({
                   " kg · 60 mL/kg · registrada em " +
                   formatDate(currentTarget.created_at) +
                   "."
-                : "Nenhuma meta de hidratação foi registrada para esta cliente."}
+                : "Nenhuma meta de hidratacao foi registrada para esta cliente."}
             </p>
           </Card>
 
@@ -106,24 +95,24 @@ export default async function AdminClientCheckinsPage({
               className={styles.form}
             >
               <label className={styles.field}>
-                <span>Peso usado no cálculo (kg)</span>
+                <span>Peso usado no calculo (kg)</span>
                 <input min="0.01" name="weightKg" required step="0.01" type="number" />
               </label>
               <p className={styles.description}>
-                A meta será calculada automaticamente como peso × 60 mL/kg e registrada com o peso informado.
+                O sistema calculara deterministicamente peso x 60 mL e criara um novo snapshot.
               </p>
-              <FormSubmitButton>Registrar meta</FormSubmitButton>
+              <Button type="submit">Registrar meta</Button>
             </form>
           </Card>
         </div>
       </Section>
 
       <Section
-        description="Registros recentes de líquidos informados pela cliente."
-        title="Líquidos recentes"
+        description="Eventos individuais de ingestao, preservados em historico append-only."
+        title="Liquidos recentes"
       >
         {recentLiquidEvents.length === 0 ? (
-          <p className={styles.description}>Nenhum líquido registrado ainda.</p>
+          <p className={styles.description}>Nenhum liquido registrado ainda.</p>
         ) : (
           <ol className={styles.list}>
             {recentLiquidEvents.map((event) => (
@@ -132,7 +121,7 @@ export default async function AdminClientCheckinsPage({
                   <div className={styles.header}>
                     <strong>{formatMl(event.amount_ml)}</strong>
                     <Badge variant="neutral">
-                      {event.liquid_kind === "water" ? "Água" : "Zero calorias"}
+                      {event.liquid_kind === "water" ? "Agua" : "Zero calorias"}
                     </Badge>
                   </div>
                   <p className={styles.description}>{formatDate(event.recorded_at)}</p>
@@ -144,8 +133,8 @@ export default async function AdminClientCheckinsPage({
       </Section>
 
       <Section
-        description="Se houver mais de uma resposta no mesmo dia, a mais recente representa a resposta atual e as anteriores permanecem no histórico."
-        title="Atividade física recente"
+        description="Quando ha mais de um registro para o mesmo dia, o mais recente representa a resposta atual e os anteriores permanecem no historico."
+        title="Atividade fisica recente"
       >
         {recentActivityEvents.length === 0 ? (
           <p className={styles.description}>Nenhum check-in de atividade registrado ainda.</p>
@@ -156,7 +145,7 @@ export default async function AdminClientCheckinsPage({
                 <Card variant="subtle">
                   <div className={styles.header}>
                     <strong>{event.checkin_date}</strong>
-                    <Badge variant="neutral">{event.did_activity ? "Sim" : "Não"}</Badge>
+                    <Badge variant="neutral">{event.did_activity ? "Sim" : "Nao"}</Badge>
                   </div>
                   <p className={styles.description}>
                     Registrado em {formatDate(event.recorded_at)}

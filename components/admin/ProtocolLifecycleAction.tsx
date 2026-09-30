@@ -29,8 +29,6 @@ const contentByKind: Record<
   ProtocolLifecycleActionKind,
   {
     button: string;
-    confirmation: string;
-    confirmationName: string;
     description: string;
     errorTitle: string;
     successTitle: string;
@@ -38,9 +36,6 @@ const contentByKind: Record<
 > = {
   submit: {
     button: "Submeter para revisão",
-    confirmation:
-      "Confirmo que terminei a edição desta versão e quero congelá-la para revisão.",
-    confirmationName: "confirmSubmission",
     description:
       "Após a submissão, esta versão fica congelada para edição. Revise a estrutura persistida antes de continuar.",
     errorTitle: "Não foi possível submeter",
@@ -48,9 +43,6 @@ const contentByKind: Record<
   },
   approve: {
     button: "Aprovar versão",
-    confirmation:
-      "Revisei esta versão e quero registrar minha aprovação profissional.",
-    confirmationName: "confirmApproval",
     description:
       "Registra a aprovação humana desta versão submetida. A aprovação não publica automaticamente.",
     errorTitle: "Não foi possível aprovar",
@@ -58,9 +50,6 @@ const contentByKind: Record<
   },
   publish: {
     button: "Publicar para a cliente",
-    confirmation:
-      "Confirme que esta é a versão revisada que deve ficar visível para a cliente.",
-    confirmationName: "confirmPublication",
     description:
       "Publica exatamente esta versão já aprovada. A cliente passa a visualizar somente o artefato publicado.",
     errorTitle: "Não foi possível publicar",
@@ -99,15 +88,6 @@ export function ProtocolLifecycleAction({
         </Alert>
       ) : null}
       <p className={styles.description}>{content.description}</p>
-      <label className={styles.confirmation}>
-        <input
-          name={content.confirmationName}
-          required
-          type="checkbox"
-          value="yes"
-        />
-        <span>{content.confirmation}</span>
-      </label>
       <Button loading={isPending} type="submit">
         {content.button}
       </Button>
