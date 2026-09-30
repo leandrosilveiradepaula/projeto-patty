@@ -3,13 +3,16 @@
 import { revalidatePath } from "next/cache";
 
 import { requireRole } from "@/lib/supabase/auth";
+import { buildProtocolCloneSnapshot } from "@/lib/protocol/clone-snapshot";
 import { getProtocolLifecycleAction } from "@/lib/protocol/lifecycle";
 import {
+  cloneAccessibleProtocolVersionDraft,
   createAccessibleProtocolPublication,
   createAccessibleProtocolVersionApproval,
   getAccessibleProtocol,
   listAccessibleProtocolPublications,
   listAccessibleProtocolVersionApprovals,
+  listAccessibleProtocolVersionMealPlans,
   listAccessibleProtocolVersions,
   submitAccessibleProtocolVersionForReview,
 } from "@/lib/supabase/data-access";
@@ -220,3 +223,67 @@ export async function publishProtocolVersion(
     success: true,
   };
 }
+
+export async function cloneProtocolVersionDraft(
+  protocolId: string,
+  sourceProtocolVersionId: string,
+  _state: ProtocolLifecycleFormState,
+  _formData: FormData,
+): Promise<ProtocolLifecycleFormState> {
+  await requireRole("admin");
+
+  const accessible = await getAccessibleVersionLifecycle(
+    protocolId,
+    sourceProtocolVersionId,
+  );
+
+  if (!accessible) {
+    return {
+      message: "Esta versão não está acessível para sua atribuição atual.",
+      success: false,
+    };
+  }
+
+  if (!accessible.version.submitted_for_review_at) {
+    return {
+      message:
+        "Somente versões já submetidas e congeladas podem servir como base para um novo rascunho.",
+      success: false,
+    };
+  }
+
+  try {
+    const sourcePlans = await listAccessibleProtocolVersionMealPlans([
+      accessible.version.id,
+    ]);
+    const sourcePlan = sourcePlans[0] ?? null;
+    const snapshot = buildProtocolCloneSnapshot(sourcePlan);
+
+    const newVersionId = await cloneAccessibleProtocolVersionDraft(
+      accessible.version.id,
+      snapshot,
+    );
+
+    if (!newVersionId) {
+      return {
+        message: "A nova versão não foi criada.",
+        success: false,
+      };
+    }
+  } catch {
+    return {
+      message:
+        "Não foi possível criar o novo rascunho. Confirme seu acesso, MFA e tente novamente.",
+      success: false,
+    };
+  }
+
+  revalidateProtocolPaths(accessible.protocol.id, accessible.protocol.client_id);
+
+  return {
+    message:
+      "Novo rascunho criado a partir desta versão, preservando a estrutura persistida.",
+    success: true,
+  };
+}
+
