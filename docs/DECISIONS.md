@@ -1,3 +1,393 @@
+## 2026-09-27 - Planilha Carb Cycle: coluna Media corresponde ao Linear
+
+### REGRA CONFIRMADA PELA PATTY
+
+A Patty confirmou que as Fases 1, 2, 3 e 4 da Planilha Carb Cycle sao usadas no conjunto dos Cuttings 1, 2 e 3 do metodo atual.
+
+Tambem confirmou explicitamente que a coluna **Media** da planilha e o valor utilizado no **protocolo Linear** da fase correspondente.
+
+### PRATICA PROFISSIONAL CONFIRMADA POSTERIORMENTE
+
+A Patty esclareceu que dificilmente utiliza as Fases 4, 5 e 6. A pratica mais frequente e repetir as Fases 1, 2 e 3, alternando periodos prolongados de cutting com periodos de bulking voltados ao ganho de massa muscular.
+
+Ao retornar ao cutting, o ciclo costuma reiniciar pelas Fases 1, 2 e 3.
+
+### LIMITE
+
+Isso confirma uma pratica recorrente, nao uma maquina de estados automatica. Continuam sem criterio deterministico confirmado:
+- quando encerrar um cutting;
+- quando iniciar bulking;
+- duracao/criterio de encerramento do bulking;
+- quando retornar ao cutting;
+- regras detalhadas das Fases 4, 5 e 6;
+- pareamento individual completo entre fases numeradas e nomes de Cutting quando nao explicitado.
+
+Nao automatizar essas transicoes sem nova regra confirmada.
+
+## 2026-09-27 - Legumes na contagem de carboidrato
+
+### REGRA CONFIRMADA PELA PATTY
+
+Para a contagem total do protocolo, **2 doses de legumes contabilizam 1 dose de carboidrato**.
+
+Exemplo confirmado:
+- total diario: 6 doses de carboidrato;
+- almoco: 2 doses de legumes = 1 dose contabilizada de carboidrato;
+- jantar: 2 doses de legumes = 1 dose contabilizada de carboidrato;
+- saldo restante: 4 doses do total diario;
+- esse saldo pode ser distribuido entre carboidrato e gordura.
+
+Assim, os legumes consomem parte do total de doses de carboidrato; nao sao adicionais ao total.
+
+### AINDA ABERTO
+
+A resposta nao formaliza a conversao exata entre o saldo de carboidrato e gordura nem confirma que a mesma alocacao almoco/jantar vale para todas as fases/protocolos.
+
+## 2026-09-27 - Sem alertas automaticos na etapa inicial
+
+### REGRA CONFIRMADA PELA PATTY
+
+Ao receber inicialmente relatos como alimentacao emocional, culpa, compulsao, restricao, doencas informadas ou alteracoes em exames, a Patty **nao espera que o sistema execute uma acao automatica especifica** apenas por causa desses dados.
+
+O acompanhamento deve ser iniciado normalmente e a Patty observa, ao longo do processo, como a cliente se comporta e responde.
+
+Portanto, a presenca inicial desses dados nao gera automaticamente:
+- destaque especial;
+- revisao obrigatoria;
+- pedido de esclarecimento;
+- encaminhamento;
+- bloqueio de protocolo/acao;
+- diagnostico ou classificacao clinica.
+
+Qualquer intervencao posterior continua sendo decisao humana da Patty conforme a evolucao do caso. Isso nao revoga a possibilidade de encaminhamento manual a outro profissional quando a Patty julgar necessario; apenas exclui uma regra automatica inicial do sistema.
+
+## 2026-09-27 - Progressao do protocolo por sequencia, adesao e resultado
+
+### REGRA CONFIRMADA PELA PATTY
+
+O acompanhamento segue a sequencia profissional ja confirmada:
+Reconhecimento Metabolico -> Cutting 1 Dia 1/Dia 2 -> Cutting 1 2 Low/1 High -> Up Metabolico -> Cutting 2 Linear -> Cutting 2 Dia 1/Dia 2 -> Cutting 2 2 Low/1 High -> Cutting 3 Linear -> Cutting 3 Dia 1/Dia 2 -> Cutting 3 2 Low/1 High -> Up Metabolico.
+
+A progressao entre etapas nao deve ser automatica.
+
+A adesao ao protocolo e um criterio central para decidir se a cliente pode continuar a sequencia. Se a cliente nao estiver aderindo adequadamente, a Patty interrompe a progressao e redefine os proximos passos.
+
+A Patty confirmou tambem a leitura profissional de resultado para esse gate:
+- qualquer resultado e valido quando ha mudanca nos indicadores numericos e essa evolucao nao esta indo contra o objetivo que a propria cliente buscou;
+- para emagrecimento/reducao de gordura, reducao de cintura e abdomen e resultado positivo;
+- busto/peito e outra referencia forte de reducao de gordura;
+- comparacao visual positiva das fotos tambem caracteriza evolucao, mesmo quando o peso se mantem;
+- o peso isolado nao e criterio suficiente para concluir ausencia de evolucao;
+- o resultado nao e considerado valido quando a evolucao vai contra o objetivo buscado pela cliente ou quando os numeros, no geral, permanecem estagnados.
+
+Quando o resultado nao e considerado valido, a progressao para e a Patty decide manualmente o que fazer a seguir.
+
+Nao inferir que resultado nao valido significa automaticamente baixa adesao.
+
+Essa confirmacao nao define deteccao automatica de estagnacao nem sucesso.
+
+### CUTTING 2
+
+Depois do Up Metabolico, o Cutting 2 reinicia a estrutura de progressao do Cutting com menos doses de macros em relacao ao ciclo anterior.
+
+Ainda nao estao formalizados:
+- quanto cada macro diminui;
+- quais macros diminuem em cada transicao;
+- formula exata dessa reducao;
+- criterio objetivo de adesao suficiente;
+- janela de tempo para caracterizar estagnacao;
+- limiar de variacao para distinguir mudanca real de ruido;
+- como tratar combinacoes conflitantes de indicadores alem dos casos confirmados;
+- criterios por objetivo diferente de emagrecimento/reducao de gordura.
+
+Nenhuma dessas lacunas autoriza score de adesao, deteccao automatica de estagnacao ou mudanca automatica de fase.
+
+## 2026-09-27 - Revisao humana dos findings de IA
+
+### REGRA CONFIRMADA PELA PATTY
+
+Para um finding/achado produzido pela IA:
+- a Patty pode aceita-lo como **observacao interna**;
+- a Patty pode transforma-lo em uma **anotacao propria**;
+- aceitar ou transformar o achado nao publica nem envia nada para a cliente;
+- nenhum conteudo originado da IA pode chegar a cliente sem **aprovacao explicita previa da Patty**.
+
+### REGRA DE AUDITORIA
+
+O sistema deve preservar separadamente o output original da IA, a decisao humana sobre o achado, a anotacao profissional resultante quando houver e qualquer versao posteriormente aprovada para comunicacao/publicacao.
+
+### QUESTOES DE UX AINDA ABERTAS
+
+Esta resposta nao definiu, por si so, todas as demais acoes da interface sobre findings, como editar o texto do finding, descartar explicitamente ou converter diretamente em pedido de esclarecimento. Essas acoes nao devem ser inferidas apenas desta confirmacao.
+
+## 2026-09-27 - Fluxo de esclarecimento e lembrete de 24 horas
+
+### REGRA CONFIRMADA PELA PATTY
+
+No fluxo de esclarecimentos pos-Anamnese:
+
+- a cliente responde ao pedido dentro do aplicativo;
+- a resposta nao encerra automaticamente o esclarecimento;
+- a Patty precisa ler e marcar manualmente como **resolvido**;
+- se ainda houver duvida, a Patty pode questionar novamente;
+- nao existe prazo/expiracao para resposta;
+- enquanto estiver aguardando resposta da cliente, o sistema deve enviar lembrete a cada **24 horas** para que ela responda.
+
+### LIMITE TECNICO
+
+Ainda nao foi definido o canal da notificacao de 24 horas. A regra funcional esta confirmada, mas a implementacao nao deve escolher silenciosamente entre notificacao in-app, email, push ou outro canal.
+
+O modelo tecnico tambem deve preservar o historico quando houver novo questionamento, sem sobrescrever pedidos/respostas anteriores.
+
+## 2026-09-27 - Projeto passa a ter escopo de sistema completo
+
+### DECISAO DE PRODUTO CONFIRMADA
+
+O Projeto Patty nao esta mais sendo conduzido como um MVP com recortes de primeira/segunda fase.
+
+O objetivo atual e construir o **sistema completo, de ponta a ponta**, cobrindo integralmente os fluxos da Patty e das clientes que ja foram definidos para o produto.
+
+Consequencias:
+- perguntas do tipo "o que entra no primeiro lancamento?" ou "o que pode ficar para depois?" deixam de ser perguntas de escopo;
+- quando a Patty responder "todos os itens" em listas de funcionalidades da cliente ou do admin, todos os itens passam a compor o escopo do sistema completo;
+- funcionalidades ja confirmadas, como check-ins de liquidos e atividade fisica, tambem fazem parte do sistema completo;
+- nao usar "MVP", "segunda fase" ou "fora do MVP" para excluir funcionalidade ja confirmada do produto;
+- ainda e valido priorizar tecnicamente a ordem de implementacao, desde que isso nao seja confundido com retirada de escopo.
+
+### REGRA DE CONTINUIDADE
+
+Continuam valendo as distincioes entre:
+- confirmado x aberto;
+- implementado x testado x aplicado x publicado;
+- automacao autorizada x regra profissional ainda pendente.
+
+Construir o sistema completo nao autoriza inventar regras profissionais ainda nao confirmadas.
+
+### DOCUMENTACAO
+
+Os arquivos historicos `MVP.md` e `MVP_READINESS.md` permanecem com esses nomes para evitar quebrar referencias existentes, mas passam a representar, respectivamente, o **escopo completo do sistema** e o **mapa de prontidao do sistema completo**.
+
+## 2026-09-27 - Escopo obrigatorio da Patty antes do uso real
+
+### DEFINICAO DE PRODUTO
+
+Nesta rodada, **primeiro lancamento** significa a primeira versao do aplicativo considerada pronta para uso real no atendimento pela Patty e pelas clientes. Nao significa o primeiro dia de uma cliente nem o primeiro acesso ao sistema.
+
+### DECISAO DE PRODUTO CONFIRMADA PELA PATTY
+
+Todos os itens listados na pergunta 8 devem estar disponiveis para a Patty antes de o aplicativo entrar em uso real:
+
+- convidar/cadastrar cliente;
+- editar Cadastro Atual;
+- ler a Anamnese;
+- registrar correcao posterior da Anamnese preservando historico;
+- solicitar esclarecimento a cliente;
+- acessar fotos, exames e documentos privados autorizados;
+- criar e trabalhar com avaliacoes;
+- comparar avaliacoes/evolucao;
+- criar/editar protocolo;
+- criar nova versao de protocolo;
+- revisar e aprovar protocolo;
+- publicar protocolo para a cliente;
+- liberar conteudos;
+- visualizar/administrar solicitacao de treino;
+- usar o painel de pendencias;
+- usar a assistencia de IA para revisao da Anamnese, respeitando os gates de privacidade e revisao humana.
+
+Nenhum desses itens deve ser planejado como funcionalidade de uma segunda fase posterior ao inicio do uso real.
+
+### LIMITE
+
+Esta decisao define **escopo obrigatorio**, nao declara que todos os itens ja estejam implementados, testados, aplicados ou publicados. A prontidao tecnica de cada fluxo continua devendo ser verificada separadamente.
+
+## 2026-09-27 - Escopo obrigatorio da cliente no primeiro lancamento
+
+### DECISAO DE PRODUTO CONFIRMADA PELA PATTY
+
+Todos os itens listados na pergunta 7 da rodada de fechamento sao obrigatorios no primeiro lancamento para a cliente:
+
+- Perfil/Cadastro Atual;
+- Anamnese;
+- envio e visualizacao de fotos;
+- envio e visualizacao de exames/documentos;
+- avaliacoes e medidas;
+- visualizacao do protocolo alimentar publicado;
+- conteudos educacionais;
+- biblioteca de exercicios;
+- solicitacao de treino;
+- visualizacao do treino quando houver prescricao;
+- pedidos/respostas de esclarecimento dentro do aplicativo;
+- visualizacao da evolucao.
+
+Nenhum desses itens deve ser adiado para uma segunda fase do lancamento inicial.
+
+### LIMITE
+
+O check-in de liquidos e atividade fisica foi definido em respostas posteriores a pergunta 5 e nao fazia parte da lista original da pergunta 7. Seu recorte exato no primeiro lancamento continua sendo tratado separadamente ate decisao explicita.
+
+## 2026-09-27 - Substituicoes dentro dos Grupos de Proteina
+
+### REGRA CONFIRMADA PELA PATTY
+
+A cliente pode escolher livremente substituicoes de alimentos dentro do grupo de equivalentes permitido pelo protocolo.
+
+Na proteina existem dois grupos:
+- maior teor de gordura;
+- menor teor de gordura.
+
+O grupo de maior teor de gordura possui limite diario. A justificativa profissional informada pela Patty e evitar excesso de gordura na alimentacao e considerar cuidados relacionados a saude e colesterol.
+
+O limite permanece sendo metade das doses totais de proteina, arredondando para cima.
+
+Exemplo confirmado: com 10 doses totais de proteina, no maximo 5 podem vir do grupo de maior teor de gordura; as 5 restantes devem vir do grupo de menor teor de gordura.
+
+Ao atingir esse limite, as doses restantes de proteina do dia devem ser escolhidas no grupo de menor teor de gordura.
+
+"Libre escolha" no grupo de menor teor de gordura significa escolha entre os alimentos permitidos dentro do total de doses de proteina do protocolo; nao significa proteina ilimitada.
+
+## 2026-09-27 - Visibilidade do Protocolo e Check-in de Metas
+
+### REGRA CONFIRMADA PELA PATTY
+
+Depois de revisado e publicado:
+- a cliente deve visualizar sua rotina de alimentacao;
+- quando houver treino prescrito, deve visualizar sua rotina de treinos;
+- a cliente nao precisa registrar execucao diretamente dentro do protocolo alimentar ou do treino publicado.
+
+O produto deve prever um check-in de acompanhamento e incentivo para:
+- registrar liquidos consumidos ao longo do dia;
+- acompanhar progresso em relacao a uma meta de liquidos;
+- receber lembretes para apoiar o cumprimento da meta;
+- realizar um check-in diario de atividade fisica, registrando se fez ou nao fez atividade naquele dia;
+- acompanhar progresso dessas metas.
+
+A meta diaria de liquidos foi confirmada posteriormente pela Patty como **60 mL por kg de peso corporal**.
+
+Formula do metodo:
+
+`meta_liquidos_ml = peso_kg * 60`
+
+Exemplo: 60 kg -> 3.600 mL/dia (3,6 L/dia).
+
+A Patty orienta que a maior parte da meta seja agua pura. O restante pode ser complementado, em menor quantidade, por liquidos zero calorias, como cha, chimarrao, suco zero ou refrigerante zero.
+
+O check-in diario de atividade fisica e independente do treino prescrito ou de qualquer rotina previamente definida. A frequencia pode ser derivada depois dos registros diarios.
+
+### MOMENTO DE DEFINICAO CONFIRMADO
+
+As metas e configuracoes individuais do check-in podem ser definidas na entrega do primeiro protocolo da cliente.
+
+### QUESTOES AINDA ABERTAS
+
+Ainda precisam ser formalizados como padrao/regra:
+- proporcao minima/exata de agua pura dentro da meta;
+- se/quando recalcular a meta apos mudanca de peso;
+- horarios e cadencia dos lembretes;
+- visibilidade e poderes de correcao da Patty;
+- politica de edicao de check-ins passados.
+
+A formula 60 mL/kg esta confirmada como regra deterministica do metodo. Nao criar score automatico de adesao a partir do check-in.
+
+## 2026-09-27 - Escopo de Edicao Manual da Patty
+
+### REGRA CONFIRMADA PELA PATTY
+
+Ao montar ou ajustar um protocolo/acompanhamento, a Patty precisa poder editar manualmente:
+- fase/protocolo;
+- totais de proteina, carboidrato e gordura;
+- numero de refeicoes;
+- distribuicao de doses entre refeicoes;
+- alimentos/equivalentes;
+- dias Low/High, quando aplicavel;
+- refeicao livre, quando aplicavel;
+- observacoes;
+- data de inicio;
+- orientacoes especificas;
+- treino, quando o cliente solicitar esse servico;
+- suplementacao;
+- manipulados.
+
+### AUTOMACAO PERMITIDA QUANDO A REGRA EXISTIR
+
+Quando houver regra previamente confirmada, documentada e deterministica, o sistema pode montar automaticamente um rascunho para revisao da Patty. Isso pode incluir, por exemplo:
+- gramas de proteina, carboidrato e gordura previstas para determinada fase;
+- estrutura alimentar derivada dessas regras;
+- treino predefinido quando existir passo a passo de exercicios previamente confirmado e aplicavel.
+
+A Patty deve visualizar o rascunho, revisar, corrigir se necessario e somente depois aprovar/publicar.
+
+### LIMITE
+
+Nenhuma regra ausente pode ser inferida. Regras de treino, suplementacao, manipulados, doses, progressao, contraindicacoes e criterios profissionais continuam abertas onde ainda nao houver confirmacao especifica.
+
+## 2026-09-27 - Historico de Avaliacoes e Correcao de Erro
+
+### REGRA CONFIRMADA PELA PATTY
+
+A Patty distinguiu dois cenarios:
+
+1. **Nova avaliacao de acompanhamento**
+   - a avaliacao anterior e sempre mantida;
+   - uma nova avaliacao e criada;
+   - a nova avaliacao recebe sua propria data;
+   - o historico de avaliacoes anteriores permanece preservado.
+
+2. **Correcao de erro de lancamento**
+   - se algum dado foi registrado incorretamente em uma avaliacao, a Patty precisa voltar a essa avaliacao;
+   - o dado incorreto deve ser corrigido;
+   - o valor errado nao deve continuar como dado valido da avaliacao.
+
+### QUESTAO TECNICA ABERTA
+
+A regra profissional exige que o dado errado deixe de valer, mas ainda precisa ser definida a forma auditavel de implementar essa correcao no banco sem perder rastreabilidade. Nao criar nova avaliacao apenas para corrigir erro de digitacao.
+
+## 2026-09-27 - Catalogo da Avaliacao Completa
+
+### REGRA CONFIRMADA PELA PATTY
+
+Na Avaliacao Completa, sao solicitados:
+- peso, em quilogramas (kg);
+- cintura, em centimetros (cm);
+- abdomen, em centimetros (cm);
+- coxa, em centimetros (cm);
+- biceps, em centimetros (cm);
+- busto para mulher ou peito para homem, em centimetros (cm);
+- quadril, em centimetros (cm);
+- ombros, em centimetros (cm);
+- panturrilhas, em centimetros (cm);
+- fotos de avaliacao.
+
+Para medidas unilaterais, deve ser utilizado somente o lado direito do corpo.
+
+A lista acima substitui referencias anteriores incompletas ao catalogo da avaliacao completa. Para a medida do torax, a nomenclatura confirmada e **busto para mulher** e **peito para homem**. Trata-se da mesma posicao no catalogo; nao criar duas medidas separadas na mesma avaliacao apenas pela diferenca de nomenclatura.
+
+### LIMITE
+
+Esta resposta fecha catalogo e unidades da Avaliacao Completa, mas nao resolve:
+- calendario para datas-ancora 29, 30 ou 31 em meses sem o mesmo dia;
+- correcao auditavel de avaliacao finalizada.
+
+## 2026-09-27 - Avaliacao Basica e Avaliacao Completa
+
+### REGRA CONFIRMADA PELA PATTY
+
+A nomenclatura profissional de avaliacao corporal passa a ser:
+- **Avaliacao Completa**: substitui o nome historico "mensal";
+- **Avaliacao Basica**: substitui o nome historico "quinzenal".
+
+A cadencia e individual e fica ancorada na data de inicio do acompanhamento:
+- a Avaliacao Completa ocorre mensalmente no mesmo dia do mes correspondente ao inicio do processo;
+- a Avaliacao Basica ocorre no meio do intervalo entre duas Avaliacoes Completas;
+- exemplo fornecido pela Patty: Avaliacao Completa no dia 2 -> Avaliacao Basica no dia 17.
+
+Portanto, o desenho normal nao cria uma avaliacao "mensal" e outra "quinzenal" concorrentes na mesma data. A Basica e uma ocorrencia intermediaria dentro do ciclo entre Completas.
+
+### LIMITE
+
+Ainda nao esta definida a regra de calendario para clientes cuja data-ancora seja 29, 30 ou 31 em meses que nao possuam o mesmo dia.
+
+O catalogo completo de medidas e unidades da Avaliacao Completa tambem permanece aberto.
+
 ## 2026-09-24 - Vercel Private Blob para midia educacional
 
 ### DECISAO TECNICA
@@ -265,26 +655,27 @@ Nenhuma formula, criterio ou comportamento dessas fases deve ser:
 Qualquer uso futuro depende de nova confirmacao profissional e atualizacao documental previa.
 
 
-## 2026-09-24 - Cutting 3 Linear e a etapa seguinte confirmada
+## 2026-09-24 - Cutting 3 Linear e etapa seguinte
 
-### REGRA CONFIRMADA PELA PATTY
+### DECISAO SUPERADA PARCIALMENTE POR CONFIRMACAO DE 2026-09-27
 
-A Patty confirmou que, depois de `Cutting 2: 2 Low / 1 High`, a etapa seguinte do metodo e:
+A confirmacao anterior registrava apenas a existencia de `Cutting 3 Linear`.
 
-`Cutting 3 Linear`
+A Patty confirmou posteriormente que o Cutting 3 segue a mesma estrutura de progressao:
+- Cutting 3 Linear;
+- Cutting 3 Dia 1 / Dia 2;
+- Cutting 3: 2 Low / 1 High;
+- depois, Up Metabolico.
 
-### LIMITE
+No Cutting 3, as quantidades de proteina e carboidrato diminuem de acordo com o peso da cliente, com base em tabelas existentes em Excel.
 
-A resposta confirma somente a existencia e o tipo linear dessa etapa.
+Ainda permanecem pendentes de reconciliacao documental:
+- valores exatos das tabelas por peso;
+- formulas/calculos derivados dessas tabelas;
+- duracao e criterios de encerramento;
+- etapas posteriores ao Up Metabolico que sucede o Cutting 3.
 
-Ainda nao estao confirmados/documentados:
-- macros ou doses do Cutting 3;
-- duracao;
-- criterios de entrada/saida;
-- eventual Dia 1/Dia 2 ou Carb Cycle posterior;
-- etapas seguintes.
-
-Nenhuma dessas regras deve ser inferida a partir dos Cuttings anteriores.
+Nao implementar os numeros sem conferir a planilha fonte.
 
 
 ## 2026-09-24 - Conteudos de formulas/manipulados fazem parte do aplicativo
@@ -1856,7 +2247,7 @@ Esses pontos foram mantidos como questoes abertas. Nenhuma formula, alerta, reco
 
 ### FONTE
 
-A rodada esta preservada em `docs/PATTY_METHOD_SURVEY_20260926.md`. As secoes de acompanhamento, formato do protocolo, excecoes, definicao de bom resultado e caso real ficaram sem resposta e permanecem abertas.
+A rodada esta preservada em `docs/PATTY_METHOD_SURVEY_20260926.md`. As secoes de acompanhamento, formato do protocolo, excecoes e caso real ficaram sem resposta naquela rodada. A definicao de bom resultado foi parcialmente esclarecida em 2026-09-27: mudanca numerica coerente com o objetivo e valida; evolucao contra o objetivo ou numeros em geral estagnados nao sao considerados resultado valido. Os criterios operacionais para automatizar essa leitura continuam abertos.
 ## 2026-09-26 - Solicitacao de treino como gate explicito
 
 ### DECISAO DE PRODUTO/TECNICA

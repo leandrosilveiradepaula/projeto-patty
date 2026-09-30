@@ -1,8 +1,8 @@
-# Mapa de prontidao do MVP
+# Mapa de prontidao do sistema completo
 
 Data de referencia: 2026-09-26 (atualizado apos validacao do update do draft canonico em producao).
 
-Este documento e um mapa operacional do estado atual. Ele nao substitui `MVP.md`, `DECISIONS.md`, `BUSINESS_RULES.md` ou `OPEN_QUESTIONS.md`.
+Este documento e um mapa operacional do estado atual. Ele nao substitui `sistema completo.md`, `DECISIONS.md`, `BUSINESS_RULES.md` ou `OPEN_QUESTIONS.md`.
 
 Estados usados:
 
@@ -10,7 +10,7 @@ Estados usados:
 - **CI VALIDADO**: passou pelo workflow atual de `npm ci`, `npm run typecheck`, testes determinísticos e `npm run build`;
 - **SAAS VALIDADO**: estado relevante foi conferido no Supabase SaaS;
 - **PRODUCAO VALIDADA**: o commit correspondente esta efetivamente publicado na Vercel e o fluxo foi conferido no ambiente de producao;
-- **PARCIAL**: fundacao existe, mas falta fluxo necessario para o MVP;
+- **PARCIAL**: fundacao existe, mas falta fluxo necessario para o sistema completo;
 - **BLOQUEADO POR DECISAO**: nao implementar sem resposta/documentacao;
 - **INVENTARIADO**: levantamento existe, sem autorizacao de migracao/publicacao.
 
@@ -88,7 +88,11 @@ Ja estao em codigo testavel, sem ligacao automatica com decisao de fase ou publi
 - limite diario do grupo de proteina com maior teor de gordura = metade das doses totais de proteina, arredondando para cima;
 - referencia inicial geral do Reconhecimento Metabolico = 2 g/kg de proteina, 2 g/kg de carboidrato e 50 g/dia de gordura.
 
-A referencia do Reconhecimento pode ser individualizada. Cutting aproximado, redistribuicao carboidrato/gordura, fases 5/6 e demais regras abertas nao foram codificados.
+A referencia do Reconhecimento pode ser individualizada.
+
+A equivalencia **2 doses de legumes = 1 dose de carboidrato na contagem total** esta confirmada documentalmente. Exemplo: em 6 doses totais, 2 doses de legumes no almoco contabilizam 1 dose de carboidrato e 2 doses de legumes no jantar contabilizam outra, restando 4 doses para distribuicao entre carboidrato e gordura.
+
+Ainda nao esta pronta para automacao completa a redistribuicao do saldo entre carboidrato e gordura, porque a conversao exata permanece aberta. Cutting aproximado, fases 5/6 e demais regras abertas tambem nao foram codificados.
 
 ## Observacoes por fluxo
 
@@ -135,6 +139,17 @@ A migration `20260924153808_create_anamnesis_clarification_flow.sql` esta aplica
 
 Tipos nao juridicos, 10 condicionais, ordem, consentimento ANAM-046 e submissao final da v1 estao fechados. A primeira `client-anamnesis` ja foi materializada, publicada e validada em producao; mudancas futuras devem ocorrer por nova versao.
 
+### Esclarecimentos - lifecycle ainda incompleto
+
+A regra profissional esta fechada:
+- resposta da cliente nao encerra automaticamente;
+- Patty le e marca como resolvido;
+- Patty pode questionar novamente;
+- nao existe prazo de expiracao;
+- enquanto aguarda resposta da cliente, deve haver lembrete a cada 24 horas.
+
+A fundacao atual e append-only e ja suporta pedido/resposta, mas ainda nao implementa estado formal resolvido, re-questionamento como lifecycle operacional nem lembrete recorrente de 24 horas. O canal da notificacao tambem permanece aberto.
+
 ### Banco e performance
 
 O advisor de performance reporta 22 foreign keys sem indice de cobertura exata e indices sem uso observado. A revisao mostrou que parte dos avisos de foreign key ja possui indice seletivo pelo primeiro campo e que a maioria restante pertence a tabelas historicas/IA ainda vazias. Nenhum indice novo foi criado apenas para zerar o lint. A politica e adicionar indice quando houver workload, RLS, integridade ou plano de execucao que justifique o custo.
@@ -152,13 +167,13 @@ Ja existe:
 - download administrativo por signed URL curta, nao persistida;
 - rejeicao deterministica de identificadores de arquivo malformados antes de consulta ao banco.
 
-Os formatos e os limites de tamanho do MVP estao definidos: fotos em JPEG/PNG/WebP ate 10 MB; exames e documentos em PDF/JPEG/PNG ate 20 MB. A cliente faz upload direto do browser para Storage privado sob RLS, usando area temporaria e validacao server-side antes de o arquivo ser considerado valido. Paths nao contem PII, objetos nao sao sobrescritos e hard delete direto pelo browser nao e permitido. A validacao deterministica de formato/extensao, MIME detectado, tamanho e geracao de path com UUIDs internos esta implementada em `lib/validation/private-files.ts` e coberta por `test:validation`. A autorizacao remota usa `client_file_upload_sessions`, com path temporario gerado pelo banco, expiracao de 15 minutos e policy de INSERT limitada ao objeto `pending` exato.
+Os formatos e os limites de tamanho do sistema completo estao definidos: fotos em JPEG/PNG/WebP ate 10 MB; exames e documentos em PDF/JPEG/PNG ate 20 MB. A cliente faz upload direto do browser para Storage privado sob RLS, usando area temporaria e validacao server-side antes de o arquivo ser considerado valido. Paths nao contem PII, objetos nao sao sobrescritos e hard delete direto pelo browser nao e permitido. A validacao deterministica de formato/extensao, MIME detectado, tamanho e geracao de path com UUIDs internos esta implementada em `lib/validation/private-files.ts` e coberta por `test:validation`. A autorizacao remota usa `client_file_upload_sessions`, com path temporario gerado pelo banco, expiracao de 15 minutos e policy de INSERT limitada ao objeto `pending` exato.
 
 A Patty mantem acesso aos arquivos mesmo sem assignment ativo, e as rotas administrativas usam signed URLs com validade de 5 minutos. A dependencia de assignment e a visibilidade por autoria/liberacao foram reconciliadas pela migration `20260922230034_private_file_access_visibility_foundation.sql`, aplicada e verificada no Supabase SaaS.
 
 Downloads administrativos de exames/documentos registram evento append-only em `client_file_access_events` antes da emissao da signed URL, sem copiar conteudo do arquivo. A migration `20260922230601_client_file_access_audit.sql` esta aplicada no Supabase SaaS; a rota registra ator, arquivo solicitado, acao, resultado da autorizacao e timestamp.
 
-O MVP nao tera limite rigido de quantidade de arquivos. A Patty tambem podera enviar arquivos em nome da cliente por fluxo administrativo server-side controlado, com autoria administrativa explicita. Arquivos enviados pela cliente ficam visiveis para ela por padrao; uploads da Patty ficam ocultos ate liberacao explicita. O primeiro MVP nao tera antimalware dedicado; esse risco permanece mitigado por allowlist fechada, validacao de tipo real, limites de tamanho, Storage privado e ausencia de execucao.
+O sistema completo nao tera limite rigido de quantidade de arquivos. A Patty tambem podera enviar arquivos em nome da cliente por fluxo administrativo server-side controlado, com autoria administrativa explicita. Arquivos enviados pela cliente ficam visiveis para ela por padrao; uploads da Patty ficam ocultos ate liberacao explicita. O primeiro sistema completo nao tera antimalware dedicado; esse risco permanece mitigado por allowlist fechada, validacao de tipo real, limites de tamanho, Storage privado e ausencia de execucao.
 
 A RLS/policy diferencia visibilidade para a cliente e acesso administrativo permanente da Patty. A auditoria estatica de 2026-09-23 confirmou que `client_files` e `storage.objects` permitem leitura administrativa por role `admin` sem assignment ativo, enquanto a policy MFA `RESTRICTIVE` continua exigindo AAL2. As rotas de listagem, download, upload administrativo e liberacao nao reintroduzem requisito de assignment. A fundacao do upload da cliente usa `client_file_upload_sessions` e esta aplicada no Supabase SaaS. Os tipos TypeScript foram regenerados a partir do schema real; como o Postgres expõe o campo gerado `temp_object_path` como anulavel no metadata, todos os pontos que o usam em Storage agora validam explicitamente sua existencia antes de prosseguir. A boundary de criacao/finalizacao server-side valida declaracao antes da sessao, reserva a sessao em `validating`, detecta assinatura binaria no objeto temporario, revalida tamanho/formato, promove para `client_files` e usa compensacao em falhas. A UI da cliente em `/cliente/arquivos` cria a sessao, envia o byte diretamente ao Storage privado, finaliza no servidor, atualiza o historico e permite download somente de arquivos visiveis pela RLS, via signed URL de 5 minutos. O smoke E2E manual em `e2e/client-private-files.spec.mjs`, acionado por `.github/workflows/e2e-private-files.yml`, foi executado em producao com conta sintetica e passou em login, upload, validacao/finalizacao, historico e download. A limpeza de temporarios expirados foi implementada sem apagar linhas historicas de sessao: o cron marca sessoes `pending` expiradas como `expired` e remove somente objetos no namespace `pending/`. O `CRON_SECRET` foi configurado em Production e o redeploy correspondente ficou READY. Em 2026-09-23, apos a janela agendada do cron, a validacao funcional da limpeza passou no Supabase SaaS: a sessao sintetica vencida estava `expired`, o objeto temporario correspondente nao existia mais em `storage.objects` e nao havia sessoes `pending` vencidas. O fluxo administrativo usa uma sessao server-side e `createSignedUploadUrl` para autorizar apenas o path temporario gerado; o browser recebe somente token temporario e envia direto ao Storage privado. A finalizacao usa a mesma validacao real do fluxo da cliente, grava autoria administrativa e mantem `client_visible_at` nulo. A Patty pode liberar explicitamente o arquivo depois, gravando ator e timestamp de visibilidade. Existe uma entrada dedicada em `/admin/arquivos`, limitada ao dominio de arquivos, para manter a excecao de acesso permanente sem ampliar os demais modulos client-scoped. O smoke E2E administrativo em `e2e/admin-private-files.spec.mjs`, acionado pelo workflow manual `.github/workflows/e2e-admin-private-files.yml`, foi executado em producao com contas sinteticas e passou. O teste confirmou login administrativo, selecao da cliente sintetica, upload administrativo, autoria administrativa, liberacao explicita, visibilidade subsequente para a cliente e download. O Supabase confirmou o arquivo sintetico com `uploaded_by_profile_id` e `client_visibility_set_by_profile_id` do admin sintetico e `client_visible_at` preenchido. Permanece aberta a politica concreta de retencao/hard delete dos arquivos aceitos.
 
@@ -306,7 +321,19 @@ A fundacao de metadata no Supabase permanece aplicada e vazia em producao. O pri
 
 O lote contem somente o video da balanca aprovado pela Patty e permanece deliberadamente sem `storage_path`, SHA-256, registros de conteudo/versao/asset, publicacao ou release enquanto o Vercel Private Blob store nao estiver criado/conectado.
 
-A integracao Vercel usada nesta sessao nao oferece operacao de Storage, portanto a criacao/conexao do store continua uma pendencia operacional manual. O procedimento seguro foi versionado em `docs/VERCEL_BLOB_SETUP.md`. Isso nao bloqueia outras frentes tecnicas do MVP e nao autoriza migracao dos demais arquivos do Drive.
+A integracao Vercel usada nesta sessao nao oferece operacao de Storage, portanto a criacao/conexao do store continua uma pendencia operacional manual. O procedimento seguro foi versionado em `docs/VERCEL_BLOB_SETUP.md`. Isso nao bloqueia outras frentes tecnicas do sistema completo e nao autoriza migracao dos demais arquivos do Drive.
+
+## IA - revisao humana de findings
+
+Estado: **REGRA DE PRODUTO CONFIRMADA / UX OPERACIONAL PARCIAL**
+
+A Patty pode aceitar um finding como observacao interna ou transforma-lo em anotacao propria.
+
+Nenhum conteudo originado da IA pode ser enviado, publicado ou exibido para a cliente sem aprovacao explicita previa da Patty.
+
+O sistema deve preservar separadamente o output original da IA, a decisao humana sobre o achado, a anotacao profissional resultante e eventual conteudo aprovado para comunicacao/publicacao.
+
+A UX completa das demais acoes sobre findings ainda precisa ser fechada e implementada.
 
 ## IA - execution nao terminal
 
@@ -356,7 +383,7 @@ A administracao possui uma visao central de executions `started` sem estado term
 
 Recovery/watchdog automatico continua fora do escopo atual.
 
-## Anamnese - consentimento do MVP
+## Anamnese - consentimento do sistema completo
 
 Estado: **PRODUCAO VALIDADA**
 
@@ -455,13 +482,157 @@ O registro nao cria treino, nao escolhe exercicios, nao altera protocolo e nao p
 
 Estado: **APLICADO NO SAAS / UI IMPLEMENTADA**
 
-O fluxo operacional permite criar avaliacao quinzenal/mensal em rascunho, editar data/tipo, medidas e vinculos de fotos privadas existentes e finalizar explicitamente.
+O fluxo operacional permite criar avaliacao em rascunho, editar data/tipo, medidas e vinculos de fotos privadas existentes e finalizar explicitamente.
+
+A nomenclatura profissional confirmada passa a ser:
+- **Avaliacao Completa**: ancora mensal definida pela data de inicio do acompanhamento;
+- **Avaliacao Basica**: avaliacao intermediaria entre duas Completas.
+
+Exemplo confirmado: Avaliacao Completa no dia 2 -> Avaliacao Basica no dia 17.
 
 Depois da finalizacao, triggers bloqueiam mutacao da avaliacao, medidas e vinculos. Acompanhamentos profissionais ligados a uma avaliacao exigem que ela esteja finalizada.
 
 A migration foi validada em transacao com `ROLLBACK`, o PR #210 passou CI/build e o Supabase SaaS registrou `20260927002227_create_assessment_draft_lifecycle`. O smoke pos-apply confirmou o lifecycle completo com fixture sintetica e `ROLLBACK`, incluindo isolamento AAL1/cross-assignment e imutabilidade depois da finalizacao, com 0 residuos.
 
-Continuam abertos: catalogo mensal completo, unidades permitidas/obrigatorias e fluxo de correcao historica depois da finalizacao.
+O schema/runtime ainda usa os identificadores tecnicos historicos de tipo; esta atualizacao documental nao autoriza migration de enum/constraint sem tarefa tecnica separada.
+
+O catalogo e as unidades da Avaliacao Completa estao confirmados: peso (kg); cintura, abdomen, coxa, biceps, quadril, ombros e panturrilhas (cm), alem da medida do torax em cm - nomeada **busto para mulher** e **peito para homem** - e das fotos. Para medidas unilaterais, utiliza-se somente o lado direito do corpo.
+
+A Patty distinguiu nova avaliacao de acompanhamento de correcao de erro:
+- nova avaliacao sempre preserva a anterior e recebe nova data;
+- erro de lancamento deve ser corrigido na avaliacao existente, fazendo o valor incorreto deixar de ser o dado valido.
+
+O runtime atual torna avaliacao/medidas finalizadas imutaveis, portanto a forma auditavel de permitir essa correcao ainda exige tarefa tecnica separada antes de ser considerada implementada.
+
+Continua aberto: regra para datas-ancora 29/30/31 em meses sem o mesmo dia e desenho tecnico da correcao auditavel pos-finalizacao.
+
+## Protocolos - progressao profissional
+
+Estado: **REGRA DE PROGRESSAO CONFIRMADA / CRITERIOS OBJETIVOS AINDA ABERTOS**
+
+A sequencia profissional deve ser preservada, mas nenhuma mudanca de fase e automatica.
+
+A adesao e o resultado observado pela Patty funcionam como gates:
+- se a cliente adere e o resultado e considerado valido, a sequencia pode continuar;
+- se nao ha adesao adequada, a progressao para e exige decisao profissional;
+- se o resultado nao e considerado valido, a progressao tambem para e exige decisao profissional.
+
+A Patty considera valido qualquer resultado em que existam mudancas nos indicadores numericos e a evolucao nao esteja indo contra o objetivo buscado pela propria cliente. Nao considera valido quando a evolucao vai contra esse objetivo ou quando os numeros, no geral, permanecem estagnados.
+
+Para emagrecimento/reducao de gordura, cintura e abdomen sao referencias fortes: sua reducao caracteriza resultado positivo. Busto/peito tambem e referencia relevante. A comparacao visual positiva das fotos pode caracterizar evolucao mesmo quando o peso permanece estavel; a balanca isolada nao e suficiente para negar evolucao.
+
+A leitura esta mais formalizada, mas ainda nao esta pronta para automacao completa. Permanecem abertas a janela de estagnacao, a tolerancia a ruido/variacao de medicao, combinacoes conflitantes de indicadores e criterios para outros objetivos.
+
+O Cutting 2 reinicia a estrutura de Cutting com menos doses de macros que o ciclo anterior. A reducao exata ainda nao esta formalizada.
+
+O Cutting 3 tambem teve sua estrutura confirmada: Linear -> Dia 1/Dia 2 -> 2 Low/1 High -> Up Metabolico. As quantidades diminuem conforme o peso da cliente com base na Planilha Carb Cycle.
+
+A planilha fonte foi localizada, e a Patty confirmou que:
+- suas Fases 1 a 4 pertencem ao conjunto dos Cuttings 1, 2 e 3 atuais;
+- a coluna Media corresponde ao valor do protocolo Linear.
+
+A Patty esclareceu que o uso operacional mais frequente se concentra nas Fases 1, 2 e 3. Fases 4, 5 e 6 sao pouco utilizadas. Na pratica, ela costuma alternar um cutting prolongado com um bulking para ganho de massa muscular e, ao retornar ao cutting, reinicia novamente pelas Fases 1, 2 e 3.
+
+Isso reduz a prioridade das Fases 4 a 6 para a primeira automacao, mas nao autoriza transicao automatica entre cutting e bulking. Ainda faltam os criterios de entrada/saida do bulking e o pareamento individual completo entre fase numerada e nome do Cutting quando nao explicitado.
+
+Nao implementar score automatico de adesao, deteccao automatica de estagnacao ou mudanca automatica de fase.
+
+## Protocolos - escopo de edicao manual confirmado
+
+Estado: **REGRA DE PRODUTO CONFIRMADA / IMPLEMENTACAO PARCIAL**
+
+A Patty precisa conseguir editar manualmente no acompanhamento, quando aplicavel:
+- fase/protocolo;
+- proteina, carboidrato e gordura;
+- numero de refeicoes e distribuicao de doses;
+- alimentos/equivalentes;
+- ciclo Low/High;
+- refeicao livre;
+- observacoes, data de inicio e orientacoes;
+- treino quando o cliente solicitar;
+- suplementacao;
+- manipulados.
+
+Isso define escopo de UI/autoria humana, nao regras automaticas. Treino, suplementacao e manipulados continuam sem formulas/criterios automatizaveis confirmados.
+
+## Protocolos - equivalentes de proteina
+
+Estado: **REGRA DE SELECAO CONFIRMADA / CATALOGO COMPLETO AINDA PENDENTE**
+
+A cliente pode escolher livremente substituicoes dentro do grupo permitido pelo protocolo.
+
+Para proteinas:
+- grupo de maior teor de gordura: possui limite diario igual a metade das doses totais, arredondado para cima;
+- ao atingir esse limite, as doses restantes devem ser escolhidas no grupo de menor teor de gordura;
+- "livre escolha" no grupo de menor teor de gordura continua limitada ao total de doses de proteina do protocolo.
+
+Ainda falta fechar o catalogo/versionamento completo de equivalentes e suas regras de exibicao.
+
+## Cliente - protocolo publicado e check-in
+
+Estado: **FORMULA DE LIQUIDOS CONFIRMADA / CHECK-IN AINDA PARCIALMENTE ABERTO**
+
+A cliente deve visualizar:
+- sua rotina de alimentacao publicada;
+- sua rotina de treinos, quando houver treino prescrito.
+
+Ela nao precisa registrar execucao dentro do protocolo publicado.
+
+O produto deve prever check-in separado para:
+- registrar liquidos ao longo do dia e acompanhar uma meta baseada no peso da cliente;
+- receber lembretes relacionados a essa meta;
+- registrar diariamente se fez ou nao fez atividade fisica, independentemente do treino prescrito;
+- visualizar progresso como estimulo.
+
+As metas/configuracoes individuais podem ser definidas na entrega do primeiro protocolo da cliente.
+
+A formula profissional confirmada para liquidos e **60 mL/kg/dia**. Exemplo: 60 kg -> 3.600 mL/dia. A maior parte deve ser agua pura e o restante pode ser complementado, em menor quantidade, por liquidos zero calorias.
+
+Ainda faltam parametros de produto: proporcao minima/exata de agua pura, regra de recalculo por peso, frequencia dos lembretes e visibilidade/correcao pela Patty.
+
+Nao tratar o check-in como score automatico de adesao.
+
+## Escopo completo - Patty/admin
+
+Estado: **ESCOPO CONFIRMADO / PRONTIDAO TECNICA A RECONCILIAR**
+
+"Sistema completo" significa a primeira versao pronta para uso real no atendimento.
+
+A Patty confirmou que todas as operacoes da pergunta 8 sao obrigatorias antes desse marco:
+- convite/cadastro de cliente;
+- edicao do Cadastro Atual;
+- leitura e correcao historica da Anamnese;
+- solicitacao de esclarecimentos;
+- acesso a arquivos privados autorizados;
+- criacao e comparacao de avaliacoes;
+- criacao/edicao/versionamento de protocolos;
+- revisao, aprovacao e publicacao;
+- liberacao de conteudos;
+- administracao de solicitacoes de treino;
+- painel de pendencias;
+- assistencia de IA na revisao da Anamnese.
+
+Esta decisao nao altera o estado tecnico de cada fluxo; implementado, testado, aplicado e publicado continuam estados separados.
+
+## Escopo completo - cliente
+
+Estado: **ESCOPO CONFIRMADO / IMPLEMENTACAO AINDA A RECONCILIAR**
+
+A Patty confirmou que todos os itens da pergunta 7 sao obrigatorios no sistema completo para a cliente:
+- Perfil/Cadastro Atual;
+- Anamnese;
+- fotos;
+- exames/documentos;
+- avaliacoes/medidas;
+- protocolo alimentar;
+- conteudos educacionais;
+- biblioteca de exercicios;
+- solicitacao de treino;
+- visualizacao do treino quando houver prescricao;
+- esclarecimentos no aplicativo;
+- evolucao.
+
+Nenhum desses itens deve ser tratado como segunda fase do lancamento inicial. A prontidao tecnica de cada fluxo deve ser avaliada individualmente; esta decisao de escopo nao transforma item pendente em implementado.
 
 ## Cadastro Atual - edicao controlada
 
@@ -476,6 +647,16 @@ A escrita usa boundary server-side privilegiada apenas depois de:
 `authenticated` continua sem INSERT/UPDATE direto em `client_registration`.
 
 Nao existe sincronizacao automatica com email de login nem com snapshots historicos da Anamnese.
+
+## Alertas profissionais iniciais
+
+Estado: **REGRA CONFIRMADA / NENHUMA AUTOMACAO INICIAL NECESSARIA**
+
+Relatos iniciais de alimentacao emocional, culpa, compulsao, restricao, doencas ou alteracoes em exames nao geram automaticamente destaque especial, revisao obrigatoria, esclarecimento, encaminhamento ou bloqueio.
+
+O acompanhamento inicia normalmente e a Patty observa a evolucao da cliente. Eventuais intervencoes posteriores permanecem decisoes humanas e nao constituem um gate tecnico pendente para o comportamento inicial do sistema.
+
+Se no futuro houver desejo de automatizar algum alerta especifico, sera necessaria nova regra profissional documentada.
 
 ## Painel de pendencias operacionais
 

@@ -56,15 +56,15 @@ A Patty relatou que normalmente so precisa pedir informacao adicional quando o p
 
 Ela tambem relatou que doencas ou alteracoes relevantes verificadas em exames podem justificar encaminhamento a outro profissional de saude.
 
-### QUESTAO ABERTA
+### REGRA CONFIRMADA EM 2026-09-27
 
-Ainda nao existem criterios suficientemente concretos para:
-- quais doencas/achados exigem encaminhamento;
-- quais respostas sao apenas destaque;
-- quais exigem revisao obrigatoria;
-- se alguma resposta deve bloquear uma acao.
+A Patty esclareceu posteriormente que, no inicio do acompanhamento, **nao espera que o sistema execute nenhuma acao automatica** apenas pela presenca de doencas relatadas, alteracoes em exames ou outros sinais dessa natureza.
 
-Nao criar alerta ou bloqueio automatico a partir desta rodada.
+O processo deve ser iniciado normalmente e a cliente e observada ao longo do acompanhamento.
+
+Nao criar automaticamente destaque, revisao obrigatoria, pedido de esclarecimento, encaminhamento ou bloqueio apenas com base nesses dados iniciais.
+
+A possibilidade de a Patty decidir manualmente por esclarecimento, ajuste ou encaminhamento em momento posterior continua existindo e depende de julgamento profissional.
 
 ## 4. Alimentacao
 
@@ -88,18 +88,29 @@ A Patty relatou que a decisao entre deficit, manutencao e superavit depende do o
 
 Ela citou revisao apos aproximadamente 30 dias como pratica comum, nao como prazo deterministico universal.
 
-### QUESTOES ABERTAS
+### ESCLARECIMENTO CONFIRMADO EM 2026-09-27
 
-As afirmacoes abaixo precisam de formalizacao antes de qualquer regra em codigo:
-- "a gordura entra na contagem do carboidrato";
-- "legumes tambem entram na contagem do carboidrato";
-- "para cada 1 dose de carbo sao 2 de legumes";
-- como essas afirmacoes convivem com a referencia ja documentada de gordura em doses/gramas separadas;
+A relacao antes ambigua entre legumes e carboidrato foi esclarecida:
+
+- **2 doses de legumes contabilizam 1 dose de carboidrato** no total do protocolo.
+
+Exemplo dado pela Patty:
+- cliente com 6 doses totais de carboidrato;
+- 2 doses de legumes no almoco contabilizam 1 dose de carboidrato;
+- 2 doses de legumes no jantar contabilizam outra dose de carboidrato;
+- restam 4 doses, que podem ser distribuidas entre carboidrato e gordura.
+
+### QUESTOES AINDA ABERTAS
+
+Ainda precisam de formalizacao:
+- conversao exata entre o saldo de carboidrato e gordura;
+- abrangencia da alocacao almoco/jantar entre fases/protocolos;
+- excecoes especificas;
 - o que significa operacionalmente "alimentacao totalmente sem gordura saturada";
 - excecoes para refeicoes fora de casa;
 - se a revisao em 30 dias e regra, referencia ou apenas exemplo de pratica.
 
-Nao alterar as formulas deterministicas atuais com base apenas nesta rodada.
+Nao ampliar formulas automaticas alem do que foi explicitamente confirmado.
 
 ## 5. Treino e atividade fisica
 
@@ -142,6 +153,14 @@ Na avaliacao corporal, a Patty considera especialmente:
 
 Visual e medidas podem ter mais peso profissional do que o numero isolado da balanca.
 
+Em esclarecimento posterior, a Patty confirmou que, para emagrecimento/reducao de gordura:
+- reducao de cintura e abdomen e sempre lida como resultado positivo;
+- busto/peito tambem e uma referencia forte;
+- peso estavel nao significa ausencia de evolucao;
+- a comparacao visual positiva entre fotos de antes e depois pode confirmar evolucao mesmo sem queda de peso.
+
+A justificativa profissional relatada pela Patty e que mudancas de composicao corporal podem ocorrer sem alteracao proporcional do peso; por isso, medidas e visual sao centrais na leitura.
+
 Fotos sao usadas principalmente para comparacao de evolucao. Em objetivo de ganho de massa, tambem ajudam a considerar regioes que a cliente deseja desenvolver para harmonia corporal.
 
 Cadencia reconfirmada:
@@ -152,7 +171,7 @@ Cadencia reconfirmada:
 
 O catalogo completo da avaliacao mensal e as unidades continuam pendentes.
 
-"Estagnacao" foi citada como motivo para mudar a estrategia, mas ainda nao possui definicao objetiva/documentada.
+A estagnacao geral dos numeros foi posteriormente confirmada em 2026-09-27 como uma das condicoes em que o resultado nao e considerado valido. Os indicadores de emagrecimento foram parcialmente esclarecidos (cintura, abdomen, busto/peito e visual), mas ainda nao existe definicao operacional suficiente para automatizar janela de estagnacao, tolerancia a ruido ou todas as combinacoes de indicadores.
 
 ## 7. Exames, medicamentos, suplementos e hormonios
 
@@ -194,36 +213,71 @@ A Patty considera:
 - motivacao;
 - confianca para seguir o processo.
 
-Relatos de alimentacao emocional, culpa, compulsao ou restricao merecem atencao profissional especial.
+Relatos de alimentacao emocional, culpa, compulsao ou restricao continuam sendo informacoes consideradas pela Patty na leitura profissional.
 
-### QUESTAO ABERTA
+### REGRA CONFIRMADA EM 2026-09-27
 
-Ainda precisa ser definido como essa "atencao especial" aparece no sistema:
-- destaque informativo;
-- revisao obrigatoria;
-- pedido de esclarecimento;
-- encaminhamento;
-- ou outro fluxo.
+Esses relatos nao devem, por si so, disparar um fluxo automatico especial no inicio do acompanhamento.
 
-Nao criar diagnostico, score ou bloqueio automatico.
+A Patty prefere iniciar o processo normalmente e observar como a cliente se comporta ao longo do acompanhamento. Qualquer intervencao posterior permanece sob julgamento humano.
+
+Nao criar diagnostico, score, destaque, revisao obrigatoria, encaminhamento ou bloqueio automatico a partir desses relatos iniciais.
 
 ## 9. Secoes sem resposta nesta rodada
 
-O roteiro nao definiu nesta rodada:
-- funcionamento detalhado do acompanhamento apos o protocolo inicial;
+A rodada de fechamento de 2026-09-27 acrescentou confirmacoes sobre acompanhamento:
+- o protocolo segue a sequencia profissional ja documentada;
+- adesao e resultado funcionam como gates de progressao;
+- quando a cliente nao adere adequadamente, a Patty interrompe a progressao e redefine manualmente os proximos passos;
+- qualquer resultado e valido quando ha mudanca nos indicadores numericos e essa evolucao nao esta indo contra o objetivo que a propria cliente buscou;
+- o resultado nao e considerado valido quando a evolucao vai contra o objetivo buscado pela cliente ou quando os numeros, no geral, permanecem estagnados;
+- quando o resultado nao e considerado valido, a Patty interrompe a progressao e redefine manualmente os proximos passos;
+- o Cutting 2 reinicia a estrutura do Cutting com menos doses de macros em relacao ao ciclo anterior;
+- o Cutting 3 segue Linear -> Dia 1/Dia 2 -> 2 Low/1 High -> Up Metabolico;
+- no Cutting 3, proteina e carboidrato diminuem progressivamente conforme o peso da cliente, com base em tabelas existentes em Excel.
+
+Continuam abertos:
 - frequencia e conteudo de cada retorno alem da cadencia corporal ja confirmada;
 - criterios completos para alterar dieta;
 - criterios completos para alterar treino;
-- sinais formais de estrategia funcionando/nao funcionando;
-- criterio para diferenciar estrategia inadequada de baixa adesao;
+- definicao objetiva de adesao suficiente/insuficiente;
+- quais indicadores numericos entram na leitura de resultado;
+- janela de tempo para caracterizar estagnacao;
+- limiar de variacao para distinguir mudanca real de ruido;
+- como combinar peso e medidas quando mudam em direcoes diferentes;
+- direcao esperada dos indicadores conforme o objetivo especifico da cliente;
+- formula exata da reducao de macros no Cutting 2;
+- pareamento individual entre as Fases 1/2/3/4 da Planilha Carb Cycle e os Cuttings 1/2/3;
+- semantica do bloco final de conversao da Planilha Carb Cycle antes de trata-lo como doses/porcoes;
+- proporcao minima/exata de agua pura dentro da meta de liquidos, regra de recalculo por peso e cadencia dos lembretes;
 - formato final do protocolo entregue;
 - canais finais de entrega/acompanhamento;
 - tratamento de excecoes como atletas, vegetarianos/veganos e doencas cronicas;
-- criterios finais de bom resultado;
-- avaliacao formal de adesao;
+- criterios operacionais restantes para avaliar resultado de forma automatizavel;
 - exercicio pratico completo com caso real.
 
-Esses pontos permanecem abertos.
+### PLANILHA CARB CYCLE — CONFIRMACAO POSTERIOR
+
+A Patty confirmou que as Fases 1, 2, 3 e 4 da Planilha Carb Cycle pertencem aos Cuttings 1, 2 e 3 do metodo atual e que a coluna **Media** corresponde ao valor usado no protocolo **Linear**.
+
+A Patty esclareceu posteriormente que dificilmente chega as Fases 4, 5 e 6. A pratica mais frequente e trabalhar com as Fases 1, 2 e 3, alternar um cutting prolongado com um periodo de bulking para ganho de massa muscular e, ao retornar ao cutting, reiniciar novamente 1, 2 e 3.
+
+Isso torna as Fases 4 a 6 excepcionais para a pratica atual, mas nao as elimina da planilha nem define automaticamente seus criterios.
+
+Continuam abertas a associacao individual completa entre fase numerada e nome do Cutting quando nao explicitada e as regras deterministicas de transicao cutting/bulking.
+
+### META DE LIQUIDOS — CONFIRMACAO POSTERIOR
+
+A Patty confirmou em 2026-09-27 a referencia de **60 mL/kg/dia** para a meta de liquidos.
+
+Exemplo:
+- 60 kg -> 3.600 mL/dia = 3,6 L/dia.
+
+A maior parte deve ser agua pura. O restante pode ser complementado, em menor quantidade, por liquidos zero calorias, como cha, chimarrao, suco zero ou refrigerante zero.
+
+Permanecem abertos a proporcao minima/exata de agua pura, o momento de recalculo por mudanca de peso e a cadencia dos lembretes.
+
+Esses pontos permanecem abertos onde indicado.
 
 ## Consequencia para automacao
 

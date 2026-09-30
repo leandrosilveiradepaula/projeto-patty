@@ -1,3 +1,34 @@
+### PARCIALMENTE RESOLVIDO - PROGRESSAO DO PROTOCOLO
+
+A Patty confirmou que a progressao segue a sequencia do protocolo, mas depende de adesao e resultado. Se a cliente nao estiver aderindo adequadamente ou se o resultado nao for considerado valido, a progressao e interrompida e os proximos passos sao definidos manualmente pela Patty.
+
+A leitura profissional de resultado esta parcialmente resolvida:
+- qualquer resultado e valido quando ha mudanca nos indicadores numericos e essa evolucao nao esta indo contra o objetivo que a propria cliente buscou;
+- o resultado nao e considerado valido quando a evolucao vai contra o objetivo buscado pela cliente ou quando os numeros, no geral, permanecem estagnados.
+
+Tambem confirmou que o Cutting 2 reinicia a estrutura de Cutting com menos doses de macros em relacao ao ciclo anterior.
+
+Continuam abertos:
+- criterio objetivo de adesao suficiente/insuficiente;
+- janela de tempo para caracterizar estagnacao;
+- limiar de variacao em medidas para distinguir mudanca real de ruido;
+- tratamento de combinacoes conflitantes de indicadores alem dos casos confirmados;
+- criterios de resultado para objetivos diferentes de emagrecimento/reducao de gordura;
+- quanto e quais macros diminuem em cada transicao do Cutting 2;
+- quando simplificar, retornar, manter ou trocar estrategia em cada caso.
+
+### RESOLVIDO PARCIALMENTE — INDICADORES DE RESULTADO
+
+Para emagrecimento/reducao de gordura:
+- reducao de cintura e abdomen e resultado positivo;
+- busto/peito e referencia adicional forte;
+- melhora visual nas fotos pode representar evolucao mesmo com peso estavel;
+- peso isolado nao invalida evolucao quando medidas e/ou visual melhoram.
+
+Nao converter automaticamente essa leitura em score ou decisao de fase enquanto janela, tolerancia a ruido e demais combinacoes nao estiverem formalizadas.
+
+Nao criar score automatico de adesao, estagnacao automatica ou mudanca automatica de fase.
+
 # Questoes Abertas
 
 Este documento concentra pontos ainda nao definidos. Cada item deve ser validado pelo responsavel adequado antes de virar decisao: regras do metodo e operacao profissional pela Patty; arquitetura, seguranca e produto tecnico pelo responsavel do projeto; temas juridicos/privacidade com validacao juridica quando aplicavel.
@@ -29,19 +60,25 @@ A App Password deve ser inserida diretamente no Supabase e nao deve ser comparti
 
 Quais serao as regras de expiracao/reenvio do convite, recuperacao de acesso e encerramento da conta?
 
-### PARCIALMENTE RESOLVIDO
+### RESOLVIDO
 
-O escopo preliminar confirmado do MVP ja esta registrado em `MVP.md`: fundacao segura, Anamnese/acompanhamento inicial, arquivos privados, avaliacoes, protocolos com controle humano, bibliotecas de conteudo/exercicios e IA assistiva em etapa posterior.
+O projeto nao esta mais sendo conduzido como MVP. O objetivo atual e construir o **sistema completo, de ponta a ponta**.
 
-O que continua aberto nao e mais a lista macro de modulos, e sim o **recorte operacional exato do primeiro lancamento** diante dos bloqueios restantes.
+Todos os modulos e fluxos confirmados para Patty e clientes fazem parte do escopo. A ordem de implementacao pode ser priorizada tecnicamente, mas nao existe mais uma decisao de produto sobre "o que fica para depois" entre funcionalidades ja confirmadas.
 
-### QUESTAO ABERTA
+### RESOLVIDO
 
-Quais fluxos precisam estar disponiveis para clientes no primeiro lancamento?
+Todos os fluxos listados para a cliente na pergunta 7 da rodada de fechamento devem estar disponiveis no primeiro lancamento: Perfil/Cadastro Atual, Anamnese, fotos, exames/documentos, avaliacoes/medidas, protocolo alimentar, conteudos educacionais, biblioteca de exercicios, solicitacao de treino, visualizacao do treino quando houver prescricao, esclarecimentos no aplicativo e evolucao.
 
-### QUESTAO ABERTA
+O check-in de liquidos/atividade fisica tambem faz parte do sistema completo. Seus parametros ainda abertos continuam sendo tratados como questoes de regra/implementacao, nao de retirada de escopo.
 
-Quais operacoes administrativas a Patty precisa executar no primeiro painel?
+### RESOLVIDO
+
+Para esta rodada, "primeiro lancamento" significa a primeira versao pronta para uso real no atendimento, e nao o primeiro dia/acesso de uma cliente.
+
+A Patty confirmou que **todas** as operacoes administrativas listadas na pergunta 8 devem estar disponiveis antes do uso real: onboarding/convite, Cadastro Atual, Anamnese e correcao historica, esclarecimentos, arquivos privados, avaliacoes/comparacao, protocolos/versionamento/aprovacao/publicacao, liberacao de conteudos, solicitacao de treino, painel de pendencias e assistencia de IA na revisao da Anamnese.
+
+A prontidao tecnica de cada item permanece sendo acompanhada separadamente.
 
 ## Autenticacao
 
@@ -63,9 +100,9 @@ Se futuramente forem introduzidos assistentes, profissionais parceiros ou suport
 
 Na Anamnese, todos os campos aplicaveis ao preenchimento final sao obrigatorios. O mapa nao juridico da v1, tipos, ordem e as 10 regras de aplicabilidade estao definidos. ANAM-046 tambem foi resolvido para o MVP como checkbox obrigatorio versionado no envio final.
 
-### QUESTAO ABERTA
+### PARCIALMENTE RESOLVIDO
 
-Quais campos definitivos existirao em medidas, fotos, exames, protocolos e avaliacoes, e quais deles serao obrigatorios em cada fluxo?
+O catalogo e as unidades das medidas da Avaliacao Completa foram confirmados pela Patty em 2026-09-27. Permanecem abertas as definicoes de campos/obrigatoriedade que nao foram cobertas por essa resposta, especialmente para exames, protocolos e outros fluxos ainda nao formalizados.
 
 ### QUESTAO ABERTA
 
@@ -200,6 +237,12 @@ O modelo inicial ainda nao deve ser tratado como escolha definitiva enquanto a a
 
 A taxonomia global de `purpose_key` para futuros usos de IA e os contratos de output desses outros purposes continuam abertos. Isso nao reabre o contrato v1 ja definido para `anamnesis_review`.
 
+### PARCIALMENTE RESOLVIDO - UX DE FINDINGS DE IA
+
+A Patty confirmou que um finding pode ser aceito como observacao interna ou transformado em anotacao propria. Nenhum conteudo originado da IA pode chegar a cliente sem aprovacao explicita previa da Patty.
+
+Continuam abertas apenas as demais acoes de UX ainda nao confirmadas, como editar o texto do finding, descartar explicitamente ou converter diretamente em pedido de esclarecimento.
+
 ### QUESTAO ABERTA
 
 Como uma edicao manual da Patty deve interagir com valor originado de calculo deterministico, sem sobrescrever silenciosamente o resultado ou atribuir esse calculo a IA?
@@ -216,9 +259,13 @@ Como a futura entidade de materializacao entre rascunho de IA e `protocol_versio
 
 Qual sera a classificacao definitiva de cada campo da anamnese nas categorias estruturais do produto?
 
-### QUESTAO ABERTA
+### RESOLVIDO — ALERTAS/BLOQUEIOS INICIAIS
 
-Havera alertas ou bloqueios de saude derivados de respostas da anamnese? Se houver, quais regras serao validadas pela Patty?
+A Patty confirmou que respostas iniciais da Anamnese, doencas relatadas, alteracoes em exames ou relatos comportamentais nao devem gerar alerta, bloqueio, encaminhamento, revisao obrigatoria ou outro fluxo automatico apenas por sua presenca.
+
+O acompanhamento inicia normalmente e a Patty observa a evolucao da cliente. Eventual intervencao posterior continua sendo julgamento humano.
+
+Se futuramente a Patty quiser automatizar algum alerta especifico, isso exigira nova regra explicitamente confirmada e documentada.
 
 ### QUESTAO ABERTA
 
@@ -280,19 +327,40 @@ Qual politica concreta de retencao define quando um arquivo inativado/substituid
 
 ### PARCIALMENTE RESOLVIDO
 
-A Patty confirmou duas rotinas de avaliacao:
-- **quinzenal**: cintura, abdomen, quadril e peso;
-- **mensal**: avaliacao completa com todas as medidas, peso e fotos.
+A Patty corrigiu a nomenclatura e a logica operacional:
+- **Avaliacao Completa** substitui o nome historico "mensal";
+- **Avaliacao Basica** substitui o nome historico "quinzenal";
+- a data da Avaliacao Completa fica ancorada no dia do mes em que a cliente iniciou o acompanhamento;
+- a Avaliacao Basica ocorre no meio do intervalo entre duas Avaliacoes Completas;
+- exemplo confirmado: Avaliacao Completa no dia 2 -> Avaliacao Basica no dia 17.
+
+Nao existem duas avaliacoes concorrentes na mesma data como regra normal do fluxo.
+
+O catalogo da Avaliacao Completa esta confirmado:
+- peso (kg);
+- cintura (cm);
+- abdomen (cm);
+- coxa (cm);
+- biceps (cm);
+- busto para mulher ou peito para homem (cm);
+- quadril (cm);
+- ombros (cm);
+- panturrilhas (cm);
+- fotos de avaliacao.
+
+Para medidas unilaterais, utiliza-se somente o lado direito do corpo.
 
 Continuam abertos:
-- o catalogo exato de todas as medidas da avaliacao mensal;
-- as unidades permitidas;
-- eventuais campos adicionais;
-- como a avaliacao mensal se relaciona operacionalmente com a ocorrencia quinzenal quando as datas coincidirem.
+- a regra de calendario quando a data de inicio cai em 29, 30 ou 31 e o mes seguinte nao possui esse dia;
+- o fluxo auditavel de correcao de uma avaliacao ou medida historica depois da finalizacao.
 
-### QUESTAO ABERTA
+### PARCIALMENTE RESOLVIDO
 
-Qual e o fluxo auditavel para correcao de uma avaliacao ou medida historica sem sobrescrever o registro anterior?
+A Patty confirmou dois cenarios distintos:
+- nova avaliacao de acompanhamento: preserva a anterior e cria uma nova avaliacao com nova data;
+- erro de lancamento: a Patty volta a avaliacao existente, corrige o dado e o valor incorreto deixa de ser o dado valido.
+
+Permanece aberta a implementacao tecnica/auditavel dessa correcao depois da finalizacao, porque o lifecycle atual torna avaliacao e medidas imutaveis. A solucao deve permitir corrigir o dado valido sem apagar rastreabilidade nem transformar erro de digitacao em nova avaliacao.
 
 ### QUESTAO ABERTA
 
@@ -342,27 +410,72 @@ Qual sera a UX e o processo humano para revisao de findings, edicao de follow-up
 
 As regras abaixo permanecem abertas somente onde a documentacao ainda nao registra confirmacao da Patty. O fluxo principal, o Reconhecimento Metabolico, as referencias iniciais de macros e doses, o limite do grupo de proteina com maior teor de gordura, o Cutting Dia 1 / Dia 2 e a refeicao livre semanal do Up Metabolico ja estao documentados como confirmados.
 
-### QUESTAO ABERTA — PENDENCIA RECONFIRMADA PELA PATTY
+### PARCIALMENTE RESOLVIDO — PLANILHA CARB CYCLE
 
-A Patty confirmou em 2026-09-24 que as Fases 5 e 6 da Planilha Carb Cycle continuam **pendentes**.
+A Patty confirmou posteriormente que:
+- as Fases 1, 2, 3 e 4 da planilha pertencem ao conjunto de fases usado nos Cuttings 1, 2 e 3 do metodo atual;
+- a coluna **Media** e o valor utilizado no protocolo **Linear** da fase correspondente.
 
-Nao implementar, inferir ou reaproveitar formulas de outras fases para preencher essa lacuna ate nova confirmacao explicita.
+A Patty esclareceu que o uso pratico mais frequente nao depende de avancar indefinidamente na numeracao da planilha: ela normalmente trabalha com as Fases 1, 2 e 3, intercala um periodo de bulking e depois reinicia novamente 1, 2 e 3 ao retornar ao cutting.
 
-### PARCIALMENTE RESOLVIDO
+As Fases 4, 5 e 6 sao pouco usadas e deixam de ser bloqueio para a primeira automacao do fluxo principal, mas suas regras continuam abertas.
 
-A Patty confirmou que, apos `Cutting 2: 2 Low / 1 High`, a etapa seguinte e **Cutting 3 com protocolo linear**.
+Continuam abertos:
+- pareamento individual completo fase numerada -> nome do Cutting quando nao estiver explicitado;
+- criterios profissionais de transicao cutting -> bulking -> cutting;
+- regras detalhadas das Fases 4, 5 e 6.
 
-Continuam abertas:
-- as regras detalhadas do Cutting 3 Linear;
-- quais etapas, se houver, seguem depois dele.
+### PARCIALMENTE RESOLVIDO — CUTTING 3
 
-### QUESTAO ABERTA
+A Patty confirmou que, apos `Cutting 2: 2 Low / 1 High`, o Cutting 3 segue esta sequencia:
+- Cutting 3 Linear;
+- Cutting 3 Dia 1 / Dia 2;
+- Cutting 3: 2 Low / 1 High;
+- depois, Up Metabolico.
 
-Quais sao as regras detalhadas de Bulking e Consolidacao?
+Tambem confirmou que as quantidades de proteina e carboidrato diminuem progressivamente conforme o peso da cliente e usam tabelas em Excel como referencia.
 
-### QUESTAO ABERTA
+A planilha fonte foi localizada e a Patty confirmou que suas Fases 1 a 4 pertencem aos Cuttings atuais e que a coluna Media corresponde ao Linear.
 
-Quais sao as regras de hidratacao?
+Continuam abertos:
+- o pareamento individual fase 1/2/3/4 -> Cutting 1/2/3;
+- a semantica do bloco final de conversao da planilha antes de trata-lo como doses/porcoes;
+- duracao e criterio de encerramento do Cutting 3;
+- etapas posteriores ao Up Metabolico que sucede o Cutting 3.
+
+Nao automatizar a selecao pelo nome do Cutting enquanto o pareamento individual nao estiver confirmado.
+
+### PARCIALMENTE RESOLVIDO — BULKING
+
+A Patty confirmou que costuma alternar um cutting prolongado com um periodo de bulking para trabalho de massa muscular e, ao retornar ao cutting, reinicia o ciclo pelas Fases 1, 2 e 3.
+
+Continuam abertos:
+- criterio para iniciar bulking;
+- estrutura de macros/doses do bulking;
+- duracao;
+- criterios de ajuste/encerramento;
+- criterio para retornar ao cutting;
+- regras detalhadas de Consolidacao.
+
+Nao automatizar bulking apenas com base nessa confirmacao de fluxo geral.
+
+### PARCIALMENTE RESOLVIDO — HIDRATACAO/CHECK-IN DE LIQUIDOS
+
+A Patty confirmou a formula usada no metodo:
+
+- **60 mL por kg de peso corporal por dia**;
+- exemplo: 60 kg -> 3.600 mL/dia = 3,6 L/dia.
+
+A maior parte da meta deve ser agua pura. O restante pode ser complementado, em menor quantidade, por liquidos zero calorias, como cha, chimarrao, suco zero ou refrigerante zero.
+
+Continuam abertos:
+- proporcao minima/exata que deve ser agua pura;
+- regra de recalculo quando o peso muda;
+- horarios/cadencia dos lembretes;
+- poderes de correcao da Patty;
+- edicao de registros anteriores.
+
+A formula pode ser implementada deterministicamente quando a tarefa tecnica correspondente for aprovada.
 
 ### QUESTAO ABERTA
 
@@ -390,18 +503,24 @@ Quais alertas profissionais devem existir, quais sao apenas informativos e quais
 
 Quais regras de comportamento ainda precisam ser formalizadas alem do principio confirmado de adaptar o protocolo a dificuldade relatada e priorizar adesao?
 
-### QUESTAO ABERTA — FORMULAS/CONVERSOES ALIMENTARES DA RODADA 2026-09-26
+### PARCIALMENTE RESOLVIDO — FORMULAS/CONVERSOES ALIMENTARES
 
-A Patty relatou que gordura e legumes entram na contagem de carboidrato e citou a relacao "1 dose de carbo para 2 de legumes".
+A relacao entre legumes e a contagem total de carboidrato foi confirmada:
 
-Antes de qualquer implementacao, esclarecer:
-- se essa e uma conversao de doses, equivalencia de tabela ou apenas orientacao pratica;
-- como ela convive com a referencia separada de gordura em gramas/doses ja documentada;
-- em quais fases/protocolos se aplica;
-- como tratar fracionamento e arredondamento;
-- se existe excecao por alimento/grupo.
+- **2 doses de legumes = 1 dose de carboidrato para efeito da contagem total**.
 
-Nao alterar calculos atuais ate essa regra estar formalizada.
+Exemplo confirmado:
+- 6 doses totais de carboidrato;
+- 2 doses de legumes no almoco contabilizam 1 dose de carboidrato;
+- 2 doses de legumes no jantar contabilizam mais 1 dose de carboidrato;
+- restam 4 doses do total diario, que podem ser distribuidas entre carboidrato e gordura.
+
+Ficam abertos:
+- a conversao exata entre doses do saldo de carboidrato e gordura;
+- se a alocacao de legumes no almoco e jantar vale para todas as fases/protocolos;
+- excecoes especificas.
+
+A equivalencia dos legumes pode ser documentada, mas nao ampliar a automacao para a redistribuicao carboidrato/gordura enquanto a conversao restante nao estiver formalizada.
 
 ### QUESTAO ABERTA — GORDURA SATURADA E REFEICOES FORA
 
@@ -421,11 +540,20 @@ A Patty confirmou que prescreve treino somente quando solicitado e relatou como 
 
 Ainda falta definir se esse minimo admite excecoes e formalizar intensidade, volume, progressao, cardio, ajustes por limitacao e criterios de avaliacao complementar.
 
-### QUESTAO ABERTA — ALERTAS/ENCAMINHAMENTO
+### RESOLVIDO PARA O COMPORTAMENTO INICIAL — ALERTAS/ENCAMINHAMENTO
 
-A Patty indicou que doencas ou alteracoes relevantes em exames podem levar a busca de outro profissional e que relatos de alimentacao emocional, culpa, compulsao ou restricao merecem atencao especial.
+A Patty confirmou que o sistema nao deve fazer nada automaticamente no inicio apenas porque foram relatadas alimentacao emocional, culpa, compulsao, restricao, doenca ou alteracao em exame.
 
-Ainda falta definir quais condicoes geram destaque informativo, revisao obrigatoria, pedido de esclarecimento, encaminhamento ou eventual bloqueio. Nao inferir esses niveis automaticamente.
+O acompanhamento e iniciado normalmente e a Patty observa como a cliente se comporta ao longo do processo.
+
+Nao ha regra inicial automatica de:
+- destaque;
+- revisao obrigatoria;
+- pedido de esclarecimento;
+- encaminhamento;
+- bloqueio.
+
+Permanece humano o julgamento posterior da Patty sobre necessidade de esclarecimento, ajuste ou encaminhamento. Se algum desses comportamentos vier a ser automatizado no futuro, sera necessaria nova confirmacao especifica.
 
 ### QUESTAO ABERTA — ACOMPANHAMENTO, RESULTADO E EXCECOES
 
@@ -482,11 +610,16 @@ A Patty tambem confirmou que, quando faltar informacao importante ou uma respost
 
 A fundacao minima de UX/historico foi definida e implementada: pedido textual da Patty, vinculo opcional a resposta original, complementos textuais append-only da cliente e visualizacao nas duas interfaces.
 
+A Patty confirmou:
+- a resposta da cliente nao resolve automaticamente;
+- a Patty precisa ler e marcar manualmente como resolvido;
+- se ainda houver duvida, pode questionar novamente;
+- nao existe prazo/expiracao para resposta;
+- enquanto estiver aguardando resposta da cliente, o sistema deve enviar lembrete a cada 24 horas.
+
 Continuam abertos:
-- notificacao fora da tela de Anamnese;
-- prazo/expiracao;
-- eventual estado formal de aberto/resolvido;
-- regras de encerramento ou reabertura;
+- o canal tecnico da notificacao de 24 horas;
+- o desenho tecnico do estado aberto/resolvido e do novo questionamento preservando historico;
 - como os complementos entram no contexto de IA e no historico de findings.
 
 ## Conteudo
@@ -569,18 +702,54 @@ Quando e como a biblioteca de exercicios podera ser exposta a cliente, e quais c
 
 ## Protocolos e equivalentes
 
-### QUESTAO ABERTA
+### PARCIALMENTE RESOLVIDO
 
-Quais campos, tipos de protocolo e elementos profissionais compoem um protocolo alem da estrutura versionada inicial?
+A Patty confirmou que o protocolo/acompanhamento precisa permitir edicao manual de fase, macros, numero de refeicoes, distribuicao de doses, alimentos/equivalentes, Low/High, refeicao livre, observacoes, data de inicio, orientacoes, treino quando solicitado, suplementacao e manipulados.
+
+Quando houver regra previamente confirmada, documentada e deterministica, o sistema pode montar rascunhos automaticamente para revisao da Patty, inclusive macros da fase e treino predefinido aplicavel.
+
+Continuam abertas as regras internas e os campos detalhados necessarios para treino, suplementacao e manipulados onde essas regras ainda nao estiverem formalizadas.
 
 ### QUESTAO ABERTA
 
 Quais regras profissionais ainda pendentes devem completar a criacao, revisao e aprovacao de um plano alimentar, sem reabrir as regras do metodo ja confirmadas em `BUSINESS_RULES.md` e `DECISIONS.md`?
 
-### QUESTAO ABERTA
+### PARCIALMENTE RESOLVIDO
 
-Qual catalogo de equivalentes sera validado, quem podera versiona-lo e qual parte, se alguma, podera ser exibida a cliente em um protocolo publicado?
+A Patty confirmou que a cliente pode escolher livremente substituicoes dentro do grupo de equivalentes permitido pelo protocolo. Na proteina, o grupo de maior teor de gordura possui limite diario e, depois de atingi-lo, as doses restantes devem vir do grupo de menor teor de gordura. "Livre escolha" nao significa proteina ilimitada.
 
+Continuam abertos:
+- catalogo completo e versionado de equivalentes;
+- governanca de quem pode alterar/versionar o catalogo;
+- regras de exibicao detalhada do catalogo para a cliente;
+- regras equivalentes para grupos de carboidratos/gorduras quando ainda nao formalizadas.
+
+
+### PARCIALMENTE RESOLVIDO
+
+A Patty confirmou que a cliente deve visualizar a rotina alimentar publicada e, quando houver treino prescrito, a rotina de treinos. A cliente nao precisa registrar execucao dentro do protocolo publicado.
+
+### PARCIALMENTE RESOLVIDO - CHECK-IN
+
+A Patty confirmou que o produto deve prever check-ins com metas e lembretes para:
+- liquidos consumidos ao longo do dia;
+- meta de liquidos baseada no peso da cliente;
+- check-in diario de atividade fisica com registro "fez / nao fez", independente do treino prescrito;
+- visualizacao do progresso pela cliente como estimulo adicional.
+
+A Patty confirmou que as metas/configuracoes individuais podem ser definidas na entrega do primeiro protocolo.
+
+A formula e a unidade da meta estao resolvidas: 60 mL/kg/dia.
+
+Ainda faltam formalizar:
+- proporcao minima/exata de agua pura dentro da meta;
+- regra de recalculo apos mudanca de peso;
+- horarios e cadencia dos lembretes;
+- o que a Patty visualiza e pode corrigir;
+- se registros anteriores podem ser editados;
+- parametros funcionais restantes necessarios para implementar o check-in completo.
+
+Nao inferir score de adesao ou frequencia ideal de treino.
 
 ## OpenAI — modelo e controles de dados
 
