@@ -10,10 +10,14 @@ export default async function AdminProtocolosPage() {
 
   return (
     <>
-      <PageHeader description="Consulta dos protocolos acessíveis para a administração atual." eyebrow="Admin" title="Protocolos" />
-      <Section description="Protocolos disponíveis conforme as atribuições administrativas ativas." title="Protocolos registrados">
+      <PageHeader description="Consulte protocolos, versões e publicações das clientes." eyebrow="Admin" title="Protocolos" />
+      <Section description="Os protocolos disponíveis aparecem aqui para consulta e revisão." title="Protocolos registrados">
         {protocols.length === 0 ? (
-          <EmptyState description="Nenhum protocolo está acessível para a administração atual." title="Sem protocolos registrados" />
+          <EmptyState
+            action={<Link className={styles.actionLink} href="/admin/clientes">Escolher cliente</Link>}
+            description="Escolha uma cliente para criar ou consultar um protocolo."
+            title="Ainda não há protocolos"
+          />
         ) : (
           <ul className={styles.protocolList}>
             {protocols.map((protocol) => (
