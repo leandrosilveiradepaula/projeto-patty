@@ -304,6 +304,45 @@ export default async function AdminAvaliacaoDetailPage({
           </Card>
         )}
       </Section>
+      {!isDraft && measurementCorrections.length > 0 ? (
+        <Section
+          description="Cada correção preserva o lançamento original e acrescenta um novo fato histórico. A correção mais recente é o valor vigente na leitura e na comparação."
+          title="Histórico de correções"
+        >
+          <ol className={styles.recordList}>
+            {measurementCorrections.map((correction) => {
+              const original = rawMeasurements.find(
+                (measurement) =>
+                  measurement.id === correction.assessment_measurement_id,
+              );
+              return (
+                <li className={styles.recordItem} key={correction.id}>
+                  <Card variant="subtle">
+                    <p className={styles.recordMeta}>
+                      {original
+                        ? formatProfessionalMeasurementLabel(
+                            original.measurement_key,
+                          )
+                        : "Medida"}{" "}
+                      · {formatRecordDateTime(correction.created_at)}
+                    </p>
+                    <p className={styles.cardDescription}>
+                      Corrigido para{" "}
+                      {formatMeasurementValue(
+                        correction.corrected_measurement_value,
+                      )}{" "}
+                      {correction.corrected_unit}.
+                      {correction.note?.trim()
+                        ? " Observação: " + correction.note.trim()
+                        : ""}
+                    </p>
+                  </Card>
+                </li>
+              );
+            })}
+          </ol>
+        </Section>
+      ) : null}
       <Section
         description="Comparação factual dos mesmos measurement_key entre a avaliação atual e a imediatamente anterior. Não calcula tendência, sucesso, estagnação ou recomendação."
         title="Comparação com avaliação anterior"
