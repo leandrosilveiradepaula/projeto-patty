@@ -1,4 +1,5 @@
 import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
+import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -59,6 +60,7 @@ export default async function AdminClienteAnamnesePage({
           </span>
         }
       />
+      <ClientWorkspaceNav clientId={client.id} />
       <Section
         action={<Badge variant="neutral">{submissions.length} registro(s)</Badge>}
         description="Cada envio preserva as respostas e a versão da Anamnese usada naquele momento."
