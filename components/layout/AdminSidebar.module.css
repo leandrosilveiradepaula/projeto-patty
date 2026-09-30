@@ -75,6 +75,14 @@
   content: "";
 }
 
+.mobileBrand {
+  color: var(--color-brand-strong);
+  font-family: var(--font-family-heading);
+  font-size: var(--text-title-medium-size);
+  font-weight: var(--text-title-medium-weight);
+  line-height: var(--text-title-medium-line-height);
+}
+
 .mobileNavigation {
   display: flex;
   align-items: center;
