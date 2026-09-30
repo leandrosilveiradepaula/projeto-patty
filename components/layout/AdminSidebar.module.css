@@ -1,7 +1,8 @@
 .nav {
   display: grid;
-  gap: var(--space-6);
+  gap: var(--space-5);
   min-width: 0;
+  min-height: calc(100svh - (var(--space-6) * 2));
 }
 
 .brand {
@@ -29,7 +30,9 @@
 }
 
 .logoutButton {
+  align-self: end;
   justify-self: start;
+  margin-top: auto;
 }
 
 .link {
