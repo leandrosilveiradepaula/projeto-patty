@@ -292,11 +292,9 @@ export function AssessmentPhotoUnlinkButton({
 
 export function AssessmentFinalizeForm({
   assessmentId,
-  isMonthly,
   readinessItems,
 }: {
   assessmentId: string;
-  isMonthly: boolean;
   readinessItems: Array<{
     key: string;
     label: string;
@@ -324,22 +322,6 @@ export function AssessmentFinalizeForm({
           ))}
         </ul>
       </div>
-
-      {isMonthly ? (
-        <label className={styles.confirmation}>
-          <input
-            name="confirmMonthlyMeasures"
-            required
-            type="checkbox"
-            value="yes"
-          />
-          <span>
-            Revisei o conjunto completo de medidas da avaliação mensal. O
-            catálogo mensal definitivo ainda está aberto e, por isso, essa
-            completude depende de revisão humana.
-          </span>
-        </label>
-      ) : null}
 
       <label className={styles.confirmation}>
         <input name="confirmFinalization" required type="checkbox" value="yes" />
