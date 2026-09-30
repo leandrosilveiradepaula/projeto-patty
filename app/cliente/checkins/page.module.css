@@ -90,3 +90,27 @@
     grid-template-columns: 1fr;
   }
 }
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+  font-size: var(--text-label-medium-size);
+  font-weight: var(--text-title-medium-weight);
+  line-height: var(--text-label-medium-line-height);
+  padding: var(--space-2) var(--space-4);
+  text-decoration: none;
+}
+
+.backLink:hover {
+  background: var(--color-surface-low);
+}
+
+.backLink:focus-visible {
+  outline: 3px solid var(--color-brand);
+  outline-offset: 2px;
+}
