@@ -198,3 +198,29 @@ O Supabase continua decidindo se a versao foi publicada e liberada para a client
 O acesso futuro ao binario deve ocorrer somente depois de validar a sessao e a release no Supabase. Preferir OIDC do runtime Vercel e URL assinada curta; nao expor token read-write ao browser.
 
 Uploads grandes devem usar multipart quando necessario. Paths nao devem conter PII.
+
+
+## Aplicativo instalável no celular
+
+### DECISAO TECNICA - 2026-09-30
+
+O primeiro caminho para tornar o Projeto Patty instalável no celular será uma Progressive Web App (PWA) sobre a aplicação Next.js existente.
+
+Objetivos desta etapa:
+
+- permitir instalação na tela inicial de Android e iPhone;
+- manter uma única base de código Next.js;
+- abrir em modo `standalone`, com aparência de aplicativo;
+- preservar autenticação, RLS e boundaries server-side existentes;
+- não introduzir wrapper nativo, App Store ou Play Store nesta primeira etapa.
+
+A fundação PWA usa Web App Manifest, metadados móveis, ícones públicos e HTTPS da Vercel.
+
+### DECISAO DE SEGURANCA
+
+A primeira versão instalável **não terá cache offline de páginas autenticadas ou dados privados**.
+
+Não introduzir service worker que persista Anamnese, avaliações, protocolos, fotos, exames, documentos ou outros dados de saúde no dispositivo sem uma revisão específica de privacidade, retenção, invalidação de sessão e comportamento offline.
+
+Push notifications também ficam fora desta primeira fundação. Caso sejam introduzidas, exigirão decisão separada sobre conteúdo, consentimento, canal, dados expostos na tela bloqueada e lifecycle de tokens.
+
