@@ -12,7 +12,7 @@ test("assessment kind accepts only the two confirmed cadences", () => {
   assert.equal(isAssessmentKind("fortnightly"), true);
   assert.equal(isAssessmentKind("monthly"), true);
   assert.equal(isAssessmentKind("weekly"), false);
-  assert.equal(assessmentKindLabel("fortnightly"), "Quinzenal");
+  assert.equal(assessmentKindLabel("fortnightly"), "Básica");
   assert.equal(assessmentKindLabel(null), "Legada / não classificada");
 });
 
