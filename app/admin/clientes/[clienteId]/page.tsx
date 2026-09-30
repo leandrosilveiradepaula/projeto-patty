@@ -104,6 +104,13 @@ export default async function AdminClienteDetailPage({
       href: `/admin/clientes/${client.id}/conteudos`,
       title: "Conteúdos",
     },
+    {
+      count: null,
+      description:
+        "Defina a meta de líquidos e consulte os check-ins factuais de líquidos e atividade física.",
+      href: `/admin/clientes/${client.id}/checkins`,
+      title: "Check-ins",
+    },
   ];
 
   return (
@@ -212,7 +219,9 @@ export default async function AdminClienteDetailPage({
               <Card className={styles.infoCard} variant="subtle">
                 <div className={styles.cardHeader}>
                   <h3 className={styles.cardTitle}>{area.title}</h3>
-                  <Badge variant="neutral">{area.count}</Badge>
+                  <Badge variant="neutral">
+                    {area.count === null ? "Abrir" : area.count}
+                  </Badge>
                 </div>
                 <p className={styles.cardDescription}>{area.description}</p>
               </Card>

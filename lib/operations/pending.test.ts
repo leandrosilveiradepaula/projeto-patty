@@ -39,6 +39,7 @@ test("operational pending builder emits only explicit backend states", () => {
         clientLabel: "Cliente 2",
         createdAt: "2026-09-23T10:00:00Z",
         responseCount: 0,
+        resolved: false,
       },
       {
         id: "clarification-2",
@@ -47,6 +48,16 @@ test("operational pending builder emits only explicit backend states", () => {
         clientLabel: "Cliente 3",
         createdAt: "2026-09-23T11:00:00Z",
         responseCount: 1,
+        resolved: false,
+      },
+      {
+        id: "clarification-3",
+        submissionId: "reviewed-1",
+        clientId: "client-3",
+        clientLabel: "Cliente 3",
+        createdAt: "2026-09-23T12:00:00Z",
+        responseCount: 1,
+        resolved: true,
       },
     ],
     assessments: [
@@ -106,6 +117,7 @@ test("operational pending builder emits only explicit backend states", () => {
       "anamnesis_draft",
       "anamnesis_submitted_without_review",
       "clarification_without_response",
+      "clarification_response_pending_review",
       "assessment_draft",
       "protocol_submitted_not_approved",
       "protocol_approved_not_published",

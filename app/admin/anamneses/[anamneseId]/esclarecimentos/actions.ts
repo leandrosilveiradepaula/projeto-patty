@@ -5,7 +5,9 @@ import { isUuid } from "@/lib/validation/uuid";
 import { requireRole } from "@/lib/supabase/auth";
 import {
   createAccessibleAnamnesisClarificationRequest,
+  createAccessibleAnamnesisClarificationResolution,
   getAccessibleAnamnesisAnswer,
+  getAccessibleAnamnesisClarificationRequest,
   getAccessibleAnamnesisSubmission,
 } from "@/lib/supabase/data-access";
 
@@ -54,4 +56,38 @@ export async function addAnamnesisClarificationRequest(
 
   revalidatePath(`/admin/anamneses/${submission.id}/esclarecimentos`);
   return { message: "Pedido de esclarecimento registrado para a cliente.", success: true };
+}
+
+
+export async function resolveAnamnesisClarificationRequest(
+  submissionId: string,
+  requestId: string,
+) {
+  const context = await requireRole("admin");
+
+  if (!isUuid(submissionId) || !isUuid(requestId)) {
+    throw new Error("Identificadores de esclarecimento invalidos");
+  }
+
+  const [submission, request] = await Promise.all([
+    getAccessibleAnamnesisSubmission(submissionId),
+    getAccessibleAnamnesisClarificationRequest(requestId),
+  ]);
+
+  if (
+    !submission ||
+    !submission.submitted_at ||
+    !request ||
+    request.submission_id !== submission.id
+  ) {
+    throw new Error("Pedido de esclarecimento nao disponivel");
+  }
+
+  await createAccessibleAnamnesisClarificationResolution({
+    clarificationRequestId: request.id,
+    resolvedByProfileId: context.profileId,
+  });
+
+  revalidatePath("/admin/pendencias");
+  revalidatePath("/admin/anamneses/" + submission.id + "/esclarecimentos");
 }

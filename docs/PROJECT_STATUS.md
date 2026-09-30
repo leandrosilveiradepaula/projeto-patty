@@ -810,3 +810,17 @@ O painel nao calcula atraso, adesao, estagnacao, urgencia, risco clinico ou prio
 
 A montagem usa somente consultas RLS ja existentes sob as atribuicoes ativas da Patty. Nao usa service role, nao cria tabela de pendencias e nao duplica estado derivavel.
 
+
+
+## Atualizacao operacional - 2026-09-30
+
+- PR #216 de reconciliacao documental foi mergeado no `master`;
+- PR #217 integrou clonagem/comparacao de versoes de protocolo e readiness de Avaliacoes sobre o master reconciliado;
+- migration remota `20260930131848_clone_protocol_version_draft` aplicada;
+- fundacao de check-ins aplicada pelas migrations `20260930132221` e `20260930132354`;
+- meta de liquidos usa snapshot de peso e 60 mL/kg, sem recalculo automatico;
+- eventos de liquidos e atividade fisica sao append-only e nao geram score;
+- resolucao manual de esclarecimentos foi materializada separadamente da resposta da cliente;
+- GitHub Actions continua com falha operacional de runner: jobs encerram sem steps; nao tratar como falha de codigo;
+- Vercel do master `b1986e7` estava READY antes desta branch e sem erros de runtime nas ultimas 24h;
+- advisor de seguranca do Supabase continua sem novo finding alem do warning conhecido de Leaked Password Protection.

@@ -2,6 +2,7 @@ import "server-only";
 
 import {
   listAccessibleAnamnesisClarificationRequests,
+  listAccessibleAnamnesisClarificationResolutions,
   listAccessibleAnamnesisClarificationResponses,
   listAccessibleAnamnesisReviews,
   listAccessibleAnamnesisSubmissions,
@@ -86,11 +87,17 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
   const clarificationRequestIds = clarificationRequests.map(
     (request) => request.id,
   );
-  const clarificationResponses =
-    await listAccessibleAnamnesisClarificationResponses(
-      clarificationRequestIds,
-    );
+  const [clarificationResponses, clarificationResolutions] =
+    await Promise.all([
+      listAccessibleAnamnesisClarificationResponses(clarificationRequestIds),
+      listAccessibleAnamnesisClarificationResolutions(clarificationRequestIds),
+    ]);
   const responseCounts = new Map<string, number>();
+  const resolvedRequestIds = new Set(
+    clarificationResolutions.map(
+      (resolution) => resolution.clarification_request_id,
+    ),
+  );
 
   for (const response of clarificationResponses) {
     responseCounts.set(
@@ -148,6 +155,7 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
       createdAt: request.created_at,
       id: request.id,
       responseCount: responseCounts.get(request.id) ?? 0,
+      resolved: resolvedRequestIds.has(request.id),
       submissionId: request.submission_id,
     })),
     assessments: assessments.map((assessment) => ({

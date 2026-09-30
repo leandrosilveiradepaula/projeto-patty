@@ -795,3 +795,20 @@ Depois da finalizacao, triggers bloqueiam mutacao da avaliacao, medidas e vincul
 
 O fluxo de correcao historica depois da finalizacao continua aberto e nao e implementado como overwrite.
 
+
+
+## Check-ins de acompanhamento
+
+### DECISAO TECNICA APLICADA
+
+`client_hydration_targets` preserva snapshots da meta de liquidos. Cada registro guarda `weight_kg`, `target_ml`, `method_key`, autoria e data. `target_ml` e gerado deterministicamente por `round(weight_kg * 60)`. Registros sao append-only.
+
+`client_liquid_intake_events` preserva eventos de ingestao com quantidade em mL e tipo `water` ou `zero_calorie_other`. O modelo nao calcula automaticamente proporcao minima de agua pura.
+
+`client_activity_checkin_events` preserva respostas diarias sim/nao. Mais de um evento pode existir no mesmo dia; o mais recente pode representar a resposta corrente na UI sem apagar o historico anterior.
+
+Nenhuma dessas entidades armazena score de adesao.
+
+### Resolucao de esclarecimentos
+
+`anamnesis_clarification_resolutions` registra, em entidade separada e append-only, a decisao humana da Patty de encerrar um pedido. A existencia de resposta da cliente nao cria automaticamente uma resolucao. O pedido, as respostas e a resolucao permanecem entidades historicas separadas.

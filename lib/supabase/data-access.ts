@@ -101,6 +101,146 @@ export async function getAccessibleClient(clientId: string) {
   return data;
 }
 
+export async function listAccessibleClientHydrationTargets(clientId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_hydration_targets")
+    .select("id, client_id, weight_kg, target_ml, method_key, created_by_profile_id, created_at")
+    .eq("client_id", clientId)
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function createAccessibleClientHydrationTarget(input: {
+  clientId: string;
+  createdByProfileId: string;
+  weightKg: number;
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_hydration_targets")
+    .insert({
+      client_id: input.clientId,
+      created_by_profile_id: input.createdByProfileId,
+      weight_kg: input.weightKg,
+    })
+    .select("id, client_id, weight_kg, target_ml, method_key, created_by_profile_id, created_at")
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function listAccessibleClientLiquidIntakeEvents(
+  clientId: string,
+  recordedFrom?: string,
+) {
+  const supabase = await createClient();
+  let query = supabase
+    .from("client_liquid_intake_events")
+    .select("id, client_id, recorded_by_profile_id, amount_ml, liquid_kind, recorded_at")
+    .eq("client_id", clientId)
+    .order("recorded_at", { ascending: false })
+    .order("id", { ascending: false });
+
+  if (recordedFrom) {
+    query = query.gte("recorded_at", recordedFrom);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function createCurrentClientLiquidIntakeEvent(input: {
+  amountMl: number;
+  clientId: string;
+  liquidKind: "water" | "zero_calorie_other";
+  recordedByProfileId: string;
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_liquid_intake_events")
+    .insert({
+      amount_ml: input.amountMl,
+      client_id: input.clientId,
+      liquid_kind: input.liquidKind,
+      recorded_by_profile_id: input.recordedByProfileId,
+    })
+    .select("id, client_id, recorded_by_profile_id, amount_ml, liquid_kind, recorded_at")
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function listAccessibleClientActivityCheckinEvents(
+  clientId: string,
+  checkinDate?: string,
+) {
+  const supabase = await createClient();
+  let query = supabase
+    .from("client_activity_checkin_events")
+    .select("id, client_id, recorded_by_profile_id, checkin_date, did_activity, recorded_at")
+    .eq("client_id", clientId)
+    .order("checkin_date", { ascending: false })
+    .order("recorded_at", { ascending: false })
+    .order("id", { ascending: false });
+
+  if (checkinDate) {
+    query = query.eq("checkin_date", checkinDate);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function createCurrentClientActivityCheckinEvent(input: {
+  checkinDate: string;
+  clientId: string;
+  didActivity: boolean;
+  recordedByProfileId: string;
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_activity_checkin_events")
+    .insert({
+      checkin_date: input.checkinDate,
+      client_id: input.clientId,
+      did_activity: input.didActivity,
+      recorded_by_profile_id: input.recordedByProfileId,
+    })
+    .select("id, client_id, recorded_by_profile_id, checkin_date, did_activity, recorded_at")
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
 export async function getAccessibleClientRegistration(clientId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -410,6 +550,47 @@ export async function listAccessibleAnamnesisClarificationResponses(requestIds: 
     .order("created_at", { ascending: true })
     .order("id", { ascending: true });
   if (error) throw error;
+  return data;
+}
+
+export async function listAccessibleAnamnesisClarificationResolutions(
+  requestIds: string[],
+) {
+  if (requestIds.length === 0) return [];
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("anamnesis_clarification_resolutions")
+    .select("id, clarification_request_id, resolved_by_profile_id, resolved_at")
+    .in("clarification_request_id", requestIds)
+    .order("resolved_at", { ascending: true })
+    .order("id", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function createAccessibleAnamnesisClarificationResolution(input: {
+  clarificationRequestId: string;
+  resolvedByProfileId: string;
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("anamnesis_clarification_resolutions")
+    .insert({
+      clarification_request_id: input.clarificationRequestId,
+      resolved_by_profile_id: input.resolvedByProfileId,
+    })
+    .select("id, clarification_request_id, resolved_by_profile_id, resolved_at")
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
   return data;
 }
 

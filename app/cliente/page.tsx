@@ -70,6 +70,14 @@ export default async function ClientePage() {
       label: "arquivo(s)",
       title: "Arquivos",
     },
+    {
+      count: null,
+      description:
+        "Registre líquidos ao longo do dia e informe sua atividade física diária.",
+      href: "/cliente/checkins",
+      label: "",
+      title: "Check-ins",
+    },
   ];
 
   return (
@@ -93,9 +101,13 @@ export default async function ClientePage() {
               <Card className={styles.areaCard} variant="subtle">
                 <div className={styles.cardHeader}>
                   <h2 className={styles.cardTitle}>{area.title}</h2>
-                  <Badge variant="neutral">
-                    {area.count} {area.label}
-                  </Badge>
+                  {area.count === null ? (
+                    <Badge variant="neutral">Abrir</Badge>
+                  ) : (
+                    <Badge variant="neutral">
+                      {area.count} {area.label}
+                    </Badge>
+                  )}
                 </div>
                 <p className={styles.cardDescription}>{area.description}</p>
               </Card>

@@ -1,5 +1,7 @@
+import { resolveAnamnesisClarificationRequest } from "@/app/admin/anamneses/[anamneseId]/esclarecimentos/actions";
 import { AdminAnamnesisClarificationRequestForm } from "@/components/admin/AdminAnamnesisClarificationRequestForm";
 import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -8,6 +10,7 @@ import {
   getAccessibleAnamnesisSubmission,
   listAccessibleAnamnesisAnswers,
   listAccessibleAnamnesisClarificationRequests,
+  listAccessibleAnamnesisClarificationResolutions,
   listAccessibleAnamnesisClarificationResponses,
   listAccessibleAnamnesisQuestions,
 } from "@/lib/supabase/data-access";
@@ -39,10 +42,20 @@ export default async function AdminAnamnesisClarificationsPage({ params }: PageP
     listAccessibleAnamnesisQuestions(submission.form_version_id),
     listAccessibleAnamnesisClarificationRequests(submission.id),
   ]);
-  const responses = await listAccessibleAnamnesisClarificationResponses(requests.map((request) => request.id));
+  const requestIds = requests.map((request) => request.id);
+  const [responses, resolutions] = await Promise.all([
+    listAccessibleAnamnesisClarificationResponses(requestIds),
+    listAccessibleAnamnesisClarificationResolutions(requestIds),
+  ]);
   const answersById = new Map(answers.map((answer) => [answer.id, answer]));
   const questionsById = new Map(questions.map((question) => [question.id, question]));
   const responsesByRequestId = new Map<string, typeof responses>();
+  const resolutionByRequestId = new Map(
+    resolutions.map((resolution) => [
+      resolution.clarification_request_id,
+      resolution,
+    ]),
+  );
 
   for (const response of responses) {
     const entries = responsesByRequestId.get(response.clarification_request_id) ?? [];
@@ -64,7 +77,7 @@ export default async function AdminAnamnesisClarificationsPage({ params }: PageP
         title="Esclarecimentos da Anamnese"
       />
       <p className={styles.notice}>
-        Este fluxo não altera a resposta original, não define prazo e não fecha automaticamente uma pendência.
+        Este fluxo não altera a resposta original. A resposta da cliente não resolve o pedido automaticamente; a Patty precisa revisar e marcar como resolvido.
       </p>
       <Section description="O vínculo com uma resposta original é opcional." title="Novo pedido">
         <Card>
@@ -80,11 +93,20 @@ export default async function AdminAnamnesisClarificationsPage({ params }: PageP
               const sourceAnswer = request.source_answer_id ? answersById.get(request.source_answer_id) : undefined;
               const sourceQuestion = sourceAnswer ? questionsById.get(sourceAnswer.question_id) : undefined;
               const requestResponses = responsesByRequestId.get(request.id) ?? [];
+              const resolution = resolutionByRequestId.get(request.id);
+              const statusLabel = resolution
+                ? "Resolvido"
+                : requestResponses.length > 0
+                  ? "Resposta recebida"
+                  : "Aguardando cliente";
               return (
                 <Card className={styles.entry} key={request.id}>
                   <div className={styles.entryHeader}>
                     <h2 className={styles.entryTitle}>Pedido da Patty</h2>
-                    <Badge variant="neutral">{formatDateTime(request.created_at)}</Badge>
+                    <div className={styles.statusGroup}>
+                      <Badge variant="neutral">{statusLabel}</Badge>
+                      <Badge variant="neutral">{formatDateTime(request.created_at)}</Badge>
+                    </div>
                   </div>
                   <p className={styles.text}>{request.request_text}</p>
                   {sourceAnswer ? (
@@ -104,6 +126,23 @@ export default async function AdminAnamnesisClarificationsPage({ params }: PageP
                       </div>
                     ))}
                   </div>
+                  {resolution ? (
+                    <p className={styles.meta}>
+                      Resolvido manualmente em {formatDateTime(resolution.resolved_at)}.
+                    </p>
+                  ) : (
+                    <form
+                      action={resolveAnamnesisClarificationRequest.bind(
+                        null,
+                        submission.id,
+                        request.id,
+                      )}
+                    >
+                      <Button type="submit" variant="secondary">
+                        Marcar como resolvido
+                      </Button>
+                    </form>
+                  )}
                 </Card>
               );
             })}

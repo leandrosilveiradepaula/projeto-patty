@@ -2314,3 +2314,34 @@ Estados inicialmente incluidos:
 
 Nao inferir prioridade, prazo, urgencia, adesao, estagnacao ou decisao profissional a partir desses estados. Novas categorias so podem entrar quando houver estado objetivo documentado que as sustente.
 
+
+
+## 2026-09-30 - Check-ins versionados e resolucao manual de esclarecimentos
+
+### DECISAO TECNICA APLICADA
+
+Foram materializadas somente regras ja confirmadas pela Patty:
+
+- meta de liquidos como snapshot append-only de peso;
+- calculo deterministico `peso_kg * 60 mL`;
+- nenhuma alteracao de peso recalcula automaticamente metas historicas;
+- ingestao de liquidos como eventos append-only, distinguindo `water` e `zero_calorie_other`;
+- atividade fisica diaria como eventos append-only, independente do treino prescrito;
+- nenhum score automatico de adesao;
+- resposta da cliente a esclarecimento nao resolve automaticamente o pedido;
+- a Patty registra manualmente a resolucao em historico append-only;
+- pedido respondido e ainda nao resolvido passa a ser uma pendencia factual de revisao, sem prioridade profissional inferida.
+
+### APLICADO NO SUPABASE SAAS
+
+- `20260930132221_create_client_checkins.sql`;
+- `20260930132354_add_anamnesis_clarification_resolutions.sql`.
+
+RLS permanece obrigatoria: cliente acessa somente os proprios check-ins; Patty/admin depende de assignment ativo e AAL2 para os dados client-scoped desta fundacao.
+
+### CONTINUA ABERTO
+
+- proporcao minima/exata de agua pura dentro da meta;
+- quando a Patty deseja criar novo snapshot de hidratacao apos mudanca de peso;
+- canal e mecanismo de envio do lembrete de 24 horas;
+- politica de edicao/correcao de eventos alem do modelo append-only atual.

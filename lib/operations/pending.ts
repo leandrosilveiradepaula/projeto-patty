@@ -3,6 +3,7 @@ export type OperationalPendingItemKind =
   | "anamnesis_draft"
   | "anamnesis_submitted_without_review"
   | "assessment_draft"
+  | "clarification_response_pending_review"
   | "clarification_without_response"
   | "protocol_approved_not_published"
   | "protocol_submitted_not_approved";
@@ -34,6 +35,7 @@ export type PendingClarificationRequest = {
   createdAt: string;
   id: string;
   responseCount: number;
+  resolved: boolean;
   submissionId: string;
 };
 
@@ -120,7 +122,23 @@ export function buildOperationalPendingItems(
   }
 
   for (const request of input.clarificationRequests) {
-    if (request.responseCount > 0) {
+    if (request.resolved) {
+      continue;
+    }
+
+    if (request.responseCount === 0) {
+      items.push({
+        clientId: request.clientId,
+        clientLabel: request.clientLabel,
+        createdAt: request.createdAt,
+        description:
+          "Existe um pedido de esclarecimento sem resposta registrada pela cliente.",
+        href: `/admin/anamneses/${request.submissionId}/esclarecimentos`,
+        id: `clarification:${request.id}`,
+        kind: "clarification_without_response",
+        statusLabel: "Sem resposta",
+        title: "Esclarecimento aguardando resposta",
+      });
       continue;
     }
 
@@ -129,12 +147,12 @@ export function buildOperationalPendingItems(
       clientLabel: request.clientLabel,
       createdAt: request.createdAt,
       description:
-        "Existe um pedido de esclarecimento sem resposta registrada pela cliente.",
+        "A cliente respondeu ao pedido de esclarecimento, mas a Patty ainda nao registrou a resolucao manual.",
       href: `/admin/anamneses/${request.submissionId}/esclarecimentos`,
-      id: `clarification:${request.id}`,
-      kind: "clarification_without_response",
-      statusLabel: "Sem resposta",
-      title: "Esclarecimento aguardando resposta",
+      id: `clarification-review:${request.id}`,
+      kind: "clarification_response_pending_review",
+      statusLabel: "Resposta recebida",
+      title: "Esclarecimento aguardando revisao da Patty",
     });
   }
 
