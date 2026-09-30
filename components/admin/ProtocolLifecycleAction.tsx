@@ -88,6 +88,12 @@ export function ProtocolLifecycleAction({
         </Alert>
       ) : null}
       <p className={styles.description}>{content.description}</p>
+      {kind === "publish" ? (
+        <label className={styles.confirmation}>
+          <input name="confirmPublication" required type="checkbox" value="yes" />
+          <span>Confirme que esta é a versão revisada que deve ficar visível para a cliente.</span>
+        </label>
+      ) : null}
       <Button loading={isPending} type="submit">
         {content.button}
       </Button>
