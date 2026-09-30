@@ -1,4 +1,5 @@
 import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
+import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Section } from "@/components/ui/Section";
@@ -56,6 +57,7 @@ export default async function AdminClientProtocolsPage({
           </span>
         }
       />
+      <ClientWorkspaceNav clientId={client.id} />
       <Section
         action={<Badge variant="neutral">{protocols.length} protocolo(s)</Badge>}
         description="Consulte o histórico de protocolos desta cliente."
