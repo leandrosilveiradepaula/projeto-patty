@@ -4,7 +4,6 @@ import { useActionState, useEffect, useRef } from "react";
 
 import {
   type AssessmentDraftActionState,
-  correctFinalizedAssessmentMeasurementAction,
   deleteAssessmentMeasurementAction,
   finalizeAssessmentAction,
   linkAssessmentPhotoAction,
@@ -355,86 +354,5 @@ export function AssessmentFinalizeForm({
         Finalizar avaliação
       </Button>
     </form>
-  );
-}
-
-
-export function AssessmentMeasurementCorrectionForm({
-  assessmentId,
-  measurementId,
-  currentUnit,
-  currentValue,
-}: {
-  assessmentId: string;
-  measurementId: string;
-  currentUnit: string;
-  currentValue: number;
-}) {
-  const action = correctFinalizedAssessmentMeasurementAction.bind(
-    null,
-    assessmentId,
-    measurementId,
-  );
-  const [state, formAction, isPending] = useActionState(action, initialState);
-
-  return (
-    <details>
-      <summary>Corrigir lançamento</summary>
-      <form action={formAction} className={styles.form}>
-        <ActionAlert state={state} />
-        <div className={styles.measurementGrid}>
-          <FormField
-            id={"correction-value-" + measurementId}
-            label="Valor corrigido"
-            required
-          >
-            {(fieldProps) => (
-              <TextInput
-                {...fieldProps}
-                defaultValue={String(currentValue)}
-                inputMode="decimal"
-                name="correctedMeasurementValue"
-                required
-              />
-            )}
-          </FormField>
-          <FormField
-            id={"correction-unit-" + measurementId}
-            label="Unidade"
-            required
-          >
-            {(fieldProps) => (
-              <TextInput
-                {...fieldProps}
-                defaultValue={currentUnit}
-                maxLength={40}
-                name="correctedUnit"
-                required
-              />
-            )}
-          </FormField>
-          <FormField
-            description="Opcional. Use somente para contextualizar o erro de lançamento."
-            id={"correction-note-" + measurementId}
-            label="Observação da correção"
-          >
-            {(fieldProps) => (
-              <TextInput
-                {...fieldProps}
-                maxLength={240}
-                name="correctionNote"
-              />
-            )}
-          </FormField>
-        </div>
-        <p className={styles.notice}>
-          Esta ação não altera nem apaga o valor originalmente lançado. Uma nova
-          correção histórica será criada e passará a ser o valor vigente.
-        </p>
-        <Button loading={isPending} size="compact" type="submit" variant="secondary">
-          Registrar correção
-        </Button>
-      </form>
-    </details>
   );
 }
