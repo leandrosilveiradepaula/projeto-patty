@@ -18,3 +18,15 @@ Regras de uso:
 O snapshot preserva os valores de referencia 15 g proteina, 12 g carboidrato, 6 g gordura e 6 g legumes observados na fonte. A equivalencia atual confirmada pela Patty de 2 doses de legumes = 1 dose de carboidrato e registrada separadamente na documentacao oficial.
 
 Este arquivo nao contem nomes de clientes nem dados individuais.
+
+## Gate automatico da fonte
+
+O helper `lib/content/food-equivalent-source.ts` valida somente a integridade da fonte de migracao:
+- status continua como rascunho historico sujeito a revisao;
+- referencias confirmadas de doses nao sofreram drift;
+- relacao 2 doses de legumes = 1 dose de carboidrato permanece registrada;
+- grupos possuem chaves unicas;
+- itens preservam a tupla historica `[alimento, quantidade, doses]`;
+- duplicidades dentro do mesmo grupo sao sinalizadas.
+
+Mesmo quando a validacao estrutural passa, o resultado permanece `publishable: false`. A validacao nunca equivale a aprovacao profissional/editorial e nao grava o snapshot nas tabelas ativas de equivalentes.
