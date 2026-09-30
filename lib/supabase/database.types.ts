@@ -901,51 +901,6 @@ export type Database = {
           },
         ]
       }
-      assessment_measurement_corrections: {
-        Row: {
-          assessment_measurement_id: string
-          corrected_by_profile_id: string
-          corrected_measurement_value: number
-          corrected_unit: string
-          created_at: string
-          id: string
-          note: string | null
-        }
-        Insert: {
-          assessment_measurement_id: string
-          corrected_by_profile_id: string
-          corrected_measurement_value: number
-          corrected_unit: string
-          created_at?: string
-          id?: string
-          note?: string | null
-        }
-        Update: {
-          assessment_measurement_id?: string
-          corrected_by_profile_id?: string
-          corrected_measurement_value?: number
-          corrected_unit?: string
-          created_at?: string
-          id?: string
-          note?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "assessment_measurement_correctio_assessment_measurement_id_fkey"
-            columns: ["assessment_measurement_id"]
-            isOneToOne: false
-            referencedRelation: "assessment_measurements"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "assessment_measurement_corrections_corrected_by_profile_id_fkey"
-            columns: ["corrected_by_profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       assessment_measurements: {
         Row: {
           assessment_id: string
