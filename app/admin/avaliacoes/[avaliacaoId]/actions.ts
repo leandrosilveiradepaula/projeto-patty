@@ -11,7 +11,6 @@ import { buildAssessmentFinalizationReadiness } from "@/lib/evaluations/assessme
 import { isProfessionalDecision } from "@/lib/follow-up/professional-decisions";
 import { requireRole } from "@/lib/supabase/auth";
 import {
-  createAccessibleAssessmentMeasurementCorrection,
   createAccessibleProfessionalFollowUp,
   deleteAccessibleAssessmentMeasurement,
   finalizeAccessibleClientAssessment,
@@ -441,54 +440,3 @@ export async function finalizeAssessmentAction(
   };
 }
 
-
-
-export async function correctFinalizedAssessmentMeasurementAction(
-  assessmentId: string,
-  measurementId: string,
-  formData: FormData,
-): Promise<void> {
-  const context = await requireRole("admin");
-  const assessment = await getAccessibleClientAssessment(assessmentId);
-
-  if (!assessment || !assessment.finalized_at) {
-    throw new Error("A correcao historica exige uma avaliacao finalizada e acessivel.");
-  }
-
-  const measurements = await listAccessibleAssessmentMeasurements(assessment.id);
-  const measurement = measurements.find((item) => item.id === measurementId);
-
-  if (!measurement) {
-    throw new Error("A medida selecionada nao pertence a esta avaliacao.");
-  }
-
-  const rawValue = formData.get("correctedMeasurementValue");
-  const rawUnit = formData.get("correctedUnit");
-  const rawNote = formData.get("correctionNote");
-  const value =
-    typeof rawValue === "string"
-      ? Number(rawValue.trim().replace(",", "."))
-      : Number.NaN;
-  const unit = typeof rawUnit === "string" ? rawUnit.trim() : "";
-  const note =
-    typeof rawNote === "string" && rawNote.trim() ? rawNote.trim() : null;
-
-  if (!Number.isFinite(value)) {
-    throw new Error("Informe um valor numerico valido para a correcao.");
-  }
-
-  if (!unit || unit.length > 40) {
-    throw new Error("Informe uma unidade valida com ate 40 caracteres.");
-  }
-
-  await createAccessibleAssessmentMeasurementCorrection({
-    correctedByProfileId: context.profileId,
-    correctedUnit: unit,
-    correctedValue: value,
-    measurementId: measurement.id,
-    note,
-  });
-
-  revalidatePath("/admin/avaliacoes/" + assessment.id);
-  revalidatePath("/admin/clientes/" + assessment.client_id + "/avaliacoes");
-}
