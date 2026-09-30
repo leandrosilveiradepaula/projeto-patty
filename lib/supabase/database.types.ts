@@ -250,6 +250,7 @@ export type Database = {
       }
       ai_executions: {
         Row: {
+          anamnesis_submission_id: string | null
           client_id: string
           completed_at: string | null
           created_at: string
@@ -263,13 +264,13 @@ export type Database = {
           id: string
           initiated_by_profile_id: string
           model_identifier: string
-          anamnesis_submission_id: string | null
           prompt_version_id: string
           provider: string
           purpose_key: string
           status: string
         }
         Insert: {
+          anamnesis_submission_id?: string | null
           client_id: string
           completed_at?: string | null
           created_at?: string
@@ -283,13 +284,13 @@ export type Database = {
           id?: string
           initiated_by_profile_id: string
           model_identifier: string
-          anamnesis_submission_id?: string | null
           prompt_version_id: string
           provider: string
           purpose_key: string
           status?: string
         }
         Update: {
+          anamnesis_submission_id?: string | null
           client_id?: string
           completed_at?: string | null
           created_at?: string
@@ -303,13 +304,19 @@ export type Database = {
           id?: string
           initiated_by_profile_id?: string
           model_identifier?: string
-          anamnesis_submission_id?: string | null
           prompt_version_id?: string
           provider?: string
           purpose_key?: string
           status?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "ai_executions_anamnesis_submission_client_fkey"
+            columns: ["anamnesis_submission_id", "client_id"]
+            isOneToOne: false
+            referencedRelation: "anamnesis_submissions"
+            referencedColumns: ["id", "client_id"]
+          },
           {
             foreignKeyName: "ai_executions_client_id_fkey"
             columns: ["client_id"]
@@ -330,13 +337,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ai_executions_anamnesis_submission_client_fkey"
-            columns: ["anamnesis_submission_id", "client_id"]
-            isOneToOne: false
-            referencedRelation: "anamnesis_submissions"
-            referencedColumns: ["id", "client_id"]
           },
           {
             foreignKeyName: "ai_executions_prompt_version_id_fkey"
@@ -466,6 +466,51 @@ export type Database = {
           },
         ]
       }
+      anamnesis_answers: {
+        Row: {
+          answer_value: Json
+          created_at: string
+          form_version_id: string
+          id: string
+          question_id: string
+          submission_id: string
+          updated_at: string
+        }
+        Insert: {
+          answer_value: Json
+          created_at?: string
+          form_version_id: string
+          id?: string
+          question_id: string
+          submission_id: string
+          updated_at?: string
+        }
+        Update: {
+          answer_value?: Json
+          created_at?: string
+          form_version_id?: string
+          id?: string
+          question_id?: string
+          submission_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "anamnesis_answers_question_version_fkey"
+            columns: ["question_id", "form_version_id"]
+            isOneToOne: false
+            referencedRelation: "anamnesis_questions"
+            referencedColumns: ["id", "form_version_id"]
+          },
+          {
+            foreignKeyName: "anamnesis_answers_submission_version_fkey"
+            columns: ["submission_id", "form_version_id"]
+            isOneToOne: false
+            referencedRelation: "anamnesis_submissions"
+            referencedColumns: ["id", "form_version_id"]
+          },
+        ]
+      }
       anamnesis_clarification_requests: {
         Row: {
           created_at: string
@@ -551,51 +596,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
-          },
-        ]
-      }
-      anamnesis_answers: {
-        Row: {
-          answer_value: Json
-          created_at: string
-          form_version_id: string
-          id: string
-          question_id: string
-          submission_id: string
-          updated_at: string
-        }
-        Insert: {
-          answer_value: Json
-          created_at?: string
-          form_version_id: string
-          id?: string
-          question_id: string
-          submission_id: string
-          updated_at?: string
-        }
-        Update: {
-          answer_value?: Json
-          created_at?: string
-          form_version_id?: string
-          id?: string
-          question_id?: string
-          submission_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "anamnesis_answers_question_version_fkey"
-            columns: ["question_id", "form_version_id"]
-            isOneToOne: false
-            referencedRelation: "anamnesis_questions"
-            referencedColumns: ["id", "form_version_id"]
-          },
-          {
-            foreignKeyName: "anamnesis_answers_submission_version_fkey"
-            columns: ["submission_id", "form_version_id"]
-            isOneToOne: false
-            referencedRelation: "anamnesis_submissions"
-            referencedColumns: ["id", "form_version_id"]
           },
         ]
       }
@@ -900,6 +900,48 @@ export type Database = {
           },
         ]
       }
+      client_activity_checkin_events: {
+        Row: {
+          checkin_date: string
+          client_id: string
+          did_activity: boolean
+          id: string
+          recorded_at: string
+          recorded_by_profile_id: string
+        }
+        Insert: {
+          checkin_date?: string
+          client_id: string
+          did_activity: boolean
+          id?: string
+          recorded_at?: string
+          recorded_by_profile_id: string
+        }
+        Update: {
+          checkin_date?: string
+          client_id?: string
+          did_activity?: boolean
+          id?: string
+          recorded_at?: string
+          recorded_by_profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_activity_checkin_events_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_activity_checkin_events_recorded_by_profile_id_fkey"
+            columns: ["recorded_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_assessments: {
         Row: {
           assessed_at: string
@@ -937,6 +979,20 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_assessments_created_by_profile_id_fkey"
+            columns: ["created_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_assessments_finalized_by_profile_id_fkey"
+            columns: ["finalized_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1226,6 +1282,93 @@ export type Database = {
           {
             foreignKeyName: "client_files_uploaded_by_profile_id_fkey"
             columns: ["uploaded_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_hydration_targets: {
+        Row: {
+          client_id: string
+          created_at: string
+          created_by_profile_id: string
+          id: string
+          method_key: string
+          target_ml: number | null
+          weight_kg: number
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          created_by_profile_id: string
+          id?: string
+          method_key?: string
+          target_ml?: number | null
+          weight_kg: number
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          created_by_profile_id?: string
+          id?: string
+          method_key?: string
+          target_ml?: number | null
+          weight_kg?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_hydration_targets_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_hydration_targets_created_by_profile_id_fkey"
+            columns: ["created_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_liquid_intake_events: {
+        Row: {
+          amount_ml: number
+          client_id: string
+          id: string
+          liquid_kind: string
+          recorded_at: string
+          recorded_by_profile_id: string
+        }
+        Insert: {
+          amount_ml: number
+          client_id: string
+          id?: string
+          liquid_kind: string
+          recorded_at?: string
+          recorded_by_profile_id: string
+        }
+        Update: {
+          amount_ml?: number
+          client_id?: string
+          id?: string
+          liquid_kind?: string
+          recorded_at?: string
+          recorded_by_profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_liquid_intake_events_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_liquid_intake_events_recorded_by_profile_id_fkey"
+            columns: ["recorded_by_profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -2111,16 +2254,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      clone_protocol_version_draft: {
+        Args: { p_plan_snapshot: Json; p_source_protocol_version_id: string }
+        Returns: string
+      }
       complete_ai_execution: {
         Args: { p_content: Json; p_execution_id: string }
         Returns: undefined
-      }
-      clone_protocol_version_draft: {
-        Args: {
-          p_plan_snapshot: Json | null
-          p_source_protocol_version_id: string
-        }
-        Returns: string
       }
       current_user_admin_mfa_satisfied: { Args: never; Returns: boolean }
       current_user_is_assigned_admin: { Args: never; Returns: boolean }
@@ -2128,11 +2268,11 @@ export type Database = {
         Args: {
           p_execution_id: string
           p_failure_code: string
-          p_failure_message: string | null
+          p_failure_message: string
           p_failure_stage: string
-          p_response_content: string | null
-          p_response_content_format: string | null
-          p_response_received_at: string | null
+          p_response_content: string
+          p_response_content_format: string
+          p_response_received_at: string
         }
         Returns: undefined
       }
