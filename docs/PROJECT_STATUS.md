@@ -877,3 +877,17 @@ Conclusao operacional: a falha nao esta demonstrada no YAML nem no label do runn
 - o primeiro video educacional aprovado continua bloqueado ate criacao/conexao de Vercel Private Blob, operacao nao exposta pela integracao disponivel;
 - Leaked Password Protection permanece dependente da configuracao/plano do Supabase;
 - canal real dos lembretes de esclarecimento continua sem decisao.
+
+
+## Auditoria desktop da interface - 2026-09-30
+
+A prioridade atual da interface foi definida como **desktop administrativo primeiro**.
+
+PRs em preparação:
+- #243: simplificação global do desktop administrativo;
+- #244: workspace contextual por cliente;
+- #242: PWA instalável, pausado até a rodada desktop estar validada.
+
+Os PRs #242, #243 e #244 permanecem em draft enquanto a Vercel estiver impedindo novos builds por rate limit.
+
+Auditoria detalhada: `docs/UI_UX_DESKTOP_20260930.md`.
