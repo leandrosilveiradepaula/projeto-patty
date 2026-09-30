@@ -1,0 +1,181 @@
+import { addLiquidIntakeAction, recordActivityCheckinAction } from "@/app/cliente/checkins/actions";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Section } from "@/components/ui/Section";
+import {
+  getCurrentClient,
+  listAccessibleClientActivityCheckinEvents,
+  listAccessibleClientHydrationTargets,
+  listAccessibleClientLiquidIntakeEvents,
+} from "@/lib/supabase/data-access";
+
+import styles from "./page.module.css";
+
+function saoPauloDate(value: Date | string) {
+  return new Intl.DateTimeFormat("en-CA", {
+    day: "2-digit",
+    month: "2-digit",
+    timeZone: "America/Sao_Paulo",
+    year: "numeric",
+  }).format(typeof value === "string" ? new Date(value) : value);
+}
+
+function formatMl(value: number) {
+  if (value >= 1000) {
+    return (
+      new Intl.NumberFormat("pt-BR", {
+        maximumFractionDigits: 2,
+      }).format(value / 1000) + " L"
+    );
+  }
+
+  return new Intl.NumberFormat("pt-BR").format(value) + " mL";
+}
+
+export default async function ClientCheckinsPage() {
+  const client = await getCurrentClient();
+
+  if (!client) {
+    return (
+      <EmptyState
+        description="Seu cadastro de cliente ainda nao esta configurado."
+        title="Cadastro pendente"
+      />
+    );
+  }
+
+  const today = saoPauloDate(new Date());
+  const recentFrom = new Date(Date.now() - 36 * 60 * 60 * 1000).toISOString();
+
+  const [targets, recentLiquidEvents, activityEvents] = await Promise.all([
+    listAccessibleClientHydrationTargets(client.id),
+    listAccessibleClientLiquidIntakeEvents(client.id, recentFrom),
+    listAccessibleClientActivityCheckinEvents(client.id, today),
+  ]);
+
+  const target = targets[0] ?? null;
+  const todayLiquidEvents = recentLiquidEvents.filter(
+    (event) => saoPauloDate(event.recorded_at) === today,
+  );
+  const totalMl = todayLiquidEvents.reduce(
+    (sum, event) => sum + event.amount_ml,
+    0,
+  );
+  const waterMl = todayLiquidEvents
+    .filter((event) => event.liquid_kind === "water")
+    .reduce((sum, event) => sum + event.amount_ml, 0);
+  const latestActivity = activityEvents[0] ?? null;
+  const progress =
+    target && target.target_ml > 0
+      ? Math.min(100, Math.round((totalMl / target.target_ml) * 100))
+      : null;
+
+  return (
+    <>
+      <PageHeader
+        description="Registre seus liquidos ao longo do dia e informe se realizou atividade fisica. Esses registros nao geram score automatico de adesao."
+        eyebrow="Cliente"
+        title="Check-ins diarios"
+      />
+
+      <Section
+        description="A meta e definida pela Patty a partir do peso usado naquele momento. Mudancas de peso nao recalculam esta meta automaticamente."
+        title="Liquidos"
+      >
+        <div className={styles.grid}>
+          <Card className={styles.summaryCard}>
+            <div className={styles.summaryHeader}>
+              <h3 className={styles.cardTitle}>Hoje</h3>
+              <Badge variant="neutral">
+                {progress === null ? "Meta ainda nao definida" : String(progress) + "%"}
+              </Badge>
+            </div>
+            <dl className={styles.metrics}>
+              <div>
+                <dt>Total registrado</dt>
+                <dd>{formatMl(totalMl)}</dd>
+              </div>
+              <div>
+                <dt>Agua pura</dt>
+                <dd>{formatMl(waterMl)}</dd>
+              </div>
+              <div>
+                <dt>Meta atual</dt>
+                <dd>{target ? formatMl(target.target_ml) : "Nao definida"}</dd>
+              </div>
+            </dl>
+            {target ? (
+              <p className={styles.note}>
+                Meta registrada com base em{" "}
+                {Number(target.weight_kg).toLocaleString("pt-BR")} kg.
+                A maior parte deve ser agua pura; outros liquidos zero calorias
+                podem complementar em menor quantidade.
+              </p>
+            ) : (
+              <p className={styles.note}>
+                A Patty ainda nao registrou uma meta de liquidos para voce.
+              </p>
+            )}
+          </Card>
+
+          <Card className={styles.formCard}>
+            <h3 className={styles.cardTitle}>Adicionar liquido</h3>
+            <form action={addLiquidIntakeAction} className={styles.form}>
+              <label className={styles.field}>
+                <span>Quantidade em mL</span>
+                <input min="1" name="amountMl" required type="number" />
+              </label>
+              <label className={styles.field}>
+                <span>Tipo</span>
+                <select defaultValue="water" name="liquidKind">
+                  <option value="water">Agua pura</option>
+                  <option value="zero_calorie_other">
+                    Outro liquido zero calorias
+                  </option>
+                </select>
+              </label>
+              <Button type="submit">Registrar liquido</Button>
+            </form>
+          </Card>
+        </div>
+      </Section>
+
+      <Section
+        description="O check-in e independente do treino prescrito. Se precisar corrigir a resposta do dia, um novo registro preserva o historico anterior."
+        title="Atividade fisica"
+      >
+        <Card className={styles.formCard}>
+          <div className={styles.summaryHeader}>
+            <h3 className={styles.cardTitle}>Voce fez atividade fisica hoje?</h3>
+            <Badge variant="neutral">
+              {latestActivity
+                ? latestActivity.did_activity
+                  ? "Ultimo registro: sim"
+                  : "Ultimo registro: nao"
+                : "Ainda nao registrado"}
+            </Badge>
+          </div>
+          <form
+            action={recordActivityCheckinAction}
+            className={styles.activityActions}
+          >
+            <Button name="didActivity" type="submit" value="yes">
+              Sim
+            </Button>
+            <Button
+              name="didActivity"
+              type="submit"
+              value="no"
+              variant="secondary"
+            >
+              Nao
+            </Button>
+          </form>
+        </Card>
+      </Section>
+    </>
+  );
+}
