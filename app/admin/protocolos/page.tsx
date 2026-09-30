@@ -10,7 +10,12 @@ export default async function AdminProtocolosPage() {
 
   return (
     <>
-      <PageHeader description="Consulta dos protocolos acessíveis para a administração atual." eyebrow="Admin" title="Protocolos" />
+      <PageHeader
+        actions={<Link className={styles.actionLink} href="/admin/protocolos/calculadora-carb-cycle">Calculadora Carb Cycle</Link>}
+        description="Consulta dos protocolos acessíveis para a administração atual."
+        eyebrow="Admin"
+        title="Protocolos"
+      />
       <Section description="Protocolos disponíveis conforme as atribuições administrativas ativas." title="Protocolos registrados">
         {protocols.length === 0 ? (
           <EmptyState description="Nenhum protocolo está acessível para a administração atual." title="Sem protocolos registrados" />
