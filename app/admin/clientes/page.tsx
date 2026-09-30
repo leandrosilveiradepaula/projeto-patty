@@ -58,11 +58,11 @@ export default async function AdminClientesPage({
           A conta inicial da cliente foi provisionada e o convite de ativação foi enviado.
         </Alert>
       ) : assignment === "ended" ? (
-        <Alert live="polite" title="Atribuição encerrada" variant="success">
+        <Alert live="polite" title="Acompanhamento encerrado" variant="success">
           O acompanhamento atual foi encerrado e o histórico da cliente foi preservado.
         </Alert>
       ) : assignment === "unavailable" ? (
-        <Alert live="assertive" title="Atribuição indisponível" variant="warning">
+        <Alert live="assertive" title="Acompanhamento indisponível" variant="warning">
           Não havia um acompanhamento ativo para encerrar.
         </Alert>
       ) : assignment === "invalid" ? (
@@ -104,7 +104,7 @@ export default async function AdminClientesPage({
         </form>
 
         {clients.length === 0 ? (
-          <p className={styles.emptyMessage}>Nenhuma cliente está atribuída ao seu perfil no momento.</p>
+          <p className={styles.emptyMessage}>Nenhuma cliente está em acompanhamento no momento.</p>
         ) : filteredClients.length === 0 ? (
           <p className={styles.emptyMessage}>Nenhuma cliente encontrada para “{searchTerm}”.</p>
         ) : (
