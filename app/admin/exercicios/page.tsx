@@ -21,18 +21,18 @@ export default async function AdminExerciciosPage() {
   return (
     <>
       <PageHeader
-        description="Biblioteca técnica de exercícios acessível ao seu perfil administrativo."
+        description="Consulte os exercícios disponíveis para apoiar a montagem dos treinos."
         eyebrow="Admin"
         title="Exercícios"
       />
       <Section
-        description="Versões registradas em ordem da criação mais recente para a mais antiga."
+        description="Os exercícios mais recentes aparecem primeiro."
         title="Biblioteca de exercícios"
       >
         {exerciseVersions.length === 0 ? (
           <EmptyState
-            description="As versões de exercícios visíveis ao seu perfil aparecerão nesta área."
-            title="Nenhum exercício disponível"
+            description="Quando houver exercícios cadastrados, eles aparecerão aqui."
+            title="A biblioteca de exercícios está vazia"
           />
         ) : (
           <ul className={styles.exerciseList}>
