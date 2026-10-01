@@ -1165,3 +1165,38 @@ Gate antes de qualquer apply:
 - CI geral;
 - advisors;
 - revisao final de diff/migrations.
+
+
+## Divergencia de migration history detectada - 2026-10-01
+
+### BLOQUEIO PARA DB PUSH / DRY-RUN OFICIAL
+
+A comparacao entre `supabase/migrations` em `master` e `supabase_migrations.schema_migrations` no projeto Supabase SaaS encontrou quatro migrations antigas com o mesmo nome logico, mas timestamps diferentes.
+
+Repositorio local:
+- `20260927014500_clone_protocol_version_draft.sql`
+- `20260930152000_create_ai_finding_actions.sql`
+- `20260930153000_harden_ai_finding_action_boundary.sql`
+- `20260930154000_enforce_single_ai_finding_action.sql`
+
+Historico remoto aplicado:
+- `20260930131848_clone_protocol_version_draft`
+- `20260930151722_create_ai_finding_actions`
+- `20260930152158_harden_ai_finding_action_boundary`
+- `20260930152248_enforce_single_ai_finding_action`
+
+A migration nova `20261001213333_create_method_configuration_foundation.sql` e a unica mudanca realmente nova desta etapa.
+
+Validacao do schema remoto confirmou que os efeitos das quatro migrations antigas estao presentes:
+- `clone_protocol_version_draft(uuid,jsonb)`;
+- tabela `ai_finding_actions`;
+- RPC `record_ai_finding_action_server(...)`;
+- constraint `ai_finding_actions_one_human_decision_per_finding`;
+- trigger imutavel de `ai_finding_actions`;
+- policy MFA AAL2.
+
+Conclusao: nao executar `supabase db push` nem `supabase db push --dry-run` antes de reconciliar os identificadores de migration. O objetivo da reconciliacao e alinhar filenames/metadata sem reaplicar SQL nem alterar o schema.
+
+A integracao GitHub desta sessao bloqueou a tentativa de renomear arquivos de migration. Portanto a correcao deve ser executada por Git/CLI normal, preservando byte-for-byte o SQL existente, ou por `supabase migration repair` somente se for conscientemente escolhida a alteracao de metadata remota.
+
+Nenhum repair foi executado e nenhuma migration history remota foi alterada.
