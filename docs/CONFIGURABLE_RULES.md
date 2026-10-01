@@ -314,3 +314,7 @@ Exemplos já conhecidos que precisarão migrar para configuração:
 
 O código pode continuar contendo temporariamente os valores atuais durante a migração, mas o estado final não deve depender deles hardcoded.
 
+
+## Inventário técnico de hardcodes
+
+O inventário auditado do runtime atual está em `PROFESSIONAL_RULE_HARDCODE_INVENTORY.md`. Ele deve ser consultado antes de criar migrations ou substituir constantes profissionais, e deve ser atualizado conforme novos acoplamentos forem encontrados durante a migração.
