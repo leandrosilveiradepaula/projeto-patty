@@ -1113,21 +1113,20 @@ Fora de escopo:
 - escolha de fase/protocolo.
 
 
-## PWA instalavel - PR #242 revalidado em 2026-10-01
+## Desktop admin UX - PR #243 revalidado em 2026-10-01
 
-### SINCRONIZADO COM O MASTER ATUAL / AINDA NAO PUBLICADO
+### SINCRONIZADO COM O MASTER ATUAL
 
-A branch `codex/installable-pwa` foi reconciliada com o master atual sem restaurar documentacao antiga.
+A branch do PR #243 foi reconciliada com o master apos a fundacao de parametrizacao e o engine deterministico v1, sem restaurar a versao antiga de PROJECT_STATUS.
 
-Fundacao preparada:
-- Web App Manifest em `app/manifest.ts`;
-- modo `standalone`;
-- icones 192x192, 512x512 e maskable gerados pelo Next.js;
-- icone Apple;
-- metadata mobile/theme;
-- rotas de metadata e icones excluidas do proxy de sessao;
-- sem service worker;
-- sem cache offline de dados privados;
-- sem push notification.
+O escopo continua exclusivamente de UX desktop administrativa:
+- dashboard mais enxuto e orientado a acoes;
+- linguagem operacional simplificada;
+- navegacao/sidebar desktop;
+- busca e estados vazios em modulos administrativos;
+- apresentacao de datas em America/Sao_Paulo;
+- ajustes visuais de upload e metricas.
 
-O antigo bloqueio de build-rate-limit do Vercel nao esta ativo. Gate atual: CI/build verde da branch sincronizada. So depois do merge e deployment `READY` esta fundacao pode ser tratada como publicada.
+Nao altera schema, RLS, regras profissionais, configuracao parametrizada ou migrations.
+
+O antigo bloqueio de build-rate-limit do Vercel nao esta ativo; o gate atual passa a ser CI/build da branch sincronizada e validacao visual do deployment de producao apos merge.

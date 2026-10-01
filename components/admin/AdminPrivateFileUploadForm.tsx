@@ -159,7 +159,7 @@ export function AdminPrivateFileUploadForm({
       ) : null}
 
       <FormField
-        description="A categoria define a allowlist e o limite de tamanho aplicados."
+        description="Escolha o tipo do arquivo para aplicar os formatos e limites corretos."
         id="admin-private-file-kind"
         label="Categoria"
         required
@@ -204,14 +204,8 @@ export function AdminPrivateFileUploadForm({
       </FormField>
 
       <p className={styles.notice}>
-        O arquivo vai direto para o Storage privado por autorização temporária.
-        A credencial privilegiada permanece no servidor. Depois do envio, o
-        conteúdo real é validado antes do registro definitivo.
-      </p>
-
-      <p className={styles.notice}>
-        Uploads administrativos ficam ocultos para a cliente até você escolher
-        “Liberar para cliente”.
+        O arquivo será validado antes de aparecer no histórico. Ele ficará
+        oculto para a cliente até você escolher “Liberar para cliente”.
       </p>
 
       <Button loading={isPending} type="submit">
