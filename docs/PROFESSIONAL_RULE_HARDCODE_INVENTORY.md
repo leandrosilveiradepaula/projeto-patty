@@ -80,29 +80,33 @@ Estado no PR #253:
 
 ### HR-003 — Limite do grupo de proteína com maior teor de gordura
 
-**Classificação:** MIGRAR.
+**Classificação:** EM MIGRAÇÃO — runtime parametrizado no PR #255; seed oficial ainda não aplicado.
 
 Arquivo ativo:
 
 - `lib/method/doses.ts`.
 
-Hardcode lógico atual:
-
-- `Math.ceil(totalProteinDoses / 2)`.
-
-Regra atual confirmada:
+Regra confirmada preservada:
 
 - metade das doses totais de proteína, arredondando para cima.
 
-Destino esperado:
+Estado no PR #255:
 
-- fórmula declarativa versionada equivalente a `ceil(total * 0.5)`;
-- o motor implementa `ceil`, multiplicação e referência a parâmetro, mas `0.5` pertence à configuração;
-- snapshot do cálculo e do override, quando houver.
+- `Math.ceil(totalProteinDoses / 2)` saiu do runtime;
+- o helper recebe configuração `method_engine_v1`;
+- coeficiente `0.5` está em `higher_fat_ratio`;
+- arredondamento `ceil` está na AST configurada;
+- golden tests reproduzem 8 -> 4, 7 -> 4 e 9 -> 5;
+- testes também demonstram alteração de ratio e arredondamento sem edição de código;
+- migration `20261001235018_seed_higher_fat_protein_limit_template.sql` cria `nutrition.protein.higher_fat_daily_limit`;
+- snapshots em consumidores operacionais continuam etapa posterior porque o helper ainda não possui consumidor fora dos testes;
+- a migration ainda não foi aplicada no SaaS.
+
+Critério para marcar como migrado: migration aplicada + template ativo confirmado no SaaS.
 
 ### HR-004 — Referência do Reconhecimento Metabólico
 
-**Classificação:** EM MIGRAÇÃO — runtime parametrizado no PR #253; seed oficial ainda não aplicado.
+**Classificação:** MIGRADO — runtime parametrizado e seed oficial aplicado no SaaS.
 
 Arquivo ativo:
 
