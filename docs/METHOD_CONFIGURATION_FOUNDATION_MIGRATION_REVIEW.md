@@ -6,10 +6,12 @@
 
 **PROPOSTA — NÃO É MIGRATION OFICIAL — NÃO APLICADA**
 
-Arquivos:
+Arquivos canonicos:
 
-- `METHOD_CONFIGURATION_FOUNDATION_MIGRATION_PROPOSAL.sql`;
-- `METHOD_CONFIGURATION_FOUNDATION_PGTAP_PROPOSAL.sql`.
+- `METHOD_CONFIGURATION_FOUNDATION_MIGRATION_PROPOSAL_V2.sql`;
+- `METHOD_CONFIGURATION_FOUNDATION_PGTAP_PROPOSAL_V2.sql`.
+
+A V1 foi substituida pela V2 apos a revisao da cadeia completa de overrides. Os arquivos V1 foram removidos da arvore atual para evitar uso acidental; seu historico permanece preservado no Git.
 
 Eles permanecem em `docs/` de propósito. O Supabase CLI não está disponível no ambiente desta sessão, e a regra operacional do projeto/skill exige criar o arquivo oficial com `supabase migration new <nome>` antes de colocá-lo em `supabase/migrations`.
 
