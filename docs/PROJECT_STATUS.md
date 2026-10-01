@@ -976,3 +976,22 @@ Estado:
 - migration antiga alterada: NAO.
 
 Proximo gate: gerar a migration oficial com `supabase migration new create_method_configuration_foundation`, copiar o SQL revisado, adaptar o pgTAP, executar static gate/testes/advisors e somente depois considerar apply.
+
+
+## Dry-run da foundation configuravel - 2026-10-01
+
+### PASS / NENHUMA ALTERACAO PERSISTIDA
+
+A proposta `docs/METHOD_CONFIGURATION_FOUNDATION_MIGRATION_PROPOSAL.sql` foi validada diretamente no Supabase SaaS dentro de transacao com `ROLLBACK`.
+
+O gate confirmou criacao das 5 tabelas, RLS, policy MFA restritiva e grants minimos esperados. Consulta pos-rollback confirmou `0` tabelas da foundation persistidas.
+
+Estado:
+- proposta SQL validada no schema real: SIM;
+- migration oficial criada: NAO;
+- pgTAP oficial executado: NAO;
+- migration history alterada: NAO;
+- schema SaaS alterado: NAO;
+- runtime alterado: NAO.
+
+O warning de seguranca conhecido do projeto continua independente desta proposta; nao houve novo finding causado pelo dry-run.
