@@ -2,7 +2,7 @@
 
 ## Estado
 
-A fundação PWA está implementada na branch `codex/installable-pwa`, mas ainda precisa passar por build antes de merge/publicação.
+A fundação PWA está implementada na branch `codex/installable-pwa`, reconciliada com o master atual e em validação de CI/build antes de merge/publicação.
 
 ## Objetivo
 
