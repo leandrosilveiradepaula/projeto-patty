@@ -825,17 +825,18 @@ Somente avaliacao finalizada pode receber esse tipo de correcao. Em rascunho, a 
 
 ## Configuracao profissional versionada
 
-### DECISAO TECNICA DOCUMENTADA - NAO IMPLEMENTADA
+### IMPLEMENTADO NO BANCO - 2026-10-01
 
 O contrato conceitual completo esta em `METHOD_CONFIGURATION_CONTRACT.md`.
 
-A fundacao futura deve separar:
+A foundation aplicada separa:
 
 - `method_configuration_templates`: identidade logica e schema conhecido da configuracao;
 - `method_configuration_versions`: versoes completas e validadas do template;
 - `client_method_configuration_override_versions`: overrides versionados por cliente e, quando aplicavel, por protocolo;
 - `method_configuration_snapshot_sets`: agrupamento imutavel das configuracoes usadas por um artefato;
-- `method_configuration_snapshots`: inputs, configuracao resolvida e resultados efetivamente usados.
+- `method_configuration_snapshots`: inputs, configuracao resolvida e resultados efetivamente usados;
+- `method_configuration_snapshot_overrides`: cadeia ordenada e imutavel dos overrides efetivamente aplicados ao snapshot.
 
 Nao usar relacao polimorfica generica `scope_type + scope_id` ou `consumer_type + consumer_id` sem FK. Cada dominio consumidor deve ganhar FK explicita quando entrar na migracao.
 
@@ -849,4 +850,4 @@ A configuracao mais especifica prevalece somente nas chaves permitidas pelo sche
 
 Templates globais nao sao client-scoped. Overrides e snapshots sao client-scoped.
 
-Nenhuma entidade deste desenho existe no banco enquanto a migration correspondente nao for criada, revisada e validada.
+As entidades acima existem no Supabase SaaS desde a aplicacao da migration `20261001213333_create_method_configuration_foundation.sql`. A existencia da foundation nao significa que todos os hardcodes profissionais ja foram migrados nem que todos os fluxos atuais ja a consomem.

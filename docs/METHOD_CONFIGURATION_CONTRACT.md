@@ -4,13 +4,13 @@
 
 ## Status
 
-### DECISÃO TÉCNICA DOCUMENTADA — ENGINE V1 PARCIALMENTE IMPLEMENTADO
+### IMPLEMENTADO — FOUNDATION APLICADA / ENGINE V1 PARCIALMENTE IMPLEMENTADO
 
 Este documento define o contrato mínimo para substituir hardcodes profissionais por configuração versionada sem transformar o Projeto Patty em um interpretador de código arbitrário.
 
-Ainda não existe migration, tabela nova ou runtime novo decorrente deste documento.
+A foundation relacional foi materializada pela migration `20261001213333_create_method_configuration_foundation.sql` e aplicada no Supabase SaaS em 2026-10-01. O engine determinístico v1 permanece parcialmente implementado e a migração dos hardcodes profissionais continua incremental.
 
-A implementação deve começar pequena, reproduzir o comportamento atual e manter compatibilidade com dados/snapshots históricos.
+A evolução deve continuar pequena, reproduzir o comportamento atual e manter compatibilidade com dados/snapshots históricos.
 
 ## Requisitos de produto já confirmados
 
