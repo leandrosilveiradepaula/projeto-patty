@@ -1028,3 +1028,16 @@ Migration history: inalterada.
 A V1 continua somente como historico de revisao e nao deve ser usada para gerar migration oficial.
 
 Proximo gate: executar o companion pgTAP V2 em ambiente de teste apropriado e, somente depois, gerar a migration oficial pelo fluxo do Supabase CLI.
+
+
+## Static gate V2 - 2026-10-01
+
+### PASS / PGTAP AINDA NAO EXECUTADO
+
+A foundation V2 recebeu novo static gate depois da correcao da cadeia de overrides e do companion pgTAP.
+
+Cobertura confirmada: 6 tabelas, RLS/MFA, grants minimos, FKs client-scoped, cadeia cliente + protocolo, `precedence`, unicidade e imutabilidade.
+
+Foi corrigido um erro de sintaxe no companion pgTAP V2 nos `throws_ok` de snapshot, usando dollar-quoting nomeado `$sql$...$sql$`.
+
+Pendencia restante: executar o pgTAP V2 em ambiente de teste apropriado com pgTAP disponivel. O SaaS de producao nao foi alterado para instalar extensao ou criar usuarios sinteticos.
