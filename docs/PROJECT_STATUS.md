@@ -1169,25 +1169,22 @@ Gate antes de qualquer apply:
 
 ## Divergencia de migration history detectada - 2026-10-01
 
-### BLOQUEIO PARA DB PUSH / DRY-RUN OFICIAL
+### RESOLVIDO NO REPOSITORIO / SAAS INALTERADO
 
-A comparacao entre `supabase/migrations` em `master` e `supabase_migrations.schema_migrations` no projeto Supabase SaaS encontrou quatro migrations antigas com o mesmo nome logico, mas timestamps diferentes.
+A comparacao entre `supabase/migrations` e `supabase_migrations.schema_migrations` encontrou quatro migrations antigas com o mesmo nome logico e efeitos ja presentes no schema remoto, mas timestamps locais diferentes dos timestamps registrados no SaaS.
 
-Repositorio local:
-- `20260927014500_clone_protocol_version_draft.sql`
-- `20260930152000_create_ai_finding_actions.sql`
-- `20260930153000_harden_ai_finding_action_boundary.sql`
-- `20260930154000_enforce_single_ai_finding_action.sql`
+A reconciliacao foi executada no Git renomeando somente os arquivos locais para os timestamps remotos ja aplicados:
 
-Historico remoto aplicado:
-- `20260930131848_clone_protocol_version_draft`
-- `20260930151722_create_ai_finding_actions`
-- `20260930152158_harden_ai_finding_action_boundary`
-- `20260930152248_enforce_single_ai_finding_action`
+- `20260930131848_clone_protocol_version_draft.sql`
+- `20260930151722_create_ai_finding_actions.sql`
+- `20260930152158_harden_ai_finding_action_boundary.sql`
+- `20260930152248_enforce_single_ai_finding_action.sql`
 
-A migration nova `20261001213333_create_method_configuration_foundation.sql` e a unica mudanca realmente nova desta etapa.
+Cada rename foi validado comparando o blob SHA antes/depois; o conteudo SQL permaneceu byte a byte identico.
 
-Validacao do schema remoto confirmou que os efeitos das quatro migrations antigas estao presentes:
+Nenhum `supabase migration repair` foi executado. Nenhuma linha de `supabase_migrations.schema_migrations` foi alterada. Nenhum SQL dessas quatro migrations foi reaplicado.
+
+O schema remoto continua confirmando os efeitos esperados dessas migrations:
 - `clone_protocol_version_draft(uuid,jsonb)`;
 - tabela `ai_finding_actions`;
 - RPC `record_ai_finding_action_server(...)`;
@@ -1195,8 +1192,6 @@ Validacao do schema remoto confirmou que os efeitos das quatro migrations antiga
 - trigger imutavel de `ai_finding_actions`;
 - policy MFA AAL2.
 
-Conclusao: nao executar `supabase db push` nem `supabase db push --dry-run` antes de reconciliar os identificadores de migration. O objetivo da reconciliacao e alinhar filenames/metadata sem reaplicar SQL nem alterar o schema.
+A migration `20261001213333_create_method_configuration_foundation.sql` permanece a unica migration nova ainda nao aplicada no SaaS.
 
-A integracao GitHub desta sessao bloqueou a tentativa de renomear arquivos de migration. Portanto a correcao deve ser executada por Git/CLI normal, preservando byte-for-byte o SQL existente, ou por `supabase migration repair` somente se for conscientemente escolhida a alteracao de metadata remota.
-
-Nenhum repair foi executado e nenhuma migration history remota foi alterada.
+Proximo gate: validar a lista local/remota e executar o dry-run oficial da migration nova antes de qualquer apply.
