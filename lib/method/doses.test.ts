@@ -2,43 +2,74 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
-  DOSE_GRAMS,
   dosesToGrams,
   gramsPerDose,
   gramsToDoses,
   maxHigherFatProteinDoses,
+  parseDoseGramConfiguration,
 } from "./doses.ts";
 
-test("uses the confirmed grams per dose", () => {
-  assert.equal(DOSE_GRAMS.protein, 15);
-  assert.equal(DOSE_GRAMS.carbohydrate, 12);
-  assert.equal(DOSE_GRAMS.fat, 6);
+const proteinDose = { value: 15, unit: "g_per_dose" };
+const carbohydrateDose = { value: 12, unit: "g_per_dose" };
+const fatDose = { value: 6, unit: "g_per_dose" };
 
-  assert.equal(gramsPerDose("protein"), 15);
-  assert.equal(gramsPerDose("carbohydrate"), 12);
-  assert.equal(gramsPerDose("fat"), 6);
+test("reproduces the current dose baselines from explicit configuration", () => {
+  assert.equal(gramsPerDose(proteinDose), 15);
+  assert.equal(gramsPerDose(carbohydrateDose), 12);
+  assert.equal(gramsPerDose(fatDose), 6);
+
+  assert.equal(dosesToGrams(proteinDose, 2), 30);
+  assert.equal(dosesToGrams(carbohydrateDose, 2.5), 30);
+  assert.equal(dosesToGrams(fatDose, 0.5), 3);
+
+  assert.equal(gramsToDoses(proteinDose, 30), 2);
+  assert.equal(gramsToDoses(carbohydrateDose, 6), 0.5);
+  assert.equal(gramsToDoses(fatDose, 3), 0.5);
 });
 
-test("converts doses to grams without rounding", () => {
-  assert.equal(dosesToGrams("protein", 2), 30);
-  assert.equal(dosesToGrams("carbohydrate", 2.5), 30);
-  assert.equal(dosesToGrams("fat", 0.5), 3);
+test("uses changed configuration without code changes", () => {
+  const changedProteinDose = { value: 18, unit: "g_per_dose" };
+
+  assert.equal(gramsPerDose(changedProteinDose), 18);
+  assert.equal(dosesToGrams(changedProteinDose, 2), 36);
+  assert.equal(gramsToDoses(changedProteinDose, 9), 0.5);
 });
 
-test("converts grams to fractional doses", () => {
-  assert.equal(gramsToDoses("protein", 30), 2);
-  assert.equal(gramsToDoses("carbohydrate", 6), 0.5);
-  assert.equal(gramsToDoses("fat", 3), 0.5);
+test("rejects malformed or unit-mismatched dose configuration", () => {
+  assert.throws(
+    () => parseDoseGramConfiguration({ value: 15, unit: "g" }),
+    TypeError,
+  );
+  assert.throws(
+    () => parseDoseGramConfiguration({ value: Number.NaN, unit: "g_per_dose" }),
+    TypeError,
+  );
+  assert.throws(
+    () =>
+      parseDoseGramConfiguration({
+        value: 15,
+        unit: "g_per_dose",
+        extra: true,
+      }),
+    TypeError,
+  );
 });
 
 test("rejects negative or non-finite dose and gram values", () => {
-  assert.throws(() => dosesToGrams("protein", -1), RangeError);
-  assert.throws(() => dosesToGrams("fat", Number.NaN), RangeError);
-  assert.throws(() => gramsToDoses("protein", -1), RangeError);
-  assert.throws(() => gramsToDoses("fat", Number.POSITIVE_INFINITY), RangeError);
+  assert.throws(() => dosesToGrams(proteinDose, -1), RangeError);
+  assert.throws(() => dosesToGrams(fatDose, Number.NaN), RangeError);
+  assert.throws(() => gramsToDoses(proteinDose, -1), RangeError);
+  assert.throws(
+    () => gramsToDoses(fatDose, Number.POSITIVE_INFINITY),
+    RangeError,
+  );
+  assert.throws(
+    () => gramsToDoses({ value: 0, unit: "g_per_dose" }, 1),
+    RangeError,
+  );
 });
 
-test("limits higher-fat protein group to half, rounded up", () => {
+test("keeps the higher-fat protein limit isolated for the next migration step", () => {
   assert.equal(maxHigherFatProteinDoses(8), 4);
   assert.equal(maxHigherFatProteinDoses(7), 4);
   assert.equal(maxHigherFatProteinDoses(9), 5);
