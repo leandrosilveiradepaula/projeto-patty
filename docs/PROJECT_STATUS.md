@@ -1009,3 +1009,22 @@ Consequencia operacional:
 - depois da correcao do SQL, o dry-run deve ser repetido;
 - nada foi aplicado no SaaS;
 - nenhuma migration history foi alterada.
+
+
+## Foundation configuravel V2 - 2026-10-01
+
+### DRY-RUN PASS / NAO APLICADA
+
+A proposta V2 corrigiu o gap de auditoria da cadeia de overrides por snapshot por meio de entidade associativa imutavel com `precedence`.
+
+Arquivos canonicamente candidatos:
+- `docs/METHOD_CONFIGURATION_FOUNDATION_MIGRATION_PROPOSAL_V2.sql`;
+- `docs/METHOD_CONFIGURATION_FOUNDATION_PGTAP_PROPOSAL_V2.sql`.
+
+Dry-run no Supabase SaaS: PASS.
+Pos-rollback: 0 tabelas da foundation persistidas.
+Migration history: inalterada.
+
+A V1 continua somente como historico de revisao e nao deve ser usada para gerar migration oficial.
+
+Proximo gate: executar o companion pgTAP V2 em ambiente de teste apropriado e, somente depois, gerar a migration oficial pelo fluxo do Supabase CLI.
