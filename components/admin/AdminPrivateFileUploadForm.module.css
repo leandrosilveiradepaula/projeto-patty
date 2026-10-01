@@ -1,6 +1,7 @@
 .form {
   display: grid;
   gap: var(--space-4);
+  max-width: 820px;
 }
 
 .select,
@@ -39,4 +40,9 @@
   color: var(--color-text-secondary);
   font-size: var(--text-body-small-size);
   line-height: var(--text-body-small-line-height);
+}
+
+.form > button {
+  justify-self: start;
+  min-width: 180px;
 }

@@ -57,3 +57,14 @@
     line-height: var(--text-h1-line-height);
   }
 }
+
+.compact {
+  gap: var(--space-3);
+  min-height: auto;
+  padding: var(--space-4);
+}
+
+.compact .value {
+  font-size: var(--text-h1-size);
+  line-height: var(--text-h1-line-height);
+}

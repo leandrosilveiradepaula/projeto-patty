@@ -1,38 +1,100 @@
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
+import { TextInput } from "@/components/ui/TextInput";
 import { listClientsForPrivateFileAdministration } from "@/lib/files/private-file-admin";
 
 import styles from "./page.module.css";
 
-export default async function AdminPrivateFilesPage() {
-  const clients = await listClientsForPrivateFileAdministration();
+function normalizeSearchValue(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("pt-BR")
+    .trim();
+}
+
+type AdminPrivateFilesPageProps = {
+  searchParams: Promise<{ q?: string }>;
+};
+
+export default async function AdminPrivateFilesPage({
+  searchParams,
+}: AdminPrivateFilesPageProps) {
+  const [{ q }, clients] = await Promise.all([
+    searchParams,
+    listClientsForPrivateFileAdministration(),
+  ]);
+  const searchTerm = q?.trim() ?? "";
+  const normalizedSearchTerm = normalizeSearchValue(searchTerm);
+  const filteredClients = normalizedSearchTerm
+    ? clients.filter((client) =>
+        normalizeSearchValue(client.profiles?.display_name ?? "").includes(
+          normalizedSearchTerm,
+        ),
+      )
+    : clients;
 
   return (
     <>
       <PageHeader
-        description="Área específica para administrar fotos, exames e documentos privados. Este acesso permanece disponível para a Patty mesmo sem assignment ativo."
+        description="Consulte fotos, exames e documentos privados das clientes."
         eyebrow="Admin"
         title="Arquivos privados"
       />
 
       <Section
         action={<Badge variant="neutral">{clients.length} cliente(s)</Badge>}
-        description="A lista abaixo expõe somente a identificação mínima necessária para localizar o histórico de arquivos. Os demais módulos continuam seguindo suas próprias regras de assignment."
+        description="Encontre uma cliente para consultar ou enviar arquivos."
         title="Clientes"
       >
+        <form action="/admin/arquivos" className={styles.searchForm} method="get">
+          <label className={styles.searchLabel} htmlFor="file-client-search">
+            Buscar cliente
+          </label>
+          <div className={styles.searchRow}>
+            <TextInput
+              defaultValue={searchTerm}
+              id="file-client-search"
+              name="q"
+              placeholder="Digite o nome da cliente"
+              type="search"
+            />
+            <Button type="submit" variant="secondary">
+              Buscar
+            </Button>
+            {searchTerm ? (
+              <Link className={styles.clearLink} href="/admin/arquivos">
+                Limpar
+              </Link>
+            ) : null}
+          </div>
+        </form>
+
         {clients.length === 0 ? (
           <EmptyState
             description="Nenhuma cliente está cadastrada."
             title="Sem clientes"
           />
+        ) : filteredClients.length === 0 ? (
+          <EmptyState
+            description={`Não encontramos nenhuma cliente com “${searchTerm}”.`}
+            title="Nenhuma cliente encontrada"
+          />
         ) : (
-          <ul className={styles.clientList}>
-            {clients.map((client) => {
+          <>
+            {searchTerm ? (
+              <p className={styles.resultCount}>
+                {filteredClients.length} de {clients.length} cliente(s) encontrada(s).
+              </p>
+            ) : null}
+            <ul className={styles.clientList}>
+            {filteredClients.map((client) => {
               const displayName = client.profiles?.display_name?.trim();
 
               return (
@@ -47,9 +109,7 @@ export default async function AdminPrivateFilesPage() {
                           {displayName || "Cliente sem nome informado"}
                         </h2>
                         <p className={styles.clientMeta}>
-                          {client.profile_id
-                            ? "Conta vinculada"
-                            : "Sem conta Auth vinculada"}
+                          {client.profile_id ? "Cadastro vinculado" : "Cadastro incompleto"}
                         </p>
                       </div>
                       <span className={styles.openLabel}>Abrir arquivos</span>
@@ -58,7 +118,8 @@ export default async function AdminPrivateFilesPage() {
                 </li>
               );
             })}
-          </ul>
+            </ul>
+          </>
         )}
       </Section>
     </>

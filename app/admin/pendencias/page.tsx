@@ -25,20 +25,20 @@ export default async function AdminPendenciasPage() {
   return (
     <>
       <PageHeader
-        actions={<Badge variant="neutral">Registros: {items.length}</Badge>}
-        description="Estados objetivos que ainda não chegaram ao próximo registro esperado do fluxo. Não há score, prioridade automática, diagnóstico, atraso inferido ou avaliação de adesão."
+        actions={<Badge variant="neutral">{items.length} pendência(s)</Badge>}
+        description="Acompanhe registros que ainda precisam de uma próxima ação no fluxo."
         eyebrow="Admin"
         title="Pendências operacionais"
       />
 
       <Section
-        description="Itens ordenados pela data factual mais antiga primeiro. A ordem não representa prioridade profissional."
+        description="Os itens mais antigos aparecem primeiro."
         title="Registros que exigem acompanhamento"
       >
         {items.length === 0 ? (
           <EmptyState
-            description="Nenhum dos estados operacionais monitorados está aberto para as suas atribuições atuais."
-            title="Sem pendências operacionais"
+            description="Não há registros aguardando acompanhamento neste momento."
+            title="Tudo em dia"
           />
         ) : (
           <ol className={styles.list}>
@@ -59,19 +59,6 @@ export default async function AdminPendenciasPage() {
             ))}
           </ol>
         )}
-      </Section>
-
-      <Section
-        description="O painel deliberadamente não transforma ausência de dados em julgamento profissional."
-        title="O que não é inferido"
-      >
-        <ul className={styles.boundaries}>
-          <li>não marca cliente como atrasada;</li>
-          <li>não calcula adesão ou prioridade;</li>
-          <li>não determina estagnação ou sucesso;</li>
-          <li>não transforma solicitação de treino em pendência de prescrição;</li>
-          <li>não interpreta arquivos recebidos como ação clínica necessária.</li>
-        </ul>
       </Section>
     </>
   );

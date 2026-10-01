@@ -12,18 +12,18 @@ export default async function AdminConteudosPage() {
   return (
     <>
       <PageHeader
-        description="Biblioteca educacional, separada da biblioteca de exercícios."
+        description="Consulte os materiais educacionais disponíveis para uso no acompanhamento."
         eyebrow="Admin"
         title="Conteúdos"
       />
       <Section
-        description="As versões são exibidas individualmente para preservar o histórico editorial."
+        description="Os conteúdos cadastrados aparecem aqui com seu estado de publicação."
         title="Biblioteca educacional"
       >
         {contentVersions.length === 0 ? (
           <EmptyState
-            description="As versões cadastradas aparecerão nesta biblioteca."
-            title="Nenhum conteúdo educacional cadastrado"
+            description="Quando houver conteúdos cadastrados, eles aparecerão aqui."
+            title="A biblioteca de conteúdos está vazia"
           />
         ) : (
           <ul className={styles.contentList}>
