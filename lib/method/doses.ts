@@ -1,29 +1,53 @@
-export const DOSE_GRAMS = {
-  protein: 15,
-  carbohydrate: 12,
-  fat: 6,
-} as const;
+import { parseScalarParameterConfiguration } from "./scalar-parameter.ts";
 
-export type DoseType = keyof typeof DOSE_GRAMS;
+export const DOSE_TYPES = ["protein", "carbohydrate", "fat"] as const;
 
-export function gramsPerDose(type: DoseType) {
-  return DOSE_GRAMS[type];
+export type DoseType = (typeof DOSE_TYPES)[number];
+
+export type DoseGramConfiguration = {
+  value: number;
+  unit: "g_per_dose";
+};
+
+export function parseDoseGramConfiguration(
+  configurationValue: unknown,
+): DoseGramConfiguration {
+  return parseScalarParameterConfiguration(
+    configurationValue,
+    "g_per_dose",
+  );
 }
 
-export function dosesToGrams(type: DoseType, doses: number) {
+export function gramsPerDose(configurationValue: unknown) {
+  return parseDoseGramConfiguration(configurationValue).value;
+}
+
+export function dosesToGrams(
+  configurationValue: unknown,
+  doses: number,
+) {
   if (!Number.isFinite(doses) || doses < 0) {
     throw new RangeError("doses must be a finite non-negative number");
   }
 
-  return doses * DOSE_GRAMS[type];
+  return doses * gramsPerDose(configurationValue);
 }
 
-export function gramsToDoses(type: DoseType, grams: number) {
+export function gramsToDoses(
+  configurationValue: unknown,
+  grams: number,
+) {
   if (!Number.isFinite(grams) || grams < 0) {
     throw new RangeError("grams must be a finite non-negative number");
   }
 
-  return grams / DOSE_GRAMS[type];
+  const doseGrams = gramsPerDose(configurationValue);
+
+  if (doseGrams <= 0) {
+    throw new RangeError("grams per dose must be greater than zero");
+  }
+
+  return grams / doseGrams;
 }
 
 export function maxHigherFatProteinDoses(totalProteinDoses: number) {
