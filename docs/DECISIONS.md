@@ -1,3 +1,43 @@
+
+## 2026-09-30 - Regras, cálculos e workflows totalmente parametrizáveis
+
+### DECISÃO DE PRODUTO E ARQUITETURA
+
+Todas as regras de negócio, regras do método, cálculos, fórmulas, coeficientes, quantidades, limites, séries, repetições, descansos, sequências e workflows devem ser parametrizáveis.
+
+Os valores atualmente existentes nos Excels e nas regras já confirmadas passam a ser **templates iniciais versionados**, e não constantes definitivas do código.
+
+A Patty deve poder:
+- alterar templates globais;
+- criar novas versões;
+- editar parâmetros por cliente;
+- sobrescrever valores em um protocolo ou treino específico;
+- alterar séries/repetições/descansos/exercícios;
+- alterar coeficientes de fórmulas;
+- alterar regras de fases e workflows;
+- preservar o histórico do que foi usado antes da mudança.
+
+### HIERARQUIA
+
+`template versionado -> configuração/override da cliente -> snapshot do protocolo/treino`
+
+Um override individual nunca transforma automaticamente aquele caso em regra global.
+
+### DECISÃO TÉCNICA
+
+O código deve conter o **motor determinístico genérico**, operadores permitidos, validações, unidades, resolução de escopo, versionamento, auditoria e segurança.
+
+Os valores profissionais e as fórmulas estruturadas devem ficar em configuração versionada.
+
+Não executar código arbitrário vindo da configuração.
+
+### INVARIANTES QUE NÃO SÃO PARAMETRIZÁVEIS PELA PATTY
+
+RLS, autenticação, MFA, secrets, segregação Auth/Profile/Client, constraints de integridade, preservação de histórico, segurança de arquivos e a proibição de publicação direta pela IA continuam como invariantes técnicas.
+
+Detalhamento: `docs/CONFIGURABLE_RULES.md`.
+
+
 ## 2026-09-27 - Planilha Carb Cycle: coluna Media corresponde ao Linear
 
 ### REGRA CONFIRMADA PELA PATTY
@@ -1641,7 +1681,7 @@ O limite diario do grupo de maior teor de gordura e metade das doses totais de p
 
 No Cutting Dia 1 / Dia 2, a proteina permanece praticamente igual e o carboidrato e a principal variavel. O protocolo linear anterior e a referencia: Dia 1 usa aproximadamente metade do carboidrato e Dia 2 aproximadamente a quantidade do linear. A gordura pode permanecer ou diminuir.
 
-A etapa 2 Low / 1 High usa a Planilha Carb Cycle baseada no peso. Somente formulas confirmadas e documentadas podem ser implementadas em codigo deterministico. As Fases 5 e 6 continuam abertas.
+A etapa 2 Low / 1 High usa a Planilha Carb Cycle baseada no peso. Somente fórmulas confirmadas e documentadas podem ser cadastradas como configuração ativa e executadas pelo motor determinístico. As Fases 5 e 6 continuam abertas.
 
 ### DECISAO CONFIRMADA
 
@@ -1685,7 +1725,7 @@ As fontes de uma execucao usam FKs concretas mutuamente exclusivas, e nao uma re
 
 A saida original da IA, cada versao editada pela Patty, a versao aprovada e a publicacao sao artefatos distintos. Nenhuma versao anterior deve ser sobrescrita silenciosamente. A rejeicao ou o descarte de uma analise/rascunho pode registrar motivo, mas esse motivo e opcional.
 
-Antes de gerar um rascunho, a Patty escolhe a fase/protocolo do metodo. A IA nao escolhe automaticamente a fase. Regras matematicas confirmadas permanecem em codigo deterministico e testavel; a IA recebe ou utiliza seus resultados, sem derivar formulas por raciocinio generativo.
+Antes de gerar um rascunho, a Patty escolhe a fase/protocolo do metodo. A IA nao escolhe automaticamente a fase. Regras matemáticas confirmadas são executadas por motor determinístico e testável, mas seus valores e fórmulas estruturadas ficam em configuração versionada; a IA recebe ou utiliza seus resultados, sem derivar fórmulas por raciocínio generativo.
 
 Quando faltar uma regra profissional confirmada, a IA pode apresentar sugestao provisoria marcada como HIPOTESE. A hipotese nao vira regra do metodo, nao pode ser baseada em exemplo historico individual como regra geral e exige confirmacao explicita da Patty antes de aprovacao ou publicacao. Uma aprovacao geral de protocolo nao pode ocultar hipotese pendente.
 
@@ -2367,3 +2407,22 @@ A migration aplicada no Supabase SaaS e `20260930134443_create_assessment_measur
 ### LIMITE
 
 Esta primeira materializacao corrige valor e unidade de uma medida existente. Alteracao historica de `measurement_key`, data/tipo da avaliacao ou vinculo de foto continua fora deste fluxo e exige desenho separado se vier a ser necessario.
+
+
+## 2026-10-01 - Engine deterministico configuravel v1
+
+### DECISAO TECNICA IMPLEMENTADA
+
+Foi implementado um evaluator puro e fail-closed para configuracoes profissionais declarativas, sem conectar qualquer fluxo existente e sem embutir valores profissionais.
+
+O engine v1:
+- aceita somente a allowlist documentada de operadores;
+- valida shape, referencias, unidades e numeros finitos;
+- rejeita operador/campo desconhecido;
+- rejeita divisao por zero e algebra de unidades nao suportada;
+- limita profundidade a 32 e quantidade total de nodes a 256;
+- usa arredondamento inteiro com empate afastando de zero;
+- nao usa `eval`, JavaScript configuravel, SQL configuravel ou codigo arbitrario;
+- nao resolve template/override no banco e nao escolhe fase profissional.
+
+A primeira implementacao permanece isolada ate a foundation versionada e seus gates de banco estarem prontos.

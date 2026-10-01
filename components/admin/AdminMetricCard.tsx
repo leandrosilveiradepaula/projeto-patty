@@ -4,6 +4,7 @@ import styles from "./AdminMetricCard.module.css";
 
 export type AdminMetricCardProps = HTMLAttributes<HTMLDivElement> & {
   action?: ReactNode;
+  compact?: boolean;
   description?: ReactNode;
   label: ReactNode;
   status?: ReactNode;
@@ -13,13 +14,18 @@ export type AdminMetricCardProps = HTMLAttributes<HTMLDivElement> & {
 export function AdminMetricCard({
   action,
   className,
+  compact = false,
   description,
   label,
   status,
   value,
   ...props
 }: AdminMetricCardProps) {
-  const classNames = [styles.metricCard, className ?? ""]
+  const classNames = [
+    styles.metricCard,
+    compact ? styles.compact : "",
+    className ?? "",
+  ]
     .filter(Boolean)
     .join(" ");
 

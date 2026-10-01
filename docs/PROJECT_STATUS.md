@@ -58,7 +58,7 @@ Em 2026-09-26, o workflow manual `E2E canonical Anamnesis start smoke`, run `362
 
 O fail anterior do run `36170455838` foi diagnosticado como corrida de UI: o segundo PATCH autenticado chegava ao Supabase com HTTP 200, mas carregava novamente o valor antigo porque um `router.refresh()` assincrono podia remontar o formulario entre o primeiro save e a segunda edicao. O PR #189 removeu refresh pos-save de respostas comuns e manteve navegacao explicita somente para perguntas controladoras de aplicabilidade. PostgreSQL, grants, RLS e schema nao precisaram ser alterados.
 
-Nao existe bloqueio atual de deployment Vercel para o `master`.
+Estado atual revalidado em 2026-10-01: o PR #246 restaurou o baseline verde e foi mergeado no `master` `407ecf24c192fa5ec5ec3a83b58ae6203f9ffe00`. O Vercel publicou esse mesmo commit em producao com estado `READY`. O gap temporario entre `master` e producao foi resolvido.
 
 ## Estado operacional resumido
 
@@ -76,10 +76,10 @@ Nao existe bloqueio atual de deployment Vercel para o `master`.
 | Correcao pos-envio da Anamnese | SIM | SIM | E2E administrativo de producao PASS em 2026-09-24 | Schema aplicado e rota/UI publicadas e validadas em producao | Resposta original continua separada de correcoes e esclarecimentos |
 | Esclarecimentos pos-Anamnese | SIM | SIM | E2E autenticado admin -> cliente -> admin PASS no run `36053370894` | Schema e UI publicados; workflow E2E versionado no PR #155 | Lifecycle sem estado formal/prazo/notificacao continua aberto |
 | Arquivos privados | SIM | PARCIAL/AVANCADO | Smokes cliente/admin + auditoria estatica | Acesso da Patty sem assignment confirmado em RLS/Storage/rotas, com MFA AAL2 | Politica de retencao/hard delete |
-| Avaliacoes e medidas | Fundacao + cadencia profissional parcial definida | Lifecycle operacional de rascunho/finalizacao implementado | CI/build PASS no PR #210 + pre-apply `ROLLBACK` PASS | `20260927002227_create_assessment_draft_lifecycle` APLICADA NO SAAS | Quinzenal: cintura/abdomen/quadril/peso; mensal: todas as medidas + peso + fotos; catalogo mensal, unidades e correcao pos-finalizacao continuam abertos |
+| Avaliacoes e medidas | Fundacao + cadencia profissional parcial definida | Lifecycle operacional de rascunho/finalizacao implementado | CI/build PASS no PR #210 + pre-apply `ROLLBACK` PASS | `20260927002227_create_assessment_draft_lifecycle` APLICADA NO SAAS | Avaliacao Basica ocorre no meio do intervalo entre Completas; Avaliacao Completa usa catalogo confirmado de peso, medidas e fotos; regra de calendario para ancora 29/30/31 continua aberta |
 | Protocolos versionados | SIM | Lifecycle manual implementado | CI/validacoes existentes | Backend/SaaS correspondente existente | Criacao/edicao profissional completa conforme regras ainda abertas |
 | Conteudo educacional / exercicios | SIM como dominios separados | Fundacao/release + metadata de asset preparada | Inventario 89/89 revalidado; smoke transacional de assets PASS | Vercel Private Blob definido para midia; store/upload ainda nao executados | Criar/conectar store privado, migrar video aprovado, verificar hash e publicar/liberar explicitamente |
-| Metodo da Patty | PARCIALMENTE DEFINIDO | Regras matematicas confirmadas em codigo testavel; documentacao em reconciliacao | CI | Fluxo confirmado inclui Cutting 3 Linear -> Dia 1/Dia 2 -> 2 Low/1 High -> Up Metabolico; meta de liquidos 60 mL/kg e equivalencia 2 doses de legumes = 1 dose de carbo confirmadas | Fases 5/6, numeros da planilha por peso do Cutting 3, pos-Up Metabolico, Bulking, Consolidacao, suplementacao, treino, parametros restantes do check-in e criterios objetivos de estagnacao |
+| Metodo da Patty | PARCIALMENTE DEFINIDO | Motor determinístico existente/parcial; regras profissionais devem migrar para configuração versionada e editável | CI | Fluxo confirmado inclui Cutting 3 Linear -> Dia 1/Dia 2 -> 2 Low/1 High -> Up Metabolico; meta de liquidos 60 mL/kg e equivalencia 2 doses de legumes = 1 dose de carbo confirmadas | Fases 5/6, numeros da planilha por peso do Cutting 3, pos-Up Metabolico, Bulking, Consolidacao, suplementacao, treino, parametros restantes do check-in e criterios objetivos de estagnacao |
 | IA assistiva | SIM como principio e arquitetura; provider OpenAI confirmado | PARCIAL/AVANCADO | Adapter OpenAI + Structured Outputs + aliases + UI de revisao humana; default tecnico `gpt-5.6-terra` / reasoning `medium` | Prompt v1 aplicado; PR #151 publicado READY; chamada externa bloqueada | Credencial OpenAI, avaliacao sintetica e conclusao do gate de dados de saude |
 | Failure handling de IA | SIM | SIM no schema + boundary server-side | CI + invariantes deterministicas | `20260922160058` aplicada; provider adapter publicado, mas chamada real segue gated | Manter gate fechado ate avaliacao sintetica/controles de dados; recovery automatico segue aberto |
 | n8n | SIM: nao usar inicialmente | N/A | N/A | Nao usado | Introduzir somente com caso concreto |
@@ -143,7 +143,7 @@ Resumo:
 - para emagrecimento/reducao de gordura, cintura e abdomen sao referencias fortes e fotos podem confirmar evolucao mesmo com peso estavel;
 - adesao e central e nao existe score automatico de adesao;
 - exemplos historicos individuais nao viram regra geral;
-- formulas so entram em codigo quando confirmadas e documentadas.
+- fórmulas profissionais confirmadas entram como configuração versionada; o código contém o motor determinístico, não os valores do método.
 
 ## Anamnese: regras que nao devem ser reabertas
 
@@ -171,7 +171,8 @@ Resumo:
 ## Pendencias de infraestrutura conhecidas
 
 1. **Deployment Vercel**
-   - RESOLVIDO: `master` `bf49254edb9292801eb9ed80a83e1d68262b7b11` publicado como `READY`; smoke canonico consolidado `36257567841` aprovado em producao.
+   - HISTORICO: `master` `bf49254edb9292801eb9ed80a83e1d68262b7b11` foi publicado como `READY` e o smoke canonico `36257567841` foi aprovado naquele baseline.
+   - ESTADO ATUAL 2026-10-01: PR #246 mergeado; `master` em `407ecf24c192fa5ec5ec3a83b58ae6203f9ffe00`; deployment de producao correspondente `READY`. Gap resolvido.
 
 2. **Email real de convite**
    - lifecycle tecnico e E2E sintetico existem;
@@ -830,10 +831,11 @@ A montagem usa somente consultas RLS ja existentes sob as atribuicoes ativas da 
 
 ### PRODUCAO
 
-- `master` atual desta reconciliacao parte do commit `c56d6752c119ee873fcc39bb2b3d4c3af73cb224`;
-- deployment Vercel correspondente `dpl_BiMMHaAutcYZJBpxQzwCdcv9LScz`: `READY`;
-- consulta de erros de runtime nas ultimas 24 horas: nenhum cluster encontrado;
-- nenhuma PR permanece aberta apos a rodada operacional.
+- estado registrado naquela reconciliacao: `master` em `c56d6752c119ee873fcc39bb2b3d4c3af73cb224` e deployment `dpl_BiMMHaAutcYZJBpxQzwCdcv9LScz` `READY`;
+- esse bloco e historico e nao representa o HEAD atual;
+- estado revalidado posteriormente em 2026-10-01: PR #246 mergeado; `master` e producao Vercel alinhados em `407ecf24c192fa5ec5ec3a83b58ae6203f9ffe00`;
+- PRs #242, #243, #244 e #245 permanecem abertos em draft nesta revalidacao;
+- historicamente houve runs encerrados antes de receber steps (`steps: null`), mas em 2026-10-01 o runner voltou a executar normalmente; diagnosticos atuais devem usar os steps/logs reais.
 
 ### SUPABASE SAAS
 
@@ -863,13 +865,13 @@ Advisor de seguranca apos os applies:
 - snapshot historico alimentar desidentificado + validador fail-closed, sem importacao no catalogo ativo;
 - fila historica de revisao da biblioteca de exercicios: 74 videos, 9 titulos genericos e 16 grupos de possivel duplicidade, todos ainda nao autorizados para publicacao.
 
-### GITHUB ACTIONS - BLOQUEIO EXTERNO CONFIRMADO
+### GITHUB ACTIONS - BLOQUEIO EXTERNO HISTORICO / RESOLVIDO
 
-O workflow `Validate application` continua sendo criado, mas o job encerra antes de receber runner e retorna `steps: null`.
+Em uma janela anterior, `Validate application` encerrava antes de receber runner e retornava `steps: null`; o diagnostico controlado do PR #236 reproduziu o comportamento com `ubuntu-24.04` e `ubuntu-latest`.
 
-Foi feito um diagnostico controlado no PR #236 trocando somente `ubuntu-24.04` por `ubuntu-latest`. O run `36737265951` apresentou exatamente o mesmo comportamento e o PR foi fechado sem merge.
+Em 2026-10-01 o runner voltou a executar normalmente. O PR #246 expôs e corrigiu tres problemas reais de baseline (nullability de RPC gerada, contagem estrutural do catalogo historico e inventario/revisao de security boundaries) e depois passou integralmente por typecheck, testes e build.
 
-Conclusao operacional: a falha nao esta demonstrada no YAML nem no label do runner; depende de intervencao de conta/quota/alocacao do GitHub Actions. Nao fazer reruns cegos.
+Conclusao operacional atual: o bloqueio externo nao esta ativo. Novas falhas devem ser tratadas pelos steps/logs reais; nao reutilizar o diagnostico antigo de `steps: null` sem nova evidencia.
 
 ### BLOQUEIOS EXTERNOS QUE PERMANECEM
 
@@ -877,3 +879,254 @@ Conclusao operacional: a falha nao esta demonstrada no YAML nem no label do runn
 - o primeiro video educacional aprovado continua bloqueado ate criacao/conexao de Vercel Private Blob, operacao nao exposta pela integracao disponivel;
 - Leaked Password Protection permanece dependente da configuracao/plano do Supabase;
 - canal real dos lembretes de esclarecimento continua sem decisao.
+
+
+## Sistema totalmente parametrizável - 2026-09-30
+
+### DECISÃO CONFIRMADA
+
+O sistema deve ser totalmente parametrizável para regras de negócio, método, cálculos, templates e workflows.
+
+Os valores atuais dos Excels e das regras confirmadas passam a ser templates iniciais versionados.
+
+A Patty deve poder alterar esses valores globalmente e também sobrescrevê-los por cliente/protocolo/treino.
+
+Exemplo:
+- template: 3 séries x 12 repetições;
+- cliente A: override para 4 x 12;
+- cliente B continua usando o template vigente.
+
+Exemplo:
+- template: 1 g a cada 5 kg;
+- Patty pode criar nova versão com 1,5 g a cada 5 kg;
+- históricos anteriores continuam vinculados à versão usada.
+
+Documento de referência: `docs/CONFIGURABLE_RULES.md`.
+
+### CONSEQUÊNCIA TÉCNICA
+
+Será necessário inventariar regras profissionais hoje hardcoded e migrá-las gradualmente para a camada configurável, preservando comportamento e histórico até a transição estar validada.
+
+
+## Inventário de hardcodes profissionais - 2026-10-01
+
+### AUDITADO / DOCUMENTADO
+
+Foi criado `docs/PROFESSIONAL_RULE_HARDCODE_INVENTORY.md` com o primeiro inventário técnico da dívida de parametrização sobre o `master` `a274b7fafb2e3aa32276833c38f583a132feba73`.
+
+Hardcodes ativos confirmados incluem:
+- coeficientes e estrutura fixa do Carb Cycle;
+- gramas por dose e limite do grupo proteico de maior gordura;
+- macros de referência do Reconhecimento Metabólico;
+- fator de hidratação de 60 mL/kg, inclusive em generated column/constraint de migration já aplicada;
+- regra de 2 doses de legumes = 1 dose de carbo no validador da fonte histórica;
+- tipos e catálogo obrigatório de Avaliação Básica/Completa;
+- lembrete de esclarecimento em 24 horas;
+- taxonomia atual de líquidos.
+
+Também foi confirmado que não existe prescrição ativa de treino com valores como séries/repetições hardcoded; esse domínio deve nascer já parametrizado quando for implementado.
+
+Nenhuma migration, schema, RLS ou runtime foi alterado por este inventário. Próximo passo técnico: desenhar o contrato de dados/motor configurável preservando compatibilidade com os snapshots e constraints já aplicados.
+
+
+## Contrato tecnico da camada configuravel - 2026-10-01
+
+### DOCUMENTADO / NAO IMPLEMENTADO
+
+Foi criado `docs/METHOD_CONFIGURATION_CONTRACT.md`.
+
+O contrato define:
+
+- identidade logica de templates;
+- versoes imutaveis apos ativacao;
+- overrides versionados por cliente/protocolo;
+- resolucao de precedencia;
+- snapshot sets e snapshot items;
+- JSON validado por schema conhecido;
+- AST segura de formulas sem codigo arbitrario;
+- unidades semanticas explicitas;
+- RLS separado para templates globais, overrides e snapshots;
+- estrategia incremental de compatibilidade para hidratacao, Avaliacoes e Carb Cycle;
+- golden tests para provar equivalencia antes de remover hardcodes.
+
+Nenhuma migration, schema, RLS ou runtime foi alterado nesta etapa.
+
+Proximo passo tecnico recomendado: transformar esse contrato em uma proposta de migration pequena para a fundacao **sem conectar nenhum fluxo existente ainda**, incluindo RLS/grants e testes de banco, para revisao antes de qualquer apply.
+
+
+## Proposta da foundation migration de configuracao - 2026-10-01
+
+### DOCUMENTADA / NAO APLICADA
+
+Foram criados, fora de `supabase/migrations`, tres artefatos de revisao:
+
+- `docs/METHOD_CONFIGURATION_FOUNDATION_MIGRATION_PROPOSAL_V2.sql`;
+- `docs/METHOD_CONFIGURATION_FOUNDATION_PGTAP_PROPOSAL_V2.sql`;
+- `docs/METHOD_CONFIGURATION_FOUNDATION_MIGRATION_REVIEW.md`.
+
+A proposta cria somente a fundacao relacional para templates, versoes, overrides e snapshots, com RLS e grants minimos. Nenhum fluxo atual passa a depender dela.
+
+O Supabase CLI nao esta disponivel no ambiente desta sessao; portanto nenhum timestamp de migration foi inventado e nenhum arquivo oficial foi criado em `supabase/migrations`.
+
+Estado:
+- IMPLEMENTADO no repositorio: NAO;
+- TESTADO em banco: NAO;
+- APLICADO no Supabase SaaS: NAO;
+- runtime alterado: NAO;
+- migration antiga alterada: NAO.
+
+Proximo gate: gerar a migration oficial com `supabase migration new create_method_configuration_foundation`, copiar o SQL revisado, adaptar o pgTAP, executar static gate/testes/advisors e somente depois considerar apply.
+
+
+## Dry-run da foundation configuravel - 2026-10-01
+
+### PASS / NENHUMA ALTERACAO PERSISTIDA
+
+A proposta V2 `docs/METHOD_CONFIGURATION_FOUNDATION_MIGRATION_PROPOSAL_V2.sql` foi validada diretamente no Supabase SaaS dentro de transacao com `ROLLBACK`.
+
+O gate confirmou criacao das 5 tabelas, RLS, policy MFA restritiva e grants minimos esperados. Consulta pos-rollback confirmou `0` tabelas da foundation persistidas.
+
+Estado:
+- proposta SQL validada no schema real: SIM;
+- migration oficial criada: NAO;
+- pgTAP oficial executado: NAO;
+- migration history alterada: NAO;
+- schema SaaS alterado: NAO;
+- runtime alterado: NAO.
+
+O warning de seguranca conhecido do projeto continua independente desta proposta; nao houve novo finding causado pelo dry-run.
+
+
+### CHANGES REQUIRED - cadeia de overrides
+
+Na revisao comportamental da foundation foi identificado que a proposta SQL atual possui apenas um `override_version_id` por snapshot. Esse desenho nao preserva a cadeia completa quando cliente e protocolo contribuem simultaneamente para a configuracao resolvida.
+
+Correcao documentada: usar entidade associativa imutavel de overrides por snapshot com `precedence` e FKs concretas.
+
+Consequencia operacional:
+- a proposta atual NAO esta pronta para virar migration oficial;
+- o dry-run anterior vale somente para a versao anterior;
+- depois da correcao do SQL, o dry-run deve ser repetido;
+- nada foi aplicado no SaaS;
+- nenhuma migration history foi alterada.
+
+
+## Foundation configuravel V2 - 2026-10-01
+
+### DRY-RUN PASS / NAO APLICADA
+
+A proposta V2 corrigiu o gap de auditoria da cadeia de overrides por snapshot por meio de entidade associativa imutavel com `precedence`.
+
+Arquivos canonicamente candidatos:
+- `docs/METHOD_CONFIGURATION_FOUNDATION_MIGRATION_PROPOSAL_V2.sql`;
+- `docs/METHOD_CONFIGURATION_FOUNDATION_PGTAP_PROPOSAL_V2.sql`.
+
+Dry-run no Supabase SaaS: PASS.
+Pos-rollback: 0 tabelas da foundation persistidas.
+Migration history: inalterada.
+
+A V1 continua somente como historico de revisao e nao deve ser usada para gerar migration oficial.
+
+Proximo gate: executar o companion pgTAP V2 em ambiente de teste apropriado e, somente depois, gerar a migration oficial pelo fluxo do Supabase CLI.
+
+
+## Static gate V2 - 2026-10-01
+
+### PASS / PGTAP AINDA NAO EXECUTADO
+
+A foundation V2 recebeu novo static gate depois da correcao da cadeia de overrides e do companion pgTAP.
+
+Cobertura confirmada: 6 tabelas, RLS/MFA, grants minimos, FKs client-scoped, cadeia cliente + protocolo, `precedence`, unicidade e imutabilidade.
+
+Foi corrigido um erro de sintaxe no companion pgTAP V2 nos `throws_ok` de snapshot, usando dollar-quoting nomeado `$sql$...$sql$`.
+
+Pendencia restante: executar o pgTAP V2 em ambiente de teste apropriado com pgTAP disponivel. O SaaS de producao nao foi alterado para instalar extensao ou criar usuarios sinteticos.
+
+
+## CI baseline real - 2026-10-01
+
+### DIAGNOSTICADO / CORRECAO ISOLADA EM PR #246
+
+A revalidacao do GitHub Actions mostrou que o runner voltou a executar normalmente e a falha atual nao deve mais ser classificada apenas como problema externo de infraestrutura.
+
+No PR #245, o workflow `Validate application` chegou ao typecheck e falhou em `lib/ai/ai-execution-persistence.ts` porque o typegen do Supabase registrou quatro parametros anulaveis da RPC `fail_ai_execution` como `string` em vez de `string | null`.
+
+A correcao foi isolada no PR #246, sem alterar SQL, runtime behavior, RLS ou SaaS.
+
+Ao avancar o pipeline do #246, foi identificado um segundo baseline stale: `lib/content/food-equivalent-source.test.ts` esperava 11 grupos, enquanto a fonte historica fail-closed atual possui 12. O teste foi alinhado para 12 sem alterar o catalogo historico ou promover qualquer item para conteudo ativo.
+
+Consequencia:
+- nao duplicar essas correcoes nos PRs #242-#245;
+- PR #246: MERGEADO e baseline verde restaurado;
+- PR #245: sincronizado com o novo `master` e em revalidacao;
+- PRs #242-#244: devem ser atualizados/revalidados contra o novo baseline antes de qualquer merge;
+- nenhuma dessas correcoes muda regra profissional.
+
+
+### RESOLVIDO - PR #246 E VERCEL
+
+O PR #246 passou integralmente por `Validate application` (typecheck, testes, security boundary e build) e foi mergeado no `master`.
+
+Commit atual desse baseline: `407ecf24c192fa5ec5ec3a83b58ae6203f9ffe00`.
+
+O Vercel criou deployment de producao correspondente e o estado e `READY`.
+
+O PR #245 foi sincronizado por merge commit com esse baseline, sem duplicar as correcoes de CI em seu diff funcional.
+
+
+## Parametrizacao - reconciliacao final do contrato de snapshot - 2026-10-01
+
+### DOCUMENTADO
+
+O contrato de snapshot foi reconciliado com a foundation V2: `method_configuration_snapshots` nao possui mais um unico `override_version_id` conceitual. A cadeia completa de overrides aplicados pertence a `method_configuration_snapshot_overrides`, com ordem por `precedence` e FKs concretas.
+
+O PR #245 foi mergeado no `master` `1a404c501fc75c96caf78ef84f2f34909b33a461` e o deployment Vercel correspondente esta `READY`.
+
+A foundation continua apenas documentada/dry-run/static-gate: nenhuma migration oficial foi criada ou aplicada no Supabase SaaS.
+
+
+## Engine deterministico configuravel v1 - 2026-10-01
+
+### IMPLEMENTADO NA BRANCH / AINDA NAO CONSUMIDO POR FLUXOS
+
+Foi adicionado `lib/method/config-engine.ts` com validator/evaluator puro para a AST segura inicial e `lib/method/config-engine.test.ts` com dados exclusivamente sinteticos.
+
+Escopo implementado:
+- validacao fail-closed de configuracao;
+- inputs e parametros com unidades explicitas;
+- operadores `literal/input/parameter/add/subtract/multiply/divide/min/max/ceil/floor/round`;
+- algebra de unidades limitada e explicita;
+- divisao por zero bloqueada;
+- numeros nao finitos bloqueados;
+- limite de profundidade 32 e 256 nodes;
+- arredondamento inteiro com empate afastando de zero;
+- nenhum valor profissional hardcoded;
+- nenhum acesso a Supabase;
+- nenhum fluxo atual alterado.
+
+Fora de escopo:
+- resolver templates/overrides persistidos;
+- criar snapshots;
+- migrar doses/Reconhecimento/Carb Cycle;
+- qualquer migration;
+- UI administrativa;
+- escolha de fase/protocolo.
+
+
+## Desktop admin UX - PR #243 revalidado em 2026-10-01
+
+### SINCRONIZADO COM O MASTER ATUAL
+
+A branch do PR #243 foi reconciliada com o master apos a fundacao de parametrizacao e o engine deterministico v1, sem restaurar a versao antiga de PROJECT_STATUS.
+
+O escopo continua exclusivamente de UX desktop administrativa:
+- dashboard mais enxuto e orientado a acoes;
+- linguagem operacional simplificada;
+- navegacao/sidebar desktop;
+- busca e estados vazios em modulos administrativos;
+- apresentacao de datas em America/Sao_Paulo;
+- ajustes visuais de upload e metricas.
+
+Nao altera schema, RLS, regras profissionais, configuracao parametrizada ou migrations.
+
+O antigo bloqueio de build-rate-limit do Vercel nao esta ativo; o gate atual passa a ser CI/build da branch sincronizada e validacao visual do deployment de producao apos merge.

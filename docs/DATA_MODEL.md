@@ -821,3 +821,32 @@ Nenhuma dessas entidades armazena score de adesao.
 A tabela e append-only. A medida original nao e atualizada ou removida. Para leitura operacional, a correcao cronologicamente mais recente e o valor vigente; todas as anteriores continuam historicas.
 
 Somente avaliacao finalizada pode receber esse tipo de correcao. Em rascunho, a medida continua sendo editada diretamente pelo lifecycle ja existente.
+
+
+## Configuracao profissional versionada
+
+### DECISAO TECNICA DOCUMENTADA - NAO IMPLEMENTADA
+
+O contrato conceitual completo esta em `METHOD_CONFIGURATION_CONTRACT.md`.
+
+A fundacao futura deve separar:
+
+- `method_configuration_templates`: identidade logica e schema conhecido da configuracao;
+- `method_configuration_versions`: versoes completas e validadas do template;
+- `client_method_configuration_override_versions`: overrides versionados por cliente e, quando aplicavel, por protocolo;
+- `method_configuration_snapshot_sets`: agrupamento imutavel das configuracoes usadas por um artefato;
+- `method_configuration_snapshots`: inputs, configuracao resolvida e resultados efetivamente usados.
+
+Nao usar relacao polimorfica generica `scope_type + scope_id` ou `consumer_type + consumer_id` sem FK. Cada dominio consumidor deve ganhar FK explicita quando entrar na migracao.
+
+A configuracao pode usar `jsonb`, mas somente sob `config_schema_key` e `schema_version` conhecidos pelo runtime. JSON livre nao e fonte autorizada de regra de negocio.
+
+A precedencia conceitual inicial e:
+
+`template ativo -> override da cliente -> override do protocolo -> configuracao resolvida -> snapshot`
+
+A configuracao mais especifica prevalece somente nas chaves permitidas pelo schema.
+
+Templates globais nao sao client-scoped. Overrides e snapshots sao client-scoped.
+
+Nenhuma entidade deste desenho existe no banco enquanto a migration correspondente nao for criada, revisada e validada.

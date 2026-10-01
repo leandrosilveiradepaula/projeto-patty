@@ -198,3 +198,64 @@ O Supabase continua decidindo se a versao foi publicada e liberada para a client
 O acesso futuro ao binario deve ocorrer somente depois de validar a sessao e a release no Supabase. Preferir OIDC do runtime Vercel e URL assinada curta; nao expor token read-write ao browser.
 
 Uploads grandes devem usar multipart quando necessario. Paths nao devem conter PII.
+
+
+## Motor parametrizável de regras e workflows
+
+### DECISÃO CONFIRMADA - 2026-09-30
+
+Regras profissionais, valores, fórmulas, coeficientes e workflows não devem ficar hardcoded na aplicação.
+
+A arquitetura passa a separar:
+
+- **configuração versionada**: valores, fórmulas estruturadas, templates e workflows;
+- **motor determinístico**: avaliação dos operadores, unidades, validações e resolução de escopo;
+- **override por cliente**: ajustes individuais feitos pela Patty;
+- **snapshot**: parâmetros efetivamente usados em protocolo/treino publicado.
+
+Os Excels existentes são fonte de migração para templates iniciais e dados históricos, não runtime permanente.
+
+A configuração profissional pode mudar sem alteração de código, mas não pode executar código arbitrário.
+
+RLS, Auth, MFA, secrets, constraints e demais invariantes de segurança/integridade continuam fora da camada de configuração profissional.
+
+Ver `CONFIGURABLE_RULES.md`.
+
+
+## Contrato tecnico do motor configuravel
+
+### DECISAO TECNICA - 2026-10-01
+
+A camada configuravel deve ser implementada como dados declarativos validados, nao como codigo dinamico.
+
+O contrato detalhado esta em `METHOD_CONFIGURATION_CONTRACT.md`.
+
+Fluxo arquitetural:
+
+```text
+template/version
+      |
+      v
+resolver de escopo
+      |
+      +--> override cliente
+      |
+      +--> override protocolo
+      |
+      v
+configuracao resolvida
+      |
+      v
+motor deterministico
+      |
+      v
+resultado + snapshot imutavel
+```
+
+O engine v1 deve comecar pequeno, com operadores estritamente necessarios para remover os primeiros hardcodes. Novos operadores entram somente com caso de uso documentado e teste.
+
+Nao permitir JavaScript, SQL, Python, `eval`, expression strings arbitrarias ou plugins executaveis vindos da configuracao.
+
+A resolucao nao pode cair silenciosamente em constante hardcoded. Durante a migracao, qualquer fallback temporario precisa ser explicito, testado e registrado no inventario de hardcodes.
+
+Cada dominio consumidor referencia snapshots por FK explicita; nao usar ponteiro polimorfico generico sem integridade referencial.

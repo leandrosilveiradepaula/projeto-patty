@@ -13,7 +13,7 @@ function formatAssessmentDate(value: string) {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
-    timeZone: "UTC",
+    timeZone: "America/Sao_Paulo",
   }).format(new Date(value));
 }
 
@@ -23,18 +23,23 @@ export default async function AdminAvaliacoesPage() {
   return (
     <>
       <PageHeader
-        description="Histórico de avaliações acessível conforme as atribuições ativas do seu perfil administrativo."
+        description="Consulte avaliações registradas e acompanhe o histórico das clientes."
         eyebrow="Admin"
         title="Avaliações"
       />
       <Section
-        description="Registros em ordem da avaliação mais recente para a mais antiga."
+        description="As avaliações mais recentes aparecem primeiro."
         title="Histórico de avaliações"
       >
         {assessments.length === 0 ? (
           <EmptyState
-            description="As avaliações disponíveis para as suas atribuições aparecerão nesta área."
-            title="Nenhuma avaliação acessível"
+            action={
+              <Link className={styles.actionLink} href="/admin/clientes">
+                Escolher cliente
+              </Link>
+            }
+            description="Escolha uma cliente para iniciar ou consultar uma avaliação."
+            title="Ainda não há avaliações"
           />
         ) : (
           <ul className={styles.evaluationList}>
@@ -54,7 +59,7 @@ export default async function AdminAvaliacoesPage() {
                     }
                     clientLabel={displayName || "Cliente sem nome informado"}
                     evaluationDate={formatAssessmentDate(assessment.assessed_at)}
-                    meta={`${assessmentKindLabel(assessment.assessment_kind)} · Identificador: ${assessment.id}`}
+                    meta={assessmentKindLabel(assessment.assessment_kind)}
                     status={
                       <Badge variant={assessment.finalized_at ? "neutral" : "warning"}>
                         {assessment.finalized_at ? "Finalizada" : "Rascunho"}

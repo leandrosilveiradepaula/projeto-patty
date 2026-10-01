@@ -49,7 +49,7 @@ export default async function AdminClientesPage({
   return (
     <>
       <PageHeader
-        description="Clientes com atribuição ativa para o seu perfil administrativo."
+        description="Encontre clientes e acesse rapidamente o acompanhamento de cada uma."
         eyebrow="Admin"
         title="Clientes"
       />
@@ -58,14 +58,12 @@ export default async function AdminClientesPage({
           A conta inicial da cliente foi provisionada e o convite de ativação foi enviado.
         </Alert>
       ) : assignment === "ended" ? (
-        <Alert live="polite" title="Atribuição encerrada" variant="success">
-          O vínculo atual foi encerrado e o histórico do assignment foi
-          preservado.
+        <Alert live="polite" title="Acompanhamento encerrado" variant="success">
+          O acompanhamento atual foi encerrado e o histórico da cliente foi preservado.
         </Alert>
       ) : assignment === "unavailable" ? (
-        <Alert live="assertive" title="Atribuição indisponível" variant="warning">
-          Não havia uma atribuição ativa deste perfil administrativo para
-          encerrar.
+        <Alert live="assertive" title="Acompanhamento indisponível" variant="warning">
+          Não havia um acompanhamento ativo para encerrar.
         </Alert>
       ) : assignment === "invalid" ? (
         <Alert live="assertive" title="Cliente inválida" variant="critical">
@@ -80,7 +78,7 @@ export default async function AdminClientesPage({
           </Link>
         }
         description="Encontre rapidamente uma cliente pelo nome."
-        title="Clientes atribuídos"
+        title="Clientes"
       >
         <form action="/admin/clientes" className={styles.searchForm} method="get">
           <label className={styles.searchLabel} htmlFor="client-search">
@@ -106,7 +104,7 @@ export default async function AdminClientesPage({
         </form>
 
         {clients.length === 0 ? (
-          <p className={styles.emptyMessage}>Nenhuma cliente está atribuída ao seu perfil no momento.</p>
+          <p className={styles.emptyMessage}>Nenhuma cliente está em acompanhamento no momento.</p>
         ) : filteredClients.length === 0 ? (
           <p className={styles.emptyMessage}>Nenhuma cliente encontrada para “{searchTerm}”.</p>
         ) : (
@@ -123,10 +121,17 @@ export default async function AdminClientesPage({
                 <li key={client.id}>
                   <ClientListItem
                     action={<Link className={styles.actionLink} href={`/admin/clientes/${client.id}`}>Abrir</Link>}
-                    meta="Cliente atribuído"
-                    name={displayName || "Cliente sem nome informado"}
-                    secondary={client.profile_id ? "Conta vinculada" : "Conta ainda não vinculada"}
-                    status={<Badge variant="neutral">Atribuição ativa</Badge>}
+                    name={displayName || "Cadastro incompleto"}
+                    secondary={
+                      client.profile_id
+                        ? "Acompanhamento ativo"
+                        : "Conta da cliente ainda não vinculada"
+                    }
+                    status={
+                      !client.profile_id ? (
+                        <Badge variant="warning">Completar cadastro</Badge>
+                      ) : null
+                    }
                     visual={<span>{getInitials(displayName)}</span>}
                   />
                 </li>

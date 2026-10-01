@@ -13,7 +13,7 @@ type AdminNavigationItem = {
 };
 
 const adminNavigationItems: AdminNavigationItem[] = [
-  { href: "/admin", label: "Dashboard" },
+  { href: "/admin", label: "Início" },
   { href: "/admin/pendencias", label: "Pendências" },
   { href: "/admin/clientes", label: "Clientes" },
   { href: "/admin/arquivos", label: "Arquivos" },
@@ -140,7 +140,7 @@ function SidebarContent({ displayName, onNavigate, pathname }: SidebarContentPro
   return (
     <nav aria-label="Navegação administrativa principal" className={styles.nav}>
       <div className={styles.brand}>Corpo &amp; Mente</div>
-      {displayName?.trim() ? <p className={styles.identity}>Admin: {displayName.trim()}</p> : null}
+      {displayName?.trim() ? <p className={styles.identity}>{displayName.trim()}</p> : null}
       <ul className={styles.list}>
         {adminNavigationItems.map((item) => {
           const isActive = isAdminNavigationItemActive(pathname, item.href);
