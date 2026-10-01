@@ -906,3 +906,24 @@ Documento de referência: `docs/CONFIGURABLE_RULES.md`.
 ### CONSEQUÊNCIA TÉCNICA
 
 Será necessário inventariar regras profissionais hoje hardcoded e migrá-las gradualmente para a camada configurável, preservando comportamento e histórico até a transição estar validada.
+
+
+## Inventário de hardcodes profissionais - 2026-10-01
+
+### AUDITADO / DOCUMENTADO
+
+Foi criado `docs/PROFESSIONAL_RULE_HARDCODE_INVENTORY.md` com o primeiro inventário técnico da dívida de parametrização sobre o `master` `a274b7fafb2e3aa32276833c38f583a132feba73`.
+
+Hardcodes ativos confirmados incluem:
+- coeficientes e estrutura fixa do Carb Cycle;
+- gramas por dose e limite do grupo proteico de maior gordura;
+- macros de referência do Reconhecimento Metabólico;
+- fator de hidratação de 60 mL/kg, inclusive em generated column/constraint de migration já aplicada;
+- regra de 2 doses de legumes = 1 dose de carbo no validador da fonte histórica;
+- tipos e catálogo obrigatório de Avaliação Básica/Completa;
+- lembrete de esclarecimento em 24 horas;
+- taxonomia atual de líquidos.
+
+Também foi confirmado que não existe prescrição ativa de treino com valores como séries/repetições hardcoded; esse domínio deve nascer já parametrizado quando for implementado.
+
+Nenhuma migration, schema, RLS ou runtime foi alterado por este inventário. Próximo passo técnico: desenhar o contrato de dados/motor configurável preservando compatibilidade com os snapshots e constraints já aplicados.
