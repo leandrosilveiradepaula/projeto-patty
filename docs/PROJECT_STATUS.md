@@ -1387,5 +1387,52 @@ Estado:
 - templates iniciais no SaaS: SIM;
 - migration history atualizada: SIM;
 - snapshots em consumidores operacionais: AINDA NAO;
-- limite de proteina com maior teor de gordura: AINDA HARDCODED;
+- limite de proteina com maior teor de gordura: PARAMETRIZADO NO PR #255 / MIGRATION AINDA NAO APLICADA;
 - hidratacao: AINDA HARDCODED.
+
+
+## Migracao do limite de proteina com maior teor de gordura - PR #255
+
+### IMPLEMENTADA NA BRANCH / AINDA NAO APLICADA NO SAAS
+
+Escopo:
+- somente o limite diario do grupo de proteina com maior teor de gordura;
+- regra confirmada preservada: metade das doses totais de proteina, arredondando para cima.
+
+Runtime:
+- `lib/method/doses.ts` nao contem mais `Math.ceil(totalProteinDoses / 2)`;
+- o helper executa `method_engine_v1`;
+- input: `total_protein_doses` em dose;
+- parametro: `higher_fat_ratio` em ratio;
+- output: `max_higher_fat_protein_doses` em dose;
+- arredondamento `ceil` pertence a AST da configuracao.
+
+Golden tests:
+- baseline: 8 -> 4, 7 -> 4, 9 -> 5;
+- ratio alternativo: comprovado sem mudanca de codigo;
+- arredondamento alternativo: comprovado sem mudanca de codigo;
+- valores negativos/nao finitos continuam fail-closed.
+
+Migration oficial:
+- filename gerado pelo Supabase CLI em CI: `20261001235018_seed_higher_fat_protein_limit_template.sql`;
+- template: `nutrition.protein.higher_fat_daily_limit`;
+- baseline atual: ratio 0.5 + `ceil`;
+- proveniencia: `system_baseline`;
+- ainda nao aplicada no Supabase SaaS.
+
+Fora de escopo:
+- hidratacao;
+- Carb Cycle;
+- legumes;
+- snapshots em consumidores operacionais;
+- UI administrativa de configuracao.
+
+Gate antes de merge/apply:
+- application CI;
+- db reset local;
+- db lint;
+- foundation pgTAP;
+- initial-template pgTAP;
+- higher-fat protein pgTAP;
+- dry-run transacional no SaaS;
+- dry-run oficial antes de apply.
