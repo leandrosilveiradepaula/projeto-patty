@@ -63,7 +63,7 @@ Não inferir Fases 5/6 ou pareamento de Cutting ainda aberto.
 
 ### HR-002 — Conversão de doses em gramas
 
-**Classificação:** EM MIGRAÇÃO — runtime parametrizado no PR #253; seed oficial ainda não aplicado.
+**Classificação:** MIGRADO — runtime parametrizado e seed oficial aplicado no SaaS.
 
 Arquivo ativo:
 
@@ -75,10 +75,8 @@ Estado no PR #253:
 - conversões recebem uma configuração escalar `g_per_dose` validada;
 - golden tests usam explicitamente os valores do template atual e também valores alternativos;
 - migration `20261001230751_seed_initial_method_templates.sql` cria os templates `nutrition.dose.protein`, `nutrition.dose.carbohydrate` e `nutrition.dose.fat`;
-- a migration ainda não foi aplicada no SaaS;
+- migration `20261001230751` aplicada e templates ativos confirmados no SaaS;
 - snapshots em protocolos consumidores continuam etapa posterior, pois estes helpers ainda não possuem consumidor operacional fora dos testes.
-
-Critério para marcar como migrado: migration aplicada + templates ativos confirmados no SaaS.
 
 ### HR-003 — Limite do grupo de proteína com maior teor de gordura
 
@@ -119,9 +117,7 @@ Estado no PR #253:
 - golden tests reproduzem `2 g/kg`, `2 g/kg` e `50 g/dia` e demonstram parâmetros alternativos sem mudança de código;
 - migration `20261001230751_seed_initial_method_templates.sql` cria `nutrition.recognition.macros` como baseline versionado;
 - override client/protocol e snapshot continuam suportados pela foundation, mas não há consumidor operacional deste helper ainda;
-- a migration ainda não foi aplicada no SaaS.
-
-Critério para marcar como migrado: migration aplicada + template ativo confirmado no SaaS.
+- migration `20261001230751` aplicada e template ativo confirmado no SaaS.
 
 ### HR-005 — Meta de líquidos
 
