@@ -48,6 +48,9 @@ jobs:
           test -f supabase/tests/database/method_configuration_initial_templates.test.sql
           echo "Committed method configuration migrations and pgTAP files found."
 
+      - name: Generate higher-fat protein migration filename
+        run: npx supabase migration new seed_higher_fat_protein_limit_template
+
       - name: Start local Supabase
         run: npx supabase start
 
