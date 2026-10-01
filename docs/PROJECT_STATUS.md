@@ -1083,3 +1083,31 @@ O contrato de snapshot foi reconciliado com a foundation V2: `method_configurati
 O PR #245 foi mergeado no `master` `1a404c501fc75c96caf78ef84f2f34909b33a461` e o deployment Vercel correspondente esta `READY`.
 
 A foundation continua apenas documentada/dry-run/static-gate: nenhuma migration oficial foi criada ou aplicada no Supabase SaaS.
+
+
+## Engine deterministico configuravel v1 - 2026-10-01
+
+### IMPLEMENTADO NA BRANCH / AINDA NAO CONSUMIDO POR FLUXOS
+
+Foi adicionado `lib/method/config-engine.ts` com validator/evaluator puro para a AST segura inicial e `lib/method/config-engine.test.ts` com dados exclusivamente sinteticos.
+
+Escopo implementado:
+- validacao fail-closed de configuracao;
+- inputs e parametros com unidades explicitas;
+- operadores `literal/input/parameter/add/subtract/multiply/divide/min/max/ceil/floor/round`;
+- algebra de unidades limitada e explicita;
+- divisao por zero bloqueada;
+- numeros nao finitos bloqueados;
+- limite de profundidade 32 e 256 nodes;
+- arredondamento inteiro com empate afastando de zero;
+- nenhum valor profissional hardcoded;
+- nenhum acesso a Supabase;
+- nenhum fluxo atual alterado.
+
+Fora de escopo:
+- resolver templates/overrides persistidos;
+- criar snapshots;
+- migrar doses/Reconhecimento/Carb Cycle;
+- qualquer migration;
+- UI administrativa;
+- escolha de fase/protocolo.
