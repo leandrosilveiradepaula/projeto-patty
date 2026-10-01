@@ -995,3 +995,17 @@ Estado:
 - runtime alterado: NAO.
 
 O warning de seguranca conhecido do projeto continua independente desta proposta; nao houve novo finding causado pelo dry-run.
+
+
+### CHANGES REQUIRED - cadeia de overrides
+
+Na revisao comportamental da foundation foi identificado que a proposta SQL atual possui apenas um `override_version_id` por snapshot. Esse desenho nao preserva a cadeia completa quando cliente e protocolo contribuem simultaneamente para a configuracao resolvida.
+
+Correcao documentada: usar entidade associativa imutavel de overrides por snapshot com `precedence` e FKs concretas.
+
+Consequencia operacional:
+- a proposta atual NAO esta pronta para virar migration oficial;
+- o dry-run anterior vale somente para a versao anterior;
+- depois da correcao do SQL, o dry-run deve ser repetido;
+- nada foi aplicado no SaaS;
+- nenhuma migration history foi alterada.
