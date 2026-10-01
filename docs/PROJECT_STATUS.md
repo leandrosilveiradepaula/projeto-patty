@@ -1087,7 +1087,7 @@ A foundation continua apenas documentada/dry-run/static-gate: nenhuma migration 
 
 ## Engine deterministico configuravel v1 - 2026-10-01
 
-### MERGEADO NO MASTER / AINDA NAO CONSUMIDO POR FLUXOS
+### IMPLEMENTADO NA BRANCH / AINDA NAO CONSUMIDO POR FLUXOS
 
 Foi adicionado `lib/method/config-engine.ts` com validator/evaluator puro para a AST segura inicial e `lib/method/config-engine.test.ts` com dados exclusivamente sinteticos.
 
@@ -1132,21 +1132,66 @@ Nao altera schema, RLS, regras profissionais, configuracao parametrizada ou migr
 O antigo bloqueio de build-rate-limit do Vercel nao esta ativo; o gate atual passa a ser CI/build da branch sincronizada e validacao visual do deployment de producao apos merge.
 
 
-## PWA instalavel - PR #242 revalidado em 2026-10-01
+## Migration oficial da foundation configuravel - 2026-10-01
 
-### SINCRONIZADO COM O MASTER ATUAL / AINDA NAO PUBLICADO
+### MATERIALIZADA NO REPOSITORIO / NAO APLICADA
 
-A branch `codex/installable-pwa` foi reconciliada novamente apos o merge do desktop admin UX (#243), sem restaurar documentacao antiga.
+O filename oficial foi gerado pelo Supabase CLI em CI com:
 
-Fundacao preparada:
-- Web App Manifest em `app/manifest.ts`;
-- modo `standalone`;
-- icones 192x192, 512x512 e maskable gerados pelo Next.js;
-- icone Apple;
-- metadata mobile/theme;
-- rotas de metadata e icones excluidas do proxy de sessao;
-- sem service worker;
-- sem cache offline de dados privados;
-- sem push notification.
+`supabase migration new create_method_configuration_foundation`
 
-Gate atual: CI/build verde da branch sincronizada. Publicacao somente apos merge e deployment de producao `READY`.
+Arquivo gerado:
+
+`supabase/migrations/20261001213333_create_method_configuration_foundation.sql`
+
+O pgTAP V2 foi promovido para:
+
+`supabase/tests/database/method_configuration_foundation_v2.test.sql`
+
+A branch desta etapa testa a migration commitada diretamente, sem recriar/copiá-la dentro do runner.
+
+Estado:
+- migration oficial no repositorio: SIM;
+- filename gerado pelo CLI: SIM;
+- pgTAP oficial no repositorio: SIM;
+- apply no Supabase SaaS: NAO;
+- migration history remota alterada: NAO;
+- runtime da aplicacao alterado: NAO.
+
+Gate antes de qualquer apply:
+- db reset local completo;
+- db lint --level error;
+- pgTAP oficial;
+- CI geral;
+- advisors;
+- revisao final de diff/migrations.
+
+
+## Divergencia de migration history detectada - 2026-10-01
+
+### RESOLVIDO NO REPOSITORIO / SAAS INALTERADO
+
+A comparacao entre `supabase/migrations` e `supabase_migrations.schema_migrations` encontrou quatro migrations antigas com o mesmo nome logico e efeitos ja presentes no schema remoto, mas timestamps locais diferentes dos timestamps registrados no SaaS.
+
+A reconciliacao foi executada no Git renomeando somente os arquivos locais para os timestamps remotos ja aplicados:
+
+- `20260930131848_clone_protocol_version_draft.sql`
+- `20260930151722_create_ai_finding_actions.sql`
+- `20260930152158_harden_ai_finding_action_boundary.sql`
+- `20260930152248_enforce_single_ai_finding_action.sql`
+
+Cada rename foi validado comparando o blob SHA antes/depois; o conteudo SQL permaneceu byte a byte identico.
+
+Nenhum `supabase migration repair` foi executado. Nenhuma linha de `supabase_migrations.schema_migrations` foi alterada. Nenhum SQL dessas quatro migrations foi reaplicado.
+
+O schema remoto continua confirmando os efeitos esperados dessas migrations:
+- `clone_protocol_version_draft(uuid,jsonb)`;
+- tabela `ai_finding_actions`;
+- RPC `record_ai_finding_action_server(...)`;
+- constraint `ai_finding_actions_one_human_decision_per_finding`;
+- trigger imutavel de `ai_finding_actions`;
+- policy MFA AAL2.
+
+A migration `20261001213333_create_method_configuration_foundation.sql` permanece a unica migration nova ainda nao aplicada no SaaS.
+
+Proximo gate: validar a lista local/remota e executar o dry-run oficial da migration nova antes de qualquer apply.
