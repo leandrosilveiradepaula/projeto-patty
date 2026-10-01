@@ -1436,3 +1436,29 @@ Gate antes de merge/apply:
 - higher-fat protein pgTAP;
 - dry-run transacional no SaaS;
 - dry-run oficial antes de apply.
+
+
+## Dry-run do limite de proteina com maior teor de gordura - PR #255
+
+### PASS / ROLLBACK CONFIRMADO
+
+A migration `20261001235018_seed_higher_fat_protein_limit_template.sql` foi executada no Supabase SaaS dentro de `BEGIN ... ROLLBACK`.
+
+O gate confirmou:
+- template `nutrition.protein.higher_fat_daily_limit` criavel;
+- versao 1 ativa com proveniencia `system_baseline`;
+- `higher_fat_ratio = 0.5`;
+- operador de arredondamento `ceil` preservado na configuracao.
+
+Validacao pos-rollback confirmou:
+- migration `20261001235018` registrada: NAO;
+- template persistido: 0.
+
+Validacao local do mesmo estado de codigo:
+- db reset: PASS;
+- db lint --level error: PASS;
+- foundation pgTAP: PASS;
+- initial-template pgTAP: PASS;
+- higher-fat protein limit pgTAP: PASS.
+
+Portanto, a migration esta validada mas ainda nao aplicada no SaaS.
