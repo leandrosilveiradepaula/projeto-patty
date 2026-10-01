@@ -63,29 +63,22 @@ Não inferir Fases 5/6 ou pareamento de Cutting ainda aberto.
 
 ### HR-002 — Conversão de doses em gramas
 
-**Classificação:** MIGRAR.
+**Classificação:** EM MIGRAÇÃO — runtime parametrizado no PR #253; seed oficial ainda não aplicado.
 
 Arquivo ativo:
 
 - `lib/method/doses.ts`.
 
-Hardcodes atuais:
+Estado no PR #253:
 
-- proteína: `15 g/dose`;
-- carboidrato: `12 g/dose`;
-- gordura: `6 g/dose`.
+- os valores `15/12/6` saíram do runtime;
+- conversões recebem uma configuração escalar `g_per_dose` validada;
+- golden tests usam explicitamente os valores do template atual e também valores alternativos;
+- migration `20261001230751_seed_initial_method_templates.sql` cria os templates `nutrition.dose.protein`, `nutrition.dose.carbohydrate` e `nutrition.dose.fat`;
+- a migration ainda não foi aplicada no SaaS;
+- snapshots em protocolos consumidores continuam etapa posterior, pois estes helpers ainda não possuem consumidor operacional fora dos testes.
 
-Acoplamento de teste:
-
-- `lib/method/doses.test.ts`.
-
-Destino esperado:
-
-- parâmetros versionados por tipo de dose;
-- motor genérico de conversão quantidade <-> gramas;
-- snapshot da versão usada no protocolo.
-
-Os três valores atuais devem formar o template inicial, não constantes definitivas.
+Critério para marcar como migrado: migration aplicada + templates ativos confirmados no SaaS.
 
 ### HR-003 — Limite do grupo de proteína com maior teor de gordura
 
@@ -111,29 +104,24 @@ Destino esperado:
 
 ### HR-004 — Referência do Reconhecimento Metabólico
 
-**Classificação:** MIGRAR.
+**Classificação:** EM MIGRAÇÃO — runtime parametrizado no PR #253; seed oficial ainda não aplicado.
 
 Arquivo ativo:
 
 - `lib/method/recognition.ts`.
 
-Hardcodes atuais:
+Estado no PR #253:
 
-- proteína: `peso * 2`;
-- carboidrato: `peso * 2`;
-- gordura: `50 g/dia`.
+- o helper não contém mais coeficientes profissionais;
+- o cálculo usa o engine determinístico `method_engine_v1`;
+- peso entra como input explícito `kg`;
+- proteína, carboidrato e gordura são lidos da configuração;
+- golden tests reproduzem `2 g/kg`, `2 g/kg` e `50 g/dia` e demonstram parâmetros alternativos sem mudança de código;
+- migration `20261001230751_seed_initial_method_templates.sql` cria `nutrition.recognition.macros` como baseline versionado;
+- override client/protocol e snapshot continuam suportados pela foundation, mas não há consumidor operacional deste helper ainda;
+- a migration ainda não foi aplicada no SaaS.
 
-Acoplamento de teste:
-
-- `lib/method/recognition.test.ts`.
-
-Destino esperado:
-
-- template versionado do Reconhecimento;
-- fórmula por kg para proteína e carboidrato;
-- constante configurável para gordura;
-- possibilidade de override por cliente;
-- snapshot dos inputs, parâmetros e resultados.
+Critério para marcar como migrado: migration aplicada + template ativo confirmado no SaaS.
 
 ### HR-005 — Meta de líquidos
 

@@ -38,16 +38,15 @@ jobs:
       - name: Show pinned Supabase CLI
         run: npx supabase --version
 
-      - name: Verify committed foundation migration
+      - name: Verify committed method configuration migrations
         shell: bash
         run: |
           set -euo pipefail
           test -f supabase/migrations/20261001213333_create_method_configuration_foundation.sql
+          test -f supabase/migrations/20261001230751_seed_initial_method_templates.sql
           test -f supabase/tests/database/method_configuration_foundation_v2.test.sql
-          echo "Committed migration and pgTAP found."
-
-      - name: Generate next method template migration filename
-        run: npx supabase migration new seed_initial_method_templates
+          test -f supabase/tests/database/method_configuration_initial_templates.test.sql
+          echo "Committed method configuration migrations and pgTAP files found."
 
       - name: Start local Supabase
         run: npx supabase start
@@ -60,6 +59,9 @@ jobs:
 
       - name: Run foundation pgTAP V2
         run: npx supabase test db supabase/tests/database/method_configuration_foundation_v2.test.sql
+
+      - name: Run initial template pgTAP
+        run: npx supabase test db supabase/tests/database/method_configuration_initial_templates.test.sql
 
       - name: Stop local Supabase
         if: always()

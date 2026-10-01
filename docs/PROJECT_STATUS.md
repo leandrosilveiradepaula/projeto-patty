@@ -1270,3 +1270,55 @@ Estado:
 - hardcodes profissionais totalmente migrados: NAO.
 
 Manifest e icones publicos foram validados em producao com HTTP 200 para `/manifest.webmanifest`, `/pwa/icon-192`, `/pwa/icon-512`, `/pwa/maskable-512` e `/apple-icon`.
+
+
+## Primeira migração de hardcodes profissionais - PR #253
+
+### IMPLEMENTADA NA BRANCH / AINDA NAO APLICADA NO SAAS
+
+Escopo desta etapa:
+- doses de proteína, carboidrato e gordura;
+- referência de macros do Reconhecimento Metabólico;
+- proveniência explícita para baselines criados por migration.
+
+Migration oficial:
+- filename gerado pelo Supabase CLI no CI: `20261001230751_seed_initial_method_templates.sql`;
+- não foi inventado timestamp;
+- ainda não aplicada no Supabase SaaS.
+
+Templates iniciais previstos:
+- `nutrition.dose.protein` -> 15 g/dose;
+- `nutrition.dose.carbohydrate` -> 12 g/dose;
+- `nutrition.dose.fat` -> 6 g/dose;
+- `nutrition.recognition.macros` -> proteína 2 g/kg, carboidrato 2 g/kg e gordura 50 g/dia.
+
+Os valores acima são o baseline atual versionado e editável; não são constantes permanentes do runtime.
+
+Proveniência:
+- baselines de migration usam `created_by_kind = system`;
+- `created_by_profile_id = null`;
+- versões usam `source_kind = system_baseline`;
+- não atribuir criação/ativação do baseline à Patty ou a um usuário real;
+- alterações profissionais futuras continuam exigindo autoria humana.
+
+Runtime:
+- `lib/method/doses.ts` recebe configuração escalar; não contém mais 15/12/6;
+- `lib/method/recognition.ts` executa configuração via engine; não contém mais 2/2/50;
+- `lib/method/scalar-parameter.ts` valida configuração escalar fail-closed;
+- golden tests reproduzem o baseline atual e valores alternativos.
+
+Fora de escopo:
+- limite do grupo de proteína com maior teor de gordura;
+- hidratação;
+- Carb Cycle;
+- resolver server-side de overrides;
+- snapshots em artefatos consumidores;
+- UI de edição de templates.
+
+Gate antes de merge/apply:
+- application CI;
+- db reset local;
+- db lint;
+- pgTAP da foundation;
+- pgTAP dos templates iniciais;
+- revisão de advisors e dry-run oficial antes de apply.
