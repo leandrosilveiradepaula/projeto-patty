@@ -1111,3 +1111,22 @@ Fora de escopo:
 - qualquer migration;
 - UI administrativa;
 - escolha de fase/protocolo.
+
+
+## Desktop admin UX - PR #243 revalidado em 2026-10-01
+
+### SINCRONIZADO COM O MASTER ATUAL
+
+A branch do PR #243 foi reconciliada com o master apos a fundacao de parametrizacao e o engine deterministico v1, sem restaurar a versao antiga de PROJECT_STATUS.
+
+O escopo continua exclusivamente de UX desktop administrativa:
+- dashboard mais enxuto e orientado a acoes;
+- linguagem operacional simplificada;
+- navegacao/sidebar desktop;
+- busca e estados vazios em modulos administrativos;
+- apresentacao de datas em America/Sao_Paulo;
+- ajustes visuais de upload e metricas.
+
+Nao altera schema, RLS, regras profissionais, configuracao parametrizada ou migrations.
+
+O antigo bloqueio de build-rate-limit do Vercel nao esta ativo; o gate atual passa a ser CI/build da branch sincronizada e validacao visual do deployment de producao apos merge.
