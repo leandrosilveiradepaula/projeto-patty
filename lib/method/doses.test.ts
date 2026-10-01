@@ -13,6 +13,30 @@ const proteinDose = { value: 15, unit: "g_per_dose" };
 const carbohydrateDose = { value: 12, unit: "g_per_dose" };
 const fatDose = { value: 6, unit: "g_per_dose" };
 
+const higherFatProteinLimitBaseline = {
+  inputs: {
+    total_protein_doses: { unit: "dose" },
+  },
+  parameters: {
+    higher_fat_ratio: { value: 0.5, unit: "ratio" },
+  },
+  outputs: {
+    max_higher_fat_protein_doses: {
+      unit: "dose",
+      expression: {
+        op: "ceil",
+        arg: {
+          op: "multiply",
+          args: [
+            { op: "input", key: "total_protein_doses" },
+            { op: "parameter", key: "higher_fat_ratio" },
+          ],
+        },
+      },
+    },
+  },
+};
+
 test("reproduces the current dose baselines from explicit configuration", () => {
   assert.equal(gramsPerDose(proteinDose), 15);
   assert.equal(gramsPerDose(carbohydrateDose), 12);
@@ -69,21 +93,64 @@ test("rejects negative or non-finite dose and gram values", () => {
   );
 });
 
-test("keeps the higher-fat protein limit isolated for the next migration step", () => {
-  assert.equal(maxHigherFatProteinDoses(8), 4);
-  assert.equal(maxHigherFatProteinDoses(7), 4);
-  assert.equal(maxHigherFatProteinDoses(9), 5);
-  assert.equal(maxHigherFatProteinDoses(7.5), 4);
-  assert.equal(maxHigherFatProteinDoses(8.5), 5);
-  assert.equal(maxHigherFatProteinDoses(0), 0);
-  assert.equal(maxHigherFatProteinDoses(1), 1);
+test("reproduces the current higher-fat protein limit from configuration", () => {
+  assert.equal(maxHigherFatProteinDoses(higherFatProteinLimitBaseline, 8), 4);
+  assert.equal(maxHigherFatProteinDoses(higherFatProteinLimitBaseline, 7), 4);
+  assert.equal(maxHigherFatProteinDoses(higherFatProteinLimitBaseline, 9), 5);
+  assert.equal(maxHigherFatProteinDoses(higherFatProteinLimitBaseline, 7.5), 4);
+  assert.equal(maxHigherFatProteinDoses(higherFatProteinLimitBaseline, 8.5), 5);
+  assert.equal(maxHigherFatProteinDoses(higherFatProteinLimitBaseline, 0), 0);
+  assert.equal(maxHigherFatProteinDoses(higherFatProteinLimitBaseline, 1), 1);
+});
+
+test("uses a changed higher-fat ratio without code changes", () => {
+  const changed = structuredClone(higherFatProteinLimitBaseline);
+  changed.parameters.higher_fat_ratio.value = 0.4;
+
+  assert.equal(maxHigherFatProteinDoses(changed, 8), 4);
+  assert.equal(maxHigherFatProteinDoses(changed, 7), 3);
+  assert.equal(maxHigherFatProteinDoses(changed, 9), 4);
+});
+
+test("keeps rounding behavior in configuration", () => {
+  const floorConfigured = structuredClone(higherFatProteinLimitBaseline);
+  floorConfigured.outputs.max_higher_fat_protein_doses.expression.op = "floor";
+
+  assert.equal(maxHigherFatProteinDoses(floorConfigured, 7), 3);
 });
 
 test("rejects negative or non-finite total protein doses", () => {
-  assert.throws(() => maxHigherFatProteinDoses(-1), RangeError);
-  assert.throws(() => maxHigherFatProteinDoses(Number.NaN), RangeError);
   assert.throws(
-    () => maxHigherFatProteinDoses(Number.POSITIVE_INFINITY),
+    () => maxHigherFatProteinDoses(higherFatProteinLimitBaseline, -1),
     RangeError,
+  );
+  assert.throws(
+    () => maxHigherFatProteinDoses(higherFatProteinLimitBaseline, Number.NaN),
+    RangeError,
+  );
+  assert.throws(
+    () =>
+      maxHigherFatProteinDoses(
+        higherFatProteinLimitBaseline,
+        Number.POSITIVE_INFINITY,
+      ),
+    RangeError,
+  );
+});
+
+test("fails closed when the higher-fat protein output is absent", () => {
+  assert.throws(
+    () =>
+      maxHigherFatProteinDoses(
+        {
+          inputs: {
+            total_protein_doses: { unit: "dose" },
+          },
+          parameters: {},
+          outputs: {},
+        },
+        8,
+      ),
+    TypeError,
   );
 });
