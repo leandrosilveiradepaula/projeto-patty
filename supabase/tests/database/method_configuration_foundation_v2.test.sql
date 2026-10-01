@@ -150,7 +150,7 @@ insert into public.method_configuration_templates (
 )
 values (
   'b5000000-0000-0000-0000-000000000001',
-  'nutrition.dose.protein',
+  'test.nutrition.dose.protein',
   'nutrition',
   'scalar_parameter_v1',
   'Dose de proteína',
@@ -262,7 +262,7 @@ values (
   'b2000000-0000-0000-0000-000000000001',
   'b5000000-0000-0000-0000-000000000001',
   'b6000000-0000-0000-0000-000000000001',
-  'nutrition.dose.protein',
+  'test.nutrition.dose.protein',
   '{}'::jsonb,
   '{"value":16,"unit":"g_per_dose"}'::jsonb,
   '{"grams_per_dose":16}'::jsonb
