@@ -1195,3 +1195,25 @@ O schema remoto continua confirmando os efeitos esperados dessas migrations:
 A migration `20261001213333_create_method_configuration_foundation.sql` permanece a unica migration nova ainda nao aplicada no SaaS.
 
 Proximo gate: validar a lista local/remota e executar o dry-run oficial da migration nova antes de qualquer apply.
+
+
+## PWA instalavel - PR #242 revalidado em 2026-10-01
+
+### SINCRONIZADO COM O MASTER ATUAL / AINDA NAO PUBLICADO
+
+A branch `codex/installable-pwa` foi reconciliada com o master atual depois da parametrizacao, engine configuravel, foundation de banco, reconciliacao de migration history e workspace desktop do cliente, sem restaurar documentacao antiga.
+
+Fundacao preparada:
+- Web App Manifest em `app/manifest.ts`;
+- modo `standalone`;
+- icones 192x192, 512x512 e maskable gerados pelo Next.js;
+- icone Apple;
+- metadata mobile/theme;
+- rotas de metadata e icones excluidas do proxy de sessao;
+- sem service worker;
+- sem cache offline de dados privados;
+- sem push notification.
+
+O monograma `C&M` continua sendo asset tecnico provisorio, nao identidade visual definitiva.
+
+Gate atual: CI/build da branch sincronizada. Publicacao somente apos merge e deployment de producao `READY`.
