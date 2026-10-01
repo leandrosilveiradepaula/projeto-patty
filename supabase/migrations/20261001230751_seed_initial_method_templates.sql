@@ -39,6 +39,7 @@ alter table public.method_configuration_versions
     (
       created_by_kind = 'profile'
       and created_by_profile_id is not null
+      and source_kind <> 'system_baseline'
     )
     or
     (
