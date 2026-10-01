@@ -42,8 +42,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npx supabase migration new ci_method_configuration_foundation
-          migration_file="$(ls -1t supabase/migrations/*_ci_method_configuration_foundation.sql | head -n 1)"
+          npx supabase migration new create_method_configuration_foundation
+          migration_file="$(ls -1t supabase/migrations/*_create_method_configuration_foundation.sql | head -n 1)"
           test -n "$migration_file"
           cp docs/METHOD_CONFIGURATION_FOUNDATION_MIGRATION_PROPOSAL_V2.sql "$migration_file"
           cp docs/METHOD_CONFIGURATION_FOUNDATION_PGTAP_PROPOSAL_V2.sql             supabase/tests/database/method_configuration_foundation_v2.test.sql
