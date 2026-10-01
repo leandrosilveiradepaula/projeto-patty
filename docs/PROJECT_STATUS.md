@@ -1111,3 +1111,23 @@ Fora de escopo:
 - qualquer migration;
 - UI administrativa;
 - escolha de fase/protocolo.
+
+
+## PWA instalavel - PR #242 revalidado em 2026-10-01
+
+### SINCRONIZADO COM O MASTER ATUAL / AINDA NAO PUBLICADO
+
+A branch `codex/installable-pwa` foi reconciliada com o master atual sem restaurar documentacao antiga.
+
+Fundacao preparada:
+- Web App Manifest em `app/manifest.ts`;
+- modo `standalone`;
+- icones 192x192, 512x512 e maskable gerados pelo Next.js;
+- icone Apple;
+- metadata mobile/theme;
+- rotas de metadata e icones excluidas do proxy de sessao;
+- sem service worker;
+- sem cache offline de dados privados;
+- sem push notification.
+
+O antigo bloqueio de build-rate-limit do Vercel nao esta ativo. Gate atual: CI/build verde da branch sincronizada. So depois do merge e deployment `READY` esta fundacao pode ser tratada como publicada.
