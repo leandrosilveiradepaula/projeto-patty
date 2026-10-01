@@ -1072,3 +1072,14 @@ Commit atual desse baseline: `407ecf24c192fa5ec5ec3a83b58ae6203f9ffe00`.
 O Vercel criou deployment de producao correspondente e o estado e `READY`.
 
 O PR #245 foi sincronizado por merge commit com esse baseline, sem duplicar as correcoes de CI em seu diff funcional.
+
+
+## Parametrizacao - reconciliacao final do contrato de snapshot - 2026-10-01
+
+### DOCUMENTADO
+
+O contrato de snapshot foi reconciliado com a foundation V2: `method_configuration_snapshots` nao possui mais um unico `override_version_id` conceitual. A cadeia completa de overrides aplicados pertence a `method_configuration_snapshot_overrides`, com ordem por `precedence` e FKs concretas.
+
+O PR #245 foi mergeado no `master` `1a404c501fc75c96caf78ef84f2f34909b33a461` e o deployment Vercel correspondente esta `READY`.
+
+A foundation continua apenas documentada/dry-run/static-gate: nenhuma migration oficial foi criada ou aplicada no Supabase SaaS.
