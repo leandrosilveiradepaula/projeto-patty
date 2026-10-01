@@ -442,14 +442,14 @@ O novo modelo não deve assumir permanentemente três steps.
 
 São bons primeiros candidatos porque hoje vivem apenas no runtime TypeScript/testes, sem coluna gerada histórica no banco.
 
-### ESTADO DA ETAPA 2 — PR #253 / NÃO APLICADO
+### ESTADO DA ETAPA 2 — PR #253 / APLICADO
 
 - `lib/method/doses.ts` não contém mais os valores profissionais `15/12/6`; recebe configuração escalar explícita;
 - `lib/method/recognition.ts` não contém mais `2 g/kg`, `2 g/kg` e `50 g`; executa `method_engine_v1` recebido como configuração;
 - migration `20261001230751_seed_initial_method_templates.sql` materializa os quatro baselines como versões ativas com proveniência de sistema;
 - golden tests reproduzem o baseline atual e demonstram alteração de parâmetros sem mudança de código;
 - o limite de proteína com maior teor de gordura continua fora desta etapa e permanece hardcoded até a próxima migração;
-- a migration ainda não foi aplicada no Supabase SaaS.
+- a migration foi aplicada no Supabase SaaS em 2026-10-01; os quatro templates estão ativos como `system_baseline`.
 
 ## RLS e autorização
 
