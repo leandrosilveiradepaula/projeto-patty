@@ -317,7 +317,7 @@ As Fases 4, 5 e 6 permanecem validas como possibilidades historicas/metodologica
 
 Ainda nao inferir o pareamento individual completo entre cada fase numerada da planilha e os nomes de Cutting quando isso nao estiver explicitado.
 
-Essa logica deve ser deterministica. Somente formulas confirmadas e documentadas podem ser implementadas.
+Essa lógica deve ser determinística. Somente fórmulas confirmadas e documentadas podem ser ativadas como configuração versionada e executadas pelo motor determinístico.
 
 As regras detalhadas das Fases 4, 5 e 6 continuam abertas.
 
@@ -400,7 +400,7 @@ Ao montar ou ajustar o acompanhamento de uma cliente, a Patty precisa conseguir 
 
 Esses campos/blocos devem permanecer editaveis pela Patty para que ela possa revisar e ajustar o plano individualmente.
 
-Quando existir regra previamente confirmada, documentada e deterministica para uma fase, o sistema pode montar automaticamente o rascunho correspondente. Isso pode incluir quantidades em gramas de proteina, carboidrato e gordura, estrutura alimentar derivada dessas regras e treino predefinido quando houver passo a passo de exercicios previamente confirmado e aplicavel.
+Quando existir regra previamente confirmada, documentada e configurada para uma fase, o motor determinístico pode montar automaticamente o rascunho correspondente. Isso pode incluir quantidades em gramas de proteina, carboidrato e gordura, estrutura alimentar derivada dessas regras e treino predefinido quando houver passo a passo de exercicios previamente confirmado e aplicavel.
 
 A Patty deve visualizar o rascunho gerado, revisar todos os campos, corrigir o que for necessario e somente depois aprovar/publicar.
 
@@ -544,3 +544,22 @@ As respostas de 2026-09-26 nao autorizam automatizar suplementacao/manipulados, 
 
 Esses temas permanecem como `QUESTAO ABERTA` ate formalizacao suficiente para implementacao deterministica e revisavel.
 
+
+
+## Parametrização do método
+
+### DECISÃO CONFIRMADA - 2026-09-30
+
+Todos os valores profissionais atuais são templates iniciais configuráveis.
+
+A Patty pode alterar:
+- parâmetros globais;
+- parâmetros por fase;
+- parâmetros por protocolo;
+- parâmetros por treino;
+- parâmetros por cliente;
+- valores específicos de um protocolo/treino.
+
+Mudanças futuras não alteram retroativamente versões já usadas/publicadas.
+
+Exemplos históricos individuais continuam não sendo regras gerais. Quando importados, permanecem como dados/configuração daquela cliente até que exista decisão explícita de promover algo a template global.
