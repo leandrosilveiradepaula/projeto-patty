@@ -36,6 +36,25 @@ Todos os modulos e fluxos confirmados para Patty e clientes fazem parte do escop
 
 Regras profissionais ainda abertas continuam bloqueadas para automacao ate confirmacao e documentacao.
 
+
+## Parametrizacao do metodo
+
+### DECISAO CONFIRMADA
+
+Regras, calculos, formulas, coeficientes, quantidades, limites e workflows do metodo profissional devem ser configuracao versionada, e nao constantes definitivas espalhadas pelo codigo.
+
+Os valores atuais dos Excels e das regras confirmadas formam os templates iniciais. A Patty deve poder criar novas versoes de template e ajustar parametros para uma cliente, protocolo ou treino especifico sem alterar silenciosamente os demais casos.
+
+A resolucao segue o principio:
+
+`template versionado -> configuracao/override da cliente -> snapshot do protocolo/treino`
+
+Alteracoes futuras de template nao reescrevem historico. Overrides individuais nao viram regra global automaticamente.
+
+O codigo fornece um motor deterministico seguro para validar e executar configuracoes estruturadas. Seguranca, autorizacao, RLS, Auth, MFA, auditoria, preservacao de historico e revisao humana permanecem invariantes tecnicas.
+
+Detalhamento normativo: `CONFIGURABLE_RULES.md`.
+
 ## Papel da IA
 
 ### DECISAO CONFIRMADA
@@ -75,15 +94,3 @@ Todo o conteudo atual do Google Drive deve ser preservado.
 ### RECOMENDACAO TECNICA
 
 A migracao do Drive deve ser planejada em etapas, com inventario, classificacao, validacao pela Patty e somente depois importacao ou publicacao no aplicativo.
-
-
-## Instalação no celular
-
-### REQUISITO CONFIRMADO - 2026-09-30
-
-O aplicativo deve poder ser instalado no telefone celular e aberto a partir da tela inicial como aplicativo.
-
-### DECISAO TECNICA
-
-A primeira implementação desse requisito será via PWA sobre a aplicação web existente. Isso não impede uma futura versão distribuída por App Store ou Google Play, caso exista necessidade concreta de produto ou capacidade nativa que justifique outra arquitetura.
-

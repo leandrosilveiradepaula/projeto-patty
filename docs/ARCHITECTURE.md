@@ -200,27 +200,62 @@ O acesso futuro ao binario deve ocorrer somente depois de validar a sessao e a r
 Uploads grandes devem usar multipart quando necessario. Paths nao devem conter PII.
 
 
-## Aplicativo instalável no celular
+## Motor parametrizável de regras e workflows
 
-### DECISAO TECNICA - 2026-09-30
+### DECISÃO CONFIRMADA - 2026-09-30
 
-O primeiro caminho para tornar o Projeto Patty instalável no celular será uma Progressive Web App (PWA) sobre a aplicação Next.js existente.
+Regras profissionais, valores, fórmulas, coeficientes e workflows não devem ficar hardcoded na aplicação.
 
-Objetivos desta etapa:
+A arquitetura passa a separar:
 
-- permitir instalação na tela inicial de Android e iPhone;
-- manter uma única base de código Next.js;
-- abrir em modo `standalone`, com aparência de aplicativo;
-- preservar autenticação, RLS e boundaries server-side existentes;
-- não introduzir wrapper nativo, App Store ou Play Store nesta primeira etapa.
+- **configuração versionada**: valores, fórmulas estruturadas, templates e workflows;
+- **motor determinístico**: avaliação dos operadores, unidades, validações e resolução de escopo;
+- **override por cliente**: ajustes individuais feitos pela Patty;
+- **snapshot**: parâmetros efetivamente usados em protocolo/treino publicado.
 
-A fundação PWA usa Web App Manifest, metadados móveis, ícones públicos e HTTPS da Vercel.
+Os Excels existentes são fonte de migração para templates iniciais e dados históricos, não runtime permanente.
 
-### DECISAO DE SEGURANCA
+A configuração profissional pode mudar sem alteração de código, mas não pode executar código arbitrário.
 
-A primeira versão instalável **não terá cache offline de páginas autenticadas ou dados privados**.
+RLS, Auth, MFA, secrets, constraints e demais invariantes de segurança/integridade continuam fora da camada de configuração profissional.
 
-Não introduzir service worker que persista Anamnese, avaliações, protocolos, fotos, exames, documentos ou outros dados de saúde no dispositivo sem uma revisão específica de privacidade, retenção, invalidação de sessão e comportamento offline.
+Ver `CONFIGURABLE_RULES.md`.
 
-Push notifications também ficam fora desta primeira fundação. Caso sejam introduzidas, exigirão decisão separada sobre conteúdo, consentimento, canal, dados expostos na tela bloqueada e lifecycle de tokens.
 
+## Contrato tecnico do motor configuravel
+
+### DECISAO TECNICA - 2026-10-01
+
+A camada configuravel deve ser implementada como dados declarativos validados, nao como codigo dinamico.
+
+O contrato detalhado esta em `METHOD_CONFIGURATION_CONTRACT.md`.
+
+Fluxo arquitetural:
+
+```text
+template/version
+      |
+      v
+resolver de escopo
+      |
+      +--> override cliente
+      |
+      +--> override protocolo
+      |
+      v
+configuracao resolvida
+      |
+      v
+motor deterministico
+      |
+      v
+resultado + snapshot imutavel
+```
+
+O engine v1 deve comecar pequeno, com operadores estritamente necessarios para remover os primeiros hardcodes. Novos operadores entram somente com caso de uso documentado e teste.
+
+Nao permitir JavaScript, SQL, Python, `eval`, expression strings arbitrarias ou plugins executaveis vindos da configuracao.
+
+A resolucao nao pode cair silenciosamente em constante hardcoded. Durante a migracao, qualquer fallback temporario precisa ser explicito, testado e registrado no inventario de hardcodes.
+
+Cada dominio consumidor referencia snapshots por FK explicita; nao usar ponteiro polimorfico generico sem integridade referencial.

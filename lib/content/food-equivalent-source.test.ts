@@ -12,7 +12,7 @@ test("historical food source is structurally valid but always fail-closed for pu
   const result = validateHistoricalFoodEquivalentSource(source);
 
   assert.equal(result.publishable, false);
-  assert.equal(result.groupCount, 11);
+  assert.equal(result.groupCount, 12);
   assert.equal(result.itemCount > 100, true);
   assert.deepEqual(result.issues, []);
 });

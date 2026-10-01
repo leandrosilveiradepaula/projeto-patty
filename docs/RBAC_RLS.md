@@ -413,3 +413,34 @@ Triggers de banco tornam avaliacao, medidas e vinculos imutaveis depois de `fina
 
 A finalizacao deve gravar `finalized_by_profile_id = auth.uid()`. Nao existe bypass de RLS para facilitar a UI.
 
+
+
+## Configuracao profissional versionada
+
+### DECISAO DE SEGURANCA - NAO IMPLEMENTADA
+
+Quando a fundacao de configuracao profissional for criada, aplicar o seguinte modelo:
+
+**Templates globais**
+- `anon`: nenhum acesso;
+- cliente: nenhum acesso direto;
+- admin/Patty: leitura com role relacional `admin` e AAL2;
+- escrita/ativacao/retirada: boundary server-side controlada;
+- nao exigir `client_assignment`, pois o template global nao pertence a uma cliente.
+
+**Overrides client-scoped**
+- `anon`: nenhum acesso;
+- cliente: nenhum acesso direto;
+- admin/Patty: leitura e boundary de escrita somente com role `admin`, AAL2 e assignment ativo da cliente;
+- nenhuma escrita direta generica pelo browser.
+
+**Snapshots**
+- sao client-scoped;
+- admin/Patty acessa conforme autorizacao vigente do dominio e AAL2;
+- cliente nao recebe SELECT generico sobre a tabela de snapshots;
+- cliente ve somente o artefato publicado que o dominio ja autoriza;
+- snapshots permanecem imutaveis/append-only.
+
+RLS e autorizacao nunca sao configuracoes profissionais. A camada configuravel nao pode ampliar acesso a dados nem contornar MFA, assignment, grants ou policies existentes.
+
+O desenho detalhado esta em `METHOD_CONFIGURATION_CONTRACT.md`.
