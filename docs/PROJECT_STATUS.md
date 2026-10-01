@@ -835,7 +835,7 @@ A montagem usa somente consultas RLS ja existentes sob as atribuicoes ativas da 
 - esse bloco e historico e nao representa o HEAD atual;
 - estado revalidado posteriormente em 2026-10-01: PR #246 mergeado; `master` e producao Vercel alinhados em `407ecf24c192fa5ec5ec3a83b58ae6203f9ffe00`;
 - PRs #242, #243, #244 e #245 permanecem abertos em draft nesta revalidacao;
-- GitHub Actions dos PRs atuais continua apresentando jobs encerrados antes de steps (`steps: null`), portanto nao usar esses fails isoladamente como evidencia de falha de codigo.
+- historicamente houve runs encerrados antes de receber steps (`steps: null`), mas em 2026-10-01 o runner voltou a executar normalmente; diagnosticos atuais devem usar os steps/logs reais.
 
 ### SUPABASE SAAS
 
@@ -865,13 +865,13 @@ Advisor de seguranca apos os applies:
 - snapshot historico alimentar desidentificado + validador fail-closed, sem importacao no catalogo ativo;
 - fila historica de revisao da biblioteca de exercicios: 74 videos, 9 titulos genericos e 16 grupos de possivel duplicidade, todos ainda nao autorizados para publicacao.
 
-### GITHUB ACTIONS - BLOQUEIO EXTERNO CONFIRMADO
+### GITHUB ACTIONS - BLOQUEIO EXTERNO HISTORICO / RESOLVIDO
 
-O workflow `Validate application` continua sendo criado, mas o job encerra antes de receber runner e retorna `steps: null`.
+Em uma janela anterior, `Validate application` encerrava antes de receber runner e retornava `steps: null`; o diagnostico controlado do PR #236 reproduziu o comportamento com `ubuntu-24.04` e `ubuntu-latest`.
 
-Foi feito um diagnostico controlado no PR #236 trocando somente `ubuntu-24.04` por `ubuntu-latest`. O run `36737265951` apresentou exatamente o mesmo comportamento e o PR foi fechado sem merge.
+Em 2026-10-01 o runner voltou a executar normalmente. O PR #246 expôs e corrigiu tres problemas reais de baseline (nullability de RPC gerada, contagem estrutural do catalogo historico e inventario/revisao de security boundaries) e depois passou integralmente por typecheck, testes e build.
 
-Conclusao operacional: a falha nao esta demonstrada no YAML nem no label do runner; depende de intervencao de conta/quota/alocacao do GitHub Actions. Nao fazer reruns cegos.
+Conclusao operacional atual: o bloqueio externo nao esta ativo. Novas falhas devem ser tratadas pelos steps/logs reais; nao reutilizar o diagnostico antigo de `steps: null` sem nova evidencia.
 
 ### BLOQUEIOS EXTERNOS QUE PERMANECEM
 
