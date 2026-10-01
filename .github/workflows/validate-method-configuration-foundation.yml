@@ -1,9 +1,6 @@
 name: Validate method configuration foundation
 
 on:
-  push:
-    branches:
-      - "codex/validate-method-configuration-pgtap"
   pull_request:
     paths:
       - ".github/workflows/validate-method-configuration-foundation.yml"
