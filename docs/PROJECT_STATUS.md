@@ -58,7 +58,7 @@ Em 2026-09-26, o workflow manual `E2E canonical Anamnesis start smoke`, run `362
 
 O fail anterior do run `36170455838` foi diagnosticado como corrida de UI: o segundo PATCH autenticado chegava ao Supabase com HTTP 200, mas carregava novamente o valor antigo porque um `router.refresh()` assincrono podia remontar o formulario entre o primeiro save e a segunda edicao. O PR #189 removeu refresh pos-save de respostas comuns e manteve navegacao explicita somente para perguntas controladoras de aplicabilidade. PostgreSQL, grants, RLS e schema nao precisaram ser alterados.
 
-Estado atual revalidado em 2026-10-01: a producao Vercel mais recente `READY` esta no commit `d7c131d398174a6486d3b0d760afe4bec08b6d7d`, enquanto o `master` remoto esta em `a274b7fafb2e3aa32276833c38f583a132feba73`. Portanto, `master` e producao estao temporariamente desencontrados. Nao tratar alteracoes posteriores a `d7c131d` como publicadas ate existir novo deployment `READY` validado.
+Estado atual revalidado em 2026-10-01: o PR #246 restaurou o baseline verde e foi mergeado no `master` `407ecf24c192fa5ec5ec3a83b58ae6203f9ffe00`. O Vercel publicou esse mesmo commit em producao com estado `READY`. O gap temporario entre `master` e producao foi resolvido.
 
 ## Estado operacional resumido
 
@@ -172,7 +172,7 @@ Resumo:
 
 1. **Deployment Vercel**
    - HISTORICO: `master` `bf49254edb9292801eb9ed80a83e1d68262b7b11` foi publicado como `READY` e o smoke canonico `36257567841` foi aprovado naquele baseline.
-   - ESTADO ATUAL 2026-10-01: producao `READY` em `d7c131d398174a6486d3b0d760afe4bec08b6d7d`; `master` remoto em `a274b7fafb2e3aa32276833c38f583a132feba73`. Existe gap de publicacao a resolver antes de considerar o HEAD atual publicado.
+   - ESTADO ATUAL 2026-10-01: PR #246 mergeado; `master` em `407ecf24c192fa5ec5ec3a83b58ae6203f9ffe00`; deployment de producao correspondente `READY`. Gap resolvido.
 
 2. **Email real de convite**
    - lifecycle tecnico e E2E sintetico existem;
@@ -833,7 +833,7 @@ A montagem usa somente consultas RLS ja existentes sob as atribuicoes ativas da 
 
 - estado registrado naquela reconciliacao: `master` em `c56d6752c119ee873fcc39bb2b3d4c3af73cb224` e deployment `dpl_BiMMHaAutcYZJBpxQzwCdcv9LScz` `READY`;
 - esse bloco e historico e nao representa o HEAD atual;
-- estado revalidado em 2026-10-01: `master` em `a274b7fafb2e3aa32276833c38f583a132feba73`, producao `READY` mais recente em `d7c131d398174a6486d3b0d760afe4bec08b6d7d`;
+- estado revalidado posteriormente em 2026-10-01: PR #246 mergeado; `master` e producao Vercel alinhados em `407ecf24c192fa5ec5ec3a83b58ae6203f9ffe00`;
 - PRs #242, #243, #244 e #245 permanecem abertos em draft nesta revalidacao;
 - GitHub Actions dos PRs atuais continua apresentando jobs encerrados antes de steps (`steps: null`), portanto nao usar esses fails isoladamente como evidencia de falha de codigo.
 
@@ -960,8 +960,8 @@ Proximo passo tecnico recomendado: transformar esse contrato em uma proposta de 
 
 Foram criados, fora de `supabase/migrations`, tres artefatos de revisao:
 
-- `docs/METHOD_CONFIGURATION_FOUNDATION_MIGRATION_PROPOSAL.sql`;
-- `docs/METHOD_CONFIGURATION_FOUNDATION_PGTAP_PROPOSAL.sql`;
+- `docs/METHOD_CONFIGURATION_FOUNDATION_MIGRATION_PROPOSAL_V2.sql`;
+- `docs/METHOD_CONFIGURATION_FOUNDATION_PGTAP_PROPOSAL_V2.sql`;
 - `docs/METHOD_CONFIGURATION_FOUNDATION_MIGRATION_REVIEW.md`.
 
 A proposta cria somente a fundacao relacional para templates, versoes, overrides e snapshots, com RLS e grants minimos. Nenhum fluxo atual passa a depender dela.
@@ -982,7 +982,7 @@ Proximo gate: gerar a migration oficial com `supabase migration new create_metho
 
 ### PASS / NENHUMA ALTERACAO PERSISTIDA
 
-A proposta `docs/METHOD_CONFIGURATION_FOUNDATION_MIGRATION_PROPOSAL.sql` foi validada diretamente no Supabase SaaS dentro de transacao com `ROLLBACK`.
+A proposta V2 `docs/METHOD_CONFIGURATION_FOUNDATION_MIGRATION_PROPOSAL_V2.sql` foi validada diretamente no Supabase SaaS dentro de transacao com `ROLLBACK`.
 
 O gate confirmou criacao das 5 tabelas, RLS, policy MFA restritiva e grants minimos esperados. Consulta pos-rollback confirmou `0` tabelas da foundation persistidas.
 
@@ -1057,6 +1057,18 @@ Ao avancar o pipeline do #246, foi identificado um segundo baseline stale: `lib/
 
 Consequencia:
 - nao duplicar essas correcoes nos PRs #242-#245;
-- primeiro restaurar um `master` verde pelo PR #246;
-- depois atualizar/revalidar os PRs abertos contra o novo baseline;
+- PR #246: MERGEADO e baseline verde restaurado;
+- PR #245: sincronizado com o novo `master` e em revalidacao;
+- PRs #242-#244: devem ser atualizados/revalidados contra o novo baseline antes de qualquer merge;
 - nenhuma dessas correcoes muda regra profissional.
+
+
+### RESOLVIDO - PR #246 E VERCEL
+
+O PR #246 passou integralmente por `Validate application` (typecheck, testes, security boundary e build) e foi mergeado no `master`.
+
+Commit atual desse baseline: `407ecf24c192fa5ec5ec3a83b58ae6203f9ffe00`.
+
+O Vercel criou deployment de producao correspondente e o estado e `READY`.
+
+O PR #245 foi sincronizado por merge commit com esse baseline, sem duplicar as correcoes de CI em seu diff funcional.
