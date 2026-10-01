@@ -952,3 +952,27 @@ O contrato define:
 Nenhuma migration, schema, RLS ou runtime foi alterado nesta etapa.
 
 Proximo passo tecnico recomendado: transformar esse contrato em uma proposta de migration pequena para a fundacao **sem conectar nenhum fluxo existente ainda**, incluindo RLS/grants e testes de banco, para revisao antes de qualquer apply.
+
+
+## Proposta da foundation migration de configuracao - 2026-10-01
+
+### DOCUMENTADA / NAO APLICADA
+
+Foram criados, fora de `supabase/migrations`, tres artefatos de revisao:
+
+- `docs/METHOD_CONFIGURATION_FOUNDATION_MIGRATION_PROPOSAL.sql`;
+- `docs/METHOD_CONFIGURATION_FOUNDATION_PGTAP_PROPOSAL.sql`;
+- `docs/METHOD_CONFIGURATION_FOUNDATION_MIGRATION_REVIEW.md`.
+
+A proposta cria somente a fundacao relacional para templates, versoes, overrides e snapshots, com RLS e grants minimos. Nenhum fluxo atual passa a depender dela.
+
+O Supabase CLI nao esta disponivel no ambiente desta sessao; portanto nenhum timestamp de migration foi inventado e nenhum arquivo oficial foi criado em `supabase/migrations`.
+
+Estado:
+- IMPLEMENTADO no repositorio: NAO;
+- TESTADO em banco: NAO;
+- APLICADO no Supabase SaaS: NAO;
+- runtime alterado: NAO;
+- migration antiga alterada: NAO.
+
+Proximo gate: gerar a migration oficial com `supabase migration new create_method_configuration_foundation`, copiar o SQL revisado, adaptar o pgTAP, executar static gate/testes/advisors e somente depois considerar apply.
