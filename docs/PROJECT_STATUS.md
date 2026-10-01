@@ -1322,3 +1322,25 @@ Gate antes de merge/apply:
 - pgTAP da foundation;
 - pgTAP dos templates iniciais;
 - revisão de advisors e dry-run oficial antes de apply.
+
+
+## Dry-run da primeira migracao de hardcodes - PR #253
+
+### PASS / ROLLBACK CONFIRMADO
+
+A migration `20261001230751_seed_initial_method_templates.sql` foi executada no Supabase SaaS dentro de `BEGIN ... ROLLBACK`.
+
+O gate confirmou:
+- alteracoes de proveniencia aceitas pelo schema atual;
+- quatro templates iniciais criaveis;
+- quatro versoes ativas com `created_by_kind = system`;
+- `created_by_profile_id = null` para baseline de sistema;
+- `source_kind = system_baseline`;
+- ativacao de baseline de sistema sem impersonar perfil humano.
+
+Validacao pos-rollback confirmou:
+- coluna `created_by_kind` persistida: NAO;
+- templates persistidos: 0;
+- migration `20261001230751` registrada: NAO.
+
+Portanto, o dry-run de compatibilidade com o SaaS real passou sem alteracao persistida.
