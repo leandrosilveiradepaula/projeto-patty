@@ -4,7 +4,7 @@
 
 ## Status
 
-### DECISÃO TÉCNICA DOCUMENTADA — NÃO IMPLEMENTADA
+### DECISÃO TÉCNICA DOCUMENTADA — ENGINE V1 PARCIALMENTE IMPLEMENTADO
 
 Este documento define o contrato mínimo para substituir hardcodes profissionais por configuração versionada sem transformar o Projeto Patty em um interpretador de código arbitrário.
 
@@ -497,6 +497,36 @@ createSnapshotSet(context, resolutions)
 O engine não escolhe qual fase profissional uma cliente deve seguir.
 
 A escolha da fase continua dependente das regras confirmadas e dos gates humanos documentados.
+
+## Semantica tecnica do engine v1
+
+### IMPLEMENTADO
+
+O evaluator puro inicial vive em `lib/method/config-engine.ts` e nao consulta banco, nao resolve fase profissional e nao possui valores da Patty embutidos.
+
+Limites tecnicos de seguranca:
+- profundidade maxima de expressao: 32;
+- total maximo de nodes de expressao por configuracao: 256;
+- operadores binarios `add`, `subtract`, `multiply`, `divide`, `min` e `max` recebem exatamente dois argumentos;
+- `ceil`, `floor` e `round` recebem exatamente um argumento;
+- `round` v1 arredonda para inteiro, com empate afastando de zero;
+- configuracao, parametros, inputs e resultados numericos nao aceitam `NaN` ou infinito;
+- campos desconhecidos em nodes/configuracoes sao rejeitados fail-closed.
+
+Algebra de unidades suportada no v1:
+- soma/subtracao/min/max exigem unidades iguais;
+- multiplicacao por `ratio` preserva a outra unidade;
+- `kg * g_per_kg -> g`;
+- `kg * ml_per_kg -> ml`;
+- divisao entre unidades iguais produz `ratio`;
+- divisao por `ratio` preserva a unidade do numerador;
+- `g / kg -> g_per_kg`;
+- `ml / kg -> ml_per_kg`;
+- qualquer outra combinacao falha fechada.
+
+O engine v1 nao permite referencia entre outputs. Expressoes referenciam somente inputs declarados, parametros escalares declarados e literais; por isso nao existe grafo de dependencias entre outputs nem ciclo possivel nesta versao. Se referencias entre outputs forem introduzidas no futuro, deteccao explicita de ciclos passa a ser obrigatoria antes da ativacao.
+
+Essas regras sao semantica tecnica do executor, nao regras profissionais. Nenhum coeficiente, dose, macro, fase, serie, repeticao ou limite profissional foi introduzido no engine.
 
 ## Estratégia de testes
 
