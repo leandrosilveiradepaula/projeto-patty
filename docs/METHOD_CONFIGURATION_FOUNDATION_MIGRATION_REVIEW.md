@@ -223,3 +223,16 @@ A proposta evita isso mantendo:
 - nenhum operador de fórmula dentro do banco nesta primeira migration.
 
 O evaluator/AST entra em tarefa separada e testável.
+
+
+## Dry-run transacional no Supabase SaaS - 2026-10-01
+
+### PASS / ROLLBACK CONFIRMADO
+
+A proposta foi executada no projeto Supabase SaaS Projeto Corpo e Mente dentro de uma unica transacao, com DDL e validacoes estruturais seguidas de ROLLBACK.
+
+O gate confirmou: 5 tabelas criaveis; RLS nas 5; policy RESTRICTIVE de MFA nas 5; anon sem SELECT; authenticated com SELECT onde previsto e sem INSERT direto de template; service_role com INSERT explicito e sem DELETE de snapshot set.
+
+Uma consulta separada apos o rollback confirmou `persisted_configuration_tables = 0`.
+
+Resultado: sintaxe/DDL PASS; compatibilidade basica com o schema SaaS atual PASS; nenhuma persistencia; migration history nao alterada; runtime nao alterado.
