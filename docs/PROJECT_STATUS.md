@@ -1134,7 +1134,7 @@ O antigo bloqueio de build-rate-limit do Vercel nao esta ativo; o gate atual pas
 
 ## Migration oficial da foundation configuravel - 2026-10-01
 
-### MATERIALIZADA NO REPOSITORIO / NAO APLICADA
+### MATERIALIZADA NO REPOSITORIO / APLICADA NO SAAS
 
 O filename oficial foi gerado pelo Supabase CLI em CI com:
 
@@ -1154,9 +1154,9 @@ Estado:
 - migration oficial no repositorio: SIM;
 - filename gerado pelo CLI: SIM;
 - pgTAP oficial no repositorio: SIM;
-- apply no Supabase SaaS: NAO;
-- migration history remota alterada: NAO;
-- runtime da aplicacao alterado: NAO.
+- apply no Supabase SaaS: SIM;
+- migration history remota: `20261001213333` registrada;
+- runtime da aplicacao alterado pela migration: NAO.
 
 Gate antes de qualquer apply:
 - db reset local completo;
@@ -1192,16 +1192,16 @@ O schema remoto continua confirmando os efeitos esperados dessas migrations:
 - trigger imutavel de `ai_finding_actions`;
 - policy MFA AAL2.
 
-A migration `20261001213333_create_method_configuration_foundation.sql` permanece a unica migration nova ainda nao aplicada no SaaS.
+A migration `20261001213333_create_method_configuration_foundation.sql` foi aplicada com sucesso no SaaS em 2026-10-01.
 
 Proximo gate: validar a lista local/remota e executar o dry-run oficial da migration nova antes de qualquer apply.
 
 
 ## PWA instalavel - PR #242 revalidado em 2026-10-01
 
-### SINCRONIZADO COM O MASTER ATUAL / AINDA NAO PUBLICADO
+### MERGEADO / PUBLICADO
 
-A branch `codex/installable-pwa` foi reconciliada com o master atual depois da parametrizacao, engine configuravel, foundation de banco, reconciliacao de migration history e workspace desktop do cliente, sem restaurar documentacao antiga.
+O PR #242 foi reconciliado com o master atual, passou pelo CI e foi mergeado. O deployment correspondente no Vercel ficou `READY` e assumiu o alias de producao `projeto-patty.vercel.app`.
 
 Fundacao preparada:
 - Web App Manifest em `app/manifest.ts`;
@@ -1217,3 +1217,56 @@ Fundacao preparada:
 O monograma `C&M` continua sendo asset tecnico provisorio, nao identidade visual definitiva.
 
 Gate atual: CI/build da branch sincronizada. Publicacao somente apos merge e deployment de producao `READY`.
+
+
+## Foundation configuravel aplicada no SaaS - 2026-10-01
+
+### APLICADA / VERIFICADA
+
+O workflow manual `Deploy Supabase migrations` foi executado em duas etapas sobre o `master` `967ab68216d29a0b62489da4f6b2911b1f23ace1`.
+
+Dry-run:
+- workflow run `36937089977`: SUCCESS;
+- `supabase migration list`: historico local/remoto alinhado;
+- unica migration pendente: `20261001213333_create_method_configuration_foundation.sql`;
+- `supabase db push --dry-run`: PASS;
+- nenhuma alteracao persistida.
+
+Apply:
+- workflow run `36937276221`: SUCCESS;
+- gate de confirmacao literal `APPLY`: PASS;
+- preview: PASS;
+- apply: PASS;
+- verificacao de migration history apos apply: PASS.
+
+Verificacao direta no Supabase SaaS apos o apply:
+- migration `20261001213333` registrada: SIM;
+- tabelas da foundation: 6/6;
+- RLS habilitada: 6/6;
+- policies RESTRICTIVE `admin_mfa_aal2_required`: 6/6;
+- triggers de lifecycle/imutabilidade esperados: 6/6.
+
+As seis tabelas aplicadas sao:
+- `method_configuration_templates`;
+- `method_configuration_versions`;
+- `client_method_configuration_override_versions`;
+- `method_configuration_snapshot_sets`;
+- `method_configuration_snapshots`;
+- `method_configuration_snapshot_overrides`.
+
+Advisors de seguranca apos apply:
+- nenhum novo finding critico decorrente da foundation;
+- permanece o warning conhecido de Leaked Password Protection desabilitado.
+
+Advisors de performance reportam FKs sem indice e indices ainda nao usados. Esses findings sao informativos e nao autorizam alteracao em massa sem carga/uso real e tarefa especifica.
+
+Estado:
+- IMPLEMENTADO NO REPOSITORIO: SIM;
+- TESTADO EM CI/pgTAP: SIM;
+- DRY-RUN OFICIAL: PASS;
+- APLICADO NO SAAS: SIM;
+- RLS/MFA/LIFECYCLE VERIFICADOS: SIM;
+- runtime consumindo todos os templates: NAO;
+- hardcodes profissionais totalmente migrados: NAO.
+
+Manifest e icones publicos foram validados em producao com HTTP 200 para `/manifest.webmanifest`, `/pwa/icon-192`, `/pwa/icon-512`, `/pwa/maskable-512` e `/apple-icon`.
