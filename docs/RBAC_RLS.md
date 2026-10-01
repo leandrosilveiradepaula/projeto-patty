@@ -417,9 +417,9 @@ A finalizacao deve gravar `finalized_by_profile_id = auth.uid()`. Nao existe byp
 
 ## Configuracao profissional versionada
 
-### DECISAO DE SEGURANCA - NAO IMPLEMENTADA
+### IMPLEMENTADO NA FOUNDATION - 2026-10-01
 
-Quando a fundacao de configuracao profissional for criada, aplicar o seguinte modelo:
+A foundation de configuracao profissional aplicada segue o seguinte modelo:
 
 **Templates globais**
 - `anon`: nenhum acesso;
