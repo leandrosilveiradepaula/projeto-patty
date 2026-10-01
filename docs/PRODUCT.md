@@ -94,3 +94,14 @@ Todo o conteudo atual do Google Drive deve ser preservado.
 ### RECOMENDACAO TECNICA
 
 A migracao do Drive deve ser planejada em etapas, com inventario, classificacao, validacao pela Patty e somente depois importacao ou publicacao no aplicativo.
+
+
+## Instalação no celular
+
+### REQUISITO CONFIRMADO - 2026-09-30
+
+O aplicativo deve poder ser instalado no telefone celular e aberto a partir da tela inicial como aplicativo.
+
+### DECISAO TECNICA
+
+A primeira implementação desse requisito será via PWA sobre a aplicação web existente. Isso não impede futura distribuição por App Store ou Google Play se surgir necessidade concreta de produto ou capacidade nativa que justifique outra arquitetura.
