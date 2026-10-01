@@ -280,3 +280,24 @@ Com isso, o snapshot preserva toda a cadeia de resolucao, inclusive quando clien
 ### Consequencia
 
 O dry-run anterior continua valido apenas para a versao anterior da proposta. Depois da correcao do SQL, o dry-run deve ser repetido antes de promover qualquer migration.
+
+
+## V2 corrigida - dry-run transacional
+
+### PASS / CANDIDATA CANONICA
+
+A V2 da proposta foi criada em `docs/METHOD_CONFIGURATION_FOUNDATION_MIGRATION_PROPOSAL_V2.sql`, acompanhada por `docs/METHOD_CONFIGURATION_FOUNDATION_PGTAP_PROPOSAL_V2.sql`.
+
+A V2 substitui o unico `override_version_id` por uma entidade associativa imutavel `method_configuration_snapshot_overrides`, capaz de preservar toda a cadeia de overrides efetivamente aplicada com `precedence` e FKs concretas.
+
+A V2 foi executada no Supabase SaaS dentro de `BEGIN ... ROLLBACK` e criou/reverteu com sucesso as 6 tabelas da foundation. Consulta separada pos-rollback confirmou `persisted_configuration_tables = 0`.
+
+Estado da V2:
+- sintaxe/DDL no schema real: PASS;
+- cadeia completa de overrides: modelada;
+- RLS/grants/MFA: incluidos na proposta;
+- persistencia no SaaS: NENHUMA;
+- migration history: NAO ALTERADA;
+- pgTAP oficial: ainda nao executado no ambiente apropriado.
+
+A V1 permanece somente como historico de revisao e nao deve ser promovida a migration oficial.
