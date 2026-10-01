@@ -58,7 +58,7 @@ Em 2026-09-26, o workflow manual `E2E canonical Anamnesis start smoke`, run `362
 
 O fail anterior do run `36170455838` foi diagnosticado como corrida de UI: o segundo PATCH autenticado chegava ao Supabase com HTTP 200, mas carregava novamente o valor antigo porque um `router.refresh()` assincrono podia remontar o formulario entre o primeiro save e a segunda edicao. O PR #189 removeu refresh pos-save de respostas comuns e manteve navegacao explicita somente para perguntas controladoras de aplicabilidade. PostgreSQL, grants, RLS e schema nao precisaram ser alterados.
 
-Nao existe bloqueio atual de deployment Vercel para o `master`.
+Estado atual revalidado em 2026-10-01: a producao Vercel mais recente `READY` esta no commit `d7c131d398174a6486d3b0d760afe4bec08b6d7d`, enquanto o `master` remoto esta em `a274b7fafb2e3aa32276833c38f583a132feba73`. Portanto, `master` e producao estao temporariamente desencontrados. Nao tratar alteracoes posteriores a `d7c131d` como publicadas ate existir novo deployment `READY` validado.
 
 ## Estado operacional resumido
 
@@ -76,7 +76,7 @@ Nao existe bloqueio atual de deployment Vercel para o `master`.
 | Correcao pos-envio da Anamnese | SIM | SIM | E2E administrativo de producao PASS em 2026-09-24 | Schema aplicado e rota/UI publicadas e validadas em producao | Resposta original continua separada de correcoes e esclarecimentos |
 | Esclarecimentos pos-Anamnese | SIM | SIM | E2E autenticado admin -> cliente -> admin PASS no run `36053370894` | Schema e UI publicados; workflow E2E versionado no PR #155 | Lifecycle sem estado formal/prazo/notificacao continua aberto |
 | Arquivos privados | SIM | PARCIAL/AVANCADO | Smokes cliente/admin + auditoria estatica | Acesso da Patty sem assignment confirmado em RLS/Storage/rotas, com MFA AAL2 | Politica de retencao/hard delete |
-| Avaliacoes e medidas | Fundacao + cadencia profissional parcial definida | Lifecycle operacional de rascunho/finalizacao implementado | CI/build PASS no PR #210 + pre-apply `ROLLBACK` PASS | `20260927002227_create_assessment_draft_lifecycle` APLICADA NO SAAS | Quinzenal: cintura/abdomen/quadril/peso; mensal: todas as medidas + peso + fotos; catalogo mensal, unidades e correcao pos-finalizacao continuam abertos |
+| Avaliacoes e medidas | Fundacao + cadencia profissional parcial definida | Lifecycle operacional de rascunho/finalizacao implementado | CI/build PASS no PR #210 + pre-apply `ROLLBACK` PASS | `20260927002227_create_assessment_draft_lifecycle` APLICADA NO SAAS | Avaliacao Basica ocorre no meio do intervalo entre Completas; Avaliacao Completa usa catalogo confirmado de peso, medidas e fotos; regra de calendario para ancora 29/30/31 continua aberta |
 | Protocolos versionados | SIM | Lifecycle manual implementado | CI/validacoes existentes | Backend/SaaS correspondente existente | Criacao/edicao profissional completa conforme regras ainda abertas |
 | Conteudo educacional / exercicios | SIM como dominios separados | Fundacao/release + metadata de asset preparada | Inventario 89/89 revalidado; smoke transacional de assets PASS | Vercel Private Blob definido para midia; store/upload ainda nao executados | Criar/conectar store privado, migrar video aprovado, verificar hash e publicar/liberar explicitamente |
 | Metodo da Patty | PARCIALMENTE DEFINIDO | Motor determinístico existente/parcial; regras profissionais devem migrar para configuração versionada e editável | CI | Fluxo confirmado inclui Cutting 3 Linear -> Dia 1/Dia 2 -> 2 Low/1 High -> Up Metabolico; meta de liquidos 60 mL/kg e equivalencia 2 doses de legumes = 1 dose de carbo confirmadas | Fases 5/6, numeros da planilha por peso do Cutting 3, pos-Up Metabolico, Bulking, Consolidacao, suplementacao, treino, parametros restantes do check-in e criterios objetivos de estagnacao |
@@ -171,7 +171,8 @@ Resumo:
 ## Pendencias de infraestrutura conhecidas
 
 1. **Deployment Vercel**
-   - RESOLVIDO: `master` `bf49254edb9292801eb9ed80a83e1d68262b7b11` publicado como `READY`; smoke canonico consolidado `36257567841` aprovado em producao.
+   - HISTORICO: `master` `bf49254edb9292801eb9ed80a83e1d68262b7b11` foi publicado como `READY` e o smoke canonico `36257567841` foi aprovado naquele baseline.
+   - ESTADO ATUAL 2026-10-01: producao `READY` em `d7c131d398174a6486d3b0d760afe4bec08b6d7d`; `master` remoto em `a274b7fafb2e3aa32276833c38f583a132feba73`. Existe gap de publicacao a resolver antes de considerar o HEAD atual publicado.
 
 2. **Email real de convite**
    - lifecycle tecnico e E2E sintetico existem;
@@ -830,10 +831,11 @@ A montagem usa somente consultas RLS ja existentes sob as atribuicoes ativas da 
 
 ### PRODUCAO
 
-- `master` atual desta reconciliacao parte do commit `c56d6752c119ee873fcc39bb2b3d4c3af73cb224`;
-- deployment Vercel correspondente `dpl_BiMMHaAutcYZJBpxQzwCdcv9LScz`: `READY`;
-- consulta de erros de runtime nas ultimas 24 horas: nenhum cluster encontrado;
-- nenhuma PR permanece aberta apos a rodada operacional.
+- estado registrado naquela reconciliacao: `master` em `c56d6752c119ee873fcc39bb2b3d4c3af73cb224` e deployment `dpl_BiMMHaAutcYZJBpxQzwCdcv9LScz` `READY`;
+- esse bloco e historico e nao representa o HEAD atual;
+- estado revalidado em 2026-10-01: `master` em `a274b7fafb2e3aa32276833c38f583a132feba73`, producao `READY` mais recente em `d7c131d398174a6486d3b0d760afe4bec08b6d7d`;
+- PRs #242, #243, #244 e #245 permanecem abertos em draft nesta revalidacao;
+- GitHub Actions dos PRs atuais continua apresentando jobs encerrados antes de steps (`steps: null`), portanto nao usar esses fails isoladamente como evidencia de falha de codigo.
 
 ### SUPABASE SAAS
 
