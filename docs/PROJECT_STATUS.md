@@ -927,3 +927,28 @@ Hardcodes ativos confirmados incluem:
 Também foi confirmado que não existe prescrição ativa de treino com valores como séries/repetições hardcoded; esse domínio deve nascer já parametrizado quando for implementado.
 
 Nenhuma migration, schema, RLS ou runtime foi alterado por este inventário. Próximo passo técnico: desenhar o contrato de dados/motor configurável preservando compatibilidade com os snapshots e constraints já aplicados.
+
+
+## Contrato tecnico da camada configuravel - 2026-10-01
+
+### DOCUMENTADO / NAO IMPLEMENTADO
+
+Foi criado `docs/METHOD_CONFIGURATION_CONTRACT.md`.
+
+O contrato define:
+
+- identidade logica de templates;
+- versoes imutaveis apos ativacao;
+- overrides versionados por cliente/protocolo;
+- resolucao de precedencia;
+- snapshot sets e snapshot items;
+- JSON validado por schema conhecido;
+- AST segura de formulas sem codigo arbitrario;
+- unidades semanticas explicitas;
+- RLS separado para templates globais, overrides e snapshots;
+- estrategia incremental de compatibilidade para hidratacao, Avaliacoes e Carb Cycle;
+- golden tests para provar equivalencia antes de remover hardcodes.
+
+Nenhuma migration, schema, RLS ou runtime foi alterado nesta etapa.
+
+Proximo passo tecnico recomendado: transformar esse contrato em uma proposta de migration pequena para a fundacao **sem conectar nenhum fluxo existente ainda**, incluindo RLS/grants e testes de banco, para revisao antes de qualquer apply.
