@@ -1165,3 +1165,33 @@ Gate antes de qualquer apply:
 - CI geral;
 - advisors;
 - revisao final de diff/migrations.
+
+
+## Divergencia de migration history detectada - 2026-10-01
+
+### RESOLVIDO NO REPOSITORIO / SAAS INALTERADO
+
+A comparacao entre `supabase/migrations` e `supabase_migrations.schema_migrations` encontrou quatro migrations antigas com o mesmo nome logico e efeitos ja presentes no schema remoto, mas timestamps locais diferentes dos timestamps registrados no SaaS.
+
+A reconciliacao foi executada no Git renomeando somente os arquivos locais para os timestamps remotos ja aplicados:
+
+- `20260930131848_clone_protocol_version_draft.sql`
+- `20260930151722_create_ai_finding_actions.sql`
+- `20260930152158_harden_ai_finding_action_boundary.sql`
+- `20260930152248_enforce_single_ai_finding_action.sql`
+
+Cada rename foi validado comparando o blob SHA antes/depois; o conteudo SQL permaneceu byte a byte identico.
+
+Nenhum `supabase migration repair` foi executado. Nenhuma linha de `supabase_migrations.schema_migrations` foi alterada. Nenhum SQL dessas quatro migrations foi reaplicado.
+
+O schema remoto continua confirmando os efeitos esperados dessas migrations:
+- `clone_protocol_version_draft(uuid,jsonb)`;
+- tabela `ai_finding_actions`;
+- RPC `record_ai_finding_action_server(...)`;
+- constraint `ai_finding_actions_one_human_decision_per_finding`;
+- trigger imutavel de `ai_finding_actions`;
+- policy MFA AAL2.
+
+A migration `20261001213333_create_method_configuration_foundation.sql` permanece a unica migration nova ainda nao aplicada no SaaS.
+
+Proximo gate: validar a lista local/remota e executar o dry-run oficial da migration nova antes de qualquer apply.
