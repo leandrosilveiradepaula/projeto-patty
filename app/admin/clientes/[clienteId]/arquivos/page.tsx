@@ -3,6 +3,7 @@ import { AdminPrivateFileUploadForm } from "@/components/admin/AdminPrivateFileU
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import { getClientForPrivateFileAdministration } from "@/lib/files/private-file-admin";
@@ -75,6 +76,7 @@ export default async function AdminClientFilesPage({
         eyebrow="Admin"
         title={displayName ? `Arquivos de ${displayName}` : "Arquivos privados"}
       />
+      <ClientWorkspaceNav clientId={client.id} />
       <Section
         description="Arquivos enviados pela Patty ficam ocultos para a cliente até serem liberados explicitamente."
         title="Enviar arquivo em nome da cliente"

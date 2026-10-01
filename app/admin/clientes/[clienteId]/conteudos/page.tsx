@@ -1,6 +1,7 @@
 import { ClientContentReleaseForm } from "@/components/admin/ClientContentReleaseForm";
 import { isContentVersionReleaseEligible } from "@/lib/content/release-eligibility";
 import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
+import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { ContentListItem } from "@/components/admin/ContentListItem";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
@@ -80,6 +81,7 @@ export default async function AdminClientContentPage({
           </span>
         }
       />
+      <ClientWorkspaceNav clientId={client.id} />
       <Section
         description="Escolha a versão publicada que deve ficar disponível para esta cliente."
         title="Liberar conteúdo"

@@ -2,6 +2,7 @@ import { createHydrationTargetAction } from "@/app/admin/clientes/[clienteId]/ch
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import {

@@ -1,5 +1,6 @@
 import { AssessmentCreateForm } from "@/components/admin/AssessmentCreateForm";
 import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
+import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { EvaluationListItem } from "@/components/admin/EvaluationListItem";
 import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -60,6 +61,7 @@ export default async function AdminClientAssessmentsPage({
           </span>
         }
       />
+      <ClientWorkspaceNav clientId={client.id} />
       <Section
         description="Crie uma avaliação em rascunho. O registro permanece editável até a finalização explícita."
         title="Nova avaliação"
