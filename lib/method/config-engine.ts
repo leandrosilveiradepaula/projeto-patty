@@ -313,6 +313,14 @@ function validateExpressionReferences(
     return;
   }
 
+  if (!("args" in expression)) {
+    fail(
+      "INVALID_CONFIGURATION",
+      "binary expression is missing arguments",
+      path,
+    );
+  }
+
   validateExpressionReferences(expression.args[0], configuration, path + ".args[0]");
   validateExpressionReferences(expression.args[1], configuration, path + ".args[1]");
 }
@@ -575,6 +583,14 @@ function evaluateExpression(
       value: assertFiniteResult(result, path),
       unit: operand.unit,
     };
+  }
+
+  if (!("args" in expression)) {
+    fail(
+      "INVALID_CONFIGURATION",
+      "binary expression is missing arguments",
+      path,
+    );
   }
 
   const left = evaluateExpression(
