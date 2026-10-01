@@ -1087,7 +1087,7 @@ A foundation continua apenas documentada/dry-run/static-gate: nenhuma migration 
 
 ## Engine deterministico configuravel v1 - 2026-10-01
 
-### IMPLEMENTADO NA BRANCH / AINDA NAO CONSUMIDO POR FLUXOS
+### MERGEADO NO MASTER / AINDA NAO CONSUMIDO POR FLUXOS
 
 Foi adicionado `lib/method/config-engine.ts` com validator/evaluator puro para a AST segura inicial e `lib/method/config-engine.test.ts` com dados exclusivamente sinteticos.
 
@@ -1130,3 +1130,23 @@ O escopo continua exclusivamente de UX desktop administrativa:
 Nao altera schema, RLS, regras profissionais, configuracao parametrizada ou migrations.
 
 O antigo bloqueio de build-rate-limit do Vercel nao esta ativo; o gate atual passa a ser CI/build da branch sincronizada e validacao visual do deployment de producao apos merge.
+
+
+## PWA instalavel - PR #242 revalidado em 2026-10-01
+
+### SINCRONIZADO COM O MASTER ATUAL / AINDA NAO PUBLICADO
+
+A branch `codex/installable-pwa` foi reconciliada novamente apos o merge do desktop admin UX (#243), sem restaurar documentacao antiga.
+
+Fundacao preparada:
+- Web App Manifest em `app/manifest.ts`;
+- modo `standalone`;
+- icones 192x192, 512x512 e maskable gerados pelo Next.js;
+- icone Apple;
+- metadata mobile/theme;
+- rotas de metadata e icones excluidas do proxy de sessao;
+- sem service worker;
+- sem cache offline de dados privados;
+- sem push notification.
+
+Gate atual: CI/build verde da branch sincronizada. Publicacao somente apos merge e deployment de producao `READY`.
