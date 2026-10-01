@@ -206,6 +206,33 @@ values (
   'synthetic override'
 );
 
+insert into public.client_method_configuration_override_versions (
+  id,
+  client_id,
+  template_id,
+  based_on_template_version_id,
+  version_number,
+  override_configuration,
+  protocol_version_id,
+  created_by_profile_id,
+  activated_at,
+  activated_by_profile_id,
+  reason
+)
+values (
+  'b7000000-0000-0000-0000-000000000002',
+  'b2000000-0000-0000-0000-000000000001',
+  'b5000000-0000-0000-0000-000000000001',
+  'b6000000-0000-0000-0000-000000000001',
+  1,
+  '{"value":17}'::jsonb,
+  'b4000000-0000-0000-0000-000000000001',
+  'b1000000-0000-0000-0000-000000000001',
+  now(),
+  'b1000000-0000-0000-0000-000000000001',
+  'synthetic protocol override'
+);
+
 insert into public.method_configuration_snapshot_sets (
   id,
   client_id,
@@ -250,14 +277,23 @@ insert into public.method_configuration_snapshot_overrides (
   override_version_id,
   precedence
 )
-values (
-  'b9000000-0000-0000-0000-000000000001',
-  'b2000000-0000-0000-0000-000000000001',
-  'b5000000-0000-0000-0000-000000000001',
-  'b6000000-0000-0000-0000-000000000001',
-  'b7000000-0000-0000-0000-000000000001',
-  1
-);
+values
+  (
+    'b9000000-0000-0000-0000-000000000001',
+    'b2000000-0000-0000-0000-000000000001',
+    'b5000000-0000-0000-0000-000000000001',
+    'b6000000-0000-0000-0000-000000000001',
+    'b7000000-0000-0000-0000-000000000001',
+    1
+  ),
+  (
+    'b9000000-0000-0000-0000-000000000001',
+    'b2000000-0000-0000-0000-000000000001',
+    'b5000000-0000-0000-0000-000000000001',
+    'b6000000-0000-0000-0000-000000000001',
+    'b7000000-0000-0000-0000-000000000002',
+    2
+  );
 
 set local role authenticated;
 
@@ -318,8 +354,8 @@ select is(
 );
 select is(
   (select count(*) from public.client_method_configuration_override_versions),
-  1::bigint,
-  'assigned admin aal2 reads assigned client override'
+  2::bigint,
+  'assigned admin aal2 reads client and protocol overrides'
 );
 select is(
   (select count(*) from public.method_configuration_snapshot_sets),
@@ -333,8 +369,21 @@ select is(
 );
 select is(
   (select count(*) from public.method_configuration_snapshot_overrides),
-  1::bigint,
-  'assigned admin aal2 reads applied override chain'
+  2::bigint,
+  'assigned admin aal2 reads full applied override chain'
+);
+
+select is(
+  (
+    select array_agg(override_version_id order by precedence)
+    from public.method_configuration_snapshot_overrides
+    where snapshot_id = 'b9000000-0000-0000-0000-000000000001'
+  ),
+  array[
+    'b7000000-0000-0000-0000-000000000001'::uuid,
+    'b7000000-0000-0000-0000-000000000002'::uuid
+  ],
+  'snapshot preserves override precedence order'
 );
 
 select set_config(
@@ -583,11 +632,33 @@ select throws_ok(
 
 select throws_ok(
   $update public.method_configuration_snapshot_overrides
-    set precedence = 2
-    where snapshot_id = 'b9000000-0000-0000-0000-000000000001'$,
+    set precedence = 3
+    where snapshot_id = 'b9000000-0000-0000-0000-000000000001'
+      and override_version_id = 'b7000000-0000-0000-0000-000000000002'$,
   '55000',
   null,
   'snapshot override chain is immutable'
+);
+
+select throws_ok(
+  $insert into public.method_configuration_snapshot_overrides (
+      snapshot_id,
+      client_id,
+      template_id,
+      template_version_id,
+      override_version_id,
+      precedence
+    ) values (
+      'b9000000-0000-0000-0000-000000000001',
+      'b2000000-0000-0000-0000-000000000001',
+      'b5000000-0000-0000-0000-000000000001',
+      'b6000000-0000-0000-0000-000000000001',
+      'b7000000-0000-0000-0000-000000000001',
+      2
+    )$,
+  '23505',
+  null,
+  'snapshot override chain rejects duplicate override or precedence'
 );
 
 select * from finish();
