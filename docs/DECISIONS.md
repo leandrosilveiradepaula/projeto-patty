@@ -2407,3 +2407,22 @@ A migration aplicada no Supabase SaaS e `20260930134443_create_assessment_measur
 ### LIMITE
 
 Esta primeira materializacao corrige valor e unidade de uma medida existente. Alteracao historica de `measurement_key`, data/tipo da avaliacao ou vinculo de foto continua fora deste fluxo e exige desenho separado se vier a ser necessario.
+
+
+## 2026-10-01 - Engine deterministico configuravel v1
+
+### DECISAO TECNICA IMPLEMENTADA
+
+Foi implementado um evaluator puro e fail-closed para configuracoes profissionais declarativas, sem conectar qualquer fluxo existente e sem embutir valores profissionais.
+
+O engine v1:
+- aceita somente a allowlist documentada de operadores;
+- valida shape, referencias, unidades e numeros finitos;
+- rejeita operador/campo desconhecido;
+- rejeita divisao por zero e algebra de unidades nao suportada;
+- limita profundidade a 32 e quantidade total de nodes a 256;
+- usa arredondamento inteiro com empate afastando de zero;
+- nao usa `eval`, JavaScript configuravel, SQL configuravel ou codigo arbitrario;
+- nao resolve template/override no banco e nao escolhe fase profissional.
+
+A primeira implementacao permanece isolada ate a foundation versionada e seus gates de banco estarem prontos.
