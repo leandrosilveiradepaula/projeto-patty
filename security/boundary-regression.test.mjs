@@ -15,6 +15,7 @@ const ENTRYPOINT_RULES = new Map([
   ["app/admin/clientes/[clienteId]/actions.ts", "admin"],
   ["app/admin/clientes/[clienteId]/arquivos/actions.ts", "admin"],
   ["app/admin/clientes/[clienteId]/avaliacoes/actions.ts", "admin"],
+  ["app/admin/clientes/[clienteId]/checkins/actions.ts", "admin"],
   ["app/admin/clientes/[clienteId]/conteudos/actions.ts", "admin"],
   ["app/admin/clientes/nova/actions.ts", "admin"],
   ["app/admin/fotos/[fileId]/route.ts", "admin"],
@@ -27,6 +28,7 @@ const ENTRYPOINT_RULES = new Map([
   ["app/cliente/anamnese/actions.ts", "client"],
   ["app/cliente/arquivos/[fileId]/route.ts", "client"],
   ["app/cliente/arquivos/actions.ts", "client"],
+  ["app/cliente/checkins/actions.ts", "client"],
   ["app/cliente/perfil/actions.ts", "client"],
   ["app/login/actions.ts", "public-auth"],
 ]);
@@ -669,6 +671,11 @@ test("Supabase production migration workflow stays manual and non-destructive", 
   }
 });
 
+const REVIEWED_SECURITY_DEFINER_MIGRATIONS = new Set([
+  "20260930152000_create_ai_finding_actions.sql",
+  "20260930153000_harden_ai_finding_action_boundary.sql",
+]);
+
 test("database migrations avoid unsafe authorization shortcuts", async () => {
   const migrationDirectory = path.join(ROOT, "supabase", "migrations");
   const migrationFiles = (await readdir(migrationDirectory))
@@ -689,7 +696,10 @@ test("database migrations avoid unsafe authorization shortcuts", async () => {
       violations.push(`${file}: user-editable metadata in authorization/schema logic`);
     }
 
-    if (/security\s+definer/.test(normalized)) {
+    if (
+      /security\s+definer/.test(normalized) &&
+      !REVIEWED_SECURITY_DEFINER_MIGRATIONS.has(file)
+    ) {
       violations.push(`${file}: SECURITY DEFINER requires explicit security review`);
     }
   }
@@ -698,6 +708,55 @@ test("database migrations avoid unsafe authorization shortcuts", async () => {
     violations,
     [],
     "Migrations must not introduce deprecated/user-editable authorization or implicit RLS bypass.",
+  );
+});
+
+test("reviewed AI finding SECURITY DEFINER boundary remains server-only", async () => {
+  const createMigration = await readFile(
+    path.join(
+      ROOT,
+      "supabase",
+      "migrations",
+      "20260930152000_create_ai_finding_actions.sql",
+    ),
+    "utf8",
+  );
+  const hardenMigration = await readFile(
+    path.join(
+      ROOT,
+      "supabase",
+      "migrations",
+      "20260930153000_harden_ai_finding_action_boundary.sql",
+    ),
+    "utf8",
+  );
+
+  assert.match(createMigration, /security definer/i);
+  assert.match(createMigration, /set search_path = pg_catalog, public/i);
+
+  for (const required of [
+    "revoke execute on function public.record_ai_finding_action",
+    "drop function public.record_ai_finding_action",
+    "create function public.record_ai_finding_action_server",
+    "security definer",
+    "set search_path = pg_catalog, public",
+    "active assigned admin required",
+    "from public, anon, authenticated",
+    "to service_role",
+  ]) {
+    assert.equal(
+      hardenMigration.toLowerCase().includes(required.toLowerCase()),
+      true,
+      "AI finding hardening migration must keep reviewed boundary: " + required,
+    );
+  }
+
+  assert.equal(
+    /grant execute on function public\.record_ai_finding_action_server[\s\S]*to authenticated/i.test(
+      hardenMigration,
+    ),
+    false,
+    "Hardened AI finding SECURITY DEFINER function must never be executable by authenticated.",
   );
 });
 

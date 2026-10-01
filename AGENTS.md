@@ -22,6 +22,21 @@ Se uma regra nao estiver definida pela Patty ou registrada como decisao confirma
 
 Exemplos, casos individuais e hipoteses nao devem ser transformados em regra geral do metodo.
 
+
+## Parametrizacao obrigatoria do metodo
+
+### DECISAO CONFIRMADA
+
+Antes de alterar runtime relacionado ao metodo, ler `docs/CONFIGURABLE_RULES.md`.
+
+Nao introduzir como estado final novos valores profissionais hardcoded no codigo. Isso inclui formulas, coeficientes, g/kg, doses, equivalencias, limites, arredondamentos, series, repeticoes, descansos, sequencias de fases, frequencias, prazos e demais parametros do metodo.
+
+Os valores atuais dos Excels e das regras confirmadas sao templates iniciais versionados. O codigo deve implementar o motor deterministico seguro; valores e formulas profissionais estruturadas pertencem a configuracao versionada, com override por cliente quando aplicavel e snapshot do que foi efetivamente usado.
+
+Constantes profissionais ja existentes sao divida de migracao e nao precedente para novos hardcodes. Nao alterar comportamento apenas para antecipar a migracao; cada retirada de hardcode deve preservar historico, testes e auditabilidade.
+
+RLS, Auth, MFA, secrets, autorizacao, constraints de integridade, protecao de arquivos, preservacao de historico e a proibicao de publicacao direta pela IA continuam invariantes tecnicas e nao configuracoes livres do metodo.
+
 ## Planejamento de tarefas
 
 ### DECISAO CONFIRMADA

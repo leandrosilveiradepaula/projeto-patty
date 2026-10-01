@@ -249,9 +249,19 @@ O output original permanece imutavel e a decisao humana fica em registro separad
 
 Continuam abertas apenas as demais acoes de UX ainda nao confirmadas, como editar o texto do finding, descartar explicitamente ou converter diretamente em pedido de esclarecimento.
 
-### QUESTAO ABERTA
+### RESOLVIDO — CALCULO DETERMINISTICO E OVERRIDE MANUAL
 
-Como uma edicao manual da Patty deve interagir com valor originado de calculo deterministico, sem sobrescrever silenciosamente o resultado ou atribuir esse calculo a IA?
+A decisao de parametrizacao de 2026-09-30 resolve a relacao conceitual entre calculo e edicao manual:
+
+- o template e sua versao de origem permanecem identificados;
+- os inputs e o resultado calculado permanecem preservados;
+- uma alteracao da Patty e registrada como override profissional, separada do resultado calculado;
+- o override preserva valor original, valor alterado, unidade, autoria, timestamp e contexto de aplicacao;
+- a alteracao nao deve ser atribuida a IA;
+- o protocolo/treino materializado preserva snapshot dos parametros efetivamente usados;
+- alterar o template no futuro nao reescreve snapshots anteriores.
+
+Continua sendo tarefa tecnica definir a materializacao exata dessas entidades no schema/runtime, sem enfraquecer auditoria, RLS ou historico.
 
 ### QUESTAO ABERTA
 
@@ -484,7 +494,9 @@ Continuam abertos:
 - poderes de correcao da Patty;
 - edicao de registros anteriores.
 
-A formula pode ser implementada deterministicamente quando a tarefa tecnica correspondente for aprovada.
+O valor atual de **60 mL/kg/dia** e a referencia profissional confirmada e passa a ser o template inicial dessa regra. O runtime atual ja possui implementacao deterministica com snapshot de meta, mas, conforme a decisao de parametrizacao de 2026-09-30, esse numero nao deve permanecer como constante profissional definitiva no codigo: deve migrar para configuracao versionada sem reescrever historico.
+
+As questoes de recalculo por mudanca de peso, proporcao minima de agua pura, lembretes e correcoes continuam abertas e nao devem ser inferidas a partir do template.
 
 ### QUESTAO ABERTA
 
@@ -719,7 +731,9 @@ Quando e como a biblioteca de exercicios podera ser exposta a cliente, e quais c
 
 A Patty confirmou que o protocolo/acompanhamento precisa permitir edicao manual de fase, macros, numero de refeicoes, distribuicao de doses, alimentos/equivalentes, Low/High, refeicao livre, observacoes, data de inicio, orientacoes, treino quando solicitado, suplementacao e manipulados.
 
-Quando houver regra previamente confirmada, documentada e deterministica, o sistema pode montar rascunhos automaticamente para revisao da Patty, inclusive macros da fase e treino predefinido aplicavel.
+Pela decisao de parametrizacao de 2026-09-30, esses ajustes devem ser representados como configuracao/override profissional versionado, preservando origem e snapshot, e nao como sobrescrita silenciosa de um calculo anterior.
+
+Quando houver regra previamente confirmada, documentada e cadastrada como configuracao ativa, o motor deterministico pode montar rascunhos automaticamente para revisao da Patty, inclusive macros da fase e treino predefinido aplicavel. A IA nao cria nem escolhe formulas profissionais por raciocinio generativo.
 
 Continuam abertas as regras internas e os campos detalhados necessarios para treino, suplementacao e manipulados onde essas regras ainda nao estiverem formalizadas.
 
@@ -818,7 +832,8 @@ Continua aberto apenas o mecanismo futuro de recovery/watchdog, caso seja necess
 
 ### RESOLVIDO TECNICAMENTE
 
-- formula e unidade da meta de liquidos: 60 mL/kg/dia;
+- formula e unidade atualmente usadas na meta de liquidos: 60 mL/kg/dia;
+- esse valor passa a ser template inicial versionado e nao constante profissional definitiva;
 - persistencia da meta como snapshot, sem sobrescrever historico;
 - ingestao e atividade fisica com eventos append-only;
 - resposta a esclarecimento nao resolve automaticamente;
