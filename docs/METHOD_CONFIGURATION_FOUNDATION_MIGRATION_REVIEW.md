@@ -331,3 +331,33 @@ Confirmado no pgTAP V2:
 - delimitadores SQL dos novos `throws_ok` corrigidos com `$sql$...$sql$`.
 
 O pgTAP ainda nao foi executado no SaaS porque a extensao `pgtap` nao esta instalada e a integracao bloqueia criacao de usuarios sinteticos em `auth.users`. Nao foi instalada extensao nem usado dado real para contornar essa limitacao.
+
+
+## Static gate final da V2
+
+### APPROVED PARA TESTE EM AMBIENTE PGTAP
+
+A proposta V2 e o companion pgTAP V2 foram revisados estaticamente depois da correcao da cadeia de overrides.
+
+Cobertura confirmada:
+
+- 6 tabelas da foundation;
+- RLS nas 6;
+- policy MFA AAL2 restritiva nas 6;
+- browser autenticado sem escrita direta;
+- service role sem DELETE de snapshots;
+- FKs concretas entre snapshot, template version e overrides;
+- override client-level e protocol-level simultaneos;
+- cadeia com 2 overrides no mesmo snapshot;
+- ordem preservada por `precedence`;
+- imutabilidade da cadeia;
+- rejeicao de override/precedencia duplicados;
+- cross-client protocol override rejeitado;
+- uma versao ativa de template por vez;
+- um override ativo por escopo.
+
+Foi corrigida tambem uma falha de sintaxe no companion anterior: os comandos passados a `throws_ok` agora usam delimitador PostgreSQL valido `$sql$...$sql$`.
+
+Resultado do static gate: PASS.
+
+Este gate nao equivale a execucao do pgTAP. O teste ainda precisa rodar em ambiente que tenha a extensao pgTAP e dados sinteticos isolados.
