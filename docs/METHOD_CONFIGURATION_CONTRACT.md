@@ -545,3 +545,14 @@ Ainda não estão definidos por este contrato:
 - regra de calendário para Avaliação em dias 29/30/31.
 
 Esses itens continuam pendentes até confirmação/documentação própria.
+
+
+### Cadeia completa de overrides no snapshot
+
+A revisao da proposta de migration em 2026-10-01 identificou que um unico `override_version_id` no snapshot nao e suficiente quando a configuracao resolvida combina mais de um override aplicavel.
+
+A decisao tecnica passa a ser: cada `method_configuration_snapshot` deve preservar uma colecao ordenada de overrides efetivamente aplicados, por uma entidade associativa imutavel (conceitualmente `method_configuration_snapshot_overrides`).
+
+Ela deve registrar pelo menos `snapshot_id`, `client_id`, `template_id`, `template_version_id`, `override_version_id`, `precedence` e `created_at`, com FKs concretas e RLS client-scoped.
+
+Isso preserva, por exemplo, a cadeia `template -> override da cliente -> override do protocolo`, sem perder nenhuma origem na auditoria.
