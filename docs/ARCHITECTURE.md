@@ -259,3 +259,27 @@ Nao permitir JavaScript, SQL, Python, `eval`, expression strings arbitrarias ou 
 A resolucao nao pode cair silenciosamente em constante hardcoded. Durante a migracao, qualquer fallback temporario precisa ser explicito, testado e registrado no inventario de hardcodes.
 
 Cada dominio consumidor referencia snapshots por FK explicita; nao usar ponteiro polimorfico generico sem integridade referencial.
+
+
+## Aplicativo instalável no celular
+
+### DECISAO TECNICA - 2026-09-30
+
+O primeiro caminho para tornar o Projeto Patty instalável no celular será uma Progressive Web App (PWA) sobre a aplicação Next.js existente.
+
+Objetivos desta etapa:
+- permitir instalação na tela inicial de Android e iPhone;
+- manter uma única base de código Next.js;
+- abrir em modo `standalone`, com aparência de aplicativo;
+- preservar autenticação, RLS e boundaries server-side existentes;
+- não introduzir wrapper nativo, App Store ou Play Store nesta primeira etapa.
+
+A fundação PWA usa Web App Manifest, metadados móveis, ícones públicos e HTTPS da Vercel.
+
+### DECISAO DE SEGURANCA
+
+A primeira versão instalável não terá cache offline de páginas autenticadas ou dados privados.
+
+Não introduzir service worker que persista Anamnese, avaliações, protocolos, fotos, exames, documentos ou outros dados de saúde no dispositivo sem revisão específica de privacidade, retenção, invalidação de sessão e comportamento offline.
+
+Push notifications também ficam fora desta primeira fundação e exigem decisão separada sobre conteúdo, consentimento, canal, exposição em tela bloqueada e lifecycle de tokens.
