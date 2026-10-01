@@ -187,5 +187,30 @@ select throws_ok(
   'system-created version is restricted to system_baseline provenance'
 );
 
+select throws_ok(
+  $sql$insert into public.method_configuration_versions (
+      template_id,
+      version_number,
+      schema_version,
+      configuration,
+      source_kind,
+      created_by_kind,
+      created_by_profile_id
+    )
+    select
+      t.id,
+      100,
+      1,
+      '{"value":1,"unit":"g_per_dose"}'::jsonb,
+      'system_baseline',
+      'profile',
+      'b1000000-0000-0000-0000-000000000001'::uuid
+    from public.method_configuration_templates t
+    where t.template_key = 'nutrition.dose.protein'$sql$,
+  '23514',
+  null,
+  'profile-created version cannot claim system_baseline provenance'
+);
+
 select * from finish();
 rollback;
