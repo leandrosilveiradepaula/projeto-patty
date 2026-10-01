@@ -1,3 +1,4 @@
+import { evaluateMethodEngineConfiguration } from "./config-engine.ts";
 import { parseScalarParameterConfiguration } from "./scalar-parameter.ts";
 
 export const DOSE_TYPES = ["protein", "carbohydrate", "fat"] as const;
@@ -50,12 +51,33 @@ export function gramsToDoses(
   return grams / doseGrams;
 }
 
-export function maxHigherFatProteinDoses(totalProteinDoses: number) {
+export function maxHigherFatProteinDoses(
+  configurationValue: unknown,
+  totalProteinDoses: number,
+) {
   if (!Number.isFinite(totalProteinDoses) || totalProteinDoses < 0) {
     throw new RangeError(
       "totalProteinDoses must be a finite non-negative number",
     );
   }
 
-  return Math.ceil(totalProteinDoses / 2);
+  const result = evaluateMethodEngineConfiguration(
+    configurationValue,
+    {
+      total_protein_doses: {
+        value: totalProteinDoses,
+        unit: "dose",
+      },
+    },
+  );
+
+  const output = result.outputs.max_higher_fat_protein_doses;
+
+  if (!output || output.unit !== "dose") {
+    throw new TypeError(
+      "higher-fat protein limit configuration is missing dose output",
+    );
+  }
+
+  return output.value;
 }
