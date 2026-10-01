@@ -38,21 +38,18 @@ jobs:
       - name: Show pinned Supabase CLI
         run: npx supabase --version
 
-      - name: Materialize foundation proposal only inside CI
+      - name: Verify committed foundation migration
         shell: bash
         run: |
           set -euo pipefail
-          npx supabase migration new create_method_configuration_foundation
-          migration_file="$(ls -1t supabase/migrations/*_create_method_configuration_foundation.sql | head -n 1)"
-          test -n "$migration_file"
-          cp docs/METHOD_CONFIGURATION_FOUNDATION_MIGRATION_PROPOSAL_V2.sql "$migration_file"
-          cp docs/METHOD_CONFIGURATION_FOUNDATION_PGTAP_PROPOSAL_V2.sql             supabase/tests/database/method_configuration_foundation_v2.test.sql
-          echo "Ephemeral migration: $migration_file"
+          test -f supabase/migrations/20261001213333_create_method_configuration_foundation.sql
+          test -f supabase/tests/database/method_configuration_foundation_v2.test.sql
+          echo "Committed migration and pgTAP found."
 
       - name: Start local Supabase
         run: npx supabase start
 
-      - name: Reset local database with ephemeral migration
+      - name: Reset local database with committed migration
         run: npx supabase db reset
 
       - name: Lint local database
