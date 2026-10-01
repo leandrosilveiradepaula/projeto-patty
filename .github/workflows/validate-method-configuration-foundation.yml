@@ -46,6 +46,9 @@ jobs:
           test -f supabase/tests/database/method_configuration_foundation_v2.test.sql
           echo "Committed migration and pgTAP found."
 
+      - name: Generate next method template migration filename
+        run: npx supabase migration new seed_initial_method_templates
+
       - name: Start local Supabase
         run: npx supabase start
 
