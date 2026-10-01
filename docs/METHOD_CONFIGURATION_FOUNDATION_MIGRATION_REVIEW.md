@@ -236,3 +236,47 @@ O gate confirmou: 5 tabelas criaveis; RLS nas 5; policy RESTRICTIVE de MFA nas 5
 Uma consulta separada apos o rollback confirmou `persisted_configuration_tables = 0`.
 
 Resultado: sintaxe/DDL PASS; compatibilidade basica com o schema SaaS atual PASS; nenhuma persistencia; migration history nao alterada; runtime nao alterado.
+
+
+## Revisao adicional - cadeia completa de overrides
+
+### CHANGES REQUIRED
+
+A proposta SQL atual nao deve ser promovida para migration oficial ainda.
+
+Problema encontrado: `method_configuration_snapshots` possui apenas um `override_version_id`. Isso nao preserva integralmente a resolucao quando a configuracao final resulta de mais de um override aplicavel, por exemplo:
+
+`template -> override da cliente -> override do protocolo -> resultado`
+
+Guardar somente o override mais especifico perde a evidencia de que o override da cliente tambem participou da configuracao resolvida.
+
+### Correcao de desenho
+
+Substituir o unico `override_version_id` no snapshot por uma entidade associativa imutavel, conceitualmente `method_configuration_snapshot_overrides`, com uma linha para cada override efetivamente aplicado.
+
+Campos minimos:
+- `snapshot_id`;
+- `client_id`;
+- `template_id`;
+- `template_version_id`;
+- `override_version_id`;
+- `precedence`;
+- `created_at`.
+
+Invariantes:
+- FK concreta para o snapshot;
+- FK concreta para o override;
+- client/template/template_version devem coincidir nos dois lados;
+- `precedence > 0`;
+- `unique(snapshot_id, precedence)`;
+- `unique(snapshot_id, override_version_id)`;
+- entidade append-only/imutavel;
+- mesma RLS client-scoped do snapshot;
+- cliente sem acesso direto;
+- admin exige AAL2 + assignment ativo.
+
+Com isso, o snapshot preserva toda a cadeia de resolucao, inclusive quando cliente e protocolo contribuem simultaneamente.
+
+### Consequencia
+
+O dry-run anterior continua valido apenas para a versao anterior da proposta. Depois da correcao do SQL, o dry-run deve ser repetido antes de promover qualquer migration.
