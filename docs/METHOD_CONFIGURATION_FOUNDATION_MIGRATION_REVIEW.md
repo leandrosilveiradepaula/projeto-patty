@@ -301,3 +301,31 @@ Estado da V2:
 - pgTAP oficial: ainda nao executado no ambiente apropriado.
 
 A V1 permanece somente como historico de revisao e nao deve ser promovida a migration oficial.
+
+
+## Static gate da V2
+
+### PASS COM LIMITACAO DE EXECUCAO
+
+A proposta SQL V2 e o companion pgTAP V2 passaram por revisao estatica adicional.
+
+Confirmado no SQL V2:
+- 6 tabelas esperadas;
+- RLS nas 6;
+- policy RESTRICTIVE de MFA nas 6;
+- snapshot sem `override_version_id` unico;
+- entidade `method_configuration_snapshot_overrides` com `precedence`;
+- FKs concretas para snapshot e override;
+- imutabilidade da cadeia de overrides;
+- authenticated sem grant de escrita;
+- service_role sem DELETE.
+
+Confirmado no pgTAP V2:
+- dois overrides no mesmo snapshot (cliente + protocolo);
+- ordem preservada por `precedence`;
+- rejeicao de override/predecessor duplicado;
+- imutabilidade da cadeia;
+- isolamento por assignment e MFA ja cobertos pelos cenarios existentes;
+- delimitadores SQL dos novos `throws_ok` corrigidos com `$sql$...$sql$`.
+
+O pgTAP ainda nao foi executado no SaaS porque a extensao `pgtap` nao esta instalada e a integracao bloqueia criacao de usuarios sinteticos em `auth.users`. Nao foi instalada extensao nem usado dado real para contornar essa limitacao.
