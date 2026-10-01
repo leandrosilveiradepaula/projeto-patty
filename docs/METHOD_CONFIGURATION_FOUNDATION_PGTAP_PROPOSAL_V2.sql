@@ -6,12 +6,12 @@ begin;
 
 select no_plan();
 
-select has_table('public', 'method_configuration_templates');
-select has_table('public', 'method_configuration_versions');
-select has_table('public', 'client_method_configuration_override_versions');
-select has_table('public', 'method_configuration_snapshot_sets');
-select has_table('public', 'method_configuration_snapshots');
-select has_table('public', 'method_configuration_snapshot_overrides');
+select has_table('method_configuration_templates');
+select has_table('method_configuration_versions');
+select has_table('client_method_configuration_override_versions');
+select has_table('method_configuration_snapshot_sets');
+select has_table('method_configuration_snapshots');
+select has_table('method_configuration_snapshot_overrides');
 
 select ok(
   (select relrowsecurity from pg_class where oid = 'public.method_configuration_templates'::regclass),

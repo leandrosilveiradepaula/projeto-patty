@@ -1,0 +1,66 @@
+name: Validate method configuration foundation
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/validate-method-configuration-foundation.yml"
+      - "docs/METHOD_CONFIGURATION_FOUNDATION_MIGRATION_PROPOSAL_V2.sql"
+      - "docs/METHOD_CONFIGURATION_FOUNDATION_PGTAP_PROPOSAL_V2.sql"
+      - "supabase/migrations/**"
+      - "supabase/tests/database/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  database:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      SUPABASE_TELEMETRY_DISABLED: "1"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install pinned dependencies
+        run: npm ci
+
+      - name: Show pinned Supabase CLI
+        run: npx supabase --version
+
+      - name: Materialize foundation proposal only inside CI
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx supabase migration new create_method_configuration_foundation
+          migration_file="$(ls -1t supabase/migrations/*_create_method_configuration_foundation.sql | head -n 1)"
+          test -n "$migration_file"
+          cp docs/METHOD_CONFIGURATION_FOUNDATION_MIGRATION_PROPOSAL_V2.sql "$migration_file"
+          cp docs/METHOD_CONFIGURATION_FOUNDATION_PGTAP_PROPOSAL_V2.sql             supabase/tests/database/method_configuration_foundation_v2.test.sql
+          echo "Ephemeral migration: $migration_file"
+
+      - name: Start local Supabase
+        run: npx supabase start
+
+      - name: Reset local database with ephemeral migration
+        run: npx supabase db reset
+
+      - name: Lint local database
+        run: npx supabase db lint --level error
+
+      - name: Run foundation pgTAP V2
+        run: npx supabase test db supabase/tests/database/method_configuration_foundation_v2.test.sql
+
+      - name: Stop local Supabase
+        if: always()
+        run: npx supabase stop --no-backup
