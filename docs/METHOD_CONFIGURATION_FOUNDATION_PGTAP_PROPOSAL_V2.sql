@@ -623,25 +623,25 @@ select throws_ok(
 );
 
 select throws_ok(
-  $delete from public.method_configuration_snapshots
-    where id = 'b9000000-0000-0000-0000-000000000001'$,
+  $sql$delete from public.method_configuration_snapshots
+    where id = 'b9000000-0000-0000-0000-000000000001'$sql$,
   '55000',
   null,
   'snapshot item cannot be deleted'
 );
 
 select throws_ok(
-  $update public.method_configuration_snapshot_overrides
+  $sql$update public.method_configuration_snapshot_overrides
     set precedence = 3
     where snapshot_id = 'b9000000-0000-0000-0000-000000000001'
-      and override_version_id = 'b7000000-0000-0000-0000-000000000002'$,
+      and override_version_id = 'b7000000-0000-0000-0000-000000000002'$sql$,
   '55000',
   null,
   'snapshot override chain is immutable'
 );
 
 select throws_ok(
-  $insert into public.method_configuration_snapshot_overrides (
+  $sql$insert into public.method_configuration_snapshot_overrides (
       snapshot_id,
       client_id,
       template_id,
@@ -655,7 +655,7 @@ select throws_ok(
       'b6000000-0000-0000-0000-000000000001',
       'b7000000-0000-0000-0000-000000000001',
       2
-    )$,
+    )$sql$,
   '23505',
   null,
   'snapshot override chain rejects duplicate override or precedence'
