@@ -150,7 +150,7 @@ insert into public.method_configuration_templates (
 )
 values (
   'b5000000-0000-0000-0000-000000000001',
-  'nutrition.dose.protein',
+  'test.nutrition.dose.protein',
   'nutrition',
   'scalar_parameter_v1',
   'Dose de proteína',
@@ -262,7 +262,7 @@ values (
   'b2000000-0000-0000-0000-000000000001',
   'b5000000-0000-0000-0000-000000000001',
   'b6000000-0000-0000-0000-000000000001',
-  'nutrition.dose.protein',
+  'test.nutrition.dose.protein',
   '{}'::jsonb,
   '{"value":16,"unit":"g_per_dose"}'::jsonb,
   '{"grams_per_dose":16}'::jsonb
@@ -347,9 +347,13 @@ select set_config(
 );
 
 select is(
-  (select count(*) from public.method_configuration_templates),
+  (
+    select count(*)
+    from public.method_configuration_templates
+    where template_key = 'test.nutrition.dose.protein'
+  ),
   1::bigint,
-  'assigned admin aal2 reads global template'
+  'assigned admin aal2 reads the synthetic global template'
 );
 select is(
   (select count(*) from public.client_method_configuration_override_versions),
@@ -397,9 +401,13 @@ select set_config(
 );
 
 select is(
-  (select count(*) from public.method_configuration_templates),
+  (
+    select count(*)
+    from public.method_configuration_templates
+    where template_key = 'test.nutrition.dose.protein'
+  ),
   1::bigint,
-  'unassigned admin aal2 may read global templates'
+  'unassigned admin aal2 may read the synthetic global template'
 );
 select is(
   (select count(*) from public.client_method_configuration_override_versions),

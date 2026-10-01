@@ -68,7 +68,8 @@ Campos conceituais mínimos:
 - `config_schema_key text`;
 - `display_name text`;
 - `description text nullable`;
-- `created_by_profile_id uuid`;
+- `created_by_kind text` (`profile` ou `system`);
+- `created_by_profile_id uuid nullable`;
 - `created_at timestamptz`.
 
 Exemplos de `template_key`:
@@ -105,7 +106,8 @@ Campos conceituais mínimos:
 - `configuration jsonb`;
 - `source_kind text`;
 - `source_reference text nullable`;
-- `created_by_profile_id uuid`;
+- `created_by_kind text` (`profile` ou `system`);
+- `created_by_profile_id uuid nullable`;
 - `created_at timestamptz`;
 - `activated_at timestamptz nullable`;
 - `activated_by_profile_id uuid nullable`;
@@ -121,6 +123,9 @@ Invariantes:
 - nova mudança profissional cria nova versão;
 - reverter significa criar/ativar nova versão baseada em uma configuração anterior, sem reescrever histórico;
 - `source_kind` diferencia, por exemplo, configuração criada pela Patty, migração de Excel ou baseline do código existente.
+- baseline criado por migration usa `created_by_kind = system`, `created_by_profile_id = null` e `source_kind = system_baseline`; não atribuir artificialmente baseline técnico à Patty;
+- criação/edição profissional humana usa `created_by_kind = profile` com `created_by_profile_id` obrigatório;
+- ativação humana exige ator; a única ativação sem `activated_by_profile_id` permitida é o baseline de sistema materializado por migration.
 
 ### 3. Overrides por cliente
 
@@ -436,6 +441,15 @@ O novo modelo não deve assumir permanentemente três steps.
 ### Doses e Reconhecimento
 
 São bons primeiros candidatos porque hoje vivem apenas no runtime TypeScript/testes, sem coluna gerada histórica no banco.
+
+### ESTADO DA ETAPA 2 — PR #253 / NÃO APLICADO
+
+- `lib/method/doses.ts` não contém mais os valores profissionais `15/12/6`; recebe configuração escalar explícita;
+- `lib/method/recognition.ts` não contém mais `2 g/kg`, `2 g/kg` e `50 g`; executa `method_engine_v1` recebido como configuração;
+- migration `20261001230751_seed_initial_method_templates.sql` materializa os quatro baselines como versões ativas com proveniência de sistema;
+- golden tests reproduzem o baseline atual e demonstram alteração de parâmetros sem mudança de código;
+- o limite de proteína com maior teor de gordura continua fora desta etapa e permanece hardcoded até a próxima migração;
+- a migration ainda não foi aplicada no Supabase SaaS.
 
 ## RLS e autorização
 
