@@ -1072,3 +1072,24 @@ Commit atual desse baseline: `407ecf24c192fa5ec5ec3a83b58ae6203f9ffe00`.
 O Vercel criou deployment de producao correspondente e o estado e `READY`.
 
 O PR #245 foi sincronizado por merge commit com esse baseline, sem duplicar as correcoes de CI em seu diff funcional.
+
+
+## Static gate final da foundation V2
+
+### PASS
+
+A V2 da foundation e seu companion pgTAP passaram por revisao estatica final.
+
+O companion agora prova explicitamente a composicao de dois overrides no mesmo snapshot (cliente + protocolo), a ordem por `precedence`, imutabilidade e rejeicao de duplicidades.
+
+Foi corrigido um delimitador SQL invalido identificado durante a revisao do teste.
+
+Estado:
+- proposta V2: static gate PASS;
+- dry-run V2 no SaaS: PASS / ROLLBACK;
+- pgTAP V2 executado: NAO, ambiente atual nao possui pgTAP;
+- migration oficial: NAO criada;
+- Supabase SaaS alterado: NAO;
+- runtime alterado: NAO.
+
+Proximo gate continua sendo a execucao real do pgTAP V2 em ambiente de teste apropriado.
