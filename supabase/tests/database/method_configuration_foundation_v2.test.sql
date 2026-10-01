@@ -1,6 +1,5 @@
--- PROPOSAL V2 ONLY.
--- Companion pgTAP proposal for METHOD_CONFIGURATION_FOUNDATION_MIGRATION_PROPOSAL_V2.sql.
--- Keep outside supabase/tests/database until the migration receives an official filename.
+-- Official pgTAP coverage for 20261001213333_create_method_configuration_foundation.sql.
+-- Source reviewed in docs/METHOD_CONFIGURATION_FOUNDATION_PGTAP_PROPOSAL_V2.sql.
 
 begin;
 

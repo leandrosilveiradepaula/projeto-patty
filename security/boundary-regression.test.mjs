@@ -672,8 +672,8 @@ test("Supabase production migration workflow stays manual and non-destructive", 
 });
 
 const REVIEWED_SECURITY_DEFINER_MIGRATIONS = new Set([
-  "20260930152000_create_ai_finding_actions.sql",
-  "20260930153000_harden_ai_finding_action_boundary.sql",
+  "20260930151722_create_ai_finding_actions.sql",
+  "20260930152158_harden_ai_finding_action_boundary.sql",
 ]);
 
 test("database migrations avoid unsafe authorization shortcuts", async () => {
@@ -717,7 +717,7 @@ test("reviewed AI finding SECURITY DEFINER boundary remains server-only", async 
       ROOT,
       "supabase",
       "migrations",
-      "20260930152000_create_ai_finding_actions.sql",
+      "20260930151722_create_ai_finding_actions.sql",
     ),
     "utf8",
   );
@@ -726,7 +726,7 @@ test("reviewed AI finding SECURITY DEFINER boundary remains server-only", async 
       ROOT,
       "supabase",
       "migrations",
-      "20260930153000_harden_ai_finding_action_boundary.sql",
+      "20260930152158_harden_ai_finding_action_boundary.sql",
     ),
     "utf8",
   );
