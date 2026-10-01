@@ -1041,3 +1041,22 @@ Cobertura confirmada: 6 tabelas, RLS/MFA, grants minimos, FKs client-scoped, cad
 Foi corrigido um erro de sintaxe no companion pgTAP V2 nos `throws_ok` de snapshot, usando dollar-quoting nomeado `$sql$...$sql$`.
 
 Pendencia restante: executar o pgTAP V2 em ambiente de teste apropriado com pgTAP disponivel. O SaaS de producao nao foi alterado para instalar extensao ou criar usuarios sinteticos.
+
+
+## CI baseline real - 2026-10-01
+
+### DIAGNOSTICADO / CORRECAO ISOLADA EM PR #246
+
+A revalidacao do GitHub Actions mostrou que o runner voltou a executar normalmente e a falha atual nao deve mais ser classificada apenas como problema externo de infraestrutura.
+
+No PR #245, o workflow `Validate application` chegou ao typecheck e falhou em `lib/ai/ai-execution-persistence.ts` porque o typegen do Supabase registrou quatro parametros anulaveis da RPC `fail_ai_execution` como `string` em vez de `string | null`.
+
+A correcao foi isolada no PR #246, sem alterar SQL, runtime behavior, RLS ou SaaS.
+
+Ao avancar o pipeline do #246, foi identificado um segundo baseline stale: `lib/content/food-equivalent-source.test.ts` esperava 11 grupos, enquanto a fonte historica fail-closed atual possui 12. O teste foi alinhado para 12 sem alterar o catalogo historico ou promover qualquer item para conteudo ativo.
+
+Consequencia:
+- nao duplicar essas correcoes nos PRs #242-#245;
+- primeiro restaurar um `master` verde pelo PR #246;
+- depois atualizar/revalidar os PRs abertos contra o novo baseline;
+- nenhuma dessas correcoes muda regra profissional.
