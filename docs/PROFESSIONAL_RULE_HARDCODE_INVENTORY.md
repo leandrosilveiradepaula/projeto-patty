@@ -430,3 +430,10 @@ Cada migração deve provar:
 - testes deixam de testar constante global e passam a testar configuração explícita;
 - questão aberta não ganha valor por inferência;
 - publicação para cliente continua exigindo revisão humana quando aplicável.
+
+
+## Contrato tecnico aprovado para a proxima etapa
+
+O desenho que orienta a retirada gradual destes hardcodes esta em `METHOD_CONFIGURATION_CONTRACT.md`.
+
+Nenhum item deste inventario deve ser migrado diretamente para um `jsonb` generico sem schema. A retirada de cada hardcode deve usar template/version, resolver de escopo, engine deterministico e snapshot conforme o contrato.
