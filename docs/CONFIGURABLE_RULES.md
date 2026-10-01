@@ -318,3 +318,15 @@ O código pode continuar contendo temporariamente os valores atuais durante a mi
 ## Inventário técnico de hardcodes
 
 O inventário auditado do runtime atual está em `PROFESSIONAL_RULE_HARDCODE_INVENTORY.md`. Ele deve ser consultado antes de criar migrations ou substituir constantes profissionais, e deve ser atualizado conforme novos acoplamentos forem encontrados durante a migração.
+
+
+## Contrato tecnico de implementacao
+
+O contrato minimo de entidades, precedencia, snapshots, AST segura, unidades, RLS e estrategia de migracao esta em `METHOD_CONFIGURATION_CONTRACT.md`.
+
+Essa decisao evita dois extremos:
+
+- manter regra profissional hardcoded;
+- substituir hardcode por JSON livre ou codigo arbitrario.
+
+A implementacao deve usar schema conhecido, operadores permitidos, versoes imutaveis apos ativacao e snapshots dos valores resolvidos.
