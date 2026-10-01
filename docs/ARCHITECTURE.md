@@ -220,3 +220,42 @@ A configuração profissional pode mudar sem alteração de código, mas não po
 RLS, Auth, MFA, secrets, constraints e demais invariantes de segurança/integridade continuam fora da camada de configuração profissional.
 
 Ver `CONFIGURABLE_RULES.md`.
+
+
+## Contrato tecnico do motor configuravel
+
+### DECISAO TECNICA - 2026-10-01
+
+A camada configuravel deve ser implementada como dados declarativos validados, nao como codigo dinamico.
+
+O contrato detalhado esta em `METHOD_CONFIGURATION_CONTRACT.md`.
+
+Fluxo arquitetural:
+
+```text
+template/version
+      |
+      v
+resolver de escopo
+      |
+      +--> override cliente
+      |
+      +--> override protocolo
+      |
+      v
+configuracao resolvida
+      |
+      v
+motor deterministico
+      |
+      v
+resultado + snapshot imutavel
+```
+
+O engine v1 deve comecar pequeno, com operadores estritamente necessarios para remover os primeiros hardcodes. Novos operadores entram somente com caso de uso documentado e teste.
+
+Nao permitir JavaScript, SQL, Python, `eval`, expression strings arbitrarias ou plugins executaveis vindos da configuracao.
+
+A resolucao nao pode cair silenciosamente em constante hardcoded. Durante a migracao, qualquer fallback temporario precisa ser explicito, testado e registrado no inventario de hardcodes.
+
+Cada dominio consumidor referencia snapshots por FK explicita; nao usar ponteiro polimorfico generico sem integridade referencial.
