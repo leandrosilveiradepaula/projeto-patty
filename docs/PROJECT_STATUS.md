@@ -1274,7 +1274,7 @@ Manifest e icones publicos foram validados em producao com HTTP 200 para `/manif
 
 ## Primeira migração de hardcodes profissionais - PR #253
 
-### IMPLEMENTADA NA BRANCH / AINDA NAO APLICADA NO SAAS
+### MERGEADA / APLICADA NO SAAS
 
 Escopo desta etapa:
 - doses de proteína, carboidrato e gordura;
@@ -1284,7 +1284,7 @@ Escopo desta etapa:
 Migration oficial:
 - filename gerado pelo Supabase CLI no CI: `20261001230751_seed_initial_method_templates.sql`;
 - não foi inventado timestamp;
-- ainda não aplicada no Supabase SaaS.
+- aplicada no Supabase SaaS em 2026-10-01 pelo workflow manual `Deploy Supabase migrations`.
 
 Templates iniciais previstos:
 - `nutrition.dose.protein` -> 15 g/dose;
@@ -1344,3 +1344,48 @@ Validacao pos-rollback confirmou:
 - migration `20261001230751` registrada: NAO.
 
 Portanto, o dry-run de compatibilidade com o SaaS real passou sem alteracao persistida.
+
+
+## Aplicacao da primeira migracao de hardcodes - 2026-10-01
+
+### APLICADA / VERIFICADA
+
+A migration `20261001230751_seed_initial_method_templates.sql` foi aplicada em producao pelo workflow manual `Deploy Supabase migrations`.
+
+Workflow:
+- dry-run oficial: run `36941341151` — SUCCESS;
+- apply oficial: run `36941886185` — SUCCESS;
+- confirmation gate `APPLY`: PASS;
+- preview: PASS;
+- apply: PASS;
+- verificacao de migration history: PASS.
+
+Verificacao direta no Supabase SaaS:
+- migration `20261001230751` registrada: SIM;
+- coluna `created_by_kind` em templates: SIM;
+- coluna `created_by_kind` em versions: SIM;
+- templates seedados: 4/4;
+- versoes ativas `system_baseline`: 4/4;
+- autoria de sistema sem impersonar perfil: SIM;
+- `activated_by_profile_id = null` somente para baseline de sistema: SIM.
+
+Templates ativos:
+- `nutrition.dose.protein` = 15 g/dose;
+- `nutrition.dose.carbohydrate` = 12 g/dose;
+- `nutrition.dose.fat` = 6 g/dose;
+- `nutrition.recognition.macros` = proteina 2 g/kg, carboidrato 2 g/kg e gordura 50 g/dia.
+
+Esses valores sao baseline versionado atual, nao constantes permanentes do runtime.
+
+Advisors de seguranca apos apply:
+- nenhum novo finding critico;
+- permanece apenas o warning conhecido de Leaked Password Protection desabilitado.
+
+Estado:
+- runtime de doses parametrizado: SIM;
+- runtime de Reconhecimento parametrizado: SIM;
+- templates iniciais no SaaS: SIM;
+- migration history atualizada: SIM;
+- snapshots em consumidores operacionais: AINDA NAO;
+- limite de proteina com maior teor de gordura: AINDA HARDCODED;
+- hidratacao: AINDA HARDCODED.
