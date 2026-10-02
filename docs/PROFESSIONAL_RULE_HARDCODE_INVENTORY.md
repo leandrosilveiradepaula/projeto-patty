@@ -272,6 +272,7 @@ Ainda pendente para marcar como migrado:
 Estado no `master`:
 
 - `lib/method/liquid-taxonomy.ts` recebe catálogo explícito de tipos elegíveis;
+- `lib/method/liquid-taxonomy-loader.ts` prepara resolução server-side fail-closed do catálogo ativo, sob RLS e sem service role;
 - cada tipo possui chave, label e classe `pure_water` ou `zero_calorie_other`;
 - os códigos históricos `water` e `zero_calorie_other` existem apenas como baseline nos golden tests do novo helper;
 - tipo ausente, chave duplicada, classe desconhecida ou campos que tentem introduzir proporção falham fechados;
@@ -290,6 +291,13 @@ Ainda pendente para marcar como migrado:
 - migrar validação e exibição do check-in;
 - preservar valores históricos;
 - criar migration nova somente se o catálogo aprovado exigir novos códigos persistidos.
+
+Preparação de persistência:
+
+- `docs/LIQUID_TAXONOMY_CONFIGURATION_MIGRATION_PROPOSAL.sql` preserva somente os dois códigos históricos atuais;
+- `docs/LIQUID_TAXONOMY_CONFIGURATION_PGTAP_PROPOSAL.sql` cobre proveniência, versão ativa, chaves históricas e ausência de regra de proporção;
+- materialização oficial continua dependente de arquivo criado por `supabase migration new` e apply pelo workflow oficial;
+- consumidor atual permanece legado até o template existir e ser validado no SaaS.
 
 ### HR-011 — Nomenclatura legada de Avaliações em UI
 
