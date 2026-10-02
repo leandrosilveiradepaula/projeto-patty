@@ -49,7 +49,9 @@ export default async function AdminClientCheckinsPage({ params }: PageProps) {
   ]);
 
   const currentTarget = targets[0] ?? null;
-  const currentTargetMl = currentTarget?.target_ml ?? null;
+  const currentTargetMl = currentTarget
+    ? currentTarget.resolved_target_ml ?? currentTarget.target_ml
+    : null;
   const recentLiquidEvents = liquidEvents.slice(0, 30);
   const recentActivityEvents = activityEvents.slice(0, 30);
 
@@ -82,7 +84,7 @@ export default async function AdminClientCheckinsPage({ params }: PageProps) {
               {currentTarget
                 ? "Base: " +
                   Number(currentTarget.weight_kg).toLocaleString("pt-BR") +
-                  " kg · 60 mL/kg · registrada em " +
+                  " kg · registrada em " +
                   formatDate(currentTarget.created_at) +
                   "."
                 : "Nenhuma meta de hidratacao foi registrada para esta cliente."}
@@ -100,7 +102,7 @@ export default async function AdminClientCheckinsPage({ params }: PageProps) {
                 <input min="0.01" name="weightKg" required step="0.01" type="number" />
               </label>
               <p className={styles.description}>
-                O sistema calculara deterministicamente peso x 60 mL e criara um novo snapshot.
+                O sistema usara a configuracao ativa para esta cliente e preservara um snapshot da regra efetivamente aplicada.
               </p>
               <Button type="submit">Registrar meta</Button>
             </form>
