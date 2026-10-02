@@ -2855,11 +2855,11 @@ export type Database = {
         Args: {
           p_execution_id: string
           p_failure_code: string
-          p_failure_message: string
+          p_failure_message: string | null
           p_failure_stage: string
-          p_response_content: string
-          p_response_content_format: string
-          p_response_received_at: string
+          p_response_content: string | null
+          p_response_content_format: string | null
+          p_response_received_at: string | null
         }
         Returns: undefined
       }
