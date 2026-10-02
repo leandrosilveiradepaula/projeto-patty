@@ -1,8 +1,13 @@
+export type CarbCycleCoefficient = {
+  value: number;
+  unit: "g_per_kg";
+};
+
 export type CarbCycleStepConfiguration = {
   key: string;
   label: string;
-  carbohydratePerKg: number;
-  proteinPerKg: number;
+  carbohydratePerKg: CarbCycleCoefficient;
+  proteinPerKg: CarbCycleCoefficient;
 };
 
 export type CarbCycleConfiguration = {
@@ -53,12 +58,29 @@ function readNonBlankString(value: unknown, path: string) {
   return value;
 }
 
-function readNonNegativeFiniteNumber(value: unknown, path: string) {
-  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
-    throw new TypeError(path + " must be a finite non-negative number");
+function readCoefficient(value: unknown, path: string): CarbCycleCoefficient {
+  if (!isRecord(value)) {
+    throw new TypeError(path + " must be an object");
   }
 
-  return value;
+  assertExactKeys(value, ["value", "unit"], path);
+
+  if (
+    typeof value.value !== "number" ||
+    !Number.isFinite(value.value) ||
+    value.value < 0
+  ) {
+    throw new TypeError(path + ".value must be a finite non-negative number");
+  }
+
+  if (value.unit !== "g_per_kg") {
+    throw new TypeError(path + ".unit must be g_per_kg");
+  }
+
+  return {
+    value: value.value,
+    unit: "g_per_kg",
+  };
 }
 
 export function parseCarbCycleConfiguration(
@@ -82,19 +104,19 @@ export function parseCarbCycleConfiguration(
 
   const seenStepKeys = new Set<string>();
   const steps = value.steps.map((stepValue, index) => {
-    const path = "configuration.steps[" + index + "]";
+    const stepPath = "configuration.steps[" + index + "]";
 
     if (!isRecord(stepValue)) {
-      throw new TypeError(path + " must be an object");
+      throw new TypeError(stepPath + " must be an object");
     }
 
     assertExactKeys(
       stepValue,
       ["key", "label", "carbohydratePerKg", "proteinPerKg"],
-      path,
+      stepPath,
     );
 
-    const key = readNonBlankString(stepValue.key, path + ".key");
+    const key = readNonBlankString(stepValue.key, stepPath + ".key");
 
     if (seenStepKeys.has(key)) {
       throw new TypeError("carb cycle step keys must be unique");
@@ -103,14 +125,14 @@ export function parseCarbCycleConfiguration(
 
     return {
       key,
-      label: readNonBlankString(stepValue.label, path + ".label"),
-      carbohydratePerKg: readNonNegativeFiniteNumber(
+      label: readNonBlankString(stepValue.label, stepPath + ".label"),
+      carbohydratePerKg: readCoefficient(
         stepValue.carbohydratePerKg,
-        path + ".carbohydratePerKg",
+        stepPath + ".carbohydratePerKg",
       ),
-      proteinPerKg: readNonNegativeFiniteNumber(
+      proteinPerKg: readCoefficient(
         stepValue.proteinPerKg,
-        path + ".proteinPerKg",
+        stepPath + ".proteinPerKg",
       ),
     };
   });
@@ -169,8 +191,8 @@ export function calculateCarbCycle(
   const steps = configuration.steps.map((step) => ({
     key: step.key,
     label: step.label,
-    carbohydrateGrams: weightKg * step.carbohydratePerKg,
-    proteinGrams: weightKg * step.proteinPerKg,
+    carbohydrateGrams: weightKg * step.carbohydratePerKg.value,
+    proteinGrams: weightKg * step.proteinPerKg.value,
   }));
 
   const stepsByKey = new Map(steps.map((step) => [step.key, step]));
