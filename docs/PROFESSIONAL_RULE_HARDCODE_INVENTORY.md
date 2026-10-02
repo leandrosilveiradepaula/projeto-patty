@@ -25,41 +25,30 @@ Baseline auditada:
 
 ### HR-001 — Coeficientes do Carb Cycle
 
-**Classificação:** MIGRAR.
+**Classificação:** EM MIGRAÇÃO — runtime parametrizado no PR #257; template/versionamento de banco ainda pendentes.
 
 Arquivo ativo:
 
 - `lib/method/carb-cycle.ts`.
 
-Hardcodes atuais:
+Estado no PR #257:
 
-- fases aceitas pelo tipo: `1 | 2 | 3`;
-- Fase 1 carboidrato: `[1.55, 1.55, 4.4]`;
-- Fase 1 proteína: `[2.3, 2.3, 2.3]`;
-- Fase 2 carboidrato: `[1.25, 1.25, 3.5]`;
-- Fase 2 proteína: `[2.3, 2.3, 2.3]`;
-- Fase 3 carboidrato: `[0.95, 0.95, 2.6]`;
-- Fase 3 proteína: `[2.3, 2.3, 2.3]`;
-- média linear calculada como `(low1 + low2 + high) / 3`.
+- coeficientes profissionais saem do runtime e passam a ser recebidos como configuração explícita;
+- identidade da fase, steps ordenados e pertencimento à média Linear vêm da configuração;
+- o divisor da média deixa de ser fixo em `3` e deriva da quantidade de steps configurados para a média;
+- o runtime deixa de exigir exatamente Low1/Low2/High;
+- os valores atuais das Fases 1, 2 e 3 permanecem apenas em golden tests como baseline de equivalência;
+- configuração inválida, steps duplicados, coeficientes inválidos e referências de média inexistentes falham fechados;
+- nenhuma Fase 4/5/6 foi inventada;
+- nenhum pareamento Cutting↔fase nem progressão automática foi introduzido.
 
-Acoplamento de teste:
+Ainda pendente para marcar como migrado:
 
-- `lib/method/carb-cycle.test.ts` reproduz exatamente esses valores.
-
-Risco:
-
-- mudar uma planilha ou adicionar nova fase exige alteração de código;
-- o tipo `1 | 2 | 3` impede extensão por configuração;
-- o divisor `3` pressupõe estrutura fixa do ciclo.
-
-Destino esperado:
-
-- template versionado de fase/ciclo;
-- steps configurados, cada um com papel/ordem e fórmula;
-- cálculo da média derivado genericamente da configuração, quando a média fizer parte da regra ativa;
-- snapshot dos coeficientes usados.
-
-Não inferir Fases 5/6 ou pareamento de Cutting ainda aberto.
+- materializar schema/template versionado de Carb Cycle no banco;
+- seed controlado dos baselines confirmados;
+- snapshot dos coeficientes usados;
+- integração operacional sem fallback silencioso;
+- manter compatibilidade enquanto algum consumidor legado depender de Low1/Low2/High.
 
 ### HR-002 — Conversão de doses em gramas
 

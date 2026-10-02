@@ -1,76 +1,223 @@
-export type CarbCyclePhase = 1 | 2 | 3;
+export type CarbCycleCoefficient = {
+  value: number;
+  unit: "g_per_kg";
+};
 
-export type CarbCycleMacroValues = {
-  low1Grams: number;
-  low2Grams: number;
-  highGrams: number;
-  linearAverageGrams: number;
+export type CarbCycleStepConfiguration = {
+  key: string;
+  label: string;
+  carbohydratePerKg: CarbCycleCoefficient;
+  proteinPerKg: CarbCycleCoefficient;
+};
+
+export type CarbCycleConfiguration = {
+  phaseKey: string;
+  steps: CarbCycleStepConfiguration[];
+  linearAverageStepKeys: string[];
+};
+
+export type CarbCycleStepResult = {
+  key: string;
+  label: string;
+  carbohydrateGrams: number;
+  proteinGrams: number;
 };
 
 export type CarbCycleResult = {
-  phase: CarbCyclePhase;
+  phaseKey: string;
   weightKg: number;
-  carbohydrate: CarbCycleMacroValues;
-  protein: CarbCycleMacroValues;
+  steps: CarbCycleStepResult[];
+  linearAverage: {
+    carbohydrateGrams: number;
+    proteinGrams: number;
+  };
 };
 
-type PhaseCoefficients = {
-  carbohydrate: readonly [number, number, number];
-  protein: readonly [number, number, number];
-};
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
 
-const PHASE_COEFFICIENTS: Record<CarbCyclePhase, PhaseCoefficients> = {
-  1: {
-    carbohydrate: [1.55, 1.55, 4.4],
-    protein: [2.3, 2.3, 2.3],
-  },
-  2: {
-    carbohydrate: [1.25, 1.25, 3.5],
-    protein: [2.3, 2.3, 2.3],
-  },
-  3: {
-    carbohydrate: [0.95, 0.95, 2.6],
-    protein: [2.3, 2.3, 2.3],
-  },
-};
-
-function assertValidWeight(weightKg: number) {
-  if (!Number.isFinite(weightKg) || weightKg <= 0) {
-    throw new Error("weightKg must be a positive finite number");
+function assertExactKeys(
+  value: Record<string, unknown>,
+  allowed: readonly string[],
+  path: string,
+) {
+  const allowedSet = new Set(allowed);
+  for (const key of Object.keys(value)) {
+    if (!allowedSet.has(key)) {
+      throw new TypeError(path + " contains unsupported field " + key);
+    }
   }
 }
 
-function toValues(
-  weightKg: number,
-  coefficients: readonly [number, number, number],
-): CarbCycleMacroValues {
-  const [low1, low2, high] = coefficients;
-  const average = (low1 + low2 + high) / 3;
+function readNonBlankString(value: unknown, path: string) {
+  if (typeof value !== "string" || value.trim().length === 0) {
+    throw new TypeError(path + " must be a non-blank string");
+  }
+
+  return value;
+}
+
+function readCoefficient(value: unknown, path: string): CarbCycleCoefficient {
+  if (!isRecord(value)) {
+    throw new TypeError(path + " must be an object");
+  }
+
+  assertExactKeys(value, ["value", "unit"], path);
+
+  if (
+    typeof value.value !== "number" ||
+    !Number.isFinite(value.value) ||
+    value.value < 0
+  ) {
+    throw new TypeError(path + ".value must be a finite non-negative number");
+  }
+
+  if (value.unit !== "g_per_kg") {
+    throw new TypeError(path + ".unit must be g_per_kg");
+  }
 
   return {
-    low1Grams: weightKg * low1,
-    low2Grams: weightKg * low2,
-    highGrams: weightKg * high,
-    linearAverageGrams: weightKg * average,
+    value: value.value,
+    unit: "g_per_kg",
   };
 }
 
-export function calculateCarbCyclePhase(
+export function parseCarbCycleConfiguration(
+  value: unknown,
+): CarbCycleConfiguration {
+  if (!isRecord(value)) {
+    throw new TypeError("carb cycle configuration must be an object");
+  }
+
+  assertExactKeys(
+    value,
+    ["phaseKey", "steps", "linearAverageStepKeys"],
+    "configuration",
+  );
+
+  const phaseKey = readNonBlankString(value.phaseKey, "configuration.phaseKey");
+
+  if (!Array.isArray(value.steps) || value.steps.length === 0) {
+    throw new TypeError("configuration.steps must be a non-empty array");
+  }
+
+  const seenStepKeys = new Set<string>();
+  const steps = value.steps.map((stepValue, index) => {
+    const stepPath = "configuration.steps[" + index + "]";
+
+    if (!isRecord(stepValue)) {
+      throw new TypeError(stepPath + " must be an object");
+    }
+
+    assertExactKeys(
+      stepValue,
+      ["key", "label", "carbohydratePerKg", "proteinPerKg"],
+      stepPath,
+    );
+
+    const key = readNonBlankString(stepValue.key, stepPath + ".key");
+
+    if (seenStepKeys.has(key)) {
+      throw new TypeError("carb cycle step keys must be unique");
+    }
+    seenStepKeys.add(key);
+
+    return {
+      key,
+      label: readNonBlankString(stepValue.label, stepPath + ".label"),
+      carbohydratePerKg: readCoefficient(
+        stepValue.carbohydratePerKg,
+        stepPath + ".carbohydratePerKg",
+      ),
+      proteinPerKg: readCoefficient(
+        stepValue.proteinPerKg,
+        stepPath + ".proteinPerKg",
+      ),
+    };
+  });
+
+  if (
+    !Array.isArray(value.linearAverageStepKeys) ||
+    value.linearAverageStepKeys.length === 0
+  ) {
+    throw new TypeError(
+      "configuration.linearAverageStepKeys must be a non-empty array",
+    );
+  }
+
+  const seenAverageKeys = new Set<string>();
+  const linearAverageStepKeys = value.linearAverageStepKeys.map(
+    (stepKeyValue, index) => {
+      const key = readNonBlankString(
+        stepKeyValue,
+        "configuration.linearAverageStepKeys[" + index + "]",
+      );
+
+      if (!seenStepKeys.has(key)) {
+        throw new TypeError(
+          "linear average references unknown carb cycle step " + key,
+        );
+      }
+
+      if (seenAverageKeys.has(key)) {
+        throw new TypeError("linear average step keys must be unique");
+      }
+      seenAverageKeys.add(key);
+      return key;
+    },
+  );
+
+  return {
+    phaseKey,
+    steps,
+    linearAverageStepKeys,
+  };
+}
+
+function assertValidWeight(weightKg: number) {
+  if (!Number.isFinite(weightKg) || weightKg <= 0) {
+    throw new RangeError("weightKg must be a finite positive number");
+  }
+}
+
+export function calculateCarbCycle(
+  configurationValue: unknown,
   weightKg: number,
-  phase: CarbCyclePhase,
 ): CarbCycleResult {
   assertValidWeight(weightKg);
+  const configuration = parseCarbCycleConfiguration(configurationValue);
 
-  const coefficients = PHASE_COEFFICIENTS[phase];
+  const steps = configuration.steps.map((step) => ({
+    key: step.key,
+    label: step.label,
+    carbohydrateGrams: weightKg * step.carbohydratePerKg.value,
+    proteinGrams: weightKg * step.proteinPerKg.value,
+  }));
+
+  const stepsByKey = new Map(steps.map((step) => [step.key, step]));
+  const averageSteps = configuration.linearAverageStepKeys.map((key) => {
+    const step = stepsByKey.get(key);
+    if (!step) {
+      throw new TypeError("linear average references missing result step " + key);
+    }
+    return step;
+  });
+
+  const divisor = averageSteps.length;
+  const carbohydrateGrams =
+    averageSteps.reduce((sum, step) => sum + step.carbohydrateGrams, 0) /
+    divisor;
+  const proteinGrams =
+    averageSteps.reduce((sum, step) => sum + step.proteinGrams, 0) / divisor;
 
   return {
-    phase,
+    phaseKey: configuration.phaseKey,
     weightKg,
-    carbohydrate: toValues(weightKg, coefficients.carbohydrate),
-    protein: toValues(weightKg, coefficients.protein),
+    steps,
+    linearAverage: {
+      carbohydrateGrams,
+      proteinGrams,
+    },
   };
-}
-
-export function getCarbCyclePhaseCoefficients(phase: CarbCyclePhase) {
-  return PHASE_COEFFICIENTS[phase];
 }
