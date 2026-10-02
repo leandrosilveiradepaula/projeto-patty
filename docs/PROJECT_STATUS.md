@@ -2,7 +2,7 @@
 
 # Estado Atual do Projeto Patty
 
-Ultima atualizacao documental: 2026-09-30.
+Ultima atualizacao documental: 2026-10-02.
 
 Este arquivo e o ponto de entrada operacional para novos chats e agentes. Ele resume o estado do projeto e aponta para as fontes de verdade detalhadas.
 
@@ -36,6 +36,34 @@ A baseline de **codigo de aplicacao** validada em producao para o fluxo canonico
 Esse commit incorpora o PR #189, que elimina a corrida de refresh que podia reenviar o valor antigo em um segundo save de resposta do draft canonico. O CI do PR, o CI do push ao `master`, o deployment correspondente e o smoke de producao passaram.
 
 Nao tratar esse SHA como o HEAD permanente do repositorio: merges documentais posteriores podem avancar `master` sem alterar a baseline de aplicacao. Todo novo chat deve revalidar o HEAD remoto antes de implementar qualquer mudanca.
+
+## Atualizacao operacional 2026-10-02
+
+### Repositorio e CI
+
+O `master` revalidado nesta rodada esta em `0de334b309ffd7dbf5db02b0e1ae88237e272b2b`.
+
+Entre os PRs recentes ja incorporados estao as preparacoes configuraveis de Carb Cycle, validacao de fonte alimentar, lembrete de esclarecimento, definicoes/tipos de Avaliacao, taxonomia de liquidos e equivalencia confirmada de legumes. Essas preparacoes nao autorizam ativar regras ainda abertas nem substituem templates/versionamento/snapshots ainda pendentes.
+
+### Vercel
+
+O ultimo deployment de producao confirmado como `READY` nesta rodada corresponde ao commit `f5e0267931bca09b99ab6263460b70b205401b70` (PR #262).
+
+Commits posteriores no `master` nao foram publicados nesta rodada porque a integracao GitHub/Vercel passou a reportar bloqueio por **build rate limit** do plano. Esse estado e operacional/de quota e nao deve ser registrado como falha de build da aplicacao sem evidencia de erro de codigo.
+
+### Supabase / fila de migrations
+
+O historico remoto revalidado continua ate `20261001230751_seed_initial_method_templates`.
+
+Continuam **NAO APLICADAS** no SaaS:
+
+- `20261001235018_seed_higher_fat_protein_limit_template.sql`;
+- `20261002005720_hydrate_client_targets_from_configuration.sql`.
+
+A verificacao direta confirmou ausencia tanto dos registros de migration quanto dos templates correspondentes `nutrition.protein.higher_fat_daily_limit` e `hydration.daily_target`.
+
+A ordem permanece obrigatoria: aplicar/validar primeiro `20261001235018`; somente depois liberar a migration de hidratacao. Nao usar SQL direto como substituto do workflow oficial de producao.
+
 
 ## Legenda de estado
 
