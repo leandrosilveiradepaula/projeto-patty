@@ -59,8 +59,10 @@ export default async function ClientCheckinsPage() {
       loadSupportedLiquidTaxonomy(),
     ]);
 
-  const liquidKindsByKey = new Map(
-    liquidTaxonomy.kinds.map((kind) => [kind.key, kind]),
+  const pureWaterKindKeys = new Set<string>(
+    liquidTaxonomy.kinds
+      .filter((kind) => kind.hydrationClass === "pure_water")
+      .map((kind) => kind.key),
   );
 
   const target = targets[0] ?? null;
@@ -75,10 +77,7 @@ export default async function ClientCheckinsPage() {
     0,
   );
   const waterMl = todayLiquidEvents
-    .filter(
-      (event) =>
-        liquidKindsByKey.get(event.liquid_kind)?.hydrationClass === "pure_water",
-    )
+    .filter((event) => pureWaterKindKeys.has(event.liquid_kind))
     .reduce((sum, event) => sum + event.amount_ml, 0);
   const latestActivity = activityEvents[0] ?? null;
   const progress =
