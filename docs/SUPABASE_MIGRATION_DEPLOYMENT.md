@@ -1,6 +1,6 @@
 # Deploy de migrations do Supabase SaaS
 
-Data de referencia: 2026-09-24.
+Data de referencia: 2026-10-02.
 
 ## Objetivo
 
@@ -56,15 +56,19 @@ O repositorio possui `.github/workflows/deploy-supabase-migrations.yml`.
 
 Caracteristicas:
 
-- somente `workflow_dispatch`;
+- `push` no `master` que altere `supabase/migrations/**` ou o proprio workflow executa **somente preview/dry-run**;
+- `workflow_dispatch` continua disponivel para preview manual e para apply;
 - somente executa no branch `master`;
 - usa a versao do Supabase CLI pinada no `package-lock.json`;
 - faz `migration list`;
 - sempre executa `db push --dry-run` antes de qualquer apply;
-- apply exige `mode=apply` e confirmacao textual exata `APPLY`;
+- apply continua impossivel em evento `push`;
+- apply exige evento `workflow_dispatch`, `mode=apply` e confirmacao textual exata `APPLY`;
 - nao executa seed;
 - nao executa reset remoto;
 - usa concurrency para impedir dois deploys de migration simultaneos.
+
+A automatizacao do dry-run reduz operacao manual sem enfraquecer o gate de producao: nenhum push aplica schema.
 
 ## Secrets necessarios no GitHub Actions
 
@@ -79,14 +83,14 @@ O project ref `hqanoskwjvpbgavppcud` nao e segredo e esta fixado no workflow par
 
 ## Procedimento
 
-Primeiro executar o workflow com:
+Quando uma migration nova for mergeada no `master`, o workflow executa automaticamente o preview. Tambem continua possivel iniciar `workflow_dispatch` manual com:
 
 - `mode = dry-run`;
 - `confirmation` vazio.
 
 O resultado deve listar somente as migrations esperadas como pendentes.
 
-Somente depois de revisar esse resultado executar novamente com:
+Somente depois de revisar esse resultado executar `workflow_dispatch` com:
 
 - `mode = apply`;
 - `confirmation = APPLY`.
@@ -284,3 +288,19 @@ Validacoes pos-apply registradas:
 - advisor de performance sem novo `auth_rls_initplan`; indices novos aparecem apenas como `unused_index` imediatamente apos criacao, sem justificar remocao.
 - smoke sintetico pos-apply com `ROLLBACK`: admin AAL2 + assignment ativo criou/alterou draft, atualizou medida, vinculou foto e finalizou; AAL1 e admin sem assignment nao leram o registro; follow-up antes da finalizacao foi bloqueado; mutacao da avaliacao/medida apos finalizacao foi bloqueada por `55000`; 0 residuos.
 
+
+
+## 2026-10-02 — dry-run automatico no master
+
+### DECISAO TECNICA
+
+Para reduzir dependencia de operacao manual sem remover o gate de producao, o workflow passa a executar automaticamente `migration list` + `db push --dry-run` quando um push ao `master` altera migrations ou o proprio workflow.
+
+Esse trigger:
+- nao executa `db push` sem `--dry-run`;
+- nao aceita `confirmation`;
+- nao aplica schema;
+- reutiliza a mesma concurrency do fluxo manual;
+- preserva `workflow_dispatch` + `confirmation=APPLY` como unico caminho de apply.
+
+Portanto, preview automatico nao equivale a autorizacao de apply.
