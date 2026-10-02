@@ -1,5 +1,5 @@
-import { gramsPerDose } from "@/lib/method/doses";
-import { vegetableCarbohydrateDoseEquivalent } from "@/lib/method/vegetable-carb";
+import { gramsPerDose } from "../method/doses.ts";
+import { vegetableCarbohydrateDoseEquivalent } from "../method/vegetable-carb.ts";
 
 export type HistoricalFoodEquivalentSourceIssue = {
   code: string;
