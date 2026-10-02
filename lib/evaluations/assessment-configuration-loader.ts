@@ -8,6 +8,7 @@ import {
   parseAssessmentDefinitionConfiguration,
   type AssessmentDefinitionConfiguration,
 } from "./assessment-definition";
+import { isAssessmentKind, type AssessmentKind } from "./assessment-draft";
 import { createClient } from "@/lib/supabase/server";
 
 type LoadedConfiguration<T> = {
@@ -85,4 +86,62 @@ export async function loadAssessmentDefinition(
   }
 
   return { ...loaded, configuration };
+}
+
+
+export type SupportedAssessmentKindOption = {
+  historicalCode: AssessmentKind;
+  label: string;
+  semanticKey: "basic" | "complete";
+};
+
+export async function loadSupportedAssessmentKindOptions(): Promise<{
+  options: SupportedAssessmentKindOption[];
+  templateId: string;
+  templateVersionId: string;
+}> {
+  const loaded = await loadAssessmentKindCatalog();
+
+  const options = loaded.configuration.entries.map((entry) => {
+    if (!isAssessmentKind(entry.historicalCode)) {
+      throw new Error(
+        "Active assessment catalog contains a code unsupported by current persistence",
+      );
+    }
+
+    if (entry.semanticKey !== "basic" && entry.semanticKey !== "complete") {
+      throw new Error(
+        "Active assessment catalog contains an unsupported semantic kind",
+      );
+    }
+
+    return {
+      historicalCode: entry.historicalCode,
+      label: entry.label,
+      semanticKey: entry.semanticKey,
+    };
+  });
+
+  if (options.length === 0) {
+    throw new Error("Active assessment catalog has no supported options");
+  }
+
+  return {
+    options,
+    templateId: loaded.templateId,
+    templateVersionId: loaded.templateVersionId,
+  };
+}
+
+export function resolveSupportedAssessmentKindOption(
+  options: SupportedAssessmentKindOption[],
+  historicalCode: string | null,
+) {
+  if (historicalCode === null) {
+    return null;
+  }
+
+  return (
+    options.find((option) => option.historicalCode === historicalCode) ?? null
+  );
 }
