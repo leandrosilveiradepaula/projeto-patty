@@ -1,6 +1,6 @@
 # Inventário de regras profissionais hardcoded
 
-Última atualização: 2026-10-01.
+Última atualização: 2026-10-02.
 
 ## Objetivo
 
@@ -8,7 +8,7 @@ Registrar onde o runtime atual ainda contém valores, fórmulas, catálogos ou w
 
 Baseline auditada:
 
-- `master`: `55d4d8d7f974b4f82aeae76aad77a42bca7950ab`;
+- `master`: `0de334b309ffd7dbf5db02b0e1ae88237e272b2b`;
 - PR documental de parametrização: #245;
 - nenhuma migration aplicada deve ser editada;
 - este inventário não autoriza alteração de regra profissional nem ativação automática de questão ainda aberta.
@@ -138,7 +138,7 @@ Questões ainda abertas continuam abertas: recálculo após mudança de peso, pr
 
 ### HR-006 — Conversão de legumes e referências no validador da fonte alimentar
 
-**Classificação:** EM MIGRAÇÃO — validador parametrizado no PR #259; templates/catálogos ativos ainda pendentes.
+**Classificação:** EM MIGRAÇÃO — validador parametrizado no PR #259 e equivalência confirmada de legumes preparada no PR #267; templates/catálogos ativos ainda pendentes.
 
 Arquivo:
 
@@ -153,16 +153,23 @@ Estado no PR #259:
 - a fonte continua obrigatoriamente `publishable: false`;
 - nenhuma quantidade histórica foi promovida a catálogo ativo ou regra global.
 
+Estado adicional no PR #267:
+
+- `lib/method/vegetable-carb.ts` executa a equivalência por configuração `method_engine_v1`;
+- o coeficiente atual `2 doses de legumes = 1 dose de carboidrato` permanece somente como baseline em golden tests;
+- alteração do coeficiente não exige mudança de runtime;
+- não foram inferidas redistribuição carboidrato/gordura, alocação fixa por refeição, exceções por fase ou gramas históricos de legumes.
+
 Classificação preservada:
 
-- a regra confirmada de `2 doses de legumes = 1 dose de carboidrato` ainda precisa virar configuração versionada própria;
+- a equivalência confirmada ainda precisa de template/versionamento ativo no banco;
 - referências de proteína/carboidrato/gordura devem futuramente vir dos templates de doses já versionados;
 - `vegetable_grams` e o marcador de dose dos itens permanecem referências históricas de reconciliação enquanto não houver confirmação profissional específica.
 
 Ainda pendente:
 
 - resolver as referências a partir de versões concretas de templates em vez de fixture explícita;
-- criar template versionado da conversão confirmada de legumes;
+- materializar template versionado da conversão confirmada de legumes;
 - migrar catálogo histórico para catálogo versionado somente após revisão/aprovação;
 - não publicar automaticamente a fonte Excel.
 
