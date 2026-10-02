@@ -3,7 +3,10 @@ import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
-import { assessmentKindLabel } from "@/lib/evaluations/assessment-draft";
+import {
+  loadSupportedAssessmentKindOptions,
+  resolveSupportedAssessmentKindOption,
+} from "@/lib/evaluations/assessment-configuration-loader";
 import { listAccessibleClientAssessments } from "@/lib/supabase/data-access";
 import Link from "next/link";
 import styles from "./page.module.css";
@@ -18,7 +21,10 @@ function formatAssessmentDate(value: string) {
 }
 
 export default async function AdminAvaliacoesPage() {
-  const assessments = await listAccessibleClientAssessments();
+  const [assessments, assessmentKinds] = await Promise.all([
+    listAccessibleClientAssessments(),
+    loadSupportedAssessmentKindOptions(),
+  ]);
 
   return (
     <>
@@ -59,7 +65,12 @@ export default async function AdminAvaliacoesPage() {
                     }
                     clientLabel={displayName || "Cliente sem nome informado"}
                     evaluationDate={formatAssessmentDate(assessment.assessed_at)}
-                    meta={assessmentKindLabel(assessment.assessment_kind)}
+                    meta={
+                      resolveSupportedAssessmentKindOption(
+                        assessmentKinds.options,
+                        assessment.assessment_kind,
+                      )?.label ?? "Legada / não classificada"
+                    }
                     status={
                       <Badge variant={assessment.finalized_at ? "neutral" : "warning"}>
                         {assessment.finalized_at ? "Finalizada" : "Rascunho"}

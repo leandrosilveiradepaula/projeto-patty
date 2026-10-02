@@ -881,6 +881,51 @@ test("assessment configuration loader stays server-only, bounded and fail-closed
   assert.match(loader, /parseAssessmentDefinitionConfiguration/);
 });
 
+test("assessment consumers resolve active catalog and definitions without hardcoded readiness", async () => {
+  const createPage = await readFile(
+    path.join(ROOT, "app", "admin", "clientes", "[clienteId]", "avaliacoes", "page.tsx"),
+    "utf8",
+  );
+  const historyPage = await readFile(
+    path.join(ROOT, "app", "admin", "avaliacoes", "page.tsx"),
+    "utf8",
+  );
+  const detailPage = await readFile(
+    path.join(ROOT, "app", "admin", "avaliacoes", "[avaliacaoId]", "page.tsx"),
+    "utf8",
+  );
+  const createAction = await readFile(
+    path.join(ROOT, "app", "admin", "clientes", "[clienteId]", "avaliacoes", "actions.ts"),
+    "utf8",
+  );
+  const detailAction = await readFile(
+    path.join(ROOT, "app", "admin", "avaliacoes", "[avaliacaoId]", "actions.ts"),
+    "utf8",
+  );
+  const createForm = await readFile(
+    path.join(ROOT, "components", "admin", "AssessmentCreateForm.tsx"),
+    "utf8",
+  );
+  const draftForms = await readFile(
+    path.join(ROOT, "components", "admin", "AssessmentDraftForms.tsx"),
+    "utf8",
+  );
+
+  for (const source of [createPage, historyPage, detailPage, createAction, detailAction]) {
+    assert.match(source, /loadSupportedAssessmentKindOptions/);
+  }
+
+  assert.match(detailPage, /loadAssessmentDefinition/);
+  assert.match(detailPage, /buildConfigurableAssessmentReadiness/);
+  assert.match(detailAction, /loadAssessmentDefinition/);
+  assert.match(detailAction, /buildConfigurableAssessmentReadiness/);
+
+  assert.doesNotMatch(createForm, /ASSESSMENT_KIND_OPTIONS/);
+  assert.doesNotMatch(draftForms, /ASSESSMENT_KIND_OPTIONS/);
+  assert.doesNotMatch(detailPage, /buildAssessmentFinalizationReadiness/);
+  assert.doesNotMatch(detailAction, /buildAssessmentFinalizationReadiness/);
+});
+
 test("Carb Cycle configuration loader stays server-only, bounded and fail-closed", async () => {
   const loader = await readFile(
     path.join(ROOT, "lib", "method", "carb-cycle-loader.ts"),

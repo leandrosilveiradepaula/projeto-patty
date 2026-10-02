@@ -6,7 +6,10 @@ import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Card } from "@/components/ui/Card";
 import { Section } from "@/components/ui/Section";
-import { assessmentKindLabel } from "@/lib/evaluations/assessment-draft";
+import {
+  loadSupportedAssessmentKindOptions,
+  resolveSupportedAssessmentKindOption,
+} from "@/lib/evaluations/assessment-configuration-loader";
 import {
   getAccessibleClient,
   listAccessibleAssessmentsForClient,
@@ -40,8 +43,15 @@ export default async function AdminClientAssessmentsPage({
     notFound();
   }
 
-  const assessments = await listAccessibleAssessmentsForClient(client.id);
+  const [assessments, assessmentKinds] = await Promise.all([
+    listAccessibleAssessmentsForClient(client.id),
+    loadSupportedAssessmentKindOptions(),
+  ]);
   const displayName = client.profiles?.display_name?.trim();
+  const kindOptions = assessmentKinds.options.map((option) => ({
+    label: option.label,
+    value: option.historicalCode,
+  }));
 
   return (
     <>
@@ -67,7 +77,7 @@ export default async function AdminClientAssessmentsPage({
         title="Nova avaliação"
       >
         <Card>
-          <AssessmentCreateForm clientId={client.id} />
+          <AssessmentCreateForm clientId={client.id} kindOptions={kindOptions} />
         </Card>
       </Section>
       <Section
@@ -94,7 +104,12 @@ export default async function AdminClientAssessmentsPage({
                   }
                   clientLabel={displayName || "Cliente sem nome informado"}
                   evaluationDate={formatAssessmentDate(assessment.assessed_at)}
-                  meta={assessmentKindLabel(assessment.assessment_kind)}
+                  meta={
+                    resolveSupportedAssessmentKindOption(
+                      assessmentKinds.options,
+                      assessment.assessment_kind,
+                    )?.label ?? "Legada / não classificada"
+                  }
                   status={
                     <Badge variant={assessment.finalized_at ? "neutral" : "warning"}>
                       {assessment.finalized_at ? "Finalizada" : "Rascunho"}

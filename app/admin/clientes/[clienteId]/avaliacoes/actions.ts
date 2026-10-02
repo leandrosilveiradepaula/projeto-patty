@@ -2,10 +2,8 @@
 
 import { redirect } from "next/navigation";
 
-import {
-  isAssessmentKind,
-  parseAssessmentDate,
-} from "@/lib/evaluations/assessment-draft";
+import { loadSupportedAssessmentKindOptions } from "@/lib/evaluations/assessment-configuration-loader";
+import { parseAssessmentDate } from "@/lib/evaluations/assessment-draft";
 import { requireRole } from "@/lib/supabase/auth";
 import {
   createAccessibleClientAssessment,
@@ -32,10 +30,17 @@ export async function createAssessmentAction(
 
   const kindValue = formData.get("assessmentKind");
   const assessedAt = parseAssessmentDate(formData.get("assessedAt"));
+  const assessmentKinds = await loadSupportedAssessmentKindOptions();
+  const selectedKind =
+    typeof kindValue === "string"
+      ? assessmentKinds.options.find(
+          (option) => option.historicalCode === kindValue,
+        ) ?? null
+      : null;
 
-  if (typeof kindValue !== "string" || !isAssessmentKind(kindValue)) {
+  if (!selectedKind) {
     return {
-      message: "Selecione se a avaliação é Básica ou Completa.",
+      message: "Selecione um tipo de avaliação disponível.",
     };
   }
 
@@ -50,7 +55,7 @@ export async function createAssessmentAction(
   try {
     assessment = await createAccessibleClientAssessment({
       assessedAt,
-      assessmentKind: kindValue,
+      assessmentKind: selectedKind.historicalCode,
       clientId: client.id,
       createdByProfileId: context.profileId,
     });

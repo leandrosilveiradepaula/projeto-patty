@@ -10,8 +10,6 @@ import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/FormField";
 import { TextInput } from "@/components/ui/TextInput";
-import { ASSESSMENT_KIND_OPTIONS } from "@/lib/evaluations/assessment-draft";
-
 import styles from "./AssessmentCreateForm.module.css";
 
 const initialState: CreateAssessmentState = {
@@ -20,10 +18,15 @@ const initialState: CreateAssessmentState = {
 
 type AssessmentCreateFormProps = {
   clientId: string;
+  kindOptions: Array<{
+    label: string;
+    value: "fortnightly" | "monthly";
+  }>;
 };
 
 export function AssessmentCreateForm({
   clientId,
+  kindOptions,
 }: AssessmentCreateFormProps) {
   const action = createAssessmentAction.bind(null, clientId);
   const [state, formAction, isPending] = useActionState(action, initialState);
@@ -37,7 +40,7 @@ export function AssessmentCreateForm({
       ) : null}
 
       <FormField
-        description="Básica: peso, cintura, abdômen e quadril. Completa: conjunto completo de medidas, peso e fotos. A validação automática do catálogo completo ainda está em evolução."
+        description="Os tipos disponíveis e seus requisitos são resolvidos a partir da configuração ativa do método."
         id="assessment-kind"
         label="Tipo de avaliação"
         required
@@ -53,7 +56,7 @@ export function AssessmentCreateForm({
             <option disabled value="">
               Selecione
             </option>
-            {ASSESSMENT_KIND_OPTIONS.map((option) => (
+            {kindOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>

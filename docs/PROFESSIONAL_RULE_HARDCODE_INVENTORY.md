@@ -195,55 +195,47 @@ Ainda pendente:
 
 ### HR-007 — Tipos de Avaliação Básica/Completa
 
-**Classificação:** EM PREPARAÇÃO — catálogo configurável de compatibilidade mergeado no PR #265; consumidores e persistência ainda legados.
+**Classificação:** EM MIGRAÇÃO — catálogo versionado aplicado no Supabase SaaS pelo Lote B; consumidores administrativos passam a resolver a versão ativa neste PR.
 
-Estado no `master`:
+Estado atual:
 
-- `lib/evaluations/assessment-kind-catalog.ts` recebe configuração explícita para mapear código histórico -> chave semântica -> label;
-- os códigos `fortnightly` e `monthly` aparecem apenas como baseline nos golden tests do novo helper;
-- o helper não interpreta os códigos como calendário/cadência;
-- códigos desconhecidos e catálogos inconsistentes falham fechados.
+- `evaluation.assessment_kind_catalog` está materializado e ativo no SaaS;
+- `lib/evaluations/assessment-configuration-loader.ts` resolve exatamente uma versão ativa sob RLS, sem service role;
+- formulários, listagens e ações administrativas deixam de usar labels/opções fixos como fonte operacional;
+- os códigos `fortnightly` e `monthly` permanecem como compatibilidade do schema legado, não como regra de calendário;
+- códigos ativos que o schema atual não consegue persistir falham fechados;
+- nenhuma regra de calendário/âncora foi inferida.
 
-Compatibilidade ainda ativa:
+Compatibilidade preservada:
 
-- `lib/evaluations/assessment-draft.ts` mantém o mapeamento legado usado pelos consumidores atuais;
 - `supabase/migrations/20260927002227_create_assessment_draft_lifecycle.sql` continua restringindo `assessment_kind` a `fortnightly|monthly`;
-- a migration aplicada não será alterada.
+- a migration aplicada não será alterada;
+- linhas históricas continuam preservando os códigos existentes.
 
-Ainda pendente para marcar como migrado:
+Ainda pendente:
 
-- persistir catálogo/versionamento;
-- resolver a versão ativa server-side;
-- migrar consumidores do mapeamento legado;
-- criar migration nova somente se um novo tipo real exigir relaxar o CHECK;
+- criar migration nova somente se a Patty confirmar um novo tipo real que exija relaxar o CHECK;
 - preservar indefinidamente os códigos históricos nas linhas existentes.
 
 ### HR-008 — Catálogo obrigatório da Avaliação Básica/Completa
 
-**Classificação:** EM PREPARAÇÃO — avaliador configurável adicionado no PR #262; operação atual ainda usa o helper legado.
+**Classificação:** EM MIGRAÇÃO — definições versionadas aplicadas no Supabase SaaS pelo Lote B; finalização passa a consumir a definição ativa neste PR.
 
-Estado no PR #262:
+Estado atual:
 
-- foi criado um avaliador genérico que recebe por configuração:
-  - chave lógica do tipo de avaliação;
-  - lista ordenada de medidas obrigatórias;
-  - labels;
-  - aliases aceitos;
-  - requisito opcional de foto e quantidade mínima;
-- o runtime genérico não assume Básica/Completa nem uma lista fixa de medidas;
-- aliases ambíguos/duplicados e configurações inválidas falham fechados;
-- os catálogos profissionais atuais de Básica/Completa permanecem apenas como golden fixtures de equivalência;
+- `evaluation.assessment_definition.basic` e `evaluation.assessment_definition.complete` estão materializados e ativos no SaaS;
+- a versão ativa define medidas obrigatórias, labels, aliases e requisito opcional de foto;
+- a página de detalhe apresenta os requisitos da definição ativa em vez de repetir uma lista fixa;
+- a finalização usa `buildConfigurableAssessmentReadiness` com a definição ativa;
+- aliases/configurações inválidas falham fechados;
 - nenhuma regra de calendário/cadência foi inferida;
-- schema, RLS, imutabilidade e códigos históricos internos não foram alterados.
+- códigos históricos internos continuam compatíveis.
 
-Ainda pendente para marcar como migrado:
+Ainda pendente para encerrar completamente:
 
-- criar definição/template versionado de cada tipo;
-- resolver a versão aplicável server-side;
-- migrar o fluxo operacional de finalização para a configuração resolvida;
-- registrar snapshot suficiente para auditoria;
-- manter compatibilidade dos códigos históricos `fortnightly` / `monthly`;
-- remover o helper legado somente depois de todos os consumidores migrarem.
+- persistir ou referenciar explicitamente na avaliação a versão de catálogo/definição usada na finalização, para auditoria direta sem depender apenas da linha do tempo de ativação;
+- decidir o mecanismo de snapshot/referência antes de automatizar qualquer decisão posterior baseada nessas definições;
+- remover o helper legado de prontidão somente depois de confirmar que nenhum consumidor restante depende dele.
 
 A regra de calendário para âncoras 29/30/31 continua aberta e não deve ser inventada.
 
