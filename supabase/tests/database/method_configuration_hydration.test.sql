@@ -48,13 +48,15 @@ select is(
 select has_column(
   'public',
   'client_hydration_targets',
-  'method_configuration_snapshot_set_id'
+  'method_configuration_snapshot_set_id',
+  'hydration targets can reference a method configuration snapshot set'
 );
 
 select has_column(
   'public',
   'client_hydration_targets',
-  'resolved_target_ml'
+  'resolved_target_ml',
+  'hydration targets can store a resolved configured target'
 );
 
 insert into auth.users (id, email, raw_user_meta_data)
