@@ -3,10 +3,10 @@
 import { revalidatePath } from "next/cache";
 
 import { loadSupportedLiquidTaxonomy } from "@/lib/method/liquid-taxonomy-loader";
+import { createLiquidIntakeWithMethodSnapshot } from "@/lib/method/liquid-persistence";
 import { requireRole } from "@/lib/supabase/auth";
 import {
   createCurrentClientActivityCheckinEvent,
-  createCurrentClientLiquidIntakeEvent,
   getCurrentClient,
 } from "@/lib/supabase/data-access";
 
@@ -46,11 +46,17 @@ export async function addLiquidIntakeAction(formData: FormData) {
     throw new Error("Tipo de liquido invalido");
   }
 
-  await createCurrentClientLiquidIntakeEvent({
+  await createLiquidIntakeWithMethodSnapshot({
     amountMl,
     clientId: client.id,
     liquidKind: liquidKind.key,
     recordedByProfileId: auth.profileId,
+    templateVersionId: taxonomy.templateVersionId,
+    resolvedConfiguration: taxonomy.configuration,
+    resultValues: {
+      liquid_kind: liquidKind.key,
+      hydration_class: liquidKind.hydrationClass,
+    },
   });
 
   revalidatePath("/cliente");
