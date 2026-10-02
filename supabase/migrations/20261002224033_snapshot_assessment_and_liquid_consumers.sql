@@ -59,8 +59,10 @@ declare
   v_assessment public.client_assessments%rowtype;
   v_catalog_template_id uuid;
   v_catalog_template_key text;
+  v_catalog_stored_configuration jsonb;
   v_definition_template_id uuid;
   v_definition_template_key text;
+  v_definition_stored_configuration jsonb;
   v_snapshot_set_id uuid;
   v_catalog_historical_code text;
   v_catalog_semantic_key text;
@@ -110,8 +112,11 @@ begin
       using errcode = '22023';
   end if;
 
-  select v.template_id, t.template_key
-  into v_catalog_template_id, v_catalog_template_key
+  select v.template_id, t.template_key, v.configuration
+  into
+    v_catalog_template_id,
+    v_catalog_template_key,
+    v_catalog_stored_configuration
   from public.method_configuration_versions v
   join public.method_configuration_templates t on t.id = v.template_id
   where v.id = p_catalog_template_version_id
@@ -124,8 +129,11 @@ begin
       using errcode = '22023';
   end if;
 
-  select v.template_id, t.template_key
-  into v_definition_template_id, v_definition_template_key
+  select v.template_id, t.template_key, v.configuration
+  into
+    v_definition_template_id,
+    v_definition_template_key,
+    v_definition_stored_configuration
   from public.method_configuration_versions v
   join public.method_configuration_templates t on t.id = v.template_id
   where v.id = p_definition_template_version_id
@@ -138,6 +146,16 @@ begin
        'evaluation.assessment_definition.complete'
      ) then
     raise exception 'active assessment definition version is required'
+      using errcode = '22023';
+  end if;
+
+  if p_catalog_configuration is distinct from v_catalog_stored_configuration then
+    raise exception 'catalog snapshot configuration must match active version'
+      using errcode = '22023';
+  end if;
+
+  if p_definition_configuration is distinct from v_definition_stored_configuration then
+    raise exception 'definition snapshot configuration must match active version'
       using errcode = '22023';
   end if;
 
@@ -165,6 +183,22 @@ begin
   if v_catalog_semantic_key is null
      or v_definition_kind_key is distinct from v_catalog_semantic_key then
     raise exception 'assessment definition does not match catalog semantic kind'
+      using errcode = '22023';
+  end if;
+
+  if not exists (
+    select 1
+    from jsonb_array_elements(v_catalog_stored_configuration->'entries') entry
+    where entry->>'historicalCode' = v_catalog_historical_code
+      and entry->>'semanticKey' = v_catalog_semantic_key
+  ) then
+    raise exception 'assessment catalog result is not present in active configuration'
+      using errcode = '22023';
+  end if;
+
+  if v_definition_stored_configuration->>'kindKey'
+     is distinct from v_definition_kind_key then
+    raise exception 'assessment definition result kind does not match active configuration'
       using errcode = '22023';
   end if;
 
@@ -285,6 +319,7 @@ as $$
 declare
   v_template_id uuid;
   v_template_key text;
+  v_stored_configuration jsonb;
   v_snapshot_set_id uuid;
   v_event_id uuid;
   v_result_kind text;
@@ -318,8 +353,8 @@ begin
       using errcode = '42501';
   end if;
 
-  select v.template_id, t.template_key
-  into v_template_id, v_template_key
+  select v.template_id, t.template_key, v.configuration
+  into v_template_id, v_template_key, v_stored_configuration
   from public.method_configuration_versions v
   join public.method_configuration_templates t on t.id = v.template_id
   where v.id = p_template_version_id
@@ -328,6 +363,16 @@ begin
 
   if not found or v_template_key <> 'hydration.liquid_taxonomy' then
     raise exception 'active liquid taxonomy version is required'
+      using errcode = '22023';
+  end if;
+
+  if p_resolved_configuration is distinct from v_stored_configuration then
+    raise exception 'liquid snapshot configuration must match active version'
+      using errcode = '22023';
+  end if;
+
+  if jsonb_typeof(v_stored_configuration->'kinds') is distinct from 'array' then
+    raise exception 'active liquid taxonomy must contain a kinds array'
       using errcode = '22023';
   end if;
 
@@ -340,9 +385,8 @@ begin
 
   if not exists (
     select 1
-    from jsonb_array_elements(p_resolved_configuration->'kinds') kind
-    where kind #>> '{}' is not null
-      and kind->>'key' = p_liquid_kind
+    from jsonb_array_elements(v_stored_configuration->'kinds') kind
+    where kind->>'key' = p_liquid_kind
   ) then
     raise exception 'selected liquid kind is absent from resolved taxonomy'
       using errcode = '22023';
