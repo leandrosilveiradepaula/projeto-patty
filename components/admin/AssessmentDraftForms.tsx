@@ -15,8 +15,6 @@ import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/FormField";
 import { TextInput } from "@/components/ui/TextInput";
-import { ASSESSMENT_KIND_OPTIONS } from "@/lib/evaluations/assessment-draft";
-
 import styles from "./AssessmentDraftForms.module.css";
 
 const initialState: AssessmentDraftActionState = {
@@ -44,10 +42,15 @@ export function AssessmentDraftMetadataForm({
   assessedAt,
   assessmentId,
   assessmentKind,
+  kindOptions,
 }: {
   assessedAt: string;
   assessmentId: string;
   assessmentKind: string | null;
+  kindOptions: Array<{
+    label: string;
+    value: "fortnightly" | "monthly";
+  }>;
 }) {
   const action = updateAssessmentDraftAction.bind(null, assessmentId);
   const [state, formAction, isPending] = useActionState(action, initialState);
@@ -72,7 +75,7 @@ export function AssessmentDraftMetadataForm({
             <option disabled value="">
               Selecione
             </option>
-            {ASSESSMENT_KIND_OPTIONS.map((option) => (
+            {kindOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
@@ -310,7 +313,7 @@ export function AssessmentFinalizeForm({
 
       <div className={styles.readiness}>
         <p className={styles.notice}>
-          Itens mínimos reconhecidos para esta cadência:
+          Itens mínimos reconhecidos para este tipo de avaliação:
         </p>
         <ul className={styles.readinessList}>
           {readinessItems.map((item) => (
