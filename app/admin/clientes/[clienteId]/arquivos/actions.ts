@@ -103,6 +103,7 @@ export async function finalizeAdminPrivateFileUploadSessionAction(
 
   const result = await finalizeClientFileUploadSession({
     clientVisibleOnAccept: false,
+    expectedClientId: clientId,
     requesterProfileId: auth.profileId,
     sessionId,
   });
