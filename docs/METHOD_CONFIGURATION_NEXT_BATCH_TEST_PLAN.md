@@ -146,3 +146,23 @@ Cada migration futura precisa de pgTAP transacional cobrindo:
 - advisors de segurança e performance revisados;
 - nenhum dado sintético persistente;
 - documentação atualizada somente depois da confirmação remota.
+
+
+## Estado de preparação — Lote A
+
+Propostas revisáveis preparadas fora da árvore oficial de migrations:
+
+- `docs/NEXT_TEMPLATE_BATCH_A_MIGRATION_PROPOSAL.sql`;
+- `docs/NEXT_TEMPLATE_BATCH_A_PGTAP_PROPOSAL.sql`.
+
+Esses arquivos não alteram produção e não devem ser aplicados diretamente.
+
+Gate para materialização oficial:
+
+1. gerar o arquivo com `supabase migration new seed_next_method_templates_batch_a`;
+2. copiar o SQL revisado da proposta sem inventar timestamp manualmente;
+3. mover/adaptar o pgTAP para `supabase/tests/database`;
+4. executar static gate + pgTAP + dry-run;
+5. somente depois merge/apply pelo workflow oficial.
+
+O Lote A não troca consumidores operacionais. A equivalência de legumes e o intervalo de lembrete continuam sendo valores versionados, com alterações futuras por nova versão/configuração e não por hardcode.
