@@ -45,9 +45,11 @@ jobs:
           test -f supabase/migrations/20261001213333_create_method_configuration_foundation.sql
           test -f supabase/migrations/20261001230751_seed_initial_method_templates.sql
           test -f supabase/migrations/20261001235018_seed_higher_fat_protein_limit_template.sql
+          test -f supabase/migrations/20261002005720_hydrate_client_targets_from_configuration.sql
           test -f supabase/tests/database/method_configuration_foundation_v2.test.sql
           test -f supabase/tests/database/method_configuration_initial_templates.test.sql
           test -f supabase/tests/database/method_configuration_higher_fat_protein_limit.test.sql
+          test -f supabase/tests/database/method_configuration_hydration.test.sql
           echo "Committed method configuration migrations and pgTAP files found."
 
       - name: Start local Supabase
@@ -67,6 +69,9 @@ jobs:
 
       - name: Run higher-fat protein limit pgTAP
         run: npx supabase test db supabase/tests/database/method_configuration_higher_fat_protein_limit.test.sql
+
+      - name: Run hydration compatibility pgTAP
+        run: npx supabase test db supabase/tests/database/method_configuration_hydration.test.sql
 
       - name: Stop local Supabase
         if: always()
