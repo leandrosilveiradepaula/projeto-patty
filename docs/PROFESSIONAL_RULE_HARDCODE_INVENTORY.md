@@ -191,41 +191,30 @@ Destino esperado:
 
 ### HR-008 — Catálogo obrigatório da Avaliação Básica/Completa
 
-**Classificação:** MIGRAR.
+**Classificação:** EM PREPARAÇÃO — avaliador configurável adicionado no PR #262; operação atual ainda usa o helper legado.
 
-Arquivo ativo:
+Estado no PR #262:
 
-- `lib/evaluations/assessment-readiness.ts`.
+- foi criado um avaliador genérico que recebe por configuração:
+  - chave lógica do tipo de avaliação;
+  - lista ordenada de medidas obrigatórias;
+  - labels;
+  - aliases aceitos;
+  - requisito opcional de foto e quantidade mínima;
+- o runtime genérico não assume Básica/Completa nem uma lista fixa de medidas;
+- aliases ambíguos/duplicados e configurações inválidas falham fechados;
+- os catálogos profissionais atuais de Básica/Completa permanecem apenas como golden fixtures de equivalência;
+- nenhuma regra de calendário/cadência foi inferida;
+- schema, RLS, imutabilidade e códigos históricos internos não foram alterados.
 
-Hardcodes atuais:
+Ainda pendente para marcar como migrado:
 
-Avaliação Básica:
-- peso;
-- cintura;
-- abdômen;
-- quadril.
-
-Avaliação Completa:
-- peso;
-- cintura;
-- abdômen;
-- coxa;
-- bíceps;
-- busto/peito normalizado como tórax;
-- quadril;
-- ombros;
-- panturrilhas;
-- pelo menos uma foto.
-
-Acoplamento de teste:
-
-- `lib/evaluations/assessment-readiness.test.ts`.
-
-Destino esperado:
-
-- definição versionada de cada tipo de avaliação;
-- itens obrigatórios, unidade, aliases de entrada quando necessários e requisito de foto como configuração;
-- finalização resolve a versão aplicável e registra snapshot suficiente para auditoria.
+- criar definição/template versionado de cada tipo;
+- resolver a versão aplicável server-side;
+- migrar o fluxo operacional de finalização para a configuração resolvida;
+- registrar snapshot suficiente para auditoria;
+- manter compatibilidade dos códigos históricos `fortnightly` / `monthly`;
+- remover o helper legado somente depois de todos os consumidores migrarem.
 
 A regra de calendário para âncoras 29/30/31 continua aberta e não deve ser inventada.
 
