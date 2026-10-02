@@ -1,4 +1,4 @@
-import { parseScalarParameterConfiguration } from "@/lib/method/scalar-parameter";
+import { parseScalarParameterConfiguration } from "../method/scalar-parameter.ts";
 
 export type ClarificationReminderIntervalConfiguration = {
   value: number;
