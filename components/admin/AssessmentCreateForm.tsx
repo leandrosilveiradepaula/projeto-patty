@@ -40,7 +40,7 @@ export function AssessmentCreateForm({
       ) : null}
 
       <FormField
-        description="Básica: peso, cintura, abdômen e quadril. Completa: conjunto completo de medidas, peso e fotos. A validação automática do catálogo completo ainda está em evolução."
+        description="Os tipos disponíveis e seus requisitos são resolvidos a partir da configuração ativa do método."
         id="assessment-kind"
         label="Tipo de avaliação"
         required
