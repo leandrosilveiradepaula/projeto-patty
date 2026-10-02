@@ -14,10 +14,11 @@ import { EvaluationMeasureList } from "@/components/admin/EvaluationMeasureList"
 import { EvaluationPhotoCollection } from "@/components/admin/EvaluationPhotoCollection";
 import { EvaluationProfessionalFollowUpForm } from "@/components/admin/EvaluationProfessionalFollowUpForm";
 import {
-  assessmentKindLabel,
-  isAssessmentKind,
-} from "@/lib/evaluations/assessment-draft";
-import { buildAssessmentFinalizationReadiness } from "@/lib/evaluations/assessment-readiness";
+  loadAssessmentDefinition,
+  loadSupportedAssessmentKindOptions,
+  resolveSupportedAssessmentKindOption,
+} from "@/lib/evaluations/assessment-configuration-loader";
+import { buildConfigurableAssessmentReadiness } from "@/lib/evaluations/assessment-definition";
 import { listAccessibleAssessmentMeasurementCorrections } from "@/lib/evaluations/measurement-correction-store";
 import { applyAssessmentMeasurementCorrections } from "@/lib/evaluations/measurement-corrections";
 import {
@@ -110,6 +111,18 @@ export default async function AdminAvaliacaoDetailPage({
   }
 
   const isDraft = !assessment.finalized_at;
+  const assessmentKinds = await loadSupportedAssessmentKindOptions();
+  const selectedAssessmentKind = resolveSupportedAssessmentKindOption(
+    assessmentKinds.options,
+    assessment.assessment_kind,
+  );
+  const assessmentDefinition = selectedAssessmentKind
+    ? await loadAssessmentDefinition(selectedAssessmentKind.semanticKey)
+    : null;
+  const kindOptions = assessmentKinds.options.map((option) => ({
+    label: option.label,
+    value: option.historicalCode,
+  }));
   const [rawMeasurements, photoFiles, followUps, clientAssessments, clientFiles] =
     await Promise.all([
       listAccessibleAssessmentMeasurements(assessment.id),
@@ -168,17 +181,17 @@ export default async function AdminAvaliacaoDetailPage({
   const internalNotes = followUps.filter(
     (followUp) => Boolean(followUp.patty_observation?.trim()),
   );
-  const assessmentKind = assessment.assessment_kind;
-  const finalizationReadiness =
-    typeof assessmentKind === "string" && isAssessmentKind(assessmentKind)
-      ? buildAssessmentFinalizationReadiness({
-        assessmentKind,
-        measurementKeys: measurements.map(
-          (measurement) => measurement.measurement_key,
-        ),
+  const finalizationReadiness = assessmentDefinition
+    ? buildConfigurableAssessmentReadiness(
+        assessmentDefinition.configuration,
+        {
+          measurementKeys: measurements.map(
+            (measurement) => measurement.measurement_key,
+          ),
           photoCount: photoFiles.length,
-        })
-      : null;
+        },
+      )
+    : null;
 
   return (
     <>
@@ -204,7 +217,7 @@ export default async function AdminAvaliacaoDetailPage({
             </div>
             <div className={styles.summaryDetail}>
               <dt>Tipo</dt>
-              <dd>{assessmentKindLabel(assessment.assessment_kind)}</dd>
+              <dd>{selectedAssessmentKind?.label ?? "Legada / não classificada"}</dd>
             </div>
             <div className={styles.summaryDetail}>
               <dt>Identificador</dt>
@@ -236,6 +249,7 @@ export default async function AdminAvaliacaoDetailPage({
               assessedAt={assessment.assessed_at}
               assessmentId={assessment.id}
               assessmentKind={assessment.assessment_kind}
+              kindOptions={kindOptions}
             />
           </Card>
         </Section>
