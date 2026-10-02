@@ -760,6 +760,39 @@ test("reviewed AI finding SECURITY DEFINER boundary remains server-only", async 
   );
 });
 
+test("private file finalization stays scoped to the expected client", async () => {
+  const finalization = await readFile(
+    path.join(ROOT, "lib", "files", "private-file-finalization.ts"),
+    "utf8",
+  );
+  const adminActions = await readFile(
+    path.join(
+      ROOT,
+      "app",
+      "admin",
+      "clientes",
+      "[clienteId]",
+      "arquivos",
+      "actions.ts",
+    ),
+    "utf8",
+  );
+  const clientActions = await readFile(
+    path.join(ROOT, "app", "cliente", "arquivos", "actions.ts"),
+    "utf8",
+  );
+
+  assert.match(finalization, /expectedClientId:\s*string/);
+  assert.match(
+    finalization,
+    /\.eq\(["']client_id["'],\s*input\.expectedClientId\)/,
+  );
+  assert.match(adminActions, /expectedClientId:\s*clientId/);
+  assert.match(clientActions, /const client = await getCurrentClient\(\)/);
+  assert.match(clientActions, /expectedClientId:\s*client\.id/);
+});
+
+
 test("any module that uses the Supabase administrative client is server-only", async () => {
   const roots = ["app", "lib"];
   const sourceFiles = [];
