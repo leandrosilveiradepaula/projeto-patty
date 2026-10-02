@@ -11,13 +11,55 @@ export type HistoricalFoodEquivalentSourceSummary = {
   issues: HistoricalFoodEquivalentSourceIssue[];
 };
 
+export type HistoricalFoodEquivalentValidationReference = {
+  macroDoseReferences: {
+    protein_grams: number;
+    carbohydrate_grams: number;
+    fat_grams: number;
+    vegetable_grams: number;
+  };
+  vegetableDosesPerCarbohydrateDose: number;
+  nonFreeItemDoseMarker: string;
+};
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
+function validateReference(
+  reference: HistoricalFoodEquivalentValidationReference,
+) {
+  for (const [key, value] of Object.entries(reference.macroDoseReferences)) {
+    if (!Number.isFinite(value) || value < 0) {
+      throw new TypeError(
+        "validation reference macro dose must be a finite non-negative number: " +
+          key,
+      );
+    }
+  }
+
+  if (
+    !Number.isFinite(reference.vegetableDosesPerCarbohydrateDose) ||
+    reference.vegetableDosesPerCarbohydrateDose <= 0
+  ) {
+    throw new TypeError(
+      "vegetableDosesPerCarbohydrateDose must be a finite positive number",
+    );
+  }
+
+  if (
+    typeof reference.nonFreeItemDoseMarker !== "string" ||
+    reference.nonFreeItemDoseMarker.trim().length === 0
+  ) {
+    throw new TypeError("nonFreeItemDoseMarker must be a non-blank string");
+  }
+}
+
 export function validateHistoricalFoodEquivalentSource(
   value: unknown,
+  reference: HistoricalFoodEquivalentValidationReference,
 ): HistoricalFoodEquivalentSourceSummary {
+  validateReference(reference);
   const issues: HistoricalFoodEquivalentSourceIssue[] = [];
 
   if (!isRecord(value)) {
@@ -52,20 +94,15 @@ export function validateHistoricalFoodEquivalentSource(
       message: "Macro dose references are required for source reconciliation.",
     });
   } else {
-    const expected = {
-      protein_grams: 15,
-      carbohydrate_grams: 12,
-      fat_grams: 6,
-      vegetable_grams: 6,
-    } as const;
-
-    for (const [key, expectedValue] of Object.entries(expected)) {
+    for (const [key, expectedValue] of Object.entries(
+      reference.macroDoseReferences,
+    )) {
       if (macro[key] !== expectedValue) {
         issues.push({
           code: "macro_reference_mismatch",
           path: "$.macro_dose_references." + key,
           message:
-            "Historical source does not match the currently confirmed dose reference.",
+            "Historical source does not match the explicitly selected reconciliation reference.",
         });
       }
     }
@@ -74,13 +111,14 @@ export function validateHistoricalFoodEquivalentSource(
   const currentRules = value.confirmed_current_rules;
   if (
     !isRecord(currentRules) ||
-    currentRules.vegetable_doses_per_carbohydrate_dose !== 2
+    currentRules.vegetable_doses_per_carbohydrate_dose !==
+      reference.vegetableDosesPerCarbohydrateDose
   ) {
     issues.push({
       code: "vegetable_conversion_mismatch",
       path: "$.confirmed_current_rules.vegetable_doses_per_carbohydrate_dose",
       message:
-        "Source reconciliation must preserve the confirmed 2 vegetable doses = 1 carbohydrate dose rule.",
+        "Source reconciliation does not match the explicitly selected vegetable conversion reference.",
     });
   }
 
@@ -183,12 +221,12 @@ export function validateHistoricalFoodEquivalentSource(
       }
       normalizedLabels.add(normalizedLabel);
 
-      if (key !== "free_foods" && doses !== "1") {
+      if (key !== "free_foods" && doses !== reference.nonFreeItemDoseMarker) {
         issues.push({
           code: "unexpected_dose_marker",
           path: itemPath + "[2]",
           message:
-            "Non-free historical items are expected to preserve one-dose equivalence pending review.",
+            "Historical non-free item dose marker does not match the explicitly selected reconciliation reference.",
         });
       }
 
