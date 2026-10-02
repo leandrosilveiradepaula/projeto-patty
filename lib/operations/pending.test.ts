@@ -5,6 +5,7 @@ import { buildOperationalPendingItems } from "./pending.ts";
 
 test("operational pending builder emits only explicit backend states", () => {
   const items = buildOperationalPendingItems({
+    clarificationReminderIntervalHours: 24,
     referenceNow: "2026-09-27T12:00:00Z",
     anamnesisSubmissions: [
       {
@@ -140,6 +141,7 @@ test("operational pending builder emits only explicit backend states", () => {
 
 test("operational pending builder excludes already resolved states", () => {
   const items = buildOperationalPendingItems({
+    clarificationReminderIntervalHours: 24,
     anamnesisSubmissions: [],
     clarificationRequests: [],
     assessments: [],
@@ -164,6 +166,7 @@ test("operational pending builder excludes already resolved states", () => {
 
 test("clarification reminder becomes factually due after 24 hours without response", () => {
   const items = buildOperationalPendingItems({
+    clarificationReminderIntervalHours: 24,
     referenceNow: "2026-09-24T10:00:00Z",
     anamnesisSubmissions: [],
     clarificationRequests: [
@@ -212,4 +215,32 @@ test("clarification reminder becomes factually due after 24 hours without respon
   assert.match(due?.description ?? "", /não prova que qualquer mensagem foi enviada/);
   assert.equal(notDue?.statusLabel, "Sem resposta");
   assert.equal(answered?.statusLabel, "Resposta recebida");
+});
+
+test("clarification reminder pending builder follows a changed configured interval", () => {
+  const items = buildOperationalPendingItems({
+    clarificationReminderIntervalHours: 12,
+    referenceNow: "2026-09-23T22:00:00Z",
+    anamnesisSubmissions: [],
+    clarificationRequests: [
+      {
+        id: "clarification-12h",
+        submissionId: "submission-12h",
+        clientId: "client-12h",
+        clientLabel: "Cliente 12h",
+        createdAt: "2026-09-23T10:00:00Z",
+        responseCount: 0,
+        resolved: false,
+      },
+    ],
+    assessments: [],
+    protocolVersions: [],
+    aiExecutions: [],
+  });
+
+  assert.equal(items.length, 1);
+  assert.equal(items[0]?.statusLabel, "Lembrete de 12h devido");
+  assert.match(items[0]?.description ?? "", /marco de 12 horas/);
+  assert.match(items[0]?.description ?? "", /2026-09-23T22:00:00.000Z/);
+  assert.doesNotMatch(items[0]?.description ?? "", /24 horas/);
 });

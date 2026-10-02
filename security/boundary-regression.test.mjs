@@ -898,6 +898,24 @@ test("Carb Cycle configuration loader stays server-only, bounded and fail-closed
   assert.match(loader, /parseCarbCycleConfiguration/);
 });
 
+test("operational pending data resolves clarification reminder configuration without fallback", async () => {
+  const source = await readFile(
+    path.join(ROOT, "lib", "operations", "pending-data.ts"),
+    "utf8",
+  );
+  const builder = await readFile(
+    path.join(ROOT, "lib", "operations", "pending.ts"),
+    "utf8",
+  );
+
+  assert.match(source, /loadClarificationReminderInterval/);
+  assert.match(source, /clarificationReminder\.intervalHours/);
+  assert.doesNotMatch(source, /createAdminClient|service_role/);
+  assert.doesNotMatch(source, /\?\?\s*24|\|\|\s*24/);
+  assert.doesNotMatch(builder, /CLARIFICATION_REMINDER_INTERVAL_MS/);
+  assert.match(builder, /clarificationReminderIntervalHours/);
+});
+
 test("clarification reminder configuration loader stays server-only and fail-closed", async () => {
   const loader = await readFile(
     path.join(

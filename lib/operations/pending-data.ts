@@ -19,6 +19,7 @@ import {
   buildOperationalPendingItems,
   type OperationalPendingItem,
 } from "@/lib/operations/pending";
+import { loadClarificationReminderInterval } from "@/lib/operations/clarification-reminder-loader";
 
 function clientLabel(value: string | null | undefined) {
   return value?.trim() || "Cliente sem nome informado";
@@ -27,11 +28,18 @@ function clientLabel(value: string | null | undefined) {
 export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
   OperationalPendingItem[]
 > {
-  const [assignments, assessments, protocols, aiExecutions] = await Promise.all([
+  const [
+    assignments,
+    assessments,
+    protocols,
+    aiExecutions,
+    clarificationReminder,
+  ] = await Promise.all([
     listClientsAssignedToCurrentAdmin(),
     listAccessibleClientAssessments(),
     listAccessibleProtocols(),
     listAccessibleNonterminalAiExecutions(),
+    loadClarificationReminderInterval(),
   ]);
 
   const assignedClients = assignments.flatMap((assignment) =>
@@ -139,6 +147,7 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
 
   return buildOperationalPendingItems({
     referenceNow: new Date().toISOString(),
+    clarificationReminderIntervalHours: clarificationReminder.intervalHours,
     anamnesisSubmissions: submissions.map((submission) => ({
       clientId: submission.client_id,
       clientLabel:
