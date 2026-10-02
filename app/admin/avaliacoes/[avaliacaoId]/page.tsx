@@ -255,21 +255,31 @@ export default async function AdminAvaliacaoDetailPage({
         </Section>
       ) : null}
       <Section
-        description="Referência operacional confirmada pela Patty. Não define sozinho se uma avaliação está completa."
-        title="Cadência de acompanhamento corporal"
+        description="Requisitos determinísticos da versão ativa para o tipo selecionado. A leitura profissional continua separada desta validação."
+        title="Requisitos da avaliação"
       >
         <Card className={styles.infoCard}>
-          <ul className={styles.cadenceList}>
-            <li>
-              <strong>Quinzenal:</strong> peso, cintura, abdômen e quadril.
-            </li>
-            <li>
-              <strong>Mensal:</strong> avaliação completa, peso e fotos.
-            </li>
-            <li>
-              <strong>Leitura profissional:</strong> visual e medidas podem ter mais peso do que a balança isolada; peito é uma medida adicional relevante, sem encerrar o catálogo mensal.
-            </li>
-          </ul>
+          {assessmentDefinition ? (
+            <ul className={styles.cadenceList}>
+              {assessmentDefinition.configuration.requiredMeasurements.map(
+                (requirement) => (
+                  <li key={requirement.key}>{requirement.label}</li>
+                ),
+              )}
+              {assessmentDefinition.configuration.photoRequirement ? (
+                <li>
+                  {assessmentDefinition.configuration.photoRequirement.label}
+                  {" · mínimo "}
+                  {assessmentDefinition.configuration.photoRequirement.minimumCount}
+                </li>
+              ) : null}
+            </ul>
+          ) : (
+            <p className={styles.cardDescription}>
+              O tipo histórico desta avaliação não corresponde a uma definição
+              ativa disponível.
+            </p>
+          )}
         </Card>
       </Section>
       {isDraft ? (
