@@ -793,6 +793,83 @@ test("private file finalization stays scoped to the expected client", async () =
 });
 
 
+test("hydration persistence boundary remains service-role-only and assignment-scoped", async () => {
+  const migration = await readFile(
+    path.join(
+      ROOT,
+      "supabase",
+      "migrations",
+      "20261002005720_hydrate_client_targets_from_configuration.sql",
+    ),
+    "utf8",
+  );
+
+  for (const required of [
+    "create function public.create_hydration_target_from_method_snapshot",
+    "security invoker",
+    "set search_path = pg_catalog",
+    "active admin assignment is required for hydration target creation",
+    "active client hydration override does not match resolution",
+    "from public, anon, authenticated",
+    "to service_role",
+  ]) {
+    assert.equal(
+      migration.toLowerCase().includes(required.toLowerCase()),
+      true,
+      "Hydration persistence boundary must keep reviewed control: " + required,
+    );
+  }
+
+  assert.equal(
+    /grant execute on function public\.create_hydration_target_from_method_snapshot[\s\S]*to authenticated/i.test(
+      migration,
+    ),
+    false,
+    "Hydration persistence boundary must never be executable by authenticated.",
+  );
+
+  assert.equal(
+    /security\s+definer/i.test(migration),
+    false,
+    "Hydration persistence boundary must remain SECURITY INVOKER.",
+  );
+});
+
+
+test("configured hydration stays disconnected until the production gate is released", async () => {
+  const loader = await readFile(
+    path.join(ROOT, "lib", "method", "hydration-loader.ts"),
+    "utf8",
+  );
+  const adminAction = await readFile(
+    path.join(
+      ROOT,
+      "app",
+      "admin",
+      "clientes",
+      "[clienteId]",
+      "checkins",
+      "actions.ts",
+    ),
+    "utf8",
+  );
+
+  assert.match(loader, /^import ["']server-only["'];/m);
+  assert.match(loader, /createClient/);
+  assert.doesNotMatch(loader, /createAdminClient/);
+  assert.match(loader, /hydration\.daily_target/);
+  assert.match(loader, /method_engine_v1/);
+  assert.match(loader, /protocol_version_id/);
+  assert.match(loader, /\.limit\(2\)/);
+
+  assert.match(adminAction, /createAccessibleClientHydrationTarget/);
+  assert.doesNotMatch(adminAction, /loadHydrationTargetResolution/);
+  assert.doesNotMatch(adminAction, /create_hydration_target_from_method_snapshot/);
+  assert.doesNotMatch(adminAction, /createAdminClient/);
+  assert.doesNotMatch(adminAction, /method_configuration_snapshot/);
+});
+
+
 test("any module that uses the Supabase administrative client is server-only", async () => {
   const roots = ["app", "lib"];
   const sourceFiles = [];
