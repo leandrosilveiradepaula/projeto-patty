@@ -57,7 +57,9 @@ export default async function ClientCheckinsPage() {
   ]);
 
   const target = targets[0] ?? null;
-  const targetMl = target?.target_ml ?? null;
+  const targetMl = target
+    ? target.resolved_target_ml ?? target.target_ml
+    : null;
   const todayLiquidEvents = recentLiquidEvents.filter(
     (event) => saoPauloDate(event.recorded_at) === today,
   );
