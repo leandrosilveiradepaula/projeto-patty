@@ -22,7 +22,8 @@ This slice:
 - preserves the historical generated `target_ml = round(weight_kg * 60)` column untouched;
 - keeps historical `method_key = patty_60_ml_per_kg` readable;
 - introduces `method_configuration_snapshot` only for the new path;
-- adds database compatibility tests and deterministic runtime tests.
+- adds database compatibility tests and deterministic runtime tests;
+- adds an atomic persistence boundary restricted to `service_role` for snapshot set + snapshot + override provenance + hydration target creation.
 
 ## Files allowed in this slice
 
@@ -76,4 +77,4 @@ This intentionally permits both representations during migration. There is no si
 
 The legacy generated `target_ml` column still exists and will continue calculating 60 mL/kg even on a future configured row. Therefore the operational switch must not happen until data access explicitly distinguishes legacy `target_ml` from configured `resolved_target_ml`. This is deliberate compatibility debt, not the final state.
 
-The next operational slice must create snapshot set + snapshot item + hydration target atomically through a controlled server boundary and must resolve template/client overrides before persistence.
+The database now exposes `create_hydration_target_from_method_snapshot(...)` as a transactionally atomic persistence boundary with `EXECUTE` revoked from `PUBLIC`, `anon` and `authenticated` and granted only to `service_role`. The application still needs a server-only resolver that validates the active template/client override with `method_engine_v1` before calling this boundary. The function does not choose a professional value or evaluate arbitrary configuration.
