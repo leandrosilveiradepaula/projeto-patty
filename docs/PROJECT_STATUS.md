@@ -41,7 +41,7 @@ Nao tratar esse SHA como o HEAD permanente do repositorio: merges documentais po
 
 ### Repositorio e CI
 
-O `master` revalidado nesta rodada esta em `0de334b309ffd7dbf5db02b0e1ae88237e272b2b`.
+O `master` revalidado nesta rodada esta em `0de334b309ffd7dbf5db02b0e1ae88237e272b2b`. O workflow `Validate application` do push ao `master` terminou `SUCCESS`, incluindo typecheck, suites deterministicas, regressao de seguranca e build.
 
 Entre os PRs recentes ja incorporados estao as preparacoes configuraveis de Carb Cycle, validacao de fonte alimentar, lembrete de esclarecimento, definicoes/tipos de Avaliacao, taxonomia de liquidos e equivalencia confirmada de legumes. Essas preparacoes nao autorizam ativar regras ainda abertas nem substituem templates/versionamento/snapshots ainda pendentes.
 
