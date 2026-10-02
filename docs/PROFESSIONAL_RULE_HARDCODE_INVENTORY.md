@@ -151,7 +151,7 @@ Questões abertas continuam abertas: recálculo após mudança de peso, proporç
 
 ### HR-006 — Conversão de legumes e referências no validador da fonte alimentar
 
-**Classificação:** EM MIGRAÇÃO — validador parametrizado no PR #259 e equivalência confirmada de legumes preparada no PR #267; templates/catálogos ativos ainda pendentes.
+**Classificação:** EM MIGRAÇÃO — validador parametrizado no PR #259; equivalência confirmada de legumes materializada no Supabase SaaS pelo Lote A; referência profissional atual agora pode ser resolvida de templates versionados, enquanto entradas históricas permanecem explícitas.
 
 Arquivo:
 
@@ -179,10 +179,17 @@ Classificação preservada:
 - referências de proteína/carboidrato/gordura devem futuramente vir dos templates de doses já versionados;
 - `vegetable_grams` e o marcador de dose dos itens permanecem referências históricas de reconciliação enquanto não houver confirmação profissional específica.
 
+Estado adicional após o Lote A:
+
+- `nutrition.vegetable_carbohydrate_equivalence` está materializado e ativo no Supabase SaaS;
+- `lib/content/food-equivalent-reconciliation-loader.ts` resolve exatamente uma versão ativa dos templates de proteína, carboidrato, gordura e equivalência de legumes;
+- a resolução usa o cliente server-side sujeito a RLS e falha fechada;
+- `vegetable_grams` e o marcador de dose permanecem parâmetros históricos explícitos, sem promoção a regra profissional;
+- o catálogo histórico continua `publishable: false`.
+
 Ainda pendente:
 
-- resolver as referências a partir de versões concretas de templates em vez de fixture explícita;
-- materializar template versionado da conversão confirmada de legumes;
+- integrar esse loader somente quando houver um fluxo server-side real de reconciliação/revisão do catálogo;
 - migrar catálogo histórico para catálogo versionado somente após revisão/aprovação;
 - não publicar automaticamente a fonte Excel.
 

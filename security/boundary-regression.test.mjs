@@ -916,6 +916,30 @@ test("operational pending data resolves clarification reminder configuration wit
   assert.match(builder, /clarificationReminderIntervalHours/);
 });
 
+test("food reconciliation loader stays server-only, RLS-bound, and fail-closed", async () => {
+  const source = await readFile(
+    path.join(
+      ROOT,
+      "lib",
+      "content",
+      "food-equivalent-reconciliation-loader.ts",
+    ),
+    "utf8",
+  );
+
+  assert.match(source, /import "server-only"/);
+  assert.match(source, /createClient/);
+  assert.match(source, /nutrition\.dose\.protein/);
+  assert.match(source, /nutrition\.dose\.carbohydrate/);
+  assert.match(source, /nutrition\.dose\.fat/);
+  assert.match(
+    source,
+    /nutrition\.vegetable_carbohydrate_equivalence/,
+  );
+  assert.match(source, /versions\.length !== 1/);
+  assert.doesNotMatch(source, /createAdminClient|service_role/);
+});
+
 test("clarification reminder configuration loader stays server-only and fail-closed", async () => {
   const loader = await readFile(
     path.join(

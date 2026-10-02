@@ -1,3 +1,6 @@
+import { gramsPerDose } from "../method/doses.ts";
+import { vegetableCarbohydrateDoseEquivalent } from "../method/vegetable-carb.ts";
+
 export type HistoricalFoodEquivalentSourceIssue = {
   code: string;
   path: string;
@@ -21,6 +24,50 @@ export type HistoricalFoodEquivalentValidationReference = {
   vegetableDosesPerCarbohydrateDose: number;
   nonFreeItemDoseMarker: string;
 };
+
+export function buildHistoricalFoodEquivalentValidationReference(input: {
+  carbohydrateDoseConfiguration: unknown;
+  fatDoseConfiguration: unknown;
+  historicalNonFreeItemDoseMarker: string;
+  historicalVegetableGrams: number;
+  proteinDoseConfiguration: unknown;
+  vegetableCarbohydrateConfiguration: unknown;
+}): HistoricalFoodEquivalentValidationReference {
+  if (
+    !Number.isFinite(input.historicalVegetableGrams) ||
+    input.historicalVegetableGrams < 0
+  ) {
+    throw new TypeError(
+      "historicalVegetableGrams must be a finite non-negative number",
+    );
+  }
+
+  const oneVegetableDoseEquivalent =
+    vegetableCarbohydrateDoseEquivalent(
+      input.vegetableCarbohydrateConfiguration,
+      1,
+    );
+
+  if (
+    !Number.isFinite(oneVegetableDoseEquivalent) ||
+    oneVegetableDoseEquivalent <= 0
+  ) {
+    throw new TypeError(
+      "vegetable carbohydrate configuration must produce a positive dose equivalent",
+    );
+  }
+
+  return {
+    macroDoseReferences: {
+      protein_grams: gramsPerDose(input.proteinDoseConfiguration),
+      carbohydrate_grams: gramsPerDose(input.carbohydrateDoseConfiguration),
+      fat_grams: gramsPerDose(input.fatDoseConfiguration),
+      vegetable_grams: input.historicalVegetableGrams,
+    },
+    vegetableDosesPerCarbohydrateDose: 1 / oneVegetableDoseEquivalent,
+    nonFreeItemDoseMarker: input.historicalNonFreeItemDoseMarker,
+  };
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
