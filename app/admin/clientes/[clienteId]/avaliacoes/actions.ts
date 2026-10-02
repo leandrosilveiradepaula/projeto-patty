@@ -35,7 +35,7 @@ export async function createAssessmentAction(
 
   if (typeof kindValue !== "string" || !isAssessmentKind(kindValue)) {
     return {
-      message: "Selecione se a avaliação é quinzenal ou mensal.",
+      message: "Selecione se a avaliação é Básica ou Completa.",
     };
   }
 
