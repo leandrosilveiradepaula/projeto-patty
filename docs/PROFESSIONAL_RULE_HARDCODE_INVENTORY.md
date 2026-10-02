@@ -293,21 +293,22 @@ Destino esperado:
 - permitir catálogo/configuração de tipos elegíveis sem alterar a regra de proporção ainda aberta;
 - qualquer flexibilização de CHECK exige migration nova.
 
-### HR-011 — Nomenclatura legada de Avaliações ainda exposta em UI
+### HR-011 — Nomenclatura legada de Avaliações em UI
 
-**Classificação:** DÍVIDA DE CONSISTÊNCIA, não nova regra.
+**Classificação:** CORRIGIDO NO PR #258 — dívida de consistência, não nova regra.
 
-Arquivos observados:
+Arquivos ajustados:
 
 - `app/admin/clientes/[clienteId]/avaliacoes/actions.ts`;
 - `components/admin/AssessmentCreateForm.tsx`.
 
-Ainda existem mensagens com “quinzenal ou mensal” e descrição “Quinzenal/Mensal”, apesar da decisão profissional vigente usar “Avaliação Básica/Completa”.
+Estado no PR #258:
 
-Destino esperado:
+- a linguagem visível de criação de avaliação usa “Básica/Completa”;
+- os códigos históricos internos `fortnightly` / `monthly` permanecem inalterados para compatibilidade;
+- schema, RLS, lifecycle, catálogo obrigatório e regras de calendário não foram alterados.
 
-- remover linguagem legada visível;
-- manter códigos históricos internos apenas enquanto necessário para compatibilidade.
+Critério para marcar como resolvido no `master`: PR #258 mergeado com CI verde.
 
 ### HR-012 — Estrutura do Carb Cycle implicitamente limitada a Low1/Low2/High
 
