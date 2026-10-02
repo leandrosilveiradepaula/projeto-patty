@@ -68,6 +68,7 @@ declare
   v_catalog_semantic_key text;
   v_definition_kind_key text;
   v_can_finalize boolean;
+  v_minimum_photo_count integer;
 begin
   select *
   into v_assessment
@@ -213,6 +214,53 @@ begin
       using errcode = '22023';
   end if;
 
+  if jsonb_typeof(v_definition_stored_configuration->'requiredMeasurements')
+     is distinct from 'array' then
+    raise exception 'active assessment definition must contain requiredMeasurements'
+      using errcode = '22023';
+  end if;
+
+  if exists (
+    select 1
+    from jsonb_array_elements(
+      v_definition_stored_configuration->'requiredMeasurements'
+    ) requirement
+    where not exists (
+      select 1
+      from public.assessment_measurements measurement
+      where measurement.assessment_id = v_assessment.id
+        and measurement.measurement_key = requirement->>'key'
+    )
+  ) then
+    raise exception 'assessment is missing required measurements'
+      using errcode = '22023';
+  end if;
+
+  if jsonb_typeof(v_definition_stored_configuration->'photoRequirement') = 'object' then
+    begin
+      v_minimum_photo_count :=
+        (v_definition_stored_configuration #>> '{photoRequirement,minimumCount}')::integer;
+    exception
+      when others then
+        raise exception 'assessment photo requirement must contain an integer minimumCount'
+          using errcode = '22023';
+    end;
+
+    if v_minimum_photo_count < 1 then
+      raise exception 'assessment photo minimum must be positive'
+        using errcode = '22023';
+    end if;
+
+    if (
+      select count(*)
+      from public.assessment_files assessment_file
+      where assessment_file.assessment_id = v_assessment.id
+    ) < v_minimum_photo_count then
+      raise exception 'assessment is missing required photos'
+        using errcode = '22023';
+    end if;
+  end if;
+
   insert into public.method_configuration_snapshot_sets (
     client_id,
     engine_contract_version,
@@ -323,6 +371,8 @@ declare
   v_snapshot_set_id uuid;
   v_event_id uuid;
   v_result_kind text;
+  v_result_hydration_class text;
+  v_expected_hydration_class text;
 begin
   if p_amount_ml is null or p_amount_ml <= 0 then
     raise exception 'liquid amount must be positive'
@@ -383,12 +433,21 @@ begin
       using errcode = '22023';
   end if;
 
-  if not exists (
-    select 1
-    from jsonb_array_elements(v_stored_configuration->'kinds') kind
-    where kind->>'key' = p_liquid_kind
-  ) then
+  select kind->>'hydrationClass'
+  into v_expected_hydration_class
+  from jsonb_array_elements(v_stored_configuration->'kinds') kind
+  where kind->>'key' = p_liquid_kind;
+
+  if not found or v_expected_hydration_class is null then
     raise exception 'selected liquid kind is absent from resolved taxonomy'
+      using errcode = '22023';
+  end if;
+
+  v_result_hydration_class :=
+    p_result_values #>> '{hydration_class}';
+
+  if v_result_hydration_class is distinct from v_expected_hydration_class then
+    raise exception 'liquid snapshot hydration class does not match active taxonomy'
       using errcode = '22023';
   end if;
 
