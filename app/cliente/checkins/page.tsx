@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
+import { loadSupportedLiquidTaxonomy } from "@/lib/method/liquid-taxonomy-loader";
 import {
   getCurrentClient,
   listAccessibleClientActivityCheckinEvents,
@@ -50,11 +51,17 @@ export default async function ClientCheckinsPage() {
   const today = saoPauloDate(new Date());
   const recentFrom = new Date(Date.now() - 36 * 60 * 60 * 1000).toISOString();
 
-  const [targets, recentLiquidEvents, activityEvents] = await Promise.all([
-    listAccessibleClientHydrationTargets(client.id),
-    listAccessibleClientLiquidIntakeEvents(client.id, recentFrom),
-    listAccessibleClientActivityCheckinEvents(client.id, today),
-  ]);
+  const [targets, recentLiquidEvents, activityEvents, liquidTaxonomy] =
+    await Promise.all([
+      listAccessibleClientHydrationTargets(client.id),
+      listAccessibleClientLiquidIntakeEvents(client.id, recentFrom),
+      listAccessibleClientActivityCheckinEvents(client.id, today),
+      loadSupportedLiquidTaxonomy(),
+    ]);
+
+  const liquidKindsByKey = new Map(
+    liquidTaxonomy.kinds.map((kind) => [kind.key, kind]),
+  );
 
   const target = targets[0] ?? null;
   const targetMl = target
@@ -68,7 +75,10 @@ export default async function ClientCheckinsPage() {
     0,
   );
   const waterMl = todayLiquidEvents
-    .filter((event) => event.liquid_kind === "water")
+    .filter(
+      (event) =>
+        liquidKindsByKey.get(event.liquid_kind)?.hydrationClass === "pure_water",
+    )
     .reduce((sum, event) => sum + event.amount_ml, 0);
   const latestActivity = activityEvents[0] ?? null;
   const progress =
@@ -114,8 +124,8 @@ export default async function ClientCheckinsPage() {
               <p className={styles.note}>
                 Meta registrada com base em{" "}
                 {Number(target.weight_kg).toLocaleString("pt-BR")} kg.
-                A maior parte deve ser agua pura; outros liquidos zero calorias
-                podem complementar em menor quantidade.
+                Os registros são classificados conforme a taxonomia ativa.
+                O sistema não aplica uma proporção mínima automática entre os tipos.
               </p>
             ) : (
               <p className={styles.note}>
@@ -133,11 +143,16 @@ export default async function ClientCheckinsPage() {
               </label>
               <label className={styles.field}>
                 <span>Tipo</span>
-                <select defaultValue="water" name="liquidKind">
-                  <option value="water">Agua pura</option>
-                  <option value="zero_calorie_other">
-                    Outro liquido zero calorias
-                  </option>
+                <select
+                  defaultValue={liquidTaxonomy.kinds[0]?.key ?? ""}
+                  name="liquidKind"
+                  required
+                >
+                  {liquidTaxonomy.kinds.map((kind) => (
+                    <option key={kind.key} value={kind.key}>
+                      {kind.label}
+                    </option>
+                  ))}
                 </select>
               </label>
               <Button type="submit">Registrar liquido</Button>
