@@ -53,10 +53,26 @@ select is(
 );
 
 select is(
-  (select count(*) from public.method_configuration_versions v
-   join public.method_configuration_templates t on t.id=v.template_id
-   where t.template_key='hydration.liquid_taxonomy'
-     and (v.configuration::text ilike '%ratio%' or v.configuration::text ilike '%minimum%water%')),
+  (
+    select count(*)
+    from public.method_configuration_versions v
+    join public.method_configuration_templates t on t.id = v.template_id
+    where t.template_key = 'hydration.liquid_taxonomy'
+      and (
+        v.configuration ? 'ratio'
+        or v.configuration ? 'minimumWaterRatio'
+        or v.configuration ? 'minimumPureWaterRatio'
+        or v.configuration ? 'pureWaterRatio'
+        or exists (
+          select 1
+          from jsonb_array_elements(v.configuration->'kinds') kind
+          where kind ? 'ratio'
+             or kind ? 'minimumWaterRatio'
+             or kind ? 'minimumPureWaterRatio'
+             or kind ? 'pureWaterRatio'
+        )
+      )
+  ),
   0::bigint,
   'taxonomy does not invent a minimum pure-water ratio'
 );
