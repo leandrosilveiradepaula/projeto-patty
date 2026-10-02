@@ -4,9 +4,10 @@ import test from "node:test";
 import {
   buildConfigurableAssessmentReadiness,
   parseAssessmentDefinitionConfiguration,
+  type AssessmentDefinitionConfiguration,
 } from "./assessment-definition.ts";
 
-const basic = {
+const basic: AssessmentDefinitionConfiguration = {
   kindKey: "basic",
   requiredMeasurements: [
     { key: "peso", label: "Peso", aliases: ["weight"] },
@@ -17,7 +18,7 @@ const basic = {
   photoRequirement: null,
 };
 
-const complete = {
+const complete: AssessmentDefinitionConfiguration = {
   kindKey: "complete",
   requiredMeasurements: [
     { key: "peso", label: "Peso", aliases: ["weight"] },
