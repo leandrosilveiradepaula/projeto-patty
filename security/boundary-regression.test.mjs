@@ -760,6 +760,49 @@ test("reviewed AI finding SECURITY DEFINER boundary remains server-only", async 
   );
 });
 
+test("hydration persistence boundary remains service-role-only and assignment-scoped", async () => {
+  const migration = await readFile(
+    path.join(
+      ROOT,
+      "supabase",
+      "migrations",
+      "20261002005720_hydrate_client_targets_from_configuration.sql",
+    ),
+    "utf8",
+  );
+
+  for (const required of [
+    "create function public.create_hydration_target_from_method_snapshot",
+    "security invoker",
+    "set search_path = pg_catalog",
+    "active admin assignment is required for hydration target creation",
+    "active client hydration override does not match resolution",
+    "from public, anon, authenticated",
+    "to service_role",
+  ]) {
+    assert.equal(
+      migration.toLowerCase().includes(required.toLowerCase()),
+      true,
+      "Hydration persistence boundary must keep reviewed control: " + required,
+    );
+  }
+
+  assert.equal(
+    /grant execute on function public\.create_hydration_target_from_method_snapshot[\s\S]*to authenticated/i.test(
+      migration,
+    ),
+    false,
+    "Hydration persistence boundary must never be executable by authenticated.",
+  );
+
+  assert.equal(
+    /security\s+definer/i.test(migration),
+    false,
+    "Hydration persistence boundary must remain SECURITY INVOKER.",
+  );
+});
+
+
 test("any module that uses the Supabase administrative client is server-only", async () => {
   const roots = ["app", "lib"];
   const sourceFiles = [];
