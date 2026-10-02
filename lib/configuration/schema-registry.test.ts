@@ -51,7 +51,7 @@ test("delegates method_engine_v1 to the deterministic engine validator", () => {
         outputs: {},
         eval: "forbidden",
       }),
-    TypeError,
+    /unsupported field/i,
   );
 });
 
