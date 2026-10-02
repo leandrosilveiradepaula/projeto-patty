@@ -88,6 +88,11 @@ export async function createClientFileUploadSessionAction(
 
 export async function finalizeClientFileUploadSessionAction(sessionId: string) {
   const auth = await requireRole("client");
+  const client = await getCurrentClient();
+
+  if (!client) {
+    throw new Error("Client profile is unavailable");
+  }
 
   if (!isUuid(sessionId)) {
     return {
@@ -98,6 +103,7 @@ export async function finalizeClientFileUploadSessionAction(sessionId: string) {
 
   const result = await finalizeClientFileUploadSession({
     clientVisibleOnAccept: true,
+    expectedClientId: client.id,
     requesterProfileId: auth.profileId,
     sessionId,
   });
