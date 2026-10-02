@@ -69,7 +69,7 @@ Estado no PR #253:
 
 ### HR-003 — Limite do grupo de proteína com maior teor de gordura
 
-**Classificação:** EM MIGRAÇÃO — runtime parametrizado no PR #255; seed oficial ainda não aplicado.
+**Classificação:** MIGRADO — runtime parametrizado e seed oficial aplicado no SaaS.
 
 Arquivo ativo:
 
@@ -89,9 +89,8 @@ Estado no PR #255:
 - testes também demonstram alteração de ratio e arredondamento sem edição de código;
 - migration `20261001235018_seed_higher_fat_protein_limit_template.sql` cria `nutrition.protein.higher_fat_daily_limit`;
 - snapshots em consumidores operacionais continuam etapa posterior porque o helper ainda não possui consumidor fora dos testes;
-- a migration ainda não foi aplicada no SaaS.
-
-Critério para marcar como migrado: migration aplicada + template ativo confirmado no SaaS.
+- migration `20261001235018` aplicada no SaaS e template `nutrition.protein.higher_fat_daily_limit` ativo confirmado;
+- snapshots em consumidores operacionais continuam etapa posterior porque o helper ainda não possui consumidor fora dos testes.
 
 ### HR-004 — Referência do Reconhecimento Metabólico
 
@@ -114,14 +113,14 @@ Estado no PR #253:
 
 ### HR-005 — Meta de líquidos
 
-**Classificação:** EM MIGRAÇÃO — compatibilidade preparada no PR #256; aplicação no SaaS e troca operacional ainda pendentes.
+**Classificação:** EM MIGRAÇÃO — migration aplicada no SaaS; troca operacional ainda pendente.
 
 Hardcode histórico preservado:
 
 - `supabase/migrations/20260930132221_create_client_checkins.sql` continua materializando `target_ml = round(weight_kg * 60)`;
 - a migration histórica permanece intacta e linhas antigas continuam legíveis com `method_key = 'patty_60_ml_per_kg'`.
 
-Estado no PR #256:
+Estado após PR #273 e apply no SaaS:
 
 - `lib/method/hydration.ts` calcula a meta a partir de configuração `method_engine_v1`, sem coeficiente profissional embutido;
 - golden tests reproduzem 60 mL/kg, alteração de coeficiente e alteração de arredondamento sem mudança de runtime;
@@ -131,11 +130,16 @@ Estado no PR #256:
 - o vínculo configurado aponta para snapshot set da mesma cliente;
 - a migration histórica não é editada nem reescrita.
 
+Aplicado e validado no SaaS:
+
+- migration `20261001235018` aplicada e higher-fat ativo confirmado;
+- migration `20261002005720` aplicada;
+- template `hydration.daily_target` ativo com baseline 60 mL/kg e `round`;
+- RPC `create_hydration_target_from_method_snapshot` presente como SECURITY INVOKER, sem EXECUTE para `anon`/`authenticated` e com EXECUTE para `service_role`.
+
 Ainda pendente para marcar como migrado:
 
-- aplicar primeiro a migration anterior `20261001235018` e validar seu template no SaaS;
-- somente depois aplicar `20261002005720`;
-- criar a boundary operacional atômica para resolver template/overrides, gerar snapshot e registrar a nova meta;
+- integrar a boundary operacional atômica para resolver template/overrides, gerar snapshot e registrar a nova meta;
 - atualizar data access/UI para ler `resolved_target_ml` no modo configurado e `target_ml` apenas no legado;
 - remover da UI a repetição textual de `60 mL/kg` quando a nova fonte estiver ativa.
 
