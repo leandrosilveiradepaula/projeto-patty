@@ -76,6 +76,9 @@ export function parseLiquidTaxonomyConfiguration(
       );
     }
 
+    const hydrationClass: LiquidHydrationClass =
+      rawKind.hydrationClass;
+
     if (seenKeys.has(key)) {
       throw new TypeError("liquid taxonomy keys must be unique");
     }
@@ -85,7 +88,7 @@ export function parseLiquidTaxonomyConfiguration(
     return {
       key,
       label,
-      hydrationClass: rawKind.hydrationClass,
+      hydrationClass,
     };
   });
 
