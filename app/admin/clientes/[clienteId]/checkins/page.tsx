@@ -51,8 +51,8 @@ export default async function AdminClientCheckinsPage({ params }: PageProps) {
       loadSupportedLiquidTaxonomy(),
     ]);
 
-  const liquidKindsByKey = new Map(
-    liquidTaxonomy.kinds.map((kind) => [kind.key, kind]),
+  const liquidLabelsByKey = new Map<string, string>(
+    liquidTaxonomy.kinds.map((kind) => [kind.key, kind.label]),
   );
 
   const currentTarget = targets[0] ?? null;
@@ -131,8 +131,7 @@ export default async function AdminClientCheckinsPage({ params }: PageProps) {
                   <div className={styles.header}>
                     <strong>{formatMl(event.amount_ml)}</strong>
                     <Badge variant="neutral">
-                      {liquidKindsByKey.get(event.liquid_kind)?.label ??
-                        "Tipo histórico"}
+                      {liquidLabelsByKey.get(event.liquid_kind) ?? "Tipo histórico"}
                     </Badge>
                   </div>
                   <p className={styles.description}>{formatDate(event.recorded_at)}</p>
