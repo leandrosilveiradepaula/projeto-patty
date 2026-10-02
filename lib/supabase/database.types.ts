@@ -347,6 +347,64 @@ export type Database = {
           },
         ]
       }
+      ai_finding_actions: {
+        Row: {
+          acted_by_profile_id: string
+          action: string
+          anamnesis_review_id: string | null
+          client_id: string
+          created_at: string
+          execution_id: string
+          finding_index: number
+          finding_snapshot: Json
+          id: string
+        }
+        Insert: {
+          acted_by_profile_id: string
+          action: string
+          anamnesis_review_id?: string | null
+          client_id: string
+          created_at?: string
+          execution_id: string
+          finding_index: number
+          finding_snapshot: Json
+          id?: string
+        }
+        Update: {
+          acted_by_profile_id?: string
+          action?: string
+          anamnesis_review_id?: string | null
+          client_id?: string
+          created_at?: string
+          execution_id?: string
+          finding_index?: number
+          finding_snapshot?: Json
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_finding_actions_acted_by_profile_id_fkey"
+            columns: ["acted_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_finding_actions_anamnesis_review_id_fkey"
+            columns: ["anamnesis_review_id"]
+            isOneToOne: false
+            referencedRelation: "anamnesis_reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_finding_actions_execution_client_fkey"
+            columns: ["execution_id", "client_id"]
+            isOneToOne: false
+            referencedRelation: "ai_executions"
+            referencedColumns: ["id", "client_id"]
+          },
+        ]
+      }
       ai_hypotheses: {
         Row: {
           client_id: string
@@ -901,6 +959,51 @@ export type Database = {
           },
         ]
       }
+      assessment_measurement_corrections: {
+        Row: {
+          assessment_measurement_id: string
+          corrected_by_profile_id: string
+          corrected_measurement_value: number
+          corrected_unit: string
+          created_at: string
+          id: string
+          note: string | null
+        }
+        Insert: {
+          assessment_measurement_id: string
+          corrected_by_profile_id: string
+          corrected_measurement_value: number
+          corrected_unit: string
+          created_at?: string
+          id?: string
+          note?: string | null
+        }
+        Update: {
+          assessment_measurement_id?: string
+          corrected_by_profile_id?: string
+          corrected_measurement_value?: number
+          corrected_unit?: string
+          created_at?: string
+          id?: string
+          note?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_measurement_correctio_assessment_measurement_id_fkey"
+            columns: ["assessment_measurement_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_measurements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_measurement_corrections_corrected_by_profile_id_fkey"
+            columns: ["corrected_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assessment_measurements: {
         Row: {
           assessment_id: string
@@ -1408,6 +1511,107 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_method_configuration_override_versions: {
+        Row: {
+          activated_at: string | null
+          activated_by_profile_id: string | null
+          based_on_template_version_id: string
+          client_id: string
+          created_at: string
+          created_by_profile_id: string
+          id: string
+          override_configuration: Json
+          protocol_version_id: string | null
+          reason: string | null
+          retired_at: string | null
+          retired_by_profile_id: string | null
+          template_id: string
+          version_number: number
+        }
+        Insert: {
+          activated_at?: string | null
+          activated_by_profile_id?: string | null
+          based_on_template_version_id: string
+          client_id: string
+          created_at?: string
+          created_by_profile_id: string
+          id?: string
+          override_configuration: Json
+          protocol_version_id?: string | null
+          reason?: string | null
+          retired_at?: string | null
+          retired_by_profile_id?: string | null
+          template_id: string
+          version_number: number
+        }
+        Update: {
+          activated_at?: string | null
+          activated_by_profile_id?: string | null
+          based_on_template_version_id?: string
+          client_id?: string
+          created_at?: string
+          created_by_profile_id?: string
+          id?: string
+          override_configuration?: Json
+          protocol_version_id?: string | null
+          reason?: string | null
+          retired_at?: string | null
+          retired_by_profile_id?: string | null
+          template_id?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_method_configuration_overri_activated_by_profile_id_fkey"
+            columns: ["activated_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_method_configuration_override_created_by_profile_id_fkey"
+            columns: ["created_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_method_configuration_override_retired_by_profile_id_fkey"
+            columns: ["retired_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_method_configuration_override_versions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_method_configuration_override_versions_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "method_configuration_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_method_configuration_overrides_protocol_client_fkey"
+            columns: ["protocol_version_id", "client_id"]
+            isOneToOne: false
+            referencedRelation: "protocol_versions"
+            referencedColumns: ["id", "client_id"]
+          },
+          {
+            foreignKeyName: "client_method_configuration_overrides_template_version_fkey"
+            columns: ["based_on_template_version_id", "template_id"]
+            isOneToOne: false
+            referencedRelation: "method_configuration_versions"
+            referencedColumns: ["id", "template_id"]
           },
         ]
       }
@@ -2006,6 +2210,295 @@ export type Database = {
           },
         ]
       }
+      method_configuration_snapshot_overrides: {
+        Row: {
+          client_id: string
+          created_at: string
+          override_version_id: string
+          precedence: number
+          snapshot_id: string
+          template_id: string
+          template_version_id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          override_version_id: string
+          precedence: number
+          snapshot_id: string
+          template_id: string
+          template_version_id: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          override_version_id?: string
+          precedence?: number
+          snapshot_id?: string
+          template_id?: string
+          template_version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "method_configuration_snapshot_overrides_override_fkey"
+            columns: [
+              "override_version_id",
+              "client_id",
+              "template_id",
+              "template_version_id",
+            ]
+            isOneToOne: false
+            referencedRelation: "client_method_configuration_override_versions"
+            referencedColumns: [
+              "id",
+              "client_id",
+              "template_id",
+              "based_on_template_version_id",
+            ]
+          },
+          {
+            foreignKeyName: "method_configuration_snapshot_overrides_snapshot_fkey"
+            columns: [
+              "snapshot_id",
+              "client_id",
+              "template_id",
+              "template_version_id",
+            ]
+            isOneToOne: false
+            referencedRelation: "method_configuration_snapshots"
+            referencedColumns: [
+              "id",
+              "client_id",
+              "template_id",
+              "template_version_id",
+            ]
+          },
+        ]
+      }
+      method_configuration_snapshot_sets: {
+        Row: {
+          client_id: string
+          created_at: string
+          created_by_profile_id: string
+          engine_contract_version: number
+          id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          created_by_profile_id: string
+          engine_contract_version: number
+          id?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          created_by_profile_id?: string
+          engine_contract_version?: number
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "method_configuration_snapshot_sets_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "method_configuration_snapshot_sets_created_by_profile_id_fkey"
+            columns: ["created_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      method_configuration_snapshots: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          input_values: Json
+          resolved_configuration: Json
+          result_values: Json
+          snapshot_set_id: string
+          template_id: string
+          template_key: string
+          template_version_id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          input_values: Json
+          resolved_configuration: Json
+          result_values: Json
+          snapshot_set_id: string
+          template_id: string
+          template_key: string
+          template_version_id: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          input_values?: Json
+          resolved_configuration?: Json
+          result_values?: Json
+          snapshot_set_id?: string
+          template_id?: string
+          template_key?: string
+          template_version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "method_configuration_snapshots_set_client_fkey"
+            columns: ["snapshot_set_id", "client_id"]
+            isOneToOne: false
+            referencedRelation: "method_configuration_snapshot_sets"
+            referencedColumns: ["id", "client_id"]
+          },
+          {
+            foreignKeyName: "method_configuration_snapshots_template_key_fkey"
+            columns: ["template_id", "template_key"]
+            isOneToOne: false
+            referencedRelation: "method_configuration_templates"
+            referencedColumns: ["id", "template_key"]
+          },
+          {
+            foreignKeyName: "method_configuration_snapshots_template_version_fkey"
+            columns: ["template_version_id", "template_id"]
+            isOneToOne: false
+            referencedRelation: "method_configuration_versions"
+            referencedColumns: ["id", "template_id"]
+          },
+        ]
+      }
+      method_configuration_templates: {
+        Row: {
+          config_schema_key: string
+          created_at: string
+          created_by_kind: string
+          created_by_profile_id: string | null
+          description: string | null
+          display_name: string
+          domain_key: string
+          id: string
+          template_key: string
+        }
+        Insert: {
+          config_schema_key: string
+          created_at?: string
+          created_by_kind?: string
+          created_by_profile_id?: string | null
+          description?: string | null
+          display_name: string
+          domain_key: string
+          id?: string
+          template_key: string
+        }
+        Update: {
+          config_schema_key?: string
+          created_at?: string
+          created_by_kind?: string
+          created_by_profile_id?: string | null
+          description?: string | null
+          display_name?: string
+          domain_key?: string
+          id?: string
+          template_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "method_configuration_templates_created_by_profile_id_fkey"
+            columns: ["created_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      method_configuration_versions: {
+        Row: {
+          activated_at: string | null
+          activated_by_profile_id: string | null
+          configuration: Json
+          created_at: string
+          created_by_kind: string
+          created_by_profile_id: string | null
+          id: string
+          retired_at: string | null
+          retired_by_profile_id: string | null
+          schema_version: number
+          source_kind: string
+          source_reference: string | null
+          template_id: string
+          version_number: number
+        }
+        Insert: {
+          activated_at?: string | null
+          activated_by_profile_id?: string | null
+          configuration: Json
+          created_at?: string
+          created_by_kind?: string
+          created_by_profile_id?: string | null
+          id?: string
+          retired_at?: string | null
+          retired_by_profile_id?: string | null
+          schema_version: number
+          source_kind: string
+          source_reference?: string | null
+          template_id: string
+          version_number: number
+        }
+        Update: {
+          activated_at?: string | null
+          activated_by_profile_id?: string | null
+          configuration?: Json
+          created_at?: string
+          created_by_kind?: string
+          created_by_profile_id?: string | null
+          id?: string
+          retired_at?: string | null
+          retired_by_profile_id?: string | null
+          schema_version?: number
+          source_kind?: string
+          source_reference?: string | null
+          template_id?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "method_configuration_versions_activated_by_profile_id_fkey"
+            columns: ["activated_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "method_configuration_versions_created_by_profile_id_fkey"
+            columns: ["created_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "method_configuration_versions_retired_by_profile_id_fkey"
+            columns: ["retired_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "method_configuration_versions_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "method_configuration_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       professional_follow_ups: {
         Row: {
           adherence_perception: string | null
@@ -2304,11 +2797,11 @@ export type Database = {
         Args: {
           p_execution_id: string
           p_failure_code: string
-          p_failure_message: string | null
+          p_failure_message: string
           p_failure_stage: string
-          p_response_content: string | null
-          p_response_content_format: string | null
-          p_response_received_at: string | null
+          p_response_content: string
+          p_response_content_format: string
+          p_response_received_at: string
         }
         Returns: undefined
       }
@@ -2319,6 +2812,19 @@ export type Database = {
       meal_plan_version_is_published_for_current_client: {
         Args: { p_meal_plan_version_id: string }
         Returns: boolean
+      }
+      record_ai_finding_action_server: {
+        Args: {
+          p_acted_by_profile_id: string
+          p_action: string
+          p_execution_id: string
+          p_finding_index: number
+          p_note?: string
+        }
+        Returns: {
+          action_id: string
+          anamnesis_review_id: string
+        }[]
       }
       start_anamnesis_review_execution: {
         Args: {
