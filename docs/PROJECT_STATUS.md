@@ -41,28 +41,35 @@ Nao tratar esse SHA como o HEAD permanente do repositorio: merges documentais po
 
 ### Repositorio e CI
 
-O `master` revalidado nesta rodada esta em `0de334b309ffd7dbf5db02b0e1ae88237e272b2b`. O workflow `Validate application` do push ao `master` terminou `SUCCESS`, incluindo typecheck, suites deterministicas, regressao de seguranca e build.
+Imediatamente antes desta reconciliacao documental, o `master` remoto estava em `87b3830edd2c5a846f431164132347da8806aeef`, resultado do PR #269. O PR #269 (`feat: prepare next configuration template batch`) adicionou o registro fechado de schemas de configuracao e teve `Validate application` aprovado no run `36982497284`.
 
-Entre os PRs recentes ja incorporados estao as preparacoes configuraveis de Carb Cycle, validacao de fonte alimentar, lembrete de esclarecimento, definicoes/tipos de Avaliacao, taxonomia de liquidos e equivalencia confirmada de legumes. Essas preparacoes nao autorizam ativar regras ainda abertas nem substituem templates/versionamento/snapshots ainda pendentes.
+O PR #270 (`ci: preview Supabase migrations automatically`) tambem esta mergeado. Ele fez o workflow de migrations executar automaticamente `migration list` + `db push --dry-run` em pushes ao `master` que alterem migrations ou o proprio workflow, sem permitir apply por evento `push`. O apply continua exclusivo de `workflow_dispatch` com `mode=apply` e confirmacao textual exata `APPLY`. O CI do PR #270 passou no run `36961639864`.
+
+O PR #256 de hidratacao permanece `OPEN`, `DRAFT` e nao mergeado, com head `d347aa966347afacbe89e30df28d5752ec24fe0d`. Os workflows `Validate application` (`36957963806`) e `Validate method configuration foundation` (`36957963799`) estao `SUCCESS`. A migration de hidratacao, pgTAP, loader server-side e boundary transacional existem apenas nesse draft e nao representam schema aplicado.
+
+As preparacoes configuraveis recentes nao autorizam ativar regras ainda abertas nem substituem versionamento, snapshots, revisao humana ou a ordem obrigatoria da fila de migrations.
 
 ### Vercel
 
-O ultimo deployment de producao confirmado como `READY` nesta rodada corresponde ao commit `f5e0267931bca09b99ab6263460b70b205401b70` (PR #262).
+O deployment de producao mais recente observado esta `READY`: `dpl_7iTtbWg9Mpafwq5RXenGEd27JGGD`, correspondente ao `master` `87b3830edd2c5a846f431164132347da8806aeef`.
 
-Commits posteriores no `master` nao foram publicados nesta rodada porque a integracao GitHub/Vercel passou a reportar bloqueio por **build rate limit** do plano. Esse estado e operacional/de quota e nao deve ser registrado como falha de build da aplicacao sem evidencia de erro de codigo.
+O deployment imediatamente anterior, do commit `e47a49520a54e261fd40e3bba9c6c9a651af69a7` que incorporou o PR #270, tambem esta `READY`. Portanto, o bloqueio temporario por build rate limit registrado anteriormente nao esta ativo no estado revalidado desta rodada.
 
 ### Supabase / fila de migrations
 
-O historico remoto revalidado continua ate `20261001230751_seed_initial_method_templates`.
+O projeto `Projeto Corpo e Mente` esta `ACTIVE_HEALTHY`. O historico remoto revalidado continua ate `20261001230751_seed_initial_method_templates`.
 
 Continuam **NAO APLICADAS** no SaaS:
 
 - `20261001235018_seed_higher_fat_protein_limit_template.sql`;
 - `20261002005720_hydrate_client_targets_from_configuration.sql`.
 
-A verificacao direta confirmou ausencia tanto dos registros de migration quanto dos templates correspondentes `nutrition.protein.higher_fat_daily_limit` e `hydration.daily_target`.
+A verificacao direta confirmou:
+- registro remoto de `20261001235018`: 0;
+- template `nutrition.protein.higher_fat_daily_limit`: 0;
+- template `hydration.daily_target`: 0.
 
-A ordem permanece obrigatoria: aplicar/validar primeiro `20261001235018`; somente depois liberar a migration de hidratacao. Nao usar SQL direto como substituto do workflow oficial de producao.
+A ordem permanece obrigatoria: aplicar/validar primeiro `20261001235018`; somente depois liberar a migration de hidratacao. Nao usar SQL direto como substituto do workflow oficial de producao. O preview pode ocorrer automaticamente no `master`, mas apply continua exigindo o gate manual documentado.
 
 
 ## Legenda de estado
@@ -200,7 +207,7 @@ Resumo:
 
 1. **Deployment Vercel**
    - HISTORICO: `master` `bf49254edb9292801eb9ed80a83e1d68262b7b11` foi publicado como `READY` e o smoke canonico `36257567841` foi aprovado naquele baseline.
-   - ESTADO ATUAL 2026-10-01: PR #246 mergeado; `master` em `407ecf24c192fa5ec5ec3a83b58ae6203f9ffe00`; deployment de producao correspondente `READY`. Gap resolvido.
+   - ESTADO REVALIDADO 2026-10-02: producao `READY` no commit `87b3830edd2c5a846f431164132347da8806aeef`, deployment `dpl_7iTtbWg9Mpafwq5RXenGEd27JGGD`; o deployment anterior do PR #270 tambem esta `READY`. Nao ha gap observado entre o ultimo `master` revalidado e producao.
 
 2. **Email real de convite**
    - lifecycle tecnico e E2E sintetico existem;
