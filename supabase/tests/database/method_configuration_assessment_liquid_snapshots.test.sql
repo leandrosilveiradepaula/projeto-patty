@@ -282,6 +282,18 @@ select throws_ok(
   'assessment snapshot boundary refuses a non-ready result'
 );
 
+insert into public.assessment_measurements (
+  assessment_id,
+  measurement_key,
+  measurement_value,
+  unit
+)
+values
+  ('d3000000-0000-0000-0000-000000000002', 'peso', 70, 'kg'),
+  ('d3000000-0000-0000-0000-000000000002', 'cintura', 75, 'cm'),
+  ('d3000000-0000-0000-0000-000000000002', 'abdomen', 80, 'cm'),
+  ('d3000000-0000-0000-0000-000000000002', 'quadril', 95, 'cm');
+
 select isnt(
   public.finalize_assessment_from_method_snapshot(
     'd3000000-0000-0000-0000-000000000002',
@@ -436,6 +448,37 @@ select throws_ok(
   '22023',
   null,
   'liquid snapshot boundary rejects a kind absent from the active taxonomy'
+);
+
+select throws_ok(
+  $sql$
+    select public.create_liquid_intake_event_from_method_snapshot(
+      'd2000000-0000-0000-0000-000000000001',
+      'd1000000-0000-0000-0000-000000000002',
+      250,
+      'water',
+      (
+        select v.id
+        from public.method_configuration_versions v
+        join public.method_configuration_templates t on t.id = v.template_id
+        where t.template_key = 'hydration.liquid_taxonomy'
+          and v.activated_at is not null
+          and v.retired_at is null
+      ),
+      (
+        select v.configuration
+        from public.method_configuration_versions v
+        join public.method_configuration_templates t on t.id = v.template_id
+        where t.template_key = 'hydration.liquid_taxonomy'
+          and v.activated_at is not null
+          and v.retired_at is null
+      ),
+      '{"liquid_kind":"water","hydration_class":"zero_calorie_other"}'::jsonb
+    )
+  $sql$,
+  '22023',
+  null,
+  'liquid snapshot boundary rejects a hydration class that disagrees with active taxonomy'
 );
 
 select isnt(
