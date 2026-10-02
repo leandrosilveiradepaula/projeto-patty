@@ -448,8 +448,18 @@ São bons primeiros candidatos porque hoje vivem apenas no runtime TypeScript/te
 - `lib/method/recognition.ts` não contém mais `2 g/kg`, `2 g/kg` e `50 g`; executa `method_engine_v1` recebido como configuração;
 - migration `20261001230751_seed_initial_method_templates.sql` materializa os quatro baselines como versões ativas com proveniência de sistema;
 - golden tests reproduzem o baseline atual e demonstram alteração de parâmetros sem mudança de código;
-- o limite de proteína com maior teor de gordura continua fora desta etapa e permanece hardcoded até a próxima migração;
+- o limite de proteína com maior teor de gordura foi isolado para a etapa seguinte e, no PR #255, passou a usar `method_engine_v1` com ratio e `ceil` declarados na configuração;
 - a migration foi aplicada no Supabase SaaS em 2026-10-01; os quatro templates estão ativos como `system_baseline`.
+
+### ESTADO DA ETAPA 3 — PR #255 / NÃO APLICADO
+
+- `lib/method/doses.ts` não contém mais a fórmula profissional do limite de proteína com maior teor de gordura;
+- a regra é executada pelo engine como `ceil(total_protein_doses * higher_fat_ratio)`;
+- o baseline atual usa `higher_fat_ratio = 0.5`;
+- tanto o coeficiente quanto o arredondamento pertencem à configuração versionada;
+- migration `20261001235018_seed_higher_fat_protein_limit_template.sql` materializa `nutrition.protein.higher_fat_daily_limit`;
+- a migration ainda não foi aplicada no Supabase SaaS;
+- hidratação permanece fora deste escopo.
 
 ## RLS e autorização
 
