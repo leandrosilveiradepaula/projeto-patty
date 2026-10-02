@@ -50,6 +50,8 @@ jobs:
           test -f supabase/tests/database/method_configuration_initial_templates.test.sql
           test -f supabase/tests/database/method_configuration_higher_fat_protein_limit.test.sql
           test -f supabase/tests/database/method_configuration_hydration.test.sql
+          test -f supabase/migrations/20261002195239_seed_next_method_templates_batch_a.sql
+          test -f supabase/tests/database/method_configuration_batch_a.test.sql
           echo "Committed method configuration migrations and pgTAP files found."
 
       - name: Start local Supabase
@@ -72,6 +74,9 @@ jobs:
 
       - name: Run hydration compatibility pgTAP
         run: npx supabase test db supabase/tests/database/method_configuration_hydration.test.sql
+
+      - name: Run Batch A method configuration pgTAP
+        run: npx supabase test db supabase/tests/database/method_configuration_batch_a.test.sql
 
       - name: Stop local Supabase
         if: always()
