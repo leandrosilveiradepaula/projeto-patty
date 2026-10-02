@@ -149,36 +149,33 @@ Questões ainda abertas continuam abertas: recálculo após mudança de peso, pr
 
 ### HR-006 — Conversão de legumes e referências no validador da fonte alimentar
 
-**Classificação:** MIGRAR / FONTE HISTÓRICA, sem publicar automaticamente.
+**Classificação:** EM MIGRAÇÃO — validador parametrizado no PR #259; templates/catálogos ativos ainda pendentes.
 
 Arquivo:
 
 - `lib/content/food-equivalent-source.ts`.
 
-Hardcodes de reconciliação:
+Estado no PR #259:
 
-- proteína `15`;
-- carboidrato `12`;
-- gordura `6`;
-- referência histórica `vegetable_grams = 6`;
-- `2` doses de legumes por `1` dose de carboidrato;
-- itens históricos não livres são esperados com marcador de `1` dose.
+- o validador deixa de embutir referências numéricas de proteína, carboidrato, gordura, legumes e marcador histórico de dose;
+- todas essas referências entram explicitamente como contexto de reconciliação;
+- golden tests preservam a fonte histórica atual e demonstram uma referência alternativa sem mudança de runtime;
+- referências inválidas falham fechadas;
+- a fonte continua obrigatoriamente `publishable: false`;
+- nenhuma quantidade histórica foi promovida a catálogo ativo ou regra global.
 
-Fonte:
+Classificação preservada:
 
-- `docs/source_drafts/food_equivalent_catalog_historical_source.json`.
+- a regra confirmada de `2 doses de legumes = 1 dose de carboidrato` ainda precisa virar configuração versionada própria;
+- referências de proteína/carboidrato/gordura devem futuramente vir dos templates de doses já versionados;
+- `vegetable_grams` e o marcador de dose dos itens permanecem referências históricas de reconciliação enquanto não houver confirmação profissional específica.
 
-Importante:
+Ainda pendente:
 
-- esse validador é fail-closed e a fonte não está publicada;
-- `vegetable_grams = 6` e quantidades individuais do catálogo não devem ser promovidas a regra global sem classificação/confirmação;
-- a regra confirmada de `2 doses de legumes = 1 dose de carboidrato` deve virar configuração versionada;
-- referências de macro devem ser lidas da mesma configuração de doses, evitando duplicação.
-
-Destino esperado:
-
-- catálogo versionado de equivalentes separado das fórmulas;
-- validação da fonte contra uma versão de template explicitamente escolhida, não contra números embutidos no código.
+- resolver as referências a partir de versões concretas de templates em vez de fixture explícita;
+- criar template versionado da conversão confirmada de legumes;
+- migrar catálogo histórico para catálogo versionado somente após revisão/aprovação;
+- não publicar automaticamente a fonte Excel.
 
 ### HR-007 — Tipos de Avaliação Básica/Completa
 
