@@ -71,26 +71,29 @@ export type OperationalPendingFactsInput = {
   aiExecutions: PendingAiExecution[];
   anamnesisSubmissions: PendingAnamnesisSubmission[];
   assessments: PendingAssessment[];
+  clarificationReminderIntervalHours: number;
   clarificationRequests: PendingClarificationRequest[];
   protocolVersions: PendingProtocolVersion[];
   referenceNow?: string;
 };
 
-const CLARIFICATION_REMINDER_INTERVAL_MS = 24 * 60 * 60 * 1000;
-
-export function clarificationFirstReminderDueAt(createdAt: string) {
+function clarificationFirstReminderDueAt(
+  createdAt: string,
+  intervalHours: number,
+) {
   return new Date(
-    new Date(createdAt).getTime() + CLARIFICATION_REMINDER_INTERVAL_MS,
+    new Date(createdAt).getTime() + intervalHours * 60 * 60 * 1000,
   ).toISOString();
 }
 
-export function isClarificationFirstReminderDue(
+function isClarificationFirstReminderDue(
   createdAt: string,
   referenceNow: string,
+  intervalHours: number,
 ) {
   return (
     new Date(referenceNow).getTime() >=
-    new Date(createdAt).getTime() + CLARIFICATION_REMINDER_INTERVAL_MS
+    new Date(createdAt).getTime() + intervalHours * 60 * 60 * 1000
   );
 }
 
@@ -150,9 +153,11 @@ export function buildOperationalPendingItems(
       const firstReminderDue = isClarificationFirstReminderDue(
         request.createdAt,
         referenceNow,
+        input.clarificationReminderIntervalHours,
       );
       const firstReminderDueAt = clarificationFirstReminderDueAt(
         request.createdAt,
+        input.clarificationReminderIntervalHours,
       );
 
       items.push({
@@ -160,13 +165,13 @@ export function buildOperationalPendingItems(
         clientLabel: request.clientLabel,
         createdAt: request.createdAt,
         description: firstReminderDue
-          ? `O pedido continua sem resposta. O primeiro marco de 24 horas ocorreu em ${firstReminderDueAt}. Isso indica apenas que um lembrete está devido; não prova que qualquer mensagem foi enviada, pois o canal ainda não foi definido.`
+          ? `O pedido continua sem resposta. O primeiro marco de ${input.clarificationReminderIntervalHours} horas ocorreu em ${firstReminderDueAt}. Isso indica apenas que um lembrete está devido; não prova que qualquer mensagem foi enviada, pois o canal ainda não foi definido.`
           : `Existe um pedido de esclarecimento sem resposta registrada pela cliente. O primeiro marco de lembrete é ${firstReminderDueAt}.`,
         href: `/admin/anamneses/${request.submissionId}/esclarecimentos`,
         id: `clarification:${request.id}`,
         kind: "clarification_without_response",
         statusLabel: firstReminderDue
-          ? "Lembrete de 24h devido"
+          ? `Lembrete de ${input.clarificationReminderIntervalHours}h devido`
           : "Sem resposta",
         title: "Esclarecimento aguardando resposta",
       });
