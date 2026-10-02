@@ -8,7 +8,7 @@ Registrar onde o runtime atual ainda contém valores, fórmulas, catálogos ou w
 
 Baseline auditada:
 
-- `master`: `f5e0267931bca09b99ab6263460b70b205401b70`;
+- `master`: `55d4d8d7f974b4f82aeae76aad77a42bca7950ab`;
 - PR documental de parametrização: #245;
 - nenhuma migration aplicada deve ser editada;
 - este inventário não autoriza alteração de regra profissional nem ativação automática de questão ainda aberta.
@@ -168,26 +168,28 @@ Ainda pendente:
 
 ### HR-007 — Tipos de Avaliação Básica/Completa
 
-**Classificação:** MIGRAR COM COMPATIBILIDADE.
+**Classificação:** EM PREPARAÇÃO — catálogo configurável de compatibilidade mergeado no PR #265; consumidores e persistência ainda legados.
 
-Hardcodes ativos:
+Estado no `master`:
 
-- `lib/evaluations/assessment-draft.ts` fixa apenas:
-  - `fortnightly -> Básica`;
-  - `monthly -> Completa`;
-- `supabase/migrations/20260927002227_create_assessment_draft_lifecycle.sql` restringe `assessment_kind` a `fortnightly|monthly`;
-- policies da mesma migration repetem essa allowlist.
+- `lib/evaluations/assessment-kind-catalog.ts` recebe configuração explícita para mapear código histórico -> chave semântica -> label;
+- os códigos `fortnightly` e `monthly` aparecem apenas como baseline nos golden tests do novo helper;
+- o helper não interpreta os códigos como calendário/cadência;
+- códigos desconhecidos e catálogos inconsistentes falham fechados.
 
-Estado:
+Compatibilidade ainda ativa:
 
-- os identificadores técnicos são históricos e já existem no SaaS;
-- a migration aplicada não deve ser alterada.
+- `lib/evaluations/assessment-draft.ts` mantém o mapeamento legado usado pelos consumidores atuais;
+- `supabase/migrations/20260927002227_create_assessment_draft_lifecycle.sql` continua restringindo `assessment_kind` a `fortnightly|monthly`;
+- a migration aplicada não será alterada.
 
-Destino esperado:
+Ainda pendente para marcar como migrado:
 
-- catálogo/versionamento de tipos de avaliação;
-- manter compatibilidade com códigos históricos;
-- criar migration nova caso o schema precise deixar de limitar tipos por CHECK fixo.
+- persistir catálogo/versionamento;
+- resolver a versão ativa server-side;
+- migrar consumidores do mapeamento legado;
+- criar migration nova somente se um novo tipo real exigir relaxar o CHECK;
+- preservar indefinidamente os códigos históricos nas linhas existentes.
 
 ### HR-008 — Catálogo obrigatório da Avaliação Básica/Completa
 
@@ -244,28 +246,29 @@ Ainda pendente para marcar como migrado:
 
 ### HR-010 — Taxonomia de líquidos do check-in
 
-**Classificação:** MIGRAR COM COMPATIBILIDADE como taxonomia do método.
+**Classificação:** EM PREPARAÇÃO — parser de catálogo configurável mergeado no PR #264; escrita operacional e CHECK histórico permanecem legados.
 
-Hardcodes ativos:
+Estado no `master`:
 
-- `app/cliente/checkins/actions.ts` aceita somente `water` e `zero_calorie_other`;
-- `supabase/migrations/20260930132221_create_client_checkins.sql` contém CHECK com os mesmos dois valores;
-- UI traduz os dois tipos diretamente.
+- `lib/method/liquid-taxonomy.ts` recebe catálogo explícito de tipos elegíveis;
+- cada tipo possui chave, label e classe `pure_water` ou `zero_calorie_other`;
+- os códigos históricos `water` e `zero_calorie_other` existem apenas como baseline nos golden tests do novo helper;
+- tipo ausente, chave duplicada, classe desconhecida ou campos que tentem introduzir proporção falham fechados;
+- nenhuma proporção mínima de água pura foi inventada.
 
-Regra atual confirmada:
+Compatibilidade ainda ativa:
 
-- maior parte em água pura;
-- restante pode ser complementado em menor quantidade por líquidos zero calorias.
+- `app/cliente/checkins/actions.ts` continua aceitando somente `water` e `zero_calorie_other`;
+- `supabase/migrations/20260930132221_create_client_checkins.sql` mantém o CHECK histórico;
+- a UI atual ainda traduz diretamente esses códigos.
 
-Questão aberta:
+Ainda pendente para marcar como migrado:
 
-- proporção mínima/exata de água pura.
-
-Destino esperado:
-
+- persistir catálogo/versionamento;
+- resolver catálogo ativo server-side;
+- migrar validação e exibição do check-in;
 - preservar valores históricos;
-- permitir catálogo/configuração de tipos elegíveis sem alterar a regra de proporção ainda aberta;
-- qualquer flexibilização de CHECK exige migration nova.
+- criar migration nova somente se o catálogo aprovado exigir novos códigos persistidos.
 
 ### HR-011 — Nomenclatura legada de Avaliações em UI
 
