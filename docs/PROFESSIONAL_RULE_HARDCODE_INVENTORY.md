@@ -8,7 +8,7 @@ Registrar onde o runtime atual ainda contém valores, fórmulas, catálogos ou w
 
 Baseline auditada:
 
-- `master`: `a274b7fafb2e3aa32276833c38f583a132feba73`;
+- `master`: `f5e0267931bca09b99ab6263460b70b205401b70`;
 - PR documental de parametrização: #245;
 - nenhuma migration aplicada deve ser editada;
 - este inventário não autoriza alteração de regra profissional nem ativação automática de questão ainda aberta.
@@ -220,31 +220,27 @@ A regra de calendário para âncoras 29/30/31 continua aberta e não deve ser in
 
 ### HR-009 — Lembrete de esclarecimento em 24 horas
 
-**Classificação:** MIGRAR.
+**Classificação:** EM PREPARAÇÃO — helper configurável mergeado no PR #260; integração operacional ainda pendente.
 
-Arquivo ativo:
+Estado no `master`:
 
-- `lib/operations/pending.ts`.
+- `lib/operations/clarification-reminder.ts` recebe configuração escalar explícita com unidade `hour`;
+- golden tests reproduzem o baseline atual de 24 horas e demonstram intervalo alternativo sem mudança de runtime;
+- não existe fallback silencioso para 24 horas no helper configurável;
+- canal e envio real continuam separados e não foram inferidos.
 
-Hardcode atual:
+Hardcode legado ainda ativo:
 
-- `CLARIFICATION_REMINDER_INTERVAL_MS = 24 * 60 * 60 * 1000`;
-- textos de UI também dizem `24 horas`/`24h`.
+- `lib/operations/pending.ts` ainda contém `CLARIFICATION_REMINDER_INTERVAL_MS = 24 * 60 * 60 * 1000`;
+- textos operacionais ainda dizem `24 horas`/`24h`.
 
-Acoplamento de teste:
+Ainda pendente para marcar como migrado:
 
-- `lib/operations/pending.test.ts`.
-
-Regra atual confirmada:
-
-- enquanto aguarda resposta da cliente, deve existir lembrete a cada 24 horas.
-
-Destino esperado:
-
-- intervalo configurável/versionado;
-- cálculo de due date recebe o parâmetro resolvido;
-- canal e execução real continuam separados e ainda abertos;
-- não presumir envio apenas porque o marco ficou devido.
+- criar template/versionamento ativo para o intervalo;
+- resolver a versão aplicável server-side;
+- passar o intervalo resolvido ao builder operacional;
+- substituir textos fixos por texto derivado da configuração quando aplicável;
+- manter a distinção entre `lembrete devido` e `lembrete enviado`.
 
 ### HR-010 — Taxonomia de líquidos do check-in
 
@@ -286,31 +282,26 @@ Estado no PR #258:
 - os códigos históricos internos `fortnightly` / `monthly` permanecem inalterados para compatibilidade;
 - schema, RLS, lifecycle, catálogo obrigatório e regras de calendário não foram alterados.
 
-Critério para marcar como resolvido no `master`: PR #258 mergeado com CI verde.
+**Estado no `master`: RESOLVIDO.** O PR #258 foi mergeado com CI verde; a linguagem visível usa Básica/Completa e os códigos históricos internos permanecem preservados apenas por compatibilidade.
 
 ### HR-012 — Estrutura do Carb Cycle implicitamente limitada a Low1/Low2/High
 
-**Classificação:** MIGRAR.
+**Classificação:** EM MIGRAÇÃO — estrutura de runtime generalizada no PR #257; persistência/configuração ativa ainda pendente.
 
-Arquivo:
+Estado no `master`:
 
-- `lib/method/carb-cycle.ts`.
+- o runtime aceita coleção ordenada de steps configurados;
+- labels/roles e pertencimento à média vêm da configuração;
+- o cálculo da média não depende mais de exatamente três steps;
+- golden tests preservam Low1/Low2/High somente como baseline atual de equivalência;
+- nenhuma Fase 4/5/6 foi inventada.
 
-O contrato `CarbCycleMacroValues` expõe campos fixos:
+Ainda pendente:
 
-- `low1Grams`;
-- `low2Grams`;
-- `highGrams`;
-- `linearAverageGrams`.
-
-Isso impede representar por dados uma sequência diferente sem mudar TypeScript.
-
-Destino esperado:
-
-- coleção ordenada de steps configurados;
-- labels/roles versionados;
-- resultados por step;
-- helpers de compatibilidade enquanto telas antigas consumirem Low1/Low2/High.
+- materializar os templates versionados no banco;
+- resolver a configuração ativa server-side;
+- criar snapshots dos steps/coeficientes usados;
+- manter adapters de compatibilidade apenas enquanto consumidores antigos precisarem deles.
 
 ## Fontes já estruturadas que não devem ser confundidas com configuração ativa
 
