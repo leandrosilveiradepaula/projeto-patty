@@ -43,6 +43,9 @@ jobs:
       - name: Deterministic method tests
         run: npm run test:method
 
+      - name: Configuration schema registry tests
+        run: npm run test:configuration
+
       - name: Protocol lifecycle tests
         run: npm run test:protocol
 

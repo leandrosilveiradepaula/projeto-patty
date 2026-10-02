@@ -7,10 +7,9 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-export function parseScalarParameterConfiguration<Unit extends string>(
+export function parseScalarParameterShapeConfiguration(
   value: unknown,
-  expectedUnit: Unit,
-): ScalarParameterConfiguration<Unit> {
+): ScalarParameterConfiguration {
   if (!isRecord(value)) {
     throw new TypeError("scalar parameter configuration must be an object");
   }
@@ -30,14 +29,32 @@ export function parseScalarParameterConfiguration<Unit extends string>(
     throw new TypeError("scalar parameter value must be a finite number");
   }
 
-  if (value.unit !== expectedUnit) {
+  if (typeof value.unit !== "string" || value.unit.trim().length === 0) {
+    throw new TypeError(
+      "scalar parameter unit must be a non-blank string",
+    );
+  }
+
+  return {
+    value: value.value,
+    unit: value.unit,
+  };
+}
+
+export function parseScalarParameterConfiguration<Unit extends string>(
+  value: unknown,
+  expectedUnit: Unit,
+): ScalarParameterConfiguration<Unit> {
+  const configuration = parseScalarParameterShapeConfiguration(value);
+
+  if (configuration.unit !== expectedUnit) {
     throw new TypeError(
       "scalar parameter configuration has an unexpected unit",
     );
   }
 
   return {
-    value: value.value,
+    value: configuration.value,
     unit: expectedUnit,
   };
 }
