@@ -219,7 +219,7 @@ Ainda pendente:
 
 ### HR-008 — Catálogo obrigatório da Avaliação Básica/Completa
 
-**Classificação:** EM MIGRAÇÃO — definições versionadas aplicadas no Supabase SaaS pelo Lote B; finalização passa a consumir a definição ativa neste PR.
+**Classificação:** EM MIGRAÇÃO — definições versionadas aplicadas no Supabase SaaS; finalização administrativa já consome a definição ativa e passa a persistir snapshot explícito neste PR.
 
 Estado atual:
 
@@ -227,14 +227,14 @@ Estado atual:
 - a versão ativa define medidas obrigatórias, labels, aliases e requisito opcional de foto;
 - a página de detalhe apresenta os requisitos da definição ativa em vez de repetir uma lista fixa;
 - a finalização usa `buildConfigurableAssessmentReadiness` com a definição ativa;
+- a persistência passa por `finalize_assessment_from_method_snapshot`, criando snapshot set + snapshots de catálogo/definição na mesma transação da finalização;
 - aliases/configurações inválidas falham fechados;
 - nenhuma regra de calendário/cadência foi inferida;
 - códigos históricos internos continuam compatíveis.
 
 Ainda pendente para encerrar completamente:
 
-- persistir ou referenciar explicitamente na avaliação a versão de catálogo/definição usada na finalização, para auditoria direta sem depender apenas da linha do tempo de ativação;
-- decidir o mecanismo de snapshot/referência antes de automatizar qualquer decisão posterior baseada nessas definições;
+- aplicar uma migration de hardening depois do consumer switch para exigir snapshot em novas finalizações sem invalidar históricos;
 - remover o helper legado de prontidão somente depois de confirmar que nenhum consumidor restante depende dele.
 
 A regra de calendário para âncoras 29/30/31 continua aberta e não deve ser inventada.
@@ -266,7 +266,7 @@ Ainda pendente para marcar como migrado:
 
 ### HR-010 — Taxonomia de líquidos do check-in
 
-**Classificação:** EM MIGRAÇÃO — catálogo versionado aplicado no Supabase SaaS pelo Lote B; validação e exibição operacionais passam a consumir a taxonomia ativa neste PR.
+**Classificação:** EM MIGRAÇÃO — catálogo versionado aplicado no Supabase SaaS; validação/exibição já consomem a taxonomia ativa e novos eventos passam a persistir snapshot explícito neste PR.
 
 Estado atual:
 
@@ -274,6 +274,7 @@ Estado atual:
 - `lib/method/liquid-taxonomy-loader.ts` resolve exatamente uma versão ativa sob RLS, sem service role;
 - cada tipo possui chave, label e classe `pure_water` ou `zero_calorie_other`;
 - a ação da cliente valida o tipo contra a taxonomia ativa antes da escrita;
+- a escrita passa por `create_liquid_intake_event_from_method_snapshot`, criando snapshot set + snapshot da taxonomia na mesma transação do evento;
 - páginas de cliente/admin usam labels e classificação da taxonomia ativa em vez de traduzir diretamente os códigos;
 - a UI deixa explícito que não existe proporção mínima automática entre tipos;
 - nenhuma proporção mínima de água pura foi inventada.
@@ -287,7 +288,7 @@ Compatibilidade preservada:
 
 Ainda pendente para encerrar completamente:
 
-- persistir ou referenciar a versão de taxonomia aplicável aos eventos caso seja necessária auditoria histórica independente da linha do tempo de ativação;
+- aplicar uma migration de hardening depois do consumer switch para exigir snapshot em novos eventos sem invalidar históricos;
 - criar migration nova somente se o catálogo aprovado exigir novos códigos persistidos.
 
 ### HR-011 — Nomenclatura legada de Avaliações em UI

@@ -124,7 +124,7 @@ export async function listAccessibleClientLiquidIntakeEvents(
   const supabase = await createClient();
   let query = supabase
     .from("client_liquid_intake_events")
-    .select("id, client_id, recorded_by_profile_id, amount_ml, liquid_kind, recorded_at")
+    .select("id, client_id, recorded_by_profile_id, amount_ml, liquid_kind, method_configuration_snapshot_set_id, recorded_at")
     .eq("client_id", clientId)
     .order("recorded_at", { ascending: false })
     .order("id", { ascending: false });
@@ -134,31 +134,6 @@ export async function listAccessibleClientLiquidIntakeEvents(
   }
 
   const { data, error } = await query;
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
-}
-
-export async function createCurrentClientLiquidIntakeEvent(input: {
-  amountMl: number;
-  clientId: string;
-  liquidKind: "water" | "zero_calorie_other";
-  recordedByProfileId: string;
-}) {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("client_liquid_intake_events")
-    .insert({
-      amount_ml: input.amountMl,
-      client_id: input.clientId,
-      liquid_kind: input.liquidKind,
-      recorded_by_profile_id: input.recordedByProfileId,
-    })
-    .select("id, client_id, recorded_by_profile_id, amount_ml, liquid_kind, recorded_at")
-    .single();
 
   if (error) {
     throw error;
@@ -701,7 +676,7 @@ export async function listAccessibleClientAssessments() {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("client_assessments")
-    .select("id, client_id, assessed_at, assessment_kind, created_by_profile_id, finalized_at, finalized_by_profile_id, clients(id, profiles(display_name))")
+    .select("id, client_id, assessed_at, assessment_kind, method_configuration_snapshot_set_id, created_by_profile_id, finalized_at, finalized_by_profile_id, clients(id, profiles(display_name))")
     .order("assessed_at", { ascending: false });
 
   if (error) {
@@ -715,7 +690,7 @@ export async function getAccessibleClientAssessment(assessmentId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("client_assessments")
-    .select("id, client_id, assessed_at, assessment_kind, created_by_profile_id, finalized_at, finalized_by_profile_id, clients(id, profiles(display_name))")
+    .select("id, client_id, assessed_at, assessment_kind, method_configuration_snapshot_set_id, created_by_profile_id, finalized_at, finalized_by_profile_id, clients(id, profiles(display_name))")
     .eq("id", assessmentId)
     .maybeSingle();
 
@@ -742,7 +717,7 @@ export async function createAccessibleClientAssessment(input: {
       created_by_profile_id: input.createdByProfileId,
     })
     .select(
-      "id, client_id, assessed_at, assessment_kind, created_by_profile_id, finalized_at, finalized_by_profile_id",
+      "id, client_id, assessed_at, assessment_kind, method_configuration_snapshot_set_id, created_by_profile_id, finalized_at, finalized_by_profile_id",
     )
     .single();
 
@@ -768,32 +743,7 @@ export async function updateAccessibleClientAssessmentDraft(input: {
     .eq("id", input.assessmentId)
     .is("finalized_at", null)
     .select(
-      "id, client_id, assessed_at, assessment_kind, created_by_profile_id, finalized_at, finalized_by_profile_id",
-    )
-    .single();
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
-}
-
-export async function finalizeAccessibleClientAssessment(input: {
-  assessmentId: string;
-  finalizedByProfileId: string;
-}) {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("client_assessments")
-    .update({
-      finalized_at: new Date().toISOString(),
-      finalized_by_profile_id: input.finalizedByProfileId,
-    })
-    .eq("id", input.assessmentId)
-    .is("finalized_at", null)
-    .select(
-      "id, client_id, assessed_at, assessment_kind, created_by_profile_id, finalized_at, finalized_by_profile_id",
+      "id, client_id, assessed_at, assessment_kind, method_configuration_snapshot_set_id, created_by_profile_id, finalized_at, finalized_by_profile_id",
     )
     .single();
 
@@ -887,7 +837,7 @@ export async function listAccessibleAssessmentsForClient(clientId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("client_assessments")
-    .select("id, client_id, assessed_at, assessment_kind, created_by_profile_id, finalized_at, finalized_by_profile_id")
+    .select("id, client_id, assessed_at, assessment_kind, method_configuration_snapshot_set_id, created_by_profile_id, finalized_at, finalized_by_profile_id")
     .eq("client_id", clientId)
     .order("assessed_at", { ascending: false })
     .order("id", { ascending: true });

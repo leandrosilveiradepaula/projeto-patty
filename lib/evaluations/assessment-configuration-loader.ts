@@ -96,6 +96,7 @@ export type SupportedAssessmentKindOption = {
 };
 
 export async function loadSupportedAssessmentKindOptions(): Promise<{
+  configuration: AssessmentKindCatalogConfiguration;
   options: SupportedAssessmentKindOption[];
   templateId: string;
   templateVersionId: string;
@@ -129,6 +130,7 @@ export async function loadSupportedAssessmentKindOptions(): Promise<{
   }
 
   return {
+    configuration: loaded.configuration,
     options,
     templateId: loaded.templateId,
     templateVersionId: loaded.templateVersionId,

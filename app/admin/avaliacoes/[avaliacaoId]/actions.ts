@@ -12,13 +12,13 @@ import {
   parseMeasurementDraft,
 } from "@/lib/evaluations/assessment-draft";
 import { buildConfigurableAssessmentReadiness } from "@/lib/evaluations/assessment-definition";
+import { finalizeAssessmentWithMethodSnapshot } from "@/lib/evaluations/assessment-persistence";
 import { createAccessibleAssessmentMeasurementCorrection } from "@/lib/evaluations/measurement-correction-store";
 import { isProfessionalDecision } from "@/lib/follow-up/professional-decisions";
 import { requireRole } from "@/lib/supabase/auth";
 import {
   createAccessibleProfessionalFollowUp,
   deleteAccessibleAssessmentMeasurement,
-  finalizeAccessibleClientAssessment,
   getAccessibleClientAssessment,
   linkAccessibleAssessmentPhoto,
   listAccessibleAssessmentMeasurements,
@@ -430,9 +430,22 @@ export async function finalizeAssessmentAction(
   }
 
   try {
-    await finalizeAccessibleClientAssessment({
+    await finalizeAssessmentWithMethodSnapshot({
       assessmentId: assessment.id,
       finalizedByProfileId: context.profileId,
+      catalogTemplateVersionId: assessmentKinds.templateVersionId,
+      catalogConfiguration: assessmentKinds.configuration,
+      catalogResultValues: {
+        historical_code: selectedKind.historicalCode,
+        semantic_key: selectedKind.semanticKey,
+        label: selectedKind.label,
+      },
+      definitionTemplateVersionId: definition.templateVersionId,
+      definitionConfiguration: definition.configuration,
+      definitionResultValues: {
+        kind_key: selectedKind.semanticKey,
+        can_finalize: readiness.canFinalizeDeterministically,
+      },
     });
   } catch {
     return {

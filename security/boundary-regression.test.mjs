@@ -862,6 +862,55 @@ test("liquid taxonomy loader stays server-only and fail-closed", async () => {
   );
 });
 
+test("assessment and liquid consumers use snapshot persistence boundaries", async () => {
+  const assessmentAction = await readFile(
+    path.join(ROOT, "app", "admin", "avaliacoes", "[avaliacaoId]", "actions.ts"),
+    "utf8",
+  );
+  const liquidAction = await readFile(
+    path.join(ROOT, "app", "cliente", "checkins", "actions.ts"),
+    "utf8",
+  );
+  const assessmentPersistence = await readFile(
+    path.join(ROOT, "lib", "evaluations", "assessment-persistence.ts"),
+    "utf8",
+  );
+  const liquidPersistence = await readFile(
+    path.join(ROOT, "lib", "method", "liquid-persistence.ts"),
+    "utf8",
+  );
+  const dataAccess = await readFile(
+    path.join(ROOT, "lib", "supabase", "data-access.ts"),
+    "utf8",
+  );
+
+  assert.match(assessmentAction, /finalizeAssessmentWithMethodSnapshot/);
+  assert.match(liquidAction, /createLiquidIntakeWithMethodSnapshot/);
+
+  for (const source of [assessmentPersistence, liquidPersistence]) {
+    assert.match(source, /import "server-only"/);
+    assert.match(source, /createAdminClient/);
+  }
+
+  assert.match(
+    assessmentPersistence,
+    /finalize_assessment_from_method_snapshot/,
+  );
+  assert.match(
+    liquidPersistence,
+    /create_liquid_intake_event_from_method_snapshot/,
+  );
+
+  assert.doesNotMatch(
+    dataAccess,
+    /function finalizeAccessibleClientAssessment/,
+  );
+  assert.doesNotMatch(
+    dataAccess,
+    /function createCurrentClientLiquidIntakeEvent/,
+  );
+});
+
 test("liquid check-in consumers resolve the active taxonomy without inventing ratios", async () => {
   const loader = await readFile(
     path.join(ROOT, "lib", "method", "liquid-taxonomy-loader.ts"),
