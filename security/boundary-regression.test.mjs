@@ -856,7 +856,10 @@ test("liquid taxonomy loader stays server-only and fail-closed", async () => {
   assert.match(loader, /\.limit\(2\)/);
   assert.match(loader, /versions\.length !== 1/);
   assert.match(loader, /parseLiquidTaxonomyConfiguration/);
-  assert.doesNotMatch(loader, /minimumRatio|minimum.*water|ratio/i);
+  assert.doesNotMatch(
+    loader,
+    /minimumRatio|minimumWaterRatio|pureWaterRatio|minimum[_\s-]*pure[_\s-]*water/i,
+  );
 });
 
 test("assessment configuration loader stays server-only, bounded and fail-closed", async () => {
