@@ -842,9 +842,13 @@ test("hydration persistence boundary remains service-role-only and assignment-sc
 });
 
 
-test("configured hydration stays disconnected until the production gate is released", async () => {
+test("configured hydration uses the reviewed server-only persistence boundary", async () => {
   const loader = await readFile(
     path.join(ROOT, "lib", "method", "hydration-loader.ts"),
+    "utf8",
+  );
+  const persistence = await readFile(
+    path.join(ROOT, "lib", "method", "hydration-persistence.ts"),
     "utf8",
   );
   const adminAction = await readFile(
@@ -868,11 +872,23 @@ test("configured hydration stays disconnected until the production gate is relea
   assert.match(loader, /protocol_version_id/);
   assert.match(loader, /\.limit\(2\)/);
 
-  assert.match(adminAction, /createAccessibleClientHydrationTarget/);
-  assert.doesNotMatch(adminAction, /loadHydrationTargetResolution/);
-  assert.doesNotMatch(adminAction, /create_hydration_target_from_method_snapshot/);
+  assert.match(persistence, /^import ["']server-only["'];/m);
+  assert.match(persistence, /createAdminClient/);
+  assert.match(
+    persistence,
+    /\.rpc\(\s*["']create_hydration_target_from_method_snapshot["']/,
+  );
+  assert.match(persistence, /p_resolved_configuration/);
+  assert.match(persistence, /p_result_values/);
+  assert.match(persistence, /p_template_version_id/);
+  assert.match(persistence, /p_override_version_id/);
+
+  assert.match(adminAction, /requireRole\(["']admin["']\)/);
+  assert.match(adminAction, /getAccessibleClient/);
+  assert.match(adminAction, /loadHydrationTargetResolution/);
+  assert.match(adminAction, /persistConfiguredHydrationTarget/);
   assert.doesNotMatch(adminAction, /createAdminClient/);
-  assert.doesNotMatch(adminAction, /method_configuration_snapshot/);
+  assert.doesNotMatch(adminAction, /createAccessibleClientHydrationTarget/);
 });
 
 

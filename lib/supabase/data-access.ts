@@ -105,33 +105,10 @@ export async function listAccessibleClientHydrationTargets(clientId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("client_hydration_targets")
-    .select("id, client_id, weight_kg, target_ml, method_key, created_by_profile_id, created_at")
+    .select("id, client_id, weight_kg, target_ml, resolved_target_ml, method_key, method_configuration_snapshot_set_id, created_by_profile_id, created_at")
     .eq("client_id", clientId)
     .order("created_at", { ascending: false })
     .order("id", { ascending: false });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
-}
-
-export async function createAccessibleClientHydrationTarget(input: {
-  clientId: string;
-  createdByProfileId: string;
-  weightKg: number;
-}) {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("client_hydration_targets")
-    .insert({
-      client_id: input.clientId,
-      created_by_profile_id: input.createdByProfileId,
-      weight_kg: input.weightKg,
-    })
-    .select("id, client_id, weight_kg, target_ml, method_key, created_by_profile_id, created_at")
-    .single();
 
   if (error) {
     throw error;

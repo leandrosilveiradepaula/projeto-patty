@@ -113,7 +113,7 @@ Estado no PR #253:
 
 ### HR-005 — Meta de líquidos
 
-**Classificação:** EM MIGRAÇÃO — migration aplicada no SaaS; troca operacional ainda pendente.
+**Classificação:** MIGRADO — configuração, snapshot e caminho operacional integrados com compatibilidade histórica.
 
 Hardcode histórico preservado:
 
@@ -137,11 +137,14 @@ Aplicado e validado no SaaS:
 - template `hydration.daily_target` ativo com baseline 60 mL/kg e `round`;
 - RPC `create_hydration_target_from_method_snapshot` presente como SECURITY INVOKER, sem EXECUTE para `anon`/`authenticated` e com EXECUTE para `service_role`.
 
-Ainda pendente para marcar como migrado:
+Integração operacional concluída:
 
-- integrar a boundary operacional atômica para resolver template/overrides, gerar snapshot e registrar a nova meta;
-- atualizar data access/UI para ler `resolved_target_ml` no modo configurado e `target_ml` apenas no legado;
-- remover da UI a repetição textual de `60 mL/kg` quando a nova fonte estiver ativa.
+- a action administrativa resolve o template ativo e eventual override client-scoped via loader sujeito à RLS;
+- a persistência privilegiada fica isolada em módulo `server-only` e chama exclusivamente a RPC atômica revisada;
+- snapshot, configuração resolvida, resultado e meta ficam vinculados na mesma operação;
+- data access/UI leem `resolved_target_ml` no modo configurado e mantêm `target_ml` somente como fallback de histórico legado;
+- a UI não repete mais `60 mL/kg` como regra fixa;
+- registros históricos `patty_60_ml_per_kg` permanecem intactos e legíveis.
 
 Questões abertas continuam abertas: recálculo após mudança de peso, proporção mínima de água pura, lembretes e correções.
 

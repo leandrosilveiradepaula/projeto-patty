@@ -58,7 +58,7 @@ O projeto `Projeto Corpo e Mente` permanece `ACTIVE_HEALTHY`. A verificacao dire
 
 O advisor de seguranca pos-apply nao apontou regressao da migration de hidratacao. Permanece o warning independente e ja conhecido de Leaked Password Protection desabilitado.
 
-A camada configuravel de hidratacao esta aplicada no banco, mas a troca operacional ainda nao esta concluida: data access/UI continuam no caminho legado ate a integracao server-side tipada, snapshot e leitura compativel serem validados. Nao remover o caminho historico nem promover questoes abertas de hidratacao a regra automatica.
+A camada configuravel de hidratacao esta aplicada e integrada ao fluxo administrativo: a resolucao usa template ativo e override client-scoped sob RLS; a persistencia privilegiada ocorre em boundary server-only pela RPC atomica; novas metas preservam snapshot da configuracao e resultado. A leitura usa `resolved_target_ml` para o modo configurado e `target_ml` apenas como compatibilidade do historico legado. O caminho historico permanece preservado e questoes abertas de hidratacao continuam sem automacao.
 
 
 
