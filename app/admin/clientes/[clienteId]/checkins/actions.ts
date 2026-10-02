@@ -3,10 +3,9 @@
 import { revalidatePath } from "next/cache";
 
 import { requireRole } from "@/lib/supabase/auth";
-import {
-  createAccessibleClientHydrationTarget,
-  getAccessibleClient,
-} from "@/lib/supabase/data-access";
+import { loadHydrationTargetResolution } from "@/lib/method/hydration-loader";
+import { persistConfiguredHydrationTarget } from "@/lib/method/hydration-persistence";
+import { getAccessibleClient } from "@/lib/supabase/data-access";
 import { isUuid } from "@/lib/validation/uuid";
 
 export async function createHydrationTargetAction(
@@ -35,9 +34,12 @@ export async function createHydrationTargetAction(
     throw new Error("Peso invalido");
   }
 
-  await createAccessibleClientHydrationTarget({
+  const resolution = await loadHydrationTargetResolution(clientId, weightKg);
+
+  await persistConfiguredHydrationTarget({
     clientId,
     createdByProfileId: auth.profileId,
+    resolution,
     weightKg,
   });
 
