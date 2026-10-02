@@ -862,6 +862,51 @@ test("liquid taxonomy loader stays server-only and fail-closed", async () => {
   );
 });
 
+test("liquid check-in consumers resolve the active taxonomy without inventing ratios", async () => {
+  const loader = await readFile(
+    path.join(ROOT, "lib", "method", "liquid-taxonomy-loader.ts"),
+    "utf8",
+  );
+  const clientAction = await readFile(
+    path.join(ROOT, "app", "cliente", "checkins", "actions.ts"),
+    "utf8",
+  );
+  const clientPage = await readFile(
+    path.join(ROOT, "app", "cliente", "checkins", "page.tsx"),
+    "utf8",
+  );
+  const adminPage = await readFile(
+    path.join(
+      ROOT,
+      "app",
+      "admin",
+      "clientes",
+      "[clienteId]",
+      "checkins",
+      "page.tsx",
+    ),
+    "utf8",
+  );
+
+  assert.match(loader, /loadSupportedLiquidTaxonomy/);
+  assert.match(loader, /unsupported by current persistence/);
+  assert.match(clientAction, /loadSupportedLiquidTaxonomy/);
+  assert.doesNotMatch(
+    clientAction,
+    /rawKind !== ["']water["'].*rawKind !== ["']zero_calorie_other["']/s,
+  );
+  assert.match(clientPage, /loadSupportedLiquidTaxonomy/);
+  assert.match(adminPage, /loadSupportedLiquidTaxonomy/);
+  assert.doesNotMatch(
+    clientPage,
+    /maior parte deve ser agua pura|menor quantidade/i,
+  );
+  assert.match(
+    clientPage,
+    /não aplica uma proporção mínima automática/i,
+  );
+});
+
 test("assessment configuration loader stays server-only, bounded and fail-closed", async () => {
   const loader = await readFile(
     path.join(ROOT, "lib", "evaluations", "assessment-configuration-loader.ts"),
