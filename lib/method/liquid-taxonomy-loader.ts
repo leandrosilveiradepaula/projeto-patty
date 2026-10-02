@@ -48,3 +48,38 @@ export async function loadLiquidTaxonomy(): Promise<LoadedLiquidTaxonomy> {
     templateVersionId: version.id,
   };
 }
+
+
+export type PersistedLiquidKindKey = "water" | "zero_calorie_other";
+
+export type SupportedPersistedLiquidKind = LiquidTaxonomyConfiguration["kinds"][number] & {
+  key: PersistedLiquidKindKey;
+};
+
+function isPersistedLiquidKindKey(value: string): value is PersistedLiquidKindKey {
+  return value === "water" || value === "zero_calorie_other";
+}
+
+export async function loadSupportedLiquidTaxonomy(): Promise<
+  LoadedLiquidTaxonomy & { kinds: SupportedPersistedLiquidKind[] }
+> {
+  const loaded = await loadLiquidTaxonomy();
+
+  const kinds = loaded.configuration.kinds.map((kind) => {
+    if (!isPersistedLiquidKindKey(kind.key)) {
+      throw new Error(
+        "Active liquid taxonomy contains a key unsupported by current persistence",
+      );
+    }
+
+    return {
+      ...kind,
+      key: kind.key,
+    };
+  });
+
+  return {
+    ...loaded,
+    kinds,
+  };
+}

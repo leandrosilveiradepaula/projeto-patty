@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/Card";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
+import { loadSupportedLiquidTaxonomy } from "@/lib/method/liquid-taxonomy-loader";
 import {
   getAccessibleClient,
   listAccessibleClientActivityCheckinEvents,
@@ -42,11 +43,17 @@ export default async function AdminClientCheckinsPage({ params }: PageProps) {
     notFound();
   }
 
-  const [targets, liquidEvents, activityEvents] = await Promise.all([
-    listAccessibleClientHydrationTargets(client.id),
-    listAccessibleClientLiquidIntakeEvents(client.id),
-    listAccessibleClientActivityCheckinEvents(client.id),
-  ]);
+  const [targets, liquidEvents, activityEvents, liquidTaxonomy] =
+    await Promise.all([
+      listAccessibleClientHydrationTargets(client.id),
+      listAccessibleClientLiquidIntakeEvents(client.id),
+      listAccessibleClientActivityCheckinEvents(client.id),
+      loadSupportedLiquidTaxonomy(),
+    ]);
+
+  const liquidLabelsByKey = new Map<string, string>(
+    liquidTaxonomy.kinds.map((kind) => [kind.key, kind.label]),
+  );
 
   const currentTarget = targets[0] ?? null;
   const currentTargetMl = currentTarget
@@ -124,7 +131,7 @@ export default async function AdminClientCheckinsPage({ params }: PageProps) {
                   <div className={styles.header}>
                     <strong>{formatMl(event.amount_ml)}</strong>
                     <Badge variant="neutral">
-                      {event.liquid_kind === "water" ? "Agua" : "Zero calorias"}
+                      {liquidLabelsByKey.get(event.liquid_kind) ?? "Tipo histórico"}
                     </Badge>
                   </div>
                   <p className={styles.description}>{formatDate(event.recorded_at)}</p>

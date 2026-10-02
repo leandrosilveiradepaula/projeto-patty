@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { loadSupportedLiquidTaxonomy } from "@/lib/method/liquid-taxonomy-loader";
 import { requireRole } from "@/lib/supabase/auth";
 import {
   createCurrentClientActivityCheckinEvent,
@@ -35,14 +36,20 @@ export async function addLiquidIntakeAction(formData: FormData) {
     throw new Error("Quantidade de liquido invalida");
   }
 
-  if (rawKind !== "water" && rawKind !== "zero_calorie_other") {
+  const taxonomy = await loadSupportedLiquidTaxonomy();
+  const liquidKind =
+    typeof rawKind === "string"
+      ? taxonomy.kinds.find((kind) => kind.key === rawKind) ?? null
+      : null;
+
+  if (!liquidKind) {
     throw new Error("Tipo de liquido invalido");
   }
 
   await createCurrentClientLiquidIntakeEvent({
     amountMl,
     clientId: client.id,
-    liquidKind: rawKind,
+    liquidKind: liquidKind.key,
     recordedByProfileId: auth.profileId,
   });
 

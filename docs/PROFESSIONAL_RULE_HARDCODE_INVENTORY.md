@@ -266,37 +266,29 @@ Ainda pendente para marcar como migrado:
 
 ### HR-010 — Taxonomia de líquidos do check-in
 
-**Classificação:** EM PREPARAÇÃO — parser de catálogo configurável mergeado no PR #264; escrita operacional e CHECK histórico permanecem legados.
+**Classificação:** EM MIGRAÇÃO — catálogo versionado aplicado no Supabase SaaS pelo Lote B; validação e exibição operacionais passam a consumir a taxonomia ativa neste PR.
 
-Estado no `master`:
+Estado atual:
 
-- `lib/method/liquid-taxonomy.ts` recebe catálogo explícito de tipos elegíveis;
-- `lib/method/liquid-taxonomy-loader.ts` prepara resolução server-side fail-closed do catálogo ativo, sob RLS e sem service role;
+- `hydration.liquid_taxonomy` está materializado e ativo no SaaS;
+- `lib/method/liquid-taxonomy-loader.ts` resolve exatamente uma versão ativa sob RLS, sem service role;
 - cada tipo possui chave, label e classe `pure_water` ou `zero_calorie_other`;
-- os códigos históricos `water` e `zero_calorie_other` existem apenas como baseline nos golden tests do novo helper;
-- tipo ausente, chave duplicada, classe desconhecida ou campos que tentem introduzir proporção falham fechados;
+- a ação da cliente valida o tipo contra a taxonomia ativa antes da escrita;
+- páginas de cliente/admin usam labels e classificação da taxonomia ativa em vez de traduzir diretamente os códigos;
+- a UI deixa explícito que não existe proporção mínima automática entre tipos;
 - nenhuma proporção mínima de água pura foi inventada.
 
-Compatibilidade ainda ativa:
+Compatibilidade preservada:
 
-- `app/cliente/checkins/actions.ts` continua aceitando somente `water` e `zero_calorie_other`;
-- `supabase/migrations/20260930132221_create_client_checkins.sql` mantém o CHECK histórico;
-- a UI atual ainda traduz diretamente esses códigos.
+- `supabase/migrations/20260930132221_create_client_checkins.sql` mantém o CHECK histórico `water|zero_calorie_other`;
+- o loader falha fechado se uma versão ativa introduzir uma chave que o schema atual ainda não consegue persistir;
+- uma nova chave profissional exigirá migration nova antes de poder ser gravada;
+- valores históricos permanecem append-only.
 
-Ainda pendente para marcar como migrado:
+Ainda pendente para encerrar completamente:
 
-- persistir catálogo/versionamento;
-- resolver catálogo ativo server-side;
-- migrar validação e exibição do check-in;
-- preservar valores históricos;
+- persistir ou referenciar a versão de taxonomia aplicável aos eventos caso seja necessária auditoria histórica independente da linha do tempo de ativação;
 - criar migration nova somente se o catálogo aprovado exigir novos códigos persistidos.
-
-Preparação de persistência:
-
-- `docs/LIQUID_TAXONOMY_CONFIGURATION_MIGRATION_PROPOSAL.sql` preserva somente os dois códigos históricos atuais;
-- `docs/LIQUID_TAXONOMY_CONFIGURATION_PGTAP_PROPOSAL.sql` cobre proveniência, versão ativa, chaves históricas e ausência de regra de proporção;
-- materialização oficial continua dependente de arquivo criado por `supabase migration new` e apply pelo workflow oficial;
-- consumidor atual permanece legado até o template existir e ser validado no SaaS.
 
 ### HR-011 — Nomenclatura legada de Avaliações em UI
 
@@ -317,21 +309,22 @@ Estado no PR #258:
 
 ### HR-012 — Estrutura do Carb Cycle implicitamente limitada a Low1/Low2/High
 
-**Classificação:** EM MIGRAÇÃO — estrutura de runtime generalizada no PR #257; persistência/configuração ativa ainda pendente.
+**Classificação:** EM MIGRAÇÃO — runtime generalizado e templates das Fases 1–3 materializados/ativos no SaaS pelo Lote B; integração automática ao protocolo permanece bloqueada por decisões abertas.
 
-Estado no `master`:
+Estado atual:
 
 - o runtime aceita coleção ordenada de steps configurados;
 - labels/roles e pertencimento à média vêm da configuração;
 - o cálculo da média não depende mais de exatamente três steps;
-- golden tests preservam Low1/Low2/High somente como baseline atual de equivalência;
-- nenhuma Fase 4/5/6 foi inventada.
+- `nutrition.carb_cycle.phase_1`, `phase_2` e `phase_3` estão ativos e versionados;
+- `lib/method/carb-cycle-loader.ts` resolve uma versão ativa fail-closed e permanece limitado às Fases 1–3;
+- nenhuma Fase 4/5/6 foi criada.
 
 Ainda pendente:
 
-- materializar os templates versionados no banco;
-- loader server-side fail-closed preparado em `lib/method/carb-cycle-loader.ts`, limitado às Fases 1–3; conectar consumidor somente após apply/validação no SaaS;
-- criar snapshots dos steps/coeficientes usados;
+- definir/documentar o mapeamento entre fases configuradas e etapas concretas do protocolo antes de qualquer consumer switch;
+- não automatizar progressão entre fases;
+- criar snapshots dos steps/coeficientes efetivamente usados em protocolos;
 - manter adapters de compatibilidade apenas enquanto consumidores antigos precisarem deles.
 
 ## Fontes já estruturadas que não devem ser confundidas com configuração ativa
