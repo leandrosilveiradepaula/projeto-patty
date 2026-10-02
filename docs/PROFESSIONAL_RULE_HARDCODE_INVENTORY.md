@@ -114,27 +114,32 @@ Estado no PR #253:
 
 ### HR-005 — Meta de líquidos
 
-**Classificação:** MIGRAR COM COMPATIBILIDADE.
+**Classificação:** EM MIGRAÇÃO — compatibilidade preparada no PR #256; aplicação no SaaS e troca operacional ainda pendentes.
 
-Hardcodes ativos:
+Hardcode histórico preservado:
 
-- `supabase/migrations/20260930132221_create_client_checkins.sql` materializou `target_ml = round(weight_kg * 60)`;
-- a mesma migration restringe `method_key = 'patty_60_ml_per_kg'`;
-- `app/admin/clientes/[clienteId]/checkins/page.tsx` exibe `60 mL/kg` e `peso x 60 mL`.
+- `supabase/migrations/20260930132221_create_client_checkins.sql` continua materializando `target_ml = round(weight_kg * 60)`;
+- a migration histórica permanece intacta e linhas antigas continuam legíveis com `method_key = 'patty_60_ml_per_kg'`.
 
-Estado:
+Estado no PR #256:
 
-- a migration já foi aplicada e **não deve ser alterada**;
-- metas já criadas são snapshots históricos e devem permanecer válidas.
+- `lib/method/hydration.ts` calcula a meta a partir de configuração `method_engine_v1`, sem coeficiente profissional embutido;
+- golden tests reproduzem 60 mL/kg, alteração de coeficiente e alteração de arredondamento sem mudança de runtime;
+- migration oficial `20261002005720_hydrate_client_targets_from_configuration.sql` cria o template `hydration.daily_target` com baseline 60 mL/kg e `round` explícito;
+- `client_hydration_targets` ganha caminho compatível com `method_configuration_snapshot_set_id` e `resolved_target_ml`;
+- o modo legado e o modo configurado são mutuamente consistentes por constraints;
+- o vínculo configurado aponta para snapshot set da mesma cliente;
+- a migration histórica não é editada nem reescrita.
 
-Destino esperado:
+Ainda pendente para marcar como migrado:
 
-- migration nova para separar definição/configuração da fórmula do snapshot calculado;
-- template inicial com `60 mL/kg/dia`;
-- cada nova meta registra template/versão, peso usado, parâmetros resolvidos e resultado;
-- UI lê a configuração/snapshot em vez de repetir `60`.
+- aplicar primeiro a migration anterior `20261001235018` e validar seu template no SaaS;
+- somente depois aplicar `20261002005720`;
+- criar a boundary operacional atômica para resolver template/overrides, gerar snapshot e registrar a nova meta;
+- atualizar data access/UI para ler `resolved_target_ml` no modo configurado e `target_ml` apenas no legado;
+- remover da UI a repetição textual de `60 mL/kg` quando a nova fonte estiver ativa.
 
-Questões ainda abertas continuam abertas: recálculo após mudança de peso, proporção mínima de água pura, lembretes e correções.
+Questões abertas continuam abertas: recálculo após mudança de peso, proporção mínima de água pura, lembretes e correções.
 
 ### HR-006 — Conversão de legumes e referências no validador da fonte alimentar
 
