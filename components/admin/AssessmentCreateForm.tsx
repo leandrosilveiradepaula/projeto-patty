@@ -37,7 +37,7 @@ export function AssessmentCreateForm({
       ) : null}
 
       <FormField
-        description="Quinzenal: referência de peso, cintura, abdômen e quadril. Mensal: avaliação completa + peso + fotos. O catálogo mensal completo ainda não é validado automaticamente."
+        description="Básica: peso, cintura, abdômen e quadril. Completa: conjunto completo de medidas, peso e fotos. A validação automática do catálogo completo ainda está em evolução."
         id="assessment-kind"
         label="Tipo de avaliação"
         required
