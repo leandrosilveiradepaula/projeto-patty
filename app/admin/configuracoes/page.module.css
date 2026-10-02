@@ -1,0 +1,194 @@
+.heroGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.7fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.principleCard,
+.statsCard,
+.configCard {
+  min-width: 0;
+}
+
+.principleCard {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.kicker,
+.domain {
+  color: var(--color-brand-strong);
+  font-size: var(--text-label-medium-size);
+  font-weight: var(--text-label-medium-weight);
+  line-height: var(--text-label-medium-line-height);
+}
+
+.principleCard h2,
+.configCard h3 {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+}
+
+.principleCard p,
+.description,
+.timelineNote,
+.guardrailGrid p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-medium-size);
+  line-height: var(--text-body-medium-line-height);
+}
+
+.flow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  padding-top: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--text-label-medium-size);
+}
+
+.flow strong {
+  color: var(--color-brand-strong);
+}
+
+.statsCard {
+  display: grid;
+  gap: var(--space-4);
+  align-content: center;
+}
+
+.statsCard > div {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.statValue {
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+  font-size: var(--text-h1-size);
+  font-weight: var(--text-display-weight);
+  line-height: var(--text-h1-line-height);
+}
+
+.statLabel {
+  color: var(--color-text-secondary);
+  font-size: var(--text-label-medium-size);
+}
+
+.timeline {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(140px, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+}
+
+.timelineItem {
+  display: grid;
+  gap: var(--space-3);
+  align-content: start;
+  min-height: 132px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
+  background: var(--color-surface);
+  padding: var(--space-4);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+  font-size: var(--text-label-medium-size);
+  font-weight: var(--text-label-medium-weight);
+}
+
+.stepNumber {
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-low);
+  color: var(--color-brand-strong);
+  font-weight: var(--text-display-weight);
+}
+
+.timelineNote {
+  margin-top: var(--space-4);
+}
+
+.configGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.configCard {
+  display: grid;
+  gap: var(--space-3);
+  align-content: start;
+}
+
+.configHeader {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.configHeader > div {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.summary {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+  font-size: var(--text-h3-size);
+  font-weight: var(--text-h3-weight);
+  line-height: var(--text-h3-line-height);
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: var(--text-label-small-size);
+}
+
+.guardrailGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.guardrailGrid > div {
+  display: grid;
+  gap: var(--space-2);
+}
+
+@media (max-width: 1100px) {
+  .heroGrid,
+  .configGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .principleCard {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 760px) {
+  .heroGrid,
+  .configGrid,
+  .guardrailGrid {
+    grid-template-columns: 1fr;
+  }
+}
