@@ -246,6 +246,7 @@ A regra de calendário para âncoras 29/30/31 continua aberta e não deve ser in
 Estado no `master`:
 
 - `lib/operations/clarification-reminder.ts` recebe configuração escalar explícita com unidade `hour`;
+- `lib/operations/clarification-reminder-loader.ts` prepara resolução server-side fail-closed do template ativo, sem service role e sem fallback silencioso;
 - golden tests reproduzem o baseline atual de 24 horas e demonstram intervalo alternativo sem mudança de runtime;
 - não existe fallback silencioso para 24 horas no helper configurável;
 - canal e envio real continuam separados e não foram inferidos.
@@ -258,8 +259,8 @@ Hardcode legado ainda ativo:
 Ainda pendente para marcar como migrado:
 
 - criar template/versionamento ativo para o intervalo;
-- resolver a versão aplicável server-side;
-- passar o intervalo resolvido ao builder operacional;
+- materializar/aplicar o template ativo do Lote A no SaaS;
+- somente depois conectar o loader ao builder operacional e passar o intervalo resolvido;
 - substituir textos fixos por texto derivado da configuração quando aplicável;
 - manter a distinção entre `lembrete devido` e `lembrete enviado`.
 
