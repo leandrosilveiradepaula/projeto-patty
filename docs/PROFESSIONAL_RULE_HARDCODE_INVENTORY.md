@@ -44,7 +44,8 @@ Estado no PR #257:
 
 Ainda pendente para marcar como migrado:
 
-- materializar schema/template versionado de Carb Cycle no banco;
+- materializar via Supabase CLI a proposta revisada em `docs/CARB_CYCLE_CONFIGURATION_MIGRATION_PROPOSAL.sql`;
+- promover o pgTAP proposto em `docs/CARB_CYCLE_CONFIGURATION_PGTAP_PROPOSAL.sql` para a suíte oficial;
 - seed controlado dos baselines confirmados;
 - snapshot dos coeficientes usados;
 - integração operacional sem fallback silencioso;
@@ -322,7 +323,7 @@ Estado no `master`:
 Ainda pendente:
 
 - materializar os templates versionados no banco;
-- resolver a configuração ativa server-side;
+- loader server-side fail-closed preparado em `lib/method/carb-cycle-loader.ts`, limitado às Fases 1–3; conectar consumidor somente após apply/validação no SaaS;
 - criar snapshots dos steps/coeficientes usados;
 - manter adapters de compatibilidade apenas enquanto consumidores antigos precisarem deles.
 

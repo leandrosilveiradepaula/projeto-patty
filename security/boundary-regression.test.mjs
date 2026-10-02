@@ -842,6 +842,23 @@ test("hydration persistence boundary remains service-role-only and assignment-sc
 });
 
 
+test("Carb Cycle configuration loader stays server-only, bounded and fail-closed", async () => {
+  const loader = await readFile(
+    path.join(ROOT, "lib", "method", "carb-cycle-loader.ts"),
+    "utf8",
+  );
+
+  assert.match(loader, /^import ["']server-only["'];/m);
+  assert.match(loader, /createClient/);
+  assert.doesNotMatch(loader, /createAdminClient/);
+  assert.match(loader, /carb_cycle_v1/);
+  assert.match(loader, /phase_1.*phase_2.*phase_3/s);
+  assert.doesNotMatch(loader, /phase_4|phase_5|phase_6/);
+  assert.match(loader, /\.limit\(2\)/);
+  assert.match(loader, /versions\.length !== 1/);
+  assert.match(loader, /parseCarbCycleConfiguration/);
+});
+
 test("clarification reminder configuration loader stays server-only and fail-closed", async () => {
   const loader = await readFile(
     path.join(
