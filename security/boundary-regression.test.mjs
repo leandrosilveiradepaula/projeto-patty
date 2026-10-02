@@ -602,21 +602,27 @@ test("password login routes from the user returned by the successful sign-in", a
   );
 });
 
-test("Vercel skips codex preview deployments while preserving production eligibility", async () => {
+test("Vercel denies automatic deployments by default while preserving approved branches", async () => {
   const config = JSON.parse(
     await readFile(path.join(ROOT, "vercel.json"), "utf8"),
   );
 
   assert.equal(
-    config.git?.deploymentEnabled?.["codex/**"],
+    config.git?.deploymentEnabled?.["**"],
     false,
-    "codex/* branches must not consume Vercel preview builds",
+    "automatic deployments must be denied by default",
   );
 
-  assert.notEqual(
+  assert.equal(
     config.git?.deploymentEnabled?.master,
-    false,
+    true,
     "master must remain eligible for production deployment",
+  );
+
+  assert.equal(
+    config.git?.deploymentEnabled?.["preview/**"],
+    true,
+    "explicit preview branches must remain eligible for preview deployment",
   );
 
   assert.deepEqual(

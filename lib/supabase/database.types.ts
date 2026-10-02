@@ -1433,7 +1433,9 @@ export type Database = {
           created_at: string
           created_by_profile_id: string
           id: string
+          method_configuration_snapshot_set_id: string | null
           method_key: string
+          resolved_target_ml: number | null
           target_ml: number | null
           weight_kg: number
         }
@@ -1442,7 +1444,9 @@ export type Database = {
           created_at?: string
           created_by_profile_id: string
           id?: string
+          method_configuration_snapshot_set_id?: string | null
           method_key?: string
+          resolved_target_ml?: number | null
           target_ml?: number | null
           weight_kg: number
         }
@@ -1451,7 +1455,9 @@ export type Database = {
           created_at?: string
           created_by_profile_id?: string
           id?: string
+          method_configuration_snapshot_set_id?: string | null
           method_key?: string
+          resolved_target_ml?: number | null
           target_ml?: number | null
           weight_kg?: number
         }
@@ -1469,6 +1475,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_hydration_targets_snapshot_set_client_fkey"
+            columns: ["method_configuration_snapshot_set_id", "client_id"]
+            isOneToOne: false
+            referencedRelation: "method_configuration_snapshot_sets"
+            referencedColumns: ["id", "client_id"]
           },
         ]
       }
@@ -2790,6 +2803,19 @@ export type Database = {
       complete_ai_execution: {
         Args: { p_content: Json; p_execution_id: string }
         Returns: undefined
+      }
+      create_hydration_target_from_method_snapshot: {
+        Args: {
+          p_client_id: string
+          p_created_by_profile_id: string
+          p_override_version_id?: string
+          p_resolved_configuration: Json
+          p_resolved_target_ml: number
+          p_result_values: Json
+          p_template_version_id: string
+          p_weight_kg: number
+        }
+        Returns: string
       }
       current_user_admin_mfa_satisfied: { Args: never; Returns: boolean }
       current_user_is_assigned_admin: { Args: never; Returns: boolean }

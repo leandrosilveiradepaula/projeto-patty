@@ -41,35 +41,25 @@ Nao tratar esse SHA como o HEAD permanente do repositorio: merges documentais po
 
 ### Repositorio e CI
 
-Imediatamente antes desta reconciliacao documental, o `master` remoto estava em `87b3830edd2c5a846f431164132347da8806aeef`, resultado do PR #269. O PR #269 (`feat: prepare next configuration template batch`) adicionou o registro fechado de schemas de configuracao e teve `Validate application` aprovado no run `36982497284`.
+O `master` remoto inclui o PR #272 (hardening da finalizacao de arquivos privados por cliente) e o PR #273 (compatibilidade configuravel de hidratacao). O PR #273 foi reconstruido sobre o master atual para preservar as regressões de seguranca e teve os workflows `Validate application` e `Validate method configuration foundation` aprovados antes do merge.
 
-O PR #270 (`ci: preview Supabase migrations automatically`) tambem esta mergeado. Ele fez o workflow de migrations executar automaticamente `migration list` + `db push --dry-run` em pushes ao `master` que alterem migrations ou o proprio workflow, sem permitir apply por evento `push`. O apply continua exclusivo de `workflow_dispatch` com `mode=apply` e confirmacao textual exata `APPLY`. O CI do PR #270 passou no run `36961639864`.
-
-O PR #256 de hidratacao permanece `OPEN`, `DRAFT` e nao mergeado, com head `d347aa966347afacbe89e30df28d5752ec24fe0d`. Os workflows `Validate application` (`36957963806`) e `Validate method configuration foundation` (`36957963799`) estao `SUCCESS`. A migration de hidratacao, pgTAP, loader server-side e boundary transacional existem apenas nesse draft e nao representam schema aplicado.
-
-As preparacoes configuraveis recentes nao autorizam ativar regras ainda abertas nem substituem versionamento, snapshots, revisao humana ou a ordem obrigatoria da fila de migrations.
-
-### Vercel
-
-O deployment de producao mais recente observado esta `READY`: `dpl_7iTtbWg9Mpafwq5RXenGEd27JGGD`, correspondente ao `master` `87b3830edd2c5a846f431164132347da8806aeef`.
-
-O deployment imediatamente anterior, do commit `e47a49520a54e261fd40e3bba9c6c9a651af69a7` que incorporou o PR #270, tambem esta `READY`. Portanto, o bloqueio temporario por build rate limit registrado anteriormente nao esta ativo no estado revalidado desta rodada.
+O workflow de migrations continua com separacao deliberada entre preview e apply: pushes ao `master` executam `migration list` + `db push --dry-run`; apply de producao continua exclusivo de `workflow_dispatch` com `mode=apply` e confirmacao textual exata `APPLY`.
 
 ### Supabase / fila de migrations
 
-O projeto `Projeto Corpo e Mente` esta `ACTIVE_HEALTHY`. O historico remoto revalidado continua ate `20261001230751_seed_initial_method_templates`.
+O projeto `Projeto Corpo e Mente` permanece `ACTIVE_HEALTHY`. A verificacao direta pos-apply confirmou no SaaS:
 
-Continuam **NAO APLICADAS** no SaaS:
+- `20261001235018_seed_higher_fat_protein_limit_template.sql`: APLICADA;
+- template `nutrition.protein.higher_fat_daily_limit`: ativo;
+- `20261002005720_hydrate_client_targets_from_configuration.sql`: APLICADA;
+- template `hydration.daily_target`: ativo, baseline 60 mL/kg com arredondamento `round`;
+- RPC `create_hydration_target_from_method_snapshot`: presente como SECURITY INVOKER;
+- EXECUTE da RPC: negado a `anon` e `authenticated`, permitido a `service_role`.
 
-- `20261001235018_seed_higher_fat_protein_limit_template.sql`;
-- `20261002005720_hydrate_client_targets_from_configuration.sql`.
+O advisor de seguranca pos-apply nao apontou regressao da migration de hidratacao. Permanece o warning independente e ja conhecido de Leaked Password Protection desabilitado.
 
-A verificacao direta confirmou:
-- registro remoto de `20261001235018`: 0;
-- template `nutrition.protein.higher_fat_daily_limit`: 0;
-- template `hydration.daily_target`: 0.
+A camada configuravel de hidratacao esta aplicada no banco, mas a troca operacional ainda nao esta concluida: data access/UI continuam no caminho legado ate a integracao server-side tipada, snapshot e leitura compativel serem validados. Nao remover o caminho historico nem promover questoes abertas de hidratacao a regra automatica.
 
-A ordem permanece obrigatoria: aplicar/validar primeiro `20261001235018`; somente depois liberar a migration de hidratacao. Nao usar SQL direto como substituto do workflow oficial de producao. O preview pode ocorrer automaticamente no `master`, mas apply continua exigindo o gate manual documentado.
 
 
 ## Legenda de estado
