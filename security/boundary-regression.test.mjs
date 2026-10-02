@@ -803,6 +803,40 @@ test("hydration persistence boundary remains service-role-only and assignment-sc
 });
 
 
+test("configured hydration stays disconnected until the production gate is released", async () => {
+  const loader = await readFile(
+    path.join(ROOT, "lib", "method", "hydration-loader.ts"),
+    "utf8",
+  );
+  const adminAction = await readFile(
+    path.join(
+      ROOT,
+      "app",
+      "admin",
+      "clientes",
+      "[clienteId]",
+      "checkins",
+      "actions.ts",
+    ),
+    "utf8",
+  );
+
+  assert.match(loader, /^import ["']server-only["'];/m);
+  assert.match(loader, /createClient/);
+  assert.doesNotMatch(loader, /createAdminClient/);
+  assert.match(loader, /hydration\.daily_target/);
+  assert.match(loader, /method_engine_v1/);
+  assert.match(loader, /protocol_version_id/);
+  assert.match(loader, /\.limit\(2\)/);
+
+  assert.match(adminAction, /createAccessibleClientHydrationTarget/);
+  assert.doesNotMatch(adminAction, /loadHydrationTargetResolution/);
+  assert.doesNotMatch(adminAction, /create_hydration_target_from_method_snapshot/);
+  assert.doesNotMatch(adminAction, /createAdminClient/);
+  assert.doesNotMatch(adminAction, /method_configuration_snapshot/);
+});
+
+
 test("any module that uses the Supabase administrative client is server-only", async () => {
   const roots = ["app", "lib"];
   const sourceFiles = [];
