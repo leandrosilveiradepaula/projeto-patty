@@ -8,7 +8,9 @@
   ],
   "git": {
     "deploymentEnabled": {
-      "codex/**": false
+      "**": false,
+      "master": true,
+      "preview/**": true
     }
   }
 }
