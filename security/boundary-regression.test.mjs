@@ -842,6 +842,28 @@ test("hydration persistence boundary remains service-role-only and assignment-sc
 });
 
 
+test("clarification reminder configuration loader stays server-only and fail-closed", async () => {
+  const loader = await readFile(
+    path.join(
+      ROOT,
+      "lib",
+      "operations",
+      "clarification-reminder-loader.ts",
+    ),
+    "utf8",
+  );
+
+  assert.match(loader, /^import ["']server-only["'];/m);
+  assert.match(loader, /createClient/);
+  assert.doesNotMatch(loader, /createAdminClient/);
+  assert.match(loader, /workflow\.anamnesis_clarification_reminder/);
+  assert.match(loader, /scalar_parameter_v1/);
+  assert.match(loader, /\.limit\(2\)/);
+  assert.match(loader, /versions\.length !== 1/);
+  assert.match(loader, /clarificationReminderIntervalHours/);
+  assert.doesNotMatch(loader, /\?\?\s*24|\|\|\s*24/);
+});
+
 test("configured hydration uses the reviewed server-only persistence boundary", async () => {
   const loader = await readFile(
     path.join(ROOT, "lib", "method", "hydration-loader.ts"),
