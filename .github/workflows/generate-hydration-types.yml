@@ -1,0 +1,41 @@
+name: Generate hydration database types
+
+on:
+  push:
+    branches:
+      - codex/hydration-operational-resolution
+    paths:
+      - .github/workflows/generate-hydration-types.yml
+
+permissions:
+  contents: read
+
+jobs:
+  generate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      SUPABASE_TELEMETRY_DISABLED: "1"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Install pinned dependencies
+        run: npm ci
+      - name: Start local Supabase
+        run: npx supabase start
+      - name: Reset local database
+        run: npx supabase db reset
+      - name: Generate TypeScript types
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx supabase gen types typescript --local > /tmp/database.types.ts
+          diff -u lib/supabase/database.types.ts /tmp/database.types.ts || true
+      - name: Stop local Supabase
+        if: always()
+        run: npx supabase stop --no-backup
