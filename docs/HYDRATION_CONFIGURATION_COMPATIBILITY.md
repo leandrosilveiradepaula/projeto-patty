@@ -32,6 +32,7 @@ This slice:
 - `supabase/migrations/20261002005720_hydrate_client_targets_from_configuration.sql`
 - `supabase/tests/database/method_configuration_hydration.test.sql`
 - `.github/workflows/validate-method-configuration-foundation.yml`
+- `security/boundary-regression.test.mjs`
 - this document
 
 ## Out of scope
