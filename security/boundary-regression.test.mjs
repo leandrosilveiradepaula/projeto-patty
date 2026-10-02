@@ -842,6 +842,23 @@ test("hydration persistence boundary remains service-role-only and assignment-sc
 });
 
 
+test("liquid taxonomy loader stays server-only and fail-closed", async () => {
+  const loader = await readFile(
+    path.join(ROOT, "lib", "method", "liquid-taxonomy-loader.ts"),
+    "utf8",
+  );
+
+  assert.match(loader, /^import ["']server-only["'];/m);
+  assert.match(loader, /createClient/);
+  assert.doesNotMatch(loader, /createAdminClient/);
+  assert.match(loader, /hydration\.liquid_taxonomy/);
+  assert.match(loader, /liquid_taxonomy_v1/);
+  assert.match(loader, /\.limit\(2\)/);
+  assert.match(loader, /versions\.length !== 1/);
+  assert.match(loader, /parseLiquidTaxonomyConfiguration/);
+  assert.doesNotMatch(loader, /minimumRatio|minimum.*water|ratio/i);
+});
+
 test("assessment configuration loader stays server-only, bounded and fail-closed", async () => {
   const loader = await readFile(
     path.join(ROOT, "lib", "evaluations", "assessment-configuration-loader.ts"),
