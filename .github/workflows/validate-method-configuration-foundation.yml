@@ -56,6 +56,8 @@ jobs:
           test -f supabase/tests/database/method_configuration_carb_cycle.test.sql
           test -f supabase/tests/database/method_configuration_assessments.test.sql
           test -f supabase/tests/database/method_configuration_liquid_taxonomy.test.sql
+          test -f supabase/migrations/20261002224033_snapshot_assessment_and_liquid_consumers.sql
+          test -f supabase/tests/database/method_configuration_assessment_liquid_snapshots.test.sql
           echo "Committed method configuration migrations and pgTAP files found."
 
       - name: Start local Supabase
@@ -90,6 +92,9 @@ jobs:
 
       - name: Run liquid taxonomy configuration pgTAP
         run: npx supabase test db supabase/tests/database/method_configuration_liquid_taxonomy.test.sql
+
+      - name: Run assessment and liquid snapshot pgTAP
+        run: npx supabase test db supabase/tests/database/method_configuration_assessment_liquid_snapshots.test.sql
 
       - name: Stop local Supabase
         if: always()
