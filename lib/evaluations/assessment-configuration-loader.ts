@@ -115,10 +115,12 @@ export async function loadSupportedAssessmentKindOptions(): Promise<{
       );
     }
 
+    const semanticKey: "basic" | "complete" = entry.semanticKey;
+
     return {
       historicalCode: entry.historicalCode,
       label: entry.label,
-      semanticKey: entry.semanticKey,
+      semanticKey,
     };
   });
 
