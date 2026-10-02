@@ -240,5 +240,156 @@ select throws_ok(
   'configured hydration target must remain positive'
 );
 
+
+
+select ok(
+  not has_function_privilege(
+    'authenticated',
+    'public.create_hydration_target_from_method_snapshot(uuid,uuid,numeric,uuid,jsonb,jsonb,integer,uuid)',
+    'EXECUTE'
+  ),
+  'authenticated cannot execute the privileged hydration persistence boundary'
+);
+
+select ok(
+  has_function_privilege(
+    'service_role',
+    'public.create_hydration_target_from_method_snapshot(uuid,uuid,numeric,uuid,jsonb,jsonb,integer,uuid)',
+    'EXECUTE'
+  ),
+  'service role can execute the controlled hydration persistence boundary'
+);
+
+insert into public.client_method_configuration_override_versions (
+  id,
+  client_id,
+  template_id,
+  based_on_template_version_id,
+  version_number,
+  override_configuration,
+  created_by_profile_id,
+  activated_at,
+  activated_by_profile_id,
+  reason
+)
+select
+  'c5000000-0000-0000-0000-000000000001',
+  'c2000000-0000-0000-0000-000000000001',
+  t.id,
+  v.id,
+  1,
+  '{"parameters":{"daily_ml_per_kg":{"value":55,"unit":"ml_per_kg"}}}'::jsonb,
+  'c1000000-0000-0000-0000-000000000001',
+  now(),
+  'c1000000-0000-0000-0000-000000000001',
+  'synthetic hydration override'
+from public.method_configuration_templates t
+join public.method_configuration_versions v on v.template_id = t.id
+where t.template_key = 'hydration.daily_target'
+  and v.version_number = 1;
+
+select isnt(
+  public.create_hydration_target_from_method_snapshot(
+    'c2000000-0000-0000-0000-000000000001',
+    'c1000000-0000-0000-0000-000000000001',
+    80,
+    (
+      select v.id
+      from public.method_configuration_versions v
+      join public.method_configuration_templates t on t.id = v.template_id
+      where t.template_key = 'hydration.daily_target'
+        and v.version_number = 1
+    ),
+    '{
+      "inputs":{"weight_kg":{"unit":"kg"}},
+      "parameters":{"daily_ml_per_kg":{"value":55,"unit":"ml_per_kg"}},
+      "outputs":{
+        "target_ml":{
+          "unit":"ml",
+          "expression":{
+            "op":"round",
+            "arg":{
+              "op":"multiply",
+              "args":[
+                {"op":"input","key":"weight_kg"},
+                {"op":"parameter","key":"daily_ml_per_kg"}
+              ]
+            }
+          }
+        }
+      }
+    }'::jsonb,
+    '{"target_ml":{"value":4400,"unit":"ml"}}'::jsonb,
+    4400,
+    'c5000000-0000-0000-0000-000000000001'
+  ),
+  null::uuid,
+  'atomic hydration boundary creates a configured target'
+);
+
+select is(
+  (
+    select resolved_target_ml
+    from public.client_hydration_targets
+    where client_id = 'c2000000-0000-0000-0000-000000000001'
+      and weight_kg = 80
+      and method_key = 'method_configuration_snapshot'
+  ),
+  4400,
+  'atomic hydration boundary persists the resolved configured result'
+);
+
+select is(
+  (
+    select count(*)
+    from public.method_configuration_snapshots s
+    join public.method_configuration_snapshot_sets ss
+      on ss.id = s.snapshot_set_id
+    where ss.client_id = 'c2000000-0000-0000-0000-000000000001'
+      and s.input_values #>> '{weight_kg,value}' = '80'
+      and s.resolved_configuration #>> '{parameters,daily_ml_per_kg,value}' = '55'
+      and s.result_values #>> '{target_ml,value}' = '4400'
+  ),
+  1::bigint,
+  'atomic hydration boundary preserves inputs, resolved configuration, and results'
+);
+
+select is(
+  (
+    select count(*)
+    from public.method_configuration_snapshot_overrides so
+    join public.method_configuration_snapshots s on s.id = so.snapshot_id
+    where so.override_version_id = 'c5000000-0000-0000-0000-000000000001'
+      and s.input_values #>> '{weight_kg,value}' = '80'
+      and so.precedence = 1
+  ),
+  1::bigint,
+  'atomic hydration boundary preserves the applied client override'
+);
+
+select throws_ok(
+  $sql$
+    select public.create_hydration_target_from_method_snapshot(
+      'c2000000-0000-0000-0000-000000000001',
+      'c1000000-0000-0000-0000-000000000001',
+      80,
+      (
+        select v.id
+        from public.method_configuration_versions v
+        join public.method_configuration_templates t on t.id = v.template_id
+        where t.template_key = 'hydration.daily_target'
+          and v.version_number = 1
+      ),
+      '{"inputs":{},"parameters":{},"outputs":{}}'::jsonb,
+      '{"target_ml":{"value":4401,"unit":"ml"}}'::jsonb,
+      4400,
+      null
+    )
+  $sql$,
+  '22023',
+  null,
+  'atomic hydration boundary rejects a result payload that disagrees with resolved target'
+);
+
 select * from finish();
 rollback;
