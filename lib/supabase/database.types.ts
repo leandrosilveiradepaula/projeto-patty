@@ -1091,6 +1091,7 @@ export type Database = {
           finalized_at: string | null
           finalized_by_profile_id: string | null
           id: string
+          method_configuration_snapshot_set_id: string | null
         }
         Insert: {
           assessed_at: string
@@ -1101,6 +1102,7 @@ export type Database = {
           finalized_at?: string | null
           finalized_by_profile_id?: string | null
           id?: string
+          method_configuration_snapshot_set_id?: string | null
         }
         Update: {
           assessed_at?: string
@@ -1111,6 +1113,7 @@ export type Database = {
           finalized_at?: string | null
           finalized_by_profile_id?: string | null
           id?: string
+          method_configuration_snapshot_set_id?: string | null
         }
         Relationships: [
           {
@@ -1133,6 +1136,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_assessments_snapshot_set_client_fkey"
+            columns: ["method_configuration_snapshot_set_id", "client_id"]
+            isOneToOne: false
+            referencedRelation: "method_configuration_snapshot_sets"
+            referencedColumns: ["id", "client_id"]
           },
         ]
       }
@@ -1491,6 +1501,7 @@ export type Database = {
           client_id: string
           id: string
           liquid_kind: string
+          method_configuration_snapshot_set_id: string | null
           recorded_at: string
           recorded_by_profile_id: string
         }
@@ -1499,6 +1510,7 @@ export type Database = {
           client_id: string
           id?: string
           liquid_kind: string
+          method_configuration_snapshot_set_id?: string | null
           recorded_at?: string
           recorded_by_profile_id: string
         }
@@ -1507,10 +1519,18 @@ export type Database = {
           client_id?: string
           id?: string
           liquid_kind?: string
+          method_configuration_snapshot_set_id?: string | null
           recorded_at?: string
           recorded_by_profile_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "client_liquid_events_snapshot_set_client_fkey"
+            columns: ["method_configuration_snapshot_set_id", "client_id"]
+            isOneToOne: false
+            referencedRelation: "method_configuration_snapshot_sets"
+            referencedColumns: ["id", "client_id"]
+          },
           {
             foreignKeyName: "client_liquid_intake_events_client_id_fkey"
             columns: ["client_id"]
@@ -2817,19 +2837,44 @@ export type Database = {
         }
         Returns: string
       }
+      create_liquid_intake_event_from_method_snapshot: {
+        Args: {
+          p_amount_ml: number
+          p_client_id: string
+          p_liquid_kind: string
+          p_recorded_by_profile_id: string
+          p_resolved_configuration: Json
+          p_result_values: Json
+          p_template_version_id: string
+        }
+        Returns: string
+      }
       current_user_admin_mfa_satisfied: { Args: never; Returns: boolean }
       current_user_is_assigned_admin: { Args: never; Returns: boolean }
       fail_ai_execution: {
         Args: {
           p_execution_id: string
           p_failure_code: string
-          p_failure_message: string | null
+          p_failure_message: string
           p_failure_stage: string
-          p_response_content: string | null
-          p_response_content_format: string | null
-          p_response_received_at: string | null
+          p_response_content: string
+          p_response_content_format: string
+          p_response_received_at: string
         }
         Returns: undefined
+      }
+      finalize_assessment_from_method_snapshot: {
+        Args: {
+          p_assessment_id: string
+          p_catalog_configuration: Json
+          p_catalog_result_values: Json
+          p_catalog_template_version_id: string
+          p_definition_configuration: Json
+          p_definition_result_values: Json
+          p_definition_template_version_id: string
+          p_finalized_by_profile_id: string
+        }
+        Returns: string
       }
       meal_plan_version_is_draft: {
         Args: { p_meal_plan_version_id: string }
