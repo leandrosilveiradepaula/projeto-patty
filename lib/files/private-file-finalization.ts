@@ -48,6 +48,7 @@ async function rejectUploadSession(input: {
 
 export async function finalizeClientFileUploadSession(input: {
   clientVisibleOnAccept: boolean;
+  expectedClientId: string;
   requesterProfileId: string;
   sessionId: string;
 }): Promise<ClientFileFinalizationResult> {
@@ -58,6 +59,7 @@ export async function finalizeClientFileUploadSession(input: {
       "id, client_id, requester_profile_id, file_kind, original_filename, file_extension, claimed_mime_type, declared_byte_size, temp_object_path, status, expires_at",
     )
     .eq("id", input.sessionId)
+    .eq("client_id", input.expectedClientId)
     .eq("requester_profile_id", input.requesterProfileId)
     .maybeSingle();
 
