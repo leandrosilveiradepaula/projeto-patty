@@ -3,11 +3,15 @@
 import { revalidatePath } from "next/cache";
 
 import {
-  isAssessmentKind,
+  loadAssessmentDefinition,
+  loadSupportedAssessmentKindOptions,
+  resolveSupportedAssessmentKindOption,
+} from "@/lib/evaluations/assessment-configuration-loader";
+import {
   parseAssessmentDate,
   parseMeasurementDraft,
 } from "@/lib/evaluations/assessment-draft";
-import { buildAssessmentFinalizationReadiness } from "@/lib/evaluations/assessment-readiness";
+import { buildConfigurableAssessmentReadiness } from "@/lib/evaluations/assessment-definition";
 import { createAccessibleAssessmentMeasurementCorrection } from "@/lib/evaluations/measurement-correction-store";
 import { isProfessionalDecision } from "@/lib/follow-up/professional-decisions";
 import { requireRole } from "@/lib/supabase/auth";
@@ -151,10 +155,17 @@ export async function updateAssessmentDraftAction(
 
   const kindValue = formData.get("assessmentKind");
   const assessedAt = parseAssessmentDate(formData.get("assessedAt"));
+  const assessmentKinds = await loadSupportedAssessmentKindOptions();
+  const selectedKind =
+    typeof kindValue === "string"
+      ? assessmentKinds.options.find(
+          (option) => option.historicalCode === kindValue,
+        ) ?? null
+      : null;
 
-  if (typeof kindValue !== "string" || !isAssessmentKind(kindValue)) {
+  if (!selectedKind) {
     return {
-      message: "Selecione se a avaliação é Básica ou Completa.",
+      message: "Selecione um tipo de avaliação disponível.",
       success: false,
     };
   }
@@ -170,7 +181,7 @@ export async function updateAssessmentDraftAction(
     await updateAccessibleClientAssessmentDraft({
       assessedAt,
       assessmentId: assessment.id,
-      assessmentKind: kindValue,
+      assessmentKind: selectedKind.historicalCode,
     });
   } catch {
     return {
@@ -378,22 +389,33 @@ export async function finalizeAssessmentAction(
     };
   }
 
-  if (!assessment.assessment_kind || !isAssessmentKind(assessment.assessment_kind)) {
+  const assessmentKinds = await loadSupportedAssessmentKindOptions();
+  const selectedKind = resolveSupportedAssessmentKindOption(
+    assessmentKinds.options,
+    assessment.assessment_kind,
+  );
+
+  if (!selectedKind) {
     return {
-      message: "Defina se a avaliação é Básica ou Completa antes de finalizar.",
+      message: "Defina um tipo de avaliação disponível antes de finalizar.",
       success: false,
     };
   }
 
-  const [measurements, photoFiles] = await Promise.all([
+  const [measurements, photoFiles, definition] = await Promise.all([
     listAccessibleAssessmentMeasurements(assessment.id),
     listAccessibleAssessmentPhotoFiles(assessment.id),
+    loadAssessmentDefinition(selectedKind.semanticKey),
   ]);
-  const readiness = buildAssessmentFinalizationReadiness({
-    assessmentKind: assessment.assessment_kind,
-    measurementKeys: measurements.map((measurement) => measurement.measurement_key),
-    photoCount: photoFiles.length,
-  });
+  const readiness = buildConfigurableAssessmentReadiness(
+    definition.configuration,
+    {
+      measurementKeys: measurements.map(
+        (measurement) => measurement.measurement_key,
+      ),
+      photoCount: photoFiles.length,
+    },
+  );
 
   if (!readiness.canFinalizeDeterministically) {
     const missing = readiness.items
