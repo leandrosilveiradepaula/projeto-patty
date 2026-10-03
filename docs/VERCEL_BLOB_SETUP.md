@@ -4,6 +4,8 @@ Data de referencia: 2026-09-26.
 
 Este runbook cobre somente a criacao/conexao do Vercel Blob privado necessario ao primeiro lote de midia educacional.
 
+Status operacional: **CONCLUIDO em 2026-10-03**.
+
 Ele nao autoriza:
 - baixar ou alterar o original do Google Drive;
 - enviar qualquer arquivo antes da verificacao do store;
@@ -73,9 +75,21 @@ Referencias oficiais consultadas em 2026-10-03:
 - https://vercel.com/docs/vercel-blob/private-storage
 - https://vercel.com/docs/vercel-blob
 
+## Evidencia de provisionamento 2026-10-03
+
+Confirmado no dashboard do projeto `projeto-patty`:
+- store: `projeto-patty-blob`;
+- acesso: `private`;
+- regiao: `iad1`;
+- conexao adicionou as variaveis nao secretas `BLOB_STORE_ID` e `BLOB_WEBHOOK_PUBLIC_KEY` ao projeto;
+- a opcao de token read-write persistente nao foi habilitada, preservando autenticacao OIDC;
+- armazenamento observado no momento da verificacao: 0 B.
+
+Nenhum valor de credencial foi copiado ou versionado.
+
 ## Gate de verificacao
 
-Somente considerar esta etapa concluida quando todos os itens abaixo forem verdadeiros:
+Esta etapa foi considerada concluida quando todos os itens abaixo ficaram verdadeiros:
 - store existe;
 - store esta conectado ao projeto correto;
 - acesso e `private`;

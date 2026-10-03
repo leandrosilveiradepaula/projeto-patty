@@ -3,7 +3,7 @@
   "generated_at": "2026-09-24",
   "batch_key": "educational_media_batch_1_food_scale",
   "scope": "single approved educational media source; no upload, publication, or client release is performed by this manifest",
-  "batch_status": "blocked_store_pending",
+  "batch_status": "draft_ready_upload_pending",
   "items": [
     {
       "source": {
@@ -28,7 +28,10 @@
         "asset_key": "primary",
         "storage_path": null,
         "storage_path_policy": "system_generated_opaque_no_pii",
-        "content_type": "video/mp4"
+        "content_type": "video/mp4",
+        "blob_store_name": "projeto-patty-blob",
+        "blob_store_region": "iad1",
+        "blob_auth_mode": "oidc"
       },
       "integrity": {
         "expected_size_bytes": 123262796,
@@ -45,18 +48,21 @@
         "preflight_note": "Read-only source preflight from the approved Google Drive file. Migration source_download_status remains not_started; re-download and re-hash are still required before Blob upload."
       },
       "supabase": {
-        "educational_content_id": null,
-        "educational_content_version_id": null,
+        "educational_content_id": "610df135-7c00-47a3-b978-2ba44411ae43",
+        "educational_content_version_id": "ae45c5db-e6af-46db-9230-b05bc4f5a5bd",
         "educational_content_asset_id": null,
-        "draft_version_status": "not_created"
+        "draft_version_status": "created_unpublished"
       },
       "operation": {
-        "blob_store_status": "pending_manual_creation_or_connection",
+        "blob_store_status": "created_connected_private",
         "source_download_status": "not_started",
         "blob_upload_status": "not_started",
         "asset_registration_status": "not_started",
         "publication_status": "not_started",
-        "client_release_status": "not_started"
+        "client_release_status": "not_started",
+        "blob_store_verified_at": "2026-10-03",
+        "blob_store_verification_note": "Verified in the Vercel project dashboard: private store projeto-patty-blob, region iad1, connected to the projeto-patty project, empty at verification time, OIDC-style project connection without a long-lived read-write token.",
+        "draft_version_created_at": "2026-10-03"
       }
     }
   ],
