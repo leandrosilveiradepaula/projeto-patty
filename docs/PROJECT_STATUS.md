@@ -390,16 +390,16 @@ A branch atual prepara:
 
 A migration `20260924193339_seed_openai_anamnesis_review_prompt.sql` foi aplicada no Supabase SaaS. A verificacao pos-apply confirmou exatamente um prompt `anamnesis_review` v1 e zero `ai_executions`.
 
-A chamada externa continua bloqueada por padrao. O default tecnico e `gpt-5.6-terra` com reasoning `medium`; para uso com dados reais ainda faltam credencial, avaliacao sintetica e habilitacao explicita do gate `OPENAI_HEALTH_DATA_PROCESSING_ENABLED` apos revisao de privacidade/retencao aplicavel.
+A chamada externa para dados reais continua bloqueada por padrao. O default tecnico e `gpt-5.6-terra` com reasoning `medium`. A credencial para avaliacao sintetica foi configurada como GitHub Actions secret e o run `37128054011` aprovou 4/4 cenarios sinteticos; para uso com dados reais ainda faltam revisao de privacidade/retencao, avaliacao de ZDR/MAM, revisao de logging, aprovacao humana e habilitacao explicita do gate `OPENAI_HEALTH_DATA_PROCESSING_ENABLED`.
 
 
 ## Rollout OpenAI controlado
 
 O PR #151 foi mergeado no commit `3412c4f` e o deployment correspondente ficou `READY` em producao. A consulta de logs `error/fatal` da janela observada nao retornou eventos.
 
-A chamada real continua desabilitada sem `OPENAI_API_KEY` e sem `OPENAI_HEALTH_DATA_PROCESSING_ENABLED=true`.
+A chamada com dados reais continua desabilitada sem `OPENAI_HEALTH_DATA_PROCESSING_ENABLED=true`. A `OPENAI_API_KEY` existe como secret do GitHub Actions para o workflow sintetico; isso nao habilita o runtime de producao nem autoriza dados de saude.
 
-Foi criado `docs/OPENAI_HEALTH_DATA_GATE.md` como checklist operacional antes de dados reais e `npm run eval:ai:openai` como avaliacao do modelo usando somente fixtures sinteticas.
+Foi criado `docs/OPENAI_HEALTH_DATA_GATE.md` como checklist operacional antes de dados reais e `npm run eval:ai:openai` como avaliacao do modelo usando somente fixtures sinteticas. Em 2026-10-03, o workflow manual `Evaluate OpenAI anamnesis review`, run `37128054011`, terminou SUCCESS com 4 cenarios aprovados e 0 falhas.
 
 
 ## Gmail SMTP do MVP
