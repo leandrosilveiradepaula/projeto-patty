@@ -223,6 +223,22 @@ export default async function AdminClienteDetailPage({
             </Card>
           </Link>
 
+          <Link className={styles.cardLink} href={`/admin/clientes/${client.id}/feedback-semanal`}>
+            <Card className={styles.infoCard}>
+              <div className={styles.cardHeader}>
+                <h3 className={styles.cardTitle}>Feedback semanal</h3>
+                <Badge variant="neutral">
+                  {weeklyFeedbacks.filter((feedback) => !feedback.submitted_at).length} pendente(s)
+                </Badge>
+              </div>
+              <p className={styles.cardDescription}>
+                {weeklyFeedbacks.length === 0
+                  ? "Nenhum feedback semanal solicitado."
+                  : `${weeklyFeedbacks.length} registro(s) no histórico semanal.`}
+              </p>
+            </Card>
+          </Link>
+
           <a className={styles.cardLink} href="#treino">
             <Card className={styles.infoCard}>
               <div className={styles.cardHeader}>
