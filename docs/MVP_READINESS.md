@@ -525,15 +525,13 @@ A leitura esta mais formalizada, mas ainda nao esta pronta para automacao comple
 
 O Cutting 2 reinicia a estrutura de Cutting com menos doses de macros que o ciclo anterior. A reducao exata ainda nao esta formalizada.
 
-O Cutting 3 tambem teve sua estrutura confirmada: Linear -> Dia 1/Dia 2 -> 2 Low/1 High -> Up Metabolico. As quantidades diminuem conforme o peso da cliente com base na Planilha Carb Cycle.
+A sequencia profissional vigente esta confirmada somente ate `Cutting 2: 2 Low / 1 High`. Qualquer etapa posterior, inclusive eventual Cutting posterior, permanece aberta e nao deve ser inferida.
 
-A planilha fonte foi localizada, e a Patty confirmou que:
-- suas Fases 1 a 4 pertencem ao conjunto dos Cuttings 1, 2 e 3 atuais;
-- a coluna Media corresponde ao valor do protocolo Linear.
+A planilha fonte foi localizada. Para automacao, somente as Fases 1, 2 e 3 possuem templates ativos/materializados atualmente; o pareamento entre fase numerada e etapa concreta do protocolo continua bloqueado por decisao profissional aberta.
 
-A Patty esclareceu que o uso operacional mais frequente se concentra nas Fases 1, 2 e 3. Fases 4, 5 e 6 sao pouco utilizadas. Na pratica, ela costuma alternar um cutting prolongado com um bulking para ganho de massa muscular e, ao retornar ao cutting, reinicia novamente pelas Fases 1, 2 e 3.
+A Patty esclareceu historicamente que o uso operacional mais frequente se concentra nas Fases 1, 2 e 3. Fases posteriores e a transicao para Bulking nao devem ser automatizadas sem confirmacao vigente e documentada.
 
-Isso reduz a prioridade das Fases 4 a 6 para a primeira automacao, mas nao autoriza transicao automatica entre cutting e bulking. Ainda faltam os criterios de entrada/saida do bulking e o pareamento individual completo entre fase numerada e nome do Cutting quando nao explicitado.
+Continuam faltando os criterios de entrada/saida do Bulking e o pareamento individual completo entre fase numerada e etapa concreta do protocolo. Nenhuma progressao automatica foi autorizada.
 
 Nao implementar score automatico de adesao, deteccao automatica de estagnacao ou mudanca automatica de fase.
 
@@ -586,9 +584,9 @@ O produto deve prever check-in separado para:
 
 As metas/configuracoes individuais podem ser definidas na entrega do primeiro protocolo da cliente.
 
-A formula profissional confirmada para liquidos e **60 mL/kg/dia**. Exemplo: 60 kg -> 3.600 mL/dia. A maior parte deve ser agua pura e o restante pode ser complementado, em menor quantidade, por liquidos zero calorias.
+A formula profissional de baseline para liquidos e **60 mL/kg/dia**. Exemplo: 60 kg -> 3.600 mL/dia. A taxonomia ativa distingue agua pura de outros liquidos zero calorias, sem proporcao minima automatica confirmada.
 
-Ainda faltam parametros de produto: proporcao minima/exata de agua pura, regra de recalculo por peso, frequencia dos lembretes e visibilidade/correcao pela Patty.
+Ainda faltam parametros de produto: eventual proporcao-alvo se a Patty quiser formaliza-la, regra de recalculo por peso, frequencia dos lembretes e visibilidade/correcao pela Patty.
 
 Nao tratar o check-in como score automatico de adesao.
 
@@ -691,7 +689,7 @@ Ja existe:
 - resolucao manual de esclarecimentos e pendencia factual para resposta recebida aguardando revisao.
 
 Ainda aberto:
-- proporcao minima exata de agua pura;
+- eventual proporcao-alvo de agua pura, caso venha a ser formalizada;
 - criterio/momento profissional para novo snapshot quando o peso muda;
 - canal de notificacao e envio recorrente do lembrete de 24h;
 - E2E autenticado desta nova UI quando o runner/ambiente de testes permitir.
@@ -737,7 +735,7 @@ Estado: **FUNDACAO IMPLEMENTADA / APLICADA / PUBLICADA**
 - atividade fisica possui check-in diario sim/nao independente do treino prescrito;
 - nao existe score automatico de adesao.
 
-Continuam abertas proporcao minima de agua pura, politica profissional de recalculo, lembretes de hidratacao e regras de correcao/edicao que dependam de decisao profissional.
+Continuam abertas eventual proporcao-alvo de agua pura, politica profissional de recalculo, lembretes de hidratacao e regras de correcao/edicao que dependam de decisao profissional.
 
 ### Esclarecimentos
 
