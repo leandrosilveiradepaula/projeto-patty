@@ -39,9 +39,9 @@ Todos os itens abaixo precisam estar explicitamente concluídos antes de definir
 - [ ] politica de retencao/processamento da organizacao OpenAI revisada;
 - [ ] necessidade e disponibilidade de ZDR/MAM avaliadas;
 - [ ] responsavel humano aprovou o envio de dados de saude para esse ambiente;
-- [ ] logs da aplicacao revisados para nao registrar prompts/respostas;
-- [ ] rollback operacional testavel: desabilitar `OPENAI_HEALTH_DATA_PROCESSING_ENABLED`;
-- [ ] revisao humana da Patty continua obrigatoria e visivel na UI.
+- [x] logs da aplicacao revisados: o provider server-only nao possui `console.log/error/warn` de prompt/resposta e a regressao de boundary protege essa ausencia;
+- [x] rollback operacional testavel: sem `OPENAI_HEALTH_DATA_PROCESSING_ENABLED=true`, `getOpenAiProviderReadiness()` falha fechado antes de qualquer chamada ao provider;
+- [x] revisao humana da Patty continua obrigatoria e visivel na UI; a tela administrativa explicita que nenhum achado cria diagnostico, pendencia, mensagem, protocolo ou publicacao automatica.
 
 ## Evidencia sintetica 2026-10-03
 
@@ -59,6 +59,19 @@ Resultado do run `37128054011`:
 - `OPENAI_HEALTH_DATA_PROCESSING_ENABLED` permaneceu ausente/desabilitado.
 
 Essa evidencia fecha apenas o gate de avaliacao sintetica inicial. Ela nao autoriza dados reais enquanto os demais itens de retencao/processamento, ZDR/MAM, logging, aprovacao humana e rollback operacional permanecerem pendentes.
+
+## Evidencias locais adicionais 2026-10-03
+
+Revisao do runtime e das regressões confirmou:
+
+- `lib/ai/openai-provider.ts` e `lib/ai/anamnesis-review-execution.ts` sao `server-only`;
+- o provider exige `OPENAI_HEALTH_DATA_PROCESSING_ENABLED === "true"` antes de verificar a chave ou chamar a API;
+- `security/boundary-regression.test.mjs` exige a presenca desse gate, `store: false` e a ausencia de `console.log/error/warn` no provider;
+- a pagina `/admin/anamneses/[anamneseId]/ia` mostra explicitamente "Revisao humana obrigatoria";
+- os unicos atos sobre findings sao registrar observacao interna ou criar anotacao da Patty, ambos separados do output original;
+- nenhuma dessas acoes publica conteudo para cliente ou altera protocolo automaticamente.
+
+Essas verificacoes nao resolvem os controles externos ainda pendentes: politica efetiva de retencao/processamento da organizacao OpenAI, elegibilidade/configuracao ZDR/MAM e aprovacao humana explicita para envio de dados reais.
 
 ## Regra de rollout
 
