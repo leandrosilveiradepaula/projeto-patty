@@ -829,7 +829,7 @@ A migration passou em transacao com `ROLLBACK` antes do merge, o PR #210 fechou 
 
 Registros historicos existentes serao preservados como finalizados sem inventar `created_by_profile_id` ou `finalized_by_profile_id` quando esses atores historicos nao forem conhecidos.
 
-O sistema nao valida automaticamente a completude quinzenal/mensal por chaves, porque catalogo mensal e unidades continuam abertos.
+A finalizacao de avaliacao usa a definicao ativa configuravel para validar prontidao e persiste snapshot da configuracao utilizada. Os codigos tecnicos historicos permanecem por compatibilidade; a regra de calendario para ancoras 29/30/31 continua aberta.
 
 ## 2026-09-27 - Cadastro Atual editavel
 
