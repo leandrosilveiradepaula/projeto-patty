@@ -465,7 +465,7 @@ Estado preservado:
 - nenhuma publicacao foi realizada;
 - os demais arquivos do Drive continuam fora deste lote.
 
-A proxima operacao de midia continua dependendo da criacao/conexao manual de um Blob store privado ao projeto Vercel. Depois disso, o lote deve seguir a ordem registrada no manifesto, sem pular verificacoes de integridade ou gates humanos.
+A proxima operacao de midia continua dependendo da criacao/conexao manual de um Blob store privado ao projeto Vercel. Depois disso, o lote deve seguir a ordem registrada no manifesto, sem pular verificacoes de integridade ou gates humanos. Como o arquivo aprovado possui ~117,6 MiB e a documentacao atual da Vercel recomenda cautela para servir Private Blob acima de 100 MB, publicacao/release fica adicionalmente condicionada a uma validacao de entrega/transferencia em producao; isso nao autoriza tornar o objeto publico.
 
 ## 2026-09-24 - Visibilidade de executions de IA sem estado terminal
 
