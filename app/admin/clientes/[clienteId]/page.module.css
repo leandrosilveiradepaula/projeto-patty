@@ -118,3 +118,20 @@
   height: 18px;
   margin-top: 2px;
 }
+
+.cardLink:focus-visible {
+  border-radius: var(--radius-large);
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.cardLink .infoCard {
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease;
+}
+
+.cardLink:hover .infoCard {
+  border-color: var(--color-brand);
+  background: var(--color-surface-low);
+}

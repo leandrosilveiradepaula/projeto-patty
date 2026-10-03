@@ -10,8 +10,16 @@ import { Section } from "@/components/ui/Section";
 import {
   getAccessibleClient,
   getAccessibleClientRegistration,
+  listAccessibleAnamnesisSubmissions,
+  listAccessibleAssessmentsForClient,
+  listAccessibleClientActivityCheckinEvents,
+  listAccessibleClientFiles,
+  listAccessibleClientHydrationTargets,
   listAccessibleClientTrainingRequests,
+  listAccessibleProtocolsForClient,
+  listContentReleasesForAccessibleClient,
 } from "@/lib/supabase/data-access";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import styles from "./page.module.css";
 
@@ -32,6 +40,21 @@ function formatDateTime(value: string) {
   }).format(new Date(value));
 }
 
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    timeZone: "America/Sao_Paulo",
+    year: "numeric",
+  }).format(new Date(value));
+}
+
+function formatMl(value: number) {
+  return value >= 1000
+    ? new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 2 }).format(value / 1000) + " L"
+    : new Intl.NumberFormat("pt-BR").format(value) + " mL";
+}
+
 export default async function AdminClienteDetailPage({
   params,
 }: AdminClienteDetailPageProps) {
@@ -42,17 +65,46 @@ export default async function AdminClienteDetailPage({
     notFound();
   }
 
-  const [registration, trainingRequests] = await Promise.all([
+  const [
+    registration,
+    trainingRequests,
+    anamneses,
+    assessments,
+    protocols,
+    files,
+    contentReleases,
+    hydrationTargets,
+    activityEvents,
+  ] = await Promise.all([
     getAccessibleClientRegistration(client.id),
     listAccessibleClientTrainingRequests(client.id),
+    listAccessibleAnamnesisSubmissions(client.id),
+    listAccessibleAssessmentsForClient(client.id),
+    listAccessibleProtocolsForClient(client.id),
+    listAccessibleClientFiles(client.id),
+    listContentReleasesForAccessibleClient(client.id),
+    listAccessibleClientHydrationTargets(client.id),
+    listAccessibleClientActivityCheckinEvents(client.id),
   ]);
 
   const displayName = client.profiles?.display_name?.trim();
+  const latestAnamnesis = anamneses[0] ?? null;
+  const latestAssessment = assessments[0] ?? null;
+  const latestProtocol = protocols[0] ?? null;
+  const currentHydrationTarget = hydrationTargets[0] ?? null;
+  const latestActivity = activityEvents[0] ?? null;
+  const currentTargetMl = currentHydrationTarget
+    ? currentHydrationTarget.resolved_target_ml ?? currentHydrationTarget.target_ml
+    : null;
 
   return (
     <>
       <ClientSummaryHeader
-        meta="Acompanhamento ativo"
+        meta={
+          client.started_at
+            ? `Acompanhamento desde ${formatDate(client.started_at)}`
+            : "Acompanhamento ativo"
+        }
         name={displayName || "Cadastro incompleto"}
         secondary={
           client.profile_id
@@ -75,6 +127,121 @@ export default async function AdminClienteDetailPage({
       <ClientWorkspaceNav clientId={client.id} />
 
       <Section
+        description="Resumo dos registros reais desta cliente. Cada cartão abre a área correspondente do acompanhamento."
+        title="Visão do acompanhamento"
+      >
+        <div className={styles.areaGrid}>
+          <Link className={styles.cardLink} href={`/admin/clientes/${client.id}/anamnese`}>
+            <Card className={styles.infoCard}>
+              <div className={styles.cardHeader}>
+                <h3 className={styles.cardTitle}>Anamnese</h3>
+                <Badge variant={latestAnamnesis?.submitted_at ? "positive" : latestAnamnesis ? "warning" : "neutral"}>
+                  {latestAnamnesis
+                    ? latestAnamnesis.submitted_at
+                      ? "Enviada"
+                      : "Rascunho"
+                    : "Não iniciada"}
+                </Badge>
+              </div>
+              <p className={styles.cardDescription}>
+                {latestAnamnesis
+                  ? latestAnamnesis.submitted_at
+                    ? `Último envio em ${formatDateTime(latestAnamnesis.submitted_at)}.`
+                    : `Rascunho criado em ${formatDateTime(latestAnamnesis.created_at)}.`
+                  : "Nenhuma Anamnese registrada."}
+              </p>
+            </Card>
+          </Link>
+
+          <Link className={styles.cardLink} href={`/admin/clientes/${client.id}/avaliacoes`}>
+            <Card className={styles.infoCard}>
+              <div className={styles.cardHeader}>
+                <h3 className={styles.cardTitle}>Avaliações</h3>
+                <Badge variant="neutral">{assessments.length}</Badge>
+              </div>
+              <p className={styles.cardDescription}>
+                {latestAssessment
+                  ? `${latestAssessment.finalized_at ? "Última finalizada" : "Última em rascunho"} · ${formatDate(latestAssessment.assessed_at)}.`
+                  : "Nenhuma avaliação registrada."}
+              </p>
+            </Card>
+          </Link>
+
+          <Link className={styles.cardLink} href={`/admin/clientes/${client.id}/protocolos`}>
+            <Card className={styles.infoCard}>
+              <div className={styles.cardHeader}>
+                <h3 className={styles.cardTitle}>Protocolos</h3>
+                <Badge variant="neutral">{protocols.length}</Badge>
+              </div>
+              <p className={styles.cardDescription}>
+                {latestProtocol
+                  ? `Mais recente: ${latestProtocol.protocol_type} · criado em ${formatDate(latestProtocol.created_at)}.`
+                  : "Nenhum protocolo registrado."}
+              </p>
+            </Card>
+          </Link>
+
+          <Link className={styles.cardLink} href={`/admin/clientes/${client.id}/arquivos`}>
+            <Card className={styles.infoCard}>
+              <div className={styles.cardHeader}>
+                <h3 className={styles.cardTitle}>Arquivos</h3>
+                <Badge variant="neutral">{files.length}</Badge>
+              </div>
+              <p className={styles.cardDescription}>
+                Fotos, exames e documentos privados vinculados a esta cliente.
+              </p>
+            </Card>
+          </Link>
+
+          <Link className={styles.cardLink} href={`/admin/clientes/${client.id}/conteudos`}>
+            <Card className={styles.infoCard}>
+              <div className={styles.cardHeader}>
+                <h3 className={styles.cardTitle}>Conteúdos</h3>
+                <Badge variant="neutral">{contentReleases.length}</Badge>
+              </div>
+              <p className={styles.cardDescription}>
+                {contentReleases.length === 0
+                  ? "Nenhum conteúdo liberado."
+                  : `${contentReleases.length} conteúdo(s) liberado(s) para a cliente.`}
+              </p>
+            </Card>
+          </Link>
+
+          <Link className={styles.cardLink} href={`/admin/clientes/${client.id}/checkins`}>
+            <Card className={styles.infoCard}>
+              <div className={styles.cardHeader}>
+                <h3 className={styles.cardTitle}>Check-ins</h3>
+                <Badge variant="neutral">
+                  {currentTargetMl !== null ? formatMl(currentTargetMl) : "Sem meta"}
+                </Badge>
+              </div>
+              <p className={styles.cardDescription}>
+                {latestActivity
+                  ? `Última atividade: ${latestActivity.checkin_date} · ${latestActivity.did_activity ? "fez atividade" : "não fez atividade"}.`
+                  : "Nenhum check-in de atividade registrado."}
+              </p>
+            </Card>
+          </Link>
+
+          <a className={styles.cardLink} href="#treino">
+            <Card className={styles.infoCard}>
+              <div className={styles.cardHeader}>
+                <h3 className={styles.cardTitle}>Treino</h3>
+                <Badge variant="neutral">
+                  {trainingRequests.length > 0 ? "Solicitado" : "Não solicitado"}
+                </Badge>
+              </div>
+              <p className={styles.cardDescription}>
+                {trainingRequests.length > 0
+                  ? `${trainingRequests.length} solicitação(ões) registrada(s) no histórico.`
+                  : "Nenhuma solicitação de treino registrada."}
+              </p>
+            </Card>
+          </a>
+        </div>
+      </Section>
+
+      <Section
         description="Informações atuais de contato, separadas do acesso à conta e da Anamnese."
         title="Cadastro atual"
       >
@@ -89,6 +256,7 @@ export default async function AdminClienteDetailPage({
 
       <Section
         description="Registre a solicitação quando a cliente contratar o serviço de treino."
+        id="treino"
         title="Treino"
       >
         <div className={styles.trainingGrid}>
