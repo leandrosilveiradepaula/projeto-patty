@@ -74,7 +74,7 @@ Estados usados:
 | Exercicios | leitura admin IMPLEMENTADA | nao | CI VALIDADO | definir exposicao a cliente e campos finais |
 | Progresso de conteudo | schema existe | fluxo nao implementado | PARCIAL | definir quem registra abertura/conclusao |
 | IA | fundacao de banco + failure handling + boundary server-side + provider OpenAI + Structured Outputs + aliases + contrato `anamnesis_review` IMPLEMENTADOS | avaliacao sintetica operacional 5/5 PASS; dados reais continuam bloqueados | run `37135047413`: latencia media 2.922 ms, 4.076 tokens totais; prompt v1 aplicado; CI cobre adapter/contrato/boundaries | confirmar controles efetivos de retencao/ZDR-MAM, projeto/credencial de producao e aprovacao humana antes de dados reais |
-| Drive | INVENTARIADO + revisao controlada iniciada | nenhuma migracao fisica | video da balanca aprovado; Vercel Private Blob definido; lote 1 machine-readable preparado | criar/conectar o store privado e somente depois migrar/verificar/versionar o primeiro item |
+| Drive | INVENTARIADO + revisao controlada iniciada | store privado `projeto-patty-blob` criado/conectado; arquivo ainda nao migrado | video da balanca aprovado; pre-flight de tamanho/MIME/SHA-256 registrado; store `private` em `iad1` | migrar/verificar/versionar o primeiro item e validar entrega privada >100 MB antes de release |
 | Regras deterministicas do metodo | IMPLEMENTADO PARCIAL | sem automacao de protocolo | CI VALIDADO | ampliar somente com formulas exatas confirmadas/documentadas |
 | CI | IMPLEMENTADO | automatico no GitHub Actions + smoke E2E manual de arquivos privados | `npm ci` + audit high/critical de producao + typecheck + suites deterministicas + `test:security-boundaries` + build; core Actions em v7; E2E de producao PASS nos fluxos ja estabilizados | ampliar E2E somente para fluxos estaveis e sinteticos |
 
@@ -311,17 +311,17 @@ A migration `20260924210600_create_educational_content_assets.sql` esta aplicada
 
 O PR #157 foi mergeado no commit `857daed` e publicado em deployment `READY`. Nenhum erro/fatal foi observado na janela consultada.
 
-Ainda nao existe Blob store conectado nem arquivo fisico migrado. O video aprovado da balanca continua no Drive ate a operacao controlada de criacao/conexao do store, upload, verificacao de hash e publicacao/release.
+O Blob store privado `projeto-patty-blob` foi criado e conectado ao projeto Vercel em 2026-10-03, em `iad1`, usando OIDC sem token read-write persistente. O arquivo fisico ainda nao foi migrado; o video aprovado continua no Drive ate o upload controlado, verificacao pos-upload e posterior publicacao/release.
 
 ## Midia educacional - lote 1 preparado
 
-Estado: **PREPARADO / BLOQUEADO NO STORE**
+Estado: **STORE PRONTO / UPLOAD PENDENTE**
 
 A fundacao de metadata no Supabase permanece aplicada e vazia em producao. O primeiro lote controlado foi definido em `docs/educational_media_migration_batch_1.json` e possui teste de invariantes no CI.
 
-O lote contem somente o video da balanca aprovado pela Patty. O pre-flight somente leitura do original no Drive confirmou tamanho/MIME e registrou SHA-256 esperado `ee05d6c12ea02db283234f5d69a09ff60c4d831183fe6715d7aa9848e76905b1`; esse valor deve ser recalculado e comparado antes do futuro upload. O lote permanece deliberadamente sem `storage_path`, registros de conteudo/versao/asset, publicacao ou release enquanto o Vercel Private Blob store nao estiver criado/conectado.
+O lote contem somente o video da balanca aprovado pela Patty. O pre-flight somente leitura do original no Drive confirmou tamanho/MIME e registrou SHA-256 esperado `ee05d6c12ea02db283234f5d69a09ff60c4d831183fe6715d7aa9848e76905b1`; esse valor deve ser recalculado e comparado antes do upload. O store ja esta pronto, mas o lote permanece deliberadamente sem `storage_path`, registros de conteudo/versao/asset, publicacao ou release.
 
-A integracao Vercel usada nesta sessao nao oferece operacao de Storage, portanto a criacao/conexao do store continua uma pendencia operacional manual. O procedimento seguro foi versionado em `docs/VERCEL_BLOB_SETUP.md`. Isso nao bloqueia outras frentes tecnicas do sistema completo e nao autoriza migracao dos demais arquivos do Drive.
+A integracao Vercel usada nesta sessao nao oferece operacao direta de Storage; por isso o store foi criado manualmente no dashboard e a evidencia foi registrada em `docs/VERCEL_BLOB_SETUP.md`. Essa conclusao autoriza apenas o proximo passo do lote aprovado e nao autoriza migracao dos demais arquivos do Drive.
 
 ## IA - revisao humana de findings
 
@@ -773,5 +773,5 @@ Estado: **INVENTARIO/VALIDACAO FAIL-CLOSED / NAO PUBLICADO**
 
 - Vercel do master validado como `READY`;
 - sem cluster de erro de runtime nas ultimas 24h na verificacao desta rodada;
-- GitHub Actions permanece bloqueado antes dos steps por runner/alocacao externa;
+- o bloqueio historico de runner do GitHub Actions esta resolvido; os workflows recentes de validacao executam steps, testes e build normalmente;
 - diagnostico com `ubuntu-latest` reproduziu `steps: null`, portanto nao alterar workflow para mascarar o problema.
