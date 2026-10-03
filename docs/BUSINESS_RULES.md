@@ -325,7 +325,7 @@ Exemplos historicos individuais nao viram regra geral.
 
 Regra nao confirmada deve permanecer como `QUESTAO ABERTA`.
 
-Nao automatizar regras de hidratacao alem da formula confirmada de 60 mL/kg e da composicao geral agua predominante + complemento zero calorias; suplementacao, manipulados, progressao definitiva de treino, criterios finais de avaliacao, fases 5 e 6 do Carb Cycle, etapas posteriores ao Cutting 2, Bulking ou Consolidacao permanecem dependentes de confirmacao documentada.
+Nao automatizar regras de hidratacao alem da formula confirmada de 60 mL/kg e da taxonomia ativa de liquidos; nao existe proporcao minima automatica confirmada entre agua pura e outros liquidos zero calorias. Suplementacao, manipulados, progressao definitiva de treino, criterios finais de avaliacao, fases 5 e 6 do Carb Cycle, etapas posteriores ao Cutting 2, Bulking ou Consolidacao permanecem dependentes de confirmacao documentada.
 ## Leitura profissional da Anamnese
 
 ### DECISAO CONFIRMADA
@@ -431,9 +431,10 @@ Exemplo confirmado:
 - cliente com 60 kg -> 3.600 mL/dia = 3,6 L/dia.
 
 Na composicao dessa meta:
-- a maior parte deve ser consumida como **agua pura**;
-- o restante pode ser complementado, em menor quantidade, com outros liquidos **zero calorias**, como cha, chimarrao, suco zero ou refrigerante zero;
-- a soma deve atingir a meta diaria calculada.
+- a taxonomia ativa distingue **agua pura** de **outros liquidos zero calorias**;
+- ambos podem ser registrados no check-in;
+- a soma registrada pode ser comparada com a meta diaria calculada;
+- nao existe proporcao minima automatica confirmada entre as categorias.
 
 A Patty descreveu essa formula como uma referencia media do seu metodo. Nao tratar essa regra do metodo como recomendacao medica geral fora do acompanhamento profissional.
 
@@ -444,7 +445,7 @@ A existencia de metas e lembretes esta confirmada como comportamento desejado do
 Esses parametros podem ser definidos individualmente **na entrega do primeiro protocolo da cliente**, junto com a revisao/publicacao inicial do acompanhamento.
 
 Ainda nao estao formalizados como regra geral:
-- proporcao minima/exata da meta que deve ser agua pura;
+- eventual proporcao-alvo entre agua pura e outros liquidos, caso a Patty queira formaliza-la futuramente;
 - se/quando a meta deve ser recalculada apos mudanca de peso;
 - horarios e cadencia padrao dos lembretes;
 - o que a Patty visualiza ou pode corrigir;
