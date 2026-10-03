@@ -31,10 +31,10 @@ Antes de habilitar dados reais, confirmar na organizacao/projeto OpenAI qual pol
 
 Todos os itens abaixo precisam estar explicitamente concluídos antes de definir `OPENAI_HEALTH_DATA_PROCESSING_ENABLED=true`:
 
-- [ ] conta/projeto OpenAI de producao identificado;
-- [ ] `OPENAI_API_KEY` configurada somente no ambiente server-side de producao;
-- [ ] chave nao presente no repositorio, browser, logs ou fixtures;
-- [ ] avaliacao sintetica do modelo executada e aprovada;
+- [x] conta/projeto OpenAI para a avaliacao sintetica identificado (organizacao `Personal`, projeto `Default project`);
+- [x] `OPENAI_API_KEY` configurada como GitHub Actions secret para a avaliacao sintetica; uso em producao continua separado do gate de dados reais;
+- [x] chave nao presente no repositorio, browser, logs ou fixtures; o workflow validou apenas a existencia do secret e o GitHub mascarou seu valor;
+- [x] avaliacao sintetica do modelo executada e aprovada no workflow `Evaluate OpenAI anamnesis review`, run `37128054011`;
 - [ ] modelo/effort avaliados em qualidade, custo e latencia;
 - [ ] politica de retencao/processamento da organizacao OpenAI revisada;
 - [ ] necessidade e disponibilidade de ZDR/MAM avaliadas;
@@ -42,6 +42,23 @@ Todos os itens abaixo precisam estar explicitamente concluídos antes de definir
 - [ ] logs da aplicacao revisados para nao registrar prompts/respostas;
 - [ ] rollback operacional testavel: desabilitar `OPENAI_HEALTH_DATA_PROCESSING_ENABLED`;
 - [ ] revisao humana da Patty continua obrigatoria e visivel na UI.
+
+## Evidencia sintetica 2026-10-03
+
+O workflow manual `Evaluate OpenAI anamnesis review` foi executado no `master` `d912211f2460fbdf94e6a70c6bd07b43ca8822b5` usando exclusivamente fixtures sinteticas.
+
+Resultado do run `37128054011`:
+
+- `clear_no_findings`: PASS;
+- `possible_contradiction`: PASS;
+- `clarification_needed`: PASS;
+- `missing_answer`: PASS;
+- total: 4 cenarios, 4 aprovados, 0 falhas;
+- modelo: `gpt-5.6-terra`;
+- nenhum dado real de cliente foi usado;
+- `OPENAI_HEALTH_DATA_PROCESSING_ENABLED` permaneceu ausente/desabilitado.
+
+Essa evidencia fecha apenas o gate de avaliacao sintetica inicial. Ela nao autoriza dados reais enquanto os demais itens de retencao/processamento, ZDR/MAM, logging, aprovacao humana e rollback operacional permanecerem pendentes.
 
 ## Regra de rollout
 
