@@ -136,7 +136,7 @@ Estado atual revalidado em 2026-10-01: o PR #246 restaurou o baseline verde e fo
 | Arquivos privados | SIM | PARCIAL/AVANCADO | Smokes cliente/admin + auditoria estatica | Acesso da Patty sem assignment confirmado em RLS/Storage/rotas, com MFA AAL2 | Politica de retencao/hard delete |
 | Avaliacoes e medidas | Fundacao + cadencia profissional parcial definida | Lifecycle operacional de rascunho/finalizacao implementado | CI/build PASS no PR #210 + pre-apply `ROLLBACK` PASS | `20260927002227_create_assessment_draft_lifecycle` APLICADA NO SAAS | Avaliacao Basica ocorre no meio do intervalo entre Completas; Avaliacao Completa usa catalogo confirmado de peso, medidas e fotos; regra de calendario para ancora 29/30/31 continua aberta |
 | Protocolos versionados | SIM | Lifecycle manual implementado | CI/validacoes existentes | Backend/SaaS correspondente existente | Criacao/edicao profissional completa conforme regras ainda abertas |
-| Conteudo educacional / exercicios | SIM como dominios separados | Fundacao/release + metadata de asset preparada | Inventario 89/89 revalidado; smoke transacional de assets PASS | Vercel Private Blob definido para midia; store/upload ainda nao executados | Criar/conectar store privado, migrar video aprovado, verificar hash e publicar/liberar explicitamente |
+| Conteudo educacional / exercicios | SIM como dominios separados | Fundacao/release + metadata de asset preparada | Inventario 89/89 revalidado; smoke transacional de assets PASS; pre-flight de integridade do primeiro video registrado | Vercel Private Blob privado `projeto-patty-blob` criado/conectado em `iad1`; upload ainda nao executado | Migrar controladamente o video aprovado, reverificar hash e validar entrega >100 MB antes de publicar/liberar explicitamente |
 | Metodo da Patty | PARCIALMENTE DEFINIDO | Motor determinístico existente/parcial; regras profissionais migram para configuração versionada e editável | CI | Fluxo confirmado somente ate Cutting 2: 2 Low / 1 High; meta de liquidos, equivalencia de legumes, catalogos de avaliacao/liquidos e templates Carb Cycle 1-3 versionados | Etapas posteriores ao Cutting 2, Fases 5/6, Bulking, Consolidacao, suplementacao, treino, parametros restantes do check-in e criterios objetivos de estagnacao |
 | IA assistiva | SIM como principio e arquitetura; provider OpenAI confirmado | PARCIAL/AVANCADO | Adapter OpenAI + Structured Outputs + aliases + UI de revisao humana; avaliacao sintetica 5/5 PASS com `gpt-5.6-terra` / reasoning `medium`; latencia media 2.922 ms e 4.076 tokens totais no run `37135047413` | Prompt v1 aplicado; chamada com dados reais segue bloqueada | Controles efetivos de retencao/ZDR-MAM, projeto/credencial definitiva e conclusao do gate de dados de saude |
 | Failure handling de IA | SIM | SIM no schema + boundary server-side | CI + invariantes deterministicas | `20260922160058` aplicada; provider adapter publicado, chamada com dados reais segue gated | Manter gate fechado ate controles organizacionais de dados; recovery automatico segue aberto |
@@ -293,7 +293,7 @@ Ordem operacional sugerida, sujeita a revalidacao do HEAD:
 3. RETOMAR quando houver acesso operacional: configurar Gmail Custom SMTP e validar convite real.
 4. CONCLUIDO: fluxo autenticado admin <-> cliente de esclarecimentos validado em producao com fixture sintetica no run `36053370894`.
 5. CONCLUIDO: avaliacao sintetica operacional do fluxo OpenAI, run `37135047413`, 5/5 PASS; latencia total 14.611 ms, media 2.922 ms e 4.076 tokens. Proximo gate: controles efetivos de retencao/ZDR-MAM, definicao do projeto/credencial de producao e aprovacao explicita antes de dados reais.
-6. Infraestrutura de midia educacional DEFINIDA como Vercel Private Blob; proximo passo operacional e criar/conectar store privado e migrar controladamente o video aprovado da balanca.
+6. Infraestrutura de midia educacional DEFINIDA e store privado `projeto-patty-blob` CRIADO/CONECTADO em `iad1`; proximo passo operacional e migrar controladamente o video aprovado da balanca, reverificar integridade e validar a entrega privada >100 MB antes de qualquer release.
 7. Fechar apenas as lacunas reais ainda abertas da Anamnese/Avaliacoes sem reabrir consentimento, publicacao da v1 ou o fluxo de draft ja validados.
 8. Ampliar automacao de alimentacao/treino somente depois das regras profissionais correspondentes estarem documentadas.
 
@@ -454,9 +454,9 @@ O primeiro lote de migracao fisica foi preparado de forma machine-readable em `d
 
 O manifesto preserva o original, exige path opaco sem PII, armazenamento `vercel_blob` privado, verificacao de tamanho/MIME/SHA-256 e a sequencia explicita draft -> asset -> revisao humana -> publicacao -> release. Em 2026-10-03 foi feito um pre-flight somente leitura diretamente do arquivo aprovado no Drive: tamanho 123.262.796 bytes, MIME `video/mp4`, duracao 141,162667 s, video H.264 1920x1080, audio AAC e SHA-256 `ee05d6c12ea02db283234f5d69a09ff60c4d831183fe6715d7aa9848e76905b1`. Esse hash e apenas referencia esperada: o arquivo devera ser baixado e hasheado novamente antes do upload ao Blob. O teste deterministico compara os metadados da fonte com o inventario original e continua falhando fechado enquanto store, asset, publicacao e release nao existirem.
 
-### PENDENCIA OPERACIONAL / BLOQUEADA NESTA SESSAO
+### PROVISIONAMENTO DO STORE CONCLUIDO / UPLOAD PENDENTE
 
-A integracao Vercel disponivel nesta sessao permite consultar projeto, deployments, logs e documentacao, mas nao expoe operacao de criacao/listagem/conexao de Blob stores. Portanto, nenhum Vercel Private Blob store foi criado ou conectado por esta tarefa.
+Em 2026-10-03 o store `projeto-patty-blob` foi criado pelo dashboard do projeto Vercel, com acesso `private`, regiao `iad1` e conexao OIDC sem token read-write persistente. A integracao desta sessao continua sem operacao direta de Storage, portanto a criacao foi executada manualmente pelo usuario e verificada pela tela do projeto.
 
 Estado preservado:
 - nenhuma copia persistente do arquivo do Drive foi mantida; o pre-flight local temporario foi removido apos a verificacao de integridade;
@@ -465,7 +465,7 @@ Estado preservado:
 - nenhuma publicacao foi realizada;
 - os demais arquivos do Drive continuam fora deste lote.
 
-A proxima operacao de midia continua dependendo da criacao/conexao manual de um Blob store privado ao projeto Vercel. Depois disso, o lote deve seguir a ordem registrada no manifesto, sem pular verificacoes de integridade ou gates humanos. Como o arquivo aprovado possui ~117,6 MiB e a documentacao atual da Vercel recomenda cautela para servir Private Blob acima de 100 MB, publicacao/release fica adicionalmente condicionada a uma validacao de entrega/transferencia em producao; isso nao autoriza tornar o objeto publico.
+O store privado ja esta criado/conectado. A proxima operacao de midia e baixar novamente a fonte aprovada, reverificar tamanho/MIME/SHA-256, gerar path opaco e executar o upload privado. Como o arquivo aprovado possui ~117,6 MiB e a documentacao atual da Vercel recomenda cautela para servir Private Blob acima de 100 MB, publicacao/release fica adicionalmente condicionada a uma validacao de entrega/transferencia em producao; isso nao autoriza tornar o objeto publico.
 
 ## 2026-09-24 - Visibilidade de executions de IA sem estado terminal
 
@@ -938,7 +938,7 @@ Conclusao operacional atual: o bloqueio externo nao esta ativo. Novas falhas dev
 ### BLOQUEIOS EXTERNOS QUE PERMANECEM
 
 - avaliacao sintetica inicial da OpenAI: CONCLUIDA com `OPENAI_API_KEY` em GitHub Actions; dados reais continuam dependentes da conclusao do gate de dados de saude;
-- o primeiro video educacional aprovado continua bloqueado ate criacao/conexao de Vercel Private Blob, operacao nao exposta pela integracao disponivel;
+- o Vercel Private Blob ja foi criado/conectado; o primeiro video educacional aprovado agora depende do upload controlado, verificacao pos-upload e validacao de entrega privada >100 MB;
 - Leaked Password Protection permanece dependente da configuracao/plano do Supabase;
 - canal real dos lembretes de esclarecimento continua sem decisao.
 
