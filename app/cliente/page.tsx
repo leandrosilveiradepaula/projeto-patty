@@ -7,6 +7,7 @@ import {
   getCurrentClient,
   getCurrentUserProfile,
   listAccessibleAnamnesisSubmissions,
+  listAccessibleWeeklyFeedbacksForClient,
   listCurrentClientContentReleases,
   listCurrentClientFiles,
   listPublishedProtocolsForCurrentClient,
@@ -35,6 +36,7 @@ export default async function ClientePage() {
     listPublishedProtocolsForCurrentClient(client.id),
     listCurrentClientContentReleases(client.id),
     listCurrentClientFiles(client.id),
+    listAccessibleWeeklyFeedbacksForClient(client.id),
   ]);
 
   const areas = [
