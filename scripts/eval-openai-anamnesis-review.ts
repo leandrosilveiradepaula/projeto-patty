@@ -66,10 +66,75 @@ const ids = {
   qm: "99999999-9999-4999-8999-999999999999",
 };
 
+
+const representativeVolumeItems: Array<{
+  answer: string;
+  key: string;
+  label: string;
+}> = [
+  { key: "city", label: "Cidade", answer: "Cidade Sintetica" },
+  { key: "contact_phone", label: "Telefone", answer: "00000000000" },
+  { key: "contact_email", label: "Email", answer: "cliente.sintetica@example.invalid" },
+  { key: "blood_test_habit", label: "Tem o costume de realizar exames de sangue?", answer: "Sim" },
+  { key: "has_health_plan", label: "Possui plano de saude?", answer: "Sim" },
+  { key: "health_plan_details", label: "Qual plano de saude?", answer: "Plano sintetico" },
+  { key: "has_diabetes", label: "Possui diabetes?", answer: "Nao" },
+  { key: "has_metabolic_disorder", label: "Possui algum transtorno metabolico, como tireoide ou hipogonadismo?", answer: "Nao" },
+  { key: "chronic_disease", label: "Possui alguma doenca cronica, como anemia, artrite, fibromialgia etc.?", answer: "Nao" },
+  { key: "had_surgery", label: "Ja realizou alguma cirurgia?", answer: "Sim" },
+  { key: "surgery_details", label: "Qual(is)?", answer: "Procedimento sintetico antigo, sem dado real" },
+  { key: "has_allergy", label: "Possui alergia a alguma medicacao ou comida?", answer: "Nao" },
+  { key: "had_fracture_or_sequela", label: "Ja fraturou ou teve alguma lesao importante que deixou sequela?", answer: "Nao" },
+  { key: "intense_body_pain", label: "Sente dor intensa em alguma parte do corpo?", answer: "Nao" },
+  { key: "cardiovascular_or_hypertension", label: "Possui alguma doenca cardiovascular ou hipertensao arterial?", answer: "Nao" },
+  { key: "chest_pain_during_activity", label: "Ja sentiu dor no peito durante alguma atividade fisica?", answer: "Nao" },
+  { key: "has_fainted", label: "Ja desmaiou alguma vez?", answer: "Nao" },
+  { key: "used_supplement_before", label: "Ja usou algum tipo de suplemento alimentar?", answer: "Sim" },
+  { key: "past_supplement_details", label: "Qual(is)?", answer: "Suplemento sintetico A" },
+  { key: "current_supplements_medicines", label: "O que esta administrando atualmente entre suplementos, fitoterapicos e medicamentos?", answer: "Nenhum no momento" },
+  { key: "libido", label: "Como esta sua libido?", answer: "Sem observacao relevante" },
+  { key: "uses_vitamin_supplement", label: "Toma algum suplemento vitaminico?", answer: "Nao" },
+  { key: "sleep_quality_and_duration", label: "Como esta a qualidade e o tempo do seu sono?", answer: "Aproximadamente 7 horas, qualidade regular" },
+  { key: "takes_long_to_sleep", label: "Demora a dormir?", answer: "Nao" },
+  { key: "wakes_often_at_night", label: "Acorda muitas vezes durante a noite?", answer: "Nao" },
+  { key: "social_relationships", label: "Como sao suas relacoes sociais?", answer: "Boas e estaveis" },
+  { key: "considers_self_patient", label: "Considera-se paciente?", answer: "Sim" },
+  { key: "was_more_patient_before", label: "Ja foi mais paciente do que e hoje?", answer: "Nao" },
+  { key: "mood", label: "Como esta seu humor?", answer: "Estavel" },
+  { key: "too_tired_to_get_up", label: "Sente-se muito cansado para levantar da cama pela manha?", answer: "Nao" },
+  { key: "daily_water_intake", label: "Toma quantos litros de agua por dia?", answer: "2L" },
+  { key: "favorite_foods", label: "3 alimentos preferidos", answer: "Arroz, feijao e frango" },
+  { key: "least_favorite_foods", label: "3 alimentos que menos gostei", answer: "Alimento sintetico A, B e C" },
+  { key: "relationship_with_food", label: "Me fala um pouco como tu ve tua relacao com a comida", answer: "Rotina regular, sem observacao adicional" },
+  { key: "self_image_in_mirror", label: "Quando tu te olha no espelho, o que tu enxerga?", answer: "Desejo de melhorar a composicao corporal" },
+  { key: "perceived_external_image", label: "E como acredita que as pessoas te veem?", answer: "Sem observacao especifica" },
+  { key: "self_qualities", label: "Me fala das tuas qualidades", answer: "Organizada, persistente e pontual" },
+  { key: "has_addiction", label: "Possui algum vicio (cigarro, bebidas alcoolicas, drogas ilicitas etc.)?", answer: "Nao" },
+  { key: "is_competitive_athlete", label: "E atleta competitivo de fisiculturismo ou outro esporte?", answer: "Nao" },
+  { key: "short_medium_long_term_goals", label: "Quais sao seus objetivos a curto (3 meses), medio (12 meses) e longo (5 anos) prazo?", answer: "Melhorar rotina, manter consistencia e preservar os resultados" },
+  { key: "plan_choice_reason", label: "Por que optou por este plano?", answer: "Busca acompanhamento estruturado" },
+  { key: "consent_acceptance", label: "Declaracao de anuencia", answer: "Concordo" },
+];
+
+const representativeVolumeSources = representativeVolumeItems.map(
+  (item, index) => {
+    const suffix = String(index + 1).padStart(12, "0");
+
+    return {
+      answer_value: item.answer,
+      label: item.label,
+      question_id: `b0000000-0000-4000-8000-${suffix}`,
+      question_key: item.key,
+      source_answer_id: `a0000000-0000-4000-8000-${suffix}`,
+    };
+  },
+);
+
 const scenarios: Array<{
   name: string;
   expectedType: AnamnesisReviewFindingType | null;
   context: AnamnesisReviewContext;
+  validationOnly?: boolean;
 }> = [
   {
     name: "clear_no_findings",
@@ -161,6 +226,19 @@ const scenarios: Array<{
           source_answer_id: ids.a4,
         },
       ],
+    },
+  },
+  {
+    name: "representative_volume",
+    expectedType: null,
+    validationOnly: true,
+    context: {
+      allowedMissingTargetQuestionIds: new Set(),
+      allowedSourceAnswerIds: new Set(
+        representativeVolumeSources.map((source) => source.source_answer_id),
+      ),
+      missingTargets: [],
+      sources: representativeVolumeSources,
     },
   },
 ];
@@ -281,8 +359,9 @@ for (const scenario of scenarios) {
   }
 
   const findingTypes = mapped.value.findings.map((finding) => finding.type);
-  const pass =
-    scenario.expectedType === null
+  const pass = scenario.validationOnly
+    ? true
+    : scenario.expectedType === null
       ? findingTypes.length === 0
       : findingTypes.includes(scenario.expectedType);
 
@@ -293,6 +372,7 @@ for (const scenario of scenarios) {
       scenario: scenario.name,
       pass,
       expectedType: scenario.expectedType,
+      validationOnly: scenario.validationOnly ?? false,
       findingTypes,
       findingCount: mapped.value.findings.length,
       latency_ms: latencyMs,
