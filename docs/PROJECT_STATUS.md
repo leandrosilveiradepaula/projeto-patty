@@ -452,14 +452,14 @@ Criar/conectar o Blob store e copiar o video continuam operacoes separadas.
 
 O primeiro lote de migracao fisica foi preparado de forma machine-readable em `docs/educational_media_migration_batch_1.json`, limitado exclusivamente ao video aprovado `MovaviClips_Video_20220217-143151.mp4` (Drive file ID `1z61DpJfwp-6DMhYMpCRNafkSwX6h9LBE`, `video/mp4`, 123.262.796 bytes).
 
-O manifesto preserva o original, exige path opaco sem PII, armazenamento `vercel_blob` privado, verificacao de tamanho/MIME/SHA-256 e a sequencia explicita draft -> asset -> revisao humana -> publicacao -> release. Um teste deterministico compara os metadados da fonte com o inventario original e falha fechado enquanto store, SHA-256, asset, publicacao e release nao existirem.
+O manifesto preserva o original, exige path opaco sem PII, armazenamento `vercel_blob` privado, verificacao de tamanho/MIME/SHA-256 e a sequencia explicita draft -> asset -> revisao humana -> publicacao -> release. Em 2026-10-03 foi feito um pre-flight somente leitura diretamente do arquivo aprovado no Drive: tamanho 123.262.796 bytes, MIME `video/mp4`, duracao 141,162667 s, video H.264 1920x1080, audio AAC e SHA-256 `ee05d6c12ea02db283234f5d69a09ff60c4d831183fe6715d7aa9848e76905b1`. Esse hash e apenas referencia esperada: o arquivo devera ser baixado e hasheado novamente antes do upload ao Blob. O teste deterministico compara os metadados da fonte com o inventario original e continua falhando fechado enquanto store, asset, publicacao e release nao existirem.
 
 ### PENDENCIA OPERACIONAL / BLOQUEADA NESTA SESSAO
 
 A integracao Vercel disponivel nesta sessao permite consultar projeto, deployments, logs e documentacao, mas nao expoe operacao de criacao/listagem/conexao de Blob stores. Portanto, nenhum Vercel Private Blob store foi criado ou conectado por esta tarefa.
 
 Estado preservado:
-- nenhum arquivo do Drive foi copiado;
+- nenhuma copia persistente do arquivo do Drive foi mantida; o pre-flight local temporario foi removido apos a verificacao de integridade;
 - nenhum Blob foi enviado;
 - nenhum `educational_content`, versao, asset ou release foi criado no Supabase;
 - nenhuma publicacao foi realizada;
