@@ -8,7 +8,7 @@ Registrar onde o runtime atual ainda contém valores, fórmulas, catálogos ou w
 
 Baseline auditada:
 
-- `master`: `0de334b309ffd7dbf5db02b0e1ae88237e272b2b`;
+- `master`: `02067ed122c97621b2e986a02e3b7d23089ee05a`;
 - PR documental de parametrização: #245;
 - nenhuma migration aplicada deve ser editada;
 - este inventário não autoriza alteração de regra profissional nem ativação automática de questão ainda aberta.
@@ -219,7 +219,7 @@ Ainda pendente:
 
 ### HR-008 — Catálogo obrigatório da Avaliação Básica/Completa
 
-**Classificação:** EM MIGRAÇÃO — definições versionadas aplicadas no Supabase SaaS; finalização administrativa já consome a definição ativa e passa a persistir snapshot explícito neste PR.
+**Classificação:** MIGRADO — definições versionadas, snapshot operacional e hardening aplicados no Supabase SaaS com compatibilidade histórica.
 
 Estado atual:
 
@@ -230,12 +230,17 @@ Estado atual:
 - a persistência passa por `finalize_assessment_from_method_snapshot`, criando snapshot set + snapshots de catálogo/definição na mesma transação da finalização;
 - aliases/configurações inválidas falham fechados;
 - nenhuma regra de calendário/cadência foi inferida;
-- códigos históricos internos continuam compatíveis.
+- códigos históricos internos continuam compatíveis;
+- os antigos caminhos `buildAssessmentFinalizationReadiness` e `finalizeAccessibleClientAssessment` não possuem consumidores no `master`.
 
-Ainda pendente para encerrar completamente:
+Hardening aplicado e verificado no SaaS:
 
-- aplicar uma migration de hardening depois do consumer switch para exigir snapshot em novas finalizações sem invalidar históricos;
-- remover o helper legado de prontidão somente depois de confirmar que nenhum consumidor restante depende dele.
+- migration `20261002231111_harden_snapshot_consumers.sql` aplicada;
+- novas transições de rascunho para avaliação finalizada exigem `method_configuration_snapshot_set_id`;
+- avaliações históricas já finalizadas antes da adoção do snapshot permanecem válidas;
+- `authenticated` não possui UPDATE amplo em `client_assessments`;
+- `authenticated` mantém UPDATE somente em `assessed_at` e `assessment_kind` para o fluxo de rascunho;
+- a função de lifecycle não é executável por `anon` nem `authenticated`.
 
 A regra de calendário para âncoras 29/30/31 continua aberta e não deve ser inventada.
 
@@ -263,7 +268,7 @@ Limite desta conclusão:
 
 ### HR-010 — Taxonomia de líquidos do check-in
 
-**Classificação:** EM MIGRAÇÃO — catálogo versionado aplicado no Supabase SaaS; validação/exibição já consomem a taxonomia ativa e novos eventos passam a persistir snapshot explícito neste PR.
+**Classificação:** MIGRADO — catálogo versionado, snapshot operacional e hardening aplicados no Supabase SaaS com compatibilidade histórica.
 
 Estado atual:
 
@@ -274,7 +279,15 @@ Estado atual:
 - a escrita passa por `create_liquid_intake_event_from_method_snapshot`, criando snapshot set + snapshot da taxonomia na mesma transação do evento;
 - páginas de cliente/admin usam labels e classificação da taxonomia ativa em vez de traduzir diretamente os códigos;
 - a UI deixa explícito que não existe proporção mínima automática entre tipos;
-- nenhuma proporção mínima de água pura foi inventada.
+- nenhuma proporção mínima de água pura foi inventada;
+- o antigo caminho `createCurrentClientLiquidIntakeEvent` não possui consumidores no `master`.
+
+Hardening aplicado e verificado no SaaS:
+
+- migration `20261002231111_harden_snapshot_consumers.sql` aplicada;
+- `authenticated` não possui INSERT direto em `client_liquid_intake_events`;
+- novos eventos do fluxo suportado passam pela boundary atômica de snapshot;
+- registros históricos anteriores à adoção do snapshot permanecem legíveis e não foram reescritos.
 
 Compatibilidade preservada:
 
@@ -282,11 +295,6 @@ Compatibilidade preservada:
 - o loader falha fechado se uma versão ativa introduzir uma chave que o schema atual ainda não consegue persistir;
 - uma nova chave profissional exigirá migration nova antes de poder ser gravada;
 - valores históricos permanecem append-only.
-
-Ainda pendente para encerrar completamente:
-
-- aplicar uma migration de hardening depois do consumer switch para exigir snapshot em novos eventos sem invalidar históricos;
-- criar migration nova somente se o catálogo aprovado exigir novos códigos persistidos.
 
 ### HR-011 — Nomenclatura legada de Avaliações em UI
 
