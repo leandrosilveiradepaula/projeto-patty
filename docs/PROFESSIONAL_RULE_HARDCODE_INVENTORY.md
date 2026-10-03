@@ -1,6 +1,6 @@
 # Inventário de regras profissionais hardcoded
 
-Última atualização: 2026-10-02.
+Última atualização: 2026-10-03.
 
 ## Objetivo
 
@@ -8,7 +8,7 @@ Registrar onde o runtime atual ainda contém valores, fórmulas, catálogos ou w
 
 Baseline auditada:
 
-- `master`: `0de334b309ffd7dbf5db02b0e1ae88237e272b2b`;
+- `master`: `02067ed122c97621b2e986a02e3b7d23089ee05a`;
 - PR documental de parametrização: #245;
 - nenhuma migration aplicada deve ser editada;
 - este inventário não autoriza alteração de regra profissional nem ativação automática de questão ainda aberta.
@@ -219,7 +219,7 @@ Ainda pendente:
 
 ### HR-008 — Catálogo obrigatório da Avaliação Básica/Completa
 
-**Classificação:** EM MIGRAÇÃO — definições versionadas aplicadas no Supabase SaaS; finalização administrativa já consome a definição ativa e passa a persistir snapshot explícito neste PR.
+**Classificação:** MIGRADO — definições versionadas, snapshot operacional e hardening aplicados no Supabase SaaS com compatibilidade histórica.
 
 Estado atual:
 
@@ -230,43 +230,45 @@ Estado atual:
 - a persistência passa por `finalize_assessment_from_method_snapshot`, criando snapshot set + snapshots de catálogo/definição na mesma transação da finalização;
 - aliases/configurações inválidas falham fechados;
 - nenhuma regra de calendário/cadência foi inferida;
-- códigos históricos internos continuam compatíveis.
+- códigos históricos internos continuam compatíveis;
+- os antigos caminhos `buildAssessmentFinalizationReadiness` e `finalizeAccessibleClientAssessment` não possuem consumidores no `master`.
 
-Ainda pendente para encerrar completamente:
+Hardening aplicado e verificado no SaaS:
 
-- aplicar uma migration de hardening depois do consumer switch para exigir snapshot em novas finalizações sem invalidar históricos;
-- remover o helper legado de prontidão somente depois de confirmar que nenhum consumidor restante depende dele.
+- migration `20261002231111_harden_snapshot_consumers.sql` aplicada;
+- novas transições de rascunho para avaliação finalizada exigem `method_configuration_snapshot_set_id`;
+- avaliações históricas já finalizadas antes da adoção do snapshot permanecem válidas;
+- `authenticated` não possui UPDATE amplo em `client_assessments`;
+- `authenticated` mantém UPDATE somente em `assessed_at` e `assessment_kind` para o fluxo de rascunho;
+- a função de lifecycle não é executável por `anon` nem `authenticated`.
 
 A regra de calendário para âncoras 29/30/31 continua aberta e não deve ser inventada.
 
 ### HR-009 — Lembrete de esclarecimento em 24 horas
 
-**Classificação:** EM PREPARAÇÃO — helper configurável mergeado no PR #260; integração operacional ainda pendente.
+**Classificação:** MIGRADO — intervalo profissional versionado no SaaS e consumidor operacional do painel já resolve a configuração ativa sem fallback hardcoded.
 
-Estado no `master`:
+Estado atual:
 
-- `lib/operations/clarification-reminder.ts` recebe configuração escalar explícita com unidade `hour`;
-- `lib/operations/clarification-reminder-loader.ts` prepara resolução server-side fail-closed do template ativo, sem service role e sem fallback silencioso;
-- golden tests reproduzem o baseline atual de 24 horas e demonstram intervalo alternativo sem mudança de runtime;
-- não existe fallback silencioso para 24 horas no helper configurável;
-- canal e envio real continuam separados e não foram inferidos.
+- o template `workflow.anamnesis_clarification_reminder` foi materializado pela migration `20261002195239_seed_next_method_templates_batch_a.sql`;
+- a versão ativa no Supabase SaaS é a v1 com `{"value":24,"unit":"hour"}`, preservando o baseline confirmado pela Patty;
+- `lib/operations/clarification-reminder.ts` interpreta a configuração escalar e calcula deterministicamente o marco de lembrete;
+- `lib/operations/clarification-reminder-loader.ts` é `server-only`, resolve exatamente uma versão ativa sob RLS e falha fechado;
+- `lib/operations/pending-data.ts` carrega o intervalo ativo e o injeta explicitamente em `buildOperationalPendingItems`;
+- `lib/operations/pending.ts` não contém mais `CLARIFICATION_REMINDER_INTERVAL_MS` nem fallback silencioso para 24 horas;
+- textos do painel derivam o número de horas da configuração resolvida;
+- testes de boundary regression protegem o loader fail-closed e a ausência do hardcode legado.
 
-Hardcode legado ainda ativo:
+Limite desta conclusão:
 
-- `lib/operations/pending.ts` ainda contém `CLARIFICATION_REMINDER_INTERVAL_MS = 24 * 60 * 60 * 1000`;
-- textos operacionais ainda dizem `24 horas`/`24h`.
-
-Ainda pendente para marcar como migrado:
-
-- criar template/versionamento ativo para o intervalo;
-- materializar/aplicar o template ativo do Lote A no SaaS;
-- somente depois conectar o loader ao builder operacional e passar o intervalo resolvido;
-- substituir textos fixos por texto derivado da configuração quando aplicável;
-- manter a distinção entre `lembrete devido` e `lembrete enviado`.
+- isso encerra a retirada do hardcode profissional do cálculo/indicador operacional;
+- o painel apenas registra que um lembrete está **devido** e não presume que uma mensagem foi enviada;
+- o canal técnico de envio continua questão aberta e nenhuma escolha entre in-app, e-mail, push ou outro canal foi inferida;
+- a implementação de envio recorrente deve permanecer separada até existir decisão documentada sobre canal/mecanismo e rastreabilidade de envio.
 
 ### HR-010 — Taxonomia de líquidos do check-in
 
-**Classificação:** EM MIGRAÇÃO — catálogo versionado aplicado no Supabase SaaS; validação/exibição já consomem a taxonomia ativa e novos eventos passam a persistir snapshot explícito neste PR.
+**Classificação:** MIGRADO — catálogo versionado, snapshot operacional e hardening aplicados no Supabase SaaS com compatibilidade histórica.
 
 Estado atual:
 
@@ -277,7 +279,15 @@ Estado atual:
 - a escrita passa por `create_liquid_intake_event_from_method_snapshot`, criando snapshot set + snapshot da taxonomia na mesma transação do evento;
 - páginas de cliente/admin usam labels e classificação da taxonomia ativa em vez de traduzir diretamente os códigos;
 - a UI deixa explícito que não existe proporção mínima automática entre tipos;
-- nenhuma proporção mínima de água pura foi inventada.
+- nenhuma proporção mínima de água pura foi inventada;
+- o antigo caminho `createCurrentClientLiquidIntakeEvent` não possui consumidores no `master`.
+
+Hardening aplicado e verificado no SaaS:
+
+- migration `20261002231111_harden_snapshot_consumers.sql` aplicada;
+- `authenticated` não possui INSERT direto em `client_liquid_intake_events`;
+- novos eventos do fluxo suportado passam pela boundary atômica de snapshot;
+- registros históricos anteriores à adoção do snapshot permanecem legíveis e não foram reescritos.
 
 Compatibilidade preservada:
 
@@ -285,11 +295,6 @@ Compatibilidade preservada:
 - o loader falha fechado se uma versão ativa introduzir uma chave que o schema atual ainda não consegue persistir;
 - uma nova chave profissional exigirá migration nova antes de poder ser gravada;
 - valores históricos permanecem append-only.
-
-Ainda pendente para encerrar completamente:
-
-- aplicar uma migration de hardening depois do consumer switch para exigir snapshot em novos eventos sem invalidar históricos;
-- criar migration nova somente se o catálogo aprovado exigir novos códigos persistidos.
 
 ### HR-011 — Nomenclatura legada de Avaliações em UI
 
