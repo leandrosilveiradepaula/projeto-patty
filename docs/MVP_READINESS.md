@@ -775,3 +775,29 @@ Estado: **INVENTARIO/VALIDACAO FAIL-CLOSED / NAO PUBLICADO**
 - sem cluster de erro de runtime nas ultimas 24h na verificacao desta rodada;
 - o bloqueio historico de runner do GitHub Actions esta resolvido; os workflows recentes de validacao executam steps, testes e build normalmente;
 - diagnostico com `ubuntu-latest` reproduziu `steps: null`, portanto nao alterar workflow para mascarar o problema.
+
+
+## Feedback Semanal - estado em 2026-10-03
+
+Estado: **BACKEND SAAS APLICADO / UI REAL IMPLEMENTADA / AUTOMACAO DE CANAL PENDENTE**
+
+Disponivel no produto:
+- questionario v1 versionado com 21 perguntas;
+- solicitacao manual por cliente e periodo;
+- prazo opcional;
+- rascunho;
+- envio final validado;
+- historico imutavel;
+- pagina administrativa client-scoped;
+- pagina da cliente;
+- entrada na navegacao real da cliente e na visao consolidada administrativa.
+
+Nao implementado ainda:
+- geracao automatica toda segunda-feira;
+- envio de link por email;
+- envio de link por WhatsApp;
+- lembretes;
+- consequencia automatica por atraso/ausencia;
+- analise por IA com dados reais.
+
+Esses itens nao devem bloquear a avaliacao do fluxo interno do produto. A conta administrativa real da Patty continua como pendencia operacional separada.
