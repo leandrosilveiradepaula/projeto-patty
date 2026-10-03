@@ -107,7 +107,7 @@ export default async function AdminPage() {
         description="Atalhos para as tarefas mais frequentes."
         title="Ações rápidas"
       >
-        <div className={styles.quickActions}>
+        <div className={styles.quickActions}>\n          <Link className={styles.quickAction} href="/admin/demo">\n            Abrir demonstracao para a Patty\n          </Link>
           <Link className={styles.quickAction} href="/admin/clientes/nova">
             Convidar cliente
           </Link>
