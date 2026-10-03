@@ -66,7 +66,7 @@ Todos os itens abaixo precisam estar explicitamente concluídos antes de definir
 - [x] `OPENAI_API_KEY` configurada como GitHub Actions secret para a avaliacao sintetica; uso em producao continua separado do gate de dados reais;
 - [x] chave nao presente no repositorio, browser, logs ou fixtures; o workflow validou apenas a existencia do secret e o GitHub mascarou seu valor;
 - [x] avaliacao sintetica do modelo executada e aprovada no workflow `Evaluate OpenAI anamnesis review`, run `37128054011`;
-- [ ] modelo/effort avaliados em qualidade, custo e latencia;
+- [x] modelo/effort avaliados em qualidade, custo e latencia em avaliacao sintetica inicial; run `37135047413`, 5/5 PASS, com latencia e uso de tokens medidos; isso nao substitui validacao de producao;
 - [x] politica publica de retencao/processamento da API OpenAI revisada na documentacao oficial;
 - [ ] politica efetivamente ativa na organizacao/projeto OpenAI verificada no painel;
 - [x] necessidade tecnica de minimizar retencao avaliada: ZDR e a opcao preferida se elegivel;
@@ -105,6 +105,38 @@ Resultado do run `37128054011`:
 - `OPENAI_HEALTH_DATA_PROCESSING_ENABLED` permaneceu ausente/desabilitado.
 
 Essa evidencia fecha apenas o gate de avaliacao sintetica inicial. Ela nao autoriza dados reais enquanto os demais itens de retencao/processamento, ZDR/MAM, logging, aprovacao humana e rollback operacional permanecerem pendentes.
+
+## Evidencia operacional sintetica 2026-10-03
+
+O workflow manual `Evaluate OpenAI anamnesis review` foi executado novamente no `master` `0be7be845216bad852eb468d88efae03fa33587f`, run `37135047413`, usando somente dados sinteticos. O run terminou `SUCCESS` com 5/5 cenarios aprovados.
+
+| Cenario | Resultado | Latencia | Input tokens | Output tokens | Total tokens |
+| --- | --- | ---: | ---: | ---: | ---: |
+| `clear_no_findings` | PASS | 1.900 ms | 420 | 17 | 437 |
+| `possible_contradiction` | PASS | 2.252 ms | 425 | 108 | 533 |
+| `clarification_needed` | PASS | 4.128 ms | 400 | 98 | 498 |
+| `missing_answer` | PASS | 1.820 ms | 421 | 68 | 489 |
+| `representative_volume` | PASS | 4.511 ms | 1.748 | 371 | 2.119 |
+
+Agregados observados:
+- latencia total: 14.611 ms;
+- latencia media: 2.922 ms;
+- input tokens: 3.414;
+- output tokens: 662;
+- total tokens: 4.076;
+- modelo: `gpt-5.6-terra`;
+- reasoning: `medium`;
+- nenhum dado real de cliente foi usado;
+- prompts e respostas nao foram registrados no log; apenas metadados do cenario, contagens e metricas;
+- `OPENAI_HEALTH_DATA_PROCESSING_ENABLED` permaneceu fechado.
+
+Referencia de preco consultada em 2026-10-03:
+- pagina oficial do modelo: https://developers.openai.com/api/docs/models/gpt-5.6-terra
+- preco exibido para tokens de texto: US$ 2,00 por 1 milhao de input tokens e US$ 12,00 por 1 milhao de output tokens.
+
+Aplicando essas tarifas aos contadores observados, sem desconto de cache e sem outras modalidades de processamento, o custo teorico somente de tokens deste run e aproximadamente **US$ 0,014772**. Esse valor e uma estimativa operacional, nao uma fatura: precos, cache, processamento regional, modos de processamento e cobranca efetiva da conta podem alterar o valor real.
+
+Esta medicao fecha a avaliacao sintetica inicial de qualidade/custo/latencia para a configuracao tecnica atual. Ela nao estabelece SLO de producao, pois representa uma unica execucao, e nao autoriza dados reais. Retencao efetiva, ZDR/MAM, credencial/projeto definitivo e aprovacao humana continuam bloqueios independentes.
 
 ## Evidencias locais adicionais 2026-10-03
 
