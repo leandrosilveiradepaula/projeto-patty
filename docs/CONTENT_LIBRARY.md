@@ -40,7 +40,7 @@ Ele e o primeiro conteudo atualmente elegivel para migracao controlada. Elegivel
 
 O arquivo aprovado da balanca possui 123.262.796 bytes (~117,6 MiB). O Supabase atual esta no plano Free e nao aceita uploads acima de 50 MB. Alem disso, o bucket `client-private` e exclusivo do dominio de arquivos privados de clientes e nao deve ser reaproveitado para conteudo educacional.
 
-A estrategia de armazenamento foi definida tecnicamente como Vercel Private Blob para a primeira versao operacional. O Supabase continua como fonte de verdade de metadata/versionamento/releases.
+A estrategia de armazenamento foi definida tecnicamente como Vercel Private Blob para a primeira versao operacional. O Supabase continua como fonte de verdade de metadata/versionamento/releases. A documentacao atual da Vercel recomenda cautela para entrega de blobs privados acima de 100 MB; como o video aprovado possui ~117,6 MiB, o store privado pode ser provisionado, mas publicacao/release desse arquivo exige validacao de entrega e transferencia no ambiente real antes de ser considerado operacional.
 
 A fundacao de metadata de assets foi preparada em `educational_content_assets`, mas isso nao significa que o Blob store esteja criado nem que o arquivo aprovado tenha sido copiado. A migracao fisica continua separada: criar/conectar store privado, copiar o original, conferir SHA-256/tamanho/MIME, registrar o asset na versao draft, revisar, publicar e liberar explicitamente.
 
