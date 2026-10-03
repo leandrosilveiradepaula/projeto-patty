@@ -54,7 +54,7 @@ Estados usados:
 - processo de autoria/revisao/publicacao das bibliotecas;
 - taxonomia e direitos/licenciamento para migracao do Drive;
 - exposicao da biblioteca de exercicios a cliente;
-- avaliacao sintetica do modelo/effort, credencial de ambiente e conclusao do gate de dados de saude da OpenAI;
+- avaliacao sintetica inicial da OpenAI CONCLUIDA; permanecem custo/latencia de rollout e conclusao do gate de dados de saude;
 - regras profissionais ainda abertas do metodo.
 
 ## Matriz operacional
@@ -73,7 +73,7 @@ Estados usados:
 | Conteudo educacional | leitura admin/cliente por release IMPLEMENTADA | release manual | CI VALIDADO; elegibilidade de release testada | taxonomia, autoria/revisao e primeiro lote do Drive |
 | Exercicios | leitura admin IMPLEMENTADA | nao | CI VALIDADO | definir exposicao a cliente e campos finais |
 | Progresso de conteudo | schema existe | fluxo nao implementado | PARCIAL | definir quem registra abertura/conclusao |
-| IA | fundacao de banco + failure handling + boundary server-side + provider OpenAI + Structured Outputs + aliases + contrato `anamnesis_review` IMPLEMENTADOS | execucao externa continua bloqueada para dados reais | prompt v1 aplicado; CI cobre adapter/contrato/boundaries; failure handling confirmado no SaaS | executar avaliacao sintetica com credencial de ambiente e concluir `OPENAI_HEALTH_DATA_GATE.md` |
+| IA | fundacao de banco + failure handling + boundary server-side + provider OpenAI + Structured Outputs + aliases + contrato `anamnesis_review` IMPLEMENTADOS | avaliacao sintetica manual 4/4 PASS; dados reais continuam bloqueados | prompt v1 aplicado; CI cobre adapter/contrato/boundaries; failure handling confirmado no SaaS | concluir custo/latencia de rollout e `OPENAI_HEALTH_DATA_GATE.md` antes de dados reais |
 | Drive | INVENTARIADO + revisao controlada iniciada | nenhuma migracao fisica | video da balanca aprovado; Vercel Private Blob definido; lote 1 machine-readable preparado | criar/conectar o store privado e somente depois migrar/verificar/versionar o primeiro item |
 | Regras deterministicas do metodo | IMPLEMENTADO PARCIAL | sem automacao de protocolo | CI VALIDADO | ampliar somente com formulas exatas confirmadas/documentadas |
 | CI | IMPLEMENTADO | automatico no GitHub Actions + smoke E2E manual de arquivos privados | `npm ci` + audit high/critical de producao + typecheck + suites deterministicas + `test:security-boundaries` + build; core Actions em v7; E2E de producao PASS nos fluxos ja estabilizados | ampliar E2E somente para fluxos estaveis e sinteticos |
@@ -276,7 +276,7 @@ Estado atual:
 - UI administrativa de revisao humana implementada;
 - chamada externa bloqueada por padrao.
 
-Antes de dados reais: configurar `OPENAI_API_KEY`, executar avaliacao sintetica representativa e revisar/habilitar explicitamente `OPENAI_HEALTH_DATA_PROCESSING_ENABLED=true`.
+Antes de dados reais: a `OPENAI_API_KEY` para avaliacao sintetica ja foi configurada em GitHub Actions e o smoke sintetico passou; ainda e necessario revisar retencao/processamento, custo/latencia de rollout e somente depois considerar `OPENAI_HEALTH_DATA_PROCESSING_ENABLED=true`.
 
 
 ## Esclarecimentos — E2E autenticado
@@ -365,7 +365,7 @@ Estado: **IMPLEMENTADO TECNICAMENTE / GATE EXTERNO FECHADO**
 
 O primeiro purpose `anamnesis_review` ja possui provider OpenAI, configuracao tecnica inicial de modelo/effort, prompt versionado, Structured Outputs, minimizacao de contexto, aliases efemeros, validacao deterministica, persistencia auditavel e revisao humana.
 
-Nao confundir fundacao tecnica pronta com liberacao para dados reais. Ainda faltam credencial de ambiente, avaliacao sintetica aprovada e conclusao humana do gate de processamento de dados de saude.
+Nao confundir fundacao tecnica pronta nem avaliacao sintetica aprovada com liberacao para dados reais. Ainda faltam controles organizacionais de retencao/processamento, custo/latencia de rollout e conclusao humana do gate de dados de saude.
 
 ## IA - limites de falha tambem protegidos no banco
 
@@ -758,7 +758,7 @@ Estado: **ACOES CONFIRMADAS IMPLEMENTADAS / DADOS REAIS AINDA GATED**
 - anotacao propria e persistida separadamente como revisao profissional;
 - nenhum desses atos publica conteudo para cliente.
 
-O gate de dados de saude/OpenAI permanece fechado ate avaliacao sintetica e controles organizacionais aplicaveis.
+O gate de dados de saude/OpenAI permanece fechado apesar da avaliacao sintetica aprovada; ainda faltam controles organizacionais aplicaveis e aprovacao explicita para dados reais.
 
 ### Fontes historicas de alimentacao e exercicios
 
