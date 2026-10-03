@@ -1,3 +1,33 @@
+## 2026-10-03 - Reconciliacao da sequencia confirmada do protocolo
+
+### REGRA CONFIRMADA VIGENTE
+
+Para automacao e produto, a sequencia atualmente confirmada termina em:
+
+```text
+Reconhecimento Metabolico
+-> Cutting 1 Dia 1 / Dia 2
+-> Cutting 1: 2 Low / 1 High
+-> Up Metabolico
+-> Cutting 2 Linear
+-> Cutting 2 Dia 1 / Dia 2
+-> Cutting 2: 2 Low / 1 High
+```
+
+Nao inferir etapas posteriores.
+
+### CONSEQUENCIA DOCUMENTAL
+
+Registros anteriores que tratavam Cutting 3 ou um Up Metabolico posterior ao Cutting 3 como parte confirmada da sequencia ficam **superados para fins de automacao**.
+
+Esses registros sao preservados como historico de levantamento, mas nao autorizam:
+- criar etapa posterior ao Cutting 2;
+- mapear automaticamente fases numeradas do Carb Cycle para um Cutting posterior;
+- gerar formulas/macros para Cutting 3;
+- avancar automaticamente para Bulking ou outra fase.
+
+Qualquer etapa posterior a `Cutting 2: 2 Low / 1 High` volta a ser questao aberta e exige nova confirmacao documentada da Patty antes de implementacao.
+
 
 ## 2026-09-30 - Regras, cálculos e workflows totalmente parametrizáveis
 
@@ -101,7 +131,7 @@ Portanto, a presenca inicial desses dados nao gera automaticamente:
 
 Qualquer intervencao posterior continua sendo decisao humana da Patty conforme a evolucao do caso. Isso nao revoga a possibilidade de encaminhamento manual a outro profissional quando a Patty julgar necessario; apenas exclui uma regra automatica inicial do sistema.
 
-## 2026-09-27 - Progressao do protocolo por sequencia, adesao e resultado
+## 2026-09-27 - Progressao do protocolo por sequencia, adesao e resultado — SUPERADA PARCIALMENTE EM 2026-10-03
 
 ### REGRA CONFIRMADA PELA PATTY
 
@@ -695,7 +725,7 @@ Nenhuma formula, criterio ou comportamento dessas fases deve ser:
 Qualquer uso futuro depende de nova confirmacao profissional e atualizacao documental previa.
 
 
-## 2026-09-24 - Cutting 3 Linear e etapa seguinte
+## 2026-09-24 - Cutting 3 Linear e etapa seguinte — SUPERADA EM 2026-10-03
 
 ### DECISAO SUPERADA PARCIALMENTE POR CONFIRMACAO DE 2026-09-27
 
