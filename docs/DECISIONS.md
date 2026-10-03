@@ -2476,3 +2476,21 @@ O engine v1:
 - nao resolve template/override no banco e nao escolhe fase profissional.
 
 A primeira implementacao permanece isolada ate a foundation versionada e seus gates de banco estarem prontos.
+
+
+## 2026-10-03 - Feedback Semanal como fluxo proprio do acompanhamento
+
+A mensagem semanal atualmente usada pela Patty foi preservada integralmente em `docs/source_drafts/weekly_feedback_current_source.md` e materializada como a primeira versao do questionario no produto.
+
+Decisoes tecnicas/produto:
+- Feedback Semanal e separado dos check-ins diarios;
+- a versao exata do questionario enviada a cliente e preservada;
+- respostas originais permanecem separadas de interpretacao da IA, observacao profissional e acao posterior;
+- a solicitacao existe dentro do aplicativo independentemente do futuro canal externo de aviso;
+- rascunho e envio final sao estados tecnicos do formulario;
+- envio final e imutavel;
+- a nota autorreferida de 0 a 10 nao e score automatico de adesao;
+- ausencia de resposta nao suspende atendimento automaticamente;
+- nenhuma resposta semanal entra em provider de IA enquanto o gate aplicavel a dados reais permanecer fechado.
+
+O primeiro fluxo operacional permite criacao manual da solicitacao pela Patty/admin. Agenda automatica, email e WhatsApp permanecem desacoplados e dependem das decisoes abertas registradas em `OPEN_QUESTIONS.md`.
