@@ -182,7 +182,7 @@ O nome do arquivo preserva o sufixo `CANDIDATE` por historico; o conteudo corres
 
 ### FATO JA CONFIRMADO
 
-A Patty confirmou que as medidas corporais podem ser separadas da Anamnese e tratadas em um fluxo proprio de Avaliacao/Medidas. O lifecycle operacional `rascunho -> finalizada` ja esta definido para autoria. O catalogo definitivo de medidas, unidades, obrigatoriedade e o fluxo de correcao historica depois da finalizacao continuam abertos.
+A Patty confirmou que as medidas corporais podem ser separadas da Anamnese e tratadas em um fluxo proprio de Avaliacao/Medidas. O lifecycle operacional `rascunho -> finalizada`, o catalogo configuravel, as unidades/obrigatoriedade das definicoes ativas e a correcao auditavel de valor/unidade apos finalizacao ja estao implementados. Continuam abertas apenas regras profissionais/calendario ainda nao formalizadas e eventuais correcoes de outros atributos historicos.
 
 ### FATO RESOLVIDO
 
@@ -226,12 +226,12 @@ Para o primeiro fluxo `anamnesis_review`:
 - revisao humana continua obrigatoria e a IA nao publica diretamente.
 
 Continuam abertos antes de dados reais:
-- avaliacao sintetica do modelo/effort com credencial de ambiente;
+- avaliacao sintetica inicial: RESOLVIDA no run `37128054011` com 4/4 cenarios aprovados;
 - controles organizacionais de retencao/processamento da OpenAI;
 - base legal/consentimento aplicavel;
 - conclusao explicita do checklist `OPENAI_HEALTH_DATA_GATE.md`.
 
-O modelo inicial ainda nao deve ser tratado como escolha definitiva enquanto a avaliacao sintetica nao for aprovada.
+O modelo inicial passou a avaliacao sintetica basica de contrato/comportamento, mas ainda nao deve ser tratado como escolha definitiva de producao ate a avaliacao de custo/latencia e os controles organizacionais de dados reais serem concluídos.
 
 ### QUESTAO ABERTA — EXPANSAO FUTURA
 
@@ -395,7 +395,7 @@ A obrigatoriedade geral permanece: todos os campos aplicaveis da versao devem es
 
 O contrato deterministico de `missing_answer` esta implementado no validador: usa `target_question_id`, permite `source_answer_ids` vazio e exige que o target esteja na allowlist de perguntas previamente verificadas como aplicaveis e sem resposta para a mesma execution/submission.
 
-A montagem server-side da allowlist foi implementada de forma deterministica a partir da submission, perguntas versionadas, answers e aplicabilidade. Provider OpenAI, configuracao tecnica inicial de modelo/effort, prompt v1 e contrato de output de `anamnesis_review` ja estao definidos. Continuam abertos a avaliacao sintetica antes de dados reais, o gate de processamento de dados de saude e a UX/processo humano dos findings.
+A montagem server-side da allowlist foi implementada de forma deterministica a partir da submission, perguntas versionadas, answers e aplicabilidade. Provider OpenAI, configuracao tecnica inicial de modelo/effort, prompt v1, contrato de output de `anamnesis_review` e avaliacao sintetica inicial ja estao definidos/validados. Continuam abertos o gate de processamento de dados de saude, os controles organizacionais/retencao e eventuais ampliacoes de UX dos findings ainda nao confirmadas.
 
 ### FATO RESOLVIDO
 
@@ -788,7 +788,7 @@ O provider do primeiro fluxo `anamnesis_review` sera OpenAI.
 
 ### QUESTOES/OPERACOES AINDA ABERTAS
 
-- validar `gpt-5.6-terra` + reasoning `medium` com avaliacao sintetica antes de enviar dados reais; o model ID pode ser sobrescrito por `OPENAI_MODEL`;
+- avaliacao sintetica inicial de `gpt-5.6-terra` + reasoning `medium`: RESOLVIDA no run `37128054011`; custo/latencia e controles para dados reais continuam pendentes;
 - configurar `OPENAI_API_KEY` fora do repositorio;
 - executar `npm run eval:ai:openai` com uma chave OpenAI de ambiente; o harness usa somente fixtures sinteticas;
 - revisar e documentar os controles organizacionais de retencao/processamento aplicaveis ao caso de uso de dados de saude;
