@@ -17,6 +17,7 @@ import {
   listAccessibleClientHydrationTargets,
   listAccessibleClientTrainingRequests,
   listAccessibleProtocolsForClient,
+  listAccessibleWeeklyFeedbacksForClient,
   listContentReleasesForAccessibleClient,
 } from "@/lib/supabase/data-access";
 import Link from "next/link";
@@ -75,6 +76,7 @@ export default async function AdminClienteDetailPage({
     contentReleases,
     hydrationTargets,
     activityEvents,
+    weeklyFeedbacks,
   ] = await Promise.all([
     getAccessibleClientRegistration(client.id),
     listAccessibleClientTrainingRequests(client.id),
@@ -85,6 +87,7 @@ export default async function AdminClienteDetailPage({
     listContentReleasesForAccessibleClient(client.id),
     listAccessibleClientHydrationTargets(client.id),
     listAccessibleClientActivityCheckinEvents(client.id),
+    listAccessibleWeeklyFeedbacksForClient(client.id),
   ]);
 
   const displayName = client.profiles?.display_name?.trim();
@@ -219,6 +222,22 @@ export default async function AdminClienteDetailPage({
                 {latestActivity
                   ? `Última atividade: ${latestActivity.checkin_date} · ${latestActivity.did_activity ? "fez atividade" : "não fez atividade"}.`
                   : "Nenhum check-in de atividade registrado."}
+              </p>
+            </Card>
+          </Link>
+
+          <Link className={styles.cardLink} href={`/admin/clientes/${client.id}/feedback-semanal`}>
+            <Card className={styles.infoCard}>
+              <div className={styles.cardHeader}>
+                <h3 className={styles.cardTitle}>Feedback semanal</h3>
+                <Badge variant="neutral">
+                  {weeklyFeedbacks.filter((feedback) => !feedback.submitted_at).length} pendente(s)
+                </Badge>
+              </div>
+              <p className={styles.cardDescription}>
+                {weeklyFeedbacks.length === 0
+                  ? "Nenhum feedback semanal solicitado."
+                  : `${weeklyFeedbacks.length} registro(s) no histórico semanal.`}
               </p>
             </Card>
           </Link>

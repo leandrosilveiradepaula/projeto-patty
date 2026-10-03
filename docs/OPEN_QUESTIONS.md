@@ -861,3 +861,31 @@ Erro de lancamento em valor/unidade de medida de uma avaliacao finalizada agora 
 - correcao de vinculo de foto depois da finalizacao.
 
 Nao ampliar o mecanismo sem caso profissional confirmado.
+
+
+## Atualizacao 2026-10-03 - Feedback Semanal
+
+### RESOLVIDO TECNICAMENTE
+
+- dominio separado dos check-ins diarios;
+- versao v1 publicada com as 21 perguntas da fonte operacional atual;
+- solicitacao client-scoped por periodo;
+- prazo opcional;
+- rascunho da cliente;
+- envio final validado e imutavel;
+- historico administrativo e da cliente;
+- RLS ownership/assignment + AAL2;
+- sem score automatico, sem alteracao automatica de protocolo e sem suspensao automatica de atendimento.
+
+### AINDA ABERTO
+
+- dia e horario padrao da agenda automatica;
+- se o prazo historico de quarta-feira apenas marca atraso ou fecha alguma acao;
+- marco exato de elegibilidade para iniciar Feedback Semanal;
+- significado tecnico de "recebeu protocolo" para elegibilidade;
+- politica de lembretes;
+- canal inicial: email, WhatsApp, ambos ou preferencia por cliente;
+- eventual consentimento/opt-in e provedor de WhatsApp;
+- se perguntas relativamente estaveis, como local de trabalho/treino, permanecem semanais;
+- se a Patty deseja revisao/observacao formal por feedback antes de qualquer uso posterior;
+- consequencia profissional de nao responder continua humana ate nova confirmacao explicita.

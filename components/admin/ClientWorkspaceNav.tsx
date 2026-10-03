@@ -20,6 +20,7 @@ export function ClientWorkspaceNav({ clientId }: ClientWorkspaceNavProps) {
     { href: `${base}/arquivos`, label: "Arquivos" },
     { href: `${base}/conteudos`, label: "Conteúdos" },
     { href: `${base}/checkins`, label: "Check-ins" },
+    { href: `${base}/feedback-semanal`, label: "Feedback semanal" },
   ];
 
   return (

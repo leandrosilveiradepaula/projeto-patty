@@ -1728,6 +1728,67 @@ export type Database = {
           },
         ]
       }
+      client_weekly_feedbacks: {
+        Row: {
+          answers: Json
+          client_id: string
+          created_at: string
+          due_at: string | null
+          form_version_id: string
+          id: string
+          period_end: string
+          period_start: string
+          requested_by_profile_id: string
+          submitted_at: string | null
+        }
+        Insert: {
+          answers?: Json
+          client_id: string
+          created_at?: string
+          due_at?: string | null
+          form_version_id: string
+          id?: string
+          period_end: string
+          period_start: string
+          requested_by_profile_id: string
+          submitted_at?: string | null
+        }
+        Update: {
+          answers?: Json
+          client_id?: string
+          created_at?: string
+          due_at?: string | null
+          form_version_id?: string
+          id?: string
+          period_end?: string
+          period_start?: string
+          requested_by_profile_id?: string
+          submitted_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_weekly_feedbacks_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_weekly_feedbacks_form_version_id_fkey"
+            columns: ["form_version_id"]
+            isOneToOne: false
+            referencedRelation: "weekly_feedback_form_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_weekly_feedbacks_requested_by_profile_id_fkey"
+            columns: ["requested_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           created_at: string
@@ -2810,6 +2871,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      weekly_feedback_form_versions: {
+        Row: {
+          created_at: string
+          definition: Json
+          id: string
+          published_at: string | null
+          title: string
+          version_number: number
+        }
+        Insert: {
+          created_at?: string
+          definition: Json
+          id?: string
+          published_at?: string | null
+          title: string
+          version_number: number
+        }
+        Update: {
+          created_at?: string
+          definition?: Json
+          id?: string
+          published_at?: string | null
+          title?: string
+          version_number?: number
+        }
+        Relationships: []
       }
     }
     Views: {

@@ -7,6 +7,7 @@ import {
   getCurrentClient,
   getCurrentUserProfile,
   listAccessibleAnamnesisSubmissions,
+  listAccessibleWeeklyFeedbacksForClient,
   listCurrentClientContentReleases,
   listCurrentClientFiles,
   listPublishedProtocolsForCurrentClient,
@@ -30,11 +31,12 @@ export default async function ClientePage() {
     );
   }
 
-  const [anamneses, protocols, contentReleases, files] = await Promise.all([
+  const [anamneses, protocols, contentReleases, files, weeklyFeedbacks] = await Promise.all([
     listAccessibleAnamnesisSubmissions(client.id),
     listPublishedProtocolsForCurrentClient(client.id),
     listCurrentClientContentReleases(client.id),
     listCurrentClientFiles(client.id),
+    listAccessibleWeeklyFeedbacksForClient(client.id),
   ]);
 
   const areas = [
@@ -77,6 +79,14 @@ export default async function ClientePage() {
       href: "/cliente/checkins",
       label: "",
       title: "Check-ins",
+    },
+    {
+      count: weeklyFeedbacks.filter((feedback) => !feedback.submitted_at).length,
+      description:
+        "Responda os feedbacks semanais solicitados pela Patty e consulte seu histórico.",
+      href: "/cliente/feedback-semanal",
+      label: "pendente(s)",
+      title: "Feedback semanal",
     },
   ];
 

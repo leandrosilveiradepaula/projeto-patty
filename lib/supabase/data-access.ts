@@ -1799,3 +1799,119 @@ export async function listPublishedProtocolsForCurrentClient(
     ];
   });
 }
+
+
+export async function getLatestPublishedWeeklyFeedbackFormVersion() {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("weekly_feedback_form_versions")
+    .select("id, version_number, title, definition, published_at, created_at")
+    .not("published_at", "is", null)
+    .order("version_number", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function listAccessibleWeeklyFeedbacksForClient(clientId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_weekly_feedbacks")
+    .select(
+      "id, client_id, form_version_id, period_start, period_end, due_at, requested_by_profile_id, answers, submitted_at, created_at, weekly_feedback_form_versions(id, version_number, title, definition, published_at)",
+    )
+    .eq("client_id", clientId)
+    .order("period_start", { ascending: false })
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function createAccessibleWeeklyFeedbackRequest(input: {
+  clientId: string;
+  dueAt: string | null;
+  formVersionId: string;
+  periodEnd: string;
+  periodStart: string;
+  requestedByProfileId: string;
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_weekly_feedbacks")
+    .insert({
+      client_id: input.clientId,
+      due_at: input.dueAt,
+      form_version_id: input.formVersionId,
+      period_end: input.periodEnd,
+      period_start: input.periodStart,
+      requested_by_profile_id: input.requestedByProfileId,
+    })
+    .select(
+      "id, client_id, form_version_id, period_start, period_end, due_at, requested_by_profile_id, answers, submitted_at, created_at",
+    )
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function getCurrentClientWeeklyFeedback(
+  clientId: string,
+  feedbackId: string,
+) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_weekly_feedbacks")
+    .select(
+      "id, client_id, form_version_id, period_start, period_end, due_at, answers, submitted_at, created_at, weekly_feedback_form_versions(id, version_number, title, definition, published_at)",
+    )
+    .eq("client_id", clientId)
+    .eq("id", feedbackId)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function updateCurrentClientWeeklyFeedback(input: {
+  answers: Json;
+  clientId: string;
+  feedbackId: string;
+  submit: boolean;
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_weekly_feedbacks")
+    .update({
+      answers: input.answers,
+      submitted_at: input.submit ? new Date().toISOString() : null,
+    })
+    .eq("id", input.feedbackId)
+    .eq("client_id", input.clientId)
+    .is("submitted_at", null)
+    .select(
+      "id, client_id, form_version_id, period_start, period_end, due_at, answers, submitted_at, created_at",
+    )
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}

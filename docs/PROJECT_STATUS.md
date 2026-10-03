@@ -1524,3 +1524,23 @@ Validacao local do mesmo estado de codigo:
 - higher-fat protein limit pgTAP: PASS.
 
 Portanto, a migration esta validada mas ainda nao aplicada no SaaS.
+
+
+## Atualizacao 2026-10-03 - Produto navegavel e Feedback Semanal real
+
+A prioridade operacional foi ajustada para aproximar o sistema de uma avaliacao real pela Patty, evitando rotas demonstrativas paralelas.
+
+Concluido nesta rodada:
+- PR #313 de "demo workspace" foi fechado sem merge; nenhuma rota fake entrou no `master`;
+- a tela real `/admin/clientes/[clienteId]` foi consolidada para mostrar o estado real de Anamnese, Avaliacoes, Protocolos, Arquivos, Conteudos, Check-ins e Treino, com navegacao para os fluxos existentes;
+- migration `20261003202254_create_weekly_feedback_flow` aplicada no Supabase SaaS;
+- migration `20261003202404_validate_weekly_feedback_submission` aplicada no Supabase SaaS;
+- Feedback Semanal v1 publicado com 21 perguntas;
+- telas reais administrativas e da cliente implementadas na branch `codex/weekly-feedback-flow`;
+- smoke transacional com fixture sintetica e `ROLLBACK` confirmou: rascunho parcial permitido, envio incompleto rejeitado, envio completo aceito e imutabilidade apos envio;
+- Security Advisor pos-apply nao apresentou regressao nova; permanece somente o warning conhecido de Leaked Password Protection do plano atual.
+
+Pendente operacional que nao bloqueia o restante do desenvolvimento:
+- criar a identidade Auth real da Patty e vincular `Profile -> role admin`; essa operacao ficou adiada porque o usuario nao pode acessar o painel Supabase neste momento.
+
+Automacao externa do Feedback Semanal ainda nao foi ativada. Agenda, prazo operacional, elegibilidade, email/WhatsApp e lembretes permanecem configuracoes/decisoes abertas; o produto ja possui o nucleo real de solicitacao/resposta para ser exercitado assim que houver acesso administrativo real.

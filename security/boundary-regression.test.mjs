@@ -17,6 +17,7 @@ const ENTRYPOINT_RULES = new Map([
   ["app/admin/clientes/[clienteId]/avaliacoes/actions.ts", "admin"],
   ["app/admin/clientes/[clienteId]/checkins/actions.ts", "admin"],
   ["app/admin/clientes/[clienteId]/conteudos/actions.ts", "admin"],
+  ["app/admin/clientes/[clienteId]/feedback-semanal/actions.ts", "admin"],
   ["app/admin/clientes/nova/actions.ts", "admin"],
   ["app/admin/fotos/[fileId]/route.ts", "admin"],
   ["app/admin/protocolos/[protocoloId]/actions.ts", "admin"],
@@ -29,6 +30,7 @@ const ENTRYPOINT_RULES = new Map([
   ["app/cliente/arquivos/[fileId]/route.ts", "client"],
   ["app/cliente/arquivos/actions.ts", "client"],
   ["app/cliente/checkins/actions.ts", "client"],
+  ["app/cliente/feedback-semanal/actions.ts", "client"],
   ["app/cliente/perfil/actions.ts", "client"],
   ["app/login/actions.ts", "public-auth"],
 ]);
