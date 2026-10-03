@@ -138,7 +138,7 @@ Estado atual revalidado em 2026-10-01: o PR #246 restaurou o baseline verde e fo
 | Protocolos versionados | SIM | Lifecycle manual implementado | CI/validacoes existentes | Backend/SaaS correspondente existente | Criacao/edicao profissional completa conforme regras ainda abertas |
 | Conteudo educacional / exercicios | SIM como dominios separados | Fundacao/release + metadata de asset preparada | Inventario 89/89 revalidado; smoke transacional de assets PASS | Vercel Private Blob definido para midia; store/upload ainda nao executados | Criar/conectar store privado, migrar video aprovado, verificar hash e publicar/liberar explicitamente |
 | Metodo da Patty | PARCIALMENTE DEFINIDO | Motor determinístico existente/parcial; regras profissionais migram para configuração versionada e editável | CI | Fluxo confirmado somente ate Cutting 2: 2 Low / 1 High; meta de liquidos, equivalencia de legumes, catalogos de avaliacao/liquidos e templates Carb Cycle 1-3 versionados | Etapas posteriores ao Cutting 2, Fases 5/6, Bulking, Consolidacao, suplementacao, treino, parametros restantes do check-in e criterios objetivos de estagnacao |
-| IA assistiva | SIM como principio e arquitetura; provider OpenAI confirmado | PARCIAL/AVANCADO | Adapter OpenAI + Structured Outputs + aliases + UI de revisao humana; avaliacao sintetica 4/4 PASS com `gpt-5.6-terra` / reasoning `medium` | Prompt v1 aplicado; chamada com dados reais segue bloqueada | Controles de retencao/ZDR-MAM, custo/latencia de rollout e conclusao do gate de dados de saude |
+| IA assistiva | SIM como principio e arquitetura; provider OpenAI confirmado | PARCIAL/AVANCADO | Adapter OpenAI + Structured Outputs + aliases + UI de revisao humana; avaliacao sintetica 5/5 PASS com `gpt-5.6-terra` / reasoning `medium`; latencia media 2.922 ms e 4.076 tokens totais no run `37135047413` | Prompt v1 aplicado; chamada com dados reais segue bloqueada | Controles efetivos de retencao/ZDR-MAM, projeto/credencial definitiva e conclusao do gate de dados de saude |
 | Failure handling de IA | SIM | SIM no schema + boundary server-side | CI + invariantes deterministicas | `20260922160058` aplicada; provider adapter publicado, chamada com dados reais segue gated | Manter gate fechado ate controles organizacionais de dados; recovery automatico segue aberto |
 | n8n | SIM: nao usar inicialmente | N/A | N/A | Nao usado | Introduzir somente com caso concreto |
 | LangGraph | SIM: nao usar inicialmente | N/A | N/A | Nao usado | Introduzir somente se fluxo de IA justificar |
@@ -292,7 +292,7 @@ Ordem operacional sugerida, sujeita a revalidacao do HEAD:
 2. CONCLUIDO: primeira `client-anamnesis` v1 publicada e fluxo de inicio/retomada/edicao/condicionais validado em producao; run consolidado `36257567841` PASS no `master` `bf49254edb9292801eb9ed80a83e1d68262b7b11`.
 3. RETOMAR quando houver acesso operacional: configurar Gmail Custom SMTP e validar convite real.
 4. CONCLUIDO: fluxo autenticado admin <-> cliente de esclarecimentos validado em producao com fixture sintetica no run `36053370894`.
-5. CONCLUIDO: avaliacao sintetica inicial do fluxo OpenAI, run `37128054011`, 4/4 PASS. Proximo gate: controles de retencao/ZDR-MAM, custo/latencia de rollout e aprovacao explicita antes de dados reais.
+5. CONCLUIDO: avaliacao sintetica operacional do fluxo OpenAI, run `37135047413`, 5/5 PASS; latencia total 14.611 ms, media 2.922 ms e 4.076 tokens. Proximo gate: controles efetivos de retencao/ZDR-MAM, definicao do projeto/credencial de producao e aprovacao explicita antes de dados reais.
 6. Infraestrutura de midia educacional DEFINIDA como Vercel Private Blob; proximo passo operacional e criar/conectar store privado e migrar controladamente o video aprovado da balanca.
 7. Fechar apenas as lacunas reais ainda abertas da Anamnese/Avaliacoes sem reabrir consentimento, publicacao da v1 ou o fluxo de draft ja validados.
 8. Ampliar automacao de alimentacao/treino somente depois das regras profissionais correspondentes estarem documentadas.
@@ -390,7 +390,7 @@ A branch atual prepara:
 
 A migration `20260924193339_seed_openai_anamnesis_review_prompt.sql` foi aplicada no Supabase SaaS. A verificacao pos-apply confirmou exatamente um prompt `anamnesis_review` v1 e zero `ai_executions`.
 
-A chamada externa para dados reais continua bloqueada por padrao. O default tecnico e `gpt-5.6-terra` com reasoning `medium`. A credencial para avaliacao sintetica foi configurada como GitHub Actions secret e o run `37128054011` aprovou 4/4 cenarios sinteticos; para uso com dados reais ainda faltam revisao de privacidade/retencao, avaliacao de ZDR/MAM, revisao de logging, aprovacao humana e habilitacao explicita do gate `OPENAI_HEALTH_DATA_PROCESSING_ENABLED`.
+A chamada externa para dados reais continua bloqueada por padrao. O default tecnico e `gpt-5.6-terra` com reasoning `medium`. A credencial para avaliacao sintetica foi configurada como GitHub Actions secret e o run `37135047413` aprovou 5/5 cenarios sinteticos, com latencia total de 14.611 ms, media de 2.922 ms e 4.076 tokens totais; para uso com dados reais ainda faltam confirmacao dos controles efetivos de privacidade/retencao e ZDR/MAM, definicao do projeto/credencial de producao, aprovacao humana e habilitacao explicita do gate `OPENAI_HEALTH_DATA_PROCESSING_ENABLED`.
 
 
 ## Rollout OpenAI controlado
@@ -399,7 +399,7 @@ O PR #151 foi mergeado no commit `3412c4f` e o deployment correspondente ficou `
 
 A chamada com dados reais continua desabilitada sem `OPENAI_HEALTH_DATA_PROCESSING_ENABLED=true`. A `OPENAI_API_KEY` existe como secret do GitHub Actions para o workflow sintetico; isso nao habilita o runtime de producao nem autoriza dados de saude.
 
-Foi criado `docs/OPENAI_HEALTH_DATA_GATE.md` como checklist operacional antes de dados reais e `npm run eval:ai:openai` como avaliacao do modelo usando somente fixtures sinteticas. Em 2026-10-03, o workflow manual `Evaluate OpenAI anamnesis review`, run `37128054011`, terminou SUCCESS com 4 cenarios aprovados e 0 falhas.
+Foi criado `docs/OPENAI_HEALTH_DATA_GATE.md` como checklist operacional antes de dados reais e `npm run eval:ai:openai` como avaliacao do modelo usando somente fixtures sinteticas. Em 2026-10-03, o workflow manual `Evaluate OpenAI anamnesis review`, run `37135047413`, terminou SUCCESS com 5 cenarios aprovados e 0 falhas. O mesmo run mediu latencia e uso de tokens; a evidencia detalhada e a referencia oficial de preco estao registradas no gate.
 
 O harness foi ampliado no PR #303 para coletar latencia e uso de tokens sem registrar prompt/resposta. Uma nova execucao manual ainda e necessaria para produzir essa evidencia operacional.
 
@@ -521,7 +521,7 @@ Nenhuma migration ou mudanca de schema foi necessaria; o schema ja garante `uniq
 
 Foi removida a divergencia entre trechos antigos que ainda tratavam provider, prompt e contrato do primeiro fluxo como indefinidos e o estado real ja implementado.
 
-Para `anamnesis_review`, OpenAI, prompt v1, Structured Outputs, aliases efemeros, contrato v1 de findings, boundary server-side e failure handling ja existem. O modelo `gpt-5.6-terra` com reasoning `medium` passou a avaliacao sintetica inicial (4/4), mas permanece configuracao tecnica inicial ate a avaliacao de custo/latencia e os controles de dados reais serem concluídos.
+Para `anamnesis_review`, OpenAI, prompt v1, Structured Outputs, aliases efemeros, contrato v1 de findings, boundary server-side e failure handling ja existem. O modelo `gpt-5.6-terra` com reasoning `medium` passou a avaliacao sintetica operacional (5/5); custo e latencia iniciais foram medidos no run `37135047413`. A configuracao permanece tecnica inicial ate os controles de dados reais serem concluidos.
 
 O gate de dados de saude continua fechado.
 
