@@ -1,0 +1,141 @@
+import type { Json } from "@/lib/supabase/database.types";
+
+export type WeeklyFeedbackInputType = "integer" | "rating_0_10" | "text";
+
+export type WeeklyFeedbackQuestion = {
+  allowsNotApplicable: boolean;
+  inputType: WeeklyFeedbackInputType;
+  key: string;
+  label: string;
+  required: boolean;
+};
+
+export type WeeklyFeedbackDefinition = {
+  questions: WeeklyFeedbackQuestion[];
+  schemaVersion: number;
+  sourceReference: string | null;
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+export function parseWeeklyFeedbackDefinition(
+  value: Json,
+): WeeklyFeedbackDefinition | null {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  const rawQuestions = value.questions;
+  const schemaVersion = value.schema_version;
+
+  if (!Array.isArray(rawQuestions) || typeof schemaVersion !== "number") {
+    return null;
+  }
+
+  const questions: WeeklyFeedbackQuestion[] = [];
+
+  for (const rawQuestion of rawQuestions) {
+    if (!isRecord(rawQuestion)) {
+      return null;
+    }
+
+    const key = rawQuestion.key;
+    const label = rawQuestion.label;
+    const inputType = rawQuestion.input_type;
+    const required = rawQuestion.required;
+
+    if (
+      typeof key !== "string" ||
+      typeof label !== "string" ||
+      (inputType !== "text" &&
+        inputType !== "integer" &&
+        inputType !== "rating_0_10") ||
+      typeof required !== "boolean"
+    ) {
+      return null;
+    }
+
+    questions.push({
+      allowsNotApplicable: rawQuestion.allows_not_applicable === true,
+      inputType,
+      key,
+      label,
+      required,
+    });
+  }
+
+  return {
+    questions,
+    schemaVersion,
+    sourceReference:
+      typeof value.source_reference === "string"
+        ? value.source_reference
+        : null,
+  };
+}
+
+export function readWeeklyFeedbackAnswer(
+  answers: Json,
+  questionKey: string,
+): string {
+  if (!isRecord(answers)) {
+    return "";
+  }
+
+  const value = answers[questionKey];
+
+  if (typeof value === "number") {
+    return String(value);
+  }
+
+  return typeof value === "string" ? value : "";
+}
+
+export function buildWeeklyFeedbackAnswers(
+  formData: FormData,
+  definition: WeeklyFeedbackDefinition,
+): Record<string, string | number> {
+  const answers: Record<string, string | number> = {};
+
+  for (const question of definition.questions) {
+    const rawValue = formData.get(question.key);
+
+    if (typeof rawValue !== "string" || rawValue.trim() === "") {
+      continue;
+    }
+
+    if (question.inputType === "integer" || question.inputType === "rating_0_10") {
+      const parsed = Number.parseInt(rawValue, 10);
+
+      if (!Number.isInteger(parsed) || parsed < 0) {
+        throw new Error(`Resposta inválida para ${question.label}`);
+      }
+
+      if (question.inputType === "rating_0_10" && parsed > 10) {
+        throw new Error(`A nota deve ficar entre 0 e 10: ${question.label}`);
+      }
+
+      answers[question.key] = parsed;
+      continue;
+    }
+
+    answers[question.key] = rawValue.trim();
+  }
+
+  return answers;
+}
+
+export function validateWeeklyFeedbackAnswers(
+  answers: Record<string, string | number>,
+  definition: WeeklyFeedbackDefinition,
+) {
+  const missing = definition.questions.filter(
+    (question) => question.required && answers[question.key] === undefined,
+  );
+
+  if (missing.length > 0) {
+    throw new Error("Preencha todas as perguntas obrigatórias antes de enviar.");
+  }
+}
