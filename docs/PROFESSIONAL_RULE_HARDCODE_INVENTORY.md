@@ -8,7 +8,7 @@ Registrar onde o runtime atual ainda contém valores, fórmulas, catálogos ou w
 
 Baseline auditada:
 
-- `master`: `02067ed122c97621b2e986a02e3b7d23089ee05a`;
+- `master`: `98bb2043cd0c415815ef1657c86b51c093cadaf1`;
 - PR documental de parametrização: #245;
 - nenhuma migration aplicada deve ser editada;
 - este inventário não autoriza alteração de regra profissional nem ativação automática de questão ainda aberta.
@@ -25,31 +25,30 @@ Baseline auditada:
 
 ### HR-001 — Coeficientes do Carb Cycle
 
-**Classificação:** EM MIGRAÇÃO — runtime parametrizado no PR #257; template/versionamento de banco ainda pendentes.
+**Classificação:** EM MIGRAÇÃO — runtime parametrizado e templates/versionamento das Fases 1–3 já ativos no Supabase SaaS; integração operacional e snapshots continuam bloqueados por decisões abertas.
 
 Arquivo ativo:
 
 - `lib/method/carb-cycle.ts`.
 
-Estado no PR #257:
+Estado confirmado:
 
-- coeficientes profissionais saem do runtime e passam a ser recebidos como configuração explícita;
+- coeficientes profissionais saíram do runtime e passam a ser recebidos como configuração explícita;
 - identidade da fase, steps ordenados e pertencimento à média Linear vêm da configuração;
-- o divisor da média deixa de ser fixo em `3` e deriva da quantidade de steps configurados para a média;
-- o runtime deixa de exigir exatamente Low1/Low2/High;
-- os valores atuais das Fases 1, 2 e 3 permanecem apenas em golden tests como baseline de equivalência;
+- o divisor da média deriva da quantidade de steps configurados para a média;
+- o runtime não exige exatamente Low1/Low2/High;
 - configuração inválida, steps duplicados, coeficientes inválidos e referências de média inexistentes falham fechados;
-- nenhuma Fase 4/5/6 foi inventada;
+- `nutrition.carb_cycle.phase_1`, `phase_2` e `phase_3` estão materializados, ativos e versionados no SaaS;
+- `lib/method/carb-cycle-loader.ts` resolve exatamente uma versão ativa sob RLS e falha fechado;
+- nenhuma Fase 4/5/6 foi criada;
 - nenhum pareamento Cutting↔fase nem progressão automática foi introduzido.
 
 Ainda pendente para marcar como migrado:
 
-- materializar via Supabase CLI a proposta revisada em `docs/CARB_CYCLE_CONFIGURATION_MIGRATION_PROPOSAL.sql`;
-- promover o pgTAP proposto em `docs/CARB_CYCLE_CONFIGURATION_PGTAP_PROPOSAL.sql` para a suíte oficial;
-- seed controlado dos baselines confirmados;
-- snapshot dos coeficientes usados;
-- integração operacional sem fallback silencioso;
-- manter compatibilidade enquanto algum consumidor legado depender de Low1/Low2/High.
+- definir/documentar o mapeamento entre fases configuradas e etapas concretas do protocolo;
+- criar snapshots dos coeficientes/steps efetivamente usados quando houver consumidor operacional;
+- integrar o loader somente depois que esse mapeamento estiver confirmado;
+- manter compatibilidade enquanto algum consumidor legado depender da estrutura histórica.
 
 ### HR-002 — Conversão de doses em gramas
 
@@ -151,71 +150,51 @@ Questões abertas continuam abertas: recálculo após mudança de peso, proporç
 
 ### HR-006 — Conversão de legumes e referências no validador da fonte alimentar
 
-**Classificação:** EM MIGRAÇÃO — validador parametrizado no PR #259; equivalência confirmada de legumes materializada no Supabase SaaS pelo Lote A; referência profissional atual agora pode ser resolvida de templates versionados, enquanto entradas históricas permanecem explícitas.
+**Classificação:** EM MIGRAÇÃO — validador e equivalência confirmada já parametrizados; template ativo no SaaS e loader de reconciliação prontos, mas o catálogo histórico ainda não deve virar catálogo ativo sem revisão/aprovação.
 
 Arquivo:
 
 - `lib/content/food-equivalent-source.ts`.
 
-Estado no PR #259:
+Estado confirmado:
 
-- o validador deixa de embutir referências numéricas de proteína, carboidrato, gordura, legumes e marcador histórico de dose;
-- todas essas referências entram explicitamente como contexto de reconciliação;
-- golden tests preservam a fonte histórica atual e demonstram uma referência alternativa sem mudança de runtime;
-- referências inválidas falham fechadas;
-- a fonte continua obrigatoriamente `publishable: false`;
-- nenhuma quantidade histórica foi promovida a catálogo ativo ou regra global.
-
-Estado adicional no PR #267:
-
+- o validador não embute referências numéricas de proteína, carboidrato, gordura, legumes e marcador histórico de dose;
+- essas referências entram explicitamente como contexto de reconciliação;
 - `lib/method/vegetable-carb.ts` executa a equivalência por configuração `method_engine_v1`;
-- o coeficiente atual `2 doses de legumes = 1 dose de carboidrato` permanece somente como baseline em golden tests;
-- alteração do coeficiente não exige mudança de runtime;
-- não foram inferidas redistribuição carboidrato/gordura, alocação fixa por refeição, exceções por fase ou gramas históricos de legumes.
-
-Classificação preservada:
-
-- a equivalência confirmada ainda precisa de template/versionamento ativo no banco;
-- referências de proteína/carboidrato/gordura devem futuramente vir dos templates de doses já versionados;
-- `vegetable_grams` e o marcador de dose dos itens permanecem referências históricas de reconciliação enquanto não houver confirmação profissional específica.
-
-Estado adicional após o Lote A:
-
+- o coeficiente atual `2 doses de legumes = 1 dose de carboidrato` é baseline versionado, não constante de runtime;
 - `nutrition.vegetable_carbohydrate_equivalence` está materializado e ativo no Supabase SaaS;
 - `lib/content/food-equivalent-reconciliation-loader.ts` resolve exatamente uma versão ativa dos templates de proteína, carboidrato, gordura e equivalência de legumes;
-- a resolução usa o cliente server-side sujeito a RLS e falha fechada;
-- `vegetable_grams` e o marcador de dose permanecem parâmetros históricos explícitos, sem promoção a regra profissional;
-- o catálogo histórico continua `publishable: false`.
+- a resolução usa cliente server-side sujeito a RLS e falha fechada;
+- `vegetable_grams` e o marcador de dose dos itens permanecem referências históricas explícitas, sem promoção a regra profissional;
+- o catálogo histórico continua `publishable: false`;
+- não foram inferidas redistribuição carboidrato/gordura, alocação fixa por refeição, exceções por fase ou gramas históricos de legumes.
 
 Ainda pendente:
 
-- integrar esse loader somente quando houver um fluxo server-side real de reconciliação/revisão do catálogo;
+- integrar o loader somente quando houver fluxo server-side real de reconciliação/revisão do catálogo;
 - migrar catálogo histórico para catálogo versionado somente após revisão/aprovação;
 - não publicar automaticamente a fonte Excel.
 
 ### HR-007 — Tipos de Avaliação Básica/Completa
 
-**Classificação:** EM MIGRAÇÃO — catálogo versionado aplicado no Supabase SaaS pelo Lote B; consumidores administrativos passam a resolver a versão ativa neste PR.
+**Classificação:** MIGRADO — catálogo versionado ativo no Supabase SaaS e consumidores administrativos resolvem a configuração ativa com compatibilidade histórica.
 
 Estado atual:
 
 - `evaluation.assessment_kind_catalog` está materializado e ativo no SaaS;
 - `lib/evaluations/assessment-configuration-loader.ts` resolve exatamente uma versão ativa sob RLS, sem service role;
-- formulários, listagens e ações administrativas deixam de usar labels/opções fixos como fonte operacional;
-- os códigos `fortnightly` e `monthly` permanecem como compatibilidade do schema legado, não como regra de calendário;
+- formulários, listagens e ações administrativas usam labels/opções da configuração ativa;
+- os códigos `fortnightly` e `monthly` permanecem somente como compatibilidade do schema legado, não como regra de calendário;
 - códigos ativos que o schema atual não consegue persistir falham fechados;
-- nenhuma regra de calendário/âncora foi inferida.
+- nenhuma regra de calendário/âncora foi inferida;
+- não há constante operacional `ASSESSMENT_KIND_OPTIONS` no `master`.
 
 Compatibilidade preservada:
 
 - `supabase/migrations/20260927002227_create_assessment_draft_lifecycle.sql` continua restringindo `assessment_kind` a `fortnightly|monthly`;
-- a migration aplicada não será alterada;
-- linhas históricas continuam preservando os códigos existentes.
-
-Ainda pendente:
-
-- criar migration nova somente se a Patty confirmar um novo tipo real que exija relaxar o CHECK;
-- preservar indefinidamente os códigos históricos nas linhas existentes.
+- a migration aplicada permanece intacta;
+- linhas históricas continuam preservando os códigos existentes;
+- se a Patty confirmar no futuro um novo tipo real, será necessária migration nova antes de esse código poder ser persistido.
 
 ### HR-008 — Catálogo obrigatório da Avaliação Básica/Completa
 

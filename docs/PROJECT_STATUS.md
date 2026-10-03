@@ -2,7 +2,7 @@
 
 # Estado Atual do Projeto Patty
 
-Ultima atualizacao documental: 2026-10-02.
+Ultima atualizacao documental: 2026-10-03.
 
 Este arquivo e o ponto de entrada operacional para novos chats e agentes. Ele resume o estado do projeto e aponta para as fontes de verdade detalhadas.
 
@@ -62,6 +62,39 @@ A camada configuravel de hidratacao esta aplicada e integrada ao fluxo administr
 
 
 
+## Atualizacao operacional 2026-10-03
+
+### Snapshots e hardening de Avaliacoes/Liquidos
+
+- PR #293 conectou os consumidores de avaliacao e liquidos às boundaries atomicas de snapshot;
+- migration `20261002224033_snapshot_assessment_and_liquid_consumers.sql` esta aplicada no Supabase SaaS;
+- PR #295 introduziu o hardening pos-rollout;
+- migration `20261002231111_harden_snapshot_consumers.sql` esta aplicada e verificada no SaaS;
+- novas finalizacoes de avaliacao exigem snapshot sem invalidar avaliacoes historicas;
+- `authenticated` nao possui INSERT direto em `client_liquid_intake_events`;
+- `authenticated` nao possui UPDATE amplo em `client_assessments`, mantendo somente os campos de rascunho permitidos;
+- a funcao de lifecycle de avaliacao nao e executavel por `anon` nem `authenticated`.
+
+### Reconciliacao do metodo
+
+A sequencia profissional vigente para automacao esta confirmada somente ate:
+
+```text
+Reconhecimento Metabolico
+-> Cutting 1 Dia 1 / Dia 2
+-> Cutting 1: 2 Low / 1 High
+-> Up Metabolico
+-> Cutting 2 Linear
+-> Cutting 2 Dia 1 / Dia 2
+-> Cutting 2: 2 Low / 1 High
+```
+
+Etapas posteriores permanecem abertas. Registros historicos que tratavam Cutting 3 como confirmado foram marcados como superados para fins de automacao.
+
+Na hidratacao, a taxonomia ativa distingue agua pura de outros liquidos zero calorias. Nao existe proporcao minima automatica confirmada entre essas categorias.
+
+O warning `auth_leaked_password_protection` continua conhecido e foi adiado; o projeto permanece no plano Free, no qual esse recurso nao esta disponivel.
+
 ## Legenda de estado
 
 - **DEFINIDO**: regra ou decisao documentada.
@@ -104,7 +137,7 @@ Estado atual revalidado em 2026-10-01: o PR #246 restaurou o baseline verde e fo
 | Avaliacoes e medidas | Fundacao + cadencia profissional parcial definida | Lifecycle operacional de rascunho/finalizacao implementado | CI/build PASS no PR #210 + pre-apply `ROLLBACK` PASS | `20260927002227_create_assessment_draft_lifecycle` APLICADA NO SAAS | Avaliacao Basica ocorre no meio do intervalo entre Completas; Avaliacao Completa usa catalogo confirmado de peso, medidas e fotos; regra de calendario para ancora 29/30/31 continua aberta |
 | Protocolos versionados | SIM | Lifecycle manual implementado | CI/validacoes existentes | Backend/SaaS correspondente existente | Criacao/edicao profissional completa conforme regras ainda abertas |
 | Conteudo educacional / exercicios | SIM como dominios separados | Fundacao/release + metadata de asset preparada | Inventario 89/89 revalidado; smoke transacional de assets PASS | Vercel Private Blob definido para midia; store/upload ainda nao executados | Criar/conectar store privado, migrar video aprovado, verificar hash e publicar/liberar explicitamente |
-| Metodo da Patty | PARCIALMENTE DEFINIDO | Motor determinístico existente/parcial; regras profissionais devem migrar para configuração versionada e editável | CI | Fluxo confirmado inclui Cutting 3 Linear -> Dia 1/Dia 2 -> 2 Low/1 High -> Up Metabolico; meta de liquidos 60 mL/kg e equivalencia 2 doses de legumes = 1 dose de carbo confirmadas | Fases 5/6, numeros da planilha por peso do Cutting 3, pos-Up Metabolico, Bulking, Consolidacao, suplementacao, treino, parametros restantes do check-in e criterios objetivos de estagnacao |
+| Metodo da Patty | PARCIALMENTE DEFINIDO | Motor determinístico existente/parcial; regras profissionais migram para configuração versionada e editável | CI | Fluxo confirmado somente ate Cutting 2: 2 Low / 1 High; meta de liquidos, equivalencia de legumes, catalogos de avaliacao/liquidos e templates Carb Cycle 1-3 versionados | Etapas posteriores ao Cutting 2, Fases 5/6, Bulking, Consolidacao, suplementacao, treino, parametros restantes do check-in e criterios objetivos de estagnacao |
 | IA assistiva | SIM como principio e arquitetura; provider OpenAI confirmado | PARCIAL/AVANCADO | Adapter OpenAI + Structured Outputs + aliases + UI de revisao humana; default tecnico `gpt-5.6-terra` / reasoning `medium` | Prompt v1 aplicado; PR #151 publicado READY; chamada externa bloqueada | Credencial OpenAI, avaliacao sintetica e conclusao do gate de dados de saude |
 | Failure handling de IA | SIM | SIM no schema + boundary server-side | CI + invariantes deterministicas | `20260922160058` aplicada; provider adapter publicado, mas chamada real segue gated | Manter gate fechado ate avaliacao sintetica/controles de dados; recovery automatico segue aberto |
 | n8n | SIM: nao usar inicialmente | N/A | N/A | Nao usado | Introduzir somente com caso concreto |
@@ -162,7 +195,7 @@ Consultar `BUSINESS_RULES.md` para detalhes.
 
 Resumo:
 - todo acompanhamento comeca pelo Reconhecimento Metabolico;
-- o fluxo principal confirmado agora segue ate Cutting 3 Linear -> Dia 1/Dia 2 -> 2 Low/1 High -> Up Metabolico;
+- o fluxo principal confirmado termina atualmente em Cutting 2: 2 Low / 1 High; etapas posteriores permanecem abertas;
 - existem regras confirmadas de refeicoes/jejum, macros/doses, grupos de proteina, legumes na contagem de carboidrato, Cutting Dia 1/Dia 2, meta de liquidos 60 mL/kg/dia e refeicao livre do Up Metabolico;
 - no inicio, relatos de saude/comportamento nao geram alerta, bloqueio ou encaminhamento automatico;
 - para emagrecimento/reducao de gordura, cintura e abdomen sao referencias fortes e fotos podem confirmar evolucao mesmo com peso estavel;
@@ -220,11 +253,11 @@ A lista autoritativa esta em `OPEN_QUESTIONS.md`.
 
 Entre as principais:
 - Fases 5 e 6 da Planilha Carb Cycle;
-- valores/formulas exatos das tabelas por peso usadas no Cutting 3;
-- etapas posteriores ao Up Metabolico que sucede o Cutting 3;
+- valores/formulas de qualquer etapa posterior ao Cutting 2, se vier a ser confirmada;
+- definicao da etapa imediatamente posterior a Cutting 2: 2 Low / 1 High;
 - Bulking detalhado;
 - Consolidacao;
-- proporcao minima de agua pura, recalculo por mudanca de peso e cadencia dos lembretes;
+- eventual proporcao-alvo de agua pura, recalculo por mudanca de peso e cadencia dos lembretes;
 - suplementacao/manipulados;
 - montagem/progressao definitiva de treino e cardio ainda nao coberto por regra confirmada;
 - janela/limiar de estagnacao e combinacoes conflitantes de indicadores;

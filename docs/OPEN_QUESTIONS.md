@@ -444,25 +444,25 @@ Continuam abertos:
 - criterios profissionais de transicao cutting -> bulking -> cutting;
 - regras detalhadas das Fases 4, 5 e 6.
 
-### PARCIALMENTE RESOLVIDO — CUTTING 3
+### QUESTAO ABERTA — ETAPAS POSTERIORES AO CUTTING 2
 
-A Patty confirmou que, apos `Cutting 2: 2 Low / 1 High`, o Cutting 3 segue esta sequencia:
-- Cutting 3 Linear;
-- Cutting 3 Dia 1 / Dia 2;
-- Cutting 3: 2 Low / 1 High;
-- depois, Up Metabolico.
+A sequencia profissional atualmente confirmada termina em:
 
-Tambem confirmou que as quantidades de proteina e carboidrato diminuem progressivamente conforme o peso da cliente e usam tabelas em Excel como referencia.
+- Cutting 2 Linear;
+- Cutting 2 Dia 1 / Dia 2;
+- Cutting 2: 2 Low / 1 High.
 
-A planilha fonte foi localizada e a Patty confirmou que suas Fases 1 a 4 pertencem aos Cuttings atuais e que a coluna Media corresponde ao Linear.
+Registros historicos anteriores mencionavam Cutting 3 como sequencia confirmada, mas essa classificacao fica superada para fins de automacao pela reconciliacao documental vigente.
 
 Continuam abertos:
-- o pareamento individual fase 1/2/3/4 -> Cutting 1/2/3;
-- a semantica do bloco final de conversao da planilha antes de trata-lo como doses/porcoes;
-- duracao e criterio de encerramento do Cutting 3;
-- etapas posteriores ao Up Metabolico que sucede o Cutting 3.
 
-Nao automatizar a selecao pelo nome do Cutting enquanto o pareamento individual nao estiver confirmado.
+- qual e a etapa imediatamente posterior a `Cutting 2: 2 Low / 1 High`;
+- se existe um Cutting posterior formal no fluxo vigente e, em caso positivo, sua nomenclatura/estrutura;
+- valores, formulas, duracao e criterios de encerramento de qualquer etapa posterior;
+- relacao dessas etapas com Bulking e eventual retorno ao Cutting;
+- pareamento individual entre fases numeradas da planilha e etapas concretas do protocolo.
+
+Nao automatizar selecao, progressao ou nomenclatura de etapa posterior ao Cutting 2 enquanto nao houver nova confirmacao documentada da Patty.
 
 ### PARCIALMENTE RESOLVIDO — BULKING
 
@@ -485,10 +485,10 @@ A Patty confirmou a formula usada no metodo:
 - **60 mL por kg de peso corporal por dia**;
 - exemplo: 60 kg -> 3.600 mL/dia = 3,6 L/dia.
 
-A maior parte da meta deve ser agua pura. O restante pode ser complementado, em menor quantidade, por liquidos zero calorias, como cha, chimarrao, suco zero ou refrigerante zero.
+A taxonomia operacional distingue agua pura de outros liquidos zero calorias. Nenhuma proporcao minima automatica entre essas categorias esta confirmada.
 
 Continuam abertos:
-- proporcao minima/exata que deve ser agua pura;
+- eventual proporcao-alvo entre agua pura e outros liquidos, caso a Patty queira formaliza-la futuramente;
 - regra de recalculo quando o peso muda;
 - horarios/cadencia dos lembretes;
 - poderes de correcao da Patty;
@@ -496,7 +496,7 @@ Continuam abertos:
 
 O valor atual de **60 mL/kg/dia** e a referencia profissional confirmada e passa a ser o template inicial dessa regra. O runtime atual ja possui implementacao deterministica com snapshot de meta, mas, conforme a decisao de parametrizacao de 2026-09-30, esse numero nao deve permanecer como constante profissional definitiva no codigo: deve migrar para configuracao versionada sem reescrever historico.
 
-As questoes de recalculo por mudanca de peso, proporcao minima de agua pura, lembretes e correcoes continuam abertas e nao devem ser inferidas a partir do template.
+As questoes de recalculo por mudanca de peso, eventual proporcao-alvo de agua pura, lembretes e correcoes continuam abertas e nao devem ser inferidas a partir do template.
 
 ### QUESTAO ABERTA
 
@@ -771,7 +771,7 @@ A Patty confirmou que as metas/configuracoes individuais podem ser definidas na 
 A formula e a unidade da meta estao resolvidas: 60 mL/kg/dia.
 
 Ainda faltam formalizar:
-- proporcao minima/exata de agua pura dentro da meta;
+- eventual proporcao-alvo de agua pura dentro da meta;
 - regra de recalculo apos mudanca de peso;
 - horarios e cadencia dos lembretes;
 - o que a Patty visualiza e pode corrigir;
@@ -841,7 +841,7 @@ Continua aberto apenas o mecanismo futuro de recovery/watchdog, caso seja necess
 
 ### AINDA ABERTO
 
-- proporcao minima/exata de agua pura;
+- eventual proporcao-alvo de agua pura;
 - criterio para criar uma nova meta quando o peso muda;
 - canal de notificacao para o lembrete de 24 horas;
 - detalhes de eventual correcao/estorno de eventos alem de adicionar novo evento;

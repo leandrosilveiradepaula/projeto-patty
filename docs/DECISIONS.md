@@ -1,3 +1,51 @@
+## 2026-10-03 - Reconciliacao da sequencia confirmada do protocolo
+
+### REGRA CONFIRMADA VIGENTE
+
+Para automacao e produto, a sequencia atualmente confirmada termina em:
+
+```text
+Reconhecimento Metabolico
+-> Cutting 1 Dia 1 / Dia 2
+-> Cutting 1: 2 Low / 1 High
+-> Up Metabolico
+-> Cutting 2 Linear
+-> Cutting 2 Dia 1 / Dia 2
+-> Cutting 2: 2 Low / 1 High
+```
+
+Nao inferir etapas posteriores.
+
+### CONSEQUENCIA DOCUMENTAL
+
+Registros anteriores que tratavam Cutting 3 ou um Up Metabolico posterior ao Cutting 3 como parte confirmada da sequencia ficam **superados para fins de automacao**.
+
+Esses registros sao preservados como historico de levantamento, mas nao autorizam:
+- criar etapa posterior ao Cutting 2;
+- mapear automaticamente fases numeradas do Carb Cycle para um Cutting posterior;
+- gerar formulas/macros para Cutting 3;
+- avancar automaticamente para Bulking ou outra fase.
+
+Qualquer etapa posterior a `Cutting 2: 2 Low / 1 High` volta a ser questao aberta e exige nova confirmacao documentada da Patty antes de implementacao.
+
+
+## 2026-10-03 - Reconciliacao da composicao do check-in de liquidos
+
+### REGRA CONFIRMADA VIGENTE
+
+A meta diaria permanece calculada pela configuracao profissional ativa. Para o baseline atual, a referencia e 60 mL/kg/dia.
+
+A taxonomia ativa distingue:
+- agua pura;
+- outros liquidos zero calorias.
+
+Nao existe proporcao minima automatica confirmada entre essas categorias.
+
+### CONSEQUENCIA DOCUMENTAL
+
+Registros historicos que descreviam "maior parte em agua pura" e "menor quantidade de outros liquidos" nao devem ser usados como regra automatica nem como threshold de validacao.
+
+Se a Patty quiser formalizar futuramente uma proporcao-alvo, esse parametro deve ser confirmado, documentado e versionado antes de qualquer automacao.
 
 ## 2026-09-30 - Regras, cálculos e workflows totalmente parametrizáveis
 
@@ -101,7 +149,7 @@ Portanto, a presenca inicial desses dados nao gera automaticamente:
 
 Qualquer intervencao posterior continua sendo decisao humana da Patty conforme a evolucao do caso. Isso nao revoga a possibilidade de encaminhamento manual a outro profissional quando a Patty julgar necessario; apenas exclui uma regra automatica inicial do sistema.
 
-## 2026-09-27 - Progressao do protocolo por sequencia, adesao e resultado
+## 2026-09-27 - Progressao do protocolo por sequencia, adesao e resultado — SUPERADA PARCIALMENTE EM 2026-10-03
 
 ### REGRA CONFIRMADA PELA PATTY
 
@@ -309,7 +357,7 @@ Formula do metodo:
 
 Exemplo: 60 kg -> 3.600 mL/dia (3,6 L/dia).
 
-A Patty orienta que a maior parte da meta seja agua pura. O restante pode ser complementado, em menor quantidade, por liquidos zero calorias, como cha, chimarrao, suco zero ou refrigerante zero.
+A orientacao historica sobre maior parte em agua pura foi superada para fins de automacao pela reconciliacao de 2026-10-03. A taxonomia ativa distingue agua pura de outros liquidos zero calorias sem proporcao minima automatica.
 
 O check-in diario de atividade fisica e independente do treino prescrito ou de qualquer rotina previamente definida. A frequencia pode ser derivada depois dos registros diarios.
 
@@ -320,7 +368,7 @@ As metas e configuracoes individuais do check-in podem ser definidas na entrega 
 ### QUESTOES AINDA ABERTAS
 
 Ainda precisam ser formalizados como padrao/regra:
-- proporcao minima/exata de agua pura dentro da meta;
+- eventual proporcao-alvo de agua pura dentro da meta;
 - se/quando recalcular a meta apos mudanca de peso;
 - horarios e cadencia dos lembretes;
 - visibilidade e poderes de correcao da Patty;
@@ -695,7 +743,7 @@ Nenhuma formula, criterio ou comportamento dessas fases deve ser:
 Qualquer uso futuro depende de nova confirmacao profissional e atualizacao documental previa.
 
 
-## 2026-09-24 - Cutting 3 Linear e etapa seguinte
+## 2026-09-24 - Cutting 3 Linear e etapa seguinte — SUPERADA EM 2026-10-03
 
 ### DECISAO SUPERADA PARCIALMENTE POR CONFIRMACAO DE 2026-09-27
 
@@ -1622,11 +1670,13 @@ Continuam abertos nesta area:
 
 - politica concreta de retencao e hard delete.
 
-## 2026-09-22 - Reconciliacao documental das regras confirmadas do metodo
+## 2026-09-22 - Reconciliacao documental das regras confirmadas do metodo — SUPERADA PARCIALMENTE EM 2026-10-03
 
 ### DECISAO CONFIRMADA
 
 Esta secao registra no repositorio regras ja confirmadas pela Patty e elimina a classificacao antiga que tratava todo o metodo como indefinido.
+
+**Nota de vigencia:** a parte desta secao que estendia a sequencia para Cutting 3 foi superada pela decisao de 2026-10-03. As demais regras confirmadas desta secao permanecem vigentes quando nao conflitarem com decisao posterior.
 
 Todo acompanhamento comeca pelo Reconhecimento Metabolico, protocolo linear inicial.
 
@@ -2381,7 +2431,7 @@ RLS permanece obrigatoria: cliente acessa somente os proprios check-ins; Patty/a
 
 ### CONTINUA ABERTO
 
-- proporcao minima/exata de agua pura dentro da meta;
+- eventual proporcao-alvo de agua pura dentro da meta;
 - quando a Patty deseja criar novo snapshot de hidratacao apos mudanca de peso;
 - canal e mecanismo de envio do lembrete de 24 horas;
 - politica de edicao/correcao de eventos alem do modelo append-only atual.
