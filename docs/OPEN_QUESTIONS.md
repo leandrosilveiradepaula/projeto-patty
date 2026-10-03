@@ -444,25 +444,25 @@ Continuam abertos:
 - criterios profissionais de transicao cutting -> bulking -> cutting;
 - regras detalhadas das Fases 4, 5 e 6.
 
-### PARCIALMENTE RESOLVIDO — CUTTING 3
+### QUESTAO ABERTA — ETAPAS POSTERIORES AO CUTTING 2
 
-A Patty confirmou que, apos `Cutting 2: 2 Low / 1 High`, o Cutting 3 segue esta sequencia:
-- Cutting 3 Linear;
-- Cutting 3 Dia 1 / Dia 2;
-- Cutting 3: 2 Low / 1 High;
-- depois, Up Metabolico.
+A sequencia profissional atualmente confirmada termina em:
 
-Tambem confirmou que as quantidades de proteina e carboidrato diminuem progressivamente conforme o peso da cliente e usam tabelas em Excel como referencia.
+- Cutting 2 Linear;
+- Cutting 2 Dia 1 / Dia 2;
+- Cutting 2: 2 Low / 1 High.
 
-A planilha fonte foi localizada e a Patty confirmou que suas Fases 1 a 4 pertencem aos Cuttings atuais e que a coluna Media corresponde ao Linear.
+Registros historicos anteriores mencionavam Cutting 3 como sequencia confirmada, mas essa classificacao fica superada para fins de automacao pela reconciliacao documental vigente.
 
 Continuam abertos:
-- o pareamento individual fase 1/2/3/4 -> Cutting 1/2/3;
-- a semantica do bloco final de conversao da planilha antes de trata-lo como doses/porcoes;
-- duracao e criterio de encerramento do Cutting 3;
-- etapas posteriores ao Up Metabolico que sucede o Cutting 3.
 
-Nao automatizar a selecao pelo nome do Cutting enquanto o pareamento individual nao estiver confirmado.
+- qual e a etapa imediatamente posterior a `Cutting 2: 2 Low / 1 High`;
+- se existe um Cutting posterior formal no fluxo vigente e, em caso positivo, sua nomenclatura/estrutura;
+- valores, formulas, duracao e criterios de encerramento de qualquer etapa posterior;
+- relacao dessas etapas com Bulking e eventual retorno ao Cutting;
+- pareamento individual entre fases numeradas da planilha e etapas concretas do protocolo.
+
+Nao automatizar selecao, progressao ou nomenclatura de etapa posterior ao Cutting 2 enquanto nao houver nova confirmacao documentada da Patty.
 
 ### PARCIALMENTE RESOLVIDO — BULKING
 
