@@ -13,7 +13,7 @@ type AdminNavigationItem = {
 };
 
 const adminNavigationItems: AdminNavigationItem[] = [
-  { href: "/admin", label: "Início" },
+  { href: "/admin", label: "Início" },\n  { href: "/admin/demo", label: "Demonstração" },
   { href: "/admin/pendencias", label: "Pendências" },
   { href: "/admin/clientes", label: "Clientes" },
   { href: "/admin/arquivos", label: "Arquivos" },
