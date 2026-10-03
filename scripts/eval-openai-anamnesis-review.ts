@@ -9,6 +9,36 @@ import {
 const apiKey = process.env.OPENAI_API_KEY?.trim();
 const model = process.env.OPENAI_EVAL_MODEL?.trim() || "gpt-5.6-terra";
 
+
+type EvalUsage = {
+  inputTokens: number | null;
+  outputTokens: number | null;
+  totalTokens: number | null;
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function readUsage(value: unknown): EvalUsage {
+  if (!isRecord(value) || !isRecord(value.usage)) {
+    return { inputTokens: null, outputTokens: null, totalTokens: null };
+  }
+
+  const readTokenCount = (key: string) => {
+    const tokenCount = value.usage[key];
+    return typeof tokenCount === "number" && Number.isFinite(tokenCount)
+      ? tokenCount
+      : null;
+  };
+
+  return {
+    inputTokens: readTokenCount("input_tokens"),
+    outputTokens: readTokenCount("output_tokens"),
+    totalTokens: readTokenCount("total_tokens"),
+  };
+}
+
 if (!apiKey) {
   console.error("OPENAI_API_KEY is required for the synthetic OpenAI evaluation.");
   process.exit(2);
@@ -130,6 +160,11 @@ const scenarios: Array<{
 ];
 
 let failed = 0;
+let totalLatencyMs = 0;
+let totalInputTokens = 0;
+let totalOutputTokens = 0;
+let totalTokens = 0;
+let usageSamples = 0;
 
 for (const scenario of scenarios) {
   const request = buildOpenAiAnamnesisReviewRequest({
@@ -138,6 +173,7 @@ for (const scenario of scenarios) {
     model,
   });
 
+  const startedAt = Date.now();
   const response = await fetch("https://api.openai.com/v1/responses", {
     method: "POST",
     headers: {
@@ -148,6 +184,8 @@ for (const scenario of scenarios) {
   });
 
   const raw = await response.text();
+  const latencyMs = Date.now() - startedAt;
+  totalLatencyMs += latencyMs;
 
   if (!response.ok) {
     failed += 1;
@@ -156,6 +194,7 @@ for (const scenario of scenarios) {
         scenario: scenario.name,
         pass: false,
         error: `HTTP ${response.status}`,
+        latency_ms: latencyMs,
       }),
     );
     continue;
@@ -172,9 +211,23 @@ for (const scenario of scenarios) {
         scenario: scenario.name,
         pass: false,
         error: "provider_response_not_json",
+        latency_ms: latencyMs,
       }),
     );
     continue;
+  }
+
+  const usage = readUsage(responseJson);
+
+  if (
+    usage.inputTokens !== null &&
+    usage.outputTokens !== null &&
+    usage.totalTokens !== null
+  ) {
+    usageSamples += 1;
+    totalInputTokens += usage.inputTokens;
+    totalOutputTokens += usage.outputTokens;
+    totalTokens += usage.totalTokens;
   }
 
   const extracted = extractOpenAiStructuredOutput(responseJson);
@@ -186,6 +239,12 @@ for (const scenario of scenarios) {
         scenario: scenario.name,
         pass: false,
         error: extracted.code,
+        latency_ms: latencyMs,
+        usage: {
+          input_tokens: usage.inputTokens,
+          output_tokens: usage.outputTokens,
+          total_tokens: usage.totalTokens,
+        },
       }),
     );
     continue;
@@ -204,6 +263,12 @@ for (const scenario of scenarios) {
         scenario: scenario.name,
         pass: false,
         error: mapped.error,
+        latency_ms: latencyMs,
+        usage: {
+          input_tokens: usage.inputTokens,
+          output_tokens: usage.outputTokens,
+          total_tokens: usage.totalTokens,
+        },
       }),
     );
     continue;
@@ -224,6 +289,12 @@ for (const scenario of scenarios) {
       expectedType: scenario.expectedType,
       findingTypes,
       findingCount: mapped.value.findings.length,
+      latency_ms: latencyMs,
+      usage: {
+        input_tokens: usage.inputTokens,
+        output_tokens: usage.outputTokens,
+        total_tokens: usage.totalTokens,
+      },
     }),
   );
 }
@@ -234,6 +305,16 @@ console.log(
     scenarios: scenarios.length,
     failed,
     passed: scenarios.length - failed,
+    latency: {
+      total_ms: totalLatencyMs,
+      average_ms: Math.round(totalLatencyMs / scenarios.length),
+    },
+    usage: {
+      samples: usageSamples,
+      input_tokens: usageSamples > 0 ? totalInputTokens : null,
+      output_tokens: usageSamples > 0 ? totalOutputTokens : null,
+      total_tokens: usageSamples > 0 ? totalTokens : null,
+    },
   }),
 );
 
