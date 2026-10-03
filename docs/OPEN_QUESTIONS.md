@@ -485,10 +485,10 @@ A Patty confirmou a formula usada no metodo:
 - **60 mL por kg de peso corporal por dia**;
 - exemplo: 60 kg -> 3.600 mL/dia = 3,6 L/dia.
 
-A maior parte da meta deve ser agua pura. O restante pode ser complementado, em menor quantidade, por liquidos zero calorias, como cha, chimarrao, suco zero ou refrigerante zero.
+A taxonomia operacional distingue agua pura de outros liquidos zero calorias. Nenhuma proporcao minima automatica entre essas categorias esta confirmada.
 
 Continuam abertos:
-- proporcao minima/exata que deve ser agua pura;
+- eventual proporcao-alvo entre agua pura e outros liquidos, caso a Patty queira formaliza-la futuramente;
 - regra de recalculo quando o peso muda;
 - horarios/cadencia dos lembretes;
 - poderes de correcao da Patty;
@@ -496,7 +496,7 @@ Continuam abertos:
 
 O valor atual de **60 mL/kg/dia** e a referencia profissional confirmada e passa a ser o template inicial dessa regra. O runtime atual ja possui implementacao deterministica com snapshot de meta, mas, conforme a decisao de parametrizacao de 2026-09-30, esse numero nao deve permanecer como constante profissional definitiva no codigo: deve migrar para configuracao versionada sem reescrever historico.
 
-As questoes de recalculo por mudanca de peso, proporcao minima de agua pura, lembretes e correcoes continuam abertas e nao devem ser inferidas a partir do template.
+As questoes de recalculo por mudanca de peso, eventual proporcao-alvo de agua pura, lembretes e correcoes continuam abertas e nao devem ser inferidas a partir do template.
 
 ### QUESTAO ABERTA
 
@@ -771,7 +771,7 @@ A Patty confirmou que as metas/configuracoes individuais podem ser definidas na 
 A formula e a unidade da meta estao resolvidas: 60 mL/kg/dia.
 
 Ainda faltam formalizar:
-- proporcao minima/exata de agua pura dentro da meta;
+- eventual proporcao-alvo de agua pura dentro da meta;
 - regra de recalculo apos mudanca de peso;
 - horarios e cadencia dos lembretes;
 - o que a Patty visualiza e pode corrigir;
@@ -841,7 +841,7 @@ Continua aberto apenas o mecanismo futuro de recovery/watchdog, caso seja necess
 
 ### AINDA ABERTO
 
-- proporcao minima/exata de agua pura;
+- eventual proporcao-alvo de agua pura;
 - criterio para criar uma nova meta quando o peso muda;
 - canal de notificacao para o lembrete de 24 horas;
 - detalhes de eventual correcao/estorno de eventos alem de adicionar novo evento;
