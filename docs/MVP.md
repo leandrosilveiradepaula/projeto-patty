@@ -122,7 +122,7 @@ Estado resumido nesta data:
 - correcoes posteriores da Anamnese pela Patty estao implementadas como historico append-only, sem sobrescrever a resposta original;
 - arquivos privados possuem upload, validacao, visualizacao/download e auditoria; a excecao de acesso da Patty sem assignment esta implementada e a politica de retencao/hard delete continua aberta;
 - avaliacoes possuem lifecycle de rascunho/finalizacao, catalogos configuraveis e snapshot/hardening aplicados; protocolos, conteudos e exercicios possuem fundacoes operacionais com pendencias profissionais/operacionais ainda abertas;
-- a IA permanece assistiva; provider OpenAI, boundary server-side, prompt v1, Structured Outputs e revisao humana existem, mas chamada com dados reais continua bloqueada por credencial, avaliacao sintetica e gate de dados de saude;
+- a IA permanece assistiva; provider OpenAI, boundary server-side, prompt v1, Structured Outputs, revisao humana e avaliacao sintetica inicial 4/4 PASS existem, mas chamada com dados reais continua bloqueada pelo gate de dados de saude e pelos controles organizacionais pendentes;
 - o `master` atual esta publicado como deployment de producao `READY`; merges exclusivamente documentais posteriores devem continuar distinguindo merge de validacao funcional em runtime.
 
 Para o estado operacional detalhado e os bloqueios atuais, consultar `PROJECT_STATUS.md`.
