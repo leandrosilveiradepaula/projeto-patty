@@ -1652,11 +1652,13 @@ Continuam abertos nesta area:
 
 - politica concreta de retencao e hard delete.
 
-## 2026-09-22 - Reconciliacao documental das regras confirmadas do metodo
+## 2026-09-22 - Reconciliacao documental das regras confirmadas do metodo — SUPERADA PARCIALMENTE EM 2026-10-03
 
 ### DECISAO CONFIRMADA
 
 Esta secao registra no repositorio regras ja confirmadas pela Patty e elimina a classificacao antiga que tratava todo o metodo como indefinido.
+
+**Nota de vigencia:** a parte desta secao que estendia a sequencia para Cutting 3 foi superada pela decisao de 2026-10-03. As demais regras confirmadas desta secao permanecem vigentes quando nao conflitarem com decisao posterior.
 
 Todo acompanhamento comeca pelo Reconhecimento Metabolico, protocolo linear inicial.
 
