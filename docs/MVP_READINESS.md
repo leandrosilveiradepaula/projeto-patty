@@ -1,6 +1,6 @@
 # Mapa de prontidao do sistema completo
 
-Data de referencia: 2026-09-26 (atualizado apos validacao do update do draft canonico em producao).
+Data de referencia: 2026-10-03 (reconciliado com snapshots/hardening, fluxo vigente do metodo e estado atual de Avaliacoes/IA).
 
 Este documento e um mapa operacional do estado atual. Ele nao substitui `sistema completo.md`, `DECISIONS.md`, `BUSINESS_RULES.md` ou `OPEN_QUESTIONS.md`.
 
@@ -66,7 +66,7 @@ Estados usados:
 | Clients / assignments | leitura + encerramento + inicio de assignment no onboarding IMPLEMENTADOS | Patty inicia onboarding por convite server-side; provisionamento cria vinculos relacionais e assignment com compensacao em falha | CI VALIDADO; encerramento E2E PASS; onboarding sintetico E2E PASS; Site URL/allowlist alinhados | template SSR real exige upgrade ou SMTP customizado; depois validar email real |
 | Cadastro Atual | leitura + edicao controlada IMPLEMENTADAS | cliente edita proprio estado atual; Patty/admin edita sob AAL2 + assignment ativo; login email permanece separado | CI cobre validacao e boundary privilegiada server-only | sem migration nova; formulario ampliado/historico cadastral permanecem fora do escopo atual |
 | Anamnese versionada | leitura, rascunho e submissao final IMPLEMENTADOS; mapa v1 + consentimento checkbox DEFINIDOS; esclarecimentos pos-envio IMPLEMENTADOS | cliente salva `text`/`single_choice`; aplicabilidade oculta dependentes; envio explicito exige ANAM-046 na forma canonica | CI + smoke SQL PASS; consent E2E `36072067063`; start/resume `36074218960`; fluxo consolidado de draft `36257567841` PASS; esclarecimentos `36053370894` PASS | manter versionamento para mudancas futuras e nao reabrir gates ja validados sem nova evidencia |
-| Avaliacoes / medidas | leitura + autoria operacional de rascunho/finalizacao IMPLEMENTADAS | draft editavel; finalizacao imutavel; acompanhamento profissional somente apos finalizacao | CI/build PASS + pre-apply `ROLLBACK` PASS + schema aplicado | `20260927002227` aplicada; definir catalogo, unidades, obrigatoriedade e correcao historica pos-finalizacao |
+| Avaliacoes / medidas | autoria operacional + catalogos configuraveis + snapshot/hardening IMPLEMENTADOS | draft editavel; finalizacao imutavel e atomica com snapshot; correcao de medida append-only | CI/build + smokes transacionais + migrations aplicadas | regra de calendario para ancoras 29/30/31 continua aberta; novos tipos exigem migration propria |
 | Arquivos privados | upload/listagem/download da cliente IMPLEMENTADOS; acesso admin permanente sem assignment, upload administrativo e liberacao explicita IMPLEMENTADOS | smoke E2E da cliente PASS; smoke E2E administrativo PASS em producao; cron de temporarios VALIDADO; auditoria estatica confirmou RLS/rotas coerentes com a excecao da Patty | definir retencao/hard delete |
 | Protocolos | leitura + lifecycle manual IMPLEMENTADOS | submit/approve/publish | CI + SAAS VALIDADO; lifecycle com guarda determinística testada | criar/editar plano somente quando fluxo profissional estiver formalizado |
 | Plano alimentar publicado | cliente ve variantes, refeicoes, doses e ciclo | nao | CI VALIDADO | equivalentes visiveis continuam abertos |
@@ -502,9 +502,9 @@ A Patty distinguiu nova avaliacao de acompanhamento de correcao de erro:
 - nova avaliacao sempre preserva a anterior e recebe nova data;
 - erro de lancamento deve ser corrigido na avaliacao existente, fazendo o valor incorreto deixar de ser o dado valido.
 
-O runtime atual torna avaliacao/medidas finalizadas imutaveis, portanto a forma auditavel de permitir essa correcao ainda exige tarefa tecnica separada antes de ser considerada implementada.
+A correcao auditavel de valor/unidade ja esta implementada por historico append-only em `assessment_measurement_corrections`, preservando o valor original e usando a correcao mais recente como valor factual vigente.
 
-Continua aberto: regra para datas-ancora 29/30/31 em meses sem o mesmo dia e desenho tecnico da correcao auditavel pos-finalizacao.
+Continua aberta a regra para datas-ancora 29/30/31 em meses sem o mesmo dia. Outras ampliacoes de correcao historica, como mudanca de `measurement_key`, data/tipo da avaliacao ou vinculo de foto, exigem desenho separado se vierem a ser necessarias.
 
 ## Protocolos - progressao profissional
 

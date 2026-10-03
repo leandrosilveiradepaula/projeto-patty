@@ -118,11 +118,11 @@ Estado resumido nesta data:
 - MFA administrativo esta implementado e o enforcement em RLS foi aplicado no Supabase SaaS;
 - a Anamnese versionada possui rascunho persistente, `text`, `single_choice`, aplicabilidade condicional versionada e submissao final deterministica aplicados;
 - a migration `20260924142453_anamnesis_final_submission_foundation.sql` consta no historico remoto; smoke pos-apply confirmou bloqueio de incompletude aplicavel e aceite de campo oculto;
-- a primeira `client-anamnesis` ainda nao pode ser materializada/publicada porque ANAM-046 depende do gate juridico `ANAMNESE_CONSENT_GATE.md`;
+- a `client-anamnesis` v1 esta publicada e validada; ANAM-046 integra a versao canonica como consentimento obrigatorio no envio final;
 - correcoes posteriores da Anamnese pela Patty estao implementadas como historico append-only, sem sobrescrever a resposta original;
 - arquivos privados possuem upload, validacao, visualizacao/download e auditoria; a excecao de acesso da Patty sem assignment esta implementada e a politica de retencao/hard delete continua aberta;
-- avaliacoes, protocolos, conteudos e exercicios possuem fundacoes de backend, mas seus fluxos completos do sistema ainda nao estao concluidos;
-- a IA permanece assistiva; a fundacao interna e partes deterministicas existem, mas provider/modelo, boundary real de execution e UX completa de revisao ainda nao estao definidos;
+- avaliacoes possuem lifecycle de rascunho/finalizacao, catalogos configuraveis e snapshot/hardening aplicados; protocolos, conteudos e exercicios possuem fundacoes operacionais com pendencias profissionais/operacionais ainda abertas;
+- a IA permanece assistiva; provider OpenAI, boundary server-side, prompt v1, Structured Outputs e revisao humana existem, mas chamada com dados reais continua bloqueada por credencial, avaliacao sintetica e gate de dados de saude;
 - o `master` atual esta publicado como deployment de producao `READY`; merges exclusivamente documentais posteriores devem continuar distinguindo merge de validacao funcional em runtime.
 
 Para o estado operacional detalhado e os bloqueios atuais, consultar `PROJECT_STATUS.md`.
