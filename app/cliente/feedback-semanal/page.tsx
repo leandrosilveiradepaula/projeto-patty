@@ -107,6 +107,7 @@ export default async function ClientWeeklyFeedbackPage() {
                       <form
                         action={saveWeeklyFeedbackAction.bind(null, feedback.id)}
                         className={styles.form}
+                        noValidate
                       >
                         {definition.questions.map((question) => {
                           const defaultValue = readWeeklyFeedbackAnswer(
