@@ -131,14 +131,14 @@ Para o estado operacional detalhado e os bloqueios atuais, consultar `PROJECT_ST
 
 ### QUESTAO ABERTA
 
-Parte do metodo ja possui regras confirmadas e documentadas em `BUSINESS_RULES.md` e `DECISIONS.md`, incluindo Reconhecimento Metabolico, sequencia principal confirmada ate Cutting 3: Linear -> Dia 1/Dia 2 -> 2 Low/1 High -> Up Metabolico, referencias iniciais de macros, conversoes de doses, limite do grupo de proteina com maior teor de gordura, equivalencia de legumes na contagem de carboidrato, regras confirmadas de Cutting Dia 1 / Dia 2, meta de liquidos de 60 mL/kg/dia e a existencia da refeicao livre semanal no Up Metabolico.
+Parte do metodo ja possui regras confirmadas e documentadas em `BUSINESS_RULES.md` e `DECISIONS.md`, incluindo Reconhecimento Metabolico, a sequencia principal confirmada ate `Cutting 2: 2 Low / 1 High`, referencias iniciais de macros, conversoes de doses, limite do grupo de proteina com maior teor de gordura, equivalencia de legumes na contagem de carboidrato, regras confirmadas de Cutting Dia 1 / Dia 2, meta de liquidos de 60 mL/kg/dia e a existencia da refeicao livre semanal no Up Metabolico.
 
 Tambem esta confirmado que, no inicio do acompanhamento, relatos de comportamento, doencas informadas ou alteracoes em exames nao disparam alerta, bloqueio, encaminhamento ou revisao obrigatoria automaticamente; a Patty inicia o processo normalmente e decide intervencoes posteriores por julgamento humano.
 
 Continuam pendentes, sem automacao alem do que ja foi explicitamente confirmado:
 
 - Fases 5 e 6 da Planilha Carb Cycle;
-- valores/formulas exatos das tabelas por peso do Cutting 3 e etapas posteriores ao Up Metabolico que o sucede;
+- etapas posteriores a `Cutting 2: 2 Low / 1 High`, incluindo qualquer eventual Cutting posterior, e seus valores/formulas;
 - Bulking detalhado;
 - Consolidacao;
 - proporcao minima de agua pura, regra de recalculo da meta de liquidos e cadencia dos lembretes;
