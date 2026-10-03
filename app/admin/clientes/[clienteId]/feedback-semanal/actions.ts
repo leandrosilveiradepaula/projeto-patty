@@ -51,7 +51,7 @@ export async function createWeeklyFeedbackRequestAction(
 
   const normalizedDueAt =
     typeof dueAt === "string" && dueAt.trim()
-      ? new Date(dueAt).toISOString()
+      ? new Date(`${dueAt}:00-03:00`).toISOString()
       : null;
 
   await createAccessibleWeeklyFeedbackRequest({
