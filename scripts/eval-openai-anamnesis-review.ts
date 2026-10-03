@@ -21,12 +21,18 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function readUsage(value: unknown): EvalUsage {
-  if (!isRecord(value) || !isRecord(value.usage)) {
+  if (!isRecord(value)) {
+    return { inputTokens: null, outputTokens: null, totalTokens: null };
+  }
+
+  const usage = value.usage;
+
+  if (!isRecord(usage)) {
     return { inputTokens: null, outputTokens: null, totalTokens: null };
   }
 
   const readTokenCount = (key: string) => {
-    const tokenCount = value.usage[key];
+    const tokenCount = usage[key];
     return typeof tokenCount === "number" && Number.isFinite(tokenCount)
       ? tokenCount
       : null;
