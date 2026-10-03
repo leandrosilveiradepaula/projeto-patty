@@ -42,7 +42,7 @@ O arquivo aprovado da balanca possui 123.262.796 bytes (~117,6 MiB). O Supabase 
 
 A estrategia de armazenamento foi definida tecnicamente como Vercel Private Blob para a primeira versao operacional. O Supabase continua como fonte de verdade de metadata/versionamento/releases. A documentacao atual da Vercel recomenda cautela para entrega de blobs privados acima de 100 MB; como o video aprovado possui ~117,6 MiB, o store privado pode ser provisionado, mas publicacao/release desse arquivo exige validacao de entrega e transferencia no ambiente real antes de ser considerado operacional.
 
-A fundacao de metadata de assets foi preparada em `educational_content_assets`, mas isso nao significa que o Blob store esteja criado nem que o arquivo aprovado tenha sido copiado. A migracao fisica continua separada: criar/conectar store privado, copiar o original, conferir SHA-256/tamanho/MIME, registrar o asset na versao draft, revisar, publicar e liberar explicitamente.
+A fundacao de metadata de assets foi preparada em `educational_content_assets`. Em 2026-10-03 o store privado `projeto-patty-blob` foi criado e conectado ao projeto Vercel de producao, em `iad1`, usando a conexao OIDC padrao e sem token read-write persistente. O arquivo aprovado ainda nao foi copiado. A migracao fisica continua separada: baixar novamente o original, conferir SHA-256/tamanho/MIME, gerar path opaco, enviar ao Blob privado, verificar o objeto, registrar o asset na versao draft, revisar, publicar e liberar explicitamente.
 
 A Patty confirmou tambem que a planilha historica `Sugestao de refeicoes` deve ser transformada em **conteudo educacional revisado** para clientes. O arquivo historico pode servir como fonte editorial, mas a versao publicada no aplicativo nao deve cristalizar seis refeicoes como regra, porque o metodo confirmado nao possui numero fixo de refeicoes.
 
@@ -96,8 +96,6 @@ O lote contem somente:
 
 O arquivo original deve permanecer preservado no Drive. O path final deve ser opaco e sem PII. Tamanho, MIME e SHA-256 devem ser conferidos a partir dos bytes reais antes do registro de `educational_content_assets`.
 
-### PENDENCIA OPERACIONAL
+### ESTADO OPERACIONAL 2026-10-03
 
-Nenhum Blob store foi criado/conectado nesta tarefa porque a integracao Vercel disponivel nao expoe operacoes de Storage. Nenhum download, upload, registro no Supabase, publicacao ou release foi executado.
-
-O manifesto permanece `blocked_store_pending` ate essa configuracao existir.
+O Blob store privado foi criado/conectado manualmente no projeto Vercel e o manifesto passou para `store_ready_upload_pending`. Nenhum upload, registro de asset no Supabase, publicacao ou release foi executado. O proximo gate e o upload controlado do arquivo aprovado com nova verificacao de integridade.
