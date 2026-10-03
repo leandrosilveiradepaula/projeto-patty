@@ -1,6 +1,6 @@
 # Mapa de prontidao do sistema completo
 
-Data de referencia: 2026-09-26 (atualizado apos validacao do update do draft canonico em producao).
+Data de referencia: 2026-10-03 (reconciliado com snapshots/hardening, fluxo vigente do metodo e estado atual de Avaliacoes/IA).
 
 Este documento e um mapa operacional do estado atual. Ele nao substitui `sistema completo.md`, `DECISIONS.md`, `BUSINESS_RULES.md` ou `OPEN_QUESTIONS.md`.
 
