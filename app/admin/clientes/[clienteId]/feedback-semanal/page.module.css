@@ -1,0 +1,67 @@
+.form {
+  display: grid;
+  gap: var(--space-4);
+  max-width: 720px;
+}
+
+.field {
+  display: grid;
+  gap: var(--space-2);
+  color: var(--color-text-primary);
+  font-size: var(--text-label-medium-size);
+  font-weight: var(--text-label-medium-weight);
+}
+
+.list {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.feedbackCard {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: start;
+  justify-content: space-between;
+}
+
+.title {
+  margin: 0;
+  font-size: var(--text-title-medium-size);
+}
+
+.meta {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.answers {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.answers div {
+  display: grid;
+  gap: var(--space-1);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+
+.answers dt {
+  color: var(--color-text-primary);
+  font-weight: 700;
+}
+
+.answers dd {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
