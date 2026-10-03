@@ -851,3 +851,27 @@ A configuracao mais especifica prevalece somente nas chaves permitidas pelo sche
 Templates globais nao sao client-scoped. Overrides e snapshots sao client-scoped.
 
 As entidades acima existem no Supabase SaaS desde a aplicacao da migration `20261001213333_create_method_configuration_foundation.sql`. A existencia da foundation nao significa que todos os hardcodes profissionais ja foram migrados nem que todos os fluxos atuais ja a consomem.
+
+
+## Feedback Semanal
+
+### Estado tecnico em 2026-10-03
+
+O Feedback Semanal e um dominio separado dos check-ins diarios de liquidos e atividade fisica.
+
+Tabelas:
+- `weekly_feedback_form_versions`: preserva versoes do questionario, definicao JSON versionada e publicacao explicita;
+- `client_weekly_feedbacks`: preserva a solicitacao client-scoped, versao exata enviada, periodo de referencia, prazo opcional, respostas originais, autoria da solicitacao e envio final.
+
+O lifecycle implementado permite rascunho enquanto `submitted_at` e nulo. O envio final valida a definicao versionada e, depois de concluido, o registro fica imutavel. DELETE e bloqueado para preservar historico.
+
+A v1 publicada materializa as 21 perguntas da fonte operacional atual da Patty. O fluxo nao calcula score de adesao, nao altera protocolo e nao suspende atendimento automaticamente.
+
+RLS:
+- cliente le somente os proprios feedbacks e pode atualizar apenas `answers` e `submitted_at` enquanto o registro esta em rascunho;
+- Patty/admin depende de assignment ativo e AAL2 para leitura e criacao de solicitacao;
+- anon nao possui acesso.
+
+A camada de UI possui:
+- `/admin/clientes/[clienteId]/feedback-semanal`: solicitacao manual e historico;
+- `/cliente/feedback-semanal`: rascunho, envio final e historico da propria cliente.
