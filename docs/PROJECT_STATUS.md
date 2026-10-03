@@ -401,6 +401,10 @@ A chamada com dados reais continua desabilitada sem `OPENAI_HEALTH_DATA_PROCESSI
 
 Foi criado `docs/OPENAI_HEALTH_DATA_GATE.md` como checklist operacional antes de dados reais e `npm run eval:ai:openai` como avaliacao do modelo usando somente fixtures sinteticas. Em 2026-10-03, o workflow manual `Evaluate OpenAI anamnesis review`, run `37128054011`, terminou SUCCESS com 4 cenarios aprovados e 0 falhas.
 
+O harness foi ampliado no PR #303 para coletar latencia e uso de tokens sem registrar prompt/resposta. Uma nova execucao manual ainda e necessaria para produzir essa evidencia operacional.
+
+A revisao da documentacao oficial da OpenAI confirmou que `/v1/responses` e elegivel a ZDR, mas elegibilidade do endpoint nao significa ZDR ativo. A configuracao efetiva da organizacao/projeto/modelo ainda precisa ser verificada no OpenAI Platform. Para dados reais de saude, a recomendacao tecnica atual e preferir ZDR quando elegivel; sem confirmacao do controle de retencao, o gate permanece fechado.
+
 
 ## Gmail SMTP do MVP
 
