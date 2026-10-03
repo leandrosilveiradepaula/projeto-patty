@@ -29,6 +29,24 @@ Esses registros sao preservados como historico de levantamento, mas nao autoriza
 Qualquer etapa posterior a `Cutting 2: 2 Low / 1 High` volta a ser questao aberta e exige nova confirmacao documentada da Patty antes de implementacao.
 
 
+## 2026-10-03 - Reconciliacao da composicao do check-in de liquidos
+
+### REGRA CONFIRMADA VIGENTE
+
+A meta diaria permanece calculada pela configuracao profissional ativa. Para o baseline atual, a referencia e 60 mL/kg/dia.
+
+A taxonomia ativa distingue:
+- agua pura;
+- outros liquidos zero calorias.
+
+Nao existe proporcao minima automatica confirmada entre essas categorias.
+
+### CONSEQUENCIA DOCUMENTAL
+
+Registros historicos que descreviam "maior parte em agua pura" e "menor quantidade de outros liquidos" nao devem ser usados como regra automatica nem como threshold de validacao.
+
+Se a Patty quiser formalizar futuramente uma proporcao-alvo, esse parametro deve ser confirmado, documentado e versionado antes de qualquer automacao.
+
 ## 2026-09-30 - Regras, cálculos e workflows totalmente parametrizáveis
 
 ### DECISÃO DE PRODUTO E ARQUITETURA
@@ -339,7 +357,7 @@ Formula do metodo:
 
 Exemplo: 60 kg -> 3.600 mL/dia (3,6 L/dia).
 
-A Patty orienta que a maior parte da meta seja agua pura. O restante pode ser complementado, em menor quantidade, por liquidos zero calorias, como cha, chimarrao, suco zero ou refrigerante zero.
+A orientacao historica sobre maior parte em agua pura foi superada para fins de automacao pela reconciliacao de 2026-10-03. A taxonomia ativa distingue agua pura de outros liquidos zero calorias sem proporcao minima automatica.
 
 O check-in diario de atividade fisica e independente do treino prescrito ou de qualquer rotina previamente definida. A frequencia pode ser derivada depois dos registros diarios.
 
@@ -350,7 +368,7 @@ As metas e configuracoes individuais do check-in podem ser definidas na entrega 
 ### QUESTOES AINDA ABERTAS
 
 Ainda precisam ser formalizados como padrao/regra:
-- proporcao minima/exata de agua pura dentro da meta;
+- eventual proporcao-alvo de agua pura dentro da meta;
 - se/quando recalcular a meta apos mudanca de peso;
 - horarios e cadencia dos lembretes;
 - visibilidade e poderes de correcao da Patty;
@@ -2413,7 +2431,7 @@ RLS permanece obrigatoria: cliente acessa somente os proprios check-ins; Patty/a
 
 ### CONTINUA ABERTO
 
-- proporcao minima/exata de agua pura dentro da meta;
+- eventual proporcao-alvo de agua pura dentro da meta;
 - quando a Patty deseja criar novo snapshot de hidratacao apos mudanca de peso;
 - canal e mecanismo de envio do lembrete de 24 horas;
 - politica de edicao/correcao de eventos alem do modelo append-only atual.
