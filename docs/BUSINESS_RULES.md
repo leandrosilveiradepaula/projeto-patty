@@ -115,23 +115,11 @@ Reconhecimento Metabolico
 -> Cutting 2 Linear
 -> Cutting 2 Dia 1 / Dia 2
 -> Cutting 2: 2 Low / 1 High
--> Cutting 3 Linear
--> Cutting 3 Dia 1 / Dia 2
--> Cutting 3: 2 Low / 1 High
--> Up Metabolico
 ```
 
-A Patty confirmou que o Cutting 3 repete a estrutura de progressao:
-- Cutting 3 Linear;
-- Cutting 3 Dia 1 / Dia 2;
-- Cutting 3: 2 Low / 1 High;
-- depois, Up Metabolico.
+Etapas posteriores a `Cutting 2: 2 Low / 1 High` nao estao confirmadas na regra vigente e nao devem ser inferidas automaticamente.
 
-No Cutting 3, as quantidades de macronutrientes diminuem progressivamente de acordo com o peso da cliente e usam como base tabelas existentes em Excel para proteina e carboidrato.
-
-A existencia e o uso dessas tabelas estao confirmados como parte do metodo, mas os valores/formulas exatos ainda nao estao formalizados nesta documentacao. Nao reproduzir ou implementar calculos sem reconciliar a planilha fonte.
-
-Nao inferir etapas posteriores ao Up Metabolico que sucede o Cutting 3: 2 Low / 1 High.
+Registros historicos que mencionavam Cutting 3 como sequencia confirmada ficam superados para fins de automacao ate nova confirmacao documentada da Patty.
 
 ### DECISAO CONFIRMADA
 
@@ -186,7 +174,7 @@ Depois do Up Metabolico, o Cutting 2 reinicia a mesma estrutura de progressao ja
 
 A Patty confirmou que o Cutting 2 trabalha com **menos doses de macros** em relacao ao ciclo anterior. A quantidade exata de reducao, quais macros sao reduzidos em cada transicao e as formulas correspondentes ainda precisam ser formalizadas antes de qualquer calculo automatico.
 
-A etapa posterior e o **Cutting 3**, cuja sequencia Linear -> Dia 1/Dia 2 -> 2 Low/1 High -> Up Metabolico ja esta confirmada. Os valores exatos de macros por peso ainda dependem da reconciliacao da planilha Excel fonte.
+A etapa posterior a `Cutting 2: 2 Low / 1 High` permanece aberta. Nao promover exemplos, planilhas historicas ou nomenclaturas antigas a uma nova etapa sem confirmacao documentada da Patty.
 
 Nao criar score automatico de adesao.
 
@@ -337,7 +325,7 @@ Exemplos historicos individuais nao viram regra geral.
 
 Regra nao confirmada deve permanecer como `QUESTAO ABERTA`.
 
-Nao automatizar regras de hidratacao alem da formula confirmada de 60 mL/kg e da composicao geral agua predominante + complemento zero calorias; suplementacao, manipulados, progressao definitiva de treino, criterios finais de avaliacao, fases 5 e 6 do Carb Cycle, valores/formulas ainda nao reconciliados do Cutting 3, etapas posteriores ao Up Metabolico confirmado apos o Cutting 3, Bulking ou Consolidacao permanecem dependentes de confirmacao documentada.
+Nao automatizar regras de hidratacao alem da formula confirmada de 60 mL/kg e da composicao geral agua predominante + complemento zero calorias; suplementacao, manipulados, progressao definitiva de treino, criterios finais de avaliacao, fases 5 e 6 do Carb Cycle, etapas posteriores ao Cutting 2, Bulking ou Consolidacao permanecem dependentes de confirmacao documentada.
 ## Leitura profissional da Anamnese
 
 ### DECISAO CONFIRMADA
