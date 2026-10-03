@@ -138,8 +138,8 @@ Estado atual revalidado em 2026-10-01: o PR #246 restaurou o baseline verde e fo
 | Protocolos versionados | SIM | Lifecycle manual implementado | CI/validacoes existentes | Backend/SaaS correspondente existente | Criacao/edicao profissional completa conforme regras ainda abertas |
 | Conteudo educacional / exercicios | SIM como dominios separados | Fundacao/release + metadata de asset preparada | Inventario 89/89 revalidado; smoke transacional de assets PASS | Vercel Private Blob definido para midia; store/upload ainda nao executados | Criar/conectar store privado, migrar video aprovado, verificar hash e publicar/liberar explicitamente |
 | Metodo da Patty | PARCIALMENTE DEFINIDO | Motor determinístico existente/parcial; regras profissionais migram para configuração versionada e editável | CI | Fluxo confirmado somente ate Cutting 2: 2 Low / 1 High; meta de liquidos, equivalencia de legumes, catalogos de avaliacao/liquidos e templates Carb Cycle 1-3 versionados | Etapas posteriores ao Cutting 2, Fases 5/6, Bulking, Consolidacao, suplementacao, treino, parametros restantes do check-in e criterios objetivos de estagnacao |
-| IA assistiva | SIM como principio e arquitetura; provider OpenAI confirmado | PARCIAL/AVANCADO | Adapter OpenAI + Structured Outputs + aliases + UI de revisao humana; default tecnico `gpt-5.6-terra` / reasoning `medium` | Prompt v1 aplicado; PR #151 publicado READY; chamada externa bloqueada | Credencial OpenAI, avaliacao sintetica e conclusao do gate de dados de saude |
-| Failure handling de IA | SIM | SIM no schema + boundary server-side | CI + invariantes deterministicas | `20260922160058` aplicada; provider adapter publicado, mas chamada real segue gated | Manter gate fechado ate avaliacao sintetica/controles de dados; recovery automatico segue aberto |
+| IA assistiva | SIM como principio e arquitetura; provider OpenAI confirmado | PARCIAL/AVANCADO | Adapter OpenAI + Structured Outputs + aliases + UI de revisao humana; avaliacao sintetica 4/4 PASS com `gpt-5.6-terra` / reasoning `medium` | Prompt v1 aplicado; chamada com dados reais segue bloqueada | Controles de retencao/ZDR-MAM, custo/latencia de rollout e conclusao do gate de dados de saude |
+| Failure handling de IA | SIM | SIM no schema + boundary server-side | CI + invariantes deterministicas | `20260922160058` aplicada; provider adapter publicado, chamada com dados reais segue gated | Manter gate fechado ate controles organizacionais de dados; recovery automatico segue aberto |
 | n8n | SIM: nao usar inicialmente | N/A | N/A | Nao usado | Introduzir somente com caso concreto |
 | LangGraph | SIM: nao usar inicialmente | N/A | N/A | Nao usado | Introduzir somente se fluxo de IA justificar |
 | VPS Hostinger | SIM: nao usar inicialmente | N/A | N/A | Nao usada | Introduzir somente por necessidade tecnica concreta |
@@ -292,7 +292,7 @@ Ordem operacional sugerida, sujeita a revalidacao do HEAD:
 2. CONCLUIDO: primeira `client-anamnesis` v1 publicada e fluxo de inicio/retomada/edicao/condicionais validado em producao; run consolidado `36257567841` PASS no `master` `bf49254edb9292801eb9ed80a83e1d68262b7b11`.
 3. RETOMAR quando houver acesso operacional: configurar Gmail Custom SMTP e validar convite real.
 4. CONCLUIDO: fluxo autenticado admin <-> cliente de esclarecimentos validado em producao com fixture sintetica no run `36053370894`.
-5. Executar a avaliacao sintetica do fluxo OpenAI quando houver credencial de ambiente; provider, prompt v1 e contrato `anamnesis_review` ja estao implementados, mas dados reais continuam bloqueados pelo `OPENAI_HEALTH_DATA_GATE.md`.
+5. CONCLUIDO: avaliacao sintetica inicial do fluxo OpenAI, run `37128054011`, 4/4 PASS. Proximo gate: controles de retencao/ZDR-MAM, custo/latencia de rollout e aprovacao explicita antes de dados reais.
 6. Infraestrutura de midia educacional DEFINIDA como Vercel Private Blob; proximo passo operacional e criar/conectar store privado e migrar controladamente o video aprovado da balanca.
 7. Fechar apenas as lacunas reais ainda abertas da Anamnese/Avaliacoes sem reabrir consentimento, publicacao da v1 ou o fluxo de draft ja validados.
 8. Ampliar automacao de alimentacao/treino somente depois das regras profissionais correspondentes estarem documentadas.
@@ -517,7 +517,7 @@ Nenhuma migration ou mudanca de schema foi necessaria; o schema ja garante `uniq
 
 Foi removida a divergencia entre trechos antigos que ainda tratavam provider, prompt e contrato do primeiro fluxo como indefinidos e o estado real ja implementado.
 
-Para `anamnesis_review`, OpenAI, prompt v1, Structured Outputs, aliases efemeros, contrato v1 de findings, boundary server-side e failure handling ja existem. O modelo `gpt-5.6-terra` com reasoning `medium` permanece configuracao tecnica inicial, ainda sujeita a avaliacao sintetica antes de qualquer liberacao com dados reais.
+Para `anamnesis_review`, OpenAI, prompt v1, Structured Outputs, aliases efemeros, contrato v1 de findings, boundary server-side e failure handling ja existem. O modelo `gpt-5.6-terra` com reasoning `medium` passou a avaliacao sintetica inicial (4/4), mas permanece configuracao tecnica inicial ate a avaliacao de custo/latencia e os controles de dados reais serem concluídos.
 
 O gate de dados de saude continua fechado.
 
@@ -933,7 +933,7 @@ Conclusao operacional atual: o bloqueio externo nao esta ativo. Novas falhas dev
 
 ### BLOQUEIOS EXTERNOS QUE PERMANECEM
 
-- avaliacao sintetica real da OpenAI exige `OPENAI_API_KEY` em ambiente apropriado e conclusao do gate de dados de saude antes de dados reais;
+- avaliacao sintetica inicial da OpenAI: CONCLUIDA com `OPENAI_API_KEY` em GitHub Actions; dados reais continuam dependentes da conclusao do gate de dados de saude;
 - o primeiro video educacional aprovado continua bloqueado ate criacao/conexao de Vercel Private Blob, operacao nao exposta pela integracao disponivel;
 - Leaked Password Protection permanece dependente da configuracao/plano do Supabase;
 - canal real dos lembretes de esclarecimento continua sem decisao.
