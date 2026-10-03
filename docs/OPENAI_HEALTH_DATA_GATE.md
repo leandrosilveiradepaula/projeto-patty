@@ -21,11 +21,42 @@ Este gate controla apenas o envio externo de dados para o provider OpenAI no flu
 
 ## Controles da OpenAI que precisam ser verificados
 
-A documentacao oficial da OpenAI informa que dados enviados pela API nao sao usados para treinamento por padrao, salvo opt-in.
+### Fatos da documentacao oficial
 
-`store: false` impede a persistencia normal do objeto Response como application state. Isso nao equivale, por si so, a Zero Data Retention: logs de monitoramento de abuso podem conter conteudo do cliente e, por padrao, podem ser retidos por ate 30 dias.
+A documentacao oficial da OpenAI informa que:
 
-Antes de habilitar dados reais, confirmar na organizacao/projeto OpenAI qual politica de dados esta efetivamente ativa e se Zero Data Retention, Modified Abuse Monitoring ou outra configuracao aprovada e necessaria/disponivel para este caso de uso.
+- dados enviados pela API nao sao usados para treinar ou melhorar os modelos por padrao, salvo opt-in explicito;
+- logs de monitoramento de abuso podem conter conteudo do cliente e, no regime padrao, podem ser retidos por ate 30 dias;
+- `/v1/responses` e um endpoint elegivel a Zero Data Retention (ZDR), sujeito as limitacoes e elegibilidade da organizacao/modelo;
+- `store: false` evita persistencia normal de application state para o Response, mas nao equivale sozinho a ZDR porque o regime de abuse monitoring e um controle separado;
+- ZDR e Modified Abuse Monitoring (MAM) so podem ser configurados depois que a organizacao for aprovada para esses controles;
+- depois da aprovacao, a configuracao aparece em `Settings -> Organization -> Data controls` e pode ser definida no nivel da organizacao e de cada projeto;
+- mesmo para clientes aprovados, a OpenAI pode tornar modelos especificos inelegiveis a ZDR/MAM em determinadas circunstancias, com notificacao aplicavel.
+
+Referencia oficial:
+- https://developers.openai.com/api/docs/guides/your-data
+
+### Estado especifico do Projeto Patty
+
+Confirmado:
+
+- o fluxo usa `/v1/responses`;
+- o request usa `store: false`;
+- o projeto nao usa Conversations API nem background mode neste fluxo;
+- a avaliacao sintetica usa a organizacao `Personal` / projeto `Default project`, mas isso nao define automaticamente o ambiente final para dados reais.
+
+Ainda nao confirmado nesta sessao:
+
+- se a organizacao OpenAI atual esta aprovada para ZDR/MAM;
+- qual controle de retencao esta efetivamente ativo na organizacao e no projeto;
+- se `gpt-5.6-terra` esta elegivel para o controle escolhido nessa organizacao;
+- se `Personal / Default project` sera mantido ou substituido por um projeto OpenAI dedicado ao Projeto Patty/Corpo e Mente.
+
+### Recomendacao tecnica de privacidade
+
+Para dados reais de saude, preferir ZDR quando a organizacao/projeto/modelo forem elegiveis. Se ZDR nao estiver disponivel, manter o gate fechado ate existir decisao explicita sobre a alternativa de retencao, com revisao de privacidade/juridica quando aplicavel.
+
+Nao interpretar "endpoint elegivel a ZDR" como "ZDR ativo".
 
 ## Checklist de liberacao
 
@@ -36,12 +67,27 @@ Todos os itens abaixo precisam estar explicitamente concluídos antes de definir
 - [x] chave nao presente no repositorio, browser, logs ou fixtures; o workflow validou apenas a existencia do secret e o GitHub mascarou seu valor;
 - [x] avaliacao sintetica do modelo executada e aprovada no workflow `Evaluate OpenAI anamnesis review`, run `37128054011`;
 - [ ] modelo/effort avaliados em qualidade, custo e latencia;
-- [ ] politica de retencao/processamento da organizacao OpenAI revisada;
-- [ ] necessidade e disponibilidade de ZDR/MAM avaliadas;
+- [x] politica publica de retencao/processamento da API OpenAI revisada na documentacao oficial;
+- [ ] politica efetivamente ativa na organizacao/projeto OpenAI verificada no painel;
+- [x] necessidade tecnica de minimizar retencao avaliada: ZDR e a opcao preferida se elegivel;
+- [ ] disponibilidade/elegibilidade de ZDR ou MAM confirmada para organizacao/projeto/modelo;
 - [ ] responsavel humano aprovou o envio de dados de saude para esse ambiente;
 - [x] logs da aplicacao revisados: o provider server-only nao possui `console.log/error/warn` de prompt/resposta e a regressao de boundary protege essa ausencia;
 - [x] rollback operacional testavel: sem `OPENAI_HEALTH_DATA_PROCESSING_ENABLED=true`, `getOpenAiProviderReadiness()` falha fechado antes de qualquer chamada ao provider;
 - [x] revisao humana da Patty continua obrigatoria e visivel na UI; a tela administrativa explicita que nenhum achado cria diagnostico, pendencia, mensagem, protocolo ou publicacao automatica.
+
+## Verificacao manual restante no OpenAI Platform
+
+Antes de qualquer dado real, verificar no painel da organizacao escolhida:
+
+1. abrir `Settings -> Organization -> Data controls`;
+2. confirmar se a secao de Data Retention esta disponivel;
+3. registrar a configuracao efetiva da organizacao;
+4. abrir o projeto que sera usado pelo Projeto Patty e registrar se ele herda o default ou possui ZDR/MAM explicito;
+5. confirmar a elegibilidade do modelo escolhido nesse projeto;
+6. somente depois decidir qual projeto/chave sera a credencial de producao.
+
+Se a secao de controles de retencao nao estiver disponivel ou a elegibilidade nao puder ser confirmada, o estado continua `NAO LIBERADO PARA DADOS REAIS`.
 
 ## Evidencia sintetica 2026-10-03
 
