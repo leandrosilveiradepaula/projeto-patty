@@ -56,6 +56,23 @@ Se o CLI nao puder ser usado, criar o store pelo dashboard da Vercel no projeto 
 4. conectar ao ambiente de producao do Projeto Patty;
 5. confirmar que o projeto recebeu a configuracao necessaria do Blob sem expor o valor de qualquer token.
 
+## Gate adicional para o video aprovado acima de 100 MB
+
+A documentacao atual da Vercel informa que Private Blob exige autenticacao para leitura e entrega o arquivo por Functions. Ela tambem recomenda evitar servir arquivos privados acima de 100 MB, salvo quando o trafego for baixo.
+
+O primeiro video aprovado possui 123.262.796 bytes (~117,6 MiB), portanto o store privado pode ser provisionado, mas o lote nao deve avancar para publicacao/release sem validar a estrategia de entrega para esse arquivo.
+
+Antes de publicar:
+- confirmar que o acesso continuara privado;
+- validar comportamento real de entrega do arquivo completo no ambiente de producao;
+- medir latencia e consumo/transferencia com fixture ou acesso controlado;
+- confirmar que o volume esperado de clientes e compativel com essa forma de entrega;
+- se a entrega se mostrar inadequada, revisar a infraestrutura sem tornar o objeto publico por conveniencia.
+
+Referencias oficiais consultadas em 2026-10-03:
+- https://vercel.com/docs/vercel-blob/private-storage
+- https://vercel.com/docs/vercel-blob
+
 ## Gate de verificacao
 
 Somente considerar esta etapa concluida quando todos os itens abaixo forem verdadeiros:
