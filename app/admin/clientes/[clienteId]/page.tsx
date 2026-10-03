@@ -17,6 +17,7 @@ import {
   listAccessibleClientHydrationTargets,
   listAccessibleClientTrainingRequests,
   listAccessibleProtocolsForClient,
+  listAccessibleWeeklyFeedbacksForClient,
   listContentReleasesForAccessibleClient,
 } from "@/lib/supabase/data-access";
 import Link from "next/link";
@@ -75,6 +76,7 @@ export default async function AdminClienteDetailPage({
     contentReleases,
     hydrationTargets,
     activityEvents,
+    weeklyFeedbacks,
   ] = await Promise.all([
     getAccessibleClientRegistration(client.id),
     listAccessibleClientTrainingRequests(client.id),
@@ -85,6 +87,7 @@ export default async function AdminClienteDetailPage({
     listContentReleasesForAccessibleClient(client.id),
     listAccessibleClientHydrationTargets(client.id),
     listAccessibleClientActivityCheckinEvents(client.id),
+    listAccessibleWeeklyFeedbacksForClient(client.id),
   ]);
 
   const displayName = client.profiles?.display_name?.trim();
