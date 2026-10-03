@@ -84,6 +84,63 @@ export async function listClientsAssignedToCurrentAdmin() {
   return data;
 }
 
+export async function listMethodConfigurationCatalogForCurrentAdmin() {
+  const supabase = await createClient();
+  const { data: templates, error: templatesError } = await supabase
+    .from("method_configuration_templates")
+    .select(
+      "id, template_key, domain_key, config_schema_key, display_name, description, created_by_kind, created_at",
+    )
+    .order("domain_key", { ascending: true })
+    .order("display_name", { ascending: true });
+
+  if (templatesError) {
+    throw templatesError;
+  }
+
+  if (templates.length === 0) {
+    return [];
+  }
+
+  const templateIds = templates.map((template) => template.id);
+  const { data: versions, error: versionsError } = await supabase
+    .from("method_configuration_versions")
+    .select(
+      "id, template_id, version_number, schema_version, configuration, source_kind, source_reference, created_by_kind, created_at, activated_at, retired_at",
+    )
+    .in("template_id", templateIds)
+    .order("version_number", { ascending: false });
+
+  if (versionsError) {
+    throw versionsError;
+  }
+
+  const versionsByTemplate = new Map<
+    string,
+    typeof versions
+  >();
+
+  for (const version of versions) {
+    const current = versionsByTemplate.get(version.template_id) ?? [];
+    current.push(version);
+    versionsByTemplate.set(version.template_id, current);
+  }
+
+  return templates.map((template) => {
+    const templateVersions = versionsByTemplate.get(template.id) ?? [];
+    const activeVersion =
+      templateVersions.find(
+        (version) => version.activated_at && !version.retired_at,
+      ) ?? null;
+
+    return {
+      ...template,
+      activeVersion,
+      versions: templateVersions,
+    };
+  });
+}
+
 export async function getAccessibleClient(clientId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
