@@ -32,8 +32,17 @@
       },
       "integrity": {
         "expected_size_bytes": 123262796,
-        "sha256_hex": null,
-        "sha256_status": "pending_source_download"
+        "sha256_hex": "ee05d6c12ea02db283234f5d69a09ff60c4d831183fe6715d7aa9848e76905b1",
+        "sha256_status": "preflight_verified_reverify_before_upload",
+        "preflight_verified_at": "2026-10-03",
+        "preflight_observed_size_bytes": 123262796,
+        "preflight_observed_mime_type": "video/mp4",
+        "preflight_duration_seconds": 141.162667,
+        "preflight_video_codec": "h264",
+        "preflight_video_width": 1920,
+        "preflight_video_height": 1080,
+        "preflight_audio_codec": "aac",
+        "preflight_note": "Read-only source preflight from the approved Google Drive file. Migration source_download_status remains not_started; re-download and re-hash are still required before Blob upload."
       },
       "supabase": {
         "educational_content_id": null,
