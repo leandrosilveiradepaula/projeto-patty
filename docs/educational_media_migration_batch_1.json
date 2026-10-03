@@ -3,7 +3,7 @@
   "generated_at": "2026-09-24",
   "batch_key": "educational_media_batch_1_food_scale",
   "scope": "single approved educational media source; no upload, publication, or client release is performed by this manifest",
-  "batch_status": "blocked_store_pending",
+  "batch_status": "store_ready_upload_pending",
   "items": [
     {
       "source": {
@@ -28,7 +28,10 @@
         "asset_key": "primary",
         "storage_path": null,
         "storage_path_policy": "system_generated_opaque_no_pii",
-        "content_type": "video/mp4"
+        "content_type": "video/mp4",
+        "blob_store_name": "projeto-patty-blob",
+        "blob_store_region": "iad1",
+        "blob_auth_mode": "oidc"
       },
       "integrity": {
         "expected_size_bytes": 123262796,
@@ -51,12 +54,14 @@
         "draft_version_status": "not_created"
       },
       "operation": {
-        "blob_store_status": "pending_manual_creation_or_connection",
+        "blob_store_status": "created_connected_private",
         "source_download_status": "not_started",
         "blob_upload_status": "not_started",
         "asset_registration_status": "not_started",
         "publication_status": "not_started",
-        "client_release_status": "not_started"
+        "client_release_status": "not_started",
+        "blob_store_verified_at": "2026-10-03",
+        "blob_store_verification_note": "Verified in the Vercel project dashboard: private store projeto-patty-blob, region iad1, connected to the projeto-patty project, empty at verification time, OIDC-style project connection without a long-lived read-write token."
       }
     }
   ],
