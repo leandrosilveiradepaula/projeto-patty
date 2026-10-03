@@ -465,7 +465,7 @@ Estado preservado:
 - nenhuma publicacao foi realizada;
 - os demais arquivos do Drive continuam fora deste lote.
 
-O store privado ja esta criado/conectado. A proxima operacao de midia e baixar novamente a fonte aprovada, reverificar tamanho/MIME/SHA-256, gerar path opaco e executar o upload privado. Como o arquivo aprovado possui ~117,6 MiB e a documentacao atual da Vercel recomenda cautela para servir Private Blob acima de 100 MB, publicacao/release fica adicionalmente condicionada a uma validacao de entrega/transferencia em producao; isso nao autoriza tornar o objeto publico.
+O store privado ja esta criado/conectado. Em 2026-10-03 foi criada no Supabase a primeira versao educacional em draft para `Como utilizar a BALANCA DE ALIMENTOS` (`educational_content_id` `610df135-7c00-47a3-b978-2ba44411ae43`, `educational_content_version_id` `ae45c5db-e6af-46db-9230-b05bc4f5a5bd`). A versao permanece nao publicada, sem asset e sem release. A proxima operacao de midia e baixar novamente a fonte aprovada, reverificar tamanho/MIME/SHA-256, gerar path opaco e executar o upload privado. Como o arquivo aprovado possui ~117,6 MiB e a documentacao atual da Vercel recomenda cautela para servir Private Blob acima de 100 MB, publicacao/release fica adicionalmente condicionada a uma validacao de entrega/transferencia em producao; isso nao autoriza tornar o objeto publico.
 
 ## 2026-09-24 - Visibilidade de executions de IA sem estado terminal
 
