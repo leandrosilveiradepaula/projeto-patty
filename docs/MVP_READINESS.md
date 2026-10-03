@@ -73,7 +73,7 @@ Estados usados:
 | Conteudo educacional | leitura admin/cliente por release IMPLEMENTADA | release manual | CI VALIDADO; elegibilidade de release testada | taxonomia, autoria/revisao e primeiro lote do Drive |
 | Exercicios | leitura admin IMPLEMENTADA | nao | CI VALIDADO | definir exposicao a cliente e campos finais |
 | Progresso de conteudo | schema existe | fluxo nao implementado | PARCIAL | definir quem registra abertura/conclusao |
-| IA | fundacao de banco + failure handling + boundary server-side + provider OpenAI + Structured Outputs + aliases + contrato `anamnesis_review` IMPLEMENTADOS | avaliacao sintetica manual 4/4 PASS; dados reais continuam bloqueados | prompt v1 aplicado; CI cobre adapter/contrato/boundaries; failure handling confirmado no SaaS | concluir custo/latencia de rollout e `OPENAI_HEALTH_DATA_GATE.md` antes de dados reais |
+| IA | fundacao de banco + failure handling + boundary server-side + provider OpenAI + Structured Outputs + aliases + contrato `anamnesis_review` IMPLEMENTADOS | avaliacao sintetica operacional 5/5 PASS; dados reais continuam bloqueados | run `37135047413`: latencia media 2.922 ms, 4.076 tokens totais; prompt v1 aplicado; CI cobre adapter/contrato/boundaries | confirmar controles efetivos de retencao/ZDR-MAM, projeto/credencial de producao e aprovacao humana antes de dados reais |
 | Drive | INVENTARIADO + revisao controlada iniciada | nenhuma migracao fisica | video da balanca aprovado; Vercel Private Blob definido; lote 1 machine-readable preparado | criar/conectar o store privado e somente depois migrar/verificar/versionar o primeiro item |
 | Regras deterministicas do metodo | IMPLEMENTADO PARCIAL | sem automacao de protocolo | CI VALIDADO | ampliar somente com formulas exatas confirmadas/documentadas |
 | CI | IMPLEMENTADO | automatico no GitHub Actions + smoke E2E manual de arquivos privados | `npm ci` + audit high/critical de producao + typecheck + suites deterministicas + `test:security-boundaries` + build; core Actions em v7; E2E de producao PASS nos fluxos ja estabilizados | ampliar E2E somente para fluxos estaveis e sinteticos |
@@ -319,7 +319,7 @@ Estado: **PREPARADO / BLOQUEADO NO STORE**
 
 A fundacao de metadata no Supabase permanece aplicada e vazia em producao. O primeiro lote controlado foi definido em `docs/educational_media_migration_batch_1.json` e possui teste de invariantes no CI.
 
-O lote contem somente o video da balanca aprovado pela Patty e permanece deliberadamente sem `storage_path`, SHA-256, registros de conteudo/versao/asset, publicacao ou release enquanto o Vercel Private Blob store nao estiver criado/conectado.
+O lote contem somente o video da balanca aprovado pela Patty. O pre-flight somente leitura do original no Drive confirmou tamanho/MIME e registrou SHA-256 esperado `ee05d6c12ea02db283234f5d69a09ff60c4d831183fe6715d7aa9848e76905b1`; esse valor deve ser recalculado e comparado antes do futuro upload. O lote permanece deliberadamente sem `storage_path`, registros de conteudo/versao/asset, publicacao ou release enquanto o Vercel Private Blob store nao estiver criado/conectado.
 
 A integracao Vercel usada nesta sessao nao oferece operacao de Storage, portanto a criacao/conexao do store continua uma pendencia operacional manual. O procedimento seguro foi versionado em `docs/VERCEL_BLOB_SETUP.md`. Isso nao bloqueia outras frentes tecnicas do sistema completo e nao autoriza migracao dos demais arquivos do Drive.
 
