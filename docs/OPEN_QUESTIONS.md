@@ -887,8 +887,8 @@ Nao ampliar o mecanismo sem caso profissional confirmado.
 
 - dia e horario padrao da agenda automatica;
 - se o prazo historico de quarta-feira apenas marca atraso ou fecha alguma acao;
-- marco exato de elegibilidade para iniciar Feedback Semanal;
-- significado tecnico de "recebeu protocolo" para elegibilidade;
+- o marco profissional de elegibilidade foi resolvido em 2026-10-04: a cliente passa a receber Feedback Semanal depois que recebe o primeiro protocolo;
+- permanece apenas a decisao tecnica de qual evento auditavel do fluxo de protocolo representa "recebeu", sem alterar a regra profissional;
 - politica de lembretes;
 - canal inicial: email, WhatsApp, ambos ou preferencia por cliente;
 - eventual consentimento/opt-in e provedor de WhatsApp;
