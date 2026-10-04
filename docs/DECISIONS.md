@@ -2881,3 +2881,25 @@ Nao existe um unico canal global obrigatorio para todas as clientes.
 A preferencia de canal deve pertencer a configuracao individual da paciente e poder ser alterada pela Patty.
 
 Os detalhes tecnicos de WhatsApp, incluindo provedor e consentimento/opt-in quando aplicavel, permanecem separados desta regra profissional.
+
+
+## 2026-10-04 - Parametrizacao como requisito para futura comercializacao
+
+### DECISAO DE PRODUTO E ARQUITETURA
+
+O sistema deve ser completamente parametrizavel no que diz respeito a regras profissionais e operacionais configuraveis.
+
+O uso inicial e da Patty e do metodo dela, mas existe direcao de produto para futura comercializacao. Portanto:
+- numeros e coeficientes profissionais nao ficam como constantes definitivas;
+- formulas profissionais sao configuracao estruturada/versionada;
+- sequencias e workflows profissionais sao configuraveis;
+- frequencias, horarios, lembretes e canais operacionais sao configuraveis quando fizerem parte do comportamento do produto;
+- templates atuais representam defaults iniciais do metodo da Patty;
+- configuracoes podem ser sobrescritas no escopo adequado sem reescrever historico;
+- snapshots publicados preservam exatamente o que foi usado.
+
+### LIMITE
+
+"Completamente parametrizavel" nao inclui tornar editaveis invariantes tecnicas como RLS, Auth, MFA, secrets, constraints de integridade, auditoria, segregacao de identidades ou a proibicao de publicacao direta pela IA.
+
+A futura comercializacao nao autoriza inferir agora um modelo multi-tenant especifico. O requisito atual e evitar acoplamento estrutural a uma unica profissional/configuracao global.
