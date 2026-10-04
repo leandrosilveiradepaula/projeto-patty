@@ -8,6 +8,7 @@ import {
   getCurrentUserProfile,
   listAccessibleAnamnesisSubmissions,
   listAccessibleWeeklyFeedbacksForClient,
+  listAccessibleClientTrainingRequests,
   listCurrentClientContentReleases,
   listCurrentClientFiles,
   listPublishedProtocolsForCurrentClient,
@@ -31,12 +32,13 @@ export default async function ClientePage() {
     );
   }
 
-  const [anamneses, protocols, contentReleases, files, weeklyFeedbacks] = await Promise.all([
+  const [anamneses, protocols, contentReleases, files, weeklyFeedbacks, trainingRequests] = await Promise.all([
     listAccessibleAnamnesisSubmissions(client.id),
     listPublishedProtocolsForCurrentClient(client.id),
     listCurrentClientContentReleases(client.id),
     listCurrentClientFiles(client.id),
     listAccessibleWeeklyFeedbacksForClient(client.id),
+    listAccessibleClientTrainingRequests(client.id),
   ]);
 
   const areas = [
@@ -87,6 +89,14 @@ export default async function ClientePage() {
       href: "/cliente/feedback-semanal",
       label: "pendente(s)",
       title: "Feedback semanal",
+    },
+    {
+      count: trainingRequests.length,
+      description:
+        "Solicite o serviço de treino e consulte o histórico das suas solicitações.",
+      href: "/cliente/treino",
+      label: "solicitação(ões)",
+      title: "Treino",
     },
   ];
 
