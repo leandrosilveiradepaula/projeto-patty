@@ -885,7 +885,8 @@ Nao ampliar o mecanismo sem caso profissional confirmado.
 
 ### AINDA ABERTO
 
-- dia e horario padrao da agenda automatica;
+- dia da semana resolvido em 2026-10-04: segunda-feira, toda semana, independentemente da fase;
+- horario padrao da agenda automatica ainda aberto;
 - se o prazo historico de quarta-feira apenas marca atraso ou fecha alguma acao;
 - o marco profissional de elegibilidade foi resolvido em 2026-10-04: a cliente passa a receber Feedback Semanal depois que recebe o primeiro protocolo;
 - permanece apenas a decisao tecnica de qual evento auditavel do fluxo de protocolo representa "recebeu", sem alterar a regra profissional;
