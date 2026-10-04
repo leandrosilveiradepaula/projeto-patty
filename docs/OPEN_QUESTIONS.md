@@ -478,7 +478,6 @@ Entre o Bulking e a volta ao Cutting, a Patty utiliza Consolidacao Metabolica pa
 Continuam abertos:
 - duracao do Bulking;
 - duracao da Consolidacao;
-- criterio para encerrar a Consolidacao e retornar ao Cutting.
 
 Nao automatizar Bulking ou Consolidacao apenas com base nessa confirmacao de fluxo geral.
 
