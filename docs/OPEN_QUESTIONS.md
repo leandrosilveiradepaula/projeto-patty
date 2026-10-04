@@ -497,7 +497,6 @@ A Patty substituiu em 2026-10-04 a referencia anterior de 60 mL/kg pela regra vi
 A taxonomia operacional distingue agua pura de outros liquidos zero calorias. A Patty confirmou que a orientacao profissional e 70% da meta em agua pura e os 30% restantes podendo vir de outros liquidos zero calorias. Divergencia da cliente nao gera bloqueio automatico nem score de adesao.
 
 Continuam abertos:
-- regra de recalculo quando o peso muda;
 - horarios/cadencia dos lembretes;
 - poderes de correcao da Patty;
 - edicao de registros anteriores.
@@ -850,7 +849,6 @@ Continua aberto apenas o mecanismo futuro de recovery/watchdog, caso seja necess
 ### AINDA ABERTO
 
 - eventual proporcao-alvo de agua pura;
-- criterio para criar uma nova meta quando o peso muda;
 - canal de notificacao para o lembrete de 24 horas;
 - detalhes de eventual correcao/estorno de eventos alem de adicionar novo evento;
 - nenhum desses pontos abertos autoriza score de adesao ou notificacao por canal inferido.
