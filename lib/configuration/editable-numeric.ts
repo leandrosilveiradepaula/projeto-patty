@@ -1,6 +1,6 @@
 import type { Json } from "../supabase/database.types.ts";
-
-import { validateMethodConfigurationBySchema } from "./schema-registry.ts";
+import { validateMethodEngineConfiguration } from "../method/config-engine.ts";
+import { parseScalarParameterShapeConfiguration } from "../method/scalar-parameter.ts";
 
 export type EditableNumericParameter = {
   key: string;
@@ -42,10 +42,7 @@ export function listEditableNumericParameters(
   configuration: Json,
 ): EditableNumericParameter[] {
   if (configSchemaKey === "scalar_parameter_v1") {
-    const parsed = validateMethodConfigurationBySchema(
-      configSchemaKey,
-      configuration,
-    );
+    const parsed = parseScalarParameterShapeConfiguration(configuration);
 
     return [
       {
@@ -57,10 +54,7 @@ export function listEditableNumericParameters(
   }
 
   if (configSchemaKey === "method_engine_v1") {
-    const parsed = validateMethodConfigurationBySchema(
-      configSchemaKey,
-      configuration,
-    );
+    const parsed = validateMethodEngineConfiguration(configuration);
 
     return Object.entries(parsed.parameters)
       .map(([key, parameter]) => ({
@@ -93,22 +87,16 @@ export function updateEditableNumericParameters(
   assertExactUpdateKeys(editable, updates);
 
   if (configSchemaKey === "scalar_parameter_v1") {
-    const parsed = validateMethodConfigurationBySchema(
-      configSchemaKey,
-      configuration,
-    );
+    const parsed = parseScalarParameterShapeConfiguration(configuration);
 
-    return validateMethodConfigurationBySchema(configSchemaKey, {
+    return parseScalarParameterShapeConfiguration({
       ...parsed,
       value: updates.value,
-    });
+    }) as Json;
   }
 
   if (configSchemaKey === "method_engine_v1") {
-    const parsed = validateMethodConfigurationBySchema(
-      configSchemaKey,
-      configuration,
-    );
+    const parsed = validateMethodEngineConfiguration(configuration);
     const parameters = Object.fromEntries(
       Object.entries(parsed.parameters).map(([key, parameter]) => [
         key,
@@ -119,10 +107,10 @@ export function updateEditableNumericParameters(
       ]),
     );
 
-    return validateMethodConfigurationBySchema(configSchemaKey, {
+    return validateMethodEngineConfiguration({
       ...parsed,
       parameters,
-    });
+    }) as Json;
   }
 
   throw new RangeError(
