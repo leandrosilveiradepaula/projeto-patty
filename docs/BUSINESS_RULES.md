@@ -690,3 +690,12 @@ A Patty pode colocar a paciente em Manutencao por um periodo conforme o contexto
 - eventos ou outros periodos em que seja mais adequado manter estabilidade antes de retomar a progressao.
 
 A duracao, configuracao e momento de entrada/saida sao definidos manualmente pela Patty, caso a caso. Nao automatizar entrada, duracao ou saida da Manutencao sem regra adicional confirmada.
+
+
+### MANUTENCAO - OBJETIVO PRINCIPAL
+
+### DECISAO CONFIRMADA
+
+Na Manutencao, o objetivo principal e preservar a adesao e a rotina da paciente durante o periodo, mesmo que peso e medidas possam variar um pouco.
+
+A Manutencao nao deve ser tratada automaticamente como meta de peso absolutamente estavel. O foco e sustentar o processo de forma viavel ate que a Patty decida retomar outra etapa conforme o contexto e os resultados.
