@@ -2861,3 +2861,23 @@ A decisao de encerramento e contextual e manual. Na pratica, o acompanhamento ge
 - nao encerrar automaticamente por fase concluida;
 - nao encerrar automaticamente por resultado, adesao ou meta isolada;
 - o sistema deve permitir encerramento manual e preservar o historico do acompanhamento.
+
+
+## 2026-10-04 - Feedback Semanal: canal configuravel por paciente
+
+### REGRA CONFIRMADA PELA PATTY
+
+O canal de comunicacao do Feedback Semanal deve ser configuravel por paciente.
+
+As opcoes disponiveis sao:
+- email;
+- WhatsApp;
+- notificacao dentro do aplicativo.
+
+Nao existe um unico canal global obrigatorio para todas as clientes.
+
+### CONSEQUENCIA DE PRODUTO
+
+A preferencia de canal deve pertencer a configuracao individual da paciente e poder ser alterada pela Patty.
+
+Os detalhes tecnicos de WhatsApp, incluindo provedor e consentimento/opt-in quando aplicavel, permanecem separados desta regra profissional.
