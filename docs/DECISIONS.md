@@ -2576,3 +2576,12 @@ O recalculo e prospectivo:
 - nao altera metas historicas;
 - nao altera check-ins passados;
 - preserva auditoria e o peso que originou cada snapshot de meta.
+
+
+## 2026-10-04 - Cliente pode corrigir check-ins
+
+### REGRA CONFIRMADA PELA PATTY
+
+A cliente pode corrigir os proprios registros de check-in de liquidos e atividade fisica.
+
+A permissao funcional esta confirmada, mas o limite temporal e a forma tecnica auditavel da correcao ainda precisam ser definidos antes de implementacao definitiva.
