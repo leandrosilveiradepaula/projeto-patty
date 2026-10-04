@@ -6,7 +6,8 @@ export type OperationalPendingItemKind =
   | "clarification_response_pending_review"
   | "clarification_without_response"
   | "protocol_approved_not_published"
-  | "protocol_submitted_not_approved"\n  | "weekly_feedback_awaiting_response";
+  | "protocol_submitted_not_approved"
+  | "weekly_feedback_awaiting_response";
 
 export type OperationalPendingItem = {
   clientId: string | null;
