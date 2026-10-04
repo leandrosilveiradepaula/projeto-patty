@@ -43,9 +43,9 @@ A Patty ja possui o email da cliente e inicia o onboarding enviando um link para
 
 O MVP usara o Gmail pessoal da Patty via Custom SMTP do Supabase Auth. A escolha de infraestrutura do email real de convite esta resolvida.
 
-### PENDENCIA OPERACIONAL — BLOQUEADA NESTA SESSAO
+### PENDENCIA OPERACIONAL — NAO BLOQUEIA O ONBOARDING ASSISTIDO
 
-A configuracao foi explicitamente adiada em 2026-09-24 por indisponibilidade operacional momentanea. Retomar quando houver acesso aos paineis Google/Supabase.
+A configuracao de Gmail/Custom SMTP continua pendente e recomendada para envio automatico.
 
 Ainda falta configurar no Google/Supabase:
 - verificacao em duas etapas na conta Google;
@@ -54,7 +54,7 @@ Ainda falta configurar no Google/Supabase:
 - template real `Invite user` usando `TokenHash` + `type=invite` para `/auth/confirm`;
 - teste de entrega real com fixture sintetica.
 
-A App Password deve ser inserida diretamente no Supabase e nao deve ser compartilhada no chat ou repositorio.
+Porem, o admin ja pode gerar links manuais individuais de convite e de recuperacao de senha. Portanto SMTP deixou de bloquear o uso assistido do sistema. A App Password deve ser inserida diretamente no Supabase e nao deve ser compartilhada no chat ou repositorio.
 
 ### PARCIALMENTE RESOLVIDO
 
