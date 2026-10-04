@@ -119,9 +119,9 @@ Reconhecimento Metabolico
 
 A progressao e passo a passo e depende dos resultados observados pela Patty. Nao existe promocao automatica de fase apenas por tempo.
 
-As estruturas internas ja confirmadas de Cutting 1 e Cutting 2 permanecem validas. A estrutura interna completa do Cutting 3 ainda nao deve ser inferida.
+As estruturas internas confirmadas de Cutting 1, Cutting 2 e Cutting 3 permanecem validas. O Cutting 3 repete Linear -> Dia 1/Dia 2 -> Carb Cycle 2 Low/1 High.
 
-Quando o objetivo inclui ganho de massa muscular, a Patty pode usar um ramo com Bulking. Entre o Bulking e a volta ao Cutting, utiliza Consolidacao Metabolica para trabalhar/preservar o ganho de massa muscular e retirar o excesso adicional de gordura e retencao liquida. Formulas, duracao e criterios exatos desse ramo continuam pendentes.
+Quando o objetivo inclui ganho de massa muscular, a Patty pode usar um ramo com Bulking. Entre o Bulking e a volta ao Cutting, utiliza Consolidacao Metabolica. Bulking e Consolidacao nao possuem formula ou duracao geral automatica confirmada: ajustes e transicoes sao decisoes manuais e contextuais da Patty, conforme as regras registradas nesta documentacao.
 
 ### DECISAO CONFIRMADA
 
@@ -315,9 +315,16 @@ As regras detalhadas das Fases 4, 5 e 6 continuam abertas.
 
 ### DECISAO CONFIRMADA
 
-No fluxo confirmado, o Up Metabolico inclui uma refeicao livre semanal.
+O Up Metabolico nao possui duracao fixa nem quantidade fixa de refeicoes livres aplicavel a todas as clientes ou ocorrencias.
 
-Nao inferir outras regras do Up Metabolico sem confirmacao documentada.
+A Patty decide manualmente conforme o momento, resultados e resposta individual. Pode haver 1 refeicao livre semanal e, em alguns momentos, 2; esses exemplos nao viram regra automatica.
+
+As faixas de referencia confirmadas para todos os Ups sao:
+- proteina: 1,5 a 2,5 g/kg;
+- carboidrato: 3,0 a 4,5 g/kg;
+- gordura: distribuida manualmente pela Patty.
+
+O sistema nao escolhe automaticamente o valor dentro das faixas. A Patty parte do protocolo anterior e ajusta manualmente, principalmente o carboidrato.
 
 ## Limites sobre metodo profissional
 
@@ -327,7 +334,7 @@ Exemplos historicos individuais nao viram regra geral.
 
 Regra nao confirmada deve permanecer como `QUESTAO ABERTA`.
 
-Nao automatizar regras de hidratacao alem da formula confirmada de 60 mL/kg e da taxonomia ativa de liquidos; nao existe proporcao minima automatica confirmada entre agua pura e outros liquidos zero calorias. Suplementacao e manipulados foram confirmados em 2026-10-04 como definicoes manuais caso a caso, sem automacao profissional nesta etapa. Outros temas ainda nao formalizados permanecem dependentes de confirmacao documentada.
+A hidratacao usa atualmente o template profissional de 35 mL/kg/dia, com orientacao de 70% em agua pura e 30% podendo vir de outros liquidos zero calorias; divergencia nao gera bloqueio nem score automatico. Suplementacao e manipulados sao definicoes manuais caso a caso, sem automacao profissional nesta etapa. Outros temas ainda nao formalizados permanecem dependentes de confirmacao documentada.
 ## Leitura profissional da Anamnese
 
 ### DECISAO CONFIRMADA
@@ -394,7 +401,7 @@ Quando existir regra previamente confirmada, documentada e configurada para uma 
 
 A Patty deve visualizar o rascunho gerado, revisar todos os campos, corrigir o que for necessario e somente depois aprovar/publicar.
 
-Automacao so e autorizada para regras previamente confirmadas e documentadas. Regras ainda abertas de treino, suplementacao, manipulados, progressao, doses, contraindicacoes, formulas ou criterios profissionais continuam abertas e nao devem ser inferidas.
+Automacao so e autorizada para regras previamente confirmadas e documentadas. Treino possui estrutura inicial e campos basicos confirmados, mas sua progressao permanece manual; suplementacao e manipulados sao manuais caso a caso. Nenhuma dose, contraindicacao, formula ou criterio profissional ausente pode ser inferido.
 
 A prescricao de treino continua condicionada a regra ja confirmada de que a Patty prescreve treino somente para clientes que solicitam esse servico.
 
@@ -449,11 +456,12 @@ A existencia de metas e lembretes esta confirmada como comportamento desejado do
 
 Esses parametros podem ser definidos individualmente **na entrega do primeiro protocolo da cliente**, junto com a revisao/publicacao inicial do acompanhamento.
 
-Ainda nao estao formalizados como regra geral:
-- a meta deve ser recalculada automaticamente sempre que um novo peso for registrado; o novo calculo vale prospectivamente e nao reescreve metas historicas;
-- horarios e cadencia padrao dos lembretes;
-- horarios e cadencia padrao dos lembretes continuam abertos.
-- a Patty pode visualizar e corrigir check-ins da cliente; a forma tecnica deve preservar auditoria.
+Regras vigentes:
+- a meta e recalculada automaticamente sempre que um novo peso for registrado;
+- o novo calculo vale apenas dali em diante e nao reescreve metas historicas;
+- a Patty pode visualizar e corrigir check-ins da cliente, preservando auditoria.
+
+Ainda permanecem abertos apenas horarios/cadencia dos lembretes de hidratacao quando nao houver configuracao individual explicita.
 
 A formula vigente de 35 mL/kg esta confirmada e pode ser tratada como calculo deterministico do metodo para novas metas. Metas historicas ja persistidas nao devem ser reescritas. Nao criar score automatico de adesao a partir do check-in.
 
