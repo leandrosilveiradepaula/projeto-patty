@@ -450,7 +450,7 @@ A existencia de metas e lembretes esta confirmada como comportamento desejado do
 Esses parametros podem ser definidos individualmente **na entrega do primeiro protocolo da cliente**, junto com a revisao/publicacao inicial do acompanhamento.
 
 Ainda nao estao formalizados como regra geral:
-- se/quando a meta deve ser recalculada apos mudanca de peso;
+- a meta deve ser recalculada automaticamente sempre que um novo peso for registrado; o novo calculo vale prospectivamente e nao reescreve metas historicas;
 - horarios e cadencia padrao dos lembretes;
 - o que a Patty visualiza ou pode corrigir;
 - politica de edicao de check-ins anteriores.
@@ -572,3 +572,12 @@ Variacoes confirmadas:
 - em alguns momentos podem existir 2 refeicoes livres na semana, por exemplo quarta-feira e sabado.
 
 Esses exemplos nao devem ser transformados em regra automatica. Duracao e numero de refeicoes livres sao parametros configuraveis por fase/cliente e dependem de decisao manual da Patty.
+
+
+### RECALCULO DA META DE LIQUIDOS POR NOVO PESO
+
+### DECISAO CONFIRMADA
+
+Sempre que um novo peso da cliente for registrado, a meta diaria de liquidos deve ser recalculada automaticamente usando a configuracao vigente da regra de hidratacao.
+
+O novo calculo passa a valer dali em diante. Metas historicas e registros de consumo anteriores permanecem preservados e nao devem ser recalculados retroativamente.
