@@ -758,3 +758,14 @@ O sistema deve permitir reducoes graduais e versionadas, preservando cada config
 A Consolidacao Metabolica termina quando a Patty considerar que o ganho de massa muscular foi preservado e que a paciente esta pronta para voltar ao Cutting.
 
 A decisao permanece profissional e individual. Nao existe threshold automatico confirmado de peso, medida ou tempo para encerrar a Consolidacao.
+
+
+### RETORNO AO CUTTING APOS CONSOLIDACAO
+
+### DECISAO CONFIRMADA
+
+Apos a Consolidacao Metabolica, quando a paciente retorna ao Cutting, o ciclo recomeça pelo Cutting 1.
+
+Consequencia operacional:
+- retorno pos-Consolidacao -> Cutting 1;
+- a progressao volta a seguir o passo a passo do Cutting 1 antes de avancar novamente para etapas posteriores.
