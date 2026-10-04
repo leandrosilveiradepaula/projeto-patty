@@ -725,3 +725,16 @@ No Bulking, a Patty define manualmente os macros para cada paciente.
 Proteina, carboidrato e gordura sao ajustados individualmente conforme a paciente e o momento do processo.
 
 Nao existe, neste momento, formula geral ou tabela automatica confirmada para calcular os macros do Bulking. O sistema deve permitir edicao manual dos tres macros e preservar a versao aprovada para cada paciente.
+
+
+### BULKING -> CONSOLIDACAO - CRITERIOS DE TRANSICAO
+
+### DECISAO CONFIRMADA
+
+A transicao do Bulking para a Consolidacao Metabolica e decidida pela Patty a partir de uma combinacao de fatores:
+- ganho de massa muscular ja alcancado naquele ciclo;
+- nivel de gordura e/ou retencao observado;
+- mudanca ou refinamento do objetivo da paciente;
+- avaliacao profissional da Patty sobre o momento adequado de transicao.
+
+Nao existe gatilho unico nem regra automatica confirmada para essa passagem.
