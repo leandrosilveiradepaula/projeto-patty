@@ -920,3 +920,6 @@ Transicao Bulking -> Consolidacao: criterios profissionais confirmados em 2026-1
 
 
 Na Consolidacao, a Patty confirmou reducao manual e gradual das doses. Permanece aberto apenas se algum dia houver interesse em formalizar um criterio/ritmo exato das reducoes graduais; ate la, os ajustes sao profissionais e caso a caso.
+
+
+Resolvido em 2026-10-04: o retorno pos-Consolidacao reinicia pelo Cutting 1 desde o Linear, seguindo depois Dia 1/Dia 2 e Carb Cycle 2 Low/1 High.
