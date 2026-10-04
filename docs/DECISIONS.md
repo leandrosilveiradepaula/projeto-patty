@@ -2631,3 +2631,20 @@ A planilha fornecida confirma que os valores da tabela central sao derivados do 
 ### OBSERVACAO DE RECONCILIACAO
 
 A coluna textual/numerica "Fase" dentro da tabela central do arquivo historico apresenta rotulos que nao correspondem diretamente ao mapeamento profissional Fase 1/2/3 confirmado por cor. Para o produto, a regra profissional confirmada por cor prevalece; nao inferir numeracao adicional a partir desse rotulo sem validacao.
+
+
+## 2026-10-04 - Estrutura do Cutting 3
+
+### REGRA CONFIRMADA PELA PATTY
+
+O Cutting 3 segue a mesma estrutura dos Cuttings anteriores:
+
+```text
+Linear
+-> Dia 1 / Dia 2
+-> 2 Low / 1 High
+```
+
+Na etapa 2 Low / 1 High do Cutting 3, o Carb Cycle usa a Fase 3 da tabela central da planilha, correspondente a faixa vermelha.
+
+A progressao permanece profissional e dependente do cumprimento do passo a passo e dos resultados observados.
