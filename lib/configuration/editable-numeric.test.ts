@@ -97,6 +97,15 @@ test("requires the exact editable parameter set", () => {
       }),
     /parâmetro numérico/i,
   );
+
+  assert.throws(
+    () =>
+      updateEditableNumericParameters("method_engine_v1", original, {
+        first: 3,
+        second: 0,
+      }),
+    /maior que zero/i,
+  );
 });
 
 test("does not expose structured schemas through the numeric editor", () => {
