@@ -449,39 +449,41 @@ Continuam abertos:
 - criterios profissionais de transicao cutting -> bulking -> cutting;
 - regras detalhadas das Fases 4, 5 e 6.
 
-### QUESTAO ABERTA — ETAPAS POSTERIORES AO CUTTING 2
+### PARCIALMENTE RESOLVIDO — ETAPAS POSTERIORES AO CUTTING 2
 
-A sequencia profissional atualmente confirmada termina em:
+A Patty confirmou em 2026-10-04 a sequencia de alto nivel:
+- Cutting 2;
+- Up Metabolico;
+- Cutting 3;
+- Up Metabolico.
 
-- Cutting 2 Linear;
-- Cutting 2 Dia 1 / Dia 2;
-- Cutting 2: 2 Low / 1 High.
-
-Registros historicos anteriores mencionavam Cutting 3 como sequencia confirmada, mas essa classificacao fica superada para fins de automacao pela reconciliacao documental vigente.
-
-Continuam abertos:
-
-- qual e a etapa imediatamente posterior a `Cutting 2: 2 Low / 1 High`;
-- se existe um Cutting posterior formal no fluxo vigente e, em caso positivo, sua nomenclatura/estrutura;
-- valores, formulas, duracao e criterios de encerramento de qualquer etapa posterior;
-- relacao dessas etapas com Bulking e eventual retorno ao Cutting;
-- pareamento individual entre fases numeradas da planilha e etapas concretas do protocolo.
-
-Nao automatizar selecao, progressao ou nomenclatura de etapa posterior ao Cutting 2 enquanto nao houver nova confirmacao documentada da Patty.
-
-### PARCIALMENTE RESOLVIDO — BULKING
-
-A Patty confirmou que costuma alternar um cutting prolongado com um periodo de bulking para trabalho de massa muscular e, ao retornar ao cutting, reinicia o ciclo pelas Fases 1, 2 e 3.
+Tambem confirmou que, quando ha objetivo de ganho de massa muscular, pode existir Bulking seguido de Consolidacao Metabolica antes do retorno ao Cutting.
 
 Continuam abertos:
-- criterio para iniciar bulking;
-- estrutura de macros/doses do bulking;
-- duracao;
-- criterios de ajuste/encerramento;
-- criterio para retornar ao cutting;
-- regras detalhadas de Consolidacao.
+- estrutura interna completa do Cutting 3;
+- formulas, duracao e criterios de entrada/saida do Bulking;
+- formulas, duracao e criterios de entrada/saida da Consolidacao Metabolica;
+- se todos os Ups Metabolicos repetem exatamente a mesma configuracao;
+- pareamento completo entre fases numeradas da planilha e etapas concretas do protocolo.
 
-Nao automatizar bulking apenas com base nessa confirmacao de fluxo geral.
+A progressao continua sendo decisao profissional baseada em resultados. Nao automatizar mudanca de fase sem regra deterministica confirmada.
+
+### PARCIALMENTE RESOLVIDO — BULKING E CONSOLIDACAO METABOLICA
+
+A Patty confirmou que Bulking e usado quando o paciente deseja trabalhar ganho de massa muscular.
+
+Entre o Bulking e a volta ao Cutting, a Patty utiliza Consolidacao Metabolica para trabalhar/preservar o ganho de massa muscular e retirar somente o excesso adicional de gordura e retencao liquida.
+
+Continuam abertos:
+- criterio para iniciar Bulking;
+- estrutura de macros/doses do Bulking;
+- duracao do Bulking;
+- criterios de ajuste/encerramento do Bulking;
+- estrutura de macros/doses da Consolidacao;
+- duracao da Consolidacao;
+- criterio para encerrar a Consolidacao e retornar ao Cutting.
+
+Nao automatizar Bulking ou Consolidacao apenas com base nessa confirmacao de fluxo geral.
 
 ### PARCIALMENTE RESOLVIDO — HIDRATACAO/CHECK-IN DE LIQUIDOS
 
