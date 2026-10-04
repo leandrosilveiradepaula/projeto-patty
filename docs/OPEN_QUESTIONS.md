@@ -488,11 +488,12 @@ A Patty confirmou que Bulking e usado quando o paciente deseja trabalhar ganho d
 
 Entre o Bulking e a volta ao Cutting, a Patty utiliza Consolidacao Metabolica para trabalhar/preservar o ganho de massa muscular e retirar somente o excesso adicional de gordura e retencao liquida.
 
-Continuam abertos:
-- duracao do Bulking;
-- duracao da Consolidacao;
+Resolvido em 2026-10-04:
+- Bulking nao possui duracao geral predefinida; Patty decide manualmente;
+- Consolidacao termina quando a Patty considera o ganho muscular preservado e a paciente pronta para voltar ao Cutting;
+- nenhum threshold automatico de tempo, peso ou medida foi confirmado.
 
-Nao automatizar Bulking ou Consolidacao apenas com base nessa confirmacao de fluxo geral.
+Nao automatizar Bulking ou Consolidacao alem das regras explicitamente confirmadas.
 
 ### PARCIALMENTE RESOLVIDO — HIDRATACAO/CHECK-IN DE LIQUIDOS
 
@@ -521,11 +522,18 @@ Suplementacao e manipulados sao definidos manualmente pela Patty, caso a caso.
 
 Nao existe regra geral automatica, template obrigatorio ou sugestao automatica da IA autorizada neste momento. O produto precisa permitir registro/edicao manual e preservar o historico publicado.
 
-### QUESTAO ABERTA
+### PARCIALMENTE RESOLVIDO — TREINO
 
-A solicitacao de treino pela cliente ja possui registro estruturado append-only e nao autoriza geracao automatica. Continua aberta a montagem e progressao definitiva de treino, incluindo excecoes de frequencia/duracao, intensidade, volume, progressao e cardio quando aplicavel.
+A solicitacao de treino pela cliente possui registro estruturado append-only e nao autoriza geracao automatica.
 
-Tambem permanece aberto como representar eventual retirada/cancelamento posterior da solicitacao de treino; nao inferir cancelamento nem apagar o registro historico.
+Confirmado em 2026-10-04:
+- existe estrutura inicial padrao;
+- progressao posterior e manual conforme treino, evolucao e paciente;
+- cada exercicio precisa de exercicio, series e repeticoes;
+- tempo de descanso e observacoes/orientacoes de execucao podem ser incluidos;
+- carga/peso e definida pela capacidade da paciente, nao como valor fixo prescrito pela Patty.
+
+Detalhes adicionais de intensidade, cardio, excecoes e eventual cancelamento da solicitacao podem ser definidos futuramente, mas nao bloqueiam a estrutura inicial do produto.
 
 ### QUESTAO ABERTA
 
@@ -789,15 +797,17 @@ A Patty confirmou que o produto deve prever check-ins com metas e lembretes para
 
 A Patty confirmou que as metas/configuracoes individuais podem ser definidas na entrega do primeiro protocolo.
 
-A formula e a unidade da meta estao resolvidas: 60 mL/kg/dia.
+A formula e a unidade da meta estao resolvidas: 35 mL/kg/dia como template profissional vigente.
 
-Ainda faltam formalizar:
-- eventual proporcao-alvo de agua pura dentro da meta;
-- regra de recalculo apos mudanca de peso;
-- horarios e cadencia dos lembretes;
-- o que a Patty visualiza e pode corrigir;
-- se registros anteriores podem ser editados;
-- parametros funcionais restantes necessarios para implementar o check-in completo.
+Tambem estao resolvidos:
+- orientacao 70% agua pura / 30% outros liquidos zero calorias;
+- recalculo automatico prospectivo apos novo peso;
+- cliente pode corrigir registros anteriores sem limite temporal profissional definido;
+- Patty pode corrigir registros da cliente com auditoria.
+
+Permanece aberto:
+- horarios/cadencia dos lembretes de hidratacao;
+- detalhes tecnicos adicionais de notificacao quando necessarios.
 
 Nao inferir score de adesao ou frequencia ideal de treino.
 
