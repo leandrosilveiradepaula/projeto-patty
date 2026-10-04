@@ -2,7 +2,7 @@
 
 # Estado Atual do Projeto Patty
 
-Ultima atualizacao documental: 2026-10-03.
+Ultima atualizacao documental: 2026-10-04.
 
 Este arquivo e o ponto de entrada operacional para novos chats e agentes. Ele resume o estado do projeto e aponta para as fontes de verdade detalhadas.
 
@@ -77,21 +77,21 @@ A camada configuravel de hidratacao esta aplicada e integrada ao fluxo administr
 
 ### Reconciliacao do metodo
 
-A sequencia profissional vigente para automacao esta confirmada somente ate:
+A rodada de confirmacoes de 2026-10-04 ampliou e reconciliou o fluxo profissional vigente:
 
 ```text
 Reconhecimento Metabolico
--> Cutting 1 Dia 1 / Dia 2
--> Cutting 1: 2 Low / 1 High
+-> Cutting 1
 -> Up Metabolico
--> Cutting 2 Linear
--> Cutting 2 Dia 1 / Dia 2
--> Cutting 2: 2 Low / 1 High
+-> Cutting 2
+-> Up Metabolico
+-> Cutting 3
+-> Up Metabolico
 ```
 
-Etapas posteriores permanecem abertas. Registros historicos que tratavam Cutting 3 como confirmado foram marcados como superados para fins de automacao.
+O Cutting 3 repete Linear -> Dia 1/Dia 2 -> Carb Cycle 2 Low/1 High. Bulking, Consolidacao e Manutencao existem como caminhos profissionais, mas suas escolhas e ajustes permanecem manuais/contextuais quando nao houver regra deterministica confirmada.
 
-Na hidratacao, a taxonomia ativa distingue agua pura de outros liquidos zero calorias. Nao existe proporcao minima automatica confirmada entre essas categorias.
+Na hidratacao, o template profissional vigente e 35 mL/kg/dia, com orientacao 70% agua pura / 30% outros liquidos zero calorias. A meta e recalculada prospectivamente quando novo peso e registrado; historico nao e reescrito.
 
 O warning `auth_leaked_password_protection` continua conhecido e foi adiado; o projeto permanece no plano Free, no qual esse recurso nao esta disponivel.
 
@@ -134,10 +134,10 @@ Estado atual revalidado em 2026-10-01: o PR #246 restaurou o baseline verde e fo
 | Correcao pos-envio da Anamnese | SIM | SIM | E2E administrativo de producao PASS em 2026-09-24 | Schema aplicado e rota/UI publicadas e validadas em producao | Resposta original continua separada de correcoes e esclarecimentos |
 | Esclarecimentos pos-Anamnese | SIM | SIM | E2E autenticado admin -> cliente -> admin PASS no run `36053370894` | Schema e UI publicados; workflow E2E versionado no PR #155 | Lifecycle sem estado formal/prazo/notificacao continua aberto |
 | Arquivos privados | SIM | PARCIAL/AVANCADO | Smokes cliente/admin + auditoria estatica | Acesso da Patty sem assignment confirmado em RLS/Storage/rotas, com MFA AAL2 | Politica de retencao/hard delete |
-| Avaliacoes e medidas | Fundacao + cadencia profissional parcial definida | Lifecycle operacional de rascunho/finalizacao implementado | CI/build PASS no PR #210 + pre-apply `ROLLBACK` PASS | `20260927002227_create_assessment_draft_lifecycle` APLICADA NO SAAS | Avaliacao Basica ocorre no meio do intervalo entre Completas; Avaliacao Completa usa catalogo confirmado de peso, medidas e fotos; regra de calendario para ancora 29/30/31 continua aberta |
+| Avaliacoes e medidas | Fundacao + cadencia profissional definida | Lifecycle operacional de rascunho/finalizacao implementado | CI/build PASS no PR #210 + pre-apply `ROLLBACK` PASS | `20260927002227_create_assessment_draft_lifecycle` APLICADA NO SAAS | Completa preferencialmente proxima de sexta/sabado; Basica no meio do intervalo; agenda nao fica presa ao mesmo dia numerico do mes |
 | Protocolos versionados | SIM | Lifecycle manual implementado | CI/validacoes existentes | Backend/SaaS correspondente existente | Criacao/edicao profissional completa conforme regras ainda abertas |
 | Conteudo educacional / exercicios | SIM como dominios separados | Fundacao/release + metadata de asset preparada | Inventario 89/89 revalidado; smoke transacional de assets PASS; pre-flight de integridade do primeiro video registrado | Vercel Private Blob privado `projeto-patty-blob` criado/conectado em `iad1`; upload ainda nao executado | Migrar controladamente o video aprovado, reverificar hash e validar entrega >100 MB antes de publicar/liberar explicitamente |
-| Metodo da Patty | PARCIALMENTE DEFINIDO | Motor determinístico existente/parcial; regras profissionais migram para configuração versionada e editável | CI | Fluxo confirmado somente ate Cutting 2: 2 Low / 1 High; meta de liquidos, equivalencia de legumes, catalogos de avaliacao/liquidos e templates Carb Cycle 1-3 versionados | Etapas posteriores ao Cutting 2, Fases 5/6, Bulking, Consolidacao, suplementacao, treino, parametros restantes do check-in e criterios objetivos de estagnacao |
+| Metodo da Patty | AMPLAMENTE DEFINIDO / ainda com pontos manuais | Motor determinístico existente/parcial; regras profissionais migram para configuração versionada e editável | CI | Fluxo confirmado ate Cutting 3 + Ups; hidratacao 35 mL/kg, equivalencias, catalogos e Carb Cycle 1-3 versionados | Parametrizar regras novas confirmadas, implementar treino prescrito configuravel e agenda/canais configuraveis do Feedback Semanal; Fases 4-6 e outros refinamentos seguem abertos |
 | IA assistiva | SIM como principio e arquitetura; provider OpenAI confirmado | PARCIAL/AVANCADO | Adapter OpenAI + Structured Outputs + aliases + UI de revisao humana; avaliacao sintetica 5/5 PASS com `gpt-5.6-terra` / reasoning `medium`; latencia media 2.922 ms e 4.076 tokens totais no run `37135047413` | Prompt v1 aplicado; chamada com dados reais segue bloqueada | Controles efetivos de retencao/ZDR-MAM, projeto/credencial definitiva e conclusao do gate de dados de saude |
 | Failure handling de IA | SIM | SIM no schema + boundary server-side | CI + invariantes deterministicas | `20260922160058` aplicada; provider adapter publicado, chamada com dados reais segue gated | Manter gate fechado ate controles organizacionais de dados; recovery automatico segue aberto |
 | n8n | SIM: nao usar inicialmente | N/A | N/A | Nao usado | Introduzir somente com caso concreto |
@@ -195,8 +195,9 @@ Consultar `BUSINESS_RULES.md` para detalhes.
 
 Resumo:
 - todo acompanhamento comeca pelo Reconhecimento Metabolico;
-- o fluxo principal confirmado termina atualmente em Cutting 2: 2 Low / 1 High; etapas posteriores permanecem abertas;
-- existem regras confirmadas de refeicoes/jejum, macros/doses, grupos de proteina, legumes na contagem de carboidrato, Cutting Dia 1/Dia 2, meta de liquidos 60 mL/kg/dia e refeicao livre do Up Metabolico;
+- o fluxo principal confirmado segue Reconhecimento -> Cutting 1 -> Up -> Cutting 2 -> Up -> Cutting 3 -> Up;
+- Cutting 3 repete Linear -> Dia 1/Dia 2 -> Carb Cycle 2 Low/1 High;
+- existem regras confirmadas de refeicoes/jejum, macros/doses, grupos de proteina, legumes na contagem de carboidrato, meta de liquidos 35 mL/kg/dia e regras contextuais do Up Metabolico;
 - no inicio, relatos de saude/comportamento nao geram alerta, bloqueio ou encaminhamento automatico;
 - para emagrecimento/reducao de gordura, cintura e abdomen sao referencias fortes e fotos podem confirmar evolucao mesmo com peso estavel;
 - adesao e central e nao existe score automatico de adesao;
@@ -1771,3 +1772,30 @@ O reteste deve usar um link de recovery novo; Auth Codes anteriores sao single-u
 A pagina de redefinicao prioriza um fragmento de recovery novo sobre qualquer sessao antiga do navegador. O formulario de nova senha somente e liberado quando existe uma sessao valida criada pelo fluxo de recovery atual.
 
 Isso evita trocar a senha da identidade errada em navegadores que ainda tenham sessao residual de teste. O PR #332 passou CI e foi publicado na Vercel.
+
+
+## Atualizacao 2026-10-04 - Rodada profissional encerrada e parametrizacao reforcada
+
+### DEFINIDO / DOCUMENTADO
+
+A rodada de levantamento profissional foi encerrada na pergunta 37.
+
+Confirmacoes relevantes desta rodada incluem:
+- Cutting 3 e fluxo posterior contextual;
+- regras de Up, Bulking, Consolidacao e Manutencao;
+- hidratacao 35 mL/kg e composicao 70/30 como orientacao;
+- recalculo prospectivo por novo peso;
+- correcao de check-ins pela cliente e pela Patty com auditoria;
+- treino com estrutura inicial, campos por exercicio e progressao manual;
+- agenda de Avaliacao Completa preferencialmente proxima de sexta/sabado;
+- Feedback Semanal apos primeiro protocolo, toda segunda-feira, template 08:00, lembrete na quarta e canal configuravel por paciente;
+- suplementacao/manipulados manuais;
+- encerramento do acompanhamento contextual/manual.
+
+### DIRECAO DE ARQUITETURA
+
+O sistema deve ser parametrizavel para futura comercializacao. Valores atuais da Patty sao templates iniciais versionados, nunca constantes universais. A futura arquitetura de tenant/organizacao ainda nao foi definida e nao deve ser antecipada por inferencia.
+
+### PROXIMO FOCO
+
+Transformar as novas regras confirmadas em configuracoes versionadas e fluxos reais, priorizando funcionalidades navegaveis para Patty sem criar telas demonstrativas paralelas.
