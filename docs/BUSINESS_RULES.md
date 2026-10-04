@@ -675,3 +675,18 @@ Podem ocorrer, entre outras possibilidades confirmadas:
 - outra continuidade definida profissionalmente a partir do resultado da paciente.
 
 Nao automatizar a escolha entre essas alternativas sem regra adicional confirmada. As regras detalhadas de manutencao, encerramento e criterios de escolha permanecem pendentes.
+
+
+### MANUTENCAO - USO PROFISSIONAL
+
+### DECISAO CONFIRMADA
+
+A Manutencao existe como uma fase/protocolo possivel do acompanhamento, mas nao possui uma regra geral fixa.
+
+A Patty pode colocar a paciente em Manutencao por um periodo conforme o contexto e o momento do processo. Exemplos confirmados incluem:
+- ferias;
+- viagens;
+- cirurgias;
+- eventos ou outros periodos em que seja mais adequado manter estabilidade antes de retomar a progressao.
+
+A duracao, configuracao e momento de entrada/saida sao definidos manualmente pela Patty, caso a caso. Nao automatizar entrada, duracao ou saida da Manutencao sem regra adicional confirmada.
