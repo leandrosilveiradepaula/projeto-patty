@@ -460,7 +460,6 @@ A Patty confirmou em 2026-10-04 a sequencia de alto nivel:
 Tambem confirmou que, quando ha objetivo de ganho de massa muscular, pode existir Bulking seguido de Consolidacao Metabolica antes do retorno ao Cutting.
 
 Continuam abertos:
-- estrutura interna completa do Cutting 3;
 - formulas, duracao e criterios de entrada/saida do Bulking;
 - formulas, duracao e criterios de entrada/saida da Consolidacao Metabolica;
 - formulas/macros detalhados de cada ocorrencia do Up Metabolico;
@@ -909,3 +908,14 @@ Continuam abertos apenas os pontos que dependem da leitura/reconciliacao da plan
 - regras das fases pouco usadas que ainda nao estejam documentadas.
 
 Nao inferir formula fora da planilha nem transformar exemplo individual em template global sem reconciliacao.
+
+
+### RESOLVIDO - ESTRUTURA DO CUTTING 3
+
+A Patty confirmou que o Cutting 3 repete:
+
+- Linear;
+- Dia 1 / Dia 2;
+- Carb Cycle 2 Low / 1 High.
+
+No Carb Cycle do Cutting 3, usar Fase 3 / faixa vermelha da tabela central.
