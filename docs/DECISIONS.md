@@ -2494,3 +2494,35 @@ Decisoes tecnicas/produto:
 - nenhuma resposta semanal entra em provider de IA enquanto o gate aplicavel a dados reais permanecer fechado.
 
 O primeiro fluxo operacional permite criacao manual da solicitacao pela Patty/admin. Agenda automatica, email e WhatsApp permanecem desacoplados e dependem das decisoes abertas registradas em `OPEN_QUESTIONS.md`.
+
+
+## 2026-10-04 - Sequencia com Cutting 3 e Consolidacao Metabolica
+
+### REGRA CONFIRMADA PELA PATTY
+
+O fluxo profissional de alto nivel inclui:
+
+```text
+Reconhecimento Metabolico
+-> Cutting 1
+-> Up Metabolico
+-> Cutting 2
+-> Up Metabolico
+-> Cutting 3
+-> Up Metabolico
+```
+
+A progressao e passo a passo e depende dos resultados do paciente.
+
+Quando o objetivo inclui ganho de massa muscular, pode haver Bulking. Entre o Bulking e a volta ao Cutting, a Patty utiliza Consolidacao Metabolica para trabalhar/preservar o ganho de massa muscular e retirar somente o excesso adicional de gordura e retencao liquida.
+
+Esta confirmacao supera a decisao de 2026-10-03 que encerrava a sequencia confirmada no Cutting 2.
+
+### LIMITES
+
+Continuam sem regra deterministica confirmada:
+- estrutura interna completa do Cutting 3;
+- formulas e duracao de Bulking;
+- formulas e duracao da Consolidacao Metabolica;
+- criterios exatos de entrada e saida dessas etapas;
+- equivalencia automatica entre todos os Ups Metabolicos.
