@@ -73,6 +73,11 @@ export default async function AdminClientAssessmentsPage({
       />
       <ClientWorkspaceNav clientId={client.id} />
       <Section
+        action={
+          <Link className={styles.actionLink} href={`/admin/clientes/${client.id}/evolucao`}>
+            Ver evolução
+          </Link>
+        }
         description="Crie uma avaliação em rascunho. O registro permanece editável até a finalização explícita."
         title="Nova avaliação"
       >
