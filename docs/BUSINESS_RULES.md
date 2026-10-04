@@ -658,3 +658,20 @@ Linear
 No Carb Cycle do Cutting 3, usar a Fase 3 da tabela central da planilha, correspondente a faixa vermelha.
 
 A progressao continua condicionada ao passo a passo profissional e aos resultados da cliente. Nao automatizar avancos de etapa sem a decisao/regra aplicavel.
+
+
+### APOS O UP METABOLICO POS-CUTTING 3
+
+### DECISAO CONFIRMADA
+
+Nao existe uma unica etapa obrigatoria depois do Up Metabolico que sucede o Cutting 3.
+
+A Patty decide o proximo passo conforme os resultados observados e o objetivo atual da paciente.
+
+Podem ocorrer, entre outras possibilidades confirmadas:
+- encerramento do processo, quando fizer sentido frente ao objetivo atingido;
+- entrada em manutencao;
+- entrada em Bulking, quando houver objetivo de ganho de massa muscular;
+- outra continuidade definida profissionalmente a partir do resultado da paciente.
+
+Nao automatizar a escolha entre essas alternativas sem regra adicional confirmada. As regras detalhadas de manutencao, encerramento e criterios de escolha permanecem pendentes.
