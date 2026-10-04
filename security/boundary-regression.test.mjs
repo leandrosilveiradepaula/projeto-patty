@@ -615,6 +615,24 @@ test("Supabase SSR proxy preserves session cookies and cache-control headers", a
   }
 });
 
+test("implicit recovery bridge consumes tokens, removes the fragment and reloads reset with session", async () => {
+  const bridge = await readFile(
+    path.join(ROOT, "components", "auth", "ImplicitRecoverySessionBridge.tsx"),
+    "utf8",
+  );
+  const action = await readFile(
+    path.join(ROOT, "app", "recuperar-senha", "actions.ts"),
+    "utf8",
+  );
+
+  assert.match(action, /redirectTo: `\$\{protocol\}:\/\/\$\{host\}\/redefinir-senha`/);
+  assert.match(bridge, /parseImplicitRecoveryFragment\(window\.location\.hash\)/);
+  assert.match(bridge, /window\.history\.replaceState/);
+  assert.match(bridge, /auth\.setSession\(\{/);
+  assert.match(bridge, /window\.location\.replace\("\/redefinir-senha"\)/);
+  assert.doesNotMatch(bridge, /console\.(log|info|warn|error)/);
+});
+
 test("implicit invite bridge consumes tokens, removes the fragment and redirects to activation", async () => {
   const bridge = await readFile(
     path.join(ROOT, "components", "auth", "ImplicitInviteSessionBridge.tsx"),

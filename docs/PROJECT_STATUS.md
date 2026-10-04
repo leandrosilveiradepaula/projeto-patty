@@ -1724,3 +1724,21 @@ Como fragmentos `#...` nao sao enviados ao servidor, a pagina de login agora:
 - nao registra tokens em logs.
 
 Essa compatibilidade existe para convites implicitos ja emitidos. O fluxo preferido continua sendo TokenHash/PKCE/manual link controlado.
+
+
+## Atualizacao 2026-10-04 - Recuperacao implicita do Supabase
+
+### IMPLEMENTADA NA BRANCH
+
+Os logs reais mostraram que o fluxo hospedado de recovery valida o link em `/verify` e retorna ao aplicativo com tokens no fragmento `#access_token=...&refresh_token=...&type=recovery`, nao com `?code=...`.
+
+Ajuste:
+- novos pedidos de recovery usam `redirectTo=/redefinir-senha`;
+- a pagina `/redefinir-senha` detecta se ja existe sessao server-side;
+- sem sessao, o browser processa somente fragmentos `type=recovery`;
+- o fragmento sensivel e removido imediatamente da barra de endereco;
+- `setSession` cria a sessao em cookies e a pagina e recarregada;
+- somente depois disso o formulario de nova senha aparece;
+- links incompletos ou sem fragmento valido caem em estado invalido.
+
+Todos os links de recovery emitidos antes desta correcao devem ser descartados durante o reteste.
