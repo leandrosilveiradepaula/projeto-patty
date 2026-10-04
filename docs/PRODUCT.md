@@ -37,6 +37,16 @@ Todos os modulos e fluxos confirmados para Patty e clientes fazem parte do escop
 Regras profissionais ainda abertas continuam bloqueadas para automacao ate confirmacao e documentacao.
 
 
+## Evolucao futura para produto comercializavel
+
+### DIRECAO DE PRODUTO CONFIRMADA - 2026-10-04
+
+O sistema nasce para uso da Patty e do metodo atual da Consultoria Corpo e Mente, mas deve ser construido de forma que possa futuramente ser comercializado.
+
+Por isso, regras e defaults da Patty nao devem ser confundidos com regras universais da plataforma. O produto deve separar o motor generico das configuracoes profissionais versionadas.
+
+A arquitetura futura de organizacoes/tenants ainda nao esta definida e nao deve ser inventada nesta etapa. A decisao atual e garantir que o dominio profissional nao fique acoplado a constantes ou a uma unica configuracao global irreversivel.
+
 ## Parametrizacao do metodo
 
 ### DECISAO CONFIRMADA
