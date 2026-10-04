@@ -1,5 +1,6 @@
 import { endClientAssignmentAction } from "@/app/admin/clientes/[clienteId]/actions";
 import { AdminClientRegistrationEditForm } from "@/components/admin/AdminClientRegistrationEditForm";
+import { AdminClientRecoveryLinkForm } from "@/components/admin/AdminClientRecoveryLinkForm";
 import { AdminTrainingRequestForm } from "@/components/admin/AdminTrainingRequestForm";
 import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
@@ -332,6 +333,15 @@ export default async function AdminClienteDetailPage({
             ))}
           </ol>
         ) : null}
+      </Section>
+
+      <Section
+        description="Use esta opção quando a cliente perder a senha e o email automático de recuperação não estiver disponível. O link é individual e não altera a senha até que a própria cliente conclua o fluxo."
+        title="Recuperação de acesso"
+      >
+        <Card className={styles.infoCard}>
+          <AdminClientRecoveryLinkForm clientId={client.id} />
+        </Card>
       </Section>
 
       <Section

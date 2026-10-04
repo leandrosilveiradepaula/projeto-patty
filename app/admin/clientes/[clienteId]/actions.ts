@@ -1,11 +1,16 @@
 "use server";
 
+import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { endCurrentAdminClientAssignments } from "@/lib/assignments/client-assignment-admin";
 import { upsertClientRegistrationPrivileged } from "@/lib/clients/registration-admin";
 import { parseClientRegistrationForm } from "@/lib/clients/registration";
+import {
+  ClientRecoveryLinkError,
+  generateClientRecoveryToken,
+} from "@/lib/onboarding/client-recovery";
 import { requireRole } from "@/lib/supabase/auth";
 import {
   createAccessibleClientTrainingRequest,
@@ -162,3 +167,97 @@ export async function updateAdminClientRegistrationAction(
   };
 }
 
+
+
+export type ManualRecoveryLinkState = {
+  message: string | null;
+  recoveryLink: string | null;
+  success: boolean;
+};
+
+export async function generateManualRecoveryLinkAction(
+  clientId: string,
+  _state: ManualRecoveryLinkState,
+): Promise<ManualRecoveryLinkState> {
+  await requireRole("admin");
+
+  if (!isUuid(clientId)) {
+    return {
+      message: "Cliente inválida para recuperação de acesso.",
+      recoveryLink: null,
+      success: false,
+    };
+  }
+
+  const client = await getAccessibleClient(clientId);
+
+  if (!client || !client.profile_id) {
+    return {
+      message:
+        "Esta cliente não possui uma identidade de acesso vinculada ou não está acessível para sua atribuição atual.",
+      recoveryLink: null,
+      success: false,
+    };
+  }
+
+  const requestHeaders = await headers();
+  const host =
+    requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
+  const protocol =
+    requestHeaders.get("x-forwarded-proto") ??
+    (host?.startsWith("localhost") ? "http" : "https");
+
+  if (!host) {
+    return {
+      message: "Não foi possível determinar o endereço do aplicativo.",
+      recoveryLink: null,
+      success: false,
+    };
+  }
+
+  try {
+    const result = await generateClientRecoveryToken({
+      profileId: client.profile_id,
+    });
+    const recoveryUrl = new URL(
+      "/auth/recovery-token",
+      `${protocol}://${host}`,
+    );
+    recoveryUrl.searchParams.set("token_hash", result.tokenHash);
+    recoveryUrl.searchParams.set("type", "recovery");
+
+    return {
+      message:
+        "Link gerado. Envie este endereço somente para a cliente correspondente.",
+      recoveryLink: recoveryUrl.toString(),
+      success: true,
+    };
+  } catch (error) {
+    if (error instanceof ClientRecoveryLinkError) {
+      if (error.code === "identity_missing") {
+        return {
+          message:
+            "A identidade de acesso vinculada não possui um email de autenticação válido.",
+          recoveryLink: null,
+          success: false,
+        };
+      }
+
+      if (error.code === "recovery_link_failed") {
+        return {
+          message:
+            "Não foi possível gerar o link de recuperação agora. Tente novamente.",
+          recoveryLink: null,
+          success: false,
+        };
+      }
+    }
+
+    return {
+      message:
+        "Não foi possível gerar o link de recuperação. Nenhuma credencial foi alterada.",
+      recoveryLink: null,
+      success: false,
+    };
+  }
+}

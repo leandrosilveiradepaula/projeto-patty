@@ -1689,3 +1689,21 @@ Fluxo:
 - token/link nao e persistido nem registrado em logs.
 
 Esse fallback remove SMTP como bloqueio do primeiro onboarding. SMTP continua recomendado para automacao, recuperacao de senha por email e melhor operacao em escala.
+
+
+## Atualizacao 2026-10-04 - Link manual de recuperacao de acesso
+
+### IMPLEMENTADO NA BRANCH / SEM ALTERACAO DE SCHEMA
+
+Foi adicionado fallback administrativo de recuperacao que usa `auth.admin.generateLink({ type: "recovery" })`.
+
+Fluxo:
+- Patty/admin abre a cliente ja acessivel por assignment;
+- o servidor usa `profile_id` para localizar a identidade Auth e o email de autenticacao, sem pedir ou expor esse email na URL;
+- Supabase gera `hashed_token` de recovery sem enviar email;
+- a Server Action monta link para `/auth/recovery-token?token_hash=...&type=recovery`;
+- a rota valida o token com `verifyOtp` e redireciona para `/redefinir-senha`;
+- a propria cliente define a nova senha;
+- token/link nao e persistido nem registrado em logs.
+
+Isso remove SMTP como bloqueio para suporte manual de recuperacao de senha. O fluxo automatico `Esqueci minha senha` continua disponivel quando email estiver configurado.
