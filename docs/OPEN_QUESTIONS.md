@@ -476,7 +476,6 @@ A Patty confirmou que Bulking e usado quando o paciente deseja trabalhar ganho d
 Entre o Bulking e a volta ao Cutting, a Patty utiliza Consolidacao Metabolica para trabalhar/preservar o ganho de massa muscular e retirar somente o excesso adicional de gordura e retencao liquida.
 
 Continuam abertos:
-- estrutura de macros/doses do Bulking;
 - duracao do Bulking;
 - criterios de ajuste/encerramento do Bulking;
 - estrutura de macros/doses da Consolidacao;
