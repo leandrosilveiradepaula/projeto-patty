@@ -2710,3 +2710,18 @@ Nao ha criterio numerico unico nem prazo fixo confirmado para essa transicao.
 Quando a paciente conclui a Consolidacao Metabolica e retorna ao Cutting, ela reinicia pelo Cutting 1.
 
 O retorno nao retoma diretamente Cutting 2 ou Cutting 3.
+
+
+## 2026-10-04 - Retorno pos-Consolidacao reinicia no Linear do Cutting 1
+
+### REGRA CONFIRMADA PELA PATTY
+
+Apos a Consolidacao Metabolica, o retorno ao Cutting recomeça pelo Cutting 1 e desde o protocolo Linear.
+
+Fluxo:
+
+```text
+Cutting 1 Linear
+-> Dia 1 / Dia 2
+-> 2 Low / 1 High
+```
