@@ -615,6 +615,19 @@ test("Supabase SSR proxy preserves session cookies and cache-control headers", a
   }
 });
 
+test("implicit invite bridge consumes tokens, removes the fragment and redirects to activation", async () => {
+  const bridge = await readFile(
+    path.join(ROOT, "components", "auth", "ImplicitInviteSessionBridge.tsx"),
+    "utf8",
+  );
+
+  assert.match(bridge, /parseImplicitInviteFragment\(window\.location\.hash\)/);
+  assert.match(bridge, /window\.history\.replaceState/);
+  assert.match(bridge, /auth\.setSession\(\{/);
+  assert.match(bridge, /window\.location\.replace\("\/ativar-conta"\)/);
+  assert.doesNotMatch(bridge, /console\.(log|info|warn|error)/);
+});
+
 test("password login routes from the user returned by the successful sign-in", async () => {
   const content = await readFile(
     path.join(ROOT, "app", "login", "actions.ts"),
