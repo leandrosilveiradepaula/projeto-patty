@@ -1541,16 +1541,16 @@ Concluido nesta rodada:
 - Security Advisor pos-apply nao apresentou regressao nova; permanece somente o warning conhecido de Leaked Password Protection do plano atual.
 
 Pendente operacional que nao bloqueia o restante do desenvolvimento:
-- criar a identidade Auth real da Patty e vincular `Profile -> role admin`; essa operacao ficou adiada porque o usuario nao pode acessar o painel Supabase neste momento.
+- executar o bootstrap controlado da identidade Auth real da Patty e vincular `Profile -> role admin`; o procedimento automatizado foi integrado ao `master` e depende apenas da execucao manual com o email real.
 
 Automacao externa do Feedback Semanal ainda nao foi ativada. Agenda, prazo operacional, elegibilidade, email/WhatsApp e lembretes permanecem configuracoes/decisoes abertas; o produto ja possui o nucleo real de solicitacao/resposta para ser exercitado assim que houver acesso administrativo real.
 
 
 ## Atualizacao 2026-10-04 - Visao factual de evolucao da cliente
 
-### IMPLEMENTADA NA BRANCH / AINDA NAO MERGEADA
+### MERGEADA / PUBLICADA
 
-Branch: `codex/client-progress-view`.
+PR #317 mergeado no `master`; deployment Vercel correspondente validado com sucesso.
 
 Objetivo:
 - tornar o acompanhamento longitudinal mais navegavel para a Patty usando exclusivamente fatos ja registrados nas avaliacoes finalizadas.
@@ -1577,9 +1577,9 @@ Invariantes preservadas:
 
 ## Atualizacao 2026-10-04 - Recuperacao de senha
 
-### IMPLEMENTADA NA BRANCH / AINDA NAO MERGEADA
+### MERGEADA / PUBLICADA
 
-Branch: `codex/password-recovery-flow`.
+PR #319 mergeado no `master`; deployment Vercel correspondente validado com sucesso.
 
 Implementado:
 - link `Esqueci minha senha` no login;
