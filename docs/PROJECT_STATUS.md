@@ -1600,7 +1600,7 @@ Invariantes:
 
 ## Atualizacao 2026-10-04 - Bootstrap controlado da Patty admin
 
-### INTEGRADO AO MASTER / AINDA NAO EXECUTADO
+### INTEGRADO AO MASTER / EXECUTADO COM SUCESSO
 
 Workflow integrado ao `master` pelo PR #320.
 
@@ -1616,7 +1616,7 @@ Foi preparado um procedimento manual e idempotente de bootstrap da unica admin d
 - em convite novo, tenta compensar Auth/profile/role se o provisionamento falhar;
 - nao cria assignment nem acesso client-scoped automaticamente.
 
-A execucao real permanece pendente porque workflows novos nao podem ser disparados pela conexao GitHub disponivel neste chat. Depois do merge, a operacao manual esperada e executar o workflow no `master` com o email administrativo real e confirmacao `BOOTSTRAP_PATTY`.
+O workflow foi executado manualmente no `master` em 2026-10-04 e concluiu com sucesso. A identidade Auth real da Patty foi criada, o `profile` correspondente existe e a role `admin` foi confirmada no Supabase SaaS.
 
 
 ## Atualizacao 2026-10-04 - Solicitacao de treino pela cliente
@@ -1693,7 +1693,7 @@ Esse fallback remove SMTP como bloqueio do primeiro onboarding. SMTP continua re
 
 ## Atualizacao 2026-10-04 - Link manual de recuperacao de acesso
 
-### MERGEADO / PUBLICACAO EM VALIDACAO / SEM ALTERACAO DE SCHEMA
+### MERGEADO / PUBLICADO / SEM ALTERACAO DE SCHEMA
 
 Foi adicionado fallback administrativo de recuperacao que usa `auth.admin.generateLink({ type: "recovery" })`.
 
@@ -1711,7 +1711,7 @@ Isso remove SMTP como bloqueio para suporte manual de recuperacao de senha. O fl
 
 ## Atualizacao 2026-10-04 - Compatibilidade com convite implicito do Supabase
 
-### IMPLEMENTADA NA BRANCH
+### MERGEADA / PUBLICADA
 
 O convite real enviado pelo Supabase no bootstrap administrativo foi observado chegando em `/login#access_token=...&refresh_token=...&type=invite`.
 
@@ -1728,7 +1728,7 @@ Essa compatibilidade existe para convites implicitos ja emitidos. O fluxo prefer
 
 ## Atualizacao 2026-10-04 - Recuperacao implicita do Supabase
 
-### IMPLEMENTADA NA BRANCH
+### MERGEADA / PUBLICADA
 
 Os logs reais mostraram que o fluxo hospedado de recovery valida o link em `/verify` e retorna ao aplicativo com tokens no fragmento `#access_token=...&refresh_token=...&type=recovery`, nao com `?code=...`.
 
@@ -1742,3 +1742,14 @@ Ajuste:
 - links incompletos ou sem fragmento valido caem em estado invalido.
 
 Todos os links de recovery emitidos antes desta correcao devem ser descartados durante o reteste.
+
+
+## Atualizacao 2026-10-04 - Gate final de redefinicao de senha
+
+### MERGEADO / PUBLICADO
+
+A pagina de redefinicao agora prioriza um fragmento de recovery novo sobre qualquer sessao antiga do navegador. O formulario de nova senha somente e liberado quando:
+- o fragmento `type=recovery` foi consumido e virou sessao valida; ou
+- ja existe sessao server-side valida criada por um fluxo autenticado anterior.
+
+Isso evita trocar a senha da identidade errada em navegadores que ainda tenham sessao residual de teste. O PR #332 passou CI e foi publicado na Vercel.
