@@ -2734,3 +2734,23 @@ Cutting 1 Linear
 Para definir o carboidrato no Up Metabolico, a Patty usa o protocolo anterior como referencia e aumenta a quantidade manualmente.
 
 Nao ha formula fixa confirmada para o aumento. O valor final e uma decisao profissional individual e deve ser preservado em versao historica.
+
+
+## 2026-10-04 - Treino: estrutura inicial, progressao e campos por exercicio
+
+### REGRA CONFIRMADA PELA PATTY
+
+Para clientes que solicitaram treino, existe uma estrutura inicial padrao, mas a progressao posterior e ajustada manualmente pela Patty conforme o treino, a evolucao e a paciente.
+
+Para cada exercicio, o treino precisa permitir definir:
+- exercicio;
+- series;
+- repeticoes;
+- opcionalmente, tempo de descanso;
+- opcionalmente, observacoes e orientacoes de execucao.
+
+A carga/peso nao e prescrita pela Patty como um valor fixo no treino; deve ser definida conforme a capacidade da paciente.
+
+### CONSEQUENCIA DE PRODUTO
+
+Nao automatizar progressao de carga, series ou repeticoes sem nova regra confirmada. O sistema deve permitir template inicial versionado e edicao manual pela Patty, preservando o treino publicado para cada paciente.
