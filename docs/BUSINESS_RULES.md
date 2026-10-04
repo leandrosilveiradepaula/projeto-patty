@@ -612,3 +612,21 @@ Consequencias:
 - nao inferir formulas sem ler e reconciliar a planilha original;
 - os calculos da planilha devem ser parametrizaveis/versionados, conforme a decisao geral de parametrizacao do metodo;
 - o peso usado no calculo deve ser preservado como input do rascunho/protocolo correspondente.
+
+
+### CARB CYCLE - MAPEAMENTO DE FASE E PESO
+
+### DECISAO CONFIRMADA
+
+A Patty confirmou que usa sempre a tabela central da planilha de Carb Cycle.
+
+Mapeamento profissional:
+- Fase 1: faixa verde;
+- Fase 2: faixa amarela;
+- Fase 3: faixa vermelha.
+
+O peso usado no calculo e o peso da ultima Avaliacao Completa da cliente.
+
+Na planilha fornecida, a tabela central calcula os valores multiplicando o peso informado pelos coeficientes da faixa correspondente. O sistema deve preservar qual peso e qual fase/faixa foram usados no calculo.
+
+A numeracao exibida na coluna "Fase" da tabela central do arquivo historico nao deve prevalecer sobre o mapeamento profissional confirmado por cor sem reconciliacao, pois ha rotulos que nao coincidem com Fase 1/2/3. Para implementacao, usar a regra profissional documentada e validar os coeficientes por faixa.
