@@ -33,6 +33,7 @@ const ENTRYPOINT_RULES = new Map([
   ["app/cliente/checkins/actions.ts", "client"],
   ["app/cliente/feedback-semanal/actions.ts", "client"],
   ["app/cliente/perfil/actions.ts", "client"],
+  ["app/cliente/treino/actions.ts", "client"],
   ["app/login/actions.ts", "public-auth"],
   ["app/recuperar-senha/actions.ts", "public-auth"],
   ["app/redefinir-senha/actions.ts", "authenticated-recovery"],
