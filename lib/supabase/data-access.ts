@@ -890,6 +890,19 @@ export async function unlinkAccessibleAssessmentPhoto(input: {
   }
 }
 
+export async function listCurrentClientFinalizedAssessmentMeasurements() {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc(
+    "list_current_client_finalized_assessment_measurements",
+  );
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
 export async function listAccessibleAssessmentsForClient(clientId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
