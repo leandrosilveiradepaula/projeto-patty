@@ -1,9 +1,11 @@
 import Link from "next/link";
 
+import { ImplicitRecoverySessionBridge } from "@/components/auth/ImplicitRecoverySessionBridge";
 import { PasswordResetForm } from "@/components/auth/PasswordResetForm";
 import { Alert } from "@/components/ui/Alert";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { createClient } from "@/lib/supabase/server";
 
 import styles from "./page.module.css";
 
@@ -15,6 +17,9 @@ export default async function ResetPasswordPage({
   searchParams,
 }: ResetPasswordPageProps) {
   const { error } = await searchParams;
+  const supabase = await createClient();
+  const { data: claimsData } = await supabase.auth.getClaims();
+  const hasSession = typeof claimsData?.claims?.sub === "string";
 
   return (
     <main className={styles.shell}>
@@ -30,8 +35,10 @@ export default async function ResetPasswordPage({
             <Alert live="polite" title="Link inválido ou expirado" variant="warning">
               Solicite um novo link de recuperação para continuar.
             </Alert>
-          ) : (
+          ) : hasSession ? (
             <PasswordResetForm />
+          ) : (
+            <ImplicitRecoverySessionBridge />
           )}
         </Card>
         <Link className={styles.backLink} href="/recuperar-senha">
