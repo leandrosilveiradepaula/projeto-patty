@@ -8,9 +8,13 @@ export type EditableNumericParameter = {
   value: number;
 };
 
-function assertFinite(value: number, key: string) {
+function assertPositiveFinite(value: number, key: string) {
   if (!Number.isFinite(value)) {
     throw new TypeError(`Parâmetro numérico inválido: ${key}`);
+  }
+
+  if (value <= 0) {
+    throw new RangeError(`Parâmetro numérico deve ser maior que zero: ${key}`);
   }
 }
 
@@ -29,7 +33,7 @@ function assertExactUpdateKeys(
   }
 
   for (const key of received) {
-    assertFinite(updates[key], key);
+    assertPositiveFinite(updates[key], key);
   }
 }
 
