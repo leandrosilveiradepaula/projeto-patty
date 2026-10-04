@@ -786,3 +786,14 @@ Cutting 1 Linear
 ```
 
 Nao pular diretamente para Dia 1/Dia 2 ou Carb Cycle no retorno pos-Consolidacao.
+
+
+### UP METABOLICO - DEFINICAO DE CARBOIDRATO
+
+### DECISAO CONFIRMADA
+
+No Up Metabolico, a Patty parte do protocolo anterior e aumenta manualmente a quantidade de carboidrato.
+
+Nao existe, neste momento, formula unica confirmada para definir o tamanho desse aumento. O ajuste e individual, conforme a paciente, o momento do processo e os resultados observados.
+
+O sistema deve permitir ajuste manual e versionado do carboidrato no Up Metabolico, preservando o protocolo anterior usado como referencia.
