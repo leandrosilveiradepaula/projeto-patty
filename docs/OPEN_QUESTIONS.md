@@ -499,7 +499,7 @@ A taxonomia operacional distingue agua pura de outros liquidos zero calorias. A 
 Continuam abertos:
 - horarios/cadencia dos lembretes;
 - poderes de correcao da Patty;
-- ate quando a cliente pode corrigir registros anteriores.
+- se a Patty tambem pode corrigir registros da cliente.
 
 O valor vigente de **35 mL/kg/dia** e a referencia profissional confirmada e passa a ser o template inicial dessa regra, substituindo 60 mL/kg para novas metas. O runtime atual ja possui implementacao deterministica com snapshot de meta, mas, conforme a decisao de parametrizacao de 2026-09-30, esse numero nao deve permanecer como constante profissional definitiva no codigo: deve migrar para configuracao versionada sem reescrever historico.
 
@@ -850,7 +850,7 @@ Continua aberto apenas o mecanismo futuro de recovery/watchdog, caso seja necess
 
 - eventual proporcao-alvo de agua pura;
 - canal de notificacao para o lembrete de 24 horas;
-- a cliente pode corrigir os proprios check-ins; permanecem abertos o limite temporal da edicao, a correcao pela Patty e a forma tecnica auditavel;
+- a cliente pode corrigir os proprios check-ins sem limite temporal profissional; permanecem abertas a correcao pela Patty e a forma tecnica auditavel;
 - nenhum desses pontos abertos autoriza score de adesao ou notificacao por canal inferido.
 
 
@@ -895,3 +895,17 @@ Nao ampliar o mecanismo sem caso profissional confirmado.
 - se perguntas relativamente estaveis, como local de trabalho/treino, permanecem semanais;
 - se a Patty deseja revisao/observacao formal por feedback antes de qualquer uso posterior;
 - consequencia profissional de nao responder continua humana ate nova confirmacao explicita.
+
+
+### PARCIALMENTE RESOLVIDO — CARB CYCLE COMO 2 LOW / 1 HIGH
+
+A Patty confirmou que Carb Cycle corresponde a etapa de 2 dias Low Carb para 1 dia High Carb.
+
+A planilha historica informada fica em `Corpo e Mente passo a passo / Alimentacao / Planilha Carb Cycle` e recebe o peso da cliente para realizar os calculos.
+
+Continuam abertos apenas os pontos que dependem da leitura/reconciliacao da planilha:
+- formulas exatas por faixa/fase;
+- mapeamento de cada coluna/linha para o protocolo;
+- regras das fases pouco usadas que ainda nao estejam documentadas.
+
+Nao inferir formula fora da planilha nem transformar exemplo individual em template global sem reconciliacao.
