@@ -641,3 +641,20 @@ A numeracao exibida na coluna "Fase" da tabela central do arquivo historico nao 
 - Cutting 3 -> Fase 3 -> faixa vermelha da tabela central.
 
 A mudanca de faixa acompanha a mudanca profissional de Cutting, depois de cumprido o passo a passo do processo. O peso usado no calculo continua sendo o da ultima Avaliacao Completa.
+
+
+### CUTTING 3 - ESTRUTURA INTERNA
+
+### DECISAO CONFIRMADA
+
+O Cutting 3 repete a mesma estrutura operacional dos Cuttings anteriores:
+
+```text
+Linear
+-> Dia 1 / Dia 2
+-> Carb Cycle 2 Low / 1 High
+```
+
+No Carb Cycle do Cutting 3, usar a Fase 3 da tabela central da planilha, correspondente a faixa vermelha.
+
+A progressao continua condicionada ao passo a passo profissional e aos resultados da cliente. Nao automatizar avancos de etapa sem a decisao/regra aplicavel.
