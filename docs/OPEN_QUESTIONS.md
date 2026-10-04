@@ -494,10 +494,9 @@ A Patty substituiu em 2026-10-04 a referencia anterior de 60 mL/kg pela regra vi
 - **minimo de 35 mL por kg de peso corporal por dia**;
 - exemplo matematico: 60 kg -> 2.100 mL/dia = 2,1 L/dia.
 
-A taxonomia operacional distingue agua pura de outros liquidos zero calorias. A Patty informou que geralmente usa cerca de 70% da meta em agua pura e o restante pode vir de liquidos zero calorias. Ainda precisa ser confirmado se esse 70% e regra obrigatoria ou referencia usual configuravel.
+A taxonomia operacional distingue agua pura de outros liquidos zero calorias. A Patty confirmou que a orientacao profissional e 70% da meta em agua pura e os 30% restantes podendo vir de outros liquidos zero calorias. Divergencia da cliente nao gera bloqueio automatico nem score de adesao.
 
 Continuam abertos:
-- confirmar se os 70% de agua pura sao regra obrigatoria ou apenas referencia usual configuravel;
 - regra de recalculo quando o peso muda;
 - horarios/cadencia dos lembretes;
 - poderes de correcao da Patty;
