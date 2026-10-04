@@ -714,3 +714,14 @@ A Patty considera em conjunto:
 - avaliacao profissional da Patty sobre a adequacao de iniciar Bulking naquele momento.
 
 Nao automatizar a entrada em Bulking apenas pela solicitacao da paciente ou por um unico indicador corporal. A decisao permanece profissional e contextual.
+
+
+### BULKING - DEFINICAO DE MACROS
+
+### DECISAO CONFIRMADA
+
+No Bulking, a Patty define manualmente os macros para cada paciente.
+
+Proteina, carboidrato e gordura sao ajustados individualmente conforme a paciente e o momento do processo.
+
+Nao existe, neste momento, formula geral ou tabela automatica confirmada para calcular os macros do Bulking. O sistema deve permitir edicao manual dos tres macros e preservar a versao aprovada para cada paciente.
