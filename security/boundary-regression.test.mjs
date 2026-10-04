@@ -25,6 +25,7 @@ const ENTRYPOINT_RULES = new Map([
   ["app/ativar-conta/actions.ts", "client-identity"],
   ["app/auth/confirm/route.ts", "public-auth"],
   ["app/auth/recovery/route.ts", "public-auth"],
+  ["app/auth/recovery-token/route.ts", "public-auth"],
   ["app/cliente/anamnese/[anamneseId]/actions.ts", "client"],
   ["app/cliente/anamnese/[anamneseId]/esclarecimentos/actions.ts", "client"],
   ["app/cliente/anamnese/actions.ts", "client"],
@@ -1213,6 +1214,33 @@ test("configured hydration uses the reviewed server-only persistence boundary", 
   assert.doesNotMatch(adminAction, /createAccessibleClientHydrationTarget/);
 });
 
+
+test("manual client recovery link stays admin-scoped, server-only and unlogged", async () => {
+  const action = await readFile(
+    path.join(ROOT, "app", "admin", "clientes", "[clienteId]", "actions.ts"),
+    "utf8",
+  );
+  const helper = await readFile(
+    path.join(ROOT, "lib", "onboarding", "client-recovery.ts"),
+    "utf8",
+  );
+  const route = await readFile(
+    path.join(ROOT, "app", "auth", "recovery-token", "route.ts"),
+    "utf8",
+  );
+
+  assert.match(action, /requireRole\("admin"\)/);
+  assert.match(action, /getAccessibleClient\(clientId\)/);
+  assert.match(action, /token_hash/);
+  assert.match(helper, /import "server-only"/);
+  assert.match(helper, /auth\.admin\.getUserById\(input\.profileId\)/);
+  assert.match(helper, /auth\.admin\.generateLink\(\{/);
+  assert.match(helper, /type: "recovery"/);
+  assert.match(route, /type !== "recovery"/);
+  assert.match(route, /auth\.verifyOtp\(\{/);
+  assert.doesNotMatch(action, /console\.(log|info|warn|error)/);
+  assert.doesNotMatch(helper, /console\.(log|info|warn|error)/);
+});
 
 test("manual client invite link stays behind the admin boundary and is not logged", async () => {
   const action = await readFile(
