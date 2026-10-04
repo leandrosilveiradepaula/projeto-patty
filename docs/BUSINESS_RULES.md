@@ -491,12 +491,16 @@ A nomenclatura profissional confirmada passa a ser:
 - **Avaliacao Completa**: substitui o nome historico "mensal";
 - **Avaliacao Basica**: substitui o nome historico "quinzenal".
 
-A cadencia e ancorada na data de inicio do acompanhamento da cliente:
-- a Avaliacao Completa ocorre mensalmente no mesmo dia do mes correspondente ao inicio do processo;
-- a Avaliacao Basica ocorre no meio do intervalo entre duas Avaliacoes Completas;
-- exemplo confirmado pela Patty: Avaliacao Completa no dia 2 -> Avaliacao Basica no dia 17.
+A regra anterior de ancorar rigidamente a Avaliacao Completa no mesmo dia do mes foi superada pela confirmacao de 2026-10-04.
 
-Nao inferir ainda a regra para datas de inicio que nao existem em todos os meses, como dias 29, 30 ou 31.
+Regra operacional vigente:
+- a data nao precisa coincidir exatamente com o mesmo dia do mes do inicio do acompanhamento;
+- a Patty prefere agendar a Avaliacao Completa o mais proximo possivel de sexta-feira ou sabado;
+- essa proximidade e uma preferencia profissional de agenda, nao um bloqueio rigido de calendario;
+- a razao informada pela Patty e permitir que a paciente possa aproveitar, apos a avaliacao, a refeicao livre do fim de semana;
+- a Avaliacao Basica continua ocorrendo aproximadamente no meio do intervalo entre duas Avaliacoes Completas, preservando a logica de acompanhamento.
+
+Nao criar regra automatica adicional sobre refeicao livre a partir desta preferencia de agenda sem confirmacao especifica.
 
 A Patty distinguiu dois cenarios:
 
