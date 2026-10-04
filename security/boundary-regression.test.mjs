@@ -1214,6 +1214,26 @@ test("configured hydration uses the reviewed server-only persistence boundary", 
 });
 
 
+test("manual client invite link stays behind the admin boundary and is not logged", async () => {
+  const action = await readFile(
+    path.join(ROOT, "app", "admin", "clientes", "nova", "actions.ts"),
+    "utf8",
+  );
+  const invitation = await readFile(
+    path.join(ROOT, "lib", "onboarding", "client-invitation.ts"),
+    "utf8",
+  );
+
+  assert.match(action, /requireRole\("admin"\)/);
+  assert.match(action, /token_hash/);
+  assert.match(action, /type", "invite"/);
+  assert.match(invitation, /import "server-only"/);
+  assert.match(invitation, /auth\.admin\.generateLink\(\{/);
+  assert.match(invitation, /type: "invite"/);
+  assert.doesNotMatch(action, /console\.(log|info|warn|error)/);
+  assert.doesNotMatch(invitation, /console\.(log|info|warn|error)/);
+});
+
 test("any module that uses the Supabase administrative client is server-only", async () => {
   const roots = ["app", "lib"];
   const sourceFiles = [];
