@@ -2670,3 +2670,16 @@ Nao existe um gatilho unico confirmado que autorize iniciar Bulking automaticame
 No Bulking, proteina, carboidrato e gordura sao definidos manualmente e individualmente para cada paciente.
 
 Nao ha formula/tabela global confirmada para automatizar esses valores. O produto deve suportar configuracao manual e versionada dos tres macros por protocolo/paciente.
+
+
+## 2026-10-04 - Transicao Bulking para Consolidacao por criterios combinados
+
+### REGRA CONFIRMADA PELA PATTY
+
+A passagem do Bulking para a Consolidacao Metabolica depende da combinacao de:
+- ganho de massa muscular atingido;
+- excesso de gordura e/ou retencao observado;
+- objetivo atual da paciente;
+- avaliacao profissional da Patty.
+
+Nao automatizar essa transicao por um unico indicador.
