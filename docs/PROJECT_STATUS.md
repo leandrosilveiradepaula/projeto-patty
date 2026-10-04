@@ -1600,9 +1600,9 @@ Invariantes:
 
 ## Atualizacao 2026-10-04 - Bootstrap controlado da Patty admin
 
-### IMPLEMENTADO NA BRANCH / AINDA NAO EXECUTADO
+### INTEGRADO AO MASTER / AINDA NAO EXECUTADO
 
-Branch: `codex/admin-bootstrap-procedure`.
+Workflow integrado ao `master` pelo PR #320.
 
 Foi preparado um procedimento manual e idempotente de bootstrap da unica admin de negocio:
 - workflow `Bootstrap Patty admin`, restrito ao `master` e com confirmacao literal;
@@ -1621,7 +1621,7 @@ A execucao real permanece pendente porque workflows novos nao podem ser disparad
 
 ## Atualizacao 2026-10-04 - Solicitacao de treino pela cliente
 
-### IMPLEMENTADA NA BRANCH / POLICY JA APLICADA NO SAAS
+### MERGEADA / PUBLICADA / POLICY APLICADA NO SAAS
 
 A migration remota `20261004132337_allow_client_training_request_self_service` foi aplicada no Supabase SaaS e materializada no repositorio com o mesmo timestamp e SQL.
 
@@ -1639,7 +1639,7 @@ Limite:
 
 ## Atualizacao 2026-10-04 - Avaliacoes e evolucao para a cliente
 
-### IMPLEMENTADA NA BRANCH / RPC SEGURA JA APLICADA NO SAAS
+### MERGEADA / PUBLICADA / RPC SEGURA APLICADA NO SAAS
 
 Migrations aplicadas no Supabase SaaS:
 - `20261004132649_allow_client_finalized_assessment_read` — etapa inicial, posteriormente substituida;
@@ -1658,7 +1658,7 @@ Estado final:
 
 ## Atualizacao 2026-10-04 - Biblioteca de exercicios para a cliente
 
-### IMPLEMENTADA NA BRANCH / POLICY JA APLICADA NO SAAS
+### MERGEADA / PUBLICADA / POLICY APLICADA NO SAAS
 
 A migration `20261004133243_allow_client_published_exercise_read` foi aplicada no Supabase SaaS.
 
@@ -1675,7 +1675,7 @@ A biblioteca esta vazia no SaaS neste momento. Migracao/autoria de exercicios re
 
 ## Atualizacao 2026-10-04 - Link manual de ativacao de cliente
 
-### IMPLEMENTADO NA BRANCH / SEM ALTERACAO DE SCHEMA
+### MERGEADO / PUBLICADO / SEM ALTERACAO DE SCHEMA
 
 Foi adicionado fallback de onboarding que usa `auth.admin.generateLink({ type: "invite" })` sem enviar email.
 
@@ -1693,7 +1693,7 @@ Esse fallback remove SMTP como bloqueio do primeiro onboarding. SMTP continua re
 
 ## Atualizacao 2026-10-04 - Link manual de recuperacao de acesso
 
-### IMPLEMENTADO NA BRANCH / SEM ALTERACAO DE SCHEMA
+### MERGEADO / PUBLICACAO EM VALIDACAO / SEM ALTERACAO DE SCHEMA
 
 Foi adicionado fallback administrativo de recuperacao que usa `auth.admin.generateLink({ type: "recovery" })`.
 
