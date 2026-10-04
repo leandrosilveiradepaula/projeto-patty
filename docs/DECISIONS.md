@@ -2798,3 +2798,16 @@ Antes de receber o primeiro protocolo, a cliente nao precisa responder ao Feedba
 ### LIMITE
 
 Esta e a regra profissional de elegibilidade. O evento tecnico usado para representar "recebeu o primeiro protocolo" deve ser definido de forma auditavel no fluxo real de protocolo e nao deve criar novo criterio profissional por inferencia.
+
+
+## 2026-10-04 - Feedback Semanal: toda segunda-feira
+
+### REGRA CONFIRMADA PELA PATTY
+
+Depois que a cliente se torna elegivel ao Feedback Semanal por ter recebido o primeiro protocolo, o feedback deve ocorrer toda segunda-feira, independentemente da fase/protocolo atual.
+
+### LIMITES
+
+- o horario de segunda-feira ainda nao foi confirmado;
+- o canal de aviso externo ainda nao foi confirmado;
+- essas lacunas nao alteram a frequencia profissional confirmada.
