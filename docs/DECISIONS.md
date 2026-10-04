@@ -2585,3 +2585,29 @@ O recalculo e prospectivo:
 A cliente pode corrigir os proprios registros de check-in de liquidos e atividade fisica.
 
 A permissao funcional esta confirmada, mas o limite temporal e a forma tecnica auditavel da correcao ainda precisam ser definidos antes de implementacao definitiva.
+
+
+## 2026-10-04 - Carb Cycle corresponde a 2 Low / 1 High
+
+### REGRA CONFIRMADA PELA PATTY
+
+"Carb Cycle" e o nome usado para a etapa de alternancia:
+
+```text
+2 dias Low Carb
+-> 1 dia High Carb
+-> repetir conforme o protocolo
+```
+
+A Patty usa uma planilha historica que recebe o peso da cliente e calcula os valores do Carb Cycle. A localizacao informada foi `Corpo e Mente passo a passo / Alimentacao / Planilha Carb Cycle`.
+
+A planilha deve ser tratada como fonte de regra a reconciliar, nao como autorizacao para inferir formulas ainda nao documentadas. Os valores/formulas confirmados depois da leitura devem entrar como configuracao versionada e parametrizavel.
+
+
+## 2026-10-04 - Correcao de check-in sem limite temporal
+
+### REGRA CONFIRMADA PELA PATTY
+
+A cliente pode corrigir um check-in proprio quando perceber que o registro esta errado, inclusive de dias anteriores. Nao existe limite temporal profissional para essa correcao.
+
+A implementacao deve preservar auditoria; permitir correcao funcional nao significa apagar silenciosamente o valor anterior.
