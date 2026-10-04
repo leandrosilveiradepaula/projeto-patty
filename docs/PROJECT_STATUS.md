@@ -1544,3 +1544,32 @@ Pendente operacional que nao bloqueia o restante do desenvolvimento:
 - criar a identidade Auth real da Patty e vincular `Profile -> role admin`; essa operacao ficou adiada porque o usuario nao pode acessar o painel Supabase neste momento.
 
 Automacao externa do Feedback Semanal ainda nao foi ativada. Agenda, prazo operacional, elegibilidade, email/WhatsApp e lembretes permanecem configuracoes/decisoes abertas; o produto ja possui o nucleo real de solicitacao/resposta para ser exercitado assim que houver acesso administrativo real.
+
+
+## Atualizacao 2026-10-04 - Visao factual de evolucao da cliente
+
+### IMPLEMENTADA NA BRANCH / AINDA NAO MERGEADA
+
+Branch: `codex/client-progress-view`.
+
+Objetivo:
+- tornar o acompanhamento longitudinal mais navegavel para a Patty usando exclusivamente fatos ja registrados nas avaliacoes finalizadas.
+
+Implementado:
+- nova rota `/admin/clientes/[clienteId]/evolucao`;
+- agrupamento longitudinal por `measurement_key` e unidade;
+- uso do valor corrigido vigente quando houver correcao append-only;
+- ordenacao cronologica;
+- diferenca matematica contra o registro anterior da mesma medida/unidade;
+- link de cada ponto para a avaliacao de origem;
+- entrada `Evolucao` na navegacao da cliente administrativa;
+- atalho a partir da pagina de Avaliacoes;
+- teste deterministico para ordenacao, delta e separacao de unidades.
+
+Invariantes preservadas:
+- nenhuma classificacao automatica de melhora, piora, sucesso ou estagnacao;
+- nenhuma regra de adesao ou mudanca de protocolo;
+- nenhuma nova migration;
+- nenhuma alteracao de RLS;
+- nenhuma exposicao das avaliacoes para a cliente;
+- nenhuma conversao automatica entre unidades diferentes.

@@ -1,0 +1,69 @@
+import { formatProfessionalMeasurementLabel } from "./professional-view.ts";
+
+export type FactualProgressMeasurement = {
+  measurement_key: string;
+  measurement_value: number;
+  unit: string;
+};
+
+export type FactualProgressAssessment = {
+  assessedAt: string;
+  id: string;
+  measurements: FactualProgressMeasurement[];
+};
+
+export type FactualProgressPoint = {
+  assessedAt: string;
+  assessmentId: string;
+  deltaFromPrevious: number | null;
+  value: number;
+};
+
+export type FactualProgressSeries = {
+  key: string;
+  label: string;
+  points: FactualProgressPoint[];
+  unit: string;
+};
+
+export function buildFactualProgressSeries(
+  assessments: FactualProgressAssessment[],
+): FactualProgressSeries[] {
+  const ordered = [...assessments].sort((left, right) => {
+    const byDate = left.assessedAt.localeCompare(right.assessedAt);
+    return byDate || left.id.localeCompare(right.id);
+  });
+  const seriesByIdentity = new Map<string, FactualProgressSeries>();
+
+  for (const assessment of ordered) {
+    for (const measurement of assessment.measurements) {
+      const identity = measurement.measurement_key + "\u0000" + measurement.unit;
+      let series = seriesByIdentity.get(identity);
+
+      if (!series) {
+        series = {
+          key: measurement.measurement_key,
+          label: formatProfessionalMeasurementLabel(measurement.measurement_key),
+          points: [],
+          unit: measurement.unit,
+        };
+        seriesByIdentity.set(identity, series);
+      }
+
+      const previous = series.points.at(-1);
+      series.points.push({
+        assessedAt: assessment.assessedAt,
+        assessmentId: assessment.id,
+        deltaFromPrevious: previous
+          ? measurement.measurement_value - previous.value
+          : null,
+        value: measurement.measurement_value,
+      });
+    }
+  }
+
+  return [...seriesByIdentity.values()].sort((left, right) => {
+    const byLabel = left.label.localeCompare(right.label, "pt-BR");
+    return byLabel || left.unit.localeCompare(right.unit, "pt-BR");
+  });
+}

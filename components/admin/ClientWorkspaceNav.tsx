@@ -16,6 +16,7 @@ export function ClientWorkspaceNav({ clientId }: ClientWorkspaceNavProps) {
     { href: base, label: "Visão geral", exact: true },
     { href: `${base}/anamnese`, label: "Anamnese" },
     { href: `${base}/avaliacoes`, label: "Avaliações" },
+    { href: `${base}/evolucao`, label: "Evolução" },
     { href: `${base}/protocolos`, label: "Protocolos" },
     { href: `${base}/arquivos`, label: "Arquivos" },
     { href: `${base}/conteudos`, label: "Conteúdos" },
