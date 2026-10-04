@@ -62,7 +62,7 @@ Estados usados:
 | Area | Estado atual | Escrita operacional | Validacao | Principal proximo gate |
 | --- | --- | --- | --- | --- |
 | Auth / sessao | login por email/senha IMPLEMENTADO; MFA administrativo TOTP IMPLEMENTADO; RLS AAL2 aplicado; senha minima Auth alinhada em 8 | admin exige `aal2` em SSR, rotas, server actions, Data API/RLS e Storage | CI + SAAS VALIDADO; smoke pos-apply PASS; Auth config auditado | HIBP depende de Pro+; manter smoke E2E de MFA |
-| Profiles / roles | IMPLEMENTADO | sem UI administrativa de gestao | RLS existente | definir bootstrap/admin e quem gerencia roles |
+| Profiles / roles | IMPLEMENTADO; bootstrap real da Patty EXECUTADO | sem UI administrativa de gestao | RLS existente; identidade admin real confirmada no SaaS | definir apenas eventual gestao futura de roles adicionais |
 | Clients / assignments | leitura + encerramento + inicio de assignment no onboarding IMPLEMENTADOS | Patty inicia onboarding por convite server-side; provisionamento cria vinculos relacionais e assignment com compensacao em falha | CI VALIDADO; encerramento E2E PASS; onboarding sintetico E2E PASS; Site URL/allowlist alinhados | envio automatico real ainda exige SMTP/template validado; fallback de link manual permite onboarding sem depender de SMTP |
 | Cadastro Atual | leitura + edicao controlada IMPLEMENTADAS | cliente edita proprio estado atual; Patty/admin edita sob AAL2 + assignment ativo; login email permanece separado | CI cobre validacao e boundary privilegiada server-only | sem migration nova; formulario ampliado/historico cadastral permanecem fora do escopo atual |
 | Anamnese versionada | leitura, rascunho e submissao final IMPLEMENTADOS; mapa v1 + consentimento checkbox DEFINIDOS; esclarecimentos pos-envio IMPLEMENTADOS | cliente salva `text`/`single_choice`; aplicabilidade oculta dependentes; envio explicito exige ANAM-046 na forma canonica | CI + smoke SQL PASS; consent E2E `36072067063`; start/resume `36074218960`; fluxo consolidado de draft `36257567841` PASS; esclarecimentos `36053370894` PASS | manter versionamento para mudancas futuras e nao reabrir gates ja validados sem nova evidencia |
@@ -98,7 +98,7 @@ Ainda nao esta pronta para automacao completa a redistribuicao do saldo entre ca
 
 ### Autenticacao e MFA
 
-A decisao de MFA obrigatorio para contas administrativas esta parcialmente materializada. O fluxo de login identifica o AAL da sessao apos email/senha. Admin sem fator verificado e direcionado para enrollment TOTP; admin com fator verificado e sessao em `aal1` e direcionado para challenge; apenas `aal2` entra em `/admin`.
+A decisao de MFA obrigatorio para contas administrativas esta materializada no fluxo atual. O fluxo de login identifica o AAL da sessao apos email/senha. Admin sem fator verificado e direcionado para enrollment TOTP; admin com fator verificado e sessao em `aal1` e direcionado para challenge; apenas `aal2` entra em `/admin`.
 
 A mesma guarda esta centralizada em `requireRole("admin")`, portanto cobre o layout administrativo e as server actions/rotas administrativas que ja usam essa boundary. O fluxo da cliente nao foi alterado e nao exige MFA.
 
