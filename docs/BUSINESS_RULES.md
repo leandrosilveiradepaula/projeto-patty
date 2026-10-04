@@ -581,3 +581,16 @@ Esses exemplos nao devem ser transformados em regra automatica. Duracao e numero
 Sempre que um novo peso da cliente for registrado, a meta diaria de liquidos deve ser recalculada automaticamente usando a configuracao vigente da regra de hidratacao.
 
 O novo calculo passa a valer dali em diante. Metas historicas e registros de consumo anteriores permanecem preservados e nao devem ser recalculados retroativamente.
+
+
+### CORRECAO DE CHECK-INS PELA CLIENTE
+
+### DECISAO CONFIRMADA
+
+A cliente pode corrigir os proprios registros de check-in de liquidos e atividade fisica.
+
+Ainda precisa ser definido:
+- ate quando um registro pode ser corrigido;
+- se dias anteriores permanecem editaveis sem limite;
+- se a Patty tambem pode corrigir registros da cliente;
+- como a correcao sera materializada tecnicamente sem perder auditoria.
