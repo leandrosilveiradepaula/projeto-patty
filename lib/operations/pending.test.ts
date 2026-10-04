@@ -244,3 +244,50 @@ test("clarification reminder pending builder follows a changed configured interv
   assert.match(items[0]?.description ?? "", /2026-09-23T22:00:00.000Z/);
   assert.doesNotMatch(items[0]?.description ?? "", /24 horas/);
 });
+
+
+test("weekly feedback pending stays factual and never suspends service automatically", () => {
+  const items = buildOperationalPendingItems({
+    clarificationReminderIntervalHours: 24,
+    referenceNow: "2026-10-03T12:00:00Z",
+    anamnesisSubmissions: [],
+    clarificationRequests: [],
+    assessments: [],
+    protocolVersions: [],
+    aiExecutions: [],
+    weeklyFeedbacks: [
+      {
+        id: "feedback-open",
+        clientId: "client-1",
+        clientLabel: "Cliente 1",
+        createdAt: "2026-09-29T10:00:00Z",
+        dueAt: "2026-10-01T12:00:00Z",
+        periodStart: "2026-09-22",
+        periodEnd: "2026-09-28",
+        submittedAt: null,
+      },
+      {
+        id: "feedback-submitted",
+        clientId: "client-2",
+        clientLabel: "Cliente 2",
+        createdAt: "2026-09-29T10:00:00Z",
+        dueAt: "2026-10-01T12:00:00Z",
+        periodStart: "2026-09-22",
+        periodEnd: "2026-09-28",
+        submittedAt: "2026-09-30T15:00:00Z",
+      },
+    ],
+  });
+
+  assert.equal(items.length, 1);
+  assert.equal(items[0]?.kind, "weekly_feedback_awaiting_response");
+  assert.equal(items[0]?.statusLabel, "Prazo informado ultrapassado");
+  assert.equal(
+    items[0]?.href,
+    "/admin/clientes/client-1/feedback-semanal",
+  );
+  assert.match(
+    items[0]?.description ?? "",
+    /nao aplica nenhuma consequencia automatica ao atendimento/i,
+  );
+});

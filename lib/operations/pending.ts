@@ -6,7 +6,8 @@ export type OperationalPendingItemKind =
   | "clarification_response_pending_review"
   | "clarification_without_response"
   | "protocol_approved_not_published"
-  | "protocol_submitted_not_approved";
+  | "protocol_submitted_not_approved"
+  | "weekly_feedback_awaiting_response";
 
 export type OperationalPendingItem = {
   clientId: string | null;
@@ -67,6 +68,17 @@ export type PendingAiExecution = {
   purposeKey: string;
 };
 
+export type PendingWeeklyFeedback = {
+  clientId: string;
+  clientLabel: string;
+  createdAt: string;
+  dueAt: string | null;
+  id: string;
+  periodEnd: string;
+  periodStart: string;
+  submittedAt: string | null;
+};
+
 export type OperationalPendingFactsInput = {
   aiExecutions: PendingAiExecution[];
   anamnesisSubmissions: PendingAnamnesisSubmission[];
@@ -75,6 +87,7 @@ export type OperationalPendingFactsInput = {
   clarificationRequests: PendingClarificationRequest[];
   protocolVersions: PendingProtocolVersion[];
   referenceNow?: string;
+  weeklyFeedbacks?: PendingWeeklyFeedback[];
 };
 
 function clarificationFirstReminderDueAt(
@@ -244,6 +257,30 @@ export function buildOperationalPendingItems(
         title: "Protocolo aguardando publicação",
       });
     }
+  }
+
+  for (const feedback of input.weeklyFeedbacks ?? []) {
+    if (feedback.submittedAt) {
+      continue;
+    }
+
+    const dueAtPassed =
+      feedback.dueAt !== null &&
+      new Date(referenceNow).getTime() > new Date(feedback.dueAt).getTime();
+
+    items.push({
+      clientId: feedback.clientId,
+      clientLabel: feedback.clientLabel,
+      createdAt: feedback.createdAt,
+      description: dueAtPassed
+        ? `O Feedback Semanal referente a ${feedback.periodStart} ate ${feedback.periodEnd} continua sem envio final e o prazo informado (${feedback.dueAt}) ja passou. Isso nao aplica nenhuma consequencia automatica ao atendimento.`
+        : `O Feedback Semanal referente a ${feedback.periodStart} ate ${feedback.periodEnd} foi solicitado e ainda nao possui envio final da cliente.`,
+      href: `/admin/clientes/${feedback.clientId}/feedback-semanal`,
+      id: `weekly-feedback:${feedback.id}`,
+      kind: "weekly_feedback_awaiting_response",
+      statusLabel: dueAtPassed ? "Prazo informado ultrapassado" : "Aguardando resposta",
+      title: "Feedback Semanal aguardando cliente",
+    });
   }
 
   for (const execution of input.aiExecutions) {

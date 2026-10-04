@@ -7,6 +7,7 @@ import {
   listAccessibleAnamnesisReviews,
   listAccessibleAnamnesisSubmissions,
   listAccessibleClientAssessments,
+  listAccessibleWeeklyFeedbacksForClient,
   listAccessibleNonterminalAiExecutions,
   listAccessibleProtocolPublications,
   listAccessibleProtocolVersionApprovals,
@@ -52,13 +53,18 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
     ]),
   );
 
-  const submissions = (
-    await Promise.all(
+  const [submissions, weeklyFeedbacks] = await Promise.all([
+    Promise.all(
       assignedClients.map((client) =>
         listAccessibleAnamnesisSubmissions(client.id),
       ),
-    )
-  ).flat();
+    ).then((items) => items.flat()),
+    Promise.all(
+      assignedClients.map((client) =>
+        listAccessibleWeeklyFeedbacksForClient(client.id),
+      ),
+    ).then((items) => items.flat()),
+  ]);
 
   const submitted = submissions.filter(
     (submission) => Boolean(submission.submitted_at),
@@ -192,6 +198,17 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
       createdAt: execution.created_at,
       id: execution.id,
       purposeKey: execution.purpose_key,
+    })),
+    weeklyFeedbacks: weeklyFeedbacks.map((feedback) => ({
+      clientId: feedback.client_id,
+      clientLabel:
+        labelsByClientId.get(feedback.client_id) ?? "Cliente sem nome informado",
+      createdAt: feedback.created_at,
+      dueAt: feedback.due_at,
+      id: feedback.id,
+      periodEnd: feedback.period_end,
+      periodStart: feedback.period_start,
+      submittedAt: feedback.submitted_at,
     })),
   });
 }
