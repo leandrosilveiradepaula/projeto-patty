@@ -615,6 +615,20 @@ test("Supabase SSR proxy preserves session cookies and cache-control headers", a
   }
 });
 
+test("password reset gate prioritizes recovery fragment over any existing server session", async () => {
+  const gate = await readFile(
+    path.join(ROOT, "components", "auth", "PasswordResetSessionGate.tsx"),
+    "utf8",
+  );
+
+  assert.match(gate, /parseImplicitRecoveryFragment\(window\.location\.hash\)/);
+  assert.match(gate, /if \(parsed\.kind === "recovery"\)/);
+  assert.match(gate, /auth\.setSession\(\{/);
+  assert.match(gate, /if \(hasServerSession\)/);
+  assert.match(gate, /return <PasswordResetForm \/>/);
+  assert.doesNotMatch(gate, /console\.(log|info|warn|error)/);
+});
+
 test("implicit recovery bridge consumes tokens, removes the fragment and reloads reset with session", async () => {
   const bridge = await readFile(
     path.join(ROOT, "components", "auth", "ImplicitRecoverySessionBridge.tsx"),
