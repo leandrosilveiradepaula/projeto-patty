@@ -1,4 +1,4 @@
-import { formatProfessionalMeasurementLabel } from "./professional-view";
+import { formatProfessionalMeasurementLabel } from "./professional-view.ts";
 
 export type FactualProgressMeasurement = {
   measurement_key: string;
