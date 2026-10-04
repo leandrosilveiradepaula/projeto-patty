@@ -318,7 +318,7 @@ Qualquer fator profissional atualmente implementado como constante deve ser inve
 
 Exemplos já conhecidos que precisarão migrar para configuração:
 
-- 60 mL/kg de líquidos;
+- hidratacao: preservar o historico legado de 60 mL/kg, mas usar 35 mL/kg como template profissional vigente; nenhum dos dois deve permanecer como constante definitiva no runtime;
 - equivalências de doses;
 - 2 doses de legumes = 1 dose de carboidrato;
 - limite do grupo de proteína de maior teor de gordura;
