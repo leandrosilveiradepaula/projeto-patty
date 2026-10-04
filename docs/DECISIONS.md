@@ -2770,3 +2770,18 @@ A Patty prefere deixar a avaliacao o mais proximo possivel de sexta-feira ou sab
 - a agenda pode deslocar a avaliacao para uma data proxima;
 - sexta/sabado deve ser tratado como preferencia operacional, nao como restricao absoluta;
 - nao inferir, a partir desta decisao de agenda, novas regras automaticas sobre refeicao livre.
+
+
+## 2026-10-04 - Patty pode corrigir check-ins da cliente
+
+### REGRA CONFIRMADA PELA PATTY
+
+A Patty pode corrigir livremente um check-in de liquidos ou atividade fisica registrado pela cliente quando identificar erro.
+
+A cliente continua podendo corrigir os proprios registros.
+
+### CONSEQUENCIA TECNICA
+
+A correcao nao deve destruir o historico original. O sistema deve preservar auditoria suficiente para identificar o valor anterior, o valor corrigido, quem realizou a correcao e quando ela ocorreu.
+
+Essa confirmacao resolve o poder profissional de correcao. A forma exata de persistencia pode ser definida tecnicamente sem alterar essa regra.
