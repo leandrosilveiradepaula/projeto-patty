@@ -749,3 +749,12 @@ Na Consolidacao Metabolica, a Patty reduz as doses de macros manualmente, de for
 Nao existe formula geral confirmada para definir a velocidade ou magnitude dessas reducoes. A Patty ajusta caso a caso conforme a evolucao e o objetivo.
 
 O sistema deve permitir reducoes graduais e versionadas, preservando cada configuracao utilizada ao longo do processo.
+
+
+### CONSOLIDACAO METABOLICA - CRITERIO DE ENCERRAMENTO
+
+### DECISAO CONFIRMADA
+
+A Consolidacao Metabolica termina quando a Patty considerar que o ganho de massa muscular foi preservado e que a paciente esta pronta para voltar ao Cutting.
+
+A decisao permanece profissional e individual. Nao existe threshold automatico confirmado de peso, medida ou tempo para encerrar a Consolidacao.
