@@ -2661,3 +2661,12 @@ A entrada em Bulking considera uma combinacao de fatores:
 - avaliacao profissional da Patty.
 
 Nao existe um gatilho unico confirmado que autorize iniciar Bulking automaticamente.
+
+
+## 2026-10-04 - Macros do Bulking definidos manualmente
+
+### REGRA CONFIRMADA PELA PATTY
+
+No Bulking, proteina, carboidrato e gordura sao definidos manualmente e individualmente para cada paciente.
+
+Nao ha formula/tabela global confirmada para automatizar esses valores. O produto deve suportar configuracao manual e versionada dos tres macros por protocolo/paciente.
