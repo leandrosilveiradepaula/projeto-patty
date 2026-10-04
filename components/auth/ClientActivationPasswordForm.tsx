@@ -15,7 +15,7 @@ import styles from "./ClientActivationPasswordForm.module.css";
 
 const initialState: ActivationPasswordState = { message: null };
 
-export function ClientActivationPasswordForm() {
+export function ClientActivationPasswordForm({ role }: { role: "admin" | "client" | null }) {
   const [state, formAction, isPending] = useActionState(
     setInitialClientPassword,
     initialState,
@@ -34,7 +34,7 @@ export function ClientActivationPasswordForm() {
       ) : null}
 
       <FormField
-        description="Use pelo menos 8 caracteres. Depois, você entrará normalmente com seu email e essa senha."
+        description={role === "admin" ? "Use pelo menos 8 caracteres. Depois, você configurará a autenticação em duas etapas obrigatória para a área administrativa." : "Use pelo menos 8 caracteres. Depois, você entrará normalmente com seu email e essa senha."}
         id="activation-password"
         label="Crie sua senha"
         required
