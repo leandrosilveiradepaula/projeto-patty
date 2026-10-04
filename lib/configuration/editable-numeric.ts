@@ -1,4 +1,4 @@
-import type { Json } from "@/lib/supabase/database.types";
+import type { Json } from "../supabase/database.types.ts";
 
 import { validateMethodConfigurationBySchema } from "./schema-registry.ts";
 
