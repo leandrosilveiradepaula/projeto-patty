@@ -2611,3 +2611,23 @@ A planilha deve ser tratada como fonte de regra a reconciliar, nao como autoriza
 A cliente pode corrigir um check-in proprio quando perceber que o registro esta errado, inclusive de dias anteriores. Nao existe limite temporal profissional para essa correcao.
 
 A implementacao deve preservar auditoria; permitir correcao funcional nao significa apagar silenciosamente o valor anterior.
+
+
+## 2026-10-04 - Carb Cycle: tabela central, cores e peso de referencia
+
+### REGRA CONFIRMADA PELA PATTY
+
+A Patty usa sempre a tabela central da planilha de Carb Cycle.
+
+Mapeamento confirmado:
+- Fase 1 -> faixa verde;
+- Fase 2 -> faixa amarela;
+- Fase 3 -> faixa vermelha.
+
+O peso usado no calculo e o peso da ultima Avaliacao Completa da cliente.
+
+A planilha fornecida confirma que os valores da tabela central sao derivados do peso informado multiplicado pelos coeficientes da faixa correspondente.
+
+### OBSERVACAO DE RECONCILIACAO
+
+A coluna textual/numerica "Fase" dentro da tabela central do arquivo historico apresenta rotulos que nao correspondem diretamente ao mapeamento profissional Fase 1/2/3 confirmado por cor. Para o produto, a regra profissional confirmada por cor prevalece; nao inferir numeracao adicional a partir desse rotulo sem validacao.
