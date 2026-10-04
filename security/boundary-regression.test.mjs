@@ -1215,6 +1215,22 @@ test("configured hydration uses the reviewed server-only persistence boundary", 
 });
 
 
+test("initial activation supports admin and client but preserves admin MFA routing", async () => {
+  const action = await readFile(
+    path.join(ROOT, "app", "ativar-conta", "actions.ts"),
+    "utf8",
+  );
+  const page = await readFile(
+    path.join(ROOT, "app", "ativar-conta", "page.tsx"),
+    "utf8",
+  );
+
+  assert.match(page, /Boolean\(context\?\.role\)/);
+  assert.match(action, /getCurrentAuthContext\(\)/);
+  assert.match(action, /context\.role === "admin" \? "\/mfa\/admin\/setup" : "\/cliente\/anamnese"/);
+  assert.doesNotMatch(action, /requireRoleIdentity\("client"\)/);
+});
+
 test("manual client recovery link stays admin-scoped, server-only and unlogged", async () => {
   const action = await readFile(
     path.join(ROOT, "app", "admin", "clientes", "[clienteId]", "actions.ts"),
