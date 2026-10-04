@@ -435,6 +435,16 @@ Qual sera a UX e o processo humano para revisao de findings, edicao de follow-up
 
 ## Metodo profissional
 
+### RESOLVIDO EM 2026-10-04 — ENCERRAMENTO DO ACOMPANHAMENTO
+
+Nao existe criterio unico automatico para encerrar o acompanhamento.
+
+A decisao e manual e contextual. Na pratica relatada pela Patty, o acompanhamento geralmente termina quando a propria paciente entende/decide que nao precisa mais continuar.
+
+Nao usar resultado, adesao, tempo, fase ou meta isolada como gatilho automatico de encerramento.
+
+
+
 As regras abaixo permanecem abertas somente onde a documentacao ainda nao registra confirmacao da Patty. O fluxo principal, o Reconhecimento Metabolico, as referencias iniciais de macros e doses, o limite do grupo de proteina com maior teor de gordura, o Cutting Dia 1 / Dia 2 e a refeicao livre semanal do Up Metabolico ja estao documentados como confirmados.
 
 ### PARCIALMENTE RESOLVIDO — PLANILHA CARB CYCLE
