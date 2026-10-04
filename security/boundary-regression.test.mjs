@@ -24,6 +24,7 @@ const ENTRYPOINT_RULES = new Map([
   ["app/api/cron/private-file-upload-cleanup/route.ts", "public-infrastructure"],
   ["app/ativar-conta/actions.ts", "client-identity"],
   ["app/auth/confirm/route.ts", "public-auth"],
+  ["app/auth/recovery/route.ts", "public-auth"],
   ["app/cliente/anamnese/[anamneseId]/actions.ts", "client"],
   ["app/cliente/anamnese/[anamneseId]/esclarecimentos/actions.ts", "client"],
   ["app/cliente/anamnese/actions.ts", "client"],
@@ -33,6 +34,8 @@ const ENTRYPOINT_RULES = new Map([
   ["app/cliente/feedback-semanal/actions.ts", "client"],
   ["app/cliente/perfil/actions.ts", "client"],
   ["app/login/actions.ts", "public-auth"],
+  ["app/recuperar-senha/actions.ts", "public-auth"],
+  ["app/redefinir-senha/actions.ts", "authenticated-recovery"],
 ]);
 
 async function walk(directory) {
@@ -120,6 +123,19 @@ test("classified protected entrypoints contain the expected authentication bound
         content,
         /createAdminClient\s*\(/,
         `${file} must not bypass RLS with the administrative client`,
+      );
+    }
+
+    if (rule === "authenticated-recovery") {
+      assert.match(
+        content,
+        /auth\.getClaims\(\)/,
+        `${file} must require an authenticated recovery session before changing credentials`,
+      );
+      assert.doesNotMatch(
+        content,
+        /createAdminClient\s*\(/,
+        `${file} must not use the administrative client to change a user password`,
       );
     }
   }
