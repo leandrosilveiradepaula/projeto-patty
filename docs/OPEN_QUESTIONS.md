@@ -463,8 +463,10 @@ Continuam abertos:
 - estrutura interna completa do Cutting 3;
 - formulas, duracao e criterios de entrada/saida do Bulking;
 - formulas, duracao e criterios de entrada/saida da Consolidacao Metabolica;
-- se todos os Ups Metabolicos repetem exatamente a mesma configuracao;
+- formulas/macros detalhados de cada ocorrencia do Up Metabolico;
 - pareamento completo entre fases numeradas da planilha e etapas concretas do protocolo.
+
+Resolvido em 2026-10-04: os Ups Metabolicos nao precisam repetir duracao nem quantidade de refeicoes livres. Esses parametros variam por periodo/cliente conforme resultado e decisao profissional.
 
 A progressao continua sendo decisao profissional baseada em resultados. Nao automatizar mudanca de fase sem regra deterministica confirmada.
 
@@ -487,21 +489,21 @@ Nao automatizar Bulking ou Consolidacao apenas com base nessa confirmacao de flu
 
 ### PARCIALMENTE RESOLVIDO — HIDRATACAO/CHECK-IN DE LIQUIDOS
 
-A Patty confirmou a formula usada no metodo:
+A Patty substituiu em 2026-10-04 a referencia anterior de 60 mL/kg pela regra vigente:
 
-- **60 mL por kg de peso corporal por dia**;
-- exemplo: 60 kg -> 3.600 mL/dia = 3,6 L/dia.
+- **minimo de 35 mL por kg de peso corporal por dia**;
+- exemplo matematico: 60 kg -> 2.100 mL/dia = 2,1 L/dia.
 
-A taxonomia operacional distingue agua pura de outros liquidos zero calorias. Nenhuma proporcao minima automatica entre essas categorias esta confirmada.
+A taxonomia operacional distingue agua pura de outros liquidos zero calorias. A Patty informou que geralmente usa cerca de 70% da meta em agua pura e o restante pode vir de liquidos zero calorias. Ainda precisa ser confirmado se esse 70% e regra obrigatoria ou referencia usual configuravel.
 
 Continuam abertos:
-- eventual proporcao-alvo entre agua pura e outros liquidos, caso a Patty queira formaliza-la futuramente;
+- confirmar se os 70% de agua pura sao regra obrigatoria ou apenas referencia usual configuravel;
 - regra de recalculo quando o peso muda;
 - horarios/cadencia dos lembretes;
 - poderes de correcao da Patty;
 - edicao de registros anteriores.
 
-O valor atual de **60 mL/kg/dia** e a referencia profissional confirmada e passa a ser o template inicial dessa regra. O runtime atual ja possui implementacao deterministica com snapshot de meta, mas, conforme a decisao de parametrizacao de 2026-09-30, esse numero nao deve permanecer como constante profissional definitiva no codigo: deve migrar para configuracao versionada sem reescrever historico.
+O valor vigente de **35 mL/kg/dia** e a referencia profissional confirmada e passa a ser o template inicial dessa regra, substituindo 60 mL/kg para novas metas. O runtime atual ja possui implementacao deterministica com snapshot de meta, mas, conforme a decisao de parametrizacao de 2026-09-30, esse numero nao deve permanecer como constante profissional definitiva no codigo: deve migrar para configuracao versionada sem reescrever historico.
 
 As questoes de recalculo por mudanca de peso, eventual proporcao-alvo de agua pura, lembretes e correcoes continuam abertas e nao devem ser inferidas a partir do template.
 
@@ -839,7 +841,7 @@ Continua aberto apenas o mecanismo futuro de recovery/watchdog, caso seja necess
 
 ### RESOLVIDO TECNICAMENTE
 
-- formula e unidade atualmente usadas na meta de liquidos: 60 mL/kg/dia;
+- formula e unidade vigentes para novas metas: 35 mL/kg/dia;
 - esse valor passa a ser template inicial versionado e nao constante profissional definitiva;
 - persistencia da meta como snapshot, sem sobrescrever historico;
 - ingestao e atividade fisica com eventos append-only;
