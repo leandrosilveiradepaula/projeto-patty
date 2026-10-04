@@ -769,3 +769,20 @@ Apos a Consolidacao Metabolica, quando a paciente retorna ao Cutting, o ciclo re
 Consequencia operacional:
 - retorno pos-Consolidacao -> Cutting 1;
 - a progressao volta a seguir o passo a passo do Cutting 1 antes de avancar novamente para etapas posteriores.
+
+
+### RETORNO POS-CONSOLIDACAO - REINICIO COMPLETO DO CUTTING 1
+
+### DECISAO CONFIRMADA
+
+Quando a paciente retorna ao Cutting 1 depois da Consolidacao Metabolica, ela reinicia o Cutting 1 desde o protocolo Linear.
+
+Sequencia confirmada:
+
+```text
+Cutting 1 Linear
+-> Cutting 1 Dia 1 / Dia 2
+-> Cutting 1 Carb Cycle 2 Low / 1 High
+```
+
+Nao pular diretamente para Dia 1/Dia 2 ou Carb Cycle no retorno pos-Consolidacao.
