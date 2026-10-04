@@ -113,17 +113,19 @@ Pode reutilizar o email de contato apenas se o produto decidir explicitamente qu
 
 A solicitacao deve sempre existir dentro do aplicativo independentemente do canal externo de aviso.
 
-## Elegibilidade confirmada em 2026-10-04
+## Elegibilidade e frequencia confirmadas em 2026-10-04
 
 A elegibilidade profissional comeca depois que a cliente recebe o primeiro protocolo.
 
 Antes desse marco, a cliente nao precisa responder ao Feedback Semanal.
 
-Esta confirmacao resolve a regra profissional de inicio. O evento tecnico exato que representara "recebeu o primeiro protocolo" deve ser mapeado de forma auditavel ao fluxo real de publicacao/entrega do protocolo, sem inventar um novo criterio profissional.
+Depois que se torna elegivel, a cliente recebe o Feedback Semanal toda segunda-feira, independentemente da fase/protocolo em que estiver.
+
+Esta confirmacao resolve a regra profissional de inicio, frequencia e dia da semana. O evento tecnico exato que representara "recebeu o primeiro protocolo" deve ser mapeado de forma auditavel ao fluxo real de publicacao/entrega do protocolo, sem inventar um novo criterio profissional. O horario e o canal de aviso continuam separados dessa regra e nao devem ser inferidos.
 
 ## Questoes que bloqueiam automacao completa
 
-1. Qual o dia/horario inicial desejado para o envio? A ideia de segunda-feira pela manha deve virar configuracao, nao constante.
+1. RESOLVIDO PARCIALMENTE: o dia e segunda-feira. O horario ainda nao foi confirmado e deve permanecer configuravel.
 2. O prazo "ate quarta-feira" continua vigente? O prazo fecha o formulario ou apenas marca atraso?
 3. O texto "responder e obrigatorio" deve ser apenas comunicacao ou gerar algum estado operacional?
 4. A regra historica de ficar sem atendimento online quando nao responder continua vigente? Se sim, quem confirma a suspensao e como ela termina? Nao automatizar sem resposta.
