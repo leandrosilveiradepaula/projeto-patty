@@ -803,3 +803,8 @@ Nao implementado ainda:
 - analise por IA com dados reais.
 
 Esses itens nao devem bloquear a avaliacao do fluxo interno do produto. A conta administrativa real da Patty continua como pendencia operacional separada.
+
+
+### Solicitacao de treino pela cliente - 2026-10-04
+
+A policy de autoatendimento foi aplicada no SaaS pela migration `20261004132337_allow_client_training_request_self_service`. A cliente pode ler e criar somente solicitacoes do proprio acompanhamento; a tabela permanece append-only. A UI `/cliente/treino` esta implementada na branch correspondente. Isso fecha a solicitacao do servico, mas nao a visualizacao de uma prescricao futura.
