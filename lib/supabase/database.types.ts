@@ -2964,6 +2964,17 @@ export type Database = {
         }
         Returns: string
       }
+      list_current_client_finalized_assessment_measurements: {
+        Args: never
+        Returns: {
+          assessment_id: string
+          assessed_at: string
+          assessment_kind: string | null
+          measurement_key: string
+          measurement_value: number
+          unit: string
+        }[]
+      }
       meal_plan_version_is_draft: {
         Args: { p_meal_plan_version_id: string }
         Returns: boolean
