@@ -1,0 +1,76 @@
+.seriesList {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.seriesCard {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.seriesHeader {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: start;
+  justify-content: space-between;
+}
+
+.seriesTitle {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+  font-size: var(--text-title-medium-size);
+  font-weight: var(--text-title-medium-weight);
+  line-height: var(--text-title-medium-line-height);
+}
+
+.seriesMeta {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-small-size);
+}
+
+.tableScroll {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.table th {
+  color: var(--color-text-secondary);
+  font-size: var(--text-label-small-size);
+  font-weight: var(--text-label-small-weight);
+}
+
+.table td {
+  color: var(--color-text-primary);
+  font-size: var(--text-body-small-size);
+}
+
+.detailLink {
+  color: var(--color-brand);
+  font-weight: var(--text-label-medium-weight);
+  text-decoration: none;
+}
+
+.detailLink:hover {
+  text-decoration: underline;
+}
+
+.detailLink:focus-visible {
+  border-radius: var(--radius-small);
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
+}
