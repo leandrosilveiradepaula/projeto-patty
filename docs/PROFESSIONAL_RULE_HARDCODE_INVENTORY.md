@@ -134,7 +134,9 @@ Aplicado e validado no SaaS:
 
 - migration `20261001235018` aplicada e higher-fat ativo confirmado;
 - migration `20261002005720` aplicada;
-- a infraestrutura do template `hydration.daily_target` esta ativa; o baseline profissional vigente precisa ser atualizado para 35 mL/kg por nova versao/configuracao, sem editar migrations aplicadas nem reescrever snapshots antigos;
+- a infraestrutura do template `hydration.daily_target` esta ativa;
+- a troca inicial no SaaS foi registrada na migration `20261004234325_activate_hydration_35_ml_per_kg`;
+- a migration portavel `20261004235059_allow_system_config_retirement_and_reconcile_hydration_35` garante em bancos novos a v2 com 35 mL/kg, aposentando a v1 de 60 mL/kg sem exigir uma admin previamente cadastrada nem reescrever historico;
 - RPC `create_hydration_target_from_method_snapshot` presente como SECURITY INVOKER, sem EXECUTE para `anon`/`authenticated` e com EXECUTE para `service_role`.
 
 Integração operacional concluída:
@@ -146,7 +148,7 @@ Integração operacional concluída:
 - a UI não repete mais `60 mL/kg` como regra fixa;
 - registros históricos `patty_60_ml_per_kg` permanecem intactos e legíveis.
 
-Confirmado em 2026-10-04: recalculo automatico prospectivo apos novo peso, orientacao 70% agua pura / 30% outros liquidos zero calorias, correcao pela cliente e pela Patty com auditoria. Permanecem abertos detalhes de lembretes de hidratacao. A proxima alteracao tecnica deve criar nova versao do template vigente em 35 mL/kg, preservando o historico de 60 mL/kg.
+Confirmado em 2026-10-04: recalculo automatico prospectivo apos novo peso, orientacao 70% agua pura / 30% outros liquidos zero calorias, correcao pela cliente e pela Patty com auditoria. A v2 de 35 mL/kg esta aplicada e ativa no SaaS; a v1 de 60 mL/kg permanece preservada como historico. Permanecem abertos apenas detalhes de lembretes de hidratacao.
 
 ### HR-006 — Conversão de legumes e referências no validador da fonte alimentar
 
