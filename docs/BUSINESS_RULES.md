@@ -327,7 +327,7 @@ Exemplos historicos individuais nao viram regra geral.
 
 Regra nao confirmada deve permanecer como `QUESTAO ABERTA`.
 
-Nao automatizar regras de hidratacao alem da formula confirmada de 60 mL/kg e da taxonomia ativa de liquidos; nao existe proporcao minima automatica confirmada entre agua pura e outros liquidos zero calorias. Suplementacao, manipulados, progressao definitiva de treino, criterios finais de avaliacao, fases 5 e 6 do Carb Cycle, etapas posteriores ao Cutting 2, Bulking ou Consolidacao permanecem dependentes de confirmacao documentada.
+Nao automatizar regras de hidratacao alem da formula confirmada de 60 mL/kg e da taxonomia ativa de liquidos; nao existe proporcao minima automatica confirmada entre agua pura e outros liquidos zero calorias. Suplementacao e manipulados foram confirmados em 2026-10-04 como definicoes manuais caso a caso, sem automacao profissional nesta etapa. Outros temas ainda nao formalizados permanecem dependentes de confirmacao documentada.
 ## Leitura profissional da Anamnese
 
 ### DECISAO CONFIRMADA
@@ -799,3 +799,14 @@ No Up Metabolico, a Patty parte do protocolo anterior e aumenta manualmente a qu
 Nao existe, neste momento, formula unica confirmada para definir o tamanho desse aumento. O ajuste e individual, conforme a paciente, o momento do processo e os resultados observados.
 
 O sistema deve permitir ajuste manual e versionado do carboidrato no Up Metabolico, preservando o protocolo anterior usado como referencia.
+
+
+## Suplementacao e manipulados
+
+### DECISAO CONFIRMADA - 2026-10-04
+
+Suplementacao e manipulados sao definidos manualmente pela Patty, caso a caso, conforme cada paciente.
+
+Nao existe, nesta etapa, template profissional automatico, regra geral de indicacao, dose automatica ou sugestao automatica da IA autorizada para esse bloco.
+
+O sistema deve permitir registro e edicao manual pela Patty, preservando o que foi efetivamente aprovado/publicado para a paciente.
