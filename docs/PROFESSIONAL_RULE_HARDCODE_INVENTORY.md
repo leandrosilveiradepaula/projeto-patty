@@ -1,6 +1,6 @@
 # Inventário de regras profissionais hardcoded
 
-Última atualização: 2026-10-03.
+Última atualização: 2026-10-04.
 
 ## Objetivo
 
@@ -123,8 +123,8 @@ Hardcode histórico preservado:
 Estado após PR #273 e apply no SaaS:
 
 - `lib/method/hydration.ts` calcula a meta a partir de configuração `method_engine_v1`, sem coeficiente profissional embutido;
-- golden tests reproduzem 60 mL/kg, alteração de coeficiente e alteração de arredondamento sem mudança de runtime;
-- migration oficial `20261002005720_hydrate_client_targets_from_configuration.sql` cria o template `hydration.daily_target` com baseline 60 mL/kg e `round` explícito;
+- golden tests demonstram que o coeficiente pode mudar sem alteracao de runtime;
+- migration oficial `20261002005720_hydrate_client_targets_from_configuration.sql` criou originalmente o template `hydration.daily_target` com baseline historico de 60 mL/kg; a confirmacao profissional de 2026-10-04 superou esse baseline para novas configuracoes, que devem usar 35 mL/kg;
 - `client_hydration_targets` ganha caminho compatível com `method_configuration_snapshot_set_id` e `resolved_target_ml`;
 - o modo legado e o modo configurado são mutuamente consistentes por constraints;
 - o vínculo configurado aponta para snapshot set da mesma cliente;
@@ -134,7 +134,7 @@ Aplicado e validado no SaaS:
 
 - migration `20261001235018` aplicada e higher-fat ativo confirmado;
 - migration `20261002005720` aplicada;
-- template `hydration.daily_target` ativo com baseline 60 mL/kg e `round`;
+- a infraestrutura do template `hydration.daily_target` esta ativa; o baseline profissional vigente precisa ser atualizado para 35 mL/kg por nova versao/configuracao, sem editar migrations aplicadas nem reescrever snapshots antigos;
 - RPC `create_hydration_target_from_method_snapshot` presente como SECURITY INVOKER, sem EXECUTE para `anon`/`authenticated` e com EXECUTE para `service_role`.
 
 Integração operacional concluída:
@@ -146,7 +146,7 @@ Integração operacional concluída:
 - a UI não repete mais `60 mL/kg` como regra fixa;
 - registros históricos `patty_60_ml_per_kg` permanecem intactos e legíveis.
 
-Questões abertas continuam abertas: recálculo após mudança de peso, proporção mínima de água pura, lembretes e correções.
+Confirmado em 2026-10-04: recalculo automatico prospectivo apos novo peso, orientacao 70% agua pura / 30% outros liquidos zero calorias, correcao pela cliente e pela Patty com auditoria. Permanecem abertos detalhes de lembretes de hidratacao. A proxima alteracao tecnica deve criar nova versao do template vigente em 35 mL/kg, preservando o historico de 60 mL/kg.
 
 ### HR-006 — Conversão de legumes e referências no validador da fonte alimentar
 
@@ -221,7 +221,7 @@ Hardening aplicado e verificado no SaaS:
 - `authenticated` mantém UPDATE somente em `assessed_at` e `assessment_kind` para o fluxo de rascunho;
 - a função de lifecycle não é executável por `anon` nem `authenticated`.
 
-A regra de calendário para âncoras 29/30/31 continua aberta e não deve ser inventada.
+A regra de calendario foi resolvida em 2026-10-04: a Avaliacao Completa nao fica presa ao mesmo dia numerico e deve ser preferencialmente posicionada proxima de sexta-feira ou sabado; isso e preferencia operacional configuravel, nao bloqueio rigido.
 
 ### HR-009 — Lembrete de esclarecimento em 24 horas
 
@@ -311,6 +311,32 @@ Ainda pendente:
 - não automatizar progressão entre fases;
 - criar snapshots dos steps/coeficientes efetivamente usados em protocolos;
 - manter adapters de compatibilidade apenas enquanto consumidores antigos precisarem deles.
+
+### HR-013 — Agenda e canais do Feedback Semanal
+
+**Classificacao:** NOVA MIGRACAO NECESSARIA / NAO HARDCODAR.
+
+Regras confirmadas em 2026-10-04:
+- elegibilidade apos recebimento do primeiro protocolo;
+- toda segunda-feira, independentemente da fase;
+- template inicial de horario 08:00;
+- dia e horario editaveis pela Patty;
+- lembrete na quarta-feira para quem ainda nao respondeu;
+- canal configuravel por paciente entre email, WhatsApp e notificacao no app.
+
+A implementacao deve nascer sobre configuracao versionada, sem constantes definitivas de segunda-feira/08:00/canal no runtime. A preferencia individual de canal deve ser client-scoped e auditavel.
+
+### HR-014 — Treino prescrito
+
+**Classificacao:** NOVO DOMINIO DEVE NASCER PARAMETRIZADO.
+
+Confirmado em 2026-10-04:
+- estrutura inicial padrao;
+- progressao posterior manual;
+- campos por exercicio: exercicio, series, repeticoes, descanso opcional e orientacoes/observacoes opcionais;
+- carga/peso definida conforme capacidade da paciente, nao como prescricao numerica fixa geral.
+
+Séries, repeticoes, descanso, exercicios e estrutura de template nao devem nascer hardcoded.
 
 ## Fontes já estruturadas que não devem ser confundidas com configuração ativa
 
