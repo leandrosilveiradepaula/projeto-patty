@@ -22,7 +22,7 @@ const ENTRYPOINT_RULES = new Map([
   ["app/admin/fotos/[fileId]/route.ts", "admin"],
   ["app/admin/protocolos/[protocoloId]/actions.ts", "admin"],
   ["app/api/cron/private-file-upload-cleanup/route.ts", "public-infrastructure"],
-  ["app/ativar-conta/actions.ts", "client-identity"],
+  ["app/ativar-conta/actions.ts", "authenticated-activation"],
   ["app/auth/confirm/route.ts", "public-auth"],
   ["app/auth/recovery/route.ts", "public-auth"],
   ["app/auth/recovery-token/route.ts", "public-auth"],
@@ -104,6 +104,24 @@ test("classified protected entrypoints contain the expected authentication bound
         content,
         /requireRoleIdentity\(["']client["']\)/,
         `${file} must enforce an authenticated client identity`,
+      );
+    }
+
+    if (rule === "authenticated-activation") {
+      assert.match(
+        content,
+        /getCurrentAuthContext\(\)/,
+        `${file} must require an authenticated app identity before setting the initial password`,
+      );
+      assert.match(
+        content,
+        /if \(!context\?\.role\)/,
+        `${file} must reject authenticated users without an app role`,
+      );
+      assert.doesNotMatch(
+        content,
+        /createAdminClient\s*\(/,
+        `${file} must not use the administrative client to set a user password`,
       );
     }
 
