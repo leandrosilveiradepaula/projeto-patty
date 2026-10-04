@@ -885,12 +885,16 @@ Nao ampliar o mecanismo sem caso profissional confirmado.
 
 ### AINDA ABERTO
 
-- dia da semana resolvido em 2026-10-04: segunda-feira, toda semana, independentemente da fase;
-- horario padrao da agenda automatica ainda aberto;
+- agenda profissional resolvida em 2026-10-04: toda segunda-feira, independentemente da fase;
+- horario padrao inicial: 08:00;
+- dia/horario devem ser configuraveis pela Patty no sistema, usando segunda-feira 08:00 como template inicial;
+- lembrete na quarta-feira para clientes elegiveis que ainda nao responderam;
+- horario e canal do lembrete continuam configuraveis/abertos;
+- quarta-feira nao foi confirmada como prazo fatal nem como fechamento automatico do formulario;
 - se o prazo historico de quarta-feira apenas marca atraso ou fecha alguma acao;
 - o marco profissional de elegibilidade foi resolvido em 2026-10-04: a cliente passa a receber Feedback Semanal depois que recebe o primeiro protocolo;
 - permanece apenas a decisao tecnica de qual evento auditavel do fluxo de protocolo representa "recebeu", sem alterar a regra profissional;
-- politica de lembretes;
+- politica de lembretes parcialmente resolvida: lembrete na quarta-feira para quem ainda nao respondeu; faltam apenas horario/canal e eventual politica adicional;
 - canal inicial: email, WhatsApp, ambos ou preferencia por cliente;
 - eventual consentimento/opt-in e provedor de WhatsApp;
 - se perguntas relativamente estaveis, como local de trabalho/treino, permanecem semanais;
