@@ -1774,6 +1774,22 @@ A pagina de redefinicao prioriza um fragmento de recovery novo sobre qualquer se
 Isso evita trocar a senha da identidade errada em navegadores que ainda tenham sessao residual de teste. O PR #332 passou CI e foi publicado na Vercel.
 
 
+## Atualizacao 2026-10-04 - Hidratacao v2 em 35 mL/kg
+
+### APLICADO NO SUPABASE SAAS
+
+A regra profissional de hidratacao confirmada pela Patty foi promovida por versionamento, sem alterar a migration historica nem reescrever snapshots:
+
+- migration `20261004234325_activate_hydration_35_ml_per_kg` aplicada;
+- `hydration.daily_target` v1 (60 mL/kg) aposentada e preservada;
+- `hydration.daily_target` v2 ativa com 35 mL/kg;
+- origem da v2 registrada como `confirmed_professional_rule`;
+- dry-run transacional com `ROLLBACK` passou antes do apply;
+- verificacao pos-apply confirmou somente a v2 como ativa;
+- Security Advisor sem nova regressao; permanece apenas o warning conhecido de Leaked Password Protection.
+
+Novas metas resolvidas pelo runtime configuravel passam a usar a versao ativa. Historico legado de 60 mL/kg permanece intacto.
+
 ## Atualizacao 2026-10-04 - Rodada profissional encerrada e parametrizacao reforcada
 
 ### DEFINIDO / DOCUMENTADO
