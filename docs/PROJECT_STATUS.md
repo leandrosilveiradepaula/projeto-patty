@@ -1654,3 +1654,20 @@ Estado final:
 - novas rotas `/cliente/avaliacoes` e `/cliente/evolucao`;
 - evolucao e puramente numerica e nao classifica melhora, piora, sucesso ou estagnacao;
 - fotos de avaliacao e follow-ups profissionais continuam fora da leitura da cliente nesta etapa.
+
+
+## Atualizacao 2026-10-04 - Biblioteca de exercicios para a cliente
+
+### IMPLEMENTADA NA BRANCH / POLICY JA APLICADA NO SAAS
+
+A migration `20261004133243_allow_client_published_exercise_read` foi aplicada no Supabase SaaS.
+
+Escopo:
+- cliente autenticada pode ler somente `exercise_versions` publicadas;
+- drafts continuam invisiveis;
+- nenhuma escrita foi aberta;
+- nova rota `/cliente/exercicios`;
+- a biblioteca mostra somente os campos existentes e confirmados da foundation atual: nome, versao e data de publicacao;
+- a UI explicita que biblioteca de exercicios nao equivale a treino prescrito.
+
+A biblioteca esta vazia no SaaS neste momento. Migracao/autoria de exercicios reais continua separada e sujeita a revisao/taxonomia/direitos.
