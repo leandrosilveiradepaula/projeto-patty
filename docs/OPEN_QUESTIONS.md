@@ -462,7 +462,7 @@ Tambem confirmou que, quando ha objetivo de ganho de massa muscular, pode existi
 Continuam abertos:
 - formulas, duracao e criterios de entrada/saida do Bulking;
 - formulas, duracao e criterios de entrada/saida da Consolidacao Metabolica;
-- formulas/macros detalhados de cada ocorrencia do Up Metabolico;
+- criterio/quantidade exata do aumento de carboidrato em cada ocorrencia do Up Metabolico, caso futuramente seja formalizado;
 - pareamento completo entre fases numeradas da planilha e etapas concretas do protocolo.
 
 Resolvido em 2026-10-04: os Ups Metabolicos nao precisam repetir duracao nem quantidade de refeicoes livres. Esses parametros variam por periodo/cliente conforme resultado e decisao profissional.
