@@ -436,9 +436,10 @@ Exemplo matematico:
 
 Na composicao dessa meta:
 - a taxonomia ativa distingue **agua pura** de **outros liquidos zero calorias**;
-- a Patty relatou que geralmente trabalha com aproximadamente 70% da meta em agua pura e o restante podendo vir de outros liquidos zero calorias;
+- a orientacao profissional passada a cliente e que 70% da meta diaria seja cumprida com agua pura;
+- os 30% restantes podem ser contabilizados com outros liquidos zero calorias;
 - exemplos citados de outros liquidos: cafe, cha, chimarrao, refrigerante zero e bebidas zero calorias similares;
-- ainda precisa ser confirmado se os 70% sao regra obrigatoria ou referencia usual configuravel.
+- se a cliente optar por cumprir de outra forma, isso e uma escolha dela; nao criar bloqueio automatico nem score de adesao a partir dessa divergencia.
 
 Nao tratar essa regra do metodo como recomendacao medica geral fora do acompanhamento profissional.
 
@@ -449,7 +450,6 @@ A existencia de metas e lembretes esta confirmada como comportamento desejado do
 Esses parametros podem ser definidos individualmente **na entrega do primeiro protocolo da cliente**, junto com a revisao/publicacao inicial do acompanhamento.
 
 Ainda nao estao formalizados como regra geral:
-- eventual proporcao-alvo entre agua pura e outros liquidos, caso a Patty queira formaliza-la futuramente;
 - se/quando a meta deve ser recalculada apos mudanca de peso;
 - horarios e cadencia padrao dos lembretes;
 - o que a Patty visualiza ou pode corrigir;
