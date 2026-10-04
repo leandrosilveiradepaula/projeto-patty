@@ -2701,3 +2701,12 @@ Nao ha formula fixa confirmada para a reducao. Cada ajuste deve ser tratado como
 A Patty encerra a Consolidacao Metabolica quando avalia que o ganho de massa muscular foi preservado e que a paciente esta pronta para retornar ao Cutting.
 
 Nao ha criterio numerico unico nem prazo fixo confirmado para essa transicao.
+
+
+## 2026-10-04 - Retorno ao Cutting 1 apos Consolidacao
+
+### REGRA CONFIRMADA PELA PATTY
+
+Quando a paciente conclui a Consolidacao Metabolica e retorna ao Cutting, ela reinicia pelo Cutting 1.
+
+O retorno nao retoma diretamente Cutting 2 ou Cutting 3.
