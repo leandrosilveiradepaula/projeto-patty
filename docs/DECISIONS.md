@@ -2832,3 +2832,16 @@ Se a cliente ainda nao tiver respondido, deve receber um lembrete na quarta-feir
 - nao fechar formulario nem suspender atendimento automaticamente na quarta-feira sem regra adicional;
 - horario e canal do lembrete ainda podem ser definidos/configurados separadamente;
 - canal principal de envio do Feedback Semanal continua aberto.
+
+
+## 2026-10-04 - Suplementacao e manipulados permanecem manuais
+
+### REGRA CONFIRMADA PELA PATTY
+
+Suplementacao e manipulados dependem totalmente da paciente e sao definidos manualmente pela Patty.
+
+Nao usar template automatico obrigatorio, regra geral de dose/indicacao ou sugestao automatica da IA para determinar esses itens.
+
+### CONSEQUENCIA DE PRODUTO
+
+O sistema deve oferecer campos editaveis para registro manual e preservar a versao publicada para cada paciente. Exemplos historicos individuais nao viram regra geral.
