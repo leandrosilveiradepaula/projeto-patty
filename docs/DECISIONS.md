@@ -2754,3 +2754,19 @@ A carga/peso nao e prescrita pela Patty como um valor fixo no treino; deve ser d
 ### CONSEQUENCIA DE PRODUTO
 
 Nao automatizar progressao de carga, series ou repeticoes sem nova regra confirmada. O sistema deve permitir template inicial versionado e edicao manual pela Patty, preservando o treino publicado para cada paciente.
+
+
+## 2026-10-04 - Avaliacoes: agenda flexivel proxima de sexta ou sabado
+
+### REGRA CONFIRMADA PELA PATTY
+
+A Avaliacao Completa nao precisa ocorrer exatamente no mesmo dia numerico do mes em que o acompanhamento foi iniciado.
+
+A Patty prefere deixar a avaliacao o mais proximo possivel de sexta-feira ou sabado. O motivo informado e facilitar que a paciente realize a avaliacao antes de aproveitar a refeicao livre do fim de semana.
+
+### CONSEQUENCIA
+
+- datas de inicio em 29, 30 ou 31 nao exigem regra especial de "ultimo dia disponivel";
+- a agenda pode deslocar a avaliacao para uma data proxima;
+- sexta/sabado deve ser tratado como preferencia operacional, nao como restricao absoluta;
+- nao inferir, a partir desta decisao de agenda, novas regras automaticas sobre refeicao livre.
