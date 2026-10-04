@@ -56,9 +56,14 @@ Ainda falta configurar no Google/Supabase:
 
 A App Password deve ser inserida diretamente no Supabase e nao deve ser compartilhada no chat ou repositorio.
 
-### QUESTAO ABERTA
+### PARCIALMENTE RESOLVIDO
 
-Quais serao as regras de expiracao/reenvio do convite, recuperacao de acesso e encerramento da conta?
+A recuperacao tecnica de senha esta implementada no aplicativo com fluxo PKCE do Supabase, resposta neutra quanto a existencia da conta e redefinicao autenticada.
+
+Continuam abertas:
+- regras de expiracao/reenvio do convite;
+- politica operacional de encerramento da conta;
+- tratamento de conta Auth excluida preservando historico profissional.
 
 ### RESOLVIDO
 
