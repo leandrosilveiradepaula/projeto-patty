@@ -589,8 +589,26 @@ O novo calculo passa a valer dali em diante. Metas historicas e registros de con
 
 A cliente pode corrigir os proprios registros de check-in de liquidos e atividade fisica.
 
+A cliente pode corrigir quando perceber o erro, inclusive em registro anterior, sem limite temporal profissional definido.
+
 Ainda precisa ser definido:
-- ate quando um registro pode ser corrigido;
-- se dias anteriores permanecem editaveis sem limite;
 - se a Patty tambem pode corrigir registros da cliente;
 - como a correcao sera materializada tecnicamente sem perder auditoria.
+
+
+### CARB CYCLE - DEFINICAO OPERACIONAL
+
+### DECISAO CONFIRMADA
+
+No metodo da Patty, o Carb Cycle corresponde a etapa em que a cliente segue a alternancia de **2 dias Low Carb para 1 dia High Carb**.
+
+A Patty utiliza a planilha historica de Carb Cycle para calcular essa etapa a partir do peso da cliente.
+
+A localizacao operacional informada pela Patty e:
+`Corpo e Mente passo a passo / Alimentacao / Planilha Carb Cycle`.
+
+Consequencias:
+- nao tratar "Carb Cycle" como uma fase separada da alternancia 2 Low / 1 High;
+- nao inferir formulas sem ler e reconciliar a planilha original;
+- os calculos da planilha devem ser parametrizaveis/versionados, conforme a decisao geral de parametrizacao do metodo;
+- o peso usado no calculo deve ser preservado como input do rascunho/protocolo correspondente.
