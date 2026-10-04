@@ -1742,3 +1742,23 @@ Ajuste:
 - links incompletos ou sem fragmento valido caem em estado invalido.
 
 Todos os links de recovery emitidos antes desta correcao devem ser descartados durante o reteste.
+
+
+## Atualizacao 2026-10-04 - Recovery PKCE confirmado em producao
+
+### IMPLEMENTADA NA BRANCH
+
+Logs reais do Supabase mostraram que os links de recovery enviados em producao foram aceitos por `/verify` com status 303 e retornaram ao aplicativo em PKCE, usando `?code=...`.
+
+Causa do falso "Link invalido ou expirado":
+- `/redefinir-senha` nao processava o parametro `code`;
+- o link era valido no Supabase, mas o aplicativo descartava o Auth Code antes de trocar por sessao.
+
+Correcao:
+- `/redefinir-senha` detecta `code` e encaminha para `/auth/recovery`;
+- `/auth/recovery` chama `exchangeCodeForSession`;
+- `sb_flow_id`, quando presente, e preservado;
+- depois da troca, o usuario volta para `/redefinir-senha` com sessao em cookie;
+- o fallback de fragmento implicito continua preservado para compatibilidade.
+
+O reteste deve usar um link de recovery novo; Auth Codes anteriores sao single-use.
