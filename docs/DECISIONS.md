@@ -2785,3 +2785,16 @@ A cliente continua podendo corrigir os proprios registros.
 A correcao nao deve destruir o historico original. O sistema deve preservar auditoria suficiente para identificar o valor anterior, o valor corrigido, quem realizou a correcao e quando ela ocorreu.
 
 Essa confirmacao resolve o poder profissional de correcao. A forma exata de persistencia pode ser definida tecnicamente sem alterar essa regra.
+
+
+## 2026-10-04 - Feedback Semanal: elegibilidade apos primeiro protocolo
+
+### REGRA CONFIRMADA PELA PATTY
+
+O Feedback Semanal comeca depois que a cliente recebe o primeiro protocolo.
+
+Antes de receber o primeiro protocolo, a cliente nao precisa responder ao Feedback Semanal.
+
+### LIMITE
+
+Esta e a regra profissional de elegibilidade. O evento tecnico usado para representar "recebeu o primeiro protocolo" deve ser definido de forma auditavel no fluxo real de protocolo e nao deve criar novo criterio profissional por inferencia.
