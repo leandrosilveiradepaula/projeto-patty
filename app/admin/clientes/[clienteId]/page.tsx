@@ -170,6 +170,20 @@ export default async function AdminClienteDetailPage({
             </Card>
           </Link>
 
+          <Link className={styles.cardLink} href={`/admin/clientes/${client.id}/evolucao`}>
+            <Card className={styles.infoCard}>
+              <div className={styles.cardHeader}>
+                <h3 className={styles.cardTitle}>Evolução</h3>
+                <Badge variant="neutral">
+                  {assessments.filter((assessment) => Boolean(assessment.finalized_at)).length} finalizada(s)
+                </Badge>
+              </div>
+              <p className={styles.cardDescription}>
+                Acompanhe medidas ao longo das avaliações finalizadas, com variações numéricas factuais.
+              </p>
+            </Card>
+          </Link>
+
           <Link className={styles.cardLink} href={`/admin/clientes/${client.id}/protocolos`}>
             <Card className={styles.infoCard}>
               <div className={styles.cardHeader}>
