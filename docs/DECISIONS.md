@@ -2903,3 +2903,35 @@ O uso inicial e da Patty e do metodo dela, mas existe direcao de produto para fu
 "Completamente parametrizavel" nao inclui tornar editaveis invariantes tecnicas como RLS, Auth, MFA, secrets, constraints de integridade, auditoria, segregacao de identidades ou a proibicao de publicacao direta pela IA.
 
 A futura comercializacao nao autoriza inferir agora um modelo multi-tenant especifico. O requisito atual e evitar acoplamento estrutural a uma unica profissional/configuracao global.
+
+
+## 2026-10-04 - Edicao administrativa de parametros cria nova versao
+
+### DECISAO TECNICA
+
+A edicao de configuracoes profissionais pela Patty nao deve alterar JSON bruto nem modificar a versao ativa in-place.
+
+Para os schemas com editor seguro nesta etapa:
+- a interface apresenta somente parametros numericos reconhecidos;
+- unidade e estrutura permanecem fixadas pelo schema;
+- o servidor revalida a configuracao completa antes da persistencia;
+- o salvamento cria uma nova versao e aposenta a anterior;
+- uma escrita baseada em versao ativa desatualizada deve falhar em vez de sobrescrever alteracao concorrente.
+
+### SEGURANCA
+
+A operacao de persistencia ocorre em boundary `server-only` usando RPC interno restrito a `service_role`. A identidade profissional vem da sessao admin/AAL2; o browser nao escolhe o ator nem recebe privilegio direto de escrita nas tabelas de configuracao.
+
+### ESCOPO V1
+
+Editaveis:
+- `scalar_parameter_v1`;
+- parametros numericos de `method_engine_v1`.
+
+Somente leitura por enquanto:
+- Carb Cycle estruturado;
+- catalogos/definicoes de Avaliacao;
+- taxonomia de liquidos;
+- outros schemas compostos.
+
+Cada schema composto deve receber editor proprio e validacao fechada quando houver necessidade, sem recorrer a JSON livre.
