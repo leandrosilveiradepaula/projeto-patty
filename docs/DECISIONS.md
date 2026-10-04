@@ -2845,3 +2845,19 @@ Nao usar template automatico obrigatorio, regra geral de dose/indicacao ou suges
 ### CONSEQUENCIA DE PRODUTO
 
 O sistema deve oferecer campos editaveis para registro manual e preservar a versao publicada para cada paciente. Exemplos historicos individuais nao viram regra geral.
+
+
+## 2026-10-04 - Encerramento do acompanhamento
+
+### REGRA CONFIRMADA PELA PATTY
+
+Nao existe um criterio unico automatico para encerrar o acompanhamento.
+
+A decisao de encerramento e contextual e manual. Na pratica, o acompanhamento geralmente termina quando a propria paciente entende/decide que nao precisa mais continuar.
+
+### CONSEQUENCIA DE PRODUTO
+
+- nao encerrar automaticamente por tempo de acompanhamento;
+- nao encerrar automaticamente por fase concluida;
+- nao encerrar automaticamente por resultado, adesao ou meta isolada;
+- o sistema deve permitir encerramento manual e preservar o historico do acompanhamento.
