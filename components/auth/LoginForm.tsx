@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 
 import { type LoginState, login } from "@/app/login/actions";
@@ -23,6 +24,9 @@ export function LoginForm() {
         {(fieldProps) => <TextInput {...fieldProps} autoComplete="current-password" name="password" required type="password" />}
       </FormField>
       <Button loading={isPending} type="submit">Entrar</Button>
+      <Link className={styles.recoveryLink} href="/recuperar-senha">
+        Esqueci minha senha
+      </Link>
     </form>
   );
 }
