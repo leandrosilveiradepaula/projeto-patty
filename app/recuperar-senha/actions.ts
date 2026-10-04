@@ -42,7 +42,7 @@ export async function requestPasswordRecovery(
 
   const supabase = await createClient();
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${protocol}://${host}/auth/recovery`,
+    redirectTo: `${protocol}://${host}/redefinir-senha`,
   });
 
   if (error) {
