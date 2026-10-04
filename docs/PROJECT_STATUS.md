@@ -1617,3 +1617,21 @@ Foi preparado um procedimento manual e idempotente de bootstrap da unica admin d
 - nao cria assignment nem acesso client-scoped automaticamente.
 
 A execucao real permanece pendente porque workflows novos nao podem ser disparados pela conexao GitHub disponivel neste chat. Depois do merge, a operacao manual esperada e executar o workflow no `master` com o email administrativo real e confirmacao `BOOTSTRAP_PATTY`.
+
+
+## Atualizacao 2026-10-04 - Solicitacao de treino pela cliente
+
+### IMPLEMENTADA NA BRANCH / POLICY JA APLICADA NO SAAS
+
+A migration remota `20261004132337_allow_client_training_request_self_service` foi aplicada no Supabase SaaS e materializada no repositorio com o mesmo timestamp e SQL.
+
+Implementado:
+- cliente autenticada pode ler somente solicitacoes vinculadas ao proprio `client_id`;
+- cliente pode inserir solicitacao somente em proprio nome;
+- historico continua append-only, sem UPDATE/DELETE;
+- nova rota `/cliente/treino` com formulario e historico;
+- area inicial da cliente passa a expor o modulo Treino;
+- Patty continua visualizando o mesmo historico administrativo ja existente.
+
+Limite:
+- solicitar treino nao cria prescricao, nao seleciona exercicios e nao altera protocolo automaticamente.

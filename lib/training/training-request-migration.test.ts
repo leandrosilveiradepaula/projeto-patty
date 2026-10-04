@@ -60,3 +60,33 @@ test("training request RLS optimization relies on the restrictive MFA policy", (
     /client_assignments\.ended_at is null/i,
   );
 });
+
+const selfServiceMigration = fs.readFileSync(
+  path.join(
+    root,
+    "supabase",
+    "migrations",
+    "20261004132337_allow_client_training_request_self_service.sql",
+  ),
+  "utf8",
+);
+
+test("client training request self service is own-client only and append-only", () => {
+  assert.match(
+    selfServiceMigration,
+    /create policy "client_training_requests_select_own_client"/i,
+  );
+  assert.match(
+    selfServiceMigration,
+    /create policy "client_training_requests_insert_own_client"/i,
+  );
+  assert.match(
+    selfServiceMigration,
+    /clients\.profile_id = \(select auth\.uid\(\)\)/i,
+  );
+  assert.match(
+    selfServiceMigration,
+    /recorded_by_profile_id = \(select auth\.uid\(\)\)/i,
+  );
+  assert.doesNotMatch(selfServiceMigration, /for update|for delete/i);
+});
