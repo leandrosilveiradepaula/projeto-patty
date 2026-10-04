@@ -615,6 +615,24 @@ test("Supabase SSR proxy preserves session cookies and cache-control headers", a
   }
 });
 
+test("PKCE password recovery code is exchanged before rendering the reset form", async () => {
+  const page = await readFile(
+    path.join(ROOT, "app", "redefinir-senha", "page.tsx"),
+    "utf8",
+  );
+  const route = await readFile(
+    path.join(ROOT, "app", "auth", "recovery", "route.ts"),
+    "utf8",
+  );
+
+  assert.match(page, /if \(code\)/);
+  assert.match(page, /redirect\(`\/auth\/recovery\?/);
+  assert.match(route, /exchangeCodeForSession\(/);
+  assert.match(route, /sb_flow_id/);
+  assert.doesNotMatch(page, /console\.(log|info|warn|error)/);
+  assert.doesNotMatch(route, /console\.(log|info|warn|error)/);
+});
+
 test("password reset gate prioritizes recovery fragment over any existing server session", async () => {
   const gate = await readFile(
     path.join(ROOT, "components", "auth", "PasswordResetSessionGate.tsx"),
