@@ -2811,3 +2811,24 @@ Depois que a cliente se torna elegivel ao Feedback Semanal por ter recebido o pr
 - o horario de segunda-feira ainda nao foi confirmado;
 - o canal de aviso externo ainda nao foi confirmado;
 - essas lacunas nao alteram a frequencia profissional confirmada.
+
+
+## 2026-10-04 - Feedback Semanal: agenda configuravel e lembrete na quarta
+
+### REGRA CONFIRMADA PELA PATTY
+
+O template inicial de agenda do Feedback Semanal e:
+- toda segunda-feira;
+- as 08:00;
+- independentemente da fase/protocolo, desde que a cliente ja tenha recebido o primeiro protocolo.
+
+A Patty quer poder alterar essa agenda pelo sistema. Portanto, segunda-feira as 08:00 e o valor inicial configurado, nao uma constante imutavel.
+
+Se a cliente ainda nao tiver respondido, deve receber um lembrete na quarta-feira.
+
+### LIMITES
+
+- quarta-feira foi confirmada como momento de lembrete, nao como prazo fatal;
+- nao fechar formulario nem suspender atendimento automaticamente na quarta-feira sem regra adicional;
+- horario e canal do lembrete ainda podem ser definidos/configurados separadamente;
+- canal principal de envio do Feedback Semanal continua aberto.
