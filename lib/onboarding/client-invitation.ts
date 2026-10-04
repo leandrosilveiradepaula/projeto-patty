@@ -7,6 +7,7 @@ import { requireRole } from "@/lib/supabase/auth";
 export type ClientInvitationProvisionErrorCode =
   | "cleanup_failed"
   | "invite_failed"
+  | "link_failed"
   | "provision_failed";
 
 export class ClientInvitationProvisionError extends Error {
@@ -69,24 +70,17 @@ async function cleanupFailedProvision(input: {
   return !failed;
 }
 
-export async function inviteAndProvisionClient(input: {
-  email: string;
+async function provisionInvitedUser(input: {
+  staffProfileId: string;
+  userId: string;
 }) {
-  const auth = await requireRole("admin");
   const admin = createAdminClient();
-  const invitation = await admin.auth.admin.inviteUserByEmail(input.email);
-
-  if (invitation.error || !invitation.data.user) {
-    throw new ClientInvitationProvisionError("invite_failed");
-  }
-
-  const userId = invitation.data.user.id;
   let clientId: string | null = null;
 
   try {
     const profile = await admin
       .from("profiles")
-      .insert({ id: userId })
+      .insert({ id: input.userId })
       .select("id")
       .single();
 
@@ -95,7 +89,7 @@ export async function inviteAndProvisionClient(input: {
     }
 
     const role = await admin.from("user_roles").insert({
-      profile_id: userId,
+      profile_id: input.userId,
       role: "client",
     });
 
@@ -105,7 +99,7 @@ export async function inviteAndProvisionClient(input: {
 
     const client = await admin
       .from("clients")
-      .insert({ profile_id: userId })
+      .insert({ profile_id: input.userId })
       .select("id")
       .single();
 
@@ -121,17 +115,65 @@ export async function inviteAndProvisionClient(input: {
 
     return {
       clientId,
-      profileId: userId,
+      profileId: input.userId,
     };
   } catch {
     const cleaned = await cleanupFailedProvision({
       clientId,
-      staffProfileId: auth.profileId,
-      userId,
+      staffProfileId: input.staffProfileId,
+      userId: input.userId,
     });
 
     throw new ClientInvitationProvisionError(
       cleaned ? "provision_failed" : "cleanup_failed",
     );
   }
+}
+
+export async function inviteAndProvisionClient(input: {
+  email: string;
+}) {
+  const auth = await requireRole("admin");
+  const admin = createAdminClient();
+  const invitation = await admin.auth.admin.inviteUserByEmail(input.email);
+
+  if (invitation.error || !invitation.data.user) {
+    throw new ClientInvitationProvisionError("invite_failed");
+  }
+
+  return provisionInvitedUser({
+    staffProfileId: auth.profileId,
+    userId: invitation.data.user.id,
+  });
+}
+
+export async function generateManualInviteAndProvisionClient(input: {
+  email: string;
+}) {
+  const auth = await requireRole("admin");
+  const admin = createAdminClient();
+  const generated = await admin.auth.admin.generateLink({
+    type: "invite",
+    email: input.email,
+  });
+
+  const user = generated.data?.user;
+  const tokenHash = generated.data?.properties?.hashed_token;
+
+  if (generated.error || !user || !tokenHash) {
+    if (user) {
+      await admin.auth.admin.deleteUser(user.id);
+    }
+    throw new ClientInvitationProvisionError("link_failed");
+  }
+
+  const provisioned = await provisionInvitedUser({
+    staffProfileId: auth.profileId,
+    userId: user.id,
+  });
+
+  return {
+    ...provisioned,
+    tokenHash,
+  };
 }

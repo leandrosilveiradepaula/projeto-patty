@@ -1671,3 +1671,21 @@ Escopo:
 - a UI explicita que biblioteca de exercicios nao equivale a treino prescrito.
 
 A biblioteca esta vazia no SaaS neste momento. Migracao/autoria de exercicios reais continua separada e sujeita a revisao/taxonomia/direitos.
+
+
+## Atualizacao 2026-10-04 - Link manual de ativacao de cliente
+
+### IMPLEMENTADO NA BRANCH / SEM ALTERACAO DE SCHEMA
+
+Foi adicionado fallback de onboarding que usa `auth.admin.generateLink({ type: "invite" })` sem enviar email.
+
+Fluxo:
+- Patty/admin informa o email de autenticacao;
+- Supabase gera um `hashed_token` de convite sem disparar email;
+- o mesmo provisionamento relacional do onboarding automatico cria profile, role client, client e assignment;
+- a Server Action monta um link para `/auth/confirm?token_hash=...&type=invite`;
+- o link aparece apenas no estado da pagina administrativa autenticada para copia manual;
+- a cliente abre o link, a rota confirma o OTP e segue para `/ativar-conta` para definir a senha;
+- token/link nao e persistido nem registrado em logs.
+
+Esse fallback remove SMTP como bloqueio do primeiro onboarding. SMTP continua recomendado para automacao, recuperacao de senha por email e melhor operacao em escala.
