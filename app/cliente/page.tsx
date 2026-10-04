@@ -10,6 +10,7 @@ import {
   listAccessibleWeeklyFeedbacksForClient,
   listAccessibleClientTrainingRequests,
   listCurrentClientContentReleases,
+  listCurrentClientFinalizedAssessmentMeasurements,
   listCurrentClientFiles,
   listPublishedProtocolsForCurrentClient,
 } from "@/lib/supabase/data-access";
@@ -32,14 +33,17 @@ export default async function ClientePage() {
     );
   }
 
-  const [anamneses, protocols, contentReleases, files, weeklyFeedbacks, trainingRequests] = await Promise.all([
+  const [anamneses, protocols, contentReleases, files, weeklyFeedbacks, trainingRequests, assessmentRows] = await Promise.all([
     listAccessibleAnamnesisSubmissions(client.id),
     listPublishedProtocolsForCurrentClient(client.id),
     listCurrentClientContentReleases(client.id),
     listCurrentClientFiles(client.id),
     listAccessibleWeeklyFeedbacksForClient(client.id),
     listAccessibleClientTrainingRequests(client.id),
+    listCurrentClientFinalizedAssessmentMeasurements(),
   ]);
+
+  const finalizedAssessmentCount = new Set(assessmentRows.map((row) => row.assessment_id)).size;
 
   const areas = [
     {
@@ -49,6 +53,22 @@ export default async function ClientePage() {
       href: "/cliente/anamnese",
       label: "registro(s)",
       title: "Anamnese",
+    },
+    {
+      count: finalizedAssessmentCount,
+      description:
+        "Consulte suas avaliações finalizadas e as medidas registradas pela Patty.",
+      href: "/cliente/avaliacoes",
+      label: "avaliação(ões)",
+      title: "Avaliações",
+    },
+    {
+      count: finalizedAssessmentCount,
+      description:
+        "Acompanhe a variação numérica das suas medidas entre avaliações finalizadas.",
+      href: "/cliente/evolucao",
+      label: "avaliação(ões)",
+      title: "Evolução",
     },
     {
       count: protocols.length,
