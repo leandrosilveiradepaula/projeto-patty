@@ -120,6 +120,7 @@ export default async function AdminConfiguracoesPage() {
                             <div className={styles.inputWithUnit}>
                               <TextInput
                                 defaultValue={parameter.value}
+                                min="0.000001"
                                 name={"parameter." + parameter.key}
                                 required
                                 step="any"
