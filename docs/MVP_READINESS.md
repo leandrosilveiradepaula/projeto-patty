@@ -48,7 +48,7 @@ Estados usados:
 - definir a politica final de retencao/hard delete de arquivos privados;
 - decidir infraestrutura/plano para habilitar `Leaked Password Protection`, recurso bloqueado no ambiente atual por exigir Pro ou superior;
 - decidir entre upgrade ou SMTP customizado para permitir o template real `Invite user`; Site URL e redirect allowlist ja estao alinhados e o lifecycle sintetico de convite/ativacao passou E2E em producao;
-- definir expiracao/reenvio e encerramento de contas de clientes; recuperacao de senha foi implementada no aplicativo em 2026-10-04 e aguarda validacao E2E do email real;
+- definir expiracao/reenvio e encerramento de contas de clientes; recuperacao automatica por email foi implementada e continua dependendo do provedor de email; fallback administrativo por link manual elimina essa dependencia para suporte assistido;
 - edicao controlada do Cadastro Atual;
 - catalogo e regras finais de avaliacao/medidas;
 - processo de autoria/revisao/publicacao das bibliotecas;
