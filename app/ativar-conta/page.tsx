@@ -17,7 +17,7 @@ export default async function ActivationPage({
 }: ActivationPageProps) {
   const { error } = await searchParams;
   const context = await getCurrentAuthContext();
-  const canActivate = context?.role === "client" && error !== "invalid";
+  const canActivate = Boolean(context?.role) && error !== "invalid";
 
   return (
     <main className={styles.shell}>
@@ -30,7 +30,7 @@ export default async function ActivationPage({
         />
         <Card>
           {canActivate ? (
-            <ClientActivationPasswordForm />
+            <ClientActivationPasswordForm role={context?.role ?? null} />
           ) : (
             <Alert
               live="polite"
