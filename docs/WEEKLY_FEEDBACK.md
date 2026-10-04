@@ -113,15 +113,22 @@ Pode reutilizar o email de contato apenas se o produto decidir explicitamente qu
 
 A solicitacao deve sempre existir dentro do aplicativo independentemente do canal externo de aviso.
 
+## Elegibilidade confirmada em 2026-10-04
+
+A elegibilidade profissional comeca depois que a cliente recebe o primeiro protocolo.
+
+Antes desse marco, a cliente nao precisa responder ao Feedback Semanal.
+
+Esta confirmacao resolve a regra profissional de inicio. O evento tecnico exato que representara "recebeu o primeiro protocolo" deve ser mapeado de forma auditavel ao fluxo real de publicacao/entrega do protocolo, sem inventar um novo criterio profissional.
+
 ## Questoes que bloqueiam automacao completa
 
 1. Qual o dia/horario inicial desejado para o envio? A ideia de segunda-feira pela manha deve virar configuracao, nao constante.
 2. O prazo "ate quarta-feira" continua vigente? O prazo fecha o formulario ou apenas marca atraso?
 3. O texto "responder e obrigatorio" deve ser apenas comunicacao ou gerar algum estado operacional?
 4. A regra historica de ficar sem atendimento online quando nao responder continua vigente? Se sim, quem confirma a suspensao e como ela termina? Nao automatizar sem resposta.
-5. O marco de elegibilidade e "1 semana" contado de qual evento: `clients.started_at`, primeira publicacao de protocolo ou outro?
-6. "Se ainda nao recebeu protocolo, nao precisa responder": qual evento tecnico define protocolo recebido?
-7. Cliente pode salvar rascunho e continuar depois?
+5. RESOLVIDO PROFISSIONALMENTE: o Feedback Semanal comeca depois que a cliente recebe o primeiro protocolo. O mapeamento tecnico de "recebeu" deve usar um evento auditavel do fluxo real de protocolo.
+6. Cliente pode salvar rascunho e continuar depois?
 8. Cliente pode corrigir depois de enviar? Se sim, ate quando e com qual historico?
 9. Havera lembrete antes/depois de quarta-feira? Qual cadencia?
 10. Canal inicial: email, WhatsApp, ambos, ou preferencia por cliente?
