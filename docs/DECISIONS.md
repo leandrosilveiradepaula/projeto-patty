@@ -2561,3 +2561,18 @@ Exemplos citados pela Patty para os 30% restantes:
 - outras bebidas zero calorias equivalentes.
 
 Se a cliente optar por cumprir de forma diferente, isso e uma escolha dela. O sistema nao deve bloquear, pontuar adesao ou alterar protocolo automaticamente por esse motivo.
+
+
+## 2026-10-04 - Recalculo automatico da meta de liquidos
+
+### REGRA CONFIRMADA PELA PATTY
+
+Sempre que houver um novo peso registrado para a cliente, a meta diaria de liquidos deve ser recalculada automaticamente pela formula/configuracao vigente.
+
+### DECISAO TECNICA
+
+O recalculo e prospectivo:
+- cria/define a nova meta vigente a partir do novo peso;
+- nao altera metas historicas;
+- nao altera check-ins passados;
+- preserva auditoria e o peso que originou cada snapshot de meta.
