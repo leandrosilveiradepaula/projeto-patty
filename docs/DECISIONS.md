@@ -2543,3 +2543,21 @@ A regra vigente passa a ser:
 O percentual de 70% ainda precisa de confirmacao adicional sobre ser obrigatorio ou apenas referencia usual. Ate la, nao implementar bloqueio/threshold automatico baseado nesse percentual.
 
 Metas historicas ja persistidas nao devem ser reescritas retroativamente.
+
+
+## 2026-10-04 - Regra de composicao da meta de liquidos
+
+### REGRA CONFIRMADA PELA PATTY
+
+A orientacao profissional passada a cliente e:
+- 70% da meta diaria minima de liquidos em agua pura;
+- os 30% restantes podem ser contabilizados com outros liquidos zero calorias.
+
+Exemplos citados pela Patty para os 30% restantes:
+- cafe;
+- cha;
+- chimarrao;
+- refrigerante zero;
+- outras bebidas zero calorias equivalentes.
+
+Se a cliente optar por cumprir de forma diferente, isso e uma escolha dela. O sistema nao deve bloquear, pontuar adesao ou alterar protocolo automaticamente por esse motivo.
