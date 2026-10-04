@@ -2692,3 +2692,12 @@ Nao automatizar essa transicao por um unico indicador.
 Na Consolidacao Metabolica, os macros sao reduzidos manualmente e gradualmente, caso a caso.
 
 Nao ha formula fixa confirmada para a reducao. Cada ajuste deve ser tratado como decisao profissional individual e preservado em versao historica.
+
+
+## 2026-10-04 - Encerramento da Consolidacao Metabolica
+
+### REGRA CONFIRMADA PELA PATTY
+
+A Patty encerra a Consolidacao Metabolica quando avalia que o ganho de massa muscular foi preservado e que a paciente esta pronta para retornar ao Cutting.
+
+Nao ha criterio numerico unico nem prazo fixo confirmado para essa transicao.
