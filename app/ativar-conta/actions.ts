@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 
 import { validateActivationPassword } from "@/lib/onboarding/validation";
-import { requireRoleIdentity } from "@/lib/supabase/auth";
+import { getCurrentAuthContext } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
 
 export type ActivationPasswordState = {
@@ -14,7 +14,11 @@ export async function setInitialClientPassword(
   _: ActivationPasswordState,
   formData: FormData,
 ): Promise<ActivationPasswordState> {
-  await requireRoleIdentity("client");
+  const context = await getCurrentAuthContext();
+
+  if (!context?.role) {
+    redirect("/login");
+  }
 
   const passwordValue = formData.get("password");
   const confirmationValue = formData.get("passwordConfirmation");
@@ -38,5 +42,5 @@ export async function setInitialClientPassword(
     };
   }
 
-  redirect("/cliente/anamnese");
+  redirect(context.role === "admin" ? "/mfa/admin/setup" : "/cliente/anamnese");
 }
