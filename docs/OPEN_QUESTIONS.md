@@ -505,9 +505,11 @@ O valor vigente de **35 mL/kg/dia** e a referencia profissional confirmada e pas
 
 As questoes de recalculo por mudanca de peso e composicao da meta foram resolvidas nesta rodada. Lembretes ainda permanecem abertos. A capacidade de correcao pela cliente e pela Patty esta confirmada; a materializacao tecnica deve preservar auditoria.
 
-### QUESTAO ABERTA
+### RESOLVIDO EM 2026-10-04 — SUPLEMENTACAO E MANIPULADOS
 
-Quais sao as regras de suplementacao e manipulados?
+Suplementacao e manipulados sao definidos manualmente pela Patty, caso a caso.
+
+Nao existe regra geral automatica, template obrigatorio ou sugestao automatica da IA autorizada neste momento. O produto precisa permitir registro/edicao manual e preservar o historico publicado.
 
 ### QUESTAO ABERTA
 
@@ -556,11 +558,13 @@ A Patty descreveu a alimentacao como "totalmente sem gordura saturada" e oriento
 
 Definir o significado operacional dessa orientacao, limites/excecoes e se e regra de protocolo ou recomendacao geral. Nao criar bloqueio alimentar automatico enquanto isso estiver aberto.
 
-### QUESTAO ABERTA — SUPLEMENTACAO/MANIPULADOS
+### RESOLVIDO PARA AUTOMACAO — SUPLEMENTACAO/MANIPULADOS
 
-A rodada trouxe exemplos adicionais de pratica profissional: magnesio antes de dormir, possibilidade de alho, manipulados ou encaminhamento conforme exames.
+Os exemplos historicos de suplementos/manipulados continuam sendo apenas exemplos individuais.
 
-Ainda faltam criterios de elegibilidade, dose, forma, duracao, contraindicacoes, interacoes, grupos excluidos e necessidade de avaliacao externa. Esses exemplos nao viram recomendacao automatica.
+A Patty confirmou em 2026-10-04 que define suplementacao e manipulados manualmente, caso a caso. Portanto, criterios gerais de elegibilidade, dose, forma, duracao, contraindicacoes e interacoes nao precisam ser inferidos nem automatizados para viabilizar o produto.
+
+Se futuramente a Patty quiser transformar alguma pratica em template/regra reutilizavel, sera necessaria nova confirmacao e versionamento.
 
 ### QUESTAO ABERTA — TREINO
 
