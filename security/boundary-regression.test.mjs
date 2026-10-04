@@ -19,6 +19,7 @@ const ENTRYPOINT_RULES = new Map([
   ["app/admin/clientes/[clienteId]/conteudos/actions.ts", "admin"],
   ["app/admin/clientes/[clienteId]/feedback-semanal/actions.ts", "admin"],
   ["app/admin/clientes/nova/actions.ts", "admin"],
+  ["app/admin/configuracoes/actions.ts", "admin"],
   ["app/admin/fotos/[fileId]/route.ts", "admin"],
   ["app/admin/protocolos/[protocoloId]/actions.ts", "admin"],
   ["app/api/cron/private-file-upload-cleanup/route.ts", "public-infrastructure"],
