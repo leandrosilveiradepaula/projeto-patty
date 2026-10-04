@@ -1,6 +1,6 @@
 # Regras e workflows totalmente parametrizáveis
 
-Última atualização: 2026-09-30.
+Última atualização: 2026-10-04.
 
 ## Decisão de produto e arquitetura
 
@@ -9,6 +9,20 @@ O Projeto Patty deve ser **totalmente parametrizável para regras de negócio, m
 Nenhuma regra profissional deve depender de valor hardcoded espalhado pelo código da aplicação.
 
 Os valores hoje existentes nas planilhas Excel passam a ser **templates iniciais versionados**. A Patty pode alterá-los no futuro sem alteração de código e pode também sobrescrevê-los para uma cliente específica.
+
+### Direcao de produto confirmada em 2026-10-04
+
+Embora o sistema seja usado inicialmente pela Patty e pelo metodo profissional dela, a arquitetura deve permitir evolucao futura para um produto comercializavel.
+
+Consequencias:
+- nenhuma regra profissional deve depender da identidade da Patty como singleton global;
+- configuracoes profissionais devem ter dono/escopo explicito e nao pressupor uma unica profissional para sempre;
+- valores, formulas, limites, sequencias, frequencias, horarios, canais, templates e workflows devem ser dados configuraveis/versionados quando pertencem ao metodo ou a operacao profissional;
+- defaults atuais representam o metodo da Patty hoje, nao verdades universais do produto;
+- uma futura comercializacao deve poder criar outros conjuntos de configuracao sem alterar o motor deterministico;
+- a modelagem exata de organizacao/tenant nao e inferida por esta decisao e deve ser definida separadamente antes de implementacao multi-tenant.
+
+O objetivo e parametrizar o **comportamento profissional e operacional**, nao tornar configuraveis invariantes de seguranca, integridade, auditoria ou separacao de responsabilidades.
 
 ## Regra central
 
