@@ -1600,7 +1600,7 @@ Invariantes:
 
 ## Atualizacao 2026-10-04 - Bootstrap controlado da Patty admin
 
-### INTEGRADO AO MASTER / AINDA NAO EXECUTADO
+### INTEGRADO AO MASTER / EXECUTADO COM SUCESSO
 
 Workflow integrado ao `master` pelo PR #320.
 
@@ -1616,7 +1616,7 @@ Foi preparado um procedimento manual e idempotente de bootstrap da unica admin d
 - em convite novo, tenta compensar Auth/profile/role se o provisionamento falhar;
 - nao cria assignment nem acesso client-scoped automaticamente.
 
-A execucao real permanece pendente porque workflows novos nao podem ser disparados pela conexao GitHub disponivel neste chat. Depois do merge, a operacao manual esperada e executar o workflow no `master` com o email administrativo real e confirmacao `BOOTSTRAP_PATTY`.
+O workflow foi executado manualmente no `master` em 2026-10-04 e concluiu com sucesso. A identidade Auth real da Patty foi criada, o `profile` correspondente existe e a role `admin` foi confirmada no Supabase SaaS.
 
 
 ## Atualizacao 2026-10-04 - Solicitacao de treino pela cliente
@@ -1728,9 +1728,9 @@ Essa compatibilidade existe para convites implicitos ja emitidos. O fluxo prefer
 
 ## Atualizacao 2026-10-04 - Recuperacao implicita do Supabase
 
-### IMPLEMENTADA NA BRANCH
+### MERGEADA / PUBLICADA
 
-Os logs reais mostraram que o fluxo hospedado de recovery valida o link em `/verify` e retorna ao aplicativo com tokens no fragmento `#access_token=...&refresh_token=...&type=recovery`, nao com `?code=...`.
+Os logs reais mostraram que o fluxo hospedado de recovery pode retornar ao aplicativo com tokens no fragmento `#access_token=...&refresh_token=...&type=recovery`, alem do fluxo PKCE.
 
 Ajuste:
 - novos pedidos de recovery usam `redirectTo=/redefinir-senha`;
@@ -1746,7 +1746,7 @@ Todos os links de recovery emitidos antes desta correcao devem ser descartados d
 
 ## Atualizacao 2026-10-04 - Recovery PKCE confirmado em producao
 
-### IMPLEMENTADA NA BRANCH
+### MERGEADA / PUBLICADA
 
 Logs reais do Supabase mostraram que os links de recovery enviados em producao foram aceitos por `/verify` com status 303 e retornaram ao aplicativo em PKCE, usando `?code=...`.
 
@@ -1762,3 +1762,12 @@ Correcao:
 - o fallback de fragmento implicito continua preservado para compatibilidade.
 
 O reteste deve usar um link de recovery novo; Auth Codes anteriores sao single-use.
+
+
+## Atualizacao 2026-10-04 - Gate final de redefinicao de senha
+
+### MERGEADO / PUBLICADO
+
+A pagina de redefinicao prioriza um fragmento de recovery novo sobre qualquer sessao antiga do navegador. O formulario de nova senha somente e liberado quando existe uma sessao valida criada pelo fluxo de recovery atual.
+
+Isso evita trocar a senha da identidade errada em navegadores que ainda tenham sessao residual de teste. O PR #332 passou CI e foi publicado na Vercel.
