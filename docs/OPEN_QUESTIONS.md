@@ -477,7 +477,6 @@ Entre o Bulking e a volta ao Cutting, a Patty utiliza Consolidacao Metabolica pa
 
 Continuam abertos:
 - duracao do Bulking;
-- estrutura de macros/doses da Consolidacao;
 - duracao da Consolidacao;
 - criterio para encerrar a Consolidacao e retornar ao Cutting.
 
@@ -919,3 +918,6 @@ No Carb Cycle do Cutting 3, usar Fase 3 / faixa vermelha da tabela central.
 
 
 Transicao Bulking -> Consolidacao: criterios profissionais confirmados em 2026-10-04 como combinacao de ganho muscular, gordura/retencao, objetivo e avaliacao da Patty. Permanecem abertas as regras internas da Consolidacao e seu criterio de encerramento.
+
+
+Na Consolidacao, a Patty confirmou reducao manual e gradual das doses. Permanece aberto apenas se algum dia houver interesse em formalizar um criterio/ritmo exato das reducoes graduais; ate la, os ajustes sao profissionais e caso a caso.
