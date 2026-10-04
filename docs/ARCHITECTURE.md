@@ -202,6 +202,18 @@ Uploads grandes devem usar multipart quando necessario. Paths nao devem conter P
 
 ## Motor parametrizável de regras e workflows
 
+### DIRECAO ARQUITETURAL - 2026-10-04
+
+A camada de configuracao profissional deve permanecer desacoplada da identidade da Patty como unica proprietaria eterna do metodo. O uso inicial e single-professional, mas o desenho nao deve impedir futura comercializacao com conjuntos de configuracao independentes.
+
+Isso nao autoriza criar agora uma arquitetura multi-tenant nao especificada. O modelo exato de tenancy/organizacao continua como decisao futura. Nesta etapa, a exigencia e evitar acoplamentos irreversiveis:
+- sem constantes profissionais espalhadas no codigo;
+- sem defaults universais baseados apenas no metodo atual;
+- sem assumir uma unica configuracao profissional global como limite estrutural;
+- com versionamento, escopo, autoria e snapshots preservados.
+
+
+
 ### DECISÃO CONFIRMADA - 2026-09-30
 
 Regras profissionais, valores, fórmulas, coeficientes e workflows não devem ficar hardcoded na aplicação.

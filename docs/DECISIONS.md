@@ -33,7 +33,7 @@ Qualquer etapa posterior a `Cutting 2: 2 Low / 1 High` volta a ser questao abert
 
 ### REGRA CONFIRMADA VIGENTE
 
-A meta diaria permanece calculada pela configuracao profissional ativa. Para o baseline atual, a referencia e 60 mL/kg/dia.
+A meta diaria permanece calculada pela configuracao profissional ativa. Para o baseline atual, a referencia vigente e 35 mL/kg/dia, substituindo a referencia anterior de 60 mL/kg/dia.
 
 A taxonomia ativa distingue:
 - agua pura;
@@ -349,15 +349,15 @@ O produto deve prever um check-in de acompanhamento e incentivo para:
 - realizar um check-in diario de atividade fisica, registrando se fez ou nao fez atividade naquele dia;
 - acompanhar progresso dessas metas.
 
-A meta diaria de liquidos foi confirmada posteriormente pela Patty como **60 mL por kg de peso corporal**.
+A meta minima diaria de liquidos vigente foi confirmada pela Patty em 2026-10-04 como **35 mL por kg de peso corporal**, substituindo a referencia anterior de 60 mL/kg.
 
 Formula do metodo:
 
-`meta_liquidos_ml = peso_kg * 60`
+`meta_liquidos_ml = peso_kg * 35`
 
-Exemplo: 60 kg -> 3.600 mL/dia (3,6 L/dia).
+Exemplo matematico: 60 kg -> 2.100 mL/dia (2,1 L/dia).
 
-A orientacao historica sobre maior parte em agua pura foi superada para fins de automacao pela reconciliacao de 2026-10-03. A taxonomia ativa distingue agua pura de outros liquidos zero calorias sem proporcao minima automatica.
+A Patty relatou que geralmente trabalha com aproximadamente 70% da meta em agua pura e o restante podendo vir de outros liquidos zero calorias. Esse percentual ainda precisa ser classificado como regra obrigatoria ou referencia usual configuravel antes de qualquer automacao.
 
 O check-in diario de atividade fisica e independente do treino prescrito ou de qualquer rotina previamente definida. A frequencia pode ser derivada depois dos registros diarios.
 
@@ -374,7 +374,7 @@ Ainda precisam ser formalizados como padrao/regra:
 - visibilidade e poderes de correcao da Patty;
 - politica de edicao de check-ins passados.
 
-A formula 60 mL/kg esta confirmada como regra deterministica do metodo. Nao criar score automatico de adesao a partir do check-in.
+A formula vigente de 35 mL/kg esta confirmada como regra deterministica do metodo para novas metas. Nao criar score automatico de adesao a partir do check-in.
 
 ## 2026-09-27 - Escopo de Edicao Manual da Patty
 
@@ -2413,7 +2413,7 @@ Nao inferir prioridade, prazo, urgencia, adesao, estagnacao ou decisao profissio
 Foram materializadas somente regras ja confirmadas pela Patty:
 
 - meta de liquidos como snapshot append-only de peso;
-- calculo deterministico `peso_kg * 60 mL`;
+- calculo deterministico vigente `peso_kg * 35 mL`, substituindo a referencia anterior de 60 mL/kg para novas metas;
 - nenhuma alteracao de peso recalcula automaticamente metas historicas;
 - ingestao de liquidos como eventos append-only, distinguindo `water` e `zero_calorie_other`;
 - atividade fisica diaria como eventos append-only, independente do treino prescrito;
@@ -2494,3 +2494,412 @@ Decisoes tecnicas/produto:
 - nenhuma resposta semanal entra em provider de IA enquanto o gate aplicavel a dados reais permanecer fechado.
 
 O primeiro fluxo operacional permite criacao manual da solicitacao pela Patty/admin. Agenda automatica, email e WhatsApp permanecem desacoplados e dependem das decisoes abertas registradas em `OPEN_QUESTIONS.md`.
+
+
+## 2026-10-04 - Sequencia com Cutting 3 e Consolidacao Metabolica
+
+### REGRA CONFIRMADA PELA PATTY
+
+O fluxo profissional de alto nivel inclui:
+
+```text
+Reconhecimento Metabolico
+-> Cutting 1
+-> Up Metabolico
+-> Cutting 2
+-> Up Metabolico
+-> Cutting 3
+-> Up Metabolico
+```
+
+A progressao e passo a passo e depende dos resultados do paciente.
+
+Quando o objetivo inclui ganho de massa muscular, pode haver Bulking. Entre o Bulking e a volta ao Cutting, a Patty utiliza Consolidacao Metabolica para trabalhar/preservar o ganho de massa muscular e retirar somente o excesso adicional de gordura e retencao liquida.
+
+Esta confirmacao supera a decisao de 2026-10-03 que encerrava a sequencia confirmada no Cutting 2.
+
+### LIMITES
+
+Continuam sem regra deterministica confirmada:
+- estrutura interna completa do Cutting 3;
+- formulas e duracao de Bulking;
+- formulas e duracao da Consolidacao Metabolica;
+- criterios exatos de entrada e saida dessas etapas;
+- equivalencia automatica entre todos os Ups Metabolicos.
+
+
+## 2026-10-04 - Revisao da regra de hidratacao
+
+### REGRA CONFIRMADA VIGENTE
+
+A Patty substituiu a referencia anterior de 60 mL/kg/dia.
+
+A regra vigente passa a ser:
+- minimo de 35 mL/kg/dia;
+- formula deterministica para novas metas: `peso_kg * 35`;
+- geralmente cerca de 70% dessa meta vem de agua pura;
+- o restante pode ser composto por outros liquidos zero calorias, como cafe, cha, chimarrao e bebidas zero calorias.
+
+O percentual de 70% ainda precisa de confirmacao adicional sobre ser obrigatorio ou apenas referencia usual. Ate la, nao implementar bloqueio/threshold automatico baseado nesse percentual.
+
+Metas historicas ja persistidas nao devem ser reescritas retroativamente.
+
+
+## 2026-10-04 - Regra de composicao da meta de liquidos
+
+### REGRA CONFIRMADA PELA PATTY
+
+A orientacao profissional passada a cliente e:
+- 70% da meta diaria minima de liquidos em agua pura;
+- os 30% restantes podem ser contabilizados com outros liquidos zero calorias.
+
+Exemplos citados pela Patty para os 30% restantes:
+- cafe;
+- cha;
+- chimarrao;
+- refrigerante zero;
+- outras bebidas zero calorias equivalentes.
+
+Se a cliente optar por cumprir de forma diferente, isso e uma escolha dela. O sistema nao deve bloquear, pontuar adesao ou alterar protocolo automaticamente por esse motivo.
+
+
+## 2026-10-04 - Recalculo automatico da meta de liquidos
+
+### REGRA CONFIRMADA PELA PATTY
+
+Sempre que houver um novo peso registrado para a cliente, a meta diaria de liquidos deve ser recalculada automaticamente pela formula/configuracao vigente.
+
+### DECISAO TECNICA
+
+O recalculo e prospectivo:
+- cria/define a nova meta vigente a partir do novo peso;
+- nao altera metas historicas;
+- nao altera check-ins passados;
+- preserva auditoria e o peso que originou cada snapshot de meta.
+
+
+## 2026-10-04 - Cliente pode corrigir check-ins
+
+### REGRA CONFIRMADA PELA PATTY
+
+A cliente pode corrigir os proprios registros de check-in de liquidos e atividade fisica.
+
+A permissao funcional esta confirmada, mas o limite temporal e a forma tecnica auditavel da correcao ainda precisam ser definidos antes de implementacao definitiva.
+
+
+## 2026-10-04 - Carb Cycle corresponde a 2 Low / 1 High
+
+### REGRA CONFIRMADA PELA PATTY
+
+"Carb Cycle" e o nome usado para a etapa de alternancia:
+
+```text
+2 dias Low Carb
+-> 1 dia High Carb
+-> repetir conforme o protocolo
+```
+
+A Patty usa uma planilha historica que recebe o peso da cliente e calcula os valores do Carb Cycle. A localizacao informada foi `Corpo e Mente passo a passo / Alimentacao / Planilha Carb Cycle`.
+
+A planilha deve ser tratada como fonte de regra a reconciliar, nao como autorizacao para inferir formulas ainda nao documentadas. Os valores/formulas confirmados depois da leitura devem entrar como configuracao versionada e parametrizavel.
+
+
+## 2026-10-04 - Correcao de check-in sem limite temporal
+
+### REGRA CONFIRMADA PELA PATTY
+
+A cliente pode corrigir um check-in proprio quando perceber que o registro esta errado, inclusive de dias anteriores. Nao existe limite temporal profissional para essa correcao.
+
+A implementacao deve preservar auditoria; permitir correcao funcional nao significa apagar silenciosamente o valor anterior.
+
+
+## 2026-10-04 - Carb Cycle: tabela central, cores e peso de referencia
+
+### REGRA CONFIRMADA PELA PATTY
+
+A Patty usa sempre a tabela central da planilha de Carb Cycle.
+
+Mapeamento confirmado:
+- Fase 1 -> faixa verde;
+- Fase 2 -> faixa amarela;
+- Fase 3 -> faixa vermelha.
+
+O peso usado no calculo e o peso da ultima Avaliacao Completa da cliente.
+
+A planilha fornecida confirma que os valores da tabela central sao derivados do peso informado multiplicado pelos coeficientes da faixa correspondente.
+
+### OBSERVACAO DE RECONCILIACAO
+
+A coluna textual/numerica "Fase" dentro da tabela central do arquivo historico apresenta rotulos que nao correspondem diretamente ao mapeamento profissional Fase 1/2/3 confirmado por cor. Para o produto, a regra profissional confirmada por cor prevalece; nao inferir numeracao adicional a partir desse rotulo sem validacao.
+
+
+## 2026-10-04 - Estrutura do Cutting 3
+
+### REGRA CONFIRMADA PELA PATTY
+
+O Cutting 3 segue a mesma estrutura dos Cuttings anteriores:
+
+```text
+Linear
+-> Dia 1 / Dia 2
+-> 2 Low / 1 High
+```
+
+Na etapa 2 Low / 1 High do Cutting 3, o Carb Cycle usa a Fase 3 da tabela central da planilha, correspondente a faixa vermelha.
+
+A progressao permanece profissional e dependente do cumprimento do passo a passo e dos resultados observados.
+
+
+## 2026-10-04 - Criterios combinados para entrada em Bulking
+
+### REGRA CONFIRMADA PELA PATTY
+
+A entrada em Bulking considera uma combinacao de fatores:
+- objetivo da paciente de ganho de massa muscular;
+- reducao de gordura ja alcancada;
+- momento metabolico e evolucao;
+- avaliacao profissional da Patty.
+
+Nao existe um gatilho unico confirmado que autorize iniciar Bulking automaticamente.
+
+
+## 2026-10-04 - Macros do Bulking definidos manualmente
+
+### REGRA CONFIRMADA PELA PATTY
+
+No Bulking, proteina, carboidrato e gordura sao definidos manualmente e individualmente para cada paciente.
+
+Nao ha formula/tabela global confirmada para automatizar esses valores. O produto deve suportar configuracao manual e versionada dos tres macros por protocolo/paciente.
+
+
+## 2026-10-04 - Transicao Bulking para Consolidacao por criterios combinados
+
+### REGRA CONFIRMADA PELA PATTY
+
+A passagem do Bulking para a Consolidacao Metabolica depende da combinacao de:
+- ganho de massa muscular atingido;
+- excesso de gordura e/ou retencao observado;
+- objetivo atual da paciente;
+- avaliacao profissional da Patty.
+
+Nao automatizar essa transicao por um unico indicador.
+
+
+## 2026-10-04 - Macros da Consolidacao reduzidos gradualmente
+
+### REGRA CONFIRMADA PELA PATTY
+
+Na Consolidacao Metabolica, os macros sao reduzidos manualmente e gradualmente, caso a caso.
+
+Nao ha formula fixa confirmada para a reducao. Cada ajuste deve ser tratado como decisao profissional individual e preservado em versao historica.
+
+
+## 2026-10-04 - Encerramento da Consolidacao Metabolica
+
+### REGRA CONFIRMADA PELA PATTY
+
+A Patty encerra a Consolidacao Metabolica quando avalia que o ganho de massa muscular foi preservado e que a paciente esta pronta para retornar ao Cutting.
+
+Nao ha criterio numerico unico nem prazo fixo confirmado para essa transicao.
+
+
+## 2026-10-04 - Retorno ao Cutting 1 apos Consolidacao
+
+### REGRA CONFIRMADA PELA PATTY
+
+Quando a paciente conclui a Consolidacao Metabolica e retorna ao Cutting, ela reinicia pelo Cutting 1.
+
+O retorno nao retoma diretamente Cutting 2 ou Cutting 3.
+
+
+## 2026-10-04 - Retorno pos-Consolidacao reinicia no Linear do Cutting 1
+
+### REGRA CONFIRMADA PELA PATTY
+
+Apos a Consolidacao Metabolica, o retorno ao Cutting recomeça pelo Cutting 1 e desde o protocolo Linear.
+
+Fluxo:
+
+```text
+Cutting 1 Linear
+-> Dia 1 / Dia 2
+-> 2 Low / 1 High
+```
+
+
+## 2026-10-04 - Carboidrato do Up Metabolico ajustado a partir do protocolo anterior
+
+### REGRA CONFIRMADA PELA PATTY
+
+Para definir o carboidrato no Up Metabolico, a Patty usa o protocolo anterior como referencia e aumenta a quantidade manualmente.
+
+Nao ha formula fixa confirmada para o aumento. O valor final e uma decisao profissional individual e deve ser preservado em versao historica.
+
+
+## 2026-10-04 - Treino: estrutura inicial, progressao e campos por exercicio
+
+### REGRA CONFIRMADA PELA PATTY
+
+Para clientes que solicitaram treino, existe uma estrutura inicial padrao, mas a progressao posterior e ajustada manualmente pela Patty conforme o treino, a evolucao e a paciente.
+
+Para cada exercicio, o treino precisa permitir definir:
+- exercicio;
+- series;
+- repeticoes;
+- opcionalmente, tempo de descanso;
+- opcionalmente, observacoes e orientacoes de execucao.
+
+A carga/peso nao e prescrita pela Patty como um valor fixo no treino; deve ser definida conforme a capacidade da paciente.
+
+### CONSEQUENCIA DE PRODUTO
+
+Nao automatizar progressao de carga, series ou repeticoes sem nova regra confirmada. O sistema deve permitir template inicial versionado e edicao manual pela Patty, preservando o treino publicado para cada paciente.
+
+
+## 2026-10-04 - Avaliacoes: agenda flexivel proxima de sexta ou sabado
+
+### REGRA CONFIRMADA PELA PATTY
+
+A Avaliacao Completa nao precisa ocorrer exatamente no mesmo dia numerico do mes em que o acompanhamento foi iniciado.
+
+A Patty prefere deixar a avaliacao o mais proximo possivel de sexta-feira ou sabado. O motivo informado e facilitar que a paciente realize a avaliacao antes de aproveitar a refeicao livre do fim de semana.
+
+### CONSEQUENCIA
+
+- datas de inicio em 29, 30 ou 31 nao exigem regra especial de "ultimo dia disponivel";
+- a agenda pode deslocar a avaliacao para uma data proxima;
+- sexta/sabado deve ser tratado como preferencia operacional, nao como restricao absoluta;
+- nao inferir, a partir desta decisao de agenda, novas regras automaticas sobre refeicao livre.
+
+
+## 2026-10-04 - Patty pode corrigir check-ins da cliente
+
+### REGRA CONFIRMADA PELA PATTY
+
+A Patty pode corrigir livremente um check-in de liquidos ou atividade fisica registrado pela cliente quando identificar erro.
+
+A cliente continua podendo corrigir os proprios registros.
+
+### CONSEQUENCIA TECNICA
+
+A correcao nao deve destruir o historico original. O sistema deve preservar auditoria suficiente para identificar o valor anterior, o valor corrigido, quem realizou a correcao e quando ela ocorreu.
+
+Essa confirmacao resolve o poder profissional de correcao. A forma exata de persistencia pode ser definida tecnicamente sem alterar essa regra.
+
+
+## 2026-10-04 - Feedback Semanal: elegibilidade apos primeiro protocolo
+
+### REGRA CONFIRMADA PELA PATTY
+
+O Feedback Semanal comeca depois que a cliente recebe o primeiro protocolo.
+
+Antes de receber o primeiro protocolo, a cliente nao precisa responder ao Feedback Semanal.
+
+### LIMITE
+
+Esta e a regra profissional de elegibilidade. O evento tecnico usado para representar "recebeu o primeiro protocolo" deve ser definido de forma auditavel no fluxo real de protocolo e nao deve criar novo criterio profissional por inferencia.
+
+
+## 2026-10-04 - Feedback Semanal: toda segunda-feira
+
+### REGRA CONFIRMADA PELA PATTY
+
+Depois que a cliente se torna elegivel ao Feedback Semanal por ter recebido o primeiro protocolo, o feedback deve ocorrer toda segunda-feira, independentemente da fase/protocolo atual.
+
+### LIMITES
+
+- o horario de segunda-feira ainda nao foi confirmado;
+- o canal de aviso externo ainda nao foi confirmado;
+- essas lacunas nao alteram a frequencia profissional confirmada.
+
+
+## 2026-10-04 - Feedback Semanal: agenda configuravel e lembrete na quarta
+
+### REGRA CONFIRMADA PELA PATTY
+
+O template inicial de agenda do Feedback Semanal e:
+- toda segunda-feira;
+- as 08:00;
+- independentemente da fase/protocolo, desde que a cliente ja tenha recebido o primeiro protocolo.
+
+A Patty quer poder alterar essa agenda pelo sistema. Portanto, segunda-feira as 08:00 e o valor inicial configurado, nao uma constante imutavel.
+
+Se a cliente ainda nao tiver respondido, deve receber um lembrete na quarta-feira.
+
+### LIMITES
+
+- quarta-feira foi confirmada como momento de lembrete, nao como prazo fatal;
+- nao fechar formulario nem suspender atendimento automaticamente na quarta-feira sem regra adicional;
+- horario e canal do lembrete ainda podem ser definidos/configurados separadamente;
+- canal principal de envio do Feedback Semanal continua aberto.
+
+
+## 2026-10-04 - Suplementacao e manipulados permanecem manuais
+
+### REGRA CONFIRMADA PELA PATTY
+
+Suplementacao e manipulados dependem totalmente da paciente e sao definidos manualmente pela Patty.
+
+Nao usar template automatico obrigatorio, regra geral de dose/indicacao ou sugestao automatica da IA para determinar esses itens.
+
+### CONSEQUENCIA DE PRODUTO
+
+O sistema deve oferecer campos editaveis para registro manual e preservar a versao publicada para cada paciente. Exemplos historicos individuais nao viram regra geral.
+
+
+## 2026-10-04 - Encerramento do acompanhamento
+
+### REGRA CONFIRMADA PELA PATTY
+
+Nao existe um criterio unico automatico para encerrar o acompanhamento.
+
+A decisao de encerramento e contextual e manual. Na pratica, o acompanhamento geralmente termina quando a propria paciente entende/decide que nao precisa mais continuar.
+
+### CONSEQUENCIA DE PRODUTO
+
+- nao encerrar automaticamente por tempo de acompanhamento;
+- nao encerrar automaticamente por fase concluida;
+- nao encerrar automaticamente por resultado, adesao ou meta isolada;
+- o sistema deve permitir encerramento manual e preservar o historico do acompanhamento.
+
+
+## 2026-10-04 - Feedback Semanal: canal configuravel por paciente
+
+### REGRA CONFIRMADA PELA PATTY
+
+O canal de comunicacao do Feedback Semanal deve ser configuravel por paciente.
+
+As opcoes disponiveis sao:
+- email;
+- WhatsApp;
+- notificacao dentro do aplicativo.
+
+Nao existe um unico canal global obrigatorio para todas as clientes.
+
+### CONSEQUENCIA DE PRODUTO
+
+A preferencia de canal deve pertencer a configuracao individual da paciente e poder ser alterada pela Patty.
+
+Os detalhes tecnicos de WhatsApp, incluindo provedor e consentimento/opt-in quando aplicavel, permanecem separados desta regra profissional.
+
+
+## 2026-10-04 - Parametrizacao como requisito para futura comercializacao
+
+### DECISAO DE PRODUTO E ARQUITETURA
+
+O sistema deve ser completamente parametrizavel no que diz respeito a regras profissionais e operacionais configuraveis.
+
+O uso inicial e da Patty e do metodo dela, mas existe direcao de produto para futura comercializacao. Portanto:
+- numeros e coeficientes profissionais nao ficam como constantes definitivas;
+- formulas profissionais sao configuracao estruturada/versionada;
+- sequencias e workflows profissionais sao configuraveis;
+- frequencias, horarios, lembretes e canais operacionais sao configuraveis quando fizerem parte do comportamento do produto;
+- templates atuais representam defaults iniciais do metodo da Patty;
+- configuracoes podem ser sobrescritas no escopo adequado sem reescrever historico;
+- snapshots publicados preservam exatamente o que foi usado.
+
+### LIMITE
+
+"Completamente parametrizavel" nao inclui tornar editaveis invariantes tecnicas como RLS, Auth, MFA, secrets, constraints de integridade, auditoria, segregacao de identidades ou a proibicao de publicacao direta pela IA.
+
+A futura comercializacao nao autoriza inferir agora um modelo multi-tenant especifico. O requisito atual e evitar acoplamento estrutural a uma unica profissional/configuracao global.

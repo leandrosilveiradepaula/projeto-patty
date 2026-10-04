@@ -38,7 +38,12 @@ O link deve abrir o aplicativo autenticado da cliente. O canal de entrega nao re
 
 ### DECISAO TECNICA/PRODUTO
 
-Agenda e canais devem ser configuraveis. Dia da semana, horario, prazo e canal nao devem ficar hardcoded como regra profissional.
+Agenda e canais devem ser configuraveis. O template inicial confirmado para a agenda do Feedback Semanal e:
+- envio toda segunda-feira;
+- horario padrao: 08:00;
+- Patty pode alterar dia/horario futuramente pela configuracao do sistema.
+
+O valor inicial nao deve ficar hardcoded como constante imutavel. Prazo e canal continuam independentes e configuraveis quando definidos.
 
 ### REGRA DE SEGURANCA
 
@@ -105,26 +110,46 @@ Nao criar estado automatico de "inadimplente", "sem atendimento" ou equivalente 
 
 Pode reutilizar o email de contato apenas se o produto decidir explicitamente que ele e o endereco operacional de notificacao. Nao usar email como chave de relacionamento.
 
-### WhatsApp
+### Canais configuraveis por paciente
 
-`client_registration.phone` nao deve ser presumido como numero de WhatsApp. Antes do envio real, definir provedor, consentimento/opt-in quando aplicavel, origem do numero e comportamento de fallback.
+A Patty confirmou em 2026-10-04 que o canal de comunicacao do Feedback Semanal deve ser configuravel por paciente.
 
-### In-app
+Opcoes disponiveis:
+- email;
+- WhatsApp;
+- notificacao dentro do aplicativo.
 
-A solicitacao deve sempre existir dentro do aplicativo independentemente do canal externo de aviso.
+Nao existe um unico canal global obrigatorio para todas as clientes.
+
+Para WhatsApp, `client_registration.phone` nao deve ser presumido automaticamente como numero apto a receber mensagens. Provedor, consentimento/opt-in quando aplicavel, origem do numero e comportamento de fallback continuam como decisoes tecnicas/operacionais.
+
+A solicitacao do Feedback Semanal continua existindo dentro do aplicativo independentemente do canal configurado para aviso.
+
+## Elegibilidade e frequencia confirmadas em 2026-10-04
+
+A elegibilidade profissional comeca depois que a cliente recebe o primeiro protocolo.
+
+Antes desse marco, a cliente nao precisa responder ao Feedback Semanal.
+
+Depois que se torna elegivel, a cliente recebe o Feedback Semanal toda segunda-feira, independentemente da fase/protocolo em que estiver.
+
+O horario padrao inicial e 08:00, mas Patty quer poder modificar dia e horario pela configuracao do sistema.
+
+Se a cliente ainda nao tiver respondido, deve receber um lembrete na quarta-feira.
+
+Esta confirmacao resolve a regra profissional de inicio, frequencia, dia da semana, horario inicial e lembrete semanal. O evento tecnico exato que representara "recebeu o primeiro protocolo" deve ser mapeado de forma auditavel ao fluxo real de publicacao/entrega do protocolo, sem inventar um novo criterio profissional. O canal de aviso e eventual prazo fatal continuam separados dessa regra e nao devem ser inferidos.
 
 ## Questoes que bloqueiam automacao completa
 
-1. Qual o dia/horario inicial desejado para o envio? A ideia de segunda-feira pela manha deve virar configuracao, nao constante.
-2. O prazo "ate quarta-feira" continua vigente? O prazo fecha o formulario ou apenas marca atraso?
+1. RESOLVIDO: template inicial de agenda = segunda-feira as 08:00, configuravel pela Patty no sistema.
+2. RESOLVIDO PARCIALMENTE: na quarta-feira, lembrar quem ainda nao respondeu. Quarta-feira nao deve ser tratada como fechamento automatico do formulario sem confirmacao adicional.
 3. O texto "responder e obrigatorio" deve ser apenas comunicacao ou gerar algum estado operacional?
 4. A regra historica de ficar sem atendimento online quando nao responder continua vigente? Se sim, quem confirma a suspensao e como ela termina? Nao automatizar sem resposta.
-5. O marco de elegibilidade e "1 semana" contado de qual evento: `clients.started_at`, primeira publicacao de protocolo ou outro?
-6. "Se ainda nao recebeu protocolo, nao precisa responder": qual evento tecnico define protocolo recebido?
-7. Cliente pode salvar rascunho e continuar depois?
+5. RESOLVIDO PROFISSIONALMENTE: o Feedback Semanal comeca depois que a cliente recebe o primeiro protocolo. O mapeamento tecnico de "recebeu" deve usar um evento auditavel do fluxo real de protocolo.
+6. Cliente pode salvar rascunho e continuar depois?
 8. Cliente pode corrigir depois de enviar? Se sim, ate quando e com qual historico?
-9. Havera lembrete antes/depois de quarta-feira? Qual cadencia?
-10. Canal inicial: email, WhatsApp, ambos, ou preferencia por cliente?
+9. RESOLVIDO PARCIALMENTE: ha lembrete na quarta-feira para quem ainda nao respondeu. O canal de comunicacao e configuravel por paciente entre email, WhatsApp e notificacao no app; horario do lembrete continua configuravel.
+10. RESOLVIDO: nao existe canal inicial global unico. A Patty configura o canal por paciente entre email, WhatsApp e notificacao dentro do aplicativo.
 11. Perguntas 8, 14, 15 e 16 devem ter aplicabilidade automatica a partir do protocolo ou a cliente marca "nao se aplica"?
 12. Perguntas 20 e 21 devem continuar semanais mesmo sendo dados relativamente estaveis?
 13. A Patty quer uma observacao/revisao manual por feedback antes de qualquer uso em IA ou protocolo?

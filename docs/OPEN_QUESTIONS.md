@@ -371,8 +371,11 @@ O catalogo da Avaliacao Completa esta confirmado:
 
 Para medidas unilaterais, utiliza-se somente o lado direito do corpo.
 
-Continua aberta:
-- a regra de calendario quando a data de inicio cai em 29, 30 ou 31 e o mes seguinte nao possui esse dia.
+Resolvido em 2026-10-04:
+- a data nao precisa permanecer presa ao mesmo dia do mes;
+- a Patty prefere posicionar a Avaliacao Completa o mais proximo possivel de sexta-feira ou sabado;
+- portanto, datas de inicio em 29, 30 ou 31 nao exigem regra especial de ultimo dia do mes;
+- a preferencia de sexta/sabado nao deve ser tratada como bloqueio rigido de agenda.
 
 O fluxo tecnico de correcao de medida historica apos finalizacao foi resolvido em 2026-09-30 com registro append-only: o lancamento original permanece preservado, cada correcao registra ator/momento/valor/unidade e a correcao mais recente passa a ser o valor factual vigente na leitura e comparacao.
 
@@ -432,6 +435,16 @@ Qual sera a UX e o processo humano para revisao de findings, edicao de follow-up
 
 ## Metodo profissional
 
+### RESOLVIDO EM 2026-10-04 — ENCERRAMENTO DO ACOMPANHAMENTO
+
+Nao existe criterio unico automatico para encerrar o acompanhamento.
+
+A decisao e manual e contextual. Na pratica relatada pela Patty, o acompanhamento geralmente termina quando a propria paciente entende/decide que nao precisa mais continuar.
+
+Nao usar resultado, adesao, tempo, fase ou meta isolada como gatilho automatico de encerramento.
+
+
+
 As regras abaixo permanecem abertas somente onde a documentacao ainda nao registra confirmacao da Patty. O fluxo principal, o Reconhecimento Metabolico, as referencias iniciais de macros e doses, o limite do grupo de proteina com maior teor de gordura, o Cutting Dia 1 / Dia 2 e a refeicao livre semanal do Up Metabolico ja estao documentados como confirmados.
 
 ### PARCIALMENTE RESOLVIDO — PLANILHA CARB CYCLE
@@ -449,69 +462,78 @@ Continuam abertos:
 - criterios profissionais de transicao cutting -> bulking -> cutting;
 - regras detalhadas das Fases 4, 5 e 6.
 
-### QUESTAO ABERTA — ETAPAS POSTERIORES AO CUTTING 2
+### PARCIALMENTE RESOLVIDO — ETAPAS POSTERIORES AO CUTTING 2
 
-A sequencia profissional atualmente confirmada termina em:
+A Patty confirmou em 2026-10-04 a sequencia de alto nivel:
+- Cutting 2;
+- Up Metabolico;
+- Cutting 3;
+- Up Metabolico.
 
-- Cutting 2 Linear;
-- Cutting 2 Dia 1 / Dia 2;
-- Cutting 2: 2 Low / 1 High.
-
-Registros historicos anteriores mencionavam Cutting 3 como sequencia confirmada, mas essa classificacao fica superada para fins de automacao pela reconciliacao documental vigente.
-
-Continuam abertos:
-
-- qual e a etapa imediatamente posterior a `Cutting 2: 2 Low / 1 High`;
-- se existe um Cutting posterior formal no fluxo vigente e, em caso positivo, sua nomenclatura/estrutura;
-- valores, formulas, duracao e criterios de encerramento de qualquer etapa posterior;
-- relacao dessas etapas com Bulking e eventual retorno ao Cutting;
-- pareamento individual entre fases numeradas da planilha e etapas concretas do protocolo.
-
-Nao automatizar selecao, progressao ou nomenclatura de etapa posterior ao Cutting 2 enquanto nao houver nova confirmacao documentada da Patty.
-
-### PARCIALMENTE RESOLVIDO — BULKING
-
-A Patty confirmou que costuma alternar um cutting prolongado com um periodo de bulking para trabalho de massa muscular e, ao retornar ao cutting, reinicia o ciclo pelas Fases 1, 2 e 3.
+Tambem confirmou que, quando ha objetivo de ganho de massa muscular, pode existir Bulking seguido de Consolidacao Metabolica antes do retorno ao Cutting.
 
 Continuam abertos:
-- criterio para iniciar bulking;
-- estrutura de macros/doses do bulking;
-- duracao;
-- criterios de ajuste/encerramento;
-- criterio para retornar ao cutting;
-- regras detalhadas de Consolidacao.
+- formulas, duracao e criterios de entrada/saida do Bulking;
+- formulas, duracao e criterios de entrada/saida da Consolidacao Metabolica;
+- criterio/quantidade exata do aumento de carboidrato em cada ocorrencia do Up Metabolico, caso futuramente seja formalizado;
+- pareamento completo entre fases numeradas da planilha e etapas concretas do protocolo.
 
-Nao automatizar bulking apenas com base nessa confirmacao de fluxo geral.
+Resolvido em 2026-10-04: os Ups Metabolicos nao precisam repetir duracao nem quantidade de refeicoes livres. Esses parametros variam por periodo/cliente conforme resultado e decisao profissional.
+
+A progressao continua sendo decisao profissional baseada em resultados. Nao automatizar mudanca de fase sem regra deterministica confirmada.
+
+### PARCIALMENTE RESOLVIDO — BULKING E CONSOLIDACAO METABOLICA
+
+A Patty confirmou que Bulking e usado quando o paciente deseja trabalhar ganho de massa muscular.
+
+Entre o Bulking e a volta ao Cutting, a Patty utiliza Consolidacao Metabolica para trabalhar/preservar o ganho de massa muscular e retirar somente o excesso adicional de gordura e retencao liquida.
+
+Resolvido em 2026-10-04:
+- Bulking nao possui duracao geral predefinida; Patty decide manualmente;
+- Consolidacao termina quando a Patty considera o ganho muscular preservado e a paciente pronta para voltar ao Cutting;
+- nenhum threshold automatico de tempo, peso ou medida foi confirmado.
+
+Nao automatizar Bulking ou Consolidacao alem das regras explicitamente confirmadas.
 
 ### PARCIALMENTE RESOLVIDO — HIDRATACAO/CHECK-IN DE LIQUIDOS
 
-A Patty confirmou a formula usada no metodo:
+A Patty substituiu em 2026-10-04 a referencia anterior de 60 mL/kg pela regra vigente:
 
-- **60 mL por kg de peso corporal por dia**;
-- exemplo: 60 kg -> 3.600 mL/dia = 3,6 L/dia.
+- **minimo de 35 mL por kg de peso corporal por dia**;
+- exemplo matematico: 60 kg -> 2.100 mL/dia = 2,1 L/dia.
 
-A taxonomia operacional distingue agua pura de outros liquidos zero calorias. Nenhuma proporcao minima automatica entre essas categorias esta confirmada.
+A taxonomia operacional distingue agua pura de outros liquidos zero calorias. A Patty confirmou que a orientacao profissional e 70% da meta em agua pura e os 30% restantes podendo vir de outros liquidos zero calorias. Divergencia da cliente nao gera bloqueio automatico nem score de adesao.
 
 Continuam abertos:
-- eventual proporcao-alvo entre agua pura e outros liquidos, caso a Patty queira formaliza-la futuramente;
-- regra de recalculo quando o peso muda;
-- horarios/cadencia dos lembretes;
-- poderes de correcao da Patty;
-- edicao de registros anteriores.
+- horarios/cadencia dos lembretes.
 
-O valor atual de **60 mL/kg/dia** e a referencia profissional confirmada e passa a ser o template inicial dessa regra. O runtime atual ja possui implementacao deterministica com snapshot de meta, mas, conforme a decisao de parametrizacao de 2026-09-30, esse numero nao deve permanecer como constante profissional definitiva no codigo: deve migrar para configuracao versionada sem reescrever historico.
+Resolvido em 2026-10-04:
+- a cliente pode corrigir os proprios check-ins, inclusive anteriores;
+- a Patty tambem pode corrigir check-ins da cliente quando identificar erro;
+- a implementacao deve preservar auditoria e nao apagar silenciosamente o valor original.
 
-As questoes de recalculo por mudanca de peso, eventual proporcao-alvo de agua pura, lembretes e correcoes continuam abertas e nao devem ser inferidas a partir do template.
+O valor vigente de **35 mL/kg/dia** e a referencia profissional confirmada e passa a ser o template inicial dessa regra, substituindo 60 mL/kg para novas metas. O runtime atual ja possui implementacao deterministica com snapshot de meta, mas, conforme a decisao de parametrizacao de 2026-09-30, esse numero nao deve permanecer como constante profissional definitiva no codigo: deve migrar para configuracao versionada sem reescrever historico.
 
-### QUESTAO ABERTA
+As questoes de recalculo por mudanca de peso e composicao da meta foram resolvidas nesta rodada. Lembretes ainda permanecem abertos. A capacidade de correcao pela cliente e pela Patty esta confirmada; a materializacao tecnica deve preservar auditoria.
 
-Quais sao as regras de suplementacao e manipulados?
+### RESOLVIDO EM 2026-10-04 — SUPLEMENTACAO E MANIPULADOS
 
-### QUESTAO ABERTA
+Suplementacao e manipulados sao definidos manualmente pela Patty, caso a caso.
 
-A solicitacao de treino pela cliente ja possui registro estruturado append-only e nao autoriza geracao automatica. Continua aberta a montagem e progressao definitiva de treino, incluindo excecoes de frequencia/duracao, intensidade, volume, progressao e cardio quando aplicavel.
+Nao existe regra geral automatica, template obrigatorio ou sugestao automatica da IA autorizada neste momento. O produto precisa permitir registro/edicao manual e preservar o historico publicado.
 
-Tambem permanece aberto como representar eventual retirada/cancelamento posterior da solicitacao de treino; nao inferir cancelamento nem apagar o registro historico.
+### PARCIALMENTE RESOLVIDO — TREINO
+
+A solicitacao de treino pela cliente possui registro estruturado append-only e nao autoriza geracao automatica.
+
+Confirmado em 2026-10-04:
+- existe estrutura inicial padrao;
+- progressao posterior e manual conforme treino, evolucao e paciente;
+- cada exercicio precisa de exercicio, series e repeticoes;
+- tempo de descanso e observacoes/orientacoes de execucao podem ser incluidos;
+- carga/peso e definida pela capacidade da paciente, nao como valor fixo prescrito pela Patty.
+
+Detalhes adicionais de intensidade, cardio, excecoes e eventual cancelamento da solicitacao podem ser definidos futuramente, mas nao bloqueiam a estrutura inicial do produto.
 
 ### QUESTAO ABERTA
 
@@ -554,11 +576,13 @@ A Patty descreveu a alimentacao como "totalmente sem gordura saturada" e oriento
 
 Definir o significado operacional dessa orientacao, limites/excecoes e se e regra de protocolo ou recomendacao geral. Nao criar bloqueio alimentar automatico enquanto isso estiver aberto.
 
-### QUESTAO ABERTA — SUPLEMENTACAO/MANIPULADOS
+### RESOLVIDO PARA AUTOMACAO — SUPLEMENTACAO/MANIPULADOS
 
-A rodada trouxe exemplos adicionais de pratica profissional: magnesio antes de dormir, possibilidade de alho, manipulados ou encaminhamento conforme exames.
+Os exemplos historicos de suplementos/manipulados continuam sendo apenas exemplos individuais.
 
-Ainda faltam criterios de elegibilidade, dose, forma, duracao, contraindicacoes, interacoes, grupos excluidos e necessidade de avaliacao externa. Esses exemplos nao viram recomendacao automatica.
+A Patty confirmou em 2026-10-04 que define suplementacao e manipulados manualmente, caso a caso. Portanto, criterios gerais de elegibilidade, dose, forma, duracao, contraindicacoes e interacoes nao precisam ser inferidos nem automatizados para viabilizar o produto.
+
+Se futuramente a Patty quiser transformar alguma pratica em template/regra reutilizavel, sera necessaria nova confirmacao e versionamento.
 
 ### QUESTAO ABERTA — TREINO
 
@@ -773,15 +797,17 @@ A Patty confirmou que o produto deve prever check-ins com metas e lembretes para
 
 A Patty confirmou que as metas/configuracoes individuais podem ser definidas na entrega do primeiro protocolo.
 
-A formula e a unidade da meta estao resolvidas: 60 mL/kg/dia.
+A formula e a unidade da meta estao resolvidas: 35 mL/kg/dia como template profissional vigente.
 
-Ainda faltam formalizar:
-- eventual proporcao-alvo de agua pura dentro da meta;
-- regra de recalculo apos mudanca de peso;
-- horarios e cadencia dos lembretes;
-- o que a Patty visualiza e pode corrigir;
-- se registros anteriores podem ser editados;
-- parametros funcionais restantes necessarios para implementar o check-in completo.
+Tambem estao resolvidos:
+- orientacao 70% agua pura / 30% outros liquidos zero calorias;
+- recalculo automatico prospectivo apos novo peso;
+- cliente pode corrigir registros anteriores sem limite temporal profissional definido;
+- Patty pode corrigir registros da cliente com auditoria.
+
+Permanece aberto:
+- horarios/cadencia dos lembretes de hidratacao;
+- detalhes tecnicos adicionais de notificacao quando necessarios.
 
 Nao inferir score de adesao ou frequencia ideal de treino.
 
@@ -837,7 +863,7 @@ Continua aberto apenas o mecanismo futuro de recovery/watchdog, caso seja necess
 
 ### RESOLVIDO TECNICAMENTE
 
-- formula e unidade atualmente usadas na meta de liquidos: 60 mL/kg/dia;
+- formula e unidade vigentes para novas metas: 35 mL/kg/dia;
 - esse valor passa a ser template inicial versionado e nao constante profissional definitiva;
 - persistencia da meta como snapshot, sem sobrescrever historico;
 - ingestao e atividade fisica com eventos append-only;
@@ -847,9 +873,8 @@ Continua aberto apenas o mecanismo futuro de recovery/watchdog, caso seja necess
 ### AINDA ABERTO
 
 - eventual proporcao-alvo de agua pura;
-- criterio para criar uma nova meta quando o peso muda;
 - canal de notificacao para o lembrete de 24 horas;
-- detalhes de eventual correcao/estorno de eventos alem de adicionar novo evento;
+- a cliente pode corrigir os proprios check-ins sem limite temporal profissional; permanecem abertas a correcao pela Patty e a forma tecnica auditavel;
 - nenhum desses pontos abertos autoriza score de adesao ou notificacao por canal inferido.
 
 
@@ -884,13 +909,52 @@ Nao ampliar o mecanismo sem caso profissional confirmado.
 
 ### AINDA ABERTO
 
-- dia e horario padrao da agenda automatica;
+- agenda profissional resolvida em 2026-10-04: toda segunda-feira, independentemente da fase;
+- horario padrao inicial: 08:00;
+- dia/horario devem ser configuraveis pela Patty no sistema, usando segunda-feira 08:00 como template inicial;
+- lembrete na quarta-feira para clientes elegiveis que ainda nao responderam;
+- canal de comunicacao resolvido: configuravel por paciente entre email, WhatsApp e notificacao dentro do aplicativo; horario do lembrete continua configuravel;
+- quarta-feira nao foi confirmada como prazo fatal nem como fechamento automatico do formulario;
 - se o prazo historico de quarta-feira apenas marca atraso ou fecha alguma acao;
-- marco exato de elegibilidade para iniciar Feedback Semanal;
-- significado tecnico de "recebeu protocolo" para elegibilidade;
-- politica de lembretes;
-- canal inicial: email, WhatsApp, ambos ou preferencia por cliente;
-- eventual consentimento/opt-in e provedor de WhatsApp;
+- o marco profissional de elegibilidade foi resolvido em 2026-10-04: a cliente passa a receber Feedback Semanal depois que recebe o primeiro protocolo;
+- permanece apenas a decisao tecnica de qual evento auditavel do fluxo de protocolo representa "recebeu", sem alterar a regra profissional;
+- politica de lembretes parcialmente resolvida: lembrete na quarta-feira para quem ainda nao respondeu; falta apenas eventual configuracao de horario/politica adicional;
+- canal do Feedback Semanal resolvido: configuravel por paciente entre email, WhatsApp e notificacao dentro do aplicativo;
+- eventual consentimento/opt-in, provedor e detalhes tecnicos de WhatsApp permanecem decisoes operacionais/tecnicas;
 - se perguntas relativamente estaveis, como local de trabalho/treino, permanecem semanais;
 - se a Patty deseja revisao/observacao formal por feedback antes de qualquer uso posterior;
 - consequencia profissional de nao responder continua humana ate nova confirmacao explicita.
+
+
+### PARCIALMENTE RESOLVIDO — CARB CYCLE COMO 2 LOW / 1 HIGH
+
+A Patty confirmou que Carb Cycle corresponde a etapa de 2 dias Low Carb para 1 dia High Carb.
+
+A planilha historica informada fica em `Corpo e Mente passo a passo / Alimentacao / Planilha Carb Cycle` e recebe o peso da cliente para realizar os calculos.
+
+Continuam abertos apenas os pontos que dependem da leitura/reconciliacao da planilha:
+- formulas exatas por faixa/fase;
+- mapeamento de cada coluna/linha para o protocolo;
+- regras das fases pouco usadas que ainda nao estejam documentadas.
+
+Nao inferir formula fora da planilha nem transformar exemplo individual em template global sem reconciliacao.
+
+
+### RESOLVIDO - ESTRUTURA DO CUTTING 3
+
+A Patty confirmou que o Cutting 3 repete:
+
+- Linear;
+- Dia 1 / Dia 2;
+- Carb Cycle 2 Low / 1 High.
+
+No Carb Cycle do Cutting 3, usar Fase 3 / faixa vermelha da tabela central.
+
+
+Transicao Bulking -> Consolidacao: criterios profissionais confirmados em 2026-10-04 como combinacao de ganho muscular, gordura/retencao, objetivo e avaliacao da Patty. Permanecem abertas as regras internas da Consolidacao e seu criterio de encerramento.
+
+
+Na Consolidacao, a Patty confirmou reducao manual e gradual das doses. Permanece aberto apenas se algum dia houver interesse em formalizar um criterio/ritmo exato das reducoes graduais; ate la, os ajustes sao profissionais e caso a caso.
+
+
+Resolvido em 2026-10-04: o retorno pos-Consolidacao reinicia pelo Cutting 1 desde o Linear, seguindo depois Dia 1/Dia 2 e Carb Cycle 2 Low/1 High.
