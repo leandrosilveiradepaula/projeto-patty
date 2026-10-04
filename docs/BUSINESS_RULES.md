@@ -676,7 +676,9 @@ Podem ocorrer, entre outras possibilidades confirmadas:
 - entrada em Bulking, quando houver objetivo de ganho de massa muscular;
 - outra continuidade definida profissionalmente a partir do resultado da paciente.
 
-Nao automatizar a escolha entre essas alternativas sem regra adicional confirmada. As regras detalhadas de manutencao, encerramento e criterios de escolha permanecem pendentes.
+Nao automatizar a escolha entre essas alternativas sem regra adicional confirmada.
+
+Sobre encerramento do acompanhamento, nao existe criterio unico automatico. A decisao e contextual e manual. Na pratica relatada pela Patty, o acompanhamento geralmente termina quando a propria paciente entende/decide que nao precisa mais continuar. Resultado, adesao, tempo de acompanhamento ou fase nao devem encerrar o acompanhamento automaticamente.
 
 
 ### MANUTENCAO - USO PROFISSIONAL
