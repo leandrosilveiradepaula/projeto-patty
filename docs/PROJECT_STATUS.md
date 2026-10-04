@@ -1596,3 +1596,24 @@ Invariantes:
 - sem secret no browser;
 - fluxo serve tanto admin quanto cliente;
 - validacao real do email continua dependente da configuracao hospedada de Auth/SMTP e da redirect allowlist.
+
+
+## Atualizacao 2026-10-04 - Bootstrap controlado da Patty admin
+
+### IMPLEMENTADO NA BRANCH / AINDA NAO EXECUTADO
+
+Branch: `codex/admin-bootstrap-procedure`.
+
+Foi preparado um procedimento manual e idempotente de bootstrap da unica admin de negocio:
+- workflow `Bootstrap Patty admin`, restrito ao `master` e com confirmacao literal;
+- reutiliza o secret server-side de Supabase ja usado pelos E2E;
+- email e fornecido somente na execucao e nao fica commitado no repositorio;
+- procura identidade Auth existente antes de convidar;
+- cria `profile` somente se ausente;
+- cria role `admin` somente quando nao ha role existente;
+- recusa promover perfil ligado a `clients`;
+- recusa role `client` ou estado ambiguo;
+- em convite novo, tenta compensar Auth/profile/role se o provisionamento falhar;
+- nao cria assignment nem acesso client-scoped automaticamente.
+
+A execucao real permanece pendente porque workflows novos nao podem ser disparados pela conexao GitHub disponivel neste chat. Depois do merge, a operacao manual esperada e executar o workflow no `master` com o email administrativo real e confirmacao `BOOTSTRAP_PATTY`.
