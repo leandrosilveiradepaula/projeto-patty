@@ -2725,3 +2725,12 @@ Cutting 1 Linear
 -> Dia 1 / Dia 2
 -> 2 Low / 1 High
 ```
+
+
+## 2026-10-04 - Carboidrato do Up Metabolico ajustado a partir do protocolo anterior
+
+### REGRA CONFIRMADA PELA PATTY
+
+Para definir o carboidrato no Up Metabolico, a Patty usa o protocolo anterior como referencia e aumenta a quantidade manualmente.
+
+Nao ha formula fixa confirmada para o aumento. O valor final e uma decisao profissional individual e deve ser preservado em versao historica.
