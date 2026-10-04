@@ -139,7 +139,7 @@ A migration `20260924153808_create_anamnesis_clarification_flow.sql` esta aplica
 
 Tipos nao juridicos, 10 condicionais, ordem, consentimento ANAM-046 e submissao final da v1 estao fechados. A primeira `client-anamnesis` ja foi materializada, publicada e validada em producao; mudancas futuras devem ocorrer por nova versao.
 
-### Esclarecimentos - lifecycle ainda incompleto
+### Esclarecimentos - lifecycle operacional implementado / notificacao ainda aberta
 
 A regra profissional esta fechada:
 - resposta da cliente nao encerra automaticamente;
@@ -148,7 +148,9 @@ A regra profissional esta fechada:
 - nao existe prazo de expiracao;
 - enquanto aguarda resposta da cliente, deve haver lembrete a cada 24 horas.
 
-A fundacao atual e append-only e ja suporta pedido/resposta, mas ainda nao implementa estado formal resolvido, re-questionamento como lifecycle operacional nem lembrete recorrente de 24 horas. O canal da notificacao tambem permanece aberto.
+O lifecycle no aplicativo ja suporta pedido, resposta append-only, resolucao manual pela Patty e novo questionamento. A fila de pendencias calcula de forma factual quando o marco configurado de lembrete esta devido.
+
+Permanece aberto somente o envio recorrente efetivo do lembrete, porque o canal tecnico de notificacao ainda nao foi definido.
 
 ### Banco e performance
 
