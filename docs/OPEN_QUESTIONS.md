@@ -494,13 +494,16 @@ A Patty substituiu em 2026-10-04 a referencia anterior de 60 mL/kg pela regra vi
 A taxonomia operacional distingue agua pura de outros liquidos zero calorias. A Patty confirmou que a orientacao profissional e 70% da meta em agua pura e os 30% restantes podendo vir de outros liquidos zero calorias. Divergencia da cliente nao gera bloqueio automatico nem score de adesao.
 
 Continuam abertos:
-- horarios/cadencia dos lembretes;
-- poderes de correcao da Patty;
-- se a Patty tambem pode corrigir registros da cliente.
+- horarios/cadencia dos lembretes.
+
+Resolvido em 2026-10-04:
+- a cliente pode corrigir os proprios check-ins, inclusive anteriores;
+- a Patty tambem pode corrigir check-ins da cliente quando identificar erro;
+- a implementacao deve preservar auditoria e nao apagar silenciosamente o valor original.
 
 O valor vigente de **35 mL/kg/dia** e a referencia profissional confirmada e passa a ser o template inicial dessa regra, substituindo 60 mL/kg para novas metas. O runtime atual ja possui implementacao deterministica com snapshot de meta, mas, conforme a decisao de parametrizacao de 2026-09-30, esse numero nao deve permanecer como constante profissional definitiva no codigo: deve migrar para configuracao versionada sem reescrever historico.
 
-As questoes de recalculo por mudanca de peso, eventual proporcao-alvo de agua pura, lembretes e correcoes continuam abertas e nao devem ser inferidas a partir do template.
+As questoes de recalculo por mudanca de peso e composicao da meta foram resolvidas nesta rodada. Lembretes ainda permanecem abertos. A capacidade de correcao pela cliente e pela Patty esta confirmada; a materializacao tecnica deve preservar auditoria.
 
 ### QUESTAO ABERTA
 
