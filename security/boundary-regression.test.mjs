@@ -699,6 +699,8 @@ test("Supabase production migration workflow stays manual and non-destructive", 
 const REVIEWED_SECURITY_DEFINER_MIGRATIONS = new Set([
   "20260930151722_create_ai_finding_actions.sql",
   "20260930152158_harden_ai_finding_action_boundary.sql",
+  "20261004132902_secure_client_assessment_effective_read.sql",
+  "20261004132955_move_client_assessment_reader_to_private_schema.sql",
 ]);
 
 test("database migrations avoid unsafe authorization shortcuts", async () => {
@@ -733,6 +735,48 @@ test("database migrations avoid unsafe authorization shortcuts", async () => {
     violations,
     [],
     "Migrations must not introduce deprecated/user-editable authorization or implicit RLS bypass.",
+  );
+});
+
+test("reviewed client assessment SECURITY DEFINER ends in a private schema", async () => {
+  const initial = await readFile(
+    path.join(
+      ROOT,
+      "supabase",
+      "migrations",
+      "20261004132902_secure_client_assessment_effective_read.sql",
+    ),
+    "utf8",
+  );
+  const final = await readFile(
+    path.join(
+      ROOT,
+      "supabase",
+      "migrations",
+      "20261004132955_move_client_assessment_reader_to_private_schema.sql",
+    ),
+    "utf8",
+  );
+
+  assert.match(
+    initial,
+    /create function public\.list_current_client_finalized_assessment_measurements\(\)[\s\S]*security definer/i,
+  );
+  assert.match(
+    final,
+    /drop function if exists public\.list_current_client_finalized_assessment_measurements\(\)/i,
+  );
+  assert.match(
+    final,
+    /create function app_private\.list_current_client_finalized_assessment_measurements\(\)[\s\S]*security definer/i,
+  );
+  assert.match(
+    final,
+    /create function public\.list_current_client_finalized_assessment_measurements\(\)[\s\S]*security invoker/i,
+  );
+  assert.match(
+    final,
+    /where c\.profile_id = \(select auth\.uid\(\)\)/i,
   );
 });
 

@@ -1635,3 +1635,22 @@ Implementado:
 
 Limite:
 - solicitar treino nao cria prescricao, nao seleciona exercicios e nao altera protocolo automaticamente.
+
+
+## Atualizacao 2026-10-04 - Avaliacoes e evolucao para a cliente
+
+### IMPLEMENTADA NA BRANCH / RPC SEGURA JA APLICADA NO SAAS
+
+Migrations aplicadas no Supabase SaaS:
+- `20261004132649_allow_client_finalized_assessment_read` — etapa inicial, posteriormente substituida;
+- `20261004132902_secure_client_assessment_effective_read` — introduziu leitura de valor vigente;
+- `20261004132955_move_client_assessment_reader_to_private_schema` — estado final, com SECURITY DEFINER em schema nao exposto e wrapper publico SECURITY INVOKER.
+
+Estado final:
+- a cliente nao recebe SELECT direto nas tabelas de avaliacoes, medidas ou correcoes por causa desta feature;
+- a RPC publica retorna somente avaliacao, data, tipo historico, chave da medida, valor vigente e unidade;
+- autoria e nota de correcao nao sao retornadas;
+- somente avaliacoes finalizadas da propria cliente entram na leitura;
+- novas rotas `/cliente/avaliacoes` e `/cliente/evolucao`;
+- evolucao e puramente numerica e nao classifica melhora, piora, sucesso ou estagnacao;
+- fotos de avaliacao e follow-ups profissionais continuam fora da leitura da cliente nesta etapa.
