@@ -60,6 +60,7 @@ jobs:
           test -f supabase/tests/database/method_configuration_assessment_liquid_snapshots.test.sql
           test -f supabase/migrations/20261002231111_harden_snapshot_consumers.sql
           test -f supabase/tests/database/method_configuration_snapshot_consumer_hardening.test.sql
+          test -f supabase/tests/database/method_configuration_version_activation.test.sql
           echo "Committed method configuration migrations and pgTAP files found."
 
       - name: Start local Supabase
@@ -100,6 +101,9 @@ jobs:
 
       - name: Run snapshot consumer hardening pgTAP
         run: npx supabase test db supabase/tests/database/method_configuration_snapshot_consumer_hardening.test.sql
+
+      - name: Run method configuration activation pgTAP
+        run: npx supabase test db supabase/tests/database/method_configuration_version_activation.test.sql
 
       - name: Stop local Supabase
         if: always()
