@@ -452,8 +452,8 @@ Esses parametros podem ser definidos individualmente **na entrega do primeiro pr
 Ainda nao estao formalizados como regra geral:
 - a meta deve ser recalculada automaticamente sempre que um novo peso for registrado; o novo calculo vale prospectivamente e nao reescreve metas historicas;
 - horarios e cadencia padrao dos lembretes;
-- o que a Patty visualiza ou pode corrigir;
-- politica de edicao de check-ins anteriores.
+- horarios e cadencia padrao dos lembretes continuam abertos.
+- a Patty pode visualizar e corrigir check-ins da cliente; a forma tecnica deve preservar auditoria.
 
 A formula vigente de 35 mL/kg esta confirmada e pode ser tratada como calculo deterministico do metodo para novas metas. Metas historicas ja persistidas nao devem ser reescritas. Nao criar score automatico de adesao a partir do check-in.
 
@@ -587,17 +587,15 @@ Sempre que um novo peso da cliente for registrado, a meta diaria de liquidos dev
 O novo calculo passa a valer dali em diante. Metas historicas e registros de consumo anteriores permanecem preservados e nao devem ser recalculados retroativamente.
 
 
-### CORRECAO DE CHECK-INS PELA CLIENTE
+### CORRECAO DE CHECK-INS
 
 ### DECISAO CONFIRMADA
 
-A cliente pode corrigir os proprios registros de check-in de liquidos e atividade fisica.
+A cliente pode corrigir os proprios registros de check-in de liquidos e atividade fisica quando perceber erro, inclusive em registro anterior, sem limite temporal profissional definido.
 
-A cliente pode corrigir quando perceber o erro, inclusive em registro anterior, sem limite temporal profissional definido.
+A Patty tambem pode corrigir registros de check-in da cliente quando identificar erro.
 
-Ainda precisa ser definido:
-- se a Patty tambem pode corrigir registros da cliente;
-- como a correcao sera materializada tecnicamente sem perder auditoria.
+A correcao administrativa nao deve apagar silenciosamente o historico original. A implementacao deve preservar auditoria de quem corrigiu, quando corrigiu e qual era o valor anterior.
 
 
 ### CARB CYCLE - DEFINICAO OPERACIONAL
