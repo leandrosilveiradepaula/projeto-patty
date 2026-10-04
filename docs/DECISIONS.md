@@ -2648,3 +2648,16 @@ Linear
 Na etapa 2 Low / 1 High do Cutting 3, o Carb Cycle usa a Fase 3 da tabela central da planilha, correspondente a faixa vermelha.
 
 A progressao permanece profissional e dependente do cumprimento do passo a passo e dos resultados observados.
+
+
+## 2026-10-04 - Criterios combinados para entrada em Bulking
+
+### REGRA CONFIRMADA PELA PATTY
+
+A entrada em Bulking considera uma combinacao de fatores:
+- objetivo da paciente de ganho de massa muscular;
+- reducao de gordura ja alcancada;
+- momento metabolico e evolucao;
+- avaliacao profissional da Patty.
+
+Nao existe um gatilho unico confirmado que autorize iniciar Bulking automaticamente.
