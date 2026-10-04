@@ -421,24 +421,26 @@ O check-in deve permitir:
 
 ### DECISAO CONFIRMADA
 
-A referencia usada pela Patty para a meta diaria de liquidos e:
+A regra vigente confirmada pela Patty em 2026-10-04 substitui a referencia anterior de 60 mL/kg.
 
-- **60 mL por kg de peso corporal por dia**.
+A meta minima usada no metodo e:
 
-Formula deterministica:
+- **35 mL por kg de peso corporal por dia**.
 
-`meta_liquidos_ml = peso_kg * 60`
+Formula deterministica vigente:
 
-Exemplo confirmado:
-- cliente com 60 kg -> 3.600 mL/dia = 3,6 L/dia.
+`meta_liquidos_ml = peso_kg * 35`
+
+Exemplo matematico:
+- cliente com 60 kg -> minimo de 2.100 mL/dia = 2,1 L/dia.
 
 Na composicao dessa meta:
 - a taxonomia ativa distingue **agua pura** de **outros liquidos zero calorias**;
-- ambos podem ser registrados no check-in;
-- a soma registrada pode ser comparada com a meta diaria calculada;
-- nao existe proporcao minima automatica confirmada entre as categorias.
+- a Patty relatou que geralmente trabalha com aproximadamente 70% da meta em agua pura e o restante podendo vir de outros liquidos zero calorias;
+- exemplos citados de outros liquidos: cafe, cha, chimarrao, refrigerante zero e bebidas zero calorias similares;
+- ainda precisa ser confirmado se os 70% sao regra obrigatoria ou referencia usual configuravel.
 
-A Patty descreveu essa formula como uma referencia media do seu metodo. Nao tratar essa regra do metodo como recomendacao medica geral fora do acompanhamento profissional.
+Nao tratar essa regra do metodo como recomendacao medica geral fora do acompanhamento profissional.
 
 O check-in diario de atividade fisica e independente do treino prescrito ou de qualquer rotina previamente definida para a cliente. O registro diario pode ser usado posteriormente para derivar frequencia, sem criar score automatico de adesao.
 
@@ -453,7 +455,7 @@ Ainda nao estao formalizados como regra geral:
 - o que a Patty visualiza ou pode corrigir;
 - politica de edicao de check-ins anteriores.
 
-A formula de 60 mL/kg esta confirmada e pode ser tratada como calculo deterministico do metodo. Nao criar score automatico de adesao a partir do check-in.
+A formula vigente de 35 mL/kg esta confirmada e pode ser tratada como calculo deterministico do metodo para novas metas. Metas historicas ja persistidas nao devem ser reescritas. Nao criar score automatico de adesao a partir do check-in.
 
 ## Avaliacao corporal e evolucao
 
@@ -554,3 +556,19 @@ A Patty pode alterar:
 Mudanças futuras não alteram retroativamente versões já usadas/publicadas.
 
 Exemplos históricos individuais continuam não sendo regras gerais. Quando importados, permanecem como dados/configuração daquela cliente até que exista decisão explícita de promover algo a template global.
+
+
+### UP METABOLICO - DURACAO E REFEICOES LIVRES
+
+### DECISAO CONFIRMADA
+
+O Up Metabolico nao possui duracao fixa nem quantidade fixa de refeicoes livres aplicavel a todas as clientes ou a todas as ocorrencias da fase.
+
+A Patty ajusta conforme o momento do processo, os resultados observados e a resposta individual da cliente.
+
+Variacoes confirmadas:
+- a cliente pode permanecer no Up Metabolico por mais um mes quando estiver apresentando resultado positivo;
+- pode haver 1 refeicao livre por semana;
+- em alguns momentos podem existir 2 refeicoes livres na semana, por exemplo quarta-feira e sabado.
+
+Esses exemplos nao devem ser transformados em regra automatica. Duracao e numero de refeicoes livres sao parametros configuraveis por fase/cliente e dependem de decisao manual da Patty.
