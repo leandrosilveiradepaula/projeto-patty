@@ -2683,3 +2683,12 @@ A passagem do Bulking para a Consolidacao Metabolica depende da combinacao de:
 - avaliacao profissional da Patty.
 
 Nao automatizar essa transicao por um unico indicador.
+
+
+## 2026-10-04 - Macros da Consolidacao reduzidos gradualmente
+
+### REGRA CONFIRMADA PELA PATTY
+
+Na Consolidacao Metabolica, os macros sao reduzidos manualmente e gradualmente, caso a caso.
+
+Nao ha formula fixa confirmada para a reducao. Cada ajuste deve ser tratado como decisao profissional individual e preservado em versao historica.
