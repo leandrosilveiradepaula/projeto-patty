@@ -371,8 +371,11 @@ O catalogo da Avaliacao Completa esta confirmado:
 
 Para medidas unilaterais, utiliza-se somente o lado direito do corpo.
 
-Continua aberta:
-- a regra de calendario quando a data de inicio cai em 29, 30 ou 31 e o mes seguinte nao possui esse dia.
+Resolvido em 2026-10-04:
+- a data nao precisa permanecer presa ao mesmo dia do mes;
+- a Patty prefere posicionar a Avaliacao Completa o mais proximo possivel de sexta-feira ou sabado;
+- portanto, datas de inicio em 29, 30 ou 31 nao exigem regra especial de ultimo dia do mes;
+- a preferencia de sexta/sabado nao deve ser tratada como bloqueio rigido de agenda.
 
 O fluxo tecnico de correcao de medida historica apos finalizacao foi resolvido em 2026-09-30 com registro append-only: o lancamento original permanece preservado, cada correcao registra ator/momento/valor/unidade e a correcao mais recente passa a ser o valor factual vigente na leitura e comparacao.
 
