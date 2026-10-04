@@ -738,3 +738,14 @@ A transicao do Bulking para a Consolidacao Metabolica e decidida pela Patty a pa
 - avaliacao profissional da Patty sobre o momento adequado de transicao.
 
 Nao existe gatilho unico nem regra automatica confirmada para essa passagem.
+
+
+### CONSOLIDACAO METABOLICA - AJUSTE DE MACROS
+
+### DECISAO CONFIRMADA
+
+Na Consolidacao Metabolica, a Patty reduz as doses de macros manualmente, de forma gradual e individual para cada paciente.
+
+Nao existe formula geral confirmada para definir a velocidade ou magnitude dessas reducoes. A Patty ajusta caso a caso conforme a evolucao e o objetivo.
+
+O sistema deve permitir reducoes graduais e versionadas, preservando cada configuracao utilizada ao longo do processo.
