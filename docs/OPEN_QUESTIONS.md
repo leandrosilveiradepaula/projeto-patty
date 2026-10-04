@@ -903,14 +903,14 @@ Nao ampliar o mecanismo sem caso profissional confirmado.
 - horario padrao inicial: 08:00;
 - dia/horario devem ser configuraveis pela Patty no sistema, usando segunda-feira 08:00 como template inicial;
 - lembrete na quarta-feira para clientes elegiveis que ainda nao responderam;
-- horario e canal do lembrete continuam configuraveis/abertos;
+- canal de comunicacao resolvido: configuravel por paciente entre email, WhatsApp e notificacao dentro do aplicativo; horario do lembrete continua configuravel;
 - quarta-feira nao foi confirmada como prazo fatal nem como fechamento automatico do formulario;
 - se o prazo historico de quarta-feira apenas marca atraso ou fecha alguma acao;
 - o marco profissional de elegibilidade foi resolvido em 2026-10-04: a cliente passa a receber Feedback Semanal depois que recebe o primeiro protocolo;
 - permanece apenas a decisao tecnica de qual evento auditavel do fluxo de protocolo representa "recebeu", sem alterar a regra profissional;
-- politica de lembretes parcialmente resolvida: lembrete na quarta-feira para quem ainda nao respondeu; faltam apenas horario/canal e eventual politica adicional;
-- canal inicial: email, WhatsApp, ambos ou preferencia por cliente;
-- eventual consentimento/opt-in e provedor de WhatsApp;
+- politica de lembretes parcialmente resolvida: lembrete na quarta-feira para quem ainda nao respondeu; falta apenas eventual configuracao de horario/politica adicional;
+- canal do Feedback Semanal resolvido: configuravel por paciente entre email, WhatsApp e notificacao dentro do aplicativo;
+- eventual consentimento/opt-in, provedor e detalhes tecnicos de WhatsApp permanecem decisoes operacionais/tecnicas;
 - se perguntas relativamente estaveis, como local de trabalho/treino, permanecem semanais;
 - se a Patty deseja revisao/observacao formal por feedback antes de qualquer uso posterior;
 - consequencia profissional de nao responder continua humana ate nova confirmacao explicita.
