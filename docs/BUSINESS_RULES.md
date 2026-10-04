@@ -699,3 +699,18 @@ A duracao, configuracao e momento de entrada/saida sao definidos manualmente pel
 Na Manutencao, o objetivo principal e preservar a adesao e a rotina da paciente durante o periodo, mesmo que peso e medidas possam variar um pouco.
 
 A Manutencao nao deve ser tratada automaticamente como meta de peso absolutamente estavel. O foco e sustentar o processo de forma viavel ate que a Patty decida retomar outra etapa conforme o contexto e os resultados.
+
+
+### BULKING - CRITERIOS DE ENTRADA
+
+### DECISAO CONFIRMADA
+
+A entrada em Bulking nao depende de um unico criterio isolado.
+
+A Patty considera em conjunto:
+- objetivo ou desejo da paciente de trabalhar ganho de massa muscular;
+- nivel de reducao de gordura ja alcancado;
+- momento metabolico e evolucao observada;
+- avaliacao profissional da Patty sobre a adequacao de iniciar Bulking naquele momento.
+
+Nao automatizar a entrada em Bulking apenas pela solicitacao da paciente ou por um unico indicador corporal. A decisao permanece profissional e contextual.
