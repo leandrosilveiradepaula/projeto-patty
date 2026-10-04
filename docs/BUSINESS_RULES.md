@@ -630,3 +630,14 @@ O peso usado no calculo e o peso da ultima Avaliacao Completa da cliente.
 Na planilha fornecida, a tabela central calcula os valores multiplicando o peso informado pelos coeficientes da faixa correspondente. O sistema deve preservar qual peso e qual fase/faixa foram usados no calculo.
 
 A numeracao exibida na coluna "Fase" da tabela central do arquivo historico nao deve prevalecer sobre o mapeamento profissional confirmado por cor sem reconciliacao, pois ha rotulos que nao coincidem com Fase 1/2/3. Para implementacao, usar a regra profissional documentada e validar os coeficientes por faixa.
+
+
+### CARB CYCLE - CORRESPONDENCIA COM OS CUTTINGS
+
+### DECISAO CONFIRMADA
+
+- Cutting 1 -> Fase 1 -> faixa verde da tabela central.
+- Cutting 2 -> Fase 2 -> faixa amarela da tabela central.
+- Cutting 3 -> Fase 3 -> faixa vermelha da tabela central.
+
+A mudanca de faixa acompanha a mudanca profissional de Cutting, depois de cumprido o passo a passo do processo. O peso usado no calculo continua sendo o da ultima Avaliacao Completa.
