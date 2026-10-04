@@ -1707,3 +1707,20 @@ Fluxo:
 - token/link nao e persistido nem registrado em logs.
 
 Isso remove SMTP como bloqueio para suporte manual de recuperacao de senha. O fluxo automatico `Esqueci minha senha` continua disponivel quando email estiver configurado.
+
+
+## Atualizacao 2026-10-04 - Compatibilidade com convite implicito do Supabase
+
+### IMPLEMENTADA NA BRANCH
+
+O convite real enviado pelo Supabase no bootstrap administrativo foi observado chegando em `/login#access_token=...&refresh_token=...&type=invite`.
+
+Como fragmentos `#...` nao sao enviados ao servidor, a pagina de login agora:
+- detecta somente fragmentos com `type=invite`;
+- remove imediatamente o fragmento sensivel da barra de endereco;
+- cria a sessao com `supabase.auth.setSession` no browser;
+- redireciona para `/ativar-conta`;
+- rejeita convite incompleto/invalido;
+- nao registra tokens em logs.
+
+Essa compatibilidade existe para convites implicitos ja emitidos. O fluxo preferido continua sendo TokenHash/PKCE/manual link controlado.
