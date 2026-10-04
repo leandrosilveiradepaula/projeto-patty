@@ -135,7 +135,8 @@ Aplicado e validado no SaaS:
 - migration `20261001235018` aplicada e higher-fat ativo confirmado;
 - migration `20261002005720` aplicada;
 - a infraestrutura do template `hydration.daily_target` esta ativa;
-- migration `20261004234325_activate_hydration_35_ml_per_kg` criou a v2 profissional com 35 mL/kg e aposentou a v1 de 60 mL/kg sem reescrever historico;
+- a troca inicial no SaaS foi registrada na migration `20261004234325_activate_hydration_35_ml_per_kg`;
+- a migration portavel `20261004235059_allow_system_config_retirement_and_reconcile_hydration_35` garante em bancos novos a v2 com 35 mL/kg, aposentando a v1 de 60 mL/kg sem exigir uma admin previamente cadastrada nem reescrever historico;
 - RPC `create_hydration_target_from_method_snapshot` presente como SECURITY INVOKER, sem EXECUTE para `anon`/`authenticated` e com EXECUTE para `service_role`.
 
 Integração operacional concluída:
