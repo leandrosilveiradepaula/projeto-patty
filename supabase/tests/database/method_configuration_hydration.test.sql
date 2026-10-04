@@ -27,10 +27,37 @@ select is(
     where t.template_key = 'hydration.daily_target'
       and v.version_number = 1
       and v.activated_at is not null
-      and v.retired_at is null
+      and v.retired_at is not null
   ),
   60::numeric,
-  'hydration baseline is 60 ml per kg'
+  'hydration v1 preserves the historical 60 ml per kg baseline after retirement'
+);
+
+select is(
+  (
+    select (v.configuration #>> '{parameters,daily_ml_per_kg,value}')::numeric
+    from public.method_configuration_versions v
+    join public.method_configuration_templates t on t.id = v.template_id
+    where t.template_key = 'hydration.daily_target'
+      and v.version_number = 2
+      and v.activated_at is not null
+      and v.retired_at is null
+  ),
+  35::numeric,
+  'hydration v2 is the active professional baseline at 35 ml per kg'
+);
+
+select is(
+  (
+    select count(*)
+    from public.method_configuration_versions v
+    join public.method_configuration_templates t on t.id = v.template_id
+    where t.template_key = 'hydration.daily_target'
+      and v.activated_at is not null
+      and v.retired_at is null
+  ),
+  1::bigint,
+  'hydration has exactly one active configuration version'
 );
 
 select is(
@@ -39,10 +66,10 @@ select is(
     from public.method_configuration_versions v
     join public.method_configuration_templates t on t.id = v.template_id
     where t.template_key = 'hydration.daily_target'
-      and v.version_number = 1
+      and v.version_number = 2
   ),
   'round'::text,
-  'hydration rounding remains explicit in configuration'
+  'hydration rounding remains explicit in active configuration'
 );
 
 select has_column(
@@ -286,7 +313,7 @@ select
 from public.method_configuration_templates t
 join public.method_configuration_versions v on v.template_id = t.id
 where t.template_key = 'hydration.daily_target'
-  and v.version_number = 1;
+  and v.version_number = 2;
 
 select throws_ok(
   $sql$
@@ -299,11 +326,11 @@ select throws_ok(
         from public.method_configuration_versions v
         join public.method_configuration_templates t on t.id = v.template_id
         where t.template_key = 'hydration.daily_target'
-          and v.version_number = 1
+          and v.version_number = 2
       ),
       '{
         "inputs":{"weight_kg":{"unit":"kg"}},
-        "parameters":{"daily_ml_per_kg":{"value":60,"unit":"ml_per_kg"}},
+        "parameters":{"daily_ml_per_kg":{"value":35,"unit":"ml_per_kg"}},
         "outputs":{
           "target_ml":{
             "unit":"ml",
@@ -320,8 +347,8 @@ select throws_ok(
           }
         }
       }'::jsonb,
-      '{"target_ml":{"value":4800,"unit":"ml"}}'::jsonb,
-      4800,
+      '{"target_ml":{"value":2800,"unit":"ml"}}'::jsonb,
+      2800,
       null
     )
   $sql$,
@@ -381,7 +408,7 @@ select
 from public.method_configuration_templates t
 join public.method_configuration_versions v on v.template_id = t.id
 where t.template_key = 'hydration.daily_target'
-  and v.version_number = 1;
+  and v.version_number = 2;
 
 select throws_ok(
   $sql$
@@ -394,7 +421,7 @@ select throws_ok(
         from public.method_configuration_versions v
         join public.method_configuration_templates t on t.id = v.template_id
         where t.template_key = 'hydration.daily_target'
-          and v.version_number = 1
+          and v.version_number = 2
       ),
       '{
         "inputs":{"weight_kg":{"unit":"kg"}},
@@ -435,7 +462,7 @@ select isnt(
       from public.method_configuration_versions v
       join public.method_configuration_templates t on t.id = v.template_id
       where t.template_key = 'hydration.daily_target'
-        and v.version_number = 1
+        and v.version_number = 2
     ),
     '{
       "inputs":{"weight_kg":{"unit":"kg"}},
@@ -515,7 +542,7 @@ select throws_ok(
         from public.method_configuration_versions v
         join public.method_configuration_templates t on t.id = v.template_id
         where t.template_key = 'hydration.daily_target'
-          and v.version_number = 1
+          and v.version_number = 2
       ),
       '{"inputs":{},"parameters":{},"outputs":{}}'::jsonb,
       '{"target_ml":{"value":4401,"unit":"ml"}}'::jsonb,
