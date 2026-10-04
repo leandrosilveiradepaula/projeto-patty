@@ -109,17 +109,19 @@ A sequencia atualmente confirmada do fluxo principal e:
 
 ```text
 Reconhecimento Metabolico
--> Cutting 1 Dia 1 / Dia 2
--> Cutting 1: 2 Low / 1 High
+-> Cutting 1
 -> Up Metabolico
--> Cutting 2 Linear
--> Cutting 2 Dia 1 / Dia 2
--> Cutting 2: 2 Low / 1 High
+-> Cutting 2
+-> Up Metabolico
+-> Cutting 3
+-> Up Metabolico
 ```
 
-Etapas posteriores a `Cutting 2: 2 Low / 1 High` nao estao confirmadas na regra vigente e nao devem ser inferidas automaticamente.
+A progressao e passo a passo e depende dos resultados observados pela Patty. Nao existe promocao automatica de fase apenas por tempo.
 
-Registros historicos que mencionavam Cutting 3 como sequencia confirmada ficam superados para fins de automacao ate nova confirmacao documentada da Patty.
+As estruturas internas ja confirmadas de Cutting 1 e Cutting 2 permanecem validas. A estrutura interna completa do Cutting 3 ainda nao deve ser inferida.
+
+Quando o objetivo inclui ganho de massa muscular, a Patty pode usar um ramo com Bulking. Entre o Bulking e a volta ao Cutting, utiliza Consolidacao Metabolica para trabalhar/preservar o ganho de massa muscular e retirar o excesso adicional de gordura e retencao liquida. Formulas, duracao e criterios exatos desse ramo continuam pendentes.
 
 ### DECISAO CONFIRMADA
 
