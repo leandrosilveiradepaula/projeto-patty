@@ -2,3 +2,22 @@
   display: grid;
   gap: var(--space-5);
 }
+
+
+.recoveryLink {
+  color: var(--color-brand);
+  font-size: var(--text-body-small-size);
+  font-weight: var(--text-label-medium-weight);
+  text-align: center;
+  text-decoration: none;
+}
+
+.recoveryLink:hover {
+  text-decoration: underline;
+}
+
+.recoveryLink:focus-visible {
+  border-radius: var(--radius-small);
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
+}

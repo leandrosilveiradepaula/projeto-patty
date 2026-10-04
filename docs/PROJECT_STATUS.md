@@ -1573,3 +1573,26 @@ Invariantes preservadas:
 - nenhuma alteracao de RLS;
 - nenhuma exposicao das avaliacoes para a cliente;
 - nenhuma conversao automatica entre unidades diferentes.
+
+
+## Atualizacao 2026-10-04 - Recuperacao de senha
+
+### IMPLEMENTADA NA BRANCH / AINDA NAO MERGEADA
+
+Branch: `codex/password-recovery-flow`.
+
+Implementado:
+- link `Esqueci minha senha` no login;
+- solicitacao de recuperacao por email com `resetPasswordForEmail`;
+- resposta neutra quanto a existencia da conta;
+- callback PKCE server-side em `/auth/recovery` usando `exchangeCodeForSession`;
+- tela `/redefinir-senha` para nova senha;
+- mesma regra tecnica de senha minima ja usada na ativacao inicial;
+- encerramento da sessao de recuperacao apos a troca e retorno ao login.
+
+Invariantes:
+- sem nova tabela, migration ou RLS;
+- sem revelar se o email informado possui conta;
+- sem secret no browser;
+- fluxo serve tanto admin quanto cliente;
+- validacao real do email continua dependente da configuracao hospedada de Auth/SMTP e da redirect allowlist.

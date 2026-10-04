@@ -1,0 +1,30 @@
+.shell {
+  display: grid;
+  min-height: 100svh;
+  place-items: center;
+  padding: var(--space-6);
+}
+
+.content {
+  display: grid;
+  gap: var(--space-6);
+  width: min(100%, 440px);
+}
+
+.backLink {
+  color: var(--color-brand);
+  font-weight: var(--text-label-medium-weight);
+  text-align: center;
+  text-decoration: none;
+}
+
+.backLink:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 767px) {
+  .shell {
+    align-items: start;
+    padding: var(--space-4);
+  }
+}
