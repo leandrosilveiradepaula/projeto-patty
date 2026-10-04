@@ -499,7 +499,7 @@ A taxonomia operacional distingue agua pura de outros liquidos zero calorias. A 
 Continuam abertos:
 - horarios/cadencia dos lembretes;
 - poderes de correcao da Patty;
-- edicao de registros anteriores.
+- ate quando a cliente pode corrigir registros anteriores.
 
 O valor vigente de **35 mL/kg/dia** e a referencia profissional confirmada e passa a ser o template inicial dessa regra, substituindo 60 mL/kg para novas metas. O runtime atual ja possui implementacao deterministica com snapshot de meta, mas, conforme a decisao de parametrizacao de 2026-09-30, esse numero nao deve permanecer como constante profissional definitiva no codigo: deve migrar para configuracao versionada sem reescrever historico.
 
@@ -850,7 +850,7 @@ Continua aberto apenas o mecanismo futuro de recovery/watchdog, caso seja necess
 
 - eventual proporcao-alvo de agua pura;
 - canal de notificacao para o lembrete de 24 horas;
-- detalhes de eventual correcao/estorno de eventos alem de adicionar novo evento;
+- a cliente pode corrigir os proprios check-ins; permanecem abertos o limite temporal da edicao, a correcao pela Patty e a forma tecnica auditavel;
 - nenhum desses pontos abertos autoriza score de adesao ou notificacao por canal inferido.
 
 
