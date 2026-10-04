@@ -1,0 +1,70 @@
+name: Bootstrap Patty admin
+
+on:
+  workflow_dispatch:
+    inputs:
+      admin_email:
+        description: "Patty admin login email"
+        required: true
+        type: string
+      confirmation:
+        description: "Type BOOTSTRAP_PATTY exactly"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bootstrap-patty-admin
+  cancel-in-progress: false
+
+jobs:
+  bootstrap:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Require explicit confirmation
+        env:
+          CONFIRMATION: ${{ inputs.confirmation }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$CONFIRMATION" = "BOOTSTRAP_PATTY" || {
+            echo "Bootstrap requires confirmation=BOOTSTRAP_PATTY"
+            exit 1
+          }
+
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate secret key
+        env:
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.E2E_SUPABASE_SECRET_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$SUPABASE_SECRET_KEY" || {
+            echo "Missing reusable Supabase secret key"
+            exit 1
+          }
+
+      - name: Bootstrap admin identity
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: "https://hqanoskwjvpbgavppcud.supabase.co"
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.E2E_SUPABASE_SECRET_KEY }}
+          ADMIN_BOOTSTRAP_EMAIL: ${{ inputs.admin_email }}
+        run: node --experimental-strip-types scripts/bootstrap-admin.ts
