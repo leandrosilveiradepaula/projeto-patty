@@ -3,7 +3,11 @@ import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
-import { getCurrentClient, listCurrentClientContentReleases } from "@/lib/supabase/data-access";
+import {
+  getCurrentClient,
+  listCurrentClientContentReleases,
+  listEducationalContentAssetsForCurrentClient,
+} from "@/lib/supabase/data-access";
 import styles from "./page.module.css";
 
 function formatRecordedDate(value: string | null) {
@@ -24,6 +28,19 @@ export default async function ClienteConteudosPage() {
   const releases = client
     ? await listCurrentClientContentReleases(client.id)
     : null;
+  const assetsByVersion = new Map(
+    client && releases
+      ? await Promise.all(
+          releases
+            .map((release) => release.educational_content_versions)
+            .filter((version): version is NonNullable<typeof version> => Boolean(version))
+            .map(async (version) => [
+              version.id,
+              await listEducationalContentAssetsForCurrentClient(version.id),
+            ] as const),
+        )
+      : [],
+  );
 
   return (
     <>
@@ -62,13 +79,31 @@ export default async function ClienteConteudosPage() {
               const completedMeta = progress?.completed_at
                 ? `Conclusão registrada em ${formatRecordedDate(progress.completed_at)}.`
                 : "Nenhuma conclusão registrada.";
+              const assets = assetsByVersion.get(contentVersion.id) ?? [];
+              const primaryAsset =
+                assets.find((asset) => asset.asset_key === "primary") ?? assets[0] ?? null;
 
               return (
                 <li key={release.id}>
                   <ClientContentCard
                     category={contentVersion.category_key ?? "Não informado"}
                     meta={`Versão ${contentVersion.version_number}. ${firstOpenedMeta} ${completedMeta}`}
-                    status={<Badge variant="neutral">Liberado</Badge>}
+                    action={
+                      primaryAsset ? (
+                        <a
+                          className={styles.openLink}
+                          href={`/cliente/conteudos/assets/${primaryAsset.id}`}
+                          target="_blank"
+                        >
+                          Abrir conteúdo
+                        </a>
+                      ) : null
+                    }
+                    status={
+                      <Badge variant={primaryAsset ? "positive" : "neutral"}>
+                        {primaryAsset ? "Disponível" : "Liberado"}
+                      </Badge>
+                    }
                     title={contentVersion.title}
                     type={contentVersion.content_type_key ?? "Não informado"}
                   />
