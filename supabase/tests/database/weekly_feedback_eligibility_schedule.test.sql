@@ -1,6 +1,6 @@
 begin;
 
-select plan(4);
+select plan(5);
 
 select is(
   (
