@@ -291,3 +291,75 @@ test("weekly feedback pending stays factual and never suspends service automatic
     /nao aplica nenhuma consequencia automatica ao atendimento/i,
   );
 });
+
+
+test("blocked weekly feedback reminder events become operational pendings", () => {
+  const items = buildOperationalPendingItems({
+    clarificationReminderIntervalHours: 24,
+    anamnesisSubmissions: [],
+    clarificationRequests: [],
+    assessments: [],
+    protocolVersions: [],
+    aiExecutions: [],
+    weeklyFeedbackNotificationEvents: [
+      {
+        id: "event-no-channel",
+        clientId: "client-1",
+        clientLabel: "Cliente 1",
+        createdAt: "2026-10-07T12:00:00Z",
+        weeklyFeedbackId: "feedback-1",
+        channelKey: null,
+        deliveryState: "blocked_no_channel",
+        blockedReason: "channel_not_configured",
+      },
+      {
+        id: "event-no-contact",
+        clientId: "client-2",
+        clientLabel: "Cliente 2",
+        createdAt: "2026-10-07T12:01:00Z",
+        weeklyFeedbackId: "feedback-2",
+        channelKey: "email",
+        deliveryState: "blocked_missing_contact",
+        blockedReason: "contact_email_missing",
+      },
+      {
+        id: "event-no-provider",
+        clientId: "client-3",
+        clientLabel: "Cliente 3",
+        createdAt: "2026-10-07T12:02:00Z",
+        weeklyFeedbackId: "feedback-3",
+        channelKey: "whatsapp",
+        deliveryState: "blocked_provider",
+        blockedReason: "external_provider_not_configured",
+      },
+      {
+        id: "event-delivered",
+        clientId: "client-4",
+        clientLabel: "Cliente 4",
+        createdAt: "2026-10-07T12:03:00Z",
+        weeklyFeedbackId: "feedback-4",
+        channelKey: "in_app",
+        deliveryState: "delivered",
+        blockedReason: null,
+      },
+    ],
+  });
+
+  assert.equal(items.length, 3);
+  assert.deepEqual(
+    items.map((item) => item.statusLabel),
+    [
+      "Canal não configurado",
+      "Contato necessário ausente",
+      "Provedor externo não configurado",
+    ],
+  );
+  assert.equal(
+    items.every((item) => item.kind === "weekly_feedback_reminder_blocked"),
+    true,
+  );
+  assert.match(
+    items[2]?.description ?? "",
+    /não considera a mensagem enviada/i,
+  );
+});
