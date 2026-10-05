@@ -53,7 +53,8 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
     ]),
   );
 
-  const [submissions, weeklyFeedbacks] = await Promise.all([
+  const [submissions, weeklyFeedbacks, weeklyFeedbackNotificationEvents] =
+    await Promise.all([
     Promise.all(
       assignedClients.map((client) =>
         listAccessibleAnamnesisSubmissions(client.id),
@@ -62,6 +63,11 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
     Promise.all(
       assignedClients.map((client) =>
         listAccessibleWeeklyFeedbacksForClient(client.id),
+      ),
+    ).then((items) => items.flat()),
+    Promise.all(
+      assignedClients.map((client) =>
+        listAccessibleClientNotificationEvents(client.id),
       ),
     ).then((items) => items.flat()),
   ]);
@@ -199,6 +205,19 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
       id: execution.id,
       purposeKey: execution.purpose_key,
     })),
+    weeklyFeedbackNotificationEvents: weeklyFeedbackNotificationEvents.map(
+      (event) => ({
+        blockedReason: event.blocked_reason,
+        channelKey: event.channel_key,
+        clientId: event.client_id,
+        clientLabel:
+          labelsByClientId.get(event.client_id) ?? "Cliente sem nome informado",
+        createdAt: event.created_at,
+        deliveryState: event.delivery_state,
+        id: event.id,
+        weeklyFeedbackId: event.weekly_feedback_id,
+      }),
+    ),
     weeklyFeedbacks: weeklyFeedbacks.map((feedback) => ({
       clientId: feedback.client_id,
       clientLabel:
