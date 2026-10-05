@@ -1965,3 +1965,26 @@ Para ativar envio real em producao:
 4. validar com conta sintetica antes de clientes reais.
 
 O Gmail conectado ao ChatGPT nao e usado pelo aplicativo.
+
+## Atualizacao 2026-10-05 - Preferencias de agenda das Avaliacoes
+
+### APLICADO NO SUPABASE SAAS
+
+- migration 20261005135254_seed_assessment_schedule_preferences aplicada;
+- template evaluation.assessment_schedule_preferences criado;
+- schema assessment_schedule_preferences_v1 ativo;
+- baseline da Avaliacao Completa: sexta-feira e sabado;
+- baseline da Avaliacao Basica: aproximadamente no meio entre duas Avaliacoes Completas.
+
+### IMPLEMENTADO NA BRANCH
+
+- parser fechado e testes determinísticos;
+- schema registrado na allowlist de configuracoes;
+- /admin/configuracoes permite alterar os dias preferidos da Avaliacao Completa por nova versao;
+- formulario real de criacao de avaliacao mostra a preferencia ativa conforme o tipo selecionado;
+- a data continua livre e nenhuma regra automatica de calendario foi criada;
+- pgTAP ampliado para provar ausencia de cadenceDays, automaticDate e anchorDay.
+
+### LIMITE
+
+A semantica da Avaliacao Basica permanece protegida como aproximadamente no meio do intervalo porque nenhuma alternativa profissional foi confirmada. Dias preferidos da Avaliacao Completa sao configuraveis.
