@@ -86,7 +86,14 @@ export default async function ClientProgressPage() {
                     <h2 className={styles.title}>{item.label}</h2>
                     <p className={styles.meta}>Unidade: {item.unit}</p>
                   </div>
-                  <Badge variant="neutral">{item.points.length} registro(s)</Badge>
+                  <div className={styles.headerBadges}>
+                    <Badge variant="neutral">{item.points.length} registro(s)</Badge>
+                    {item.points.length > 0 ? (
+                      <Badge variant="neutral">
+                        Atual: {formatNumber(item.points[item.points.length - 1].value)} {item.unit}
+                      </Badge>
+                    ) : null}
+                  </div>
                 </div>
                 <div className={styles.tableScroll}>
                   <table className={styles.table}>
@@ -100,11 +107,11 @@ export default async function ClientProgressPage() {
                     <tbody>
                       {item.points.map((point) => (
                         <tr key={point.assessmentId}>
-                          <td>{formatDate(point.assessedAt)}</td>
-                          <td>
+                          <td data-label="Data">{formatDate(point.assessedAt)}</td>
+                          <td data-label="Valor">
                             {formatNumber(point.value)} {item.unit}
                           </td>
-                          <td>
+                          <td data-label="Variação vs. anterior">
                             {formatDelta(point.deltaFromPrevious)}
                             {point.deltaFromPrevious === null
                               ? ""
