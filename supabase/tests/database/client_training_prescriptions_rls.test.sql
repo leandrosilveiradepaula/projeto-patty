@@ -1,6 +1,6 @@
 begin;
 
-select plan(31);
+select plan(32);
 
 select has_table('public', 'client_training_plans');
 select has_table('public', 'client_training_plan_versions');
