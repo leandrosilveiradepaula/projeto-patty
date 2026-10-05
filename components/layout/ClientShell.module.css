@@ -109,3 +109,18 @@
     min-height: calc(100svh - var(--space-10) - var(--space-10));
   }
 }
+
+
+@media (min-width: 1024px) {
+  .frame {
+    width: min(100%, 960px);
+  }
+
+  .navigation {
+    width: min(calc(100% - var(--space-12) - var(--space-4)), 960px);
+  }
+
+  .main {
+    padding-inline: var(--space-8);
+  }
+}
