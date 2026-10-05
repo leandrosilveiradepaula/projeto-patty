@@ -214,6 +214,7 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
           labelsByClientId.get(event.client_id) ?? "Cliente sem nome informado",
         createdAt: event.created_at,
         deliveryState: event.delivery_state,
+        eventKey: event.event_key,
         id: event.id,
         weeklyFeedbackId: event.weekly_feedback_id,
       }),
