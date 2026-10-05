@@ -34,7 +34,6 @@ export async function GET(
     blob = await get(asset.storage_path, {
       access: "private",
       ifNoneMatch: request.headers.get("if-none-match") ?? undefined,
-      ifModifiedSince: request.headers.get("if-modified-since") ?? undefined,
     });
   } catch {
     return new Response(null, { status: 404 });
@@ -49,7 +48,7 @@ export async function GET(
       status: 304,
       headers: {
         "Cache-Control": "private, no-store",
-        ETag: blob.etag,
+        ETag: blob.headers.get("etag") ?? "",
       },
     });
   }
@@ -62,7 +61,7 @@ export async function GET(
       "Content-Disposition": "inline",
       "Content-Length": String(blob.blob.size),
       "Content-Type": asset.content_type,
-      ETag: blob.etag,
+      ETag: blob.headers.get("etag") ?? "",
     },
   });
 }
