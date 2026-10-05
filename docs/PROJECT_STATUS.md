@@ -1948,7 +1948,7 @@ Nao ha envio externo real por email/WhatsApp nesta etapa. Provedor, opt-in quand
 
 - worker Gmail SMTP server-only;
 - rota protegida `/api/cron/weekly-feedback-email-delivery`;
-- cron Vercel horario, sem transformar horario tecnico em regra profissional;
+- cron Vercel diario, compativel com Hobby/Pro, sem transformar horario tecnico em regra profissional;
 - email operacional sem dados de saude;
 - Message-ID deterministico para retries;
 - estados de fila, falha e entrega visiveis corretamente para a Patty;
