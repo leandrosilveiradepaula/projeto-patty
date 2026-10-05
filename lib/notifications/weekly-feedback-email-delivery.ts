@@ -18,8 +18,16 @@ function formatDate(value: string) {
 }
 
 function safeFailureMessage(error: unknown) {
-  const message = error instanceof Error ? error.message : "Unknown email delivery error";
-  return message.replace(/[\r\n]+/g, " ").slice(0, 500);
+  const message =
+    error instanceof Error ? error.message : "Unknown email delivery error";
+
+  return message
+    .replace(
+      /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi,
+      "[email]",
+    )
+    .replace(/[\r\n]+/g, " ")
+    .slice(0, 500);
 }
 
 export type WeeklyFeedbackEmailDeliveryResult = {
@@ -81,26 +89,15 @@ export async function deliverWeeklyFeedbackReminderEmails(input: {
       "Consultoria Corpo e Mente - Patty",
     ].join("\n");
 
+    let result: Awaited<ReturnType<typeof sendGmailSmtpEmail>>;
+
     try {
-      const result = await sendGmailSmtpEmail(smtpConfig, {
+      result = await sendGmailSmtpEmail(smtpConfig, {
         bodyText,
+        messageId: `<weekly-feedback-${claim.notification_event_id}@projeto-patty.local>`,
         subject,
         to: claim.recipient_email,
       });
-
-      const { error: completeError } = await admin.rpc(
-        "complete_weekly_feedback_email_delivery_server",
-        {
-          p_attempt_id: claim.attempt_id,
-          p_provider_message_id: result.providerMessageId,
-        },
-      );
-
-      if (completeError) {
-        throw completeError;
-      }
-
-      delivered += 1;
     } catch (error) {
       const { error: failError } = await admin.rpc(
         "fail_weekly_feedback_email_delivery_server",
@@ -116,7 +113,25 @@ export async function deliverWeeklyFeedbackReminderEmails(input: {
       }
 
       failed += 1;
+      continue;
     }
+
+    const { error: completeError } = await admin.rpc(
+      "complete_weekly_feedback_email_delivery_server",
+      {
+        p_attempt_id: claim.attempt_id,
+        p_provider_message_id: result.providerMessageId,
+      },
+    );
+
+    if (completeError) {
+      throw new Error(
+        "SMTP accepted the reminder but delivery persistence failed",
+        { cause: completeError },
+      );
+    }
+
+    delivered += 1;
   }
 
   return {
