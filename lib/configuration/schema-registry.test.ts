@@ -14,6 +14,7 @@ test("keeps the configuration schema registry closed", () => {
     "carb_cycle_v1",
     "assessment_kind_catalog_v1",
     "assessment_definition_v1",
+    "assessment_schedule_preferences_v1",
     "liquid_taxonomy_v1",
     "weekly_feedback_schedule_v1",
   ]);
@@ -207,6 +208,38 @@ test("delegates weekly_feedback_schedule_v1 to the closed schedule parser", () =
         timezone: "America/Sao_Paulo",
         channel: "email",
       }),
+    TypeError,
+  );
+});
+
+
+test("delegates assessment_schedule_preferences_v1 to the closed parser", () => {
+  assert.deepEqual(
+    validateMethodConfigurationBySchema(
+      "assessment_schedule_preferences_v1",
+      {
+        basic_placement:
+          "approximately_midpoint_between_complete_assessments",
+        complete_preferred_weekdays: [5, 6],
+      },
+    ),
+    {
+      basicPlacement: "approximately_midpoint_between_complete_assessments",
+      completePreferredWeekdays: [5, 6],
+    },
+  );
+
+  assert.throws(
+    () =>
+      validateMethodConfigurationBySchema(
+        "assessment_schedule_preferences_v1",
+        {
+          basic_placement:
+            "approximately_midpoint_between_complete_assessments",
+          complete_preferred_weekdays: [5, 6],
+          automatic_date: true,
+        },
+      ),
     TypeError,
   );
 });
