@@ -1990,3 +1990,24 @@ PR #348 mergeado no commit `9a78dab4962d8a102ec29dd89f3c07dbc510d11c`.
 ### LIMITE
 
 A semantica da Avaliacao Basica permanece protegida como aproximadamente no meio do intervalo porque nenhuma alternativa profissional foi confirmada. Dias preferidos da Avaliacao Completa sao configuraveis.
+
+
+## Biblioteca de exercicios — autoria versionada operacional
+
+Atualizado em 2026-10-05.
+
+PR #350 mergeado no commit `6c4e7ab1ac39616257fb6299f50b9ebb90e189b4`.
+
+- Patty/admin pode criar um exercicio como rascunho pela interface administrativa;
+- somente a versao em rascunho e editavel pela interface;
+- publicacao exige acao manual explicita;
+- alteracoes posteriores sao feitas por nova versao, preservando o historico publicado;
+- cliente visualiza somente a versao publicada mais recente de cada exercicio;
+- publicar um exercicio na biblioteca nao prescreve treino para uma cliente;
+- nenhuma regra de series, repeticoes, descanso, carga ou progressao foi inferida;
+- nenhuma migration, schema ou policy RLS nova foi necessaria: o fluxo usa as tabelas e policies MFA/admin existentes;
+- o gate `Validate application` do head final do PR passou por completo antes do merge, incluindo typecheck, testes deterministas, boundaries de seguranca e build.
+
+### LIMITE
+
+A biblioteca de exercicios agora possui autoria/publicacao operacional, mas a prescricao versionada de treino por cliente continua sendo uma lacuna separada. Ela nao deve ser criada ate que o modelo operacional e as regras profissionais necessarias estejam documentados e confirmados.
