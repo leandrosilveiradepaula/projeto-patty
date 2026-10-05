@@ -1,3 +1,4 @@
+import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -7,6 +8,7 @@ import {
   getCurrentClient,
   getCurrentUserProfile,
   listAccessibleAnamnesisSubmissions,
+  listAccessibleClientNotificationEvents,
   listAccessibleWeeklyFeedbacksForClient,
   listAccessibleClientTrainingRequests,
   listCurrentClientContentReleases,
@@ -34,18 +36,41 @@ export default async function ClientePage() {
     );
   }
 
-  const [anamneses, protocols, contentReleases, files, weeklyFeedbacks, trainingRequests, assessmentRows, exerciseVersions] = await Promise.all([
+  const [
+    anamneses,
+    protocols,
+    contentReleases,
+    files,
+    weeklyFeedbacks,
+    weeklyFeedbackNotificationEvents,
+    trainingRequests,
+    assessmentRows,
+    exerciseVersions,
+  ] = await Promise.all([
     listAccessibleAnamnesisSubmissions(client.id),
     listPublishedProtocolsForCurrentClient(client.id),
     listCurrentClientContentReleases(client.id),
     listCurrentClientFiles(client.id),
     listAccessibleWeeklyFeedbacksForClient(client.id),
+    listAccessibleClientNotificationEvents(client.id),
     listAccessibleClientTrainingRequests(client.id),
     listCurrentClientFinalizedAssessmentMeasurements(),
     listPublishedExerciseVersionsForCurrentClient(),
   ]);
 
   const finalizedAssessmentCount = new Set(assessmentRows.map((row) => row.assessment_id)).size;
+  const pendingWeeklyFeedbackIds = new Set(
+    weeklyFeedbacks
+      .filter((feedback) => !feedback.submitted_at)
+      .map((feedback) => feedback.id),
+  );
+  const hasDeliveredWeeklyFeedbackReminder = weeklyFeedbackNotificationEvents.some(
+    (event) =>
+      event.event_key.startsWith("weekly_feedback_reminder:") &&
+      event.channel_key === "in_app" &&
+      event.delivery_state === "delivered" &&
+      pendingWeeklyFeedbackIds.has(event.weekly_feedback_id),
+  );
 
   const areas = [
     {
@@ -141,6 +166,17 @@ export default async function ClientePage() {
         eyebrow="Cliente"
         title="Área da cliente"
       />
+      {hasDeliveredWeeklyFeedbackReminder ? (
+        <Alert
+          action={<Link href="/cliente/feedback-semanal">Responder agora</Link>}
+          title="Feedback Semanal pendente"
+          variant="info"
+        >
+          Você tem um lembrete do Feedback Semanal. Acesse o formulário para
+          continuar o preenchimento e enviar quando concluir.
+        </Alert>
+      ) : null}
+
       <Section
         description="Escolha uma área para continuar."
         title="Seu acompanhamento"
