@@ -7,7 +7,7 @@
     },
     {
       "path": "/api/cron/weekly-feedback-email-delivery",
-      "schedule": "7 * * * *"
+      "schedule": "7 12 * * *"
     }
   ],
   "git": {
