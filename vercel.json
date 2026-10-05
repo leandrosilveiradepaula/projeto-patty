@@ -4,6 +4,10 @@
     {
       "path": "/api/cron/private-file-upload-cleanup",
       "schedule": "17 3 * * *"
+    },
+    {
+      "path": "/api/cron/weekly-feedback-email-delivery",
+      "schedule": "7 12 * * *"
     }
   ],
   "git": {

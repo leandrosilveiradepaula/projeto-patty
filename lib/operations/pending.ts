@@ -303,13 +303,21 @@ export function buildOperationalPendingItems(
   >();
 
   for (const event of input.weeklyFeedbackNotificationEvents ?? []) {
-    if (!event.eventKey.startsWith("weekly_feedback_reminder:")) {
+    if (
+      !event.eventKey.startsWith("weekly_feedback_reminder:") &&
+      !event.eventKey.startsWith("weekly_feedback_email_delivery:") &&
+      !event.eventKey.startsWith("weekly_feedback_email_delivery_failed:")
+    ) {
       continue;
     }
 
     const current = latestReminderEventByFeedbackId.get(event.weeklyFeedbackId);
 
-    if (!current || event.createdAt > current.createdAt) {
+    if (
+      !current ||
+      event.createdAt > current.createdAt ||
+      (event.createdAt === current.createdAt && event.id > current.id)
+    ) {
       latestReminderEventByFeedbackId.set(event.weeklyFeedbackId, event);
     }
   }
@@ -323,6 +331,7 @@ export function buildOperationalPendingItems(
   for (const event of latestReminderEventByFeedbackId.values()) {
     if (
       event.deliveryState === "delivered" ||
+      event.deliveryState === "queued_external" ||
       submittedFeedbackIds.has(event.weeklyFeedbackId)
     ) {
       continue;
@@ -333,14 +342,18 @@ export function buildOperationalPendingItems(
         ? "Canal não configurado"
         : event.deliveryState === "blocked_missing_contact"
           ? "Contato necessário ausente"
-          : "Provedor externo não configurado";
+          : event.deliveryState === "delivery_failed"
+            ? "Falha no envio por email"
+            : "Provedor externo não configurado";
 
     const description =
       event.deliveryState === "blocked_no_channel"
         ? "O lembrete de quarta-feira foi devido, mas não existe canal configurado para esta cliente."
         : event.deliveryState === "blocked_missing_contact"
           ? `O lembrete de quarta-feira usa ${event.channelKey ?? "canal externo"}, mas o dado de contato necessário não está cadastrado.`
-          : `O canal ${event.channelKey ?? "externo"} está configurado, mas nenhum provedor de envio foi ativado. O sistema não considera a mensagem enviada.`;
+          : event.deliveryState === "delivery_failed"
+            ? "Uma tentativa real de envio do lembrete por email falhou. O sistema preservou o histórico e poderá tentar novamente sem considerar a mensagem entregue."
+            : `O canal ${event.channelKey ?? "externo"} está configurado, mas nenhum provedor de envio foi ativado. O sistema não considera a mensagem enviada.`;
 
     items.push({
       clientId: event.clientId,

@@ -420,3 +420,137 @@ test("latest delivered retry suppresses older blocked reminder pending", () => {
     false,
   );
 });
+
+
+test("queued email reminder is not treated as an operational failure", () => {
+  const items = buildOperationalPendingItems({
+    clarificationReminderIntervalHours: 24,
+    anamnesisSubmissions: [],
+    clarificationRequests: [],
+    assessments: [],
+    protocolVersions: [],
+    aiExecutions: [],
+    weeklyFeedbacks: [
+      {
+        id: "feedback-email-queued",
+        clientId: "client-email",
+        clientLabel: "Cliente Email",
+        createdAt: "2026-10-19T11:00:00Z",
+        dueAt: null,
+        periodStart: "2026-10-12",
+        periodEnd: "2026-10-18",
+        submittedAt: null,
+      },
+    ],
+    weeklyFeedbackNotificationEvents: [
+      {
+        id: "email-queued",
+        clientId: "client-email",
+        clientLabel: "Cliente Email",
+        createdAt: "2026-10-21T12:00:00Z",
+        weeklyFeedbackId: "feedback-email-queued",
+        channelKey: "email",
+        deliveryState: "queued_external",
+        eventKey: "weekly_feedback_reminder:pref-email",
+        blockedReason: "awaiting_external_delivery",
+      },
+    ],
+  });
+
+  assert.equal(
+    items.some((item) => item.kind === "weekly_feedback_reminder_blocked"),
+    false,
+  );
+});
+
+test("failed email delivery becomes an operational pending until a later delivery succeeds", () => {
+  const base = {
+    clarificationReminderIntervalHours: 24,
+    anamnesisSubmissions: [],
+    clarificationRequests: [],
+    assessments: [],
+    protocolVersions: [],
+    aiExecutions: [],
+    weeklyFeedbacks: [
+      {
+        id: "feedback-email-failed",
+        clientId: "client-email",
+        clientLabel: "Cliente Email",
+        createdAt: "2026-10-19T11:00:00Z",
+        dueAt: null,
+        periodStart: "2026-10-12",
+        periodEnd: "2026-10-18",
+        submittedAt: null,
+      },
+    ],
+  };
+
+  const failed = buildOperationalPendingItems({
+    ...base,
+    weeklyFeedbackNotificationEvents: [
+      {
+        id: "email-source",
+        clientId: "client-email",
+        clientLabel: "Cliente Email",
+        createdAt: "2026-10-21T12:00:00Z",
+        weeklyFeedbackId: "feedback-email-failed",
+        channelKey: "email",
+        deliveryState: "queued_external",
+        eventKey: "weekly_feedback_reminder:pref-email",
+        blockedReason: "awaiting_external_delivery",
+      },
+      {
+        id: "email-failed",
+        clientId: "client-email",
+        clientLabel: "Cliente Email",
+        createdAt: "2026-10-21T12:05:00Z",
+        weeklyFeedbackId: "feedback-email-failed",
+        channelKey: "email",
+        deliveryState: "delivery_failed",
+        eventKey: "weekly_feedback_email_delivery_failed:attempt-1",
+        blockedReason: "gmail_smtp_error",
+      },
+    ],
+  });
+
+  const failurePending = failed.find(
+    (item) => item.kind === "weekly_feedback_reminder_blocked",
+  );
+  assert.equal(failurePending?.statusLabel, "Falha no envio por email");
+  assert.match(failurePending?.description ?? "", /poderá tentar novamente/i);
+
+  const delivered = buildOperationalPendingItems({
+    ...base,
+    weeklyFeedbackNotificationEvents: [
+      {
+        id: "email-failed",
+        clientId: "client-email",
+        clientLabel: "Cliente Email",
+        createdAt: "2026-10-21T12:05:00Z",
+        weeklyFeedbackId: "feedback-email-failed",
+        channelKey: "email",
+        deliveryState: "delivery_failed",
+        eventKey: "weekly_feedback_email_delivery_failed:attempt-1",
+        blockedReason: "gmail_smtp_error",
+      },
+      {
+        id: "email-delivered",
+        clientId: "client-email",
+        clientLabel: "Cliente Email",
+        createdAt: "2026-10-21T12:10:00Z",
+        weeklyFeedbackId: "feedback-email-failed",
+        channelKey: "email",
+        deliveryState: "delivered",
+        eventKey: "weekly_feedback_email_delivery:attempt-2",
+        blockedReason: null,
+      },
+    ],
+  });
+
+  assert.equal(
+    delivered.some(
+      (item) => item.kind === "weekly_feedback_reminder_blocked",
+    ),
+    false,
+  );
+});

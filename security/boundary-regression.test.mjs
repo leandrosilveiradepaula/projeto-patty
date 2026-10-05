@@ -23,6 +23,7 @@ const ENTRYPOINT_RULES = new Map([
   ["app/admin/fotos/[fileId]/route.ts", "admin"],
   ["app/admin/protocolos/[protocoloId]/actions.ts", "admin"],
   ["app/api/cron/private-file-upload-cleanup/route.ts", "public-infrastructure"],
+  ["app/api/cron/weekly-feedback-email-delivery/route.ts", "public-infrastructure"],
   ["app/ativar-conta/actions.ts", "authenticated-activation"],
   ["app/auth/confirm/route.ts", "public-auth"],
   ["app/auth/recovery/route.ts", "public-auth"],
@@ -733,6 +734,10 @@ test("Vercel denies automatic deployments by default while preserving approved b
       {
         path: "/api/cron/private-file-upload-cleanup",
         schedule: "17 3 * * *",
+      },
+      {
+        path: "/api/cron/weekly-feedback-email-delivery",
+        schedule: "7 12 * * *",
       },
     ],
     "Vercel cron configuration must be preserved",

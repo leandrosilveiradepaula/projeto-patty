@@ -54,6 +54,18 @@ function notificationStatusLabel(
     return "Lembrete disponível no app";
   }
 
+  if (event.delivery_state === "delivered" && event.channel_key === "email") {
+    return "Lembrete entregue por email";
+  }
+
+  if (event.delivery_state === "queued_external" && event.channel_key === "email") {
+    return "Lembrete por email aguardando envio";
+  }
+
+  if (event.delivery_state === "delivery_failed" && event.channel_key === "email") {
+    return "Falha no envio do lembrete por email";
+  }
+
   if (event.delivery_state === "blocked_no_channel") {
     return "Lembrete bloqueado: canal não configurado";
   }
@@ -66,7 +78,7 @@ function notificationStatusLabel(
 
   if (event.delivery_state === "blocked_provider") {
     return event.channel_key === "email"
-      ? "Email configurado; provedor externo ainda não ativado"
+      ? "Email configurado; entrega externa ainda não concluída"
       : "WhatsApp configurado; provedor externo ainda não ativado";
   }
 
@@ -91,7 +103,11 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
 
   for (const event of notificationEvents) {
     if (
-      event.event_key.startsWith("weekly_feedback_reminder:") &&
+      (
+        event.event_key.startsWith("weekly_feedback_reminder:") ||
+        event.event_key.startsWith("weekly_feedback_email_delivery:") ||
+        event.event_key.startsWith("weekly_feedback_email_delivery_failed:")
+      ) &&
       !reminderEventsByFeedbackId.has(event.weekly_feedback_id)
     ) {
       reminderEventsByFeedbackId.set(event.weekly_feedback_id, event);

@@ -218,3 +218,34 @@ Estados atuais:
 - `blocked_provider`: canal externo configurado, mas integracao de envio ainda indisponivel.
 
 Email de contato e telefone continuam dados de contato, nao prova automatica de consentimento para mensagens externas.
+
+
+## Entrega real por email — implementacao preparada em 2026-10-05
+
+O canal `email` agora possui fundacao de entrega externa auditavel.
+
+Fluxo tecnico:
+- o gerador de quarta-feira cria `queued_external` quando a cliente tem email de contato;
+- um cron server-side do aplicativo consulta somente trabalhos elegiveis;
+- cada claim cria tentativa com lease;
+- Gmail SMTP aceitou a mensagem -> nova evidencia `delivered`;
+- erro SMTP -> `delivery_failed`, preservando retry limitado;
+- nenhum evento anterior e reescrito.
+
+O worker:
+- usa somente o email de contato atual;
+- nao usa email de login como chave ou destino implicito;
+- nao inclui dados de saude no corpo;
+- envia apenas periodo do Feedback e link para a area autenticada;
+- nao declara atraso, baixa adesao ou suspensao de atendimento.
+
+A cadencia do cron da Vercel e tecnica. A funcao do banco continua liberando envio somente no `reminder_weekday` configurado. Nao existe horario profissional novo inferido.
+
+### Gate de producao ainda pendente
+
+A entrega real permanece desativada ate a Vercel receber:
+- `GMAIL_SMTP_USER` da Patty;
+- `GMAIL_SMTP_APP_PASSWORD` exclusiva do worker;
+- opcionalmente `GMAIL_SMTP_FROM_NAME`.
+
+Depois disso, validar com conta sintetica antes de qualquer cliente real.
