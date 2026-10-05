@@ -261,7 +261,7 @@ export default async function AdminClienteDetailPage({
             </Card>
           </Link>
 
-          <a className={styles.cardLink} href="#treino">
+          <Link className={styles.cardLink} href={`/admin/clientes/${client.id}/treino`}>
             <Card className={styles.infoCard}>
               <div className={styles.cardHeader}>
                 <h3 className={styles.cardTitle}>Treino</h3>
@@ -275,7 +275,7 @@ export default async function AdminClienteDetailPage({
                   : "Nenhuma solicitação de treino registrada."}
               </p>
             </Card>
-          </a>
+          </Link>
         </div>
       </Section>
 
