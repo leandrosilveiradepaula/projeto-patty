@@ -1933,3 +1933,33 @@ PR #343 mergeado no commit `0bb3f797f2ce418bab176df06f08645c34747bb5`.
 ### LIMITE ATUAL
 
 Nao ha envio externo real por email/WhatsApp nesta etapa. Provedor, opt-in quando aplicavel e politica de fallback continuam pendentes.
+
+
+## Atualizacao 2026-10-05 - Worker de email do Feedback Semanal
+
+### APLICADO NO SUPABASE SAAS
+
+- migration `20261005120729_add_weekly_feedback_email_delivery_attempts` aplicada;
+- estados `queued_external` e `delivery_failed` adicionados aos eventos;
+- tabela de tentativas de entrega com RLS, lease, retry limitado e historico terminal protegido;
+- RPCs internos de claim, complete e fail disponiveis apenas ao boundary server-side.
+
+### IMPLEMENTADO NA BRANCH
+
+- worker Gmail SMTP server-only;
+- rota protegida `/api/cron/weekly-feedback-email-delivery`;
+- cron Vercel horario, sem transformar horario tecnico em regra profissional;
+- email operacional sem dados de saude;
+- Message-ID deterministico para retries;
+- estados de fila, falha e entrega visiveis corretamente para a Patty;
+- pgTAP e testes de pendencias ampliados.
+
+### PENDENTE DE CONFIGURACAO HUMANA
+
+Para ativar envio real em producao:
+1. configurar `GMAIL_SMTP_USER` com a conta Gmail da Patty na Vercel;
+2. gerar/configurar `GMAIL_SMTP_APP_PASSWORD` exclusiva do worker;
+3. publicar o master com o worker;
+4. validar com conta sintetica antes de clientes reais.
+
+O Gmail conectado ao ChatGPT nao e usado pelo aplicativo.
