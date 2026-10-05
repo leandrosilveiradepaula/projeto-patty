@@ -2011,3 +2011,46 @@ PR #350 mergeado no commit `6c4e7ab1ac39616257fb6299f50b9ebb90e189b4`.
 ### LIMITE
 
 A biblioteca de exercicios agora possui autoria/publicacao operacional, mas a prescricao versionada de treino por cliente continua sendo uma lacuna separada. Ela nao deve ser criada ate que o modelo operacional e as regras profissionais necessarias estejam documentados e confirmados.
+
+
+## Biblioteca educacional — autoria, publicacao e assets privados
+
+Atualizado em 2026-10-05.
+
+### MERGEADO NO MASTER
+
+PR #352:
+- criacao administrativa de conteudo educacional como rascunho;
+- edicao de titulo e ordem enquanto a versao permanece em rascunho;
+- historico factual de versoes;
+- nenhuma categoria, tipo ou fase e inferida automaticamente.
+
+PR #353:
+- publicacao manual explicita de versao em rascunho;
+- versao publicada permanece imutavel pela UI;
+- nova versao pode ser criada a partir da ultima publicada;
+- publicacao apenas torna a versao elegivel para a liberacao manual por cliente ja existente.
+
+PR #354:
+- workspace administrativo mostra o estado dos assets da versao atual;
+- metadados tecnicos exibidos incluem provider, MIME type, byte size, storage path e SHA-256;
+- ausencia de binario registrado aparece explicitamente como estado sem asset.
+
+PR #355 mergeado no commit `859a651681fe1f63d6df1bf885252558d502a3d8`:
+- admin pode registrar metadados de um asset ja copiado e verificado no Vercel Private Blob;
+- registro exige versao ainda em rascunho, confirmacao explicita, path privado opaco, MIME type, byte size positivo e SHA-256 valido;
+- provider permanece `vercel_blob` e o asset primario usa `asset_key = primary`;
+- a interface nao recebe token do Blob, nao aceita URL publica como storage path e nao registra asset retroativamente em versao publicada;
+- nenhuma migration ou alteracao de RLS foi necessaria nesta sequencia.
+
+### LIMITE ATUAL
+
+Registro de metadados nao equivale a upload concluido.
+
+A migracao fisica de cada arquivo somente pode ser considerada concluida quando:
+1. o objeto existir no Vercel Private Blob;
+2. tamanho e SHA-256 tiverem sido verificados contra a origem aprovada;
+3. o asset correspondente tiver sido registrado no Supabase;
+4. direitos/licenciamento permitirem a distribuicao quando o material nao for proprio.
+
+Nenhum arquivo deve ser marcado como migrado apenas porque existe manifesto, path planejado ou registro de interface.
