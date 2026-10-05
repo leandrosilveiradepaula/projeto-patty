@@ -6,10 +6,11 @@ select is(
    where template_key in (
      'evaluation.assessment_kind_catalog',
      'evaluation.assessment_definition.basic',
-     'evaluation.assessment_definition.complete'
+     'evaluation.assessment_definition.complete',
+     'evaluation.assessment_schedule_preferences'
    )),
-  3::bigint,
-  'assessment configuration seeds exactly three templates'
+  4::bigint,
+  'assessment configuration seeds exactly four templates'
 );
 
 select is(
@@ -18,13 +19,14 @@ select is(
    where t.template_key in (
      'evaluation.assessment_kind_catalog',
      'evaluation.assessment_definition.basic',
-     'evaluation.assessment_definition.complete'
+     'evaluation.assessment_definition.complete',
+     'evaluation.assessment_schedule_preferences'
    )
    and v.version_number=1 and v.schema_version=1
    and v.source_kind='system_baseline'
    and v.created_by_kind='system'
    and v.activated_at is not null and v.retired_at is null),
-  3::bigint,
+  4::bigint,
   'assessment baselines have one active system version'
 );
 
@@ -84,6 +86,40 @@ select is(
      )),
   0::bigint,
   'assessment configuration does not invent cadence or month-end anchor rules'
+);
+
+select is(
+  (select v.configuration->'complete_preferred_weekdays'
+   from public.method_configuration_versions v
+   join public.method_configuration_templates t on t.id=v.template_id
+   where t.template_key='evaluation.assessment_schedule_preferences'
+     and v.retired_at is null),
+  '[5, 6]'::jsonb,
+  'Complete assessment baseline prefers Friday and Saturday'
+);
+
+select is(
+  (select v.configuration->>'basic_placement'
+   from public.method_configuration_versions v
+   join public.method_configuration_templates t on t.id=v.template_id
+   where t.template_key='evaluation.assessment_schedule_preferences'
+     and v.retired_at is null),
+  'approximately_midpoint_between_complete_assessments',
+  'Basic assessment baseline remains approximately midway between complete assessments'
+);
+
+select is(
+  (select count(*) from public.method_configuration_versions v
+   join public.method_configuration_templates t on t.id=v.template_id
+   where t.template_key='evaluation.assessment_schedule_preferences'
+     and (
+       v.configuration ? 'cadenceDays'
+       or v.configuration ? 'automaticCadenceDays'
+       or v.configuration ? 'automaticDate'
+       or v.configuration::text like '%anchorDay%'
+     )),
+  0::bigint,
+  'assessment schedule preferences do not invent automatic calendar rules'
 );
 
 select * from finish();
