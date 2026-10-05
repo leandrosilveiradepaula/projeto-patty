@@ -989,3 +989,22 @@ Ainda aberto:
 - eventual horario profissional especifico do lembrete, caso a Patty queira definir um no futuro.
 
 Ate essas decisoes, email/WhatsApp nunca devem ser marcados como enviados automaticamente.
+
+
+### PARCIALMENTE RESOLVIDO — ENVIO REAL POR EMAIL DO FEEDBACK SEMANAL
+
+Resolvido tecnicamente:
+- worker server-side dedicado;
+- Gmail SMTP como provider de baixo volume do MVP;
+- fila, lease, tentativa, falha, retry limitado e entrega auditavel;
+- separacao do Custom SMTP do Supabase Auth;
+- cron protegido por `CRON_SECRET`;
+- cliente nao acessa logs internos de transporte.
+
+Ainda pendente de configuracao operacional:
+- cadastrar na Vercel o Gmail da Patty;
+- cadastrar App Password exclusiva do worker;
+- publicar o master correspondente;
+- validar envio/recebimento com conta sintetica.
+
+WhatsApp continua separado e sem provider escolhido.
