@@ -1863,7 +1863,9 @@ A UI esta implementada nesta branch, mas ainda precisa passar CI, merge e public
 - migration `20261005002026_seed_weekly_feedback_schedule_configuration` aplicada;
 - template `weekly_feedback.schedule` v1 ativo com segunda-feira 08:00, lembrete quarta e fuso America/Sao_Paulo.
 
-### IMPLEMENTADO NA BRANCH
+### MERGEADO NO MASTER
+
+PR #339 mergeado no commit `d7ce9c2a00c24eb3ecc34c558db8caab672ce21c`.
 
 - UI administrativa mostra se a cliente esta elegivel;
 - botao manual fica indisponivel antes do primeiro protocolo publicado;
