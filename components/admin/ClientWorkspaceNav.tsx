@@ -22,6 +22,7 @@ export function ClientWorkspaceNav({ clientId }: ClientWorkspaceNavProps) {
     { href: `${base}/conteudos`, label: "Conteúdos" },
     { href: `${base}/checkins`, label: "Check-ins" },
     { href: `${base}/feedback-semanal`, label: "Feedback semanal" },
+    { href: `${base}#treino`, label: "Treino", hash: "#treino" },
   ];
 
   return (
@@ -29,7 +30,9 @@ export function ClientWorkspaceNav({ clientId }: ClientWorkspaceNavProps) {
       {items.map((item) => {
         const isActive = item.exact
           ? pathname === item.href
-          : pathname === item.href || pathname.startsWith(`${item.href}/`);
+          : item.hash
+            ? false
+            : pathname === item.href || pathname.startsWith(`${item.href}/`);
 
         return (
           <Link
