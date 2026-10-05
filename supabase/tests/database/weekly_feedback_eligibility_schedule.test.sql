@@ -1,6 +1,6 @@
 begin;
 
-select plan(29);
+select plan(43);
 
 select is(
   (
@@ -443,8 +443,183 @@ select is(
           and period_end = date '2026-10-18'
       )
   ),
-  'blocked_provider'::text,
-  'email reminder is not falsely marked delivered while provider is not configured'
+  'queued_external'::text,
+  'email reminder is queued for the external worker and is not falsely marked delivered'
+);
+
+select ok(
+  not has_function_privilege(
+    'authenticated',
+    'public.claim_weekly_feedback_email_deliveries_server(integer,timestamptz)',
+    'EXECUTE'
+  ),
+  'authenticated users cannot claim internal email delivery work'
+);
+
+select is(
+  (
+    select count(*)
+    from public.claim_weekly_feedback_email_deliveries_server(
+      10,
+      '2026-10-20 15:17:00+00'::timestamptz
+    )
+  ),
+  0::bigint,
+  'email delivery worker cannot claim the reminder before configured Wednesday'
+);
+
+select is(
+  (
+    select count(*)
+    from public.claim_weekly_feedback_email_deliveries_server(
+      10,
+      '2026-10-21 15:18:00+00'::timestamptz
+    )
+  ),
+  1::bigint,
+  'email delivery worker claims the queued Wednesday reminder'
+);
+
+select is(
+  (
+    select status
+    from public.client_notification_delivery_attempts
+    where client_id = 'e2000000-0000-0000-0000-000000000001'
+      and weekly_feedback_id = (
+        select id
+        from public.client_weekly_feedbacks
+        where client_id = 'e2000000-0000-0000-0000-000000000001'
+          and period_start = date '2026-10-12'
+          and period_end = date '2026-10-18'
+      )
+  ),
+  'started'::text,
+  'claimed email delivery has a started audit attempt'
+);
+
+select is(
+  (
+    select count(*)
+    from public.claim_weekly_feedback_email_deliveries_server(
+      10,
+      '2026-10-21 15:19:00+00'::timestamptz
+    )
+  ),
+  0::bigint,
+  'active email delivery lease prevents concurrent duplicate claim'
+);
+
+select isnt(
+  public.complete_weekly_feedback_email_delivery_server(
+    (
+      select id
+      from public.client_notification_delivery_attempts
+      where client_id = 'e2000000-0000-0000-0000-000000000001'
+        and status = 'started'
+      order by started_at desc
+      limit 1
+    ),
+    'gmail-smtp-accepted-test',
+    '2026-10-21 15:20:00+00'::timestamptz
+  ),
+  null::uuid,
+  'successful SMTP acceptance completes the claimed attempt'
+);
+
+select is(
+  (
+    select count(*)
+    from public.client_notification_events
+    where client_id = 'e2000000-0000-0000-0000-000000000001'
+      and channel_key = 'email'
+      and delivery_state = 'delivered'
+      and event_key like 'weekly_feedback_email_delivery:%'
+  ),
+  1::bigint,
+  'successful email delivery creates a separate immutable delivered event'
+);
+
+select throws_ok(
+  $sql$
+    update public.client_notification_delivery_attempts
+    set failure_message = 'rewrite terminal history'
+    where client_id = 'e2000000-0000-0000-0000-000000000001'
+      and status = 'delivered'
+  $sql$,
+  '55000',
+  'terminal notification delivery attempt cannot be changed',
+  'terminal email delivery attempt history cannot be rewritten'
+);
+
+select is(
+  public.generate_scheduled_weekly_feedback_requests(
+    '2026-10-26 11:00:00+00'::timestamptz
+  ),
+  1,
+  'next Monday generation creates another scheduled weekly feedback'
+);
+
+select is(
+  public.generate_weekly_feedback_reminder_events(
+    '2026-10-28 15:17:00+00'::timestamptz
+  ),
+  1,
+  'next Wednesday queues another email reminder'
+);
+
+select is(
+  (
+    select count(*)
+    from public.claim_weekly_feedback_email_deliveries_server(
+      10,
+      '2026-10-28 15:18:00+00'::timestamptz
+    )
+  ),
+  1::bigint,
+  'email worker claims the next queued reminder'
+);
+
+select isnt(
+  public.fail_weekly_feedback_email_delivery_server(
+    (
+      select id
+      from public.client_notification_delivery_attempts
+      where client_id = 'e2000000-0000-0000-0000-000000000001'
+        and status = 'started'
+      order by started_at desc
+      limit 1
+    ),
+    'gmail_smtp_error',
+    'synthetic transport failure',
+    '2026-10-28 15:19:00+00'::timestamptz
+  ),
+  null::uuid,
+  'failed SMTP attempt is finalized explicitly'
+);
+
+select is(
+  (
+    select delivery_state
+    from public.client_notification_events
+    where client_id = 'e2000000-0000-0000-0000-000000000001'
+      and event_key like 'weekly_feedback_email_delivery_failed:%'
+    order by created_at desc
+    limit 1
+  ),
+  'delivery_failed'::text,
+  'failed SMTP attempt creates a separate failure event instead of delivery'
+);
+
+select is(
+  (
+    select count(*)
+    from public.claim_weekly_feedback_email_deliveries_server(
+      10,
+      '2026-10-28 15:20:00+00'::timestamptz
+    )
+  ),
+  1::bigint,
+  'failed email delivery remains eligible for a bounded retry'
 );
 
 set local role authenticated;
