@@ -1976,14 +1976,16 @@ O Gmail conectado ao ChatGPT nao e usado pelo aplicativo.
 - baseline da Avaliacao Completa: sexta-feira e sabado;
 - baseline da Avaliacao Basica: aproximadamente no meio entre duas Avaliacoes Completas.
 
-### IMPLEMENTADO NA BRANCH
+### MERGEADO NO MASTER
+
+PR #348 mergeado no commit `9a78dab4962d8a102ec29dd89f3c07dbc510d11c`.
 
 - parser fechado e testes determinísticos;
 - schema registrado na allowlist de configuracoes;
 - /admin/configuracoes permite alterar os dias preferidos da Avaliacao Completa por nova versao;
 - formulario real de criacao de avaliacao mostra a preferencia ativa conforme o tipo selecionado;
 - a data continua livre e nenhuma regra automatica de calendario foi criada;
-- pgTAP ampliado para provar ausencia de cadenceDays, automaticDate e anchorDay.
+- typecheck, testes de dominio, boundary de seguranca, build, db reset, lint e pgTAP passaram antes do merge.
 
 ### LIMITE
 
