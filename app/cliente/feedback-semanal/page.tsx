@@ -37,7 +37,14 @@ function formatDueAt(value: string | null) {
   }).format(new Date(value));
 }
 
-export default async function ClientWeeklyFeedbackPage() {
+type ClientWeeklyFeedbackPageProps = {
+  searchParams: Promise<{ status?: string }>;
+};
+
+export default async function ClientWeeklyFeedbackPage({
+  searchParams,
+}: ClientWeeklyFeedbackPageProps) {
+  const { status } = await searchParams;
   const client = await getCurrentClient();
 
   if (!client) {
@@ -71,6 +78,15 @@ export default async function ClientWeeklyFeedbackPage() {
         eyebrow="Cliente"
         title="Feedback Semanal"
       />
+      {status === "draft-saved" ? (
+        <Alert live="polite" title="Rascunho salvo" variant="success">
+          Suas respostas foram salvas. Você pode continuar em outro momento.
+        </Alert>
+      ) : status === "submitted" ? (
+        <Alert live="polite" title="Feedback enviado" variant="success">
+          Seu Feedback Semanal foi enviado e não está mais disponível para edição.
+        </Alert>
+      ) : null}
 
       <Section title="Seus feedbacks">
         {feedbacks.length === 0 ? (
