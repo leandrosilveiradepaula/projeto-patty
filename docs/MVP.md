@@ -129,28 +129,31 @@ Para o estado operacional detalhado e os bloqueios atuais, consultar `PROJECT_ST
 
 ## Regras e detalhes pendentes da Patty
 
-### QUESTAO ABERTA
+### ESTADO RECONCILIADO EM 2026-10-05
 
-Parte do metodo ja possui regras confirmadas e documentadas em `BUSINESS_RULES.md` e `DECISIONS.md`, incluindo Reconhecimento Metabolico, a sequencia principal confirmada ate `Cutting 2: 2 Low / 1 High`, referencias iniciais de macros, conversoes de doses, limite do grupo de proteina com maior teor de gordura, equivalencia de legumes na contagem de carboidrato, regras confirmadas de Cutting Dia 1 / Dia 2, meta de liquidos de 60 mL/kg/dia e a existencia da refeicao livre semanal no Up Metabolico.
+As rodadas posteriores de respostas da Patty fecharam diversos itens que permaneciam listados aqui como abertos. A fonte normativa atual e `BUSINESS_RULES.md` + `DECISIONS.md`; esta secao nao deve reabrir decisoes ja confirmadas.
 
-Tambem esta confirmado que, no inicio do acompanhamento, relatos de comportamento, doencas informadas ou alteracoes em exames nao disparam alerta, bloqueio, encaminhamento ou revisao obrigatoria automaticamente; a Patty inicia o processo normalmente e decide intervencoes posteriores por julgamento humano.
+Ja estao confirmados, entre outros pontos:
+- Cutting 3 com `Linear -> Dia 1/Dia 2 -> Carb Cycle 2 Low/1 High`, usando Fase 3/faixa vermelha no Carb Cycle;
+- depois do Up pos-Cutting 3, a proxima etapa e decisao profissional contextual, podendo incluir encerramento, Manutencao, Bulking ou outra continuidade definida pela Patty;
+- Manutencao existe e tem entrada, duracao e saida manuais; seu objetivo principal e preservar adesao e rotina no periodo;
+- entrada em Bulking e contextual; macros do Bulking sao definidos manualmente por paciente;
+- transicao Bulking -> Consolidacao considera ganho muscular, gordura/retencao, objetivo e avaliacao profissional;
+- Consolidacao reduz doses manual e gradualmente, encerra por decisao profissional e, no retorno ao Cutting, reinicia pelo Cutting 1 Linear;
+- Up Metabolico parte do protocolo anterior e tem carboidrato ajustado manualmente;
+- hidratacao usa 35 mL/kg/dia, com orientacao 70% agua pura / 30% outros liquidos zero calorias, e recalculo prospectivo quando novo peso e registrado;
+- suplementacao e manipulados sao manuais, caso a caso, sem template automatico obrigatorio;
+- Feedback Semanal, agenda, periodo de referencia, lembrete e canais possuem regras posteriores documentadas.
 
-Continuam pendentes, sem automacao alem do que ja foi explicitamente confirmado:
-
-- Fases 5 e 6 da Planilha Carb Cycle;
-- etapas posteriores a `Cutting 2: 2 Low / 1 High`, incluindo qualquer eventual Cutting posterior, e seus valores/formulas;
-- Bulking detalhado;
-- Consolidacao;
-- proporcao minima de agua pura, regra de recalculo da meta de liquidos e cadencia dos lembretes;
-- suplementacao e manipulados;
-- montagem e progressao definitiva de treino;
-- cardio quando nao coberto por regra confirmada;
-- janela/limiar de estagnacao e combinacoes conflitantes de indicadores;
+Continuam realmente abertos apenas os pontos que ainda carecem de regra profissional ou detalhe operacional suficiente:
+- regras detalhadas das Fases 4, 5 e 6 da Planilha Carb Cycle quando forem efetivamente usadas;
+- montagem automatizavel e progressao de treino: intensidade, volume, progressao, cardio, excecoes e criterios objetivos de ajuste por dor/lesao/limitacao;
+- horario/cadencia dos lembretes de hidratacao quando nao houver configuracao individual explicita;
+- janela/limiar de estagnacao, tolerancia a ruido e combinacoes conflitantes de indicadores;
 - criterios de resultado para objetivos diferentes de emagrecimento/reducao de gordura;
-- criterios completos de mudanca de fase alem do fluxo ja confirmado;
-- demais regras profissionais ainda nao formalizadas.
+- regras profissionais adicionais que a Patty deliberadamente manteve como decisao manual e contextual nao devem ser tratadas como "faltando formula": o comportamento confirmado e permitir decisao/edicao humana versionada.
 
-Essas pendencias nao devem ser resolvidas por inferencia, exemplo individual ou recomendacao tecnica. Devem ser registradas e validadas pela Patty antes de virar regra do produto.
+Essas pendencias nao devem ser resolvidas por inferencia, exemplo individual ou recomendacao tecnica. Antes de formular nova pergunta para a Patty, verificar primeiro `BUSINESS_RULES.md`, `DECISIONS.md`, `OPEN_QUESTIONS.md` e as rodadas de levantamento ja preservadas.
 
 ## Fora do sistema completo
 
