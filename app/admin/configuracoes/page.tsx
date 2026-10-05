@@ -1,4 +1,5 @@
 import {
+  updateAssessmentSchedulePreferencesAction,
   updateMethodConfigurationAction,
   updateWeeklyFeedbackScheduleAction,
 } from "@/app/admin/configuracoes/actions";
@@ -14,6 +15,10 @@ import {
   formatConfigurationUnit,
   listEditableNumericParameters,
 } from "@/lib/configuration/editable-numeric";
+import {
+  formatIsoWeekdayPtBr,
+  parseAssessmentSchedulePreferencesConfiguration,
+} from "@/lib/configuration/assessment-schedule-preferences";
 import { parseWeeklyFeedbackScheduleConfiguration } from "@/lib/configuration/weekly-feedback-schedule";
 import { listMethodConfigurationCatalogForCurrentAdmin } from "@/lib/supabase/data-access";
 import styles from "./page.module.css";
@@ -70,6 +75,14 @@ export default async function AdminConfiguracoesPage() {
                       active.configuration,
                     )
                   : null;
+              const assessmentSchedulePreferences =
+                active &&
+                template.config_schema_key ===
+                  "assessment_schedule_preferences_v1"
+                  ? parseAssessmentSchedulePreferencesConfiguration(
+                      active.configuration,
+                    )
+                  : null;
 
               return (
                 <Card className={styles.card} key={template.id}>
@@ -106,7 +119,52 @@ export default async function AdminConfiguracoesPage() {
                     </div>
                   </dl>
 
-                  {active && weeklyFeedbackSchedule ? (
+                  {active && assessmentSchedulePreferences ? (
+                    <form
+                      action={updateAssessmentSchedulePreferencesAction.bind(
+                        null,
+                        template.id,
+                        active.id,
+                      )}
+                      className={styles.editor}
+                    >
+                      <div>
+                        <h3 className={styles.editorTitle}>
+                          Preferências de agenda das avaliações
+                        </h3>
+                        <p className={styles.editorDescription}>
+                          Selecione os dias preferidos para a Avaliação Completa.
+                          Isso orienta a agenda, mas não bloqueia outras datas.
+                        </p>
+                      </div>
+
+                      <div className={styles.checkboxGrid}>
+                        {[1, 2, 3, 4, 5, 6, 7].map((weekday) => (
+                          <label className={styles.checkboxField} key={weekday}>
+                            <input
+                              defaultChecked={assessmentSchedulePreferences.completePreferredWeekdays.includes(
+                                weekday,
+                              )}
+                              name="completePreferredWeekday"
+                              type="checkbox"
+                              value={weekday}
+                            />
+                            <span>{formatIsoWeekdayPtBr(weekday)}</span>
+                          </label>
+                        ))}
+                      </div>
+
+                      <p className={styles.editorDescription}>
+                        Avaliação Básica: aproximadamente no meio do intervalo
+                        entre duas Avaliações Completas. Esta semântica permanece
+                        protegida até existir outra regra profissional confirmada.
+                      </p>
+
+                      <Button type="submit">
+                        Criar nova versão das preferências
+                      </Button>
+                    </form>
+                  ) : active && weeklyFeedbackSchedule ? (
                     <form
                       action={updateWeeklyFeedbackScheduleAction.bind(
                         null,
