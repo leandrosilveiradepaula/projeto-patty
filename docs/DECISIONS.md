@@ -2978,3 +2978,30 @@ A funcao geradora calcula o periodo em relacao ao calendario local configurado, 
 A geracao e idempotente, exige elegibilidade previamente confirmada e registra origem automatica separada de autoria humana.
 
 Quarta-feira continua sendo apenas momento de lembrete; nao preencher `due_at` nem fechar formulario automaticamente sem nova regra.
+
+
+## 2026-10-05 - Lembrete semanal: preferencia versionada por cliente
+
+### REGRA CONFIRMADA / DECISAO DE PRODUTO
+
+A Patty escolhe o canal do Feedback Semanal por cliente entre:
+- email;
+- WhatsApp;
+- notificacao dentro do aplicativo.
+
+Essa escolha nao reutiliza email/telefone como regra implicita. Ela e armazenada como preferencia versionada client-scoped.
+
+### LEMBRETE DE QUARTA-FEIRA
+
+Quarta-feira e o dia confirmado. Nao existe horario profissional confirmado.
+
+O scheduler tecnico pode verificar periodicamente se o lembrete esta devido, mas nenhum horario tecnico deve ser documentado como regra da Patty.
+
+### ENTREGA E AUDITORIA
+
+- in-app pode ser entregue internamente;
+- email/WhatsApp permanecem bloqueados enquanto nao houver provedor/consentimento aplicavel;
+- eventos sao append-only;
+- bloqueio nao equivale a envio;
+- troca de preferencia permite nova tentativa apos bloqueio;
+- entrega confirmada encerra novas tentativas daquele Feedback naquela semana.
