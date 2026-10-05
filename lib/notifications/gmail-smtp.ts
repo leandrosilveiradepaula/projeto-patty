@@ -93,7 +93,7 @@ class SmtpConnection {
 
     const normalized = this.buffer.replace(/\r\n/g, "\n");
     const lines = normalized.split("\n");
-    const completeLines = normalized.endsWith("\n") ? lines.slice(0, -1) : lines.slice(0, -1);
+    const completeLines = lines.slice(0, -1);
 
     if (completeLines.length === 0) return;
 
