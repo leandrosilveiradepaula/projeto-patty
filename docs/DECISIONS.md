@@ -2963,3 +2963,18 @@ Esses valores estao em `weekly_feedback.schedule` / `weekly_feedback_schedule_v1
 ### LIMITE
 
 Nao foi confirmado qual periodo de referencia automatico deve ser criado na segunda-feira. Ate essa definicao, `period_start` e `period_end` continuam manuais e a criacao automatica semanal nao deve ser ativada.
+
+
+## 2026-10-05 - Feedback Semanal: geracao automatica usa semana anterior
+
+### REGRA CONFIRMADA PELA PATTY
+
+Quando o Feedback Semanal for criado automaticamente, ele representa a semana anterior completa, de segunda-feira a domingo.
+
+### CONSEQUENCIA TECNICA
+
+A funcao geradora calcula o periodo em relacao ao calendario local configurado, preservando o recorte segunda-domingo mesmo se a Patty alterar futuramente o dia de disparo.
+
+A geracao e idempotente, exige elegibilidade previamente confirmada e registra origem automatica separada de autoria humana.
+
+Quarta-feira continua sendo apenas momento de lembrete; nao preencher `due_at` nem fechar formulario automaticamente sem nova regra.
