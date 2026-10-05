@@ -36,6 +36,7 @@ const ENTRYPOINT_RULES = new Map([
   ["app/cliente/anamnese/[anamneseId]/esclarecimentos/actions.ts", "client"],
   ["app/cliente/anamnese/actions.ts", "client"],
   ["app/cliente/arquivos/[fileId]/route.ts", "client"],
+  ["app/cliente/conteudos/assets/[assetId]/route.ts", "client"],
   ["app/cliente/arquivos/actions.ts", "client"],
   ["app/cliente/checkins/actions.ts", "client"],
   ["app/cliente/feedback-semanal/actions.ts", "client"],

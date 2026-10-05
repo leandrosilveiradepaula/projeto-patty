@@ -78,3 +78,7 @@
     justify-content: flex-end;
   }
 }
+
+.action {
+  margin-top: var(--space-3);
+}

@@ -940,6 +940,46 @@ export async function listContentReleasesForAccessibleClient(clientId: string) {
   return listContentReleasesForClient(clientId);
 }
 
+export async function getAccessibleEducationalContentAssetForCurrentClient(
+  assetId: string,
+) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("educational_content_assets")
+    .select(
+      "id, educational_content_version_id, asset_key, storage_provider, storage_path, content_type, byte_size, sha256_hex",
+    )
+    .eq("id", assetId)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function listEducationalContentAssetsForCurrentClient(
+  versionId: string,
+) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("educational_content_assets")
+    .select(
+      "id, educational_content_version_id, asset_key, content_type, byte_size",
+    )
+    .eq("educational_content_version_id", versionId)
+    .order("asset_key", { ascending: true })
+    .order("id", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+
 
 export async function createAccessibleClientContentRelease(
   clientId: string,
