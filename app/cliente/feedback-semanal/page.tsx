@@ -57,7 +57,7 @@ export default async function ClientWeeklyFeedbackPage() {
     notificationEvents
       .filter(
         (event) =>
-          event.event_key === "weekly_feedback_reminder" &&
+          event.event_key.startsWith("weekly_feedback_reminder:") &&
           event.channel_key === "in_app" &&
           event.delivery_state === "delivered",
       )
