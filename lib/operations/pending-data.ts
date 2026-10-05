@@ -7,6 +7,7 @@ import {
   listAccessibleAnamnesisReviews,
   listAccessibleAnamnesisSubmissions,
   listAccessibleClientAssessments,
+  listAccessibleClientNotificationEvents,
   listAccessibleWeeklyFeedbacksForClient,
   listAccessibleNonterminalAiExecutions,
   listAccessibleProtocolPublications,
