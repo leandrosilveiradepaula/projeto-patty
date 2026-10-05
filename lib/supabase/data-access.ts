@@ -780,8 +780,11 @@ export async function deleteAccessibleEducationalContentWithoutVersions(
 }
 
 export async function createAccessibleEducationalContentVersion(input: {
+  categoryKey?: string | null;
   contentId: string;
+  contentTypeKey?: string | null;
   displayOrder: number;
+  phaseKey?: string | null;
   title: string;
   versionNumber: number;
 }) {
@@ -789,8 +792,11 @@ export async function createAccessibleEducationalContentVersion(input: {
   const { data, error } = await supabase
     .from("educational_content_versions")
     .insert({
+      category_key: input.categoryKey ?? null,
+      content_type_key: input.contentTypeKey ?? null,
       display_order: input.displayOrder,
       educational_content_id: input.contentId,
+      phase_key: input.phaseKey ?? null,
       title: input.title,
       version_number: input.versionNumber,
     })
@@ -819,6 +825,30 @@ export async function updateAccessibleEducationalContentDraftVersion(input: {
       display_order: input.displayOrder,
       title: input.title,
     })
+    .eq("id", input.versionId)
+    .eq("educational_content_id", input.contentId)
+    .is("published_at", null)
+    .select(
+      "id, educational_content_id, version_number, title, category_key, content_type_key, phase_key, display_order, published_at, created_at",
+    )
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function publishAccessibleEducationalContentVersion(input: {
+  contentId: string;
+  publishedAt: string;
+  versionId: string;
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("educational_content_versions")
+    .update({ published_at: input.publishedAt })
     .eq("id", input.versionId)
     .eq("educational_content_id", input.contentId)
     .is("published_at", null)
