@@ -1,4 +1,5 @@
 import { addLiquidIntakeAction, recordActivityCheckinAction } from "@/app/cliente/checkins/actions";
+import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -36,7 +37,14 @@ function formatMl(value: number) {
   return new Intl.NumberFormat("pt-BR").format(value) + " mL";
 }
 
-export default async function ClientCheckinsPage() {
+type ClientCheckinsPageProps = {
+  searchParams: Promise<{ status?: string }>;
+};
+
+export default async function ClientCheckinsPage({
+  searchParams,
+}: ClientCheckinsPageProps) {
+  const { status } = await searchParams;
   const client = await getCurrentClient();
 
   if (!client) {
@@ -92,6 +100,15 @@ export default async function ClientCheckinsPage() {
         eyebrow="Cliente"
         title="Check-ins diarios"
       />
+      {status === "liquid-recorded" ? (
+        <Alert live="polite" title="Líquido registrado" variant="success">
+          O registro foi salvo no seu histórico de hoje.
+        </Alert>
+      ) : status === "activity-recorded" ? (
+        <Alert live="polite" title="Atividade registrada" variant="success">
+          Sua resposta de atividade física de hoje foi salva.
+        </Alert>
+      ) : null}
 
       <Section
         description="A meta e definida pela Patty a partir do peso usado naquele momento. Mudancas de peso nao recalculam esta meta automaticamente."

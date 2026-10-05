@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 import { loadSupportedLiquidTaxonomy } from "@/lib/method/liquid-taxonomy-loader";
 import { createLiquidIntakeWithMethodSnapshot } from "@/lib/method/liquid-persistence";
@@ -61,6 +62,7 @@ export async function addLiquidIntakeAction(formData: FormData) {
 
   revalidatePath("/cliente");
   revalidatePath("/cliente/checkins");
+  redirect("/cliente/checkins?status=liquid-recorded");
 }
 
 export async function recordActivityCheckinAction(formData: FormData) {
@@ -86,4 +88,5 @@ export async function recordActivityCheckinAction(formData: FormData) {
 
   revalidatePath("/cliente");
   revalidatePath("/cliente/checkins");
+  redirect("/cliente/checkins?status=activity-recorded");
 }
