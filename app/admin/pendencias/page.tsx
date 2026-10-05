@@ -46,9 +46,19 @@ export default async function AdminPendenciasPage() {
               <li key={item.id}>
                 <PendingItemCard
                   action={
-                    <Link className={styles.actionLink} href={item.href}>
-                      Abrir registro
-                    </Link>
+                    <div className={styles.actions}>
+                      <Link className={styles.actionLink} href={item.href}>
+                        Abrir registro
+                      </Link>
+                      {item.clientId ? (
+                        <Link
+                          className={styles.clientLink}
+                          href={`/admin/clientes/${item.clientId}`}
+                        >
+                          Ver cliente
+                        </Link>
+                      ) : null}
+                    </div>
                   }
                   description={item.description}
                   meta={`${item.clientLabel} · ${formatDateTime(item.createdAt)}`}
