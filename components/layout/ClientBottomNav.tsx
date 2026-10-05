@@ -17,9 +17,30 @@ const clientNavigationItems: ClientNavigationItem[] = [
   { href: "/cliente/mais", label: "Mais" },
 ];
 
+const moreSectionPrefixes = [
+  "/cliente/anamnese",
+  "/cliente/avaliacoes",
+  "/cliente/evolucao",
+  "/cliente/conteudos",
+  "/cliente/exercicios",
+  "/cliente/arquivos",
+  "/cliente/treino",
+  "/cliente/perfil",
+];
+
 export function isClientNavigationItemActive(pathname: string, href: string) {
   if (href === "/cliente") {
     return pathname === href;
+  }
+
+  if (href === "/cliente/mais") {
+    return (
+      pathname === href ||
+      pathname.startsWith(`${href}/`) ||
+      moreSectionPrefixes.some(
+        (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+      )
+    );
   }
 
   return pathname === href || pathname.startsWith(`${href}/`);
