@@ -1,4 +1,5 @@
 import { requestTrainingAction } from "@/app/cliente/treino/actions";
+import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -20,7 +21,14 @@ function formatDateTime(value: string) {
   }).format(new Date(value));
 }
 
-export default async function ClientTrainingPage() {
+type ClientTrainingPageProps = {
+  searchParams: Promise<{ status?: string }>;
+};
+
+export default async function ClientTrainingPage({
+  searchParams,
+}: ClientTrainingPageProps) {
+  const { status } = await searchParams;
   const client = await getCurrentClient();
 
   if (!client) {
@@ -41,6 +49,11 @@ export default async function ClientTrainingPage() {
         eyebrow="Cliente"
         title="Treino"
       />
+      {status === "requested" ? (
+        <Alert live="polite" title="Solicitação enviada" variant="success">
+          Sua solicitação de treino foi registrada no acompanhamento e ficará visível para a Patty.
+        </Alert>
+      ) : null}
 
       <Section
         description="A Patty verá a solicitação no seu histórico de acompanhamento."
