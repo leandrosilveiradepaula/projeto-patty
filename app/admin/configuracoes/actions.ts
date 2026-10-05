@@ -195,6 +195,12 @@ export async function updateAssessmentSchedulePreferencesAction(
     .getAll("completePreferredWeekday")
     .map((value) => Number(value));
 
+  if (preferredWeekdays.length === 0) {
+    throw new Error(
+      "Selecione pelo menos um dia preferido para a Avaliação Completa.",
+    );
+  }
+
   const configuration =
     serializeAssessmentSchedulePreferencesConfiguration({
       basicPlacement: current.basicPlacement,
