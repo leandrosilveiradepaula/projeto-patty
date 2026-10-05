@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import {
@@ -330,11 +329,6 @@ export default async function AdminClientTrainingPage({ params }: Props) {
 
       {latestPublished ? (
         <Section
-          action={
-            <Link className={styles.link} href="/cliente/treino">
-              Referência da área da cliente
-            </Link>
-          }
           description="Prévia factual da versão publicada mais recente."
           title="Último treino publicado"
         >
