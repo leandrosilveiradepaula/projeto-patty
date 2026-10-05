@@ -3005,3 +3005,30 @@ O scheduler tecnico pode verificar periodicamente se o lembrete esta devido, mas
 - bloqueio nao equivale a envio;
 - troca de preferencia permite nova tentativa apos bloqueio;
 - entrega confirmada encerra novas tentativas daquele Feedback naquela semana.
+
+
+## 2026-10-05 - Email de lembrete semanal via worker server-side
+
+### DECISAO TECNICA
+
+O Gmail da Patty continua sendo o provedor de baixo volume do MVP, mas com dois boundaries independentes:
+- Supabase Auth Custom SMTP para autenticacao/convites;
+- worker server-side do aplicativo para lembretes do Feedback Semanal.
+
+O worker nao depende do Gmail connector do ChatGPT.
+
+### SEGURANCA E AUDITORIA
+
+- credenciais SMTP ficam apenas em segredo server-side da Vercel;
+- usar App Password exclusiva para o worker;
+- o browser nunca recebe credenciais;
+- claim e conclusao/falha passam por funcoes internas executaveis apenas por service_role;
+- eventos de notificacao continuam append-only;
+- tentativas de transporte possuem lifecycle proprio e auditavel;
+- email so vira `delivered` depois de aceite SMTP;
+- falha de transporte nunca vira entrega;
+- a mensagem nao inclui dado de saude e aponta para area autenticada.
+
+### LIMITE
+
+O cron tecnico pode rodar frequentemente, mas o banco so libera claims no dia profissional configurado para o lembrete. Isso nao cria horario profissional novo.
