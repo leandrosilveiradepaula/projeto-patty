@@ -195,7 +195,9 @@ A biblioteca educacional separa autorizacao/metadados de armazenamento binario:
 
 O Supabase continua decidindo se a versao foi publicada e liberada para a cliente. O Blob nao substitui RLS nem vira fonte de verdade de negocio.
 
-O acesso futuro ao binario deve ocorrer somente depois de validar a sessao e a release no Supabase. Preferir OIDC do runtime Vercel e URL assinada curta; nao expor token read-write ao browser.
+O acesso ao binario ocorre somente depois de validar a sessao e a release exata no Supabase. A implementacao v1 usa uma rota server-side autenticada para buscar o asset sob a sessao da cliente e fazer proxy do Vercel Private Blob com `@vercel/blob`. O browser recebe somente o stream autorizado; `storage_path`, token e URL privada do Blob nao sao expostos.
+
+A rota falha fechada quando a identidade, release, asset ou provider nao conferem e responde com cache privado desabilitado (`private, no-store`). O SDK usa a credencial server-side/OIDC disponibilizada pelo ambiente Vercel; nenhum token read-write entra no browser.
 
 Uploads grandes devem usar multipart quando necessario. Paths nao devem conter PII.
 
