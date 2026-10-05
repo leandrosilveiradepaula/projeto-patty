@@ -313,7 +313,11 @@ export function buildOperationalPendingItems(
 
     const current = latestReminderEventByFeedbackId.get(event.weeklyFeedbackId);
 
-    if (!current || event.createdAt > current.createdAt) {
+    if (
+      !current ||
+      event.createdAt > current.createdAt ||
+      (event.createdAt === current.createdAt && event.id > current.id)
+    ) {
       latestReminderEventByFeedbackId.set(event.weeklyFeedbackId, event);
     }
   }
