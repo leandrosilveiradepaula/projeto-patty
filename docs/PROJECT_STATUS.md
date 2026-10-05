@@ -1817,3 +1817,38 @@ O sistema deve ser parametrizavel para futura comercializacao. Valores atuais da
 ### PROXIMO FOCO
 
 Transformar as novas regras confirmadas em configuracoes versionadas e fluxos reais, priorizando funcionalidades navegaveis para Patty sem criar telas demonstrativas paralelas.
+
+
+## Atualizacao 2026-10-04 - Edicao versionada de parametros profissionais
+
+### IMPLEMENTADO NA BRANCH / BOUNDARY APLICADO NO SAAS
+
+A area real `/admin/configuracoes` foi evoluida de consulta para edicao segura dos parametros numericos dos schemas atualmente suportados.
+
+Implementacao:
+- `scalar_parameter_v1` e `method_engine_v1` expoem apenas valores numericos reconhecidos;
+- unidades, formulas e expressoes permanecem protegidas;
+- salvar nunca altera uma versao ativa in-place: cria nova versao, aposenta a anterior e preserva historico;
+- a acao administrativa exige Patty/admin autenticada com AAL2;
+- o browser nao recebe service role nem INSERT/UPDATE direto nas tabelas de configuracao;
+- concorrencia usa `expected_active_version_id`; alteracao stale e rejeitada;
+- valores nao finitos ou nao positivos sao recusados neste editor v1;
+- schemas estruturados, como Carb Cycle, Avaliacoes e taxonomia de liquidos, continuam somente leitura ate possuirem editor proprio.
+
+### APLICADO NO SUPABASE SAAS
+
+A migration `20261004235422_create_method_configuration_activation_boundary` foi aplicada.
+
+O RPC interno `activate_method_configuration_version_server`:
+- e `SECURITY INVOKER`;
+- aceita apenas ator com role admin;
+- e executavel somente por `service_role`;
+- rejeita `anon` e `authenticated`;
+- trava a versao ativa e rejeita escrita concorrente stale;
+- preserva autoria, source reference e lifecycle versionado.
+
+Dry-run transacional passou antes do apply. A verificacao pos-apply confirmou `service_role=true`, `authenticated=false` e `anon=false`. O Security Advisor nao apresentou nova regressao; permanece apenas o warning conhecido de Leaked Password Protection.
+
+### ESTADO
+
+A UI esta implementada nesta branch, mas ainda precisa passar CI, merge e publicacao antes de ser tratada como disponivel para Patty.

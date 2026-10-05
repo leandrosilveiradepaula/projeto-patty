@@ -1,8 +1,16 @@
+import { updateMethodConfigurationAction } from "@/app/admin/configuracoes/actions";
 import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
+import { TextInput } from "@/components/ui/TextInput";
+import {
+  formatConfigurationParameterKey,
+  formatConfigurationUnit,
+  listEditableNumericParameters,
+} from "@/lib/configuration/editable-numeric";
 import { listMethodConfigurationCatalogForCurrentAdmin } from "@/lib/supabase/data-access";
 import styles from "./page.module.css";
 
@@ -27,13 +35,13 @@ export default async function AdminConfiguracoesPage() {
   return (
     <>
       <PageHeader
-        description="Consulte as regras profissionais versionadas que alimentam os cálculos e fluxos configuráveis do sistema."
+        description="Consulte e ajuste parâmetros profissionais versionados sem alterar o histórico já publicado."
         eyebrow="Admin"
         title="Configurações"
       />
 
       <Section
-        description="Esta visão é somente leitura. Versões ativas não são editadas em lugar; mudanças profissionais devem criar uma nova versão validada e auditável."
+        description="Alterações numéricas criam uma nova versão ativa e preservam a anterior. Fórmulas, unidades e estruturas complexas continuam protegidas contra edição livre."
         title="Regras profissionais versionadas"
       >
         {templates.length === 0 ? (
@@ -45,6 +53,12 @@ export default async function AdminConfiguracoesPage() {
           <div className={styles.grid}>
             {templates.map((template) => {
               const active = template.activeVersion;
+              const editableParameters = active
+                ? listEditableNumericParameters(
+                    template.config_schema_key,
+                    active.configuration,
+                  )
+                : [];
 
               return (
                 <Card className={styles.card} key={template.id}>
@@ -80,6 +94,53 @@ export default async function AdminConfiguracoesPage() {
                       <dd>{active ? `v${active.version_number}` : "—"}</dd>
                     </div>
                   </dl>
+
+                  {active && editableParameters.length > 0 ? (
+                    <form
+                      action={updateMethodConfigurationAction.bind(
+                        null,
+                        template.id,
+                        active.id,
+                      )}
+                      className={styles.editor}
+                    >
+                      <div>
+                        <h3 className={styles.editorTitle}>Parâmetros editáveis</h3>
+                        <p className={styles.editorDescription}>
+                          Salvar cria uma nova versão. A versão atual permanece no histórico.
+                        </p>
+                      </div>
+
+                      <div className={styles.editorFields}>
+                        {editableParameters.map((parameter) => (
+                          <label className={styles.editorField} key={parameter.key}>
+                            <span>
+                              {formatConfigurationParameterKey(parameter.key)}
+                            </span>
+                            <div className={styles.inputWithUnit}>
+                              <TextInput
+                                defaultValue={parameter.value}
+                                min="0.000001"
+                                name={"parameter." + parameter.key}
+                                required
+                                step="any"
+                                type="number"
+                              />
+                              <small>
+                                {formatConfigurationUnit(parameter.unit)}
+                              </small>
+                            </div>
+                          </label>
+                        ))}
+                      </div>
+
+                      <Button type="submit">Criar nova versão</Button>
+                    </form>
+                  ) : active ? (
+                    <p className={styles.readOnlyNotice}>
+                      Este template possui estrutura protegida e continua somente leitura nesta etapa.
+                    </p>
+                  ) : null}
 
                   {active ? (
                     <details className={styles.details}>

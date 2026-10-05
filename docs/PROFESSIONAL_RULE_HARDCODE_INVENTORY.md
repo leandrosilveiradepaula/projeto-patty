@@ -429,3 +429,22 @@ Cada migração deve provar:
 O desenho que orienta a retirada gradual destes hardcodes esta em `METHOD_CONFIGURATION_CONTRACT.md`.
 
 Nenhum item deste inventario deve ser migrado diretamente para um `jsonb` generico sem schema. A retirada de cada hardcode deve usar template/version, resolver de escopo, engine deterministico e snapshot conforme o contrato.
+
+
+## Edicao operacional dos templates - 2026-10-04
+
+### IMPLEMENTADO / A VALIDAR EM CI
+
+A retirada de hardcodes agora possui um caminho administrativo real para os schemas numericos simples.
+
+A tela `/admin/configuracoes`:
+- permite alterar valores de `scalar_parameter_v1` e parametros de `method_engine_v1`;
+- nao permite editar unidades, formulas ou JSON arbitrario;
+- cria sempre nova versao;
+- preserva historico da versao anterior;
+- usa boundary server-only e RPC restrito a service role;
+- rejeita concorrencia stale.
+
+Isto permite que valores como doses, coeficientes simples e o parametro de hidratacao sejam modificados sem alteracao de codigo, respeitando o principio `template versionado -> override -> snapshot`.
+
+Schemas estruturados continuam inventariados para editores especificos; nao devem ser liberados via JSON generico.

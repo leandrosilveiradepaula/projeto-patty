@@ -2904,6 +2904,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      activate_method_configuration_version_server: {
+        Args: {
+          p_actor_profile_id: string
+          p_configuration: Json
+          p_expected_active_version_id: string
+          p_source_reference: string
+          p_template_id: string
+        }
+        Returns: string
+      }
       clone_protocol_version_draft: {
         Args: { p_plan_snapshot: Json; p_source_protocol_version_id: string }
         Returns: string
