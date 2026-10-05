@@ -305,7 +305,8 @@ export function buildOperationalPendingItems(
   for (const event of input.weeklyFeedbackNotificationEvents ?? []) {
     if (
       !event.eventKey.startsWith("weekly_feedback_reminder:") &&
-      !event.eventKey.startsWith("weekly_feedback_email_delivery:")
+      !event.eventKey.startsWith("weekly_feedback_email_delivery:") &&
+      !event.eventKey.startsWith("weekly_feedback_email_delivery_failed:")
     ) {
       continue;
     }
