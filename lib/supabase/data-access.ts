@@ -834,6 +834,23 @@ export async function updateAccessibleEducationalContentDraftVersion(input: {
   return data;
 }
 
+async function listContentReleasesForClient(clientId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_content_releases")
+    .select(
+      "id, released_at, educational_content_versions(id, version_number, title, category_key, content_type_key), client_content_progress(first_opened_at, completed_at)",
+    )
+    .eq("client_id", clientId)
+    .order("released_at", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
 export async function listCurrentClientContentReleases(clientId: string) {
   return listContentReleasesForClient(clientId);
 }
