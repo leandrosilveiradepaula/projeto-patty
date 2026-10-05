@@ -10,6 +10,8 @@ import {
   loadSupportedAssessmentKindOptions,
   resolveSupportedAssessmentKindOption,
 } from "@/lib/evaluations/assessment-configuration-loader";
+import { loadAssessmentSchedulePreferences } from "@/lib/evaluations/assessment-schedule-preferences-loader";
+import { formatIsoWeekdayPtBr } from "@/lib/configuration/assessment-schedule-preferences";
 import {
   getAccessibleClient,
   listAccessibleAssessmentsForClient,
@@ -43,15 +45,22 @@ export default async function AdminClientAssessmentsPage({
     notFound();
   }
 
-  const [assessments, assessmentKinds] = await Promise.all([
-    listAccessibleAssessmentsForClient(client.id),
-    loadSupportedAssessmentKindOptions(),
-  ]);
+  const [assessments, assessmentKinds, assessmentSchedulePreferences] =
+    await Promise.all([
+      listAccessibleAssessmentsForClient(client.id),
+      loadSupportedAssessmentKindOptions(),
+      loadAssessmentSchedulePreferences(),
+    ]);
   const displayName = client.profiles?.display_name?.trim();
   const kindOptions = assessmentKinds.options.map((option) => ({
     label: option.label,
+    semanticKey: option.semanticKey,
     value: option.historicalCode,
   }));
+  const completePreferredWeekdayLabels =
+    assessmentSchedulePreferences.configuration.completePreferredWeekdays.map(
+      (weekday) => formatIsoWeekdayPtBr(weekday),
+    );
 
   return (
     <>
@@ -82,7 +91,15 @@ export default async function AdminClientAssessmentsPage({
         title="Nova avaliação"
       >
         <Card>
-          <AssessmentCreateForm clientId={client.id} kindOptions={kindOptions} />
+          <AssessmentCreateForm
+            clientId={client.id}
+            kindOptions={kindOptions}
+            schedulePreferences={{
+              basicPlacementLabel:
+                "Preferência atual para Avaliação Básica: aproximadamente no meio do intervalo entre duas Avaliações Completas. A data continua livre.",
+              completePreferredWeekdayLabels,
+            }}
+          />
         </Card>
       </Section>
       <Section

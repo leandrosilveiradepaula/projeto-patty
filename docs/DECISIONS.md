@@ -457,25 +457,21 @@ Esta resposta fecha catalogo e unidades da Avaliacao Completa, mas nao resolve:
 
 ## 2026-09-27 - Avaliacao Basica e Avaliacao Completa
 
-### REGRA CONFIRMADA PELA PATTY
+### HISTORICO - PARCIALMENTE SUPERADO EM 2026-10-04
 
-A nomenclatura profissional de avaliacao corporal passa a ser:
+A nomenclatura continua valida:
 - **Avaliacao Completa**: substitui o nome historico "mensal";
 - **Avaliacao Basica**: substitui o nome historico "quinzenal".
 
-A cadencia e individual e fica ancorada na data de inicio do acompanhamento:
-- a Avaliacao Completa ocorre mensalmente no mesmo dia do mes correspondente ao inicio do processo;
-- a Avaliacao Basica ocorre no meio do intervalo entre duas Avaliacoes Completas;
-- exemplo fornecido pela Patty: Avaliacao Completa no dia 2 -> Avaliacao Basica no dia 17.
+A referencia antiga de prender a Avaliacao Completa ao mesmo dia numerico do mes foi superada pela decisao documentada em 2026-10-04.
 
-Portanto, o desenho normal nao cria uma avaliacao "mensal" e outra "quinzenal" concorrentes na mesma data. A Basica e uma ocorrencia intermediaria dentro do ciclo entre Completas.
+Regra vigente:
+- a Avaliacao Completa deve ser posicionada, quando possivel, proxima de sexta-feira ou sabado;
+- essa proximidade e preferencia profissional de agenda, nao bloqueio rigido;
+- a Avaliacao Basica permanece aproximadamente no meio do intervalo entre duas Avaliacoes Completas;
+- datas 29/30/31 nao exigem regra especial de ultimo dia do mes.
 
-### LIMITE
-
-Ainda nao esta definida a regra de calendario para clientes cuja data-ancora seja 29, 30 ou 31 em meses que nao possuam o mesmo dia.
-
-O catalogo completo de medidas e unidades da Avaliacao Completa tambem permanece aberto.
-
+O catalogo de medidas e unidades foi confirmado posteriormente e esta documentado nas decisoes mais recentes.
 ## 2026-09-24 - Vercel Private Blob para midia educacional
 
 ### DECISAO TECNICA
@@ -3032,3 +3028,29 @@ O worker nao depende do Gmail connector do ChatGPT.
 ### LIMITE
 
 O cron tecnico pode rodar frequentemente, mas o banco so libera claims no dia profissional configurado para o lembrete. Isso nao cria horario profissional novo.
+
+## 2026-10-05 - Preferencias versionadas de agenda das Avaliacoes
+
+### REGRA CONFIRMADA / DECISAO DE PRODUTO
+
+A preferencia profissional vigente para a Avaliacao Completa e sexta-feira ou sabado.
+
+Essa preferencia:
+- orienta a Patty;
+- nao bloqueia outras datas;
+- nao cria automaticamente uma data;
+- nao reativa a regra antiga de mesmo dia numerico do mes.
+
+A Avaliacao Basica permanece aproximadamente no meio do intervalo entre duas Avaliacoes Completas.
+
+### DECISAO TECNICA
+
+As preferencias de agenda passam a ser configuracao versionada com schema fechado assessment_schedule_preferences_v1.
+
+Baseline:
+- complete_preferred_weekdays = [5,6];
+- basic_placement = approximately_midpoint_between_complete_assessments.
+
+A Patty pode alterar os dias preferidos da Avaliacao Completa em /admin/configuracoes, criando nova versao e preservando historico.
+
+Nenhum scheduler automatico de Avaliacao foi criado nesta etapa.

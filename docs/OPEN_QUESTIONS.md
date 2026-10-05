@@ -346,53 +346,25 @@ Qual politica concreta de retencao define quando um arquivo inativado/substituid
 
 ## Avaliacoes e acompanhamento
 
-### PARCIALMENTE RESOLVIDO
+### RESOLVIDO PARA AGENDA E CORRECAO DE MEDIDAS
 
-A Patty corrigiu a nomenclatura e a logica operacional:
 - **Avaliacao Completa** substitui o nome historico "mensal";
 - **Avaliacao Basica** substitui o nome historico "quinzenal";
-- a data da Avaliacao Completa fica ancorada no dia do mes em que a cliente iniciou o acompanhamento;
-- a Avaliacao Basica ocorre no meio do intervalo entre duas Avaliacoes Completas;
-- exemplo confirmado: Avaliacao Completa no dia 2 -> Avaliacao Basica no dia 17.
+- a Avaliacao Completa nao fica presa ao mesmo dia numerico do mes;
+- a preferencia profissional vigente e posiciona-la, quando possivel, proxima de sexta-feira ou sabado;
+- essa preferencia nao bloqueia outras datas;
+- a Avaliacao Basica permanece aproximadamente no meio do intervalo entre duas Avaliacoes Completas;
+- datas de inicio 29/30/31 nao exigem regra especial de ultimo dia do mes;
+- a preferencia de dias da Avaliacao Completa e versionada/configuravel;
+- nenhum agendamento automatico de Avaliacao foi autorizado.
 
-Nao existem duas avaliacoes concorrentes na mesma data como regra normal do fluxo.
+O catalogo da Avaliacao Completa e as unidades estao confirmados em BUSINESS_RULES.md.
 
-O catalogo da Avaliacao Completa esta confirmado:
-- peso (kg);
-- cintura (cm);
-- abdomen (cm);
-- coxa (cm);
-- biceps (cm);
-- busto para mulher ou peito para homem (cm);
-- quadril (cm);
-- ombros (cm);
-- panturrilhas (cm);
-- fotos de avaliacao.
-
-Para medidas unilaterais, utiliza-se somente o lado direito do corpo.
-
-Resolvido em 2026-10-04:
-- a data nao precisa permanecer presa ao mesmo dia do mes;
-- a Patty prefere posicionar a Avaliacao Completa o mais proximo possivel de sexta-feira ou sabado;
-- portanto, datas de inicio em 29, 30 ou 31 nao exigem regra especial de ultimo dia do mes;
-- a preferencia de sexta/sabado nao deve ser tratada como bloqueio rigido de agenda.
-
-O fluxo tecnico de correcao de medida historica apos finalizacao foi resolvido em 2026-09-30 com registro append-only: o lancamento original permanece preservado, cada correcao registra ator/momento/valor/unidade e a correcao mais recente passa a ser o valor factual vigente na leitura e comparacao.
-
-### PARCIALMENTE RESOLVIDO
-
-A Patty confirmou dois cenarios distintos:
-- nova avaliacao de acompanhamento: preserva a anterior e cria uma nova avaliacao com nova data;
-- erro de lancamento: a Patty volta a avaliacao existente, corrige o dado e o valor incorreto deixa de ser o dado valido.
-
-### RESOLVIDO TECNICAMENTE EM 2026-09-30
-
-A implementacao auditavel foi materializada em `assessment_measurement_corrections`. A medida original permanece imutavel e cada ajuste e append-only. O runtime administrativo usa a correcao mais recente como valor vigente sem apagar o original nem criar nova avaliacao apenas por erro de digitacao.
+A correcao de medida finalizada esta resolvida tecnicamente por assessment_measurement_corrections, preservando o lancamento original e tornando a correcao mais recente o valor factual vigente.
 
 ### QUESTAO ABERTA
 
 Qual e a origem da percepcao de aderencia e quais partes do acompanhamento profissional poderao futuramente ser exibidas para a cliente?
-
 ## IA e revisao de Anamnese
 
 ### PARCIALMENTE RESOLVIDO
