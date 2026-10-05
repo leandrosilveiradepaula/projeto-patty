@@ -1919,14 +1919,16 @@ PR #341 mergeado no commit `c9400cba703f4a76978081d178ac908883b538c1`.
 - migration `20261005102805_retry_weekly_feedback_reminder_after_preference_change` aplicada;
 - migration `20261005102839_stop_weekly_feedback_reminder_retry_after_delivery` aplicada.
 
-### IMPLEMENTADO NA BRANCH
+### MERGEADO NO MASTER
 
-- formulario admin para escolher email / WhatsApp / notificacao no app por cliente;
+PR #343 mergeado no commit `0bb3f797f2ce418bab176df06f08645c34747bb5`.
+
+- formulario admin permite escolher email / WhatsApp / notificacao no app por cliente;
 - in-app aparece como lembrete real na tela de Feedback Semanal da cliente;
 - admin ve status de entrega/bloqueio no historico;
 - bloqueios viram pendencias operacionais;
 - email/WhatsApp com provedor ausente nao sao tratados como enviados;
-- tipos e testes foram ampliados para o novo fluxo.
+- tipos, build, seguranca e pgTAP passaram antes do merge.
 
 ### LIMITE ATUAL
 
