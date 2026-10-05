@@ -46,3 +46,39 @@
   line-height: var(--text-body-medium-line-height);
   overflow-wrap: anywhere;
 }
+
+
+.nextActions {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+}
+
+.nextActionLink {
+  display: grid;
+  color: inherit;
+  text-decoration: none;
+}
+
+.nextActionCard {
+  display: grid;
+  gap: var(--space-3);
+  height: 100%;
+  border-color: var(--color-brand);
+  background: var(--color-surface);
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease,
+    transform 120ms ease;
+}
+
+.nextActionLink:hover .nextActionCard {
+  background: var(--color-surface-low);
+  transform: translateY(-1px);
+}
+
+.nextActionLink:focus-visible {
+  border-radius: var(--radius-large);
+  outline: 3px solid var(--color-brand);
+  outline-offset: 3px;
+}
