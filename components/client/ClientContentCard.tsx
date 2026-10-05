@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/Card";
 import styles from "./ClientContentCard.module.css";
 
 export type ClientContentCardProps = HTMLAttributes<HTMLDivElement> & {
+  action?: ReactNode;
   category: ReactNode;
   meta?: ReactNode;
   status?: ReactNode;
@@ -11,6 +12,7 @@ export type ClientContentCardProps = HTMLAttributes<HTMLDivElement> & {
 };
 
 export function ClientContentCard({
+  action,
   category,
   className,
   meta,
@@ -42,6 +44,7 @@ export function ClientContentCard({
         {status ? <div className={styles.status}>{status}</div> : null}
       </div>
       {meta ? <p className={styles.meta}>{meta}</p> : null}
+      {action ? <div className={styles.action}>{action}</div> : null}
     </Card>
   );
 }
