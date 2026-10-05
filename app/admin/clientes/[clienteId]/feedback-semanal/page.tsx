@@ -105,7 +105,8 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
     if (
       (
         event.event_key.startsWith("weekly_feedback_reminder:") ||
-        event.event_key.startsWith("weekly_feedback_email_delivery:")
+        event.event_key.startsWith("weekly_feedback_email_delivery:") ||
+        event.event_key.startsWith("weekly_feedback_email_delivery_failed:")
       ) &&
       !reminderEventsByFeedbackId.has(event.weekly_feedback_id)
     ) {
