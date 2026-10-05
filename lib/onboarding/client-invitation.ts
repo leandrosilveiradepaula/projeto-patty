@@ -71,6 +71,7 @@ async function cleanupFailedProvision(input: {
 }
 
 async function provisionInvitedUser(input: {
+  displayName: string;
   staffProfileId: string;
   userId: string;
 }) {
@@ -80,7 +81,7 @@ async function provisionInvitedUser(input: {
   try {
     const profile = await admin
       .from("profiles")
-      .insert({ id: input.userId })
+      .insert({ id: input.userId, display_name: input.displayName })
       .select("id")
       .single();
 
@@ -131,6 +132,7 @@ async function provisionInvitedUser(input: {
 }
 
 export async function inviteAndProvisionClient(input: {
+  displayName: string;
   email: string;
 }) {
   const auth = await requireRole("admin");
@@ -142,12 +144,14 @@ export async function inviteAndProvisionClient(input: {
   }
 
   return provisionInvitedUser({
+    displayName: input.displayName,
     staffProfileId: auth.profileId,
     userId: invitation.data.user.id,
   });
 }
 
 export async function generateManualInviteAndProvisionClient(input: {
+  displayName: string;
   email: string;
 }) {
   const auth = await requireRole("admin");
@@ -168,6 +172,7 @@ export async function generateManualInviteAndProvisionClient(input: {
   }
 
   const provisioned = await provisionInvitedUser({
+    displayName: input.displayName,
     staffProfileId: auth.profileId,
     userId: user.id,
   });

@@ -38,6 +38,24 @@ export function ManualClientInviteForm() {
       ) : null}
 
       <FormField
+        description="Nome usado para identificar a cliente no painel da Patty."
+        id="manual-client-invitation-display-name"
+        label="Nome da cliente"
+        required
+      >
+        {(fieldProps) => (
+          <TextInput
+            {...fieldProps}
+            autoComplete="name"
+            maxLength={120}
+            name="displayName"
+            required
+            type="text"
+          />
+        )}
+      </FormField>
+
+      <FormField
         description="O endereço é usado somente para criar a identidade de acesso. O email de contato continua separado."
         id="manual-client-invitation-email"
         label="Email da cliente"

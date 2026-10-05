@@ -23,9 +23,16 @@ export async function inviteClient(
   formData: FormData,
 ): Promise<InviteClientState> {
   await requireRole("admin");
+  const displayNameValue = formData.get("displayName");
+  const displayName =
+    typeof displayNameValue === "string" ? displayNameValue.trim() : "";
   const emailValue = formData.get("email");
   const email = typeof emailValue === "string" ? emailValue : "";
   const validation = validateInvitationEmail(email);
+
+  if (displayName.length < 2 || displayName.length > 120) {
+    return { message: "Informe o nome da cliente.", };
+  }
 
   if (!validation.ok) {
     return { message: validation.message };
@@ -33,6 +40,7 @@ export async function inviteClient(
 
   try {
     await inviteAndProvisionClient({
+      displayName,
       email: normalizeInvitationEmail(email),
     });
   } catch (error) {
@@ -73,9 +81,20 @@ export async function generateManualClientInvite(
   formData: FormData,
 ): Promise<ManualInviteClientState> {
   await requireRole("admin");
+  const displayNameValue = formData.get("displayName");
+  const displayName =
+    typeof displayNameValue === "string" ? displayNameValue.trim() : "";
   const emailValue = formData.get("email");
   const email = typeof emailValue === "string" ? emailValue : "";
   const validation = validateInvitationEmail(email);
+
+  if (displayName.length < 2 || displayName.length > 120) {
+    return {
+      activationLink: null,
+      message: "Informe o nome da cliente.",
+      success: false,
+    };
+  }
 
   if (!validation.ok) {
     return {
@@ -102,6 +121,7 @@ export async function generateManualClientInvite(
 
   try {
     const result = await generateManualInviteAndProvisionClient({
+      displayName,
       email: normalizeInvitationEmail(email),
     });
     const activationUrl = new URL("/auth/confirm", `${protocol}://${host}`);
