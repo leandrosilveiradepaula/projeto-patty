@@ -176,3 +176,20 @@
   font-weight: 500;
   white-space: nowrap;
 }
+
+
+.select {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  padding: 0 var(--space-3);
+  font: inherit;
+}
+
+.select:focus {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
