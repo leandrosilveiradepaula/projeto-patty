@@ -345,6 +345,216 @@ export async function createAccessibleClientTrainingRequest(input: {
   return data;
 }
 
+export async function getAccessibleClientTrainingPlan(clientId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_training_plans")
+    .select("id, client_id, created_at")
+    .eq("client_id", clientId)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function listAccessibleClientTrainingPlanVersions(
+  trainingPlanId: string,
+) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_training_plan_versions")
+    .select(
+      "id, training_plan_id, version_number, title, notes, created_by_profile_id, reviewed_at, reviewed_by_profile_id, published_at, published_by_profile_id, created_at",
+    )
+    .eq("training_plan_id", trainingPlanId)
+    .order("version_number", { ascending: false })
+    .order("id", { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function listAccessibleClientTrainingPlanItems(
+  trainingPlanVersionId: string,
+) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_training_plan_items")
+    .select(
+      "id, training_plan_version_id, position, exercise_version_id, exercise_name, sets_text, repetitions_text, rest_text, execution_notes, created_at",
+    )
+    .eq("training_plan_version_id", trainingPlanVersionId)
+    .order("position", { ascending: true })
+    .order("id", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function createAccessibleClientTrainingPlanDraft(input: {
+  clientId: string;
+  notes: string | null;
+  title: string;
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc(
+    "create_client_training_plan_draft",
+    {
+      p_client_id: input.clientId,
+      p_notes: input.notes ?? undefined,
+      p_title: input.title,
+    },
+  );
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function updateAccessibleClientTrainingPlanDraft(input: {
+  notes: string | null;
+  title: string;
+  trainingPlanVersionId: string;
+}) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("client_training_plan_versions")
+    .update({
+      notes: input.notes,
+      title: input.title,
+    })
+    .eq("id", input.trainingPlanVersionId)
+    .is("reviewed_at", null)
+    .is("published_at", null);
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function createAccessibleClientTrainingPlanItem(input: {
+  executionNotes: string | null;
+  exerciseName: string;
+  exerciseVersionId: string | null;
+  position: number;
+  repetitionsText: string;
+  restText: string | null;
+  setsText: string;
+  trainingPlanVersionId: string;
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_training_plan_items")
+    .insert({
+      execution_notes: input.executionNotes,
+      exercise_name: input.exerciseName,
+      exercise_version_id: input.exerciseVersionId,
+      position: input.position,
+      repetitions_text: input.repetitionsText,
+      rest_text: input.restText,
+      sets_text: input.setsText,
+      training_plan_version_id: input.trainingPlanVersionId,
+    })
+    .select(
+      "id, training_plan_version_id, position, exercise_version_id, exercise_name, sets_text, repetitions_text, rest_text, execution_notes, created_at",
+    )
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function updateAccessibleClientTrainingPlanItem(input: {
+  executionNotes: string | null;
+  exerciseName: string;
+  exerciseVersionId: string | null;
+  itemId: string;
+  position: number;
+  repetitionsText: string;
+  restText: string | null;
+  setsText: string;
+}) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("client_training_plan_items")
+    .update({
+      execution_notes: input.executionNotes,
+      exercise_name: input.exerciseName,
+      exercise_version_id: input.exerciseVersionId,
+      position: input.position,
+      repetitions_text: input.repetitionsText,
+      rest_text: input.restText,
+      sets_text: input.setsText,
+    })
+    .eq("id", input.itemId);
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function deleteAccessibleClientTrainingPlanItem(itemId: string) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("client_training_plan_items")
+    .delete()
+    .eq("id", itemId);
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function reviewAccessibleClientTrainingPlanVersion(
+  trainingPlanVersionId: string,
+) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc(
+    "review_client_training_plan_version",
+    {
+      p_training_plan_version_id: trainingPlanVersionId,
+    },
+  );
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function publishAccessibleClientTrainingPlanVersion(
+  trainingPlanVersionId: string,
+) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc(
+    "publish_client_training_plan_version",
+    {
+      p_training_plan_version_id: trainingPlanVersionId,
+    },
+  );
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
 export async function listAccessibleNonterminalAiExecutions() {
   const supabase = await createClient();
   const { data, error } = await supabase
