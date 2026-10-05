@@ -1,4 +1,8 @@
-import { updateEducationalContentDraftAction } from "@/app/admin/conteudos/[contentId]/actions";
+import {
+  createNextEducationalContentVersionAction,
+  publishEducationalContentVersionAction,
+  updateEducationalContentDraftAction,
+} from "@/app/admin/conteudos/[contentId]/actions";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -80,9 +84,12 @@ export default async function AdminEducationalContentDetailPage({
               <Badge variant="positive">Publicado</Badge>
             </div>
             <p className={styles.description}>
-              A interface não altera versões publicadas. O fluxo de nova versão e
-              publicação permanece separado.
+              A interface não altera versões publicadas. Mudanças posteriores são
+              feitas em uma nova versão.
             </p>
+            <form action={createNextEducationalContentVersionAction.bind(null, content.id)}>
+              <Button type="submit">Criar nova versão</Button>
+            </form>
           </Card>
         ) : (
           <Card>
@@ -132,6 +139,32 @@ export default async function AdminEducationalContentDetailPage({
               Categoria atual: {current.category_key ?? "não definida"} · Tipo
               atual: {current.content_type_key ?? "não definido"} · Fase:{" "}
               {current.phase_key ?? "não vinculada"}.
+            </p>
+
+            <form
+              action={publishEducationalContentVersionAction.bind(
+                null,
+                content.id,
+                current.id,
+              )}
+              className={styles.form}
+            >
+              <label className={styles.confirmation}>
+                <input
+                  name="confirmPublish"
+                  required
+                  type="checkbox"
+                  value="yes"
+                />
+                <span>
+                  Confirmo que esta versão foi revisada e pode ser publicada.
+                </span>
+              </label>
+              <Button type="submit">Publicar versão</Button>
+            </form>
+            <p className={styles.description}>
+              Publicar torna a versão elegível para liberação manual por cliente.
+              Não há liberação automática.
             </p>
           </Card>
         )}
