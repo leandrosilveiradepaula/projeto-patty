@@ -67,3 +67,38 @@
   font-size: var(--text-body-small-size);
   line-height: var(--text-body-small-line-height);
 }
+
+
+.protocolHeader {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.historyItem {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
+  background: var(--color-surface);
+}
+
+.historyItem > summary {
+  cursor: pointer;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+  font-weight: var(--text-title-medium-weight);
+  padding: var(--space-4);
+}
+
+.historyItem > summary:focus-visible {
+  outline: 3px solid var(--color-brand);
+  outline-offset: 3px;
+}
+
+.historyContent {
+  display: grid;
+  gap: var(--space-5);
+  border-top: 1px solid var(--color-border);
+  padding: var(--space-4);
+}
