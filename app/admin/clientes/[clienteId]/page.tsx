@@ -2,6 +2,7 @@ import { endClientAssignmentAction } from "@/app/admin/clientes/[clienteId]/acti
 import { AdminClientRegistrationEditForm } from "@/components/admin/AdminClientRegistrationEditForm";
 import { AdminClientRecoveryLinkForm } from "@/components/admin/AdminClientRecoveryLinkForm";
 import { AdminTrainingRequestForm } from "@/components/admin/AdminTrainingRequestForm";
+import { AdminWeeklyFeedbackNotificationPreferenceForm } from "@/components/admin/AdminWeeklyFeedbackNotificationPreferenceForm";
 import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { Badge } from "@/components/ui/Badge";
@@ -11,6 +12,7 @@ import { Section } from "@/components/ui/Section";
 import {
   getAccessibleClient,
   getAccessibleClientRegistration,
+  getAccessibleWeeklyFeedbackNotificationPreference,
   listAccessibleAnamnesisSubmissions,
   listAccessibleAssessmentsForClient,
   listAccessibleClientActivityCheckinEvents,
@@ -78,6 +80,7 @@ export default async function AdminClienteDetailPage({
     hydrationTargets,
     activityEvents,
     weeklyFeedbacks,
+    weeklyFeedbackNotificationPreference,
   ] = await Promise.all([
     getAccessibleClientRegistration(client.id),
     listAccessibleClientTrainingRequests(client.id),
@@ -89,6 +92,7 @@ export default async function AdminClienteDetailPage({
     listAccessibleClientHydrationTargets(client.id),
     listAccessibleClientActivityCheckinEvents(client.id),
     listAccessibleWeeklyFeedbacksForClient(client.id),
+    getAccessibleWeeklyFeedbackNotificationPreference(client.id),
   ]);
 
   const displayName = client.profiles?.display_name?.trim();
@@ -286,6 +290,21 @@ export default async function AdminClienteDetailPage({
           instagram={registration?.instagram ?? undefined}
           phone={registration?.phone ?? undefined}
         />
+      </Section>
+
+      <Section
+        description="Escolha por cliente como o lembrete do Feedback Semanal deve ser comunicado. A preferência é versionada e separada dos dados de contato."
+        title="Canal do Feedback Semanal"
+      >
+        <Card className={styles.infoCard}>
+          <AdminWeeklyFeedbackNotificationPreferenceForm
+            clientId={client.id}
+            contactEmail={registration?.contact_email ?? null}
+            currentChannel={weeklyFeedbackNotificationPreference?.channel_key ?? null}
+            currentVersionId={weeklyFeedbackNotificationPreference?.id ?? null}
+            phone={registration?.phone ?? null}
+          />
+        </Card>
       </Section>
 
       <Section

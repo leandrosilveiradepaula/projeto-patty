@@ -164,7 +164,7 @@ O canal de aviso, horario do lembrete e eventual prazo fatal continuam separados
 5. RESOLVIDO: o Feedback Semanal comeca depois que a cliente recebe o primeiro protocolo, representado tecnicamente pela primeira `protocol_publications` da cliente.
 6. Cliente pode salvar rascunho e continuar depois?
 8. Cliente pode corrigir depois de enviar? Se sim, ate quando e com qual historico?
-9. RESOLVIDO PARCIALMENTE: ha lembrete na quarta-feira para quem ainda nao respondeu. O canal de comunicacao e configuravel por paciente entre email, WhatsApp e notificacao no app; horario do lembrete continua configuravel.
+9. RESOLVIDO PARCIALMENTE: ha lembrete na quarta-feira para quem ainda nao respondeu. O canal de comunicacao e configuravel por paciente entre email, WhatsApp e notificacao no app. Nao existe horario profissional confirmado para o lembrete; a regra atual e de dia da semana.
 10. RESOLVIDO: nao existe canal inicial global unico. A Patty configura o canal por paciente entre email, WhatsApp e notificacao dentro do aplicativo.
 11. Perguntas 8, 14, 15 e 16 devem ter aplicabilidade automatica a partir do protocolo ou a cliente marca "nao se aplica"?
 12. Perguntas 20 e 21 devem continuar semanais mesmo sendo dados relativamente estaveis?
@@ -193,3 +193,28 @@ A geracao automatica:
 - nao define `due_at` na quarta-feira, pois quarta foi confirmada apenas como lembrete, nao prazo fatal.
 
 O job tecnico do Supabase Cron pode executar frequentemente; a regra profissional de quando gerar permanece nos parametros versionados.
+
+
+## Entrega do lembrete e preferencia por cliente
+
+Implementado em 2026-10-05:
+
+- a Patty configura o canal do Feedback Semanal por cliente;
+- a preferencia e versionada em historico proprio e nao altera email/telefone de contato;
+- canais aceitos: `email`, `whatsapp`, `in_app`;
+- o lembrete de quarta-feira e materializado apenas para Feedbacks automaticos ainda pendentes do periodo correto;
+- nao existe horario profissional confirmado para o lembrete. O job tecnico roda periodicamente durante a quarta-feira; isso nao transforma a hora tecnica em regra da Patty;
+- `in_app` e entregue como aviso visivel dentro do aplicativo;
+- `email` e `whatsapp` nao sao marcados como enviados enquanto provedor externo nao estiver configurado;
+- ausencia de canal ou de dado de contato gera estado operacional bloqueado, visivel para a Patty;
+- eventos de notificacao sao append-only;
+- se uma tentativa ficar bloqueada e a Patty trocar a preferencia, nova tentativa pode ser registrada na mesma quarta-feira;
+- depois de qualquer tentativa `delivered`, nao sao criadas novas tentativas para aquele Feedback naquela semana.
+
+Estados atuais:
+- `delivered`: disponibilidade no app confirmada;
+- `blocked_no_channel`: Patty ainda nao configurou canal;
+- `blocked_missing_contact`: email/telefone necessario ausente;
+- `blocked_provider`: canal externo configurado, mas integracao de envio ainda indisponivel.
+
+Email de contato e telefone continuam dados de contato, nao prova automatica de consentimento para mensagens externas.

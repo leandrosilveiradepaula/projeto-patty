@@ -970,3 +970,22 @@ Exemplo confirmado para operacionalizacao:
 - `period_end = 04/10/2026`.
 
 Essa definicao remove o bloqueio profissional da geracao automatica semanal.
+
+
+### PARCIALMENTE RESOLVIDO — CANAIS DO FEEDBACK SEMANAL
+
+Resolvido:
+- canal e configuravel por cliente;
+- opcoes: email, WhatsApp e notificacao dentro do app;
+- preferencia e versionada e auditavel;
+- notificacao in-app esta operacional;
+- bloqueios de canal/contato/provedor aparecem como pendencia profissional;
+- quarta-feira e o dia confirmado do lembrete.
+
+Ainda aberto:
+- provedor tecnico de WhatsApp;
+- requisitos de consentimento/opt-in e fallback para WhatsApp;
+- ativacao efetiva do envio por email;
+- eventual horario profissional especifico do lembrete, caso a Patty queira definir um no futuro.
+
+Ate essas decisoes, email/WhatsApp nunca devem ser marcados como enviados automaticamente.

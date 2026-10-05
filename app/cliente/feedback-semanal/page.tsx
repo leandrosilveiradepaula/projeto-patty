@@ -1,4 +1,5 @@
 import { saveWeeklyFeedbackAction } from "@/app/cliente/feedback-semanal/actions";
+import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -13,6 +14,7 @@ import {
 } from "@/lib/weekly-feedback/definition";
 import {
   getCurrentClient,
+  listAccessibleClientNotificationEvents,
   listAccessibleWeeklyFeedbacksForClient,
 } from "@/lib/supabase/data-access";
 import styles from "./page.module.css";
@@ -47,7 +49,20 @@ export default async function ClientWeeklyFeedbackPage() {
     );
   }
 
-  const feedbacks = await listAccessibleWeeklyFeedbacksForClient(client.id);
+  const [feedbacks, notificationEvents] = await Promise.all([
+    listAccessibleWeeklyFeedbacksForClient(client.id),
+    listAccessibleClientNotificationEvents(client.id),
+  ]);
+  const inAppReminderFeedbackIds = new Set(
+    notificationEvents
+      .filter(
+        (event) =>
+          event.event_key.startsWith("weekly_feedback_reminder:") &&
+          event.channel_key === "in_app" &&
+          event.delivery_state === "delivered",
+      )
+      .map((event) => event.weekly_feedback_id),
+  );
 
   return (
     <>
@@ -74,6 +89,13 @@ export default async function ClientWeeklyFeedbackPage() {
               return (
                 <li key={feedback.id}>
                   <Card className={styles.card}>
+                    {!feedback.submitted_at &&
+                    inAppReminderFeedbackIds.has(feedback.id) ? (
+                      <Alert title="Lembrete do Feedback Semanal" variant="info">
+                        Seu Feedback Semanal desta semana ainda está pendente. Você
+                        pode continuar o preenchimento e enviar quando concluir.
+                      </Alert>
+                    ) : null}
                     <div className={styles.header}>
                       <div>
                         <h2 className={styles.title}>

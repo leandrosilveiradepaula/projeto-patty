@@ -1648,6 +1648,148 @@ export type Database = {
           },
         ]
       }
+      client_notification_events: {
+        Row: {
+          blocked_reason: string | null
+          channel_key: string | null
+          client_id: string
+          created_at: string
+          delivered_at: string | null
+          delivery_state: string
+          event_key: string
+          id: string
+          preference_version_id: string | null
+          schedule_configuration_version_id: string
+          weekly_feedback_id: string
+        }
+        Insert: {
+          blocked_reason?: string | null
+          channel_key?: string | null
+          client_id: string
+          created_at?: string
+          delivered_at?: string | null
+          delivery_state: string
+          event_key: string
+          id?: string
+          preference_version_id?: string | null
+          schedule_configuration_version_id: string
+          weekly_feedback_id: string
+        }
+        Update: {
+          blocked_reason?: string | null
+          channel_key?: string | null
+          client_id?: string
+          created_at?: string
+          delivered_at?: string | null
+          delivery_state?: string
+          event_key?: string
+          id?: string
+          preference_version_id?: string | null
+          schedule_configuration_version_id?: string
+          weekly_feedback_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_notification_events_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_notification_events_preference_version_id_fkey"
+            columns: ["preference_version_id"]
+            isOneToOne: false
+            referencedRelation: "client_notification_preference_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_notification_events_schedule_configuration_version__fkey"
+            columns: ["schedule_configuration_version_id"]
+            isOneToOne: false
+            referencedRelation: "method_configuration_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_notification_events_weekly_feedback_id_fkey"
+            columns: ["weekly_feedback_id"]
+            isOneToOne: false
+            referencedRelation: "client_weekly_feedbacks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_notification_preference_versions: {
+        Row: {
+          activated_at: string
+          activated_by_profile_id: string
+          channel_key: string
+          client_id: string
+          created_at: string
+          created_by_profile_id: string
+          id: string
+          purpose_key: string
+          retired_at: string | null
+          retired_by_profile_id: string | null
+          version_number: number
+        }
+        Insert: {
+          activated_at?: string
+          activated_by_profile_id: string
+          channel_key: string
+          client_id: string
+          created_at?: string
+          created_by_profile_id: string
+          id?: string
+          purpose_key: string
+          retired_at?: string | null
+          retired_by_profile_id?: string | null
+          version_number: number
+        }
+        Update: {
+          activated_at?: string
+          activated_by_profile_id?: string
+          channel_key?: string
+          client_id?: string
+          created_at?: string
+          created_by_profile_id?: string
+          id?: string
+          purpose_key?: string
+          retired_at?: string | null
+          retired_by_profile_id?: string | null
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_notification_preference_ver_activated_by_profile_id_fkey"
+            columns: ["activated_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_notification_preference_versi_created_by_profile_id_fkey"
+            columns: ["created_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_notification_preference_versi_retired_by_profile_id_fkey"
+            columns: ["retired_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_notification_preference_versions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_registration: {
         Row: {
           city: string | null
@@ -2917,6 +3059,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      activate_client_notification_preference_version_server: {
+        Args: {
+          p_actor_profile_id: string
+          p_channel_key: string
+          p_client_id: string
+          p_expected_active_version_id: string | null
+          p_purpose_key: string
+        }
+        Returns: string
+      }
       activate_method_configuration_version_server: {
         Args: {
           p_actor_profile_id: string
@@ -2986,6 +3138,10 @@ export type Database = {
           p_finalized_by_profile_id: string
         }
         Returns: string
+      }
+      generate_weekly_feedback_reminder_events: {
+        Args: { p_now?: string }
+        Returns: number
       }
       list_current_client_finalized_assessment_measurements: {
         Args: never

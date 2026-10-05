@@ -1905,3 +1905,29 @@ PR #341 mergeado no commit `c9400cba703f4a76978081d178ac908883b538c1`.
 - tipos TypeScript atualizados para os novos campos do Feedback Semanal;
 - historico administrativo mostra origem Manual/Automatica;
 - CI de aplicacao e banco passaram antes do merge.
+
+
+## Atualizacao 2026-10-05 - Lembrete e canal por cliente
+
+### APLICADO NO SUPABASE SAAS
+
+- migration `20261005101949_create_weekly_feedback_reminder_delivery_foundation` aplicada;
+- preferencias de canal client-scoped e versionadas criadas;
+- eventos de notificacao append-only criados;
+- job `weekly-feedback-reminders-due` criado;
+- migration `20261005102524_match_weekly_feedback_reminders_by_period` aplicada;
+- migration `20261005102805_retry_weekly_feedback_reminder_after_preference_change` aplicada;
+- migration `20261005102839_stop_weekly_feedback_reminder_retry_after_delivery` aplicada.
+
+### IMPLEMENTADO NA BRANCH
+
+- formulario admin para escolher email / WhatsApp / notificacao no app por cliente;
+- in-app aparece como lembrete real na tela de Feedback Semanal da cliente;
+- admin ve status de entrega/bloqueio no historico;
+- bloqueios viram pendencias operacionais;
+- email/WhatsApp com provedor ausente nao sao tratados como enviados;
+- tipos e testes foram ampliados para o novo fluxo.
+
+### LIMITE ATUAL
+
+Nao ha envio externo real por email/WhatsApp nesta etapa. Provedor, opt-in quando aplicavel e politica de fallback continuam pendentes.
