@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { requireRole } from "@/lib/supabase/auth";
 import {
+  createAccessibleEducationalContentAsset,
   createAccessibleEducationalContentVersion,
   getAccessibleEducationalContentForCurrentAdmin,
   listEducationalContentVersionsForCurrentAdmin,
@@ -159,5 +160,90 @@ export async function createNextEducationalContentVersionAction(
   });
 
   revalidatePath("/admin/conteudos");
+  revalidatePath("/admin/conteudos/" + contentId);
+}
+
+
+function readRequiredText(formData: FormData, key: string, label: string) {
+  const raw = formData.get(key);
+
+  if (typeof raw !== "string" || raw.trim().length === 0) {
+    throw new Error("Informe " + label);
+  }
+
+  return raw.trim();
+}
+
+export async function registerEducationalContentAssetAction(
+  contentId: string,
+  versionId: string,
+  formData: FormData,
+) {
+  await requireRole("admin");
+
+  if (!isUuid(contentId) || !isUuid(versionId)) {
+    throw new Error("Conteúdo inválido");
+  }
+
+  const content = await getAccessibleEducationalContentForCurrentAdmin(contentId);
+
+  if (!content) {
+    throw new Error("Conteúdo não encontrado");
+  }
+
+  const versions = await listEducationalContentVersionsForCurrentAdmin(contentId);
+  const version = versions.find((item) => item.id === versionId);
+
+  if (!version || version.published_at !== null) {
+    throw new Error("Assets só podem ser registrados enquanto a versão está em rascunho");
+  }
+
+  const storagePath = readRequiredText(
+    formData,
+    "storagePath",
+    "o path privado verificado",
+  );
+  const contentType = readRequiredText(formData, "contentType", "o MIME type");
+  const sha256Hex = readRequiredText(
+    formData,
+    "sha256Hex",
+    "o SHA-256 verificado",
+  ).toLowerCase();
+  const rawByteSize = readRequiredText(
+    formData,
+    "byteSize",
+    "o tamanho em bytes",
+  );
+  const byteSize = Number.parseInt(rawByteSize, 10);
+
+  if (!/^[0-9a-f]{64}$/.test(sha256Hex)) {
+    throw new Error("SHA-256 inválido");
+  }
+
+  if (!Number.isSafeInteger(byteSize) || byteSize <= 0) {
+    throw new Error("Tamanho do asset inválido");
+  }
+
+  if (
+    storagePath.length > 1024 ||
+    storagePath.includes("://") ||
+    storagePath.includes("..") ||
+    storagePath.startsWith("/")
+  ) {
+    throw new Error("Path privado inválido");
+  }
+
+  if (contentType.length > 255 || !contentType.includes("/")) {
+    throw new Error("MIME type inválido");
+  }
+
+  await createAccessibleEducationalContentAsset({
+    byteSize,
+    contentType,
+    sha256Hex,
+    storagePath,
+    versionId,
+  });
+
   revalidatePath("/admin/conteudos/" + contentId);
 }
