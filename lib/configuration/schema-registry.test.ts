@@ -15,6 +15,7 @@ test("keeps the configuration schema registry closed", () => {
     "assessment_kind_catalog_v1",
     "assessment_definition_v1",
     "liquid_taxonomy_v1",
+    "weekly_feedback_schedule_v1",
   ]);
 
   assert.equal(isMethodConfigurationSchemaKey("method_engine_v1"), true);
@@ -175,6 +176,36 @@ test("delegates liquid_taxonomy_v1 without accepting ratio fields", () => {
             minimumRatio: 0.6,
           },
         ],
+      }),
+    TypeError,
+  );
+});
+
+
+test("delegates weekly_feedback_schedule_v1 to the closed schedule parser", () => {
+  assert.deepEqual(
+    validateMethodConfigurationBySchema("weekly_feedback_schedule_v1", {
+      request_weekday: 1,
+      request_time_local: "08:00",
+      reminder_weekday: 3,
+      timezone: "America/Sao_Paulo",
+    }),
+    {
+      requestWeekday: 1,
+      requestTimeLocal: "08:00",
+      reminderWeekday: 3,
+      timezone: "America/Sao_Paulo",
+    },
+  );
+
+  assert.throws(
+    () =>
+      validateMethodConfigurationBySchema("weekly_feedback_schedule_v1", {
+        request_weekday: 1,
+        request_time_local: "08:00",
+        reminder_weekday: 3,
+        timezone: "America/Sao_Paulo",
+        channel: "email",
       }),
     TypeError,
   );

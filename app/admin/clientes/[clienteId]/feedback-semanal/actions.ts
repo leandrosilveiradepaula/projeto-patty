@@ -7,6 +7,7 @@ import {
   createAccessibleWeeklyFeedbackRequest,
   getAccessibleClient,
   getLatestPublishedWeeklyFeedbackFormVersion,
+  hasAccessibleProtocolPublicationForClient,
 } from "@/lib/supabase/data-access";
 import { isUuid } from "@/lib/validation/uuid";
 
@@ -41,6 +42,14 @@ export async function createWeeklyFeedbackRequestAction(
 
   if (periodEnd < periodStart) {
     throw new Error("A data final não pode ser anterior à data inicial");
+  }
+
+  const eligible = await hasAccessibleProtocolPublicationForClient(clientId);
+
+  if (!eligible) {
+    throw new Error(
+      "O Feedback Semanal só pode ser solicitado depois que a cliente receber o primeiro protocolo publicado.",
+    );
   }
 
   const formVersion = await getLatestPublishedWeeklyFeedbackFormVersion();

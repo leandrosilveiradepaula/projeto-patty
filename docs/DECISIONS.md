@@ -2935,3 +2935,31 @@ Somente leitura por enquanto:
 - outros schemas compostos.
 
 Cada schema composto deve receber editor proprio e validacao fechada quando houver necessidade, sem recorrer a JSON livre.
+
+
+## 2026-10-05 - Feedback Semanal: elegibilidade tecnica e agenda versionada
+
+### DECISAO TECNICA
+
+O marco "cliente recebeu o primeiro protocolo" passa a usar o evento existente `protocol_publications`.
+
+A primeira publicacao de qualquer protocolo da cliente:
+- torna a cliente elegivel ao Feedback Semanal;
+- evita criar flag booleana redundante;
+- permanece auditavel pelo historico real de publicacao.
+
+A policy de INSERT de `client_weekly_feedbacks` exige esse marco alem de assignment admin ativo e formulario publicado.
+
+### CONFIGURACAO VERSIONADA
+
+A agenda global inicial do metodo da Patty usa:
+- segunda-feira;
+- 08:00;
+- lembrete na quarta-feira;
+- fuso America/Sao_Paulo.
+
+Esses valores estao em `weekly_feedback.schedule` / `weekly_feedback_schedule_v1`, nao em constantes definitivas. A Patty pode alterar dia, horario da solicitacao e dia do lembrete pela area de Configuracoes, criando nova versao.
+
+### LIMITE
+
+Nao foi confirmado qual periodo de referencia automatico deve ser criado na segunda-feira. Ate essa definicao, `period_start` e `period_end` continuam manuais e a criacao automatica semanal nao deve ser ativada.

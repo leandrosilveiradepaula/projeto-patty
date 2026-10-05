@@ -1,6 +1,6 @@
 # Feedback Semanal
 
-Data de referencia: 2026-10-03.
+Data de referencia: 2026-10-05.
 
 ## Objetivo
 
@@ -137,7 +137,23 @@ O horario padrao inicial e 08:00, mas Patty quer poder modificar dia e horario p
 
 Se a cliente ainda nao tiver respondido, deve receber um lembrete na quarta-feira.
 
-Esta confirmacao resolve a regra profissional de inicio, frequencia, dia da semana, horario inicial e lembrete semanal. O evento tecnico exato que representara "recebeu o primeiro protocolo" deve ser mapeado de forma auditavel ao fluxo real de publicacao/entrega do protocolo, sem inventar um novo criterio profissional. O canal de aviso e eventual prazo fatal continuam separados dessa regra e nao devem ser inferidos.
+Esta confirmacao resolve a regra profissional de inicio, frequencia, dia da semana, horario inicial e lembrete semanal.
+
+### MAPEAMENTO TECNICO RESOLVIDO EM 2026-10-05
+
+"Recebeu o primeiro protocolo" e representado pela primeira linha de `protocol_publications` para a cliente. Esse evento ja existe no fluxo real e corresponde ao momento em que uma versao aprovada e publicada/visivel, sem introduzir booleano redundante.
+
+A policy de INSERT de `client_weekly_feedbacks` agora exige a existencia dessa publicacao. A UI administrativa tambem mostra a elegibilidade e impede solicitacao manual antes desse marco.
+
+A agenda esta materializada em configuracao versionada `weekly_feedback.schedule`, schema `weekly_feedback_schedule_v1`, com baseline:
+- request_weekday = 1 (segunda-feira);
+- request_time_local = 08:00;
+- reminder_weekday = 3 (quarta-feira);
+- timezone = America/Sao_Paulo.
+
+A Patty pode alterar dia, horario do feedback e dia do lembrete pela area real de Configuracoes; cada salvamento cria nova versao.
+
+O canal de aviso, horario do lembrete e eventual prazo fatal continuam separados e nao devem ser inferidos.
 
 ## Questoes que bloqueiam automacao completa
 
@@ -145,7 +161,7 @@ Esta confirmacao resolve a regra profissional de inicio, frequencia, dia da sema
 2. RESOLVIDO PARCIALMENTE: na quarta-feira, lembrar quem ainda nao respondeu. Quarta-feira nao deve ser tratada como fechamento automatico do formulario sem confirmacao adicional.
 3. O texto "responder e obrigatorio" deve ser apenas comunicacao ou gerar algum estado operacional?
 4. A regra historica de ficar sem atendimento online quando nao responder continua vigente? Se sim, quem confirma a suspensao e como ela termina? Nao automatizar sem resposta.
-5. RESOLVIDO PROFISSIONALMENTE: o Feedback Semanal comeca depois que a cliente recebe o primeiro protocolo. O mapeamento tecnico de "recebeu" deve usar um evento auditavel do fluxo real de protocolo.
+5. RESOLVIDO: o Feedback Semanal comeca depois que a cliente recebe o primeiro protocolo, representado tecnicamente pela primeira `protocol_publications` da cliente.
 6. Cliente pode salvar rascunho e continuar depois?
 8. Cliente pode corrigir depois de enviar? Se sim, ate quando e com qual historico?
 9. RESOLVIDO PARCIALMENTE: ha lembrete na quarta-feira para quem ainda nao respondeu. O canal de comunicacao e configuravel por paciente entre email, WhatsApp e notificacao no app; horario do lembrete continua configuravel.
@@ -153,3 +169,4 @@ Esta confirmacao resolve a regra profissional de inicio, frequencia, dia da sema
 11. Perguntas 8, 14, 15 e 16 devem ter aplicabilidade automatica a partir do protocolo ou a cliente marca "nao se aplica"?
 12. Perguntas 20 e 21 devem continuar semanais mesmo sendo dados relativamente estaveis?
 13. A Patty quer uma observacao/revisao manual por feedback antes de qualquer uso em IA ou protocolo?
+14. Qual periodo de referencia a solicitacao criada na agenda representa: semana anterior, semana corrente ou outro recorte? Esta definicao bloqueia apenas a geracao automatica de `period_start`/`period_end`; nao bloqueia elegibilidade nem edicao da agenda.

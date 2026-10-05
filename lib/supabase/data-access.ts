@@ -1830,6 +1830,23 @@ export async function listPublishedProtocolsForCurrentClient(
 }
 
 
+export async function hasAccessibleProtocolPublicationForClient(clientId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("protocol_publications")
+    .select("id")
+    .eq("client_id", clientId)
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return Boolean(data);
+}
+
+
 export async function getLatestPublishedWeeklyFeedbackFormVersion() {
   const supabase = await createClient();
   const { data, error } = await supabase

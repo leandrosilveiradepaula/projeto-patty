@@ -10,6 +10,7 @@ import { TextInput } from "@/components/ui/TextInput";
 import { parseWeeklyFeedbackDefinition, readWeeklyFeedbackAnswer } from "@/lib/weekly-feedback/definition";
 import {
   getAccessibleClient,
+  hasAccessibleProtocolPublicationForClient,
   listAccessibleWeeklyFeedbacksForClient,
 } from "@/lib/supabase/data-access";
 import { notFound } from "next/navigation";
@@ -43,7 +44,10 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
 
   if (!client) notFound();
 
-  const feedbacks = await listAccessibleWeeklyFeedbacksForClient(client.id);
+  const [feedbacks, eligible] = await Promise.all([
+    listAccessibleWeeklyFeedbacksForClient(client.id),
+    hasAccessibleProtocolPublicationForClient(client.id),
+  ]);
   const displayName = client.profiles?.display_name?.trim();
 
   return (
@@ -58,7 +62,16 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
       <ClientWorkspaceNav clientId={client.id} />
 
       <Section
-        description="Cria uma solicitação usando a versão publicada atual. Agenda automática e canais externos ainda não são executados nesta etapa."
+        action={
+          <Badge variant={eligible ? "positive" : "warning"}>
+            {eligible ? "Elegível" : "Aguardando 1º protocolo"}
+          </Badge>
+        }
+        description={
+          eligible
+            ? "A cliente já recebeu protocolo publicado. A solicitação manual usa a versão publicada atual enquanto a agenda automática termina de ser parametrizada."
+            : "O Feedback Semanal começa somente depois da primeira publicação de protocolo para esta cliente."
+        }
         title="Solicitar Feedback Semanal"
       >
         <Card>
@@ -78,7 +91,9 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
               <span>Prazo para resposta</span>
               <TextInput name="dueAt" type="datetime-local" />
             </label>
-            <Button type="submit">Criar solicitação</Button>
+            <Button disabled={!eligible} type="submit">
+              {eligible ? "Criar solicitação" : "Aguardando primeiro protocolo"}
+            </Button>
           </form>
         </Card>
       </Section>

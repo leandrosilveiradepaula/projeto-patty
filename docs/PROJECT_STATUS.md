@@ -1852,3 +1852,26 @@ Dry-run transacional passou antes do apply. A verificacao pos-apply confirmou `s
 ### ESTADO
 
 A UI esta implementada nesta branch, mas ainda precisa passar CI, merge e publicacao antes de ser tratada como disponivel para Patty.
+
+
+## Atualizacao 2026-10-05 - Feedback Semanal elegivel e agenda versionada
+
+### APLICADO NO SUPABASE SAAS
+
+- migration `20261005001804_gate_weekly_feedback_after_first_protocol_publication` aplicada;
+- `client_weekly_feedbacks` so pode ser criado apos existir `protocol_publications` para a cliente;
+- migration `20261005002026_seed_weekly_feedback_schedule_configuration` aplicada;
+- template `weekly_feedback.schedule` v1 ativo com segunda-feira 08:00, lembrete quarta e fuso America/Sao_Paulo.
+
+### IMPLEMENTADO NA BRANCH
+
+- UI administrativa mostra se a cliente esta elegivel;
+- botao manual fica indisponivel antes do primeiro protocolo publicado;
+- action faz pre-check amigavel alem da barreira final de RLS;
+- schema fechado `weekly_feedback_schedule_v1` criado e testado;
+- area `/admin/configuracoes` ganhou editor especifico de dia/horario do feedback e dia do lembrete;
+- cada alteracao cria nova versao pelo boundary de configuracao ja existente.
+
+### AINDA ABERTO
+
+A geracao automatica semanal nao sera ativada ate a Patty confirmar qual periodo deve preencher `period_start`/`period_end` (semana anterior, corrente ou outro recorte).
