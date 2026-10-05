@@ -7,7 +7,8 @@ export type OperationalPendingItemKind =
   | "clarification_without_response"
   | "protocol_approved_not_published"
   | "protocol_submitted_not_approved"
-  | "weekly_feedback_awaiting_response";
+  | "weekly_feedback_awaiting_response"
+  | "weekly_feedback_reminder_blocked";
 
 export type OperationalPendingItem = {
   clientId: string | null;
@@ -79,6 +80,17 @@ export type PendingWeeklyFeedback = {
   submittedAt: string | null;
 };
 
+export type PendingWeeklyFeedbackNotificationEvent = {
+  blockedReason: string | null;
+  channelKey: string | null;
+  clientId: string;
+  clientLabel: string;
+  createdAt: string;
+  deliveryState: string;
+  id: string;
+  weeklyFeedbackId: string;
+};
+
 export type OperationalPendingFactsInput = {
   aiExecutions: PendingAiExecution[];
   anamnesisSubmissions: PendingAnamnesisSubmission[];
@@ -87,6 +99,7 @@ export type OperationalPendingFactsInput = {
   clarificationRequests: PendingClarificationRequest[];
   protocolVersions: PendingProtocolVersion[];
   referenceNow?: string;
+  weeklyFeedbackNotificationEvents?: PendingWeeklyFeedbackNotificationEvent[];
   weeklyFeedbacks?: PendingWeeklyFeedback[];
 };
 
@@ -280,6 +293,38 @@ export function buildOperationalPendingItems(
       kind: "weekly_feedback_awaiting_response",
       statusLabel: dueAtPassed ? "Prazo informado ultrapassado" : "Aguardando resposta",
       title: "Feedback Semanal aguardando cliente",
+    });
+  }
+
+  for (const event of input.weeklyFeedbackNotificationEvents ?? []) {
+    if (event.deliveryState === "delivered") {
+      continue;
+    }
+
+    const statusLabel =
+      event.deliveryState === "blocked_no_channel"
+        ? "Canal não configurado"
+        : event.deliveryState === "blocked_missing_contact"
+          ? "Contato necessário ausente"
+          : "Provedor externo não configurado";
+
+    const description =
+      event.deliveryState === "blocked_no_channel"
+        ? "O lembrete de quarta-feira foi devido, mas não existe canal configurado para esta cliente."
+        : event.deliveryState === "blocked_missing_contact"
+          ? `O lembrete de quarta-feira usa ${event.channelKey ?? "canal externo"}, mas o dado de contato necessário não está cadastrado.`
+          : `O canal ${event.channelKey ?? "externo"} está configurado, mas nenhum provedor de envio foi ativado. O sistema não considera a mensagem enviada.`;
+
+    items.push({
+      clientId: event.clientId,
+      clientLabel: event.clientLabel,
+      createdAt: event.createdAt,
+      description,
+      href: `/admin/clientes/${event.clientId}/feedback-semanal`,
+      id: `weekly-feedback-reminder-blocked:${event.id}`,
+      kind: "weekly_feedback_reminder_blocked",
+      statusLabel,
+      title: "Lembrete do Feedback Semanal não entregue",
     });
   }
 
