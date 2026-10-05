@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useMemo, useState } from "react";
 
 import {
   type CreateAssessmentState,
@@ -20,16 +20,37 @@ type AssessmentCreateFormProps = {
   clientId: string;
   kindOptions: Array<{
     label: string;
+    semanticKey: "basic" | "complete";
     value: "fortnightly" | "monthly";
   }>;
+  schedulePreferences: {
+    basicPlacementLabel: string;
+    completePreferredWeekdayLabels: string[];
+  };
 };
 
 export function AssessmentCreateForm({
   clientId,
   kindOptions,
+  schedulePreferences,
 }: AssessmentCreateFormProps) {
   const action = createAssessmentAction.bind(null, clientId);
   const [state, formAction, isPending] = useActionState(action, initialState);
+  const [selectedKind, setSelectedKind] = useState("");
+
+  const selectedOption = useMemo(
+    () => kindOptions.find((option) => option.value === selectedKind) ?? null,
+    [kindOptions, selectedKind],
+  );
+
+  const scheduleGuidance =
+    selectedOption?.semanticKey === "complete"
+      ? `Preferência atual para Avaliação Completa: ${schedulePreferences.completePreferredWeekdayLabels.join(
+          " ou ",
+        )}. Outras datas continuam permitidas.`
+      : selectedOption?.semanticKey === "basic"
+        ? schedulePreferences.basicPlacementLabel
+        : null;
 
   return (
     <form action={formAction} className={styles.form}>
@@ -51,6 +72,7 @@ export function AssessmentCreateForm({
             className={styles.select}
             defaultValue=""
             name="assessmentKind"
+            onChange={(event) => setSelectedKind(event.target.value)}
             required
           >
             <option disabled value="">
@@ -64,6 +86,12 @@ export function AssessmentCreateForm({
           </select>
         )}
       </FormField>
+
+      {scheduleGuidance ? (
+        <p aria-live="polite" className={styles.notice}>
+          {scheduleGuidance}
+        </p>
+      ) : null}
 
       <FormField
         description="Data profissional da coleta/avaliação. Pode ser ajustada enquanto o registro estiver em rascunho."
