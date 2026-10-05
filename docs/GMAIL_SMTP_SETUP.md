@@ -2,23 +2,31 @@
 
 ## Decisao atual
 
-No MVP, os emails de autenticacao/convite serao enviados pelo Gmail pessoal da Patty via Custom SMTP do Supabase Auth.
+No MVP, a conta Gmail da Patty atende dois usos separados:
 
-Essa e uma decisao operacional de baixo volume. O fluxo de aplicacao continua usando o Supabase Auth; o aplicativo nao envia email diretamente pelo Gmail e nao depende de ChatGPT/Gmail connector.
+1. autenticacao/convite via Custom SMTP do Supabase Auth;
+2. lembrete operacional do Feedback Semanal via worker server-side do aplicativo.
+
+Essa e uma decisao operacional de baixo volume. Nenhum dos dois fluxos depende do ChatGPT/Gmail connector.
 
 ## Arquitetura
 
-Fluxo:
+Fluxo de autenticacao:
 
 `Patty/admin -> inviteUserByEmail -> Supabase Auth -> Custom SMTP -> smtp.gmail.com -> cliente`
 
-O codigo de onboarding existente nao precisa mudar por causa do provider SMTP.
+Fluxo de lembrete semanal:
+
+`Supabase agenda o lembrete -> Vercel cron -> worker server-only -> Gmail SMTP -> cliente -> evento de entrega auditavel`
+
+O codigo de onboarding continua separado do worker de notificacao.
 
 ## Configuracao recomendada
 
 No Google:
 - habilitar verificacao em duas etapas na conta da Patty;
-- criar uma App Password exclusiva para o SMTP do Projeto Patty;
+- criar uma App Password exclusiva para o Custom SMTP do Supabase Auth;
+- criar uma segunda App Password exclusiva para o worker de lembretes do aplicativo;
 - nao usar a senha principal da conta.
 
 No Supabase Auth > Email > SMTP Settings:
@@ -69,3 +77,41 @@ Usar somente uma conta de teste, nunca dados reais de cliente, para validar:
 Gmail foi escolhido porque o volume previsto no MVP e baixo.
 
 Se surgirem problemas de entregabilidade, bloqueio da conta, crescimento de volume ou necessidade de observabilidade/SLA, migrar o Custom SMTP para um provedor transacional dedicado sem alterar o fluxo de onboarding da aplicacao.
+
+
+### Worker de lembretes no Vercel
+
+Variaveis server-only:
+- `GMAIL_SMTP_USER`: Gmail da Patty;
+- `GMAIL_SMTP_APP_PASSWORD`: App Password exclusiva do worker;
+- `GMAIL_SMTP_FROM_NAME`: nome do remetente, baseline `Consultoria Corpo e Mente - Patty`.
+
+Esses valores devem ser configurados no ambiente de producao da Vercel. Nenhum deles usa prefixo `NEXT_PUBLIC_`.
+
+O cron `/api/cron/weekly-feedback-email-delivery` roda tecnicamente a cada hora. A funcao de claim do banco so libera trabalho no dia de lembrete configurado para o Feedback Semanal. Portanto a cadencia tecnica nao cria uma nova regra profissional de horario.
+
+Se as credenciais Gmail nao estiverem configuradas, o worker retorna sem fazer claim e sem criar tentativa falsa.
+
+### Auditoria de entrega
+
+O evento original de quarta-feira permanece imutavel.
+
+Para email:
+- `queued_external`: lembrete apto ao worker;
+- tentativa `started`: worker adquiriu lease;
+- `delivery_failed`: tentativa SMTP falhou, sem marcar envio;
+- `delivered`: Gmail aceitou a mensagem via SMTP.
+
+Tentativas sao auditaveis, possuem lease e retry limitado. Um evento entregue nao e reescrito.
+
+O texto do lembrete e operacional e nao aplica consequencia automatica ao atendimento.
+
+### Limite operacional atual
+
+A implementacao esta pronta no codigo e no banco, mas o envio real em producao so deve ser considerado ativo depois de:
+- configurar `GMAIL_SMTP_USER` e `GMAIL_SMTP_APP_PASSWORD` na Vercel;
+- publicar o master contendo o worker;
+- validar com conta sintetica de teste;
+- confirmar recebimento e registro `delivered`.
+
+Nao usar cliente real no teste inicial.
