@@ -1944,7 +1944,9 @@ Nao ha envio externo real por email/WhatsApp nesta etapa. Provedor, opt-in quand
 - tabela de tentativas de entrega com RLS, lease, retry limitado e historico terminal protegido;
 - RPCs internos de claim, complete e fail disponiveis apenas ao boundary server-side.
 
-### IMPLEMENTADO NA BRANCH
+### MERGEADO NO MASTER
+
+PR #346 mergeado no commit `9112495ad30cc1bebfd910fbcbe6a386b6ea9a97`.
 
 - worker Gmail SMTP server-only;
 - rota protegida `/api/cron/weekly-feedback-email-delivery`;
@@ -1952,7 +1954,7 @@ Nao ha envio externo real por email/WhatsApp nesta etapa. Provedor, opt-in quand
 - email operacional sem dados de saude;
 - Message-ID deterministico para retries;
 - estados de fila, falha e entrega visiveis corretamente para a Patty;
-- pgTAP e testes de pendencias ampliados.
+- migrations, typecheck, testes de dominio, boundary de seguranca, build, db reset, lint e pgTAP passaram antes do merge.
 
 ### PENDENTE DE CONFIGURACAO HUMANA
 
