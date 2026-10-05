@@ -1,6 +1,7 @@
 import {
   createNextEducationalContentVersionAction,
   publishEducationalContentVersionAction,
+  registerEducationalContentAssetAction,
   updateEducationalContentDraftAction,
 } from "@/app/admin/conteudos/[contentId]/actions";
 import { Badge } from "@/components/ui/Badge";
@@ -196,10 +197,76 @@ export default async function AdminEducationalContentDetailPage({
               <Badge variant="warning">Sem asset</Badge>
             </div>
             <p className={styles.description}>
-              Para conteúdos que dependem de mídia, o próximo passo técnico é
-              concluir a cópia privada, verificar integridade e registrar o asset
-              enquanto a versão ainda estiver em rascunho.
+              Para conteúdos que dependem de mídia, conclua a cópia privada,
+              verifique integridade e só então registre os metadados abaixo.
             </p>
+            {current.published_at === null ? (
+              <form
+                action={registerEducationalContentAssetAction.bind(
+                  null,
+                  content.id,
+                  current.id,
+                )}
+                className={styles.form}
+              >
+                <label className={styles.field}>
+                  <span>Path privado verificado</span>
+                  <input
+                    autoComplete="off"
+                    name="storagePath"
+                    placeholder="educational-content/.../primary"
+                    required
+                  />
+                </label>
+                <label className={styles.field}>
+                  <span>MIME type</span>
+                  <input
+                    autoComplete="off"
+                    name="contentType"
+                    placeholder="video/mp4"
+                    required
+                  />
+                </label>
+                <label className={styles.field}>
+                  <span>Tamanho em bytes</span>
+                  <input
+                    min="1"
+                    name="byteSize"
+                    required
+                    type="number"
+                  />
+                </label>
+                <label className={styles.field}>
+                  <span>SHA-256 verificado</span>
+                  <input
+                    autoComplete="off"
+                    maxLength={64}
+                    minLength={64}
+                    name="sha256Hex"
+                    pattern="[0-9a-fA-F]{64}"
+                    required
+                  />
+                </label>
+                <label className={styles.confirmation}>
+                  <input
+                    name="confirmVerified"
+                    required
+                    type="checkbox"
+                    value="yes"
+                  />
+                  <span>
+                    Confirmo que o objeto privado já existe e que tamanho e
+                    SHA-256 foram verificados contra o arquivo migrado.
+                  </span>
+                </label>
+                <Button type="submit">Registrar asset verificado</Button>
+              </form>
+            ) : (
+              <p className={styles.description}>
+                Esta versão já foi publicada; assets não são registrados
+                retroativamente pela interface.
+              </p>
+            )}
           </Card>
         ) : (
           <ol className={styles.assetList}>
