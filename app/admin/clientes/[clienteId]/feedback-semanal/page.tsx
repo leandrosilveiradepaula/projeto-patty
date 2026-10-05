@@ -11,6 +11,7 @@ import { parseWeeklyFeedbackDefinition, readWeeklyFeedbackAnswer } from "@/lib/w
 import {
   getAccessibleClient,
   hasAccessibleProtocolPublicationForClient,
+  listAccessibleClientNotificationEvents,
   listAccessibleWeeklyFeedbacksForClient,
 } from "@/lib/supabase/data-access";
 import { notFound } from "next/navigation";
@@ -38,16 +39,56 @@ function formatDateTime(value: string | null) {
   }).format(new Date(value));
 }
 
+function notificationStatusLabel(
+  event:
+    | {
+        blocked_reason: string | null;
+        channel_key: string | null;
+        delivery_state: string;
+      }
+    | undefined,
+) {
+  if (!event) return null;
+
+  if (event.delivery_state === "delivered" && event.channel_key === "in_app") {
+    return "Lembrete disponível no app";
+  }
+
+  if (event.delivery_state === "blocked_no_channel") {
+    return "Lembrete bloqueado: canal não configurado";
+  }
+
+  if (event.delivery_state === "blocked_missing_contact") {
+    return event.channel_key === "email"
+      ? "Lembrete bloqueado: email de contato ausente"
+      : "Lembrete bloqueado: telefone ausente";
+  }
+
+  if (event.delivery_state === "blocked_provider") {
+    return event.channel_key === "email"
+      ? "Email configurado; provedor externo ainda não ativado"
+      : "WhatsApp configurado; provedor externo ainda não ativado";
+  }
+
+  return "Lembrete registrado";
+}
+
 export default async function AdminClientWeeklyFeedbackPage({ params }: PageProps) {
   const { clienteId } = await params;
   const client = await getAccessibleClient(clienteId);
 
   if (!client) notFound();
 
-  const [feedbacks, eligible] = await Promise.all([
+  const [feedbacks, eligible, notificationEvents] = await Promise.all([
     listAccessibleWeeklyFeedbacksForClient(client.id),
     hasAccessibleProtocolPublicationForClient(client.id),
+    listAccessibleClientNotificationEvents(client.id),
   ]);
+  const reminderEventsByFeedbackId = new Map(
+    notificationEvents
+      .filter((event) => event.event_key === "weekly_feedback_reminder")
+      .map((event) => [event.weekly_feedback_id, event]),
+  );
   const displayName = client.profiles?.display_name?.trim();
 
   return (
