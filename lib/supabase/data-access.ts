@@ -1164,6 +1164,9 @@ export async function createAccessibleProfessionalFollowUp(input: {
 }
 
 export async function listPublishedExerciseVersionsForCurrentClient() {
+  const { selectLatestPublishedExerciseVersions } = await import(
+    "@/lib/training/exercise-versioning"
+  );
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("exercise_versions")
@@ -1176,7 +1179,7 @@ export async function listPublishedExerciseVersionsForCurrentClient() {
     throw error;
   }
 
-  return data;
+  return selectLatestPublishedExerciseVersions(data);
 }
 
 export async function listExerciseVersionsVisibleToCurrentAdmin() {
@@ -1186,6 +1189,131 @@ export async function listExerciseVersionsVisibleToCurrentAdmin() {
     .select("id, exercise_id, version_number, name, published_at, created_at")
     .order("created_at", { ascending: false })
     .order("id", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function getAccessibleExerciseForCurrentAdmin(exerciseId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("exercises")
+    .select("id, created_at")
+    .eq("id", exerciseId)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function listExerciseVersionsForCurrentAdmin(exerciseId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("exercise_versions")
+    .select("id, exercise_id, version_number, name, published_at, created_at")
+    .eq("exercise_id", exerciseId)
+    .order("version_number", { ascending: false })
+    .order("id", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function createAccessibleExercise() {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("exercises")
+    .insert({})
+    .select("id, created_at")
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function deleteAccessibleExerciseWithoutVersions(exerciseId: string) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("exercises")
+    .delete()
+    .eq("id", exerciseId);
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function createAccessibleExerciseVersion(input: {
+  exerciseId: string;
+  name: string;
+  versionNumber: number;
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("exercise_versions")
+    .insert({
+      exercise_id: input.exerciseId,
+      name: input.name,
+      version_number: input.versionNumber,
+    })
+    .select("id, exercise_id, version_number, name, published_at, created_at")
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function updateAccessibleExerciseDraftVersion(input: {
+  exerciseId: string;
+  name: string;
+  versionId: string;
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("exercise_versions")
+    .update({ name: input.name })
+    .eq("id", input.versionId)
+    .eq("exercise_id", input.exerciseId)
+    .is("published_at", null)
+    .select("id, exercise_id, version_number, name, published_at, created_at")
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function publishAccessibleExerciseVersion(input: {
+  exerciseId: string;
+  publishedAt: string;
+  versionId: string;
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("exercise_versions")
+    .update({ published_at: input.publishedAt })
+    .eq("id", input.versionId)
+    .eq("exercise_id", input.exerciseId)
+    .is("published_at", null)
+    .select("id, exercise_id, version_number, name, published_at, created_at")
+    .single();
 
   if (error) {
     throw error;
