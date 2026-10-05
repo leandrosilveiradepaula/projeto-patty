@@ -1875,3 +1875,30 @@ A UI esta implementada nesta branch, mas ainda precisa passar CI, merge e public
 ### AINDA ABERTO
 
 A geracao automatica semanal nao sera ativada ate a Patty confirmar qual periodo deve preencher `period_start`/`period_end` (semana anterior, corrente ou outro recorte).
+
+
+## Atualizacao 2026-10-05 - Geracao automatica do Feedback Semanal
+
+### APLICADO NO SUPABASE SAAS
+
+- migration `20261005032000_generate_scheduled_weekly_feedback_requests` aplicada;
+- Supabase Cron habilitado;
+- job `weekly-feedback-generate-due` consulta a configuracao ativa a cada minuto e so gera quando o dia/horario local configurado coincide;
+- migration `20261005032046_audit_scheduled_weekly_feedback_origin` aplicada;
+- solicitacoes automaticas registram `request_source = schedule`, versao da agenda usada e nenhum falso autor humano.
+
+### REGRA PROFISSIONAL RESOLVIDA
+
+O periodo automatico e a semana anterior completa, de segunda a domingo.
+
+Exemplo:
+- geracao: 05/10/2026;
+- periodo: 28/09/2026 a 04/10/2026.
+
+### IMPLEMENTADO NA BRANCH
+
+- pgTAP ampliado para horario, periodo, origem, configuracao usada e idempotencia;
+- tipos TypeScript sincronizados com o SaaS;
+- historico administrativo passa a mostrar origem Manual/Automatica.
+
+Ainda precisa passar CI e merge para ser tratado como codigo principal/publicavel.
