@@ -134,6 +134,9 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
                         {feedback.submitted_at ? "Respondido" : "Pendente"}
                       </Badge>
                     </div>
+                    <p className={styles.meta}>
+                      Origem: {feedback.request_source === "schedule" ? "Automática" : "Manual"}
+                    </p>
                     <p className={styles.meta}>Prazo: {formatDateTime(feedback.due_at)}</p>
                     {feedback.submitted_at && definition ? (
                       <dl className={styles.answers}>
