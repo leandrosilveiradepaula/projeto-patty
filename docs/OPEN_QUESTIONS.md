@@ -711,11 +711,15 @@ O bucket `client-private` nao sera reutilizado e o original nao sera reduzido ap
 
 ### PENDENCIA OPERACIONAL
 
-Ainda falta:
-- criar/conectar o Blob store privado ao projeto Vercel;
+Resolvido tecnicamente:
+- o Blob store privado foi criado/conectado ao projeto Vercel;
+- a UI administrativa ja mostra o estado de assets e permite registrar metadados verificados em versao draft;
+- registro exige path privado opaco, MIME, byte size e SHA-256, sem expor token ou URL publica.
+
+Ainda falta operacionalmente:
 - migrar o arquivo original aprovado;
-- conferir tamanho, MIME e SHA-256;
-- registrar o asset na versao draft;
+- conferir tamanho, MIME e SHA-256 contra a origem;
+- registrar o asset verificado na versao draft;
 - revisar/publicar/liberar explicitamente.
 
 ### QUESTAO ABERTA
@@ -802,20 +806,22 @@ A escolha do provider nao autoriza por si so o envio de dados reais.
 
 O checklist operacional esta em `OPENAI_HEALTH_DATA_GATE.md`. O gate permanece fechado ate conclusao humana explicita dos itens aplicaveis.
 
-### PENDENCIA OPERACIONAL — VERCEL PRIVATE BLOB STORE
+### PENDENCIA OPERACIONAL — PRIMEIRO LOTE NO VERCEL PRIVATE BLOB
 
 O primeiro lote controlado de midia esta definido em `docs/educational_media_migration_batch_1.json` e cobre somente o video aprovado da balanca.
 
-Ainda falta criar/conectar um Vercel Private Blob store ao projeto. A integracao Vercel disponivel na sessao de 2026-09-24 nao expoe operacao de Storage, portanto essa etapa nao foi executada automaticamente.
+O Vercel Private Blob store ja foi criado/conectado ao projeto. A interface administrativa tambem ja suporta visualizar e registrar os metadados de um asset privado verificado.
 
-Enquanto o store nao existir:
-- nao baixar/copiar o arquivo apenas para adiantar a migracao;
-- nao preencher `storage_path` ou SHA-256 por estimativa;
-- nao criar asset;
-- nao publicar versao;
-- nao criar release.
+Ainda falta executar a migracao fisica do primeiro arquivo. A integracao disponivel nesta sessao nao expoe operacao de Storage/Blob, portanto o upload nao deve ser tratado como executado.
 
-Depois da criacao/conexao do store, seguir a ordem deterministica do manifesto e manter os demais arquivos do Drive fora do lote.
+A ordem continua deterministica:
+1. copiar o arquivo original aprovado para o path privado previsto;
+2. conferir tamanho, MIME e SHA-256 contra a origem;
+3. registrar o asset na versao draft;
+4. revisar e publicar a versao;
+5. liberar explicitamente para clientes quando apropriado.
+
+Manter os demais arquivos do Drive fora deste lote ate revisao individual e direitos/licenciamento aplicaveis.
 
 ### GAP OPERACIONAL — OBSERVABILIDADE CENTRAL IMPLEMENTADA
 
