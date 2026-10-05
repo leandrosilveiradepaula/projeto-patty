@@ -10,6 +10,7 @@ type SmtpConfig = {
 
 type SendEmailInput = {
   bodyText: string;
+  messageId: string;
   subject: string;
   to: string;
 };
@@ -161,8 +162,19 @@ export async function sendGmailSmtpEmail(
   const to = validateMailbox(input.to.trim(), "recipient");
   const from = validateMailbox(config.fromEmail, "sender");
 
-  if (!input.subject.trim() || /[\r\n]/.test(input.subject)) {
+  if (
+    !input.subject.trim() ||
+    input.subject.length > 200 ||
+    /[\r\n]/.test(input.subject)
+  ) {
     throw new Error("Email subject is invalid");
+  }
+
+  if (
+    !/^<[A-Za-z0-9._@-]+>$/.test(input.messageId) ||
+    input.messageId.length > 200
+  ) {
+    throw new Error("Email Message-ID is invalid");
   }
 
   const socket = tls.connect({
@@ -200,12 +212,11 @@ export async function sendGmailSmtpEmail(
     await smtp.command(`RCPT TO:<${to}>`, [250, 251]);
     await smtp.command("DATA", 354);
 
-    const messageId = `<${crypto.randomUUID()}@projeto-patty.local>`;
     const message = [
       `From: ${encodeHeader(config.fromName)} <${from}>`,
       `To: <${to}>`,
       `Subject: ${encodeHeader(input.subject.trim())}`,
-      `Message-ID: ${messageId}`,
+      `Message-ID: ${input.messageId}`,
       "MIME-Version: 1.0",
       'Content-Type: text/plain; charset="UTF-8"',
       "Content-Transfer-Encoding: 8bit",
@@ -225,7 +236,12 @@ export async function sendGmailSmtpEmail(
       );
     }
 
-    await smtp.command("QUIT", 221);
+    try {
+      await smtp.command("QUIT", 221);
+    } catch {
+      // DATA was already accepted with 250. QUIT failure must not turn an
+      // accepted message into a retryable transport failure.
+    }
 
     return {
       providerMessageId: accepted.lines.join(" ").slice(0, 255),
