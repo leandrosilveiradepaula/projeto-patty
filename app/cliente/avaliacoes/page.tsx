@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
+import Link from "next/link";
 import { formatProfessionalMeasurementLabel } from "@/lib/evaluations/professional-view";
 import { listCurrentClientFinalizedAssessmentMeasurements } from "@/lib/supabase/data-access";
 
@@ -62,42 +63,66 @@ export default async function ClientAssessmentsPage() {
             title="Nenhuma avaliação disponível"
           />
         ) : (
-          <div className={styles.list}>
-            {items.map(([assessmentId, assessment]) => (
-              <Card className={styles.card} key={assessmentId}>
-                <div className={styles.header}>
-                  <h2 className={styles.title}>
-                    Avaliação de {formatDate(assessment.assessedAt)}
-                  </h2>
-                  <Badge variant="neutral">
-                    {assessment.measurements.length} medida(s)
-                  </Badge>
-                </div>
-                <dl className={styles.measurements}>
-                  {assessment.measurements.map((measurement) => (
-                    <div
-                      className={styles.measurement}
-                      key={
-                        measurement.measurement_key +
-                        ":" +
-                        measurement.unit
-                      }
-                    >
-                      <dt>
-                        {formatProfessionalMeasurementLabel(
-                          measurement.measurement_key,
-                        )}
-                      </dt>
-                      <dd>
-                        {formatNumber(measurement.measurement_value)}{" "}
-                        {measurement.unit}
-                      </dd>
+          <>
+            <div className={styles.actions}>
+              <Link className={styles.evolutionLink} href="/cliente/evolucao">
+                Ver evolução entre avaliações
+              </Link>
+            </div>
+            <div className={styles.list}>
+              {items.map(([assessmentId, assessment], assessmentIndex) => {
+                const content = (
+                  <Card className={styles.card}>
+                    <div className={styles.header}>
+                      <h2 className={styles.title}>
+                        Avaliação de {formatDate(assessment.assessedAt)}
+                      </h2>
+                      <div className={styles.badges}>
+                        {assessmentIndex === 0 ? (
+                          <Badge variant="positive">Mais recente</Badge>
+                        ) : null}
+                        <Badge variant="neutral">
+                          {assessment.measurements.length} medida(s)
+                        </Badge>
+                      </div>
                     </div>
-                  ))}
-                </dl>
-              </Card>
-            ))}
-          </div>
+                    <dl className={styles.measurements}>
+                      {assessment.measurements.map((measurement) => (
+                        <div
+                          className={styles.measurement}
+                          key={measurement.measurement_key + ":" + measurement.unit}
+                        >
+                          <dt>
+                            {formatProfessionalMeasurementLabel(
+                              measurement.measurement_key,
+                            )}
+                          </dt>
+                          <dd>
+                            {formatNumber(measurement.measurement_value)}{" "}
+                            {measurement.unit}
+                          </dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </Card>
+                );
+
+                if (assessmentIndex === 0) {
+                  return <div key={assessmentId}>{content}</div>;
+                }
+
+                return (
+                  <details className={styles.historyItem} key={assessmentId}>
+                    <summary>
+                      Avaliação de {formatDate(assessment.assessedAt)} ·{" "}
+                      {assessment.measurements.length} medida(s)
+                    </summary>
+                    <div className={styles.historyContent}>{content}</div>
+                  </details>
+                );
+              })}
+            </div>
+          </>
         )}
       </Section>
     </>
