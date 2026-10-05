@@ -250,6 +250,45 @@ export async function createCurrentClientActivityCheckinEvent(input: {
   return data;
 }
 
+export async function getAccessibleWeeklyFeedbackNotificationPreference(
+  clientId: string,
+) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_notification_preference_versions")
+    .select(
+      "id, client_id, purpose_key, channel_key, version_number, created_at, activated_at, retired_at",
+    )
+    .eq("client_id", clientId)
+    .eq("purpose_key", "weekly_feedback")
+    .is("retired_at", null)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function listAccessibleClientNotificationEvents(clientId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_notification_events")
+    .select(
+      "id, client_id, weekly_feedback_id, event_key, channel_key, preference_version_id, schedule_configuration_version_id, delivery_state, blocked_reason, delivered_at, created_at",
+    )
+    .eq("client_id", clientId)
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
 export async function getAccessibleClientRegistration(clientId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
