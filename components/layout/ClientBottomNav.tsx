@@ -11,10 +11,10 @@ type ClientNavigationItem = {
 
 const clientNavigationItems: ClientNavigationItem[] = [
   { href: "/cliente", label: "Início" },
-  { href: "/cliente/anamnese", label: "Anamnese" },
   { href: "/cliente/protocolo", label: "Protocolo" },
-  { href: "/cliente/conteudos", label: "Conteúdos" },
-  { href: "/cliente/perfil", label: "Perfil" },
+  { href: "/cliente/checkins", label: "Check-ins" },
+  { href: "/cliente/feedback-semanal", label: "Feedback" },
+  { href: "/cliente/mais", label: "Mais" },
 ];
 
 export function isClientNavigationItemActive(pathname: string, href: string) {
