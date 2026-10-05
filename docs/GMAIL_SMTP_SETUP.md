@@ -88,7 +88,7 @@ Variaveis server-only:
 
 Esses valores devem ser configurados no ambiente de producao da Vercel. Nenhum deles usa prefixo `NEXT_PUBLIC_`.
 
-O cron `/api/cron/weekly-feedback-email-delivery` roda tecnicamente a cada hora. A funcao de claim do banco so libera trabalho no dia de lembrete configurado para o Feedback Semanal. Portanto a cadencia tecnica nao cria uma nova regra profissional de horario.
+O cron `/api/cron/weekly-feedback-email-delivery` roda tecnicamente uma vez por dia. A funcao de claim do banco so libera trabalho no dia de lembrete configurado para o Feedback Semanal. Portanto a cadencia tecnica nao cria uma nova regra profissional de horario.
 
 Se as credenciais Gmail nao estiverem configuradas, o worker retorna sem fazer claim e sem criar tentativa falsa.
 
