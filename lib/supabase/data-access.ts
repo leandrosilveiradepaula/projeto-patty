@@ -1869,7 +1869,7 @@ export async function listAccessibleWeeklyFeedbacksForClient(clientId: string) {
   const { data, error } = await supabase
     .from("client_weekly_feedbacks")
     .select(
-      "id, client_id, form_version_id, period_start, period_end, due_at, requested_by_profile_id, answers, submitted_at, created_at, weekly_feedback_form_versions(id, version_number, title, definition, published_at)",
+      "id, client_id, form_version_id, period_start, period_end, due_at, requested_by_profile_id, request_source, schedule_configuration_version_id, answers, submitted_at, created_at, weekly_feedback_form_versions(id, version_number, title, definition, published_at)",
     )
     .eq("client_id", clientId)
     .order("period_start", { ascending: false })
@@ -1902,7 +1902,7 @@ export async function createAccessibleWeeklyFeedbackRequest(input: {
       requested_by_profile_id: input.requestedByProfileId,
     })
     .select(
-      "id, client_id, form_version_id, period_start, period_end, due_at, requested_by_profile_id, answers, submitted_at, created_at",
+      "id, client_id, form_version_id, period_start, period_end, due_at, requested_by_profile_id, request_source, schedule_configuration_version_id, answers, submitted_at, created_at",
     )
     .single();
 
@@ -1921,7 +1921,7 @@ export async function getCurrentClientWeeklyFeedback(
   const { data, error } = await supabase
     .from("client_weekly_feedbacks")
     .select(
-      "id, client_id, form_version_id, period_start, period_end, due_at, answers, submitted_at, created_at, weekly_feedback_form_versions(id, version_number, title, definition, published_at)",
+      "id, client_id, form_version_id, period_start, period_end, due_at, request_source, schedule_configuration_version_id, answers, submitted_at, created_at, weekly_feedback_form_versions(id, version_number, title, definition, published_at)",
     )
     .eq("client_id", clientId)
     .eq("id", feedbackId)
@@ -1951,7 +1951,7 @@ export async function updateCurrentClientWeeklyFeedback(input: {
     .eq("client_id", input.clientId)
     .is("submitted_at", null)
     .select(
-      "id, client_id, form_version_id, period_start, period_end, due_at, answers, submitted_at, created_at",
+      "id, client_id, form_version_id, period_start, period_end, due_at, request_source, schedule_configuration_version_id, answers, submitted_at, created_at",
     )
     .maybeSingle();
 

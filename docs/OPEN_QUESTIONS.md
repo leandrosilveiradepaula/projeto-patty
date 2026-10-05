@@ -960,18 +960,13 @@ Na Consolidacao, a Patty confirmou reducao manual e gradual das doses. Permanece
 Resolvido em 2026-10-04: o retorno pos-Consolidacao reinicia pelo Cutting 1 desde o Linear, seguindo depois Dia 1/Dia 2 e Carb Cycle 2 Low/1 High.
 
 
-### QUESTAO ABERTA — PERIODO DO FEEDBACK SEMANAL
+### RESOLVIDO EM 2026-10-05 — PERIODO DO FEEDBACK SEMANAL
 
-Resolvido:
-- elegibilidade comeca apos a primeira publicacao de protocolo da cliente;
-- evento tecnico = primeira linha em `protocol_publications`;
-- template de agenda = segunda-feira 08:00;
-- lembrete = quarta-feira;
-- dia/horario da solicitacao e dia do lembrete sao configuraveis/versionados.
+A solicitacao automatica representa a semana anterior completa, de segunda-feira a domingo.
 
-Ainda falta confirmar qual intervalo deve preencher `period_start` e `period_end` quando a solicitacao for criada automaticamente:
-- semana anterior;
-- semana corrente;
-- outro recorte definido pela Patty.
+Exemplo confirmado para operacionalizacao:
+- geracao em segunda-feira 05/10/2026;
+- `period_start = 28/09/2026`;
+- `period_end = 04/10/2026`.
 
-Nao automatizar a geracao do periodo ate essa resposta.
+Essa definicao remove o bloqueio profissional da geracao automatica semanal.

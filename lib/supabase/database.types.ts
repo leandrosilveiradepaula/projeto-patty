@@ -1738,7 +1738,9 @@ export type Database = {
           id: string
           period_end: string
           period_start: string
-          requested_by_profile_id: string
+          request_source: string
+          requested_by_profile_id: string | null
+          schedule_configuration_version_id: string | null
           submitted_at: string | null
         }
         Insert: {
@@ -1750,7 +1752,9 @@ export type Database = {
           id?: string
           period_end: string
           period_start: string
-          requested_by_profile_id: string
+          request_source?: string
+          requested_by_profile_id?: string | null
+          schedule_configuration_version_id?: string | null
           submitted_at?: string | null
         }
         Update: {
@@ -1762,7 +1766,9 @@ export type Database = {
           id?: string
           period_end?: string
           period_start?: string
-          requested_by_profile_id?: string
+          request_source?: string
+          requested_by_profile_id?: string | null
+          schedule_configuration_version_id?: string | null
           submitted_at?: string | null
         }
         Relationships: [
@@ -1785,6 +1791,13 @@ export type Database = {
             columns: ["requested_by_profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_weekly_feedbacks_schedule_configuration_version_id_fkey"
+            columns: ["schedule_configuration_version_id"]
+            isOneToOne: false
+            referencedRelation: "method_configuration_versions"
             referencedColumns: ["id"]
           },
         ]

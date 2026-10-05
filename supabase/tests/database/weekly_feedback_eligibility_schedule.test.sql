@@ -1,6 +1,6 @@
 begin;
 
-select plan(5);
+select plan(13);
 
 select is(
   (
@@ -182,6 +182,97 @@ select is(
   ),
   1::bigint,
   'eligibility uses the existing protocol publication event'
+);
+
+reset role;
+
+select is(
+  public.generate_scheduled_weekly_feedback_requests(
+    '2026-10-05 10:59:00+00'::timestamptz
+  ),
+  0,
+  'generator does nothing before configured Monday 08:00 local time'
+);
+
+select is(
+  public.generate_scheduled_weekly_feedback_requests(
+    '2026-10-05 11:00:00+00'::timestamptz
+  ),
+  1,
+  'generator creates one request at configured Monday 08:00 local time'
+);
+
+select is(
+  (
+    select period_start
+    from public.client_weekly_feedbacks
+    where client_id = 'e2000000-0000-0000-0000-000000000001'
+      and request_source = 'schedule'
+  ),
+  date '2026-09-28',
+  'scheduled feedback starts on Monday of the previous complete week'
+);
+
+select is(
+  (
+    select period_end
+    from public.client_weekly_feedbacks
+    where client_id = 'e2000000-0000-0000-0000-000000000001'
+      and request_source = 'schedule'
+  ),
+  date '2026-10-04',
+  'scheduled feedback ends on Sunday of the previous complete week'
+);
+
+select is(
+  (
+    select request_source
+    from public.client_weekly_feedbacks
+    where client_id = 'e2000000-0000-0000-0000-000000000001'
+      and period_start = date '2026-09-28'
+      and period_end = date '2026-10-04'
+  ),
+  'schedule'::text,
+  'scheduled request records automation as its origin'
+);
+
+select is(
+  (
+    select requested_by_profile_id
+    from public.client_weekly_feedbacks
+    where client_id = 'e2000000-0000-0000-0000-000000000001'
+      and period_start = date '2026-09-28'
+      and period_end = date '2026-10-04'
+  ),
+  null::uuid,
+  'scheduled request does not pretend to have a human requester'
+);
+
+select is(
+  (
+    select schedule_configuration_version_id
+    from public.client_weekly_feedbacks
+    where client_id = 'e2000000-0000-0000-0000-000000000001'
+      and period_start = date '2026-09-28'
+      and period_end = date '2026-10-04'
+  ),
+  (
+    select v.id
+    from public.method_configuration_versions v
+    join public.method_configuration_templates t on t.id = v.template_id
+    where t.template_key = 'weekly_feedback.schedule'
+      and v.activated_at is not null
+      and v.retired_at is null
+  ),
+  'scheduled request preserves the exact schedule configuration version used'
+);
+
+select is(
+  public.generate_scheduled_weekly_feedback_requests(
+    '2026-10-05 11:00:00+00'::timestamptz
+  ),
+  0,
+  'generator is idempotent for the same client and weekly period'
 );
 
 select * from finish();
