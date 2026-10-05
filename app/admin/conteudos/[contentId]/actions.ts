@@ -181,8 +181,12 @@ export async function registerEducationalContentAssetAction(
 ) {
   await requireRole("admin");
 
-  if (!isUuid(contentId) || !isUuid(versionId)) {
-    throw new Error("Conteúdo inválido");
+  if (
+    !isUuid(contentId) ||
+    !isUuid(versionId) ||
+    formData.get("confirmVerified") !== "yes"
+  ) {
+    throw new Error("Confirme a verificação do asset privado");
   }
 
   const content = await getAccessibleEducationalContentForCurrentAdmin(contentId);
