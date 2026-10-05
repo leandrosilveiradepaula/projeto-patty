@@ -986,3 +986,25 @@ Ainda pendente de configuracao operacional:
 - validar envio/recebimento com conta sintetica.
 
 WhatsApp continua separado e sem provider escolhido.
+
+
+### PENDENCIA OPERACIONAL EXPLICITA — UPLOAD DO PRIMEIRO VIDEO EDUCACIONAL
+
+Registrado em 2026-10-05 para retomada quando houver acesso operacional adequado ao Vercel Blob.
+
+Estado:
+- o arquivo aprovado da balanca ja foi baixado e revalidado;
+- tamanho e SHA-256 esperados estao registrados no manifesto;
+- o Vercel Private Blob store esta criado e conectado;
+- o boundary de acesso privado da cliente esta implementado;
+- o binario ainda nao foi fisicamente enviado ao Blob.
+
+Retomada obrigatoria:
+1. enviar o arquivo aprovado para o path privado previsto;
+2. verificar objeto, tamanho, MIME e SHA-256;
+3. somente depois registrar o asset no Supabase;
+4. submeter a revisao humana;
+5. publicar explicitamente;
+6. liberar explicitamente para cliente quando apropriado.
+
+Nao bloquear as demais frentes do projeto por esta pendencia e nao marcar upload, asset, publicacao ou release como concluidos antes da verificacao real.
