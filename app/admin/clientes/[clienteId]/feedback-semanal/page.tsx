@@ -84,11 +84,19 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
     hasAccessibleProtocolPublicationForClient(client.id),
     listAccessibleClientNotificationEvents(client.id),
   ]);
-  const reminderEventsByFeedbackId = new Map(
-    notificationEvents
-      .filter((event) => event.event_key === "weekly_feedback_reminder")
-      .map((event) => [event.weekly_feedback_id, event]),
-  );
+  const reminderEventsByFeedbackId = new Map<
+    string,
+    (typeof notificationEvents)[number]
+  >();
+
+  for (const event of notificationEvents) {
+    if (
+      event.event_key.startsWith("weekly_feedback_reminder:") &&
+      !reminderEventsByFeedbackId.has(event.weekly_feedback_id)
+    ) {
+      reminderEventsByFeedbackId.set(event.weekly_feedback_id, event);
+    }
+  }
   const displayName = client.profiles?.display_name?.trim();
 
   return (
