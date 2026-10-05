@@ -1648,6 +1648,79 @@ export type Database = {
           },
         ]
       }
+      client_notification_delivery_attempts: {
+        Row: {
+          attempt_number: number
+          channel_key: string
+          client_id: string
+          completed_at: string | null
+          failure_code: string | null
+          failure_message: string | null
+          id: string
+          lease_expires_at: string
+          notification_event_id: string
+          provider_key: string
+          provider_message_id: string | null
+          started_at: string
+          status: string
+          weekly_feedback_id: string
+        }
+        Insert: {
+          attempt_number: number
+          channel_key: string
+          client_id: string
+          completed_at?: string | null
+          failure_code?: string | null
+          failure_message?: string | null
+          id?: string
+          lease_expires_at: string
+          notification_event_id: string
+          provider_key: string
+          provider_message_id?: string | null
+          started_at?: string
+          status: string
+          weekly_feedback_id: string
+        }
+        Update: {
+          attempt_number?: number
+          channel_key?: string
+          client_id?: string
+          completed_at?: string | null
+          failure_code?: string | null
+          failure_message?: string | null
+          id?: string
+          lease_expires_at?: string
+          notification_event_id?: string
+          provider_key?: string
+          provider_message_id?: string | null
+          started_at?: string
+          status?: string
+          weekly_feedback_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_notification_delivery_attempt_notification_event_id_fkey"
+            columns: ["notification_event_id"]
+            isOneToOne: false
+            referencedRelation: "client_notification_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_notification_delivery_attempts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_notification_delivery_attempts_weekly_feedback_id_fkey"
+            columns: ["weekly_feedback_id"]
+            isOneToOne: false
+            referencedRelation: "client_weekly_feedbacks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_notification_events: {
         Row: {
           blocked_reason: string | null
@@ -3079,6 +3152,18 @@ export type Database = {
         }
         Returns: string
       }
+      claim_weekly_feedback_email_deliveries_server: {
+        Args: { p_limit?: number; p_now?: string }
+        Returns: {
+          attempt_id: string
+          client_id: string
+          notification_event_id: string
+          period_end: string
+          period_start: string
+          recipient_email: string
+          weekly_feedback_id: string
+        }[]
+      }
       clone_protocol_version_draft: {
         Args: { p_plan_snapshot: Json; p_source_protocol_version_id: string }
         Returns: string
@@ -3086,6 +3171,14 @@ export type Database = {
       complete_ai_execution: {
         Args: { p_content: Json; p_execution_id: string }
         Returns: undefined
+      }
+      complete_weekly_feedback_email_delivery_server: {
+        Args: {
+          p_attempt_id: string
+          p_now?: string
+          p_provider_message_id: string
+        }
+        Returns: string
       }
       create_hydration_target_from_method_snapshot: {
         Args: {
@@ -3125,6 +3218,15 @@ export type Database = {
           p_response_received_at: string | null
         }
         Returns: undefined
+      }
+      fail_weekly_feedback_email_delivery_server: {
+        Args: {
+          p_attempt_id: string
+          p_failure_code: string
+          p_failure_message?: string
+          p_now?: string
+        }
+        Returns: string
       }
       finalize_assessment_from_method_snapshot: {
         Args: {
