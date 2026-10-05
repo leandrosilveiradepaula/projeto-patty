@@ -1863,7 +1863,9 @@ A UI esta implementada nesta branch, mas ainda precisa passar CI, merge e public
 - migration `20261005002026_seed_weekly_feedback_schedule_configuration` aplicada;
 - template `weekly_feedback.schedule` v1 ativo com segunda-feira 08:00, lembrete quarta e fuso America/Sao_Paulo.
 
-### IMPLEMENTADO NA BRANCH
+### MERGEADO NO MASTER
+
+PR #339 mergeado no commit `d7ce9c2a00c24eb3ecc34c558db8caab672ce21c`.
 
 - UI administrativa mostra se a cliente esta elegivel;
 - botao manual fica indisponivel antes do primeiro protocolo publicado;
@@ -1872,9 +1874,9 @@ A UI esta implementada nesta branch, mas ainda precisa passar CI, merge e public
 - area `/admin/configuracoes` ganhou editor especifico de dia/horario do feedback e dia do lembrete;
 - cada alteracao cria nova versao pelo boundary de configuracao ja existente.
 
-### AINDA ABERTO
+### RESOLVIDO EM 2026-10-05
 
-A geracao automatica semanal nao sera ativada ate a Patty confirmar qual periodo deve preencher `period_start`/`period_end` (semana anterior, corrente ou outro recorte).
+A Patty confirmou a semana anterior completa, de segunda-feira a domingo, como periodo de referencia automatico.
 
 
 ## Atualizacao 2026-10-05 - Geracao automatica do Feedback Semanal
@@ -1895,10 +1897,11 @@ Exemplo:
 - geracao: 05/10/2026;
 - periodo: 28/09/2026 a 04/10/2026.
 
-### IMPLEMENTADO NA BRANCH
+### MERGEADO NO MASTER
 
-- pgTAP ampliado para horario, periodo, origem, configuracao usada e idempotencia;
-- tipos TypeScript sincronizados com o SaaS;
-- historico administrativo passa a mostrar origem Manual/Automatica.
+PR #341 mergeado no commit `c9400cba703f4a76978081d178ac908883b538c1`.
 
-Ainda precisa passar CI e merge para ser tratado como codigo principal/publicavel.
+- pgTAP cobre horario, periodo, origem, configuracao usada e idempotencia;
+- tipos TypeScript atualizados para os novos campos do Feedback Semanal;
+- historico administrativo mostra origem Manual/Automatica;
+- CI de aplicacao e banco passaram antes do merge.
