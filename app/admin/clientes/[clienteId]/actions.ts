@@ -6,6 +6,10 @@ import { redirect } from "next/navigation";
 
 import { endCurrentAdminClientAssignments } from "@/lib/assignments/client-assignment-admin";
 import { upsertClientRegistrationPrivileged } from "@/lib/clients/registration-admin";
+import {
+  activateWeeklyFeedbackNotificationPreference,
+  type WeeklyFeedbackNotificationChannel,
+} from "@/lib/notifications/weekly-feedback-preference-admin";
 import { parseClientRegistrationForm } from "@/lib/clients/registration";
 import {
   ClientRecoveryLinkError,
@@ -260,4 +264,84 @@ export async function generateManualRecoveryLinkAction(
       success: false,
     };
   }
+}
+
+
+export type WeeklyFeedbackNotificationPreferenceFormState = {
+  message: string | null;
+  success: boolean;
+};
+
+export async function updateWeeklyFeedbackNotificationPreferenceAction(
+  clientId: string,
+  expectedActiveVersionId: string | null,
+  _state: WeeklyFeedbackNotificationPreferenceFormState,
+  formData: FormData,
+): Promise<WeeklyFeedbackNotificationPreferenceFormState> {
+  const context = await requireRole("admin");
+
+  if (!isUuid(clientId)) {
+    return {
+      message: "Cliente inválida para configurar o canal do Feedback Semanal.",
+      success: false,
+    };
+  }
+
+  if (
+    expectedActiveVersionId !== null &&
+    !isUuid(expectedActiveVersionId)
+  ) {
+    return {
+      message: "A versão atual da preferência é inválida. Atualize a página.",
+      success: false,
+    };
+  }
+
+  const client = await getAccessibleClient(clientId);
+
+  if (!client) {
+    return {
+      message: "Esta cliente não está acessível para sua atribuição atual.",
+      success: false,
+    };
+  }
+
+  const channelValue = formData.get("channel");
+  const channel =
+    channelValue === "email" ||
+    channelValue === "whatsapp" ||
+    channelValue === "in_app"
+      ? (channelValue as WeeklyFeedbackNotificationChannel)
+      : null;
+
+  if (!channel) {
+    return {
+      message: "Selecione um canal válido para o Feedback Semanal.",
+      success: false,
+    };
+  }
+
+  try {
+    await activateWeeklyFeedbackNotificationPreference({
+      actorProfileId: context.profileId,
+      channel,
+      clientId: client.id,
+      expectedActiveVersionId,
+    });
+  } catch {
+    return {
+      message:
+        "Não foi possível alterar o canal. A configuração pode ter mudado; atualize a página e tente novamente.",
+      success: false,
+    };
+  }
+
+  revalidatePath(`/admin/clientes/${client.id}`);
+  revalidatePath(`/admin/clientes/${client.id}/feedback-semanal`);
+  revalidatePath("/cliente/feedback-semanal");
+
+  return {
+    message: "Canal do Feedback Semanal atualizado em nova versão.",
+    success: true,
+  };
 }
