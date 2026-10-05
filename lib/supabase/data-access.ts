@@ -884,6 +884,37 @@ export async function listEducationalContentAssetsForCurrentAdmin(
   return data;
 }
 
+export async function createAccessibleEducationalContentAsset(input: {
+  byteSize: number;
+  contentType: string;
+  sha256Hex: string;
+  storagePath: string;
+  versionId: string;
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("educational_content_assets")
+    .insert({
+      asset_key: "primary",
+      byte_size: input.byteSize,
+      content_type: input.contentType,
+      educational_content_version_id: input.versionId,
+      sha256_hex: input.sha256Hex,
+      storage_path: input.storagePath,
+      storage_provider: "vercel_blob",
+    })
+    .select(
+      "id, educational_content_version_id, asset_key, storage_provider, storage_path, content_type, byte_size, sha256_hex, created_at",
+    )
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
 async function listContentReleasesForClient(clientId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
