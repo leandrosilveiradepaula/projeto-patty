@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 import {
   buildWeeklyFeedbackAnswers,
@@ -58,4 +59,8 @@ export async function saveWeeklyFeedbackAction(
 
   revalidatePath("/cliente");
   revalidatePath("/cliente/feedback-semanal");
+  redirect(
+    "/cliente/feedback-semanal?status=" +
+      (submit ? "submitted" : "draft-saved"),
+  );
 }
