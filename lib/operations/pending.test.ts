@@ -310,6 +310,7 @@ test("blocked weekly feedback reminder events become operational pendings", () =
         weeklyFeedbackId: "feedback-1",
         channelKey: null,
         deliveryState: "blocked_no_channel",
+        eventKey: "weekly_feedback_reminder:none",
         blockedReason: "channel_not_configured",
       },
       {
@@ -320,6 +321,7 @@ test("blocked weekly feedback reminder events become operational pendings", () =
         weeklyFeedbackId: "feedback-2",
         channelKey: "email",
         deliveryState: "blocked_missing_contact",
+        eventKey: "weekly_feedback_reminder:pref-email",
         blockedReason: "contact_email_missing",
       },
       {
@@ -330,6 +332,7 @@ test("blocked weekly feedback reminder events become operational pendings", () =
         weeklyFeedbackId: "feedback-3",
         channelKey: "whatsapp",
         deliveryState: "blocked_provider",
+        eventKey: "weekly_feedback_reminder:pref-whatsapp",
         blockedReason: "external_provider_not_configured",
       },
       {
@@ -340,6 +343,7 @@ test("blocked weekly feedback reminder events become operational pendings", () =
         weeklyFeedbackId: "feedback-4",
         channelKey: "in_app",
         deliveryState: "delivered",
+        eventKey: "weekly_feedback_reminder:pref-app",
         blockedReason: null,
       },
     ],
@@ -361,5 +365,58 @@ test("blocked weekly feedback reminder events become operational pendings", () =
   assert.match(
     items[2]?.description ?? "",
     /não considera a mensagem enviada/i,
+  );
+});
+
+
+test("latest delivered retry suppresses older blocked reminder pending", () => {
+  const items = buildOperationalPendingItems({
+    clarificationReminderIntervalHours: 24,
+    anamnesisSubmissions: [],
+    clarificationRequests: [],
+    assessments: [],
+    protocolVersions: [],
+    aiExecutions: [],
+    weeklyFeedbacks: [
+      {
+        id: "feedback-retry",
+        clientId: "client-retry",
+        clientLabel: "Cliente Retry",
+        createdAt: "2026-10-05T11:00:00Z",
+        dueAt: null,
+        periodStart: "2026-09-28",
+        periodEnd: "2026-10-04",
+        submittedAt: null,
+      },
+    ],
+    weeklyFeedbackNotificationEvents: [
+      {
+        id: "blocked-first",
+        clientId: "client-retry",
+        clientLabel: "Cliente Retry",
+        createdAt: "2026-10-07T10:00:00Z",
+        weeklyFeedbackId: "feedback-retry",
+        channelKey: null,
+        deliveryState: "blocked_no_channel",
+        eventKey: "weekly_feedback_reminder:none",
+        blockedReason: "channel_not_configured",
+      },
+      {
+        id: "delivered-after",
+        clientId: "client-retry",
+        clientLabel: "Cliente Retry",
+        createdAt: "2026-10-07T11:00:00Z",
+        weeklyFeedbackId: "feedback-retry",
+        channelKey: "in_app",
+        deliveryState: "delivered",
+        eventKey: "weekly_feedback_reminder:pref-app",
+        blockedReason: null,
+      },
+    ],
+  });
+
+  assert.equal(
+    items.some((item) => item.kind === "weekly_feedback_reminder_blocked"),
+    false,
   );
 });
