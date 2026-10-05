@@ -708,15 +708,124 @@ export async function createAccessibleAnamnesisReview(
   }
 }
 
-export async function listEducationalContentVersionsForCurrentAdmin() {
+export async function getAccessibleEducationalContentForCurrentAdmin(
+  contentId: string,
+) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("educational_contents")
+    .select("id, created_at")
+    .eq("id", contentId)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function listEducationalContentVersionsForCurrentAdmin(
+  contentId?: string,
+) {
+  const supabase = await createClient();
+  let query = supabase
+    .from("educational_content_versions")
+    .select(
+      "id, educational_content_id, version_number, title, category_key, content_type_key, phase_key, display_order, published_at, created_at",
+    );
+
+  if (contentId) {
+    query = query.eq("educational_content_id", contentId);
+  }
+
+  const { data, error } = await query
+    .order("version_number", { ascending: false })
+    .order("id", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function createAccessibleEducationalContent() {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("educational_contents")
+    .insert({})
+    .select("id, created_at")
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function deleteAccessibleEducationalContentWithoutVersions(
+  contentId: string,
+) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("educational_contents")
+    .delete()
+    .eq("id", contentId);
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function createAccessibleEducationalContentVersion(input: {
+  contentId: string;
+  displayOrder: number;
+  title: string;
+  versionNumber: number;
+}) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("educational_content_versions")
+    .insert({
+      display_order: input.displayOrder,
+      educational_content_id: input.contentId,
+      title: input.title,
+      version_number: input.versionNumber,
+    })
     .select(
-      "id, version_number, title, category_key, content_type_key, display_order, published_at",
+      "id, educational_content_id, version_number, title, category_key, content_type_key, phase_key, display_order, published_at, created_at",
     )
-    .order("display_order", { ascending: true })
-    .order("version_number", { ascending: true });
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function updateAccessibleEducationalContentDraftVersion(input: {
+  contentId: string;
+  displayOrder: number;
+  title: string;
+  versionId: string;
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("educational_content_versions")
+    .update({
+      display_order: input.displayOrder,
+      title: input.title,
+    })
+    .eq("id", input.versionId)
+    .eq("educational_content_id", input.contentId)
+    .is("published_at", null)
+    .select(
+      "id, educational_content_id, version_number, title, category_key, content_type_key, phase_key, display_order, published_at, created_at",
+    )
+    .single();
 
   if (error) {
     throw error;
