@@ -4,6 +4,7 @@ import { parseCarbCycleConfiguration } from "../method/carb-cycle.ts";
 import { validateMethodEngineConfiguration } from "../method/config-engine.ts";
 import { parseLiquidTaxonomyConfiguration } from "../method/liquid-taxonomy.ts";
 import { parseScalarParameterShapeConfiguration } from "../method/scalar-parameter.ts";
+import { parseWeeklyFeedbackScheduleConfiguration } from "./weekly-feedback-schedule.ts";
 
 export const METHOD_CONFIGURATION_SCHEMA_KEYS = [
   "method_engine_v1",
@@ -12,6 +13,7 @@ export const METHOD_CONFIGURATION_SCHEMA_KEYS = [
   "assessment_kind_catalog_v1",
   "assessment_definition_v1",
   "liquid_taxonomy_v1",
+  "weekly_feedback_schedule_v1",
 ] as const;
 
 export type MethodConfigurationSchemaKey =
@@ -48,5 +50,7 @@ export function validateMethodConfigurationBySchema(
       return parseAssessmentDefinitionConfiguration(configurationValue);
     case "liquid_taxonomy_v1":
       return parseLiquidTaxonomyConfiguration(configurationValue);
+    case "weekly_feedback_schedule_v1":
+      return parseWeeklyFeedbackScheduleConfiguration(configurationValue);
   }
 }
