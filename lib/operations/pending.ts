@@ -87,6 +87,7 @@ export type PendingWeeklyFeedbackNotificationEvent = {
   clientLabel: string;
   createdAt: string;
   deliveryState: string;
+  eventKey: string;
   id: string;
   weeklyFeedbackId: string;
 };
@@ -296,8 +297,34 @@ export function buildOperationalPendingItems(
     });
   }
 
+  const latestReminderEventByFeedbackId = new Map<
+    string,
+    PendingWeeklyFeedbackNotificationEvent
+  >();
+
   for (const event of input.weeklyFeedbackNotificationEvents ?? []) {
-    if (event.deliveryState === "delivered") {
+    if (!event.eventKey.startsWith("weekly_feedback_reminder:")) {
+      continue;
+    }
+
+    const current = latestReminderEventByFeedbackId.get(event.weeklyFeedbackId);
+
+    if (!current || event.createdAt > current.createdAt) {
+      latestReminderEventByFeedbackId.set(event.weeklyFeedbackId, event);
+    }
+  }
+
+  const submittedFeedbackIds = new Set(
+    (input.weeklyFeedbacks ?? [])
+      .filter((feedback) => Boolean(feedback.submittedAt))
+      .map((feedback) => feedback.id),
+  );
+
+  for (const event of latestReminderEventByFeedbackId.values()) {
+    if (
+      event.deliveryState === "delivered" ||
+      submittedFeedbackIds.has(event.weeklyFeedbackId)
+    ) {
       continue;
     }
 
