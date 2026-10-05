@@ -864,6 +864,26 @@ export async function publishAccessibleEducationalContentVersion(input: {
   return data;
 }
 
+export async function listEducationalContentAssetsForCurrentAdmin(
+  versionId: string,
+) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("educational_content_assets")
+    .select(
+      "id, educational_content_version_id, asset_key, storage_provider, storage_path, content_type, byte_size, sha256_hex, created_at",
+    )
+    .eq("educational_content_version_id", versionId)
+    .order("asset_key", { ascending: true })
+    .order("id", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
 async function listContentReleasesForClient(clientId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
