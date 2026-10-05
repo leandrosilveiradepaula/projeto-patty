@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
-import { PageHeader } from "@/components/ui/PageHeader";
+import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
 import { Section } from "@/components/ui/Section";
 import { loadSupportedLiquidTaxonomy } from "@/lib/method/liquid-taxonomy-loader";
 import {
@@ -12,7 +12,6 @@ import {
   listAccessibleClientHydrationTargets,
   listAccessibleClientLiquidIntakeEvents,
 } from "@/lib/supabase/data-access";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import styles from "./page.module.css";
@@ -64,16 +63,14 @@ export default async function AdminClientCheckinsPage({ params }: PageProps) {
 
   return (
     <>
-      <PageHeader
-        actions={
-          <Link className={styles.backLink} href={"/admin/clientes/" + client.id}>
-            Voltar a cliente
-          </Link>
-        }
-        description="Acompanhe registros factuais. O sistema nao calcula adesao, prioridade ou sucesso automaticamente."
-        eyebrow="Administracao"
-        title={"Check-ins · " + (client.profiles?.display_name?.trim() || "Cliente")}
+      <ClientSummaryHeader
+        meta="Cliente atribuído"
+        name={client.profiles?.display_name?.trim() || "Cliente sem nome informado"}
+        secondary="Check-ins de acompanhamento"
+        status={<Badge variant="neutral">Acompanhamento ativo</Badge>}
       />
+
+      <ClientWorkspaceNav clientId={client.id} />
 
       <Section
         description="Cada nova meta preserva a anterior. O peso usado fica congelado no registro; mudanca de peso nao recalcula automaticamente metas antigas."
