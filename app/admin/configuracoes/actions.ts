@@ -11,6 +11,10 @@ import {
   parseWeeklyFeedbackScheduleConfiguration,
   serializeWeeklyFeedbackScheduleConfiguration,
 } from "@/lib/configuration/weekly-feedback-schedule";
+import {
+  parseAssessmentSchedulePreferencesConfiguration,
+  serializeAssessmentSchedulePreferencesConfiguration,
+} from "@/lib/configuration/assessment-schedule-preferences";
 import { requireRole } from "@/lib/supabase/auth";
 import { listMethodConfigurationCatalogForCurrentAdmin } from "@/lib/supabase/data-access";
 import { isUuid } from "@/lib/validation/uuid";
@@ -147,6 +151,61 @@ export async function updateWeeklyFeedbackScheduleAction(
     configuration,
     expectedActiveVersionId,
     sourceReference: "admin-configuracoes-weekly-feedback",
+    templateId,
+  });
+
+  revalidatePath("/admin/configuracoes");
+}
+
+
+export async function updateAssessmentSchedulePreferencesAction(
+  templateId: string,
+  expectedActiveVersionId: string,
+  formData: FormData,
+) {
+  const auth = await requireRole("admin");
+
+  if (!isUuid(templateId) || !isUuid(expectedActiveVersionId)) {
+    throw new Error("Configuração inválida");
+  }
+
+  const templates = await listMethodConfigurationCatalogForCurrentAdmin();
+  const template = templates.find((item) => item.id === templateId);
+  const active = template?.activeVersion ?? null;
+
+  if (!template || !active) {
+    throw new Error("Configuração ativa não encontrada");
+  }
+
+  if (template.config_schema_key !== "assessment_schedule_preferences_v1") {
+    throw new Error("Template incompatível com a agenda das avaliações");
+  }
+
+  if (active.id !== expectedActiveVersionId) {
+    throw new Error(
+      "A configuração foi alterada desde que esta tela foi carregada. Atualize a página antes de salvar.",
+    );
+  }
+
+  const current = parseAssessmentSchedulePreferencesConfiguration(
+    active.configuration,
+  );
+
+  const preferredWeekdays = formData
+    .getAll("completePreferredWeekday")
+    .map((value) => Number(value));
+
+  const configuration =
+    serializeAssessmentSchedulePreferencesConfiguration({
+      basicPlacement: current.basicPlacement,
+      completePreferredWeekdays: preferredWeekdays,
+    });
+
+  await activateMethodConfigurationVersion({
+    actorProfileId: auth.profileId,
+    configuration,
+    expectedActiveVersionId,
+    sourceReference: "admin-configuracoes-assessment-schedule",
     templateId,
   });
 
