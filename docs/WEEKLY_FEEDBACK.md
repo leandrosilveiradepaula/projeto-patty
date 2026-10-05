@@ -169,4 +169,27 @@ O canal de aviso, horario do lembrete e eventual prazo fatal continuam separados
 11. Perguntas 8, 14, 15 e 16 devem ter aplicabilidade automatica a partir do protocolo ou a cliente marca "nao se aplica"?
 12. Perguntas 20 e 21 devem continuar semanais mesmo sendo dados relativamente estaveis?
 13. A Patty quer uma observacao/revisao manual por feedback antes de qualquer uso em IA ou protocolo?
-14. Qual periodo de referencia a solicitacao criada na agenda representa: semana anterior, semana corrente ou outro recorte? Esta definicao bloqueia apenas a geracao automatica de `period_start`/`period_end`; nao bloqueia elegibilidade nem edicao da agenda.
+14. RESOLVIDO EM 2026-10-05: a solicitacao criada na agenda representa a semana anterior completa, de segunda-feira a domingo. Exemplo: solicitacao criada em 05/10/2026 usa periodo 28/09/2026 a 04/10/2026.
+
+
+## Geracao automatica confirmada em 2026-10-05
+
+A Patty confirmou que o Feedback Semanal criado na agenda deve representar a semana anterior completa, de segunda-feira a domingo.
+
+Regra deterministica:
+- calcular a segunda-feira da semana local atual;
+- `period_start` = segunda-feira anterior;
+- `period_end` = domingo imediatamente anterior;
+- o recorte permanece segunda-domingo mesmo se o dia de disparo for alterado futuramente.
+
+A geracao automatica:
+- consulta a versao ativa de `weekly_feedback.schedule`;
+- so cria solicitacoes quando dia e horario locais coincidem com a configuracao ativa;
+- inclui apenas clientes com protocolo publicado e assignment admin ativo;
+- e idempotente pela unicidade `client_id + period_start + period_end`;
+- registra `request_source = schedule`;
+- preserva a versao exata da configuracao usada em `schedule_configuration_version_id`;
+- nao atribui falsamente a criacao a uma pessoa: `requested_by_profile_id` fica nulo para origem automatica;
+- nao define `due_at` na quarta-feira, pois quarta foi confirmada apenas como lembrete, nao prazo fatal.
+
+O job tecnico do Supabase Cron pode executar frequentemente; a regra profissional de quando gerar permanece nos parametros versionados.
