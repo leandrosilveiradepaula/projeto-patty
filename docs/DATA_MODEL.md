@@ -801,7 +801,7 @@ O fluxo de correcao historica depois da finalizacao continua aberto e nao e impl
 
 ### DECISAO TECNICA APLICADA
 
-`client_hydration_targets` preserva snapshots da meta de liquidos. Cada registro guarda `weight_kg`, `target_ml`, `method_key`, autoria e data. `target_ml` e gerado deterministicamente por `round(weight_kg * 60)`. Registros sao append-only.
+`client_hydration_targets` preserva snapshots da meta de liquidos. Cada registro guarda `weight_kg`, `target_ml`, `method_key`, autoria e data. Para novas metas, `target_ml` e gerado deterministicamente pela configuracao profissional vigente; o template atual confirmado e 35 mL/kg/dia. O coeficiente efetivamente usado deve permanecer auditavel no snapshot/configuracao aplicavel, sem reescrever metas historicas. Registros sao append-only.
 
 `client_liquid_intake_events` preserva eventos de ingestao com quantidade em mL e tipo `water` ou `zero_calorie_other`. O modelo nao calcula automaticamente proporcao minima de agua pura.
 
