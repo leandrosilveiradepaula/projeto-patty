@@ -59,6 +59,12 @@ export default async function ClientePage() {
   ]);
 
   const finalizedAssessmentCount = new Set(assessmentRows.map((row) => row.assessment_id)).size;
+  const currentAnamnesisDraft = anamneses.find(
+    (submission) => submission.submitted_at === null,
+  );
+  const hasSubmittedAnamnesis = anamneses.some(
+    (submission) => submission.submitted_at !== null,
+  );
   const pendingWeeklyFeedbackIds = new Set(
     weeklyFeedbacks
       .filter((feedback) => !feedback.submitted_at)
@@ -166,6 +172,84 @@ export default async function ClientePage() {
         eyebrow="Cliente"
         title="Área da cliente"
       />
+      <Section
+        description="Atalhos para o que normalmente merece atenção primeiro. O sistema não decide condutas nem classifica adesão."
+        title="Próximos passos"
+      >
+        <div className={styles.nextActions}>
+          {pendingWeeklyFeedbackIds.size > 0 ? (
+            <Link className={styles.nextActionLink} href="/cliente/feedback-semanal">
+              <Card className={styles.nextActionCard}>
+                <div className={styles.cardHeader}>
+                  <h2 className={styles.cardTitle}>Responder Feedback Semanal</h2>
+                  <Badge variant="warning">
+                    {pendingWeeklyFeedbackIds.size} pendente(s)
+                  </Badge>
+                </div>
+                <p className={styles.cardDescription}>
+                  Continue um rascunho ou envie o feedback solicitado pela Patty.
+                </p>
+              </Card>
+            </Link>
+          ) : null}
+
+          {currentAnamnesisDraft ? (
+            <Link
+              className={styles.nextActionLink}
+              href={`/cliente/anamnese/${currentAnamnesisDraft.id}`}
+            >
+              <Card className={styles.nextActionCard}>
+                <div className={styles.cardHeader}>
+                  <h2 className={styles.cardTitle}>Continuar Anamnese</h2>
+                  <Badge variant="warning">Rascunho</Badge>
+                </div>
+                <p className={styles.cardDescription}>
+                  Há respostas salvas que ainda não foram enviadas.
+                </p>
+              </Card>
+            </Link>
+          ) : !hasSubmittedAnamnesis ? (
+            <Link className={styles.nextActionLink} href="/cliente/anamnese">
+              <Card className={styles.nextActionCard}>
+                <div className={styles.cardHeader}>
+                  <h2 className={styles.cardTitle}>Preencher Anamnese</h2>
+                  <Badge variant="neutral">Começar</Badge>
+                </div>
+                <p className={styles.cardDescription}>
+                  Acesse a Anamnese disponível para iniciar seu cadastro de informações.
+                </p>
+              </Card>
+            </Link>
+          ) : null}
+
+          <Link className={styles.nextActionLink} href="/cliente/checkins">
+            <Card className={styles.nextActionCard}>
+              <div className={styles.cardHeader}>
+                <h2 className={styles.cardTitle}>Check-in do dia</h2>
+                <Badge variant="neutral">Abrir</Badge>
+              </div>
+              <p className={styles.cardDescription}>
+                Registre líquidos e informe sua atividade física de hoje.
+              </p>
+            </Card>
+          </Link>
+
+          {protocols.length > 0 ? (
+            <Link className={styles.nextActionLink} href="/cliente/protocolo">
+              <Card className={styles.nextActionCard}>
+                <div className={styles.cardHeader}>
+                  <h2 className={styles.cardTitle}>Consultar protocolo</h2>
+                  <Badge variant="positive">Publicado</Badge>
+                </div>
+                <p className={styles.cardDescription}>
+                  Consulte a versão mais recente já liberada pela Patty.
+                </p>
+              </Card>
+            </Link>
+          ) : null}
+        </div>
+      </Section>
+
       {hasDeliveredWeeklyFeedbackReminder ? (
         <Alert
           action={<Link href="/cliente/feedback-semanal">Responder agora</Link>}
