@@ -236,12 +236,7 @@ export async function addTrainingPlanItemAction(
         ? exerciseVersionRaw
         : null;
 
-    let exerciseName = requiredText(
-      formData,
-      "exerciseName",
-      200,
-      "Exercício",
-    );
+    let exerciseName: string;
 
     if (exerciseVersionId) {
       const exerciseVersions =
@@ -258,6 +253,13 @@ export async function addTrainingPlanItemAction(
       }
 
       exerciseName = exerciseVersion.name.trim();
+    } else {
+      exerciseName = requiredText(
+        formData,
+        "exerciseName",
+        200,
+        "Exercício",
+      );
     }
 
     const items = await listAccessibleClientTrainingPlanItems(version.id);
@@ -341,12 +343,7 @@ export async function updateTrainingPlanItemAction(
         ? exerciseVersionRaw
         : null;
 
-    let exerciseName = requiredText(
-      formData,
-      "exerciseName",
-      200,
-      "Exercício",
-    );
+    let exerciseName: string;
 
     if (exerciseVersionId) {
       const exerciseVersions =
@@ -363,6 +360,13 @@ export async function updateTrainingPlanItemAction(
       }
 
       exerciseName = exerciseVersion.name.trim();
+    } else {
+      exerciseName = requiredText(
+        formData,
+        "exerciseName",
+        200,
+        "Exercício",
+      );
     }
 
     await updateAccessibleClientTrainingPlanItem({
