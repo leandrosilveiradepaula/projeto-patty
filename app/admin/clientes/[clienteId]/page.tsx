@@ -21,6 +21,7 @@ import {
   listAccessibleClientTrainingRequests,
   listAccessibleProtocolsForClient,
   listAccessibleWeeklyFeedbacksForClient,
+  hasAccessibleProtocolPublicationForClient,
   listContentReleasesForAccessibleClient,
 } from "@/lib/supabase/data-access";
 import Link from "next/link";
@@ -81,6 +82,7 @@ export default async function AdminClienteDetailPage({
     activityEvents,
     weeklyFeedbacks,
     weeklyFeedbackNotificationPreference,
+    hasPublishedProtocol,
   ] = await Promise.all([
     getAccessibleClientRegistration(client.id),
     listAccessibleClientTrainingRequests(client.id),
@@ -93,6 +95,7 @@ export default async function AdminClienteDetailPage({
     listAccessibleClientActivityCheckinEvents(client.id),
     listAccessibleWeeklyFeedbacksForClient(client.id),
     getAccessibleWeeklyFeedbackNotificationPreference(client.id),
+    hasAccessibleProtocolPublicationForClient(client.id),
   ]);
 
   const displayName = client.profiles?.display_name?.trim();
@@ -133,6 +136,136 @@ export default async function AdminClienteDetailPage({
       />
 
       <ClientWorkspaceNav clientId={client.id} />
+
+      <Section
+        description="Use esta trilha como orientação operacional do atendimento. Ela mostra fatos já registrados e atalhos para a próxima área; não decide fase, conduta ou progressão profissional automaticamente."
+        title="Fluxo do atendimento"
+      >
+        <ol className={styles.journeyList}>
+          <li className={styles.journeyItem}>
+            <div className={styles.journeyMain}>
+              <span className={styles.journeyStep}>1</span>
+              <div>
+                <h3 className={styles.cardTitle}>Acesso da cliente</h3>
+                <p className={styles.cardDescription}>
+                  {client.profile_id
+                    ? "Conta vinculada e pronta para acesso."
+                    : "A conta ainda não foi vinculada ao cadastro da cliente."}
+                </p>
+              </div>
+            </div>
+            <Badge variant={client.profile_id ? "positive" : "warning"}>
+              {client.profile_id ? "Concluído" : "Pendente"}
+            </Badge>
+          </li>
+
+          <li className={styles.journeyItem}>
+            <div className={styles.journeyMain}>
+              <span className={styles.journeyStep}>2</span>
+              <div>
+                <h3 className={styles.cardTitle}>Cadastro atual</h3>
+                <p className={styles.cardDescription}>
+                  {registration
+                    ? "Dados de contato já registrados e editáveis nesta página."
+                    : "Cadastre os dados atuais de contato para completar o contexto operacional."}
+                </p>
+              </div>
+            </div>
+            <a className={styles.journeyLink} href="#cadastro-atual">
+              {registration ? "Revisar cadastro" : "Preencher cadastro"}
+            </a>
+          </li>
+
+          <li className={styles.journeyItem}>
+            <div className={styles.journeyMain}>
+              <span className={styles.journeyStep}>3</span>
+              <div>
+                <h3 className={styles.cardTitle}>Anamnese</h3>
+                <p className={styles.cardDescription}>
+                  {latestAnamnesis?.submitted_at
+                    ? "Anamnese enviada e disponível para revisão."
+                    : latestAnamnesis
+                      ? "Existe um rascunho ainda não enviado pela cliente."
+                      : "A cliente ainda não iniciou a Anamnese."}
+                </p>
+              </div>
+            </div>
+            <Link className={styles.journeyLink} href={`/admin/clientes/${client.id}/anamnese`}>
+              Abrir Anamnese
+            </Link>
+          </li>
+
+          <li className={styles.journeyItem}>
+            <div className={styles.journeyMain}>
+              <span className={styles.journeyStep}>4</span>
+              <div>
+                <h3 className={styles.cardTitle}>Avaliação</h3>
+                <p className={styles.cardDescription}>
+                  {assessments.some((assessment) => Boolean(assessment.finalized_at))
+                    ? "Há avaliação finalizada no histórico."
+                    : latestAssessment
+                      ? "Existe uma avaliação em rascunho."
+                      : "Nenhuma avaliação foi registrada ainda."}
+                </p>
+              </div>
+            </div>
+            <Link className={styles.journeyLink} href={`/admin/clientes/${client.id}/avaliacoes`}>
+              Abrir avaliações
+            </Link>
+          </li>
+
+          <li className={styles.journeyItem}>
+            <div className={styles.journeyMain}>
+              <span className={styles.journeyStep}>5</span>
+              <div>
+                <h3 className={styles.cardTitle}>Primeiro protocolo</h3>
+                <p className={styles.cardDescription}>
+                  {hasPublishedProtocol
+                    ? "Já existe protocolo aprovado e publicado para esta cliente."
+                    : protocols.length > 0
+                      ? "Há protocolo criado, mas ainda não existe publicação registrada."
+                      : "Nenhum protocolo foi criado ainda."}
+                </p>
+              </div>
+            </div>
+            <Link className={styles.journeyLink} href={`/admin/clientes/${client.id}/protocolos`}>
+              Abrir protocolos
+            </Link>
+          </li>
+
+          <li className={styles.journeyItem}>
+            <div className={styles.journeyMain}>
+              <span className={styles.journeyStep}>6</span>
+              <div>
+                <h3 className={styles.cardTitle}>Acompanhamento contínuo</h3>
+                <p className={styles.cardDescription}>
+                  {hasPublishedProtocol
+                    ? "Use avaliações, check-ins e Feedback Semanal para acompanhar a evolução e registrar novas decisões."
+                    : "O acompanhamento semanal passa a ser elegível depois da primeira publicação de protocolo."}
+                </p>
+              </div>
+            </div>
+            <Link className={styles.journeyLink} href={`/admin/clientes/${client.id}/feedback-semanal`}>
+              Abrir acompanhamento
+            </Link>
+          </li>
+
+          <li className={styles.journeyItem}>
+            <div className={styles.journeyMain}>
+              <span className={styles.journeyStep}>7</span>
+              <div>
+                <h3 className={styles.cardTitle}>Encerramento</h3>
+                <p className={styles.cardDescription}>
+                  O acompanhamento só é encerrado por decisão manual. O histórico permanece preservado.
+                </p>
+              </div>
+            </div>
+            <a className={styles.journeyLink} href="#encerrar-acompanhamento">
+              Ir para encerramento
+            </a>
+          </li>
+        </ol>
+      </Section>
 
       <Section
         description="Resumo dos registros reais desta cliente. Cada cartão abre a área correspondente do acompanhamento."
@@ -281,6 +414,7 @@ export default async function AdminClienteDetailPage({
 
       <Section
         description="Informações atuais de contato, separadas do acesso à conta e da Anamnese."
+        id="cadastro-atual"
         title="Cadastro atual"
       >
         <AdminClientRegistrationEditForm
@@ -365,6 +499,7 @@ export default async function AdminClienteDetailPage({
 
       <Section
         description="Use esta ação somente quando o acompanhamento atual precisar ser encerrado. O histórico da cliente é preservado."
+        id="encerrar-acompanhamento"
         title="Encerrar acompanhamento"
       >
         <div className={styles.assignmentPanel}>
