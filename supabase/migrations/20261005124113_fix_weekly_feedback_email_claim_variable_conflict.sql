@@ -14,7 +14,7 @@ returns table (
 language plpgsql
 security invoker
 set search_path = pg_catalog
-as $
+as $$
 #variable_conflict use_column
 begin
   if p_limit < 1 or p_limit > 100 then
