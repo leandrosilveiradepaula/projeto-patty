@@ -1,7 +1,6 @@
 import { endClientAssignmentAction } from "@/app/admin/clientes/[clienteId]/actions";
 import { AdminClientRegistrationEditForm } from "@/components/admin/AdminClientRegistrationEditForm";
 import { AdminClientRecoveryLinkForm } from "@/components/admin/AdminClientRecoveryLinkForm";
-import { AdminTrainingRequestForm } from "@/components/admin/AdminTrainingRequestForm";
 import { AdminWeeklyFeedbackNotificationPreferenceForm } from "@/components/admin/AdminWeeklyFeedbackNotificationPreferenceForm";
 import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
@@ -394,7 +393,7 @@ export default async function AdminClienteDetailPage({
             </Card>
           </Link>
 
-          <a className={styles.cardLink} href="#treino">
+          <Link className={styles.cardLink} href={`/admin/clientes/${client.id}/treino`}>
             <Card className={styles.infoCard}>
               <div className={styles.cardHeader}>
                 <h3 className={styles.cardTitle}>Treino</h3>
@@ -408,7 +407,7 @@ export default async function AdminClienteDetailPage({
                   : "Nenhuma solicitação de treino registrada."}
               </p>
             </Card>
-          </a>
+          </Link>
         </div>
       </Section>
 
@@ -439,53 +438,6 @@ export default async function AdminClienteDetailPage({
             phone={registration?.phone ?? null}
           />
         </Card>
-      </Section>
-
-      <Section
-        description="Registre a solicitação quando a cliente contratar o serviço de treino."
-        id="treino"
-        title="Treino"
-      >
-        <div className={styles.trainingGrid}>
-          <Card className={styles.infoCard}>
-            <div className={styles.cardHeader}>
-              <h3 className={styles.cardTitle}>Situação atual</h3>
-              <Badge variant="neutral">
-                {trainingRequests.length > 0
-                  ? "Solicitado"
-                  : "Não solicitado"}
-              </Badge>
-            </div>
-            <p className={styles.cardDescription}>
-              {trainingRequests.length > 0
-                ? "Há solicitação de treino registrada no histórico desta cliente."
-                : "Nenhuma solicitação de treino foi registrada até o momento."}
-            </p>
-          </Card>
-          <Card className={styles.infoCard}>
-            <AdminTrainingRequestForm clientId={client.id} />
-          </Card>
-        </div>
-
-        {trainingRequests.length > 0 ? (
-          <ol className={styles.trainingHistory}>
-            {trainingRequests.map((request) => (
-              <li key={request.id}>
-                <Card variant="subtle">
-                  <p className={styles.trainingMeta}>
-                    Solicitado em {formatDateTime(request.requested_at)}
-                    {request.profiles?.display_name?.trim()
-                      ? ` · registrado por ${request.profiles.display_name.trim()}`
-                      : ""}
-                  </p>
-                  <p className={styles.cardDescription}>
-                    {request.note?.trim() || "Sem observação adicional."}
-                  </p>
-                </Card>
-              </li>
-            ))}
-          </ol>
-        ) : null}
       </Section>
 
       <Section
