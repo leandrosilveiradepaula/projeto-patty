@@ -34,6 +34,24 @@ export function ClientInviteForm() {
       ) : null}
 
       <FormField
+        description="Nome usado para identificar a cliente no painel da Patty."
+        id="client-invitation-display-name"
+        label="Nome da cliente"
+        required
+      >
+        {(fieldProps) => (
+          <TextInput
+            {...fieldProps}
+            autoComplete="name"
+            maxLength={120}
+            name="displayName"
+            required
+            type="text"
+          />
+        )}
+      </FormField>
+
+      <FormField
         description="Esse endereço será usado como email de autenticação. O email de contato da cliente continua sendo um dado cadastral separado."
         id="client-invitation-email"
         label="Email da cliente"
