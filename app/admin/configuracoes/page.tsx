@@ -1,4 +1,7 @@
-import { updateMethodConfigurationAction } from "@/app/admin/configuracoes/actions";
+import {
+  updateMethodConfigurationAction,
+  updateWeeklyFeedbackScheduleAction,
+} from "@/app/admin/configuracoes/actions";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -11,6 +14,7 @@ import {
   formatConfigurationUnit,
   listEditableNumericParameters,
 } from "@/lib/configuration/editable-numeric";
+import { parseWeeklyFeedbackScheduleConfiguration } from "@/lib/configuration/weekly-feedback-schedule";
 import { listMethodConfigurationCatalogForCurrentAdmin } from "@/lib/supabase/data-access";
 import styles from "./page.module.css";
 
@@ -59,6 +63,13 @@ export default async function AdminConfiguracoesPage() {
                     active.configuration,
                   )
                 : [];
+              const weeklyFeedbackSchedule =
+                active &&
+                template.config_schema_key === "weekly_feedback_schedule_v1"
+                  ? parseWeeklyFeedbackScheduleConfiguration(
+                      active.configuration,
+                    )
+                  : null;
 
               return (
                 <Card className={styles.card} key={template.id}>
@@ -95,7 +106,76 @@ export default async function AdminConfiguracoesPage() {
                     </div>
                   </dl>
 
-                  {active && editableParameters.length > 0 ? (
+                  {active && weeklyFeedbackSchedule ? (
+                    <form
+                      action={updateWeeklyFeedbackScheduleAction.bind(
+                        null,
+                        template.id,
+                        active.id,
+                      )}
+                      className={styles.editor}
+                    >
+                      <div>
+                        <h3 className={styles.editorTitle}>Agenda do Feedback Semanal</h3>
+                        <p className={styles.editorDescription}>
+                          Salvar cria uma nova versão. O horário do lembrete não é
+                          configurado aqui porque ainda não existe regra confirmada.
+                        </p>
+                      </div>
+
+                      <div className={styles.editorFields}>
+                        <label className={styles.editorField}>
+                          <span>Dia do Feedback Semanal</span>
+                          <select
+                            className={styles.select}
+                            defaultValue={weeklyFeedbackSchedule.requestWeekday}
+                            name="requestWeekday"
+                          >
+                            <option value="1">Segunda-feira</option>
+                            <option value="2">Terça-feira</option>
+                            <option value="3">Quarta-feira</option>
+                            <option value="4">Quinta-feira</option>
+                            <option value="5">Sexta-feira</option>
+                            <option value="6">Sábado</option>
+                            <option value="7">Domingo</option>
+                          </select>
+                        </label>
+
+                        <label className={styles.editorField}>
+                          <span>Horário local</span>
+                          <TextInput
+                            defaultValue={weeklyFeedbackSchedule.requestTimeLocal}
+                            name="requestTimeLocal"
+                            required
+                            type="time"
+                          />
+                        </label>
+
+                        <label className={styles.editorField}>
+                          <span>Dia do lembrete</span>
+                          <select
+                            className={styles.select}
+                            defaultValue={weeklyFeedbackSchedule.reminderWeekday}
+                            name="reminderWeekday"
+                          >
+                            <option value="1">Segunda-feira</option>
+                            <option value="2">Terça-feira</option>
+                            <option value="3">Quarta-feira</option>
+                            <option value="4">Quinta-feira</option>
+                            <option value="5">Sexta-feira</option>
+                            <option value="6">Sábado</option>
+                            <option value="7">Domingo</option>
+                          </select>
+                        </label>
+
+                        <p className={styles.editorDescription}>
+                          Fuso atual: {weeklyFeedbackSchedule.timezone}
+                        </p>
+                      </div>
+
+                      <Button type="submit">Criar nova versão da agenda</Button>
+                    </form>
+                  ) : active && editableParameters.length > 0 ? (
                     <form
                       action={updateMethodConfigurationAction.bind(
                         null,
