@@ -11,6 +11,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import {
   getAccessibleEducationalContentForCurrentAdmin,
+  listEducationalContentAssetsForCurrentAdmin,
   listEducationalContentVersionsForCurrentAdmin,
 } from "@/lib/supabase/data-access";
 import { isUuid } from "@/lib/validation/uuid";
@@ -48,6 +49,9 @@ export default async function AdminEducationalContentDetailPage({
 
   const versions = await listEducationalContentVersionsForCurrentAdmin(content.id);
   const current = versions[0] ?? null;
+  const currentAssets = current
+    ? await listEducationalContentAssetsForCurrentAdmin(current.id)
+    : [];
 
   return (
     <>
@@ -167,6 +171,63 @@ export default async function AdminEducationalContentDetailPage({
               Não há liberação automática.
             </p>
           </Card>
+        )}
+      </Section>
+
+      <Section
+        description="Metadados técnicos dos arquivos vinculados à versão atual. O binário continua privado no provedor de armazenamento."
+        title="Assets da versão atual"
+      >
+        {!current ? (
+          <EmptyState
+            description="Crie uma versão antes de registrar assets."
+            title="Sem versão atual"
+          />
+        ) : currentAssets.length === 0 ? (
+          <Card>
+            <div className={styles.header}>
+              <div>
+                <h2 className={styles.title}>Nenhum asset registrado</h2>
+                <p className={styles.description}>
+                  Esta versão ainda não possui arquivo binário associado no
+                  Supabase. Isso não publica nem libera nada automaticamente.
+                </p>
+              </div>
+              <Badge variant="warning">Sem asset</Badge>
+            </div>
+            <p className={styles.description}>
+              Para conteúdos que dependem de mídia, o próximo passo técnico é
+              concluir a cópia privada, verificar integridade e registrar o asset
+              enquanto a versão ainda estiver em rascunho.
+            </p>
+          </Card>
+        ) : (
+          <ol className={styles.assetList}>
+            {currentAssets.map((asset) => (
+              <li key={asset.id}>
+                <Card variant="subtle">
+                  <div className={styles.header}>
+                    <div>
+                      <strong>{asset.asset_key}</strong>
+                      <p className={styles.description}>
+                        {asset.content_type} · {asset.byte_size.toLocaleString("pt-BR")} bytes
+                      </p>
+                      <p className={styles.mono}>
+                        Provider: {asset.storage_provider}
+                      </p>
+                      <p className={styles.mono}>
+                        Path: {asset.storage_path}
+                      </p>
+                      <p className={styles.mono}>
+                        SHA-256: {asset.sha256_hex}
+                      </p>
+                    </div>
+                    <Badge variant="positive">Registrado</Badge>
+                  </div>
+                </Card>
+              </li>
+            ))}
+          </ol>
         )}
       </Section>
 
