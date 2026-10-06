@@ -59,14 +59,21 @@ export async function addAnamnesisClarificationRequest(
 }
 
 
+export type AnamnesisClarificationResolutionFormState = {
+  message: string | null;
+  success: boolean;
+};
+
 export async function resolveAnamnesisClarificationRequest(
   submissionId: string,
   requestId: string,
-) {
+  _state: AnamnesisClarificationResolutionFormState,
+  _formData: FormData,
+): Promise<AnamnesisClarificationResolutionFormState> {
   const context = await requireRole("admin");
 
   if (!isUuid(submissionId) || !isUuid(requestId)) {
-    throw new Error("Identificadores de esclarecimento invalidos");
+    return { message: "Identificadores de esclarecimento inválidos.", success: false };
   }
 
   const [submission, request] = await Promise.all([
@@ -80,14 +87,23 @@ export async function resolveAnamnesisClarificationRequest(
     !request ||
     request.submission_id !== submission.id
   ) {
-    throw new Error("Pedido de esclarecimento nao disponivel");
+    return { message: "Pedido de esclarecimento não disponível.", success: false };
   }
 
-  await createAccessibleAnamnesisClarificationResolution({
-    clarificationRequestId: request.id,
-    resolvedByProfileId: context.profileId,
-  });
+  try {
+    await createAccessibleAnamnesisClarificationResolution({
+      clarificationRequestId: request.id,
+      resolvedByProfileId: context.profileId,
+    });
+  } catch {
+    return {
+      message: "Não foi possível marcar o pedido como resolvido. Atualize a página e tente novamente.",
+      success: false,
+    };
+  }
 
   revalidatePath("/admin/pendencias");
   revalidatePath("/admin/anamneses/" + submission.id + "/esclarecimentos");
+
+  return { message: "Pedido marcado como resolvido.", success: true };
 }
