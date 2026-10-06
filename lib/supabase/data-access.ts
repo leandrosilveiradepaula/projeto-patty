@@ -1020,6 +1020,29 @@ export async function listEducationalContentAssetsForCurrentClient(
   return data;
 }
 
+export async function listEducationalContentAssetsForCurrentClientVersions(
+  versionIds: string[],
+) {
+  if (versionIds.length === 0) return [];
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("educational_content_assets")
+    .select(
+      "id, educational_content_version_id, asset_key, content_type, byte_size",
+    )
+    .in("educational_content_version_id", versionIds)
+    .order("educational_content_version_id", { ascending: true })
+    .order("asset_key", { ascending: true })
+    .order("id", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
 
 
 export async function createAccessibleClientContentRelease(
