@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/Badge";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import { getOperationalPendingItemsForCurrentAdmin } from "@/lib/operations/pending-data";
+import { groupOperationalPendingItems } from "@/lib/operations/pending";
 import {
   getCurrentUserProfile,
   listAccessibleClientAssessments,
@@ -35,7 +36,8 @@ export default async function AdminPage() {
   const assignedCount = assignments.length;
   const assessmentCount = assessments.length;
   const protocolCount = protocols.length;
-  const pendingCount = pendingItems.length;
+  const groupedPendingItems = groupOperationalPendingItems(pendingItems);
+  const pattyPendingCount = groupedPendingItems.patty.length;
   const aiCount = nonterminalAiExecutions.length;
 
   return (
@@ -71,14 +73,14 @@ export default async function AdminPage() {
             compact
             action={
               <Link className={styles.metricLink} href="/admin/pendencias">
-                Ver pendências
+                Abrir fila
               </Link>
             }
-            label="Pendências"
+            label="Ação da Patty"
             status={
-              pendingCount > 0 ? <Badge variant="warning">Revisar</Badge> : null
+              pattyPendingCount > 0 ? <Badge variant="warning">Revisar</Badge> : null
             }
-            value={String(pendingCount)}
+            value={String(pattyPendingCount)}
           />
           <AdminMetricCard
             compact
