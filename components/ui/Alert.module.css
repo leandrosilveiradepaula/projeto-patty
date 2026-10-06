@@ -86,3 +86,15 @@
     justify-content: flex-start;
   }
 }
+
+.action > a {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+}
+
+.action > a:focus-visible {
+  border-radius: var(--radius-medium);
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
+}
