@@ -60,7 +60,7 @@ function formatAssessmentDate(value: string) {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
-    timeZone: "UTC",
+    timeZone: "America/Sao_Paulo",
   }).format(new Date(value));
 }
 
@@ -70,7 +70,7 @@ function formatRecordDateTime(value: string) {
     hour: "2-digit",
     minute: "2-digit",
     month: "2-digit",
-    timeZone: "UTC",
+    timeZone: "America/Sao_Paulo",
     year: "numeric",
   }).format(new Date(value));
 }
