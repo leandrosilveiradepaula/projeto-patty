@@ -130,7 +130,10 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
         secondary="Revisão, aprovação e publicação"
         status={<Badge variant="neutral">{versions.length} versão(ões)</Badge>}
       />
-      <ClientWorkspaceNav clientId={protocol.client_id} />
+      <ClientWorkspaceNav
+        activeArea="protocolos"
+        clientId={protocol.client_id}
+      />
       <Section
         description="A versão mais recente aparece primeiro. Cada versão mantém seus fatos, estrutura alimentar e próxima ação manual."
         title="Histórico de versões"
