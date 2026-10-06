@@ -193,6 +193,12 @@
   text-decoration: underline;
 }
 
+.journeyLink:focus-visible {
+  border-radius: var(--radius-medium);
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
 
 .nextAction {
   display: flex;
