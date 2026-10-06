@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
-import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
+import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
 import { Section } from "@/components/ui/Section";
 import { loadSupportedLiquidTaxonomy } from "@/lib/method/liquid-taxonomy-loader";
 import {
@@ -63,9 +63,9 @@ export default async function AdminClientCheckinsPage({ params }: PageProps) {
 
   return (
     <>
-      <ClientSummaryHeader
-        meta="Cliente atribuído"
-        name={client.profiles?.display_name?.trim() || "Cliente sem nome informado"}
+      <ClientWorkspaceHeader
+        meta="Acompanhamento ativo"
+        displayName={client.profiles?.display_name}
         secondary="Check-ins de acompanhamento"
         status={<Badge variant="neutral">Acompanhamento ativo</Badge>}
       />
