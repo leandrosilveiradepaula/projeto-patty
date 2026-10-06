@@ -1,0 +1,44 @@
+.subnav {
+  display: flex;
+  gap: var(--space-2);
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-snap-type: inline proximity;
+  scrollbar-width: thin;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: var(--space-3);
+}
+
+.link,
+.activeLink {
+  display: inline-flex;
+  flex: 0 0 auto;
+  min-height: 44px;
+  align-items: center;
+  border-radius: var(--radius-full);
+  padding: var(--space-2) var(--space-4);
+  color: var(--color-text-secondary);
+  font-family: var(--font-family-heading);
+  font-size: var(--text-label-medium-size);
+  font-weight: var(--text-label-medium-weight);
+  scroll-snap-align: start;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.link:hover {
+  background: var(--color-surface-low);
+  color: var(--color-text-primary);
+}
+
+.activeLink {
+  background: var(--color-surface-low);
+  color: var(--color-brand-strong);
+}
+
+.link:focus-visible,
+.activeLink:focus-visible {
+  outline: 3px solid var(--color-brand);
+  outline-offset: 3px;
+}
