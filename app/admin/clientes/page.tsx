@@ -78,7 +78,7 @@ export default async function AdminClientesPage({
           </Link>
         }
         description="Encontre rapidamente uma cliente pelo nome."
-        title="Clientes"
+        title="Em acompanhamento"
       >
         <form action="/admin/clientes" className={styles.searchForm} method="get">
           <label className={styles.searchLabel} htmlFor="client-search">
