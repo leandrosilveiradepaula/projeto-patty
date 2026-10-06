@@ -1,4 +1,7 @@
 .backLink {
+  align-items: center;
+  min-height: 44px;
+  display: inline-flex;
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
   text-decoration: none;
@@ -64,4 +67,10 @@
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.backLink:focus-visible {
+  border-radius: var(--radius-medium);
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
 }
