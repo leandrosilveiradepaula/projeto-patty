@@ -20,7 +20,10 @@ import {
   loadSupportedAssessmentKindOptions,
   resolveSupportedAssessmentKindOption,
 } from "@/lib/evaluations/assessment-configuration-loader";
-import { buildConfigurableAssessmentReadiness } from "@/lib/evaluations/assessment-definition";
+import {
+  buildConfigurableAssessmentReadiness,
+  normalizeConfiguredAssessmentKey,
+} from "@/lib/evaluations/assessment-definition";
 import { listAccessibleAssessmentMeasurementCorrections } from "@/lib/evaluations/measurement-correction-store";
 import { applyAssessmentMeasurementCorrections } from "@/lib/evaluations/measurement-corrections";
 import {
@@ -193,6 +196,21 @@ export default async function AdminAvaliacaoDetailPage({
         },
       )
     : null;
+  const recordedMeasurementKeys = new Set(
+    measurements.map((measurement) =>
+      normalizeConfiguredAssessmentKey(measurement.measurement_key),
+    ),
+  );
+  const measurementOptions =
+    assessmentDefinition?.configuration.requiredMeasurements.map(
+      (requirement) => ({
+        key: requirement.key,
+        label: requirement.label,
+        recorded: requirement.aliases.some((alias) =>
+          recordedMeasurementKeys.has(alias),
+        ),
+      }),
+    ) ?? [];
 
   return (
     <>
@@ -265,11 +283,14 @@ export default async function AdminAvaliacaoDetailPage({
       </Section>
       {isDraft ? (
         <Section
-          description="Cadastre ou atualize uma medida no rascunho. O catálogo de chaves e unidades continua aberto; por isso o sistema não impõe nomes ou unidades não confirmados."
+          description="Cadastre ou atualize as medidas previstas na definição ativa desta avaliação. O seletor evita diferenças de digitação que atrapalhariam histórico e comparação."
           title="Adicionar ou atualizar medida"
         >
           <Card>
-            <AssessmentMeasurementForm assessmentId={assessment.id} />
+            <AssessmentMeasurementForm
+              assessmentId={assessment.id}
+              measurementOptions={measurementOptions}
+            />
           </Card>
         </Section>
       ) : null}
