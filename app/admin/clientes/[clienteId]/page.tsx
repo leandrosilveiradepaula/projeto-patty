@@ -13,6 +13,7 @@ import {
   getAccessibleClient,
   getAccessibleClientRegistration,
   getAccessibleWeeklyFeedbackNotificationPreference,
+  listAccessibleAnamnesisReviews,
   listAccessibleAnamnesisSubmissions,
   listAccessibleAssessmentsForClient,
   listAccessibleClientActivityCheckinEvents,
@@ -104,6 +105,9 @@ export default async function AdminClienteDetailPage({
 
   const displayName = client.profiles?.display_name?.trim();
   const latestAnamnesis = anamneses[0] ?? null;
+  const latestAnamnesisReviews = latestAnamnesis?.submitted_at
+    ? await listAccessibleAnamnesisReviews(latestAnamnesis.id)
+    : [];
   const latestAssessment = assessments[0] ?? null;
   const latestProtocol = protocols[0] ?? null;
   const currentHydrationTarget = hydrationTargets[0] ?? null;
@@ -137,17 +141,26 @@ export default async function AdminClienteDetailPage({
           label: "Ver status da Anamnese",
           title: "Anamnese",
         }
-      : !hasFinalizedAssessment
+      : latestAnamnesisReviews.length === 0
         ? {
             description:
-              latestAssessment
-                ? "Existe uma avaliação em rascunho. Conclua a coleta antes de seguir."
-                : "Registre a primeira avaliação da cliente.",
+              "A Anamnese foi enviada pela cliente e ainda precisa de revisão profissional antes de avançar no atendimento.",
             eyebrow: "Ação da Patty",
-            href: `/admin/clientes/${client.id}/avaliacoes`,
-            label: "Abrir avaliações",
-            title: "Avaliação",
+            href: `/admin/anamneses/${latestAnamnesis.id}/revisao`,
+            label: "Revisar Anamnese",
+            title: "Revisão da Anamnese",
           }
+        : !hasFinalizedAssessment
+          ? {
+              description:
+                latestAssessment
+                  ? "Existe uma avaliação em rascunho. Conclua a coleta antes de seguir."
+                  : "Registre a primeira avaliação da cliente.",
+              eyebrow: "Ação da Patty",
+              href: `/admin/clientes/${client.id}/avaliacoes`,
+              label: "Abrir avaliações",
+              title: "Avaliação",
+            }
         : !hasPublishedProtocol
           ? {
               description:
