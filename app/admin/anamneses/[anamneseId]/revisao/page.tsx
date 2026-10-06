@@ -1,14 +1,13 @@
 import { AdminAnamnesisReviewForm } from "@/components/admin/AdminAnamnesisReviewForm";
+import { AdminAnamnesisWorkspaceHeader } from "@/components/admin/AdminAnamnesisWorkspaceHeader";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import {
   getAccessibleAnamnesisSubmission,
   listAccessibleAnamnesisReviews,
 } from "@/lib/supabase/data-access";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import styles from "./page.module.css";
 
@@ -24,7 +23,7 @@ function formatDateTime(value: string) {
     hour: "2-digit",
     minute: "2-digit",
     month: "2-digit",
-    timeZone: "UTC",
+    timeZone: "America/Sao_Paulo",
     year: "numeric",
   }).format(new Date(value));
 }
@@ -44,22 +43,12 @@ export default async function AnamnesisReviewPage({
 
   return (
     <>
-      <PageHeader
-        actions={
-          <Link
-            className={styles.backLink}
-            href={`/admin/anamneses/${submission.id}`}
-          >
-            Voltar à Anamnese
-          </Link>
-        }
-        description={
-          displayName
-            ? `Histórico interno de revisão da Anamnese de ${displayName}.`
-            : "Histórico interno de revisão da Anamnese."
-        }
-        eyebrow="Uso interno"
-        title="Revisões da Anamnese"
+      <AdminAnamnesisWorkspaceHeader
+        activeSection="revisoes"
+        clientId={submission.client_id}
+        displayName={displayName}
+        submissionId={submission.id}
+        submittedAt={submission.submitted_at}
       />
       <p className={styles.notice}>
         Estas notas são registros profissionais append-only. Não alteram as
