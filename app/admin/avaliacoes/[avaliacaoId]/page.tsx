@@ -15,6 +15,7 @@ import { EvaluationPhotoCollection } from "@/components/admin/EvaluationPhotoCol
 import { EvaluationProfessionalFollowUpForm } from "@/components/admin/EvaluationProfessionalFollowUpForm";
 import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
+import { PageSectionNav } from "@/components/admin/PageSectionNav";
 import {
   loadAssessmentDefinition,
   loadSupportedAssessmentKindOptions,
@@ -238,9 +239,26 @@ export default async function AdminAvaliacaoDetailPage({
         activeArea="avaliacoes"
         clientId={assessment.client_id}
       />
+      <PageSectionNav
+        items={[
+          ...(isDraft
+            ? [{ href: "#coleta" as const, label: "Coleta" }]
+            : []),
+          { href: "#medidas" as const, label: "Medidas" },
+          { href: "#comparacao" as const, label: "Comparação" },
+          { href: "#fotos" as const, label: "Fotos" },
+          ...(isDraft
+            ? [{ href: "#finalizar" as const, label: "Finalizar" }]
+            : []),
+          { href: "#acompanhamento" as const, label: "Acompanhamento" },
+          { href: "#historico-profissional" as const, label: "Histórico profissional" },
+        ]}
+        label="Ir para"
+      />
       {isDraft ? (
         <Section
           description="Data, tipo, medidas e vínculos de foto podem ser ajustados enquanto esta avaliação estiver em rascunho."
+          id="coleta"
           title="Editar rascunho"
         >
           <Card>
@@ -296,6 +314,7 @@ export default async function AdminAvaliacaoDetailPage({
       ) : null}
       <Section
         description="Chaves, valores e unidades exatamente como foram registrados."
+        id="medidas"
         title="Medidas"
       >
         {measurements.length > 0 ? (
@@ -376,6 +395,7 @@ export default async function AdminAvaliacaoDetailPage({
       ) : null}
       <Section
         description="Comparação factual dos mesmos measurement_key entre a avaliação atual e a imediatamente anterior. Não calcula tendência, sucesso, estagnação ou recomendação."
+        id="comparacao"
         title="Comparação com avaliação anterior"
       >
         {previousAssessment && factualComparison.length > 0 ? (
@@ -408,6 +428,7 @@ export default async function AdminAvaliacaoDetailPage({
       ) : null}
       <Section
         description="Fotos privadas vinculadas diretamente a esta avaliação, carregadas somente após autorização administrativa."
+        id="fotos"
         title="Fotos"
       >
         {photoFiles.length > 0 ? (
@@ -437,6 +458,7 @@ export default async function AdminAvaliacaoDetailPage({
       {isDraft ? (
         <Section
           description="Finalizar congela data, tipo, medidas e vínculos de foto. A Básica exige peso, cintura, abdômen e quadril; a Completa exige o catálogo corporal confirmado e pelo menos uma foto."
+          id="finalizar"
           title="Finalizar avaliação"
         >
           <Card>
@@ -449,6 +471,7 @@ export default async function AdminAvaliacaoDetailPage({
       ) : null}
       <Section
         description="Decisões profissionais são registradas somente depois que a coleta da avaliação foi finalizada."
+        id="acompanhamento"
         title="Registrar acompanhamento"
       >
         {isDraft ? (
@@ -466,6 +489,7 @@ export default async function AdminAvaliacaoDetailPage({
       </Section>
       <Section
         description="Histórico factual de acompanhamento profissional associado a esta avaliação. Registrar uma decisão não executa mudança automática de protocolo ou fase."
+        id="historico-profissional"
         title="Adesão e decisão profissional"
       >
         {followUps.length > 0 ? (
