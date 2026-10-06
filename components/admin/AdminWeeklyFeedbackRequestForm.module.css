@@ -1,0 +1,13 @@
+.form {
+  display: grid;
+  gap: var(--space-4);
+  max-width: 720px;
+}
+
+.field {
+  display: grid;
+  gap: var(--space-2);
+  color: var(--color-text-primary);
+  font-size: var(--text-label-medium-size);
+  font-weight: var(--text-label-medium-weight);
+}
