@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 
 import {
   type ClientAnamnesisDraftAnswerFormState,
@@ -40,42 +40,56 @@ export function ClientAnamnesisDraftSingleChoiceAnswerForm({
     questionId,
   );
   const [state, formAction, isPending] = useActionState(action, initialState);
+  const [selectedValue, setSelectedValue] = useState(initialValue);
   const formRef = useRef<HTMLFormElement>(null);
   const lastSavedValueRef = useRef(initialValue);
   const pendingValueRef = useRef<string | null>(null);
+  const failedValueRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!state.success || pendingValueRef.current === null) {
+    if (pendingValueRef.current === null) {
       return;
     }
 
-    lastSavedValueRef.current = pendingValueRef.current;
-    pendingValueRef.current = null;
+    if (state.success) {
+      lastSavedValueRef.current = pendingValueRef.current;
+      failedValueRef.current = null;
+      pendingValueRef.current = null;
 
-    if (state.success && reloadPageOnSuccess) {
-      window.location.assign(`/cliente/anamnese/${submissionId}`);
+      if (state.success && reloadPageOnSuccess) {
+        window.location.assign(`/cliente/anamnese/${submissionId}`);
+      }
+      return;
+    }
+
+    if (state.message) {
+      failedValueRef.current = pendingValueRef.current;
+      pendingValueRef.current = null;
     }
   }, [reloadPageOnSuccess, state, submissionId]);
 
-  function saveValue(value: string) {
-    if (isPending || value === lastSavedValueRef.current) {
+  useEffect(() => {
+    if (
+      isPending ||
+      pendingValueRef.current !== null ||
+      selectedValue === null ||
+      selectedValue === lastSavedValueRef.current ||
+      selectedValue === failedValueRef.current
+    ) {
       return;
     }
 
-    pendingValueRef.current = value;
+    pendingValueRef.current = selectedValue;
     formRef.current?.requestSubmit();
-  }
+  }, [isPending, selectedValue, state]);
 
   function retrySelectedValue() {
-    const selected = formRef.current
-      ? new FormData(formRef.current).get("answerValue")
-      : null;
-
-    if (typeof selected !== "string") {
+    if (selectedValue === null || isPending) {
       return;
     }
 
-    pendingValueRef.current = selected;
+    failedValueRef.current = null;
+    pendingValueRef.current = selectedValue;
     formRef.current?.requestSubmit();
   }
 
@@ -116,12 +130,12 @@ export function ClientAnamnesisDraftSingleChoiceAnswerForm({
             return (
               <label className={styles.option} htmlFor={optionId} key={option}>
                 <input
-                  defaultChecked={initialValue === option}
+                  checked={selectedValue === option}
                   id={optionId}
                   name="answerValue"
                   onChange={(event) => {
                     if (event.currentTarget.checked) {
-                      saveValue(event.currentTarget.value);
+                      setSelectedValue(event.currentTarget.value);
                     }
                   }}
                   type="radio"
