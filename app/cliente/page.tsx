@@ -77,6 +77,49 @@ export default async function ClientePage() {
       event.delivery_state === "delivered" &&
       pendingWeeklyFeedbackIds.has(event.weekly_feedback_id),
   );
+  const primaryAction = currentAnamnesisDraft
+    ? {
+        badge: "Rascunho",
+        badgeVariant: "warning" as const,
+        description: "Há respostas salvas que ainda não foram enviadas.",
+        href: `/cliente/anamnese/${currentAnamnesisDraft.id}`,
+        label: "Continuar Anamnese",
+      }
+    : !hasSubmittedAnamnesis
+      ? {
+          badge: "Começar",
+          badgeVariant: "neutral" as const,
+          description:
+            "Acesse a Anamnese disponível e comece seu preenchimento no seu ritmo.",
+          href: "/cliente/anamnese",
+          label: "Preencher Anamnese",
+        }
+      : pendingWeeklyFeedbackIds.size > 0
+        ? {
+            badge: `${pendingWeeklyFeedbackIds.size} pendente(s)`,
+            badgeVariant: "warning" as const,
+            description:
+              "Continue um rascunho ou envie o Feedback Semanal solicitado pela Patty.",
+            href: "/cliente/feedback-semanal",
+            label: "Responder Feedback Semanal",
+          }
+        : protocols.length > 0
+          ? {
+              badge: "Publicado",
+              badgeVariant: "positive" as const,
+              description:
+                "Consulte a versão mais recente do protocolo já liberado pela Patty.",
+              href: "/cliente/protocolo",
+              label: "Consultar protocolo",
+            }
+          : {
+              badge: "Hoje",
+              badgeVariant: "neutral" as const,
+              description:
+                "Registre seus líquidos e informe sua atividade física quando quiser atualizar seu dia.",
+              href: "/cliente/checkins",
+              label: "Fazer check-in do dia",
+            };
 
   const areas = [
     {
@@ -173,84 +216,51 @@ export default async function ClientePage() {
         title="Área da cliente"
       />
       <Section
-        description="Atalhos para o que normalmente merece atenção primeiro. O sistema não decide condutas nem classifica adesão."
-        title="Próximos passos"
+        description="Uma ação principal para você continuar sem precisar procurar o próximo passo."
+        title="O que fazer agora"
       >
-        <div className={styles.nextActions}>
-          {pendingWeeklyFeedbackIds.size > 0 ? (
-            <Link className={styles.nextActionLink} href="/cliente/feedback-semanal">
-              <Card className={styles.nextActionCard}>
-                <div className={styles.cardHeader}>
-                  <h2 className={styles.cardTitle}>Responder Feedback Semanal</h2>
-                  <Badge variant="warning">
-                    {pendingWeeklyFeedbackIds.size} pendente(s)
-                  </Badge>
-                </div>
+        <Link className={styles.primaryActionLink} href={primaryAction.href}>
+          <Card className={styles.primaryActionCard}>
+            <div className={styles.primaryActionContent}>
+              <div>
+                <p className={styles.primaryActionEyebrow}>Próxima ação</p>
+                <h2 className={styles.primaryActionTitle}>
+                  {primaryAction.label}
+                </h2>
                 <p className={styles.cardDescription}>
-                  Continue um rascunho ou envie o feedback solicitado pela Patty.
+                  {primaryAction.description}
                 </p>
-              </Card>
-            </Link>
-          ) : null}
-
-          {currentAnamnesisDraft ? (
-            <Link
-              className={styles.nextActionLink}
-              href={`/cliente/anamnese/${currentAnamnesisDraft.id}`}
-            >
-              <Card className={styles.nextActionCard}>
-                <div className={styles.cardHeader}>
-                  <h2 className={styles.cardTitle}>Continuar Anamnese</h2>
-                  <Badge variant="warning">Rascunho</Badge>
-                </div>
-                <p className={styles.cardDescription}>
-                  Há respostas salvas que ainda não foram enviadas.
-                </p>
-              </Card>
-            </Link>
-          ) : !hasSubmittedAnamnesis ? (
-            <Link className={styles.nextActionLink} href="/cliente/anamnese">
-              <Card className={styles.nextActionCard}>
-                <div className={styles.cardHeader}>
-                  <h2 className={styles.cardTitle}>Preencher Anamnese</h2>
-                  <Badge variant="neutral">Começar</Badge>
-                </div>
-                <p className={styles.cardDescription}>
-                  Acesse a Anamnese disponível para iniciar seu cadastro de informações.
-                </p>
-              </Card>
-            </Link>
-          ) : null}
-
-          <Link className={styles.nextActionLink} href="/cliente/checkins">
-            <Card className={styles.nextActionCard}>
-              <div className={styles.cardHeader}>
-                <h2 className={styles.cardTitle}>Check-in do dia</h2>
-                <Badge variant="neutral">Abrir</Badge>
               </div>
-              <p className={styles.cardDescription}>
-                Registre líquidos e informe sua atividade física de hoje.
-              </p>
-            </Card>
-          </Link>
+              <Badge variant={primaryAction.badgeVariant}>
+                {primaryAction.badge}
+              </Badge>
+            </div>
+            <span className={styles.primaryActionCta}>Abrir</span>
+          </Card>
+        </Link>
 
-          {protocols.length > 0 ? (
-            <Link className={styles.nextActionLink} href="/cliente/protocolo">
-              <Card className={styles.nextActionCard}>
-                <div className={styles.cardHeader}>
-                  <h2 className={styles.cardTitle}>Consultar protocolo</h2>
-                  <Badge variant="positive">Publicado</Badge>
-                </div>
-                <p className={styles.cardDescription}>
-                  Consulte a versão mais recente já liberada pela Patty.
-                </p>
-              </Card>
+        <div className={styles.routineActions} aria-label="Acessos rápidos">
+          {primaryAction.href !== "/cliente/checkins" ? (
+            <Link className={styles.routineActionLink} href="/cliente/checkins">
+              Check-in do dia
+            </Link>
+          ) : null}
+          {primaryAction.href !== "/cliente/feedback-semanal" &&
+          pendingWeeklyFeedbackIds.size > 0 ? (
+            <Link className={styles.routineActionLink} href="/cliente/feedback-semanal">
+              Feedback Semanal ({pendingWeeklyFeedbackIds.size})
+            </Link>
+          ) : null}
+          {primaryAction.href !== "/cliente/protocolo" && protocols.length > 0 ? (
+            <Link className={styles.routineActionLink} href="/cliente/protocolo">
+              Ver protocolo
             </Link>
           ) : null}
         </div>
       </Section>
 
-      {hasDeliveredWeeklyFeedbackReminder ? (
+      {hasDeliveredWeeklyFeedbackReminder &&
+      primaryAction.href !== "/cliente/feedback-semanal" ? (
         <Alert
           action={<Link href="/cliente/feedback-semanal">Responder agora</Link>}
           title="Feedback Semanal pendente"
