@@ -49,16 +49,37 @@ export function ClientAnamnesisDraftTextAnswerForm({
 
     lastSavedValueRef.current = pendingValueRef.current;
     pendingValueRef.current = null;
-  }, [state.success]);
+  }, [state]);
 
   function saveIfChanged() {
-    if (isPending || value === lastSavedValueRef.current) {
+    if (
+      isPending ||
+      pendingValueRef.current !== null ||
+      value === lastSavedValueRef.current
+    ) {
       return;
     }
 
     pendingValueRef.current = value;
     formRef.current?.requestSubmit();
   }
+
+  useEffect(() => {
+    if (
+      isPending ||
+      pendingValueRef.current !== null ||
+      value === lastSavedValueRef.current
+    ) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      pendingValueRef.current = value;
+      formRef.current?.requestSubmit();
+    }, 900);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [isPending, state, value]);
 
   const saved = state.success && value === lastSavedValueRef.current;
 
@@ -74,7 +95,7 @@ export function ClientAnamnesisDraftTextAnswerForm({
         </Alert>
       ) : null}
       <FormField
-        description="Esta resposta é salva automaticamente quando você sai do campo. Você pode fechar o aplicativo e continuar depois."
+        description="Esta resposta é salva automaticamente após uma breve pausa ou quando você sai do campo. Antes de fechar o aplicativo, confirme a mensagem de que a resposta foi salva."
         id={`anamnesis-draft-answer-${questionId}`}
         label={label}
         required={required}
