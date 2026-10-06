@@ -144,6 +144,21 @@ A auditoria de hierarquia identificou informacoes corretas que competiam visualm
 
 Nenhum dado foi removido da persistencia, nenhuma validacao deterministica foi alterada e nenhuma regra profissional, schema ou RLS foi modificada.
 
+## Atualizacao de auditoria de interface 2026-10-06 - clareza de estados
+
+### Estado operacional e dono da proxima acao
+
+A auditoria encontrou telas em que o dado persistido estava correto, mas o texto visual exigia interpretacao adicional da Patty:
+
+- Feedback Semanal passa a exibir, enquanto aguarda a cliente, o estado factual mais recente do lembrete associado: entregue, em fila, falha, bloqueio ou ausencia de evento;
+- esclarecimentos da Anamnese distinguem "Aguardando cliente", "Acao da Patty" e "Resolvido", alinhando a tela local com a fila operacional;
+- na lista de Anamneses da cliente, um rascunho passa a ser apresentado para a Patty como "Aguardando cliente", sem alterar o estado persistido;
+- lifecycle de Protocolo passa a usar "Aguardando aprovacao", "Aguardando publicacao" e "Publicado" quando esses fatos ja determinam a proxima acao manual;
+- o codigo interno de tipo de protocolo `nutrition` passa a ser apresentado como "Nutricional" na interface;
+- a lista de Avaliacoes dentro do workspace da cliente deixa de repetir o nome da mesma cliente em cada item; a lista global continua exibindo o nome.
+
+Nenhuma prioridade clinica foi criada. Nenhum estado persistido, regra profissional, schema ou RLS foi alterado.
+
 ## Legenda de estado
 
 - **DEFINIDO**: regra ou decisao documentada.
