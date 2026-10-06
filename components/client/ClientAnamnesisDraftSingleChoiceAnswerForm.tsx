@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useRef } from "react";
 
 import {
   type ClientAnamnesisDraftAnswerFormState,
@@ -40,22 +40,54 @@ export function ClientAnamnesisDraftSingleChoiceAnswerForm({
     questionId,
   );
   const [state, formAction, isPending] = useActionState(action, initialState);
+  const formRef = useRef<HTMLFormElement>(null);
+  const lastSavedValueRef = useRef(initialValue);
+  const pendingValueRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (state.success && reloadPageOnSuccess) {
+    if (!state.success || pendingValueRef.current === null) {
+      return;
+    }
+
+    lastSavedValueRef.current = pendingValueRef.current;
+    pendingValueRef.current = null;
+
+    if (reloadPageOnSuccess) {
       window.location.assign(`/cliente/anamnese/${submissionId}`);
     }
   }, [reloadPageOnSuccess, state.success, submissionId]);
 
+  function saveValue(value: string) {
+    if (isPending || value === lastSavedValueRef.current) {
+      return;
+    }
+
+    pendingValueRef.current = value;
+    formRef.current?.requestSubmit();
+  }
+
+  function retrySelectedValue() {
+    const selected = formRef.current
+      ? new FormData(formRef.current).get("answerValue")
+      : null;
+
+    if (typeof selected !== "string") {
+      return;
+    }
+
+    pendingValueRef.current = selected;
+    formRef.current?.requestSubmit();
+  }
+
   const descriptionId = `anamnesis-draft-choice-${questionId}-description`;
 
   return (
-    <form action={formAction} className={styles.form}>
-      {state.message ? (
+    <form action={formAction} className={styles.form} ref={formRef}>
+      {state.message && !state.success ? (
         <Alert
-          live={state.success ? "polite" : "assertive"}
-          title={state.success ? "Rascunho salvo" : "Não foi possível salvar"}
-          variant={state.success ? "success" : "critical"}
+          live="assertive"
+          title="Não foi possível salvar"
+          variant="critical"
         >
           {state.message}
         </Alert>
@@ -70,9 +102,8 @@ export function ClientAnamnesisDraftSingleChoiceAnswerForm({
           ) : null}
         </legend>
         <p className={styles.description} id={descriptionId}>
-          Selecione uma opção para esta resposta. Você pode salvar e continuar o
-          restante em outro momento. Quando terminar todos os campos aplicáveis,
-          use a seção de finalização para enviar a Anamnese.
+          Ao selecionar uma opção, a resposta é salva automaticamente. Você pode
+          continuar o restante em outro momento.
         </p>
         <div
           aria-describedby={descriptionId}
@@ -88,6 +119,11 @@ export function ClientAnamnesisDraftSingleChoiceAnswerForm({
                   defaultChecked={initialValue === option}
                   id={optionId}
                   name="answerValue"
+                  onChange={(event) => {
+                    if (event.currentTarget.checked) {
+                      saveValue(event.currentTarget.value);
+                    }
+                  }}
                   type="radio"
                   value={option}
                 />
@@ -97,10 +133,24 @@ export function ClientAnamnesisDraftSingleChoiceAnswerForm({
           })}
         </div>
       </fieldset>
-      <div className={styles.actions}>
-        <Button loading={isPending} size="compact" type="submit">
-          Salvar no rascunho
-        </Button>
+      <div className={styles.statusRow}>
+        <p aria-live="polite" className={styles.saveStatus}>
+          {isPending
+            ? "Salvando..."
+            : state.success
+              ? "Salvo automaticamente."
+              : "Selecione uma opção para salvar."}
+        </p>
+        {state.message && !state.success ? (
+          <Button
+            loading={isPending}
+            onClick={retrySelectedValue}
+            size="compact"
+            type="button"
+          >
+            Tentar salvar novamente
+          </Button>
+        ) : null}
       </div>
     </form>
   );
