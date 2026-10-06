@@ -1,6 +1,6 @@
 begin;
 
-select plan(10);
+select plan(11);
 
 select has_table('public', 'exercises');
 select has_table('public', 'exercise_versions');
@@ -28,6 +28,16 @@ select throws_ok($$update public.exercise_versions set name = 'changed' where id
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '96000000-0000-0000-0000-000000000001', true);
 select is((select count(*) from public.exercise_versions), 0::bigint, 'client cannot browse exercise library');
+select ok(
+  not exists (
+    select 1
+    from pg_policies
+    where schemaname = 'public'
+      and tablename = 'exercise_versions'
+      and policyname = 'exercise_versions_select_published_authenticated'
+  ),
+  'global authenticated exercise library policy is absent'
+);
 select throws_ok($$insert into public.exercises default values$$, '42501', null, 'client cannot create exercise');
 select set_config('request.jwt.claim.sub', '96000000-0000-0000-0000-000000000002', true);
 select is((select count(*) from public.exercise_versions), 2::bigint, 'global admin manages exercise library');
