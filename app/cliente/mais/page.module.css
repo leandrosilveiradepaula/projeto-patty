@@ -35,11 +35,13 @@
 }
 
 .title {
+  margin: 0;
   font-size: var(--text-title-medium-size);
   line-height: var(--text-title-medium-line-height);
 }
 
 .description {
+  margin: 0;
   color: var(--color-text-secondary);
   font-size: var(--text-body-medium-size);
   line-height: var(--text-body-medium-line-height);
