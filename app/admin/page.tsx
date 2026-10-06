@@ -76,7 +76,7 @@ export default async function AdminPage() {
                 Abrir fila
               </Link>
             }
-            label="Ação da Patty"
+            label="Fila da Patty"
             status={
               pattyPendingCount > 0 ? <Badge variant="warning">Revisar</Badge> : null
             }
