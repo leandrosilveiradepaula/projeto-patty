@@ -96,14 +96,19 @@ export default async function AdminAnamnesisClarificationsPage({ params }: PageP
               const statusLabel = resolution
                 ? "Resolvido"
                 : requestResponses.length > 0
-                  ? "Resposta recebida"
+                  ? "Ação da Patty"
                   : "Aguardando cliente";
+              const statusVariant = resolution
+                ? "positive"
+                : requestResponses.length > 0
+                  ? "warning"
+                  : "neutral";
               return (
                 <Card className={styles.entry} key={request.id}>
                   <div className={styles.entryHeader}>
                     <h2 className={styles.entryTitle}>Pedido da Patty</h2>
                     <div className={styles.statusGroup}>
-                      <Badge variant="neutral">{statusLabel}</Badge>
+                      <Badge variant={statusVariant}>{statusLabel}</Badge>
                       <Badge variant="neutral">{formatDateTime(request.created_at)}</Badge>
                     </div>
                   </div>

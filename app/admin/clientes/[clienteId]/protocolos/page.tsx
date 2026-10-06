@@ -67,6 +67,10 @@ type AdminClientProtocolsPageProps = {
   }>;
 };
 
+function formatProtocolType(value: string) {
+  return value === "nutrition" ? "Nutricional" : value;
+}
+
 function formatCreatedAt(value: string) {
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
@@ -120,14 +124,14 @@ export default async function AdminClientProtocolsPage({
               <li className={styles.protocolItem} key={protocol.id}>
                 <div>
                   <h2 className={styles.protocolTitle}>
-                    {protocol.protocol_type}
+                    {formatProtocolType(protocol.protocol_type)}
                   </h2>
                   <p className={styles.protocolMeta}>
                     Criado em {formatCreatedAt(protocol.created_at)}
                   </p>
                 </div>
                 <Link
-                  aria-label={`Ver histórico do protocolo ${protocol.protocol_type} criado em ${formatCreatedAt(protocol.created_at)}`}
+                  aria-label={`Ver histórico do protocolo ${formatProtocolType(protocol.protocol_type)} criado em ${formatCreatedAt(protocol.created_at)}`}
                   className={styles.actionLink}
                   href={`/admin/protocolos/${protocol.id}`}
                 >

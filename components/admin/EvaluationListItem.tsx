@@ -3,7 +3,7 @@ import styles from "./EvaluationListItem.module.css";
 
 export type EvaluationListItemProps = HTMLAttributes<HTMLDivElement> & {
   action?: ReactNode;
-  clientLabel: ReactNode;
+  clientLabel?: ReactNode;
   evaluationDate: ReactNode;
   meta?: ReactNode;
   status?: ReactNode;
@@ -25,7 +25,7 @@ export function EvaluationListItem({
   return (
     <div {...props} className={classNames}>
       <div className={styles.content}>
-        <div className={styles.clientLabel}>{clientLabel}</div>
+        {clientLabel ? <div className={styles.clientLabel}>{clientLabel}</div> : null}
         <dl className={styles.details}>
           <div className={styles.detail}>
             <dt>Data</dt>

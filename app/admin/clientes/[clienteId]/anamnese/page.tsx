@@ -92,7 +92,7 @@ export default async function AdminClienteAnamnesePage({
                         </p>
                       </div>
                       <Badge variant="neutral">
-                        {submitted ? "Enviada" : "Rascunho"}
+                        {submitted ? "Enviada" : "Aguardando cliente"}
                       </Badge>
                     </div>
                     <dl className={styles.submissionDetails}>
