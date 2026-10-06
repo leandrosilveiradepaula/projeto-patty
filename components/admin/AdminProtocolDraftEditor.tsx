@@ -7,6 +7,12 @@ import {
   addProtocolMealDose,
   addProtocolMealPlanVariant,
   createProtocolMealPlan,
+  removeProtocolMeal,
+  removeProtocolMealDose,
+  removeProtocolMealPlanVariant,
+  updateProtocolMealDose,
+  updateProtocolMealLabel,
+  updateProtocolMealPlanVariantLabel,
   type ProtocolLifecycleFormState,
 } from "@/app/admin/protocolos/[protocoloId]/actions";
 import type { AdminProtocolVersionPlanData } from "@/components/admin/AdminProtocolVersionPlan";
@@ -210,6 +216,254 @@ function AddDoseForm({
   );
 }
 
+
+function UpdateVariantForm({
+  label,
+  mealPlanVersionId,
+  protocolId,
+  protocolVersionId,
+  variantId,
+}: {
+  label: string | null;
+  mealPlanVersionId: string;
+  protocolId: string;
+  protocolVersionId: string;
+  variantId: string;
+}) {
+  const action = updateProtocolMealPlanVariantLabel.bind(
+    null,
+    protocolId,
+    protocolVersionId,
+    mealPlanVersionId,
+    variantId,
+  );
+  const [state, formAction, pending] = useActionState(action, initialState);
+
+  return (
+    <form action={formAction} className={styles.inlineEdit}>
+      <ActionFeedback state={state} />
+      <FormField
+        id={`variant-edit-${variantId}`}
+        label="Nome da variação"
+        required
+      >
+        {(fieldProps) => (
+          <TextInput
+            {...fieldProps}
+            defaultValue={label ?? ""}
+            maxLength={120}
+            name="label"
+            required
+            type="text"
+          />
+        )}
+      </FormField>
+      <Button loading={pending} size="compact" type="submit" variant="secondary">
+        Salvar nome
+      </Button>
+    </form>
+  );
+}
+
+function RemoveVariantForm({
+  mealPlanVersionId,
+  protocolId,
+  protocolVersionId,
+  variantId,
+}: {
+  mealPlanVersionId: string;
+  protocolId: string;
+  protocolVersionId: string;
+  variantId: string;
+}) {
+  const action = removeProtocolMealPlanVariant.bind(
+    null,
+    protocolId,
+    protocolVersionId,
+    mealPlanVersionId,
+    variantId,
+  );
+  const [state, formAction, pending] = useActionState(action, initialState);
+
+  return (
+    <form action={formAction} className={styles.inlineAction}>
+      <ActionFeedback state={state} />
+      <Button loading={pending} size="compact" type="submit" variant="danger">
+        Remover variação vazia
+      </Button>
+    </form>
+  );
+}
+
+function UpdateMealForm({
+  label,
+  mealId,
+  mealPlanVersionId,
+  protocolId,
+  protocolVersionId,
+}: {
+  label: string | null;
+  mealId: string;
+  mealPlanVersionId: string;
+  protocolId: string;
+  protocolVersionId: string;
+}) {
+  const action = updateProtocolMealLabel.bind(
+    null,
+    protocolId,
+    protocolVersionId,
+    mealPlanVersionId,
+    mealId,
+  );
+  const [state, formAction, pending] = useActionState(action, initialState);
+
+  return (
+    <form action={formAction} className={styles.inlineEdit}>
+      <ActionFeedback state={state} />
+      <FormField id={`meal-edit-${mealId}`} label="Nome da refeição" required>
+        {(fieldProps) => (
+          <TextInput
+            {...fieldProps}
+            defaultValue={label ?? ""}
+            maxLength={120}
+            name="label"
+            required
+            type="text"
+          />
+        )}
+      </FormField>
+      <Button loading={pending} size="compact" type="submit" variant="secondary">
+        Salvar nome
+      </Button>
+    </form>
+  );
+}
+
+function RemoveMealForm({
+  mealId,
+  mealPlanVersionId,
+  protocolId,
+  protocolVersionId,
+  variantId,
+}: {
+  mealId: string;
+  mealPlanVersionId: string;
+  protocolId: string;
+  protocolVersionId: string;
+  variantId: string;
+}) {
+  const action = removeProtocolMeal.bind(
+    null,
+    protocolId,
+    protocolVersionId,
+    mealPlanVersionId,
+    variantId,
+    mealId,
+  );
+  const [state, formAction, pending] = useActionState(action, initialState);
+
+  return (
+    <form action={formAction} className={styles.inlineAction}>
+      <ActionFeedback state={state} />
+      <Button loading={pending} size="compact" type="submit" variant="danger">
+        Remover refeição vazia
+      </Button>
+    </form>
+  );
+}
+
+function DoseRow({
+  dose,
+  mealPlanVersionId,
+  protocolId,
+  protocolVersionId,
+}: {
+  dose: { doseQuantity: number; doseType: string; id: string };
+  mealPlanVersionId: string;
+  protocolId: string;
+  protocolVersionId: string;
+}) {
+  const updateAction = updateProtocolMealDose.bind(
+    null,
+    protocolId,
+    protocolVersionId,
+    mealPlanVersionId,
+    dose.id,
+  );
+  const removeAction = removeProtocolMealDose.bind(
+    null,
+    protocolId,
+    protocolVersionId,
+    mealPlanVersionId,
+    dose.id,
+  );
+  const [updateState, updateFormAction, updatePending] = useActionState(
+    updateAction,
+    initialState,
+  );
+  const [removeState, removeFormAction, removePending] = useActionState(
+    removeAction,
+    initialState,
+  );
+
+  const label =
+    dose.doseType === "protein"
+      ? "Proteína"
+      : dose.doseType === "carbohydrate"
+        ? "Carboidrato"
+        : dose.doseType === "fat"
+          ? "Gordura"
+          : dose.doseType;
+
+  return (
+    <div className={styles.doseRow}>
+      <div className={styles.doseIdentity}>
+        <strong>{label}</strong>
+      </div>
+      <form action={updateFormAction} className={styles.doseEdit}>
+        <ActionFeedback state={updateState} />
+        <FormField
+          id={`dose-edit-${dose.id}`}
+          label="Quantidade"
+          required
+        >
+          {(fieldProps) => (
+            <TextInput
+              {...fieldProps}
+              defaultValue={String(dose.doseQuantity)}
+              inputMode="decimal"
+              min="0.0001"
+              name="doseQuantity"
+              required
+              step="0.0001"
+              type="number"
+            />
+          )}
+        </FormField>
+        <Button
+          loading={updatePending}
+          size="compact"
+          type="submit"
+          variant="secondary"
+        >
+          Salvar dose
+        </Button>
+      </form>
+      <form action={removeFormAction} className={styles.inlineAction}>
+        <ActionFeedback state={removeState} />
+        <Button
+          loading={removePending}
+          size="compact"
+          type="submit"
+          variant="danger"
+        >
+          Remover
+        </Button>
+      </form>
+    </div>
+  );
+}
+
 type AdminProtocolDraftEditorProps = {
   plan: AdminProtocolVersionPlanData | null;
   protocolId: string;
@@ -260,6 +514,23 @@ export function AdminProtocolDraftEditor({
                 <span>{variant.meals.length} refeição(ões)</span>
               </div>
 
+              <UpdateVariantForm
+                label={variant.label}
+                mealPlanVersionId={plan.id}
+                protocolId={protocolId}
+                protocolVersionId={protocolVersionId}
+                variantId={variant.id}
+              />
+
+              {variant.meals.length === 0 ? (
+                <RemoveVariantForm
+                  mealPlanVersionId={plan.id}
+                  protocolId={protocolId}
+                  protocolVersionId={protocolVersionId}
+                  variantId={variant.id}
+                />
+              ) : null}
+
               <AddMealForm
                 mealPlanVersionId={plan.id}
                 protocolId={protocolId}
@@ -275,6 +546,37 @@ export function AdminProtocolDraftEditor({
                         <strong>{meal.label ?? `Refeição ${meal.position}`}</strong>
                         <span>{meal.doseAllocations.length} macro(s)</span>
                       </div>
+
+                      <UpdateMealForm
+                        label={meal.label}
+                        mealId={meal.id}
+                        mealPlanVersionId={plan.id}
+                        protocolId={protocolId}
+                        protocolVersionId={protocolVersionId}
+                      />
+
+                      {meal.doseAllocations.length === 0 ? (
+                        <RemoveMealForm
+                          mealId={meal.id}
+                          mealPlanVersionId={plan.id}
+                          protocolId={protocolId}
+                          protocolVersionId={protocolVersionId}
+                          variantId={variant.id}
+                        />
+                      ) : (
+                        <div className={styles.doseRows}>
+                          {meal.doseAllocations.map((dose) => (
+                            <DoseRow
+                              dose={dose}
+                              key={dose.id}
+                              mealPlanVersionId={plan.id}
+                              protocolId={protocolId}
+                              protocolVersionId={protocolVersionId}
+                            />
+                          ))}
+                        </div>
+                      )}
+
                       <AddDoseForm
                         mealId={meal.id}
                         mealPlanVersionId={plan.id}

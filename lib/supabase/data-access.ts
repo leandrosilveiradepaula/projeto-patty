@@ -1954,6 +1954,140 @@ export async function listAccessibleMealsForVariant(mealPlanVariantId: string) {
 }
 
 
+export async function updateAccessibleMealPlanVariantLabel(input: {
+  label: string;
+  mealPlanVersionId: string;
+  variantId: string;
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("meal_plan_variants")
+    .update({ label: input.label })
+    .eq("id", input.variantId)
+    .eq("meal_plan_version_id", input.mealPlanVersionId)
+    .select("id, meal_plan_version_id, label")
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function updateAccessibleMealLabel(input: {
+  label: string;
+  mealId: string;
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("meals")
+    .update({ label: input.label })
+    .eq("id", input.mealId)
+    .select("id, label")
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function updateAccessibleMealDoseAllocation(input: {
+  doseAllocationId: string;
+  doseQuantity: number;
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("meal_dose_allocations")
+    .update({ dose_quantity: input.doseQuantity })
+    .eq("id", input.doseAllocationId)
+    .select("id, meal_id, dose_type, dose_quantity")
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function deleteAccessibleMealDoseAllocation(doseAllocationId: string) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("meal_dose_allocations")
+    .delete()
+    .eq("id", doseAllocationId);
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function deleteAccessibleEmptyMeal(input: {
+  mealId: string;
+  variantId: string;
+}) {
+  const supabase = await createClient();
+  const { count, error: countError } = await supabase
+    .from("meal_dose_allocations")
+    .select("id", { count: "exact", head: true })
+    .eq("meal_id", input.mealId);
+
+  if (countError) {
+    throw countError;
+  }
+
+  if ((count ?? 0) > 0) {
+    return false;
+  }
+
+  const { error } = await supabase
+    .from("meals")
+    .delete()
+    .eq("id", input.mealId)
+    .eq("meal_plan_variant_id", input.variantId);
+
+  if (error) {
+    throw error;
+  }
+
+  return true;
+}
+
+export async function deleteAccessibleEmptyMealPlanVariant(input: {
+  mealPlanVersionId: string;
+  variantId: string;
+}) {
+  const supabase = await createClient();
+  const { count, error: countError } = await supabase
+    .from("meals")
+    .select("id", { count: "exact", head: true })
+    .eq("meal_plan_variant_id", input.variantId);
+
+  if (countError) {
+    throw countError;
+  }
+
+  if ((count ?? 0) > 0) {
+    return false;
+  }
+
+  const { error } = await supabase
+    .from("meal_plan_variants")
+    .delete()
+    .eq("id", input.variantId)
+    .eq("meal_plan_version_id", input.mealPlanVersionId);
+
+  if (error) {
+    throw error;
+  }
+
+  return true;
+}
+
+
 export async function listAccessibleProtocolVersionMealPlans(
   protocolVersionIds: string[],
 ): Promise<AccessibleProtocolVersionMealPlan[]> {
