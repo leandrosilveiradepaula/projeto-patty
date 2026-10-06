@@ -133,6 +133,7 @@ export default async function AdminClientProgressPage({ params }: PageProps) {
                           </td>
                           <td>
                             <Link
+                              aria-label={`Abrir avaliação de ${formatAssessmentDate(point.assessedAt)} para ${item.label}`}
                               className={styles.detailLink}
                               href={"/admin/avaliacoes/" + point.assessmentId}
                             >
