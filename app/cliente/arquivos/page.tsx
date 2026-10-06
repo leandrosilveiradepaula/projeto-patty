@@ -122,6 +122,7 @@ export default async function ClientFilesPage() {
                     </div>
                   </dl>
                   <Link
+                    aria-label={`Baixar ${file.original_filename?.trim() || "arquivo sem nome informado"}`}
                     className={styles.downloadLink}
                     href={`/cliente/arquivos/${file.id}`}
                   >

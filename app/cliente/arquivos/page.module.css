@@ -71,7 +71,10 @@
 
 
 .downloadLink {
+  display: inline-flex;
   width: fit-content;
+  min-height: 44px;
+  align-items: center;
   color: var(--color-brand);
   font-family: var(--font-family-heading);
   font-size: var(--text-label-medium-size);

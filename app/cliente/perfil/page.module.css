@@ -15,7 +15,7 @@
 .anamneseLink {
   display: inline-flex;
   width: fit-content;
-  min-height: 36px;
+  min-height: 44px;
   align-items: center;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-full);

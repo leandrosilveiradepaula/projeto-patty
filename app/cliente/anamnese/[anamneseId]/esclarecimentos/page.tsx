@@ -10,6 +10,7 @@ import {
   listAccessibleAnamnesisAnswers,
   listAccessibleAnamnesisClarificationRequests,
   listAccessibleAnamnesisClarificationResponses,
+  listAccessibleAnamnesisClarificationResolutions,
   listAccessibleAnamnesisQuestions,
 } from "@/lib/supabase/data-access";
 import Link from "next/link";
@@ -22,7 +23,7 @@ function formatDateTime(value: string) {
   return new Intl.DateTimeFormat("pt-BR", {
     dateStyle: "short",
     timeStyle: "short",
-    timeZone: "UTC",
+    timeZone: "America/Sao_Paulo",
   }).format(new Date(value));
 }
 
@@ -43,7 +44,14 @@ export default async function ClientAnamnesisClarificationsPage({ params }: Page
     listAccessibleAnamnesisQuestions(submission.form_version_id),
     listAccessibleAnamnesisClarificationRequests(submission.id),
   ]);
-  const responses = await listAccessibleAnamnesisClarificationResponses(requests.map((request) => request.id));
+  const requestIds = requests.map((request) => request.id);
+  const [responses, resolutions] = await Promise.all([
+    listAccessibleAnamnesisClarificationResponses(requestIds),
+    listAccessibleAnamnesisClarificationResolutions(requestIds),
+  ]);
+  const resolvedRequestIds = new Set(
+    resolutions.map((resolution) => resolution.clarification_request_id),
+  );
   const answersById = new Map(answers.map((answer) => [answer.id, answer]));
   const questionsById = new Map(questions.map((question) => [question.id, question]));
   const responsesByRequestId = new Map<string, typeof responses>();
@@ -71,11 +79,17 @@ export default async function ClientAnamnesisClarificationsPage({ params }: Page
               const sourceAnswer = request.source_answer_id ? answersById.get(request.source_answer_id) : undefined;
               const sourceQuestion = sourceAnswer ? questionsById.get(sourceAnswer.question_id) : undefined;
               const requestResponses = responsesByRequestId.get(request.id) ?? [];
+              const resolved = resolvedRequestIds.has(request.id);
               return (
                 <Card className={styles.entry} key={request.id}>
                   <div className={styles.entryHeader}>
                     <h2 className={styles.entryTitle}>Pedido da Patty</h2>
-                    <Badge variant="neutral">{formatDateTime(request.created_at)}</Badge>
+                    <div className={styles.statusGroup}>
+                      <Badge variant={resolved ? "positive" : "warning"}>
+                        {resolved ? "Resolvido" : "Aguardando resposta"}
+                      </Badge>
+                      <Badge variant="neutral">{formatDateTime(request.created_at)}</Badge>
+                    </div>
                   </div>
                   <p className={styles.text}>{request.request_text}</p>
                   {sourceAnswer ? (
@@ -93,7 +107,16 @@ export default async function ClientAnamnesisClarificationsPage({ params }: Page
                       </div>
                     ))}
                   </div>
-                  <ClientAnamnesisClarificationResponseForm requestId={request.id} submissionId={submission.id} />
+                  {resolved ? (
+                    <p className={styles.meta}>
+                      Este pedido já foi marcado como resolvido pela Patty e não aceita novos complementos.
+                    </p>
+                  ) : (
+                    <ClientAnamnesisClarificationResponseForm
+                      requestId={request.id}
+                      submissionId={submission.id}
+                    />
+                  )}
                 </Card>
               );
             })}

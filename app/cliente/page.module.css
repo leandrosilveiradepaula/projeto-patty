@@ -14,6 +14,12 @@
   text-decoration: underline;
 }
 
+.cardLink:focus-visible {
+  border-radius: var(--radius-large);
+  outline: 3px solid var(--color-brand);
+  outline-offset: 3px;
+}
+
 .areaCard {
   display: grid;
   gap: var(--space-3);

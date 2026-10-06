@@ -27,7 +27,7 @@
 
 .navigation a {
   display: inline-flex;
-  min-height: 36px;
+  min-height: 44px;
   align-items: center;
   border-radius: var(--radius-medium);
   padding: var(--space-2) var(--space-3);

@@ -96,9 +96,9 @@ export default async function ClientCheckinsPage({
   return (
     <>
       <PageHeader
-        description="Registre seus líquidos ao longo do dia e informe se realizou atividade física. Esses registros não geram score automatico de adesao."
+        description="Registre seus líquidos ao longo do dia e informe se realizou atividade física. Esses registros não geram score automático de adesão."
         eyebrow="Cliente"
-        title="Check-ins diarios"
+        title="Check-ins diários"
       />
       {status === "liquid-recorded" ? (
         <Alert live="polite" title="Líquido registrado" variant="success">
@@ -165,7 +165,7 @@ export default async function ClientCheckinsPage({
               </p>
             ) : (
               <p className={styles.note}>
-                A Patty ainda não registrou uma meta de líquidos para voce.
+                A Patty ainda não registrou uma meta de líquidos para você.
               </p>
             )}
           </Card>
@@ -198,7 +198,7 @@ export default async function ClientCheckinsPage({
       </Section>
 
       <Section
-        description="O check-in e independente do treino prescrito. Se precisar corrigir a resposta do dia, um novo registro preserva o histórico anterior."
+        description="O check-in é independente do treino prescrito. Se precisar corrigir a resposta do dia, um novo registro preserva o histórico anterior."
         title="Atividade física"
       >
         <Card className={styles.formCard}>
