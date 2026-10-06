@@ -75,6 +75,14 @@ export function AdminAnamnesisWorkspaceHeader({
   return (
     <>
       <ClientWorkspaceHeader
+        actions={
+          <Link
+            className={styles.backLink}
+            href={`/admin/clientes/${clientId}/anamnese`}
+          >
+            Voltar ao histórico da Anamnese
+          </Link>
+        }
         meta={
           submittedAt
             ? `Enviada em ${formatDateTime(submittedAt)}`
