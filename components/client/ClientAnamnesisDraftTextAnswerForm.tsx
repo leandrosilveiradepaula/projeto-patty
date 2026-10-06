@@ -1,13 +1,12 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 
 import {
   type ClientAnamnesisDraftAnswerFormState,
   saveClientAnamnesisDraftTextAnswer,
 } from "@/app/cliente/anamnese/[anamneseId]/actions";
 import { Alert } from "@/components/ui/Alert";
-import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/FormField";
 import { Textarea } from "@/components/ui/Textarea";
 import styles from "./ClientAnamnesisDraftTextAnswerForm.module.css";
@@ -38,20 +37,44 @@ export function ClientAnamnesisDraftTextAnswerForm({
     questionId,
   );
   const [state, formAction, isPending] = useActionState(action, initialState);
+  const [value, setValue] = useState(initialValue);
+  const formRef = useRef<HTMLFormElement>(null);
+  const lastSavedValueRef = useRef(initialValue);
+  const pendingValueRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!state.success || pendingValueRef.current === null) {
+      return;
+    }
+
+    lastSavedValueRef.current = pendingValueRef.current;
+    pendingValueRef.current = null;
+  }, [state.success]);
+
+  function saveIfChanged() {
+    if (isPending || value === lastSavedValueRef.current) {
+      return;
+    }
+
+    pendingValueRef.current = value;
+    formRef.current?.requestSubmit();
+  }
+
+  const saved = state.success && value === lastSavedValueRef.current;
 
   return (
-    <form action={formAction} className={styles.form}>
-      {state.message ? (
+    <form action={formAction} className={styles.form} ref={formRef}>
+      {state.message && !state.success ? (
         <Alert
-          live={state.success ? "polite" : "assertive"}
-          title={state.success ? "Rascunho salvo" : "Não foi possível salvar"}
-          variant={state.success ? "success" : "critical"}
+          live="assertive"
+          title="Não foi possível salvar"
+          variant="critical"
         >
-          {state.message}
+          {state.message} Toque no campo e saia dele novamente para tentar salvar.
         </Alert>
       ) : null}
       <FormField
-        description="Você pode salvar esta resposta e continuar o restante em outro momento. Quando terminar todos os campos aplicáveis, use a seção de finalização para enviar a Anamnese."
+        description="Esta resposta é salva automaticamente quando você sai do campo. Você pode fechar o aplicativo e continuar depois."
         id={`anamnesis-draft-answer-${questionId}`}
         label={label}
         required={required}
@@ -59,17 +82,23 @@ export function ClientAnamnesisDraftTextAnswerForm({
         {(fieldProps) => (
           <Textarea
             {...fieldProps}
-            defaultValue={initialValue}
             name="answerValue"
+            onBlur={saveIfChanged}
+            onChange={(event) => setValue(event.target.value)}
             rows={5}
+            value={value}
           />
         )}
       </FormField>
-      <div className={styles.actions}>
-        <Button loading={isPending} size="compact" type="submit">
-          Salvar no rascunho
-        </Button>
-      </div>
+      <p aria-live="polite" className={styles.saveStatus}>
+        {isPending
+          ? "Salvando..."
+          : saved
+            ? "Salvo automaticamente."
+            : value === lastSavedValueRef.current
+              ? "Resposta salva."
+              : "A resposta será salva ao sair do campo."}
+      </p>
     </form>
   );
 }

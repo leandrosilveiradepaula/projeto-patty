@@ -1,9 +1,11 @@
 .form {
   display: grid;
-  gap: var(--space-4);
+  gap: var(--space-3);
 }
 
-.actions {
-  display: flex;
-  justify-content: flex-start;
+.saveStatus {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-body-small-size);
+  line-height: var(--text-body-small-line-height);
 }
