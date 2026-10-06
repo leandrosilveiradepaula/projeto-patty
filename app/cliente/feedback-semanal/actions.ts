@@ -68,6 +68,10 @@ export async function saveWeeklyFeedbackAction(
     redirect("/cliente/feedback-semanal?status=save-error");
   }
 
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
+  revalidatePath("/admin/clientes/" + client.id);
+  revalidatePath("/admin/clientes/" + client.id + "/feedback-semanal");
   revalidatePath("/cliente");
   revalidatePath("/cliente/feedback-semanal");
   redirect(

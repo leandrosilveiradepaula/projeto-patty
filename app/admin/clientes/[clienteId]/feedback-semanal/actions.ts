@@ -97,6 +97,8 @@ export async function createWeeklyFeedbackRequestAction(
     };
   }
 
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
   revalidatePath("/admin/clientes/" + clientId);
   revalidatePath("/admin/clientes/" + clientId + "/feedback-semanal");
   revalidatePath("/cliente");

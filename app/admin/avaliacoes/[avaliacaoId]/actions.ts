@@ -483,7 +483,9 @@ export async function finalizeAssessmentAction(
   }
 
   revalidatePath(`/admin/avaliacoes/${assessment.id}`);
+  revalidatePath(`/admin/clientes/${assessment.client_id}`);
   revalidatePath(`/admin/clientes/${assessment.client_id}/avaliacoes`);
+  revalidatePath(`/admin/clientes/${assessment.client_id}/evolucao`);
   revalidatePath(`/admin/clientes/${assessment.client_id}/checkins`);
   revalidatePath("/admin/avaliacoes");
   revalidatePath("/cliente");
@@ -568,7 +570,10 @@ export async function correctFinalizedAssessmentMeasurementAction(
   }
 
   revalidatePath("/admin/avaliacoes/" + assessment.id);
+  revalidatePath("/admin/clientes/" + assessment.client_id);
   revalidatePath("/admin/clientes/" + assessment.client_id + "/avaliacoes");
+  revalidatePath("/admin/clientes/" + assessment.client_id + "/evolucao");
+  revalidatePath("/cliente/evolucao");
 
   return {
     message: "Correção histórica registrada sem alterar o lançamento original.",

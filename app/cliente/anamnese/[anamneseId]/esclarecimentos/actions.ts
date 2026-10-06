@@ -55,6 +55,13 @@ export async function respondToAnamnesisClarification(
     return { message: "Não foi possível registrar seu esclarecimento. Tente novamente.", success: false };
   }
 
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
+  revalidatePath(`/admin/anamneses/${submission.id}`);
+  revalidatePath(`/admin/anamneses/${submission.id}/esclarecimentos`);
+  revalidatePath(`/admin/clientes/${client.id}`);
+  revalidatePath(`/admin/clientes/${client.id}/anamnese`);
+  revalidatePath("/cliente");
   revalidatePath(`/cliente/anamnese/${submission.id}/esclarecimentos`);
   return { message: "Seu esclarecimento foi registrado.", success: true };
 }
