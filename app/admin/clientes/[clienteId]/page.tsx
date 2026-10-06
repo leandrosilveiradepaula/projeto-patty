@@ -111,6 +111,64 @@ export default async function AdminClienteDetailPage({
   const currentTargetMl = currentHydrationTarget
     ? currentHydrationTarget.resolved_target_ml ?? currentHydrationTarget.target_ml
     : null;
+  const hasFinalizedAssessment = assessments.some((assessment) =>
+    Boolean(assessment.finalized_at),
+  );
+  const pendingWeeklyFeedbackCount = weeklyFeedbacks.filter(
+    (feedback) => !feedback.submitted_at,
+  ).length;
+  const nextOperationalAction = !registration
+    ? {
+        description:
+          "Complete os dados atuais de contato antes de seguir com o restante do atendimento.",
+        href: "#cadastro-atual",
+        label: "Preencher cadastro atual",
+        title: "Cadastro atual",
+      }
+    : !latestAnamnesis?.submitted_at
+      ? {
+          description:
+            latestAnamnesis
+              ? "A Anamnese está em rascunho. Acompanhe o preenchimento antes da revisão profissional."
+              : "A cliente ainda não iniciou a Anamnese.",
+          href: `/admin/clientes/${client.id}/anamnese`,
+          label: "Abrir Anamnese",
+          title: "Anamnese",
+        }
+      : !hasFinalizedAssessment
+        ? {
+            description:
+              latestAssessment
+                ? "Existe uma avaliação em rascunho. Conclua a coleta antes de seguir."
+                : "Registre a primeira avaliação da cliente.",
+            href: `/admin/clientes/${client.id}/avaliacoes`,
+            label: "Abrir avaliações",
+            title: "Avaliação",
+          }
+        : !hasPublishedProtocol
+          ? {
+              description:
+                protocols.length > 0
+                  ? "Existe protocolo em andamento, mas ainda não há uma publicação para a cliente."
+                  : "Crie e revise o primeiro protocolo antes de iniciar o acompanhamento semanal.",
+              href: `/admin/clientes/${client.id}/protocolos`,
+              label: "Abrir protocolos",
+              title: "Primeiro protocolo",
+            }
+          : pendingWeeklyFeedbackCount > 0
+            ? {
+                description: `${pendingWeeklyFeedbackCount} Feedback Semanal pendente(s) aguardando acompanhamento.`,
+                href: `/admin/clientes/${client.id}/feedback-semanal`,
+                label: "Revisar feedbacks",
+                title: "Acompanhamento semanal",
+              }
+            : {
+                description:
+                  "As etapas iniciais estão registradas. Continue o acompanhamento conforme os dados e a decisão profissional da Patty.",
+                href: `/admin/clientes/${client.id}/feedback-semanal`,
+                label: "Abrir acompanhamento",
+                title: "Acompanhamento contínuo",
+              };
 
   return (
     <>
@@ -151,6 +209,27 @@ export default async function AdminClienteDetailPage({
         </Alert>
       ) : null}
 
+      <section className={styles.nextAction} aria-labelledby="next-action-title">
+        <div>
+          <p className={styles.nextActionEyebrow}>Próxima ação operacional</p>
+          <h2 className={styles.nextActionTitle} id="next-action-title">
+            {nextOperationalAction.title}
+          </h2>
+          <p className={styles.nextActionDescription}>
+            {nextOperationalAction.description}
+          </p>
+        </div>
+        {nextOperationalAction.href.startsWith("#") ? (
+          <a className={styles.nextActionLink} href={nextOperationalAction.href}>
+            {nextOperationalAction.label}
+          </a>
+        ) : (
+          <Link className={styles.nextActionLink} href={nextOperationalAction.href}>
+            {nextOperationalAction.label}
+          </Link>
+        )}
+      </section>
+
       <Section
         description="Use esta trilha como orientação operacional do atendimento. Ela mostra fatos já registrados e atalhos para a próxima área; não decide fase, conduta ou progressão profissional automaticamente."
         title="Fluxo do atendimento"
@@ -185,9 +264,14 @@ export default async function AdminClienteDetailPage({
                 </p>
               </div>
             </div>
-            <a className={styles.journeyLink} href="#cadastro-atual">
-              {registration ? "Revisar cadastro" : "Preencher cadastro"}
-            </a>
+            <div className={styles.journeyActions}>
+              <Badge variant={registration ? "positive" : "warning"}>
+                {registration ? "Concluído" : "Pendente"}
+              </Badge>
+              <a className={styles.journeyLink} href="#cadastro-atual">
+                {registration ? "Revisar cadastro" : "Preencher cadastro"}
+              </a>
+            </div>
           </li>
 
           <li className={styles.journeyItem}>
@@ -204,9 +288,26 @@ export default async function AdminClienteDetailPage({
                 </p>
               </div>
             </div>
-            <Link className={styles.journeyLink} href={`/admin/clientes/${client.id}/anamnese`}>
-              Abrir Anamnese
-            </Link>
+            <div className={styles.journeyActions}>
+              <Badge
+                variant={
+                  latestAnamnesis?.submitted_at
+                    ? "positive"
+                    : latestAnamnesis
+                      ? "warning"
+                      : "neutral"
+                }
+              >
+                {latestAnamnesis?.submitted_at
+                  ? "Enviada"
+                  : latestAnamnesis
+                    ? "Em preenchimento"
+                    : "Não iniciada"}
+              </Badge>
+              <Link className={styles.journeyLink} href={`/admin/clientes/${client.id}/anamnese`}>
+                Abrir Anamnese
+              </Link>
+            </div>
           </li>
 
           <li className={styles.journeyItem}>
@@ -215,7 +316,7 @@ export default async function AdminClienteDetailPage({
               <div>
                 <h3 className={styles.cardTitle}>Avaliação</h3>
                 <p className={styles.cardDescription}>
-                  {assessments.some((assessment) => Boolean(assessment.finalized_at))
+                  {hasFinalizedAssessment
                     ? "Há avaliação finalizada no histórico."
                     : latestAssessment
                       ? "Existe uma avaliação em rascunho."
@@ -223,9 +324,26 @@ export default async function AdminClienteDetailPage({
                 </p>
               </div>
             </div>
-            <Link className={styles.journeyLink} href={`/admin/clientes/${client.id}/avaliacoes`}>
-              Abrir avaliações
-            </Link>
+            <div className={styles.journeyActions}>
+              <Badge
+                variant={
+                  hasFinalizedAssessment
+                    ? "positive"
+                    : latestAssessment
+                      ? "warning"
+                      : "neutral"
+                }
+              >
+                {hasFinalizedAssessment
+                  ? "Finalizada"
+                  : latestAssessment
+                    ? "Rascunho"
+                    : "Não iniciada"}
+              </Badge>
+              <Link className={styles.journeyLink} href={`/admin/clientes/${client.id}/avaliacoes`}>
+                Abrir avaliações
+              </Link>
+            </div>
           </li>
 
           <li className={styles.journeyItem}>
@@ -242,9 +360,26 @@ export default async function AdminClienteDetailPage({
                 </p>
               </div>
             </div>
-            <Link className={styles.journeyLink} href={`/admin/clientes/${client.id}/protocolos`}>
-              Abrir protocolos
-            </Link>
+            <div className={styles.journeyActions}>
+              <Badge
+                variant={
+                  hasPublishedProtocol
+                    ? "positive"
+                    : protocols.length > 0
+                      ? "warning"
+                      : "neutral"
+                }
+              >
+                {hasPublishedProtocol
+                  ? "Publicado"
+                  : protocols.length > 0
+                    ? "Em preparação"
+                    : "Não iniciado"}
+              </Badge>
+              <Link className={styles.journeyLink} href={`/admin/clientes/${client.id}/protocolos`}>
+                Abrir protocolos
+              </Link>
+            </div>
           </li>
 
           <li className={styles.journeyItem}>
@@ -259,9 +394,26 @@ export default async function AdminClienteDetailPage({
                 </p>
               </div>
             </div>
-            <Link className={styles.journeyLink} href={`/admin/clientes/${client.id}/feedback-semanal`}>
-              Abrir acompanhamento
-            </Link>
+            <div className={styles.journeyActions}>
+              <Badge
+                variant={
+                  !hasPublishedProtocol
+                    ? "neutral"
+                    : pendingWeeklyFeedbackCount > 0
+                      ? "warning"
+                      : "positive"
+                }
+              >
+                {!hasPublishedProtocol
+                  ? "Aguardando protocolo"
+                  : pendingWeeklyFeedbackCount > 0
+                    ? `${pendingWeeklyFeedbackCount} pendente(s)`
+                    : "Ativo"}
+              </Badge>
+              <Link className={styles.journeyLink} href={`/admin/clientes/${client.id}/feedback-semanal`}>
+                Abrir acompanhamento
+              </Link>
+            </div>
           </li>
 
           <li className={styles.journeyItem}>
@@ -274,9 +426,12 @@ export default async function AdminClienteDetailPage({
                 </p>
               </div>
             </div>
-            <a className={styles.journeyLink} href="#encerrar-acompanhamento">
-              Ir para encerramento
-            </a>
+            <div className={styles.journeyActions}>
+              <Badge variant="neutral">Manual</Badge>
+              <a className={styles.journeyLink} href="#encerrar-acompanhamento">
+                Ir para encerramento
+              </a>
+            </div>
           </li>
         </ol>
       </Section>
