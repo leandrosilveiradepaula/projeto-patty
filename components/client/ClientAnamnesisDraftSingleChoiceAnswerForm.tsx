@@ -55,7 +55,7 @@ export function ClientAnamnesisDraftSingleChoiceAnswerForm({
     if (state.success && reloadPageOnSuccess) {
       window.location.assign(`/cliente/anamnese/${submissionId}`);
     }
-  }, [reloadPageOnSuccess, state.success, submissionId]);
+  }, [reloadPageOnSuccess, state, submissionId]);
 
   function saveValue(value: string) {
     if (isPending || value === lastSavedValueRef.current) {
