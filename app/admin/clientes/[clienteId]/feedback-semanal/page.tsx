@@ -116,10 +116,14 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
   return (
     <>
       <ClientWorkspaceHeader
-        meta="Acompanhamento ativo"
+        meta="Solicitações, respostas e lembretes"
         displayName={displayName}
         secondary="Feedbacks semanais"
-        status={<Badge variant="neutral">Acompanhamento ativo</Badge>}
+        status={
+          <Badge variant={eligible ? "neutral" : "warning"}>
+            {eligible ? "Disponível" : "Aguardando 1º protocolo"}
+          </Badge>
+        }
       />
 
       <ClientWorkspaceNav activeArea="feedback-semanal" clientId={client.id} />
