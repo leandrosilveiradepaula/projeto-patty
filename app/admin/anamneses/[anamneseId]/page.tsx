@@ -17,6 +17,7 @@ import {
   listAccessibleClientFiles,
 } from "@/lib/supabase/data-access";
 import Link from "next/link";
+import { isUuid } from "@/lib/validation/uuid";
 import { notFound } from "next/navigation";
 import styles from "./page.module.css";
 
@@ -61,6 +62,10 @@ export default async function AdminAnamnesisDetailPage({
   params,
 }: AdminAnamnesisDetailPageProps) {
   const { anamneseId } = await params;
+
+  if (!isUuid(anamneseId)) {
+    notFound();
+  }
   const submission = await getAccessibleAnamnesisSubmission(anamneseId);
 
   if (!submission) {
