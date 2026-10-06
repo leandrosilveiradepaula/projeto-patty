@@ -42,20 +42,31 @@ export async function saveWeeklyFeedbackAction(
     throw new Error("Definição do Feedback Semanal indisponível");
   }
 
-  const answers = buildWeeklyFeedbackAnswers(formData, definition);
   const intent = formData.get("intent");
   const submit = intent === "submit";
 
-  if (submit) {
-    validateWeeklyFeedbackAnswers(answers, definition);
+  let answers;
+
+  try {
+    answers = buildWeeklyFeedbackAnswers(formData, definition);
+
+    if (submit) {
+      validateWeeklyFeedbackAnswers(answers, definition);
+    }
+  } catch {
+    redirect("/cliente/feedback-semanal?status=invalid");
   }
 
-  await updateCurrentClientWeeklyFeedback({
-    answers,
-    clientId: client.id,
-    feedbackId,
-    submit,
-  });
+  try {
+    await updateCurrentClientWeeklyFeedback({
+      answers,
+      clientId: client.id,
+      feedbackId,
+      submit,
+    });
+  } catch {
+    redirect("/cliente/feedback-semanal?status=save-error");
+  }
 
   revalidatePath("/cliente");
   revalidatePath("/cliente/feedback-semanal");
