@@ -1,4 +1,4 @@
-import { correctFinalizedAssessmentMeasurementAction } from "@/app/admin/avaliacoes/[avaliacaoId]/actions";
+import { AssessmentCorrectionForm } from "@/components/admin/AssessmentCorrectionForm";
 import {
   AssessmentDeleteMeasurementButton,
   AssessmentDraftMetadataForm,
@@ -309,40 +309,12 @@ export default async function AdminAvaliacaoDetailPage({
               ) : (
                 <details className={styles.correctionDetails}>
                   <summary>Corrigir lançamento</summary>
-                  <form
-                    action={correctFinalizedAssessmentMeasurementAction.bind(
-                      null,
-                      assessment.id,
-                      measurement.id,
-                    )}
-                    className={styles.correctionForm}
-                  >
-                    <label className={styles.correctionField}>
-                      <span>Valor corrigido</span>
-                      <input
-                        defaultValue={String(measurement.measurement_value)}
-                        inputMode="decimal"
-                        name="correctedMeasurementValue"
-                        required
-                      />
-                    </label>
-                    <label className={styles.correctionField}>
-                      <span>Unidade</span>
-                      <input
-                        defaultValue={measurement.unit}
-                        maxLength={40}
-                        name="correctedUnit"
-                        required
-                      />
-                    </label>
-                    <label className={styles.correctionField}>
-                      <span>Observação opcional</span>
-                      <input maxLength={240} name="correctionNote" />
-                    </label>
-                    <button className={styles.correctionSubmit} type="submit">
-                      Registrar correção
-                    </button>
-                  </form>
+                  <AssessmentCorrectionForm
+                    assessmentId={assessment.id}
+                    measurementId={measurement.id}
+                    measurementUnit={measurement.unit}
+                    measurementValue={measurement.measurement_value}
+                  />
                 </details>
               ),
               id: measurement.id,
