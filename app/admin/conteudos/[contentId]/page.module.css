@@ -48,6 +48,7 @@
 
 .field input {
   width: 100%;
+  min-height: 44px;
 }
 
 .history {
@@ -60,6 +61,7 @@
 
 .confirmation {
   display: flex;
+  min-height: 44px;
   gap: var(--space-2);
   align-items: flex-start;
 }
