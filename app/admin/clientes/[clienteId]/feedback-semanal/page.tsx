@@ -1,5 +1,5 @@
 import { createWeeklyFeedbackRequestAction } from "@/app/admin/clientes/[clienteId]/feedback-semanal/actions";
-import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
+import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -117,9 +117,9 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
 
   return (
     <>
-      <ClientSummaryHeader
-        meta="Cliente atribuído"
-        name={displayName || "Cliente sem nome informado"}
+      <ClientWorkspaceHeader
+        meta="Acompanhamento ativo"
+        displayName={displayName}
         secondary="Feedbacks semanais"
         status={<Badge variant="neutral">Acompanhamento ativo</Badge>}
       />
