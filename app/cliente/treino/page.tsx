@@ -53,6 +53,10 @@ export default async function ClientTrainingPage({
         <Alert live="polite" title="Solicitação enviada" variant="success">
           Sua solicitação de treino foi registrada no acompanhamento e ficará visível para a Patty.
         </Alert>
+      ) : status === "request-error" ? (
+        <Alert live="assertive" title="Não foi possível enviar" variant="critical">
+          Sua solicitação não foi registrada. Tente novamente antes de sair desta página.
+        </Alert>
       ) : null}
 
       <Section
