@@ -54,7 +54,14 @@ export async function addAnamnesisClarificationRequest(
     return { message: "Não foi possível registrar o pedido. Confirme seu acesso atual e tente novamente.", success: false };
   }
 
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
+  revalidatePath(`/admin/anamneses/${submission.id}`);
   revalidatePath(`/admin/anamneses/${submission.id}/esclarecimentos`);
+  revalidatePath(`/admin/clientes/${submission.client_id}`);
+  revalidatePath(`/admin/clientes/${submission.client_id}/anamnese`);
+  revalidatePath("/cliente");
+  revalidatePath(`/cliente/anamnese/${submission.id}/esclarecimentos`);
   return { message: "Pedido de esclarecimento registrado para a cliente.", success: true };
 }
 
@@ -102,8 +109,14 @@ export async function resolveAnamnesisClarificationRequest(
     };
   }
 
+  revalidatePath("/admin");
   revalidatePath("/admin/pendencias");
+  revalidatePath("/admin/anamneses/" + submission.id);
   revalidatePath("/admin/anamneses/" + submission.id + "/esclarecimentos");
+  revalidatePath("/admin/clientes/" + submission.client_id);
+  revalidatePath("/admin/clientes/" + submission.client_id + "/anamnese");
+  revalidatePath("/cliente");
+  revalidatePath("/cliente/anamnese/" + submission.id + "/esclarecimentos");
 
   return { message: "Pedido marcado como resolvido.", success: true };
 }
