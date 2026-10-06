@@ -5,32 +5,59 @@ import { usePathname } from "next/navigation";
 
 import styles from "./ClientWorkspaceNav.module.css";
 
+type ClientWorkspaceArea =
+  | "visao-geral"
+  | "anamnese"
+  | "avaliacoes"
+  | "evolucao"
+  | "protocolos"
+  | "arquivos"
+  | "conteudos"
+  | "checkins"
+  | "feedback-semanal"
+  | "treino";
+
 type ClientWorkspaceNavProps = {
+  activeArea?: ClientWorkspaceArea;
   clientId: string;
 };
 
-export function ClientWorkspaceNav({ clientId }: ClientWorkspaceNavProps) {
+export function ClientWorkspaceNav({
+  activeArea,
+  clientId,
+}: ClientWorkspaceNavProps) {
   const pathname = usePathname();
   const base = `/admin/clientes/${clientId}`;
-  const items = [
-    { href: base, label: "Visão geral", exact: true },
-    { href: `${base}/anamnese`, label: "Anamnese" },
-    { href: `${base}/avaliacoes`, label: "Avaliações" },
-    { href: `${base}/evolucao`, label: "Evolução" },
-    { href: `${base}/protocolos`, label: "Protocolos" },
-    { href: `${base}/arquivos`, label: "Arquivos" },
-    { href: `${base}/conteudos`, label: "Conteúdos" },
-    { href: `${base}/checkins`, label: "Check-ins" },
-    { href: `${base}/feedback-semanal`, label: "Feedback semanal" },
-    { href: `${base}/treino`, label: "Treino" },
+  const items: Array<{
+    area: ClientWorkspaceArea;
+    exact?: boolean;
+    href: string;
+    label: string;
+  }> = [
+    { area: "visao-geral", href: base, label: "Visão geral", exact: true },
+    { area: "anamnese", href: `${base}/anamnese`, label: "Anamnese" },
+    { area: "avaliacoes", href: `${base}/avaliacoes`, label: "Avaliações" },
+    { area: "evolucao", href: `${base}/evolucao`, label: "Evolução" },
+    { area: "protocolos", href: `${base}/protocolos`, label: "Protocolos" },
+    { area: "arquivos", href: `${base}/arquivos`, label: "Arquivos" },
+    { area: "conteudos", href: `${base}/conteudos`, label: "Conteúdos" },
+    { area: "checkins", href: `${base}/checkins`, label: "Check-ins" },
+    {
+      area: "feedback-semanal",
+      href: `${base}/feedback-semanal`,
+      label: "Feedback semanal",
+    },
+    { area: "treino", href: `${base}/treino`, label: "Treino" },
   ];
 
   return (
     <nav aria-label="Áreas da cliente" className={styles.nav}>
       {items.map((item) => {
-        const isActive = item.exact
-          ? pathname === item.href
-          : pathname === item.href || pathname.startsWith(`${item.href}/`);
+        const isActive = activeArea
+          ? activeArea === item.area
+          : item.exact
+            ? pathname === item.href
+            : pathname === item.href || pathname.startsWith(`${item.href}/`);
 
         return (
           <Link
