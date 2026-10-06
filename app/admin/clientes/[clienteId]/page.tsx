@@ -353,29 +353,45 @@ export default async function AdminClienteDetailPage({
               <div>
                 <h3 className={styles.cardTitle}>Anamnese</h3>
                 <p className={styles.cardDescription}>
-                  {latestAnamnesis?.submitted_at
-                    ? "Anamnese enviada e disponível para revisão."
-                    : latestAnamnesis
+                  {!latestAnamnesis?.submitted_at
+                    ? latestAnamnesis
                       ? "Existe um rascunho ainda não enviado pela cliente."
-                      : "A cliente ainda não iniciou a Anamnese."}
+                      : "A cliente ainda não iniciou a Anamnese."
+                    : latestAnamnesisReviews.length === 0
+                      ? "A Anamnese foi enviada e ainda aguarda revisão profissional."
+                      : clarificationAwaitingPatty
+                        ? "A cliente respondeu a um esclarecimento e a Patty ainda precisa revisar a resposta."
+                        : clarificationAwaitingClient
+                          ? "Existe pedido de esclarecimento aberto aguardando resposta da cliente."
+                          : "A Anamnese possui revisão registrada e não há esclarecimento aberto."}
                 </p>
               </div>
             </div>
             <div className={styles.journeyActions}>
               <Badge
                 variant={
-                  latestAnamnesis?.submitted_at
-                    ? "positive"
-                    : latestAnamnesis
+                  !latestAnamnesis?.submitted_at
+                    ? latestAnamnesis
                       ? "warning"
                       : "neutral"
+                    : latestAnamnesisReviews.length === 0 ||
+                        clarificationAwaitingPatty ||
+                        clarificationAwaitingClient
+                      ? "warning"
+                      : "positive"
                 }
               >
-                {latestAnamnesis?.submitted_at
-                  ? "Enviada"
-                  : latestAnamnesis
+                {!latestAnamnesis?.submitted_at
+                  ? latestAnamnesis
                     ? "Em preenchimento"
-                    : "Não iniciada"}
+                    : "Não iniciada"
+                  : latestAnamnesisReviews.length === 0
+                    ? "Revisão pendente"
+                    : clarificationAwaitingPatty
+                      ? "Ação da Patty"
+                      : clarificationAwaitingClient
+                        ? "Aguardando cliente"
+                        : "Revisada"}
               </Badge>
               <Link className={styles.journeyLink} href={`/admin/clientes/${client.id}/anamnese`}>
                 Abrir Anamnese
