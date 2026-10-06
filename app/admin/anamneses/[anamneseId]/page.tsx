@@ -219,7 +219,12 @@ export default async function AdminAnamnesisDetailPage({
                         {file.file_kind === "exam" ? "Exame" : "Documento"} · {formatDateTime(file.created_at)}
                       </span>
                     </div>
-                    <Link href={`/admin/arquivos/${file.id}`}>Abrir</Link>
+                    <Link
+                      aria-label={`Abrir ${file.file_kind === "exam" ? "exame" : "documento"} ${file.original_filename?.trim() || "sem nome informado"}`}
+                      href={`/admin/arquivos/${file.id}`}
+                    >
+                      Abrir
+                    </Link>
                   </li>
                 ))}
               </ul>
