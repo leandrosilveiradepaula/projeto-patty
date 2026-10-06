@@ -135,7 +135,11 @@ export default async function AdminClientFilesPage({
                     </div>
                   </dl>
                   <div className={styles.fileActions}>
-                    <Link className={styles.downloadLink} href={`/admin/arquivos/${file.id}`}>
+                    <Link
+                      aria-label={`Baixar ${file.original_filename?.trim() || "arquivo sem nome informado"}`}
+                      className={styles.downloadLink}
+                      href={`/admin/arquivos/${file.id}`}
+                    >
                       Baixar arquivo
                     </Link>
                     {!file.client_visible_at ? (

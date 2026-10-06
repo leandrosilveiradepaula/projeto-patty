@@ -86,7 +86,10 @@
 }
 
 .downloadLink {
+  display: inline-flex;
   width: fit-content;
+  min-height: 44px;
+  align-items: center;
   color: var(--color-brand-strong);
   font-size: var(--text-label-medium-size);
   font-weight: var(--text-label-medium-weight);
@@ -106,4 +109,10 @@
   gap: var(--space-3);
   align-items: start;
   justify-content: space-between;
+}
+
+.downloadLink:focus-visible {
+  border-radius: var(--radius-medium);
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
 }

@@ -1,6 +1,6 @@
 import { AdminMealDraftGuidance } from "@/components/admin/AdminMealDraftGuidance";
 import { AdminProtocolDraftEditor } from "@/components/admin/AdminProtocolDraftEditor";
-import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
+import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { AdminProtocolVersionPlan } from "@/components/admin/AdminProtocolVersionPlan";
 import { ProtocolCloneVersionAction } from "@/components/admin/ProtocolCloneVersionAction";
@@ -116,7 +116,7 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
 
   return (
     <>
-      <ClientSummaryHeader
+      <ClientWorkspaceHeader
         actions={
           <Link
             className={styles.backLink}
@@ -126,7 +126,7 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
           </Link>
         }
         meta="Protocolo nutricional"
-        name={protocol.clients?.profiles?.display_name?.trim() || "Cliente sem nome informado"}
+        displayName={protocol.clients?.profiles?.display_name}
         secondary="Revisão, aprovação e publicação"
         status={<Badge variant="neutral">{versions.length} versão(ões)</Badge>}
       />
