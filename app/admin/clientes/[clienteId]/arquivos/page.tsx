@@ -3,12 +3,11 @@ import { AdminPrivateFileUploadForm } from "@/components/admin/AdminPrivateFileU
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
-import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import { getClientForPrivateFileAdministration } from "@/lib/files/private-file-admin";
 import { listAccessibleClientFiles } from "@/lib/supabase/data-access";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import styles from "./page.module.css";
 
@@ -66,17 +65,13 @@ export default async function AdminClientFilesPage({
 
   return (
     <>
-      <PageHeader
-        actions={
-          <Link className={styles.backLink} href="/admin/arquivos">
-            Voltar a arquivos
-          </Link>
-        }
-        description="Fotos, exames e documentos privados desta cliente."
-        eyebrow="Admin"
-        title={displayName ? `Arquivos de ${displayName}` : "Arquivos privados"}
+      <ClientSummaryHeader
+        meta="Cliente atribuído"
+        name={displayName || "Cliente sem nome informado"}
+        secondary="Fotos, exames e documentos privados"
+        status={<Badge variant="neutral">{files.length} arquivo(s)</Badge>}
       />
-      <ClientWorkspaceNav clientId={client.id} />
+      <ClientWorkspaceNav activeArea="arquivos" clientId={client.id} />
       <Section
         description="Arquivos enviados pela Patty ficam ocultos para a cliente até serem liberados explicitamente."
         title="Enviar arquivo em nome da cliente"
