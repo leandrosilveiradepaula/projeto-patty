@@ -31,6 +31,7 @@ type ClienteAnamneseDetailPageProps = {
   }>;
   searchParams: Promise<{
     saved?: string;
+    submitted?: string;
   }>;
 };
 
@@ -153,6 +154,11 @@ export default async function ClienteAnamneseDetailPage({
       {query.saved === "1" ? (
         <Alert title="Rascunho salvo" variant="success">
           Resposta salva no rascunho.
+        </Alert>
+      ) : null}
+      {query.submitted === "1" ? (
+        <Alert live="polite" title="Anamnese enviada" variant="success">
+          Suas respostas foram enviadas para análise da Patty. Este registro agora está preservado como enviado e não pode mais ser editado por você.
         </Alert>
       ) : null}
       <Section
