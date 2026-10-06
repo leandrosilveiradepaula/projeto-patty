@@ -13,6 +13,8 @@ import { EvaluationMeasureComparison } from "@/components/admin/EvaluationMeasur
 import { EvaluationMeasureList } from "@/components/admin/EvaluationMeasureList";
 import { EvaluationPhotoCollection } from "@/components/admin/EvaluationPhotoCollection";
 import { EvaluationProfessionalFollowUpForm } from "@/components/admin/EvaluationProfessionalFollowUpForm";
+import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
+import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import {
   loadAssessmentDefinition,
   loadSupportedAssessmentKindOptions,
@@ -28,7 +30,6 @@ import {
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import {
   getAccessibleClientAssessment,
@@ -195,50 +196,30 @@ export default async function AdminAvaliacaoDetailPage({
 
   return (
     <>
-      <PageHeader
+      <ClientSummaryHeader
         actions={
-          <Link className={styles.backLink} href="/admin/avaliacoes">
-            Voltar ao histórico
+          <Link
+            className={styles.backLink}
+            href={`/admin/clientes/${assessment.client_id}/avaliacoes`}
+          >
+            Voltar às avaliações da cliente
           </Link>
         }
-        description="Leitura administrativa de uma avaliação acessível conforme as atribuições ativas."
-        eyebrow="Admin"
-        title="Detalhe da avaliação"
+        meta={`${formatAssessmentDate(assessment.assessed_at)} · ${
+          selectedAssessmentKind?.label ?? "Legada / não classificada"
+        }`}
+        name={displayName || "Cliente sem nome informado"}
+        secondary="Avaliação corporal"
+        status={
+          <Badge variant={isDraft ? "warning" : "positive"}>
+            {isDraft ? "Rascunho" : "Finalizada"}
+          </Badge>
+        }
       />
-      <section className={styles.summaryHeader} aria-labelledby="evaluation-summary-title">
-        <div className={styles.summaryContent}>
-          <h2 className={styles.summaryTitle} id="evaluation-summary-title">
-            {displayName || "Cliente sem nome informado"}
-          </h2>
-          <dl className={styles.summaryDetails}>
-            <div className={styles.summaryDetail}>
-              <dt>Data</dt>
-              <dd>{formatAssessmentDate(assessment.assessed_at)}</dd>
-            </div>
-            <div className={styles.summaryDetail}>
-              <dt>Tipo</dt>
-              <dd>{selectedAssessmentKind?.label ?? "Legada / não classificada"}</dd>
-            </div>
-            <div className={styles.summaryDetail}>
-              <dt>Identificador</dt>
-              <dd>{assessment.id}</dd>
-            </div>
-          </dl>
-        </div>
-        <Badge variant={isDraft ? "warning" : "neutral"}>
-          {isDraft ? "Rascunho" : "Finalizada"}
-        </Badge>
-      </section>
-      <Section
-        description="Campos factuais da avaliação disponível para consulta."
-        title="Resumo"
-      >
-        <Card className={styles.infoCard}>
-          <p className={styles.cardDescription}>
-            Registro de avaliação associado à cliente conforme a atribuição ativa.
-          </p>
-        </Card>
-      </Section>
+      <ClientWorkspaceNav
+        activeArea="avaliacoes"
+        clientId={assessment.client_id}
+      />
       {isDraft ? (
         <Section
           description="Data, tipo, medidas e vínculos de foto podem ser ajustados enquanto esta avaliação estiver em rascunho."
