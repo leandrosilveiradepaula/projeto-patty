@@ -1,10 +1,12 @@
 import { AdminMealDraftGuidance } from "@/components/admin/AdminMealDraftGuidance";
+import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
+import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { AdminProtocolVersionPlan } from "@/components/admin/AdminProtocolVersionPlan";
 import { ProtocolCloneVersionAction } from "@/components/admin/ProtocolCloneVersionAction";
 import { ProtocolVersionComparison } from "@/components/admin/ProtocolVersionComparison";
 import { ProtocolLifecycleAction } from "@/components/admin/ProtocolLifecycleAction";
+import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import {
   getAccessibleProtocol,
@@ -28,6 +30,38 @@ import { notFound } from "next/navigation";
 import styles from "./page.module.css";
 
 type AdminProtocoloDetailPageProps = { params: Promise<{ protocoloId: string }> };
+
+function formatDateTime(value: string | null | undefined) {
+  if (!value) {
+    return "Não registrado";
+  }
+
+  return new Intl.DateTimeFormat("pt-BR", {
+    dateStyle: "short",
+    timeStyle: "short",
+    timeZone: "America/Sao_Paulo",
+  }).format(new Date(value));
+}
+
+function getLifecyclePresentation(input: {
+  hasApproval: boolean;
+  hasPublication: boolean;
+  submittedForReview: boolean;
+}) {
+  if (input.hasPublication) {
+    return { label: "Publicado", variant: "positive" as const };
+  }
+
+  if (input.hasApproval) {
+    return { label: "Aprovado", variant: "positive" as const };
+  }
+
+  if (input.submittedForReview) {
+    return { label: "Em revisão", variant: "warning" as const };
+  }
+
+  return { label: "Rascunho", variant: "neutral" as const };
+}
 
 export default async function AdminProtocoloDetailPage({ params }: AdminProtocoloDetailPageProps) {
   const { protocoloId } = await params;
@@ -76,17 +110,25 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
 
   return (
     <>
-      <PageHeader actions={<Link className={styles.backLink} href="/admin/protocolos">Voltar aos protocolos</Link>} description="Consulta factual do protocolo e de seu histórico de versões." eyebrow="Admin" title="Protocolo" />
-      <section className={styles.summaryHeader} aria-labelledby="protocol-summary-title">
-        <div className={styles.summaryContent}>
-          <h2 className={styles.summaryTitle} id="protocol-summary-title">{protocol.clients?.profiles?.display_name ?? "Cliente sem nome de exibição"}</h2>
-          <dl className={styles.summaryDetails}>
-            <div className={styles.summaryDetail}><dt>Tipo</dt><dd>{protocol.protocol_type}</dd></div>
-            <div className={styles.summaryDetail}><dt>ID do protocolo</dt><dd>{protocol.id}</dd></div>
-          </dl>
-        </div>
-      </section>
-      <Section description="Fatos persistidos de cada versão, sem combinar submissão, aprovação e publicação em um status único." title="Histórico de versões">
+      <ClientSummaryHeader
+        actions={
+          <Link
+            className={styles.backLink}
+            href={`/admin/clientes/${protocol.client_id}/protocolos`}
+          >
+            Voltar aos protocolos da cliente
+          </Link>
+        }
+        meta="Protocolo nutricional"
+        name={protocol.clients?.profiles?.display_name?.trim() || "Cliente sem nome informado"}
+        secondary="Revisão, aprovação e publicação"
+        status={<Badge variant="neutral">{versions.length} versão(ões)</Badge>}
+      />
+      <ClientWorkspaceNav clientId={protocol.client_id} />
+      <Section
+        description="A versão mais recente aparece primeiro. Cada versão mantém seus fatos, estrutura alimentar e próxima ação manual."
+        title="Histórico de versões"
+      >
         {versions.length === 0 ? (
           <EmptyState description="Nenhuma versão está acessível para este protocolo." title="Sem versões registradas" />
         ) : (
@@ -106,19 +148,82 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
                 hasPublication: Boolean(publication),
                 submittedForReview: Boolean(version.submitted_for_review_at),
               });
+              const lifecyclePresentation = getLifecyclePresentation({
+                hasApproval: Boolean(approval),
+                hasPublication: Boolean(publication),
+                submittedForReview: Boolean(version.submitted_for_review_at),
+              });
 
               return (
                 <li className={styles.versionItem} key={version.id}>
-                  <h3>Versão {version.version_number}</h3>
+                  <div className={styles.versionHeader}>
+                    <div>
+                      <h3>Versão {version.version_number}</h3>
+                      <p className={styles.versionCreated}>
+                        Criada em {formatDateTime(version.created_at)}
+                      </p>
+                    </div>
+                    <Badge variant={lifecyclePresentation.variant}>
+                      {lifecyclePresentation.label}
+                    </Badge>
+                  </div>
                   <dl className={styles.versionFacts}>
-                    <div><dt>ID da versão</dt><dd>{version.id}</dd></div>
-                    <div><dt>Baseada na versão</dt><dd>{version.based_on_version_id ?? "Não registrada"}</dd></div>
-                    <div><dt>Submetida para revisão</dt><dd>{version.submitted_for_review_at ?? "Não submetido"}</dd></div>
-                    <div><dt>Aprovação</dt><dd>{approval ? approval.approved_at : "Não registrada"}</dd></div>
-                    {approval ? <><div><dt>ID da aprovação</dt><dd>{approval.id}</dd></div><div><dt>Aprovada por</dt><dd>{approval.approved_by_profile_id}</dd></div></> : null}
-                    <div><dt>Publicação</dt><dd>{publication ? publication.published_at : "Não registrada"}</dd></div>
-                    {publication ? <><div><dt>ID da publicação</dt><dd>{publication.id}</dd></div><div><dt>ID da aprovação publicada</dt><dd>{publication.approval_id}</dd></div><div><dt>Publicada por</dt><dd>{publication.published_by_profile_id}</dd></div></> : null}
+                    <div>
+                      <dt>Base</dt>
+                      <dd>
+                        {baseVersion
+                          ? `Versão ${baseVersion.version_number}`
+                          : "Versão inicial"}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Revisão</dt>
+                      <dd>
+                        {version.submitted_for_review_at
+                          ? formatDateTime(version.submitted_for_review_at)
+                          : "Ainda não submetida"}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Aprovação</dt>
+                      <dd>
+                        {approval
+                          ? formatDateTime(approval.approved_at)
+                          : "Ainda não aprovada"}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Publicação</dt>
+                      <dd>
+                        {publication
+                          ? formatDateTime(publication.published_at)
+                          : "Ainda não publicada"}
+                      </dd>
+                    </div>
                   </dl>
+                  <details className={styles.technicalDetails}>
+                    <summary>Detalhes técnicos e auditoria</summary>
+                    <dl className={styles.technicalFacts}>
+                      <div><dt>ID da versão</dt><dd>{version.id}</dd></div>
+                      <div><dt>ID do protocolo</dt><dd>{protocol.id}</dd></div>
+                      {version.based_on_version_id ? (
+                        <div><dt>ID da versão-base</dt><dd>{version.based_on_version_id}</dd></div>
+                      ) : null}
+                      {approval ? (
+                        <>
+                          <div><dt>ID da aprovação</dt><dd>{approval.id}</dd></div>
+                          <div><dt>Aprovada por</dt><dd>{approval.approved_by_profile_id}</dd></div>
+                        </>
+                      ) : null}
+                      {publication ? (
+                        <>
+                          <div><dt>ID da publicação</dt><dd>{publication.id}</dd></div>
+                          <div><dt>ID da aprovação publicada</dt><dd>{publication.approval_id}</dd></div>
+                          <div><dt>Publicada por</dt><dd>{publication.published_by_profile_id}</dd></div>
+                        </>
+                      ) : null}
+                    </dl>
+                  </details>
                   <div className={styles.versionPlan}>
                     <h4>Apoio ao rascunho alimentar</h4>
                     <p>
