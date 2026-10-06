@@ -10,19 +10,6 @@ import {
 } from "@/lib/supabase/data-access";
 import styles from "./page.module.css";
 
-function formatRecordedDate(value: string | null) {
-  if (!value) {
-    return "Não registrada";
-  }
-
-  return new Intl.DateTimeFormat("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(new Date(value));
-}
-
 export default async function ClienteConteudosPage() {
   const client = await getCurrentClient();
   const releases = client
@@ -67,18 +54,10 @@ export default async function ClienteConteudosPage() {
           <ul className={styles.contentList}>
             {releases?.map((release) => {
               const contentVersion = release.educational_content_versions;
-              const progress = release.client_content_progress[0] ?? null;
-
               if (!contentVersion) {
                 return null;
               }
 
-              const firstOpenedMeta = progress?.first_opened_at
-                ? `Primeira abertura registrada em ${formatRecordedDate(progress.first_opened_at)}.`
-                : "Nenhuma abertura registrada.";
-              const completedMeta = progress?.completed_at
-                ? `Conclusão registrada em ${formatRecordedDate(progress.completed_at)}.`
-                : "Nenhuma conclusão registrada.";
               const assets = assetsByVersion.get(contentVersion.id) ?? [];
               const primaryAsset =
                 assets.find((asset) => asset.asset_key === "primary") ?? assets[0] ?? null;
@@ -87,7 +66,7 @@ export default async function ClienteConteudosPage() {
                 <li key={release.id}>
                   <ClientContentCard
                     category={contentVersion.category_key ?? "Não informado"}
-                    meta={`Versão ${contentVersion.version_number}. ${firstOpenedMeta} ${completedMeta}`}
+                    meta={`Versão ${contentVersion.version_number}`}
                     action={
                       primaryAsset ? (
                         <a

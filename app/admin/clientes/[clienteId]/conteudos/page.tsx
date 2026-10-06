@@ -105,7 +105,7 @@ export default async function AdminClientContentPage({
         )}
       </Section>
       <Section
-        description="Conteúdos já liberados e registros de abertura ou conclusão."
+        description="Conteúdos já liberados para esta cliente."
         title="Conteúdos liberados"
       >
         {releases.length === 0 ? (
@@ -117,24 +117,15 @@ export default async function AdminClientContentPage({
           <ul className={styles.contentList}>
             {releases.map((release) => {
               const contentVersion = release.educational_content_versions;
-              const progress = release.client_content_progress[0] ?? null;
-
               if (!contentVersion) {
                 return null;
               }
-
-              const firstOpenedMeta = progress?.first_opened_at
-                ? `Primeira abertura registrada em ${formatRecordedDate(progress.first_opened_at)}.`
-                : "Nenhuma abertura registrada.";
-              const completedMeta = progress?.completed_at
-                ? `Conclusão registrada em ${formatRecordedDate(progress.completed_at)}.`
-                : "Nenhuma conclusão registrada.";
 
               return (
                 <li key={release.id}>
                   <ContentListItem
                     category={contentVersion.category_key ?? "Não informado"}
-                    meta={`Versão ${contentVersion.version_number}. Liberado em ${formatRecordedDate(release.released_at)}. ${firstOpenedMeta} ${completedMeta}`}
+                    meta={`Versão ${contentVersion.version_number}. Liberado em ${formatRecordedDate(release.released_at)}.`}
                     status={<Badge variant="neutral">Liberado</Badge>}
                     title={contentVersion.title}
                     type={contentVersion.content_type_key ?? "Não informado"}
