@@ -179,6 +179,9 @@
 }
 
 .journeyLink {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
   color: var(--color-brand-strong);
   font-family: var(--font-family-heading);
   font-size: var(--text-label-medium-size);
@@ -188,6 +191,12 @@
 
 .journeyLink:hover {
   text-decoration: underline;
+}
+
+.journeyLink:focus-visible {
+  border-radius: var(--radius-medium);
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
 }
 
 
