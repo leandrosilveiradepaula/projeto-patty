@@ -50,7 +50,7 @@ export default async function ClientCheckinsPage({
   if (!client) {
     return (
       <EmptyState
-        description="Seu cadastro de cliente ainda nao esta configurado."
+        description="Seu cadastro de cliente ainda não esta configurado."
         title="Cadastro pendente"
       />
     );
@@ -96,7 +96,7 @@ export default async function ClientCheckinsPage({
   return (
     <>
       <PageHeader
-        description="Registre seus liquidos ao longo do dia e informe se realizou atividade fisica. Esses registros nao geram score automatico de adesao."
+        description="Registre seus líquidos ao longo do dia e informe se realizou atividade física. Esses registros não geram score automatico de adesao."
         eyebrow="Cliente"
         title="Check-ins diarios"
       />
@@ -131,15 +131,15 @@ export default async function ClientCheckinsPage({
       ) : null}
 
       <Section
-        description="A meta e definida pela Patty a partir do peso usado naquele momento. Mudancas de peso nao recalculam esta meta automaticamente."
-        title="Liquidos"
+        description="Sua meta usa o peso mais recente registrado em uma avaliação finalizada. Quando houver novo peso, uma nova meta passa a valer dali em diante sem alterar o histórico anterior."
+        title="Líquidos"
       >
         <div className={styles.grid}>
           <Card className={styles.summaryCard}>
             <div className={styles.summaryHeader}>
               <h3 className={styles.cardTitle}>Hoje</h3>
               <Badge variant="neutral">
-                {progress === null ? "Meta ainda nao definida" : String(progress) + "%"}
+                {progress === null ? "Meta ainda não definida" : String(progress) + "%"}
               </Badge>
             </div>
             <dl className={styles.metrics}>
@@ -148,12 +148,12 @@ export default async function ClientCheckinsPage({
                 <dd>{formatMl(totalMl)}</dd>
               </div>
               <div>
-                <dt>Agua pura</dt>
+                <dt>Água pura</dt>
                 <dd>{formatMl(waterMl)}</dd>
               </div>
               <div>
                 <dt>Meta atual</dt>
-                <dd>{targetMl !== null ? formatMl(targetMl) : "Nao definida"}</dd>
+                <dd>{targetMl !== null ? formatMl(targetMl) : "Não definida"}</dd>
               </div>
             </dl>
             {target ? (
@@ -165,13 +165,13 @@ export default async function ClientCheckinsPage({
               </p>
             ) : (
               <p className={styles.note}>
-                A Patty ainda nao registrou uma meta de liquidos para voce.
+                A Patty ainda não registrou uma meta de líquidos para voce.
               </p>
             )}
           </Card>
 
           <Card className={styles.formCard}>
-            <h3 className={styles.cardTitle}>Adicionar liquido</h3>
+            <h3 className={styles.cardTitle}>Adicionar líquido</h3>
             <form action={addLiquidIntakeAction} className={styles.form}>
               <label className={styles.field}>
                 <span>Quantidade em mL</span>
@@ -191,25 +191,25 @@ export default async function ClientCheckinsPage({
                   ))}
                 </select>
               </label>
-              <Button type="submit">Registrar liquido</Button>
+              <Button type="submit">Registrar líquido</Button>
             </form>
           </Card>
         </div>
       </Section>
 
       <Section
-        description="O check-in e independente do treino prescrito. Se precisar corrigir a resposta do dia, um novo registro preserva o historico anterior."
-        title="Atividade fisica"
+        description="O check-in e independente do treino prescrito. Se precisar corrigir a resposta do dia, um novo registro preserva o histórico anterior."
+        title="Atividade física"
       >
         <Card className={styles.formCard}>
           <div className={styles.summaryHeader}>
-            <h3 className={styles.cardTitle}>Voce fez atividade fisica hoje?</h3>
+            <h3 className={styles.cardTitle}>Você fez atividade física hoje?</h3>
             <Badge variant="neutral">
               {latestActivity
                 ? latestActivity.did_activity
-                  ? "Ultimo registro: sim"
-                  : "Ultimo registro: nao"
-                : "Ainda nao registrado"}
+                  ? "Último registro: sim"
+                  : "Último registro: não"
+                : "Ainda não registrado"}
             </Badge>
           </div>
           <form
@@ -225,7 +225,7 @@ export default async function ClientCheckinsPage({
               value="no"
               variant="secondary"
             >
-              Nao
+              Não
             </Button>
           </form>
         </Card>
