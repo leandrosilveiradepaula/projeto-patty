@@ -8,6 +8,8 @@ import {
   getCurrentClient,
   getCurrentUserProfile,
   listAccessibleAnamnesisSubmissions,
+  listAccessibleClientActivityCheckinEvents,
+  listAccessibleClientLiquidIntakeEvents,
   listAccessibleClientNotificationEvents,
   listAccessibleWeeklyFeedbacksForClient,
   listAccessibleClientTrainingRequests,
@@ -19,6 +21,15 @@ import {
 } from "@/lib/supabase/data-access";
 import Link from "next/link";
 import styles from "./page.module.css";
+
+function saoPauloDate(value: Date | string) {
+  return new Intl.DateTimeFormat("en-CA", {
+    day: "2-digit",
+    month: "2-digit",
+    timeZone: "America/Sao_Paulo",
+    year: "numeric",
+  }).format(typeof value === "string" ? new Date(value) : value);
+}
 
 export default async function ClientePage() {
   const [profile, client] = await Promise.all([
@@ -36,6 +47,9 @@ export default async function ClientePage() {
     );
   }
 
+  const today = saoPauloDate(new Date());
+  const recentFrom = new Date(Date.now() - 36 * 60 * 60 * 1000).toISOString();
+
   const [
     anamneses,
     protocols,
@@ -43,6 +57,8 @@ export default async function ClientePage() {
     files,
     weeklyFeedbacks,
     weeklyFeedbackNotificationEvents,
+    activityEvents,
+    recentLiquidEvents,
     trainingRequests,
     assessmentRows,
     exerciseVersions,
@@ -53,6 +69,8 @@ export default async function ClientePage() {
     listCurrentClientFiles(client.id),
     listAccessibleWeeklyFeedbacksForClient(client.id),
     listAccessibleClientNotificationEvents(client.id),
+    listAccessibleClientActivityCheckinEvents(client.id, today),
+    listAccessibleClientLiquidIntakeEvents(client.id, recentFrom),
     listAccessibleClientTrainingRequests(client.id),
     listCurrentClientFinalizedAssessmentMeasurements(),
     listPublishedExerciseVersionsForCurrentClient(),
@@ -77,6 +95,18 @@ export default async function ClientePage() {
       event.delivery_state === "delivered" &&
       pendingWeeklyFeedbackIds.has(event.weekly_feedback_id),
   );
+  const hasActivityCheckinToday = activityEvents.length > 0;
+  const hasLiquidCheckinToday = recentLiquidEvents.some(
+    (event) => saoPauloDate(event.recorded_at) === today,
+  );
+  const hasPendingDailyCheckin =
+    !hasActivityCheckinToday || !hasLiquidCheckinToday;
+  const dailyCheckinDescription =
+    !hasActivityCheckinToday && !hasLiquidCheckinToday
+      ? "Registre seus líquidos e informe sua atividade física de hoje."
+      : !hasActivityCheckinToday
+        ? "Seus líquidos já começaram a ser registrados. Falta informar sua atividade física de hoje."
+        : "Sua atividade física já foi informada. Registre seus líquidos de hoje quando quiser atualizar o acompanhamento.";
   const primaryAction = currentAnamnesisDraft
     ? {
         badge: "Rascunho",
@@ -103,23 +133,31 @@ export default async function ClientePage() {
             href: "/cliente/feedback-semanal",
             label: "Responder Feedback Semanal",
           }
-        : protocols.length > 0
+        : hasPendingDailyCheckin
           ? {
-              badge: "Publicado",
-              badgeVariant: "positive" as const,
-              description:
-                "Consulte a versão mais recente do protocolo já liberado pela Patty.",
-              href: "/cliente/protocolo",
-              label: "Consultar protocolo",
-            }
-          : {
               badge: "Hoje",
               badgeVariant: "neutral" as const,
-              description:
-                "Registre seus líquidos e informe sua atividade física quando quiser atualizar seu dia.",
+              description: dailyCheckinDescription,
               href: "/cliente/checkins",
               label: "Fazer check-in do dia",
-            };
+            }
+          : protocols.length > 0
+            ? {
+                badge: "Publicado",
+                badgeVariant: "positive" as const,
+                description:
+                  "Consulte a versão mais recente do protocolo já liberado pela Patty.",
+                href: "/cliente/protocolo",
+                label: "Consultar protocolo",
+              }
+            : {
+                badge: "Em dia",
+                badgeVariant: "positive" as const,
+                description:
+                  "Seus registros principais de hoje estão atualizados. Consulte as demais áreas quando precisar.",
+                href: "/cliente/mais",
+                label: "Ver acompanhamento",
+              };
 
   const areas = [
     {
@@ -240,7 +278,8 @@ export default async function ClientePage() {
         </Link>
 
         <div className={styles.routineActions} aria-label="Acessos rápidos">
-          {primaryAction.href !== "/cliente/checkins" ? (
+          {primaryAction.href !== "/cliente/checkins" &&
+          hasPendingDailyCheckin ? (
             <Link className={styles.routineActionLink} href="/cliente/checkins">
               Check-in do dia
             </Link>
