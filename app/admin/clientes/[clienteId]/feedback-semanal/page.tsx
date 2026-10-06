@@ -1,12 +1,10 @@
-import { createWeeklyFeedbackRequestAction } from "@/app/admin/clientes/[clienteId]/feedback-semanal/actions";
+import { AdminWeeklyFeedbackRequestForm } from "@/components/admin/AdminWeeklyFeedbackRequestForm";
 import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Section } from "@/components/ui/Section";
-import { TextInput } from "@/components/ui/TextInput";
 import { parseWeeklyFeedbackDefinition, readWeeklyFeedbackAnswer } from "@/lib/weekly-feedback/definition";
 import {
   getAccessibleClient,
@@ -140,26 +138,10 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
         title="Solicitar Feedback Semanal"
       >
         <Card>
-          <form
-            action={createWeeklyFeedbackRequestAction.bind(null, client.id)}
-            className={styles.form}
-          >
-            <label className={styles.field}>
-              <span>Semana de referência · início</span>
-              <TextInput name="periodStart" required type="date" />
-            </label>
-            <label className={styles.field}>
-              <span>Semana de referência · fim</span>
-              <TextInput name="periodEnd" required type="date" />
-            </label>
-            <label className={styles.field}>
-              <span>Prazo para resposta</span>
-              <TextInput name="dueAt" type="datetime-local" />
-            </label>
-            <Button disabled={!eligible} type="submit">
-              {eligible ? "Criar solicitação" : "Aguardando primeiro protocolo"}
-            </Button>
-          </form>
+          <AdminWeeklyFeedbackRequestForm
+            clientId={client.id}
+            eligible={eligible}
+          />
         </Card>
       </Section>
 

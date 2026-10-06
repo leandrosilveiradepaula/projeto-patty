@@ -1,8 +1,7 @@
-import { resolveAnamnesisClarificationRequest } from "@/app/admin/anamneses/[anamneseId]/esclarecimentos/actions";
+import { AdminAnamnesisClarificationResolutionForm } from "@/components/admin/AdminAnamnesisClarificationResolutionForm";
 import { AdminAnamnesisClarificationRequestForm } from "@/components/admin/AdminAnamnesisClarificationRequestForm";
 import { AdminAnamnesisWorkspaceHeader } from "@/components/admin/AdminAnamnesisWorkspaceHeader";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Section } from "@/components/ui/Section";
@@ -131,17 +130,10 @@ export default async function AdminAnamnesisClarificationsPage({ params }: PageP
                       Resolvido manualmente em {formatDateTime(resolution.resolved_at)}.
                     </p>
                   ) : (
-                    <form
-                      action={resolveAnamnesisClarificationRequest.bind(
-                        null,
-                        submission.id,
-                        request.id,
-                      )}
-                    >
-                      <Button type="submit" variant="secondary">
-                        Marcar como resolvido
-                      </Button>
-                    </form>
+                    <AdminAnamnesisClarificationResolutionForm
+                      requestId={request.id}
+                      submissionId={submission.id}
+                    />
                   )}
                 </Card>
               );

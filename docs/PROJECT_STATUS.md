@@ -106,6 +106,18 @@ A auditoria de uso real identificou e removeu dois padroes N+1 em rotas de alta 
 
 A rodada tambem reforca alvos de toque em confirmacao de encerramento de acompanhamento e em detalhes tecnicos de protocolo. Nenhuma regra profissional, schema, migration ou RLS foi alterado.
 
+## Atualizacao de auditoria de interface 2026-10-06 - continuidade de acoes
+
+### Feedback local em acoes administrativas
+
+A auditoria de continuidade identificou tres acoes relevantes que ainda dependiam de reload, mudanca visual indireta ou erro global para comunicar o resultado:
+
+- solicitacao manual de Feedback Semanal;
+- resolucao manual de pedido de esclarecimento da Anamnese;
+- correcao historica de medida de avaliacao finalizada.
+
+Essas acoes passam a usar estado de formulario explicito, feedback local de sucesso/erro e indicador de processamento, seguindo o padrao ja usado nos demais formularios administrativos. A semantica persistida permanece inalterada: resolucao continua manual, correcao continua historica e nenhuma acao publica ou altera protocolo automaticamente.
+
 ## Legenda de estado
 
 - **DEFINIDO**: regra ou decisao documentada.
