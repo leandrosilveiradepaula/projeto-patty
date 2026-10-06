@@ -86,6 +86,7 @@ export default async function AdminExerciciosPage() {
                   <ExerciseListItem
                     action={
                       <Link
+                        aria-label={`Abrir exercício ${exerciseVersion.name}`}
                         className={styles.openLink}
                         href={"/admin/exercicios/" + exerciseVersion.exercise_id}
                       >
