@@ -39,7 +39,7 @@ export async function inviteClient(
   }
 
   try {
-    await inviteAndProvisionClient({
+    const provisioned = await inviteAndProvisionClient({
       displayName,
       email: normalizeInvitationEmail(email),
     });
@@ -66,12 +66,13 @@ export async function inviteClient(
     };
   }
 
-  redirect("/admin/clientes?onboarding=invited");
+  redirect(`/admin/clientes/${provisioned.clientId}?onboarding=invited`);
 }
 
 
 export type ManualInviteClientState = {
   activationLink: string | null;
+  clientId: string | null;
   message: string | null;
   success: boolean;
 };
@@ -91,6 +92,7 @@ export async function generateManualClientInvite(
   if (displayName.length < 2 || displayName.length > 120) {
     return {
       activationLink: null,
+      clientId: null,
       message: "Informe o nome da cliente.",
       success: false,
     };
@@ -99,6 +101,7 @@ export async function generateManualClientInvite(
   if (!validation.ok) {
     return {
       activationLink: null,
+      clientId: null,
       message: validation.message,
       success: false,
     };
@@ -114,6 +117,7 @@ export async function generateManualClientInvite(
   if (!host) {
     return {
       activationLink: null,
+      clientId: null,
       message: "Não foi possível determinar o endereço do aplicativo.",
       success: false,
     };
@@ -130,6 +134,7 @@ export async function generateManualClientInvite(
 
     return {
       activationLink: activationUrl.toString(),
+      clientId: result.clientId,
       message:
         "Link gerado. Envie este endereço somente para a cliente correspondente.",
       success: true,
@@ -157,6 +162,7 @@ export async function generateManualClientInvite(
 
     return {
       activationLink: null,
+      clientId: null,
       message:
         "Não foi possível concluir o cadastro inicial da cliente. Nenhum acesso deve ser considerado configurado.",
       success: false,
