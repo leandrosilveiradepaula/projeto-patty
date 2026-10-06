@@ -124,7 +124,6 @@ export default async function AdminClientAssessmentsPage({
                       Ver avaliação
                     </Link>
                   }
-                  clientLabel={displayName || "Cliente sem nome informado"}
                   evaluationDate={formatAssessmentDate(assessment.assessed_at)}
                   meta={
                     resolveSupportedAssessmentKindOption(
