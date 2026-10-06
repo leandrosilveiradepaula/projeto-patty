@@ -57,6 +57,7 @@ export default async function AdminAvaliacoesPage() {
                   <EvaluationListItem
                     action={
                       <Link
+                        aria-label={`Ver avaliação de ${displayName || "cliente sem nome informado"}`}
                         className={styles.actionLink}
                         href={`/admin/avaliacoes/${assessment.id}`}
                       >
