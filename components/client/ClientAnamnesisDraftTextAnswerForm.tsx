@@ -41,14 +41,24 @@ export function ClientAnamnesisDraftTextAnswerForm({
   const formRef = useRef<HTMLFormElement>(null);
   const lastSavedValueRef = useRef(initialValue);
   const pendingValueRef = useRef<string | null>(null);
+  const failedValueRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!state.success || pendingValueRef.current === null) {
+    if (pendingValueRef.current === null) {
       return;
     }
 
-    lastSavedValueRef.current = pendingValueRef.current;
-    pendingValueRef.current = null;
+    if (state.success) {
+      lastSavedValueRef.current = pendingValueRef.current;
+      failedValueRef.current = null;
+      pendingValueRef.current = null;
+      return;
+    }
+
+    if (state.message) {
+      failedValueRef.current = pendingValueRef.current;
+      pendingValueRef.current = null;
+    }
   }, [state]);
 
   function saveIfChanged() {
@@ -68,7 +78,8 @@ export function ClientAnamnesisDraftTextAnswerForm({
     if (
       isPending ||
       pendingValueRef.current !== null ||
-      value === lastSavedValueRef.current
+      value === lastSavedValueRef.current ||
+      value === failedValueRef.current
     ) {
       return;
     }
