@@ -125,6 +125,10 @@ export default async function ClienteAnamneseDetailPage({
     questionsBySectionId.set(question.section_id, sectionQuestions);
   }
 
+  const visibleSections = sections.filter(
+    (section) => (questionsBySectionId.get(section.id) ?? []).length > 0,
+  );
+
   return (
     <>
       <PageHeader
@@ -195,6 +199,23 @@ export default async function ClienteAnamneseDetailPage({
           </dl>
         </Card>
       </Section>
+      {visibleSections.length > 1 ? (
+        <nav aria-label="Seções da Anamnese" className={styles.sectionNavigation}>
+          <p className={styles.sectionNavigationTitle}>Ir para uma seção</p>
+          <div className={styles.sectionNavigationLinks}>
+            {visibleSections.map((section) => (
+              <a
+                className={styles.sectionNavigationLink}
+                href={`#${section.section_key}`}
+                key={section.id}
+              >
+                {section.title}
+              </a>
+            ))}
+          </div>
+        </nav>
+      ) : null}
+
       <Section
         description="As perguntas abaixo pertencem à versão exata associada a este registro. Nenhuma interpretação profissional ou de IA é exibida aqui."
         title="Respostas"
