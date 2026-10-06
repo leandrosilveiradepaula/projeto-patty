@@ -8,6 +8,7 @@ import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { Section } from "@/components/ui/Section";
 import { getClientForPrivateFileAdministration } from "@/lib/files/private-file-admin";
 import { listAccessibleClientFiles } from "@/lib/supabase/data-access";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import styles from "./page.module.css";
 
