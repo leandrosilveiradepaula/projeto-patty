@@ -1,10 +1,12 @@
 import { AdminMealDraftGuidance } from "@/components/admin/AdminMealDraftGuidance";
+import { AdminProtocolDraftEditor } from "@/components/admin/AdminProtocolDraftEditor";
 import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { AdminProtocolVersionPlan } from "@/components/admin/AdminProtocolVersionPlan";
 import { ProtocolCloneVersionAction } from "@/components/admin/ProtocolCloneVersionAction";
 import { ProtocolVersionComparison } from "@/components/admin/ProtocolVersionComparison";
 import { ProtocolLifecycleAction } from "@/components/admin/ProtocolLifecycleAction";
+import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Section } from "@/components/ui/Section";
@@ -22,6 +24,10 @@ import {
   buildMealDraftAnamnesisContext,
   summarizeMealDraftPlan,
 } from "@/lib/protocol/meal-draft-guidance";
+import {
+  formatProtocolDraftReadiness,
+  getProtocolDraftReadiness,
+} from "@/lib/protocol/draft-readiness";
 import { getProtocolLifecycleAction } from "@/lib/protocol/lifecycle";
 import { buildProtocolPlanComparison } from "@/lib/protocol/version-diff";
 import { isUuid } from "@/lib/validation/uuid";
@@ -153,6 +159,7 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
                 hasPublication: Boolean(publication),
                 submittedForReview: Boolean(version.submitted_for_review_at),
               });
+              const draftReadiness = getProtocolDraftReadiness(mealPlan);
 
               return (
                 <li className={styles.versionItem} key={version.id}>
@@ -236,6 +243,15 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
                       variantSummaries={summarizeMealDraftPlan(mealPlan)}
                     />
                   </div>
+                  {!version.submitted_for_review_at ? (
+                    <div className={styles.versionPlan}>
+                      <AdminProtocolDraftEditor
+                        plan={mealPlan}
+                        protocolId={protocol.id}
+                        protocolVersionId={version.id}
+                      />
+                    </div>
+                  ) : null}
                   <div className={styles.versionPlan}>
                     <h4>Estrutura alimentar desta versão</h4>
                     <p>
@@ -268,6 +284,10 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
                         Esta versão já foi publicada. Nenhuma ação adicional de
                         lifecycle está disponível para este registro.
                       </p>
+                    ) : lifecycleAction === "submit" && !draftReadiness.ready ? (
+                      <Alert title="Rascunho ainda incompleto" variant="warning">
+                        {formatProtocolDraftReadiness(draftReadiness.reasons)}
+                      </Alert>
                     ) : (
                       <ProtocolLifecycleAction
                         kind={lifecycleAction}
