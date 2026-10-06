@@ -122,7 +122,7 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
         status={<Badge variant="neutral">Acompanhamento ativo</Badge>}
       />
 
-      <ClientWorkspaceNav clientId={client.id} />
+      <ClientWorkspaceNav activeArea="feedback-semanal" clientId={client.id} />
 
       <Section
         action={
