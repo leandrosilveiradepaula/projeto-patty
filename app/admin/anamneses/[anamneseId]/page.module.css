@@ -267,3 +267,53 @@
   outline: 3px solid var(--color-accent);
   outline-offset: 3px;
 }
+
+.technicalDetails {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-3);
+}
+
+.technicalDetails > summary {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  width: fit-content;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  font-size: var(--text-label-small-size);
+  font-weight: var(--text-label-small-weight);
+}
+
+.technicalDetails > summary:focus-visible {
+  border-radius: var(--radius-medium);
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.technicalMetadata {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  margin: var(--space-3) 0 0;
+}
+
+.technicalMetadata div {
+  min-width: 0;
+}
+
+.technicalMetadata dt {
+  color: var(--color-text-muted);
+  font-size: var(--text-label-small-size);
+  font-weight: var(--text-label-small-weight);
+}
+
+.technicalMetadata dd {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-small-size);
+  overflow-wrap: anywhere;
+}
+
+:global(section[id]) {
+  scroll-margin-top: var(--space-6);
+}

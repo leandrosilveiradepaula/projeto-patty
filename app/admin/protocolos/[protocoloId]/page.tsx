@@ -79,10 +79,13 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
 
   if (!protocol) notFound();
 
-  const [versions, anamneses] = await Promise.all([
-    listAccessibleProtocolVersions(protocol.id),
-    listAccessibleAnamnesisSubmissions(protocol.client_id),
-  ]);
+  const versions = await listAccessibleProtocolVersions(protocol.id);
+  const hasEditableDraft = versions.some(
+    (version) => !version.submitted_for_review_at,
+  );
+  const anamneses = hasEditableDraft
+    ? await listAccessibleAnamnesisSubmissions(protocol.client_id)
+    : [];
   const latestSubmittedAnamnesis =
     anamneses.find((submission) => Boolean(submission.submitted_at)) ?? null;
   const [foodQuestions, foodAnswers] = latestSubmittedAnamnesis
@@ -257,26 +260,28 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
                       ) : null}
                     </dl>
                   </details>
-                  <div className={styles.versionPlan}>
-                    <h4>Apoio ao rascunho alimentar</h4>
-                    <p>
-                      Orientação profissional baseada apenas em regras confirmadas,
-                      contexto alimentar da última Anamnese enviada e estrutura já
-                      persistida nesta versão.
-                    </p>
-                    <AdminMealDraftGuidance
-                      foodContext={foodContext}
-                      variantSummaries={summarizeMealDraftPlan(mealPlan)}
-                    />
-                  </div>
                   {!version.submitted_for_review_at ? (
-                    <div className={styles.versionPlan}>
-                      <AdminProtocolDraftEditor
-                        plan={mealPlan}
-                        protocolId={protocol.id}
-                        protocolVersionId={version.id}
-                      />
-                    </div>
+                    <>
+                      <div className={styles.versionPlan}>
+                        <h4>Apoio ao rascunho alimentar</h4>
+                        <p>
+                          Contexto atual da última Anamnese enviada e regras
+                          confirmadas para apoiar a edição deste rascunho. Este
+                          contexto não integra o histórico persistido da versão.
+                        </p>
+                        <AdminMealDraftGuidance
+                          foodContext={foodContext}
+                          variantSummaries={summarizeMealDraftPlan(mealPlan)}
+                        />
+                      </div>
+                      <div className={styles.versionPlan}>
+                        <AdminProtocolDraftEditor
+                          plan={mealPlan}
+                          protocolId={protocol.id}
+                          protocolVersionId={version.id}
+                        />
+                      </div>
+                    </>
                   ) : null}
                   <div className={styles.versionPlan}>
                     <h4>Estrutura alimentar desta versão</h4>

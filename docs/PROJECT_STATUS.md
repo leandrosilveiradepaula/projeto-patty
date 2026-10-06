@@ -159,6 +159,22 @@ A auditoria encontrou telas em que o dado persistido estava correto, mas o texto
 
 Nenhuma prioridade clinica foi criada. Nenhum estado persistido, regra profissional, schema ou RLS foi alterado.
 
+## Atualizacao de auditoria de interface 2026-10-06 - fluxo longo e contexto historico
+
+### Anamnese, Avaliacao e Protocolo
+
+A auditoria de telas longas e continuidade operacional identificou pontos de densidade e um risco de contexto historico:
+
+- Anamnese detalhada passa a usar a mesma identidade visual do workspace da cliente;
+- a Anamnese recebe atalhos internos para visao profissional, saude/arquivos, atencao da Patty e respostas originais;
+- IDs tecnicos da submissao e da versao do formulario ficam recolhidos em "Detalhes tecnicos e auditoria", sem sair do registro;
+- Anamnese em preenchimento usa "Aguardando cliente" tambem no cabecalho, alinhando a propriedade da proxima acao;
+- Avaliacao em rascunho deixa de repetir uma secao de requisitos que ja aparece com estado "Registrado/Pendente" no formulario deterministico de finalizacao;
+- o apoio contextual da ultima Anamnese enviada deixa de aparecer em versoes de Protocolo ja submetidas, aprovadas ou publicadas, evitando sugerir que contexto atual integrou uma decisao historica;
+- respostas da Anamnese passam a ser consultadas na pagina de Protocolo apenas quando existe rascunho editavel que realmente usa esse apoio.
+
+Nenhuma regra profissional, validacao deterministica, dado historico, schema ou RLS foi alterado.
+
 ## Legenda de estado
 
 - **DEFINIDO**: regra ou decisao documentada.

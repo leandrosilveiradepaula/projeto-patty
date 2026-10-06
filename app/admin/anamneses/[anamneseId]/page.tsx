@@ -3,6 +3,7 @@ import {
   buildProfessionalReviewGroups,
 } from "@/lib/anamnesis/professional-review";
 import { AdminAnamnesisWorkspaceHeader } from "@/components/admin/AdminAnamnesisWorkspaceHeader";
+import { PageSectionNav } from "@/components/admin/PageSectionNav";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -106,6 +107,15 @@ export default async function AdminAnamnesisDetailPage({
         submissionId={submission.id}
         submittedAt={submission.submitted_at}
       />
+      <PageSectionNav
+        items={[
+          { href: "#visao-profissional", label: "Visão de trabalho" },
+          { href: "#saude-arquivos", label: "Saúde e arquivos" },
+          { href: "#atencao-patty", label: "Atenção da Patty" },
+          { href: "#respostas-originais", label: "Respostas originais" },
+        ]}
+        label="Ir para"
+      />
       <Section
         action={
           <Badge variant="neutral">
@@ -137,15 +147,26 @@ export default async function AdminAnamnesisDetailPage({
                   : "Ainda não enviada"}
               </dd>
             </div>
-            <div>
-              <dt>Identificador</dt>
-              <dd>{submission.id}</dd>
-            </div>
+
           </dl>
+          <details className={styles.technicalDetails}>
+            <summary>Detalhes técnicos e auditoria</summary>
+            <dl className={styles.technicalMetadata}>
+              <div>
+                <dt>Identificador da submissão</dt>
+                <dd>{submission.id}</dd>
+              </div>
+              <div>
+                <dt>ID da versão do formulário</dt>
+                <dd>{submission.form_version_id}</dd>
+              </div>
+            </dl>
+          </details>
         </Card>
       </Section>
       <Section
         description="Organização determinística das respostas já existentes conforme a forma de leitura profissional confirmada pela Patty. Não cria score, diagnóstico, alerta clínico nem interpretação automática."
+        id="visao-profissional"
         title="Visão de trabalho da Patty"
       >
         {professionalReviewGroups.length === 0 ? (
@@ -176,6 +197,7 @@ export default async function AdminAnamnesisDetailPage({
       </Section>
       <Section
         description="Contexto factual de saúde combinado com os exames/documentos privados mais recentes. A Patty interpreta os dados; o sistema não diagnostica, recomenda suplemento nem decide encaminhamento."
+        id="saude-arquivos"
         title="Saúde, exames e documentos para revisão"
       >
         <div className={styles.healthGrid}>
@@ -244,6 +266,7 @@ export default async function AdminAnamnesisDetailPage({
       <Section
         action={<Badge variant="neutral">Revisão humana</Badge>}
         description="Respostas comportamentais e de autoimagem separadas para atenção da Patty. O sistema não infere compulsão, culpa, restrição, severidade ou diagnóstico."
+        id="atencao-patty"
         title="Atenção para revisão da Patty"
       >
         {professionalAttentionItems.length > 0 ? (
@@ -276,6 +299,7 @@ export default async function AdminAnamnesisDetailPage({
 
       <Section
         description="Seções e perguntas carregadas da versão exata registrada na submissão. Ausência de resposta é exibida como fato, sem inferência."
+        id="respostas-originais"
         title="Respostas originais"
       >
         {sections.length === 0 ? (
