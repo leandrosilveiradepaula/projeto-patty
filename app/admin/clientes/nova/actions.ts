@@ -38,11 +38,14 @@ export async function inviteClient(
     return { message: validation.message };
   }
 
+  let provisionedClientId: string | null = null;
+
   try {
-    await inviteAndProvisionClient({
+    const provisioned = await inviteAndProvisionClient({
       displayName,
       email: normalizeInvitationEmail(email),
     });
+    provisionedClientId = provisioned.clientId;
   } catch (error) {
     if (error instanceof ClientInvitationProvisionError) {
       if (error.code === "cleanup_failed") {
@@ -66,12 +69,20 @@ export async function inviteClient(
     };
   }
 
-  redirect("/admin/clientes?onboarding=invited");
+  if (!provisionedClientId) {
+    return {
+      message:
+        "Não foi possível identificar o acompanhamento criado para esta cliente.",
+    };
+  }
+
+  redirect(`/admin/clientes/${provisionedClientId}?onboarding=invited`);
 }
 
 
 export type ManualInviteClientState = {
   activationLink: string | null;
+  clientId: string | null;
   message: string | null;
   success: boolean;
 };
@@ -91,6 +102,7 @@ export async function generateManualClientInvite(
   if (displayName.length < 2 || displayName.length > 120) {
     return {
       activationLink: null,
+      clientId: null,
       message: "Informe o nome da cliente.",
       success: false,
     };
@@ -99,6 +111,7 @@ export async function generateManualClientInvite(
   if (!validation.ok) {
     return {
       activationLink: null,
+      clientId: null,
       message: validation.message,
       success: false,
     };
@@ -114,6 +127,7 @@ export async function generateManualClientInvite(
   if (!host) {
     return {
       activationLink: null,
+      clientId: null,
       message: "Não foi possível determinar o endereço do aplicativo.",
       success: false,
     };
@@ -130,6 +144,7 @@ export async function generateManualClientInvite(
 
     return {
       activationLink: activationUrl.toString(),
+      clientId: result.clientId,
       message:
         "Link gerado. Envie este endereço somente para a cliente correspondente.",
       success: true,
@@ -139,6 +154,7 @@ export async function generateManualClientInvite(
       if (error.code === "cleanup_failed") {
         return {
           activationLink: null,
+          clientId: null,
           message:
             "O link não pôde ser provisionado com segurança e a compensação automática falhou. Revise o estado da conta antes de tentar novamente.",
           success: false,
@@ -148,6 +164,7 @@ export async function generateManualClientInvite(
       if (error.code === "link_failed") {
         return {
           activationLink: null,
+          clientId: null,
           message:
             "Não foi possível gerar o link. Verifique se esse email já possui uma conta ou tente novamente.",
           success: false,
@@ -157,6 +174,7 @@ export async function generateManualClientInvite(
 
     return {
       activationLink: null,
+      clientId: null,
       message:
         "Não foi possível concluir o cadastro inicial da cliente. Nenhum acesso deve ser considerado configurado.",
       success: false,
