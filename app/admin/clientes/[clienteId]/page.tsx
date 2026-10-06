@@ -667,9 +667,9 @@ export default async function AdminClienteDetailPage({
       </Section>
 
       <Section
-        description="Resumo dos registros reais desta cliente. Cada cartão abre a área correspondente do acompanhamento."
+        description="Atalhos para consultar registros e áreas complementares sem alterar o fluxo operacional acima."
         id="visao-acompanhamento"
-        title="Visão do acompanhamento"
+        title="Áreas da cliente"
       >
         <div className={styles.areaGrid}>
           <Link className={styles.cardLink} href={`/admin/clientes/${client.id}/anamnese`}>
