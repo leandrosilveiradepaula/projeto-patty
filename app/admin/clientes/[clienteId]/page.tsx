@@ -178,6 +178,9 @@ export default async function AdminClienteDetailPage({
     (state) => state.clarificationAwaitingClient,
   );
   const latestAssessment = assessments[0] ?? null;
+  const assessmentDraft = assessments.find(
+    (assessment) => !assessment.finalized_at,
+  );
   const latestProtocol = protocols[0] ?? null;
   const protocolVersionGroups = await Promise.all(
     protocols.map(async (protocol) => ({
@@ -279,18 +282,25 @@ export default async function AdminClienteDetailPage({
                 label: "Ver status da Anamnese",
                 title: "Anamnese",
               }
-            : !hasFinalizedAssessment
+            : assessmentDraft
               ? {
                   description:
-                    latestAssessment
-                      ? "Existe uma avaliação em rascunho. Conclua a coleta antes de seguir."
-                      : "Registre a primeira avaliação da cliente.",
+                    "Existe uma avaliação em rascunho. Conclua ou revise esse registro antes de seguir para outras etapas operacionais.",
                   eyebrow: "Ação da Patty",
-                  href: `/admin/clientes/${client.id}/avaliacoes`,
-                  label: "Abrir avaliações",
-                  title: "Avaliação",
+                  href: `/admin/avaliacoes/${assessmentDraft.id}`,
+                  label: "Continuar avaliação",
+                  title: "Avaliação em rascunho",
                 }
-              : protocolAction
+              : !hasFinalizedAssessment
+                ? {
+                    description:
+                      "Registre a primeira avaliação da cliente.",
+                    eyebrow: "Ação da Patty",
+                    href: `/admin/clientes/${client.id}/avaliacoes`,
+                    label: "Abrir avaliações",
+                    title: "Avaliação",
+                  }
+                : protocolAction
                 ? !approvedProtocolVersionIds.has(protocolAction.version.id)
                   ? {
                       description:
@@ -488,10 +498,10 @@ export default async function AdminClienteDetailPage({
               <div>
                 <h3 className={styles.cardTitle}>Avaliação</h3>
                 <p className={styles.cardDescription}>
-                  {hasFinalizedAssessment
-                    ? "Há avaliação finalizada no histórico."
-                    : latestAssessment
-                      ? "Existe uma avaliação em rascunho."
+                  {assessmentDraft
+                    ? "Existe uma avaliação em rascunho que ainda precisa ser concluída."
+                    : hasFinalizedAssessment
+                      ? "Há avaliação finalizada no histórico."
                       : "Nenhuma avaliação foi registrada ainda."}
                 </p>
               </div>
@@ -499,17 +509,17 @@ export default async function AdminClienteDetailPage({
             <div className={styles.journeyActions}>
               <Badge
                 variant={
-                  hasFinalizedAssessment
-                    ? "positive"
-                    : latestAssessment
-                      ? "warning"
+                  assessmentDraft
+                    ? "warning"
+                    : hasFinalizedAssessment
+                      ? "positive"
                       : "neutral"
                 }
               >
-                {hasFinalizedAssessment
-                  ? "Finalizada"
-                  : latestAssessment
-                    ? "Rascunho"
+                {assessmentDraft
+                  ? "Rascunho"
+                  : hasFinalizedAssessment
+                    ? "Finalizada"
                     : "Não iniciada"}
               </Badge>
               <Link className={styles.journeyLink} href={`/admin/clientes/${client.id}/avaliacoes`}>
@@ -652,9 +662,11 @@ export default async function AdminClienteDetailPage({
                 <Badge variant="neutral">{assessments.length}</Badge>
               </div>
               <p className={styles.cardDescription}>
-                {latestAssessment
-                  ? `${latestAssessment.finalized_at ? "Última finalizada" : "Última em rascunho"} · ${formatDate(latestAssessment.assessed_at)}.`
-                  : "Nenhuma avaliação registrada."}
+                {assessmentDraft
+                  ? `Rascunho pendente · ${formatDate(assessmentDraft.assessed_at)}.`
+                  : latestAssessment
+                    ? `Última finalizada · ${formatDate(latestAssessment.assessed_at)}.`
+                    : "Nenhuma avaliação registrada."}
               </p>
             </Card>
           </Link>
