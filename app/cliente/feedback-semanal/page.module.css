@@ -65,3 +65,58 @@
   margin: 0;
   color: var(--color-text-secondary);
 }
+
+
+.historyList {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.historyItem {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
+  background: var(--color-surface);
+}
+
+.historyItem > summary {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  padding: var(--space-4);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+  font-weight: var(--text-label-medium-weight);
+  list-style-position: inside;
+}
+
+.historyItem > summary:focus-visible {
+  outline: 3px solid var(--color-brand);
+  outline-offset: 3px;
+}
+
+.historyContent {
+  display: grid;
+  gap: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  padding: var(--space-4);
+}
+
+@media (max-width: 640px) {
+  .historyItem > summary {
+    align-items: flex-start;
+  }
+
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .actions > * {
+    width: 100%;
+  }
+}
