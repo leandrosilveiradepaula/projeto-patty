@@ -47,7 +47,7 @@ export function ManualClientInviteForm() {
     <form action={formAction} className={styles.form} noValidate>
       {state.message ? (
         <Alert
-          live="polite"
+          live={state.success ? "polite" : "assertive"}
           title={state.success ? "Link gerado" : "Não foi possível gerar"}
           variant={state.success ? "success" : "critical"}
         >
