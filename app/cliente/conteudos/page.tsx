@@ -70,8 +70,10 @@ export default async function ClienteConteudosPage() {
                     action={
                       primaryAsset ? (
                         <a
+                          aria-label={`Abrir conteúdo ${contentVersion.title} em nova aba`}
                           className={styles.openLink}
                           href={`/cliente/conteudos/assets/${primaryAsset.id}`}
+                          rel="noreferrer"
                           target="_blank"
                         >
                           Abrir conteúdo
