@@ -38,7 +38,7 @@ export function FormField({
       <label className={styles.label} htmlFor={id}>
         <span>{label}</span>
         {required ? (
-          <span className={styles.required} aria-label="obrigatorio">
+          <span className={styles.required} aria-label="obrigatório">
             *
           </span>
         ) : null}

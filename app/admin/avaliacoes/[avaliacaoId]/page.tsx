@@ -307,7 +307,7 @@ export default async function AdminAvaliacaoDetailPage({
                   measurementId={measurement.id}
                 />
               ) : (
-                <details>
+                <details className={styles.correctionDetails}>
                   <summary>Corrigir lançamento</summary>
                   <form
                     action={correctFinalizedAssessmentMeasurementAction.bind(
@@ -315,8 +315,9 @@ export default async function AdminAvaliacaoDetailPage({
                       assessment.id,
                       measurement.id,
                     )}
+                    className={styles.correctionForm}
                   >
-                    <label>
+                    <label className={styles.correctionField}>
                       <span>Valor corrigido</span>
                       <input
                         defaultValue={String(measurement.measurement_value)}
@@ -325,7 +326,7 @@ export default async function AdminAvaliacaoDetailPage({
                         required
                       />
                     </label>
-                    <label>
+                    <label className={styles.correctionField}>
                       <span>Unidade</span>
                       <input
                         defaultValue={measurement.unit}
@@ -334,11 +335,13 @@ export default async function AdminAvaliacaoDetailPage({
                         required
                       />
                     </label>
-                    <label>
+                    <label className={styles.correctionField}>
                       <span>Observação opcional</span>
                       <input maxLength={240} name="correctionNote" />
                     </label>
-                    <button type="submit">Registrar correção</button>
+                    <button className={styles.correctionSubmit} type="submit">
+                      Registrar correção
+                    </button>
                   </form>
                 </details>
               ),
