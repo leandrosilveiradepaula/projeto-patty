@@ -69,17 +69,7 @@ export default async function AdminClientContentPage({
         meta="Acompanhamento ativo"
         displayName={displayName}
         secondary="Conteúdos liberados"
-        status={<Badge variant="neutral">Atribuição ativa</Badge>}
-        visual={
-          <span>
-            {displayName
-              ?.split(/\s+/)
-              .map((word) => word[0])
-              .join("")
-              .slice(0, 2)
-              .toUpperCase() || "?"}
-          </span>
-        }
+        status={<Badge variant="neutral">Acompanhamento ativo</Badge>}
       />
       <ClientWorkspaceNav clientId={client.id} />
       <Section
