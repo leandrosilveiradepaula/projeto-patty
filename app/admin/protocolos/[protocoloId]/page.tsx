@@ -60,11 +60,11 @@ function getLifecyclePresentation(input: {
   }
 
   if (input.hasApproval) {
-    return { label: "Aprovado", variant: "positive" as const };
+    return { label: "Aguardando publicação", variant: "warning" as const };
   }
 
   if (input.submittedForReview) {
-    return { label: "Em revisão", variant: "warning" as const };
+    return { label: "Aguardando aprovação", variant: "warning" as const };
   }
 
   return { label: "Rascunho", variant: "neutral" as const };
