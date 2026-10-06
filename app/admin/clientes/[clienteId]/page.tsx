@@ -24,6 +24,9 @@ import {
   listAccessibleClientHydrationTargets,
   listAccessibleClientTrainingRequests,
   listAccessibleProtocolsForClient,
+  listAccessibleProtocolPublications,
+  listAccessibleProtocolVersionApprovals,
+  listAccessibleProtocolVersions,
   listAccessibleWeeklyFeedbacksForClient,
   hasAccessibleProtocolPublicationForClient,
   listContentReleasesForAccessibleClient,
@@ -176,6 +179,41 @@ export default async function AdminClienteDetailPage({
   );
   const latestAssessment = assessments[0] ?? null;
   const latestProtocol = protocols[0] ?? null;
+  const protocolVersionGroups = await Promise.all(
+    protocols.map(async (protocol) => ({
+      protocol,
+      versions: await listAccessibleProtocolVersions(protocol.id),
+    })),
+  );
+  const protocolVersions = protocolVersionGroups.flatMap(
+    ({ protocol, versions }) =>
+      versions.map((version) => ({ protocol, version })),
+  );
+  const protocolVersionIds = protocolVersions.map(({ version }) => version.id);
+  const [protocolApprovals, protocolPublications] =
+    protocolVersionIds.length > 0
+      ? await Promise.all([
+          listAccessibleProtocolVersionApprovals(protocolVersionIds),
+          listAccessibleProtocolPublications(protocolVersionIds),
+        ])
+      : [[], []];
+  const approvedProtocolVersionIds = new Set(
+    protocolApprovals.map((approval) => approval.protocol_version_id),
+  );
+  const publishedProtocolVersionIds = new Set(
+    protocolPublications.map((publication) => publication.protocol_version_id),
+  );
+  const protocolAction = protocolVersions.find(({ version }) => {
+    if (!version.submitted_for_review_at) {
+      return false;
+    }
+
+    if (!approvedProtocolVersionIds.has(version.id)) {
+      return true;
+    }
+
+    return !publishedProtocolVersionIds.has(version.id);
+  });
   const currentHydrationTarget = hydrationTargets[0] ?? null;
   const latestActivity = activityEvents[0] ?? null;
   const currentTargetMl = currentHydrationTarget
@@ -252,25 +290,43 @@ export default async function AdminClienteDetailPage({
                   label: "Abrir avaliações",
                   title: "Avaliação",
                 }
-              : !hasPublishedProtocol
-                ? {
-                    description:
-                      protocols.length > 0
-                        ? "Existe protocolo em andamento, mas ainda não há uma publicação para a cliente."
-                        : "Crie e revise o primeiro protocolo antes de iniciar o acompanhamento semanal.",
-                    eyebrow: "Ação da Patty",
-                    href: `/admin/clientes/${client.id}/protocolos`,
-                    label: "Abrir protocolos",
-                    title: "Primeiro protocolo",
-                  }
-                : {
-                    description:
-                      "As etapas iniciais estão registradas. Continue o acompanhamento conforme os dados e a decisão profissional da Patty.",
-                    eyebrow: "Acompanhamento",
-                    href: `/admin/clientes/${client.id}/feedback-semanal`,
-                    label: "Abrir acompanhamento",
-                    title: "Acompanhamento contínuo",
-                  };
+              : protocolAction
+                ? !approvedProtocolVersionIds.has(protocolAction.version.id)
+                  ? {
+                      description:
+                        `A versão ${protocolAction.version.version_number} do protocolo foi submetida para revisão e ainda não possui aprovação registrada.`,
+                      eyebrow: "Ação da Patty",
+                      href: `/admin/protocolos/${protocolAction.protocol.id}`,
+                      label: "Revisar protocolo",
+                      title: "Protocolo aguardando revisão",
+                    }
+                  : {
+                      description:
+                        `A versão ${protocolAction.version.version_number} do protocolo já possui aprovação, mas ainda não foi publicada para a cliente.`,
+                      eyebrow: "Ação da Patty",
+                      href: `/admin/protocolos/${protocolAction.protocol.id}`,
+                      label: "Publicar protocolo",
+                      title: "Protocolo aguardando publicação",
+                    }
+                : !hasPublishedProtocol
+                  ? {
+                      description:
+                        protocols.length > 0
+                          ? "Existe protocolo em andamento, mas ainda não há uma publicação para a cliente."
+                          : "Crie e revise o primeiro protocolo antes de iniciar o acompanhamento semanal.",
+                      eyebrow: "Ação da Patty",
+                      href: `/admin/clientes/${client.id}/protocolos`,
+                      label: "Abrir protocolos",
+                      title: "Primeiro protocolo",
+                    }
+                  : {
+                      description:
+                        "As etapas iniciais estão registradas. Continue o acompanhamento conforme os dados e a decisão profissional da Patty.",
+                      eyebrow: "Acompanhamento",
+                      href: `/admin/clientes/${client.id}/feedback-semanal`,
+                      label: "Abrir acompanhamento",
+                      title: "Acompanhamento contínuo",
+                    };
 
   return (
     <>
@@ -468,29 +524,39 @@ export default async function AdminClienteDetailPage({
               <div>
                 <h3 className={styles.cardTitle}>Primeiro protocolo</h3>
                 <p className={styles.cardDescription}>
-                  {hasPublishedProtocol
-                    ? "Já existe protocolo aprovado e publicado para esta cliente."
-                    : protocols.length > 0
-                      ? "Há protocolo criado, mas ainda não existe publicação registrada."
-                      : "Nenhum protocolo foi criado ainda."}
+                  {protocolAction
+                    ? !approvedProtocolVersionIds.has(protocolAction.version.id)
+                      ? `A versão ${protocolAction.version.version_number} está submetida e aguarda aprovação.`
+                      : `A versão ${protocolAction.version.version_number} está aprovada e aguarda publicação.`
+                    : hasPublishedProtocol
+                      ? "Já existe protocolo aprovado e publicado para esta cliente."
+                      : protocols.length > 0
+                        ? "Há protocolo criado, mas ainda não existe publicação registrada."
+                        : "Nenhum protocolo foi criado ainda."}
                 </p>
               </div>
             </div>
             <div className={styles.journeyActions}>
               <Badge
                 variant={
-                  hasPublishedProtocol
-                    ? "positive"
-                    : protocols.length > 0
-                      ? "warning"
-                      : "neutral"
+                  protocolAction
+                    ? "warning"
+                    : hasPublishedProtocol
+                      ? "positive"
+                      : protocols.length > 0
+                        ? "warning"
+                        : "neutral"
                 }
               >
-                {hasPublishedProtocol
-                  ? "Publicado"
-                  : protocols.length > 0
-                    ? "Em preparação"
-                    : "Não iniciado"}
+                {protocolAction
+                  ? !approvedProtocolVersionIds.has(protocolAction.version.id)
+                    ? "Aguardando aprovação"
+                    : "Aguardando publicação"
+                  : hasPublishedProtocol
+                    ? "Publicado"
+                    : protocols.length > 0
+                      ? "Em preparação"
+                      : "Não iniciado"}
               </Badge>
               <Link className={styles.journeyLink} href={`/admin/clientes/${client.id}/protocolos`}>
                 Abrir protocolos
