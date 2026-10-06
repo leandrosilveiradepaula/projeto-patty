@@ -230,6 +230,15 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
                     <dl className={styles.technicalFacts}>
                       <div><dt>ID da versão</dt><dd>{version.id}</dd></div>
                       <div><dt>ID do protocolo</dt><dd>{protocol.id}</dd></div>
+                      {mealPlan ? (
+                        <>
+                          <div><dt>ID do plano alimentar</dt><dd>{mealPlan.id}</dd></div>
+                          <div>
+                            <dt>Versão do catálogo de equivalentes</dt>
+                            <dd>{mealPlan.foodEquivalentCatalogVersionId ?? "Não vinculada"}</dd>
+                          </div>
+                        </>
+                      ) : null}
                       {version.based_on_version_id ? (
                         <div><dt>ID da versão-base</dt><dd>{version.based_on_version_id}</dd></div>
                       ) : null}
