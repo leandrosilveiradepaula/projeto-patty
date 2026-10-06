@@ -7,6 +7,7 @@ import {
   getAccessibleAnamnesisClarificationRequest,
   getAccessibleAnamnesisSubmission,
   getCurrentClient,
+  listAccessibleAnamnesisClarificationResolutions,
 } from "@/lib/supabase/data-access";
 
 export type AnamnesisClarificationResponseFormState = { message: string | null; success: boolean };
@@ -26,6 +27,17 @@ export async function respondToAnamnesisClarification(
 
   if (!client || !submission || submission.client_id !== client.id || !submission.submitted_at || !request || request.submission_id !== submission.id) {
     return { message: "Este pedido de esclarecimento não está disponível.", success: false };
+  }
+
+  const resolutions = await listAccessibleAnamnesisClarificationResolutions([
+    request.id,
+  ]);
+
+  if (resolutions.length > 0) {
+    return {
+      message: "Este pedido de esclarecimento já foi resolvido pela Patty.",
+      success: false,
+    };
   }
 
   const responseText = formData.get("responseText");
