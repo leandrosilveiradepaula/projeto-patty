@@ -108,50 +108,72 @@ export default async function AdminClienteDetailPage({
 
   const displayName = client.profiles?.display_name?.trim();
   const latestAnamnesis = anamneses[0] ?? null;
-  const latestAnamnesisReviews = latestAnamnesis?.submitted_at
-    ? await listAccessibleAnamnesisReviews(latestAnamnesis.id)
-    : [];
-  const latestAnamnesisClarificationRequests = latestAnamnesis?.submitted_at
-    ? await listAccessibleAnamnesisClarificationRequests(latestAnamnesis.id)
-    : [];
-  const latestClarificationRequestIds =
-    latestAnamnesisClarificationRequests.map((request) => request.id);
-  const [latestAnamnesisClarificationResponses, latestAnamnesisClarificationResolutions] =
-    latestClarificationRequestIds.length > 0
-      ? await Promise.all([
-          listAccessibleAnamnesisClarificationResponses(
-            latestClarificationRequestIds,
-          ),
-          listAccessibleAnamnesisClarificationResolutions(
-            latestClarificationRequestIds,
-          ),
-        ])
-      : [[], []];
-  const clarificationResponseCountByRequestId = new Map<string, number>();
-  const resolvedClarificationRequestIds = new Set(
-    latestAnamnesisClarificationResolutions.map(
-      (resolution) => resolution.clarification_request_id,
-    ),
-  );
+  const submittedAnamneses = anamneses
+    .filter((submission) => Boolean(submission.submitted_at))
+    .slice()
+    .reverse();
+  const submittedAnamnesisStates = await Promise.all(
+    submittedAnamneses.map(async (submission) => {
+      const [reviews, clarificationRequests] = await Promise.all([
+        listAccessibleAnamnesisReviews(submission.id),
+        listAccessibleAnamnesisClarificationRequests(submission.id),
+      ]);
+      const clarificationRequestIds = clarificationRequests.map(
+        (request) => request.id,
+      );
+      const [clarificationResponses, clarificationResolutions] =
+        clarificationRequestIds.length > 0
+          ? await Promise.all([
+              listAccessibleAnamnesisClarificationResponses(
+                clarificationRequestIds,
+              ),
+              listAccessibleAnamnesisClarificationResolutions(
+                clarificationRequestIds,
+              ),
+            ])
+          : [[], []];
+      const clarificationResponseCountByRequestId = new Map<string, number>();
+      const resolvedClarificationRequestIds = new Set(
+        clarificationResolutions.map(
+          (resolution) => resolution.clarification_request_id,
+        ),
+      );
 
-  for (const response of latestAnamnesisClarificationResponses) {
-    clarificationResponseCountByRequestId.set(
-      response.clarification_request_id,
-      (clarificationResponseCountByRequestId.get(
-        response.clarification_request_id,
-      ) ?? 0) + 1,
-    );
-  }
+      for (const response of clarificationResponses) {
+        clarificationResponseCountByRequestId.set(
+          response.clarification_request_id,
+          (clarificationResponseCountByRequestId.get(
+            response.clarification_request_id,
+          ) ?? 0) + 1,
+        );
+      }
 
-  const unresolvedClarificationRequests =
-    latestAnamnesisClarificationRequests.filter(
-      (request) => !resolvedClarificationRequestIds.has(request.id),
-    );
-  const clarificationAwaitingPatty = unresolvedClarificationRequests.some(
-    (request) => (clarificationResponseCountByRequestId.get(request.id) ?? 0) > 0,
+      const unresolvedClarificationRequests = clarificationRequests.filter(
+        (request) => !resolvedClarificationRequestIds.has(request.id),
+      );
+      const clarificationAwaitingPatty =
+        unresolvedClarificationRequests.some(
+          (request) =>
+            (clarificationResponseCountByRequestId.get(request.id) ?? 0) > 0,
+        );
+      const clarificationAwaitingClient =
+        unresolvedClarificationRequests.length > 0 &&
+        !clarificationAwaitingPatty;
+
+      return {
+        clarificationAwaitingClient,
+        clarificationAwaitingPatty,
+        reviewPending: reviews.length === 0,
+        submission,
+      };
+    }),
   );
-  const clarificationAwaitingClient =
-    unresolvedClarificationRequests.length > 0 && !clarificationAwaitingPatty;
+  const anamnesisPattyAction = submittedAnamnesisStates.find(
+    (state) => state.reviewPending || state.clarificationAwaitingPatty,
+  );
+  const anamnesisClientWait = submittedAnamnesisStates.find(
+    (state) => state.clarificationAwaitingClient,
+  );
   const latestAssessment = assessments[0] ?? null;
   const latestProtocol = protocols[0] ?? null;
   const currentHydrationTarget = hydrationTargets[0] ?? null;
@@ -174,74 +196,81 @@ export default async function AdminClienteDetailPage({
         label: "Preencher cadastro atual",
         title: "Cadastro atual",
       }
-    : !latestAnamnesis?.submitted_at
-      ? {
-          description:
-            latestAnamnesis
-              ? "A Anamnese está em rascunho e depende do preenchimento e envio da cliente antes da revisão profissional."
-              : "A cliente ainda não iniciou a Anamnese. Esta etapa depende da cliente antes da revisão profissional.",
-          eyebrow: "Aguardando cliente",
-          href: `/admin/clientes/${client.id}/anamnese`,
-          label: "Ver status da Anamnese",
-          title: "Anamnese",
-        }
-      : latestAnamnesisReviews.length === 0
+    : anamnesisPattyAction
+      ? anamnesisPattyAction.reviewPending
         ? {
             description:
-              "A Anamnese foi enviada pela cliente e ainda precisa de revisão profissional antes de avançar no atendimento.",
+              "Existe Anamnese enviada sem revisão registrada. Revise esta submissão antes de avançar no atendimento.",
             eyebrow: "Ação da Patty",
-            href: `/admin/anamneses/${latestAnamnesis.id}/revisao`,
+            href: `/admin/anamneses/${anamnesisPattyAction.submission.id}/revisao`,
             label: "Revisar Anamnese",
             title: "Revisão da Anamnese",
           }
-        : clarificationAwaitingPatty
+        : {
+            description:
+              "A cliente respondeu a um pedido de esclarecimento e a Patty ainda precisa revisar e marcar a pendência como resolvida.",
+            eyebrow: "Ação da Patty",
+            href: `/admin/anamneses/${anamnesisPattyAction.submission.id}/esclarecimentos`,
+            label: "Revisar esclarecimentos",
+            title: "Esclarecimento da Anamnese",
+          }
+      : anamnesisClientWait
+        ? {
+            description:
+              "Existe pedido de esclarecimento aberto e o atendimento aguarda a resposta da cliente antes de seguir.",
+            eyebrow: "Aguardando cliente",
+            href: `/admin/anamneses/${anamnesisClientWait.submission.id}/esclarecimentos`,
+            label: "Ver esclarecimentos",
+            title: "Esclarecimento da Anamnese",
+          }
+        : latestAnamnesis && !latestAnamnesis.submitted_at
           ? {
               description:
-                "A cliente respondeu a um pedido de esclarecimento e a Patty ainda precisa revisar e marcar a pendência como resolvida.",
-              eyebrow: "Ação da Patty",
-              href: `/admin/anamneses/${latestAnamnesis.id}/esclarecimentos`,
-              label: "Revisar esclarecimentos",
-              title: "Esclarecimento da Anamnese",
+                "A Anamnese mais recente está em rascunho e depende do preenchimento e envio da cliente.",
+              eyebrow: "Aguardando cliente",
+              href: `/admin/clientes/${client.id}/anamnese`,
+              label: "Ver status da Anamnese",
+              title: "Anamnese",
             }
-          : clarificationAwaitingClient
+          : anamneses.length === 0
             ? {
                 description:
-                  "Existe pedido de esclarecimento aberto e o atendimento aguarda a resposta da cliente antes de seguir.",
+                  "A cliente ainda não iniciou a Anamnese. Esta etapa depende da cliente antes da revisão profissional.",
                 eyebrow: "Aguardando cliente",
-                href: `/admin/anamneses/${latestAnamnesis.id}/esclarecimentos`,
-                label: "Ver esclarecimentos",
-                title: "Esclarecimento da Anamnese",
+                href: `/admin/clientes/${client.id}/anamnese`,
+                label: "Ver status da Anamnese",
+                title: "Anamnese",
               }
             : !hasFinalizedAssessment
-          ? {
-              description:
-                latestAssessment
-                  ? "Existe uma avaliação em rascunho. Conclua a coleta antes de seguir."
-                  : "Registre a primeira avaliação da cliente.",
-              eyebrow: "Ação da Patty",
-              href: `/admin/clientes/${client.id}/avaliacoes`,
-              label: "Abrir avaliações",
-              title: "Avaliação",
-            }
-        : !hasPublishedProtocol
-          ? {
-              description:
-                protocols.length > 0
-                  ? "Existe protocolo em andamento, mas ainda não há uma publicação para a cliente."
-                  : "Crie e revise o primeiro protocolo antes de iniciar o acompanhamento semanal.",
-              eyebrow: "Ação da Patty",
-              href: `/admin/clientes/${client.id}/protocolos`,
-              label: "Abrir protocolos",
-              title: "Primeiro protocolo",
-            }
-          : {
-              description:
-                "As etapas iniciais estão registradas. Continue o acompanhamento conforme os dados e a decisão profissional da Patty.",
-              eyebrow: "Acompanhamento",
-              href: `/admin/clientes/${client.id}/feedback-semanal`,
-              label: "Abrir acompanhamento",
-              title: "Acompanhamento contínuo",
-            };
+              ? {
+                  description:
+                    latestAssessment
+                      ? "Existe uma avaliação em rascunho. Conclua a coleta antes de seguir."
+                      : "Registre a primeira avaliação da cliente.",
+                  eyebrow: "Ação da Patty",
+                  href: `/admin/clientes/${client.id}/avaliacoes`,
+                  label: "Abrir avaliações",
+                  title: "Avaliação",
+                }
+              : !hasPublishedProtocol
+                ? {
+                    description:
+                      protocols.length > 0
+                        ? "Existe protocolo em andamento, mas ainda não há uma publicação para a cliente."
+                        : "Crie e revise o primeiro protocolo antes de iniciar o acompanhamento semanal.",
+                    eyebrow: "Ação da Patty",
+                    href: `/admin/clientes/${client.id}/protocolos`,
+                    label: "Abrir protocolos",
+                    title: "Primeiro protocolo",
+                  }
+                : {
+                    description:
+                      "As etapas iniciais estão registradas. Continue o acompanhamento conforme os dados e a decisão profissional da Patty.",
+                    eyebrow: "Acompanhamento",
+                    href: `/admin/clientes/${client.id}/feedback-semanal`,
+                    label: "Abrir acompanhamento",
+                    title: "Acompanhamento contínuo",
+                  };
 
   return (
     <>
@@ -353,44 +382,42 @@ export default async function AdminClienteDetailPage({
               <div>
                 <h3 className={styles.cardTitle}>Anamnese</h3>
                 <p className={styles.cardDescription}>
-                  {!latestAnamnesis?.submitted_at
-                    ? latestAnamnesis
-                      ? "Existe um rascunho ainda não enviado pela cliente."
-                      : "A cliente ainda não iniciou a Anamnese."
-                    : latestAnamnesisReviews.length === 0
-                      ? "A Anamnese foi enviada e ainda aguarda revisão profissional."
-                      : clarificationAwaitingPatty
-                        ? "A cliente respondeu a um esclarecimento e a Patty ainda precisa revisar a resposta."
-                        : clarificationAwaitingClient
-                          ? "Existe pedido de esclarecimento aberto aguardando resposta da cliente."
-                          : "A Anamnese possui revisão registrada e não há esclarecimento aberto."}
+                  {anamnesisPattyAction
+                    ? anamnesisPattyAction.reviewPending
+                      ? "Existe Anamnese enviada aguardando revisão profissional."
+                      : "Existe resposta de esclarecimento aguardando revisão da Patty."
+                    : anamnesisClientWait
+                      ? "Existe pedido de esclarecimento aberto aguardando resposta da cliente."
+                      : latestAnamnesis && !latestAnamnesis.submitted_at
+                        ? "A Anamnese mais recente ainda está em preenchimento pela cliente."
+                        : anamneses.length === 0
+                          ? "A cliente ainda não iniciou a Anamnese."
+                          : "As submissões enviadas estão revisadas e sem esclarecimentos abertos."}
                 </p>
               </div>
             </div>
             <div className={styles.journeyActions}>
               <Badge
                 variant={
-                  !latestAnamnesis?.submitted_at
-                    ? latestAnamnesis
-                      ? "warning"
-                      : "neutral"
-                    : latestAnamnesisReviews.length === 0 ||
-                        clarificationAwaitingPatty ||
-                        clarificationAwaitingClient
-                      ? "warning"
+                  anamnesisPattyAction ||
+                  anamnesisClientWait ||
+                  (latestAnamnesis && !latestAnamnesis.submitted_at)
+                    ? "warning"
+                    : anamneses.length === 0
+                      ? "neutral"
                       : "positive"
                 }
               >
-                {!latestAnamnesis?.submitted_at
-                  ? latestAnamnesis
-                    ? "Em preenchimento"
-                    : "Não iniciada"
-                  : latestAnamnesisReviews.length === 0
+                {anamnesisPattyAction
+                  ? anamnesisPattyAction.reviewPending
                     ? "Revisão pendente"
-                    : clarificationAwaitingPatty
-                      ? "Ação da Patty"
-                      : clarificationAwaitingClient
-                        ? "Aguardando cliente"
+                    : "Ação da Patty"
+                  : anamnesisClientWait
+                    ? "Aguardando cliente"
+                    : latestAnamnesis && !latestAnamnesis.submitted_at
+                      ? "Em preenchimento"
+                      : anamneses.length === 0
+                        ? "Não iniciada"
                         : "Revisada"}
               </Badge>
               <Link className={styles.journeyLink} href={`/admin/clientes/${client.id}/anamnese`}>
