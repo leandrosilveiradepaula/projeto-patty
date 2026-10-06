@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 import { LogoutButton } from "@/components/auth/LogoutButton";
 import styles from "./AdminSidebar.module.css";
@@ -61,6 +61,8 @@ type AdminSidebarProps = {
 export function AdminSidebar({ displayName, mode = "desktop" }: AdminSidebarProps) {
   const pathname = usePathname();
   const drawerId = useId();
+  const drawerRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
@@ -82,11 +84,54 @@ export function AdminSidebar({ displayName, mode = "desktop" }: AdminSidebarProp
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    drawerRef.current?.focus();
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      menuButtonRef.current?.focus();
+    };
+  }, [isOpen]);
+
+  function handleDrawerKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
+    if (event.key !== "Tab") {
+      return;
+    }
+
+    const focusable = drawerRef.current?.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    );
+
+    if (!focusable || focusable.length === 0) {
+      event.preventDefault();
+      return;
+    }
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    const active = document.activeElement;
+
+    if (event.shiftKey && active === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && active === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
   if (mode === "mobile") {
     return (
       <div className={styles.mobileNavigation}>
         <span className={styles.mobileBrand}>Corpo &amp; Mente</span>
         <button
+          ref={menuButtonRef}
           aria-label="Abrir navegação administrativa"
           aria-controls={drawerId}
           aria-expanded={isOpen}
@@ -100,8 +145,13 @@ export function AdminSidebar({ displayName, mode = "desktop" }: AdminSidebarProp
           <div className={styles.drawerLayer}>
             <div
               aria-label="Navegação administrativa"
+              aria-modal="true"
               className={styles.drawer}
               id={drawerId}
+              onKeyDown={handleDrawerKeyDown}
+              ref={drawerRef}
+              role="dialog"
+              tabIndex={-1}
             >
               <SidebarContent
                 displayName={displayName}
