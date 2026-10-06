@@ -1,5 +1,4 @@
 import { ClientProtocolNutrition } from "@/components/client/ClientProtocolNutrition";
-import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import styles from "./AdminProtocolVersionPlan.module.css";
 
@@ -50,19 +49,6 @@ export function AdminProtocolVersionPlan({
 
   return (
     <div className={styles.plan}>
-      <Card variant="subtle">
-        <dl className={styles.metadata}>
-          <div>
-            <dt>ID do plano</dt>
-            <dd>{plan.id}</dd>
-          </div>
-          <div>
-            <dt>Versão do catálogo de equivalentes</dt>
-            <dd>{plan.foodEquivalentCatalogVersionId ?? "Não vinculada"}</dd>
-          </div>
-        </dl>
-      </Card>
-
       <div className={styles.block}>
         <h4 className={styles.blockTitle}>Variantes, refeições e doses</h4>
         <ClientProtocolNutrition

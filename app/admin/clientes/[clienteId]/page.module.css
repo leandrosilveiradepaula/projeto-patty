@@ -6,7 +6,7 @@
 
 .infoCard {
   display: grid;
-  gap: var(--space-3);
+  gap: var(--space-2);
   align-content: start;
   min-width: 0;
   height: 100%;
@@ -21,6 +21,17 @@
 
 .cardLink:hover .cardTitle {
   text-decoration: underline;
+}
+
+.cardLink .cardTitle {
+  font-size: var(--text-title-small-size);
+  font-weight: var(--text-title-small-weight);
+  line-height: var(--text-title-small-line-height);
+}
+
+.cardLink .cardDescription {
+  font-size: var(--text-body-small-size);
+  line-height: var(--text-body-small-line-height);
 }
 
 .cardHeader {
