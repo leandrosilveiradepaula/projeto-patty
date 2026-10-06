@@ -151,7 +151,7 @@ export default async function AdminExerciseDetailPage({ params }: PageProps) {
       </Section>
 
       <Section
-        description="O histórico permanece disponível para a Patty. A cliente visualiza somente a versão publicada mais recente de cada exercício."
+        description="O histórico permanece disponível para a Patty. A forma definitiva de exposição da biblioteca de exercícios para clientes precisa seguir a decisão de produto documentada."
         title="Histórico de versões"
       >
         {versions.length === 0 ? (
