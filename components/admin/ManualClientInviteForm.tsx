@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
 import {
   type ManualInviteClientState,
@@ -24,6 +24,22 @@ export function ManualClientInviteForm() {
     generateManualClientInvite,
     initialState,
   );
+  const [copyStatus, setCopyStatus] = useState<string | null>(null);
+
+  async function copyActivationLink() {
+    if (!state.activationLink) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(state.activationLink);
+      setCopyStatus("Link copiado.");
+    } catch {
+      setCopyStatus(
+        "Não foi possível copiar automaticamente. Selecione o link abaixo e copie manualmente.",
+      );
+    }
+  }
 
   return (
     <form action={formAction} className={styles.form} noValidate>
@@ -89,6 +105,16 @@ export function ManualClientInviteForm() {
             rows={4}
             value={state.activationLink}
           />
+          <div className={styles.linkActions}>
+            <Button onClick={copyActivationLink} type="button" variant="secondary">
+              Copiar link
+            </Button>
+            {copyStatus ? (
+              <p aria-live="polite" className={styles.copyStatus}>
+                {copyStatus}
+              </p>
+            ) : null}
+          </div>
           <p className={styles.note}>
             Copie e envie este link somente para a cliente cujo email foi
             informado acima. O link não deve ser publicado ou compartilhado com
