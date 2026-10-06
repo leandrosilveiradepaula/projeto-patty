@@ -25,7 +25,7 @@ export async function addLiquidIntakeAction(formData: FormData) {
   const client = await getCurrentClient();
 
   if (!client) {
-    throw new Error("Client profile is unavailable");
+    redirect("/cliente/checkins?status=client-unavailable");
   }
 
   const rawAmount = formData.get("amountMl");
@@ -34,7 +34,7 @@ export async function addLiquidIntakeAction(formData: FormData) {
     typeof rawAmount === "string" ? Number.parseInt(rawAmount, 10) : Number.NaN;
 
   if (!Number.isInteger(amountMl) || amountMl <= 0) {
-    throw new Error("Quantidade de liquido invalida");
+    redirect("/cliente/checkins?status=liquid-invalid");
   }
 
   const taxonomy = await loadSupportedLiquidTaxonomy();
@@ -44,21 +44,25 @@ export async function addLiquidIntakeAction(formData: FormData) {
       : null;
 
   if (!liquidKind) {
-    throw new Error("Tipo de liquido invalido");
+    redirect("/cliente/checkins?status=liquid-invalid");
   }
 
-  await createLiquidIntakeWithMethodSnapshot({
-    amountMl,
-    clientId: client.id,
-    liquidKind: liquidKind.key,
-    recordedByProfileId: auth.profileId,
-    templateVersionId: taxonomy.templateVersionId,
-    resolvedConfiguration: taxonomy.configuration,
-    resultValues: {
-      liquid_kind: liquidKind.key,
-      hydration_class: liquidKind.hydrationClass,
-    },
-  });
+  try {
+    await createLiquidIntakeWithMethodSnapshot({
+      amountMl,
+      clientId: client.id,
+      liquidKind: liquidKind.key,
+      recordedByProfileId: auth.profileId,
+      templateVersionId: taxonomy.templateVersionId,
+      resolvedConfiguration: taxonomy.configuration,
+      resultValues: {
+        liquid_kind: liquidKind.key,
+        hydration_class: liquidKind.hydrationClass,
+      },
+    });
+  } catch {
+    redirect("/cliente/checkins?status=liquid-error");
+  }
 
   revalidatePath("/cliente");
   revalidatePath("/cliente/checkins");
@@ -70,21 +74,25 @@ export async function recordActivityCheckinAction(formData: FormData) {
   const client = await getCurrentClient();
 
   if (!client) {
-    throw new Error("Client profile is unavailable");
+    redirect("/cliente/checkins?status=client-unavailable");
   }
 
   const rawValue = formData.get("didActivity");
 
   if (rawValue !== "yes" && rawValue !== "no") {
-    throw new Error("Resposta de atividade fisica invalida");
+    redirect("/cliente/checkins?status=activity-invalid");
   }
 
-  await createCurrentClientActivityCheckinEvent({
-    checkinDate: currentSaoPauloDate(),
-    clientId: client.id,
-    didActivity: rawValue === "yes",
-    recordedByProfileId: auth.profileId,
-  });
+  try {
+    await createCurrentClientActivityCheckinEvent({
+      checkinDate: currentSaoPauloDate(),
+      clientId: client.id,
+      didActivity: rawValue === "yes",
+      recordedByProfileId: auth.profileId,
+    });
+  } catch {
+    redirect("/cliente/checkins?status=activity-error");
+  }
 
   revalidatePath("/cliente");
   revalidatePath("/cliente/checkins");
