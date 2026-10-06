@@ -83,8 +83,8 @@ export function AdminAnamnesisWorkspaceHeader({
         displayName={displayName}
         secondary="Anamnese"
         status={
-          <Badge variant={submittedAt ? "positive" : "warning"}>
-            {submittedAt ? "Enviada" : "Rascunho"}
+          <Badge variant={submittedAt ? "positive" : "neutral"}>
+            {submittedAt ? "Enviada" : "Aguardando cliente"}
           </Badge>
         }
       />
