@@ -6,7 +6,7 @@ import { Section } from "@/components/ui/Section";
 import {
   getCurrentClient,
   listCurrentClientContentReleases,
-  listEducationalContentAssetsForCurrentClient,
+  listEducationalContentAssetsForCurrentClientVersions,
 } from "@/lib/supabase/data-access";
 import styles from "./page.module.css";
 
@@ -15,19 +15,26 @@ export default async function ClienteConteudosPage() {
   const releases = client
     ? await listCurrentClientContentReleases(client.id)
     : null;
-  const assetsByVersion = new Map(
-    client && releases
-      ? await Promise.all(
-          releases
-            .map((release) => release.educational_content_versions)
-            .filter((version): version is NonNullable<typeof version> => Boolean(version))
-            .map(async (version) => [
-              version.id,
-              await listEducationalContentAssetsForCurrentClient(version.id),
-            ] as const),
-        )
-      : [],
-  );
+  const releasedVersions =
+    releases
+      ?.map((release) => release.educational_content_versions)
+      .filter((version): version is NonNullable<typeof version> => Boolean(version)) ??
+    [];
+  const assets = client
+    ? await listEducationalContentAssetsForCurrentClientVersions(
+        releasedVersions.map((version) => version.id),
+      )
+    : [];
+  const assetsByVersion = new Map<
+    string,
+    typeof assets
+  >();
+
+  for (const asset of assets) {
+    const current = assetsByVersion.get(asset.educational_content_version_id) ?? [];
+    current.push(asset);
+    assetsByVersion.set(asset.educational_content_version_id, current);
+  }
 
   return (
     <>
