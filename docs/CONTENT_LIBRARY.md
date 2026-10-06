@@ -1,3 +1,13 @@
+## Biblioteca de exercicios e visibilidade por cliente
+
+### REGRA CONFIRMADA PELA PATTY EM 2026-10-06
+
+A biblioteca de exercicios e um catalogo global administrado pela Patty. Ela pode cadastrar todos os exercicios que considerar disponiveis para composicao profissional de treinos.
+
+Cada cliente recebe um subconjunto individual escolhido pela Patty. A publicacao de uma versao na biblioteca apenas a torna disponivel para selecao profissional; nao libera o exercicio globalmente para clientes.
+
+A cliente deve visualizar somente os exercicios que pertencem ao treino selecionado e publicado para ela. O conjunto pode variar entre clientes e pode ser alterado manualmente pela Patty, com preservacao do historico do treino efetivamente publicado.
+
 # Biblioteca de Conteudo
 
 ## Conteudo existente
