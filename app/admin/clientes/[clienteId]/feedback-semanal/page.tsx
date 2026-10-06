@@ -196,7 +196,7 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
                         </p>
                       </div>
                       <Badge variant={feedback.submitted_at ? "positive" : "warning"}>
-                        {feedback.submitted_at ? "Respondido" : "Pendente"}
+                        {feedback.submitted_at ? "Respondido" : "Aguardando cliente"}
                       </Badge>
                     </div>
                     <p className={styles.meta}>
