@@ -8,6 +8,7 @@ import {
 } from "@/app/admin/clientes/nova/actions";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
+import Link from "next/link";
 import { FormField } from "@/components/ui/FormField";
 import { TextInput } from "@/components/ui/TextInput";
 
@@ -15,6 +16,7 @@ import styles from "./ManualClientInviteForm.module.css";
 
 const initialState: ManualInviteClientState = {
   activationLink: null,
+  clientId: null,
   message: null,
   success: false,
 };
@@ -115,6 +117,14 @@ export function ManualClientInviteForm() {
               </p>
             ) : null}
           </div>
+          {state.clientId ? (
+            <Link
+              className={styles.clientLink}
+              href={`/admin/clientes/${state.clientId}?onboarding=link-generated`}
+            >
+              Abrir acompanhamento desta cliente
+            </Link>
+          ) : null}
           <p className={styles.note}>
             Copie e envie este link somente para a cliente cujo email foi
             informado acima. O link não deve ser publicado ou compartilhado com
