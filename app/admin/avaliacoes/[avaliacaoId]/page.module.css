@@ -83,3 +83,9 @@
   outline: 3px solid var(--color-accent);
   outline-offset: 3px;
 }
+
+/* Keep anchored sections visible below surrounding navigation. */
+:global(section[id]),
+.versionItem[id] {
+  scroll-margin-top: var(--space-6);
+}
