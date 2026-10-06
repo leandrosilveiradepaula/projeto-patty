@@ -121,6 +121,7 @@ export default async function AdminClienteDetailPage({
     ? {
         description:
           "Complete os dados atuais de contato antes de seguir com o restante do atendimento.",
+        eyebrow: "Ação da Patty",
         href: "#cadastro-atual",
         label: "Preencher cadastro atual",
         title: "Cadastro atual",
@@ -129,10 +130,11 @@ export default async function AdminClienteDetailPage({
       ? {
           description:
             latestAnamnesis
-              ? "A Anamnese está em rascunho. Acompanhe o preenchimento antes da revisão profissional."
-              : "A cliente ainda não iniciou a Anamnese.",
+              ? "A Anamnese está em rascunho e depende do preenchimento e envio da cliente antes da revisão profissional."
+              : "A cliente ainda não iniciou a Anamnese. Esta etapa depende da cliente antes da revisão profissional.",
+          eyebrow: "Aguardando cliente",
           href: `/admin/clientes/${client.id}/anamnese`,
-          label: "Abrir Anamnese",
+          label: "Ver status da Anamnese",
           title: "Anamnese",
         }
       : !hasFinalizedAssessment
@@ -141,6 +143,7 @@ export default async function AdminClienteDetailPage({
               latestAssessment
                 ? "Existe uma avaliação em rascunho. Conclua a coleta antes de seguir."
                 : "Registre a primeira avaliação da cliente.",
+            eyebrow: "Ação da Patty",
             href: `/admin/clientes/${client.id}/avaliacoes`,
             label: "Abrir avaliações",
             title: "Avaliação",
@@ -151,6 +154,7 @@ export default async function AdminClienteDetailPage({
                 protocols.length > 0
                   ? "Existe protocolo em andamento, mas ainda não há uma publicação para a cliente."
                   : "Crie e revise o primeiro protocolo antes de iniciar o acompanhamento semanal.",
+              eyebrow: "Ação da Patty",
               href: `/admin/clientes/${client.id}/protocolos`,
               label: "Abrir protocolos",
               title: "Primeiro protocolo",
@@ -158,6 +162,7 @@ export default async function AdminClienteDetailPage({
           : {
               description:
                 "As etapas iniciais estão registradas. Continue o acompanhamento conforme os dados e a decisão profissional da Patty.",
+              eyebrow: "Acompanhamento",
               href: `/admin/clientes/${client.id}/feedback-semanal`,
               label: "Abrir acompanhamento",
               title: "Acompanhamento contínuo",
@@ -204,7 +209,7 @@ export default async function AdminClienteDetailPage({
 
       <section className={styles.nextAction} aria-labelledby="next-action-title">
         <div>
-          <p className={styles.nextActionEyebrow}>Próxima ação operacional</p>
+          <p className={styles.nextActionEyebrow}>{nextOperationalAction.eyebrow}</p>
           <h2 className={styles.nextActionTitle} id="next-action-title">
             {nextOperationalAction.title}
           </h2>
