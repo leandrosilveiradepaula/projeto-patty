@@ -175,6 +175,21 @@ A auditoria de telas longas e continuidade operacional identificou pontos de den
 
 Nenhuma regra profissional, validacao deterministica, dado historico, schema ou RLS foi alterado.
 
+## Atualizacao de auditoria de interface 2026-10-06 - polimento do workspace
+
+### Orientacao, mobile e estados vazios
+
+A rodada de polimento do workspace administrativo consolidou os seguintes ajustes:
+
+- todas as paginas-raiz auditadas do workspace passam a declarar explicitamente a area ativa na navegacao;
+- cabecalhos de Anamnese, Avaliacoes, Protocolos, Conteudos, Feedback Semanal e Check-ins deixam de repetir textos genericos como "Acompanhamento ativo" quando ja existe estado local mais util;
+- Check-ins diferencia visualmente a meta atual da acao excepcional de recalculo manual;
+- Evolucao administrativa passa a transformar a tabela em cartoes legiveis no mobile, seguindo o padrao ja usado na area da cliente e preservando o link para a avaliacao;
+- estado vazio do Feedback Semanal deixa de mandar criar uma solicitacao quando ainda nao existe protocolo publicado e, portanto, a acao nao esta disponivel;
+- Anamnese deixa de duplicar a geracao manual de iniciais e usa integralmente o cabecalho compartilhado do workspace.
+
+Nenhuma regra profissional, elegibilidade, calculo, dado historico, schema ou RLS foi alterado.
+
 ## Legenda de estado
 
 - **DEFINIDO**: regra ou decisao documentada.
