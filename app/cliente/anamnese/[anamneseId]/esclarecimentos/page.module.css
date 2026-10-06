@@ -1,4 +1,7 @@
 .backLink {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
   color: var(--color-brand-strong);
   font-family: var(--font-family-heading);
   text-decoration: none;
@@ -39,4 +42,17 @@
   color: var(--color-text-muted);
   font-size: var(--text-body-small-size);
   font-weight: var(--text-label-small-weight);
+}
+
+.backLink:focus-visible {
+  border-radius: var(--radius-medium);
+  outline: 3px solid var(--color-brand);
+  outline-offset: 3px;
+}
+
+.statusGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
 }
