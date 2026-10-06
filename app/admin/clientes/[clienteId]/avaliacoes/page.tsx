@@ -1,5 +1,5 @@
 import { AssessmentCreateForm } from "@/components/admin/AssessmentCreateForm";
-import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
+import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { EvaluationListItem } from "@/components/admin/EvaluationListItem";
 import { Badge } from "@/components/ui/Badge";
@@ -64,9 +64,9 @@ export default async function AdminClientAssessmentsPage({
 
   return (
     <>
-      <ClientSummaryHeader
-        meta="Cliente atribuído"
-        name={displayName || "Cliente sem nome informado"}
+      <ClientWorkspaceHeader
+        meta="Acompanhamento ativo"
+        displayName={displayName}
         secondary="Histórico de avaliações"
         status={<Badge variant="neutral">Atribuição ativa</Badge>}
         visual={
