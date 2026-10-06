@@ -79,3 +79,9 @@
 .detailLink:hover {
   text-decoration: underline;
 }
+
+.detailLink:focus-visible {
+  border-radius: var(--radius-medium);
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
+}
