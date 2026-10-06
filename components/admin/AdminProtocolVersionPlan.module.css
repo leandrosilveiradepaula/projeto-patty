@@ -8,31 +8,6 @@
   min-width: 0;
 }
 
-.metadata {
-  display: grid;
-  gap: var(--space-3);
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
-  margin: 0;
-}
-
-.metadata div {
-  display: grid;
-  gap: var(--space-1);
-  min-width: 0;
-}
-
-.metadata dt {
-  color: var(--color-text-muted);
-  font-size: var(--text-body-small-size);
-  font-weight: var(--text-label-small-weight);
-}
-
-.metadata dd {
-  margin: 0;
-  color: var(--color-text-secondary);
-  overflow-wrap: anywhere;
-}
-
 .block {
   gap: var(--space-3);
 }
