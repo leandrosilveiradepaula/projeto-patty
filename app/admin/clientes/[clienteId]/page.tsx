@@ -13,10 +13,10 @@ import {
   getAccessibleClient,
   getAccessibleClientRegistration,
   getAccessibleWeeklyFeedbackNotificationPreference,
-  listAccessibleAnamnesisClarificationRequests,
+  listAccessibleAnamnesisClarificationRequestsForSubmissions,
   listAccessibleAnamnesisClarificationResolutions,
   listAccessibleAnamnesisClarificationResponses,
-  listAccessibleAnamnesisReviews,
+  listAccessibleAnamnesisReviewsForSubmissions,
   listAccessibleAnamnesisSubmissions,
   listAccessibleAssessmentsForClient,
   listAccessibleClientActivityCheckinEvents,
@@ -26,7 +26,7 @@ import {
   listAccessibleProtocolsForClient,
   listAccessibleProtocolPublications,
   listAccessibleProtocolVersionApprovals,
-  listAccessibleProtocolVersions,
+  listAccessibleProtocolVersionsForProtocols,
   listAccessibleWeeklyFeedbacksForClient,
   hasAccessibleProtocolPublicationForClient,
   listContentReleasesForAccessibleClient,
@@ -115,62 +115,84 @@ export default async function AdminClienteDetailPage({
     .filter((submission) => Boolean(submission.submitted_at))
     .slice()
     .reverse();
-  const submittedAnamnesisStates = await Promise.all(
-    submittedAnamneses.map(async (submission) => {
-      const [reviews, clarificationRequests] = await Promise.all([
-        listAccessibleAnamnesisReviews(submission.id),
-        listAccessibleAnamnesisClarificationRequests(submission.id),
-      ]);
-      const clarificationRequestIds = clarificationRequests.map(
-        (request) => request.id,
-      );
-      const [clarificationResponses, clarificationResolutions] =
-        clarificationRequestIds.length > 0
-          ? await Promise.all([
-              listAccessibleAnamnesisClarificationResponses(
-                clarificationRequestIds,
-              ),
-              listAccessibleAnamnesisClarificationResolutions(
-                clarificationRequestIds,
-              ),
-            ])
-          : [[], []];
-      const clarificationResponseCountByRequestId = new Map<string, number>();
-      const resolvedClarificationRequestIds = new Set(
-        clarificationResolutions.map(
-          (resolution) => resolution.clarification_request_id,
-        ),
-      );
+  const submittedAnamnesisIds = submittedAnamneses.map(
+    (submission) => submission.id,
+  );
+  const [submittedAnamnesisReviews, clarificationRequests] =
+    submittedAnamnesisIds.length > 0
+      ? await Promise.all([
+          listAccessibleAnamnesisReviewsForSubmissions(submittedAnamnesisIds),
+          listAccessibleAnamnesisClarificationRequestsForSubmissions(
+            submittedAnamnesisIds,
+          ),
+        ])
+      : [[], []];
+  const clarificationRequestIds = clarificationRequests.map(
+    (request) => request.id,
+  );
+  const [clarificationResponses, clarificationResolutions] =
+    clarificationRequestIds.length > 0
+      ? await Promise.all([
+          listAccessibleAnamnesisClarificationResponses(
+            clarificationRequestIds,
+          ),
+          listAccessibleAnamnesisClarificationResolutions(
+            clarificationRequestIds,
+          ),
+        ])
+      : [[], []];
+  const reviewedSubmissionIds = new Set(
+    submittedAnamnesisReviews.map((review) => review.submission_id),
+  );
+  const clarificationRequestsBySubmissionId = new Map<
+    string,
+    typeof clarificationRequests
+  >();
+  const clarificationResponseCountByRequestId = new Map<string, number>();
+  const resolvedClarificationRequestIds = new Set(
+    clarificationResolutions.map(
+      (resolution) => resolution.clarification_request_id,
+    ),
+  );
 
-      for (const response of clarificationResponses) {
-        clarificationResponseCountByRequestId.set(
-          response.clarification_request_id,
-          (clarificationResponseCountByRequestId.get(
-            response.clarification_request_id,
-          ) ?? 0) + 1,
-        );
-      }
+  for (const request of clarificationRequests) {
+    const current =
+      clarificationRequestsBySubmissionId.get(request.submission_id) ?? [];
+    current.push(request);
+    clarificationRequestsBySubmissionId.set(request.submission_id, current);
+  }
 
-      const unresolvedClarificationRequests = clarificationRequests.filter(
+  for (const response of clarificationResponses) {
+    clarificationResponseCountByRequestId.set(
+      response.clarification_request_id,
+      (clarificationResponseCountByRequestId.get(
+        response.clarification_request_id,
+      ) ?? 0) + 1,
+    );
+  }
+
+  const submittedAnamnesisStates = submittedAnamneses.map((submission) => {
+    const submissionClarificationRequests =
+      clarificationRequestsBySubmissionId.get(submission.id) ?? [];
+    const unresolvedClarificationRequests =
+      submissionClarificationRequests.filter(
         (request) => !resolvedClarificationRequestIds.has(request.id),
       );
-      const clarificationAwaitingPatty =
-        unresolvedClarificationRequests.some(
-          (request) =>
-            (clarificationResponseCountByRequestId.get(request.id) ?? 0) > 0,
-        );
-      const clarificationAwaitingClient =
-        unresolvedClarificationRequests.length > 0 &&
-        !clarificationAwaitingPatty;
+    const clarificationAwaitingPatty = unresolvedClarificationRequests.some(
+      (request) =>
+        (clarificationResponseCountByRequestId.get(request.id) ?? 0) > 0,
+    );
+    const clarificationAwaitingClient =
+      unresolvedClarificationRequests.length > 0 &&
+      !clarificationAwaitingPatty;
 
-      return {
-        clarificationAwaitingClient,
-        clarificationAwaitingPatty,
-        reviewPending: reviews.length === 0,
-        submission,
-      };
-    }),
-  );
+    return {
+      clarificationAwaitingClient,
+      clarificationAwaitingPatty,
+      reviewPending: !reviewedSubmissionIds.has(submission.id),
+      submission,
+    };
+  });
   const anamnesisPattyAction = submittedAnamnesisStates.find(
     (state) => state.reviewPending || state.clarificationAwaitingPatty,
   );
@@ -182,16 +204,17 @@ export default async function AdminClienteDetailPage({
     (assessment) => !assessment.finalized_at,
   );
   const latestProtocol = protocols[0] ?? null;
-  const protocolVersionGroups = await Promise.all(
-    protocols.map(async (protocol) => ({
-      protocol,
-      versions: await listAccessibleProtocolVersions(protocol.id),
-    })),
+  const accessibleProtocolVersions =
+    await listAccessibleProtocolVersionsForProtocols(
+      protocols.map((protocol) => protocol.id),
+    );
+  const protocolById = new Map(
+    protocols.map((protocol) => [protocol.id, protocol]),
   );
-  const protocolVersions = protocolVersionGroups.flatMap(
-    ({ protocol, versions }) =>
-      versions.map((version) => ({ protocol, version })),
-  );
+  const protocolVersions = accessibleProtocolVersions.flatMap((version) => {
+    const protocol = protocolById.get(version.protocol_id);
+    return protocol ? [{ protocol, version }] : [];
+  });
   const protocolVersionIds = protocolVersions.map(({ version }) => version.id);
   const [protocolApprovals, protocolPublications] =
     protocolVersionIds.length > 0

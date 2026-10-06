@@ -95,6 +95,17 @@ Na hidratacao, o template profissional vigente e 35 mL/kg/dia, com orientacao 70
 
 O warning `auth_leaked_password_protection` continua conhecido e foi adiado; o projeto permanece no plano Free, no qual esse recurso nao esta disponivel.
 
+## Atualizacao de auditoria de interface 2026-10-06
+
+### UX e performance percebida
+
+A auditoria de uso real identificou e removeu dois padroes N+1 em rotas de alta frequencia:
+
+- o workspace administrativo da cliente passa a carregar revisoes/esclarecimentos de Anamnese e versoes de protocolos em consultas em massa, preservando RLS e os mesmos estados operacionais;
+- a biblioteca de Conteudos da cliente passa a carregar assets das versoes liberadas em uma consulta em massa, preservando a versao exata liberada.
+
+A rodada tambem reforca alvos de toque em confirmacao de encerramento de acompanhamento e em detalhes tecnicos de protocolo. Nenhuma regra profissional, schema, migration ou RLS foi alterado.
+
 ## Legenda de estado
 
 - **DEFINIDO**: regra ou decisao documentada.
