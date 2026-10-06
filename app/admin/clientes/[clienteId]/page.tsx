@@ -581,7 +581,9 @@ export default async function AdminClienteDetailPage({
                 <h3 className={styles.cardTitle}>Acompanhamento contínuo</h3>
                 <p className={styles.cardDescription}>
                   {hasPublishedProtocol
-                    ? "Use avaliações, check-ins e Feedback Semanal para acompanhar a evolução e registrar novas decisões."
+                    ? pendingWeeklyFeedbackCount > 0
+                      ? `Há ${pendingWeeklyFeedbackCount} Feedback Semanal aguardando envio da cliente. Isso não cria uma ação da Patty até a cliente responder.`
+                      : "Use avaliações, check-ins e Feedback Semanal para acompanhar a evolução e registrar novas decisões."
                     : "O acompanhamento semanal passa a ser elegível depois da primeira publicação de protocolo."}
                 </p>
               </div>
@@ -599,7 +601,7 @@ export default async function AdminClienteDetailPage({
                 {!hasPublishedProtocol
                   ? "Aguardando protocolo"
                   : pendingWeeklyFeedbackCount > 0
-                    ? `${pendingWeeklyFeedbackCount} pendente(s)`
+                    ? `Aguardando cliente · ${pendingWeeklyFeedbackCount}`
                     : "Ativo"}
               </Badge>
               <Link className={styles.journeyLink} href={`/admin/clientes/${client.id}/feedback-semanal`}>
