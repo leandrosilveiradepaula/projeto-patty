@@ -52,6 +52,9 @@ export async function addAnamnesisReviewNote(
   }
 
   revalidatePath(`/admin/anamneses/${submission.id}/revisao`);
+  revalidatePath(`/admin/anamneses/${submission.id}`);
+  revalidatePath(`/admin/clientes/${submission.client_id}`);
+  revalidatePath(`/admin/clientes/${submission.client_id}/anamnese`);
 
   return {
     message: "Nota interna registrada.",
