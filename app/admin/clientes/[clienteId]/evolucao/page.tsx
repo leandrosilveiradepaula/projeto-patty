@@ -87,7 +87,7 @@ export default async function AdminClientProgressPage({ params }: PageProps) {
         status={<Badge variant="neutral">{assessments.length} avaliação(ões)</Badge>}
       />
 
-      <ClientWorkspaceNav clientId={client.id} />
+      <ClientWorkspaceNav activeArea="evolucao" clientId={client.id} />
 
       <Section
         description="Esta visão reúne apenas valores registrados nas avaliações finalizadas. Variações são diferenças matemáticas entre registros consecutivos da mesma medida e unidade; o sistema não classifica melhora, piora, sucesso ou estagnação."
