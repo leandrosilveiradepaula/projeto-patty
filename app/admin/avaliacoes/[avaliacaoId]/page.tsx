@@ -273,36 +273,6 @@ export default async function AdminAvaliacaoDetailPage({
       ) : null}
       {isDraft ? (
         <Section
-          description="Requisitos determinísticos da versão ativa para o tipo selecionado. A leitura profissional continua separada desta validação."
-          title="Requisitos da avaliação"
-        >
-          <Card className={styles.infoCard}>
-            {assessmentDefinition ? (
-              <ul className={styles.cadenceList}>
-                {assessmentDefinition.configuration.requiredMeasurements.map(
-                  (requirement) => (
-                    <li key={requirement.key}>{requirement.label}</li>
-                  ),
-                )}
-                {assessmentDefinition.configuration.photoRequirement ? (
-                  <li>
-                    {assessmentDefinition.configuration.photoRequirement.label}
-                    {" · mínimo "}
-                    {assessmentDefinition.configuration.photoRequirement.minimumCount}
-                  </li>
-                ) : null}
-              </ul>
-            ) : (
-              <p className={styles.cardDescription}>
-                O tipo histórico desta avaliação não corresponde a uma definição
-                ativa disponível.
-              </p>
-            )}
-          </Card>
-        </Section>
-      ) : null}
-      {isDraft ? (
-        <Section
           description="Cadastre ou atualize as medidas previstas na definição ativa desta avaliação. O seletor evita diferenças de digitação que atrapalhariam histórico e comparação."
           title="Adicionar ou atualizar medida"
         >
