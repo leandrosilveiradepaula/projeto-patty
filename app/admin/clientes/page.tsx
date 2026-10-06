@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/Button";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { TextInput } from "@/components/ui/TextInput";
 import { Section } from "@/components/ui/Section";
+import { getOperationalPendingItemsForCurrentAdmin } from "@/lib/operations/pending-data";
+import { groupOperationalPendingItems } from "@/lib/operations/pending";
 import { listClientsAssignedToCurrentAdmin } from "@/lib/supabase/data-access";
 import Link from "next/link";
 import styles from "./page.module.css";
@@ -34,8 +36,24 @@ export default async function AdminClientesPage({
   searchParams,
 }: AdminClientesPageProps) {
   const { assignment, onboarding, q } = await searchParams;
-  const assignments = await listClientsAssignedToCurrentAdmin();
+  const [assignments, pendingItems] = await Promise.all([
+    listClientsAssignedToCurrentAdmin(),
+    getOperationalPendingItemsForCurrentAdmin(),
+  ]);
   const clients = assignments?.flatMap((assignment) => assignment.clients ? [assignment.clients] : []) ?? [];
+  const pattyPendingItems = groupOperationalPendingItems(pendingItems).patty;
+  const pattyPendingCountByClientId = new Map<string, number>();
+
+  for (const item of pattyPendingItems) {
+    if (!item.clientId) {
+      continue;
+    }
+
+    pattyPendingCountByClientId.set(
+      item.clientId,
+      (pattyPendingCountByClientId.get(item.clientId) ?? 0) + 1,
+    );
+  }
   const searchTerm = q?.trim() ?? "";
   const normalizedSearchTerm = normalizeSearchValue(searchTerm);
   const filteredClients = normalizedSearchTerm
@@ -117,10 +135,18 @@ export default async function AdminClientesPage({
             <ul className={styles.clientList}>
             {filteredClients.map((client) => {
               const displayName = client.profiles?.display_name?.trim();
+              const pattyPendingCount =
+                pattyPendingCountByClientId.get(client.id) ?? 0;
+
               return (
                 <li key={client.id}>
                   <ClientListItem
                     action={<Link className={styles.actionLink} href={`/admin/clientes/${client.id}`}>Abrir</Link>}
+                    meta={
+                      pattyPendingCount > 0
+                        ? `${pattyPendingCount} ação(ões) aguardando a Patty`
+                        : "Sem ação da Patty pendente"
+                    }
                     name={displayName || "Cadastro incompleto"}
                     secondary={
                       client.profile_id
@@ -130,6 +156,8 @@ export default async function AdminClientesPage({
                     status={
                       !client.profile_id ? (
                         <Badge variant="warning">Completar cadastro</Badge>
+                      ) : pattyPendingCount > 0 ? (
+                        <Badge variant="warning">Ação da Patty</Badge>
                       ) : null
                     }
                     visual={<span>{getInitials(displayName)}</span>}
