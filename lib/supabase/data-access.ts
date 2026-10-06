@@ -577,6 +577,24 @@ export async function listAccessibleAnamnesisClarificationRequests(submissionId:
   return data;
 }
 
+export async function listAccessibleAnamnesisClarificationRequestsForSubmissions(
+  submissionIds: string[],
+) {
+  if (submissionIds.length === 0) return [];
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("anamnesis_clarification_requests")
+    .select("id, submission_id, source_answer_id, requested_by_profile_id, request_text, created_at")
+    .in("submission_id", submissionIds)
+    .order("submission_id", { ascending: true })
+    .order("created_at", { ascending: true })
+    .order("id", { ascending: true });
+
+  if (error) throw error;
+  return data;
+}
+
 export async function getAccessibleAnamnesisClarificationRequest(requestId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -680,6 +698,29 @@ export async function listAccessibleAnamnesisReviews(submissionId: string) {
       "id, submission_id, reviewer_profile_id, note, created_at, profiles(display_name)",
     )
     .eq("submission_id", submissionId)
+    .order("created_at", { ascending: true })
+    .order("id", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function listAccessibleAnamnesisReviewsForSubmissions(
+  submissionIds: string[],
+) {
+  if (submissionIds.length === 0) return [];
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("anamnesis_reviews")
+    .select(
+      "id, submission_id, reviewer_profile_id, note, created_at, profiles(display_name)",
+    )
+    .in("submission_id", submissionIds)
+    .order("submission_id", { ascending: true })
     .order("created_at", { ascending: true })
     .order("id", { ascending: true });
 
@@ -1679,6 +1720,28 @@ export async function listAccessibleProtocolVersions(protocolId: string) {
       "id, protocol_id, client_id, version_number, based_on_version_id, submitted_for_review_at, created_at",
     )
     .eq("protocol_id", protocolId)
+    .order("version_number", { ascending: false })
+    .order("id", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function listAccessibleProtocolVersionsForProtocols(
+  protocolIds: string[],
+) {
+  if (protocolIds.length === 0) return [];
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("protocol_versions")
+    .select(
+      "id, protocol_id, client_id, version_number, based_on_version_id, submitted_for_review_at, created_at",
+    )
+    .in("protocol_id", protocolIds)
     .order("version_number", { ascending: false })
     .order("id", { ascending: true });
 
