@@ -33,3 +33,18 @@
   font-size: var(--text-body-small-size);
   line-height: var(--text-body-small-line-height);
 }
+
+
+.linkActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.copyStatus {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-small-size);
+  line-height: var(--text-body-small-line-height);
+}
