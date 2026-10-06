@@ -72,6 +72,13 @@
   gap: var(--space-2);
 }
 
+.noteForm label {
+  display: grid;
+  gap: var(--space-2);
+  color: var(--color-text-primary);
+  font-weight: var(--text-label-medium-weight);
+}
+
 .noteForm textarea {
   width: 100%;
   min-height: 88px;
