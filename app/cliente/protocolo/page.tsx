@@ -11,9 +11,17 @@ function formatPublishedAt(value: string) {
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     month: "2-digit",
+    timeZone: "America/Sao_Paulo",
     year: "numeric",
-    timeZone: "UTC",
   }).format(new Date(value));
+}
+
+function formatProtocolType(value: string) {
+  if (value === "nutrition") {
+    return "Alimentação";
+  }
+
+  return value;
 }
 
 export default async function ClienteProtocoloPage() {
@@ -25,9 +33,9 @@ export default async function ClienteProtocoloPage() {
   return (
     <>
       <PageHeader
-        description="Registros publicados disponíveis para consulta nesta conta."
+        description="Consulte aqui o plano que a Patty liberou para você e, quando precisar, as versões anteriores."
         eyebrow="Cliente"
-        title="Protocolos publicados"
+        title="Meu protocolo"
       />
       {!client ? (
         <EmptyState
@@ -47,7 +55,7 @@ export default async function ClienteProtocoloPage() {
                 <Card>
                   <div className={styles.protocolHeader}>
                     <dl className={styles.facts}>
-                      <div><dt>Tipo</dt><dd>{publication.protocolType}</dd></div>
+                      <div><dt>Área</dt><dd>{formatProtocolType(publication.protocolType)}</dd></div>
                       <div><dt>Versão</dt><dd>{publication.versionNumber}</dd></div>
                       <div><dt>Publicado em</dt><dd>{formatPublishedAt(publication.publishedAt)}</dd></div>
                     </dl>
@@ -57,9 +65,9 @@ export default async function ClienteProtocoloPage() {
                   </div>
                 </Card>
                 <Section
-                  description="Variantes, refeições e doses registradas nesta publicação."
+                  description="Veja as variações, refeições e doses exatamente como foram liberadas pela Patty nesta versão."
                   headingLevel={3}
-                  title="Estrutura alimentar"
+                  title="Seu plano alimentar"
                 >
                   {!publication.mealPlan ? (
                     <EmptyState
@@ -80,7 +88,7 @@ export default async function ClienteProtocoloPage() {
                         }))}
                       />
                       <div className={styles.cycleBlock}>
-                        <h4 className={styles.cycleTitle}>Sequência do ciclo</h4>
+                        <h4 className={styles.cycleTitle}>Como alternar as variações</h4>
                         {publication.mealPlan.cycles.length === 0 ? (
                           <p className={styles.cycleEmpty}>
                             Nenhum ciclo foi registrado nesta publicação.
@@ -96,7 +104,7 @@ export default async function ClienteProtocoloPage() {
                                   <ol className={styles.cycleSteps}>
                                     {cycle.steps.map((step) => (
                                       <li key={`${cycle.id}-${step.position}`}>
-                                        <span>Passo {step.position}</span>
+                                        <span>Ordem {step.position}</span>
                                         <strong>{step.variantLabel ?? step.variantKey}</strong>
                                       </li>
                                     ))}
@@ -116,9 +124,9 @@ export default async function ClienteProtocoloPage() {
             if (publicationIndex === 0) {
               return (
                 <Section
-                  description="Esta é a publicação mais recente liberada pela Patty."
+                  description={`Última versão liberada pela Patty em ${formatPublishedAt(publication.publishedAt)}.`}
                   key={publication.id}
-                  title={`Protocolo ${publication.protocolType} — versão ${publication.versionNumber}`}
+                  title="Plano atual"
                 >
                   {content}
                 </Section>
@@ -128,7 +136,7 @@ export default async function ClienteProtocoloPage() {
             return (
               <details className={styles.historyItem} key={publication.id}>
                 <summary>
-                  Protocolo {publication.protocolType} · versão {publication.versionNumber} · {formatPublishedAt(publication.publishedAt)}
+                  Plano anterior · versão {publication.versionNumber} · {formatPublishedAt(publication.publishedAt)}
                 </summary>
                 <div className={styles.historyContent}>{content}</div>
               </details>
