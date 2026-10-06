@@ -189,3 +189,98 @@
 .journeyLink:hover {
   text-decoration: underline;
 }
+
+
+.nextAction {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-6);
+  border: 1px solid var(--color-brand);
+  border-radius: var(--radius-large);
+  background: var(--color-surface-low);
+  padding: var(--space-5);
+}
+
+.nextAction > div {
+  min-width: min(100%, 420px);
+  flex: 1;
+}
+
+.nextActionEyebrow,
+.nextActionTitle,
+.nextActionDescription {
+  margin: 0;
+}
+
+.nextActionEyebrow {
+  color: var(--color-brand-strong);
+  font-size: var(--text-label-small-size);
+  font-weight: var(--text-label-small-weight);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.nextActionTitle {
+  margin-top: var(--space-1);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+  font-size: var(--text-title-large-size);
+  line-height: var(--text-title-large-line-height);
+}
+
+.nextActionDescription {
+  max-width: 68ch;
+  margin-top: var(--space-2);
+  color: var(--color-text-secondary);
+  line-height: var(--text-body-medium-line-height);
+}
+
+.nextActionLink {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-medium);
+  background: var(--color-brand);
+  padding: var(--space-2) var(--space-4);
+  color: var(--color-on-brand);
+  font-family: var(--font-family-heading);
+  font-size: var(--text-label-medium-size);
+  font-weight: var(--text-label-medium-weight);
+  text-decoration: none;
+}
+
+.nextActionLink:hover {
+  text-decoration: underline;
+}
+
+.nextActionLink:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.journeyActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  justify-content: flex-end;
+}
+
+@media (max-width: 640px) {
+  .nextAction {
+    align-items: stretch;
+  }
+
+  .nextActionLink {
+    width: 100%;
+  }
+
+  .journeyActions {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
