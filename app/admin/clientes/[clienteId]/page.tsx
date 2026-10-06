@@ -4,6 +4,7 @@ import { AdminClientRecoveryLinkForm } from "@/components/admin/AdminClientRecov
 import { AdminWeeklyFeedbackNotificationPreferenceForm } from "@/components/admin/AdminWeeklyFeedbackNotificationPreferenceForm";
 import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
+import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -30,6 +31,9 @@ import styles from "./page.module.css";
 type AdminClienteDetailPageProps = {
   params: Promise<{
     clienteId: string;
+  }>;
+  searchParams: Promise<{
+    onboarding?: string;
   }>;
 };
 
@@ -61,8 +65,9 @@ function formatMl(value: number) {
 
 export default async function AdminClienteDetailPage({
   params,
+  searchParams,
 }: AdminClienteDetailPageProps) {
-  const { clienteId } = await params;
+  const [{ clienteId }, query] = await Promise.all([params, searchParams]);
   const client = await getAccessibleClient(clienteId);
 
   if (!client) {
@@ -135,6 +140,16 @@ export default async function AdminClienteDetailPage({
       />
 
       <ClientWorkspaceNav clientId={client.id} />
+
+      {query.onboarding === "invited" ? (
+        <Alert live="polite" title="Cliente convidada" variant="success">
+          A conta inicial foi criada e o convite de ativação foi enviado. Você já pode continuar o cadastro e preparar as próximas etapas do atendimento.
+        </Alert>
+      ) : query.onboarding === "link-generated" ? (
+        <Alert live="polite" title="Link de ativação gerado" variant="success">
+          A conta inicial foi criada. Envie o link individual para esta cliente e continue o cadastro por aqui.
+        </Alert>
+      ) : null}
 
       <Section
         description="Use esta trilha como orientação operacional do atendimento. Ela mostra fatos já registrados e atalhos para a próxima área; não decide fase, conduta ou progressão profissional automaticamente."
