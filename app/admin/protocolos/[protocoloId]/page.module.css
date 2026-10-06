@@ -157,3 +157,9 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Keep anchored sections visible below surrounding navigation. */
+:global(section[id]),
+.versionItem[id] {
+  scroll-margin-top: var(--space-6);
+}
