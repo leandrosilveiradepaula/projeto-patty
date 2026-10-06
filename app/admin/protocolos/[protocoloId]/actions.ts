@@ -1,17 +1,27 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 
 import { requireRole } from "@/lib/supabase/auth";
 import { buildProtocolCloneSnapshot } from "@/lib/protocol/clone-snapshot";
+import {
+  formatProtocolDraftReadiness,
+  getProtocolDraftReadiness,
+} from "@/lib/protocol/draft-readiness";
 import { getProtocolLifecycleAction } from "@/lib/protocol/lifecycle";
 import {
   cloneAccessibleProtocolVersionDraft,
+  createAccessibleMeal,
+  createAccessibleMealDoseAllocation,
+  createAccessibleMealPlanVariant,
+  createAccessibleMealPlanVersion,
   createAccessibleProtocolPublication,
   createAccessibleProtocolVersionApproval,
   getAccessibleProtocol,
   listAccessibleProtocolPublications,
   listAccessibleProtocolVersionApprovals,
+  listAccessibleMealsForVariant,
   listAccessibleProtocolVersionMealPlans,
   listAccessibleProtocolVersions,
   submitAccessibleProtocolVersionForReview,
@@ -67,6 +77,200 @@ function revalidateProtocolPaths(protocolId: string, clientId: string) {
   revalidatePath("/cliente/protocolo");
 }
 
+function parseTrimmedText(formData: FormData, key: string, maxLength: number) {
+  const value = formData.get(key);
+
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const trimmed = value.trim();
+
+  if (trimmed.length === 0 || trimmed.length > maxLength) {
+    return null;
+  }
+
+  return trimmed;
+}
+
+export async function createProtocolMealPlan(
+  protocolId: string,
+  protocolVersionId: string,
+  _state: ProtocolLifecycleFormState,
+  _formData: FormData,
+): Promise<ProtocolLifecycleFormState> {
+  await requireRole("admin");
+  const accessible = await getAccessibleVersionLifecycle(protocolId, protocolVersionId);
+
+  if (!accessible || accessible.lifecycleAction !== "submit") {
+    return { message: "Somente um rascunho acessível pode receber estrutura alimentar.", success: false };
+  }
+
+  const existing = await listAccessibleProtocolVersionMealPlans([protocolVersionId]);
+
+  if (existing.length > 0) {
+    return { message: "A estrutura alimentar desta versão já foi iniciada.", success: true };
+  }
+
+  try {
+    await createAccessibleMealPlanVersion({
+      clientId: accessible.protocol.client_id,
+      protocolVersionId,
+    });
+  } catch {
+    return { message: "Não foi possível iniciar a estrutura alimentar.", success: false };
+  }
+
+  revalidateProtocolPaths(protocolId, accessible.protocol.client_id);
+  return { message: "Estrutura alimentar iniciada.", success: true };
+}
+
+export async function addProtocolMealPlanVariant(
+  protocolId: string,
+  protocolVersionId: string,
+  mealPlanVersionId: string,
+  _state: ProtocolLifecycleFormState,
+  formData: FormData,
+): Promise<ProtocolLifecycleFormState> {
+  await requireRole("admin");
+  const label = parseTrimmedText(formData, "label", 120);
+
+  if (!label) {
+    return { message: "Informe um nome para a variação.", success: false };
+  }
+
+  const accessible = await getAccessibleVersionLifecycle(protocolId, protocolVersionId);
+
+  if (!accessible || accessible.lifecycleAction !== "submit") {
+    return { message: "Esta versão não está disponível para edição.", success: false };
+  }
+
+  const plans = await listAccessibleProtocolVersionMealPlans([protocolVersionId]);
+  const plan = plans.find((item) => item.id === mealPlanVersionId);
+
+  if (!plan) {
+    return { message: "A estrutura alimentar não está acessível.", success: false };
+  }
+
+  try {
+    await createAccessibleMealPlanVariant({
+      clientId: accessible.protocol.client_id,
+      label,
+      mealPlanVersionId,
+      variantKey: `draft-${randomUUID()}`,
+    });
+  } catch {
+    return { message: "Não foi possível adicionar a variação.", success: false };
+  }
+
+  revalidateProtocolPaths(protocolId, accessible.protocol.client_id);
+  return { message: "Variação adicionada.", success: true };
+}
+
+export async function addProtocolMeal(
+  protocolId: string,
+  protocolVersionId: string,
+  mealPlanVersionId: string,
+  variantId: string,
+  _state: ProtocolLifecycleFormState,
+  formData: FormData,
+): Promise<ProtocolLifecycleFormState> {
+  await requireRole("admin");
+  const label = parseTrimmedText(formData, "label", 120);
+
+  if (!label) {
+    return { message: "Informe um nome para a refeição.", success: false };
+  }
+
+  const accessible = await getAccessibleVersionLifecycle(protocolId, protocolVersionId);
+
+  if (!accessible || accessible.lifecycleAction !== "submit") {
+    return { message: "Esta versão não está disponível para edição.", success: false };
+  }
+
+  const plans = await listAccessibleProtocolVersionMealPlans([protocolVersionId]);
+  const plan = plans.find((item) => item.id === mealPlanVersionId);
+  const variant = plan?.variants.find((item) => item.id === variantId);
+
+  if (!plan || !variant) {
+    return { message: "A variação não está acessível.", success: false };
+  }
+
+  const latest = await listAccessibleMealsForVariant(variantId);
+  const position = (latest[0]?.position ?? 0) + 1;
+
+  try {
+    await createAccessibleMeal({
+      label,
+      mealPlanVariantId: variantId,
+      position,
+    });
+  } catch {
+    return { message: "Não foi possível adicionar a refeição.", success: false };
+  }
+
+  revalidateProtocolPaths(protocolId, accessible.protocol.client_id);
+  return { message: "Refeição adicionada.", success: true };
+}
+
+export async function addProtocolMealDose(
+  protocolId: string,
+  protocolVersionId: string,
+  mealPlanVersionId: string,
+  mealId: string,
+  _state: ProtocolLifecycleFormState,
+  formData: FormData,
+): Promise<ProtocolLifecycleFormState> {
+  await requireRole("admin");
+
+  const doseTypeValue = formData.get("doseType");
+  const quantityValue = formData.get("doseQuantity");
+  const doseType =
+    doseTypeValue === "protein" ||
+    doseTypeValue === "carbohydrate" ||
+    doseTypeValue === "fat"
+      ? doseTypeValue
+      : null;
+  const doseQuantity =
+    typeof quantityValue === "string" ? Number(quantityValue.replace(",", ".")) : Number.NaN;
+
+  if (!doseType || !Number.isFinite(doseQuantity) || doseQuantity <= 0 || doseQuantity > 999) {
+    return { message: "Informe um tipo e uma quantidade de dose válidos.", success: false };
+  }
+
+  const accessible = await getAccessibleVersionLifecycle(protocolId, protocolVersionId);
+
+  if (!accessible || accessible.lifecycleAction !== "submit") {
+    return { message: "Esta versão não está disponível para edição.", success: false };
+  }
+
+  const plans = await listAccessibleProtocolVersionMealPlans([protocolVersionId]);
+  const plan = plans.find((item) => item.id === mealPlanVersionId);
+  const mealExists = plan?.variants.some((variant) =>
+    variant.meals.some((meal) => meal.id === mealId),
+  );
+
+  if (!plan || !mealExists) {
+    return { message: "A refeição não está acessível.", success: false };
+  }
+
+  try {
+    await createAccessibleMealDoseAllocation({
+      doseQuantity,
+      doseType,
+      mealId,
+    });
+  } catch {
+    return {
+      message: "Não foi possível adicionar a dose. Verifique se esse macro já foi informado nesta refeição.",
+      success: false,
+    };
+  }
+
+  revalidateProtocolPaths(protocolId, accessible.protocol.client_id);
+  return { message: "Dose adicionada.", success: true };
+}
+
 export async function submitProtocolVersionForReview(
   protocolId: string,
   protocolVersionId: string,
@@ -98,6 +302,18 @@ export async function submitProtocolVersionForReview(
     return {
       message:
         "Esta versão não está mais no estado de rascunho disponível para submissão.",
+      success: false,
+    };
+  }
+
+  const draftPlans = await listAccessibleProtocolVersionMealPlans([
+    accessible.version.id,
+  ]);
+  const readiness = getProtocolDraftReadiness(draftPlans[0] ?? null);
+
+  if (!readiness.ready) {
+    return {
+      message: formatProtocolDraftReadiness(readiness.reasons),
       success: false,
     };
   }

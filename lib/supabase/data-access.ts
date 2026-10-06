@@ -1845,6 +1845,115 @@ export type AccessibleProtocolVersionMealPlan = {
   }>;
 };
 
+export async function createAccessibleMealPlanVersion(input: {
+  clientId: string;
+  protocolVersionId: string;
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("meal_plan_versions")
+    .insert({
+      client_id: input.clientId,
+      protocol_version_id: input.protocolVersionId,
+    })
+    .select("id, protocol_version_id, client_id, food_equivalent_catalog_version_id, created_at")
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function createAccessibleMealPlanVariant(input: {
+  clientId: string;
+  label: string;
+  mealPlanVersionId: string;
+  variantKey: string;
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("meal_plan_variants")
+    .insert({
+      client_id: input.clientId,
+      label: input.label,
+      meal_plan_version_id: input.mealPlanVersionId,
+      variant_key: input.variantKey,
+    })
+    .select("id, meal_plan_version_id, client_id, variant_key, label, created_at")
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function createAccessibleMeal(input: {
+  label: string;
+  mealPlanVariantId: string;
+  position: number;
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("meals")
+    .insert({
+      label: input.label,
+      meal_plan_variant_id: input.mealPlanVariantId,
+      position: input.position,
+    })
+    .select("id, meal_plan_variant_id, position, label, created_at")
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function createAccessibleMealDoseAllocation(input: {
+  doseQuantity: number;
+  doseType: "protein" | "carbohydrate" | "fat";
+  mealId: string;
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("meal_dose_allocations")
+    .insert({
+      dose_quantity: input.doseQuantity,
+      dose_type: input.doseType,
+      meal_id: input.mealId,
+    })
+    .select("id, meal_id, dose_type, dose_quantity, created_at")
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function listAccessibleMealsForVariant(mealPlanVariantId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("meals")
+    .select("id, position")
+    .eq("meal_plan_variant_id", mealPlanVariantId)
+    .order("position", { ascending: false })
+    .limit(1);
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+
 export async function listAccessibleProtocolVersionMealPlans(
   protocolVersionIds: string[],
 ): Promise<AccessibleProtocolVersionMealPlan[]> {
