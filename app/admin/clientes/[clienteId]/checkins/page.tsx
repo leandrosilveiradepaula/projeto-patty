@@ -70,18 +70,18 @@ export default async function AdminClientCheckinsPage({ params }: PageProps) {
         status={<Badge variant="neutral">Acompanhamento ativo</Badge>}
       />
 
-      <ClientWorkspaceNav clientId={client.id} />
+      <ClientWorkspaceNav activeArea="checkins" clientId={client.id} />
 
       <Section
-        description="Cada nova meta preserva a anterior. O peso usado fica congelado no registro; mudanca de peso nao recalcula automaticamente metas antigas."
-        title="Meta de liquidos"
+        description="Quando uma avaliação finalizada registra um novo peso em kg, o sistema cria automaticamente uma nova meta válida dali em diante e preserva todas as metas anteriores."
+        title="Meta de líquidos"
       >
         <div className={styles.grid}>
           <Card className={styles.card}>
             <div className={styles.header}>
               <h3 className={styles.title}>Meta atual</h3>
               <Badge variant="neutral">
-                {currentTargetMl !== null ? formatMl(currentTargetMl) : "Nao definida"}
+                {currentTargetMl !== null ? formatMl(currentTargetMl) : "Não definida"}
               </Badge>
             </div>
             <p className={styles.description}>
@@ -91,35 +91,35 @@ export default async function AdminClientCheckinsPage({ params }: PageProps) {
                   " kg · registrada em " +
                   formatDate(currentTarget.created_at) +
                   "."
-                : "Nenhuma meta de hidratacao foi registrada para esta cliente."}
+                : "Nenhuma meta de hidratação foi registrada para esta cliente."}
             </p>
           </Card>
 
           <Card className={styles.card}>
-            <h3 className={styles.title}>Registrar nova meta</h3>
+            <h3 className={styles.title}>Recalcular manualmente</h3>
             <form
               action={createHydrationTargetAction.bind(null, client.id)}
               className={styles.form}
             >
               <label className={styles.field}>
-                <span>Peso usado no calculo (kg)</span>
+                <span>Peso usado no cálculo (kg)</span>
                 <input min="0.01" name="weightKg" required step="0.01" type="number" />
               </label>
               <p className={styles.description}>
-                O sistema usara a configuracao ativa para esta cliente e preservara um snapshot da regra efetivamente aplicada.
+                Use esta opção somente quando precisar registrar a meta fora do fluxo normal de uma avaliação finalizada. O sistema usa a configuração ativa da cliente e preserva o histórico.
               </p>
-              <Button type="submit">Registrar meta</Button>
+              <Button type="submit">Recalcular meta</Button>
             </form>
           </Card>
         </div>
       </Section>
 
       <Section
-        description="Eventos individuais de ingestao, preservados em historico append-only."
-        title="Liquidos recentes"
+        description="Registros individuais de ingestão preservados no histórico."
+        title="Líquidos recentes"
       >
         {recentLiquidEvents.length === 0 ? (
-          <p className={styles.description}>Nenhum liquido registrado ainda.</p>
+          <p className={styles.description}>Nenhum líquido registrado ainda.</p>
         ) : (
           <ol className={styles.list}>
             {recentLiquidEvents.map((event) => (
@@ -140,8 +140,8 @@ export default async function AdminClientCheckinsPage({ params }: PageProps) {
       </Section>
 
       <Section
-        description="Quando ha mais de um registro para o mesmo dia, o mais recente representa a resposta atual e os anteriores permanecem no historico."
-        title="Atividade fisica recente"
+        description="Quando há mais de um registro para o mesmo dia, o mais recente representa a resposta atual e os anteriores permanecem no histórico."
+        title="Atividade física recente"
       >
         {recentActivityEvents.length === 0 ? (
           <p className={styles.description}>Nenhum check-in de atividade registrado ainda.</p>
@@ -152,7 +152,7 @@ export default async function AdminClientCheckinsPage({ params }: PageProps) {
                 <Card variant="subtle">
                   <div className={styles.header}>
                     <strong>{event.checkin_date}</strong>
-                    <Badge variant="neutral">{event.did_activity ? "Sim" : "Nao"}</Badge>
+                    <Badge variant="neutral">{event.did_activity ? "Sim" : "Não"}</Badge>
                   </div>
                   <p className={styles.description}>
                     Registrado em {formatDate(event.recorded_at)}
