@@ -109,8 +109,14 @@ export function AssessmentDraftMetadataForm({
 
 export function AssessmentMeasurementForm({
   assessmentId,
+  measurementOptions,
 }: {
   assessmentId: string;
+  measurementOptions: Array<{
+    key: string;
+    label: string;
+    recorded: boolean;
+  }>;
 }) {
   const formRef = useRef<HTMLFormElement>(null);
   const action = saveAssessmentMeasurementAction.bind(null, assessmentId);
@@ -128,19 +134,35 @@ export function AssessmentMeasurementForm({
 
       <div className={styles.measurementGrid}>
         <FormField
-          description="Use uma chave descritiva. Enquanto o catálogo final não estiver fechado, o sistema não impõe nomes automáticos."
+          description="Escolha uma medida da definição ativa desta avaliação. Itens já registrados podem ser selecionados novamente para correção enquanto o rascunho estiver aberto."
           id="draft-measurement-key"
           label="Medida"
           required
         >
           {(fieldProps) => (
-            <TextInput
+            <select
               {...fieldProps}
-              maxLength={120}
+              className={styles.select}
+              defaultValue={
+                measurementOptions.find((option) => !option.recorded)?.key ??
+                measurementOptions[0]?.key ??
+                ""
+              }
               name="measurementKey"
-              placeholder="Ex.: cintura"
               required
-            />
+            >
+              {measurementOptions.length === 0 ? (
+                <option disabled value="">
+                  Nenhuma medida configurada
+                </option>
+              ) : null}
+              {measurementOptions.map((option) => (
+                <option key={option.key} value={option.key}>
+                  {option.label}
+                  {option.recorded ? " · já registrada" : ""}
+                </option>
+              ))}
+            </select>
           )}
         </FormField>
 
@@ -161,7 +183,7 @@ export function AssessmentMeasurementForm({
         </FormField>
 
         <FormField
-          description="A unidade continua explícita porque o catálogo definitivo ainda está aberto."
+          description="A unidade permanece explícita no registro para preservar exatamente o dado informado."
           id="draft-measurement-unit"
           label="Unidade"
           required
