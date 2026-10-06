@@ -179,6 +179,9 @@
 }
 
 .journeyLink {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
   color: var(--color-brand-strong);
   font-family: var(--font-family-heading);
   font-size: var(--text-label-medium-size);
