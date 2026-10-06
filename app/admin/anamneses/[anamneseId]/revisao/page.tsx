@@ -8,6 +8,7 @@ import {
   getAccessibleAnamnesisSubmission,
   listAccessibleAnamnesisReviews,
 } from "@/lib/supabase/data-access";
+import { isUuid } from "@/lib/validation/uuid";
 import { notFound } from "next/navigation";
 import styles from "./page.module.css";
 
@@ -32,6 +33,10 @@ export default async function AnamnesisReviewPage({
   params,
 }: AnamnesisReviewPageProps) {
   const { anamneseId } = await params;
+
+  if (!isUuid(anamneseId)) {
+    notFound();
+  }
   const submission = await getAccessibleAnamnesisSubmission(anamneseId);
 
   if (!submission) {
