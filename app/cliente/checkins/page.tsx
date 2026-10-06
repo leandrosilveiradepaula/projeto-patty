@@ -108,6 +108,26 @@ export default async function ClientCheckinsPage({
         <Alert live="polite" title="Atividade registrada" variant="success">
           Sua resposta de atividade física de hoje foi salva.
         </Alert>
+      ) : status === "liquid-invalid" ? (
+        <Alert live="assertive" title="Revise o líquido informado" variant="critical">
+          Informe uma quantidade válida e selecione um tipo de líquido disponível.
+        </Alert>
+      ) : status === "activity-invalid" ? (
+        <Alert live="assertive" title="Revise sua resposta" variant="critical">
+          Escolha Sim ou Não para registrar a atividade física de hoje.
+        </Alert>
+      ) : status === "liquid-error" ? (
+        <Alert live="assertive" title="Não foi possível registrar o líquido" variant="critical">
+          O registro não foi salvo. Tente novamente antes de sair desta página.
+        </Alert>
+      ) : status === "activity-error" ? (
+        <Alert live="assertive" title="Não foi possível registrar a atividade" variant="critical">
+          Sua resposta não foi salva. Tente novamente antes de sair desta página.
+        </Alert>
+      ) : status === "client-unavailable" ? (
+        <Alert live="assertive" title="Cadastro indisponível" variant="critical">
+          Não foi possível acessar seu acompanhamento neste momento. Atualize a página e tente novamente.
+        </Alert>
       ) : null}
 
       <Section
