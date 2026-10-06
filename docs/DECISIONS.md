@@ -1,3 +1,26 @@
+## 2026-10-06 - Biblioteca global de exercicios e selecao individual por cliente
+
+### REGRA CONFIRMADA PELA PATTY
+
+A Patty cadastra na biblioteca de exercicios o catalogo global de exercicios disponiveis para uso profissional.
+
+A biblioteca global e uma ferramenta de trabalho da Patty. Ela nao significa que todas as clientes devam visualizar ou executar todos os exercicios cadastrados.
+
+Para cada cliente, a Patty escolhe um conjunto proprio de exercicios. Esse conjunto pode variar entre clientes e tambem pode ser alterado pela Patty ao longo do acompanhamento.
+
+A cliente deve visualizar somente os exercicios que fizerem parte do treino selecionado e publicado para ela.
+
+### CONSEQUENCIA DE PRODUTO E SEGURANCA
+
+Publicar uma versao de exercicio na biblioteca:
+- torna essa versao disponivel para selecao profissional pela Patty;
+- nao prescreve o exercicio para nenhuma cliente;
+- nao libera automaticamente o exercicio para todas as clientes.
+
+A exposicao global de versoes publicadas para clientes implementada anteriormente fica superada por esta confirmacao.
+
+A prescricao de treino por cliente deve preservar versao/historico do conjunto efetivamente selecionado e publicado. A forma definitiva desse modelo ainda precisa ser implementada sem inferir regras de progressao, series, repeticoes, carga ou troca automatica de exercicios.
+
 ## 2026-10-03 - Reconciliacao da sequencia confirmada do protocolo
 
 ### REGRA CONFIRMADA VIGENTE
