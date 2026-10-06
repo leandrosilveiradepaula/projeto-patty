@@ -132,6 +132,18 @@ Foi adicionado um padrao leve de atalhos internos com alvos de toque de 44px e f
 
 O conteudo continua integralmente visivel e auditavel. Nao foram introduzidos accordions automaticos, prioridades clinicas, alteracoes de regra profissional, schema ou RLS.
 
+## Atualizacao de auditoria de interface 2026-10-06 - hierarquia visual
+
+### Separacao entre operacao, apoio e auditoria
+
+A auditoria de hierarquia identificou informacoes corretas que competiam visualmente com a tarefa principal:
+
+- no Protocolo, IDs do plano alimentar e da versao do catalogo deixam a leitura profissional principal e permanecem em "Detalhes tecnicos e auditoria";
+- na Avaliacao, a lista configuracional de requisitos permanece no fluxo de rascunho/finalizacao, mas deixa de ocupar uma secao na leitura de uma avaliacao ja finalizada;
+- no workspace geral, "Fluxo do atendimento" permanece como trilha operacional principal e a antiga "Visao do acompanhamento" passa a ser apresentada como "Areas da cliente", com hierarquia visual secundaria e mantendo seus indicadores factuais.
+
+Nenhum dado foi removido da persistencia, nenhuma validacao deterministica foi alterada e nenhuma regra profissional, schema ou RLS foi modificada.
+
 ## Legenda de estado
 
 - **DEFINIDO**: regra ou decisao documentada.
