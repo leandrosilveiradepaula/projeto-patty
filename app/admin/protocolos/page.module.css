@@ -5,7 +5,7 @@
 .details div { display: flex; flex-wrap: wrap; gap: var(--space-1); }
 .details dt { color: var(--color-text-muted); font-weight: var(--text-label-small-weight); }
 .details dd { margin: 0; overflow-wrap: anywhere; }
-.actionLink { display: inline-flex; min-height: 36px; align-items: center; justify-content: center; border: 1px solid var(--color-border); border-radius: var(--radius-full); padding: var(--space-2) var(--space-4); color: var(--color-text-primary); font-family: var(--font-family-heading); font-size: var(--text-label-medium-size); font-weight: var(--text-label-medium-weight); line-height: var(--text-label-medium-line-height); text-decoration: none; }
+.actionLink { display: inline-flex; min-height: 44px; align-items: center; justify-content: center; border: 1px solid var(--color-border); border-radius: var(--radius-full); padding: var(--space-2) var(--space-4); color: var(--color-text-primary); font-family: var(--font-family-heading); font-size: var(--text-label-medium-size); font-weight: var(--text-label-medium-weight); line-height: var(--text-label-medium-line-height); text-decoration: none; }
 .actionLink:hover { border-color: var(--color-brand); background: var(--color-surface-low); }
 .actionLink:focus { outline: none; }
 .actionLink:focus-visible { outline: 3px solid var(--color-accent); outline-offset: 3px; }

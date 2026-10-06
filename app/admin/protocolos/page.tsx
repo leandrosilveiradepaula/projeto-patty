@@ -26,7 +26,13 @@ export default async function AdminProtocolosPage() {
                   <p className={styles.clientLabel}>{protocol.clients?.profiles?.display_name ?? "Cliente sem nome de exibição"}</p>
                   <dl className={styles.details}><div><dt>Tipo</dt><dd>{protocol.protocol_type}</dd></div></dl>
                 </div>
-                <Link className={styles.actionLink} href={`/admin/protocolos/${protocol.id}`}>Ver detalhes</Link>
+                <Link
+                  aria-label={`Ver protocolo de ${protocol.clients?.profiles?.display_name?.trim() || "cliente sem nome de exibição"}`}
+                  className={styles.actionLink}
+                  href={`/admin/protocolos/${protocol.id}`}
+                >
+                  Ver detalhes
+                </Link>
               </li>
             ))}
           </ul>
