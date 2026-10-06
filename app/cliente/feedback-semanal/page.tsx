@@ -92,6 +92,14 @@ export default async function ClientWeeklyFeedbackPage({
         <Alert live="polite" title="Feedback enviado" variant="success">
           Seu Feedback Semanal foi enviado e não está mais disponível para edição.
         </Alert>
+      ) : status === "invalid" ? (
+        <Alert live="assertive" title="Revise suas respostas" variant="critical">
+          Preencha as perguntas obrigatórias e confira os campos numéricos antes de enviar.
+        </Alert>
+      ) : status === "save-error" ? (
+        <Alert live="assertive" title="Não foi possível salvar" variant="critical">
+          O sistema não conseguiu gravar seu Feedback Semanal. Tente novamente antes de sair desta página.
+        </Alert>
       ) : null}
 
       {feedbacks.length === 0 ? (
@@ -150,7 +158,6 @@ export default async function ClientWeeklyFeedbackPage({
                           <form
                             action={saveWeeklyFeedbackAction.bind(null, feedback.id)}
                             className={styles.form}
-                            noValidate
                           >
                             {definition.questions.map((question) => {
                               const defaultValue = readWeeklyFeedbackAnswer(
@@ -186,7 +193,7 @@ export default async function ClientWeeklyFeedbackPage({
                               );
                             })}
                             <div className={styles.actions}>
-                              <Button name="intent" type="submit" value="save" variant="secondary">
+                              <Button formNoValidate name="intent" type="submit" value="save" variant="secondary">
                                 Salvar rascunho
                               </Button>
                               <Button name="intent" type="submit" value="submit">
