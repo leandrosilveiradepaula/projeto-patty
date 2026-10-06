@@ -7,7 +7,10 @@
 }
 
 .actionLink {
+  display: inline-flex;
   width: fit-content;
+  min-height: 44px;
+  align-items: center;
   color: var(--color-brand-strong);
   font-size: var(--text-label-medium-size);
   font-weight: var(--text-label-medium-weight);
@@ -29,7 +32,10 @@
 }
 
 .clientLink {
+  display: inline-flex;
   width: fit-content;
+  min-height: 44px;
+  align-items: center;
   color: var(--color-text-secondary);
   font-size: var(--text-label-medium-size);
   font-weight: var(--text-label-medium-weight);
@@ -96,9 +102,4 @@
     grid-template-columns: 1fr;
   }
 
-  .actionLink,
-  .clientLink {
-    min-height: 44px;
-    align-items: center;
-  }
 }
