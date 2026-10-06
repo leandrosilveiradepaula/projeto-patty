@@ -154,8 +154,8 @@ export default async function AdminClientesPage({
                       !client.profile_id
                         ? "Vincule a conta da cliente para concluir o cadastro."
                         : pattyPendingCount > 0
-                          ? `${pattyPendingCount} ação(ões) aguardando a Patty`
-                          : "Sem ação da Patty pendente"
+                          ? `${pattyPendingCount} item(ns) na fila da Patty`
+                          : "Sem item na fila da Patty"
                     }
                     name={displayName || "Cadastro incompleto"}
                     secondary={
@@ -167,7 +167,7 @@ export default async function AdminClientesPage({
                       !client.profile_id ? (
                         <Badge variant="warning">Completar cadastro</Badge>
                       ) : pattyPendingCount > 0 ? (
-                        <Badge variant="warning">Ação da Patty</Badge>
+                        <Badge variant="warning">Fila da Patty</Badge>
                       ) : null
                     }
                     visual={<span>{getInitials(displayName)}</span>}
