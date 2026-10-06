@@ -106,3 +106,54 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+.inlineEdit,
+.inlineAction,
+.doseRows,
+.doseRow,
+.doseEdit,
+.doseIdentity {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.inlineEdit {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+}
+
+.inlineAction {
+  justify-items: start;
+}
+
+.doseRows {
+  margin-top: var(--space-2);
+}
+
+.doseRow {
+  grid-template-columns: minmax(120px, 0.6fr) minmax(220px, 1fr) auto;
+  align-items: end;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  background: var(--color-surface-low);
+  padding: var(--space-3);
+}
+
+.doseIdentity {
+  align-self: center;
+}
+
+.doseEdit {
+  grid-template-columns: minmax(140px, 1fr) auto;
+  align-items: end;
+}
+
+@media (max-width: 767px) {
+  .inlineEdit,
+  .doseRow,
+  .doseEdit {
+    grid-template-columns: 1fr;
+  }
+}
