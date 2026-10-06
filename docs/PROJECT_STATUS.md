@@ -190,6 +190,26 @@ A rodada de polimento do workspace administrativo consolidou os seguintes ajuste
 
 Nenhuma regra profissional, elegibilidade, calculo, dado historico, schema ou RLS foi alterado.
 
+## Atualizacao de auditoria de interface 2026-10-06 - continuidade pos-acao
+
+### Estado visivel depois de concluir uma tarefa
+
+A simulacao do fluxo lista -> cliente -> acao -> conclusao -> retorno identificou telas dependentes que podiam permanecer com estado anterior em cache mesmo depois de uma gravacao valida.
+
+Foram ampliadas as revalidacoes de interface, sem alterar persistencia ou regra de negocio:
+
+- finalizacao de Avaliacao atualiza visao geral da cliente, Avaliacoes, Evolucao e Check-ins;
+- correcao historica de medida atualiza visao geral, Avaliacoes e Evolucao da Patty e da cliente;
+- nota de revisao da Anamnese atualiza detalhe, historico e visao geral da cliente;
+- criacao e resolucao de esclarecimento atualizam dashboard, pendencias, detalhe da Anamnese, workspace da cliente e area correspondente da cliente;
+- resposta da cliente a esclarecimento atualiza imediatamente as superficies da Patty que passam a ter acao pendente;
+- lifecycle do Protocolo atualiza detalhe, workspace, dashboard, Feedback Semanal e superficies da cliente dependentes da publicacao;
+- criacao e envio de Feedback Semanal atualizam dashboard, pendencias e workspace administrativo, alem da area da cliente.
+
+O objetivo e garantir que a proxima acao factual exibida acompanhe imediatamente o estado persistido.
+
+Nenhuma regra profissional, calculo, schema, RLS ou criterio de elegibilidade foi alterado.
+
 ## Legenda de estado
 
 - **DEFINIDO**: regra ou decisao documentada.
