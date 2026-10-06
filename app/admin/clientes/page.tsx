@@ -151,9 +151,11 @@ export default async function AdminClientesPage({
                       </Link>
                     }
                     meta={
-                      pattyPendingCount > 0
-                        ? `${pattyPendingCount} ação(ões) aguardando a Patty`
-                        : "Sem ação da Patty pendente"
+                      !client.profile_id
+                        ? "Vincule a conta da cliente para concluir o cadastro."
+                        : pattyPendingCount > 0
+                          ? `${pattyPendingCount} ação(ões) aguardando a Patty`
+                          : "Sem ação da Patty pendente"
                     }
                     name={displayName || "Cadastro incompleto"}
                     secondary={
