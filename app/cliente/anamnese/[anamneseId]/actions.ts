@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 import { requireRole } from "@/lib/supabase/auth";
 import {
@@ -190,9 +191,5 @@ export async function submitClientAnamnesis(
   }
 
   revalidateAnamnesisDraft(submissionId);
-
-  return {
-    message: "Sua Anamnese foi enviada para análise da Patty.",
-    success: true,
-  };
+  redirect(`/cliente/anamnese/${submissionId}?submitted=1`);
 }
