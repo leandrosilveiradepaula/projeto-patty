@@ -118,6 +118,20 @@ A auditoria de continuidade identificou tres acoes relevantes que ainda dependia
 
 Essas acoes passam a usar estado de formulario explicito, feedback local de sucesso/erro e indicador de processamento, seguindo o padrao ja usado nos demais formularios administrativos. A semantica persistida permanece inalterada: resolucao continua manual, correcao continua historica e nenhuma acao publica ou altera protocolo automaticamente.
 
+## Atualizacao de auditoria de interface 2026-10-06 - escaneabilidade
+
+### Navegacao interna em paginas longas
+
+A auditoria de densidade identificou custo de localizacao em paginas administrativas extensas, sem necessidade de esconder ou resumir fatos persistidos.
+
+Foi adicionado um padrao leve de atalhos internos com alvos de toque de 44px e faixa horizontal no mobile:
+
+- Avaliacao: atalhos para coleta, medidas, comparacao, fotos, finalizacao e acompanhamento conforme o estado;
+- workspace geral da cliente: atalhos para fluxo, areas, cadastro, preferencia de Feedback, recuperacao de acesso e encerramento;
+- Protocolo: atalhos diretos para cada versao do historico.
+
+O conteudo continua integralmente visivel e auditavel. Nao foram introduzidos accordions automaticos, prioridades clinicas, alteracoes de regra profissional, schema ou RLS.
+
 ## Legenda de estado
 
 - **DEFINIDO**: regra ou decisao documentada.

@@ -2,6 +2,7 @@ import { AdminMealDraftGuidance } from "@/components/admin/AdminMealDraftGuidanc
 import { AdminProtocolDraftEditor } from "@/components/admin/AdminProtocolDraftEditor";
 import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
+import { PageSectionNav } from "@/components/admin/PageSectionNav";
 import { AdminProtocolVersionPlan } from "@/components/admin/AdminProtocolVersionPlan";
 import { ProtocolCloneVersionAction } from "@/components/admin/ProtocolCloneVersionAction";
 import { ProtocolVersionComparison } from "@/components/admin/ProtocolVersionComparison";
@@ -134,6 +135,15 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
         activeArea="protocolos"
         clientId={protocol.client_id}
       />
+      {versions.length > 0 ? (
+        <PageSectionNav
+          items={versions.map((version) => ({
+            href: `#versao-${version.version_number}` as const,
+            label: `Versão ${version.version_number}`,
+          }))}
+          label="Ir para a versão"
+        />
+      ) : null}
       <Section
         description="A versão mais recente aparece primeiro. Cada versão mantém seus fatos, estrutura alimentar e próxima ação manual."
         title="Histórico de versões"
@@ -165,7 +175,11 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
               const draftReadiness = getProtocolDraftReadiness(mealPlan);
 
               return (
-                <li className={styles.versionItem} key={version.id}>
+                <li
+                  className={styles.versionItem}
+                  id={`versao-${version.version_number}`}
+                  key={version.id}
+                >
                   <div className={styles.versionHeader}>
                     <div>
                       <h3>Versão {version.version_number}</h3>

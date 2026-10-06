@@ -4,6 +4,7 @@ import { AdminClientRecoveryLinkForm } from "@/components/admin/AdminClientRecov
 import { AdminWeeklyFeedbackNotificationPreferenceForm } from "@/components/admin/AdminWeeklyFeedbackNotificationPreferenceForm";
 import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
+import { PageSectionNav } from "@/components/admin/PageSectionNav";
 import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -389,6 +390,17 @@ export default async function AdminClienteDetailPage({
       />
 
       <ClientWorkspaceNav clientId={client.id} />
+      <PageSectionNav
+        items={[
+          { href: "#fluxo-atendimento", label: "Fluxo" },
+          { href: "#visao-acompanhamento", label: "Áreas" },
+          { href: "#cadastro-atual", label: "Cadastro" },
+          { href: "#preferencia-feedback", label: "Feedback" },
+          { href: "#recuperacao-acesso", label: "Acesso" },
+          { href: "#encerrar-acompanhamento", label: "Encerramento" },
+        ]}
+        label="Ir para"
+      />
 
       {query.onboarding === "invited" ? (
         <Alert live="polite" title="Cliente convidada" variant="success">
@@ -423,6 +435,7 @@ export default async function AdminClienteDetailPage({
 
       <Section
         description="Use esta trilha como orientação operacional do atendimento. Ela mostra fatos já registrados e atalhos para a próxima área; não decide fase, conduta ou progressão profissional automaticamente."
+        id="fluxo-atendimento"
         title="Fluxo do atendimento"
       >
         <ol className={styles.journeyList}>
@@ -655,6 +668,7 @@ export default async function AdminClienteDetailPage({
 
       <Section
         description="Resumo dos registros reais desta cliente. Cada cartão abre a área correspondente do acompanhamento."
+        id="visao-acompanhamento"
         title="Visão do acompanhamento"
       >
         <div className={styles.areaGrid}>
@@ -816,6 +830,7 @@ export default async function AdminClienteDetailPage({
 
       <Section
         description="Escolha por cliente como o lembrete do Feedback Semanal deve ser comunicado. A preferência é versionada e separada dos dados de contato."
+        id="preferencia-feedback"
         title="Canal do Feedback Semanal"
       >
         <Card className={styles.infoCard}>
@@ -831,6 +846,7 @@ export default async function AdminClienteDetailPage({
 
       <Section
         description="Use esta opção quando a cliente perder a senha e o email automático de recuperação não estiver disponível. O link é individual e não altera a senha até que a própria cliente conclua o fluxo."
+        id="recuperacao-acesso"
         title="Recuperação de acesso"
       >
         <Card className={styles.infoCard}>
