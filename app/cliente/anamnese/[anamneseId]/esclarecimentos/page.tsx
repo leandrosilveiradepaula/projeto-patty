@@ -14,6 +14,7 @@ import {
   listAccessibleAnamnesisQuestions,
 } from "@/lib/supabase/data-access";
 import Link from "next/link";
+import { isUuid } from "@/lib/validation/uuid";
 import { notFound } from "next/navigation";
 import styles from "./page.module.css";
 
@@ -33,6 +34,11 @@ function formatAnswer(value: unknown) {
 
 export default async function ClientAnamnesisClarificationsPage({ params }: PageProps) {
   const { anamneseId } = await params;
+
+  if (!isUuid(anamneseId)) {
+    notFound();
+  }
+
   const [client, submission] = await Promise.all([
     getCurrentClient(),
     getAccessibleAnamnesisSubmission(anamneseId),
