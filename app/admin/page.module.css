@@ -5,7 +5,10 @@
 }
 
 .metricLink {
+  display: inline-flex;
   width: fit-content;
+  min-height: 44px;
+  align-items: center;
   color: var(--color-brand-strong);
   font-size: var(--text-label-medium-size);
   font-weight: var(--text-label-medium-weight);
@@ -25,7 +28,7 @@
 
 .quickAction {
   display: inline-flex;
-  min-height: 40px;
+  min-height: 44px;
   align-items: center;
   justify-content: center;
   border: 1px solid var(--color-border);
