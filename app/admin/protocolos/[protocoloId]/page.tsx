@@ -79,10 +79,13 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
 
   if (!protocol) notFound();
 
-  const [versions, anamneses] = await Promise.all([
-    listAccessibleProtocolVersions(protocol.id),
-    listAccessibleAnamnesisSubmissions(protocol.client_id),
-  ]);
+  const versions = await listAccessibleProtocolVersions(protocol.id);
+  const hasEditableDraft = versions.some(
+    (version) => !version.submitted_for_review_at,
+  );
+  const anamneses = hasEditableDraft
+    ? await listAccessibleAnamnesisSubmissions(protocol.client_id)
+    : [];
   const latestSubmittedAnamnesis =
     anamneses.find((submission) => Boolean(submission.submitted_at)) ?? null;
   const [foodQuestions, foodAnswers] = latestSubmittedAnamnesis
