@@ -52,7 +52,7 @@ export function ClientAnamnesisDraftSingleChoiceAnswerForm({
     lastSavedValueRef.current = pendingValueRef.current;
     pendingValueRef.current = null;
 
-    if (reloadPageOnSuccess) {
+    if (state.success && reloadPageOnSuccess) {
       window.location.assign(`/cliente/anamnese/${submissionId}`);
     }
   }, [reloadPageOnSuccess, state.success, submissionId]);
