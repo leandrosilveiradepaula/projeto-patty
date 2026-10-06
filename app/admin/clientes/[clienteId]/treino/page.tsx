@@ -45,7 +45,7 @@ export default async function AdminClientTrainingPage({ params }: PageProps) {
         status={<Badge variant="neutral">Acompanhamento ativo</Badge>}
       />
 
-      <ClientWorkspaceNav clientId={client.id} />
+      <ClientWorkspaceNav activeArea="treino" clientId={client.id} />
 
       <Section
         action={
