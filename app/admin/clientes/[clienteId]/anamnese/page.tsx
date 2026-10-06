@@ -91,7 +91,7 @@ export default async function AdminClienteAnamnesePage({
                           Criada em {formatDateTime(submission.created_at)}
                         </p>
                       </div>
-                      <Badge variant={submitted ? "positive" : "neutral"}>
+                      <Badge variant="neutral">
                         {submitted ? "Enviada" : "Aguardando cliente"}
                       </Badge>
                     </div>
