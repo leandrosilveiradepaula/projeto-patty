@@ -97,6 +97,7 @@ export default async function AdminConteudosPage() {
                   <ContentListItem
                     action={
                       <Link
+                        aria-label={`Abrir conteúdo ${contentVersion.title}`}
                         className={styles.openLink}
                         href={
                           "/admin/conteudos/" +
