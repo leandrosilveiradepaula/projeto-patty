@@ -60,7 +60,7 @@ export default async function AdminClienteAnamnesePage({
           </span>
         }
       />
-      <ClientWorkspaceNav clientId={client.id} />
+      <ClientWorkspaceNav activeArea="anamnese" clientId={client.id} />
       <Section
         action={<Badge variant="neutral">{submissions.length} registro(s)</Badge>}
         description="Cada envio preserva as respostas e a versão da Anamnese usada naquele momento."
