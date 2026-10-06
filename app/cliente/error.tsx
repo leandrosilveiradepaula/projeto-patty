@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import Link from "next/link";
+import styles from "./error.module.css";
 
 export default function ClientError({
   reset,
@@ -26,11 +27,11 @@ export default function ClientError({
             Verifique sua conexão e tente novamente. Se o problema continuar, volte
             ao início e repita a ação mais tarde.
           </Alert>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", marginTop: "16px" }}>
+          <div className={styles.actions}>
             <Button onClick={reset} type="button">
               Tentar novamente
             </Button>
-            <Link href="/cliente">Voltar ao início</Link>
+            <Link className={styles.returnLink} href="/cliente">Voltar ao início</Link>
           </div>
         </Card>
       </Section>
