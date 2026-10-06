@@ -2,10 +2,10 @@ import {
   buildProfessionalAttentionItems,
   buildProfessionalReviewGroups,
 } from "@/lib/anamnesis/professional-review";
+import { AdminAnamnesisWorkspaceHeader } from "@/components/admin/AdminAnamnesisWorkspaceHeader";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import {
   getAccessibleAnamnesisSubmission,
@@ -31,7 +31,7 @@ function formatDateTime(value: string) {
     hour: "2-digit",
     minute: "2-digit",
     month: "2-digit",
-    timeZone: "UTC",
+    timeZone: "America/Sao_Paulo",
     year: "numeric",
   }).format(new Date(value));
 }
@@ -99,48 +99,12 @@ export default async function AdminAnamnesisDetailPage({
 
   return (
     <>
-      <PageHeader
-        actions={
-          <div className={styles.headerActions}>
-            <Link
-              className={styles.backLink}
-              href={`/admin/clientes/${submission.client_id}/anamnese`}
-            >
-              Voltar ao histórico
-            </Link>
-            <Link
-              className={styles.backLink}
-              href={`/admin/anamneses/${submission.id}/revisao`}
-            >
-              Revisões ({reviews.length})
-            </Link>
-            {submission.submitted_at ? (
-              <>
-                <Link
-                  className={styles.backLink}
-                  href={`/admin/anamneses/${submission.id}/ia`}
-                >
-                  Análise IA
-                </Link>
-                <Link
-                  className={styles.backLink}
-                  href={`/admin/anamneses/${submission.id}/esclarecimentos`}
-                >
-                  Esclarecimentos
-                </Link>
-                <Link
-                  className={styles.backLink}
-                  href={`/admin/anamneses/${submission.id}/correcoes`}
-                >
-                  Correções
-                </Link>
-              </>
-            ) : null}
-          </div>
-        }
-        description="Leitura administrativa das respostas originais preservadas no backend, sem interpretação automática."
-        eyebrow="Administração"
-        title={displayName ? `Anamnese de ${displayName}` : "Detalhe da Anamnese"}
+      <AdminAnamnesisWorkspaceHeader
+        activeSection="respostas"
+        clientId={submission.client_id}
+        displayName={displayName}
+        submissionId={submission.id}
+        submittedAt={submission.submitted_at}
       />
       <Section
         action={
