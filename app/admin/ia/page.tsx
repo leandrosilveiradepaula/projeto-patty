@@ -81,6 +81,7 @@ export default async function AdminAiPage() {
 
                     {submissionId ? (
                       <Link
+                        aria-label={`Abrir revisão da Anamnese de ${displayName || "cliente sem nome informado"}`}
                         className={styles.actionLink}
                         href={`/admin/anamneses/${submissionId}/ia`}
                       >
