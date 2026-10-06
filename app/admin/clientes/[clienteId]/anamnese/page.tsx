@@ -49,16 +49,6 @@ export default async function AdminClienteAnamnesePage({
         displayName={displayName}
         secondary="Histórico real de Anamnese"
         status={<Badge variant="neutral">{submissions.length} registro(s)</Badge>}
-        visual={
-          <span>
-            {displayName
-              ?.split(/\s+/)
-              .map((word) => word[0])
-              .join("")
-              .slice(0, 2)
-              .toUpperCase() || "?"}
-          </span>
-        }
       />
       <ClientWorkspaceNav activeArea="anamnese" clientId={client.id} />
       <Section
