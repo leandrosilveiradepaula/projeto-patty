@@ -80,7 +80,7 @@ export default async function AdminClientAssessmentsPage({
           </span>
         }
       />
-      <ClientWorkspaceNav clientId={client.id} />
+      <ClientWorkspaceNav activeArea="avaliacoes" clientId={client.id} />
       <Section
         action={
           <Link className={styles.actionLink} href={`/admin/clientes/${client.id}/evolucao`}>
