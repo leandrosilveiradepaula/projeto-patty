@@ -64,10 +64,14 @@ export default async function AdminClientCheckinsPage({ params }: PageProps) {
   return (
     <>
       <ClientWorkspaceHeader
-        meta="Acompanhamento ativo"
+        meta="Registros de líquidos e atividade física"
         displayName={client.profiles?.display_name}
         secondary="Check-ins de acompanhamento"
-        status={<Badge variant="neutral">Acompanhamento ativo</Badge>}
+        status={
+          <Badge variant="neutral">
+            {currentTargetMl !== null ? "Meta definida" : "Meta não definida"}
+          </Badge>
+        }
       />
 
       <ClientWorkspaceNav activeArea="checkins" clientId={client.id} />
@@ -95,8 +99,8 @@ export default async function AdminClientCheckinsPage({ params }: PageProps) {
             </p>
           </Card>
 
-          <Card className={styles.card}>
-            <h3 className={styles.title}>Recalcular manualmente</h3>
+          <Card className={styles.card} variant="subtle">
+            <h3 className={styles.title}>Exceção: recalcular manualmente</h3>
             <form
               action={createHydrationTargetAction.bind(null, client.id)}
               className={styles.form}
