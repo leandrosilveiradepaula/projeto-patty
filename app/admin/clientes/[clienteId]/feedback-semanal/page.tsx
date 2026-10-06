@@ -185,6 +185,20 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
                       Origem: {feedback.request_source === "schedule" ? "Automática" : "Manual"}
                     </p>
                     <p className={styles.meta}>Prazo: {formatDateTime(feedback.due_at)}</p>
+                    {!feedback.submitted_at ? (() => {
+                      const reminderEvent = reminderEventsByFeedbackId.get(feedback.id);
+                      const reminderStatus = notificationStatusLabel(reminderEvent);
+
+                      return reminderStatus ? (
+                        <p className={styles.reminderStatus}>
+                          <strong>Lembrete:</strong> {reminderStatus}
+                        </p>
+                      ) : (
+                        <p className={styles.reminderStatus}>
+                          <strong>Lembrete:</strong> nenhum evento de lembrete registrado.
+                        </p>
+                      );
+                    })() : null}
                     {feedback.submitted_at && definition ? (
                       <dl className={styles.answers}>
                         {definition.questions.map((question) => (
