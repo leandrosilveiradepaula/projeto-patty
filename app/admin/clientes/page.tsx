@@ -141,7 +141,15 @@ export default async function AdminClientesPage({
               return (
                 <li key={client.id}>
                   <ClientListItem
-                    action={<Link className={styles.actionLink} href={`/admin/clientes/${client.id}`}>Abrir</Link>}
+                    action={
+                      <Link
+                        aria-label={`Abrir acompanhamento de ${displayName || "cliente com cadastro incompleto"}`}
+                        className={styles.actionLink}
+                        href={`/admin/clientes/${client.id}`}
+                      >
+                        Abrir
+                      </Link>
+                    }
                     meta={
                       pattyPendingCount > 0
                         ? `${pattyPendingCount} ação(ões) aguardando a Patty`
