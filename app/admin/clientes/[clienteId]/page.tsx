@@ -155,20 +155,13 @@ export default async function AdminClienteDetailPage({
               label: "Abrir protocolos",
               title: "Primeiro protocolo",
             }
-          : pendingWeeklyFeedbackCount > 0
-            ? {
-                description: `${pendingWeeklyFeedbackCount} Feedback Semanal pendente(s) aguardando acompanhamento.`,
-                href: `/admin/clientes/${client.id}/feedback-semanal`,
-                label: "Revisar feedbacks",
-                title: "Acompanhamento semanal",
-              }
-            : {
-                description:
-                  "As etapas iniciais estão registradas. Continue o acompanhamento conforme os dados e a decisão profissional da Patty.",
-                href: `/admin/clientes/${client.id}/feedback-semanal`,
-                label: "Abrir acompanhamento",
-                title: "Acompanhamento contínuo",
-              };
+          : {
+              description:
+                "As etapas iniciais estão registradas. Continue o acompanhamento conforme os dados e a decisão profissional da Patty.",
+              href: `/admin/clientes/${client.id}/feedback-semanal`,
+              label: "Abrir acompanhamento",
+              title: "Acompanhamento contínuo",
+            };
 
   return (
     <>
