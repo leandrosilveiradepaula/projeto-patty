@@ -210,6 +210,21 @@ O objetivo e garantir que a proxima acao factual exibida acompanhe imediatamente
 
 Nenhuma regra profissional, calculo, schema, RLS ou criterio de elegibilidade foi alterado.
 
+## Atualizacao de auditoria de interface 2026-10-06 - resiliencia de rotas profundas
+
+### Contexto, recuperacao e falha segura
+
+A auditoria de acesso por rotas profundas identificou inconsistencias que afetam a percepcao de produto acabado e um conflito de produto que nao deve ser resolvido por inferencia:
+
+- Avaliacao detalhada passa a usar o mesmo cabecalho de identidade do workspace da cliente;
+- rotas profundas de Avaliacao e Anamnese validam o formato UUID antes de consultar dados;
+- admin e cliente recebem experiencias proprias de "nao encontrado/indisponivel", com caminhos seguros de retorno e texto que nao revela se um registro existe sem autorizacao;
+- o workspace profundo da Anamnese recebe retorno explicito para o historico da mesma cliente;
+- a interface administrativa de Exercicios deixa de afirmar que publicacao implica exposicao global automatica para clientes;
+- foi registrada em `OPEN_QUESTIONS.md` a divergencia entre `DECISIONS.md` (biblioteca de exercicios nao exposta globalmente nesta etapa) e a rota atual `/cliente/exercicios`.
+
+Nenhuma autorizacao, RLS, publicacao ou regra de liberacao de exercicios foi alterada. O conflito permanece pendente ate reconciliacao documental/produto.
+
 ## Legenda de estado
 
 - **DEFINIDO**: regra ou decisao documentada.
