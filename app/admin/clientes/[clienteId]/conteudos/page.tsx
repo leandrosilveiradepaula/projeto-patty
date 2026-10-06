@@ -1,6 +1,6 @@
 import { ClientContentReleaseForm } from "@/components/admin/ClientContentReleaseForm";
 import { isContentVersionReleaseEligible } from "@/lib/content/release-eligibility";
-import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
+import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { ContentListItem } from "@/components/admin/ContentListItem";
 import { Badge } from "@/components/ui/Badge";
@@ -65,9 +65,9 @@ export default async function AdminClientContentPage({
 
   return (
     <>
-      <ClientSummaryHeader
-        meta="Cliente atribuído"
-        name={displayName || "Cliente sem nome informado"}
+      <ClientWorkspaceHeader
+        meta="Acompanhamento ativo"
+        displayName={displayName}
         secondary="Conteúdos liberados"
         status={<Badge variant="neutral">Atribuição ativa</Badge>}
         visual={
