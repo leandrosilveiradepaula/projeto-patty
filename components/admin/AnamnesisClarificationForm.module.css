@@ -22,3 +22,9 @@
   font: inherit;
 }
 .actions { display: flex; justify-content: flex-start; }
+
+.select:focus-visible {
+  border-color: var(--color-brand);
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+}
