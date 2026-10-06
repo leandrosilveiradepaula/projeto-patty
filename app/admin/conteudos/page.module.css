@@ -35,6 +35,9 @@
 }
 
 .openLink {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
   color: var(--color-text-primary);
   font-weight: 600;
   text-decoration: none;
@@ -42,6 +45,11 @@
 
 .openLink:hover {
   text-decoration: underline;
+}
+
+.openLink:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
 }
 
 @media (max-width: 720px) {
