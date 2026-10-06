@@ -22,7 +22,15 @@ function formatDoseType(value: string) {
   return labels[value] ?? value;
 }
 
+function formatDoseQuantity(value: number) {
+  const quantity = new Intl.NumberFormat("pt-BR", {
+    maximumFractionDigits: 4,
+  }).format(value);
+
+  return value === 1 ? "1 dose" : `${quantity} doses`;
+}
+
 export function ClientProtocolMealCard({ className, doseGroups, label, order, ...props }: ClientProtocolMealCardProps) {
   const classNames = [styles.card, className ?? ""].filter(Boolean).join(" ");
-  return <article {...props} className={classNames}><p className={styles.order}>Refeição {order}</p><h4>{label}</h4><div className={styles.doses}><p>Doses registradas</p>{doseGroups.length === 0 ? <p>Nenhuma dose registrada.</p> : <ul>{doseGroups.map((group) => <li key={`${group.doseType}-${group.doseQuantity}`}><span>{formatDoseType(group.doseType)}</span><span>{group.doseQuantity}</span></li>)}</ul>}</div></article>;
+  return <article {...props} className={classNames}><p className={styles.order}>Refeição {order}</p><h4>{label}</h4><div className={styles.doses}><p>Distribuição de doses</p>{doseGroups.length === 0 ? <p>Nenhuma dose registrada.</p> : <ul>{doseGroups.map((group) => <li key={`${group.doseType}-${group.doseQuantity}`}><span>{formatDoseType(group.doseType)}</span><span>{formatDoseQuantity(group.doseQuantity)}</span></li>)}</ul>}</div></article>;
 }
