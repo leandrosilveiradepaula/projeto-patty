@@ -17,7 +17,6 @@ import {
   listCurrentClientFinalizedAssessmentMeasurements,
   listCurrentClientFiles,
   listPublishedProtocolsForCurrentClient,
-  listPublishedExerciseVersionsForCurrentClient,
 } from "@/lib/supabase/data-access";
 import Link from "next/link";
 import styles from "./page.module.css";
@@ -61,7 +60,6 @@ export default async function ClientePage() {
     recentLiquidEvents,
     trainingRequests,
     assessmentRows,
-    exerciseVersions,
   ] = await Promise.all([
     listAccessibleAnamnesisSubmissions(client.id),
     listPublishedProtocolsForCurrentClient(client.id),
@@ -73,7 +71,6 @@ export default async function ClientePage() {
     listAccessibleClientLiquidIntakeEvents(client.id, recentFrom),
     listAccessibleClientTrainingRequests(client.id),
     listCurrentClientFinalizedAssessmentMeasurements(),
-    listPublishedExerciseVersionsForCurrentClient(),
   ]);
 
   const finalizedAssessmentCount = new Set(assessmentRows.map((row) => row.assessment_id)).size;
@@ -199,14 +196,6 @@ export default async function ClientePage() {
       href: "/cliente/conteudos",
       label: "liberado(s)",
       title: "Conteúdos",
-    },
-    {
-      count: exerciseVersions.length,
-      description:
-        "Consulte os exercícios publicados na biblioteca da Consultoria.",
-      href: "/cliente/exercicios",
-      label: "publicado(s)",
-      title: "Exercícios",
     },
     {
       count: files.length,
