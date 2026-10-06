@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/Badge";
-import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
+import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 
 import styles from "./AdminAnamnesisWorkspaceHeader.module.css";
@@ -74,13 +74,13 @@ export function AdminAnamnesisWorkspaceHeader({
 
   return (
     <>
-      <ClientSummaryHeader
+      <ClientWorkspaceHeader
         meta={
           submittedAt
             ? `Enviada em ${formatDateTime(submittedAt)}`
             : "Preenchimento ainda em rascunho"
         }
-        name={displayName?.trim() || "Cliente sem nome informado"}
+        displayName={displayName}
         secondary="Anamnese"
         status={
           <Badge variant={submittedAt ? "positive" : "warning"}>
