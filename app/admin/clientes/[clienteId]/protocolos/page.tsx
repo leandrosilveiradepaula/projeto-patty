@@ -4,12 +4,62 @@ import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Section } from "@/components/ui/Section";
 import {
+  createAccessibleInitialProtocolVersion,
+  createAccessibleProtocol,
+  deleteAccessibleProtocolWithoutVersions,
   getAccessibleClient,
   listAccessibleProtocolsForClient,
 } from "@/lib/supabase/data-access";
+import { Button } from "@/components/ui/Button";
+import { requireRole } from "@/lib/supabase/auth";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import styles from "./page.module.css";
+
+async function createFirstProtocolAction(formData: FormData) {
+  "use server";
+
+  const auth = await requireRole("admin");
+  const clientId = formData.get("clientId");
+
+  if (typeof clientId !== "string") {
+    return;
+  }
+
+  const client = await getAccessibleClient(clientId);
+
+  if (!client) {
+    return;
+  }
+
+  const existing = await listAccessibleProtocolsForClient(client.id);
+
+  if (existing.length > 0) {
+    redirect(`/admin/protocolos/${existing[0].id}`);
+  }
+
+  const protocol = await createAccessibleProtocol({
+    clientId: client.id,
+    protocolType: "nutrition",
+  });
+
+  try {
+    await createAccessibleInitialProtocolVersion({
+      clientId: client.id,
+      createdByProfileId: auth.profileId,
+      protocolId: protocol.id,
+    });
+  } catch (error) {
+    try {
+      await deleteAccessibleProtocolWithoutVersions(protocol.id);
+    } catch {
+      // Best-effort cleanup: never hide the original creation failure.
+    }
+    throw error;
+  }
+
+  redirect(`/admin/protocolos/${protocol.id}`);
+}
 
 type AdminClientProtocolsPageProps = {
   params: Promise<{
@@ -65,7 +115,13 @@ export default async function AdminClientProtocolsPage({
       >
         {protocols.length === 0 ? (
           <EmptyState
-            description="Nenhum protocolo está registrado para esta cliente."
+            action={
+              <form action={createFirstProtocolAction}>
+                <input name="clientId" type="hidden" value={client.id} />
+                <Button type="submit">Criar primeiro protocolo</Button>
+              </form>
+            }
+            description="Crie o primeiro protocolo nutricional para iniciar a versão 1 em rascunho. Nada será publicado para a cliente até passar por revisão, aprovação e publicação manual."
             title="Sem protocolos registrados"
           />
         ) : (
