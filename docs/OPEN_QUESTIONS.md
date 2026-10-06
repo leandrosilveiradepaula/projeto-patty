@@ -1,14 +1,10 @@
 ### PARCIALMENTE RESOLVIDO - PROGRESSAO DO PROTOCOLO
 
-## Conflito identificado na auditoria de interface - exposicao da biblioteca de exercicios
+## RESOLVIDO EM 2026-10-06 - exposicao da biblioteca de exercicios
 
-**Status:** pendencia de reconciliacao entre documentacao e implementacao.
+A Patty confirmou que a biblioteca global e o catalogo profissional de exercicios e que cada cliente deve visualizar somente o conjunto de exercicios escolhido para o treino individual dela.
 
-`docs/DECISIONS.md` registra que a biblioteca de exercicios nao e exposta globalmente a clientes nesta etapa. A implementacao atual, porem, possui `/cliente/exercicios` e lista versoes publicadas globalmente por `listPublishedExerciseVersionsForCurrentClient`.
-
-A auditoria nao transforma essa divergencia em nova regra. Antes de alterar autorizacao, navegacao ou comportamento da biblioteca, confirmar/reconciliar a decisao de produto e documentar o resultado.
-
-Enquanto isso, a interface administrativa nao deve afirmar como regra que publicar um exercicio implica exposicao global automatica para a cliente.
+A exposicao global da biblioteca para clientes fica superada. A implementacao do modelo versionado de treino por cliente, com selecao de exercicios pela Patty, permanece como tarefa de produto/engenharia; nao como questao profissional aberta.
 
 
 A Patty confirmou que a progressao segue a sequencia do protocolo, mas depende de adesao e resultado. Se a cliente nao estiver aderindo adequadamente ou se o resultado nao for considerado valido, a progressao e interrompida e os proximos passos sao definidos manualmente pela Patty.
