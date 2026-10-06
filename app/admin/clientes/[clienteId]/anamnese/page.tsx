@@ -45,22 +45,12 @@ export default async function AdminClienteAnamnesePage({
   return (
     <>
       <ClientWorkspaceHeader
-        meta="Acompanhamento ativo"
+        meta="Respostas e versões preservadas no histórico"
         displayName={displayName}
         secondary="Histórico real de Anamnese"
-        status={<Badge variant="neutral">Atribuição ativa</Badge>}
-        visual={
-          <span>
-            {displayName
-              ?.split(/\s+/)
-              .map((word) => word[0])
-              .join("")
-              .slice(0, 2)
-              .toUpperCase() || "?"}
-          </span>
-        }
+        status={<Badge variant="neutral">{submissions.length} registro(s)</Badge>}
       />
-      <ClientWorkspaceNav clientId={client.id} />
+      <ClientWorkspaceNav activeArea="anamnese" clientId={client.id} />
       <Section
         action={<Badge variant="neutral">{submissions.length} registro(s)</Badge>}
         description="Cada envio preserva as respostas e a versão da Anamnese usada naquele momento."

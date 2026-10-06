@@ -66,12 +66,12 @@ export default async function AdminClientContentPage({
   return (
     <>
       <ClientWorkspaceHeader
-        meta="Acompanhamento ativo"
+        meta="Liberações por versão publicada"
         displayName={displayName}
         secondary="Conteúdos liberados"
-        status={<Badge variant="neutral">Acompanhamento ativo</Badge>}
+        status={<Badge variant="neutral">{releases.length} liberação(ões)</Badge>}
       />
-      <ClientWorkspaceNav clientId={client.id} />
+      <ClientWorkspaceNav activeArea="conteudos" clientId={client.id} />
       <Section
         description="Escolha a versão publicada que deve ficar disponível para esta cliente."
         title="Liberar conteúdo"

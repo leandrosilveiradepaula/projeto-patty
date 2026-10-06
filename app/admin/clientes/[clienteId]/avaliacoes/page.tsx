@@ -65,10 +65,10 @@ export default async function AdminClientAssessmentsPage({
   return (
     <>
       <ClientWorkspaceHeader
-        meta="Acompanhamento ativo"
+        meta="Coleta, finalização e histórico corporal"
         displayName={displayName}
         secondary="Histórico de avaliações"
-        status={<Badge variant="neutral">Atribuição ativa</Badge>}
+        status={<Badge variant="neutral">{assessments.length} avaliação(ões)</Badge>}
         visual={
           <span>
             {displayName
@@ -80,7 +80,7 @@ export default async function AdminClientAssessmentsPage({
           </span>
         }
       />
-      <ClientWorkspaceNav clientId={client.id} />
+      <ClientWorkspaceNav activeArea="avaliacoes" clientId={client.id} />
       <Section
         action={
           <Link className={styles.actionLink} href={`/admin/clientes/${client.id}/evolucao`}>

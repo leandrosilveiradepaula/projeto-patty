@@ -116,13 +116,17 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
   return (
     <>
       <ClientWorkspaceHeader
-        meta="Acompanhamento ativo"
+        meta="Solicitações, respostas e lembretes"
         displayName={displayName}
         secondary="Feedbacks semanais"
-        status={<Badge variant="neutral">Acompanhamento ativo</Badge>}
+        status={
+          <Badge variant={eligible ? "neutral" : "warning"}>
+            {eligible ? "Disponível" : "Aguardando 1º protocolo"}
+          </Badge>
+        }
       />
 
-      <ClientWorkspaceNav clientId={client.id} />
+      <ClientWorkspaceNav activeArea="feedback-semanal" clientId={client.id} />
 
       <Section
         action={
@@ -152,7 +156,11 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
       >
         {feedbacks.length === 0 ? (
           <EmptyState
-            description="Crie a primeira solicitação acima."
+            description={
+              eligible
+                ? "Use a seção acima para registrar a primeira solicitação."
+                : "O primeiro Feedback Semanal poderá ser solicitado depois que houver um protocolo publicado para esta cliente."
+            }
             title="Nenhum Feedback Semanal registrado"
           />
         ) : (

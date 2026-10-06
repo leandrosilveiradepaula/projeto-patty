@@ -87,7 +87,7 @@ export default async function AdminClientProgressPage({ params }: PageProps) {
         status={<Badge variant="neutral">{assessments.length} avaliação(ões)</Badge>}
       />
 
-      <ClientWorkspaceNav clientId={client.id} />
+      <ClientWorkspaceNav activeArea="evolucao" clientId={client.id} />
 
       <Section
         description="Esta visão reúne apenas valores registrados nas avaliações finalizadas. Variações são diferenças matemáticas entre registros consecutivos da mesma medida e unidade; o sistema não classifica melhora, piora, sucesso ou estagnação."
@@ -123,15 +123,15 @@ export default async function AdminClientProgressPage({ params }: PageProps) {
                     <tbody>
                       {item.points.map((point) => (
                         <tr key={point.assessmentId}>
-                          <td>{formatAssessmentDate(point.assessedAt)}</td>
-                          <td>
+                          <td data-label="Data">{formatAssessmentDate(point.assessedAt)}</td>
+                          <td data-label="Valor">
                             {formatNumber(point.value)} {item.unit}
                           </td>
-                          <td>
+                          <td data-label="Variação vs. anterior">
                             {formatDelta(point.deltaFromPrevious)}
                             {point.deltaFromPrevious === null ? "" : " " + item.unit}
                           </td>
-                          <td>
+                          <td data-label="Avaliação">
                             <Link
                               aria-label={`Abrir avaliação de ${formatAssessmentDate(point.assessedAt)} para ${item.label}`}
                               className={styles.detailLink}

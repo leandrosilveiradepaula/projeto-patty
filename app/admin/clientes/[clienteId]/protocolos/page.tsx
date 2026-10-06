@@ -96,12 +96,12 @@ export default async function AdminClientProtocolsPage({
   return (
     <>
       <ClientWorkspaceHeader
-        meta="Acompanhamento ativo"
+        meta="Versões, revisão, aprovação e publicação"
         displayName={displayName}
         secondary="Histórico de protocolos"
-        status={<Badge variant="neutral">Acompanhamento ativo</Badge>}
+        status={<Badge variant="neutral">{protocols.length} protocolo(s)</Badge>}
       />
-      <ClientWorkspaceNav clientId={client.id} />
+      <ClientWorkspaceNav activeArea="protocolos" clientId={client.id} />
       <Section
         action={<Badge variant="neutral">{protocols.length} protocolo(s)</Badge>}
         description="Consulte o histórico de protocolos desta cliente."
