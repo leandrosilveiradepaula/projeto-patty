@@ -13,6 +13,9 @@ import {
   getAccessibleClient,
   getAccessibleClientRegistration,
   getAccessibleWeeklyFeedbackNotificationPreference,
+  listAccessibleAnamnesisClarificationRequests,
+  listAccessibleAnamnesisClarificationResolutions,
+  listAccessibleAnamnesisClarificationResponses,
   listAccessibleAnamnesisReviews,
   listAccessibleAnamnesisSubmissions,
   listAccessibleAssessmentsForClient,
@@ -108,6 +111,47 @@ export default async function AdminClienteDetailPage({
   const latestAnamnesisReviews = latestAnamnesis?.submitted_at
     ? await listAccessibleAnamnesisReviews(latestAnamnesis.id)
     : [];
+  const latestAnamnesisClarificationRequests = latestAnamnesis?.submitted_at
+    ? await listAccessibleAnamnesisClarificationRequests(latestAnamnesis.id)
+    : [];
+  const latestClarificationRequestIds =
+    latestAnamnesisClarificationRequests.map((request) => request.id);
+  const [latestAnamnesisClarificationResponses, latestAnamnesisClarificationResolutions] =
+    latestClarificationRequestIds.length > 0
+      ? await Promise.all([
+          listAccessibleAnamnesisClarificationResponses(
+            latestClarificationRequestIds,
+          ),
+          listAccessibleAnamnesisClarificationResolutions(
+            latestClarificationRequestIds,
+          ),
+        ])
+      : [[], []];
+  const clarificationResponseCountByRequestId = new Map<string, number>();
+  const resolvedClarificationRequestIds = new Set(
+    latestAnamnesisClarificationResolutions.map(
+      (resolution) => resolution.clarification_request_id,
+    ),
+  );
+
+  for (const response of latestAnamnesisClarificationResponses) {
+    clarificationResponseCountByRequestId.set(
+      response.clarification_request_id,
+      (clarificationResponseCountByRequestId.get(
+        response.clarification_request_id,
+      ) ?? 0) + 1,
+    );
+  }
+
+  const unresolvedClarificationRequests =
+    latestAnamnesisClarificationRequests.filter(
+      (request) => !resolvedClarificationRequestIds.has(request.id),
+    );
+  const clarificationAwaitingPatty = unresolvedClarificationRequests.some(
+    (request) => (clarificationResponseCountByRequestId.get(request.id) ?? 0) > 0,
+  );
+  const clarificationAwaitingClient =
+    unresolvedClarificationRequests.length > 0 && !clarificationAwaitingPatty;
   const latestAssessment = assessments[0] ?? null;
   const latestProtocol = protocols[0] ?? null;
   const currentHydrationTarget = hydrationTargets[0] ?? null;
@@ -150,7 +194,25 @@ export default async function AdminClienteDetailPage({
             label: "Revisar Anamnese",
             title: "Revisão da Anamnese",
           }
-        : !hasFinalizedAssessment
+        : clarificationAwaitingPatty
+          ? {
+              description:
+                "A cliente respondeu a um pedido de esclarecimento e a Patty ainda precisa revisar e marcar a pendência como resolvida.",
+              eyebrow: "Ação da Patty",
+              href: `/admin/anamneses/${latestAnamnesis.id}/esclarecimentos`,
+              label: "Revisar esclarecimentos",
+              title: "Esclarecimento da Anamnese",
+            }
+          : clarificationAwaitingClient
+            ? {
+                description:
+                  "Existe pedido de esclarecimento aberto e o atendimento aguarda a resposta da cliente antes de seguir.",
+                eyebrow: "Aguardando cliente",
+                href: `/admin/anamneses/${latestAnamnesis.id}/esclarecimentos`,
+                label: "Ver esclarecimentos",
+                title: "Esclarecimento da Anamnese",
+              }
+            : !hasFinalizedAssessment
           ? {
               description:
                 latestAssessment
