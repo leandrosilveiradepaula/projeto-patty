@@ -1,10 +1,10 @@
 import { resolveAnamnesisClarificationRequest } from "@/app/admin/anamneses/[anamneseId]/esclarecimentos/actions";
 import { AdminAnamnesisClarificationRequestForm } from "@/components/admin/AdminAnamnesisClarificationRequestForm";
+import { AdminAnamnesisWorkspaceHeader } from "@/components/admin/AdminAnamnesisWorkspaceHeader";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import {
   getAccessibleAnamnesisSubmission,
@@ -14,7 +14,6 @@ import {
   listAccessibleAnamnesisClarificationResponses,
   listAccessibleAnamnesisQuestions,
 } from "@/lib/supabase/data-access";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import styles from "./page.module.css";
 
@@ -24,7 +23,7 @@ function formatDateTime(value: string) {
   return new Intl.DateTimeFormat("pt-BR", {
     dateStyle: "short",
     timeStyle: "short",
-    timeZone: "UTC",
+    timeZone: "America/Sao_Paulo",
   }).format(new Date(value));
 }
 
@@ -70,11 +69,12 @@ export default async function AdminAnamnesisClarificationsPage({ params }: PageP
 
   return (
     <>
-      <PageHeader
-        actions={<Link className={styles.backLink} href={`/admin/anamneses/${submission.id}`}>Voltar à Anamnese</Link>}
-        description="Pedidos enviados à cliente e respostas complementares preservados separadamente da resposta original."
-        eyebrow="Administração"
-        title="Esclarecimentos da Anamnese"
+      <AdminAnamnesisWorkspaceHeader
+        activeSection="esclarecimentos"
+        clientId={submission.client_id}
+        displayName={submission.clients?.profiles?.display_name}
+        submissionId={submission.id}
+        submittedAt={submission.submitted_at}
       />
       <p className={styles.notice}>
         Este fluxo não altera a resposta original. A resposta da cliente não resolve o pedido automaticamente; a Patty precisa revisar e marcar como resolvido.

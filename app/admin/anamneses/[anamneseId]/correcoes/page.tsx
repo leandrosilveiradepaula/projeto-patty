@@ -1,8 +1,8 @@
 import { AdminAnamnesisCorrectionForm } from "@/components/admin/AdminAnamnesisCorrectionForm";
+import { AdminAnamnesisWorkspaceHeader } from "@/components/admin/AdminAnamnesisWorkspaceHeader";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import {
   getAccessibleAnamnesisSubmission,
@@ -12,7 +12,6 @@ import {
 } from "@/lib/supabase/data-access";
 import type { Json } from "@/lib/supabase/database.types";
 import { serializeCorrectionJson } from "@/lib/anamnesis/corrections";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import styles from "./page.module.css";
 
@@ -28,7 +27,7 @@ function formatDateTime(value: string) {
     hour: "2-digit",
     minute: "2-digit",
     month: "2-digit",
-    timeZone: "UTC",
+    timeZone: "America/Sao_Paulo",
     year: "numeric",
   }).format(new Date(value));
 }
@@ -71,22 +70,12 @@ export default async function AnamnesisCorrectionsPage({
 
   return (
     <>
-      <PageHeader
-        actions={
-          <Link
-            className={styles.backLink}
-            href={`/admin/anamneses/${submission.id}`}
-          >
-            Voltar à Anamnese
-          </Link>
-        }
-        description={
-          displayName
-            ? `Histórico de correções da Anamnese de ${displayName}.`
-            : "Histórico de correções da Anamnese."
-        }
-        eyebrow="Uso interno"
-        title="Correções da Anamnese"
+      <AdminAnamnesisWorkspaceHeader
+        activeSection="correcoes"
+        clientId={submission.client_id}
+        displayName={displayName}
+        submissionId={submission.id}
+        submittedAt={submission.submitted_at}
       />
       <p className={styles.notice}>
         Cada correção é append-only e fica separada da resposta original. A

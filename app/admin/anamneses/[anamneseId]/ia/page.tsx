@@ -3,12 +3,12 @@ import {
   createPattyNoteFromAiFinding,
 } from "@/app/admin/anamneses/[anamneseId]/ia/actions";
 import { AdminAiReviewForm } from "@/components/admin/AdminAiReviewForm";
+import { AdminAnamnesisWorkspaceHeader } from "@/components/admin/AdminAnamnesisWorkspaceHeader";
 import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import { getOpenAiProviderReadiness } from "@/lib/ai/openai-provider";
 import { listAccessibleAiFindingActions } from "@/lib/ai/finding-actions";
@@ -22,7 +22,6 @@ import {
   listAccessibleAnamnesisAnswers,
   listAccessibleAnamnesisQuestions,
 } from "@/lib/supabase/data-access";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import styles from "./page.module.css";
 
@@ -89,7 +88,7 @@ function formatDateTime(value: string) {
   return new Intl.DateTimeFormat("pt-BR", {
     dateStyle: "short",
     timeStyle: "short",
-    timeZone: "UTC",
+    timeZone: "America/Sao_Paulo",
   }).format(new Date(value));
 }
 
@@ -139,18 +138,12 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
 
   return (
     <>
-      <PageHeader
-        actions={
-          <Link
-            className={styles.backLink}
-            href={`/admin/anamneses/${submission.id}`}
-          >
-            Voltar à Anamnese
-          </Link>
-        }
-        description="A IA apenas sinaliza possíveis inconsistências, esclarecimentos e ausências aplicáveis. Patty decide o que fazer com cada achado."
-        eyebrow="Administração · IA assistiva"
-        title="Revisão assistida da Anamnese"
+      <AdminAnamnesisWorkspaceHeader
+        activeSection="ia"
+        clientId={submission.client_id}
+        displayName={submission.clients?.profiles?.display_name}
+        submissionId={submission.id}
+        submittedAt={submission.submitted_at}
       />
 
       <Alert
