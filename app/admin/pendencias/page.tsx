@@ -4,6 +4,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import { getOperationalPendingItemsForCurrentAdmin } from "@/lib/operations/pending-data";
+import { groupOperationalPendingItems } from "@/lib/operations/pending";
 import Link from "next/link";
 
 import styles from "./page.module.css";
@@ -17,28 +18,6 @@ function formatDateTime(value: string) {
     timeZone: "America/Sao_Paulo",
     year: "numeric",
   }).format(new Date(value));
-}
-
-function groupPendingItems(items: Awaited<ReturnType<typeof getOperationalPendingItemsForCurrentAdmin>>) {
-  const clientWaitingKinds = new Set([
-    "anamnesis_draft",
-    "clarification_without_response",
-    "weekly_feedback_awaiting_response",
-  ]);
-  const operationalKinds = new Set([
-    "ai_execution_started",
-    "weekly_feedback_reminder_blocked",
-  ]);
-
-  return {
-    patty: items.filter(
-      (item) =>
-        !clientWaitingKinds.has(item.kind) &&
-        !operationalKinds.has(item.kind),
-    ),
-    client: items.filter((item) => clientWaitingKinds.has(item.kind)),
-    operational: items.filter((item) => operationalKinds.has(item.kind)),
-  };
 }
 
 function PendingList({
@@ -79,7 +58,7 @@ function PendingList({
 
 export default async function AdminPendenciasPage() {
   const items = await getOperationalPendingItemsForCurrentAdmin();
-  const grouped = groupPendingItems(items);
+  const grouped = groupOperationalPendingItems(items);
 
   return (
     <>
