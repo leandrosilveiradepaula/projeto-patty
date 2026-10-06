@@ -156,7 +156,11 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
       >
         {feedbacks.length === 0 ? (
           <EmptyState
-            description="Crie a primeira solicitação acima."
+            description={
+              eligible
+                ? "Use a seção acima para registrar a primeira solicitação."
+                : "O primeiro Feedback Semanal poderá ser solicitado depois que houver um protocolo publicado para esta cliente."
+            }
             title="Nenhum Feedback Semanal registrado"
           />
         ) : (
