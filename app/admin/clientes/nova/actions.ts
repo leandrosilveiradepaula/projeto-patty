@@ -38,11 +38,14 @@ export async function inviteClient(
     return { message: validation.message };
   }
 
+  let provisionedClientId: string | null = null;
+
   try {
     const provisioned = await inviteAndProvisionClient({
       displayName,
       email: normalizeInvitationEmail(email),
     });
+    provisionedClientId = provisioned.clientId;
   } catch (error) {
     if (error instanceof ClientInvitationProvisionError) {
       if (error.code === "cleanup_failed") {
@@ -66,7 +69,14 @@ export async function inviteClient(
     };
   }
 
-  redirect(`/admin/clientes/${provisioned.clientId}?onboarding=invited`);
+  if (!provisionedClientId) {
+    return {
+      message:
+        "Não foi possível identificar o acompanhamento criado para esta cliente.",
+    };
+  }
+
+  redirect(`/admin/clientes/${provisionedClientId}?onboarding=invited`);
 }
 
 
@@ -144,6 +154,7 @@ export async function generateManualClientInvite(
       if (error.code === "cleanup_failed") {
         return {
           activationLink: null,
+          clientId: null,
           message:
             "O link não pôde ser provisionado com segurança e a compensação automática falhou. Revise o estado da conta antes de tentar novamente.",
           success: false,
@@ -153,6 +164,7 @@ export async function generateManualClientInvite(
       if (error.code === "link_failed") {
         return {
           activationLink: null,
+          clientId: null,
           message:
             "Não foi possível gerar o link. Verifique se esse email já possui uma conta ou tente novamente.",
           success: false,
