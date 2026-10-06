@@ -1568,6 +1568,78 @@ export async function listAccessibleProtocols() {
 }
 
 
+export async function createAccessibleProtocol(input: {
+  clientId: string;
+  protocolType: "nutrition";
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("protocols")
+    .insert({
+      client_id: input.clientId,
+      protocol_type: input.protocolType,
+    })
+    .select("id, client_id, protocol_type, created_at")
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function createAccessibleInitialProtocolVersion(input: {
+  clientId: string;
+  createdByProfileId: string;
+  protocolId: string;
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("protocol_versions")
+    .insert({
+      client_id: input.clientId,
+      created_by_profile_id: input.createdByProfileId,
+      protocol_id: input.protocolId,
+      version_number: 1,
+    })
+    .select(
+      "id, protocol_id, client_id, version_number, based_on_version_id, submitted_for_review_at, created_at",
+    )
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function deleteAccessibleProtocolWithoutVersions(protocolId: string) {
+  const supabase = await createClient();
+  const { count, error: countError } = await supabase
+    .from("protocol_versions")
+    .select("id", { count: "exact", head: true })
+    .eq("protocol_id", protocolId);
+
+  if (countError) {
+    throw countError;
+  }
+
+  if ((count ?? 0) > 0) {
+    return false;
+  }
+
+  const { error } = await supabase.from("protocols").delete().eq("id", protocolId);
+
+  if (error) {
+    throw error;
+  }
+
+  return true;
+}
+
+
 export async function listAccessibleProtocolsForClient(clientId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
