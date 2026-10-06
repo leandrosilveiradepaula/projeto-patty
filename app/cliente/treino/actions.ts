@@ -24,12 +24,17 @@ export async function requestTrainingAction(formData: FormData) {
     throw new Error("A observação deve ter no máximo 1000 caracteres");
   }
 
-  await createAccessibleClientTrainingRequest({
-    clientId: client.id,
-    note: note || null,
-    recordedByProfileId: auth.profileId,
-  });
+  try {
+    await createAccessibleClientTrainingRequest({
+      clientId: client.id,
+      note: note || null,
+      recordedByProfileId: auth.profileId,
+    });
+  } catch {
+    redirect("/cliente/treino?status=request-error");
+  }
 
   revalidatePath("/cliente");
   revalidatePath("/cliente/treino");
+  redirect("/cliente/treino?status=requested");
 }
