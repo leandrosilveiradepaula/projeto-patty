@@ -22,6 +22,7 @@ import {
   listAccessibleAnamnesisSections,
 } from "@/lib/supabase/data-access";
 import Link from "next/link";
+import { isUuid } from "@/lib/validation/uuid";
 import { notFound } from "next/navigation";
 import styles from "./page.module.css";
 
@@ -71,6 +72,11 @@ export default async function ClienteAnamneseDetailPage({
   searchParams,
 }: ClienteAnamneseDetailPageProps) {
   const [{ anamneseId }, query] = await Promise.all([params, searchParams]);
+
+  if (!isUuid(anamneseId)) {
+    notFound();
+  }
+
   const [client, submission] = await Promise.all([
     getCurrentClient(),
     getAccessibleAnamnesisSubmission(anamneseId),

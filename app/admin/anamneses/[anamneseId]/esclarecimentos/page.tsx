@@ -13,6 +13,7 @@ import {
   listAccessibleAnamnesisClarificationResponses,
   listAccessibleAnamnesisQuestions,
 } from "@/lib/supabase/data-access";
+import { isUuid } from "@/lib/validation/uuid";
 import { notFound } from "next/navigation";
 import styles from "./page.module.css";
 
@@ -32,6 +33,10 @@ function formatAnswer(value: unknown) {
 
 export default async function AdminAnamnesisClarificationsPage({ params }: PageProps) {
   const { anamneseId } = await params;
+
+  if (!isUuid(anamneseId)) {
+    notFound();
+  }
   const submission = await getAccessibleAnamnesisSubmission(anamneseId);
   if (!submission || !submission.submitted_at) notFound();
 

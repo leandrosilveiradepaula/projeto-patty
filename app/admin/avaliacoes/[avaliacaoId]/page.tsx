@@ -13,7 +13,7 @@ import { EvaluationMeasureComparison } from "@/components/admin/EvaluationMeasur
 import { EvaluationMeasureList } from "@/components/admin/EvaluationMeasureList";
 import { EvaluationPhotoCollection } from "@/components/admin/EvaluationPhotoCollection";
 import { EvaluationProfessionalFollowUpForm } from "@/components/admin/EvaluationProfessionalFollowUpForm";
-import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
+import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { PageSectionNav } from "@/components/admin/PageSectionNav";
 import {
@@ -44,6 +44,7 @@ import {
   listAccessibleProfessionalFollowUpsForAssessment,
 } from "@/lib/supabase/data-access";
 import Link from "next/link";
+import { isUuid } from "@/lib/validation/uuid";
 import { notFound } from "next/navigation";
 import styles from "./page.module.css";
 
@@ -109,6 +110,11 @@ export default async function AdminAvaliacaoDetailPage({
   params,
 }: AdminAvaliacaoDetailPageProps) {
   const { avaliacaoId } = await params;
+
+  if (!isUuid(avaliacaoId)) {
+    notFound();
+  }
+
   const assessment = await getAccessibleClientAssessment(avaliacaoId);
 
   if (!assessment) {
@@ -215,7 +221,7 @@ export default async function AdminAvaliacaoDetailPage({
 
   return (
     <>
-      <ClientSummaryHeader
+      <ClientWorkspaceHeader
         actions={
           <Link
             className={styles.backLink}
@@ -227,7 +233,7 @@ export default async function AdminAvaliacaoDetailPage({
         meta={`${formatAssessmentDate(assessment.assessed_at)} · ${
           selectedAssessmentKind?.label ?? "Legada / não classificada"
         }`}
-        name={displayName || "Cliente sem nome informado"}
+        displayName={displayName}
         secondary="Avaliação corporal"
         status={
           <Badge variant={isDraft ? "warning" : "positive"}>

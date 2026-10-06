@@ -22,7 +22,6 @@ const moreSectionPrefixes = [
   "/cliente/avaliacoes",
   "/cliente/evolucao",
   "/cliente/conteudos",
-  "/cliente/exercicios",
   "/cliente/arquivos",
   "/cliente/treino",
   "/cliente/perfil",

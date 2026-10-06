@@ -22,6 +22,7 @@ import {
   listAccessibleAnamnesisAnswers,
   listAccessibleAnamnesisQuestions,
 } from "@/lib/supabase/data-access";
+import { isUuid } from "@/lib/validation/uuid";
 import { notFound } from "next/navigation";
 import styles from "./page.module.css";
 
@@ -94,6 +95,10 @@ function formatDateTime(value: string) {
 
 export default async function AdminAnamnesisAiPage({ params }: PageProps) {
   const { anamneseId } = await params;
+
+  if (!isUuid(anamneseId)) {
+    notFound();
+  }
   const submission = await getAccessibleAnamnesisSubmission(anamneseId);
 
   if (!submission || !submission.submitted_at) {

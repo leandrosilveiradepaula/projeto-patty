@@ -1,3 +1,17 @@
+## Biblioteca de exercicios e treino individual
+
+### REGRA CONFIRMADA
+
+A biblioteca de exercicios e o catalogo global mantido pela Patty com os exercicios disponiveis para composicao dos treinos.
+
+Cada cliente recebe somente o conjunto de exercicios que a Patty selecionar para o treino daquela cliente. Clientes diferentes podem receber conjuntos diferentes, e a Patty pode variar manualmente os exercicios ao longo do acompanhamento.
+
+Publicar um exercicio na biblioteca nao equivale a prescreve-lo nem a libera-lo para todas as clientes.
+
+A cliente deve visualizar somente os exercicios pertencentes ao treino que foi selecionado, revisado e publicado para ela.
+
+A selecao e a alteracao de exercicios sao decisoes profissionais da Patty. Nao criar selecao, troca ou progressao automatica sem regra previamente confirmada, documentada e configurada.
+
 # Regras de Negocio
 
 ## Regras confirmadas

@@ -12,6 +12,7 @@ import {
 } from "@/lib/supabase/data-access";
 import type { Json } from "@/lib/supabase/database.types";
 import { serializeCorrectionJson } from "@/lib/anamnesis/corrections";
+import { isUuid } from "@/lib/validation/uuid";
 import { notFound } from "next/navigation";
 import styles from "./page.module.css";
 
@@ -40,6 +41,10 @@ export default async function AnamnesisCorrectionsPage({
   params,
 }: AnamnesisCorrectionsPageProps) {
   const { anamneseId } = await params;
+
+  if (!isUuid(anamneseId)) {
+    notFound();
+  }
   const submission = await getAccessibleAnamnesisSubmission(anamneseId);
 
   if (!submission) {

@@ -27,11 +27,6 @@ const areas = [
     title: "Conteúdos",
   },
   {
-    description: "Consulte a biblioteca de exercícios publicada pela Consultoria.",
-    href: "/cliente/exercicios",
-    title: "Exercícios",
-  },
-  {
     description: "Envie e consulte fotos, exames e documentos privados.",
     href: "/cliente/arquivos",
     title: "Arquivos",

@@ -1,3 +1,29 @@
+## Atualizacao 2026-10-06 - biblioteca de exercicios passa a ser catalogo profissional
+
+### REGRA CONFIRMADA / IMPLEMENTACAO EM CORRECAO
+
+A Patty confirmou que:
+- a biblioteca global contem os exercicios disponiveis para composicao profissional;
+- cada cliente recebe um conjunto individual escolhido pela Patty;
+- clientes diferentes podem receber exercicios diferentes;
+- a Patty pode variar manualmente os exercicios ao longo do acompanhamento;
+- publicar um exercicio na biblioteca nao o libera para todas as clientes;
+- a cliente deve visualizar somente os exercicios pertencentes ao treino selecionado e publicado para ela.
+
+Essa confirmacao supera a exposicao global implementada em 2026-10-04.
+
+Nesta branch:
+- a biblioteca global deixa de aparecer na home/navegacao da cliente;
+- /cliente/exercicios deixa de listar o catalogo global e orienta para a area de Treino;
+- nova migration revoga a policy global de leitura autenticada de exercise_versions;
+- o teste de RLS volta a exigir que cliente nao consiga navegar pela biblioteca global.
+
+### PROXIMA IMPLEMENTACAO
+
+Ainda falta implementar o modelo versionado de treino por cliente que referencia as versoes exatas dos exercicios escolhidos pela Patty e publica somente esse conjunto para a cliente.
+
+Essa lacuna e de implementacao, nao de regra profissional. Nao inferir progressao, troca automatica, series, repeticoes ou carga.
+
 > Escopo atual: **sistema completo, de ponta a ponta**. O projeto nao e mais conduzido como MVP. Referencias historicas a MVP devem ser lidas como legado documental, nao como reducao de escopo.
 
 # Estado Atual do Projeto Patty
@@ -209,6 +235,21 @@ Foram ampliadas as revalidacoes de interface, sem alterar persistencia ou regra 
 O objetivo e garantir que a proxima acao factual exibida acompanhe imediatamente o estado persistido.
 
 Nenhuma regra profissional, calculo, schema, RLS ou criterio de elegibilidade foi alterado.
+
+## Atualizacao de auditoria de interface 2026-10-06 - resiliencia de rotas profundas
+
+### Contexto, recuperacao e falha segura
+
+A auditoria de acesso por rotas profundas identificou inconsistencias que afetam a percepcao de produto acabado e um conflito de produto que nao deve ser resolvido por inferencia:
+
+- Avaliacao detalhada passa a usar o mesmo cabecalho de identidade do workspace da cliente;
+- rotas profundas de Avaliacao e Anamnese validam o formato UUID antes de consultar dados;
+- admin e cliente recebem experiencias proprias de "nao encontrado/indisponivel", com caminhos seguros de retorno e texto que nao revela se um registro existe sem autorizacao;
+- o workspace profundo da Anamnese recebe retorno explicito para o historico da mesma cliente;
+- a interface administrativa de Exercicios deixa de afirmar que publicacao implica exposicao global automatica para clientes;
+- a divergencia foi posteriormente resolvida pela confirmacao da Patty em 2026-10-06: biblioteca global e catalogo profissional; cliente ve somente exercicios do proprio treino publicado.
+
+A autorizacao global de leitura de exercicios por clientes e corrigida por migration nova nesta mesma branch.
 
 ## Legenda de estado
 
