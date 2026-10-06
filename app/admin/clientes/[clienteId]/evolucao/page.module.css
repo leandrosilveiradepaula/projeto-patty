@@ -60,6 +60,9 @@
 }
 
 .detailLink {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
   color: var(--color-brand);
   font-weight: var(--text-label-medium-weight);
   text-decoration: none;
