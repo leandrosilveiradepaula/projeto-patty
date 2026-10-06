@@ -22,6 +22,44 @@ export type OperationalPendingItem = {
   title: string;
 };
 
+
+export type OperationalPendingGroup = "patty" | "client" | "operational";
+
+const CLIENT_WAITING_PENDING_KINDS = new Set<OperationalPendingItemKind>([
+  "anamnesis_draft",
+  "clarification_without_response",
+  "weekly_feedback_awaiting_response",
+]);
+
+const OPERATIONAL_PENDING_KINDS = new Set<OperationalPendingItemKind>([
+  "ai_execution_started",
+  "weekly_feedback_reminder_blocked",
+]);
+
+export function getOperationalPendingGroup(
+  item: OperationalPendingItem,
+): OperationalPendingGroup {
+  if (CLIENT_WAITING_PENDING_KINDS.has(item.kind)) {
+    return "client";
+  }
+
+  if (OPERATIONAL_PENDING_KINDS.has(item.kind)) {
+    return "operational";
+  }
+
+  return "patty";
+}
+
+export function groupOperationalPendingItems(items: OperationalPendingItem[]) {
+  return {
+    patty: items.filter((item) => getOperationalPendingGroup(item) === "patty"),
+    client: items.filter((item) => getOperationalPendingGroup(item) === "client"),
+    operational: items.filter(
+      (item) => getOperationalPendingGroup(item) === "operational",
+    ),
+  };
+}
+
 export type PendingAnamnesisSubmission = {
   clientId: string;
   clientLabel: string;
