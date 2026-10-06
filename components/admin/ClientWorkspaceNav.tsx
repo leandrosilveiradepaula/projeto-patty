@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 
 import styles from "./ClientWorkspaceNav.module.css";
@@ -27,6 +28,15 @@ export function ClientWorkspaceNav({
   clientId,
 }: ClientWorkspaceNavProps) {
   const pathname = usePathname();
+  const activeLinkRef = useRef<HTMLAnchorElement>(null);
+
+  useEffect(() => {
+    activeLinkRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "center",
+    });
+  }, [activeArea, pathname]);
   const base = `/admin/clientes/${clientId}`;
   const items: Array<{
     area: ClientWorkspaceArea;
@@ -65,6 +75,7 @@ export function ClientWorkspaceNav({
             className={isActive ? styles.activeLink : styles.link}
             href={item.href}
             key={item.href}
+            ref={isActive ? activeLinkRef : undefined}
           >
             {item.label}
           </Link>
