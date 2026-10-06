@@ -1,4 +1,4 @@
-import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
+import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -91,9 +91,9 @@ export default async function AdminClientProtocolsPage({
 
   return (
     <>
-      <ClientSummaryHeader
-        meta="Cliente atribuído"
-        name={displayName || "Cliente sem nome informado"}
+      <ClientWorkspaceHeader
+        meta="Acompanhamento ativo"
+        displayName={displayName}
         secondary="Histórico de protocolos"
         status={<Badge variant="neutral">Atribuição ativa</Badge>}
         visual={

@@ -3,7 +3,7 @@ import { AdminPrivateFileUploadForm } from "@/components/admin/AdminPrivateFileU
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
+import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { Section } from "@/components/ui/Section";
 import { getClientForPrivateFileAdministration } from "@/lib/files/private-file-admin";
@@ -66,9 +66,9 @@ export default async function AdminClientFilesPage({
 
   return (
     <>
-      <ClientSummaryHeader
-        meta="Cliente atribuído"
-        name={displayName || "Cliente sem nome informado"}
+      <ClientWorkspaceHeader
+        meta="Acompanhamento ativo"
+        displayName={displayName}
         secondary="Fotos, exames e documentos privados"
         status={<Badge variant="neutral">{files.length} arquivo(s)</Badge>}
       />
