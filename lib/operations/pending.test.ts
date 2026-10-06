@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { buildOperationalPendingItems } from "./pending.ts";
+import {
+  buildOperationalPendingItems,
+  groupOperationalPendingItems,
+} from "./pending.ts";
 
 test("operational pending builder emits only explicit backend states", () => {
   const items = buildOperationalPendingItems({
@@ -552,5 +555,58 @@ test("failed email delivery becomes an operational pending until a later deliver
       (item) => item.kind === "weekly_feedback_reminder_blocked",
     ),
     false,
+  );
+});
+
+
+test("operational pending groups keep action ownership explicit", () => {
+  const items = buildOperationalPendingItems({
+    clarificationReminderIntervalHours: 24,
+    referenceNow: "2026-10-08T12:00:00Z",
+    anamnesisSubmissions: [
+      {
+        id: "draft-client",
+        clientId: "client-1",
+        clientLabel: "Cliente 1",
+        createdAt: "2026-10-01T10:00:00Z",
+        submittedAt: null,
+        reviewCount: 0,
+      },
+      {
+        id: "review-patty",
+        clientId: "client-2",
+        clientLabel: "Cliente 2",
+        createdAt: "2026-10-01T11:00:00Z",
+        submittedAt: "2026-10-02T11:00:00Z",
+        reviewCount: 0,
+      },
+    ],
+    clarificationRequests: [],
+    assessments: [],
+    protocolVersions: [],
+    aiExecutions: [
+      {
+        id: "ai-operational",
+        clientId: "client-3",
+        clientLabel: "Cliente 3",
+        createdAt: "2026-10-03T10:00:00Z",
+        purposeKey: "anamnesis_review",
+      },
+    ],
+  });
+
+  const grouped = groupOperationalPendingItems(items);
+
+  assert.deepEqual(
+    grouped.patty.map((item) => item.kind),
+    ["anamnesis_submitted_without_review"],
+  );
+  assert.deepEqual(
+    grouped.client.map((item) => item.kind),
+    ["anamnesis_draft"],
+  );
+  assert.deepEqual(
+    grouped.operational.map((item) => item.kind),
+    ["ai_execution_started"],
   );
 });
