@@ -1,3 +1,22 @@
+## Bloco funcional consolidado - avaliacoes, protocolos, conta e conteudos 2026-10-07
+
+Este lote acumula varios fechamentos da auditoria funcional:
+- Avaliacoes: readiness de preenchimento/finalizacao foi separado de criterio profissional de resultado; agenda continua configuravel e correcao preserva valor original.
+- Protocolos: o motor deterministico/configuravel ja executa regras exatas confirmadas, mas nao esta autorizado a inventar redistribuicao de macros, numero de refeicoes, alimentos, fase ou protocolo completo.
+- Conta: recuperacao de acesso ja possui fluxo tecnico e link assistido; continuam abertas expiracao/reenvio de convite e politica de encerramento/desativacao da conta Auth.
+- Conteudos: o primeiro lote educacional continua fail-closed sem upload/asset/publicacao/release, com integridade e entrega privada como gates.
+- Regressao documental automatizada protege essas reconciliacoes contra retorno de pendencias historicas ja resolvidas.
+
+Nenhuma regra profissional nova, schema, migration ou RLS foi introduzido neste lote.
+
+## Auditoria funcional das avaliacoes 2026-10-07
+
+A finalizacao possui readiness deterministico separado por tipo: a avaliacao basica exige peso, cintura, abdomen e quadril; a completa exige o conjunto ampliado e ao menos uma foto. Isso e validacao operacional existente, nao criterio profissional de resultado/evolucao.
+
+Preferencias de agenda de avaliacao sao configuracao versionada: dias preferenciais da completa e posicionamento aproximado da basica entre completas. Nao transformar preferencia de agenda em regra clinica.
+
+Correcoes de medidas preservam o valor/unidade original e calculam o valor efetivo pela correcao mais recente, mantendo contagem e id da ultima correcao. A resolucao de peso em kg continua factual e nao deve reativar meta automatica de hidratacao.
+
 ## Auditoria dos limites do Feedback Semanal 2026-10-07
 
 A agenda e parametrizada por dia ISO, horario local, dia de lembrete e timezone; o runtime nao depende de segunda/08h hardcoded. A preferencia de canal e versionada por cliente entre `email`, `whatsapp` e `in_app`.

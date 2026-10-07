@@ -104,8 +104,8 @@ O lote contem somente:
 - destino `vercel_blob` privado;
 - asset `primary`.
 
-O arquivo original deve permanecer preservado no Drive. O path final deve ser opaco e sem PII. Tamanho, MIME e SHA-256 devem ser conferidos a partir dos bytes reais antes do registro de `educational_content_assets`.
+O arquivo original deve permanecer preservado no Drive. O path final deve ser opaco e sem PII. Tamanho, MIME e SHA-256 devem ser conferidos a partir dos bytes reais antes do registro de `educational_content_assets`. O manifesto/testes atuais tambem impedem que asset, publicacao ou release sejam marcados como avancados antes de um upload Blob verificado.
 
-### ESTADO OPERACIONAL 2026-10-03
+### ESTADO OPERACIONAL RECONCILIADO 2026-10-07
 
-O Blob store privado foi criado/conectado manualmente no projeto Vercel e o manifesto passou para `store_ready_upload_pending`. Nenhum upload, registro de asset no Supabase, publicacao ou release foi executado. O proximo gate e o upload controlado do arquivo aprovado com nova verificacao de integridade.
+O Blob store privado esta criado/conectado. A fonte aprovada foi reobtida read-only em 2026-10-07 e tamanho/MIME foram reconfirmados; o SHA-256 previamente verificado continua sendo gate e deve ser recomputado a partir dos bytes usados no upload. Nenhum upload Blob, registro de asset, publicacao ou release foi executado. O lote permanece fail-closed antes da transferencia fisica e da validacao de entrega privada do video acima de 100 MB.
