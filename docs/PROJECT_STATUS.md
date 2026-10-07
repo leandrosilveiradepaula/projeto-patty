@@ -1570,7 +1570,7 @@ A montagem usa somente consultas RLS ja existentes sob as atribuicoes ativas da 
 - estado registrado naquela reconciliacao: `master` em `c56d6752c119ee873fcc39bb2b3d4c3af73cb224` e deployment `dpl_BiMMHaAutcYZJBpxQzwCdcv9LScz` `READY`;
 - esse bloco e historico e nao representa o HEAD atual;
 - estado revalidado posteriormente em 2026-10-01: PR #246 mergeado; `master` e producao Vercel alinhados em `407ecf24c192fa5ec5ec3a83b58ae6203f9ffe00`;
-- PRs #242, #243, #244 e #245 permanecem abertos em draft nesta revalidacao;
+- naquele checkpoint, os PRs #242, #243, #244 e #245 ainda apareciam em draft; esse estado e historico e foi superado pelos merges/reconciliacoes posteriores;
 - historicamente houve runs encerrados antes de receber steps (`steps: null`), mas em 2026-10-01 o runner voltou a executar normalmente; diagnosticos atuais devem usar os steps/logs reais.
 
 ### SUPABASE SAAS
@@ -1690,9 +1690,11 @@ Nenhuma migration, schema, RLS ou runtime foi alterado nesta etapa.
 Proximo passo tecnico recomendado: transformar esse contrato em uma proposta de migration pequena para a fundacao **sem conectar nenhum fluxo existente ainda**, incluindo RLS/grants e testes de banco, para revisao antes de qualquer apply.
 
 
-## Proposta da foundation migration de configuracao - 2026-10-01
+## REGISTRO HISTORICO SUPERADO - proposta da foundation migration de configuracao (2026-10-01)
 
-### DOCUMENTADA / NAO APLICADA
+> Este bloco registra a etapa anterior a materializacao da migration oficial. O estado posterior prevalece: `20261001213333_create_method_configuration_foundation.sql` foi criada, testada, aplicada e verificada no Supabase SaaS.
+
+### ESTADO NAQUELE CHECKPOINT — DOCUMENTADA / NAO APLICADA
 
 Foram criados, fora de `supabase/migrations`, tres artefatos de revisao:
 
@@ -2369,7 +2371,7 @@ Esse fallback remove SMTP como bloqueio do primeiro onboarding. SMTP continua re
 
 ## Atualizacao 2026-10-04 - Link manual de recuperacao de acesso
 
-### MERGEADO / PUBLICACAO EM VALIDACAO / SEM ALTERACAO DE SCHEMA
+### MERGEADO / DISPONIVEL NO MASTER / SEM ALTERACAO DE SCHEMA
 
 Foi adicionado fallback administrativo de recuperacao que usa `auth.admin.generateLink({ type: "recovery" })`.
 
@@ -2387,7 +2389,7 @@ Isso remove SMTP como bloqueio para suporte manual de recuperacao de senha. O fl
 
 ## Atualizacao 2026-10-04 - Compatibilidade com convite implicito do Supabase
 
-### IMPLEMENTADA NA BRANCH
+### MERGEADA / DISPONIVEL NO MASTER
 
 O convite real enviado pelo Supabase no bootstrap administrativo foi observado chegando em `/login#access_token=...&refresh_token=...&type=invite`.
 
@@ -2835,3 +2837,15 @@ A auditoria encontrou estados de 2026-09/10 ainda redigidos no presente:
 - uma decisao antiga ainda tratava deployment Vercel como blocker atual da validacao do DELETE de rascunho.
 
 Os registros foram preservados como historicos e reconciliados com o estado posterior. WhatsApp/opt-in/fallback e SMTP operacional continuam pendencias reais; nenhuma regra profissional foi inferida.
+
+
+## Fechamento da penultima passada de fonte de verdade - 2026-10-07
+
+A revisao detalhada dos checkpoints antigos encontrou e reconciliou os ultimos estados intermediarios de alto risco antes da passada final:
+- PRs #242-#245 nao sao mais tratados como drafts atuais;
+- a proposta inicial da foundation configuravel foi marcada como checkpoint historico anterior a migration oficial aplicada;
+- recovery manual e compatibilidade de convite implicito deixaram de aparecer como apenas em validacao/branch;
+- o diagnostico antigo de runner com `steps: null` foi mantido apenas como historico;
+- a decisao de assets educacionais agora reconhece o Vercel Private Blob ja provisionado e separa corretamente store pronto de upload/publicacao ainda pendentes.
+
+Nenhuma regra profissional, schema, migration ou RLS foi alterado. A proxima passada deve ser de fechamento transversal: verificar somente contradicoes residuais entre documentos normativos, readiness e runtime, sem reabrir registros historicos ja explicitamente marcados como tais.

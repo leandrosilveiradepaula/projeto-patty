@@ -257,3 +257,23 @@ test("historical branch and deployment wording is not presented as current readi
   assert.match(status, /REGISTRO HISTORICO — ENGINE V1 ANTES DA INTEGRACAO COM CONSUMIDORES/);
   assert.match(decisions, /nao deve ser tratada como blocker atual sem nova evidencia/);
 });
+
+
+test("final source-of-truth cleanup supersedes stale branch and foundation checkpoints", () => {
+  const status = read("docs/PROJECT_STATUS.md");
+  const readiness = read("docs/MVP_READINESS.md");
+
+  assert.match(status, /PRs #242, #243, #244 e #245.*estado e historico/);
+  assert.match(status, /REGISTRO HISTORICO SUPERADO - proposta da foundation migration/);
+  assert.match(status, /20261001213333_create_method_configuration_foundation\.sql.*criada, testada, aplicada e verificada/);
+  assert.match(status, /Compatibilidade com convite implicito do Supabase[\s\S]*MERGEADA \/ DISPONIVEL NO MASTER/);
+  assert.match(readiness, /diagnostico historico.*steps: null.*janela anterior ao restabelecimento do runner/);
+});
+
+test("educational media decision reflects the provisioned private Blob store", () => {
+  const decisions = read("docs/DECISIONS.md");
+
+  assert.match(decisions, /Vercel Private Blob privado `projeto-patty-blob` foi criado\/conectado/);
+  assert.match(decisions, /primeiro video aprovado ainda nao foi fisicamente enviado/);
+  assert.doesNotMatch(decisions, /Nenhum Blob store foi criado e nenhum arquivo foi migrado nesta etapa/);
+});

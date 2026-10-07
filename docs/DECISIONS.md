@@ -601,13 +601,11 @@ O Supabase continua sendo a fonte de verdade de metadados, versionamento, releas
 
 Cliente so pode ler metadata de asset quando a mesma versao estiver explicitamente liberada para ela. O acesso ao blob privado sera mediado server-side/signed URL apos autorizacao no Supabase.
 
-### LIMITE
+### ESTADO RECONCILIADO EM 2026-10-07
 
-Criar a tabela de metadata nao significa que o Blob store exista nem que o video tenha sido copiado. Criacao do store, upload do arquivo original, verificacao de hash e publicacao permanecem passos operacionais separados.
+A tabela de metadata continua separada do binario e da liberacao, mas o store deixou de ser lacuna: Vercel Private Blob privado `projeto-patty-blob` foi criado/conectado para binarios educacionais. O primeiro video aprovado ainda nao foi fisicamente enviado; upload controlado, verificacao pos-upload de tamanho/MIME/SHA-256, registro do asset, publicacao e release explicita continuam passos operacionais separados.
 
-### ESTADO OPERACIONAL
-
-A migration `20260924210600_create_educational_content_assets.sql` foi aplicada no Supabase SaaS em 2026-09-24 e passou smoke pos-apply sintetico com `ROLLBACK`. O PR #157 foi mergeado no commit `857daed` e o deployment correspondente ficou `READY` em producao. Nenhum Blob store foi criado e nenhum arquivo foi migrado nesta etapa.
+A migration `20260924210600_create_educational_content_assets.sql` permanece aplicada no Supabase SaaS. O bucket `client-private` nao deve ser reutilizado para conteudo educacional.
 
 ## 2026-09-24 - Gmail da Patty como SMTP do MVP
 
