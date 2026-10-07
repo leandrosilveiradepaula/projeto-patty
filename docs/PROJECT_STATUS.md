@@ -1,3 +1,16 @@
+## Atualizacao 2026-10-07 - runtime de hidratacao reconciliado
+
+A hidratacao continua aberta como regra profissional automatica.
+
+O runtime foi reconciliado para:
+- nao criar/recalcular meta de hidratacao ao finalizar avaliacao;
+- nao oferecer recalculo manual de meta na area administrativa;
+- nao exibir meta ou percentual automatico para a cliente;
+- preservar check-ins factuais de liquidos e atividade fisica;
+- preservar metas/templates/snapshots historicos sem trata-los como regra vigente.
+
+Referencias antigas a 35 mL/kg ou 60 mL/kg permanecem apenas como historico tecnico/documental.
+
 ## Atualizacao de auditoria de interface 2026-10-07 - home e navegacao da cliente
 
 A home da cliente foi enxugada para priorizar a proxima acao e os atalhos realmente relevantes.
@@ -245,7 +258,7 @@ O projeto `Projeto Corpo e Mente` permanece `ACTIVE_HEALTHY`. A verificacao dire
 
 O advisor de seguranca pos-apply nao apontou regressao da migration de hidratacao. Permanece o warning independente e ja conhecido de Leaked Password Protection desabilitado.
 
-A camada configuravel de hidratacao esta aplicada e integrada ao fluxo administrativo: a resolucao usa template ativo e override client-scoped sob RLS; a persistencia privilegiada ocorre em boundary server-only pela RPC atomica; novas metas preservam snapshot da configuracao e resultado. A leitura usa `resolved_target_ml` para o modo configurado e `target_ml` apenas como compatibilidade do historico legado. O caminho historico permanece preservado e questoes abertas de hidratacao continuam sem automacao.
+A camada configuravel de hidratacao permanece aplicada como infraestrutura historica/compatibilidade, mas o runtime operacional foi desconectado em 2026-10-07 enquanto a regra profissional de hidratacao estiver aberta. Metas historicas permanecem preservadas; nenhuma nova meta automatica deve ser criada ou recalculada pela aplicacao.
 
 
 
@@ -502,7 +515,7 @@ Resumo:
 - todo acompanhamento comeca pelo Reconhecimento Metabolico;
 - o fluxo principal confirmado termina em Reconhecimento -> Cutting 1 -> Up Metabolico -> Cutting 2, com as subetapas confirmadas documentadas;
 - etapas posteriores ao Cutting 2 nao devem ser inferidas;
-- existem regras confirmadas de refeicoes/jejum, macros/doses, grupos de proteina, legumes na contagem de carboidrato, meta de liquidos 35 mL/kg/dia e regras contextuais do Up Metabolico;
+- existem regras confirmadas de refeicoes/jejum, macros/doses, grupos de proteina, legumes na contagem de carboidrato e regras contextuais do Up Metabolico; hidratacao permanece aberta para automacao;
 - no inicio, relatos de saude/comportamento nao geram alerta, bloqueio ou encaminhamento automatico;
 - para emagrecimento/reducao de gordura, cintura e abdomen sao referencias fortes e fotos podem confirmar evolucao mesmo com peso estavel;
 - adesao e central e nao existe score automatico de adesao;
