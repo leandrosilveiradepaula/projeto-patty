@@ -6,9 +6,19 @@ import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
+import { TextInput } from "@/components/ui/TextInput";
 import { listExerciseVersionsVisibleToCurrentAdmin } from "@/lib/supabase/data-access";
 import Link from "next/link";
 import styles from "./page.module.css";
+
+
+function normalizeSearchValue(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("pt-BR")
+    .trim();
+}
 
 function formatPublishedDate(value: string) {
   return new Intl.DateTimeFormat("pt-BR", {
@@ -19,7 +29,12 @@ function formatPublishedDate(value: string) {
   }).format(new Date(value));
 }
 
-export default async function AdminExerciciosPage() {
+type AdminExerciciosPageProps = {
+  searchParams: Promise<{ q?: string; status?: string }>;
+};
+
+export default async function AdminExerciciosPage({ searchParams }: AdminExerciciosPageProps) {
+  const { q, status } = await searchParams;
   const exerciseVersions = await listExerciseVersionsVisibleToCurrentAdmin();
   const latestByExercise = new Map<string, (typeof exerciseVersions)[number]>();
 
@@ -34,6 +49,19 @@ export default async function AdminExerciciosPage() {
   const exercises = [...latestByExercise.values()].sort((left, right) =>
     right.created_at.localeCompare(left.created_at),
   );
+
+  const searchTerm = q?.trim() ?? "";
+  const normalizedSearchTerm = normalizeSearchValue(searchTerm);
+  const statusFilter = status === "draft" || status === "published" ? status : "all";
+  const filteredExercises = exercises.filter((exercise) => {
+    const matchesSearch =
+      !normalizedSearchTerm ||
+      normalizeSearchValue(exercise.name).includes(normalizedSearchTerm);
+    const matchesStatus =
+      statusFilter === "all" ||
+      (statusFilter === "published" ? Boolean(exercise.published_at) : !exercise.published_at);
+    return matchesSearch && matchesStatus;
+  });
 
   return (
     <>
@@ -67,14 +95,48 @@ export default async function AdminExerciciosPage() {
         description="Cada item abre o histórico versionado do exercício."
         title="Biblioteca de exercícios"
       >
+        {exercises.length > 0 ? (
+          <form action="/admin/exercicios" className={styles.filters} method="get">
+            <label className={styles.searchField}>
+              <span>Buscar exercício</span>
+              <TextInput
+                defaultValue={searchTerm}
+                name="q"
+                placeholder="Digite o nome do exercício"
+                type="search"
+              />
+            </label>
+            <label className={styles.statusField}>
+              <span>Status</span>
+              <select defaultValue={statusFilter} name="status">
+                <option value="all">Todos</option>
+                <option value="draft">Rascunhos</option>
+                <option value="published">Publicados</option>
+              </select>
+            </label>
+            <Button type="submit" variant="secondary">Filtrar</Button>
+            {searchTerm || statusFilter !== "all" ? (
+              <Link className={styles.clearLink} href="/admin/exercicios">Limpar</Link>
+            ) : null}
+          </form>
+        ) : null}
         {exercises.length === 0 ? (
           <EmptyState
             description="Crie o primeiro exercício para iniciar a biblioteca."
             title="A biblioteca de exercícios está vazia"
           />
+        ) : filteredExercises.length === 0 ? (
+          <EmptyState
+            description="Ajuste a busca ou limpe os filtros para voltar a ver a biblioteca completa."
+            title="Nenhum exercício encontrado"
+          />
         ) : (
-          <ul className={styles.exerciseList}>
-            {exercises.map((exerciseVersion) => {
+          <>
+            <p className={styles.resultCount}>
+              {filteredExercises.length} de {exercises.length} exercício(s)
+            </p>
+            <ul className={styles.exerciseList}>
+            {filteredExercises.map((exerciseVersion) => {
               const publishedMeta = exerciseVersion.published_at
                 ? "Publicado em " +
                   formatPublishedDate(exerciseVersion.published_at) +
@@ -114,6 +176,7 @@ export default async function AdminExerciciosPage() {
               );
             })}
           </ul>
+          </>
         )}
       </Section>
     </>

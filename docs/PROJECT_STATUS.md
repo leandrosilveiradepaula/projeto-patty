@@ -1,3 +1,14 @@
+## Atualizacao de auditoria de interface 2026-10-07 - descoberta nas bibliotecas administrativas
+
+As bibliotecas administrativas de Conteudos e Exercicios passam a suportar busca e filtro de lifecycle sem alterar publicacao ou elegibilidade.
+
+- Conteudos pode ser buscado por titulo, categoria ou tipo e filtrado entre rascunhos/publicados;
+- Exercicios pode ser buscado por nome e filtrado entre rascunhos/publicados;
+- filtros preservam a biblioteca versionada e apenas mudam a descoberta na interface;
+- estados sem resultado orientam a limpar os filtros;
+- formularios de criacao e publicacao manual permanecem inalterados;
+- nenhuma regra profissional, schema ou RLS foi alterado.
+
 ## Atualizacao de auditoria de interface 2026-10-07 - lote de continuidade do portal da cliente
 
 Um lote maior de UX melhora continuidade e hierarquia em quatro areas do portal da cliente.
