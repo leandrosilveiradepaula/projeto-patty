@@ -1,3 +1,14 @@
+## Bloco consolidado de readiness transversal 2026-10-07
+
+A auditoria funcional acumulou cinco frentes antes deste PR:
+- PWA: a fundacao instalavel ja esta mergeada no master; a documentacao deixou de tratar uma branch antiga como estado futuro.
+- Email: Gmail/SMTP continua a infraestrutura escolhida para baixo volume, mas a documentacao operacional deixou de chamar o sistema atual de MVP.
+- IA: o modelo sintetico avaliado continua sendo configuracao tecnica inicial; dados reais permanecem bloqueados pelo gate de retencao/ZDR-MAM e aprovacao humana.
+- Drive: o primeiro item aprovado pode seguir apenas pelo lote controlado ja preparado; os demais 109 itens conhecidos continuam em triagem/hold conforme direitos, privacidade e revisao.
+- Questoes abertas: rotulos operacionais herdados de "pos-MVP" foram corrigidos sem mudar o conteudo das decisoes.
+
+Nenhuma capacidade foi declarada pronta apenas por documentacao: dependencias externas e gates de dados permanecem explicitamente separados.
+
 ## Bloco funcional consolidado - avaliacoes, protocolos, conta e conteudos 2026-10-07
 
 Este lote acumula varios fechamentos da auditoria funcional:
