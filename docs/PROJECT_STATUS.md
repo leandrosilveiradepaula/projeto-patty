@@ -1,3 +1,17 @@
+## Atualizacao de auditoria de interface 2026-10-07 - proxima acao na lista de clientes
+
+A lista de clientes passa a reduzir um clique no trabalho diario da Patty.
+
+- clientes sao ordenadas alfabeticamente pelo nome, com cadastros sem nome ao final;
+- quando existe item em `Acao da Patty`, a lista mostra qual e o item factual mais antigo daquela cliente;
+- o botao principal abre diretamente o registro correspondente;
+- o acesso a visao geral da cliente continua disponivel como acao secundaria;
+- quando nao existe acao da Patty, o comportamento permanece simples: abrir a cliente.
+
+A ordenacao das pendencias continua cronologica e nao representa prioridade clinica.
+
+Nenhum schema, migration, RLS ou criterio profissional foi alterado.
+
 ## Atualizacao de auditoria de interface 2026-10-07 - fila operacional na home da Patty
 
 A home administrativa passa a refletir a mesma separacao da fila operacional:
