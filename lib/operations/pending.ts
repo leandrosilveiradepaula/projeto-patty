@@ -5,6 +5,7 @@ export type OperationalPendingItemKind =
   | "assessment_draft"
   | "clarification_response_pending_review"
   | "clarification_without_response"
+  | "assessment_draft_open"
   | "client_registration_missing"
   | "weekly_feedback_channel_missing"
   | "weekly_feedback_email_contact_missing"
@@ -175,6 +176,14 @@ export type PendingPrivateFileRelease = {
   fileId: string;
   fileKind: string;
   originalFilename: string;
+};
+
+export type PendingAssessmentDraft = {
+  assessedAt: string;
+  assessmentId: string;
+  clientId: string;
+  clientLabel: string;
+  createdAt: string;
 };
 
 export type OperationalPendingFactsInput = {
@@ -404,6 +413,21 @@ export function buildOperationalPendingItems(
       kind: "training_reviewed_not_published",
       statusLabel: "Revisado, não publicado",
       title: "Treino aguardando publicação",
+    });
+  }
+
+  for (const assessment of input.assessmentDrafts ?? []) {
+    items.push({
+      clientId: assessment.clientId,
+      clientLabel: assessment.clientLabel,
+      createdAt: assessment.createdAt,
+      description:
+        "A avaliação está em rascunho e permanece editável. Revise medidas e fotos e finalize explicitamente quando a coleta estiver pronta.",
+      href: `/admin/avaliacoes/${assessment.assessmentId}`,
+      id: `assessment-draft:${assessment.assessmentId}`,
+      kind: "assessment_draft_open",
+      statusLabel: "Rascunho",
+      title: "Continuar avaliação",
     });
   }
 
