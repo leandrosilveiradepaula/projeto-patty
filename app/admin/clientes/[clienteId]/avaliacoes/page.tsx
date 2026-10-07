@@ -57,7 +57,7 @@ export default async function AdminClientAssessmentsPage({
   const finalizedAssessments = assessments.filter(
     (assessment) => Boolean(assessment.finalized_at),
   );
-  const displayName = client.profiles?.display_name?.trim();
+  const displayName = client.full_name?.trim() || client.profiles?.display_name?.trim();
   const kindOptions = assessmentKinds.options.map((option) => ({
     label: option.label,
     semanticKey: option.semanticKey,
