@@ -415,6 +415,7 @@ export async function deleteTrainingPlanItemAction(
   trainingPlanVersionId: string,
   itemId: string,
   _state: TrainingPlanFormState,
+  _formData: FormData,
 ): Promise<TrainingPlanFormState> {
   try {
     const { client, version } = await requireAccessibleTrainingVersion(
@@ -456,6 +457,7 @@ export async function reviewTrainingPlanVersionAction(
   clientId: string,
   trainingPlanVersionId: string,
   _state: TrainingPlanFormState,
+  _formData: FormData,
 ): Promise<TrainingPlanFormState> {
   try {
     const { client, version } = await requireAccessibleTrainingVersion(
@@ -487,6 +489,7 @@ export async function publishTrainingPlanVersionAction(
   clientId: string,
   trainingPlanVersionId: string,
   _state: TrainingPlanFormState,
+  _formData: FormData,
 ): Promise<TrainingPlanFormState> {
   try {
     const { client, version } = await requireAccessibleTrainingVersion(
