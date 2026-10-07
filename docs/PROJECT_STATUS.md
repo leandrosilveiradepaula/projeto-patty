@@ -1,3 +1,11 @@
+## Auditoria funcional das avaliacoes 2026-10-07
+
+A finalizacao possui readiness deterministico separado por tipo: a avaliacao basica exige peso, cintura, abdomen e quadril; a completa exige o conjunto ampliado e ao menos uma foto. Isso e validacao operacional existente, nao criterio profissional de resultado/evolucao.
+
+Preferencias de agenda de avaliacao sao configuracao versionada: dias preferenciais da completa e posicionamento aproximado da basica entre completas. Nao transformar preferencia de agenda em regra clinica.
+
+Correcoes de medidas preservam o valor/unidade original e calculam o valor efetivo pela correcao mais recente, mantendo contagem e id da ultima correcao. A resolucao de peso em kg continua factual e nao deve reativar meta automatica de hidratacao.
+
 ## Auditoria dos limites do Feedback Semanal 2026-10-07
 
 A agenda e parametrizada por dia ISO, horario local, dia de lembrete e timezone; o runtime nao depende de segunda/08h hardcoded. A preferencia de canal e versionada por cliente entre `email`, `whatsapp` e `in_app`.
