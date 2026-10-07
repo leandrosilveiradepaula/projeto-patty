@@ -8,6 +8,7 @@ import {
   listAccessibleAnamnesisSubmissions,
   listAccessibleClientAssessments,
   listAccessibleClientNotificationEvents,
+  listAccessibleClientFilesForClients,
   listAccessibleClientRegistrationsForClients,
   listAccessibleWeeklyFeedbackNotificationPreferencesForClients,
   listContentReleasesForAccessibleClients,
@@ -73,6 +74,7 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
     registrations,
     weeklyFeedbackPreferences,
     contentReleases,
+    privateFiles,
   ] = await Promise.all([
     Promise.all(
       assignedClients.map((client) =>
@@ -94,6 +96,7 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
     listAccessibleClientRegistrationsForClients(clientIds),
     listAccessibleWeeklyFeedbackNotificationPreferencesForClients(clientIds),
     listContentReleasesForAccessibleClients(clientIds),
+    listAccessibleClientFilesForClients(clientIds),
   ]);
 
   const [trainingVersions, releasedContentAssets] = await Promise.all([
@@ -290,6 +293,31 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
         hasRegistration: Boolean(registration),
         weeklyFeedbackChannel: preference?.channel_key ?? null,
       };
+    }),
+    privateFileReleases: privateFiles.flatMap((file) => {
+      const assignedClient = assignedClients.find(
+        (client) => client.id === file.client_id,
+      );
+
+      if (
+        !assignedClient ||
+        file.client_visible_at ||
+        file.uploaded_by_profile_id === assignedClient.profile_id
+      ) {
+        return [];
+      }
+
+      return [{
+        clientId: file.client_id,
+        clientLabel:
+          labelsByClientId.get(file.client_id) ??
+          "Cliente sem nome informado",
+        createdAt: file.created_at,
+        fileId: file.id,
+        fileKind: file.file_kind,
+        originalFilename:
+          file.original_filename?.trim() || "Arquivo sem nome informado",
+      }];
     }),
     contentReleaseReadiness: contentReleases.flatMap((release) => {
       const version = release.educational_content_versions;
