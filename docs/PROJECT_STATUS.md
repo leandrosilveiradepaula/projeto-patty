@@ -10,9 +10,10 @@ Implementado nesta branch:
 - registros legados sem nome deixam de ser apresentados como "cadastro incompleto" normal e passam a ser sinalizados como inconsistencia;
 - a lista ativa mostra explicitamente o estado `Ativa`.
 
-Pendente de hardening:
-- existe registro legado sem nome no ambiente atual;
-- a constraint definitiva de nome no banco deve ser aplicada somente depois de corrigir esse registro com dado verdadeiro;
+Estado atual:
+- a fixture de teste sem nome foi removida do Supabase SaaS em 2026-10-07 depois de confirmar que possuia somente um assignment e nenhum dado profissional associado;
+- nao existem mais clientes sem nome no ambiente atual;
+- o hardening estrutural do nome no banco pode seguir em migration futura, sem inventar dados;
 - a visualizacao e o reengajamento de clientes inativas exigem desenho separado de RLS/autorizacao, sem liberar dados sensiveis de ex-clientes fora de regra documentada.
 
 ## Atualizacao de auditoria de interface 2026-10-07 - proxima acao na lista de clientes
