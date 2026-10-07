@@ -2948,3 +2948,15 @@ A fila operacional foi refinada para que falhas de lembrete levem a Patty ao pon
 - a pagina de Feedback Semanal ganhou ancoras estaveis para solicitacao e pendencias.
 
 Nenhum estado de entrega foi reclassificado e nenhuma mensagem e considerada enviada sem evidencia do worker/provider. O SMTP real e o provider/opt-in do WhatsApp continuam dependencias operacionais separadas.
+
+
+## Fechamento de deep links do fluxo central - 2026-10-07
+
+A fila administrativa passa a apontar para a acao exata nos principais estados centrais ja implementados:
+- Anamnese enviada sem revisao abre diretamente a area de nova nota interna;
+- esclarecimento respondido abre diretamente o pedido especifico a ser resolvido;
+- Avaliacao em rascunho abre na coleta editavel;
+- Protocolo submetido/aprovado abre a versao exata que exige acao de lifecycle;
+- Treino solicitado abre a secao de solicitacao e rascunho/revisado abre a prescricao.
+
+As ancoras sao apenas navegacao operacional sobre fatos persistidos. Nenhuma acao e executada automaticamente e nenhuma regra profissional nova foi criada.
