@@ -419,10 +419,12 @@ export default async function AdminClienteDetailPage({
             : "Conta da cliente ainda não vinculada"
         }
         status={
-          displayName ? (
+          !displayName ? (
+            <Badge variant="critical">Nome obrigatório</Badge>
+          ) : client.status === "active" ? (
             <Badge variant="positive">Ativa</Badge>
           ) : (
-            <Badge variant="critical">Nome obrigatório</Badge>
+            <Badge variant="neutral">Inativa</Badge>
           )
         }
         visual={
