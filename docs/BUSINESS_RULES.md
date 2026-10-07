@@ -333,36 +333,19 @@ No Cutting Dia 1 / Dia 2:
 
 A etapa 2 Low / 1 High usa a Planilha Carb Cycle baseada no peso.
 
-### RELACAO ENTRE PLANILHA CARB CYCLE E PROTOCOLO LINEAR
+### PLANILHA CARB CYCLE — LIMITE VIGENTE
 
 ### DECISAO CONFIRMADA
 
-A Patty confirmou que:
-- as **Fases 1, 2, 3 e 4** da Planilha Carb Cycle pertencem ao conjunto de fases usado nos **Cuttings 1, 2 e 3** do metodo atual;
-- a coluna **Media** da planilha corresponde ao valor utilizado no **protocolo Linear** da fase correspondente.
+A etapa 2 Low / 1 High usa a Planilha Carb Cycle baseada no peso.
 
-Portanto, o Linear nao deve ser calculado por uma formula inventada fora da planilha quando houver fase da Planilha Carb Cycle aplicavel: a referencia confirmada e a coluna Media.
+Essa logica deve ser deterministica. Somente formulas confirmadas e documentadas podem ser ativadas como configuracao versionada e executadas pelo motor deterministico.
 
-### USO PRATICO DAS FASES DA PLANILHA
-
-A Patty confirmou que, na pratica, **dificilmente chega as Fases 4, 5 e 6** da planilha.
-
-O padrao profissional mais frequente e:
-- trabalhar repetidamente com as Fases 1, 2 e 3;
-- realizar um periodo de cutting mais prolongado;
-- intercalar com um periodo de bulking voltado ao trabalho de massa muscular;
-- depois reiniciar novamente o ciclo pelas Fases 1, 2 e 3 quando voltar ao cutting.
-
-Isso descreve a pratica profissional atual e **nao cria uma transicao automatica** entre cutting e bulking. Os criterios de quando interromper cutting, iniciar bulking, encerrar bulking e retornar ao cutting continuam dependentes de decisao da Patty.
-
-As Fases 4, 5 e 6 permanecem validas como possibilidades historicas/metodologicas, mas nao devem ser tratadas como caminho padrao nem como requisito para a primeira automacao do fluxo.
-
-Ainda nao inferir o pareamento individual completo entre cada fase numerada da planilha e os nomes de Cutting quando isso nao estiver explicitado.
-
-Essa lógica deve ser determinística. Somente fórmulas confirmadas e documentadas podem ser ativadas como configuração versionada e executadas pelo motor determinístico.
-
-As regras detalhadas das Fases 4, 5 e 6 continuam abertas.
-
+Nao inferir mapeamentos ou etapas posteriores ao fluxo confirmado do metodo. Em especial:
+- o fluxo vigente confirmado termina em Cutting 2: 2 Low / 1 High;
+- Cutting 3 e etapas posteriores nao fazem parte da sequencia vigente confirmada;
+- Fases 5 e 6 da Planilha Carb Cycle permanecem abertas;
+- referencias historicas a outras fases, cores ou pareamentos nao autorizam automacao.
 ## Up Metabolico
 
 ### DECISAO CONFIRMADA
@@ -386,7 +369,7 @@ Exemplos historicos individuais nao viram regra geral.
 
 Regra nao confirmada deve permanecer como `QUESTAO ABERTA`.
 
-A hidratacao usa atualmente o template profissional de 35 mL/kg/dia, com orientacao de 70% em agua pura e 30% podendo vir de outros liquidos zero calorias; divergencia nao gera bloqueio nem score automatico. Suplementacao e manipulados sao definicoes manuais caso a caso, sem automacao profissional nesta etapa. Outros temas ainda nao formalizados permanecem dependentes de confirmacao documentada.
+A hidratacao permanece aberta para regra profissional automatica. Valores historicos como 35/60 mL/kg, composicao 70/30, metas, lembretes e recalculos automaticos nao sao regra vigente enquanto nao houver nova confirmacao documentada da Patty. Check-ins de liquidos e atividade fisica permanecem como registros factuais. Suplementacao e manipulados sao definicoes manuais caso a caso, sem automacao profissional nesta etapa. Outros temas ainda nao formalizados permanecem dependentes de confirmacao documentada.
 ## Leitura profissional da Anamnese
 
 ### DECISAO CONFIRMADA
@@ -465,58 +448,28 @@ Depois de revisado e publicado pela Patty, a cliente deve conseguir visualizar n
 
 A cliente nao precisa registrar execucao diretamente dentro do protocolo alimentar ou do treino publicado. O protocolo permanece como orientacao publicada e versionada.
 
-### DECISAO DE PRODUTO CONFIRMADA
+### DECISAO DE PRODUTO CONFIRMADA — RECONCILIADA EM 2026-10-07
 
-O produto deve prever um check-in de acompanhamento para servir tambem como estimulo a cliente.
+O produto preserva os check-ins como registros factuais do acompanhamento.
 
 O check-in deve permitir:
 - registrar a quantidade de liquidos consumida ao longo do dia;
-- acompanhar progresso em relacao a uma meta de liquidos;
-- receber lembretes relacionados ao consumo de liquidos;
 - realizar um check-in diario de atividade fisica, registrando se fez ou nao fez atividade naquele dia;
-- acompanhar o progresso dessas metas de forma visivel para a cliente.
+- preservar o historico desses registros sem gerar score automatico de adesao.
 
-### META DE LIQUIDOS
+Enquanto a regra profissional de hidratacao permanecer aberta:
+- nao criar meta diaria automatica de hidratacao;
+- nao mostrar progresso percentual contra meta automatica;
+- nao usar 35 mL/kg, 60 mL/kg ou composicao 70/30 como regra profissional vigente;
+- nao recalcular meta automaticamente quando houver novo peso;
+- nao oferecer acao de recalcular meta baseada nesses valores historicos;
+- nao ativar lembretes derivados de meta automatica de hidratacao.
 
-### DECISAO CONFIRMADA
+Metas, snapshots, templates, migrations e helpers historicos de hidratacao permanecem preservados por auditoria e compatibilidade, mas nao autorizam comportamento automatico novo.
 
-A regra vigente confirmada pela Patty em 2026-10-04 substitui a referencia anterior de 60 mL/kg.
+O check-in diario de atividade fisica continua independente do treino prescrito ou de qualquer rotina previamente definida para a cliente.
 
-A meta minima usada no metodo e:
-
-- **35 mL por kg de peso corporal por dia**.
-
-Formula deterministica vigente:
-
-`meta_liquidos_ml = peso_kg * 35`
-
-Exemplo matematico:
-- cliente com 60 kg -> minimo de 2.100 mL/dia = 2,1 L/dia.
-
-Na composicao dessa meta:
-- a taxonomia ativa distingue **agua pura** de **outros liquidos zero calorias**;
-- a orientacao profissional passada a cliente e que 70% da meta diaria seja cumprida com agua pura;
-- os 30% restantes podem ser contabilizados com outros liquidos zero calorias;
-- exemplos citados de outros liquidos: cafe, cha, chimarrao, refrigerante zero e bebidas zero calorias similares;
-- se a cliente optar por cumprir de outra forma, isso e uma escolha dela; nao criar bloqueio automatico nem score de adesao a partir dessa divergencia.
-
-Nao tratar essa regra do metodo como recomendacao medica geral fora do acompanhamento profissional.
-
-O check-in diario de atividade fisica e independente do treino prescrito ou de qualquer rotina previamente definida para a cliente. O registro diario pode ser usado posteriormente para derivar frequencia, sem criar score automatico de adesao.
-
-A existencia de metas e lembretes esta confirmada como comportamento desejado do produto.
-
-Esses parametros podem ser definidos individualmente **na entrega do primeiro protocolo da cliente**, junto com a revisao/publicacao inicial do acompanhamento.
-
-Regras vigentes:
-- a meta e recalculada automaticamente sempre que um novo peso for registrado;
-- o novo calculo vale apenas dali em diante e nao reescreve metas historicas;
-- a Patty pode visualizar e corrigir check-ins da cliente, preservando auditoria.
-
-Ainda permanecem abertos apenas horarios/cadencia dos lembretes de hidratacao quando nao houver configuracao individual explicita.
-
-A formula vigente de 35 mL/kg esta confirmada e pode ser tratada como calculo deterministico do metodo para novas metas. Metas historicas ja persistidas nao devem ser reescritas. Nao criar score automatico de adesao a partir do check-in.
-
+A cliente e a Patty podem corrigir registros conforme as regras de auditoria ja documentadas, sem apagar silenciosamente o historico original.
 ## Avaliacao corporal e evolucao
 
 ### DECISAO CONFIRMADA
@@ -638,15 +591,13 @@ Variacoes confirmadas:
 Esses exemplos nao devem ser transformados em regra automatica. Duracao e numero de refeicoes livres sao parametros configuraveis por fase/cliente e dependem de decisao manual da Patty.
 
 
-### RECALCULO DA META DE LIQUIDOS POR NOVO PESO
+### HIDRATACAO — ESTADO VIGENTE
 
-### DECISAO CONFIRMADA
+### QUESTAO ABERTA
 
-Sempre que um novo peso da cliente for registrado, a meta diaria de liquidos deve ser recalculada automaticamente usando a configuracao vigente da regra de hidratacao.
+A regra profissional de hidratacao automatica permanece aberta.
 
-O novo calculo passa a valer dali em diante. Metas historicas e registros de consumo anteriores permanecem preservados e nao devem ser recalculados retroativamente.
-
-
+Nao recalcular automaticamente meta de liquidos quando houver novo peso enquanto nao existir nova confirmacao documentada da Patty. Snapshots e configuracoes historicas permanecem preservados apenas para compatibilidade e auditoria.
 ### CORRECAO DE CHECK-INS
 
 ### DECISAO CONFIRMADA
@@ -694,9 +645,13 @@ Na planilha fornecida, a tabela central calcula os valores multiplicando o peso 
 A numeracao exibida na coluna "Fase" da tabela central do arquivo historico nao deve prevalecer sobre o mapeamento profissional confirmado por cor sem reconciliacao, pois ha rotulos que nao coincidem com Fase 1/2/3. Para implementacao, usar a regra profissional documentada e validar os coeficientes por faixa.
 
 
+## Material historico posterior ao fluxo vigente
+
+> Os blocos abaixo preservam respostas e hipoteses historicas para rastreabilidade. Eles foram superados como fonte de regra vigente pela reconciliacao de 2026-10-07. Nao implementar, automatizar ou inferir sequencia profissional a partir deles sem nova confirmacao documentada da Patty.
+
 ### CARB CYCLE - CORRESPONDENCIA COM OS CUTTINGS
 
-### DECISAO CONFIRMADA
+### REGISTRO HISTORICO — NAO VIGENTE PARA AUTOMACAO
 
 - Cutting 1 -> Fase 1 -> faixa verde da tabela central.
 - Cutting 2 -> Fase 2 -> faixa amarela da tabela central.
@@ -707,7 +662,7 @@ A mudanca de faixa acompanha a mudanca profissional de Cutting, depois de cumpri
 
 ### CUTTING 3 - ESTRUTURA INTERNA
 
-### DECISAO CONFIRMADA
+### REGISTRO HISTORICO — NAO VIGENTE PARA AUTOMACAO
 
 O Cutting 3 repete a mesma estrutura operacional dos Cuttings anteriores:
 
@@ -724,7 +679,7 @@ A progressao continua condicionada ao passo a passo profissional e aos resultado
 
 ### APOS O UP METABOLICO POS-CUTTING 3
 
-### DECISAO CONFIRMADA
+### REGISTRO HISTORICO — NAO VIGENTE PARA AUTOMACAO
 
 Nao existe uma unica etapa obrigatoria depois do Up Metabolico que sucede o Cutting 3.
 
@@ -743,7 +698,7 @@ Sobre encerramento do acompanhamento, nao existe criterio unico automatico. A de
 
 ### MANUTENCAO - USO PROFISSIONAL
 
-### DECISAO CONFIRMADA
+### REGISTRO HISTORICO — NAO VIGENTE PARA AUTOMACAO
 
 A Manutencao existe como uma fase/protocolo possivel do acompanhamento, mas nao possui uma regra geral fixa.
 
@@ -758,7 +713,7 @@ A duracao, configuracao e momento de entrada/saida sao definidos manualmente pel
 
 ### MANUTENCAO - OBJETIVO PRINCIPAL
 
-### DECISAO CONFIRMADA
+### REGISTRO HISTORICO — NAO VIGENTE PARA AUTOMACAO
 
 Na Manutencao, o objetivo principal e preservar a adesao e a rotina da paciente durante o periodo, mesmo que peso e medidas possam variar um pouco.
 
@@ -767,7 +722,7 @@ A Manutencao nao deve ser tratada automaticamente como meta de peso absolutament
 
 ### BULKING - CRITERIOS DE ENTRADA
 
-### DECISAO CONFIRMADA
+### REGISTRO HISTORICO — NAO VIGENTE PARA AUTOMACAO
 
 A entrada em Bulking nao depende de um unico criterio isolado.
 
@@ -782,7 +737,7 @@ Nao automatizar a entrada em Bulking apenas pela solicitacao da paciente ou por 
 
 ### BULKING - DEFINICAO DE MACROS
 
-### DECISAO CONFIRMADA
+### REGISTRO HISTORICO — NAO VIGENTE PARA AUTOMACAO
 
 No Bulking, a Patty define manualmente os macros para cada paciente.
 
@@ -793,7 +748,7 @@ Nao existe, neste momento, formula geral ou tabela automatica confirmada para ca
 
 ### BULKING -> CONSOLIDACAO - CRITERIOS DE TRANSICAO
 
-### DECISAO CONFIRMADA
+### REGISTRO HISTORICO — NAO VIGENTE PARA AUTOMACAO
 
 A transicao do Bulking para a Consolidacao Metabolica e decidida pela Patty a partir de uma combinacao de fatores:
 - ganho de massa muscular ja alcancado naquele ciclo;
@@ -806,7 +761,7 @@ Nao existe gatilho unico nem regra automatica confirmada para essa passagem.
 
 ### CONSOLIDACAO METABOLICA - AJUSTE DE MACROS
 
-### DECISAO CONFIRMADA
+### REGISTRO HISTORICO — NAO VIGENTE PARA AUTOMACAO
 
 Na Consolidacao Metabolica, a Patty reduz as doses de macros manualmente, de forma gradual e individual para cada paciente.
 
@@ -817,7 +772,7 @@ O sistema deve permitir reducoes graduais e versionadas, preservando cada config
 
 ### CONSOLIDACAO METABOLICA - CRITERIO DE ENCERRAMENTO
 
-### DECISAO CONFIRMADA
+### REGISTRO HISTORICO — NAO VIGENTE PARA AUTOMACAO
 
 A Consolidacao Metabolica termina quando a Patty considerar que o ganho de massa muscular foi preservado e que a paciente esta pronta para voltar ao Cutting.
 
@@ -826,7 +781,7 @@ A decisao permanece profissional e individual. Nao existe threshold automatico c
 
 ### RETORNO AO CUTTING APOS CONSOLIDACAO
 
-### DECISAO CONFIRMADA
+### REGISTRO HISTORICO — NAO VIGENTE PARA AUTOMACAO
 
 Apos a Consolidacao Metabolica, quando a paciente retorna ao Cutting, o ciclo recomeça pelo Cutting 1.
 
@@ -837,7 +792,7 @@ Consequencia operacional:
 
 ### RETORNO POS-CONSOLIDACAO - REINICIO COMPLETO DO CUTTING 1
 
-### DECISAO CONFIRMADA
+### REGISTRO HISTORICO — NAO VIGENTE PARA AUTOMACAO
 
 Quando a paciente retorna ao Cutting 1 depois da Consolidacao Metabolica, ela reinicia o Cutting 1 desde o protocolo Linear.
 
@@ -854,7 +809,7 @@ Nao pular diretamente para Dia 1/Dia 2 ou Carb Cycle no retorno pos-Consolidacao
 
 ### UP METABOLICO - DEFINICAO DE CARBOIDRATO
 
-### DECISAO CONFIRMADA
+### REGISTRO HISTORICO — NAO VIGENTE PARA AUTOMACAO
 
 No Up Metabolico, a Patty parte do protocolo anterior e aumenta manualmente a quantidade de carboidrato.
 
