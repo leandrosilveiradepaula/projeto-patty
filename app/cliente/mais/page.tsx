@@ -32,7 +32,7 @@ const areas = [
     title: "Arquivos",
   },
   {
-    description: "Solicite o serviço de treino e consulte suas solicitações.",
+    description: "Consulte seu treino publicado ou solicite o serviço de treino quando precisar.",
     href: "/cliente/treino",
     title: "Treino",
   },
