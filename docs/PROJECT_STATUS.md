@@ -1,3 +1,11 @@
+## Auditoria do gate de IA com dados de saude 2026-10-07
+
+O fluxo `anamnesis_review` esta tecnicamente preparado, mas continua corretamente fechado para dados reais. O contexto e construido somente a partir da submissao acessivel ao admin, respeita aplicabilidade, exclui Instagram sempre e exige inclusao explicita para capacidade financeira. IDs internos usados como fonte permanecem separados do payload externo por aliases no provider.
+
+A existencia da API key ou o sucesso das avaliacoes sinteticas nao libera o gate. Continuam faltando verificacao da politica efetiva de retencao no projeto/organizacao OpenAI, elegibilidade/configuracao ZDR/MAM para o ambiente escolhido e aprovacao humana explicita para dados reais.
+
+Nenhum dado real deve ser usado para fechar esses itens.
+
 ## Gate operacional da primeira migracao educacional 2026-10-07
 
 O lote aprovado da balanca permanece preparado, mas fail-closed: sem upload Blob verificado, o manifest deve continuar sem asset registrado, publicacao ou release. A suite agora protege explicitamente essa dependencia e valida hash SHA-256 estrito e path opaco sem reutilizar titulo/id do Drive.
