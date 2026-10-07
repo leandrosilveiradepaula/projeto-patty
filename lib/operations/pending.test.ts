@@ -664,9 +664,9 @@ test("training lifecycle facts become Patty operational pendings", () => {
   assert.deepEqual(
     items.map((item) => item.href),
     [
-      "/admin/clientes/client-1/treino",
-      "/admin/clientes/client-2/treino",
-      "/admin/clientes/client-3/treino",
+      "/admin/clientes/client-1/treino#solicitacao-treino",
+      "/admin/clientes/client-2/treino#prescricao-treino",
+      "/admin/clientes/client-3/treino#prescricao-treino",
     ],
   );
 });
@@ -862,7 +862,7 @@ test("assessment draft pending stays factual and points to the real editor", () 
   assert.equal(items.length, 1);
   assert.equal(items[0]?.kind, "assessment_draft");
   assert.equal(items[0]?.title, "Continuar avaliação");
-  assert.equal(items[0]?.href, "/admin/avaliacoes/assessment-draft");
+  assert.equal(items[0]?.href, "/admin/avaliacoes/assessment-draft#coleta");
   assert.match(items[0]?.description ?? "", /finalize explicitamente/);
   assert.doesNotMatch(items[0]?.description ?? "", /atras|urg|prioridade/i);
 });
@@ -933,5 +933,61 @@ test("weekly feedback delivery blockers point to the corrective surface", () => 
   assert.equal(
     failedDelivery[0]?.href,
     "/admin/clientes/client-feedback/feedback-semanal#feedback-pendentes",
+  );
+});
+
+
+test("core Patty pendings deep-link to the exact review action", () => {
+  const items = buildOperationalPendingItems({
+    clarificationReminderIntervalHours: 24,
+    anamnesisSubmissions: [
+      {
+        id: "anamnesis-review",
+        clientId: "client-1",
+        clientLabel: "Cliente 1",
+        createdAt: "2026-10-07T09:00:00Z",
+        submittedAt: "2026-10-07T10:00:00Z",
+        reviewCount: 0,
+      },
+    ],
+    clarificationRequests: [
+      {
+        clientId: "client-2",
+        clientLabel: "Cliente 2",
+        createdAt: "2026-10-07T10:10:00Z",
+        id: "clarification-review",
+        responseCount: 1,
+        resolved: false,
+        submissionId: "anamnesis-2",
+      },
+    ],
+    assessments: [],
+    protocolVersions: [
+      {
+        approvalCount: 0,
+        clientId: "client-3",
+        clientLabel: "Cliente 3",
+        createdAt: "2026-10-07T10:20:00Z",
+        id: "protocol-version",
+        protocolId: "protocol-1",
+        publicationCount: 0,
+        submittedForReviewAt: "2026-10-07T10:30:00Z",
+        versionNumber: 4,
+      },
+    ],
+    aiExecutions: [],
+  });
+
+  assert.equal(
+    items.find((item) => item.kind === "anamnesis_submitted_without_review")?.href,
+    "/admin/anamneses/anamnesis-review/revisao#nova-revisao",
+  );
+  assert.equal(
+    items.find((item) => item.kind === "clarification_response_pending_review")?.href,
+    "/admin/anamneses/anamnesis-2/esclarecimentos#esclarecimento-clarification-review",
+  );
+  assert.equal(
+    items.find((item) => item.kind === "protocol_submitted_not_approved")?.href,
+    "/admin/protocolos/protocol-1#versao-4",
   );
 });
