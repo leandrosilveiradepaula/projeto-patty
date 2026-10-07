@@ -1,3 +1,12 @@
+## Bloco funcional consolidado 2026-10-07
+
+A auditoria funcional pos-UX consolidou quatro frentes: status real dos canais do Feedback Semanal, gate de produto para progresso de conteudos, reverificacao do primeiro lote educacional e readiness dos fluxos de conta/arquivos privados.
+
+- email de Feedback Semanal possui esteira de entrega e depende da configuracao SMTP do ambiente; WhatsApp continua sem provider externo;
+- progresso de conteudos permanece fail-closed ate confirmacao da semantica de abertura/conclusao;
+- a fonte aprovada do primeiro lote foi reobtida read-only do Drive com tamanho/MIME coerentes; SHA-256 continua gate antes de upload;
+- ativacao/recuperacao de conta e upload/visualizacao privada ja existem no runtime e nao devem ser tratados como UI ausente.
+
 ## Reconciliacao funcional pos-auditoria de UX 2026-10-07
 
 A primeira varredura funcional separou pendencias reais de documentacao historica:
