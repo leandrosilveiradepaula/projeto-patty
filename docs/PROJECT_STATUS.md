@@ -1,3 +1,22 @@
+## Atualizacao 2026-10-06 - reconciliacao e integracao do treino individual versionado
+
+### IMPLEMENTADO NESTA BRANCH / AGUARDANDO MERGE
+
+O Supabase SaaS ja possuia as migrations `20261005141224_create_versioned_client_training_prescriptions` e `20261005142111_fix_training_plan_rls_recursion` aplicadas, mas os arquivos nao estavam no master.
+
+Nesta branch:
+- os dois SQLs originais foram recuperados de `codex/client-training-prescription-v1` e reconciliados no repositorio sem reaplicacao remota;
+- `database.types.ts` foi regenerado a partir do schema remoto;
+- o acesso a dados passou a incluir plano, versoes e itens de treino;
+- a area admin separa explicitamente solicitacao do servico e prescricao individual;
+- a Patty pode criar/editar rascunho, selecionar exercicios publicados da biblioteca ou registrar nome manual, revisar e publicar;
+- a cliente ve somente a versao publicada do proprio treino;
+- drafts e revisoes internas nao ficam visiveis para a cliente;
+- publicar nova versao preserva as anteriores;
+- nenhuma selecao, progressao, troca, carga ou publicacao automatica foi introduzida.
+
+O schema remoto nao foi alterado nesta reconciliacao. A aplicacao dessas migrations ja constava no historico do Supabase antes desta branch.
+
 ## Atualizacao 2026-10-06 - biblioteca de exercicios passa a ser catalogo profissional
 
 ### REGRA CONFIRMADA / IMPLEMENTACAO EM CORRECAO

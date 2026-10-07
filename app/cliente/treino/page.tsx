@@ -7,7 +7,10 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import {
+  getAccessibleClientTrainingPlan,
   getCurrentClient,
+  listAccessibleClientTrainingPlanItems,
+  listAccessibleClientTrainingPlanVersions,
   listAccessibleClientTrainingRequests,
 } from "@/lib/supabase/data-access";
 
@@ -40,7 +43,18 @@ export default async function ClientTrainingPage({
     );
   }
 
-  const requests = await listAccessibleClientTrainingRequests(client.id);
+  const [requests, trainingPlan] = await Promise.all([
+    listAccessibleClientTrainingRequests(client.id),
+    getAccessibleClientTrainingPlan(client.id),
+  ]);
+  const trainingVersions = trainingPlan
+    ? await listAccessibleClientTrainingPlanVersions(trainingPlan.id)
+    : [];
+  const latestPublished =
+    trainingVersions.find((version) => Boolean(version.published_at)) ?? null;
+  const trainingItems = latestPublished
+    ? await listAccessibleClientTrainingPlanItems(latestPublished.id)
+    : [];
 
   return (
     <>
@@ -58,6 +72,73 @@ export default async function ClientTrainingPage({
           Sua solicitação não foi registrada. Tente novamente antes de sair desta página.
         </Alert>
       ) : null}
+
+      <Section
+        description="Apenas versões revisadas e publicadas pela Patty aparecem aqui."
+        title="Seu treino publicado"
+      >
+        {latestPublished ? (
+          <Card className={styles.publishedCard}>
+            <div className={styles.publishedHeader}>
+              <div>
+                <p className={styles.meta}>
+                  Versão {latestPublished.version_number} · publicada em{" "}
+                  {formatDateTime(latestPublished.published_at!)}
+                </p>
+                <h2 className={styles.publishedTitle}>
+                  {latestPublished.title}
+                </h2>
+              </div>
+              <Badge variant="positive">Publicado</Badge>
+            </div>
+
+            {latestPublished.notes ? (
+              <p className={styles.note}>{latestPublished.notes}</p>
+            ) : null}
+
+            <ol className={styles.workoutList}>
+              {trainingItems.map((item) => (
+                <li key={item.id}>
+                  <Card className={styles.workoutItem} variant="subtle">
+                    <div className={styles.header}>
+                      <strong>
+                        {item.position}. {item.exercise_name}
+                      </strong>
+                      <Badge variant="neutral">
+                        {item.sets_text} séries
+                      </Badge>
+                    </div>
+                    <p className={styles.workoutDetail}>
+                      Repetições: {item.repetitions_text}
+                      {item.rest_text
+                        ? ` · Descanso: ${item.rest_text}`
+                        : ""}
+                    </p>
+                    {item.execution_notes ? (
+                      <p className={styles.note}>
+                        Orientações: {item.execution_notes}
+                      </p>
+                    ) : null}
+                    <p className={styles.capacityNote}>
+                      A carga/peso deve respeitar sua capacidade no exercício e
+                      não é definida aqui como valor fixo.
+                    </p>
+                  </Card>
+                </li>
+              ))}
+            </ol>
+          </Card>
+        ) : (
+          <EmptyState
+            description={
+              requests.length > 0
+                ? "Sua solicitação está registrada. O treino aparecerá aqui somente depois da revisão e publicação da Patty."
+                : "Quando houver uma solicitação e a Patty publicar seu treino, ele aparecerá aqui."
+            }
+            title="Nenhum treino publicado"
+          />
+        )}
+      </Section>
 
       <Section
         description="A Patty verá a solicitação no seu histórico de acompanhamento."
