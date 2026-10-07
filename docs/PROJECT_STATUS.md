@@ -1,3 +1,14 @@
+## Bloco consolidado de boundaries funcionais 2026-10-07
+
+Cinco fronteiras foram reconciliadas em conjunto:
+- identidade: `profiles.status` permanece sem semantica de acompanhamento; `clients.status` e a fonte profissional sincronizada por assignment;
+- convite: suporte tecnico a token `invite` nao define politica de expiracao/reenvio;
+- reengajamento: cliente inativa nao autoriza acesso ampliado a dados clinicos nem campanha sem base legal/consentimento, canal e escopo de dados definidos;
+- bibliotecas: categorias/pastas historicas do Drive nao viram taxonomia de conteudo ou exercicio por importacao;
+- notificacoes: a preferencia de canal de `weekly_feedback` nao e herdada por esclarecimentos; purposes distintos exigem decisao/configuracao propria.
+
+Uma regressao documental automatizada protege essas boundaries contra inferencias futuras.
+
 ## Bloco consolidado de readiness transversal 2026-10-07
 
 A auditoria funcional acumulou cinco frentes antes deste PR:
