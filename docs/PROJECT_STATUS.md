@@ -1031,7 +1031,7 @@ O E2E autenticado completo passou em producao no workflow `E2E anamnesis clarifi
 
 ## Hardening da execution boundary de IA
 
-A branch de hardening prepara:
+O hardening de execution boundary esta implementado e mergeado:
 - vinculo direto `ai_executions -> anamnesis_submission` para `anamnesis_review`;
 - prompt key compativel com o purpose;
 - sources restritas a answers da submission selecionada;
@@ -1039,6 +1039,8 @@ A branch de hardening prepara:
 - RPCs `SECURITY INVOKER` exclusivas de `service_role` para start/complete/fail atomicos;
 - construtor deterministico de contexto com aplicabilidade e minimizacao;
 - identidade administrativa derivada de sessao AAL2 em camada `server-only`.
+
+Este bloco descreve runtime existente; nao e trabalho futuro de branch.
 
 A migration `20260924165942_harden_ai_execution_boundary.sql` foi aplicada no Supabase SaaS. O smoke pos-apply com dados sinteticos e `ROLLBACK` confirmou vinculo da submission, deduplicacao de sources, bloqueio cross-submission, congelamento pos-terminal, completion/failure atomicos, preservacao de resposta bruta quando aplicavel e RPCs inacessiveis a `anon`/`authenticated`. O advisor de seguranca nao trouxe finding novo; permanece apenas Leaked Password Protection ja conhecido. O advisor de performance passou a listar a nova FK composta de `ai_executions` como sem indice de cobertura exata; nenhuma migration extra foi criada apenas para zerar esse lint sem workload. O PR #149 foi mergeado no commit `9b7bbba` e o deployment correspondente ficou `READY` em producao. A consulta de logs `error/fatal` da janela observada nao retornou eventos.
 
@@ -1556,7 +1558,7 @@ A montagem usa somente consultas RLS ja existentes sob as atribuicoes ativas da 
 - meta de liquidos usa snapshot de peso e 60 mL/kg, sem recalculo automatico;
 - eventos de liquidos e atividade fisica sao append-only e nao geram score;
 - resolucao manual de esclarecimentos foi materializada separadamente da resposta da cliente;
-- GitHub Actions continua com falha operacional de runner: jobs encerram sem steps; nao tratar como falha de codigo;
+- registro historico: naquela janela houve falha operacional de runner com jobs encerrando sem steps; esse bloqueio foi resolvido em 2026-10-01 e nao deve ser reutilizado como diagnostico atual sem nova evidencia;
 - Vercel do master `b1986e7` estava READY antes desta branch e sem erros de runtime nas ultimas 24h;
 - advisor de seguranca do Supabase continua sem novo finding alem do warning conhecido de Leaked Password Protection.
 
@@ -2121,13 +2123,13 @@ Estado:
 - templates iniciais no SaaS: SIM;
 - migration history atualizada: SIM;
 - snapshots em consumidores operacionais: AINDA NAO;
-- limite de proteina com maior teor de gordura: PARAMETRIZADO NO PR #255 / MIGRATION AINDA NAO APLICADA;
-- hidratacao: AINDA HARDCODED.
+- limite de proteina com maior teor de gordura: PARAMETRIZADO e migration `20261001235018` posteriormente APLICADA no SaaS;
+- hidratacao: infraestrutura configuravel historica foi aplicada depois, mas a automacao operacional encontra-se suspensa pela reconciliacao vigente de 2026-10-07.
 
 
 ## Migracao do limite de proteina com maior teor de gordura - PR #255
 
-### IMPLEMENTADA NA BRANCH / AINDA NAO APLICADA NO SAAS
+### REGISTRO HISTORICO — IMPLEMENTACAO ANTES DO APPLY
 
 Escopo:
 - somente o limite diario do grupo de proteina com maior teor de gordura;
@@ -2152,7 +2154,7 @@ Migration oficial:
 - template: `nutrition.protein.higher_fat_daily_limit`;
 - baseline atual: ratio 0.5 + `ceil`;
 - proveniencia: `system_baseline`;
-- ainda nao aplicada no Supabase SaaS.
+- naquele ponto ainda nao estava aplicada; o estado posterior confirmado no mesmo documento registra `20261001235018_seed_higher_fat_protein_limit_template.sql` como **APLICADA** no SaaS.
 
 Fora de escopo:
 - hidratacao;
@@ -2195,7 +2197,7 @@ Validacao local do mesmo estado de codigo:
 - initial-template pgTAP: PASS;
 - higher-fat protein limit pgTAP: PASS.
 
-Portanto, a migration esta validada mas ainda nao aplicada no SaaS.
+Naquele dry-run a migration ainda nao estava aplicada. O estado posterior prevalece: `20261001235018` foi aplicada no SaaS e o template ficou ativo.
 
 
 ## Atualizacao 2026-10-03 - Produto navegavel e Feedback Semanal real
@@ -2494,7 +2496,7 @@ Transformar as novas regras confirmadas em configuracoes versionadas e fluxos re
 
 ## Atualizacao 2026-10-04 - Edicao versionada de parametros profissionais
 
-### IMPLEMENTADO NA BRANCH / BOUNDARY APLICADO NO SAAS
+### MERGEADO / BOUNDARY APLICADO NO SAAS
 
 A area real `/admin/configuracoes` foi evoluida de consulta para edicao segura dos parametros numericos dos schemas atualmente suportados.
 
@@ -2522,9 +2524,9 @@ O RPC interno `activate_method_configuration_version_server`:
 
 Dry-run transacional passou antes do apply. A verificacao pos-apply confirmou `service_role=true`, `authenticated=false` e `anon=false`. O Security Advisor nao apresentou nova regressao; permanece apenas o warning conhecido de Leaked Password Protection.
 
-### ESTADO
+### ESTADO RECONCILIADO
 
-A UI esta implementada nesta branch, mas ainda precisa passar CI, merge e publicacao antes de ser tratada como disponivel para Patty.
+A UI de `/admin/configuracoes` ja esta mergeada no `master` e faz parte do produto atual. Alteracoes numericas suportadas continuam criando nova versao e preservando historico; schemas estruturados sem editor proprio permanecem somente leitura.
 
 
 ## Atualizacao 2026-10-05 - Feedback Semanal elegivel e agenda versionada
