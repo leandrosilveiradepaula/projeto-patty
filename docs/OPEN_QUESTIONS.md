@@ -1,3 +1,17 @@
+## Ciclo de conta x ciclo de acompanhamento (auditoria 2026-10-07)
+
+Fatos confirmados no runtime:
+- encerrar o ultimo assignment ativo marca `clients.status = inactive` e preserva a conta e o historico;
+- iniciar/reiniciar assignment marca a cliente como `active`;
+- recuperacao assistida pode gerar link individual sem alterar a senha diretamente.
+
+Questoes de produto ainda abertas e que nao devem ser inferidas:
+- expiracao/reenvio operacional de convite;
+- encerramento/desativacao da conta Auth quando houver motivo independente do acompanhamento;
+- politica de reengajamento/campanhas para clientes inativas e sua base de autorizacao/privacidade.
+
+Importante: cliente inativa nao equivale a conta Auth desativada. Nao apagar identidade, perfil ou historico ao encerrar acompanhamento.
+
 ## Conteudos - semantica de progresso (aberto em 2026-10-07)
 
 A tabela `client_content_progress` ja existe com `first_opened_at` e `completed_at`, mas o produto ainda nao definiu quem deve registrar esses fatos.

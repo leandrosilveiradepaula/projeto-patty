@@ -1,3 +1,9 @@
+## Auditoria funcional do ciclo de conta 2026-10-07
+
+O ciclo de acompanhamento esta coerente com a regra confirmada: encerrar o ultimo assignment torna a cliente inativa; iniciar/reiniciar acompanhamento torna ativa; historico e conta permanecem preservados. O ciclo de Auth continua separado e nao sera inferido a partir do status da cliente.
+
+Expiracao/reenvio de convite, desativacao de Auth e politica de reengajamento permanecem gates de produto. A recuperacao assistida por link individual ja existe.
+
 ## Limpeza normativa funcional 2026-10-07
 
 A reconciliacao documental foi aprofundada para reduzir risco de implementacao a partir de trechos historicos:
