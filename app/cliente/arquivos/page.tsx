@@ -4,11 +4,11 @@ import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
+import Link from "next/link";
 import {
   getCurrentClient,
   listCurrentClientFiles,
 } from "@/lib/supabase/data-access";
-
 
 import styles from "./page.module.css";
 
