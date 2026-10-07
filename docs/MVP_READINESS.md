@@ -807,7 +807,7 @@ Estado: **INVENTARIO/VALIDACAO FAIL-CLOSED / NAO PUBLICADO**
 
 ## Feedback Semanal - estado em 2026-10-03
 
-Estado: **BACKEND SAAS APLICADO / UI REAL IMPLEMENTADA / PARAMETRIZACAO DE AGENDA IMPLEMENTADA / GERACAO RECORRENTE PENDENTE**
+Estado: **BACKEND SAAS APLICADO / UI REAL IMPLEMENTADA / AGENDA PARAMETRIZADA / GERACAO RECORRENTE IMPLEMENTADA NO SAAS**
 
 Disponivel no produto:
 - questionario v1 versionado com 21 perguntas;
@@ -822,13 +822,13 @@ Disponivel no produto:
 
 Estado operacional reconciliado:
 - a agenda semanal e parametrizavel por dia da solicitacao, horario local, dia do lembrete e timezone;
+- a geracao recorrente ja existe no banco via pg_cron e `generate_scheduled_weekly_feedback_requests`, com origem auditavel e idempotencia por cliente/periodo;
 - preferencia de canal por cliente e eventos auditaveis de notificacao existem;
 - a esteira de entrega de lembrete por email existe, mas depende do SMTP real do ambiente;
 - notificacao in-app existe;
 - WhatsApp ainda nao possui provider externo.
 
 Nao implementado ainda:
-- geracao recorrente automatica da solicitacao semanal a partir da agenda configurada;
 - entrega por WhatsApp;
 - consequencia automatica por atraso/ausencia;
 - analise por IA com dados reais.

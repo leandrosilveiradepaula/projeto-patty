@@ -1,3 +1,9 @@
+## Reconciliacao do gerador semanal 2026-10-07
+
+A auditoria confirmou que a geracao recorrente do Feedback Semanal ja foi implementada em migration aplicada: `pg_cron` executa `generate_scheduled_weekly_feedback_requests()`, que resolve a configuracao ativa, exige assignment admin ativo e protocolo publicado, registra origem `schedule` e evita duplicidade por cliente/periodo.
+
+Portanto, geracao recorrente nao e gap funcional atual. Permanecem separados os gates reais de entrega por canal e analise por IA com dados reais.
+
 ## Auditoria funcional de progresso de conteudos 2026-10-07
 
 O runtime confirma que a cliente pode abrir apenas assets de versoes explicitamente liberadas, enquanto a Patty ve liberacoes e disponibilidade de arquivo. A tabela `client_content_progress` existe, mas as policies atuais permitem escrita apenas administrativa.
