@@ -2926,3 +2926,14 @@ Os gaps ja integrados a fila global passam tambem a aparecer no contexto da clie
 - o atalho leva para a secao real `#aguardando-liberacao`.
 
 Este bloco melhora visibilidade contextual; nao cria prioridade clinica, nao libera arquivos automaticamente e nao altera o lifecycle do Feedback Semanal.
+
+
+## Prioridade operacional do workspace - 2026-10-07
+
+A revisao da visibilidade contextual identificou um risco de UX: pendencias complementares (canal do Feedback Semanal ou arquivo aguardando liberacao) poderiam ocupar a unica "proxima acao" antes de etapas centrais do atendimento ainda incompletas. A ordem foi corrigida sem criar score:
+- Cadastro Atual continua primeiro quando ausente;
+- depois permanecem os estados reais de Anamnese, Avaliacao, Protocolo e Treino que exigem acao/espera;
+- configuracao do canal de Feedback Semanal so vira proxima acao depois que o fluxo central ja possui protocolo publicado e nao ha treino pendente;
+- arquivo administrativo aguardando liberacao continua visivel, mas nao bloqueia a progressao central.
+
+Esta ordenacao e uma decisao de produto/UX, nao uma regra clinica nem score de adesao.
