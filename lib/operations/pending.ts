@@ -574,7 +574,12 @@ export function buildOperationalPendingItems(
       clientLabel: event.clientLabel,
       createdAt: event.createdAt,
       description,
-      href: `/admin/clientes/${event.clientId}/feedback-semanal`,
+      href:
+        event.deliveryState === "blocked_no_channel"
+          ? `/admin/clientes/${event.clientId}#preferencia-feedback`
+          : event.deliveryState === "blocked_missing_contact"
+            ? `/admin/clientes/${event.clientId}#cadastro-atual`
+            : `/admin/clientes/${event.clientId}/feedback-semanal#feedback-pendentes`,
       id: `weekly-feedback-reminder-blocked:${event.id}`,
       kind: "weekly_feedback_reminder_blocked",
       statusLabel,
