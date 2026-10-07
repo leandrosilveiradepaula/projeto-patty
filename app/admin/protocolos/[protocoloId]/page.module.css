@@ -163,3 +163,42 @@
 .versionItem[id] {
   scroll-margin-top: var(--space-6);
 }
+
+
+.versionDetails {
+  min-width: 0;
+}
+
+.versionSummary {
+  cursor: pointer;
+  list-style-position: outside;
+}
+
+.versionSummary:focus-visible {
+  outline: 3px solid var(--color-brand);
+  outline-offset: 3px;
+  border-radius: var(--radius-small);
+}
+
+.versionSummary .versionHeader {
+  display: inline-flex;
+  width: calc(100% - var(--space-5));
+  margin-left: var(--space-2);
+  vertical-align: middle;
+}
+
+.versionBody {
+  display: grid;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+}
+
+.versionDetails:not([open]) .versionSummary {
+  min-height: 44px;
+}
+
+@media (max-width: 767px) {
+  .versionSummary .versionHeader {
+    width: calc(100% - var(--space-4));
+  }
+}
