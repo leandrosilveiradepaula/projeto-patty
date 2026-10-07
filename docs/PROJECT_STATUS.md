@@ -1,3 +1,11 @@
+## Auditoria dos limites do Feedback Semanal 2026-10-07
+
+A agenda e parametrizada por dia ISO, horario local, dia de lembrete e timezone; o runtime nao depende de segunda/08h hardcoded. A preferencia de canal e versionada por cliente entre `email`, `whatsapp` e `in_app`.
+
+A entrega real por email ja possui pipeline server-only com claim auditavel, registro de sucesso/falha e sanitizacao de email em mensagem de erro, mas somente opera quando SMTP esta configurado. WhatsApp continua sem provider ativado.
+
+A fonte historica do Feedback Semanal preserva frases como obrigatoriedade e suspensao de atendimento, mas essas frases nao autorizam consequencia automatica. O sistema nao deve criar score de adesao a partir da nota 0-10 nem bloquear atendimento por ausencia de resposta sem regra confirmada.
+
 ## Auditoria do lembrete de esclarecimentos 2026-10-07
 
 O intervalo do lembrete de esclarecimentos nao esta hardcoded no runtime: ele e carregado da versao ativa de `workflow.anamnesis_clarification_reminder`, validada como parametro escalar em horas. A fila operacional calcula apenas o primeiro marco devido e deixa explicito que isso nao prova envio.
