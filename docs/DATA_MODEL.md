@@ -1,3 +1,21 @@
+## Correcoes auditaveis de check-ins
+
+### DECISAO TECNICA
+
+Os eventos originais de liquidos e atividade fisica permanecem imutaveis e append-only.
+
+A fundacao preparada para correcao usa duas tabelas separadas:
+- `client_liquid_intake_event_corrections`;
+- `client_activity_checkin_event_corrections`.
+
+Cada correcao referencia o evento original, preserva o valor corrigido, autoria e timestamp. O valor original nao e atualizado nem apagado.
+
+Para liquidos, a correcao preserva quantidade, tipo e momento corrigidos. Para atividade fisica, preserva data do check-in e resposta corrigidas.
+
+A leitura efetiva futura deve considerar a correcao mais recente de cada evento, mantendo todo o historico anterior auditavel.
+
+A migration `20261007173100_create_client_checkin_corrections.sql` esta preparada no repositorio, mas nao deve ser tratada como aplicada ao Supabase SaaS ate o workflow remoto concluir com sucesso.
+
 ## Identidade profissional da cliente e status
 
 ### REGRA CONFIRMADA / DECISAO DE MODELO

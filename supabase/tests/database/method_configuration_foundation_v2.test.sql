@@ -102,10 +102,10 @@ values
   ('b1000000-0000-0000-0000-000000000004', 'client'),
   ('b1000000-0000-0000-0000-000000000005', 'client');
 
-insert into public.clients (id, profile_id)
+insert into public.clients (id, profile_id, full_name, status)
 values
-  ('b2000000-0000-0000-0000-000000000001', 'b1000000-0000-0000-0000-000000000004'),
-  ('b2000000-0000-0000-0000-000000000002', 'b1000000-0000-0000-0000-000000000005');
+  ('b2000000-0000-0000-0000-000000000001', 'b1000000-0000-0000-0000-000000000004', 'Config Client A', 'active'),
+  ('b2000000-0000-0000-0000-000000000002', 'b1000000-0000-0000-0000-000000000005', 'Config Client B', 'active');
 
 insert into public.client_assignments (client_id, staff_profile_id, ended_at)
 values

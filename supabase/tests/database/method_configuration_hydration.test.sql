@@ -101,10 +101,12 @@ values
   ('c1000000-0000-0000-0000-000000000001', 'admin'),
   ('c1000000-0000-0000-0000-000000000002', 'client');
 
-insert into public.clients (id, profile_id)
+insert into public.clients (id, profile_id, full_name, status)
 values (
   'c2000000-0000-0000-0000-000000000001',
-  'c1000000-0000-0000-0000-000000000002'
+  'c1000000-0000-0000-0000-000000000002',
+  'Hydration Client A',
+  'active'
 );
 
 insert into public.client_assignments (client_id, staff_profile_id, ended_at)
@@ -376,10 +378,12 @@ values (
   'client'
 );
 
-insert into public.clients (id, profile_id)
+insert into public.clients (id, profile_id, full_name, status)
 values (
   'c2000000-0000-0000-0000-000000000002',
-  'c1000000-0000-0000-0000-000000000003'
+  'c1000000-0000-0000-0000-000000000003',
+  'Hydration Client B',
+  'active'
 );
 
 insert into public.client_method_configuration_override_versions (

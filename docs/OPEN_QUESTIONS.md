@@ -813,7 +813,7 @@ A regra profissional automatica de hidratacao permanece aberta. Portanto, valore
 Permanece aberto:
 - eventual regra profissional futura de hidratacao;
 - horarios/cadencia de lembretes caso sejam reativados a partir de regra confirmada;
-- forma tecnica definitiva da correcao auditavel de check-ins, sem destruir o valor original;
+- UI/fluxo operacional definitivo da correcao auditavel de check-ins; a fundacao de persistencia append-only ja esta preparada na migration `20261007173100_create_client_checkin_corrections.sql`, ainda pendente de apply remoto;
 - detalhes tecnicos adicionais de notificacao quando necessarios.
 
 Nao inferir score de adesao ou frequencia ideal de treino.

@@ -1,3 +1,17 @@
+## Correcoes auditaveis de check-ins
+
+### DECISAO DE SEGURANCA
+
+As tabelas de correcao de check-ins sao append-only. `authenticated` recebe somente `SELECT` e `INSERT`; nao recebe `UPDATE` nem `DELETE`.
+
+A cliente pode ler e inserir correcao apenas para eventos pertencentes ao proprio `client_id`, com autoria igual ao proprio `auth.uid()`.
+
+Patty/admin pode ler e inserir correcao somente para cliente sob assignment ativo, mantendo a exigencia transversal de AAL2.
+
+Nenhuma policy de correcao amplia acesso aos eventos originais. `anon` permanece sem privilegios.
+
+A migration `20261007173100_create_client_checkin_corrections.sql` foi validada contra o Supabase real dentro de transacao com `ROLLBACK`; a aplicacao remota continua pendente.
+
 # RBAC e RLS
 
 ## Principios de acesso
