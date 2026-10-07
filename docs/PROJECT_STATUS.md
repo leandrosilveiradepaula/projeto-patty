@@ -1,3 +1,13 @@
+## Atualizacao de auditoria de interface 2026-10-07 - visao geral sem meta historica de hidratacao
+
+A visao geral administrativa da cliente deixou de promover snapshots historicos de hidratacao como se fossem meta profissional atual.
+
+- o card `Check-ins` passa a exibir `Registros factuais`;
+- a home administrativa deixa de consultar metas historicas apenas para compor esse card;
+- o ultimo registro de atividade fisica continua disponivel como contexto operacional;
+- snapshots e configuracoes historicas permanecem preservados no banco para auditoria/compatibilidade.
+
+Nenhuma regra profissional nova, schema, migration ou RLS foi alterado.
 ## Atualizacao de auditoria de interface 2026-10-07 - contagens sem duplicacao no workspace
 
 O workspace administrativo foi enxugado para evitar repetir a mesma contagem no cabecalho da cliente e novamente na secao imediatamente abaixo.
