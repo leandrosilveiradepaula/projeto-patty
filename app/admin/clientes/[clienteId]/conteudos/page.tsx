@@ -10,6 +10,7 @@ import { Section } from "@/components/ui/Section";
 import {
   getAccessibleClient,
   listContentReleasesForAccessibleClient,
+  listEducationalContentAssetsForCurrentAdminVersions,
   listEducationalContentVersionsForCurrentAdmin,
 } from "@/lib/supabase/data-access";
 import { notFound } from "next/navigation";
@@ -48,6 +49,12 @@ export default async function AdminClientContentPage({
     listContentReleasesForAccessibleClient(client.id),
     listEducationalContentVersionsForCurrentAdmin(),
   ]);
+  const assets = await listEducationalContentAssetsForCurrentAdminVersions(
+    contentVersions.map((version) => version.id),
+  );
+  const versionIdsWithAssets = new Set(
+    assets.map((asset) => asset.educational_content_version_id),
+  );
   const releasedVersionIds = new Set(
     releases.flatMap((release) =>
       release.educational_content_versions?.id
@@ -89,6 +96,7 @@ export default async function AdminClientContentPage({
                 id: version.id,
                 title: version.title,
                 versionNumber: version.version_number,
+                hasAsset: versionIdsWithAssets.has(version.id),
               }))}
             />
           </Card>
@@ -116,7 +124,19 @@ export default async function AdminClientContentPage({
                   <ContentListItem
                     category={contentVersion.category_key ?? "Não informado"}
                     meta={`Versão ${contentVersion.version_number}. Liberado em ${formatRecordedDate(release.released_at)}.`}
-                    status={<Badge variant="neutral">Liberado</Badge>}
+                    status={
+                      <Badge
+                        variant={
+                          versionIdsWithAssets.has(contentVersion.id)
+                            ? "positive"
+                            : "warning"
+                        }
+                      >
+                        {versionIdsWithAssets.has(contentVersion.id)
+                          ? "Disponível para abrir"
+                          : "Liberado sem arquivo"}
+                      </Badge>
+                    }
                     title={contentVersion.title}
                     type={contentVersion.content_type_key ?? "Não informado"}
                   />
