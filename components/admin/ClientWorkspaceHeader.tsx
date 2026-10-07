@@ -35,7 +35,7 @@ export function ClientWorkspaceHeader({
   return (
     <ClientSummaryHeader
       {...props}
-      name={normalizedDisplayName || "Cliente sem nome informado"}
+      name={normalizedDisplayName || "Nome da cliente indisponível"}
       visual={visual ?? <span>{getInitials(normalizedDisplayName)}</span>}
     />
   );

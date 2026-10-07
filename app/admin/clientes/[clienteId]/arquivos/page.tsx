@@ -67,7 +67,7 @@ export default async function AdminClientFilesPage({
   return (
     <>
       <ClientWorkspaceHeader
-        meta="Acompanhamento ativo"
+        meta="Privacidade e liberação de arquivos"
         displayName={displayName}
         secondary="Fotos, exames e documentos privados"
         status={<Badge variant="neutral">{files.length} arquivo(s)</Badge>}
