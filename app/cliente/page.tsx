@@ -5,6 +5,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import {
+  getAccessibleClientTrainingPlan,
   getCurrentClient,
   getCurrentUserProfile,
   listAccessibleAnamnesisSubmissions,
@@ -12,6 +13,7 @@ import {
   listAccessibleClientLiquidIntakeEvents,
   listAccessibleClientNotificationEvents,
   listAccessibleWeeklyFeedbacksForClient,
+  listAccessibleClientTrainingPlanVersions,
   listAccessibleClientTrainingRequests,
   listCurrentClientContentReleases,
   listCurrentClientFinalizedAssessmentMeasurements,
@@ -59,6 +61,7 @@ export default async function ClientePage() {
     activityEvents,
     recentLiquidEvents,
     trainingRequests,
+    trainingPlan,
     assessmentRows,
   ] = await Promise.all([
     listAccessibleAnamnesisSubmissions(client.id),
@@ -70,9 +73,15 @@ export default async function ClientePage() {
     listAccessibleClientActivityCheckinEvents(client.id, today),
     listAccessibleClientLiquidIntakeEvents(client.id, recentFrom),
     listAccessibleClientTrainingRequests(client.id),
+    getAccessibleClientTrainingPlan(client.id),
     listCurrentClientFinalizedAssessmentMeasurements(),
   ]);
 
+  const trainingVersions = trainingPlan
+    ? await listAccessibleClientTrainingPlanVersions(trainingPlan.id)
+    : [];
+  const latestPublishedTraining =
+    trainingVersions.find((version) => Boolean(version.published_at)) ?? null;
   const finalizedAssessmentCount = new Set(assessmentRows.map((row) => row.assessment_id)).size;
   const currentAnamnesisDraft = anamneses.find(
     (submission) => submission.submitted_at === null,
@@ -222,12 +231,14 @@ export default async function ClientePage() {
       title: "Feedback semanal",
     },
     {
-      count: trainingRequests.length,
-      description:
-        "Solicite o serviço de treino e consulte o histórico das suas solicitações.",
+      count: latestPublishedTraining ? null : trainingRequests.length,
+      description: latestPublishedTraining
+        ? "Consulte o treino individual que a Patty revisou e publicou para você."
+        : "Solicite o serviço de treino e consulte o histórico das suas solicitações.",
       href: "/cliente/treino",
-      label: "solicitação(ões)",
+      label: latestPublishedTraining ? "" : "solicitação(ões)",
       title: "Treino",
+      badgeLabel: latestPublishedTraining ? "Publicado" : null,
     },
   ];
 
@@ -284,6 +295,11 @@ export default async function ClientePage() {
               Ver protocolo
             </Link>
           ) : null}
+          {primaryAction.href !== "/cliente/treino" && latestPublishedTraining ? (
+            <Link className={styles.routineActionLink} href="/cliente/treino">
+              Ver treino publicado
+            </Link>
+          ) : null}
         </div>
       </Section>
 
@@ -309,7 +325,9 @@ export default async function ClientePage() {
               <Card className={styles.areaCard} variant="subtle">
                 <div className={styles.cardHeader}>
                   <h2 className={styles.cardTitle}>{area.title}</h2>
-                  {area.count === null ? (
+                  {"badgeLabel" in area && area.badgeLabel ? (
+                    <Badge variant="positive">{area.badgeLabel}</Badge>
+                  ) : area.count === null ? (
                     <Badge variant="neutral">Abrir</Badge>
                   ) : (
                     <Badge variant="neutral">

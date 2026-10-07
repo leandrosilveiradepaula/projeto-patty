@@ -1,3 +1,16 @@
+## Atualizacao de auditoria de interface 2026-10-07 - treino publicado na home da cliente
+
+A home da cliente passa a diferenciar solicitacao de treino de prescricao efetivamente publicada.
+
+Quando existe uma versao publicada do treino individual:
+- o card Treino mostra estado `Publicado`;
+- a descricao orienta a cliente a consultar o treino revisado e liberado pela Patty;
+- um acesso rapido `Ver treino publicado` aparece junto das demais acoes de rotina.
+
+Quando nao existe treino publicado, a home preserva o comportamento anterior de mostrar a quantidade de solicitacoes.
+
+A home consulta apenas o root e as versoes acessiveis por RLS e considera exclusivamente `published_at`; drafts e versoes apenas revisadas continuam invisiveis para a cliente.
+
 ## Atualizacao 2026-10-07 - treino versionado mergeado e documentacao reconciliada
 
 ### IMPLEMENTADO / MERGEADO / VALIDADO
