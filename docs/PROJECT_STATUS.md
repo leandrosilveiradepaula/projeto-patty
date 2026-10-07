@@ -1047,7 +1047,7 @@ A migration `20260924165942_harden_ai_execution_boundary.sql` foi aplicada no Su
 
 Provider confirmado: OpenAI.
 
-A branch atual prepara:
+O runtime atual possui:
 - Responses API server-side;
 - `store: false`;
 - Structured Outputs;
@@ -1057,6 +1057,8 @@ A branch atual prepara:
 - tela administrativa de revisao humana;
 - opt-in explicito da capacidade financeira;
 - nenhuma acao automatica sobre cliente/protocolo.
+
+Essas capacidades nao habilitam dados reais por si so; o gate de dados de saude permanece fechado ate os controles operacionais serem confirmados.
 
 A migration `20260924193339_seed_openai_anamnesis_review_prompt.sql` foi aplicada no Supabase SaaS. A verificacao pos-apply confirmou exatamente um prompt `anamnesis_review` v1 e zero `ai_executions`.
 
