@@ -338,17 +338,6 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
         versionId: version.id,
       }];
     }),
-    assessmentDrafts: assessments
-      .filter((assessment) => !assessment.finalized_at)
-      .map((assessment) => ({
-        assessedAt: assessment.assessed_at,
-        assessmentId: assessment.id,
-        clientId: assessment.client_id,
-        clientLabel:
-          labelsByClientId.get(assessment.client_id) ??
-          "Cliente sem nome informado",
-        createdAt: assessment.created_at,
-      })),
     clarificationRequests: clarificationRequests.map((request) => ({
       clientId: request.clientId,
       clientLabel:
