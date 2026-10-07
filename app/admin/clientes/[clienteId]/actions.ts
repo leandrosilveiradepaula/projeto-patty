@@ -20,8 +20,8 @@ import {
   createAccessibleClientTrainingRequest,
   getAccessibleClient,
 } from "@/lib/supabase/data-access";
+import { updateClientProfileDisplayNamePrivileged } from "@/lib/clients/client-profile-admin";
 import { validateClientDisplayName } from "@/lib/onboarding/validation";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { isUuid } from "@/lib/validation/uuid";
 
 export async function endClientAssignmentAction(
@@ -94,13 +94,12 @@ export async function updateAdminClientDisplayNameAction(
     };
   }
 
-  const admin = createAdminClient();
-  const { error } = await admin
-    .from("profiles")
-    .update({ display_name: displayName })
-    .eq("id", client.profile_id);
-
-  if (error) {
+  try {
+    await updateClientProfileDisplayNamePrivileged({
+      displayName,
+      profileId: client.profile_id,
+    });
+  } catch {
     return {
       message: "Não foi possível atualizar o nome da cliente.",
       success: false,
