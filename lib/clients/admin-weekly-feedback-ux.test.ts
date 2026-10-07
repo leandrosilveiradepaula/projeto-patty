@@ -19,3 +19,11 @@ test("admin weekly feedback separates pending work from submitted history", () =
   assert.match(page, /submittedFeedbacks\.map/);
   assert.match(page, /<details className=\{styles\.historyItem\}>/);
 });
+
+
+test("weekly feedback admin page exposes stable operational anchors", () => {
+  const page = read("app/admin/clientes/[clienteId]/feedback-semanal/page.tsx");
+
+  assert.match(page, /id="solicitar-feedback"/);
+  assert.match(page, /id="feedback-pendentes"/);
+});

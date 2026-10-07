@@ -2937,3 +2937,14 @@ A revisao da visibilidade contextual identificou um risco de UX: pendencias comp
 - arquivo administrativo aguardando liberacao continua visivel, mas nao bloqueia a progressao central.
 
 Esta ordenacao e uma decisao de produto/UX, nao uma regra clinica nem score de adesao.
+
+
+## Deep links corretivos do Feedback Semanal - 2026-10-07
+
+A fila operacional foi refinada para que falhas de lembrete levem a Patty ao ponto em que a causa pode ser corrigida:
+- blocked_no_channel aponta para a preferencia individual de canal no workspace da cliente;
+- blocked_missing_contact aponta para Cadastro Atual, preservando email de contato separado do login;
+- falha real de entrega/provedor aponta para o Feedback Semanal e sua lista de pendentes;
+- a pagina de Feedback Semanal ganhou ancoras estaveis para solicitacao e pendencias.
+
+Nenhum estado de entrega foi reclassificado e nenhuma mensagem e considerada enviada sem evidencia do worker/provider. O SMTP real e o provider/opt-in do WhatsApp continuam dependencias operacionais separadas.
