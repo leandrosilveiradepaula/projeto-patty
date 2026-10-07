@@ -144,7 +144,11 @@ as $$
 declare
   v_client_id uuid;
 begin
-  v_client_id := coalesce(new.client_id, old.client_id);
+  if tg_op = 'DELETE' then
+    v_client_id := old.client_id;
+  else
+    v_client_id := new.client_id;
+  end if;
 
   update public.clients c
   set
@@ -160,7 +164,11 @@ begin
     updated_at = now()
   where c.id = v_client_id;
 
-  return coalesce(new, old);
+  if tg_op = 'DELETE' then
+    return old;
+  end if;
+
+  return new;
 end;
 $$;
 
