@@ -23,14 +23,7 @@ function formatDateTime(value: string) {
   }).format(new Date(value));
 }
 
-type ClientTrainingPageProps = {
-  searchParams: Promise<{ status?: string }>;
-};
-
-export default async function ClientTrainingPage({
-  searchParams,
-}: ClientTrainingPageProps) {
-  const { status } = await searchParams;
+export default async function ClientTrainingPage() {
   const client = await getCurrentClient();
 
   if (!client) {
@@ -66,15 +59,6 @@ export default async function ClientTrainingPage({
         eyebrow="Cliente"
         title="Treino"
       />
-      {status === "requested" ? (
-        <Alert live="polite" title="Solicitação enviada" variant="success">
-          Sua solicitação de treino foi registrada no acompanhamento e ficará visível para a Patty.
-        </Alert>
-      ) : status === "request-error" ? (
-        <Alert live="assertive" title="Não foi possível enviar" variant="critical">
-          Sua solicitação não foi registrada. Tente novamente antes de sair desta página.
-        </Alert>
-      ) : null}
 
       <Section
         description="Apenas versões revisadas e publicadas pela Patty aparecem aqui."
