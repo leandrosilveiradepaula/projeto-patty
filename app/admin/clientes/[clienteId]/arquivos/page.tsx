@@ -81,7 +81,6 @@ export default async function AdminClientFilesPage({
       </Section>
 
       <Section
-        action={<Badge variant="neutral">{files.length} arquivo(s)</Badge>}
         description="Consulte os arquivos privados e controle quais uploads administrativos podem ser vistos pela cliente."
         title="Arquivos"
       >
@@ -96,14 +95,9 @@ export default async function AdminClientFilesPage({
               <li key={file.id}>
                 <Card className={styles.fileCard}>
                   <div className={styles.fileHeader}>
-                    <div>
-                      <h3 className={styles.fileTitle}>
-                        {file.original_filename?.trim() || "Arquivo sem nome informado"}
-                      </h3>
-                      <p className={styles.fileKind}>
-                        {fileKindLabels[file.file_kind] ?? file.file_kind}
-                      </p>
-                    </div>
+                    <h3 className={styles.fileTitle}>
+                      {file.original_filename?.trim() || "Arquivo sem nome informado"}
+                    </h3>
                     <div className={styles.badges}>
                       <Badge variant="neutral">
                         {fileKindLabels[file.file_kind] ?? file.file_kind}
