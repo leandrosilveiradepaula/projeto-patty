@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import styles from "./ClientWorkspaceNav.module.css";
 
@@ -28,15 +27,7 @@ export function ClientWorkspaceNav({
   clientId,
 }: ClientWorkspaceNavProps) {
   const pathname = usePathname();
-  const activeLinkRef = useRef<HTMLAnchorElement>(null);
-
-  useEffect(() => {
-    activeLinkRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "nearest",
-      inline: "center",
-    });
-  }, [activeArea, pathname]);
+  const router = useRouter();
   const base = `/admin/clientes/${clientId}`;
   const items: Array<{
     area: ClientWorkspaceArea;
@@ -60,27 +51,51 @@ export function ClientWorkspaceNav({
     { area: "treino", href: `${base}/treino`, label: "Treino" },
   ];
 
-  return (
-    <nav aria-label="Áreas da cliente" className={styles.nav}>
-      {items.map((item) => {
-        const isActive = activeArea
-          ? activeArea === item.area
-          : item.exact
-            ? pathname === item.href
-            : pathname === item.href || pathname.startsWith(`${item.href}/`);
+  const resolvedActiveArea =
+    activeArea ??
+    items.find((item) =>
+      item.exact
+        ? pathname === item.href
+        : pathname === item.href || pathname.startsWith(`${item.href}/`),
+    )?.area ??
+    "visao-geral";
 
-        return (
-          <Link
-            aria-current={isActive ? "page" : undefined}
-            className={isActive ? styles.activeLink : styles.link}
-            href={item.href}
-            key={item.href}
-            ref={isActive ? activeLinkRef : undefined}
+  return (
+    <>
+      <nav aria-label="Áreas da cliente" className={styles.nav}>
+        {items.map((item) => {
+          const isActive = resolvedActiveArea === item.area;
+
+          return (
+            <Link
+              aria-current={isActive ? "page" : undefined}
+              className={isActive ? styles.activeLink : styles.link}
+              href={item.href}
+              key={item.href}
+            >
+              {item.label}
+            </Link>
+          );
+        })}
+      </nav>
+
+      <nav aria-label="Áreas da cliente" className={styles.mobileNav}>
+        <label className={styles.mobileField}>
+          <span className={styles.mobileLabel}>Área da cliente</span>
+          <select
+            aria-label="Área da cliente"
+            className={styles.mobileSelect}
+            onChange={(event) => router.push(event.target.value)}
+            value={items.find((item) => item.area === resolvedActiveArea)?.href ?? base}
           >
-            {item.label}
-          </Link>
-        );
-      })}
-    </nav>
+            {items.map((item) => (
+              <option key={item.href} value={item.href}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      </nav>
+    </>
   );
 }
