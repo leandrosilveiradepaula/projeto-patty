@@ -2837,3 +2837,15 @@ A auditoria encontrou estados de 2026-09/10 ainda redigidos no presente:
 - uma decisao antiga ainda tratava deployment Vercel como blocker atual da validacao do DELETE de rascunho.
 
 Os registros foram preservados como historicos e reconciliados com o estado posterior. WhatsApp/opt-in/fallback e SMTP operacional continuam pendencias reais; nenhuma regra profissional foi inferida.
+
+
+## Fechamento da penultima passada de fonte de verdade - 2026-10-07
+
+A revisao detalhada dos checkpoints antigos encontrou e reconciliou os ultimos estados intermediarios de alto risco antes da passada final:
+- PRs #242-#245 nao sao mais tratados como drafts atuais;
+- a proposta inicial da foundation configuravel foi marcada como checkpoint historico anterior a migration oficial aplicada;
+- recovery manual e compatibilidade de convite implicito deixaram de aparecer como apenas em validacao/branch;
+- o diagnostico antigo de runner com `steps: null` foi mantido apenas como historico;
+- a decisao de assets educacionais agora reconhece o Vercel Private Blob ja provisionado e separa corretamente store pronto de upload/publicacao ainda pendentes.
+
+Nenhuma regra profissional, schema, migration ou RLS foi alterado. A proxima passada deve ser de fechamento transversal: verificar somente contradicoes residuais entre documentos normativos, readiness e runtime, sem reabrir registros historicos ja explicitamente marcados como tais.
