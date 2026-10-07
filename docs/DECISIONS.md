@@ -1,3 +1,44 @@
+## 2026-10-07 - Nome obrigatorio e status ativo/inativo da cliente
+
+### REGRA CONFIRMADA
+
+Todo cadastro profissional de cliente deve possuir nome. Nao deve ser possivel concluir/salvar um novo cadastro de cliente sem nome valido.
+
+O nome profissional da cliente nao deve depender da existencia permanente de uma conta Auth. Como `clients.profile_id` pode ser nulo e o historico deve sobreviver a alteracoes de acesso, a fonte profissional definitiva do nome deve pertencer ao dominio `Client`, e nao ficar exclusivamente em `profiles.display_name`.
+
+### REGRA CONFIRMADA
+
+`clients.status` passa a ter a semantica profissional:
+
+- `active`: cliente atualmente em acompanhamento;
+- `inactive`: cliente que ja esteve em acompanhamento e atualmente nao esta em processo ativo.
+
+Inativar uma cliente nao apaga historico, arquivos, avaliacoes, protocolos, treinos ou demais registros.
+
+Status de cliente e diferente de:
+- estado da conta Auth;
+- status do profile;
+- existencia de sessao;
+- assignment de acesso.
+
+### DECISAO TECNICA/PRODUTO
+
+Novos onboardings devem criar a cliente como `active`.
+
+O encerramento explicito do acompanhamento deve persistir `inactive` no dominio da cliente, alem de encerrar o assignment correspondente.
+
+A eventual reativacao futura deve preservar o historico do periodo anterior; nao sobrescrever silenciosamente o encerramento anterior.
+
+### LIMITE DE ESCOPO / PRIVACIDADE
+
+O objetivo futuro de reengajamento/campanhas para clientes inativas nao autoriza, por si so:
+- envio automatico de campanha;
+- acesso amplo a dados sensiveis apos o fim do assignment;
+- reaproveitamento de contato sem regra de consentimento/base legal/canal;
+- enfraquecimento de RLS.
+
+A forma de listar e contatar clientes inativas para reengajamento exige um desenho de autorizacao e privacidade separado.
+
 ## 2026-10-07 - Reconciliacao vigente do metodo e das pendencias
 
 ### REGRA CONFIRMADA VIGENTE
