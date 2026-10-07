@@ -8,6 +8,9 @@ import {
   listAccessibleAnamnesisSubmissions,
   listAccessibleClientAssessments,
   listAccessibleClientNotificationEvents,
+  listAccessibleClientTrainingPlansForClients,
+  listAccessibleClientTrainingPlanVersionsForPlans,
+  listAccessibleClientTrainingRequestsForClients,
   listAccessibleWeeklyFeedbacksForClient,
   listAccessibleNonterminalAiExecutions,
   listAccessibleProtocolPublications,
@@ -20,6 +23,7 @@ import {
 import {
   buildOperationalPendingItems,
   type OperationalPendingItem,
+  type PendingTrainingLifecycle,
 } from "@/lib/operations/pending";
 import { loadClarificationReminderInterval } from "@/lib/operations/clarification-reminder-loader";
 
@@ -54,8 +58,15 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
     ]),
   );
 
-  const [submissions, weeklyFeedbacks, weeklyFeedbackNotificationEvents] =
-    await Promise.all([
+  const clientIds = assignedClients.map((client) => client.id);
+
+  const [
+    submissions,
+    weeklyFeedbacks,
+    weeklyFeedbackNotificationEvents,
+    trainingRequests,
+    trainingPlans,
+  ] = await Promise.all([
     Promise.all(
       assignedClients.map((client) =>
         listAccessibleAnamnesisSubmissions(client.id),
@@ -71,7 +82,66 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
         listAccessibleClientNotificationEvents(client.id),
       ),
     ).then((items) => items.flat()),
+    listAccessibleClientTrainingRequestsForClients(clientIds),
+    listAccessibleClientTrainingPlansForClients(clientIds),
   ]);
+
+  const trainingVersions = await listAccessibleClientTrainingPlanVersionsForPlans(
+    trainingPlans.map((plan) => plan.id),
+  );
+  const trainingPlanByClientId = new Map(
+    trainingPlans.map((plan) => [plan.client_id, plan]),
+  );
+  const openTrainingVersionByPlanId = new Map(
+    trainingVersions
+      .filter((version) => !version.published_at)
+      .map((version) => [version.training_plan_id, version]),
+  );
+  const latestRequestByClientId = new Map<
+    string,
+    (typeof trainingRequests)[number]
+  >();
+
+  for (const request of trainingRequests) {
+    if (!latestRequestByClientId.has(request.client_id)) {
+      latestRequestByClientId.set(request.client_id, request);
+    }
+  }
+
+  const trainingLifecycle: PendingTrainingLifecycle[] = assignedClients.flatMap<PendingTrainingLifecycle>((client) => {
+    const plan = trainingPlanByClientId.get(client.id);
+    const request = latestRequestByClientId.get(client.id);
+
+    if (!plan) {
+      return request
+        ? [{
+            clientId: client.id,
+            clientLabel: clientLabel(client.profiles?.display_name),
+            createdAt: request.requested_at,
+            id: request.id,
+            state: "requested_without_plan" as const,
+            versionNumber: null,
+          }]
+        : [];
+    }
+
+    const openVersion = openTrainingVersionByPlanId.get(plan.id);
+
+    if (!openVersion) {
+      return [];
+    }
+
+    return [{
+      clientId: client.id,
+      clientLabel: clientLabel(client.profiles?.display_name),
+      createdAt: openVersion.reviewed_at ?? openVersion.created_at,
+      id: openVersion.id,
+      state: openVersion.reviewed_at
+        ? ("reviewed_not_published" as const)
+        : ("draft" as const),
+      versionNumber: openVersion.version_number,
+    }];
+  });
 
   const submitted = submissions.filter(
     (submission) => Boolean(submission.submitted_at),
@@ -199,6 +269,7 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
       submittedForReviewAt: version.submitted_for_review_at,
       versionNumber: version.version_number,
     })),
+    trainingLifecycle,
     aiExecutions: aiExecutions.map((execution) => ({
       clientId: execution.client_id,
       clientLabel: clientLabel(execution.clients?.profiles?.display_name),

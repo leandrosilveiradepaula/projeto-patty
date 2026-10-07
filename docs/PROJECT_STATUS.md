@@ -1,3 +1,20 @@
+## Atualizacao de auditoria de interface 2026-10-07 - treino nas proximas acoes
+
+A auditoria de continuidade passou a expor os estados objetivos do lifecycle de treino fora da aba especifica.
+
+Na visao geral da cliente:
+- o card de Treino diferencia nao solicitado, solicitado sem plano, rascunho, revisado aguardando publicacao e publicado;
+- a proxima acao da Patty passa a apontar para o treino quando existir solicitacao sem plano, rascunho aberto ou versao revisada ainda nao publicada, depois das etapas iniciais obrigatorias ja existentes no fluxo.
+
+Na fila global de pendencias:
+- solicitacao de treino sem plano;
+- rascunho de treino;
+- treino revisado e ainda nao publicado
+
+passam a aparecer como fatos operacionais sob `Acao da Patty`.
+
+Isso nao cria prioridade clinica, score, prazo, progressao ou automacao profissional. Sao apenas estados persistidos que ja possuem uma acao humana explicita no produto. As consultas foram implementadas em lote para evitar N+1.
+
 ## Atualizacao de auditoria de interface 2026-10-07 - fluxo operacional de treino
 
 A auditoria do fluxo de Treino foi refinada depois da integracao do modelo versionado.

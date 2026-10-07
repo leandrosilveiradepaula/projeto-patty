@@ -322,6 +322,28 @@ export async function listAccessibleClientTrainingRequests(clientId: string) {
   return data;
 }
 
+export async function listAccessibleClientTrainingRequestsForClients(
+  clientIds: string[],
+) {
+  if (clientIds.length === 0) {
+    return [];
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_training_requests")
+    .select("id, client_id, requested_at, created_at")
+    .in("client_id", clientIds)
+    .order("requested_at", { ascending: false })
+    .order("id", { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
 export async function createAccessibleClientTrainingRequest(input: {
   clientId: string;
   note: string | null;
@@ -360,6 +382,28 @@ export async function getAccessibleClientTrainingPlan(clientId: string) {
   return data;
 }
 
+export async function listAccessibleClientTrainingPlansForClients(
+  clientIds: string[],
+) {
+  if (clientIds.length === 0) {
+    return [];
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_training_plans")
+    .select("id, client_id, created_at")
+    .in("client_id", clientIds)
+    .order("created_at", { ascending: true })
+    .order("id", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
 export async function listAccessibleClientTrainingPlanVersions(
   trainingPlanId: string,
 ) {
@@ -370,6 +414,31 @@ export async function listAccessibleClientTrainingPlanVersions(
       "id, training_plan_id, version_number, title, notes, created_by_profile_id, reviewed_at, reviewed_by_profile_id, published_at, published_by_profile_id, created_at",
     )
     .eq("training_plan_id", trainingPlanId)
+    .order("version_number", { ascending: false })
+    .order("id", { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function listAccessibleClientTrainingPlanVersionsForPlans(
+  trainingPlanIds: string[],
+) {
+  if (trainingPlanIds.length === 0) {
+    return [];
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_training_plan_versions")
+    .select(
+      "id, training_plan_id, version_number, title, reviewed_at, published_at, created_at",
+    )
+    .in("training_plan_id", trainingPlanIds)
+    .order("training_plan_id", { ascending: true })
     .order("version_number", { ascending: false })
     .order("id", { ascending: false });
 
