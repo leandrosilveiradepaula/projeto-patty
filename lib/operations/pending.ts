@@ -9,6 +9,7 @@ export type OperationalPendingItemKind =
   | "weekly_feedback_channel_missing"
   | "weekly_feedback_email_contact_missing"
   | "content_released_without_asset"
+  | "private_file_pending_release"
   | "protocol_approved_not_published"
   | "protocol_submitted_not_approved"
   | "training_requested_without_plan"
@@ -167,6 +168,15 @@ export type PendingContentReleaseReadiness = {
   versionId: string;
 };
 
+export type PendingPrivateFileRelease = {
+  clientId: string;
+  clientLabel: string;
+  createdAt: string;
+  fileId: string;
+  fileKind: string;
+  originalFilename: string;
+};
+
 export type OperationalPendingFactsInput = {
   aiExecutions: PendingAiExecution[];
   anamnesisSubmissions: PendingAnamnesisSubmission[];
@@ -175,6 +185,7 @@ export type OperationalPendingFactsInput = {
   clarificationRequests: PendingClarificationRequest[];
   clientOperationalReadiness?: PendingClientOperationalReadiness[];
   contentReleaseReadiness?: PendingContentReleaseReadiness[];
+  privateFileReleases?: PendingPrivateFileRelease[];
   protocolVersions: PendingProtocolVersion[];
   trainingLifecycle?: PendingTrainingLifecycle[];
   referenceNow?: string;
@@ -442,6 +453,20 @@ export function buildOperationalPendingItems(
         title: "Completar contato para o Feedback Semanal",
       });
     }
+  }
+
+  for (const file of input.privateFileReleases ?? []) {
+    items.push({
+      clientId: file.clientId,
+      clientLabel: file.clientLabel,
+      createdAt: file.createdAt,
+      description: `O arquivo "${file.originalFilename}" foi enviado administrativamente e permanece privado. Revise o arquivo e decida explicitamente se ele deve ser liberado para a cliente.`,
+      href: `/admin/clientes/${file.clientId}/arquivos#aguardando-liberacao`,
+      id: `private-file-release:${file.fileId}`,
+      kind: "private_file_pending_release",
+      statusLabel: "Aguardando liberação",
+      title: "Revisar arquivo privado",
+    });
   }
 
   for (const release of input.contentReleaseReadiness ?? []) {
