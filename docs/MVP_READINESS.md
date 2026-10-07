@@ -604,7 +604,7 @@ Ainda falta fechar o catalogo/versionamento completo de equivalentes e suas regr
 
 ## Cliente - protocolo publicado e check-in
 
-Estado: **FORMULA DE LIQUIDOS CONFIRMADA / CHECK-IN AINDA PARCIALMENTE ABERTO**
+Estado: **AUTOMACAO DE HIDRATACAO SUSPENSA / CHECK-IN FACTUAL DISPONIVEL**
 
 A cliente deve visualizar:
 - sua rotina de alimentacao publicada;
@@ -612,17 +612,9 @@ A cliente deve visualizar:
 
 Ela nao precisa registrar execucao dentro do protocolo publicado.
 
-O produto deve prever check-in separado para:
-- registrar liquidos ao longo do dia e acompanhar uma meta baseada no peso da cliente;
-- receber lembretes relacionados a essa meta;
-- registrar diariamente se fez ou nao fez atividade fisica, independentemente do treino prescrito;
-- visualizar progresso como estimulo.
+O produto possui check-in separado para registrar liquidos e atividade fisica diaria, mas a reconciliacao vigente suspende qualquer meta automatica de hidratacao ate nova confirmacao profissional documentada.
 
-As metas/configuracoes individuais podem ser definidas na entrega do primeiro protocolo da cliente.
-
-A formula profissional de baseline para liquidos e **60 mL/kg/dia**. Exemplo: 60 kg -> 3.600 mL/dia. A taxonomia ativa distingue agua pura de outros liquidos zero calorias, sem proporcao minima automatica confirmada.
-
-Ainda faltam parametros de produto: eventual proporcao-alvo se a Patty quiser formaliza-la, regra de recalculo por peso, frequencia dos lembretes e visibilidade/correcao pela Patty.
+O runtime nao deve gerar meta ao finalizar avaliacao, nem exibir progresso contra meta automatica para a cliente. Infraestrutura e snapshots historicos de hidratacao permanecem preservados somente por compatibilidade/auditoria; referencias historicas de 60 mL/kg ou 35 mL/kg nao autorizam automacao vigente.
 
 Nao tratar o check-in como score automatico de adesao.
 
@@ -711,26 +703,19 @@ Ficam deliberadamente fora:
 
 
 
-## Check-ins - estado tecnico em 2026-09-30
+## Check-ins - estado tecnico reconciliado em 2026-10-07
 
-Estado: **FUNDACAO + UI IMPLEMENTADAS NA BRANCH / SCHEMA APLICADO**
+Estado: **REGISTRO FACTUAL IMPLEMENTADO / META AUTOMATICA DESABILITADA**
 
 Ja existe:
-- snapshot de meta de liquidos com formula 60 mL/kg no banco;
 - historico append-only de ingestao;
 - historico append-only de atividade fisica diaria;
-- area da cliente para registrar e acompanhar;
-- area administrativa client-scoped para Patty registrar nova meta e consultar eventos;
+- area da cliente para registrar fatos;
+- area administrativa client-scoped para consulta factual;
 - RLS com ownership para cliente e assignment ativo + AAL2 para admin;
-- resolucao manual de esclarecimentos e pendencia factual para resposta recebida aguardando revisao.
+- infraestrutura historica de snapshots de hidratacao preservada por compatibilidade.
 
-Ainda aberto:
-- eventual proporcao-alvo de agua pura, caso venha a ser formalizada;
-- criterio/momento profissional para novo snapshot quando o peso muda;
-- canal de notificacao e envio recorrente do lembrete de 24h;
-- E2E autenticado desta nova UI quando o runner/ambiente de testes permitir.
-
-Nenhum score automatico de adesao foi introduzido.
+A reconciliacao vigente removeu a geracao automatica de meta na finalizacao da avaliacao e a exibicao de progresso contra meta automatica. Formula, recalculo, proporcao e lembretes de hidratacao permanecem pendencias profissionais; nenhum score automatico de adesao foi introduzido.
 
 
 ## Atualizacao de prontidao - 2026-09-30
@@ -763,15 +748,16 @@ A RPC `clone_protocol_version_draft` esta aplicada. Clonar:
 
 ### Check-ins
 
-Estado: **FUNDACAO IMPLEMENTADA / APLICADA / PUBLICADA**
+Estado: **REGISTRO FACTUAL IMPLEMENTADO / AUTOMACAO DE META SUSPENSA**
 
-- meta de liquidos calculada por `peso_kg * 60` e persistida como snapshot;
-- mudanca futura de peso nao recalcula silenciosamente snapshot anterior;
 - eventos de liquidos sao append-only;
 - atividade fisica possui check-in diario sim/nao independente do treino prescrito;
+- nenhuma avaliacao gera meta de hidratacao automaticamente;
+- a cliente nao recebe meta/progresso automatico de hidratacao;
+- infraestrutura historica de snapshots permanece preservada sem ser tratada como regra vigente;
 - nao existe score automatico de adesao.
 
-Continuam abertas eventual proporcao-alvo de agua pura, politica profissional de recalculo, lembretes de hidratacao e regras de correcao/edicao que dependam de decisao profissional.
+Formula, proporcao, politica profissional de recalculo, lembretes e regras de correcao/edicao que dependam de decisao profissional continuam abertas.
 
 ### Esclarecimentos
 
@@ -846,6 +832,8 @@ Nao tratar a ausencia desses itens como autorizacao para hardcode de segunda-fei
 Esses itens nao devem bloquear a avaliacao do fluxo interno do produto. A conta administrativa real da Patty continua como pendencia operacional separada.
 
 
-### Solicitacao de treino pela cliente - 2026-10-04
+### Solicitacao e prescricao de treino por cliente - reconciliado em 2026-10-07
 
-A policy de autoatendimento foi aplicada no SaaS pela migration `20261004132337_allow_client_training_request_self_service`. A cliente pode ler e criar somente solicitacoes do proprio acompanhamento; a tabela permanece append-only. A UI `/cliente/treino` esta implementada na branch correspondente. Isso fecha a solicitacao do servico, mas nao a visualizacao de uma prescricao futura.
+A policy de autoatendimento foi aplicada no SaaS pela migration `20261004132337_allow_client_training_request_self_service`. A cliente pode ler e criar somente solicitacoes do proprio acompanhamento; a tabela permanece append-only.
+
+A prescricao versionada individual deixou de ser lacuna: o modelo mergeado no PR #445 permite a Patty criar rascunho somente depois de solicitacao, selecionar exercicios individualmente, revisar/congelar, publicar manualmente e preservar historico. A cliente visualiza somente a prescricao publicada para ela. Progressao, carga, volume e demais regras profissionais de treino continuam abertas e nao sao automatizadas.
