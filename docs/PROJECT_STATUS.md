@@ -1,3 +1,19 @@
+## Atualizacao de auditoria de interface 2026-10-07 - navegacao mobile do workspace da cliente
+
+O workspace administrativo da cliente possui 10 areas. No mobile, a faixa horizontal de abas foi substituida por um seletor explicito de area.
+
+Comportamento:
+- desktop continua usando as abas visiveis;
+- mobile mostra um seletor `Area da cliente` ocupando a largura util;
+- a area atual permanece selecionada;
+- a troca navega diretamente para a area escolhida;
+- todas as 10 areas continuam acessiveis;
+- nao depende de descobrir rolagem horizontal.
+
+Tambem foram removidos os ultimos metadados genericos `Acompanhamento ativo` dos cabecalhos de Arquivos e Evolucao, substituidos por contexto especifico da area.
+
+Nenhuma regra profissional, schema, migration ou RLS foi alterado.
+
 ## Atualizacao de auditoria de interface 2026-10-07 - visao geral da cliente sem duplicacoes
 
 A visao geral da cliente foi simplificada para reduzir repeticao e comprimento desnecessario da pagina.
