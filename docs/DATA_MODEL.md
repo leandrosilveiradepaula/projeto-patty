@@ -1,3 +1,28 @@
+## Identidade profissional da cliente e status
+
+### REGRA CONFIRMADA / DECISAO DE MODELO
+
+Todo `Client` deve possuir nome profissional obrigatorio.
+
+A aplicacao atualmente utiliza `profiles.display_name` para exibicao, mas isso nao e suficiente como fonte profissional definitiva porque `clients.profile_id` pode ser `NULL` e o historico da cliente deve sobreviver a alteracoes/exclusao da identidade Auth.
+
+A evolucao do modelo deve introduzir um nome canonicamente pertencente a `clients` (por exemplo, `full_name`), obrigatorio para novos cadastros. Durante a transicao, o onboarding continua validando nome antes de provisionar qualquer cliente.
+
+### STATUS DE CLIENTE
+
+`clients.status` passa a aceitar semanticamente:
+
+- `active`: acompanhamento atual em andamento;
+- `inactive`: acompanhamento encerrado no momento, com historico preservado.
+
+`clients.status` nao substitui `client_assignments`. Assignment continua sendo mecanismo de autorizacao/client-scope; status continua sendo estado de negocio da cliente.
+
+### PENDENCIA DE HARDENING
+
+Existe registro legado sem nome no ambiente atual. Nao inventar valor para corrigi-lo.
+
+Antes de impor constraint definitiva de banco para nome obrigatorio, o registro legado deve ser corrigido com dado verdadeiro. A constraint de nome deve ser adicionada em migration futura sem alterar migrations ja aplicadas.
+
 ## Treino individual versionado
 
 ### DECISAO TECNICA/PRODUTO
@@ -186,9 +211,9 @@ Exclusao da identidade Auth nao deve provocar cascade sobre dados historicos do 
 
 Na implementacao futura, `clients.profile_id` deve usar semantica equivalente a `ON DELETE SET NULL`.
 
-### QUESTAO ABERTA
+### REGRA CONFIRMADA
 
-Ainda nao foram definidos valores definitivos para `clients.status`.
+Os valores profissionais vigentes de `clients.status` sao `active` e `inactive`.
 
 ## Client registration
 
