@@ -46,8 +46,8 @@ export default async function AdminClientesPage({
       assignment.clients ? [assignment.clients] : [],
     ) ?? []
   ).sort((left, right) => {
-    const leftName = left.profiles?.display_name?.trim();
-    const rightName = right.profiles?.display_name?.trim();
+    const leftName = left.full_name?.trim() || left.profiles?.display_name?.trim();
+    const rightName = right.full_name?.trim() || right.profiles?.display_name?.trim();
 
     if (!leftName && !rightName) return left.id.localeCompare(right.id);
     if (!leftName) return 1;
@@ -78,7 +78,7 @@ export default async function AdminClientesPage({
   const filteredClients = clients.filter((client) => {
     const matchesSearch =
       !normalizedSearchTerm ||
-      normalizeSearchValue(client.profiles?.display_name ?? "").includes(
+      normalizeSearchValue(client.full_name || client.profiles?.display_name || "").includes(
         normalizedSearchTerm,
       );
     const matchesView =
@@ -166,7 +166,7 @@ export default async function AdminClientesPage({
             ) : null}
             <ul className={styles.clientList}>
             {filteredClients.map((client) => {
-              const displayName = client.profiles?.display_name?.trim();
+              const displayName = client.full_name?.trim() || client.profiles?.display_name?.trim();
               const clientPattyPendingItems =
                 pattyPendingItemsByClientId.get(client.id) ?? [];
               const nextPattyPending = clientPattyPendingItems[0] ?? null;
