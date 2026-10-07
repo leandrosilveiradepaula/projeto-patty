@@ -9,7 +9,7 @@ export async function listClientsForPrivateFileAdministration() {
   const admin = createAdminClient();
   const { data, error } = await admin
     .from("clients")
-    .select("id, profile_id, created_at, profiles(display_name)")
+    .select("id, profile_id, full_name, created_at, profiles(display_name)")
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -23,7 +23,7 @@ export async function getClientForPrivateFileAdministration(clientId: string) {
   const admin = createAdminClient();
   const { data, error } = await admin
     .from("clients")
-    .select("id, profile_id, created_at, profiles(display_name)")
+    .select("id, profile_id, full_name, created_at, profiles(display_name)")
     .eq("id", clientId)
     .maybeSingle();
 
