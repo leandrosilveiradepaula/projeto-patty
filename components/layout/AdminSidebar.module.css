@@ -93,6 +93,17 @@
   min-width: 0;
 }
 
+ .menuButton {
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.menuIcon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
 .menuButton,
 .closeButton {
   min-height: 44px;
