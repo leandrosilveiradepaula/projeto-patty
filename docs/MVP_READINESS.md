@@ -254,7 +254,7 @@ O Drive possui manifesto inicial com 89 arquivos claramente nao client-scoped. N
 
 Uma triagem somente por metadados cobre todos os itens em `drive_content_triage.json`. Ela identificou 16 grupos de possiveis duplicidades por nome normalizado entre as pastas historicas de exercicios e 9 videos com nomes genericos que exigem inspecao do conteudo antes de receber titulo final. As categorias registradas sao hipoteses, os rotulos historicos "masculino/feminino" nao sao regra de produto e todos os itens continuam com direitos nao revisados e migracao/publicacao nao autorizadas.
 
-A Patty ja aprovou o video de uso da balanca como primeiro item elegivel, mas sua migracao fisica esta bloqueada pela infraestrutura atual: o arquivo original possui ~117,6 MiB e excede o limite de 50 MB do Supabase Free. O bucket `client-private` nao deve ser reutilizado para conteudo educacional. E necessario decidir infraestrutura de midia antes de criar o fluxo fisico de importacao.
+A Patty ja aprovou o video de uso da balanca como primeiro item elegivel. A limitacao historica do Supabase Free para o arquivo de ~117,6 MiB ja foi resolvida por decisao de infraestrutura: binarios educacionais usam Vercel Private Blob e o bucket `client-private` nao e reutilizado. O store privado ja existe; a pendencia atual e operacional — upload controlado, verificacao de tamanho/MIME/SHA-256, registro do asset, publicacao e release explicita.
 
 A liberacao manual ja implementada considera elegivel somente uma versao publicada ainda nao liberada para a mesma cliente. A UI e a server action compartilham a mesma guarda deterministica, enquanto RLS e unicidade no banco continuam sendo a autoridade final.
 
@@ -296,7 +296,9 @@ A migration `20260924165942_harden_ai_execution_boundary.sql` esta aplicada no S
 
 O codigo correspondente foi mergeado pelo PR #149 e publicado no deployment READY do commit `9b7bbba`. A verificacao de runtime consultada nao mostrou logs `error/fatal` na janela observada.
 
-Isso nao significa integracao de provider pronta. Provider/modelo, prompt operacional, politica juridica aplicavel, chamada externa e UX humana dos findings continuam gates separados.
+### RECONCILIADO EM 2026-10-07
+
+A integracao de provider ja existe para `anamnesis_review`: OpenAI/Responses API, prompt versionado, Structured Outputs, execution lifecycle e revisao humana estao implementados. O gate que continua fechado e o **uso de dados reais de saude**, condicionado aos controles organizacionais/retencao e habilitacao explicita; nao reabrir provider/modelo como lacuna tecnica geral.
 
 
 ## OpenAI — revisao assistida da Anamnese
