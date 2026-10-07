@@ -8,7 +8,7 @@ Este gate controla apenas o envio externo de dados para o provider OpenAI no flu
 
 - provider confirmado: OpenAI;
 - endpoint: Responses API;
-- modelo tecnico inicial: `gpt-5.6-terra`;
+- modelo tecnico inicial avaliado: `gpt-5.6-terra`; a escolha de producao continua sujeita ao gate vigente;
 - reasoning inicial: `medium`;
 - `store: false` em todas as chamadas do fluxo;
 - contexto minimizado antes da chamada;

@@ -107,7 +107,7 @@ Esse numero nao significa que todos os 110 sejam candidatos de migracao:
 
 ### RECOMENDACAO TECNICA
 
-Nao iniciar migracao fisica em lote ainda.
+Nao iniciar migracao fisica em lote ainda. O primeiro item aprovado pode seguir apenas pelo lote controlado ja preparado, mantendo os demais em triagem.
 
 A proxima revisao deve priorizar:
 

@@ -2,7 +2,7 @@
 
 ## Estado
 
-A fundação PWA está implementada na branch `codex/installable-pwa`, reconciliada com o master atual e em validação de CI/build antes de merge/publicação.
+A fundação PWA já está mergeada no `master` e faz parte da aplicação atual.
 
 ## Objetivo
 
@@ -10,7 +10,7 @@ Permitir que Patty e clientes instalem o Projeto Patty na tela inicial do telefo
 
 ## Android
 
-Após a publicação da fundação PWA:
+Com a fundação PWA atual:
 
 1. abrir o Projeto Patty no Chrome;
 2. abrir o menu do navegador;

@@ -1,8 +1,8 @@
-# Gmail SMTP no MVP
+# Gmail SMTP - estado operacional
 
 ## Decisao atual
 
-No MVP, a conta Gmail da Patty atende dois usos separados:
+No estado atual, a conta Gmail da Patty atende dois usos separados:
 
 1. autenticacao/convite via Custom SMTP do Supabase Auth;
 2. lembrete operacional do Feedback Semanal via worker server-side do aplicativo.
@@ -74,7 +74,7 @@ Usar somente uma conta de teste, nunca dados reais de cliente, para validar:
 
 ## Limites e migracao futura
 
-Gmail foi escolhido porque o volume previsto no MVP e baixo.
+Gmail foi escolhido porque o volume previsto inicialmente e baixo.
 
 Se surgirem problemas de entregabilidade, bloqueio da conta, crescimento de volume ou necessidade de observabilidade/SLA, migrar o Custom SMTP para um provedor transacional dedicado sem alterar o fluxo de onboarding da aplicacao.
 
