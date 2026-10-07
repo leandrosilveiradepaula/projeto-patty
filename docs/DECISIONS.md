@@ -1,3 +1,19 @@
+## 2026-10-07 - Runtime de hidratacao reconciliado com a regra vigente
+
+### DECISAO TECNICA / PRODUTO
+
+A regra profissional de hidratacao permanece aberta. Portanto, o runtime nao deve:
+- gerar meta diaria automaticamente a partir do peso;
+- recalcular meta ao finalizar avaliacao;
+- oferecer recalculo manual baseado em coeficiente historico;
+- apresentar percentual de progresso contra uma meta automatica.
+
+Check-ins de liquidos e atividade fisica permanecem ativos como registros factuais.
+
+Metas historicas, templates, snapshots, migrations e helpers de hidratacao permanecem preservados para auditoria/compatibilidade, mas nao representam regra profissional vigente.
+
+Esta decisao operacional deriva da reconciliacao vigente de 2026-10-07 e prevalece sobre registros historicos de 35 mL/kg ou 60 mL/kg.
+
 ## 2026-10-07 - Nome obrigatorio e status ativo/inativo da cliente
 
 ### REGRA CONFIRMADA
