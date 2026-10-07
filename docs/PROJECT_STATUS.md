@@ -1,3 +1,12 @@
+## Limpeza normativa funcional 2026-10-07
+
+A reconciliacao documental foi aprofundada para reduzir risco de implementacao a partir de trechos historicos:
+- fatos cadastrais ja resolvidos deixaram de aparecer sob rotulo de questao aberta;
+- detalhes historicos de Cutting 3, Bulking e Consolidacao foram retirados do corpo normativo vigente de `BUSINESS_RULES.md` e remetidos ao historico;
+- referencias historicas de 35 mL/kg em `DECISIONS.md` foram marcadas explicitamente como superadas pela reconciliacao vigente de hidratacao.
+
+Nenhuma regra profissional nova foi criada.
+
 ## Bloco funcional consolidado 2026-10-07
 
 A auditoria funcional pos-UX consolidou quatro frentes: status real dos canais do Feedback Semanal, gate de produto para progresso de conteudos, reverificacao do primeiro lote educacional e readiness dos fluxos de conta/arquivos privados.
