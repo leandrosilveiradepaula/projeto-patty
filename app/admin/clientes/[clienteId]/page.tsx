@@ -286,34 +286,7 @@ export default async function AdminClienteDetailPage({
         label: "Preencher cadastro atual",
         title: "Cadastro atual",
       }
-    : weeklyFeedbackChannelNeedsSetup
-      ? {
-          description:
-            "Defina o canal individual do Feedback Semanal antes de depender dos lembretes automáticos.",
-          eyebrow: "Ação da Patty",
-          href: "#preferencia-feedback",
-          label: "Configurar canal",
-          title: "Canal do Feedback Semanal",
-        }
-      : weeklyFeedbackEmailNeedsContact
-        ? {
-            description:
-              "Email foi escolhido para o Feedback Semanal, mas o Cadastro Atual ainda não possui email de contato. O email de login não é usado como substituto.",
-            eyebrow: "Ação da Patty",
-            href: "#cadastro-atual",
-            label: "Completar email de contato",
-            title: "Contato para Feedback Semanal",
-          }
-        : pendingPrivateFileReleaseCount > 0
-          ? {
-              description:
-                `Há ${pendingPrivateFileReleaseCount} arquivo(s) administrativo(s) aguardando decisão explícita de liberação para a cliente.`,
-              eyebrow: "Ação da Patty",
-              href: `/admin/clientes/${client.id}/arquivos#aguardando-liberacao`,
-              label: "Revisar arquivos",
-              title: "Arquivos aguardando liberação",
-            }
-          : anamnesisPattyAction
+    : anamnesisPattyAction
       ? anamnesisPattyAction.reviewPending
         ? {
             description:
@@ -369,77 +342,103 @@ export default async function AdminClienteDetailPage({
                 }
               : !hasFinalizedAssessment
                 ? {
-                    description:
-                      "Registre a primeira avaliação da cliente.",
+                    description: "Registre a primeira avaliação da cliente.",
                     eyebrow: "Ação da Patty",
                     href: `/admin/clientes/${client.id}/avaliacoes`,
                     label: "Abrir avaliações",
                     title: "Avaliação",
                   }
                 : protocolAction
-                ? !approvedProtocolVersionIds.has(protocolAction.version.id)
-                  ? {
-                      description:
-                        `A versão ${protocolAction.version.version_number} do protocolo foi submetida para revisão e ainda não possui aprovação registrada.`,
-                      eyebrow: "Ação da Patty",
-                      href: `/admin/protocolos/${protocolAction.protocol.id}`,
-                      label: "Revisar protocolo",
-                      title: "Protocolo aguardando revisão",
-                    }
-                  : {
-                      description:
-                        `A versão ${protocolAction.version.version_number} do protocolo já possui aprovação, mas ainda não foi publicada para a cliente.`,
-                      eyebrow: "Ação da Patty",
-                      href: `/admin/protocolos/${protocolAction.protocol.id}`,
-                      label: "Publicar protocolo",
-                      title: "Protocolo aguardando publicação",
-                    }
-                : !hasPublishedProtocol
-                  ? {
-                      description:
-                        protocols.length > 0
-                          ? "Existe protocolo em andamento, mas ainda não há uma publicação para a cliente."
-                          : "Crie e revise o primeiro protocolo antes de iniciar o acompanhamento semanal.",
-                      eyebrow: "Ação da Patty",
-                      href: `/admin/clientes/${client.id}/protocolos`,
-                      label: "Abrir protocolos",
-                      title: "Primeiro protocolo",
-                    }
-                  : trainingWorkspaceState.kind === "reviewed"
+                  ? !approvedProtocolVersionIds.has(protocolAction.version.id)
                     ? {
                         description:
-                          "O treino foi revisado e está congelado. Falta a publicação explícita para a cliente.",
+                          `A versão ${protocolAction.version.version_number} do protocolo foi submetida para revisão e ainda não possui aprovação registrada.`,
                         eyebrow: "Ação da Patty",
-                        href: `/admin/clientes/${client.id}/treino`,
-                        label: "Publicar treino",
-                        title: "Treino aguardando publicação",
+                        href: `/admin/protocolos/${protocolAction.protocol.id}`,
+                        label: "Revisar protocolo",
+                        title: "Protocolo aguardando revisão",
                       }
-                    : trainingWorkspaceState.kind === "draft"
+                    : {
+                        description:
+                          `A versão ${protocolAction.version.version_number} do protocolo já possui aprovação, mas ainda não foi publicada para a cliente.`,
+                        eyebrow: "Ação da Patty",
+                        href: `/admin/protocolos/${protocolAction.protocol.id}`,
+                        label: "Publicar protocolo",
+                        title: "Protocolo aguardando publicação",
+                      }
+                  : !hasPublishedProtocol
+                    ? {
+                        description:
+                          protocols.length > 0
+                            ? "Existe protocolo em andamento, mas ainda não há uma publicação para a cliente."
+                            : "Crie e revise o primeiro protocolo antes de iniciar o acompanhamento semanal.",
+                        eyebrow: "Ação da Patty",
+                        href: `/admin/clientes/${client.id}/protocolos`,
+                        label: "Abrir protocolos",
+                        title: "Primeiro protocolo",
+                      }
+                    : trainingWorkspaceState.kind === "reviewed"
                       ? {
                           description:
-                            "Existe um rascunho de treino em edição. Continue a montagem e faça a revisão quando estiver pronto.",
+                            "O treino foi revisado e está congelado. Falta a publicação explícita para a cliente.",
                           eyebrow: "Ação da Patty",
                           href: `/admin/clientes/${client.id}/treino`,
-                          label: "Continuar treino",
-                          title: "Treino em rascunho",
+                          label: "Publicar treino",
+                          title: "Treino aguardando publicação",
                         }
-                      : trainingWorkspaceState.kind === "requested"
+                      : trainingWorkspaceState.kind === "draft"
                         ? {
                             description:
-                              "Existe solicitação de treino registrada e ainda não há prescrição criada.",
+                              "Existe um rascunho de treino em edição. Continue a montagem e faça a revisão quando estiver pronto.",
                             eyebrow: "Ação da Patty",
                             href: `/admin/clientes/${client.id}/treino`,
-                            label: "Criar treino",
-                            title: "Treino solicitado",
+                            label: "Continuar treino",
+                            title: "Treino em rascunho",
                           }
-                        : {
-                            description:
-                              "As etapas iniciais estão registradas. Continue o acompanhamento conforme os dados e a decisão profissional da Patty.",
-                            eyebrow: "Acompanhamento",
-                            href: `/admin/clientes/${client.id}/feedback-semanal`,
-                            label: "Abrir acompanhamento",
-                            title: "Acompanhamento contínuo",
-                          };
+                        : trainingWorkspaceState.kind === "requested"
+                          ? {
+                              description:
+                                "Existe solicitação de treino registrada e ainda não há prescrição criada.",
+                              eyebrow: "Ação da Patty",
+                              href: `/admin/clientes/${client.id}/treino`,
+                              label: "Criar treino",
+                              title: "Treino solicitado",
+                            }
+                          : weeklyFeedbackChannelNeedsSetup
+                            ? {
+                                description:
+                                  "O acompanhamento semanal já é elegível. Defina o canal individual do Feedback Semanal antes de depender dos lembretes automáticos.",
+                                eyebrow: "Ação da Patty",
+                                href: "#preferencia-feedback",
+                                label: "Configurar canal",
+                                title: "Canal do Feedback Semanal",
+                              }
+                            : weeklyFeedbackEmailNeedsContact
+                              ? {
+                                  description:
+                                    "Email foi escolhido para o Feedback Semanal, mas o Cadastro Atual ainda não possui email de contato. O email de login não é usado como substituto.",
+                                  eyebrow: "Ação da Patty",
+                                  href: "#cadastro-atual",
+                                  label: "Completar email de contato",
+                                  title: "Contato para Feedback Semanal",
+                                }
+                              : pendingPrivateFileReleaseCount > 0
+                                ? {
+                                    description:
+                                      `Há ${pendingPrivateFileReleaseCount} arquivo(s) administrativo(s) aguardando decisão explícita de liberação para a cliente.`,
+                                    eyebrow: "Ação da Patty",
+                                    href: `/admin/clientes/${client.id}/arquivos#aguardando-liberacao`,
+                                    label: "Revisar arquivos",
+                                    title: "Arquivos aguardando liberação",
+                                  }
+                                : {
+                                    description:
+                                      "As etapas iniciais estão registradas. Continue o acompanhamento conforme os dados e a decisão profissional da Patty.",
+                                    eyebrow: "Acompanhamento",
+                                    href: `/admin/clientes/${client.id}/feedback-semanal`,
+                                    label: "Abrir acompanhamento",
+                                    title: "Acompanhamento contínuo",
+                                  };
 
   return (
     <>
