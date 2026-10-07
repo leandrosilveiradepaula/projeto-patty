@@ -533,26 +533,19 @@ Resolvido em 2026-10-04:
 
 Nao automatizar Bulking ou Consolidacao alem das regras explicitamente confirmadas.
 
-### PARCIALMENTE RESOLVIDO — HIDRATACAO/CHECK-IN DE LIQUIDOS
+### RECONCILIADO EM 2026-10-07 — HIDRATACAO/CHECK-IN DE LIQUIDOS
 
-A Patty substituiu em 2026-10-04 a referencia anterior de 60 mL/kg pela regra vigente:
+As referencias de 2026-10-04 a 35 mL/kg e composicao 70/30 ficam preservadas somente como historico de decisao. A reconciliacao profissional mais recente prevalece: **nao existe regra automatica vigente de hidratacao**.
 
-- **minimo de 35 mL por kg de peso corporal por dia**;
-- exemplo matematico: 60 kg -> 2.100 mL/dia = 2,1 L/dia.
+Estado atual:
+- check-ins de liquidos permanecem registros factuais;
+- cliente e Patty podem corrigir registros com auditoria append-only;
+- nenhuma avaliacao gera meta automaticamente;
+- nenhuma tela deve mostrar progresso percentual contra meta automatica;
+- 35 mL/kg, 60 mL/kg e 70/30 nao autorizam calculo, recalculo ou lembrete automatico;
+- snapshots/configuracoes historicos permanecem preservados para auditoria/compatibilidade.
 
-A taxonomia operacional distingue agua pura de outros liquidos zero calorias. A Patty confirmou que a orientacao profissional e 70% da meta em agua pura e os 30% restantes podendo vir de outros liquidos zero calorias. Divergencia da cliente nao gera bloqueio automatico nem score de adesao.
-
-Continuam abertos:
-- horarios/cadencia dos lembretes.
-
-Resolvido em 2026-10-04:
-- a cliente pode corrigir os proprios check-ins, inclusive anteriores;
-- a Patty tambem pode corrigir check-ins da cliente quando identificar erro;
-- a implementacao deve preservar auditoria e nao apagar silenciosamente o valor original.
-
-O valor vigente de **35 mL/kg/dia** e a referencia profissional confirmada e passa a ser o template inicial dessa regra, substituindo 60 mL/kg para novas metas. O runtime atual ja possui implementacao deterministica com snapshot de meta, mas, conforme a decisao de parametrizacao de 2026-09-30, esse numero nao deve permanecer como constante profissional definitiva no codigo: deve migrar para configuracao versionada sem reescrever historico.
-
-As questoes de recalculo por mudanca de peso e composicao da meta foram resolvidas nesta rodada. Lembretes ainda permanecem abertos. A capacidade de correcao pela cliente e pela Patty esta confirmada; a materializacao tecnica deve preservar auditoria.
+Continua aberta somente uma eventual nova regra profissional de hidratacao e, se ela vier a ser confirmada/documentada, seus parametros e lembretes correspondentes.
 
 ### RESOLVIDO EM 2026-10-04 — SUPLEMENTACAO E MANIPULADOS
 
