@@ -1,3 +1,11 @@
+## Fechamento funcional do status de canais 2026-10-07
+
+A interface administrativa de preferencia do Feedback Semanal foi reconciliada com o runtime existente:
+- email nao e mais descrito como provedor inexistente; a esteira de entrega ja existe e sua disponibilidade real depende da configuracao SMTP do ambiente;
+- WhatsApp continua explicitamente sem provedor externo ativado;
+- notificacao in-app continua operacional;
+- nenhuma preferencia de cliente, regra de envio ou provider foi ativado por esta mudanca.
+
 ## Reconciliacao funcional pos-auditoria de UX 2026-10-07
 
 A primeira varredura funcional separou pendencias reais de documentacao historica:
