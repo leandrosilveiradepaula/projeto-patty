@@ -163,7 +163,7 @@ export default async function AdminClientesPage({
                       <div className={styles.itemActions}>
                         {nextPattyPending ? (
                           <Link
-                            aria-label={`Abrir ${nextPattyPending.title.toLocaleLowerCase("pt-BR")} de ${displayName || "cliente com cadastro incompleto"}`}
+                            aria-label={`Abrir ${nextPattyPending.title.toLocaleLowerCase("pt-BR")} de ${displayName || "registro legado sem nome"}`}
                             className={styles.actionLink}
                             href={nextPattyPending.href}
                           >
@@ -171,7 +171,7 @@ export default async function AdminClientesPage({
                           </Link>
                         ) : null}
                         <Link
-                          aria-label={`Abrir acompanhamento de ${displayName || "cliente com cadastro incompleto"}`}
+                          aria-label={`Abrir acompanhamento de ${displayName || "registro legado sem nome"}`}
                           className={
                             nextPattyPending
                               ? styles.secondaryActionLink
@@ -190,18 +190,24 @@ export default async function AdminClientesPage({
                           ? `${nextPattyPending.title} · ${clientPattyPendingItems.length} item(ns) na fila da Patty`
                           : "Sem item na fila da Patty"
                     }
-                    name={displayName || "Cadastro incompleto"}
+                    name={displayName || "Nome ausente — registro legado"}
                     secondary={
-                      client.profile_id
-                        ? "Acompanhamento ativo"
-                        : "Conta da cliente ainda não vinculada"
+                      !displayName
+                        ? "Corrija o nome antes de considerar este cadastro regular."
+                        : client.profile_id
+                          ? "Cliente ativa"
+                          : "Conta da cliente ainda não vinculada"
                     }
                     status={
-                      !client.profile_id ? (
+                      !displayName ? (
+                        <Badge variant="critical">Nome obrigatório</Badge>
+                      ) : !client.profile_id ? (
                         <Badge variant="warning">Completar cadastro</Badge>
                       ) : nextPattyPending ? (
                         <Badge variant="warning">Ação da Patty</Badge>
-                      ) : null
+                      ) : (
+                        <Badge variant="positive">Ativa</Badge>
+                      )
                     }
                     visual={<span>{getInitials(displayName)}</span>}
                   />
