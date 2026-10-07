@@ -12,6 +12,11 @@ Questoes de produto ainda abertas e que nao devem ser inferidas:
 
 Importante: cliente inativa nao equivale a conta Auth desativada. Nao apagar identidade, perfil ou historico ao encerrar acompanhamento.
 
+Boundary adicional:
+- o parser de convite do frontend apenas reconhece tokens do tipo `invite`; isso e suporte tecnico ao fluxo, nao politica de expiracao/reenvio;
+- reengajamento nao autoriza listar dados clinicos/sensiveis de clientes inativas fora das regras atuais de RLS;
+- eventual campanha futura precisa definir base legal/consentimento, canal, escopo minimo de dados e autorizacao de leitura antes de qualquer implementacao.
+
 ## Conteudos - semantica de progresso (aberto em 2026-10-07)
 
 A tabela `client_content_progress` ja existe com `first_opened_at` e `completed_at`, mas o produto ainda nao definiu quem deve registrar esses fatos.
@@ -174,13 +179,13 @@ O catalogo e as unidades das medidas da Avaliacao Completa foram confirmados pel
 
 Qual sera a politica geral de retencao, arquivamento e exportacao de dados fora das decisoes ja confirmadas para preservacao do historico de IA?
 
-### QUESTAO ABERTA
+### QUESTAO ABERTA TECNICA
 
-Quais serao os valores definitivos de `profiles.status`?
+`profiles.status` existe desde a fundacao de identidade, mas nao deve ser usado para representar acompanhamento. Os valores/semantica desse campo ainda nao estao definidos e nenhuma automacao deve depender dele.
 
 ### RESOLVIDO EM 2026-10-07
 
-`clients.status` usa `active` para cliente em acompanhamento e `inactive` para cliente sem acompanhamento atual, preservando historico.
+`clients.status` e a fonte do estado profissional de acompanhamento: `active` para cliente em acompanhamento e `inactive` para cliente sem acompanhamento atual, preservando historico. O banco sincroniza esse estado a partir dos assignments ativos.
 
 ### QUESTAO ABERTA
 
