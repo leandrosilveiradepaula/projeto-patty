@@ -71,7 +71,7 @@ Ja existem tambem boundaries server-side de escrita para notas internas de revis
 
 A rota raiz usa o contexto autenticado para encaminhar admin, cliente ou login.
 
-Esses fatos de implementacao nao significam que todos os fluxos de escrita estejam definidos. A UI e a submissao final da Anamnese continuam dependentes das definicoes finais do questionario; as migrations de rascunho, MFA administrativo em RLS e correcoes historicas estao aplicadas e validadas no SaaS. A UI administrativa de correcoes esta conectada ao backend real sem service role: exibe a resposta original e o historico separado, e somente acrescenta uma nova linha de correcao sob RLS/AAL2. Retencao/hard delete de arquivos, operacoes administrativas ainda abertas, automacoes e integracao real com provider de IA continuam sujeitos as decisoes e questoes abertas correspondentes.
+Esses fatos de implementacao nao significam que todos os fluxos de escrita estejam definidos. A UI, o rascunho e a submissao final da Anamnese v1 estao implementados sobre a definicao versionada publicada; aplicabilidade, consentimento ANAM-046, MFA administrativo em RLS e correcoes historicas estao aplicados e validados no SaaS. A UI administrativa de correcoes esta conectada ao backend real sem service role: exibe a resposta original e o historico separado, e somente acrescenta uma nova linha de correcao sob RLS/AAL2. Retencao/hard delete de arquivos, automacoes dependentes de canal e uso de dados reais no provider de IA continuam sujeitos aos gates correspondentes.
 
 ### DECISAO HISTORICA SUBSTITUIDA
 
