@@ -520,7 +520,9 @@ Resolvido em 2026-10-04: os Ups Metabolicos nao precisam repetir duracao nem qua
 
 A progressao continua sendo decisao profissional baseada em resultados. Nao automatizar mudanca de fase sem regra deterministica confirmada.
 
-### PARCIALMENTE RESOLVIDO — BULKING E CONSOLIDACAO METABOLICA
+### REGISTRO HISTORICO — BULKING E CONSOLIDACAO METABOLICA
+
+> Este bloco preserva respostas de 2026-10-04 para rastreabilidade. A reconciliacao vigente de 2026-10-07 nao autoriza usar Cutting 3, Bulking ou Consolidacao como sequencia automatica atual.
 
 A Patty confirmou que Bulking e usado quando o paciente deseja trabalhar ganho de massa muscular.
 
@@ -978,7 +980,9 @@ Continuam abertos apenas os pontos que dependem da leitura/reconciliacao da plan
 Nao inferir formula fora da planilha nem transformar exemplo individual em template global sem reconciliacao.
 
 
-### HISTORICO SUPERADO — ESTRUTURA DO CUTTING 3
+### REGISTRO HISTORICO — ESTRUTURA DO CUTTING 3
+
+> Preservado somente como historico. Nao usar para implementar etapa posterior ao Cutting 2 sem nova confirmacao documentada da Patty.
 
 A Patty confirmou que o Cutting 3 repete:
 
