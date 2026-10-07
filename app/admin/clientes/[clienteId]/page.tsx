@@ -23,7 +23,6 @@ import {
   listAccessibleAssessmentsForClient,
   listAccessibleClientActivityCheckinEvents,
   listAccessibleClientFiles,
-  listAccessibleClientHydrationTargets,
   listAccessibleClientTrainingPlanVersions,
   listAccessibleClientTrainingRequests,
   listAccessibleProtocolsForClient,
@@ -56,12 +55,6 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
-function formatMl(value: number) {
-  return value >= 1000
-    ? new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 2 }).format(value / 1000) + " L"
-    : new Intl.NumberFormat("pt-BR").format(value) + " mL";
-}
-
 export default async function AdminClienteDetailPage({
   params,
   searchParams,
@@ -82,7 +75,6 @@ export default async function AdminClienteDetailPage({
     protocols,
     files,
     contentReleases,
-    hydrationTargets,
     activityEvents,
     weeklyFeedbacks,
     weeklyFeedbackNotificationPreference,
@@ -96,7 +88,6 @@ export default async function AdminClienteDetailPage({
     listAccessibleProtocolsForClient(client.id),
     listAccessibleClientFiles(client.id),
     listContentReleasesForAccessibleClient(client.id),
-    listAccessibleClientHydrationTargets(client.id),
     listAccessibleClientActivityCheckinEvents(client.id),
     listAccessibleWeeklyFeedbacksForClient(client.id),
     getAccessibleWeeklyFeedbackNotificationPreference(client.id),
@@ -269,11 +260,7 @@ export default async function AdminClienteDetailPage({
 
     return !publishedProtocolVersionIds.has(version.id);
   });
-  const currentHydrationTarget = hydrationTargets[0] ?? null;
   const latestActivity = activityEvents[0] ?? null;
-  const currentTargetMl = currentHydrationTarget
-    ? currentHydrationTarget.resolved_target_ml ?? currentHydrationTarget.target_ml
-    : null;
   const hasFinalizedAssessment = assessments.some((assessment) =>
     Boolean(assessment.finalized_at),
   );
@@ -777,9 +764,7 @@ export default async function AdminClienteDetailPage({
             <Card className={styles.infoCard}>
               <div className={styles.cardHeader}>
                 <h3 className={styles.cardTitle}>Check-ins</h3>
-                <Badge variant="neutral">
-                  {currentTargetMl !== null ? formatMl(currentTargetMl) : "Sem meta"}
-                </Badge>
+                <Badge variant="neutral">Registros factuais</Badge>
               </div>
               <p className={styles.cardDescription}>
                 {latestActivity
