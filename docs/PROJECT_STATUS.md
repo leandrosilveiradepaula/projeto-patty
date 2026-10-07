@@ -2723,3 +2723,8 @@ A migracao fisica de cada arquivo somente pode ser considerada concluida quando:
 4. direitos/licenciamento permitirem a distribuicao quando o material nao for proprio.
 
 Nenhum arquivo deve ser marcado como migrado apenas porque existe manifesto, path planejado ou registro de interface.
+
+
+## Reconciliacao funcional de identidade administrativa 2026-10-07
+
+A varredura posterior ao PR #501 encontrou superficies administrativas transversais que ainda exibiam o nome profissional diretamente de `profiles.display_name`. Listas de protocolos, avaliacoes e arquivos, alem dos workspaces de evolucao e liberacao de conteudos, passam a preferir `clients.full_name`, mantendo `profiles.display_name` apenas como fallback historico/compatibilidade. Nenhum schema, migration ou RLS foi alterado.

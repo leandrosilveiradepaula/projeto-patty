@@ -68,7 +68,7 @@ export default async function AdminClientContentPage({
       publishedAt: version.published_at,
     }),
   );
-  const displayName = client.profiles?.display_name?.trim();
+  const displayName = client.full_name?.trim() || client.profiles?.display_name?.trim();
 
   return (
     <>

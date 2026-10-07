@@ -23,11 +23,11 @@ export default async function AdminProtocolosPage() {
             {protocols.map((protocol) => (
               <li className={styles.protocolItem} key={protocol.id}>
                 <div>
-                  <p className={styles.clientLabel}>{protocol.clients?.profiles?.display_name ?? "Cliente sem nome de exibição"}</p>
+                  <p className={styles.clientLabel}>{protocol.clients?.full_name?.trim() || protocol.clients?.profiles?.display_name?.trim() || "Cliente sem nome cadastrado"}</p>
                   <dl className={styles.details}><div><dt>Tipo</dt><dd>{protocol.protocol_type}</dd></div></dl>
                 </div>
                 <Link
-                  aria-label={`Ver protocolo de ${protocol.clients?.profiles?.display_name?.trim() || "cliente sem nome de exibição"}`}
+                  aria-label={`Ver protocolo de ${protocol.clients?.full_name?.trim() || protocol.clients?.profiles?.display_name?.trim() || "cliente sem nome cadastrado"}`}
                   className={styles.actionLink}
                   href={`/admin/protocolos/${protocol.id}`}
                 >

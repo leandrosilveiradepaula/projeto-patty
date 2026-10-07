@@ -30,3 +30,35 @@ test("readiness separates deterministic helpers from automatic professional prot
   assert.match(readiness, /nao autoriza gerar automaticamente um protocolo completo/);
   assert.match(readiness, /revisao e publicacao humanas obrigatorias/);
 });
+
+
+test("remaining administrative client surfaces prefer the canonical client name", () => {
+  const protocolList = read("app/admin/protocolos/page.tsx");
+  const assessmentList = read("app/admin/avaliacoes/page.tsx");
+  const privateFilesList = read("app/admin/arquivos/page.tsx");
+  const evolution = read("app/admin/clientes/[clienteId]/evolucao/page.tsx");
+  const contentReleases = read("app/admin/clientes/[clienteId]/conteudos/page.tsx");
+
+  for (const source of [
+    protocolList,
+    assessmentList,
+    privateFilesList,
+    evolution,
+    contentReleases,
+  ]) {
+    assert.match(source, /full_name/);
+  }
+
+  assert.match(
+    privateFilesList,
+    /client\.full_name\?\.trim\(\) \|\| client\.profiles\?\.display_name\?\.trim\(\)/,
+  );
+  assert.match(
+    evolution,
+    /client\.full_name\?\.trim\(\) \|\| client\.profiles\?\.display_name\?\.trim\(\)/,
+  );
+  assert.match(
+    contentReleases,
+    /client\.full_name\?\.trim\(\) \|\| client\.profiles\?\.display_name\?\.trim\(\)/,
+  );
+});
