@@ -1,3 +1,14 @@
+## Atualizacao de auditoria de interface 2026-10-07 - proxima acao e check-ins factuais
+
+A home da cliente deixa de tratar ausencia de registro de liquidos como pendencia diaria obrigatoria.
+
+- a proxima acao `Fazer check-in do dia` passa a depender somente do registro diario de atividade fisica, que possui regra operacional confirmada;
+- o registro de liquidos continua disponivel em `Check-ins` como registro factual;
+- ausencia de registro de liquidos nao impede mais a cliente de ficar `Em dia`;
+- removida da home a consulta de ingestao de liquidos usada apenas para inferir essa pendencia;
+- a copy explicita que liquidos permanecem disponiveis sem meta automatica.
+
+Nenhuma regra profissional nova, schema, migration ou RLS foi alterado.
 ## Atualizacao de auditoria de interface 2026-10-07 - telas secundarias da cliente
 
 As telas secundarias foram simplificadas para evitar repetir a navegacao principal.
