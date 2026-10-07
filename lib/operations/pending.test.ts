@@ -837,3 +837,31 @@ test("hidden administrative private files become explicit Patty release decision
   assert.equal(getOperationalPendingGroup(items[0]!), "patty");
   assert.match(items[0]?.description ?? "", /decida explicitamente/);
 });
+
+
+test("open assessment drafts become explicit Patty continuation actions", () => {
+  const items = buildOperationalPendingItems({
+    clarificationReminderIntervalHours: 24,
+    anamnesisSubmissions: [],
+    clarificationRequests: [],
+    assessments: [],
+    protocolVersions: [],
+    aiExecutions: [],
+    assessmentDrafts: [
+      {
+        assessedAt: "2026-10-07",
+        assessmentId: "assessment-draft",
+        clientId: "client-assessment",
+        clientLabel: "Cliente Avaliação",
+        createdAt: "2026-10-07T12:30:00Z",
+      },
+    ],
+  });
+
+  assert.equal(items.length, 1);
+  assert.equal(items[0]?.kind, "assessment_draft_open");
+  assert.equal(items[0]?.statusLabel, "Rascunho");
+  assert.equal(items[0]?.href, "/admin/avaliacoes/assessment-draft");
+  assert.equal(getOperationalPendingGroup(items[0]!), "patty");
+  assert.match(items[0]?.description ?? "", /finalize explicitamente/);
+});
