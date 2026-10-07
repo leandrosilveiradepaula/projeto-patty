@@ -102,7 +102,7 @@ A Patty ja possui o email da cliente e inicia o onboarding enviando um link para
 
 ### DECISAO DE INFRAESTRUTURA
 
-O MVP usara o Gmail pessoal da Patty via Custom SMTP do Supabase Auth. A escolha de infraestrutura do email real de convite esta resolvida.
+O sistema atual usara o Gmail pessoal da Patty via Custom SMTP do Supabase Auth. A escolha de infraestrutura do email real de convite esta resolvida.
 
 ### PENDENCIA OPERACIONAL — NAO BLOQUEIA O ONBOARDING ASSISTIDO
 
@@ -154,7 +154,7 @@ Qual sera o tratamento de conta Auth excluida quando for necessario manter histo
 
 ## Autorizacao
 
-### QUESTAO ABERTA POS-MVP
+### QUESTAO ABERTA FUTURA
 
 Se futuramente forem introduzidos assistentes, profissionais parceiros ou suporte operacional, quais papeis e permissoes client-scoped serao necessarios?
 
