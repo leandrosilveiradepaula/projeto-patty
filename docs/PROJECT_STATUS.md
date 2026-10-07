@@ -1,3 +1,20 @@
+## Atualizacao de cadastro 2026-10-07 - nome obrigatorio e cliente ativa/inativa
+
+A Patty confirmou que todo cadastro profissional deve possuir nome e que cliente deve ter estado `active` ou `inactive`.
+
+Implementado nesta branch:
+- onboarding valida nome obrigatorio em ponto centralizado e em defesa em profundidade antes do provisionamento;
+- novas clientes sao criadas com `clients.status = active`;
+- iniciar/reiniciar assignment marca a cliente como `active`;
+- encerrar o ultimo assignment ativo marca a cliente como `inactive`;
+- registros legados sem nome deixam de ser apresentados como "cadastro incompleto" normal e passam a ser sinalizados como inconsistencia;
+- a lista ativa mostra explicitamente o estado `Ativa`.
+
+Pendente de hardening:
+- existe registro legado sem nome no ambiente atual;
+- a constraint definitiva de nome no banco deve ser aplicada somente depois de corrigir esse registro com dado verdadeiro;
+- a visualizacao e o reengajamento de clientes inativas exigem desenho separado de RLS/autorizacao, sem liberar dados sensiveis de ex-clientes fora de regra documentada.
+
 ## Atualizacao de auditoria de interface 2026-10-07 - proxima acao na lista de clientes
 
 A lista de clientes passa a reduzir um clique no trabalho diario da Patty.
