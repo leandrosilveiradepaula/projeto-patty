@@ -2824,3 +2824,14 @@ A auditoria encontrou mais estados intermediarios antigos redigidos como se foss
 - decisao antiga de assignment/onboarding que ainda descrevia a Server Action como futura, embora o onboarding real ja provisione identidade e vinculos.
 
 Os registros historicos foram preservados, mas o texto agora aponta explicitamente para o estado posterior que prevalece.
+
+
+## Reconciliacao de status 2026-10-07 - Feedback Semanal e estados de branch
+
+A auditoria encontrou estados de 2026-09/10 ainda redigidos no presente:
+- Feedback Semanal aparecia com automacao externa totalmente inativa e agenda/elegibilidade ainda abertas, embora esses blocos tenham sido implementados posteriormente;
+- telas reais ainda eram descritas como apenas presentes em branch;
+- painel de pendencias e engine deterministico v1 mantinham headings de estado intermediario;
+- uma decisao antiga ainda tratava deployment Vercel como blocker atual da validacao do DELETE de rascunho.
+
+Os registros foram preservados como historicos e reconciliados com o estado posterior. WhatsApp/opt-in/fallback e SMTP operacional continuam pendencias reais; nenhuma regra profissional foi inferida.
