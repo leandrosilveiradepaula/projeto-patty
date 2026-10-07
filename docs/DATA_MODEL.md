@@ -6,7 +6,7 @@ Todo `Client` deve possuir nome profissional obrigatorio.
 
 A aplicacao atualmente utiliza `profiles.display_name` para exibicao, mas isso nao e suficiente como fonte profissional definitiva porque `clients.profile_id` pode ser `NULL` e o historico da cliente deve sobreviver a alteracoes/exclusao da identidade Auth.
 
-A evolucao do modelo deve introduzir um nome canonicamente pertencente a `clients` (por exemplo, `full_name`), obrigatorio para novos cadastros. Durante a transicao, o onboarding continua validando nome antes de provisionar qualquer cliente.
+A migration `20261007133000_enforce_client_name_and_status.sql` introduz `clients.full_name` como nome profissional canonico, obrigatorio e preservado independentemente da identidade Auth/Profile. O onboarding continua validando nome antes de provisionar qualquer cliente, e o banco passa a reforcar a invariavel.
 
 ### STATUS DE CLIENTE
 
@@ -17,11 +17,11 @@ A evolucao do modelo deve introduzir um nome canonicamente pertencente a `client
 
 `clients.status` nao substitui `client_assignments`. Assignment continua sendo mecanismo de autorizacao/client-scope; status continua sendo estado de negocio da cliente.
 
-### PENDENCIA DE HARDENING
+### HARDENING PREPARADO
 
 A fixture de teste sem nome foi removida do ambiente em 2026-10-07 depois de confirmar ausencia de dados profissionais associados.
 
-Nao existem mais clientes sem nome no ambiente atual. A constraint definitiva de nome deve ser adicionada em migration futura sem alterar migrations ja aplicadas.
+Nao existem mais clientes sem nome no ambiente atual. A migration `20261007133000_enforce_client_name_and_status.sql` prepara a constraint definitiva de nome e status sem alterar migrations ja aplicadas. A aplicacao remota permanece pendente do workflow manual de migrations.
 
 ## Treino individual versionado
 
