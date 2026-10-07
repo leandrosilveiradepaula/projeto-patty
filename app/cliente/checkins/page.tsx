@@ -10,7 +10,6 @@ import { loadSupportedLiquidTaxonomy } from "@/lib/method/liquid-taxonomy-loader
 import {
   getCurrentClient,
   listAccessibleClientActivityCheckinEvents,
-  listAccessibleClientHydrationTargets,
   listAccessibleClientLiquidIntakeEvents,
 } from "@/lib/supabase/data-access";
 
@@ -59,9 +58,8 @@ export default async function ClientCheckinsPage({
   const today = saoPauloDate(new Date());
   const recentFrom = new Date(Date.now() - 36 * 60 * 60 * 1000).toISOString();
 
-  const [targets, recentLiquidEvents, activityEvents, liquidTaxonomy] =
+  const [recentLiquidEvents, activityEvents, liquidTaxonomy] =
     await Promise.all([
-      listAccessibleClientHydrationTargets(client.id),
       listAccessibleClientLiquidIntakeEvents(client.id, recentFrom),
       listAccessibleClientActivityCheckinEvents(client.id, today),
       loadSupportedLiquidTaxonomy(),
@@ -73,10 +71,6 @@ export default async function ClientCheckinsPage({
       .map((kind) => kind.key),
   );
 
-  const target = targets[0] ?? null;
-  const targetMl = target
-    ? target.resolved_target_ml ?? target.target_ml
-    : null;
   const todayLiquidEvents = recentLiquidEvents.filter(
     (event) => saoPauloDate(event.recorded_at) === today,
   );
@@ -88,10 +82,6 @@ export default async function ClientCheckinsPage({
     .filter((event) => pureWaterKindKeys.has(event.liquid_kind))
     .reduce((sum, event) => sum + event.amount_ml, 0);
   const latestActivity = activityEvents[0] ?? null;
-  const progress =
-    targetMl !== null && targetMl > 0
-      ? Math.min(100, Math.round((totalMl / targetMl) * 100))
-      : null;
 
   return (
     <>
@@ -131,16 +121,14 @@ export default async function ClientCheckinsPage({
       ) : null}
 
       <Section
-        description="Sua meta usa o peso mais recente registrado em uma avaliação finalizada. Quando houver novo peso, uma nova meta passa a valer dali em diante sem alterar o histórico anterior."
+        description="Registre os líquidos que você consumir ao longo do dia. O aplicativo não define automaticamente uma meta diária de hidratação."
         title="Líquidos"
       >
         <div className={styles.grid}>
           <Card className={styles.summaryCard}>
             <div className={styles.summaryHeader}>
               <h3 className={styles.cardTitle}>Hoje</h3>
-              <Badge variant="neutral">
-                {progress === null ? "Meta ainda não definida" : String(progress) + "%"}
-              </Badge>
+              <Badge variant="neutral">Registro do dia</Badge>
             </div>
             <dl className={styles.metrics}>
               <div>
@@ -151,23 +139,11 @@ export default async function ClientCheckinsPage({
                 <dt>Água pura</dt>
                 <dd>{formatMl(waterMl)}</dd>
               </div>
-              <div>
-                <dt>Meta atual</dt>
-                <dd>{targetMl !== null ? formatMl(targetMl) : "Não definida"}</dd>
-              </div>
+
             </dl>
-            {target ? (
-              <p className={styles.note}>
-                Meta registrada com base em{" "}
-                {Number(target.weight_kg).toLocaleString("pt-BR")} kg.
-                Os registros são classificados conforme a taxonomia ativa.
-                O sistema não aplica uma proporção mínima automática entre os tipos.
-              </p>
-            ) : (
-              <p className={styles.note}>
-                A Patty ainda não registrou uma meta de líquidos para você.
-              </p>
-            )}
+            <p className={styles.note}>
+              Os registros são classificados conforme a taxonomia ativa. O sistema não aplica automaticamente uma meta diária nem uma proporção mínima entre os tipos de líquido.
+            </p>
           </Card>
 
           <Card className={styles.formCard}>
