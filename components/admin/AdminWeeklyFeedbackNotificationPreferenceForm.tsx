@@ -57,11 +57,15 @@ function channelStatus(
     };
   }
 
+  if (channel === "email") {
+    return {
+      text: "Email selecionado. O sistema possui a esteira de entrega; a disponibilidade real depende da configuração SMTP do ambiente.",
+      variant: "info" as const,
+    };
+  }
+
   return {
-    text:
-      channel === "email"
-        ? "Email selecionado. O provedor de envio externo ainda não está ativado."
-        : "WhatsApp selecionado. O provedor de envio externo ainda não está ativado.",
+    text: "WhatsApp selecionado. O provedor externo ainda não está ativado.",
     variant: "info" as const,
   };
 }
