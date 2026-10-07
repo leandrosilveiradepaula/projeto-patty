@@ -2742,3 +2742,16 @@ Estado vigente:
 - regras profissionais de progressao de treino continuam abertas e nao devem ser inferidas.
 
 Esta reconciliacao corrige documentacao historica; nao cria regra profissional nova, schema, migration ou RLS.
+
+
+## Reconciliacao de OPEN_QUESTIONS 2026-10-07
+
+A auditoria documental fechou pendencias que continuavam descritas como abertas apesar de o runtime ja possuir implementacao correspondente:
+- lifecycle versionado de autoria/publicacao da biblioteca educacional;
+- exposicao autenticada de exercicios publicados e prescricao individual versionada;
+- agenda, elegibilidade, periodo e geracao recorrente do Feedback Semanal;
+- correcao auditavel de check-ins por cliente e Patty.
+
+Tambem foi marcado explicitamente como historico superado o trecho que ainda chamava 35 mL/kg de formula vigente. Hidratacao automatica continua aberta e desabilitada.
+
+As pendencias remanescentes foram estreitadas ao que realmente falta: governanca/taxonomia editorial, regras profissionais adicionais de treino, WhatsApp/opt-in, detalhes opcionais do Feedback Semanal e eventual nova regra profissional de hidratacao.
