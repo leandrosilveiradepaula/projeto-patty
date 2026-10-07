@@ -1,3 +1,24 @@
+## Atualizacao 2026-10-07 - fundacao auditavel de correcao de check-ins
+
+Foi preparada a migration `20261007173100_create_client_checkin_corrections.sql`.
+
+Ela cria tabelas append-only separadas para correcao de:
+- eventos de ingestao de liquidos;
+- eventos de atividade fisica.
+
+A correcao preserva o evento original e registra valor corrigido, autoria e timestamp. Nao existe UPDATE/DELETE do historico original.
+
+Seguranca:
+- RLS habilitada;
+- `anon` sem acesso;
+- `authenticated` com somente SELECT/INSERT;
+- cliente restrita aos proprios eventos;
+- Patty/admin restrita a assignment ativo e AAL2.
+
+A migration foi validada no Supabase SaaS dentro de transacao com `ROLLBACK`: 3 policies em cada tabela, SELECT/INSERT permitidos a `authenticated`, UPDATE negado.
+
+IMPORTANTE: a migration esta somente preparada no repositorio. Ainda nao foi aplicada ao Supabase SaaS. A UI de correcao nao deve depender destas tabelas antes do apply remoto.
+
 ## Atualizacao de auditoria de interface 2026-10-07 - avaliacoes em andamento separadas do historico
 
 A tela administrativa de Avaliacoes passa a separar trabalho atual de historico concluido.
