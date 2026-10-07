@@ -10,7 +10,6 @@ import {
   getCurrentUserProfile,
   listAccessibleAnamnesisSubmissions,
   listAccessibleClientActivityCheckinEvents,
-  listAccessibleClientLiquidIntakeEvents,
   listAccessibleClientNotificationEvents,
   listAccessibleWeeklyFeedbacksForClient,
   listAccessibleClientTrainingPlanVersions,
@@ -45,15 +44,12 @@ export default async function ClientePage() {
   }
 
   const today = saoPauloDate(new Date());
-  const recentFrom = new Date(Date.now() - 36 * 60 * 60 * 1000).toISOString();
-
   const [
     anamneses,
     protocols,
     weeklyFeedbacks,
     weeklyFeedbackNotificationEvents,
     activityEvents,
-    recentLiquidEvents,
     trainingPlan,
   ] = await Promise.all([
     listAccessibleAnamnesisSubmissions(client.id),
@@ -61,7 +57,6 @@ export default async function ClientePage() {
     listAccessibleWeeklyFeedbacksForClient(client.id),
     listAccessibleClientNotificationEvents(client.id),
     listAccessibleClientActivityCheckinEvents(client.id, today),
-    listAccessibleClientLiquidIntakeEvents(client.id, recentFrom),
     getAccessibleClientTrainingPlan(client.id),
   ]);
 
@@ -89,17 +84,9 @@ export default async function ClientePage() {
       pendingWeeklyFeedbackIds.has(event.weekly_feedback_id),
   );
   const hasActivityCheckinToday = activityEvents.length > 0;
-  const hasLiquidCheckinToday = recentLiquidEvents.some(
-    (event) => saoPauloDate(event.recorded_at) === today,
-  );
-  const hasPendingDailyCheckin =
-    !hasActivityCheckinToday || !hasLiquidCheckinToday;
+  const hasPendingDailyCheckin = !hasActivityCheckinToday;
   const dailyCheckinDescription =
-    !hasActivityCheckinToday && !hasLiquidCheckinToday
-      ? "Registre seus líquidos e informe sua atividade física de hoje."
-      : !hasActivityCheckinToday
-        ? "Seus líquidos já começaram a ser registrados. Falta informar sua atividade física de hoje."
-        : "Sua atividade física já foi informada. Registre seus líquidos de hoje quando quiser atualizar o acompanhamento.";
+    "Informe se realizou atividade física hoje. O registro de líquidos continua disponível em Check-ins, sem meta automática.";
   const primaryAction = currentAnamnesisDraft
     ? {
         badge: "Rascunho",
