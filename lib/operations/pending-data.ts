@@ -8,6 +8,10 @@ import {
   listAccessibleAnamnesisSubmissions,
   listAccessibleClientAssessments,
   listAccessibleClientNotificationEvents,
+  listAccessibleClientRegistrationsForClients,
+  listAccessibleWeeklyFeedbackNotificationPreferencesForClients,
+  listContentReleasesForAccessibleClients,
+  listEducationalContentAssetsForCurrentAdminVersions,
   listAccessibleClientTrainingPlansForClients,
   listAccessibleClientTrainingPlanVersionsForPlans,
   listAccessibleClientTrainingRequestsForClients,
@@ -66,6 +70,9 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
     weeklyFeedbackNotificationEvents,
     trainingRequests,
     trainingPlans,
+    registrations,
+    weeklyFeedbackPreferences,
+    contentReleases,
   ] = await Promise.all([
     Promise.all(
       assignedClients.map((client) =>
@@ -84,10 +91,36 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
     ).then((items) => items.flat()),
     listAccessibleClientTrainingRequestsForClients(clientIds),
     listAccessibleClientTrainingPlansForClients(clientIds),
+    listAccessibleClientRegistrationsForClients(clientIds),
+    listAccessibleWeeklyFeedbackNotificationPreferencesForClients(clientIds),
+    listContentReleasesForAccessibleClients(clientIds),
   ]);
 
-  const trainingVersions = await listAccessibleClientTrainingPlanVersionsForPlans(
-    trainingPlans.map((plan) => plan.id),
+  const [trainingVersions, releasedContentAssets] = await Promise.all([
+    listAccessibleClientTrainingPlanVersionsForPlans(
+      trainingPlans.map((plan) => plan.id),
+    ),
+    listEducationalContentAssetsForCurrentAdminVersions(
+      contentReleases.flatMap((release) =>
+        release.educational_content_versions?.id
+          ? [release.educational_content_versions.id]
+          : [],
+      ),
+    ),
+  ]);
+  const registrationsByClientId = new Map(
+    registrations.map((registration) => [registration.client_id, registration]),
+  );
+  const weeklyFeedbackPreferenceByClientId = new Map(
+    weeklyFeedbackPreferences.map((preference) => [
+      preference.client_id,
+      preference,
+    ]),
+  );
+  const releasedVersionIdsWithAssets = new Set(
+    releasedContentAssets.map(
+      (asset) => asset.educational_content_version_id,
+    ),
   );
   const trainingPlanByClientId = new Map(
     trainingPlans.map((plan) => [plan.client_id, plan]),
@@ -241,6 +274,40 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
       reviewCount: reviewsBySubmission.get(submission.id) ?? 0,
       submittedAt: submission.submitted_at,
     })),
+    clientOperationalReadiness: assignedClients.map((client) => {
+      const registration = registrationsByClientId.get(client.id);
+      const preference = weeklyFeedbackPreferenceByClientId.get(client.id);
+
+      return {
+        clientId: client.id,
+        clientLabel: clientLabel(
+          client.full_name || client.profiles?.display_name,
+        ),
+        contactEmail: registration?.contact_email ?? null,
+        createdAt: client.started_at ?? client.created_at,
+        hasRegistration: Boolean(registration),
+        weeklyFeedbackChannel: preference?.channel_key ?? null,
+      };
+    }),
+    contentReleaseReadiness: contentReleases.flatMap((release) => {
+      const version = release.educational_content_versions;
+
+      if (!version) {
+        return [];
+      }
+
+      return [{
+        clientId: release.client_id,
+        clientLabel:
+          labelsByClientId.get(release.client_id) ??
+          "Cliente sem nome informado",
+        createdAt: release.released_at,
+        hasAsset: releasedVersionIdsWithAssets.has(version.id),
+        releaseId: release.id,
+        title: version.title,
+        versionId: version.id,
+      }];
+    }),
     clarificationRequests: clarificationRequests.map((request) => ({
       clientId: request.clientId,
       clientLabel:
