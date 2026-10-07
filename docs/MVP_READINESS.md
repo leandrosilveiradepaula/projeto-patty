@@ -250,7 +250,7 @@ O Supabase SaaS estava com 0 registros nas quatro tabelas-base de biblioteca no 
 - `exercises`;
 - `exercise_versions`.
 
-O Drive possui manifesto inicial com 89 arquivos claramente nao client-scoped. Nenhum deles foi importado.
+O Drive possui manifesto inicial com 89 arquivos claramente nao client-scoped. A migracao em massa ainda nao ocorreu; o primeiro video aprovado ja possui store privado e draft preparados, mas o binario continua pendente de upload/verificacao antes de asset/publicacao/release.
 
 Uma triagem somente por metadados cobre todos os itens em `drive_content_triage.json`. Ela identificou 16 grupos de possiveis duplicidades por nome normalizado entre as pastas historicas de exercicios e 9 videos com nomes genericos que exigem inspecao do conteudo antes de receber titulo final. As categorias registradas sao hipoteses, os rotulos historicos "masculino/feminino" nao sao regra de produto e todos os itens continuam com direitos nao revisados e migracao/publicacao nao autorizadas.
 
