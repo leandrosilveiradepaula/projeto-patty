@@ -2810,3 +2810,15 @@ A auditoria encontrou tres contradicoes historicas adicionais:
 - o bloco historico de hidratacao v2 ainda dizia que novas metas usariam 35 mL/kg, contradizendo a suspensao vigente da automacao de hidratacao.
 
 Os blocos foram reconciliados preservando o historico tecnico sem permitir que estado antigo seja interpretado como regra/runtime atual.
+
+
+## Reconciliacao de estados historicos 2026-10-07 - runtime e migrations
+
+A auditoria encontrou mais estados intermediarios antigos redigidos como se fossem atuais. Foram reconciliados:
+- hardening de IA que ainda aparecia como trabalho de branch, embora esteja mergeado/aplicado;
+- falha antiga do runner GitHub Actions, resolvida desde 2026-10-01;
+- migration do limite de proteina mais gordurosa, que um bloco antigo ainda dizia nao aplicada apesar do apply posterior confirmado;
+- editor versionado de parametros, que ainda aparecia aguardando CI/merge/publicacao embora ja esteja no master;
+- decisao antiga de assignment/onboarding que ainda descrevia a Server Action como futura, embora o onboarding real ja provisione identidade e vinculos.
+
+Os registros historicos foram preservados, mas o texto agora aponta explicitamente para o estado posterior que prevalece.
