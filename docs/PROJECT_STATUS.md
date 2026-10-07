@@ -1,3 +1,13 @@
+## Atualizacao de auditoria de interface 2026-10-07 - anamnese pendente separada do historico
+
+A area administrativa de Anamnese passa a distinguir trabalho ainda aguardando a cliente de envios concluidos.
+
+- anamneses nao enviadas aparecem em `Aguardando cliente`;
+- apenas anamneses enviadas aparecem em `Historico enviado`;
+- respostas originais continuam acessiveis nos envios concluidos;
+- rascunhos da cliente nao sao apresentados como historico concluido;
+- nenhuma pergunta, obrigatoriedade, versionamento, schema ou RLS foi alterado.
+
 ## Atualizacao de auditoria de interface 2026-10-07 - versao atual e historico de protocolos
 
 O workspace administrativo de Protocolos passa a priorizar a versao mais recente sem remover o historico auditavel.
