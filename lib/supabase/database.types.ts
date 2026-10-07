@@ -1901,6 +1901,157 @@ export type Database = {
           },
         ]
       }
+      client_training_plan_items: {
+        Row: {
+          created_at: string
+          execution_notes: string | null
+          exercise_name: string
+          exercise_version_id: string | null
+          id: string
+          position: number
+          repetitions_text: string
+          rest_text: string | null
+          sets_text: string
+          training_plan_version_id: string
+        }
+        Insert: {
+          created_at?: string
+          execution_notes?: string | null
+          exercise_name: string
+          exercise_version_id?: string | null
+          id?: string
+          position: number
+          repetitions_text: string
+          rest_text?: string | null
+          sets_text: string
+          training_plan_version_id: string
+        }
+        Update: {
+          created_at?: string
+          execution_notes?: string | null
+          exercise_name?: string
+          exercise_version_id?: string | null
+          id?: string
+          position?: number
+          repetitions_text?: string
+          rest_text?: string | null
+          sets_text?: string
+          training_plan_version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_training_plan_items_exercise_version_id_fkey"
+            columns: ["exercise_version_id"]
+            isOneToOne: false
+            referencedRelation: "exercise_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_training_plan_items_training_plan_version_id_fkey"
+            columns: ["training_plan_version_id"]
+            isOneToOne: false
+            referencedRelation: "client_training_plan_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_training_plan_versions: {
+        Row: {
+          created_at: string
+          created_by_profile_id: string
+          id: string
+          notes: string | null
+          published_at: string | null
+          published_by_profile_id: string | null
+          reviewed_at: string | null
+          reviewed_by_profile_id: string | null
+          title: string
+          training_plan_id: string
+          version_number: number
+        }
+        Insert: {
+          created_at?: string
+          created_by_profile_id: string
+          id?: string
+          notes?: string | null
+          published_at?: string | null
+          published_by_profile_id?: string | null
+          reviewed_at?: string | null
+          reviewed_by_profile_id?: string | null
+          title: string
+          training_plan_id: string
+          version_number: number
+        }
+        Update: {
+          created_at?: string
+          created_by_profile_id?: string
+          id?: string
+          notes?: string | null
+          published_at?: string | null
+          published_by_profile_id?: string | null
+          reviewed_at?: string | null
+          reviewed_by_profile_id?: string | null
+          title?: string
+          training_plan_id?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_training_plan_versions_created_by_profile_id_fkey"
+            columns: ["created_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_training_plan_versions_published_by_profile_id_fkey"
+            columns: ["published_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_training_plan_versions_reviewed_by_profile_id_fkey"
+            columns: ["reviewed_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_training_plan_versions_training_plan_id_fkey"
+            columns: ["training_plan_id"]
+            isOneToOne: false
+            referencedRelation: "client_training_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_training_plans: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_training_plans_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: true
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_training_requests: {
         Row: {
           client_id: string
@@ -3137,7 +3288,7 @@ export type Database = {
           p_actor_profile_id: string
           p_channel_key: string
           p_client_id: string
-          p_expected_active_version_id: string | null
+          p_expected_active_version_id: string
           p_purpose_key: string
         }
         Returns: string
@@ -3180,6 +3331,10 @@ export type Database = {
         }
         Returns: string
       }
+      create_client_training_plan_draft: {
+        Args: { p_client_id: string; p_notes?: string; p_title: string }
+        Returns: string
+      }
       create_hydration_target_from_method_snapshot: {
         Args: {
           p_client_id: string
@@ -3211,11 +3366,11 @@ export type Database = {
         Args: {
           p_execution_id: string
           p_failure_code: string
-          p_failure_message: string | null
+          p_failure_message: string
           p_failure_stage: string
-          p_response_content: string | null
-          p_response_content_format: string | null
-          p_response_received_at: string | null
+          p_response_content: string
+          p_response_content_format: string
+          p_response_received_at: string
         }
         Returns: undefined
       }
@@ -3241,6 +3396,10 @@ export type Database = {
         }
         Returns: string
       }
+      generate_scheduled_weekly_feedback_requests: {
+        Args: { p_now?: string }
+        Returns: number
+      }
       generate_weekly_feedback_reminder_events: {
         Args: { p_now?: string }
         Returns: number
@@ -3248,9 +3407,9 @@ export type Database = {
       list_current_client_finalized_assessment_measurements: {
         Args: never
         Returns: {
-          assessment_id: string
           assessed_at: string
-          assessment_kind: string | null
+          assessment_id: string
+          assessment_kind: string
           measurement_key: string
           measurement_value: number
           unit: string
@@ -3264,6 +3423,10 @@ export type Database = {
         Args: { p_meal_plan_version_id: string }
         Returns: boolean
       }
+      publish_client_training_plan_version: {
+        Args: { p_training_plan_version_id: string }
+        Returns: string
+      }
       record_ai_finding_action_server: {
         Args: {
           p_acted_by_profile_id: string
@@ -3276,6 +3439,10 @@ export type Database = {
           action_id: string
           anamnesis_review_id: string
         }[]
+      }
+      review_client_training_plan_version: {
+        Args: { p_training_plan_version_id: string }
+        Returns: string
       }
       start_anamnesis_review_execution: {
         Args: {

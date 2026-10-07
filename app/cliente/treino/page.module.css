@@ -45,3 +45,58 @@
   font-size: var(--text-body-medium-size);
   line-height: var(--text-body-medium-line-height);
 }
+
+
+.publishedCard {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.publishedHeader {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: start;
+  justify-content: space-between;
+}
+
+.publishedTitle {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+  font-size: var(--text-title-medium-size);
+  font-weight: var(--text-title-medium-weight);
+  line-height: var(--text-title-medium-line-height);
+}
+
+.meta {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-body-small-size);
+  line-height: var(--text-body-small-line-height);
+}
+
+.workoutList {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.workoutItem {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.workoutDetail,
+.capacityNote {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-medium-size);
+  line-height: var(--text-body-medium-line-height);
+}
+
+.capacityNote {
+  font-size: var(--text-body-small-size);
+}
