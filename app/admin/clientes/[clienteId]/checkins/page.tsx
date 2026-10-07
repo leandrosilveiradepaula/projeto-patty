@@ -84,7 +84,7 @@ export default async function AdminClientCheckinsPage({
     <>
       <ClientWorkspaceHeader
         meta="Registros de líquidos e atividade física"
-        displayName={client.profiles?.display_name}
+        displayName={client.full_name || client.profiles?.display_name}
         secondary="Check-ins de acompanhamento"
         status={<Badge variant="neutral">Registro factual</Badge>}
       />
