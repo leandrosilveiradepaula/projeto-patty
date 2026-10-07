@@ -680,3 +680,8 @@ Suplementacao e manipulados sao definidos manualmente pela Patty, caso a caso, c
 Nao existe, nesta etapa, template profissional automatico, regra geral de indicacao, dose automatica ou sugestao automatica da IA autorizada para esse bloco.
 
 O sistema deve permitir registro e edicao manual pela Patty, preservando o que foi efetivamente aprovado/publicado para a paciente.
+
+
+## Boundary de nome profissional nas superficies administrativas - 2026-10-07
+
+O nome profissional da cliente exibido em listas e workspaces administrativos deve vir de `clients.full_name`. `profiles.display_name` pode ser usado somente como fallback historico/compatibilidade. Essa regra vale tambem para superficies transversais como protocolos, avaliacoes, arquivos, evolucao e liberacao de conteudos; Profile nao substitui Client como cadastro profissional.
