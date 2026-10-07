@@ -66,3 +66,66 @@
   }
 }
 
+
+
+.pendingMetricGrid {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.pendingPreviewList {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pendingActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.secondaryLink,
+.sectionLink {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 44px;
+  align-items: center;
+  color: var(--color-text-secondary);
+  font-size: var(--text-label-medium-size);
+  font-weight: var(--text-label-medium-weight);
+  line-height: var(--text-label-medium-line-height);
+  text-decoration: none;
+}
+
+.sectionLink {
+  color: var(--color-brand-strong);
+}
+
+.secondaryLink:hover,
+.sectionLink:hover {
+  text-decoration: underline;
+}
+
+.secondaryLink:focus-visible,
+.sectionLink:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+@media (max-width: 1100px) {
+  .pendingMetricGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .pendingActions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+}

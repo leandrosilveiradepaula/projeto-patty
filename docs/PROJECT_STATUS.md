@@ -1,3 +1,17 @@
+## Atualizacao de auditoria de interface 2026-10-07 - fila operacional na home da Patty
+
+A home administrativa passa a refletir a mesma separacao da fila operacional:
+
+- Acao da Patty;
+- Aguardando cliente;
+- Operacional do sistema.
+
+A home tambem mostra uma previa das tres pendencias mais antigas em `Acao da Patty`, com acesso direto ao registro e a cliente correspondente.
+
+A ordem continua cronologica e nao representa prioridade clinica, gravidade ou urgencia profissional. A alteracao apenas reduz a necessidade de abrir a fila completa para descobrir qual e o proximo trabalho operacional.
+
+Nenhum schema, migration, RLS ou criterio profissional foi alterado.
+
 ## Atualizacao de auditoria de interface 2026-10-07 - treino nas proximas acoes
 
 A auditoria de continuidade passou a expor os estados objetivos do lifecycle de treino fora da aba especifica.
