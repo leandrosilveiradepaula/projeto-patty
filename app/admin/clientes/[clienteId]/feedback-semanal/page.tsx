@@ -111,6 +111,12 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
       reminderEventsByFeedbackId.set(event.weekly_feedback_id, event);
     }
   }
+  const pendingFeedbacks = feedbacks.filter(
+    (feedback) => feedback.submitted_at === null,
+  );
+  const submittedFeedbacks = feedbacks.filter(
+    (feedback) => feedback.submitted_at !== null,
+  );
   const displayName = client.profiles?.display_name?.trim();
 
   return (
@@ -150,26 +156,25 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
       </Section>
 
       <Section
-        action={<Badge variant="neutral">{feedbacks.length} registro(s)</Badge>}
-        description="Histórico real das solicitações desta cliente."
-        title="Histórico"
+        action={
+          <Badge variant={pendingFeedbacks.length > 0 ? "warning" : "neutral"}>
+            {pendingFeedbacks.length} pendente(s)
+          </Badge>
+        }
+        description="Solicitações que ainda aguardam envio da cliente."
+        title="Pendentes"
       >
-        {feedbacks.length === 0 ? (
+        {pendingFeedbacks.length === 0 ? (
           <EmptyState
-            description={
-              eligible
-                ? "Use a seção acima para registrar a primeira solicitação."
-                : "O primeiro Feedback Semanal poderá ser solicitado depois que houver um protocolo publicado para esta cliente."
-            }
-            title="Nenhum Feedback Semanal registrado"
+            description="Não há Feedback Semanal aguardando resposta neste momento."
+            title="Nenhum feedback pendente"
           />
         ) : (
           <ol className={styles.list}>
-            {feedbacks.map((feedback) => {
+            {pendingFeedbacks.map((feedback) => {
               const version = feedback.weekly_feedback_form_versions;
-              const definition = version
-                ? parseWeeklyFeedbackDefinition(version.definition)
-                : null;
+              const reminderEvent = reminderEventsByFeedbackId.get(feedback.id);
+              const reminderStatus = notificationStatusLabel(reminderEvent);
 
               return (
                 <li key={feedback.id}>
@@ -185,45 +190,80 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
                             : "Versão indisponível"}
                         </p>
                       </div>
-                      <Badge variant={feedback.submitted_at ? "positive" : "warning"}>
-                        {feedback.submitted_at ? "Respondido" : "Aguardando cliente"}
-                      </Badge>
+                      <Badge variant="warning">Aguardando cliente</Badge>
                     </div>
                     <p className={styles.meta}>
                       Origem: {feedback.request_source === "schedule" ? "Automática" : "Manual"}
                     </p>
                     <p className={styles.meta}>Prazo: {formatDateTime(feedback.due_at)}</p>
-                    {!feedback.submitted_at ? (() => {
-                      const reminderEvent = reminderEventsByFeedbackId.get(feedback.id);
-                      const reminderStatus = notificationStatusLabel(reminderEvent);
-
-                      return reminderStatus ? (
-                        <p className={styles.reminderStatus}>
-                          <strong>Lembrete:</strong> {reminderStatus}
-                        </p>
-                      ) : (
-                        <p className={styles.reminderStatus}>
-                          <strong>Lembrete:</strong> nenhum evento de lembrete registrado.
-                        </p>
-                      );
-                    })() : null}
-                    {feedback.submitted_at && definition ? (
-                      <dl className={styles.answers}>
-                        {definition.questions.map((question) => (
-                          <div key={question.key}>
-                            <dt>{question.label}</dt>
-                            <dd>
-                              {readWeeklyFeedbackAnswer(feedback.answers, question.key) || "Sem resposta"}
-                            </dd>
-                          </div>
-                        ))}
-                      </dl>
-                    ) : (
-                      <p className={styles.meta}>
-                        A cliente ainda não concluiu o envio. Rascunhos não são interpretados automaticamente.
-                      </p>
-                    )}
+                    <p className={styles.reminderStatus}>
+                      <strong>Lembrete:</strong>{" "}
+                      {reminderStatus ?? "nenhum evento de lembrete registrado."}
+                    </p>
+                    <p className={styles.meta}>
+                      A cliente ainda não concluiu o envio. Rascunhos não são interpretados automaticamente.
+                    </p>
                   </Card>
+                </li>
+              );
+            })}
+          </ol>
+        )}
+      </Section>
+
+      <Section
+        action={<Badge variant="neutral">{submittedFeedbacks.length} enviado(s)</Badge>}
+        description="Feedbacks concluídos permanecem preservados e podem ser consultados quando necessário."
+        title="Histórico enviado"
+      >
+        {submittedFeedbacks.length === 0 ? (
+          <EmptyState
+            description="Depois que a cliente enviar um Feedback Semanal, ele aparecerá aqui."
+            title="Nenhum feedback enviado ainda"
+          />
+        ) : (
+          <ol className={styles.historyList}>
+            {submittedFeedbacks.map((feedback) => {
+              const version = feedback.weekly_feedback_form_versions;
+              const definition = version
+                ? parseWeeklyFeedbackDefinition(version.definition)
+                : null;
+
+              return (
+                <li key={feedback.id}>
+                  <details className={styles.historyItem}>
+                    <summary>
+                      <span>
+                        {formatDate(feedback.period_start)} a {formatDate(feedback.period_end)}
+                      </span>
+                      <Badge variant="positive">Respondido</Badge>
+                    </summary>
+                    <div className={styles.historyContent}>
+                      <p className={styles.meta}>
+                        {version
+                          ? `${version.title} · versão ${version.version_number}`
+                          : "Versão indisponível"}
+                      </p>
+                      <p className={styles.meta}>
+                        Origem: {feedback.request_source === "schedule" ? "Automática" : "Manual"}
+                      </p>
+                      <p className={styles.meta}>Prazo: {formatDateTime(feedback.due_at)}</p>
+                      {definition ? (
+                        <dl className={styles.answers}>
+                          {definition.questions.map((question) => (
+                            <div key={question.key}>
+                              <dt>{question.label}</dt>
+                              <dd>
+                                {readWeeklyFeedbackAnswer(feedback.answers, question.key) || "Sem resposta"}
+                              </dd>
+                            </div>
+                          ))}
+                        </dl>
+                      ) : (
+                        <p className={styles.meta}>Definição do formulário indisponível.</p>
+                      )}
+                    </div>
+                  </details>
                 </li>
               );
             })}
