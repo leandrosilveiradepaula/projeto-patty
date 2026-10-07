@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   normalizeInvitationEmail,
   validateActivationPassword,
+  validateClientDisplayName,
   validateInvitationEmail,
 } from "./validation.ts";
 
@@ -40,4 +41,16 @@ test("accepts matching activation passwords", () => {
     validateActivationPassword("senha-segura", "senha-segura"),
     { ok: true },
   );
+});
+
+
+test("rejects missing or invalid client display name", () => {
+  assert.equal(validateClientDisplayName("").ok, false);
+  assert.equal(validateClientDisplayName(" ").ok, false);
+  assert.equal(validateClientDisplayName("A").ok, false);
+  assert.equal(validateClientDisplayName("A".repeat(121)).ok, false);
+});
+
+test("accepts a valid client display name", () => {
+  assert.deepEqual(validateClientDisplayName("  Maria da Silva  "), { ok: true });
 });
