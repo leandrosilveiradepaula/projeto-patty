@@ -1,3 +1,7 @@
+## Gate de produto para progresso de conteudos 2026-10-07
+
+A auditoria confirmou que `client_content_progress` existe, mas nao ha regra confirmada que autorize transformar abertura/download em progresso. Para evitar telemetria implicita ou uma falsa conclusao de consumo, a implementacao permanece somente de leitura ate a semantica ser confirmada. A questao foi registrada em `OPEN_QUESTIONS.md`.
+
 ## Reconciliacao funcional pos-auditoria de UX 2026-10-07
 
 A primeira varredura funcional separou pendencias reais de documentacao historica:
