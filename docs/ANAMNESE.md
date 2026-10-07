@@ -1,3 +1,9 @@
+## NOTA DE VIGENCIA 2026-10-07
+
+As tabelas de inventario historico abaixo preservam a evidencia original e, por isso, ainda contem expressoes como `pendente de validacao` e `UI final ainda pendente`. Essas celulas nao representam o estado operacional atual quando houver decisao posterior.
+
+Para a v1 operacional prevalecem as decisoes posteriores documentadas: mapa canonico publicado, tipos nao juridicos definidos, 10 dependencias condicionais, ANAM-044 integrado ao dominio privado de arquivos e ANAM-046 versionado/obrigatorio no envio final. O inventario historico nao deve ser usado para reabrir esses gates sem nova evidencia.
+
 # Anamnese
 
 Este documento registra o inventario funcional da anamnese atual da Patty e serve como base documental para migracao e especificacao futura do modulo.

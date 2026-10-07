@@ -172,13 +172,13 @@ Quais serao os valores definitivos de `profiles.status`?
 
 Quais campos adicionais, se houver, devem ser incorporados futuramente ao `client_registration` alem de Cidade, Telefone, Email de contato e Instagram? O fluxo atual edita somente esses quatro campos ja existentes.
 
-### QUESTAO ABERTA
+### FATO RESOLVIDO
 
-FATO RESOLVIDO: a cliente atualiza Cidade, Telefone, Email de contato e Instagram em `/cliente/perfil`, sem alterar Auth ou Anamnese historica.
+ a cliente atualiza Cidade, Telefone, Email de contato e Instagram em `/cliente/perfil`, sem alterar Auth ou Anamnese historica.
 
-### QUESTAO ABERTA
+### FATO RESOLVIDO
 
-FATO RESOLVIDO: a propria cliente pode atualizar seus quatro campos atuais; Patty/admin pode atualizar os mesmos campos somente para cliente acessivel por assignment ativo e sessao administrativa AAL2.
+ a propria cliente pode atualizar seus quatro campos atuais; Patty/admin pode atualizar os mesmos campos somente para cliente acessivel por assignment ativo e sessao administrativa AAL2.
 
 ### QUESTAO ABERTA
 
@@ -355,9 +355,9 @@ Qual representacao tecnica sera usada para eventual snapshot historico de dados 
 
 Quando o email de autenticacao e o email de contato devem iniciar com o mesmo valor?
 
-### QUESTAO ABERTA
+### FATO RESOLVIDO
 
-FATO RESOLVIDO: email de autenticacao e email de contato permanecem independentes; editar Cadastro Atual nao altera o email de login e nao existe sincronizacao bidirecional automatica.
+ email de autenticacao e email de contato permanecem independentes; editar Cadastro Atual nao altera o email de login e nao existe sincronizacao bidirecional automatica.
 
 ## Dados e LGPD
 
@@ -631,9 +631,9 @@ As secoes do roteiro sobre acompanhamento apos protocolo inicial, criterios form
 Esses temas permanecem abertos e devem ser retomados em rodada posterior.
 ## Cadastro e Anamnese
 
-### QUESTAO ABERTA
+### FATO RESOLVIDO
 
-FATO RESOLVIDO: a cliente cria/atualiza o proprio Cadastro Atual pela area de Perfil; Patty/admin cria/atualiza pela tela da cliente sob assignment ativo + AAL2. A persistencia usa boundary server-side privilegiada e o browser continua sem INSERT/UPDATE direto em `client_registration`.
+ a cliente cria/atualiza o proprio Cadastro Atual pela area de Perfil; Patty/admin cria/atualiza pela tela da cliente sob assignment ativo + AAL2. A persistencia usa boundary server-side privilegiada e o browser continua sem INSERT/UPDATE direto em `client_registration`.
 
 ### FATO RESOLVIDO
 

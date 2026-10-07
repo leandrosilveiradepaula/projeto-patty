@@ -807,7 +807,7 @@ Estado: **INVENTARIO/VALIDACAO FAIL-CLOSED / NAO PUBLICADO**
 
 ## Feedback Semanal - estado em 2026-10-03
 
-Estado: **BACKEND SAAS APLICADO / UI REAL IMPLEMENTADA / AUTOMACAO DE CANAL PENDENTE**
+Estado: **BACKEND SAAS APLICADO / UI REAL IMPLEMENTADA / PARAMETRIZACAO DE AGENDA IMPLEMENTADA / GERACAO RECORRENTE PENDENTE**
 
 Disponivel no produto:
 - questionario v1 versionado com 21 perguntas;
@@ -820,13 +820,20 @@ Disponivel no produto:
 - pagina da cliente;
 - entrada na navegacao real da cliente e na visao consolidada administrativa.
 
+Estado operacional reconciliado:
+- a agenda semanal e parametrizavel por dia da solicitacao, horario local, dia do lembrete e timezone;
+- preferencia de canal por cliente e eventos auditaveis de notificacao existem;
+- a esteira de entrega de lembrete por email existe, mas depende do SMTP real do ambiente;
+- notificacao in-app existe;
+- WhatsApp ainda nao possui provider externo.
+
 Nao implementado ainda:
-- geracao automatica toda segunda-feira;
-- envio de link por email;
-- envio de link por WhatsApp;
-- lembretes;
+- geracao recorrente automatica da solicitacao semanal a partir da agenda configurada;
+- entrega por WhatsApp;
 - consequencia automatica por atraso/ausencia;
 - analise por IA com dados reais.
+
+Nao tratar a ausencia desses itens como autorizacao para hardcode de segunda-feira/08h ou para inventar consequencia profissional.
 
 Esses itens nao devem bloquear a avaliacao do fluxo interno do produto. A conta administrativa real da Patty continua como pendencia operacional separada.
 
