@@ -213,3 +213,26 @@ test("historical hydration 35 apply is not presented as current runtime behavior
     /Novas metas resolvidas pelo runtime configuravel passam a usar a versao ativa/,
   );
 });
+
+
+test("project status does not present historical runner and migration states as current", () => {
+  const status = read("docs/PROJECT_STATUS.md");
+
+  assert.match(status, /esse bloqueio foi resolvido em 2026-10-01/);
+  assert.match(status, /20261001235018.*posteriormente APLICADA/);
+  assert.match(status, /MERGEADO \/ BOUNDARY APLICADO NO SAAS/);
+  assert.match(status, /UI de `\/admin\/configuracoes` ja esta mergeada no `master`/);
+  assert.doesNotMatch(status, /GitHub Actions continua com falha operacional de runner/);
+  assert.doesNotMatch(status, /A UI esta implementada nesta branch, mas ainda precisa passar CI, merge e publicacao/);
+});
+
+test("decisions do not describe onboarding assignment as future-only", () => {
+  const decisions = read("docs/DECISIONS.md");
+
+  assert.match(decisions, /onboarding administrativo por convite ja cria a identidade Auth/);
+  assert.match(decisions, /assignment ativo da Patty/);
+  assert.doesNotMatch(
+    decisions,
+    /boundary de inicio somente deve ser acionada por uma futura server action/,
+  );
+});
