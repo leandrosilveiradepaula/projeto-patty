@@ -51,3 +51,33 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+.actionForm {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+}
+
+.confirmation {
+  display: grid;
+  gap: var(--space-3);
+  width: min(100%, 520px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-low);
+  padding: var(--space-3);
+}
+
+.confirmation p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-small-size);
+  line-height: var(--text-body-small-line-height);
+}
+
+.actionRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}

@@ -414,60 +414,105 @@ export async function deleteTrainingPlanItemAction(
   clientId: string,
   trainingPlanVersionId: string,
   itemId: string,
-) {
-  const { client, version } = await requireAccessibleTrainingVersion(
-    clientId,
-    trainingPlanVersionId,
-  );
+  _state: TrainingPlanFormState,
+  _formData: FormData,
+): Promise<TrainingPlanFormState> {
+  try {
+    const { client, version } = await requireAccessibleTrainingVersion(
+      clientId,
+      trainingPlanVersionId,
+    );
 
-  if (!isUuid(itemId)) {
-    throw new Error("Item de treino inválido.");
+    if (!isUuid(itemId)) {
+      return initialError("Item de treino inválido.");
+    }
+
+    if (version.reviewed_at || version.published_at) {
+      return initialError("Esta versão não está mais editável.");
+    }
+
+    const items = await listAccessibleClientTrainingPlanItems(version.id);
+
+    if (!items.some((item) => item.id === itemId)) {
+      return initialError("Exercício não encontrado nesta versão.");
+    }
+
+    await deleteAccessibleClientTrainingPlanItem(itemId);
+    revalidateTraining(client.id);
+
+    return {
+      message: "Exercício removido do rascunho.",
+      success: true,
+    };
+  } catch (error) {
+    return initialError(
+      error instanceof Error
+        ? error.message
+        : "Não foi possível remover o exercício.",
+    );
   }
-
-  if (version.reviewed_at || version.published_at) {
-    throw new Error("Esta versão não está mais editável.");
-  }
-
-  const items = await listAccessibleClientTrainingPlanItems(version.id);
-
-  if (!items.some((item) => item.id === itemId)) {
-    throw new Error("Exercício não encontrado nesta versão.");
-  }
-
-  await deleteAccessibleClientTrainingPlanItem(itemId);
-  revalidateTraining(client.id);
 }
 
 export async function reviewTrainingPlanVersionAction(
   clientId: string,
   trainingPlanVersionId: string,
-) {
-  const { client, version } = await requireAccessibleTrainingVersion(
-    clientId,
-    trainingPlanVersionId,
-  );
+  _state: TrainingPlanFormState,
+  _formData: FormData,
+): Promise<TrainingPlanFormState> {
+  try {
+    const { client, version } = await requireAccessibleTrainingVersion(
+      clientId,
+      trainingPlanVersionId,
+    );
 
-  if (version.reviewed_at || version.published_at) {
-    throw new Error("Esta versão já foi revisada.");
+    if (version.reviewed_at || version.published_at) {
+      return initialError("Esta versão já foi revisada.");
+    }
+
+    await reviewAccessibleClientTrainingPlanVersion(version.id);
+    revalidateTraining(client.id);
+
+    return {
+      message: "Treino revisado. O conteúdo foi congelado e está pronto para publicação.",
+      success: true,
+    };
+  } catch (error) {
+    return initialError(
+      error instanceof Error
+        ? error.message
+        : "Não foi possível revisar o treino.",
+    );
   }
-
-  await reviewAccessibleClientTrainingPlanVersion(version.id);
-  revalidateTraining(client.id);
 }
 
 export async function publishTrainingPlanVersionAction(
   clientId: string,
   trainingPlanVersionId: string,
-) {
-  const { client, version } = await requireAccessibleTrainingVersion(
-    clientId,
-    trainingPlanVersionId,
-  );
+  _state: TrainingPlanFormState,
+  _formData: FormData,
+): Promise<TrainingPlanFormState> {
+  try {
+    const { client, version } = await requireAccessibleTrainingVersion(
+      clientId,
+      trainingPlanVersionId,
+    );
 
-  if (!version.reviewed_at || version.published_at) {
-    throw new Error("A versão precisa estar revisada e ainda não publicada.");
+    if (!version.reviewed_at || version.published_at) {
+      return initialError("A versão precisa estar revisada e ainda não publicada.");
+    }
+
+    await publishAccessibleClientTrainingPlanVersion(version.id);
+    revalidateTraining(client.id);
+
+    return {
+      message: "Treino publicado para a cliente.",
+      success: true,
+    };
+  } catch (error) {
+    return initialError(
+      error instanceof Error
+        ? error.message
+        : "Não foi possível publicar o treino.",
+    );
   }
-
-  await publishAccessibleClientTrainingPlanVersion(version.id);
-  revalidateTraining(client.id);
 }

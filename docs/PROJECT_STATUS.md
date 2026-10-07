@@ -1,3 +1,21 @@
+## Atualizacao de auditoria de interface 2026-10-07 - fluxo operacional de treino
+
+A auditoria do fluxo de Treino foi refinada depois da integracao do modelo versionado.
+
+Na area da Patty:
+- a Prescricao de treino passa a aparecer antes das secoes de solicitacao/historico, priorizando o trabalho operacional principal;
+- o cabecalho diferencia `Nao solicitado`, `Solicitado`, `Rascunho em edicao`, `Pronto para publicar` e `Treino publicado`;
+- remocao de exercicio exige confirmacao explicita;
+- remocao, revisao e publicacao exibem estado de processamento e feedback local de sucesso/erro;
+- o estado vazio orienta a registrar a solicitacao na propria pagina, sem referencia incorreta a outra tela.
+
+Na area da cliente:
+- o cabecalho passa a contextualizar o treino publicado quando houver;
+- a observacao sobre carga/peso deixa de se repetir em cada exercicio e passa a aparecer uma unica vez;
+- o formulario de solicitacao usa os componentes padrao e exibe estado de envio.
+
+Nenhuma regra profissional, schema, migration ou RLS foi alterado. Revisao e publicacao continuam exclusivamente humanas e explicitas.
+
 ## Atualizacao de auditoria de interface 2026-10-07 - treino publicado na home da cliente
 
 A home da cliente passa a diferenciar solicitacao de treino de prescricao efetivamente publicada.

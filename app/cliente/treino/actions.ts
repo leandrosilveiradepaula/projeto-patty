@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 
 import { requireRole } from "@/lib/supabase/auth";
 import {
@@ -9,32 +8,53 @@ import {
   getCurrentClient,
 } from "@/lib/supabase/data-access";
 
-export async function requestTrainingAction(formData: FormData) {
-  const auth = await requireRole("client");
-  const client = await getCurrentClient();
+export type ClientTrainingRequestFormState = {
+  message: string | null;
+  success: boolean;
+};
 
-  if (!client) {
-    throw new Error("Cadastro de cliente indisponível");
-  }
-
-  const rawNote = formData.get("note");
-  const note = typeof rawNote === "string" ? rawNote.trim() : "";
-
-  if (note.length > 1000) {
-    throw new Error("A observação deve ter no máximo 1000 caracteres");
-  }
-
+export async function requestTrainingAction(
+  _state: ClientTrainingRequestFormState,
+  formData: FormData,
+): Promise<ClientTrainingRequestFormState> {
   try {
+    const auth = await requireRole("client");
+    const client = await getCurrentClient();
+
+    if (!client) {
+      return {
+        message: "Cadastro de cliente indisponível.",
+        success: false,
+      };
+    }
+
+    const rawNote = formData.get("note");
+    const note = typeof rawNote === "string" ? rawNote.trim() : "";
+
+    if (note.length > 1000) {
+      return {
+        message: "A observação deve ter no máximo 1000 caracteres.",
+        success: false,
+      };
+    }
+
     await createAccessibleClientTrainingRequest({
       clientId: client.id,
       note: note || null,
       recordedByProfileId: auth.profileId,
     });
-  } catch {
-    redirect("/cliente/treino?status=request-error");
-  }
 
-  revalidatePath("/cliente");
-  revalidatePath("/cliente/treino");
-  redirect("/cliente/treino?status=requested");
+    revalidatePath("/cliente");
+    revalidatePath("/cliente/treino");
+
+    return {
+      message: "Sua solicitação de treino foi registrada e ficará visível para a Patty.",
+      success: true,
+    };
+  } catch {
+    return {
+      message: "Sua solicitação não foi registrada. Tente novamente.",
+      success: false,
+    };
+  }
 }

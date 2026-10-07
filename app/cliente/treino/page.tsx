@@ -1,7 +1,6 @@
-import { requestTrainingAction } from "@/app/cliente/treino/actions";
 import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
+import { ClientTrainingRequestForm } from "@/components/client/ClientTrainingRequestForm";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -24,14 +23,7 @@ function formatDateTime(value: string) {
   }).format(new Date(value));
 }
 
-type ClientTrainingPageProps = {
-  searchParams: Promise<{ status?: string }>;
-};
-
-export default async function ClientTrainingPage({
-  searchParams,
-}: ClientTrainingPageProps) {
-  const { status } = await searchParams;
+export default async function ClientTrainingPage() {
   const client = await getCurrentClient();
 
   if (!client) {
@@ -59,25 +51,21 @@ export default async function ClientTrainingPage({
   return (
     <>
       <PageHeader
-        description="Registre aqui quando quiser solicitar o serviço de treino. A solicitação não cria prescrição automática nem altera seu protocolo."
+        description={
+          latestPublished
+            ? "Consulte seu treino individual publicado pela Patty e, quando precisar, registre uma nova solicitação de treino."
+            : "Registre aqui quando quiser solicitar o serviço de treino. A solicitação não cria prescrição automática nem altera seu protocolo."
+        }
         eyebrow="Cliente"
         title="Treino"
       />
-      {status === "requested" ? (
-        <Alert live="polite" title="Solicitação enviada" variant="success">
-          Sua solicitação de treino foi registrada no acompanhamento e ficará visível para a Patty.
-        </Alert>
-      ) : status === "request-error" ? (
-        <Alert live="assertive" title="Não foi possível enviar" variant="critical">
-          Sua solicitação não foi registrada. Tente novamente antes de sair desta página.
-        </Alert>
-      ) : null}
 
       <Section
         description="Apenas versões revisadas e publicadas pela Patty aparecem aqui."
         title="Seu treino publicado"
       >
         {latestPublished ? (
+          <>
           <Card className={styles.publishedCard}>
             <div className={styles.publishedHeader}>
               <div>
@@ -119,15 +107,16 @@ export default async function ClientTrainingPage({
                         Orientações: {item.execution_notes}
                       </p>
                     ) : null}
-                    <p className={styles.capacityNote}>
-                      A carga/peso deve respeitar sua capacidade no exercício e
-                      não é definida aqui como valor fixo.
-                    </p>
                   </Card>
                 </li>
               ))}
             </ol>
           </Card>
+          <Alert title="Sobre carga e peso" variant="info">
+            A carga não é exibida aqui como um valor fixo. Siga as orientações
+            profissionais da Patty e respeite sua capacidade em cada exercício.
+          </Alert>
+          </>
         ) : (
           <EmptyState
             description={
@@ -145,18 +134,7 @@ export default async function ClientTrainingPage({
         title="Solicitar treino"
       >
         <Card>
-          <form action={requestTrainingAction} className={styles.form}>
-            <label className={styles.field}>
-              <span>Observação opcional</span>
-              <textarea
-                maxLength={1000}
-                name="note"
-                placeholder="Se quiser, conte algo importante sobre sua solicitação."
-                rows={4}
-              />
-            </label>
-            <Button type="submit">Solicitar treino</Button>
-          </form>
+          <ClientTrainingRequestForm />
         </Card>
       </Section>
 
