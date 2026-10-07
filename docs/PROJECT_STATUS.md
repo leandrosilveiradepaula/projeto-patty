@@ -1,3 +1,14 @@
+## Atualizacao de auditoria de interface 2026-10-07 - feedback semanal administrativo
+
+A tela administrativa de Feedback Semanal foi reorganizada para manter o trabalho pendente em evidencia sem deixar o historico crescer indefinidamente na pagina.
+
+- solicitacoes ainda nao enviadas ficam em `Pendentes`;
+- feedbacks enviados passam para `Historico enviado`;
+- respostas enviadas ficam recolhidas por padrao e podem ser expandidas quando necessario;
+- prazo, origem, versao do formulario e respostas permanecem preservados;
+- lembretes continuam visiveis apenas enquanto a solicitacao estiver pendente.
+
+Nenhuma regra de elegibilidade, agendamento, lembrete, formulario, schema, migration ou RLS foi alterado.
 ## Atualizacao de auditoria de interface 2026-10-07 - historico de arquivos sem duplicacoes
 
 As telas de Arquivos foram enxugadas para reduzir informacao repetida, especialmente no mobile.
