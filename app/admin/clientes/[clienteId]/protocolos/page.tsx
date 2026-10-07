@@ -103,7 +103,6 @@ export default async function AdminClientProtocolsPage({
       />
       <ClientWorkspaceNav activeArea="protocolos" clientId={client.id} />
       <Section
-        action={<Badge variant="neutral">{protocols.length} protocolo(s)</Badge>}
         description="Consulte o histórico de protocolos desta cliente."
         title="Protocolos"
       >
