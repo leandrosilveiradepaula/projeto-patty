@@ -88,15 +88,10 @@ export default async function ClientFilesPage() {
               <li key={file.id}>
                 <Card className={styles.fileCard}>
                   <div className={styles.fileHeader}>
-                    <div>
-                      <h3 className={styles.fileTitle}>
-                        {file.original_filename?.trim() ||
-                          "Arquivo sem nome informado"}
-                      </h3>
-                      <p className={styles.fileKind}>
-                        {fileKindLabels[file.file_kind] ?? file.file_kind}
-                      </p>
-                    </div>
+                    <h3 className={styles.fileTitle}>
+                      {file.original_filename?.trim() ||
+                        "Arquivo sem nome informado"}
+                    </h3>
                     <Badge variant="neutral">
                       {fileKindLabels[file.file_kind] ?? file.file_kind}
                     </Badge>
