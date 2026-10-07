@@ -100,3 +100,34 @@
 .capacityNote {
   font-size: var(--text-body-small-size);
 }
+
+
+.requestHistory {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.olderRequests {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
+  background: var(--color-surface);
+}
+
+.olderRequests > summary {
+  min-height: 48px;
+  cursor: pointer;
+  padding: var(--space-4);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+  font-weight: var(--text-label-medium-weight);
+}
+
+.olderRequests > summary:focus-visible {
+  outline: 3px solid var(--color-brand);
+  outline-offset: 3px;
+}
+
+.olderRequests > .list {
+  border-top: 1px solid var(--color-border);
+  padding: var(--space-3);
+}

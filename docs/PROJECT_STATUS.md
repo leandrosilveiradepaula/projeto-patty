@@ -1,3 +1,13 @@
+## Atualizacao de auditoria de interface 2026-10-07 - lote de continuidade do portal da cliente
+
+Um lote maior de UX melhora continuidade e hierarquia em quatro areas do portal da cliente.
+
+- Conteudos diferencia uma versao realmente abrivel de uma liberacao cujo arquivo ainda nao esta disponivel;
+- Evolucao oferece retorno direto ao historico de Avaliacoes;
+- Feedback Semanal mantem o pendente mais recente aberto e recolhe pendencias anteriores, sem impedir acesso ou edicao;
+- Treino destaca a solicitacao mais recente e recolhe solicitacoes anteriores em historico consultavel;
+- nenhuma regra profissional, publicacao, persistencia, schema ou RLS foi alterada.
+
 ## Atualizacao de auditoria de interface 2026-10-07 - arquivos aguardando liberacao
 
 A area administrativa de Arquivos passa a separar a decisao operacional da Patty do historico privado.

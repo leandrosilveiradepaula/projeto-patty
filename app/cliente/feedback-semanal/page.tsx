@@ -123,7 +123,7 @@ export default async function ClientWeeklyFeedbackPage({
               />
             ) : (
               <ol className={styles.list}>
-                {pendingFeedbacks.map((feedback) => {
+                {pendingFeedbacks.map((feedback, feedbackIndex) => {
                   const version = feedback.weekly_feedback_form_versions;
                   const definition = version
                     ? parseWeeklyFeedbackDefinition(version.definition)
@@ -131,6 +131,19 @@ export default async function ClientWeeklyFeedbackPage({
 
                   return (
                     <li key={feedback.id}>
+                      <details
+                        className={styles.pendingItem}
+                        open={feedbackIndex === 0}
+                      >
+                        <summary className={styles.pendingSummary}>
+                          <span>
+                            Semana de {formatDate(feedback.period_start)} a {formatDate(feedback.period_end)}
+                          </span>
+                          <Badge variant="warning">
+                            {feedbackIndex === 0 ? "Responder agora" : "Pendente"}
+                          </Badge>
+                        </summary>
+                        <div className={styles.pendingContent}>
                       <Card className={styles.card}>
                         {inAppReminderFeedbackIds.has(feedback.id) ? (
                           <Alert title="Lembrete do Feedback Semanal" variant="info">
@@ -203,6 +216,8 @@ export default async function ClientWeeklyFeedbackPage({
                           </form>
                         )}
                       </Card>
+                        </div>
+                      </details>
                     </li>
                   );
                 })}
