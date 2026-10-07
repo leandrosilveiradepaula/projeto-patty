@@ -225,6 +225,94 @@ export async function listAccessibleClientActivityCheckinEvents(
   return data;
 }
 
+export async function listAccessibleClientLiquidIntakeEventCorrections(
+  eventIds: string[],
+) {
+  if (eventIds.length === 0) return [];
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_liquid_intake_event_corrections")
+    .select(
+      "id, event_id, corrected_amount_ml, corrected_liquid_kind, corrected_recorded_at, corrected_by_profile_id, created_at",
+    )
+    .in("event_id", eventIds)
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false });
+
+  if (error) throw error;
+  return data;
+}
+
+export async function listAccessibleClientActivityCheckinEventCorrections(
+  eventIds: string[],
+) {
+  if (eventIds.length === 0) return [];
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_activity_checkin_event_corrections")
+    .select(
+      "id, event_id, corrected_checkin_date, corrected_did_activity, corrected_by_profile_id, created_at",
+    )
+    .in("event_id", eventIds)
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false });
+
+  if (error) throw error;
+  return data;
+}
+
+export async function createAccessibleClientLiquidIntakeEventCorrection(input: {
+  amountMl: number;
+  correctedByProfileId: string;
+  eventId: string;
+  liquidKind: string;
+  recordedAt: string;
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_liquid_intake_event_corrections")
+    .insert({
+      corrected_amount_ml: input.amountMl,
+      corrected_by_profile_id: input.correctedByProfileId,
+      corrected_liquid_kind: input.liquidKind,
+      corrected_recorded_at: input.recordedAt,
+      event_id: input.eventId,
+    })
+    .select(
+      "id, event_id, corrected_amount_ml, corrected_liquid_kind, corrected_recorded_at, corrected_by_profile_id, created_at",
+    )
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function createAccessibleClientActivityCheckinEventCorrection(input: {
+  checkinDate: string;
+  correctedByProfileId: string;
+  didActivity: boolean;
+  eventId: string;
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_activity_checkin_event_corrections")
+    .insert({
+      corrected_by_profile_id: input.correctedByProfileId,
+      corrected_checkin_date: input.checkinDate,
+      corrected_did_activity: input.didActivity,
+      event_id: input.eventId,
+    })
+    .select(
+      "id, event_id, corrected_checkin_date, corrected_did_activity, corrected_by_profile_id, created_at",
+    )
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
 export async function createCurrentClientActivityCheckinEvent(input: {
   checkinDate: string;
   clientId: string;

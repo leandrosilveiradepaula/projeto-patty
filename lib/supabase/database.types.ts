@@ -1039,6 +1039,48 @@ export type Database = {
           },
         ]
       }
+      client_activity_checkin_event_corrections: {
+        Row: {
+          corrected_by_profile_id: string
+          corrected_checkin_date: string
+          corrected_did_activity: boolean
+          created_at: string
+          event_id: string
+          id: string
+        }
+        Insert: {
+          corrected_by_profile_id: string
+          corrected_checkin_date: string
+          corrected_did_activity: boolean
+          created_at?: string
+          event_id: string
+          id?: string
+        }
+        Update: {
+          corrected_by_profile_id?: string
+          corrected_checkin_date?: string
+          corrected_did_activity?: boolean
+          created_at?: string
+          event_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_activity_checkin_event_corr_corrected_by_profile_id_fkey"
+            columns: ["corrected_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_activity_checkin_event_corrections_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "client_activity_checkin_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_activity_checkin_events: {
         Row: {
           checkin_date: string
@@ -1492,6 +1534,51 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "method_configuration_snapshot_sets"
             referencedColumns: ["id", "client_id"]
+          },
+        ]
+      }
+      client_liquid_intake_event_corrections: {
+        Row: {
+          corrected_amount_ml: number
+          corrected_by_profile_id: string
+          corrected_liquid_kind: string
+          corrected_recorded_at: string
+          created_at: string
+          event_id: string
+          id: string
+        }
+        Insert: {
+          corrected_amount_ml: number
+          corrected_by_profile_id: string
+          corrected_liquid_kind: string
+          corrected_recorded_at: string
+          created_at?: string
+          event_id: string
+          id?: string
+        }
+        Update: {
+          corrected_amount_ml?: number
+          corrected_by_profile_id?: string
+          corrected_liquid_kind?: string
+          corrected_recorded_at?: string
+          created_at?: string
+          event_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_liquid_intake_event_correct_corrected_by_profile_id_fkey"
+            columns: ["corrected_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_liquid_intake_event_corrections_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "client_liquid_intake_events"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -2176,7 +2263,7 @@ export type Database = {
           id: string
           profile_id: string | null
           started_at: string | null
-          status: string | null
+          status: string
           updated_at: string
         }
         Insert: {
@@ -2186,7 +2273,7 @@ export type Database = {
           id?: string
           profile_id?: string | null
           started_at?: string | null
-          status?: string | null
+          status: string
           updated_at?: string
         }
         Update: {
@@ -2196,7 +2283,7 @@ export type Database = {
           id?: string
           profile_id?: string | null
           started_at?: string | null
-          status?: string | null
+          status?: string
           updated_at?: string
         }
         Relationships: [
@@ -3399,6 +3486,10 @@ export type Database = {
         }
         Returns: string
       }
+      generate_scheduled_weekly_feedback_requests: {
+        Args: { p_now?: string }
+        Returns: number
+      }
       generate_weekly_feedback_reminder_events: {
         Args: { p_now?: string }
         Returns: number
@@ -3406,9 +3497,9 @@ export type Database = {
       list_current_client_finalized_assessment_measurements: {
         Args: never
         Returns: {
-          assessment_id: string
           assessed_at: string
-          assessment_kind: string | null
+          assessment_id: string
+          assessment_kind: string
           measurement_key: string
           measurement_value: number
           unit: string

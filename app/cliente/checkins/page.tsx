@@ -1,4 +1,9 @@
-import { addLiquidIntakeAction, recordActivityCheckinAction } from "@/app/cliente/checkins/actions";
+import {
+  addLiquidIntakeAction,
+  correctActivityCheckinAction,
+  correctLiquidIntakeAction,
+  recordActivityCheckinAction,
+} from "@/app/cliente/checkins/actions";
 import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -9,7 +14,9 @@ import { Section } from "@/components/ui/Section";
 import { loadSupportedLiquidTaxonomy } from "@/lib/method/liquid-taxonomy-loader";
 import {
   getCurrentClient,
+  listAccessibleClientActivityCheckinEventCorrections,
   listAccessibleClientActivityCheckinEvents,
+  listAccessibleClientLiquidIntakeEventCorrections,
   listAccessibleClientLiquidIntakeEvents,
 } from "@/lib/supabase/data-access";
 
@@ -65,23 +72,54 @@ export default async function ClientCheckinsPage({
       loadSupportedLiquidTaxonomy(),
     ]);
 
+  const [liquidCorrections, activityCorrections] = await Promise.all([
+    listAccessibleClientLiquidIntakeEventCorrections(
+      recentLiquidEvents.map((event) => event.id),
+    ),
+    listAccessibleClientActivityCheckinEventCorrections(
+      activityEvents.map((event) => event.id),
+    ),
+  ]);
+  const latestLiquidCorrectionByEvent = new Map(
+    liquidCorrections.map((correction) => [correction.event_id, correction]),
+  );
+  const latestActivityCorrectionByEvent = new Map(
+    activityCorrections.map((correction) => [correction.event_id, correction]),
+  );
+
   const pureWaterKindKeys = new Set<string>(
     liquidTaxonomy.kinds
       .filter((kind) => kind.hydrationClass === "pure_water")
       .map((kind) => kind.key),
   );
 
-  const todayLiquidEvents = recentLiquidEvents.filter(
+  const effectiveLiquidEvents = recentLiquidEvents.map((event) => {
+    const correction = latestLiquidCorrectionByEvent.get(event.id);
+    return {
+      ...event,
+      effectiveAmountMl: correction?.corrected_amount_ml ?? event.amount_ml,
+      effectiveLiquidKind: correction?.corrected_liquid_kind ?? event.liquid_kind,
+      wasCorrected: Boolean(correction),
+    };
+  });
+  const todayLiquidEvents = effectiveLiquidEvents.filter(
     (event) => saoPauloDate(event.recorded_at) === today,
   );
   const totalMl = todayLiquidEvents.reduce(
-    (sum, event) => sum + event.amount_ml,
+    (sum, event) => sum + event.effectiveAmountMl,
     0,
   );
   const waterMl = todayLiquidEvents
-    .filter((event) => pureWaterKindKeys.has(event.liquid_kind))
-    .reduce((sum, event) => sum + event.amount_ml, 0);
+    .filter((event) => pureWaterKindKeys.has(event.effectiveLiquidKind))
+    .reduce((sum, event) => sum + event.effectiveAmountMl, 0);
   const latestActivity = activityEvents[0] ?? null;
+  const latestActivityCorrection = latestActivity
+    ? latestActivityCorrectionByEvent.get(latestActivity.id)
+    : null;
+  const effectiveDidActivity =
+    latestActivityCorrection?.corrected_did_activity ??
+    latestActivity?.did_activity ??
+    null;
 
   return (
     <>
@@ -90,7 +128,19 @@ export default async function ClientCheckinsPage({
         eyebrow="Cliente"
         title="Check-ins diários"
       />
-      {status === "liquid-recorded" ? (
+      {status === "correction-recorded" ? (
+        <Alert live="polite" title="Correção registrada" variant="success">
+          O valor corrigido passa a ser usado na tela, e o registro original continua preservado no histórico.
+        </Alert>
+      ) : status === "correction-invalid" ? (
+        <Alert live="assertive" title="Revise a correção" variant="critical">
+          Não foi possível identificar um registro ou valor válido para corrigir.
+        </Alert>
+      ) : status === "correction-error" ? (
+        <Alert live="assertive" title="Não foi possível registrar a correção" variant="critical">
+          O registro original não foi alterado. Tente novamente.
+        </Alert>
+      ) : status === "liquid-recorded" ? (
         <Alert live="polite" title="Líquido registrado" variant="success">
           O registro foi salvo no seu histórico de hoje.
         </Alert>
@@ -181,11 +231,11 @@ export default async function ClientCheckinsPage({
           <div className={styles.summaryHeader}>
             <h3 className={styles.cardTitle}>Você fez atividade física hoje?</h3>
             <Badge variant="neutral">
-              {latestActivity
-                ? latestActivity.did_activity
+              {effectiveDidActivity === null
+                ? "Ainda não registrado"
+                : effectiveDidActivity
                   ? "Último registro: sim"
-                  : "Último registro: não"
-                : "Ainda não registrado"}
+                  : "Último registro: não"}
             </Badge>
           </div>
           <form
@@ -204,7 +254,91 @@ export default async function ClientCheckinsPage({
               Não
             </Button>
           </form>
+          {latestActivity ? (
+            <details className={styles.correction}>
+              <summary>Corrigir resposta de hoje</summary>
+              <form action={correctActivityCheckinAction} className={styles.activityActions}>
+                <input name="eventId" type="hidden" value={latestActivity.id} />
+                <Button name="didActivity" type="submit" value="yes" variant="secondary">
+                  Corrigir para Sim
+                </Button>
+                <Button name="didActivity" type="submit" value="no" variant="secondary">
+                  Corrigir para Não
+                </Button>
+              </form>
+              {latestActivityCorrection ? (
+                <p className={styles.note}>
+                  Este registro já possui correção. O valor original continua preservado.
+                </p>
+              ) : null}
+            </details>
+          ) : null}
         </Card>
+      </Section>
+
+      <Section
+        description="Você pode corrigir registros recentes sem apagar o que foi informado originalmente."
+        title="Histórico de líquidos"
+      >
+        {todayLiquidEvents.length === 0 ? (
+          <EmptyState
+            description="Os líquidos registrados hoje aparecerão aqui."
+            title="Nenhum líquido registrado hoje"
+          />
+        ) : (
+          <ol className={styles.historyList}>
+            {todayLiquidEvents.map((event) => (
+              <li key={event.id}>
+                <Card className={styles.historyCard} variant="subtle">
+                  <div className={styles.summaryHeader}>
+                    <strong>{formatMl(event.effectiveAmountMl)}</strong>
+                    {event.wasCorrected ? <Badge variant="neutral">Corrigido</Badge> : null}
+                  </div>
+                  <p className={styles.note}>
+                    {liquidTaxonomy.kinds.find((kind) => kind.key === event.effectiveLiquidKind)?.label ??
+                      "Tipo histórico"}
+                  </p>
+                  <details className={styles.correction}>
+                    <summary>Corrigir registro</summary>
+                    <form action={correctLiquidIntakeAction} className={styles.form}>
+                      <input name="eventId" type="hidden" value={event.id} />
+                      <label className={styles.field}>
+                        <span>Quantidade em mL</span>
+                        <input
+                          defaultValue={event.effectiveAmountMl}
+                          min="1"
+                          name="amountMl"
+                          required
+                          type="number"
+                        />
+                      </label>
+                      <label className={styles.field}>
+                        <span>Tipo</span>
+                        <select
+                          defaultValue={event.effectiveLiquidKind}
+                          name="liquidKind"
+                          required
+                        >
+                          {liquidTaxonomy.kinds.map((kind) => (
+                            <option key={kind.key} value={kind.key}>
+                              {kind.label}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <Button type="submit" variant="secondary">Salvar correção</Button>
+                    </form>
+                    {event.wasCorrected ? (
+                      <p className={styles.note}>
+                        Original: {formatMl(event.amount_ml)}. O histórico de correções permanece preservado.
+                      </p>
+                    ) : null}
+                  </details>
+                </Card>
+              </li>
+            ))}
+          </ol>
+        )}
       </Section>
     </>
   );
