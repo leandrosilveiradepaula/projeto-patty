@@ -2903,3 +2903,15 @@ A integracao UI-backend da fila administrativa foi ampliada para o fluxo privado
 - a decisao continua explicitamente humana: o sistema nao publica nem libera arquivo automaticamente.
 
 A politica definitiva de retencao/hard-delete continua aberta e nao foi inferida neste bloco.
+
+
+## Avaliacoes em rascunho na fila operacional - 2026-10-07
+
+A fila administrativa agora reaproveita o lifecycle de Avaliacoes ja implementado para expor um estado objetivo que antes exigia navegacao por cliente:
+- cada avaliacao ainda nao finalizada gera uma acao da Patty para continuar a coleta;
+- a acao aponta para o editor real da avaliacao, onde medidas/fotos continuam editaveis ate finalizacao explicita;
+- nenhuma data de atraso, urgencia ou prioridade e inferida;
+- preferencias de sexta/sabado continuam apenas orientacao configuravel para Avaliacao Completa;
+- a regra para ancoras 29/30/31 continua aberta e nao foi automatizada.
+
+Nenhuma migration/RLS nova foi necessaria; a fila deriva somente do estado factual `finalized_at`.
