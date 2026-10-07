@@ -183,3 +183,33 @@ test("readiness describes the OpenAI boundary as implemented but health-data gat
   assert.match(status, /O runtime atual possui:/);
   assert.match(status, /gate de dados de saude permanece fechado/);
 });
+
+
+test("readiness no longer treats educational media infrastructure as undecided", () => {
+  const readiness = read("docs/MVP_READINESS.md");
+
+  assert.match(readiness, /binarios educacionais usam Vercel Private Blob/);
+  assert.match(readiness, /store privado ja existe/);
+  assert.doesNotMatch(
+    readiness,
+    /E necessario decidir infraestrutura de midia antes de criar o fluxo fisico de importacao/,
+  );
+});
+
+test("older AI execution-boundary section does not reopen provider integration", () => {
+  const readiness = read("docs/MVP_READINESS.md");
+
+  assert.match(readiness, /A integracao de provider ja existe para `anamnesis_review`/);
+  assert.doesNotMatch(readiness, /Isso nao significa integracao de provider pronta/);
+});
+
+test("historical hydration 35 apply is not presented as current runtime behavior", () => {
+  const status = read("docs/PROJECT_STATUS.md");
+
+  assert.match(status, /REGISTRO HISTORICO SUPERADO - Hidratacao v2 em 35 mL\/kg/);
+  assert.match(status, /35 mL\/kg nao e regra profissional automatica atual/);
+  assert.doesNotMatch(
+    status,
+    /Novas metas resolvidas pelo runtime configuravel passam a usar a versao ativa/,
+  );
+});
