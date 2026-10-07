@@ -236,3 +236,24 @@ test("decisions do not describe onboarding assignment as future-only", () => {
     /boundary de inicio somente deve ser acionada por uma futura server action/,
   );
 });
+
+
+test("weekly feedback docs no longer present automation as wholly inactive", () => {
+  const status = read("docs/PROJECT_STATUS.md");
+  const decisions = read("docs/DECISIONS.md");
+
+  assert.match(status, /geracao recorrente, elegibilidade apos primeiro protocolo/);
+  assert.match(status, /worker de email ja foram implementados\/aplicados/);
+  assert.doesNotMatch(status, /Automacao externa do Feedback Semanal ainda nao foi ativada/);
+  assert.match(decisions, /criacao manual continua disponivel, mas deixou de ser o unico fluxo/);
+  assert.match(decisions, /WhatsApp permanece desacoplado/);
+});
+
+test("historical branch and deployment wording is not presented as current readiness", () => {
+  const status = read("docs/PROJECT_STATUS.md");
+  const decisions = read("docs/DECISIONS.md");
+
+  assert.match(status, /IMPLEMENTADO \/ MERGEADO/);
+  assert.match(status, /REGISTRO HISTORICO — ENGINE V1 ANTES DA INTEGRACAO COM CONSUMIDORES/);
+  assert.match(decisions, /nao deve ser tratada como blocker atual sem nova evidencia/);
+});
