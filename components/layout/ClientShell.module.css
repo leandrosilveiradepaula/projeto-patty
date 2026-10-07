@@ -2,6 +2,7 @@
   min-height: 100svh;
   background: var(--color-canvas);
   padding: var(--space-4);
+  padding-top: calc(var(--space-4) + env(safe-area-inset-top, 0px));
   padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
 }
 
@@ -32,6 +33,7 @@
   font-weight: var(--text-title-medium-weight);
   line-height: var(--text-title-medium-line-height);
   padding: var(--space-4);
+  overflow-wrap: anywhere;
 }
 
 .main {
