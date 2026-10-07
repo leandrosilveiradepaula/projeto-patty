@@ -419,7 +419,7 @@ export function buildOperationalPendingItems(
         createdAt: client.createdAt,
         description:
           "Nenhum canal está configurado para o Feedback Semanal desta cliente. Escolha a preferência individual antes de depender do lembrete automático.",
-        href: `/admin/clientes/${client.clientId}#preferencia-feedback-semanal`,
+        href: `/admin/clientes/${client.clientId}#preferencia-feedback`,
         id: `weekly-feedback-channel:${client.clientId}`,
         kind: "weekly_feedback_channel_missing",
         statusLabel: "Canal não configurado",
