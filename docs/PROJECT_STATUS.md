@@ -1,3 +1,7 @@
+## Reconciliacao documental 2026-10-07 - migrations aplicadas
+
+O estado remoto foi reconciliado depois do workflow manual `Deploy Supabase migrations`, run #40. As migrations de restricao da biblioteca de exercicios, nome/status de cliente e correcoes auditaveis de check-ins estao aplicadas no Supabase SaaS. Blocos historicos abaixo foram atualizados para nao apresentarem essas migrations como pendentes.
+
 ## Atualizacao 2026-10-07 - visibilidade operacional de assets nas liberacoes
 
 A tela de Conteudos da cliente no workspace administrativo agora diferencia uma versao liberada e realmente abrivel de uma versao liberada sem arquivo/asset cadastrado.
@@ -37,7 +41,7 @@ Seguranca:
 
 A migration foi validada no Supabase SaaS dentro de transacao com `ROLLBACK`: 3 policies em cada tabela, SELECT/INSERT permitidos a `authenticated`, UPDATE negado.
 
-IMPORTANTE: a migration esta somente preparada no repositorio. Ainda nao foi aplicada ao Supabase SaaS. A UI de correcao nao deve depender destas tabelas antes do apply remoto.
+ESTADO ATUAL: esta migration foi aplicada ao Supabase SaaS em 2026-10-07 pelo workflow `Deploy Supabase migrations`, run #40. O runtime de correcoes auditaveis ja esta integrado e mergeado.
 
 ## Atualizacao de auditoria de interface 2026-10-07 - avaliacoes em andamento separadas do historico
 
@@ -180,7 +184,7 @@ A migration:
 
 A migration foi validada contra os dados reais dentro de transacao com `ROLLBACK`: 2 clientes, 0 sem nome, 0 status invalido.
 
-IMPORTANTE: o workflow `Deploy Supabase migrations` em push executa somente `db push --dry-run`. Portanto, esta migration e a migration `20261006171000_restrict_exercise_library_to_admin.sql` so serao aplicadas ao SaaS quando o workflow for executado manualmente em modo `apply` com confirmacao `APPLY`.
+ESTADO ATUAL: o workflow `Deploy Supabase migrations` em push continua executando somente `db push --dry-run`. Em 2026-10-07 houve execucao manual em modo `apply`, run #40, que aplicou `20261006171000_restrict_exercise_library_to_admin.sql`, `20261007133000_enforce_client_name_and_status.sql` e `20261007173100_create_client_checkin_corrections.sql` ao Supabase SaaS.
 
 ## Atualizacao de cadastro 2026-10-07 - nome obrigatorio e cliente ativa/inativa
 
@@ -197,7 +201,7 @@ Implementado nesta branch:
 Estado atual:
 - a fixture de teste sem nome foi removida do Supabase SaaS em 2026-10-07 depois de confirmar que possuia somente um assignment e nenhum dado profissional associado;
 - nao existem mais clientes sem nome no ambiente atual;
-- o hardening estrutural do nome no banco pode seguir em migration futura, sem inventar dados;
+- o hardening estrutural de nome e status foi aplicado ao banco pela migration `20261007133000_enforce_client_name_and_status.sql`;
 - a visualizacao e o reengajamento de clientes inativas exigem desenho separado de RLS/autorizacao, sem liberar dados sensiveis de ex-clientes fora de regra documentada.
 
 ## Atualizacao de auditoria de interface 2026-10-07 - proxima acao na lista de clientes
