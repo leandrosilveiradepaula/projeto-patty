@@ -1,10 +1,26 @@
+## RECONCILIACAO VIGENTE — 2026-10-07
+
+Permanecem explicitamente abertas:
+
+- qualquer etapa posterior a `Cutting 2: 2 Low / 1 High`;
+- Cutting 3 e seu eventual detalhamento;
+- Bulking detalhado;
+- Consolidacao;
+- hidratacao como regra profissional automatica;
+- Fases 5 e 6 do Carb Cycle;
+- criterios finais de progressao/treino ainda nao formalizados.
+
+Trechos historicos abaixo que marquem esses pontos como resolvidos devem ser lidos como superados por esta reconciliacao.
+
+O modelo versionado de treino por cliente foi mergeado no `master` pelo PR #445. Portanto, a selecao individual de exercicios e a publicacao do treino deixaram de ser pendencia de implementacao basica; progressao e regras profissionais de treino continuam abertas.
+
 ### PARCIALMENTE RESOLVIDO - PROGRESSAO DO PROTOCOLO
 
 ## RESOLVIDO EM 2026-10-06 - exposicao da biblioteca de exercicios
 
 A Patty confirmou que a biblioteca global e o catalogo profissional de exercicios e que cada cliente deve visualizar somente o conjunto de exercicios escolhido para o treino individual dela.
 
-A exposicao global da biblioteca para clientes fica superada. O modelo versionado de treino por cliente, com selecao de exercicios pela Patty, foi implementado na branch de reconciliacao de treino e permanece como tarefa de engenharia somente ate merge/validacao. Nao e questao profissional aberta.
+A exposicao global da biblioteca para clientes fica superada. O modelo versionado de treino por cliente, com selecao de exercicios pela Patty, foi mergeado no master pelo PR #445. Nao e questao profissional aberta.
 
 
 A Patty confirmou que a progressao segue a sequencia do protocolo, mas depende de adesao e resultado. Se a cliente nao estiver aderindo adequadamente ou se o resultado nao for considerado valido, a progressao e interrompida e os proximos passos sao definidos manualmente pela Patty.
@@ -441,7 +457,7 @@ Continuam abertos:
 - criterios profissionais de transicao cutting -> bulking -> cutting;
 - regras detalhadas das Fases 4, 5 e 6.
 
-### PARCIALMENTE RESOLVIDO — ETAPAS POSTERIORES AO CUTTING 2
+### HISTORICO SUPERADO — ETAPAS POSTERIORES AO CUTTING 2
 
 A Patty confirmou em 2026-10-04 a sequencia de alto nivel:
 - Cutting 2;
@@ -925,7 +941,7 @@ Continuam abertos apenas os pontos que dependem da leitura/reconciliacao da plan
 Nao inferir formula fora da planilha nem transformar exemplo individual em template global sem reconciliacao.
 
 
-### RESOLVIDO - ESTRUTURA DO CUTTING 3
+### HISTORICO SUPERADO — ESTRUTURA DO CUTTING 3
 
 A Patty confirmou que o Cutting 3 repete:
 

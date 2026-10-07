@@ -1,3 +1,23 @@
+## REGRA VIGENTE — RECONCILIACAO 2026-10-07
+
+Para automacao e produto, a sequencia confirmada do metodo termina em:
+
+```text
+Reconhecimento Metabolico
+-> Cutting 1 Dia 1 / Dia 2
+-> Cutting 1: 2 Low / 1 High
+-> Up Metabolico
+-> Cutting 2 Linear
+-> Cutting 2 Dia 1 / Dia 2
+-> Cutting 2: 2 Low / 1 High
+```
+
+Nao inferir etapas posteriores. Cutting 3, Bulking detalhado, Consolidacao e qualquer etapa posterior ao Cutting 2 permanecem pendentes.
+
+Hidratacao tambem permanece aberta para regra profissional automatica. Templates tecnicos ou valores historicos existentes nao equivalem a regra profissional confirmada.
+
+Quando houver conflito com trechos historicos abaixo, esta reconciliacao mais recente prevalece.
+
 ## Biblioteca de exercicios e treino individual
 
 ### REGRA CONFIRMADA
@@ -119,23 +139,21 @@ Nao sobrescrever o output original da IA quando a Patty criar sua propria anotac
 
 Todo acompanhamento comeca pelo Reconhecimento Metabolico, que e o protocolo linear inicial.
 
-A sequencia atualmente confirmada do fluxo principal e:
+A sequencia atualmente confirmada do fluxo principal termina em:
 
 ```text
 Reconhecimento Metabolico
--> Cutting 1
+-> Cutting 1 Dia 1 / Dia 2
+-> Cutting 1: 2 Low / 1 High
 -> Up Metabolico
--> Cutting 2
--> Up Metabolico
--> Cutting 3
--> Up Metabolico
+-> Cutting 2 Linear
+-> Cutting 2 Dia 1 / Dia 2
+-> Cutting 2: 2 Low / 1 High
 ```
 
 A progressao e passo a passo e depende dos resultados observados pela Patty. Nao existe promocao automatica de fase apenas por tempo.
 
-As estruturas internas confirmadas de Cutting 1, Cutting 2 e Cutting 3 permanecem validas. O Cutting 3 repete Linear -> Dia 1/Dia 2 -> Carb Cycle 2 Low/1 High.
-
-Quando o objetivo inclui ganho de massa muscular, a Patty pode usar um ramo com Bulking. Entre o Bulking e a volta ao Cutting, utiliza Consolidacao Metabolica. Bulking e Consolidacao nao possuem formula ou duracao geral automatica confirmada: ajustes e transicoes sao decisoes manuais e contextuais da Patty, conforme as regras registradas nesta documentacao.
+Etapas posteriores ao Cutting 2 permanecem abertas. Referencias historicas a Cutting 3, Bulking ou Consolidacao nao autorizam automacao nem definem a sequencia vigente.
 
 ### DECISAO CONFIRMADA
 
