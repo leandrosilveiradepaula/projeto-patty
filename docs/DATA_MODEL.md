@@ -1,3 +1,17 @@
+## Treino individual versionado
+
+### DECISAO TECNICA/PRODUTO
+
+`client_training_plans` representa o plano logico unico de treino de uma cliente.
+
+`client_training_plan_versions` preserva as versoes do plano, com titulo, observacoes, autoria, revisao e publicacao. So pode existir um draft aberto por plano; versoes publicadas sao imutaveis.
+
+`client_training_plan_items` preserva os exercicios e a prescricao textual daquela versao: posicao, referencia opcional a uma `exercise_version` publicada, nome preservado, series, repeticoes, descanso e orientacoes de execucao.
+
+`sets_text`, `repetitions_text`, `rest_text` e `execution_notes` sao conteudo explicito da prescricao individual versionada, nao regras globais nem autorizacao para progressao automatica.
+
+A cliente pode ler somente o proprio plano e itens pertencentes a versoes publicadas. A Patty/admin depende de assignment ativo e AAL2. A criacao do primeiro draft exige solicitacao de treino previamente registrada.
+
 # Modelo de Dados
 
 ## Principios confirmados
