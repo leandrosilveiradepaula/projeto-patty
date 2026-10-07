@@ -98,7 +98,7 @@ export default async function AdminClientTrainingPage({ params }: Props) {
       versionNumber: exercise.version_number,
     }));
 
-  const displayName = client.profiles?.display_name?.trim();
+  const displayName = client.full_name?.trim() || client.profiles?.display_name?.trim();
 
   return (
     <>
