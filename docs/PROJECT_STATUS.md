@@ -1,3 +1,16 @@
+## Fechamento da auditoria detalhada de interface 2026-10-07
+
+A varredura transversal final da etapa de UX foi concluida depois dos lotes de clientes, protocolos, anamnese, arquivos, portal da cliente, bibliotecas e operacao administrativa.
+
+Hardening final:
+- textos longos passam a quebrar de forma segura globalmente;
+- interfaces respeitam `prefers-reduced-motion`;
+- portal da cliente considera a safe area superior em dispositivos moveis e protege cabecalhos com textos longos;
+- acionador mobile da navegacao administrativa fica mais compacto, mantendo nome acessivel, foco, Escape e focus trap ja existentes;
+- regressao automatizada protege esses contratos.
+
+Esta etapa de auditoria de interface pode ser considerada concluida apos validacao e merge deste lote. Isso nao significa que todo o produto esteja concluido: pendencias funcionais, regras profissionais abertas e proximas prioridades permanecem registradas na documentacao.
+
 ## Atualizacao de auditoria de interface 2026-10-07 - lote operacional do painel da Patty
 
 Um lote consolidado melhora foco operacional em Clientes, Pendencias e Configuracoes.
