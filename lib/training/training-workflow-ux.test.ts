@@ -49,6 +49,7 @@ test("client training page foregrounds published prescription and avoids repeate
   assert.match(page, /Consulte seu treino individual publicado pela Patty/);
   assert.match(page, /Sobre carga e peso/);
   assert.doesNotMatch(page, /capacityNote/);
-  assert.match(form, /useFormStatus/);
-  assert.match(form, /loading={pending}/);
+  assert.match(form, /useActionState/);
+  assert.match(form, /loading={isPending}/);
+  assert.match(form, /Solicitação enviada/);
 });
