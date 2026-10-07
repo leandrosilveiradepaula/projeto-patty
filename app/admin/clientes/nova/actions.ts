@@ -10,6 +10,7 @@ import {
 } from "@/lib/onboarding/client-invitation";
 import {
   normalizeInvitationEmail,
+  validateClientDisplayName,
   validateInvitationEmail,
 } from "@/lib/onboarding/validation";
 import { requireRole } from "@/lib/supabase/auth";
@@ -28,14 +29,15 @@ export async function inviteClient(
     typeof displayNameValue === "string" ? displayNameValue.trim() : "";
   const emailValue = formData.get("email");
   const email = typeof emailValue === "string" ? emailValue : "";
-  const validation = validateInvitationEmail(email);
+  const displayNameValidation = validateClientDisplayName(displayName);
+  const emailValidation = validateInvitationEmail(email);
 
-  if (displayName.length < 2 || displayName.length > 120) {
-    return { message: "Informe o nome da cliente.", };
+  if (!displayNameValidation.ok) {
+    return { message: displayNameValidation.message };
   }
 
-  if (!validation.ok) {
-    return { message: validation.message };
+  if (!emailValidation.ok) {
+    return { message: emailValidation.message };
   }
 
   let provisionedClientId: string | null = null;
@@ -97,22 +99,23 @@ export async function generateManualClientInvite(
     typeof displayNameValue === "string" ? displayNameValue.trim() : "";
   const emailValue = formData.get("email");
   const email = typeof emailValue === "string" ? emailValue : "";
-  const validation = validateInvitationEmail(email);
+  const displayNameValidation = validateClientDisplayName(displayName);
+  const emailValidation = validateInvitationEmail(email);
 
-  if (displayName.length < 2 || displayName.length > 120) {
+  if (!displayNameValidation.ok) {
     return {
       activationLink: null,
       clientId: null,
-      message: "Informe o nome da cliente.",
+      message: displayNameValidation.message,
       success: false,
     };
   }
 
-  if (!validation.ok) {
+  if (!emailValidation.ok) {
     return {
       activationLink: null,
       clientId: null,
-      message: validation.message,
+      message: emailValidation.message,
       success: false,
     };
   }
