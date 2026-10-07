@@ -1,3 +1,15 @@
+## Auditoria de conta e arquivos privados 2026-10-07
+
+A varredura do runtime confirmou que os fluxos abaixo ja existem no repositorio e nao devem permanecer classificados como UI ausente:
+- ativacao de conta da cliente;
+- solicitacao de recuperacao de senha;
+- gate de sessao e redefinicao de senha;
+- upload privado por cliente e por admin;
+- visualizacao/download privado por cliente e admin;
+- sessao de upload e limpeza operacional de uploads privados.
+
+Isso nao resolve dependencias de entrega de email do Supabase/SMTP nem autoriza hard delete. Esses pontos continuam separados.
+
 ## Reconciliacao funcional 2026-10-07
 
 A auditoria pos-UX verificou codigo e estado SaaS para separar gaps reais de pendencias documentais antigas.
