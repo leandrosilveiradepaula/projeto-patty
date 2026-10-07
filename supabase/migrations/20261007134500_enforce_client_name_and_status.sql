@@ -44,7 +44,7 @@ alter table public.clients
   add constraint clients_status_valid
     check (status in ('active', 'inactive'));
 
-create or replace function private.enforce_client_full_name()
+create or replace function app_private.enforce_client_full_name()
 returns trigger
 language plpgsql
 security invoker
@@ -76,18 +76,18 @@ begin
 end;
 $$;
 
-revoke all on function private.enforce_client_full_name() from public;
-revoke all on function private.enforce_client_full_name() from anon;
-revoke all on function private.enforce_client_full_name() from authenticated;
+revoke all on function app_private.enforce_client_full_name() from public;
+revoke all on function app_private.enforce_client_full_name() from anon;
+revoke all on function app_private.enforce_client_full_name() from authenticated;
 
 drop trigger if exists clients_enforce_full_name on public.clients;
 create trigger clients_enforce_full_name
 before insert or update of full_name, profile_id
 on public.clients
 for each row
-execute function private.enforce_client_full_name();
+execute function app_private.enforce_client_full_name();
 
-create or replace function private.sync_client_full_name_from_profile()
+create or replace function app_private.sync_client_full_name_from_profile()
 returns trigger
 language plpgsql
 security definer
@@ -124,18 +124,18 @@ begin
 end;
 $$;
 
-revoke all on function private.sync_client_full_name_from_profile() from public;
-revoke all on function private.sync_client_full_name_from_profile() from anon;
-revoke all on function private.sync_client_full_name_from_profile() from authenticated;
+revoke all on function app_private.sync_client_full_name_from_profile() from public;
+revoke all on function app_private.sync_client_full_name_from_profile() from anon;
+revoke all on function app_private.sync_client_full_name_from_profile() from authenticated;
 
 drop trigger if exists profiles_sync_client_full_name on public.profiles;
 create trigger profiles_sync_client_full_name
 after update of display_name
 on public.profiles
 for each row
-execute function private.sync_client_full_name_from_profile();
+execute function app_private.sync_client_full_name_from_profile();
 
-create or replace function private.sync_client_status_from_assignments()
+create or replace function app_private.sync_client_status_from_assignments()
 returns trigger
 language plpgsql
 security definer
@@ -172,13 +172,13 @@ begin
 end;
 $$;
 
-revoke all on function private.sync_client_status_from_assignments() from public;
-revoke all on function private.sync_client_status_from_assignments() from anon;
-revoke all on function private.sync_client_status_from_assignments() from authenticated;
+revoke all on function app_private.sync_client_status_from_assignments() from public;
+revoke all on function app_private.sync_client_status_from_assignments() from anon;
+revoke all on function app_private.sync_client_status_from_assignments() from authenticated;
 
 drop trigger if exists client_assignments_sync_client_status on public.client_assignments;
 create trigger client_assignments_sync_client_status
 after insert or update of ended_at or delete
 on public.client_assignments
 for each row
-execute function private.sync_client_status_from_assignments();
+execute function app_private.sync_client_status_from_assignments();
