@@ -1,53 +1,41 @@
-## Atualizacao 2026-10-06 - reconciliacao e integracao do treino individual versionado
+## Atualizacao 2026-10-07 - treino versionado mergeado e documentacao reconciliada
 
-### IMPLEMENTADO NESTA BRANCH / AGUARDANDO MERGE
+### IMPLEMENTADO / MERGEADO / VALIDADO
 
-O Supabase SaaS ja possuia as migrations `20261005141224_create_versioned_client_training_prescriptions` e `20261005142111_fix_training_plan_rls_recursion` aplicadas, mas os arquivos nao estavam no master.
+O PR #445 foi mergeado no `master` em `fd32f3049716b6737e98e664429af71d69750956`.
 
-Nesta branch:
-- os dois SQLs originais foram recuperados de `codex/client-training-prescription-v1` e reconciliados no repositorio sem reaplicacao remota;
-- `database.types.ts` foi regenerado a partir do schema remoto;
-- o acesso a dados passou a incluir plano, versoes e itens de treino;
-- a area admin separa explicitamente solicitacao do servico e prescricao individual;
-- a Patty pode criar/editar rascunho, selecionar exercicios publicados da biblioteca ou registrar nome manual, revisar e publicar;
-- a cliente ve somente a versao publicada do proprio treino;
-- drafts e revisoes internas nao ficam visiveis para a cliente;
-- publicar nova versao preserva as anteriores;
+Estado confirmado:
+- migrations `20261005141224_create_versioned_client_training_prescriptions` e `20261005142111_fix_training_plan_rls_recursion` ja estavam aplicadas no Supabase SaaS e foram reconciliadas no repositorio sem recriacao;
+- o pipeline pos-merge de validacao da aplicacao passou;
+- o workflow de migrations pos-merge passou;
+- a Patty pode criar e editar rascunho de treino, selecionar exercicios publicados, revisar e publicar;
+- a cliente ve somente o treino individual publicado para ela;
+- biblioteca global de exercicios permanece ferramenta profissional da Patty;
+- drafts e revisoes internas nao sao expostos a cliente;
+- historico de versoes e preservado;
 - nenhuma selecao, progressao, troca, carga ou publicacao automatica foi introduzida.
 
-O schema remoto nao foi alterado nesta reconciliacao. A aplicacao dessas migrations ja constava no historico do Supabase antes desta branch.
+### REGRA PROFISSIONAL VIGENTE
 
-## Atualizacao 2026-10-06 - biblioteca de exercicios passa a ser catalogo profissional
+Para automacao e produto, o fluxo confirmado termina em:
 
-### REGRA CONFIRMADA / IMPLEMENTACAO EM CORRECAO
+```text
+Reconhecimento Metabolico
+-> Cutting 1 Dia 1 / Dia 2
+-> Cutting 1: 2 Low / 1 High
+-> Up Metabolico
+-> Cutting 2 Linear
+-> Cutting 2 Dia 1 / Dia 2
+-> Cutting 2: 2 Low / 1 High
+```
 
-A Patty confirmou que:
-- a biblioteca global contem os exercicios disponiveis para composicao profissional;
-- cada cliente recebe um conjunto individual escolhido pela Patty;
-- clientes diferentes podem receber exercicios diferentes;
-- a Patty pode variar manualmente os exercicios ao longo do acompanhamento;
-- publicar um exercicio na biblioteca nao o libera para todas as clientes;
-- a cliente deve visualizar somente os exercicios pertencentes ao treino selecionado e publicado para ela.
-
-Essa confirmacao supera a exposicao global implementada em 2026-10-04.
-
-Nesta branch:
-- a biblioteca global deixa de aparecer na home/navegacao da cliente;
-- /cliente/exercicios deixa de listar o catalogo global e orienta para a area de Treino;
-- nova migration revoga a policy global de leitura autenticada de exercise_versions;
-- o teste de RLS volta a exigir que cliente nao consiga navegar pela biblioteca global.
-
-### PROXIMA IMPLEMENTACAO
-
-Ainda falta implementar o modelo versionado de treino por cliente que referencia as versoes exatas dos exercicios escolhidos pela Patty e publica somente esse conjunto para a cliente.
-
-Essa lacuna e de implementacao, nao de regra profissional. Nao inferir progressao, troca automatica, series, repeticoes ou carga.
+Nao inferir etapas posteriores. Cutting 3, Bulking detalhado, Consolidacao, Fases 5 e 6 do Carb Cycle e hidratacao como regra profissional automatica permanecem abertos ate nova confirmacao documentada.
 
 > Escopo atual: **sistema completo, de ponta a ponta**. O projeto nao e mais conduzido como MVP. Referencias historicas a MVP devem ser lidas como legado documental, nao como reducao de escopo.
 
 # Estado Atual do Projeto Patty
 
-Ultima atualizacao documental: 2026-10-04.
+Ultima atualizacao documental: 2026-10-07.
 
 Este arquivo e o ponto de entrada operacional para novos chats e agentes. Ele resume o estado do projeto e aponta para as fontes de verdade detalhadas.
 
@@ -122,21 +110,9 @@ A camada configuravel de hidratacao esta aplicada e integrada ao fluxo administr
 
 ### Reconciliacao do metodo
 
-A rodada de confirmacoes de 2026-10-04 ampliou e reconciliou o fluxo profissional vigente:
+A reconciliacao vigente limita o fluxo automatizavel a Reconhecimento Metabolico -> Cutting 1 -> Up Metabolico -> Cutting 2, com as subetapas confirmadas documentadas em BUSINESS_RULES e DECISIONS. Etapas posteriores ao Cutting 2 permanecem abertas.
 
-```text
-Reconhecimento Metabolico
--> Cutting 1
--> Up Metabolico
--> Cutting 2
--> Up Metabolico
--> Cutting 3
--> Up Metabolico
-```
-
-O Cutting 3 repete Linear -> Dia 1/Dia 2 -> Carb Cycle 2 Low/1 High. Bulking, Consolidacao e Manutencao existem como caminhos profissionais, mas suas escolhas e ajustes permanecem manuais/contextuais quando nao houver regra deterministica confirmada.
-
-Na hidratacao, o template profissional vigente e 35 mL/kg/dia, com orientacao 70% agua pura / 30% outros liquidos zero calorias. A meta e recalculada prospectivamente quando novo peso e registrado; historico nao e reescrito.
+Hidratacao permanece aberta como regra profissional automatica. Configuracoes tecnicas historicas existentes devem ser tratadas como compatibilidade/infraestrutura, nao como autorizacao para inferir uma regra profissional vigente.
 
 O warning `auth_leaked_password_protection` continua conhecido e foi adiado; o projeto permanece no plano Free, no qual esse recurso nao esta disponivel.
 
@@ -312,7 +288,7 @@ Estado atual revalidado em 2026-10-01: o PR #246 restaurou o baseline verde e fo
 | Avaliacoes e medidas | Fundacao + cadencia profissional definida | Lifecycle operacional de rascunho/finalizacao implementado | CI/build PASS no PR #210 + pre-apply `ROLLBACK` PASS | `20260927002227_create_assessment_draft_lifecycle` APLICADA NO SAAS | Completa preferencialmente proxima de sexta/sabado; Basica no meio do intervalo; agenda nao fica presa ao mesmo dia numerico do mes |
 | Protocolos versionados | SIM | Lifecycle manual implementado | CI/validacoes existentes | Backend/SaaS correspondente existente | Criacao/edicao profissional completa conforme regras ainda abertas |
 | Conteudo educacional / exercicios | SIM como dominios separados | Fundacao/release + metadata de asset preparada | Inventario 89/89 revalidado; smoke transacional de assets PASS; pre-flight de integridade do primeiro video registrado | Vercel Private Blob privado `projeto-patty-blob` criado/conectado em `iad1`; upload ainda nao executado | Migrar controladamente o video aprovado, reverificar hash e validar entrega >100 MB antes de publicar/liberar explicitamente |
-| Metodo da Patty | AMPLAMENTE DEFINIDO / ainda com pontos manuais | Motor determinístico existente/parcial; regras profissionais migram para configuração versionada e editável | CI | Fluxo confirmado ate Cutting 3 + Ups; hidratacao 35 mL/kg, equivalencias, catalogos e Carb Cycle 1-3 versionados | Parametrizar regras novas confirmadas, implementar treino prescrito configuravel e agenda/canais configuraveis do Feedback Semanal; Fases 4-6 e outros refinamentos seguem abertos |
+| Metodo da Patty | AMPLAMENTE DEFINIDO / ainda com pontos manuais | Motor deterministico existente/parcial; regras profissionais migram para configuracao versionada e editavel | CI | Fluxo confirmado ate Cutting 2: 2 Low / 1 High; treino individual versionado mergeado; etapas posteriores e hidratacao profissional seguem abertas | Continuar parametrizacao somente de regras confirmadas; Fases 5-6, etapas posteriores ao Cutting 2, hidratacao, treino/progressao definitiva e outros refinamentos seguem abertos |
 | IA assistiva | SIM como principio e arquitetura; provider OpenAI confirmado | PARCIAL/AVANCADO | Adapter OpenAI + Structured Outputs + aliases + UI de revisao humana; avaliacao sintetica 5/5 PASS com `gpt-5.6-terra` / reasoning `medium`; latencia media 2.922 ms e 4.076 tokens totais no run `37135047413` | Prompt v1 aplicado; chamada com dados reais segue bloqueada | Controles efetivos de retencao/ZDR-MAM, projeto/credencial definitiva e conclusao do gate de dados de saude |
 | Failure handling de IA | SIM | SIM no schema + boundary server-side | CI + invariantes deterministicas | `20260922160058` aplicada; provider adapter publicado, chamada com dados reais segue gated | Manter gate fechado ate controles organizacionais de dados; recovery automatico segue aberto |
 | n8n | SIM: nao usar inicialmente | N/A | N/A | Nao usado | Introduzir somente com caso concreto |
@@ -370,8 +346,8 @@ Consultar `BUSINESS_RULES.md` para detalhes.
 
 Resumo:
 - todo acompanhamento comeca pelo Reconhecimento Metabolico;
-- o fluxo principal confirmado segue Reconhecimento -> Cutting 1 -> Up -> Cutting 2 -> Up -> Cutting 3 -> Up;
-- Cutting 3 repete Linear -> Dia 1/Dia 2 -> Carb Cycle 2 Low/1 High;
+- o fluxo principal confirmado termina em Reconhecimento -> Cutting 1 -> Up Metabolico -> Cutting 2, com as subetapas confirmadas documentadas;
+- etapas posteriores ao Cutting 2 nao devem ser inferidas;
 - existem regras confirmadas de refeicoes/jejum, macros/doses, grupos de proteina, legumes na contagem de carboidrato, meta de liquidos 35 mL/kg/dia e regras contextuais do Up Metabolico;
 - no inicio, relatos de saude/comportamento nao geram alerta, bloqueio ou encaminhamento automatico;
 - para emagrecimento/reducao de gordura, cintura e abdomen sao referencias fortes e fotos podem confirmar evolucao mesmo com peso estavel;
