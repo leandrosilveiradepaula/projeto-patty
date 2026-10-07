@@ -1,3 +1,11 @@
+## Auditoria do lembrete de esclarecimentos 2026-10-07
+
+O intervalo do lembrete de esclarecimentos nao esta hardcoded no runtime: ele e carregado da versao ativa de `workflow.anamnesis_clarification_reminder`, validada como parametro escalar em horas. A fila operacional calcula apenas o primeiro marco devido e deixa explicito que isso nao prova envio.
+
+O lifecycle profissional permanece correto: sem resposta fica aguardando cliente; apos resposta fica aguardando revisao/resolucao manual da Patty. Nao existe encerramento automatico nem consequencia automatica.
+
+A lacuna continua sendo entrega recorrente efetiva do lembrete por um canal definido. Nao implementar envio enquanto o canal/operacao correspondente permanecer sem decisao.
+
 ## Auditoria do gate de IA com dados de saude 2026-10-07
 
 O fluxo `anamnesis_review` esta tecnicamente preparado, mas continua corretamente fechado para dados reais. O contexto e construido somente a partir da submissao acessivel ao admin, respeita aplicabilidade, exclui Instagram sempre e exige inclusao explicita para capacidade financeira. IDs internos usados como fonte permanecem separados do payload externo por aliases no provider.
