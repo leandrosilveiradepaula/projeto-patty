@@ -155,6 +155,7 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
         </Card>
       </Section>
 
+      <div id="feedback-pendentes">
       <Section
         action={
           <Badge variant={pendingFeedbacks.length > 0 ? "warning" : "neutral"}>
@@ -210,6 +211,7 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
           </ol>
         )}
       </Section>
+      </div>
 
       <Section
         action={<Badge variant="neutral">{submittedFeedbacks.length} enviado(s)</Badge>}
