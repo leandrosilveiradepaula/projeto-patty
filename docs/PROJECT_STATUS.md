@@ -1,3 +1,9 @@
+## Atualizacao 2026-10-07 - visibilidade operacional de assets nas liberacoes
+
+A tela de Conteudos da cliente no workspace administrativo agora diferencia uma versao liberada e realmente abrivel de uma versao liberada sem arquivo/asset cadastrado.
+
+Antes da liberacao, o seletor tambem sinaliza versoes publicadas sem arquivo. Isso e informativo: a elegibilidade de liberacao nao foi alterada e a ausencia de asset nao virou bloqueio automatico, pois essa regra de produto nao foi confirmada.
+
 ## Atualizacao 2026-10-07 - runtime de correcoes auditaveis de check-ins
 
 As migrations pendentes de 06/10 e 07/10 foram aplicadas ao Supabase SaaS pelo workflow manual `Deploy Supabase migrations`, run #40, com sucesso.
