@@ -13,6 +13,7 @@ import { Section } from "@/components/ui/Section";
 import {
   getAccessibleClient,
   getAccessibleClientRegistration,
+  getAccessibleClientTrainingPlan,
   getAccessibleWeeklyFeedbackNotificationPreference,
   listAccessibleAnamnesisClarificationRequestsForSubmissions,
   listAccessibleAnamnesisClarificationResolutions,
@@ -23,6 +24,7 @@ import {
   listAccessibleClientActivityCheckinEvents,
   listAccessibleClientFiles,
   listAccessibleClientHydrationTargets,
+  listAccessibleClientTrainingPlanVersions,
   listAccessibleClientTrainingRequests,
   listAccessibleProtocolsForClient,
   listAccessibleProtocolPublications,
@@ -85,6 +87,7 @@ export default async function AdminClienteDetailPage({
   const [
     registration,
     trainingRequests,
+    trainingPlan,
     anamneses,
     assessments,
     protocols,
@@ -98,6 +101,7 @@ export default async function AdminClienteDetailPage({
   ] = await Promise.all([
     getAccessibleClientRegistration(client.id),
     listAccessibleClientTrainingRequests(client.id),
+    getAccessibleClientTrainingPlan(client.id),
     listAccessibleAnamnesisSubmissions(client.id),
     listAccessibleAssessmentsForClient(client.id),
     listAccessibleProtocolsForClient(client.id),
@@ -109,6 +113,43 @@ export default async function AdminClienteDetailPage({
     getAccessibleWeeklyFeedbackNotificationPreference(client.id),
     hasAccessibleProtocolPublicationForClient(client.id),
   ]);
+
+  const trainingVersions = trainingPlan
+    ? await listAccessibleClientTrainingPlanVersions(trainingPlan.id)
+    : [];
+  const openTrainingVersion =
+    trainingVersions.find((version) => !version.published_at) ?? null;
+  const latestPublishedTraining =
+    trainingVersions.find((version) => Boolean(version.published_at)) ?? null;
+  const trainingWorkspaceState = openTrainingVersion?.reviewed_at
+    ? {
+        badge: "Pronto para publicar",
+        description: `A versão ${openTrainingVersion.version_number} foi revisada e aguarda publicação para a cliente.`,
+        kind: "reviewed" as const,
+      }
+    : openTrainingVersion
+      ? {
+          badge: "Rascunho",
+          description: `A versão ${openTrainingVersion.version_number} está em edição e ainda não foi revisada.`,
+          kind: "draft" as const,
+        }
+      : latestPublishedTraining
+        ? {
+            badge: "Publicado",
+            description: `A versão ${latestPublishedTraining.version_number} está publicada para a cliente.`,
+            kind: "published" as const,
+          }
+        : trainingRequests.length > 0
+          ? {
+              badge: "Solicitado",
+              description: "Existe solicitação de treino registrada, mas nenhum plano foi criado ainda.",
+              kind: "requested" as const,
+            }
+          : {
+              badge: "Não solicitado",
+              description: "Nenhuma solicitação de treino registrada.",
+              kind: "none" as const,
+            };
 
   const displayName = client.profiles?.display_name?.trim();
   const latestAnamnesis = anamneses[0] ?? null;
@@ -353,14 +394,41 @@ export default async function AdminClienteDetailPage({
                       label: "Abrir protocolos",
                       title: "Primeiro protocolo",
                     }
-                  : {
-                      description:
-                        "As etapas iniciais estão registradas. Continue o acompanhamento conforme os dados e a decisão profissional da Patty.",
-                      eyebrow: "Acompanhamento",
-                      href: `/admin/clientes/${client.id}/feedback-semanal`,
-                      label: "Abrir acompanhamento",
-                      title: "Acompanhamento contínuo",
-                    };
+                  : trainingWorkspaceState.kind === "reviewed"
+                    ? {
+                        description:
+                          "O treino foi revisado e está congelado. Falta a publicação explícita para a cliente.",
+                        eyebrow: "Ação da Patty",
+                        href: `/admin/clientes/${client.id}/treino`,
+                        label: "Publicar treino",
+                        title: "Treino aguardando publicação",
+                      }
+                    : trainingWorkspaceState.kind === "draft"
+                      ? {
+                          description:
+                            "Existe um rascunho de treino em edição. Continue a montagem e faça a revisão quando estiver pronto.",
+                          eyebrow: "Ação da Patty",
+                          href: `/admin/clientes/${client.id}/treino`,
+                          label: "Continuar treino",
+                          title: "Treino em rascunho",
+                        }
+                      : trainingWorkspaceState.kind === "requested"
+                        ? {
+                            description:
+                              "Existe solicitação de treino registrada e ainda não há prescrição criada.",
+                            eyebrow: "Ação da Patty",
+                            href: `/admin/clientes/${client.id}/treino`,
+                            label: "Criar treino",
+                            title: "Treino solicitado",
+                          }
+                        : {
+                            description:
+                              "As etapas iniciais estão registradas. Continue o acompanhamento conforme os dados e a decisão profissional da Patty.",
+                            eyebrow: "Acompanhamento",
+                            href: `/admin/clientes/${client.id}/feedback-semanal`,
+                            label: "Abrir acompanhamento",
+                            title: "Acompanhamento contínuo",
+                          };
 
   return (
     <>
@@ -800,14 +868,22 @@ export default async function AdminClienteDetailPage({
             <Card className={styles.infoCard}>
               <div className={styles.cardHeader}>
                 <h3 className={styles.cardTitle}>Treino</h3>
-                <Badge variant="neutral">
-                  {trainingRequests.length > 0 ? "Solicitado" : "Não solicitado"}
+                <Badge
+                  variant={
+                    trainingWorkspaceState.kind === "published"
+                      ? "positive"
+                      : trainingWorkspaceState.kind === "draft"
+                        ? "warning"
+                        : trainingWorkspaceState.kind === "reviewed"
+                          ? "info"
+                          : "neutral"
+                  }
+                >
+                  {trainingWorkspaceState.badge}
                 </Badge>
               </div>
               <p className={styles.cardDescription}>
-                {trainingRequests.length > 0
-                  ? `${trainingRequests.length} solicitação(ões) registrada(s) no histórico.`
-                  : "Nenhuma solicitação de treino registrada."}
+                {trainingWorkspaceState.description}
               </p>
             </Card>
           </Link>
