@@ -1,7 +1,6 @@
-import { requestTrainingAction } from "@/app/cliente/treino/actions";
 import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
+import { ClientTrainingRequestForm } from "@/components/client/ClientTrainingRequestForm";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -151,18 +150,7 @@ export default async function ClientTrainingPage({
         title="Solicitar treino"
       >
         <Card>
-          <form action={requestTrainingAction} className={styles.form}>
-            <label className={styles.field}>
-              <span>Observação opcional</span>
-              <textarea
-                maxLength={1000}
-                name="note"
-                placeholder="Se quiser, conte algo importante sobre sua solicitação."
-                rows={4}
-              />
-            </label>
-            <Button type="submit">Solicitar treino</Button>
-          </form>
+          <ClientTrainingRequestForm />
         </Card>
       </Section>
 
