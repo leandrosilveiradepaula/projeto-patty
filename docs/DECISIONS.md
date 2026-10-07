@@ -1096,7 +1096,7 @@ No mesmo fluxo, o dry-run listou apenas `20260923191554_fix_anamnesis_draft_dele
 
 Isso separa dois estados:
 - failure handling de IA: migration presente no repositorio e confirmada no historico remoto;
-- correcao do DELETE de rascunho: migration aplicada no SaaS e validada no banco por smoke transacional; a validacao E2E de UI continua dependente de um deployment Vercel atualizado.
+- correcao do DELETE de rascunho: migration aplicada no SaaS e validada no banco por smoke transacional; a dependencia de deployment citada aqui era o estado daquela janela historica e nao deve ser tratada como blocker atual sem nova evidencia.
 
 ### VERIFICACAO POS-APPLY
 
@@ -2605,7 +2605,9 @@ Decisoes tecnicas/produto:
 - ausencia de resposta nao suspende atendimento automaticamente;
 - nenhuma resposta semanal entra em provider de IA enquanto o gate aplicavel a dados reais permanecer fechado.
 
-O primeiro fluxo operacional permite criacao manual da solicitacao pela Patty/admin. Agenda automatica, email e WhatsApp permanecem desacoplados e dependem das decisoes abertas registradas em `OPEN_QUESTIONS.md`.
+### RECONCILIADO EM 2026-10-07
+
+A criacao manual continua disponivel, mas deixou de ser o unico fluxo: geracao recorrente idempotente, agenda versionada, elegibilidade apos primeiro protocolo, periodo da semana anterior, lembrete de quarta-feira, notificacao in-app e worker de email foram implementados posteriormente. WhatsApp permanece desacoplado e ainda depende de provider/opt-in/fallback; SMTP real continua configuracao operacional.
 
 
 ## 2026-10-04 - Sequencia com Cutting 3 e Consolidacao Metabolica
