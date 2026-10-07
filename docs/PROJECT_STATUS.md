@@ -1,3 +1,13 @@
+## Atualizacao de auditoria de interface 2026-10-07 - historico de arquivos sem duplicacoes
+
+As telas de Arquivos foram enxugadas para reduzir informacao repetida, especialmente no mobile.
+
+- cliente: a categoria deixa de aparecer simultaneamente como texto e badge no mesmo card;
+- admin: a categoria deixa de aparecer simultaneamente como texto e badge no mesmo card;
+- admin: a contagem total de arquivos permanece no cabecalho do workspace e deixa de ser repetida na secao;
+- estilos sem uso associados aos elementos removidos foram eliminados.
+
+Upload, validacao, privacidade, download e liberacao para a cliente permanecem inalterados.
 ## Atualizacao de auditoria de interface 2026-10-07 - proxima acao e check-ins factuais
 
 A home da cliente deixa de tratar ausencia de registro de liquidos como pendencia diaria obrigatoria.
