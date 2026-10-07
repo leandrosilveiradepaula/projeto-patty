@@ -2728,3 +2728,17 @@ Nenhum arquivo deve ser marcado como migrado apenas porque existe manifesto, pat
 ## Reconciliacao funcional de identidade administrativa 2026-10-07
 
 A varredura posterior ao PR #501 encontrou superficies administrativas transversais que ainda exibiam o nome profissional diretamente de `profiles.display_name`. Listas de protocolos, avaliacoes e arquivos, alem dos workspaces de evolucao e liberacao de conteudos, passam a preferir `clients.full_name`, mantendo `profiles.display_name` apenas como fallback historico/compatibilidade. Nenhum schema, migration ou RLS foi alterado.
+
+
+## Reconciliacao de prontidao funcional 2026-10-07 - hidratacao e treino
+
+A auditoria encontrou trechos historicos de status que ainda descreviam hidratacao automatica e prescricao de treino como se fossem o estado atual.
+
+Estado vigente:
+- check-ins de liquidos e atividade fisica permanecem como registros factuais;
+- nenhuma avaliacao gera meta automatica de hidratacao e a cliente nao recebe progresso contra meta automatica enquanto a regra profissional estiver aberta;
+- infraestrutura/snapshots historicos de hidratacao permanecem preservados por compatibilidade e auditoria;
+- a prescricao versionada de treino por cliente ja esta no `master` desde o PR #445, com solicitacao previa, selecao individual, revisao, publicacao humana e historico;
+- regras profissionais de progressao de treino continuam abertas e nao devem ser inferidas.
+
+Esta reconciliacao corrige documentacao historica; nao cria regra profissional nova, schema, migration ou RLS.
