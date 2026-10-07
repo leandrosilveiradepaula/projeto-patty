@@ -1,3 +1,9 @@
+## Auditoria funcional de progresso de conteudos 2026-10-07
+
+O runtime confirma que a cliente pode abrir apenas assets de versoes explicitamente liberadas, enquanto a Patty ve liberacoes e disponibilidade de arquivo. A tabela `client_content_progress` existe, mas as policies atuais permitem escrita apenas administrativa.
+
+Portanto, abertura de asset nao deve ser tratada como consentimento ou como conclusao, e o portal da cliente nao deve tentar gravar `first_opened_at`/`completed_at` ate a semantica de produto ser confirmada. O estado atual e deliberadamente fail-closed, sem telemetria implicita.
+
 ## Auditoria funcional do ciclo de conta 2026-10-07
 
 O ciclo de acompanhamento esta coerente com a regra confirmada: encerrar o ultimo assignment torna a cliente inativa; iniciar/reiniciar acompanhamento torna ativa; historico e conta permanecem preservados. O ciclo de Auth continua separado e nao sera inferido a partir do status da cliente.
