@@ -1293,6 +1293,29 @@ export async function listEducationalContentAssetsForCurrentAdmin(
   return data;
 }
 
+export async function listEducationalContentAssetsForCurrentAdminVersions(
+  versionIds: string[],
+) {
+  if (versionIds.length === 0) return [];
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("educational_content_assets")
+    .select(
+      "id, educational_content_version_id, asset_key, storage_provider, content_type, byte_size, created_at",
+    )
+    .in("educational_content_version_id", versionIds)
+    .order("educational_content_version_id", { ascending: true })
+    .order("asset_key", { ascending: true })
+    .order("id", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
 export async function createAccessibleEducationalContentAsset(input: {
   byteSize: number;
   contentType: string;
