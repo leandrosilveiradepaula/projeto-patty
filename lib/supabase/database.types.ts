@@ -3288,7 +3288,7 @@ export type Database = {
           p_actor_profile_id: string
           p_channel_key: string
           p_client_id: string
-          p_expected_active_version_id: string
+          p_expected_active_version_id: string | null
           p_purpose_key: string
         }
         Returns: string
@@ -3366,11 +3366,11 @@ export type Database = {
         Args: {
           p_execution_id: string
           p_failure_code: string
-          p_failure_message: string
+          p_failure_message: string | null
           p_failure_stage: string
-          p_response_content: string
-          p_response_content_format: string
-          p_response_received_at: string
+          p_response_content: string | null
+          p_response_content_format: string | null
+          p_response_received_at: string | null
         }
         Returns: undefined
       }
@@ -3396,10 +3396,6 @@ export type Database = {
         }
         Returns: string
       }
-      generate_scheduled_weekly_feedback_requests: {
-        Args: { p_now?: string }
-        Returns: number
-      }
       generate_weekly_feedback_reminder_events: {
         Args: { p_now?: string }
         Returns: number
@@ -3407,9 +3403,9 @@ export type Database = {
       list_current_client_finalized_assessment_measurements: {
         Args: never
         Returns: {
-          assessed_at: string
           assessment_id: string
-          assessment_kind: string
+          assessed_at: string
+          assessment_kind: string | null
           measurement_key: string
           measurement_value: number
           unit: string
