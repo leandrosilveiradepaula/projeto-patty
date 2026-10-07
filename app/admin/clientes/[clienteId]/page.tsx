@@ -131,7 +131,7 @@ export default async function AdminClienteDetailPage({
               kind: "none" as const,
             };
 
-  const displayName = client.profiles?.display_name?.trim();
+  const displayName = client.full_name?.trim() || client.profiles?.display_name?.trim();
   const latestAnamnesis = anamneses[0] ?? null;
   const submittedAnamneses = anamneses
     .filter((submission) => Boolean(submission.submitted_at))
