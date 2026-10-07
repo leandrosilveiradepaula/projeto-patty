@@ -1,3 +1,13 @@
+## Atualizacao de auditoria de interface 2026-10-07 - telas secundarias da cliente
+
+As telas secundarias foram simplificadas para evitar repetir a navegacao principal.
+
+- Perfil deixa de repetir um card de Anamnese; a pagina fica focada em acesso e Cadastro Atual;
+- Arquivos deixa de exibir `Voltar ao inicio` no cabecalho, pois a barra inferior persistente ja oferece navegacao principal;
+- estilos e imports associados a esses atalhos foram removidos.
+
+Nenhuma regra profissional, schema, migration ou RLS foi alterado.
+
 ## Atualizacao 2026-10-07 - runtime de hidratacao reconciliado
 
 A hidratacao continua aberta como regra profissional automatica.
