@@ -267,6 +267,16 @@ export default async function AdminClienteDetailPage({
   const pendingWeeklyFeedbackCount = weeklyFeedbacks.filter(
     (feedback) => !feedback.submitted_at,
   ).length;
+  const pendingPrivateFileReleaseCount = files.filter(
+    (file) =>
+      !file.client_visible_at &&
+      file.uploaded_by_profile_id !== client.profile_id,
+  ).length;
+  const weeklyFeedbackChannel = weeklyFeedbackNotificationPreference?.channel_key ?? null;
+  const weeklyFeedbackChannelNeedsSetup = !weeklyFeedbackChannel;
+  const weeklyFeedbackEmailNeedsContact =
+    weeklyFeedbackChannel === "email" && !registration?.contact_email?.trim();
+
   const nextOperationalAction = !registration
     ? {
         description:
@@ -276,7 +286,34 @@ export default async function AdminClienteDetailPage({
         label: "Preencher cadastro atual",
         title: "Cadastro atual",
       }
-    : anamnesisPattyAction
+    : weeklyFeedbackChannelNeedsSetup
+      ? {
+          description:
+            "Defina o canal individual do Feedback Semanal antes de depender dos lembretes automáticos.",
+          eyebrow: "Ação da Patty",
+          href: "#preferencia-feedback",
+          label: "Configurar canal",
+          title: "Canal do Feedback Semanal",
+        }
+      : weeklyFeedbackEmailNeedsContact
+        ? {
+            description:
+              "Email foi escolhido para o Feedback Semanal, mas o Cadastro Atual ainda não possui email de contato. O email de login não é usado como substituto.",
+            eyebrow: "Ação da Patty",
+            href: "#cadastro-atual",
+            label: "Completar email de contato",
+            title: "Contato para Feedback Semanal",
+          }
+        : pendingPrivateFileReleaseCount > 0
+          ? {
+              description:
+                `Há ${pendingPrivateFileReleaseCount} arquivo(s) administrativo(s) aguardando decisão explícita de liberação para a cliente.`,
+              eyebrow: "Ação da Patty",
+              href: `/admin/clientes/${client.id}/arquivos#aguardando-liberacao`,
+              label: "Revisar arquivos",
+              title: "Arquivos aguardando liberação",
+            }
+          : anamnesisPattyAction
       ? anamnesisPattyAction.reviewPending
         ? {
             description:
@@ -740,10 +777,16 @@ export default async function AdminClienteDetailPage({
             <Card className={styles.infoCard}>
               <div className={styles.cardHeader}>
                 <h3 className={styles.cardTitle}>Arquivos</h3>
-                <Badge variant="neutral">{files.length}</Badge>
+                <Badge variant={pendingPrivateFileReleaseCount > 0 ? "warning" : "neutral"}>
+                  {pendingPrivateFileReleaseCount > 0
+                    ? `${pendingPrivateFileReleaseCount} aguardando liberação`
+                    : files.length}
+                </Badge>
               </div>
               <p className={styles.cardDescription}>
-                Fotos, exames e documentos privados vinculados a esta cliente.
+                {pendingPrivateFileReleaseCount > 0
+                  ? `${pendingPrivateFileReleaseCount} arquivo(s) administrativo(s) aguardam decisão explícita de liberação.`
+                  : "Fotos, exames e documentos privados vinculados a esta cliente."}
               </p>
             </Card>
           </Link>

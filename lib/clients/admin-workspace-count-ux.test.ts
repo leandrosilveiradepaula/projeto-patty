@@ -17,3 +17,15 @@ test("workspace sections do not repeat counts already shown in the header", () =
   assert.doesNotMatch(anamnesis, /action=\{<Badge variant="neutral">\{submissions\.length\} registro\(s\)<\/Badge>\}/);
   assert.doesNotMatch(protocols, /action=\{<Badge variant="neutral">\{protocols\.length\} protocolo\(s\)<\/Badge>\}/);
 });
+
+
+test("client workspace surfaces feedback readiness and hidden administrative files", () => {
+  const page = read("app/admin/clientes/[clienteId]/page.tsx");
+
+  assert.match(page, /weeklyFeedbackChannelNeedsSetup/);
+  assert.match(page, /weeklyFeedbackEmailNeedsContact/);
+  assert.match(page, /email de login não é usado como substituto/i);
+  assert.match(page, /pendingPrivateFileReleaseCount/);
+  assert.match(page, /arquivos#aguardando-liberacao/);
+  assert.match(page, /aguardando liberação/);
+});
