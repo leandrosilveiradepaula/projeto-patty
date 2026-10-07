@@ -1,3 +1,12 @@
+## Reconciliacao funcional pos-auditoria de UX 2026-10-07
+
+A primeira varredura funcional separou pendencias reais de documentacao historica:
+- lembrete de esclarecimento ja usa template versionado ativo no runtime; falta somente decisao de canal/entrega recorrente;
+- Feedback Semanal ja possui fundacao de entrega por email, mantendo SMTP real como dependencia externa;
+- progresso de conteudo possui schema, mas o comportamento de abertura/conclusao ainda carece de definicao de produto;
+- primeiro video aprovado do Drive foi reobtido e revalidado quanto a tamanho/MIME antes da proxima etapa de migracao; nenhuma publicacao/release foi feita;
+- `MVP.md` foi reconciliado para nao reabrir como confirmadas regras profissionais superadas pela reconciliacao de 2026-10-07.
+
 ## Fechamento da auditoria detalhada de interface 2026-10-07
 
 A varredura transversal final da etapa de UX foi concluida depois dos lotes de clientes, protocolos, anamnese, arquivos, portal da cliente, bibliotecas e operacao administrativa.

@@ -1,3 +1,17 @@
+## Reconciliacao funcional 2026-10-07
+
+A auditoria pos-UX verificou codigo e estado SaaS para separar gaps reais de pendencias documentais antigas.
+
+Confirmado nesta rodada:
+- o template versionado `workflow.anamnesis_clarification_reminder` existe no Supabase SaaS com uma unica versao ativa de 24 horas;
+- o runtime de pendencias ja resolve essa configuracao server-side e nao depende mais de constante historica de 24h;
+- o envio recorrente do lembrete de esclarecimento continua bloqueado porque canal/lifecycle de entrega ainda nao foi confirmado;
+- o Feedback Semanal ja possui fundacao de preferencia de canal, eventos auditaveis e endpoint de entrega de email; SMTP real continua dependencia operacional externa;
+- `client_content_progress` existe no schema, mas nao ha fluxo de produto implementado para abertura/conclusao; continua PARCIAL ate definir quem registra esses eventos;
+- o primeiro video educacional aprovado foi novamente obtido do Drive sem alterar o original e teve tamanho observado de 123.262.796 bytes e MIME `video/mp4`, coerentes com o manifesto. Upload ao Blob, registro do asset, publicacao e release permanecem etapas separadas.
+
+A reconciliacao documental do metodo foi reforcada: qualquer trecho historico que trate etapas posteriores ao Cutting 2 ou hidratacao automatica como regra vigente nao autoriza implementacao. A fonte normativa mais recente prevalece.
+
 # Mapa de prontidao do sistema completo
 
 Data de referencia: 2026-10-03 (reconciliado com snapshots/hardening, fluxo vigente do metodo e estado atual de Avaliacoes/IA).
