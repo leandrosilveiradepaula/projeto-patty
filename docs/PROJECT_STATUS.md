@@ -2798,3 +2798,13 @@ Os textos foram reconciliados sem ampliar autorizacoes:
 - consentimento da Anamnese v1 resolvido nao equivale a consentimento para IA;
 - integracao OpenAI implementada nao equivale a permissao para processar dados reais de saude;
 - o gate de dados reais permanece fechado ate os controles operacionais aplicaveis serem confirmados.
+
+
+## Reconciliacao adicional de readiness 2026-10-07
+
+A auditoria encontrou tres contradicoes historicas adicionais:
+- um trecho de `MVP_READINESS.md` ainda dizia que a infraestrutura de midia educacional precisava ser decidida, embora Vercel Private Blob ja esteja escolhido e provisionado;
+- uma secao antiga de execution boundary ainda dizia que provider/modelo nao estavam integrados, contradizendo o runtime OpenAI atual;
+- o bloco historico de hidratacao v2 ainda dizia que novas metas usariam 35 mL/kg, contradizendo a suspensao vigente da automacao de hidratacao.
+
+Os blocos foram reconciliados preservando o historico tecnico sem permitir que estado antigo seja interpretado como regra/runtime atual.
