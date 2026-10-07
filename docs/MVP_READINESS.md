@@ -104,6 +104,14 @@ Estados usados:
 | Regras deterministicas do metodo | IMPLEMENTADO PARCIAL | sem automacao de protocolo | CI VALIDADO | ampliar somente com formulas exatas confirmadas/documentadas |
 | CI | IMPLEMENTADO | automatico no GitHub Actions + smoke E2E manual de arquivos privados | `npm ci` + audit high/critical de producao + typecheck + suites deterministicas + `test:security-boundaries` + build; core Actions em v7; E2E de producao PASS nos fluxos ja estabilizados | ampliar E2E somente para fluxos estaveis e sinteticos |
 
+## Boundary de automacao de protocolo 2026-10-07
+
+O motor deterministico ja suporta configuracoes versionadas para conversao de doses, limite do grupo de proteina com maior teor de gordura e equivalencia confirmada de legumes. Os testes demonstram que alteracoes de parametros mudam o resultado sem mudanca de codigo.
+
+Isso nao autoriza gerar automaticamente um protocolo completo. O helper de rascunho alimentar atual apenas extrai contexto alimentar confirmado da Anamnese e resume doses persistidas; ele nao redistribui macros, escolhe numero de refeicoes, seleciona alimentos nem decide fase.
+
+Automacao de rascunho deve continuar restrita a regras exatas confirmadas/configuradas, com revisao e publicacao humanas obrigatorias.
+
 ## Regras deterministicas confirmadas
 
 Ja estao em codigo testavel, sem ligacao automatica com decisao de fase ou publicacao:
