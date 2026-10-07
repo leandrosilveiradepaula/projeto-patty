@@ -51,6 +51,12 @@ export default async function AdminClientAssessmentsPage({
       loadSupportedAssessmentKindOptions(),
       loadAssessmentSchedulePreferences(),
     ]);
+  const draftAssessments = assessments.filter(
+    (assessment) => !assessment.finalized_at,
+  );
+  const finalizedAssessments = assessments.filter(
+    (assessment) => Boolean(assessment.finalized_at),
+  );
   const displayName = client.profiles?.display_name?.trim();
   const kindOptions = assessmentKinds.options.map((option) => ({
     label: option.label,
@@ -102,18 +108,55 @@ export default async function AdminClientAssessmentsPage({
           />
         </Card>
       </Section>
+      {draftAssessments.length > 0 ? (
+        <Section
+          action={<Badge variant="warning">{draftAssessments.length} rascunho(s)</Badge>}
+          description="Avaliações ainda editáveis e que aguardam finalização explícita."
+          title="Em andamento"
+        >
+          <ul className={styles.evaluationList}>
+            {draftAssessments.map((assessment) => (
+              <li key={assessment.id}>
+                <EvaluationListItem
+                  action={
+                    <Link
+                      className={styles.actionLink}
+                      href={`/admin/avaliacoes/${assessment.id}`}
+                    >
+                      Continuar avaliação
+                    </Link>
+                  }
+                  evaluationDate={formatAssessmentDate(assessment.assessed_at)}
+                  meta={
+                    resolveSupportedAssessmentKindOption(
+                      assessmentKinds.options,
+                      assessment.assessment_kind,
+                    )?.label ?? "Legada / não classificada"
+                  }
+                  status={<Badge variant="warning">Rascunho</Badge>}
+                />
+              </li>
+            ))}
+          </ul>
+        </Section>
+      ) : null}
+
       <Section
-        description="Registros desta cliente em ordem da avaliação mais recente para a mais antiga."
-        title="Avaliações"
+        description="Avaliações já finalizadas, preservadas da mais recente para a mais antiga."
+        title="Histórico finalizado"
       >
-        {assessments.length === 0 ? (
+        {finalizedAssessments.length === 0 ? (
           <EmptyState
-            description="Novas avaliações aparecerão nesta área quando forem registradas."
-            title="Nenhuma avaliação registrada"
+            description={
+              draftAssessments.length > 0
+                ? "Finalize uma avaliação em andamento para iniciar o histórico."
+                : "Crie e finalize uma avaliação para iniciar o histórico desta cliente."
+            }
+            title="Nenhuma avaliação finalizada"
           />
         ) : (
           <ul className={styles.evaluationList}>
-            {assessments.map((assessment) => (
+            {finalizedAssessments.map((assessment) => (
               <li key={assessment.id}>
                 <EvaluationListItem
                   action={
@@ -131,11 +174,7 @@ export default async function AdminClientAssessmentsPage({
                       assessment.assessment_kind,
                     )?.label ?? "Legada / não classificada"
                   }
-                  status={
-                    <Badge variant={assessment.finalized_at ? "neutral" : "warning"}>
-                      {assessment.finalized_at ? "Finalizada" : "Rascunho"}
-                    </Badge>
-                  }
+                  status={<Badge variant="neutral">Finalizada</Badge>}
                 />
               </li>
             ))}
