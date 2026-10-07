@@ -84,3 +84,35 @@ test("readiness reflects the merged client-specific training prescription", () =
     /prescricao versionada de treino por cliente continua sendo uma lacuna separada/,
   );
 });
+
+
+test("open questions do not reopen implemented content and exercise lifecycles", () => {
+  const questions = read("docs/OPEN_QUESTIONS.md");
+
+  assert.doesNotMatch(
+    questions,
+    /Qual sera o processo de revisao, aprovacao e versionamento dos conteudos\?/,
+  );
+  assert.match(questions, /processo de autoria da biblioteca educacional ja e versionado/);
+  assert.match(questions, /biblioteca de exercicios ja expoe para clientes autenticadas somente versoes publicadas/);
+  assert.match(questions, /prescricao individual tambem ja possui lifecycle versionado/);
+});
+
+test("open questions keep hydration historical values non-authoritative", () => {
+  const questions = read("docs/OPEN_QUESTIONS.md");
+
+  assert.match(questions, /HISTORICO SUPERADO \/ RECONCILIADO EM 2026-10-07/);
+  assert.match(questions, /35 mL\/kg.*nao e regra profissional automatica vigente/);
+  assert.doesNotMatch(
+    questions,
+    /formula e unidade vigentes para novas metas: 35 mL\/kg\/dia/,
+  );
+});
+
+test("weekly feedback open questions distinguish implemented schedule from actual gaps", () => {
+  const questions = read("docs/OPEN_QUESTIONS.md");
+
+  assert.match(questions, /periodo automatico = semana anterior completa/);
+  assert.match(questions, /geracao recorrente, origem auditavel e idempotencia implementadas/);
+  assert.match(questions, /provedor, opt-in\/consentimento e fallback do WhatsApp/);
+});
