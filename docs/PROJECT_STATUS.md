@@ -2867,3 +2867,15 @@ A passada final comparou os documentos normativos e de readiness contra os estad
 A reconciliacao documental da auditoria de interface/runtime esta encerrada para os conflitos identificados nesta rodada. Pendencias que permanecem em `OPEN_QUESTIONS.md` devem ser tratadas como pendencias reais — profissionais, juridicas, operacionais ou de produto — e nao como falhas desta reconciliacao.
 
 Este fechamento nao declara o produto inteiro concluido e nao autoriza inferir regras abertas. Ele encerra especificamente a etapa de auditoria/reconciliacao iniciada nesta sequencia de PRs.
+
+
+## Integracao UI-backend - fila de prontidao operacional 2026-10-07
+
+Primeiro bloco apos o fechamento da reconciliacao documental. A fila administrativa passa a expor novos gaps baseados exclusivamente em fatos persistidos, sem score ou inferencia clinica:
+- cliente ativa sem `client_registration`: acao da Patty para completar Cadastro Atual;
+- Feedback Semanal sem canal configurado: acao da Patty para definir preferencia individual;
+- canal email selecionado sem `contact_email`: acao da Patty para completar contato, sem usar email de login como substituto;
+- conteudo ja liberado cuja versao exata nao possui asset: gap operacional de entrega;
+- novas liberacoes de conteudo passam a listar somente versoes publicadas que ja possuem asset privado registrado, evitando criar novos estados de "liberado sem arquivo".
+
+A implementacao usa consultas batch client-scoped existentes sob RLS e nao altera schema. Estados legados de conteudo liberado sem asset permanecem preservados/auditaveis e aparecem na fila em vez de serem apagados ou corrigidos silenciosamente.

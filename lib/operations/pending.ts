@@ -5,6 +5,10 @@ export type OperationalPendingItemKind =
   | "assessment_draft"
   | "clarification_response_pending_review"
   | "clarification_without_response"
+  | "client_registration_missing"
+  | "weekly_feedback_channel_missing"
+  | "weekly_feedback_email_contact_missing"
+  | "content_released_without_asset"
   | "protocol_approved_not_published"
   | "protocol_submitted_not_approved"
   | "training_requested_without_plan"
@@ -37,6 +41,7 @@ const CLIENT_WAITING_PENDING_KINDS = new Set<OperationalPendingItemKind>([
 const OPERATIONAL_PENDING_KINDS = new Set<OperationalPendingItemKind>([
   "ai_execution_started",
   "weekly_feedback_reminder_blocked",
+  "content_released_without_asset",
 ]);
 
 export function getOperationalPendingGroup(
@@ -143,12 +148,33 @@ export type PendingWeeklyFeedbackNotificationEvent = {
   weeklyFeedbackId: string;
 };
 
+export type PendingClientOperationalReadiness = {
+  clientId: string;
+  clientLabel: string;
+  contactEmail: string | null;
+  createdAt: string;
+  hasRegistration: boolean;
+  weeklyFeedbackChannel: string | null;
+};
+
+export type PendingContentReleaseReadiness = {
+  clientId: string;
+  clientLabel: string;
+  createdAt: string;
+  hasAsset: boolean;
+  releaseId: string;
+  title: string;
+  versionId: string;
+};
+
 export type OperationalPendingFactsInput = {
   aiExecutions: PendingAiExecution[];
   anamnesisSubmissions: PendingAnamnesisSubmission[];
   assessments: PendingAssessment[];
   clarificationReminderIntervalHours: number;
   clarificationRequests: PendingClarificationRequest[];
+  clientOperationalReadiness?: PendingClientOperationalReadiness[];
+  contentReleaseReadiness?: PendingContentReleaseReadiness[];
   protocolVersions: PendingProtocolVersion[];
   trainingLifecycle?: PendingTrainingLifecycle[];
   referenceNow?: string;
@@ -367,6 +393,72 @@ export function buildOperationalPendingItems(
       kind: "training_reviewed_not_published",
       statusLabel: "Revisado, não publicado",
       title: "Treino aguardando publicação",
+    });
+  }
+
+  for (const client of input.clientOperationalReadiness ?? []) {
+    if (!client.hasRegistration) {
+      items.push({
+        clientId: client.clientId,
+        clientLabel: client.clientLabel,
+        createdAt: client.createdAt,
+        description:
+          "A cliente possui acompanhamento ativo, mas ainda não possui Cadastro Atual persistido. Complete os dados de contato antes de depender deles em fluxos operacionais.",
+        href: `/admin/clientes/${client.clientId}#cadastro-atual`,
+        id: `client-registration:${client.clientId}`,
+        kind: "client_registration_missing",
+        statusLabel: "Cadastro atual ausente",
+        title: "Completar Cadastro Atual",
+      });
+    }
+
+    if (!client.weeklyFeedbackChannel) {
+      items.push({
+        clientId: client.clientId,
+        clientLabel: client.clientLabel,
+        createdAt: client.createdAt,
+        description:
+          "Nenhum canal está configurado para o Feedback Semanal desta cliente. Escolha a preferência individual antes de depender do lembrete automático.",
+        href: `/admin/clientes/${client.clientId}#preferencia-feedback`,
+        id: `weekly-feedback-channel:${client.clientId}`,
+        kind: "weekly_feedback_channel_missing",
+        statusLabel: "Canal não configurado",
+        title: "Configurar canal do Feedback Semanal",
+      });
+    } else if (
+      client.weeklyFeedbackChannel === "email" &&
+      !client.contactEmail?.trim()
+    ) {
+      items.push({
+        clientId: client.clientId,
+        clientLabel: client.clientLabel,
+        createdAt: client.createdAt,
+        description:
+          "Email foi escolhido como canal do Feedback Semanal, mas o Cadastro Atual não possui email de contato. Email de login não é usado como substituto.",
+        href: `/admin/clientes/${client.clientId}#cadastro-atual`,
+        id: `weekly-feedback-email-contact:${client.clientId}`,
+        kind: "weekly_feedback_email_contact_missing",
+        statusLabel: "Email de contato ausente",
+        title: "Completar contato para o Feedback Semanal",
+      });
+    }
+  }
+
+  for (const release of input.contentReleaseReadiness ?? []) {
+    if (release.hasAsset) {
+      continue;
+    }
+
+    items.push({
+      clientId: release.clientId,
+      clientLabel: release.clientLabel,
+      createdAt: release.createdAt,
+      description: `O conteúdo "${release.title}" foi liberado para a cliente, mas a versão exata ainda não possui asset privado registrado. A liberação permanece auditável, porém o arquivo não pode ser aberto.`,
+      href: `/admin/clientes/${release.clientId}/conteudos`,
+      id: `content-release-asset:${release.releaseId}`,
+      kind: "content_released_without_asset",
+      statusLabel: "Liberado sem arquivo",
+      title: "Conteúdo liberado sem asset",
     });
   }
 

@@ -359,6 +359,30 @@ export async function getAccessibleWeeklyFeedbackNotificationPreference(
   return data;
 }
 
+export async function listAccessibleWeeklyFeedbackNotificationPreferencesForClients(
+  clientIds: string[],
+) {
+  if (clientIds.length === 0) {
+    return [];
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_notification_preference_versions")
+    .select(
+      "id, client_id, purpose_key, channel_key, version_number, created_at, activated_at, retired_at",
+    )
+    .in("client_id", clientIds)
+    .eq("purpose_key", "weekly_feedback")
+    .is("retired_at", null);
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
 export async function listAccessibleClientNotificationEvents(clientId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -384,6 +408,26 @@ export async function getAccessibleClientRegistration(clientId: string) {
     .select("client_id, city, phone, contact_email, instagram, created_at, updated_at")
     .eq("client_id", clientId)
     .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function listAccessibleClientRegistrationsForClients(
+  clientIds: string[],
+) {
+  if (clientIds.length === 0) {
+    return [];
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_registration")
+    .select("client_id, city, phone, contact_email, instagram, created_at, updated_at")
+    .in("client_id", clientIds);
 
   if (error) {
     throw error;
@@ -1370,6 +1414,29 @@ export async function listCurrentClientContentReleases(clientId: string) {
 
 export async function listContentReleasesForAccessibleClient(clientId: string) {
   return listContentReleasesForClient(clientId);
+}
+
+export async function listContentReleasesForAccessibleClients(
+  clientIds: string[],
+) {
+  if (clientIds.length === 0) {
+    return [];
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_content_releases")
+    .select(
+      "id, client_id, released_at, educational_content_versions(id, educational_content_id, version_number, title, category_key, content_type_key)",
+    )
+    .in("client_id", clientIds)
+    .order("released_at", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
 }
 
 export async function getAccessibleEducationalContentAssetForCurrentClient(

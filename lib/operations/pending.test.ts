@@ -670,3 +670,96 @@ test("training lifecycle facts become Patty operational pendings", () => {
     ],
   );
 });
+
+
+test("client readiness gaps become explicit Patty actions without using login email", () => {
+  const items = buildOperationalPendingItems({
+    clarificationReminderIntervalHours: 24,
+    anamnesisSubmissions: [],
+    clarificationRequests: [],
+    assessments: [],
+    protocolVersions: [],
+    aiExecutions: [],
+    clientOperationalReadiness: [
+      {
+        clientId: "client-registration",
+        clientLabel: "Cliente Cadastro",
+        contactEmail: null,
+        createdAt: "2026-10-07T10:00:00Z",
+        hasRegistration: false,
+        weeklyFeedbackChannel: null,
+      },
+      {
+        clientId: "client-email",
+        clientLabel: "Cliente Email",
+        contactEmail: null,
+        createdAt: "2026-10-07T10:05:00Z",
+        hasRegistration: true,
+        weeklyFeedbackChannel: "email",
+      },
+      {
+        clientId: "client-ready",
+        clientLabel: "Cliente Pronta",
+        contactEmail: "contato@example.test",
+        createdAt: "2026-10-07T10:10:00Z",
+        hasRegistration: true,
+        weeklyFeedbackChannel: "email",
+      },
+    ],
+  });
+
+  assert.deepEqual(
+    items.map((item) => item.kind),
+    [
+      "client_registration_missing",
+      "weekly_feedback_channel_missing",
+      "weekly_feedback_email_contact_missing",
+    ],
+  );
+  assert.equal(
+    items.every((item) => getOperationalPendingGroup(item) === "patty"),
+    true,
+  );
+  assert.match(
+    items.find((item) => item.kind === "weekly_feedback_email_contact_missing")
+      ?.description ?? "",
+    /Email de login não é usado como substituto/,
+  );
+});
+
+test("released content without an asset becomes an operational gap", () => {
+  const items = buildOperationalPendingItems({
+    clarificationReminderIntervalHours: 24,
+    anamnesisSubmissions: [],
+    clarificationRequests: [],
+    assessments: [],
+    protocolVersions: [],
+    aiExecutions: [],
+    contentReleaseReadiness: [
+      {
+        clientId: "client-1",
+        clientLabel: "Cliente 1",
+        createdAt: "2026-10-07T11:00:00Z",
+        hasAsset: false,
+        releaseId: "release-missing",
+        title: "Como utilizar a balança",
+        versionId: "version-missing",
+      },
+      {
+        clientId: "client-2",
+        clientLabel: "Cliente 2",
+        createdAt: "2026-10-07T11:05:00Z",
+        hasAsset: true,
+        releaseId: "release-ready",
+        title: "Conteúdo pronto",
+        versionId: "version-ready",
+      },
+    ],
+  });
+
+  assert.equal(items.length, 1);
+  assert.equal(items[0]?.kind, "content_released_without_asset");
+  assert.equal(getOperationalPendingGroup(items[0]!), "operational");
+  assert.equal(items[0]?.statusLabel, "Liberado sem arquivo");
+  assert.match(items[0]?.description ?? "", /versão exata/);
+});

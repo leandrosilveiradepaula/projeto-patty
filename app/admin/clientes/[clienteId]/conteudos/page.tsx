@@ -62,11 +62,19 @@ export default async function AdminClientContentPage({
         : [],
     ),
   );
-  const availableVersions = contentVersions.filter((version) =>
-    isContentVersionReleaseEligible({
-      alreadyReleased: releasedVersionIds.has(version.id),
-      publishedAt: version.published_at,
-    }),
+  const availableVersions = contentVersions.filter(
+    (version) =>
+      versionIdsWithAssets.has(version.id) &&
+      isContentVersionReleaseEligible({
+        alreadyReleased: releasedVersionIds.has(version.id),
+        publishedAt: version.published_at,
+      }),
+  );
+  const publishedVersionsAwaitingAsset = contentVersions.filter(
+    (version) =>
+      Boolean(version.published_at) &&
+      !releasedVersionIds.has(version.id) &&
+      !versionIdsWithAssets.has(version.id),
   );
   const displayName = client.full_name?.trim() || client.profiles?.display_name?.trim();
 
@@ -83,9 +91,23 @@ export default async function AdminClientContentPage({
         description="Escolha a versão publicada que deve ficar disponível para esta cliente."
         title="Liberar conteúdo"
       >
+        {publishedVersionsAwaitingAsset.length > 0 ? (
+          <Card>
+            <p className={styles.notice}>
+              {publishedVersionsAwaitingAsset.length} versão(ões) publicada(s) ainda
+              não possuem arquivo privado registrado e, por segurança operacional,
+              não aparecem como opção de nova liberação. Registre e verifique o asset
+              na biblioteca antes de liberar para a cliente.
+            </p>
+          </Card>
+        ) : null}
         {availableVersions.length === 0 ? (
           <EmptyState
-            description="Não há versão publicada disponível para uma nova liberação nesta cliente."
+            description={
+              publishedVersionsAwaitingAsset.length > 0
+                ? "As versões publicadas restantes aguardam asset privado verificado."
+                : "Não há versão publicada disponível para uma nova liberação nesta cliente."
+            }
             title="Nenhum conteúdo disponível para liberar"
           />
         ) : (
