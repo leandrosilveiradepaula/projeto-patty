@@ -94,7 +94,7 @@ export default async function AdminClientesPage({
         </Alert>
       ) : assignment === "ended" ? (
         <Alert live="polite" title="Acompanhamento encerrado" variant="success">
-          O acompanhamento atual foi encerrado e o histórico da cliente foi preservado.
+          A cliente agora está inativa. O acompanhamento atual foi encerrado e todo o histórico foi preservado.
         </Alert>
       ) : assignment === "unavailable" ? (
         <Alert live="assertive" title="Acompanhamento indisponível" variant="warning">
