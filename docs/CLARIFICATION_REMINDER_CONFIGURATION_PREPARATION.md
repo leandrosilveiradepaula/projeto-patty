@@ -1,6 +1,6 @@
 # Clarification reminder configuration preparation
 
-Last updated: 2026-10-02.
+Last updated: 2026-10-07.
 
 ## Objective
 
@@ -21,17 +21,21 @@ This slice adds a deterministic unit-aware helper that receives an explicit scal
 
 Golden tests reproduce the current 24-hour reference and prove that a changed interval can be evaluated without editing runtime code.
 
-## Deliberately not switched yet
+## Runtime status reconciled on 2026-10-07
 
-The existing pending-items runtime still contains its historical 24-hour constant. It is not replaced in this preparation because the active template resolver is not yet wired into application data access.
+The preparation described above has already advanced into runtime:
+- `workflow.anamnesis_clarification_reminder` exists as a versioned `scalar_parameter_v1` template;
+- the active SaaS version resolves to 24 hours;
+- `loadClarificationReminderInterval()` resolves the active version server-side and fails closed if the template/version is missing or ambiguous;
+- the operational pending builder receives the resolved interval explicitly;
+- visible pending text derives the interval from the resolved value;
+- there is no silent fallback to a hardcoded 24-hour runtime constant.
 
-There is no silent fallback from configuration to 24 hours.
+The remaining gap is deliberately separate: the notification channel and recurring delivery mechanism for clarification reminders are still open. A due reminder must not be represented as a delivered message.
 
 ## Next gates
 
-1. Create a versioned template such as workflow.anamnesis_clarification_reminder.
-2. Resolve the active version server-side.
-3. Pass the resolved interval explicitly to the operational pending builder.
-4. Replace visible text that embeds 24h with text derived from the resolved interval where appropriate.
-5. Keep channel execution separate from the due-date calculation.
-6. Preserve the rule that due does not mean a message was sent.
+1. Confirm the notification channel/lifecycle for clarification reminders.
+2. Only then implement recurring delivery and its auditable delivery state.
+3. Preserve the distinction between `due`, `attempted`, `delivered` and `failed/blocked`.
+4. Do not reuse the Weekly Feedback channel rules automatically; that would be a new product/professional decision.
