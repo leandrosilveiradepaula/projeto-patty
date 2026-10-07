@@ -1047,7 +1047,7 @@ A migration `20260924165942_harden_ai_execution_boundary.sql` foi aplicada no Su
 
 Provider confirmado: OpenAI.
 
-A branch atual prepara:
+O runtime atual possui:
 - Responses API server-side;
 - `store: false`;
 - Structured Outputs;
@@ -1057,6 +1057,8 @@ A branch atual prepara:
 - tela administrativa de revisao humana;
 - opt-in explicito da capacidade financeira;
 - nenhuma acao automatica sobre cliente/protocolo.
+
+Essas capacidades nao habilitam dados reais por si so; o gate de dados de saude permanece fechado ate os controles operacionais serem confirmados.
 
 A migration `20260924193339_seed_openai_anamnesis_review_prompt.sql` foi aplicada no Supabase SaaS. A verificacao pos-apply confirmou exatamente um prompt `anamnesis_review` v1 e zero `ai_executions`.
 
@@ -2782,3 +2784,15 @@ Reconciliado:
 - a sequencia antiga em `DECISIONS.md` que alcancava Cutting 3 foi marcada explicitamente como historica/superada; o fluxo vigente confirmado termina em `Cutting 2: 2 Low / 1 High`.
 
 Nenhum schema, RLS ou comportamento de runtime foi alterado nesta reconciliacao.
+
+
+## Reconciliacao de blocos obsoletos 2026-10-07 - Anamnese e IA
+
+A auditoria encontrou dois estados antigos ainda redigidos como atuais:
+- `DECISIONS.md` ainda bloqueava a publicacao da Anamnese v1 por ANAM-046, embora o consentimento versionado ja esteja resolvido e a v1 publicada/validada;
+- `MVP_READINESS.md` ainda dizia que nao existia integracao real com provider/modelo, apesar de o boundary server-side OpenAI e a avaliacao sintetica ja existirem.
+
+Os textos foram reconciliados sem ampliar autorizacoes:
+- consentimento da Anamnese v1 resolvido nao equivale a consentimento para IA;
+- integracao OpenAI implementada nao equivale a permissao para processar dados reais de saude;
+- o gate de dados reais permanece fechado ate os controles operacionais aplicaveis serem confirmados.

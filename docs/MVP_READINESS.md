@@ -264,7 +264,9 @@ A fundacao de banco preserva lifecycle, sources, output original, drafts, hypoth
 
 O contrato estrutural do primeiro purpose `anamnesis_review` agora possui validador deterministico em codigo e testes. O validador aceita apenas os dois finding types confirmados, rejeita propriedades extras, exige sources autorizadas da execution e nao permite score/diagnostico/conclusao clinica. Ele nao decide se um finding e verdadeiro e nao substitui revisao humana.
 
-Ainda nao existe integracao real com provider/modelo nem boundary server-side que crie execution, monte contexto minimizado, chame provider e persista sucesso/falha. Esses pontos continuam separados para evitar acoplamento prematuro a um provider.
+### RECONCILIADO EM 2026-10-07
+
+A integracao server-side com OpenAI e o boundary de execution ja existem: execution auditavel, contexto minimizado, chamada via Responses API, persistencia de sucesso/falha e revisao administrativa humana. A avaliacao sintetica passou, mas **dados reais de saude continuam bloqueados** pelo gate operacional `OPENAI_HEALTH_DATA_PROCESSING_ENABLED` e pelos controles de privacidade/retencao ainda nao confirmados. Fundacao tecnica pronta nao equivale a autorizacao para uso real.
 
 ## Proxima rodada de decisoes da Patty
 

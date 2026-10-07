@@ -723,9 +723,9 @@ O SQL foi validado antes do apply em transacao com `ROLLBACK` e repetido apos o 
 
 A auditoria pos-apply confirmou que `authenticated` pode atualizar `submitted_at`, mas nao `client_id` nem `form_version_id`; a policy de UPDATE e o trigger de validacao existem.
 
-### LIMITE
+### RECONCILIADO EM 2026-10-07
 
-ANAM-046 continua juridicamente pendente. A existencia da submissao final tecnica nao autoriza publicar a primeira `client-anamnesis` antes do fechamento do consentimento.
+ANAM-046 deixou de estar pendente para a v1. O consentimento canonico foi definido como checkbox obrigatorio versionado, com valor persistido `Concordo`, e a primeira `client-anamnesis` ja foi publicada/validada. Esta reconciliacao nao generaliza o aceite para uso de dados reais por IA nem resolve politica ampla de retencao/revogacao fora do escopo documentado.
 
 ## 2026-09-24 - Fechamento de produto da Anamnese v1, exceto consentimento juridico
 
@@ -747,11 +747,9 @@ ANAM-044 nao cria `anamnesis_answer`. A secao Arquivos orienta e aponta para `/c
 
 Nao duplicar bytes, metadados ou referencias em respostas da Anamnese. Sem nova regra profissional confirmada, a existencia de upload nao bloqueia o envio final.
 
-### LIMITE JURIDICO
+### RECONCILIADO EM 2026-10-07
 
-ANAM-046 continua pendente. Texto definitivo, versao, base legal, forma de aceite, revogacao, retencao e impacto da recusa exigem validacao juridica/operacional.
-
-Enquanto ANAM-046 nao estiver resolvido, a primeira `client-anamnesis` permanece **NAO PUBLICAVEL**.
+O gate operacional da v1 para ANAM-046 foi resolvido posteriormente: texto, versao e forma de aceite no produto foram definidos, e a `client-anamnesis` v1 foi publicada/validada. Questões juridicas mais amplas de retencao/revogacao continuam separadas e nao devem ser confundidas com o estado tecnico de publicacao da v1.
 
 ## 2026-09-24 - Fundacao versionada de aplicabilidade da Anamnese
 
