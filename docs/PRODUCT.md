@@ -91,7 +91,7 @@ Ainda e necessario definir se havera outros papeis administrativos alem da Patty
 
 No sistema, a Patty inicia o onboarding com o email da cliente e envia um link de convite/ativacao. Nao existe cadastro publico/autonomo. A cliente define a senha no fluxo de ativacao e o login posterior usa email + senha.
 
-Continuam abertas somente as regras operacionais ainda nao fechadas, como expiracao/reenvio do convite, recuperacao de acesso, encerramento da conta e a infraestrutura definitiva do email real de convite.
+Continuam abertas somente as regras operacionais ainda nao fechadas, como expiracao/reenvio do convite, encerramento/desativacao da conta Auth e a infraestrutura definitiva do email real de convite. A recuperacao de acesso ja possui fluxo tecnico no aplicativo e geracao assistida de link individual; isso nao define politica de encerramento de conta.
 
 ## Substituicao gradual do Drive
 
