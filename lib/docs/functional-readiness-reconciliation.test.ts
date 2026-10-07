@@ -219,7 +219,7 @@ test("project status does not present historical runner and migration states as 
   const status = read("docs/PROJECT_STATUS.md");
 
   assert.match(status, /esse bloqueio foi resolvido em 2026-10-01/);
-  assert.match(status, /20261001235018.*posteriormente APLICADA no);
+  assert.match(status, /20261001235018.*posteriormente APLICADA/);
   assert.match(status, /MERGEADO \/ BOUNDARY APLICADO NO SAAS/);
   assert.match(status, /UI de `\/admin\/configuracoes` ja esta mergeada no `master`/);
   assert.doesNotMatch(status, /GitHub Actions continua com falha operacional de runner/);
