@@ -1,3 +1,11 @@
+## Auditoria funcional da biblioteca de exercicios 2026-10-07
+
+A autoria administrativa real ja permite criar exercicio, editar um unico draft, publicar versao e abrir nova versao a partir da ultima publicada. A biblioteca global continua restrita ao admin; a cliente recebe somente exercicios presentes no treino individual publicado.
+
+O inventario historico do Drive possui 74 itens e continua `publishable: false`. Pastas historicas como "TREINO FEMININO" sao metadado de origem, nao taxonomia/regra de produto. Duplicatas possiveis, autoria, direitos e revisao tecnica precisam de revisao humana antes de migracao/publicacao.
+
+Assim, o proximo trabalho de conteudo e curadoria dos exercicios reais, nao automacao de selecao/progressao nem importacao cega do inventario historico.
+
 ## Auditoria funcional de equivalentes alimentares 2026-10-07
 
 A fundacao versionada de catalogos/grupos/itens e o vinculo do plano alimentar a uma versao exata ja existem. O banco congela mutacoes quando a versao de catalogo esta referenciada por protocolo submetido para revisao.
