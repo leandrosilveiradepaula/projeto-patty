@@ -24,7 +24,7 @@ test("client workspace surfaces feedback readiness and hidden administrative fil
 
   assert.match(page, /weeklyFeedbackChannelNeedsSetup/);
   assert.match(page, /weeklyFeedbackEmailNeedsContact/);
-  assert.match(page, /Email de login não é usado como substituto/);
+  assert.match(page, /email de login não é usado como substituto/i);
   assert.match(page, /pendingPrivateFileReleaseCount/);
   assert.match(page, /arquivos#aguardando-liberacao/);
   assert.match(page, /aguardando liberação/);
