@@ -438,13 +438,19 @@ export default async function AdminClienteDetailPage({
             ? `Acompanhamento desde ${formatDate(client.started_at)}`
             : "Acompanhamento ativo"
         }
-        name={displayName || "Cadastro incompleto"}
+        name={displayName || "Nome ausente — registro legado"}
         secondary={
           client.profile_id
             ? "Conta da cliente vinculada"
             : "Conta da cliente ainda não vinculada"
         }
-        status={<Badge variant="neutral">Ativa</Badge>}
+        status={
+          displayName ? (
+            <Badge variant="positive">Ativa</Badge>
+          ) : (
+            <Badge variant="critical">Nome obrigatório</Badge>
+          )
+        }
         visual={
           <span>
             {displayName
