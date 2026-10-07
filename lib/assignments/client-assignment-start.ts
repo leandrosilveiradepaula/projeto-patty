@@ -5,6 +5,18 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { requireRole } from "@/lib/supabase/auth";
 import { isUuid } from "@/lib/validation/uuid";
 
+async function markClientActive(clientId: string) {
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("clients")
+    .update({ status: "active" })
+    .eq("id", clientId);
+
+  if (error) {
+    throw error;
+  }
+}
+
 export type StartClientAssignmentResult =
   | {
       assignmentId: string;
@@ -51,6 +63,8 @@ export async function startCurrentAdminClientAssignment(input: {
   const existingAssignmentId = await getActiveAssignmentId(scopedInput);
 
   if (getAssignmentStartStatus(existingAssignmentId) === "already_active") {
+    await markClientActive(input.clientId);
+
     return {
       assignmentId: existingAssignmentId as string,
       status: "already_active",
@@ -68,6 +82,8 @@ export async function startCurrentAdminClientAssignment(input: {
     .single();
 
   if (!error) {
+    await markClientActive(input.clientId);
+
     return {
       assignmentId: data.id,
       status: "created",
@@ -82,6 +98,8 @@ export async function startCurrentAdminClientAssignment(input: {
     const concurrentAssignmentId = await getActiveAssignmentId(scopedInput);
 
     if (concurrentAssignmentId) {
+      await markClientActive(input.clientId);
+
       return {
         assignmentId: concurrentAssignmentId,
         status: "already_active",

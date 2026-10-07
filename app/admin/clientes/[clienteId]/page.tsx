@@ -1,4 +1,5 @@
 import { endClientAssignmentAction } from "@/app/admin/clientes/[clienteId]/actions";
+import { AdminClientNameEditForm } from "@/components/admin/AdminClientNameEditForm";
 import { AdminClientRegistrationEditForm } from "@/components/admin/AdminClientRegistrationEditForm";
 import { AdminClientRecoveryLinkForm } from "@/components/admin/AdminClientRecoveryLinkForm";
 import { AdminWeeklyFeedbackNotificationPreferenceForm } from "@/components/admin/AdminWeeklyFeedbackNotificationPreferenceForm";
@@ -438,13 +439,19 @@ export default async function AdminClienteDetailPage({
             ? `Acompanhamento desde ${formatDate(client.started_at)}`
             : "Acompanhamento ativo"
         }
-        name={displayName || "Cadastro incompleto"}
+        name={displayName || "Nome ausente — registro legado"}
         secondary={
           client.profile_id
             ? "Conta da cliente vinculada"
             : "Conta da cliente ainda não vinculada"
         }
-        status={<Badge variant="neutral">Ativa</Badge>}
+        status={
+          displayName ? (
+            <Badge variant="positive">Ativa</Badge>
+          ) : (
+            <Badge variant="critical">Nome obrigatório</Badge>
+          )
+        }
         visual={
           <span>
             {displayName
@@ -895,13 +902,19 @@ export default async function AdminClienteDetailPage({
         id="cadastro-atual"
         title="Cadastro atual"
       >
-        <AdminClientRegistrationEditForm
+        <div className={styles.registrationStack}>
+          <AdminClientNameEditForm
+            clientId={client.id}
+            displayName={displayName ?? undefined}
+          />
+          <AdminClientRegistrationEditForm
           city={registration?.city ?? undefined}
           clientId={client.id}
           contactEmail={registration?.contact_email ?? undefined}
           instagram={registration?.instagram ?? undefined}
-          phone={registration?.phone ?? undefined}
-        />
+            phone={registration?.phone ?? undefined}
+          />
+        </div>
       </Section>
 
       <Section

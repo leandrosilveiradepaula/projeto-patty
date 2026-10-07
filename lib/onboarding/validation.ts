@@ -6,6 +6,23 @@ export function normalizeInvitationEmail(value: string) {
   return value.trim();
 }
 
+export function validateClientDisplayName(value: string): ValidationResult {
+  const displayName = value.trim();
+
+  if (displayName.length < 2) {
+    return { message: "Informe o nome da cliente.", ok: false };
+  }
+
+  if (displayName.length > 120) {
+    return {
+      message: "O nome da cliente deve ter no máximo 120 caracteres.",
+      ok: false,
+    };
+  }
+
+  return { ok: true };
+}
+
 export function validateInvitationEmail(value: string): ValidationResult {
   const email = normalizeInvitationEmail(value);
 

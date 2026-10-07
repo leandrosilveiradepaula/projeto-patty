@@ -1,3 +1,35 @@
+## Atualizacao de cadastro 2026-10-07 - nome obrigatorio e cliente ativa/inativa
+
+A Patty confirmou que todo cadastro profissional deve possuir nome e que cliente deve ter estado `active` ou `inactive`.
+
+Implementado nesta branch:
+- onboarding valida nome obrigatorio em ponto centralizado e em defesa em profundidade antes do provisionamento;
+- novas clientes sao criadas com `clients.status = active`;
+- iniciar/reiniciar assignment marca a cliente como `active`;
+- encerrar o ultimo assignment ativo marca a cliente como `inactive`;
+- registros legados sem nome deixam de ser apresentados como "cadastro incompleto" normal e passam a ser sinalizados como inconsistencia;
+- a lista ativa mostra explicitamente o estado `Ativa`.
+
+Estado atual:
+- a fixture de teste sem nome foi removida do Supabase SaaS em 2026-10-07 depois de confirmar que possuia somente um assignment e nenhum dado profissional associado;
+- nao existem mais clientes sem nome no ambiente atual;
+- o hardening estrutural do nome no banco pode seguir em migration futura, sem inventar dados;
+- a visualizacao e o reengajamento de clientes inativas exigem desenho separado de RLS/autorizacao, sem liberar dados sensiveis de ex-clientes fora de regra documentada.
+
+## Atualizacao de auditoria de interface 2026-10-07 - proxima acao na lista de clientes
+
+A lista de clientes passa a reduzir um clique no trabalho diario da Patty.
+
+- clientes sao ordenadas alfabeticamente pelo nome, com cadastros sem nome ao final;
+- quando existe item em `Acao da Patty`, a lista mostra qual e o item factual mais antigo daquela cliente;
+- o botao principal abre diretamente o registro correspondente;
+- o acesso a visao geral da cliente continua disponivel como acao secundaria;
+- quando nao existe acao da Patty, o comportamento permanece simples: abrir a cliente.
+
+A ordenacao das pendencias continua cronologica e nao representa prioridade clinica.
+
+Nenhum schema, migration, RLS ou criterio profissional foi alterado.
+
 ## Atualizacao de auditoria de interface 2026-10-07 - fila operacional na home da Patty
 
 A home administrativa passa a refletir a mesma separacao da fila operacional:

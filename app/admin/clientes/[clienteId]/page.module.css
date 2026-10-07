@@ -311,3 +311,9 @@
 .versionItem[id] {
   scroll-margin-top: var(--space-6);
 }
+
+
+.registrationStack {
+  display: grid;
+  gap: var(--space-6);
+}

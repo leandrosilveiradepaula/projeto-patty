@@ -1,3 +1,16 @@
+## NOVAS QUESTOES ABERTAS — CLIENTES INATIVAS / REENGAJAMENTO
+
+A Patty confirmou em 2026-10-07 que clientes devem ser identificadas como ativas ou inativas e que o historico de inativas deve ser preservado para possibilitar reengajamento futuro.
+
+Continuam abertas antes de implementar campanhas:
+- qual base legal/consentimento sera exigida para contato de reengajamento;
+- quais canais poderao ser usados;
+- quais dados minimos de cliente inativa a Patty podera consultar sem assignment ativo;
+- qual autorizacao client-scoped substituira, se necessario, o assignment ativo para esse uso limitado;
+- como sera modelada a reativacao sem apagar o historico do acompanhamento anterior.
+
+A existencia de `inactive` nao autoriza relaxar RLS nem consultar dados clinicos/sensiveis de ex-clientes fora de uma regra de acesso documentada.
+
 ## RECONCILIACAO VIGENTE — 2026-10-07
 
 Permanecem explicitamente abertas:
@@ -140,9 +153,9 @@ Qual sera a politica geral de retencao, arquivamento e exportacao de dados fora 
 
 Quais serao os valores definitivos de `profiles.status`?
 
-### QUESTAO ABERTA
+### RESOLVIDO EM 2026-10-07
 
-Quais serao os valores definitivos de `clients.status`?
+`clients.status` usa `active` para cliente em acompanhamento e `inactive` para cliente sem acompanhamento atual, preservando historico.
 
 ### QUESTAO ABERTA
 

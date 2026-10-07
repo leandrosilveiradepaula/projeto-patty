@@ -28,6 +28,29 @@ export async function endCurrentAdminClientAssignments(input: {
     throw error;
   }
 
+  const { data: remainingAssignments, error: remainingAssignmentsError } =
+    await admin
+      .from("client_assignments")
+      .select("id")
+      .eq("client_id", input.clientId)
+      .is("ended_at", null)
+      .limit(1);
+
+  if (remainingAssignmentsError) {
+    throw remainingAssignmentsError;
+  }
+
+  if (data.length > 0 && remainingAssignments.length === 0) {
+    const { error: clientStatusError } = await admin
+      .from("clients")
+      .update({ status: "inactive" })
+      .eq("id", input.clientId);
+
+    if (clientStatusError) {
+      throw clientStatusError;
+    }
+  }
+
   return {
     endedAt,
     endedAssignmentIds: data.map((assignment) => assignment.id),

@@ -40,19 +40,36 @@ export default async function AdminClientesPage({
     listClientsAssignedToCurrentAdmin(),
     getOperationalPendingItemsForCurrentAdmin(),
   ]);
-  const clients = assignments?.flatMap((assignment) => assignment.clients ? [assignment.clients] : []) ?? [];
+  const clients = (
+    assignments?.flatMap((assignment) =>
+      assignment.clients ? [assignment.clients] : [],
+    ) ?? []
+  ).sort((left, right) => {
+    const leftName = left.profiles?.display_name?.trim();
+    const rightName = right.profiles?.display_name?.trim();
+
+    if (!leftName && !rightName) return left.id.localeCompare(right.id);
+    if (!leftName) return 1;
+    if (!rightName) return -1;
+
+    return leftName.localeCompare(rightName, "pt-BR", {
+      sensitivity: "base",
+    });
+  });
   const pattyPendingItems = groupOperationalPendingItems(pendingItems).patty;
-  const pattyPendingCountByClientId = new Map<string, number>();
+  const pattyPendingItemsByClientId = new Map<
+    string,
+    typeof pattyPendingItems
+  >();
 
   for (const item of pattyPendingItems) {
     if (!item.clientId) {
       continue;
     }
 
-    pattyPendingCountByClientId.set(
-      item.clientId,
-      (pattyPendingCountByClientId.get(item.clientId) ?? 0) + 1,
-    );
+    const current = pattyPendingItemsByClientId.get(item.clientId) ?? [];
+    current.push(item);
+    pattyPendingItemsByClientId.set(item.clientId, current);
   }
   const searchTerm = q?.trim() ?? "";
   const normalizedSearchTerm = normalizeSearchValue(searchTerm);
@@ -135,40 +152,62 @@ export default async function AdminClientesPage({
             <ul className={styles.clientList}>
             {filteredClients.map((client) => {
               const displayName = client.profiles?.display_name?.trim();
-              const pattyPendingCount =
-                pattyPendingCountByClientId.get(client.id) ?? 0;
+              const clientPattyPendingItems =
+                pattyPendingItemsByClientId.get(client.id) ?? [];
+              const nextPattyPending = clientPattyPendingItems[0] ?? null;
 
               return (
                 <li key={client.id}>
                   <ClientListItem
                     action={
-                      <Link
-                        aria-label={`Abrir acompanhamento de ${displayName || "cliente com cadastro incompleto"}`}
-                        className={styles.actionLink}
-                        href={`/admin/clientes/${client.id}`}
-                      >
-                        Abrir
-                      </Link>
+                      <div className={styles.itemActions}>
+                        {nextPattyPending ? (
+                          <Link
+                            aria-label={`Abrir ${nextPattyPending.title.toLocaleLowerCase("pt-BR")} de ${displayName || "registro legado sem nome"}`}
+                            className={styles.actionLink}
+                            href={nextPattyPending.href}
+                          >
+                            Abrir ação
+                          </Link>
+                        ) : null}
+                        <Link
+                          aria-label={`Abrir acompanhamento de ${displayName || "registro legado sem nome"}`}
+                          className={
+                            nextPattyPending
+                              ? styles.secondaryActionLink
+                              : styles.actionLink
+                          }
+                          href={`/admin/clientes/${client.id}`}
+                        >
+                          {nextPattyPending ? "Ver cliente" : "Abrir"}
+                        </Link>
+                      </div>
                     }
                     meta={
                       !client.profile_id
                         ? "Vincule a conta da cliente para concluir o cadastro."
-                        : pattyPendingCount > 0
-                          ? `${pattyPendingCount} item(ns) na fila da Patty`
+                        : nextPattyPending
+                          ? `${nextPattyPending.title} · ${clientPattyPendingItems.length} item(ns) na fila da Patty`
                           : "Sem item na fila da Patty"
                     }
-                    name={displayName || "Cadastro incompleto"}
+                    name={displayName || "Nome ausente — registro legado"}
                     secondary={
-                      client.profile_id
-                        ? "Acompanhamento ativo"
-                        : "Conta da cliente ainda não vinculada"
+                      !displayName
+                        ? "Corrija o nome antes de considerar este cadastro regular."
+                        : client.profile_id
+                          ? "Cliente ativa"
+                          : "Conta da cliente ainda não vinculada"
                     }
                     status={
-                      !client.profile_id ? (
+                      !displayName ? (
+                        <Badge variant="critical">Nome obrigatório</Badge>
+                      ) : !client.profile_id ? (
                         <Badge variant="warning">Completar cadastro</Badge>
-                      ) : pattyPendingCount > 0 ? (
-                        <Badge variant="warning">Fila da Patty</Badge>
-                      ) : null
+                      ) : nextPattyPending ? (
+                        <Badge variant="warning">Ação da Patty</Badge>
+                      ) : (
+                        <Badge variant="positive">Ativa</Badge>
+                      )
                     }
                     visual={<span>{getInitials(displayName)}</span>}
                   />

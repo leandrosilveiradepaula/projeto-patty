@@ -75,13 +75,19 @@ async function provisionInvitedUser(input: {
   staffProfileId: string;
   userId: string;
 }) {
+  const displayName = input.displayName.trim();
+
+  if (displayName.length < 2 || displayName.length > 120) {
+    throw new ClientInvitationProvisionError("provision_failed");
+  }
+
   const admin = createAdminClient();
   let clientId: string | null = null;
 
   try {
     const profile = await admin
       .from("profiles")
-      .insert({ id: input.userId, display_name: input.displayName })
+      .insert({ id: input.userId, display_name: displayName })
       .select("id")
       .single();
 
@@ -100,7 +106,7 @@ async function provisionInvitedUser(input: {
 
     const client = await admin
       .from("clients")
-      .insert({ profile_id: input.userId })
+      .insert({ profile_id: input.userId, status: "active" })
       .select("id")
       .single();
 
