@@ -90,7 +90,7 @@ execute function app_private.enforce_client_full_name();
 create or replace function app_private.sync_client_full_name_from_profile()
 returns trigger
 language plpgsql
-security definer
+security invoker
 set search_path = ''
 as $$
 declare
@@ -138,7 +138,7 @@ execute function app_private.sync_client_full_name_from_profile();
 create or replace function app_private.sync_client_status_from_assignments()
 returns trigger
 language plpgsql
-security definer
+security invoker
 set search_path = ''
 as $$
 declare
