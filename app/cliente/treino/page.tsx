@@ -148,23 +148,43 @@ export default async function ClientTrainingPage() {
             title="Sem solicitações"
           />
         ) : (
-          <ol className={styles.list}>
-            {requests.map((request) => (
-              <li key={request.id}>
-                <Card className={styles.entry} variant="subtle">
-                  <div className={styles.header}>
-                    <strong>Solicitação de treino</strong>
-                    <Badge variant="neutral">
-                      {formatDateTime(request.requested_at)}
-                    </Badge>
-                  </div>
-                  <p className={styles.note}>
-                    {request.note?.trim() || "Sem observação adicional."}
-                  </p>
-                </Card>
-              </li>
-            ))}
-          </ol>
+          <div className={styles.requestHistory}>
+            <Card className={styles.entry} variant="subtle">
+              <div className={styles.header}>
+                <strong>Solicitação mais recente</strong>
+                <Badge variant="neutral">
+                  {formatDateTime(requests[0].requested_at)}
+                </Badge>
+              </div>
+              <p className={styles.note}>
+                {requests[0].note?.trim() || "Sem observação adicional."}
+              </p>
+            </Card>
+            {requests.length > 1 ? (
+              <details className={styles.olderRequests}>
+                <summary>
+                  Ver {requests.length - 1} solicitação(ões) anterior(es)
+                </summary>
+                <ol className={styles.list}>
+                  {requests.slice(1).map((request) => (
+                    <li key={request.id}>
+                      <Card className={styles.entry} variant="subtle">
+                        <div className={styles.header}>
+                          <strong>Solicitação de treino</strong>
+                          <Badge variant="neutral">
+                            {formatDateTime(request.requested_at)}
+                          </Badge>
+                        </div>
+                        <p className={styles.note}>
+                          {request.note?.trim() || "Sem observação adicional."}
+                        </p>
+                      </Card>
+                    </li>
+                  ))}
+                </ol>
+              </details>
+            ) : null}
+          </div>
         )}
       </Section>
     </>
