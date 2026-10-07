@@ -129,31 +129,34 @@ Para o estado operacional detalhado e os bloqueios atuais, consultar `PROJECT_ST
 
 ## Regras e detalhes pendentes da Patty
 
-### ESTADO RECONCILIADO EM 2026-10-05
+### ESTADO RECONCILIADO EM 2026-10-07
 
-As rodadas posteriores de respostas da Patty fecharam diversos itens que permaneciam listados aqui como abertos. A fonte normativa atual e `BUSINESS_RULES.md` + `DECISIONS.md`; esta secao nao deve reabrir decisoes ja confirmadas.
+A reconciliacao mais recente de `BUSINESS_RULES.md`, `DECISIONS.md` e `OPEN_QUESTIONS.md` prevalece sobre levantamentos historicos anteriores.
 
-Ja estao confirmados, entre outros pontos:
-- Cutting 3 com `Linear -> Dia 1/Dia 2 -> Carb Cycle 2 Low/1 High`, usando Fase 3/faixa vermelha no Carb Cycle;
-- depois do Up pos-Cutting 3, a proxima etapa e decisao profissional contextual, podendo incluir encerramento, Manutencao, Bulking ou outra continuidade definida pela Patty;
-- Manutencao existe e tem entrada, duracao e saida manuais; seu objetivo principal e preservar adesao e rotina no periodo;
-- entrada em Bulking e contextual; macros do Bulking sao definidos manualmente por paciente;
-- transicao Bulking -> Consolidacao considera ganho muscular, gordura/retencao, objetivo e avaliacao profissional;
-- Consolidacao reduz doses manual e gradualmente, encerra por decisao profissional e, no retorno ao Cutting, reinicia pelo Cutting 1 Linear;
-- Up Metabolico parte do protocolo anterior e tem carboidrato ajustado manualmente;
-- hidratacao usa 35 mL/kg/dia, com orientacao 70% agua pura / 30% outros liquidos zero calorias, e recalculo prospectivo quando novo peso e registrado;
-- suplementacao e manipulados sao manuais, caso a caso, sem template automatico obrigatorio;
-- Feedback Semanal, agenda, periodo de referencia, lembrete e canais possuem regras posteriores documentadas.
+O fluxo profissional atualmente autorizado para automacao termina em:
 
-Continuam realmente abertos apenas os pontos que ainda carecem de regra profissional ou detalhe operacional suficiente:
-- regras detalhadas das Fases 4, 5 e 6 da Planilha Carb Cycle quando forem efetivamente usadas;
-- montagem automatizavel e progressao de treino: intensidade, volume, progressao, cardio, excecoes e criterios objetivos de ajuste por dor/lesao/limitacao;
-- horario/cadencia dos lembretes de hidratacao quando nao houver configuracao individual explicita;
-- janela/limiar de estagnacao, tolerancia a ruido e combinacoes conflitantes de indicadores;
-- criterios de resultado para objetivos diferentes de emagrecimento/reducao de gordura;
-- regras profissionais adicionais que a Patty deliberadamente manteve como decisao manual e contextual nao devem ser tratadas como "faltando formula": o comportamento confirmado e permitir decisao/edicao humana versionada.
+```text
+Reconhecimento Metabolico
+-> Cutting 1 Dia 1 / Dia 2
+-> Cutting 1: 2 Low / 1 High
+-> Up Metabolico
+-> Cutting 2 Linear
+-> Cutting 2 Dia 1 / Dia 2
+-> Cutting 2: 2 Low / 1 High
+```
 
-Essas pendencias nao devem ser resolvidas por inferencia, exemplo individual ou recomendacao tecnica. Antes de formular nova pergunta para a Patty, verificar primeiro `BUSINESS_RULES.md`, `DECISIONS.md`, `OPEN_QUESTIONS.md` e as rodadas de levantamento ja preservadas.
+Permanecem abertos, entre outros pontos documentados nas fontes normativas:
+- qualquer etapa posterior ao Cutting 2;
+- Cutting 3 e seu eventual detalhamento;
+- Bulking detalhado;
+- Consolidacao;
+- hidratacao como regra profissional automatica;
+- Fases 5 e 6 do Carb Cycle;
+- progressao/ajustes automatizaveis de treino ainda nao formalizados;
+- criterios objetivos de estagnacao, ruido e combinacoes conflitantes de indicadores;
+- criterios de resultado para objetivos diferentes dos ja confirmados.
+
+Regras deliberadamente manuais e contextuais nao devem ser tratadas como formulas faltantes. Nenhuma dessas lacunas deve ser resolvida por inferencia, exemplo individual ou documentacao historica superada.
 
 ## Fora do sistema completo
 
