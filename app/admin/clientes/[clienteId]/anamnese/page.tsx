@@ -40,6 +40,12 @@ export default async function AdminClienteAnamnesePage({
   }
 
   const submissions = await listAccessibleAnamnesisSubmissions(client.id);
+  const pendingSubmissions = submissions.filter(
+    (submission) => !submission.submitted_at,
+  );
+  const submittedSubmissions = submissions.filter(
+    (submission) => Boolean(submission.submitted_at),
+  );
   const displayName = client.profiles?.display_name?.trim();
 
   return (
@@ -51,20 +57,15 @@ export default async function AdminClienteAnamnesePage({
         status={<Badge variant="neutral">{submissions.length} registro(s)</Badge>}
       />
       <ClientWorkspaceNav activeArea="anamnese" clientId={client.id} />
-      <Section
-        description="Cada envio preserva as respostas e a versão da Anamnese usada naquele momento."
-        title="Anamneses"
-      >
-        {submissions.length === 0 ? (
-          <EmptyState
-            description="Nenhuma submissão de Anamnese está registrada para esta cliente."
-            title="Sem Anamnese registrada"
-          />
-        ) : (
+      {pendingSubmissions.length > 0 ? (
+        <Section
+          action={<Badge variant="warning">{pendingSubmissions.length} pendente(s)</Badge>}
+          description="Anamneses iniciadas que ainda aguardam o envio da cliente."
+          title="Aguardando cliente"
+        >
           <ol className={styles.submissionList}>
-            {submissions.map((submission) => {
+            {pendingSubmissions.map((submission) => {
               const version = submission.anamnesis_form_versions;
-              const submitted = Boolean(submission.submitted_at);
 
               return (
                 <li key={submission.id}>
@@ -80,18 +81,56 @@ export default async function AdminClienteAnamnesePage({
                           Criada em {formatDateTime(submission.created_at)}
                         </p>
                       </div>
-                      <Badge variant="neutral">
-                        {submitted ? "Enviada" : "Aguardando cliente"}
-                      </Badge>
+                      <Badge variant="warning">Aguardando cliente</Badge>
+                    </div>
+                    <p className={styles.submissionMeta}>
+                      As respostas ainda não foram enviadas. Rascunhos da cliente não integram o histórico concluído.
+                    </p>
+                  </Card>
+                </li>
+              );
+            })}
+          </ol>
+        </Section>
+      ) : null}
+      <Section
+        description="Cada envio concluído preserva as respostas originais e a versão da Anamnese usada naquele momento."
+        title="Histórico enviado"
+      >
+        {submittedSubmissions.length === 0 ? (
+          <EmptyState
+            description={
+              pendingSubmissions.length > 0
+                ? "Quando a cliente enviar a Anamnese pendente, ela aparecerá neste histórico."
+                : "Nenhuma submissão de Anamnese está registrada para esta cliente."
+            }
+            title="Sem Anamnese enviada"
+          />
+        ) : (
+          <ol className={styles.submissionList}>
+            {submittedSubmissions.map((submission) => {
+              const version = submission.anamnesis_form_versions;
+
+              return (
+                <li key={submission.id}>
+                  <Card className={styles.submissionCard}>
+                    <div className={styles.submissionHeader}>
+                      <div>
+                        <h2 className={styles.submissionTitle}>
+                          {version?.version_number
+                            ? `Anamnese · versão ${version.version_number}`
+                            : "Anamnese"}
+                        </h2>
+                        <p className={styles.submissionMeta}>
+                          Enviada em {formatDateTime(submission.submitted_at!)}
+                        </p>
+                      </div>
+                      <Badge variant="positive">Enviada</Badge>
                     </div>
                     <dl className={styles.submissionDetails}>
                       <div>
-                        <dt>Envio</dt>
-                        <dd>
-                          {submission.submitted_at
-                            ? formatDateTime(submission.submitted_at)
-                            : "Ainda não enviado"}
-                        </dd>
+                        <dt>Criação</dt>
+                        <dd>{formatDateTime(submission.created_at)}</dd>
                       </div>
                     </dl>
                     <Link
