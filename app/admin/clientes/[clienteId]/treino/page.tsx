@@ -1,17 +1,12 @@
 import { notFound } from "next/navigation";
 
-import {
-  deleteTrainingPlanItemAction,
-  publishTrainingPlanVersionAction,
-  reviewTrainingPlanVersionAction,
-} from "@/app/admin/clientes/[clienteId]/treino/actions";
 import { AdminTrainingPlanDraftForm } from "@/components/admin/AdminTrainingPlanDraftForm";
 import { AdminTrainingPlanItemForm } from "@/components/admin/AdminTrainingPlanItemForm";
+import { AdminTrainingPlanLifecycleAction } from "@/components/admin/AdminTrainingPlanLifecycleAction";
 import { AdminTrainingRequestForm } from "@/components/admin/AdminTrainingRequestForm";
 import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Section } from "@/components/ui/Section";
@@ -76,6 +71,15 @@ export default async function AdminClientTrainingPage({ params }: Props) {
     versions.find((version) => !version.published_at) ?? null;
   const latestPublished =
     versions.find((version) => Boolean(version.published_at)) ?? null;
+  const workspaceStatus = openVersion?.reviewed_at
+    ? { label: "Pronto para publicar", variant: "info" as const }
+    : openVersion
+      ? { label: "Rascunho em edição", variant: "warning" as const }
+      : latestPublished
+        ? { label: "Treino publicado", variant: "positive" as const }
+        : requests.length > 0
+          ? { label: "Solicitado", variant: "neutral" as const }
+          : { label: "Não solicitado", variant: "neutral" as const };
 
   const [openItems, publishedItems] = await Promise.all([
     openVersion
@@ -103,9 +107,7 @@ export default async function AdminClientTrainingPage({ params }: Props) {
         displayName={displayName}
         secondary="Solicitação e prescrição individual"
         status={
-          <Badge variant={requests.length > 0 ? "positive" : "neutral"}>
-            {requests.length > 0 ? "Treino solicitado" : "Não solicitado"}
-          </Badge>
+          <Badge variant={workspaceStatus.variant}>{workspaceStatus.label}</Badge>
         }
       />
 
@@ -113,69 +115,12 @@ export default async function AdminClientTrainingPage({ params }: Props) {
 
 
       <Section
-        action={
-          <Badge variant={requests.length > 0 ? "positive" : "neutral"}>
-            {requests.length > 0 ? "Solicitado" : "Não solicitado"}
-          </Badge>
-        }
-        description="Solicitação do serviço e prescrição são etapas diferentes. Registrar uma solicitação não monta nem publica treino automaticamente."
-        title="Solicitação do serviço"
-      >
-        <div className={styles.grid}>
-          <Card>
-            <div className={styles.summary}>
-              <h2>Situação atual</h2>
-              <p>
-                {requests.length > 0
-                  ? `${requests.length} solicitação(ões) registrada(s) no histórico.`
-                  : "Nenhuma solicitação de treino registrada até o momento."}
-              </p>
-            </div>
-          </Card>
-          <Card>
-            <AdminTrainingRequestForm clientId={client.id} />
-          </Card>
-        </div>
-      </Section>
-
-      <Section
-        action={<Badge variant="neutral">{requests.length} registro(s)</Badge>}
-        description="Histórico preservado das solicitações registradas para esta cliente."
-        title="Histórico de solicitações"
-      >
-        {requests.length === 0 ? (
-          <EmptyState
-            description="Quando houver uma solicitação, ela aparecerá aqui."
-            title="Sem solicitações de treino"
-          />
-        ) : (
-          <ol className={styles.history}>
-            {requests.map((request) => (
-              <li key={request.id}>
-                <Card variant="subtle">
-                  <p className={styles.meta}>
-                    Solicitado em {formatDateTime(request.requested_at)}
-                    {request.profiles?.display_name?.trim()
-                      ? ` · registrado por ${request.profiles.display_name.trim()}`
-                      : ""}
-                  </p>
-                  <p className={styles.note}>
-                    {request.note?.trim() || "Sem observação adicional."}
-                  </p>
-                </Card>
-              </li>
-            ))}
-          </ol>
-        )}
-      </Section>
-
-      <Section
         description="A prescrição só é liberada depois de solicitação da cliente. Salvar não publica; revisão e publicação são etapas separadas."
         title="Prescrição de treino"
       >
         {requests.length === 0 ? (
           <EmptyState
-            description="Registre primeiro a solicitação de treino na visão geral da cliente. O sistema não cria prescrição sem esse pedido."
+            description="Registre primeiro a solicitação do serviço nesta página. O sistema não cria prescrição sem esse pedido."
             title="Treino ainda não solicitado"
           />
         ) : openVersion ? (
@@ -239,18 +184,12 @@ export default async function AdminClientTrainingPage({ params }: Props) {
                         }}
                         trainingPlanVersionId={openVersion.id}
                       />
-                      <form
-                        action={deleteTrainingPlanItemAction.bind(
-                          null,
-                          client.id,
-                          openVersion.id,
-                          item.id,
-                        )}
-                      >
-                        <Button size="compact" type="submit" variant="danger">
-                          Remover exercício
-                        </Button>
-                      </form>
+                      <AdminTrainingPlanLifecycleAction
+                        clientId={client.id}
+                        itemId={item.id}
+                        mode="delete"
+                        trainingPlanVersionId={openVersion.id}
+                      />
                     </>
                   ) : (
                     <div className={styles.summary}>
@@ -286,21 +225,12 @@ export default async function AdminClientTrainingPage({ params }: Props) {
                       orientações não poderão mais ser alterados.
                     </p>
                   </div>
-                  <form
-                    action={reviewTrainingPlanVersionAction.bind(
-                      null,
-                      client.id,
-                      openVersion.id,
-                    )}
-                  >
-                    <Button
-                      disabled={openItems.length === 0}
-                      type="submit"
-                      variant="secondary"
-                    >
-                      Marcar como revisado
-                    </Button>
-                  </form>
+                  <AdminTrainingPlanLifecycleAction
+                    clientId={client.id}
+                    disabled={openItems.length === 0}
+                    mode="review"
+                    trainingPlanVersionId={openVersion.id}
+                  />
                 </Card>
               </>
             ) : (
@@ -312,15 +242,11 @@ export default async function AdminClientTrainingPage({ params }: Props) {
                     cliente. Nenhuma IA ou automação publica por conta própria.
                   </p>
                 </div>
-                <form
-                  action={publishTrainingPlanVersionAction.bind(
-                    null,
-                    client.id,
-                    openVersion.id,
-                  )}
-                >
-                  <Button type="submit">Publicar treino</Button>
-                </form>
+                <AdminTrainingPlanLifecycleAction
+                  clientId={client.id}
+                  mode="publish"
+                  trainingPlanVersionId={openVersion.id}
+                />
               </Card>
             )}
           </div>
@@ -336,6 +262,63 @@ export default async function AdminClientTrainingPage({ params }: Props) {
             </p>
             <AdminTrainingPlanDraftForm clientId={client.id} />
           </Card>
+        )}
+      </Section>
+
+      <Section
+        action={
+          <Badge variant={requests.length > 0 ? "positive" : "neutral"}>
+            {requests.length > 0 ? "Solicitado" : "Não solicitado"}
+          </Badge>
+        }
+        description="Solicitação do serviço e prescrição são etapas diferentes. Registrar uma solicitação não monta nem publica treino automaticamente."
+        title="Solicitação do serviço"
+      >
+        <div className={styles.grid}>
+          <Card>
+            <div className={styles.summary}>
+              <h2>Situação atual</h2>
+              <p>
+                {requests.length > 0
+                  ? `${requests.length} solicitação(ões) registrada(s) no histórico.`
+                  : "Nenhuma solicitação de treino registrada até o momento."}
+              </p>
+            </div>
+          </Card>
+          <Card>
+            <AdminTrainingRequestForm clientId={client.id} />
+          </Card>
+        </div>
+      </Section>
+
+      <Section
+        action={<Badge variant="neutral">{requests.length} registro(s)</Badge>}
+        description="Histórico preservado das solicitações registradas para esta cliente."
+        title="Histórico de solicitações"
+      >
+        {requests.length === 0 ? (
+          <EmptyState
+            description="Quando houver uma solicitação, ela aparecerá aqui."
+            title="Sem solicitações de treino"
+          />
+        ) : (
+          <ol className={styles.history}>
+            {requests.map((request) => (
+              <li key={request.id}>
+                <Card variant="subtle">
+                  <p className={styles.meta}>
+                    Solicitado em {formatDateTime(request.requested_at)}
+                    {request.profiles?.display_name?.trim()
+                      ? ` · registrado por ${request.profiles.display_name.trim()}`
+                      : ""}
+                  </p>
+                  <p className={styles.note}>
+                    {request.note?.trim() || "Sem observação adicional."}
+                  </p>
+                </Card>
+              </li>
+            ))}
+          </ol>
         )}
       </Section>
 
