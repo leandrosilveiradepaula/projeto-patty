@@ -19,9 +19,9 @@ A evolucao do modelo deve introduzir um nome canonicamente pertencente a `client
 
 ### PENDENCIA DE HARDENING
 
-Existe registro legado sem nome no ambiente atual. Nao inventar valor para corrigi-lo.
+A fixture de teste sem nome foi removida do ambiente em 2026-10-07 depois de confirmar ausencia de dados profissionais associados.
 
-Antes de impor constraint definitiva de banco para nome obrigatorio, o registro legado deve ser corrigido com dado verdadeiro. A constraint de nome deve ser adicionada em migration futura sem alterar migrations ja aplicadas.
+Nao existem mais clientes sem nome no ambiente atual. A constraint definitiva de nome deve ser adicionada em migration futura sem alterar migrations ja aplicadas.
 
 ## Treino individual versionado
 
