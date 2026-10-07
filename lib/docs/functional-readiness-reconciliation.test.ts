@@ -62,3 +62,25 @@ test("remaining administrative client surfaces prefer the canonical client name"
     /client\.full_name\?\.trim\(\) \|\| client\.profiles\?\.display_name\?\.trim\(\)/,
   );
 });
+
+
+test("readiness does not present historical hydration formulas as current automation", () => {
+  const readiness = read("docs/MVP_READINESS.md");
+  assert.match(readiness, /AUTOMACAO DE HIDRATACAO SUSPENSA/);
+  assert.match(readiness, /nenhuma avaliacao gera meta de hidratacao automaticamente/i);
+  assert.match(readiness, /referencias historicas de 60 mL\/kg ou 35 mL\/kg nao autorizam automacao vigente/);
+  assert.doesNotMatch(readiness, /meta de liquidos calculada por `peso_kg \* 60` e persistida como snapshot/);
+});
+
+test("readiness reflects the merged client-specific training prescription", () => {
+  const readiness = read("docs/MVP_READINESS.md");
+  const status = read("docs/PROJECT_STATUS.md");
+
+  assert.match(readiness, /prescricao versionada individual deixou de ser lacuna/);
+  assert.match(readiness, /PR #445/);
+  assert.match(status, /prescricao versionada por cliente ja foi implementada e mergeada posteriormente pelo PR #445/);
+  assert.doesNotMatch(
+    status,
+    /prescricao versionada de treino por cliente continua sendo uma lacuna separada/,
+  );
+});
