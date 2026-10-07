@@ -73,7 +73,7 @@ export async function listClientsAssignedToCurrentAdmin() {
   const { data, error } = await supabase
     .from("client_assignments")
     .select(
-      "client_id, assigned_at, clients(id, profile_id, status, started_at, ended_at, profiles(display_name))",
+      "client_id, assigned_at, clients(id, profile_id, full_name, status, started_at, ended_at, profiles(display_name))",
     )
     .is("ended_at", null);
 
@@ -146,7 +146,7 @@ export async function getAccessibleClient(clientId: string) {
   const { data, error } = await supabase
     .from("clients")
     .select(
-      "id, profile_id, status, started_at, ended_at, created_at, updated_at, profiles(display_name)",
+      "id, profile_id, full_name, status, started_at, ended_at, created_at, updated_at, profiles(display_name)",
     )
     .eq("id", clientId)
     .maybeSingle();
@@ -718,7 +718,7 @@ export async function listAccessibleNonterminalAiExecutions() {
   const { data, error } = await supabase
     .from("ai_executions")
     .select(
-      "id, client_id, purpose_key, anamnesis_submission_id, provider, model_identifier, status, created_at, completed_at, failed_at, clients(id, profiles(display_name))",
+      "id, client_id, purpose_key, anamnesis_submission_id, provider, model_identifier, status, created_at, completed_at, failed_at, clients(id, full_name, profiles(display_name))",
     )
     .eq("status", "started")
     .is("completed_at", null)
@@ -809,7 +809,7 @@ export async function getAccessibleAnamnesisSubmission(submissionId: string) {
   const { data, error } = await supabase
     .from("anamnesis_submissions")
     .select(
-      "id, client_id, form_version_id, created_at, submitted_at, clients(id, profiles(display_name)), anamnesis_form_versions(id, version_number, published_at)",
+      "id, client_id, form_version_id, created_at, submitted_at, clients(id, full_name, profiles(display_name)), anamnesis_form_versions(id, version_number, published_at)",
     )
     .eq("id", submissionId)
     .maybeSingle();
@@ -1457,7 +1457,7 @@ export async function listAccessibleClientAssessments() {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("client_assessments")
-    .select("id, client_id, assessed_at, assessment_kind, method_configuration_snapshot_set_id, created_by_profile_id, finalized_at, finalized_by_profile_id, clients(id, profiles(display_name))")
+    .select("id, client_id, assessed_at, assessment_kind, method_configuration_snapshot_set_id, created_by_profile_id, finalized_at, finalized_by_profile_id, clients(id, full_name, profiles(display_name))")
     .order("assessed_at", { ascending: false });
 
   if (error) {
@@ -1471,7 +1471,7 @@ export async function getAccessibleClientAssessment(assessmentId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("client_assessments")
-    .select("id, client_id, assessed_at, assessment_kind, method_configuration_snapshot_set_id, created_by_profile_id, finalized_at, finalized_by_profile_id, clients(id, profiles(display_name))")
+    .select("id, client_id, assessed_at, assessment_kind, method_configuration_snapshot_set_id, created_by_profile_id, finalized_at, finalized_by_profile_id, clients(id, full_name, profiles(display_name))")
     .eq("id", assessmentId)
     .maybeSingle();
 
@@ -2011,7 +2011,7 @@ export async function listAccessibleProtocols() {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("protocols")
-    .select("id, client_id, protocol_type, created_at, clients(id, profiles(display_name))")
+    .select("id, client_id, protocol_type, created_at, clients(id, full_name, profiles(display_name))")
     .order("created_at", { ascending: false })
     .order("id", { ascending: true });
 
@@ -2115,7 +2115,7 @@ export async function getAccessibleProtocol(protocolId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("protocols")
-    .select("id, client_id, protocol_type, created_at, clients(id, profiles(display_name))")
+    .select("id, client_id, protocol_type, created_at, clients(id, full_name, profiles(display_name))")
     .eq("id", protocolId)
     .maybeSingle();
 

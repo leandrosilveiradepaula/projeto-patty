@@ -1,3 +1,16 @@
+## Bloco consolidado - nome canonico da cliente 2026-10-07
+
+A auditoria do lifecycle de clientes encontrou uma inconsistência residual: o banco ja exige `clients.full_name`, mas algumas telas e a fila operacional ainda usavam `profiles.display_name` como fonte primaria.
+
+Este lote corrige cinco pontos em conjunto:
+- leituras administrativas passam a carregar `clients.full_name`;
+- onboarding grava o nome canonico explicitamente em `clients`, sem depender apenas do trigger de compatibilidade;
+- lista administrativa de clientes usa `full_name` para ordenacao, busca e exibicao;
+- workspace individual usa `full_name` como fonte primaria;
+- fila de pendencias usa `full_name` para rotulos de cliente em Anamnese, treino, avaliacoes, protocolos e IA.
+
+`profiles.display_name` permanece somente como fallback de compatibilidade para registros historicos. Auth, Profile e Client continuam entidades separadas; nenhuma relacao passa a depender de email.
+
 ## Bloco consolidado de boundaries funcionais 2026-10-07
 
 Cinco fronteiras foram reconciliadas em conjunto:

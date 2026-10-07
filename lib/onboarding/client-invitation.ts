@@ -106,7 +106,7 @@ async function provisionInvitedUser(input: {
 
     const client = await admin
       .from("clients")
-      .insert({ profile_id: input.userId, status: "active" })
+      .insert({ full_name: displayName, profile_id: input.userId, status: "active" })
       .select("id")
       .single();
 
