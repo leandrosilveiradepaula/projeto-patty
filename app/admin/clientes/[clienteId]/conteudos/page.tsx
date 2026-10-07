@@ -67,6 +67,7 @@ export default async function AdminClientContentPage({
       versionIdsWithAssets.has(version.id) &&
       isContentVersionReleaseEligible({
         alreadyReleased: releasedVersionIds.has(version.id),
+        hasAsset: versionIdsWithAssets.has(version.id),
         publishedAt: version.published_at,
       }),
   );
@@ -87,6 +88,7 @@ export default async function AdminClientContentPage({
         status={<Badge variant="neutral">{releases.length} liberação(ões)</Badge>}
       />
       <ClientWorkspaceNav activeArea="conteudos" clientId={client.id} />
+      <div id="liberar-conteudo">
       <Section
         description="Escolha a versão publicada que deve ficar disponível para esta cliente."
         title="Liberar conteúdo"
@@ -124,6 +126,7 @@ export default async function AdminClientContentPage({
           </Card>
         )}
       </Section>
+      </div>
       <Section
         description="Conteúdos já liberados para esta cliente."
         title="Conteúdos liberados"

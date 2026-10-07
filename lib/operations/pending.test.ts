@@ -288,7 +288,7 @@ test("weekly feedback pending stays factual and never suspends service automatic
   assert.equal(items[0]?.statusLabel, "Prazo informado ultrapassado");
   assert.equal(
     items[0]?.href,
-    "/admin/clientes/client-1/feedback-semanal",
+    "/admin/clientes/client-1/feedback-semanal#feedback-pendentes",
   );
   assert.match(
     items[0]?.description ?? "",
@@ -762,4 +762,46 @@ test("released content without an asset becomes an operational gap", () => {
   assert.equal(getOperationalPendingGroup(items[0]!), "operational");
   assert.equal(items[0]?.statusLabel, "Liberado sem arquivo");
   assert.match(items[0]?.description ?? "", /versão exata/);
+});
+
+
+test("operational readiness links land on the exact corrective workflow", () => {
+  const items = buildOperationalPendingItems({
+    clarificationReminderIntervalHours: 24,
+    anamnesisSubmissions: [],
+    clarificationRequests: [],
+    assessments: [],
+    protocolVersions: [],
+    aiExecutions: [],
+    clientOperationalReadiness: [
+      {
+        clientId: "client-channel",
+        clientLabel: "Cliente Canal",
+        contactEmail: null,
+        createdAt: "2026-10-07T10:00:00Z",
+        hasRegistration: true,
+        weeklyFeedbackChannel: null,
+      },
+    ],
+    contentReleaseReadiness: [
+      {
+        clientId: "client-content",
+        clientLabel: "Cliente Conteúdo",
+        createdAt: "2026-10-07T11:00:00Z",
+        hasAsset: false,
+        releaseId: "release-missing",
+        title: "Conteúdo",
+        versionId: "version-missing",
+      },
+    ],
+  });
+
+  assert.equal(
+    items.find((item) => item.kind === "weekly_feedback_channel_missing")?.href,
+    "/admin/clientes/client-channel#preferencia-feedback",
+  );
+  assert.equal(
+    items.find((item) => item.kind === "content_released_without_asset")?.href,
+    "/admin/clientes/client-content/conteudos#liberar-conteudo",
+  );
 });

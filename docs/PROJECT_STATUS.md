@@ -2879,3 +2879,15 @@ Primeiro bloco apos o fechamento da reconciliacao documental. A fila administrat
 - novas liberacoes de conteudo passam a listar somente versoes publicadas que ja possuem asset privado registrado, evitando criar novos estados de "liberado sem arquivo".
 
 A implementacao usa consultas batch client-scoped existentes sob RLS e nao altera schema. Estados legados de conteudo liberado sem asset permanecem preservados/auditaveis e aparecem na fila em vez de serem apagados ou corrigidos silenciosamente.
+
+
+## Hardening dos fluxos operacionais UI-backend - 2026-10-07
+
+A revisao imediatamente posterior a fila de prontidao encontrou um boundary importante: esconder versoes sem asset na UI nao bastava, porque a server action ainda aceitava uma chamada direta para uma versao publicada sem arquivo. O fluxo foi endurecido sem schema/RLS novo:
+- elegibilidade de release agora exige simultaneamente publicacao, asset privado registrado e ausencia de release anterior;
+- a server action revalida o asset no momento da mutacao, evitando bypass da UI;
+- textos antigos que diziam ser permitido liberar conteudo "sem arquivo" foram removidos;
+- pendencias operacionais apontam para secoes corretivas especificas por ancora, reduzindo navegacao manual;
+- testes cobrem tanto o gate de asset quanto os deep links operacionais.
+
+Releases legados sem asset continuam preservados e visiveis como pendencia; nao ha mutacao retroativa do historico.

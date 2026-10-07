@@ -8,6 +8,7 @@ import {
   createAccessibleClientContentRelease,
   getAccessibleClient,
   listContentReleasesForAccessibleClient,
+  listEducationalContentAssetsForCurrentAdminVersions,
   listEducationalContentVersionsForCurrentAdmin,
 } from "@/lib/supabase/data-access";
 
@@ -40,9 +41,10 @@ export async function releaseContentToClient(
     };
   }
 
-  const [versions, releases] = await Promise.all([
+  const [versions, releases, assets] = await Promise.all([
     listEducationalContentVersionsForCurrentAdmin(),
     listContentReleasesForAccessibleClient(client.id),
+    listEducationalContentAssetsForCurrentAdminVersions([versionId]),
   ]);
   const releasedVersionIds = new Set(
     releases.flatMap((release) =>
@@ -57,12 +59,13 @@ export async function releaseContentToClient(
     !selectedVersion ||
     !isContentVersionReleaseEligible({
       alreadyReleased: releasedVersionIds.has(versionId),
+      hasAsset: assets.length > 0,
       publishedAt: selectedVersion.published_at,
     })
   ) {
     return {
       message:
-        "A versão selecionada não está publicada, não está disponível ou já foi liberada.",
+        "A versão selecionada não está publicada, não possui arquivo privado registrado, não está disponível ou já foi liberada.",
       success: false,
     };
   }

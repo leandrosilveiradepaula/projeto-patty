@@ -48,7 +48,7 @@ export function ClientContentReleaseForm({
       ) : null}
 
       <FormField
-        description="Somente versões publicadas podem ser liberadas. A liberação aponta para esta versão exata."
+        description="Somente versões publicadas com arquivo privado registrado podem ser liberadas. A liberação aponta para esta versão exata."
         id="educational-content-version"
         label="Versão de conteúdo"
         required
@@ -67,7 +67,7 @@ export function ClientContentReleaseForm({
             {options.map((option) => (
               <option key={option.id} value={option.id}>
                 {option.title} · versão {option.versionNumber}
-                {option.hasAsset ? "" : " · sem arquivo"}
+                {option.hasAsset ? "" : " · indisponível"}
               </option>
             ))}
           </select>
@@ -75,9 +75,8 @@ export function ClientContentReleaseForm({
       </FormField>
 
       <p className={styles.notice}>
-        Versões marcadas como “sem arquivo” podem ser liberadas, mas a cliente
-        não terá um arquivo para abrir até que um asset seja cadastrado nessa
-        versão exata.
+        O servidor também valida a existência do asset no momento da liberação,
+        evitando que uma chamada direta crie um release sem arquivo.
       </p>
       <p className={styles.notice}>
         Esta ação não cria liberação automática por fase e não troca a versão
