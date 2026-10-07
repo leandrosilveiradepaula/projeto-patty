@@ -59,7 +59,11 @@ export default async function ClientTrainingPage({
   return (
     <>
       <PageHeader
-        description="Registre aqui quando quiser solicitar o serviço de treino. A solicitação não cria prescrição automática nem altera seu protocolo."
+        description={
+          latestPublished
+            ? "Consulte seu treino individual publicado pela Patty e, quando precisar, registre uma nova solicitação de treino."
+            : "Registre aqui quando quiser solicitar o serviço de treino. A solicitação não cria prescrição automática nem altera seu protocolo."
+        }
         eyebrow="Cliente"
         title="Treino"
       />
@@ -78,6 +82,7 @@ export default async function ClientTrainingPage({
         title="Seu treino publicado"
       >
         {latestPublished ? (
+          <>
           <Card className={styles.publishedCard}>
             <div className={styles.publishedHeader}>
               <div>
@@ -119,15 +124,16 @@ export default async function ClientTrainingPage({
                         Orientações: {item.execution_notes}
                       </p>
                     ) : null}
-                    <p className={styles.capacityNote}>
-                      A carga/peso deve respeitar sua capacidade no exercício e
-                      não é definida aqui como valor fixo.
-                    </p>
                   </Card>
                 </li>
               ))}
             </ol>
           </Card>
+          <Alert title="Sobre carga e peso" variant="info">
+            A carga não é exibida aqui como um valor fixo. Siga as orientações
+            profissionais da Patty e respeite sua capacidade em cada exercício.
+          </Alert>
+          </>
         ) : (
           <EmptyState
             description={
