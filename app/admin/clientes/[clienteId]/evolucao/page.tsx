@@ -81,7 +81,7 @@ export default async function AdminClientProgressPage({ params }: PageProps) {
   return (
     <>
       <ClientWorkspaceHeader
-        meta="Acompanhamento ativo"
+        meta="Histórico longitudinal de medidas"
         displayName={displayName}
         secondary="Evolução factual por avaliações finalizadas"
         status={<Badge variant="neutral">{assessments.length} avaliação(ões)</Badge>}
