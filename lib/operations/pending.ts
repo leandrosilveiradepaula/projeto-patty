@@ -7,6 +7,9 @@ export type OperationalPendingItemKind =
   | "clarification_without_response"
   | "protocol_approved_not_published"
   | "protocol_submitted_not_approved"
+  | "training_requested_without_plan"
+  | "training_draft"
+  | "training_reviewed_not_published"
   | "weekly_feedback_awaiting_response"
   | "weekly_feedback_reminder_blocked";
 
@@ -99,6 +102,16 @@ export type PendingProtocolVersion = {
   versionNumber: number;
 };
 
+export type PendingTrainingLifecycle = {
+  clientId: string;
+  clientLabel: string;
+  createdAt: string;
+  id: string;
+  state: "requested_without_plan" | "draft" | "reviewed_not_published";
+  versionNumber: number | null;
+};
+
+
 export type PendingAiExecution = {
   clientId: string | null;
   clientLabel: string;
@@ -137,6 +150,7 @@ export type OperationalPendingFactsInput = {
   clarificationReminderIntervalHours: number;
   clarificationRequests: PendingClarificationRequest[];
   protocolVersions: PendingProtocolVersion[];
+  trainingLifecycle?: PendingTrainingLifecycle[];
   referenceNow?: string;
   weeklyFeedbackNotificationEvents?: PendingWeeklyFeedbackNotificationEvent[];
   weeklyFeedbacks?: PendingWeeklyFeedback[];
@@ -309,6 +323,51 @@ export function buildOperationalPendingItems(
         title: "Protocolo aguardando publicação",
       });
     }
+  }
+
+  for (const training of input.trainingLifecycle ?? []) {
+    if (training.state === "requested_without_plan") {
+      items.push({
+        clientId: training.clientId,
+        clientLabel: training.clientLabel,
+        createdAt: training.createdAt,
+        description:
+          "Existe solicitação de treino registrada, mas nenhum plano de treino foi criado para esta cliente.",
+        href: `/admin/clientes/${training.clientId}/treino`,
+        id: `training-request:${training.id}`,
+        kind: "training_requested_without_plan",
+        statusLabel: "Solicitado, sem plano",
+        title: "Treino solicitado",
+      });
+      continue;
+    }
+
+    if (training.state === "draft") {
+      items.push({
+        clientId: training.clientId,
+        clientLabel: training.clientLabel,
+        createdAt: training.createdAt,
+        description: `A versão ${training.versionNumber ?? ""} do treino permanece em rascunho e ainda não foi revisada.`,
+        href: `/admin/clientes/${training.clientId}/treino`,
+        id: `training-draft:${training.id}`,
+        kind: "training_draft",
+        statusLabel: "Rascunho",
+        title: "Treino em edição",
+      });
+      continue;
+    }
+
+    items.push({
+      clientId: training.clientId,
+      clientLabel: training.clientLabel,
+      createdAt: training.createdAt,
+      description: `A versão ${training.versionNumber ?? ""} do treino foi revisada, mas ainda não foi publicada para a cliente.`,
+      href: `/admin/clientes/${training.clientId}/treino`,
+      id: `training-publish:${training.id}`,
+      kind: "training_reviewed_not_published",
+      statusLabel: "Revisado, não publicado",
+      title: "Treino aguardando publicação",
+    });
   }
 
   for (const feedback of input.weeklyFeedbacks ?? []) {
