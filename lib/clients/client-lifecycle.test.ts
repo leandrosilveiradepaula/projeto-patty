@@ -31,12 +31,17 @@ test("assignment lifecycle keeps client status aligned without deleting history"
 
 test("admin can repair a legacy missing client name without changing Auth", () => {
   const action = read("app/admin/clientes/[clienteId]/actions.ts");
+  const helper = read("lib/clients/client-profile-admin.ts");
   const form = read("components/admin/AdminClientNameEditForm.tsx");
 
   assert.match(action, /updateAdminClientDisplayNameAction/);
   assert.match(action, /validateClientDisplayName/);
-  assert.match(action, /from\("profiles"\)/);
-  assert.match(action, /update\(\{ display_name: displayName \}\)/);
+  assert.match(action, /updateClientProfileDisplayNamePrivileged/);
+  assert.doesNotMatch(action, /createAdminClient/);
+  assert.match(helper, /^import "server-only";/m);
+  assert.match(helper, /createAdminClient/);
+  assert.match(helper, /from\("profiles"\)/);
+  assert.match(helper, /display_name: input\.displayName/);
   assert.match(form, /label="Nome da cliente"/);
   assert.match(form, /required/);
 });
