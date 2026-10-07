@@ -1,3 +1,13 @@
+## Atualizacao de auditoria de interface 2026-10-07 - avaliacoes em andamento separadas do historico
+
+A tela administrativa de Avaliacoes passa a separar trabalho atual de historico concluido.
+
+- rascunhos aparecem em `Em andamento`, com acao `Continuar avaliacao`;
+- avaliacoes finalizadas aparecem em `Historico finalizado`;
+- quando existem apenas rascunhos, o estado vazio do historico explica que ele sera iniciado apos a finalizacao;
+- datas, tipos, registros e links permanecem preservados.
+
+Nenhum criterio profissional, validacao de finalizacao, schema, migration ou RLS foi alterado.
 ## Atualizacao de auditoria de interface 2026-10-07 - visao geral sem meta historica de hidratacao
 
 A visao geral administrativa da cliente deixou de promover snapshots historicos de hidratacao como se fossem meta profissional atual.
