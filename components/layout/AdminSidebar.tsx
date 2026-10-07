@@ -139,7 +139,8 @@ export function AdminSidebar({ displayName, mode = "desktop" }: AdminSidebarProp
           onClick={() => setIsOpen(true)}
           type="button"
         >
-          Abrir navegação
+          <span aria-hidden="true" className={styles.menuIcon}>☰</span>
+          <span>Menu</span>
         </button>
         {isOpen ? (
           <div className={styles.drawerLayer}>
