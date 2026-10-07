@@ -184,7 +184,7 @@ A regra profissional esta fechada:
 
 O lifecycle no aplicativo ja suporta pedido, resposta append-only, resolucao manual pela Patty e novo questionamento. A fila de pendencias calcula de forma factual quando o marco configurado de lembrete esta devido.
 
-O intervalo do lembrete e carregado de configuracao versionada ativa e a fila operacional identifica factualmente quando o marco esta devido, sem afirmar envio. Permanece aberto somente o envio recorrente efetivo do lembrete, porque o canal tecnico de notificacao ainda nao foi definido.
+O intervalo do lembrete e carregado de configuracao versionada ativa e a fila operacional identifica factualmente quando o marco esta devido, sem afirmar envio. Permanece aberto somente o envio recorrente efetivo do lembrete, porque o canal tecnico de notificacao ainda nao foi definido. A preferencia de canal existente para `weekly_feedback` nao deve ser reutilizada automaticamente para esclarecimentos: sao purposes distintos e exigem decisao/configuracao propria.
 
 ### Banco e performance
 

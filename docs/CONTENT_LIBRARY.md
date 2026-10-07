@@ -76,11 +76,11 @@ Nao usar dados reais no desenvolvimento inicial.
 
 ### QUESTAO ABERTA
 
-Ainda e necessario definir a taxonomia da biblioteca educacional.
+Ainda e necessario definir a taxonomia da biblioteca educacional. Categorias derivadas de nomes de pastas/arquivos do Drive continuam sendo apenas hipoteses de triagem e nao devem virar taxonomia por importacao.
 
 ### QUESTAO ABERTA
 
-Ainda e necessario definir a taxonomia da biblioteca de exercicios.
+Ainda e necessario definir a taxonomia da biblioteca de exercicios. Rotulos historicos como "TREINO FEMININO"/"TREINO MASCULINO" e categorias propostas por metadado nao sao taxonomia de produto nem regra de elegibilidade para clientes.
 
 ### PARCIALMENTE RESOLVIDO
 
