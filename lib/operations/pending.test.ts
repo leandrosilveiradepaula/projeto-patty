@@ -805,3 +805,35 @@ test("operational readiness links land on the exact corrective workflow", () => 
     "/admin/clientes/client-content/conteudos#liberar-conteudo",
   );
 });
+
+
+test("hidden administrative private files become explicit Patty release decisions", () => {
+  const items = buildOperationalPendingItems({
+    clarificationReminderIntervalHours: 24,
+    anamnesisSubmissions: [],
+    clarificationRequests: [],
+    assessments: [],
+    protocolVersions: [],
+    aiExecutions: [],
+    privateFileReleases: [
+      {
+        clientId: "client-file",
+        clientLabel: "Cliente Arquivo",
+        createdAt: "2026-10-07T12:00:00Z",
+        fileId: "file-hidden",
+        fileKind: "exam",
+        originalFilename: "exame.pdf",
+      },
+    ],
+  });
+
+  assert.equal(items.length, 1);
+  assert.equal(items[0]?.kind, "private_file_pending_release");
+  assert.equal(items[0]?.statusLabel, "Aguardando liberação");
+  assert.equal(
+    items[0]?.href,
+    "/admin/clientes/client-file/arquivos#aguardando-liberacao",
+  );
+  assert.equal(getOperationalPendingGroup(items[0]!), "patty");
+  assert.match(items[0]?.description ?? "", /decida explicitamente/);
+});

@@ -25,3 +25,8 @@ test("only hidden administrative uploads become release pendencies", () => {
   assert.match(page, /AdminPrivateFileReleaseForm/);
   assert.match(page, /Enviado pela cliente/);
 });
+
+
+test("pending private file section exposes a stable corrective deep link", () => {
+  assert.match(page, /id="aguardando-liberacao"/);
+});
