@@ -419,7 +419,7 @@ export function buildOperationalPendingItems(
         createdAt: client.createdAt,
         description:
           "Nenhum canal está configurado para o Feedback Semanal desta cliente. Escolha a preferência individual antes de depender do lembrete automático.",
-        href: `/admin/clientes/${client.clientId}#preferencia-feedback`,
+        href: `/admin/clientes/${client.clientId}#preferencia-feedback-semanal`,
         id: `weekly-feedback-channel:${client.clientId}`,
         kind: "weekly_feedback_channel_missing",
         statusLabel: "Canal não configurado",
@@ -454,7 +454,7 @@ export function buildOperationalPendingItems(
       clientLabel: release.clientLabel,
       createdAt: release.createdAt,
       description: `O conteúdo "${release.title}" foi liberado para a cliente, mas a versão exata ainda não possui asset privado registrado. A liberação permanece auditável, porém o arquivo não pode ser aberto.`,
-      href: `/admin/clientes/${release.clientId}/conteudos`,
+      href: `/admin/clientes/${release.clientId}/conteudos#liberar-conteudo`,
       id: `content-release-asset:${release.releaseId}`,
       kind: "content_released_without_asset",
       statusLabel: "Liberado sem arquivo",
@@ -478,7 +478,7 @@ export function buildOperationalPendingItems(
       description: dueAtPassed
         ? `O Feedback Semanal referente a ${feedback.periodStart} ate ${feedback.periodEnd} continua sem envio final e o prazo informado (${feedback.dueAt}) ja passou. Isso nao aplica nenhuma consequencia automatica ao atendimento.`
         : `O Feedback Semanal referente a ${feedback.periodStart} ate ${feedback.periodEnd} foi solicitado e ainda nao possui envio final da cliente.`,
-      href: `/admin/clientes/${feedback.clientId}/feedback-semanal`,
+      href: `/admin/clientes/${feedback.clientId}/feedback-semanal#feedback-pendentes`,
       id: `weekly-feedback:${feedback.id}`,
       kind: "weekly_feedback_awaiting_response",
       statusLabel: dueAtPassed ? "Prazo informado ultrapassado" : "Aguardando resposta",
