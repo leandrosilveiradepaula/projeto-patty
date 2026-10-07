@@ -28,13 +28,6 @@
   overflow-wrap: anywhere;
 }
 
-.fileKind {
-  margin: var(--space-1) 0 0;
-  color: var(--color-text-secondary);
-  font-size: var(--text-body-small-size);
-  line-height: var(--text-body-small-line-height);
-}
-
 .fileMeta {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
