@@ -1,3 +1,11 @@
+## Atualizacao de auditoria de interface 2026-10-07 - contagens sem duplicacao no workspace
+
+O workspace administrativo foi enxugado para evitar repetir a mesma contagem no cabecalho da cliente e novamente na secao imediatamente abaixo.
+
+- Anamnese mantem a contagem no cabecalho e remove o badge duplicado da secao;
+- Protocolos mantem a contagem no cabecalho e remove o badge duplicado da secao.
+
+Nenhuma funcionalidade, regra profissional, schema, migration ou RLS foi alterado.
 ## Atualizacao de auditoria de interface 2026-10-07 - feedback semanal administrativo
 
 A tela administrativa de Feedback Semanal foi reorganizada para manter o trabalho pendente em evidencia sem deixar o historico crescer indefinidamente na pagina.
