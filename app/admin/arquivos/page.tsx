@@ -34,7 +34,7 @@ export default async function AdminPrivateFilesPage({
   const normalizedSearchTerm = normalizeSearchValue(searchTerm);
   const filteredClients = normalizedSearchTerm
     ? clients.filter((client) =>
-        normalizeSearchValue(client.profiles?.display_name ?? "").includes(
+        normalizeSearchValue(client.full_name ?? client.profiles?.display_name ?? "").includes(
           normalizedSearchTerm,
         ),
       )
@@ -95,7 +95,7 @@ export default async function AdminPrivateFilesPage({
             ) : null}
             <ul className={styles.clientList}>
             {filteredClients.map((client) => {
-              const displayName = client.profiles?.display_name?.trim();
+              const displayName = client.full_name?.trim() || client.profiles?.display_name?.trim();
 
               return (
                 <li key={client.id}>
