@@ -1,3 +1,11 @@
+## Gate de retencao de arquivos privados 2026-10-07
+
+A auditoria separou dois comportamentos que nao devem ser confundidos:
+- temporarios de upload expirados podem ser removidos do Storage; o runtime limita essa limpeza ao namespace `pending/` e preserva as linhas historicas de sessao;
+- arquivos finalizados em `client_files` nao possuem politica confirmada de hard delete. Nenhum job ou UI deve apagar fisicamente esses objetos ate existir regra de retencao/arquivamento e verificacao de referencias historicas.
+
+O cron atual de cleanup nao implementa retencao de documentos profissionais; ele apenas higieniza uploads temporarios nao finalizados.
+
 ## Reconciliacao do gerador semanal 2026-10-07
 
 A auditoria confirmou que a geracao recorrente do Feedback Semanal ja foi implementada em migration aplicada: `pg_cron` executa `generate_scheduled_weekly_feedback_requests()`, que resolve a configuracao ativa, exige assignment admin ativo e protocolo publicado, registra origem `schedule` e evita duplicidade por cliente/periodo.
