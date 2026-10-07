@@ -44,7 +44,6 @@ export default async function ClientePerfilPage() {
           phone={registration?.phone ?? undefined}
         />
       </Section>
-
     </>
   );
 }
