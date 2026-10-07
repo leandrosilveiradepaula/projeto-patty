@@ -288,7 +288,7 @@ test("weekly feedback pending stays factual and never suspends service automatic
   assert.equal(items[0]?.statusLabel, "Prazo informado ultrapassado");
   assert.equal(
     items[0]?.href,
-    "/admin/clientes/client-1/feedback-semanal",
+    "/admin/clientes/client-1/feedback-semanal#feedback-pendentes",
   );
   assert.match(
     items[0]?.description ?? "",
