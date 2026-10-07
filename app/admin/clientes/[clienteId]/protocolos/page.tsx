@@ -91,7 +91,7 @@ export default async function AdminClientProtocolsPage({
   }
 
   const protocols = await listAccessibleProtocolsForClient(client.id);
-  const displayName = client.profiles?.display_name?.trim();
+  const displayName = client.full_name?.trim() || client.profiles?.display_name?.trim();
 
   return (
     <>
