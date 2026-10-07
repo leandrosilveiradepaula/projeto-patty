@@ -67,6 +67,7 @@ export default async function AdminClientContentPage({
       versionIdsWithAssets.has(version.id) &&
       isContentVersionReleaseEligible({
         alreadyReleased: releasedVersionIds.has(version.id),
+        hasAsset: versionIdsWithAssets.has(version.id),
         publishedAt: version.published_at,
       }),
   );
