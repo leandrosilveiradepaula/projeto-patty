@@ -1,27 +1,48 @@
 "use client";
 
-import { useFormStatus } from "react-dom";
+import { useActionState, useEffect, useRef } from "react";
 
-import { requestTrainingAction } from "@/app/cliente/treino/actions";
+import {
+  type ClientTrainingRequestFormState,
+  requestTrainingAction,
+} from "@/app/cliente/treino/actions";
+import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/FormField";
 import { Textarea } from "@/components/ui/Textarea";
 
 import styles from "@/app/cliente/treino/page.module.css";
 
-function SubmitButton() {
-  const { pending } = useFormStatus();
-
-  return (
-    <Button loading={pending} type="submit">
-      Solicitar treino
-    </Button>
-  );
-}
+const initialState: ClientTrainingRequestFormState = {
+  message: null,
+  success: false,
+};
 
 export function ClientTrainingRequestForm() {
+  const formRef = useRef<HTMLFormElement>(null);
+  const [state, formAction, isPending] = useActionState(
+    requestTrainingAction,
+    initialState,
+  );
+
+  useEffect(() => {
+    if (state.success) {
+      formRef.current?.reset();
+    }
+  }, [state.success]);
+
   return (
-    <form action={requestTrainingAction} className={styles.form}>
+    <form action={formAction} className={styles.form} ref={formRef}>
+      {state.message ? (
+        <Alert
+          live={state.success ? "polite" : "assertive"}
+          title={state.success ? "Solicitação enviada" : "Não foi possível enviar"}
+          variant={state.success ? "success" : "critical"}
+        >
+          {state.message}
+        </Alert>
+      ) : null}
+
       <FormField
         description="Opcional. Use este campo para registrar algo importante sobre a solicitação."
         id="client-training-request-note"
@@ -37,7 +58,10 @@ export function ClientTrainingRequestForm() {
           />
         )}
       </FormField>
-      <SubmitButton />
+
+      <Button loading={isPending} type="submit">
+        Solicitar treino
+      </Button>
     </form>
   );
 }
