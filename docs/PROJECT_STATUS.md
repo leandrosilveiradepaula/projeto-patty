@@ -2769,3 +2769,16 @@ A documentacao agora marca explicitamente esses trechos como historicos/superado
 - qualquer etapa posterior exige nova confirmacao documentada da Patty.
 
 Nenhum dado historico foi apagado e nenhuma regra profissional nova foi criada.
+
+
+## Reconciliacao de DECISIONS 2026-10-07
+
+A auditoria encontrou decisoes historicas que ainda descreviam como pendentes capacidades ja existentes no runtime.
+
+Reconciliado:
+- recuperacao de senha self-service e link manual de recovery administrativo ja existem;
+- onboarding cria assignment ativo e a ficha administrativa permite encerrar o assignment atual, inativando a cliente quando nao resta vinculo ativo e preservando historico;
+- eventual reassignment generico/equipe continua sendo expansao futura, nao ausencia do fluxo atual;
+- a sequencia antiga em `DECISIONS.md` que alcancava Cutting 3 foi marcada explicitamente como historica/superada; o fluxo vigente confirmado termina em `Cutting 2: 2 Low / 1 High`.
+
+Nenhum schema, RLS ou comportamento de runtime foi alterado nesta reconciliacao.
