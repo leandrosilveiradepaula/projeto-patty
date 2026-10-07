@@ -73,7 +73,11 @@ export default async function ClienteConteudosPage() {
                 <li key={release.id}>
                   <ClientContentCard
                     category={contentVersion.category_key ?? "Não informado"}
-                    meta={`Versão ${contentVersion.version_number}`}
+                    meta={
+                      primaryAsset
+                        ? `Versão ${contentVersion.version_number}`
+                        : `Versão ${contentVersion.version_number} · arquivo ainda indisponível`
+                    }
                     action={
                       primaryAsset ? (
                         <a
@@ -88,8 +92,8 @@ export default async function ClienteConteudosPage() {
                       ) : null
                     }
                     status={
-                      <Badge variant={primaryAsset ? "positive" : "neutral"}>
-                        {primaryAsset ? "Disponível" : "Liberado"}
+                      <Badge variant={primaryAsset ? "positive" : "warning"}>
+                        {primaryAsset ? "Disponível" : "Aguardando arquivo"}
                       </Badge>
                     }
                     title={contentVersion.title}
