@@ -1,3 +1,14 @@
+## Conteudos - semantica de progresso (aberto em 2026-10-07)
+
+A tabela `client_content_progress` ja existe com `first_opened_at` e `completed_at`, mas o produto ainda nao definiu quem deve registrar esses fatos.
+
+Questoes abertas:
+- abrir um asset pelo portal deve registrar automaticamente `first_opened_at`, ou abertura deve continuar sem rastreamento ate consentimento/definicao explicita?
+- `completed_at` deve ser marcado pela propria cliente, pela Patty ou por outro evento verificavel?
+- para video/PDF, "concluido" significa declaracao da cliente ou algum criterio tecnico? Nao inferir consumo completo a partir de download/abertura.
+
+Ate confirmacao, nao escrever progresso automaticamente. O schema pode continuar preservado sem ser usado como telemetria implicita.
+
 ## NOVAS QUESTOES ABERTAS — CLIENTES INATIVAS / REENGAJAMENTO
 
 A Patty confirmou em 2026-10-07 que clientes devem ser identificadas como ativas ou inativas e que o historico de inativas deve ser preservado para possibilitar reengajamento futuro.
