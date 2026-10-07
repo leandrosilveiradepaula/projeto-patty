@@ -1985,6 +1985,8 @@ O caminho administrativo deixou de estar totalmente pendente:
 - quando nao resta assignment ativo, a cliente passa a `inactive`;
 - o encerramento preserva historico e possui smoke E2E sintetico.
 
+Esse encerramento nao exclui a identidade Auth nem apaga dados profissionais; `Auth User != Profile != Client != Assignment` continua sendo boundary obrigatoria.
+
 Continua aberta somente eventual necessidade futura de reassignment para outro profissional/equipe ou de um editor administrativo generico de assignments. O bootstrap inicial da conta admin da Patty continua sendo procedimento administrativo controlado e separado.
 
 ## 2026-09-15 - Separacao entre autenticacao, cadastro do cliente e snapshot de anamnese
