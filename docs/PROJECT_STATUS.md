@@ -2891,3 +2891,15 @@ A revisao imediatamente posterior a fila de prontidao encontrou um boundary impo
 - testes cobrem tanto o gate de asset quanto os deep links operacionais.
 
 Releases legados sem asset continuam preservados e visiveis como pendencia; nao ha mutacao retroativa do historico.
+
+
+## Arquivos privados na fila operacional - 2026-10-07
+
+A integracao UI-backend da fila administrativa foi ampliada para o fluxo privado ja existente:
+- uploads administrativos validados que continuam ocultos para a cliente agora geram uma pendencia factual da Patty para decisao de liberacao;
+- arquivos enviados pela propria cliente nao entram nessa pendencia, pois ja seguem o fluxo de visibilidade do proprio upload;
+- a coleta usa leitura batch client-scoped sob RLS e nao altera schema;
+- a pendencia aponta diretamente para a secao "Aguardando liberacao" da cliente;
+- a decisao continua explicitamente humana: o sistema nao publica nem libera arquivo automaticamente.
+
+A politica definitiva de retencao/hard-delete continua aberta e nao foi inferida neste bloco.
