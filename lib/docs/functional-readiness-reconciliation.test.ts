@@ -163,3 +163,23 @@ test("historical post-Cutting sequence is explicitly superseded in decisions", (
     /reconciliacao de 2026-10-07 limita o fluxo confirmado a `Cutting 2: 2 Low \/ 1 High`/,
   );
 });
+
+
+test("decisions no longer block the published anamnesis v1 on resolved ANAM-046", () => {
+  const decisions = read("docs/DECISIONS.md");
+
+  assert.match(decisions, /ANAM-046 deixou de estar pendente para a v1/);
+  assert.match(decisions, /client-anamnesis.*ja foi publicada\/validada/);
+  assert.doesNotMatch(decisions, /primeira `client-anamnesis` permanece \*\*NAO PUBLICAVEL\*\*/);
+});
+
+test("readiness describes the OpenAI boundary as implemented but health-data gated", () => {
+  const readiness = read("docs/MVP_READINESS.md");
+  const status = read("docs/PROJECT_STATUS.md");
+
+  assert.match(readiness, /integracao server-side com OpenAI e o boundary de execution ja existem/);
+  assert.match(readiness, /dados reais de saude continuam bloqueados/);
+  assert.doesNotMatch(readiness, /Ainda nao existe integracao real com provider\/modelo/);
+  assert.match(status, /O runtime atual possui:/);
+  assert.match(status, /gate de dados de saude permanece fechado/);
+});
