@@ -1,3 +1,15 @@
+## Atualizacao de auditoria de interface 2026-10-07 - visao geral da cliente sem duplicacoes
+
+A visao geral da cliente foi simplificada para reduzir repeticao e comprimento desnecessario da pagina.
+
+- Anamnese, Avaliacoes, Protocolos e Feedback Semanal permanecem na trilha operacional do atendimento;
+- a antiga secao `Areas da cliente` passa a se chamar `Atalhos complementares`;
+- nela permanecem apenas Evolucao, Arquivos, Conteudos, Check-ins e Treino;
+- Treino continua acessivel sem ser promovido a etapa linear obrigatoria do metodo;
+- o atalho de navegacao local passa de `Areas` para `Complementares`.
+
+Nenhuma regra profissional, schema, migration ou RLS foi alterado.
+
 ## Atualizacao estrutural 2026-10-07 - nome canonico e status da cliente
 
 Foi preparada a migration `20261007133000_enforce_client_name_and_status.sql` para consolidar no banco as regras confirmadas de cadastro.
