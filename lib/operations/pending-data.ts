@@ -284,7 +284,9 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
           client.full_name || client.profiles?.display_name,
         ),
         contactEmail: registration?.contact_email ?? null,
-        createdAt: client.started_at ?? client.created_at,
+        createdAt: client.started_at ?? assignments.find(
+          (assignment) => assignment.client_id === client.id,
+        )?.assigned_at ?? new Date(0).toISOString(),
         hasRegistration: Boolean(registration),
         weeklyFeedbackChannel: preference?.channel_key ?? null,
       };
