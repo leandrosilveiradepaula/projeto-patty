@@ -65,7 +65,7 @@ export default async function AdminClientCheckinsPage({ params }: PageProps) {
 
       <Section
         description="A hidratação permanece sem meta automática enquanto a regra profissional não estiver formalizada. Esta área preserva apenas os registros factuais já informados."
-        title="Líquidos"
+        title="Hidratação"
       >
         <Card className={styles.card} variant="subtle">
           <p className={styles.description}>
