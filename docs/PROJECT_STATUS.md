@@ -2677,9 +2677,9 @@ PR #350 mergeado no commit `6c4e7ab1ac39616257fb6299f50b9ebb90e189b4`.
 - nenhuma migration, schema ou policy RLS nova foi necessaria: o fluxo usa as tabelas e policies MFA/admin existentes;
 - o gate `Validate application` do head final do PR passou por completo antes do merge, incluindo typecheck, testes deterministas, boundaries de seguranca e build.
 
-### LIMITE
+### RECONCILIACAO VIGENTE
 
-A biblioteca de exercicios agora possui autoria/publicacao operacional, mas a prescricao versionada de treino por cliente continua sendo uma lacuna separada. Ela nao deve ser criada ate que o modelo operacional e as regras profissionais necessarias estejam documentados e confirmados.
+A autoria/publicacao da biblioteca permanece separada da prescricao. A prescricao versionada por cliente ja foi implementada e mergeada posteriormente pelo PR #445: exige solicitacao, permite selecao individual pela Patty, possui revisao/publicacao humanas e preserva historico. O que continua aberto sao as regras profissionais de progressao, carga, volume e demais criterios de treino; nenhuma delas deve ser inferida ou automatizada.
 
 
 ## Biblioteca educacional — autoria, publicacao e assets privados
