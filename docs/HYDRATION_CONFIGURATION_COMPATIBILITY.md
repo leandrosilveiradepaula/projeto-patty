@@ -1,5 +1,9 @@
 # Hydration configuration compatibility slice
 
+> **SUPERADO PARA RUNTIME EM 2026-10-07**
+>
+> Este documento preserva a historia tecnica da camada configuravel de hidratacao. Os valores 60 mL/kg e 35 mL/kg descritos aqui nao sao regra profissional vigente. A decisao mais recente mantem hidratacao aberta para automacao; o runtime atual nao gera nem recalcula metas automaticamente.
+
 Last updated: 2026-10-02.
 
 ## Objective

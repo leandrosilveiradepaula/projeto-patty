@@ -12,10 +12,7 @@ import {
   parseMeasurementDraft,
 } from "@/lib/evaluations/assessment-draft";
 import { buildConfigurableAssessmentReadiness } from "@/lib/evaluations/assessment-definition";
-import { resolveAssessmentWeightKg } from "@/lib/evaluations/assessment-hydration";
 import { finalizeAssessmentWithMethodSnapshot } from "@/lib/evaluations/assessment-persistence";
-import { loadHydrationTargetResolution } from "@/lib/method/hydration-loader";
-import { persistConfiguredHydrationTarget } from "@/lib/method/hydration-persistence";
 import { createAccessibleAssessmentMeasurementCorrection } from "@/lib/evaluations/measurement-correction-store";
 import { isProfessionalDecision } from "@/lib/follow-up/professional-decisions";
 import { requireRole } from "@/lib/supabase/auth";
@@ -458,45 +455,15 @@ export async function finalizeAssessmentAction(
     };
   }
 
-  const finalizedWeightKg = resolveAssessmentWeightKg(measurements);
-  let hydrationUpdated = false;
-  let hydrationWarning = false;
-
-  if (finalizedWeightKg !== null) {
-    try {
-      const hydrationResolution = await loadHydrationTargetResolution(
-        assessment.client_id,
-        finalizedWeightKg,
-      );
-
-      await persistConfiguredHydrationTarget({
-        clientId: assessment.client_id,
-        createdByProfileId: context.profileId,
-        resolution: hydrationResolution,
-        weightKg: finalizedWeightKg,
-      });
-
-      hydrationUpdated = true;
-    } catch {
-      hydrationWarning = true;
-    }
-  }
-
   revalidatePath(`/admin/avaliacoes/${assessment.id}`);
   revalidatePath(`/admin/clientes/${assessment.client_id}`);
   revalidatePath(`/admin/clientes/${assessment.client_id}/avaliacoes`);
   revalidatePath(`/admin/clientes/${assessment.client_id}/evolucao`);
-  revalidatePath(`/admin/clientes/${assessment.client_id}/checkins`);
   revalidatePath("/admin/avaliacoes");
   revalidatePath("/cliente");
-  revalidatePath("/cliente/checkins");
 
   return {
-    message: hydrationWarning
-      ? "Avaliação finalizada. A nova meta de líquidos não pôde ser recalculada automaticamente; revise a área de Check-ins."
-      : hydrationUpdated
-        ? "Avaliação finalizada e meta de líquidos recalculada com o novo peso, sem alterar o histórico anterior."
-        : "Avaliação finalizada. Nenhum peso em kg foi encontrado para recalcular a meta de líquidos.",
+    message: "Avaliação finalizada. Os dados foram preservados sem gerar meta automática de hidratação.",
     success: true,
   };
 }

@@ -15,7 +15,6 @@ const ENTRYPOINT_RULES = new Map([
   ["app/admin/clientes/[clienteId]/actions.ts", "admin"],
   ["app/admin/clientes/[clienteId]/arquivos/actions.ts", "admin"],
   ["app/admin/clientes/[clienteId]/avaliacoes/actions.ts", "admin"],
-  ["app/admin/clientes/[clienteId]/checkins/actions.ts", "admin"],
   ["app/admin/clientes/[clienteId]/conteudos/actions.ts", "admin"],
   ["app/admin/clientes/[clienteId]/feedback-semanal/actions.ts", "admin"],
   ["app/admin/clientes/[clienteId]/treino/actions.ts", "admin"],
@@ -1107,9 +1106,13 @@ test("liquid check-in consumers resolve the active taxonomy without inventing ra
     clientPage,
     /maior parte deve ser agua pura|menor quantidade/i,
   );
+  assert.doesNotMatch(
+    clientPage,
+    /minimumRatio|minimumWaterRatio|pureWaterRatio|meta atual|meta ainda não definida/i,
+  );
   assert.match(
     clientPage,
-    /não aplica uma proporção mínima automática/i,
+    /não aplica automaticamente uma meta diária nem uma proporção mínima/i,
   );
 });
 
@@ -1258,7 +1261,7 @@ test("clarification reminder configuration loader stays server-only and fail-clo
   assert.doesNotMatch(loader, /\?\?\s*24|\|\|\s*24/);
 });
 
-test("configured hydration uses the reviewed server-only persistence boundary", async () => {
+test("historical hydration compatibility boundaries remain server-only but disconnected from runtime", async () => {
   const loader = await readFile(
     path.join(ROOT, "lib", "method", "hydration-loader.ts"),
     "utf8",
@@ -1267,16 +1270,16 @@ test("configured hydration uses the reviewed server-only persistence boundary", 
     path.join(ROOT, "lib", "method", "hydration-persistence.ts"),
     "utf8",
   );
-  const adminAction = await readFile(
-    path.join(
-      ROOT,
-      "app",
-      "admin",
-      "clientes",
-      "[clienteId]",
-      "checkins",
-      "actions.ts",
-    ),
+  const assessmentAction = await readFile(
+    path.join(ROOT, "app", "admin", "avaliacoes", "[avaliacaoId]", "actions.ts"),
+    "utf8",
+  );
+  const adminPage = await readFile(
+    path.join(ROOT, "app", "admin", "clientes", "[clienteId]", "checkins", "page.tsx"),
+    "utf8",
+  );
+  const clientPage = await readFile(
+    path.join(ROOT, "app", "cliente", "checkins", "page.tsx"),
     "utf8",
   );
 
@@ -1299,12 +1302,12 @@ test("configured hydration uses the reviewed server-only persistence boundary", 
   assert.match(persistence, /p_template_version_id/);
   assert.match(persistence, /p_override_version_id/);
 
-  assert.match(adminAction, /requireRole\(["']admin["']\)/);
-  assert.match(adminAction, /getAccessibleClient/);
-  assert.match(adminAction, /loadHydrationTargetResolution/);
-  assert.match(adminAction, /persistConfiguredHydrationTarget/);
-  assert.doesNotMatch(adminAction, /createAdminClient/);
-  assert.doesNotMatch(adminAction, /createAccessibleClientHydrationTarget/);
+  for (const runtimeSource of [assessmentAction, adminPage, clientPage]) {
+    assert.doesNotMatch(runtimeSource, /loadHydrationTargetResolution/);
+    assert.doesNotMatch(runtimeSource, /persistConfiguredHydrationTarget/);
+  }
+  assert.doesNotMatch(adminPage, /createHydrationTargetAction|Recalcular meta/);
+  assert.doesNotMatch(clientPage, /Meta atual|Meta ainda não definida/);
 });
 
 
