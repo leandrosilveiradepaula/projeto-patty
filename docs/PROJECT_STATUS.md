@@ -2755,3 +2755,17 @@ A auditoria documental fechou pendencias que continuavam descritas como abertas 
 Tambem foi marcado explicitamente como historico superado o trecho que ainda chamava 35 mL/kg de formula vigente. Hidratacao automatica continua aberta e desabilitada.
 
 As pendencias remanescentes foram estreitadas ao que realmente falta: governanca/taxonomia editorial, regras profissionais adicionais de treino, WhatsApp/opt-in, detalhes opcionais do Feedback Semanal e eventual nova regra profissional de hidratacao.
+
+
+## Reconciliacao de regras historicas 2026-10-07
+
+A segunda passada em `OPEN_QUESTIONS.md` encontrou dois grupos historicos ainda redigidos de forma que podiam parecer vigentes:
+- 35 mL/kg e composicao 70/30 para hidratacao;
+- Cutting 3, Bulking e Consolidacao descritos a partir da rodada de 2026-10-04.
+
+A documentacao agora marca explicitamente esses trechos como historicos/superados. Para automacao, prevalecem as decisoes reconciliadas mais recentes:
+- hidratacao automatica permanece aberta e desabilitada;
+- a sequencia profissional vigente termina em `Cutting 2: 2 Low / 1 High`;
+- qualquer etapa posterior exige nova confirmacao documentada da Patty.
+
+Nenhum dado historico foi apagado e nenhuma regra profissional nova foi criada.

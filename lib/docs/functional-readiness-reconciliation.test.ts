@@ -116,3 +116,26 @@ test("weekly feedback open questions distinguish implemented schedule from actua
   assert.match(questions, /geracao recorrente, origem auditavel e idempotencia implementadas/);
   assert.match(questions, /provedor, opt-in\/consentimento e fallback do WhatsApp/);
 });
+
+
+test("open questions no longer present historical hydration or post-Cutting material as current rules", () => {
+  const questions = read("docs/OPEN_QUESTIONS.md");
+
+  assert.match(questions, /nao existe regra automatica vigente de hidratacao/);
+  assert.doesNotMatch(
+    questions,
+    /O valor vigente de \*\*35 mL\/kg\/dia\*\* e a referencia profissional confirmada/,
+  );
+  assert.match(
+    questions,
+    /REGISTRO HISTORICO — BULKING E CONSOLIDACAO METABOLICA/,
+  );
+  assert.match(
+    questions,
+    /REGISTRO HISTORICO — ESTRUTURA DO CUTTING 3/,
+  );
+  assert.match(
+    questions,
+    /Nao usar para implementar etapa posterior ao Cutting 2 sem nova confirmacao documentada da Patty/,
+  );
+});
