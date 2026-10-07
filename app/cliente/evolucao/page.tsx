@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
+import Link from "next/link";
 import { buildFactualProgressSeries } from "@/lib/evaluations/progress-view";
 import { listCurrentClientFinalizedAssessmentMeasurements } from "@/lib/supabase/data-access";
 
@@ -69,6 +70,11 @@ export default async function ClientProgressPage() {
       />
 
       <Section
+        action={
+          <Link className={styles.assessmentsLink} href="/cliente/avaliacoes">
+            Ver avaliações
+          </Link>
+        }
         description="Cada linha compara apenas a mesma medida na mesma unidade."
         title="Histórico de medidas"
       >
