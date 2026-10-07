@@ -1,3 +1,15 @@
+## Bloco consolidado - nome e status nos workspaces 2026-10-07
+
+A consolidacao de `clients.full_name` foi estendida para os workspaces administrativos de Protocolos, Treino, Avaliacoes, Arquivos, Anamnese, Feedback Semanal e Check-ins.
+
+Tambem foi corrigida uma inconsistência de apresentacao: badges `Ativa`/`Inativa` agora dependem de `clients.status`, e nao da simples presenca de nome ou profile vinculado.
+
+Regras preservadas:
+- `clients.full_name` e a fonte profissional do nome;
+- `clients.status` e a fonte profissional de ativo/inativo;
+- `profiles.display_name` permanece apenas fallback de compatibilidade;
+- status profissional continua separado de Auth, sessao e assignment.
+
 ## Bloco consolidado - nome canonico da cliente 2026-10-07
 
 A auditoria do lifecycle de clientes encontrou uma inconsistência residual: o banco ja exige `clients.full_name`, mas algumas telas e a fila operacional ainda usavam `profiles.display_name` como fonte primaria.

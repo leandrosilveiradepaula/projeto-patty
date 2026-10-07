@@ -12,7 +12,7 @@ Cada cliente possui estado profissional:
 
 Encerrar acompanhamento nao apaga historico.
 
-Status profissional da cliente nao e equivalente a login, conta Auth, sessao ou assignment.
+Status profissional da cliente nao e equivalente a login, conta Auth, sessao ou assignment. Interfaces administrativas devem exibir `clients.status` quando apresentarem `Ativa`/`Inativa`; a presenca de nome, profile ou conta vinculada nao substitui esse estado.
 
 ### FUTURO REENGAJAMENTO
 

@@ -117,7 +117,7 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
   const submittedFeedbacks = feedbacks.filter(
     (feedback) => feedback.submitted_at !== null,
   );
-  const displayName = client.profiles?.display_name?.trim();
+  const displayName = client.full_name?.trim() || client.profiles?.display_name?.trim();
 
   return (
     <>

@@ -62,7 +62,7 @@ export default async function AdminClientFilesPage({
     notFound();
   }
 
-  const displayName = client.profiles?.display_name?.trim();
+  const displayName = client.full_name?.trim() || client.profiles?.display_name?.trim();
   const pendingReleaseFiles = files.filter(
     (file) =>
       !file.client_visible_at &&
