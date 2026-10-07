@@ -54,7 +54,7 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
   const labelsByClientId = new Map(
     assignedClients.map((client) => [
       client.id,
-      clientLabel(client.profiles?.display_name),
+      clientLabel(client.full_name || client.profiles?.display_name),
     ]),
   );
 
@@ -116,7 +116,7 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
       return request
         ? [{
             clientId: client.id,
-            clientLabel: clientLabel(client.profiles?.display_name),
+            clientLabel: clientLabel(client.full_name || client.profiles?.display_name),
             createdAt: request.requested_at,
             id: request.id,
             state: "requested_without_plan" as const,
@@ -133,7 +133,7 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
 
     return [{
       clientId: client.id,
-      clientLabel: clientLabel(client.profiles?.display_name),
+      clientLabel: clientLabel(client.full_name || client.profiles?.display_name),
       createdAt: openVersion.reviewed_at ?? openVersion.created_at,
       id: openVersion.id,
       state: openVersion.reviewed_at
@@ -253,7 +253,7 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
     })),
     assessments: assessments.map((assessment) => ({
       clientId: assessment.client_id,
-      clientLabel: clientLabel(assessment.clients?.profiles?.display_name),
+      clientLabel: clientLabel(assessment.clients?.full_name || assessment.clients?.profiles?.display_name),
       createdAt: assessment.assessed_at,
       finalizedAt: assessment.finalized_at,
       id: assessment.id,
@@ -261,7 +261,7 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
     protocolVersions: protocolVersions.map(({ protocol, version }) => ({
       approvalCount: approvalCounts.get(version.id) ?? 0,
       clientId: version.client_id,
-      clientLabel: clientLabel(protocol.clients?.profiles?.display_name),
+      clientLabel: clientLabel(protocol.clients?.full_name || protocol.clients?.profiles?.display_name),
       createdAt: version.created_at,
       id: version.id,
       protocolId: protocol.id,
@@ -272,7 +272,7 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
     trainingLifecycle,
     aiExecutions: aiExecutions.map((execution) => ({
       clientId: execution.client_id,
-      clientLabel: clientLabel(execution.clients?.profiles?.display_name),
+      clientLabel: clientLabel(execution.clients?.full_name || execution.clients?.profiles?.display_name),
       createdAt: execution.created_at,
       id: execution.id,
       purposeKey: execution.purpose_key,
