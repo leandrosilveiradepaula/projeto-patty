@@ -63,6 +63,16 @@ export default async function AdminClientFilesPage({
   }
 
   const displayName = client.profiles?.display_name?.trim();
+  const pendingReleaseFiles = files.filter(
+    (file) =>
+      !file.client_visible_at &&
+      file.uploaded_by_profile_id !== client.profile_id,
+  );
+  const historyFiles = files.filter(
+    (file) =>
+      file.client_visible_at ||
+      file.uploaded_by_profile_id === client.profile_id,
+  );
 
   return (
     <>
@@ -80,18 +90,14 @@ export default async function AdminClientFilesPage({
         <AdminPrivateFileUploadForm clientId={client.id} />
       </Section>
 
-      <Section
-        description="Consulte os arquivos privados e controle quais uploads administrativos podem ser vistos pela cliente."
-        title="Arquivos"
-      >
-        {files.length === 0 ? (
-          <EmptyState
-            description="Nenhum arquivo privado está cadastrado para esta cliente."
-            title="Sem arquivos cadastrados"
-          />
-        ) : (
+      {pendingReleaseFiles.length > 0 ? (
+        <Section
+          action={<Badge variant="warning">{pendingReleaseFiles.length} pendente(s)</Badge>}
+          description="Uploads administrativos ainda ocultos para a cliente e que aguardam decisão explícita de liberação."
+          title="Aguardando liberação"
+        >
           <ul className={styles.fileList}>
-            {files.map((file) => (
+            {pendingReleaseFiles.map((file: (typeof files)[number]) => (
               <li key={file.id}>
                 <Card className={styles.fileCard}>
                   <div className={styles.fileHeader}>
@@ -115,18 +121,9 @@ export default async function AdminClientFilesPage({
                     </div>
                   </div>
                   <dl className={styles.fileMeta}>
-                    <div>
-                      <dt>Tipo</dt>
-                      <dd>{file.mime_type || "Não informado"}</dd>
-                    </div>
-                    <div>
-                      <dt>Tamanho</dt>
-                      <dd>{formatFileSize(file.byte_size)}</dd>
-                    </div>
-                    <div>
-                      <dt>Cadastrado em</dt>
-                      <dd>{formatCreatedAt(file.created_at)}</dd>
-                    </div>
+                    <div><dt>Tipo</dt><dd>{file.mime_type || "Não informado"}</dd></div>
+                    <div><dt>Tamanho</dt><dd>{formatFileSize(file.byte_size)}</dd></div>
+                    <div><dt>Cadastrado em</dt><dd>{formatCreatedAt(file.created_at)}</dd></div>
                   </dl>
                   <div className={styles.fileActions}>
                     <Link
@@ -136,11 +133,70 @@ export default async function AdminClientFilesPage({
                     >
                       Baixar arquivo
                     </Link>
-                    {!file.client_visible_at ? (
-                      <AdminPrivateFileReleaseForm
-                        clientId={client.id}
-                        fileId={file.id}
-                      />
+                    {!file.client_visible_at && file.uploaded_by_profile_id !== client.profile_id ? (
+                      <AdminPrivateFileReleaseForm clientId={client.id} fileId={file.id} />
+                    ) : null}
+                  </div>
+                </Card>
+              </li>
+            ))}
+          </ul>
+        </Section>
+      ) : null}
+
+      <Section
+        description="Arquivos já liberados para a cliente e arquivos enviados pela própria cliente permanecem disponíveis no histórico privado."
+        title="Histórico de arquivos"
+      >
+        {historyFiles.length === 0 ? (
+          <EmptyState
+            description={
+              pendingReleaseFiles.length > 0
+                ? "Os uploads administrativos pendentes aparecem acima. Depois da liberação, eles passam para este histórico."
+                : "Nenhum arquivo privado está cadastrado para esta cliente."
+            }
+            title="Sem arquivos no histórico"
+          />
+        ) : (
+          <ul className={styles.fileList}>
+            {historyFiles.map((file: (typeof files)[number]) => (
+              <li key={file.id}>
+                <Card className={styles.fileCard}>
+                  <div className={styles.fileHeader}>
+                    <h3 className={styles.fileTitle}>
+                      {file.original_filename?.trim() || "Arquivo sem nome informado"}
+                    </h3>
+                    <div className={styles.badges}>
+                      <Badge variant="neutral">
+                        {fileKindLabels[file.file_kind] ?? file.file_kind}
+                      </Badge>
+                      <Badge variant="neutral">
+                        {file.uploaded_by_profile_id === client.profile_id
+                          ? "Enviado pela cliente"
+                          : "Upload administrativo"}
+                      </Badge>
+                      <Badge variant={file.client_visible_at ? "positive" : "neutral"}>
+                        {file.client_visible_at
+                          ? "Visível para cliente"
+                          : "Oculto para cliente"}
+                      </Badge>
+                    </div>
+                  </div>
+                  <dl className={styles.fileMeta}>
+                    <div><dt>Tipo</dt><dd>{file.mime_type || "Não informado"}</dd></div>
+                    <div><dt>Tamanho</dt><dd>{formatFileSize(file.byte_size)}</dd></div>
+                    <div><dt>Cadastrado em</dt><dd>{formatCreatedAt(file.created_at)}</dd></div>
+                  </dl>
+                  <div className={styles.fileActions}>
+                    <Link
+                      aria-label={`Baixar ${file.original_filename?.trim() || "arquivo sem nome informado"}`}
+                      className={styles.downloadLink}
+                      href={`/admin/arquivos/${file.id}`}
+                    >
+                      Baixar arquivo
+                    </Link>
+                    {!file.client_visible_at && file.uploaded_by_profile_id !== client.profile_id ? (
+                      <AdminPrivateFileReleaseForm clientId={client.id} fileId={file.id} />
                     ) : null}
                   </div>
                 </Card>

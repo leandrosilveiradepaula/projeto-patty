@@ -1,3 +1,12 @@
+## Atualizacao de auditoria de interface 2026-10-07 - arquivos aguardando liberacao
+
+A area administrativa de Arquivos passa a separar a decisao operacional da Patty do historico privado.
+
+- uploads administrativos ainda ocultos aparecem em `Aguardando liberacao`;
+- arquivos ja liberados e arquivos enviados pela propria cliente ficam em `Historico de arquivos`;
+- download e liberacao explicita permanecem disponiveis;
+- nenhuma regra de privacidade, storage, schema ou RLS foi alterada.
+
 ## Atualizacao de auditoria de interface 2026-10-07 - anamnese pendente separada do historico
 
 A area administrativa de Anamnese passa a distinguir trabalho ainda aguardando a cliente de envios concluidos.
