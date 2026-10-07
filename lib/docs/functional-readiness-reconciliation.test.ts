@@ -139,3 +139,27 @@ test("open questions no longer present historical hydration or post-Cutting mate
     /Nao usar para implementar etapa posterior ao Cutting 2 sem nova confirmacao documentada da Patty/,
   );
 });
+
+
+test("decisions reflect implemented password recovery and assignment administration", () => {
+  const decisions = read("docs/DECISIONS.md");
+
+  assert.match(decisions, /Recuperacao de acesso deixou de ser pendencia/);
+  assert.match(decisions, /Patty tambem pode gerar link manual de recovery/);
+  assert.match(decisions, /caminho administrativo deixou de estar totalmente pendente/);
+  assert.match(decisions, /Patty pode encerrar o assignment atual pela ficha da cliente/);
+  assert.doesNotMatch(
+    decisions,
+    /O caminho administrativo para criar, alterar ou encerrar assignments continua pendente/,
+  );
+});
+
+test("historical post-Cutting sequence is explicitly superseded in decisions", () => {
+  const decisions = read("docs/DECISIONS.md");
+
+  assert.match(decisions, /HISTORICO SUPERADO/);
+  assert.match(
+    decisions,
+    /reconciliacao de 2026-10-07 limita o fluxo confirmado a `Cutting 2: 2 Low \/ 1 High`/,
+  );
+});
