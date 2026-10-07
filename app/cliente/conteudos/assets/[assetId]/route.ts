@@ -30,10 +30,13 @@ export async function GET(
 
   let blob;
 
+  const range = request.headers.get("range") ?? undefined;
+
   try {
     blob = await get(asset.storage_path, {
       access: "private",
       ifNoneMatch: request.headers.get("if-none-match") ?? undefined,
+      range,
     });
   } catch {
     return new Response(null, { status: 404 });
@@ -53,15 +56,23 @@ export async function GET(
     });
   }
 
+  const responseHeaders = new Headers({
+    "Accept-Ranges": "bytes",
+    "Cache-Control": "private, no-store",
+    "Content-Disposition": "inline",
+    "Content-Length":
+      blob.headers.get("content-length") ?? String(blob.blob.size),
+    "Content-Type": asset.content_type,
+    ETag: blob.headers.get("etag") ?? "",
+  });
+  const contentRange = blob.headers.get("content-range");
+
+  if (contentRange) {
+    responseHeaders.set("Content-Range", contentRange);
+  }
+
   return new Response(blob.stream, {
-    status: 200,
-    headers: {
-      "Accept-Ranges": "bytes",
-      "Cache-Control": "private, no-store",
-      "Content-Disposition": "inline",
-      "Content-Length": String(blob.blob.size),
-      "Content-Type": asset.content_type,
-      ETag: blob.headers.get("etag") ?? "",
-    },
+    status: blob.statusCode === 206 ? 206 : 200,
+    headers: responseHeaders,
   });
 }
