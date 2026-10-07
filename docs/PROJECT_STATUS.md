@@ -1,3 +1,16 @@
+## Atualizacao de auditoria de interface 2026-10-07 - home e navegacao da cliente
+
+A home da cliente foi enxugada para priorizar a proxima acao e os atalhos realmente relevantes.
+
+- removido o catalogo completo de areas da home, que duplicava a barra inferior e a pagina `Mais`;
+- removidas consultas usadas apenas para contadores desses cards, reduzindo trabalho desnecessario no carregamento inicial;
+- `Mais` continua sendo o catalogo das areas secundarias;
+- a descricao de Treino em `Mais` passa a cobrir tanto treino publicado quanto solicitacao do servico;
+- `/cliente/exercicios` passa a redirecionar diretamente para `/cliente/treino`, eliminando uma tela intermediaria;
+- rotas secundarias de Exercicios e Jornada passam a manter `Mais` ativo na navegacao quando acessadas por deep link.
+
+Nenhuma regra profissional, schema, migration ou RLS foi alterado.
+
 ## Atualizacao de auditoria de interface 2026-10-07 - navegacao mobile do workspace da cliente
 
 O workspace administrativo da cliente possui 10 areas. No mobile, a faixa horizontal de abas foi substituida por um seletor explicito de area.
