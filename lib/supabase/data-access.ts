@@ -1813,6 +1813,28 @@ export async function listAccessibleClientFiles(clientId: string) {
   return data;
 }
 
+export async function listAccessibleClientFilesForClients(clientIds: string[]) {
+  if (clientIds.length === 0) {
+    return [];
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_files")
+    .select(
+      "id, client_id, file_kind, original_filename, mime_type, byte_size, created_at, uploaded_by_profile_id, client_visible_at, client_visibility_set_by_profile_id",
+    )
+    .in("client_id", clientIds)
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
 export async function getAccessiblePrivateFileForCurrentClientDownload(
   fileId: string,
 ) {
