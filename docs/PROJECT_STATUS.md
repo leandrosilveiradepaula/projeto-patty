@@ -2915,3 +2915,14 @@ A revisao do bloco confirmou que avaliacoes em rascunho **ja alimentavam** a fil
 - a regra para ancoras 29/30/31 continua aberta e nao foi automatizada.
 
 Nenhuma migration/RLS nova foi necessaria.
+
+
+## Visibilidade operacional no workspace da cliente - 2026-10-07
+
+Os gaps ja integrados a fila global passam tambem a aparecer no contexto da cliente, sem duplicar regra de dominio:
+- ausencia de canal do Feedback Semanal entra na proxima acao operacional do workspace;
+- canal email sem `contact_email` direciona para Cadastro Atual e explicita que email de login nao substitui contato;
+- arquivos administrativos ocultos aguardando liberacao passam a ter contagem/status no card Arquivos e podem virar a proxima acao;
+- o atalho leva para a secao real `#aguardando-liberacao`.
+
+Este bloco melhora visibilidade contextual; nao cria prioridade clinica, nao libera arquivos automaticamente e nao altera o lifecycle do Feedback Semanal.
