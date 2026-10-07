@@ -801,24 +801,19 @@ A Patty confirmou que a cliente deve visualizar a rotina alimentar publicada e, 
 
 ### PARCIALMENTE RESOLVIDO - CHECK-IN
 
-A Patty confirmou que o produto deve prever check-ins com metas e lembretes para:
-- liquidos consumidos ao longo do dia;
-- meta de liquidos baseada no peso da cliente;
-- check-in diario de atividade fisica com registro "fez / nao fez", independente do treino prescrito;
-- visualizacao do progresso pela cliente como estimulo adicional.
+A Patty confirmou que o produto deve prever check-ins para:
+- registrar liquidos consumidos ao longo do dia;
+- realizar check-in diario de atividade fisica com registro "fez / nao fez", independente do treino prescrito;
+- preservar historico e auditoria dos registros;
+- permitir que a cliente corrija os proprios registros anteriores sem limite temporal profissional definido;
+- permitir que a Patty corrija registros da cliente, preservando auditoria.
 
-A Patty confirmou que as metas/configuracoes individuais podem ser definidas na entrega do primeiro protocolo.
-
-A formula e a unidade da meta estao resolvidas: 35 mL/kg/dia como template profissional vigente.
-
-Tambem estao resolvidos:
-- orientacao 70% agua pura / 30% outros liquidos zero calorias;
-- recalculo automatico prospectivo apos novo peso;
-- cliente pode corrigir registros anteriores sem limite temporal profissional definido;
-- Patty pode corrigir registros da cliente com auditoria.
+A regra profissional automatica de hidratacao permanece aberta. Portanto, valores historicos como 35 mL/kg, 60 mL/kg, composicao 70/30, metas automaticas, progresso contra meta e recalculo automatico nao devem ser tratados como regra vigente.
 
 Permanece aberto:
-- horarios/cadencia dos lembretes de hidratacao;
+- eventual regra profissional futura de hidratacao;
+- horarios/cadencia de lembretes caso sejam reativados a partir de regra confirmada;
+- forma tecnica definitiva da correcao auditavel de check-ins, sem destruir o valor original;
 - detalhes tecnicos adicionais de notificacao quando necessarios.
 
 Nao inferir score de adesao ou frequencia ideal de treino.
