@@ -1478,7 +1478,7 @@ A organizacao usa somente perguntas/respostas originais ja persistidas. Nao cria
 A logica de agrupamento esta isolada em `lib/anamnesis/professional-review.ts` e possui teste deterministico.
 ## 2026-09-26 - Evolucao operacional a partir da rodada da Patty
 
-### IMPLEMENTADO NA BRANCH DE PRODUTO
+### REGISTRO HISTORICO — IMPLEMENTACAO POSTERIORMENTE MERGEADA
 
 As seis frentes autorizadas foram implementadas sem ampliar regras profissionais abertas:
 1. visao profissional agrupada da Anamnese, preservando respostas originais;
@@ -1529,9 +1529,9 @@ Nenhuma migration foi necessaria.
 
 ## 2026-09-27 - Painel de pendencias operacionais
 
-### IMPLEMENTADO NA BRANCH
+### IMPLEMENTADO / MERGEADO
 
-A rota `/admin/pendencias` passa a consolidar somente estados operacionais explicitamente demonstraveis pelo backend acessivel a Patty/admin:
+A rota `/admin/pendencias` consolida somente estados operacionais explicitamente demonstraveis pelo backend acessivel a Patty/admin:
 
 - Anamnese criada sem `submitted_at`;
 - Anamnese enviada sem nota interna de revisao registrada;
@@ -1823,7 +1823,7 @@ A foundation continua apenas documentada/dry-run/static-gate: nenhuma migration 
 
 ## Engine deterministico configuravel v1 - 2026-10-01
 
-### IMPLEMENTADO NA BRANCH / AINDA NAO CONSUMIDO POR FLUXOS
+### REGISTRO HISTORICO — ENGINE V1 ANTES DA INTEGRACAO COM CONSUMIDORES
 
 Foi adicionado `lib/method/config-engine.ts` com validator/evaluator puro para a AST segura inicial e `lib/method/config-engine.test.ts` com dados exclusivamente sinteticos.
 
@@ -2210,14 +2210,16 @@ Concluido nesta rodada:
 - migration `20261003202254_create_weekly_feedback_flow` aplicada no Supabase SaaS;
 - migration `20261003202404_validate_weekly_feedback_submission` aplicada no Supabase SaaS;
 - Feedback Semanal v1 publicado com 21 perguntas;
-- telas reais administrativas e da cliente implementadas na branch `codex/weekly-feedback-flow`;
+- telas reais administrativas e da cliente posteriormente mergeadas no `master` e hoje parte do produto;
 - smoke transacional com fixture sintetica e `ROLLBACK` confirmou: rascunho parcial permitido, envio incompleto rejeitado, envio completo aceito e imutabilidade apos envio;
 - Security Advisor pos-apply nao apresentou regressao nova; permanece somente o warning conhecido de Leaked Password Protection do plano atual.
 
 Pendente operacional que nao bloqueia o restante do desenvolvimento:
 - executar o bootstrap controlado da identidade Auth real da Patty e vincular `Profile -> role admin`; o procedimento automatizado foi integrado ao `master` e depende apenas da execucao manual com o email real.
 
-Automacao externa do Feedback Semanal ainda nao foi ativada. Agenda, prazo operacional, elegibilidade, email/WhatsApp e lembretes permanecem configuracoes/decisoes abertas; o produto ja possui o nucleo real de solicitacao/resposta para ser exercitado assim que houver acesso administrativo real.
+### RECONCILIADO EM 2026-10-07
+
+Esse estado foi superado. A geracao recorrente, elegibilidade apos primeiro protocolo, agenda versionada, periodo da semana anterior, lembrete de quarta-feira, preferencia de canal, notificacao in-app e worker de email ja foram implementados/aplicados. Permanecem abertos apenas provider/opt-in/fallback do WhatsApp, configuracao operacional do SMTP real e eventuais decisoes profissionais adicionais explicitamente registradas.
 
 
 ## Atualizacao 2026-10-04 - Visao factual de evolucao da cliente
