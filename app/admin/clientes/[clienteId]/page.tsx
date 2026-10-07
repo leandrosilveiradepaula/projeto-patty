@@ -1,5 +1,6 @@
 import { endClientAssignmentAction } from "@/app/admin/clientes/[clienteId]/actions";
 import { AdminClientNameEditForm } from "@/components/admin/AdminClientNameEditForm";
+import { AdminEndClientAssignmentForm } from "@/components/admin/AdminEndClientAssignmentForm";
 import { AdminClientRegistrationEditForm } from "@/components/admin/AdminClientRegistrationEditForm";
 import { AdminClientRecoveryLinkForm } from "@/components/admin/AdminClientRecoveryLinkForm";
 import { AdminWeeklyFeedbackNotificationPreferenceForm } from "@/components/admin/AdminWeeklyFeedbackNotificationPreferenceForm";
@@ -8,7 +9,6 @@ import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { PageSectionNav } from "@/components/admin/PageSectionNav";
 import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Section } from "@/components/ui/Section";
 import {
@@ -944,7 +944,7 @@ export default async function AdminClienteDetailPage({
       </Section>
 
       <Section
-        description="Use esta ação somente quando o acompanhamento atual precisar ser encerrado. O histórico da cliente é preservado."
+        description="Encerre somente quando a cliente não estiver mais em acompanhamento. O histórico permanece preservado."
         id="encerrar-acompanhamento"
         title="Encerrar acompanhamento"
       >
@@ -952,27 +952,14 @@ export default async function AdminClienteDetailPage({
           <div>
             <p className={styles.assignmentTitle}>Acompanhamento ativo</p>
             <p className={styles.assignmentDescription}>
-              Esta operação não apaga a cliente nem seus dados. Ela encerra
-              apenas o vínculo atual de acompanhamento.
+              Ao concluir, a cliente deixa a lista de acompanhamento atual e
+              passa a ser considerada inativa.
             </p>
           </div>
-          <form
-            action={endClientAssignmentAction.bind(null, client.id)}
-            className={styles.dangerForm}
-          >
-            <label className={styles.dangerConfirmation}>
-              <input
-                name="confirmEndAssignment"
-                required
-                type="checkbox"
-                value="yes"
-              />
-              <span>Confirmo que quero encerrar o acompanhamento desta cliente.</span>
-            </label>
-            <Button type="submit" variant="danger">
-              Encerrar acompanhamento
-            </Button>
-          </form>
+          <AdminEndClientAssignmentForm
+            clientId={client.id}
+            displayName={displayName ?? undefined}
+          />
         </div>
       </Section>
     </>
