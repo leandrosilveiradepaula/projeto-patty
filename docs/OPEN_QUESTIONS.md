@@ -743,9 +743,11 @@ A Patty confirmou ainda que conteudos sobre **formulas/manipulados** devem fazer
 
 Os demais conteudos continuam sujeitos a revisao individual.
 
-### QUESTAO ABERTA
+### RESOLVIDO TECNICAMENTE
 
-Qual sera o processo de revisao, aprovacao e versionamento dos conteudos?
+O processo de autoria da biblioteca educacional ja e versionado: Patty/admin cria rascunho, edita enquanto draft, publica manualmente uma versao imutavel e pode criar nova versao posteriormente. A liberacao para cliente aponta para versao publicada exata e continua sendo acao separada/manual.
+
+Permanece aberta apenas a governanca editorial adicional que a Patty eventualmente queira definir; nao tratar o lifecycle tecnico de revisao/publicacao como ausente.
 
 ### QUESTAO ABERTA
 
@@ -792,9 +794,11 @@ Ainda falta operacionalmente:
 
 Como ocorrera a migracao fisica dos demais arquivos do Google Drive, incluindo referencias de origem internas, lotes, direitos e revisao individual?
 
-### QUESTAO ABERTA
+### PARCIALMENTE RESOLVIDO
 
-Quando e como a biblioteca de exercicios podera ser exposta a cliente, e quais campos definitivos de exercicio serao necessarios sem antecipar programacao de treino?
+A biblioteca de exercicios ja expoe para clientes autenticadas somente versoes publicadas. A autoria administrativa e versionada, e publicar um exercicio global nao o prescreve para uma cliente.
+
+A prescricao individual tambem ja possui lifecycle versionado e publicacao humana. Permanecem abertas somente taxonomia/campos adicionais e regras profissionais de progressao, carga, volume, cardio ou outros criterios ainda nao formalizados.
 
 ## Protocolos e equivalentes
 
@@ -806,7 +810,7 @@ Pela decisao de parametrizacao de 2026-09-30, esses ajustes devem ser representa
 
 Quando houver regra previamente confirmada, documentada e cadastrada como configuracao ativa, o motor deterministico pode montar rascunhos automaticamente para revisao da Patty, inclusive macros da fase e treino predefinido aplicavel. A IA nao cria nem escolhe formulas profissionais por raciocinio generativo.
 
-Continuam abertas as regras internas e os campos detalhados necessarios para treino, suplementacao e manipulados onde essas regras ainda nao estiverem formalizadas.
+Treino ja possui autoria/prescricao individual versionada e campos operacionais iniciais. Continuam abertas somente as regras profissionais de progressao, carga, volume, cardio e campos adicionais que ainda nao estiverem formalizados. Suplementacao e manipulados permanecem manuais caso a caso, sem formulas automaticas autorizadas.
 
 ### QUESTAO ABERTA
 
@@ -901,21 +905,20 @@ Continua aberto apenas o mecanismo futuro de recovery/watchdog, caso seja necess
 
 ## Atualizacao 2026-09-30 - check-ins e esclarecimentos
 
-### RESOLVIDO TECNICAMENTE
+### HISTORICO SUPERADO / RECONCILIADO EM 2026-10-07
 
-- formula e unidade vigentes para novas metas: 35 mL/kg/dia;
-- esse valor passa a ser template inicial versionado e nao constante profissional definitiva;
-- persistencia da meta como snapshot, sem sobrescrever historico;
+A infraestrutura historica chegou a materializar 35 mL/kg como configuracao/snapshot, mas essa referencia nao e regra profissional automatica vigente. A reconciliacao posterior prevalece: check-ins de liquidos e atividade fisica sao registros factuais, sem meta/progresso/recalculo automatico de hidratacao ate nova confirmacao documentada.
+
+Resolvido tecnicamente:
 - ingestao e atividade fisica com eventos append-only;
+- cliente e Patty podem corrigir check-ins com auditoria preservada;
 - resposta a esclarecimento nao resolve automaticamente;
 - resolucao manual da Patty possui registro separado e auditavel.
 
-### AINDA ABERTO
-
-- eventual proporcao-alvo de agua pura;
-- canal de notificacao para o lembrete de 24 horas;
-- a cliente pode corrigir os proprios check-ins sem limite temporal profissional; permanecem abertas a correcao pela Patty e a forma tecnica auditavel;
-- nenhum desses pontos abertos autoriza score de adesao ou notificacao por canal inferido.
+Ainda aberto:
+- eventual regra profissional futura de hidratacao;
+- canal de notificacao para o lembrete de 24 horas de esclarecimentos;
+- nenhum ponto aberto autoriza score de adesao ou notificacao por canal inferido.
 
 
 ## Atualizacao 2026-09-30 - correcao de Avaliacao
@@ -947,23 +950,25 @@ Nao ampliar o mecanismo sem caso profissional confirmado.
 - RLS ownership/assignment + AAL2;
 - sem score automatico, sem alteracao automatica de protocolo e sem suspensao automatica de atendimento.
 
-### AINDA ABERTO
+### ESTADO RECONCILIADO
 
-- agenda profissional resolvida em 2026-10-04: toda segunda-feira, independentemente da fase;
-- horario padrao inicial: 08:00;
-- dia/horario devem ser configuraveis pela Patty no sistema, usando segunda-feira 08:00 como template inicial;
-- lembrete na quarta-feira para clientes elegiveis que ainda nao responderam;
-- canal de comunicacao resolvido: configuravel por paciente entre email, WhatsApp e notificacao dentro do aplicativo; horario do lembrete continua configuravel;
-- quarta-feira nao foi confirmada como prazo fatal nem como fechamento automatico do formulario;
-- se o prazo historico de quarta-feira apenas marca atraso ou fecha alguma acao;
-- o marco profissional de elegibilidade foi resolvido em 2026-10-04: a cliente passa a receber Feedback Semanal depois que recebe o primeiro protocolo;
-- permanece apenas a decisao tecnica de qual evento auditavel do fluxo de protocolo representa "recebeu", sem alterar a regra profissional;
-- politica de lembretes parcialmente resolvida: lembrete na quarta-feira para quem ainda nao respondeu; falta apenas eventual configuracao de horario/politica adicional;
-- canal do Feedback Semanal resolvido: configuravel por paciente entre email, WhatsApp e notificacao dentro do aplicativo;
-- eventual consentimento/opt-in, provedor e detalhes tecnicos de WhatsApp permanecem decisoes operacionais/tecnicas;
-- se perguntas relativamente estaveis, como local de trabalho/treino, permanecem semanais;
-- se a Patty deseja revisao/observacao formal por feedback antes de qualquer uso posterior;
-- consequencia profissional de nao responder continua humana ate nova confirmacao explicita.
+Resolvido:
+- agenda profissional toda segunda-feira, independentemente da fase;
+- template inicial 08:00, com dia/horario configuraveis e versionados;
+- elegibilidade somente depois do primeiro protocolo publicado;
+- periodo automatico = semana anterior completa, de segunda a domingo;
+- lembrete na quarta-feira para quem ainda nao respondeu;
+- canal configuravel por cliente entre email, WhatsApp e notificacao no aplicativo;
+- geracao recorrente, origem auditavel e idempotencia implementadas;
+- notificacao in-app operacional;
+- worker de email implementado, dependendo apenas da configuracao SMTP operacional.
+
+Ainda aberto:
+- quarta-feira nao e prazo fatal nem fechamento automatico; qualquer consequencia profissional de ausencia permanece humana;
+- provedor, opt-in/consentimento e fallback do WhatsApp;
+- eventual horario profissional especifico do lembrete, se a Patty quiser formaliza-lo;
+- se perguntas relativamente estaveis permanecem semanais;
+- se a Patty deseja revisao/observacao formal por feedback antes de qualquer uso posterior.
 
 
 ### PARCIALMENTE RESOLVIDO — CARB CYCLE COMO 2 LOW / 1 HIGH
