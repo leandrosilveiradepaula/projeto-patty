@@ -91,8 +91,9 @@ export default async function AdminClientFilesPage({
       </Section>
 
       {pendingReleaseFiles.length > 0 ? (
+        <div id="aguardando-liberacao">
         <Section
-          action={<Badge variant="warning">{pendingReleaseFiles.length} pendente(s)</Badge>}
+          action={<Badge variant="warning">{pendingReleaseFiles.length} pendente(s)</Badge>
           description="Uploads administrativos ainda ocultos para a cliente e que aguardam decisão explícita de liberação."
           title="Aguardando liberação"
         >
@@ -142,6 +143,7 @@ export default async function AdminClientFilesPage({
             ))}
           </ul>
         </Section>
+        </div>
       ) : null}
 
       <Section
