@@ -800,7 +800,7 @@ Estado: **INVENTARIO/VALIDACAO FAIL-CLOSED / NAO PUBLICADO**
 - Vercel do master validado como `READY`;
 - sem cluster de erro de runtime nas ultimas 24h na verificacao desta rodada;
 - o bloqueio historico de runner do GitHub Actions esta resolvido; os workflows recentes de validacao executam steps, testes e build normalmente;
-- diagnostico com `ubuntu-latest` reproduziu `steps: null`, portanto nao alterar workflow para mascarar o problema.
+- o diagnostico historico com `ubuntu-latest` que reproduziu `steps: null` pertence a janela anterior ao restabelecimento do runner; nao alterar workflow nem diagnosticar falha atual com base nesse evento sem nova evidencia.
 
 
 ## Feedback Semanal - estado em 2026-10-03
