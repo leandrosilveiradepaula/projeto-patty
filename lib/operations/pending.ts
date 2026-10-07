@@ -318,12 +318,12 @@ export function buildOperationalPendingItems(
       clientLabel: assessment.clientLabel,
       createdAt: assessment.createdAt,
       description:
-        "A avaliação permanece em rascunho e ainda não foi finalizada explicitamente.",
+        "A avaliação está em rascunho e permanece editável. Revise medidas e fotos e finalize explicitamente quando a coleta estiver pronta.",
       href: `/admin/avaliacoes/${assessment.id}`,
       id: `assessment:${assessment.id}`,
       kind: "assessment_draft",
       statusLabel: "Rascunho",
-      title: "Avaliação não finalizada",
+      title: "Continuar avaliação",
     });
   }
 

@@ -2903,3 +2903,15 @@ A integracao UI-backend da fila administrativa foi ampliada para o fluxo privado
 - a decisao continua explicitamente humana: o sistema nao publica nem libera arquivo automaticamente.
 
 A politica definitiva de retencao/hard-delete continua aberta e nao foi inferida neste bloco.
+
+
+## Refinamento da fila de Avaliacoes - 2026-10-07
+
+A revisao do bloco confirmou que avaliacoes em rascunho **ja alimentavam** a fila administrativa pelo estado factual `finalized_at`. Em vez de criar um segundo modelo duplicado, o fluxo existente foi mantido e refinado:
+- titulo orientado a acao: `Continuar avaliacao`;
+- descricao explicita que medidas/fotos permanecem editaveis ate finalizacao;
+- link continua apontando para o editor real da avaliacao;
+- nenhum atraso, urgencia ou prioridade e inferido;
+- a regra para ancoras 29/30/31 continua aberta e nao foi automatizada.
+
+Nenhuma migration/RLS nova foi necessaria.

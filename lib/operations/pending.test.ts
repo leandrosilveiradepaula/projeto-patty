@@ -837,3 +837,32 @@ test("hidden administrative private files become explicit Patty release decision
   assert.equal(getOperationalPendingGroup(items[0]!), "patty");
   assert.match(items[0]?.description ?? "", /decida explicitamente/);
 });
+
+
+
+
+test("assessment draft pending stays factual and points to the real editor", () => {
+  const items = buildOperationalPendingItems({
+    clarificationReminderIntervalHours: 24,
+    anamnesisSubmissions: [],
+    clarificationRequests: [],
+    assessments: [
+      {
+        clientId: "client-assessment",
+        clientLabel: "Cliente Avaliação",
+        createdAt: "2026-10-07",
+        finalizedAt: null,
+        id: "assessment-draft",
+      },
+    ],
+    protocolVersions: [],
+    aiExecutions: [],
+  });
+
+  assert.equal(items.length, 1);
+  assert.equal(items[0]?.kind, "assessment_draft");
+  assert.equal(items[0]?.title, "Continuar avaliação");
+  assert.equal(items[0]?.href, "/admin/avaliacoes/assessment-draft");
+  assert.match(items[0]?.description ?? "", /finalize explicitamente/);
+  assert.doesNotMatch(items[0]?.description ?? "", /atras|urg|prioridade/i);
+});
