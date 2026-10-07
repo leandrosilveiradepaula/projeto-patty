@@ -1,3 +1,12 @@
+## Atualizacao de auditoria de interface 2026-10-07 - lote operacional do painel da Patty
+
+Um lote consolidado melhora foco operacional em Clientes, Pendencias e Configuracoes.
+
+- Clientes pode ser filtrado para mostrar somente quem possui acao na fila da Patty, preservando busca e acesso ao acompanhamento;
+- Pendencias mantem `Acao da Patty` aberta e recolhe grupos secundarios de `Aguardando cliente` e `Operacional do sistema`, sem alterar a classificacao persistida;
+- Configuracoes ganha busca por nome/dominio/chave e filtro por dominio, preservando os editores versionados existentes;
+- nenhuma prioridade clinica automatica, regra profissional, schema, migration ou RLS foi alterado.
+
 ## Atualizacao de auditoria de interface 2026-10-07 - descoberta nas bibliotecas administrativas
 
 As bibliotecas administrativas de Conteudos e Exercicios passam a suportar busca e filtro de lifecycle sem alterar publicacao ou elegibilidade.

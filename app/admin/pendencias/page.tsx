@@ -94,29 +94,33 @@ export default async function AdminPendenciasPage() {
             ) : null}
 
             {grouped.client.length > 0 ? (
-              <section className={styles.group}>
-                <div className={styles.groupHeader}>
-                  <div>
-                    <h3>Aguardando cliente</h3>
-                    <p>Itens que continuam abertos, mas neste momento dependem principalmente de resposta ou preenchimento da cliente.</p>
-                  </div>
+              <details className={styles.collapsibleGroup}>
+                <summary className={styles.groupSummary}>
+                  <span>
+                    <strong>Aguardando cliente</strong>
+                    <small>Itens abertos que dependem principalmente de resposta ou preenchimento da cliente.</small>
+                  </span>
                   <Badge variant="neutral">{grouped.client.length}</Badge>
+                </summary>
+                <div className={styles.collapsibleContent}>
+                  <PendingList items={grouped.client} />
                 </div>
-                <PendingList items={grouped.client} />
-              </section>
+              </details>
             ) : null}
 
             {grouped.operational.length > 0 ? (
-              <section className={styles.group}>
-                <div className={styles.groupHeader}>
-                  <div>
-                    <h3>Operacional do sistema</h3>
-                    <p>Falhas de envio ou execuções técnicas que precisam de acompanhamento operacional.</p>
-                  </div>
+              <details className={styles.collapsibleGroup}>
+                <summary className={styles.groupSummary}>
+                  <span>
+                    <strong>Operacional do sistema</strong>
+                    <small>Falhas de envio ou execuções técnicas que precisam de acompanhamento operacional.</small>
+                  </span>
                   <Badge variant="warning">{grouped.operational.length}</Badge>
+                </summary>
+                <div className={styles.collapsibleContent}>
+                  <PendingList items={grouped.operational} />
                 </div>
-                <PendingList items={grouped.operational} />
-              </section>
+              </details>
             ) : null}
           </div>
         )}

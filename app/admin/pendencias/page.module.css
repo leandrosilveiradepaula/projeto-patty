@@ -103,3 +103,47 @@
   }
 
 }
+
+
+.collapsibleGroup {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
+  background: var(--color-surface);
+}
+
+.groupSummary {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  justify-content: space-between;
+  min-height: 64px;
+  cursor: pointer;
+  padding: var(--space-4);
+}
+
+.groupSummary > span {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.groupSummary strong {
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+}
+
+.groupSummary small {
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-small-size);
+  font-weight: 400;
+  line-height: var(--text-body-small-line-height);
+}
+
+.groupSummary:focus-visible {
+  outline: 3px solid var(--color-brand);
+  outline-offset: 3px;
+}
+
+.collapsibleContent {
+  border-top: 1px solid var(--color-border);
+  padding: var(--space-4);
+}

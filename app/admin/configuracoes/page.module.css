@@ -231,3 +231,38 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+.filters {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: minmax(220px, 1fr) minmax(180px, 260px) auto auto;
+  align-items: end;
+  margin-bottom: var(--space-5);
+}
+
+.filterField {
+  display: grid;
+  gap: var(--space-2);
+  font-weight: 600;
+}
+
+.filterField > span {
+  color: var(--color-text-secondary);
+  font-size: var(--text-label-medium-size);
+}
+
+.clearLink {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+
+@media (max-width: 760px) {
+  .filters {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+}

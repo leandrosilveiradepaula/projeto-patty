@@ -29,13 +29,14 @@ type AdminClientesPageProps = {
     assignment?: string;
     onboarding?: string;
     q?: string;
+    view?: string;
   }>;
 };
 
 export default async function AdminClientesPage({
   searchParams,
 }: AdminClientesPageProps) {
-  const { assignment, onboarding, q } = await searchParams;
+  const { assignment, onboarding, q, view } = await searchParams;
   const [assignments, pendingItems] = await Promise.all([
     listClientsAssignedToCurrentAdmin(),
     getOperationalPendingItemsForCurrentAdmin(),
@@ -73,13 +74,18 @@ export default async function AdminClientesPage({
   }
   const searchTerm = q?.trim() ?? "";
   const normalizedSearchTerm = normalizeSearchValue(searchTerm);
-  const filteredClients = normalizedSearchTerm
-    ? clients.filter((client) =>
-        normalizeSearchValue(client.profiles?.display_name ?? "").includes(
-          normalizedSearchTerm,
-        ),
-      )
-    : clients;
+  const viewFilter = view === "patty" ? "patty" : "all";
+  const filteredClients = clients.filter((client) => {
+    const matchesSearch =
+      !normalizedSearchTerm ||
+      normalizeSearchValue(client.profiles?.display_name ?? "").includes(
+        normalizedSearchTerm,
+      );
+    const matchesView =
+      viewFilter === "all" || pattyPendingItemsByClientId.has(client.id);
+
+    return matchesSearch && matchesView;
+  });
 
   return (
     <>
@@ -127,10 +133,19 @@ export default async function AdminClientesPage({
               placeholder="Digite o nome da cliente"
               type="search"
             />
+            <select
+              aria-label="Filtrar clientes"
+              className={styles.viewFilter}
+              defaultValue={viewFilter}
+              name="view"
+            >
+              <option value="all">Todas em acompanhamento</option>
+              <option value="patty">Com ação da Patty</option>
+            </select>
             <Button type="submit" variant="secondary">
-              Buscar
+              Filtrar
             </Button>
-            {searchTerm ? (
+            {searchTerm || viewFilter !== "all" ? (
               <Link className={styles.clearLink} href="/admin/clientes">
                 Limpar
               </Link>
@@ -144,9 +159,9 @@ export default async function AdminClientesPage({
           <p className={styles.emptyMessage}>Nenhuma cliente encontrada para “{searchTerm}”.</p>
         ) : (
           <>
-            {searchTerm ? (
+            {searchTerm || viewFilter !== "all" ? (
               <p className={styles.resultCount}>
-                {filteredClients.length} de {clients.length} cliente(s) encontrada(s).
+                {filteredClients.length} de {clients.length} cliente(s) exibida(s).
               </p>
             ) : null}
             <ul className={styles.clientList}>

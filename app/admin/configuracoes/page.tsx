@@ -21,7 +21,16 @@ import {
 } from "@/lib/configuration/assessment-schedule-preferences";
 import { parseWeeklyFeedbackScheduleConfiguration } from "@/lib/configuration/weekly-feedback-schedule";
 import { listMethodConfigurationCatalogForCurrentAdmin } from "@/lib/supabase/data-access";
+import Link from "next/link";
 import styles from "./page.module.css";
+
+function normalizeSearchValue(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("pt-BR")
+    .trim();
+}
 
 function formatDate(value: string | null) {
   if (!value) return "—";
@@ -38,8 +47,34 @@ function formatConfiguration(value: unknown) {
   return JSON.stringify(value, null, 2);
 }
 
-export default async function AdminConfiguracoesPage() {
+type AdminConfiguracoesPageProps = {
+  searchParams: Promise<{ q?: string; domain?: string }>;
+};
+
+export default async function AdminConfiguracoesPage({
+  searchParams,
+}: AdminConfiguracoesPageProps) {
+  const { q, domain } = await searchParams;
   const templates = await listMethodConfigurationCatalogForCurrentAdmin();
+  const searchTerm = q?.trim() ?? "";
+  const normalizedSearchTerm = normalizeSearchValue(searchTerm);
+  const domains = [...new Set(templates.map((template) => template.domain_key))].sort(
+    (left, right) => left.localeCompare(right, "pt-BR"),
+  );
+  const domainFilter = domain && domains.includes(domain) ? domain : "all";
+  const filteredTemplates = templates.filter((template) => {
+    const matchesSearch =
+      !normalizedSearchTerm ||
+      normalizeSearchValue(
+        [template.display_name, template.description, template.domain_key, template.template_key]
+          .filter(Boolean)
+          .join(" "),
+      ).includes(normalizedSearchTerm);
+    const matchesDomain =
+      domainFilter === "all" || template.domain_key === domainFilter;
+
+    return matchesSearch && matchesDomain;
+  });
 
   return (
     <>
@@ -59,8 +94,39 @@ export default async function AdminConfiguracoesPage() {
             title="Sem configurações disponíveis"
           />
         ) : (
-          <div className={styles.grid}>
-            {templates.map((template) => {
+          <>
+            <form action="/admin/configuracoes" className={styles.filters} method="get">
+              <label className={styles.filterField}>
+                <span>Buscar configuração</span>
+                <TextInput
+                  defaultValue={searchTerm}
+                  name="q"
+                  placeholder="Nome, domínio ou chave"
+                  type="search"
+                />
+              </label>
+              <label className={styles.filterField}>
+                <span>Domínio</span>
+                <select className={styles.select} defaultValue={domainFilter} name="domain">
+                  <option value="all">Todos os domínios</option>
+                  {domains.map((domainKey) => (
+                    <option key={domainKey} value={domainKey}>{domainKey}</option>
+                  ))}
+                </select>
+              </label>
+              <Button type="submit" variant="secondary">Filtrar</Button>
+              {searchTerm || domainFilter !== "all" ? (
+                <Link className={styles.clearLink} href="/admin/configuracoes">Limpar</Link>
+              ) : null}
+            </form>
+            {filteredTemplates.length === 0 ? (
+              <EmptyState
+                description="Ajuste a busca ou limpe os filtros para voltar a ver as configurações disponíveis."
+                title="Nenhuma configuração encontrada"
+              />
+            ) : (
+            <div className={styles.grid}>
+            {filteredTemplates.map((template) => {
               const active = template.activeVersion;
               const editableParameters = active
                 ? listEditableNumericParameters(
@@ -320,6 +386,8 @@ export default async function AdminConfiguracoesPage() {
               );
             })}
           </div>
+            )}
+          </>
         )}
       </Section>
     </>
