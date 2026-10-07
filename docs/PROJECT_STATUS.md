@@ -1,3 +1,11 @@
+## Auditoria funcional de equivalentes alimentares 2026-10-07
+
+A fundacao versionada de catalogos/grupos/itens e o vinculo do plano alimentar a uma versao exata ja existem. O banco congela mutacoes quando a versao de catalogo esta referenciada por protocolo submetido para revisao.
+
+O inventario historico em `docs/source_drafts/food_equivalent_catalog_historical_source.json` continua deliberadamente nao publicavel: o validador exige reconciliacao com configuracoes ativas e sempre retorna `publishable: false`. Isso preserva a regra central de nao transformar planilhas/exemplos historicos em regra atual.
+
+Portanto, a lacuna nao e criar automaticamente equivalentes a partir do historico. O proximo gate e revisao editorial/profissional explicita antes de promover conteudo real para um catalogo versionado utilizavel.
+
 ## Gate de retencao de arquivos privados 2026-10-07
 
 A auditoria separou dois comportamentos que nao devem ser confundidos:
