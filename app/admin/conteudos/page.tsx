@@ -6,9 +6,19 @@ import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
+import { TextInput } from "@/components/ui/TextInput";
 import { listEducationalContentVersionsForCurrentAdmin } from "@/lib/supabase/data-access";
 import Link from "next/link";
 import styles from "./page.module.css";
+
+
+function normalizeSearchValue(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("pt-BR")
+    .trim();
+}
 
 function formatPublishedDate(value: string) {
   return new Intl.DateTimeFormat("pt-BR", {
@@ -19,7 +29,12 @@ function formatPublishedDate(value: string) {
   }).format(new Date(value));
 }
 
-export default async function AdminConteudosPage() {
+type AdminConteudosPageProps = {
+  searchParams: Promise<{ q?: string; status?: string }>;
+};
+
+export default async function AdminConteudosPage({ searchParams }: AdminConteudosPageProps) {
+  const { q, status } = await searchParams;
   const contentVersions = await listEducationalContentVersionsForCurrentAdmin();
   const latestByContent = new Map<
     string,
@@ -40,6 +55,23 @@ export default async function AdminConteudosPage() {
     }
 
     return left.title.localeCompare(right.title, "pt-BR");
+  });
+
+  const searchTerm = q?.trim() ?? "";
+  const normalizedSearchTerm = normalizeSearchValue(searchTerm);
+  const statusFilter = status === "draft" || status === "published" ? status : "all";
+  const filteredContents = contents.filter((content) => {
+    const matchesSearch =
+      !normalizedSearchTerm ||
+      normalizeSearchValue(
+        [content.title, content.category_key, content.content_type_key]
+          .filter(Boolean)
+          .join(" "),
+      ).includes(normalizedSearchTerm);
+    const matchesStatus =
+      statusFilter === "all" ||
+      (statusFilter === "published" ? Boolean(content.published_at) : !content.published_at);
+    return matchesSearch && matchesStatus;
   });
 
   return (
@@ -78,14 +110,48 @@ export default async function AdminConteudosPage() {
         description="Itens publicados podem ser liberados por cliente. Rascunhos permanecem internos."
         title="Biblioteca educacional"
       >
+        {contents.length > 0 ? (
+          <form action="/admin/conteudos" className={styles.filters} method="get">
+            <label className={styles.searchField}>
+              <span>Buscar conteúdo</span>
+              <TextInput
+                defaultValue={searchTerm}
+                name="q"
+                placeholder="Título, categoria ou tipo"
+                type="search"
+              />
+            </label>
+            <label className={styles.statusField}>
+              <span>Status</span>
+              <select defaultValue={statusFilter} name="status">
+                <option value="all">Todos</option>
+                <option value="draft">Rascunhos</option>
+                <option value="published">Publicados</option>
+              </select>
+            </label>
+            <Button type="submit" variant="secondary">Filtrar</Button>
+            {searchTerm || statusFilter !== "all" ? (
+              <Link className={styles.clearLink} href="/admin/conteudos">Limpar</Link>
+            ) : null}
+          </form>
+        ) : null}
         {contents.length === 0 ? (
           <EmptyState
             description="Crie o primeiro rascunho para iniciar a biblioteca."
             title="A biblioteca educacional está vazia"
           />
+        ) : filteredContents.length === 0 ? (
+          <EmptyState
+            description="Ajuste a busca ou limpe os filtros para voltar a ver a biblioteca completa."
+            title="Nenhum conteúdo encontrado"
+          />
         ) : (
-          <ul className={styles.contentList}>
-            {contents.map((contentVersion) => {
+          <>
+            <p className={styles.resultCount}>
+              {filteredContents.length} de {contents.length} conteúdo(s)
+            </p>
+            <ul className={styles.contentList}>
+            {filteredContents.map((contentVersion) => {
               const publishedMeta = contentVersion.published_at
                 ? "Publicado em " +
                   formatPublishedDate(contentVersion.published_at) +
@@ -130,6 +196,7 @@ export default async function AdminConteudosPage() {
               );
             })}
           </ul>
+          </>
         )}
       </Section>
     </>
