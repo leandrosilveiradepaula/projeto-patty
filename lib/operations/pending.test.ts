@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   buildOperationalPendingItems,
+  getOperationalPendingGroup,
   groupOperationalPendingItems,
 } from "./pending.ts";
 
@@ -608,5 +609,64 @@ test("operational pending groups keep action ownership explicit", () => {
   assert.deepEqual(
     grouped.operational.map((item) => item.kind),
     ["ai_execution_started"],
+  );
+});
+
+
+test("training lifecycle facts become Patty operational pendings", () => {
+  const items = buildOperationalPendingItems({
+    clarificationReminderIntervalHours: 24,
+    anamnesisSubmissions: [],
+    clarificationRequests: [],
+    assessments: [],
+    protocolVersions: [],
+    aiExecutions: [],
+    trainingLifecycle: [
+      {
+        id: "request-1",
+        clientId: "client-1",
+        clientLabel: "Cliente 1",
+        createdAt: "2026-10-07T10:00:00Z",
+        state: "requested_without_plan",
+        versionNumber: null,
+      },
+      {
+        id: "version-draft",
+        clientId: "client-2",
+        clientLabel: "Cliente 2",
+        createdAt: "2026-10-07T10:10:00Z",
+        state: "draft",
+        versionNumber: 2,
+      },
+      {
+        id: "version-reviewed",
+        clientId: "client-3",
+        clientLabel: "Cliente 3",
+        createdAt: "2026-10-07T10:20:00Z",
+        state: "reviewed_not_published",
+        versionNumber: 3,
+      },
+    ],
+  });
+
+  assert.deepEqual(
+    items.map((item) => item.kind),
+    [
+      "training_requested_without_plan",
+      "training_draft",
+      "training_reviewed_not_published",
+    ],
+  );
+  assert.equal(
+    items.every((item) => getOperationalPendingGroup(item) === "patty"),
+    true,
+  );
+  assert.deepEqual(
+    items.map((item) => item.href),
+    [
+      "/admin/clientes/client-1/treino",
+      "/admin/clientes/client-2/treino",
+      "/admin/clientes/client-3/treino",
+    ],
   );
 });
