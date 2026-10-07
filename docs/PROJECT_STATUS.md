@@ -1,3 +1,22 @@
+## Atualizacao estrutural 2026-10-07 - nome canonico e status da cliente
+
+Foi preparada a migration `20261007133000_enforce_client_name_and_status.sql` para consolidar no banco as regras confirmadas de cadastro.
+
+A migration:
+- adiciona `clients.full_name` como nome profissional canonico;
+- faz backfill exclusivamente a partir de `profiles.display_name` existente;
+- falha se ainda existir cliente sem nome verdadeiro;
+- faz backfill de `clients.status` a partir da existencia de assignment ativo;
+- torna `full_name` e `status` obrigatorios;
+- restringe `status` a `active` ou `inactive`;
+- mantem sincronizacao do nome quando a Patty corrige `profiles.display_name`;
+- mantem sincronizacao do status quando assignments sao iniciados/encerrados/excluidos;
+- usa funcoes internas em `app_private` e revoga execucao direta de `anon` e `authenticated`.
+
+A migration foi validada contra os dados reais dentro de transacao com `ROLLBACK`: 2 clientes, 0 sem nome, 0 status invalido.
+
+IMPORTANTE: o workflow `Deploy Supabase migrations` em push executa somente `db push --dry-run`. Portanto, esta migration e a migration `20261006171000_restrict_exercise_library_to_admin.sql` so serao aplicadas ao SaaS quando o workflow for executado manualmente em modo `apply` com confirmacao `APPLY`.
+
 ## Atualizacao de cadastro 2026-10-07 - nome obrigatorio e cliente ativa/inativa
 
 A Patty confirmou que todo cadastro profissional deve possuir nome e que cliente deve ter estado `active` ou `inactive`.
