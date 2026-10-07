@@ -210,7 +210,9 @@ export default async function AdminClientesPage({
                       !displayName
                         ? "Corrija o nome antes de considerar este cadastro regular."
                         : client.profile_id
-                          ? "Cliente ativa"
+                          ? client.status === "active"
+                            ? "Cliente ativa"
+                            : "Cliente inativa"
                           : "Conta da cliente ainda não vinculada"
                     }
                     status={
@@ -218,6 +220,8 @@ export default async function AdminClientesPage({
                         <Badge variant="critical">Nome obrigatório</Badge>
                       ) : !client.profile_id ? (
                         <Badge variant="warning">Completar cadastro</Badge>
+                      ) : client.status === "inactive" ? (
+                        <Badge variant="neutral">Inativa</Badge>
                       ) : nextPattyPending ? (
                         <Badge variant="warning">Ação da Patty</Badge>
                       ) : (
