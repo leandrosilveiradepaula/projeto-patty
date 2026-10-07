@@ -109,7 +109,8 @@ export default async function AdminAnamnesisClarificationsPage({ params }: PageP
                   ? "warning"
                   : "neutral";
               return (
-                <Card className={styles.entry} key={request.id}>
+                <div id={`esclarecimento-${request.id}`} key={request.id}>
+                <Card className={styles.entry}>
                   <div className={styles.entryHeader}>
                     <h2 className={styles.entryTitle}>Pedido da Patty</h2>
                     <div className={styles.statusGroup}>
@@ -146,6 +147,7 @@ export default async function AdminAnamnesisClarificationsPage({ params }: PageP
                     />
                   )}
                 </Card>
+                </div>
               );
             })}
           </div>
