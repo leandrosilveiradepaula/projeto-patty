@@ -813,8 +813,9 @@ A regra profissional automatica de hidratacao permanece aberta. Portanto, valore
 Permanece aberto:
 - eventual regra profissional futura de hidratacao;
 - horarios/cadencia de lembretes caso sejam reativados a partir de regra confirmada;
-- UI/fluxo operacional definitivo da correcao auditavel de check-ins; a fundacao de persistencia append-only ja esta preparada na migration `20261007173100_create_client_checkin_corrections.sql`, ainda pendente de apply remoto;
 - detalhes tecnicos adicionais de notificacao quando necessarios.
+
+A correcao auditavel de check-ins deixou de ser questao aberta: a persistencia append-only foi aplicada e o fluxo operacional de cliente e Patty foi integrado ao runtime em 2026-10-07.
 
 Nao inferir score de adesao ou frequencia ideal de treino.
 
