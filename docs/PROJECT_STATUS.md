@@ -1555,7 +1555,7 @@ A montagem usa somente consultas RLS ja existentes sob as atribuicoes ativas da 
 - PR #217 integrou clonagem/comparacao de versoes de protocolo e readiness de Avaliacoes sobre o master reconciliado;
 - migration remota `20260930131848_clone_protocol_version_draft` aplicada;
 - fundacao de check-ins aplicada pelas migrations `20260930132221` e `20260930132354`;
-- meta de liquidos usa snapshot de peso e 60 mL/kg, sem recalculo automatico;
+- registro historico: meta de liquidos usava snapshot de peso e 60 mL/kg, sem recalculo automatico; a automacao de hidratacao esta hoje suspensa;
 - eventos de liquidos e atividade fisica sao append-only e nao geram score;
 - resolucao manual de esclarecimentos foi materializada separadamente da resposta da cliente;
 - registro historico: naquela janela houve falha operacional de runner com jobs encerrando sem steps; esse bloqueio foi resolvido em 2026-10-01 e nao deve ser reutilizado como diagnostico atual sem nova evidencia;
@@ -1593,7 +1593,7 @@ Advisor de seguranca apos os applies:
 - clonagem de versao de protocolo para novo draft sem copiar aprovacao/publicacao;
 - Avaliacao Basica/Completa alinhadas aos nomes e catalogos confirmados;
 - correcao append-only de medidas finalizadas, preservando valor original;
-- check-in de liquidos com meta snapshot de `60 mL/kg`, eventos de ingestao e check-in diario de atividade fisica;
+- registro historico: check-in de liquidos foi criado com meta snapshot de `60 mL/kg`; eventos de ingestao e check-in diario de atividade fisica permanecem validos, mas nenhuma nova meta automatica deve ser inferida desse valor;
 - resolucao manual append-only de esclarecimentos;
 - indicador factual de primeiro lembrete devido em `created_at + 24h`, sem inferir canal ou envio;
 - calculador isolado da Planilha Carb Cycle para fases numericas confirmadas, sem selecao automatica de Cutting;
@@ -1650,11 +1650,11 @@ Será necessário inventariar regras profissionais hoje hardcoded e migrá-las g
 
 Foi criado `docs/PROFESSIONAL_RULE_HARDCODE_INVENTORY.md` com o primeiro inventário técnico da dívida de parametrização sobre o `master` `a274b7fafb2e3aa32276833c38f583a132feba73`.
 
-Hardcodes ativos confirmados incluem:
+Naquele inventario, hardcodes ativos confirmados incluiam:
 - coeficientes e estrutura fixa do Carb Cycle;
 - gramas por dose e limite do grupo proteico de maior gordura;
 - macros de referência do Reconhecimento Metabólico;
-- fator de hidratação de 60 mL/kg, inclusive em generated column/constraint de migration já aplicada;
+- fator historico de hidratacao de 60 mL/kg, inclusive em generated column/constraint de migration aplicada; a automacao de hidratacao foi posteriormente suspensa;
 - regra de 2 doses de legumes = 1 dose de carbo no validador da fonte histórica;
 - tipos e catálogo obrigatório de Avaliação Básica/Completa;
 - lembrete de esclarecimento em 24 horas;
@@ -1749,9 +1749,11 @@ Consequencia operacional:
 - nenhuma migration history foi alterada.
 
 
-## Foundation configuravel V2 - 2026-10-01
+## REGISTRO HISTORICO SUPERADO - Foundation configuravel V2 antes da migration oficial (2026-10-01)
 
-### DRY-RUN PASS / NAO APLICADA
+> Este checkpoint antecede a migration oficial. O estado posterior prevalece: `20261001213333_create_method_configuration_foundation.sql` foi materializada, testada, aplicada e verificada no SaaS.
+
+### ESTADO NAQUELE CHECKPOINT — DRY-RUN PASS / NAO APLICADA
 
 A proposta V2 corrigiu o gap de auditoria da cadeia de overrides por snapshot por meio de entidade associativa imutavel com `precedence`.
 
@@ -2849,3 +2851,19 @@ A revisao detalhada dos checkpoints antigos encontrou e reconciliou os ultimos e
 - a decisao de assets educacionais agora reconhece o Vercel Private Blob ja provisionado e separa corretamente store pronto de upload/publicacao ainda pendentes.
 
 Nenhuma regra profissional, schema, migration ou RLS foi alterado. A proxima passada deve ser de fechamento transversal: verificar somente contradicoes residuais entre documentos normativos, readiness e runtime, sem reabrir registros historicos ja explicitamente marcados como tais.
+
+
+## Fechamento da auditoria transversal de fonte de verdade - 2026-10-07
+
+A passada final comparou os documentos normativos e de readiness contra os estados posteriores registrados no repositorio. Foram eliminadas as contradicoes residuais de maior risco:
+- a sequencia vigente confirmada permanece limitada a `Cutting 2: 2 Low / 1 High`; blocos de Cutting 3/Bulking/Consolidacao da rodada de 2026-10-04 estao explicitamente historicos e nao autorizam automacao;
+- hidratacao continua aberta para regra profissional automatica; 35 mL/kg e 60 mL/kg permanecem apenas em infraestrutura/snapshots/historico;
+- a migration de exclusao de draft da Anamnese nao aparece mais como pendente onde o apply posterior ja e conhecido;
+- o checkpoint V2 pre-migration da foundation configuravel aponta explicitamente para a migration oficial aplicada;
+- inventarios antigos de hardcode foram preservados como fotografia temporal, sem transformar valores historicos em regra vigente.
+
+### Resultado desta etapa
+
+A reconciliacao documental da auditoria de interface/runtime esta encerrada para os conflitos identificados nesta rodada. Pendencias que permanecem em `OPEN_QUESTIONS.md` devem ser tratadas como pendencias reais — profissionais, juridicas, operacionais ou de produto — e nao como falhas desta reconciliacao.
+
+Este fechamento nao declara o produto inteiro concluido e nao autoriza inferir regras abertas. Ele encerra especificamente a etapa de auditoria/reconciliacao iniciada nesta sequencia de PRs.

@@ -277,3 +277,38 @@ test("educational media decision reflects the provisioned private Blob store", (
   assert.match(decisions, /primeiro video aprovado ainda nao foi fisicamente enviado/);
   assert.doesNotMatch(decisions, /Nenhum Blob store foi criado e nenhum arquivo foi migrado nesta etapa/);
 });
+
+
+test("final audit keeps the confirmed method sequence capped at Cutting 2", () => {
+  const decisions = read("docs/DECISIONS.md");
+
+  assert.match(decisions, /sequencia vigente confirmada termina em `Cutting 2: 2 Low \/ 1 High`/);
+  assert.match(decisions, /REGISTRO HISTORICO SUPERADO - Sequencia com Cutting 3/);
+  assert.match(decisions, /REGISTRO HISTORICO SUPERADO - Estrutura do Cutting 3/);
+  assert.doesNotMatch(
+    decisions,
+    /-> Cutting 2: 2 Low \/ 1 High\n-> Cutting 3 Linear/,
+  );
+});
+
+test("final audit prevents historical hydration values from becoming current rules", () => {
+  const decisions = read("docs/DECISIONS.md");
+  const status = read("docs/PROJECT_STATUS.md");
+
+  assert.match(decisions, /REGISTRO HISTORICO SUPERADO - Revisao da regra de hidratacao/);
+  assert.match(decisions, /peso_kg \* 35 mL.*nao e regra profissional automatica vigente/);
+  assert.match(status, /automacao de hidratacao esta hoje suspensa/);
+});
+
+test("final audit supersedes the remaining pre-apply foundation checkpoint", () => {
+  const status = read("docs/PROJECT_STATUS.md");
+
+  assert.match(status, /REGISTRO HISTORICO SUPERADO - Foundation configuravel V2 antes da migration oficial/);
+  assert.match(status, /20261001213333_create_method_configuration_foundation\.sql.*materializada, testada, aplicada e verificada/);
+});
+
+test("draft-delete migration checkpoint points to the later successful apply", () => {
+  const decisions = read("docs/DECISIONS.md");
+
+  assert.match(decisions, /Estado posterior que prevalece.*20260923191554_fix_anamnesis_draft_delete_trigger\.sql.*aplicada com sucesso/);
+});
