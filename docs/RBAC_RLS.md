@@ -10,7 +10,7 @@ Patty/admin pode ler e inserir correcao somente para cliente sob assignment ativ
 
 Nenhuma policy de correcao amplia acesso aos eventos originais. `anon` permanece sem privilegios.
 
-A migration `20261007173100_create_client_checkin_corrections.sql` foi validada contra o Supabase real dentro de transacao com `ROLLBACK`; a aplicacao remota continua pendente.
+A migration `20261007173100_create_client_checkin_corrections.sql` foi aplicada ao Supabase SaaS em 2026-10-07 pelo workflow `Deploy Supabase migrations`, run #40. As policies vigentes preservam o modelo append-only e os grants minimos descritos acima.
 
 # RBAC e RLS
 
