@@ -1,3 +1,9 @@
+## Gate operacional da primeira migracao educacional 2026-10-07
+
+O lote aprovado da balanca permanece preparado, mas fail-closed: sem upload Blob verificado, o manifest deve continuar sem asset registrado, publicacao ou release. A suite agora protege explicitamente essa dependencia e valida hash SHA-256 estrito e path opaco sem reutilizar titulo/id do Drive.
+
+A tabela `educational_content_assets` ja impede anexar asset a versao publicada e congela mutacao depois da publicacao. Isso permite registrar o asset somente no draft apos verificar o objeto privado, sem antecipar publicacao/liberacao.
+
 ## Auditoria funcional da biblioteca de exercicios 2026-10-07
 
 A autoria administrativa real ja permite criar exercicio, editar um unico draft, publicar versao e abrir nova versao a partir da ultima publicada. A biblioteca global continua restrita ao admin; a cliente recebe somente exercicios presentes no treino individual publicado.
