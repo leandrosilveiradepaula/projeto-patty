@@ -1,3 +1,23 @@
+## Cadastro e lifecycle da cliente
+
+### REGRA CONFIRMADA
+
+Nome da cliente e obrigatorio. Um novo cadastro profissional nao pode ser concluido sem nome valido.
+
+### REGRA CONFIRMADA
+
+Cada cliente possui estado profissional:
+- `active`: esta em acompanhamento;
+- `inactive`: ja esteve em acompanhamento e atualmente nao esta em processo ativo.
+
+Encerrar acompanhamento nao apaga historico.
+
+Status profissional da cliente nao e equivalente a login, conta Auth, sessao ou assignment.
+
+### FUTURO REENGAJAMENTO
+
+Clientes inativas devem permanecer preservadas para permitir, no futuro, fluxos de reengajamento/campanhas. Isso nao confirma envio automatico nem regras de consentimento, canal, segmentacao ou acesso a dados sensiveis.
+
 ## REGRA VIGENTE — RECONCILIACAO 2026-10-07
 
 Para automacao e produto, a sequencia confirmada do metodo termina em:
