@@ -1,3 +1,17 @@
+## Atualizacao 2026-10-07 - runtime de correcoes auditaveis de check-ins
+
+As migrations pendentes de 06/10 e 07/10 foram aplicadas ao Supabase SaaS pelo workflow manual `Deploy Supabase migrations`, run #40, com sucesso.
+
+O runtime agora integra as tabelas append-only de correcao de check-ins:
+- tipos TypeScript sincronizados com o schema remoto;
+- leitura da correcao mais recente como valor efetivo;
+- evento original preservado;
+- cliente pode corrigir os proprios registros acessiveis;
+- Patty/admin pode corrigir registros de cliente sob assignment ativo, mantendo AAL2;
+- telas mostram estado `Corrigido` e o valor original quando existe correcao.
+
+Nenhum UPDATE/DELETE dos eventos originais foi introduzido.
+
 ## Atualizacao 2026-10-07 - fundacao auditavel de correcao de check-ins
 
 Foi preparada a migration `20261007173100_create_client_checkin_corrections.sql`.
