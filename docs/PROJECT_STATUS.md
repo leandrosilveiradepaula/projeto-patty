@@ -1,3 +1,12 @@
+## Atualizacao de auditoria de interface 2026-10-07 - versao atual e historico de protocolos
+
+O workspace administrativo de Protocolos passa a priorizar a versao mais recente sem remover o historico auditavel.
+
+- a versao mais recente abre expandida e recebe identificacao `atual`;
+- versoes anteriores ficam recolhidas por padrao e podem ser abertas individualmente;
+- lifecycle, estrutura alimentar, comparacao, clonagem e detalhes tecnicos continuam disponiveis em cada versao;
+- nenhuma regra profissional, aprovacao, publicacao, schema ou RLS foi alterado.
+
 ## Reconciliacao documental 2026-10-07 - migrations aplicadas
 
 O estado remoto foi reconciliado depois do workflow manual `Deploy Supabase migrations`, run #40. As migrations de restricao da biblioteca de exercicios, nome/status de cliente e correcoes auditaveis de check-ins estao aplicadas no Supabase SaaS. Blocos historicos abaixo foram atualizados para nao apresentarem essas migrations como pendentes.
