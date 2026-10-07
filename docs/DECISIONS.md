@@ -259,7 +259,9 @@ Qualquer intervencao posterior continua sendo decisao humana da Patty conforme a
 
 ### REGRA CONFIRMADA PELA PATTY
 
-O acompanhamento segue a sequencia profissional ja confirmada:
+> **HISTORICO SUPERADO:** a sequencia abaixo registra a resposta disponivel em 2026-09-27, mas nao e a sequencia vigente para automacao. A reconciliacao de 2026-10-07 limita o fluxo confirmado a `Cutting 2: 2 Low / 1 High`; etapas posteriores exigem nova confirmacao documentada da Patty.
+
+Sequencia historicamente registrada naquela rodada:
 Reconhecimento Metabolico -> Cutting 1 Dia 1/Dia 2 -> Cutting 1 2 Low/1 High -> Up Metabolico -> Cutting 2 Linear -> Cutting 2 Dia 1/Dia 2 -> Cutting 2 2 Low/1 High -> Cutting 3 Linear -> Cutting 3 Dia 1/Dia 2 -> Cutting 3 2 Low/1 High -> Up Metabolico.
 
 A progressao entre etapas nao deve ser automatica.
@@ -1443,7 +1445,7 @@ Ao abrir um convite valido, a cliente entra em uma sessao de ativacao e deve cri
 
 Para SSR, o template de email de convite do Supabase deve apontar para `/auth/confirm` usando `TokenHash` e tipo `invite`; a rota troca o token por sessao e redireciona para `/ativar-conta`. Site URL e redirect allowlist ja foram alinhados com a producao. O template ainda nao pode ser alterado no ambiente atual: a Management API confirmou que projetos Free com o provedor de email padrao precisam de upgrade ou SMTP customizado para modificar templates.
 
-Expiracao/reenvio do convite, recuperacao de acesso e encerramento da conta continuam pendentes.
+O lifecycle inicial de convite/ativacao permanece implementado. Recuperacao de acesso deixou de ser pendencia: existe fluxo self-service de solicitacao/redefinicao de senha e a Patty tambem pode gerar link manual de recovery para a identidade vinculada. Expiracao/reenvio de convite e encerramento/desativacao da identidade Auth por motivo independente do acompanhamento continuam pendentes.
 
 ## 2026-09-22 - Limpeza de temporarios expirados de upload privado
 
@@ -1975,9 +1977,15 @@ O acesso a cliente e client-scoped: a propria cliente acessa somente o registro 
 
 Remover uma identidade Auth de cliente preserva o registro profissional e limpa somente `clients.profile_id`. Encerrar assignment preserva historico e remove sua permissao ativa.
 
-### QUESTAO ABERTA
+### RECONCILIADO EM 2026-10-07
 
-O caminho administrativo para criar, alterar ou encerrar assignments continua pendente. O bootstrap inicial da conta admin da Patty foi definido como procedimento administrativo controlado e unico; seeds e testes locais nao definem esse procedimento de producao.
+O caminho administrativo deixou de estar totalmente pendente:
+- o onboarding cria o assignment ativo da Patty de forma controlada;
+- a Patty pode encerrar o assignment atual pela ficha da cliente;
+- quando nao resta assignment ativo, a cliente passa a `inactive`;
+- o encerramento preserva historico e possui smoke E2E sintetico.
+
+Continua aberta somente eventual necessidade futura de reassignment para outro profissional/equipe ou de um editor administrativo generico de assignments. O bootstrap inicial da conta admin da Patty continua sendo procedimento administrativo controlado e separado.
 
 ## 2026-09-15 - Separacao entre autenticacao, cadastro do cliente e snapshot de anamnese
 
