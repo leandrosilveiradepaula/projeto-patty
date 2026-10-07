@@ -810,7 +810,7 @@ Pela decisao de parametrizacao de 2026-09-30, esses ajustes devem ser representa
 
 Quando houver regra previamente confirmada, documentada e cadastrada como configuracao ativa, o motor deterministico pode montar rascunhos automaticamente para revisao da Patty, inclusive macros da fase e treino predefinido aplicavel. A IA nao cria nem escolhe formulas profissionais por raciocinio generativo.
 
-Continuam abertas as regras internas e os campos detalhados necessarios para treino, suplementacao e manipulados onde essas regras ainda nao estiverem formalizadas.
+Treino ja possui autoria/prescricao individual versionada e campos operacionais iniciais. Continuam abertas somente as regras profissionais de progressao, carga, volume, cardio e campos adicionais que ainda nao estiverem formalizados. Suplementacao e manipulados permanecem manuais caso a caso, sem formulas automaticas autorizadas.
 
 ### QUESTAO ABERTA
 
