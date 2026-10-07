@@ -148,14 +148,14 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
         />
       ) : null}
       <Section
-        description="A versão mais recente aparece primeiro. Cada versão mantém seus fatos, estrutura alimentar e próxima ação manual."
-        title="Histórico de versões"
+        description="A versão atual fica aberta para trabalho. Versões anteriores permanecem recolhidas e podem ser consultadas quando necessário."
+        title="Versão atual e histórico"
       >
         {versions.length === 0 ? (
           <EmptyState description="Nenhuma versão está acessível para este protocolo." title="Sem versões registradas" />
         ) : (
           <ol className={styles.versionList}>
-            {versions.map((version) => {
+            {versions.map((version, versionIndex) => {
               const approval = approvalsByVersionId.get(version.id);
               const publication = publicationsByVersionId.get(version.id);
               const mealPlan = mealPlansByVersionId.get(version.id) ?? null;
@@ -176,6 +176,7 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
                 submittedForReview: Boolean(version.submitted_for_review_at),
               });
               const draftReadiness = getProtocolDraftReadiness(mealPlan);
+              const isCurrentVersion = versionIndex === 0;
 
               return (
                 <li
@@ -183,17 +184,24 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
                   id={`versao-${version.version_number}`}
                   key={version.id}
                 >
-                  <div className={styles.versionHeader}>
-                    <div>
-                      <h3>Versão {version.version_number}</h3>
-                      <p className={styles.versionCreated}>
-                        Criada em {formatDateTime(version.created_at)}
-                      </p>
-                    </div>
-                    <Badge variant={lifecyclePresentation.variant}>
-                      {lifecyclePresentation.label}
-                    </Badge>
-                  </div>
+                  <details className={styles.versionDetails} open={isCurrentVersion}>
+                    <summary className={styles.versionSummary}>
+                      <div className={styles.versionHeader}>
+                        <div>
+                          <h3>
+                            Versão {version.version_number}
+                            {isCurrentVersion ? " · atual" : ""}
+                          </h3>
+                          <p className={styles.versionCreated}>
+                            Criada em {formatDateTime(version.created_at)}
+                          </p>
+                        </div>
+                        <Badge variant={lifecyclePresentation.variant}>
+                          {lifecyclePresentation.label}
+                        </Badge>
+                      </div>
+                    </summary>
+                    <div className={styles.versionBody}>
                   <dl className={styles.versionFacts}>
                     <div>
                       <dt>Base</dt>
@@ -327,6 +335,8 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
                       />
                     )}
                   </div>
+                    </div>
+                  </details>
                 </li>
               );
             })}
