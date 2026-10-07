@@ -20,6 +20,8 @@ import {
   createAccessibleClientTrainingRequest,
   getAccessibleClient,
 } from "@/lib/supabase/data-access";
+import { validateClientDisplayName } from "@/lib/onboarding/validation";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { isUuid } from "@/lib/validation/uuid";
 
 export async function endClientAssignmentAction(
@@ -48,6 +50,70 @@ export async function endClientAssignmentAction(
   }
 
   redirect("/admin/clientes?assignment=ended");
+}
+
+
+export type AdminClientDisplayNameFormState = {
+  message: string | null;
+  success: boolean;
+};
+
+export async function updateAdminClientDisplayNameAction(
+  clientId: string,
+  _state: AdminClientDisplayNameFormState,
+  formData: FormData,
+): Promise<AdminClientDisplayNameFormState> {
+  await requireRole("admin");
+
+  if (!isUuid(clientId)) {
+    return {
+      message: "Cliente inválida para atualizar o nome.",
+      success: false,
+    };
+  }
+
+  const client = await getAccessibleClient(clientId);
+
+  if (!client || !client.profile_id) {
+    return {
+      message:
+        "Esta cliente não possui perfil vinculado ou não está acessível para sua atribuição atual.",
+      success: false,
+    };
+  }
+
+  const rawDisplayName = formData.get("displayName");
+  const displayName =
+    typeof rawDisplayName === "string" ? rawDisplayName.trim() : "";
+  const validation = validateClientDisplayName(displayName);
+
+  if (!validation.ok) {
+    return {
+      message: validation.message,
+      success: false,
+    };
+  }
+
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("profiles")
+    .update({ display_name: displayName })
+    .eq("id", client.profile_id);
+
+  if (error) {
+    return {
+      message: "Não foi possível atualizar o nome da cliente.",
+      success: false,
+    };
+  }
+
+  revalidatePath("/admin/clientes");
+  revalidatePath(`/admin/clientes/${client.id}`);
+
+  return {
+    message: "Nome da cliente atualizado.",
+    success: true,
+  };
 }
 
 export type TrainingRequestFormState = {
