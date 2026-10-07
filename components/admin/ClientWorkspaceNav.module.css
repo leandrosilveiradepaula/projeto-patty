@@ -42,17 +42,6 @@
 }
 
 
-@media (max-width: 767px) {
-  .nav {
-    display: none;
-  }
-
-  .mobileNav {
-    display: block;
-    margin: 0 0 var(--space-6);
-  }
-}
-
 .mobileNav {
   display: none;
 }
@@ -83,4 +72,16 @@
 .mobileSelect:focus-visible {
   outline: 3px solid var(--color-accent);
   outline-offset: 2px;
+}
+
+
+@media (max-width: 767px) {
+  .nav {
+    display: none;
+  }
+
+  .mobileNav {
+    display: block;
+    margin: 0 0 var(--space-6);
+  }
 }
