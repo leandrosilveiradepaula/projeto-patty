@@ -48,7 +48,11 @@
         "preflight_note": "Read-only source preflight from the approved Google Drive file. Migration source_download_status remains not_started; re-download and re-hash are still required before Blob upload.",
         "source_reverified_at": "2026-10-03",
         "source_reverified_size_bytes": 123262796,
-        "source_reverified_sha256_hex": "ee05d6c12ea02db283234f5d69a09ff60c4d831183fe6715d7aa9848e76905b1"
+        "source_reverified_sha256_hex": "ee05d6c12ea02db283234f5d69a09ff60c4d831183fe6715d7aa9848e76905b1",
+        "latest_source_reverified_at": "2026-10-07",
+        "latest_source_reverified_size_bytes": 123262796,
+        "latest_source_reverified_mime_type": "video/mp4",
+        "latest_source_reverification_note": "Read-only re-fetch from the approved Google Drive source before migration work resumed; original Drive object was not modified. SHA-256 was not recomputed in this connector-only re-fetch, so the previously verified hash remains the upload gate."
       },
       "supabase": {
         "educational_content_id": "610df135-7c00-47a3-b978-2ba44411ae43",
