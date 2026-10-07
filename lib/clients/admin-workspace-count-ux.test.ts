@@ -29,3 +29,18 @@ test("client workspace surfaces feedback readiness and hidden administrative fil
   assert.match(page, /arquivos#aguardando-liberacao/);
   assert.match(page, /aguardando liberação/);
 });
+
+
+test("complementary readiness does not preempt the core care flow", () => {
+  const page = read("app/admin/clientes/[clienteId]/page.tsx");
+
+  const actionStart = page.indexOf("const nextOperationalAction");
+  const actionEnd = page.indexOf("return (", actionStart);
+  const actionBlock = page.slice(actionStart, actionEnd);
+
+  assert.ok(actionBlock.indexOf("anamnesisPattyAction") < actionBlock.indexOf("weeklyFeedbackChannelNeedsSetup"));
+  assert.ok(actionBlock.indexOf("assessmentDraft") < actionBlock.indexOf("weeklyFeedbackChannelNeedsSetup"));
+  assert.ok(actionBlock.indexOf("protocolAction") < actionBlock.indexOf("weeklyFeedbackChannelNeedsSetup"));
+  assert.ok(actionBlock.indexOf('trainingWorkspaceState.kind === "reviewed"') < actionBlock.indexOf("weeklyFeedbackChannelNeedsSetup"));
+  assert.ok(actionBlock.indexOf("weeklyFeedbackChannelNeedsSetup") < actionBlock.indexOf("pendingPrivateFileReleaseCount"));
+});
