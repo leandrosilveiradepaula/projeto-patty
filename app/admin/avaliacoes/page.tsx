@@ -50,7 +50,7 @@ export default async function AdminAvaliacoesPage() {
         ) : (
           <ul className={styles.evaluationList}>
             {assessments.map((assessment) => {
-              const displayName = assessment.clients?.profiles?.display_name?.trim();
+              const displayName = assessment.clients?.full_name?.trim() || assessment.clients?.profiles?.display_name?.trim();
 
               return (
                 <li key={assessment.id}>
