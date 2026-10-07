@@ -76,7 +76,7 @@ export default async function AdminClientProgressPage({ params }: PageProps) {
   );
 
   const series = buildFactualProgressSeries(assessmentSnapshots);
-  const displayName = client.profiles?.display_name?.trim();
+  const displayName = client.full_name?.trim() || client.profiles?.display_name?.trim();
 
   return (
     <>
