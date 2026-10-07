@@ -139,7 +139,7 @@ Qualquer etapa posterior a `Cutting 2: 2 Low / 1 High` volta a ser questao abert
 
 ### REGRA CONFIRMADA VIGENTE
 
-A meta diaria permanece calculada pela configuracao profissional ativa. Para o baseline atual, a referencia vigente e 35 mL/kg/dia, substituindo a referencia anterior de 60 mL/kg/dia.
+[HISTORICO SUPERADO EM 2026-10-07] Este registro documentava 35 mL/kg/dia como referencia. A reconciliacao vigente no topo deste arquivo determina que hidratacao permanece aberta e este valor nao autoriza comportamento automatico.
 
 A taxonomia ativa distingue:
 - agua pura;
@@ -455,7 +455,7 @@ O produto deve prever um check-in de acompanhamento e incentivo para:
 - realizar um check-in diario de atividade fisica, registrando se fez ou nao fez atividade naquele dia;
 - acompanhar progresso dessas metas.
 
-A meta minima diaria de liquidos vigente foi confirmada pela Patty em 2026-10-04 como **35 mL por kg de peso corporal**, substituindo a referencia anterior de 60 mL/kg.
+[HISTORICO SUPERADO EM 2026-10-07] Em 2026-10-04 foi registrado **35 mL por kg de peso corporal**. A reconciliacao posterior determina que hidratacao permanece aberta para regra automatica; este valor e preservado apenas como historico.
 
 Formula do metodo:
 
@@ -480,7 +480,7 @@ Ainda precisam ser formalizados como padrao/regra:
 - visibilidade e poderes de correcao da Patty;
 - politica de edicao de check-ins passados.
 
-A formula vigente de 35 mL/kg esta confirmada como regra deterministica do metodo para novas metas. Nao criar score automatico de adesao a partir do check-in.
+[HISTORICO SUPERADO EM 2026-10-07] O registro anterior tratava 35 mL/kg como formula deterministica. A regra automatica de hidratacao foi reaberta na reconciliacao vigente; nao gerar novas metas a partir deste valor.
 
 ## 2026-09-27 - Escopo de Edicao Manual da Patty
 
