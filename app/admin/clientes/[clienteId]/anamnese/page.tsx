@@ -46,7 +46,7 @@ export default async function AdminClienteAnamnesePage({
   const submittedSubmissions = submissions.filter(
     (submission) => Boolean(submission.submitted_at),
   );
-  const displayName = client.profiles?.display_name?.trim();
+  const displayName = client.full_name?.trim() || client.profiles?.display_name?.trim();
 
   return (
     <>
