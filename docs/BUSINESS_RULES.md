@@ -2,7 +2,7 @@
 
 ### REGRA CONFIRMADA
 
-Nome da cliente e obrigatorio. Um novo cadastro profissional nao pode ser concluido sem nome valido.
+Nome da cliente e obrigatorio. Um novo cadastro profissional nao pode ser concluido sem nome valido. No dominio profissional, `clients.full_name` e a fonte canonica do nome da cliente; `profiles.display_name` permanece ligado a identidade/perfil e pode existir como compatibilidade de apresentacao, mas nao substitui o campo obrigatorio de `Client`.
 
 ### REGRA CONFIRMADA
 
