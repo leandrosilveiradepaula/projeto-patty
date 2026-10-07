@@ -47,17 +47,6 @@ type AdminClienteDetailPageProps = {
   }>;
 };
 
-function formatDateTime(value: string) {
-  return new Intl.DateTimeFormat("pt-BR", {
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    month: "2-digit",
-    timeZone: "America/Sao_Paulo",
-    year: "numeric",
-  }).format(new Date(value));
-}
-
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
@@ -241,11 +230,9 @@ export default async function AdminClienteDetailPage({
   const anamnesisClientWait = submittedAnamnesisStates.find(
     (state) => state.clarificationAwaitingClient,
   );
-  const latestAssessment = assessments[0] ?? null;
   const assessmentDraft = assessments.find(
     (assessment) => !assessment.finalized_at,
   );
-  const latestProtocol = protocols[0] ?? null;
   const accessibleProtocolVersions =
     await listAccessibleProtocolVersionsForProtocols(
       protocols.map((protocol) => protocol.id),
@@ -467,7 +454,7 @@ export default async function AdminClienteDetailPage({
       <PageSectionNav
         items={[
           { href: "#fluxo-atendimento", label: "Fluxo" },
-          { href: "#visao-acompanhamento", label: "Áreas" },
+          { href: "#visao-acompanhamento", label: "Complementares" },
           { href: "#cadastro-atual", label: "Cadastro" },
           { href: "#preferencia-feedback", label: "Feedback" },
           { href: "#recuperacao-acesso", label: "Acesso" },
@@ -741,49 +728,11 @@ export default async function AdminClienteDetailPage({
       </Section>
 
       <Section
-        description="Atalhos para consultar registros e áreas complementares sem alterar o fluxo operacional acima."
+        description="Acesse aqui somente áreas complementares que não precisam repetir as etapas já visíveis no fluxo do atendimento."
         id="visao-acompanhamento"
-        title="Áreas da cliente"
+        title="Atalhos complementares"
       >
         <div className={styles.areaGrid}>
-          <Link className={styles.cardLink} href={`/admin/clientes/${client.id}/anamnese`}>
-            <Card className={styles.infoCard}>
-              <div className={styles.cardHeader}>
-                <h3 className={styles.cardTitle}>Anamnese</h3>
-                <Badge variant={latestAnamnesis?.submitted_at ? "positive" : latestAnamnesis ? "warning" : "neutral"}>
-                  {latestAnamnesis
-                    ? latestAnamnesis.submitted_at
-                      ? "Enviada"
-                      : "Rascunho"
-                    : "Não iniciada"}
-                </Badge>
-              </div>
-              <p className={styles.cardDescription}>
-                {latestAnamnesis
-                  ? latestAnamnesis.submitted_at
-                    ? `Último envio em ${formatDateTime(latestAnamnesis.submitted_at)}.`
-                    : `Rascunho criado em ${formatDateTime(latestAnamnesis.created_at)}.`
-                  : "Nenhuma Anamnese registrada."}
-              </p>
-            </Card>
-          </Link>
-
-          <Link className={styles.cardLink} href={`/admin/clientes/${client.id}/avaliacoes`}>
-            <Card className={styles.infoCard}>
-              <div className={styles.cardHeader}>
-                <h3 className={styles.cardTitle}>Avaliações</h3>
-                <Badge variant="neutral">{assessments.length}</Badge>
-              </div>
-              <p className={styles.cardDescription}>
-                {assessmentDraft
-                  ? `Rascunho pendente · ${formatDate(assessmentDraft.assessed_at)}.`
-                  : latestAssessment
-                    ? `Última finalizada · ${formatDate(latestAssessment.assessed_at)}.`
-                    : "Nenhuma avaliação registrada."}
-              </p>
-            </Card>
-          </Link>
-
           <Link className={styles.cardLink} href={`/admin/clientes/${client.id}/evolucao`}>
             <Card className={styles.infoCard}>
               <div className={styles.cardHeader}>
@@ -794,20 +743,6 @@ export default async function AdminClienteDetailPage({
               </div>
               <p className={styles.cardDescription}>
                 Acompanhe medidas ao longo das avaliações finalizadas, com variações numéricas factuais.
-              </p>
-            </Card>
-          </Link>
-
-          <Link className={styles.cardLink} href={`/admin/clientes/${client.id}/protocolos`}>
-            <Card className={styles.infoCard}>
-              <div className={styles.cardHeader}>
-                <h3 className={styles.cardTitle}>Protocolos</h3>
-                <Badge variant="neutral">{protocols.length}</Badge>
-              </div>
-              <p className={styles.cardDescription}>
-                {latestProtocol
-                  ? `Mais recente: ${latestProtocol.protocol_type} · criado em ${formatDate(latestProtocol.created_at)}.`
-                  : "Nenhum protocolo registrado."}
               </p>
             </Card>
           </Link>
@@ -850,22 +785,6 @@ export default async function AdminClienteDetailPage({
                 {latestActivity
                   ? `Última atividade: ${latestActivity.checkin_date} · ${latestActivity.did_activity ? "fez atividade" : "não fez atividade"}.`
                   : "Nenhum check-in de atividade registrado."}
-              </p>
-            </Card>
-          </Link>
-
-          <Link className={styles.cardLink} href={`/admin/clientes/${client.id}/feedback-semanal`}>
-            <Card className={styles.infoCard}>
-              <div className={styles.cardHeader}>
-                <h3 className={styles.cardTitle}>Feedback semanal</h3>
-                <Badge variant="neutral">
-                  {weeklyFeedbacks.filter((feedback) => !feedback.submitted_at).length} pendente(s)
-                </Badge>
-              </div>
-              <p className={styles.cardDescription}>
-                {weeklyFeedbacks.length === 0
-                  ? "Nenhum feedback semanal solicitado."
-                  : `${weeklyFeedbacks.length} registro(s) no histórico semanal.`}
               </p>
             </Card>
           </Link>
