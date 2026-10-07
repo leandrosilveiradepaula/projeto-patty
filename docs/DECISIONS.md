@@ -843,9 +843,11 @@ Nenhuma formula, criterio ou comportamento dessas fases deve ser:
 Qualquer uso futuro depende de nova confirmacao profissional e atualizacao documental previa.
 
 
-## 2026-09-24 - Cutting 3 Linear e etapa seguinte — SUPERADA EM 2026-10-03
+## REGISTRO HISTORICO SUPERADO - Cutting 3 Linear e etapa seguinte (2026-09-24)
 
-### DECISAO SUPERADA PARCIALMENTE POR CONFIRMACAO DE 2026-09-27
+> Este bloco preserva confirmacoes antigas da rodada profissional. A reconciliacao vigente de 2026-10-07 limita a sequencia automatizavel confirmada a `Cutting 2: 2 Low / 1 High`; Cutting 3 e etapas posteriores voltaram a ser questoes abertas e nao autorizam automacao.
+
+### ESTADO HISTORICO DAQUELA RODADA
 
 A confirmacao anterior registrava apenas a existencia de `Cutting 3 Linear`.
 
@@ -1193,7 +1195,7 @@ Dry-run transacional no Supabase SaaS com `ROLLBACK` confirmou:
 - exclusao privilegiada de rascunho: PASS;
 - exclusao de submission enviada continua bloqueada com `55000`: PASS.
 
-A migration esta versionada e validada, mas ainda nao aplicada no SaaS.
+**Estado daquele checkpoint:** a migration estava versionada e validada, mas ainda nao aplicada. **Estado posterior que prevalece:** `20260923191554_fix_anamnesis_draft_delete_trigger.sql` foi aplicada com sucesso no SaaS e validada por smoke transacional/E2E.
 
 ## 2026-09-23 - Retomada parcial de rascunho da Anamnese na UI da cliente
 
@@ -1778,7 +1780,7 @@ Continuam abertos nesta area:
 
 Esta secao registra no repositorio regras ja confirmadas pela Patty e elimina a classificacao antiga que tratava todo o metodo como indefinido.
 
-**Nota de vigencia:** a parte desta secao que estendia a sequencia para Cutting 3 foi superada pela decisao de 2026-10-03. As demais regras confirmadas desta secao permanecem vigentes quando nao conflitarem com decisao posterior.
+**Nota de vigencia reconciliada em 2026-10-07:** a extensao desta secao para Cutting 3 esta superada. A sequencia vigente confirmada termina em `Cutting 2: 2 Low / 1 High`. As demais regras confirmadas desta secao permanecem vigentes quando nao conflitarem com decisao posterior.
 
 Todo acompanhamento comeca pelo Reconhecimento Metabolico, protocolo linear inicial.
 
@@ -1792,10 +1794,9 @@ Reconhecimento Metabolico
 -> Cutting 2 Linear
 -> Cutting 2 Dia 1 / Dia 2
 -> Cutting 2: 2 Low / 1 High
--> Cutting 3 Linear
 ```
 
-Nao inferir automaticamente regras internas do Cutting 3 nem etapas posteriores.
+Nao inferir Cutting 3 nem qualquer etapa posterior.
 
 ### DECISAO CONFIRMADA
 
@@ -1841,7 +1842,7 @@ No fluxo confirmado, o Up Metabolico inclui uma refeicao livre semanal. Outras r
 
 ### QUESTAO ABERTA
 
-Permanecem abertas, entre outros pontos: Fases 5 e 6 do Carb Cycle, regras detalhadas do Cutting 3 Linear e etapas posteriores a ele, Bulking detalhado, Consolidacao, hidratacao, suplementacao/manipulados, montagem e progressao definitiva de treino, alertas profissionais e criterios finais de avaliacao.
+Permanecem abertas, entre outros pontos: Fases 5 e 6 do Carb Cycle, Cutting 3 e qualquer etapa posterior ao Cutting 2, Bulking detalhado, Consolidacao, hidratacao, suplementacao/manipulados, montagem e progressao definitiva de treino, alertas profissionais e criterios finais de avaliacao.
 
 ## 2026-09-22 - Primeira versao assistiva de IA
 
@@ -2516,14 +2517,14 @@ Nao inferir prioridade, prazo, urgencia, adesao, estagnacao ou decisao profissio
 
 
 
-## 2026-09-30 - Check-ins versionados e resolucao manual de esclarecimentos
+## REGISTRO HISTORICO SUPERADO - Check-ins versionados e hidratacao automatica (2026-09-30)
 
-### DECISAO TECNICA APLICADA
+### DECISAO TECNICA APLICADA NAQUELE ESTADO
 
-Foram materializadas somente regras ja confirmadas pela Patty:
+A fundacao de check-ins e resolucao manual permanece valida, mas a regra automatica de hidratacao foi posteriormente suspensa pela reconciliacao de 2026-10-07.
 
-- meta de liquidos como snapshot append-only de peso;
-- calculo deterministico vigente `peso_kg * 35 mL`, substituindo a referencia anterior de 60 mL/kg para novas metas;
+- meta de liquidos foi materializada historicamente como snapshot append-only de peso;
+- o calculo `peso_kg * 35 mL` e historico e **nao e regra profissional automatica vigente**;
 - nenhuma alteracao de peso recalcula automaticamente metas historicas;
 - ingestao de liquidos como eventos append-only, distinguindo `water` e `zero_calorie_other`;
 - atividade fisica diaria como eventos append-only, independente do treino prescrito;
@@ -2608,9 +2609,11 @@ Decisoes tecnicas/produto:
 A criacao manual continua disponivel, mas deixou de ser o unico fluxo: geracao recorrente idempotente, agenda versionada, elegibilidade apos primeiro protocolo, periodo da semana anterior, lembrete de quarta-feira, notificacao in-app e worker de email foram implementados posteriormente. WhatsApp permanece desacoplado e ainda depende de provider/opt-in/fallback; SMTP real continua configuracao operacional.
 
 
-## 2026-10-04 - Sequencia com Cutting 3 e Consolidacao Metabolica
+## REGISTRO HISTORICO SUPERADO - Sequencia com Cutting 3 e Consolidacao Metabolica (2026-10-04)
 
-### REGRA CONFIRMADA PELA PATTY
+> A reconciliacao vigente de 2026-10-07 reabriu Cutting 3, Bulking detalhado e Consolidacao. O conteudo abaixo e preservado como exemplo historico da rodada e nao autoriza automacao nem amplia a sequencia vigente.
+
+### REGISTRO DA RODADA
 
 O fluxo profissional de alto nivel inclui:
 
@@ -2628,7 +2631,7 @@ A progressao e passo a passo e depende dos resultados do paciente.
 
 Quando o objetivo inclui ganho de massa muscular, pode haver Bulking. Entre o Bulking e a volta ao Cutting, a Patty utiliza Consolidacao Metabolica para trabalhar/preservar o ganho de massa muscular e retirar somente o excesso adicional de gordura e retencao liquida.
 
-Esta confirmacao supera a decisao de 2026-10-03 que encerrava a sequencia confirmada no Cutting 2.
+Naquela rodada, esta confirmacao foi registrada como superando a decisao anterior. Esse efeito foi posteriormente revertido pela reconciliacao de 2026-10-07.
 
 ### LIMITES
 
@@ -2640,15 +2643,17 @@ Continuam sem regra deterministica confirmada:
 - equivalencia automatica entre todos os Ups Metabolicos.
 
 
-## 2026-10-04 - Revisao da regra de hidratacao
+## REGISTRO HISTORICO SUPERADO - Revisao da regra de hidratacao (2026-10-04)
 
-### REGRA CONFIRMADA VIGENTE
+> A reconciliacao vigente de 2026-10-07 reabriu hidratacao para regra profissional automatica. Os valores abaixo permanecem somente como historico e nao devem gerar novas metas, progresso ou recalculo.
+
+### REGISTRO DA RODADA
 
 A Patty substituiu a referencia anterior de 60 mL/kg/dia.
 
-A regra vigente passa a ser:
+Naquela rodada foi registrado:
 - minimo de 35 mL/kg/dia;
-- formula deterministica para novas metas: `peso_kg * 35`;
+- formula `peso_kg * 35`;
 - geralmente cerca de 70% dessa meta vem de agua pura;
 - o restante pode ser composto por outros liquidos zero calorias, como cafe, cha, chimarrao e bebidas zero calorias.
 
@@ -2745,9 +2750,11 @@ A planilha fornecida confirma que os valores da tabela central sao derivados do 
 A coluna textual/numerica "Fase" dentro da tabela central do arquivo historico apresenta rotulos que nao correspondem diretamente ao mapeamento profissional Fase 1/2/3 confirmado por cor. Para o produto, a regra profissional confirmada por cor prevalece; nao inferir numeracao adicional a partir desse rotulo sem validacao.
 
 
-## 2026-10-04 - Estrutura do Cutting 3
+## REGISTRO HISTORICO SUPERADO - Estrutura do Cutting 3 (2026-10-04)
 
-### REGRA CONFIRMADA PELA PATTY
+> Cutting 3 nao integra a sequencia profissional vigente confirmada em 2026-10-07. Este detalhamento e preservado somente como historico e nao deve ser cadastrado como regra ativa.
+
+### REGISTRO DA RODADA
 
 O Cutting 3 segue a mesma estrutura dos Cuttings anteriores:
 
