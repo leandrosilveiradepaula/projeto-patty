@@ -1,3 +1,29 @@
+## 2026-10-07 - Reconciliacao vigente do metodo e das pendencias
+
+### REGRA CONFIRMADA VIGENTE
+
+Para produto, automacao e implementacao, o fluxo principal confirmado termina em:
+
+```text
+Reconhecimento Metabolico
+-> Cutting 1 Dia 1 / Dia 2
+-> Cutting 1: 2 Low / 1 High
+-> Up Metabolico
+-> Cutting 2 Linear
+-> Cutting 2 Dia 1 / Dia 2
+-> Cutting 2: 2 Low / 1 High
+```
+
+Nao inferir etapas posteriores. Cutting 3, Bulking detalhado, Consolidacao e qualquer etapa posterior ao Cutting 2 permanecem pendentes ate nova confirmacao explicita e documentada da Patty.
+
+### HIDRATACAO
+
+Hidratacao permanece questao profissional aberta para fins de regra automatica. Valores historicos, templates tecnicos ou configuracoes ja existentes nao devem ser promovidos a regra profissional vigente sem confirmacao documental especifica.
+
+### CONSEQUENCIA DOCUMENTAL
+
+Esta reconciliacao prevalece sobre trechos historicos deste arquivo que tratem Cutting 3, etapas posteriores ao Cutting 2 ou parametros de hidratacao como fechados para automacao. Esses trechos permanecem somente como historico de levantamento.
+
 ## 2026-10-06 - Biblioteca global de exercicios e selecao individual por cliente
 
 ### REGRA CONFIRMADA PELA PATTY
