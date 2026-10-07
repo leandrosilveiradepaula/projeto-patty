@@ -19,14 +19,19 @@ test("admin content release flow exposes whether exact versions have an asset", 
   assert.match(page, /versionIdsWithAssets/);
   assert.match(page, /Disponível para abrir/);
   assert.match(page, /Liberado sem arquivo/);
-  assert.match(form, /sem arquivo/);
-  assert.match(form, /não terá um arquivo para abrir/);
+  assert.match(form, /arquivo privado registrado/);
+  assert.match(form, /servidor também valida a existência do asset/);
 });
 
-test("asset visibility does not turn missing assets into an automatic release block", () => {
+test("missing asset blocks new releases in both domain and server action", () => {
   const actions = read("app/admin/clientes/[clienteId]/conteudos/actions.ts");
   const eligibility = read("lib/content/release-eligibility.ts");
 
-  assert.doesNotMatch(actions, /hasAsset/);
-  assert.doesNotMatch(eligibility, /asset/i);
+  assert.match(actions, /listEducationalContentAssetsForCurrentAdminVersions/);
+  assert.match(actions, /hasAsset: assets\.length > 0/);
+  assert.match(eligibility, /hasAsset: boolean/);
+  assert.match(
+    eligibility,
+    /Boolean\(facts\.publishedAt\) && facts\.hasAsset && !facts\.alreadyReleased/,
+  );
 });
