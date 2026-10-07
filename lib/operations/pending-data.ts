@@ -23,6 +23,7 @@ import {
 import {
   buildOperationalPendingItems,
   type OperationalPendingItem,
+  type PendingTrainingLifecycle,
 } from "@/lib/operations/pending";
 import { loadClarificationReminderInterval } from "@/lib/operations/clarification-reminder-loader";
 
@@ -107,7 +108,7 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
     }
   }
 
-  const trainingLifecycle = assignedClients.flatMap((client) => {
+  const trainingLifecycle: PendingTrainingLifecycle[] = assignedClients.flatMap<PendingTrainingLifecycle>((client) => {
     const plan = trainingPlanByClientId.get(client.id);
     const request = latestRequestByClientId.get(client.id);
 
