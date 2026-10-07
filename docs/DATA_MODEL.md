@@ -12,9 +12,9 @@ Cada correcao referencia o evento original, preserva o valor corrigido, autoria 
 
 Para liquidos, a correcao preserva quantidade, tipo e momento corrigidos. Para atividade fisica, preserva data do check-in e resposta corrigidas.
 
-A leitura efetiva futura deve considerar a correcao mais recente de cada evento, mantendo todo o historico anterior auditavel.
+A leitura efetiva considera a correcao mais recente de cada evento, mantendo o valor original e todo o historico anterior auditaveis.
 
-A migration `20261007173100_create_client_checkin_corrections.sql` esta preparada no repositorio, mas nao deve ser tratada como aplicada ao Supabase SaaS ate o workflow remoto concluir com sucesso.
+A migration `20261007173100_create_client_checkin_corrections.sql` foi aplicada ao Supabase SaaS em 2026-10-07 pelo workflow `Deploy Supabase migrations`, run #40. O runtime de cliente e Patty ja usa essas tabelas append-only.
 
 ## Identidade profissional da cliente e status
 
