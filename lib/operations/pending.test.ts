@@ -866,3 +866,72 @@ test("assessment draft pending stays factual and points to the real editor", () 
   assert.match(items[0]?.description ?? "", /finalize explicitamente/);
   assert.doesNotMatch(items[0]?.description ?? "", /atras|urg|prioridade/i);
 });
+
+
+test("weekly feedback delivery blockers point to the corrective surface", () => {
+  const base = {
+    clarificationReminderIntervalHours: 24,
+    anamnesisSubmissions: [],
+    clarificationRequests: [],
+    assessments: [],
+    protocolVersions: [],
+    aiExecutions: [],
+  };
+
+  const noChannel = buildOperationalPendingItems({
+    ...base,
+    weeklyFeedbackNotificationEvents: [{
+      blockedReason: "no_channel",
+      channelKey: null,
+      clientId: "client-feedback",
+      clientLabel: "Cliente Feedback",
+      createdAt: "2026-10-07T12:00:00Z",
+      deliveryState: "blocked_no_channel",
+      eventKey: "weekly_feedback_reminder:1",
+      id: "event-no-channel",
+      weeklyFeedbackId: "feedback-1",
+    }],
+  });
+  assert.equal(
+    noChannel[0]?.href,
+    "/admin/clientes/client-feedback#preferencia-feedback",
+  );
+
+  const missingContact = buildOperationalPendingItems({
+    ...base,
+    weeklyFeedbackNotificationEvents: [{
+      blockedReason: "missing_contact",
+      channelKey: "email",
+      clientId: "client-feedback",
+      clientLabel: "Cliente Feedback",
+      createdAt: "2026-10-07T12:00:00Z",
+      deliveryState: "blocked_missing_contact",
+      eventKey: "weekly_feedback_reminder:2",
+      id: "event-missing-contact",
+      weeklyFeedbackId: "feedback-2",
+    }],
+  });
+  assert.equal(
+    missingContact[0]?.href,
+    "/admin/clientes/client-feedback#cadastro-atual",
+  );
+
+  const failedDelivery = buildOperationalPendingItems({
+    ...base,
+    weeklyFeedbackNotificationEvents: [{
+      blockedReason: "smtp_failure",
+      channelKey: "email",
+      clientId: "client-feedback",
+      clientLabel: "Cliente Feedback",
+      createdAt: "2026-10-07T12:00:00Z",
+      deliveryState: "delivery_failed",
+      eventKey: "weekly_feedback_email_delivery_failed:3",
+      id: "event-delivery-failed",
+      weeklyFeedbackId: "feedback-3",
+    }],
+  });
+  assert.equal(
+    failedDelivery[0]?.href,
+    "/admin/clientes/client-feedback/feedback-semanal#feedback-pendentes",
+  );
+});
