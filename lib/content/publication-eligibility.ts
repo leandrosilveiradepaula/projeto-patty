@@ -1,7 +1,7 @@
 export function educationalContentPublicationNeedsAsset(
   contentTypeKey: string | null,
 ) {
-  return contentTypeKey === "video" || contentTypeKey === "pdf" || contentTypeKey === "image";
+  return contentTypeKey === "video";
 }
 
 export function canPublishEducationalContentVersion(input: {
