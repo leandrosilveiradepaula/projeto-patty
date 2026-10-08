@@ -2617,13 +2617,19 @@ export async function updateAccessibleMealDoseAllocation(input: {
 
 export async function deleteAccessibleMealDoseAllocation(doseAllocationId: string) {
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("meal_dose_allocations")
     .delete()
-    .eq("id", doseAllocationId);
+    .eq("id", doseAllocationId)
+    .select("id")
+    .maybeSingle();
 
   if (error) {
     throw error;
+  }
+
+  if (!data) {
+    throw new Error("A exclusão da dose não foi confirmada. Atualize a página e confira o rascunho.");
   }
 }
 
@@ -2645,17 +2651,19 @@ export async function deleteAccessibleEmptyMeal(input: {
     return false;
   }
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("meals")
     .delete()
     .eq("id", input.mealId)
-    .eq("meal_plan_variant_id", input.variantId);
+    .eq("meal_plan_variant_id", input.variantId)
+    .select("id")
+    .maybeSingle();
 
   if (error) {
     throw error;
   }
 
-  return true;
+  return Boolean(data);
 }
 
 export async function deleteAccessibleEmptyMealPlanVariant(input: {
@@ -2676,17 +2684,19 @@ export async function deleteAccessibleEmptyMealPlanVariant(input: {
     return false;
   }
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("meal_plan_variants")
     .delete()
     .eq("id", input.variantId)
-    .eq("meal_plan_version_id", input.mealPlanVersionId);
+    .eq("meal_plan_version_id", input.mealPlanVersionId)
+    .select("id")
+    .maybeSingle();
 
   if (error) {
     throw error;
   }
 
-  return true;
+  return Boolean(data);
 }
 
 
