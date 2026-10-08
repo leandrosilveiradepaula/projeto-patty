@@ -109,3 +109,14 @@ O arquivo original deve permanecer preservado no Drive. O path final deve ser op
 ### ESTADO OPERACIONAL RECONCILIADO 2026-10-07
 
 O Blob store privado esta criado/conectado. A fonte aprovada foi reobtida read-only em 2026-10-07 e tamanho/MIME foram reconfirmados; o SHA-256 previamente verificado continua sendo gate e deve ser recomputado a partir dos bytes usados no upload. Nenhum upload Blob, registro de asset, publicacao ou release foi executado. O lote permanece fail-closed antes da transferencia fisica e da validacao de entrega privada do video acima de 100 MB.
+
+
+## Gate de publicacao para conteudo em video
+
+### DECISAO TECNICA DE PRODUTO
+
+Enquanto a taxonomia completa de tipos da biblioteca educacional continua aberta, o unico tipo confirmado e utilizado no primeiro lote real e `video`. Para esse tipo, a publicacao passa a exigir que exista um asset privado previamente registrado e verificado.
+
+Essa regra evita um estado inconsistente em que uma versao de video seria publicada antes do arquivo e depois nao poderia receber asset pela interface, pois assets continuam sendo registrados apenas enquanto a versao esta em rascunho.
+
+Nenhuma regra equivalente foi inferida para tipos ainda nao formalizados, como PDF/imagem/texto. Esses tipos permanecem pendentes de definicao explicita de produto antes de ganhar um gate semelhante.
