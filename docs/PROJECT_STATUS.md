@@ -3090,3 +3090,8 @@ O lote permanece estritamente de UX e comunicacao operacional. Nao adiciona tele
 Quatro areas de consulta passam a orientar a proxima navegacao real quando ainda nao existem registros: Arquivos aponta para o proprio formulario de upload; Avaliacoes esclarece que somente medidas finalizadas estao disponiveis e permite voltar as areas do acompanhamento; Evolucao aponta para Avaliacoes sem inventar progresso; e Protocolo orienta retorno ao inicio, deixando explicita a dependencia de publicacao pela Patty.
 
 Nenhuma ausencia de dados passa a ser tratada como falha, liberacao automatica ou julgamento profissional. Sem alteracoes em banco, RLS, Auth, schema, migrations ou regras clinicas.
+
+
+## Continuidade nos estados sem registros do portal da cliente — 2026-10-08
+
+Quatro áreas agora oferecem orientação factual: Conteúdos distingue ausência de liberação e aprovação profissional; Anamnese distingue disponibilidade de formulário; Feedback Semanal distingue ausência de solicitação; Treino oferece acesso ao formulário somente quando ainda não existe solicitação. As mudanças são de navegação e mensagens, sem novas regras profissionais, schema, Auth, RLS ou migrations.
