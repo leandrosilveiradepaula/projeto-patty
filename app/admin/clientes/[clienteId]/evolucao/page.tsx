@@ -95,8 +95,9 @@ export default async function AdminClientProgressPage({ params }: PageProps) {
       >
         {series.length === 0 ? (
           <EmptyState
-            description="Finalize avaliações com medidas para formar o histórico longitudinal."
+            description="Ainda não há medidas em avaliações finalizadas suficientes para exibir a evolução. Consulte ou finalize avaliações no workspace desta cliente."
             title="Evolução ainda indisponível"
+            action={<Link href={`/admin/clientes/${client.id}/avaliacoes`}>Abrir avaliações</Link>}
           />
         ) : (
           <div className={styles.seriesList}>
