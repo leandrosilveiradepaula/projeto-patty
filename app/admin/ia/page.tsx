@@ -53,7 +53,9 @@ export default async function AdminAiPage() {
         ) : (
           <ul className={styles.executionList}>
             {executions.map((execution) => {
-              const displayName = execution.clients?.profiles?.display_name?.trim();
+              const displayName =
+                execution.clients?.full_name?.trim() ||
+                execution.clients?.profiles?.display_name?.trim();
               const submissionId = execution.anamnesis_submission_id;
 
               return (

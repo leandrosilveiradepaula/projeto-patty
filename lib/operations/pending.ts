@@ -119,6 +119,7 @@ export type PendingTrainingLifecycle = {
 
 
 export type PendingAiExecution = {
+  anamnesisSubmissionId?: string | null;
   clientId: string | null;
   clientLabel: string;
   createdAt: string;
@@ -593,7 +594,11 @@ export function buildOperationalPendingItems(
       clientLabel: execution.clientLabel,
       createdAt: execution.createdAt,
       description: `A execução de IA para ${execution.purposeKey} permanece com status started e sem estado terminal registrado.`,
-      href: "/admin/ia",
+      href:
+        execution.purposeKey === "anamnesis_review" &&
+        execution.anamnesisSubmissionId
+          ? `/admin/anamneses/${execution.anamnesisSubmissionId}/ia`
+          : "/admin/ia",
       id: `ai:${execution.id}`,
       kind: "ai_execution_started",
       statusLabel: "Started",

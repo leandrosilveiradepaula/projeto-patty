@@ -368,6 +368,7 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
     })),
     trainingLifecycle,
     aiExecutions: aiExecutions.map((execution) => ({
+      anamnesisSubmissionId: execution.anamnesis_submission_id,
       clientId: execution.client_id,
       clientLabel: clientLabel(execution.clients?.full_name || execution.clients?.profiles?.display_name),
       createdAt: execution.created_at,

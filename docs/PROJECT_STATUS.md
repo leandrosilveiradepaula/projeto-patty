@@ -2960,3 +2960,15 @@ A fila administrativa passa a apontar para a acao exata nos principais estados c
 - Treino solicitado abre a secao de solicitacao e rascunho/revisado abre a prescricao.
 
 As ancoras sao apenas navegacao operacional sobre fatos persistidos. Nenhuma acao e executada automaticamente e nenhuma regra profissional nova foi criada.
+
+
+## Fechamento da integracao operacional UI-backend - 2026-10-07
+
+A passagem final desta etapa removeu dois ultimos pontos de incoerencia operacional:
+- execucoes de IA ainda em estado started para revisao de Anamnese agora preservam o submission_id na fila e abrem diretamente a revisao correspondente, mantendo /admin/ia como fallback para outros purposes;
+- a tela de Feedback Semanal deixou de descrever a agenda automatica como ainda em parametrizacao, pois geracao recorrente, elegibilidade, periodo anterior e lembrete de quarta-feira ja estao implementados;
+- a area de IA passa a preferir clients.full_name, usando profiles.display_name apenas como fallback historico.
+
+Com os PRs desta sequencia, a fila global, o workspace da cliente e os principais fluxos centrais possuem navegacao corretiva baseada em fatos persistidos. Esta etapa de integracao operacional UI-backend pode ser considerada encerrada.
+
+O encerramento desta etapa nao resolve dependencias externas ou decisoes ainda abertas: Gmail SMTP real, WhatsApp/provider/opt-in, primeiro upload educacional ao Blob, politica de retencao/hard-delete, regras profissionais abertas e gate de dados reais de saude para IA continuam fora deste fechamento.

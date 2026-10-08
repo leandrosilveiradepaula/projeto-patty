@@ -27,3 +27,11 @@ test("weekly feedback admin page exposes stable operational anchors", () => {
   assert.match(page, /id="solicitar-feedback"/);
   assert.match(page, /id="feedback-pendentes"/);
 });
+
+
+test("weekly feedback copy reflects the implemented recurring schedule", () => {
+  const page = read("app/admin/clientes/[clienteId]/feedback-semanal/page.tsx");
+
+  assert.match(page, /A agenda automática gera as solicitações elegíveis/);
+  assert.doesNotMatch(page, /termina de ser parametrizada/);
+});
