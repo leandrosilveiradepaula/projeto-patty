@@ -115,7 +115,7 @@ export default async function ClientFilesPage() {
                   </dl>
                   <div className={styles.fileActions}>
                     {isPreviewablePrivateFileMimeType(file.mime_type) ? (
-                      <Link
+                      <a
                         aria-label={`Visualizar ${file.original_filename?.trim() || "arquivo sem nome informado"}`}
                         className={styles.downloadLink}
                         href={`/cliente/arquivos/${file.id}?preview=1`}
@@ -123,7 +123,7 @@ export default async function ClientFilesPage() {
                         target="_blank"
                       >
                         Visualizar
-                      </Link>
+                      </a>
                     ) : null}
                   <Link
                     aria-label={`Baixar ${file.original_filename?.trim() || "arquivo sem nome informado"}`}
