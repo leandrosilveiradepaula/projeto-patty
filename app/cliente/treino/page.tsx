@@ -1,4 +1,5 @@
 import { Alert } from "@/components/ui/Alert";
+import { publishedTrainingVersions } from "@/lib/training/published-versions";
 import { Badge } from "@/components/ui/Badge";
 import { ClientTrainingRequestForm } from "@/components/client/ClientTrainingRequestForm";
 import { Card } from "@/components/ui/Card";
@@ -43,11 +44,15 @@ export default async function ClientTrainingPage() {
   const trainingVersions = trainingPlan
     ? await listAccessibleClientTrainingPlanVersions(trainingPlan.id)
     : [];
-  const latestPublished =
-    trainingVersions.find((version) => Boolean(version.published_at)) ?? null;
-  const trainingItems = latestPublished
-    ? await listAccessibleClientTrainingPlanItems(latestPublished.id)
-    : [];
+  const publishedVersions = publishedTrainingVersions(trainingVersions);
+  const latestPublished = publishedVersions[0] ?? null;
+  const publishedItems = await Promise.all(
+    publishedVersions.map(async (version) => ({
+      version,
+      items: await listAccessibleClientTrainingPlanItems(version.id),
+    })),
+  );
+  const trainingItems = publishedItems[0]?.items ?? [];
 
   return (
     <>
@@ -130,6 +135,43 @@ export default async function ClientTrainingPage() {
           />
         )}
       </Section>
+
+      {publishedItems.length > 1 ? (
+        <Section
+          description="Histórico das prescrições que a Patty publicou para você. Rascunhos e versões apenas revisadas não aparecem aqui."
+          title="Treinos anteriores"
+        >
+          <div className={styles.previousTrainings}>
+            {publishedItems.slice(1).map(({ version, items }) => (
+              <details className={styles.previousTraining} key={version.id}>
+                <summary>
+                  Versão {version.version_number} · {version.title} · publicada em{" "}
+                  {formatDateTime(version.published_at!)}
+                </summary>
+                <div className={styles.previousTrainingBody}>
+                  {version.notes ? <p className={styles.note}>{version.notes}</p> : null}
+                  <ol className={styles.workoutList}>
+                    {items.map((item) => (
+                      <li key={item.id}>
+                        <Card className={styles.workoutItem} variant="subtle">
+                          <strong>{item.position}. {item.exercise_name}</strong>
+                          <p className={styles.workoutDetail}>
+                            {item.sets_text} séries · {item.repetitions_text} repetições
+                            {item.rest_text ? ` · Descanso: ${item.rest_text}` : ""}
+                          </p>
+                          {item.execution_notes ? (
+                            <p className={styles.note}>Orientações: {item.execution_notes}</p>
+                          ) : null}
+                        </Card>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              </details>
+            ))}
+          </div>
+        </Section>
+      ) : null}
 
       <Section
         id="solicitar-treino"
