@@ -46,6 +46,10 @@ export async function requestTrainingAction(
 
     revalidatePath("/cliente");
     revalidatePath("/cliente/treino");
+    revalidatePath("/admin");
+    revalidatePath("/admin/pendencias");
+    revalidatePath(`/admin/clientes/${client.id}`);
+    revalidatePath(`/admin/clientes/${client.id}/treino`);
 
     return {
       message: "Sua solicitação de treino foi registrada e ficará visível para a Patty.",

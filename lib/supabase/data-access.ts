@@ -1,4 +1,5 @@
 import "server-only";
+import { collectTrainingHistoryRows } from "@/lib/training/history-batches";
 
 import type { Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
@@ -604,6 +605,27 @@ export async function listAccessibleClientTrainingPlanItems(
   }
 
   return data;
+}
+
+/**
+ * Load all published training items without a per-version N+1 request.
+ * The caller passes only versions visible to the authenticated client.
+ * RLS remains the final authority for every returned row.
+ */
+export async function listAccessibleClientTrainingPlanItemsForVersions(
+  versionIds: string[],
+) {
+  const supabase = await createClient();
+  return collectTrainingHistoryRows(versionIds, (ids, from, to) =>
+    supabase
+      .from("client_training_plan_items")
+      .select("id, training_plan_version_id, position, exercise_version_id, exercise_name, sets_text, repetitions_text, rest_text, execution_notes, created_at")
+      .in("training_plan_version_id", ids)
+      .order("training_plan_version_id", { ascending: true })
+      .order("position", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
 }
 
 export async function createAccessibleClientTrainingPlanDraft(input: {
