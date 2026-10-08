@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { verifyPrivateBlobAsset } from "@/lib/content/private-blob-integrity";
 import { requireRole } from "@/lib/supabase/auth";
 import {
   createAccessibleEducationalContentAsset,
@@ -240,6 +241,13 @@ export async function registerEducationalContentAssetAction(
   if (contentType.length > 255 || !contentType.includes("/")) {
     throw new Error("MIME type inválido");
   }
+
+  await verifyPrivateBlobAsset({
+    byteSize,
+    contentType,
+    sha256Hex,
+    storagePath,
+  });
 
   await createAccessibleEducationalContentAsset({
     byteSize,
