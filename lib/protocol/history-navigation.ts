@@ -20,18 +20,23 @@ export function requestedProtocolVersion(
 }
 
 /**
- * The newest editable draft and the newest published version are different
+ * The newest draft/version and the most recently published version are different
  * facts. Publication is a manual, version-specific event.
  */
 export function latestPublishedProtocolVersionId(
   versions: readonly ProtocolHistoryVersion[],
-  publications: readonly { protocol_version_id: string }[],
+  publications: readonly {
+    id: string;
+    protocol_version_id: string;
+    published_at: string;
+  }[],
 ): string | null {
-  const publishedIds = new Set(
-    publications.map((publication) => publication.protocol_version_id),
-  );
-
-  return [...versions]
-    .sort((a, b) => b.version_number - a.version_number)
-    .find((version) => publishedIds.has(version.id))?.id ?? null;
+  const validVersionIds = new Set(versions.map((version) => version.id));
+  return [...publications]
+    .filter((publication) => validVersionIds.has(publication.protocol_version_id))
+    .sort(
+      (a, b) =>
+        b.published_at.localeCompare(a.published_at) ||
+        a.id.localeCompare(b.id),
+    )[0]?.protocol_version_id ?? null;
 }
