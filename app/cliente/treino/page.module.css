@@ -131,3 +131,34 @@
   border-top: 1px solid var(--color-border);
   padding: var(--space-3);
 }
+
+.previousTrainings {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.previousTraining {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
+  background: var(--color-surface);
+}
+
+.previousTraining > summary {
+  min-height: 48px;
+  cursor: pointer;
+  padding: var(--space-4);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.previousTraining > summary:focus-visible {
+  outline: 3px solid var(--color-brand);
+  outline-offset: 3px;
+}
+
+.previousTrainingBody {
+  display: grid;
+  gap: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  padding: var(--space-4);
+}

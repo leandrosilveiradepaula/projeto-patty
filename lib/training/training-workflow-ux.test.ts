@@ -61,3 +61,15 @@ test("training workspace exposes stable anchors for request and prescription wor
   assert.match(page, /id="prescricao-treino"/);
   assert.match(page, /id="solicitacao-treino"/);
 });
+
+// Last publication is a chronological event, not necessarily the highest version.
+test("admin training screens use the same latest publication selector as the client", () => {
+  const admin = read("app/admin/clientes/[clienteId]/treino/page.tsx");
+  const overview = read("app/admin/clientes/[clienteId]/page.tsx");
+  const client = read("app/cliente/treino/page.tsx");
+  const home = read("app/cliente/page.tsx");
+  assert.match(admin, /latestPublishedTrainingVersion\(versions\)/);
+  assert.match(overview, /latestPublishedTrainingVersion\(trainingVersions\)/);
+  assert.match(home, /latestPublishedTrainingVersion\(trainingVersions\)/);
+  assert.match(client, /publishedTrainingVersions\(trainingVersions\)/);
+});

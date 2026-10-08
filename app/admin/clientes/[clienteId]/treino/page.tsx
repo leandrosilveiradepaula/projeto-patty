@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { latestPublishedTrainingVersion } from "@/lib/training/published-versions";
 
 import { AdminTrainingPlanDraftForm } from "@/components/admin/AdminTrainingPlanDraftForm";
 import { AdminTrainingPlanItemForm } from "@/components/admin/AdminTrainingPlanItemForm";
@@ -69,8 +70,7 @@ export default async function AdminClientTrainingPage({ params }: Props) {
     : [];
   const openVersion =
     versions.find((version) => !version.published_at) ?? null;
-  const latestPublished =
-    versions.find((version) => Boolean(version.published_at)) ?? null;
+  const latestPublished = latestPublishedTrainingVersion(versions);
   const workspaceStatus = openVersion?.reviewed_at
     ? { label: "Pronto para publicar", variant: "info" as const }
     : openVersion

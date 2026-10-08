@@ -16,7 +16,7 @@ test("client home surfaces published training without exposing drafts", () => {
   assert.match(source, /getAccessibleClientTrainingPlan/);
   assert.match(source, /listAccessibleClientTrainingPlanVersions/);
   assert.match(source, /latestPublishedTraining/);
-  assert.match(source, /Boolean\(version\.published_at\)/);
+  assert.match(source, /latestPublishedTrainingVersion\(trainingVersions\)/);
   assert.match(source, /Ver treino publicado/);
   assert.match(source, /Ver treino publicado/);
   assert.doesNotMatch(source, /title="Seu acompanhamento"/);
