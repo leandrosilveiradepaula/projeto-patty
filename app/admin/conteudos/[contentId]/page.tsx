@@ -1,9 +1,9 @@
 import {
   createNextEducationalContentVersionAction,
   publishEducationalContentVersionAction,
-  registerEducationalContentAssetAction,
   updateEducationalContentDraftAction,
 } from "@/app/admin/conteudos/[contentId]/actions";
+import { AdminEducationalContentAssetUploadForm } from "@/components/admin/AdminEducationalContentAssetUploadForm";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -197,72 +197,15 @@ export default async function AdminEducationalContentDetailPage({
               <Badge variant="warning">Sem asset</Badge>
             </div>
             <p className={styles.description}>
-              Para conteúdos que dependem de mídia, conclua a cópia privada,
-              verifique integridade e só então registre os metadados abaixo.
+              Selecione o arquivo aprovado. O navegador calcula SHA-256
+              localmente e envia o binário diretamente ao Blob privado; o
+              servidor continua validando o objeto antes de registrar metadata.
             </p>
             {current.published_at === null ? (
-              <form
-                action={registerEducationalContentAssetAction.bind(
-                  null,
-                  content.id,
-                  current.id,
-                )}
-                className={styles.form}
-              >
-                <label className={styles.field}>
-                  <span>Path privado verificado</span>
-                  <input
-                    autoComplete="off"
-                    name="storagePath"
-                    placeholder="educational-content/.../primary"
-                    required
-                  />
-                </label>
-                <label className={styles.field}>
-                  <span>MIME type</span>
-                  <input
-                    autoComplete="off"
-                    name="contentType"
-                    placeholder="video/mp4"
-                    required
-                  />
-                </label>
-                <label className={styles.field}>
-                  <span>Tamanho em bytes</span>
-                  <input
-                    min="1"
-                    name="byteSize"
-                    required
-                    type="number"
-                  />
-                </label>
-                <label className={styles.field}>
-                  <span>SHA-256 verificado</span>
-                  <input
-                    autoComplete="off"
-                    maxLength={64}
-                    minLength={64}
-                    name="sha256Hex"
-                    pattern="[0-9a-fA-F]{64}"
-                    required
-                  />
-                </label>
-                <label className={styles.confirmation}>
-                  <input
-                    name="confirmVerified"
-                    required
-                    type="checkbox"
-                    value="yes"
-                  />
-                  <span>
-                    Confirmo que o objeto privado já existe e que tamanho,
-                    MIME e SHA-256 foram verificados contra o arquivo migrado.
-                    O sistema também confere existência, path, tamanho e MIME
-                    diretamente no Blob antes de registrar os metadados.
-                  </span>
-                </label>
-                <Button type="submit">Registrar asset verificado</Button>
-              </form>
+              <AdminEducationalContentAssetUploadForm
+                contentId={content.id}
+                versionId={current.id}
+              />
             ) : (
               <p className={styles.description}>
                 Esta versão já foi publicada; assets não são registrados
