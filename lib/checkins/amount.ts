@@ -7,5 +7,8 @@ export function parsePositiveCheckinMl(value: unknown): number | null {
   const trimmed = value.trim();
   if (!/^\d+$/.test(trimmed)) return null;
   const amount = Number(trimmed);
-  return Number.isSafeInteger(amount) && amount > 0 ? amount : null;
+  // PostgreSQL stores amount_ml and corrected_amount_ml as signed int4.
+  // This is a persistence boundary, not a hydration recommendation.
+  const POSTGRES_INT4_MAX = 2_147_483_647;
+  return Number.isSafeInteger(amount) && amount > 0 && amount <= POSTGRES_INT4_MAX ? amount : null;
 }
