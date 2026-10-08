@@ -142,7 +142,7 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
         }
         description={
           eligible
-            ? "A cliente já recebeu protocolo publicado. A solicitação manual usa a versão publicada atual enquanto a agenda automática termina de ser parametrizada."
+            ? "A cliente já recebeu protocolo publicado. A agenda automática gera as solicitações elegíveis; a solicitação manual permanece disponível para necessidade operacional específica."
             : "O Feedback Semanal começa somente depois da primeira publicação de protocolo para esta cliente."
         }
         id="solicitar-feedback"
