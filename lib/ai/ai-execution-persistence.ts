@@ -82,3 +82,21 @@ export async function failInternalAiExecution(input: InternalAiFailureInput) {
     throw error;
   }
 }
+
+
+export async function recoverInternalStartedAiExecution(input: {
+  executionId: string;
+  reason: string;
+  recoveredByProfileId: string;
+}) {
+  const supabase = createAdminClient();
+  const { error } = await supabase.rpc("recover_started_ai_execution", {
+    p_execution_id: input.executionId,
+    p_reason: input.reason,
+    p_recovered_by_profile_id: input.recoveredByProfileId,
+  });
+
+  if (error) {
+    throw error;
+  }
+}
