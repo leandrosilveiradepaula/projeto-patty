@@ -83,7 +83,7 @@ if (role.error) throw role.error;
 const profile = await admin.from("profiles").delete().eq("id", profileId);
 if (profile.error) throw profile.error;
 
-const authUser = await admin.auth.admin.deleteUser(profileId);
-if (authUser.error) throw authUser.error;
+const deletedAuthUser = await admin.auth.admin.deleteUser(profileId);
+if (deletedAuthUser.error) throw deletedAuthUser.error;
 
 console.log("Ephemeral canonical E2E client cleanup complete.");
