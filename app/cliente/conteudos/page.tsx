@@ -9,6 +9,7 @@ import {
   listEducationalContentAssetsForCurrentClientVersions,
 } from "@/lib/supabase/data-access";
 import styles from "./page.module.css";
+import Link from "next/link";
 
 export default async function ClienteConteudosPage() {
   const client = await getCurrentClient();
@@ -54,8 +55,9 @@ export default async function ClienteConteudosPage() {
           />
         ) : releases?.length === 0 ? (
           <EmptyState
-            description="Novas liberações aparecerão nesta biblioteca."
+            description="Ainda não há conteúdos liberados pela Patty para sua conta. As liberações dependem de uma decisão profissional e aparecerão aqui."
             title="Nenhum conteúdo foi liberado para você ainda"
+            action={<Link href="/cliente">Voltar ao início</Link>}
           />
         ) : (
           <ul className={styles.contentList}>
