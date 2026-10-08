@@ -3125,3 +3125,8 @@ No workspace administrativo, os estados sem conteúdos elegíveis ou liberados l
 ## Clareza administrativa de arquivos privados e evolução — 2026-10-08
 
 A visão de Evolução oferece acesso direto às Avaliações quando não existem medidas finalizadas disponíveis para a série. A tela de Arquivos distingue upload administrativo oculto, decisão explícita de liberação e histórico visível, sem alterar permissões, publicação ou estado do arquivo. As mudanças são de comunicação e navegação, acompanhadas de teste de regressão; sem schema, RLS, Auth, migrations ou regras profissionais.
+
+
+## Filtros de clientes e fila operacional — 2026-10-08
+
+O estado vazio da lista administrativa agora diferencia filtro por ação da Patty, busca por nome e combinação dos dois, evitando exibir uma busca vazia quando o filtro não retorna clientes. A fila operacional explicita os grupos Ação da Patty, Aguardando cliente e Operacional do sistema e ressalta que registros pendentes não estabelecem prioridade clínica. Apenas textos e testes de regressão; sem alteração de classificação, RLS, Auth, schema ou migrations.
