@@ -61,6 +61,7 @@ export default async function AnamnesisReviewPage({
       </p>
       <Section
         description="A nova nota será registrada em seu perfil e preservada como histórico interno."
+        id="nova-revisao"
         title="Adicionar nota interna"
       >
         <Card>

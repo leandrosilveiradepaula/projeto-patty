@@ -251,7 +251,7 @@ export function buildOperationalPendingItems(
         createdAt: submission.submittedAt,
         description:
           "A Anamnese foi enviada e ainda não possui nota interna de revisão registrada.",
-        href: `/admin/anamneses/${submission.id}`,
+        href: `/admin/anamneses/${submission.id}/revisao#nova-revisao`,
         id: `anamnesis-review:${submission.id}`,
         kind: "anamnesis_submitted_without_review",
         statusLabel: "Sem revisão registrada",
@@ -283,7 +283,7 @@ export function buildOperationalPendingItems(
         description: firstReminderDue
           ? `O pedido continua sem resposta. O primeiro marco de ${input.clarificationReminderIntervalHours} horas ocorreu em ${firstReminderDueAt}. Isso indica apenas que um lembrete está devido; não prova que qualquer mensagem foi enviada, pois o canal ainda não foi definido.`
           : `Existe um pedido de esclarecimento sem resposta registrada pela cliente. O primeiro marco de lembrete é ${firstReminderDueAt}.`,
-        href: `/admin/anamneses/${request.submissionId}/esclarecimentos`,
+        href: `/admin/anamneses/${request.submissionId}/esclarecimentos#esclarecimento-${request.id}`,
         id: `clarification:${request.id}`,
         kind: "clarification_without_response",
         statusLabel: firstReminderDue
@@ -300,7 +300,7 @@ export function buildOperationalPendingItems(
       createdAt: request.createdAt,
       description:
         "A cliente respondeu ao pedido de esclarecimento, mas a Patty ainda nao registrou a resolucao manual.",
-      href: `/admin/anamneses/${request.submissionId}/esclarecimentos`,
+      href: `/admin/anamneses/${request.submissionId}/esclarecimentos#esclarecimento-${request.id}`,
       id: `clarification-review:${request.id}`,
       kind: "clarification_response_pending_review",
       statusLabel: "Resposta recebida",
@@ -319,7 +319,7 @@ export function buildOperationalPendingItems(
       createdAt: assessment.createdAt,
       description:
         "A avaliação está em rascunho e permanece editável. Revise medidas e fotos e finalize explicitamente quando a coleta estiver pronta.",
-      href: `/admin/avaliacoes/${assessment.id}`,
+      href: `/admin/avaliacoes/${assessment.id}#coleta`,
       id: `assessment:${assessment.id}`,
       kind: "assessment_draft",
       statusLabel: "Rascunho",
@@ -338,7 +338,7 @@ export function buildOperationalPendingItems(
         clientLabel: version.clientLabel,
         createdAt: version.submittedForReviewAt,
         description: `A versão ${version.versionNumber} foi submetida para revisão e ainda não possui aprovação registrada.`,
-        href: `/admin/protocolos/${version.protocolId}`,
+        href: `/admin/protocolos/${version.protocolId}#versao-${version.versionNumber}`,
         id: `protocol-approval:${version.id}`,
         kind: "protocol_submitted_not_approved",
         statusLabel: "Sem aprovação",
@@ -353,7 +353,7 @@ export function buildOperationalPendingItems(
         clientLabel: version.clientLabel,
         createdAt: version.submittedForReviewAt,
         description: `A versão ${version.versionNumber} possui aprovação registrada, mas ainda não possui publicação.`,
-        href: `/admin/protocolos/${version.protocolId}`,
+        href: `/admin/protocolos/${version.protocolId}#versao-${version.versionNumber}`,
         id: `protocol-publication:${version.id}`,
         kind: "protocol_approved_not_published",
         statusLabel: "Aprovado, não publicado",
@@ -370,7 +370,7 @@ export function buildOperationalPendingItems(
         createdAt: training.createdAt,
         description:
           "Existe solicitação de treino registrada, mas nenhum plano de treino foi criado para esta cliente.",
-        href: `/admin/clientes/${training.clientId}/treino`,
+        href: `/admin/clientes/${training.clientId}/treino#solicitacao-treino`,
         id: `training-request:${training.id}`,
         kind: "training_requested_without_plan",
         statusLabel: "Solicitado, sem plano",
@@ -385,7 +385,7 @@ export function buildOperationalPendingItems(
         clientLabel: training.clientLabel,
         createdAt: training.createdAt,
         description: `A versão ${training.versionNumber ?? ""} do treino permanece em rascunho e ainda não foi revisada.`,
-        href: `/admin/clientes/${training.clientId}/treino`,
+        href: `/admin/clientes/${training.clientId}/treino#prescricao-treino`,
         id: `training-draft:${training.id}`,
         kind: "training_draft",
         statusLabel: "Rascunho",
@@ -399,7 +399,7 @@ export function buildOperationalPendingItems(
       clientLabel: training.clientLabel,
       createdAt: training.createdAt,
       description: `A versão ${training.versionNumber ?? ""} do treino foi revisada, mas ainda não foi publicada para a cliente.`,
-      href: `/admin/clientes/${training.clientId}/treino`,
+      href: `/admin/clientes/${training.clientId}/treino#prescricao-treino`,
       id: `training-publish:${training.id}`,
       kind: "training_reviewed_not_published",
       statusLabel: "Revisado, não publicado",

@@ -27,3 +27,18 @@ test("only submitted anamnesis exposes original answers as completed history", (
   assert.ok(historyStart > pendingStart);
   assert.ok(originalAnswers > historyStart);
 });
+
+
+test("anamnesis review and clarification surfaces expose stable corrective anchors", () => {
+  const review = fs.readFileSync(
+    path.join(root, "app/admin/anamneses/[anamneseId]/revisao/page.tsx"),
+    "utf8",
+  );
+  const clarifications = fs.readFileSync(
+    path.join(root, "app/admin/anamneses/[anamneseId]/esclarecimentos/page.tsx"),
+    "utf8",
+  );
+
+  assert.match(review, /id="nova-revisao"/);
+  assert.match(clarifications, /id=\{\`esclarecimento-\$\{request\.id\}\`\}/);
+});

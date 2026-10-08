@@ -116,6 +116,7 @@ export default async function AdminClientTrainingPage({ params }: Props) {
 
       <Section
         description="A prescrição só é liberada depois de solicitação da cliente. Salvar não publica; revisão e publicação são etapas separadas."
+        id="prescricao-treino"
         title="Prescrição de treino"
       >
         {requests.length === 0 ? (
@@ -272,6 +273,7 @@ export default async function AdminClientTrainingPage({ params }: Props) {
           </Badge>
         }
         description="Solicitação do serviço e prescrição são etapas diferentes. Registrar uma solicitação não monta nem publica treino automaticamente."
+        id="solicitacao-treino"
         title="Solicitação do serviço"
       >
         <div className={styles.grid}>

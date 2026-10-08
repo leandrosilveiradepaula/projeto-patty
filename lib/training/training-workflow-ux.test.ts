@@ -53,3 +53,11 @@ test("client training page foregrounds published prescription and avoids repeate
   assert.match(form, /loading={isPending}/);
   assert.match(form, /Solicitação enviada/);
 });
+
+
+test("training workspace exposes stable anchors for request and prescription work", () => {
+  const page = read("app/admin/clientes/[clienteId]/treino/page.tsx");
+
+  assert.match(page, /id="prescricao-treino"/);
+  assert.match(page, /id="solicitacao-treino"/);
+});

@@ -24,3 +24,8 @@ test("protocol history keeps lifecycle and audit controls available", () => {
   assert.match(page, /ProtocolCloneVersionAction/);
   assert.match(page, /ProtocolLifecycleAction/);
 });
+
+
+test("protocol versions keep stable anchors for lifecycle actions", () => {
+  assert.match(page, /id=\{\`versao-\$\{version\.version_number\}\`\}/);
+});
