@@ -2972,3 +2972,15 @@ A passagem final desta etapa removeu dois ultimos pontos de incoerencia operacio
 Com os PRs desta sequencia, a fila global, o workspace da cliente e os principais fluxos centrais possuem navegacao corretiva baseada em fatos persistidos. Esta etapa de integracao operacional UI-backend pode ser considerada encerrada.
 
 O encerramento desta etapa nao resolve dependencias externas ou decisoes ainda abertas: Gmail SMTP real, WhatsApp/provider/opt-in, primeiro upload educacional ao Blob, politica de retencao/hard-delete, regras profissionais abertas e gate de dados reais de saude para IA continuam fora deste fechamento.
+
+
+## Entrega privada de midia educacional via Blob - 2026-10-07
+
+A fundacao de entrega do primeiro lote educacional foi endurecida antes do upload real:
+- cliente autenticada recebe somente uma URL assinada de leitura depois que RLS confirma acesso ao asset liberado;
+- Patty/admin com AAL2 possui rota separada para abrir e verificar o asset registrado antes de qualquer liberacao;
+- a assinatura e limitada ao pathname exato, operacao GET e validade de 5 minutos;
+- a resposta de autorizacao usa redirect 307, no-store e no-referrer, evitando fazer proxy do binario grande pela Function;
+- a tela administrativa do conteudo oferece abertura do asset privado registrado sem expor URL permanente do Blob.
+
+Este bloco nao executa upload, nao registra asset e nao publica/libera conteudo. O primeiro video de 123.262.796 bytes continua fail-closed ate download/re-hash imediatamente anterior ao upload, upload privado, verificacao pos-upload e validacao end-to-end da entrega >100 MB em producao.
