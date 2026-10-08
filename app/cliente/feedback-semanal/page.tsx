@@ -18,6 +18,7 @@ import {
   listAccessibleWeeklyFeedbacksForClient,
 } from "@/lib/supabase/data-access";
 import styles from "./page.module.css";
+import Link from "next/link";
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("pt-BR", {
@@ -105,8 +106,9 @@ export default async function ClientWeeklyFeedbackPage({
       {feedbacks.length === 0 ? (
         <Section title="Seus feedbacks">
           <EmptyState
-            description="Quando a Patty solicitar um feedback, ele aparecerá aqui."
+            description="Ainda não existe um Feedback Semanal disponível para responder. Quando a solicitação estiver registrada, ela aparecerá aqui."
             title="Nenhum feedback solicitado"
+            action={<Link href="/cliente">Voltar ao início</Link>}
           />
         </Section>
       ) : (
