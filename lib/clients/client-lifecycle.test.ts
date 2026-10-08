@@ -37,11 +37,18 @@ test("admin can repair a legacy missing client name without changing Auth", () =
   assert.match(action, /updateAdminClientDisplayNameAction/);
   assert.match(action, /validateClientDisplayName/);
   assert.match(action, /updateClientProfileDisplayNamePrivileged/);
+  assert.match(action, /if \(client\.profile_id\)/);
   assert.doesNotMatch(action, /createAdminClient/);
   assert.match(helper, /^import "server-only";/m);
   assert.match(helper, /createAdminClient/);
   assert.match(helper, /from\("profiles"\)/);
   assert.match(helper, /display_name: input\.displayName/);
+  assert.match(helper, /\.select\("id"\)\s*\.single\(\)/);
+  assert.match(helper, /from\("clients"\)/);
+  assert.match(helper, /full_name: input\.displayName/);
+  assert.match(helper, /\.is\("profile_id", null\)/);
+  assert.match(action, /updateStandaloneClientFullNamePrivileged/);
+  assert.match(action, /revalidatePath\("\/cliente", "layout"\)/);
   assert.match(form, /label="Nome da cliente"/);
   assert.match(form, /required/);
 });

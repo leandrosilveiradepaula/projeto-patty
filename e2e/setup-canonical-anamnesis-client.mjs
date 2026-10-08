@@ -16,6 +16,7 @@ const admin = createClient(url, secret, {
 
 const suffix = randomBytes(8).toString("hex");
 const email = `e2e-canonical-${suffix}@example.invalid`;
+const displayName = `E2E Canonical Client ${suffix}`;
 const password = `E2E-Canonical-${randomBytes(18).toString("base64url")}-Aa1!`;
 
 // Prevent ephemeral credentials from being echoed by later GitHub Actions steps.
@@ -36,7 +37,7 @@ let clientId = null;
 try {
   const profile = await admin.from("profiles").insert({
     id: profileId,
-    display_name: `E2E Canonical Client ${suffix}`,
+    display_name: displayName,
     status: "active",
   });
   if (profile.error) throw profile.error;
@@ -50,6 +51,7 @@ try {
   const client = await admin
     .from("clients")
     .insert({
+      full_name: displayName,
       profile_id: profileId,
       status: "active",
       started_at: new Date().toISOString(),

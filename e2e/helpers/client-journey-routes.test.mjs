@@ -39,6 +39,9 @@ test("production browser smoke uses only the ephemeral canonical client and pres
   assert.match(script, /example\\.invalid/);
   assert.match(script, /clientAreasFromMore/);
   assert.match(script, /clientDirectJourneyAreas/);
+  assert.match(script, /Salvar Cadastro Atual/);
+  assert.match(script, /page\.reload\(\)/);
+  assert.match(script, /Cidade Sintetica E2E/);
   assert.doesNotMatch(script, /\.from\("protocol_publications"\)\.insert|auth\.admin\.updateUserById/);
 
   assert.match(workflow, /npx playwright test e2e\/client-operational-navigation\.spec\.mjs/);
@@ -47,4 +50,14 @@ test("production browser smoke uses only the ephemeral canonical client and pres
     workflow.indexOf("Run production client operational navigation smoke") <
       workflow.indexOf("Cleanup ephemeral canonical E2E client"),
   );
+});
+
+test("registration E2E cleanup verifies synthetic ownership and removes the restrictive FK row first", () => {
+  const setup = read("e2e/setup-canonical-anamnesis-client.mjs");
+  const cleanup = read("e2e/cleanup-canonical-anamnesis-client.mjs");
+  assert.match(setup, /full_name: displayName/);
+  assert.match(cleanup, /e2e-canonical-\[0-9a-f\]/);
+  assert.match(cleanup, /getUserById\(profileId\)/);
+  assert.match(cleanup, /linkedClient\.data\?\.profile_id !== profileId/);
+  assert.ok(cleanup.indexOf('from("client_registration")') < cleanup.indexOf('from("clients").delete()'));
 });
