@@ -64,7 +64,7 @@ export default async function AdminPendenciasPage() {
     <>
       <PageHeader
         actions={<Badge variant="neutral">{items.length} pendência(s)</Badge>}
-        description="Acompanhe registros que ainda precisam de uma próxima ação no fluxo."
+        description="Acompanhe ações da Patty, registros aguardando a cliente e pendências técnicas separadamente. Estar na fila não significa prioridade clínica."
         eyebrow="Admin"
         title="Pendências operacionais"
       />
@@ -75,7 +75,7 @@ export default async function AdminPendenciasPage() {
       >
         {items.length === 0 ? (
           <EmptyState
-            description="Não há registros aguardando acompanhamento neste momento."
+            description="Nenhuma ação da Patty, espera de cliente ou pendência operacional consta nesta fila no momento."
             title="Tudo em dia"
           />
         ) : (
