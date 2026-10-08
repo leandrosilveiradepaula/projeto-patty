@@ -1,6 +1,5 @@
 "use server";
 
-import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -22,6 +21,7 @@ import {
 } from "@/lib/supabase/data-access";
 import { updateClientProfileDisplayNamePrivileged, updateStandaloneClientFullNamePrivileged } from "@/lib/clients/client-profile-admin";
 import { validateClientDisplayName } from "@/lib/onboarding/validation";
+import { ClientAccessLinkOriginError, resolveTrustedClientAccessOrigin } from "@/lib/onboarding/trusted-client-access-origin";
 import { isUuid } from "@/lib/validation/uuid";
 
 export async function endClientAssignmentAction(
@@ -276,16 +276,13 @@ export async function generateManualRecoveryLinkAction(
     };
   }
 
-  const requestHeaders = await headers();
-  const host =
-    requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
-  const protocol =
-    requestHeaders.get("x-forwarded-proto") ??
-    (host?.startsWith("localhost") ? "http" : "https");
-
-  if (!host) {
+  let origin: string;
+  try {
+    origin = resolveTrustedClientAccessOrigin();
+  } catch (error) {
+    if (!(error instanceof ClientAccessLinkOriginError)) throw error;
     return {
-      message: "Não foi possível determinar o endereço do aplicativo.",
+      message: "O endereço seguro do aplicativo não está configurado. Nenhum link foi gerado.",
       recoveryLink: null,
       success: false,
     };
@@ -295,10 +292,7 @@ export async function generateManualRecoveryLinkAction(
     const result = await generateClientRecoveryToken({
       profileId: client.profile_id,
     });
-    const recoveryUrl = new URL(
-      "/auth/recovery-token",
-      `${protocol}://${host}`,
-    );
+    const recoveryUrl = new URL("/auth/recovery-token", origin);
     recoveryUrl.searchParams.set("token_hash", result.tokenHash);
     recoveryUrl.searchParams.set("type", "recovery");
 

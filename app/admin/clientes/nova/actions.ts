@@ -1,6 +1,5 @@
 "use server";
 
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import {
@@ -14,6 +13,7 @@ import {
   validateInvitationEmail,
 } from "@/lib/onboarding/validation";
 import { requireRole } from "@/lib/supabase/auth";
+import { ClientAccessLinkOriginError, resolveTrustedClientAccessOrigin } from "@/lib/onboarding/trusted-client-access-origin";
 
 export type InviteClientState = {
   message: string | null;
@@ -120,18 +120,17 @@ export async function generateManualClientInvite(
     };
   }
 
-  const requestHeaders = await headers();
-  const host =
-    requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
-  const protocol =
-    requestHeaders.get("x-forwarded-proto") ??
-    (host?.startsWith("localhost") ? "http" : "https");
-
-  if (!host) {
+  // Resolve a trusted origin before creating any one-time Auth token/user.
+  // Never embed a token in a URL derived from the request Host headers.
+  let origin: string;
+  try {
+    origin = resolveTrustedClientAccessOrigin();
+  } catch (error) {
+    if (!(error instanceof ClientAccessLinkOriginError)) throw error;
     return {
       activationLink: null,
       clientId: null,
-      message: "Não foi possível determinar o endereço do aplicativo.",
+      message: "O endereço seguro do aplicativo não está configurado. Nenhum convite ou conta foi criado.",
       success: false,
     };
   }
@@ -141,7 +140,7 @@ export async function generateManualClientInvite(
       displayName,
       email: normalizeInvitationEmail(email),
     });
-    const activationUrl = new URL("/auth/confirm", `${protocol}://${host}`);
+    const activationUrl = new URL("/auth/confirm", origin);
     activationUrl.searchParams.set("token_hash", result.tokenHash);
     activationUrl.searchParams.set("type", "invite");
 
