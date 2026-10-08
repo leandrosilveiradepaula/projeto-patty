@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import { getOperationalPendingItemsForCurrentAdmin } from "@/lib/operations/pending-data";
 import { groupOperationalPendingItems } from "@/lib/operations/pending";
+import { pendingQueueLinks } from "@/lib/operations/pending-navigation";
 import {
   getCurrentUserProfile,
   listAccessibleClientAssessments,
@@ -115,7 +116,7 @@ export default async function AdminPage() {
           <AdminMetricCard
             compact
             action={
-              <Link className={styles.metricLink} href="/admin/pendencias">
+              <Link className={styles.metricLink} href={pendingQueueLinks.patty}>
                 Abrir fila da Patty
               </Link>
             }
@@ -129,7 +130,7 @@ export default async function AdminPage() {
           <AdminMetricCard
             compact
             action={
-              <Link className={styles.metricLink} href="/admin/pendencias">
+              <Link className={styles.metricLink} href={pendingQueueLinks.client}>
                 Ver aguardando cliente
               </Link>
             }
@@ -140,7 +141,7 @@ export default async function AdminPage() {
           <AdminMetricCard
             compact
             action={
-              <Link className={styles.metricLink} href="/admin/pendencias">
+              <Link className={styles.metricLink} href={pendingQueueLinks.operational}>
                 Ver operacional
               </Link>
             }
