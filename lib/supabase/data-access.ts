@@ -1,5 +1,6 @@
 import "server-only";
 import { collectTrainingHistoryRows } from "@/lib/training/history-batches";
+import { collectAnamnesisHistoryRows } from "@/lib/anamnesis/history-pagination";
 import { collectPublishedProtocolRows } from "@/lib/protocol/published-read-pagination";
 
 import type { Json } from "@/lib/supabase/database.types";
@@ -873,19 +874,15 @@ export async function getLatestAccessibleAiPromptVersion(promptKey: string) {
 
 export async function listAccessibleAnamnesisSubmissions(clientId: string) {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("anamnesis_submissions")
-    .select(
-      "id, client_id, form_version_id, created_at, submitted_at, anamnesis_form_versions(version_number)",
-    )
-    .eq("client_id", clientId)
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  return collectAnamnesisHistoryRows([clientId], (ids, from, to) =>
+    supabase
+      .from("anamnesis_submissions")
+      .select("id, client_id, form_version_id, created_at, submitted_at, anamnesis_form_versions(version_number)")
+      .in("client_id", ids)
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false })
+      .range(from, to),
+  );
 }
 
 export async function getAccessibleAnamnesisSubmission(submissionId: string) {
@@ -907,54 +904,41 @@ export async function getAccessibleAnamnesisSubmission(submissionId: string) {
 
 export async function listAccessibleAnamnesisSections(formVersionId: string) {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("anamnesis_sections")
-    .select("id, form_version_id, section_key, title, display_order")
-    .eq("form_version_id", formVersionId)
-    .order("display_order", { ascending: true })
-    .order("id", { ascending: true });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  return collectAnamnesisHistoryRows([formVersionId], (ids, from, to) =>
+    supabase
+      .from("anamnesis_sections")
+      .select("id, form_version_id, section_key, title, display_order")
+      .in("form_version_id", ids)
+      .order("display_order", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
 }
 
 export async function listAccessibleAnamnesisQuestions(formVersionId: string) {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("anamnesis_questions")
-    .select(
-      "id, form_version_id, section_id, question_key, label, display_order, answer_type, required, options, applicability_source_question_id, applicability_expected_answer",
-    )
-    .eq("form_version_id", formVersionId)
-    .order("display_order", { ascending: true })
-    .order("id", { ascending: true });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  return collectAnamnesisHistoryRows([formVersionId], (ids, from, to) =>
+    supabase
+      .from("anamnesis_questions")
+      .select("id, form_version_id, section_id, question_key, label, display_order, answer_type, required, options, applicability_source_question_id, applicability_expected_answer")
+      .in("form_version_id", ids)
+      .order("display_order", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
 }
 
 export async function listAccessibleAnamnesisAnswers(submissionId: string) {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("anamnesis_answers")
-    .select(
-      "id, submission_id, form_version_id, question_id, answer_value, created_at, updated_at",
-    )
-    .eq("submission_id", submissionId)
-    .order("created_at", { ascending: true })
-    .order("id", { ascending: true });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  return collectAnamnesisHistoryRows([submissionId], (ids, from, to) =>
+    supabase
+      .from("anamnesis_answers")
+      .select("id, submission_id, form_version_id, question_id, answer_value, created_at, updated_at")
+      .in("submission_id", ids)
+      .order("created_at", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
 }
 
 export async function getAccessibleAnamnesisAnswer(answerId: string) {
@@ -974,28 +958,20 @@ export async function getAccessibleAnamnesisAnswer(answerId: string) {
   return data;
 }
 
-export async function listAccessibleAnamnesisAnswerCorrections(
-  answerIds: string[],
-) {
-  if (answerIds.length === 0) {
-    return [];
-  }
-
+export async function listAccessibleAnamnesisAnswerCorrections(answerIds: string[]) {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("anamnesis_answer_corrections")
-    .select(
-      "id, answer_id, corrected_answer_value, corrected_by_profile_id, created_at, profiles(display_name)",
-    )
-    .in("answer_id", answerIds)
-    .order("created_at", { ascending: true })
-    .order("id", { ascending: true });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  const corrections = await collectAnamnesisHistoryRows(answerIds, (ids, from, to) =>
+    supabase
+      .from("anamnesis_answer_corrections")
+      .select("id, answer_id, corrected_answer_value, corrected_by_profile_id, created_at, profiles(display_name)")
+      .in("answer_id", ids)
+      .order("created_at", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
+  return corrections.sort((a, b) =>
+    a.created_at.localeCompare(b.created_at) || a.id.localeCompare(b.id),
+  );
 }
 
 export async function createAccessibleAnamnesisAnswerCorrection(input: {
@@ -1019,32 +995,34 @@ export async function createAccessibleAnamnesisAnswerCorrection(input: {
 
 export async function listAccessibleAnamnesisClarificationRequests(submissionId: string) {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("anamnesis_clarification_requests")
-    .select("id, submission_id, source_answer_id, requested_by_profile_id, request_text, created_at")
-    .eq("submission_id", submissionId)
-    .order("created_at", { ascending: true })
-    .order("id", { ascending: true });
-  if (error) throw error;
-  return data;
+  return collectAnamnesisHistoryRows([submissionId], (ids, from, to) =>
+    supabase
+      .from("anamnesis_clarification_requests")
+      .select("id, submission_id, source_answer_id, requested_by_profile_id, request_text, created_at")
+      .in("submission_id", ids)
+      .order("created_at", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
 }
 
-export async function listAccessibleAnamnesisClarificationRequestsForSubmissions(
-  submissionIds: string[],
-) {
-  if (submissionIds.length === 0) return [];
-
+export async function listAccessibleAnamnesisClarificationRequestsForSubmissions(submissionIds: string[]) {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("anamnesis_clarification_requests")
-    .select("id, submission_id, source_answer_id, requested_by_profile_id, request_text, created_at")
-    .in("submission_id", submissionIds)
-    .order("submission_id", { ascending: true })
-    .order("created_at", { ascending: true })
-    .order("id", { ascending: true });
-
-  if (error) throw error;
-  return data;
+  const requests = await collectAnamnesisHistoryRows(submissionIds, (ids, from, to) =>
+    supabase
+      .from("anamnesis_clarification_requests")
+      .select("id, submission_id, source_answer_id, requested_by_profile_id, request_text, created_at")
+      .in("submission_id", ids)
+      .order("submission_id", { ascending: true })
+      .order("created_at", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
+  return requests.sort((a, b) =>
+    a.submission_id.localeCompare(b.submission_id) ||
+    a.created_at.localeCompare(b.created_at) ||
+    a.id.localeCompare(b.id),
+  );
 }
 
 export async function getAccessibleAnamnesisClarificationRequest(requestId: string) {
@@ -1059,36 +1037,35 @@ export async function getAccessibleAnamnesisClarificationRequest(requestId: stri
 }
 
 export async function listAccessibleAnamnesisClarificationResponses(requestIds: string[]) {
-  if (requestIds.length === 0) return [];
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("anamnesis_clarification_responses")
-    .select("id, clarification_request_id, responder_profile_id, response_text, created_at")
-    .in("clarification_request_id", requestIds)
-    .order("created_at", { ascending: true })
-    .order("id", { ascending: true });
-  if (error) throw error;
-  return data;
+  const responses = await collectAnamnesisHistoryRows(requestIds, (ids, from, to) =>
+    supabase
+      .from("anamnesis_clarification_responses")
+      .select("id, clarification_request_id, responder_profile_id, response_text, created_at")
+      .in("clarification_request_id", ids)
+      .order("created_at", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
+  return responses.sort((a, b) =>
+    a.created_at.localeCompare(b.created_at) || a.id.localeCompare(b.id),
+  );
 }
 
-export async function listAccessibleAnamnesisClarificationResolutions(
-  requestIds: string[],
-) {
-  if (requestIds.length === 0) return [];
-
+export async function listAccessibleAnamnesisClarificationResolutions(requestIds: string[]) {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("anamnesis_clarification_resolutions")
-    .select("id, clarification_request_id, resolved_by_profile_id, resolved_at")
-    .in("clarification_request_id", requestIds)
-    .order("resolved_at", { ascending: true })
-    .order("id", { ascending: true });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  const resolutions = await collectAnamnesisHistoryRows(requestIds, (ids, from, to) =>
+    supabase
+      .from("anamnesis_clarification_resolutions")
+      .select("id, clarification_request_id, resolved_by_profile_id, resolved_at")
+      .in("clarification_request_id", ids)
+      .order("resolved_at", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
+  return resolutions.sort((a, b) =>
+    a.resolved_at.localeCompare(b.resolved_at) || a.id.localeCompare(b.id),
+  );
 }
 
 export async function createAccessibleAnamnesisClarificationResolution(input: {
