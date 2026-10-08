@@ -3165,3 +3165,10 @@ Uma auditoria identificou que as leituras de Check-ins da cliente e da Patty mon
 ## Consulta histórica de líquidos nos Check-ins — 2026-10-08
 
 As telas de Check-ins da cliente e da Patty permitem consultar registros de líquidos por dia civil de São Paulo, inclusive datas anteriores sem limite de negócio. A seleção é validada e a consulta ao backend usa intervalo limitado ao dia. Correções preservam o dia consultado na navegação após sucesso, mantendo o histórico append-only e os valores originais. O resumo de líquidos de hoje não é apresentado com zero enganoso ao consultar outra data. Sem alterações em schema, RLS, Auth, migrations, regra de hidratação ou score de adesão. Testes determinísticos de data e limite de consulta incluídos em `test:clients`.
+
+
+## Histórico de atividade física e validação de líquidos — 2026-10-08
+
+A auditoria pós-#547 identificou que a consulta histórica por data estava disponível apenas para líquidos, embora a regra confirmada permita corrigir também check-ins antigos de atividade sem limite temporal profissional. No portal da cliente, selecionar um dia antigo agora exibe suas respostas históricas de atividade e permite corrigir cada evento por ação append-only; a resposta de atividade de hoje continua em seção independente. Na área administrativa, o filtro de data existente também limita a lista de atividade ao dia solicitado, sem cortar os eventos desse dia pelo recorte dos 30 mais recentes. Após corrigir uma resposta histórica, o dia consultado é preservado no retorno à página.
+
+A validação de quantidade em mL foi unificada nas ações de inclusão e correção, tanto da cliente quanto da Patty: strings parciais como `12abc`, `1e3` e `1.5` não são mais truncadas por `parseInt`. Aceitam-se apenas inteiros positivos seguros; não foi introduzida meta profissional ou limite clínico de hidratação. Testes determinísticos de parser e de integração de navegação integram `test:clients` já executado no workflow Validate application. Sem schema, migrations, Auth, RLS ou alterações de histórico.
