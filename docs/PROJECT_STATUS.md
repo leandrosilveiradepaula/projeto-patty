@@ -3145,3 +3145,8 @@ As bibliotecas de Conteudos e Exercicios passam a calcular independentemente a v
 ## UX de finalização de avaliações — 2026-10-08
 
 O detalhe administrativo de Avaliação utiliza o nome canônico da cliente, apresenta requisitos de finalização a partir da definição profissional ativa (sem lista fixa no texto), e desabilita a ação de finalizar quando a checagem determinística já identifica itens obrigatórios ausentes. O servidor mantém a validação obrigatória independente da interface. Quando não há outra foto privada disponível para vincular, a tela oferece acesso ao workspace privado de arquivos da mesma cliente. Sem mudanças em migrations, schema, RLS, Auth, armazenamento ou regras profissionais.
+
+
+## Recuperação operacional de lembretes do Feedback Semanal — 2026-10-08
+
+A tela administrativa de Feedback Semanal oferece navegação para Cadastro Atual ou preferência de canal quando o evento de lembrete registrar falta de contato ou canal. O estado de email aceito pelo SMTP não declara recebimento na caixa postal. O evento e a escolha de canal continuam preservados, sem envio adicional, mudança de regras profissionais, alterações de Auth/RLS ou migrations. A classificação é determinística e possui testes de regressão.
