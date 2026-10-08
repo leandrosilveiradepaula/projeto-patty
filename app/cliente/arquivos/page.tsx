@@ -1,4 +1,5 @@
 import { ClientPrivateFileUploadForm } from "@/components/client/ClientPrivateFileUploadForm";
+import { isPreviewablePrivateFileMimeType } from "@/lib/files/private-file-preview";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -112,6 +113,18 @@ export default async function ClientFilesPage() {
                       <dd>{formatCreatedAt(file.created_at)}</dd>
                     </div>
                   </dl>
+                  <div className={styles.fileActions}>
+                    {isPreviewablePrivateFileMimeType(file.mime_type) ? (
+                      <a
+                        aria-label={`Visualizar ${file.original_filename?.trim() || "arquivo sem nome informado"}`}
+                        className={styles.downloadLink}
+                        href={`/cliente/arquivos/${file.id}?preview=1`}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        Visualizar
+                      </a>
+                    ) : null}
                   <Link
                     aria-label={`Baixar ${file.original_filename?.trim() || "arquivo sem nome informado"}`}
                     className={styles.downloadLink}
@@ -119,6 +132,7 @@ export default async function ClientFilesPage() {
                   >
                     Baixar arquivo
                   </Link>
+                  </div>
                 </Card>
               </li>
             ))}

@@ -1,3 +1,9 @@
+## Auditoria integrada - visualizacao de imagens e PDFs privados - 2026-10-08
+
+A cliente e a Patty apenas podiam baixar arquivos privados. As duas areas passam a oferecer Visualizar em nova aba para imagens e PDFs, com os mesmos metadados e checks RLS de download e sem copiar bytes para storage publico. O preview somente e oferecido para MIME validado no upload: PDF/JPEG/PNG/WebP. Signed URL de visualizacao sem parametro download tem validade de 60 segundos; downloads mantem a configuracao anterior de 300 segundos. O redirecionamento impede cache, Referer e indexacao, e nova aba usa noopener/noreferrer. A apresentacao inline depende do navegador.
+
+Para exames/documentos, a rota administrativa registra evento de auditoria view (incluindo falhas de autorizacao) e falha fechada se a auditoria autorizada nao puder ser persistida. A cliente continua limitada a arquivos visiveis em RLS. Upload aceito da cliente revalida a ficha administrativa de arquivos. Nenhuma alteracao de migrations, RLS, Auth, grants, armazenamento, dados reais ou regra profissional foi feita. Testes de contrato cobrem as rotas, a interface e os MIME suportados; teste E2E autenticado de visualizacao ainda aberto.
+
 ## Auditoria integrada - continuidade de avaliacoes e protocolos na fila administrativa - 2026-10-08
 
 A fila operacional da Patty inclui rascunhos de avaliacao e estados de versao de protocolos, mas varias transicoes administrativas nao invalidavam a rota /admin/pendencias. A criacao inicial/recuperacao de protocolos e a criacao/finalizacao de avaliacoes agora revalidam a fila, o painel administrativo e as fichas correspondentes somente depois da operacao confirmada. O helper compartilhado de lifecycle de protocolos foi atualizado para manter a fila coerente entre edicao, revisao, aprovacao e publicacao manuais.
