@@ -123,6 +123,7 @@ export default async function AdminClientTrainingPage({ params }: Props) {
           <EmptyState
             description="Registre primeiro a solicitação do serviço nesta página. O sistema não cria prescrição sem esse pedido."
             title="Treino ainda não solicitado"
+            action={<a href="#solicitacao-treino">Ir para solicitação</a>}
           />
         ) : openVersion ? (
           <div className={styles.stack}>
@@ -300,8 +301,9 @@ export default async function AdminClientTrainingPage({ params }: Props) {
       >
         {requests.length === 0 ? (
           <EmptyState
-            description="Quando houver uma solicitação, ela aparecerá aqui."
+            description="Nenhuma solicitação registrada. Se houver pedido da cliente, registre-o no formulário de Solicitação do serviço acima."
             title="Sem solicitações de treino"
+            action={<a href="#solicitacao-treino">Ir para solicitação</a>}
           />
         ) : (
           <ol className={styles.history}>
