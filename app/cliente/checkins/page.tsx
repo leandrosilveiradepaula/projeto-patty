@@ -69,10 +69,13 @@ export default async function ClientCheckinsPage({
   const selectedDay = parseCheckinHistoryDay(dia, today) ?? today;
   const range = saoPauloCheckinDayRange(selectedDay);
 
-  const [recentLiquidEvents, activityEvents, liquidTaxonomy] =
+  const [recentLiquidEvents, activityEvents, historicalActivityEvents, liquidTaxonomy] =
     await Promise.all([
       listAccessibleClientLiquidIntakeEvents(client.id, range.recordedFrom, range.recordedBefore),
       listAccessibleClientActivityCheckinEvents(client.id, today),
+      selectedDay === today
+        ? Promise.resolve([])
+        : listAccessibleClientActivityCheckinEvents(client.id, selectedDay),
       loadSupportedLiquidTaxonomy(),
     ]);
 
@@ -81,7 +84,7 @@ export default async function ClientCheckinsPage({
       recentLiquidEvents.map((event) => event.id),
     ),
     listAccessibleClientActivityCheckinEventCorrections(
-      activityEvents.map((event) => event.id),
+      [...activityEvents, ...historicalActivityEvents].map((event) => event.id),
     ),
   ]);
   const latestLiquidCorrectionByEvent = latestCheckinCorrectionsByEvent(liquidCorrections);
@@ -291,7 +294,7 @@ export default async function ClientCheckinsPage({
         title={selectedDay === today ? "Histórico de líquidos de hoje" : `Histórico de líquidos de ${selectedDay}`}
       >
         <form action="/cliente/checkins" className={styles.form} method="get">
-          <label className={styles.field}>Consultar dia
+          <label className={styles.field}>Consultar líquidos e atividade por dia
             <input defaultValue={selectedDay} max={today} name="dia" required type="date" />
           </label>
           <Button type="submit" variant="secondary">Consultar histórico</Button>
@@ -300,7 +303,7 @@ export default async function ClientCheckinsPage({
         {displayedLiquidEvents.length === 0 ? (
           <EmptyState
             description={selectedDay === today ? "Não há líquidos registrados hoje. Se desejar informar um consumo, use o formulário acima; não existe meta automática de hidratação." : "Não há líquidos registrados no dia selecionado."}
-            title="Nenhum líquido registrado hoje"
+            title={selectedDay === today ? "Nenhum líquido registrado hoje" : "Nenhum líquido neste dia"}
             action={<a href="#registrar-liquidos">Ir para registro</a>}
           />
         ) : (
@@ -359,6 +362,51 @@ export default async function ClientCheckinsPage({
           </ol>
         )}
       </Section>
+      {selectedDay !== today ? (
+        <Section
+          description="Respostas factuais do dia escolhido, sem alterar o check-in de hoje. As correções preservam o registro original."
+          title={`Atividade física em ${selectedDay}`}
+        >
+          {historicalActivityEvents.length === 0 ? (
+            <EmptyState
+              description="Nenhuma resposta de atividade física foi registrada para o dia selecionado."
+              title="Sem atividade registrada neste dia"
+            />
+          ) : (
+            <ol className={styles.historyList}>
+              {historicalActivityEvents.map((event) => {
+                const correction = latestActivityCorrectionByEvent.get(event.id);
+                const didActivity = correction?.corrected_did_activity ?? event.did_activity;
+                return (
+                  <li key={event.id}>
+                    <Card className={styles.historyCard} variant="subtle">
+                      <div className={styles.summaryHeader}>
+                        <strong>Atividade física: {didActivity ? "Sim" : "Não"}</strong>
+                        {correction ? <Badge variant="neutral">Corrigido</Badge> : null}
+                      </div>
+                      <p className={styles.note}>Dia da atividade: {correction?.corrected_checkin_date ?? event.checkin_date}</p>
+                      <details className={styles.correction}>
+                        <summary>Corrigir resposta deste dia</summary>
+                        <form action={correctActivityCheckinAction} className={styles.activityActions}>
+                          <input name="eventId" type="hidden" value={event.id} />
+                          <input name="historyDay" type="hidden" value={selectedDay} />
+                          <Button name="didActivity" type="submit" value="yes" variant="secondary">Corrigir para Sim</Button>
+                          <Button name="didActivity" type="submit" value="no" variant="secondary">Corrigir para Não</Button>
+                        </form>
+                        {correction ? (
+                          <p className={styles.note}>
+                            Original: {event.did_activity ? "Sim" : "Não"}. O histórico das correções permanece preservado.
+                          </p>
+                        ) : null}
+                      </details>
+                    </Card>
+                  </li>
+                );
+              })}
+            </ol>
+          )}
+        </Section>
+      ) : null}
     </>
   );
 }
