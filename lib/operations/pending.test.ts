@@ -991,3 +991,53 @@ test("core Patty pendings deep-link to the exact review action", () => {
     "/admin/protocolos/protocol-1#versao-4",
   );
 });
+
+
+test("nonterminal anamnesis AI execution deep-links to its source review", () => {
+  const items = buildOperationalPendingItems({
+    clarificationReminderIntervalHours: 24,
+    anamnesisSubmissions: [],
+    clarificationRequests: [],
+    assessments: [],
+    protocolVersions: [],
+    aiExecutions: [
+      {
+        anamnesisSubmissionId: "submission-ai",
+        clientId: "client-ai",
+        clientLabel: "Cliente IA",
+        createdAt: "2026-10-07T18:00:00Z",
+        id: "execution-ai",
+        purposeKey: "anamnesis_review",
+      },
+    ],
+  });
+
+  assert.equal(items.length, 1);
+  assert.equal(items[0]?.kind, "ai_execution_started");
+  assert.equal(
+    items[0]?.href,
+    "/admin/anamneses/submission-ai/ia",
+  );
+});
+
+test("non-anamnesis AI execution keeps the generic operations fallback", () => {
+  const items = buildOperationalPendingItems({
+    clarificationReminderIntervalHours: 24,
+    anamnesisSubmissions: [],
+    clarificationRequests: [],
+    assessments: [],
+    protocolVersions: [],
+    aiExecutions: [
+      {
+        anamnesisSubmissionId: null,
+        clientId: "client-ai",
+        clientLabel: "Cliente IA",
+        createdAt: "2026-10-07T18:05:00Z",
+        id: "execution-generic",
+        purposeKey: "future_assistive_analysis",
+      },
+    ],
+  });
+
+  assert.equal(items[0]?.href, "/admin/ia");
+});
