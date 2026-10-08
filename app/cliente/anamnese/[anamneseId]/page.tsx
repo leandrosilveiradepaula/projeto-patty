@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import { getApplicableAnamnesisQuestionIds } from "@/lib/anamnesis/applicability";
+import { summarizeAnamnesisDraftRequiredAnswers } from "@/lib/anamnesis/draft-progress";
 import { ANAMNESIS_QUESTION_KEYS } from "@/lib/anamnesis/question-keys";
 import {
   canEditDraftSingleChoiceAnswer,
@@ -134,6 +135,12 @@ export default async function ClienteAnamneseDetailPage({
   const visibleSections = sections.filter(
     (section) => (questionsBySectionId.get(section.id) ?? []).length > 0,
   );
+  const draftProgress = submission.submitted_at
+    ? null
+    : summarizeAnamnesisDraftRequiredAnswers(
+        visibleSections.flatMap((section) => questionsBySectionId.get(section.id) ?? []),
+        answers,
+      );
 
   return (
     <>
@@ -205,6 +212,33 @@ export default async function ClienteAnamneseDetailPage({
           </dl>
         </Card>
       </Section>
+      {draftProgress ? (
+        <Section
+          description="Resumo das respostas obrigatórias aplicáveis, calculado a partir do que já estava salvo ao abrir esta página."
+          title="Preenchimento do rascunho"
+        >
+          <Card className={styles.progressCard}>
+            <p className={styles.progressCount}>
+              {draftProgress.answered} de {draftProgress.required} respostas obrigatórias salvas
+            </p>
+            {draftProgress.firstMissingQuestionId ? (
+              <a
+                className={styles.progressLink}
+                href={`#pergunta-${draftProgress.firstMissingQuestionId}`}
+              >
+                Ir para a primeira pergunta obrigatória sem resposta
+              </a>
+            ) : (
+              <p className={styles.progressNote}>
+                Todas as perguntas obrigatórias atualmente aplicáveis têm uma resposta salva.
+              </p>
+            )}
+            <p className={styles.progressNote}>
+              Depois de novos salvamentos, atualize a página para conferir o resumo. O envio final continua sujeito à validação do banco e ao aceite exigido nesta versão.
+            </p>
+          </Card>
+        </Section>
+      ) : null}
       {visibleSections.length > 1 ? (
         <nav aria-label="Seções da Anamnese" className={styles.sectionNavigation}>
           <p className={styles.sectionNavigationTitle}>Ir para uma seção</p>
@@ -216,6 +250,11 @@ export default async function ClienteAnamneseDetailPage({
                 key={section.id}
               >
                 {section.title}
+                {draftProgress && (draftProgress.bySection.get(section.id)?.required ?? 0) > 0 ? (
+                  <span className={styles.sectionCount}>
+                    {draftProgress.bySection.get(section.id)?.answered ?? 0}/{draftProgress.bySection.get(section.id)?.required ?? 0} salvas
+                  </span>
+                ) : null}
               </a>
             ))}
           </div>
@@ -231,9 +270,14 @@ export default async function ClienteAnamneseDetailPage({
             description="A definição versionada desta Anamnese não está disponível para leitura com a autorização atual."
             title="Definição da Anamnese indisponível"
           />
+        ) : visibleSections.length === 0 ? (
+          <EmptyState
+            description="Nenhuma pergunta se aplica às respostas atuais desta versão. Consulte a navegação ou atualize a página após salvar uma resposta condicional."
+            title="Nenhuma pergunta aplicável neste momento"
+          />
         ) : (
           <div className={styles.sections}>
-            {sections.map((section) => {
+            {visibleSections.map((section) => {
               const sectionQuestions =
                 questionsBySectionId.get(section.id) ?? [];
 
@@ -288,7 +332,7 @@ export default async function ClienteAnamneseDetailPage({
 
                         if (editableTextDraft) {
                           return (
-                            <Card className={styles.questionCard} key={question.id}>
+                            <Card className={styles.questionCard} id={`pergunta-${question.id}`} key={question.id}>
                               <ClientAnamnesisDraftTextAnswerForm
                                 initialValue={
                                   typeof answerValue === "string"
@@ -309,7 +353,7 @@ export default async function ClienteAnamneseDetailPage({
                           singleChoiceOptions !== null
                         ) {
                           return (
-                            <Card className={styles.questionCard} key={question.id}>
+                            <Card className={styles.questionCard} id={`pergunta-${question.id}`} key={question.id}>
                               <ClientAnamnesisDraftSingleChoiceAnswerForm
                                 initialValue={
                                   typeof answerValue === "string"
@@ -328,7 +372,7 @@ export default async function ClienteAnamneseDetailPage({
                         }
 
                         return (
-                          <Card className={styles.questionCard} key={question.id}>
+                          <Card className={styles.questionCard} id={`pergunta-${question.id}`} key={question.id}>
                             <div className={styles.questionHeader}>
                               <h3 className={styles.questionLabel}>
                                 {question.label}

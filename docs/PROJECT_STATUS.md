@@ -1,3 +1,9 @@
+## PR #550 reconciliado com master - orientação de preenchimento da Anamnese - 2026-10-08
+
+O PR #550, aberto antes de diversas auditorias integradas, foi reconciliado com o HEAD de master por um commit de integração na propria branch; o historico anterior do PR e dos merges foi preservado. A cliente agora ve apenas secoes aplicaveis na versao associada a Anamnese e um resumo somente de leitura das respostas obrigatorias atualmente aplicaveis e persistidas, com acesso direto a primeira resposta faltante. O consentimento continua exigindo aceite especifico na submissao final. A contagem e informativa, calculada no carregamento, e nao substitui a validacao deterministica do backend nem indica aptidao clinica.
+
+Nenhum dado historico de resposta, regra profissional, consentimento versionado, schema, migration, RLS, Auth ou aprovacao foi alterado. Foram preservados testes deterministas do PR original para progresso, zero/false, ocultacao de secoes e link de navegacao. E2E autenticado real nao e substituido por CI. Nenhum merge foi feito no master.
+
 ## Auditoria integrada - nova solicitacao de treino apos publicacao - 2026-10-08
 
 Quando uma cliente solicitava novamente o serviço de treino apos ja possuir um plano publicado, o pedido ficava salvo no historico, mas nao gerava pendencia na fila da Patty se nao houvesse rascunho aberto. A ficha administrativa indicava o treino como apenas publicado, sem destacar a solicitacao mais nova.

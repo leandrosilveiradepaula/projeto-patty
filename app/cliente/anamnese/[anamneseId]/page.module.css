@@ -185,3 +185,53 @@
   outline: 3px solid var(--color-brand);
   outline-offset: 3px;
 }
+
+/* Display-only guidance: the authoritative final validation remains in SQL. */
+.progressCard {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.progressCount {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+  font-weight: var(--text-label-medium-weight);
+}
+
+.progressNote {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-small-size);
+  line-height: var(--text-body-small-line-height);
+}
+
+.progressLink {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 44px;
+  align-items: center;
+  color: var(--color-brand-strong);
+  font-weight: var(--text-label-medium-weight);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.progressLink:focus-visible {
+  border-radius: var(--radius-small);
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.sectionNavigationLink {
+  gap: var(--space-2);
+}
+
+.sectionCount {
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-small-size);
+}
+
+.questionCard[id] {
+  scroll-margin-top: calc(var(--space-12) + var(--space-8));
+}
