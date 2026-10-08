@@ -1337,6 +1337,25 @@ export async function listEducationalContentAssetsForCurrentAdmin(
   return data;
 }
 
+export async function getAccessibleEducationalContentAssetForCurrentAdmin(
+  assetId: string,
+) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("educational_content_assets")
+    .select(
+      "id, educational_content_version_id, asset_key, storage_provider, storage_path, content_type, byte_size, sha256_hex, created_at",
+    )
+    .eq("id", assetId)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
 export async function listEducationalContentAssetsForCurrentAdminVersions(
   versionIds: string[],
 ) {
