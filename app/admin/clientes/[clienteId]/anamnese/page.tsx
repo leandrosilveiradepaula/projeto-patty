@@ -60,7 +60,7 @@ export default async function AdminClienteAnamnesePage({
       {pendingSubmissions.length > 0 ? (
         <Section
           action={<Badge variant="warning">{pendingSubmissions.length} pendente(s)</Badge>}
-          description="Anamneses iniciadas que ainda aguardam o envio da cliente."
+          description="Rascunhos iniciados pela cliente, ainda não enviados. Eles não equivalem a Anamnese concluída nem geram revisão profissional nesta lista."
           title="Aguardando cliente"
         >
           <ol className={styles.submissionList}>
@@ -94,7 +94,7 @@ export default async function AdminClienteAnamnesePage({
         </Section>
       ) : null}
       <Section
-        description="Cada envio concluído preserva as respostas originais e a versão da Anamnese usada naquele momento."
+        description="Somente Anamneses efetivamente enviadas aparecem aqui. As respostas originais e a versão utilizada permanecem preservadas para consulta."
         title="Histórico enviado"
       >
         {submittedSubmissions.length === 0 ? (
@@ -102,7 +102,7 @@ export default async function AdminClienteAnamnesePage({
             description={
               pendingSubmissions.length > 0
                 ? "Quando a cliente enviar a Anamnese pendente, ela aparecerá neste histórico."
-                : "Nenhuma submissão de Anamnese está registrada para esta cliente."
+                 : "Não há Anamnese enviada nem rascunho registrado para esta cliente."
             }
             title="Sem Anamnese enviada"
           />
