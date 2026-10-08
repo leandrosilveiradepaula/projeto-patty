@@ -1,6 +1,5 @@
-import { issueSignedToken, presignUrl } from "@vercel/blob";
-
 import { requireRole } from "@/lib/supabase/auth";
+import { createPrivateBlobReadUrl } from "@/lib/content/private-blob-url";
 import { getAccessibleEducationalContentAssetForCurrentClient } from "@/lib/supabase/data-access";
 import { isUuid } from "@/lib/validation/uuid";
 
@@ -9,8 +8,6 @@ type ClientEducationalContentAssetRouteProps = {
     assetId: string;
   }>;
 };
-
-const PRIVATE_BLOB_URL_TTL_MS = 5 * 60 * 1000;
 
 export async function GET(
   _request: Request,
@@ -31,15 +28,7 @@ export async function GET(
   }
 
   try {
-    const validUntil = Date.now() + PRIVATE_BLOB_URL_TTL_MS;
-    const token = await issueSignedToken({
-      operations: ["get"],
-    });
-    const { presignedUrl } = await presignUrl(token, {
-      operation: "get",
-      pathname: asset.storage_path,
-      validUntil,
-    });
+    const presignedUrl = await createPrivateBlobReadUrl(asset.storage_path);
 
     return new Response(null, {
       status: 307,
