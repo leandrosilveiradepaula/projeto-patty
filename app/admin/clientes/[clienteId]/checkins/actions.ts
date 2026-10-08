@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { parseCheckinHistoryDay } from "@/lib/checkins/history-day";
+import { parsePositiveCheckinMl } from "@/lib/checkins/amount";
 import { loadSupportedLiquidTaxonomy } from "@/lib/method/liquid-taxonomy-loader";
 import { requireRole } from "@/lib/supabase/auth";
 import {
@@ -31,14 +32,12 @@ export async function correctClientLiquidIntakeAction(
   const eventId = formData.get("eventId");
   const rawAmount = formData.get("amountMl");
   const rawKind = formData.get("liquidKind");
-  const amountMl =
-    typeof rawAmount === "string" ? Number.parseInt(rawAmount, 10) : Number.NaN;
+  const amountMl = parsePositiveCheckinMl(rawAmount);
 
   if (
     typeof eventId !== "string" ||
     !eventId ||
-    !Number.isInteger(amountMl) ||
-    amountMl <= 0
+    amountMl === null
   ) {
     redirect(adminCheckinsPath(clientId, "correction-invalid"));
   }
@@ -115,5 +114,7 @@ export async function correctClientActivityCheckinAction(
   revalidatePath(adminCheckinsPath(clientId));
   revalidatePath("/cliente");
   revalidatePath("/cliente/checkins");
-  redirect(adminCheckinsPath(clientId, "correction-recorded"));
+  const today = new Intl.DateTimeFormat("en-CA", { year: "numeric", month: "2-digit", day: "2-digit", timeZone: "America/Sao_Paulo" }).format(new Date());
+  const historyDay = parseCheckinHistoryDay(formData.get("historyDay"), today);
+  redirect(adminCheckinsPath(clientId, "correction-recorded") + (historyDay ? "&dia=" + historyDay : ""));
 }

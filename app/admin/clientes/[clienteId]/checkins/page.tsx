@@ -61,7 +61,7 @@ export default async function AdminClientCheckinsPage({
   const selectedRange = selectedDay ? saoPauloCheckinDayRange(selectedDay) : null;
   const [liquidEvents, activityEvents, liquidTaxonomy] = await Promise.all([
     listAccessibleClientLiquidIntakeEvents(client.id, selectedRange?.recordedFrom, selectedRange?.recordedBefore),
-    listAccessibleClientActivityCheckinEvents(client.id),
+    listAccessibleClientActivityCheckinEvents(client.id, selectedDay ?? undefined),
     loadSupportedLiquidTaxonomy(),
   ]);
 
@@ -70,7 +70,7 @@ export default async function AdminClientCheckinsPage({
   );
 
   const recentLiquidEvents = selectedRange ? liquidEvents : liquidEvents.slice(0, 30);
-  const recentActivityEvents = activityEvents.slice(0, 30);
+  const recentActivityEvents = selectedDay ? activityEvents : activityEvents.slice(0, 30);
   const [liquidCorrections, activityCorrections] = await Promise.all([
     listAccessibleClientLiquidIntakeEventCorrections(
       recentLiquidEvents.map((event) => event.id),
@@ -127,7 +127,7 @@ export default async function AdminClientCheckinsPage({
         title="Líquidos recentes"
       >
         <form action={`/admin/clientes/${client.id}/checkins`} className={styles.form} method="get">
-          <label className={styles.field}>Consultar líquidos por dia
+          <label className={styles.field}>Consultar líquidos e atividade por dia
             <input defaultValue={selectedDay ?? today} max={today} name="dia" required type="date" />
           </label>
           <Button type="submit" variant="secondary">Consultar histórico</Button>
@@ -192,8 +192,8 @@ export default async function AdminClientCheckinsPage({
       </Section>
 
       <Section
-        description="Até 30 registros recentes de atividade. A data do check-in pode ser diferente da data em que a resposta foi registrada; correções preservam o original."
-        title="Atividade física recente"
+        description={selectedDay ? "Respostas registradas para o dia selecionado. Correções preservam o original." : "Até 30 registros recentes de atividade. A data do check-in pode ser diferente da data em que a resposta foi registrada; correções preservam o original."}
+        title={selectedDay ? `Atividade física em ${selectedDay}` : "Atividade física recente"}
       >
         {recentActivityEvents.length === 0 ? (
           <p className={styles.description}>Ainda não existem check-ins de atividade desta cliente para consultar ou corrigir.</p>
@@ -224,6 +224,7 @@ export default async function AdminClientCheckinsPage({
                         className={styles.actions}
                       >
                         <input name="eventId" type="hidden" value={event.id} />
+                        {selectedDay ? <input name="historyDay" type="hidden" value={selectedDay} /> : null}
                         <Button name="didActivity" type="submit" value="yes" variant="secondary">
                           Corrigir para Sim
                         </Button>
