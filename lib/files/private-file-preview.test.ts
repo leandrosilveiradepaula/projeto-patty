@@ -53,7 +53,7 @@ test("both areas provide a safe optional preview while retaining download", () =
   for (const page of [admin, client]) {
     assert.match(page, /rel="noopener noreferrer"/);
     assert.match(page, /target="_blank"/);
-    assert.match(page, />\s*Visualizar\s*<\/Link>/);
+    assert.match(page, />\s*Visualizar\s*<\/a>/);
     assert.match(page, />\s*Baixar arquivo\s*<\/Link>/);
   }
   const access = read("lib/supabase/data-access.ts");
