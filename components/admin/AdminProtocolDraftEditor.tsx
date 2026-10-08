@@ -192,7 +192,7 @@ function AddDoseForm({
         </select>
       </label>
       <FormField
-        description="Aceita doses fracionadas."
+        description="Aceita doses fracionadas com até quatro casas decimais."
         id={`dose-quantity-${mealId}`}
         label="Quantidade de doses"
         required
@@ -201,6 +201,7 @@ function AddDoseForm({
           <TextInput
             {...fieldProps}
             inputMode="decimal"
+            max="999"
             min="0.0001"
             name="doseQuantity"
             required
@@ -425,6 +426,7 @@ function DoseRow({
         <FormField
           id={`dose-edit-${dose.id}`}
           label="Quantidade"
+          description="Até quatro casas decimais; o valor não é arredondado ao salvar."
           required
         >
           {(fieldProps) => (
@@ -432,6 +434,7 @@ function DoseRow({
               {...fieldProps}
               defaultValue={String(dose.doseQuantity)}
               inputMode="decimal"
+              max="999"
               min="0.0001"
               name="doseQuantity"
               required
