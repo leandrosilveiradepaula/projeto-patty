@@ -20,7 +20,7 @@ import {
   createAccessibleClientTrainingRequest,
   getAccessibleClient,
 } from "@/lib/supabase/data-access";
-import { updateClientProfileDisplayNamePrivileged } from "@/lib/clients/client-profile-admin";
+import { updateClientProfileDisplayNamePrivileged, updateStandaloneClientFullNamePrivileged } from "@/lib/clients/client-profile-admin";
 import { validateClientDisplayName } from "@/lib/onboarding/validation";
 import { isUuid } from "@/lib/validation/uuid";
 
@@ -74,10 +74,9 @@ export async function updateAdminClientDisplayNameAction(
 
   const client = await getAccessibleClient(clientId);
 
-  if (!client || !client.profile_id) {
+  if (!client) {
     return {
-      message:
-        "Esta cliente não possui perfil vinculado ou não está acessível para sua atribuição atual.",
+      message: "Esta cliente não está acessível para sua atribuição atual.",
       success: false,
     };
   }
@@ -95,10 +94,17 @@ export async function updateAdminClientDisplayNameAction(
   }
 
   try {
-    await updateClientProfileDisplayNamePrivileged({
-      displayName,
-      profileId: client.profile_id,
-    });
+    if (client.profile_id) {
+      await updateClientProfileDisplayNamePrivileged({
+        displayName,
+        profileId: client.profile_id,
+      });
+    } else {
+      await updateStandaloneClientFullNamePrivileged({
+        clientId: client.id,
+        displayName,
+      });
+    }
   } catch {
     return {
       message: "Não foi possível atualizar o nome da cliente.",
@@ -108,6 +114,7 @@ export async function updateAdminClientDisplayNameAction(
 
   revalidatePath("/admin/clientes");
   revalidatePath(`/admin/clientes/${client.id}`);
+  revalidatePath("/cliente", "layout");
 
   return {
     message: "Nome da cliente atualizado.",

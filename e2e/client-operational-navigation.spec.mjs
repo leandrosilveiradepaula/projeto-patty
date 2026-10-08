@@ -49,6 +49,20 @@ test("cliente sintetica percorre a navegação real após login, sem publicar ne
     }
   });
 
+  await test.step("salvar Cadastro Atual, recarregar e confirmar persistência real", async () => {
+    await page.goto("/cliente/perfil");
+    const city = page.getByLabel("Cidade");
+    await city.fill("Cidade Sintetica E2E");
+    await page.getByRole("button", { name: "Salvar Cadastro Atual" }).click();
+    await expect(page.getByText("Cadastro atualizado")).toBeVisible();
+    await page.reload();
+    await expect(page.getByLabel("Cidade")).toHaveValue("Cidade Sintetica E2E");
+
+    await page.goto("/cliente");
+    await page.goto("/cliente/perfil");
+    await expect(page.getByLabel("Cidade")).toHaveValue("Cidade Sintetica E2E");
+  });
+
   await test.step("consultar áreas do acompanhamento com dados ainda não liberados", async () => {
     for (const area of clientDirectJourneyAreas) {
       const response = await page.goto(area.path);
