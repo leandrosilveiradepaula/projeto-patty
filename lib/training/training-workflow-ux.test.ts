@@ -88,3 +88,19 @@ test("new request after published training remains visible in admin queue, overv
   assert.match(workspace, /Ver solicitação/);
   assert.doesNotMatch(workspace, /newRequestAfterPublication\s*\?\s*createAccessibleClientTrainingPlanDraft/);
 });
+
+test("client training reports new request after the last publication without changing its release", () => {
+  const page = read("app/cliente/treino/page.tsx");
+  const actions = read("app/cliente/treino/actions.ts");
+  const source = read("lib/supabase/data-access.ts");
+  assert.match(page, /isTrainingRequestAfterPublication\(requests\[0\]\.requested_at, latestPublished\.published_at\)/);
+  assert.match(page, /Nova solicitação registrada/);
+  assert.match(page, /id="suas-solicitacoes"/);
+  assert.match(page, /publicado continua disponível/);
+  assert.match(page, /listAccessibleClientTrainingPlanItemsForVersions\(/);
+  assert.doesNotMatch(page, /Promise\.all\(\s*publishedVersions\.map\(/);
+  assert.match(source, /collectTrainingHistoryRows\(versionIds/);
+  assert.match(source, /\.in\("training_plan_version_id", ids\)/);
+  assert.match(actions, /revalidatePath\("\/admin\/pendencias"\)/);
+  assert.match(actions, /revalidatePath\(`\/admin\/clientes\/\$\{client\.id\}\/treino`\)/);
+});

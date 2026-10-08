@@ -1,5 +1,6 @@
 import { Alert } from "@/components/ui/Alert";
 import { publishedTrainingVersions } from "@/lib/training/published-versions";
+import { isTrainingRequestAfterPublication } from "@/lib/training/request-follow-up";
 import { Badge } from "@/components/ui/Badge";
 import { ClientTrainingRequestForm } from "@/components/client/ClientTrainingRequestForm";
 import { Card } from "@/components/ui/Card";
@@ -9,7 +10,7 @@ import { Section } from "@/components/ui/Section";
 import {
   getAccessibleClientTrainingPlan,
   getCurrentClient,
-  listAccessibleClientTrainingPlanItems,
+  listAccessibleClientTrainingPlanItemsForVersions,
   listAccessibleClientTrainingPlanVersions,
   listAccessibleClientTrainingRequests,
 } from "@/lib/supabase/data-access";
@@ -46,13 +47,24 @@ export default async function ClientTrainingPage() {
     : [];
   const publishedVersions = publishedTrainingVersions(trainingVersions);
   const latestPublished = publishedVersions[0] ?? null;
-  const publishedItems = await Promise.all(
-    publishedVersions.map(async (version) => ({
-      version,
-      items: await listAccessibleClientTrainingPlanItems(version.id),
-    })),
+  const historyRows = await listAccessibleClientTrainingPlanItemsForVersions(
+    publishedVersions.map((version) => version.id),
   );
+  const rowsByVersionId = new Map<string, typeof historyRows>();
+  for (const row of historyRows) {
+    const items = rowsByVersionId.get(row.training_plan_version_id) ?? [];
+    items.push(row);
+    rowsByVersionId.set(row.training_plan_version_id, items);
+  }
+  const publishedItems = publishedVersions.map((version) => ({
+    version,
+    items: rowsByVersionId.get(version.id) ?? [],
+  }));
   const trainingItems = publishedItems[0]?.items ?? [];
+  const newRequestAfterPublication = Boolean(
+    latestPublished && requests[0] &&
+    isTrainingRequestAfterPublication(requests[0].requested_at, latestPublished.published_at),
+  );
 
   return (
     <>
@@ -65,6 +77,15 @@ export default async function ClientTrainingPage() {
         eyebrow="Cliente"
         title="Treino"
       />
+
+      {newRequestAfterPublication ? (
+        <Alert title="Nova solicitação registrada" variant="info">
+          Você fez uma nova solicitação de treino depois da publicação atual.
+          A Patty poderá revisar o pedido e decidir se é necessária uma nova prescrição.
+          Enquanto isso, o treino já publicado continua disponível abaixo.
+          {" "}<a href="#suas-solicitacoes">Ver solicitação</a>
+        </Alert>
+      ) : null}
 
       <Section
         description="Apenas versões revisadas e publicadas pela Patty aparecem aqui."
@@ -184,6 +205,7 @@ export default async function ClientTrainingPage() {
       </Section>
 
       <Section
+        id="suas-solicitacoes"
         description="Histórico preservado das solicitações registradas."
         title="Suas solicitações"
       >

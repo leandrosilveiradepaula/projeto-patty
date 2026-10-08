@@ -1,3 +1,11 @@
+## Auditoria integrada - solicitação e histórico de treinos da cliente - 2026-10-08
+
+A cliente podia registrar nova solicitação após um treino publicado sem conseguir distinguir esse novo pedido da prescrição vigente. O painel administrativo já possuía a pendência, mas a área da cliente não explicava a continuidade. A página de Treino passa a exibir aviso factual quando a solicitação mais recente ocorreu após a última publicação humana, com link para o histórico; o plano vigente continua disponível até nova revisão e publicação da Patty. A ação de solicitação agora revalida também a fila e a ficha administrativa, reduzindo estados desatualizados entre as duas jornadas.
+
+O histórico de prescrições publicadas carregava os exercícios em uma consulta independente por versão (N+1). A leitura agora é em lotes de IDs de versões publicadas, com paginação de 500 linhas, ordenação determinística e filtragem RLS existente. Os itens são agrupados por versão no servidor e o componente preserva o snapshot de cada versão liberada. Testes determinísticos cobrem paginação, erro, duplicidade, escopo da leitura e conexão das telas. A melhoria é estrutural; latência em produção e E2E autenticado ainda não foram medidos/executados.
+
+Sem alterações de migrations, schema, RLS, parâmetros profissionais ou publicação automática. Nenhuma conclusão técnica substitui a revisão humana da Patty.
+
 ## Auditoria integrada - corrigir E2E de autosalvamento da Anamnese - 2026-10-08
 
 A auditoria dos fluxos E2E verificou que dois testes de navegador ainda buscavam o antigo botão "Salvar no rascunho", removido quando a UI passou a salvar texto ao sair do campo e seleção única automaticamente. O smoke de envio condicional também verificava uma instrução de envio que não existe mais no formulário. Isso inviabilizava a execução confiável de jornadas autenticadas de Anamnese, apesar de os testes estáticos e o build do aplicativo passarem.
