@@ -100,9 +100,19 @@ export default async function AdminClientProgressPage({ params }: PageProps) {
             action={<Link href={`/admin/clientes/${client.id}/avaliacoes`}>Abrir avaliações</Link>}
           />
         ) : (
-          <div className={styles.seriesList}>
+          <>
+            {series.length > 1 ? (
+              <nav aria-label="Ir para medida" className={styles.measureNavigation}>
+                {series.map((item, index) => (
+                  <a href={`#medida-${index}`} key={item.key + ":" + item.unit}>
+                    {item.label} ({item.unit})
+                  </a>
+                ))}
+              </nav>
+            ) : null}
+            <div className={styles.seriesList}>
             {series.map((item) => (
-              <Card className={styles.seriesCard} key={item.key + ":" + item.unit}>
+              <Card className={styles.seriesCard} id={`medida-${series.indexOf(item)}`} key={item.key + ":" + item.unit}>
                 <div className={styles.seriesHeader}>
                   <div>
                     <h2 className={styles.seriesTitle}>{item.label}</h2>
@@ -148,7 +158,8 @@ export default async function AdminClientProgressPage({ params }: PageProps) {
                 </div>
               </Card>
             ))}
-          </div>
+            </div>
+          </>
         )}
       </Section>
     </>
