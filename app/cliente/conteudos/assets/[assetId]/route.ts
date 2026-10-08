@@ -1,4 +1,4 @@
-import { get } from "@vercel/blob";
+import { issueSignedToken, presignUrl } from "@vercel/blob";
 
 import { requireRole } from "@/lib/supabase/auth";
 import { getAccessibleEducationalContentAssetForCurrentClient } from "@/lib/supabase/data-access";
@@ -10,8 +10,10 @@ type ClientEducationalContentAssetRouteProps = {
   }>;
 };
 
+const PRIVATE_BLOB_URL_TTL_MS = 5 * 60 * 1000;
+
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: ClientEducationalContentAssetRouteProps,
 ) {
   await requireRole("client");
@@ -28,40 +30,30 @@ export async function GET(
     return new Response(null, { status: 404 });
   }
 
-  let blob;
-
   try {
-    blob = await get(asset.storage_path, {
-      access: "private",
-      ifNoneMatch: request.headers.get("if-none-match") ?? undefined,
+    const validUntil = Date.now() + PRIVATE_BLOB_URL_TTL_MS;
+    const token = await issueSignedToken({
+      operations: ["get"],
     });
-  } catch {
-    return new Response(null, { status: 404 });
-  }
+    const { presignedUrl } = await presignUrl(token, {
+      operation: "get",
+      pathname: asset.storage_path,
+      validUntil,
+    });
 
-  if (!blob) {
-    return new Response(null, { status: 404 });
-  }
-
-  if (blob.statusCode === 304) {
     return new Response(null, {
-      status: 304,
+      status: 307,
       headers: {
         "Cache-Control": "private, no-store",
-        ETag: blob.headers.get("etag") ?? "",
+        Location: presignedUrl,
+      },
+    });
+  } catch {
+    return new Response(null, {
+      status: 404,
+      headers: {
+        "Cache-Control": "private, no-store",
       },
     });
   }
-
-  return new Response(blob.stream, {
-    status: 200,
-    headers: {
-      "Accept-Ranges": "bytes",
-      "Cache-Control": "private, no-store",
-      "Content-Disposition": "inline",
-      "Content-Length": String(blob.blob.size),
-      "Content-Type": asset.content_type,
-      ETag: blob.headers.get("etag") ?? "",
-    },
-  });
 }
