@@ -33,8 +33,9 @@ function isUploadRequestBody(value: unknown): value is {
   const candidate = value as Record<string, unknown>;
 
   return (
+    typeof candidate.byteSize === "number" &&
     Number.isSafeInteger(candidate.byteSize) &&
-    (candidate.byteSize as number) > 0 &&
+    candidate.byteSize > 0 &&
     typeof candidate.contentType === "string" &&
     typeof candidate.versionId === "string"
   );
