@@ -15,6 +15,7 @@ import {
   listEducationalContentAssetsForCurrentAdmin,
   listEducationalContentVersionsForCurrentAdmin,
 } from "@/lib/supabase/data-access";
+import { canPublishEducationalContentVersion } from "@/lib/content/publication-eligibility";
 import { isUuid } from "@/lib/validation/uuid";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -53,6 +54,12 @@ export default async function AdminEducationalContentDetailPage({
   const currentAssets = current
     ? await listEducationalContentAssetsForCurrentAdmin(current.id)
     : [];
+  const currentCanPublish = current
+    ? canPublishEducationalContentVersion({
+        contentTypeKey: current.content_type_key,
+        hasAsset: currentAssets.length > 0,
+      })
+    : false;
 
   return (
     <>
@@ -165,11 +172,14 @@ export default async function AdminEducationalContentDetailPage({
                   Confirmo que esta versão foi revisada e pode ser publicada.
                 </span>
               </label>
-              <Button type="submit">Publicar versão</Button>
+              <Button disabled={!currentCanPublish} type="submit">
+                Publicar versão
+              </Button>
             </form>
             <p className={styles.description}>
-              Publicar torna a versão elegível para liberação manual por cliente.
-              Não há liberação automática.
+              {currentCanPublish
+                ? "Publicar torna a versão elegível para liberação manual por cliente. Não há liberação automática."
+                : "Esta versão é de vídeo e ainda não possui asset privado verificado registrado. O upload e o registro do asset precisam acontecer antes da publicação."}
             </p>
           </Card>
         )}
