@@ -14,6 +14,7 @@ import {
   listEducationalContentVersionsForCurrentAdmin,
 } from "@/lib/supabase/data-access";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import styles from "./page.module.css";
 
 type AdminClientContentPageProps = {
@@ -90,7 +91,7 @@ export default async function AdminClientContentPage({
       <ClientWorkspaceNav activeArea="conteudos" clientId={client.id} />
       <div id="liberar-conteudo">
       <Section
-        description="Escolha a versão publicada que deve ficar disponível para esta cliente."
+        description="Escolha uma versão publicada e com arquivo privado verificado. A liberação é individual e não ocorre automaticamente."
         title="Liberar conteúdo"
       >
         {publishedVersionsAwaitingAsset.length > 0 ? (
@@ -111,6 +112,7 @@ export default async function AdminClientContentPage({
                 : "Não há versão publicada disponível para uma nova liberação nesta cliente."
             }
             title="Nenhum conteúdo disponível para liberar"
+            action={<Link href="/admin/conteudos">Gerenciar biblioteca de conteúdos</Link>}
           />
         ) : (
           <Card>
@@ -133,8 +135,9 @@ export default async function AdminClientContentPage({
       >
         {releases.length === 0 ? (
           <EmptyState
-            description="Novas liberações aparecerão nesta área."
+            description="Ainda não há conteúdo liberado para esta cliente. Verifique as versões disponíveis acima ou prepare o material na biblioteca administrativa."
             title="Nenhum conteúdo foi liberado para esta cliente"
+            action={<Link href="/admin/conteudos">Abrir biblioteca de conteúdos</Link>}
           />
         ) : (
           <ul className={styles.contentList}>
