@@ -10,6 +10,8 @@ import { Card } from "@/components/ui/Card";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
 import { Section } from "@/components/ui/Section";
+import Link from "next/link";
+import { parseCheckinHistoryDay, saoPauloCheckinDayRange } from "@/lib/checkins/history-day";
 import { loadSupportedLiquidTaxonomy } from "@/lib/method/liquid-taxonomy-loader";
 import { latestCheckinCorrectionsByEvent } from "@/lib/checkins/effective-corrections";
 import {
@@ -25,7 +27,7 @@ import styles from "./page.module.css";
 
 type PageProps = {
   params: Promise<{ clienteId: string }>;
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; dia?: string }>;
 };
 
 function formatMl(value: number) {
@@ -47,15 +49,18 @@ export default async function AdminClientCheckinsPage({
   searchParams,
 }: PageProps) {
   const { clienteId } = await params;
-  const { status } = await searchParams;
+  const { status, dia } = await searchParams;
   const client = await getAccessibleClient(clienteId);
 
   if (!client) {
     notFound();
   }
 
+  const today = new Intl.DateTimeFormat("en-CA", { year: "numeric", month: "2-digit", day: "2-digit", timeZone: "America/Sao_Paulo" }).format(new Date());
+  const selectedDay = parseCheckinHistoryDay(dia, today);
+  const selectedRange = selectedDay ? saoPauloCheckinDayRange(selectedDay) : null;
   const [liquidEvents, activityEvents, liquidTaxonomy] = await Promise.all([
-    listAccessibleClientLiquidIntakeEvents(client.id),
+    listAccessibleClientLiquidIntakeEvents(client.id, selectedRange?.recordedFrom, selectedRange?.recordedBefore),
     listAccessibleClientActivityCheckinEvents(client.id),
     loadSupportedLiquidTaxonomy(),
   ]);
@@ -64,7 +69,7 @@ export default async function AdminClientCheckinsPage({
     liquidTaxonomy.kinds.map((kind) => [kind.key, kind.label]),
   );
 
-  const recentLiquidEvents = liquidEvents.slice(0, 30);
+  const recentLiquidEvents = selectedRange ? liquidEvents : liquidEvents.slice(0, 30);
   const recentActivityEvents = activityEvents.slice(0, 30);
   const [liquidCorrections, activityCorrections] = await Promise.all([
     listAccessibleClientLiquidIntakeEventCorrections(
@@ -118,9 +123,16 @@ export default async function AdminClientCheckinsPage({
       </Section>
 
       <Section
-        description="Até 30 registros recentes de ingestão. Cada item mostra o valor vigente e preserva o original quando corrigido."
+        description={selectedRange ? "Registros do dia selecionado. Cada item mostra o valor vigente e preserva o original quando corrigido." : "Até 30 registros recentes de ingestão. Cada item mostra o valor vigente e preserva o original quando corrigido."}
         title="Líquidos recentes"
       >
+        <form action={`/admin/clientes/${client.id}/checkins`} className={styles.form} method="get">
+          <label className={styles.field}>Consultar líquidos por dia
+            <input defaultValue={selectedDay ?? today} max={today} name="dia" required type="date" />
+          </label>
+          <Button type="submit" variant="secondary">Consultar histórico</Button>
+          {selectedRange ? <Link href={`/admin/clientes/${client.id}/checkins`}>Ver registros recentes</Link> : null}
+        </form>
         {recentLiquidEvents.length === 0 ? (
           <p className={styles.description}>Ainda não existem registros de líquidos desta cliente para consultar ou corrigir.</p>
         ) : (
@@ -150,6 +162,7 @@ export default async function AdminClientCheckinsPage({
                         className={styles.form}
                       >
                         <input name="eventId" type="hidden" value={event.id} />
+                        {selectedDay ? <input name="historyDay" type="hidden" value={selectedDay} /> : null}
                         <label className={styles.field}>
                           <span>Quantidade em mL</span>
                           <input defaultValue={effectiveAmount} min="1" name="amountMl" required type="number" />

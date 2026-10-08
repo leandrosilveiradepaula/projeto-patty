@@ -177,6 +177,7 @@ export async function listAccessibleClientHydrationTargets(clientId: string) {
 export async function listAccessibleClientLiquidIntakeEvents(
   clientId: string,
   recordedFrom?: string,
+  recordedBefore?: string,
 ) {
   const supabase = await createClient();
   let query = supabase
@@ -188,6 +189,9 @@ export async function listAccessibleClientLiquidIntakeEvents(
 
   if (recordedFrom) {
     query = query.gte("recorded_at", recordedFrom);
+  }
+  if (recordedBefore) {
+    query = query.lt("recorded_at", recordedBefore);
   }
 
   const { data, error } = await query;

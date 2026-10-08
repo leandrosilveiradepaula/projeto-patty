@@ -11,6 +11,8 @@ import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
+import { parseCheckinHistoryDay, saoPauloCheckinDayRange } from "@/lib/checkins/history-day";
+import Link from "next/link";
 import { loadSupportedLiquidTaxonomy } from "@/lib/method/liquid-taxonomy-loader";
 import { latestCheckinCorrectionsByEvent } from "@/lib/checkins/effective-corrections";
 import {
@@ -45,13 +47,13 @@ function formatMl(value: number) {
 }
 
 type ClientCheckinsPageProps = {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; dia?: string }>;
 };
 
 export default async function ClientCheckinsPage({
   searchParams,
 }: ClientCheckinsPageProps) {
-  const { status } = await searchParams;
+  const { status, dia } = await searchParams;
   const client = await getCurrentClient();
 
   if (!client) {
@@ -64,11 +66,12 @@ export default async function ClientCheckinsPage({
   }
 
   const today = saoPauloDate(new Date());
-  const recentFrom = new Date(Date.now() - 36 * 60 * 60 * 1000).toISOString();
+  const selectedDay = parseCheckinHistoryDay(dia, today) ?? today;
+  const range = saoPauloCheckinDayRange(selectedDay);
 
   const [recentLiquidEvents, activityEvents, liquidTaxonomy] =
     await Promise.all([
-      listAccessibleClientLiquidIntakeEvents(client.id, recentFrom),
+      listAccessibleClientLiquidIntakeEvents(client.id, range.recordedFrom, range.recordedBefore),
       listAccessibleClientActivityCheckinEvents(client.id, today),
       loadSupportedLiquidTaxonomy(),
     ]);
@@ -99,8 +102,9 @@ export default async function ClientCheckinsPage({
       wasCorrected: Boolean(correction),
     };
   });
-  const todayLiquidEvents = effectiveLiquidEvents.filter(
-    (event) => saoPauloDate(event.recorded_at) === today,
+  const todayLiquidEvents = selectedDay === today ? effectiveLiquidEvents : [];
+  const displayedLiquidEvents = effectiveLiquidEvents.filter(
+    (event) => saoPauloDate(event.recorded_at) === selectedDay,
   );
   const totalMl = todayLiquidEvents.reduce(
     (sum, event) => sum + event.effectiveAmountMl,
@@ -173,6 +177,7 @@ export default async function ClientCheckinsPage({
         title="Líquidos"
       >
         <div className={styles.grid}>
+          {selectedDay === today ? (
           <Card className={styles.summaryCard}>
             <div className={styles.summaryHeader}>
               <h3 className={styles.cardTitle}>Hoje</h3>
@@ -193,6 +198,12 @@ export default async function ClientCheckinsPage({
               Os registros são classificados conforme a taxonomia ativa. O sistema não aplica automaticamente uma meta diária nem uma proporção mínima entre os tipos de líquido.
             </p>
           </Card>
+
+          ) : (
+            <Card className={styles.summaryCard}>
+              <p className={styles.note}>Você está consultando líquidos de {selectedDay}. O resumo de hoje aparece ao voltar para a data atual.</p>
+            </Card>
+          )}
 
           <Card className={styles.formCard}>
             <h3 className={styles.cardTitle}>Adicionar líquido</h3>
@@ -276,18 +287,25 @@ export default async function ClientCheckinsPage({
       </Section>
 
       <Section
-        description="Você pode corrigir registros recentes sem apagar o que foi informado originalmente."
-        title="Histórico de líquidos de hoje"
+        description="Consulte um dia específico para corrigir registros antigos sem apagar o valor original."
+        title={selectedDay === today ? "Histórico de líquidos de hoje" : `Histórico de líquidos de ${selectedDay}`}
       >
-        {todayLiquidEvents.length === 0 ? (
+        <form action="/cliente/checkins" className={styles.form} method="get">
+          <label className={styles.field}>Consultar dia
+            <input defaultValue={selectedDay} max={today} name="dia" required type="date" />
+          </label>
+          <Button type="submit" variant="secondary">Consultar histórico</Button>
+          {selectedDay !== today ? <Link href="/cliente/checkins">Voltar para hoje</Link> : null}
+        </form>
+        {displayedLiquidEvents.length === 0 ? (
           <EmptyState
-            description="Não há líquidos registrados hoje. Se desejar informar um consumo, use o formulário acima; não existe meta automática de hidratação."
+            description={selectedDay === today ? "Não há líquidos registrados hoje. Se desejar informar um consumo, use o formulário acima; não existe meta automática de hidratação." : "Não há líquidos registrados no dia selecionado."}
             title="Nenhum líquido registrado hoje"
             action={<a href="#registrar-liquidos">Ir para registro</a>}
           />
         ) : (
           <ol className={styles.historyList}>
-            {todayLiquidEvents.map((event) => (
+            {displayedLiquidEvents.map((event) => (
               <li key={event.id}>
                 <Card className={styles.historyCard} variant="subtle">
                   <div className={styles.summaryHeader}>
@@ -302,6 +320,7 @@ export default async function ClientCheckinsPage({
                     <summary>Corrigir registro</summary>
                     <form action={correctLiquidIntakeAction} className={styles.form}>
                       <input name="eventId" type="hidden" value={event.id} />
+                      <input name="historyDay" type="hidden" value={selectedDay} />
                       <label className={styles.field}>
                         <span>Quantidade em mL</span>
                         <input

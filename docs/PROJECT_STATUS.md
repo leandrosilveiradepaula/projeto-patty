@@ -3160,3 +3160,8 @@ A área de Avaliações da cliente ordena explicitamente registros por data decr
 ## Correção vigente dos Check-ins — 2026-10-08
 
 Uma auditoria identificou que as leituras de Check-ins da cliente e da Patty montavam Map diretamente a partir de correções ordenadas por data decrescente: quando havia várias correções no mesmo evento, o Map terminava com a mais antiga, produzindo valor vigente incorreto. Ambas as telas passam a selecionar explicitamente a correção de maior `created_at` e, em empate, maior `id`, independentemente da ordem do retorno. Os eventos e correções originais seguem append-only e preservados; o código não cria score nem meta de hidratação. Os testes de `lib/checkins` foram incorporados a `test:clients` para execução pela CI. Sem schema, migrations, Auth ou RLS.
+
+
+## Consulta histórica de líquidos nos Check-ins — 2026-10-08
+
+As telas de Check-ins da cliente e da Patty permitem consultar registros de líquidos por dia civil de São Paulo, inclusive datas anteriores sem limite de negócio. A seleção é validada e a consulta ao backend usa intervalo limitado ao dia. Correções preservam o dia consultado na navegação após sucesso, mantendo o histórico append-only e os valores originais. O resumo de líquidos de hoje não é apresentado com zero enganoso ao consultar outra data. Sem alterações em schema, RLS, Auth, migrations, regra de hidratação ou score de adesão. Testes determinísticos de data e limite de consulta incluídos em `test:clients`.

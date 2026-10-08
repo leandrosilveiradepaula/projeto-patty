@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { parseCheckinHistoryDay } from "@/lib/checkins/history-day";
 import { loadSupportedLiquidTaxonomy } from "@/lib/method/liquid-taxonomy-loader";
 import { createLiquidIntakeWithMethodSnapshot } from "@/lib/method/liquid-persistence";
 import { requireRole } from "@/lib/supabase/auth";
@@ -152,7 +153,8 @@ export async function correctLiquidIntakeAction(formData: FormData) {
 
   revalidatePath("/cliente");
   revalidatePath("/cliente/checkins");
-  redirect("/cliente/checkins?status=correction-recorded");
+  const historyDay = parseCheckinHistoryDay(formData.get("historyDay"), currentSaoPauloDate());
+  redirect("/cliente/checkins?status=correction-recorded" + (historyDay ? "&dia=" + historyDay : ""));
 }
 
 export async function correctActivityCheckinAction(formData: FormData) {
