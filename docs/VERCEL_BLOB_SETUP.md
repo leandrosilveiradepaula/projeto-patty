@@ -66,8 +66,8 @@ O primeiro video aprovado possui 123.262.796 bytes (~117,6 MiB), portanto o stor
 
 Antes de publicar:
 - confirmar que o acesso continuara privado;
-- validar requests HTTP Range end-to-end no deploy real; o route handler agora encaminha Range ao Private Blob e preserva 206/Content-Range, mas isso nao substitui a validacao de producao;
-- validar comportamento real de entrega do arquivo completo no ambiente de producao;
+- validar requests HTTP Range end-to-end no deploy real; a rota autenticada agora emite uma URL privada assinada, curta e limitada ao pathname/GET, e redireciona o browser para o Blob sem fazer proxy do binario pela Function;
+- validar comportamento real de entrega do arquivo completo no ambiente de producao, inclusive retomada/seek do video pela URL assinada;
 - medir latencia e consumo/transferencia com fixture ou acesso controlado;
 - confirmar que o volume esperado de clientes e compativel com essa forma de entrega;
 - se a entrega se mostrar inadequada, revisar a infraestrutura sem tornar o objeto publico por conveniencia.
