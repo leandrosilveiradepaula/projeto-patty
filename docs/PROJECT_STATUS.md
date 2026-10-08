@@ -3030,3 +3030,16 @@ A preparacao auditavel de IA recebeu um hardening de privacidade antes de qualqu
 - testes protegem contexto e payload do provider.
 
 O gate OpenAI de dados reais continua fechado. Este bloco reduz superficie de dados, mas nao substitui a verificacao externa de retencao/ZDR/MAM nem a aprovacao humana exigida.
+
+
+## Recuperacao auditavel de execucoes de IA - 2026-10-07
+
+Foi fechado o gap operacional de executions de IA presas em `started`:
+- a tela da revisao da Anamnese oferece reconciliacao manual somente para execution sem estado terminal;
+- a Patty precisa registrar um motivo antes de encerrar como falha;
+- o banco distingue `manual_recovery` de falhas reais do provider;
+- a transicao exige assignment ativo e ocorre por boundary server-side/service-role;
+- nao existe timeout automatico nem retry automatico, evitando inferir que uma requisicao externa falhou apenas por idade;
+- regressao de banco protege estado, motivo e ausencia de grant direto a `authenticated`.
+
+O gate OpenAI para dados reais continua fechado e independente desta melhoria.
