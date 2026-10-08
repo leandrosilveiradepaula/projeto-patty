@@ -12,7 +12,7 @@
     "test:content": "node --experimental-strip-types --test lib/content/*.test.ts",
     "test:follow-up": "node --experimental-strip-types --test lib/follow-up/*.test.ts",
     "test:ai": "node --experimental-strip-types --test lib/ai/*.test.ts",
-    "test:e2e-helpers": "node --test e2e/helpers/*.test.mjs && node --check e2e/client-operational-navigation.spec.mjs && node --check e2e/client-anamnesis-canonical-start.spec.mjs && node --check e2e/client-anamnesis-conditional-submit.spec.mjs",
+    "test:e2e-helpers": "node --test e2e/helpers/*.test.mjs && node --check e2e/client-operational-navigation.spec.mjs && node --check e2e/client-anamnesis-canonical-start.spec.mjs && node --check e2e/client-anamnesis-conditional-submit.spec.mjs && node --check e2e/client-onboarding-activation.spec.mjs",
     "test:validation": "node --experimental-strip-types --test lib/validation/*.test.ts",
     "test:assignments": "node --experimental-strip-types --test lib/assignments/*.test.ts",
     "test:onboarding": "node --experimental-strip-types --test lib/onboarding/*.test.ts",
