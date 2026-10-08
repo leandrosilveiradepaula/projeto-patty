@@ -74,3 +74,30 @@ test("unpublished protocol isolation uses synthetic draft and refuses historical
   assert.match(cleanup, /Refusing cleanup of approved or published protocol history/);
   assert.ok(cleanup.indexOf('from("protocols").select("id")') < cleanup.indexOf('from("clients").delete()'));
 });
+
+// The browser suites must test the actual automatic save workflow, not the
+// removed explicit save button. Otherwise the manually dispatched E2E never
+// exercises persistence at all.
+test("Anamnesis browser E2E matches automatic save controls and durable persistence", () => {
+  const canonical = read("e2e/client-anamnesis-canonical-start.spec.mjs");
+  const conditional = read("e2e/client-anamnesis-conditional-submit.spec.mjs");
+  const textForm = read("components/client/ClientAnamnesisDraftTextAnswerForm.tsx");
+  const choiceForm = read("components/client/ClientAnamnesisDraftSingleChoiceAnswerForm.tsx");
+  const submitForm = read("components/client/ClientAnamnesisSubmitForm.tsx");
+  for (const suite of [canonical, conditional]) {
+    assert.doesNotMatch(suite, /getByRole\("button", \{ name: "Salvar no rascunho" \}/);
+  }
+  assert.match(textForm, /onBlur=\{saveIfChanged\}/);
+  assert.match(textForm, /requestSubmit\(\)/);
+  assert.match(choiceForm, /requestSubmit\(\)/);
+  assert.match(canonical, /await city\.blur\(\)/);
+  assert.match(canonical, /await detail\.blur\(\)/);
+  assert.match(canonical, /historicalDetail/);
+  assert.match(canonical, /respostas obrigatórias salvas/);
+  assert.match(conditional, /expect\.poll\(savedControllerAnswer/);
+  assert.match(submitForm, /Antes de enviar, confira as respostas/);
+  assert.match(conditional, /Antes de enviar, confira as respostas/);
+  const workflow = read(".github/workflows/e2e-client-anamnesis-conditional-submit.yml");
+  assert.match(workflow, /npx playwright test e2e\/client-anamnesis-conditional-submit\.spec\.mjs/);
+  assert.match(workflow, /if: always\(\)/);
+});

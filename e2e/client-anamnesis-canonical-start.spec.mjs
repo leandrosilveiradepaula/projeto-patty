@@ -149,6 +149,16 @@ test("cliente percorre start, resume, edita e aplica condicional da Anamnese can
 
       await expect(page).toHaveURL(/\/cliente\/anamnese\/[0-9a-f-]+$/);
       await expect(page.getByText("Rascunho", { exact: true })).toBeVisible();
+      await expect(
+        page.getByText(/^\d+ de \d+ respostas obrigatórias salvas$/),
+      ).toBeVisible();
+      const nextMissing = page.getByRole("link", {
+        name: "Ir para a primeira pergunta obrigatória sem resposta",
+      });
+      await expect(nextMissing).toBeVisible();
+      const missingHref = await nextMissing.getAttribute("href");
+      expect(missingHref).toMatch(/^#pergunta-[0-9a-f-]+$/);
+      await expect(page.locator(missingHref)).toHaveCount(1);
 
       draftId = page.url().split("/").at(-1) ?? null;
       if (!draftId) throw new Error("Could not resolve created draft id.");
@@ -187,14 +197,11 @@ test("cliente percorre start, resume, edita e aplica condicional da Anamnese can
 
     await test.step("insere e atualiza Cidade sem duplicar resposta", async () => {
       const city = draftTextField(page, canonical.city.id);
-      const cityForm = formContaining(page, city);
-
       await expect(city).toBeVisible();
 
+      // Text fields save automatically after blur or a short pause.
       await city.fill("Porto Alegre E2E");
-      await cityForm
-        .getByRole("button", { name: "Salvar no rascunho" })
-        .click();
+      await city.blur();
 
       await expect
         .poll(async () => {
@@ -204,13 +211,9 @@ test("cliente percorre start, resume, edita e aplica condicional da Anamnese can
         .toEqual(["Porto Alegre E2E"]);
 
       const refreshedCity = draftTextField(page, canonical.city.id);
-      const refreshedCityForm = formContaining(page, refreshedCity);
-
       await expect(refreshedCity).toBeVisible();
       await refreshedCity.fill("Cidade E2E atualizada");
-      await refreshedCityForm
-        .getByRole("button", { name: "Salvar no rascunho" })
-        .click();
+      await refreshedCity.blur();
 
       await expect
         .poll(async () => {
@@ -218,6 +221,16 @@ test("cliente percorre start, resume, edita e aplica condicional da Anamnese can
           return answers.map((answer) => answer.answer_value);
         }, { timeout: 20_000 })
         .toEqual(["Cidade E2E atualizada"]);
+
+      // The progress summary is server-derived; a reload must reflect real
+      // persisted answers without relying on a stale client-side counter.
+      await page.reload();
+      await expect(
+        page.getByText(/^\d+ de \d+ respostas obrigatórias salvas$/),
+      ).toBeVisible();
+      await expect(
+        draftTextField(page, canonical.city.id),
+      ).toHaveValue("Cidade E2E atualizada");
     });
 
     await test.step("ativa a pergunta condicional com Sim", async () => {
@@ -229,10 +242,9 @@ test("cliente percorre start, resume, edita e aplica condicional da Anamnese can
         .locator("form")
         .filter({ hasText: canonical.source.label });
 
+      // Choice fields auto-submit on selection and re-open the detail
+      // page after a controller changes applicability.
       await sourceForm.getByLabel("Sim", { exact: true }).check();
-      await sourceForm
-        .getByRole("button", { name: "Salvar no rascunho" })
-        .click();
 
       await expect
         .poll(async () => {
@@ -252,14 +264,10 @@ test("cliente percorre start, resume, edita e aplica condicional da Anamnese can
 
     await test.step("salva o detalhe condicional", async () => {
       const detail = draftTextField(page, canonical.detail.id);
-      const detailForm = formContaining(page, detail);
-
       await expect(detail).toBeVisible();
 
       await detail.fill("Plano E2E");
-      await detailForm
-        .getByRole("button", { name: "Salvar no rascunho" })
-        .click();
+      await detail.blur();
 
       await expect
         .poll(async () => {
@@ -275,9 +283,6 @@ test("cliente percorre start, resume, edita e aplica condicional da Anamnese can
         .filter({ hasText: canonical.source.label });
 
       await sourceForm.getByLabel("Nao", { exact: true }).check();
-      await sourceForm
-        .getByRole("button", { name: "Salvar no rascunho" })
-        .click();
 
       await expect
         .poll(async () => {
@@ -293,6 +298,10 @@ test("cliente percorre start, resume, edita e aplica condicional da Anamnese can
       await expect(
         draftTextField(page, canonical.detail.id),
       ).toHaveCount(0, { timeout: 20_000 });
+
+      // A hidden historical answer is preserved even after applicability changes.
+      const historicalDetail = await loadAnswer(draftId, canonical.detail.id);
+      expect(historicalDetail.map((item) => item.answer_value)).toEqual(["Plano E2E"]);
     });
 
     const submission = await admin
