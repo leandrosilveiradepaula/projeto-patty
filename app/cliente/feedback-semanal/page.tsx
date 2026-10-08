@@ -115,7 +115,7 @@ export default async function ClientWeeklyFeedbackPage({
         <>
           <Section
             action={<Badge variant={pendingFeedbacks.length > 0 ? "warning" : "neutral"}>{pendingFeedbacks.length} pendente(s)</Badge>}
-            description="Feedbacks que ainda podem ser preenchidos e enviados."
+            description="Respostas ainda não enviadas. Abra a semana desejada para continuar um rascunho ou concluir o envio."
             title="Pendentes"
           >
             {pendingFeedbacks.length === 0 ? (
@@ -229,7 +229,7 @@ export default async function ClientWeeklyFeedbackPage({
 
           <Section
             action={<Badge variant="neutral">{submittedFeedbacks.length} enviado(s)</Badge>}
-            description="Feedbacks já enviados ficam preservados e podem ser consultados quando você precisar."
+            description="Consulte respostas já enviadas. Esses registros permanecem preservados e não podem ser editados por aqui."
             title="Histórico enviado"
           >
             {submittedFeedbacks.length === 0 ? (
