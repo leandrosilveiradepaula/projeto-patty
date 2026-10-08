@@ -177,6 +177,7 @@ export default async function ClientCheckinsPage({
         title="Líquidos"
       >
         <div className={styles.grid}>
+          {selectedDay === today ? (
           <Card className={styles.summaryCard}>
             <div className={styles.summaryHeader}>
               <h3 className={styles.cardTitle}>Hoje</h3>
@@ -197,6 +198,12 @@ export default async function ClientCheckinsPage({
               Os registros são classificados conforme a taxonomia ativa. O sistema não aplica automaticamente uma meta diária nem uma proporção mínima entre os tipos de líquido.
             </p>
           </Card>
+
+          ) : (
+            <Card className={styles.summaryCard}>
+              <p className={styles.note}>Você está consultando líquidos de {selectedDay}. O resumo de hoje aparece ao voltar para a data atual.</p>
+            </Card>
+          )}
 
           <Card className={styles.formCard}>
             <h3 className={styles.cardTitle}>Adicionar líquido</h3>
