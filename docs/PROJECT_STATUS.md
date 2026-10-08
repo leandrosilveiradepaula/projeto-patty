@@ -1,3 +1,11 @@
+## Auditoria integrada - continuidade de avaliacoes e protocolos na fila administrativa - 2026-10-08
+
+A fila operacional da Patty inclui rascunhos de avaliacao e estados de versao de protocolos, mas varias transicoes administrativas nao invalidavam a rota /admin/pendencias. A criacao inicial/recuperacao de protocolos e a criacao/finalizacao de avaliacoes agora revalidam a fila, o painel administrativo e as fichas correspondentes somente depois da operacao confirmada. O helper compartilhado de lifecycle de protocolos foi atualizado para manter a fila coerente entre edicao, revisao, aprovacao e publicacao manuais.
+
+A correcao append-only de medida em avaliacao finalizada revalidava a evolucao da cliente, mas nao a pagina de avaliacoes/medidas. Ambas passam a refletir a correcao historica sem editar o registro original. Os testes de contrato verificam as transicoes e rotas consumidoras.
+
+Atualizacao restrita a coerencia de interface/cache: sem mudanca de calculo, criterios clinicos, aprovacoes, publicacoes, Auth, schema, migrations ou RLS. CI nao substitui E2E autenticado.
+
 ## Auditoria integrada - compensacao segura de convites e identidade Auth - 2026-10-08
 
 O fluxo anterior de convite de cliente podia tentar localizar `clients` por `profile_id` quando a insercao da cliente ainda nao tinha ocorrido e, em caso de falha, excluir um cadastro preexistente. Tambem apagava o usuario Auth retornado por `inviteUserByEmail`/`generateLink` sem prova de que ele havia sido criado na tentativa corrente. Isso era perigoso para contas/atendimentos historicos e em casos de erro ou concorrencia.

@@ -460,6 +460,8 @@ export async function finalizeAssessmentAction(
   revalidatePath(`/admin/clientes/${assessment.client_id}/avaliacoes`);
   revalidatePath(`/admin/clientes/${assessment.client_id}/evolucao`);
   revalidatePath("/admin/avaliacoes");
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
   revalidatePath("/cliente");
   revalidatePath("/cliente/avaliacoes");
   revalidatePath("/cliente/evolucao");
@@ -542,6 +544,7 @@ export async function correctFinalizedAssessmentMeasurementAction(
   revalidatePath("/admin/clientes/" + assessment.client_id);
   revalidatePath("/admin/clientes/" + assessment.client_id + "/avaliacoes");
   revalidatePath("/admin/clientes/" + assessment.client_id + "/evolucao");
+  revalidatePath("/cliente/avaliacoes");
   revalidatePath("/cliente/evolucao");
 
   return {

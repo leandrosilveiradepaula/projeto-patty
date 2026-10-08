@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
 import { loadSupportedAssessmentKindOptions } from "@/lib/evaluations/assessment-configuration-loader";
 import { parseAssessmentDate } from "@/lib/evaluations/assessment-draft";
@@ -66,5 +67,10 @@ export async function createAssessmentAction(
     };
   }
 
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
+  revalidatePath("/admin/avaliacoes");
+  revalidatePath(`/admin/clientes/${client.id}`);
+  revalidatePath(`/admin/clientes/${client.id}/avaliacoes`);
   redirect(`/admin/avaliacoes/${assessment.id}`);
 }
