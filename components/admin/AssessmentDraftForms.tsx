@@ -317,9 +317,11 @@ export function AssessmentPhotoUnlinkButton({
 
 export function AssessmentFinalizeForm({
   assessmentId,
+  canFinalize,
   readinessItems,
 }: {
   assessmentId: string;
+  canFinalize: boolean;
   readinessItems: Array<{
     key: string;
     label: string;
@@ -348,6 +350,12 @@ export function AssessmentFinalizeForm({
         </ul>
       </div>
 
+      {!canFinalize ? (
+        <p className={styles.notice} role="status">
+          A finalização estará disponível quando todos os itens obrigatórios acima estiverem registrados.
+        </p>
+      ) : null}
+
       <label className={styles.confirmation}>
         <input name="confirmFinalization" required type="checkbox" value="yes" />
         <span>
@@ -357,7 +365,7 @@ export function AssessmentFinalizeForm({
         </span>
       </label>
 
-      <Button loading={isPending} type="submit">
+      <Button disabled={!canFinalize} loading={isPending} type="submit">
         Finalizar avaliação
       </Button>
     </form>

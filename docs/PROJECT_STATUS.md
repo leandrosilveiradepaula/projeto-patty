@@ -3140,3 +3140,8 @@ Os tres indicadores da home administrativa agora apontam para o grupo correspond
 ## Filtros versionados das bibliotecas administrativas — 2026-10-08
 
 As bibliotecas de Conteudos e Exercicios passam a calcular independentemente a versao atual e a ultima versao publicada. Um novo rascunho nao oculta a publicacao anterior no filtro Publicados; o mesmo item pode aparecer em Rascunhos e Publicados, conforme seu historico, exibindo explicitamente que a versao atual segue em rascunho. O runtime nao altera a publicacao, liberacao, prescricao ou permissao de acesso; a mudanca e apenas na leitura e filtragem administrativa, com testes determinísticos.
+
+
+## UX de finalização de avaliações — 2026-10-08
+
+O detalhe administrativo de Avaliação utiliza o nome canônico da cliente, apresenta requisitos de finalização a partir da definição profissional ativa (sem lista fixa no texto), e desabilita a ação de finalizar quando a checagem determinística já identifica itens obrigatórios ausentes. O servidor mantém a validação obrigatória independente da interface. Quando não há outra foto privada disponível para vincular, a tela oferece acesso ao workspace privado de arquivos da mesma cliente. Sem mudanças em migrations, schema, RLS, Auth, armazenamento ou regras profissionais.
