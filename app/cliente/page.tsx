@@ -17,6 +17,7 @@ import {
 } from "@/lib/supabase/data-access";
 import Link from "next/link";
 import { latestPublishedTrainingVersion } from "@/lib/training/published-versions";
+import { loadClientClarificationSummary } from "@/lib/follow-up/client-clarification-summary-loader";
 import styles from "./page.module.css";
 
 function saoPauloDate(value: Date | string) {
@@ -65,6 +66,12 @@ export default async function ClientePage() {
     ? await listAccessibleClientTrainingPlanVersions(trainingPlan.id)
     : [];
   const latestPublishedTraining = latestPublishedTrainingVersion(trainingVersions);
+  const clarificationSummary = await loadClientClarificationSummary(
+    anamneses.filter((item) => item.submitted_at !== null).map((item) => item.id),
+  );
+  const clarificationHref = clarificationSummary.firstAwaitingClient
+    ? `/cliente/anamnese/${clarificationSummary.firstAwaitingClient.submissionId}/esclarecimentos#esclarecimento-${clarificationSummary.firstAwaitingClient.id}`
+    : null;
   const currentAnamnesisDraft = anamneses.find(
     (submission) => submission.submitted_at === null,
   );
@@ -95,6 +102,15 @@ export default async function ClientePage() {
         href: `/cliente/anamnese/${currentAnamnesisDraft.id}`,
         label: "Continuar Anamnese",
       }
+    : clarificationHref
+      ? {
+          badge: `${clarificationSummary.awaitingClient} pendente(s)`,
+          badgeVariant: "warning" as const,
+          description:
+            "A Patty pediu informações adicionais. Consulte o pedido e responda sem alterar a Anamnese enviada.",
+          href: clarificationHref,
+          label: "Responder esclarecimento",
+        }
     : !hasSubmittedAnamnesis
       ? {
           badge: "Começar",
@@ -175,6 +191,11 @@ export default async function ClientePage() {
         </Link>
 
         <div className={styles.routineActions} aria-label="Acessos rápidos">
+          {clarificationHref && primaryAction.href !== clarificationHref ? (
+            <Link className={styles.routineActionLink} href={clarificationHref}>
+              Esclarecimentos ({clarificationSummary.awaitingClient})
+            </Link>
+          ) : null}
           {primaryAction.href !== "/cliente/checkins" &&
           hasPendingDailyCheckin ? (
             <Link className={styles.routineActionLink} href="/cliente/checkins">
