@@ -988,7 +988,7 @@ test("core Patty pendings deep-link to the exact review action", () => {
   );
   assert.equal(
     items.find((item) => item.kind === "protocol_submitted_not_approved")?.href,
-    "/admin/protocolos/protocol-1#versao-4",
+    "/admin/protocolos/protocol-1?versao=4#versao-4",
   );
 });
 
@@ -1040,4 +1040,25 @@ test("non-anamnesis AI execution keeps the generic operations fallback", () => {
   });
 
   assert.equal(items[0]?.href, "/admin/ia");
+});
+
+test("protocol drafts remain actionable alongside released and pending versions", () => {
+  const shared = { clientId: "c", clientLabel: "Cliente", protocolId: "p" };
+  const items = buildOperationalPendingItems({
+    aiExecutions: [], anamnesisSubmissions: [], assessments: [],
+    clarificationReminderIntervalHours: 24, clarificationRequests: [],
+    protocolVersions: [
+      { ...shared, id: "draft", createdAt: "2026-10-08T10:00:00Z", submittedForReviewAt: null, approvalCount: 0, publicationCount: 0, versionNumber: 4 },
+      { ...shared, id: "released", createdAt: "2026-10-01T10:00:00Z", submittedForReviewAt: "2026-10-01T12:00:00Z", approvalCount: 1, publicationCount: 1, versionNumber: 3 },
+      { ...shared, id: "approved", createdAt: "2026-09-28T10:00:00Z", submittedForReviewAt: "2026-09-28T12:00:00Z", approvalCount: 1, publicationCount: 0, versionNumber: 2 },
+      { ...shared, id: "review", createdAt: "2026-09-26T10:00:00Z", submittedForReviewAt: "2026-09-26T12:00:00Z", approvalCount: 0, publicationCount: 0, versionNumber: 1 },
+    ],
+  });
+  assert.deepEqual(new Set(items.map(item => item.kind)), new Set([
+    "protocol_draft", "protocol_approved_not_published", "protocol_submitted_not_approved",
+  ]));
+  assert.equal(items.find(item => item.kind === "protocol_draft")?.href, "/admin/protocolos/p?versao=4#versao-4");
+  assert.equal(items.find(item => item.kind === "protocol_approved_not_published")?.href, "/admin/protocolos/p?versao=2#versao-2");
+  assert.equal(items.find(item => item.kind === "protocol_submitted_not_approved")?.href, "/admin/protocolos/p?versao=1#versao-1");
+  assert.equal(getOperationalPendingGroup(items.find(item => item.kind === "protocol_draft")!), "patty");
 });
