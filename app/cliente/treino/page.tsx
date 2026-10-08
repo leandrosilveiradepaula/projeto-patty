@@ -14,6 +14,7 @@ import {
 } from "@/lib/supabase/data-access";
 
 import styles from "./page.module.css";
+import Link from "next/link";
 
 function formatDateTime(value: string) {
   return new Intl.DateTimeFormat("pt-BR", {
@@ -125,11 +126,13 @@ export default async function ClientTrainingPage() {
                 : "Quando houver uma solicitação e a Patty publicar seu treino, ele aparecerá aqui."
             }
             title="Nenhum treino publicado"
+            action={requests.length === 0 ? <a href="#solicitar-treino">Ir para solicitação</a> : <Link href="/cliente">Voltar ao início</Link>}
           />
         )}
       </Section>
 
       <Section
+        id="solicitar-treino"
         description="A Patty verá a solicitação no seu histórico de acompanhamento."
         title="Solicitar treino"
       >
@@ -144,8 +147,9 @@ export default async function ClientTrainingPage() {
       >
         {requests.length === 0 ? (
           <EmptyState
-            description="Você ainda não registrou nenhuma solicitação de treino."
+            description="Ainda não há solicitações no histórico. Use o formulário de Solicitar treino acima se desejar registrar uma."
             title="Sem solicitações"
+            action={<a href="#solicitar-treino">Ir para solicitação</a>}
           />
         ) : (
           <div className={styles.requestHistory}>
