@@ -1,3 +1,9 @@
+## Auditoria integrada - retomar protocolo sem versao - 2026-10-08
+
+A criacao do primeiro protocolo grava protocolo e versao em duas operacoes. Falha intermediaria com compensacao incompleta podia deixar protocolo sem versao e bloquear a Patty. A listagem agora distingue esse estado e oferece recuperacao explicita, com validacao da identidade administrativa, autorizacao da cliente, ownership do protocolo e ausencia de versoes. Concorrencia de abas e tratada reconsultando versoes apos falha da insercao, usando a constraint existente unique(protocol_id, version_number). A compensacao de exclusao agora exige linha retornada antes de confirmar sucesso; falhas apresentam mensagens acionaveis, nao erro bruto. O historico existente e preservado e nada e aprovado/publicado automaticamente.
+
+Testes deterministas de contratos foram adicionados ao grupo de protocolos. E2E autenticado permanece pendente, sem alegacao de sucesso em ambiente real. Sem migrations, schema, RLS, Auth, alteracao profissional ou IA. PR #550 mantido separado.
+
 ## Auditoria integrada - rascunhos e navegacao de protocolos - 2026-10-08
 
 A fila administrativa passa a reconhecer versoes de protocolos ainda em rascunho como pendencias de trabalho da Patty mesmo quando uma versao anterior ja foi publicada. O resumo da cliente tambem apresenta a edicao pendente como proxima acao depois das etapas anteriores, sem confundir rascunho com publicacao. Links de pendencias para revisao, aprovacao e publicacao agora abrem a versao exata via `?versao=N#versao-N`, inclusive quando nao e a ultima versao. Testes deterministas exercitam a convivencia de versoes em rascunho, publicadas, aprovadas e em revisao. Sem publicacao automatica, schema/migrations, Auth/RLS ou regras profissionais.
