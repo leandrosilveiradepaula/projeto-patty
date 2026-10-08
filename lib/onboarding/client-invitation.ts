@@ -32,7 +32,6 @@ async function cleanupFailedProvision(input: {
   userId: string;
 }) {
   const admin = createAdminClient();
-  let failed = false;
 
   if (input.clientId) {
     const assignmentCleanup = await admin
@@ -41,7 +40,7 @@ async function cleanupFailedProvision(input: {
       .eq("client_id", input.clientId)
       .eq("staff_profile_id", input.staffProfileId);
 
-    if (assignmentCleanup.error) failed = true;
+    if (assignmentCleanup.error) return false;
 
     const { data, error } = await admin
       .from("clients")
@@ -51,7 +50,9 @@ async function cleanupFailedProvision(input: {
       .select("id")
       .single();
 
-    if (error || !data) failed = true;
+    // Do not delete the profile if its client could not be removed; the FK
+    // would otherwise detach a professional record from its identity.
+    if (error || !data) return false;
   }
 
   if (input.roleCreated) {
@@ -62,7 +63,7 @@ async function cleanupFailedProvision(input: {
       .eq("role", "client")
       .select("profile_id")
       .single();
-    if (error || !data) failed = true;
+    if (error || !data) return false;
   }
 
   if (input.profileCreated) {
@@ -72,11 +73,11 @@ async function cleanupFailedProvision(input: {
       .eq("id", input.userId)
       .select("id")
       .single();
-    if (error || !data) failed = true;
+    if (error || !data) return false;
   }
 
   // Never delete an Auth user here: the returned identity may predate the invite.
-  return !failed;
+  return true;
 }
 
 async function provisionInvitedUser(input: {
