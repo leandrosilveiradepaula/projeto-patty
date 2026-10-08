@@ -1,3 +1,4 @@
+import { clarificationFollowupStatus, clarificationStatusLabel, clarificationStatusVariant } from "@/lib/follow-up/clarification-status";
 import { ClientAnamnesisClarificationResponseForm } from "@/components/client/ClientAnamnesisClarificationResponseForm";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
@@ -68,6 +69,7 @@ export default async function ClientAnamnesisClarificationsPage({ params }: Page
     responsesByRequestId.set(response.clarification_request_id, entries);
   }
 
+  const firstAwaitingClientId = requests.find((r) => !resolvedRequestIds.has(r.id) && !(responsesByRequestId.get(r.id)?.length))?.id;
   return (
     <>
       <PageHeader
@@ -80,20 +82,22 @@ export default async function ClientAnamnesisClarificationsPage({ params }: Page
         {requests.length === 0 ? (
           <EmptyState description="Não há pedidos de esclarecimento para esta Anamnese." title="Nenhum esclarecimento solicitado" />
         ) : (
+          <>
+            {firstAwaitingClientId ? <p className={styles.jump}><Link href={`#esclarecimento-${firstAwaitingClientId}`}>Ir para o primeiro pedido aguardando sua resposta</Link></p> : null}
           <div className={styles.list}>
             {requests.map((request) => {
               const sourceAnswer = request.source_answer_id ? answersById.get(request.source_answer_id) : undefined;
               const sourceQuestion = sourceAnswer ? questionsById.get(sourceAnswer.question_id) : undefined;
               const requestResponses = responsesByRequestId.get(request.id) ?? [];
               const resolved = resolvedRequestIds.has(request.id);
+              const status = clarificationFollowupStatus({ hasResponse: requestResponses.length > 0, resolved });
               return (
-                <Card className={styles.entry} key={request.id}>
+                <div id={`esclarecimento-${request.id}`} key={request.id}>
+                <Card className={styles.entry}>
                   <div className={styles.entryHeader}>
                     <h2 className={styles.entryTitle}>Pedido da Patty</h2>
                     <div className={styles.statusGroup}>
-                      <Badge variant={resolved ? "positive" : "warning"}>
-                        {resolved ? "Resolvido" : "Aguardando resposta"}
-                      </Badge>
+                      <Badge variant={clarificationStatusVariant(status)}>{clarificationStatusLabel(status, "client")}</Badge>
                       <Badge variant="neutral">{formatDateTime(request.created_at)}</Badge>
                     </div>
                   </div>
@@ -118,15 +122,17 @@ export default async function ClientAnamnesisClarificationsPage({ params }: Page
                       Este pedido já foi marcado como resolvido pela Patty e não aceita novos complementos.
                     </p>
                   ) : (
-                    <ClientAnamnesisClarificationResponseForm
-                      requestId={request.id}
-                      submissionId={submission.id}
-                    />
+                    <>
+                      {status === "awaiting_professional" ? <p className={styles.meta}>Seu complemento já foi registrado. A Patty ainda precisa revisar; você pode acrescentar informações enquanto este pedido estiver aberto.</p> : null}
+                      <ClientAnamnesisClarificationResponseForm requestId={request.id} submissionId={submission.id} />
+                    </>
                   )}
                 </Card>
+                </div>
               );
             })}
           </div>
+          </>
         )}
       </Section>
     </>
