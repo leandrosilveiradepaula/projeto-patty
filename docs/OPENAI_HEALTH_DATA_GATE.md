@@ -195,3 +195,19 @@ O builder de contexto foi endurecido para separar informacao operacional/contato
 Capacidade financeira para suplementos/medicamentos continua fora do contexto automatico e so pode entrar por opt-in explicito da Patty para aquela execution. Se estiver sem resposta, ela tambem nao vira alvo automatico de `missing_answer`.
 
 Essa regra e aplicada antes da montagem do request OpenAI. O provider recebe apenas o contexto ja minimizado.
+
+
+## Recuperacao manual de execution interrompida - 2026-10-07
+
+Execucoes de IA que permanecem em `started` sem timestamp terminal agora possuem um caminho auditavel de reconciliacao humana. A Patty/admin pode encerrar explicitamente a execution como falha, informando um motivo entre 10 e 500 caracteres.
+
+A recuperacao:
+- nao usa timeout inventado;
+- nao presume se o provider processou ou nao a requisicao;
+- nao cria output;
+- registra `failure_stage=recovery` e `failure_code=manual_recovery`;
+- exige admin ainda atribuido a cliente;
+- passa por RPC interna service-role, sem grant direto ao browser;
+- preserva as fontes e a identidade imutavel da execution original.
+
+Esse mecanismo fecha o gap operacional de executions interrompidas, mas nao altera o gate de dados reais nem autoriza nova chamada automaticamente.
