@@ -163,13 +163,14 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
             {pendingFeedbacks.length} pendente(s)
           </Badge>
         }
-        description="Solicitações que ainda aguardam envio da cliente."
+        description="Solicitações registradas que ainda aguardam envio da cliente. A ausência de resposta não exige revisão profissional imediata."
         title="Pendentes"
       >
         {pendingFeedbacks.length === 0 ? (
           <EmptyState
-            description="Não há Feedback Semanal aguardando resposta neste momento."
+            description="Não existem solicitações abertas aguardando a cliente. Se precisar criar uma solicitação manual específica, use o formulário acima."
             title="Nenhum feedback pendente"
+            action={<a href="#solicitar-feedback">Ir para solicitação</a>}
           />
         ) : (
           <ol className={styles.list}>
@@ -216,12 +217,12 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
 
       <Section
         action={<Badge variant="neutral">{submittedFeedbacks.length} enviado(s)</Badge>}
-        description="Feedbacks concluídos permanecem preservados e podem ser consultados quando necessário."
+        description="Respostas efetivamente enviadas pela cliente, preservadas para consulta e decisão profissional da Patty."
         title="Histórico enviado"
       >
         {submittedFeedbacks.length === 0 ? (
           <EmptyState
-            description="Depois que a cliente enviar um Feedback Semanal, ele aparecerá aqui."
+            description="Ainda não há respostas enviadas pela cliente. Solicitações abertas, quando existentes, permanecem na seção Pendentes."
             title="Nenhum feedback enviado ainda"
           />
         ) : (

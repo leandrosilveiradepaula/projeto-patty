@@ -3105,3 +3105,8 @@ Check-ins oferece retorno direto ao formulário de líquidos quando o histórico
 ## Clareza temporal em Check-ins e Feedback Semanal — 2026-10-08
 
 A interface identifica explicitamente o histórico de líquidos como referente a hoje e o estado efetivo de atividade como registro de hoje. Em Feedback Semanal, os rascunhos permanecem editáveis até envio e as respostas enviadas são apresentadas como histórico não editável. Apenas textos e testes de regressão; não houve alteração de persistência, regras profissionais, RLS, Auth ou migrations.
+
+
+## Clareza operacional em Feedback Semanal e Anamnese administrativa — 2026-10-08
+
+Feedback Semanal distingue solicitações aguardando a cliente de respostas enviadas e oferece retorno ao formulário manual quando a fila está vazia. Anamnese distingue explicitamente rascunhos da cliente de submissões finalizadas e preserva a leitura das respostas originais. Nenhuma situação aguardando cliente foi convertida em revisão ou decisão automática da Patty. Mudanças apenas de mensagens e navegação, com regressão; sem schema, RLS, migrations ou regras profissionais.
