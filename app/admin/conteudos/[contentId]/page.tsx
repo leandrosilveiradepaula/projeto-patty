@@ -255,8 +255,10 @@ export default async function AdminEducationalContentDetailPage({
                     value="yes"
                   />
                   <span>
-                    Confirmo que o objeto privado já existe e que tamanho e
-                    SHA-256 foram verificados contra o arquivo migrado.
+                    Confirmo que o objeto privado já existe e que tamanho,
+                    MIME e SHA-256 foram verificados contra o arquivo migrado.
+                    O sistema também confere existência, path, tamanho e MIME
+                    diretamente no Blob antes de registrar os metadados.
                   </span>
                 </label>
                 <Button type="submit">Registrar asset verificado</Button>
