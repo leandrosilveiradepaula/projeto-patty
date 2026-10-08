@@ -53,7 +53,7 @@ async function findAdminProfileId(email) {
 async function cleanupSyntheticClient({ clientId, profileId, email }) {
   // Destructive service-role cleanup is reserved for this exact synthetic
   // identity. Never delete a user selected only by a supplied profile ID.
-  if (!/^e2e-onboarding-[0-9]+@example\\.invalid$/.test(email ?? "")) {
+  if (!/^e2e-onboarding-[0-9]+@example\.invalid$/.test(email ?? "")) {
     throw new Error("Refusing cleanup of a non-synthetic onboarding identity.");
   }
   const authUser = await admin.auth.admin.getUserById(profileId);
