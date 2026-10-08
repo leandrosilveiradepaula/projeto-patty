@@ -159,7 +159,7 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
       ) : null}
       <Section
         description="A versão mais recente fica aberta para trabalho. Escolha uma versão para expandir seu histórico, sem alterar o que já foi publicado."
-        title="Versão atual e histórico"
+        title="Versões e histórico"
       >
         {versions.length === 0 ? (
           <EmptyState description="Nenhuma versão está acessível para este protocolo." title="Sem versões registradas" />
