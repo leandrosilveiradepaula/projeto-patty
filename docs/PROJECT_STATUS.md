@@ -3057,3 +3057,10 @@ Validacoes operacionais:
 - permanece o aviso operacional conhecido de Leaked Password Protection desabilitada, dependente da configuracao/plano do Supabase.
 
 Status deste bloco: implementado, mergeado, aplicado e validado no SaaS. O gate OpenAI para dados reais continua fechado e independente.
+
+
+## UX do convite inicial — 2026-10-08
+
+A interface de criacao de cliente passou a explicitar que convite automatico e link manual sao caminhos alternativos de criacao de uma nova conta, nao mecanismos de reenvio. A mensagem do link manual orienta tratamento como credencial temporaria e copia antes de sair da pagina. Erros de conta existente encaminham ao fluxo de recuperacao de acesso, sem duplicar identidade.
+
+Este lote nao implementa politica de expiracao/reenvio, nao altera Supabase Auth, nao envia emails reais e nao muda assignments/RLS. Essas pendencias permanecem abertas.

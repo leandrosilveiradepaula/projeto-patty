@@ -52,7 +52,7 @@ export function ClientInviteForm() {
       </FormField>
 
       <FormField
-        description="Esse endereço será usado como email de autenticação. O email de contato da cliente continua sendo um dado cadastral separado."
+        description="Este procedimento cria uma nova conta. Não use para reenviar convite ou recuperar conta existente. Esse endereço será usado como email de autenticação. O email de contato da cliente continua sendo um dado cadastral separado."
         id="client-invitation-email"
         label="Email da cliente"
         required
@@ -70,7 +70,7 @@ export function ClientInviteForm() {
       </FormField>
 
       <Button loading={isPending} type="submit">
-        Enviar convite
+        Criar cliente e enviar convite
       </Button>
     </form>
   );
