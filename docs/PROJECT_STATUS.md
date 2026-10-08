@@ -3043,3 +3043,17 @@ Foi fechado o gap operacional de executions de IA presas em `started`:
 - regressao de banco protege estado, motivo e ausencia de grant direto a `authenticated`.
 
 O gate OpenAI para dados reais continua fechado e independente desta melhoria.
+
+
+## Aplicacao da recuperacao de IA no Supabase SaaS - 2026-10-07
+
+A migration `add_ai_execution_manual_recovery` foi aplicada ao projeto Supabase de producao apos o merge do PR #527 e validada diretamente no banco.
+
+Validacoes operacionais:
+- migration registrada no historico remoto;
+- `authenticated` nao possui EXECUTE em `recover_started_ai_execution(uuid,uuid,text)`;
+- `service_role` possui EXECUTE;
+- advisor de seguranca nao apontou nova vulnerabilidade de schema/RLS causada por esta migration;
+- permanece o aviso operacional conhecido de Leaked Password Protection desabilitada, dependente da configuracao/plano do Supabase.
+
+Status deste bloco: implementado, mergeado, aplicado e validado no SaaS. O gate OpenAI para dados reais continua fechado e independente.
