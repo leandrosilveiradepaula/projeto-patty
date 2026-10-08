@@ -188,7 +188,7 @@ export default async function AdminAvaliacaoDetailPage({
         file.original_filename?.trim() ||
         `Foto de ${formatAssessmentDate(file.created_at)}`,
     }));
-  const displayName = assessment.clients?.profiles?.display_name?.trim();
+  const displayName = assessment.clients?.full_name?.trim() || assessment.clients?.profiles?.display_name?.trim();
   const internalNotes = followUps.filter(
     (followUp) => Boolean(followUp.patty_observation?.trim()),
   );
@@ -401,6 +401,12 @@ export default async function AdminAvaliacaoDetailPage({
               assessmentId={assessment.id}
               photos={availablePhotos}
             />
+            {availablePhotos.length === 0 ? (
+              <p className={styles.cardDescription}>
+                Não há outras fotos privadas disponíveis para vincular. Se precisar cadastrar uma nova foto,
+                acesse os <Link href={`/admin/clientes/${assessment.client_id}/arquivos`}>arquivos privados da cliente</Link>.
+              </p>
+            ) : null}
           </Card>
         </Section>
       ) : null}
@@ -435,13 +441,14 @@ export default async function AdminAvaliacaoDetailPage({
       </Section>
       {isDraft ? (
         <Section
-          description="Finalizar congela data, tipo, medidas e vínculos de foto. A Básica exige peso, cintura, abdômen e quadril; a Completa exige o catálogo corporal confirmado e pelo menos uma foto."
+          description="Finalizar congela data, tipo, medidas e vínculos de foto. Os itens obrigatórios são os da configuração profissional ativa para este tipo de avaliação, apresentados abaixo."
           id="finalizar"
           title="Finalizar avaliação"
         >
           <Card>
             <AssessmentFinalizeForm
               assessmentId={assessment.id}
+              canFinalize={finalizationReadiness?.canFinalizeDeterministically ?? false}
               readinessItems={finalizationReadiness?.items ?? []}
             />
           </Card>
