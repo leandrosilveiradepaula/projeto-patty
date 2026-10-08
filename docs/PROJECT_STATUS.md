@@ -3005,3 +3005,16 @@ A interface administrativa agora possui caminho direto para transferir um arquiv
 - upload e registro continuam etapas separadas; registrar exige confirmacao humana e a verificacao server-side do objeto real implementada anteriormente.
 
 Nenhum arquivo foi transferido neste PR. O primeiro video aprovado continua pendente de selecao/upload real pela interface, verificacao pos-upload e validacao de entrega >100 MB antes de publicacao/release.
+
+
+## Gate de publicacao de video educacional - 2026-10-07
+
+Foi fechado um risco de lifecycle identificado apos a habilitacao do upload direto: uma versao de video poderia ser publicada antes do registro do asset, criando um estado sem caminho seguro de correcao pela interface.
+
+Agora:
+- o dominio reconhece somente o tipo confirmado `video` como obrigatoriamente dependente de asset para publicar;
+- a server action revalida a existencia do asset no momento da publicacao;
+- a UI desabilita a publicacao e explica o motivo enquanto o video estiver sem asset registrado;
+- tipos ainda nao formalizados nao recebem regra por inferencia.
+
+O primeiro video da balanca permanece em rascunho e sem publicacao/release ate que o upload real, registro do asset e validacao de entrega sejam concluidos.
