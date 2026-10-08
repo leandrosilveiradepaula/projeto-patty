@@ -73,3 +73,18 @@ test("admin training screens use the same latest publication selector as the cli
   assert.match(home, /latestPublishedTrainingVersion\(trainingVersions\)/);
   assert.match(client, /publishedTrainingVersions\(trainingVersions\)/);
 });
+
+// New training requests must remain visible even when an older prescription is published.
+test("new request after published training remains visible in admin queue, overview and workspace", () => {
+  const facts = read("lib/operations/pending-data.ts");
+  const pending = read("lib/operations/pending.ts");
+  const overview = read("app/admin/clientes/[clienteId]/page.tsx");
+  const workspace = read("app/admin/clientes/[clienteId]/treino/page.tsx");
+  assert.match(facts, /isTrainingRequestAfterPublication\(request\.requested_at, latestPublication\.published_at\)/);
+  assert.match(facts, /state: "requested_after_publication"/);
+  assert.match(pending, /training_request_after_publication/);
+  assert.match(overview, /trainingWorkspaceState\.kind === "new_request"/);
+  assert.match(workspace, /newRequestAfterPublication/);
+  assert.match(workspace, /Ver solicitação/);
+  assert.doesNotMatch(workspace, /newRequestAfterPublication\s*\?\s*createAccessibleClientTrainingPlanDraft/);
+});

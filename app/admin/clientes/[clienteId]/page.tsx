@@ -1,5 +1,6 @@
 import { AdminClientNameEditForm } from "@/components/admin/AdminClientNameEditForm";
 import { latestPublishedTrainingVersion } from "@/lib/training/published-versions";
+import { isTrainingRequestAfterPublication } from "@/lib/training/request-follow-up";
 import { AdminEndClientAssignmentForm } from "@/components/admin/AdminEndClientAssignmentForm";
 import { AdminClientRegistrationEditForm } from "@/components/admin/AdminClientRegistrationEditForm";
 import { AdminClientRecoveryLinkForm } from "@/components/admin/AdminClientRecoveryLinkForm";
@@ -101,6 +102,13 @@ export default async function AdminClienteDetailPage({
   const openTrainingVersion =
     trainingVersions.find((version) => !version.published_at) ?? null;
   const latestPublishedTraining = latestPublishedTrainingVersion(trainingVersions);
+  const newTrainingRequestAfterPublication = Boolean(
+    trainingRequests[0] && latestPublishedTraining &&
+    isTrainingRequestAfterPublication(
+      trainingRequests[0].requested_at,
+      latestPublishedTraining.published_at,
+    ),
+  );
   const trainingWorkspaceState = openTrainingVersion?.reviewed_at
     ? {
         badge: "Pronto para publicar",
@@ -113,6 +121,12 @@ export default async function AdminClienteDetailPage({
           description: `A versão ${openTrainingVersion.version_number} está em edição e ainda não foi revisada.`,
           kind: "draft" as const,
         }
+      : newTrainingRequestAfterPublication
+        ? {
+            badge: "Nova solicitação",
+            description: "A cliente enviou uma nova solicitação após a última publicação. A Patty decide os próximos passos.",
+            kind: "new_request" as const,
+          }
       : latestPublishedTraining
         ? {
             badge: "Publicado",
@@ -404,6 +418,15 @@ export default async function AdminClienteDetailPage({
                             label: "Continuar treino",
                             title: "Treino em rascunho",
                           }
+                        : trainingWorkspaceState.kind === "new_request"
+                          ? {
+                              description:
+                                "A cliente registrou uma nova solicitação depois do último treino publicado. Revise o pedido antes de decidir se haverá outra prescrição.",
+                              eyebrow: "Ação da Patty",
+                              href: `/admin/clientes/${client.id}/treino#solicitacao-treino`,
+                              label: "Revisar solicitação",
+                              title: "Nova solicitação de treino",
+                            }
                         : trainingWorkspaceState.kind === "requested"
                           ? {
                               description:

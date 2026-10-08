@@ -25,6 +25,8 @@ import {
   type PendingTrainingLifecycle,
 } from "@/lib/operations/pending";
 import { loadClarificationReminderInterval } from "@/lib/operations/clarification-reminder-loader";
+import { latestPublishedTrainingVersion } from "@/lib/training/published-versions";
+import { isTrainingRequestAfterPublication } from "@/lib/training/request-follow-up";
 import {
   listPendingAnamnesisSubmissionsForClients,
   listPendingAnamnesisReviewsForSubmissions,
@@ -123,6 +125,13 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
       .filter((version) => !version.published_at)
       .map((version) => [version.training_plan_id, version]),
   );
+  const publishedVersionsByPlanId = new Map<string, typeof trainingVersions>();
+  for (const version of trainingVersions) {
+    if (!version.published_at) continue;
+    const values = publishedVersionsByPlanId.get(version.training_plan_id) ?? [];
+    values.push(version);
+    publishedVersionsByPlanId.set(version.training_plan_id, values);
+  }
   const latestRequestByClientId = new Map<
     string,
     (typeof trainingRequests)[number]
@@ -154,6 +163,22 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
     const openVersion = openTrainingVersionByPlanId.get(plan.id);
 
     if (!openVersion) {
+      const latestPublication = latestPublishedTrainingVersion(
+        publishedVersionsByPlanId.get(plan.id) ?? [],
+      );
+      if (
+        request && latestPublication &&
+        isTrainingRequestAfterPublication(request.requested_at, latestPublication.published_at)
+      ) {
+        return [{
+          clientId: client.id,
+          clientLabel: clientLabel(client.full_name || client.profiles?.display_name),
+          createdAt: request.requested_at,
+          id: request.id,
+          state: "requested_after_publication" as const,
+          versionNumber: latestPublication.version_number,
+        }];
+      }
       return [];
     }
 

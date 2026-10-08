@@ -14,6 +14,7 @@ export type OperationalPendingItemKind =
   | "protocol_draft"
   | "protocol_submitted_not_approved"
   | "training_requested_without_plan"
+  | "training_request_after_publication"
   | "training_draft"
   | "training_reviewed_not_published"
   | "weekly_feedback_awaiting_response"
@@ -114,7 +115,7 @@ export type PendingTrainingLifecycle = {
   clientLabel: string;
   createdAt: string;
   id: string;
-  state: "requested_without_plan" | "draft" | "reviewed_not_published";
+  state: "requested_without_plan" | "requested_after_publication" | "draft" | "reviewed_not_published";
   versionNumber: number | null;
 };
 
@@ -389,6 +390,22 @@ export function buildOperationalPendingItems(
         kind: "training_requested_without_plan",
         statusLabel: "Solicitado, sem plano",
         title: "Treino solicitado",
+      });
+      continue;
+    }
+
+    if (training.state === "requested_after_publication") {
+      items.push({
+        clientId: training.clientId,
+        clientLabel: training.clientLabel,
+        createdAt: training.createdAt,
+        description:
+          "Uma nova solicitação de treino foi registrada depois da última publicação. Revise o pedido e decida manualmente se será necessária uma nova prescrição; o treino publicado permanece disponível.",
+        href: `/admin/clientes/${training.clientId}/treino#solicitacao-treino`,
+        id: `training-request-followup:${training.id}`,
+        kind: "training_request_after_publication",
+        statusLabel: "Nova solicitação",
+        title: "Revisar nova solicitação de treino",
       });
       continue;
     }
