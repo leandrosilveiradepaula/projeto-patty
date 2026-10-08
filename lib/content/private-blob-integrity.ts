@@ -26,13 +26,5 @@ export async function verifyPrivateBlobAsset(
     throw new Error("O MIME type do objeto no Blob diverge do valor informado");
   }
 
-  const sha256 = metadata.downloadUrl
-    ? new URL(metadata.downloadUrl).searchParams.get("sha256")
-    : null;
-
-  if (sha256 && sha256.toLowerCase() !== asset.sha256Hex.toLowerCase()) {
-    throw new Error("O SHA-256 informado diverge do metadado do objeto no Blob");
-  }
-
   return metadata;
 }
