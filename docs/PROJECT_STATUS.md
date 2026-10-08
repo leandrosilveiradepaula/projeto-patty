@@ -1,3 +1,11 @@
+## Auditoria integrada - fila operacional com leituras em lotes - 2026-10-08
+
+A fila de pendencias e o painel administrativo carregavam em separado Anamneses, Feedbacks Semanais e eventos de notificacao para cada cliente; para cada Anamnese enviada eram feitas leituras individuais de revisoes e esclarecimentos e, para cada protocolo, leitura individual de versoes. Esse padrao N+1 crescia diretamente com o numero de clientes e criava espera desnecessaria antes de a Patty enxergar suas proximas acoes.
+
+A coleta agora usa batches RLS-scoped para essas seis familias de fatos. IDs sao deduplicados e divididos em lotes de 100, com paginacao de 500 linhas por consulta, ordenacao estavel e falha explicita em erro ou retorno nulo. A projeção carrega somente campos operacionais, evitando transportar texto da Anamnese ou respostas completas de Feedback para a fila. O agrupamento e a ordem dos itens continuaram no mesmo motor deterministico; nenhuma regra profissional, permissionamento, versao, publicacao, migration ou schema foi modificado. Testes de paginacao e contratos impedem regressao para consultas por cliente/protocolo.
+
+O CI verifica testes e build, mas nao significa que a latencia em SaaS foi medida. O E2E autenticado da jornada completa permanece pendente; PR #550 da Anamnese continua separado.
+
 ## Auditoria integrada - historico de treinos publicados - 2026-10-08
 
 A area da cliente mostrava somente o treino publicado com maior numero de versao e nao oferecia acesso aos exercicios de prescricoes anteriores. Como a publicacao e evento humano versionado, a selecao passa a usar `published_at` decrescente com desempate estavel por ID; a mesma funcao deterministica e utilizada na home da cliente, na ficha e no workspace administrativo de treino. A cliente agora pode abrir historicos anteriores efetivamente publicados, com seus exercicios e orientacoes persistidos. Rascunhos e versoes apenas revisadas nao entram na lista. Testes cobrem ordem temporal, desempate e isolamento de rascunhos, alem dos contratos das telas.
