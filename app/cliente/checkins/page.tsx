@@ -225,6 +225,7 @@ export default async function ClientCheckinsPage({
       </Section>
 
       <Section
+        id="atividade-fisica"
         description="O check-in é independente do treino prescrito. Se precisar corrigir a resposta do dia, um novo registro preserva o histórico anterior."
         title="Atividade física"
       >
@@ -235,8 +236,8 @@ export default async function ClientCheckinsPage({
               {effectiveDidActivity === null
                 ? "Ainda não registrado"
                 : effectiveDidActivity
-                  ? "Último registro: sim"
-                  : "Último registro: não"}
+                  ? "Registrado hoje: sim"
+                  : "Registrado hoje: não"}
             </Badge>
           </div>
           <form
@@ -279,7 +280,7 @@ export default async function ClientCheckinsPage({
 
       <Section
         description="Você pode corrigir registros recentes sem apagar o que foi informado originalmente."
-        title="Histórico de líquidos"
+        title="Histórico de líquidos de hoje"
       >
         {todayLiquidEvents.length === 0 ? (
           <EmptyState
