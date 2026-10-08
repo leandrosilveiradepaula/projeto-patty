@@ -288,6 +288,13 @@ export default async function AdminEducationalContentDetailPage({
                       <p className={styles.mono}>
                         SHA-256: {asset.sha256_hex}
                       </p>
+                      <Link
+                        className={styles.backLink}
+                        href={`/admin/conteudos/assets/${asset.id}`}
+                        target="_blank"
+                      >
+                        Abrir arquivo privado
+                      </Link>
                     </div>
                     <Badge variant="positive">Registrado</Badge>
                   </div>
