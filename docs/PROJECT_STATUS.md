@@ -3076,3 +3076,10 @@ A tela de recuperação individual da cliente agora oferece cópia direta do lin
 O workspace da cliente agora distingue identidade vinculada de ativacao/login verificados. A solicitacao de convite aceita pelo Supabase nao e apresentada como comprovante de entrega de email. O link manual nao e recuperavel da pagina anterior; a interface orienta a nao criar cadastro duplicado e a utilizar o fluxo apropriado de recuperacao de acesso.
 
 Esta melhoria e de comunicacao operacional, nao altera lifecycle de Auth, schema, assignments ou RLS. O sistema ainda nao possui telemetria de entrega/ativacao nessa tela e nao deve simular esses estados.
+
+
+### Reconciliacao adicional do estado de acesso no painel
+
+A mesma precisao foi aplicada aos pontos adjacentes do fluxo administrativo: a lista de clientes nao afirma mais que o email de convite foi entregue; a trilha de atendimento nao marca acesso como concluido apenas pela existencia de `profile_id`; rotulos usam identidade vinculada como fato observavel; falhas do convite automatico evitam afirmar que nenhum email foi enviado; e falha de link manual orienta recuperacao quando a identidade ja existe, sem sugerir novo cadastro.
+
+O lote permanece estritamente de UX e comunicacao operacional. Nao adiciona telemetria de entrega, nao infere ativacao/login, nao altera Supabase Auth, schema, migrations, assignments ou RLS.

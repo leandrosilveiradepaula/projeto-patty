@@ -26,7 +26,7 @@ export function ClientInviteForm() {
       {state.message ? (
         <Alert
           live="assertive"
-          title="Convite não enviado"
+          title="Não foi possível concluir"
           variant="critical"
         >
           {state.message}

@@ -489,7 +489,7 @@ export default async function AdminClienteDetailPage({
       />
 
       {query.onboarding === "invited" ? (
-        <Alert live="polite" title="Cliente convidada" variant="success">
+        <Alert live="polite" title="Solicitação de convite registrada" variant="success">
           A conta inicial foi criada e o Supabase aceitou a solicitação de envio do convite. A entrega do email e a ativação ainda não foram verificadas. Você já pode continuar o cadastro e preparar as próximas etapas do atendimento.
         </Alert>
       ) : query.onboarding === "link-generated" ? (
@@ -537,8 +537,8 @@ export default async function AdminClienteDetailPage({
                 </p>
               </div>
             </div>
-            <Badge variant={client.profile_id ? "positive" : "warning"}>
-              {client.profile_id ? "Concluído" : "Pendente"}
+            <Badge variant={client.profile_id ? "info" : "warning"}>
+              {client.profile_id ? "Identidade vinculada" : "Sem vínculo"}
             </Badge>
           </li>
 

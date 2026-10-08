@@ -95,8 +95,8 @@ export default async function AdminClientesPage({
         title="Clientes"
       />
       {onboarding === "invited" ? (
-        <Alert live="polite" title="Convite enviado" variant="success">
-          A conta inicial da cliente foi provisionada e o convite de ativação foi enviado.
+        <Alert live="polite" title="Solicitação de convite registrada" variant="success">
+          A conta inicial da cliente foi criada e o Supabase aceitou a solicitação de envio do convite. A entrega do email e a ativação ainda não foram verificadas.
         </Alert>
       ) : assignment === "ended" ? (
         <Alert live="polite" title="Acompanhamento encerrado" variant="success">
@@ -200,7 +200,7 @@ export default async function AdminClientesPage({
                     }
                     meta={
                       !client.profile_id
-                        ? "Vincule a conta da cliente para concluir o cadastro."
+                        ? "Vincule a identidade de acesso da cliente para concluir o cadastro."
                         : nextPattyPending
                           ? `${nextPattyPending.title} · ${clientPattyPendingItems.length} item(ns) na fila da Patty`
                           : "Sem item na fila da Patty"
@@ -213,7 +213,7 @@ export default async function AdminClientesPage({
                           ? client.status === "active"
                             ? "Cliente ativa"
                             : "Cliente inativa"
-                          : "Conta da cliente ainda não vinculada"
+                          : "Identidade de acesso não vinculada"
                     }
                     status={
                       !displayName ? (
