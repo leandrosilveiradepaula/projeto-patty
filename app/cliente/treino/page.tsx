@@ -80,7 +80,7 @@ export default async function ClientTrainingPage() {
 
       {newRequestAfterPublication ? (
         <Alert title="Nova solicitação registrada" variant="info">
-          Você fez uma nova solicitação de treino depois da publicação atual.
+          Uma nova solicitação de treino foi registrada depois da publicação atual.
           A Patty poderá revisar o pedido e decidir se é necessária uma nova prescrição.
           Enquanto isso, o treino já publicado continua disponível abaixo.
           {" "}<a href="#suas-solicitacoes">Ver solicitação</a>
