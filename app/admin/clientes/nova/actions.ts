@@ -60,7 +60,7 @@ export async function inviteClient(
       if (error.code === "invite_failed") {
         return {
           message:
-            "Não foi possível enviar o convite. Verifique se esse email já possui uma conta ou tente novamente.",
+            "Não foi possível enviar o convite. Verifique se esse email já possui uma conta. Se já existir, utilize recuperação de acesso; não crie outro cadastro.",
         };
       }
     }
@@ -149,7 +149,7 @@ export async function generateManualClientInvite(
       activationLink: activationUrl.toString(),
       clientId: result.clientId,
       message:
-        "Link gerado. Envie este endereço somente para a cliente correspondente.",
+        "Conta criada e link gerado. Copie o endereço antes de sair da página e envie somente para a cliente correspondente.",
       success: true,
     };
   } catch (error) {
