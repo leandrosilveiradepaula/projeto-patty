@@ -50,8 +50,26 @@ async function findAdminProfileId(email) {
   return user.id;
 }
 
-async function cleanupSyntheticClient({ clientId, profileId }) {
+async function cleanupSyntheticClient({ clientId, profileId, email }) {
+  // Destructive service-role cleanup is reserved for this exact synthetic
+  // identity. Never delete a user selected only by a supplied profile ID.
+  if (!/^e2e-onboarding-[0-9]+@example\\.invalid$/.test(email ?? "")) {
+    throw new Error("Refusing cleanup of a non-synthetic onboarding identity.");
+  }
+  const authUser = await admin.auth.admin.getUserById(profileId);
+  if (authUser.error || authUser.data.user?.email !== email) {
+    throw new Error("Synthetic Auth ownership verification failed.");
+  }
+
   if (clientId) {
+    const linkedClient = await admin
+      .from("clients")
+      .select("id, profile_id")
+      .eq("id", clientId)
+      .single();
+    if (linkedClient.error || linkedClient.data?.profile_id !== profileId) {
+      throw new Error("Synthetic client ownership verification failed.");
+    }
     const assignment = await admin
       .from("client_assignments")
       .delete()
@@ -59,9 +77,15 @@ async function cleanupSyntheticClient({ clientId, profileId }) {
 
     if (assignment.error) throw assignment.error;
 
-    const client = await admin.from("clients").delete().eq("id", clientId);
+    const client = await admin.from("clients").delete()
+      .eq("id", clientId)
+      .eq("profile_id", profileId)
+      .select("id")
+      .single();
 
-    if (client.error) throw client.error;
+    if (client.error || !client.data) {
+      throw client.error ?? new Error("Synthetic client deletion not confirmed.");
+    }
   }
 
   if (profileId) {
@@ -76,9 +100,9 @@ async function cleanupSyntheticClient({ clientId, profileId }) {
 
     if (profile.error) throw profile.error;
 
-    const authUser = await admin.auth.admin.deleteUser(profileId);
+    const deletedAuthUser = await admin.auth.admin.deleteUser(profileId);
 
-    if (authUser.error) throw authUser.error;
+    if (deletedAuthUser.error) throw deletedAuthUser.error;
   }
 }
 
@@ -131,7 +155,7 @@ test("convite sintetico ativa conta, cria senha e permite novo login", async ({
 
     const client = await admin
       .from("clients")
-      .insert({ profile_id: profileId })
+      .insert({ profile_id: profileId, full_name: "E2E Onboarding Client", status: "active" })
       .select("id")
       .single();
 
@@ -187,7 +211,7 @@ test("convite sintetico ativa conta, cria senha e permite novo login", async ({
     await activationContext?.close();
 
     if (profileId) {
-      await cleanupSyntheticClient({ clientId, profileId });
+      await cleanupSyntheticClient({ clientId, profileId, email });
     }
   }
 });
