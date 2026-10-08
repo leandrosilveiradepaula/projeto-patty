@@ -24,3 +24,20 @@ test("assessment photo workflow links to the existing private file workspace",()
  assert.match(page,/availablePhotos\.length === 0/);
  assert.match(page,/\/arquivos\`\}/);
 });
+
+test("assessment draft removal and photo linking require a confirmed affected row", () => {
+  const access = read("lib/supabase/data-access.ts");
+  const chunk = access.slice(access.indexOf("export async function deleteAccessibleAssessmentMeasurement"), access.indexOf("export async function listCurrentClientFinalizedAssessmentMeasurements"));
+  for (const name of ["deleteAccessibleAssessmentMeasurement", "linkAccessibleAssessmentPhoto", "unlinkAccessibleAssessmentPhoto"]) {
+    const section = chunk.slice(chunk.indexOf("export async function " + name), chunk.indexOf("export async function ", chunk.indexOf("export async function " + name) + 1) < 0 ? undefined : chunk.indexOf("export async function ", chunk.indexOf("export async function " + name) + 1));
+    assert.match(section, /\.select\(/);
+    assert.match(section, /\.single\(\)/);
+    assert.match(section, /if \(error \|\| !data\)/);
+  }
+});
+test("finalized assessments invalidate both the administrative and client journeys", () => {
+  const actions = read("app/admin/avaliacoes/[avaliacaoId]/actions.ts");
+  const section = actions.slice(actions.indexOf("export async function finalizeAssessmentAction"), actions.indexOf("export type AssessmentCorrectionFormState"));
+  assert.match(section, /revalidatePath\("\/cliente\/avaliacoes"\)/);
+  assert.match(section, /revalidatePath\("\/cliente\/evolucao"\)/);
+});
