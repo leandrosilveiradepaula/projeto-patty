@@ -1,5 +1,6 @@
 import "server-only";
 import { collectTrainingHistoryRows } from "@/lib/training/history-batches";
+import { collectPublishedProtocolRows } from "@/lib/protocol/published-read-pagination";
 
 import type { Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
@@ -2952,16 +2953,17 @@ export async function listPublishedProtocolsForCurrentClient(
   clientId: string,
 ): Promise<CurrentClientPublishedProtocol[]> {
   const supabase = await createClient();
-  const { data: publications, error: publicationsError } = await supabase
-    .from("protocol_publications")
-    .select("id, protocol_version_id, published_at")
-    .eq("client_id", clientId)
-    .order("published_at", { ascending: false })
-    .order("id", { ascending: true });
-
-  if (publicationsError) {
-    throw publicationsError;
-  }
+  // Only an existing publication may introduce a client-visible version.
+  // Paginate every level: PostgREST otherwise truncates large histories.
+  const publications = await collectPublishedProtocolRows([clientId], (clientIds, from, to) =>
+    supabase
+      .from("protocol_publications")
+      .select("id, protocol_version_id, published_at")
+      .in("client_id", clientIds)
+      .order("published_at", { ascending: false })
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
 
   const protocolVersionIds = publications.map(
     (publication) => publication.protocol_version_id,
@@ -2971,115 +2973,97 @@ export async function listPublishedProtocolsForCurrentClient(
     return [];
   }
 
-  const { data: versions, error: versionsError } = await supabase
-    .from("protocol_versions")
-    .select("id, protocol_id, version_number")
-    .eq("client_id", clientId)
-    .in("id", protocolVersionIds);
-
-  if (versionsError) {
-    throw versionsError;
-  }
+  const versions = await collectPublishedProtocolRows(protocolVersionIds, (ids, from, to) =>
+    supabase
+      .from("protocol_versions")
+      .select("id, protocol_id, version_number")
+      .eq("client_id", clientId)
+      .in("id", ids)
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
 
   const protocolIds = versions.map((version) => version.protocol_id);
-  const { data: protocols, error: protocolsError } = await supabase
-    .from("protocols")
-    .select("id, protocol_type")
-    .eq("client_id", clientId)
-    .in("id", protocolIds);
+  const [protocols, mealPlanVersions] = await Promise.all([
+    collectPublishedProtocolRows(protocolIds, (ids, from, to) =>
+      supabase
+        .from("protocols")
+        .select("id, protocol_type")
+        .eq("client_id", clientId)
+        .in("id", ids)
+        .order("id", { ascending: true })
+        .range(from, to),
+    ),
+    collectPublishedProtocolRows(protocolVersionIds, (ids, from, to) =>
+      supabase
+        .from("meal_plan_versions")
+        .select("id, protocol_version_id")
+        .eq("client_id", clientId)
+        .in("protocol_version_id", ids)
+        .order("id", { ascending: true })
+        .range(from, to),
+    ),
+  ]);
 
-  if (protocolsError) {
-    throw protocolsError;
-  }
-
-  const { data: mealPlanVersions, error: mealPlanVersionsError } = await supabase
-    .from("meal_plan_versions")
-    .select("id, protocol_version_id")
-    .eq("client_id", clientId)
-    .in("protocol_version_id", protocolVersionIds);
-
-  if (mealPlanVersionsError) {
-    throw mealPlanVersionsError;
-  }
-
-  const mealPlanVersionIds = mealPlanVersions.map(
-    (mealPlanVersion) => mealPlanVersion.id,
-  );
-  const [
-    { data: variants, error: variantsError },
-    { data: cycles, error: cyclesError },
-  ] = mealPlanVersionIds.length
-    ? await Promise.all([
-        supabase
-          .from("meal_plan_variants")
-          .select("id, meal_plan_version_id, variant_key, label")
-          .in("meal_plan_version_id", mealPlanVersionIds)
-          .order("variant_key", { ascending: true })
-          .order("id", { ascending: true }),
-        supabase
-          .from("meal_plan_cycles")
-          .select("id, meal_plan_version_id")
-          .in("meal_plan_version_id", mealPlanVersionIds)
-          .order("created_at", { ascending: true })
-          .order("id", { ascending: true }),
-      ])
-    : [
-        { data: [], error: null },
-        { data: [], error: null },
-      ];
-
-  if (variantsError) {
-    throw variantsError;
-  }
-
-  if (cyclesError) {
-    throw cyclesError;
-  }
+  const mealPlanVersionIds = mealPlanVersions.map((mealPlanVersion) => mealPlanVersion.id);
+  const [variants, cycles] = await Promise.all([
+    collectPublishedProtocolRows(mealPlanVersionIds, (ids, from, to) =>
+      supabase
+        .from("meal_plan_variants")
+        .select("id, meal_plan_version_id, variant_key, label")
+        .in("meal_plan_version_id", ids)
+        .order("meal_plan_version_id", { ascending: true })
+        .order("variant_key", { ascending: true })
+        .order("id", { ascending: true })
+        .range(from, to),
+    ),
+    collectPublishedProtocolRows(mealPlanVersionIds, (ids, from, to) =>
+      supabase
+        .from("meal_plan_cycles")
+        .select("id, meal_plan_version_id")
+        .in("meal_plan_version_id", ids)
+        .order("meal_plan_version_id", { ascending: true })
+        .order("created_at", { ascending: true })
+        .order("id", { ascending: true })
+        .range(from, to),
+    ),
+  ]);
 
   const variantIds = variants.map((variant) => variant.id);
-  const { data: meals, error: mealsError } = variantIds.length
-    ? await supabase
-        .from("meals")
-        .select("id, meal_plan_variant_id, position, label")
-        .in("meal_plan_variant_id", variantIds)
-        .order("position", { ascending: true })
-        .order("id", { ascending: true })
-    : { data: [], error: null };
-
-  if (mealsError) {
-    throw mealsError;
-  }
+  const meals = await collectPublishedProtocolRows(variantIds, (ids, from, to) =>
+    supabase
+      .from("meals")
+      .select("id, meal_plan_variant_id, position, label")
+      .in("meal_plan_variant_id", ids)
+      .order("meal_plan_variant_id", { ascending: true })
+      .order("position", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
 
   const mealIds = meals.map((meal) => meal.id);
   const cycleIds = cycles.map((cycle) => cycle.id);
-  const [
-    { data: doseAllocations, error: doseAllocationsError },
-    { data: cycleSteps, error: cycleStepsError },
-  ] = await Promise.all([
-    mealIds.length
-      ? supabase
-          .from("meal_dose_allocations")
-          .select("id, meal_id, dose_type, dose_quantity")
-          .in("meal_id", mealIds)
-          .order("dose_type", { ascending: true })
-          .order("id", { ascending: true })
-      : Promise.resolve({ data: [], error: null }),
-    cycleIds.length
-      ? supabase
-          .from("meal_plan_cycle_steps")
-          .select("cycle_id, variant_id, position")
-          .in("cycle_id", cycleIds)
-          .order("position", { ascending: true })
-      : Promise.resolve({ data: [], error: null }),
+  const [doseAllocations, cycleSteps] = await Promise.all([
+    collectPublishedProtocolRows(mealIds, (ids, from, to) =>
+      supabase
+        .from("meal_dose_allocations")
+        .select("id, meal_id, dose_type, dose_quantity")
+        .in("meal_id", ids)
+        .order("meal_id", { ascending: true })
+        .order("dose_type", { ascending: true })
+        .order("id", { ascending: true })
+        .range(from, to),
+    ),
+    collectPublishedProtocolRows(cycleIds, (ids, from, to) =>
+      supabase
+        .from("meal_plan_cycle_steps")
+        .select("cycle_id, variant_id, position")
+        .in("cycle_id", ids)
+        .order("cycle_id", { ascending: true })
+        .order("position", { ascending: true })
+        .range(from, to),
+    ),
   ]);
-
-  if (doseAllocationsError) {
-    throw doseAllocationsError;
-  }
-
-  if (cycleStepsError) {
-    throw cycleStepsError;
-  }
 
   const protocolsById = new Map(protocols.map((protocol) => [protocol.id, protocol]));
   const versionsById = new Map(versions.map((version) => [version.id, version]));
