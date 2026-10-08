@@ -50,7 +50,7 @@ export function AdminClientRecoveryLinkForm({
         </Alert>
       ) : null}
 
-      <Button loading={isPending} type="submit">
+      <Button loading={isPending} onClick={() => setCopyStatus(null)} type="submit">
         Gerar link de recuperação
       </Button>
 
