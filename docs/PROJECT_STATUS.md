@@ -3130,3 +3130,8 @@ A visão de Evolução oferece acesso direto às Avaliações quando não existe
 ## Filtros de clientes e fila operacional — 2026-10-08
 
 O estado vazio da lista administrativa agora diferencia filtro por ação da Patty, busca por nome e combinação dos dois, evitando exibir uma busca vazia quando o filtro não retorna clientes. A fila operacional explicita os grupos Ação da Patty, Aguardando cliente e Operacional do sistema e ressalta que registros pendentes não estabelecem prioridade clínica. Apenas textos e testes de regressão; sem alteração de classificação, RLS, Auth, schema ou migrations.
+
+
+## Navegacao contextual da fila operacional — 2026-10-08
+
+Os tres indicadores da home administrativa agora apontam para o grupo correspondente na pagina de Pendencias. Os grupos recolhiveis de Aguardando cliente e Operacional do sistema se expandem quando selecionados via link, sem alterar classificacao, ordem, RLS, dados ou prioridade clinica. Um grupo solicitado sem itens informa essa condicao e permite voltar a fila completa. Parametro de navegacao validado com lista fechada, testes de regressao inclusos.

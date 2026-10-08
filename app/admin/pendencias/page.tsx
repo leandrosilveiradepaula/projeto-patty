@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import { getOperationalPendingItemsForCurrentAdmin } from "@/lib/operations/pending-data";
 import { groupOperationalPendingItems } from "@/lib/operations/pending";
+import { parsePendingQueueFocus } from "@/lib/operations/pending-navigation";
 import Link from "next/link";
 
 import styles from "./page.module.css";
@@ -56,7 +57,9 @@ function PendingList({
   );
 }
 
-export default async function AdminPendenciasPage() {
+export default async function AdminPendenciasPage({ searchParams }: { searchParams: Promise<{ grupo?: string }> }) {
+  const { grupo } = await searchParams;
+  const focusedGroup = parsePendingQueueFocus(grupo);
   const items = await getOperationalPendingItemsForCurrentAdmin();
   const grouped = groupOperationalPendingItems(items);
 
@@ -80,8 +83,18 @@ export default async function AdminPendenciasPage() {
           />
         ) : (
           <div className={styles.groups}>
+            {focusedGroup && grouped[focusedGroup].length === 0 ? (
+              <div className={styles.focusedEmpty} role="status">
+                {focusedGroup === "patty"
+                  ? "Nenhuma ação da Patty registrada nesta fila no momento."
+                  : focusedGroup === "client"
+                    ? "Nenhuma pendência aguardando cliente nesta fila no momento."
+                    : "Nenhuma pendência operacional do sistema nesta fila no momento."}
+                <Link className={styles.clientLink} href="/admin/pendencias">Ver toda a fila</Link>
+              </div>
+            ) : null}
             {grouped.patty.length > 0 ? (
-              <section className={styles.group}>
+              <section className={styles.group} id="acao-da-patty">
                 <div className={styles.groupHeader}>
                   <div>
                     <h3>Ação da Patty</h3>
@@ -94,7 +107,7 @@ export default async function AdminPendenciasPage() {
             ) : null}
 
             {grouped.client.length > 0 ? (
-              <details className={styles.collapsibleGroup}>
+              <details className={styles.collapsibleGroup} id="aguardando-cliente" open={focusedGroup === "client"}>
                 <summary className={styles.groupSummary}>
                   <span>
                     <strong>Aguardando cliente</strong>
@@ -109,7 +122,7 @@ export default async function AdminPendenciasPage() {
             ) : null}
 
             {grouped.operational.length > 0 ? (
-              <details className={styles.collapsibleGroup}>
+              <details className={styles.collapsibleGroup} id="operacional-do-sistema" open={focusedGroup === "operational"}>
                 <summary className={styles.groupSummary}>
                   <span>
                     <strong>Operacional do sistema</strong>
