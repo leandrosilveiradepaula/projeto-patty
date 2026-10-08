@@ -80,8 +80,9 @@ export default async function ClientProgressPage() {
       >
         {series.length === 0 ? (
           <EmptyState
-            description="São necessárias avaliações finalizadas com medidas para formar sua evolução."
+            description="A evolução será exibida quando houver avaliações finalizadas com medidas comparáveis. Você pode consultar os registros já disponíveis em Avaliações."
             title="Evolução ainda indisponível"
+            action={<Link href="/cliente/avaliacoes">Consultar avaliações</Link>}
           />
         ) : (
           <div className={styles.seriesList}>

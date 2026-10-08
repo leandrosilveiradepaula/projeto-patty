@@ -59,8 +59,9 @@ export default async function ClientAssessmentsPage() {
       >
         {items.length === 0 ? (
           <EmptyState
-            description="Quando houver uma avaliação finalizada com medidas, ela aparecerá aqui."
+            description="Ainda não há avaliações finalizadas com medidas disponíveis. Quando a Patty publicar esses registros, você poderá consultá-los aqui."
             title="Nenhuma avaliação disponível"
+            action={<Link href="/cliente/mais">Ver outras áreas</Link>}
           />
         ) : (
           <>

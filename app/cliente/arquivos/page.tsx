@@ -66,6 +66,7 @@ export default async function ClientFilesPage() {
       />
 
       <Section
+        id="enviar-arquivo"
         description="O arquivo passa por uma validação antes de entrar no seu histórico."
         title="Enviar arquivo"
       >
@@ -79,8 +80,9 @@ export default async function ClientFilesPage() {
       >
         {files.length === 0 ? (
           <EmptyState
-            description="Você ainda não possui arquivos privados validados no histórico."
-            title="Nenhum arquivo enviado"
+            description="Ainda não há arquivos disponíveis no histórico. Você pode enviar uma foto, um exame ou um documento pelo formulário acima."
+            title="Nenhum arquivo disponível"
+            action={<a href="#enviar-arquivo">Ir para envio</a>}
           />
         ) : (
           <ul className={styles.fileList}>

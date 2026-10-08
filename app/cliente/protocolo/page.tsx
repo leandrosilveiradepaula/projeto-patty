@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import { getCurrentClient, listPublishedProtocolsForCurrentClient } from "@/lib/supabase/data-access";
 import styles from "./page.module.css";
+import Link from "next/link";
 
 function formatPublishedAt(value: string) {
   return new Intl.DateTimeFormat("pt-BR", {
@@ -44,8 +45,9 @@ export default async function ClienteProtocoloPage() {
         />
       ) : publications?.length === 0 ? (
         <EmptyState
-          description="Novas publicações aparecerão nesta área."
+          description="A Patty ainda não liberou um protocolo para esta conta. Quando houver uma publicação aprovada, ela aparecerá aqui."
           title="Nenhum protocolo foi publicado para você"
+          action={<Link href="/cliente">Voltar ao início</Link>}
         />
       ) : (
         <div className={styles.publications}>

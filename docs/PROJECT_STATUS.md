@@ -3083,3 +3083,10 @@ Esta melhoria e de comunicacao operacional, nao altera lifecycle de Auth, schema
 A mesma precisao foi aplicada aos pontos adjacentes do fluxo administrativo: a lista de clientes nao afirma mais que o email de convite foi entregue; a trilha de atendimento nao marca acesso como concluido apenas pela existencia de `profile_id`; rotulos usam identidade vinculada como fato observavel; falhas do convite automatico evitam afirmar que nenhum email foi enviado; e falha de link manual orienta recuperacao quando a identidade ja existe, sem sugerir novo cadastro.
 
 O lote permanece estritamente de UX e comunicacao operacional. Nao adiciona telemetria de entrega, nao infere ativacao/login, nao altera Supabase Auth, schema, migrations, assignments ou RLS.
+
+
+## Continuidade em estados vazios do portal da cliente — 2026-10-08
+
+Quatro areas de consulta passam a orientar a proxima navegacao real quando ainda nao existem registros: Arquivos aponta para o proprio formulario de upload; Avaliacoes esclarece que somente medidas finalizadas estao disponiveis e permite voltar as areas do acompanhamento; Evolucao aponta para Avaliacoes sem inventar progresso; e Protocolo orienta retorno ao inicio, deixando explicita a dependencia de publicacao pela Patty.
+
+Nenhuma ausencia de dados passa a ser tratada como falha, liberacao automatica ou julgamento profissional. Sem alteracoes em banco, RLS, Auth, schema, migrations ou regras clinicas.
