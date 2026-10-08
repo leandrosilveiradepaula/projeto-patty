@@ -1,3 +1,9 @@
+## Auditoria integrada - isolamento real de rascunho alimentar no smoke E2E - 2026-10-08
+
+A fixture E2E descartavel da cliente agora cria um protocolo nutricional sintetico com versao 1 ainda em rascunho, sem aprovacao ou publicacao. O teste autenticado exige que a pagina Meu protocolo mostre o estado vazio de nenhuma publicacao, mesmo com versao existente no banco. O cleanup so remove o rascunho apos verificar a identidade sintetica e recusar versoes submetidas, aprovadas ou publicadas. A checagem e executada no fluxo manual existente apenas apos merge e deployment; CI de PR valida contratos e build, nao simula o acesso real ao Supabase. Nao envolve dados pessoais reais, registro profissional finalizado nem publicacao de dieta.
+
+O teste nao comprova isolamento cruzado entre duas clientes, nem a leitura de uma publicacao real; ambos permanecem pendentes de fixture separada segura. PR #550 continua independente. Sem mudancas de schema/RLS/migrations ou regras do metodo.
+
 ## Auditoria integrada - retomar protocolo sem versao - 2026-10-08
 
 A criacao do primeiro protocolo grava protocolo e versao em duas operacoes. Falha intermediaria com compensacao incompleta podia deixar protocolo sem versao e bloquear a Patty. A listagem agora distingue esse estado e oferece recuperacao explicita, com validacao da identidade administrativa, autorizacao da cliente, ownership do protocolo e ausencia de versoes. Concorrencia de abas e tratada reconsultando versoes apos falha da insercao, usando a constraint existente unique(protocol_id, version_number). A compensacao de exclusao agora exige linha retornada antes de confirmar sucesso; falhas apresentam mensagens acionaveis, nao erro bruto. O historico existente e preservado e nada e aprovado/publicado automaticamente.
