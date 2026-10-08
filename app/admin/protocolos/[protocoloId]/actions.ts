@@ -485,7 +485,7 @@ export async function removeProtocolMeal(
 
     if (!removed) {
       return {
-        message: "A refeição deixou de estar vazia. Atualize a página antes de tentar novamente.",
+        message: "A refeição não foi removida. Ela pode ter sido alterada ou excluída em outra aba. Atualize a página e confira o rascunho.",
         success: false,
       };
     }
@@ -535,7 +535,7 @@ export async function removeProtocolMealPlanVariant(
 
     if (!removed) {
       return {
-        message: "A variação deixou de estar vazia. Atualize a página antes de tentar novamente.",
+        message: "A variação não foi removida. Ela pode ter sido alterada ou excluída em outra aba. Atualize a página e confira o rascunho.",
         success: false,
       };
     }
