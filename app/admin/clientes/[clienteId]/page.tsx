@@ -451,8 +451,8 @@ export default async function AdminClienteDetailPage({
         name={displayName || "Nome ausente — registro legado"}
         secondary={
           client.profile_id
-            ? "Conta da cliente vinculada"
-            : "Conta da cliente ainda não vinculada"
+            ? "Identidade de acesso vinculada"
+            : "Identidade de acesso não vinculada"
         }
         status={
           !displayName ? (
@@ -490,11 +490,11 @@ export default async function AdminClienteDetailPage({
 
       {query.onboarding === "invited" ? (
         <Alert live="polite" title="Cliente convidada" variant="success">
-          A conta inicial foi criada e o convite de ativação foi enviado. Você já pode continuar o cadastro e preparar as próximas etapas do atendimento.
+          A conta inicial foi criada e o Supabase aceitou a solicitação de envio do convite. A entrega do email e a ativação ainda não foram verificadas. Você já pode continuar o cadastro e preparar as próximas etapas do atendimento.
         </Alert>
       ) : query.onboarding === "link-generated" ? (
         <Alert live="polite" title="Link de ativação gerado" variant="success">
-          A conta inicial foi criada. Envie o link individual para esta cliente e continue o cadastro por aqui.
+          A conta inicial foi criada e o link foi exibido na página anterior. Se ainda não foi copiado, não gere outro cadastro; utilize a recuperação de acesso quando necessário.
         </Alert>
       ) : null}
 
@@ -532,7 +532,7 @@ export default async function AdminClienteDetailPage({
                 <h3 className={styles.cardTitle}>Acesso da cliente</h3>
                 <p className={styles.cardDescription}>
                   {client.profile_id
-                    ? "Conta vinculada e pronta para acesso."
+                    ? "Conta vinculada ao cadastro. A ativação, a senha e a capacidade de login não são verificadas por este indicador."
                     : "A conta ainda não foi vinculada ao cadastro da cliente."}
                 </p>
               </div>
