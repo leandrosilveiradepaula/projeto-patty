@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createAdminClient } from "@/lib/supabase/admin";
+import { classifyPrivateFileReleasePostcondition } from "@/lib/files/private-file-release-postcondition";
 import type { PrivateFileKind } from "@/lib/validation/private-files";
 
 const PRIVATE_FILE_BUCKET = "client-private";
@@ -147,7 +148,20 @@ export async function releasePrivateFileToClient(input: {
   }
 
   if (!released) {
-    return { status: "already_visible" as const };
+    const { data: persistedFile, error: verifyError } = await admin
+      .from("client_files")
+      .select("client_visible_at")
+      .eq("id", input.fileId)
+      .eq("client_id", input.clientId)
+      .maybeSingle();
+
+    if (verifyError) {
+      throw verifyError;
+    }
+
+    return {
+      status: classifyPrivateFileReleasePostcondition(persistedFile),
+    };
   }
 
   return { status: "released" as const };
