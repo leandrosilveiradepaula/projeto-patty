@@ -1,6 +1,6 @@
 begin;
 
-select plan(12);
+select plan(16);
 
 insert into auth.users (id,email,raw_user_meta_data)
 values
@@ -272,6 +272,57 @@ select ok(
       and pg_get_constraintdef(c.oid) ilike '%char_length(failure_message) <= 1024%'
   ),
   'failure message has a 1024-character database check constraint'
+);
+
+
+insert into ai_boundary_ids
+select 'recoverable', public.start_anamnesis_review_execution(
+  'fb000000-0000-4000-8000-000000000001',
+  'e0000000-0000-4000-8000-000000000001',
+  'e2000000-0000-4000-8000-000000000001',
+  'fa000000-0000-4000-8000-000000000001',
+  'provider-test',
+  'model-test',
+  array['e1000000-0000-4000-8000-000000000001']::uuid[]
+);
+
+select public.recover_started_ai_execution(
+  (select value from ai_boundary_ids where key='recoverable'),
+  'fa000000-0000-4000-8000-000000000001',
+  'manual recovery after interrupted request'
+);
+
+set constraints all immediate;
+set constraints all deferred;
+
+select is(
+  (select status from public.ai_executions
+   where id=(select value from ai_boundary_ids where key='recoverable')),
+  'failed',
+  'manual recovery moves only a started execution to failed'
+);
+
+select is(
+  (select failure_code from public.ai_executions
+   where id=(select value from ai_boundary_ids where key='recoverable')),
+  'manual_recovery',
+  'manual recovery remains distinguishable from provider failures'
+);
+
+select is(
+  (select failure_message from public.ai_executions
+   where id=(select value from ai_boundary_ids where key='recoverable')),
+  'manual recovery after interrupted request',
+  'manual recovery preserves the human reason'
+);
+
+select ok(
+  not has_function_privilege(
+    'authenticated',
+    'public.recover_started_ai_execution(uuid,uuid,text)',
+    'EXECUTE'
+  ),
+  'authenticated cannot call internal AI recovery RPC directly'
 );
 
 select * from finish();
