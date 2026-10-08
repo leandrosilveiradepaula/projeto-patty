@@ -1,3 +1,9 @@
+## Confirmação de gravação do Feedback Semanal — 2026-10-08
+
+A ação da cliente agora diferencia atualização efetivamente persistida de atualização condicional sem linha retornada (por exemplo, quando o Feedback foi enviado por outra aba). Nesse caso não informa falsamente "Rascunho salvo" ou "Feedback enviado": a cliente recebe um aviso de conflito e pode conferir o estado atual. As ações aceitas são exclusivamente "save" e "submit"; valores inesperados são rejeitados. A condição server-side que impede edição após envio permanece preservada. Incluído teste de regressão no domínio weekly-feedback já abrangido por `test:clients`.
+
+Sem alterações em schema, migrations, Auth, RLS, formulário versionado, regra clínica ou envio de mensagens.
+
 ## Bloco consolidado - nome e status nos workspaces 2026-10-07
 
 A consolidacao de `clients.full_name` foi estendida para os workspaces administrativos de Protocolos, Treino, Avaliacoes, Arquivos, Anamnese, Feedback Semanal e Check-ins.
