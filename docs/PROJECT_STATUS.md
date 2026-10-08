@@ -2984,3 +2984,12 @@ A fundacao de entrega do primeiro lote educacional foi endurecida antes do uploa
 - a tela administrativa do conteudo oferece abertura do asset privado registrado sem expor URL permanente do Blob.
 
 Este bloco nao executa upload, nao registra asset e nao publica/libera conteudo. O primeiro video de 123.262.796 bytes continua fail-closed ate download/re-hash imediatamente anterior ao upload, upload privado, verificacao pos-upload e validacao end-to-end da entrega >100 MB em producao.
+
+
+## Gate de integridade do asset educacional - 2026-10-07
+
+Antes de permitir o registro de metadata de um asset educacional, o servidor agora consulta o Vercel Blob real e compara existencia, pathname, tamanho e MIME. Divergencia interrompe o registro.
+
+O SHA-256 permanece um gate separado do binario: deve ser recalculado no arquivo fonte imediatamente antes do upload e verificado sobre a transferencia conforme o runbook. Como o head() do Blob nao expoe SHA-256 criptografico do conteudo, ETag nao e tratado como substituto.
+
+O primeiro video continua sem upload/asset/publicacao/release nesta etapa; este endurecimento apenas impede que metadata administrativa seja registrada para um objeto inexistente ou tecnicamente divergente.
