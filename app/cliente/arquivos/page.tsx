@@ -51,7 +51,6 @@ export default async function ClientFilesPage() {
       <EmptyState
         description="A identidade de acesso ainda não está vinculada a um cadastro de cliente. Não envie arquivos por outra conta."
         title="Cadastro pendente"
-        action={<Link href="/cliente">Voltar ao início</Link>}
       />
     );
   }
