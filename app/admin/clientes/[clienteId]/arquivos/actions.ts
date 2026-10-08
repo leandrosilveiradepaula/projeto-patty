@@ -160,6 +160,13 @@ export async function releaseAdminPrivateFileToClientAction(
       };
     }
 
+    if (result.status === "unconfirmed") {
+      return {
+        message: "A liberação não foi confirmada. Atualize a página e confira a visibilidade do arquivo antes de tentar novamente.",
+        success: false,
+      };
+    }
+
     revalidatePath("/admin/arquivos");
     revalidatePath(`/admin/clientes/${clientId}/arquivos`);
     revalidatePath("/cliente");
