@@ -7,6 +7,7 @@ import {
   OpenAiAnamnesisReviewExecutionError,
 } from "@/lib/ai/openai-provider";
 import { recordAiFindingAction } from "@/lib/ai/finding-actions";
+import { recoverInternalStartedAiExecution } from "@/lib/ai/ai-execution-persistence";
 
 export type AdminAiReviewFormState = {
   executionId?: string;
@@ -130,5 +131,31 @@ export async function createPattyNoteFromAiFinding(
   });
 
   revalidatePath("/admin/anamneses/" + submissionId);
+  revalidatePath("/admin/anamneses/" + submissionId + "/ia");
+}
+
+
+export async function recoverStartedAiExecution(
+  submissionId: string,
+  executionId: string,
+  formData: FormData,
+) {
+  const auth = await requireRole("admin");
+  const rawReason = formData.get("recoveryReason");
+  const reason = typeof rawReason === "string" ? rawReason.trim() : "";
+
+  if (reason.length < 10 || reason.length > 500) {
+    throw new Error(
+      "Informe um motivo de recuperação entre 10 e 500 caracteres.",
+    );
+  }
+
+  await recoverInternalStartedAiExecution({
+    executionId,
+    reason,
+    recoveredByProfileId: auth.profileId,
+  });
+
+  revalidatePath("/admin/ia");
   revalidatePath("/admin/anamneses/" + submissionId + "/ia");
 }
