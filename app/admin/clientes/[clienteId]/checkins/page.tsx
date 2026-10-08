@@ -11,6 +11,7 @@ import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
 import { Section } from "@/components/ui/Section";
 import { loadSupportedLiquidTaxonomy } from "@/lib/method/liquid-taxonomy-loader";
+import { latestCheckinCorrectionsByEvent } from "@/lib/checkins/effective-corrections";
 import {
   getAccessibleClient,
   listAccessibleClientActivityCheckinEventCorrections,
@@ -73,12 +74,8 @@ export default async function AdminClientCheckinsPage({
       recentActivityEvents.map((event) => event.id),
     ),
   ]);
-  const latestLiquidCorrectionByEvent = new Map(
-    liquidCorrections.map((correction) => [correction.event_id, correction]),
-  );
-  const latestActivityCorrectionByEvent = new Map(
-    activityCorrections.map((correction) => [correction.event_id, correction]),
-  );
+  const latestLiquidCorrectionByEvent = latestCheckinCorrectionsByEvent(liquidCorrections);
+  const latestActivityCorrectionByEvent = latestCheckinCorrectionsByEvent(activityCorrections);
 
   return (
     <>

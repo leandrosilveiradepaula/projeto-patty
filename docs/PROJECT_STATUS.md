@@ -3155,3 +3155,8 @@ A tela administrativa de Feedback Semanal oferece navegação para Cadastro Atua
 ## Navegação de avaliações e medidas — 2026-10-08
 
 A área de Avaliações da cliente ordena explicitamente registros por data decrescente e oferece navegação interna entre avaliações quando houver mais de uma. As telas de Evolução da cliente e da Patty oferecem navegação direta às séries de medidas quando há várias, sem mudar o cálculo de diferenças, os valores vigentes, o histórico, a privacidade ou regras profissionais. Inclusos testes de regressão. Nenhum schema, RLS, Auth, migration ou ação automática foi alterado.
+
+
+## Correção vigente dos Check-ins — 2026-10-08
+
+Uma auditoria identificou que as leituras de Check-ins da cliente e da Patty montavam Map diretamente a partir de correções ordenadas por data decrescente: quando havia várias correções no mesmo evento, o Map terminava com a mais antiga, produzindo valor vigente incorreto. Ambas as telas passam a selecionar explicitamente a correção de maior `created_at` e, em empate, maior `id`, independentemente da ordem do retorno. Os eventos e correções originais seguem append-only e preservados; o código não cria score nem meta de hidratação. Os testes de `lib/checkins` foram incorporados a `test:clients` para execução pela CI. Sem schema, migrations, Auth ou RLS.
