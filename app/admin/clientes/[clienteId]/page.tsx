@@ -1,4 +1,5 @@
 import { AdminClientNameEditForm } from "@/components/admin/AdminClientNameEditForm";
+import { latestPublishedTrainingVersion } from "@/lib/training/published-versions";
 import { AdminEndClientAssignmentForm } from "@/components/admin/AdminEndClientAssignmentForm";
 import { AdminClientRegistrationEditForm } from "@/components/admin/AdminClientRegistrationEditForm";
 import { AdminClientRecoveryLinkForm } from "@/components/admin/AdminClientRecoveryLinkForm";
@@ -99,8 +100,7 @@ export default async function AdminClienteDetailPage({
     : [];
   const openTrainingVersion =
     trainingVersions.find((version) => !version.published_at) ?? null;
-  const latestPublishedTraining =
-    trainingVersions.find((version) => Boolean(version.published_at)) ?? null;
+  const latestPublishedTraining = latestPublishedTrainingVersion(trainingVersions);
   const trainingWorkspaceState = openTrainingVersion?.reviewed_at
     ? {
         badge: "Pronto para publicar",
