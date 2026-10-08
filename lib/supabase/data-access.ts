@@ -2220,13 +2220,20 @@ export async function deleteAccessibleProtocolWithoutVersions(protocolId: string
     return false;
   }
 
-  const { error } = await supabase.from("protocols").delete().eq("id", protocolId);
+  // RLS and concurrent changes can result in zero affected rows without SQL error.
+  // Never report cleanup as completed unless the deletion was confirmed.
+  const { data, error } = await supabase
+    .from("protocols")
+    .delete()
+    .eq("id", protocolId)
+    .select("id")
+    .maybeSingle();
 
   if (error) {
     throw error;
   }
 
-  return true;
+  return Boolean(data);
 }
 
 
