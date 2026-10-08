@@ -11,6 +11,7 @@ export type OperationalPendingItemKind =
   | "content_released_without_asset"
   | "private_file_pending_release"
   | "protocol_approved_not_published"
+  | "protocol_draft"
   | "protocol_submitted_not_approved"
   | "training_requested_without_plan"
   | "training_draft"
@@ -330,6 +331,18 @@ export function buildOperationalPendingItems(
 
   for (const version of input.protocolVersions) {
     if (!version.submittedForReviewAt) {
+      // A saved draft still needs manual work, even with a published predecessor.
+      items.push({
+        clientId: version.clientId,
+        clientLabel: version.clientLabel,
+        createdAt: version.createdAt,
+        description: `A versão ${version.versionNumber} está em rascunho e precisa de edição antes da revisão profissional. Nenhuma alteração foi publicada para a cliente.`,
+        href: `/admin/protocolos/${version.protocolId}?versao=${version.versionNumber}#versao-${version.versionNumber}`,
+        id: `protocol-draft:${version.id}`,
+        kind: "protocol_draft",
+        statusLabel: "Rascunho",
+        title: "Continuar protocolo",
+      });
       continue;
     }
 
@@ -339,7 +352,7 @@ export function buildOperationalPendingItems(
         clientLabel: version.clientLabel,
         createdAt: version.submittedForReviewAt,
         description: `A versão ${version.versionNumber} foi submetida para revisão e ainda não possui aprovação registrada.`,
-        href: `/admin/protocolos/${version.protocolId}#versao-${version.versionNumber}`,
+        href: `/admin/protocolos/${version.protocolId}?versao=${version.versionNumber}#versao-${version.versionNumber}`,
         id: `protocol-approval:${version.id}`,
         kind: "protocol_submitted_not_approved",
         statusLabel: "Sem aprovação",
@@ -354,7 +367,7 @@ export function buildOperationalPendingItems(
         clientLabel: version.clientLabel,
         createdAt: version.submittedForReviewAt,
         description: `A versão ${version.versionNumber} possui aprovação registrada, mas ainda não possui publicação.`,
-        href: `/admin/protocolos/${version.protocolId}#versao-${version.versionNumber}`,
+        href: `/admin/protocolos/${version.protocolId}?versao=${version.versionNumber}#versao-${version.versionNumber}`,
         id: `protocol-publication:${version.id}`,
         kind: "protocol_approved_not_published",
         statusLabel: "Aprovado, não publicado",
