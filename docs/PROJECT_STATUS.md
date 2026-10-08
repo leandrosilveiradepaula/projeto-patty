@@ -3110,3 +3110,8 @@ A interface identifica explicitamente o histórico de líquidos como referente a
 ## Clareza operacional em Feedback Semanal e Anamnese administrativa — 2026-10-08
 
 Feedback Semanal distingue solicitações aguardando a cliente de respostas enviadas e oferece retorno ao formulário manual quando a fila está vazia. Anamnese distingue explicitamente rascunhos da cliente de submissões finalizadas e preserva a leitura das respostas originais. Nenhuma situação aguardando cliente foi convertida em revisão ou decisão automática da Patty. Mudanças apenas de mensagens e navegação, com regressão; sem schema, RLS, migrations ou regras profissionais.
+
+
+## Clareza administrativa de avaliacoes e check-ins — 2026-10-08
+
+A interface de Check-ins agora distingue a data factual da atividade da data/hora em que a resposta foi registrada, sinaliza o recorte de ate 30 registros recentes e preserva a diferenca entre valor efetivo e original corrigido. Em Avaliacoes, a interface diferencia retomada de rascunho da criacao de nova avaliacao e informa que somente avaliacoes finalizadas integram o historico. Apenas copy, testes de regressao e documentacao; sem mudancas em banco, RLS, Auth, migrations ou metodo profissional.
