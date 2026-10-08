@@ -3177,3 +3177,10 @@ A validação de quantidade em mL foi unificada nas ações de inclusão e corre
 ## Feedback Semanal — integridade de respostas numéricas (2026-10-08)
 
 A auditoria identificou que a leitura de respostas de contagem e de nota (`integer` e `rating_0_10`) usava `parseInt`, o que podia aceitar e truncar entradas como `2,5`, `3abc` ou `1e2` silenciosamente. O parser agora exige exclusivamente dígitos de inteiro decimal não negativo e precisão segura de JavaScript, antes de converter e gravar. A nota informada pela cliente mantém a faixa 0–10 já definida na versão do formulário; não há geração de score de adesão ou interpretação clínica automática. O fluxo de rascunho e de envio final conserva as permissões e a validação server-side já existentes. Testes determinísticos de aceitação e rejeição integram `test:clients` na CI. Nenhuma migration, schema, RLS, Auth, configuração do método ou política profissional foi alterada.
+
+
+## Orientação de preenchimento da Anamnese — 2026-10-08
+
+A auditoria da Anamnese identificou que o navegador de seções calculava corretamente quais seções continham perguntas aplicáveis, mas o conteúdo ainda renderizava seções sem perguntas. A página da cliente agora mostra apenas seções com perguntas aplicáveis nesta versão e nestas respostas, sem alterar o histórico original de respostas ocultadas por condicionais.
+
+Para rascunhos, uma projeção somente de leitura exibe quantas perguntas obrigatórias atualmente aplicáveis possuem resposta persistida, contagem por seção e acesso direto à primeira pergunta obrigatória sem resposta. A questão de consentimento da Anamnese canônica permanece no fluxo de aceite explícito de envio e não entra na contagem do rascunho. O resumo é calculado no carregamento da página e não é prova de completude ou elegibilidade clínica; o banco continua responsável pela validação final. Mudança limitada à UI e aos testes determinísticos de `lib/anamnesis`, sem alteração de formulário versionado, dados, Auth, RLS, schema ou migrations.
