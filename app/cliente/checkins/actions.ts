@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { parseCheckinHistoryDay } from "@/lib/checkins/history-day";
+import { parsePositiveCheckinMl } from "@/lib/checkins/amount";
 import { loadSupportedLiquidTaxonomy } from "@/lib/method/liquid-taxonomy-loader";
 import { createLiquidIntakeWithMethodSnapshot } from "@/lib/method/liquid-persistence";
 import { requireRole } from "@/lib/supabase/auth";
@@ -35,10 +36,9 @@ export async function addLiquidIntakeAction(formData: FormData) {
 
   const rawAmount = formData.get("amountMl");
   const rawKind = formData.get("liquidKind");
-  const amountMl =
-    typeof rawAmount === "string" ? Number.parseInt(rawAmount, 10) : Number.NaN;
+  const amountMl = parsePositiveCheckinMl(rawAmount);
 
-  if (!Number.isInteger(amountMl) || amountMl <= 0) {
+  if (amountMl === null) {
     redirect("/cliente/checkins?status=liquid-invalid");
   }
 
@@ -114,14 +114,12 @@ export async function correctLiquidIntakeAction(formData: FormData) {
   const eventId = formData.get("eventId");
   const rawAmount = formData.get("amountMl");
   const rawKind = formData.get("liquidKind");
-  const amountMl =
-    typeof rawAmount === "string" ? Number.parseInt(rawAmount, 10) : Number.NaN;
+  const amountMl = parsePositiveCheckinMl(rawAmount);
 
   if (
     typeof eventId !== "string" ||
     !eventId ||
-    !Number.isInteger(amountMl) ||
-    amountMl <= 0
+    amountMl === null
   ) {
     redirect("/cliente/checkins?status=correction-invalid");
   }
@@ -192,5 +190,6 @@ export async function correctActivityCheckinAction(formData: FormData) {
 
   revalidatePath("/cliente");
   revalidatePath("/cliente/checkins");
-  redirect("/cliente/checkins?status=correction-recorded");
+  const historyDay = parseCheckinHistoryDay(formData.get("historyDay"), currentSaoPauloDate());
+  redirect("/cliente/checkins?status=correction-recorded" + (historyDay ? "&dia=" + historyDay : ""));
 }
