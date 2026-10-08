@@ -1,3 +1,11 @@
+## Auditoria integrada - esclarecimentos visiveis no inicio e no historico da cliente - 2026-10-08
+
+Os pedidos de esclarecimento da Patty ficavam disponiveis apenas na Anamnese especifica, sem aparecer como acao no inicio da cliente ou no historico de Anamneses. A navegacao da cliente agora resume os pedidos explicitamente abertos e sem resposta e oferece link direto para o primeiro pedido a responder. A contagem e por pedidos reais; nao e score clinico, prioridade de risco nem interpretacao de resposta. Se a cliente ja respondeu, o pedido deixa de ser uma acao dela e passa a ser apresentado como aguardando revisao humana da Patty. A resolucao manual remove a pendencia; o historico e preservado.
+
+A tela inicial mostra esclarecimentos como proxima acao, sem esconder a retomada de rascunho se houver; quando outra acao for principal, oferece acesso rapido para os pedidos aguardando resposta. A pagina /cliente/anamnese mostra contexto e links por submissao. Revalidacoes foram adicionadas para pedido, resposta e resolucao no historico de Anamnese, somente apos gravacao confirmada. A leitura usa os limites de visibilidade do Supabase autenticado/RLS e nao expõe texto de pedido/resposta na sintese.
+
+Testes cobrem ordenacao cronologica, multiplas Anamneses, estados com/sem resposta, resolucoes, nao mutacao das entradas e contratos das telas. Sem schema/migrations/RLS, notificacao automatica, diagnostico, bloqueio de fase ou publicacao de IA. E2E autenticado real segue pendente.
+
 ## Auditoria integrada - visualizacao de imagens e PDFs privados - 2026-10-08
 
 A cliente e a Patty apenas podiam baixar arquivos privados. As duas areas passam a oferecer Visualizar em nova aba para imagens e PDFs, com os mesmos metadados e checks RLS de download e sem copiar bytes para storage publico. O preview somente e oferecido para MIME validado no upload: PDF/JPEG/PNG/WebP. Signed URL de visualizacao sem parametro download tem validade de 60 segundos; downloads mantem a configuracao anterior de 300 segundos. O redirecionamento impede cache, Referer e indexacao, e nova aba usa noopener/noreferrer. A apresentacao inline depende do navegador.

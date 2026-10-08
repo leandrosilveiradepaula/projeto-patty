@@ -8,6 +8,7 @@ import {
   listAccessibleAnamnesisSubmissions,
 } from "@/lib/supabase/data-access";
 import { getCurrentClientAnamnesisStartAvailability } from "@/lib/anamnesis/start";
+import { loadClientClarificationSummary } from "@/lib/follow-up/client-clarification-summary-loader";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import { startClientAnamnesisDraft } from "./actions";
@@ -32,6 +33,10 @@ export default async function ClienteAnamnesePage() {
         getCurrentClientAnamnesisStartAvailability(),
       ])
     : [null, { available: false } as const];
+
+  const clarificationSummary = await loadClientClarificationSummary(
+    (submissions ?? []).filter((item) => item.submitted_at !== null).map((item) => item.id),
+  );
 
   const hasCurrentDraft =
     startAvailability.available &&
@@ -87,6 +92,11 @@ export default async function ClienteAnamnesePage() {
           <ol className={styles.submissionList}>
             {submissions?.map((submission) => {
               const version = submission.anamnesis_form_versions;
+              const clarification = clarificationSummary.bySubmission.get(submission.id);
+              const pendingClarificationHref =
+                submission.submitted_at && clarification?.firstAwaitingClientRequestId
+                  ? `/cliente/anamnese/${submission.id}/esclarecimentos#esclarecimento-${clarification.firstAwaitingClientRequestId}`
+                  : null;
 
               return (
                 <li key={submission.id}>
@@ -111,6 +121,15 @@ export default async function ClienteAnamnesePage() {
                         ? `Enviada em ${formatDateTime(submission.submitted_at)}`
                         : "Este registro ainda não foi enviado."}
                     </p>
+                    {pendingClarificationHref ? (
+                      <Link className={styles.detailLink} href={pendingClarificationHref}>
+                        Responder {clarification?.awaitingClient} esclarecimento(s) da Patty
+                      </Link>
+                    ) : clarification && clarification.awaitingProfessional > 0 ? (
+                      <p className={styles.submissionStatus}>
+                        {clarification.awaitingProfessional} esclarecimento(s) aguardando revisão da Patty.
+                      </p>
+                    ) : null}
                     <Link
                       className={styles.detailLink}
                       href={`/cliente/anamnese/${submission.id}`}

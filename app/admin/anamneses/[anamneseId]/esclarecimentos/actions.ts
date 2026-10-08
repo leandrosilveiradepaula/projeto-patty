@@ -61,6 +61,7 @@ export async function addAnamnesisClarificationRequest(
   revalidatePath(`/admin/clientes/${submission.client_id}`);
   revalidatePath(`/admin/clientes/${submission.client_id}/anamnese`);
   revalidatePath("/cliente");
+  revalidatePath("/cliente/anamnese");
   revalidatePath(`/cliente/anamnese/${submission.id}/esclarecimentos`);
   return { message: "Pedido de esclarecimento registrado para a cliente.", success: true };
 }
@@ -116,6 +117,7 @@ export async function resolveAnamnesisClarificationRequest(
   revalidatePath("/admin/clientes/" + submission.client_id);
   revalidatePath("/admin/clientes/" + submission.client_id + "/anamnese");
   revalidatePath("/cliente");
+  revalidatePath("/cliente/anamnese");
   revalidatePath("/cliente/anamnese/" + submission.id + "/esclarecimentos");
 
   return { message: "Pedido marcado como resolvido.", success: true };
