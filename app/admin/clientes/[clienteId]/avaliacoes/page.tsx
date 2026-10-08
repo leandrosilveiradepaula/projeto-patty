@@ -111,7 +111,7 @@ export default async function AdminClientAssessmentsPage({
       {draftAssessments.length > 0 ? (
         <Section
           action={<Badge variant="warning">{draftAssessments.length} rascunho(s)</Badge>}
-          description="Avaliações ainda editáveis e que aguardam finalização explícita."
+          description="Retome um rascunho existente para revisar as medidas e finalizar explicitamente quando estiver pronto. Criar outra avaliação não conclui a anterior."
           title="Em andamento"
         >
           <ul className={styles.evaluationList}>
@@ -142,15 +142,15 @@ export default async function AdminClientAssessmentsPage({
       ) : null}
 
       <Section
-        description="Avaliações já finalizadas, preservadas da mais recente para a mais antiga."
+        description="Somente avaliações finalizadas aparecem aqui, preservadas da mais recente para a mais antiga. Rascunhos permanecem em Em andamento."
         title="Histórico finalizado"
       >
         {finalizedAssessments.length === 0 ? (
           <EmptyState
             description={
               draftAssessments.length > 0
-                ? "Finalize uma avaliação em andamento para iniciar o histórico."
-                : "Crie e finalize uma avaliação para iniciar o histórico desta cliente."
+                ? "Há avaliação em andamento, mas nenhuma finalizada. Retome o rascunho acima para revisar e finalizar."
+                 : "Nenhuma avaliação foi finalizada. Use o formulário Nova avaliação acima para começar."
             }
             title="Nenhuma avaliação finalizada"
           />

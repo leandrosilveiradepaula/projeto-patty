@@ -121,11 +121,11 @@ export default async function AdminClientCheckinsPage({
       </Section>
 
       <Section
-        description="Registros individuais de ingestão preservados no histórico."
+        description="Até 30 registros recentes de ingestão. Cada item mostra o valor vigente e preserva o original quando corrigido."
         title="Líquidos recentes"
       >
         {recentLiquidEvents.length === 0 ? (
-          <p className={styles.description}>Nenhum líquido registrado ainda.</p>
+          <p className={styles.description}>Ainda não existem registros de líquidos desta cliente para consultar ou corrigir.</p>
         ) : (
           <ol className={styles.list}>
             {recentLiquidEvents.map((event) => {
@@ -182,11 +182,11 @@ export default async function AdminClientCheckinsPage({
       </Section>
 
       <Section
-        description="Quando há mais de um registro para o mesmo dia, o mais recente representa a resposta atual e os anteriores permanecem no histórico."
+        description="Até 30 registros recentes de atividade. A data do check-in pode ser diferente da data em que a resposta foi registrada; correções preservam o original."
         title="Atividade física recente"
       >
         {recentActivityEvents.length === 0 ? (
-          <p className={styles.description}>Nenhum check-in de atividade registrado ainda.</p>
+          <p className={styles.description}>Ainda não existem check-ins de atividade desta cliente para consultar ou corrigir.</p>
         ) : (
           <ol className={styles.list}>
             {recentActivityEvents.map((event) => {
@@ -198,14 +198,14 @@ export default async function AdminClientCheckinsPage({
                 <li key={event.id}>
                   <Card className={styles.card} variant="subtle">
                     <div className={styles.header}>
-                      <strong>{correction?.corrected_checkin_date ?? event.checkin_date}</strong>
+                      <strong>Dia da atividade: {correction?.corrected_checkin_date ?? event.checkin_date}</strong>
                       <div className={styles.badges}>
                         <Badge variant="neutral">{effectiveDidActivity ? "Sim" : "Não"}</Badge>
                         {correction ? <Badge variant="neutral">Corrigido</Badge> : null}
                       </div>
                     </div>
                     <p className={styles.description}>
-                      Registrado em {formatDate(event.recorded_at)}
+                      Resposta registrada em {formatDate(event.recorded_at)}
                     </p>
                     <details className={styles.correction}>
                       <summary>Corrigir resposta</summary>
