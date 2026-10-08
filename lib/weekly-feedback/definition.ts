@@ -93,6 +93,20 @@ export function readWeeklyFeedbackAnswer(
   return typeof value === "string" ? value : "";
 }
 
+/**
+ * The weekly feedback asks for factual whole counts and an integer rating.
+ * Reject partial numeric strings instead of silently truncating with parseInt.
+ */
+export function parseWeeklyFeedbackWholeNumber(raw: string): number | null {
+  const text = raw.trim();
+  if (!/^[0-9]+$/.test(text)) {
+    return null;
+  }
+
+  const value = Number(text);
+  return Number.isSafeInteger(value) && value >= 0 ? value : null;
+}
+
 export function buildWeeklyFeedbackAnswers(
   formData: FormData,
   definition: WeeklyFeedbackDefinition,
@@ -107,9 +121,9 @@ export function buildWeeklyFeedbackAnswers(
     }
 
     if (question.inputType === "integer" || question.inputType === "rating_0_10") {
-      const parsed = Number.parseInt(rawValue, 10);
+      const parsed = parseWeeklyFeedbackWholeNumber(rawValue);
 
-      if (!Number.isInteger(parsed) || parsed < 0) {
+      if (parsed === null) {
         throw new Error(`Resposta inválida para ${question.label}`);
       }
 

@@ -23,7 +23,7 @@
     "test:media-migration": "node --test lib/content/educational-media-migration.test.mjs",
     "test:evaluations": "node --experimental-strip-types --test lib/evaluations/*.test.ts",
     "test:training": "node --experimental-strip-types --test lib/training/*.test.ts",
-    "test:clients": "node --experimental-strip-types --test lib/clients/*.test.ts lib/checkins/*.test.ts",
+    "test:clients": "node --experimental-strip-types --test lib/clients/*.test.ts lib/checkins/*.test.ts lib/weekly-feedback/*.test.ts",
     "test:operations": "node --experimental-strip-types --test lib/operations/*.test.ts",
     "test:configuration": "node --experimental-strip-types --test lib/configuration/*.test.ts"
   },
