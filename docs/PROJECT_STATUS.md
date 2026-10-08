@@ -1,3 +1,11 @@
+## Auditoria integrada - nova solicitacao de treino apos publicacao - 2026-10-08
+
+Quando uma cliente solicitava novamente o serviço de treino apos ja possuir um plano publicado, o pedido ficava salvo no historico, mas nao gerava pendencia na fila da Patty se nao houvesse rascunho aberto. A ficha administrativa indicava o treino como apenas publicado, sem destacar a solicitacao mais nova.
+
+Agora a fila compara o horario da ultima solicitacao com o evento de publicacao efetiva mais recente (nao o maior numero de versao). Se a solicitacao for posterior e nao houver versao aberta, aparece uma pendencia manual especifica, com link para o historico. A ficha da cliente e o workspace de treinos destacam o pedido. Se existe rascunho/revisao aberto, a acao de trabalhar nessa versao permanece prioritária; publicacao posterior ao pedido encerra essa pendencia factual. Testes cobrem a comparacao temporal, o comportamento da fila e os contratos entre telas.
+
+A pendencia sinaliza revisao profissional; nao gera outro treino, nao decide adesao ou progressao e nao cria regra clinica. Sem alteracao de migrations, RLS, schema, exercicios, snapshots, automacoes ou dados reais. CI nao constitui E2E autenticado e este continua pendente. PR #550 de Anamnese permanece independente.
+
 ## Auditoria integrada - fila operacional com leituras em lotes - 2026-10-08
 
 A fila de pendencias e o painel administrativo carregavam em separado Anamneses, Feedbacks Semanais e eventos de notificacao para cada cliente; para cada Anamnese enviada eram feitas leituras individuais de revisoes e esclarecimentos e, para cada protocolo, leitura individual de versoes. Esse padrao N+1 crescia diretamente com o numero de clientes e criava espera desnecessaria antes de a Patty enxergar suas proximas acoes.

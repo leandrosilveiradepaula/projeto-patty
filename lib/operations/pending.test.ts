@@ -672,6 +672,31 @@ test("training lifecycle facts become Patty operational pendings", () => {
 });
 
 
+test("a training request after publication is a Patty follow-up, never automatic prescription", () => {
+  const items = buildOperationalPendingItems({
+    clarificationReminderIntervalHours: 24,
+    anamnesisSubmissions: [],
+    clarificationRequests: [],
+    assessments: [],
+    protocolVersions: [],
+    aiExecutions: [],
+    trainingLifecycle: [{
+      clientId: "client-new-request",
+      clientLabel: "Cliente",
+      createdAt: "2026-10-08T13:00:00Z",
+      id: "new-request",
+      state: "requested_after_publication",
+      versionNumber: 3,
+    }],
+  });
+  assert.equal(items.length, 1);
+  assert.equal(items[0].kind, "training_request_after_publication");
+  assert.equal(items[0].id, "training-request-followup:new-request");
+  assert.equal(items[0].href, "/admin/clientes/client-new-request/treino#solicitacao-treino");
+  assert.equal(getOperationalPendingGroup(items[0]), "patty");
+  assert.match(items[0].description, /decida manualmente/);
+});
+
 test("client readiness gaps become explicit Patty actions without using login email", () => {
   const items = buildOperationalPendingItems({
     clarificationReminderIntervalHours: 24,

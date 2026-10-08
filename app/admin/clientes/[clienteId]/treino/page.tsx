@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
+import { Alert } from "@/components/ui/Alert";
 import { latestPublishedTrainingVersion } from "@/lib/training/published-versions";
+import { isTrainingRequestAfterPublication } from "@/lib/training/request-follow-up";
 
 import { AdminTrainingPlanDraftForm } from "@/components/admin/AdminTrainingPlanDraftForm";
 import { AdminTrainingPlanItemForm } from "@/components/admin/AdminTrainingPlanItemForm";
@@ -71,10 +73,16 @@ export default async function AdminClientTrainingPage({ params }: Props) {
   const openVersion =
     versions.find((version) => !version.published_at) ?? null;
   const latestPublished = latestPublishedTrainingVersion(versions);
+  const newRequestAfterPublication = Boolean(
+    !openVersion && requests[0] && latestPublished &&
+    isTrainingRequestAfterPublication(requests[0].requested_at, latestPublished.published_at),
+  );
   const workspaceStatus = openVersion?.reviewed_at
     ? { label: "Pronto para publicar", variant: "info" as const }
     : openVersion
       ? { label: "Rascunho em edição", variant: "warning" as const }
+      : newRequestAfterPublication
+        ? { label: "Nova solicitação", variant: "warning" as const }
       : latestPublished
         ? { label: "Treino publicado", variant: "positive" as const }
         : requests.length > 0
@@ -113,6 +121,14 @@ export default async function AdminClientTrainingPage({ params }: Props) {
 
       <ClientWorkspaceNav activeArea="treino" clientId={client.id} />
 
+      {newRequestAfterPublication ? (
+        <Alert title="Nova solicitação após o treino publicado" variant="warning">
+          A cliente registrou um novo pedido em {formatDateTime(requests[0].requested_at)}.
+          Revise a solicitação no histórico abaixo e decida os próximos passos.
+          A publicação anterior continua disponível; nenhum novo treino é criado automaticamente.
+          {" "}<a href="#solicitacao-treino">Ver solicitação</a>
+        </Alert>
+      ) : null}
 
       <Section
         description="A prescrição só é liberada depois de solicitação da cliente. Salvar não publica; revisão e publicação são etapas separadas."
