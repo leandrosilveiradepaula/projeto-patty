@@ -56,6 +56,12 @@ export async function inviteClient(
             "O convite não pôde ser concluído com segurança e a compensação automática também falhou. Não reenvie antes de revisar o estado da conta.",
         };
       }
+      if (error.code === "identity_reconciliation_required") {
+        return {
+          message:
+            "O convite não foi concluído. Uma identidade de acesso pode ter sido criada ou já existir e foi preservada por segurança. Não reenvie antes de revisar a conta vinculada.",
+        };
+      }
 
       if (error.code === "invite_failed") {
         return {
@@ -159,6 +165,15 @@ export async function generateManualClientInvite(
           clientId: null,
           message:
             "O link não pôde ser provisionado com segurança e a compensação automática falhou. Revise o estado da conta antes de tentar novamente.",
+          success: false,
+        };
+      }
+      if (error.code === "identity_reconciliation_required") {
+        return {
+          activationLink: null,
+          clientId: null,
+          message:
+            "O link não foi concluído. A identidade de acesso pode já existir e foi preservada por segurança. Revise a conta antes de gerar outro convite.",
           success: false,
         };
       }
