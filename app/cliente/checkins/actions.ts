@@ -26,6 +26,17 @@ function currentSaoPauloDate() {
   }).format(new Date());
 }
 
+/**
+ * The same factual records appear in both authenticated workspaces.
+ * Invalidate the administrative view only after a write is confirmed.
+ */
+function revalidateCheckinJourneys(clientId: string) {
+  revalidatePath("/cliente");
+  revalidatePath("/cliente/checkins");
+  revalidatePath(`/admin/clientes/${clientId}`);
+  revalidatePath(`/admin/clientes/${clientId}/checkins`);
+}
+
 export async function addLiquidIntakeAction(formData: FormData) {
   const auth = await requireRole("client");
   const client = await getCurrentClient();
@@ -69,8 +80,7 @@ export async function addLiquidIntakeAction(formData: FormData) {
     redirect("/cliente/checkins?status=liquid-error");
   }
 
-  revalidatePath("/cliente");
-  revalidatePath("/cliente/checkins");
+  revalidateCheckinJourneys(client.id);
   redirect("/cliente/checkins?status=liquid-recorded");
 }
 
@@ -99,8 +109,7 @@ export async function recordActivityCheckinAction(formData: FormData) {
     redirect("/cliente/checkins?status=activity-error");
   }
 
-  revalidatePath("/cliente");
-  revalidatePath("/cliente/checkins");
+  revalidateCheckinJourneys(client.id);
   redirect("/cliente/checkins?status=activity-recorded");
 }
 
@@ -149,8 +158,7 @@ export async function correctLiquidIntakeAction(formData: FormData) {
     redirect("/cliente/checkins?status=correction-error");
   }
 
-  revalidatePath("/cliente");
-  revalidatePath("/cliente/checkins");
+  revalidateCheckinJourneys(client.id);
   const historyDay = parseCheckinHistoryDay(formData.get("historyDay"), currentSaoPauloDate());
   redirect("/cliente/checkins?status=correction-recorded" + (historyDay ? "&dia=" + historyDay : ""));
 }
@@ -188,8 +196,7 @@ export async function correctActivityCheckinAction(formData: FormData) {
     redirect("/cliente/checkins?status=correction-error");
   }
 
-  revalidatePath("/cliente");
-  revalidatePath("/cliente/checkins");
+  revalidateCheckinJourneys(client.id);
   const historyDay = parseCheckinHistoryDay(formData.get("historyDay"), currentSaoPauloDate());
   redirect("/cliente/checkins?status=correction-recorded" + (historyDay ? "&dia=" + historyDay : ""));
 }
