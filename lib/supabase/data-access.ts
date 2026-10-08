@@ -1673,15 +1673,19 @@ export async function deleteAccessibleAssessmentMeasurement(input: {
   measurementId: string;
 }) {
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("assessment_measurements")
     .delete()
     .eq("id", input.measurementId)
-    .eq("assessment_id", input.assessmentId);
+    .eq("assessment_id", input.assessmentId)
+    .select("id")
+    .single();
 
-  if (error) {
-    throw error;
+  if (error || !data) {
+    throw error ?? new Error("Assessment measurement deletion was not confirmed");
   }
+
+  return data;
 }
 
 export async function linkAccessibleAssessmentPhoto(input: {
@@ -1690,15 +1694,17 @@ export async function linkAccessibleAssessmentPhoto(input: {
   clientId: string;
 }) {
   const supabase = await createClient();
-  const { error } = await supabase.from("assessment_files").insert({
+  const { data, error } = await supabase.from("assessment_files").insert({
     assessment_id: input.assessmentId,
     client_file_id: input.clientFileId,
     client_id: input.clientId,
-  });
+  }).select("assessment_id, client_file_id").single();
 
-  if (error) {
-    throw error;
+  if (error || !data) {
+    throw error ?? new Error("Assessment photo link was not confirmed");
   }
+
+  return data;
 }
 
 export async function unlinkAccessibleAssessmentPhoto(input: {
@@ -1706,15 +1712,19 @@ export async function unlinkAccessibleAssessmentPhoto(input: {
   clientFileId: string;
 }) {
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("assessment_files")
     .delete()
     .eq("assessment_id", input.assessmentId)
-    .eq("client_file_id", input.clientFileId);
+    .eq("client_file_id", input.clientFileId)
+    .select("assessment_id, client_file_id")
+    .single();
 
-  if (error) {
-    throw error;
+  if (error || !data) {
+    throw error ?? new Error("Assessment photo unlink was not confirmed");
   }
+
+  return data;
 }
 
 export async function listCurrentClientFinalizedAssessmentMeasurements() {

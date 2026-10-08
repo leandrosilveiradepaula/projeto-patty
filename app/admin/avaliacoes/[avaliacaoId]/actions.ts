@@ -461,6 +461,8 @@ export async function finalizeAssessmentAction(
   revalidatePath(`/admin/clientes/${assessment.client_id}/evolucao`);
   revalidatePath("/admin/avaliacoes");
   revalidatePath("/cliente");
+  revalidatePath("/cliente/avaliacoes");
+  revalidatePath("/cliente/evolucao");
 
   return {
     message: "Avaliação finalizada. Os dados foram preservados sem gerar meta automática de hidratação.",
