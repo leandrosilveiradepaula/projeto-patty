@@ -1,3 +1,7 @@
+## PENDENCIA OPERACIONAL - reconciliacao de identidade Auth parcial apos falha de convite (2026-10-08)
+
+O fluxo de convite deixou de apagar automaticamente identidades retornadas pelo Supabase Auth em erro de provisionamento, pois a resposta do provedor nao comprova que aquela identidade foi criada na tentativa atual. Se isso ocorrer, o aplicativo preserva contas preexistentes e registros profissionais e informa que a origem/estado da identidade precisa ser verificado por operador autorizado antes de tentar novo convite. A revisao ou recuperacao segura de Auth parcialmente provisionado ainda nao possui fluxo operacional definitivo de reconciliacao; **nao** automatizar exclusao de usuarios, reenvio, uniao de identidades ou exclusao de historico por email. Registrar esse incidente sem PII em logs e definir mais tarde recuperacao controlada.
+
 ## Ciclo de conta x ciclo de acompanhamento (auditoria 2026-10-07)
 
 Fatos confirmados no runtime:
