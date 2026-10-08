@@ -3069,3 +3069,17 @@ Este lote nao implementa politica de expiracao/reenvio, nao altera Supabase Auth
 ## UX da recuperação assistida — 2026-10-08
 
 A tela de recuperação individual da cliente agora oferece cópia direta do link com alternativa manual, aviso de credencial temporária, orientação para entrega somente à cliente correta e limpeza de confirmação de cópia ao solicitar novo token. A mensagem de sucesso esclarece que o link deve ser copiado antes de sair da página. Sem alterações de política de expiração, Auth, RLS ou envio automático.
+
+
+## Precisao de status de acesso no workspace — 2026-10-08
+
+O workspace da cliente agora distingue identidade vinculada de ativacao/login verificados. A solicitacao de convite aceita pelo Supabase nao e apresentada como comprovante de entrega de email. O link manual nao e recuperavel da pagina anterior; a interface orienta a nao criar cadastro duplicado e a utilizar o fluxo apropriado de recuperacao de acesso.
+
+Esta melhoria e de comunicacao operacional, nao altera lifecycle de Auth, schema, assignments ou RLS. O sistema ainda nao possui telemetria de entrega/ativacao nessa tela e nao deve simular esses estados.
+
+
+### Reconciliacao adicional do estado de acesso no painel
+
+A mesma precisao foi aplicada aos pontos adjacentes do fluxo administrativo: a lista de clientes nao afirma mais que o email de convite foi entregue; a trilha de atendimento nao marca acesso como concluido apenas pela existencia de `profile_id`; rotulos usam identidade vinculada como fato observavel; falhas do convite automatico evitam afirmar que nenhum email foi enviado; e falha de link manual orienta recuperacao quando a identidade ja existe, sem sugerir novo cadastro.
+
+O lote permanece estritamente de UX e comunicacao operacional. Nao adiciona telemetria de entrega, nao infere ativacao/login, nao altera Supabase Auth, schema, migrations, assignments ou RLS.

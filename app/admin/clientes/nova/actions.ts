@@ -169,7 +169,7 @@ export async function generateManualClientInvite(
           activationLink: null,
           clientId: null,
           message:
-            "Não foi possível gerar o link. Verifique se esse email já possui uma conta ou tente novamente.",
+            "Não foi possível gerar o link. Verifique se esse email já possui uma conta. Se já existir, utilize recuperação de acesso; não crie outro cadastro.",
           success: false,
         };
       }
