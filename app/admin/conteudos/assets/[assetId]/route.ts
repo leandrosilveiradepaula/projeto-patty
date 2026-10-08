@@ -35,6 +35,7 @@ export async function GET(
       headers: {
         "Cache-Control": "private, no-store",
         Location: presignedUrl,
+        "Referrer-Policy": "no-referrer",
       },
     });
   } catch {
