@@ -33,6 +33,8 @@ if (created.error) throw created.error;
 
 const profileId = created.data.user.id;
 let clientId = null;
+let protocolId = null;
+let protocolVersionId = null;
 
 try {
   const profile = await admin.from("profiles").insert({
@@ -60,6 +62,34 @@ try {
     .single();
   if (client.error) throw client.error;
   clientId = client.data.id;
+
+  // Seed an unpublished, synthetic nutrition draft to verify that the actual
+  // authenticated client UI does NOT expose a professional draft via RLS.
+  // This is not a professional approval/publication or an application action.
+  const protocol = await admin
+    .from("protocols")
+    .insert({ client_id: clientId, protocol_type: "nutrition" })
+    .select("id")
+    .single();
+  if (protocol.error) throw protocol.error;
+  protocolId = protocol.data.id;
+
+  const version = await admin
+    .from("protocol_versions")
+    .insert({
+      client_id: clientId,
+      // Technical creator for this disposable test fixture; no real staff ID.
+      created_by_profile_id: profileId,
+      protocol_id: protocolId,
+      version_number: 1,
+    })
+    .select("id, submitted_for_review_at")
+    .single();
+  if (version.error) throw version.error;
+  if (version.data.submitted_for_review_at !== null) {
+    throw new Error("Synthetic protocol fixture must remain an unpublished draft");
+  }
+  protocolVersionId = version.data.id;
 
   const verifier = createClient(url, secret, {
     auth: { autoRefreshToken: false, persistSession: false },
@@ -95,12 +125,22 @@ try {
       `E2E_CANONICAL_PASSWORD=${password}`,
       `E2E_CANONICAL_PROFILE_ID=${profileId}`,
       `E2E_CANONICAL_CLIENT_ID=${clientId}`,
+      `E2E_CANONICAL_PROTOCOL_ID=${protocolId}`,
+      `E2E_CANONICAL_PROTOCOL_VERSION_ID=${protocolVersionId}`,
       "",
     ].join("\n"),
   );
 
   console.log("Ephemeral canonical E2E client created and login preflight passed.");
 } catch (error) {
+  // Compensate only objects created inside this invocation, in FK order.
+  if (protocolVersionId) {
+    await admin.from("protocol_versions").delete().eq("id", protocolVersionId)
+      .is("submitted_for_review_at", null);
+  }
+  if (protocolId) {
+    await admin.from("protocols").delete().eq("id", protocolId);
+  }
   if (clientId) {
     await admin.from("clients").delete().eq("id", clientId);
   }
