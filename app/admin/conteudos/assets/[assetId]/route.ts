@@ -1,9 +1,9 @@
-import { requireRole } from "@/lib/supabase/auth";
 import { createPrivateBlobReadUrl } from "@/lib/content/private-blob-url";
-import { getAccessibleEducationalContentAssetForCurrentClient } from "@/lib/supabase/data-access";
+import { requireRole } from "@/lib/supabase/auth";
+import { getAccessibleEducationalContentAssetForCurrentAdmin } from "@/lib/supabase/data-access";
 import { isUuid } from "@/lib/validation/uuid";
 
-type ClientEducationalContentAssetRouteProps = {
+type AdminEducationalContentAssetRouteProps = {
   params: Promise<{
     assetId: string;
   }>;
@@ -11,9 +11,9 @@ type ClientEducationalContentAssetRouteProps = {
 
 export async function GET(
   _request: Request,
-  { params }: ClientEducationalContentAssetRouteProps,
+  { params }: AdminEducationalContentAssetRouteProps,
 ) {
-  await requireRole("client");
+  await requireRole("admin");
 
   const { assetId } = await params;
 
@@ -21,7 +21,7 @@ export async function GET(
     return new Response(null, { status: 404 });
   }
 
-  const asset = await getAccessibleEducationalContentAssetForCurrentClient(assetId);
+  const asset = await getAccessibleEducationalContentAssetForCurrentAdmin(assetId);
 
   if (!asset || asset.storage_provider !== "vercel_blob") {
     return new Response(null, { status: 404 });
