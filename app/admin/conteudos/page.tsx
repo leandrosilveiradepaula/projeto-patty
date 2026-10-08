@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import { TextInput } from "@/components/ui/TextInput";
+import { summarizeLibraryVersions, matchesLibraryStatus } from "@/lib/content/admin-library-status";
 import { listEducationalContentVersionsForCurrentAdmin } from "@/lib/supabase/data-access";
 import Link from "next/link";
 import styles from "./page.module.css";
@@ -36,42 +37,24 @@ type AdminConteudosPageProps = {
 export default async function AdminConteudosPage({ searchParams }: AdminConteudosPageProps) {
   const { q, status } = await searchParams;
   const contentVersions = await listEducationalContentVersionsForCurrentAdmin();
-  const latestByContent = new Map<
-    string,
-    (typeof contentVersions)[number]
-  >();
-
-  for (const version of contentVersions) {
-    const current = latestByContent.get(version.educational_content_id);
-
-    if (!current || version.version_number > current.version_number) {
-      latestByContent.set(version.educational_content_id, version);
-    }
-  }
-
-  const contents = [...latestByContent.values()].sort((left, right) => {
-    if (left.display_order !== right.display_order) {
-      return left.display_order - right.display_order;
-    }
-
-    return left.title.localeCompare(right.title, "pt-BR");
-  });
+  const summaries = [...summarizeLibraryVersions(contentVersions, (version) => version.educational_content_id).values()]
+    .sort((left, right) => {
+      if (left.latestVersion.display_order !== right.latestVersion.display_order) {
+        return left.latestVersion.display_order - right.latestVersion.display_order;
+      }
+      return left.latestVersion.title.localeCompare(right.latestVersion.title, "pt-BR");
+    });
+  const contents = summaries;
 
   const searchTerm = q?.trim() ?? "";
   const normalizedSearchTerm = normalizeSearchValue(searchTerm);
   const statusFilter = status === "draft" || status === "published" ? status : "all";
-  const filteredContents = contents.filter((content) => {
-    const matchesSearch =
-      !normalizedSearchTerm ||
-      normalizeSearchValue(
-        [content.title, content.category_key, content.content_type_key]
-          .filter(Boolean)
-          .join(" "),
-      ).includes(normalizedSearchTerm);
-    const matchesStatus =
-      statusFilter === "all" ||
-      (statusFilter === "published" ? Boolean(content.published_at) : !content.published_at);
-    return matchesSearch && matchesStatus;
+  const filteredContents = contents.filter((summary) => {
+    const matchesSearch = !normalizedSearchTerm ||
+      [summary.latestVersion, summary.latestPublishedVersion].some((version) =>
+        version !== null && normalizeSearchValue([version.title, version.category_key, version.content_type_key].filter(Boolean).join(" ")).includes(normalizedSearchTerm),
+      );
+    return matchesSearch && matchesLibraryStatus(summary, statusFilter);
   });
 
   return (
@@ -151,12 +134,12 @@ export default async function AdminConteudosPage({ searchParams }: AdminConteudo
               {filteredContents.length} de {contents.length} conteúdo(s)
             </p>
             <ul className={styles.contentList}>
-            {filteredContents.map((contentVersion) => {
+            {filteredContents.map(({ latestVersion: contentVersion, latestPublishedVersion }) => {
               const publishedMeta = contentVersion.published_at
-                ? "Publicado em " +
-                  formatPublishedDate(contentVersion.published_at) +
-                  "."
-                : "Versão atual em rascunho.";
+                ? "Publicado em " + formatPublishedDate(contentVersion.published_at) + "."
+                : latestPublishedVersion
+                  ? `Versão atual em rascunho. Versão ${latestPublishedVersion.version_number} permanece publicada.`
+                  : "Versão atual em rascunho; nenhuma versão publicada.";
 
               return (
                 <li key={contentVersion.educational_content_id}>

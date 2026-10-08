@@ -3135,3 +3135,8 @@ O estado vazio da lista administrativa agora diferencia filtro por ação da Pat
 ## Navegacao contextual da fila operacional — 2026-10-08
 
 Os tres indicadores da home administrativa agora apontam para o grupo correspondente na pagina de Pendencias. Os grupos recolhiveis de Aguardando cliente e Operacional do sistema se expandem quando selecionados via link, sem alterar classificacao, ordem, RLS, dados ou prioridade clinica. Um grupo solicitado sem itens informa essa condicao e permite voltar a fila completa. Parametro de navegacao validado com lista fechada, testes de regressao inclusos.
+
+
+## Filtros versionados das bibliotecas administrativas — 2026-10-08
+
+As bibliotecas de Conteudos e Exercicios passam a calcular independentemente a versao atual e a ultima versao publicada. Um novo rascunho nao oculta a publicacao anterior no filtro Publicados; o mesmo item pode aparecer em Rascunhos e Publicados, conforme seu historico, exibindo explicitamente que a versao atual segue em rascunho. O runtime nao altera a publicacao, liberacao, prescricao ou permissao de acesso; a mudanca e apenas na leitura e filtragem administrativa, com testes determinísticos.
