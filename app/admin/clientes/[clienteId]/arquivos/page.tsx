@@ -1,4 +1,5 @@
 import { AdminPrivateFileReleaseForm } from "@/components/admin/AdminPrivateFileReleaseForm";
+import { isPreviewablePrivateFileMimeType } from "@/lib/files/private-file-preview";
 import { AdminPrivateFileUploadForm } from "@/components/admin/AdminPrivateFileUploadForm";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
@@ -127,6 +128,17 @@ export default async function AdminClientFilesPage({
                     <div><dt>Cadastrado em</dt><dd>{formatCreatedAt(file.created_at)}</dd></div>
                   </dl>
                   <div className={styles.fileActions}>
+                    {isPreviewablePrivateFileMimeType(file.mime_type) ? (
+                      <Link
+                        aria-label={`Visualizar ${file.original_filename?.trim() || "arquivo sem nome informado"}`}
+                        className={styles.downloadLink}
+                        href={`/admin/arquivos/${file.id}?preview=1`}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        Visualizar
+                      </Link>
+                    ) : null}
                     <Link
                       aria-label={`Baixar ${file.original_filename?.trim() || "arquivo sem nome informado"}`}
                       className={styles.downloadLink}
@@ -190,6 +202,17 @@ export default async function AdminClientFilesPage({
                     <div><dt>Cadastrado em</dt><dd>{formatCreatedAt(file.created_at)}</dd></div>
                   </dl>
                   <div className={styles.fileActions}>
+                    {isPreviewablePrivateFileMimeType(file.mime_type) ? (
+                      <Link
+                        aria-label={`Visualizar ${file.original_filename?.trim() || "arquivo sem nome informado"}`}
+                        className={styles.downloadLink}
+                        href={`/admin/arquivos/${file.id}?preview=1`}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        Visualizar
+                      </Link>
+                    ) : null}
                     <Link
                       aria-label={`Baixar ${file.original_filename?.trim() || "arquivo sem nome informado"}`}
                       className={styles.downloadLink}

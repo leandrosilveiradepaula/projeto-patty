@@ -1910,7 +1910,7 @@ export async function getAccessiblePrivateFileForCurrentClientDownload(
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("client_files")
-    .select("id, bucket_id, object_path, original_filename, file_kind")
+    .select("id, bucket_id, object_path, original_filename, file_kind, mime_type")
     .eq("id", fileId)
     .maybeSingle();
 
@@ -1926,7 +1926,7 @@ export async function getAccessiblePrivateFileForAdminDownload(fileId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("client_files")
-    .select("id, bucket_id, object_path, original_filename, file_kind")
+    .select("id, bucket_id, object_path, original_filename, file_kind, mime_type")
     .eq("id", fileId)
     .maybeSingle();
 

@@ -1,4 +1,5 @@
 import { requireRole } from "@/lib/supabase/auth";
+import { isPreviewablePrivateFileMimeType } from "@/lib/files/private-file-preview";
 import {
   getAccessiblePrivateFileForAdminDownload,
   recordClientFileAccessEvent,
@@ -13,7 +14,7 @@ type AdminPrivateFileRouteProps = {
 };
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: AdminPrivateFileRouteProps,
 ) {
   const auth = await requireRole("admin");
@@ -24,12 +25,13 @@ export async function GET(
     return new Response(null, { status: 404 });
   }
 
+  const preview = new URL(request.url).searchParams.get("preview") === "1";
   const file = await getAccessiblePrivateFileForAdminDownload(fileId);
 
-  if (!file) {
+  if (!file || (preview && !isPreviewablePrivateFileMimeType(file.mime_type))) {
     try {
       await recordClientFileAccessEvent({
-        action: "download",
+        action: preview ? "view" : "download",
         actorProfileId: auth.profileId,
         authorized: false,
         fileKind: null,
@@ -45,7 +47,7 @@ export async function GET(
   if (file.file_kind === "exam" || file.file_kind === "document") {
     try {
       await recordClientFileAccessEvent({
-        action: "download",
+        action: preview ? "view" : "download",
         actorProfileId: auth.profileId,
         authorized: true,
         fileKind: file.file_kind,
@@ -60,9 +62,11 @@ export async function GET(
   const downloadName = file.original_filename?.trim() || true;
   const { data, error } = await supabase.storage
     .from(file.bucket_id)
-    .createSignedUrl(file.object_path, 300, {
-      download: downloadName,
-    });
+    .createSignedUrl(
+      file.object_path,
+      preview ? 60 : 300,
+      preview ? undefined : { download: downloadName },
+    );
 
   if (error || !data?.signedUrl) {
     return new Response(null, { status: 404 });
@@ -72,6 +76,8 @@ export async function GET(
     status: 307,
     headers: {
       "Cache-Control": "private, no-store",
+      "Referrer-Policy": "no-referrer",
+      "X-Robots-Tag": "noindex",
       Location: data.signedUrl,
     },
   });

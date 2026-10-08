@@ -85,3 +85,10 @@
   outline-offset: 3px;
 }
 
+
+.fileActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: center;
+}
