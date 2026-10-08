@@ -1,3 +1,11 @@
+## Auditoria integrada - origem confiavel dos links de ativacao e recuperacao - 2026-10-08
+
+A geracao manual de convites e recuperacao de acesso montava URLs com `x-forwarded-host`, `host` e `x-forwarded-proto` recebidos na requisicao. Como essas URLs levam `token_hash` individual, construir seu destino a partir de cabecalhos controlados pela entrada pode direcionar um link de acesso a um dominio indevido. A origem agora e resolvida exclusivamente por configuracao server-side (opcional `APP_PUBLIC_ORIGIN`, hostname automatico `VERCEL_PROJECT_PRODUCTION_URL` ou `VERCEL_URL`), sempre validando HTTPS, host sem credenciais e URL sem path/query/hash. Em desenvolvimento local, localhost HTTP permanece permitido apenas com NODE_ENV=development.
+
+Convites e recuperacoes manuais validam o destino **antes** de gerar usuario/token e falham com mensagem acionavel se o deployment nao fornecer uma origem confiavel. Nenhuma origem e derivada do Host recebido. Testes deterministas incluem origens confiaveis, rejeicao de URL hostil, caminho alterado, protocolo inseguro, configuracao ausente e contrato dos dois fluxos. A documentacao de ambiente recebeu orientacao opcional; no Vercel o dominio e obtido das variaveis de ambiente automaticas, sem nova intervencao do usuario para instalacoes ja hospedadas.
+
+Sem mudancas de Auth, schema, migrations, RLS, metodo profissional ou envio de dados reais. O CI valida contratos/build mas nao prova entrega real de SMTP nem expiracao de links, que permanecem pendencias operacionais.
+
 ## Auditoria integrada - leitura completa de protocolos publicados - 2026-10-08
 
 A area `/cliente/protocolo` carregava registros de `protocol_publications`, versoes, variacoes, refeicoes, doses e ciclos em consultas sem paginacao. O Supabase/PostgREST pode limitar o numero de linhas retornadas de cada SELECT, truncando silenciosamente um historico volumoso e omitindo refeicoes/doses/passos mesmo quando existem no banco. Isso seria especialmente grave para um plano nutricional publicado, que deve refletir exatamente o snapshot aprovado pela Patty.
