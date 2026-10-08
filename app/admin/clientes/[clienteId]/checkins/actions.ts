@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { parseCheckinHistoryDay } from "@/lib/checkins/history-day";
 import { loadSupportedLiquidTaxonomy } from "@/lib/method/liquid-taxonomy-loader";
 import { requireRole } from "@/lib/supabase/auth";
 import {
@@ -70,7 +71,9 @@ export async function correctClientLiquidIntakeAction(
   revalidatePath(adminCheckinsPath(clientId));
   revalidatePath("/cliente");
   revalidatePath("/cliente/checkins");
-  redirect(adminCheckinsPath(clientId, "correction-recorded"));
+  const today = new Intl.DateTimeFormat("en-CA", { year: "numeric", month: "2-digit", day: "2-digit", timeZone: "America/Sao_Paulo" }).format(new Date());
+  const historyDay = parseCheckinHistoryDay(formData.get("historyDay"), today);
+  redirect(adminCheckinsPath(clientId, "correction-recorded") + (historyDay ? "&dia=" + historyDay : ""));
 }
 
 export async function correctClientActivityCheckinAction(
