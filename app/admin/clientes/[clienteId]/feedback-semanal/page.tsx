@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Section } from "@/components/ui/Section";
+import Link from "next/link";
+import { describeAdminFeedbackReminder } from "@/lib/operations/admin-feedback-reminder";
 import { parseWeeklyFeedbackDefinition, readWeeklyFeedbackAnswer } from "@/lib/weekly-feedback/definition";
 import {
   getAccessibleClient,
@@ -35,52 +37,6 @@ function formatDateTime(value: string | null) {
     timeStyle: "short",
     timeZone: "America/Sao_Paulo",
   }).format(new Date(value));
-}
-
-function notificationStatusLabel(
-  event:
-    | {
-        blocked_reason: string | null;
-        channel_key: string | null;
-        delivery_state: string;
-      }
-    | undefined,
-) {
-  if (!event) return null;
-
-  if (event.delivery_state === "delivered" && event.channel_key === "in_app") {
-    return "Lembrete disponível no app";
-  }
-
-  if (event.delivery_state === "delivered" && event.channel_key === "email") {
-    return "Lembrete entregue por email";
-  }
-
-  if (event.delivery_state === "queued_external" && event.channel_key === "email") {
-    return "Lembrete por email aguardando envio";
-  }
-
-  if (event.delivery_state === "delivery_failed" && event.channel_key === "email") {
-    return "Falha no envio do lembrete por email";
-  }
-
-  if (event.delivery_state === "blocked_no_channel") {
-    return "Lembrete bloqueado: canal não configurado";
-  }
-
-  if (event.delivery_state === "blocked_missing_contact") {
-    return event.channel_key === "email"
-      ? "Lembrete bloqueado: email de contato ausente"
-      : "Lembrete bloqueado: telefone ausente";
-  }
-
-  if (event.delivery_state === "blocked_provider") {
-    return event.channel_key === "email"
-      ? "Email configurado; entrega externa ainda não concluída"
-      : "WhatsApp configurado; provedor externo ainda não ativado";
-  }
-
-  return "Lembrete registrado";
 }
 
 export default async function AdminClientWeeklyFeedbackPage({ params }: PageProps) {
@@ -177,7 +133,7 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
             {pendingFeedbacks.map((feedback) => {
               const version = feedback.weekly_feedback_form_versions;
               const reminderEvent = reminderEventsByFeedbackId.get(feedback.id);
-              const reminderStatus = notificationStatusLabel(reminderEvent);
+              const reminderStatus = describeAdminFeedbackReminder(reminderEvent);
 
               return (
                 <li key={feedback.id}>
@@ -201,7 +157,10 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
                     <p className={styles.meta}>Prazo: {formatDateTime(feedback.due_at)}</p>
                     <p className={styles.reminderStatus}>
                       <strong>Lembrete:</strong>{" "}
-                      {reminderStatus ?? "nenhum evento de lembrete registrado."}
+                      {reminderStatus?.label ?? "nenhum evento de lembrete registrado."}
+                       {reminderStatus?.nextStep ? (
+                         <> · <Link href={`/admin/clientes/${client.id}#${reminderStatus.nextStep.anchor}`}>{reminderStatus.nextStep.label}</Link></>
+                       ) : null}
                     </p>
                     <p className={styles.meta}>
                       A cliente ainda não concluiu o envio. Rascunhos não são interpretados automaticamente.
