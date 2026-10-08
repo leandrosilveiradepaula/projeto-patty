@@ -2993,3 +2993,15 @@ Antes de permitir o registro de metadata de um asset educacional, o servidor ago
 O SHA-256 permanece um gate separado do binario: deve ser recalculado no arquivo fonte imediatamente antes do upload e verificado sobre a transferencia conforme o runbook. Como o head() do Blob nao expoe SHA-256 criptografico do conteudo, ETag nao e tratado como substituto.
 
 O primeiro video continua sem upload/asset/publicacao/release nesta etapa; este endurecimento apenas impede que metadata administrativa seja registrada para um objeto inexistente ou tecnicamente divergente.
+
+
+## Upload direto de midia educacional preparado - 2026-10-07
+
+A interface administrativa agora possui caminho direto para transferir um arquivo educacional aprovado ao Vercel Private Blob sem proxy do binario pela Function:
+- grant de upload exige admin/AAL2, versao em rascunho e ausencia de asset registrado;
+- URL de PUT e curta, privada, limitada ao pathname opaco, MIME e tamanho maximo;
+- tipos inicialmente aceitos no fluxo sao PDF, JPEG, PNG, WebP e MP4;
+- o browser calcula SHA-256 antes da transferencia;
+- upload e registro continuam etapas separadas; registrar exige confirmacao humana e a verificacao server-side do objeto real implementada anteriormente.
+
+Nenhum arquivo foi transferido neste PR. O primeiro video aprovado continua pendente de selecao/upload real pela interface, verificacao pos-upload e validacao de entrega >100 MB antes de publicacao/release.
