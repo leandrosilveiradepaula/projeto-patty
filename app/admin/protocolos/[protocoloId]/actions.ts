@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 
 import { requireRole } from "@/lib/supabase/auth";
 import { buildProtocolCloneSnapshot } from "@/lib/protocol/clone-snapshot";
+import { parseProtocolDraftDoseQuantity } from "@/lib/protocol/dose-entry";
 import {
   formatProtocolDraftReadiness,
   getProtocolDraftReadiness,
@@ -242,10 +243,9 @@ export async function addProtocolMealDose(
     doseTypeValue === "fat"
       ? doseTypeValue
       : null;
-  const doseQuantity =
-    typeof quantityValue === "string" ? Number(quantityValue.replace(",", ".")) : Number.NaN;
+  const doseQuantity = parseProtocolDraftDoseQuantity(quantityValue);
 
-  if (!doseType || !Number.isFinite(doseQuantity) || doseQuantity <= 0 || doseQuantity > 999) {
+  if (!doseType || doseQuantity === null) {
     return { message: "Informe um tipo e uma quantidade de dose válidos.", success: false };
   }
 
@@ -376,10 +376,9 @@ export async function updateProtocolMealDose(
 ): Promise<ProtocolLifecycleFormState> {
   await requireRole("admin");
   const quantityValue = formData.get("doseQuantity");
-  const doseQuantity =
-    typeof quantityValue === "string" ? Number(quantityValue.replace(",", ".")) : Number.NaN;
+  const doseQuantity = parseProtocolDraftDoseQuantity(quantityValue);
 
-  if (!Number.isFinite(doseQuantity) || doseQuantity <= 0 || doseQuantity > 999) {
+  if (doseQuantity === null) {
     return { message: "Informe uma quantidade de dose válida.", success: false };
   }
 
