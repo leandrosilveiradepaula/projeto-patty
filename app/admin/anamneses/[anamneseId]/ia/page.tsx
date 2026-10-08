@@ -1,6 +1,7 @@
 import {
   acceptAiFindingAsInternalObservation,
   createPattyNoteFromAiFinding,
+  recoverStartedAiExecution,
 } from "@/app/admin/anamneses/[anamneseId]/ia/actions";
 import { AdminAiReviewForm } from "@/components/admin/AdminAiReviewForm";
 import { AdminAnamnesisWorkspaceHeader } from "@/components/admin/AdminAnamnesisWorkspaceHeader";
@@ -212,15 +213,39 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
                     completedAt: execution.completed_at,
                     failedAt: execution.failed_at,
                   }) ? (
-                    <Alert
-                      title="Execução sem estado terminal"
-                      variant="warning"
-                    >
-                      Esta execução permanece iniciada e não foi convertida
-                      automaticamente em falha. Nenhum resultado deve ser
-                      presumido; se este estado persistir, ele exige
-                      reconciliação operacional antes de uma nova tentativa.
-                    </Alert>
+                    <>
+                      <Alert
+                        title="Execução sem estado terminal"
+                        variant="warning"
+                      >
+                        Esta execução permanece iniciada e não foi convertida
+                        automaticamente em falha. Nenhum resultado deve ser
+                        presumido. A recuperação abaixo exige decisão humana e
+                        registra a execução como falha sem inventar timeout.
+                      </Alert>
+                      <form
+                        action={recoverStartedAiExecution.bind(
+                          null,
+                          submission.id,
+                          execution.id,
+                        )}
+                        className={styles.recoveryForm}
+                      >
+                        <label>
+                          <span>Motivo da recuperação manual</span>
+                          <textarea
+                            maxLength={500}
+                            minLength={10}
+                            name="recoveryReason"
+                            placeholder="Ex.: execução interrompida antes de registrar resposta; revisar antes de tentar novamente."
+                            required
+                          />
+                        </label>
+                        <Button size="compact" type="submit" variant="secondary">
+                          Encerrar como falha e liberar nova tentativa
+                        </Button>
+                      </form>
+                    </>
                   ) : null}
 
                   {execution.status === "failed" ? (

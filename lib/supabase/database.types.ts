@@ -3464,6 +3464,14 @@ export type Database = {
         }
         Returns: undefined
       }
+      recover_started_ai_execution: {
+        Args: {
+          p_execution_id: string
+          p_reason: string
+          p_recovered_by_profile_id: string
+        }
+        Returns: undefined
+      }
       fail_weekly_feedback_email_delivery_server: {
         Args: {
           p_attempt_id: string
