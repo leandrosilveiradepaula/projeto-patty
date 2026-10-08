@@ -3,6 +3,12 @@ import { ANAMNESIS_QUESTION_KEYS } from "../anamnesis/question-keys.ts";
 import type { Json } from "@/lib/supabase/database.types";
 
 const ALWAYS_EXCLUDED_QUESTION_KEYS = new Set<string>([
+  ANAMNESIS_QUESTION_KEYS.address,
+  ANAMNESIS_QUESTION_KEYS.city,
+  ANAMNESIS_QUESTION_KEYS.contactEmail,
+  ANAMNESIS_QUESTION_KEYS.contactPhone,
+  ANAMNESIS_QUESTION_KEYS.consentAcceptance,
+  ANAMNESIS_QUESTION_KEYS.educationLevel,
   ANAMNESIS_QUESTION_KEYS.instagram,
 ]);
 const EXPLICIT_ONLY_QUESTION_KEYS = new Set<string>([
@@ -177,7 +183,9 @@ export function buildAnamnesisReviewContext(input: {
     .filter(
       (question) =>
         applicableQuestionIds.has(question.id) &&
-        !answersByQuestionId.has(question.id),
+        !answersByQuestionId.has(question.id) &&
+        !ALWAYS_EXCLUDED_QUESTION_KEYS.has(question.question_key) &&
+        !EXPLICIT_ONLY_QUESTION_KEYS.has(question.question_key),
     )
     .map((question) => ({
       label: question.label,

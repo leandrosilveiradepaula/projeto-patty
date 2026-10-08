@@ -3018,3 +3018,15 @@ Agora:
 - tipos ainda nao formalizados nao recebem regra por inferencia.
 
 O primeiro video da balanca permanece em rascunho e sem publicacao/release ate que o upload real, registro do asset e validacao de entrega sejam concluidos.
+
+
+## Minimizacao de dados no contexto de IA - 2026-10-07
+
+A preparacao auditavel de IA recebeu um hardening de privacidade antes de qualquer liberacao de dados reais:
+- cidade/endereco, telefone, email de contato, Instagram, escolaridade e consentimento foram excluidos do contexto automatico;
+- esses campos tambem nao podem aparecer como pergunta ausente sugerida pela IA;
+- capacidade financeira permanece opt-in por execution e nao vira missing target quando ausente;
+- a tela administrativa explicita o boundary para a Patty;
+- testes protegem contexto e payload do provider.
+
+O gate OpenAI de dados reais continua fechado. Este bloco reduz superficie de dados, mas nao substitui a verificacao externa de retencao/ZDR/MAM nem a aprovacao humana exigida.

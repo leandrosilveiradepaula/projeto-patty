@@ -191,3 +191,38 @@ test("validates prompt content shape", () => {
     null,
   );
 });
+
+
+test("provider request contains only the already-minimized canonical context", () => {
+  const request = buildOpenAiAnamnesisReviewRequest({
+    context: {
+      allowedMissingTargetQuestionIds: new Set(),
+      allowedSourceAnswerIds: new Set([ANSWER_A]),
+      missingTargets: [],
+      sources: [
+        {
+          answer_value: "source value",
+          label: "Allowed question",
+          question_id: "66666666-6666-4666-8666-666666666666",
+          question_key: "allowed",
+          source_answer_id: ANSWER_A,
+        },
+      ],
+    },
+    instructions: "Review only.",
+    model: "gpt-test",
+  });
+
+  assert.match(request.body.input, /Allowed question/);
+  for (const forbidden of [
+    "Cidade",
+    "Telefone",
+    "Email",
+    "Instagram",
+    "Escolaridade",
+    "consent_acceptance",
+    "financial_capacity_for_supplements",
+  ]) {
+    assert.equal(request.body.input.includes(forbidden), false);
+  }
+});

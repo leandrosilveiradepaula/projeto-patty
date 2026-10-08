@@ -194,3 +194,116 @@ test("cross-submission answers are rejected before context construction", () => 
       error.code === "answer_submission_mismatch",
   );
 });
+
+
+test("informational and contact fields never enter AI sources or missing targets", () => {
+  const informationalQuestions = [
+    {
+      id: "30000000-0000-4000-8000-000000000101",
+      form_version_id: VERSION,
+      question_key: "city",
+      label: "Cidade",
+      applicability_source_question_id: null,
+      applicability_expected_answer: null,
+    },
+    {
+      id: "30000000-0000-4000-8000-000000000102",
+      form_version_id: VERSION,
+      question_key: "contact_phone",
+      label: "Telefone",
+      applicability_source_question_id: null,
+      applicability_expected_answer: null,
+    },
+    {
+      id: "30000000-0000-4000-8000-000000000103",
+      form_version_id: VERSION,
+      question_key: "contact_email",
+      label: "Email",
+      applicability_source_question_id: null,
+      applicability_expected_answer: null,
+    },
+    {
+      id: "30000000-0000-4000-8000-000000000104",
+      form_version_id: VERSION,
+      question_key: "consent_acceptance",
+      label: "Consentimento",
+      applicability_source_question_id: null,
+      applicability_expected_answer: null,
+    },
+    {
+      id: "30000000-0000-4000-8000-000000000105",
+      form_version_id: VERSION,
+      question_key: "education_level",
+      label: "Escolaridade",
+      applicability_source_question_id: null,
+      applicability_expected_answer: null,
+    },
+  ];
+
+  const informationalAnswers = informationalQuestions.slice(0, 4).map(
+    (question, index) => ({
+      id: `40000000-0000-4000-8000-00000000010${index + 1}`,
+      submission_id: SUBMISSION,
+      form_version_id: VERSION,
+      question_id: question.id,
+      answer_value: "informational value",
+    }),
+  );
+
+  const context = buildAnamnesisReviewContext({
+    answers: informationalAnswers,
+    formVersionId: VERSION,
+    questions: informationalQuestions,
+    submissionId: SUBMISSION,
+  });
+
+  assert.deepEqual(context.sources, []);
+  assert.deepEqual(context.missingTargets, []);
+  assert.equal(context.allowedSourceAnswerIds.size, 0);
+  assert.equal(context.allowedMissingTargetQuestionIds.size, 0);
+});
+
+test("explicit-only financial field never becomes a missing-answer target", () => {
+  const financialQuestion = questions[2];
+  const context = buildAnamnesisReviewContext({
+    answers: [],
+    formVersionId: VERSION,
+    questions: [financialQuestion],
+    submissionId: SUBMISSION,
+  });
+
+  assert.deepEqual(context.sources, []);
+  assert.deepEqual(context.missingTargets, []);
+});
+
+test("informational fields cannot be forced into the provider context", () => {
+  const cityQuestion = {
+    id: "30000000-0000-4000-8000-000000000201",
+    form_version_id: VERSION,
+    question_key: "city",
+    label: "Cidade",
+    applicability_source_question_id: null,
+    applicability_expected_answer: null,
+  };
+  const cityAnswer = {
+    id: "40000000-0000-4000-8000-000000000201",
+    submission_id: SUBMISSION,
+    form_version_id: VERSION,
+    question_id: cityQuestion.id,
+    answer_value: "Cidade privada",
+  };
+
+  assert.throws(
+    () =>
+      buildAnamnesisReviewContext({
+        answers: [cityAnswer],
+        explicitlyIncludedAnswerIds: [cityAnswer.id],
+        formVersionId: VERSION,
+        questions: [cityQuestion],
+        submissionId: SUBMISSION,
+      }),
+    (error) =>
+      error instanceof AnamnesisReviewContextBuildError &&
+      error.code === "explicit_source_not_allowed",
+  );
+});

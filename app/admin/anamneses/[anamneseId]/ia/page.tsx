@@ -164,6 +164,12 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
         title="Nova execução"
       >
         <Card>
+          <p className={styles.text}>
+            Cidade/endereço, telefone, email de contato, Instagram,
+            escolaridade e aceite de consentimento não entram no contexto da
+            IA nem aparecem como resposta ausente. Capacidade financeira
+            continua opt-in por execução.
+          </p>
           <AdminAiReviewForm
             financialAnswerId={financialAnswer?.id ?? null}
             model={readiness.ready ? readiness.model : null}

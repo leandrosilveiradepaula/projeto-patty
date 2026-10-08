@@ -180,3 +180,18 @@ Independentemente da politica de retencao do provider, a aplicacao limita localm
 - resposta truncada e identificada explicitamente e armazenada como texto.
 
 Esse controle reduz persistencia excessiva em erro, mas nao altera o status deste gate: dados reais continuam proibidos enquanto o checklist de liberacao nao estiver concluido.
+
+
+## Minimizacao reforcada do contexto de Anamnese - 2026-10-07
+
+O builder de contexto foi endurecido para separar informacao operacional/contato do material enviado ao provider. Independentemente de haver resposta armazenada, os seguintes campos nao entram como fonte nem como alvo de `missing_answer`:
+- cidade/endereco;
+- telefone de contato;
+- email de contato;
+- Instagram;
+- escolaridade;
+- aceite de consentimento.
+
+Capacidade financeira para suplementos/medicamentos continua fora do contexto automatico e so pode entrar por opt-in explicito da Patty para aquela execution. Se estiver sem resposta, ela tambem nao vira alvo automatico de `missing_answer`.
+
+Essa regra e aplicada antes da montagem do request OpenAI. O provider recebe apenas o contexto ja minimizado.

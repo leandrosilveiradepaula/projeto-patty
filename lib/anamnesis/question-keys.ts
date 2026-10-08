@@ -1,7 +1,12 @@
 export const ANAMNESIS_QUESTION_KEYS = {
+  address: "address",
+  city: "city",
+  contactEmail: "contact_email",
+  contactPhone: "contact_phone",
+  consentAcceptance: "consent_acceptance",
+  educationLevel: "education_level",
   financialCapacityForSupplements: "financial_capacity_for_supplements",
   instagram: "instagram",
-  consentAcceptance: "consent_acceptance",
 } as const;
 
 export const ANAMNESIS_SOURCE_CODES = {
