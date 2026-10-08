@@ -1,3 +1,11 @@
+## Auditoria integrada - corrigir E2E de autosalvamento da Anamnese - 2026-10-08
+
+A auditoria dos fluxos E2E verificou que dois testes de navegador ainda buscavam o antigo botão "Salvar no rascunho", removido quando a UI passou a salvar texto ao sair do campo e seleção única automaticamente. O smoke de envio condicional também verificava uma instrução de envio que não existe mais no formulário. Isso inviabilizava a execução confiável de jornadas autenticadas de Anamnese, apesar de os testes estáticos e o build do aplicativo passarem.
+
+Os testes de navegador agora usam blur para texto e check para escolha, aguardam persistência real na tabela de respostas com polling e, quando aplicável, a atualização de visibilidade da pergunta dependente. O smoke canônico verifica ainda o novo resumo de respostas obrigatórias, âncora para pergunta pendente, persistência após reload e preservação do valor histórico quando a condição é desativada. Testes de contrato impedem reintroduzir os seletores obsoletos e ligam as expectativas à UI existente.
+
+Nenhuma migration, RLS, aprovação, publicação, dado real ou regra da Patty foi alterada. A correção dos testes foi validada pelo CI; os workflows autenticados de produção continuam manuais e não devem ser tratados como executados sem run correspondente.
+
 ## PR #550 reconciliado com master - orientação de preenchimento da Anamnese - 2026-10-08
 
 O PR #550, aberto antes de diversas auditorias integradas, foi reconciliado com o HEAD de master por um commit de integração na propria branch; o historico anterior do PR e dos merges foi preservado. A cliente agora ve apenas secoes aplicaveis na versao associada a Anamnese e um resumo somente de leitura das respostas obrigatorias atualmente aplicaveis e persistidas, com acesso direto a primeira resposta faltante. O consentimento continua exigindo aceite especifico na submissao final. A contagem e informativa, calculada no carregamento, e nao substitui a validacao deterministica do backend nem indica aptidao clinica.

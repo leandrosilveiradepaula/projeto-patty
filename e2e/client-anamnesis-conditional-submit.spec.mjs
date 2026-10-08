@@ -208,22 +208,34 @@ test("cliente sintetica usa single_choice, condicional e envio incompleto perman
     await expect(page.getByText("Rascunho", { exact: true })).toBeVisible();
     await expect(
       page.getByText(
-        "Quando terminar todos os campos aplicáveis, use a seção de finalização para enviar a Anamnese.",
+        "Antes de enviar, confira as respostas.",
         { exact: false },
       ),
     ).toBeVisible();
 
     await expect(page.getByLabel("E2E detalhe condicional")).toHaveCount(0);
 
+    // The current UI saves radio choices automatically; there is no save button.
+    // Assert the actual database change rather than a transient toast.
+    async function savedControllerAnswer() {
+      const answer = await admin
+        .from("anamnesis_answers")
+        .select("answer_value")
+        .eq("submission_id", fixture.submissionId)
+        .eq("question_id", fixture.sourceQuestionId)
+        .maybeSingle();
+      if (answer.error) throw answer.error;
+      return answer.data?.answer_value ?? null;
+    }
+
     await page.getByLabel("Nao", { exact: true }).check();
-    await page.getByRole("button", { name: "Salvar no rascunho" }).first().click();
-    await expect(page.getByText("Resposta salva no rascunho.")).toBeVisible();
-    await expect(page.getByLabel("E2E detalhe condicional")).toHaveCount(0);
+    await expect.poll(savedControllerAnswer, { timeout: 20_000 }).toBe("Nao");
+    await expect(page.getByLabel("E2E detalhe condicional")).toHaveCount(0, { timeout: 20_000 });
 
     await page.getByLabel("Sim", { exact: true }).check();
-    await page.getByRole("button", { name: "Salvar no rascunho" }).first().click();
-    await expect(page.getByText("Resposta salva no rascunho.")).toBeVisible();
-    await expect(page.getByLabel("E2E detalhe condicional")).toBeVisible();
+    await expect.poll(savedControllerAnswer, { timeout: 20_000 }).toBe("Sim");
+    await expect(page.getByLabel("E2E detalhe condicional")).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText(/^\d+ de \d+ respostas obrigatórias salvas$/)).toBeVisible();
 
     await page.getByRole("button", { name: "Enviar Anamnese" }).click();
 
