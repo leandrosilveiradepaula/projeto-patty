@@ -39,6 +39,11 @@ export function resolveTrustedClientAccessOrigin(
     throw new ClientAccessLinkOriginError();
   }
 
+  // Protocol-relative/absolute paths are not deployment hostnames.
+  if (raw.startsWith("/") || raw.startsWith("\\\\")) {
+    throw new ClientAccessLinkOriginError();
+  }
+
   try {
     // Vercel injects hostname values without a scheme.
     const url = new URL(raw.includes("://") ? raw : `https://${raw}`);
