@@ -38,6 +38,38 @@ if (linkedClient.error || linkedClient.data?.profile_id !== profileId) {
   throw new Error("Canonical E2E cleanup client ownership verification failed.");
 }
 
+// Refuse deletion unless every protocol record belongs to this disposable client
+// and no professional review, approval or publication exists.
+const protocols = await admin.from("protocols").select("id").eq("client_id", clientId);
+if (protocols.error) throw protocols.error;
+for (const protocol of protocols.data) {
+  const versions = await admin.from("protocol_versions")
+    .select("id, submitted_for_review_at").eq("protocol_id", protocol.id);
+  if (versions.error) throw versions.error;
+  for (const version of versions.data) {
+    if (version.submitted_for_review_at) {
+      throw new Error("Refusing cleanup of reviewed protocol history.");
+    }
+    const approvals = await admin.from("protocol_version_approvals")
+      .select("id").eq("protocol_version_id", version.id).limit(1);
+    const releases = await admin.from("protocol_publications")
+      .select("id").eq("protocol_version_id", version.id).limit(1);
+    if (approvals.error || releases.error || approvals.data.length || releases.data.length) {
+      throw new Error("Refusing cleanup of approved or published protocol history.");
+    }
+    const deletedVersion = await admin.from("protocol_versions").delete()
+      .eq("id", version.id).is("submitted_for_review_at", null).select("id").single();
+    if (deletedVersion.error || !deletedVersion.data) {
+      throw new Error("Synthetic draft deletion was not confirmed.");
+    }
+  }
+  const deletedProtocol = await admin.from("protocols").delete()
+    .eq("id", protocol.id).eq("client_id", clientId).select("id").single();
+  if (deletedProtocol.error || !deletedProtocol.data) {
+    throw new Error("Synthetic protocol deletion was not confirmed.");
+  }
+}
+
 const submissions = await admin
   .from("anamnesis_submissions")
   .select("id, submitted_at")
