@@ -304,7 +304,7 @@ export default async function ClientCheckinsPage({
           <EmptyState
             description={selectedDay === today ? "Não há líquidos registrados hoje. Se desejar informar um consumo, use o formulário acima; não existe meta automática de hidratação." : "Não há líquidos registrados no dia selecionado."}
             title={selectedDay === today ? "Nenhum líquido registrado hoje" : "Nenhum líquido neste dia"}
-            action={<a href="#registrar-liquidos">Ir para registro</a>}
+            action={selectedDay === today ? <a href="#registrar-liquidos">Ir para registro</a> : undefined}
           />
         ) : (
           <ol className={styles.historyList}>
