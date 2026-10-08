@@ -249,6 +249,7 @@ export default async function AdminClienteDetailPage({
   const publishedProtocolVersionIds = new Set(
     protocolPublications.map((publication) => publication.protocol_version_id),
   );
+  const protocolDraftAction = protocolVersions.find(({ version }) => !version.submitted_for_review_at);
   const protocolAction = protocolVersions.find(({ version }) => {
     if (!version.submitted_for_review_at) {
       return false;
@@ -354,7 +355,7 @@ export default async function AdminClienteDetailPage({
                         description:
                           `A versão ${protocolAction.version.version_number} do protocolo foi submetida para revisão e ainda não possui aprovação registrada.`,
                         eyebrow: "Ação da Patty",
-                        href: `/admin/protocolos/${protocolAction.protocol.id}`,
+                        href: `/admin/protocolos/${protocolAction.protocol.id}?versao=${protocolAction.version.version_number}#versao-${protocolAction.version.version_number}`,
                         label: "Revisar protocolo",
                         title: "Protocolo aguardando revisão",
                       }
@@ -362,9 +363,17 @@ export default async function AdminClienteDetailPage({
                         description:
                           `A versão ${protocolAction.version.version_number} do protocolo já possui aprovação, mas ainda não foi publicada para a cliente.`,
                         eyebrow: "Ação da Patty",
-                        href: `/admin/protocolos/${protocolAction.protocol.id}`,
+                        href: `/admin/protocolos/${protocolAction.protocol.id}?versao=${protocolAction.version.version_number}#versao-${protocolAction.version.version_number}`,
                         label: "Publicar protocolo",
                         title: "Protocolo aguardando publicação",
+                      }
+                  : protocolDraftAction
+                    ? {
+                        description: `A versão ${protocolDraftAction.version.version_number} está em rascunho. Publicações anteriores permanecem disponíveis.`,
+                        eyebrow: "Ação da Patty",
+                        href: `/admin/protocolos/${protocolDraftAction.protocol.id}?versao=${protocolDraftAction.version.version_number}#versao-${protocolDraftAction.version.version_number}`,
+                        label: "Continuar protocolo",
+                        title: "Protocolo em rascunho",
                       }
                   : !hasPublishedProtocol
                     ? {
@@ -660,6 +669,8 @@ export default async function AdminClienteDetailPage({
                     ? !approvedProtocolVersionIds.has(protocolAction.version.id)
                       ? `A versão ${protocolAction.version.version_number} está submetida e aguarda aprovação.`
                       : `A versão ${protocolAction.version.version_number} está aprovada e aguarda publicação.`
+                    : protocolDraftAction
+                      ? `A versão ${protocolDraftAction.version.version_number} está em rascunho; publicações anteriores permanecem disponíveis.`
                     : hasPublishedProtocol
                       ? "Já existe protocolo aprovado e publicado para esta cliente."
                       : protocols.length > 0
@@ -684,6 +695,8 @@ export default async function AdminClienteDetailPage({
                   ? !approvedProtocolVersionIds.has(protocolAction.version.id)
                     ? "Aguardando aprovação"
                     : "Aguardando publicação"
+                  : protocolDraftAction
+                    ? "Rascunho"
                   : hasPublishedProtocol
                     ? "Publicado"
                     : protocols.length > 0
