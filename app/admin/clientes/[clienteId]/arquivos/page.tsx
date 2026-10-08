@@ -84,7 +84,7 @@ export default async function AdminClientFilesPage({
       />
       <ClientWorkspaceNav activeArea="arquivos" clientId={client.id} />
       <Section
-        description="Arquivos enviados pela Patty ficam ocultos para a cliente até serem liberados explicitamente."
+        description="Envie o arquivo em nome da cliente. O upload administrativo permanece privado e oculto até a decisão explícita de liberação."
         title="Enviar arquivo em nome da cliente"
       >
         <AdminPrivateFileUploadForm clientId={client.id} />
@@ -94,7 +94,7 @@ export default async function AdminClientFilesPage({
         <div id="aguardando-liberacao">
         <Section
           action={<Badge variant="warning">{pendingReleaseFiles.length} pendente(s)</Badge>}
-          description="Uploads administrativos ainda ocultos para a cliente e que aguardam decisão explícita de liberação."
+          description="Arquivos administrativos ainda ocultos para a cliente. Revise cada arquivo antes de decidir se deve liberá-lo."
           title="Aguardando liberação"
         >
           <ul className={styles.fileList}>
@@ -147,7 +147,7 @@ export default async function AdminClientFilesPage({
       ) : null}
 
       <Section
-        description="Arquivos já liberados para a cliente e arquivos enviados pela própria cliente permanecem disponíveis no histórico privado."
+        description="Histórico privado de arquivos já liberados e de arquivos enviados pela própria cliente. Upload administrativo oculto permanece em Aguardando liberação."
         title="Histórico de arquivos"
       >
         {historyFiles.length === 0 ? (
@@ -155,7 +155,7 @@ export default async function AdminClientFilesPage({
             description={
               pendingReleaseFiles.length > 0
                 ? "Os uploads administrativos pendentes aparecem acima. Depois da liberação, eles passam para este histórico."
-                : "Nenhum arquivo privado está cadastrado para esta cliente."
+                 : "Ainda não há arquivos privados cadastrados. Para adicionar um, use o formulário de envio acima."
             }
             title="Sem arquivos no histórico"
           />
