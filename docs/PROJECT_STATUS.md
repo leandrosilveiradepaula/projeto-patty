@@ -1,3 +1,9 @@
+## Auditoria integrada - historico de treinos publicados - 2026-10-08
+
+A area da cliente mostrava somente o treino publicado com maior numero de versao e nao oferecia acesso aos exercicios de prescricoes anteriores. Como a publicacao e evento humano versionado, a selecao passa a usar `published_at` decrescente com desempate estavel por ID; a mesma funcao deterministica e utilizada na home da cliente, na ficha e no workspace administrativo de treino. A cliente agora pode abrir historicos anteriores efetivamente publicados, com seus exercicios e orientacoes persistidos. Rascunhos e versoes apenas revisadas nao entram na lista. Testes cobrem ordem temporal, desempate e isolamento de rascunhos, alem dos contratos das telas.
+
+Nao altera publicacao/aprovacao, formulas, parametros de treino, snapshots, RLS, schema, migrations ou dados reais. Os testes do CI nao constituem E2E autenticado real; a validacao integrada continua aberta. PR #550 da Anamnese permanece separado.
+
 ## Auditoria integrada - isolamento real de rascunho alimentar no smoke E2E - 2026-10-08
 
 A fixture E2E descartavel da cliente agora cria um protocolo nutricional sintetico com versao 1 ainda em rascunho, sem aprovacao ou publicacao. O teste autenticado exige que a pagina Meu protocolo mostre o estado vazio de nenhuma publicacao, mesmo com versao existente no banco. O cleanup so remove o rascunho apos verificar a identidade sintetica e recusar versoes submetidas, aprovadas ou publicadas. A checagem e executada no fluxo manual existente apenas apos merge e deployment; CI de PR valida contratos e build, nao simula o acesso real ao Supabase. Nao envolve dados pessoais reais, registro profissional finalizado nem publicacao de dieta.
