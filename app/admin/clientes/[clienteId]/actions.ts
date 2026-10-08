@@ -297,7 +297,7 @@ export async function generateManualRecoveryLinkAction(
 
     return {
       message:
-        "Link gerado. Envie este endereço somente para a cliente correspondente.",
+        "Link de recuperação gerado. Copie antes de sair da página e envie somente para a cliente correspondente.",
       recoveryLink: recoveryUrl.toString(),
       success: true,
     };

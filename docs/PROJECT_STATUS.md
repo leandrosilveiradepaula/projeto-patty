@@ -3064,3 +3064,8 @@ Status deste bloco: implementado, mergeado, aplicado e validado no SaaS. O gate 
 A interface de criacao de cliente passou a explicitar que convite automatico e link manual sao caminhos alternativos de criacao de uma nova conta, nao mecanismos de reenvio. A mensagem do link manual orienta tratamento como credencial temporaria e copia antes de sair da pagina. Erros de conta existente encaminham ao fluxo de recuperacao de acesso, sem duplicar identidade.
 
 Este lote nao implementa politica de expiracao/reenvio, nao altera Supabase Auth, nao envia emails reais e nao muda assignments/RLS. Essas pendencias permanecem abertas.
+
+
+## UX da recuperação assistida — 2026-10-08
+
+A tela de recuperação individual da cliente agora oferece cópia direta do link com alternativa manual, aviso de credencial temporária, orientação para entrega somente à cliente correta e limpeza de confirmação de cópia ao solicitar novo token. A mensagem de sucesso esclarece que o link deve ser copiado antes de sair da página. Sem alterações de política de expiração, Auth, RLS ou envio automático.
