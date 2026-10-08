@@ -1,3 +1,9 @@
+## Auditoria integrada - leitura completa de protocolos publicados - 2026-10-08
+
+A area `/cliente/protocolo` carregava registros de `protocol_publications`, versoes, variacoes, refeicoes, doses e ciclos em consultas sem paginacao. O Supabase/PostgREST pode limitar o numero de linhas retornadas de cada SELECT, truncando silenciosamente um historico volumoso e omitindo refeicoes/doses/passos mesmo quando existem no banco. Isso seria especialmente grave para um plano nutricional publicado, que deve refletir exatamente o snapshot aprovado pela Patty.
+
+A leitura autenticada da hierarquia passa a usar batches de ate 100 IDs de pais e paginas de 500 linhas para as nove tabelas envolvidas, mantendo filtros de client_id existentes, RLS em todas as consultas, ordenacao deterministica e o criterio de visibilidade exclusivamente por evento de publicacao. Erros e retornos nulos interrompem a leitura em vez de exibir um plano incompleto como se fosse valido. Testes deterministas cobrem paginas completas, varios batches, escopo e ausencia de service role. Nao houve alteracao de snapshot, schema, migration, politica de acesso ou regra profissional. O teste autenticado real de grande volume permanece pendente; CI nao substitui essa comprovacao.
+
 ## Auditoria integrada - continuidade entre Check-ins, Anamnese e painel da Patty - 2026-10-08
 
 A escrita e a correcao de Check-ins feitas pela cliente invalidavam apenas as paginas da propria cliente. A ficha administrativa e a pagina de Check-ins da Patty nao eram revalidadas explicitamente, embora dependessem dos mesmos registros originais e append-only de correcoes. As quatro operacoes agora usam uma unica revalidacao client-scoped apos confirmar a persistencia; nenhuma revalidacao de sucesso e executada na rota de erro.
