@@ -118,7 +118,7 @@ export default async function AdminClientesPage({
             Convidar cliente
           </Link>
         }
-        description="Encontre rapidamente uma cliente pelo nome."
+        description="Busque por nome ou filtre clientes com ação da Patty. Este filtro não inclui itens aguardando resposta da cliente."
         title="Em acompanhamento"
       >
         <form action="/admin/clientes" className={styles.searchForm} method="get">
@@ -156,7 +156,7 @@ export default async function AdminClientesPage({
         {clients.length === 0 ? (
           <p className={styles.emptyMessage}>Nenhuma cliente está em acompanhamento no momento.</p>
         ) : filteredClients.length === 0 ? (
-          <p className={styles.emptyMessage}>Nenhuma cliente encontrada para “{searchTerm}”.</p>
+          <p className={styles.emptyMessage}>{viewFilter === "patty" ? (searchTerm ? `Nenhuma cliente com ação da Patty corresponde à busca por “${searchTerm}”.` : "Nenhuma cliente em acompanhamento possui ação da Patty nesta fila.") : `Nenhuma cliente corresponde à busca por “${searchTerm}”.`}</p>
         ) : (
           <>
             {searchTerm || viewFilter !== "all" ? (
