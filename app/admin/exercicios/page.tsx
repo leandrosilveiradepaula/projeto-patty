@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import { TextInput } from "@/components/ui/TextInput";
+import { summarizeLibraryVersions, matchesLibraryStatus } from "@/lib/content/admin-library-status";
 import { listExerciseVersionsVisibleToCurrentAdmin } from "@/lib/supabase/data-access";
 import Link from "next/link";
 import styles from "./page.module.css";
@@ -36,31 +37,18 @@ type AdminExerciciosPageProps = {
 export default async function AdminExerciciosPage({ searchParams }: AdminExerciciosPageProps) {
   const { q, status } = await searchParams;
   const exerciseVersions = await listExerciseVersionsVisibleToCurrentAdmin();
-  const latestByExercise = new Map<string, (typeof exerciseVersions)[number]>();
-
-  for (const version of exerciseVersions) {
-    const current = latestByExercise.get(version.exercise_id);
-
-    if (!current || version.version_number > current.version_number) {
-      latestByExercise.set(version.exercise_id, version);
-    }
-  }
-
-  const exercises = [...latestByExercise.values()].sort((left, right) =>
-    right.created_at.localeCompare(left.created_at),
-  );
+  const summaries = [...summarizeLibraryVersions(exerciseVersions, (version) => version.exercise_id).values()]
+    .sort((left, right) => right.latestVersion.created_at.localeCompare(left.latestVersion.created_at));
+  const exercises = summaries;
 
   const searchTerm = q?.trim() ?? "";
   const normalizedSearchTerm = normalizeSearchValue(searchTerm);
   const statusFilter = status === "draft" || status === "published" ? status : "all";
-  const filteredExercises = exercises.filter((exercise) => {
-    const matchesSearch =
-      !normalizedSearchTerm ||
-      normalizeSearchValue(exercise.name).includes(normalizedSearchTerm);
-    const matchesStatus =
-      statusFilter === "all" ||
-      (statusFilter === "published" ? Boolean(exercise.published_at) : !exercise.published_at);
-    return matchesSearch && matchesStatus;
+  const filteredExercises = exercises.filter((summary) => {
+    const matchesSearch = !normalizedSearchTerm ||
+      normalizeSearchValue(summary.latestVersion.name).includes(normalizedSearchTerm) ||
+      (summary.latestPublishedVersion !== null && normalizeSearchValue(summary.latestPublishedVersion.name).includes(normalizedSearchTerm));
+    return matchesSearch && matchesLibraryStatus(summary, statusFilter);
   });
 
   return (
@@ -136,12 +124,12 @@ export default async function AdminExerciciosPage({ searchParams }: AdminExercic
               {filteredExercises.length} de {exercises.length} exercício(s)
             </p>
             <ul className={styles.exerciseList}>
-            {filteredExercises.map((exerciseVersion) => {
+            {filteredExercises.map(({ latestVersion: exerciseVersion, latestPublishedVersion }) => {
               const publishedMeta = exerciseVersion.published_at
-                ? "Publicado em " +
-                  formatPublishedDate(exerciseVersion.published_at) +
-                  "."
-                : "Versão atual em rascunho.";
+                ? "Publicado em " + formatPublishedDate(exerciseVersion.published_at) + "."
+                : latestPublishedVersion
+                  ? `Versão atual em rascunho. Versão ${latestPublishedVersion.version_number} permanece publicada.`
+                  : "Versão atual em rascunho; nenhuma versão publicada.";
 
               return (
                 <li key={exerciseVersion.exercise_id}>
