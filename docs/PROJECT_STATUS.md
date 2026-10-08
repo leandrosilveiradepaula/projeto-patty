@@ -3100,3 +3100,8 @@ Quatro áreas agora oferecem orientação factual: Conteúdos distingue ausênci
 ## Continuidade operacional dos registros e acessos no portal — 2026-10-08
 
 Check-ins oferece retorno direto ao formulário de líquidos quando o histórico do dia está vazio, sem meta automática de hidratação. Feedback Semanal distingue ausência de pendência de ausência de histórico enviado. Arquivos e Conteúdos esclarecem que ausência de cliente vinculada não autoriza uso de outra conta ou acesso a conteúdos privados. Mudanças apenas de mensagens e navegação, sem schema, RLS, Auth, migrations ou regras profissionais.
+
+
+## Clareza temporal em Check-ins e Feedback Semanal — 2026-10-08
+
+A interface identifica explicitamente o histórico de líquidos como referente a hoje e o estado efetivo de atividade como registro de hoje. Em Feedback Semanal, os rascunhos permanecem editáveis até envio e as respostas enviadas são apresentadas como histórico não editável. Apenas textos e testes de regressão; não houve alteração de persistência, regras profissionais, RLS, Auth ou migrations.
