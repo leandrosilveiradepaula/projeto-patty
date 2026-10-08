@@ -1,3 +1,7 @@
+## Treino administrativo — confirmação de alterações — 2026-10-08
+
+Auditoria de integridade do fluxo de Treino: salvar metadados de rascunho, editar exercício e excluir exercício já verificavam erros SQL, porém sem confirmação de linha alterada. Com updates/deletes condicionais e RLS, zero registros podiam ser afetados sem erro e a interface retornar sucesso. As três operações agora exigem retorno explícito do identificador afetado; ausência de linha gera erro recuperável apresentado pela action e não confirmação falsa. A edição de versão continua condicionada a `reviewed_at` e `published_at` nulos. A proteção de revisão, publicação, histórico e limites de autorização permanece no banco. Foram incluídos testes determinísticos em `test:training`. Sem alteração de migrations, schema, Auth/RLS, fórmulas, templates ou regras profissionais.
+
 ## Confirmação de gravação do Feedback Semanal — 2026-10-08
 
 A ação da cliente agora diferencia atualização efetivamente persistida de atualização condicional sem linha retornada (por exemplo, quando o Feedback foi enviado por outra aba). Nesse caso não informa falsamente "Rascunho salvo" ou "Feedback enviado": a cliente recebe um aviso de conflito e pode conferir o estado atual. As ações aceitas são exclusivamente "save" e "submit"; valores inesperados são rejeitados. A condição server-side que impede edição após envio permanece preservada. Incluído teste de regressão no domínio weekly-feedback já abrangido por `test:clients`.

@@ -2,6 +2,7 @@ import "server-only";
 
 import type { Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
+import { requireConfirmedTrainingMutation } from "@/lib/training/confirmed-mutation";
 
 async function getVerifiedProfileId() {
   const supabase = await createClient();
@@ -633,7 +634,7 @@ export async function updateAccessibleClientTrainingPlanDraft(input: {
   trainingPlanVersionId: string;
 }) {
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("client_training_plan_versions")
     .update({
       notes: input.notes,
@@ -641,11 +642,15 @@ export async function updateAccessibleClientTrainingPlanDraft(input: {
     })
     .eq("id", input.trainingPlanVersionId)
     .is("reviewed_at", null)
-    .is("published_at", null);
+    .is("published_at", null)
+    .select("id")
+    .maybeSingle();
 
   if (error) {
     throw error;
   }
+
+  requireConfirmedTrainingMutation(data);
 }
 
 export async function createAccessibleClientTrainingPlanItem(input: {
@@ -694,7 +699,7 @@ export async function updateAccessibleClientTrainingPlanItem(input: {
   setsText: string;
 }) {
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("client_training_plan_items")
     .update({
       execution_notes: input.executionNotes,
@@ -705,23 +710,31 @@ export async function updateAccessibleClientTrainingPlanItem(input: {
       rest_text: input.restText,
       sets_text: input.setsText,
     })
-    .eq("id", input.itemId);
+    .eq("id", input.itemId)
+    .select("id")
+    .maybeSingle();
 
   if (error) {
     throw error;
   }
+
+  requireConfirmedTrainingMutation(data);
 }
 
 export async function deleteAccessibleClientTrainingPlanItem(itemId: string) {
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("client_training_plan_items")
     .delete()
-    .eq("id", itemId);
+    .eq("id", itemId)
+    .select("id")
+    .maybeSingle();
 
   if (error) {
     throw error;
   }
+
+  requireConfirmedTrainingMutation(data);
 }
 
 export async function reviewAccessibleClientTrainingPlanVersion(
