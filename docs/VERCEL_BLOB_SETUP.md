@@ -117,3 +117,10 @@ Depois de o store estar confirmado, seguir exatamente a ordem do manifesto:
 11. release explicita para cliente.
 
 Qualquer falha de integridade interrompe o lote. Nao corrigir tamanho, MIME, hash ou path por estimativa.
+
+
+## Verificacao automatica antes do registro do asset
+
+O registro administrativo de um asset vercel_blob agora consulta o objeto real via head() antes de persistir a metadata no Supabase. O registro falha fechado se o objeto nao existir ou se pathname, tamanho ou MIME divergirem do informado.
+
+O SHA-256 continua sendo evidencia calculada sobre o binario aprovado e deve ser conferido antes do upload e novamente sobre o arquivo transferido conforme o checklist. A API de metadata do Blob nao fornece SHA-256 criptografico do conteudo; portanto o sistema nao deve inventar essa verificacao a partir de ETag ou URL.
