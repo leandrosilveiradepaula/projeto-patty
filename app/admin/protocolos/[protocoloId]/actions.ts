@@ -83,6 +83,7 @@ function revalidateProtocolPaths(protocolId: string, clientId: string) {
   revalidatePath(`/admin/clientes/${clientId}/protocolos`);
   revalidatePath(`/admin/clientes/${clientId}/feedback-semanal`);
   revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
   revalidatePath("/admin/protocolos");
   revalidatePath("/cliente");
   revalidatePath("/cliente/protocolo");

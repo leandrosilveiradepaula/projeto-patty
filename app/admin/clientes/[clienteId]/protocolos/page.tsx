@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/Button";
 import { requireRole } from "@/lib/supabase/auth";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { isUuid } from "@/lib/validation/uuid";
 import styles from "./page.module.css";
 
@@ -70,6 +71,11 @@ async function createFirstProtocolAction(formData: FormData) {
     redirect(`/admin/clientes/${client.id}/protocolos?recuperacao=${removed ? "criacao" : "necessaria"}`);
   }
 
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
+  revalidatePath("/admin/protocolos");
+  revalidatePath(`/admin/clientes/${client.id}`);
+  revalidatePath(`/admin/clientes/${client.id}/protocolos`);
   redirect(`/admin/protocolos/${protocol.id}`);
 }
 
@@ -103,6 +109,11 @@ async function resumeVersionlessProtocolAction(formData: FormData) {
       }
     }
   }
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
+  revalidatePath("/admin/protocolos");
+  revalidatePath(`/admin/clientes/${client.id}`);
+  revalidatePath(`/admin/clientes/${client.id}/protocolos`);
   redirect(`/admin/protocolos/${protocolId}`);
 }
 
