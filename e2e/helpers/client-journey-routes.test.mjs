@@ -61,3 +61,16 @@ test("registration E2E cleanup verifies synthetic ownership and removes the rest
   assert.match(cleanup, /linkedClient\.data\?\.profile_id !== profileId/);
   assert.ok(cleanup.indexOf('from("client_registration")') < cleanup.indexOf('from("clients").delete()'));
 });
+
+test("unpublished protocol isolation uses synthetic draft and refuses historical deletion", () => {
+  const setup = read("e2e/setup-canonical-anamnesis-client.mjs");
+  const cleanup = read("e2e/cleanup-canonical-anamnesis-client.mjs");
+  const smoke = read("e2e/client-operational-navigation.spec.mjs");
+  assert.match(setup, /from\("protocol_versions"\)/);
+  assert.match(setup, /submitted_for_review_at !== null/);
+  assert.doesNotMatch(setup, /from\("protocol_publications"\)\s*\.insert/);
+  assert.match(smoke, /Nenhum protocolo foi publicado para você/);
+  assert.match(cleanup, /Refusing cleanup of reviewed protocol history/);
+  assert.match(cleanup, /Refusing cleanup of approved or published protocol history/);
+  assert.ok(cleanup.indexOf('from("protocols").select("id")') < cleanup.indexOf('from("clients").delete()'));
+});
