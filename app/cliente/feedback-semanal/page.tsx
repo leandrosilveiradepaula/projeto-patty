@@ -120,8 +120,8 @@ export default async function ClientWeeklyFeedbackPage({
           >
             {pendingFeedbacks.length === 0 ? (
               <EmptyState
-                description="Você não possui Feedback Semanal pendente neste momento."
-                title="Tudo enviado"
+                description="Não há Feedback Semanal aguardando sua resposta neste momento. Novas solicitações aparecerão aqui quando estiverem disponíveis."
+                title="Nenhuma resposta pendente"
               />
             ) : (
               <ol className={styles.list}>
@@ -234,7 +234,7 @@ export default async function ClientWeeklyFeedbackPage({
           >
             {submittedFeedbacks.length === 0 ? (
               <EmptyState
-                description="Depois que você enviar um Feedback Semanal, ele aparecerá aqui."
+                description="Ainda não existe Feedback Semanal enviado no histórico. Respostas futuras ficarão preservadas aqui para consulta."
                 title="Nenhum feedback enviado ainda"
               />
             ) : (

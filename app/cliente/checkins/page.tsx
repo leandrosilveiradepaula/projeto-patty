@@ -171,6 +171,7 @@ export default async function ClientCheckinsPage({
       ) : null}
 
       <Section
+        id="registrar-liquidos"
         description="Registre os líquidos que você consumir ao longo do dia. O aplicativo não define automaticamente uma meta diária de hidratação."
         title="Líquidos"
       >
@@ -282,8 +283,9 @@ export default async function ClientCheckinsPage({
       >
         {todayLiquidEvents.length === 0 ? (
           <EmptyState
-            description="Os líquidos registrados hoje aparecerão aqui."
+            description="Não há líquidos registrados hoje. Se desejar informar um consumo, use o formulário acima; não existe meta automática de hidratação."
             title="Nenhum líquido registrado hoje"
+            action={<a href="#registrar-liquidos">Ir para registro</a>}
           />
         ) : (
           <ol className={styles.historyList}>

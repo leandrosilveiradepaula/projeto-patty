@@ -50,8 +50,9 @@ export default async function ClienteConteudosPage() {
       >
         {!client ? (
           <EmptyState
-            description="Sua conta ainda não está vinculada a uma cliente."
+            description="Esta conta ainda não está vinculada a um cadastro de cliente. Os conteúdos permanecem privados até que o vínculo e a liberação estejam disponíveis."
             title="Conteúdos indisponíveis"
+            action={<Link href="/cliente">Voltar ao início</Link>}
           />
         ) : releases?.length === 0 ? (
           <EmptyState

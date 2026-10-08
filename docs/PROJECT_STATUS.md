@@ -3095,3 +3095,8 @@ Nenhuma ausencia de dados passa a ser tratada como falha, liberacao automatica o
 ## Continuidade nos estados sem registros do portal da cliente — 2026-10-08
 
 Quatro áreas agora oferecem orientação factual: Conteúdos distingue ausência de liberação e aprovação profissional; Anamnese distingue disponibilidade de formulário; Feedback Semanal distingue ausência de solicitação; Treino oferece acesso ao formulário somente quando ainda não existe solicitação. As mudanças são de navegação e mensagens, sem novas regras profissionais, schema, Auth, RLS ou migrations.
+
+
+## Continuidade operacional dos registros e acessos no portal — 2026-10-08
+
+Check-ins oferece retorno direto ao formulário de líquidos quando o histórico do dia está vazio, sem meta automática de hidratação. Feedback Semanal distingue ausência de pendência de ausência de histórico enviado. Arquivos e Conteúdos esclarecem que ausência de cliente vinculada não autoriza uso de outra conta ou acesso a conteúdos privados. Mudanças apenas de mensagens e navegação, sem schema, RLS, Auth, migrations ou regras profissionais.

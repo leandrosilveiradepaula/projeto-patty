@@ -49,7 +49,7 @@ export default async function ClientFilesPage() {
   if (!client) {
     return (
       <EmptyState
-        description="Seu cadastro de cliente ainda não está configurado."
+        description="A identidade de acesso ainda não está vinculada a um cadastro de cliente. Não envie arquivos por outra conta."
         title="Cadastro pendente"
       />
     );
