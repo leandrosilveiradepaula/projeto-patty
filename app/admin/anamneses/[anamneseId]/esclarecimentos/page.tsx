@@ -1,3 +1,4 @@
+import { clarificationFollowupStatus, clarificationStatusLabel, clarificationStatusVariant } from "@/lib/follow-up/clarification-status";
 import { AdminAnamnesisClarificationResolutionForm } from "@/components/admin/AdminAnamnesisClarificationResolutionForm";
 import { AdminAnamnesisClarificationRequestForm } from "@/components/admin/AdminAnamnesisClarificationRequestForm";
 import { AdminAnamnesisWorkspaceHeader } from "@/components/admin/AdminAnamnesisWorkspaceHeader";
@@ -71,12 +72,13 @@ export default async function AdminAnamnesisClarificationsPage({ params }: PageP
     label: questionsById.get(answer.question_id)?.label ?? `Resposta ${answer.id.slice(0, 8)}`,
   }));
 
+  const firstAwaitingReviewId = requests.find((r) => !resolutionByRequestId.has(r.id) && Boolean(responsesByRequestId.get(r.id)?.length))?.id;
   return (
     <>
       <AdminAnamnesisWorkspaceHeader
         activeSection="esclarecimentos"
         clientId={submission.client_id}
-        displayName={submission.clients?.profiles?.display_name}
+        displayName={submission.clients?.full_name?.trim() || submission.clients?.profiles?.display_name}
         submissionId={submission.id}
         submittedAt={submission.submitted_at}
       />
@@ -92,29 +94,22 @@ export default async function AdminAnamnesisClarificationsPage({ params }: PageP
         {requests.length === 0 ? (
           <EmptyState description="Nenhum pedido de esclarecimento foi registrado para esta Anamnese." title="Sem esclarecimentos" />
         ) : (
+          <>
+            {firstAwaitingReviewId ? <p className={styles.jump}><a href={`#esclarecimento-${firstAwaitingReviewId}`}>Ir para o primeiro complemento aguardando revisão da Patty</a></p> : null}
           <div className={styles.list}>
             {requests.map((request) => {
               const sourceAnswer = request.source_answer_id ? answersById.get(request.source_answer_id) : undefined;
               const sourceQuestion = sourceAnswer ? questionsById.get(sourceAnswer.question_id) : undefined;
               const requestResponses = responsesByRequestId.get(request.id) ?? [];
               const resolution = resolutionByRequestId.get(request.id);
-              const statusLabel = resolution
-                ? "Resolvido"
-                : requestResponses.length > 0
-                  ? "Ação da Patty"
-                  : "Aguardando cliente";
-              const statusVariant = resolution
-                ? "positive"
-                : requestResponses.length > 0
-                  ? "warning"
-                  : "neutral";
+              const status = clarificationFollowupStatus({ hasResponse: requestResponses.length > 0, resolved: Boolean(resolution) });
               return (
                 <div id={`esclarecimento-${request.id}`} key={request.id}>
                 <Card className={styles.entry}>
                   <div className={styles.entryHeader}>
                     <h2 className={styles.entryTitle}>Pedido da Patty</h2>
                     <div className={styles.statusGroup}>
-                      <Badge variant={statusVariant}>{statusLabel}</Badge>
+                      <Badge variant={clarificationStatusVariant(status)}>{clarificationStatusLabel(status, "admin")}</Badge>
                       <Badge variant="neutral">{formatDateTime(request.created_at)}</Badge>
                     </div>
                   </div>
@@ -151,6 +146,7 @@ export default async function AdminAnamnesisClarificationsPage({ params }: PageP
               );
             })}
           </div>
+          </>
         )}
       </Section>
     </>
