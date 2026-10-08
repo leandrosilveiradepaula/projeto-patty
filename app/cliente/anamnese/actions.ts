@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
 import {
   AnamnesisDraftPersistenceError,
@@ -33,5 +34,11 @@ export async function startClientAnamnesisDraft() {
     throw error;
   }
 
+  // Newly created or reused drafts must be visible in both client continuity
+  // and the Patty's pending queue, never only on the detail redirect.
+  revalidatePath("/cliente");
+  revalidatePath("/cliente/anamnese");
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
   redirect(`/cliente/anamnese/${submissionId}`);
 }

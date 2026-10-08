@@ -1,3 +1,11 @@
+## Auditoria integrada - continuidade entre Check-ins, Anamnese e painel da Patty - 2026-10-08
+
+A escrita e a correcao de Check-ins feitas pela cliente invalidavam apenas as paginas da propria cliente. A ficha administrativa e a pagina de Check-ins da Patty nao eram revalidadas explicitamente, embora dependessem dos mesmos registros originais e append-only de correcoes. As quatro operacoes agora usam uma unica revalidacao client-scoped apos confirmar a persistencia; nenhuma revalidacao de sucesso e executada na rota de erro.
+
+A abertura e o envio final de Anamnese tambem nao revalidavam explicitamente o painel e a fila da Patty. A criacao/reutilizacao do rascunho atualiza ambas as jornadas. A submissao confirmada passa a usar o client_id retornado pelo backend para atualizar a ficha administrativa, a area de Anamnese e as pendencias. O salvamento de cada campo do rascunho nao dispara revalidacoes administrativas desnecessarias; a publicacao de protocolos ou qualquer analise permanece exclusivamente profissional.
+
+Testes de contrato conferem a cobertura das quatro operacoes de Check-ins e das transicoes de Anamnese. Nenhum schema, migration, RLS, calculo clinico ou historico foi alterado. Typecheck/testes/build nao substituem validacao E2E em navegador autenticado, que segue pendente.
+
 ## Auditoria integrada - solicitação e histórico de treinos da cliente - 2026-10-08
 
 A cliente podia registrar nova solicitação após um treino publicado sem conseguir distinguir esse novo pedido da prescrição vigente. O painel administrativo já possuía a pendência, mas a área da cliente não explicava a continuidade. A página de Treino passa a exibir aviso factual quando a solicitação mais recente ocorreu após a última publicação humana, com link para o histórico; o plano vigente continua disponível até nova revisão e publicação da Patty. A ação de solicitação agora revalida também a fila e a ficha administrativa, reduzindo estados desatualizados entre as duas jornadas.

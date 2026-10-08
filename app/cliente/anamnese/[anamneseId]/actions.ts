@@ -48,6 +48,16 @@ function revalidateAnamnesisDraft(submissionId: string) {
   revalidatePath("/cliente/anamnese");
 }
 
+function revalidateSubmittedAnamnesis(clientId: string, submissionId: string) {
+  revalidateAnamnesisDraft(submissionId);
+  revalidatePath("/cliente");
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
+  revalidatePath(`/admin/clientes/${clientId}`);
+  revalidatePath(`/admin/clientes/${clientId}/anamnese`);
+  revalidatePath(`/admin/anamneses/${submissionId}`);
+}
+
 export async function saveClientAnamnesisDraftTextAnswer(
   submissionId: string,
   questionId: string,
@@ -139,8 +149,9 @@ export async function submitClientAnamnesis(
 ): Promise<ClientAnamnesisSubmitFormState> {
   await requireRole("client");
 
+  let submitted;
   try {
-    await submitCurrentClientAnamnesisDraft(submissionId, {
+    submitted = await submitCurrentClientAnamnesisDraft(submissionId, {
       consentAccepted: isAnamnesisConsentAccepted(
         formData.get("consentAccepted"),
       ),
@@ -190,6 +201,6 @@ export async function submitClientAnamnesis(
     };
   }
 
-  revalidateAnamnesisDraft(submissionId);
+  revalidateSubmittedAnamnesis(submitted.client_id, submissionId);
   redirect(`/cliente/anamnese/${submissionId}?submitted=1`);
 }
