@@ -52,7 +52,7 @@ export function AdminWeeklyFeedbackRequestForm({
         <TextInput name="periodEnd" required type="date" />
       </label>
       <label className={styles.field}>
-        <span>Prazo para resposta</span>
+        <span>Prazo para resposta (opcional)</span>
         <TextInput name="dueAt" type="datetime-local" />
       </label>
       <Button disabled={!eligible} loading={isPending} type="submit">
