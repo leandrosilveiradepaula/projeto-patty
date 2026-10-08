@@ -3150,3 +3150,8 @@ O detalhe administrativo de Avaliação utiliza o nome canônico da cliente, apr
 ## Recuperação operacional de lembretes do Feedback Semanal — 2026-10-08
 
 A tela administrativa de Feedback Semanal oferece navegação para Cadastro Atual ou preferência de canal quando o evento de lembrete registrar falta de contato ou canal. O estado de email aceito pelo SMTP não declara recebimento na caixa postal. O evento e a escolha de canal continuam preservados, sem envio adicional, mudança de regras profissionais, alterações de Auth/RLS ou migrations. A classificação é determinística e possui testes de regressão.
+
+
+## Navegação de avaliações e medidas — 2026-10-08
+
+A área de Avaliações da cliente ordena explicitamente registros por data decrescente e oferece navegação interna entre avaliações quando houver mais de uma. As telas de Evolução da cliente e da Patty oferecem navegação direta às séries de medidas quando há várias, sem mudar o cálculo de diferenças, os valores vigentes, o histórico, a privacidade ou regras profissionais. Inclusos testes de regressão. Nenhum schema, RLS, Auth, migration ou ação automática foi alterado.

@@ -43,7 +43,9 @@ export default async function ClientAssessmentsPage() {
     assessments.set(row.assessment_id, current);
   }
 
-  const items = [...assessments.entries()];
+  const items = [...assessments.entries()].sort((left, right) =>
+    right[1].assessedAt.localeCompare(left[1].assessedAt) || left[0].localeCompare(right[0]),
+  );
 
   return (
     <>
@@ -65,6 +67,15 @@ export default async function ClientAssessmentsPage() {
           />
         ) : (
           <>
+            {items.length > 1 ? (
+              <nav aria-label="Ir para avaliação" className={styles.historyNavigation}>
+                {items.map(([id, assessment]) => (
+                  <a href={`#avaliacao-${id}`} key={id}>
+                    {formatDate(assessment.assessedAt)}
+                  </a>
+                ))}
+              </nav>
+            ) : null}
             <div className={styles.actions}>
               <Link className={styles.evolutionLink} href="/cliente/evolucao">
                 Ver evolução entre avaliações
@@ -109,11 +120,11 @@ export default async function ClientAssessmentsPage() {
                 );
 
                 if (assessmentIndex === 0) {
-                  return <div key={assessmentId}>{content}</div>;
+                  return <div id={`avaliacao-${assessmentId}`} key={assessmentId}>{content}</div>;
                 }
 
                 return (
-                  <details className={styles.historyItem} key={assessmentId}>
+                  <details className={styles.historyItem} id={`avaliacao-${assessmentId}`} key={assessmentId}>
                     <summary>
                       Avaliação de {formatDate(assessment.assessedAt)} ·{" "}
                       {assessment.measurements.length} medida(s)
