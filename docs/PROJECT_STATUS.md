@@ -3120,3 +3120,8 @@ A interface de Check-ins agora distingue a data factual da atividade da data/hor
 ## Navegação operacional de conteúdos e treino — 2026-10-08
 
 No workspace administrativo, os estados sem conteúdos elegíveis ou liberados levam à biblioteca real de conteúdos, sem alterar elegibilidade nem liberar versões automaticamente. Os estados sem solicitação de treino passam a apontar ao formulário já existente na própria página. Preservadas revisão e publicação humana; sem mudanças em schema, RLS, Auth, migrations ou método profissional.
+
+
+## Clareza administrativa de arquivos privados e evolução — 2026-10-08
+
+A visão de Evolução oferece acesso direto às Avaliações quando não existem medidas finalizadas disponíveis para a série. A tela de Arquivos distingue upload administrativo oculto, decisão explícita de liberação e histórico visível, sem alterar permissões, publicação ou estado do arquivo. As mudanças são de comunicação e navegação, acompanhadas de teste de regressão; sem schema, RLS, Auth, migrations ou regras profissionais.
