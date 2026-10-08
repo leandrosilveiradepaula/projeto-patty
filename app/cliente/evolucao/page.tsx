@@ -85,9 +85,19 @@ export default async function ClientProgressPage() {
             action={<Link href="/cliente/avaliacoes">Consultar avaliações</Link>}
           />
         ) : (
-          <div className={styles.seriesList}>
+          <>
+            {series.length > 1 ? (
+              <nav aria-label="Ir para medida" className={styles.measureNavigation}>
+                {series.map((item, index) => (
+                  <a href={`#medida-${index}`} key={item.key + ":" + item.unit}>
+                    {item.label} ({item.unit})
+                  </a>
+                ))}
+              </nav>
+            ) : null}
+            <div className={styles.seriesList}>
             {series.map((item) => (
-              <Card className={styles.seriesCard} key={item.key + ":" + item.unit}>
+              <Card className={styles.seriesCard} id={`medida-${series.indexOf(item)}`} key={item.key + ":" + item.unit}>
                 <div className={styles.header}>
                   <div>
                     <h2 className={styles.title}>{item.label}</h2>
@@ -131,7 +141,8 @@ export default async function ClientProgressPage() {
                 </div>
               </Card>
             ))}
-          </div>
+            </div>
+          </>
         )}
       </Section>
     </>
