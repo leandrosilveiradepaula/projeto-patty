@@ -124,3 +124,19 @@ Qualquer falha de integridade interrompe o lote. Nao corrigir tamanho, MIME, has
 O registro administrativo de um asset vercel_blob agora consulta o objeto real via head() antes de persistir a metadata no Supabase. O registro falha fechado se o objeto nao existir ou se pathname, tamanho ou MIME divergirem do informado.
 
 O SHA-256 continua sendo evidencia calculada sobre o binario aprovado e deve ser conferido antes do upload e novamente sobre o arquivo transferido conforme o checklist. A API de metadata do Blob nao fornece SHA-256 criptografico do conteudo; portanto o sistema nao deve inventar essa verificacao a partir de ETag ou URL.
+
+
+## Upload direto pela interface administrativa
+
+A biblioteca administrativa agora pode solicitar uma URL temporaria de PUT para o Vercel Private Blob depois de autenticar Patty/admin com AAL2 e confirmar que a versao continua em rascunho e sem asset registrado.
+
+O fluxo:
+1. Patty seleciona o arquivo aprovado;
+2. o browser calcula SHA-256 localmente;
+3. o servidor cria pathname opaco baseado apenas em IDs internos e MIME permitido;
+4. o servidor emite uma URL privada de PUT limitada ao pathname, MIME, tamanho maximo informado e validade curta;
+5. o browser envia o binario diretamente ao Blob, sem passar o corpo do arquivo pela Function;
+6. depois do upload, Patty revisa os dados e registra o asset explicitamente;
+7. o registro consulta o Blob real por head() e falha fechado se path, tamanho ou MIME divergirem.
+
+A existencia desta interface nao significa que o primeiro video ja foi enviado. O lote continua pendente ate a transferencia real e a validacao pos-upload.
