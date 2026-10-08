@@ -74,6 +74,13 @@ test("cliente sintetica percorre a navegação real após login, sem publicar ne
     }
   });
 
+  await test.step("rascunho profissional não aparece à cliente sem publicação", async () => {
+    const response = await page.goto("/cliente/protocolo");
+    expect(response?.status()).toBe(200);
+    await expect(page.getByRole("heading", { name: "Nenhum protocolo foi publicado para você" })).toBeVisible();
+    await expect(page.getByText("Protocolo atual")).toHaveCount(0);
+  });
+
   await test.step("confirmar que registros profissionais não aparecem sem publicação", async () => {
     const assessments = await page.goto("/cliente/avaliacoes");
     expect(assessments?.status()).toBe(200);
