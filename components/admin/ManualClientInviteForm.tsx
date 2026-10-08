@@ -98,7 +98,7 @@ export function ManualClientInviteForm() {
       {state.activationLink ? (
         <div className={styles.linkPanel}>
           <label className={styles.linkLabel} htmlFor="manual-activation-link">
-            Link individual de ativação
+            Link individual de ativação — acesso sensível
           </label>
           <textarea
             className={styles.linkValue}
@@ -126,9 +126,9 @@ export function ManualClientInviteForm() {
             </Link>
           ) : null}
           <p className={styles.note}>
-            Copie e envie este link somente para a cliente cujo email foi
+            O link permite ativar a conta e deve ser tratado como credencial temporária. Não salve em anotações públicas, capturas de tela ou mensagens de grupo. Copie e envie somente para a cliente cujo email foi
             informado acima. O link não deve ser publicado ou compartilhado com
-            terceiros.
+            terceiros. Se o link expirar ou a conta já existir, não crie outro cadastro: use o fluxo de recuperação de acesso.
           </p>
         </div>
       ) : null}
