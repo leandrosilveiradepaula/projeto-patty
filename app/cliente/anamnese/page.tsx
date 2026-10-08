@@ -79,8 +79,9 @@ export default async function ClienteAnamnesePage() {
           />
         ) : submissions?.length === 0 ? (
           <EmptyState
-            description="Nenhuma submissão de Anamnese está registrada para sua conta."
+            description={startAvailability.available ? "Ainda não há submissões. Use a seção Começar Anamnese acima para iniciar seu preenchimento." : "Ainda não há submissões nem formulário disponível para começar neste momento."}
             title="Sem Anamnese registrada"
+            action={<Link href="/cliente">Voltar ao início</Link>}
           />
         ) : (
           <ol className={styles.submissionList}>
