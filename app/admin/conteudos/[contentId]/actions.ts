@@ -2,12 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 
+import { canPublishEducationalContentVersion } from "@/lib/content/publication-eligibility";
 import { verifyPrivateBlobAsset } from "@/lib/content/private-blob-integrity";
 import { requireRole } from "@/lib/supabase/auth";
 import {
   createAccessibleEducationalContentAsset,
   createAccessibleEducationalContentVersion,
   getAccessibleEducationalContentForCurrentAdmin,
+  listEducationalContentAssetsForCurrentAdmin,
   listEducationalContentVersionsForCurrentAdmin,
   publishAccessibleEducationalContentVersion,
   updateAccessibleEducationalContentDraftVersion,
@@ -103,6 +105,19 @@ export async function publishEducationalContentVersionAction(
 
   if (!version || version.published_at !== null) {
     throw new Error("A versão em rascunho mudou. Atualize a página.");
+  }
+
+  const assets = await listEducationalContentAssetsForCurrentAdmin(versionId);
+
+  if (
+    !canPublishEducationalContentVersion({
+      contentTypeKey: version.content_type_key,
+      hasAsset: assets.length > 0,
+    })
+  ) {
+    throw new Error(
+      "Conteúdo em vídeo só pode ser publicado depois que o asset privado verificado estiver registrado",
+    );
   }
 
   await publishAccessibleEducationalContentVersion({
