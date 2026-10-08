@@ -126,6 +126,9 @@ test("admin envia arquivo oculto, libera explicitamente e cliente passa a ver", 
       }),
     ).toHaveCount(0);
 
+    await fileCard.getByRole("checkbox", {
+      name: "Confirme que este arquivo pode ficar visível para a cliente.",
+    }).check();
     await fileCard.getByRole("button", { name: "Liberar para cliente" }).click();
 
     // The durable postcondition is the persisted visibility state. The
