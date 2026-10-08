@@ -3115,3 +3115,8 @@ Feedback Semanal distingue solicitações aguardando a cliente de respostas envi
 ## Clareza administrativa de avaliacoes e check-ins — 2026-10-08
 
 A interface de Check-ins agora distingue a data factual da atividade da data/hora em que a resposta foi registrada, sinaliza o recorte de ate 30 registros recentes e preserva a diferenca entre valor efetivo e original corrigido. Em Avaliacoes, a interface diferencia retomada de rascunho da criacao de nova avaliacao e informa que somente avaliacoes finalizadas integram o historico. Apenas copy, testes de regressao e documentacao; sem mudancas em banco, RLS, Auth, migrations ou metodo profissional.
+
+
+## Navegação operacional de conteúdos e treino — 2026-10-08
+
+No workspace administrativo, os estados sem conteúdos elegíveis ou liberados levam à biblioteca real de conteúdos, sem alterar elegibilidade nem liberar versões automaticamente. Os estados sem solicitação de treino passam a apontar ao formulário já existente na própria página. Preservadas revisão e publicação humana; sem mudanças em schema, RLS, Auth, migrations ou método profissional.
