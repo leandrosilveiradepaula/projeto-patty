@@ -51,6 +51,15 @@ export default async function ClienteProtocoloPage() {
         />
       ) : (
         <div className={styles.publications}>
+          {publications && publications.length > 1 ? (
+            <nav aria-label="Ir para plano publicado" className={styles.publicationNavigation}>
+              {publications.map((publication, index) => (
+                <a href={`#publicacao-${publication.id}`} key={publication.id}>
+                  {index === 0 ? "Plano atual" : `Versão ${publication.versionNumber} · ${formatPublishedAt(publication.publishedAt)}`}
+                </a>
+              ))}
+            </nav>
+          ) : null}
           {publications?.map((publication, publicationIndex) => {
             const content = (
               <>
@@ -127,6 +136,7 @@ export default async function ClienteProtocoloPage() {
               return (
                 <Section
                   description={`Última versão liberada pela Patty em ${formatPublishedAt(publication.publishedAt)}.`}
+                  id={`publicacao-${publication.id}`}
                   key={publication.id}
                   title="Plano atual"
                 >
@@ -136,7 +146,7 @@ export default async function ClienteProtocoloPage() {
             }
 
             return (
-              <details className={styles.historyItem} key={publication.id}>
+              <details className={styles.historyItem} id={`publicacao-${publication.id}`} key={publication.id}>
                 <summary>
                   Plano anterior · versão {publication.versionNumber} · {formatPublishedAt(publication.publishedAt)}
                 </summary>

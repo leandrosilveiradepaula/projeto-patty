@@ -30,13 +30,14 @@ import {
   getProtocolDraftReadiness,
 } from "@/lib/protocol/draft-readiness";
 import { getProtocolLifecycleAction } from "@/lib/protocol/lifecycle";
+import { latestPublishedProtocolVersionId, requestedProtocolVersion } from "@/lib/protocol/history-navigation";
 import { buildProtocolPlanComparison } from "@/lib/protocol/version-diff";
 import { isUuid } from "@/lib/validation/uuid";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import styles from "./page.module.css";
 
-type AdminProtocoloDetailPageProps = { params: Promise<{ protocoloId: string }> };
+type AdminProtocoloDetailPageProps = { params: Promise<{ protocoloId: string }>; searchParams: Promise<{ versao?: string }> };
 
 function formatDateTime(value: string | null | undefined) {
   if (!value) {
@@ -70,8 +71,9 @@ function getLifecyclePresentation(input: {
   return { label: "Rascunho", variant: "neutral" as const };
 }
 
-export default async function AdminProtocoloDetailPage({ params }: AdminProtocoloDetailPageProps) {
+export default async function AdminProtocoloDetailPage({ params, searchParams }: AdminProtocoloDetailPageProps) {
   const { protocoloId } = await params;
+  const { versao: requestedVersion } = await searchParams;
 
   if (!isUuid(protocoloId)) notFound();
 
@@ -105,6 +107,9 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
     listAccessibleProtocolPublications(versionIds),
     listAccessibleProtocolVersionMealPlans(versionIds),
   ]);
+  const selectedVersionNumber = requestedProtocolVersion(requestedVersion, versions);
+  const latestPublishedId = latestPublishedProtocolVersionId(versions, publications);
+  const lastPublishedVersion = versions.find((version) => version.id === latestPublishedId) ?? null;
   const approvalsByVersionId = new Map(
     approvals.map((approval) => [approval.protocol_version_id, approval]),
   );
@@ -130,7 +135,7 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
           </Link>
         }
         meta="Protocolo nutricional"
-        displayName={protocol.clients?.profiles?.display_name}
+        displayName={protocol.clients?.full_name?.trim() || protocol.clients?.profiles?.display_name}
         secondary="Revisão, aprovação e publicação"
         status={<Badge variant="neutral">{versions.length} versão(ões)</Badge>}
       />
@@ -141,15 +146,20 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
       {versions.length > 0 ? (
         <PageSectionNav
           items={versions.map((version) => ({
-            href: `#versao-${version.version_number}` as const,
+            href: `/admin/protocolos/${protocol.id}?versao=${version.version_number}#versao-${version.version_number}` as const,
             label: `Versão ${version.version_number}`,
           }))}
           label="Ir para a versão"
         />
       ) : null}
+      {lastPublishedVersion && versions[0]?.id !== lastPublishedVersion.id ? (
+        <p className={styles.publicationDistinction}>
+          A versão {versions[0].version_number} é a mais recente cadastrada, mas a versão {lastPublishedVersion.version_number} é a última publicada deste protocolo para a cliente. Nenhum rascunho ou versão ainda não publicada substitui automaticamente o plano liberado.
+        </p>
+      ) : null}
       <Section
-        description="A versão atual fica aberta para trabalho. Versões anteriores permanecem recolhidas e podem ser consultadas quando necessário."
-        title="Versão atual e histórico"
+        description="A versão mais recente fica aberta para trabalho. Escolha uma versão para expandir seu histórico, sem alterar o que já foi publicado."
+        title="Versões e histórico"
       >
         {versions.length === 0 ? (
           <EmptyState description="Nenhuma versão está acessível para este protocolo." title="Sem versões registradas" />
@@ -177,6 +187,8 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
               });
               const draftReadiness = getProtocolDraftReadiness(mealPlan);
               const isCurrentVersion = versionIndex === 0;
+              const isLatestPublishedVersion = version.id === latestPublishedId;
+              const isRequestedVersion = version.version_number === selectedVersionNumber;
 
               return (
                 <li
@@ -184,21 +196,22 @@ export default async function AdminProtocoloDetailPage({ params }: AdminProtocol
                   id={`versao-${version.version_number}`}
                   key={version.id}
                 >
-                  <details className={styles.versionDetails} open={isCurrentVersion}>
+                  <details className={styles.versionDetails} open={isCurrentVersion || isRequestedVersion}>
                     <summary className={styles.versionSummary}>
                       <div className={styles.versionHeader}>
                         <div>
                           <h3>
                             Versão {version.version_number}
-                            {isCurrentVersion ? " · atual" : ""}
+                            {isCurrentVersion ? " · mais recente" : ""}
                           </h3>
                           <p className={styles.versionCreated}>
                             Criada em {formatDateTime(version.created_at)}
                           </p>
                         </div>
-                        <Badge variant={lifecyclePresentation.variant}>
-                          {lifecyclePresentation.label}
-                        </Badge>
+                        <div className={styles.versionBadges}>
+                          <Badge variant={lifecyclePresentation.variant}>{lifecyclePresentation.label}</Badge>
+                          {isLatestPublishedVersion ? <Badge variant="positive">Última publicada deste protocolo</Badge> : null}
+                        </div>
                       </div>
                     </summary>
                     <div className={styles.versionBody}>

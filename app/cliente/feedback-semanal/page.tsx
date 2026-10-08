@@ -97,6 +97,10 @@ export default async function ClientWeeklyFeedbackPage({
         <Alert live="assertive" title="Revise suas respostas" variant="critical">
           Preencha as perguntas obrigatórias e confira os campos numéricos antes de enviar.
         </Alert>
+      ) : status === "conflict" ? (
+        <Alert live="assertive" title="Feedback não atualizado" variant="critical">
+          Esta solicitação pode já ter sido enviada em outra aba. Nenhuma nova gravação foi confirmada; confira o estado atual antes de tentar novamente.
+        </Alert>
       ) : status === "save-error" ? (
         <Alert live="assertive" title="Não foi possível salvar" variant="critical">
           O sistema não conseguiu gravar seu Feedback Semanal. Tente novamente antes de sair desta página.

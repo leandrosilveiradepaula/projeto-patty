@@ -1,3 +1,111 @@
+## PR #550 reconciliado com master - orientação de preenchimento da Anamnese - 2026-10-08
+
+O PR #550, aberto antes de diversas auditorias integradas, foi reconciliado com o HEAD de master por um commit de integração na propria branch; o historico anterior do PR e dos merges foi preservado. A cliente agora ve apenas secoes aplicaveis na versao associada a Anamnese e um resumo somente de leitura das respostas obrigatorias atualmente aplicaveis e persistidas, com acesso direto a primeira resposta faltante. O consentimento continua exigindo aceite especifico na submissao final. A contagem e informativa, calculada no carregamento, e nao substitui a validacao deterministica do backend nem indica aptidao clinica.
+
+Nenhum dado historico de resposta, regra profissional, consentimento versionado, schema, migration, RLS, Auth ou aprovacao foi alterado. Foram preservados testes deterministas do PR original para progresso, zero/false, ocultacao de secoes e link de navegacao. E2E autenticado real nao e substituido por CI. Nenhum merge foi feito no master.
+
+## Auditoria integrada - nova solicitacao de treino apos publicacao - 2026-10-08
+
+Quando uma cliente solicitava novamente o serviço de treino apos ja possuir um plano publicado, o pedido ficava salvo no historico, mas nao gerava pendencia na fila da Patty se nao houvesse rascunho aberto. A ficha administrativa indicava o treino como apenas publicado, sem destacar a solicitacao mais nova.
+
+Agora a fila compara o horario da ultima solicitacao com o evento de publicacao efetiva mais recente (nao o maior numero de versao). Se a solicitacao for posterior e nao houver versao aberta, aparece uma pendencia manual especifica, com link para o historico. A ficha da cliente e o workspace de treinos destacam o pedido. Se existe rascunho/revisao aberto, a acao de trabalhar nessa versao permanece prioritária; publicacao posterior ao pedido encerra essa pendencia factual. Testes cobrem a comparacao temporal, o comportamento da fila e os contratos entre telas.
+
+A pendencia sinaliza revisao profissional; nao gera outro treino, nao decide adesao ou progressao e nao cria regra clinica. Sem alteracao de migrations, RLS, schema, exercicios, snapshots, automacoes ou dados reais. CI nao constitui E2E autenticado e este continua pendente. PR #550 de Anamnese permanece independente.
+
+## Auditoria integrada - fila operacional com leituras em lotes - 2026-10-08
+
+A fila de pendencias e o painel administrativo carregavam em separado Anamneses, Feedbacks Semanais e eventos de notificacao para cada cliente; para cada Anamnese enviada eram feitas leituras individuais de revisoes e esclarecimentos e, para cada protocolo, leitura individual de versoes. Esse padrao N+1 crescia diretamente com o numero de clientes e criava espera desnecessaria antes de a Patty enxergar suas proximas acoes.
+
+A coleta agora usa batches RLS-scoped para essas seis familias de fatos. IDs sao deduplicados e divididos em lotes de 100, com paginacao de 500 linhas por consulta, ordenacao estavel e falha explicita em erro ou retorno nulo. A projeção carrega somente campos operacionais, evitando transportar texto da Anamnese ou respostas completas de Feedback para a fila. O agrupamento e a ordem dos itens continuaram no mesmo motor deterministico; nenhuma regra profissional, permissionamento, versao, publicacao, migration ou schema foi modificado. Testes de paginacao e contratos impedem regressao para consultas por cliente/protocolo.
+
+O CI verifica testes e build, mas nao significa que a latencia em SaaS foi medida. O E2E autenticado da jornada completa permanece pendente; PR #550 da Anamnese continua separado.
+
+## Auditoria integrada - historico de treinos publicados - 2026-10-08
+
+A area da cliente mostrava somente o treino publicado com maior numero de versao e nao oferecia acesso aos exercicios de prescricoes anteriores. Como a publicacao e evento humano versionado, a selecao passa a usar `published_at` decrescente com desempate estavel por ID; a mesma funcao deterministica e utilizada na home da cliente, na ficha e no workspace administrativo de treino. A cliente agora pode abrir historicos anteriores efetivamente publicados, com seus exercicios e orientacoes persistidos. Rascunhos e versoes apenas revisadas nao entram na lista. Testes cobrem ordem temporal, desempate e isolamento de rascunhos, alem dos contratos das telas.
+
+Nao altera publicacao/aprovacao, formulas, parametros de treino, snapshots, RLS, schema, migrations ou dados reais. Os testes do CI nao constituem E2E autenticado real; a validacao integrada continua aberta. PR #550 da Anamnese permanece separado.
+
+## Auditoria integrada - isolamento real de rascunho alimentar no smoke E2E - 2026-10-08
+
+A fixture E2E descartavel da cliente agora cria um protocolo nutricional sintetico com versao 1 ainda em rascunho, sem aprovacao ou publicacao. O teste autenticado exige que a pagina Meu protocolo mostre o estado vazio de nenhuma publicacao, mesmo com versao existente no banco. O cleanup so remove o rascunho apos verificar a identidade sintetica e recusar versoes submetidas, aprovadas ou publicadas. A checagem e executada no fluxo manual existente apenas apos merge e deployment; CI de PR valida contratos e build, nao simula o acesso real ao Supabase. Nao envolve dados pessoais reais, registro profissional finalizado nem publicacao de dieta.
+
+O teste nao comprova isolamento cruzado entre duas clientes, nem a leitura de uma publicacao real; ambos permanecem pendentes de fixture separada segura. PR #550 continua independente. Sem mudancas de schema/RLS/migrations ou regras do metodo.
+
+## Auditoria integrada - retomar protocolo sem versao - 2026-10-08
+
+A criacao do primeiro protocolo grava protocolo e versao em duas operacoes. Falha intermediaria com compensacao incompleta podia deixar protocolo sem versao e bloquear a Patty. A listagem agora distingue esse estado e oferece recuperacao explicita, com validacao da identidade administrativa, autorizacao da cliente, ownership do protocolo e ausencia de versoes. Concorrencia de abas e tratada reconsultando versoes apos falha da insercao, usando a constraint existente unique(protocol_id, version_number). A compensacao de exclusao agora exige linha retornada antes de confirmar sucesso; falhas apresentam mensagens acionaveis, nao erro bruto. O historico existente e preservado e nada e aprovado/publicado automaticamente.
+
+Testes deterministas de contratos foram adicionados ao grupo de protocolos. E2E autenticado permanece pendente, sem alegacao de sucesso em ambiente real. Sem migrations, schema, RLS, Auth, alteracao profissional ou IA. PR #550 mantido separado.
+
+## Auditoria integrada - rascunhos e navegacao de protocolos - 2026-10-08
+
+A fila administrativa passa a reconhecer versoes de protocolos ainda em rascunho como pendencias de trabalho da Patty mesmo quando uma versao anterior ja foi publicada. O resumo da cliente tambem apresenta a edicao pendente como proxima acao depois das etapas anteriores, sem confundir rascunho com publicacao. Links de pendencias para revisao, aprovacao e publicacao agora abrem a versao exata via `?versao=N#versao-N`, inclusive quando nao e a ultima versao. Testes deterministas exercitam a convivencia de versoes em rascunho, publicadas, aprovadas e em revisao. Sem publicacao automatica, schema/migrations, Auth/RLS ou regras profissionais.
+
+A auditoria detectou tambem a possibilidade teorica de protocolo sem versao apos falha e compensacao incompleta durante sua criacao. Esta recuperacao transacional permanece uma pendencia especifica para nao ampliar este pacote sem confirmar o melhor mecanismo; nenhuma tentativa de exclusao ou escrita automatica foi introduzida. E2E autenticado transacional admin-cliente continua pendente de ambiente seguro e fixture descartavel.
+
+## Auditoria integrada - integridade de avaliacoes e leitura da cliente - 2026-10-08
+
+Na jornada de avaliacao, a remocao de medidas e a desvinculacao de fotos eram operacoes SQL sem retorno de linha. Em caso de zero linhas afetadas (concorrencia, RLS, outra aba), a interface confirmava falsamente sucesso. A persistencia agora exige retorno do registro exato excluido. O vinculo de foto tambem exige retorno de linha inserida. Os triggers de banco que impedem alteracoes apos finalizacao permanecem inalterados, assim como os arquivos privados originais e os historicos. Ao finalizar uma avaliacao, as paginas da cliente de Avaliacoes e Evolucao passam a ser explicitamente revalidadas, alem das paginas administrativas. Testes de regressao cobrem confirmacao de mutacoes e atualizacao transversal. Nenhuma migration, schema, RLS, metodo profissional ou publicacao automatica foi alterada.
+
+Validacao E2E transacional autenticada da jornada completa segue pendente; este pacote testa contratos deterministas e CI, sem criar dados reais ou finalizar avaliacoes em producao. PR #550 continua independente.
+
+## Auditoria integrada - Cadastro Atual, nome e persistencia E2E - 2026-10-08
+
+No percurso administrativo do cadastro profissional, a edicao de nome de cliente com identidade vinculada utiliza o trigger existente `profiles_sync_client_full_name` (migration `20261007133000`) para atualizar `clients.full_name`; a persistencia em `profiles` agora exige retorno da linha atualizada antes de informar sucesso. Para registros profissionais antigos sem `profile_id`, a Patty pode corrigir diretamente `clients.full_name` sob verificacao previa de acesso administrativo e confirmacao da linha persistida, sem criar Auth/Profile nem alterar historico. Se o registro deixar de ser desvinculado durante a operacao, a escrita condicional e rejeitada. O layout da cliente e revalidado apos renomear para nao deixar a identificacao anterior em cache. Nenhuma regra de autorizacao/RLS, migration ou entidade de identidade foi alterada.
+
+O smoke E2E sintetico da cliente, anteriormente apenas de navegacao, passa a salvar um valor nao pessoal de Cidade no Cadastro Atual, recarregar a pagina e revisitar a area para comprovar persistencia real pelo backend. O setup registra `clients.full_name` explicitamente. O cleanup agora confere identidade Auth sintetica + vinculo client/profile antes de qualquer exclusao, remove a linha de `client_registration` (FK `ON DELETE RESTRICT`) e preserva a recusa de apagar Anamneses enviadas. Os testes estaticos protegem o contrato, mas a execucao autenticada de producao continua **pendente**: workflow manual `E2E canonical Anamnesis start smoke` apos merge/deploy. Sem tocar em clientes reais, publicacao de protocolos, aprovacoes ou dados de saude.
+
+A auditoria admin -> avaliacao -> revisao/aprovacao/publicacao -> retorno ao acompanhamento permanece aberta para um E2E transacional com fixture segura. PR #550 da Anamnese permanece separado, aberto e com mergeabilidade a reconciliar; nao foi alterado.
+
+## Jornada operacional da cliente — smoke integrado de navegacao — 2026-10-08
+
+Auditoria integrada de cadastro -> Anamnese -> Avaliacoes -> Protocolo -> acompanhamento: os testes E2E de producao existentes validavam partes importantes separadamente, mas nao percorriam a navegacao real da cliente entre essas areas apos uma autenticacao. Foi acrescentado `e2e/client-operational-navigation.spec.mjs` ao workflow manual `E2E canonical Anamnesis start smoke`, reutilizando a conta **sintetica efemera** e o cleanup `if: always()` existentes. O smoke autentica, abre a acao principal de Anamnese, navega a partir de Mais para Anamnese, Avaliacoes, Evolucao, Conteudos, Arquivos, Treino e Perfil; visita Protocolo, Feedback Semanal e Check-ins, e verifica estados vazios protegidos (sem publicar ou criar dados profissionais). A conta exigida deve ter o identificador de fixture `e2e-canonical-...@example.invalid`; credenciais ficam exclusivamente no ambiente do workflow. Nao ha envio de notificacoes ou contatos reais.
+
+`e2e/helpers/client-journey-routes.test.mjs` valida contratos das rotas/nomes da interface e preservacao do cleanup, rodando automaticamente via `test:e2e-helpers`; a sintaxe do novo smoke tambem e conferida no CI. **Implementado nao significa executado:** o E2E autenticado em producao depende de executar novamente o workflow manual existente apos o merge. A jornada completa admin -> cliente com **avaliacao finalizada, protocolo revisado/aprovado/publicado e retorno ao acompanhamento** continua pendente de um smoke transacional sintetico isolado, seguro para historico permanente, sem usar dados reais nem automatizar aprovacao profissional. O PR #550 de Anamnese permanece paralelo.
+
+Sem alteracoes de migrations, schema, RLS, Auth, negocio profissional, templates, cadastro real, protocolos publicados ou integracoes com IA.
+
+## Protocolos — separar versão mais recente de versão publicada e navegar no histórico — 2026-10-08
+
+Auditoria do fluxo cliente/admin encontrou uma ambiguidade operacional: a página administrativa chamava a versão mais recente do protocolo de `atual`, mesmo quando essa versão ainda era um rascunho, uma submissão pendente de aprovação ou uma aprovação ainda não publicada. O `master` agora preserva conceitos distintos na interface: a versão mais recente cadastrada e a **última publicação efetiva daquele protocolo**. Esta última é determinada pelo timestamp de publicação (com desempate determinístico), não pelo maior número de versão; é apresentada com identificação explícita e nota quando for anterior ao trabalho mais recente. O nome no cabeçalho administrativo usa `clients.full_name` com fallback de perfil.
+
+Para a navegação histórica, atalhos administrativos para `?versao=N#versao-N` expandem também a versão solicitada, sem fechar a versão mais recente. Um seletor de versão só aceita números de versões realmente disponíveis, evitando referência arbitrária. A cliente, que continua recebendo somente snapshots publicados pela consulta RLS, possui agora atalhos para suas publicações anteriores; a publicação mais recente permanece destacada.
+
+Incluídos testes de ordenação/publicação, desempate, entradas inválidas e verificação das duas telas em `test:protocol`. Não altera lifecycle, quem pode aprovar ou publicar, schema, Auth/RLS, migrations, macros, ingestão alimentar, protocolos já publicados ou critérios clínicos.
+
+## Editor de Protocolos — integridade de entradas de doses — 2026-10-08
+
+A auditoria do editor de plano alimentar encontrou uma divergência entre o formulário (até quatro casas decimais, como `numeric(12,4)` no banco) e as Server Actions, que convertiam a entrada com `Number(...)`. Isso permitia notação científica, hexadecimal e valores com mais de quatro casas decimais; alguns poderiam ser arredondados silenciosamente pelo banco. A criação e edição de doses agora usam o mesmo parser determinístico, que aceita frações com ponto ou vírgula, respeita a precisão persistida, preserva o teto técnico de input já existente (999, não critério clínico) e rejeita formatos ambíguos, valores não finitos, zero/negativo e excesso de casas decimais antes de qualquer escrita. A UI explica a precisão e alinha o limite máximo de entrada. Testes unitários, de integração estática nas actions e de contrato de interface integram `test:protocol`.
+
+Sem mudança de valores salvos/publicados, migrations, schema, RLS, Auth, fórmulas, dose profissional, número de refeições ou aprovação/publicação; o método continua configurável e toda prescrição requer revisão humana.
+
+## Protocolos: confirmação de exclusões no rascunho — 2026-10-08
+
+A auditoria de operação do editor de plano alimentar confirmou que atualizar nomes de variações, refeições e quantidades de doses já depende de `select(...).single()`, portanto não informa sucesso em mutações sem linha. Em contraste, as três exclusões do rascunho (dose, refeição vazia e variação vazia) tratavam ausência de erro SQL como exclusão confirmada mesmo quando zero linhas eram removidas por concorrência, RLS ou mudança de estado. As três operações agora solicitam o `id` da linha efetivamente excluída e só confirmam sucesso quando o registro é retornado; o comportamento existente de impedir excluir refeições/variações com filhos permanece. A interface distingue a remoção não confirmada e orienta atualizar e revisar o rascunho. Testes de regressão adicionados em `lib/protocol/draft-deletions.test.ts`, executados por `test:protocol`. Sem mudança de migrations, schema, Auth/RLS, lógica de macros, parâmetros profissionais, versionamento, revisão, aprovação ou publicação automática.
+
+## Esclarecimentos pós-Anamnese — estado factual e navegação — 2026-10-08
+
+A auditoria identificou que a cliente via `Aguardando resposta` mesmo após registrar um complemento; isso não refletia a regra confirmada de que a resposta só muda a pendência para revisão da Patty, sem resolver automaticamente o pedido. Um helper determinístico reutilizado nas duas telas deriva os três estados a partir de existência de resposta e registro explícito de resolução: `aguardando cliente`, `aguardando profissional` e `resolvido`. Na cliente, a interface mostra `Aguardando revisão da Patty` após complemento; no admin, `Ação da Patty`. Ambos oferecem atalho para o primeiro pedido que precisa de ação e mantêm o histórico cronológico. O cabeçalho de Esclarecimentos do admin passa a usar `clients.full_name` como nome profissional canônico, com fallback de perfil. Nada fecha o pedido automaticamente; novos complementos antes da resolução seguem permitidos conforme comportamento existente. Testes em `test:follow-up`. Sem alterações em banco, migrations, Auth, RLS, notificações, regra de lembretes ou julgamento profissional.
+
+## Feedback Semanal — datas da solicitação manual — 2026-10-08
+
+A criação manual de Feedback Semanal agora rejeita datas de referência impossíveis (por exemplo, 30 de fevereiro) e prazo local inválido (mês/dia/hora/minuto), retornando erro orientativo antes da escrita. O campo de prazo permanece opcional; vazio continua mapeado para `due_at = null`, sem introduzir fechamento automático ou prazo profissional presumido. A conversão do horário válido para o instante UTC mantém a convenção técnica anterior de São Paulo (`-03:00`); a agenda recorrente e seus parâmetros versionados não mudam. Testes determinísticos para calendário, bissextos, inputs malformados e hora local foram incluídos em `test:clients`. Sem novas migrations, schema, Auth, RLS ou alteração de regras profissionais.
+
+## Arquivos privados: confirmação da liberação — 2026-10-08
+
+A auditoria verificou que a exceção documentada do MVP permite à Patty administrar arquivos privados sem assignment ativo; esta regra permanece inalterada e o acesso administrativo continua exigindo role e AAL2. No fluxo de liberação de arquivo, uma atualização condicional que retorne zero linhas não é prova de que o arquivo já está visível. O servidor passa a consultar novamente o registro exato e distingue: arquivo ausente, arquivo já visível e liberação não confirmada. O último estado informa falha recuperável, nunca sucesso. O teste E2E de upload/liberação foi alinhado à confirmação explícita obrigatória na interface. Testes determinísticos integram `test:clients`. Sem schema, migrations, RLS, Auth, mudança de visibilidade automática ou alteração no conteúdo dos arquivos.
+
+## Treino administrativo — confirmação de alterações — 2026-10-08
+
+Auditoria de integridade do fluxo de Treino: salvar metadados de rascunho, editar exercício e excluir exercício já verificavam erros SQL, porém sem confirmação de linha alterada. Com updates/deletes condicionais e RLS, zero registros podiam ser afetados sem erro e a interface retornar sucesso. As três operações agora exigem retorno explícito do identificador afetado; ausência de linha gera erro recuperável apresentado pela action e não confirmação falsa. A edição de versão continua condicionada a `reviewed_at` e `published_at` nulos. A proteção de revisão, publicação, histórico e limites de autorização permanece no banco. Foram incluídos testes determinísticos em `test:training`. Sem alteração de migrations, schema, Auth/RLS, fórmulas, templates ou regras profissionais.
+
+## Confirmação de gravação do Feedback Semanal — 2026-10-08
+
+A ação da cliente agora diferencia atualização efetivamente persistida de atualização condicional sem linha retornada (por exemplo, quando o Feedback foi enviado por outra aba). Nesse caso não informa falsamente "Rascunho salvo" ou "Feedback enviado": a cliente recebe um aviso de conflito e pode conferir o estado atual. As ações aceitas são exclusivamente "save" e "submit"; valores inesperados são rejeitados. A condição server-side que impede edição após envio permanece preservada. Incluído teste de regressão no domínio weekly-feedback já abrangido por `test:clients`.
+
+Sem alterações em schema, migrations, Auth, RLS, formulário versionado, regra clínica ou envio de mensagens.
+
 ## Bloco consolidado - nome e status nos workspaces 2026-10-07
 
 A consolidacao de `clients.full_name` foi estendida para os workspaces administrativos de Protocolos, Treino, Avaliacoes, Arquivos, Anamnese, Feedback Semanal e Check-ins.
@@ -3177,10 +3285,3 @@ A validação de quantidade em mL foi unificada nas ações de inclusão e corre
 ## Feedback Semanal — integridade de respostas numéricas (2026-10-08)
 
 A auditoria identificou que a leitura de respostas de contagem e de nota (`integer` e `rating_0_10`) usava `parseInt`, o que podia aceitar e truncar entradas como `2,5`, `3abc` ou `1e2` silenciosamente. O parser agora exige exclusivamente dígitos de inteiro decimal não negativo e precisão segura de JavaScript, antes de converter e gravar. A nota informada pela cliente mantém a faixa 0–10 já definida na versão do formulário; não há geração de score de adesão ou interpretação clínica automática. O fluxo de rascunho e de envio final conserva as permissões e a validação server-side já existentes. Testes determinísticos de aceitação e rejeição integram `test:clients` na CI. Nenhuma migration, schema, RLS, Auth, configuração do método ou política profissional foi alterada.
-
-
-## Orientação de preenchimento da Anamnese — 2026-10-08
-
-A auditoria da Anamnese identificou que o navegador de seções calculava corretamente quais seções continham perguntas aplicáveis, mas o conteúdo ainda renderizava seções sem perguntas. A página da cliente agora mostra apenas seções com perguntas aplicáveis nesta versão e nestas respostas, sem alterar o histórico original de respostas ocultadas por condicionais.
-
-Para rascunhos, uma projeção somente de leitura exibe quantas perguntas obrigatórias atualmente aplicáveis possuem resposta persistida, contagem por seção e acesso direto à primeira pergunta obrigatória sem resposta. A questão de consentimento da Anamnese canônica permanece no fluxo de aceite explícito de envio e não entra na contagem do rascunho. O resumo é calculado no carregamento da página e não é prova de completude ou elegibilidade clínica; o banco continua responsável pela validação final. Mudança limitada à UI e aos testes determinísticos de `lib/anamnesis`, sem alteração de formulário versionado, dados, Auth, RLS, schema ou migrations.

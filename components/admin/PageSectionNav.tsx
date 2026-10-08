@@ -3,7 +3,7 @@ import Link from "next/link";
 import styles from "./PageSectionNav.module.css";
 
 export type PageSectionNavItem = {
-  href: `#${string}`;
+  href: `#${string}` | `/${string}`;
   label: string;
 };
 

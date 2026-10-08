@@ -16,6 +16,7 @@ import {
   listPublishedProtocolsForCurrentClient,
 } from "@/lib/supabase/data-access";
 import Link from "next/link";
+import { latestPublishedTrainingVersion } from "@/lib/training/published-versions";
 import styles from "./page.module.css";
 
 function saoPauloDate(value: Date | string) {
@@ -63,8 +64,7 @@ export default async function ClientePage() {
   const trainingVersions = trainingPlan
     ? await listAccessibleClientTrainingPlanVersions(trainingPlan.id)
     : [];
-  const latestPublishedTraining =
-    trainingVersions.find((version) => Boolean(version.published_at)) ?? null;
+  const latestPublishedTraining = latestPublishedTrainingVersion(trainingVersions);
   const currentAnamnesisDraft = anamneses.find(
     (submission) => submission.submitted_at === null,
   );

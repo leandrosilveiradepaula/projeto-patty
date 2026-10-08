@@ -2,6 +2,7 @@ import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader"
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { Alert } from "@/components/ui/Alert";
 import { Section } from "@/components/ui/Section";
 import {
   createAccessibleInitialProtocolVersion,
@@ -9,11 +10,14 @@ import {
   deleteAccessibleProtocolWithoutVersions,
   getAccessibleClient,
   listAccessibleProtocolsForClient,
+  listAccessibleProtocolVersions,
+  listAccessibleProtocolVersionsForProtocols,
 } from "@/lib/supabase/data-access";
 import { Button } from "@/components/ui/Button";
 import { requireRole } from "@/lib/supabase/auth";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { isUuid } from "@/lib/validation/uuid";
 import styles from "./page.module.css";
 
 async function createFirstProtocolAction(formData: FormData) {
@@ -22,7 +26,7 @@ async function createFirstProtocolAction(formData: FormData) {
   const auth = await requireRole("admin");
   const clientId = formData.get("clientId");
 
-  if (typeof clientId !== "string") {
+  if (typeof clientId !== "string" || !isUuid(clientId)) {
     return;
   }
 
@@ -35,6 +39,11 @@ async function createFirstProtocolAction(formData: FormData) {
   const existing = await listAccessibleProtocolsForClient(client.id);
 
   if (existing.length > 0) {
+    const versions = await listAccessibleProtocolVersionsForProtocols(existing.map((item) => item.id));
+    const versionedIds = new Set(versions.map((version) => version.protocol_id));
+    if (!versionedIds.has(existing[0].id)) {
+      redirect(`/admin/clientes/${client.id}/protocolos?recuperacao=necessaria`);
+    }
     redirect(`/admin/protocolos/${existing[0].id}`);
   }
 
@@ -49,22 +58,57 @@ async function createFirstProtocolAction(formData: FormData) {
       createdByProfileId: auth.profileId,
       protocolId: protocol.id,
     });
-  } catch (error) {
+  } catch {
+    // The first insert may already have succeeded. Never present a raw error
+    // or assume a compensating DELETE removed anything.
+    let removed = false;
     try {
-      await deleteAccessibleProtocolWithoutVersions(protocol.id);
+      removed = await deleteAccessibleProtocolWithoutVersions(protocol.id);
     } catch {
-      // Best-effort cleanup: never hide the original creation failure.
+      // The durable protocol remains visible for explicit recovery.
     }
-    throw error;
+    redirect(`/admin/clientes/${client.id}/protocolos?recuperacao=${removed ? "criacao" : "necessaria"}`);
   }
 
   redirect(`/admin/protocolos/${protocol.id}`);
 }
 
+async function resumeVersionlessProtocolAction(formData: FormData) {
+  "use server";
+
+  const auth = await requireRole("admin");
+  const clientId = formData.get("clientId");
+  const protocolId = formData.get("protocolId");
+  if (typeof clientId !== "string" || !isUuid(clientId) ||
+      typeof protocolId !== "string" || !isUuid(protocolId)) return;
+
+  const client = await getAccessibleClient(clientId);
+  if (!client) return;
+  const protocols = await listAccessibleProtocolsForClient(client.id);
+  if (!protocols.some((item) => item.id === protocolId)) return;
+
+  const versions = await listAccessibleProtocolVersions(protocolId);
+  if (versions.length === 0) {
+    try {
+      await createAccessibleInitialProtocolVersion({
+        clientId: client.id,
+        createdByProfileId: auth.profileId,
+        protocolId,
+      });
+    } catch {
+      // A concurrent tab may have created version 1. Verify, never guess.
+      const afterConflict = await listAccessibleProtocolVersions(protocolId);
+      if (afterConflict.length === 0) {
+        redirect(`/admin/clientes/${client.id}/protocolos?recuperacao=erro`);
+      }
+    }
+  }
+  redirect(`/admin/protocolos/${protocolId}`);
+}
+
 type AdminClientProtocolsPageProps = {
-  params: Promise<{
-    clienteId: string;
-  }>;
+  params: Promise<{ clienteId: string }>;
+  searchParams: Promise<{ recuperacao?: string }>;
 };
 
 function formatProtocolType(value: string) {
@@ -82,8 +126,9 @@ function formatCreatedAt(value: string) {
 
 export default async function AdminClientProtocolsPage({
   params,
+  searchParams,
 }: AdminClientProtocolsPageProps) {
-  const { clienteId } = await params;
+  const [{ clienteId }, { recuperacao }] = await Promise.all([params, searchParams]);
   const client = await getAccessibleClient(clienteId);
 
   if (!client) {
@@ -91,6 +136,8 @@ export default async function AdminClientProtocolsPage({
   }
 
   const protocols = await listAccessibleProtocolsForClient(client.id);
+  const versions = await listAccessibleProtocolVersionsForProtocols(protocols.map((item) => item.id));
+  const versionedIds = new Set(versions.map((version) => version.protocol_id));
   const displayName = client.full_name?.trim() || client.profiles?.display_name?.trim();
 
   return (
@@ -106,6 +153,15 @@ export default async function AdminClientProtocolsPage({
         description="Consulte o histórico de protocolos desta cliente."
         title="Protocolos"
       >
+        {recuperacao ? (
+          <Alert title="Verifique a versão inicial" variant={recuperacao === "necessaria" ? "warning" : "critical"}>
+            {recuperacao === "necessaria"
+              ? "Um protocolo foi registrado sem versão inicial. Use Retomar versão inicial para continuar."
+              : recuperacao === "criacao"
+                ? "A criação não foi concluída. Nenhum protocolo novo foi confirmado; tente novamente."
+                : "A versão inicial não foi confirmada. Atualize a página antes de tentar novamente."}
+          </Alert>
+        ) : null}
         {protocols.length === 0 ? (
           <EmptyState
             action={
@@ -129,13 +185,21 @@ export default async function AdminClientProtocolsPage({
                     Criado em {formatCreatedAt(protocol.created_at)}
                   </p>
                 </div>
-                <Link
-                  aria-label={`Ver histórico do protocolo ${formatProtocolType(protocol.protocol_type)} criado em ${formatCreatedAt(protocol.created_at)}`}
-                  className={styles.actionLink}
-                  href={`/admin/protocolos/${protocol.id}`}
-                >
-                  Ver histórico
-                </Link>
+                {versionedIds.has(protocol.id) ? (
+                  <Link
+                    aria-label={`Ver histórico do protocolo ${formatProtocolType(protocol.protocol_type)} criado em ${formatCreatedAt(protocol.created_at)}`}
+                    className={styles.actionLink}
+                    href={`/admin/protocolos/${protocol.id}`}
+                  >
+                    Ver histórico
+                  </Link>
+                ) : (
+                  <form action={resumeVersionlessProtocolAction}>
+                    <input name="clientId" type="hidden" value={client.id} />
+                    <input name="protocolId" type="hidden" value={protocol.id} />
+                    <Button type="submit" variant="secondary">Retomar versão inicial</Button>
+                  </form>
+                )}
               </li>
             ))}
           </ol>

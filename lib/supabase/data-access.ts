@@ -2,6 +2,7 @@ import "server-only";
 
 import type { Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
+import { requireConfirmedTrainingMutation } from "@/lib/training/confirmed-mutation";
 
 async function getVerifiedProfileId() {
   const supabase = await createClient();
@@ -633,7 +634,7 @@ export async function updateAccessibleClientTrainingPlanDraft(input: {
   trainingPlanVersionId: string;
 }) {
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("client_training_plan_versions")
     .update({
       notes: input.notes,
@@ -641,11 +642,15 @@ export async function updateAccessibleClientTrainingPlanDraft(input: {
     })
     .eq("id", input.trainingPlanVersionId)
     .is("reviewed_at", null)
-    .is("published_at", null);
+    .is("published_at", null)
+    .select("id")
+    .maybeSingle();
 
   if (error) {
     throw error;
   }
+
+  requireConfirmedTrainingMutation(data);
 }
 
 export async function createAccessibleClientTrainingPlanItem(input: {
@@ -694,7 +699,7 @@ export async function updateAccessibleClientTrainingPlanItem(input: {
   setsText: string;
 }) {
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("client_training_plan_items")
     .update({
       execution_notes: input.executionNotes,
@@ -705,23 +710,31 @@ export async function updateAccessibleClientTrainingPlanItem(input: {
       rest_text: input.restText,
       sets_text: input.setsText,
     })
-    .eq("id", input.itemId);
+    .eq("id", input.itemId)
+    .select("id")
+    .maybeSingle();
 
   if (error) {
     throw error;
   }
+
+  requireConfirmedTrainingMutation(data);
 }
 
 export async function deleteAccessibleClientTrainingPlanItem(itemId: string) {
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("client_training_plan_items")
     .delete()
-    .eq("id", itemId);
+    .eq("id", itemId)
+    .select("id")
+    .maybeSingle();
 
   if (error) {
     throw error;
   }
+
+  requireConfirmedTrainingMutation(data);
 }
 
 export async function reviewAccessibleClientTrainingPlanVersion(
@@ -1660,15 +1673,19 @@ export async function deleteAccessibleAssessmentMeasurement(input: {
   measurementId: string;
 }) {
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("assessment_measurements")
     .delete()
     .eq("id", input.measurementId)
-    .eq("assessment_id", input.assessmentId);
+    .eq("assessment_id", input.assessmentId)
+    .select("id")
+    .single();
 
-  if (error) {
-    throw error;
+  if (error || !data) {
+    throw error ?? new Error("Assessment measurement deletion was not confirmed");
   }
+
+  return data;
 }
 
 export async function linkAccessibleAssessmentPhoto(input: {
@@ -1677,15 +1694,17 @@ export async function linkAccessibleAssessmentPhoto(input: {
   clientId: string;
 }) {
   const supabase = await createClient();
-  const { error } = await supabase.from("assessment_files").insert({
+  const { data, error } = await supabase.from("assessment_files").insert({
     assessment_id: input.assessmentId,
     client_file_id: input.clientFileId,
     client_id: input.clientId,
-  });
+  }).select("assessment_id, client_file_id").single();
 
-  if (error) {
-    throw error;
+  if (error || !data) {
+    throw error ?? new Error("Assessment photo link was not confirmed");
   }
+
+  return data;
 }
 
 export async function unlinkAccessibleAssessmentPhoto(input: {
@@ -1693,15 +1712,19 @@ export async function unlinkAccessibleAssessmentPhoto(input: {
   clientFileId: string;
 }) {
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("assessment_files")
     .delete()
     .eq("assessment_id", input.assessmentId)
-    .eq("client_file_id", input.clientFileId);
+    .eq("client_file_id", input.clientFileId)
+    .select("assessment_id, client_file_id")
+    .single();
 
-  if (error) {
-    throw error;
+  if (error || !data) {
+    throw error ?? new Error("Assessment photo unlink was not confirmed");
   }
+
+  return data;
 }
 
 export async function listCurrentClientFinalizedAssessmentMeasurements() {
@@ -2197,13 +2220,20 @@ export async function deleteAccessibleProtocolWithoutVersions(protocolId: string
     return false;
   }
 
-  const { error } = await supabase.from("protocols").delete().eq("id", protocolId);
+  // RLS and concurrent changes can result in zero affected rows without SQL error.
+  // Never report cleanup as completed unless the deletion was confirmed.
+  const { data, error } = await supabase
+    .from("protocols")
+    .delete()
+    .eq("id", protocolId)
+    .select("id")
+    .maybeSingle();
 
   if (error) {
     throw error;
   }
 
-  return true;
+  return Boolean(data);
 }
 
 
@@ -2604,13 +2634,19 @@ export async function updateAccessibleMealDoseAllocation(input: {
 
 export async function deleteAccessibleMealDoseAllocation(doseAllocationId: string) {
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("meal_dose_allocations")
     .delete()
-    .eq("id", doseAllocationId);
+    .eq("id", doseAllocationId)
+    .select("id")
+    .maybeSingle();
 
   if (error) {
     throw error;
+  }
+
+  if (!data) {
+    throw new Error("A exclusão da dose não foi confirmada. Atualize a página e confira o rascunho.");
   }
 }
 
@@ -2632,17 +2668,19 @@ export async function deleteAccessibleEmptyMeal(input: {
     return false;
   }
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("meals")
     .delete()
     .eq("id", input.mealId)
-    .eq("meal_plan_variant_id", input.variantId);
+    .eq("meal_plan_variant_id", input.variantId)
+    .select("id")
+    .maybeSingle();
 
   if (error) {
     throw error;
   }
 
-  return true;
+  return Boolean(data);
 }
 
 export async function deleteAccessibleEmptyMealPlanVariant(input: {
@@ -2663,17 +2701,19 @@ export async function deleteAccessibleEmptyMealPlanVariant(input: {
     return false;
   }
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("meal_plan_variants")
     .delete()
     .eq("id", input.variantId)
-    .eq("meal_plan_version_id", input.mealPlanVersionId);
+    .eq("meal_plan_version_id", input.mealPlanVersionId)
+    .select("id")
+    .maybeSingle();
 
   if (error) {
     throw error;
   }
 
-  return true;
+  return Boolean(data);
 }
 
 

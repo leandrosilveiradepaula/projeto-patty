@@ -1,4 +1,6 @@
 import { AdminClientNameEditForm } from "@/components/admin/AdminClientNameEditForm";
+import { latestPublishedTrainingVersion } from "@/lib/training/published-versions";
+import { isTrainingRequestAfterPublication } from "@/lib/training/request-follow-up";
 import { AdminEndClientAssignmentForm } from "@/components/admin/AdminEndClientAssignmentForm";
 import { AdminClientRegistrationEditForm } from "@/components/admin/AdminClientRegistrationEditForm";
 import { AdminClientRecoveryLinkForm } from "@/components/admin/AdminClientRecoveryLinkForm";
@@ -99,8 +101,14 @@ export default async function AdminClienteDetailPage({
     : [];
   const openTrainingVersion =
     trainingVersions.find((version) => !version.published_at) ?? null;
-  const latestPublishedTraining =
-    trainingVersions.find((version) => Boolean(version.published_at)) ?? null;
+  const latestPublishedTraining = latestPublishedTrainingVersion(trainingVersions);
+  const newTrainingRequestAfterPublication = Boolean(
+    trainingRequests[0] && latestPublishedTraining &&
+    isTrainingRequestAfterPublication(
+      trainingRequests[0].requested_at,
+      latestPublishedTraining.published_at,
+    ),
+  );
   const trainingWorkspaceState = openTrainingVersion?.reviewed_at
     ? {
         badge: "Pronto para publicar",
@@ -113,6 +121,12 @@ export default async function AdminClienteDetailPage({
           description: `A versão ${openTrainingVersion.version_number} está em edição e ainda não foi revisada.`,
           kind: "draft" as const,
         }
+      : newTrainingRequestAfterPublication
+        ? {
+            badge: "Nova solicitação",
+            description: "A cliente enviou uma nova solicitação após a última publicação. A Patty decide os próximos passos.",
+            kind: "new_request" as const,
+          }
       : latestPublishedTraining
         ? {
             badge: "Publicado",
@@ -249,6 +263,7 @@ export default async function AdminClienteDetailPage({
   const publishedProtocolVersionIds = new Set(
     protocolPublications.map((publication) => publication.protocol_version_id),
   );
+  const protocolDraftAction = protocolVersions.find(({ version }) => !version.submitted_for_review_at);
   const protocolAction = protocolVersions.find(({ version }) => {
     if (!version.submitted_for_review_at) {
       return false;
@@ -354,7 +369,7 @@ export default async function AdminClienteDetailPage({
                         description:
                           `A versão ${protocolAction.version.version_number} do protocolo foi submetida para revisão e ainda não possui aprovação registrada.`,
                         eyebrow: "Ação da Patty",
-                        href: `/admin/protocolos/${protocolAction.protocol.id}`,
+                        href: `/admin/protocolos/${protocolAction.protocol.id}?versao=${protocolAction.version.version_number}#versao-${protocolAction.version.version_number}`,
                         label: "Revisar protocolo",
                         title: "Protocolo aguardando revisão",
                       }
@@ -362,9 +377,17 @@ export default async function AdminClienteDetailPage({
                         description:
                           `A versão ${protocolAction.version.version_number} do protocolo já possui aprovação, mas ainda não foi publicada para a cliente.`,
                         eyebrow: "Ação da Patty",
-                        href: `/admin/protocolos/${protocolAction.protocol.id}`,
+                        href: `/admin/protocolos/${protocolAction.protocol.id}?versao=${protocolAction.version.version_number}#versao-${protocolAction.version.version_number}`,
                         label: "Publicar protocolo",
                         title: "Protocolo aguardando publicação",
+                      }
+                  : protocolDraftAction
+                    ? {
+                        description: `A versão ${protocolDraftAction.version.version_number} está em rascunho. Publicações anteriores permanecem disponíveis.`,
+                        eyebrow: "Ação da Patty",
+                        href: `/admin/protocolos/${protocolDraftAction.protocol.id}?versao=${protocolDraftAction.version.version_number}#versao-${protocolDraftAction.version.version_number}`,
+                        label: "Continuar protocolo",
+                        title: "Protocolo em rascunho",
                       }
                   : !hasPublishedProtocol
                     ? {
@@ -395,6 +418,15 @@ export default async function AdminClienteDetailPage({
                             label: "Continuar treino",
                             title: "Treino em rascunho",
                           }
+                        : trainingWorkspaceState.kind === "new_request"
+                          ? {
+                              description:
+                                "A cliente registrou uma nova solicitação depois do último treino publicado. Revise o pedido antes de decidir se haverá outra prescrição.",
+                              eyebrow: "Ação da Patty",
+                              href: `/admin/clientes/${client.id}/treino#solicitacao-treino`,
+                              label: "Revisar solicitação",
+                              title: "Nova solicitação de treino",
+                            }
                         : trainingWorkspaceState.kind === "requested"
                           ? {
                               description:
@@ -660,6 +692,8 @@ export default async function AdminClienteDetailPage({
                     ? !approvedProtocolVersionIds.has(protocolAction.version.id)
                       ? `A versão ${protocolAction.version.version_number} está submetida e aguarda aprovação.`
                       : `A versão ${protocolAction.version.version_number} está aprovada e aguarda publicação.`
+                    : protocolDraftAction
+                      ? `A versão ${protocolDraftAction.version.version_number} está em rascunho; publicações anteriores permanecem disponíveis.`
                     : hasPublishedProtocol
                       ? "Já existe protocolo aprovado e publicado para esta cliente."
                       : protocols.length > 0
@@ -684,6 +718,8 @@ export default async function AdminClienteDetailPage({
                   ? !approvedProtocolVersionIds.has(protocolAction.version.id)
                     ? "Aguardando aprovação"
                     : "Aguardando publicação"
+                  : protocolDraftAction
+                    ? "Rascunho"
                   : hasPublishedProtocol
                     ? "Publicado"
                     : protocols.length > 0

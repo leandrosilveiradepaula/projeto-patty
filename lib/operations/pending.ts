@@ -11,8 +11,10 @@ export type OperationalPendingItemKind =
   | "content_released_without_asset"
   | "private_file_pending_release"
   | "protocol_approved_not_published"
+  | "protocol_draft"
   | "protocol_submitted_not_approved"
   | "training_requested_without_plan"
+  | "training_request_after_publication"
   | "training_draft"
   | "training_reviewed_not_published"
   | "weekly_feedback_awaiting_response"
@@ -113,7 +115,7 @@ export type PendingTrainingLifecycle = {
   clientLabel: string;
   createdAt: string;
   id: string;
-  state: "requested_without_plan" | "draft" | "reviewed_not_published";
+  state: "requested_without_plan" | "requested_after_publication" | "draft" | "reviewed_not_published";
   versionNumber: number | null;
 };
 
@@ -330,6 +332,18 @@ export function buildOperationalPendingItems(
 
   for (const version of input.protocolVersions) {
     if (!version.submittedForReviewAt) {
+      // A saved draft still needs manual work, even with a published predecessor.
+      items.push({
+        clientId: version.clientId,
+        clientLabel: version.clientLabel,
+        createdAt: version.createdAt,
+        description: `A versão ${version.versionNumber} está em rascunho e precisa de edição antes da revisão profissional. Nenhuma alteração foi publicada para a cliente.`,
+        href: `/admin/protocolos/${version.protocolId}?versao=${version.versionNumber}#versao-${version.versionNumber}`,
+        id: `protocol-draft:${version.id}`,
+        kind: "protocol_draft",
+        statusLabel: "Rascunho",
+        title: "Continuar protocolo",
+      });
       continue;
     }
 
@@ -339,7 +353,7 @@ export function buildOperationalPendingItems(
         clientLabel: version.clientLabel,
         createdAt: version.submittedForReviewAt,
         description: `A versão ${version.versionNumber} foi submetida para revisão e ainda não possui aprovação registrada.`,
-        href: `/admin/protocolos/${version.protocolId}#versao-${version.versionNumber}`,
+        href: `/admin/protocolos/${version.protocolId}?versao=${version.versionNumber}#versao-${version.versionNumber}`,
         id: `protocol-approval:${version.id}`,
         kind: "protocol_submitted_not_approved",
         statusLabel: "Sem aprovação",
@@ -354,7 +368,7 @@ export function buildOperationalPendingItems(
         clientLabel: version.clientLabel,
         createdAt: version.submittedForReviewAt,
         description: `A versão ${version.versionNumber} possui aprovação registrada, mas ainda não possui publicação.`,
-        href: `/admin/protocolos/${version.protocolId}#versao-${version.versionNumber}`,
+        href: `/admin/protocolos/${version.protocolId}?versao=${version.versionNumber}#versao-${version.versionNumber}`,
         id: `protocol-publication:${version.id}`,
         kind: "protocol_approved_not_published",
         statusLabel: "Aprovado, não publicado",
@@ -376,6 +390,22 @@ export function buildOperationalPendingItems(
         kind: "training_requested_without_plan",
         statusLabel: "Solicitado, sem plano",
         title: "Treino solicitado",
+      });
+      continue;
+    }
+
+    if (training.state === "requested_after_publication") {
+      items.push({
+        clientId: training.clientId,
+        clientLabel: training.clientLabel,
+        createdAt: training.createdAt,
+        description:
+          "Uma nova solicitação de treino foi registrada depois da última publicação. Revise o pedido e decida manualmente se será necessária uma nova prescrição; o treino publicado permanece disponível.",
+        href: `/admin/clientes/${training.clientId}/treino#solicitacao-treino`,
+        id: `training-request-followup:${training.id}`,
+        kind: "training_request_after_publication",
+        statusLabel: "Nova solicitação",
+        title: "Revisar nova solicitação de treino",
       });
       continue;
     }

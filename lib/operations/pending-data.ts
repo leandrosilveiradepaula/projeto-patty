@@ -1,13 +1,9 @@
 import "server-only";
 
 import {
-  listAccessibleAnamnesisClarificationRequests,
   listAccessibleAnamnesisClarificationResolutions,
   listAccessibleAnamnesisClarificationResponses,
-  listAccessibleAnamnesisReviews,
-  listAccessibleAnamnesisSubmissions,
   listAccessibleClientAssessments,
-  listAccessibleClientNotificationEvents,
   listAccessibleClientFilesForClients,
   listAccessibleClientRegistrationsForClients,
   listAccessibleWeeklyFeedbackNotificationPreferencesForClients,
@@ -16,11 +12,9 @@ import {
   listAccessibleClientTrainingPlansForClients,
   listAccessibleClientTrainingPlanVersionsForPlans,
   listAccessibleClientTrainingRequestsForClients,
-  listAccessibleWeeklyFeedbacksForClient,
   listAccessibleNonterminalAiExecutions,
   listAccessibleProtocolPublications,
   listAccessibleProtocolVersionApprovals,
-  listAccessibleProtocolVersions,
   listAccessibleProtocols,
   listClientsAssignedToCurrentAdmin,
 } from "@/lib/supabase/data-access";
@@ -31,6 +25,16 @@ import {
   type PendingTrainingLifecycle,
 } from "@/lib/operations/pending";
 import { loadClarificationReminderInterval } from "@/lib/operations/clarification-reminder-loader";
+import { latestPublishedTrainingVersion } from "@/lib/training/published-versions";
+import { isTrainingRequestAfterPublication } from "@/lib/training/request-follow-up";
+import {
+  listPendingAnamnesisSubmissionsForClients,
+  listPendingAnamnesisReviewsForSubmissions,
+  listPendingClarificationRequestsForSubmissions,
+  listPendingNotificationEventsForClients,
+  listPendingProtocolVersionsForProtocols,
+  listPendingWeeklyFeedbacksForClients,
+} from "@/lib/operations/pending-facts";
 
 function clientLabel(value: string | null | undefined) {
   return value?.trim() || "Cliente sem nome informado";
@@ -76,21 +80,9 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
     contentReleases,
     privateFiles,
   ] = await Promise.all([
-    Promise.all(
-      assignedClients.map((client) =>
-        listAccessibleAnamnesisSubmissions(client.id),
-      ),
-    ).then((items) => items.flat()),
-    Promise.all(
-      assignedClients.map((client) =>
-        listAccessibleWeeklyFeedbacksForClient(client.id),
-      ),
-    ).then((items) => items.flat()),
-    Promise.all(
-      assignedClients.map((client) =>
-        listAccessibleClientNotificationEvents(client.id),
-      ),
-    ).then((items) => items.flat()),
+    listPendingAnamnesisSubmissionsForClients(clientIds),
+    listPendingWeeklyFeedbacksForClients(clientIds),
+    listPendingNotificationEventsForClients(clientIds),
     listAccessibleClientTrainingRequestsForClients(clientIds),
     listAccessibleClientTrainingPlansForClients(clientIds),
     listAccessibleClientRegistrationsForClients(clientIds),
@@ -133,6 +125,13 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
       .filter((version) => !version.published_at)
       .map((version) => [version.training_plan_id, version]),
   );
+  const publishedVersionsByPlanId = new Map<string, typeof trainingVersions>();
+  for (const version of trainingVersions) {
+    if (!version.published_at) continue;
+    const values = publishedVersionsByPlanId.get(version.training_plan_id) ?? [];
+    values.push(version);
+    publishedVersionsByPlanId.set(version.training_plan_id, values);
+  }
   const latestRequestByClientId = new Map<
     string,
     (typeof trainingRequests)[number]
@@ -164,6 +163,22 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
     const openVersion = openTrainingVersionByPlanId.get(plan.id);
 
     if (!openVersion) {
+      const latestPublication = latestPublishedTrainingVersion(
+        publishedVersionsByPlanId.get(plan.id) ?? [],
+      );
+      if (
+        request && latestPublication &&
+        isTrainingRequestAfterPublication(request.requested_at, latestPublication.published_at)
+      ) {
+        return [{
+          clientId: client.id,
+          clientLabel: clientLabel(client.full_name || client.profiles?.display_name),
+          createdAt: request.requested_at,
+          id: request.id,
+          state: "requested_after_publication" as const,
+          versionNumber: latestPublication.version_number,
+        }];
+      }
       return [];
     }
 
@@ -182,34 +197,24 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
   const submitted = submissions.filter(
     (submission) => Boolean(submission.submitted_at),
   );
-  const reviewsBySubmission = new Map<string, number>();
-  const clarificationRequests: Array<{
-    clientId: string;
-    created_at: string;
-    id: string;
-    request_text: string;
-    requested_by_profile_id: string;
-    source_answer_id: string | null;
-    submission_id: string;
-  }> = [];
-
-  await Promise.all(
-    submitted.map(async (submission) => {
-      const [reviews, requests] = await Promise.all([
-        listAccessibleAnamnesisReviews(submission.id),
-        listAccessibleAnamnesisClarificationRequests(submission.id),
-      ]);
-
-      reviewsBySubmission.set(submission.id, reviews.length);
-
-      for (const request of requests) {
-        clarificationRequests.push({
-          ...request,
-          clientId: submission.client_id,
-        });
-      }
-    }),
+  const submittedById = new Map(
+    submitted.map((submission) => [submission.id, submission.client_id]),
   );
+  const [reviews, requests] = await Promise.all([
+    listPendingAnamnesisReviewsForSubmissions([...submittedById.keys()]),
+    listPendingClarificationRequestsForSubmissions([...submittedById.keys()]),
+  ]);
+  const reviewsBySubmission = new Map<string, number>();
+  for (const review of reviews) {
+    reviewsBySubmission.set(
+      review.submission_id,
+      (reviewsBySubmission.get(review.submission_id) ?? 0) + 1,
+    );
+  }
+  const clarificationRequests = requests.flatMap((request) => {
+    const clientId = submittedById.get(request.submission_id);
+    return clientId ? [{ ...request, clientId }] : [];
+  });
 
   const clarificationRequestIds = clarificationRequests.map(
     (request) => request.id,
@@ -233,15 +238,14 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
     );
   }
 
-  const versionsByProtocol = await Promise.all(
-    protocols.map(async (protocol) => ({
-      protocol,
-      versions: await listAccessibleProtocolVersions(protocol.id),
-    })),
+  const accessibleProtocolVersions = await listPendingProtocolVersionsForProtocols(
+    protocols.map((protocol) => protocol.id),
   );
-  const protocolVersions = versionsByProtocol.flatMap(({ protocol, versions }) =>
-    versions.map((version) => ({ protocol, version })),
-  );
+  const protocolsById = new Map(protocols.map((protocol) => [protocol.id, protocol]));
+  const protocolVersions = accessibleProtocolVersions.flatMap((version) => {
+    const protocol = protocolsById.get(version.protocol_id);
+    return protocol ? [{ protocol, version }] : [];
+  });
   const protocolVersionIds = protocolVersions.map(({ version }) => version.id);
   const [approvals, publications] = await Promise.all([
     listAccessibleProtocolVersionApprovals(protocolVersionIds),

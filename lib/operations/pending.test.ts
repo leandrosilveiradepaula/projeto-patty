@@ -672,6 +672,31 @@ test("training lifecycle facts become Patty operational pendings", () => {
 });
 
 
+test("a training request after publication is a Patty follow-up, never automatic prescription", () => {
+  const items = buildOperationalPendingItems({
+    clarificationReminderIntervalHours: 24,
+    anamnesisSubmissions: [],
+    clarificationRequests: [],
+    assessments: [],
+    protocolVersions: [],
+    aiExecutions: [],
+    trainingLifecycle: [{
+      clientId: "client-new-request",
+      clientLabel: "Cliente",
+      createdAt: "2026-10-08T13:00:00Z",
+      id: "new-request",
+      state: "requested_after_publication",
+      versionNumber: 3,
+    }],
+  });
+  assert.equal(items.length, 1);
+  assert.equal(items[0].kind, "training_request_after_publication");
+  assert.equal(items[0].id, "training-request-followup:new-request");
+  assert.equal(items[0].href, "/admin/clientes/client-new-request/treino#solicitacao-treino");
+  assert.equal(getOperationalPendingGroup(items[0]), "patty");
+  assert.match(items[0].description, /decida manualmente/);
+});
+
 test("client readiness gaps become explicit Patty actions without using login email", () => {
   const items = buildOperationalPendingItems({
     clarificationReminderIntervalHours: 24,
@@ -988,7 +1013,7 @@ test("core Patty pendings deep-link to the exact review action", () => {
   );
   assert.equal(
     items.find((item) => item.kind === "protocol_submitted_not_approved")?.href,
-    "/admin/protocolos/protocol-1#versao-4",
+    "/admin/protocolos/protocol-1?versao=4#versao-4",
   );
 });
 
@@ -1040,4 +1065,25 @@ test("non-anamnesis AI execution keeps the generic operations fallback", () => {
   });
 
   assert.equal(items[0]?.href, "/admin/ia");
+});
+
+test("protocol drafts remain actionable alongside released and pending versions", () => {
+  const shared = { clientId: "c", clientLabel: "Cliente", protocolId: "p" };
+  const items = buildOperationalPendingItems({
+    aiExecutions: [], anamnesisSubmissions: [], assessments: [],
+    clarificationReminderIntervalHours: 24, clarificationRequests: [],
+    protocolVersions: [
+      { ...shared, id: "draft", createdAt: "2026-10-08T10:00:00Z", submittedForReviewAt: null, approvalCount: 0, publicationCount: 0, versionNumber: 4 },
+      { ...shared, id: "released", createdAt: "2026-10-01T10:00:00Z", submittedForReviewAt: "2026-10-01T12:00:00Z", approvalCount: 1, publicationCount: 1, versionNumber: 3 },
+      { ...shared, id: "approved", createdAt: "2026-09-28T10:00:00Z", submittedForReviewAt: "2026-09-28T12:00:00Z", approvalCount: 1, publicationCount: 0, versionNumber: 2 },
+      { ...shared, id: "review", createdAt: "2026-09-26T10:00:00Z", submittedForReviewAt: "2026-09-26T12:00:00Z", approvalCount: 0, publicationCount: 0, versionNumber: 1 },
+    ],
+  });
+  assert.deepEqual(new Set(items.map(item => item.kind)), new Set([
+    "protocol_draft", "protocol_approved_not_published", "protocol_submitted_not_approved",
+  ]));
+  assert.equal(items.find(item => item.kind === "protocol_draft")?.href, "/admin/protocolos/p?versao=4#versao-4");
+  assert.equal(items.find(item => item.kind === "protocol_approved_not_published")?.href, "/admin/protocolos/p?versao=2#versao-2");
+  assert.equal(items.find(item => item.kind === "protocol_submitted_not_approved")?.href, "/admin/protocolos/p?versao=1#versao-1");
+  assert.equal(getOperationalPendingGroup(items.find(item => item.kind === "protocol_draft")!), "patty");
 });

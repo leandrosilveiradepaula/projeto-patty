@@ -62,6 +62,11 @@ jobs:
           E2E_SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.E2E_SUPABASE_SECRET_KEY }}
         run: npx playwright test e2e/client-anamnesis-canonical-start.spec.mjs --reporter=line
 
+      - name: Run production client operational navigation smoke
+        env:
+          E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
+        run: npx playwright test e2e/client-operational-navigation.spec.mjs --reporter=line
+
       - name: Cleanup ephemeral canonical E2E client
         if: always()
         env:

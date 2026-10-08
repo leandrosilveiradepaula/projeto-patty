@@ -57,3 +57,8 @@
   outline: 3px solid var(--color-accent);
   outline-offset: 3px;
 }
+
+.jump { margin: 0 0 var(--space-4); }
+.jump a { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-brand-strong); text-decoration: underline; text-underline-offset: 3px; }
+.jump a:focus-visible { outline: 3px solid var(--color-brand); outline-offset: 3px; }
+.entry[id], .list > div[id] { scroll-margin-top: var(--space-6); }

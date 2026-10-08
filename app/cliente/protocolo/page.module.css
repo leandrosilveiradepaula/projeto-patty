@@ -102,3 +102,30 @@
   border-top: 1px solid var(--color-border);
   padding: var(--space-4);
 }
+
+.publicationNavigation {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.publicationNavigation a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  padding: var(--space-2) var(--space-3);
+  color: var(--color-brand-strong);
+  text-decoration: none;
+}
+
+.publicationNavigation a:focus-visible {
+  outline: 3px solid var(--color-brand);
+  outline-offset: 3px;
+}
+
+.historyItem[id],
+:global(section[id^="publicacao-"]) {
+  scroll-margin-top: var(--space-6);
+}

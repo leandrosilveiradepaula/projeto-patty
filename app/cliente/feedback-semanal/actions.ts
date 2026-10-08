@@ -30,7 +30,7 @@ export async function saveWeeklyFeedbackAction(
   const feedback = await getCurrentClientWeeklyFeedback(client.id, feedbackId);
 
   if (!feedback || feedback.submitted_at) {
-    throw new Error("Feedback indisponível para edição");
+    redirect("/cliente/feedback-semanal?status=conflict");
   }
 
   const version = feedback.weekly_feedback_form_versions;
@@ -43,6 +43,9 @@ export async function saveWeeklyFeedbackAction(
   }
 
   const intent = formData.get("intent");
+  if (intent !== "save" && intent !== "submit") {
+    redirect("/cliente/feedback-semanal?status=invalid");
+  }
   const submit = intent === "submit";
 
   let answers;
@@ -57,8 +60,9 @@ export async function saveWeeklyFeedbackAction(
     redirect("/cliente/feedback-semanal?status=invalid");
   }
 
+  let saved;
   try {
-    await updateCurrentClientWeeklyFeedback({
+    saved = await updateCurrentClientWeeklyFeedback({
       answers,
       clientId: client.id,
       feedbackId,
@@ -66,6 +70,10 @@ export async function saveWeeklyFeedbackAction(
     });
   } catch {
     redirect("/cliente/feedback-semanal?status=save-error");
+  }
+
+  if (!saved) {
+    redirect("/cliente/feedback-semanal?status=conflict");
   }
 
   revalidatePath("/admin");

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { isValidWeeklyFeedbackCalendarDay, parseOptionalWeeklyFeedbackDueAt } from "@/lib/weekly-feedback/request-calendar";
 import { requireRole } from "@/lib/supabase/auth";
 import {
   createAccessibleWeeklyFeedbackRequest,
@@ -43,8 +44,8 @@ export async function createWeeklyFeedbackRequestAction(
   if (
     typeof periodStart !== "string" ||
     typeof periodEnd !== "string" ||
-    !/^\d{4}-\d{2}-\d{2}$/.test(periodStart) ||
-    !/^\d{4}-\d{2}-\d{2}$/.test(periodEnd)
+    !isValidWeeklyFeedbackCalendarDay(periodStart) ||
+    !isValidWeeklyFeedbackCalendarDay(periodEnd)
   ) {
     return { message: "Informe um período válido.", success: false };
   }
@@ -75,15 +76,15 @@ export async function createWeeklyFeedbackRequestAction(
     };
   }
 
-  const normalizedDueAt =
-    typeof dueAt === "string" && dueAt.trim()
-      ? new Date(`${dueAt}:00-03:00`).toISOString()
-      : null;
+  const deadline = parseOptionalWeeklyFeedbackDueAt(dueAt);
+  if (!deadline.ok) {
+    return { message: "Informe um prazo válido ou deixe o campo em branco.", success: false };
+  }
 
   try {
     await createAccessibleWeeklyFeedbackRequest({
       clientId,
-      dueAt: normalizedDueAt,
+      dueAt: deadline.dueAt,
       formVersionId: formVersion.id,
       periodEnd,
       periodStart,
