@@ -117,7 +117,7 @@ export async function createPattyNoteFromAiFinding(
 ) {
   const auth = await requireRole("admin");
 
-  if (!Number.isInteger(findingIndex) || findingIndex < 0) {
+  if (!isUuid(submissionId) || !isUuid(executionId) || !Number.isSafeInteger(findingIndex) || findingIndex < 0) {
     throw new Error("Índice de achado inválido.");
   }
 
