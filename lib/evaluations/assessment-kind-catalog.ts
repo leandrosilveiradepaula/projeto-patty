@@ -99,6 +99,9 @@ export function resolveAssessmentKindByHistoricalCode(
 ) {
   const configuration =
     parseAssessmentKindCatalogConfiguration(configurationValue);
+  if (typeof historicalCode !== "string" || historicalCode.trim() !== historicalCode) {
+    throw new TypeError("assessment historical code must be a valid string");
+  }
   const entry = configuration.entries.find(
     (candidate) => candidate.historicalCode === historicalCode,
   );
