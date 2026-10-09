@@ -1,3 +1,7 @@
+## Auditoria integrada - invariantes de configuracao de avaliacoes - 2026-10-09
+
+Cinco blocos: normalizacao canonica da chave do tipo de avaliacao; rejeicao de chave de tipo vazia apos normalizacao; rejeicao de chave de medida vazia apos normalizacao; rejeicao de aliases vazios apos normalizacao; validacao estrita dos tipos de entrada na verificacao de prontidao, incluindo contagem segura de fotos e array de chaves textuais. Regras continuam configuraveis, sem criterio clinico automatico. Testes exercitam as funcoes reais.
+
 ## Auditoria integrada - integridade de configuracoes de avaliacao - 2026-10-09
 
 Cinco blocos de validacao de configuracao: comprimento da chave do tipo de avaliacao; limites de chave e rotulo das medidas; limite de aliases; quantidade minima de fotos como inteiro seguro; limite do rotulo de fotos. Valores de exigencia continuam configuraveis, sem transformar exemplos historicos em regras clinicas. Testes de unidade exercitam o parser real. E2E autenticado pendente.
