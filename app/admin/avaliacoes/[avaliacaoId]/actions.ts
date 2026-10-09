@@ -50,7 +50,7 @@ export async function addProfessionalFollowUp(
   formData: FormData,
 ): Promise<ProfessionalFollowUpFormState> {
   const context = await requireRole("admin");
-  const assessment = await getAccessibleClientAssessment(assessmentId);
+  const assessment = isUuid(assessmentId) ? await getAccessibleClientAssessment(assessmentId) : null;
 
   if (!assessment) {
     return {
@@ -125,7 +125,7 @@ export type AssessmentDraftActionState = {
 };
 
 async function getDraftAssessment(assessmentId: string) {
-  const assessment = await getAccessibleClientAssessment(assessmentId);
+  const assessment = isUuid(assessmentId) ? await getAccessibleClientAssessment(assessmentId) : null;
 
   if (!assessment) {
     return {
@@ -502,7 +502,7 @@ export async function correctFinalizedAssessmentMeasurementAction(
   formData: FormData,
 ): Promise<AssessmentCorrectionFormState> {
   const context = await requireRole("admin");
-  const assessment = await getAccessibleClientAssessment(assessmentId);
+  const assessment = isUuid(assessmentId) ? await getAccessibleClientAssessment(assessmentId) : null;
 
   if (!assessment || !assessment.finalized_at) {
     return {
