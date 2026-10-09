@@ -1,3 +1,7 @@
+## Auditoria operacional - indice completo da area da cliente - 2026-10-09
+
+A area Mais agora cobre as jornadas reais de Anamnese, avaliacoes, evolucao, conteudos, arquivos, treino, perfil, protocolo, check-ins, feedback semanal e biblioteca de exercicios. Cinco entradas operacionais foram adicionadas ao indice (inicio, protocolo, check-ins, feedback e exercicios), e o painel principal inclui retorno explicito ao indice. A pagina Jornada, ainda sem regras aprovadas, continua fora dos atalhos. Teste de contrato confirma os destinos. Sem publicacao automatica ou acesso a dados fora de RLS. Validacao E2E autenticada ainda pendente.
+
 ## Auditoria operacional - acesso direto as jornadas reais - 2026-10-09
 
 Primeiro incremento da etapa de integracao operacional, sem demonstracoes falsas: dez acessos diretos no painel da cliente para cadastro, arquivos, avaliacoes, evolucao, conteudos, treino, protocolo, Anamnese, check-ins e Feedback Semanal. O painel profissional tambem ganha atalhos para avaliacoes, protocolos, arquivos privados, acompanhamentos e configuracoes. Atalhos apontam para rotas existentes e preservam autenticacao, RLS, liberacao por versao e revisao humana. Teste de contrato verifica os destinos e os limites de publicacao. Isto e melhoria de navegacao real, nao evidencia de E2E autenticado em producao; essa validacao segue pendente.
