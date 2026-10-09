@@ -120,12 +120,18 @@ export default async function AdminClientAssessmentsPage({
           />
         </Card>
       </Section>
-      {draftAssessments.length > 0 ? (
-        <Section
-          action={<Badge variant="warning">{draftAssessments.length} rascunho(s)</Badge>}
+      <Section
+          action={<Badge variant={draftAssessments.length > 0 ? "warning" : "neutral"}>{draftAssessments.length} rascunho(s)</Badge>}
           description="Retome um rascunho existente para revisar as medidas e finalizar explicitamente quando estiver pronto. Criar outra avaliação não conclui a anterior."
+          id="avaliacoes-em-andamento"
           title="Em andamento"
         >
+          {draftAssessments.length === 0 ? (
+            <EmptyState
+              description="Não existem avaliações em rascunho. Use Nova avaliação para iniciar uma coleta."
+              title="Nenhuma avaliação em andamento"
+            />
+          ) : (
           <ul className={styles.evaluationList}>
             {draftAssessments.map((assessment) => (
               <li key={assessment.id}>
@@ -150,8 +156,8 @@ export default async function AdminClientAssessmentsPage({
               </li>
             ))}
           </ul>
+          )}
         </Section>
-      ) : null}
 
       <Section
         description="Somente avaliações finalizadas aparecem aqui, preservadas da mais recente para a mais antiga. Rascunhos permanecem em Em andamento."
