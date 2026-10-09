@@ -30,7 +30,11 @@ export function buildFactualProgressSeries(
   assessments: FactualProgressAssessment[],
 ): FactualProgressSeries[] {
   const ordered = [...assessments].sort((left, right) => {
-    const byDate = left.assessedAt.localeCompare(right.assessedAt);
+    const leftInstant = Date.parse(left.assessedAt);
+    const rightInstant = Date.parse(right.assessedAt);
+    const byDate = Number.isFinite(leftInstant) && Number.isFinite(rightInstant)
+      ? leftInstant - rightInstant
+      : left.assessedAt.localeCompare(right.assessedAt);
     return byDate || left.id.localeCompare(right.id);
   });
   const seriesByIdentity = new Map<string, FactualProgressSeries>();
@@ -55,12 +59,11 @@ export function buildFactualProgressSeries(
       }
 
       const previous = series.points.at(-1);
+      const delta = previous ? measurement.measurement_value - previous.value : null;
       series.points.push({
         assessedAt: assessment.assessedAt,
         assessmentId: assessment.id,
-        deltaFromPrevious: previous
-          ? measurement.measurement_value - previous.value
-          : null,
+        deltaFromPrevious: delta !== null && Number.isFinite(delta) ? delta : null,
         value: measurement.measurement_value,
       });
     }

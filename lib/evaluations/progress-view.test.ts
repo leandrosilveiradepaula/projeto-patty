@@ -85,3 +85,19 @@ test("does not duplicate the same measurement in one assessment", () => {
   ]);
   assert.equal(series[0]?.points.length, 1);
 });
+
+test("progress orders timestamps by actual instant across timezone offsets", () => {
+  const series = buildFactualProgressSeries([
+    { id: "earlier", assessedAt: "2026-01-01T10:00:00+03:00", measurements: [{ measurement_key: "peso", measurement_value: 70, unit: "kg" }] },
+    { id: "later", assessedAt: "2026-01-01T08:00:00Z", measurements: [{ measurement_key: "peso", measurement_value: 69, unit: "kg" }] },
+  ]);
+  assert.deepEqual(series[0]?.points.map((point) => point.assessmentId), ["earlier", "later"]);
+});
+
+test("progress delta overflow never becomes Infinity", () => {
+  const series = buildFactualProgressSeries([
+    { id: "a", assessedAt: "2026-01-01", measurements: [{ measurement_key: "peso", measurement_value: -1e308, unit: "kg" }] },
+    { id: "b", assessedAt: "2026-02-01", measurements: [{ measurement_key: "peso", measurement_value: 1e308, unit: "kg" }] },
+  ]);
+  assert.equal(series[0]?.points[1]?.deltaFromPrevious, null);
+});

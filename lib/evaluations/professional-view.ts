@@ -38,7 +38,9 @@ export function buildFactualMeasurementComparison(
         : undefined;
 
     return {
-      currentValue: String(measurement.measurement_value),
+      currentValue: Number.isFinite(measurement.measurement_value)
+        ? String(measurement.measurement_value)
+        : "—",
       label: formatProfessionalMeasurementLabel(measurement.measurement_key),
       previousValue,
       unit: measurement.unit,

@@ -1,3 +1,7 @@
+## Auditoria integrada - cronologia e exibicao factual de avaliacoes - 2026-10-09
+
+Cinco frentes: ordenacao de correcoes por instante real entre fusos; ordenacao de pontos de evolucao por instante real; delta de evolucao protegido contra overflow; exibicao de valores atuais invalidos sem NaN/Infinity; comparacao profissional sem valor anterior para medida atual invalida. Testes reais adicionados. Sem inferencia clinica, conversao de unidades ou alteracao do historico persistido. E2E autenticado pendente.
+
 ## Auditoria integrada - historico efetivo de correcoes de medidas - 2026-10-09
 
 Cinco verificacoes de integridade: correcoes orfas nao afetam medidas, valores corrigidos nao finitos sao ignorados, unidades vazias nao substituem unidades originais, datas invalidas nao entram na ordenacao, e ultima correcao valida prevalece mesmo quando houver registro posterior malformado. Registros originais e historico persistido nao sao apagados; apenas a leitura efetiva e protegida. Testes unitarios reais incluidos. E2E autenticado pendente.

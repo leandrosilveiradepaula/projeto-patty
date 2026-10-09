@@ -50,3 +50,12 @@ test("assessment comparison does not compare the same key across different units
   assert.equal(result[0]?.unit, "cm");
 });
 
+
+test("professional comparison displays a placeholder for nonfinite current values", () => {
+  const result = buildFactualMeasurementComparison(
+    [{ measurement_key: "peso", measurement_value: Number.NaN, unit: "kg" }],
+    [{ measurement_key: "peso", measurement_value: 70, unit: "kg" }],
+  );
+  assert.equal(result[0]?.currentValue, "—");
+  assert.equal(result[0]?.previousValue, undefined);
+});
