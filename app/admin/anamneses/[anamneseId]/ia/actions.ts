@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/supabase/auth";
+import { isUuid } from "@/lib/validation/uuid";
 import {
   executeOpenAiAnamnesisReview,
   OpenAiAnamnesisReviewExecutionError,
@@ -21,6 +22,9 @@ export async function runAdminAnamnesisAiReview(
   formData: FormData,
 ): Promise<AdminAiReviewFormState> {
   await requireRole("admin");
+  if (!isUuid(submissionId)) {
+    return { message: "Anamnese inválida.", success: false };
+  }
   const financialAnswerId = formData.get("financialAnswerId");
   const explicitlyIncludedAnswerIds =
     typeof financialAnswerId === "string" && financialAnswerId
@@ -88,7 +92,7 @@ export async function acceptAiFindingAsInternalObservation(
 ) {
   const auth = await requireRole("admin");
 
-  if (!Number.isInteger(findingIndex) || findingIndex < 0) {
+  if (!isUuid(submissionId) || !isUuid(executionId) || !Number.isSafeInteger(findingIndex) || findingIndex < 0) {
     throw new Error("Índice de achado inválido.");
   }
 
@@ -99,6 +103,9 @@ export async function acceptAiFindingAsInternalObservation(
     findingIndex,
   });
 
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
+  revalidatePath("/admin/ia");
   revalidatePath("/admin/anamneses/" + submissionId + "/ia");
 }
 
@@ -110,7 +117,7 @@ export async function createPattyNoteFromAiFinding(
 ) {
   const auth = await requireRole("admin");
 
-  if (!Number.isInteger(findingIndex) || findingIndex < 0) {
+  if (!isUuid(submissionId) || !isUuid(executionId) || !Number.isSafeInteger(findingIndex) || findingIndex < 0) {
     throw new Error("Índice de achado inválido.");
   }
 
@@ -133,6 +140,9 @@ export async function createPattyNoteFromAiFinding(
     note,
   });
 
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
+  revalidatePath("/admin/ia");
   revalidatePath("/admin/anamneses/" + submissionId);
   revalidatePath("/admin/anamneses/" + submissionId + "/ia");
 }
@@ -144,6 +154,9 @@ export async function recoverStartedAiExecution(
   formData: FormData,
 ) {
   const auth = await requireRole("admin");
+  if (!isUuid(submissionId) || !isUuid(executionId)) {
+    throw new Error("Execução ou Anamnese inválida.");
+  }
   const rawReason = formData.get("recoveryReason");
   const reason = typeof rawReason === "string" ? rawReason.trim() : "";
 

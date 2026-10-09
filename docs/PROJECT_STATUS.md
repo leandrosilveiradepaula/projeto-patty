@@ -1,3 +1,7 @@
+## Auditoria integrada - revisao de anamnese assistida por IA - 2026-10-09
+
+Quatro melhorias relacionadas: invalidacao das filas ao aceitar achados internos; invalidacao ao converter achados em nota profissional; validacao de UUIDs e indices seguros em acoes de IA; limite explicito de 4.000 caracteres nas notas de revisao humana. IA permanece restrita a apoio interno, sem publicacao automatica. Testes de contrato adicionados; E2E autenticado pendente.
+
 ## Auditoria integrada - avaliacao, anamnese e liberacao de conteudos - 2026-10-09
 
 Consolidadas atualizacoes de interface apos cinco operacoes: metadados de rascunho de avaliacao, salvamento e remocao de medidas, salvamento de respostas em anamnese e liberacao de conteudo para cliente. Mantidas revisao profissional, releases explicitos, historico e controle de acesso. Testes de contrato adicionados; E2E autenticado pendente.
