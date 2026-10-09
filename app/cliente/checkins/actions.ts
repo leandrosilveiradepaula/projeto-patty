@@ -162,8 +162,7 @@ export async function correctLiquidIntakeAction(formData: FormData) {
   }
 
   revalidateCheckinJourneys(client.id);
-  const rawHistoryDay = formData.get("historyDay");
-  const historyDay = parseCheckinHistoryDay(rawHistoryDay, currentSaoPauloDate());
+  const historyDay = parseCheckinHistoryDay(formData.get("historyDay"), currentSaoPauloDate());
   redirect("/cliente/checkins?status=correction-recorded" + (historyDay ? "&dia=" + historyDay : ""));
 }
 
@@ -201,7 +200,6 @@ export async function correctActivityCheckinAction(formData: FormData) {
   }
 
   revalidateCheckinJourneys(client.id);
-  const rawHistoryDay = formData.get("historyDay");
-  const historyDay = parseCheckinHistoryDay(rawHistoryDay, currentSaoPauloDate());
+  const historyDay = parseCheckinHistoryDay(formData.get("historyDay"), currentSaoPauloDate());
   redirect("/cliente/checkins?status=correction-recorded" + (historyDay ? "&dia=" + historyDay : ""));
 }
