@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import {
   type AssessmentDraftActionState,
@@ -54,6 +55,11 @@ export function AssessmentDraftMetadataForm({
 }) {
   const action = updateAssessmentDraftAction.bind(null, assessmentId);
   const [state, formAction, isPending] = useActionState(action, initialState);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (state.success) router.refresh();
+  }, [state, router]);
 
   return (
     <form action={formAction} className={styles.form}>
@@ -121,12 +127,14 @@ export function AssessmentMeasurementForm({
   const formRef = useRef<HTMLFormElement>(null);
   const action = saveAssessmentMeasurementAction.bind(null, assessmentId);
   const [state, formAction, isPending] = useActionState(action, initialState);
+  const router = useRouter();
 
   useEffect(() => {
     if (state.success) {
       formRef.current?.reset();
+      router.refresh();
     }
-  }, [state]);
+  }, [state, router]);
 
   return (
     <form action={formAction} className={styles.form} ref={formRef}>
@@ -205,7 +213,7 @@ export function AssessmentMeasurementForm({
         estiver em rascunho.
       </p>
 
-      <Button loading={isPending} type="submit">
+      <Button disabled={measurementOptions.length === 0} loading={isPending} type="submit">
         Salvar medida
       </Button>
     </form>
@@ -225,13 +233,33 @@ export function AssessmentDeleteMeasurementButton({
     measurementId,
   );
   const [state, formAction, isPending] = useActionState(action, initialState);
+  const [confirmRemoval, setConfirmRemoval] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (state.success) router.refresh();
+  }, [state, router]);
+
+  if (!confirmRemoval) {
+    return (
+      <Button onClick={() => setConfirmRemoval(true)} size="compact" type="button" variant="danger">
+        Remover do rascunho
+      </Button>
+    );
+  }
 
   return (
     <form action={formAction} className={styles.inlineAction}>
       <ActionAlert state={state} />
-      <Button loading={isPending} size="compact" type="submit" variant="danger">
-        Remover do rascunho
-      </Button>
+      <p className={styles.notice}>Confirma a remoção desta medida do rascunho? Esta ação não altera avaliações finalizadas.</p>
+      <div className={styles.actionRow}>
+        <Button disabled={isPending} onClick={() => setConfirmRemoval(false)} size="compact" type="button" variant="ghost">
+          Cancelar
+        </Button>
+        <Button loading={isPending} size="compact" type="submit" variant="danger">
+          Confirmar remoção
+        </Button>
+      </div>
     </form>
   );
 }
@@ -246,11 +274,20 @@ export function AssessmentPhotoLinkForm({
     label: string;
   }>;
 }) {
+  const formRef = useRef<HTMLFormElement>(null);
   const action = linkAssessmentPhotoAction.bind(null, assessmentId);
   const [state, formAction, isPending] = useActionState(action, initialState);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (state.success) {
+      formRef.current?.reset();
+      router.refresh();
+    }
+  }, [state, router]);
 
   return (
-    <form action={formAction} className={styles.form}>
+    <form action={formAction} className={styles.form} ref={formRef}>
       <ActionAlert state={state} />
 
       <FormField
@@ -304,13 +341,33 @@ export function AssessmentPhotoUnlinkButton({
     clientFileId,
   );
   const [state, formAction, isPending] = useActionState(action, initialState);
+  const [confirmUnlink, setConfirmUnlink] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (state.success) router.refresh();
+  }, [state, router]);
+
+  if (!confirmUnlink) {
+    return (
+      <Button onClick={() => setConfirmUnlink(true)} size="compact" type="button" variant="outline">
+        Desvincular
+      </Button>
+    );
+  }
 
   return (
     <form action={formAction} className={styles.inlineAction}>
       <ActionAlert state={state} />
-      <Button loading={isPending} size="compact" type="submit" variant="outline">
-        Desvincular
-      </Button>
+      <p className={styles.notice}>Desvincular esta foto da avaliação? O arquivo privado original será preservado.</p>
+      <div className={styles.actionRow}>
+        <Button disabled={isPending} onClick={() => setConfirmUnlink(false)} size="compact" type="button" variant="ghost">
+          Cancelar
+        </Button>
+        <Button loading={isPending} size="compact" type="submit" variant="outline">
+          Confirmar desvinculação
+        </Button>
+      </div>
     </form>
   );
 }
@@ -330,6 +387,11 @@ export function AssessmentFinalizeForm({
 }) {
   const action = finalizeAssessmentAction.bind(null, assessmentId);
   const [state, formAction, isPending] = useActionState(action, initialState);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (state.success) router.refresh();
+  }, [state, router]);
 
   return (
     <form action={formAction} className={styles.form}>
@@ -357,7 +419,7 @@ export function AssessmentFinalizeForm({
       ) : null}
 
       <label className={styles.confirmation}>
-        <input name="confirmFinalization" required type="checkbox" value="yes" />
+        <input disabled={!canFinalize || isPending} name="confirmFinalization" required type="checkbox" value="yes" />
         <span>
           Revisei data, tipo, medidas e fotos. Entendo que a finalização torna
           esses dados imutáveis e que correções futuras deverão usar um fluxo

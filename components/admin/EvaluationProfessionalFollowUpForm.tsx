@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 
 import {
   type ProfessionalFollowUpFormState,
@@ -26,14 +27,16 @@ export function EvaluationProfessionalFollowUpForm({
   assessmentId,
 }: EvaluationProfessionalFollowUpFormProps) {
   const formRef = useRef<HTMLFormElement>(null);
+  const router = useRouter();
   const action = addProfessionalFollowUp.bind(null, assessmentId);
   const [state, formAction, isPending] = useActionState(action, initialState);
 
   useEffect(() => {
     if (state.success) {
       formRef.current?.reset();
+      router.refresh();
     }
-  }, [state]);
+  }, [state, router]);
 
   return (
     <form action={formAction} className={styles.form} ref={formRef}>
@@ -59,6 +62,7 @@ export function EvaluationProfessionalFollowUpForm({
         {(fieldProps) => (
           <Textarea
             {...fieldProps}
+            maxLength={4000}
             name="difficulty"
             placeholder="Opcional"
             rows={3}
@@ -74,6 +78,7 @@ export function EvaluationProfessionalFollowUpForm({
         {(fieldProps) => (
           <Textarea
             {...fieldProps}
+            maxLength={4000}
             name="adherencePerception"
             placeholder="Opcional"
             rows={3}
@@ -115,6 +120,7 @@ export function EvaluationProfessionalFollowUpForm({
         {(fieldProps) => (
           <Textarea
             {...fieldProps}
+            maxLength={4000}
             name="decisionReason"
             required
             rows={4}
@@ -130,6 +136,7 @@ export function EvaluationProfessionalFollowUpForm({
         {(fieldProps) => (
           <Textarea
             {...fieldProps}
+            maxLength={4000}
             name="pattyObservation"
             placeholder="Opcional"
             rows={4}

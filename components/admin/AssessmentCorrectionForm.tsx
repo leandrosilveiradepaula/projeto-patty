@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 import {
   type AssessmentCorrectionFormState,
@@ -33,6 +34,11 @@ export function AssessmentCorrectionForm({
     measurementId,
   );
   const [state, formAction, isPending] = useActionState(action, initialState);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (state.success) router.refresh();
+  }, [state, router]);
 
   return (
     <form action={formAction} className={styles.form}>
@@ -62,7 +68,7 @@ export function AssessmentCorrectionForm({
           </label>
           <label className={styles.field}>
             <span>Observação opcional</span>
-            <input maxLength={240} name="correctionNote" />
+            <input maxLength={4000} name="correctionNote" />
           </label>
           <Button loading={isPending} type="submit">
             Registrar correção
