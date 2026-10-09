@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import {
   type AnamnesisClarificationResponseFormState,
   respondToAnamnesisClarification,
@@ -21,12 +22,16 @@ export function ClientAnamnesisClarificationResponseForm({
   submissionId: string;
 }) {
   const formRef = useRef<HTMLFormElement>(null);
+  const router = useRouter();
   const action = respondToAnamnesisClarification.bind(null, submissionId, requestId);
   const [state, formAction, isPending] = useActionState(action, initialState);
 
   useEffect(() => {
-    if (state.success) formRef.current?.reset();
-  }, [state]);
+    if (state.success) {
+      formRef.current?.reset();
+      router.refresh();
+    }
+  }, [state, router]);
 
   return (
     <form action={formAction} className={styles.form} ref={formRef}>
@@ -46,7 +51,7 @@ export function ClientAnamnesisClarificationResponseForm({
         required
       >
         {(fieldProps) => (
-          <Textarea {...fieldProps} name="responseText" placeholder="Digite a informação complementar solicitada." required rows={4} />
+          <Textarea {...fieldProps} maxLength={4000} name="responseText" placeholder="Digite a informação complementar solicitada." required rows={4} />
         )}
       </FormField>
       <div className={styles.actions}>

@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 import {
   type AnamnesisCorrectionFormState,
@@ -34,6 +35,11 @@ export function AdminAnamnesisCorrectionForm({
     answerId,
   );
   const [state, formAction, isPending] = useActionState(action, initialState);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (state.success) router.refresh();
+  }, [state, router]);
 
   return (
     <form action={formAction} className={styles.form}>
@@ -73,7 +79,7 @@ export function AdminAnamnesisCorrectionForm({
           />
         )}
       </FormField>
-      <Button loading={isPending} type="submit">
+      <Button disabled={state.success} loading={isPending} type="submit">
         Registrar correção
       </Button>
     </form>

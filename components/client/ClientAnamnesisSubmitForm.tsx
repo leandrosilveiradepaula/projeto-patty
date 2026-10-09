@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 import {
   type ClientAnamnesisSubmitFormState,
@@ -26,6 +27,11 @@ export function ClientAnamnesisSubmitForm({
 }: ClientAnamnesisSubmitFormProps) {
   const action = submitClientAnamnesis.bind(null, submissionId);
   const [state, formAction, isPending] = useActionState(action, initialState);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (state.success) router.refresh();
+  }, [state, router]);
 
   return (
     <form action={formAction} className={styles.form}>
@@ -53,7 +59,7 @@ export function ClientAnamnesisSubmitForm({
           <span>{consentText}</span>
         </label>
       ) : null}
-      <Button loading={isPending} type="submit">
+      <Button disabled={state.success} loading={isPending} type="submit">
         Enviar Anamnese
       </Button>
     </form>
