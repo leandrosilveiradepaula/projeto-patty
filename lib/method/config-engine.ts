@@ -1,5 +1,6 @@
 export const METHOD_ENGINE_MAX_EXPRESSION_DEPTH = 32;
 export const METHOD_ENGINE_MAX_EXPRESSION_NODES = 256;
+export const METHOD_ENGINE_MAX_SECTION_ENTRIES = 128;
 
 export const METHOD_ENGINE_UNITS = [
   "g",
@@ -342,6 +343,12 @@ export function validateMethodEngineConfiguration(
   const rawParameters = parseNamedRecord(value.parameters, "$.parameters");
   const rawOutputs = parseNamedRecord(value.outputs, "$.outputs");
 
+  for (const [section, entries] of [["inputs", rawInputs], ["parameters", rawParameters], ["outputs", rawOutputs]] as const) {
+    if (Object.keys(entries).length > METHOD_ENGINE_MAX_SECTION_ENTRIES) {
+      fail("LIMIT_EXCEEDED", "configuration section exceeds maximum entry count", "$." + section);
+    }
+  }
+
   const inputs: MethodEngineConfiguration["inputs"] = {};
 
   for (const [key, rawInput] of Object.entries(rawInputs)) {
@@ -661,6 +668,9 @@ function validateRuntimeInputs(
   value: unknown,
 ): Record<string, MethodEngineNumericValue> {
   const rawInputs = parseNamedRecord(value, "$inputs");
+  if (Object.keys(rawInputs).length > METHOD_ENGINE_MAX_SECTION_ENTRIES) {
+    fail("LIMIT_EXCEEDED", "runtime input count exceeds maximum", "$inputs");
+  }
   const inputs: Record<string, MethodEngineNumericValue> = {};
 
   for (const key of Object.keys(rawInputs)) {

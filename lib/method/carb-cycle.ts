@@ -110,6 +110,10 @@ export function parseCarbCycleConfiguration(
     throw new TypeError("configuration.steps must be a non-empty array");
   }
 
+  if (value.steps.length > 128) {
+    throw new RangeError("carb cycle exceeds maximum step count");
+  }
+
   const seenStepKeys = new Set<string>();
   const steps = value.steps.map((stepValue, index) => {
     const stepPath = "configuration.steps[" + index + "]";
@@ -152,6 +156,10 @@ export function parseCarbCycleConfiguration(
     throw new TypeError(
       "configuration.linearAverageStepKeys must be a non-empty array",
     );
+  }
+
+  if (value.linearAverageStepKeys.length > value.steps.length) {
+    throw new RangeError("carb cycle average references exceed available steps");
   }
 
   const seenAverageKeys = new Set<string>();
