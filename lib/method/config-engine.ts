@@ -129,7 +129,7 @@ function assertExactKeys(
 }
 
 function readNonBlankKey(value: unknown, path: string) {
-  if (typeof value !== "string" || !/^[a-z][a-z0-9_-]{0,119}$/.test(value)) {
+  if (typeof value !== "string" || !/^[a-z][A-Za-z0-9_-]{0,119}$/.test(value) || ["__proto__", "constructor", "prototype", "toString", "valueOf", "hasOwnProperty"].includes(value)) {
     fail("INVALID_CONFIGURATION", "key must be a safe identifier", path);
   }
 
