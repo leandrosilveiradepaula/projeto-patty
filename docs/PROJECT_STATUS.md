@@ -1,3 +1,7 @@
+## Auditoria integrada - arquivos privados e liberacao de conteudo - 2026-10-09
+
+Cinco blocos: UUID de cliente validado antes da consulta de liberacao de conteudo, UUID da versao exata de conteudo, tipo textual do nome original do upload da cliente e do admin, e limite de comprimento para ambos os nomes originais. Preservados arquivos privados, releases explicitos, acesso client-scoped e revisao humana. Testes de contrato incluidos; E2E autenticado pendente.
+
 ## Auditoria integrada - entradas da cliente - 2026-10-09
 
 Cinco frentes de verificacao: IDs de eventos de ingestao e atividade validados antes da consulta historica; observacoes de solicitacao de treino rejeitam valores nao textuais; intencao de salvar/enviar Feedback Semanal validada antes da leitura privada; navegacao de historico nas duas correcoes continua usando parser de dia. Testes de contrato incluidos; E2E autenticado pendente. Sem mudancas de RLS, dados originais ou decisoes profissionais.

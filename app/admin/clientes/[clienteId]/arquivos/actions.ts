@@ -49,9 +49,12 @@ export async function createAdminPrivateFileUploadSessionAction(
     };
   }
 
+  if (typeof input.originalFilename !== "string") {
+    return { error: "invalid_original_filename" as const, ok: false as const };
+  }
   const originalFilename = input.originalFilename.trim();
 
-  if (!originalFilename) {
+  if (!originalFilename || originalFilename.length > 255) {
     return {
       error: "invalid_original_filename" as const,
       ok: false as const,
