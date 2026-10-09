@@ -1,3 +1,7 @@
+## Auditoria integrada - itens do treino por cliente - 2026-10-09
+
+Quatro blocos de correcoes na prescricao versionada: rejeicao de identificadores de exercicio malformados na inclusao; mesma rejeicao na edicao; protecao contra versoes publicadas de exercicio sem nome valido; validacao de todos os campos da inclusao antes de consultar posicao e persistir item. Preservados escolha individual pela Patty, versao exata do exercicio, revisao humana e publicacao manual. Testes de contrato adicionados; E2E autenticado pendente.
+
 ## Auditoria integrada - esclarecimentos de anamnese - 2026-10-09
 
 Cinco blocos relacionados: IDs validados antes da leitura privada pela cliente; ID validado antes da leitura administrativa; limites de texto de 4.000 caracteres nos pedidos e respostas; atualizacao do detalhe da anamnese apos resposta e novo pedido; atualizacao apos resolucao profissional. Mantidos resposta original, resposta de esclarecimento e resolucao humana como registros distintos. Testes de contrato adicionados; E2E autenticado pendente.
