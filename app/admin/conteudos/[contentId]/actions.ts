@@ -263,7 +263,7 @@ export async function registerEducationalContentAssetAction(
     throw new Error("Path privado inválido");
   }
 
-  if (contentType.length > 255 || !contentType.includes("/")) {
+  if (contentType.length > 255 || !/^[a-zA-Z0-9][a-zA-Z0-9!#  if (contentType.length > 255 || !contentType.includes("/")) {^_.+-]*\/[a-zA-Z0-9][a-zA-Z0-9!#  if (contentType.length > 255 || !contentType.includes("/")) {^_.+-]*$/.test(contentType)) {
     throw new Error("MIME type inválido");
   }
 
