@@ -9,7 +9,7 @@ export type EditableNumericParameter = {
 };
 
 function assertPositiveFinite(value: number, key: string) {
-  if (!Number.isFinite(value)) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
     throw new TypeError(`Parâmetro numérico inválido: ${key}`);
   }
 
@@ -132,7 +132,7 @@ export function formatConfigurationUnit(unit: string) {
     ratio: "proporção",
   };
 
-  return labels[unit] ?? unit;
+  return Object.prototype.hasOwnProperty.call(labels, unit) ? labels[unit] : unit;
 }
 
 export function formatConfigurationParameterKey(key: string) {
@@ -146,7 +146,7 @@ export function formatConfigurationParameterKey(key: string) {
     value: "Valor",
   };
 
-  if (labels[key]) {
+  if (Object.prototype.hasOwnProperty.call(labels, key)) {
     return labels[key];
   }
 
