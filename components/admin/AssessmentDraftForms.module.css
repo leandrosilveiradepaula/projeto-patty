@@ -89,3 +89,9 @@
   font-size: var(--text-body-small-size);
 }
 
+
+.actionRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}

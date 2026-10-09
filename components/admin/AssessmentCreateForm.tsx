@@ -70,8 +70,8 @@ export function AssessmentCreateForm({
           <select
             {...fieldProps}
             className={styles.select}
-            defaultValue=""
             name="assessmentKind"
+            value={selectedKind}
             onChange={(event) => setSelectedKind(event.target.value)}
             required
           >
@@ -114,7 +114,7 @@ export function AssessmentCreateForm({
         ajustadas até a finalização explícita.
       </p>
 
-      <Button loading={isPending} type="submit">
+      <Button disabled={kindOptions.length === 0} loading={isPending} type="submit">
         Criar rascunho de avaliação
       </Button>
     </form>

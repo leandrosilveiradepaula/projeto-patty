@@ -291,7 +291,7 @@ export default async function AdminAvaliacaoDetailPage({
         </Section>
       ) : null}
       <Section
-        description="Chaves, valores e unidades exatamente como foram registrados."
+        description="Valores vigentes de cada medida. Quando houver correção histórica, o valor original permanece preservado no registro e no histórico de correções abaixo."
         id="medidas"
         title="Medidas"
       >
@@ -307,6 +307,7 @@ export default async function AdminAvaliacaoDetailPage({
                 <details className={styles.correctionDetails}>
                   <summary>Corrigir lançamento</summary>
                   <AssessmentCorrectionForm
+                    key={measurement.latest_correction_id ?? measurement.id}
                     assessmentId={assessment.id}
                     measurementId={measurement.id}
                     measurementUnit={measurement.unit}
