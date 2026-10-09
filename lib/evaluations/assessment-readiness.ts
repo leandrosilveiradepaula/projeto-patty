@@ -93,6 +93,15 @@ export function buildAssessmentFinalizationReadiness({
   measurementKeys,
   photoCount,
 }: AssessmentReadinessInput): AssessmentFinalizationReadiness {
+  if (assessmentKind !== "fortnightly" && assessmentKind !== "monthly") {
+    throw new TypeError("Unknown assessment kind");
+  }
+  if (!Number.isSafeInteger(photoCount) || photoCount < 0) {
+    throw new RangeError("photoCount must be a non-negative safe integer");
+  }
+  if (!Array.isArray(measurementKeys) || measurementKeys.some((key) => typeof key !== "string")) {
+    throw new TypeError("measurementKeys must be an array of strings");
+  }
   const presentKeys = new Set(
     measurementKeys.map((key) => normalizeAssessmentMeasurementKey(key)),
   );
