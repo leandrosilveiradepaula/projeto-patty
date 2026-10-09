@@ -1,3 +1,7 @@
+## Auditoria integrada - integridade de formularios de treino - 2026-10-09
+
+Cinco blocos relacionados: rejeicao de campos opcionais enviados como arquivo, rejeicao de selecao de versao de exercicio com tipo incorreto na inclusao, mesma protecao na edicao, validacao previa dos campos da edicao antes da escrita, e verificacao de posicao numerica segura ao inserir exercicio. Preservados plano individual, revisao profissional e publicacao manual. Testes de contrato incluidos; E2E autenticado pendente.
+
 ## Auditoria integrada - integridade de entradas em avaliacoes - 2026-10-09
 
 Cinco blocos: validacao de UUID nas consultas de avaliacao, limite do motivo de decisao profissional, limite de campos complementares de acompanhamento, validacao de ID da medida na correcao historica e limite de justificativa da correcao. Mantidos historico original, revisao humana, RLS e nenhuma decisao clinica automatizada. Testes de contrato adicionados; E2E autenticado pendente.
