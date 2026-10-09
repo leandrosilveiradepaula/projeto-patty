@@ -57,6 +57,9 @@ export default async function AdminClientContentPage({
   const versionIdsWithAssets = new Set(
     assets.map((asset) => asset.educational_content_version_id),
   );
+  const parentContentIdByVersionId = new Map(
+    contentVersions.map((version) => [version.id, version.educational_content_id]),
+  );
   const releasedVersionIds = new Set(
     releases.flatMap((release) =>
       release.educational_content_versions?.id
@@ -112,6 +115,15 @@ export default async function AdminClientContentPage({
               não aparecem como opção de nova liberação. Registre e verifique o asset
               na biblioteca antes de liberar para a cliente.
             </p>
+            <ul className={styles.contentList}>
+              {sortClientContentReleaseOptions(publishedVersionsAwaitingAsset).map((version) => (
+                <li key={version.id}>
+                  <Link href={`/admin/conteudos/${version.educational_content_id}`}>
+                    {version.title} · versão {version.version_number} · verificar na biblioteca
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </Card>
         ) : null}
         {availableVersions.length === 0 ? (
@@ -163,7 +175,11 @@ export default async function AdminClientContentPage({
                     category={contentVersion.category_key ?? "Não informado"}
                     meta={`Versão ${contentVersion.version_number}. Liberado em ${formatRecordedDate(release.released_at)}.`}
                     action={!versionIdsWithAssets.has(contentVersion.id) ? (
-                      <Link href="/admin/conteudos">Verificar asset na biblioteca</Link>
+                      <Link href={
+                        parentContentIdByVersionId.has(contentVersion.id)
+                          ? `/admin/conteudos/${parentContentIdByVersionId.get(contentVersion.id)}`
+                          : "/admin/conteudos"
+                      }>Verificar asset desta versão</Link>
                     ) : undefined}
                     status={
                       <Badge
