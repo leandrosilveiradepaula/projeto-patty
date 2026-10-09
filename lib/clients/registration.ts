@@ -10,8 +10,11 @@ export type ClientRegistrationValidationResult =
   | { ok: false; message: string };
 
 function normalizeOptionalText(value: FormDataEntryValue | null, maxLength: number) {
-  if (typeof value !== "string") {
+  if (value === null) {
     return null;
+  }
+  if (typeof value !== "string") {
+    throw new Error("invalid_type");
   }
 
   const trimmed = value.trim();
@@ -62,7 +65,7 @@ export function parseClientRegistrationForm(
   } catch {
     return {
       message:
-        "Um dos campos ultrapassa o limite permitido. Revise o cadastro e tente novamente.",
+        "Um dos campos do cadastro é inválido ou ultrapassa o limite permitido. Revise os dados e tente novamente.",
       ok: false,
     };
   }
