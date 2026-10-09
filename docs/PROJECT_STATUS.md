@@ -1,3 +1,7 @@
+## Auditoria integrada - consistencia da evolucao de avaliacoes - 2026-10-09
+
+Cinco blocos: ignorar medidas nao finitas na serie de evolucao; evitar medidas duplicadas na mesma avaliacao; impedir que nomes herdados do objeto virem rotulos profissionais; nao comparar valores anteriores nao finitos; selecionar peso valido em kg mesmo quando houver registro anterior inutilizavel. Testes reais adicionados. Sem inferir conversoes, diagnosticos ou criterios clinicos. E2E autenticado pendente.
+
 ## Auditoria integrada - catalogo de tipos de avaliacao - 2026-10-09
 
 Cinco frentes de validacao: limite de comprimento de codigo historico, chave semantica e rotulo; formato seguro de codigo historico; formato seguro de chave semantica; validacao de entrada na busca de codigo historico; e testes de preservacao de catalogo parametrizavel. Nenhum mapeamento clinico novo, migration ou alteracao de RLS. E2E autenticado pendente.
