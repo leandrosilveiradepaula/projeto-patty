@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 import {
   cloneProtocolVersionDraft,
@@ -32,6 +33,11 @@ export function ProtocolCloneVersionAction({
     sourceProtocolVersionId,
   );
   const [state, formAction, isPending] = useActionState(action, initialState);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (state.success) router.refresh();
+  }, [state, router]);
 
   return (
     <form action={formAction} className={styles.form}>
@@ -53,7 +59,7 @@ export function ProtocolCloneVersionAction({
         copiando o plano alimentar, variantes, refeições, doses e ciclos
         persistidos. Aprovação e publicação não são copiadas.
       </p>
-      <Button loading={isPending} type="submit" variant="secondary">
+      <Button disabled={state.success} loading={isPending} type="submit" variant="secondary">
         Criar novo rascunho a partir desta versão
       </Button>
     </form>

@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 import {
   approveProtocolVersion,
@@ -85,7 +86,12 @@ export function ProtocolLifecycleAction({
         : publishProtocolVersion.bind(null, protocolId, protocolVersionId);
 
   const [state, formAction, isPending] = useActionState(action, initialState);
+  const router = useRouter();
   const content = contentByKind[kind];
+
+  useEffect(() => {
+    if (state.success) router.refresh();
+  }, [state, router]);
 
   return (
     <form action={formAction} className={styles.form}>
@@ -101,6 +107,7 @@ export function ProtocolLifecycleAction({
       <p className={styles.description}>{content.description}</p>
       <label className={styles.confirmation}>
         <input
+          disabled={isPending || state.success}
           name={content.confirmationName}
           required
           type="checkbox"
@@ -108,7 +115,7 @@ export function ProtocolLifecycleAction({
         />
         <span>{content.confirmation}</span>
       </label>
-      <Button loading={isPending} type="submit">
+      <Button disabled={state.success} loading={isPending} type="submit">
         {content.button}
       </Button>
     </form>
