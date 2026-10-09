@@ -1,3 +1,4 @@
+import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
 import {
   addLiquidIntakeAction,
   correctActivityCheckinAction,
@@ -407,6 +408,7 @@ export default async function ClientCheckinsPage({
           )}
         </Section>
       ) : null}
+      <ClientJourneyNextSteps areas={["feedback","protocol","index"]} />
     </>
   );
 }
