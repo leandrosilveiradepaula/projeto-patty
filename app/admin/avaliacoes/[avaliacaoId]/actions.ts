@@ -285,6 +285,10 @@ export async function deleteAssessmentMeasurementAction(
     return { message, success: false };
   }
 
+  if (!isUuid(measurementId)) {
+    return { message: "Identificador de medida inválido.", success: false };
+  }
+
   try {
     await deleteAccessibleAssessmentMeasurement({
       assessmentId: assessment.id,
@@ -321,7 +325,7 @@ export async function linkAssessmentPhotoAction(
 
   const fileId = formData.get("clientFileId");
 
-  if (typeof fileId !== "string" || !fileId) {
+  if (typeof fileId !== "string" || !isUuid(fileId)) {
     return {
       message: "Selecione uma foto privada para vincular.",
       success: false,
@@ -375,6 +379,10 @@ export async function unlinkAssessmentPhotoAction(
 
   if (!assessment) {
     return { message, success: false };
+  }
+
+  if (!isUuid(clientFileId)) {
+    return { message: "Identificador de foto inválido.", success: false };
   }
 
   try {
