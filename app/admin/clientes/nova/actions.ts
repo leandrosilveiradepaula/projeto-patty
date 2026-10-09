@@ -32,6 +32,9 @@ export async function inviteClient(
   const displayName =
     typeof displayNameValue === "string" ? displayNameValue.trim() : "";
   const emailValue = formData.get("email");
+  if (emailValue !== null && typeof emailValue !== "string") {
+    return { message: "Informe um email válido para a cliente." };
+  }
   const email = typeof emailValue === "string" ? emailValue : "";
   const displayNameValidation = validateClientDisplayName(displayName);
   const emailValidation = validateInvitationEmail(email);
@@ -114,6 +117,9 @@ export async function generateManualClientInvite(
   const displayName =
     typeof displayNameValue === "string" ? displayNameValue.trim() : "";
   const emailValue = formData.get("email");
+  if (emailValue !== null && typeof emailValue !== "string") {
+    return { activationLink: null, clientId: null, message: "Informe um email válido para a cliente.", success: false };
+  }
   const email = typeof emailValue === "string" ? emailValue : "";
   const displayNameValidation = validateClientDisplayName(displayName);
   const emailValidation = validateInvitationEmail(email);
