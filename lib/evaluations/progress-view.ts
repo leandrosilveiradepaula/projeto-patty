@@ -36,8 +36,12 @@ export function buildFactualProgressSeries(
   const seriesByIdentity = new Map<string, FactualProgressSeries>();
 
   for (const assessment of ordered) {
+    const seenInAssessment = new Set<string>();
     for (const measurement of assessment.measurements) {
+      if (!Number.isFinite(measurement.measurement_value)) continue;
       const identity = measurement.measurement_key + "\u0000" + measurement.unit;
+      if (seenInAssessment.has(identity)) continue;
+      seenInAssessment.add(identity);
       let series = seriesByIdentity.get(identity);
 
       if (!series) {

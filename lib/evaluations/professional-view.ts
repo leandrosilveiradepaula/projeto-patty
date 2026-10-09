@@ -18,7 +18,8 @@ const LABELS: Record<string, string> = {
 };
 
 export function formatProfessionalMeasurementLabel(key: string) {
-  return LABELS[key.trim().toLowerCase()] ?? key;
+  const normalized = key.trim().toLowerCase();
+  return Object.prototype.hasOwnProperty.call(LABELS, normalized) ? LABELS[normalized] : key;
 }
 
 export function buildFactualMeasurementComparison(
@@ -26,13 +27,13 @@ export function buildFactualMeasurementComparison(
   previous: AssessmentMeasurementLike[],
 ) {
   const previousByKey = new Map(
-    previous.map((measurement) => [measurement.measurement_key, measurement]),
+    previous.filter((measurement) => Number.isFinite(measurement.measurement_value)).map((measurement) => [measurement.measurement_key, measurement]),
   );
 
   return current.map((measurement) => {
     const previousMeasurement = previousByKey.get(measurement.measurement_key);
     const previousValue =
-      previousMeasurement && previousMeasurement.unit === measurement.unit
+      Number.isFinite(measurement.measurement_value) && previousMeasurement && previousMeasurement.unit === measurement.unit
         ? String(previousMeasurement.measurement_value)
         : undefined;
 

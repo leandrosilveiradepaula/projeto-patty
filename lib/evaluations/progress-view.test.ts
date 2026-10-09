@@ -66,3 +66,22 @@ test("keeps different units in separate factual series", () => {
   );
   assert.ok(series.every((item) => item.points[0]?.deltaFromPrevious === null));
 });
+
+test("ignores nonfinite progress values", () => {
+  const series = buildFactualProgressSeries([
+    { id: "a", assessedAt: "2026-01-01", measurements: [{ measurement_key: "weight", measurement_value: Number.NaN, unit: "kg" }] },
+    { id: "b", assessedAt: "2026-02-01", measurements: [{ measurement_key: "weight", measurement_value: 70, unit: "kg" }] },
+  ]);
+  assert.deepEqual(series[0]?.points.map((point) => point.value), [70]);
+  assert.equal(series[0]?.points[0]?.deltaFromPrevious, null);
+});
+
+test("does not duplicate the same measurement in one assessment", () => {
+  const series = buildFactualProgressSeries([
+    { id: "a", assessedAt: "2026-01-01", measurements: [
+      { measurement_key: "weight", measurement_value: 70, unit: "kg" },
+      { measurement_key: "weight", measurement_value: 71, unit: "kg" },
+    ] },
+  ]);
+  assert.equal(series[0]?.points.length, 1);
+});
