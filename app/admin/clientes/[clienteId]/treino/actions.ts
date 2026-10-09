@@ -382,6 +382,11 @@ export async function updateTrainingPlanItemAction(
       );
     }
 
+    const executionNotes = optionalText(formData, "executionNotes", 2000, "Orientações de execução");
+    const repetitionsText = requiredText(formData, "repetitionsText", 80, "Repetições");
+    const restText = optionalText(formData, "restText", 120, "Tempo de descanso");
+    const setsText = requiredText(formData, "setsText", 80, "Séries");
+
     await updateAccessibleClientTrainingPlanItem({
       executionNotes: optionalText(
         formData,
