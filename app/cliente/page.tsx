@@ -226,6 +226,9 @@ export default async function ClientePage() {
         title="Meu acompanhamento"
       >
         <div className={styles.routineActions} aria-label="Áreas do acompanhamento">
+          <Link className={styles.routineActionLink} href="/cliente/mais">
+            Todas as áreas
+          </Link>
           <Link className={styles.routineActionLink} href="/cliente/perfil">
             Meu cadastro
           </Link>
