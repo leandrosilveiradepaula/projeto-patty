@@ -49,7 +49,7 @@ export async function createClientFileUploadSessionAction(
   }
   const originalFilename = input.originalFilename.trim();
 
-  if (!originalFilename) {
+  if (!originalFilename || originalFilename.length > 255) {
     return {
       error: "invalid_original_filename" as const,
       ok: false as const,
