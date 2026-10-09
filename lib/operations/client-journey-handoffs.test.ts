@@ -67,6 +67,9 @@ test("private upload validates size, resets file selection on category change an
 test("check-in correction errors preserve the selected history date", () => {
   const actions = readFileSync("app/cliente/checkins/actions.ts", "utf8");
   assert.ok(actions.includes('checkinHistorySearch(day)'));
-  assert.ok(actions.includes('correctionRedirect("correction-error", formData)'));
-  assert.ok(actions.includes('correctionRedirect("correction-invalid", formData)'));
+  for (const kind of ["liquido", "atividade"]) {
+    assert.ok(actions.includes(`correctionRedirect("correction-error", formData, "${kind}")`));
+    assert.ok(actions.includes(`correctionRedirect("correction-invalid", formData, "${kind}")`));
+  }
+  assert.ok(actions.includes('isUuid(eventId)'));
 });
