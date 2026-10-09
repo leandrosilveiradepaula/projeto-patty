@@ -1,3 +1,7 @@
+## Auditoria integrada - integridade do Carb Cycle e override de hidratacao - 2026-10-09
+
+Dez frentes relacionadas: (1) formato seguro da chave de fase; (2) limite da chave de fase; (3) formato seguro de chaves de passos; (4) limite de chaves de passos; (5) referencias de media com identificadores validos; (6) rotulos limitados; (7) caracteres de controle e espacos exteriores rejeitados; (8) overflow de macros por passo recusado; (9) overflow de medias recusado; (10) configuracao de hidratacao resolvida reavaliada apos override. Testes unitarios cobrem configuracoes validas e entradas invalidas. Nenhuma fase nova ou regra clinica inferida; parametrizacao e revisao humana preservadas. CI e E2E autenticado pendentes.
+
 ## Auditoria integrada - dez protecoes nos calculos parametrizados - 2026-10-09
 
 Dez frentes: (1) overflow de doses para gramas; (2) overflow de gramas para doses; (3) limite de doses de proteina gordurosa nao negativo e finito; (4) macros do reconhecimento nao negativos e finitos; (5) equivalente de vegetais nao negativo e finito; (6) meta de hidratacao nao negativa e finita; (7) identificadores de unidade escalar validos e limitados; (8) chaves de liquidos com formato seguro; (9) rotulos de liquidos limitados; (10) testes cobrindo valores invalidos, overflow e configuracoes validas. Mantida a parametrizacao existente; nao se criam metas clinicas novas. Sem schema/RLS, IA ou publicacao automatica. CI e E2E autenticado pendentes.
