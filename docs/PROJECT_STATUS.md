@@ -1,3 +1,7 @@
+## Auditoria integrada - avaliacao e cadastro visiveis apos mutacoes - 2026-10-09
+
+Cinco operacoes com atualizacao coerente de interface: vinculo de foto privada a avaliacao, desvinculo sem excluir arquivo, registro de acompanhamento profissional, alteracao de Cadastro Atual pela administracao e alteracao versionada do canal de Feedback Semanal. Apenas invalidacao de visoes apos sucesso, sem alterar acesso a arquivos, historico, schema ou RLS. Testes de contrato incluidos; E2E autenticado pendente.
+
 ## Auditoria integrada - revisao de anamnese assistida por IA - 2026-10-09
 
 Quatro melhorias relacionadas: invalidacao das filas ao aceitar achados internos; invalidacao ao converter achados em nota profissional; validacao de UUIDs e indices seguros em acoes de IA; limite explicito de 4.000 caracteres nas notas de revisao humana. IA permanece restrita a apoio interno, sem publicacao automatica. Testes de contrato adicionados; E2E autenticado pendente.

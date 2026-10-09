@@ -247,6 +247,7 @@ export async function updateAdminClientRegistrationAction(
   revalidatePath("/admin");
   revalidatePath("/admin/pendencias");
   revalidatePath(`/admin/clientes/${client.id}`);
+  revalidatePath("/cliente");
   revalidatePath("/cliente/perfil");
 
   return {
@@ -418,6 +419,7 @@ export async function updateWeeklyFeedbackNotificationPreferenceAction(
   revalidatePath("/admin/pendencias");
   revalidatePath(`/admin/clientes/${client.id}`);
   revalidatePath(`/admin/clientes/${client.id}/feedback-semanal`);
+  revalidatePath("/cliente");
   revalidatePath("/cliente/feedback-semanal");
 
   return {

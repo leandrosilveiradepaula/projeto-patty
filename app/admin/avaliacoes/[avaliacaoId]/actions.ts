@@ -108,6 +108,8 @@ export async function addProfessionalFollowUp(
   revalidatePath("/admin");
   revalidatePath("/admin/pendencias");
   revalidatePath(`/admin/clientes/${assessment.client_id}`);
+  revalidatePath("/admin/avaliacoes");
+  revalidatePath(`/admin/clientes/${assessment.client_id}/avaliacoes`);
   revalidatePath(`/admin/avaliacoes/${assessment.id}`);
 
   return {
@@ -339,6 +341,8 @@ export async function linkAssessmentPhotoAction(
     };
   }
 
+  revalidatePath("/admin/avaliacoes");
+  revalidatePath(`/admin/clientes/${assessment.client_id}/avaliacoes`);
   revalidatePath(`/admin/avaliacoes/${assessment.id}`);
 
   return {
@@ -372,6 +376,8 @@ export async function unlinkAssessmentPhotoAction(
     };
   }
 
+  revalidatePath("/admin/avaliacoes");
+  revalidatePath(`/admin/clientes/${assessment.client_id}/avaliacoes`);
   revalidatePath(`/admin/avaliacoes/${assessment.id}`);
 
   return {
