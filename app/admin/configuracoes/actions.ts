@@ -114,7 +114,7 @@ function readRequiredString(formData: FormData, key: string) {
 
 function readWeekday(formData: FormData, key: string) {
   const raw = readRequiredString(formData, key);
-  if (!/^[0-6]$/.test(raw)) {
+  if (!/^[1-7]$/.test(raw)) {
     throw new Error("Selecione um dia da semana válido.");
   }
   return Number(raw);
@@ -210,7 +210,7 @@ export async function updateAssessmentSchedulePreferencesAction(
   const preferredWeekdays = formData
     .getAll("completePreferredWeekday")
     .map((value) => {
-      if (typeof value !== "string" || !/^[0-6]$/.test(value)) {
+      if (typeof value !== "string" || !/^[1-7]$/.test(value)) {
         throw new Error("Selecione dias da semana válidos.");
       }
       return Number(value);
