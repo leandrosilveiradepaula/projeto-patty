@@ -1,3 +1,7 @@
+## Auditoria integrada - entradas do rascunho de avaliacao - 2026-10-09
+
+Cinco protecoes: data de avaliacao com ano zero recusada; entradas de arquivo recusadas nos campos de medida; caracteres de controle recusados em chaves; caracteres de controle recusados em unidades; valores numericos textuais limitados antes do parse. Testes unitarios do parser real incluidos. Preservadas medidas livres, unidades sem conversao implicita, revisao humana e historico. CI e E2E autenticado pendentes.
+
 ## Auditoria integrada - consistencia de leituras factuais das avaliacoes - 2026-10-09
 
 Cinco verificacoes: comparacao profissional encontra medida anterior pela chave e unidade; unidade distinta anterior nao encobre a unidade correta; avaliacao sem data valida nao entra na linha do tempo; medida sem chave identificavel nao entra na evolucao; medida sem unidade nao entra na evolucao. Testes reais adicionados. Historico persistido preservado, sem conversoes automaticas nem interpretacao clinica. E2E autenticado pendente.
