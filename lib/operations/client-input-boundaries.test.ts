@@ -28,5 +28,5 @@ test("weekly feedback validates intent before fetching private feedback record",
 });
 
 test("client correction history date remains parsed on both correction journeys", () => {
-  assert.equal(checkins.split("parseCheckinHistoryDay(rawHistoryDay, currentSaoPauloDate())").length - 1, 2);
+  assert.equal(checkins.split("parseCheckinHistoryDay(formData.get("historyDay"), currentSaoPauloDate())").length - 1, 2);
 });
