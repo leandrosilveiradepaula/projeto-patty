@@ -5,7 +5,8 @@ import test from "node:test";
 const source = readFileSync(new URL("../../app/admin/avaliacoes/[avaliacaoId]/actions.ts", import.meta.url), "utf8");
 
 test("historical measurement correction does not interpret an empty value as zero", () => {
-  assert.match(source, /normalizedValue\.length > 0 \? Number\(normalizedValue\) : Number\.NaN/);
+  assert.match(source, /parseAssessmentMeasurementNumber\(rawValue\)/);
+  assert.match(source, /if \(value === null\)/);
 });
 
 test("professional follow-up refreshes operational workspace", () => {
