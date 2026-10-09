@@ -108,6 +108,14 @@ function readRequiredString(formData: FormData, key: string) {
   return value.trim();
 }
 
+function readWeekday(formData: FormData, key: string) {
+  const raw = readRequiredString(formData, key);
+  if (!/^[0-6]$/.test(raw)) {
+    throw new Error("Selecione um dia da semana válido.");
+  }
+  return Number(raw);
+}
+
 export async function updateWeeklyFeedbackScheduleAction(
   templateId: string,
   expectedActiveVersionId: string,
@@ -142,9 +150,9 @@ export async function updateWeeklyFeedbackScheduleAction(
   );
 
   const configuration = serializeWeeklyFeedbackScheduleConfiguration({
-    requestWeekday: Number(readRequiredString(formData, "requestWeekday")),
+    requestWeekday: readWeekday(formData, "requestWeekday"),
     requestTimeLocal: readRequiredString(formData, "requestTimeLocal"),
-    reminderWeekday: Number(readRequiredString(formData, "reminderWeekday")),
+    reminderWeekday: readWeekday(formData, "reminderWeekday"),
     timezone: current.timezone,
   });
 
