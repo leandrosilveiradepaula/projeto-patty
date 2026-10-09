@@ -1,3 +1,7 @@
+## Auditoria operacional - continuidade entre jornadas profissionais - 2026-10-09
+
+Cinco areas reais da cliente conectadas com pelo menos dez transicoes: Anamnese enviada -> revisao, esclarecimentos, correcoes e analise assistiva; avaliacoes -> evolucao e protocolos; protocolos -> feedback semanal, treino e conteudos; liberacao de conteudos -> protocolos e feedback; feedback semanal -> avaliacoes, check-ins e protocolos. Acesso continua client-scoped, sujeito a RLS e revisao/publicacao humanas. Testes de contrato verificam destinos e preservacao das regras existentes. Validacao E2E autenticada segue pendente.
+
 ## Auditoria operacional - indice completo da area da cliente - 2026-10-09
 
 A area Mais agora cobre as jornadas reais de Anamnese, avaliacoes, evolucao, conteudos, arquivos, treino, perfil, protocolo, check-ins, feedback semanal e biblioteca de exercicios. Cinco entradas operacionais foram adicionadas ao indice (inicio, protocolo, check-ins, feedback e exercicios), e o painel principal inclui retorno explicito ao indice. A pagina Jornada, ainda sem regras aprovadas, continua fora dos atalhos. Teste de contrato confirma os destinos. Sem publicacao automatica ou acesso a dados fora de RLS. Validacao E2E autenticada ainda pendente.

@@ -161,6 +161,22 @@ export default async function AdminClientProtocolsPage({
       />
       <ClientWorkspaceNav activeArea="protocolos" clientId={client.id} />
       <Section
+        description="A publicação depende de revisão e aprovação explícitas. Depois, continue o acompanhamento nas áreas reais da cliente."
+        title="Continuidade do acompanhamento"
+      >
+        <Link className={styles.actionLink} href={`/admin/clientes/${client.id}/feedback-semanal`}>
+          Acompanhar feedback semanal
+        </Link>
+        {" · "}
+        <Link className={styles.actionLink} href={`/admin/clientes/${client.id}/treino`}>
+          Consultar treino
+        </Link>
+        {" · "}
+        <Link className={styles.actionLink} href={`/admin/clientes/${client.id}/conteudos`}>
+          Liberar conteúdos
+        </Link>
+      </Section>
+      <Section
         description="Consulte o histórico de protocolos desta cliente."
         title="Protocolos"
       >

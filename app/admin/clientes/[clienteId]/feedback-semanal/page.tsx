@@ -89,6 +89,16 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
       />
 
       <ClientWorkspaceNav activeArea="feedback-semanal" clientId={client.id} />
+      <Section
+        description="As respostas enviadas são informações para avaliação da Patty; não provocam alteração automática de protocolo."
+        title="Consultar contexto do acompanhamento"
+      >
+        <Link href={`/admin/clientes/${client.id}/avaliacoes`}>Avaliações</Link>
+        {" · "}
+        <Link href={`/admin/clientes/${client.id}/checkins`}>Check-ins</Link>
+        {" · "}
+        <Link href={`/admin/clientes/${client.id}/protocolos`}>Protocolos</Link>
+      </Section>
 
       <Section
         action={
