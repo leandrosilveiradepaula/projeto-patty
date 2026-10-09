@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import {
   addProtocolMeal,
@@ -26,6 +27,25 @@ const initialState: ProtocolLifecycleFormState = {
   message: null,
   success: false,
 };
+
+/**
+ * Reflect persisted mutations in the version editor; never assume a local
+ * success flag means the snapshot has already changed on the page.
+ * Form reset is only used for create/add operations, not edits.
+ */
+function usePersistedProtocolRefresh(
+  state: ProtocolLifecycleFormState,
+  formRef?: { current: HTMLFormElement | null },
+) {
+  const router = useRouter();
+  useEffect(() => {
+    if (state.success) {
+      formRef?.current?.reset();
+      router.refresh();
+    }
+  }, [state, router, formRef]);
+}
+
 
 function ActionFeedback({
   state,
@@ -56,6 +76,7 @@ function CreatePlanForm({
 }) {
   const action = createProtocolMealPlan.bind(null, protocolId, protocolVersionId);
   const [state, formAction, pending] = useActionState(action, initialState);
+  usePersistedProtocolRefresh(state);
 
   return (
     <form action={formAction} className={styles.form}>
@@ -86,9 +107,11 @@ function AddVariantForm({
     mealPlanVersionId,
   );
   const [state, formAction, pending] = useActionState(action, initialState);
+  const formRef = useRef<HTMLFormElement>(null);
+  usePersistedProtocolRefresh(state, formRef);
 
   return (
-    <form action={formAction} className={styles.form}>
+    <form action={formAction} className={styles.form} ref={formRef}>
       <ActionFeedback state={state} />
       <FormField
         description="Ex.: Linear, Dia 1, Dia 2, Low ou High. Use apenas nomes que façam sentido para este protocolo."
@@ -132,9 +155,11 @@ function AddMealForm({
     variantId,
   );
   const [state, formAction, pending] = useActionState(action, initialState);
+  const formRef = useRef<HTMLFormElement>(null);
+  usePersistedProtocolRefresh(state, formRef);
 
   return (
-    <form action={formAction} className={styles.form}>
+    <form action={formAction} className={styles.form} ref={formRef}>
       <ActionFeedback state={state} />
       <FormField
         description="A posição é definida automaticamente pela ordem de inclusão."
@@ -178,9 +203,11 @@ function AddDoseForm({
     mealId,
   );
   const [state, formAction, pending] = useActionState(action, initialState);
+  const formRef = useRef<HTMLFormElement>(null);
+  usePersistedProtocolRefresh(state, formRef);
 
   return (
-    <form action={formAction} className={styles.doseForm}>
+    <form action={formAction} className={styles.doseForm} ref={formRef}>
       <ActionFeedback state={state} />
       <label className={styles.selectField}>
         <span>Macro</span>
@@ -239,6 +266,7 @@ function UpdateVariantForm({
     variantId,
   );
   const [state, formAction, pending] = useActionState(action, initialState);
+  usePersistedProtocolRefresh(state);
 
   return (
     <form action={formAction} className={styles.inlineEdit}>
@@ -285,13 +313,29 @@ function RemoveVariantForm({
     variantId,
   );
   const [state, formAction, pending] = useActionState(action, initialState);
+  const [confirmRemoval, setConfirmRemoval] = useState(false);
+  usePersistedProtocolRefresh(state);
 
   return (
     <form action={formAction} className={styles.inlineAction}>
       <ActionFeedback state={state} />
-      <Button loading={pending} size="compact" type="submit" variant="danger">
-        Remover variação vazia
-      </Button>
+      {!confirmRemoval ? (
+        <Button onClick={() => setConfirmRemoval(true)} size="compact" type="button" variant="danger">
+          Remover variação vazia
+        </Button>
+      ) : (
+        <>
+          <p className={styles.help}>Confirma remover esta variação do rascunho? Esta ação não altera versões já publicadas.</p>
+          <div className={styles.confirmActions}>
+            <Button disabled={pending} onClick={() => setConfirmRemoval(false)} size="compact" type="button" variant="ghost">
+              Cancelar
+            </Button>
+            <Button loading={pending} size="compact" type="submit" variant="danger">
+              Confirmar remoção
+            </Button>
+          </div>
+        </>
+      )}
     </form>
   );
 }
@@ -317,6 +361,7 @@ function UpdateMealForm({
     mealId,
   );
   const [state, formAction, pending] = useActionState(action, initialState);
+  usePersistedProtocolRefresh(state);
 
   return (
     <form action={formAction} className={styles.inlineEdit}>
@@ -362,13 +407,29 @@ function RemoveMealForm({
     mealId,
   );
   const [state, formAction, pending] = useActionState(action, initialState);
+  const [confirmRemoval, setConfirmRemoval] = useState(false);
+  usePersistedProtocolRefresh(state);
 
   return (
     <form action={formAction} className={styles.inlineAction}>
       <ActionFeedback state={state} />
-      <Button loading={pending} size="compact" type="submit" variant="danger">
-        Remover refeição vazia
-      </Button>
+      {!confirmRemoval ? (
+        <Button onClick={() => setConfirmRemoval(true)} size="compact" type="button" variant="danger">
+          Remover refeição vazia
+        </Button>
+      ) : (
+        <>
+          <p className={styles.help}>Confirma remover esta refeição do rascunho? Esta ação não altera versões já publicadas.</p>
+          <div className={styles.confirmActions}>
+            <Button disabled={pending} onClick={() => setConfirmRemoval(false)} size="compact" type="button" variant="ghost">
+              Cancelar
+            </Button>
+            <Button loading={pending} size="compact" type="submit" variant="danger">
+              Confirmar remoção
+            </Button>
+          </div>
+        </>
+      )}
     </form>
   );
 }
@@ -406,6 +467,9 @@ function DoseRow({
     removeAction,
     initialState,
   );
+  const [confirmDoseRemoval, setConfirmDoseRemoval] = useState(false);
+  usePersistedProtocolRefresh(updateState);
+  usePersistedProtocolRefresh(removeState);
 
   const label =
     dose.doseType === "protein"
@@ -454,14 +518,23 @@ function DoseRow({
       </form>
       <form action={removeFormAction} className={styles.inlineAction}>
         <ActionFeedback state={removeState} />
-        <Button
-          loading={removePending}
-          size="compact"
-          type="submit"
-          variant="danger"
-        >
-          Remover
-        </Button>
+        {!confirmDoseRemoval ? (
+          <Button onClick={() => setConfirmDoseRemoval(true)} size="compact" type="button" variant="danger">
+            Remover dose
+          </Button>
+        ) : (
+          <>
+            <p className={styles.help}>Confirma remover esta dose do rascunho?</p>
+            <div className={styles.confirmActions}>
+              <Button disabled={removePending} onClick={() => setConfirmDoseRemoval(false)} size="compact" type="button" variant="ghost">
+                Cancelar
+              </Button>
+              <Button loading={removePending} size="compact" type="submit" variant="danger">
+                Confirmar remoção
+              </Button>
+            </div>
+          </>
+        )
       </form>
     </div>
   );
