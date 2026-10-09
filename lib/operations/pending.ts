@@ -508,7 +508,7 @@ export function buildOperationalPendingItems(
       clientLabel: file.clientLabel,
       createdAt: file.createdAt,
       description: `O arquivo "${file.originalFilename}" foi enviado administrativamente e permanece privado. Revise o arquivo e decida explicitamente se ele deve ser liberado para a cliente.`,
-      href: `/admin/clientes/${file.clientId}/arquivos#aguardando-liberacao`,
+      href: `/admin/clientes/${file.clientId}/arquivos#arquivo-pendente-${file.fileId}`,
       id: `private-file-release:${file.fileId}`,
       kind: "private_file_pending_release",
       statusLabel: "Aguardando liberação",
@@ -526,7 +526,7 @@ export function buildOperationalPendingItems(
       clientLabel: release.clientLabel,
       createdAt: release.createdAt,
       description: `O conteúdo "${release.title}" foi liberado para a cliente, mas a versão exata ainda não possui asset privado registrado. A liberação permanece auditável, porém o arquivo não pode ser aberto.`,
-      href: `/admin/clientes/${release.clientId}/conteudos#liberar-conteudo`,
+      href: `/admin/clientes/${release.clientId}/conteudos#liberacao-${release.releaseId}`,
       id: `content-release-asset:${release.releaseId}`,
       kind: "content_released_without_asset",
       statusLabel: "Liberado sem arquivo",
@@ -564,6 +564,10 @@ export function buildOperationalPendingItems(
   >();
 
   for (const event of input.weeklyFeedbackNotificationEvents ?? []) {
+    if (!Number.isFinite(Date.parse(event.createdAt))) {
+      // Cannot establish a current delivery state from an invalid timestamp.
+      continue;
+    }
     if (
       !event.eventKey.startsWith("weekly_feedback_reminder:") &&
       !event.eventKey.startsWith("weekly_feedback_email_delivery:") &&

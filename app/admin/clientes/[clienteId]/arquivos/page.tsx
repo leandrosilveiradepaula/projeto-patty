@@ -105,7 +105,7 @@ export default async function AdminClientFilesPage({
           ) : (
           <ul className={styles.fileList}>
             {pendingReleaseFiles.map((file: (typeof files)[number]) => (
-              <li key={file.id}>
+              <li id={`arquivo-pendente-${file.id}`} key={file.id}>
                 <Card className={styles.fileCard}>
                   <div className={styles.fileHeader}>
                     <h3 className={styles.fileTitle}>
