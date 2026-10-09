@@ -129,8 +129,8 @@ function assertExactKeys(
 }
 
 function readNonBlankKey(value: unknown, path: string) {
-  if (typeof value !== "string" || value.trim().length === 0) {
-    fail("INVALID_CONFIGURATION", "key must be a non-blank string", path);
+  if (typeof value !== "string" || !/^[a-z][a-z0-9_-]{0,119}$/.test(value)) {
+    fail("INVALID_CONFIGURATION", "key must be a safe identifier", path);
   }
 
   return value;
@@ -277,7 +277,7 @@ function validateExpressionReferences(
   path: string,
 ): void {
   if (expression.op === "input") {
-    if (!(expression.key in configuration.inputs)) {
+    if (!Object.prototype.hasOwnProperty.call(configuration.inputs, expression.key)) {
       fail(
         "MISSING_INPUT_DEFINITION",
         "expression references an undeclared input",
@@ -289,7 +289,7 @@ function validateExpressionReferences(
   }
 
   if (expression.op === "parameter") {
-    if (!(expression.key in configuration.parameters)) {
+    if (!Object.prototype.hasOwnProperty.call(configuration.parameters, expression.key)) {
       fail(
         "MISSING_PARAMETER",
         "expression references an undeclared parameter",
@@ -342,7 +342,7 @@ export function validateMethodEngineConfiguration(
   const rawParameters = parseNamedRecord(value.parameters, "$.parameters");
   const rawOutputs = parseNamedRecord(value.outputs, "$.outputs");
 
-  const inputs: MethodEngineConfiguration["inputs"] = {};
+  const inputs: MethodEngineConfiguration["inputs"] = Object.create(null);
 
   for (const [key, rawInput] of Object.entries(rawInputs)) {
     if (!isRecord(rawInput)) {
@@ -359,7 +359,7 @@ export function validateMethodEngineConfiguration(
     };
   }
 
-  const parameters: MethodEngineConfiguration["parameters"] = {};
+  const parameters: MethodEngineConfiguration["parameters"] = Object.create(null);
 
   for (const [key, rawParameter] of Object.entries(rawParameters)) {
     if (!isRecord(rawParameter)) {
@@ -380,7 +380,7 @@ export function validateMethodEngineConfiguration(
     };
   }
 
-  const outputs: MethodEngineConfiguration["outputs"] = {};
+  const outputs: MethodEngineConfiguration["outputs"] = Object.create(null);
   const state: ParseState = { nodes: 0 };
 
   for (const [key, rawOutput] of Object.entries(rawOutputs)) {
@@ -661,10 +661,10 @@ function validateRuntimeInputs(
   value: unknown,
 ): Record<string, MethodEngineNumericValue> {
   const rawInputs = parseNamedRecord(value, "$inputs");
-  const inputs: Record<string, MethodEngineNumericValue> = {};
+  const inputs: Record<string, MethodEngineNumericValue> = Object.create(null);
 
   for (const key of Object.keys(rawInputs)) {
-    if (!(key in configuration.inputs)) {
+    if (!Object.prototype.hasOwnProperty.call(configuration.inputs, key)) {
       fail(
         "UNKNOWN_INPUT",
         "runtime input was not declared by the configuration",
@@ -712,7 +712,7 @@ export function evaluateMethodEngineConfiguration(
   const configuration =
     validateMethodEngineConfiguration(configurationValue);
   const inputs = validateRuntimeInputs(configuration, runtimeInputsValue);
-  const outputs: Record<string, MethodEngineNumericValue> = {};
+  const outputs: Record<string, MethodEngineNumericValue> = Object.create(null);
 
   for (const [key, output] of Object.entries(configuration.outputs)) {
     const result = evaluateExpression(
