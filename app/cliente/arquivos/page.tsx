@@ -1,3 +1,4 @@
+import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
 import { ClientPrivateFileUploadForm } from "@/components/client/ClientPrivateFileUploadForm";
 import { isPreviewablePrivateFileMimeType } from "@/lib/files/private-file-preview";
 import { Badge } from "@/components/ui/Badge";
@@ -139,6 +140,7 @@ export default async function ClientFilesPage() {
           </ul>
         )}
       </Section>
+      <ClientJourneyNextSteps areas={["assessments","index"]} />
     </>
   );
 }
