@@ -48,6 +48,8 @@ export async function createExerciseAction(formData: FormData) {
     throw error;
   }
 
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
   revalidatePath("/admin/exercicios");
   redirect("/admin/exercicios/" + exercise.id);
 }
