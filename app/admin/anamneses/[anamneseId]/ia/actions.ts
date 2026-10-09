@@ -22,6 +22,9 @@ export async function runAdminAnamnesisAiReview(
   formData: FormData,
 ): Promise<AdminAiReviewFormState> {
   await requireRole("admin");
+  if (!isUuid(submissionId)) {
+    return { message: "Anamnese inválida.", success: false };
+  }
   const financialAnswerId = formData.get("financialAnswerId");
   const explicitlyIncludedAnswerIds =
     typeof financialAnswerId === "string" && financialAnswerId
