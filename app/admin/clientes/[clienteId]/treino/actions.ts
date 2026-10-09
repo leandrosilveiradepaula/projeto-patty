@@ -66,8 +66,12 @@ function optionalText(
 ) {
   const value = formData.get(key);
 
-  if (typeof value !== "string") {
+  if (value === null) {
     return null;
+  }
+
+  if (typeof value !== "string") {
+    throw new Error(`${label} deve ser um texto válido.`);
   }
 
   const normalized = value.trim();
