@@ -1,3 +1,7 @@
+## Auditoria integrada - historico efetivo de correcoes de medidas - 2026-10-09
+
+Cinco verificacoes de integridade: correcoes orfas nao afetam medidas, valores corrigidos nao finitos sao ignorados, unidades vazias nao substituem unidades originais, datas invalidas nao entram na ordenacao, e ultima correcao valida prevalece mesmo quando houver registro posterior malformado. Registros originais e historico persistido nao sao apagados; apenas a leitura efetiva e protegida. Testes unitarios reais incluidos. E2E autenticado pendente.
+
 ## Auditoria integrada - consistencia da evolucao de avaliacoes - 2026-10-09
 
 Cinco blocos: ignorar medidas nao finitas na serie de evolucao; evitar medidas duplicadas na mesma avaliacao; impedir que nomes herdados do objeto virem rotulos profissionais; nao comparar valores anteriores nao finitos; selecionar peso valido em kg mesmo quando houver registro anterior inutilizavel. Testes reais adicionados. Sem inferir conversoes, diagnosticos ou criterios clinicos. E2E autenticado pendente.
