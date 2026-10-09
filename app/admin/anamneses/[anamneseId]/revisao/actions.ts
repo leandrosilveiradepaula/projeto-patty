@@ -37,6 +37,10 @@ export async function addAnamnesisReviewNote(
     };
   }
 
+  if (value.trim().length > 4000) {
+    return { message: "A nota deve ter no máximo 4.000 caracteres.", success: false };
+  }
+
   try {
     await createAccessibleAnamnesisReview(
       submission.id,
