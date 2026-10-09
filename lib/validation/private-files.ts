@@ -112,6 +112,15 @@ export function validatePrivateFile(input: {
   extension: string;
   fileKind: PrivateFileKind;
 }): PrivateFileValidationResult {
+  if (!Object.prototype.hasOwnProperty.call(PRIVATE_FILE_ALLOWLIST, input.fileKind)) {
+    return { ok: false, error: "invalid_extension" };
+  }
+  if (typeof input.extension !== "string") {
+    return { ok: false, error: "invalid_extension" };
+  }
+  if (typeof input.detectedMimeType !== "string") {
+    return { ok: false, error: "invalid_mime_type" };
+  }
   const extension = normalizeExtension(input.extension);
   const mimeType = normalizeMimeType(input.detectedMimeType);
   const allowed = PRIVATE_FILE_ALLOWLIST[input.fileKind];
@@ -160,6 +169,9 @@ export function buildPrivateFileObjectPath(input: {
     throw new Error("Invalid internal identifier for private file path");
   }
 
+  if (!Object.prototype.hasOwnProperty.call(PRIVATE_FILE_ALLOWLIST, input.fileKind)) {
+    throw new Error("Invalid private file kind");
+  }
   const extension = normalizeExtension(input.extension);
   const allowed = PRIVATE_FILE_ALLOWLIST[input.fileKind];
 
