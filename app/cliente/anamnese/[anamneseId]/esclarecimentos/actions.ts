@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { isUuid } from "@/lib/validation/uuid";
 import { requireRole } from "@/lib/supabase/auth";
 import {
   createAccessibleAnamnesisClarificationResponse,
@@ -19,6 +20,9 @@ export async function respondToAnamnesisClarification(
   formData: FormData,
 ): Promise<AnamnesisClarificationResponseFormState> {
   const context = await requireRole("client");
+  if (!isUuid(submissionId) || !isUuid(requestId)) {
+    return { message: "Este pedido de esclarecimento não está disponível.", success: false };
+  }
   const [client, submission, request] = await Promise.all([
     getCurrentClient(),
     getAccessibleAnamnesisSubmission(submissionId),
