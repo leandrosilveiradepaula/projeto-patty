@@ -258,7 +258,9 @@ export async function registerEducationalContentAssetAction(
     storagePath.length > 1024 ||
     storagePath.includes("://") ||
     storagePath.includes("..") ||
-    storagePath.startsWith("/")
+    storagePath.startsWith("/") ||
+    storagePath.includes("\\") ||
+    storagePath.split("/").some((segment) => !segment || segment === ".")
   ) {
     throw new Error("Path privado inválido");
   }
