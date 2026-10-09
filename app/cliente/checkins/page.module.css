@@ -116,3 +116,5 @@
   color: var(--color-brand);
   font-weight: var(--text-label-medium-weight);
 }
+
+.historyList > li, .correction[id] { scroll-margin-top: var(--space-4); }

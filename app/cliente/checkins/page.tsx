@@ -279,7 +279,7 @@ export default async function ClientCheckinsPage({
             </Button>
           </form>
           {latestActivity ? (
-            <details className={styles.correction}>
+            <details className={styles.correction} id={`atividade-${latestActivity.id}`}>
               <summary>Corrigir resposta de hoje</summary>
               <form action={correctActivityCheckinAction} className={styles.activityActions}>
                 <input name="eventId" type="hidden" value={latestActivity.id} />
@@ -328,7 +328,7 @@ export default async function ClientCheckinsPage({
             {displayedLiquidEvents.map((event) => {
               const kindSelection = liquidCorrectionSelection(event.effectiveLiquidKind, activeLiquidKindKeys);
               return (
-              <li key={event.id}>
+              <li id={`liquido-${event.id}`} key={event.id}>
                 <Card className={styles.historyCard} variant="subtle">
                   <div className={styles.summaryHeader}>
                     <strong>{formatMl(event.effectiveAmountMl)}</strong>
@@ -403,7 +403,7 @@ export default async function ClientCheckinsPage({
                 const correction = latestActivityCorrectionByEvent.get(event.id);
                 const didActivity = correction?.corrected_did_activity ?? event.did_activity;
                 return (
-                  <li key={event.id}>
+                  <li id={`atividade-${event.id}`} key={event.id}>
                     <Card className={styles.historyCard} variant="subtle">
                       <div className={styles.summaryHeader}>
                         <strong>Atividade física: {didActivity ? "Sim" : "Não"}</strong>

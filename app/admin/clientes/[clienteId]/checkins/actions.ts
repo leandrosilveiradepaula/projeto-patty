@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { parseCheckinHistoryDay } from "@/lib/checkins/history-day";
+import { checkinHistorySearch, parseCheckinHistoryDay } from "@/lib/checkins/history-day";
 import { parsePositiveCheckinMl } from "@/lib/checkins/amount";
 import { loadSupportedLiquidTaxonomy } from "@/lib/method/liquid-taxonomy-loader";
 import { isUuid } from "@/lib/validation/uuid";
@@ -19,6 +19,26 @@ import {
 function adminCheckinsPath(clientId: string, status?: string) {
   const path = `/admin/clientes/${clientId}/checkins`;
   return status ? `${path}?status=${status}` : path;
+}
+
+function correctionReturnPath(
+  clientId: string,
+  status: "correction-invalid" | "correction-error" | "correction-recorded",
+  formData: FormData,
+  kind: "liquido" | "atividade",
+) {
+  const today = new Intl.DateTimeFormat("en-CA", {
+    day: "2-digit",
+    month: "2-digit",
+    timeZone: "America/Sao_Paulo",
+    year: "numeric",
+  }).format(new Date());
+  const day = parseCheckinHistoryDay(formData.get("historyDay"), today);
+  const eventId = formData.get("eventId");
+  const anchor = typeof eventId === "string" && isUuid(eventId)
+    ? `#${kind}-${eventId}`
+    : "";
+  return adminCheckinsPath(clientId, status) + checkinHistorySearch(day) + anchor;
 }
 
 export async function correctClientLiquidIntakeAction(
@@ -41,13 +61,13 @@ export async function correctClientLiquidIntakeAction(
     !isUuid(eventId) ||
     amountMl === null
   ) {
-    redirect(adminCheckinsPath(clientId, "correction-invalid"));
+    redirect(correctionReturnPath(clientId, "correction-invalid", formData, "liquido"));
   }
 
   const events = await listAccessibleClientLiquidIntakeEvents(client.id);
   const event = events.find((item) => item.id === eventId);
 
-  if (!event) redirect(adminCheckinsPath(clientId, "correction-invalid"));
+  if (!event) redirect(correctionReturnPath(clientId, "correction-invalid", formData, "liquido"));
 
   const taxonomy = await loadSupportedLiquidTaxonomy();
   const liquidKind =
@@ -55,7 +75,7 @@ export async function correctClientLiquidIntakeAction(
       ? taxonomy.kinds.find((kind) => kind.key === rawKind) ?? null
       : null;
 
-  if (!liquidKind) redirect(adminCheckinsPath(clientId, "correction-invalid"));
+  if (!liquidKind) redirect(correctionReturnPath(clientId, "correction-invalid", formData, "liquido"));
 
   try {
     await createAccessibleClientLiquidIntakeEventCorrection({
@@ -66,7 +86,7 @@ export async function correctClientLiquidIntakeAction(
       recordedAt: event.recorded_at,
     });
   } catch {
-    redirect(adminCheckinsPath(clientId, "correction-error"));
+    redirect(correctionReturnPath(clientId, "correction-error", formData, "liquido"));
   }
 
   revalidatePath("/admin");
@@ -75,9 +95,7 @@ export async function correctClientLiquidIntakeAction(
   revalidatePath(adminCheckinsPath(clientId));
   revalidatePath("/cliente");
   revalidatePath("/cliente/checkins");
-  const today = new Intl.DateTimeFormat("en-CA", { year: "numeric", month: "2-digit", day: "2-digit", timeZone: "America/Sao_Paulo" }).format(new Date());
-  const historyDay = parseCheckinHistoryDay(formData.get("historyDay"), today);
-  redirect(adminCheckinsPath(clientId, "correction-recorded") + (historyDay ? "&dia=" + historyDay : ""));
+  redirect(correctionReturnPath(clientId, "correction-recorded", formData, "liquido"));
 }
 
 export async function correctClientActivityCheckinAction(
@@ -98,13 +116,13 @@ export async function correctClientActivityCheckinAction(
     !isUuid(eventId) ||
     (rawValue !== "yes" && rawValue !== "no")
   ) {
-    redirect(adminCheckinsPath(clientId, "correction-invalid"));
+    redirect(correctionReturnPath(clientId, "correction-invalid", formData, "atividade"));
   }
 
   const events = await listAccessibleClientActivityCheckinEvents(client.id);
   const event = events.find((item) => item.id === eventId);
 
-  if (!event) redirect(adminCheckinsPath(clientId, "correction-invalid"));
+  if (!event) redirect(correctionReturnPath(clientId, "correction-invalid", formData, "atividade"));
 
   try {
     await createAccessibleClientActivityCheckinEventCorrection({
@@ -114,7 +132,7 @@ export async function correctClientActivityCheckinAction(
       eventId,
     });
   } catch {
-    redirect(adminCheckinsPath(clientId, "correction-error"));
+    redirect(correctionReturnPath(clientId, "correction-error", formData, "atividade"));
   }
 
   revalidatePath("/admin");
@@ -123,7 +141,5 @@ export async function correctClientActivityCheckinAction(
   revalidatePath(adminCheckinsPath(clientId));
   revalidatePath("/cliente");
   revalidatePath("/cliente/checkins");
-  const today = new Intl.DateTimeFormat("en-CA", { year: "numeric", month: "2-digit", day: "2-digit", timeZone: "America/Sao_Paulo" }).format(new Date());
-  const historyDay = parseCheckinHistoryDay(formData.get("historyDay"), today);
-  redirect(adminCheckinsPath(clientId, "correction-recorded") + (historyDay ? "&dia=" + historyDay : ""));
+  redirect(correctionReturnPath(clientId, "correction-recorded", formData, "atividade"));
 }

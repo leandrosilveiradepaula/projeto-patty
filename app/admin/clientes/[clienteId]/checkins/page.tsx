@@ -158,7 +158,7 @@ export default async function AdminClientCheckinsPage({
               const kindSelection = liquidCorrectionSelection(effectiveKind, activeLiquidKindKeys);
 
               return (
-                <li key={event.id}>
+                <li id={`liquido-${event.id}`} key={event.id}>
                   <Card className={styles.card} variant="subtle">
                     <div className={styles.header}>
                       <strong>{formatMl(effectiveAmount)}</strong>
@@ -223,7 +223,7 @@ export default async function AdminClientCheckinsPage({
                 correction?.corrected_did_activity ?? event.did_activity;
 
               return (
-                <li key={event.id}>
+                <li id={`atividade-${event.id}`} key={event.id}>
                   <Card className={styles.card} variant="subtle">
                     <div className={styles.header}>
                       <strong>Dia da atividade: {correction?.corrected_checkin_date ?? event.checkin_date}</strong>
