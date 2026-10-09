@@ -17,7 +17,7 @@ test("password recovery refuses to request a token without a configured trusted 
 });
 
 test("password recovery validates email length and type", () => {
-  assert.match(recovery, /email\.length > 254/);
+  assert.match(recovery, /validateInvitationEmail\(email\)\.ok/);
   assert.match(recovery, /rawEmail !== null && typeof rawEmail !== "string"/);
 });
 
