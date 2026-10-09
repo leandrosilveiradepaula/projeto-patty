@@ -20,6 +20,7 @@ import {
 } from "@/lib/supabase/data-access";
 import styles from "./page.module.css";
 import Link from "next/link";
+import { orderClientWeeklyFeedbacks } from "@/lib/follow-up/client-weekly-feedback-order";
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("pt-BR", {
@@ -72,10 +73,11 @@ export default async function ClientWeeklyFeedbackPage({
       )
       .map((event) => event.weekly_feedback_id),
   );
-  const pendingFeedbacks = feedbacks.filter(
+  const orderedFeedbacks = orderClientWeeklyFeedbacks(feedbacks);
+  const pendingFeedbacks = orderedFeedbacks.filter(
     (feedback) => feedback.submitted_at === null,
   );
-  const submittedFeedbacks = feedbacks.filter(
+  const submittedFeedbacks = orderedFeedbacks.filter(
     (feedback) => feedback.submitted_at !== null,
   );
 
@@ -137,7 +139,7 @@ export default async function ClientWeeklyFeedbackPage({
                     : null;
 
                   return (
-                    <li key={feedback.id}>
+                    <li id={`feedback-pendente-${feedback.id}`} key={feedback.id}>
                       <details
                         className={styles.pendingItem}
                         open={feedbackIndex === 0}

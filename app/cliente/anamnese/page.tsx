@@ -126,9 +126,10 @@ export default async function ClienteAnamnesePage() {
                       <Link className={styles.detailLink} href={pendingClarificationHref}>
                         Responder {clarification?.awaitingClient} esclarecimento(s) da Patty
                       </Link>
-                    ) : clarification && clarification.awaitingProfessional > 0 ? (
+                    ) : null}
+                    {clarification && clarification.awaitingProfessional > 0 ? (
                       <p className={styles.submissionStatus}>
-                        {clarification.awaitingProfessional} esclarecimento(s) aguardando revisão da Patty.
+                        {clarification.awaitingProfessional} esclarecimento(s) respondido(s) aguardando revisão da Patty.
                       </p>
                     ) : null}
                     <Link

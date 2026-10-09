@@ -157,3 +157,10 @@
     width: 100%;
   }
 }
+
+.statusNote {
+  margin: var(--space-3) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-small-size);
+  line-height: var(--text-body-small-line-height);
+}
