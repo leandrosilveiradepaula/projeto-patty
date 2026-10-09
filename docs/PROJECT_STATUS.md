@@ -1,3 +1,10 @@
+## Auditoria integrada - coerencia da fila apos mutacoes operacionais - 2026-10-08
+
+A fila operacional e o painel administrativo dependem de fatos que podem mudar fora da propria rota de Pendencias. A auditoria encontrou transicoes confirmadas que persistiam corretamente no backend, mas nao invalidavam todas as superficies consumidoras: revisao de Anamnese, Cadastro Atual alterado pela Patty ou pela cliente, preferencia de canal do Feedback Semanal, solicitacao/lifecycle de treino, upload administrativo de arquivo aguardando liberacao, liberacao de arquivo e encerramento do acompanhamento. Isso podia deixar contagens, rotulos ou itens da fila desatualizados ate outra navegacao/revalidacao.
+
+As Server Actions agora revalidam `/admin`, `/admin/pendencias` e as fichas/workspaces relacionados somente depois de a mutacao correspondente ser confirmada. O encerramento de assignment nao invalida estado de sucesso quando nenhuma atribuicao foi encerrada; upload privado so cria a nova visao da pendencia depois de finalizacao aceita; liberacao nao remove a pendencia quando o backend retorna estado nao confirmado. Alteracoes de nome tambem atualizam os rotulos derivados exibidos na fila.
+
+Testes de contrato cobrem essas boundaries e a ordem entre persistencia/confirmacao e revalidacao. O pacote nao altera schema, migrations, RLS, Auth, regras profissionais, publicacao automatica, historico ou dados reais. CI valida typecheck, suites e build; a coerencia visual em uma sessao autenticada real continua dependente de validacao E2E no ambiente publicado.
 ## Auditoria integrada - completar fila operacional e Feedback Semanal sem truncamento - 2026-10-08
 
 A fila da Patty ainda consumia leituras sem paginacao em lote para preferencias de notificacao, cadastro de contato, solicitacoes/planos/versoes de treino, liberacoes de conteudo e arquivos privados. Com mais registros, o limite implicito de retorno PostgREST poderia omitir tarefas, inclusive arquivos aguardando liberacao, sem apresentar erro. O historico do Feedback Semanal e os eventos de notificacao da cliente tambem estavam sujeitos a truncamento.
