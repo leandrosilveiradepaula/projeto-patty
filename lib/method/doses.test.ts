@@ -154,3 +154,14 @@ test("fails closed when the higher-fat protein output is absent", () => {
     TypeError,
   );
 });
+
+test("dose conversions reject overflow even with finite inputs", () => {
+  assert.throws(() => dosesToGrams({ value: 1e308, unit: "g_per_dose" }, 10), /finite/);
+  assert.throws(() => gramsToDoses({ value: 1e-308, unit: "g_per_dose" }, 1e308), /finite/);
+});
+
+test("higher-fat dose output cannot be negative", () => {
+  const invalid = structuredClone(higherFatProteinLimitBaseline);
+  invalid.parameters.higher_fat_ratio.value = -1;
+  assert.throws(() => maxHigherFatProteinDoses(invalid, 8), /non-negative/);
+});
