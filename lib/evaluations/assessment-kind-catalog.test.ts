@@ -118,3 +118,35 @@ test("rejects duplicate historical codes, duplicate semantic keys, and unknown f
     TypeError,
   );
 });
+
+test("catalog rejects oversized historical codes, semantic keys and labels", () => {
+  for (const entry of [
+    { historicalCode: "a".repeat(121), semanticKey: "basic", label: "Basic" },
+    { historicalCode: "weekly", semanticKey: "a".repeat(121), label: "Basic" },
+    { historicalCode: "weekly", semanticKey: "basic", label: "x".repeat(201) },
+  ]) {
+    assert.throws(() => parseAssessmentKindCatalogConfiguration({ entries: [entry] }), /maximum field length/);
+  }
+});
+
+test("catalog rejects malformed historical identifiers", () => {
+  for (const historicalCode of ["UPPER", "white space", "1start", "é", "a/b"]) {
+    assert.throws(() => parseAssessmentKindCatalogConfiguration({ entries: [{ historicalCode, semanticKey: "basic", label: "Basic" }] }), /invalid identifier/);
+  }
+});
+
+test("catalog rejects malformed semantic identifiers", () => {
+  for (const semanticKey of ["UPPER", "two words", "1start", "é", "a/b"]) {
+    assert.throws(() => parseAssessmentKindCatalogConfiguration({ entries: [{ historicalCode: "weekly", semanticKey, label: "Basic" }] }), /invalid identifier/);
+  }
+});
+
+test("catalog rejects malformed lookup inputs", () => {
+  assert.throws(() => resolveAssessmentKindByHistoricalCode(currentBaseline, " monthly "), /valid string/);
+  assert.throws(() => resolveAssessmentKindByHistoricalCode(currentBaseline, null as never), /valid string/);
+});
+
+test("catalog preserves configurable historical and semantic identifiers", () => {
+  const custom = { entries: [{ historicalCode: "weekly_v2", semanticKey: "initial-phase", label: "Inicial" }] };
+  assert.equal(resolveAssessmentKindByHistoricalCode(custom, "weekly_v2").semanticKey, "initial-phase");
+});
