@@ -509,10 +509,8 @@ export async function correctFinalizedAssessmentMeasurementAction(
   const rawValue = formData.get("correctedMeasurementValue");
   const rawUnit = formData.get("correctedUnit");
   const rawNote = formData.get("correctionNote");
-  const value =
-    typeof rawValue === "string"
-      ? Number(rawValue.trim().replace(",", "."))
-      : Number.NaN;
+  const normalizedValue = typeof rawValue === "string" ? rawValue.trim().replace(",", ".") : "";
+  const value = normalizedValue.length > 0 ? Number(normalizedValue) : Number.NaN;
   const unit = typeof rawUnit === "string" ? rawUnit.trim() : "";
   const note =
     typeof rawNote === "string" && rawNote.trim() ? rawNote.trim() : null;
