@@ -1,3 +1,4 @@
+import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
 import { ClientProtocolNutrition } from "@/components/client/ClientProtocolNutrition";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
@@ -156,6 +157,7 @@ export default async function ClienteProtocoloPage() {
           })}
         </div>
       )}
+      <ClientJourneyNextSteps areas={["feedback","training","contents","index"]} />
     </>
   );
 }
