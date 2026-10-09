@@ -111,6 +111,10 @@ export async function finalizeClientFileUploadSessionAction(sessionId: string) {
   if (result.status === "accepted") {
     revalidatePath("/cliente");
     revalidatePath("/cliente/arquivos");
+    revalidatePath("/admin");
+    revalidatePath("/admin/pendencias");
+    revalidatePath("/admin/arquivos");
+    revalidatePath(`/admin/clientes/${client.id}`);
     revalidatePath(`/admin/clientes/${client.id}/arquivos`);
   }
 

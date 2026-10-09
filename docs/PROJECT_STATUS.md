@@ -1,3 +1,7 @@
+## Auditoria integrada - upload da cliente e fila de arquivos - 2026-10-09
+
+A finalizacao aceita de arquivo privado pela cliente atualizava a area da cliente e a ficha de arquivos, mas nao invalidava explicitamente o painel, a fila de pendencias, o indice administrativo de arquivos e o resumo da ficha. Essas superficies agora sao revalidadas apenas quando o backend confirma status accepted. O fluxo de rejeicao permanece sem revalidacao de sucesso. Teste de contrato cobre as rotas; E2E autenticado continua pendente. Sem alteracoes de schema, RLS, Auth, storage, publicacao ou regra profissional.
+
 ## Auditoria integrada - validacao de assets e continuidade de conteudo/IA - 2026-10-09
 
 A validacao administrativa de ordem e tamanho de assets educacionais usava parseInt, que aceitava entradas numericas parciais e as truncava. Agora exige inteiro decimal completo e seguro, preservando as verificacoes existentes de integridade do arquivo privado. A liberacao manual de conteudo e as transicoes confirmadas de analise/recuperacao de IA revalidam as superficies operacionais relacionadas, sem automatizar liberacao ou decisao profissional. Acoes administrativas de conteudo tambem atualizam painel e pendencias apos persistencia. Sem schema, migrations, RLS ou mudancas no metodo da Patty. Validacao autenticada E2E permanece pendente.
