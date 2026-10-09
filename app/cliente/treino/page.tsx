@@ -1,3 +1,4 @@
+import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
 import { Alert } from "@/components/ui/Alert";
 import { publishedTrainingVersions } from "@/lib/training/published-versions";
 import { isTrainingRequestAfterPublication } from "@/lib/training/request-follow-up";
@@ -255,6 +256,7 @@ export default async function ClientTrainingPage() {
           </div>
         )}
       </Section>
+      <ClientJourneyNextSteps areas={["protocol","checkins","index"]} />
     </>
   );
 }
