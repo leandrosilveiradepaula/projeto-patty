@@ -30,7 +30,7 @@ export function validateInvitationEmail(value: string): ValidationResult {
     return { message: "Informe o email da cliente.", ok: false };
   }
 
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { message: "Informe um email válido.", ok: false };
   }
 
