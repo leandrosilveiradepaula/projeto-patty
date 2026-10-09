@@ -16,11 +16,20 @@ export function latestCheckinCorrectionsByEvent<
 
   for (const correction of corrections) {
     const previous = latest.get(correction.event_id);
+    const candidateAt = Date.parse(correction.created_at);
+    const previousAt = previous ? Date.parse(previous.created_at) : Number.NaN;
+    const candidateValid = Number.isFinite(candidateAt);
+    const previousValid = Number.isFinite(previousAt);
+
     if (
       !previous ||
-      correction.created_at > previous.created_at ||
-      (correction.created_at === previous.created_at &&
-        correction.id > previous.id)
+      (candidateValid && !previousValid) ||
+      (candidateValid && previousValid && candidateAt > previousAt) ||
+      (
+        candidateValid === previousValid &&
+        (!candidateValid || candidateAt === previousAt) &&
+        correction.id > previous.id
+      )
     ) {
       latest.set(correction.event_id, correction);
     }

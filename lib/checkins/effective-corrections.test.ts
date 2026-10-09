@@ -26,3 +26,30 @@ test("identical timestamps use id descending as in database query", () => {
 test("empty corrections preserve no effective overrides", () => {
   assert.equal(latestCheckinCorrectionsByEvent([]).size,0);
 });
+
+test("latest correction uses absolute instants across UTC offsets, without mutating order", () => {
+  const older = { id: "z", event_id: "liquid", created_at: "2026-10-09T11:30:00Z", corrected_amount_ml: 250 };
+  const newer = { id: "a", event_id: "liquid", created_at: "2026-10-09T09:00:00-03:00", corrected_amount_ml: 450 };
+  for (const input of [[older, newer], [newer, older]]) {
+    assert.equal(latestCheckinCorrectionsByEvent(input).get("liquid")?.corrected_amount_ml, 450);
+  }
+});
+
+test("equal instants with different offset spellings break ties by ID", () => {
+  const result = latestCheckinCorrectionsByEvent([
+    { id:"b", event_id:"activity", created_at:"2026-10-09T09:00:00-03:00" },
+    { id:"a", event_id:"activity", created_at:"2026-10-09T12:00:00Z" },
+  ]);
+  assert.equal(result.get("activity")?.id,"b");
+});
+
+test("valid correction wins over invalid legacy timestamps, and missing dates are deterministic", () => {
+  const map = latestCheckinCorrectionsByEvent([
+    {id:"z",event_id:"liquid",created_at:"invalid"},
+    {id:"a",event_id:"liquid",created_at:"2026-10-09T12:00:00Z"},
+    {id:"old",event_id:"activity",created_at:"invalid"},
+    {id:"new",event_id:"activity",created_at:"invalid"},
+  ]);
+  assert.equal(map.get("liquid")?.id,"a");
+  assert.equal(map.get("activity")?.id,"old");
+});
