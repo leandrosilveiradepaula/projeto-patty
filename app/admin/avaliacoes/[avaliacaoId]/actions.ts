@@ -194,6 +194,10 @@ export async function updateAssessmentDraftAction(
     };
   }
 
+  revalidatePath("/admin/avaliacoes");
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
+  revalidatePath(`/admin/clientes/${assessment.client_id}`);
   revalidatePath(`/admin/avaliacoes/${assessment.id}`);
   revalidatePath(`/admin/clientes/${assessment.client_id}/avaliacoes`);
 
@@ -243,6 +247,8 @@ export async function saveAssessmentMeasurementAction(
     };
   }
 
+  revalidatePath("/admin/avaliacoes");
+  revalidatePath(`/admin/clientes/${assessment.client_id}/avaliacoes`);
   revalidatePath(`/admin/avaliacoes/${assessment.id}`);
 
   return {
@@ -276,6 +282,8 @@ export async function deleteAssessmentMeasurementAction(
     };
   }
 
+  revalidatePath("/admin/avaliacoes");
+  revalidatePath(`/admin/clientes/${assessment.client_id}/avaliacoes`);
   revalidatePath(`/admin/avaliacoes/${assessment.id}`);
 
   return {

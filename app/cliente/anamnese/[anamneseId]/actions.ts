@@ -44,6 +44,7 @@ function getDraftPersistenceErrorMessage(error: unknown) {
 }
 
 function revalidateAnamnesisDraft(submissionId: string) {
+  revalidatePath("/cliente");
   revalidatePath(`/cliente/anamnese/${submissionId}`);
   revalidatePath("/cliente/anamnese");
 }

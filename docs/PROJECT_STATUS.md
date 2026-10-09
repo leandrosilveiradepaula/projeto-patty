@@ -1,3 +1,7 @@
+## Auditoria integrada - avaliacao, anamnese e liberacao de conteudos - 2026-10-09
+
+Consolidadas atualizacoes de interface apos cinco operacoes: metadados de rascunho de avaliacao, salvamento e remocao de medidas, salvamento de respostas em anamnese e liberacao de conteudo para cliente. Mantidas revisao profissional, releases explicitos, historico e controle de acesso. Testes de contrato adicionados; E2E autenticado pendente.
+
 ## Auditoria integrada - consistencia operacional consolidada - 2026-10-09
 
 Cinco superficies corrigidas em conjunto: criacao de exercicios, transicoes de versoes de exercicios, tres tipos de configuracao parametrizavel, criacao de conteudo educacional e atualizacao de Cadastro Atual pela cliente. Invalidacoes de cache agora abrangem painel administrativo, pendencias e painel da cliente conforme a mutacao confirmada. Sem mudancas de schema, RLS, publicacao automatica ou regras clinicas. Testes de contrato adicionados; E2E autenticado permanece pendente.
