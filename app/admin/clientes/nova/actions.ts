@@ -26,6 +26,9 @@ export async function inviteClient(
 ): Promise<InviteClientState> {
   await requireRole("admin");
   const displayNameValue = formData.get("displayName");
+  if (displayNameValue !== null && typeof displayNameValue !== "string") {
+    return { message: "Informe um nome válido para a cliente." };
+  }
   const displayName =
     typeof displayNameValue === "string" ? displayNameValue.trim() : "";
   const emailValue = formData.get("email");
@@ -105,6 +108,9 @@ export async function generateManualClientInvite(
 ): Promise<ManualInviteClientState> {
   await requireRole("admin");
   const displayNameValue = formData.get("displayName");
+  if (displayNameValue !== null && typeof displayNameValue !== "string") {
+    return { activationLink: null, clientId: null, message: "Informe um nome válido para a cliente.", success: false };
+  }
   const displayName =
     typeof displayNameValue === "string" ? displayNameValue.trim() : "";
   const emailValue = formData.get("email");
