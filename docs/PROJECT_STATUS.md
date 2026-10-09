@@ -1,3 +1,7 @@
+## Auditoria operacional - acesso direto as jornadas reais - 2026-10-09
+
+Primeiro incremento da etapa de integracao operacional, sem demonstracoes falsas: dez acessos diretos no painel da cliente para cadastro, arquivos, avaliacoes, evolucao, conteudos, treino, protocolo, Anamnese, check-ins e Feedback Semanal. O painel profissional tambem ganha atalhos para avaliacoes, protocolos, arquivos privados, acompanhamentos e configuracoes. Atalhos apontam para rotas existentes e preservam autenticacao, RLS, liberacao por versao e revisao humana. Teste de contrato verifica os destinos e os limites de publicacao. Isto e melhoria de navegacao real, nao evidencia de E2E autenticado em producao; essa validacao segue pendente.
+
 ## Auditoria integrada - limites tecnicos das configuracoes do metodo - 2026-10-09
 
 Dez verificacoes relacionadas: limites de quantidade de entradas, parametros e saidas do motor; limite de entradas de execucao; compatibilidade do limite; quantidade de tipos de liquidos; controles em rotulos de liquidos; preservacao de taxonomia valida; quantidade de passos de Carb Cycle; quantidade de referencias de media; preservacao de passos configuraveis. Limites tecnicos de recursos nao representam regras clinicas nem metas da Patty. Testes unitarios adicionados. Sem migrations, RLS, alteracoes em protocolos aprovados ou publicacao automatica. CI e E2E autenticado a verificar.

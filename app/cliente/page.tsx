@@ -221,6 +221,44 @@ export default async function ClientePage() {
         </div>
       </Section>
 
+      <Section
+        description="Acesse diretamente os registros e materiais do seu acompanhamento, sem depender da próxima ação sugerida."
+        title="Meu acompanhamento"
+      >
+        <div className={styles.routineActions} aria-label="Áreas do acompanhamento">
+          <Link className={styles.routineActionLink} href="/cliente/perfil">
+            Meu cadastro
+          </Link>
+          <Link className={styles.routineActionLink} href="/cliente/arquivos">
+            Fotos e documentos
+          </Link>
+          <Link className={styles.routineActionLink} href="/cliente/avaliacoes">
+            Minhas avaliações
+          </Link>
+          <Link className={styles.routineActionLink} href="/cliente/evolucao">
+            Minha evolução
+          </Link>
+          <Link className={styles.routineActionLink} href="/cliente/conteudos">
+            Conteúdos liberados
+          </Link>
+          <Link className={styles.routineActionLink} href="/cliente/treino">
+            Meu treino
+          </Link>
+          <Link className={styles.routineActionLink} href="/cliente/protocolo">
+            Meu protocolo
+          </Link>
+          <Link className={styles.routineActionLink} href="/cliente/anamnese">
+            Minha Anamnese
+          </Link>
+          <Link className={styles.routineActionLink} href="/cliente/checkins">
+            Check-ins
+          </Link>
+          <Link className={styles.routineActionLink} href="/cliente/feedback-semanal">
+            Feedback Semanal
+          </Link>
+        </div>
+      </Section>
+
       {hasDeliveredWeeklyFeedbackReminder &&
       primaryAction.href !== "/cliente/feedback-semanal" ? (
         <Alert
