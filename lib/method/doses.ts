@@ -31,7 +31,9 @@ export function dosesToGrams(
     throw new RangeError("doses must be a finite non-negative number");
   }
 
-  return doses * gramsPerDose(configurationValue);
+  const result = doses * gramsPerDose(configurationValue);
+  if (!Number.isFinite(result)) throw new RangeError("converted grams must be finite");
+  return result;
 }
 
 export function gramsToDoses(
@@ -48,7 +50,9 @@ export function gramsToDoses(
     throw new RangeError("grams per dose must be greater than zero");
   }
 
-  return grams / doseGrams;
+  const result = grams / doseGrams;
+  if (!Number.isFinite(result)) throw new RangeError("converted doses must be finite");
+  return result;
 }
 
 export function maxHigherFatProteinDoses(
@@ -79,5 +83,8 @@ export function maxHigherFatProteinDoses(
     );
   }
 
+  if (!Number.isFinite(output.value) || output.value < 0) {
+    throw new RangeError("higher-fat protein dose limit must be finite and non-negative");
+  }
   return output.value;
 }
