@@ -19,6 +19,9 @@ export async function addAnamnesisClarificationRequest(
   formData: FormData,
 ): Promise<AnamnesisClarificationRequestFormState> {
   const context = await requireRole("admin");
+  if (!isUuid(submissionId)) {
+    return { message: "Identificador de Anamnese inválido.", success: false };
+  }
   const submission = await getAccessibleAnamnesisSubmission(submissionId);
 
   if (!submission || !submission.submitted_at) {
