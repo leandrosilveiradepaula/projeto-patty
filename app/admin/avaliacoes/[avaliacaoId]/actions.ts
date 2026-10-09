@@ -91,6 +91,13 @@ export async function addProfessionalFollowUp(
     return { message: "O motivo deve ter no máximo 4.000 caracteres.", success: false };
   }
 
+  for (const key of ["adherencePerception", "difficulty", "pattyObservation"]) {
+    const entry = formData.get(key);
+    if (entry !== null && (typeof entry !== "string" || entry.trim().length > 4000)) {
+      return { message: "As observações devem ter no máximo 4.000 caracteres.", success: false };
+    }
+  }
+
   try {
     await createAccessibleProfessionalFollowUp({
       adherencePerception: optionalText(formData.get("adherencePerception")),
