@@ -18,7 +18,7 @@ test("ending follow-up explains inactive status and preserves history", () => {
   assert.match(form, /Histórico, avaliações, protocolos, treinos, arquivos/);
   assert.match(form, /A conta da cliente e seus dados não serão excluídos/);
   assert.match(form, /Encerrar e marcar como inativa/);
-  assert.match(form, /disabled=!\{?confirmed\}?|disabled=\{!confirmed\}/);
+  assert.match(form, /disabled=\{!confirmed \|\| isSubmitting\}/);
   assert.match(list, /A cliente agora está inativa/);
 });
 
