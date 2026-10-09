@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 
 import { loadSupportedAssessmentKindOptions } from "@/lib/evaluations/assessment-configuration-loader";
 import { parseAssessmentDate } from "@/lib/evaluations/assessment-draft";
+import { isUuid } from "@/lib/validation/uuid";
 import { requireRole } from "@/lib/supabase/auth";
 import {
   createAccessibleClientAssessment,
@@ -21,6 +22,9 @@ export async function createAssessmentAction(
   formData: FormData,
 ): Promise<CreateAssessmentState> {
   const context = await requireRole("admin");
+  if (!isUuid(clientId)) {
+    return { message: "Identificador de cliente inválido." };
+  }
   const client = await getAccessibleClient(clientId);
 
   if (!client) {
