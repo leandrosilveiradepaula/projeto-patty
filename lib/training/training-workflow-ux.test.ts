@@ -80,8 +80,10 @@ test("new request after published training remains visible in admin queue, overv
   const pending = read("lib/operations/pending.ts");
   const overview = read("app/admin/clientes/[clienteId]/page.tsx");
   const workspace = read("app/admin/clientes/[clienteId]/treino/page.tsx");
-  assert.match(facts, /isTrainingRequestAfterPublication\(request\.requested_at, latestPublication\.published_at\)/);
-  assert.match(facts, /state: "requested_after_publication"/);
+  const lifecycle = read("lib/operations/pending-training-lifecycle.ts");
+  assert.match(facts, /derivePendingTrainingLifecycle\(/);
+  assert.match(lifecycle, /isTrainingRequestAfterPublication\(request\.requested_at, published\.published_at\)/);
+  assert.match(lifecycle, /state: "requested_after_publication"/);
   assert.match(pending, /training_request_after_publication/);
   assert.match(overview, /trainingWorkspaceState\.kind === "new_request"/);
   assert.match(workspace, /newRequestAfterPublication/);

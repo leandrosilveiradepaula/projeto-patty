@@ -158,10 +158,13 @@ export default async function AdminClientContentPage({
               }
 
               return (
-                <li key={release.id}>
+                <li id={`liberacao-${release.id}`} key={release.id}>
                   <ContentListItem
                     category={contentVersion.category_key ?? "Não informado"}
                     meta={`Versão ${contentVersion.version_number}. Liberado em ${formatRecordedDate(release.released_at)}.`}
+                    action={!versionIdsWithAssets.has(contentVersion.id) ? (
+                      <Link href="/admin/conteudos">Verificar asset na biblioteca</Link>
+                    ) : undefined}
                     status={
                       <Badge
                         variant={
