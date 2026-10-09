@@ -1,3 +1,7 @@
+## Auditoria integrada - avaliacoes e correcoes historicas - 2026-10-09
+
+Corrigida a interpretacao de valor vazio como zero em correcoes historicas de medidas finalizadas. Apos acompanhamento profissional e correcoes historicas, as visoes operacionais relevantes sao revalidadas. Nenhum dado original e sobrescrito; permanecem revisao humana, RLS e historico. Testes de contrato adicionados; E2E autenticado pendente.
+
 ## Auditoria integrada - correcoes de Anamnese e Check-ins - 2026-10-09
 
 Correcoes profissionais de respostas de Anamnese agora invalidam painel, pendencias e ficha administrativa alem do historico da propria submissao. Registros e correcoes de Check-ins pela cliente, bem como correcoes administrativas, atualizam o painel operacional e a ficha correspondente apos persistencia confirmada. Preservados registros originais, historico append-only, autorizacao e separacao entre dado e interpretacao. Sem migrations ou alteracoes de RLS. Teste de contrato cobre os caminhos; E2E autenticado permanece pendente.
