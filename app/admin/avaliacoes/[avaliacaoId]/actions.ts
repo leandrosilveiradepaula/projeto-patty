@@ -541,6 +541,10 @@ export async function correctFinalizedAssessmentMeasurementAction(
   const note =
     typeof rawNote === "string" && rawNote.trim() ? rawNote.trim() : null;
 
+  if (note && note.length > 4000) {
+    return { message: "A justificativa da correção deve ter no máximo 4.000 caracteres.", success: false };
+  }
+
   if (!Number.isFinite(value)) {
     return { message: "Informe um valor numérico válido para a correção.", success: false };
   }
