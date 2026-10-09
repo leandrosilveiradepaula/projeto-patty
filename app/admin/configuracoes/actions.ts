@@ -212,6 +212,10 @@ export async function updateAssessmentSchedulePreferencesAction(
       return Number(value);
     });
 
+  if (new Set(preferredWeekdays).size !== preferredWeekdays.length) {
+    throw new Error("Não repita dias preferidos para a avaliação.");
+  }
+
   if (preferredWeekdays.length === 0) {
     throw new Error(
       "Selecione pelo menos um dia preferido para a Avaliação Completa.",
