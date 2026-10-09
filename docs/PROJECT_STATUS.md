@@ -1,3 +1,7 @@
+## Auditoria integrada - criacao de conteudo educacional - 2026-10-09
+
+A criacao inicial de conteudo passa a validar titulo e ordem antes de criar o registro base. A ordem nao aceita mais sufixos nao numericos ou inteiros fora do intervalo seguro do JavaScript. Mantida compensacao de falha de persistencia, versionamento, acesso administrativo e publicacao manual. Teste de contrato adicionado; E2E autenticado pendente.
+
 ## Auditoria integrada - avaliacoes e correcoes historicas - 2026-10-09
 
 Corrigida a interpretacao de valor vazio como zero em correcoes historicas de medidas finalizadas. Apos acompanhamento profissional e correcoes historicas, as visoes operacionais relevantes sao revalidadas. Nenhum dado original e sobrescrito; permanecem revisao humana, RLS e historico. Testes de contrato adicionados; E2E autenticado pendente.

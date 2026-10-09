@@ -28,9 +28,10 @@ function readTitle(formData: FormData) {
 
 function readDisplayOrder(formData: FormData) {
   const raw = formData.get("displayOrder");
-  const value = typeof raw === "string" ? Number.parseInt(raw, 10) : Number.NaN;
+  const normalized = typeof raw === "string" ? raw.trim() : "";
+  const value = /^(0|[1-9][0-9]*)$/.test(normalized) ? Number(normalized) : Number.NaN;
 
-  if (!Number.isInteger(value) || value < 0) {
+  if (!Number.isSafeInteger(value) || value < 0) {
     throw new Error("Informe uma ordem de exibição válida");
   }
 
@@ -40,13 +41,15 @@ function readDisplayOrder(formData: FormData) {
 export async function createEducationalContentDraftAction(formData: FormData) {
   await requireRole("admin");
 
+  const title = readTitle(formData);
+  const displayOrder = readDisplayOrder(formData);
   const content = await createAccessibleEducationalContent();
 
   try {
     await createAccessibleEducationalContentVersion({
       contentId: content.id,
-      displayOrder: readDisplayOrder(formData),
-      title: readTitle(formData),
+      displayOrder,
+      title,
       versionNumber: 1,
     });
   } catch (error) {
