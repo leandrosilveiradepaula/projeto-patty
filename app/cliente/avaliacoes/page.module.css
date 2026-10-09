@@ -128,3 +128,5 @@
 .historyNavigation a { display: inline-flex; align-items: center; min-height: 44px; border: 1px solid var(--color-border); border-radius: var(--radius-full); padding: var(--space-2) var(--space-3); color: var(--color-brand-strong); text-decoration: none; }
 .historyNavigation a:focus-visible { outline: 3px solid var(--color-accent); outline-offset: 3px; }
 .historyItem[id] { scroll-margin-top: var(--space-6); }
+
+.historyItem:target, .list > div[id]:target { scroll-margin-top: var(--space-6); outline: 2px solid var(--color-accent); outline-offset: 3px; border-radius: var(--radius-large); }

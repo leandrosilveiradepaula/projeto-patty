@@ -6,11 +6,13 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import Link from "next/link";
 import { formatProfessionalMeasurementLabel } from "@/lib/evaluations/professional-view";
+import { newestFactualAssessments } from "@/lib/evaluations/progress-journey";
 import { listCurrentClientFinalizedAssessmentMeasurements } from "@/lib/supabase/data-access";
 
 import styles from "./page.module.css";
 
 function formatDate(value: string) {
+  if (!Number.isFinite(Date.parse(value))) return "Data indisponível";
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     month: "2-digit",
@@ -44,8 +46,11 @@ export default async function ClientAssessmentsPage() {
     assessments.set(row.assessment_id, current);
   }
 
-  const items = [...assessments.entries()].sort((left, right) =>
-    right[1].assessedAt.localeCompare(left[1].assessedAt) || left[0].localeCompare(right[0]),
+  const items = newestFactualAssessments(
+    [...assessments.entries()].map(([id, assessment]) => ({
+      id,
+      ...assessment,
+    })),
   );
 
   return (
@@ -62,7 +67,7 @@ export default async function ClientAssessmentsPage() {
       >
         {items.length === 0 ? (
           <EmptyState
-            description="Ainda não há avaliações finalizadas com medidas disponíveis. Quando a Patty publicar esses registros, você poderá consultá-los aqui."
+            description="Ainda não há avaliações finalizadas com medidas disponíveis. Consulte esta área quando houver novas avaliações concluídas pela Patty."
             title="Nenhuma avaliação disponível"
             action={<Link href="/cliente/mais">Ver outras áreas</Link>}
           />
@@ -70,8 +75,8 @@ export default async function ClientAssessmentsPage() {
           <>
             {items.length > 1 ? (
               <nav aria-label="Ir para avaliação" className={styles.historyNavigation}>
-                {items.map(([id, assessment]) => (
-                  <a href={`#avaliacao-${id}`} key={id}>
+                {items.map((assessment) => (
+                  <a href={`#avaliacao-${assessment.id}`} key={assessment.id}>
                     {formatDate(assessment.assessedAt)}
                   </a>
                 ))}
@@ -83,7 +88,8 @@ export default async function ClientAssessmentsPage() {
               </Link>
             </div>
             <div className={styles.list}>
-              {items.map(([assessmentId, assessment], assessmentIndex) => {
+              {items.map((assessment, assessmentIndex) => {
+                const assessmentId = assessment.id;
                 const content = (
                   <Card className={styles.card}>
                     <div className={styles.header}>
@@ -92,7 +98,7 @@ export default async function ClientAssessmentsPage() {
                       </h2>
                       <div className={styles.badges}>
                         {assessmentIndex === 0 ? (
-                          <Badge variant="positive">Mais recente</Badge>
+                          <Badge variant="neutral">Mais recente</Badge>
                         ) : null}
                         <Badge variant="neutral">
                           {assessment.measurements.length} medida(s)
