@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
 import {
   ClientInvitationProvisionError,
@@ -84,6 +85,9 @@ export async function inviteClient(
     };
   }
 
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
+  revalidatePath("/admin/clientes");
   redirect(`/admin/clientes/${provisionedClientId}?onboarding=invited`);
 }
 
@@ -146,6 +150,9 @@ export async function generateManualClientInvite(
       displayName,
       email: normalizeInvitationEmail(email),
     });
+    revalidatePath("/admin");
+    revalidatePath("/admin/pendencias");
+    revalidatePath("/admin/clientes");
     const activationUrl = new URL("/auth/confirm", origin);
     activationUrl.searchParams.set("token_hash", result.tokenHash);
     activationUrl.searchParams.set("type", "invite");
