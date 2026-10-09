@@ -96,3 +96,27 @@ test("feedback rejects file-valued answers rather than silently omitting them", 
   form.set("treinos", new Blob(["invalid"]), "invalid.txt");
   assert.throws(() => buildWeeklyFeedbackAnswers(form, definition), /Resposta inválida/);
 });
+
+test("definition rejects nonboolean optional not-applicable flags", () => {
+  assert.equal(parseWeeklyFeedbackDefinition({ schema_version: 1, questions: [{ key: "x", label: "X", input_type: "text", required: false, allows_not_applicable: "true" }] } as never), null);
+});
+
+test("definition rejects oversized or malformed source references", () => {
+  for (const source_reference of [123, "x".repeat(501)]) {
+    assert.equal(parseWeeklyFeedbackDefinition({ schema_version: 1, questions: [{ key: "x", label: "X", input_type: "text", required: false }], source_reference } as never), null);
+  }
+});
+
+test("feedback text answer length is bounded", () => {
+  assert.throws(() => buildWeeklyFeedbackAnswers(feedbackForm({ comentario: "x".repeat(4001) }), definition), /muito longa/);
+});
+
+test("feedback submission rejects unexpected answer keys", () => {
+  assert.throws(() => validateWeeklyFeedbackAnswers({ treinos: 2, nota: 7, unknown: "x" }, definition), /inválidas/);
+});
+
+test("feedback submission validates numeric types and bounds", () => {
+  for (const answers of [{ treinos: -1, nota: 7 }, { treinos: 1.5, nota: 7 }, { treinos: 2, nota: 11 }, { treinos: "2", nota: 7 }]) {
+    assert.throws(() => validateWeeklyFeedbackAnswers(answers as never, definition), /inválidas/);
+  }
+});
