@@ -59,7 +59,9 @@ export default async function ClientTrainingPage() {
   }
   const publishedItems = publishedVersions.map((version) => ({
     version,
-    items: rowsByVersionId.get(version.id) ?? [],
+    items: [...(rowsByVersionId.get(version.id) ?? [])].sort(
+      (a, b) => a.position - b.position || a.id.localeCompare(b.id),
+    ),
   }));
   const trainingItems = publishedItems[0]?.items ?? [];
   const newRequestAfterPublication = Boolean(

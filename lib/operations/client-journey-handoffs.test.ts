@@ -34,3 +34,35 @@ test("shared journey links remain navigation only without automatic clinical act
   assert.ok(!source.includes('"use server"'));
   assert.ok(!source.includes("publish"));
 });
+
+test("client check-in history distinguishes past consultation from today's recording", () => {
+  const source = readFileSync("app/cliente/checkins/page.tsx", "utf8");
+  assert.ok(source.includes("const totalMl = displayedLiquidEvents.reduce("));
+  assert.ok(source.includes("const waterMl = displayedLiquidEvents"));
+  assert.ok(source.includes("invalidHistoryDay"));
+  assert.ok(source.includes("Voltar para os registros de hoje"));
+  assert.ok(source.includes("A resposta de hoje fica disponível"));
+});
+
+test("training requests refresh persisted history and exercise positions retain order", () => {
+  const form = readFileSync("components/client/ClientTrainingRequestForm.tsx", "utf8");
+  const page = readFileSync("app/cliente/treino/page.tsx", "utf8");
+  assert.ok(form.includes("router.refresh()"));
+  assert.ok(page.includes("a.position - b.position"));
+  assert.ok(page.includes("publishedTrainingVersions(trainingVersions)"));
+});
+
+test("private upload validates size, resets file selection on category change and omits private error payloads", () => {
+  const form = readFileSync("components/client/ClientPrivateFileUploadForm.tsx", "utf8");
+  assert.ok(form.includes("selectedFile.size > maxBytes"));
+  assert.ok(form.includes('input[name="file"]'));
+  assert.ok(!form.includes('console.error("Private file temporary upload failed", uploadError)'));
+  assert.ok(!form.includes('console.error("Private file upload flow failed", error)'));
+});
+
+test("check-in correction errors preserve the selected history date", () => {
+  const actions = readFileSync("app/cliente/checkins/actions.ts", "utf8");
+  assert.ok(actions.includes('checkinHistorySearch(day)'));
+  assert.ok(actions.includes('correctionRedirect("correction-error", formData)'));
+  assert.ok(actions.includes('correctionRedirect("correction-invalid", formData)'));
+});

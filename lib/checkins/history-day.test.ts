@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { parseCheckinHistoryDay, saoPauloCheckinDayRange } from "./history-day.ts";
+import { checkinHistorySearch, parseCheckinHistoryDay, saoPauloCheckinDayRange } from "./history-day.ts";
 
 test("historical day accepts actual past dates and rejects malformed or future",()=>{
   assert.equal(parseCheckinHistoryDay("2026-10-01", "2026-10-08"),"2026-10-01");
@@ -13,4 +13,9 @@ test("historical liquid window has precise half-open local day bounds",()=>{
     recordedFrom:"2026-10-01T03:00:00.000Z",
     recordedBefore:"2026-10-02T03:00:00.000Z",
   });
+});
+
+test("history-day query preserves prior dates and omits absent selection", () => {
+  assert.equal(checkinHistorySearch("2026-10-01"), "&dia=2026-10-01");
+  assert.equal(checkinHistorySearch(null), "");
 });

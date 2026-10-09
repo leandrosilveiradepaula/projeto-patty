@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 
 import {
   type ClientTrainingRequestFormState,
@@ -20,6 +21,7 @@ const initialState: ClientTrainingRequestFormState = {
 
 export function ClientTrainingRequestForm() {
   const formRef = useRef<HTMLFormElement>(null);
+  const router = useRouter();
   const [state, formAction, isPending] = useActionState(
     requestTrainingAction,
     initialState,
@@ -28,8 +30,9 @@ export function ClientTrainingRequestForm() {
   useEffect(() => {
     if (state.success) {
       formRef.current?.reset();
+      router.refresh();
     }
-  }, [state.success]);
+  }, [state.success, router]);
 
   return (
     <form action={formAction} className={styles.form} ref={formRef}>

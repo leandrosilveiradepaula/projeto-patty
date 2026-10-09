@@ -67,7 +67,9 @@ export default async function ClientCheckinsPage({
   }
 
   const today = saoPauloDate(new Date());
-  const selectedDay = parseCheckinHistoryDay(dia, today) ?? today;
+  const parsedDay = dia === undefined ? today : parseCheckinHistoryDay(dia, today);
+  const invalidHistoryDay = dia !== undefined && parsedDay === null;
+  const selectedDay = parsedDay ?? today;
   const range = saoPauloCheckinDayRange(selectedDay);
 
   const [recentLiquidEvents, activityEvents, historicalActivityEvents, liquidTaxonomy] =
@@ -106,15 +108,14 @@ export default async function ClientCheckinsPage({
       wasCorrected: Boolean(correction),
     };
   });
-  const todayLiquidEvents = selectedDay === today ? effectiveLiquidEvents : [];
   const displayedLiquidEvents = effectiveLiquidEvents.filter(
     (event) => saoPauloDate(event.recorded_at) === selectedDay,
   );
-  const totalMl = todayLiquidEvents.reduce(
+  const totalMl = displayedLiquidEvents.reduce(
     (sum, event) => sum + event.effectiveAmountMl,
     0,
   );
-  const waterMl = todayLiquidEvents
+  const waterMl = displayedLiquidEvents
     .filter((event) => pureWaterKindKeys.has(event.effectiveLiquidKind))
     .reduce((sum, event) => sum + event.effectiveAmountMl, 0);
   const latestActivity = activityEvents[0] ?? null;
@@ -133,6 +134,11 @@ export default async function ClientCheckinsPage({
         eyebrow="Cliente"
         title="Check-ins diários"
       />
+      {invalidHistoryDay ? (
+        <Alert live="assertive" title="Data do histórico inválida" variant="critical">
+          A data selecionada não é válida ou está no futuro. Exibimos os registros de hoje.
+        </Alert>
+      ) : null}
       {status === "correction-recorded" ? (
         <Alert live="polite" title="Correção registrada" variant="success">
           O valor corrigido passa a ser usado na tela, e o registro original continua preservado no histórico.
@@ -181,36 +187,23 @@ export default async function ClientCheckinsPage({
         title="Líquidos"
       >
         <div className={styles.grid}>
-          {selectedDay === today ? (
           <Card className={styles.summaryCard}>
             <div className={styles.summaryHeader}>
-              <h3 className={styles.cardTitle}>Hoje</h3>
+              <h3 className={styles.cardTitle}>{selectedDay === today ? "Hoje" : selectedDay}</h3>
               <Badge variant="neutral">Registro do dia</Badge>
             </div>
             <dl className={styles.metrics}>
-              <div>
-                <dt>Total registrado</dt>
-                <dd>{formatMl(totalMl)}</dd>
-              </div>
-              <div>
-                <dt>Água pura</dt>
-                <dd>{formatMl(waterMl)}</dd>
-              </div>
-
+              <div><dt>Total registrado</dt><dd>{formatMl(totalMl)}</dd></div>
+              <div><dt>Água pura</dt><dd>{formatMl(waterMl)}</dd></div>
             </dl>
             <p className={styles.note}>
-              Os registros são classificados conforme a taxonomia ativa. O sistema não aplica automaticamente uma meta diária nem uma proporção mínima entre os tipos de líquido.
+              Valores dos registros deste dia, incluindo correções. Não existe meta automática de hidratação nem proporção mínima entre os tipos de líquido.
             </p>
           </Card>
 
-          ) : (
-            <Card className={styles.summaryCard}>
-              <p className={styles.note}>Você está consultando líquidos de {selectedDay}. O resumo de hoje aparece ao voltar para a data atual.</p>
-            </Card>
-          )}
-
+          {selectedDay === today ? (
           <Card className={styles.formCard}>
-            <h3 className={styles.cardTitle}>Adicionar líquido</h3>
+            <h3 className={styles.cardTitle}>Adicionar líquido de hoje</h3>
             <form action={addLiquidIntakeAction} className={styles.form}>
               <label className={styles.field}>
                 <span>Quantidade em mL</span>
@@ -233,6 +226,15 @@ export default async function ClientCheckinsPage({
               <Button type="submit">Registrar líquido</Button>
             </form>
           </Card>
+          ) : (
+            <Card className={styles.formCard}>
+              <p className={styles.note}>
+                Você está consultando um dia anterior. Novos registros de líquidos são feitos para hoje;
+                os registros antigos podem ser corrigidos no histórico abaixo.
+              </p>
+              <Link href="/cliente/checkins">Voltar para os registros de hoje</Link>
+            </Card>
+          )}
         </div>
       </Section>
 
@@ -241,6 +243,7 @@ export default async function ClientCheckinsPage({
         description="O check-in é independente do treino prescrito. Se precisar corrigir a resposta do dia, um novo registro preserva o histórico anterior."
         title="Atividade física"
       >
+        {selectedDay === today ? (
         <Card className={styles.formCard}>
           <div className={styles.summaryHeader}>
             <h3 className={styles.cardTitle}>Você fez atividade física hoje?</h3>
@@ -288,6 +291,12 @@ export default async function ClientCheckinsPage({
             </details>
           ) : null}
         </Card>
+        ) : (
+          <p className={styles.note}>
+            A resposta de hoje fica disponível ao voltar para a data atual. A atividade do dia
+            selecionado pode ser consultada e corrigida no histórico abaixo.
+          </p>
+        )}
       </Section>
 
       <Section
