@@ -72,7 +72,10 @@ export function parseAssessmentDefinitionConfiguration(
     "assessment definition",
   );
 
-  const kindKey = nonBlank(value.kindKey, "assessment definition.kindKey");
+  const kindKey = normalizeConfiguredAssessmentKey(nonBlank(value.kindKey, "assessment definition.kindKey"));
+  if (!kindKey) {
+    throw new TypeError("assessment definition.kindKey must contain a valid identifier");
+  }
   if (kindKey.length > 120) {
     throw new TypeError("assessment definition.kindKey exceeds maximum length");
   }
@@ -97,6 +100,9 @@ export function parseAssessmentDefinitionConfiguration(
 
       exactKeys(raw, ["key", "label", "aliases"], path);
       const key = normalizeConfiguredAssessmentKey(nonBlank(raw.key, path + ".key"));
+      if (!key) {
+        throw new TypeError(path + ".key must contain a valid identifier");
+      }
       const label = nonBlank(raw.label, path + ".label");
       if (key.length > 120 || label.length > 200) {
         throw new TypeError(path + " exceeds maximum key or label length");
@@ -117,6 +123,9 @@ export function parseAssessmentDefinitionConfiguration(
         ),
       );
 
+      if (aliases.some((alias) => !alias)) {
+        throw new TypeError(path + ".aliases must contain valid identifiers");
+      }
       if (aliases.some((alias) => alias.length > 120)) {
         throw new TypeError(path + ".aliases contains an overlong alias");
       }
@@ -182,10 +191,13 @@ export function buildConfigurableAssessmentReadiness(
     photoCount: number;
   },
 ): ConfigurableAssessmentReadiness {
-  if (!Number.isInteger(input.photoCount) || input.photoCount < 0) {
+  if (!Number.isSafeInteger(input.photoCount) || input.photoCount < 0) {
     throw new RangeError("photoCount must be a non-negative integer");
   }
 
+  if (!Array.isArray(input.measurementKeys) || input.measurementKeys.some((key) => typeof key !== "string")) {
+    throw new TypeError("measurementKeys must be an array of strings");
+  }
   const configuration =
     parseAssessmentDefinitionConfiguration(configurationValue);
   const aliasToKey = new Map<string, string>();
