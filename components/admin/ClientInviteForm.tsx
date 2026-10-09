@@ -62,6 +62,7 @@ export function ClientInviteForm() {
             {...fieldProps}
             autoComplete="email"
             inputMode="email"
+            maxLength={254}
             name="email"
             required
             type="email"

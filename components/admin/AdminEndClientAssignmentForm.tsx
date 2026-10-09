@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { endClientAssignmentAction } from "@/app/admin/clientes/[clienteId]/actions";
 import { Alert } from "@/components/ui/Alert";
@@ -19,6 +19,7 @@ export function AdminEndClientAssignmentForm({
 }: AdminEndClientAssignmentFormProps) {
   const [confirmed, setConfirmed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const inFlightRef = useRef(false);
   const action = endClientAssignmentAction.bind(null, clientId);
   const clientLabel = displayName?.trim() || "esta cliente";
 
@@ -26,7 +27,14 @@ export function AdminEndClientAssignmentForm({
     <form
       action={action}
       className={styles.dangerForm}
-      onSubmit={() => setIsSubmitting(true)}
+      onSubmit={(event) => {
+        if (inFlightRef.current) {
+          event.preventDefault();
+          return;
+        }
+        inFlightRef.current = true;
+        setIsSubmitting(true);
+      }}
     >
       <Alert title="O que acontece ao encerrar" variant="warning">
         <ul className={styles.assignmentConsequences}>
@@ -40,6 +48,7 @@ export function AdminEndClientAssignmentForm({
       <label className={styles.dangerConfirmation}>
         <input
           checked={confirmed}
+          disabled={isSubmitting}
           name="confirmEndAssignment"
           onChange={(event) => setConfirmed(event.target.checked)}
           required
@@ -53,7 +62,7 @@ export function AdminEndClientAssignmentForm({
       </label>
 
       <Button
-        disabled={!confirmed}
+        disabled={!confirmed || isSubmitting}
         loading={isSubmitting}
         type="submit"
         variant="danger"

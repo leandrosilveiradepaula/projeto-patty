@@ -86,6 +86,7 @@ export function ManualClientInviteForm() {
             autoComplete="email"
             disabled={state.success}
             inputMode="email"
+            maxLength={254}
             name="email"
             required
             type="email"
