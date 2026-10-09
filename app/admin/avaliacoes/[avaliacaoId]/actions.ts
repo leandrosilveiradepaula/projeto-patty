@@ -105,6 +105,9 @@ export async function addProfessionalFollowUp(
     };
   }
 
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
+  revalidatePath(`/admin/clientes/${assessment.client_id}`);
   revalidatePath(`/admin/avaliacoes/${assessment.id}`);
 
   return {
