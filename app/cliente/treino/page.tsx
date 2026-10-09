@@ -2,6 +2,7 @@ import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSte
 import { Alert } from "@/components/ui/Alert";
 import { publishedTrainingVersions } from "@/lib/training/published-versions";
 import { isTrainingRequestAfterPublication } from "@/lib/training/request-follow-up";
+import { newestTrainingRequests } from "@/lib/training/operational-order";
 import { Badge } from "@/components/ui/Badge";
 import { ClientTrainingRequestForm } from "@/components/client/ClientTrainingRequestForm";
 import { Card } from "@/components/ui/Card";
@@ -43,6 +44,7 @@ export default async function ClientTrainingPage() {
     listAccessibleClientTrainingRequests(client.id),
     getAccessibleClientTrainingPlan(client.id),
   ]);
+  const orderedRequests = newestTrainingRequests(requests);
   const trainingVersions = trainingPlan
     ? await listAccessibleClientTrainingPlanVersions(trainingPlan.id)
     : [];
@@ -65,8 +67,8 @@ export default async function ClientTrainingPage() {
   }));
   const trainingItems = publishedItems[0]?.items ?? [];
   const newRequestAfterPublication = Boolean(
-    latestPublished && requests[0] &&
-    isTrainingRequestAfterPublication(requests[0].requested_at, latestPublished.published_at),
+    latestPublished && orderedRequests[0] &&
+    isTrainingRequestAfterPublication(orderedRequests[0].requested_at, latestPublished.published_at),
   );
 
   return (
@@ -224,20 +226,20 @@ export default async function ClientTrainingPage() {
               <div className={styles.header}>
                 <strong>Solicitação mais recente</strong>
                 <Badge variant="neutral">
-                  {formatDateTime(requests[0].requested_at)}
+                  {formatDateTime(orderedRequests[0].requested_at)}
                 </Badge>
               </div>
               <p className={styles.note}>
-                {requests[0].note?.trim() || "Sem observação adicional."}
+                {orderedRequests[0].note?.trim() || "Sem observação adicional."}
               </p>
             </Card>
             {requests.length > 1 ? (
               <details className={styles.olderRequests}>
                 <summary>
-                  Ver {requests.length - 1} solicitação(ões) anterior(es)
+                  Ver {orderedRequests.length - 1} solicitação(ões) anterior(es)
                 </summary>
                 <ol className={styles.list}>
-                  {requests.slice(1).map((request) => (
+                  {orderedRequests.slice(1).map((request) => (
                     <li key={request.id}>
                       <Card className={styles.entry} variant="subtle">
                         <div className={styles.header}>

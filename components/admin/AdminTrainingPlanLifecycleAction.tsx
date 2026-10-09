@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import {
   deleteTrainingPlanItemAction,
@@ -41,6 +42,8 @@ type Props =
 
 export function AdminTrainingPlanLifecycleAction(props: Props) {
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [confirmTransition, setConfirmTransition] = useState(false);
+  const router = useRouter();
 
   const action =
     props.mode === "review"
@@ -64,6 +67,10 @@ export function AdminTrainingPlanLifecycleAction(props: Props) {
 
   const [state, formAction, isPending] = useActionState(action, initialState);
 
+  useEffect(() => {
+    if (state.success) router.refresh();
+  }, [state.success, router]);
+
   if (props.mode === "delete" && !confirmDelete) {
     return (
       <Button
@@ -73,6 +80,19 @@ export function AdminTrainingPlanLifecycleAction(props: Props) {
         variant="danger"
       >
         Remover exercício
+      </Button>
+    );
+  }
+
+  if (props.mode !== "delete" && !confirmTransition) {
+    return (
+      <Button
+        disabled={props.disabled}
+        onClick={() => setConfirmTransition(true)}
+        type="button"
+        variant={props.mode === "review" ? "secondary" : "primary"}
+      >
+        {props.mode === "review" ? "Revisar treino" : "Publicar treino"}
       </Button>
     );
   }
@@ -116,14 +136,30 @@ export function AdminTrainingPlanLifecycleAction(props: Props) {
           </div>
         </div>
       ) : (
-        <Button
-          disabled={props.disabled}
-          loading={isPending}
-          type="submit"
-          variant={props.mode === "review" ? "secondary" : "primary"}
-        >
-          {props.mode === "review" ? "Marcar como revisado" : "Publicar treino"}
-        </Button>
+        <div className={styles.confirmation}>
+          <p>
+            {props.mode === "review"
+              ? "Confirmar revisão? Esta versão ficará congelada e não poderá mais receber alterações nos exercícios ou orientações."
+              : "Confirmar publicação? Somente esta versão revisada ficará visível para a cliente. A ação não pode ser desfeita por esta tela."}
+          </p>
+          <div className={styles.actionRow}>
+            <Button
+              disabled={isPending}
+              onClick={() => setConfirmTransition(false)}
+              type="button"
+              variant="ghost"
+            >
+              Cancelar
+            </Button>
+            <Button
+              loading={isPending}
+              type="submit"
+              variant={props.mode === "review" ? "secondary" : "primary"}
+            >
+              {props.mode === "review" ? "Confirmar revisão" : "Confirmar publicação"}
+            </Button>
+          </div>
+        </div>
       )}
     </form>
   );

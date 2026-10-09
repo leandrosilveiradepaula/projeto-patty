@@ -93,7 +93,8 @@ test("client training reports new request after the last publication without cha
   const page = read("app/cliente/treino/page.tsx");
   const actions = read("app/cliente/treino/actions.ts");
   const source = read("lib/supabase/data-access.ts");
-  assert.match(page, /isTrainingRequestAfterPublication\(requests\[0\]\.requested_at, latestPublished\.published_at\)/);
+  assert.match(page, /newestTrainingRequests\(requests\)/);
+  assert.match(page, /isTrainingRequestAfterPublication\(orderedRequests\[0\]\.requested_at, latestPublished\.published_at\)/);
   assert.match(page, /Nova solicitação registrada/);
   assert.match(page, /id="suas-solicitacoes"/);
   assert.match(page, /publicado continua disponível/);

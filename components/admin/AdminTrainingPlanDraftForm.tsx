@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 import {
   createTrainingPlanDraftAction,
@@ -41,6 +42,11 @@ export function AdminTrainingPlanDraftForm({
       )
     : createTrainingPlanDraftAction.bind(null, clientId);
   const [state, formAction, isPending] = useActionState(action, initialState);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (state.success) router.refresh();
+  }, [state.success, router]);
 
   return (
     <form action={formAction} className={styles.form}>
