@@ -1,3 +1,7 @@
+## Auditoria integrada - entradas da cliente - 2026-10-09
+
+Cinco frentes de verificacao: IDs de eventos de ingestao e atividade validados antes da consulta historica; observacoes de solicitacao de treino rejeitam valores nao textuais; intencao de salvar/enviar Feedback Semanal validada antes da leitura privada; navegacao de historico nas duas correcoes continua usando parser de dia. Testes de contrato incluidos; E2E autenticado pendente. Sem mudancas de RLS, dados originais ou decisoes profissionais.
+
 ## Auditoria integrada - precisao de configuracoes parametrizaveis - 2026-10-09
 
 Cinco blocos: validacao estrita de dia ISO 1-7 na solicitacao semanal, na lembranca semanal e nas preferencias de avaliacao; rejeicao de dias preferidos duplicados; e validacao decimal explicita antes de salvar parametros numericos. Mantida a parametrizacao versionada e a decisao humana. Testes de contrato adicionados; E2E autenticado pendente.

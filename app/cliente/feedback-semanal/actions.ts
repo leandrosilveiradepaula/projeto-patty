@@ -27,6 +27,11 @@ export async function saveWeeklyFeedbackAction(
     throw new Error("Feedback indisponível");
   }
 
+  const intent = formData.get("intent");
+  if (intent !== "save" && intent !== "submit") {
+    redirect("/cliente/feedback-semanal?status=invalid");
+  }
+
   const feedback = await getCurrentClientWeeklyFeedback(client.id, feedbackId);
 
   if (!feedback || feedback.submitted_at) {
@@ -42,10 +47,6 @@ export async function saveWeeklyFeedbackAction(
     throw new Error("Definição do Feedback Semanal indisponível");
   }
 
-  const intent = formData.get("intent");
-  if (intent !== "save" && intent !== "submit") {
-    redirect("/cliente/feedback-semanal?status=invalid");
-  }
   const submit = intent === "submit";
 
   let answers;

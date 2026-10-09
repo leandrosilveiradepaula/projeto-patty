@@ -8,6 +8,7 @@ import { parsePositiveCheckinMl } from "@/lib/checkins/amount";
 import { loadSupportedLiquidTaxonomy } from "@/lib/method/liquid-taxonomy-loader";
 import { createLiquidIntakeWithMethodSnapshot } from "@/lib/method/liquid-persistence";
 import { requireRole } from "@/lib/supabase/auth";
+import { isUuid } from "@/lib/validation/uuid";
 import {
   createAccessibleClientActivityCheckinEventCorrection,
   createAccessibleClientLiquidIntakeEventCorrection,
@@ -129,7 +130,7 @@ export async function correctLiquidIntakeAction(formData: FormData) {
 
   if (
     typeof eventId !== "string" ||
-    !eventId ||
+    !isUuid(eventId) ||
     amountMl === null
   ) {
     redirect("/cliente/checkins?status=correction-invalid");
@@ -176,7 +177,7 @@ export async function correctActivityCheckinAction(formData: FormData) {
 
   if (
     typeof eventId !== "string" ||
-    !eventId ||
+    !isUuid(eventId) ||
     (rawValue !== "yes" && rawValue !== "no")
   ) {
     redirect("/cliente/checkins?status=correction-invalid");
