@@ -130,7 +130,10 @@ export function buildWeeklyFeedbackAnswers(
   for (const question of definition.questions) {
     const rawValue = formData.get(question.key);
 
-    if (typeof rawValue !== "string" || rawValue.trim() === "") {
+    if (rawValue !== null && typeof rawValue !== "string") {
+      throw new Error(`Resposta inválida para ${question.label}`);
+    }
+    if (rawValue === null || rawValue.trim() === "") {
       continue;
     }
 
