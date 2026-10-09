@@ -128,6 +128,8 @@ async function requireAccessibleTrainingVersion(
 }
 
 function revalidateTraining(clientId: string) {
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
   revalidatePath(`/admin/clientes/${clientId}`);
   revalidatePath(`/admin/clientes/${clientId}/treino`);
   revalidatePath("/cliente");

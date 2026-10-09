@@ -42,12 +42,14 @@ export async function endClientAssignmentAction(
     clientId,
   });
 
-  revalidatePath("/admin/clientes");
-  revalidatePath(`/admin/clientes/${clientId}`);
-
   if (result.endedAssignmentIds.length === 0) {
     redirect("/admin/clientes?assignment=unavailable");
   }
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
+  revalidatePath("/admin/clientes");
+  revalidatePath(`/admin/clientes/${clientId}`);
 
   redirect("/admin/clientes?assignment=ended");
 }
@@ -112,6 +114,8 @@ export async function updateAdminClientDisplayNameAction(
     };
   }
 
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
   revalidatePath("/admin/clientes");
   revalidatePath(`/admin/clientes/${client.id}`);
   revalidatePath("/cliente", "layout");
@@ -177,7 +181,12 @@ export async function recordTrainingRequestAction(
     };
   }
 
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
   revalidatePath(`/admin/clientes/${client.id}`);
+  revalidatePath(`/admin/clientes/${client.id}/treino`);
+  revalidatePath("/cliente");
+  revalidatePath("/cliente/treino");
 
   return {
     message: "Solicitação de treino registrada no histórico.",
@@ -235,7 +244,10 @@ export async function updateAdminClientRegistrationAction(
     };
   }
 
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
   revalidatePath(`/admin/clientes/${client.id}`);
+  revalidatePath("/cliente/perfil");
 
   return {
     message: "Cadastro atual atualizado com sucesso.",
@@ -402,6 +414,8 @@ export async function updateWeeklyFeedbackNotificationPreferenceAction(
     };
   }
 
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
   revalidatePath(`/admin/clientes/${client.id}`);
   revalidatePath(`/admin/clientes/${client.id}/feedback-semanal`);
   revalidatePath("/cliente/feedback-semanal");
