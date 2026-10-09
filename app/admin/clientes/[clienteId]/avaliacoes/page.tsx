@@ -88,6 +88,18 @@ export default async function AdminClientAssessmentsPage({
       />
       <ClientWorkspaceNav activeArea="avaliacoes" clientId={client.id} />
       <Section
+        description="Após finalizar uma avaliação, consulte a evolução factual e retome a preparação do protocolo na mesma área da cliente."
+        title="Próximos passos"
+      >
+        <Link className={styles.actionLink} href={`/admin/clientes/${client.id}/evolucao`}>
+          Comparar medidas finalizadas
+        </Link>
+        {" · "}
+        <Link className={styles.actionLink} href={`/admin/clientes/${client.id}/protocolos`}>
+          Abrir protocolos da cliente
+        </Link>
+      </Section>
+      <Section
         action={
           <Link className={styles.actionLink} href={`/admin/clientes/${client.id}/evolucao`}>
             Ver evolução
