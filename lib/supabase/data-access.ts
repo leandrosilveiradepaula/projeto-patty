@@ -1,4 +1,5 @@
 import "server-only";
+import { collectScopedClientOperationalRows } from "@/lib/operations/client-operational-pagination";
 import { collectTrainingHistoryRows } from "@/lib/training/history-batches";
 import { collectAnamnesisHistoryRows } from "@/lib/anamnesis/history-pagination";
 import { collectPublishedProtocolRows } from "@/lib/protocol/published-read-pagination";
@@ -370,43 +371,36 @@ export async function getAccessibleWeeklyFeedbackNotificationPreference(
 export async function listAccessibleWeeklyFeedbackNotificationPreferencesForClients(
   clientIds: string[],
 ) {
-  if (clientIds.length === 0) {
-    return [];
-  }
-
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("client_notification_preference_versions")
-    .select(
-      "id, client_id, purpose_key, channel_key, version_number, created_at, activated_at, retired_at",
-    )
-    .in("client_id", clientIds)
-    .eq("purpose_key", "weekly_feedback")
-    .is("retired_at", null);
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  const rows = await collectScopedClientOperationalRows(clientIds, (ids, from, to) =>
+    supabase
+      .from("client_notification_preference_versions")
+      .select("id, client_id, purpose_key, channel_key, version_number, created_at, activated_at, retired_at")
+      .in("client_id", ids)
+      .eq("purpose_key", "weekly_feedback")
+      .is("retired_at", null)
+      .order("client_id", { ascending: true })
+      .order("created_at", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
+  return rows.sort(
+    (a, b) => a.client_id.localeCompare(b.client_id) ||
+      a.created_at.localeCompare(b.created_at) || a.id.localeCompare(b.id),
+  );
 }
 
 export async function listAccessibleClientNotificationEvents(clientId: string) {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("client_notification_events")
-    .select(
-      "id, client_id, weekly_feedback_id, event_key, channel_key, preference_version_id, schedule_configuration_version_id, delivery_state, blocked_reason, delivered_at, created_at",
-    )
-    .eq("client_id", clientId)
-    .order("created_at", { ascending: false })
-    .order("id", { ascending: false });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  return collectScopedClientOperationalRows([clientId], (ids, from, to) =>
+    supabase
+      .from("client_notification_events")
+      .select("id, client_id, weekly_feedback_id, event_key, channel_key, preference_version_id, schedule_configuration_version_id, delivery_state, blocked_reason, delivered_at, created_at")
+      .in("client_id", ids)
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false })
+      .range(from, to),
+  );
 }
 
 export async function getAccessibleClientRegistration(clientId: string) {
@@ -427,21 +421,16 @@ export async function getAccessibleClientRegistration(clientId: string) {
 export async function listAccessibleClientRegistrationsForClients(
   clientIds: string[],
 ) {
-  if (clientIds.length === 0) {
-    return [];
-  }
-
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("client_registration")
-    .select("client_id, city, phone, contact_email, instagram, created_at, updated_at")
-    .in("client_id", clientIds);
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  const rows = await collectScopedClientOperationalRows(clientIds, (ids, from, to) =>
+    supabase
+      .from("client_registration")
+      .select("client_id, city, phone, contact_email, instagram, created_at, updated_at")
+      .in("client_id", ids)
+      .order("client_id", { ascending: true })
+      .range(from, to),
+  );
+  return rows.sort((a, b) => a.client_id.localeCompare(b.client_id));
 }
 
 export async function listAccessibleClientTrainingRequests(clientId: string) {
@@ -465,23 +454,19 @@ export async function listAccessibleClientTrainingRequests(clientId: string) {
 export async function listAccessibleClientTrainingRequestsForClients(
   clientIds: string[],
 ) {
-  if (clientIds.length === 0) {
-    return [];
-  }
-
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("client_training_requests")
-    .select("id, client_id, requested_at, created_at")
-    .in("client_id", clientIds)
-    .order("requested_at", { ascending: false })
-    .order("id", { ascending: false });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  const rows = await collectScopedClientOperationalRows(clientIds, (ids, from, to) =>
+    supabase
+      .from("client_training_requests")
+      .select("id, client_id, requested_at, created_at")
+      .in("client_id", ids)
+      .order("requested_at", { ascending: false })
+      .order("id", { ascending: false })
+      .range(from, to),
+  );
+  return rows.sort((a, b) =>
+    b.requested_at.localeCompare(a.requested_at) || b.id.localeCompare(a.id),
+  );
 }
 
 export async function createAccessibleClientTrainingRequest(input: {
@@ -525,23 +510,19 @@ export async function getAccessibleClientTrainingPlan(clientId: string) {
 export async function listAccessibleClientTrainingPlansForClients(
   clientIds: string[],
 ) {
-  if (clientIds.length === 0) {
-    return [];
-  }
-
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("client_training_plans")
-    .select("id, client_id, created_at")
-    .in("client_id", clientIds)
-    .order("created_at", { ascending: true })
-    .order("id", { ascending: true });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  const rows = await collectScopedClientOperationalRows(clientIds, (ids, from, to) =>
+    supabase
+      .from("client_training_plans")
+      .select("id, client_id, created_at")
+      .in("client_id", ids)
+      .order("created_at", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
+  return rows.sort((a, b) =>
+    a.created_at.localeCompare(b.created_at) || a.id.localeCompare(b.id),
+  );
 }
 
 export async function listAccessibleClientTrainingPlanVersions(
@@ -567,26 +548,22 @@ export async function listAccessibleClientTrainingPlanVersions(
 export async function listAccessibleClientTrainingPlanVersionsForPlans(
   trainingPlanIds: string[],
 ) {
-  if (trainingPlanIds.length === 0) {
-    return [];
-  }
-
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("client_training_plan_versions")
-    .select(
-      "id, training_plan_id, version_number, title, reviewed_at, published_at, created_at",
-    )
-    .in("training_plan_id", trainingPlanIds)
-    .order("training_plan_id", { ascending: true })
-    .order("version_number", { ascending: false })
-    .order("id", { ascending: false });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  const rows = await collectScopedClientOperationalRows(trainingPlanIds, (ids, from, to) =>
+    supabase
+      .from("client_training_plan_versions")
+      .select("id, training_plan_id, version_number, title, reviewed_at, published_at, created_at")
+      .in("training_plan_id", ids)
+      .order("training_plan_id", { ascending: true })
+      .order("version_number", { ascending: false })
+      .order("id", { ascending: false })
+      .range(from, to),
+  );
+  return rows.sort((a, b) =>
+    a.training_plan_id.localeCompare(b.training_plan_id) ||
+    b.version_number - a.version_number ||
+    b.id.localeCompare(a.id),
+  );
 }
 
 export async function listAccessibleClientTrainingPlanItems(
@@ -1455,24 +1432,19 @@ export async function listContentReleasesForAccessibleClient(clientId: string) {
 export async function listContentReleasesForAccessibleClients(
   clientIds: string[],
 ) {
-  if (clientIds.length === 0) {
-    return [];
-  }
-
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("client_content_releases")
-    .select(
-      "id, client_id, released_at, educational_content_versions(id, educational_content_id, version_number, title, category_key, content_type_key)",
-    )
-    .in("client_id", clientIds)
-    .order("released_at", { ascending: true });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  const rows = await collectScopedClientOperationalRows(clientIds, (ids, from, to) =>
+    supabase
+      .from("client_content_releases")
+      .select("id, client_id, released_at, educational_content_versions(id, educational_content_id, version_number, title, category_key, content_type_key)")
+      .in("client_id", ids)
+      .order("released_at", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
+  return rows.sort((a, b) =>
+    a.released_at.localeCompare(b.released_at) || a.id.localeCompare(b.id),
+  );
 }
 
 export async function getAccessibleEducationalContentAssetForCurrentClient(
@@ -1860,25 +1832,19 @@ export async function listAccessibleClientFiles(clientId: string) {
 }
 
 export async function listAccessibleClientFilesForClients(clientIds: string[]) {
-  if (clientIds.length === 0) {
-    return [];
-  }
-
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("client_files")
-    .select(
-      "id, client_id, file_kind, original_filename, mime_type, byte_size, created_at, uploaded_by_profile_id, client_visible_at, client_visibility_set_by_profile_id",
-    )
-    .in("client_id", clientIds)
-    .order("created_at", { ascending: false })
-    .order("id", { ascending: true });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  const rows = await collectScopedClientOperationalRows(clientIds, (ids, from, to) =>
+    supabase
+      .from("client_files")
+      .select("id, client_id, file_kind, original_filename, mime_type, byte_size, created_at, uploaded_by_profile_id, client_visible_at, client_visibility_set_by_profile_id")
+      .in("client_id", ids)
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
+  return rows.sort((a, b) =>
+    b.created_at.localeCompare(a.created_at) || a.id.localeCompare(b.id),
+  );
 }
 
 export async function getAccessiblePrivateFileForCurrentClientDownload(
@@ -3190,20 +3156,16 @@ export async function getLatestPublishedWeeklyFeedbackFormVersion() {
 
 export async function listAccessibleWeeklyFeedbacksForClient(clientId: string) {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("client_weekly_feedbacks")
-    .select(
-      "id, client_id, form_version_id, period_start, period_end, due_at, requested_by_profile_id, request_source, schedule_configuration_version_id, answers, submitted_at, created_at, weekly_feedback_form_versions(id, version_number, title, definition, published_at)",
-    )
-    .eq("client_id", clientId)
-    .order("period_start", { ascending: false })
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  return collectScopedClientOperationalRows([clientId], (ids, from, to) =>
+    supabase
+      .from("client_weekly_feedbacks")
+      .select("id, client_id, form_version_id, period_start, period_end, due_at, requested_by_profile_id, request_source, schedule_configuration_version_id, answers, submitted_at, created_at, weekly_feedback_form_versions(id, version_number, title, definition, published_at)")
+      .in("client_id", ids)
+      .order("period_start", { ascending: false })
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false })
+      .range(from, to),
+  );
 }
 
 export async function createAccessibleWeeklyFeedbackRequest(input: {
