@@ -284,6 +284,9 @@ export async function addTrainingPlanItemAction(
     const items = await listAccessibleClientTrainingPlanItems(version.id);
     const nextPosition =
       items.reduce((max, item) => Math.max(max, item.position), 0) + 1;
+    if (!Number.isSafeInteger(nextPosition) || nextPosition < 1) {
+      return initialError("Não foi possível definir uma posição válida para o exercício.");
+    }
 
     await createAccessibleClientTrainingPlanItem({
       executionNotes,
