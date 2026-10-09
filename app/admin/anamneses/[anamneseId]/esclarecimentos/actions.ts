@@ -38,6 +38,10 @@ export async function addAnamnesisClarificationRequest(
     return { message: "O pedido deve ter no máximo 4.000 caracteres.", success: false };
   }
 
+  if (rawSourceAnswerId !== null && typeof rawSourceAnswerId !== "string") {
+    return { message: "A resposta original selecionada não é válida.", success: false };
+  }
+
   let sourceAnswerId: string | null = null;
   if (typeof rawSourceAnswerId === "string" && rawSourceAnswerId.trim()) {
     if (!isUuid(rawSourceAnswerId)) {

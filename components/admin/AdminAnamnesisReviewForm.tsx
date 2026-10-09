@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 
 import {
   type AnamnesisReviewFormState,
@@ -25,14 +26,16 @@ export function AdminAnamnesisReviewForm({
   submissionId,
 }: AdminAnamnesisReviewFormProps) {
   const formRef = useRef<HTMLFormElement>(null);
+  const router = useRouter();
   const action = addAnamnesisReviewNote.bind(null, submissionId);
   const [state, formAction, isPending] = useActionState(action, initialState);
 
   useEffect(() => {
     if (state.success) {
       formRef.current?.reset();
+      router.refresh();
     }
-  }, [state]);
+  }, [state, router]);
 
   return (
     <form action={formAction} className={styles.form} ref={formRef}>
@@ -54,6 +57,7 @@ export function AdminAnamnesisReviewForm({
         {(fieldProps) => (
           <Textarea
             {...fieldProps}
+            maxLength={4000}
             name="note"
             placeholder="Registre a observação profissional sem alterar a resposta original da cliente."
             required

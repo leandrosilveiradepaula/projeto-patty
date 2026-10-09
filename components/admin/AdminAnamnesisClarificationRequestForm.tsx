@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import {
   type AnamnesisClarificationRequestFormState,
   addAnamnesisClarificationRequest,
@@ -21,12 +22,16 @@ export function AdminAnamnesisClarificationRequestForm({
   submissionId: string;
 }) {
   const formRef = useRef<HTMLFormElement>(null);
+  const router = useRouter();
   const action = addAnamnesisClarificationRequest.bind(null, submissionId);
   const [state, formAction, isPending] = useActionState(action, initialState);
 
   useEffect(() => {
-    if (state.success) formRef.current?.reset();
-  }, [state]);
+    if (state.success) {
+      formRef.current?.reset();
+      router.refresh();
+    }
+  }, [state, router]);
 
   return (
     <form action={formAction} className={styles.form} ref={formRef}>
@@ -44,7 +49,7 @@ export function AdminAnamnesisClarificationRequestForm({
           Resposta original relacionada
         </label>
         <p className={styles.help}>Opcional. Selecione apenas quando o pedido se referir diretamente a uma resposta.</p>
-        <select className={styles.select} defaultValue="" id="clarification-source-answer" name="sourceAnswerId">
+        <select className={styles.select} defaultValue="" disabled={isPending} id="clarification-source-answer" name="sourceAnswerId">
           <option value="">Sem vínculo direto</option>
           {sourceAnswers.map((answer) => (
             <option key={answer.id} value={answer.id}>{answer.label}</option>
@@ -58,7 +63,7 @@ export function AdminAnamnesisClarificationRequestForm({
         required
       >
         {(fieldProps) => (
-          <Textarea {...fieldProps} name="requestText" placeholder="Explique o que precisa ser complementado ou esclarecido." required rows={5} />
+          <Textarea {...fieldProps} maxLength={4000} name="requestText" placeholder="Explique o que precisa ser complementado ou esclarecido." required rows={5} />
         )}
       </FormField>
       <div className={styles.actions}>

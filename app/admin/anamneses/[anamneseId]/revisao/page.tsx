@@ -44,7 +44,7 @@ export default async function AnamnesisReviewPage({
   }
 
   const reviews = await listAccessibleAnamnesisReviews(submission.id);
-  const displayName = submission.clients?.profiles?.display_name?.trim();
+  const displayName = submission.clients?.full_name?.trim() || submission.clients?.profiles?.display_name?.trim();
 
   return (
     <>

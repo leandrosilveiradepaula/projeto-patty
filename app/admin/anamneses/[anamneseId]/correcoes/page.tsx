@@ -71,7 +71,7 @@ export default async function AnamnesisCorrectionsPage({
     correctionsByAnswerId.set(correction.answer_id, answerCorrections);
   }
 
-  const displayName = submission.clients?.profiles?.display_name?.trim();
+  const displayName = submission.clients?.full_name?.trim() || submission.clients?.profiles?.display_name?.trim();
 
   return (
     <>
@@ -164,6 +164,7 @@ export default async function AnamnesisCorrectionsPage({
                   <div className={styles.formArea}>
                     <h3 className={styles.historyTitle}>Adicionar correção</h3>
                     <AdminAnamnesisCorrectionForm
+                      key={answerCorrections.at(-1)?.id ?? answer.id}
                       answerId={answer.id}
                       initialValue={serializeCorrectionJson(latestValue)}
                       submissionId={submission.id}
