@@ -1,3 +1,7 @@
+## Auditoria integrada - validacao de entradas administrativas - 2026-10-09
+
+Quatro blocos: identificador de cliente validado antes da consulta na criacao de avaliacao; identificador de cliente validado nas duas correcoes de check-in; identificador do evento de check-in validado nas duas correcoes; observacao de solicitacao de treino pelo admin rejeita tipo nao textual. Mantidos RLS, historico de correcoes, configuracoes de treino e decisao humana. Testes de contrato adicionados; E2E autenticado pendente.
+
 ## Auditoria integrada - itens do treino por cliente - 2026-10-09
 
 Quatro blocos de correcoes na prescricao versionada: rejeicao de identificadores de exercicio malformados na inclusao; mesma rejeicao na edicao; protecao contra versoes publicadas de exercicio sem nome valido; validacao de todos os campos da inclusao antes de consultar posicao e persistir item. Preservados escolha individual pela Patty, versao exata do exercicio, revisao humana e publicacao manual. Testes de contrato adicionados; E2E autenticado pendente.
