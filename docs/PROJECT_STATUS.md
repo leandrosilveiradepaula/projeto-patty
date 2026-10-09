@@ -1,3 +1,7 @@
+## Auditoria integrada - integridade de configuracoes de avaliacao - 2026-10-09
+
+Cinco blocos de validacao de configuracao: comprimento da chave do tipo de avaliacao; limites de chave e rotulo das medidas; limite de aliases; quantidade minima de fotos como inteiro seguro; limite do rotulo de fotos. Valores de exigencia continuam configuraveis, sem transformar exemplos historicos em regras clinicas. Testes de unidade exercitam o parser real. E2E autenticado pendente.
+
 ## Auditoria integrada - entradas de avaliacoes - 2026-10-09
 
 Cinco blocos: parser decimal compartilhado para medida em rascunho e correcao historica, rejeicao de formatos numericos nao decimais, validacao textual da justificativa de correcao, validacao de identificadores de medidas em remocao e de fotos em vinculacao/desvinculacao. Historico original preservado; decisao profissional continua humana. Testes de unidade incluidos; E2E autenticado pendente.
