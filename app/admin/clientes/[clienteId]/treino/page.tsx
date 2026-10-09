@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { Alert } from "@/components/ui/Alert";
 import { latestPublishedTrainingVersion } from "@/lib/training/published-versions";
 import { isTrainingRequestAfterPublication } from "@/lib/training/request-follow-up";
+import { newestTrainingRequests, newestUnpublishedTrainingVersion } from "@/lib/training/operational-order";
 
 import { AdminTrainingPlanDraftForm } from "@/components/admin/AdminTrainingPlanDraftForm";
 import { AdminTrainingPlanItemForm } from "@/components/admin/AdminTrainingPlanItemForm";
@@ -67,15 +68,15 @@ export default async function AdminClientTrainingPage({ params }: Props) {
     listExerciseVersionsVisibleToCurrentAdmin(),
   ]);
 
+  const orderedRequests = newestTrainingRequests(requests);
   const versions = plan
     ? await listAccessibleClientTrainingPlanVersions(plan.id)
     : [];
-  const openVersion =
-    versions.find((version) => !version.published_at) ?? null;
+  const openVersion = newestUnpublishedTrainingVersion(versions);
   const latestPublished = latestPublishedTrainingVersion(versions);
   const newRequestAfterPublication = Boolean(
-    !openVersion && requests[0] && latestPublished &&
-    isTrainingRequestAfterPublication(requests[0].requested_at, latestPublished.published_at),
+    orderedRequests[0] && latestPublished &&
+    isTrainingRequestAfterPublication(orderedRequests[0].requested_at, latestPublished.published_at),
   );
   const workspaceStatus = openVersion?.reviewed_at
     ? { label: "Pronto para publicar", variant: "info" as const }
@@ -97,6 +98,13 @@ export default async function AdminClientTrainingPage({ params }: Props) {
       ? listAccessibleClientTrainingPlanItems(latestPublished.id)
       : Promise.resolve([]),
   ]);
+
+  const sortedOpenItems = [...openItems].sort(
+    (a, b) => a.position - b.position || a.id.localeCompare(b.id),
+  );
+  const sortedPublishedItems = [...publishedItems].sort(
+    (a, b) => a.position - b.position || a.id.localeCompare(b.id),
+  );
 
   const exerciseOptions = exerciseVersions
     .filter((exercise) => Boolean(exercise.published_at))
@@ -123,9 +131,11 @@ export default async function AdminClientTrainingPage({ params }: Props) {
 
       {newRequestAfterPublication ? (
         <Alert title="Nova solicitação após o treino publicado" variant="warning">
-          A cliente registrou um novo pedido em {formatDateTime(requests[0].requested_at)}.
+          A cliente registrou um novo pedido em {formatDateTime(orderedRequests[0].requested_at)}.
           Revise a solicitação no histórico abaixo e decida os próximos passos.
-          A publicação anterior continua disponível; nenhum novo treino é criado automaticamente.
+          {openVersion
+            ? " Já existe um rascunho em preparação: confira se o pedido exige ajustes nessa versão antes de publicar."
+            : " A publicação anterior continua disponível; nenhum novo treino é criado automaticamente."}
           {" "}<a href="#solicitacao-treino">Ver solicitação</a>
         </Alert>
       ) : null}
@@ -175,7 +185,7 @@ export default async function AdminClientTrainingPage({ params }: Props) {
             </Card>
 
             <div className={styles.items}>
-              {openItems.map((item) => (
+              {sortedOpenItems.map((item) => (
                 <Card className={styles.card} key={item.id} variant="subtle">
                   <div className={styles.itemHeader}>
                     <strong>
@@ -323,7 +333,7 @@ export default async function AdminClientTrainingPage({ params }: Props) {
           />
         ) : (
           <ol className={styles.history}>
-            {requests.map((request) => (
+            {orderedRequests.map((request) => (
               <li key={request.id}>
                 <Card variant="subtle">
                   <p className={styles.meta}>
@@ -400,7 +410,7 @@ export default async function AdminClientTrainingPage({ params }: Props) {
               <p className={styles.description}>{latestPublished.notes}</p>
             ) : null}
             <ol className={styles.publishedList}>
-              {publishedItems.map((item) => (
+              {sortedPublishedItems.map((item) => (
                 <li key={item.id}>
                   <strong>{item.exercise_name}</strong>
                   <span>
