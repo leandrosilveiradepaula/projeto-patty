@@ -82,7 +82,7 @@ export default async function ClientWeeklyFeedbackPage({
   return (
     <>
       <PageHeader
-        description="Responda o acompanhamento referente à semana indicada. Você pode salvar um rascunho e concluir depois."
+        description="Responda o acompanhamento referente à semana indicada. Salvar rascunho não envia suas respostas; somente Enviar feedback conclui o registro."
         eyebrow="Cliente"
         title="Feedback Semanal"
       />
@@ -194,6 +194,7 @@ export default async function ClientWeeklyFeedbackPage({
                                   {question.inputType === "text" ? (
                                     <Textarea
                                       defaultValue={defaultValue}
+                                      maxLength={4000}
                                       name={question.key}
                                       required={question.required}
                                       rows={3}

@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { Section } from "@/components/ui/Section";
 import Link from "next/link";
 import { describeAdminFeedbackReminder } from "@/lib/operations/admin-feedback-reminder";
+import { latestReminderEventByFeedback } from "@/lib/operations/feedback-reminder-order";
 import { parseWeeklyFeedbackDefinition, readWeeklyFeedbackAnswer } from "@/lib/weekly-feedback/definition";
 import {
   getAccessibleClient,
@@ -50,23 +51,7 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
     hasAccessibleProtocolPublicationForClient(client.id),
     listAccessibleClientNotificationEvents(client.id),
   ]);
-  const reminderEventsByFeedbackId = new Map<
-    string,
-    (typeof notificationEvents)[number]
-  >();
-
-  for (const event of notificationEvents) {
-    if (
-      (
-        event.event_key.startsWith("weekly_feedback_reminder:") ||
-        event.event_key.startsWith("weekly_feedback_email_delivery:") ||
-        event.event_key.startsWith("weekly_feedback_email_delivery_failed:")
-      ) &&
-      !reminderEventsByFeedbackId.has(event.weekly_feedback_id)
-    ) {
-      reminderEventsByFeedbackId.set(event.weekly_feedback_id, event);
-    }
-  }
+  const reminderEventsByFeedbackId = latestReminderEventByFeedback(notificationEvents);
   const pendingFeedbacks = feedbacks.filter(
     (feedback) => feedback.submitted_at === null,
   );

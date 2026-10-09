@@ -1,5 +1,6 @@
 import { ClientContentReleaseForm } from "@/components/admin/ClientContentReleaseForm";
 import { isContentVersionReleaseEligible } from "@/lib/content/release-eligibility";
+import { newestClientContentReleases, sortClientContentReleaseOptions } from "@/lib/content/release-order";
 import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { ContentListItem } from "@/components/admin/ContentListItem";
@@ -63,7 +64,7 @@ export default async function AdminClientContentPage({
         : [],
     ),
   );
-  const availableVersions = contentVersions.filter(
+  const availableVersions = sortClientContentReleaseOptions(contentVersions.filter(
     (version) =>
       versionIdsWithAssets.has(version.id) &&
       isContentVersionReleaseEligible({
@@ -71,7 +72,8 @@ export default async function AdminClientContentPage({
         hasAsset: versionIdsWithAssets.has(version.id),
         publishedAt: version.published_at,
       }),
-  );
+  ));
+  const newestReleases = newestClientContentReleases(releases);
   const publishedVersionsAwaitingAsset = contentVersions.filter(
     (version) =>
       Boolean(version.published_at) &&
@@ -149,7 +151,7 @@ export default async function AdminClientContentPage({
           />
         ) : (
           <ul className={styles.contentList}>
-            {releases.map((release) => {
+            {newestReleases.map((release) => {
               const contentVersion = release.educational_content_versions;
               if (!contentVersion) {
                 return null;

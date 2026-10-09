@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import {
   type WeeklyFeedbackRequestFormState,
@@ -25,12 +26,21 @@ export function AdminWeeklyFeedbackRequestForm({
   eligible: boolean;
 }) {
   const formRef = useRef<HTMLFormElement>(null);
+  const router = useRouter();
+  const [periodStart, setPeriodStart] = useState("");
+  const [periodEnd, setPeriodEnd] = useState("");
+  const periodReversed = Boolean(periodStart && periodEnd && periodEnd < periodStart);
   const action = createWeeklyFeedbackRequestAction.bind(null, clientId);
   const [state, formAction, isPending] = useActionState(action, initialState);
 
   useEffect(() => {
-    if (state.success) formRef.current?.reset();
-  }, [state]);
+    if (state.success) {
+      formRef.current?.reset();
+      setPeriodStart("");
+      setPeriodEnd("");
+      router.refresh();
+    }
+  }, [state, router]);
 
   return (
     <form action={formAction} className={styles.form} ref={formRef}>
@@ -45,17 +55,35 @@ export function AdminWeeklyFeedbackRequestForm({
       ) : null}
       <label className={styles.field}>
         <span>Semana de referência · início</span>
-        <TextInput name="periodStart" required type="date" />
+        <TextInput
+          name="periodStart"
+          onChange={(event) => setPeriodStart(event.target.value)}
+          required
+          type="date"
+          value={periodStart}
+        />
       </label>
       <label className={styles.field}>
         <span>Semana de referência · fim</span>
-        <TextInput name="periodEnd" required type="date" />
+        <TextInput
+          min={periodStart || undefined}
+          name="periodEnd"
+          onChange={(event) => setPeriodEnd(event.target.value)}
+          required
+          type="date"
+          value={periodEnd}
+        />
       </label>
       <label className={styles.field}>
         <span>Prazo para resposta (opcional)</span>
         <TextInput name="dueAt" type="datetime-local" />
       </label>
-      <Button disabled={!eligible} loading={isPending} type="submit">
+      {periodReversed ? (
+        <Alert live="polite" title="Revise o período" variant="critical">
+          A data final não pode ser anterior à data inicial.
+        </Alert>
+      ) : null}
+      <Button disabled={!eligible || periodReversed} loading={isPending} type="submit">
         {eligible ? "Criar solicitação" : "Aguardando primeiro protocolo"}
       </Button>
     </form>
