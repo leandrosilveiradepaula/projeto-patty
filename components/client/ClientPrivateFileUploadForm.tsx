@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/FormField";
 import { createClient } from "@/lib/supabase/client";
 import type { PrivateFileKind } from "@/lib/validation/private-files";
+import { validatePrivateFileUploadSelection } from "@/lib/files/private-file-upload-selection";
 
 import styles from "./ClientPrivateFileUploadForm.module.css";
 
@@ -22,6 +23,7 @@ const acceptByKind: Record<PrivateFileKind, string> = {
 };
 
 const errorMessages: Record<string, string> = {
+  missing_file: "Selecione um arquivo não vazio para enviar.",
   extension_mime_mismatch:
     "A extensão do arquivo não corresponde ao tipo informado pelo dispositivo.",
   invalid_extension: "Este formato de arquivo não é aceito.",
@@ -31,13 +33,9 @@ const errorMessages: Record<string, string> = {
   invalid_size: "O arquivo está vazio ou ultrapassa o limite permitido.",
 };
 
-function getExtension(filename: string) {
-  const dotIndex = filename.lastIndexOf(".");
-  return dotIndex >= 0 ? filename.slice(dotIndex + 1) : "";
-}
-
 export function ClientPrivateFileUploadForm() {
   const formRef = useRef<HTMLFormElement>(null);
+  const inFlightRef = useRef(false);
   const router = useRouter();
   const [fileKind, setFileKind] = useState<PrivateFileKind>("photo");
   const [message, setMessage] = useState<string | null>(null);
@@ -46,32 +44,32 @@ export function ClientPrivateFileUploadForm() {
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (inFlightRef.current) return;
     setMessage(null);
     setSuccess(false);
 
     const formData = new FormData(event.currentTarget);
     const selectedFile = formData.get("file");
 
-    if (!(selectedFile instanceof File) || selectedFile.size === 0) {
-      setMessage("Selecione um arquivo para enviar.");
+    const selection = validatePrivateFileUploadSelection(
+      selectedFile instanceof File ? selectedFile : null,
+      fileKind,
+    );
+    if (!selection.ok) {
+      setMessage(errorMessages[selection.error] ?? "Revise o formato e o tamanho do arquivo.");
       return;
     }
 
-    const maxBytes = fileKind === "photo" ? 10 * 1024 * 1024 : 20 * 1024 * 1024;
-    if (selectedFile.size > maxBytes) {
-      setMessage("O arquivo ultrapassa o limite indicado para a categoria selecionada.");
-      return;
-    }
-
+    inFlightRef.current = true;
     setIsPending(true);
 
     try {
       const sessionResult = await createClientFileUploadSessionAction({
-        byteSize: selectedFile.size,
-        claimedMimeType: selectedFile.type,
-        extension: getExtension(selectedFile.name),
+        byteSize: selection.byteSize,
+        claimedMimeType: selection.claimedMimeType,
+        extension: selection.extension,
         fileKind,
-        originalFilename: selectedFile.name,
+        originalFilename: selection.originalFilename,
       });
 
       if (!sessionResult.ok) {
@@ -129,12 +127,13 @@ export function ClientPrivateFileUploadForm() {
       console.error("Private file upload flow failed");
       setMessage("Não foi possível concluir o upload. Tente novamente.");
     } finally {
+      inFlightRef.current = false;
       setIsPending(false);
     }
   }
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit} ref={formRef}>
+    <form aria-busy={isPending} className={styles.form} onSubmit={handleSubmit} ref={formRef}>
       {message ? (
         <Alert
           live={success ? "polite" : "assertive"}
@@ -155,6 +154,7 @@ export function ClientPrivateFileUploadForm() {
           <select
             {...fieldProps}
             className={styles.select}
+            disabled={isPending}
             name="fileKind"
             onChange={(event) => {
               setFileKind(event.target.value as PrivateFileKind);
@@ -187,6 +187,7 @@ export function ClientPrivateFileUploadForm() {
             {...fieldProps}
             accept={acceptByKind[fileKind]}
             className={styles.fileInput}
+            disabled={isPending}
             name="file"
             required
             type="file"
