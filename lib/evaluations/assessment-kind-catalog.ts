@@ -66,6 +66,12 @@ export function parseAssessmentKindCatalogConfiguration(
     const semanticKey = nonBlank(raw.semanticKey, path + ".semanticKey");
     const label = nonBlank(raw.label, path + ".label");
 
+    if (historicalCode.length > 120 || semanticKey.length > 120 || label.length > 200) {
+      throw new TypeError(path + " exceeds maximum field length");
+    }
+    if (!/^[a-z][a-z0-9_-]*$/.test(historicalCode) || !/^[a-z][a-z0-9_-]*$/.test(semanticKey)) {
+      throw new TypeError(path + " contains invalid identifier");
+    }
     if (historicalCodes.has(historicalCode)) {
       throw new TypeError(
         "assessment historical codes must be unique",
@@ -93,6 +99,9 @@ export function resolveAssessmentKindByHistoricalCode(
 ) {
   const configuration =
     parseAssessmentKindCatalogConfiguration(configurationValue);
+  if (typeof historicalCode !== "string" || historicalCode.trim() !== historicalCode) {
+    throw new TypeError("assessment historical code must be a valid string");
+  }
   const entry = configuration.entries.find(
     (candidate) => candidate.historicalCode === historicalCode,
   );
