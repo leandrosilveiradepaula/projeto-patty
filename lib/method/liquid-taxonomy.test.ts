@@ -129,3 +129,23 @@ test("liquid taxonomy rejects unsafe identifiers and oversized labels", () => {
     { key: "water", label: "x".repeat(201), hydrationClass: "pure_water" },
   ] }), /invalid key/);
 });
+
+test("liquid taxonomy bounds number of configurable kinds", () => {
+  const kinds = Array.from({ length: 129 }, (_, index) => ({
+    key: "liquid_" + index, label: "Líquido " + index, hydrationClass: "pure_water",
+  }));
+  assert.throws(() => parseLiquidTaxonomyConfiguration({ kinds }), /maximum kind count/);
+});
+
+test("liquid taxonomy rejects control characters in labels", () => {
+  for (const label of ["Água\u0000", "Água\n", "Água\u007f"]) {
+    assert.throws(() => parseLiquidTaxonomyConfiguration({ kinds: [
+      { key: "water", label, hydrationClass: "pure_water" },
+    ] }), /invalid key or label/);
+  }
+});
+
+test("liquid taxonomy accepts supported configured kinds", () => {
+  const kinds = [{ key: "water", label: "Água", hydrationClass: "pure_water" }];
+  assert.deepEqual(parseLiquidTaxonomyConfiguration({ kinds }).kinds, kinds);
+});
