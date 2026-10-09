@@ -41,6 +41,9 @@ export function validateActivationPassword(
   password: string,
   confirmation: string,
 ): ValidationResult {
+  if (password.length > 128) {
+    return { message: "A senha deve ter no máximo 128 caracteres.", ok: false };
+  }
   if (password.length < 8) {
     return {
       message: "A senha deve ter pelo menos 8 caracteres.",
