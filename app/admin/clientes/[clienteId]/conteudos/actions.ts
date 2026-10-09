@@ -84,6 +84,9 @@ export async function releaseContentToClient(
     };
   }
 
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
+  revalidatePath(`/admin/clientes/${client.id}`);
   revalidatePath(`/admin/clientes/${client.id}/conteudos`);
   revalidatePath("/cliente/conteudos");
 
