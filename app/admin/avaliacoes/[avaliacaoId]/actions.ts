@@ -194,6 +194,10 @@ export async function updateAssessmentDraftAction(
     };
   }
 
+  revalidatePath("/admin/avaliacoes");
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
+  revalidatePath(`/admin/clientes/${assessment.client_id}`);
   revalidatePath(`/admin/avaliacoes/${assessment.id}`);
   revalidatePath(`/admin/clientes/${assessment.client_id}/avaliacoes`);
 
