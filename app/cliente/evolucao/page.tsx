@@ -83,7 +83,7 @@ export default async function ClientProgressPage() {
       >
         {series.length === 0 ? (
           <EmptyState
-            description="A evolução será exibida quando houver avaliações finalizadas com medidas comparáveis. Você pode consultar os registros já disponíveis em Avaliações."
+            description="Não há medidas válidas de avaliações finalizadas para exibir. Você pode consultar os registros já disponíveis em Avaliações."
             title="Evolução ainda indisponível"
             action={<Link href="/cliente/avaliacoes">Consultar avaliações</Link>}
           />
@@ -153,7 +153,7 @@ export default async function ClientProgressPage() {
                               className={styles.assessmentDetailLink}
                               href={`/cliente/avaliacoes#avaliacao-${point.assessmentId}`}
                             >
-                              Abrir registro
+                              Ir à avaliação
                             </Link>
                           </td>
                         </tr>

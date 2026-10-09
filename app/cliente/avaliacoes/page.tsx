@@ -67,7 +67,7 @@ export default async function ClientAssessmentsPage() {
       >
         {items.length === 0 ? (
           <EmptyState
-            description="Ainda não há avaliações finalizadas com medidas disponíveis. Quando a Patty publicar esses registros, você poderá consultá-los aqui."
+            description="Ainda não há avaliações finalizadas com medidas disponíveis. Consulte esta área quando houver novas avaliações concluídas pela Patty."
             title="Nenhuma avaliação disponível"
             action={<Link href="/cliente/mais">Ver outras áreas</Link>}
           />
@@ -98,7 +98,7 @@ export default async function ClientAssessmentsPage() {
                       </h2>
                       <div className={styles.badges}>
                         {assessmentIndex === 0 ? (
-                          <Badge variant="positive">Mais recente</Badge>
+                          <Badge variant="neutral">Mais recente</Badge>
                         ) : null}
                         <Badge variant="neutral">
                           {assessment.measurements.length} medida(s)
