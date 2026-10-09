@@ -87,6 +87,10 @@ export async function addProfessionalFollowUp(
     };
   }
 
+  if (reasonValue.trim().length > 4000) {
+    return { message: "O motivo deve ter no máximo 4.000 caracteres.", success: false };
+  }
+
   try {
     await createAccessibleProfessionalFollowUp({
       adherencePerception: optionalText(formData.get("adherencePerception")),
