@@ -24,9 +24,8 @@ export type MethodConfigurationSchemaKey =
 export function isMethodConfigurationSchemaKey(
   value: string,
 ): value is MethodConfigurationSchemaKey {
-  return (METHOD_CONFIGURATION_SCHEMA_KEYS as readonly string[]).includes(
-    value,
-  );
+  return typeof value === "string" &&
+    (METHOD_CONFIGURATION_SCHEMA_KEYS as readonly string[]).includes(value);
 }
 
 export function validateMethodConfigurationBySchema(
