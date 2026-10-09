@@ -103,3 +103,5 @@
   padding: 0 var(--space-3);
   font: inherit;
 }
+
+.list > li { scroll-margin-top: var(--space-4); }

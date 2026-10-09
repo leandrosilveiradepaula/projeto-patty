@@ -29,6 +29,8 @@ test("weekly feedback validates intent before fetching private feedback record",
 
 test("client correction history date remains parsed on both correction journeys", () => {
   assert.equal(checkins.split('parseCheckinHistoryDay(formData.get("historyDay"), currentSaoPauloDate())').length - 1, 1);
-  assert.equal(checkins.split('redirect(correctionRedirect("correction-recorded", formData))').length - 1, 2);
+  assert.equal(checkins.split('redirect(correctionRedirect("correction-recorded", formData, "liquido"))').length - 1, 1);
+  assert.equal(checkins.split('redirect(correctionRedirect("correction-recorded", formData, "atividade"))').length - 1, 1);
+  assert.ok(checkins.includes('isUuid(eventId)'));
   assert.ok(checkins.includes('checkinHistorySearch(day)'));
 });
