@@ -101,3 +101,23 @@ test("progress delta overflow never becomes Infinity", () => {
   ]);
   assert.equal(series[0]?.points[1]?.deltaFromPrevious, null);
 });
+
+test("progress ignores assessments without valid dates", () => {
+  const series = buildFactualProgressSeries([
+    { id: "invalid", assessedAt: "not-a-date", measurements: [{ measurement_key: "peso", measurement_value: 99, unit: "kg" }] },
+    { id: "valid", assessedAt: "2026-01-01", measurements: [{ measurement_key: "peso", measurement_value: 70, unit: "kg" }] },
+  ]);
+  assert.deepEqual(series[0]?.points.map((point) => point.assessmentId), ["valid"]);
+});
+
+test("progress excludes measurements without usable keys or units", () => {
+  const series = buildFactualProgressSeries([
+    { id: "a", assessedAt: "2026-01-01", measurements: [
+      { measurement_key: " ", measurement_value: 70, unit: "kg" },
+      { measurement_key: "peso", measurement_value: 70, unit: " " },
+      { measurement_key: "peso", measurement_value: 70, unit: "kg" },
+    ] },
+  ]);
+  assert.equal(series.length, 1);
+  assert.equal(series[0]?.points.length, 1);
+});

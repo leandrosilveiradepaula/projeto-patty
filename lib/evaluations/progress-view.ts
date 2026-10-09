@@ -40,9 +40,11 @@ export function buildFactualProgressSeries(
   const seriesByIdentity = new Map<string, FactualProgressSeries>();
 
   for (const assessment of ordered) {
+    if (!Number.isFinite(Date.parse(assessment.assessedAt))) continue;
     const seenInAssessment = new Set<string>();
     for (const measurement of assessment.measurements) {
       if (!Number.isFinite(measurement.measurement_value)) continue;
+      if (!measurement.measurement_key.trim() || !measurement.unit.trim()) continue;
       const identity = measurement.measurement_key + "\u0000" + measurement.unit;
       if (seenInAssessment.has(identity)) continue;
       seenInAssessment.add(identity);

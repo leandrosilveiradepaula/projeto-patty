@@ -59,3 +59,25 @@ test("professional comparison displays a placeholder for nonfinite current value
   assert.equal(result[0]?.currentValue, "—");
   assert.equal(result[0]?.previousValue, undefined);
 });
+
+test("professional comparison finds prior value by both measurement key and unit", () => {
+  const result = buildFactualMeasurementComparison(
+    [{ measurement_key: "peso", measurement_value: 70, unit: "kg" }],
+    [
+      { measurement_key: "peso", measurement_value: 154, unit: "lb" },
+      { measurement_key: "peso", measurement_value: 72, unit: "kg" },
+    ],
+  );
+  assert.equal(result[0]?.previousValue, "72");
+});
+
+test("professional comparison does not lose matching unit to later unrelated unit", () => {
+  const result = buildFactualMeasurementComparison(
+    [{ measurement_key: "peso", measurement_value: 70, unit: "kg" }],
+    [
+      { measurement_key: "peso", measurement_value: 72, unit: "kg" },
+      { measurement_key: "peso", measurement_value: 154, unit: "lb" },
+    ],
+  );
+  assert.equal(result[0]?.previousValue, "72");
+});

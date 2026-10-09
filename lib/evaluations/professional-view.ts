@@ -27,11 +27,12 @@ export function buildFactualMeasurementComparison(
   previous: AssessmentMeasurementLike[],
 ) {
   const previousByKey = new Map(
-    previous.filter((measurement) => Number.isFinite(measurement.measurement_value)).map((measurement) => [measurement.measurement_key, measurement]),
+    previous.filter((measurement) => Number.isFinite(measurement.measurement_value))
+      .map((measurement) => [measurement.measurement_key + "\u0000" + measurement.unit, measurement] as const),
   );
 
   return current.map((measurement) => {
-    const previousMeasurement = previousByKey.get(measurement.measurement_key);
+    const previousMeasurement = previousByKey.get(measurement.measurement_key + "\u0000" + measurement.unit);
     const previousValue =
       Number.isFinite(measurement.measurement_value) && previousMeasurement && previousMeasurement.unit === measurement.unit
         ? String(previousMeasurement.measurement_value)

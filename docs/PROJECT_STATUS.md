@@ -1,3 +1,7 @@
+## Auditoria integrada - consistencia de leituras factuais das avaliacoes - 2026-10-09
+
+Cinco verificacoes: comparacao profissional encontra medida anterior pela chave e unidade; unidade distinta anterior nao encobre a unidade correta; avaliacao sem data valida nao entra na linha do tempo; medida sem chave identificavel nao entra na evolucao; medida sem unidade nao entra na evolucao. Testes reais adicionados. Historico persistido preservado, sem conversoes automaticas nem interpretacao clinica. E2E autenticado pendente.
+
 ## Auditoria integrada - cronologia e exibicao factual de avaliacoes - 2026-10-09
 
 Cinco frentes: ordenacao de correcoes por instante real entre fusos; ordenacao de pontos de evolucao por instante real; delta de evolucao protegido contra overflow; exibicao de valores atuais invalidos sem NaN/Infinity; comparacao profissional sem valor anterior para medida atual invalida. Testes reais adicionados. Sem inferencia clinica, conversao de unidades ou alteracao do historico persistido. E2E autenticado pendente.
