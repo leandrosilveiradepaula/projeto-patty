@@ -24,6 +24,8 @@ export function parseAssessmentDate(value: FormDataEntryValue | null) {
     return null;
   }
 
+  if (value.startsWith("0000-")) return null;
+
   const date = new Date(`${value}T12:00:00.000Z`);
 
   if (
@@ -50,16 +52,19 @@ export function parseMeasurementDraft(input: {
   unit: FormDataEntryValue | null;
   value: FormDataEntryValue | null;
 }) {
+  if ([input.key, input.unit, input.value].some((entry) => entry !== null && typeof entry !== "string")) {
+    return { error: "Informe dados textuais válidos para a medida." } as const;
+  }
   const rawKey = typeof input.key === "string" ? input.key.trim() : "";
   const key = rawKey ? canonicalizeKnownAssessmentMeasurementKey(rawKey) : "";
   const unit = typeof input.unit === "string" ? input.unit.trim() : "";
   const rawValue = typeof input.value === "string" ? input.value.trim() : "";
 
-  if (!key || key.length > 120) {
+  if (!key || key.length > 120 || /[\u0000-\u001f\u007f]/.test(key)) {
     return { error: "Informe uma chave de medida com até 120 caracteres." } as const;
   }
 
-  if (!unit || unit.length > 40) {
+  if (!unit || unit.length > 40 || /[\u0000-\u001f\u007f]/.test(unit)) {
     return { error: "Informe uma unidade com até 40 caracteres." } as const;
   }
 
@@ -67,6 +72,9 @@ export function parseMeasurementDraft(input: {
     return { error: "Informe o valor da medida." } as const;
   }
 
+  if (rawValue.length > 100) {
+    return { error: "Informe um valor numérico com até 100 caracteres." } as const;
+  }
   const value = parseAssessmentMeasurementNumber(rawValue);
 
   if (value === null) {

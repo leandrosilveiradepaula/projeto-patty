@@ -84,3 +84,30 @@ test("unknown measurement keys remain freeform while confirmed cadence keys are 
     },
   );
 });
+
+test("assessment date rejects year zero", () => {
+  assert.equal(parseAssessmentDate("0000-01-01"), null);
+});
+
+test("measurement draft rejects file-valued fields", () => {
+  for (const field of ["key", "unit", "value"] as const) {
+    const input: { key: FormDataEntryValue; unit: FormDataEntryValue; value: FormDataEntryValue } = { key: "peso", unit: "kg", value: "70" };
+    input[field] = new Blob(["invalid"]) as unknown as File;
+    assert.ok("error" in parseMeasurementDraft(input));
+  }
+});
+
+test("measurement draft rejects control characters in keys and units", () => {
+  assert.ok("error" in parseMeasurementDraft({ key: "peso\u0000", unit: "kg", value: "70" }));
+  assert.ok("error" in parseMeasurementDraft({ key: "peso", unit: "kg\u007f", value: "70" }));
+});
+
+test("measurement draft rejects oversized numeric strings", () => {
+  assert.ok("error" in parseMeasurementDraft({ key: "peso", unit: "kg", value: "1".repeat(101) }));
+});
+
+test("measurement draft retains ordinary decimal input", () => {
+  assert.deepEqual(parseMeasurementDraft({ key: "peso", unit: "kg", value: "70,5" }), {
+    data: { key: "peso", unit: "kg", value: 70.5 },
+  });
+});
