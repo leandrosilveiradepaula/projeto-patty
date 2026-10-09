@@ -470,3 +470,45 @@ test("enforces the total expression node safety limit", () => {
     "LIMIT_EXCEEDED",
   );
 });
+
+test("rejects unsafe input, parameter and output identifiers", () => {
+  for (const key of ["__proto__", "constructor", "toString", "bad key", "1bad", "x".repeat(121)]) {
+    for (const section of ["inputs", "parameters", "outputs"] as const) {
+      const config: Record<string, unknown> = { inputs: {}, parameters: {}, outputs: {} };
+      (config[section] as Record<string, unknown>)[key] = section === "inputs"
+        ? { unit: "kg" }
+        : section === "parameters"
+          ? { value: 1, unit: "kg" }
+          : { unit: "kg", expression: { op: "literal", value: 1, unit: "kg" } };
+      assertEngineError(() => validateMethodEngineConfiguration(config), "INVALID_CONFIGURATION");
+    }
+  }
+});
+
+test("rejects inherited input and parameter references", () => {
+  for (const op of ["input", "parameter"]) {
+    assertEngineError(() => validateMethodEngineConfiguration({
+      inputs: {}, parameters: {}, outputs: {
+        result: { unit: "ratio", expression: { op, key: "constructor" } },
+      },
+    }), "INVALID_CONFIGURATION");
+  }
+});
+
+test("rejects undeclared runtime input names", () => {
+  assertEngineError(() => evaluateMethodEngineConfiguration({
+    inputs: {}, parameters: {}, outputs: {},
+  }, { constructor: { value: 1, unit: "kg" } }), "UNKNOWN_INPUT");
+});
+
+test("method engine retains ordinary configured identifiers and calculations", () => {
+  const result = evaluateMethodEngineConfiguration({
+    inputs: { weight_kg: { unit: "kg" } },
+    parameters: { coefficient_v2: { value: 2, unit: "g_per_kg" } },
+    outputs: { protein_g: { unit: "g", expression: { op: "multiply", args: [
+      { op: "input", key: "weight_kg" },
+      { op: "parameter", key: "coefficient_v2" },
+    ] } } },
+  }, { weight_kg: { value: 60, unit: "kg" } });
+  assert.equal(result.outputs.protein_g.value, 120);
+});
