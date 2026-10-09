@@ -135,6 +135,9 @@ export function resolveHydrationConfiguration(
     resolved.parameters.daily_ml_per_kg = overriddenParameter;
   }
 
+  evaluateMethodEngineConfiguration(resolved, {
+    weight_kg: { value: 1, unit: "kg" },
+  });
   return resolved;
 }
 
