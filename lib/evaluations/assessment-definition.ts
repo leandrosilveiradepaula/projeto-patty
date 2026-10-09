@@ -73,6 +73,9 @@ export function parseAssessmentDefinitionConfiguration(
   );
 
   const kindKey = nonBlank(value.kindKey, "assessment definition.kindKey");
+  if (kindKey.length > 120) {
+    throw new TypeError("assessment definition.kindKey exceeds maximum length");
+  }
 
   if (
     !Array.isArray(value.requiredMeasurements) ||
@@ -95,6 +98,9 @@ export function parseAssessmentDefinitionConfiguration(
       exactKeys(raw, ["key", "label", "aliases"], path);
       const key = normalizeConfiguredAssessmentKey(nonBlank(raw.key, path + ".key"));
       const label = nonBlank(raw.label, path + ".label");
+      if (key.length > 120 || label.length > 200) {
+        throw new TypeError(path + " exceeds maximum key or label length");
+      }
 
       if (seenKeys.has(key)) {
         throw new TypeError("assessment measurement keys must be unique");
@@ -111,6 +117,9 @@ export function parseAssessmentDefinitionConfiguration(
         ),
       );
 
+      if (aliases.some((alias) => alias.length > 120)) {
+        throw new TypeError(path + ".aliases contains an overlong alias");
+      }
       const normalizedAliases = Array.from(new Set([key, ...aliases]));
       for (const alias of normalizedAliases) {
         if (seenAliases.has(alias)) {
@@ -141,7 +150,7 @@ export function parseAssessmentDefinitionConfiguration(
 
     if (
       typeof value.photoRequirement.minimumCount !== "number" ||
-      !Number.isInteger(value.photoRequirement.minimumCount) ||
+      !Number.isSafeInteger(value.photoRequirement.minimumCount) ||
       value.photoRequirement.minimumCount <= 0
     ) {
       throw new TypeError(
@@ -149,11 +158,12 @@ export function parseAssessmentDefinitionConfiguration(
       );
     }
 
+    const photoLabel = nonBlank(value.photoRequirement.label, "assessment definition.photoRequirement.label");
+    if (photoLabel.length > 200) {
+      throw new TypeError("assessment definition.photoRequirement.label exceeds maximum length");
+    }
     photoRequirement = {
-      label: nonBlank(
-        value.photoRequirement.label,
-        "assessment definition.photoRequirement.label",
-      ),
+      label: photoLabel,
       minimumCount: value.photoRequirement.minimumCount,
     };
   }
