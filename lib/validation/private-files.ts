@@ -172,6 +172,9 @@ export function buildPrivateFileObjectPath(input: {
   if (!Object.prototype.hasOwnProperty.call(PRIVATE_FILE_ALLOWLIST, input.fileKind)) {
     throw new Error("Invalid private file kind");
   }
+  if (typeof input.extension !== "string") {
+    throw new Error("Invalid extension for private file path");
+  }
   const extension = normalizeExtension(input.extension);
   const allowed = PRIVATE_FILE_ALLOWLIST[input.fileKind];
 
