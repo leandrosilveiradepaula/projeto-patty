@@ -419,6 +419,7 @@ export async function updateWeeklyFeedbackNotificationPreferenceAction(
   revalidatePath("/admin/pendencias");
   revalidatePath(`/admin/clientes/${client.id}`);
   revalidatePath(`/admin/clientes/${client.id}/feedback-semanal`);
+  revalidatePath("/cliente");
   revalidatePath("/cliente/feedback-semanal");
 
   return {
