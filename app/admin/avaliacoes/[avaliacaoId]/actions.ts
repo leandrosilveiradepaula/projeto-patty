@@ -541,6 +541,9 @@ export async function correctFinalizedAssessmentMeasurementAction(
     };
   }
 
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
+  revalidatePath("/admin/avaliacoes");
   revalidatePath("/admin/avaliacoes/" + assessment.id);
   revalidatePath("/admin/clientes/" + assessment.client_id);
   revalidatePath("/admin/clientes/" + assessment.client_id + "/avaliacoes");
