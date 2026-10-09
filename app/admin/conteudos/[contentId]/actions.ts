@@ -169,6 +169,10 @@ export async function createNextEducationalContentVersionAction(
       0,
     ) + 1;
 
+  if (!Number.isSafeInteger(nextVersionNumber) || nextVersionNumber < 2) {
+    throw new Error("Não foi possível definir um número válido para a próxima versão");
+  }
+
   await createAccessibleEducationalContentVersion({
     categoryKey: latestPublished.category_key,
     contentId,
