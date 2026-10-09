@@ -29,7 +29,7 @@ export function parseScalarParameterShapeConfiguration(
     throw new TypeError("scalar parameter value must be a finite number");
   }
 
-  if (typeof value.unit !== "string" || value.unit.trim().length === 0) {
+  if (typeof value.unit !== "string" || value.unit.trim().length === 0 || value.unit.length > 80 || value.unit !== value.unit.trim()) {
     throw new TypeError(
       "scalar parameter unit must be a non-blank string",
     );
