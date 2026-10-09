@@ -1,3 +1,7 @@
+## Auditoria integrada - entradas de avaliacoes - 2026-10-09
+
+Cinco blocos: parser decimal compartilhado para medida em rascunho e correcao historica, rejeicao de formatos numericos nao decimais, validacao textual da justificativa de correcao, validacao de identificadores de medidas em remocao e de fotos em vinculacao/desvinculacao. Historico original preservado; decisao profissional continua humana. Testes de unidade incluidos; E2E autenticado pendente.
+
 ## Auditoria integrada - validacao de formularios de autenticacao - 2026-10-09
 
 Cinco blocos: login usa validador compartilhado de email; login limita tamanho da senha antes de consultar Auth; recuperacao de senha reutiliza politica de email do convite; ambos os convites rejeitam nomes nao textuais; ambos os convites rejeitam emails nao textuais. Testes de contrato incluidos. Sem alterar fluxo de MFA, Auth, RLS ou links confiaveis. E2E autenticado pendente.

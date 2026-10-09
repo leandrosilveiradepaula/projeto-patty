@@ -9,6 +9,7 @@ import {
 } from "@/lib/evaluations/assessment-configuration-loader";
 import {
   parseAssessmentDate,
+  parseAssessmentMeasurementNumber,
   parseMeasurementDraft,
 } from "@/lib/evaluations/assessment-draft";
 import { buildConfigurableAssessmentReadiness } from "@/lib/evaluations/assessment-definition";
@@ -284,6 +285,10 @@ export async function deleteAssessmentMeasurementAction(
     return { message, success: false };
   }
 
+  if (!isUuid(measurementId)) {
+    return { message: "Identificador de medida inválido.", success: false };
+  }
+
   try {
     await deleteAccessibleAssessmentMeasurement({
       assessmentId: assessment.id,
@@ -320,7 +325,7 @@ export async function linkAssessmentPhotoAction(
 
   const fileId = formData.get("clientFileId");
 
-  if (typeof fileId !== "string" || !fileId) {
+  if (typeof fileId !== "string" || !isUuid(fileId)) {
     return {
       message: "Selecione uma foto privada para vincular.",
       success: false,
@@ -374,6 +379,10 @@ export async function unlinkAssessmentPhotoAction(
 
   if (!assessment) {
     return { message, success: false };
+  }
+
+  if (!isUuid(clientFileId)) {
+    return { message: "Identificador de foto inválido.", success: false };
   }
 
   try {
@@ -535,9 +544,11 @@ export async function correctFinalizedAssessmentMeasurementAction(
   const rawValue = formData.get("correctedMeasurementValue");
   const rawUnit = formData.get("correctedUnit");
   const rawNote = formData.get("correctionNote");
-  const normalizedValue = typeof rawValue === "string" ? rawValue.trim().replace(",", ".") : "";
-  const value = normalizedValue.length > 0 ? Number(normalizedValue) : Number.NaN;
+  const value = typeof rawValue === "string" ? parseAssessmentMeasurementNumber(rawValue) : null;
   const unit = typeof rawUnit === "string" ? rawUnit.trim() : "";
+  if (rawNote !== null && typeof rawNote !== "string") {
+    return { message: "A justificativa deve ser um texto válido.", success: false };
+  }
   const note =
     typeof rawNote === "string" && rawNote.trim() ? rawNote.trim() : null;
 
@@ -545,7 +556,7 @@ export async function correctFinalizedAssessmentMeasurementAction(
     return { message: "A justificativa da correção deve ter no máximo 4.000 caracteres.", success: false };
   }
 
-  if (!Number.isFinite(value)) {
+  if (value === null) {
     return { message: "Informe um valor numérico válido para a correção.", success: false };
   }
 
