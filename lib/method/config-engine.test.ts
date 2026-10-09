@@ -512,3 +512,28 @@ test("method engine retains ordinary configured identifiers and calculations", (
   }, { weight_kg: { value: 60, unit: "kg" } });
   assert.equal(result.outputs.protein_g.value, 120);
 });
+
+test("bounds configurable input, parameter and output sections", () => {
+  for (const section of ["inputs", "parameters", "outputs"] as const) {
+    const config: Record<string, Record<string, unknown>> = { inputs: {}, parameters: {}, outputs: {} };
+    for (let i = 0; i < 129; i += 1) {
+      const key = "item_" + i;
+      config[section][key] = section === "inputs" ? { unit: "kg" } : section === "parameters"
+        ? { value: 1, unit: "ratio" }
+        : { unit: "ratio", expression: { op: "literal", value: 1, unit: "ratio" } };
+    }
+    assertEngineError(() => validateMethodEngineConfiguration(config), "LIMIT_EXCEEDED");
+  }
+});
+
+test("bounds runtime inputs before validating each entry", () => {
+  const values: Record<string, unknown> = {};
+  for (let i = 0; i < 129; i += 1) values["item_" + i] = { value: 1, unit: "kg" };
+  assertEngineError(() => evaluateMethodEngineConfiguration({ inputs: {}, parameters: {}, outputs: {} }, values), "LIMIT_EXCEEDED");
+});
+
+test("allows configuration sections within the supported bound", () => {
+  const parameters: Record<string, unknown> = {};
+  for (let i = 0; i < 128; i += 1) parameters["item_" + i] = { value: 1, unit: "ratio" };
+  assert.equal(Object.keys(validateMethodEngineConfiguration({ inputs: {}, parameters, outputs: {} }).parameters).length, 128);
+});
