@@ -33,6 +33,7 @@ export function parseWeeklyFeedbackDefinition(
   if (
     !Array.isArray(rawQuestions) ||
     rawQuestions.length === 0 ||
+    typeof schemaVersion !== "number" ||
     !Number.isSafeInteger(schemaVersion) ||
     schemaVersion < 1
   ) {
