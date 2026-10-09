@@ -139,6 +139,18 @@ export default async function AdminClienteAnamnesePage({
                     >
                       Ver respostas originais
                     </Link>
+                    <Link className={styles.detailLink} href={`/admin/anamneses/${submission.id}/revisao`}>
+                      Abrir revisão profissional
+                    </Link>
+                    <Link className={styles.detailLink} href={`/admin/anamneses/${submission.id}/esclarecimentos`}>
+                      Consultar esclarecimentos
+                    </Link>
+                    <Link className={styles.detailLink} href={`/admin/anamneses/${submission.id}/correcoes`}>
+                      Consultar correções
+                    </Link>
+                    <Link className={styles.detailLink} href={`/admin/anamneses/${submission.id}/ia`}>
+                      Consultar análise assistiva
+                    </Link>
                   </Card>
                 </li>
               );
