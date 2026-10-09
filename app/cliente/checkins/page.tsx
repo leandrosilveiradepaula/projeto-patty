@@ -197,7 +197,7 @@ export default async function ClientCheckinsPage({
               <div><dt>Água pura</dt><dd>{formatMl(waterMl)}</dd></div>
             </dl>
             <p className={styles.note}>
-              Valores dos registros deste dia, incluindo correções. Não existe meta automática de hidratação nem proporção mínima entre os tipos de líquido.
+              Valores dos registros deste dia, incluindo correções. O sistema não aplica automaticamente uma meta diária nem uma proporção mínima entre os tipos de líquido.
             </p>
           </Card>
 
