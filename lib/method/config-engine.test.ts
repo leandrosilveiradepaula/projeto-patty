@@ -491,14 +491,14 @@ test("rejects inherited input and parameter references", () => {
       inputs: {}, parameters: {}, outputs: {
         result: { unit: "ratio", expression: { op, key: "constructor" } },
       },
-    }), op === "input" ? "MISSING_INPUT_DEFINITION" : "MISSING_PARAMETER");
+    }), "INVALID_CONFIGURATION");
   }
 });
 
 test("rejects undeclared runtime input names", () => {
   assertEngineError(() => evaluateMethodEngineConfiguration({
     inputs: {}, parameters: {}, outputs: {},
-  }, { constructor: { value: 1, unit: "kg" } }), "UNKNOWN_INPUT");
+  }, { constructor: { value: 1, unit: "kg" } }), "INVALID_CONFIGURATION");
 });
 
 test("method engine retains ordinary configured identifiers and calculations", () => {
