@@ -38,7 +38,9 @@ test("released content with missing asset links to its exact historical release"
   assert.equal(items[0]?.href, "/admin/clientes/client-x/conteudos#liberacao-release-x");
   const page = read("app/admin/clientes/[clienteId]/conteudos/page.tsx");
   assert.ok(page.includes('id={`liberacao-${release.id}`}'));
-  assert.ok(page.includes('href="/admin/conteudos">Verificar asset na biblioteca'));
+  assert.ok(page.includes("parentContentIdByVersionId.has(contentVersion.id)"));
+  assert.ok(page.includes("Verificar asset desta versão"));
+  assert.ok(page.includes('id={`liberacao-${release.id}`}'));
 });
 
 test("normal already-accessible content remains actionable only through its existing release", () => {
