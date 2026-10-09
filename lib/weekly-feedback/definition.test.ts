@@ -93,6 +93,6 @@ test("definition still accepts existing configured question types", () => {
 
 test("feedback rejects file-valued answers rather than silently omitting them", () => {
   const form = new FormData();
-  form.set("treinos", new File(["invalid"], "invalid.txt"));
+  form.set("treinos", new Blob(["invalid"]), "invalid.txt");
   assert.throws(() => buildWeeklyFeedbackAnswers(form, definition), /Resposta inválida/);
 });
