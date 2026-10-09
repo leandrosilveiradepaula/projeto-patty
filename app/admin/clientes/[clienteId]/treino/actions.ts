@@ -258,6 +258,9 @@ export async function addTrainingPlanItemAction(
       }
 
       exerciseName = exerciseVersion.name.trim();
+      if (!exerciseName) {
+        return initialError("A versão publicada do exercício está sem nome válido.");
+      }
     } else {
       exerciseName = requiredText(
         formData,
@@ -368,6 +371,9 @@ export async function updateTrainingPlanItemAction(
       }
 
       exerciseName = exerciseVersion.name.trim();
+      if (!exerciseName) {
+        return initialError("A versão publicada do exercício está sem nome válido.");
+      }
     } else {
       exerciseName = requiredText(
         formData,
