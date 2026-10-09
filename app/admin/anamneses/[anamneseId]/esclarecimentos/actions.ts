@@ -34,6 +34,10 @@ export async function addAnamnesisClarificationRequest(
     return { message: "Escreva o pedido de esclarecimento antes de enviar.", success: false };
   }
 
+  if (requestText.trim().length > 4000) {
+    return { message: "O pedido deve ter no máximo 4.000 caracteres.", success: false };
+  }
+
   let sourceAnswerId: string | null = null;
   if (typeof rawSourceAnswerId === "string" && rawSourceAnswerId.trim()) {
     if (!isUuid(rawSourceAnswerId)) {
