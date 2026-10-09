@@ -40,7 +40,7 @@ export function AdminWeeklyFeedbackRequestForm({
       setPeriodEnd("");
       router.refresh();
     }
-  }, [state.success, router]);
+  }, [state, router]);
 
   return (
     <form action={formAction} className={styles.form} ref={formRef}>

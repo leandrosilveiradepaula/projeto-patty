@@ -46,7 +46,7 @@ export function ClientContentReleaseForm({
       setConfirmRelease(false);
       router.refresh();
     }
-  }, [state.success, router]);
+  }, [state, router]);
 
   return (
     <form action={formAction} className={styles.form}>
