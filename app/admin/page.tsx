@@ -214,6 +214,21 @@ export default async function AdminPage() {
           <Link className={styles.quickAction} href="/admin/exercicios">
             Abrir exercícios
           </Link>
+          <Link className={styles.quickAction} href="/admin/avaliacoes">
+            Consultar avaliações
+          </Link>
+          <Link className={styles.quickAction} href="/admin/protocolos">
+            Gerenciar protocolos
+          </Link>
+          <Link className={styles.quickAction} href="/admin/arquivos">
+            Revisar arquivos privados
+          </Link>
+          <Link className={styles.quickAction} href="/admin/clientes">
+            Abrir acompanhamentos
+          </Link>
+          <Link className={styles.quickAction} href="/admin/configuracoes">
+            Ajustar configurações
+          </Link>
           <Link className={styles.quickAction} href="/admin/ia">
             Análises da IA{aiCount > 0 ? ` (${aiCount})` : ""}
           </Link>
