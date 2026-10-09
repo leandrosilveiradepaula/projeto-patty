@@ -19,6 +19,9 @@ export async function addAnamnesisClarificationRequest(
   formData: FormData,
 ): Promise<AnamnesisClarificationRequestFormState> {
   const context = await requireRole("admin");
+  if (!isUuid(submissionId)) {
+    return { message: "Identificador de Anamnese inválido.", success: false };
+  }
   const submission = await getAccessibleAnamnesisSubmission(submissionId);
 
   if (!submission || !submission.submitted_at) {
@@ -29,6 +32,10 @@ export async function addAnamnesisClarificationRequest(
   const rawSourceAnswerId = formData.get("sourceAnswerId");
   if (typeof requestText !== "string" || !requestText.trim()) {
     return { message: "Escreva o pedido de esclarecimento antes de enviar.", success: false };
+  }
+
+  if (requestText.trim().length > 4000) {
+    return { message: "O pedido deve ter no máximo 4.000 caracteres.", success: false };
   }
 
   let sourceAnswerId: string | null = null;
@@ -62,6 +69,7 @@ export async function addAnamnesisClarificationRequest(
   revalidatePath(`/admin/clientes/${submission.client_id}/anamnese`);
   revalidatePath("/cliente");
   revalidatePath("/cliente/anamnese");
+  revalidatePath(`/cliente/anamnese/${submission.id}`);
   revalidatePath(`/cliente/anamnese/${submission.id}/esclarecimentos`);
   return { message: "Pedido de esclarecimento registrado para a cliente.", success: true };
 }
@@ -118,6 +126,7 @@ export async function resolveAnamnesisClarificationRequest(
   revalidatePath("/admin/clientes/" + submission.client_id + "/anamnese");
   revalidatePath("/cliente");
   revalidatePath("/cliente/anamnese");
+  revalidatePath("/cliente/anamnese/" + submission.id);
   revalidatePath("/cliente/anamnese/" + submission.id + "/esclarecimentos");
 
   return { message: "Pedido marcado como resolvido.", success: true };

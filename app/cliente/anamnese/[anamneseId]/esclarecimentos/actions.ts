@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { isUuid } from "@/lib/validation/uuid";
 import { requireRole } from "@/lib/supabase/auth";
 import {
   createAccessibleAnamnesisClarificationResponse,
@@ -19,6 +20,9 @@ export async function respondToAnamnesisClarification(
   formData: FormData,
 ): Promise<AnamnesisClarificationResponseFormState> {
   const context = await requireRole("client");
+  if (!isUuid(submissionId) || !isUuid(requestId)) {
+    return { message: "Este pedido de esclarecimento não está disponível.", success: false };
+  }
   const [client, submission, request] = await Promise.all([
     getCurrentClient(),
     getAccessibleAnamnesisSubmission(submissionId),
@@ -45,6 +49,10 @@ export async function respondToAnamnesisClarification(
     return { message: "Escreva seu esclarecimento antes de registrar.", success: false };
   }
 
+  if (responseText.trim().length > 4000) {
+    return { message: "O esclarecimento deve ter no máximo 4.000 caracteres.", success: false };
+  }
+
   try {
     await createAccessibleAnamnesisClarificationResponse({
       clarificationRequestId: request.id,
@@ -63,6 +71,7 @@ export async function respondToAnamnesisClarification(
   revalidatePath(`/admin/clientes/${client.id}/anamnese`);
   revalidatePath("/cliente");
   revalidatePath("/cliente/anamnese");
+  revalidatePath(`/cliente/anamnese/${submission.id}`);
   revalidatePath(`/cliente/anamnese/${submission.id}/esclarecimentos`);
   return { message: "Seu esclarecimento foi registrado.", success: true };
 }

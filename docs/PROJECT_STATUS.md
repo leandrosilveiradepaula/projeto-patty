@@ -1,3 +1,7 @@
+## Auditoria integrada - esclarecimentos de anamnese - 2026-10-09
+
+Cinco blocos relacionados: IDs validados antes da leitura privada pela cliente; ID validado antes da leitura administrativa; limites de texto de 4.000 caracteres nos pedidos e respostas; atualizacao do detalhe da anamnese apos resposta e novo pedido; atualizacao apos resolucao profissional. Mantidos resposta original, resposta de esclarecimento e resolucao humana como registros distintos. Testes de contrato adicionados; E2E autenticado pendente.
+
 ## Auditoria integrada - avaliacao e cadastro visiveis apos mutacoes - 2026-10-09
 
 Cinco operacoes com atualizacao coerente de interface: vinculo de foto privada a avaliacao, desvinculo sem excluir arquivo, registro de acompanhamento profissional, alteracao de Cadastro Atual pela administracao e alteracao versionada do canal de Feedback Semanal. Apenas invalidacao de visoes apos sucesso, sem alterar acesso a arquivos, historico, schema ou RLS. Testes de contrato incluidos; E2E autenticado pendente.
