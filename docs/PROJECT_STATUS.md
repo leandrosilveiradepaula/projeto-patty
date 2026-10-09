@@ -1,3 +1,7 @@
+## Auditoria integrada - integridade de identificadores no motor parametrizavel - 2026-10-09
+
+Dez verificacoes relacionadas: chaves seguras para entradas, parametros e saidas; limite de 120 caracteres; rejeicao de nomes de prototipo e nomes malformados; referencias de entrada verificadas por propriedade propria; referencias de parametros verificadas por propriedade propria; entradas de execucao validadas por propriedade propria; preservacao do formato de objetos retornados; testes de entradas e referencias invalidas; teste de calculo parametrizado valido. Sem alterar formulas clinicas, limites de negocio, migrations ou RLS. CI e E2E autenticado pendentes.
+
 ## Auditoria integrada - integridade do Carb Cycle e override de hidratacao - 2026-10-09
 
 Dez frentes relacionadas: (1) formato seguro da chave de fase; (2) limite da chave de fase; (3) formato seguro de chaves de passos; (4) limite de chaves de passos; (5) referencias de media com identificadores validos; (6) rotulos limitados; (7) caracteres de controle e espacos exteriores rejeitados; (8) overflow de macros por passo recusado; (9) overflow de medias recusado; (10) configuracao de hidratacao resolvida reavaliada apos override. Testes unitarios cobrem configuracoes validas e entradas invalidas. Nenhuma fase nova ou regra clinica inferida; parametrizacao e revisao humana preservadas. CI e E2E autenticado pendentes.
