@@ -30,7 +30,7 @@ export function validateInvitationEmail(value: string): ValidationResult {
     return { message: "Informe o email da cliente.", ok: false };
   }
 
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { message: "Informe um email válido.", ok: false };
   }
 
@@ -41,6 +41,9 @@ export function validateActivationPassword(
   password: string,
   confirmation: string,
 ): ValidationResult {
+  if (password.length > 128) {
+    return { message: "A senha deve ter no máximo 128 caracteres.", ok: false };
+  }
   if (password.length < 8) {
     return {
       message: "A senha deve ter pelo menos 8 caracteres.",

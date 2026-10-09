@@ -1,3 +1,7 @@
+## Auditoria integrada - recuperacao e ativacao de acesso - 2026-10-09
+
+Cinco blocos: link de redefinicao de senha usa origem confiavel configurada e nao headers de Host; ausencia de origem confiavel bloqueia solicitacao antes de gerar token; email de recuperacao tem tipo e comprimento validados; convite inicial usa o mesmo limite de email; ativacao e redefinicao compartilham limite superior de senha. Testes de contrato incluidos. Nenhum token e registrado em logs; E2E autenticado pendente.
+
 ## Auditoria integrada - validacao compartilhada de arquivos e cadastro - 2026-10-09
 
 Cinco blocos: tipo de arquivo privado validado antes de consultar allowlist; extensao e MIME validados antes de normalizar; tipo de arquivo validado ao construir path privado; extensao validada ao construir path; campos opcionais do Cadastro Atual rejeitam valores nao textuais em vez de apagar dados existentes silenciosamente. Testes de contrato incluidos; E2E autenticado pendente. Mantidos arquivos privados e RLS.

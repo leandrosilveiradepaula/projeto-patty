@@ -667,7 +667,9 @@ test("implicit recovery bridge consumes tokens, removes the fragment and reloads
     "utf8",
   );
 
-  assert.match(action, /redirectTo: `\$\{protocol\}:\/\/\$\{host\}\/redefinir-senha`/);
+  assert.match(action, /resolveTrustedClientAccessOrigin\(\)/);
+  assert.match(action, /redirectTo: new URL\("\/redefinir-senha", origin\)\.toString\(\)/);
+  assert.doesNotMatch(action, /x-forwarded-host|x-forwarded-proto/);
   assert.match(bridge, /parseImplicitRecoveryFragment\(window\.location\.hash\)/);
   assert.match(bridge, /window\.history\.replaceState/);
   assert.match(bridge, /auth\.setSession\(\{/);
