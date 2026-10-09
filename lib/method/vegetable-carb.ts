@@ -28,5 +28,8 @@ export function vegetableCarbohydrateDoseEquivalent(
     );
   }
 
+  if (!Number.isFinite(output.value) || output.value < 0) {
+    throw new RangeError("vegetable carbohydrate dose output must be finite and non-negative");
+  }
   return output.value;
 }

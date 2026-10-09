@@ -100,3 +100,9 @@ test("fails closed when the expected output is absent", () => {
     TypeError,
   );
 });
+
+test("vegetable conversion rejects negative configured output", () => {
+  const invalid = structuredClone(currentBaseline);
+  invalid.parameters.vegetable_doses_per_carbohydrate_dose.value = -2;
+  assert.throws(() => vegetableCarbohydrateDoseEquivalent(invalid, 2), /non-negative/);
+});

@@ -1,3 +1,7 @@
+## Auditoria integrada - dez protecoes nos calculos parametrizados - 2026-10-09
+
+Dez frentes: (1) overflow de doses para gramas; (2) overflow de gramas para doses; (3) limite de doses de proteina gordurosa nao negativo e finito; (4) macros do reconhecimento nao negativos e finitos; (5) equivalente de vegetais nao negativo e finito; (6) meta de hidratacao nao negativa e finita; (7) identificadores de unidade escalar validos e limitados; (8) chaves de liquidos com formato seguro; (9) rotulos de liquidos limitados; (10) testes cobrindo valores invalidos, overflow e configuracoes validas. Mantida a parametrizacao existente; nao se criam metas clinicas novas. Sem schema/RLS, IA ou publicacao automatica. CI e E2E autenticado pendentes.
+
 ## Auditoria integrada - validacao de configuracoes parametrizaveis - 2026-10-09
 
 Dez frentes relacionadas: (1) dia semanal do Feedback Semanal com tipo numerico seguro; (2) fuso horario IANA valido; (3) limite de comprimento do fuso; (4) dia semanal das avaliacoes com tipo numerico seguro; (5) editor numerico recusa valores nao numericos; (6) rotulos de unidades sem heranca de prototipo; (7) rotulos de parametros sem heranca de prototipo; (8) chave de schema recusa tipos inesperados; (9) testes de configuracoes de calendario e fuso; (10) testes de edicao e despacho do registro de schemas. Parametros continuam configuraveis e revisados pela Patty. Sem alteracao de schema, RLS ou regra clinica. CI e E2E autenticado pendentes.

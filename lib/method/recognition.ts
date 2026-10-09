@@ -18,6 +18,9 @@ function readGramOutput(
     );
   }
 
+  if (!Number.isFinite(output.value) || output.value < 0) {
+    throw new RangeError("Recognition Metabolic gram output must be finite and non-negative");
+  }
   return output.value;
 }
 
