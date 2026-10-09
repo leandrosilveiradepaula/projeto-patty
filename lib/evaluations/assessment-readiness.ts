@@ -81,7 +81,7 @@ export function normalizeAssessmentMeasurementKey(value: string) {
 export function canonicalizeKnownAssessmentMeasurementKey(value: string) {
   const normalized = normalizeAssessmentMeasurementKey(value);
 
-  if (normalized in LABELS && normalized !== "foto") {
+  if (Object.prototype.hasOwnProperty.call(LABELS, normalized) && normalized !== "foto") {
     return normalized;
   }
 
