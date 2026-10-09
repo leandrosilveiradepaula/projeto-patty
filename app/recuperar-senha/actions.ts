@@ -1,6 +1,6 @@
 "use server";
 
-import { headers } from "next/headers";
+import { ClientAccessLinkOriginError, resolveTrustedClientAccessOrigin } from "@/lib/onboarding/trusted-client-access-origin";
 
 import { createClient } from "@/lib/supabase/server";
 
@@ -20,29 +20,27 @@ export async function requestPasswordRecovery(
   const rawEmail = formData.get("email");
   const email = typeof rawEmail === "string" ? rawEmail.trim() : "";
 
-  if (!email || !validEmail(email)) {
+  if (!email || email.length > 254 || !validEmail(email)) {
     return {
       message: "Informe um email válido.",
       success: false,
     };
   }
 
-  const requestHeaders = await headers();
-  const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
-  const protocol =
-    requestHeaders.get("x-forwarded-proto") ??
-    (host?.startsWith("localhost") ? "http" : "https");
-
-  if (!host) {
+  let origin: string;
+  try {
+    origin = resolveTrustedClientAccessOrigin();
+  } catch (error) {
+    if (!(error instanceof ClientAccessLinkOriginError)) throw error;
     return {
-      message: "Não foi possível iniciar a recuperação agora. Tente novamente.",
+      message: "O endereço seguro do aplicativo não está configurado. Tente novamente mais tarde.",
       success: false,
     };
   }
 
   const supabase = await createClient();
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${protocol}://${host}/redefinir-senha`,
+    redirectTo: new URL("/redefinir-senha", origin).toString(),
   });
 
   if (error) {
