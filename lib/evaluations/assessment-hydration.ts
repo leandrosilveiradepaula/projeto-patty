@@ -13,7 +13,10 @@ export function resolveAssessmentWeightKg(
 ) {
   const weight = measurements.find((measurement) => {
     const key = normalize(measurement.measurement_key);
-    return key === "peso" || key === "weight";
+    return (key === "peso" || key === "weight") &&
+      normalize(measurement.unit) === "kg" &&
+      Number.isFinite(measurement.measurement_value) &&
+      measurement.measurement_value > 0;
   });
 
   if (!weight) {
