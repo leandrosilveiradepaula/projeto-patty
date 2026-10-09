@@ -247,6 +247,7 @@ export async function updateAdminClientRegistrationAction(
   revalidatePath("/admin");
   revalidatePath("/admin/pendencias");
   revalidatePath(`/admin/clientes/${client.id}`);
+  revalidatePath("/cliente");
   revalidatePath("/cliente/perfil");
 
   return {
