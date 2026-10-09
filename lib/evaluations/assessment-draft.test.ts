@@ -91,7 +91,7 @@ test("assessment date rejects year zero", () => {
 
 test("measurement draft rejects file-valued fields", () => {
   for (const field of ["key", "unit", "value"] as const) {
-    const input = { key: "peso", unit: "kg", value: "70" } as Record<string, FormDataEntryValue>;
+    const input: { key: FormDataEntryValue; unit: FormDataEntryValue; value: FormDataEntryValue } = { key: "peso", unit: "kg", value: "70" };
     input[field] = new Blob(["invalid"]) as unknown as File;
     assert.ok("error" in parseMeasurementDraft(input));
   }
