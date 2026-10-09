@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 import {
   type AdminPrivateFileReleaseState,
@@ -19,11 +20,13 @@ const initialState: AdminPrivateFileReleaseState = {
 type AdminPrivateFileReleaseFormProps = {
   clientId: string;
   fileId: string;
+  fileName: string;
 };
 
 export function AdminPrivateFileReleaseForm({
   clientId,
   fileId,
+  fileName,
 }: AdminPrivateFileReleaseFormProps) {
   const action = releaseAdminPrivateFileToClientAction.bind(
     null,
@@ -31,6 +34,11 @@ export function AdminPrivateFileReleaseForm({
     fileId,
   );
   const [state, formAction, isPending] = useActionState(action, initialState);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (state.success) router.refresh();
+  }, [state, router]);
 
   return (
     <form action={formAction} className={styles.form}>
@@ -49,8 +57,8 @@ export function AdminPrivateFileReleaseForm({
       ) : null}
 
       <label className={styles.confirmation}>
-        <input name="confirmRelease" required type="checkbox" value="yes" />
-        <span>Confirme que este arquivo pode ficar visível para a cliente.</span>
+        <input disabled={isPending} name="confirmRelease" required type="checkbox" value="yes" />
+        <span>Confirmo que o arquivo <strong>{fileName}</strong> pode ficar visível para esta cliente.</span>
       </label>
 
       <Button loading={isPending} type="submit" variant="secondary">
