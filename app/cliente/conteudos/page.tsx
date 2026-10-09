@@ -1,3 +1,4 @@
+import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
 import { ClientContentCard } from "@/components/client/ClientContentCard";
 import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -108,6 +109,7 @@ export default async function ClienteConteudosPage() {
           </ul>
         )}
       </Section>
+      <ClientJourneyNextSteps areas={["protocol","training","index"]} />
     </>
   );
 }
