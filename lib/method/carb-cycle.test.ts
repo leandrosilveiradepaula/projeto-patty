@@ -226,3 +226,27 @@ test("carb cycle preserves configurable safe identifiers and labels", () => {
   changed.linearAverageStepKeys[0] = "low_custom";
   assert.equal(calculateCarbCycle(changed, 60).phaseKey, "phase_custom");
 });
+
+test("carb cycle rejects unbounded step collections", () => {
+  const changed = structuredClone(phase1);
+  changed.steps = Array.from({ length: 129 }, (_, i) => ({
+    ...structuredClone(phase1.steps[0]), key: "step_" + i,
+  }));
+  assert.throws(() => parseCarbCycleConfiguration(changed), /maximum step count/);
+});
+
+test("carb cycle rejects average reference lists longer than available steps", () => {
+  const changed = structuredClone(phase1);
+  changed.linearAverageStepKeys = ["low_1", "low_2", "high", "low_1"];
+  assert.throws(() => parseCarbCycleConfiguration(changed), /exceed available steps/);
+});
+
+test("carb cycle continues to allow configurable steps within bounds", () => {
+  const changed = structuredClone(phase1);
+  changed.steps.push({
+    key: "recovery", label: "Recovery",
+    carbohydratePerKg: { value: 2, unit: "g_per_kg" },
+    proteinPerKg: { value: 2.1, unit: "g_per_kg" },
+  });
+  assert.equal(parseCarbCycleConfiguration(changed).steps.length, 4);
+});
