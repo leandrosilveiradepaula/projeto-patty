@@ -534,7 +534,7 @@ function DoseRow({
               </Button>
             </div>
           </>
-        )
+        )}
       </form>
     </div>
   );
