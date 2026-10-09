@@ -73,13 +73,15 @@ export function normalizeAssessmentMeasurementKey(value: string) {
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[\s-]+/g, "_");
 
-  return KNOWN_ALIASES[normalized] ?? normalized;
+  return Object.prototype.hasOwnProperty.call(KNOWN_ALIASES, normalized)
+    ? KNOWN_ALIASES[normalized]
+    : normalized;
 }
 
 export function canonicalizeKnownAssessmentMeasurementKey(value: string) {
   const normalized = normalizeAssessmentMeasurementKey(value);
 
-  if (normalized in LABELS && normalized !== "foto") {
+  if (Object.prototype.hasOwnProperty.call(LABELS, normalized) && normalized !== "foto") {
     return normalized;
   }
 
@@ -91,6 +93,15 @@ export function buildAssessmentFinalizationReadiness({
   measurementKeys,
   photoCount,
 }: AssessmentReadinessInput): AssessmentFinalizationReadiness {
+  if (assessmentKind !== "fortnightly" && assessmentKind !== "monthly") {
+    throw new TypeError("Unknown assessment kind");
+  }
+  if (!Number.isSafeInteger(photoCount) || photoCount < 0) {
+    throw new RangeError("photoCount must be a non-negative safe integer");
+  }
+  if (!Array.isArray(measurementKeys) || measurementKeys.some((key) => typeof key !== "string")) {
+    throw new TypeError("measurementKeys must be an array of strings");
+  }
   const presentKeys = new Set(
     measurementKeys.map((key) => normalizeAssessmentMeasurementKey(key)),
   );

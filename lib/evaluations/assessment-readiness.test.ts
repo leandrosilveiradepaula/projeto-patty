@@ -91,3 +91,35 @@ test("complete finalization fails closed when a confirmed item is missing", () =
     false,
   );
 });
+
+test("prototype names never masquerade as catalog measurement aliases", () => {
+  assert.equal(normalizeAssessmentMeasurementKey("constructor"), "constructor");
+  assert.equal(canonicalizeKnownAssessmentMeasurementKey("constructor"), "constructor");
+  assert.equal(normalizeAssessmentMeasurementKey("toString"), "tostring");
+});
+
+test("unknown assessment kinds are rejected rather than defaulting to monthly", () => {
+  assert.throws(() => buildAssessmentFinalizationReadiness({
+    assessmentKind: "other" as never,
+    measurementKeys: [],
+    photoCount: 0,
+  }), /Unknown assessment kind/);
+});
+
+test("assessment photo count must be a nonnegative safe integer", () => {
+  for (const photoCount of [-1, 1.5, Number.MAX_SAFE_INTEGER + 1]) {
+    assert.throws(() => buildAssessmentFinalizationReadiness({
+      assessmentKind: "monthly",
+      measurementKeys: [],
+      photoCount,
+    }), /non-negative safe integer/);
+  }
+});
+
+test("assessment measurement keys must be strings", () => {
+  assert.throws(() => buildAssessmentFinalizationReadiness({
+    assessmentKind: "fortnightly",
+    measurementKeys: [null] as unknown as string[],
+    photoCount: 0,
+  }), /array of strings/);
+});

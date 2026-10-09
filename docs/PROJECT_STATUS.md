@@ -1,3 +1,7 @@
+## Auditoria integrada - protecoes na prontidao de avaliacoes - 2026-10-09
+
+Cinco protecoes na implementacao de prontidao legada: aliases consultados apenas por chaves proprias, catalogo de medidas consultado apenas por chaves proprias, rejeicao de tipo de avaliacao desconhecido, validacao de contagem de fotos como inteiro seguro nao negativo e rejeicao de arrays com chaves nao textuais. Testes unitarios adicionados ao arquivo existente. Nao altera regras clinicas, criterios parametrizados nem historico. Validacao de CI necessaria antes de merge.
+
 ## Auditoria integrada - invariantes de configuracao de avaliacoes - 2026-10-09
 
 Cinco blocos: normalizacao canonica da chave do tipo de avaliacao; rejeicao de chave de tipo vazia apos normalizacao; rejeicao de chave de medida vazia apos normalizacao; rejeicao de aliases vazios apos normalizacao; validacao estrita dos tipos de entrada na verificacao de prontidao, incluindo contagem segura de fotos e array de chaves textuais. Regras continuam configuraveis, sem criterio clinico automatico. Testes exercitam as funcoes reais.
