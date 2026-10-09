@@ -7,6 +7,26 @@ import styles from "./page.module.css";
 
 const areas = [
   {
+    description: "Volte ao painel principal e veja o que precisa da sua atenção.",
+    href: "/cliente",
+    title: "Início",
+  },
+  {
+    description: "Consulte seu plano alimentar publicado pela Patty e versões anteriores.",
+    href: "/cliente/protocolo",
+    title: "Meu protocolo",
+  },
+  {
+    description: "Registre sua atividade e os líquidos consumidos, com histórico e correções.",
+    href: "/cliente/checkins",
+    title: "Check-ins",
+  },
+  {
+    description: "Responda ou continue o formulário semanal solicitado pela Patty.",
+    href: "/cliente/feedback-semanal",
+    title: "Feedback semanal",
+  },
+  {
     description: "Preencha, continue ou consulte suas respostas já enviadas.",
     href: "/cliente/anamnese",
     title: "Anamnese",
@@ -37,6 +57,11 @@ const areas = [
     title: "Treino",
   },
   {
+    description: "Consulte a biblioteca de exercícios disponível para sua conta.",
+    href: "/cliente/exercicios",
+    title: "Exercícios",
+  },
+  {
     description: "Consulte e atualize seus dados de contato e acesso.",
     href: "/cliente/perfil",
     title: "Perfil",
@@ -53,7 +78,7 @@ export default function ClientMorePage() {
       />
 
       <Section
-        description="Tudo o que não precisa ficar na barra principal continua disponível aqui."
+        description="Encontre as áreas reais do seu acompanhamento, incluindo os registros anteriores e as ações do dia."
         title="Outras áreas"
       >
         <div className={styles.grid}>
