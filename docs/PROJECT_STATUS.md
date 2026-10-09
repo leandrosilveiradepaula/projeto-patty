@@ -1,3 +1,7 @@
+## Auditoria integrada - continuidade do onboarding - 2026-10-09
+
+Os fluxos de convite automatico e geracao manual de link agora invalidam a lista de clientes, painel e pendencias apos provisionamento bem-sucedido. Erros e compensacoes permanecem sem invalidacao de sucesso; nao ha mudanca na separacao Auth/Profile/Client, no vinculo por ID ou na politica de tokens. Teste de contrato incluido; E2E autenticado pendente.
+
 ## Auditoria integrada - criacao de conteudo educacional - 2026-10-09
 
 A criacao inicial de conteudo passa a validar titulo e ordem antes de criar o registro base. A ordem nao aceita mais sufixos nao numericos ou inteiros fora do intervalo seguro do JavaScript. Mantida compensacao de falha de persistencia, versionamento, acesso administrativo e publicacao manual. Teste de contrato adicionado; E2E autenticado pendente.
