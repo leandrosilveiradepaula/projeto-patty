@@ -827,7 +827,7 @@ test("operational readiness links land on the exact corrective workflow", () => 
   );
   assert.equal(
     items.find((item) => item.kind === "content_released_without_asset")?.href,
-    "/admin/clientes/client-content/conteudos#liberar-conteudo",
+    "/admin/clientes/client-content/conteudos#liberacao-release-missing",
   );
 });
 
@@ -857,7 +857,7 @@ test("hidden administrative private files become explicit Patty release decision
   assert.equal(items[0]?.statusLabel, "Aguardando liberação");
   assert.equal(
     items[0]?.href,
-    "/admin/clientes/client-file/arquivos#aguardando-liberacao",
+    "/admin/clientes/client-file/arquivos#arquivo-pendente-file-hidden",
   );
   assert.equal(getOperationalPendingGroup(items[0]!), "patty");
   assert.match(items[0]?.description ?? "", /decida explicitamente/);
