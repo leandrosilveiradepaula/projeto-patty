@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { parseCheckinHistoryDay } from "@/lib/checkins/history-day";
 import { parsePositiveCheckinMl } from "@/lib/checkins/amount";
 import { loadSupportedLiquidTaxonomy } from "@/lib/method/liquid-taxonomy-loader";
+import { isUuid } from "@/lib/validation/uuid";
 import { requireRole } from "@/lib/supabase/auth";
 import {
   createAccessibleClientActivityCheckinEventCorrection,
@@ -25,6 +26,7 @@ export async function correctClientLiquidIntakeAction(
   formData: FormData,
 ) {
   const auth = await requireRole("admin");
+  if (!isUuid(clientId)) redirect("/admin/clientes?status=invalid");
   const client = await getAccessibleClient(clientId);
 
   if (!client) redirect(adminCheckinsPath(clientId, "client-unavailable"));
@@ -36,7 +38,7 @@ export async function correctClientLiquidIntakeAction(
 
   if (
     typeof eventId !== "string" ||
-    !eventId ||
+    !isUuid(eventId) ||
     amountMl === null
   ) {
     redirect(adminCheckinsPath(clientId, "correction-invalid"));
@@ -83,6 +85,7 @@ export async function correctClientActivityCheckinAction(
   formData: FormData,
 ) {
   const auth = await requireRole("admin");
+  if (!isUuid(clientId)) redirect("/admin/clientes?status=invalid");
   const client = await getAccessibleClient(clientId);
 
   if (!client) redirect(adminCheckinsPath(clientId, "client-unavailable"));
@@ -92,7 +95,7 @@ export async function correctClientActivityCheckinAction(
 
   if (
     typeof eventId !== "string" ||
-    !eventId ||
+    !isUuid(eventId) ||
     (rawValue !== "yes" && rawValue !== "no")
   ) {
     redirect(adminCheckinsPath(clientId, "correction-invalid"));

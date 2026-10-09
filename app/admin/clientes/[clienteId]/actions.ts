@@ -155,6 +155,9 @@ export async function recordTrainingRequestAction(
   }
 
   const noteValue = formData.get("note");
+  if (noteValue !== null && typeof noteValue !== "string") {
+    return { message: "Observação inválida.", success: false };
+  }
   const note =
     typeof noteValue === "string" && noteValue.trim()
       ? noteValue.trim()
