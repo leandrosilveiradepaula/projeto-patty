@@ -23,6 +23,25 @@ export type ClientClarificationSubmissionSummary = {
   firstAwaitingClientRequestId: string | null;
 };
 
+/**
+ * Requests may carry different UTC offsets. Sort by the factual instant so
+ * the client home and clarification detail choose the same oldest open item.
+ * Invalid legacy timestamps are listed last and never hide valid requests.
+ */
+export function orderClientClarificationRequests<T extends ClientClarificationRequestFact>(
+  requests: readonly T[],
+): T[] {
+  return [...requests].sort((a, b) => {
+    const left = Date.parse(a.created_at);
+    const right = Date.parse(b.created_at);
+    const leftValid = Number.isFinite(left);
+    const rightValid = Number.isFinite(right);
+    if (leftValid && rightValid && left !== right) return left - right;
+    if (leftValid !== rightValid) return leftValid ? -1 : 1;
+    return a.id.localeCompare(b.id);
+  });
+}
+
 export function summarizeClientClarifications(
   requests: readonly ClientClarificationRequestFact[],
   responses: readonly ClientClarificationResponseFact[],
@@ -35,11 +54,7 @@ export function summarizeClientClarifications(
   let awaitingProfessional = 0;
   let firstAwaitingClient: { id: string; submissionId: string } | null = null;
 
-  const ordered = [...requests].sort(
-    (a, b) =>
-      a.created_at.localeCompare(b.created_at) ||
-      a.id.localeCompare(b.id),
-  );
+  const ordered = orderClientClarificationRequests(requests);
 
   for (const request of ordered) {
     if (resolvedIds.has(request.id)) continue;

@@ -18,6 +18,7 @@ import {
 import Link from "next/link";
 import { latestPublishedTrainingVersion } from "@/lib/training/published-versions";
 import { loadClientClarificationSummary } from "@/lib/follow-up/client-clarification-summary-loader";
+import { firstPendingClientWeeklyFeedback } from "@/lib/follow-up/client-weekly-feedback-order";
 import styles from "./page.module.css";
 
 function saoPauloDate(value: Date | string) {
@@ -78,6 +79,10 @@ export default async function ClientePage() {
   const hasSubmittedAnamnesis = anamneses.some(
     (submission) => submission.submitted_at !== null,
   );
+  const firstPendingFeedback = firstPendingClientWeeklyFeedback(weeklyFeedbacks);
+  const pendingFeedbackHref = firstPendingFeedback
+    ? `/cliente/feedback-semanal#feedback-pendente-${firstPendingFeedback.id}`
+    : null;
   const pendingWeeklyFeedbackIds = new Set(
     weeklyFeedbacks
       .filter((feedback) => !feedback.submitted_at)
@@ -120,13 +125,13 @@ export default async function ClientePage() {
           href: "/cliente/anamnese",
           label: "Preencher Anamnese",
         }
-      : pendingWeeklyFeedbackIds.size > 0
+      : pendingFeedbackHref
         ? {
             badge: `${pendingWeeklyFeedbackIds.size} pendente(s)`,
             badgeVariant: "warning" as const,
             description:
               "Continue um rascunho ou envie o Feedback Semanal solicitado pela Patty.",
-            href: "/cliente/feedback-semanal",
+            href: pendingFeedbackHref,
             label: "Responder Feedback Semanal",
           }
         : hasPendingDailyCheckin
@@ -202,9 +207,8 @@ export default async function ClientePage() {
               Check-in do dia
             </Link>
           ) : null}
-          {primaryAction.href !== "/cliente/feedback-semanal" &&
-          pendingWeeklyFeedbackIds.size > 0 ? (
-            <Link className={styles.routineActionLink} href="/cliente/feedback-semanal">
+          {pendingFeedbackHref && primaryAction.href !== pendingFeedbackHref ? (
+            <Link className={styles.routineActionLink} href={pendingFeedbackHref}>
               Feedback Semanal ({pendingWeeklyFeedbackIds.size})
             </Link>
           ) : null}
@@ -219,6 +223,12 @@ export default async function ClientePage() {
             </Link>
           ) : null}
         </div>
+        {clarificationSummary.awaitingProfessional > 0 ? (
+          <p className={styles.statusNote} role="status">
+            {clarificationSummary.awaitingProfessional} esclarecimento(s) respondido(s) aguardam revisão da Patty.
+            Seus complementos continuam registrados; você não precisa reenviar a Anamnese.
+          </p>
+        ) : null}
       </Section>
 
       <Section
@@ -263,9 +273,9 @@ export default async function ClientePage() {
       </Section>
 
       {hasDeliveredWeeklyFeedbackReminder &&
-      primaryAction.href !== "/cliente/feedback-semanal" ? (
+      pendingFeedbackHref && primaryAction.href !== pendingFeedbackHref ? (
         <Alert
-          action={<Link href="/cliente/feedback-semanal">Responder agora</Link>}
+          action={<Link href={pendingFeedbackHref}>Responder agora</Link>}
           title="Feedback Semanal pendente"
           variant="info"
         >

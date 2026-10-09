@@ -156,3 +156,7 @@
     align-items: flex-start;
   }
 }
+
+.list > li {
+  scroll-margin-top: var(--space-4);
+}

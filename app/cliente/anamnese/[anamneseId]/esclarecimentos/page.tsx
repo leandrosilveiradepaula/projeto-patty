@@ -1,4 +1,5 @@
 import { clarificationFollowupStatus, clarificationStatusLabel, clarificationStatusVariant } from "@/lib/follow-up/clarification-status";
+import { orderClientClarificationRequests } from "@/lib/follow-up/client-clarification-summary";
 import { ClientAnamnesisClarificationResponseForm } from "@/components/client/ClientAnamnesisClarificationResponseForm";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
@@ -51,7 +52,8 @@ export default async function ClientAnamnesisClarificationsPage({ params }: Page
     listAccessibleAnamnesisQuestions(submission.form_version_id),
     listAccessibleAnamnesisClarificationRequests(submission.id),
   ]);
-  const requestIds = requests.map((request) => request.id);
+  const orderedRequests = orderClientClarificationRequests(requests);
+  const requestIds = orderedRequests.map((request) => request.id);
   const [responses, resolutions] = await Promise.all([
     listAccessibleAnamnesisClarificationResponses(requestIds),
     listAccessibleAnamnesisClarificationResolutions(requestIds),
@@ -69,7 +71,7 @@ export default async function ClientAnamnesisClarificationsPage({ params }: Page
     responsesByRequestId.set(response.clarification_request_id, entries);
   }
 
-  const firstAwaitingClientId = requests.find((r) => !resolvedRequestIds.has(r.id) && !(responsesByRequestId.get(r.id)?.length))?.id;
+  const firstAwaitingClientId = orderedRequests.find((r) => !resolvedRequestIds.has(r.id) && !(responsesByRequestId.get(r.id)?.length))?.id;
   return (
     <>
       <PageHeader
@@ -85,7 +87,7 @@ export default async function ClientAnamnesisClarificationsPage({ params }: Page
           <>
             {firstAwaitingClientId ? <p className={styles.jump}><Link href={`#esclarecimento-${firstAwaitingClientId}`}>Ir para o primeiro pedido aguardando sua resposta</Link></p> : null}
           <div className={styles.list}>
-            {requests.map((request) => {
+            {orderedRequests.map((request) => {
               const sourceAnswer = request.source_answer_id ? answersById.get(request.source_answer_id) : undefined;
               const sourceQuestion = sourceAnswer ? questionsById.get(sourceAnswer.question_id) : undefined;
               const requestResponses = responsesByRequestId.get(request.id) ?? [];
