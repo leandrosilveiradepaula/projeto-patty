@@ -129,8 +129,8 @@ function assertExactKeys(
 }
 
 function readNonBlankKey(value: unknown, path: string) {
-  if (typeof value !== "string" || value.trim().length === 0) {
-    fail("INVALID_CONFIGURATION", "key must be a non-blank string", path);
+  if (typeof value !== "string" || !/^[a-z][A-Za-z0-9_-]{0,119}$/.test(value) || ["__proto__", "constructor", "prototype", "toString", "valueOf", "hasOwnProperty"].includes(value)) {
+    fail("INVALID_CONFIGURATION", "key must be a safe identifier", path);
   }
 
   return value;
@@ -277,7 +277,7 @@ function validateExpressionReferences(
   path: string,
 ): void {
   if (expression.op === "input") {
-    if (!(expression.key in configuration.inputs)) {
+    if (!Object.prototype.hasOwnProperty.call(configuration.inputs, expression.key)) {
       fail(
         "MISSING_INPUT_DEFINITION",
         "expression references an undeclared input",
@@ -289,7 +289,7 @@ function validateExpressionReferences(
   }
 
   if (expression.op === "parameter") {
-    if (!(expression.key in configuration.parameters)) {
+    if (!Object.prototype.hasOwnProperty.call(configuration.parameters, expression.key)) {
       fail(
         "MISSING_PARAMETER",
         "expression references an undeclared parameter",
@@ -664,7 +664,7 @@ function validateRuntimeInputs(
   const inputs: Record<string, MethodEngineNumericValue> = {};
 
   for (const key of Object.keys(rawInputs)) {
-    if (!(key in configuration.inputs)) {
+    if (!Object.prototype.hasOwnProperty.call(configuration.inputs, key)) {
       fail(
         "UNKNOWN_INPUT",
         "runtime input was not declared by the configuration",
