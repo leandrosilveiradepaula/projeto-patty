@@ -162,7 +162,7 @@ export function ClientPrivateFileUploadForm() {
               if (input) input.value = "";
               setMessage(null);
               setSuccess(false);
-            }
+            }}
             value={fileKind}
           >
             <option value="photo">Foto</option>
