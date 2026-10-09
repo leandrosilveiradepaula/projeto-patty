@@ -236,6 +236,9 @@ export async function addTrainingPlanItemAction(
     }
 
     const exerciseVersionRaw = formData.get("exerciseVersionId");
+    if (exerciseVersionRaw !== null && typeof exerciseVersionRaw !== "string") {
+      return initialError("A versão do exercício selecionado é inválida.");
+    }
     if (typeof exerciseVersionRaw === "string" && exerciseVersionRaw.trim() && !isUuid(exerciseVersionRaw)) {
       return initialError("A versão do exercício selecionado é inválida.");
     }
@@ -338,6 +341,9 @@ export async function updateTrainingPlanItemAction(
     }
 
     const exerciseVersionRaw = formData.get("exerciseVersionId");
+    if (exerciseVersionRaw !== null && typeof exerciseVersionRaw !== "string") {
+      return initialError("A versão do exercício selecionado é inválida.");
+    }
     if (typeof exerciseVersionRaw === "string" && exerciseVersionRaw.trim() && !isUuid(exerciseVersionRaw)) {
       return initialError("A versão do exercício selecionado é inválida.");
     }
