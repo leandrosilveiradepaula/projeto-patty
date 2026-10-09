@@ -22,7 +22,7 @@ export function ClientInviteForm() {
   );
 
   return (
-    <form action={formAction} className={styles.form} noValidate>
+    <form action={formAction} className={styles.form}>
       {state.message ? (
         <Alert
           live="assertive"

@@ -1,6 +1,7 @@
 import { AdminClientNameEditForm } from "@/components/admin/AdminClientNameEditForm";
 import { latestPublishedTrainingVersion } from "@/lib/training/published-versions";
 import { isTrainingRequestAfterPublication } from "@/lib/training/request-follow-up";
+import { newestTrainingRequests, newestUnpublishedTrainingVersion } from "@/lib/training/operational-order";
 import { AdminEndClientAssignmentForm } from "@/components/admin/AdminEndClientAssignmentForm";
 import { AdminClientRegistrationEditForm } from "@/components/admin/AdminClientRegistrationEditForm";
 import { AdminClientRecoveryLinkForm } from "@/components/admin/AdminClientRecoveryLinkForm";
@@ -99,13 +100,13 @@ export default async function AdminClienteDetailPage({
   const trainingVersions = trainingPlan
     ? await listAccessibleClientTrainingPlanVersions(trainingPlan.id)
     : [];
-  const openTrainingVersion =
-    trainingVersions.find((version) => !version.published_at) ?? null;
+  const orderedTrainingRequests = newestTrainingRequests(trainingRequests);
+  const openTrainingVersion = newestUnpublishedTrainingVersion(trainingVersions);
   const latestPublishedTraining = latestPublishedTrainingVersion(trainingVersions);
   const newTrainingRequestAfterPublication = Boolean(
-    trainingRequests[0] && latestPublishedTraining &&
+    orderedTrainingRequests[0] && latestPublishedTraining &&
     isTrainingRequestAfterPublication(
-      trainingRequests[0].requested_at,
+      orderedTrainingRequests[0].requested_at,
       latestPublishedTraining.published_at,
     ),
   );
@@ -875,6 +876,11 @@ export default async function AdminClienteDetailPage({
               <p className={styles.cardDescription}>
                 {trainingWorkspaceState.description}
               </p>
+              {newTrainingRequestAfterPublication && openTrainingVersion ? (
+                <p className={styles.cardDescription}>
+                  Existe uma solicitação após a última publicação. Confira se o pedido exige ajustes no rascunho ou uma decisão profissional antes da próxima publicação.
+                </p>
+              ) : null}
             </Card>
           </Link>
         </div>

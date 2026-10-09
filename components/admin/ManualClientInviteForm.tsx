@@ -44,7 +44,7 @@ export function ManualClientInviteForm() {
   }
 
   return (
-    <form action={formAction} className={styles.form} noValidate>
+    <form action={formAction} className={styles.form}>
       {state.message ? (
         <Alert
           live={state.success ? "polite" : "assertive"}
@@ -65,6 +65,7 @@ export function ManualClientInviteForm() {
           <TextInput
             {...fieldProps}
             autoComplete="name"
+            disabled={state.success}
             maxLength={120}
             name="displayName"
             required
@@ -83,6 +84,7 @@ export function ManualClientInviteForm() {
           <TextInput
             {...fieldProps}
             autoComplete="email"
+            disabled={state.success}
             inputMode="email"
             name="email"
             required
@@ -91,7 +93,7 @@ export function ManualClientInviteForm() {
         )}
       </FormField>
 
-      <Button loading={isPending} type="submit">
+      <Button disabled={state.success} loading={isPending} type="submit">
         Gerar link de ativação
       </Button>
 
@@ -108,7 +110,7 @@ export function ManualClientInviteForm() {
             value={state.activationLink}
           />
           <div className={styles.linkActions}>
-            <Button onClick={copyActivationLink} type="button" variant="secondary">
+            <Button disabled={isPending} onClick={copyActivationLink} type="button" variant="secondary">
               Copiar link
             </Button>
             {copyStatus ? (
