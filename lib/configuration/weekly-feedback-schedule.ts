@@ -10,7 +10,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function parseWeekday(value: unknown, field: string) {
-  if (!Number.isInteger(value) || (value as number) < 1 || (value as number) > 7) {
+  if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 1 || value > 7) {
     throw new RangeError(field + " must be an ISO weekday from 1 to 7");
   }
 
@@ -29,11 +29,17 @@ function parseLocalTime(value: unknown) {
 }
 
 function parseTimezone(value: unknown) {
-  if (typeof value !== "string" || value.trim().length === 0) {
-    throw new TypeError("timezone must be a non-blank string");
+  if (typeof value !== "string" || value.trim().length === 0 || value.length > 100) {
+    throw new TypeError("timezone must be a non-blank string with at most 100 characters");
   }
 
-  return value.trim();
+  const timezone = value.trim();
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: timezone });
+  } catch {
+    throw new RangeError("timezone must be a supported IANA time zone");
+  }
+  return timezone;
 }
 
 export function parseWeeklyFeedbackScheduleConfiguration(

@@ -18,7 +18,7 @@ function parsePreferredWeekdays(value: unknown) {
   }
 
   const weekdays = value.map((item) => {
-    if (!Number.isInteger(item) || (item as number) < 1 || (item as number) > 7) {
+    if (typeof item !== "number" || !Number.isSafeInteger(item) || item < 1 || item > 7) {
       throw new RangeError(
         "complete_preferred_weekdays must contain ISO weekdays from 1 to 7",
       );
