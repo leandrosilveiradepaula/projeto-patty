@@ -475,11 +475,11 @@ test("rejects unsafe input, parameter and output identifiers", () => {
   for (const key of ["__proto__", "constructor", "toString", "bad key", "1bad", "x".repeat(121)]) {
     for (const section of ["inputs", "parameters", "outputs"] as const) {
       const config: Record<string, unknown> = { inputs: {}, parameters: {}, outputs: {} };
-      (config[section] as Record<string, unknown>)[key] = section === "inputs"
+      Object.defineProperty(config[section], key, { enumerable: true, configurable: true, value: section === "inputs"
         ? { unit: "kg" }
         : section === "parameters"
           ? { value: 1, unit: "kg" }
-          : { unit: "kg", expression: { op: "literal", value: 1, unit: "kg" } };
+          : { unit: "kg", expression: { op: "literal", value: 1, unit: "kg" } } });
       assertEngineError(() => validateMethodEngineConfiguration(config), "INVALID_CONFIGURATION");
     }
   }
@@ -491,7 +491,7 @@ test("rejects inherited input and parameter references", () => {
       inputs: {}, parameters: {}, outputs: {
         result: { unit: "ratio", expression: { op, key: "constructor" } },
       },
-    }), "INVALID_CONFIGURATION");
+    }), op === "input" ? "MISSING_INPUT_DEFINITION" : "MISSING_PARAMETER");
   }
 });
 
