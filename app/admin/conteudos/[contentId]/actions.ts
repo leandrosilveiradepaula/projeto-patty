@@ -244,7 +244,7 @@ export async function registerEducationalContentAssetAction(
     "byteSize",
     "o tamanho em bytes",
   );
-  const byteSize = /^[1-9][0-9]*$/.test(rawByteSize) ? Number(rawByteSize) : Number.NaN;
+  const byteSize = /^[1-9][0-9]*$/.test(rawByteSize.trim()) ? Number(rawByteSize.trim()) : Number.NaN;
 
   if (!/^[0-9a-f]{64}$/.test(sha256Hex)) {
     throw new Error("SHA-256 inválido");
