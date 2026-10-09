@@ -86,3 +86,13 @@ test("fails closed when the hydration output is absent", () => {
     TypeError,
   );
 });
+
+test("hydration rejects negative configured target outputs", () => {
+  const invalid = structuredClone(currentHydrationBaseline);
+  invalid.parameters.daily_ml_per_kg.value = -5;
+  assert.throws(() => hydrationDailyTargetMl(invalid, 60), /non-negative/);
+});
+
+test("hydration rejects target arithmetic overflow", () => {
+  assert.throws(() => hydrationDailyTargetMl(currentHydrationBaseline, 1e308), /finite/);
+});
