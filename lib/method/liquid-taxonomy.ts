@@ -65,6 +65,9 @@ export function parseLiquidTaxonomyConfiguration(
 
     const key = nonBlank(rawKind.key, path + ".key");
     const label = nonBlank(rawKind.label, path + ".label");
+    if (!/^[a-z][a-z0-9_-]*$/.test(key) || key.length > 120 || label.length > 200) {
+      throw new TypeError(path + " has invalid key or label length");
+    }
 
     if (
       rawKind.hydrationClass !== "pure_water" &&
