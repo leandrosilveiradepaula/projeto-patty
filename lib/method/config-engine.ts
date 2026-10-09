@@ -342,7 +342,7 @@ export function validateMethodEngineConfiguration(
   const rawParameters = parseNamedRecord(value.parameters, "$.parameters");
   const rawOutputs = parseNamedRecord(value.outputs, "$.outputs");
 
-  const inputs: MethodEngineConfiguration["inputs"] = Object.create(null);
+  const inputs: MethodEngineConfiguration["inputs"] = {};
 
   for (const [key, rawInput] of Object.entries(rawInputs)) {
     if (!isRecord(rawInput)) {
@@ -359,7 +359,7 @@ export function validateMethodEngineConfiguration(
     };
   }
 
-  const parameters: MethodEngineConfiguration["parameters"] = Object.create(null);
+  const parameters: MethodEngineConfiguration["parameters"] = {};
 
   for (const [key, rawParameter] of Object.entries(rawParameters)) {
     if (!isRecord(rawParameter)) {
@@ -380,7 +380,7 @@ export function validateMethodEngineConfiguration(
     };
   }
 
-  const outputs: MethodEngineConfiguration["outputs"] = Object.create(null);
+  const outputs: MethodEngineConfiguration["outputs"] = {};
   const state: ParseState = { nodes: 0 };
 
   for (const [key, rawOutput] of Object.entries(rawOutputs)) {
@@ -661,7 +661,7 @@ function validateRuntimeInputs(
   value: unknown,
 ): Record<string, MethodEngineNumericValue> {
   const rawInputs = parseNamedRecord(value, "$inputs");
-  const inputs: Record<string, MethodEngineNumericValue> = Object.create(null);
+  const inputs: Record<string, MethodEngineNumericValue> = {};
 
   for (const key of Object.keys(rawInputs)) {
     if (!Object.prototype.hasOwnProperty.call(configuration.inputs, key)) {
@@ -712,7 +712,7 @@ export function evaluateMethodEngineConfiguration(
   const configuration =
     validateMethodEngineConfiguration(configurationValue);
   const inputs = validateRuntimeInputs(configuration, runtimeInputsValue);
-  const outputs: Record<string, MethodEngineNumericValue> = Object.create(null);
+  const outputs: Record<string, MethodEngineNumericValue> = {};
 
   for (const [key, output] of Object.entries(configuration.outputs)) {
     const result = evaluateExpression(
