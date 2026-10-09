@@ -25,6 +25,7 @@ export function applyAssessmentMeasurementCorrections(
   measurements: AssessmentMeasurementLike[],
   corrections: AssessmentMeasurementCorrectionLike[],
 ): EffectiveAssessmentMeasurement[] {
+  const knownMeasurements = new Set(measurements.map((measurement) => measurement.id));
   const latestByMeasurement = new Map<
     string,
     AssessmentMeasurementCorrectionLike
@@ -32,6 +33,10 @@ export function applyAssessmentMeasurementCorrections(
   const countByMeasurement = new Map<string, number>();
 
   for (const correction of corrections) {
+    if (!knownMeasurements.has(correction.assessment_measurement_id)) continue;
+    if (!Number.isFinite(correction.corrected_measurement_value)) continue;
+    if (!correction.corrected_unit.trim()) continue;
+    if (!Number.isFinite(Date.parse(correction.created_at))) continue;
     countByMeasurement.set(
       correction.assessment_measurement_id,
       (countByMeasurement.get(correction.assessment_measurement_id) ?? 0) + 1,
