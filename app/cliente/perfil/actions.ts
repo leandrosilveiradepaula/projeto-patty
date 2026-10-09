@@ -48,6 +48,9 @@ export async function updateCurrentClientRegistrationAction(
     };
   }
 
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
+  revalidatePath(`/admin/clientes/${client.id}`);
   revalidatePath("/cliente/perfil");
 
   return {
