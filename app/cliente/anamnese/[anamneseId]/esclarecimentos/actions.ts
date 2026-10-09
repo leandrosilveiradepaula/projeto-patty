@@ -71,6 +71,7 @@ export async function respondToAnamnesisClarification(
   revalidatePath(`/admin/clientes/${client.id}/anamnese`);
   revalidatePath("/cliente");
   revalidatePath("/cliente/anamnese");
+  revalidatePath(`/cliente/anamnese/${submission.id}`);
   revalidatePath(`/cliente/anamnese/${submission.id}/esclarecimentos`);
   return { message: "Seu esclarecimento foi registrado.", success: true };
 }
