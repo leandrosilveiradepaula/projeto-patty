@@ -150,3 +150,13 @@ test("fails closed if the active template does not support the hydration paramet
     ),
   );
 });
+
+test("resolved hydration configuration remains evaluable after override", () => {
+  const resolved = resolveHydrationConfiguration(hydrationTemplate, {
+    parameters: { daily_ml_per_kg: { value: 52, unit: "ml_per_kg" } },
+  });
+  assert.equal(resolved.parameters.daily_ml_per_kg.value, 52);
+  assert.equal(resolveHydrationTarget(hydrationTemplate, 60, {
+    parameters: { daily_ml_per_kg: { value: 52, unit: "ml_per_kg" } },
+  }).targetMl, 3120);
+});
