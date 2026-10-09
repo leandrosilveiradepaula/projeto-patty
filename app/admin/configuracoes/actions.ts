@@ -205,7 +205,12 @@ export async function updateAssessmentSchedulePreferencesAction(
 
   const preferredWeekdays = formData
     .getAll("completePreferredWeekday")
-    .map((value) => Number(value));
+    .map((value) => {
+      if (typeof value !== "string" || !/^[0-6]$/.test(value)) {
+        throw new Error("Selecione dias da semana válidos.");
+      }
+      return Number(value);
+    });
 
   if (preferredWeekdays.length === 0) {
     throw new Error(
