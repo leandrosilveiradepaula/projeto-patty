@@ -109,7 +109,10 @@ export async function finalizeAdminPrivateFileUploadSessionAction(
   });
 
   if (result.status === "accepted") {
+    revalidatePath("/admin");
+    revalidatePath("/admin/pendencias");
     revalidatePath("/admin/arquivos");
+    revalidatePath(`/admin/clientes/${clientId}`);
     revalidatePath(`/admin/clientes/${clientId}/arquivos`);
   }
 
@@ -167,7 +170,10 @@ export async function releaseAdminPrivateFileToClientAction(
       };
     }
 
+    revalidatePath("/admin");
+    revalidatePath("/admin/pendencias");
     revalidatePath("/admin/arquivos");
+    revalidatePath(`/admin/clientes/${clientId}`);
     revalidatePath(`/admin/clientes/${clientId}/arquivos`);
     revalidatePath("/cliente");
     revalidatePath("/cliente/arquivos");
