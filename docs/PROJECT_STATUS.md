@@ -1,3 +1,11 @@
+## Auditoria integrada - completar fila operacional e Feedback Semanal sem truncamento - 2026-10-08
+
+A fila da Patty ainda consumia leituras sem paginacao em lote para preferencias de notificacao, cadastro de contato, solicitacoes/planos/versoes de treino, liberacoes de conteudo e arquivos privados. Com mais registros, o limite implicito de retorno PostgREST poderia omitir tarefas, inclusive arquivos aguardando liberacao, sem apresentar erro. O historico do Feedback Semanal e os eventos de notificacao da cliente tambem estavam sujeitos a truncamento.
+
+Essas nove leituras agora usam helper deterministico compartilhado com ate 100 IDs distintos por consulta, paginacao de 500 linhas, checagem estrita de erro/retorno nulo e ordenacao global apos lotes para os resultados multi-cliente. A ordenacao dos estados de treino continua privilegiando timestamps e version_number; as telas seguem recebendo dados autenticos e autorizados via Supabase Auth + RLS, sem service role. O historico do Feedback Semanal e lembretes preservam suas ordenacoes cronologicas existentes. Nenhuma nova notificacao e disparada.
+
+Testes unitarios verificam pagina cheia, lotes, deduplicacao, erros, seguranca de query e contratos das consultas utilizadas pela fila e pelo cliente. O pacote nao muda Auth, schema, migrations, RLS, regras profissionais, publicacoes, limites de prazos nem historicos. CI valida typecheck, suites e build; ainda e necessario teste autenticado de volume real em Supabase para comprovar o comportamento end-to-end.
+
 ## Auditoria integrada - leitura completa de Anamnese e esclarecimentos - 2026-10-08
 
 A interface de Anamnese e o resumo de esclarecimentos da cliente estavam sujeitos ao limite implicito de linhas do PostgREST: submissões, seções, perguntas, respostas, correções, pedidos de esclarecimento, complementos e resoluções utilizavam SELECTs sem paginação. Uma leitura truncada poderia ocultar pedido ainda aguardando resposta ou parte de um historico clinico, sem emitir erro. Agora essas leituras usam uma única boundary de paginação determinística e autenticada, com lotes de ate 100 IDs, paginas de 500 linhas, erro fail-closed e deduplicação dos IDs informados. Listas multi-pai retornam em ordem global identica ao contrato anterior (ordem cronologica; solicitações tambem por submissao).
