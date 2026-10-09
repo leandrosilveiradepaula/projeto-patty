@@ -169,6 +169,10 @@ export async function createNextEducationalContentVersionAction(
       0,
     ) + 1;
 
+  if (!Number.isSafeInteger(nextVersionNumber) || nextVersionNumber < 2) {
+    throw new Error("Não foi possível definir um número válido para a próxima versão");
+  }
+
   await createAccessibleEducationalContentVersion({
     categoryKey: latestPublished.category_key,
     contentId,
@@ -240,7 +244,7 @@ export async function registerEducationalContentAssetAction(
     "byteSize",
     "o tamanho em bytes",
   );
-  const byteSize = /^[1-9][0-9]*$/.test(rawByteSize) ? Number(rawByteSize) : Number.NaN;
+  const byteSize = /^[1-9][0-9]*$/.test(rawByteSize.trim()) ? Number(rawByteSize.trim()) : Number.NaN;
 
   if (!/^[0-9a-f]{64}$/.test(sha256Hex)) {
     throw new Error("SHA-256 inválido");
@@ -254,12 +258,14 @@ export async function registerEducationalContentAssetAction(
     storagePath.length > 1024 ||
     storagePath.includes("://") ||
     storagePath.includes("..") ||
-    storagePath.startsWith("/")
+    storagePath.startsWith("/") ||
+    storagePath.includes("\\") ||
+    storagePath.split("/").some((segment) => !segment || segment === ".")
   ) {
     throw new Error("Path privado inválido");
   }
 
-  if (contentType.length > 255 || !contentType.includes("/")) {
+  if (contentType.length > 255 || !/^[a-zA-Z0-9][a-zA-Z0-9._+-]*\/[a-zA-Z0-9][a-zA-Z0-9._+-]*$/.test(contentType)) {
     throw new Error("MIME type inválido");
   }
 

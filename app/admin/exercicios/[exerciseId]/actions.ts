@@ -126,10 +126,15 @@ export async function createNextExerciseVersionAction(exerciseId: string) {
     throw new Error("Publique a primeira versão antes de criar uma nova");
   }
 
+  const nextVersionNumber = nextExerciseVersionNumber(versions);
+  if (!Number.isSafeInteger(nextVersionNumber) || nextVersionNumber < 2) {
+    throw new Error("Não foi possível definir um número válido para a próxima versão");
+  }
+
   await createAccessibleExerciseVersion({
     exerciseId,
     name: latestPublished.name,
-    versionNumber: nextExerciseVersionNumber(versions),
+    versionNumber: nextVersionNumber,
   });
 
   revalidatePath("/admin");

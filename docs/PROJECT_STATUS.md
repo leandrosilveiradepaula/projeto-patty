@@ -1,3 +1,7 @@
+## Auditoria integrada - biblioteca de conteudos e exercicios - 2026-10-09
+
+Cinco blocos: limite numerico seguro ao criar nova versao de conteudo, MIME type estruturalmente valido para assets privados, paths privados sem segmentos vazios ou barras invertidas, limite numerico seguro para novas versoes de exercicios e tamanho de asset com espacos externos aceitos sem permitir valores parciais. Preservados storage privado, historico, versionamento e publicacao manual. Testes de contrato incluidos; E2E autenticado pendente.
+
 ## Auditoria integrada - integridade de formularios de treino - 2026-10-09
 
 Cinco blocos relacionados: rejeicao de campos opcionais enviados como arquivo, rejeicao de selecao de versao de exercicio com tipo incorreto na inclusao, mesma protecao na edicao, validacao previa dos campos da edicao antes da escrita, e verificacao de posicao numerica segura ao inserir exercicio. Preservados plano individual, revisao profissional e publicacao manual. Testes de contrato incluidos; E2E autenticado pendente.
