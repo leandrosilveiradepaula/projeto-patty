@@ -140,3 +140,19 @@ test("formats known units and parameter labels for the admin UI", () => {
     "Custom Parameter",
   );
 });
+
+test("numeric editor rejects runtime nonnumber values", () => {
+  for (const value of ["24", null, true]) {
+    assert.throws(() => updateEditableNumericParameters("scalar_parameter_v1", { value: 24, unit: "hour" }, { value } as never), /numérico inválido/);
+  }
+});
+
+test("unit labels ignore inherited object property names", () => {
+  assert.equal(formatConfigurationUnit("constructor"), "constructor");
+  assert.equal(formatConfigurationUnit("toString"), "toString");
+});
+
+test("parameter labels ignore inherited object property names", () => {
+  assert.equal(formatConfigurationParameterKey("constructor"), "Constructor");
+  assert.equal(formatConfigurationParameterKey("toString"), "ToString");
+});
