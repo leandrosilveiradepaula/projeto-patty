@@ -1,3 +1,7 @@
+## Auditoria integrada - integridade do formulario semanal - 2026-10-09
+
+Cinco frentes: versao de schema positiva e inteira segura; definicao com perguntas presentes; chaves de perguntas nao vazias, unicas e sem nomes perigosos; rotulos preenchidos com limite de tamanho; respostas de arquivo recusadas em vez de omitidas silenciosamente. Testes unitarios adicionados ao parser e ao processamento de respostas. Sem alterar regras clinicas, RLS ou publicar respostas automaticamente. CI e E2E autenticado a verificar.
+
 ## Auditoria integrada - protecoes na prontidao de avaliacoes - 2026-10-09
 
 Cinco protecoes na implementacao de prontidao legada: aliases consultados apenas por chaves proprias, catalogo de medidas consultado apenas por chaves proprias, rejeicao de tipo de avaliacao desconhecido, validacao de contagem de fotos como inteiro seguro nao negativo e rejeicao de arrays com chaves nao textuais. Testes unitarios adicionados ao arquivo existente. Nao altera regras clinicas, criterios parametrizados nem historico. Validacao de CI necessaria antes de merge.

@@ -30,11 +30,18 @@ export function parseWeeklyFeedbackDefinition(
   const rawQuestions = value.questions;
   const schemaVersion = value.schema_version;
 
-  if (!Array.isArray(rawQuestions) || typeof schemaVersion !== "number") {
+  if (
+    !Array.isArray(rawQuestions) ||
+    rawQuestions.length === 0 ||
+    typeof schemaVersion !== "number" ||
+    !Number.isSafeInteger(schemaVersion) ||
+    schemaVersion < 1
+  ) {
     return null;
   }
 
   const questions: WeeklyFeedbackQuestion[] = [];
+  const seenKeys = new Set<string>();
 
   for (const rawQuestion of rawQuestions) {
     if (!isRecord(rawQuestion)) {
@@ -48,7 +55,14 @@ export function parseWeeklyFeedbackDefinition(
 
     if (
       typeof key !== "string" ||
+      key.trim().length === 0 ||
+      key !== key.trim() ||
+      key.length > 120 ||
+      ["__proto__", "constructor", "prototype"].includes(key) ||
+      seenKeys.has(key) ||
       typeof label !== "string" ||
+      label.trim().length === 0 ||
+      label.length > 500 ||
       (inputType !== "text" &&
         inputType !== "integer" &&
         inputType !== "rating_0_10") ||
@@ -57,6 +71,7 @@ export function parseWeeklyFeedbackDefinition(
       return null;
     }
 
+    seenKeys.add(key);
     questions.push({
       allowsNotApplicable: rawQuestion.allows_not_applicable === true,
       inputType,
@@ -116,7 +131,10 @@ export function buildWeeklyFeedbackAnswers(
   for (const question of definition.questions) {
     const rawValue = formData.get(question.key);
 
-    if (typeof rawValue !== "string" || rawValue.trim() === "") {
+    if (rawValue !== null && typeof rawValue !== "string") {
+      throw new Error(`Resposta inválida para ${question.label}`);
+    }
+    if (rawValue === null || rawValue.trim() === "") {
       continue;
     }
 
