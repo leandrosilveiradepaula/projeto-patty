@@ -85,3 +85,23 @@ test("rejects invalid weekdays, times, missing fields and extra fields", () => {
     TypeError,
   );
 });
+
+test("rejects invalid or unsupported IANA time zones", () => {
+  const baseline = { request_weekday: 1, request_time_local: "08:00", reminder_weekday: 3 };
+  for (const timezone of ["Invalid/Timezone", " ", "x".repeat(101)]) {
+    assert.throws(() => parseWeeklyFeedbackScheduleConfiguration({ ...baseline, timezone }));
+  }
+});
+
+test("rejects malformed weekday types", () => {
+  const baseline = { request_weekday: 1, request_time_local: "08:00", reminder_weekday: 3, timezone: "America/Sao_Paulo" };
+  for (const request_weekday of ["1", 1.5, null, Number.POSITIVE_INFINITY]) {
+    assert.throws(() => parseWeeklyFeedbackScheduleConfiguration({ ...baseline, request_weekday }));
+  }
+});
+
+test("accepts configurable valid time zones beyond the default", () => {
+  assert.equal(parseWeeklyFeedbackScheduleConfiguration({
+    request_weekday: 5, request_time_local: "16:30", reminder_weekday: 7, timezone: "Europe/Lisbon",
+  }).timezone, "Europe/Lisbon");
+});
