@@ -29,6 +29,9 @@ export async function requestTrainingAction(
     }
 
     const rawNote = formData.get("note");
+    if (rawNote !== null && typeof rawNote !== "string") {
+      return { message: "A observação deve ser um texto válido.", success: false };
+    }
     const note = typeof rawNote === "string" ? rawNote.trim() : "";
 
     if (note.length > 1000) {
