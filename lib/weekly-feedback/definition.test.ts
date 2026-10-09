@@ -90,3 +90,9 @@ test("definition still accepts existing configured question types", () => {
   ] } as never);
   assert.equal(parsed?.questions.length, 3);
 });
+
+test("feedback rejects file-valued answers rather than silently omitting them", () => {
+  const form = new FormData();
+  form.set("treinos", new File(["invalid"], "invalid.txt"));
+  assert.throws(() => buildWeeklyFeedbackAnswers(form, definition), /Resposta inválida/);
+});
