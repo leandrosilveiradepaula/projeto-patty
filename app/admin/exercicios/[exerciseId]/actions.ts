@@ -72,6 +72,8 @@ export async function updateExerciseDraftAction(
     versionId,
   });
 
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
   revalidatePath("/admin/exercicios");
   revalidatePath("/admin/exercicios/" + exerciseId);
 }
@@ -100,6 +102,8 @@ export async function publishExerciseVersionAction(
     versionId,
   });
 
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
   revalidatePath("/admin/exercicios");
   revalidatePath("/admin/exercicios/" + exerciseId);
   revalidatePath("/cliente");
@@ -128,6 +132,8 @@ export async function createNextExerciseVersionAction(exerciseId: string) {
     versionNumber: nextExerciseVersionNumber(versions),
   });
 
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
   revalidatePath("/admin/exercicios");
   revalidatePath("/admin/exercicios/" + exerciseId);
 }
