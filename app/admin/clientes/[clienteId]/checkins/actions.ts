@@ -67,6 +67,9 @@ export async function correctClientLiquidIntakeAction(
     redirect(adminCheckinsPath(clientId, "correction-error"));
   }
 
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
+  revalidatePath(`/admin/clientes/${client.id}`);
   revalidatePath(adminCheckinsPath(clientId));
   revalidatePath("/cliente");
   revalidatePath("/cliente/checkins");
@@ -111,6 +114,9 @@ export async function correctClientActivityCheckinAction(
     redirect(adminCheckinsPath(clientId, "correction-error"));
   }
 
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
+  revalidatePath(`/admin/clientes/${client.id}`);
   revalidatePath(adminCheckinsPath(clientId));
   revalidatePath("/cliente");
   revalidatePath("/cliente/checkins");
