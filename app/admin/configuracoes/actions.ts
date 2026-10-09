@@ -26,7 +26,11 @@ function readNumericValue(formData: FormData, key: string) {
     throw new Error("Preencha todos os parâmetros numéricos");
   }
 
-  const value = Number(raw);
+  const normalized = raw.trim();
+  if (!/^[+-]?(?:[0-9]+(?:\.[0-9]+)?|\.[0-9]+)$/.test(normalized)) {
+    throw new Error("Informe apenas números decimais válidos");
+  }
+  const value = Number(normalized);
 
   if (!Number.isFinite(value)) {
     throw new Error("Informe apenas valores numéricos válidos");
@@ -108,6 +112,14 @@ function readRequiredString(formData: FormData, key: string) {
   return value.trim();
 }
 
+function readWeekday(formData: FormData, key: string) {
+  const raw = readRequiredString(formData, key);
+  if (!/^[1-7]$/.test(raw)) {
+    throw new Error("Selecione um dia da semana válido.");
+  }
+  return Number(raw);
+}
+
 export async function updateWeeklyFeedbackScheduleAction(
   templateId: string,
   expectedActiveVersionId: string,
@@ -142,9 +154,9 @@ export async function updateWeeklyFeedbackScheduleAction(
   );
 
   const configuration = serializeWeeklyFeedbackScheduleConfiguration({
-    requestWeekday: Number(readRequiredString(formData, "requestWeekday")),
+    requestWeekday: readWeekday(formData, "requestWeekday"),
     requestTimeLocal: readRequiredString(formData, "requestTimeLocal"),
-    reminderWeekday: Number(readRequiredString(formData, "reminderWeekday")),
+    reminderWeekday: readWeekday(formData, "reminderWeekday"),
     timezone: current.timezone,
   });
 
@@ -197,7 +209,16 @@ export async function updateAssessmentSchedulePreferencesAction(
 
   const preferredWeekdays = formData
     .getAll("completePreferredWeekday")
-    .map((value) => Number(value));
+    .map((value) => {
+      if (typeof value !== "string" || !/^[1-7]$/.test(value)) {
+        throw new Error("Selecione dias da semana válidos.");
+      }
+      return Number(value);
+    });
+
+  if (new Set(preferredWeekdays).size !== preferredWeekdays.length) {
+    throw new Error("Não repita dias preferidos para a avaliação.");
+  }
 
   if (preferredWeekdays.length === 0) {
     throw new Error(
