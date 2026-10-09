@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { isContentVersionReleaseEligible } from "@/lib/content/release-eligibility";
 import { requireRole } from "@/lib/supabase/auth";
+import { isUuid } from "@/lib/validation/uuid";
 import {
   createAccessibleClientContentRelease,
   getAccessibleClient,
@@ -23,6 +24,9 @@ export async function releaseContentToClient(
   formData: FormData,
 ): Promise<ClientContentReleaseFormState> {
   const context = await requireRole("admin");
+  if (!isUuid(clientId)) {
+    return { message: "Identificador de cliente inválido.", success: false };
+  }
   const client = await getAccessibleClient(clientId);
 
   if (!client) {
@@ -34,7 +38,7 @@ export async function releaseContentToClient(
 
   const versionId = formData.get("educationalContentVersionId");
 
-  if (typeof versionId !== "string" || !versionId) {
+  if (typeof versionId !== "string" || !isUuid(versionId)) {
     return {
       message: "Selecione uma versão publicada para liberar.",
       success: false,
