@@ -54,7 +54,11 @@ test("training requests refresh persisted history and exercise positions retain 
 
 test("private upload validates size, resets file selection on category change and omits private error payloads", () => {
   const form = readFileSync("components/client/ClientPrivateFileUploadForm.tsx", "utf8");
-  assert.ok(form.includes("selectedFile.size > maxBytes"));
+  const preflight = readFileSync("lib/files/private-file-upload-selection.ts", "utf8");
+  const validator = readFileSync("lib/validation/private-files.ts", "utf8");
+  assert.ok(form.includes("validatePrivateFileUploadSelection("));
+  assert.ok(preflight.includes("validatePrivateFile({"));
+  assert.ok(validator.includes("input.byteSize > PRIVATE_FILE_LIMITS_BYTES[input.fileKind]"));
   assert.ok(form.includes('input[name="file"]'));
   assert.ok(!form.includes('console.error("Private file temporary upload failed", uploadError)'));
   assert.ok(!form.includes('console.error("Private file upload flow failed", error)'));

@@ -91,13 +91,18 @@ export default async function AdminClientFilesPage({
         <AdminPrivateFileUploadForm clientId={client.id} />
       </Section>
 
-      {pendingReleaseFiles.length > 0 ? (
-        <div id="aguardando-liberacao">
+      <div id="aguardando-liberacao">
         <Section
-          action={<Badge variant="warning">{pendingReleaseFiles.length} pendente(s)</Badge>}
+          action={<Badge variant={pendingReleaseFiles.length > 0 ? "warning" : "neutral"}>{pendingReleaseFiles.length} pendente(s)</Badge>}
           description="Arquivos administrativos ainda ocultos para a cliente. Revise cada arquivo antes de decidir se deve liberá-lo."
           title="Aguardando liberação"
         >
+          {pendingReleaseFiles.length === 0 ? (
+            <EmptyState
+              description="Nenhum upload administrativo está aguardando liberação nesta cliente."
+              title="Sem arquivos pendentes"
+            />
+          ) : (
           <ul className={styles.fileList}>
             {pendingReleaseFiles.map((file: (typeof files)[number]) => (
               <li key={file.id}>
@@ -147,16 +152,16 @@ export default async function AdminClientFilesPage({
                       Baixar arquivo
                     </Link>
                     {!file.client_visible_at && file.uploaded_by_profile_id !== client.profile_id ? (
-                      <AdminPrivateFileReleaseForm clientId={client.id} fileId={file.id} />
+                      <AdminPrivateFileReleaseForm clientId={client.id} fileId={file.id} fileName={file.original_filename?.trim() || "Arquivo sem nome informado"} />
                     ) : null}
                   </div>
                 </Card>
               </li>
             ))}
           </ul>
+          )}
         </Section>
-        </div>
-      ) : null}
+      </div>
 
       <Section
         description="Histórico privado de arquivos já liberados e de arquivos enviados pela própria cliente. Upload administrativo oculto permanece em Aguardando liberação."
@@ -221,7 +226,7 @@ export default async function AdminClientFilesPage({
                       Baixar arquivo
                     </Link>
                     {!file.client_visible_at && file.uploaded_by_profile_id !== client.profile_id ? (
-                      <AdminPrivateFileReleaseForm clientId={client.id} fileId={file.id} />
+                      <AdminPrivateFileReleaseForm clientId={client.id} fileId={file.id} fileName={file.original_filename?.trim() || "Arquivo sem nome informado"} />
                     ) : null}
                   </div>
                 </Card>

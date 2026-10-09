@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/FormField";
 import { createClient } from "@/lib/supabase/client";
 import type { PrivateFileKind } from "@/lib/validation/private-files";
+import { validatePrivateFileUploadSelection } from "@/lib/files/private-file-upload-selection";
 
 import styles from "./AdminPrivateFileUploadForm.module.css";
 
@@ -22,6 +23,7 @@ const acceptByKind: Record<PrivateFileKind, string> = {
 };
 
 const errorMessages: Record<string, string> = {
+  missing_file: "Selecione um arquivo não vazio para enviar.",
   client_not_found: "A cliente selecionada não está disponível.",
   extension_mime_mismatch:
     "A extensão do arquivo não corresponde ao tipo informado pelo dispositivo.",
@@ -33,11 +35,6 @@ const errorMessages: Record<string, string> = {
   invalid_size: "O arquivo está vazio ou ultrapassa o limite permitido.",
 };
 
-function getExtension(filename: string) {
-  const dotIndex = filename.lastIndexOf(".");
-  return dotIndex >= 0 ? filename.slice(dotIndex + 1) : "";
-}
-
 type AdminPrivateFileUploadFormProps = {
   clientId: string;
 };
@@ -46,6 +43,7 @@ export function AdminPrivateFileUploadForm({
   clientId,
 }: AdminPrivateFileUploadFormProps) {
   const formRef = useRef<HTMLFormElement>(null);
+  const inFlightRef = useRef(false);
   const router = useRouter();
   const [fileKind, setFileKind] = useState<PrivateFileKind>("photo");
   const [message, setMessage] = useState<string | null>(null);
@@ -54,28 +52,35 @@ export function AdminPrivateFileUploadForm({
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (inFlightRef.current) return;
     setMessage(null);
     setSuccess(false);
 
     const formData = new FormData(event.currentTarget);
     const selectedFile = formData.get("file");
-
-    if (!(selectedFile instanceof File) || selectedFile.size === 0) {
+    if (!(selectedFile instanceof File)) {
       setMessage("Selecione um arquivo para enviar.");
       return;
     }
 
+    const selection = validatePrivateFileUploadSelection(selectedFile, fileKind);
+    if (!selection.ok) {
+      setMessage(errorMessages[selection.error] ?? "Revise o formato e o tamanho do arquivo.");
+      return;
+    }
+
+    inFlightRef.current = true;
     setIsPending(true);
 
     try {
       const sessionResult = await createAdminPrivateFileUploadSessionAction(
         clientId,
         {
-          byteSize: selectedFile.size,
-          claimedMimeType: selectedFile.type,
-          extension: getExtension(selectedFile.name),
+          byteSize: selection.byteSize,
+          claimedMimeType: selection.claimedMimeType,
+          extension: selection.extension,
           fileKind,
-          originalFilename: selectedFile.name,
+          originalFilename: selection.originalFilename,
         },
       );
 
@@ -101,7 +106,7 @@ export function AdminPrivateFileUploadForm({
         );
 
       if (uploadError) {
-        console.error("Admin private file temporary upload failed", uploadError);
+        console.error("Admin private file temporary upload failed");
         setMessage(
           "Não foi possível enviar o arquivo para a área temporária. Tente novamente.",
         );
@@ -138,16 +143,17 @@ export function AdminPrivateFileUploadForm({
         "Arquivo enviado e validado. Ele permanece oculto para a cliente até liberação explícita.",
       );
       router.refresh();
-    } catch (error) {
-      console.error("Admin private file upload flow failed", error);
+    } catch {
+      console.error("Admin private file upload flow failed");
       setMessage("Não foi possível concluir o upload. Tente novamente.");
     } finally {
+      inFlightRef.current = false;
       setIsPending(false);
     }
   }
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit} ref={formRef}>
+    <form aria-busy={isPending} className={styles.form} onSubmit={handleSubmit} ref={formRef}>
       {message ? (
         <Alert
           live={success ? "polite" : "assertive"}
@@ -168,10 +174,15 @@ export function AdminPrivateFileUploadForm({
           <select
             {...fieldProps}
             className={styles.select}
+            disabled={isPending}
             name="fileKind"
-            onChange={(event) =>
-              setFileKind(event.target.value as PrivateFileKind)
-            }
+            onChange={(event) => {
+              setFileKind(event.target.value as PrivateFileKind);
+              const input = formRef.current?.querySelector<HTMLInputElement>('input[name="file"]');
+              if (input) input.value = "";
+              setMessage(null);
+              setSuccess(false);
+            }}
             value={fileKind}
           >
             <option value="photo">Foto</option>
@@ -196,6 +207,7 @@ export function AdminPrivateFileUploadForm({
             {...fieldProps}
             accept={acceptByKind[fileKind]}
             className={styles.fileInput}
+            disabled={isPending}
             name="file"
             required
             type="file"
