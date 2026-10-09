@@ -58,11 +58,12 @@ export function AdminPrivateFileUploadForm({
 
     const formData = new FormData(event.currentTarget);
     const selectedFile = formData.get("file");
+    if (!(selectedFile instanceof File)) {
+      setMessage("Selecione um arquivo para enviar.");
+      return;
+    }
 
-    const selection = validatePrivateFileUploadSelection(
-      selectedFile instanceof File ? selectedFile : null,
-      fileKind,
-    );
+    const selection = validatePrivateFileUploadSelection(selectedFile, fileKind);
     if (!selection.ok) {
       setMessage(errorMessages[selection.error] ?? "Revise o formato e o tamanho do arquivo.");
       return;
