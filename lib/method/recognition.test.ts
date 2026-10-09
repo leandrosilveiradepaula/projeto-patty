@@ -124,3 +124,13 @@ test("fails closed when required Recognition outputs are absent", () => {
     TypeError,
   );
 });
+
+test("recognition rejects negative configured macro outputs", () => {
+  const invalid = structuredClone(currentRecognitionBaseline);
+  invalid.parameters.fat_daily.value = -5;
+  assert.throws(() => recognitionMetabolicReferenceMacros(invalid, 70), /non-negative/);
+});
+
+test("recognition rejects output arithmetic overflow", () => {
+  assert.throws(() => recognitionMetabolicReferenceMacros(currentRecognitionBaseline, 1e308), /finite/);
+});
