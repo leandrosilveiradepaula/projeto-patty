@@ -69,3 +69,11 @@ test("formats supported weekdays in pt-BR", () => {
   assert.equal(formatIsoWeekdayPtBr(6), "sábado");
   assert.throws(() => formatIsoWeekdayPtBr(0), RangeError);
 });
+
+test("assessment preferred weekdays reject nonnumeric inputs", () => {
+  for (const complete_preferred_weekdays of [["5"], [null], [5.5], [Number.POSITIVE_INFINITY]]) {
+    assert.throws(() => parseAssessmentSchedulePreferencesConfiguration({
+      basic_placement: ASSESSMENT_BASIC_PLACEMENT, complete_preferred_weekdays,
+    }));
+  }
+});
