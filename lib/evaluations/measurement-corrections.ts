@@ -48,8 +48,8 @@ export function applyAssessmentMeasurementCorrections(
 
     if (
       !current ||
-      correction.created_at > current.created_at ||
-      (correction.created_at === current.created_at &&
+      Date.parse(correction.created_at) > Date.parse(current.created_at) ||
+      (Date.parse(correction.created_at) === Date.parse(current.created_at) &&
         correction.id > current.id)
     ) {
       latestByMeasurement.set(
