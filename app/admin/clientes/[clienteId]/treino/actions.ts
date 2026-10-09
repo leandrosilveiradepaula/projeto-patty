@@ -270,33 +270,22 @@ export async function addTrainingPlanItemAction(
       );
     }
 
+    const executionNotes = optionalText(formData, "executionNotes", 2000, "Orientações de execução");
+    const repetitionsText = requiredText(formData, "repetitionsText", 80, "Repetições");
+    const restText = optionalText(formData, "restText", 120, "Tempo de descanso");
+    const setsText = requiredText(formData, "setsText", 80, "Séries");
     const items = await listAccessibleClientTrainingPlanItems(version.id);
     const nextPosition =
       items.reduce((max, item) => Math.max(max, item.position), 0) + 1;
 
     await createAccessibleClientTrainingPlanItem({
-      executionNotes: optionalText(
-        formData,
-        "executionNotes",
-        2000,
-        "Orientações de execução",
-      ),
+      executionNotes,
       exerciseName,
       exerciseVersionId,
       position: nextPosition,
-      repetitionsText: requiredText(
-        formData,
-        "repetitionsText",
-        80,
-        "Repetições",
-      ),
-      restText: optionalText(
-        formData,
-        "restText",
-        120,
-        "Tempo de descanso",
-      ),
-      setsText: requiredText(formData, "setsText", 80, "Séries"),
+      repetitionsText,
+      restText,
+      setsText,
       trainingPlanVersionId: version.id,
     });
 
