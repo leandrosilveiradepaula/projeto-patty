@@ -92,6 +92,8 @@ export async function updateMethodConfigurationAction(
     templateId,
   });
 
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
   revalidatePath("/admin/configuracoes");
 }
 
@@ -154,6 +156,8 @@ export async function updateWeeklyFeedbackScheduleAction(
     templateId,
   });
 
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
   revalidatePath("/admin/configuracoes");
 }
 
@@ -215,5 +219,7 @@ export async function updateAssessmentSchedulePreferencesAction(
     templateId,
   });
 
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
   revalidatePath("/admin/configuracoes");
 }
