@@ -51,6 +51,8 @@ export async function addAnamnesisReviewNote(
     };
   }
 
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
   revalidatePath(`/admin/anamneses/${submission.id}/revisao`);
   revalidatePath(`/admin/anamneses/${submission.id}`);
   revalidatePath(`/admin/clientes/${submission.client_id}`);
