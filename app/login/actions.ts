@@ -7,6 +7,7 @@ import {
   getAuthContextForProfileId,
 } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
+import { validateInvitationEmail } from "@/lib/onboarding/validation";
 
 export type LoginState = { message: string | null };
 
@@ -14,7 +15,13 @@ export async function login(_: LoginState, formData: FormData): Promise<LoginSta
   const email = formData.get("email");
   const password = formData.get("password");
 
-  if (typeof email !== "string" || typeof password !== "string" || !email.trim() || !password) {
+  if (
+    typeof email !== "string" ||
+    typeof password !== "string" ||
+    !validateInvitationEmail(email).ok ||
+    !password ||
+    password.length > 128
+  ) {
     return { message: "Email ou senha inválidos." };
   }
 

@@ -1,3 +1,7 @@
+## Auditoria integrada - validacao de formularios de autenticacao - 2026-10-09
+
+Cinco blocos: login usa validador compartilhado de email; login limita tamanho da senha antes de consultar Auth; recuperacao de senha reutiliza politica de email do convite; ambos os convites rejeitam nomes nao textuais; ambos os convites rejeitam emails nao textuais. Testes de contrato incluidos. Sem alterar fluxo de MFA, Auth, RLS ou links confiaveis. E2E autenticado pendente.
+
 ## Auditoria integrada - recuperacao e ativacao de acesso - 2026-10-09
 
 Cinco blocos: link de redefinicao de senha usa origem confiavel configurada e nao headers de Host; ausencia de origem confiavel bloqueia solicitacao antes de gerar token; email de recuperacao tem tipo e comprimento validados; convite inicial usa o mesmo limite de email; ativacao e redefinicao compartilham limite superior de senha. Testes de contrato incluidos. Nenhum token e registrado em logs; E2E autenticado pendente.
