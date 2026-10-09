@@ -45,3 +45,10 @@ test("ignores missing or invalid weight", () => {
     null,
   );
 });
+
+test("finds usable weight after an invalid earlier weight record", () => {
+  assert.equal(resolveAssessmentWeightKg([
+    { measurement_key: "peso", measurement_value: 62000, unit: "g" },
+    { measurement_key: "weight", measurement_value: 62, unit: "kg" },
+  ]), 62);
+});
