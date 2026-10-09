@@ -73,7 +73,9 @@ export function normalizeAssessmentMeasurementKey(value: string) {
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[\s-]+/g, "_");
 
-  return KNOWN_ALIASES[normalized] ?? normalized;
+  return Object.prototype.hasOwnProperty.call(KNOWN_ALIASES, normalized)
+    ? KNOWN_ALIASES[normalized]
+    : normalized;
 }
 
 export function canonicalizeKnownAssessmentMeasurementKey(value: string) {
