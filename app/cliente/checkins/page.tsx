@@ -16,6 +16,7 @@ import { parseCheckinHistoryDay, saoPauloCheckinDayRange } from "@/lib/checkins/
 import Link from "next/link";
 import { loadSupportedLiquidTaxonomy } from "@/lib/method/liquid-taxonomy-loader";
 import { latestCheckinCorrectionsByEvent } from "@/lib/checkins/effective-corrections";
+import { liquidCorrectionSelection } from "@/lib/checkins/correction-selection";
 import {
   getCurrentClient,
   listAccessibleClientActivityCheckinEventCorrections,
@@ -93,6 +94,7 @@ export default async function ClientCheckinsPage({
   const latestLiquidCorrectionByEvent = latestCheckinCorrectionsByEvent(liquidCorrections);
   const latestActivityCorrectionByEvent = latestCheckinCorrectionsByEvent(activityCorrections);
 
+  const activeLiquidKindKeys = liquidTaxonomy.kinds.map((kind) => kind.key);
   const pureWaterKindKeys = new Set<string>(
     liquidTaxonomy.kinds
       .filter((kind) => kind.hydrationClass === "pure_water")
@@ -204,10 +206,15 @@ export default async function ClientCheckinsPage({
           {selectedDay === today ? (
           <Card className={styles.formCard}>
             <h3 className={styles.cardTitle}>Adicionar líquido de hoje</h3>
+            {liquidTaxonomy.kinds.length === 0 ? (
+              <Alert title="Tipos de líquido indisponíveis" variant="info">
+                Não há tipos de líquido ativos para registrar neste momento. Seus registros anteriores continuam disponíveis para consulta.
+              </Alert>
+            ) : null}
             <form action={addLiquidIntakeAction} className={styles.form}>
               <label className={styles.field}>
                 <span>Quantidade em mL</span>
-                <input min="1" name="amountMl" required type="number" />
+                <input max={2_147_483_647} min="1" name="amountMl" required step="1" type="number" />
               </label>
               <label className={styles.field}>
                 <span>Tipo</span>
@@ -223,7 +230,7 @@ export default async function ClientCheckinsPage({
                   ))}
                 </select>
               </label>
-              <Button type="submit">Registrar líquido</Button>
+              <Button disabled={liquidTaxonomy.kinds.length === 0} type="submit">Registrar líquido</Button>
             </form>
           </Card>
           ) : (
@@ -318,7 +325,9 @@ export default async function ClientCheckinsPage({
           />
         ) : (
           <ol className={styles.historyList}>
-            {displayedLiquidEvents.map((event) => (
+            {displayedLiquidEvents.map((event) => {
+              const kindSelection = liquidCorrectionSelection(event.effectiveLiquidKind, activeLiquidKindKeys);
+              return (
               <li key={event.id}>
                 <Card className={styles.historyCard} variant="subtle">
                   <div className={styles.summaryHeader}>
@@ -339,18 +348,23 @@ export default async function ClientCheckinsPage({
                         <input
                           defaultValue={event.effectiveAmountMl}
                           min="1"
+                          max={2_147_483_647}
                           name="amountMl"
                           required
+                          step="1"
                           type="number"
                         />
                       </label>
                       <label className={styles.field}>
                         <span>Tipo</span>
                         <select
-                          defaultValue={event.effectiveLiquidKind}
+                          defaultValue={kindSelection.defaultValue}
                           name="liquidKind"
                           required
                         >
+                          {kindSelection.requiresChoice ? (
+                            <option disabled value="">Tipo histórico indisponível. Escolha um tipo ativo.</option>
+                          ) : null}
                           {liquidTaxonomy.kinds.map((kind) => (
                             <option key={kind.key} value={kind.key}>
                               {kind.label}
@@ -358,7 +372,7 @@ export default async function ClientCheckinsPage({
                           ))}
                         </select>
                       </label>
-                      <Button type="submit" variant="secondary">Salvar correção</Button>
+                      <Button disabled={liquidTaxonomy.kinds.length === 0} type="submit" variant="secondary">Salvar correção</Button>
                     </form>
                     {event.wasCorrected ? (
                       <p className={styles.note}>
@@ -368,7 +382,8 @@ export default async function ClientCheckinsPage({
                   </details>
                 </Card>
               </li>
-            ))}
+              );
+            })}
           </ol>
         )}
       </Section>

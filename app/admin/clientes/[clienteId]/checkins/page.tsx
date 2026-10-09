@@ -14,6 +14,7 @@ import Link from "next/link";
 import { parseCheckinHistoryDay, saoPauloCheckinDayRange } from "@/lib/checkins/history-day";
 import { loadSupportedLiquidTaxonomy } from "@/lib/method/liquid-taxonomy-loader";
 import { latestCheckinCorrectionsByEvent } from "@/lib/checkins/effective-corrections";
+import { liquidCorrectionSelection } from "@/lib/checkins/correction-selection";
 import {
   getAccessibleClient,
   listAccessibleClientActivityCheckinEventCorrections,
@@ -58,6 +59,7 @@ export default async function AdminClientCheckinsPage({
 
   const today = new Intl.DateTimeFormat("en-CA", { year: "numeric", month: "2-digit", day: "2-digit", timeZone: "America/Sao_Paulo" }).format(new Date());
   const selectedDay = parseCheckinHistoryDay(dia, today);
+  const invalidHistoryDay = dia !== undefined && selectedDay === null;
   const selectedRange = selectedDay ? saoPauloCheckinDayRange(selectedDay) : null;
   const [liquidEvents, activityEvents, liquidTaxonomy] = await Promise.all([
     listAccessibleClientLiquidIntakeEvents(client.id, selectedRange?.recordedFrom, selectedRange?.recordedBefore),
@@ -65,6 +67,7 @@ export default async function AdminClientCheckinsPage({
     loadSupportedLiquidTaxonomy(),
   ]);
 
+  const activeLiquidKindKeys = liquidTaxonomy.kinds.map((kind) => kind.key);
   const liquidLabelsByKey = new Map<string, string>(
     liquidTaxonomy.kinds.map((kind) => [kind.key, kind.label]),
   );
@@ -92,6 +95,12 @@ export default async function AdminClientCheckinsPage({
       />
 
       <ClientWorkspaceNav activeArea="checkins" clientId={client.id} />
+
+      {invalidHistoryDay ? (
+        <Alert live="assertive" title="Data do histórico inválida" variant="critical">
+          A data informada é inválida ou está no futuro. Exibimos os registros recentes.
+        </Alert>
+      ) : null}
 
       {status === "correction-recorded" ? (
         <Alert live="polite" title="Correção registrada" variant="success">
@@ -133,6 +142,11 @@ export default async function AdminClientCheckinsPage({
           <Button type="submit" variant="secondary">Consultar histórico</Button>
           {selectedRange ? <Link href={`/admin/clientes/${client.id}/checkins`}>Ver registros recentes</Link> : null}
         </form>
+        {liquidTaxonomy.kinds.length === 0 ? (
+          <Alert title="Tipos de líquido indisponíveis" variant="info">
+            Nenhuma categoria ativa está disponível para correção neste momento; os registros históricos continuam visíveis.
+          </Alert>
+        ) : null}
         {recentLiquidEvents.length === 0 ? (
           <p className={styles.description}>Ainda não existem registros de líquidos desta cliente para consultar ou corrigir.</p>
         ) : (
@@ -141,6 +155,7 @@ export default async function AdminClientCheckinsPage({
               const correction = latestLiquidCorrectionByEvent.get(event.id);
               const effectiveAmount = correction?.corrected_amount_ml ?? event.amount_ml;
               const effectiveKind = correction?.corrected_liquid_kind ?? event.liquid_kind;
+              const kindSelection = liquidCorrectionSelection(effectiveKind, activeLiquidKindKeys);
 
               return (
                 <li key={event.id}>
@@ -165,17 +180,20 @@ export default async function AdminClientCheckinsPage({
                         {selectedDay ? <input name="historyDay" type="hidden" value={selectedDay} /> : null}
                         <label className={styles.field}>
                           <span>Quantidade em mL</span>
-                          <input defaultValue={effectiveAmount} min="1" name="amountMl" required type="number" />
+                          <input defaultValue={effectiveAmount} max={2_147_483_647} min="1" name="amountMl" required step="1" type="number" />
                         </label>
                         <label className={styles.field}>
                           <span>Tipo</span>
-                          <select defaultValue={effectiveKind} name="liquidKind" required>
+                          <select defaultValue={kindSelection.defaultValue} name="liquidKind" required>
+                            {kindSelection.requiresChoice ? (
+                              <option disabled value="">Tipo histórico indisponível. Escolha um tipo ativo.</option>
+                            ) : null}
                             {liquidTaxonomy.kinds.map((kind) => (
                               <option key={kind.key} value={kind.key}>{kind.label}</option>
                             ))}
                           </select>
                         </label>
-                        <Button type="submit" variant="secondary">Salvar correção</Button>
+                        <Button disabled={liquidTaxonomy.kinds.length === 0} type="submit" variant="secondary">Salvar correção</Button>
                       </form>
                       {correction ? (
                         <p className={styles.description}>
