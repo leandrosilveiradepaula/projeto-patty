@@ -18,6 +18,9 @@ export async function requestPasswordRecovery(
   formData: FormData,
 ): Promise<PasswordRecoveryRequestState> {
   const rawEmail = formData.get("email");
+  if (rawEmail !== null && typeof rawEmail !== "string") {
+    return { message: "Informe um email válido.", success: false };
+  }
   const email = typeof rawEmail === "string" ? rawEmail.trim() : "";
 
   if (!email || email.length > 254 || !validEmail(email)) {
