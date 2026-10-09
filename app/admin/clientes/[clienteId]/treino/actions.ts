@@ -388,29 +388,14 @@ export async function updateTrainingPlanItemAction(
     const setsText = requiredText(formData, "setsText", 80, "Séries");
 
     await updateAccessibleClientTrainingPlanItem({
-      executionNotes: optionalText(
-        formData,
-        "executionNotes",
-        2000,
-        "Orientações de execução",
-      ),
+      executionNotes,
       exerciseName,
       exerciseVersionId,
       itemId: existing.id,
       position: existing.position,
-      repetitionsText: requiredText(
-        formData,
-        "repetitionsText",
-        80,
-        "Repetições",
-      ),
-      restText: optionalText(
-        formData,
-        "restText",
-        120,
-        "Tempo de descanso",
-      ),
-      setsText: requiredText(formData, "setsText", 80, "Séries"),
+      repetitionsText,
+      restText,
+      setsText,
     });
 
     revalidateTraining(client.id);
