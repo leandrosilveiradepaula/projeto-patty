@@ -1,3 +1,7 @@
+## Auditoria integrada - precisao de configuracoes parametrizaveis - 2026-10-09
+
+Cinco blocos: validacao estrita de dia ISO 1-7 na solicitacao semanal, na lembranca semanal e nas preferencias de avaliacao; rejeicao de dias preferidos duplicados; e validacao decimal explicita antes de salvar parametros numericos. Mantida a parametrizacao versionada e a decisao humana. Testes de contrato adicionados; E2E autenticado pendente.
+
 ## Auditoria integrada - biblioteca de conteudos e exercicios - 2026-10-09
 
 Cinco blocos: limite numerico seguro ao criar nova versao de conteudo, MIME type estruturalmente valido para assets privados, paths privados sem segmentos vazios ou barras invertidas, limite numerico seguro para novas versoes de exercicios e tamanho de asset com espacos externos aceitos sem permitir valores parciais. Preservados storage privado, historico, versionamento e publicacao manual. Testes de contrato incluidos; E2E autenticado pendente.
