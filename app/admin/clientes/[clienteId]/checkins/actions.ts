@@ -38,7 +38,7 @@ export async function correctClientLiquidIntakeAction(
 
   if (
     typeof eventId !== "string" ||
-    !eventId ||
+    !isUuid(eventId) ||
     amountMl === null
   ) {
     redirect(adminCheckinsPath(clientId, "correction-invalid"));
@@ -95,7 +95,7 @@ export async function correctClientActivityCheckinAction(
 
   if (
     typeof eventId !== "string" ||
-    !eventId ||
+    !isUuid(eventId) ||
     (rawValue !== "yes" && rawValue !== "no")
   ) {
     redirect(adminCheckinsPath(clientId, "correction-invalid"));
