@@ -49,6 +49,10 @@ export async function respondToAnamnesisClarification(
     return { message: "Escreva seu esclarecimento antes de registrar.", success: false };
   }
 
+  if (responseText.trim().length > 4000) {
+    return { message: "O esclarecimento deve ter no máximo 4.000 caracteres.", success: false };
+  }
+
   try {
     await createAccessibleAnamnesisClarificationResponse({
       clarificationRequestId: request.id,
