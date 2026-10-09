@@ -62,6 +62,8 @@ export async function createEducationalContentDraftAction(formData: FormData) {
     throw error;
   }
 
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
   revalidatePath("/admin/conteudos");
   redirect("/admin/conteudos/" + content.id);
 }
