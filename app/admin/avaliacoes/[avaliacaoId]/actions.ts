@@ -16,6 +16,7 @@ import { finalizeAssessmentWithMethodSnapshot } from "@/lib/evaluations/assessme
 import { createAccessibleAssessmentMeasurementCorrection } from "@/lib/evaluations/measurement-correction-store";
 import { isProfessionalDecision } from "@/lib/follow-up/professional-decisions";
 import { requireRole } from "@/lib/supabase/auth";
+import { isUuid } from "@/lib/validation/uuid";
 import {
   createAccessibleProfessionalFollowUp,
   deleteAccessibleAssessmentMeasurement,
