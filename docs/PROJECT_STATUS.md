@@ -1,3 +1,7 @@
+## Auditoria integrada - validacao compartilhada de arquivos e cadastro - 2026-10-09
+
+Cinco blocos: tipo de arquivo privado validado antes de consultar allowlist; extensao e MIME validados antes de normalizar; tipo de arquivo validado ao construir path privado; extensao validada ao construir path; campos opcionais do Cadastro Atual rejeitam valores nao textuais em vez de apagar dados existentes silenciosamente. Testes de contrato incluidos; E2E autenticado pendente. Mantidos arquivos privados e RLS.
+
 ## Auditoria integrada - arquivos privados e liberacao de conteudo - 2026-10-09
 
 Cinco blocos: UUID de cliente validado antes da consulta de liberacao de conteudo, UUID da versao exata de conteudo, tipo textual do nome original do upload da cliente e do admin, e limite de comprimento para ambos os nomes originais. Preservados arquivos privados, releases explicitos, acesso client-scoped e revisao humana. Testes de contrato incluidos; E2E autenticado pendente.
