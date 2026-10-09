@@ -89,6 +89,14 @@ export default async function AdminClientContentPage({
         status={<Badge variant="neutral">{releases.length} liberação(ões)</Badge>}
       />
       <ClientWorkspaceNav activeArea="conteudos" clientId={client.id} />
+      <Section
+        description="A liberação individual depende da versão publicada e do arquivo privado verificado. Consulte as demais áreas sem perder o contexto da cliente."
+        title="Continuar atendimento"
+      >
+        <Link href={`/admin/clientes/${client.id}/protocolos`}>Protocolos da cliente</Link>
+        {" · "}
+        <Link href={`/admin/clientes/${client.id}/feedback-semanal`}>Feedback semanal</Link>
+      </Section>
       <div id="liberar-conteudo">
       <Section
         description="Escolha uma versão publicada e com arquivo privado verificado. A liberação é individual e não ocorre automaticamente."
