@@ -57,11 +57,6 @@ const areas = [
     title: "Treino",
   },
   {
-    description: "Consulte seu treino individual e os exercícios liberados pela Patty.",
-    href: "/cliente/treino",
-    title: "Exercícios do meu treino",
-  },
-  {
     description: "Consulte e atualize seus dados de contato e acesso.",
     href: "/cliente/perfil",
     title: "Perfil",
