@@ -118,3 +118,14 @@ test("requires at least one pure-water category but does not infer a ratio", () 
     TypeError,
   );
 });
+
+test("liquid taxonomy rejects unsafe identifiers and oversized labels", () => {
+  for (const key of ["Unsafe", "with space", "a/b", "1start", "a".repeat(121)]) {
+    assert.throws(() => parseLiquidTaxonomyConfiguration({ kinds: [
+      { key, label: "Água", hydrationClass: "pure_water" },
+    ] }), /invalid key/);
+  }
+  assert.throws(() => parseLiquidTaxonomyConfiguration({ kinds: [
+    { key: "water", label: "x".repeat(201), hydrationClass: "pure_water" },
+  ] }), /invalid key/);
+});
