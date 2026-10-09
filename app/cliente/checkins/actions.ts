@@ -33,6 +33,8 @@ function currentSaoPauloDate() {
 function revalidateCheckinJourneys(clientId: string) {
   revalidatePath("/cliente");
   revalidatePath("/cliente/checkins");
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
   revalidatePath(`/admin/clientes/${clientId}`);
   revalidatePath(`/admin/clientes/${clientId}/checkins`);
 }

@@ -82,6 +82,10 @@ export async function addAnamnesisAnswerCorrection(
     };
   }
 
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
+  revalidatePath(`/admin/clientes/${submission.client_id}`);
+  revalidatePath(`/admin/clientes/${submission.client_id}/anamnese`);
   revalidatePath(`/admin/anamneses/${submission.id}`);
   revalidatePath(`/admin/anamneses/${submission.id}/correcoes`);
 

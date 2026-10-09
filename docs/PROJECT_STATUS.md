@@ -1,3 +1,7 @@
+## Auditoria integrada - correcoes de Anamnese e Check-ins - 2026-10-09
+
+Correcoes profissionais de respostas de Anamnese agora invalidam painel, pendencias e ficha administrativa alem do historico da propria submissao. Registros e correcoes de Check-ins pela cliente, bem como correcoes administrativas, atualizam o painel operacional e a ficha correspondente apos persistencia confirmada. Preservados registros originais, historico append-only, autorizacao e separacao entre dado e interpretacao. Sem migrations ou alteracoes de RLS. Teste de contrato cobre os caminhos; E2E autenticado permanece pendente.
+
 ## Auditoria integrada - upload da cliente e fila de arquivos - 2026-10-09
 
 A finalizacao aceita de arquivo privado pela cliente atualizava a area da cliente e a ficha de arquivos, mas nao invalidava explicitamente o painel, a fila de pendencias, o indice administrativo de arquivos e o resumo da ficha. Essas superficies agora sao revalidadas apenas quando o backend confirma status accepted. O fluxo de rejeicao permanece sem revalidacao de sucesso. Teste de contrato cobre as rotas; E2E autenticado continua pendente. Sem alteracoes de schema, RLS, Auth, storage, publicacao ou regra profissional.
