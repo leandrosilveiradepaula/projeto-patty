@@ -5,7 +5,7 @@ import test from "node:test";
 const index = readFileSync("app/cliente/mais/page.tsx", "utf8");
 const dashboard = readFileSync("app/cliente/page.tsx", "utf8");
 
-test("client care index exposes all ten core journeys and exercise library", () => {
+test("client care index exposes all ten core journeys", () => {
   for (const href of [
     "/cliente/anamnese",
     "/cliente/avaliacoes",
@@ -17,7 +17,6 @@ test("client care index exposes all ten core journeys and exercise library", () 
     "/cliente/protocolo",
     "/cliente/checkins",
     "/cliente/feedback-semanal",
-    "/cliente/exercicios",
   ]) {
     assert.ok(index.includes(`href: "${href}"`), `Missing client destination ${href}`);
   }
@@ -30,4 +29,10 @@ test("client care index links back to the real dashboard", () => {
 
 test("client care index does not expose the unapproved journey timeline", () => {
   assert.ok(!index.includes('href: "/cliente/jornada"'));
+});
+
+test("exercise redirect is not misrepresented as a standalone exercise library", () => {
+  const exerciseRoute = readFileSync("app/cliente/exercicios/page.tsx", "utf8");
+  assert.ok(exerciseRoute.includes('redirect("/cliente/treino")'));
+  assert.ok(!index.includes('href: "/cliente/exercicios"'));
 });

@@ -1,3 +1,7 @@
+## Auditoria operacional - continuidade nas jornadas da cliente - 2026-10-09
+
+Nove areas reais (Anamnese, avaliacoes, evolucao, protocolo, feedback semanal, check-ins, treino, conteudos e arquivos) passam a apresentar proximos destinos relevantes por componente compartilhado, preservando rotas existentes, controles de acesso e publicacao exclusivamente profissional. A rota /cliente/exercicios foi confirmada como redirecionamento para /cliente/treino; o indice Mais deixa de apresenta-la incorretamente como biblioteca independente. Testes de contrato cobrem as nove areas e dez destinos permitidos. Nenhuma regra clinica automatizada. Validacao E2E autenticada pendente.
+
 ## Auditoria operacional - continuidade entre jornadas profissionais - 2026-10-09
 
 Cinco areas reais da cliente conectadas com pelo menos dez transicoes: Anamnese enviada -> revisao, esclarecimentos, correcoes e analise assistiva; avaliacoes -> evolucao e protocolos; protocolos -> feedback semanal, treino e conteudos; liberacao de conteudos -> protocolos e feedback; feedback semanal -> avaliacoes, check-ins e protocolos. Acesso continua client-scoped, sujeito a RLS e revisao/publicacao humanas. Testes de contrato verificam destinos e preservacao das regras existentes. Validacao E2E autenticada segue pendente.

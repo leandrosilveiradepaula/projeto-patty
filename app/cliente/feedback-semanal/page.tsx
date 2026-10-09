@@ -1,3 +1,4 @@
+import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
 import { saveWeeklyFeedbackAction } from "@/app/cliente/feedback-semanal/actions";
 import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
@@ -288,6 +289,7 @@ export default async function ClientWeeklyFeedbackPage({
           </Section>
         </>
       )}
+      <ClientJourneyNextSteps areas={["checkins","protocol","index"]} />
     </>
   );
 }

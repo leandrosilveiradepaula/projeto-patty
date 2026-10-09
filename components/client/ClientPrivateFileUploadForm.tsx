@@ -57,6 +57,12 @@ export function ClientPrivateFileUploadForm() {
       return;
     }
 
+    const maxBytes = fileKind === "photo" ? 10 * 1024 * 1024 : 20 * 1024 * 1024;
+    if (selectedFile.size > maxBytes) {
+      setMessage("O arquivo ultrapassa o limite indicado para a categoria selecionada.");
+      return;
+    }
+
     setIsPending(true);
 
     try {
@@ -86,7 +92,7 @@ export function ClientPrivateFileUploadForm() {
         });
 
       if (uploadError) {
-        console.error("Private file temporary upload failed", uploadError);
+        console.error("Private file temporary upload failed");
         setMessage(
           "Não foi possível enviar o arquivo para a área temporária. Tente novamente.",
         );
@@ -119,8 +125,8 @@ export function ClientPrivateFileUploadForm() {
       setSuccess(true);
       setMessage("Arquivo enviado e validado com sucesso.");
       router.refresh();
-    } catch (error) {
-      console.error("Private file upload flow failed", error);
+    } catch {
+      console.error("Private file upload flow failed");
       setMessage("Não foi possível concluir o upload. Tente novamente.");
     } finally {
       setIsPending(false);
@@ -150,9 +156,13 @@ export function ClientPrivateFileUploadForm() {
             {...fieldProps}
             className={styles.select}
             name="fileKind"
-            onChange={(event) =>
-              setFileKind(event.target.value as PrivateFileKind)
-            }
+            onChange={(event) => {
+              setFileKind(event.target.value as PrivateFileKind);
+              const input = formRef.current?.querySelector<HTMLInputElement>('input[name="file"]');
+              if (input) input.value = "";
+              setMessage(null);
+              setSuccess(false);
+            }}
             value={fileKind}
           >
             <option value="photo">Foto</option>

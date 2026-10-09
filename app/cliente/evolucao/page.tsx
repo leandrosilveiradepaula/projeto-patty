@@ -1,3 +1,4 @@
+import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -145,6 +146,7 @@ export default async function ClientProgressPage() {
           </>
         )}
       </Section>
+      <ClientJourneyNextSteps areas={["assessments","protocol","index"]} />
     </>
   );
 }

@@ -57,11 +57,6 @@ const areas = [
     title: "Treino",
   },
   {
-    description: "Consulte a biblioteca de exercícios disponível para sua conta.",
-    href: "/cliente/exercicios",
-    title: "Exercícios",
-  },
-  {
     description: "Consulte e atualize seus dados de contato e acesso.",
     href: "/cliente/perfil",
     title: "Perfil",
