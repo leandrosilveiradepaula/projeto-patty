@@ -66,8 +66,12 @@ function optionalText(
 ) {
   const value = formData.get(key);
 
-  if (typeof value !== "string") {
+  if (value === null) {
     return null;
+  }
+
+  if (typeof value !== "string") {
+    throw new Error(`${label} deve ser um texto válido.`);
   }
 
   const normalized = value.trim();
@@ -232,6 +236,9 @@ export async function addTrainingPlanItemAction(
     }
 
     const exerciseVersionRaw = formData.get("exerciseVersionId");
+    if (exerciseVersionRaw !== null && typeof exerciseVersionRaw !== "string") {
+      return initialError("A versão do exercício selecionado é inválida.");
+    }
     if (typeof exerciseVersionRaw === "string" && exerciseVersionRaw.trim() && !isUuid(exerciseVersionRaw)) {
       return initialError("A versão do exercício selecionado é inválida.");
     }
@@ -277,6 +284,9 @@ export async function addTrainingPlanItemAction(
     const items = await listAccessibleClientTrainingPlanItems(version.id);
     const nextPosition =
       items.reduce((max, item) => Math.max(max, item.position), 0) + 1;
+    if (!Number.isSafeInteger(nextPosition) || nextPosition < 1) {
+      return initialError("Não foi possível definir uma posição válida para o exercício.");
+    }
 
     await createAccessibleClientTrainingPlanItem({
       executionNotes,
@@ -334,6 +344,9 @@ export async function updateTrainingPlanItemAction(
     }
 
     const exerciseVersionRaw = formData.get("exerciseVersionId");
+    if (exerciseVersionRaw !== null && typeof exerciseVersionRaw !== "string") {
+      return initialError("A versão do exercício selecionado é inválida.");
+    }
     if (typeof exerciseVersionRaw === "string" && exerciseVersionRaw.trim() && !isUuid(exerciseVersionRaw)) {
       return initialError("A versão do exercício selecionado é inválida.");
     }
@@ -372,30 +385,20 @@ export async function updateTrainingPlanItemAction(
       );
     }
 
+    const executionNotes = optionalText(formData, "executionNotes", 2000, "Orientações de execução");
+    const repetitionsText = requiredText(formData, "repetitionsText", 80, "Repetições");
+    const restText = optionalText(formData, "restText", 120, "Tempo de descanso");
+    const setsText = requiredText(formData, "setsText", 80, "Séries");
+
     await updateAccessibleClientTrainingPlanItem({
-      executionNotes: optionalText(
-        formData,
-        "executionNotes",
-        2000,
-        "Orientações de execução",
-      ),
+      executionNotes,
       exerciseName,
       exerciseVersionId,
       itemId: existing.id,
       position: existing.position,
-      repetitionsText: requiredText(
-        formData,
-        "repetitionsText",
-        80,
-        "Repetições",
-      ),
-      restText: optionalText(
-        formData,
-        "restText",
-        120,
-        "Tempo de descanso",
-      ),
-      setsText: requiredText(formData, "setsText", 80, "Séries"),
+      repetitionsText,
+      restText,
+      setsText,
     });
 
     revalidateTraining(client.id);
