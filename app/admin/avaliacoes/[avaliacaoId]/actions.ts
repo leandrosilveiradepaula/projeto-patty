@@ -16,6 +16,7 @@ import { finalizeAssessmentWithMethodSnapshot } from "@/lib/evaluations/assessme
 import { createAccessibleAssessmentMeasurementCorrection } from "@/lib/evaluations/measurement-correction-store";
 import { isProfessionalDecision } from "@/lib/follow-up/professional-decisions";
 import { requireRole } from "@/lib/supabase/auth";
+import { isUuid } from "@/lib/validation/uuid";
 import {
   createAccessibleProfessionalFollowUp,
   deleteAccessibleAssessmentMeasurement,
@@ -49,7 +50,7 @@ export async function addProfessionalFollowUp(
   formData: FormData,
 ): Promise<ProfessionalFollowUpFormState> {
   const context = await requireRole("admin");
-  const assessment = await getAccessibleClientAssessment(assessmentId);
+  const assessment = isUuid(assessmentId) ? await getAccessibleClientAssessment(assessmentId) : null;
 
   if (!assessment) {
     return {
@@ -84,6 +85,17 @@ export async function addProfessionalFollowUp(
       message: "Registre o motivo da decisão profissional.",
       success: false,
     };
+  }
+
+  if (reasonValue.trim().length > 4000) {
+    return { message: "O motivo deve ter no máximo 4.000 caracteres.", success: false };
+  }
+
+  for (const key of ["adherencePerception", "difficulty", "pattyObservation"]) {
+    const entry = formData.get(key);
+    if (entry !== null && (typeof entry !== "string" || entry.trim().length > 4000)) {
+      return { message: "As observações devem ter no máximo 4.000 caracteres.", success: false };
+    }
   }
 
   try {
@@ -124,7 +136,7 @@ export type AssessmentDraftActionState = {
 };
 
 async function getDraftAssessment(assessmentId: string) {
-  const assessment = await getAccessibleClientAssessment(assessmentId);
+  const assessment = isUuid(assessmentId) ? await getAccessibleClientAssessment(assessmentId) : null;
 
   if (!assessment) {
     return {
@@ -501,7 +513,7 @@ export async function correctFinalizedAssessmentMeasurementAction(
   formData: FormData,
 ): Promise<AssessmentCorrectionFormState> {
   const context = await requireRole("admin");
-  const assessment = await getAccessibleClientAssessment(assessmentId);
+  const assessment = isUuid(assessmentId) ? await getAccessibleClientAssessment(assessmentId) : null;
 
   if (!assessment || !assessment.finalized_at) {
     return {
@@ -511,7 +523,7 @@ export async function correctFinalizedAssessmentMeasurementAction(
   }
 
   const measurements = await listAccessibleAssessmentMeasurements(assessment.id);
-  const measurement = measurements.find((item) => item.id === measurementId);
+  const measurement = isUuid(measurementId) ? measurements.find((item) => item.id === measurementId) : null;
 
   if (!measurement) {
     return {
@@ -528,6 +540,10 @@ export async function correctFinalizedAssessmentMeasurementAction(
   const unit = typeof rawUnit === "string" ? rawUnit.trim() : "";
   const note =
     typeof rawNote === "string" && rawNote.trim() ? rawNote.trim() : null;
+
+  if (note && note.length > 4000) {
+    return { message: "A justificativa da correção deve ter no máximo 4.000 caracteres.", success: false };
+  }
 
   if (!Number.isFinite(value)) {
     return { message: "Informe um valor numérico válido para a correção.", success: false };

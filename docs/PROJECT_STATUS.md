@@ -1,3 +1,7 @@
+## Auditoria integrada - integridade de entradas em avaliacoes - 2026-10-09
+
+Cinco blocos: validacao de UUID nas consultas de avaliacao, limite do motivo de decisao profissional, limite de campos complementares de acompanhamento, validacao de ID da medida na correcao historica e limite de justificativa da correcao. Mantidos historico original, revisao humana, RLS e nenhuma decisao clinica automatizada. Testes de contrato adicionados; E2E autenticado pendente.
+
 ## Auditoria integrada - validacao de entradas administrativas - 2026-10-09
 
 Quatro blocos: identificador de cliente validado antes da consulta na criacao de avaliacao; identificador de cliente validado nas duas correcoes de check-in; identificador do evento de check-in validado nas duas correcoes; observacao de solicitacao de treino pelo admin rejeita tipo nao textual. Mantidos RLS, historico de correcoes, configuracoes de treino e decisao humana. Testes de contrato adicionados; E2E autenticado pendente.
