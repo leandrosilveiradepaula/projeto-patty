@@ -247,6 +247,8 @@ export async function saveAssessmentMeasurementAction(
     };
   }
 
+  revalidatePath("/admin/avaliacoes");
+  revalidatePath(`/admin/clientes/${assessment.client_id}/avaliacoes`);
   revalidatePath(`/admin/avaliacoes/${assessment.id}`);
 
   return {
