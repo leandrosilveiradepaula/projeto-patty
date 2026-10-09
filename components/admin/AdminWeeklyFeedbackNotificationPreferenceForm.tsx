@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 import {
   type WeeklyFeedbackNotificationPreferenceFormState,
@@ -83,6 +84,11 @@ export function AdminWeeklyFeedbackNotificationPreferenceForm({
     currentVersionId ?? null,
   );
   const [state, formAction, isPending] = useActionState(action, initialState);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (state.success) router.refresh();
+  }, [state, router]);
   const status = channelStatus(currentChannel, contactEmail, phone);
 
   return (
@@ -106,6 +112,8 @@ export function AdminWeeklyFeedbackNotificationPreferenceForm({
         <select
           className={styles.select}
           defaultValue={currentChannel ?? ""}
+          disabled={isPending}
+          key={currentVersionId ?? "unconfigured"}
           name="channel"
           required
         >

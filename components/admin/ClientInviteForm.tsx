@@ -22,7 +22,7 @@ export function ClientInviteForm() {
   );
 
   return (
-    <form action={formAction} className={styles.form} noValidate>
+    <form action={formAction} className={styles.form}>
       {state.message ? (
         <Alert
           live="assertive"
@@ -62,6 +62,7 @@ export function ClientInviteForm() {
             {...fieldProps}
             autoComplete="email"
             inputMode="email"
+            maxLength={254}
             name="email"
             required
             type="email"

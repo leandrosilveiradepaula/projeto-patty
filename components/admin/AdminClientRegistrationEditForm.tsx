@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 import {
   type AdminClientRegistrationFormState,
@@ -35,6 +36,11 @@ export function AdminClientRegistrationEditForm({
 }: AdminClientRegistrationEditFormProps) {
   const action = updateAdminClientRegistrationAction.bind(null, clientId);
   const [state, formAction, isPending] = useActionState(action, initialState);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (state.success) router.refresh();
+  }, [state, router]);
 
   return (
     <form action={formAction} className={styles.form}>

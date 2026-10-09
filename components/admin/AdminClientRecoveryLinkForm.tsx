@@ -50,12 +50,13 @@ export function AdminClientRecoveryLinkForm({
         </Alert>
       ) : null}
 
-      <Button loading={isPending} onClick={() => setCopyStatus(null)} type="submit">
+      <Button disabled={Boolean(state.recoveryLink)} loading={isPending} onClick={() => setCopyStatus(null)} type="submit">
         Gerar link de recuperação
       </Button>
 
       {state.recoveryLink ? (
         <div className={styles.panel}>
+          <p className={styles.note}>O link foi gerado para esta solicitação. Copie-o antes de sair desta página; para emitir outro, reabra a área de recuperação. Não regenere apenas para conferir o resultado.</p>
           <label className={styles.label} htmlFor="client-recovery-link">
             Link individual de recuperação — acesso sensível
           </label>
@@ -66,7 +67,7 @@ export function AdminClientRecoveryLinkForm({
             rows={4}
             value={state.recoveryLink}
           />
-          <Button onClick={copyRecoveryLink} type="button" variant="secondary">Copiar link</Button>
+          <Button disabled={isPending} onClick={copyRecoveryLink} type="button" variant="secondary">Copiar link</Button>
           {copyStatus ? <p aria-live="polite">{copyStatus}</p> : null}
           <p className={styles.note}>
             Envie este link somente para esta cliente. Ele concede uma sessão
