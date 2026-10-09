@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import { getOperationalPendingItemsForCurrentAdmin } from "@/lib/operations/pending-data";
 import { groupOperationalPendingItems } from "@/lib/operations/pending";
-import { parsePendingQueueFocus } from "@/lib/operations/pending-navigation";
+import { parsePendingQueueFocus, pendingQueueLinks } from "@/lib/operations/pending-navigation";
 import Link from "next/link";
 
 import styles from "./page.module.css";
@@ -23,7 +23,9 @@ function formatDateTime(value: string) {
 
 function PendingList({
   items,
+  group,
 }: {
+  group: "patty" | "client" | "operational";
   items: Awaited<ReturnType<typeof getOperationalPendingItemsForCurrentAdmin>>;
 }) {
   return (
@@ -48,7 +50,7 @@ function PendingList({
             }
             description={item.description}
             meta={`${item.clientLabel} · ${formatDateTime(item.createdAt)}`}
-            status={<Badge variant="warning">{item.statusLabel}</Badge>}
+            status={<Badge variant={group === "client" ? "neutral" : "warning"}>{item.statusLabel}</Badge>}
             title={item.title}
           />
         </li>
@@ -76,6 +78,25 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
         description="As pendências continuam ordenadas por antiguidade dentro de cada grupo, mas agora ficam separadas pelo tipo de ação necessária."
         title="Registros que exigem acompanhamento"
       >
+        {items.length > 0 ? (
+          <nav aria-label="Ir para grupo de pendências" className={styles.groupNavigation}>
+            {grouped.patty.length > 0 ? (
+              <Link aria-current={focusedGroup === "patty" ? "location" : undefined} href={pendingQueueLinks.patty}>
+                Ação da Patty ({grouped.patty.length})
+              </Link>
+            ) : <span>Ação da Patty (0)</span>}
+            {grouped.client.length > 0 ? (
+              <Link aria-current={focusedGroup === "client" ? "location" : undefined} href={pendingQueueLinks.client}>
+                Aguardando cliente ({grouped.client.length})
+              </Link>
+            ) : <span>Aguardando cliente (0)</span>}
+            {grouped.operational.length > 0 ? (
+              <Link aria-current={focusedGroup === "operational" ? "location" : undefined} href={pendingQueueLinks.operational}>
+                Operacional do sistema ({grouped.operational.length})
+              </Link>
+            ) : <span>Operacional do sistema (0)</span>}
+          </nav>
+        ) : null}
         {items.length === 0 ? (
           <EmptyState
             description="Nenhuma ação da Patty, espera de cliente ou pendência operacional consta nesta fila no momento."
@@ -102,7 +123,7 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
                   </div>
                   <Badge variant="warning">{grouped.patty.length}</Badge>
                 </div>
-                <PendingList items={grouped.patty} />
+                <PendingList group="patty" items={grouped.patty} />
               </section>
             ) : null}
 
@@ -116,7 +137,7 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
                   <Badge variant="neutral">{grouped.client.length}</Badge>
                 </summary>
                 <div className={styles.collapsibleContent}>
-                  <PendingList items={grouped.client} />
+                  <PendingList group="client" items={grouped.client} />
                 </div>
               </details>
             ) : null}
@@ -131,7 +152,7 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
                   <Badge variant="warning">{grouped.operational.length}</Badge>
                 </summary>
                 <div className={styles.collapsibleContent}>
-                  <PendingList items={grouped.operational} />
+                  <PendingList group="operational" items={grouped.operational} />
                 </div>
               </details>
             ) : null}
