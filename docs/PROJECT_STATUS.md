@@ -1,3 +1,7 @@
+## Auditoria integrada - catalogo de tipos de avaliacao - 2026-10-09
+
+Cinco frentes de validacao: limite de comprimento de codigo historico, chave semantica e rotulo; formato seguro de codigo historico; formato seguro de chave semantica; validacao de entrada na busca de codigo historico; e testes de preservacao de catalogo parametrizavel. Nenhum mapeamento clinico novo, migration ou alteracao de RLS. E2E autenticado pendente.
+
 ## Auditoria integrada - integridade das respostas semanais - 2026-10-09
 
 Cinco blocos: tipo booleano estrito para permite-nao-aplicavel, referencia da origem do formulario limitada e validada, limite de comprimento para respostas textuais, rejeicao de chaves de resposta desconhecidas e validacao de tipos/faixas de respostas antes do envio. Testes unitarios adicionados. Sem score automatico, regras clinicas novas ou mudancas de RLS. E2E autenticado pendente.
