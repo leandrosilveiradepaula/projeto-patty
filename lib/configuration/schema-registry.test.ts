@@ -243,3 +243,10 @@ test("delegates assessment_schedule_preferences_v1 to the closed parser", () => 
     TypeError,
   );
 });
+
+test("schema registry rejects malformed runtime keys", () => {
+  for (const value of [null, 123, {}, ["scalar_parameter_v1"]]) {
+    assert.equal(isMethodConfigurationSchemaKey(value as never), false);
+    assert.throws(() => validateMethodConfigurationBySchema(value as never, {}), RangeError);
+  }
+});
