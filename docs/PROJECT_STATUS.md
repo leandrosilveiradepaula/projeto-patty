@@ -1,3 +1,9 @@
+## Auditoria integrada - leitura completa de Anamnese e esclarecimentos - 2026-10-08
+
+A interface de Anamnese e o resumo de esclarecimentos da cliente estavam sujeitos ao limite implicito de linhas do PostgREST: submissões, seções, perguntas, respostas, correções, pedidos de esclarecimento, complementos e resoluções utilizavam SELECTs sem paginação. Uma leitura truncada poderia ocultar pedido ainda aguardando resposta ou parte de um historico clinico, sem emitir erro. Agora essas leituras usam uma única boundary de paginação determinística e autenticada, com lotes de ate 100 IDs, paginas de 500 linhas, erro fail-closed e deduplicação dos IDs informados. Listas multi-pai retornam em ordem global identica ao contrato anterior (ordem cronologica; solicitações tambem por submissao).
+
+Apenas registros autorizados pela RLS são consultados, sem service role, sem alterar os valores originais ou regras da Patty. Não cria envios automáticos, liberações de conteúdo, edições de resposta nem novos campos. Foram adicionados testes para paginação de múltiplas páginas, lotes, falhas, retorno nulo, deduplicação e contratos das 9 leituras. E2E de historico volumoso autenticado no Supabase SaaS não foi executado e permanece pendente.
+
 ## Auditoria integrada - esclarecimentos visiveis no inicio e no historico da cliente - 2026-10-08
 
 Os pedidos de esclarecimento da Patty ficavam disponiveis apenas na Anamnese especifica, sem aparecer como acao no inicio da cliente ou no historico de Anamneses. A navegacao da cliente agora resume os pedidos explicitamente abertos e sem resposta e oferece link direto para o primeiro pedido a responder. A contagem e por pedidos reais; nao e score clinico, prioridade de risco nem interpretacao de resposta. Se a cliente ja respondeu, o pedido deixa de ser uma acao dela e passa a ser apresentado como aguardando revisao humana da Patty. A resolucao manual remove a pendencia; o historico e preservado.
