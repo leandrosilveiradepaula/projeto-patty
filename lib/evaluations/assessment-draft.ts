@@ -36,6 +36,15 @@ export function parseAssessmentDate(value: FormDataEntryValue | null) {
   return date.toISOString();
 }
 
+export function parseAssessmentMeasurementNumber(raw: string): number | null {
+  const normalized = raw.trim().replace(",", ".");
+  if (!/^[+-]?(?:[0-9]+(?:\.[0-9]+)?|\.[0-9]+)$/.test(normalized)) {
+    return null;
+  }
+  const value = Number(normalized);
+  return Number.isFinite(value) ? value : null;
+}
+
 export function parseMeasurementDraft(input: {
   key: FormDataEntryValue | null;
   unit: FormDataEntryValue | null;
@@ -58,10 +67,9 @@ export function parseMeasurementDraft(input: {
     return { error: "Informe o valor da medida." } as const;
   }
 
-  const normalizedValue = rawValue.replace(",", ".");
-  const value = Number(normalizedValue);
+  const value = parseAssessmentMeasurementNumber(rawValue);
 
-  if (!Number.isFinite(value)) {
+  if (value === null) {
     return { error: "Informe um valor numérico válido." } as const;
   }
 
