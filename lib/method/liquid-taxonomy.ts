@@ -53,6 +53,10 @@ export function parseLiquidTaxonomyConfiguration(
     );
   }
 
+  if (value.kinds.length > 128) {
+    throw new RangeError("liquid taxonomy exceeds maximum kind count");
+  }
+
   const seenKeys = new Set<string>();
   const kinds = value.kinds.map((rawKind, index) => {
     const path = "liquid taxonomy configuration.kinds[" + index + "]";
@@ -65,7 +69,7 @@ export function parseLiquidTaxonomyConfiguration(
 
     const key = nonBlank(rawKind.key, path + ".key");
     const label = nonBlank(rawKind.label, path + ".label");
-    if (!/^[a-z][a-z0-9_-]*$/.test(key) || key.length > 120 || label.length > 200) {
+    if (!/^[a-z][a-z0-9_-]*$/.test(key) || key.length > 120 || label.length > 200 || /[\u0000-\u001f\u007f]/.test(label)) {
       throw new TypeError(path + " has invalid key or label length");
     }
 
