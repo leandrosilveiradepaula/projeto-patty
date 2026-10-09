@@ -1,3 +1,7 @@
+## Auditoria integrada - validacao de configuracoes parametrizaveis - 2026-10-09
+
+Dez frentes relacionadas: (1) dia semanal do Feedback Semanal com tipo numerico seguro; (2) fuso horario IANA valido; (3) limite de comprimento do fuso; (4) dia semanal das avaliacoes com tipo numerico seguro; (5) editor numerico recusa valores nao numericos; (6) rotulos de unidades sem heranca de prototipo; (7) rotulos de parametros sem heranca de prototipo; (8) chave de schema recusa tipos inesperados; (9) testes de configuracoes de calendario e fuso; (10) testes de edicao e despacho do registro de schemas. Parametros continuam configuraveis e revisados pela Patty. Sem alteracao de schema, RLS ou regra clinica. CI e E2E autenticado pendentes.
+
 ## Auditoria integrada - entradas do rascunho de avaliacao - 2026-10-09
 
 Cinco protecoes: data de avaliacao com ano zero recusada; entradas de arquivo recusadas nos campos de medida; caracteres de controle recusados em chaves; caracteres de controle recusados em unidades; valores numericos textuais limitados antes do parse. Testes unitarios do parser real incluidos. Preservadas medidas livres, unidades sem conversao implicita, revisao humana e historico. CI e E2E autenticado pendentes.
