@@ -175,3 +175,54 @@ test("rejects coefficient units that do not match g_per_kg", () => {
 
   assert.throws(() => parseCarbCycleConfiguration(invalid), TypeError);
 });
+
+test("carb cycle rejects unsafe phase identifiers", () => {
+  for (const phaseKey of ["Upper", "two words", "1start", "x".repeat(121), "phase/1"]) {
+    assert.throws(() => parseCarbCycleConfiguration({ ...phase1, phaseKey }), TypeError);
+  }
+});
+
+test("carb cycle rejects unsafe step identifiers", () => {
+  for (const key of ["Upper", "two words", "1start", "x".repeat(121), "step/1"]) {
+    const changed = structuredClone(phase1);
+    changed.steps[0].key = key;
+    assert.throws(() => parseCarbCycleConfiguration(changed), TypeError);
+  }
+});
+
+test("carb cycle rejects malformed average step identifiers", () => {
+  const changed = structuredClone(phase1);
+  changed.linearAverageStepKeys = ["low_1 "];
+  assert.throws(() => parseCarbCycleConfiguration(changed), TypeError);
+});
+
+test("carb cycle rejects oversized labels and control characters", () => {
+  for (const label of ["x".repeat(201), "Low\u0000day", " Low"]) {
+    const changed = structuredClone(phase1);
+    changed.steps[0].label = label;
+    assert.throws(() => parseCarbCycleConfiguration(changed), TypeError);
+  }
+});
+
+test("carb cycle rejects overflowing step calculations", () => {
+  const changed = structuredClone(phase1);
+  changed.steps[0].carbohydratePerKg.value = 1e308;
+  assert.throws(() => calculateCarbCycle(changed, 10), /finite/);
+});
+
+test("carb cycle rejects overflowing average calculations", () => {
+  const changed = structuredClone(phase1);
+  for (const step of changed.steps) {
+    step.carbohydratePerKg.value = 1e308;
+  }
+  assert.throws(() => calculateCarbCycle(changed, 1), /finite/);
+});
+
+test("carb cycle preserves configurable safe identifiers and labels", () => {
+  const changed = structuredClone(phase1);
+  changed.phaseKey = "phase_custom";
+  changed.steps[0].key = "low_custom";
+  changed.steps[0].label = "Low custom";
+  changed.linearAverageStepKeys[0] = "low_custom";
+  assert.equal(calculateCarbCycle(changed, 60).phaseKey, "phase_custom");
+});

@@ -50,12 +50,20 @@ function assertExactKeys(
   }
 }
 
-function readNonBlankString(value: unknown, path: string) {
-  if (typeof value !== "string" || value.trim().length === 0) {
-    throw new TypeError(path + " must be a non-blank string");
+function readNonBlankString(value: unknown, path: string, maxLength = 200) {
+  if (typeof value !== "string" || value.trim().length === 0 || value !== value.trim() || value.length > maxLength || /[\u0000-\u001f\u007f]/.test(value)) {
+    throw new TypeError(path + " must be a valid non-blank string");
   }
 
   return value;
+}
+
+function readIdentifier(value: unknown, path: string) {
+  const identifier = readNonBlankString(value, path, 120);
+  if (!/^[a-z][a-z0-9_-]*$/.test(identifier)) {
+    throw new TypeError(path + " must be a safe identifier");
+  }
+  return identifier;
 }
 
 function readCoefficient(value: unknown, path: string): CarbCycleCoefficient {
@@ -96,7 +104,7 @@ export function parseCarbCycleConfiguration(
     "configuration",
   );
 
-  const phaseKey = readNonBlankString(value.phaseKey, "configuration.phaseKey");
+  const phaseKey = readIdentifier(value.phaseKey, "configuration.phaseKey");
 
   if (!Array.isArray(value.steps) || value.steps.length === 0) {
     throw new TypeError("configuration.steps must be a non-empty array");
@@ -116,7 +124,7 @@ export function parseCarbCycleConfiguration(
       stepPath,
     );
 
-    const key = readNonBlankString(stepValue.key, stepPath + ".key");
+    const key = readIdentifier(stepValue.key, stepPath + ".key");
 
     if (seenStepKeys.has(key)) {
       throw new TypeError("carb cycle step keys must be unique");
@@ -149,7 +157,7 @@ export function parseCarbCycleConfiguration(
   const seenAverageKeys = new Set<string>();
   const linearAverageStepKeys = value.linearAverageStepKeys.map(
     (stepKeyValue, index) => {
-      const key = readNonBlankString(
+      const key = readIdentifier(
         stepKeyValue,
         "configuration.linearAverageStepKeys[" + index + "]",
       );
@@ -188,12 +196,14 @@ export function calculateCarbCycle(
   assertValidWeight(weightKg);
   const configuration = parseCarbCycleConfiguration(configurationValue);
 
-  const steps = configuration.steps.map((step) => ({
-    key: step.key,
-    label: step.label,
-    carbohydrateGrams: weightKg * step.carbohydratePerKg.value,
-    proteinGrams: weightKg * step.proteinPerKg.value,
-  }));
+  const steps = configuration.steps.map((step) => {
+    const carbohydrateGrams = weightKg * step.carbohydratePerKg.value;
+    const proteinGrams = weightKg * step.proteinPerKg.value;
+    if (!Number.isFinite(carbohydrateGrams) || !Number.isFinite(proteinGrams)) {
+      throw new RangeError("carb cycle step outputs must be finite");
+    }
+    return { key: step.key, label: step.label, carbohydrateGrams, proteinGrams };
+  });
 
   const stepsByKey = new Map(steps.map((step) => [step.key, step]));
   const averageSteps = configuration.linearAverageStepKeys.map((key) => {
@@ -210,6 +220,10 @@ export function calculateCarbCycle(
     divisor;
   const proteinGrams =
     averageSteps.reduce((sum, step) => sum + step.proteinGrams, 0) / divisor;
+
+  if (!Number.isFinite(carbohydrateGrams) || !Number.isFinite(proteinGrams)) {
+    throw new RangeError("carb cycle average outputs must be finite");
+  }
 
   return {
     phaseKey: configuration.phaseKey,
