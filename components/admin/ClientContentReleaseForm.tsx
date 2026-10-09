@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import {
   type ClientContentReleaseFormState,
@@ -34,6 +35,18 @@ export function ClientContentReleaseForm({
 }: ClientContentReleaseFormProps) {
   const action = releaseContentToClient.bind(null, clientId);
   const [state, formAction, isPending] = useActionState(action, initialState);
+  const router = useRouter();
+  const [selectedVersionId, setSelectedVersionId] = useState("");
+  const [confirmRelease, setConfirmRelease] = useState(false);
+  const selectedVersion = options.find((option) => option.id === selectedVersionId);
+
+  useEffect(() => {
+    if (state.success) {
+      setSelectedVersionId("");
+      setConfirmRelease(false);
+      router.refresh();
+    }
+  }, [state.success, router]);
 
   return (
     <form action={formAction} className={styles.form}>
@@ -57,9 +70,13 @@ export function ClientContentReleaseForm({
           <select
             {...fieldProps}
             className={styles.select}
-            defaultValue=""
             name="educationalContentVersionId"
+            onChange={(event) => {
+              setSelectedVersionId(event.target.value);
+              setConfirmRelease(false);
+            }}
             required
+            value={selectedVersionId}
           >
             <option disabled value="">
               Selecione uma versão publicada
@@ -83,9 +100,28 @@ export function ClientContentReleaseForm({
         liberada se uma nova versão do conteúdo for publicada depois.
       </p>
 
-      <Button loading={isPending} type="submit">
-        Liberar conteúdo
-      </Button>
+      {confirmRelease && selectedVersion ? (
+        <div className={styles.notice}>
+          <p>
+            Confirmar liberação de <strong>{selectedVersion.title} · versão {selectedVersion.versionNumber}</strong> para esta cliente?
+            A liberação será individual e permanecerá vinculada exatamente a esta versão.
+          </p>
+          <Button disabled={isPending} onClick={() => setConfirmRelease(false)} type="button" variant="ghost">
+            Cancelar
+          </Button>
+          <Button loading={isPending} type="submit">
+            Confirmar liberação
+          </Button>
+        </div>
+      ) : (
+        <Button
+          disabled={!selectedVersion || isPending}
+          onClick={() => setConfirmRelease(true)}
+          type="button"
+        >
+          Revisar liberação
+        </Button>
+      )}
     </form>
   );
 }
