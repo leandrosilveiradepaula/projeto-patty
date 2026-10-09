@@ -141,7 +141,7 @@ test("liquid taxonomy rejects control characters in labels", () => {
   for (const label of ["Água\u0000", "Água\n", "Água\u007f"]) {
     assert.throws(() => parseLiquidTaxonomyConfiguration({ kinds: [
       { key: "water", label, hydrationClass: "pure_water" },
-    ] }), /invalid key or label/);
+    ] }), /control characters/);
   }
 });
 
