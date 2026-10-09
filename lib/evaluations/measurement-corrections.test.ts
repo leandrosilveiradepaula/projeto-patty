@@ -57,3 +57,49 @@ test("measurement remains unchanged when there is no correction", () => {
   assert.equal(measurement.correction_count, 0);
   assert.equal(measurement.latest_correction_id, null);
 });
+
+test("orphaned corrections do not affect effective measurement history", () => {
+  const result = applyAssessmentMeasurementCorrections(
+    [{ assessment_id: "a", id: "m", measurement_key: "peso", measurement_value: 70, unit: "kg" }],
+    [{ assessment_measurement_id: "unknown", corrected_measurement_value: 99, corrected_unit: "kg", created_at: "2026-01-01T00:00:00Z", id: "c" }],
+  );
+  assert.equal(result[0]?.correction_count, 0);
+  assert.equal(result[0]?.measurement_value, 70);
+});
+
+test("nonfinite correction values do not replace original measurements", () => {
+  const result = applyAssessmentMeasurementCorrections(
+    [{ assessment_id: "a", id: "m", measurement_key: "peso", measurement_value: 70, unit: "kg" }],
+    [{ assessment_measurement_id: "m", corrected_measurement_value: Number.NaN, corrected_unit: "kg", created_at: "2026-01-01T00:00:00Z", id: "c" }],
+  );
+  assert.equal(result[0]?.measurement_value, 70);
+  assert.equal(result[0]?.correction_count, 0);
+});
+
+test("corrections with blank units are ignored", () => {
+  const result = applyAssessmentMeasurementCorrections(
+    [{ assessment_id: "a", id: "m", measurement_key: "peso", measurement_value: 70, unit: "kg" }],
+    [{ assessment_measurement_id: "m", corrected_measurement_value: 69, corrected_unit: " ", created_at: "2026-01-01T00:00:00Z", id: "c" }],
+  );
+  assert.equal(result[0]?.measurement_value, 70);
+});
+
+test("corrections with invalid dates are ignored", () => {
+  const result = applyAssessmentMeasurementCorrections(
+    [{ assessment_id: "a", id: "m", measurement_key: "peso", measurement_value: 70, unit: "kg" }],
+    [{ assessment_measurement_id: "m", corrected_measurement_value: 69, corrected_unit: "kg", created_at: "not-a-date", id: "c" }],
+  );
+  assert.equal(result[0]?.measurement_value, 70);
+});
+
+test("valid corrections remain effective when malformed later corrections exist", () => {
+  const result = applyAssessmentMeasurementCorrections(
+    [{ assessment_id: "a", id: "m", measurement_key: "peso", measurement_value: 70, unit: "kg" }],
+    [
+      { assessment_measurement_id: "m", corrected_measurement_value: 69, corrected_unit: "kg", created_at: "2026-01-01T00:00:00Z", id: "c1" },
+      { assessment_measurement_id: "m", corrected_measurement_value: Number.POSITIVE_INFINITY, corrected_unit: "kg", created_at: "2026-02-01T00:00:00Z", id: "c2" },
+    ],
+  );
+  assert.equal(result[0]?.measurement_value, 69);
+  assert.equal(result[0]?.latest_correction_id, "c1");
+});
