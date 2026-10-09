@@ -523,7 +523,7 @@ export async function correctFinalizedAssessmentMeasurementAction(
   }
 
   const measurements = await listAccessibleAssessmentMeasurements(assessment.id);
-  const measurement = measurements.find((item) => item.id === measurementId);
+  const measurement = isUuid(measurementId) ? measurements.find((item) => item.id === measurementId) : null;
 
   if (!measurement) {
     return {
