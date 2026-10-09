@@ -26,7 +26,11 @@ function readNumericValue(formData: FormData, key: string) {
     throw new Error("Preencha todos os parâmetros numéricos");
   }
 
-  const value = Number(raw);
+  const normalized = raw.trim();
+  if (!/^[+-]?(?:[0-9]+(?:\.[0-9]+)?|\.[0-9]+)$/.test(normalized)) {
+    throw new Error("Informe apenas números decimais válidos");
+  }
+  const value = Number(normalized);
 
   if (!Number.isFinite(value)) {
     throw new Error("Informe apenas valores numéricos válidos");
