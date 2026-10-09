@@ -216,12 +216,28 @@ function isClarificationFirstReminderDue(
   );
 }
 
+/**
+ * Order instants rather than ISO text (offsets may differ). Invalid legacy
+ * timestamps sort after valid instants without crashing an operational queue.
+ */
+function comparePendingInstants(left: string, right: string): number {
+  const leftTime = Date.parse(left);
+  const rightTime = Date.parse(right);
+  const validLeft = Number.isFinite(leftTime);
+  const validRight = Number.isFinite(rightTime);
+
+  if (validLeft && validRight) return leftTime - rightTime;
+  if (validLeft) return -1;
+  if (validRight) return 1;
+  return left.localeCompare(right);
+}
+
 function byCreatedAtThenId(
   left: OperationalPendingItem,
   right: OperationalPendingItem,
 ) {
-  const byDate = left.createdAt.localeCompare(right.createdAt);
-  return byDate || left.id.localeCompare(right.id);
+  return comparePendingInstants(left.createdAt, right.createdAt) ||
+    left.id.localeCompare(right.id);
 }
 
 export function buildOperationalPendingItems(
@@ -560,8 +576,8 @@ export function buildOperationalPendingItems(
 
     if (
       !current ||
-      event.createdAt > current.createdAt ||
-      (event.createdAt === current.createdAt && event.id > current.id)
+      comparePendingInstants(event.createdAt, current.createdAt) > 0 ||
+      (comparePendingInstants(event.createdAt, current.createdAt) === 0 && event.id > current.id)
     ) {
       latestReminderEventByFeedbackId.set(event.weeklyFeedbackId, event);
     }
@@ -575,10 +591,16 @@ export function buildOperationalPendingItems(
 
   for (const event of latestReminderEventByFeedbackId.values()) {
     if (
-      event.deliveryState === "delivered" ||
-      event.deliveryState === "queued_external" ||
-      submittedFeedbackIds.has(event.weeklyFeedbackId)
+      event.deliveryState !== "blocked_no_channel" &&
+      event.deliveryState !== "blocked_missing_contact" &&
+      event.deliveryState !== "blocked_provider" &&
+      event.deliveryState !== "delivery_failed"
     ) {
+      // Other states do not prove a failed delivery. Never invent one.
+      continue;
+    }
+
+    if (submittedFeedbackIds.has(event.weeklyFeedbackId)) {
       continue;
     }
 
