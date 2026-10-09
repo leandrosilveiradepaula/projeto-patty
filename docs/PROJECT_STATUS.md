@@ -1,3 +1,7 @@
+## Auditoria integrada - consistencia operacional consolidada - 2026-10-09
+
+Cinco superficies corrigidas em conjunto: criacao de exercicios, transicoes de versoes de exercicios, tres tipos de configuracao parametrizavel, criacao de conteudo educacional e atualizacao de Cadastro Atual pela cliente. Invalidacoes de cache agora abrangem painel administrativo, pendencias e painel da cliente conforme a mutacao confirmada. Sem mudancas de schema, RLS, publicacao automatica ou regras clinicas. Testes de contrato adicionados; E2E autenticado permanece pendente.
+
 ## Auditoria integrada - continuidade do onboarding - 2026-10-09
 
 Os fluxos de convite automatico e geracao manual de link agora invalidam a lista de clientes, painel e pendencias apos provisionamento bem-sucedido. Erros e compensacoes permanecem sem invalidacao de sucesso; nao ha mudanca na separacao Auth/Profile/Client, no vinculo por ID ou na politica de tokens. Teste de contrato incluido; E2E autenticado pendente.
