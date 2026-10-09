@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import {
   addTrainingPlanItemAction,
@@ -62,9 +63,23 @@ export function AdminTrainingPlanItemForm({
         trainingPlanVersionId,
       );
   const [state, formAction, isPending] = useActionState(action, initialState);
+  const [selectedExerciseId, setSelectedExerciseId] = useState(item?.exerciseVersionId ?? "");
+  const formRef = useRef<HTMLFormElement>(null);
+  const router = useRouter();
+  const selectedExercise = exerciseOptions.find((exercise) => exercise.id === selectedExerciseId);
+
+  useEffect(() => {
+    if (state.success) {
+      if (!item) {
+        formRef.current?.reset();
+        setSelectedExerciseId("");
+      }
+      router.refresh();
+    }
+  }, [state.success, item?.id, router]);
 
   return (
-    <form action={formAction} className={styles.form}>
+    <form action={formAction} className={styles.form} ref={formRef}>
       {state.message ? (
         <Alert
           live={state.success ? "polite" : "assertive"}
@@ -85,8 +100,9 @@ export function AdminTrainingPlanItemForm({
         <span>Exercício da biblioteca (opcional)</span>
         <select
           className={styles.select}
-          defaultValue={item?.exerciseVersionId ?? ""}
           name="exerciseVersionId"
+          onChange={(event) => setSelectedExerciseId(event.target.value)}
+          value={selectedExerciseId}
         >
           <option value="">Usar nome manual</option>
           {exerciseOptions.map((exercise) => (
@@ -96,8 +112,9 @@ export function AdminTrainingPlanItemForm({
           ))}
         </select>
         <small>
-          Se uma versão publicada for selecionada, o nome dela será preservado
-          automaticamente na prescrição.
+          {selectedExercise
+            ? `Selecionado: ${selectedExercise.name} · versão ${selectedExercise.versionNumber}. O nome manual não será enviado.`
+            : "Sem versão selecionada: informe o nome manual abaixo para a prescrição."}
         </small>
       </label>
 
@@ -110,8 +127,10 @@ export function AdminTrainingPlanItemForm({
           <TextInput
             {...fieldProps}
             defaultValue={item?.exerciseName}
+            disabled={Boolean(selectedExercise)}
             maxLength={200}
             name="exerciseName"
+            required={!selectedExercise}
           />
         )}
       </FormField>
