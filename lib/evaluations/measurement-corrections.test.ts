@@ -103,3 +103,15 @@ test("valid corrections remain effective when malformed later corrections exist"
   assert.equal(result[0]?.measurement_value, 69);
   assert.equal(result[0]?.latest_correction_id, "c1");
 });
+
+test("correction order follows actual time across offsets", () => {
+  const [measurement] = applyAssessmentMeasurementCorrections(
+    [{ assessment_id: "a", id: "m", measurement_key: "peso", measurement_value: 70, unit: "kg" }],
+    [
+      { assessment_measurement_id: "m", corrected_measurement_value: 68, corrected_unit: "kg", created_at: "2026-01-01T10:00:00+03:00", id: "c1" },
+      { assessment_measurement_id: "m", corrected_measurement_value: 69, corrected_unit: "kg", created_at: "2026-01-01T08:00:00Z", id: "c2" },
+    ],
+  );
+  assert.equal(measurement.measurement_value, 69);
+  assert.equal(measurement.latest_correction_id, "c2");
+});
