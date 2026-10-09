@@ -34,9 +34,9 @@ function readTitle(formData: FormData) {
 
 function readDisplayOrder(formData: FormData) {
   const raw = formData.get("displayOrder");
-  const value = typeof raw === "string" ? Number.parseInt(raw, 10) : Number.NaN;
+  const value = typeof raw === "string" && /^(0|[1-9][0-9]*)$/.test(raw.trim()) ? Number(raw.trim()) : Number.NaN;
 
-  if (!Number.isInteger(value) || value < 0) {
+  if (!Number.isSafeInteger(value) || value < 0) {
     throw new Error("Informe uma ordem de exibição válida");
   }
 
@@ -76,6 +76,8 @@ export async function updateEducationalContentDraftAction(
 
   revalidatePath("/admin/conteudos");
   revalidatePath("/admin/conteudos/" + contentId);
+  revalidatePath("/admin/pendencias");
+  revalidatePath("/admin");
 }
 
 
@@ -128,6 +130,8 @@ export async function publishEducationalContentVersionAction(
 
   revalidatePath("/admin/conteudos");
   revalidatePath("/admin/conteudos/" + contentId);
+  revalidatePath("/admin/pendencias");
+  revalidatePath("/admin");
 }
 
 export async function createNextEducationalContentVersionAction(
@@ -177,6 +181,8 @@ export async function createNextEducationalContentVersionAction(
 
   revalidatePath("/admin/conteudos");
   revalidatePath("/admin/conteudos/" + contentId);
+  revalidatePath("/admin/pendencias");
+  revalidatePath("/admin");
 }
 
 
@@ -234,7 +240,7 @@ export async function registerEducationalContentAssetAction(
     "byteSize",
     "o tamanho em bytes",
   );
-  const byteSize = Number.parseInt(rawByteSize, 10);
+  const byteSize = /^[1-9][0-9]*$/.test(rawByteSize) ? Number(rawByteSize) : Number.NaN;
 
   if (!/^[0-9a-f]{64}$/.test(sha256Hex)) {
     throw new Error("SHA-256 inválido");
@@ -273,4 +279,6 @@ export async function registerEducationalContentAssetAction(
   });
 
   revalidatePath("/admin/conteudos/" + contentId);
+  revalidatePath("/admin/pendencias");
+  revalidatePath("/admin");
 }

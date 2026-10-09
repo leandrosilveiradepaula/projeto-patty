@@ -33,6 +33,9 @@ export async function runAdminAnamnesisAiReview(
       submissionId,
     });
 
+    revalidatePath("/admin");
+    revalidatePath("/admin/pendencias");
+    revalidatePath("/admin/ia");
     revalidatePath(`/admin/anamneses/${submissionId}/ia`);
 
     return {
@@ -156,6 +159,8 @@ export async function recoverStartedAiExecution(
     recoveredByProfileId: auth.profileId,
   });
 
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
   revalidatePath("/admin/ia");
   revalidatePath("/admin/anamneses/" + submissionId + "/ia");
 }

@@ -1,3 +1,7 @@
+## Auditoria integrada - validacao de assets e continuidade de conteudo/IA - 2026-10-09
+
+A validacao administrativa de ordem e tamanho de assets educacionais usava parseInt, que aceitava entradas numericas parciais e as truncava. Agora exige inteiro decimal completo e seguro, preservando as verificacoes existentes de integridade do arquivo privado. A liberacao manual de conteudo e as transicoes confirmadas de analise/recuperacao de IA revalidam as superficies operacionais relacionadas, sem automatizar liberacao ou decisao profissional. Acoes administrativas de conteudo tambem atualizam painel e pendencias apos persistencia. Sem schema, migrations, RLS ou mudancas no metodo da Patty. Validacao autenticada E2E permanece pendente.
+
 ## Auditoria integrada - coerencia da fila apos mutacoes operacionais - 2026-10-08
 
 A fila operacional e o painel administrativo dependem de fatos que podem mudar fora da propria rota de Pendencias. A auditoria encontrou transicoes confirmadas que persistiam corretamente no backend, mas nao invalidavam todas as superficies consumidoras: revisao de Anamnese, Cadastro Atual alterado pela Patty ou pela cliente, preferencia de canal do Feedback Semanal, solicitacao/lifecycle de treino, upload administrativo de arquivo aguardando liberacao, liberacao de arquivo e encerramento do acompanhamento. Isso podia deixar contagens, rotulos ou itens da fila desatualizados ate outra navegacao/revalidacao.
