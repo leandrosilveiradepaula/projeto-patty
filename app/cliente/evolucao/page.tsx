@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import Link from "next/link";
 import { buildFactualProgressSeries } from "@/lib/evaluations/progress-view";
+import { summarizeFactualProgressCoverage } from "@/lib/evaluations/progress-journey";
 import { listCurrentClientFinalizedAssessmentMeasurements } from "@/lib/supabase/data-access";
 
 import styles from "./page.module.css";
@@ -61,6 +62,7 @@ export default async function ClientProgressPage() {
   }
 
   const series = buildFactualProgressSeries([...assessments.values()]);
+  const coverage = summarizeFactualProgressCoverage(series);
 
   return (
     <>
@@ -87,6 +89,15 @@ export default async function ClientProgressPage() {
           />
         ) : (
           <>
+            {coverage.comparableSeriesCount === 0 ? (
+              <p className={styles.progressNote} role="status">
+                Há medidas registradas, mas ainda não existem duas observações comparáveis da mesma medida e unidade. Os valores abaixo são históricos factuais, sem variação calculável.
+              </p>
+            ) : coverage.singleObservationSeriesCount > 0 ? (
+              <p className={styles.progressNote}>
+                Algumas medidas possuem somente um registro; para elas, a variação permanece indisponível até existir outra observação da mesma medida e unidade.
+              </p>
+            ) : null}
             {series.length > 1 ? (
               <nav aria-label="Ir para medida" className={styles.measureNavigation}>
                 {series.map((item, index) => (
@@ -97,8 +108,8 @@ export default async function ClientProgressPage() {
               </nav>
             ) : null}
             <div className={styles.seriesList}>
-            {series.map((item) => (
-              <Card className={styles.seriesCard} id={`medida-${series.indexOf(item)}`} key={item.key + ":" + item.unit}>
+            {series.map((item, index) => (
+              <Card className={styles.seriesCard} id={`medida-${index}`} key={item.key + ":" + item.unit}>
                 <div className={styles.header}>
                   <div>
                     <h2 className={styles.title}>{item.label}</h2>
@@ -120,6 +131,7 @@ export default async function ClientProgressPage() {
                         <th>Data</th>
                         <th>Valor</th>
                         <th>Variação vs. anterior</th>
+                        <th>Avaliação</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -134,6 +146,15 @@ export default async function ClientProgressPage() {
                             {point.deltaFromPrevious === null
                               ? ""
                               : " " + item.unit}
+                          </td>
+                          <td data-label="Avaliação">
+                            <Link
+                              aria-label={`Abrir avaliação de ${formatDate(point.assessedAt)} para ${item.label}`}
+                              className={styles.assessmentDetailLink}
+                              href={`/cliente/avaliacoes#avaliacao-${point.assessmentId}`}
+                            >
+                              Abrir registro
+                            </Link>
                           </td>
                         </tr>
                       ))}

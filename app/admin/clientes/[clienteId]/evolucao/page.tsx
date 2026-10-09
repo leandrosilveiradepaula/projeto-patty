@@ -7,6 +7,7 @@ import { Section } from "@/components/ui/Section";
 import { listAccessibleAssessmentMeasurementCorrections } from "@/lib/evaluations/measurement-correction-store";
 import { applyAssessmentMeasurementCorrections } from "@/lib/evaluations/measurement-corrections";
 import { buildFactualProgressSeries } from "@/lib/evaluations/progress-view";
+import { summarizeFactualProgressCoverage } from "@/lib/evaluations/progress-journey";
 import {
   getAccessibleClient,
   listAccessibleAssessmentMeasurements,
@@ -76,6 +77,7 @@ export default async function AdminClientProgressPage({ params }: PageProps) {
   );
 
   const series = buildFactualProgressSeries(assessmentSnapshots);
+  const coverage = summarizeFactualProgressCoverage(series);
   const displayName = client.full_name?.trim() || client.profiles?.display_name?.trim();
 
   return (
@@ -101,6 +103,15 @@ export default async function AdminClientProgressPage({ params }: PageProps) {
           />
         ) : (
           <>
+            {coverage.comparableSeriesCount === 0 ? (
+              <p className={styles.progressNote} role="status">
+                Há medidas registradas, mas ainda não existem duas observações comparáveis da mesma medida e unidade. Os valores abaixo são históricos factuais, sem variação calculável.
+              </p>
+            ) : coverage.singleObservationSeriesCount > 0 ? (
+              <p className={styles.progressNote}>
+                Algumas medidas possuem somente um registro; para elas, a variação permanece indisponível até existir outra observação da mesma medida e unidade.
+              </p>
+            ) : null}
             {series.length > 1 ? (
               <nav aria-label="Ir para medida" className={styles.measureNavigation}>
                 {series.map((item, index) => (
@@ -111,8 +122,8 @@ export default async function AdminClientProgressPage({ params }: PageProps) {
               </nav>
             ) : null}
             <div className={styles.seriesList}>
-            {series.map((item) => (
-              <Card className={styles.seriesCard} id={`medida-${series.indexOf(item)}`} key={item.key + ":" + item.unit}>
+            {series.map((item, index) => (
+              <Card className={styles.seriesCard} id={`medida-${index}`} key={item.key + ":" + item.unit}>
                 <div className={styles.seriesHeader}>
                   <div>
                     <h2 className={styles.seriesTitle}>{item.label}</h2>
