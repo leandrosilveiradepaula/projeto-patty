@@ -99,6 +99,9 @@ export async function acceptAiFindingAsInternalObservation(
     findingIndex,
   });
 
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
+  revalidatePath("/admin/ia");
   revalidatePath("/admin/anamneses/" + submissionId + "/ia");
 }
 
@@ -133,6 +136,9 @@ export async function createPattyNoteFromAiFinding(
     note,
   });
 
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
+  revalidatePath("/admin/ia");
   revalidatePath("/admin/anamneses/" + submissionId);
   revalidatePath("/admin/anamneses/" + submissionId + "/ia");
 }
