@@ -22,11 +22,9 @@ import {
 import {
   buildOperationalPendingItems,
   type OperationalPendingItem,
-  type PendingTrainingLifecycle,
 } from "@/lib/operations/pending";
 import { loadClarificationReminderInterval } from "@/lib/operations/clarification-reminder-loader";
-import { latestPublishedTrainingVersion } from "@/lib/training/published-versions";
-import { isTrainingRequestAfterPublication } from "@/lib/training/request-follow-up";
+import { derivePendingTrainingLifecycle } from "@/lib/operations/pending-training-lifecycle";
 import {
   listPendingAnamnesisSubmissionsForClients,
   listPendingAnamnesisReviewsForSubmissions,
@@ -117,81 +115,14 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
       (asset) => asset.educational_content_version_id,
     ),
   );
-  const trainingPlanByClientId = new Map(
-    trainingPlans.map((plan) => [plan.client_id, plan]),
-  );
-  const openTrainingVersionByPlanId = new Map(
-    trainingVersions
-      .filter((version) => !version.published_at)
-      .map((version) => [version.training_plan_id, version]),
-  );
-  const publishedVersionsByPlanId = new Map<string, typeof trainingVersions>();
-  for (const version of trainingVersions) {
-    if (!version.published_at) continue;
-    const values = publishedVersionsByPlanId.get(version.training_plan_id) ?? [];
-    values.push(version);
-    publishedVersionsByPlanId.set(version.training_plan_id, values);
-  }
-  const latestRequestByClientId = new Map<
-    string,
-    (typeof trainingRequests)[number]
-  >();
-
-  for (const request of trainingRequests) {
-    if (!latestRequestByClientId.has(request.client_id)) {
-      latestRequestByClientId.set(request.client_id, request);
-    }
-  }
-
-  const trainingLifecycle: PendingTrainingLifecycle[] = assignedClients.flatMap<PendingTrainingLifecycle>((client) => {
-    const plan = trainingPlanByClientId.get(client.id);
-    const request = latestRequestByClientId.get(client.id);
-
-    if (!plan) {
-      return request
-        ? [{
-            clientId: client.id,
-            clientLabel: clientLabel(client.full_name || client.profiles?.display_name),
-            createdAt: request.requested_at,
-            id: request.id,
-            state: "requested_without_plan" as const,
-            versionNumber: null,
-          }]
-        : [];
-    }
-
-    const openVersion = openTrainingVersionByPlanId.get(plan.id);
-
-    if (!openVersion) {
-      const latestPublication = latestPublishedTrainingVersion(
-        publishedVersionsByPlanId.get(plan.id) ?? [],
-      );
-      if (
-        request && latestPublication &&
-        isTrainingRequestAfterPublication(request.requested_at, latestPublication.published_at)
-      ) {
-        return [{
-          clientId: client.id,
-          clientLabel: clientLabel(client.full_name || client.profiles?.display_name),
-          createdAt: request.requested_at,
-          id: request.id,
-          state: "requested_after_publication" as const,
-          versionNumber: latestPublication.version_number,
-        }];
-      }
-      return [];
-    }
-
-    return [{
-      clientId: client.id,
-      clientLabel: clientLabel(client.full_name || client.profiles?.display_name),
-      createdAt: openVersion.reviewed_at ?? openVersion.created_at,
-      id: openVersion.id,
-      state: openVersion.reviewed_at
-        ? ("reviewed_not_published" as const)
-        : ("draft" as const),
-      versionNumber: openVersion.version_number,
-    }];
+  const trainingLifecycle = derivePendingTrainingLifecycle({
+    clients: assignedClients.map((client) => ({
+      id: client.id,
+      label: clientLabel(client.full_name || client.profiles?.display_name),
+    })),
+    plans: trainingPlans,
+    requests: trainingRequests,
+    versions: trainingVersions,
   });
 
   const submitted = submissions.filter(
