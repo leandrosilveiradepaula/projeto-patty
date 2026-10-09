@@ -1,3 +1,7 @@
+## Auditoria integrada - integridade das respostas semanais - 2026-10-09
+
+Cinco blocos: tipo booleano estrito para permite-nao-aplicavel, referencia da origem do formulario limitada e validada, limite de comprimento para respostas textuais, rejeicao de chaves de resposta desconhecidas e validacao de tipos/faixas de respostas antes do envio. Testes unitarios adicionados. Sem score automatico, regras clinicas novas ou mudancas de RLS. E2E autenticado pendente.
+
 ## Auditoria integrada - integridade do formulario semanal - 2026-10-09
 
 Cinco frentes: versao de schema positiva e inteira segura; definicao com perguntas presentes; chaves de perguntas nao vazias, unicas e sem nomes perigosos; rotulos preenchidos com limite de tamanho; respostas de arquivo recusadas em vez de omitidas silenciosamente. Testes unitarios adicionados ao parser e ao processamento de respostas. Sem alterar regras clinicas, RLS ou publicar respostas automaticamente. CI e E2E autenticado a verificar.

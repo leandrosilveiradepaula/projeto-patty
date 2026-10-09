@@ -66,7 +66,8 @@ export function parseWeeklyFeedbackDefinition(
       (inputType !== "text" &&
         inputType !== "integer" &&
         inputType !== "rating_0_10") ||
-      typeof required !== "boolean"
+      typeof required !== "boolean" ||
+      (rawQuestion.allows_not_applicable !== undefined && typeof rawQuestion.allows_not_applicable !== "boolean")
     ) {
       return null;
     }
@@ -79,6 +80,11 @@ export function parseWeeklyFeedbackDefinition(
       label,
       required,
     });
+  }
+
+  if (value.source_reference !== undefined && value.source_reference !== null &&
+      (typeof value.source_reference !== "string" || value.source_reference.length > 500)) {
+    return null;
   }
 
   return {
@@ -153,7 +159,11 @@ export function buildWeeklyFeedbackAnswers(
       continue;
     }
 
-    answers[question.key] = rawValue.trim();
+    const normalizedText = rawValue.trim();
+    if (normalizedText.length > 4000) {
+      throw new Error(`Resposta muito longa para ${question.label}`);
+    }
+    answers[question.key] = normalizedText;
   }
 
   return answers;
@@ -163,6 +173,15 @@ export function validateWeeklyFeedbackAnswers(
   answers: Record<string, string | number>,
   definition: WeeklyFeedbackDefinition,
 ) {
+  if (!isRecord(answers) || Object.entries(answers).some(([key, value]) => {
+    const question = definition.questions.find((item) => item.key === key);
+    if (!question) return true;
+    if (question.inputType === "text") return typeof value !== "string" || value.length > 4000;
+    return typeof value !== "number" || !Number.isSafeInteger(value) || value < 0 ||
+      (question.inputType === "rating_0_10" && value > 10);
+  })) {
+    throw new Error("Respostas do Feedback Semanal inválidas.");
+  }
   const missing = definition.questions.filter(
     (question) => question.required && answers[question.key] === undefined,
   );
