@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useState, useRef, useEffect } from "react";
 
 import {
   type ManualInviteClientState,
@@ -43,8 +43,24 @@ export function ManualClientInviteForm() {
     }
   }
 
+  const inFlightRef = useRef(false);
+  useEffect(() => {
+    inFlightRef.current = false;
+  }, [state]);
+
   return (
-    <form action={formAction} className={styles.form}>
+    <form
+      action={formAction}
+      aria-busy={isPending}
+      className={styles.form}
+      onSubmit={(event) => {
+        if (inFlightRef.current || isPending || state.success) {
+          event.preventDefault();
+          return;
+        }
+        inFlightRef.current = true;
+      }}
+    >
       {state.message ? (
         <Alert
           live={state.success ? "polite" : "assertive"}
@@ -65,7 +81,7 @@ export function ManualClientInviteForm() {
           <TextInput
             {...fieldProps}
             autoComplete="name"
-            disabled={state.success}
+            disabled={state.success || isPending}
             maxLength={120}
             name="displayName"
             required
@@ -84,7 +100,7 @@ export function ManualClientInviteForm() {
           <TextInput
             {...fieldProps}
             autoComplete="email"
-            disabled={state.success}
+            disabled={state.success || isPending}
             inputMode="email"
             maxLength={254}
             name="email"

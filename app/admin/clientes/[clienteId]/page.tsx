@@ -893,10 +893,12 @@ export default async function AdminClienteDetailPage({
       >
         <div className={styles.registrationStack}>
           <AdminClientNameEditForm
+            key={displayName ?? "unnamed"}
             clientId={client.id}
             displayName={displayName ?? undefined}
           />
           <AdminClientRegistrationEditForm
+            key={registration?.updated_at ?? "new"}
           city={registration?.city ?? undefined}
           clientId={client.id}
           contactEmail={registration?.contact_email ?? undefined}

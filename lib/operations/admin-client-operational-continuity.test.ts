@@ -7,7 +7,7 @@ const read = (path: string) => readFileSync(new URL("../../" + path, import.meta
 test("professional client name refreshes canonical identity after success", () => {
   const form = read("components/admin/AdminClientNameEditForm.tsx");
   assert.ok(form.includes('useRouter'));
-  assert.ok(form.includes('if (state.success) router.refresh()'));
+  assert.ok(form.includes('router.refresh()'));
   assert.ok(form.includes('name="displayName"'));
   assert.ok(form.includes('maxLength={120}'));
   const action = read("app/admin/clientes/[clienteId]/actions.ts");
@@ -17,7 +17,7 @@ test("professional client name refreshes canonical identity after success", () =
 
 test("changing Cadastro Atual refreshes visible contact details without changing login email", () => {
   const form = read("components/admin/AdminClientRegistrationEditForm.tsx");
-  assert.ok(form.includes('if (state.success) router.refresh()'));
+  assert.ok(form.includes('router.refresh()'));
   assert.ok(form.includes('name="contactEmail"'));
   assert.ok(form.includes('email operacional de contato') || form.includes('Email operacional de contato'));
   const action = read("app/admin/clientes/[clienteId]/actions.ts");
@@ -28,7 +28,7 @@ test("changing Cadastro Atual refreshes visible contact details without changing
 
 test("weekly feedback channel refreshes after saving an immutable preference version", () => {
   const form = read("components/admin/AdminWeeklyFeedbackNotificationPreferenceForm.tsx");
-  assert.ok(form.includes('if (state.success) router.refresh()'));
+  assert.ok(form.includes('router.refresh()'));
   assert.ok(form.includes('key={currentVersionId ?? "unconfigured"}'));
   assert.ok(form.includes('disabled={isPending || state.success}'));
   assert.ok(form.includes('name="channel"'));

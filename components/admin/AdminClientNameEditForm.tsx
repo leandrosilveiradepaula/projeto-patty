@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -30,15 +30,33 @@ export function AdminClientNameEditForm({
 }: AdminClientNameEditFormProps) {
   const action = updateAdminClientDisplayNameAction.bind(null, clientId);
   const [state, formAction, isPending] = useActionState(action, initialState);
+  const inFlightRef = useRef(false);
+  const [editedSinceResult, setEditedSinceResult] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    if (state.success) router.refresh();
+    inFlightRef.current = false;
+    if (state.success) {
+      setEditedSinceResult(false);
+      router.refresh();
+    }
   }, [state, router]);
 
   return (
-    <form action={formAction} className={styles.form}>
-      {state.message ? (
+    <form
+      action={formAction}
+      aria-busy={isPending}
+      className={styles.form}
+      onChange={() => setEditedSinceResult(true)}
+      onSubmit={(event) => {
+        if (inFlightRef.current || isPending) {
+          event.preventDefault();
+          return;
+        }
+        inFlightRef.current = true;
+      }}
+    >
+      {state.message && !editedSinceResult ? (
         <Alert
           live={state.success ? "polite" : "assertive"}
           title={state.success ? "Nome atualizado" : "Não foi possível atualizar"}
@@ -58,7 +76,8 @@ export function AdminClientNameEditForm({
           <TextInput
             {...fieldProps}
             autoComplete="name"
-            defaultValue={displayName}
+            disabled={isPending}
+              defaultValue={displayName}
             maxLength={120}
             name="displayName"
             required
@@ -67,7 +86,7 @@ export function AdminClientNameEditForm({
         )}
       </FormField>
 
-      <Button loading={isPending} type="submit">
+      <Button disabled={isPending} loading={isPending} type="submit">
         Salvar nome
       </Button>
     </form>

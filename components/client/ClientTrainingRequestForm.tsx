@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -21,6 +21,8 @@ const initialState: ClientTrainingRequestFormState = {
 
 export function ClientTrainingRequestForm() {
   const formRef = useRef<HTMLFormElement>(null);
+  const inFlightRef = useRef(false);
+  const [allowNext, setAllowNext] = useState(false);
   const router = useRouter();
   const [state, formAction, isPending] = useActionState(
     requestTrainingAction,
@@ -28,15 +30,23 @@ export function ClientTrainingRequestForm() {
   );
 
   useEffect(() => {
+    inFlightRef.current = false;
     if (state.success) {
+      setAllowNext(false);
       formRef.current?.reset();
       router.refresh();
     }
-  }, [state.success, router]);
+  }, [state, router]);
 
   return (
-    <form action={formAction} className={styles.form} ref={formRef}>
-      {state.message ? (
+    <form action={formAction} aria-busy={isPending} className={styles.form} onSubmit={(event) => {
+        if (inFlightRef.current || isPending || (state.success && !allowNext)) {
+          event.preventDefault();
+          return;
+        }
+        inFlightRef.current = true;
+      }} ref={formRef}>
+      {state.message && (!state.success || !allowNext) ? (
         <Alert
           live={state.success ? "polite" : "assertive"}
           title={state.success ? "Solicitação enviada" : "Não foi possível enviar"}
@@ -54,6 +64,7 @@ export function ClientTrainingRequestForm() {
         {(fieldProps) => (
           <Textarea
             {...fieldProps}
+            disabled={isPending || (state.success && !allowNext)}
             maxLength={1000}
             name="note"
             placeholder="Se quiser, conte algo importante sobre sua solicitação."
@@ -62,9 +73,14 @@ export function ClientTrainingRequestForm() {
         )}
       </FormField>
 
-      <Button loading={isPending} type="submit">
+      <Button disabled={isPending || (state.success && !allowNext)} loading={isPending} type="submit">
         Solicitar treino
       </Button>
+      {state.success && !allowNext ? (
+        <Button onClick={() => setAllowNext(true)} type="button" variant="secondary">
+          Registrar outra solicitação
+        </Button>
+      ) : null}
     </form>
   );
 }
