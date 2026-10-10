@@ -1,4 +1,5 @@
 import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
+import { loadClientClarificationSummary } from "@/lib/follow-up/client-clarification-summary-loader";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
@@ -7,6 +8,7 @@ import { Section } from "@/components/ui/Section";
 import {
   getAccessibleClient,
   listAccessibleAnamnesisSubmissions,
+  listAccessibleAnamnesisReviewsForSubmissions,
 } from "@/lib/supabase/data-access";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -46,6 +48,12 @@ export default async function AdminClienteAnamnesePage({
   const submittedSubmissions = submissions.filter(
     (submission) => Boolean(submission.submitted_at),
   );
+  const submittedIds = submittedSubmissions.map((submission) => submission.id);
+  const [reviews, clarificationSummary] = await Promise.all([
+    listAccessibleAnamnesisReviewsForSubmissions(submittedIds),
+    loadClientClarificationSummary(submittedIds),
+  ]);
+  const reviewedSubmissionIds = new Set(reviews.map((review) => review.submission_id));
   const displayName = client.full_name?.trim() || client.profiles?.display_name?.trim();
 
   return (
@@ -110,6 +118,10 @@ export default async function AdminClienteAnamnesePage({
           <ol className={styles.submissionList}>
             {submittedSubmissions.map((submission) => {
               const version = submission.anamnesis_form_versions;
+              const clarification = clarificationSummary.bySubmission.get(submission.id);
+              const awaitingClient = clarification?.awaitingClient ?? 0;
+              const awaitingProfessional = clarification?.awaitingProfessional ?? 0;
+              const hasProfessionalNote = reviewedSubmissionIds.has(submission.id);
 
               return (
                 <li key={submission.id}>
@@ -125,14 +137,52 @@ export default async function AdminClienteAnamnesePage({
                           Enviada em {formatDateTime(submission.submitted_at!)}
                         </p>
                       </div>
-                      <Badge variant="positive">Enviada</Badge>
+                      <Badge variant="neutral">Enviada</Badge>
                     </div>
                     <dl className={styles.submissionDetails}>
                       <div>
                         <dt>Criação</dt>
                         <dd>{formatDateTime(submission.created_at)}</dd>
                       </div>
+                      <div>
+                        <dt>Nota de revisão profissional</dt>
+                        <dd>{hasProfessionalNote ? "Registro interno encontrado" : "Ainda não registrada"}</dd>
+                      </div>
+                      <div>
+                        <dt>Esclarecimentos aguardando cliente</dt>
+                        <dd>{awaitingClient}</dd>
+                      </div>
+                      <div>
+                        <dt>Complementos aguardando Patty</dt>
+                        <dd>{awaitingProfessional}</dd>
+                      </div>
                     </dl>
+                    {!hasProfessionalNote ? (
+                      <p className={styles.submissionMeta}>
+                        Esta submissão ainda não possui nota de revisão profissional registrada.
+                      </p>
+                    ) : null}
+                    {awaitingClient > 0 && awaitingProfessional > 0 ? (
+                      <p className={styles.submissionMeta}>
+                        Existem esclarecimentos em duas situações distintas: alguns já foram respondidos e aguardam revisão da Patty; outros ainda aguardam a cliente.
+                      </p>
+                    ) : null}
+                    {awaitingProfessional > 0 && clarification?.firstAwaitingProfessionalRequestId ? (
+                      <Link
+                        className={styles.detailLink}
+                        href={`/admin/anamneses/${submission.id}/esclarecimentos#esclarecimento-${clarification.firstAwaitingProfessionalRequestId}`}
+                      >
+                        Revisar {awaitingProfessional} complemento(s) da cliente
+                      </Link>
+                    ) : null}
+                    {awaitingClient > 0 && clarification?.firstAwaitingClientRequestId ? (
+                      <Link
+                        className={styles.detailLink}
+                        href={`/admin/anamneses/${submission.id}/esclarecimentos#esclarecimento-${clarification.firstAwaitingClientRequestId}`}
+                      >
+                        Ver {awaitingClient} pedido(s) aguardando resposta da cliente
+                      </Link>
+                    ) : null}
                     <Link
                       className={styles.detailLink}
                       href={`/admin/anamneses/${submission.id}`}
