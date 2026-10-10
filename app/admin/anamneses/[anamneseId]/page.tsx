@@ -12,7 +12,6 @@ import {
   getAccessibleAnamnesisSubmission,
   listAccessibleAnamnesisAnswers,
   listAccessibleAnamnesisQuestions,
-  listAccessibleAnamnesisReviews,
   listAccessibleAnamnesisSections,
   listAccessibleClientFiles,
 } from "@/lib/supabase/data-access";
@@ -28,6 +27,7 @@ type AdminAnamnesisDetailPageProps = {
 };
 
 function formatDateTime(value: string) {
+  if (!Number.isFinite(Date.parse(value))) return "Data indisponível";
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     hour: "2-digit",
@@ -72,11 +72,10 @@ export default async function AdminAnamnesisDetailPage({
     notFound();
   }
 
-  const [sections, questions, answers, reviews, clientFiles] = await Promise.all([
+  const [sections, questions, answers, clientFiles] = await Promise.all([
     listAccessibleAnamnesisSections(submission.form_version_id),
     listAccessibleAnamnesisQuestions(submission.form_version_id),
     listAccessibleAnamnesisAnswers(submission.id),
-    listAccessibleAnamnesisReviews(submission.id),
     listAccessibleClientFiles(submission.client_id),
   ]);
 
