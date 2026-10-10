@@ -48,7 +48,7 @@ test("administrative protocol page opens selected history without treating an un
   const page=read("app/admin/protocolos/[protocoloId]/page.tsx");
   assert.match(page,/requestedProtocolVersion\(requestedVersion, versions\)/);
   assert.match(page,/latestPublishedProtocolVersionId\(versions, publications\)/);
-  assert.match(page,/defaultOpen=\\{isCurrentVersion \\|\\| isRequestedVersion\\}/);
+  assert.ok(page.includes("defaultOpen={isCurrentVersion || isRequestedVersion}"));
   assert.ok(page.includes('id={`versao-${version.version_number}`}'));
   assert.ok(page.includes("<ClientHistoryDisclosure"));
   const disclosure=read("components/client/ClientHistoryDisclosure.tsx");
