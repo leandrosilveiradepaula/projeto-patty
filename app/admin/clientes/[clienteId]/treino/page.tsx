@@ -487,6 +487,9 @@ export default async function AdminClientTrainingPage({ params }: Props) {
             {latestPublished.notes ? (
               <p className={styles.description}>{latestPublished.notes}</p>
             ) : null}
+            {sortedPublishedItems.length === 0 ? (
+              <p className={styles.description}>Nenhum exercício registrado nesta versão publicada. Confira o histórico antes de orientar a cliente.</p>
+            ) : (
             <ol className={styles.publishedList}>
               {sortedPublishedItems.map((item) => (
                 <li key={item.id}>
@@ -501,6 +504,7 @@ export default async function AdminClientTrainingPage({ params }: Props) {
                 </li>
               ))}
             </ol>
+            )}
           </Card>
         </Section>
       ) : null}
