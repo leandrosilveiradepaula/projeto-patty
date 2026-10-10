@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -71,7 +71,7 @@ function channelStatus(
   };
 }
 
-export function AdminWeeklyFeedbackNotificationPreferenceForm({
+function VersionedWeeklyFeedbackPreferenceForm({
   clientId,
   currentChannel,
   currentVersionId,
@@ -85,14 +85,27 @@ export function AdminWeeklyFeedbackNotificationPreferenceForm({
   );
   const [state, formAction, isPending] = useActionState(action, initialState);
   const router = useRouter();
+  const inFlightRef = useRef(false);
 
   useEffect(() => {
+    inFlightRef.current = false;
     if (state.success) router.refresh();
   }, [state, router]);
   const status = channelStatus(currentChannel, contactEmail, phone);
 
   return (
-    <form action={formAction} className={styles.form}>
+    <form
+      action={formAction}
+      aria-busy={isPending}
+      className={styles.form}
+      onSubmit={(event) => {
+        if (inFlightRef.current || isPending || state.success) {
+          event.preventDefault();
+          return;
+        }
+        inFlightRef.current = true;
+      }}
+    >
       {state.message ? (
         <Alert
           live={state.success ? "polite" : "assertive"}
@@ -112,7 +125,7 @@ export function AdminWeeklyFeedbackNotificationPreferenceForm({
         <select
           className={styles.select}
           defaultValue={currentChannel ?? ""}
-          disabled={isPending}
+          disabled={isPending || state.success}
           key={currentVersionId ?? "unconfigured"}
           name="channel"
           required
@@ -131,9 +144,19 @@ export function AdminWeeklyFeedbackNotificationPreferenceForm({
         continuam separados desta configuração.
       </p>
 
-      <Button loading={isPending} type="submit">
+      <Button disabled={isPending || state.success} loading={isPending} type="submit">
         Salvar canal
       </Button>
     </form>
+  );
+}
+
+// A nova versão ativa troca também o estado da action e sua precondição de concorrência.
+export function AdminWeeklyFeedbackNotificationPreferenceForm(props: Props) {
+  return (
+    <VersionedWeeklyFeedbackPreferenceForm
+      key={props.currentVersionId ?? "unconfigured"}
+      {...props}
+    />
   );
 }

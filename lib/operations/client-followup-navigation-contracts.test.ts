@@ -21,8 +21,10 @@ test("pending feedback card has the real deep-link anchor and opens selected new
   assert.match(page, /id=\{`feedback-pendente-\$\{feedback\.id\}`\}/);
   assert.match(page, /open=\{feedbackIndex === 0\}/);
   assert.match(page, /saveWeeklyFeedbackAction\.bind\(null, feedback\.id\)/);
-  assert.match(page, /value="save"/);
-  assert.match(page, /value="submit"/);
+  const controls = read("app/cliente/feedback-semanal/ClientWeeklyFeedbackSubmitControls.tsx");
+  assert.match(page, /<ClientWeeklyFeedbackSubmitControls \/>/);
+  assert.match(controls, /value="save"/);
+  assert.match(controls, /value="submit"/);
   assert.ok(!page.includes("publishProtocolVersion"));
 });
 

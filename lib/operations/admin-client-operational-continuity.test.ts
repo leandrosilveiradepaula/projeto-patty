@@ -30,8 +30,9 @@ test("weekly feedback channel refreshes after saving an immutable preference ver
   const form = read("components/admin/AdminWeeklyFeedbackNotificationPreferenceForm.tsx");
   assert.ok(form.includes('if (state.success) router.refresh()'));
   assert.ok(form.includes('key={currentVersionId ?? "unconfigured"}'));
-  assert.ok(form.includes('disabled={isPending}'));
+  assert.ok(form.includes('disabled={isPending || state.success}'));
   assert.ok(form.includes('name="channel"'));
+  assert.ok(form.includes('key={props.currentVersionId ?? "unconfigured"}'));
   for (const channel of ['email','whatsapp','in_app']) assert.ok(form.includes('value="' + channel + '"'));
 });
 
