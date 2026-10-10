@@ -1,14 +1,11 @@
 import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
-import { saveWeeklyFeedbackAction } from "@/app/cliente/feedback-semanal/actions";
+import { ClientWeeklyFeedbackResponseForm } from "./ClientWeeklyFeedbackResponseForm";
 import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
-import { ClientWeeklyFeedbackSubmitControls } from "./ClientWeeklyFeedbackSubmitControls";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
-import { TextInput } from "@/components/ui/TextInput";
-import { Textarea } from "@/components/ui/Textarea";
 import {
   parseWeeklyFeedbackDefinition,
   readWeeklyFeedbackAnswer,
@@ -40,14 +37,7 @@ function formatDueAt(value: string | null) {
   }).format(new Date(value));
 }
 
-type ClientWeeklyFeedbackPageProps = {
-  searchParams: Promise<{ status?: string }>;
-};
-
-export default async function ClientWeeklyFeedbackPage({
-  searchParams,
-}: ClientWeeklyFeedbackPageProps) {
-  const { status } = await searchParams;
+export default async function ClientWeeklyFeedbackPage() {
   const client = await getCurrentClient();
 
   if (!client) {
@@ -88,28 +78,6 @@ export default async function ClientWeeklyFeedbackPage({
         eyebrow="Cliente"
         title="Feedback Semanal"
       />
-      {status === "draft-saved" ? (
-        <Alert live="polite" title="Rascunho salvo" variant="success">
-          Suas respostas foram salvas. Você pode continuar em outro momento.
-        </Alert>
-      ) : status === "submitted" ? (
-        <Alert live="polite" title="Feedback enviado" variant="success">
-          Seu Feedback Semanal foi enviado e não está mais disponível para edição.
-        </Alert>
-      ) : status === "invalid" ? (
-        <Alert live="assertive" title="Revise suas respostas" variant="critical">
-          Preencha as perguntas obrigatórias e confira os campos numéricos antes de enviar.
-        </Alert>
-      ) : status === "conflict" ? (
-        <Alert live="assertive" title="Feedback não atualizado" variant="critical">
-          Esta solicitação pode já ter sido enviada em outra aba. Nenhuma nova gravação foi confirmada; confira o estado atual antes de tentar novamente.
-        </Alert>
-      ) : status === "save-error" ? (
-        <Alert live="assertive" title="Não foi possível salvar" variant="critical">
-          O sistema não conseguiu gravar seu Feedback Semanal. Tente novamente antes de sair desta página.
-        </Alert>
-      ) : null}
-
       {feedbacks.length === 0 ? (
         <Section title="Seus feedbacks">
           <EmptyState
@@ -177,46 +145,16 @@ export default async function ClientWeeklyFeedbackPage({
                         {!definition ? (
                           <p className={styles.meta}>Definição do formulário indisponível.</p>
                         ) : (
-                          <form
-                            action={saveWeeklyFeedbackAction.bind(null, feedback.id)}
-                            className={styles.form}
-                          >
-                            {definition.questions.map((question) => {
-                              const defaultValue = readWeeklyFeedbackAnswer(
-                                feedback.answers,
+                          <ClientWeeklyFeedbackResponseForm
+                            feedbackId={feedback.id}
+                            initialValues={Object.fromEntries(
+                              definition.questions.map((question) => [
                                 question.key,
-                              );
-
-                              return (
-                                <label className={styles.field} key={question.key}>
-                                  <span>{question.label}</span>
-                                  {question.allowsNotApplicable ? (
-                                    <small>Quando não se aplicar ao seu protocolo, escreva “Não se aplica”.</small>
-                                  ) : null}
-                                  {question.inputType === "text" ? (
-                                    <Textarea
-                                      defaultValue={defaultValue}
-                                      maxLength={4000}
-                                      name={question.key}
-                                      required={question.required}
-                                      rows={3}
-                                    />
-                                  ) : (
-                                    <TextInput
-                                      defaultValue={defaultValue}
-                                      max={question.inputType === "rating_0_10" ? 10 : undefined}
-                                      min={0}
-                                      name={question.key}
-                                      required={question.required}
-                                      step={1}
-                                      type="number"
-                                    />
-                                  )}
-                                </label>
-                              );
-                            })}
-                            <ClientWeeklyFeedbackSubmitControls />
-                          </form>
+                                readWeeklyFeedbackAnswer(feedback.answers, question.key),
+                              ]),
+                            )}
+                            questions={definition.questions}
+                          />
                         )}
                       </Card>
                         </div>

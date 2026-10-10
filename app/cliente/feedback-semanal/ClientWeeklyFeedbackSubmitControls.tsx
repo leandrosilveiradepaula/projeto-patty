@@ -8,7 +8,7 @@ import styles from "./page.module.css";
 
 // A action do formulário permanece no servidor; este componente apenas expõe o
 // estado da submissão real e impede uma segunda intenção simultânea.
-export function ClientWeeklyFeedbackSubmitControls() {
+export function ClientWeeklyFeedbackSubmitControls({ completed = false }: { completed?: boolean }) {
   const { pending, data } = useFormStatus();
   const intent = data?.get("intent");
 
@@ -16,7 +16,7 @@ export function ClientWeeklyFeedbackSubmitControls() {
     <>
       <div className={styles.actions}>
         <Button
-          disabled={pending}
+          disabled={pending || completed}
           formNoValidate
           loading={pending && intent === "save"}
           name="intent" type="submit" value="save" variant="secondary"
@@ -24,7 +24,7 @@ export function ClientWeeklyFeedbackSubmitControls() {
           Salvar rascunho
         </Button>
         <Button
-          disabled={pending}
+          disabled={pending || completed}
           loading={pending && intent === "submit"}
           name="intent" type="submit" value="submit"
         >

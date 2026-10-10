@@ -21,9 +21,11 @@ test("professional reminder uses persisted latest event, not first incidental it
 test("client weekly feedback has a non-submitting draft and text-limit guidance", () => {
   const source = read("app/cliente/feedback-semanal/page.tsx");
   assert.match(source, /Salvar rascunho não envia suas respostas/);
-  assert.match(source, /maxLength=\{4000\}/);
+  const form = read("app/cliente/feedback-semanal/ClientWeeklyFeedbackResponseForm.tsx");
+  assert.match(form, /maxLength=\{4000\}/);
   const controls = read("app/cliente/feedback-semanal/ClientWeeklyFeedbackSubmitControls.tsx");
-  assert.match(source, /<ClientWeeklyFeedbackSubmitControls \/>/);
+  assert.match(source, /<ClientWeeklyFeedbackResponseForm/);
+  assert.match(form, /<ClientWeeklyFeedbackSubmitControls completed=\{submitted\} \/>/);
   assert.match(controls, /name="intent" type="submit" value="save"/);
   assert.match(controls, /name="intent" type="submit" value="submit"/);
 });

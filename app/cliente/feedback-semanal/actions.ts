@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 
 import {
   buildWeeklyFeedbackAnswers,
@@ -16,26 +15,43 @@ import {
 } from "@/lib/supabase/data-access";
 import { isUuid } from "@/lib/validation/uuid";
 
+export type WeeklyFeedbackSaveOutcome =
+  | "idle"
+  | "draft-saved"
+  | "submitted"
+  | "invalid"
+  | "conflict"
+  | "save-error"
+  | "unavailable";
+
+export type WeeklyFeedbackSaveFormState = {
+  message: string | null;
+  outcome: WeeklyFeedbackSaveOutcome;
+};
+
 export async function saveWeeklyFeedbackAction(
   feedbackId: string,
+  _previousState: WeeklyFeedbackSaveFormState,
   formData: FormData,
-) {
+): Promise<WeeklyFeedbackSaveFormState> {
   await requireRole("client");
   const client = await getCurrentClient();
 
   if (!client || !isUuid(feedbackId)) {
-    throw new Error("Feedback indisponível");
+    return { outcome: "unavailable", message: "Feedback indisponível. Confira seu acesso." };
   }
 
   const intent = formData.get("intent");
   if (intent !== "save" && intent !== "submit") {
-    redirect("/cliente/feedback-semanal?status=invalid");
+    return { outcome: "invalid", message: "Escolha salvar o rascunho ou enviar o feedback." };
   }
 
   const feedback = await getCurrentClientWeeklyFeedback(client.id, feedbackId);
-
   if (!feedback || feedback.submitted_at) {
-    redirect("/cliente/feedback-semanal?status=conflict");
+    return {
+      outcome: "conflict",
+      message: "O feedback pode já ter sido enviado em outra aba ou não estar mais disponível. Nenhuma nova gravação foi confirmada.",
+    };
   }
 
   const version = feedback.weekly_feedback_form_versions;
@@ -44,21 +60,21 @@ export async function saveWeeklyFeedbackAction(
     : null;
 
   if (!definition) {
-    throw new Error("Definição do Feedback Semanal indisponível");
+    return { outcome: "unavailable", message: "A definição versionada deste feedback está indisponível." };
   }
 
   const submit = intent === "submit";
-
   let answers;
-
   try {
     answers = buildWeeklyFeedbackAnswers(formData, definition);
-
     if (submit) {
       validateWeeklyFeedbackAnswers(answers, definition);
     }
   } catch {
-    redirect("/cliente/feedback-semanal?status=invalid");
+    return {
+      outcome: "invalid",
+      message: "Revise os campos numéricos, os limites e as perguntas obrigatórias antes de tentar novamente.",
+    };
   }
 
   let saved;
@@ -70,11 +86,17 @@ export async function saveWeeklyFeedbackAction(
       submit,
     });
   } catch {
-    redirect("/cliente/feedback-semanal?status=save-error");
+    return {
+      outcome: "save-error",
+      message: "Não foi possível gravar agora. Suas respostas continuam nesta tela para uma nova tentativa.",
+    };
   }
 
   if (!saved) {
-    redirect("/cliente/feedback-semanal?status=conflict");
+    return {
+      outcome: "conflict",
+      message: "Este registro mudou antes da gravação. Nenhuma nova gravação foi confirmada; confira a situação antes de tentar novamente.",
+    };
   }
 
   revalidatePath("/admin");
@@ -83,8 +105,11 @@ export async function saveWeeklyFeedbackAction(
   revalidatePath("/admin/clientes/" + client.id + "/feedback-semanal");
   revalidatePath("/cliente");
   revalidatePath("/cliente/feedback-semanal");
-  redirect(
-    "/cliente/feedback-semanal?status=" +
-      (submit ? "submitted" : "draft-saved"),
-  );
+
+  return {
+    outcome: submit ? "submitted" : "draft-saved",
+    message: submit
+      ? "Feedback enviado e preservado. A Patty poderá consultar as respostas."
+      : "Rascunho salvo. Você pode continuar e enviar em outro momento.",
+  };
 }
