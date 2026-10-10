@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import { TextInput } from "@/components/ui/TextInput";
 import { summarizeLibraryVersions, matchesLibraryStatus } from "@/lib/content/admin-library-status";
+import { newestExerciseLibrarySummaries } from "@/lib/training/exercise-library-order";
 import { listExerciseVersionsVisibleToCurrentAdmin } from "@/lib/supabase/data-access";
 import Link from "next/link";
 import styles from "./page.module.css";
@@ -37,8 +38,9 @@ type AdminExerciciosPageProps = {
 export default async function AdminExerciciosPage({ searchParams }: AdminExerciciosPageProps) {
   const { q, status } = await searchParams;
   const exerciseVersions = await listExerciseVersionsVisibleToCurrentAdmin();
-  const summaries = [...summarizeLibraryVersions(exerciseVersions, (version) => version.exercise_id).values()]
-    .sort((left, right) => right.latestVersion.created_at.localeCompare(left.latestVersion.created_at));
+  const summaries = newestExerciseLibrarySummaries(
+    [...summarizeLibraryVersions(exerciseVersions, (version) => version.exercise_id).values()],
+  );
   const exercises = summaries;
 
   const searchTerm = q?.trim() ?? "";
@@ -60,7 +62,7 @@ export default async function AdminExerciciosPage({ searchParams }: AdminExercic
       />
 
       <Section
-        description="A primeira versão começa como rascunho. A Patty revisa e publica manualmente."
+        description="A primeira versão começa como rascunho. A Patty revisa e publica manualmente; a criação não atribui exercícios a nenhuma cliente."
         title="Novo exercício"
       >
         <Card className={styles.createCard}>
@@ -80,7 +82,7 @@ export default async function AdminExerciciosPage({ searchParams }: AdminExercic
       </Section>
 
       <Section
-        description="Cada item abre o histórico versionado do exercício."
+        description="Catálogo profissional. Somente exercícios selecionados em treinos individuais e publicados pela Patty ficam visíveis às respectivas clientes."
         title="Biblioteca de exercícios"
       >
         {exercises.length > 0 ? (
@@ -153,7 +155,7 @@ export default async function AdminExerciciosPage({ searchParams }: AdminExercic
                     status={
                       <Badge
                         variant={
-                          exerciseVersion.published_at ? "positive" : "warning"
+                          exerciseVersion.published_at ? "neutral" : "warning"
                         }
                       >
                         {exerciseVersion.published_at ? "Publicado" : "Rascunho"}

@@ -76,3 +76,10 @@
   outline: 3px solid var(--color-accent);
   outline-offset: 3px;
 }
+
+.actionRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
