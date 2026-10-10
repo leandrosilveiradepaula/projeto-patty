@@ -129,3 +129,9 @@
 :global(section[id^="publicacao-"]) {
   scroll-margin-top: var(--space-6);
 }
+
+
+.historyItem:target {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
