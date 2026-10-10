@@ -39,7 +39,7 @@ test("released content with missing asset links to its exact historical release"
   const page = read("app/admin/clientes/[clienteId]/conteudos/page.tsx");
   assert.ok(page.includes('id={`liberacao-${release.id}`}'));
   assert.ok(page.includes("parentContentIdByVersionId.has(contentVersion.id)"));
-  assert.ok(page.includes("Verificar asset desta versão"));
+  assert.ok(page.includes("Verificar arquivo desta versão"));
   assert.ok(page.includes('id={`liberacao-${release.id}`}'));
 });
 
