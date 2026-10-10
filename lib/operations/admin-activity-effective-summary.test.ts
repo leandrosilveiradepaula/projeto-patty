@@ -57,7 +57,13 @@ test("professional check-in history distinguishes original and effective activit
 
 test("an absent correction leaves the original answer unchanged", () => {
   const event = { id: "event-1", did_activity: false };
-  const correction = latestCheckinCorrectionsByEvent([]).get(event.id);
+  const corrections: Array<{
+    id: string;
+    event_id: string;
+    created_at: string;
+    corrected_did_activity: boolean;
+  }> = [];
+  const correction = latestCheckinCorrectionsByEvent(corrections).get(event.id);
   assert.equal(correction?.corrected_did_activity ?? event.did_activity, false);
   assert.ok(overview.includes("const latestActivity = activityEvents[0] ?? null"));
 });
