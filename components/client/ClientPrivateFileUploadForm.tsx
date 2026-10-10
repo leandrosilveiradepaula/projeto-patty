@@ -67,6 +67,7 @@ export function ClientPrivateFileUploadForm() {
     inFlightRef.current = true;
     setIsPending(true);
     setPhase("authorizing");
+    let finalizationStarted = false;
 
     try {
       const sessionResult = await createClientFileUploadSessionAction({
@@ -103,6 +104,7 @@ export function ClientPrivateFileUploadForm() {
         return;
       }
 
+      finalizationStarted = true;
       setPhase("verifying");
       const finalizationResult = await finalizeClientFileUploadSessionAction(
         sessionResult.session.id,
@@ -132,7 +134,11 @@ export function ClientPrivateFileUploadForm() {
       router.refresh();
     } catch {
       console.error("Private file upload flow failed");
-      setMessage("A confirmação do envio não foi concluída. Confira o histórico antes de tentar novamente.");
+      setMessage(
+        finalizationStarted
+          ? "A confirmação do envio não foi concluída. Confira o histórico antes de tentar novamente."
+          : "O envio não foi concluído. Corrija a conexão ou tente novamente.",
+      );
     } finally {
       inFlightRef.current = false;
       setIsPending(false);
