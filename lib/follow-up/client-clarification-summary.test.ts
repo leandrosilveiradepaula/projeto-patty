@@ -23,6 +23,7 @@ test("unanswered clarifications link to the oldest request, across submissions",
     awaitingClient: 2,
     awaitingProfessional: 0,
     firstAwaitingClientRequestId: "middle",
+    firstAwaitingProfessionalRequestId: null,
   });
   assert.deepEqual(items, snapshot, "no mutation of client records");
 });
@@ -92,4 +93,49 @@ test("request, response and professional resolution invalidate client Anamnesis 
   assert.match(admin, /await createAccessibleAnamnesisClarificationRequest/);
   assert.match(admin, /await createAccessibleAnamnesisClarificationResolution/);
   assert.match(client, /await createAccessibleAnamnesisClarificationResponse/);
+});
+
+test("mixed answered and unanswered requests stay separately actionable within one Anamnese", () => {
+  const requests = [
+    request("answered", "same-submission", "2026-10-09T10:00:00-03:00"),
+    request("unanswered", "same-submission", "2026-10-09T14:00:00+02:00"),
+    request("resolved", "same-submission", "2026-10-08T09:00:00Z"),
+  ];
+  const summary = summarizeClientClarifications(
+    requests,
+    [{ clarification_request_id: "answered" }, { clarification_request_id: "resolved" }],
+    [{ clarification_request_id: "resolved" }],
+  );
+  assert.deepEqual(summary.bySubmission.get("same-submission"), {
+    awaitingClient: 1,
+    awaitingProfessional: 1,
+    firstAwaitingClientRequestId: "unanswered",
+    firstAwaitingProfessionalRequestId: "answered",
+  });
+  assert.equal(summary.awaitingClient, 1);
+  assert.equal(summary.awaitingProfessional, 1);
+});
+
+test("first professional clarification follows factual timestamp order, not array order", () => {
+  const summary = summarizeClientClarifications(
+    [
+      request("later", "s", "2026-10-10T12:00:00-03:00"),
+      request("earlier", "s", "2026-10-10T15:00:00+02:00"),
+    ],
+    [{ clarification_request_id: "later" }, { clarification_request_id: "earlier" }],
+    [],
+  );
+  assert.equal(summary.bySubmission.get("s")?.firstAwaitingProfessionalRequestId, "earlier");
+  assert.equal(summary.bySubmission.get("s")?.awaitingClient, 0);
+  assert.equal(summary.bySubmission.get("s")?.awaitingProfessional, 2);
+});
+
+test("manual resolution removes only the resolved clarification, not siblings", () => {
+  const summary = summarizeClientClarifications(
+    [request("closed", "s", "2026-10-01T00:00:00Z"), request("still-open", "s", "2026-10-02T00:00:00Z")],
+    [{ clarification_request_id: "closed" }, { clarification_request_id: "still-open" }],
+    [{ clarification_request_id: "closed" }],
+  );
+  assert.equal(summary.bySubmission.get("s")?.firstAwaitingProfessionalRequestId, "still-open");
+  assert.equal(summary.bySubmission.get("s")?.awaitingProfessional, 1);
 });
