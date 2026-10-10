@@ -28,7 +28,7 @@ test("the add-item form resets only on successful save and distinguishes manual 
   const source = read("components/admin/AdminTrainingPlanItemForm.tsx");
   assert.match(source, /formRef\.current\?\.reset\(\)/);
   assert.ok(source.includes('setSelectedExerciseId("")'));
-  assert.match(source, /disabled=\{Boolean\(selectedExercise\)\}/);
+  assert.match(source, /disabled=\{isPending \|\| Boolean\(selectedExercise\) \|\| missingHistoricalVersion\}/);
   assert.match(source, /required=\{!selectedExercise\}/);
   assert.match(source, /router\.refresh\(\)/);
 });
