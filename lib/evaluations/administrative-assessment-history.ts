@@ -14,11 +14,12 @@ export function orderAdministrativeAssessments<T extends HistoricalAdministrativ
   rows: readonly T[],
 ): T[] {
   return newestFactualAssessments(
-    rows.map((assessment) => ({
-      ...assessment,
-      assessedAt: assessment.assessed_at,
+    rows.map((original) => ({
+      id: original.id,
+      assessedAt: original.assessed_at,
+      original,
     })),
-  ).map(({ assessedAt: _assessedAt, ...assessment }) => assessment as unknown as T);
+  ).map((item) => item.original);
 }
 
 export function findPreviousFinalizedAssessment<
