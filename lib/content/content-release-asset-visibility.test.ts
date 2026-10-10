@@ -17,7 +17,9 @@ test("admin content release flow exposes whether exact versions have an asset", 
 
   assert.match(dataAccess, /listEducationalContentAssetsForCurrentAdminVersions/);
   assert.match(page, /versionIdsWithAssets/);
-  assert.match(page, /Disponível para abrir/);
+  assert.match(page, /Arquivo registrado/);
+  assert.match(page, /Conferir arquivos na biblioteca/);
+  assert.match(page, /assetCountsByVersionId/);
   assert.match(page, /Liberado sem arquivo/);
   assert.match(form, /arquivo privado registrado/);
   assert.match(form, /servidor também valida a existência do asset/);
