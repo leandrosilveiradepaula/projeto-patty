@@ -16,19 +16,19 @@ test("client recording and correction forms all guard appending events against r
   ]) {
     assert.ok(client.includes("action={" + action + "}"), action);
   }
-  assert.equal((client.match(/<CheckinActionForm\\b/g) ?? []).length, 5);
-  assert.equal((client.match(/<\\/CheckinActionForm>/g) ?? []).length, 5);
-  assert.equal((client.match(/<CheckinSubmitButton\\b/g) ?? []).length, 8);
-  assert.equal((client.match(/<\\/CheckinSubmitButton>/g) ?? []).length, 8);
+  assert.equal((client.match(/<CheckinActionForm\b/g) ?? []).length, 5);
+  assert.equal((client.match(/<\/CheckinActionForm>/g) ?? []).length, 5);
+  assert.equal((client.match(/<CheckinSubmitButton\b/g) ?? []).length, 8);
+  assert.equal((client.match(/<\/CheckinSubmitButton>/g) ?? []).length, 8);
 });
 
 test("professional corrections use the same protection without touching client permissions", () => {
   assert.ok(admin.includes("action={correctClientLiquidIntakeAction.bind(null, client.id)}"));
   assert.ok(admin.includes("action={correctClientActivityCheckinAction.bind(null, client.id)}"));
-  assert.equal((admin.match(/<CheckinActionForm\\b/g) ?? []).length, 2);
-  assert.equal((admin.match(/<\\/CheckinActionForm>/g) ?? []).length, 2);
-  assert.equal((admin.match(/<CheckinSubmitButton\\b/g) ?? []).length, 3);
-  assert.equal((admin.match(/<\\/CheckinSubmitButton>/g) ?? []).length, 3);
+  assert.equal((admin.match(/<CheckinActionForm\b/g) ?? []).length, 2);
+  assert.equal((admin.match(/<\/CheckinActionForm>/g) ?? []).length, 2);
+  assert.equal((admin.match(/<CheckinSubmitButton\b/g) ?? []).length, 3);
+  assert.equal((admin.match(/<\/CheckinSubmitButton>/g) ?? []).length, 3);
 });
 
 test("factual history GET filters do not append events or change into server actions", () => {
