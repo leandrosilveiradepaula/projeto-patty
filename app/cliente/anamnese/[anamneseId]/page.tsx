@@ -1,6 +1,7 @@
 import { ClientAnamnesisDraftSingleChoiceAnswerForm } from "@/components/client/ClientAnamnesisDraftSingleChoiceAnswerForm";
 import { ClientAnamnesisDraftTextAnswerForm } from "@/components/client/ClientAnamnesisDraftTextAnswerForm";
 import { ClientAnamnesisSubmitForm } from "@/components/client/ClientAnamnesisSubmitForm";
+import { ClientAnamnesisDraftProgressRefresh } from "@/components/client/ClientAnamnesisDraftProgressRefresh";
 import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
@@ -233,8 +234,9 @@ export default async function ClienteAnamneseDetailPage({
                 Todas as perguntas obrigatórias atualmente aplicáveis têm uma resposta salva.
               </p>
             )}
+            <ClientAnamnesisDraftProgressRefresh />
             <p className={styles.progressNote}>
-              Depois de novos salvamentos, atualize a página para conferir o resumo. O envio final continua sujeito à validação do banco e ao aceite exigido nesta versão.
+              Confira se todas as respostas indicam salvamento concluído antes de atualizar o resumo. O envio final continua sujeito à validação do banco e ao aceite exigido nesta versão.
             </p>
           </Card>
         </Section>
