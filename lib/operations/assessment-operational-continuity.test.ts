@@ -23,7 +23,7 @@ test("measurement save clears the entry only on success and refreshes readiness"
   assert.match(chunk, /if \(state\.success\)/);
   assert.match(chunk, /formRef\.current\?\.reset\(\)/);
   assert.match(chunk, /router\.refresh\(\)/);
-  assert.match(chunk, /disabled=\{measurementOptions\.length === 0\}/);
+  assert.ok(chunk.includes("disabled={measurementOptions.length === 0 || isPending}"));
   assert.match(chunk, /Salvar medida/);
 });
 
@@ -47,7 +47,7 @@ test("linking a private assessment photo refreshes only after confirmed success"
   assert.match(chunk, /if \(state\.success\)/);
   assert.match(chunk, /formRef\.current\?\.reset\(\)/);
   assert.match(chunk, /router\.refresh\(\)/);
-  assert.match(chunk, /disabled=\{photos\.length === 0\}/);
+  assert.ok(chunk.includes("disabled={photos.length === 0 || isPending}"));
 });
 
 test("unlinking preserves the private source file and requires confirmation", () => {
@@ -66,9 +66,9 @@ test("finalization honors configured readiness, admin confirmation and refreshes
   const chunk = draft.slice(draft.indexOf("export function AssessmentFinalizeForm"));
   assert.match(chunk, /canFinalize/);
   assert.match(chunk, /confirmFinalization/);
-  assert.match(chunk, /disabled=\{!canFinalize \|\| isPending\}/);
+  assert.ok(chunk.includes("disabled={!canFinalize || isPending || state.success}"));
   assert.match(chunk, /if \(state\.success\) router\.refresh\(\)/);
-  assert.match(chunk, /disabled=\{!canFinalize\}/);
+  assert.ok(chunk.includes("disabled={!canFinalize || isPending || state.success}"));
 });
 
 test("correction entry matches server note limit and refreshes effective values", () => {
@@ -87,7 +87,7 @@ test("professional follow-up refreshes decision history and enforces matching te
   assert.match(form, /formRef\.current\?\.reset\(\)/);
   assert.match(form, /router\.refresh\(\)/);
   for (const field of ["difficulty", "adherencePerception", "decisionReason", "pattyObservation"]) {
-    assert.ok(form.includes(`maxLength={4000}\n            name="${field}"`), field);
+    assert.ok(form.includes(`maxLength={4000}\n            disabled={isPending || lockedAfterSuccess}\n            name="${field}"`), field);
   }
   assert.match(action, /createAccessibleProfessionalFollowUp\(/);
 });
@@ -112,7 +112,7 @@ test("assessment create form tracks configured options without inventing a kind"
   const form = read("components/admin/AssessmentCreateForm.tsx");
   assert.match(form, /value=\{selectedKind\}/);
   assert.match(form, /setSelectedKind\(event\.target\.value\)/);
-  assert.match(form, /disabled=\{kindOptions\.length === 0\}/);
+  assert.ok(form.includes("disabled={kindOptions.length === 0 || isPending}"));
 });
 
 test("assessment operations still require admin, persist before cache invalidation, and do not publish automatically", () => {
