@@ -1,5 +1,6 @@
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
+import { CheckinActionForm, CheckinSubmitButton } from "@/components/checkins/CheckinActionForm";
 import {
   correctClientActivityCheckinAction,
   correctClientLiquidIntakeAction,
@@ -172,7 +173,7 @@ export default async function AdminClientCheckinsPage({
                     <p className={styles.description}>{formatDate(event.recorded_at)}</p>
                     <details className={styles.correction}>
                       <summary>Corrigir registro</summary>
-                      <form
+                      <CheckinActionForm
                         action={correctClientLiquidIntakeAction.bind(null, client.id)}
                         className={styles.form}
                       >
@@ -193,8 +194,8 @@ export default async function AdminClientCheckinsPage({
                             ))}
                           </select>
                         </label>
-                        <Button disabled={liquidTaxonomy.kinds.length === 0} type="submit" variant="secondary">Salvar correção</Button>
-                      </form>
+                        <CheckinSubmitButton disabled={liquidTaxonomy.kinds.length === 0}  variant="secondary">Salvar correção</CheckinSubmitButton>
+                      </CheckinActionForm>
                       {correction ? (
                         <p className={styles.description}>
                           Original: {formatMl(event.amount_ml)}. A correção mais recente foi registrada em {formatDate(correction.created_at)}.
@@ -237,19 +238,19 @@ export default async function AdminClientCheckinsPage({
                     </p>
                     <details className={styles.correction}>
                       <summary>Corrigir resposta</summary>
-                      <form
+                      <CheckinActionForm
                         action={correctClientActivityCheckinAction.bind(null, client.id)}
                         className={styles.actions}
                       >
                         <input name="eventId" type="hidden" value={event.id} />
                         {selectedDay ? <input name="historyDay" type="hidden" value={selectedDay} /> : null}
-                        <Button name="didActivity" type="submit" value="yes" variant="secondary">
+                        <CheckinSubmitButton name="didActivity"  value="yes" variant="secondary">
                           Corrigir para Sim
-                        </Button>
-                        <Button name="didActivity" type="submit" value="no" variant="secondary">
+                        </CheckinSubmitButton>
+                        <CheckinSubmitButton name="didActivity"  value="no" variant="secondary">
                           Corrigir para Não
-                        </Button>
-                      </form>
+                        </CheckinSubmitButton>
+                      </CheckinActionForm>
                       {correction ? (
                         <p className={styles.description}>
                           Original: {event.did_activity ? "Sim" : "Não"}. A correção mais recente foi registrada em {formatDate(correction.created_at)}.
