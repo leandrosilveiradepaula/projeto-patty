@@ -69,7 +69,7 @@ test("new version creation requires a separate confirmation and preserves publis
   assert.match(partSource,/setReviewing\(true\)/);
   assert.match(partSource,/Confirmar novo rascunho/);
   assert.match(partSource,/createNextExerciseVersionAction\(exerciseId\)/);
-  assert.match(partSource,/inFlight\.current \|\|/);
+  assert.match(partSource,/completed \|\| inFlight\.current/);
   assert.match(partSource,/completed/);
   assert.match(partSource,/router\.refresh\(\)/);
   assert.match(actions,/Já existe uma versão em rascunho para este exercício/);
