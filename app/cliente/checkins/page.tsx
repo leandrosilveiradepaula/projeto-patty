@@ -37,6 +37,15 @@ function saoPauloDate(value: Date | string) {
   }).format(typeof value === "string" ? new Date(value) : value);
 }
 
+function formatRecordedAt(value: string) {
+  if (!Number.isFinite(Date.parse(value))) return "Data indisponível";
+  return new Intl.DateTimeFormat("pt-BR", {
+    dateStyle: "short",
+    timeStyle: "short",
+    timeZone: "America/Sao_Paulo",
+  }).format(new Date(value));
+}
+
 function formatMl(value: number) {
   if (value >= 1000) {
     return (
@@ -162,6 +171,10 @@ export default async function ClientCheckinsPage({
         <Alert live="polite" title="Atividade registrada" variant="success">
           Sua resposta de atividade física de hoje foi salva.
         </Alert>
+      ) : status === "activity-already-recorded" ? (
+        <Alert live="polite" title="Atividade de hoje já registrada" variant="info">
+          Nenhum novo registro foi criado. Se precisar alterar sua resposta, use Corrigir resposta de hoje.
+        </Alert>
       ) : status === "liquid-invalid" ? (
         <Alert live="assertive" title="Revise o líquido informado" variant="critical">
           Informe uma quantidade válida e selecione um tipo de líquido disponível.
@@ -254,7 +267,7 @@ export default async function ClientCheckinsPage({
         {selectedDay === today ? (
         <Card className={styles.formCard}>
           <div className={styles.summaryHeader}>
-            <h3 className={styles.cardTitle}>Você fez atividade física hoje?</h3>
+            <h3 className={styles.cardTitle}>{latestActivity ? "Atividade física de hoje" : "Você fez atividade física hoje?"}</h3>
             <Badge variant="neutral">
               {effectiveDidActivity === null
                 ? "Ainda não registrado"
@@ -263,22 +276,20 @@ export default async function ClientCheckinsPage({
                   : "Registrado hoje: não"}
             </Badge>
           </div>
-          <CheckinActionForm
-            action={recordActivityCheckinAction}
-            className={styles.activityActions}
-          >
-            <CheckinSubmitButton name="didActivity"  value="yes">
-              Sim
-            </CheckinSubmitButton>
-            <CheckinSubmitButton
-              name="didActivity"
-              
-              value="no"
-              variant="secondary"
+          {!latestActivity ? (
+            <CheckinActionForm
+              action={recordActivityCheckinAction}
+              className={styles.activityActions}
             >
-              Não
-            </CheckinSubmitButton>
-          </CheckinActionForm>
+              <CheckinSubmitButton name="didActivity" value="yes">Sim</CheckinSubmitButton>
+              <CheckinSubmitButton name="didActivity" value="no" variant="secondary">Não</CheckinSubmitButton>
+            </CheckinActionForm>
+          ) : (
+            <p className={styles.note}>
+              Você já registrou sua atividade de hoje. Para alterar a resposta, use a correção abaixo
+              sem criar outro registro original.
+            </p>
+          )}
           {latestActivity ? (
             <details className={styles.correction} id={`atividade-${latestActivity.id}`}>
               <summary>Corrigir resposta de hoje</summary>
@@ -297,6 +308,42 @@ export default async function ClientCheckinsPage({
                 </p>
               ) : null}
             </details>
+          ) : null}
+          {activityEvents.length > 1 ? (
+            <section className={styles.additionalActivity} aria-label="Outros registros de atividade de hoje">
+              <h4>Outros registros de hoje ({activityEvents.length - 1})</h4>
+              <p className={styles.note}>
+                Existem respostas anteriores para esta mesma data. Todas continuam preservadas;
+                consulte e corrija um registro específico sem criar novos originais.
+              </p>
+              <ol className={styles.historyList}>
+                {activityEvents.slice(1).map((event) => {
+                  const correction = latestActivityCorrectionByEvent.get(event.id);
+                  const didActivity = correction?.corrected_did_activity ?? event.did_activity;
+                  return (
+                    <li id={`atividade-${event.id}`} key={event.id}>
+                      <div className={styles.additionalActivityRecord}>
+                        <p className={styles.note}>Registrado em {formatRecordedAt(event.recorded_at)}</p>
+                        <p>Resposta: <strong>{didActivity ? "Sim" : "Não"}</strong>{correction ? " (corrigida)" : ""}</p>
+                        <details className={styles.correction}>
+                          <summary>Corrigir este registro anterior</summary>
+                          <CheckinActionForm action={correctActivityCheckinAction} className={styles.activityActions}>
+                            <input name="eventId" type="hidden" value={event.id} />
+                            <CheckinSubmitButton name="didActivity" value="yes" variant="secondary">Corrigir para Sim</CheckinSubmitButton>
+                            <CheckinSubmitButton name="didActivity" value="no" variant="secondary">Corrigir para Não</CheckinSubmitButton>
+                          </CheckinActionForm>
+                          {correction ? (
+                            <p className={styles.note}>
+                              Original: {event.did_activity ? "Sim" : "Não"}. As correções permanecem no histórico.
+                            </p>
+                          ) : null}
+                        </details>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ol>
+            </section>
           ) : null}
         </Card>
         ) : (
