@@ -38,6 +38,7 @@ export default async function ClientePerfilPage() {
         title="Cadastro atual"
       >
         <ClientRegistrationEditForm
+          key={registration?.updated_at ?? "new"}
           city={registration?.city ?? undefined}
           contactEmail={registration?.contact_email ?? undefined}
           instagram={registration?.instagram ?? undefined}
