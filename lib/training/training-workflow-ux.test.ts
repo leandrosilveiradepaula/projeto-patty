@@ -68,7 +68,8 @@ test("admin training screens use the same latest publication selector as the cli
   const overview = read("app/admin/clientes/[clienteId]/page.tsx");
   const client = read("app/cliente/treino/page.tsx");
   const home = read("app/cliente/page.tsx");
-  assert.match(admin, /latestPublishedTrainingVersion\(versions\)/);
+  assert.match(admin, /publishedTrainingVersions\\(versions\\)/);
+  assert.ok(admin.includes("const latestPublished = publishedVersions[0] ?? null"));
   assert.match(overview, /latestPublishedTrainingVersion\(trainingVersions\)/);
   assert.match(home, /latestPublishedTrainingVersion\(trainingVersions\)/);
   assert.match(client, /publishedTrainingVersions\(trainingVersions\)/);
