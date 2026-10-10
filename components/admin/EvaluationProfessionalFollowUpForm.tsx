@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/FormField";
 import { Textarea } from "@/components/ui/Textarea";
 import styles from "./EvaluationProfessionalFollowUpForm.module.css";
+import { useAssessmentSubmitGuard } from "./useAssessmentSubmitGuard";
 
 const initialState: ProfessionalFollowUpFormState = {
   message: null,
@@ -30,17 +31,21 @@ export function EvaluationProfessionalFollowUpForm({
   const router = useRouter();
   const action = addProfessionalFollowUp.bind(null, assessmentId);
   const [state, formAction, isPending] = useActionState(action, initialState);
+  const [readyForAnother, setReadyForAnother] = useState(false);
+  const guardSubmit = useAssessmentSubmitGuard(state, isPending, state.success && !readyForAnother);
+  const lockedAfterSuccess = state.success && !readyForAnother;
 
   useEffect(() => {
     if (state.success) {
       formRef.current?.reset();
+      setReadyForAnother(false);
       router.refresh();
     }
   }, [state, router]);
 
   return (
-    <form action={formAction} className={styles.form} ref={formRef}>
-      {state.message ? (
+    <form action={formAction} aria-busy={isPending} className={styles.form} onSubmit={guardSubmit} ref={formRef}>
+      {state.message && (!state.success || !readyForAnother) ? (
         <Alert
           live={state.success ? "polite" : "assertive"}
           title={
@@ -63,6 +68,7 @@ export function EvaluationProfessionalFollowUpForm({
           <Textarea
             {...fieldProps}
             maxLength={4000}
+            disabled={isPending || lockedAfterSuccess}
             name="difficulty"
             placeholder="Opcional"
             rows={3}
@@ -79,6 +85,7 @@ export function EvaluationProfessionalFollowUpForm({
           <Textarea
             {...fieldProps}
             maxLength={4000}
+            disabled={isPending || lockedAfterSuccess}
             name="adherencePerception"
             placeholder="Opcional"
             rows={3}
@@ -96,6 +103,7 @@ export function EvaluationProfessionalFollowUpForm({
             {...fieldProps}
             className={styles.select}
             defaultValue=""
+            disabled={isPending || lockedAfterSuccess}
             name="professionalDecision"
             required
           >
@@ -121,6 +129,7 @@ export function EvaluationProfessionalFollowUpForm({
           <Textarea
             {...fieldProps}
             maxLength={4000}
+            disabled={isPending || lockedAfterSuccess}
             name="decisionReason"
             required
             rows={4}
@@ -137,6 +146,7 @@ export function EvaluationProfessionalFollowUpForm({
           <Textarea
             {...fieldProps}
             maxLength={4000}
+            disabled={isPending || lockedAfterSuccess}
             name="pattyObservation"
             placeholder="Opcional"
             rows={4}
@@ -149,9 +159,15 @@ export function EvaluationProfessionalFollowUpForm({
         automaticamente.
       </p>
 
-      <Button loading={isPending} type="submit">
-        Registrar acompanhamento
-      </Button>
+      {lockedAfterSuccess ? (
+        <Button onClick={() => setReadyForAnother(true)} type="button" variant="secondary">
+          Registrar outro acompanhamento
+        </Button>
+      ) : (
+        <Button disabled={isPending} loading={isPending} type="submit">
+          Registrar acompanhamento
+        </Button>
+      )}
     </form>
   );
 }
