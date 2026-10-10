@@ -126,12 +126,12 @@ export default async function AdminClientAssessmentsPage({
             />
           ) : (
           <ul className={styles.evaluationList}>
-            {draftAssessments.map((assessment) => (
+            {draftAssessments.map((assessment, index) => (
               <li key={assessment.id}>
                 <EvaluationListItem
                   action={
                     <Link
-                      aria-label={`Continuar avaliação de ${formatAdministrativeAssessmentDate(assessment.assessed_at)}`}
+                      aria-label={`Continuar avaliação ${index + 1} da lista de rascunhos, de ${formatAdministrativeAssessmentDate(assessment.assessed_at)}`}
                       className={styles.actionLink}
                       href={`/admin/avaliacoes/${assessment.id}`}
                     >
@@ -168,12 +168,12 @@ export default async function AdminClientAssessmentsPage({
           />
         ) : (
           <ul className={styles.evaluationList}>
-            {finalizedAssessments.map((assessment) => (
+            {finalizedAssessments.map((assessment, index) => (
               <li key={assessment.id}>
                 <EvaluationListItem
                   action={
                     <Link
-                      aria-label={`Ver avaliação de ${formatAdministrativeAssessmentDate(assessment.assessed_at)}`}
+                      aria-label={`Ver avaliação ${index + 1} do histórico finalizado, de ${formatAdministrativeAssessmentDate(assessment.assessed_at)}`}
                       className={styles.actionLink}
                       href={`/admin/avaliacoes/${assessment.id}`}
                     >
