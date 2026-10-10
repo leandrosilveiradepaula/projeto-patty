@@ -1,5 +1,6 @@
 import { AdminClientNameEditForm } from "@/components/admin/AdminClientNameEditForm";
 import { summarizeClientClarifications } from "@/lib/follow-up/client-clarification-summary";
+import { latestCheckinCorrectionsByEvent } from "@/lib/checkins/effective-corrections";
 import { latestPublishedTrainingVersion } from "@/lib/training/published-versions";
 import { isTrainingRequestAfterPublication } from "@/lib/training/request-follow-up";
 import { newestTrainingRequests, newestUnpublishedTrainingVersion } from "@/lib/training/operational-order";
@@ -25,6 +26,7 @@ import {
   listAccessibleAnamnesisReviewsForSubmissions,
   listAccessibleAnamnesisSubmissions,
   listAccessibleAssessmentsForClient,
+  listAccessibleClientActivityCheckinEventCorrections,
   listAccessibleClientActivityCheckinEvents,
   listAccessibleClientFiles,
   listAccessibleClientTrainingPlanVersions,
@@ -247,6 +249,20 @@ export default async function AdminClienteDetailPage({
     return !publishedProtocolVersionIds.has(version.id);
   });
   const latestActivity = activityEvents[0] ?? null;
+  const latestActivityCorrections = latestActivity
+    ? await listAccessibleClientActivityCheckinEventCorrections([latestActivity.id])
+    : [];
+  const latestActivityCorrection = latestActivity
+    ? latestCheckinCorrectionsByEvent(latestActivityCorrections).get(latestActivity.id)
+    : null;
+  const effectiveActivityDate =
+    latestActivityCorrection?.corrected_checkin_date ?? latestActivity?.checkin_date;
+  const effectiveDidActivity =
+    latestActivityCorrection?.corrected_did_activity ?? latestActivity?.did_activity;
+  // History filters by original checkin_date, including corrected records.
+  const latestActivityHistoryHref = latestActivity
+    ? `/admin/clientes/${client.id}/checkins?dia=${latestActivity.checkin_date}#atividade-${latestActivity.id}`
+    : `/admin/clientes/${client.id}/checkins`;
   const hasFinalizedAssessment = assessments.some((assessment) =>
     Boolean(assessment.finalized_at),
   );
@@ -835,7 +851,7 @@ export default async function AdminClienteDetailPage({
             </Card>
           </Link>
 
-          <Link className={styles.cardLink} href={`/admin/clientes/${client.id}/checkins`}>
+          <Link className={styles.cardLink} href={latestActivityHistoryHref}>
             <Card className={styles.infoCard}>
               <div className={styles.cardHeader}>
                 <h3 className={styles.cardTitle}>Check-ins</h3>
@@ -843,7 +859,7 @@ export default async function AdminClienteDetailPage({
               </div>
               <p className={styles.cardDescription}>
                 {latestActivity
-                  ? `Última atividade: ${latestActivity.checkin_date} · ${latestActivity.did_activity ? "fez atividade" : "não fez atividade"}.`
+                  ? `Última atividade: ${effectiveActivityDate} · ${effectiveDidActivity ? "fez atividade" : "não fez atividade"}${latestActivityCorrection ? " · resposta corrigida" : ""}.`
                   : "Nenhum check-in de atividade registrado."}
               </p>
             </Card>
