@@ -1,4 +1,5 @@
 import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
+import { ClientAssessmentHistoryDisclosure } from "./ClientAssessmentHistoryDisclosure";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -75,9 +76,9 @@ export default async function ClientAssessmentsPage() {
           <>
             {items.length > 1 ? (
               <nav aria-label="Ir para avaliação" className={styles.historyNavigation}>
-                {items.map((assessment) => (
+                {items.map((assessment, index) => (
                   <a href={`#avaliacao-${assessment.id}`} key={assessment.id}>
-                    {formatDate(assessment.assessedAt)}
+                    Avaliação {index + 1}: {formatDate(assessment.assessedAt)}
                   </a>
                 ))}
               </nav>
@@ -131,13 +132,14 @@ export default async function ClientAssessmentsPage() {
                 }
 
                 return (
-                  <details className={styles.historyItem} id={`avaliacao-${assessmentId}`} key={assessmentId}>
-                    <summary>
-                      Avaliação de {formatDate(assessment.assessedAt)} ·{" "}
-                      {assessment.measurements.length} medida(s)
-                    </summary>
+                  <ClientAssessmentHistoryDisclosure
+                    className={styles.historyItem}
+                    id={`avaliacao-${assessmentId}`}
+                    key={assessmentId}
+                    summary={`Avaliação ${assessmentIndex + 1} de ${items.length} · ${formatDate(assessment.assessedAt)} · ${assessment.measurements.length} medida(s)`}
+                  >
                     <div className={styles.historyContent}>{content}</div>
-                  </details>
+                  </ClientAssessmentHistoryDisclosure>
                 );
               })}
             </div>
