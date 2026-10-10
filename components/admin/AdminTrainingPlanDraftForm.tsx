@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -43,13 +43,21 @@ export function AdminTrainingPlanDraftForm({
     : createTrainingPlanDraftAction.bind(null, clientId);
   const [state, formAction, isPending] = useActionState(action, initialState);
   const router = useRouter();
+  const inFlightRef = useRef(false);
 
   useEffect(() => {
+    inFlightRef.current = false;
     if (state.success) router.refresh();
-  }, [state.success, router]);
+  }, [state, router]);
 
   return (
-    <form action={formAction} className={styles.form}>
+    <form action={formAction} aria-busy={isPending} className={styles.form} onSubmit={(event) => {
+      if (inFlightRef.current || (!trainingPlanVersionId && state.success)) {
+        event.preventDefault();
+        return;
+      }
+      inFlightRef.current = true;
+    }}>
       {state.message ? (
         <Alert
           live={state.success ? "polite" : "assertive"}
@@ -69,6 +77,7 @@ export function AdminTrainingPlanDraftForm({
           <TextInput
             {...fieldProps}
             defaultValue={title}
+            disabled={isPending || (!trainingPlanVersionId && state.success)}
             maxLength={160}
             name="title"
             required
@@ -85,6 +94,7 @@ export function AdminTrainingPlanDraftForm({
           <Textarea
             {...fieldProps}
             defaultValue={notes ?? undefined}
+            disabled={isPending || (!trainingPlanVersionId && state.success)}
             maxLength={4000}
             name="notes"
             rows={4}
@@ -97,7 +107,7 @@ export function AdminTrainingPlanDraftForm({
         explícita da Patty.
       </p>
 
-      <Button loading={isPending} type="submit">
+      <Button disabled={isPending || (!trainingPlanVersionId && state.success)} loading={isPending} type="submit">
         {trainingPlanVersionId ? "Salvar rascunho" : "Criar rascunho"}
       </Button>
     </form>
