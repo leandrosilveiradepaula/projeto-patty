@@ -1098,20 +1098,18 @@ export async function createAccessibleAnamnesisClarificationResponse(input: {
 
 export async function listAccessibleAnamnesisReviews(submissionId: string) {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("anamnesis_reviews")
-    .select(
-      "id, submission_id, reviewer_profile_id, note, created_at, profiles(display_name)",
-    )
-    .eq("submission_id", submissionId)
-    .order("created_at", { ascending: true })
-    .order("id", { ascending: true });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  const reviews = await collectAnamnesisHistoryRows([submissionId], (ids, from, to) =>
+    supabase
+      .from("anamnesis_reviews")
+      .select("id, submission_id, reviewer_profile_id, note, created_at, profiles(display_name)")
+      .in("submission_id", ids)
+      .order("created_at", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
+  return reviews.sort((left, right) =>
+    left.created_at.localeCompare(right.created_at) || left.id.localeCompare(right.id),
+  );
 }
 
 export async function listAccessibleAnamnesisReviewsForSubmissions(
@@ -1120,23 +1118,25 @@ export async function listAccessibleAnamnesisReviewsForSubmissions(
   if (submissionIds.length === 0) return [];
 
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("anamnesis_reviews")
-    .select(
-      "id, submission_id, reviewer_profile_id, note, created_at, profiles(display_name)",
-    )
-    .in("submission_id", submissionIds)
-    .order("submission_id", { ascending: true })
-    .order("created_at", { ascending: true })
-    .order("id", { ascending: true });
+  const reviews = await collectAnamnesisHistoryRows(submissionIds, (ids, from, to) =>
+    supabase
+      .from("anamnesis_reviews")
+      .select("id, submission_id, reviewer_profile_id, note, created_at, profiles(display_name)")
+      .in("submission_id", ids)
+      .order("submission_id", { ascending: true })
+      .order("created_at", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
 
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  // Every scoped ID batch is ordered independently. Restore total order
+  // before building per-submission summaries or rendering audit history.
+  return reviews.sort((left, right) =>
+    left.submission_id.localeCompare(right.submission_id) ||
+    left.created_at.localeCompare(right.created_at) ||
+    left.id.localeCompare(right.id),
+  );
 }
-
 
 export async function createAccessibleAnamnesisReview(
   submissionId: string,
