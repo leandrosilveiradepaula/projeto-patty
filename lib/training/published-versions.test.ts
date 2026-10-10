@@ -30,3 +30,30 @@ test("publication ties have stable id ordering and unpublished versions stay hid
   assert.equal(latestPublishedTrainingVersion([{ id: "only-draft", published_at: null }]), null);
   assert.equal(latestPublishedTrainingVersion([]), null);
 });
+
+test("published training is ordered by actual instant even when timestamp offsets differ", () => {
+  const versions = [
+    { id: "offset-earlier", published_at: "2026-10-10T10:00:00-03:00" },
+    { id: "offset-later", published_at: "2026-10-10T14:30:00+01:00" },
+    { id: "zulu", published_at: "2026-10-10T13:15:00Z" },
+  ];
+  assert.deepEqual(
+    publishedTrainingVersions(versions).map((version) => version.id),
+    ["offset-later", "zulu", "offset-earlier"],
+  );
+  assert.equal(latestPublishedTrainingVersion(versions)?.id, "offset-later");
+});
+
+test("equal instants resolve deterministically and invalid legacy dates cannot become current", () => {
+  const versions = [
+    { id: "bad", published_at: "invalid-legacy-timestamp" },
+    { id: "b", published_at: "2026-10-10T10:00:00-03:00" },
+    { id: "a", published_at: "2026-10-10T13:00:00Z" },
+    { id: "draft", published_at: "" },
+  ];
+  assert.deepEqual(publishedTrainingVersions(versions).map((v) => v.id), [
+    "a", "b", "bad",
+  ]);
+  assert.equal(latestPublishedTrainingVersion(versions)?.id, "a");
+  assert.equal(versions[0].id, "bad");
+});
