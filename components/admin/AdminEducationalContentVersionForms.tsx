@@ -17,12 +17,14 @@ type SaveResult = { success: boolean; message: string } | null;
 function VersionMutationForm({
   children,
   completeMessage,
+  disabled = false,
   label,
   lockAfterSuccess,
   run,
 }: {
   children?: ReactNode;
   completeMessage: string;
+  disabled?: boolean;
   label: string;
   lockAfterSuccess: boolean;
   run: (formData: FormData) => Promise<void>;
@@ -35,7 +37,7 @@ function VersionMutationForm({
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (inFlightRef.current || locked) return;
+    if (inFlightRef.current || locked || disabled) return;
     const formData = new FormData(event.currentTarget);
     inFlightRef.current = true;
     setBusy(true);
@@ -60,6 +62,7 @@ function VersionMutationForm({
     <form
       aria-busy={busy}
       className={styles.form}
+      onChange={() => { if (result && !result.success) setResult(null); }}
       onSubmit={submit}
     >
       {result ? (
@@ -71,7 +74,7 @@ function VersionMutationForm({
           {result.message}
         </Alert>
       ) : null}
-      <fieldset className={styles.mutationFields} disabled={busy || locked}>
+      <fieldset className={styles.mutationFields} disabled={busy || locked || disabled}>
         {children}
         <Button disabled={busy || locked} loading={busy} type="submit">
           {label}
@@ -126,6 +129,7 @@ export function AdminEducationalContentPublishForm({
     <VersionMutationForm
       completeMessage="Publicação confirmada. A liberação para cada cliente ainda exige uma ação profissional separada."
       label="Publicar versão"
+      disabled={!canPublish}
       lockAfterSuccess
       run={(formData) => publishEducationalContentVersionAction(contentId, versionId, formData)}
     >
