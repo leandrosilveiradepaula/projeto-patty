@@ -1,11 +1,10 @@
 import {
-  createNextEducationalContentVersionAction,
-  publishEducationalContentVersionAction,
-  updateEducationalContentDraftAction,
-} from "@/app/admin/conteudos/[contentId]/actions";
+  AdminEducationalContentDraftSaveForm,
+  AdminEducationalContentNewVersionForm,
+  AdminEducationalContentPublishForm,
+} from "@/components/admin/AdminEducationalContentVersionForms";
 import { AdminEducationalContentAssetUploadForm } from "@/components/admin/AdminEducationalContentAssetUploadForm";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -27,6 +26,7 @@ type PageProps = {
 };
 
 function formatDateTime(value: string) {
+  if (!Number.isFinite(Date.parse(value))) return "Data indisponível";
   return new Intl.DateTimeFormat("pt-BR", {
     dateStyle: "short",
     timeStyle: "short",
@@ -99,9 +99,7 @@ export default async function AdminEducationalContentDetailPage({
               A interface não altera versões publicadas. Mudanças posteriores são
               feitas em uma nova versão.
             </p>
-            <form action={createNextEducationalContentVersionAction.bind(null, content.id)}>
-              <Button type="submit">Criar nova versão</Button>
-            </form>
+            <AdminEducationalContentNewVersionForm contentId={content.id} />
           </Card>
         ) : (
           <Card>
@@ -115,37 +113,13 @@ export default async function AdminEducationalContentDetailPage({
               <Badge variant="warning">Rascunho</Badge>
             </div>
 
-            <form
-              action={updateEducationalContentDraftAction.bind(
-                null,
-                content.id,
-                current.id,
-              )}
-              className={styles.form}
-            >
-              <label className={styles.field}>
-                <span>Título</span>
-                <input
-                  defaultValue={current.title}
-                  maxLength={200}
-                  name="title"
-                  required
-                />
-              </label>
-
-              <label className={styles.field}>
-                <span>Ordem de exibição</span>
-                <input
-                  defaultValue={current.display_order}
-                  min="0"
-                  name="displayOrder"
-                  required
-                  type="number"
-                />
-              </label>
-
-              <Button type="submit">Salvar rascunho</Button>
-            </form>
+            <AdminEducationalContentDraftSaveForm
+              contentId={content.id}
+              displayOrder={current.display_order}
+              key={JSON.stringify([current.id, current.title, current.display_order])}
+              title={current.title}
+              versionId={current.id}
+            />
 
             <p className={styles.description}>
               Categoria atual: {current.category_key ?? "não definida"} · Tipo
@@ -153,29 +127,12 @@ export default async function AdminEducationalContentDetailPage({
               {current.phase_key ?? "não vinculada"}.
             </p>
 
-            <form
-              action={publishEducationalContentVersionAction.bind(
-                null,
-                content.id,
-                current.id,
-              )}
-              className={styles.form}
-            >
-              <label className={styles.confirmation}>
-                <input
-                  name="confirmPublish"
-                  required
-                  type="checkbox"
-                  value="yes"
-                />
-                <span>
-                  Confirmo que esta versão foi revisada e pode ser publicada.
-                </span>
-              </label>
-              <Button disabled={!currentCanPublish} type="submit">
-                Publicar versão
-              </Button>
-            </form>
+            <AdminEducationalContentPublishForm
+              canPublish={currentCanPublish}
+              contentId={content.id}
+              versionId={current.id}
+              versionNumber={current.version_number}
+            />
             <p className={styles.description}>
               {currentCanPublish
                 ? "Publicar torna a versão elegível para liberação manual por cliente. Não há liberação automática."
