@@ -54,8 +54,8 @@ export function EvaluationMeasureComparison({
           </tr>
         </thead>
         <tbody>
-          {items.map((item) => (
-            <tr key={item.label}>
+          {items.map((item, index) => (
+            <tr key={item.label + ":" + (item.unit ?? "") + ":" + index}>
               <th data-label="Medida" scope="row">
                 {item.label}
               </th>

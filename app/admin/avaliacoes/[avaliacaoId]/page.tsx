@@ -378,11 +378,19 @@ export default async function AdminAvaliacaoDetailPage({
         title="Comparação com avaliação anterior"
       >
         {previousAssessment && factualComparison.length > 0 ? (
-          <EvaluationMeasureComparison
-            currentDate={formatAssessmentDate(assessment.assessed_at)}
-            items={factualComparison}
-            previousDate={formatAssessmentDate(previousAssessment.assessed_at)}
-          />
+          <div className={styles.comparisonStack}>
+            <EvaluationMeasureComparison
+              currentDate={formatAssessmentDate(assessment.assessed_at)}
+              items={factualComparison}
+              previousDate={formatAssessmentDate(previousAssessment.assessed_at)}
+            />
+            <Link
+              className={styles.backLink}
+              href={`/admin/avaliacoes/${previousAssessment.id}`}
+            >
+              Abrir avaliação anterior de {formatAssessmentDate(previousAssessment.assessed_at)}
+            </Link>
+          </div>
         ) : (
           <Card variant="subtle">
             <EmptyState
