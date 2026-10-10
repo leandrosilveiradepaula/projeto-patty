@@ -2236,42 +2236,38 @@ export async function getAccessibleProtocol(protocolId: string) {
 
 export async function listAccessibleProtocolVersions(protocolId: string) {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("protocol_versions")
-    .select(
-      "id, protocol_id, client_id, version_number, based_on_version_id, submitted_for_review_at, created_at",
-    )
-    .eq("protocol_id", protocolId)
-    .order("version_number", { ascending: false })
-    .order("id", { ascending: true });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  const versions = await collectPublishedProtocolRows([protocolId], (ids, from, to) =>
+    supabase
+      .from("protocol_versions")
+      .select("id, protocol_id, client_id, version_number, based_on_version_id, submitted_for_review_at, created_at")
+      .in("protocol_id", ids)
+      .order("version_number", { ascending: false })
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
+  return versions.sort((left, right) =>
+    right.version_number - left.version_number || left.id.localeCompare(right.id),
+  );
 }
 
 export async function listAccessibleProtocolVersionsForProtocols(
   protocolIds: string[],
 ) {
   if (protocolIds.length === 0) return [];
-
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("protocol_versions")
-    .select(
-      "id, protocol_id, client_id, version_number, based_on_version_id, submitted_for_review_at, created_at",
-    )
-    .in("protocol_id", protocolIds)
-    .order("version_number", { ascending: false })
-    .order("id", { ascending: true });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  const versions = await collectPublishedProtocolRows(protocolIds, (ids, from, to) =>
+    supabase
+      .from("protocol_versions")
+      .select("id, protocol_id, client_id, version_number, based_on_version_id, submitted_for_review_at, created_at")
+      .in("protocol_id", ids)
+      .order("version_number", { ascending: false })
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
+  // Batches are individually sorted by PostgREST; restore global order.
+  return versions.sort((left, right) =>
+    right.version_number - left.version_number || left.id.localeCompare(right.id),
+  );
 }
 
 export async function cloneAccessibleProtocolVersionDraft(
@@ -2292,43 +2288,40 @@ export async function cloneAccessibleProtocolVersionDraft(
 }
 
 export async function listAccessibleProtocolVersionApprovals(protocolVersionIds: string[]) {
-  if (protocolVersionIds.length === 0) {
-    return [];
-  }
-
+  if (protocolVersionIds.length === 0) return [];
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("protocol_version_approvals")
-    .select("id, protocol_version_id, approved_by_profile_id, approved_at")
-    .in("protocol_version_id", protocolVersionIds)
-    .order("protocol_version_id", { ascending: true });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  const approvals = await collectPublishedProtocolRows(protocolVersionIds, (ids, from, to) =>
+    supabase
+      .from("protocol_version_approvals")
+      .select("id, protocol_version_id, approved_by_profile_id, approved_at")
+      .in("protocol_version_id", ids)
+      .order("protocol_version_id", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
+  return approvals.sort((left, right) =>
+    left.protocol_version_id.localeCompare(right.protocol_version_id) ||
+    left.id.localeCompare(right.id),
+  );
 }
 
 export async function listAccessibleProtocolPublications(protocolVersionIds: string[]) {
-  if (protocolVersionIds.length === 0) {
-    return [];
-  }
-
+  if (protocolVersionIds.length === 0) return [];
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("protocol_publications")
-    .select("id, protocol_version_id, approval_id, published_by_profile_id, published_at")
-    .in("protocol_version_id", protocolVersionIds)
-    .order("protocol_version_id", { ascending: true });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  const publications = await collectPublishedProtocolRows(protocolVersionIds, (ids, from, to) =>
+    supabase
+      .from("protocol_publications")
+      .select("id, protocol_version_id, approval_id, published_by_profile_id, published_at")
+      .in("protocol_version_id", ids)
+      .order("protocol_version_id", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
+  return publications.sort((left, right) =>
+    left.protocol_version_id.localeCompare(right.protocol_version_id) ||
+    left.id.localeCompare(right.id),
+  );
 }
-
 
 export async function submitAccessibleProtocolVersionForReview(
   protocolVersionId: string,
