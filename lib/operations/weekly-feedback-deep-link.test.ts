@@ -72,7 +72,8 @@ test("Patty queue links remain client-scoped and never send answers through a UR
 test("the professional confirmation and final client submission remain distinct", () => {
   const professional = read("components/admin/AdminWeeklyFeedbackRequestForm.tsx");
   const response = read("app/cliente/feedback-semanal/ClientWeeklyFeedbackResponseForm.tsx");
-  assert.ok(professional.includes("eligible={"));
+  assert.ok(admin.includes("eligible={eligible}"));
+  assert.ok(professional.includes("disabled={!eligible"));
   assert.ok(response.includes("saveWeeklyFeedbackAction.bind(null, feedbackId)"));
   assert.ok(response.includes("inFlightRef.current || isPending || submitted"));
   assert.ok(response.includes("state.outcome === \"submitted\""));
