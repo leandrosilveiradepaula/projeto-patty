@@ -13,6 +13,7 @@ import { FormField } from "@/components/ui/FormField";
 import { createClient } from "@/lib/supabase/client";
 import type { PrivateFileKind } from "@/lib/validation/private-files";
 import { validatePrivateFileUploadSelection } from "@/lib/files/private-file-upload-selection";
+import { privateFileUploadProgressMessage, type PrivateFileUploadPhase } from "@/lib/files/private-file-upload-progress";
 
 import styles from "./AdminPrivateFileUploadForm.module.css";
 
@@ -49,12 +50,14 @@ export function AdminPrivateFileUploadForm({
   const [message, setMessage] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isPending, setIsPending] = useState(false);
+  const [phase, setPhase] = useState<PrivateFileUploadPhase>(null);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (inFlightRef.current) return;
     setMessage(null);
     setSuccess(false);
+    setPhase(null);
 
     const formData = new FormData(event.currentTarget);
     const selectedFile = formData.get("file");
@@ -71,6 +74,8 @@ export function AdminPrivateFileUploadForm({
 
     inFlightRef.current = true;
     setIsPending(true);
+    setPhase("authorizing");
+    let finalizationStarted = false;
 
     try {
       const sessionResult = await createAdminPrivateFileUploadSessionAction(
@@ -92,6 +97,7 @@ export function AdminPrivateFileUploadForm({
         return;
       }
 
+      setPhase("transferring");
       const supabase = createClient();
       const { error: uploadError } = await supabase.storage
         .from("client-private")
@@ -113,6 +119,8 @@ export function AdminPrivateFileUploadForm({
         return;
       }
 
+      finalizationStarted = true;
+      setPhase("verifying");
       const finalizationResult =
         await finalizeAdminPrivateFileUploadSessionAction(
           clientId,
@@ -122,7 +130,7 @@ export function AdminPrivateFileUploadForm({
       if (!finalizationResult.ok) {
         setMessage(
           errorMessages[finalizationResult.error] ??
-            "Não foi possível concluir o upload.",
+            "Não foi possível confirmar o registro. Confira o histórico antes de enviar novamente.",
         );
         return;
       }
@@ -145,10 +153,15 @@ export function AdminPrivateFileUploadForm({
       router.refresh();
     } catch {
       console.error("Admin private file upload flow failed");
-      setMessage("Não foi possível concluir o upload. Tente novamente.");
+      setMessage(
+        finalizationStarted
+          ? "A confirmação do envio não foi concluída. Confira o histórico antes de tentar novamente."
+          : "O envio não foi concluído. Corrija a conexão ou tente novamente.",
+      );
     } finally {
       inFlightRef.current = false;
       setIsPending(false);
+      setPhase(null);
     }
   }
 
@@ -182,6 +195,7 @@ export function AdminPrivateFileUploadForm({
               if (input) input.value = "";
               setMessage(null);
               setSuccess(false);
+              setPhase(null);
             }}
             value={fileKind}
           >
@@ -209,6 +223,10 @@ export function AdminPrivateFileUploadForm({
             className={styles.fileInput}
             disabled={isPending}
             name="file"
+            onChange={() => {
+              setMessage(null);
+              setSuccess(false);
+            }}
             required
             type="file"
           />
@@ -220,7 +238,13 @@ export function AdminPrivateFileUploadForm({
         oculto para a cliente até você escolher “Liberar para cliente”.
       </p>
 
-      <Button loading={isPending} type="submit">
+      {isPending && privateFileUploadProgressMessage(phase) ? (
+        <p aria-live="polite" role="status" className={styles.notice}>
+          {privateFileUploadProgressMessage(phase)} Não feche esta página até a confirmação.
+        </p>
+      ) : null}
+
+      <Button disabled={isPending} loading={isPending} type="submit">
         Enviar arquivo
       </Button>
     </form>
