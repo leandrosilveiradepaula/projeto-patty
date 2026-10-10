@@ -8,6 +8,14 @@ import { useEffect, useRef, type FormEvent } from "react";
  * explicit retry; a successful terminal action may independently stay closed.
  * This is a UI safeguard, not cross-session transactional idempotency.
  */
+export function shouldBlockAssessmentSubmit(
+  inFlight: boolean,
+  pending: boolean,
+  completed: boolean,
+): boolean {
+  return inFlight || pending || completed;
+}
+
 export function useAssessmentSubmitGuard(
   actionState: unknown,
   isPending: boolean,
@@ -20,7 +28,7 @@ export function useAssessmentSubmitGuard(
   }, [actionState]);
 
   return (event: FormEvent<HTMLFormElement>) => {
-    if (inFlightRef.current || isPending || completed) {
+    if (shouldBlockAssessmentSubmit(inFlightRef.current, isPending, completed)) {
       event.preventDefault();
       return;
     }
