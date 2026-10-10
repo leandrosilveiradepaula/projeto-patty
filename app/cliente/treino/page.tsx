@@ -88,7 +88,7 @@ export default async function ClientTrainingPage() {
           Uma nova solicitação de treino foi registrada depois da publicação atual.
           A Patty poderá revisar o pedido e decidir se é necessária uma nova prescrição.
           Enquanto isso, o treino já publicado continua disponível abaixo.
-          {" "}<a href="#suas-solicitacoes">Ver solicitação</a>
+          {" "}<a href={`#pedido-treino-${orderedRequests[0].id}`}>Ver solicitação</a>
         </Alert>
       ) : null}
 
@@ -109,7 +109,7 @@ export default async function ClientTrainingPage() {
                   {latestPublished.title}
                 </h2>
               </div>
-              <Badge variant="positive">Publicado</Badge>
+              <Badge variant="neutral">Publicado</Badge>
             </div>
 
             {latestPublished.notes ? (
@@ -222,7 +222,7 @@ export default async function ClientTrainingPage() {
           />
         ) : (
           <div className={styles.requestHistory}>
-            <Card className={styles.entry} variant="subtle">
+            <Card className={styles.entry} id={`pedido-treino-${orderedRequests[0].id}`} variant="subtle">
               <div className={styles.header}>
                 <strong>Solicitação mais recente</strong>
                 <Badge variant="neutral">
@@ -240,7 +240,7 @@ export default async function ClientTrainingPage() {
                 </summary>
                 <ol className={styles.list}>
                   {orderedRequests.slice(1).map((request) => (
-                    <li key={request.id}>
+                    <li id={`pedido-treino-${request.id}`} key={request.id}>
                       <Card className={styles.entry} variant="subtle">
                         <div className={styles.header}>
                           <strong>Solicitação de treino</strong>

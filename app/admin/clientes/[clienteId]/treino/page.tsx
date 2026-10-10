@@ -3,6 +3,7 @@ import { Alert } from "@/components/ui/Alert";
 import { latestPublishedTrainingVersion } from "@/lib/training/published-versions";
 import { isTrainingRequestAfterPublication } from "@/lib/training/request-follow-up";
 import { newestTrainingRequests, newestUnpublishedTrainingVersion } from "@/lib/training/operational-order";
+import { orderPublishedExerciseOptions } from "@/lib/training/exercise-selection";
 
 import { AdminTrainingPlanDraftForm } from "@/components/admin/AdminTrainingPlanDraftForm";
 import { AdminTrainingPlanItemForm } from "@/components/admin/AdminTrainingPlanItemForm";
@@ -72,6 +73,9 @@ export default async function AdminClientTrainingPage({ params }: Props) {
   const versions = plan
     ? await listAccessibleClientTrainingPlanVersions(plan.id)
     : [];
+  const orderedVersions = [...versions].sort(
+    (left, right) => right.version_number - left.version_number || left.id.localeCompare(right.id),
+  );
   const openVersion = newestUnpublishedTrainingVersion(versions);
   const latestPublished = latestPublishedTrainingVersion(versions);
   const newRequestAfterPublication = Boolean(
@@ -106,13 +110,15 @@ export default async function AdminClientTrainingPage({ params }: Props) {
     (a, b) => a.position - b.position || a.id.localeCompare(b.id),
   );
 
-  const exerciseOptions = exerciseVersions
-    .filter((exercise) => Boolean(exercise.published_at))
-    .map((exercise) => ({
-      id: exercise.id,
-      name: exercise.name,
-      versionNumber: exercise.version_number,
-    }));
+  const exerciseOptions = orderPublishedExerciseOptions(
+    exerciseVersions
+      .filter((exercise) => Boolean(exercise.published_at))
+      .map((exercise) => ({
+        id: exercise.id,
+        name: exercise.name,
+        versionNumber: exercise.version_number,
+      })),
+  );
 
   const displayName = client.full_name?.trim() || client.profiles?.display_name?.trim();
 
@@ -136,7 +142,7 @@ export default async function AdminClientTrainingPage({ params }: Props) {
           {openVersion
             ? " Já existe um rascunho em preparação: confira se o pedido exige ajustes nessa versão antes de publicar."
             : " A publicação anterior continua disponível; nenhum novo treino é criado automaticamente."}
-          {" "}<a href="#solicitacao-treino">Ver solicitação</a>
+          {" "}<a href={`#pedido-treino-${orderedRequests[0].id}`}>Ver solicitação</a>
         </Alert>
       ) : null}
 
@@ -186,7 +192,7 @@ export default async function AdminClientTrainingPage({ params }: Props) {
 
             <div className={styles.items}>
               {sortedOpenItems.map((item) => (
-                <Card className={styles.card} key={item.id} variant="subtle">
+                <Card className={styles.card} id={`exercicio-rascunho-${item.id}`} key={item.id} variant="subtle">
                   <div className={styles.itemHeader}>
                     <strong>
                       {item.position}. {item.exercise_name}
@@ -201,6 +207,10 @@ export default async function AdminClientTrainingPage({ params }: Props) {
                       <AdminTrainingPlanItemForm
                         clientId={client.id}
                         exerciseOptions={exerciseOptions}
+                        key={JSON.stringify([
+                          item.id, item.exercise_version_id, item.exercise_name,
+                          item.sets_text, item.repetitions_text, item.rest_text, item.execution_notes,
+                        ])}
                         item={{
                           executionNotes: item.execution_notes,
                           exerciseName: item.exercise_name,
@@ -215,6 +225,7 @@ export default async function AdminClientTrainingPage({ params }: Props) {
                       <AdminTrainingPlanLifecycleAction
                         clientId={client.id}
                         itemId={item.id}
+                        itemLabel={item.exercise_name}
                         mode="delete"
                         trainingPlanVersionId={openVersion.id}
                       />
@@ -258,6 +269,7 @@ export default async function AdminClientTrainingPage({ params }: Props) {
                     disabled={openItems.length === 0}
                     mode="review"
                     trainingPlanVersionId={openVersion.id}
+                    versionNumber={openVersion.version_number}
                   />
                 </Card>
               </>
@@ -274,6 +286,7 @@ export default async function AdminClientTrainingPage({ params }: Props) {
                   clientId={client.id}
                   mode="publish"
                   trainingPlanVersionId={openVersion.id}
+                  versionNumber={openVersion.version_number}
                 />
               </Card>
             )}
@@ -334,7 +347,7 @@ export default async function AdminClientTrainingPage({ params }: Props) {
         ) : (
           <ol className={styles.history}>
             {orderedRequests.map((request) => (
-              <li key={request.id}>
+              <li id={`pedido-treino-${request.id}`} key={request.id}>
                 <Card variant="subtle">
                   <p className={styles.meta}>
                     Solicitado em {formatDateTime(request.requested_at)}
@@ -363,11 +376,11 @@ export default async function AdminClientTrainingPage({ params }: Props) {
           />
         ) : (
           <ol className={styles.history}>
-            {versions.map((version) => {
+            {orderedVersions.map((version) => {
               const status = versionStatus(version);
 
               return (
-                <li key={version.id}>
+                <li id={`versao-treino-${version.id}`} key={version.id}>
                   <Card className={styles.historyCard} variant="subtle">
                     <div>
                       <strong>
@@ -404,7 +417,7 @@ export default async function AdminClientTrainingPage({ params }: Props) {
                 </p>
                 <h2 className={styles.title}>{latestPublished.title}</h2>
               </div>
-              <Badge variant="positive">Publicado</Badge>
+              <Badge variant="neutral">Publicado</Badge>
             </div>
             {latestPublished.notes ? (
               <p className={styles.description}>{latestPublished.notes}</p>
