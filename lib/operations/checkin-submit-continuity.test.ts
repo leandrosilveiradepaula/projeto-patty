@@ -16,10 +16,10 @@ test("client recording and correction forms all guard appending events against r
   ]) {
     assert.ok(client.includes("action={" + action + "}"), action);
   }
-  assert.equal((client.match(/<CheckinActionForm\b/g) ?? []).length, 5);
-  assert.equal((client.match(/<\/CheckinActionForm>/g) ?? []).length, 5);
-  assert.equal((client.match(/<CheckinSubmitButton\b/g) ?? []).length, 8);
-  assert.equal((client.match(/<\/CheckinSubmitButton>/g) ?? []).length, 8);
+  assert.equal((client.match(/<CheckinActionForm\b/g) ?? []).length, 6);
+  assert.equal((client.match(/<\/CheckinActionForm>/g) ?? []).length, 6);
+  assert.equal((client.match(/<CheckinSubmitButton\b/g) ?? []).length, 10);
+  assert.equal((client.match(/<\/CheckinSubmitButton>/g) ?? []).length, 10);
 });
 
 test("professional corrections use the same protection without touching client permissions", () => {
