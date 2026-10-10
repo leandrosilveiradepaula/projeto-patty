@@ -1,4 +1,5 @@
 import { AssessmentCreateForm } from "@/components/admin/AssessmentCreateForm";
+import { formatAdministrativeAssessmentDate, orderAdministrativeAssessments } from "@/lib/evaluations/administrative-assessment-history";
 import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { EvaluationListItem } from "@/components/admin/EvaluationListItem";
@@ -26,15 +27,6 @@ type AdminClientAssessmentsPageProps = {
   }>;
 };
 
-function formatAssessmentDate(value: string) {
-  return new Intl.DateTimeFormat("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    timeZone: "America/Sao_Paulo",
-  }).format(new Date(value));
-}
-
 export default async function AdminClientAssessmentsPage({
   params,
 }: AdminClientAssessmentsPageProps) {
@@ -51,10 +43,11 @@ export default async function AdminClientAssessmentsPage({
       loadSupportedAssessmentKindOptions(),
       loadAssessmentSchedulePreferences(),
     ]);
-  const draftAssessments = assessments.filter(
+  const orderedAssessments = orderAdministrativeAssessments(assessments);
+  const draftAssessments = orderedAssessments.filter(
     (assessment) => !assessment.finalized_at,
   );
-  const finalizedAssessments = assessments.filter(
+  const finalizedAssessments = orderedAssessments.filter(
     (assessment) => Boolean(assessment.finalized_at),
   );
   const displayName = client.full_name?.trim() || client.profiles?.display_name?.trim();
@@ -133,18 +126,19 @@ export default async function AdminClientAssessmentsPage({
             />
           ) : (
           <ul className={styles.evaluationList}>
-            {draftAssessments.map((assessment) => (
+            {draftAssessments.map((assessment, index) => (
               <li key={assessment.id}>
                 <EvaluationListItem
                   action={
                     <Link
+                      aria-label={`Continuar avaliação ${index + 1} da lista de rascunhos, de ${formatAdministrativeAssessmentDate(assessment.assessed_at)}`}
                       className={styles.actionLink}
                       href={`/admin/avaliacoes/${assessment.id}`}
                     >
                       Continuar avaliação
                     </Link>
                   }
-                  evaluationDate={formatAssessmentDate(assessment.assessed_at)}
+                  evaluationDate={formatAdministrativeAssessmentDate(assessment.assessed_at)}
                   meta={
                     resolveSupportedAssessmentKindOption(
                       assessmentKinds.options,
@@ -174,18 +168,19 @@ export default async function AdminClientAssessmentsPage({
           />
         ) : (
           <ul className={styles.evaluationList}>
-            {finalizedAssessments.map((assessment) => (
+            {finalizedAssessments.map((assessment, index) => (
               <li key={assessment.id}>
                 <EvaluationListItem
                   action={
                     <Link
+                      aria-label={`Ver avaliação ${index + 1} do histórico finalizado, de ${formatAdministrativeAssessmentDate(assessment.assessed_at)}`}
                       className={styles.actionLink}
                       href={`/admin/avaliacoes/${assessment.id}`}
                     >
                       Ver avaliação
                     </Link>
                   }
-                  evaluationDate={formatAssessmentDate(assessment.assessed_at)}
+                  evaluationDate={formatAdministrativeAssessmentDate(assessment.assessed_at)}
                   meta={
                     resolveSupportedAssessmentKindOption(
                       assessmentKinds.options,
