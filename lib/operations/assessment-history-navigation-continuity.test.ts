@@ -6,12 +6,14 @@ const read = (path: string) => readFileSync(new URL("../../" + path, import.meta
 
 test("historical assessment deep links reveal the originally selected closed native disclosure", () => {
   const history = read("app/cliente/avaliacoes/page.tsx");
-  const disclosure = read("app/cliente/avaliacoes/ClientAssessmentHistoryDisclosure.tsx");
+  const disclosure = read("components/client/ClientHistoryDisclosure.tsx");
   assert.ok(history.includes("<ClientAssessmentHistoryDisclosure"));
+  assert.ok(read("app/cliente/avaliacoes/ClientAssessmentHistoryDisclosure.tsx").includes("ClientHistoryDisclosure as ClientAssessmentHistoryDisclosure"));
   assert.ok(history.includes('id={`avaliacao-${assessmentId}`}'));
-  assert.ok(disclosure.includes('if (window.location.hash !== "#" + id) return'));
+  assert.ok(disclosure.includes("const target = document.getElementById(targetId)"));
+  assert.ok(disclosure.includes("details.contains(target)"));
   assert.ok(disclosure.includes("details.open = true"));
-  assert.ok(disclosure.includes('details.scrollIntoView({ block: "start" })'));
+  assert.ok(disclosure.includes('target.scrollIntoView({ block: "start" })'));
   assert.ok(disclosure.includes('window.addEventListener("hashchange", revealTarget)'));
   assert.ok(disclosure.includes('window.removeEventListener("hashchange", revealTarget)'));
   assert.ok(disclosure.includes("revealTarget();"));
@@ -19,7 +21,7 @@ test("historical assessment deep links reveal the originally selected closed nat
 
 test("older assessments are opened on demand and can still be toggled manually", () => {
   const history = read("app/cliente/avaliacoes/page.tsx");
-  const disclosure = read("app/cliente/avaliacoes/ClientAssessmentHistoryDisclosure.tsx");
+  const disclosure = read("components/client/ClientHistoryDisclosure.tsx");
   assert.ok(history.includes("if (assessmentIndex === 0)"));
   assert.ok(history.includes('id={`avaliacao-${assessmentId}`}'));
   assert.ok(disclosure.includes("<details"));
@@ -79,7 +81,7 @@ test("professional comparison link remains accessible on mobile screens", () => 
 test("assessment disclosure does not bypass finalized client data access or professional approval", () => {
   const history = read("app/cliente/avaliacoes/page.tsx");
   const progress = read("app/cliente/evolucao/page.tsx");
-  const disclosure = read("app/cliente/avaliacoes/ClientAssessmentHistoryDisclosure.tsx");
+  const disclosure = read("components/client/ClientHistoryDisclosure.tsx");
   for (const source of [history, progress]) {
     assert.ok(source.includes("listCurrentClientFinalizedAssessmentMeasurements()"));
     assert.ok(!source.includes("createAdminClient"));
