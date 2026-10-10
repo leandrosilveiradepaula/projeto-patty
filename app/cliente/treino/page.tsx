@@ -1,4 +1,5 @@
 import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
+import { ClientHistoryDisclosure } from "@/components/client/ClientHistoryDisclosure";
 import { Alert } from "@/components/ui/Alert";
 import { publishedTrainingVersions } from "@/lib/training/published-versions";
 import { isTrainingRequestAfterPublication } from "@/lib/training/request-follow-up";
@@ -92,13 +93,23 @@ export default async function ClientTrainingPage() {
         </Alert>
       ) : null}
 
+      {publishedItems.length > 1 ? (
+        <nav aria-label="Ir para treino publicado" className={styles.publishedNavigation}>
+          {publishedItems.map(({ version }, index) => (
+            <a href={`#treino-versao-${version.id}`} key={version.id}>
+              {index === 0 ? `Treino atual · versão ${version.version_number}` : `Versão anterior ${version.version_number}`}
+            </a>
+          ))}
+        </nav>
+      ) : null}
+
       <Section
         description="Apenas versões revisadas e publicadas pela Patty aparecem aqui."
         title="Seu treino publicado"
       >
         {latestPublished ? (
           <>
-          <Card className={styles.publishedCard}>
+          <Card className={styles.publishedCard} id={`treino-versao-${latestPublished.id}`}>
             <div className={styles.publishedHeader}>
               <div>
                 <p className={styles.meta}>
@@ -169,11 +180,12 @@ export default async function ClientTrainingPage() {
         >
           <div className={styles.previousTrainings}>
             {publishedItems.slice(1).map(({ version, items }) => (
-              <details className={styles.previousTraining} key={version.id}>
-                <summary>
-                  Versão {version.version_number} · {version.title} · publicada em{" "}
-                  {formatDateTime(version.published_at!)}
-                </summary>
+              <ClientHistoryDisclosure
+                className={styles.previousTraining}
+                id={`treino-versao-${version.id}`}
+                key={version.id}
+                summary={`Versão ${version.version_number} · ${version.title} · publicada em ${formatDateTime(version.published_at!)}`}
+              >
                 <div className={styles.previousTrainingBody}>
                   {version.notes ? <p className={styles.note}>{version.notes}</p> : null}
                   <ol className={styles.workoutList}>
@@ -193,7 +205,7 @@ export default async function ClientTrainingPage() {
                     ))}
                   </ol>
                 </div>
-              </details>
+              </ClientHistoryDisclosure>
             ))}
           </div>
         </Section>
@@ -234,10 +246,11 @@ export default async function ClientTrainingPage() {
               </p>
             </Card>
             {requests.length > 1 ? (
-              <details className={styles.olderRequests}>
-                <summary>
-                  Ver {orderedRequests.length - 1} solicitação(ões) anterior(es)
-                </summary>
+              <ClientHistoryDisclosure
+                className={styles.olderRequests}
+                id="solicitacoes-anteriores"
+                summary={`Ver ${orderedRequests.length - 1} solicitação(ões) anterior(es)`}
+              >
                 <ol className={styles.list}>
                   {orderedRequests.slice(1).map((request) => (
                     <li id={`pedido-treino-${request.id}`} key={request.id}>
@@ -255,7 +268,7 @@ export default async function ClientTrainingPage() {
                     </li>
                   ))}
                 </ol>
-              </details>
+              </ClientHistoryDisclosure>
             ) : null}
           </div>
         )}
