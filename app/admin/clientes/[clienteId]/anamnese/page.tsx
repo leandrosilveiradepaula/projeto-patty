@@ -1,4 +1,5 @@
 import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
+import { summarizeAnamnesisReviewHistory } from "@/lib/anamnesis/review-summary";
 import { loadClientClarificationSummary } from "@/lib/follow-up/client-clarification-summary-loader";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { Badge } from "@/components/ui/Badge";
@@ -21,6 +22,7 @@ type AdminClienteAnamnesePageProps = {
 };
 
 function formatDateTime(value: string) {
+  if (!Number.isFinite(Date.parse(value))) return "Data indisponível";
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     hour: "2-digit",
@@ -53,7 +55,8 @@ export default async function AdminClienteAnamnesePage({
     listAccessibleAnamnesisReviewsForSubmissions(submittedIds),
     loadClientClarificationSummary(submittedIds),
   ]);
-  const reviewedSubmissionIds = new Set(reviews.map((review) => review.submission_id));
+  const reviewSummaries = summarizeAnamnesisReviewHistory(reviews);
+  const reviewedSubmissionIds = new Set(reviewSummaries.keys());
   const displayName = client.full_name?.trim() || client.profiles?.display_name?.trim();
 
   return (
@@ -122,6 +125,7 @@ export default async function AdminClienteAnamnesePage({
               const awaitingClient = clarification?.awaitingClient ?? 0;
               const awaitingProfessional = clarification?.awaitingProfessional ?? 0;
               const hasProfessionalNote = reviewedSubmissionIds.has(submission.id);
+              const reviewSummary = reviewSummaries.get(submission.id);
 
               return (
                 <li key={submission.id}>
@@ -146,7 +150,7 @@ export default async function AdminClienteAnamnesePage({
                       </div>
                       <div>
                         <dt>Nota de revisão profissional</dt>
-                        <dd>{hasProfessionalNote ? "Registro interno encontrado" : "Ainda não registrada"}</dd>
+                        <dd>{hasProfessionalNote ? `Registro interno encontrado · ${reviewSummary?.count} nota(s)` : "Ainda não registrada"}</dd>
                       </div>
                       <div>
                         <dt>Esclarecimentos aguardando cliente</dt>
@@ -157,6 +161,14 @@ export default async function AdminClienteAnamnesePage({
                         <dd>{awaitingProfessional}</dd>
                       </div>
                     </dl>
+                    {reviewSummary ? (
+                      <Link
+                        className={styles.detailLink}
+                        href={`/admin/anamneses/${submission.id}/revisao#revisao-${reviewSummary.latest.id}`}
+                      >
+                        Consultar última nota interna · {formatDateTime(reviewSummary.latest.created_at)}
+                      </Link>
+                    ) : null}
                     {!hasProfessionalNote ? (
                       <p className={styles.submissionMeta}>
                         Esta submissão ainda não possui nota de revisão profissional registrada.

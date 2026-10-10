@@ -78,6 +78,8 @@ test("Anamnesis history and clarification access functions all paginate under th
     "listAccessibleAnamnesisClarificationRequestsForSubmissions",
     "listAccessibleAnamnesisClarificationResponses",
     "listAccessibleAnamnesisClarificationResolutions",
+    "listAccessibleAnamnesisReviews",
+    "listAccessibleAnamnesisReviewsForSubmissions",
   ];
   for (const name of names) {
     const start = source.indexOf("export async function " + name + "(");
@@ -101,4 +103,15 @@ test("Anamnesis history and clarification access functions all paginate under th
     assert.match(fn, /\.sort\(\(a, b\) =>/, "global ordering across ID batches: " + name);
   }
   assert.match(source, /\.order\("created_at", \{ ascending: false \}\)\s*\.order\("id", \{ ascending: false \}\)\s*\.range\(from, to\)/);
+});
+
+test("grouped professional Anamnesis review history globally orders pages after ID batching", () => {
+  const source = read("lib/supabase/data-access.ts");
+  const start = source.indexOf("export async function listAccessibleAnamnesisReviewsForSubmissions(");
+  const end = source.indexOf("\nexport async function ", start + 15);
+  const fn = source.slice(start, end);
+  assert.ok(fn.includes("collectAnamnesisHistoryRows(submissionIds"));
+  assert.ok(fn.includes(".range(from, to)"));
+  assert.ok(fn.includes("reviews.sort((left, right) =>"));
+  assert.ok(fn.includes("compareAnamnesisReviewChronology(left, right)"));
 });

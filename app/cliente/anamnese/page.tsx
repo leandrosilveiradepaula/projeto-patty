@@ -16,6 +16,7 @@ import { startClientAnamnesisDraft } from "./actions";
 import styles from "./page.module.css";
 
 function formatDateTime(value: string) {
+  if (!Number.isFinite(Date.parse(value))) return "Data indisponível";
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     hour: "2-digit",
