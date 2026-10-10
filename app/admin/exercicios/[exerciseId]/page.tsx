@@ -1,15 +1,14 @@
 import {
-  createNextExerciseVersionAction,
-  publishExerciseVersionAction,
-  updateExerciseDraftAction,
-} from "@/app/admin/exercicios/[exerciseId]/actions";
+  AdminExerciseDraftEditForm,
+  AdminExercisePublishForm,
+  AdminExerciseCreateVersionForm,
+} from "@/components/admin/AdminExerciseLifecycleForms";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
-import { findSingleDraftExerciseVersion } from "@/lib/training/exercise-versioning";
+import { findSingleDraftExerciseVersion, nextExerciseVersionNumber } from "@/lib/training/exercise-versioning";
 import {
   getAccessibleExerciseForCurrentAdmin,
   listExerciseVersionsForCurrentAdmin,
@@ -45,7 +44,11 @@ export default async function AdminExerciseDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  const versions = await listExerciseVersionsForCurrentAdmin(exercise.id);
+  const versions = (await listExerciseVersionsForCurrentAdmin(exercise.id))
+    .slice()
+    .sort((left, right) =>
+      right.version_number - left.version_number || left.id.localeCompare(right.id),
+    );
   const draft = findSingleDraftExerciseVersion(versions);
   const latestPublished =
     versions
@@ -77,25 +80,12 @@ export default async function AdminExerciseDetailPage({ params }: PageProps) {
               <h2 className={styles.cardTitle}>
                 Rascunho · versão {draft.version_number}
               </h2>
-              <form
-                action={updateExerciseDraftAction.bind(
-                  null,
-                  exercise.id,
-                  draft.id,
-                )}
-                className={styles.form}
-              >
-                <label className={styles.field}>
-                  <span>Nome do exercício</span>
-                  <input
-                    defaultValue={draft.name}
-                    maxLength={200}
-                    name="exerciseName"
-                    required
-                  />
-                </label>
-                <Button type="submit">Salvar rascunho</Button>
-              </form>
+              <AdminExerciseDraftEditForm
+                exerciseId={exercise.id}
+                initialName={draft.name}
+                key={draft.id}
+                versionId={draft.id}
+              />
             </Card>
 
             <Card>
@@ -104,25 +94,13 @@ export default async function AdminExerciseDetailPage({ params }: PageProps) {
                 Depois de publicada, esta versão não é editada pela interface.
                 Mudanças futuras são feitas em uma nova versão.
               </p>
-              <form
-                action={publishExerciseVersionAction.bind(
-                  null,
-                  exercise.id,
-                  draft.id,
-                )}
-                className={styles.form}
-              >
-                <label className={styles.confirmation}>
-                  <input
-                    name="confirmPublish"
-                    required
-                    type="checkbox"
-                    value="yes"
-                  />
-                  <span>Confirmo a publicação desta versão.</span>
-                </label>
-                <Button type="submit">Publicar exercício</Button>
-              </form>
+              <AdminExercisePublishForm
+                exerciseId={exercise.id}
+                key={draft.id}
+                name={draft.name}
+                versionId={draft.id}
+                versionNumber={draft.version_number}
+              />
             </Card>
           </div>
         ) : latestPublished ? (
@@ -136,11 +114,14 @@ export default async function AdminExerciseDetailPage({ params }: PageProps) {
                   Publicada em {formatDateTime(latestPublished.published_at!)}.
                 </p>
               </div>
-              <Badge variant="positive">Publicado</Badge>
+              <Badge variant="neutral">Publicado</Badge>
             </div>
-            <form action={createNextExerciseVersionAction.bind(null, exercise.id)}>
-              <Button type="submit">Criar nova versão</Button>
-            </form>
+            <AdminExerciseCreateVersionForm
+              exerciseId={exercise.id}
+              key={latestPublished.id}
+              name={latestPublished.name}
+              nextVersionNumber={nextExerciseVersionNumber(versions)}
+            />
           </Card>
         ) : (
           <EmptyState
@@ -151,7 +132,7 @@ export default async function AdminExerciseDetailPage({ params }: PageProps) {
       </Section>
 
       <Section
-        description="O histórico permanece disponível para a Patty. A forma definitiva de exposição da biblioteca de exercícios para clientes precisa seguir a decisão de produto documentada."
+        description="Histórico das versões da biblioteca profissional. A cliente somente vê exercícios escolhidos e publicados no treino individual."
         title="Histórico de versões"
       >
         {versions.length === 0 ? (
@@ -162,7 +143,7 @@ export default async function AdminExerciseDetailPage({ params }: PageProps) {
         ) : (
           <ol className={styles.history}>
             {versions.map((version) => (
-              <li key={version.id}>
+              <li id={`versao-${version.id}`} key={version.id}>
                 <Card variant="subtle">
                   <div className={styles.summaryHeader}>
                     <div>
@@ -177,7 +158,7 @@ export default async function AdminExerciseDetailPage({ params }: PageProps) {
                           : " · ainda em rascunho"}
                       </p>
                     </div>
-                    <Badge variant={version.published_at ? "positive" : "warning"}>
+                    <Badge variant={version.published_at ? "neutral" : "warning"}>
                       {version.published_at ? "Publicado" : "Rascunho"}
                     </Badge>
                   </div>
