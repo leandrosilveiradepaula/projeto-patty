@@ -4,6 +4,19 @@ export type AnamnesisReviewSummaryRow = {
   created_at: string;
 };
 
+export function compareAnamnesisReviewChronology(
+  left: AnamnesisReviewSummaryRow,
+  right: AnamnesisReviewSummaryRow,
+): number {
+  const leftTime = Date.parse(left.created_at);
+  const rightTime = Date.parse(right.created_at);
+  const leftValid = Number.isFinite(leftTime);
+  const rightValid = Number.isFinite(rightTime);
+  if (leftValid && rightValid && leftTime !== rightTime) return leftTime - rightTime;
+  if (leftValid !== rightValid) return leftValid ? -1 : 1;
+  return left.id.localeCompare(right.id);
+}
+
 export function summarizeAnamnesisReviewHistory<T extends AnamnesisReviewSummaryRow>(
   reviews: readonly T[],
 ): Map<string, { count: number; latest: T }> {
@@ -14,16 +27,7 @@ export function summarizeAnamnesisReviewHistory<T extends AnamnesisReviewSummary
       bySubmission.set(review.submission_id, { count: 1, latest: review });
       continue;
     }
-    const reviewTime = Date.parse(review.created_at);
-    const latestTime = Date.parse(current.latest.created_at);
-    const reviewValid = Number.isFinite(reviewTime);
-    const latestValid = Number.isFinite(latestTime);
-    const newer =
-      (reviewValid && !latestValid) ||
-      (reviewValid && latestValid && reviewTime > latestTime) ||
-      (reviewValid === latestValid &&
-        ((reviewValid && reviewTime === latestTime) || (!reviewValid)) &&
-        review.id.localeCompare(current.latest.id) > 0);
+    const newer = compareAnamnesisReviewChronology(review, current.latest) > 0;
     bySubmission.set(review.submission_id, {
       count: current.count + 1,
       latest: newer ? review : current.latest,
