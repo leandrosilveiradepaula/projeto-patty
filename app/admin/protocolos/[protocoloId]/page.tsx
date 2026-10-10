@@ -1,6 +1,7 @@
 import { AdminMealDraftGuidance } from "@/components/admin/AdminMealDraftGuidance";
 import { AdminProtocolDraftEditor } from "@/components/admin/AdminProtocolDraftEditor";
 import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
+import { ClientHistoryDisclosure } from "@/components/client/ClientHistoryDisclosure";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { PageSectionNav } from "@/components/admin/PageSectionNav";
 import { AdminProtocolVersionPlan } from "@/components/admin/AdminProtocolVersionPlan";
@@ -40,7 +41,7 @@ import styles from "./page.module.css";
 type AdminProtocoloDetailPageProps = { params: Promise<{ protocoloId: string }>; searchParams: Promise<{ versao?: string }> };
 
 function formatDateTime(value: string | null | undefined) {
-  if (!value) {
+  if (!value || !Number.isFinite(Date.parse(value))) {
     return "Não registrado";
   }
 
@@ -191,14 +192,14 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
               const isRequestedVersion = version.version_number === selectedVersionNumber;
 
               return (
-                <li
-                  className={styles.versionItem}
-                  id={`versao-${version.version_number}`}
-                  key={version.id}
-                >
-                  <details className={styles.versionDetails} open={isCurrentVersion || isRequestedVersion}>
-                    <summary className={styles.versionSummary}>
-                      <div className={styles.versionHeader}>
+                <li className={styles.versionItem} key={version.id}>
+                  <ClientHistoryDisclosure
+                    className={styles.versionDetails}
+                    defaultOpen={isCurrentVersion || isRequestedVersion}
+                    id={`versao-${version.version_number}`}
+                    summary={
+                      <div className={styles.versionSummary}>
+                        <div className={styles.versionHeader}>
                         <div>
                           <h3>
                             Versão {version.version_number}
@@ -212,8 +213,10 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
                           <Badge variant={lifecyclePresentation.variant}>{lifecyclePresentation.label}</Badge>
                           {isLatestPublishedVersion ? <Badge variant="positive">Última publicada deste protocolo</Badge> : null}
                         </div>
+                        </div>
                       </div>
-                    </summary>
+                    }
+                  >
                     <div className={styles.versionBody}>
                   <dl className={styles.versionFacts}>
                     <div>
@@ -349,7 +352,7 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
                     )}
                   </div>
                     </div>
-                  </details>
+                  </ClientHistoryDisclosure>
                 </li>
               );
             })}
