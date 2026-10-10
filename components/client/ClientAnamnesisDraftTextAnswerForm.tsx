@@ -7,6 +7,7 @@ import {
   saveClientAnamnesisDraftTextAnswer,
 } from "@/app/cliente/anamnese/[anamneseId]/actions";
 import { Alert } from "@/components/ui/Alert";
+import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/FormField";
 import { Textarea } from "@/components/ui/Textarea";
 import styles from "./ClientAnamnesisDraftTextAnswerForm.module.css";
@@ -102,7 +103,7 @@ export function ClientAnamnesisDraftTextAnswerForm({
           title="Não foi possível salvar"
           variant="critical"
         >
-          {state.message} Toque no campo e saia dele novamente para tentar salvar.
+          {state.message} Sua resposta permanece neste campo. Você pode tentar salvar novamente sem redigitá-la.
         </Alert>
       ) : null}
       <FormField
@@ -122,6 +123,11 @@ export function ClientAnamnesisDraftTextAnswerForm({
           />
         )}
       </FormField>
+      {state.message && !state.success && value !== lastSavedValueRef.current ? (
+        <Button disabled={isPending || pendingValueRef.current !== null} onClick={saveIfChanged} size="compact" type="button" variant="secondary">
+          Tentar salvar novamente
+        </Button>
+      ) : null}
       <p aria-live="polite" className={styles.saveStatus}>
         {isPending
           ? "Salvando..."
@@ -129,7 +135,9 @@ export function ClientAnamnesisDraftTextAnswerForm({
             ? "Salvo automaticamente."
             : value === lastSavedValueRef.current
               ? "Resposta salva."
-              : "A resposta será salva ao sair do campo."}
+              : state.message && !state.success
+                ? "Não salvo. Sua resposta ainda está no campo."
+                : "Alterações não salvas. A resposta será salva após uma pausa ou ao sair do campo."}
       </p>
     </form>
   );

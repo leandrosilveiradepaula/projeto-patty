@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -36,13 +36,21 @@ export function AdminAnamnesisCorrectionForm({
   );
   const [state, formAction, isPending] = useActionState(action, initialState);
   const router = useRouter();
+  const inFlightRef = useRef(false);
 
   useEffect(() => {
+    inFlightRef.current = false;
     if (state.success) router.refresh();
   }, [state, router]);
 
   return (
-    <form action={formAction} className={styles.form}>
+    <form action={formAction} aria-busy={isPending} className={styles.form} onSubmit={(event) => {
+      if (inFlightRef.current || isPending || state.success) {
+        event.preventDefault();
+        return;
+      }
+      inFlightRef.current = true;
+    }}>
       {state.message ? (
         <Alert
           live={state.success ? "polite" : "assertive"}
@@ -72,6 +80,7 @@ export function AdminAnamnesisCorrectionForm({
           <Textarea
             {...fieldProps}
             defaultValue={initialValue}
+            disabled={isPending || state.success}
             name="correctedAnswerValue"
             required
             rows={5}
@@ -79,7 +88,7 @@ export function AdminAnamnesisCorrectionForm({
           />
         )}
       </FormField>
-      <Button disabled={state.success} loading={isPending} type="submit">
+      <Button disabled={state.success || isPending} loading={isPending} type="submit">
         Registrar correção
       </Button>
     </form>

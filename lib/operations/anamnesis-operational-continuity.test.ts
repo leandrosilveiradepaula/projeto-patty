@@ -51,7 +51,7 @@ test("historical correction refreshes the visible effective value while preservi
   const page = read("app/admin/anamneses/[anamneseId]/correcoes/page.tsx");
   const action = read("app/admin/anamneses/[anamneseId]/correcoes/actions.ts");
   assert.ok(form.includes("if (state.success) router.refresh()"));
-  assert.ok(form.includes("disabled={state.success}"));
+  assert.ok(form.includes("disabled={state.success || isPending}"));
   assert.ok(page.includes("key={answerCorrections.at(-1)?.id ?? answer.id}"));
   assert.ok(page.includes("formatJson(answer.answer_value)"));
   assert.ok(page.includes("answerCorrections.map((correction)"));
@@ -63,7 +63,7 @@ test("client final submission refreshes its real status and disables duplicate s
   const form = read("components/client/ClientAnamnesisSubmitForm.tsx");
   const action = read("app/cliente/anamnese/[anamneseId]/actions.ts");
   assert.ok(form.includes("if (state.success) router.refresh()"));
-  assert.ok(form.includes("disabled={state.success}"));
+  assert.ok(form.includes("disabled={state.success || isPending}"));
   assert.ok(form.includes('name="consentAccepted"'));
   assert.ok(action.includes("submitClientAnamnesis"));
 });

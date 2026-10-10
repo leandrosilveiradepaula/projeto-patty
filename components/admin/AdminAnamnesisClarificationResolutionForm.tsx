@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -32,13 +32,21 @@ export function AdminAnamnesisClarificationResolutionForm({
   const [state, formAction, isPending] = useActionState(action, initialState);
   const [confirmResolve, setConfirmResolve] = useState(false);
   const router = useRouter();
+  const inFlightRef = useRef(false);
 
   useEffect(() => {
+    inFlightRef.current = false;
     if (state.success) router.refresh();
   }, [state, router]);
 
   return (
-    <form action={formAction} className={styles.form}>
+    <form action={formAction} aria-busy={isPending} className={styles.form} onSubmit={(event) => {
+      if (inFlightRef.current || isPending || state.success || !confirmResolve) {
+        event.preventDefault();
+        return;
+      }
+      inFlightRef.current = true;
+    }}>
       {state.message ? (
         <Alert
           live={state.success ? "polite" : "assertive"}
@@ -49,7 +57,7 @@ export function AdminAnamnesisClarificationResolutionForm({
         </Alert>
       ) : null}
       {!state.success && !confirmResolve ? (
-        <Button onClick={() => setConfirmResolve(true)} type="button" variant="secondary">
+        <Button disabled={isPending} onClick={() => setConfirmResolve(true)} type="button" variant="secondary">
           Marcar como resolvido
         </Button>
       ) : null}
@@ -60,7 +68,7 @@ export function AdminAnamnesisClarificationResolutionForm({
             <Button disabled={isPending} onClick={() => setConfirmResolve(false)} type="button" variant="ghost">
               Cancelar
             </Button>
-            <Button loading={isPending} type="submit" variant="secondary">
+            <Button disabled={isPending || state.success} loading={isPending} type="submit" variant="secondary">
               Confirmar resolução
             </Button>
           </div>

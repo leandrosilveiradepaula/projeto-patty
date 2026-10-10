@@ -22,11 +22,13 @@ export function ClientAnamnesisClarificationResponseForm({
   submissionId: string;
 }) {
   const formRef = useRef<HTMLFormElement>(null);
+  const inFlightRef = useRef(false);
   const router = useRouter();
   const action = respondToAnamnesisClarification.bind(null, submissionId, requestId);
   const [state, formAction, isPending] = useActionState(action, initialState);
 
   useEffect(() => {
+    inFlightRef.current = false;
     if (state.success) {
       formRef.current?.reset();
       router.refresh();
@@ -34,7 +36,19 @@ export function ClientAnamnesisClarificationResponseForm({
   }, [state, router]);
 
   return (
-    <form action={formAction} className={styles.form} ref={formRef}>
+    <form
+      action={formAction}
+      aria-busy={isPending}
+      className={styles.form}
+      onSubmit={(event) => {
+        if (inFlightRef.current || isPending) {
+          event.preventDefault();
+          return;
+        }
+        inFlightRef.current = true;
+      }}
+      ref={formRef}
+    >
       {state.message ? (
         <Alert
           live={state.success ? "polite" : "assertive"}
@@ -51,11 +65,11 @@ export function ClientAnamnesisClarificationResponseForm({
         required
       >
         {(fieldProps) => (
-          <Textarea {...fieldProps} maxLength={4000} name="responseText" placeholder="Digite a informação complementar solicitada." required rows={4} />
+          <Textarea {...fieldProps} disabled={isPending} maxLength={4000} name="responseText" placeholder="Digite a informação complementar solicitada." required rows={4} />
         )}
       </FormField>
       <div className={styles.actions}>
-        <Button loading={isPending} size="compact" type="submit">Registrar esclarecimento</Button>
+        <Button disabled={isPending} loading={isPending} size="compact" type="submit">Registrar esclarecimento</Button>
       </div>
     </form>
   );
