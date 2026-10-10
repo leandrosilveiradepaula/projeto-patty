@@ -1,16 +1,19 @@
 import { PendingItemCard } from "@/components/admin/PendingItemCard";
 import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import { getOperationalPendingItemsForCurrentAdmin } from "@/lib/operations/pending-data";
 import { groupOperationalPendingItems } from "@/lib/operations/pending";
 import { parsePendingQueueFocus, pendingQueueLinks } from "@/lib/operations/pending-navigation";
+import { countPendingAreas, filterOperationalPendingByArea, parsePendingArea, pendingQueueHrefForArea, PENDING_AREA_OPTIONS } from "@/lib/operations/pending-area-filter";
 import Link from "next/link";
 
 import styles from "./page.module.css";
 
 function formatDateTime(value: string) {
+  if (!Number.isFinite(Date.parse(value))) return "Data indisponível";
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     hour: "2-digit",
@@ -59,49 +62,81 @@ function PendingList({
   );
 }
 
-export default async function AdminPendenciasPage({ searchParams }: { searchParams: Promise<{ grupo?: string }> }) {
-  const { grupo } = await searchParams;
+export default async function AdminPendenciasPage({ searchParams }: { searchParams: Promise<{ grupo?: string; area?: string }> }) {
+  const { grupo, area } = await searchParams;
   const focusedGroup = parsePendingQueueFocus(grupo);
-  const items = await getOperationalPendingItemsForCurrentAdmin();
+  const selectedArea = parsePendingArea(area);
+  const allItems = await getOperationalPendingItemsForCurrentAdmin();
+  const items = filterOperationalPendingByArea(allItems, selectedArea);
   const grouped = groupOperationalPendingItems(items);
+  const areaCounts = countPendingAreas(allItems);
+  const selectedAreaLabel = PENDING_AREA_OPTIONS.find((option) => option.value === selectedArea)?.label ?? null;
+  const resetHref = focusedGroup ? pendingQueueLinks[focusedGroup] : "/admin/pendencias";
 
   return (
     <>
       <PageHeader
-        actions={<Badge variant="neutral">{items.length} pendência(s)</Badge>}
+        actions={<Badge variant="neutral">{selectedArea ? `${items.length} de ${allItems.length}` : items.length} pendência(s)</Badge>}
         description="Acompanhe ações da Patty, registros aguardando a cliente e pendências técnicas separadamente. Estar na fila não significa prioridade clínica."
         eyebrow="Admin"
         title="Pendências operacionais"
       />
 
       <Section
-        description="As pendências continuam ordenadas por antiguidade dentro de cada grupo, mas agora ficam separadas pelo tipo de ação necessária."
+        description="A fila continua separada por responsável e em ordem factual de registro. Filtre por área para localizar o trabalho, sem estabelecer prioridade clínica."
         title="Registros que exigem acompanhamento"
       >
+        <form action="/admin/pendencias" className={styles.areaFilterForm} method="get">
+          {focusedGroup ? <input name="grupo" type="hidden" value={focusedGroup} /> : null}
+          <label className={styles.areaFilterLabel} htmlFor="pending-area">Área da pendência</label>
+          <div className={styles.areaFilterRow}>
+            <select className={styles.areaSelect} defaultValue={selectedArea ?? ""} id="pending-area" name="area">
+              <option value="">Todas as áreas ({allItems.length})</option>
+              {PENDING_AREA_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label} ({areaCounts.get(option.value) ?? 0})
+                </option>
+              ))}
+            </select>
+            <Button type="submit" variant="secondary">Filtrar</Button>
+            {selectedArea ? <Link className={styles.resetFilter} href={resetHref}>Limpar área</Link> : null}
+          </div>
+        </form>
+        {selectedAreaLabel ? (
+          <p className={styles.areaStatus} role="status">
+            Exibindo {items.length} de {allItems.length} pendência(s) na área {selectedAreaLabel}.
+            Este filtro altera somente a visualização, não as ações registradas nem sua prioridade.
+          </p>
+        ) : null}
         {items.length > 0 ? (
           <nav aria-label="Ir para grupo de pendências" className={styles.groupNavigation}>
             {grouped.patty.length > 0 ? (
-              <Link aria-current={focusedGroup === "patty" ? "location" : undefined} href={pendingQueueLinks.patty}>
+              <Link aria-current={focusedGroup === "patty" ? "location" : undefined} href={pendingQueueHrefForArea(pendingQueueLinks.patty, selectedArea)}>
                 Ação da Patty ({grouped.patty.length})
               </Link>
             ) : <span>Ação da Patty (0)</span>}
             {grouped.client.length > 0 ? (
-              <Link aria-current={focusedGroup === "client" ? "location" : undefined} href={pendingQueueLinks.client}>
+              <Link aria-current={focusedGroup === "client" ? "location" : undefined} href={pendingQueueHrefForArea(pendingQueueLinks.client, selectedArea)}>
                 Aguardando cliente ({grouped.client.length})
               </Link>
             ) : <span>Aguardando cliente (0)</span>}
             {grouped.operational.length > 0 ? (
-              <Link aria-current={focusedGroup === "operational" ? "location" : undefined} href={pendingQueueLinks.operational}>
+              <Link aria-current={focusedGroup === "operational" ? "location" : undefined} href={pendingQueueHrefForArea(pendingQueueLinks.operational, selectedArea)}>
                 Operacional do sistema ({grouped.operational.length})
               </Link>
             ) : <span>Operacional do sistema (0)</span>}
           </nav>
         ) : null}
-        {items.length === 0 ? (
+        {allItems.length === 0 ? (
           <EmptyState
             description="Nenhuma ação da Patty, espera de cliente ou pendência operacional consta nesta fila no momento."
             title="Tudo em dia"
           />
+        ) : items.length === 0 ? (
+          <div className={styles.focusedEmpty} role="status">
+            Nenhuma pendência registrada nesta área. As demais áreas permanecem disponíveis.
+            <Link className={styles.clientLink} href={resetHref}>Ver todas as áreas</Link>
+          </div>
         ) : (
           <div className={styles.groups}>
             {focusedGroup && grouped[focusedGroup].length === 0 ? (
