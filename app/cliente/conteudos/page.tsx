@@ -1,5 +1,6 @@
 import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
 import { newestClientContentReleases } from "@/lib/content/release-order";
+import { educationalAssetKind, educationalAssetOpenLabel, educationalAssetSize, orderReleasedEducationalAssets } from "@/lib/content/client-assets";
 import { ClientContentCard } from "@/components/client/ClientContentCard";
 import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -22,6 +23,7 @@ export default async function ClienteConteudosPage() {
   const visibleReleases = orderedReleases.filter(
     (release) => Boolean(release.educational_content_versions),
   );
+  const missingVersionCount = orderedReleases.length - visibleReleases.length;
   const releasedVersions = visibleReleases.map(
     (release) => release.educational_content_versions!,
   );
@@ -69,6 +71,12 @@ export default async function ClienteConteudosPage() {
             action={<Link href="/cliente">Voltar ao início</Link>}
           />
         ) : (
+          <>
+          {missingVersionCount > 0 ? (
+            <p className={styles.notice} role="status">
+              {missingVersionCount} liberação(ões) possuem versão indisponível para consulta. A Patty pode verificar o registro.
+            </p>
+          ) : null}
           <ul className={styles.contentList}>
             {visibleReleases.map((release) => {
               const contentVersion = release.educational_content_versions;
@@ -76,35 +84,50 @@ export default async function ClienteConteudosPage() {
                 return null;
               }
 
-              const assets = assetsByVersion.get(contentVersion.id) ?? [];
-              const primaryAsset =
-                assets.find((asset) => asset.asset_key === "primary") ?? assets[0] ?? null;
+              const releaseAssets = orderReleasedEducationalAssets(
+                assetsByVersion.get(contentVersion.id) ?? [],
+              );
+              const hasPrimaryAsset = releaseAssets.some((asset) => asset.asset_key === "primary");
 
               return (
                 <li id={`conteudo-liberado-${release.id}`} key={release.id}>
                   <ClientContentCard
                     category={contentVersion.category_key ?? "Não informado"}
                     meta={
-                      primaryAsset
-                        ? `Versão ${contentVersion.version_number}`
+                      releaseAssets.length > 0
+                        ? `Versão ${contentVersion.version_number} · ${releaseAssets.length} arquivo(s) disponível(is)`
                         : `Versão ${contentVersion.version_number} · arquivo ainda indisponível`
                     }
-                    action={
-                      primaryAsset ? (
-                        <a
-                          aria-label={`Abrir conteúdo ${contentVersion.title} em nova aba`}
-                          className={styles.openLink}
-                          href={`/cliente/conteudos/assets/${primaryAsset.id}`}
-                          rel="noreferrer"
-                          target="_blank"
-                        >
-                          Abrir conteúdo
-                        </a>
-                      ) : null
-                    }
+                    action={releaseAssets.length > 0 ? (
+                      <ul className={styles.assetList} aria-label={`Arquivos liberados de ${contentVersion.title}`}>
+                        {releaseAssets.map((asset, index) => {
+                          const label = educationalAssetOpenLabel(
+                            asset,
+                            hasPrimaryAsset ? index : index,
+                            hasPrimaryAsset,
+                          );
+                          return (
+                            <li className={styles.assetItem} key={asset.id}>
+                              <a
+                                aria-label={`${label} de ${contentVersion.title} em nova aba`}
+                                className={styles.openLink}
+                                href={`/cliente/conteudos/assets/${asset.id}`}
+                                rel="noopener noreferrer"
+                                target="_blank"
+                              >
+                                {label}
+                              </a>
+                              <span className={styles.assetMeta}>
+                                {educationalAssetKind(asset.content_type)} · {educationalAssetSize(asset.byte_size)}
+                              </span>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    ) : null}
                     status={
-                      <Badge variant={primaryAsset ? "positive" : "warning"}>
-                        {primaryAsset ? "Disponível" : "Aguardando arquivo"}
+                      <Badge variant={releaseAssets.length > 0 ? "positive" : "warning"}>
+                        {releaseAssets.length > 0 ? "Disponível" : "Aguardando arquivo"}
                       </Badge>
                     }
                     title={contentVersion.title}
@@ -114,6 +137,7 @@ export default async function ClienteConteudosPage() {
               );
             })}
           </ul>
+          </>
         )}
       </Section>
       <ClientJourneyNextSteps areas={["protocol","training","index"]} />
