@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -36,15 +36,33 @@ export function AdminClientRegistrationEditForm({
 }: AdminClientRegistrationEditFormProps) {
   const action = updateAdminClientRegistrationAction.bind(null, clientId);
   const [state, formAction, isPending] = useActionState(action, initialState);
+  const inFlightRef = useRef(false);
+  const [editedSinceResult, setEditedSinceResult] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    if (state.success) router.refresh();
+    inFlightRef.current = false;
+    if (state.success) {
+      setEditedSinceResult(false);
+      router.refresh();
+    }
   }, [state, router]);
 
   return (
-    <form action={formAction} className={styles.form}>
-      {state.message ? (
+    <form
+      action={formAction}
+      aria-busy={isPending}
+      className={styles.form}
+      onChange={() => setEditedSinceResult(true)}
+      onSubmit={(event) => {
+        if (inFlightRef.current || isPending) {
+          event.preventDefault();
+          return;
+        }
+        inFlightRef.current = true;
+      }}
+    >
+      {state.message && !editedSinceResult ? (
         <Alert
           live={state.success ? "polite" : "assertive"}
           title={state.success ? "Cadastro atualizado" : "Não foi possível atualizar"}
@@ -59,6 +77,7 @@ export function AdminClientRegistrationEditForm({
           {(fieldProps) => (
             <TextInput
               {...fieldProps}
+              disabled={isPending}
               defaultValue={city}
               maxLength={120}
               name="city"
@@ -70,6 +89,7 @@ export function AdminClientRegistrationEditForm({
           {(fieldProps) => (
             <TextInput
               {...fieldProps}
+              disabled={isPending}
               defaultValue={phone}
               inputMode="tel"
               maxLength={40}
@@ -86,6 +106,7 @@ export function AdminClientRegistrationEditForm({
           {(fieldProps) => (
             <TextInput
               {...fieldProps}
+              disabled={isPending}
               defaultValue={contactEmail}
               maxLength={254}
               name="contactEmail"
@@ -102,6 +123,7 @@ export function AdminClientRegistrationEditForm({
           {(fieldProps) => (
             <TextInput
               {...fieldProps}
+              disabled={isPending}
               defaultValue={instagram}
               maxLength={100}
               name="instagram"
@@ -115,7 +137,7 @@ export function AdminClientRegistrationEditForm({
         identidade de autenticação permanecem separadas.
       </p>
 
-      <Button loading={isPending} type="submit">
+      <Button disabled={isPending} loading={isPending} type="submit">
         Salvar Cadastro Atual
       </Button>
     </form>
