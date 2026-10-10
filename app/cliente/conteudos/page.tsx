@@ -103,7 +103,7 @@ export default async function ClienteConteudosPage() {
                         {releaseAssets.map((asset, index) => {
                           const label = educationalAssetOpenLabel(
                             asset,
-                            hasPrimaryAsset ? index : index,
+                            index,
                             hasPrimaryAsset,
                           );
                           return (
