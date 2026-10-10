@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -28,13 +28,21 @@ export function ClientAnamnesisSubmitForm({
   const action = submitClientAnamnesis.bind(null, submissionId);
   const [state, formAction, isPending] = useActionState(action, initialState);
   const router = useRouter();
+  const inFlightRef = useRef(false);
 
   useEffect(() => {
+    inFlightRef.current = false;
     if (state.success) router.refresh();
   }, [state, router]);
 
   return (
-    <form action={formAction} className={styles.form}>
+    <form action={formAction} aria-busy={isPending} className={styles.form} onSubmit={(event) => {
+      if (inFlightRef.current || isPending || state.success) {
+        event.preventDefault();
+        return;
+      }
+      inFlightRef.current = true;
+    }}>
       {state.message ? (
         <Alert
           live={state.success ? "polite" : "assertive"}
@@ -47,10 +55,12 @@ export function ClientAnamnesisSubmitForm({
       <p className={styles.notice}>
         Antes de enviar, confira as respostas. Após o envio, suas respostas
         originais ficam preservadas e não poderão mais ser editadas por você.
+        Aguarde a confirmação de salvamento de todas as respostas antes de enviar.
       </p>
       {consentText ? (
         <label className={styles.consent}>
           <input
+            disabled={isPending || state.success}
             name="consentAccepted"
             required
             type="checkbox"
@@ -59,7 +69,7 @@ export function ClientAnamnesisSubmitForm({
           <span>{consentText}</span>
         </label>
       ) : null}
-      <Button disabled={state.success} loading={isPending} type="submit">
+      <Button disabled={state.success || isPending} loading={isPending} type="submit">
         Enviar Anamnese
       </Button>
     </form>

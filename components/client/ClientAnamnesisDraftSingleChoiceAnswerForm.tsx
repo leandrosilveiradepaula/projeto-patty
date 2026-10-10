@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import {
   type ClientAnamnesisDraftAnswerFormState,
@@ -42,6 +43,7 @@ export function ClientAnamnesisDraftSingleChoiceAnswerForm({
   const [state, formAction, isPending] = useActionState(action, initialState);
   const [selectedValue, setSelectedValue] = useState(initialValue);
   const formRef = useRef<HTMLFormElement>(null);
+  const router = useRouter();
   const lastSavedValueRef = useRef(initialValue);
   const pendingValueRef = useRef<string | null>(null);
   const failedValueRef = useRef<string | null>(null);
@@ -56,8 +58,8 @@ export function ClientAnamnesisDraftSingleChoiceAnswerForm({
       failedValueRef.current = null;
       pendingValueRef.current = null;
 
-      if (state.success && reloadPageOnSuccess) {
-        window.location.assign(`/cliente/anamnese/${submissionId}`);
+      if (reloadPageOnSuccess) {
+        router.refresh();
       }
       return;
     }
@@ -66,7 +68,7 @@ export function ClientAnamnesisDraftSingleChoiceAnswerForm({
       failedValueRef.current = pendingValueRef.current;
       pendingValueRef.current = null;
     }
-  }, [reloadPageOnSuccess, state, submissionId]);
+  }, [reloadPageOnSuccess, router, state]);
 
   useEffect(() => {
     if (
@@ -94,6 +96,10 @@ export function ClientAnamnesisDraftSingleChoiceAnswerForm({
   }
 
   const descriptionId = `anamnesis-draft-choice-${questionId}-description`;
+  const savedChoice = selectedValue !== null &&
+    selectedValue === lastSavedValueRef.current;
+  const unavailableHistoricalChoice = selectedValue !== null &&
+    !options.includes(selectedValue);
 
   return (
     <form action={formAction} className={styles.form} ref={formRef}>
@@ -119,6 +125,11 @@ export function ClientAnamnesisDraftSingleChoiceAnswerForm({
           Ao selecionar uma opção, a resposta é salva automaticamente. Você pode
           continuar o restante em outro momento.
         </p>
+        {unavailableHistoricalChoice ? (
+          <Alert title="Resposta histórica indisponível" variant="info">
+            A opção originalmente salva não está nesta versão disponível. Selecione uma das opções atuais para alterar a resposta, sem substituição automática.
+          </Alert>
+        ) : null}
         <div
           aria-describedby={descriptionId}
           className={styles.optionList}
@@ -131,6 +142,7 @@ export function ClientAnamnesisDraftSingleChoiceAnswerForm({
               <label className={styles.option} htmlFor={optionId} key={option}>
                 <input
                   checked={selectedValue === option}
+                  disabled={isPending}
                   id={optionId}
                   name="answerValue"
                   onChange={(event) => {
@@ -151,12 +163,15 @@ export function ClientAnamnesisDraftSingleChoiceAnswerForm({
         <p aria-live="polite" className={styles.saveStatus}>
           {isPending
             ? "Salvando..."
-            : state.success
-              ? "Salvo automaticamente."
-              : "Selecione uma opção para salvar."}
+            : savedChoice
+              ? "Resposta salva."
+              : state.message && !state.success
+                ? "Não salvo. Selecione novamente ou tente salvar."
+                : "Alterações não salvas. Aguarde a confirmação antes de sair."}
         </p>
         {state.message && !state.success ? (
           <Button
+            disabled={selectedValue === null || isPending}
             loading={isPending}
             onClick={retrySelectedValue}
             size="compact"
