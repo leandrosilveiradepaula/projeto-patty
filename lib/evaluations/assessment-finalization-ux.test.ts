@@ -16,7 +16,7 @@ test("assessment detail uses canonical client name and configured finalization r
 });
 test("assessment finalization button follows the deterministic server readiness",()=>{
  const form=read("components/admin/AssessmentDraftForms.tsx");
- assert.match(form,/disabled=\{!canFinalize\}/);
+ assert.ok(form.includes("disabled={!canFinalize || isPending || state.success}"));
  assert.match(form,/todos os itens obrigatórios acima/);
 });
 test("assessment photo workflow links to the existing private file workspace",()=>{
