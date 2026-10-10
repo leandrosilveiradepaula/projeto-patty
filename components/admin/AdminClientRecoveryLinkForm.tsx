@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useState, useRef, useEffect } from "react";
 
 import {
   type ManualRecoveryLinkState,
@@ -38,8 +38,24 @@ export function AdminClientRecoveryLinkForm({
     }
   }
 
+  const inFlightRef = useRef(false);
+  useEffect(() => {
+    inFlightRef.current = false;
+  }, [state]);
+
   return (
-    <form action={formAction} className={styles.form}>
+    <form
+      action={formAction}
+      aria-busy={isPending}
+      className={styles.form}
+      onSubmit={(event) => {
+        if (inFlightRef.current || isPending || Boolean(state.recoveryLink)) {
+          event.preventDefault();
+          return;
+        }
+        inFlightRef.current = true;
+      }}
+    >
       {state.message ? (
         <Alert
           live="polite"
