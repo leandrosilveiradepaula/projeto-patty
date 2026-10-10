@@ -1,6 +1,6 @@
 import "server-only";
 import { collectScopedClientOperationalRows } from "@/lib/operations/client-operational-pagination";
-import { collectTrainingHistoryRows } from "@/lib/training/history-batches";
+import { collectTrainingHistoryRows, collectTrainingPagedRows } from "@/lib/training/history-batches";
 import { collectAnamnesisHistoryRows } from "@/lib/anamnesis/history-pagination";
 import { collectPublishedProtocolRows } from "@/lib/protocol/published-read-pagination";
 
@@ -435,20 +435,22 @@ export async function listAccessibleClientRegistrationsForClients(
 
 export async function listAccessibleClientTrainingRequests(clientId: string) {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("client_training_requests")
-    .select(
-      "id, client_id, recorded_by_profile_id, requested_at, note, created_at, profiles(display_name)",
-    )
-    .eq("client_id", clientId)
-    .order("requested_at", { ascending: false })
-    .order("id", { ascending: false });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  const rows = await collectTrainingPagedRows((from, to) =>
+    supabase
+      .from("client_training_requests")
+      .select("id, client_id, recorded_by_profile_id, requested_at, note, created_at, profiles(display_name)")
+      .eq("client_id", clientId)
+      .order("requested_at", { ascending: false })
+      .order("id", { ascending: false })
+      .range(from, to),
+  );
+  // The final ordering must not depend on date strings or batch boundaries.
+  return rows.sort((left, right) => {
+    const a = Date.parse(left.requested_at);
+    const b = Date.parse(right.requested_at);
+    return (Number.isFinite(b) ? b : -Infinity) -
+      (Number.isFinite(a) ? a : -Infinity) || left.id.localeCompare(right.id);
+  });
 }
 
 export async function listAccessibleClientTrainingRequestsForClients(
@@ -529,20 +531,18 @@ export async function listAccessibleClientTrainingPlanVersions(
   trainingPlanId: string,
 ) {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("client_training_plan_versions")
-    .select(
-      "id, training_plan_id, version_number, title, notes, created_by_profile_id, reviewed_at, reviewed_by_profile_id, published_at, published_by_profile_id, created_at",
-    )
-    .eq("training_plan_id", trainingPlanId)
-    .order("version_number", { ascending: false })
-    .order("id", { ascending: false });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  const rows = await collectTrainingPagedRows((from, to) =>
+    supabase
+      .from("client_training_plan_versions")
+      .select("id, training_plan_id, version_number, title, notes, created_by_profile_id, reviewed_at, reviewed_by_profile_id, published_at, published_by_profile_id, created_at")
+      .eq("training_plan_id", trainingPlanId)
+      .order("version_number", { ascending: false })
+      .order("id", { ascending: false })
+      .range(from, to),
+  );
+  return rows.sort((left, right) =>
+    right.version_number - left.version_number || left.id.localeCompare(right.id),
+  );
 }
 
 export async function listAccessibleClientTrainingPlanVersionsForPlans(
@@ -570,27 +570,20 @@ export async function listAccessibleClientTrainingPlanItems(
   trainingPlanVersionId: string,
 ) {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("client_training_plan_items")
-    .select(
-      "id, training_plan_version_id, position, exercise_version_id, exercise_name, sets_text, repetitions_text, rest_text, execution_notes, created_at",
-    )
-    .eq("training_plan_version_id", trainingPlanVersionId)
-    .order("position", { ascending: true })
-    .order("id", { ascending: true });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  const rows = await collectTrainingPagedRows((from, to) =>
+    supabase
+      .from("client_training_plan_items")
+      .select("id, training_plan_version_id, position, exercise_version_id, exercise_name, sets_text, repetitions_text, rest_text, execution_notes, created_at")
+      .eq("training_plan_version_id", trainingPlanVersionId)
+      .order("position", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
+  return rows.sort((left, right) =>
+    left.position - right.position || left.id.localeCompare(right.id),
+  );
 }
 
-/**
- * Load all published training items without a per-version N+1 request.
- * The caller passes only versions visible to the authenticated client.
- * RLS remains the final authority for every returned row.
- */
 export async function listAccessibleClientTrainingPlanItemsForVersions(
   versionIds: string[],
 ) {
@@ -1970,17 +1963,20 @@ export async function listPublishedExerciseVersionsForCurrentClient() {
 
 export async function listExerciseVersionsVisibleToCurrentAdmin() {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("exercise_versions")
-    .select("id, exercise_id, version_number, name, published_at, created_at")
-    .order("created_at", { ascending: false })
-    .order("id", { ascending: true });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  const rows = await collectTrainingPagedRows((from, to) =>
+    supabase
+      .from("exercise_versions")
+      .select("id, exercise_id, version_number, name, published_at, created_at")
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
+  return rows.sort((left, right) => {
+    const a = Date.parse(left.created_at);
+    const b = Date.parse(right.created_at);
+    return (Number.isFinite(b) ? b : -Infinity) -
+      (Number.isFinite(a) ? a : -Infinity) || left.id.localeCompare(right.id);
+  });
 }
 
 export async function getAccessibleExerciseForCurrentAdmin(exerciseId: string) {
