@@ -23,7 +23,7 @@ test("admin library remains separate from client-only prescribed workout selecti
   assert.match(page,/newestExerciseLibrarySummaries\(/);
   assert.match(client,/redirect\("\/cliente\/treino"\)/);
   assert.ok(!client.includes("listExerciseVersionsVisibleToCurrentAdmin"));
-  assert.match(workout,/listPublishedTraining/);
+  assert.match(workout,/publishedTrainingVersions\(trainingVersions\)/);
 });
 
 test("library history chooses stable version numbers independently of SQL ordering",()=>{
