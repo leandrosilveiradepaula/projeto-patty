@@ -151,3 +151,6 @@
 .link:hover {
   text-decoration: underline;
 }
+
+.history > li[id], .items > div[id] { scroll-margin-top: var(--space-4); }
+.history > li[id]:target, .items > div[id]:target { outline: 3px solid var(--color-accent); outline-offset: 2px; border-radius: var(--radius-md); }

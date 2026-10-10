@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -24,12 +24,14 @@ type Props =
       clientId: string;
       mode: "review";
       trainingPlanVersionId: string;
+      versionNumber?: number;
       disabled?: boolean;
     }
   | {
       clientId: string;
       mode: "publish";
       trainingPlanVersionId: string;
+      versionNumber?: number;
       disabled?: boolean;
     }
   | {
@@ -37,6 +39,7 @@ type Props =
       itemId: string;
       mode: "delete";
       trainingPlanVersionId: string;
+      itemLabel?: string;
       disabled?: boolean;
     };
 
@@ -44,6 +47,7 @@ export function AdminTrainingPlanLifecycleAction(props: Props) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmTransition, setConfirmTransition] = useState(false);
   const router = useRouter();
+  const inFlightRef = useRef(false);
 
   const action =
     props.mode === "review"
@@ -68,12 +72,14 @@ export function AdminTrainingPlanLifecycleAction(props: Props) {
   const [state, formAction, isPending] = useActionState(action, initialState);
 
   useEffect(() => {
+    inFlightRef.current = false;
     if (state.success) router.refresh();
-  }, [state.success, router]);
+  }, [state, router]);
 
-  if (props.mode === "delete" && !confirmDelete) {
+  if (props.mode === "delete" && !confirmDelete && !state.success) {
     return (
       <Button
+        disabled={props.disabled || isPending}
         onClick={() => setConfirmDelete(true)}
         size="compact"
         type="button"
@@ -84,10 +90,10 @@ export function AdminTrainingPlanLifecycleAction(props: Props) {
     );
   }
 
-  if (props.mode !== "delete" && !confirmTransition) {
+  if (props.mode !== "delete" && !confirmTransition && !state.success) {
     return (
       <Button
-        disabled={props.disabled}
+        disabled={props.disabled || isPending}
         onClick={() => setConfirmTransition(true)}
         type="button"
         variant={props.mode === "review" ? "secondary" : "primary"}
@@ -98,7 +104,13 @@ export function AdminTrainingPlanLifecycleAction(props: Props) {
   }
 
   return (
-    <form action={formAction} className={styles.actionForm}>
+    <form action={formAction} aria-busy={isPending} className={styles.actionForm} onSubmit={(event) => {
+      if (inFlightRef.current || isPending || state.success || props.disabled) {
+        event.preventDefault();
+        return;
+      }
+      inFlightRef.current = true;
+    }}>
       {state.message ? (
         <Alert
           live={state.success ? "polite" : "assertive"}
@@ -112,12 +124,12 @@ export function AdminTrainingPlanLifecycleAction(props: Props) {
       {props.mode === "delete" ? (
         <div className={styles.confirmation}>
           <p>
-            Remover este exercício do rascunho? Esta ação afeta somente a versão
+            Remover {props.itemLabel ? `"${props.itemLabel}"` : "este exercício"} do rascunho? Esta ação afeta somente a versão
             ainda não revisada.
           </p>
           <div className={styles.actionRow}>
             <Button
-              disabled={isPending}
+              disabled={isPending || state.success}
               onClick={() => setConfirmDelete(false)}
               size="compact"
               type="button"
@@ -126,6 +138,7 @@ export function AdminTrainingPlanLifecycleAction(props: Props) {
               Cancelar
             </Button>
             <Button
+              disabled={isPending || state.success}
               loading={isPending}
               size="compact"
               type="submit"
@@ -139,12 +152,12 @@ export function AdminTrainingPlanLifecycleAction(props: Props) {
         <div className={styles.confirmation}>
           <p>
             {props.mode === "review"
-              ? "Confirmar revisão? Esta versão ficará congelada e não poderá mais receber alterações nos exercícios ou orientações."
-              : "Confirmar publicação? Somente esta versão revisada ficará visível para a cliente. A ação não pode ser desfeita por esta tela."}
+              ? `Confirmar revisão da versão ${props.versionNumber ?? "selecionada"}? Ela ficará congelada e não poderá mais receber alterações nos exercícios ou orientações.`
+              : `Confirmar publicação da versão ${props.versionNumber ?? "selecionada"}? Somente esta versão revisada ficará visível para a cliente. A ação não pode ser desfeita por esta tela.`}
           </p>
           <div className={styles.actionRow}>
             <Button
-              disabled={isPending}
+              disabled={isPending || state.success}
               onClick={() => setConfirmTransition(false)}
               type="button"
               variant="ghost"
@@ -152,6 +165,7 @@ export function AdminTrainingPlanLifecycleAction(props: Props) {
               Cancelar
             </Button>
             <Button
+              disabled={props.disabled || isPending || state.success}
               loading={isPending}
               type="submit"
               variant={props.mode === "review" ? "secondary" : "primary"}

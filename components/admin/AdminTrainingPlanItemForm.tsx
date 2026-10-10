@@ -14,6 +14,8 @@ import { FormField } from "@/components/ui/FormField";
 import { TextInput } from "@/components/ui/TextInput";
 import { Textarea } from "@/components/ui/Textarea";
 
+import { isHistoricalExerciseSelectionUnavailable } from "@/lib/training/exercise-selection";
+
 import styles from "./AdminTrainingPlanForms.module.css";
 
 const initialState: TrainingPlanFormState = {
@@ -65,8 +67,14 @@ export function AdminTrainingPlanItemForm({
   const [state, formAction, isPending] = useActionState(action, initialState);
   const [selectedExerciseId, setSelectedExerciseId] = useState(item?.exerciseVersionId ?? "");
   const formRef = useRef<HTMLFormElement>(null);
+  const inFlightRef = useRef(false);
   const router = useRouter();
   const selectedExercise = exerciseOptions.find((exercise) => exercise.id === selectedExerciseId);
+  const missingHistoricalVersion = isHistoricalExerciseSelectionUnavailable(
+    item?.exerciseVersionId,
+    selectedExerciseId,
+    exerciseOptions,
+  );
 
   useEffect(() => {
     if (state.success) {
@@ -76,10 +84,27 @@ export function AdminTrainingPlanItemForm({
       }
       router.refresh();
     }
-  }, [state.success, item?.id, router]);
+    inFlightRef.current = false;
+  }, [state, item?.id, router]);
+
+  useEffect(() => {
+    setSelectedExerciseId(item?.exerciseVersionId ?? "");
+  }, [item?.exerciseVersionId]);
 
   return (
-    <form action={formAction} className={styles.form} ref={formRef}>
+    <form
+      action={formAction}
+      aria-busy={isPending}
+      className={styles.form}
+      onSubmit={(event) => {
+        if (inFlightRef.current || missingHistoricalVersion) {
+          event.preventDefault();
+          return;
+        }
+        inFlightRef.current = true;
+      }}
+      ref={formRef}
+    >
       {state.message ? (
         <Alert
           live={state.success ? "polite" : "assertive"}
@@ -100,11 +125,17 @@ export function AdminTrainingPlanItemForm({
         <span>Exercício da biblioteca (opcional)</span>
         <select
           className={styles.select}
+          disabled={isPending}
           name="exerciseVersionId"
           onChange={(event) => setSelectedExerciseId(event.target.value)}
           value={selectedExerciseId}
         >
           <option value="">Usar nome manual</option>
+          {missingHistoricalVersion ? (
+            <option disabled value={selectedExerciseId}>
+              Versão original indisponível — selecione uma versão publicada ou nome manual
+            </option>
+          ) : null}
           {exerciseOptions.map((exercise) => (
             <option key={exercise.id} value={exercise.id}>
               {exercise.name} · v{exercise.versionNumber}
@@ -112,7 +143,9 @@ export function AdminTrainingPlanItemForm({
           ))}
         </select>
         <small>
-          {selectedExercise
+          {missingHistoricalVersion
+            ? "Esta versão vinculada não está disponível no catálogo. A referência original foi preservada; selecione explicitamente outra versão publicada ou nome manual antes de salvar."
+            : selectedExercise
             ? `Selecionado: ${selectedExercise.name} · versão ${selectedExercise.versionNumber}. O nome manual não será enviado.`
             : "Sem versão selecionada: informe o nome manual abaixo para a prescrição."}
         </small>
@@ -127,7 +160,7 @@ export function AdminTrainingPlanItemForm({
           <TextInput
             {...fieldProps}
             defaultValue={item?.exerciseName}
-            disabled={Boolean(selectedExercise)}
+            disabled={isPending || Boolean(selectedExercise) || missingHistoricalVersion}
             maxLength={200}
             name="exerciseName"
             required={!selectedExercise}
@@ -144,6 +177,7 @@ export function AdminTrainingPlanItemForm({
             <TextInput
               {...fieldProps}
               defaultValue={item?.setsText}
+              disabled={isPending}
               maxLength={80}
               name="setsText"
               placeholder="Ex.: 3"
@@ -160,6 +194,7 @@ export function AdminTrainingPlanItemForm({
             <TextInput
               {...fieldProps}
               defaultValue={item?.repetitionsText}
+              disabled={isPending}
               maxLength={80}
               name="repetitionsText"
               placeholder="Ex.: 10–12"
@@ -178,6 +213,7 @@ export function AdminTrainingPlanItemForm({
           <TextInput
             {...fieldProps}
             defaultValue={item?.restText ?? undefined}
+            disabled={isPending}
             maxLength={120}
             name="restText"
             placeholder="Ex.: 60–90 s"
@@ -194,6 +230,7 @@ export function AdminTrainingPlanItemForm({
           <Textarea
             {...fieldProps}
             defaultValue={item?.executionNotes ?? undefined}
+            disabled={isPending}
             maxLength={2000}
             name="executionNotes"
             rows={3}
@@ -206,7 +243,7 @@ export function AdminTrainingPlanItemForm({
         depende da capacidade da paciente.
       </p>
 
-      <Button loading={isPending} type="submit">
+      <Button disabled={missingHistoricalVersion || isPending} loading={isPending} type="submit">
         {item ? "Salvar exercício" : "Adicionar exercício"}
       </Button>
     </form>
