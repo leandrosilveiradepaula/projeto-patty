@@ -82,7 +82,8 @@ test("Patty sees which specific published content versions are awaiting an asset
 test("missing released asset directs Patty to the content rather than a generic library index", () => {
   assert.ok(adminPage.includes("parentContentIdByVersionId"));
   assert.ok(adminPage.includes("parentContentIdByVersionId.has(contentVersion.id)"));
-  assert.ok(adminPage.includes("Verificar asset desta versão"));
+  assert.ok(adminPage.includes("Verificar arquivo desta versão"));
+  assert.ok(adminPage.includes("Conferir arquivos na biblioteca"));
   assert.ok(adminPage.includes("newestClientContentReleases(releases)"));
   assert.ok(adminPage.includes("id={`liberacao-${release.id}`}"));
 });
@@ -92,8 +93,11 @@ test("client educational library is newest-first, tied to explicitly released ex
   assert.ok(clientPage.includes("visibleReleases"));
   assert.ok(clientPage.includes("educational_content_versions"));
   assert.ok(clientPage.includes("id={`conteudo-liberado-${release.id}`}"));
-  assert.ok(clientPage.includes("assets.find((asset) => asset.asset_key === \"primary\")"));
-  assert.ok(clientPage.includes('href={`/cliente/conteudos/assets/${primaryAsset.id}`}'));
+  assert.ok(clientPage.includes("orderReleasedEducationalAssets("));
+  assert.ok(clientPage.includes('href={`/cliente/conteudos/assets/${asset.id}`}'));
+  assert.ok(clientPage.includes("releaseAssets.map((asset, index) =>"));
+  assert.ok(clientPage.includes('rel="noopener noreferrer"'));
+  assert.ok(clientPage.includes('target="_blank"'));
 });
 
 test("client library does not render a blank history when released versions are inaccessible", () => {
