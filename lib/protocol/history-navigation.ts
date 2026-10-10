@@ -34,9 +34,15 @@ export function latestPublishedProtocolVersionId(
   const validVersionIds = new Set(versions.map((version) => version.id));
   return [...publications]
     .filter((publication) => validVersionIds.has(publication.protocol_version_id))
-    .sort(
-      (a, b) =>
-        b.published_at.localeCompare(a.published_at) ||
-        a.id.localeCompare(b.id),
-    )[0]?.protocol_version_id ?? null;
+    .sort((a, b) => {
+      // An ISO offset changes lexical order, not the actual publication
+      // instant. Malformed legacy dates must never take priority.
+      const aTime = Date.parse(a.published_at);
+      const bTime = Date.parse(b.published_at);
+      const aValid = Number.isFinite(aTime);
+      const bValid = Number.isFinite(bTime);
+      if (aValid && bValid && aTime !== bTime) return bTime - aTime;
+      if (aValid !== bValid) return aValid ? -1 : 1;
+      return a.id.localeCompare(b.id);
+    })[0]?.protocol_version_id ?? null;
 }

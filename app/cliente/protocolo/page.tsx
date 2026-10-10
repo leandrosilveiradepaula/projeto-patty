@@ -11,6 +11,7 @@ import styles from "./page.module.css";
 import Link from "next/link";
 
 function formatPublishedAt(value: string) {
+  if (!Number.isFinite(Date.parse(value))) return "Data indisponível";
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     month: "2-digit",

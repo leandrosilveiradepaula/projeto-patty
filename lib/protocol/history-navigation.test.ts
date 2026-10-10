@@ -48,7 +48,11 @@ test("administrative protocol page opens selected history without treating an un
   const page=read("app/admin/protocolos/[protocoloId]/page.tsx");
   assert.match(page,/requestedProtocolVersion\(requestedVersion, versions\)/);
   assert.match(page,/latestPublishedProtocolVersionId\(versions, publications\)/);
-  assert.match(page,/open=\{isCurrentVersion \|\| isRequestedVersion\}/);
+  assert.ok(page.includes("defaultOpen={isCurrentVersion || isRequestedVersion}"));
+  assert.ok(page.includes('id={`versao-${version.version_number}`}'));
+  assert.ok(page.includes("<ClientHistoryDisclosure"));
+  const disclosure=read("components/client/ClientHistoryDisclosure.tsx");
+  assert.ok(disclosure.includes("details.open = true"));
   assert.match(page,/versao=\$\{version\.version_number\}#versao-/);
   assert.match(page,/Última publicada deste protocolo/);
   assert.match(page,/Nenhum rascunho ou versão ainda não publicada substitui automaticamente/);
@@ -61,4 +65,37 @@ test("client receives links to exact released snapshots without exposing drafts"
   assert.match(page,/publications\.length > 1/);
   assert.match(page,/aria-label="Ir para plano publicado"/);
   assert.match(page,/id=\{\`publicacao-\$\{publication\.id\}\`\}/);
+});
+
+test("protocol publication chronology compares actual instants across timezone offsets", () => {
+  const publications=[
+    {id:"later-offset",protocol_version_id:"v2",published_at:"2026-10-10T10:00:00-03:00"},
+    {id:"earlier-lexical",protocol_version_id:"v1",published_at:"2026-10-10T14:00:00+02:00"},
+    {id:"invalid-legacy",protocol_version_id:"v3",published_at:"legacy-not-a-date"},
+  ];
+  assert.equal(latestPublishedProtocolVersionId(versions,publications),"v2");
+  assert.equal(latestPublishedProtocolVersionId(versions,[...publications].reverse()),"v2");
+});
+
+test("invalid historical publication dates sort last and stable IDs break ties", () => {
+  const publications=[
+    {id:"z",protocol_version_id:"v3",published_at:"malformed"},
+    {id:"a",protocol_version_id:"v1",published_at:"2026-10-10T10:00:00Z"},
+    {id:"b",protocol_version_id:"v2",published_at:"2026-10-10T07:00:00-03:00"},
+  ];
+  assert.equal(latestPublishedProtocolVersionId(versions,publications),"v1");
+  assert.equal(latestPublishedProtocolVersionId(versions,publications.slice(0,1)),"v3");
+  assert.equal(latestPublishedProtocolVersionId(versions,[]),null);
+});
+
+test("professional and client protocol timestamps show a neutral label when malformed", () => {
+  const admin=read("app/admin/protocolos/[protocoloId]/page.tsx");
+  const listing=read("app/admin/clientes/[clienteId]/protocolos/page.tsx");
+  const client=read("app/cliente/protocolo/page.tsx");
+  for(const source of [admin,listing,client]) {
+    assert.ok(source.includes("Number.isFinite(Date.parse(value))"));
+  }
+  assert.ok(admin.includes("Não registrado"));
+  assert.ok(listing.includes("Data indisponível"));
+  assert.ok(client.includes("Data indisponível"));
 });

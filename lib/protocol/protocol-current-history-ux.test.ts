@@ -13,7 +13,8 @@ const page = fs.readFileSync(
 test("protocol workspace keeps the newest version open and history collapsible", () => {
   assert.match(page, /versions\.map\(\(version, versionIndex\)/);
   assert.match(page, /const isCurrentVersion = versionIndex === 0/);
-  assert.match(page, /<details className=\{styles\.versionDetails\} open=\{isCurrentVersion \|\| isRequestedVersion\}>/);
+  assert.ok(page.includes("<ClientHistoryDisclosure"));
+  assert.ok(page.includes("defaultOpen={isCurrentVersion || isRequestedVersion}"));
   assert.match(page, /Versão \{version\.version_number\}/);
   assert.match(page, /isCurrentVersion \? " · mais recente" : ""/);
 });

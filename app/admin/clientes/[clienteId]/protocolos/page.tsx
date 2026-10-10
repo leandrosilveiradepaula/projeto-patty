@@ -127,6 +127,7 @@ function formatProtocolType(value: string) {
 }
 
 function formatCreatedAt(value: string) {
+  if (!Number.isFinite(Date.parse(value))) return "Data indisponível";
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     month: "2-digit",

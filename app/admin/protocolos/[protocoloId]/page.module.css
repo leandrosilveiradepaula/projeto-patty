@@ -160,7 +160,7 @@
 
 /* Keep anchored sections visible below surrounding navigation. */
 :global(section[id]),
-.versionItem[id] {
+.versionDetails[id] {
   scroll-margin-top: var(--space-6);
 }
 
@@ -169,18 +169,18 @@
   min-width: 0;
 }
 
-.versionSummary {
+.versionDetails > summary {
   cursor: pointer;
   list-style-position: outside;
 }
 
-.versionSummary:focus-visible {
+.versionDetails > summary:focus-visible {
   outline: 3px solid var(--color-brand);
   outline-offset: 3px;
   border-radius: var(--radius-small);
 }
 
-.versionSummary .versionHeader {
+.versionDetails > summary .versionHeader {
   display: inline-flex;
   width: calc(100% - var(--space-5));
   margin-left: var(--space-2);
@@ -193,12 +193,12 @@
   padding-top: var(--space-4);
 }
 
-.versionDetails:not([open]) .versionSummary {
+.versionDetails:not([open]) > summary {
   min-height: 44px;
 }
 
 @media (max-width: 767px) {
-  .versionSummary .versionHeader {
+  .versionDetails > summary .versionHeader {
     width: calc(100% - var(--space-4));
   }
 }
@@ -217,4 +217,10 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
+}
+
+.versionDetails:target {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 3px;
+  border-radius: var(--radius-small);
 }
