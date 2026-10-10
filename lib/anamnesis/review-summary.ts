@@ -13,7 +13,8 @@ export function compareAnamnesisReviewChronology(
   const leftValid = Number.isFinite(leftTime);
   const rightValid = Number.isFinite(rightTime);
   if (leftValid && rightValid && leftTime !== rightTime) return leftTime - rightTime;
-  if (leftValid !== rightValid) return leftValid ? -1 : 1;
+  // Invalid legacy timestamps remain visible but cannot supersede dated notes.
+  if (leftValid !== rightValid) return leftValid ? 1 : -1;
   return left.id.localeCompare(right.id);
 }
 
