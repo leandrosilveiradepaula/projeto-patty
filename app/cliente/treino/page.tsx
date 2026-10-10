@@ -128,6 +128,11 @@ export default async function ClientTrainingPage() {
               <p className={styles.note}>{latestPublished.notes}</p>
             ) : null}
 
+            {trainingItems.length === 0 ? (
+              <Alert title="Treino publicado sem exercícios registrados" variant="info">
+                Nenhum exercício consta nesta versão publicada. Confira com a Patty antes de iniciar o treino.
+              </Alert>
+            ) : (
             <ol className={styles.workoutList}>
               {trainingItems.map((item) => (
                 <li key={item.id}>
@@ -155,6 +160,7 @@ export default async function ClientTrainingPage() {
                 </li>
               ))}
             </ol>
+            )}
           </Card>
           <Alert title="Sobre carga e peso" variant="info">
             A carga não é exibida aqui como um valor fixo. Siga as orientações
@@ -189,6 +195,9 @@ export default async function ClientTrainingPage() {
               >
                 <div className={styles.previousTrainingBody}>
                   {version.notes ? <p className={styles.note}>{version.notes}</p> : null}
+                  {items.length === 0 ? (
+                    <p className={styles.note}>Nenhum exercício registrado nesta versão publicada anterior.</p>
+                  ) : (
                   <ol className={styles.workoutList}>
                     {items.map((item) => (
                       <li key={item.id}>
@@ -205,6 +214,7 @@ export default async function ClientTrainingPage() {
                       </li>
                     ))}
                   </ol>
+                  )}
                 </div>
               </ClientHistoryDisclosure>
             ))}
