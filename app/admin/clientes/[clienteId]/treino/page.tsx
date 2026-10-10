@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { Alert } from "@/components/ui/Alert";
-import { latestPublishedTrainingVersion } from "@/lib/training/published-versions";
+import { publishedTrainingVersions } from "@/lib/training/published-versions";
+import { ClientHistoryDisclosure } from "@/components/client/ClientHistoryDisclosure";
 import { isTrainingRequestAfterPublication } from "@/lib/training/request-follow-up";
 import { newestTrainingRequests, newestUnpublishedTrainingVersion } from "@/lib/training/operational-order";
 import { orderPublishedExerciseOptions } from "@/lib/training/exercise-selection";
@@ -19,6 +20,7 @@ import {
   getAccessibleClient,
   getAccessibleClientTrainingPlan,
   listAccessibleClientTrainingPlanItems,
+  listAccessibleClientTrainingPlanItemsForVersions,
   listAccessibleClientTrainingPlanVersions,
   listAccessibleClientTrainingRequests,
   listExerciseVersionsVisibleToCurrentAdmin,
@@ -33,6 +35,7 @@ type Props = {
 };
 
 function formatDateTime(value: string) {
+  if (!Number.isFinite(Date.parse(value))) return "Data indisponível";
   return new Intl.DateTimeFormat("pt-BR", {
     dateStyle: "short",
     timeStyle: "short",
@@ -77,7 +80,8 @@ export default async function AdminClientTrainingPage({ params }: Props) {
     (left, right) => right.version_number - left.version_number || left.id.localeCompare(right.id),
   );
   const openVersion = newestUnpublishedTrainingVersion(versions);
-  const latestPublished = latestPublishedTrainingVersion(versions);
+  const publishedVersions = publishedTrainingVersions(versions);
+  const latestPublished = publishedVersions[0] ?? null;
   const newRequestAfterPublication = Boolean(
     orderedRequests[0] && latestPublished &&
     isTrainingRequestAfterPublication(orderedRequests[0].requested_at, latestPublished.published_at),
@@ -94,21 +98,33 @@ export default async function AdminClientTrainingPage({ params }: Props) {
           ? { label: "Solicitado", variant: "neutral" as const }
           : { label: "Não solicitado", variant: "neutral" as const };
 
-  const [openItems, publishedItems] = await Promise.all([
+  const [openItems, publishedHistoryItems] = await Promise.all([
     openVersion
       ? listAccessibleClientTrainingPlanItems(openVersion.id)
       : Promise.resolve([]),
-    latestPublished
-      ? listAccessibleClientTrainingPlanItems(latestPublished.id)
-      : Promise.resolve([]),
+    listAccessibleClientTrainingPlanItemsForVersions(publishedVersions.map((version) => version.id)),
   ]);
+  const publishedItemsByVersion = new Map<string, typeof publishedHistoryItems>();
+  for (const item of publishedHistoryItems) {
+    const items = publishedItemsByVersion.get(item.training_plan_version_id) ?? [];
+    items.push(item);
+    publishedItemsByVersion.set(item.training_plan_version_id, items);
+  }
+  const sortedHistoryItemsByVersion = new Map(
+    publishedVersions.map((version) => [
+      version.id,
+      [...(publishedItemsByVersion.get(version.id) ?? [])].sort(
+        (left, right) => left.position - right.position || left.id.localeCompare(right.id),
+      ),
+    ]),
+  );
 
   const sortedOpenItems = [...openItems].sort(
     (a, b) => a.position - b.position || a.id.localeCompare(b.id),
   );
-  const sortedPublishedItems = [...publishedItems].sort(
-    (a, b) => a.position - b.position || a.id.localeCompare(b.id),
-  );
+  const sortedPublishedItems = latestPublished
+    ? sortedHistoryItemsByVersion.get(latestPublished.id) ?? []
+    : [];
 
   const exerciseOptions = orderPublishedExerciseOptions(
     exerciseVersions
@@ -375,32 +391,80 @@ export default async function AdminClientTrainingPage({ params }: Props) {
             title="Sem versões"
           />
         ) : (
-          <ol className={styles.history}>
-            {orderedVersions.map((version) => {
-              const status = versionStatus(version);
-
-              return (
-                <li id={`versao-treino-${version.id}`} key={version.id}>
-                  <Card className={styles.historyCard} variant="subtle">
-                    <div>
-                      <strong>
-                        Versão {version.version_number} · {version.title}
-                      </strong>
-                      <p className={styles.itemMeta}>
-                        Criada em {formatDateTime(version.created_at)}
-                        {version.published_at
-                          ? ` · publicada em ${formatDateTime(version.published_at)}`
-                          : version.reviewed_at
-                            ? ` · revisada em ${formatDateTime(version.reviewed_at)}`
-                            : ""}
-                      </p>
-                    </div>
-                    <Badge variant={status.variant}>{status.label}</Badge>
-                  </Card>
-                </li>
-              );
-            })}
-          </ol>
+          <>
+            {publishedVersions.length > 0 ? (
+              <nav aria-label="Ir para treino publicado no histórico" className={styles.versionNavigation}>
+                {publishedVersions.map((version) => (
+                  <a href={`#versao-treino-${version.id}`} key={version.id}>
+                    Versão {version.version_number} · {version.id === latestPublished?.id ? "Atual para cliente" : "Anterior"}
+                  </a>
+                ))}
+              </nav>
+            ) : null}
+            <ol className={styles.history}>
+              {orderedVersions.map((version) => {
+                const status = versionStatus(version);
+                const versionItems = sortedHistoryItemsByVersion.get(version.id) ?? [];
+                const meta = `Criada em ${formatDateTime(version.created_at)}${version.published_at
+                  ? ` · publicada em ${formatDateTime(version.published_at)}`
+                  : version.reviewed_at
+                    ? ` · revisada em ${formatDateTime(version.reviewed_at)}`
+                    : ""}`;
+                return (
+                  <li key={version.id}>
+                    {version.published_at ? (
+                      <ClientHistoryDisclosure
+                        className={styles.publishedHistoryDisclosure}
+                        id={`versao-treino-${version.id}`}
+                        summary={
+                          <span className={styles.publishedHistorySummary}>
+                            <span>
+                              <strong>Versão {version.version_number} · {version.title}</strong>
+                              <span className={styles.itemMeta}>{meta}</span>
+                            </span>
+                            <Badge variant="positive">
+                              {version.id === latestPublished?.id ? "Atual para cliente" : "Publicado"}
+                            </Badge>
+                          </span>
+                        }
+                      >
+                        <div className={styles.publishedHistoryBody}>
+                          <p className={styles.description}>
+                            Esta é a versão publicada para a cliente. A consulta do histórico não permite editar nem republicar este registro.
+                          </p>
+                          {version.notes ? <p className={styles.note}>Orientações gerais: {version.notes}</p> : null}
+                          {versionItems.length === 0 ? (
+                            <p className={styles.description}>Nenhum exercício registrado nesta versão publicada.</p>
+                          ) : (
+                            <ol className={styles.publishedList}>
+                              {versionItems.map((item) => (
+                                <li key={item.id}>
+                                  <strong>{item.position}. {item.exercise_name}</strong>
+                                  <span>
+                                    {item.sets_text} séries · {item.repetitions_text} repetições
+                                    {item.rest_text ? ` · descanso ${item.rest_text}` : ""}
+                                  </span>
+                                  {item.execution_notes ? <small>Orientações: {item.execution_notes}</small> : null}
+                                </li>
+                              ))}
+                            </ol>
+                          )}
+                        </div>
+                      </ClientHistoryDisclosure>
+                    ) : (
+                      <Card className={styles.historyCard} id={`versao-treino-${version.id}`} variant="subtle">
+                        <div>
+                          <strong>Versão {version.version_number} · {version.title}</strong>
+                          <p className={styles.itemMeta}>{meta}</p>
+                        </div>
+                        <Badge variant={status.variant}>{status.label}</Badge>
+                      </Card>
+                    )}
+                  </li>
+                );
+              })}
+            </ol>
+          </>
         )}
       </Section>
 
@@ -416,6 +480,7 @@ export default async function AdminClientTrainingPage({ params }: Props) {
                   Versão {latestPublished.version_number}
                 </p>
                 <h2 className={styles.title}>{latestPublished.title}</h2>
+                  <a className={styles.link} href={`#versao-treino-${latestPublished.id}`}>Conferir versão publicada no histórico</a>
               </div>
               <Badge variant="neutral">Publicado</Badge>
             </div>
