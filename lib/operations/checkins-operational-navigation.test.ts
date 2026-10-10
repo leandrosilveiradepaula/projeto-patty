@@ -30,7 +30,7 @@ test("both liquid correction selectors avoid implicit remapping to first active 
 
 test("client cannot submit new liquid without configured kinds and sees why", () => {
   assert.ok(client.includes('title="Tipos de líquido indisponíveis"'));
-  assert.match(client, /<CheckinSubmitButton\\s+disabled=\\{liquidTaxonomy\\.kinds\\.length === 0\\}\\s*>Registrar líquido/);
+  assert.match(client, /<CheckinSubmitButton\s+disabled=\{liquidTaxonomy\.kinds\.length === 0\}\s*>Registrar líquido/);
   assert.ok(client.includes('max={2_147_483_647}'));
   assert.ok(client.includes('step="1"'));
 });
