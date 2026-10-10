@@ -39,6 +39,7 @@ function formatMl(value: number) {
 }
 
 function formatDate(value: string) {
+  if (!Number.isFinite(Date.parse(value))) return "Data indisponível";
   return new Intl.DateTimeFormat("pt-BR", {
     dateStyle: "short",
     timeStyle: "short",
@@ -236,6 +237,16 @@ export default async function AdminClientCheckinsPage({
                     <p className={styles.description}>
                       Resposta registrada em {formatDate(event.recorded_at)}
                     </p>
+                    {correction ? (
+                      <p className={styles.description}>
+                        Original: {event.did_activity ? "Sim" : "Não"} em {event.checkin_date}.
+                        A resposta efetiva é {effectiveDidActivity ? "Sim" : "Não"}
+                        {correction.corrected_checkin_date !== event.checkin_date
+                          ? ` e a data efetiva é ${correction.corrected_checkin_date}`
+                          : ""}.
+                        O filtro do histórico utiliza a data original para localizar este registro.
+                      </p>
+                    ) : null}
                     <details className={styles.correction}>
                       <summary>Corrigir resposta</summary>
                       <CheckinActionForm
@@ -253,7 +264,7 @@ export default async function AdminClientCheckinsPage({
                       </CheckinActionForm>
                       {correction ? (
                         <p className={styles.description}>
-                          Original: {event.did_activity ? "Sim" : "Não"}. A correção mais recente foi registrada em {formatDate(correction.created_at)}.
+                          Última correção registrada em {formatDate(correction.created_at)}. O original e todas as correções permanecem preservados.
                         </p>
                       ) : null}
                     </details>
