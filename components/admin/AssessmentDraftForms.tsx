@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/FormField";
 import { TextInput } from "@/components/ui/TextInput";
 import styles from "./AssessmentDraftForms.module.css";
+import { useAssessmentSubmitGuard } from "./useAssessmentSubmitGuard";
 
 const initialState: AssessmentDraftActionState = {
   message: null,
@@ -55,6 +56,7 @@ export function AssessmentDraftMetadataForm({
 }) {
   const action = updateAssessmentDraftAction.bind(null, assessmentId);
   const [state, formAction, isPending] = useActionState(action, initialState);
+  const guardSubmit = useAssessmentSubmitGuard(state, isPending);
   const router = useRouter();
 
   useEffect(() => {
@@ -62,7 +64,7 @@ export function AssessmentDraftMetadataForm({
   }, [state, router]);
 
   return (
-    <form action={formAction} className={styles.form}>
+    <form aria-busy={isPending} onSubmit={guardSubmit} action={formAction} className={styles.form}>
       <ActionAlert state={state} />
 
       <FormField
@@ -75,6 +77,7 @@ export function AssessmentDraftMetadataForm({
             {...fieldProps}
             className={styles.select}
             defaultValue={assessmentKind ?? ""}
+            disabled={isPending}
             name="assessmentKind"
             required
           >
@@ -99,6 +102,7 @@ export function AssessmentDraftMetadataForm({
           <TextInput
             {...fieldProps}
             defaultValue={assessedAt.slice(0, 10)}
+            disabled={isPending}
             name="assessedAt"
             required
             type="date"
@@ -106,7 +110,7 @@ export function AssessmentDraftMetadataForm({
         )}
       </FormField>
 
-      <Button loading={isPending} type="submit" variant="secondary">
+      <Button disabled={isPending} loading={isPending} type="submit" variant="secondary">
         Salvar dados do rascunho
       </Button>
     </form>
@@ -127,6 +131,7 @@ export function AssessmentMeasurementForm({
   const formRef = useRef<HTMLFormElement>(null);
   const action = saveAssessmentMeasurementAction.bind(null, assessmentId);
   const [state, formAction, isPending] = useActionState(action, initialState);
+  const guardSubmit = useAssessmentSubmitGuard(state, isPending);
   const router = useRouter();
 
   useEffect(() => {
@@ -137,7 +142,7 @@ export function AssessmentMeasurementForm({
   }, [state, router]);
 
   return (
-    <form action={formAction} className={styles.form} ref={formRef}>
+    <form aria-busy={isPending} onSubmit={guardSubmit} action={formAction} className={styles.form} ref={formRef}>
       <ActionAlert state={state} />
 
       <div className={styles.measurementGrid}>
@@ -156,6 +161,7 @@ export function AssessmentMeasurementForm({
                 measurementOptions[0]?.key ??
                 ""
               }
+              disabled={isPending}
               name="measurementKey"
               required
             >
@@ -183,6 +189,7 @@ export function AssessmentMeasurementForm({
             <TextInput
               {...fieldProps}
               inputMode="decimal"
+              disabled={isPending}
               name="measurementValue"
               placeholder="Ex.: 74,5"
               required
@@ -200,6 +207,7 @@ export function AssessmentMeasurementForm({
             <TextInput
               {...fieldProps}
               maxLength={40}
+              disabled={isPending}
               name="unit"
               placeholder="Ex.: cm"
               required
@@ -213,7 +221,7 @@ export function AssessmentMeasurementForm({
         estiver em rascunho.
       </p>
 
-      <Button disabled={measurementOptions.length === 0} loading={isPending} type="submit">
+      <Button disabled={measurementOptions.length === 0 || isPending} loading={isPending} type="submit">
         Salvar medida
       </Button>
     </form>
@@ -233,6 +241,7 @@ export function AssessmentDeleteMeasurementButton({
     measurementId,
   );
   const [state, formAction, isPending] = useActionState(action, initialState);
+  const guardSubmit = useAssessmentSubmitGuard(state, isPending, state.success);
   const [confirmRemoval, setConfirmRemoval] = useState(false);
   const router = useRouter();
 
@@ -249,14 +258,14 @@ export function AssessmentDeleteMeasurementButton({
   }
 
   return (
-    <form action={formAction} className={styles.inlineAction}>
+    <form aria-busy={isPending} onSubmit={guardSubmit} action={formAction} className={styles.inlineAction}>
       <ActionAlert state={state} />
       <p className={styles.notice}>Confirma a remoção desta medida do rascunho? Esta ação não altera avaliações finalizadas.</p>
       <div className={styles.actionRow}>
         <Button disabled={isPending} onClick={() => setConfirmRemoval(false)} size="compact" type="button" variant="ghost">
           Cancelar
         </Button>
-        <Button loading={isPending} size="compact" type="submit" variant="danger">
+        <Button disabled={isPending || state.success} loading={isPending} size="compact" type="submit" variant="danger">
           Confirmar remoção
         </Button>
       </div>
@@ -277,6 +286,7 @@ export function AssessmentPhotoLinkForm({
   const formRef = useRef<HTMLFormElement>(null);
   const action = linkAssessmentPhotoAction.bind(null, assessmentId);
   const [state, formAction, isPending] = useActionState(action, initialState);
+  const guardSubmit = useAssessmentSubmitGuard(state, isPending);
   const router = useRouter();
 
   useEffect(() => {
@@ -287,7 +297,7 @@ export function AssessmentPhotoLinkForm({
   }, [state, router]);
 
   return (
-    <form action={formAction} className={styles.form} ref={formRef}>
+    <form aria-busy={isPending} onSubmit={guardSubmit} action={formAction} className={styles.form} ref={formRef}>
       <ActionAlert state={state} />
 
       <FormField
@@ -301,6 +311,7 @@ export function AssessmentPhotoLinkForm({
             {...fieldProps}
             className={styles.select}
             defaultValue=""
+            disabled={isPending}
             name="clientFileId"
             required
           >
@@ -317,7 +328,7 @@ export function AssessmentPhotoLinkForm({
       </FormField>
 
       <Button
-        disabled={photos.length === 0}
+        disabled={photos.length === 0 || isPending}
         loading={isPending}
         type="submit"
         variant="secondary"
@@ -341,6 +352,7 @@ export function AssessmentPhotoUnlinkButton({
     clientFileId,
   );
   const [state, formAction, isPending] = useActionState(action, initialState);
+  const guardSubmit = useAssessmentSubmitGuard(state, isPending, state.success);
   const [confirmUnlink, setConfirmUnlink] = useState(false);
   const router = useRouter();
 
@@ -357,14 +369,14 @@ export function AssessmentPhotoUnlinkButton({
   }
 
   return (
-    <form action={formAction} className={styles.inlineAction}>
+    <form aria-busy={isPending} onSubmit={guardSubmit} action={formAction} className={styles.inlineAction}>
       <ActionAlert state={state} />
       <p className={styles.notice}>Desvincular esta foto da avaliação? O arquivo privado original será preservado.</p>
       <div className={styles.actionRow}>
         <Button disabled={isPending} onClick={() => setConfirmUnlink(false)} size="compact" type="button" variant="ghost">
           Cancelar
         </Button>
-        <Button loading={isPending} size="compact" type="submit" variant="outline">
+        <Button disabled={isPending || state.success} loading={isPending} size="compact" type="submit" variant="outline">
           Confirmar desvinculação
         </Button>
       </div>
@@ -387,6 +399,7 @@ export function AssessmentFinalizeForm({
 }) {
   const action = finalizeAssessmentAction.bind(null, assessmentId);
   const [state, formAction, isPending] = useActionState(action, initialState);
+  const guardSubmit = useAssessmentSubmitGuard(state, isPending, state.success);
   const router = useRouter();
 
   useEffect(() => {
@@ -394,7 +407,7 @@ export function AssessmentFinalizeForm({
   }, [state, router]);
 
   return (
-    <form action={formAction} className={styles.form}>
+    <form aria-busy={isPending} onSubmit={guardSubmit} action={formAction} className={styles.form}>
       <ActionAlert state={state} />
 
       <div className={styles.readiness}>
@@ -419,7 +432,7 @@ export function AssessmentFinalizeForm({
       ) : null}
 
       <label className={styles.confirmation}>
-        <input disabled={!canFinalize || isPending} name="confirmFinalization" required type="checkbox" value="yes" />
+        <input disabled={!canFinalize || isPending || state.success} name="confirmFinalization" required type="checkbox" value="yes" />
         <span>
           Revisei data, tipo, medidas e fotos. Entendo que a finalização torna
           esses dados imutáveis e que correções futuras deverão usar um fluxo
@@ -427,7 +440,7 @@ export function AssessmentFinalizeForm({
         </span>
       </label>
 
-      <Button disabled={!canFinalize} loading={isPending} type="submit">
+      <Button disabled={!canFinalize || isPending || state.success} loading={isPending} type="submit">
         Finalizar avaliação
       </Button>
     </form>

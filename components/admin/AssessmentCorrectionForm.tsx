@@ -11,6 +11,7 @@ import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 
 import styles from "./AssessmentCorrectionForm.module.css";
+import { useAssessmentSubmitGuard } from "./useAssessmentSubmitGuard";
 
 const initialState: AssessmentCorrectionFormState = {
   message: null,
@@ -34,6 +35,7 @@ export function AssessmentCorrectionForm({
     measurementId,
   );
   const [state, formAction, isPending] = useActionState(action, initialState);
+  const guardSubmit = useAssessmentSubmitGuard(state, isPending, state.success);
   const router = useRouter();
 
   useEffect(() => {
@@ -41,7 +43,7 @@ export function AssessmentCorrectionForm({
   }, [state, router]);
 
   return (
-    <form action={formAction} className={styles.form}>
+    <form action={formAction} aria-busy={isPending} className={styles.form} onSubmit={guardSubmit}>
       {state.message ? (
         <Alert
           live={state.success ? "polite" : "assertive"}
@@ -57,6 +59,7 @@ export function AssessmentCorrectionForm({
             <span>Valor corrigido</span>
             <input
               defaultValue={String(measurementValue)}
+              disabled={isPending}
               inputMode="decimal"
               name="correctedMeasurementValue"
               required
@@ -64,13 +67,13 @@ export function AssessmentCorrectionForm({
           </label>
           <label className={styles.field}>
             <span>Unidade</span>
-            <input defaultValue={measurementUnit} maxLength={40} name="correctedUnit" required />
+            <input defaultValue={measurementUnit} disabled={isPending} maxLength={40} name="correctedUnit" required />
           </label>
           <label className={styles.field}>
             <span>Observação opcional</span>
-            <input maxLength={4000} name="correctionNote" />
+            <input disabled={isPending} maxLength={4000} name="correctionNote" />
           </label>
-          <Button loading={isPending} type="submit">
+          <Button disabled={isPending || state.success} loading={isPending} type="submit">
             Registrar correção
           </Button>
         </>

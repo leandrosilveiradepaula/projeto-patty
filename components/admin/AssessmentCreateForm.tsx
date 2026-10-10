@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/FormField";
 import { TextInput } from "@/components/ui/TextInput";
 import styles from "./AssessmentCreateForm.module.css";
+import { useAssessmentSubmitGuard } from "./useAssessmentSubmitGuard";
 
 const initialState: CreateAssessmentState = {
   message: null,
@@ -36,6 +37,7 @@ export function AssessmentCreateForm({
 }: AssessmentCreateFormProps) {
   const action = createAssessmentAction.bind(null, clientId);
   const [state, formAction, isPending] = useActionState(action, initialState);
+  const guardSubmit = useAssessmentSubmitGuard(state, isPending);
   const [selectedKind, setSelectedKind] = useState("");
 
   const selectedOption = useMemo(
@@ -53,7 +55,7 @@ export function AssessmentCreateForm({
         : null;
 
   return (
-    <form action={formAction} className={styles.form}>
+    <form action={formAction} aria-busy={isPending} className={styles.form} onSubmit={guardSubmit}>
       {state.message ? (
         <Alert live="assertive" title="Não foi possível criar" variant="critical">
           {state.message}
@@ -70,6 +72,7 @@ export function AssessmentCreateForm({
           <select
             {...fieldProps}
             className={styles.select}
+            disabled={isPending}
             name="assessmentKind"
             value={selectedKind}
             onChange={(event) => setSelectedKind(event.target.value)}
@@ -102,6 +105,7 @@ export function AssessmentCreateForm({
         {(fieldProps) => (
           <TextInput
             {...fieldProps}
+            disabled={isPending}
             name="assessedAt"
             required
             type="date"
@@ -114,7 +118,7 @@ export function AssessmentCreateForm({
         ajustadas até a finalização explícita.
       </p>
 
-      <Button disabled={kindOptions.length === 0} loading={isPending} type="submit">
+      <Button disabled={kindOptions.length === 0 || isPending} loading={isPending} type="submit">
         Criar rascunho de avaliação
       </Button>
     </form>
