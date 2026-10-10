@@ -1,4 +1,5 @@
 import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
+import { newestClientContentReleases } from "@/lib/content/release-order";
 import { ClientContentCard } from "@/components/client/ClientContentCard";
 import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -17,11 +18,13 @@ export default async function ClienteConteudosPage() {
   const releases = client
     ? await listCurrentClientContentReleases(client.id)
     : null;
-  const releasedVersions =
-    releases
-      ?.map((release) => release.educational_content_versions)
-      .filter((version): version is NonNullable<typeof version> => Boolean(version)) ??
-    [];
+  const orderedReleases = newestClientContentReleases(releases ?? []);
+  const visibleReleases = orderedReleases.filter(
+    (release) => Boolean(release.educational_content_versions),
+  );
+  const releasedVersions = visibleReleases.map(
+    (release) => release.educational_content_versions!,
+  );
   const assets = client
     ? await listEducationalContentAssetsForCurrentClientVersions(
         releasedVersions.map((version) => version.id),
@@ -55,15 +58,19 @@ export default async function ClienteConteudosPage() {
             title="Conteúdos indisponíveis"
             action={<Link href="/cliente">Voltar ao início</Link>}
           />
-        ) : releases?.length === 0 ? (
+        ) : visibleReleases.length === 0 ? (
           <EmptyState
-            description="Ainda não há conteúdos liberados pela Patty para sua conta. As liberações dependem de uma decisão profissional e aparecerão aqui."
+            description={
+              orderedReleases.length > 0
+                ? "Há registros de liberação, mas as respectivas versões não estão disponíveis para consulta nesta conta. Solicite a verificação à Patty."
+                : "Ainda não há conteúdos liberados pela Patty para sua conta. As liberações dependem de uma decisão profissional e aparecerão aqui."
+            }
             title="Nenhum conteúdo foi liberado para você ainda"
             action={<Link href="/cliente">Voltar ao início</Link>}
           />
         ) : (
           <ul className={styles.contentList}>
-            {releases?.map((release) => {
+            {visibleReleases.map((release) => {
               const contentVersion = release.educational_content_versions;
               if (!contentVersion) {
                 return null;
@@ -74,7 +81,7 @@ export default async function ClienteConteudosPage() {
                 assets.find((asset) => asset.asset_key === "primary") ?? assets[0] ?? null;
 
               return (
-                <li key={release.id}>
+                <li id={`conteudo-liberado-${release.id}`} key={release.id}>
                   <ClientContentCard
                     category={contentVersion.category_key ?? "Não informado"}
                     meta={

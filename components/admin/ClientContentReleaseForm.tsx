@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -38,9 +38,11 @@ export function ClientContentReleaseForm({
   const router = useRouter();
   const [selectedVersionId, setSelectedVersionId] = useState("");
   const [confirmRelease, setConfirmRelease] = useState(false);
+  const submitInFlightRef = useRef(false);
   const selectedVersion = options.find((option) => option.id === selectedVersionId);
 
   useEffect(() => {
+    submitInFlightRef.current = false;
     if (state.success) {
       setSelectedVersionId("");
       setConfirmRelease(false);
@@ -49,7 +51,18 @@ export function ClientContentReleaseForm({
   }, [state, router]);
 
   return (
-    <form action={formAction} className={styles.form}>
+    <form
+      action={formAction}
+      aria-busy={isPending}
+      className={styles.form}
+      onSubmit={(event) => {
+        if (submitInFlightRef.current || !confirmRelease || !selectedVersion) {
+          event.preventDefault();
+          return;
+        }
+        submitInFlightRef.current = true;
+      }}
+    >
       {state.message ? (
         <Alert
           live={state.success ? "polite" : "assertive"}
@@ -70,6 +83,7 @@ export function ClientContentReleaseForm({
           <select
             {...fieldProps}
             className={styles.select}
+            disabled={isPending}
             name="educationalContentVersionId"
             onChange={(event) => {
               setSelectedVersionId(event.target.value);
@@ -109,7 +123,7 @@ export function ClientContentReleaseForm({
           <Button disabled={isPending} onClick={() => setConfirmRelease(false)} type="button" variant="ghost">
             Cancelar
           </Button>
-          <Button loading={isPending} type="submit">
+          <Button disabled={isPending} loading={isPending} type="submit">
             Confirmar liberação
           </Button>
         </div>

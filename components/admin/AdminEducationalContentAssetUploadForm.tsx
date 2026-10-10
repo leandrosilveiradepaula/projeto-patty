@@ -1,9 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { type FormEvent, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { registerEducationalContentAssetAction } from "@/app/admin/conteudos/[contentId]/actions";
 import { Button } from "@/components/ui/Button";
+import { EDUCATIONAL_ASSET_MIME_TYPES, validateEducationalAssetUploadSelection } from "@/lib/content/asset-upload-selection";
 
 import styles from "@/app/admin/conteudos/[contentId]/page.module.css";
 
@@ -47,6 +49,11 @@ export function AdminEducationalContentAssetUploadForm({
   const [status, setStatus] = useState<string | null>(null);
   const [uploaded, setUploaded] = useState<UploadedAsset | null>(null);
   const [busy, setBusy] = useState(false);
+  const [registerBusy, setRegisterBusy] = useState(false);
+  const uploadInFlightRef = useRef(false);
+  const registerInFlightRef = useRef(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
 
   const registerAction = useMemo(
     () => registerEducationalContentAssetAction.bind(null, contentId, versionId),
@@ -54,15 +61,18 @@ export function AdminEducationalContentAssetUploadForm({
   );
 
   async function uploadSelectedFile() {
-    if (!file || busy) {
+    if (uploadInFlightRef.current || registerInFlightRef.current || uploaded) {
       return;
     }
 
-    if (!file.type) {
-      setStatus("O arquivo precisa informar um MIME type reconhecido.");
+    const selection = validateEducationalAssetUploadSelection(file);
+    if (!selection.ok) {
+      setStatus(selection.message);
       return;
     }
+    if (!file) return;
 
+    uploadInFlightRef.current = true;
     setBusy(true);
     setUploaded(null);
 
@@ -124,17 +134,42 @@ export function AdminEducationalContentAssetUploadForm({
         error instanceof Error ? error.message : "Falha inesperada no upload",
       );
     } finally {
+      uploadInFlightRef.current = false;
       setBusy(false);
     }
   }
 
+  async function registerUploadedAsset(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!uploaded || registerInFlightRef.current || uploadInFlightRef.current) return;
+    registerInFlightRef.current = true;
+    setRegisterBusy(true);
+    setStatus("Validando o asset no servidor e registrando os metadados…");
+    try {
+      await registerAction(new FormData(event.currentTarget));
+      setStatus("Asset privado registrado com sucesso. Ainda não foi publicado nem liberado.");
+      setUploaded(null);
+      setFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      router.refresh();
+    } catch {
+      setStatus(
+        "Não foi possível registrar o asset verificado. O upload não será repetido automaticamente. Revise e tente registrar novamente.",
+      );
+    } finally {
+      registerInFlightRef.current = false;
+      setRegisterBusy(false);
+    }
+  }
+
   return (
-    <div className={styles.uploadPanel}>
+    <div aria-busy={busy || registerBusy} className={styles.uploadPanel}>
       <label className={styles.field}>
         <span>Arquivo aprovado para upload privado</span>
         <input
-          accept="application/pdf,image/jpeg,image/png,image/webp,video/mp4"
-          disabled={busy}
+          accept={EDUCATIONAL_ASSET_MIME_TYPES.join(",")}
+          disabled={busy || registerBusy}
+          ref={fileInputRef}
           onChange={(event) => {
             setFile(event.target.files?.[0] ?? null);
             setUploaded(null);
@@ -146,7 +181,7 @@ export function AdminEducationalContentAssetUploadForm({
 
       <div className={styles.uploadActions}>
         <Button
-          disabled={!file || busy}
+          disabled={!file || busy || registerBusy || uploaded !== null}
           onClick={uploadSelectedFile}
           type="button"
         >
@@ -167,7 +202,7 @@ export function AdminEducationalContentAssetUploadForm({
       ) : null}
 
       {uploaded ? (
-        <form action={registerAction} className={styles.form}>
+        <form className={styles.form} onSubmit={registerUploadedAsset}>
           <input name="storagePath" type="hidden" value={uploaded.pathname} />
           <input name="contentType" type="hidden" value={uploaded.contentType} />
           <input
@@ -189,6 +224,7 @@ export function AdminEducationalContentAssetUploadForm({
 
           <label className={styles.confirmation}>
             <input
+              disabled={registerBusy}
               name="confirmVerified"
               required
               type="checkbox"
@@ -200,7 +236,9 @@ export function AdminEducationalContentAssetUploadForm({
             </span>
           </label>
 
-          <Button type="submit">Registrar asset verificado</Button>
+          <Button disabled={busy || registerBusy} loading={registerBusy} type="submit">
+            Registrar asset verificado
+          </Button>
         </form>
       ) : null}
     </div>
