@@ -2684,14 +2684,15 @@ export async function listAccessibleProtocolVersionMealPlans(
   }
 
   const supabase = await createClient();
-  const { data: plans, error: plansError } = await supabase
-    .from("meal_plan_versions")
-    .select("id, protocol_version_id, food_equivalent_catalog_version_id")
-    .in("protocol_version_id", protocolVersionIds);
-
-  if (plansError) {
-    throw plansError;
-  }
+  const plans = await collectPublishedProtocolRows(protocolVersionIds, (ids, from, to) =>
+    supabase
+      .from("meal_plan_versions")
+      .select("id, protocol_version_id, food_equivalent_catalog_version_id")
+      .in("protocol_version_id", ids)
+      .order("protocol_version_id", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
 
   const planIds = plans.map((plan) => plan.id);
 
@@ -2699,78 +2700,65 @@ export async function listAccessibleProtocolVersionMealPlans(
     return [];
   }
 
-  const [
-    { data: variants, error: variantsError },
-    { data: cycles, error: cyclesError },
-  ] = await Promise.all([
-    supabase
-      .from("meal_plan_variants")
-      .select("id, meal_plan_version_id, variant_key, label")
-      .in("meal_plan_version_id", planIds)
-      .order("variant_key", { ascending: true })
-      .order("id", { ascending: true }),
-    supabase
-      .from("meal_plan_cycles")
-      .select("id, meal_plan_version_id")
-      .in("meal_plan_version_id", planIds)
-      .order("created_at", { ascending: true })
-      .order("id", { ascending: true }),
+  const [variants, cycles] = await Promise.all([
+    collectPublishedProtocolRows(planIds, (ids, from, to) =>
+      supabase
+        .from("meal_plan_variants")
+        .select("id, meal_plan_version_id, variant_key, label")
+        .in("meal_plan_version_id", ids)
+        .order("meal_plan_version_id", { ascending: true })
+        .order("variant_key", { ascending: true })
+        .order("id", { ascending: true })
+        .range(from, to),
+    ),
+    collectPublishedProtocolRows(planIds, (ids, from, to) =>
+      supabase
+        .from("meal_plan_cycles")
+        .select("id, meal_plan_version_id")
+        .in("meal_plan_version_id", ids)
+        .order("meal_plan_version_id", { ascending: true })
+        .order("created_at", { ascending: true })
+        .order("id", { ascending: true })
+        .range(from, to),
+    ),
   ]);
-
-  if (variantsError) {
-    throw variantsError;
-  }
-
-  if (cyclesError) {
-    throw cyclesError;
-  }
 
   const variantIds = variants.map((variant) => variant.id);
   const cycleIds = cycles.map((cycle) => cycle.id);
 
-  const [
-    { data: meals, error: mealsError },
-    { data: cycleSteps, error: cycleStepsError },
-  ] = await Promise.all([
-    variantIds.length
-      ? supabase
-          .from("meals")
-          .select("id, meal_plan_variant_id, position, label")
-          .in("meal_plan_variant_id", variantIds)
-          .order("position", { ascending: true })
-          .order("id", { ascending: true })
-      : Promise.resolve({ data: [], error: null }),
-    cycleIds.length
-      ? supabase
-          .from("meal_plan_cycle_steps")
-          .select("cycle_id, meal_plan_version_id, variant_id, position")
-          .in("cycle_id", cycleIds)
-          .order("position", { ascending: true })
-      : Promise.resolve({ data: [], error: null }),
+  const [meals, cycleSteps] = await Promise.all([
+    collectPublishedProtocolRows(variantIds, (ids, from, to) =>
+      supabase
+        .from("meals")
+        .select("id, meal_plan_variant_id, position, label")
+        .in("meal_plan_variant_id", ids)
+        .order("meal_plan_variant_id", { ascending: true })
+        .order("position", { ascending: true })
+        .order("id", { ascending: true })
+        .range(from, to),
+    ),
+    collectPublishedProtocolRows(cycleIds, (ids, from, to) =>
+      supabase
+        .from("meal_plan_cycle_steps")
+        .select("cycle_id, meal_plan_version_id, variant_id, position")
+        .in("cycle_id", ids)
+        .order("cycle_id", { ascending: true })
+        .order("position", { ascending: true })
+        .range(from, to),
+    ),
   ]);
 
-  if (mealsError) {
-    throw mealsError;
-  }
-
-  if (cycleStepsError) {
-    throw cycleStepsError;
-  }
-
   const mealIds = meals.map((meal) => meal.id);
-  const { data: doseAllocations, error: doseAllocationsError } =
-    mealIds.length > 0
-      ? await supabase
-          .from("meal_dose_allocations")
-          .select("id, meal_id, dose_type, dose_quantity")
-          .in("meal_id", mealIds)
-          .order("dose_type", { ascending: true })
-          .order("id", { ascending: true })
-      : { data: [], error: null };
-
-  if (doseAllocationsError) {
-    throw doseAllocationsError;
-  }
+  const doseAllocations = await collectPublishedProtocolRows(mealIds, (ids, from, to) =>
+    supabase
+      .from("meal_dose_allocations")
+      .select("id, meal_id, dose_type, dose_quantity")
+      .in("meal_id", ids)
+      .order("meal_id", { ascending: true })
+      .order("dose_type", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
 
   const variantsByPlanId = new Map<string, typeof variants>();
   const mealsByVariantId = new Map<string, typeof meals>();
@@ -2808,6 +2796,32 @@ export async function listAccessibleProtocolVersionMealPlans(
     entries.push(step);
     stepsByCycleId.set(step.cycle_id, entries);
   }
+
+  // Each batch is ordered by the database. Restore a deterministic global
+  // presentation order after combining batches without changing snapshot data.
+  variants.sort((left, right) =>
+    left.meal_plan_version_id.localeCompare(right.meal_plan_version_id) ||
+    left.variant_key.localeCompare(right.variant_key) ||
+    left.id.localeCompare(right.id),
+  );
+  cycles.sort((left, right) =>
+    left.meal_plan_version_id.localeCompare(right.meal_plan_version_id) ||
+    left.id.localeCompare(right.id),
+  );
+  meals.sort((left, right) =>
+    left.meal_plan_variant_id.localeCompare(right.meal_plan_variant_id) ||
+    left.position - right.position ||
+    left.id.localeCompare(right.id),
+  );
+  cycleSteps.sort((left, right) =>
+    left.cycle_id.localeCompare(right.cycle_id) ||
+    left.position - right.position,
+  );
+  doseAllocations.sort((left, right) =>
+    left.meal_id.localeCompare(right.meal_id) ||
+    left.dose_type.localeCompare(right.dose_type) ||
+    left.id.localeCompare(right.id),
+  );
 
   return plans.map((plan) => ({
     cycles: (cyclesByPlanId.get(plan.id) ?? []).map((cycle) => ({
