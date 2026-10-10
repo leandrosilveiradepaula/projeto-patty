@@ -22,11 +22,13 @@ export function AdminAnamnesisClarificationRequestForm({
   submissionId: string;
 }) {
   const formRef = useRef<HTMLFormElement>(null);
+  const inFlightRef = useRef(false);
   const router = useRouter();
   const action = addAnamnesisClarificationRequest.bind(null, submissionId);
   const [state, formAction, isPending] = useActionState(action, initialState);
 
   useEffect(() => {
+    inFlightRef.current = false;
     if (state.success) {
       formRef.current?.reset();
       router.refresh();
@@ -34,7 +36,19 @@ export function AdminAnamnesisClarificationRequestForm({
   }, [state, router]);
 
   return (
-    <form action={formAction} className={styles.form} ref={formRef}>
+    <form
+      action={formAction}
+      aria-busy={isPending}
+      className={styles.form}
+      onSubmit={(event) => {
+        if (inFlightRef.current || isPending) {
+          event.preventDefault();
+          return;
+        }
+        inFlightRef.current = true;
+      }}
+      ref={formRef}
+    >
       {state.message ? (
         <Alert
           live={state.success ? "polite" : "assertive"}
@@ -63,11 +77,11 @@ export function AdminAnamnesisClarificationRequestForm({
         required
       >
         {(fieldProps) => (
-          <Textarea {...fieldProps} maxLength={4000} name="requestText" placeholder="Explique o que precisa ser complementado ou esclarecido." required rows={5} />
+          <Textarea {...fieldProps} disabled={isPending} maxLength={4000} name="requestText" placeholder="Explique o que precisa ser complementado ou esclarecido." required rows={5} />
         )}
       </FormField>
       <div className={styles.actions}>
-        <Button loading={isPending} type="submit">Enviar pedido à cliente</Button>
+        <Button disabled={isPending} loading={isPending} type="submit">Enviar pedido à cliente</Button>
       </div>
     </form>
   );

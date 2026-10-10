@@ -26,11 +26,13 @@ export function AdminAnamnesisReviewForm({
   submissionId,
 }: AdminAnamnesisReviewFormProps) {
   const formRef = useRef<HTMLFormElement>(null);
+  const inFlightRef = useRef(false);
   const router = useRouter();
   const action = addAnamnesisReviewNote.bind(null, submissionId);
   const [state, formAction, isPending] = useActionState(action, initialState);
 
   useEffect(() => {
+    inFlightRef.current = false;
     if (state.success) {
       formRef.current?.reset();
       router.refresh();
@@ -38,7 +40,19 @@ export function AdminAnamnesisReviewForm({
   }, [state, router]);
 
   return (
-    <form action={formAction} className={styles.form} ref={formRef}>
+    <form
+      action={formAction}
+      aria-busy={isPending}
+      className={styles.form}
+      onSubmit={(event) => {
+        if (inFlightRef.current || isPending) {
+          event.preventDefault();
+          return;
+        }
+        inFlightRef.current = true;
+      }}
+      ref={formRef}
+    >
       {state.message ? (
         <Alert
           live={state.success ? "polite" : "assertive"}
@@ -57,6 +71,7 @@ export function AdminAnamnesisReviewForm({
         {(fieldProps) => (
           <Textarea
             {...fieldProps}
+            disabled={isPending}
             maxLength={4000}
             name="note"
             placeholder="Registre a observação profissional sem alterar a resposta original da cliente."
@@ -65,7 +80,7 @@ export function AdminAnamnesisReviewForm({
           />
         )}
       </FormField>
-      <Button loading={isPending} type="submit">
+      <Button disabled={isPending} loading={isPending} type="submit">
         Registrar nota
       </Button>
     </form>
