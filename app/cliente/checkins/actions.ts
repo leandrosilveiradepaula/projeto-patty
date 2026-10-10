@@ -114,9 +114,25 @@ export async function recordActivityCheckinAction(formData: FormData) {
     redirect("/cliente/checkins?status=activity-invalid");
   }
 
+  const checkinDate = currentSaoPauloDate();
+  // This is a UX-level duplicate guard, not a transactional uniqueness
+  // guarantee across independent tabs or devices. Preserve existing events.
+  let recordedToday = false;
+  try {
+    recordedToday = (
+      await listAccessibleClientActivityCheckinEvents(client.id, checkinDate)
+    ).length > 0;
+  } catch {
+    redirect("/cliente/checkins?status=activity-error");
+  }
+
+  if (recordedToday) {
+    redirect("/cliente/checkins?status=activity-already-recorded#atividade-fisica");
+  }
+
   try {
     await createCurrentClientActivityCheckinEvent({
-      checkinDate: currentSaoPauloDate(),
+      checkinDate,
       clientId: client.id,
       didActivity: rawValue === "yes",
       recordedByProfileId: auth.profileId,

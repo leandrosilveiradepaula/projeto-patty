@@ -118,3 +118,36 @@
 }
 
 .historyList > li, .correction[id] { scroll-margin-top: var(--space-4); }
+
+.additionalActivity {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-4);
+}
+
+.additionalActivity h4,
+.additionalActivityRecord p {
+  margin: 0;
+}
+
+.additionalActivityRecord {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .additionalActivity .activityActions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .additionalActivity .activityActions > button {
+    width: 100%;
+  }
+}
