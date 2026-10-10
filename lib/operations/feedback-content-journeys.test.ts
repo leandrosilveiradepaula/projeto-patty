@@ -7,7 +7,7 @@ test("manual weekly feedback checks dates and refreshes only after a confirmed r
   const source = read("components/admin/AdminWeeklyFeedbackRequestForm.tsx");
   assert.match(source, /periodEnd < periodStart/);
   assert.match(source, /min=\{periodStart \|\| undefined\}/);
-  assert.match(source, /disabled=\{!eligible \|\| periodReversed\}/);
+  assert.match(source, /disabled=\{!eligible \|\| periodReversed \|\| isPending\}/);
   assert.match(source, /if \(state\.success\)/);
   assert.match(source, /router\.refresh\(\)/);
 });
@@ -22,8 +22,10 @@ test("client weekly feedback has a non-submitting draft and text-limit guidance"
   const source = read("app/cliente/feedback-semanal/page.tsx");
   assert.match(source, /Salvar rascunho não envia suas respostas/);
   assert.match(source, /maxLength=\{4000\}/);
-  assert.match(source, /name="intent" type="submit" value="save"/);
-  assert.match(source, /name="intent" type="submit" value="submit"/);
+  const controls = read("app/cliente/feedback-semanal/ClientWeeklyFeedbackSubmitControls.tsx");
+  assert.match(source, /<ClientWeeklyFeedbackSubmitControls \/>/);
+  assert.match(controls, /name="intent" type="submit" value="save"/);
+  assert.match(controls, /name="intent" type="submit" value="submit"/);
 });
 
 test("content release requires selected exact version and explicit professional confirmation", () => {

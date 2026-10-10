@@ -26,6 +26,7 @@ export function AdminWeeklyFeedbackRequestForm({
   eligible: boolean;
 }) {
   const formRef = useRef<HTMLFormElement>(null);
+  const inFlightRef = useRef(false);
   const router = useRouter();
   const [periodStart, setPeriodStart] = useState("");
   const [periodEnd, setPeriodEnd] = useState("");
@@ -34,6 +35,7 @@ export function AdminWeeklyFeedbackRequestForm({
   const [state, formAction, isPending] = useActionState(action, initialState);
 
   useEffect(() => {
+    inFlightRef.current = false;
     if (state.success) {
       formRef.current?.reset();
       setPeriodStart("");
@@ -43,7 +45,19 @@ export function AdminWeeklyFeedbackRequestForm({
   }, [state, router]);
 
   return (
-    <form action={formAction} className={styles.form} ref={formRef}>
+    <form
+      action={formAction}
+      aria-busy={isPending}
+      className={styles.form}
+      onSubmit={(event) => {
+        if (inFlightRef.current || isPending) {
+          event.preventDefault();
+          return;
+        }
+        inFlightRef.current = true;
+      }}
+      ref={formRef}
+    >
       {state.message ? (
         <Alert
           live={state.success ? "polite" : "assertive"}
@@ -56,6 +70,7 @@ export function AdminWeeklyFeedbackRequestForm({
       <label className={styles.field}>
         <span>Semana de referência · início</span>
         <TextInput
+          disabled={isPending}
           name="periodStart"
           onChange={(event) => setPeriodStart(event.target.value)}
           required
@@ -67,6 +82,7 @@ export function AdminWeeklyFeedbackRequestForm({
         <span>Semana de referência · fim</span>
         <TextInput
           min={periodStart || undefined}
+          disabled={isPending}
           name="periodEnd"
           onChange={(event) => setPeriodEnd(event.target.value)}
           required
@@ -76,14 +92,14 @@ export function AdminWeeklyFeedbackRequestForm({
       </label>
       <label className={styles.field}>
         <span>Prazo para resposta (opcional)</span>
-        <TextInput name="dueAt" type="datetime-local" />
+        <TextInput disabled={isPending} name="dueAt" type="datetime-local" />
       </label>
       {periodReversed ? (
         <Alert live="polite" title="Revise o período" variant="critical">
           A data final não pode ser anterior à data inicial.
         </Alert>
       ) : null}
-      <Button disabled={!eligible || periodReversed} loading={isPending} type="submit">
+      <Button disabled={!eligible || periodReversed || isPending} loading={isPending} type="submit">
         {eligible ? "Criar solicitação" : "Aguardando primeiro protocolo"}
       </Button>
     </form>

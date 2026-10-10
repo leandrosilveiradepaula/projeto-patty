@@ -2,7 +2,7 @@ import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSte
 import { saveWeeklyFeedbackAction } from "@/app/cliente/feedback-semanal/actions";
 import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
+import { ClientWeeklyFeedbackSubmitControls } from "./ClientWeeklyFeedbackSubmitControls";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -215,14 +215,7 @@ export default async function ClientWeeklyFeedbackPage({
                                 </label>
                               );
                             })}
-                            <div className={styles.actions}>
-                              <Button formNoValidate name="intent" type="submit" value="save" variant="secondary">
-                                Salvar rascunho
-                              </Button>
-                              <Button name="intent" type="submit" value="submit">
-                                Enviar feedback
-                              </Button>
-                            </div>
+                            <ClientWeeklyFeedbackSubmitControls />
                           </form>
                         )}
                       </Card>
