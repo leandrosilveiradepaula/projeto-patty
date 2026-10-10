@@ -26,7 +26,7 @@ const fileKindLabels: Record<string, string> = {
 };
 
 function formatFileSize(value: number | null) {
-  if (typeof value !== "number") {
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
     return "Tamanho não informado";
   }
 
@@ -42,6 +42,7 @@ function formatFileSize(value: number | null) {
 }
 
 function formatCreatedAt(value: string) {
+  if (!Number.isFinite(Date.parse(value))) return "Data indisponível";
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     month: "2-digit",
