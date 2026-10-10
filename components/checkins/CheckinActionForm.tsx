@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useFormStatus } from "react-dom";
 
 import { Button, type ButtonProps } from "@/components/ui/Button";
@@ -13,6 +13,23 @@ import { Button, type ButtonProps } from "@/components/ui/Button";
  * The check-in actions redirect on success and on validation/database errors,
  * so the next page load provides a fresh form for another intentional attempt.
  */
+function CheckinSubmissionLifecycle({ onFinished }: { onFinished: () => void }) {
+  const { pending } = useFormStatus();
+  const sawPendingRef = useRef(false);
+
+  // A redirect to the same route can preserve mounted client state. Release
+  // the synchronous lock after the actual server action has settled.
+  useEffect(() => {
+    if (pending) {
+      sawPendingRef.current = true;
+    } else if (sawPendingRef.current) {
+      sawPendingRef.current = false;
+      onFinished();
+    }
+  }, [pending, onFinished]);
+  return null;
+}
+
 export function CheckinActionForm({
   action,
   children,
@@ -37,6 +54,10 @@ export function CheckinActionForm({
   return (
     <form action={action} aria-busy={submitting} className={className} onSubmit={onSubmit}>
       {children}
+      <CheckinSubmissionLifecycle onFinished={() => {
+        inFlightRef.current = false;
+        setSubmitting(false);
+      }} />
       {submitting ? (
         <p aria-live="polite" role="status">
           Registrando alteração. Aguarde a confirmação antes de enviar novamente.
