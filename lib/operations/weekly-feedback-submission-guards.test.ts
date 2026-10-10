@@ -19,7 +19,7 @@ test("manual feedback requests block same-tick double submissions and recover af
 test("all manual request inputs and submit remain available for retry, not during a pending write", () => {
   const form = read("components/admin/AdminWeeklyFeedbackRequestForm.tsx");
   assert.match(form, /disabled=\{isPending\}\s*name="periodStart"/);
-  assert.match(form, /disabled=\{isPending\}\s*min=\{periodStart \|\| undefined\}/);
+  assert.match(form, /min=\{periodStart \|\| undefined\}\s*disabled=\{isPending\}/);
   assert.ok(form.includes('<TextInput disabled={isPending} name="dueAt"'));
   assert.ok(form.includes("disabled={!eligible || periodReversed || isPending}"));
   assert.ok(form.includes('min={periodStart || undefined}'));
