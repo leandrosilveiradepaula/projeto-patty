@@ -69,3 +69,34 @@
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+
+.historyNavigation {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-4);
+}
+
+.historyNavigation a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--color-brand-strong);
+  text-decoration: underline;
+}
+
+.historyNavigation a:focus-visible {
+  outline: 3px solid var(--color-brand);
+  outline-offset: 3px;
+}
+
+.items > li[id] {
+  scroll-margin-top: var(--space-6);
+}
+
+.items > li:target .reviewCard {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 3px;
+}
