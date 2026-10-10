@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -25,20 +25,30 @@ export function AdminTrainingRequestForm({
   clientId,
 }: AdminTrainingRequestFormProps) {
   const formRef = useRef<HTMLFormElement>(null);
+  const inFlightRef = useRef(false);
+  const [allowNext, setAllowNext] = useState(false);
   const router = useRouter();
   const action = recordTrainingRequestAction.bind(null, clientId);
   const [state, formAction, isPending] = useActionState(action, initialState);
 
   useEffect(() => {
+    inFlightRef.current = false;
     if (state.success) {
+      setAllowNext(false);
       formRef.current?.reset();
       router.refresh();
     }
-  }, [state.success, router]);
+  }, [state, router]);
 
   return (
-    <form action={formAction} ref={formRef}>
-      {state.message ? (
+    <form action={formAction} aria-busy={isPending} onSubmit={(event) => {
+        if (inFlightRef.current || isPending || (state.success && !allowNext)) {
+          event.preventDefault();
+          return;
+        }
+        inFlightRef.current = true;
+      }} ref={formRef}>
+      {state.message && (!state.success || !allowNext) ? (
         <Alert
           live={state.success ? "polite" : "assertive"}
           title={state.success ? "Solicitação registrada" : "Não foi possível registrar"}
@@ -55,6 +65,7 @@ export function AdminTrainingRequestForm({
         {(fieldProps) => (
           <Textarea
             {...fieldProps}
+            disabled={isPending || (state.success && !allowNext)}
             maxLength={4000}
             name="note"
             placeholder="Ex.: cliente solicitou inclusão do serviço de treino durante o acompanhamento."
@@ -66,9 +77,14 @@ export function AdminTrainingRequestForm({
         Este registro apenas confirma que houve solicitação. Ele não cria,
         publica ou altera treino automaticamente.
       </p>
-      <Button loading={isPending} type="submit">
+      <Button disabled={isPending || (state.success && !allowNext)} loading={isPending} type="submit">
         Registrar solicitação de treino
       </Button>
+      {state.success && !allowNext ? (
+        <Button onClick={() => setAllowNext(true)} type="button" variant="secondary">
+          Registrar outra solicitação
+        </Button>
+      ) : null}
     </form>
   );
 }
