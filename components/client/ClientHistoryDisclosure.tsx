@@ -10,11 +10,13 @@ import { useEffect, useRef, type ReactNode } from "react";
 export function ClientHistoryDisclosure({
   children,
   className,
+  defaultOpen = false,
   id,
   summary,
 }: {
   children: ReactNode;
   className?: string;
+  defaultOpen?: boolean;
   id?: string;
   summary: ReactNode;
 }) {
@@ -47,7 +49,7 @@ export function ClientHistoryDisclosure({
   }, []);
 
   return (
-    <details className={className} id={id} ref={detailsRef}>
+    <details className={className} id={id} open={defaultOpen} ref={detailsRef}>
       <summary>{summary}</summary>
       {children}
     </details>

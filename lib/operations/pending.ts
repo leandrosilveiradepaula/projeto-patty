@@ -550,7 +550,7 @@ export function buildOperationalPendingItems(
       description: dueAtPassed
         ? `O Feedback Semanal referente a ${feedback.periodStart} ate ${feedback.periodEnd} continua sem envio final e o prazo informado (${feedback.dueAt}) ja passou. Isso nao aplica nenhuma consequencia automatica ao atendimento.`
         : `O Feedback Semanal referente a ${feedback.periodStart} ate ${feedback.periodEnd} foi solicitado e ainda nao possui envio final da cliente.`,
-      href: `/admin/clientes/${feedback.clientId}/feedback-semanal#feedback-pendentes`,
+      href: `/admin/clientes/${feedback.clientId}/feedback-semanal#feedback-pendente-${feedback.id}`,
       id: `weekly-feedback:${feedback.id}`,
       kind: "weekly_feedback_awaiting_response",
       statusLabel: dueAtPassed ? "Prazo informado ultrapassado" : "Aguardando resposta",

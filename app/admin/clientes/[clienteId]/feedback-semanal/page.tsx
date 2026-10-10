@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { Section } from "@/components/ui/Section";
 import Link from "next/link";
 import { describeAdminFeedbackReminder } from "@/lib/operations/admin-feedback-reminder";
+import { orderClientWeeklyFeedbacks } from "@/lib/follow-up/client-weekly-feedback-order";
 import { latestReminderEventByFeedback } from "@/lib/operations/feedback-reminder-order";
 import { parseWeeklyFeedbackDefinition, readWeeklyFeedbackAnswer } from "@/lib/weekly-feedback/definition";
 import {
@@ -33,6 +34,7 @@ function formatDate(value: string) {
 
 function formatDateTime(value: string | null) {
   if (!value) return "Sem prazo configurado";
+  if (!Number.isFinite(Date.parse(value))) return "Data indisponível";
   return new Intl.DateTimeFormat("pt-BR", {
     dateStyle: "short",
     timeStyle: "short",
@@ -52,10 +54,11 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
     listAccessibleClientNotificationEvents(client.id),
   ]);
   const reminderEventsByFeedbackId = latestReminderEventByFeedback(notificationEvents);
-  const pendingFeedbacks = feedbacks.filter(
+  const orderedFeedbacks = orderClientWeeklyFeedbacks(feedbacks);
+  const pendingFeedbacks = orderedFeedbacks.filter(
     (feedback) => feedback.submitted_at === null,
   );
-  const submittedFeedbacks = feedbacks.filter(
+  const submittedFeedbacks = orderedFeedbacks.filter(
     (feedback) => feedback.submitted_at !== null,
   );
   const displayName = client.full_name?.trim() || client.profiles?.display_name?.trim();
@@ -117,6 +120,15 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
         description="Solicitações registradas que ainda aguardam envio da cliente. A ausência de resposta não exige revisão profissional imediata."
         title="Pendentes"
       >
+        {pendingFeedbacks.length > 1 ? (
+          <nav aria-label="Localizar Feedback Semanal pendente" className={styles.feedbackNavigation}>
+            {pendingFeedbacks.map((feedback, index) => (
+              <a href={`#feedback-pendente-${feedback.id}`} key={feedback.id}>
+                {index + 1}. {formatDate(feedback.period_start)} a {formatDate(feedback.period_end)}
+              </a>
+            ))}
+          </nav>
+        ) : null}
         {pendingFeedbacks.length === 0 ? (
           <EmptyState
             description="Não existem solicitações abertas aguardando a cliente. Se precisar criar uma solicitação manual específica, use o formulário acima."
@@ -131,7 +143,7 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
               const reminderStatus = describeAdminFeedbackReminder(reminderEvent);
 
               return (
-                <li key={feedback.id}>
+                <li id={`feedback-pendente-${feedback.id}`} key={feedback.id}>
                   <Card className={styles.feedbackCard}>
                     <div className={styles.header}>
                       <div>
@@ -189,7 +201,7 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
 
               return (
                 <li key={feedback.id}>
-                  <details className={styles.historyItem}>
+                  <details className={styles.historyItem} id={`feedback-enviado-${feedback.id}`}>
                     <summary>
                       <span>
                         {formatDate(feedback.period_start)} a {formatDate(feedback.period_end)}
