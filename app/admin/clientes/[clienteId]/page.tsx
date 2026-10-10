@@ -1,4 +1,5 @@
 import { AdminClientNameEditForm } from "@/components/admin/AdminClientNameEditForm";
+import { summarizeClientClarifications } from "@/lib/follow-up/client-clarification-summary";
 import { latestPublishedTrainingVersion } from "@/lib/training/published-versions";
 import { isTrainingRequestAfterPublication } from "@/lib/training/request-follow-up";
 import { newestTrainingRequests, newestUnpublishedTrainingVersion } from "@/lib/training/operational-order";
@@ -181,51 +182,19 @@ export default async function AdminClienteDetailPage({
   const reviewedSubmissionIds = new Set(
     submittedAnamnesisReviews.map((review) => review.submission_id),
   );
-  const clarificationRequestsBySubmissionId = new Map<
-    string,
-    typeof clarificationRequests
-  >();
-  const clarificationResponseCountByRequestId = new Map<string, number>();
-  const resolvedClarificationRequestIds = new Set(
-    clarificationResolutions.map(
-      (resolution) => resolution.clarification_request_id,
-    ),
+  // Both workspaces derive facts from the same clarification summary.
+  const clarificationSummary = summarizeClientClarifications(
+    clarificationRequests,
+    clarificationResponses,
+    clarificationResolutions,
   );
-
-  for (const request of clarificationRequests) {
-    const current =
-      clarificationRequestsBySubmissionId.get(request.submission_id) ?? [];
-    current.push(request);
-    clarificationRequestsBySubmissionId.set(request.submission_id, current);
-  }
-
-  for (const response of clarificationResponses) {
-    clarificationResponseCountByRequestId.set(
-      response.clarification_request_id,
-      (clarificationResponseCountByRequestId.get(
-        response.clarification_request_id,
-      ) ?? 0) + 1,
-    );
-  }
-
   const submittedAnamnesisStates = submittedAnamneses.map((submission) => {
-    const submissionClarificationRequests =
-      clarificationRequestsBySubmissionId.get(submission.id) ?? [];
-    const unresolvedClarificationRequests =
-      submissionClarificationRequests.filter(
-        (request) => !resolvedClarificationRequestIds.has(request.id),
-      );
-    const clarificationAwaitingPatty = unresolvedClarificationRequests.some(
-      (request) =>
-        (clarificationResponseCountByRequestId.get(request.id) ?? 0) > 0,
-    );
-    const clarificationAwaitingClient =
-      unresolvedClarificationRequests.length > 0 &&
-      !clarificationAwaitingPatty;
-
+    const followUp = clarificationSummary.bySubmission.get(submission.id);
     return {
-      clarificationAwaitingClient,
-      clarificationAwaitingPatty,
+      clarificationAwaitingClient: (followUp?.awaitingClient ?? 0) > 0,
+      clarificationAwaitingPatty: (followUp?.awaitingProfessional ?? 0) > 0,
+      firstAwaitingProfessionalRequestId:
+        followUp?.firstAwaitingProfessionalRequestId ?? null,
       reviewPending: !reviewedSubmissionIds.has(submission.id),
       submission,
     };
@@ -233,9 +202,10 @@ export default async function AdminClienteDetailPage({
   const anamnesisPattyAction = submittedAnamnesisStates.find(
     (state) => state.reviewPending || state.clarificationAwaitingPatty,
   );
-  const anamnesisClientWait = submittedAnamnesisStates.find(
-    (state) => state.clarificationAwaitingClient,
+  const anamnesisAnsweredClarification = submittedAnamnesisStates.find(
+    (state) => state.clarificationAwaitingPatty,
   );
+  const anamnesisClientWait = clarificationSummary.firstAwaitingClient;
   const assessmentDraft = assessments.find(
     (assessment) => !assessment.finalized_at,
   );
@@ -325,7 +295,7 @@ export default async function AdminClienteDetailPage({
             description:
               "Existe pedido de esclarecimento aberto e o atendimento aguarda a resposta da cliente antes de seguir.",
             eyebrow: "Aguardando cliente",
-            href: `/admin/anamneses/${anamnesisClientWait.submission.id}/esclarecimentos`,
+            href: `/admin/anamneses/${anamnesisClientWait.submissionId}/esclarecimentos#esclarecimento-${anamnesisClientWait.id}`,
             label: "Ver esclarecimentos",
             title: "Esclarecimento da Anamnese",
           }
@@ -615,6 +585,14 @@ export default async function AdminClienteDetailPage({
                           ? "A cliente ainda não iniciou a Anamnese."
                           : "As submissões enviadas estão revisadas e sem esclarecimentos abertos."}
                 </p>
+                  {clarificationSummary.awaitingClient > 0 &&
+                  clarificationSummary.awaitingProfessional > 0 ? (
+                    <p className={styles.cardDescription}>
+                      {clarificationSummary.awaitingProfessional} complemento(s) aguardando revisão da Patty e{" "}
+                      {clarificationSummary.awaitingClient} pedido(s) aguardando resposta da cliente.
+                      Essas pendências são independentes.
+                    </p>
+                  ) : null}
               </div>
             </div>
             <div className={styles.journeyActions}>
@@ -644,6 +622,22 @@ export default async function AdminClienteDetailPage({
               <Link className={styles.journeyLink} href={`/admin/clientes/${client.id}/anamnese`}>
                 Abrir Anamnese
               </Link>
+              {anamnesisAnsweredClarification?.firstAwaitingProfessionalRequestId ? (
+                <Link
+                  className={styles.journeyLink}
+                  href={`/admin/anamneses/${anamnesisAnsweredClarification.submission.id}/esclarecimentos#esclarecimento-${anamnesisAnsweredClarification.firstAwaitingProfessionalRequestId}`}
+                >
+                  Revisar complemento(s) ({clarificationSummary.awaitingProfessional})
+                </Link>
+              ) : null}
+              {anamnesisClientWait ? (
+                <Link
+                  className={styles.journeyLink}
+                  href={`/admin/anamneses/${anamnesisClientWait.submissionId}/esclarecimentos#esclarecimento-${anamnesisClientWait.id}`}
+                >
+                  Ver aguardando cliente ({clarificationSummary.awaitingClient})
+                </Link>
+              ) : null}
             </div>
           </li>
 

@@ -1,4 +1,5 @@
 import { clarificationFollowupStatus, clarificationStatusLabel, clarificationStatusVariant } from "@/lib/follow-up/clarification-status";
+import { orderClientClarificationRequests } from "@/lib/follow-up/client-clarification-summary";
 import { AdminAnamnesisClarificationResolutionForm } from "@/components/admin/AdminAnamnesisClarificationResolutionForm";
 import { AdminAnamnesisClarificationRequestForm } from "@/components/admin/AdminAnamnesisClarificationRequestForm";
 import { AdminAnamnesisWorkspaceHeader } from "@/components/admin/AdminAnamnesisWorkspaceHeader";
@@ -46,7 +47,8 @@ export default async function AdminAnamnesisClarificationsPage({ params }: PageP
     listAccessibleAnamnesisQuestions(submission.form_version_id),
     listAccessibleAnamnesisClarificationRequests(submission.id),
   ]);
-  const requestIds = requests.map((request) => request.id);
+  const orderedRequests = orderClientClarificationRequests(requests);
+  const requestIds = orderedRequests.map((request) => request.id);
   const [responses, resolutions] = await Promise.all([
     listAccessibleAnamnesisClarificationResponses(requestIds),
     listAccessibleAnamnesisClarificationResolutions(requestIds),
@@ -72,7 +74,16 @@ export default async function AdminAnamnesisClarificationsPage({ params }: PageP
     label: questionsById.get(answer.question_id)?.label ?? `Resposta ${answer.id.slice(0, 8)}`,
   }));
 
-  const firstAwaitingReviewId = requests.find((r) => !resolutionByRequestId.has(r.id) && Boolean(responsesByRequestId.get(r.id)?.length))?.id;
+  const firstAwaitingReviewId = orderedRequests.find(
+    (request) =>
+      !resolutionByRequestId.has(request.id) &&
+      Boolean(responsesByRequestId.get(request.id)?.length),
+  )?.id;
+  const firstAwaitingClientId = orderedRequests.find(
+    (request) =>
+      !resolutionByRequestId.has(request.id) &&
+      !responsesByRequestId.get(request.id)?.length,
+  )?.id;
   return (
     <>
       <AdminAnamnesisWorkspaceHeader
@@ -91,13 +102,14 @@ export default async function AdminAnamnesisClarificationsPage({ params }: PageP
         </Card>
       </Section>
       <Section description="Histórico cronológico de pedidos e complementos." title="Histórico">
-        {requests.length === 0 ? (
+        {orderedRequests.length === 0 ? (
           <EmptyState description="Nenhum pedido de esclarecimento foi registrado para esta Anamnese." title="Sem esclarecimentos" />
         ) : (
           <>
             {firstAwaitingReviewId ? <p className={styles.jump}><a href={`#esclarecimento-${firstAwaitingReviewId}`}>Ir para o primeiro complemento aguardando revisão da Patty</a></p> : null}
+            {firstAwaitingClientId ? <p className={styles.jump}><a href={`#esclarecimento-${firstAwaitingClientId}`}>Ir para o primeiro pedido aguardando resposta da cliente</a></p> : null}
           <div className={styles.list}>
-            {requests.map((request) => {
+            {orderedRequests.map((request) => {
               const sourceAnswer = request.source_answer_id ? answersById.get(request.source_answer_id) : undefined;
               const sourceQuestion = sourceAnswer ? questionsById.get(sourceAnswer.question_id) : undefined;
               const requestResponses = responsesByRequestId.get(request.id) ?? [];

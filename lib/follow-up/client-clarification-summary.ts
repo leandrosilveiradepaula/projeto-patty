@@ -21,6 +21,7 @@ export type ClientClarificationSubmissionSummary = {
   awaitingClient: number;
   awaitingProfessional: number;
   firstAwaitingClientRequestId: string | null;
+  firstAwaitingProfessionalRequestId: string | null;
 };
 
 /**
@@ -62,10 +63,12 @@ export function summarizeClientClarifications(
       awaitingClient: 0,
       awaitingProfessional: 0,
       firstAwaitingClientRequestId: null,
+      firstAwaitingProfessionalRequestId: null,
     };
 
     if (responseIds.has(request.id)) {
       current.awaitingProfessional += 1;
+      current.firstAwaitingProfessionalRequestId ??= request.id;
       awaitingProfessional += 1;
     } else {
       current.awaitingClient += 1;
