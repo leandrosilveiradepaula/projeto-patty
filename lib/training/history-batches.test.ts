@@ -39,7 +39,7 @@ test("query failure or null response never masquerades as empty history", async 
 
 test("single-scope history reads every page, including an exactly full page", async () => {
   const calls: Array<[number, number]> = [];
-  const rows = await collectTrainingPagedRows((from, to) => {
+  const rows = await collectTrainingPagedRows(async (from, to) => {
     calls.push([from, to]);
     return { data: from === 0 ? Array(TRAINING_HISTORY_PAGE_SIZE).fill("first") : [], error: null };
   });
@@ -48,7 +48,7 @@ test("single-scope history reads every page, including an exactly full page", as
 });
 
 test("single-scope history includes the last partial page and keeps source order", async () => {
-  const rows = await collectTrainingPagedRows((from) => ({
+  const rows = await collectTrainingPagedRows(async (from) => ({
     data: from === 0 ? Array.from({ length: TRAINING_HISTORY_PAGE_SIZE }, (_, n) => n) : [500, 501],
     error: null,
   }));
