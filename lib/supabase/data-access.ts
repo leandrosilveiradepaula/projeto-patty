@@ -2714,7 +2714,7 @@ export async function listAccessibleProtocolVersionMealPlans(
     collectPublishedProtocolRows(planIds, (ids, from, to) =>
       supabase
         .from("meal_plan_cycles")
-        .select("id, meal_plan_version_id")
+        .select("id, meal_plan_version_id, created_at")
         .in("meal_plan_version_id", ids)
         .order("meal_plan_version_id", { ascending: true })
         .order("created_at", { ascending: true })
@@ -2760,6 +2760,33 @@ export async function listAccessibleProtocolVersionMealPlans(
       .range(from, to),
   );
 
+  // Each batch is ordered by the database. Restore a deterministic global
+  // presentation order after combining batches without changing snapshot data.
+  variants.sort((left, right) =>
+    left.meal_plan_version_id.localeCompare(right.meal_plan_version_id) ||
+    left.variant_key.localeCompare(right.variant_key) ||
+    left.id.localeCompare(right.id),
+  );
+  cycles.sort((left, right) =>
+    left.meal_plan_version_id.localeCompare(right.meal_plan_version_id) ||
+    Date.parse(left.created_at) - Date.parse(right.created_at) ||
+    left.id.localeCompare(right.id),
+  );
+  meals.sort((left, right) =>
+    left.meal_plan_variant_id.localeCompare(right.meal_plan_variant_id) ||
+    left.position - right.position ||
+    left.id.localeCompare(right.id),
+  );
+  cycleSteps.sort((left, right) =>
+    left.cycle_id.localeCompare(right.cycle_id) ||
+    left.position - right.position,
+  );
+  doseAllocations.sort((left, right) =>
+    left.meal_id.localeCompare(right.meal_id) ||
+    left.dose_type.localeCompare(right.dose_type) ||
+    left.id.localeCompare(right.id),
+  );
+
   const variantsByPlanId = new Map<string, typeof variants>();
   const mealsByVariantId = new Map<string, typeof meals>();
   const dosesByMealId = new Map<string, typeof doseAllocations>();
@@ -2796,32 +2823,6 @@ export async function listAccessibleProtocolVersionMealPlans(
     entries.push(step);
     stepsByCycleId.set(step.cycle_id, entries);
   }
-
-  // Each batch is ordered by the database. Restore a deterministic global
-  // presentation order after combining batches without changing snapshot data.
-  variants.sort((left, right) =>
-    left.meal_plan_version_id.localeCompare(right.meal_plan_version_id) ||
-    left.variant_key.localeCompare(right.variant_key) ||
-    left.id.localeCompare(right.id),
-  );
-  cycles.sort((left, right) =>
-    left.meal_plan_version_id.localeCompare(right.meal_plan_version_id) ||
-    left.id.localeCompare(right.id),
-  );
-  meals.sort((left, right) =>
-    left.meal_plan_variant_id.localeCompare(right.meal_plan_variant_id) ||
-    left.position - right.position ||
-    left.id.localeCompare(right.id),
-  );
-  cycleSteps.sort((left, right) =>
-    left.cycle_id.localeCompare(right.cycle_id) ||
-    left.position - right.position,
-  );
-  doseAllocations.sort((left, right) =>
-    left.meal_id.localeCompare(right.meal_id) ||
-    left.dose_type.localeCompare(right.dose_type) ||
-    left.id.localeCompare(right.id),
-  );
 
   return plans.map((plan) => ({
     cycles: (cyclesByPlanId.get(plan.id) ?? []).map((cycle) => ({
