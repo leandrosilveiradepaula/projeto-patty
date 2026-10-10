@@ -1,4 +1,5 @@
 import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
+import { ClientHistoryDisclosure } from "@/components/client/ClientHistoryDisclosure";
 import { ClientProtocolNutrition } from "@/components/client/ClientProtocolNutrition";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
@@ -56,7 +57,7 @@ export default async function ClienteProtocoloPage() {
             <nav aria-label="Ir para plano publicado" className={styles.publicationNavigation}>
               {publications.map((publication, index) => (
                 <a href={`#publicacao-${publication.id}`} key={publication.id}>
-                  {index === 0 ? "Plano atual" : `Versão ${publication.versionNumber} · ${formatPublishedAt(publication.publishedAt)}`}
+                  {index === 0 ? "Plano atual" : `Plano anterior ${index + 1} · versão ${publication.versionNumber} · ${formatPublishedAt(publication.publishedAt)}`}
                 </a>
               ))}
             </nav>
@@ -147,12 +148,14 @@ export default async function ClienteProtocoloPage() {
             }
 
             return (
-              <details className={styles.historyItem} id={`publicacao-${publication.id}`} key={publication.id}>
-                <summary>
-                  Plano anterior · versão {publication.versionNumber} · {formatPublishedAt(publication.publishedAt)}
-                </summary>
+              <ClientHistoryDisclosure
+                className={styles.historyItem}
+                id={`publicacao-${publication.id}`}
+                key={publication.id}
+                summary={`Plano anterior · versão ${publication.versionNumber} · ${formatPublishedAt(publication.publishedAt)}`}
+              >
                 <div className={styles.historyContent}>{content}</div>
-              </details>
+              </ClientHistoryDisclosure>
             );
           })}
         </div>
