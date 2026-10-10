@@ -288,7 +288,7 @@ test("weekly feedback pending stays factual and never suspends service automatic
   assert.equal(items[0]?.statusLabel, "Prazo informado ultrapassado");
   assert.equal(
     items[0]?.href,
-    "/admin/clientes/client-1/feedback-semanal#feedback-pendentes",
+    "/admin/clientes/client-1/feedback-semanal#feedback-pendente-feedback-1",
   );
   assert.match(
     items[0]?.description ?? "",
@@ -957,7 +957,7 @@ test("weekly feedback delivery blockers point to the corrective surface", () => 
   });
   assert.equal(
     failedDelivery[0]?.href,
-    "/admin/clientes/client-feedback/feedback-semanal#feedback-pendentes",
+    "/admin/clientes/client-feedback/feedback-semanal#feedback-pendente-feedback-1",
   );
 });
 
