@@ -2,6 +2,7 @@ import "server-only";
 import { collectScopedClientOperationalRows } from "@/lib/operations/client-operational-pagination";
 import { collectTrainingHistoryRows } from "@/lib/training/history-batches";
 import { collectAnamnesisHistoryRows } from "@/lib/anamnesis/history-pagination";
+import { compareAnamnesisReviewChronology } from "@/lib/anamnesis/review-summary";
 import { collectPublishedProtocolRows } from "@/lib/protocol/published-read-pagination";
 
 import type { Json } from "@/lib/supabase/database.types";
@@ -1108,7 +1109,7 @@ export async function listAccessibleAnamnesisReviews(submissionId: string) {
       .range(from, to),
   );
   return reviews.sort((left, right) =>
-    left.created_at.localeCompare(right.created_at) || left.id.localeCompare(right.id),
+    compareAnamnesisReviewChronology(left, right),
   );
 }
 
@@ -1133,8 +1134,7 @@ export async function listAccessibleAnamnesisReviewsForSubmissions(
   // before building per-submission summaries or rendering audit history.
   return reviews.sort((left, right) =>
     left.submission_id.localeCompare(right.submission_id) ||
-    left.created_at.localeCompare(right.created_at) ||
-    left.id.localeCompare(right.id),
+    compareAnamnesisReviewChronology(left, right),
   );
 }
 
