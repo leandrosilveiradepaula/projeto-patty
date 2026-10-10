@@ -75,6 +75,7 @@ export function AdminPrivateFileUploadForm({
     inFlightRef.current = true;
     setIsPending(true);
     setPhase("authorizing");
+    let finalizationStarted = false;
 
     try {
       const sessionResult = await createAdminPrivateFileUploadSessionAction(
@@ -118,6 +119,7 @@ export function AdminPrivateFileUploadForm({
         return;
       }
 
+      finalizationStarted = true;
       setPhase("verifying");
       const finalizationResult =
         await finalizeAdminPrivateFileUploadSessionAction(
@@ -151,7 +153,11 @@ export function AdminPrivateFileUploadForm({
       router.refresh();
     } catch {
       console.error("Admin private file upload flow failed");
-      setMessage("A confirmação do envio não foi concluída. Confira o histórico antes de tentar novamente.");
+      setMessage(
+        finalizationStarted
+          ? "A confirmação do envio não foi concluída. Confira o histórico antes de tentar novamente."
+          : "O envio não foi concluído. Corrija a conexão ou tente novamente.",
+      );
     } finally {
       inFlightRef.current = false;
       setIsPending(false);
