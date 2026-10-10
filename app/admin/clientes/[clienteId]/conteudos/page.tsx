@@ -25,7 +25,7 @@ type AdminClientContentPageProps = {
 };
 
 function formatRecordedDate(value: string | null) {
-  if (!value) {
+  if (!value || !Number.isFinite(Date.parse(value))) {
     return "Não registrada";
   }
 
@@ -54,9 +54,12 @@ export default async function AdminClientContentPage({
   const assets = await listEducationalContentAssetsForCurrentAdminVersions(
     contentVersions.map((version) => version.id),
   );
-  const versionIdsWithAssets = new Set(
-    assets.map((asset) => asset.educational_content_version_id),
-  );
+  const assetCountsByVersionId = new Map<string, number>();
+  for (const asset of assets) {
+    const versionId = asset.educational_content_version_id;
+    assetCountsByVersionId.set(versionId, (assetCountsByVersionId.get(versionId) ?? 0) + 1);
+  }
+  const versionIdsWithAssets = new Set(assetCountsByVersionId.keys());
   const parentContentIdByVersionId = new Map(
     contentVersions.map((version) => [version.id, version.educational_content_id]),
   );
@@ -77,6 +80,10 @@ export default async function AdminClientContentPage({
       }),
   ));
   const newestReleases = newestClientContentReleases(releases);
+  const visibleReleases = newestReleases.filter(
+    (release) => Boolean(release.educational_content_versions),
+  );
+  const missingReleaseVersions = newestReleases.length - visibleReleases.length;
   const publishedVersionsAwaitingAsset = contentVersions.filter(
     (version) =>
       Boolean(version.published_at) &&
@@ -155,15 +162,24 @@ export default async function AdminClientContentPage({
         description="Conteúdos já liberados para esta cliente."
         title="Conteúdos liberados"
       >
-        {releases.length === 0 ? (
+        {visibleReleases.length === 0 ? (
           <EmptyState
-            description="Ainda não há conteúdo liberado para esta cliente. Verifique as versões disponíveis acima ou prepare o material na biblioteca administrativa."
-            title="Nenhum conteúdo foi liberado para esta cliente"
+            description={missingReleaseVersions > 0
+              ? "Há liberações registradas, mas nenhuma versão está disponível nesta consulta. Verifique os registros da biblioteca."
+              : "Ainda não há conteúdo liberado para esta cliente. Verifique as versões disponíveis acima ou prepare o material na biblioteca administrativa."}
+            title={missingReleaseVersions > 0 ? "Versões liberadas indisponíveis" : "Nenhum conteúdo foi liberado para esta cliente"}
             action={<Link href="/admin/conteudos">Abrir biblioteca de conteúdos</Link>}
           />
         ) : (
+          <>
+          {missingReleaseVersions > 0 ? (
+            <p className={styles.notice} role="status">
+              {missingReleaseVersions} liberação(ões) têm versão indisponível nesta consulta.
+              Confira a biblioteca antes de depender desses materiais no atendimento.
+            </p>
+          ) : null}
           <ul className={styles.contentList}>
-            {newestReleases.map((release) => {
+            {visibleReleases.map((release) => {
               const contentVersion = release.educational_content_versions;
               if (!contentVersion) {
                 return null;
@@ -173,14 +189,18 @@ export default async function AdminClientContentPage({
                 <li id={`liberacao-${release.id}`} key={release.id}>
                   <ContentListItem
                     category={contentVersion.category_key ?? "Não informado"}
-                    meta={`Versão ${contentVersion.version_number}. Liberado em ${formatRecordedDate(release.released_at)}.`}
-                    action={!versionIdsWithAssets.has(contentVersion.id) ? (
+                    meta={`Versão ${contentVersion.version_number} · ${assetCountsByVersionId.get(contentVersion.id) ?? 0} arquivo(s) registrado(s). Liberado em ${formatRecordedDate(release.released_at)}.`}
+                    action={
                       <Link href={
                         parentContentIdByVersionId.has(contentVersion.id)
                           ? `/admin/conteudos/${parentContentIdByVersionId.get(contentVersion.id)}`
                           : "/admin/conteudos"
-                      }>Verificar asset desta versão</Link>
-                    ) : undefined}
+                      }>
+                        {versionIdsWithAssets.has(contentVersion.id)
+                          ? "Conferir arquivos na biblioteca"
+                          : "Verificar arquivo desta versão"}
+                      </Link>
+                    }
                     status={
                       <Badge
                         variant={
@@ -190,7 +210,7 @@ export default async function AdminClientContentPage({
                         }
                       >
                         {versionIdsWithAssets.has(contentVersion.id)
-                          ? "Disponível para abrir"
+                          ? "Arquivo registrado"
                           : "Liberado sem arquivo"}
                       </Badge>
                     }
@@ -201,6 +221,7 @@ export default async function AdminClientContentPage({
               );
             })}
           </ul>
+          </>
         )}
       </Section>
     </>
