@@ -78,6 +78,8 @@ test("Anamnesis history and clarification access functions all paginate under th
     "listAccessibleAnamnesisClarificationRequestsForSubmissions",
     "listAccessibleAnamnesisClarificationResponses",
     "listAccessibleAnamnesisClarificationResolutions",
+    "listAccessibleAnamnesisReviews",
+    "listAccessibleAnamnesisReviewsForSubmissions",
   ];
   for (const name of names) {
     const start = source.indexOf("export async function " + name + "(");
@@ -94,6 +96,7 @@ test("Anamnesis history and clarification access functions all paginate under th
     "listAccessibleAnamnesisClarificationRequestsForSubmissions",
     "listAccessibleAnamnesisClarificationResponses",
     "listAccessibleAnamnesisClarificationResolutions",
+    "listAccessibleAnamnesisReviewsForSubmissions",
   ]) {
     const start = source.indexOf("export async function " + name + "(");
     const end = source.indexOf("\nexport async function ", start + 15);
