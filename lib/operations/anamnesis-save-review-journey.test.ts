@@ -39,13 +39,14 @@ test("text answer describes both delayed autosave and the difference between sav
   assert.ok(source.includes("state.message && !state.success"));
 });
 
-test("conditional answers update applicability through Next router instead of navigating away", () => {
+test("conditional answers refresh applicability via the existing safe navigation gate", () => {
   const form = read("components/client/ClientAnamnesisDraftSingleChoiceAnswerForm.tsx");
   const page = read("app/cliente/anamnese/[anamneseId]/page.tsx");
   assert.ok(page.includes("reloadPageOnSuccess={controlsApplicability}"));
-  assert.ok(form.includes("if (reloadPageOnSuccess)"));
-  assert.ok(form.includes("router.refresh()"));
-  assert.ok(!form.includes("window.location.assign("));
+  assert.ok(form.includes("if (state.success && reloadPageOnSuccess)"));
+  assert.ok(form.includes("window.location.assign("));
+  assert.ok(form.includes("#pergunta-"));
+  assert.ok(!form.includes("router.refresh()"));
   assert.ok(page.includes("getApplicableAnamnesisQuestionIds("));
 });
 

@@ -1,7 +1,6 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 
 import {
   type ClientAnamnesisDraftAnswerFormState,
@@ -43,7 +42,6 @@ export function ClientAnamnesisDraftSingleChoiceAnswerForm({
   const [state, formAction, isPending] = useActionState(action, initialState);
   const [selectedValue, setSelectedValue] = useState(initialValue);
   const formRef = useRef<HTMLFormElement>(null);
-  const router = useRouter();
   const lastSavedValueRef = useRef(initialValue);
   const pendingValueRef = useRef<string | null>(null);
   const failedValueRef = useRef<string | null>(null);
@@ -58,8 +56,8 @@ export function ClientAnamnesisDraftSingleChoiceAnswerForm({
       failedValueRef.current = null;
       pendingValueRef.current = null;
 
-      if (reloadPageOnSuccess) {
-        router.refresh();
+      if (state.success && reloadPageOnSuccess) {
+        window.location.assign(`/cliente/anamnese/${submissionId}#pergunta-${questionId}`);
       }
       return;
     }
@@ -68,7 +66,7 @@ export function ClientAnamnesisDraftSingleChoiceAnswerForm({
       failedValueRef.current = pendingValueRef.current;
       pendingValueRef.current = null;
     }
-  }, [reloadPageOnSuccess, router, state]);
+  }, [questionId, reloadPageOnSuccess, state, submissionId]);
 
   useEffect(() => {
     if (
