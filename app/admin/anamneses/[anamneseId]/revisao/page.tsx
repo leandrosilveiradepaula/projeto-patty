@@ -1,6 +1,7 @@
 import { AdminAnamnesisReviewForm } from "@/components/admin/AdminAnamnesisReviewForm";
 import { AdminAnamnesisWorkspaceHeader } from "@/components/admin/AdminAnamnesisWorkspaceHeader";
 import { Badge } from "@/components/ui/Badge";
+import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Section } from "@/components/ui/Section";
@@ -19,6 +20,7 @@ type AnamnesisReviewPageProps = {
 };
 
 function formatDateTime(value: string) {
+  if (!Number.isFinite(Date.parse(value))) return "Data indisponível";
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     hour: "2-digit",
@@ -44,6 +46,7 @@ export default async function AnamnesisReviewPage({
   }
 
   const reviews = await listAccessibleAnamnesisReviews(submission.id);
+  const latestReview = reviews.at(-1) ?? null;
   const displayName = submission.clients?.full_name?.trim() || submission.clients?.profiles?.display_name?.trim();
 
   return (
@@ -72,6 +75,14 @@ export default async function AnamnesisReviewPage({
         description="Registros anteriores em ordem cronológica, sem edição ou sobrescrita."
         title="Histórico de revisões"
       >
+        {latestReview ? (
+          <p className={styles.historyNavigation}>
+            {reviews.length} nota(s) preservada(s).{" "}
+            <Link href={`#revisao-${latestReview.id}`}>
+              Ir para a nota mais recente
+            </Link>
+          </p>
+        ) : null}
         {reviews.length === 0 ? (
           <EmptyState
             description="Nenhuma nota de revisão está registrada para esta submissão."
@@ -83,7 +94,7 @@ export default async function AnamnesisReviewPage({
               const reviewerName = review.profiles?.display_name?.trim();
 
               return (
-                <li key={review.id}>
+                <li id={`revisao-${review.id}`} key={review.id}>
                   <Card className={styles.reviewCard}>
                     <div className={styles.reviewHeader}>
                       <div>
