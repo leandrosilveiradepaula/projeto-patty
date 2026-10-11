@@ -101,6 +101,15 @@ export default async function AdminClientCheckinsPage({
 
       <ClientWorkspaceNav activeArea="checkins" clientId={client.id} />
 
+      {status === "correction-conflict" ? (
+        <Alert live="assertive" title="Registro atualizado em outra sessão" variant="critical">
+          A correção mudou desde que esta página foi carregada. Confira o histórico e atualize a página antes de fazer outra alteração.
+        </Alert>
+      ) : status === "correction-unchanged" ? (
+        <Alert live="polite" title="Nenhuma alteração necessária" variant="info">
+          O valor informado é igual ao último registro válido. Nenhuma correção duplicada foi criada.
+        </Alert>
+      ) : null}
       {invalidHistoryDay ? (
         <Alert live="assertive" title="Data do histórico inválida" variant="critical">
           A data informada é inválida ou está no futuro. Exibimos os registros recentes.
@@ -201,6 +210,21 @@ export default async function AdminClientCheckinsPage({
                         </label>
                         <CheckinSubmitButton disabled={liquidTaxonomy.kinds.length === 0}  variant="secondary">Salvar correção</CheckinSubmitButton>
                       </CheckinActionForm>
+{(liquidHistory.get(event.id)?.length ?? 0) > 0 ? (
+  <details className={styles.correction}>
+    <summary>Histórico de correções (liquidHistory.get(event.id)?.length})</summary>
+    <ol className={styles.auditHistory}>
+      <li>Original · formatDate(event.recorded_at)} · formatMl(event.amount_ml)} · {checkinCorrectionAuthor(event.recorded_by_profile_id, client.profile_id)}</li>
+      {liquidHistory.get(event.id)?.map((item) => (
+        <li key={item.id}>
+          Correção · {formatCheckinAuditDate(item.created_at)} · {formatMl(item.corrected_amount_ml)}
+          {" · "}{liquidTaxonomy.kinds.find((kind) => kind.key === item.corrected_liquid_kind)?.label ?? "Tipo histórico"}
+          {" · "}{checkinCorrectionAuthor(item.corrected_by_profile_id, client.profile_id)}
+        </li>
+      ))}
+    </ol>
+  </details>
+) : null}
                       {correction ? (
                         <p className={styles.description}>
                           Original: {formatMl(event.amount_ml)}. A correção mais recente foi registrada em {formatDate(correction.created_at)}.
@@ -241,6 +265,17 @@ export default async function AdminClientCheckinsPage({
                     <p className={styles.description}>
                       Resposta registrada em {formatDate(event.recorded_at)}
                     </p>
+{(activityHistory.get(event.id)?.length ?? 0) > 0 ? (
+  <details className={styles.correction}>
+    <summary>Histórico de correções ({activityHistory.get(event.id)?.length})</summary>
+    <ol className={styles.auditHistory}>
+      <li>Original · {formatCheckinAuditDate(event.recorded_at)} · {event.checkin_date} · {event.did_activity ? "Sim" : "Não"} · {checkinCorrectionAuthor(event.recorded_by_profile_id, client.profile_id)}</li>
+      {activityHistory.get(event.id)?.map((item) => (
+        <li key={item.id}>Correção · {formatCheckinAuditDate(item.created_at)} · {item.corrected_checkin_date} · {item.corrected_did_activity ? "Sim" : "Não"} · {checkinCorrectionAuthor(item.corrected_by_profile_id, client.profile_id)}</li>
+      ))}
+    </ol>
+  </details>
+) : null
                     {correction ? (
                       <p className={styles.description}>
                         Original: {event.did_activity ? "Sim" : "Não"} em {event.checkin_date}.

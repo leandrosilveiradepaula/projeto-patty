@@ -149,6 +149,15 @@ export default async function ClientCheckinsPage({
         eyebrow="Cliente"
         title="Check-ins diários"
       />
+      {status === "correction-conflict" ? (
+        <Alert live="assertive" title="Registro atualizado em outra sessão" variant="critical">
+          A correção mudou desde que esta página foi carregada. Confira o histórico e atualize a página antes de fazer outra alteração.
+        </Alert>
+      ) : status === "correction-unchanged" ? (
+        <Alert live="polite" title="Nenhuma alteração necessária" variant="info">
+          O valor informado é igual ao último registro válido. Nenhuma correção duplicada foi criada.
+        </Alert>
+      ) : null}
       {invalidHistoryDay ? (
         <Alert live="assertive" title="Data do histórico inválida" variant="critical">
           A data selecionada não é válida ou está no futuro. Exibimos os registros de hoje.
@@ -306,6 +315,9 @@ export default async function ClientCheckinsPage({
                   Corrigir para Não
                 </CheckinSubmitButton>
               </CheckinActionForm>
+              {(activityHistory.get(latestActivity.id)?.length ?? 0) > 0 ? (
+                <details className={styles.correction}><summary>Histórico completo da resposta de hoje</summary><ol className={styles.auditHistory}>{activityHistory.get(latestActivity.id)?.map((item) => <li key={item.id}>{formatCheckinAuditDate(item.created_at)} · {item.corrected_did_activity ? "Sim" : "Não"} · {checkinCorrectionAuthor(item.corrected_by_profile_id, client.profile_id)}</li>)}</ol></details>
+              ) : null}
               {latestActivityCorrection ? (
                 <p className={styles.note}>
                   Este registro já possui correção. O valor original continua preservado.
@@ -337,6 +349,17 @@ export default async function ClientCheckinsPage({
                             <CheckinSubmitButton name="didActivity" value="yes" variant="secondary">Corrigir para Sim</CheckinSubmitButton>
                             <CheckinSubmitButton name="didActivity" value="no" variant="secondary">Corrigir para Não</CheckinSubmitButton>
                           </CheckinActionForm>
+{(activityHistory.get(event.id)?.length ?? 0) > 0 ? (
+  <details className={styles.correction}>
+    <summary>Histórico de correções ({activityHistory.get(event.id)?.length})</summary>
+    <ol className={styles.auditHistory}>
+      <li>Original · {formatCheckinAuditDate(event.recorded_at)} · {event.checkin_date} · {event.did_activity ? "Sim" : "Não"} · {checkinCorrectionAuthor(event.recorded_by_profile_id, client.profile_id)}</li>
+      {activityHistory.get(event.id)?.map((item) => (
+        <li key={item.id}>Correção · {formatCheckinAuditDate(item.created_at)} · {item.corrected_checkin_date} · {item.corrected_did_activity ? "Sim" : "Não"} · {checkinCorrectionAuthor(item.corrected_by_profile_id, client.profile_id)}</li>
+      ))}
+    </ol>
+  </details>
+) : null
                           {correction ? (
                             <p className={styles.note}>
                               Original: {event.did_activity ? "Sim" : "Não"}. As correções permanecem no histórico.
@@ -428,6 +451,21 @@ export default async function ClientCheckinsPage({
                       </label>
                       <CheckinSubmitButton disabled={liquidTaxonomy.kinds.length === 0}  variant="secondary">Salvar correção</CheckinSubmitButton>
                     </CheckinActionForm>
+{(liquidHistory.get(event.id)?.length ?? 0) > 0 ? (
+  <details className={styles.correction}>
+    <summary>Histórico de correções (liquidHistory.get(event.id)?.length})</summary>
+    <ol className={styles.auditHistory}>
+      <li>Original · formatRecordedAt(event.recorded_at)} · formatMl(event.amount_ml)} · {checkinCorrectionAuthor(event.recorded_by_profile_id, client.profile_id)}</li>
+      {liquidHistory.get(event.id)?.map((item) => (
+        <li key={item.id}>
+          Correção · {formatCheckinAuditDate(item.created_at)} · {formatMl(item.corrected_amount_ml)}
+          {" · "}{liquidTaxonomy.kinds.find((kind) => kind.key === item.corrected_liquid_kind)?.label ?? "Tipo histórico"}
+          {" · "}{checkinCorrectionAuthor(item.corrected_by_profile_id, client.profile_id)}
+        </li>
+      ))}
+    </ol>
+  </details>
+) : null}
                     {event.wasCorrected ? (
                       <p className={styles.note}>
                         Original: {formatMl(event.amount_ml)}. O histórico de correções permanece preservado.
@@ -473,6 +511,17 @@ export default async function ClientCheckinsPage({
                           <CheckinSubmitButton name="didActivity"  value="yes" variant="secondary">Corrigir para Sim</CheckinSubmitButton>
                           <CheckinSubmitButton name="didActivity"  value="no" variant="secondary">Corrigir para Não</CheckinSubmitButton>
                         </CheckinActionForm>
+{(activityHistory.get(event.id)?.length ?? 0) > 0 ? (
+  <details className={styles.correction}>
+    <summary>Histórico de correções ({activityHistory.get(event.id)?.length})</summary>
+    <ol className={styles.auditHistory}>
+      <li>Original · {formatCheckinAuditDate(event.recorded_at)} · {event.checkin_date} · {event.did_activity ? "Sim" : "Não"} · {checkinCorrectionAuthor(event.recorded_by_profile_id, client.profile_id)}</li>
+      {activityHistory.get(event.id)?.map((item) => (
+        <li key={item.id}>Correção · {formatCheckinAuditDate(item.created_at)} · {item.corrected_checkin_date} · {item.corrected_did_activity ? "Sim" : "Não"} · {checkinCorrectionAuthor(item.corrected_by_profile_id, client.profile_id)}</li>
+      ))}
+    </ol>
+  </details>
+) : null
                         {correction ? (
                           <p className={styles.note}>
                             Original: {event.did_activity ? "Sim" : "Não"}. O histórico das correções permanece preservado.
