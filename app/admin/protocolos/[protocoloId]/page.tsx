@@ -1,4 +1,4 @@
-import {parseVersionFilter,exploreProtocolVersions,protocolVersionExplorerHref} from "@/lib/protocol/version-explorer";
+import {parseVersionFilter,exploreProtocolVersions,protocolVersionExplorerHref,indexProtocolVersionStructures,summarizeProtocolVersionArchive} from "@/lib/protocol/version-explorer";
 import { AdminMealDraftGuidance } from "@/components/admin/AdminMealDraftGuidance";
 import { AdminProtocolDraftEditor } from "@/components/admin/AdminProtocolDraftEditor";
 import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
@@ -41,7 +41,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import styles from "./page.module.css";
 
-type AdminProtocoloDetailPageProps = { params: Promise<{ protocoloId: string }>; searchParams: Promise<{ versao?: string; buscar?: string; estado?: string; ordem?: string; pagina?: string }> };
+type AdminProtocoloDetailPageProps = { params: Promise<{ protocoloId: string }>; searchParams: Promise<{ versao?: string; buscar?: string; estado?: string; ordem?: string; pagina?: string; estrutura?: string }> };
 
 function formatDateTime(value: string | null | undefined) {
   if (!value || !Number.isFinite(Date.parse(value))) {
@@ -125,7 +125,11 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
   const mealPlansByVersionId = new Map(
     mealPlans.map((mealPlan) => [mealPlan.protocolVersionId, mealPlan]),
   );
-  const archive=exploreProtocolVersions(versions,new Set(approvals.map(x=>x.protocol_version_id)),new Set(publications.map(x=>x.protocol_version_id)),filters,requestedVersion);
+  const structures=indexProtocolVersionStructures(mealPlans);
+  const approvedIds=new Set(approvals.map(x=>x.protocol_version_id));
+  const publishedIds=new Set(publications.map(x=>x.protocol_version_id));
+  const archive=exploreProtocolVersions(versions,approvedIds,publishedIds,filters,requestedVersion,structures);
+  const archiveSummary=summarizeProtocolVersionArchive(versions,approvedIds,publishedIds,structures);
   const versionsById = new Map(
     versions.map((version) => [version.id, version]),
   );
@@ -176,10 +180,18 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
             <form method="get" className={styles.versionFilters}>
               <label>Buscar número da versão<input type="search" name="buscar" maxLength={120} defaultValue={filters.term} placeholder="Ex.: 3" /></label>
               <label>Situação<select name="estado" defaultValue={filters.status}><option value="all">Todas</option><option value="draft">Rascunho</option><option value="review">Em revisão</option><option value="approved">Aprovada, não publicada</option><option value="published">Publicada</option></select></label>
+              <label>Estrutura alimentar<select name="estrutura" defaultValue={filters.structure}>
+                <option value="all">Todas</option>
+                <option value="with-plan">Com plano registrado</option>
+                <option value="without-plan">Sem plano registrado</option>
+                <option value="with-cycles">Com ciclos registrados</option>
+                <option value="with-doses">Com doses registradas</option>
+              </select></label>
               <label>Ordem<select name="ordem" defaultValue={filters.order}><option value="newest">Versões recentes</option><option value="oldest">Versões antigas</option></select></label>
               <button type="submit">Aplicar filtros</button>
               <Link className={styles.backLink} href={protocolVersionExplorerHref("/admin/protocolos/"+protocol.id,parseVersionFilter({}),1)}>Limpar filtros</Link>
             </form>
+            <p className={styles.versionFactsSummary}>Total: {archiveSummary.total} · Rascunho: {archiveSummary.draft} · Revisão: {archiveSummary.review} · Aprovadas: {archiveSummary.approved} · Publicadas: {archiveSummary.published} · Sem plano: {archiveSummary.missingPlan} · Com ciclos: {archiveSummary.withCycles} · Com doses: {archiveSummary.withDoses}</p>
             <p role="status">{archive.from}–{archive.to} de {archive.total} versões encontradas.</p>
             {archive.invalid ? <p role="status">Página solicitada não disponível; mostrando uma página válida.</p> : null}
             {archive.selectedHidden ? <p role="status">A versão solicitada não corresponde aos filtros. Limpe os filtros para consultá-la.</p> : null}
@@ -189,6 +201,7 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
               const approval = approvalsByVersionId.get(version.id);
               const publication = publicationsByVersionId.get(version.id);
               const mealPlan = mealPlansByVersionId.get(version.id) ?? null;
+              const structureFacts=structures.get(version.id);
               const baseVersion = version.based_on_version_id
                 ? versionsById.get(version.based_on_version_id) ?? null
                 : null;
@@ -239,6 +252,7 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
                   >
                     <div className={styles.versionBody}>
                   <dl className={styles.versionFacts}>
+                    <div><dt>Estrutura alimentar</dt><dd>{structureFacts ? structureFacts.variantCount+" variações · "+structureFacts.mealCount+" refeições · "+structureFacts.allocationCount+" doses registradas · "+structureFacts.cycleCount+" ciclos" : "Plano não registrado"}</dd></div>
                     <div>
                       <dt>Base</dt>
                       <dd>
