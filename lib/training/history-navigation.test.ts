@@ -3,7 +3,7 @@ import test from "node:test";
 import {
   parseTrainingRequestFilters, trainingRequestFactualOrigin, exploreTrainingRequests,
   trainingRequestFilteredHref, trainingRequestExactHref, trainingVersionExactHref,
-  trainingVersionPageHref, paginateTrainingVersions, selectPublishedTrainingComparison, trainingVersionComparisonHref, clientTrainingRequestExactHref, parseTrainingVersionFilters, exploreTrainingVersionHistory, parseClientTrainingArchiveFilters, exploreClientTrainingArchive, trainingAdminVersionHref, trainingClientArchivedVersionHref, trainingClientArchiveHref, trainingRequestFilteredHref, parseTrainingVersionFilters, parseClientTrainingArchiveFilters,
+  trainingVersionPageHref, paginateTrainingVersions, selectPublishedTrainingComparison, trainingVersionComparisonHref, clientTrainingRequestExactHref, parseTrainingVersionFilters, exploreTrainingVersionHistory, parseClientTrainingArchiveFilters, exploreClientTrainingArchive, trainingAdminVersionHref, trainingClientArchivedVersionHref, trainingClientArchiveHref,
 } from "./history-navigation.ts";
 
 const rows = [
