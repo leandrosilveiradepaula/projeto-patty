@@ -2,8 +2,10 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { privateFileUploadRecoveryDecision } from "@/lib/files/private-file-upload-recovery-state";
 
 import {
+  checkClientFileUploadSessionStatusAction,
   createClientFileUploadSessionAction,
   finalizeClientFileUploadSessionAction,
 } from "@/app/cliente/arquivos/actions";
@@ -43,6 +45,8 @@ export function ClientPrivateFileUploadForm() {
   const [selectedFile,setSelectedFile] = useState<File|null>(null);
   const [selectionConfirmed,setSelectionConfirmed] = useState(false);
   const [ambiguousCompletion,setAmbiguousCompletion] = useState(false);
+  const [recoverySessionId,setRecoverySessionId] = useState<string | null>(null);
+  const [allowSameSessionRetry,setAllowSameSessionRetry] = useState(false);
   const reviewed = privateFileSelectionReview(selectedFile,fileKind);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -106,6 +110,7 @@ export function ClientPrivateFileUploadForm() {
         return;
       }
 
+      setRecoverySessionId(sessionResult.session.id);
       finalizationStarted = true;
       setPhase("verifying");
       const finalizationResult = await finalizeClientFileUploadSessionAction(
@@ -135,6 +140,8 @@ export function ClientPrivateFileUploadForm() {
       setSelectedFile(null);
       setSelectionConfirmed(false);
       setAmbiguousCompletion(false);
+      setRecoverySessionId(null);
+      setAllowSameSessionRetry(false);
       setSuccess(true);
       setMessage("Arquivo enviado e validado com sucesso.");
       router.refresh();
@@ -146,6 +153,80 @@ export function ClientPrivateFileUploadForm() {
           ? "A confirmação do envio não foi concluída. Confira o histórico antes de tentar novamente."
           : "O envio não foi concluído. Corrija a conexão ou tente novamente.",
       );
+    } finally {
+      inFlightRef.current = false;
+      setIsPending(false);
+      setPhase(null);
+    }
+  }
+
+  async function inspectUncertainSession() {
+    if (inFlightRef.current || !recoverySessionId) return;
+    inFlightRef.current = true;
+    setIsPending(true);
+    setMessage(null);
+    try {
+      const response = await checkClientFileUploadSessionStatusAction(sessionId);
+      const decision = privateFileUploadRecoveryDecision(response.status);
+      setMessage(decision.message);
+      if (decision.next === "confirmed") {
+        formRef.current?.reset();
+        setFileKind("photo");
+        setSelectedFile(null);
+        setSelectionConfirmed(false);
+        setAmbiguousCompletion(false);
+        setRecoverySessionId(null);
+        setSuccess(true);
+        router.refresh();
+      } else if (decision.next === "resume") {
+        setAllowSameSessionRetry(true);
+      } else if (decision.next === "new_selection") {
+        setAmbiguousCompletion(false);
+        setRecoverySessionId(null);
+        setSelectedFile(null);
+        setSelectionConfirmed(false);
+        formRef.current?.reset();
+      }
+    } catch {
+      setMessage("Não foi possível consultar o estado do envio. Consulte o histórico antes de reenviar.");
+    } finally {
+      inFlightRef.current = false;
+      setIsPending(false);
+    }
+  }
+
+  async function resumeUncertainSession() {
+    const sessionId = recoverySessionId;
+    if (!sessionId || !allowSameSessionRetry || inFlightRef.current) return;
+    inFlightRef.current = true;
+    setIsPending(true);
+    setPhase("verifying");
+    setMessage(null);
+    setAllowSameSessionRetry(false);
+    try {
+      const result = await finalizeClientFileUploadSessionAction(sessionId);
+      if (result.ok && result.result.status === "accepted") {
+        formRef.current?.reset();
+        setFileKind("photo");
+        setSelectedFile(null);
+        setSelectionConfirmed(false);
+        setAmbiguousCompletion(false);
+        setRecoverySessionId(null);
+        setSuccess(true);
+        setMessage("Arquivo recebido e confirmado pelo servidor.");
+        router.refresh();
+      } else if (result.ok && result.result.status === "rejected") {
+        setAmbiguousCompletion(false);
+        setRecoverySessionId(null);
+        setSelectedFile(null);
+        setSelectionConfirmed(false);
+        formRef.current?.reset();
+        setMessage("A validação rejeitou o arquivo ou a sessão expirou. Selecione um arquivo válido para novo envio.");
+      } else {
+        setMessage("A confirmação ainda é incerta. Consulte o estado novamente.");
+      }
+    } catch {
+      setMessage("Ainda não foi possível concluir esta sessão. Consulte o estado novamente; não inicie outro envio.");
     } finally {
       inFlightRef.current = false;
       setIsPending(false);
@@ -182,6 +263,8 @@ export function ClientPrivateFileUploadForm() {
               setSelectedFile(null);
               setSelectionConfirmed(false);
               setAmbiguousCompletion(false);
+              setRecoverySessionId(null);
+              setAllowSameSessionRetry(false);
               const input = formRef.current?.querySelector<HTMLInputElement>('input[name="file"]');
               if (input) input.value = "";
               setMessage(null);
@@ -218,6 +301,8 @@ export function ClientPrivateFileUploadForm() {
               setSelectedFile(event.currentTarget.files?.[0] ?? null);
               setSelectionConfirmed(false);
               setAmbiguousCompletion(false);
+              setRecoverySessionId(null);
+              setAllowSameSessionRetry(false);
               setMessage(null);
               setSuccess(false);
             }}
@@ -238,8 +323,13 @@ export function ClientPrivateFileUploadForm() {
         </label> : null}
       </div>
       {ambiguousCompletion ? <div role="alert" className={styles.selectionReview}>
-        <p>A confirmação do envio pode ter sido concluída. Confira o histórico antes de repetir para evitar duplicidade.</p>
-        <Button type="button" variant="secondary" disabled={isPending} onClick={()=>{router.refresh();setAmbiguousCompletion(false);setSelectionConfirmed(false);}}>Conferi o histórico; permitir nova tentativa</Button>
+        <p>A confirmação do envio é incerta. Consulte o histórico e o estado desta sessão antes de enviar novamente.</p>
+        <p>Você pode verificar a sessão original sem enviar uma segunda cópia.</p>
+        <Button type="button" variant="secondary" disabled={isPending || !recoverySessionId} onClick={inspectUncertainSession}>Consultar estado do envio</Button>
+        {allowSameSessionRetry ? (
+          <Button type="button" variant="secondary" disabled={isPending} onClick={resumeUncertainSession}>Concluir esta mesma sessão</Button>
+        ) : null}
+        <a href="#lista-arquivos">Consultar histórico nesta página</a>
       </div> : null}
       <p className={styles.privacyNote}>
         O arquivo permanece privado. Ele só é registrado como recebido depois
