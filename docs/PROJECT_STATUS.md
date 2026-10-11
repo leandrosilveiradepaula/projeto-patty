@@ -1,3 +1,7 @@
+## Biblioteca educacional — descoberta dos releases autorizados, 2026-10-11
+
+A cliente recebe busca local sem acentos, filtros por categoria/tipo reais da propria colecao liberada, situacao dos assets, ordenacao, contagens e paginacao de 12 itens. Links de arquivos continuam usando a rota autenticada e a versao liberada exata; itens sem arquivo exibem estado explicito. A Patty pode pesquisar a lista de versoes elegiveis por titulo/numero, sem perder a escolha durante a busca e mantendo confirmacao individual da liberacao. Nenhum filtro cria taxonomia profissional, libera conteudo automaticamente ou altera RLS, Storage, schema, direitos de terceiros ou migracao do Drive. Testes E2E autenticados e autorizacao de distribuicao de novos materiais seguem separados.
+
 ## Inspecao de versoes de treino — 2026-10-11
 
 Treino individual: a Patty passa a comparar o rascunho ou versao revisada com a publicacao anterior, vendo titulo, observacoes e diferencas exatas de exercicios por posicao, series, repeticoes, descanso e orientacoes. A cliente pode inspecionar diferencas factuais entre as duas publicacoes mais recentes sem visualizar rascunho. Pedidos anteriores recebem paginacao de leitura sem perda de historico. Posicoes duplicadas no legado sao marcadas ambiguas; a equivalencia de posicao nao autoriza inferir progressao de exercicios, metas ou series. A revisao/aprovacao/publicacao segue exclusivamente manual. Sem alteracao de migrations, RLS, Supabase ou dados reais. Homologacao E2E autenticada continua pendente.
