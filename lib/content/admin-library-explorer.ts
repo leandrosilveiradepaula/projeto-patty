@@ -4,18 +4,18 @@ export type LibraryExplorerVersion={
  category_key:string|null;content_type_key:string|null;phase_key:string|null;
  display_order:number;published_at:string|null;created_at:string;
 };
-export type LibraryExplorerState="all"|"draft-only"|"published-current"|"published-with-draft"|"any-published";
+export type LibraryExplorerState="all"|"latest-draft"|"draft-only"|"published-current"|"published-with-draft"|"any-published";
 export type LibraryExplorerOrder="display"|"title"|"created-recent"|"created-oldest"|"published-recent"|"version";
 export type LibraryExplorerFilters={query:string;state:LibraryExplorerState;category:string;type:string;order:LibraryExplorerOrder;page:number;invalidPage:boolean};
 export const LIBRARY_EXPLORER_PAGE_SIZE=12;
 function normal(value:string){return value.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLocaleLowerCase("pt-BR").trim();}
 export function readLibraryExplorerFilters(raw:Record<string,unknown>):LibraryExplorerFilters{
- const states=["all","draft-only","published-current","published-with-draft","any-published"];
+ const states=["all","latest-draft","draft-only","published-current","published-with-draft","any-published"];
  const sorts=["display","title","created-recent","created-oldest","published-recent","version"];
  const validPage=raw.pagina===undefined||typeof raw.pagina==="string"&&/^[1-9][0-9]{0,3}$/.test(raw.pagina);
  return {
   query:typeof raw.q==="string"?raw.q.trim().slice(0,120):"",
-  state:states.includes(String(raw.estado))?raw.estado as LibraryExplorerState:"all",
+  state:states.includes(String(raw.estado))?raw.estado as LibraryExplorerState:raw.status==="draft"?"latest-draft":raw.status==="published"?"any-published":"all",
   category:typeof raw.categoria==="string"?raw.categoria.slice(0,120):"all",
   type:typeof raw.tipo==="string"?raw.tipo.slice(0,120):"all",
   order:sorts.includes(String(raw.ordem))?raw.ordem as LibraryExplorerOrder:"display",
@@ -45,8 +45,9 @@ export function exploreAdminEducationalLibrary(
  const query=normal(filters.query);
  const matched=summaries.filter(s=>{
   const v=s.latestVersion,p=s.latestPublishedVersion,status=classification(s);
-  if(filters.state!=="all"&&filters.state!=="any-published"&&filters.state!==status)return false;
+  if(filters.state!=="all"&&filters.state!=="any-published"&&filters.state!=="latest-draft"&&filters.state!==status)return false;
   if(filters.state==="any-published"&&!p)return false;
+  if(filters.state==="latest-draft"&&v.published_at)return false;
   if(filters.category!=="all"&&(v.category_key??"Não informado")!==filters.category)return false;
   if(filters.type!=="all"&&(v.content_type_key??"Não informado")!==filters.type)return false;
   if(!query)return true;
