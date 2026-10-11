@@ -29,7 +29,6 @@ export function ClientRegistrationEditor({initialValues,updatedAt,action,notice,
   const [touched,setTouched] = useState(false);
   const [showComparison,setShowComparison] = useState(false);
   const [reviewedConflict,setReviewedConflict] = useState(false);
-  const [resultVersion,setResultVersion] = useState("");
   const inFlight=useRef(false);
   const router=useRouter();
   const normalized=normalizeClientRegistrationDraft(draft);
@@ -50,14 +49,9 @@ export function ClientRegistrationEditor({initialValues,updatedAt,action,notice,
   // A new server result is the commit acknowledgement; unrelated typing is not.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[state,router]);
-  useEffect(()=>{
-    if(!state.message)return;
-    setResultVersion(state.message);
-  },[state]);
   function update(key:keyof ClientRegistrationDraft,value:string){
     setDraft(old=>({...old,[key]:value}));
     setTouched(true);
-    setReviewedConflict(false);
   }
   function reset(){
     setDraft(clientRegistrationDraftFromInput(baseline));
