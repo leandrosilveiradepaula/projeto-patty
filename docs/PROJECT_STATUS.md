@@ -3896,3 +3896,8 @@ O registro do asset privado agora é idempotente somente para **a mesma versão 
 ## Histórico de liberações educacionais — consulta profissional — 2026-10-11
 
 A Patty pode filtrar as liberações da cliente por título/categoria/tipo, disponibilidade factual de asset registrado na versão exata e ordenar por data/título, com paginação e URLs estáveis. A busca utiliza somente registros já autorizados pelo assignment atual e sob RLS. Filtro não publica, não concede acesso, não conclui progresso nem interpreta abertura como consumo. Versões históricas cujo join esteja ausente continuam contabilizadas como pendência de consulta. Sem alteração de schema/RLS, migracões ou regra clínica. Testes automatizados/CI não equivalem a E2E com usuários reais ou deploy verificado.
+
+
+## Histórico de solicitações de treino: filtros factuais — 2026-10-11
+
+A Patty e a cliente podem consultar solicitações de treino já registradas filtrando por autoria factual (cliente, profissional, origem desconhecida), existência de observação, ordem cronológica e momento em relação à última publicação. A cliente continua visualizando a solicitação mais recente separadamente e filtra somente as anteriores. Os filtros não alteram registros, não sugerem frequência de treino, não inferem progressão, não geram prescrição e não publicam automaticamente. As consultas continuam usando dados acessíveis sob Auth, assignment e RLS existentes; não há migration nem alteração de permissões. A verificação E2E autenticada e a publicação efetiva permanecem distintas do CI de código.
