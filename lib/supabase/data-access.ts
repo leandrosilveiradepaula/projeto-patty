@@ -2411,6 +2411,61 @@ export type AccessibleProtocolVersionMealPlan = {
   }>;
 };
 
+export async function createAccessibleMealPlanCycle(input: {
+  clientId: string;
+  mealPlanVersionId: string;
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("meal_plan_cycles")
+    .insert({ client_id: input.clientId, meal_plan_version_id: input.mealPlanVersionId })
+    .select("id, meal_plan_version_id")
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function replaceAccessibleDraftMealPlanCycleSteps(input: {
+  cycleId: string;
+  mealPlanVersionId: string;
+  expectedSteps: Array<{ position: number; variantId: string }>;
+  variantIds: string[];
+}) {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("replace_draft_meal_plan_cycle_steps", {
+    p_cycle_id: input.cycleId,
+    p_meal_plan_version_id: input.mealPlanVersionId,
+    p_expected_steps: input.expectedSteps.map((step) => ({
+      position: step.position,
+      variantId: step.variantId,
+    })),
+    p_variant_ids: input.variantIds,
+  });
+  if (error) throw error;
+}
+
+export async function deleteAccessibleEmptyMealPlanCycle(input: {
+  cycleId: string;
+  mealPlanVersionId: string;
+}) {
+  const supabase = await createClient();
+  const { count, error: countError } = await supabase
+    .from("meal_plan_cycle_steps")
+    .select("position", { count: "exact", head: true })
+    .eq("cycle_id", input.cycleId);
+  if (countError) throw countError;
+  if ((count ?? 0) !== 0) return false;
+  const { data, error } = await supabase
+    .from("meal_plan_cycles")
+    .delete()
+    .eq("id", input.cycleId)
+    .eq("meal_plan_version_id", input.mealPlanVersionId)
+    .select("id")
+    .maybeSingle();
+  if (error) throw error;
+  return Boolean(data);
+}
+
 export async function createAccessibleMealPlanVersion(input: {
   clientId: string;
   protocolVersionId: string;

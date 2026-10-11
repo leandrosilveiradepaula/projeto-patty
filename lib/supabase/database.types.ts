@@ -3405,6 +3405,15 @@ export type Database = {
           weekly_feedback_id: string
         }[]
       }
+      replace_draft_meal_plan_cycle_steps: {
+        Args: {
+          p_cycle_id: string
+          p_meal_plan_version_id: string
+          p_expected_steps: Json
+          p_variant_ids: string[]
+        }
+        Returns: undefined
+      }
       clone_protocol_version_draft: {
         Args: { p_plan_snapshot: Json; p_source_protocol_version_id: string }
         Returns: string
