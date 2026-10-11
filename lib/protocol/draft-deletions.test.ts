@@ -29,7 +29,7 @@ test("draft dose deletion requires a returned row and refuses silent zero-row su
 test("empty meal deletion only reports success when a row was removed", () => {
   const code = functionSource(dataAccess, "deleteAccessibleEmptyMeal");
   assert.match(code, /\.select\("id", \{ count: "exact", head: true \}\)/);
-  assert.match(code, /if \(\(count \?\? 0\) > 0\)\s*\{\s*return false;/);
+  assert.match(code, /if \(\(count \?\? 0\) > 0\)\s*(?:\{\s*)?return false;/);
   assert.match(code, /\.eq\("id", input\.mealId\)/);
   assert.match(code, /\.eq\("meal_plan_variant_id", input\.variantId\)/);
   assert.match(code, /\.eq\("position", input\.originalPosition\)/);
@@ -42,7 +42,7 @@ test("empty meal deletion only reports success when a row was removed", () => {
 test("empty variant deletion only reports success when a row was removed", () => {
   const code = functionSource(dataAccess, "deleteAccessibleEmptyMealPlanVariant");
   assert.match(code, /\.select\("id", \{ count: "exact", head: true \}\)/);
-  assert.match(code, /if \(\(count \?\? 0\) > 0\)\s*\{\s*return false;/);
+  assert.match(code, /if \(\(count \?\? 0\) > 0\)\s*(?:\{\s*)?return false;/);
   assert.match(code, /\.eq\("id", input\.variantId\)/);
   assert.match(code, /\.eq\("meal_plan_version_id", input\.mealPlanVersionId\)/);
   assert.match(code, /\.eq\("variant_key", input\.originalVariantKey\)/);
