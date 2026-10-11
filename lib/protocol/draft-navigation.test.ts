@@ -64,7 +64,7 @@ test("search is case and diacritic-insensitive and never mutates ordering",()=>{
  assert.equal(searchDraftDirectory(items,"almoco")[0].id,"m1");
  assert.equal(searchDraftDirectory(items,"DIA")[0].id,"v1");
  assert.equal(searchDraftDirectory(items,["m1"]).length,items.length);
- assert.equal(items.length,5);
+ assert.equal(items.length,6);
  assert.equal(searchDraftDirectory(items,"nao existe").length,0);
 });
 test("empty steps per cycle and duplicate usage count are separate from readiness",()=>{
