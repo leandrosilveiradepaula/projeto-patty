@@ -1,3 +1,4 @@
+import { parseTrainingVersionFilters, exploreTrainingVersionHistory, trainingAdminVersionPageHref } from "@/lib/training/history-navigation";
 import { parseTrainingRequestFilters, exploreTrainingRequests, trainingRequestFilteredHref } from "@/lib/training/history-navigation";
 import { notFound } from "next/navigation";
 import { TrainingVersionComparisonView } from "@/components/training/TrainingVersionComparisonView";
@@ -37,7 +38,7 @@ type Props = {
   params: Promise<{
     clienteId: string;
   }>;
-  searchParams: Promise<{ pedidos?: string; origem?: string; observacao?: string; periodo?: string; ordem?: string }>;
+  searchParams: Promise<{ pedidos?: string; origem?: string; observacao?: string; periodo?: string; ordem?: string; buscaVersao?: string; estadoVersao?: string; ordemVersao?: string; versoes?: string }>;
 };
 
 function formatDateTime(value: string) {
@@ -68,6 +69,7 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
   const [{ clienteId }, search] = await Promise.all([params, searchParams]);
   const { pedidos } = search;
   const requestFilters = parseTrainingRequestFilters(search);
+  const archiveFilters = parseTrainingVersionFilters(search);
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(clienteId)) notFound();
   const client = await getAccessibleClient(clienteId);
 
@@ -88,6 +90,7 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
   const orderedVersions = [...versions].sort(
     (left, right) => right.version_number - left.version_number || left.id.localeCompare(right.id),
   );
+  const archive = exploreTrainingVersionHistory(orderedVersions,archiveFilters);
   const openVersion = newestUnpublishedTrainingVersion(versions);
   // Read-only inspection never needs the global exercise catalog.
   // Load it only while the professional can actually edit a draft.
@@ -453,6 +456,7 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
 
       <Section
         description="Versões publicadas permanecem imutáveis e preservadas no histórico."
+        id="historico-versoes-treino"
         title="Histórico de versões"
       >
         {versions.length === 0 ? (
@@ -471,8 +475,18 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
                 ))}
               </nav>
             ) : null}
+            <form method="get" className={styles.versionFilters}>
+              <label>Buscar versão<input type="search" name="buscaVersao" defaultValue={archiveFilters.query} maxLength={120} placeholder="Número ou título" /></label>
+              <label>Estado<select name="estadoVersao" defaultValue={archiveFilters.status}><option value="all">Todos</option><option value="published">Publicados</option><option value="reviewed">Revisados</option><option value="draft">Rascunhos</option></select></label>
+              <label>Ordem<select name="ordemVersao" defaultValue={archiveFilters.order}><option value="number-desc">Versão decrescente</option><option value="number-asc">Versão crescente</option><option value="title">Título</option></select></label>
+              <button type="submit">Filtrar versões</button>
+              <Link href={trainingAdminVersionPageHref("/admin/clientes/"+client.id+"/treino",1,parseTrainingVersionFilters({}),requestFilters)}>Limpar filtros de versões</Link>
+            </form>
+            <p role="status" className={styles.description}>Exibindo {archive.from}–{archive.to} de {archive.total} versão(ões) encontradas.</p>
+            {archive.total === 0 ? <p className={styles.description}>Nenhuma versão corresponde aos filtros.</p> : null}
+            {archive.invalid ? <p role="status">Página indisponível; exibimos uma página válida.</p> : null}
             <ol className={styles.history}>
-              {orderedVersions.map((version) => {
+              {archive.items.map((version) => {
                 const status = versionStatus(version);
                 const versionItems = sortedHistoryItemsByVersion.get(version.id) ?? [];
                 const meta = `Criada em ${formatDateTime(version.created_at)}${version.published_at
@@ -534,6 +548,11 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
                 );
               })}
             </ol>
+            {archive.total > 0 ? <nav aria-label="Páginas do histórico de versões" className={styles.versionNavigation}>
+              <span>Página {archive.page} de {archive.pageCount}</span>
+              {archive.previous ? <Link href={trainingAdminVersionPageHref("/admin/clientes/"+client.id+"/treino",archive.previous,archiveFilters,requestFilters)}>Anterior</Link> : null}
+              {archive.next ? <Link href={trainingAdminVersionPageHref("/admin/clientes/"+client.id+"/treino",archive.next,archiveFilters,requestFilters)}>Próxima</Link> : null}
+            </nav> : null}
           </>
         )}
       </Section>
