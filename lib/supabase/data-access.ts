@@ -1,3 +1,4 @@
+import { collectAiPages, collectAiPagesForIds, orderAiHistoryByCreatedAt } from "@/lib/ai/history-pagination";
 import { collectConfigurationPages, collectConfigurationVersionRows } from "@/lib/configuration/catalog-pagination";
 import { collectPrivateFilePages, orderPrivateFileHistory } from "@/lib/files/private-file-pagination";
 import { collectCheckinHistoryPages, collectCheckinCorrectionRows, newestFirstByInstant } from "@/lib/checkins/history-pagination";
@@ -744,59 +745,39 @@ export async function publishAccessibleClientTrainingPlanVersion(
 
 export async function listAccessibleNonterminalAiExecutions() {
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const rows = await collectAiPages((from, to) => supabase
     .from("ai_executions")
-    .select(
-      "id, client_id, purpose_key, anamnesis_submission_id, provider, model_identifier, status, created_at, completed_at, failed_at, clients(id, full_name, profiles(display_name))",
-    )
+    .select("id, client_id, purpose_key, anamnesis_submission_id, provider, model_identifier, status, created_at, completed_at, failed_at, clients(id, full_name, profiles(display_name))")
     .eq("status", "started")
     .is("completed_at", null)
     .is("failed_at", null)
     .order("created_at", { ascending: true })
-    .order("id", { ascending: true });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+    .order("id", { ascending: true })
+    .range(from, to));
+  return orderAiHistoryByCreatedAt(rows, false);
 }
 
 export async function listAccessibleAiAnamnesisExecutions(submissionId: string) {
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const rows = await collectAiPages((from, to) => supabase
     .from("ai_executions")
-    .select(
-      "id, anamnesis_submission_id, provider, model_identifier, status, prompt_version_id, created_at, completed_at, failed_at, failure_stage, failure_code, failure_message",
-    )
+    .select("id, anamnesis_submission_id, provider, model_identifier, status, prompt_version_id, created_at, completed_at, failed_at, failure_stage, failure_code, failure_message")
     .eq("purpose_key", "anamnesis_review")
     .eq("anamnesis_submission_id", submissionId)
     .order("created_at", { ascending: false })
-    .order("id", { ascending: false });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+    .order("id", { ascending: true })
+    .range(from, to));
+  return orderAiHistoryByCreatedAt(rows, true);
 }
 
 export async function listAccessibleAiExecutionOutputs(executionIds: string[]) {
-  if (executionIds.length === 0) {
-    return [];
-  }
-
   const supabase = await createClient();
-  const { data, error } = await supabase
+  return collectAiPagesForIds(executionIds, (ids, from, to) => supabase
     .from("ai_execution_outputs")
     .select("execution_id, content, created_at")
-    .in("execution_id", executionIds);
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+    .in("execution_id", ids)
+    .order("execution_id", { ascending: true })
+    .range(from, to));
 }
 
 export async function getLatestAccessibleAiPromptVersion(promptKey: string) {
