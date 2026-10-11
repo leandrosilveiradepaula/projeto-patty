@@ -50,6 +50,7 @@ export function AdminEducationalContentAssetUploadForm({
   const [uploaded, setUploaded] = useState<UploadedAsset | null>(null);
   const [busy, setBusy] = useState(false);
   const [registerBusy, setRegisterBusy] = useState(false);
+  const [needsRegistrationReview, setNeedsRegistrationReview] = useState(false);
   const uploadInFlightRef = useRef(false);
   const registerInFlightRef = useRef(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -75,6 +76,7 @@ export function AdminEducationalContentAssetUploadForm({
     uploadInFlightRef.current = true;
     setBusy(true);
     setUploaded(null);
+    setNeedsRegistrationReview(false);
 
     try {
       setStatus("Calculando SHA-256 localmente antes do upload…");
@@ -150,12 +152,14 @@ export function AdminEducationalContentAssetUploadForm({
       setStatus("Asset privado registrado com sucesso. Ainda não foi publicado nem liberado.");
       setUploaded(null);
       setFile(null);
+      setNeedsRegistrationReview(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
       router.refresh();
     } catch {
-      setStatus(
-        "Não foi possível registrar o asset verificado. O upload não será repetido automaticamente. Revise e tente registrar novamente.",
-      );
+      // A dropped response is ambiguous: the server may have inserted.
+      setNeedsRegistrationReview(true);
+      setStatus("O registro não foi confirmado. Confira os arquivos da versão antes de repetir a operação. O upload não será repetido automaticamente.");
+      router.refresh();
     } finally {
       registerInFlightRef.current = false;
       setRegisterBusy(false);
@@ -174,6 +178,7 @@ export function AdminEducationalContentAssetUploadForm({
             setFile(event.target.files?.[0] ?? null);
             setUploaded(null);
             setStatus(null);
+            setNeedsRegistrationReview(false);
           }}
           type="file"
         />
@@ -199,6 +204,13 @@ export function AdminEducationalContentAssetUploadForm({
         <p aria-live="polite" className={styles.description}>
           {status}
         </p>
+      ) : null}
+
+      {needsRegistrationReview ? (
+        <a className={styles.backLink}
+          href={`/admin/conteudos/${contentId}?versao=${versionId}#assets-do-conteudo`}>
+          Conferir se este arquivo já foi registrado
+        </a>
       ) : null}
 
       {uploaded ? (

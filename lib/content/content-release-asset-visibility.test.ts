@@ -37,3 +37,22 @@ test("missing asset blocks new releases in both domain and server action", () =>
     /Boolean\(facts\.publishedAt\) && facts\.hasAsset && !facts\.alreadyReleased/,
   );
 });
+
+test("new private Blob upload grants are version-scoped and retryable", () => {
+  const grant = read("app/admin/conteudos/[contentId]/assets/upload/route.ts");
+  const action = read("app/admin/conteudos/[contentId]/actions.ts");
+  assert.match(grant, /createEducationalAssetUploadPath/);
+  assert.match(action, /isEducationalAssetUploadPathForVersion/);
+});
+
+test("ambiguous asset registrations require review rather than an automatic upload retry", () => {
+  const form = read("components/admin/AdminEducationalContentAssetUploadForm.tsx");
+  assert.match(form, /needsRegistrationReview/);
+  assert.match(form, /Conferir se este arquivo já foi registrado/);
+  assert.match(form, /router\.refresh\(\)/);
+});
+
+test("successful content release refresh makes the chooser available for another release", () => {
+  const page = read("app/admin/clientes/[clienteId]/conteudos/page.tsx");
+  assert.match(page, /key=\{availableVersions\.map\(\(version\) => version\.id\)\.join\(":"\)\}/);
+});

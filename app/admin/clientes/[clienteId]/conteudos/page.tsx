@@ -157,6 +157,7 @@ export default async function AdminClientContentPage({
         ) : (
           <Card>
             <ClientContentReleaseForm
+              key={availableVersions.map((version) => version.id).join(":")}
               clientId={client.id}
               options={availableVersions.map((version) => ({
                 id: version.id,
