@@ -98,14 +98,20 @@ export function trainingRequestFilteredHref(
   page: number,
   anchor: "historico-solicitacoes-treino" | "solicitacoes-anteriores",
   versionPage?: number,
+  siblings?: {
+    professional?: TrainingVersionFilters;
+    client?: ClientTrainingArchiveFilters;
+    comparisonId?: string | null;
+  },
 ) {
-  const p = new URLSearchParams();
-  if (filters.origin !== "all") p.set("origem", filters.origin);
-  if (filters.notes !== "all") p.set("observacao", filters.notes);
-  if (filters.period !== "all") p.set("periodo", filters.period);
-  if (filters.order !== "newest") p.set("ordem", filters.order);
+  const p = trainingHistoryPreservedFilterParams({ ...filters, page: undefined }, versionPage);
   if (page > 1) p.set("pedidos", String(page));
-  if (versionPage && versionPage > 1) p.set("versoes", String(versionPage));
+  if (siblings?.professional) {
+    for (const [key, value] of trainingProfessionalArchiveState(siblings.professional, versionPage)) p.set(key, value);
+  }
+  if (siblings?.client) {
+    for (const [key, value] of trainingClientArchiveState(siblings.client, versionPage, siblings.comparisonId)) p.set(key, value);
+  }
   return base + (p.size ? "?" + p.toString() : "") + "#" + anchor;
 }
 
@@ -187,16 +193,22 @@ export function selectPublishedTrainingComparison<
   };
 }
 
-/** Authorized direct links to the exact immutable published version. */
+/** Comparison always targets a published version and never repaginates the archive implicitly. */
 export function trainingVersionComparisonHref<T extends { id: string; published_at: string | null }>(
-  base: string, authorized: readonly T[], versionId: string, requestFilters?: TrainingRequestFilters,
+  base: string,
+  authorized: readonly T[],
+  versionId: string,
+  requestFilters?: TrainingRequestFilters,
+  archiveFilters?: ClientTrainingArchiveFilters,
+  archivePage?: number,
 ) {
   if (!authorized.some(version => version.id === versionId && Boolean(version.published_at))) return null;
-  const url = trainingVersionExactHref(base, authorized.filter(v => Boolean(v.published_at)), versionId, requestFilters);
-  if (!url) return null;
-  const [path] = url.split("#");
-  return path + (path.includes("?") ? "&" : "?") +
-    "comparar=" + encodeURIComponent(versionId) + "#comparar-publicacoes-treino";
+  const p = trainingHistoryPreservedFilterParams(requestFilters ?? parseTrainingRequestFilters({}));
+  if (archiveFilters) {
+    for (const [key, value] of trainingClientArchiveState(archiveFilters, archivePage)) p.set(key, value);
+  }
+  p.set("comparar", versionId);
+  return base + "?" + p.toString() + "#comparar-publicacoes-treino";
 }
 
 /** Latest request is shown outside paginated history in the client workspace. */
@@ -210,13 +222,15 @@ export function clientTrainingRequestExactHref(
   return trainingRequestExactHref(base, sorted.slice(1), requestId, versionPage);
 }
 
-/** Links preserve the other section's page, never notes or unpublished content. */
+/** Only enumerated filters and bounded pagination are retained in URL state. */
 export function trainingHistoryPreservedFilterParams(filters: TrainingRequestFilters, versionPage?: number) {
   const p = new URLSearchParams();
   if (filters.origin !== "all") p.set("origem", filters.origin);
   if (filters.notes !== "all") p.set("observacao", filters.notes);
   if (filters.period !== "all") p.set("periodo", filters.period);
   if (filters.order !== "newest") p.set("ordem", filters.order);
+  const page = parseTrainingHistoryPage(filters.page);
+  if (!page.invalid && page.page > 1) p.set("pedidos", String(page.page));
   if (versionPage && versionPage > 1 && Number.isSafeInteger(versionPage)) p.set("versoes", String(versionPage));
   return p;
 }
@@ -285,6 +299,17 @@ export function trainingAdminVersionHref(
   if (page > 1) p.set("versoes",String(page));
   return base + (p.size ? "?" + p.toString() : "") + "#versao-treino-" + versionId;
 }
+/** A filtered administrative page preserves the independent request-history state. */
+export function trainingProfessionalArchiveState(filters: TrainingVersionFilters, page?: number) {
+  const p = new URLSearchParams();
+  if (filters.query) p.set("buscaVersao", filters.query);
+  if (filters.status !== "all") p.set("estadoVersao", filters.status);
+  if (filters.order !== "number-desc") p.set("ordemVersao", filters.order);
+  const fallback = parseTrainingHistoryPage(filters.page);
+  const effective = page ?? (!fallback.invalid ? fallback.page : 1);
+  if (effective > 1 && Number.isSafeInteger(effective)) p.set("versoes", String(effective));
+  return p;
+}
 export function trainingAdminVersionPageHref(
   base: string,
   page: number,
@@ -292,11 +317,8 @@ export function trainingAdminVersionPageHref(
   requests: TrainingRequestFilters,
 ) {
   const p = trainingHistoryPreservedFilterParams(requests);
-  if (versions.query) p.set("buscaVersao",versions.query);
-  if (versions.status !== "all") p.set("estadoVersao",versions.status);
-  if (versions.order !== "number-desc") p.set("ordemVersao",versions.order);
-  if (page > 1) p.set("versoes",String(page));
-  return base + (p.size?"?"+p.toString():"") + "#historico-versoes-treino";
+  for (const [key, value] of trainingProfessionalArchiveState(versions, page)) p.set(key, value);
+  return base + (p.size ? "?" + p.toString() : "") + "#historico-versoes-treino";
 }
 
 /** Client-side archive navigation without exposing unpublished versions. */
@@ -333,6 +355,21 @@ export function exploreClientTrainingArchive<T extends ClientTrainingArchivedVer
   const result = paginateTrainingVersions(ordered,filters.page);
   return {...result,filteredCount:matches.length,unfilteredCount:previous.length};
 }
+/** Client controls never inherit a raw comparison ID from the query string. */
+export function trainingClientArchiveState(
+  filters: ClientTrainingArchiveFilters,
+  page?: number,
+  verifiedComparisonId?: string | null,
+) {
+  const p = new URLSearchParams();
+  if (filters.query) p.set("buscaTreino", filters.query);
+  if (filters.order !== "newest") p.set("ordemTreino", filters.order);
+  const parsed = parseTrainingHistoryPage(filters.page);
+  const effective = page ?? (!parsed.invalid ? parsed.page : 1);
+  if (Number.isSafeInteger(effective) && effective > 1) p.set("versoes", String(effective));
+  if (verifiedComparisonId) p.set("comparar", verifiedComparisonId);
+  return p;
+}
 export function trainingClientArchiveHref(
   base: string,
   filters: ClientTrainingArchiveFilters,
@@ -341,11 +378,8 @@ export function trainingClientArchiveHref(
   comparisonId?: string | null,
 ) {
   const p = trainingHistoryPreservedFilterParams(requests ?? parseTrainingRequestFilters({}));
-  if (filters.query) p.set("buscaTreino",filters.query);
-  if (filters.order !== "newest") p.set("ordemTreino",filters.order);
-  if (page > 1) p.set("versoes",String(page));
-  if (comparisonId) p.set("comparar",comparisonId);
-  return base + (p.size?"?"+p.toString():"") + "#historico-versoes-treino";
+  for (const [key, value] of trainingClientArchiveState(filters, page, comparisonId)) p.set(key, value);
+  return base + (p.size ? "?" + p.toString() : "") + "#historico-versoes-treino";
 }
 export function trainingClientArchivedVersionHref(
   base: string,
