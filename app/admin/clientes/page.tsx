@@ -1,4 +1,5 @@
 import { ClientListItem } from "@/components/admin/ClientListItem";
+import { matchesClientDirectoryName, readClientDirectorySearchTerm } from "@/lib/clients/client-directory-search";
 import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -14,14 +15,6 @@ import styles from "./page.module.css";
 function getInitials(displayName: string | null | undefined) {
   const words = displayName?.trim().split(/\s+/).filter(Boolean) ?? [];
   return words.map((word) => word[0]).join("").slice(0, 2).toUpperCase() || "?";
-}
-
-function normalizeSearchValue(value: string) {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLocaleLowerCase("pt-BR")
-    .trim();
 }
 
 type AdminClientesPageProps = {
@@ -72,15 +65,12 @@ export default async function AdminClientesPage({
     current.push(item);
     pattyPendingItemsByClientId.set(item.clientId, current);
   }
-  const searchTerm = q?.trim() ?? "";
-  const normalizedSearchTerm = normalizeSearchValue(searchTerm);
+  const searchTerm = readClientDirectorySearchTerm(q);
   const viewFilter = view === "patty" ? "patty" : "all";
   const filteredClients = clients.filter((client) => {
-    const matchesSearch =
-      !normalizedSearchTerm ||
-      normalizeSearchValue(client.full_name || client.profiles?.display_name || "").includes(
-        normalizedSearchTerm,
-      );
+    const matchesSearch = matchesClientDirectoryName(
+      searchTerm, client.full_name, client.profiles?.display_name,
+    );
     const matchesView =
       viewFilter === "all" || pattyPendingItemsByClientId.has(client.id);
 
@@ -130,6 +120,7 @@ export default async function AdminClientesPage({
               defaultValue={searchTerm}
               id="client-search"
               name="q"
+              maxLength={120}
               placeholder="Digite o nome da cliente"
               type="search"
             />
@@ -156,7 +147,10 @@ export default async function AdminClientesPage({
         {clients.length === 0 ? (
           <p className={styles.emptyMessage}>Nenhuma cliente está em acompanhamento no momento.</p>
         ) : filteredClients.length === 0 ? (
-          <p className={styles.emptyMessage}>{viewFilter === "patty" ? (searchTerm ? `Nenhuma cliente com ação da Patty corresponde à busca por “${searchTerm}”.` : "Nenhuma cliente em acompanhamento possui ação da Patty nesta fila.") : `Nenhuma cliente corresponde à busca por “${searchTerm}”.`}</p>
+          <div className={styles.emptyMessage}>
+            <p>{viewFilter === "patty" ? (searchTerm ? `Nenhuma cliente com ação da Patty corresponde à busca por “${searchTerm}”.` : "Nenhuma cliente em acompanhamento possui ação da Patty nesta fila.") : `Nenhuma cliente corresponde à busca por “${searchTerm}”.`}</p>
+            <Link className={styles.clearLink} href="/admin/clientes">Limpar filtros</Link>
+          </div>
         ) : (
           <>
             {searchTerm || viewFilter !== "all" ? (

@@ -12,7 +12,7 @@ export async function listClientsForPrivateFileAdministration() {
   // Only the dedicated administrative workspace calls this privileged read.
   const rows = await collectPrivateFilePages((from, to) => admin
     .from("clients")
-    .select("id, profile_id, full_name, created_at, profiles(display_name)")
+    .select("id, profile_id, full_name, status, created_at, profiles(display_name)")
     .order("created_at", { ascending: false })
     .order("id", { ascending: true })
     .range(from, to));

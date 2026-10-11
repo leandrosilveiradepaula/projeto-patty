@@ -11,6 +11,7 @@ import { getClientForPrivateFileAdministration } from "@/lib/files/private-file-
 import { listAccessibleClientFiles } from "@/lib/supabase/data-access";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { isUuid } from "@/lib/validation/uuid";
 import styles from "./page.module.css";
 
 type AdminClientFilesPageProps = {
@@ -55,6 +56,8 @@ export default async function AdminClientFilesPage({
   params,
 }: AdminClientFilesPageProps) {
   const { clienteId } = await params;
+  if (!isUuid(clienteId)) notFound();
+
   const [client, files] = await Promise.all([
     getClientForPrivateFileAdministration(clienteId),
     listAccessibleClientFiles(clienteId),

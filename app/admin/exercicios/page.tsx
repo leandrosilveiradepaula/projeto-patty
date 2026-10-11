@@ -11,6 +11,7 @@ import { summarizeLibraryVersions, matchesLibraryStatus } from "@/lib/content/ad
 import { newestExerciseLibrarySummaries } from "@/lib/training/exercise-library-order";
 import { listExerciseVersionsVisibleToCurrentAdmin } from "@/lib/supabase/data-access";
 import Link from "next/link";
+import { readClientDirectorySearchTerm } from "@/lib/clients/client-directory-search";
 import styles from "./page.module.css";
 
 
@@ -44,7 +45,7 @@ export default async function AdminExerciciosPage({ searchParams }: AdminExercic
   );
   const exercises = summaries;
 
-  const searchTerm = q?.trim() ?? "";
+  const searchTerm = readClientDirectorySearchTerm(q);
   const normalizedSearchTerm = normalizeSearchValue(searchTerm);
   const statusFilter = status === "draft" || status === "published" ? status : "all";
   const filteredExercises = exercises.filter((summary) => {
@@ -82,6 +83,7 @@ export default async function AdminExerciciosPage({ searchParams }: AdminExercic
               <TextInput
                 defaultValue={searchTerm}
                 name="q"
+                maxLength={120}
                 placeholder="Digite o nome do exercício"
                 type="search"
               />
