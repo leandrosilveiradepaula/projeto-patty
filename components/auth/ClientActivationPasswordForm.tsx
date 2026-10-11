@@ -43,7 +43,6 @@ export function ClientActivationPasswordForm({ role }: { role: "admin" | "client
           <TextInput
             {...fieldProps}
             autoComplete="new-password"
-            disabled={isPending}
             minLength={8}
             maxLength={128}
             name="password"
