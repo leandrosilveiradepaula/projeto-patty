@@ -1,3 +1,4 @@
+import {parseVersionFilter,exploreProtocolVersions,protocolVersionExplorerHref} from "@/lib/protocol/version-explorer";
 import { AdminMealDraftGuidance } from "@/components/admin/AdminMealDraftGuidance";
 import { AdminProtocolDraftEditor } from "@/components/admin/AdminProtocolDraftEditor";
 import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
@@ -40,7 +41,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import styles from "./page.module.css";
 
-type AdminProtocoloDetailPageProps = { params: Promise<{ protocoloId: string }>; searchParams: Promise<{ versao?: string }> };
+type AdminProtocoloDetailPageProps = { params: Promise<{ protocoloId: string }>; searchParams: Promise<{ versao?: string; buscar?: string; estado?: string; ordem?: string; pagina?: string }> };
 
 function formatDateTime(value: string | null | undefined) {
   if (!value || !Number.isFinite(Date.parse(value))) {
@@ -76,7 +77,9 @@ function getLifecyclePresentation(input: {
 
 export default async function AdminProtocoloDetailPage({ params, searchParams }: AdminProtocoloDetailPageProps) {
   const { protocoloId } = await params;
-  const { versao: requestedVersion } = await searchParams;
+  const search = await searchParams;
+  const { versao: requestedVersion } = search;
+  const filters = parseVersionFilter(search);
 
   if (!isUuid(protocoloId)) notFound();
 
@@ -122,6 +125,7 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
   const mealPlansByVersionId = new Map(
     mealPlans.map((mealPlan) => [mealPlan.protocolVersionId, mealPlan]),
   );
+  const archive=exploreProtocolVersions(versions,new Set(approvals.map(x=>x.protocol_version_id)),new Set(publications.map(x=>x.protocol_version_id)),filters,requestedVersion);
   const versionsById = new Map(
     versions.map((version) => [version.id, version]),
   );
@@ -161,14 +165,27 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
         </p>
       ) : null}
       <Section
+        id="historico-versoes-protocolo"
         description="A versão mais recente fica aberta para trabalho. Escolha uma versão para expandir seu histórico, sem alterar o que já foi publicado."
         title="Versões e histórico"
       >
         {versions.length === 0 ? (
           <EmptyState description="Nenhuma versão está acessível para este protocolo." title="Sem versões registradas" />
         ) : (
-          <ol className={styles.versionList}>
-            {versions.map((version, versionIndex) => {
+          <>
+            <form method="get" className={styles.versionFilters}>
+              <label>Buscar número da versão<input type="search" name="buscar" maxLength={120} defaultValue={filters.term} placeholder="Ex.: 3" /></label>
+              <label>Situação<select name="estado" defaultValue={filters.status}><option value="all">Todas</option><option value="draft">Rascunho</option><option value="review">Em revisão</option><option value="approved">Aprovada, não publicada</option><option value="published">Publicada</option></select></label>
+              <label>Ordem<select name="ordem" defaultValue={filters.order}><option value="newest">Versões recentes</option><option value="oldest">Versões antigas</option></select></label>
+              <button type="submit">Aplicar filtros</button>
+              <Link className={styles.backLink} href={protocolVersionExplorerHref("/admin/protocolos/"+protocol.id,parseVersionFilter({}),1)}>Limpar filtros</Link>
+            </form>
+            <p role="status">{archive.from}–{archive.to} de {archive.total} versões encontradas.</p>
+            {archive.invalid ? <p role="status">Página solicitada não disponível; mostrando uma página válida.</p> : null}
+            {archive.selectedHidden ? <p role="status">A versão solicitada não corresponde aos filtros. Limpe os filtros para consultá-la.</p> : null}
+            {archive.total===0 ? <p>Não existem versões que correspondam aos filtros.</p> : null}
+            <ol className={styles.versionList}>
+            {archive.items.map((version) => {
               const approval = approvalsByVersionId.get(version.id);
               const publication = publicationsByVersionId.get(version.id);
               const mealPlan = mealPlansByVersionId.get(version.id) ?? null;
@@ -190,7 +207,7 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
               });
               const draftReadiness = getProtocolDraftReadiness(mealPlan);
               const draftNavigation = !version.submitted_for_review_at ? buildProtocolDraftNavigation(mealPlan) : null;
-              const isCurrentVersion = versionIndex === 0;
+              const isCurrentVersion = versions[0]?.id === version.id;
               const isLatestPublishedVersion = version.id === latestPublishedId;
               const isRequestedVersion = version.version_number === selectedVersionNumber;
 
@@ -361,6 +378,12 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
               );
             })}
           </ol>
+          {archive.total>0 ? <nav className={styles.versionPaging} aria-label="Páginas do histórico de versões">
+            <span>Página {archive.page} de {archive.pages}</span>
+            {archive.previous ? <Link href={protocolVersionExplorerHref("/admin/protocolos/"+protocol.id,filters,archive.previous)}>Anterior</Link> : null}
+            {archive.next ? <Link href={protocolVersionExplorerHref("/admin/protocolos/"+protocol.id,filters,archive.next)}>Próxima</Link> : null}
+          </nav> : null}
+          </>
         )}
       </Section>
     </>
