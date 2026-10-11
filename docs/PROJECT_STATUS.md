@@ -1,3 +1,7 @@
+## Protocolos — mapa operacional de pendências do rascunho (2026-10-11)
+
+Editor de rascunho alimentar: contagens factuais de variações, refeições, doses, ciclos e etapas, todas as pendências técnicas da estrutura mínima com links diretos para os registros, pesquisa local de itens e avisos informativos sobre nomes repetidos, variações não usadas e referências ausentes de ciclos. Destinos usam IDs já autorizados pelo workspace e permanecem na interface admin. Os critérios existentes de revisão permanecem intactos, sem regras clínicas, scores, novo gate, publicação automática ou migration. A validação E2E autenticada permanece pendente.
+
 ## Onboarding — preflight de novas contas (2026-10-11)
 
 Ambas as alternativas administrativas (convite via email e link manual) agora requerem confirmação explícita de que se trata de conta nova, além de validar nome e email de acesso com as mesmas regras no browser e no servidor, antes de qualquer operação no Supabase Auth. O servidor rejeita chaves duplicadas e arquivos em campos de identidade, evitando escolher silenciosamente um valor arbitrário. Validação pre-provisionamento pode ser refeita; falhas após interação com o provedor continuam bloqueando reenvio até revisão para não duplicar identidades. Não é novo fluxo de reenvio, recuperação nem alteração de regras profissionais. Email de login segue diferente de contato. E2E de envio real e entrega SMTP não foram executados. Sem migrations/RLS.

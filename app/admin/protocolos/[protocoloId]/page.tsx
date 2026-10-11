@@ -30,6 +30,8 @@ import {
   formatProtocolDraftReadiness,
   getProtocolDraftReadiness,
 } from "@/lib/protocol/draft-readiness";
+import { buildProtocolDraftNavigation } from "@/lib/protocol/draft-navigation";
+import { ProtocolDraftCompletionMap } from "@/components/admin/ProtocolDraftCompletionMap";
 import { getProtocolLifecycleAction } from "@/lib/protocol/lifecycle";
 import { latestPublishedProtocolVersionId, requestedProtocolVersion } from "@/lib/protocol/history-navigation";
 import { buildProtocolPlanComparison } from "@/lib/protocol/version-diff";
@@ -187,6 +189,7 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
                 submittedForReview: Boolean(version.submitted_for_review_at),
               });
               const draftReadiness = getProtocolDraftReadiness(mealPlan);
+              const draftNavigation = !version.submitted_for_review_at ? buildProtocolDraftNavigation(mealPlan) : null;
               const isCurrentVersion = versionIndex === 0;
               const isLatestPublishedVersion = version.id === latestPublishedId;
               const isRequestedVersion = version.version_number === selectedVersionNumber;
@@ -298,6 +301,7 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
                           variantSummaries={summarizeMealDraftPlan(mealPlan)}
                         />
                       </div>
+                      {draftNavigation ? <ProtocolDraftCompletionMap navigation={draftNavigation} /> : null}
                       <div className={styles.versionPlan}>
                         <AdminProtocolDraftEditor
                           plan={mealPlan}
