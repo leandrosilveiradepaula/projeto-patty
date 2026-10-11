@@ -1,3 +1,7 @@
+## Protocolos: concorrência de edição manual e comparação de ciclos — 2026-10-11
+
+A auditoria seguinte ao editor de ciclos corrigiu atualizações silenciosas de variações, refeições e doses, exclusão de dose alterada em outra aba, exclusão de refeição com dados de origem obsoletos e remoção de variações ainda presentes em ciclos. A comparação factual entre versões agora informa a sequência persistida dos ciclos. Nenhum comportamento nutricional automático, schema ou RLS foi alterado. E2E autenticado com Supabase real permanece pendente. Consulte `docs/AUDIT_PROTOCOL_DRAFT_CONCURRENCY_2026_10_11.md`.
+
 ## Solicitações de treino — recuperação de erros de rede - 2026-10-11
 
 Corrigidas mensagens que anteriormente afirmavam que uma solicitação não havia sido registrada mesmo quando o resultado do servidor era incerto. Os formulários da Patty e da cliente preservam observações em caso de erro, indicam processamento e oferecem link direto ao histórico antes de repetir. A ação de registro permanece autenticada e a solicitação não cria nem publica treino. Essas melhorias reduzem duplicidades acidentais mas não constituem idempotência entre dispositivos. E2E autenticado real pendente.
