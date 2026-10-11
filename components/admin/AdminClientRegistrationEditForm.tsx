@@ -25,6 +25,7 @@ type AdminClientRegistrationEditFormProps = {
   contactEmail?: string;
   instagram?: string;
   phone?: string;
+  updatedAt?: string | null;
 };
 
 export function AdminClientRegistrationEditForm({
@@ -33,6 +34,7 @@ export function AdminClientRegistrationEditForm({
   contactEmail,
   instagram,
   phone,
+  updatedAt,
 }: AdminClientRegistrationEditFormProps) {
   const action = updateAdminClientRegistrationAction.bind(null, clientId);
   const [state, formAction, isPending] = useActionState(action, initialState);
@@ -62,6 +64,7 @@ export function AdminClientRegistrationEditForm({
         inFlightRef.current = true;
       }}
     >
+      <input name="expectedUpdatedAt" type="hidden" value={updatedAt ?? ""} />
       {state.message && !editedSinceResult ? (
         <Alert
           live={state.success ? "polite" : "assertive"}
@@ -137,6 +140,9 @@ export function AdminClientRegistrationEditForm({
         identidade de autenticação permanecem separadas.
       </p>
 
+      {state.message?.includes("alterado em outra sessão") && !editedSinceResult ? (
+        <Button onClick={() => router.refresh()} type="button" variant="secondary">Recarregar dados atuais</Button>
+      ) : null}
       <Button disabled={isPending} loading={isPending} type="submit">
         Salvar Cadastro Atual
       </Button>
