@@ -15,6 +15,8 @@ import {
 import styles from "./page.module.css";
 import { formatPrivateFileRecordedAt, formatPrivateFileSize, readPrivateFileKindFilter } from "@/lib/files/private-file-history-view";
 
+import { paginatePrivateFileHistory, privateFileHistoryHref, readPrivateFileHistoryPage, readPrivateFileHistorySort, sortPrivateFileHistory, countPrivateFileCategories, visiblePrivateFilePageNumbers } from "@/lib/files/private-file-history-workspace";
+
 const fileKindLabels: Record<string, string> = {
   document: "Documento",
   exam: "Exame",
@@ -47,8 +49,8 @@ function formatCreatedAt(value: string) {
   }).format(new Date(value));
 }
 
-export default async function ClientFilesPage({ searchParams }: { searchParams: Promise<{ categoria?: string }> }) {
-  const { categoria } = await searchParams;
+export default async function ClientFilesPage({ searchParams }: { searchParams: Promise<{ categoria?: string; ordem?: string; pagina?: string }> }) {
+  const { categoria, ordem, pagina } = await searchParams;
   const kind = readPrivateFileKindFilter(categoria);
   const client = await getCurrentClient();
 
@@ -62,7 +64,13 @@ export default async function ClientFilesPage({ searchParams }: { searchParams: 
   }
 
   const files = await listCurrentClientFiles(client.id);
-  const filteredFiles = files.filter(file => kind === "all" || file.file_kind === kind);
+  const order = readPrivateFileHistorySort(ordem);
+  const requestedPage = readPrivateFileHistoryPage(pagina);
+  const filteredFiles = sortPrivateFileHistory(files.filter(file => kind === "all" || file.file_kind === kind), order.value);
+  const visiblePage = paginatePrivateFileHistory(filteredFiles, requestedPage.page);
+  const categories = countPrivateFileCategories(files);
+  const historyPath = "/cliente/arquivos";
+  const historyHref = (page: number) => privateFileHistoryHref(historyPath, { categoria: kind, ordem: order.value, pagina: page, anchor: "lista-arquivos" });
 
   return (
     <>
@@ -87,11 +95,24 @@ export default async function ClientFilesPage({ searchParams }: { searchParams: 
               <option value="all">Todas</option><option value="photo">Fotos</option><option value="exam">Exames</option><option value="document">Documentos</option>
             </select>
           </label>
+          <label>Ordenação
+            <select name="ordem" defaultValue={order.value}>
+              <option value="newest">Mais recentes</option>
+              <option value="oldest">Mais antigos</option>
+              <option value="largest">Maiores arquivos</option>
+              <option value="smallest">Menores arquivos</option>
+              <option value="kind">Por categoria</option>
+            </select>
+          </label>
           <button type="submit">Filtrar</button>
           <Link href="/cliente/arquivos">Limpar filtros</Link>
         </form>
-        <p role="status">{filteredFiles.length} de {files.length} arquivo(s) disponível(is).</p>
+        <p role="status">{filteredFiles.length} de {files.length} arquivo(s) disponível(is) · Fotos: {categories.photo}, exames: {categories.exam}, documentos: {categories.document}.</p>
       </Section>
+      <div id="lista-arquivos" className={styles.historyAnchor}>
+      {(order.invalid || requestedPage.invalid || visiblePage.outOfRange) ? (
+        <p className={styles.filterNotice} role="status">O filtro ou a página solicitada não está disponível. Exibimos uma página válida dos seus arquivos autorizados.</p>
+      ) : null}
       <Section
         action={<Badge variant="neutral">{filteredFiles.length} arquivo(s)</Badge>}
         description="Aqui aparecem os arquivos já validados e liberados para sua conta."
@@ -105,7 +126,7 @@ export default async function ClientFilesPage({ searchParams }: { searchParams: 
           />
         ) : (
           <ul className={styles.fileList}>
-            {filteredFiles.map((file) => (
+            {visiblePage.items.map((file) => (
               <li key={file.id}>
                 <Card className={styles.fileCard}>
                   <div className={styles.fileHeader}>
@@ -157,6 +178,19 @@ export default async function ClientFilesPage({ searchParams }: { searchParams: 
           </ul>
         )}
       </Section>
+      {visiblePage.total > 0 ? (
+        <nav aria-label="Páginas dos arquivos" className={styles.pagination}>
+          <p>{visiblePage.first}–{visiblePage.last} de {visiblePage.total} arquivo(s) · Página {visiblePage.page} de {visiblePage.pageCount}</p>
+          {visiblePage.previous ? <Link href={historyHref(visiblePage.previous)}>Anterior</Link> : null}
+          {visiblePrivateFilePageNumbers(visiblePage.page, visiblePage.pageCount).map((number) =>
+            number === visiblePage.page
+              ? <strong key={number} aria-current="page">Página {number}</strong>
+              : <Link key={number} href={historyHref(number)} aria-label={`Ir para página ${number}`}>{number}</Link>
+          )}
+          {visiblePage.next ? <Link href={historyHref(visiblePage.next)}>Próxima</Link> : null}
+        </nav>
+      ) : null}
+      </div>
       <ClientJourneyNextSteps areas={["assessments","index"]} />
     </>
   );

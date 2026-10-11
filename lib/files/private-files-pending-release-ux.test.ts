@@ -21,7 +21,8 @@ test("admin private files separates release decisions from the filtered history"
   assert.match(page, /isPrivateFilePendingProfessionalRelease\(file, client\.profile_id\)/);
   assert.match(page, /title="Aguardando liberação"/);
   assert.match(page, /title="Histórico de arquivos"/);
-  assert.match(page, /totalPending = files\.filter/);
+  assert.match(page, /totalPending = counts\.pending/);
+  assert.match(page, /privateFileHistoryCounts\(files, client\.profile_id\)/);
 });
 
 test("only hidden non-client uploads become professional release pendencies", () => {
