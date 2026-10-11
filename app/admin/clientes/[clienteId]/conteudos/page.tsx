@@ -1,3 +1,4 @@
+import { filterProfessionalReleases, readProfessionalReleaseOptions, professionalReleaseHref } from "@/lib/content/professional-release-explorer";
 import { ClientContentReleaseForm } from "@/components/admin/ClientContentReleaseForm";
 import { isContentVersionReleaseEligible } from "@/lib/content/release-eligibility";
 import { newestClientContentReleases, sortClientContentReleaseOptions } from "@/lib/content/release-order";
@@ -20,9 +21,8 @@ import Link from "next/link";
 import styles from "./page.module.css";
 
 type AdminClientContentPageProps = {
-  params: Promise<{
-    clienteId: string;
-  }>;
+  params: Promise<{ clienteId: string }>;
+  searchParams: Promise<{ q?: string; arquivo?: string; ordem?: string; pagina?: string }>;
 };
 
 function formatRecordedDate(value: string | null) {
@@ -38,9 +38,10 @@ function formatRecordedDate(value: string | null) {
 }
 
 export default async function AdminClientContentPage({
-  params,
+  params, searchParams,
 }: AdminClientContentPageProps) {
   const { clienteId } = await params;
+  const filters = readProfessionalReleaseOptions(await searchParams);
   if (!isUuid(clienteId)) notFound();
   const client = await getAccessibleClient(clienteId);
 
@@ -91,6 +92,8 @@ export default async function AdminClientContentPage({
     (release) => Boolean(release.educational_content_versions),
   );
   const missingReleaseVersions = newestReleases.length - visibleReleases.length;
+  const explored = filterProfessionalReleases(visibleReleases, assetCountsByVersionId, filters);
+  const baseHref = `/admin/clientes/${client.id}/conteudos`;
   const publishedVersionsAwaitingAsset = contentVersions.filter(
     (version) =>
       Boolean(version.published_at) &&
@@ -170,12 +173,23 @@ export default async function AdminClientContentPage({
       </Section>
       </div>
       <Section
+        id="historico-liberacoes"
         description="Conteúdos já liberados para esta cliente."
         title="Conteúdos liberados"
       >
         <p className={styles.notice}>
           {visibleReleases.length} liberação(ões) com versão consultável no histórico desta cliente.
         </p>
+        {visibleReleases.length > 0 ? (
+          <form action={baseHref} className={styles.historyFilters} method="get">
+            <label>Buscar<input type="search" name="q" maxLength={160} defaultValue={filters.query} placeholder="Título, categoria ou tipo" /></label>
+            <label>Arquivo<select name="arquivo" defaultValue={filters.availability}><option value="all">Todos</option><option value="available">Com arquivo</option><option value="missing">Sem arquivo</option></select></label>
+            <label>Ordem<select name="ordem" defaultValue={filters.order}><option value="newest">Mais recentes</option><option value="oldest">Mais antigas</option><option value="title">Título</option></select></label>
+            <button type="submit">Filtrar</button>
+            <Link href={baseHref + "#historico-liberacoes"}>Limpar filtros</Link>
+          </form>
+        ) : null}
+        {visibleReleases.length > 0 ? <p role="status" className={styles.notice}>Exibindo {explored.first}–{explored.last} de {explored.total} liberações encontradas.</p> : null}
         {visibleReleases.length === 0 ? (
           <EmptyState
             description={missingReleaseVersions > 0
@@ -192,8 +206,9 @@ export default async function AdminClientContentPage({
               Confira a biblioteca antes de depender desses materiais no atendimento.
             </p>
           ) : null}
+          {explored.total === 0 ? <EmptyState title="Nenhum conteúdo encontrado" description="Ajuste os filtros; as liberações anteriores estão preservadas." /> : null}
           <ul className={styles.contentList}>
-            {visibleReleases.map((release) => {
+            {explored.items.map((release) => {
               const contentVersion = release.educational_content_versions;
               if (!contentVersion) {
                 return null;
@@ -235,6 +250,11 @@ export default async function AdminClientContentPage({
               );
             })}
           </ul>
+          {explored.pages > 1 ? <nav className={styles.historyPages} aria-label="Páginas do histórico">
+            {explored.previous ? <Link href={professionalReleaseHref(baseHref, filters, explored.previous)}>Anterior</Link> : <span>Anterior</span>}
+            <span>Página {explored.page} de {explored.pages}</span>
+            {explored.next ? <Link href={professionalReleaseHref(baseHref, filters, explored.next)}>Próxima</Link> : <span>Próxima</span>}
+          </nav> : null}
           </>
         )}
       </Section>

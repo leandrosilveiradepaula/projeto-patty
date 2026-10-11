@@ -13,3 +13,5 @@
   font-size: var(--text-body-medium-size);
   line-height: var(--text-body-medium-line-height);
 }
+
+.historyFilters{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:var(--space-3);align-items:end;margin:var(--space-4) 0}.historyFilters label{display:grid;gap:var(--space-2);min-width:0}.historyFilters input,.historyFilters select,.historyFilters button{width:100%;min-height:44px;padding:var(--space-2);font:inherit;background:var(--color-surface);color:var(--color-text-primary);border:1px solid var(--color-border);border-radius:var(--radius-small)}.historyFilters a,.historyPages a{display:inline-flex;align-items:center;min-height:44px}.historyPages{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:var(--space-3);margin-top:var(--space-4)}.historyFilters :is(input,select,button,a):focus-visible,.historyPages a:focus-visible{outline:3px solid var(--color-accent);outline-offset:2px}
