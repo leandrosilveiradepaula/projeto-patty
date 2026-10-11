@@ -265,6 +265,7 @@ export default async function AdminEducationalContentDetailPage({
                     <strong>
                       Versão {version.version_number} · {version.title}
                     </strong>
+                    <p className={styles.description}>Arquivos registrados: {assetCounts.get(version.id)??0}</p>
                     <p className={styles.description}>
                       Criada em {formatDateTime(version.created_at)}
                       {version.published_at
@@ -283,6 +284,11 @@ export default async function AdminEducationalContentDetailPage({
             </li>
           ))}
         </ol>
+        {archive.total>0 ? <nav className={styles.historyPagination} aria-label="Páginas de versões do conteúdo">
+          <span>Página {archive.page} de {archive.pages}</span>
+          {archive.previous ? <Link href={contentVersionArchiveHref("/admin/conteudos/"+content.id,filters,archive.previous)}>Anterior</Link> : null}
+          {archive.next ? <Link href={contentVersionArchiveHref("/admin/conteudos/"+content.id,filters,archive.next)}>Próxima</Link> : null}
+        </nav> : null}
       </Section>
     </>
   );
