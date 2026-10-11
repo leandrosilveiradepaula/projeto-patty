@@ -12,6 +12,7 @@ import {
   AnamnesisSubmissionError,
   submitCurrentClientAnamnesisDraft,
 } from "@/lib/anamnesis/submission";
+import { parseDraftAnswerExpectation } from "@/lib/anamnesis/draft-concurrency";
 import { isAnamnesisConsentAccepted } from "@/lib/anamnesis/consent-policy";
 
 export type ClientAnamnesisDraftAnswerFormState = {
@@ -33,6 +34,10 @@ function getDraftPersistenceErrorMessage(error: unknown) {
       error.code === "unsupported_answer_type"
     ) {
       return "Esta pergunta não está disponível para edição nesta interface.";
+    }
+
+    if (error.code === "answer_conflict") {
+      return "Esta resposta foi alterada em outra sessão. Seu texto continua aqui, mas não foi gravado. Atualize a página, confira o valor salvo e só então decida se deseja editá-lo novamente.";
     }
 
     if (error.code === "invalid_answer_value") {
@@ -68,6 +73,11 @@ export async function saveClientAnamnesisDraftTextAnswer(
   await requireRole("client");
 
   const value = formData.get("answerValue");
+  const expectedAnswer = parseDraftAnswerExpectation(formData);
+
+  if (!expectedAnswer) {
+    return { message: "Não foi possível verificar a versão desta resposta. Atualize a página antes de salvar.", success: false };
+  }
 
   if (typeof value !== "string") {
     return {
@@ -79,6 +89,7 @@ export async function saveClientAnamnesisDraftTextAnswer(
   try {
     await saveCurrentClientAnamnesisDraftAnswer({
       answerValue: value,
+      expectedAnswer,
       expectedAnswerType: "text",
       questionId,
       submissionId,
@@ -107,6 +118,11 @@ export async function saveClientAnamnesisDraftSingleChoiceAnswer(
   await requireRole("client");
 
   const value = formData.get("answerValue");
+  const expectedAnswer = parseDraftAnswerExpectation(formData);
+
+  if (!expectedAnswer) {
+    return { message: "Não foi possível verificar a versão desta resposta. Atualize a página antes de salvar.", success: false };
+  }
 
   if (typeof value !== "string") {
     return {
@@ -118,6 +134,7 @@ export async function saveClientAnamnesisDraftSingleChoiceAnswer(
   try {
     await saveCurrentClientAnamnesisDraftAnswer({
       answerValue: value,
+      expectedAnswer,
       expectedAnswerType: "single_choice",
       questionId,
       submissionId,

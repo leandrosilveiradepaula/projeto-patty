@@ -336,6 +336,7 @@ export default async function ClienteAnamneseDetailPage({
                           return (
                             <Card className={styles.questionCard} id={`pergunta-${question.id}`} key={question.id}>
                               <ClientAnamnesisDraftTextAnswerForm
+                                initialAnswerExists={Boolean(answer)}
                                 initialValue={
                                   typeof answerValue === "string"
                                     ? answerValue
@@ -357,6 +358,7 @@ export default async function ClienteAnamneseDetailPage({
                           return (
                             <Card className={styles.questionCard} id={`pergunta-${question.id}`} key={question.id}>
                               <ClientAnamnesisDraftSingleChoiceAnswerForm
+                                initialAnswerExists={Boolean(answer)}
                                 initialValue={
                                   typeof answerValue === "string"
                                     ? answerValue
