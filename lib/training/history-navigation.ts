@@ -220,3 +220,143 @@ export function trainingHistoryPreservedFilterParams(filters: TrainingRequestFil
   if (versionPage && versionPage > 1 && Number.isSafeInteger(versionPage)) p.set("versoes", String(versionPage));
   return p;
 }
+
+
+/**
+ * Administrative version explorer. These are projections of versions already
+ * returned to the authenticated professional by RLS-protected data access.
+ */
+export type TrainingVersionFilters = {
+  query: string;
+  status: "all" | "published" | "reviewed" | "draft";
+  order: "number-desc" | "number-asc" | "title";
+  page: string | undefined;
+};
+export type TrainingVersionArchiveRow = {
+  id: string;
+  title: string;
+  version_number: number;
+  published_at: string | null;
+  reviewed_at: string | null;
+};
+export function parseTrainingVersionFilters(raw: Record<string, unknown>): TrainingVersionFilters {
+  return {
+    query: typeof raw.buscaVersao === "string" ? raw.buscaVersao.trim().slice(0, 120) : "",
+    status: raw.estadoVersao === "published" || raw.estadoVersao === "reviewed" || raw.estadoVersao === "draft" ? raw.estadoVersao : "all",
+    order: raw.ordemVersao === "number-asc" || raw.ordemVersao === "title" ? raw.ordemVersao : "number-desc",
+    page: typeof raw.versoes === "string" ? raw.versoes : undefined,
+  };
+}
+function normalizeHistoryText(value: string) {
+  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR");
+}
+export function exploreTrainingVersionHistory<T extends TrainingVersionArchiveRow>(
+  rows: readonly T[],
+  filters: TrainingVersionFilters,
+) {
+  const query = normalizeHistoryText(filters.query);
+  const matched = rows.filter(row => {
+    if (filters.status === "published" && !row.published_at) return false;
+    if (filters.status === "reviewed" && (!row.reviewed_at || row.published_at)) return false;
+    if (filters.status === "draft" && (row.reviewed_at || row.published_at)) return false;
+    return !query || normalizeHistoryText(row.title).includes(query) || String(row.version_number).includes(query);
+  });
+  const ordered = [...matched].sort((a,b) => {
+    if (filters.order === "title") {
+      return a.title.localeCompare(b.title,"pt-BR",{sensitivity:"base"}) ||
+        b.version_number-a.version_number || a.id.localeCompare(b.id);
+    }
+    const numeric = filters.order === "number-asc" ? a.version_number-b.version_number : b.version_number-a.version_number;
+    return numeric || a.id.localeCompare(b.id);
+  });
+  const page = paginateTrainingVersions(ordered,filters.page);
+  return {...page, filteredCount:matched.length, unfilteredCount:rows.length};
+}
+export function trainingAdminVersionHref(
+  base: string,
+  rows: readonly TrainingVersionArchiveRow[],
+  versionId: string,
+  requests?: TrainingRequestFilters,
+) {
+  const index = rows.findIndex(row=>row.id===versionId);
+  if (index < 0) return null;
+  const p = trainingHistoryPreservedFilterParams(requests ?? parseTrainingRequestFilters({}));
+  const page = Math.floor(index / TRAINING_VERSIONS_PER_PAGE) + 1;
+  if (page > 1) p.set("versoes",String(page));
+  return base + (p.size ? "?" + p.toString() : "") + "#versao-treino-" + versionId;
+}
+export function trainingAdminVersionPageHref(
+  base: string,
+  page: number,
+  versions: TrainingVersionFilters,
+  requests: TrainingRequestFilters,
+) {
+  const p = trainingHistoryPreservedFilterParams(requests);
+  if (versions.query) p.set("buscaVersao",versions.query);
+  if (versions.status !== "all") p.set("estadoVersao",versions.status);
+  if (versions.order !== "number-desc") p.set("ordemVersao",versions.order);
+  if (page > 1) p.set("versoes",String(page));
+  return base + (p.size?"?"+p.toString():"") + "#historico-versoes-treino";
+}
+
+/** Client-side archive navigation without exposing unpublished versions. */
+export type ClientTrainingArchiveFilters = {
+  query: string;
+  order: "newest" | "oldest" | "title";
+  page: string | undefined;
+};
+export function parseClientTrainingArchiveFilters(raw: Record<string, unknown>): ClientTrainingArchiveFilters {
+  return {
+    query: typeof raw.buscaTreino === "string" ? raw.buscaTreino.trim().slice(0, 120) : "",
+    order: raw.ordemTreino === "oldest" || raw.ordemTreino === "title" ? raw.ordemTreino : "newest",
+    page: typeof raw.versoes === "string" ? raw.versoes : undefined,
+  };
+}
+export type ClientTrainingArchivedVersion = {
+  version: {id:string;title:string;version_number:number;published_at:string|null};
+};
+export function exploreClientTrainingArchive<T extends ClientTrainingArchivedVersion>(
+  previous: readonly T[],
+  filters: ClientTrainingArchiveFilters,
+) {
+  const query = normalizeHistoryText(filters.query);
+  const matches = previous.filter(({version}) =>
+    Boolean(version.published_at) &&
+    (!query || normalizeHistoryText(version.title).includes(query) || String(version.version_number).includes(query)),
+  );
+  const ordered = [...matches];
+  if (filters.order === "oldest") ordered.reverse();
+  if (filters.order === "title") {
+    ordered.sort((a,b)=>a.version.title.localeCompare(b.version.title,"pt-BR",{sensitivity:"base"}) ||
+      b.version.version_number-a.version.version_number || a.version.id.localeCompare(b.version.id));
+  }
+  const result = paginateTrainingVersions(ordered,filters.page);
+  return {...result,filteredCount:matches.length,unfilteredCount:previous.length};
+}
+export function trainingClientArchiveHref(
+  base: string,
+  filters: ClientTrainingArchiveFilters,
+  page: number,
+  requests?: TrainingRequestFilters,
+  comparisonId?: string | null,
+) {
+  const p = trainingHistoryPreservedFilterParams(requests ?? parseTrainingRequestFilters({}));
+  if (filters.query) p.set("buscaTreino",filters.query);
+  if (filters.order !== "newest") p.set("ordemTreino",filters.order);
+  if (page > 1) p.set("versoes",String(page));
+  if (comparisonId) p.set("comparar",comparisonId);
+  return base + (p.size?"?"+p.toString():"") + "#historico-versoes-treino";
+}
+export function trainingClientArchivedVersionHref(
+  base: string,
+  previous: readonly ClientTrainingArchivedVersion[],
+  versionId: string,
+  requests?: TrainingRequestFilters,
+) {
+  const index = previous.findIndex(row=>row.version.id===versionId && Boolean(row.version.published_at));
+  if (index<0) return null;
+  const p = trainingHistoryPreservedFilterParams(requests ?? parseTrainingRequestFilters({}));
+  const page = Math.floor(index / TRAINING_VERSIONS_PER_PAGE)+1;
+  if (page > 1) p.set("versoes",String(page));
+  return base + (p.size?"?"+p.toString():"") + "#treino-versao-" + versionId;
+}
