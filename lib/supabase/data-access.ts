@@ -1,3 +1,4 @@
+import { comparePlanVariantRegistration } from "@/lib/protocol/variant-registration-order";
 import { collectAiPages, collectAiPagesForIds, orderAiHistoryByCreatedAt } from "@/lib/ai/history-pagination";
 import { collectConfigurationPages, collectConfigurationVersionRows } from "@/lib/configuration/catalog-pagination";
 import { collectPrivateFilePages, orderPrivateFileHistory } from "@/lib/files/private-file-pagination";
@@ -2742,10 +2743,10 @@ export async function listAccessibleProtocolVersionMealPlans(
     collectPublishedProtocolRows(planIds, (ids, from, to) =>
       supabase
         .from("meal_plan_variants")
-        .select("id, meal_plan_version_id, variant_key, label")
+        .select("id, meal_plan_version_id, variant_key, label, created_at")
         .in("meal_plan_version_id", ids)
         .order("meal_plan_version_id", { ascending: true })
-        .order("variant_key", { ascending: true })
+        .order("created_at", { ascending: true })
         .order("id", { ascending: true })
         .range(from, to),
     ),
@@ -2802,7 +2803,7 @@ export async function listAccessibleProtocolVersionMealPlans(
   // presentation order after combining batches without changing snapshot data.
   variants.sort((left, right) =>
     left.meal_plan_version_id.localeCompare(right.meal_plan_version_id) ||
-    left.variant_key.localeCompare(right.variant_key) ||
+    comparePlanVariantRegistration(left, right) ||
     left.id.localeCompare(right.id),
   );
   cycles.sort((left, right) =>
@@ -2999,10 +3000,10 @@ export async function listPublishedProtocolsForCurrentClient(
     collectPublishedProtocolRows(mealPlanVersionIds, (ids, from, to) =>
       supabase
         .from("meal_plan_variants")
-        .select("id, meal_plan_version_id, variant_key, label")
+        .select("id, meal_plan_version_id, variant_key, label, created_at")
         .in("meal_plan_version_id", ids)
         .order("meal_plan_version_id", { ascending: true })
-        .order("variant_key", { ascending: true })
+        .order("created_at", { ascending: true })
         .order("id", { ascending: true })
         .range(from, to),
     ),
@@ -3053,6 +3054,14 @@ export async function listPublishedProtocolsForCurrentClient(
         .range(from, to),
     ),
   ]);
+
+  variants.sort(comparePlanVariantRegistration);
+  cycles.sort((left, right) =>
+    left.meal_plan_version_id.localeCompare(right.meal_plan_version_id) ||
+    Date.parse(left.created_at) - Date.parse(right.created_at) ||
+    left.id.localeCompare(right.id),
+  );
+  cycleSteps.sort((left, right) => left.cycle_id.localeCompare(right.cycle_id) || left.position - right.position);
 
   const protocolsById = new Map(protocols.map((protocol) => [protocol.id, protocol]));
   const versionsById = new Map(versions.map((version) => [version.id, version]));
