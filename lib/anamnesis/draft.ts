@@ -7,6 +7,12 @@ import { createClient } from "@/lib/supabase/server";
 import { isUuid } from "@/lib/validation/uuid";
 
 import {
+  type DraftAnswerExpectation,
+  draftAnswerJsonbFilter,
+  matchesDraftAnswerExpectation,
+} from "./draft-concurrency";
+
+import {
   getDraftAnswerWriteMode,
   getDraftCreationMode,
   getDraftSingleChoiceOptions,
@@ -20,7 +26,8 @@ export type AnamnesisDraftPersistenceErrorCode =
   | "invalid_answer_value"
   | "invalid_identifier"
   | "question_not_available"
-  | "unsupported_answer_type";
+  | "unsupported_answer_type"
+  | "answer_conflict";
 
 export class AnamnesisDraftPersistenceError extends Error {
   constructor(public readonly code: AnamnesisDraftPersistenceErrorCode) {
@@ -132,17 +139,23 @@ async function updateDraftAnswer(
   input: {
     answerId: string;
     answerValue: Json;
+    expectedAnswerValue: string;
   },
 ) {
   const { data, error } = await supabase
     .from("anamnesis_answers")
     .update({ answer_value: input.answerValue })
-    .eq("id", input.answerId)
+     .eq("id", input.answerId)
+    .eq("answer_value", draftAnswerJsonbFilter(input.expectedAnswerValue))
     .select("id, submission_id, question_id, answer_value, updated_at")
-    .single();
+    .maybeSingle();
 
   if (error) {
     throw error;
+  }
+
+  if (!data) {
+    throw new AnamnesisDraftPersistenceError("answer_conflict");
   }
 
   return data;
@@ -151,6 +164,7 @@ async function updateDraftAnswer(
 export async function saveCurrentClientAnamnesisDraftAnswer(input: {
   answerValue: Json;
   expectedAnswerType?: string;
+  expectedAnswer: DraftAnswerExpectation;
   questionId: string;
   submissionId: string;
 }) {
@@ -198,6 +212,14 @@ export async function saveCurrentClientAnamnesisDraftAnswer(input: {
     throw new AnamnesisDraftPersistenceError("unsupported_answer_type");
   }
 
+  if (question.answer_type !== "single_choice" && question.answer_type !== "text") {
+    throw new AnamnesisDraftPersistenceError("unsupported_answer_type");
+  }
+
+  if (question.answer_type === "text" && typeof input.answerValue !== "string") {
+    throw new AnamnesisDraftPersistenceError("invalid_answer_value");
+  }
+
   if (question.answer_type === "single_choice") {
     const options = getDraftSingleChoiceOptions(question.options);
 
@@ -212,7 +234,7 @@ export async function saveCurrentClientAnamnesisDraftAnswer(input: {
 
   const { data: existingAnswer, error: existingAnswerError } = await supabase
     .from("anamnesis_answers")
-    .select("id")
+    .select("id, answer_value, submission_id, question_id, updated_at")
     .eq("submission_id", submission.id)
     .eq("question_id", question.id)
     .maybeSingle();
@@ -221,14 +243,22 @@ export async function saveCurrentClientAnamnesisDraftAnswer(input: {
     throw existingAnswerError;
   }
 
+  if (!matchesDraftAnswerExpectation(existingAnswer, input.expectedAnswer)) {
+    throw new AnamnesisDraftPersistenceError("answer_conflict");
+  }
+
   if (
     getDraftAnswerWriteMode(existingAnswer?.id ?? null) === "update" &&
-    existingAnswer
+    existingAnswer && input.expectedAnswer.exists
   ) {
+    if (existingAnswer.answer_value === input.answerValue) {
+      return { answer: existingAnswer, status: "unchanged" as const };
+    }
     return {
       answer: await updateDraftAnswer(supabase, {
         answerId: existingAnswer.id,
         answerValue: input.answerValue,
+        expectedAnswerValue: input.expectedAnswer.value,
       }),
       status: "updated" as const,
     };
@@ -255,7 +285,7 @@ export async function saveCurrentClientAnamnesisDraftAnswer(input: {
   if (isUniqueViolationCode(error.code)) {
     const { data: concurrent, error: concurrentError } = await supabase
       .from("anamnesis_answers")
-      .select("id")
+      .select("id, submission_id, question_id, answer_value, updated_at")
       .eq("submission_id", submission.id)
       .eq("question_id", question.id)
       .maybeSingle();
@@ -265,13 +295,11 @@ export async function saveCurrentClientAnamnesisDraftAnswer(input: {
     }
 
     if (concurrent) {
-      return {
-        answer: await updateDraftAnswer(supabase, {
-          answerId: concurrent.id,
-          answerValue: input.answerValue,
-        }),
-        status: "updated" as const,
-      };
+      if (concurrent.answer_value === input.answerValue) {
+        return { answer: concurrent, status: "unchanged" as const };
+      }
+      // An insert by another tab must never turn into a blind overwrite.
+      throw new AnamnesisDraftPersistenceError("answer_conflict");
     }
   }
 
