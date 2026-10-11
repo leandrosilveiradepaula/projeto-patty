@@ -157,7 +157,10 @@ export function publishedVariantMatches(view:PublishedView, rawTerm:unknown, dos
   const matchedVariantIds=new Set(matches.map(meal=>meal.variantId));
   return view.variants.filter(variant=>{
     // Keep empty variants discoverable when there are no search constraints.
-    if(variant.meals.length===0&&normalizePublishedSearch(rawTerm)===""&&doseType==="all")return true;
+    if(variant.meals.length===0&&doseType==="all") {
+      const query=normalizePublishedSearch(rawTerm);
+      return !query||normalizePublishedSearch(variant.label).includes(query);
+    }
     return matchedVariantIds.has(variant.id);
   }).map(variant=>({id:variant.id,label:variant.label,meals:variant.meals.length}));
 }
