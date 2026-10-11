@@ -903,8 +903,10 @@ export default async function AdminClienteDetailPage({
       >
         <div className={styles.registrationStack}>
           <AdminClientNameEditForm
-            key={displayName ?? "unnamed"}
+            key={[client.full_name, client.profiles?.display_name ?? ""].join(":")}
             clientId={client.id}
+            canonicalName={client.full_name}
+            profileName={client.profiles?.display_name ?? null}
             displayName={displayName ?? undefined}
           />
           <AdminClientRegistrationEditForm
