@@ -1,4 +1,4 @@
-import { PUBLISHED_PROTOCOL_PAGE_SIZE } from "@/lib/protocol/published-read-pagination";
+import { PUBLISHED_PROTOCOL_PAGE_SIZE } from "./published-read-pagination.ts";
 
 /** Complete an authenticated protocol catalog without inventing parent IDs. */
 export async function collectProtocolCatalogPages<T>(
