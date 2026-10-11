@@ -1,6 +1,7 @@
 import "server-only";
 import { collectScopedClientOperationalRows } from "@/lib/operations/client-operational-pagination";
 import { collectTrainingHistoryRows, collectTrainingPagedRows } from "@/lib/training/history-batches";
+import { collectLibraryPages, collectLibraryVersionRows } from "@/lib/content/library-pagination";
 import { collectAnamnesisHistoryRows } from "@/lib/anamnesis/history-pagination";
 import { collectPublishedProtocolRows } from "@/lib/protocol/published-read-pagination";
 
@@ -1169,25 +1170,17 @@ export async function listEducationalContentVersionsForCurrentAdmin(
   contentId?: string,
 ) {
   const supabase = await createClient();
-  let query = supabase
-    .from("educational_content_versions")
-    .select(
-      "id, educational_content_id, version_number, title, category_key, content_type_key, phase_key, display_order, published_at, created_at",
-    );
-
-  if (contentId) {
-    query = query.eq("educational_content_id", contentId);
-  }
-
-  const { data, error } = await query
-    .order("version_number", { ascending: false })
-    .order("id", { ascending: true });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  const rows = await collectLibraryPages((from, to) => {
+    let query = supabase
+      .from("educational_content_versions")
+      .select("id, educational_content_id, version_number, title, category_key, content_type_key, phase_key, display_order, published_at, created_at");
+    if (contentId) query = query.eq("educational_content_id", contentId);
+    return query
+      .order("version_number", { ascending: false })
+      .order("id", { ascending: true })
+      .range(from, to);
+  });
+  return rows.sort((left, right) => right.version_number - left.version_number || left.id.localeCompare(right.id));
 }
 
 export async function createAccessibleEducationalContent() {
@@ -1308,20 +1301,14 @@ export async function listEducationalContentAssetsForCurrentAdmin(
   versionId: string,
 ) {
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const rows = await collectLibraryPages((from, to) => supabase
     .from("educational_content_assets")
-    .select(
-      "id, educational_content_version_id, asset_key, storage_provider, storage_path, content_type, byte_size, sha256_hex, created_at",
-    )
+    .select("id, educational_content_version_id, asset_key, storage_provider, storage_path, content_type, byte_size, sha256_hex, created_at")
     .eq("educational_content_version_id", versionId)
     .order("asset_key", { ascending: true })
-    .order("id", { ascending: true });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+    .order("id", { ascending: true })
+    .range(from, to));
+  return rows.sort((a, b) => a.asset_key.localeCompare(b.asset_key) || a.id.localeCompare(b.id));
 }
 
 export async function getAccessibleEducationalContentAssetForCurrentAdmin(
@@ -1346,24 +1333,18 @@ export async function getAccessibleEducationalContentAssetForCurrentAdmin(
 export async function listEducationalContentAssetsForCurrentAdminVersions(
   versionIds: string[],
 ) {
-  if (versionIds.length === 0) return [];
-
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const rows = await collectLibraryVersionRows(versionIds, (ids, from, to) => supabase
     .from("educational_content_assets")
-    .select(
-      "id, educational_content_version_id, asset_key, storage_provider, content_type, byte_size, created_at",
-    )
-    .in("educational_content_version_id", versionIds)
+    .select("id, educational_content_version_id, asset_key, storage_provider, content_type, byte_size, created_at")
+    .in("educational_content_version_id", ids)
     .order("educational_content_version_id", { ascending: true })
     .order("asset_key", { ascending: true })
-    .order("id", { ascending: true });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+    .order("id", { ascending: true })
+    .range(from, to));
+  return rows.sort((a, b) =>
+    a.educational_content_version_id.localeCompare(b.educational_content_version_id) ||
+    a.asset_key.localeCompare(b.asset_key) || a.id.localeCompare(b.id));
 }
 
 export async function createAccessibleEducationalContentAsset(input: {
@@ -1399,19 +1380,19 @@ export async function createAccessibleEducationalContentAsset(input: {
 
 async function listContentReleasesForClient(clientId: string) {
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const rows = await collectLibraryPages((from, to) => supabase
     .from("client_content_releases")
-    .select(
-      "id, released_at, educational_content_versions(id, version_number, title, category_key, content_type_key), client_content_progress(first_opened_at, completed_at)",
-    )
+    .select("id, released_at, educational_content_versions(id, version_number, title, category_key, content_type_key), client_content_progress(first_opened_at, completed_at)")
     .eq("client_id", clientId)
-    .order("released_at", { ascending: true });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+    .order("released_at", { ascending: true })
+    .order("id", { ascending: true })
+    .range(from, to));
+  return rows.sort((left, right) => {
+    const a = Date.parse(left.released_at);
+    const b = Date.parse(right.released_at);
+    return (Number.isFinite(a) ? a : -Infinity) - (Number.isFinite(b) ? b : -Infinity) ||
+      left.id.localeCompare(right.id);
+  });
 }
 
 export async function listCurrentClientContentReleases(clientId: string) {
@@ -1463,46 +1444,32 @@ export async function listEducationalContentAssetsForCurrentClient(
   versionId: string,
 ) {
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const rows = await collectLibraryPages((from, to) => supabase
     .from("educational_content_assets")
-    .select(
-      "id, educational_content_version_id, asset_key, content_type, byte_size",
-    )
+    .select("id, educational_content_version_id, asset_key, content_type, byte_size")
     .eq("educational_content_version_id", versionId)
     .order("asset_key", { ascending: true })
-    .order("id", { ascending: true });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+    .order("id", { ascending: true })
+    .range(from, to));
+  return rows.sort((a, b) => a.asset_key.localeCompare(b.asset_key) || a.id.localeCompare(b.id));
 }
 
 export async function listEducationalContentAssetsForCurrentClientVersions(
   versionIds: string[],
 ) {
-  if (versionIds.length === 0) return [];
-
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const rows = await collectLibraryVersionRows(versionIds, (ids, from, to) => supabase
     .from("educational_content_assets")
-    .select(
-      "id, educational_content_version_id, asset_key, content_type, byte_size",
-    )
-    .in("educational_content_version_id", versionIds)
+    .select("id, educational_content_version_id, asset_key, content_type, byte_size")
+    .in("educational_content_version_id", ids)
     .order("educational_content_version_id", { ascending: true })
     .order("asset_key", { ascending: true })
-    .order("id", { ascending: true });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+    .order("id", { ascending: true })
+    .range(from, to));
+  return rows.sort((a, b) =>
+    a.educational_content_version_id.localeCompare(b.educational_content_version_id) ||
+    a.asset_key.localeCompare(b.asset_key) || a.id.localeCompare(b.id));
 }
-
-
 
 export async function createAccessibleClientContentRelease(
   clientId: string,

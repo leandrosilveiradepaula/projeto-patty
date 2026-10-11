@@ -115,3 +115,17 @@
   border-radius: var(--radius-medium);
   background: var(--color-surface-subtle);
 }
+
+/* A version mutation is one atomic, disableable form control group. */
+.mutationFields {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+  max-width: 720px;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.mutationFields[disabled] {
+  opacity: 0.75;
+}

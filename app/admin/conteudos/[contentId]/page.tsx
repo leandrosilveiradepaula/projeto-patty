@@ -1,11 +1,10 @@
 import {
-  createNextEducationalContentVersionAction,
-  publishEducationalContentVersionAction,
-  updateEducationalContentDraftAction,
-} from "@/app/admin/conteudos/[contentId]/actions";
+  AdminEducationalContentDraftSaveForm,
+  AdminEducationalContentNewVersionForm,
+  AdminEducationalContentPublishForm,
+} from "@/components/admin/AdminEducationalContentVersionForms";
 import { AdminEducationalContentAssetUploadForm } from "@/components/admin/AdminEducationalContentAssetUploadForm";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -24,9 +23,11 @@ import styles from "./page.module.css";
 
 type PageProps = {
   params: Promise<{ contentId: string }>;
+  searchParams: Promise<{ versao?: string }>;
 };
 
 function formatDateTime(value: string) {
+  if (!Number.isFinite(Date.parse(value))) return "Data indisponível";
   return new Intl.DateTimeFormat("pt-BR", {
     dateStyle: "short",
     timeStyle: "short",
@@ -36,8 +37,9 @@ function formatDateTime(value: string) {
 
 export default async function AdminEducationalContentDetailPage({
   params,
+  searchParams,
 }: PageProps) {
-  const { contentId } = await params;
+  const [{ contentId }, { versao }] = await Promise.all([params, searchParams]);
 
   if (!isUuid(contentId)) {
     notFound();
@@ -51,9 +53,15 @@ export default async function AdminEducationalContentDetailPage({
 
   const versions = await listEducationalContentVersionsForCurrentAdmin(content.id);
   const current = versions[0] ?? null;
-  const currentAssets = current
-    ? await listEducationalContentAssetsForCurrentAdmin(current.id)
-    : [];
+  // Only a version already visible under the professional RLS can be inspected.
+  const inspected = versions.find((version) => version.id === versao) ?? current;
+  const [currentAssets, inspectedAssets] = await Promise.all([
+    current ? listEducationalContentAssetsForCurrentAdmin(current.id) : Promise.resolve([]),
+    inspected && inspected.id !== current?.id
+      ? listEducationalContentAssetsForCurrentAdmin(inspected.id)
+      : Promise.resolve(null),
+  ]);
+  const visibleAssets = inspectedAssets ?? currentAssets;
   const currentCanPublish = current
     ? canPublishEducationalContentVersion({
         contentTypeKey: current.content_type_key,
@@ -99,9 +107,7 @@ export default async function AdminEducationalContentDetailPage({
               A interface não altera versões publicadas. Mudanças posteriores são
               feitas em uma nova versão.
             </p>
-            <form action={createNextEducationalContentVersionAction.bind(null, content.id)}>
-              <Button type="submit">Criar nova versão</Button>
-            </form>
+            <AdminEducationalContentNewVersionForm contentId={content.id} />
           </Card>
         ) : (
           <Card>
@@ -115,37 +121,13 @@ export default async function AdminEducationalContentDetailPage({
               <Badge variant="warning">Rascunho</Badge>
             </div>
 
-            <form
-              action={updateEducationalContentDraftAction.bind(
-                null,
-                content.id,
-                current.id,
-              )}
-              className={styles.form}
-            >
-              <label className={styles.field}>
-                <span>Título</span>
-                <input
-                  defaultValue={current.title}
-                  maxLength={200}
-                  name="title"
-                  required
-                />
-              </label>
-
-              <label className={styles.field}>
-                <span>Ordem de exibição</span>
-                <input
-                  defaultValue={current.display_order}
-                  min="0"
-                  name="displayOrder"
-                  required
-                  type="number"
-                />
-              </label>
-
-              <Button type="submit">Salvar rascunho</Button>
-            </form>
+            <AdminEducationalContentDraftSaveForm
+              contentId={content.id}
+              displayOrder={current.display_order}
+              key={JSON.stringify([current.id, current.title, current.display_order])}
+              title={current.title}
+              versionId={current.id}
+            />
 
             <p className={styles.description}>
               Categoria atual: {current.category_key ?? "não definida"} · Tipo
@@ -153,29 +135,12 @@ export default async function AdminEducationalContentDetailPage({
               {current.phase_key ?? "não vinculada"}.
             </p>
 
-            <form
-              action={publishEducationalContentVersionAction.bind(
-                null,
-                content.id,
-                current.id,
-              )}
-              className={styles.form}
-            >
-              <label className={styles.confirmation}>
-                <input
-                  name="confirmPublish"
-                  required
-                  type="checkbox"
-                  value="yes"
-                />
-                <span>
-                  Confirmo que esta versão foi revisada e pode ser publicada.
-                </span>
-              </label>
-              <Button disabled={!currentCanPublish} type="submit">
-                Publicar versão
-              </Button>
-            </form>
+            <AdminEducationalContentPublishForm
+              canPublish={currentCanPublish}
+              contentId={content.id}
+              versionId={current.id}
+              versionNumber={current.version_number}
+            />
             <p className={styles.description}>
               {currentCanPublish
                 ? "Publicar torna a versão elegível para liberação manual por cliente. Não há liberação automática."
@@ -186,22 +151,23 @@ export default async function AdminEducationalContentDetailPage({
       </Section>
 
       <Section
-        description="Metadados técnicos dos arquivos vinculados à versão atual. O binário continua privado no provedor de armazenamento."
-        title="Assets da versão atual"
+        id="assets-do-conteudo"
+        description="Consulte os arquivos da versão selecionada. O binário permanece privado no provedor de armazenamento."
+        title={inspected ? `Arquivos da versão ${inspected.version_number}` : "Arquivos"}
       >
-        {!current ? (
+        {!inspected ? (
           <EmptyState
             description="Crie uma versão antes de registrar assets."
             title="Sem versão atual"
           />
-        ) : currentAssets.length === 0 ? (
+        ) : visibleAssets.length === 0 ? (
           <Card>
             <div className={styles.header}>
               <div>
                 <h2 className={styles.title}>Nenhum asset registrado</h2>
                 <p className={styles.description}>
-                  Esta versão ainda não possui arquivo binário associado no
-                  Supabase. Isso não publica nem libera nada automaticamente.
+                  A versão {inspected.version_number} ainda não possui arquivo registrado.
+                  Isso não publica nem libera nada automaticamente.
                 </p>
               </div>
               <Badge variant="warning">Sem asset</Badge>
@@ -211,21 +177,21 @@ export default async function AdminEducationalContentDetailPage({
               localmente e envia o binário diretamente ao Blob privado; o
               servidor continua validando o objeto antes de registrar metadata.
             </p>
-            {current.published_at === null ? (
+            {inspected.id === current?.id && current?.published_at === null ? (
               <AdminEducationalContentAssetUploadForm
                 contentId={content.id}
                 versionId={current.id}
               />
             ) : (
               <p className={styles.description}>
-                Esta versão já foi publicada; assets não são registrados
-                retroativamente pela interface.
+                Uma versão histórica ou publicada não pode receber arquivos
+                retroativamente. Selecione o rascunho atual para incluir novo asset.
               </p>
             )}
           </Card>
         ) : (
           <ol className={styles.assetList}>
-            {currentAssets.map((asset) => (
+            {visibleAssets.map((asset) => (
               <li key={asset.id}>
                 <Card variant="subtle">
                   <div className={styles.header}>
@@ -266,7 +232,7 @@ export default async function AdminEducationalContentDetailPage({
       >
         <ol className={styles.history}>
           {versions.map((version) => (
-            <li key={version.id}>
+            <li id={`versao-conteudo-${version.id}`} key={version.id}>
               <Card variant="subtle">
                 <div className={styles.header}>
                   <div>
@@ -284,6 +250,9 @@ export default async function AdminEducationalContentDetailPage({
                     {version.published_at ? "Publicado" : "Rascunho"}
                   </Badge>
                 </div>
+                <Link className={styles.backLink} href={`?versao=${version.id}#assets-do-conteudo`}>
+                  {version.id === inspected?.id ? "Ver arquivos desta versão (selecionada)" : "Ver arquivos desta versão"}
+                </Link>
               </Card>
             </li>
           ))}
