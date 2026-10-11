@@ -46,7 +46,7 @@ test("new notification channel uses server-side version precondition, not UI-onl
 test("manual invitation can be copied after success but cannot be accidentally provisioned twice", () => {
   const form = read("components/admin/ManualClientInviteForm.tsx");
   assert.ok(!form.includes('className={styles.form} noValidate'));
-  assert.ok(form.includes('disabled={state.success} loading={isPending} type="submit"'));
+  assert.ok(form.includes('disabled={state.success || isPending} loading={isPending} type="submit"'));
   assert.ok(form.includes('disabled={state.success}'));
   assert.ok(form.includes('state.activationLink'));
   assert.ok(form.includes('copyActivationLink'));
@@ -70,7 +70,7 @@ test("automatic and manual invitation share browser hints and server-side name/e
 
 test("manual recovery link avoids inadvertent token regeneration and stays copyable", () => {
   const form = read("components/admin/AdminClientRecoveryLinkForm.tsx");
-  assert.ok(form.includes('disabled={Boolean(state.recoveryLink)}'));
+  assert.ok(form.includes('disabled={isPending || Boolean(state.recoveryLink)}'));
   assert.ok(form.includes('disabled={isPending} onClick={copyRecoveryLink}'));
   assert.ok(form.includes('readOnly'));
   assert.ok(form.includes('navigator.clipboard.writeText(state.recoveryLink)'));

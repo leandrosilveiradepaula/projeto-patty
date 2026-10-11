@@ -32,7 +32,7 @@ test("persisted registration versions remount contact editors without conflating
   const client = read("app/cliente/perfil/page.tsx");
   assert.ok(admin.includes('key={registration?.updated_at ?? "new"}'));
   assert.ok(client.includes('key={registration?.updated_at ?? "new"}'));
-  assert.ok(admin.includes('key={displayName ?? "unnamed"}'));
+  assert.ok(admin.includes('key={[client.full_name, client.profiles?.display_name ?? ""].join(":")}'));
   assert.ok(admin.includes("client.full_name?.trim()"));
 });
 
