@@ -1,5 +1,6 @@
-import { validateInvitationDraft } from "@/lib/onboarding/validation";
 "use client";
+
+import { validateInvitationDraft } from "@/lib/onboarding/validation";
 
 import { useActionState, useRef, useEffect, useState } from "react";
 
