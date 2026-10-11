@@ -7,7 +7,8 @@ import type { Json } from "@/lib/supabase/database.types";
  * It is deliberately NOT an authorization primitive or an atomic database CAS.
  * Do not place answer bodies in PostgREST filters, URLs or telemetry.
  */
-function stableJson(value: Json): string {
+function stableJson(value: Json | undefined): string {
+  if (value === undefined) return "null";
   if (value === null || typeof value !== "object") return JSON.stringify(value);
   if (Array.isArray(value)) return "[" + value.map(stableJson).join(",") + "]";
   return "{" + Object.entries(value).sort(([a], [b]) => a.localeCompare(b)).map(
