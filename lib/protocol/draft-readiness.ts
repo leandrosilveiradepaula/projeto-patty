@@ -2,9 +2,11 @@ export type ProtocolDraftReadinessReason =
   | "missing_plan"
   | "missing_variant"
   | "variant_without_meal"
-  | "meal_without_dose";
+  | "meal_without_dose"
+  | "cycle_without_step";
 
 export type ProtocolDraftReadinessPlan = {
+  cycles?: Array<{ steps: Array<unknown> }>;
   variants: Array<{
     meals: Array<{
       doseAllocations: Array<unknown>;
@@ -39,6 +41,10 @@ export function getProtocolDraftReadiness(
     reasons.push("meal_without_dose");
   }
 
+  if (plan.cycles?.some((cycle) => cycle.steps.length === 0)) {
+    reasons.push("cycle_without_step");
+  }
+
   return {
     ready: reasons.length === 0,
     reasons,
@@ -62,6 +68,10 @@ export function formatProtocolDraftReadiness(
 
   if (reasons.includes("meal_without_dose")) {
     return "Toda refeição precisa ter ao menos uma dose registrada.";
+  }
+
+  if (reasons.includes("cycle_without_step")) {
+    return "Complete os ciclos iniciados ou exclua os ciclos vazios antes da revisão.";
   }
 
   return "A estrutura alimentar mínima está registrada.";

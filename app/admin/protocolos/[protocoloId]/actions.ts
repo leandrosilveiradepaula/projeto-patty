@@ -6,6 +6,8 @@ import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/supabase/auth";
 import { buildProtocolCloneSnapshot } from "@/lib/protocol/clone-snapshot";
 import { parseProtocolDraftDoseQuantity } from "@/lib/protocol/dose-entry";
+import { applyDraftCycleOperation, parseDraftCycleSteps, sameDraftCycleSteps } from "@/lib/protocol/cycle-editor";
+import { isUuid } from "@/lib/validation/uuid";
 import {
   formatProtocolDraftReadiness,
   getProtocolDraftReadiness,
@@ -17,6 +19,9 @@ import {
   createAccessibleMealDoseAllocation,
   createAccessibleMealPlanVariant,
   createAccessibleMealPlanVersion,
+  createAccessibleMealPlanCycle,
+  replaceAccessibleDraftMealPlanCycleSteps,
+  deleteAccessibleEmptyMealPlanCycle,
   deleteAccessibleEmptyMeal,
   deleteAccessibleEmptyMealPlanVariant,
   deleteAccessibleMealDoseAllocation,
@@ -545,6 +550,120 @@ export async function removeProtocolMealPlanVariant(
 
   revalidateProtocolPaths(protocolId, accessible.protocol.client_id);
   return { message: "Variação removida.", success: true };
+}
+
+
+export async function addProtocolMealPlanCycle(
+  protocolId: string,
+  protocolVersionId: string,
+  mealPlanVersionId: string,
+  _state: ProtocolLifecycleFormState,
+  _formData: FormData,
+): Promise<ProtocolLifecycleFormState> {
+  await requireRole("admin");
+  const accessible = await getAccessibleVersionLifecycle(protocolId, protocolVersionId);
+  if (!accessible || accessible.lifecycleAction !== "submit") {
+    return { success: false, message: "Somente rascunhos acessíveis podem receber ciclos." };
+  }
+  const plans = await listAccessibleProtocolVersionMealPlans([protocolVersionId]);
+  if (!plans.some((plan) => plan.id === mealPlanVersionId)) {
+    return { success: false, message: "O plano alimentar não está acessível." };
+  }
+  try {
+    await createAccessibleMealPlanCycle({ clientId: accessible.protocol.client_id, mealPlanVersionId });
+  } catch {
+    return { success: false, message: "Não foi possível registrar o ciclo. Confira o histórico antes de repetir." };
+  }
+  revalidateProtocolPaths(protocolId, accessible.protocol.client_id);
+  return { success: true, message: "Ciclo vazio registrado. Adicione as etapas manualmente." };
+}
+
+export async function editProtocolMealPlanCycle(
+  protocolId: string,
+  protocolVersionId: string,
+  mealPlanVersionId: string,
+  cycleId: string,
+  _state: ProtocolLifecycleFormState,
+  formData: FormData,
+): Promise<ProtocolLifecycleFormState> {
+  await requireRole("admin");
+  const operation = formData.get("operation");
+  const validOperations = ["add", "replace", "move_up", "move_down", "remove"] as const;
+  if (!validOperations.some((item) => item === operation)) {
+    return { success: false, message: "Selecione uma alteração válida." };
+  }
+  const positionInput = formData.get("position");
+  const position = typeof positionInput === "string" && /^[1-9][0-9]*$/.test(positionInput) &&
+    Number.isSafeInteger(Number(positionInput)) ? Number(positionInput) : null;
+  const variantInput = formData.get("variantId");
+  const variantId = typeof variantInput === "string" && isUuid(variantInput) ? variantInput : null;
+  const expected = parseDraftCycleSteps(formData.get("expectedSteps"));
+  if (!expected) {
+    return { success: false, message: "A referência da edição é inválida. Atualize a página." };
+  }
+  const accessible = await getAccessibleVersionLifecycle(protocolId, protocolVersionId);
+  if (!accessible || accessible.lifecycleAction !== "submit") {
+    return { success: false, message: "Esta versão não está disponível para edição." };
+  }
+  const plans = await listAccessibleProtocolVersionMealPlans([protocolVersionId]);
+  const plan = plans.find((item) => item.id === mealPlanVersionId);
+  const cycle = plan?.cycles.find((item) => item.id === cycleId);
+  if (!plan || !cycle) {
+    return { success: false, message: "Ciclo não encontrado nesta versão. Atualize a página." };
+  }
+  if (!sameDraftCycleSteps(expected, cycle.steps)) {
+    return { success: false, message: "O ciclo mudou desde que esta página foi aberta. Atualize antes de editar." };
+  }
+  const variants = applyDraftCycleOperation({
+    steps: expected,
+    operation: operation as "add" | "replace" | "move_up" | "move_down" | "remove",
+    position, variantId,
+    allowedVariantIds: plan.variants.map((item) => item.id),
+  });
+  if (!variants) {
+    return { success: false, message: "A operação ou a variação selecionada não é válida para este ciclo." };
+  }
+  try {
+    await replaceAccessibleDraftMealPlanCycleSteps({
+      cycleId, mealPlanVersionId, expectedSteps: expected, variantIds: variants,
+    });
+  } catch {
+    return { success: false, message: "Não foi possível confirmar a alteração. Outra sessão pode ter mudado o ciclo; atualize e confira antes de repetir." };
+  }
+  revalidateProtocolPaths(protocolId, accessible.protocol.client_id);
+  return { success: true, message: "Sequência do ciclo registrada no rascunho." };
+}
+
+export async function removeProtocolMealPlanCycle(
+  protocolId: string,
+  protocolVersionId: string,
+  mealPlanVersionId: string,
+  cycleId: string,
+  _state: ProtocolLifecycleFormState,
+  _formData: FormData,
+): Promise<ProtocolLifecycleFormState> {
+  await requireRole("admin");
+  const accessible = await getAccessibleVersionLifecycle(protocolId, protocolVersionId);
+  if (!accessible || accessible.lifecycleAction !== "submit") {
+    return { success: false, message: "Esta versão não está disponível para edição." };
+  }
+  const plans = await listAccessibleProtocolVersionMealPlans([protocolVersionId]);
+  const plan = plans.find((item) => item.id === mealPlanVersionId);
+  const cycle = plan?.cycles.find((item) => item.id === cycleId);
+  if (!cycle) return { success: false, message: "Ciclo não encontrado nesta versão." };
+  if (cycle.steps.length > 0) {
+    return { success: false, message: "Remova as etapas antes de excluir o ciclo." };
+  }
+  try {
+    const removed = await deleteAccessibleEmptyMealPlanCycle({ cycleId, mealPlanVersionId });
+    if (!removed) {
+      return { success: false, message: "Ciclo alterado ou removido em outra sessão. Atualize antes de repetir." };
+    }
+  } catch {
+    return { success: false, message: "Não foi possível excluir o ciclo. Atualize e confira as etapas." };
+  }
+  revalidateProtocolPaths(protocolId, accessible.protocol.client_id);
+  return { success: true, message: "Ciclo vazio excluído do rascunho." };
 }
 
 export async function submitProtocolVersionForReview(

@@ -53,3 +53,25 @@ test("draft is ready with at least one dose in every meal", () => {
     "A estrutura alimentar mínima está registrada.",
   );
 });
+
+test("cycle remains optional when no cycle exists", () => {
+  const plan = { variants: [{ meals: [{ doseAllocations: [{}] }] }], cycles: [] };
+  assert.deepEqual(getProtocolDraftReadiness(plan), { ready: true, reasons: [] });
+});
+
+test("created empty cycle blocks review without imposing a fixed sequence", () => {
+  const plan = {
+    variants: [{ meals: [{ doseAllocations: [{}] }] }],
+    cycles: [{ steps: [] }],
+  };
+  const result = getProtocolDraftReadiness(plan);
+  assert.deepEqual(result, { ready: false, reasons: ["cycle_without_step"] });
+  assert.match(formatProtocolDraftReadiness(result.reasons), /ciclos vazios/);
+});
+
+test("manually composed single or repeated cycle steps can be reviewed", () => {
+  const variants = [{ meals: [{ doseAllocations: [{}] }] }];
+  for (const steps of [[{}], [{}, {}, {}]]) {
+    assert.equal(getProtocolDraftReadiness({ variants, cycles: [{ steps }] }).ready, true);
+  }
+});
