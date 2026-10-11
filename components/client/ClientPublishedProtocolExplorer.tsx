@@ -3,7 +3,7 @@ import {useState} from "react";
 import Link from "next/link";
 import {
   findPublishedHistory,paginatePublishedHistory,adjacentPublishedVersions,
-  publishedProtocolDate,publishedNutritionDoseTypes,publishedVariantMatches,
+  publishedProtocolDate,publishedNutritionDoseTypes,publishedVariantMatches,normalizePublishedSearch,
   summarizePublishedNutrition,formatPublishedDoseAmount,labelPublishedDoseType,
 } from "@/lib/protocol/client-published-explorer";
 import {publishedVariationAnchor,publishedMealAnchor,publishedCycleAnchor,publishedVersionHref,type buildClientPublishedNutritionView} from "@/lib/protocol/client-published-view";
@@ -91,8 +91,8 @@ export function ClientPublishedNutritionExplorer({view,publicationId}:{view:Publ
   {query.trim() ? <div className={styles.directory}>
     <strong>Refeições que correspondem à pesquisa</strong>
     <ul>{view.variants.flatMap(variant => variant.meals
-      .filter(meal => (variant.label + " " + meal.label).normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLocaleLowerCase("pt-BR")
-        .includes(query.trim().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLocaleLowerCase("pt-BR")))
+      .filter(meal => normalizePublishedSearch(variant.label + " " + meal.label)
+        .includes(normalizePublishedSearch(query)))
       .map(meal => <li key={meal.id}><a href={"#"+publishedMealAnchor(publicationId,meal.id)}>{variant.label} · {meal.label}</a></li>))}</ul>
   </div> : null}
   {view.cycles.length > 1 ? <nav aria-label="Ir para ciclo publicado" className={styles.inline}>
