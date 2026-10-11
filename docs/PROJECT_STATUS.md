@@ -3951,3 +3951,8 @@ No editor profissional, filtros e contagens permitem localizar versões com ou s
 ## Catálogo administrativo da biblioteca educacional — consulta completa (2026-10-11)
 
 O painel da Patty permite buscar títulos e metadados autorizados, filtrar por categoria, tipo e situação factual da última versão (nunca publicada, publicação vigente, publicada com novo rascunho), ordenar e paginar sem truncar o conjunto. Contagens distinguem conteúdos em rascunho de versões históricas publicadas e não criam liberação por fase/cliente. Filtros antigos de rascunho/publicado continuam reconhecidos. Leitura das versões com permissão atual e sem mudanças RLS/Auth, migrations ou publicação automática; validação E2E autenticada não foi executada.
+
+
+## Histórico de versões da biblioteca educacional — busca e assets por versão (2026-10-11)
+
+No detalhe administrativo de um conteúdo educacional, a Patty pode buscar número ou título, filtrar versões publicadas/rascunhos, com/sem asset registrado, ordenar e navegar páginas do histórico sem apagar ou modificar versões. A contagem de assets se baseia na versão exata já consultável sob RLS, não confere disponibilidade de binário privado. A versão inspecionada segue limitada a IDs autorizados; não se adicionam assets retroativamente a versões publicadas. O upload e publicação continuam processos humanos existentes. Sem alterações de schema/Auth/RLS, releases ou acesso do cliente; E2E autenticado e conferência visual continuam pendentes.

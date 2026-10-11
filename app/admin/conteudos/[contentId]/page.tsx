@@ -1,3 +1,4 @@
+import {readContentVersionFilter,inspectContentVersionArchive,contentVersionArchiveHref} from "@/lib/content/version-archive";
 import {
   AdminEducationalContentDraftSaveForm,
   AdminEducationalContentNewVersionForm,
@@ -13,6 +14,7 @@ import {
   getAccessibleEducationalContentForCurrentAdmin,
   listEducationalContentAssetsForCurrentAdmin,
   listEducationalContentVersionsForCurrentAdmin,
+  listEducationalContentAssetsForCurrentAdminVersions,
 } from "@/lib/supabase/data-access";
 import { canPublishEducationalContentVersion } from "@/lib/content/publication-eligibility";
 import { isUuid } from "@/lib/validation/uuid";
@@ -23,7 +25,7 @@ import styles from "./page.module.css";
 
 type PageProps = {
   params: Promise<{ contentId: string }>;
-  searchParams: Promise<{ versao?: string }>;
+  searchParams: Promise<{ versao?: string; busca?: string; estado?: string; arquivo?: string; ordem?: string; pagina?: string }>;
 };
 
 function formatDateTime(value: string) {
@@ -39,7 +41,9 @@ export default async function AdminEducationalContentDetailPage({
   params,
   searchParams,
 }: PageProps) {
-  const [{ contentId }, { versao }] = await Promise.all([params, searchParams]);
+  const [{ contentId }, raw] = await Promise.all([params, searchParams]);
+  const {versao}=raw;
+  const filters=readContentVersionFilter(raw);
 
   if (!isUuid(contentId)) {
     notFound();
@@ -53,6 +57,12 @@ export default async function AdminEducationalContentDetailPage({
 
   const versions = await listEducationalContentVersionsForCurrentAdmin(content.id);
   const current = versions[0] ?? null;
+  const allAssetRefs=await listEducationalContentAssetsForCurrentAdminVersions(versions.map(v=>v.id));
+  const assetCounts=new Map<string,number>();
+  for(const asset of allAssetRefs){
+    assetCounts.set(asset.educational_content_version_id,(assetCounts.get(asset.educational_content_version_id)??0)+1);
+  }
+  const archive=inspectContentVersionArchive(versions,assetCounts,filters,versao);
   // Only a version already visible under the professional RLS can be inspected.
   const inspected = versions.find((version) => version.id === versao) ?? current;
   const [currentAssets, inspectedAssets] = await Promise.all([
@@ -229,11 +239,25 @@ export default async function AdminEducationalContentDetailPage({
       </Section>
 
       <Section
+        id="historico-versoes-conteudos"
         description="Histórico factual das versões já existentes."
         title="Versões"
       >
+        <form action={"/admin/conteudos/"+content.id} method="get" className={styles.historyFilters}>
+          <label>Buscar número ou título<input type="search" name="busca" defaultValue={filters.query} maxLength={120} /></label>
+          <label>Estado<select name="estado" defaultValue={filters.status}><option value="all">Todas</option><option value="draft">Rascunhos</option><option value="published">Publicadas</option></select></label>
+          <label>Arquivo<select name="arquivo" defaultValue={filters.asset}><option value="all">Todos</option><option value="with-asset">Com arquivo</option><option value="without-asset">Sem arquivo</option></select></label>
+          <label>Ordem<select name="ordem" defaultValue={filters.order}><option value="newest">Versões recentes</option><option value="oldest">Versões antigas</option><option value="title">Título</option></select></label>
+          <button type="submit">Filtrar versões</button>
+          <Link href={contentVersionArchiveHref("/admin/conteudos/"+content.id,readContentVersionFilter({}),1)}>Limpar filtros</Link>
+        </form>
+        <p className={styles.description}>Total: {archive.counts.total} · Publicadas: {archive.counts.published} · Rascunhos: {archive.counts.draft} · Com arquivo: {archive.counts.withAsset} · Sem arquivo: {archive.counts.withoutAsset}</p>
+        <p role="status" className={styles.description}>Exibindo {archive.from}–{archive.to} de {archive.total} versões encontradas.</p>
+        {archive.invalidPage ? <p role="status">Página indisponível; exibindo uma página válida.</p> : null}
+        {archive.selectedHidden ? <p role="status">A versão selecionada não corresponde aos filtros. Limpe os filtros para consultá-la.</p> : null}
+        {archive.total===0 ? <p>Nenhuma versão corresponde aos filtros.</p> : null}
         <ol className={styles.history}>
-          {versions.map((version) => (
+          {archive.items.map((version) => (
             <li id={`versao-conteudo-${version.id}`} key={version.id}>
               <Card variant="subtle">
                 <div className={styles.header}>
@@ -241,6 +265,7 @@ export default async function AdminEducationalContentDetailPage({
                     <strong>
                       Versão {version.version_number} · {version.title}
                     </strong>
+                    <p className={styles.description}>Arquivos registrados: {assetCounts.get(version.id)??0}</p>
                     <p className={styles.description}>
                       Criada em {formatDateTime(version.created_at)}
                       {version.published_at
@@ -259,6 +284,11 @@ export default async function AdminEducationalContentDetailPage({
             </li>
           ))}
         </ol>
+        {archive.total>0 ? <nav className={styles.historyPagination} aria-label="Páginas de versões do conteúdo">
+          <span>Página {archive.page} de {archive.pages}</span>
+          {archive.previous ? <Link href={contentVersionArchiveHref("/admin/conteudos/"+content.id,filters,archive.previous)}>Anterior</Link> : null}
+          {archive.next ? <Link href={contentVersionArchiveHref("/admin/conteudos/"+content.id,filters,archive.next)}>Próxima</Link> : null}
+        </nav> : null}
       </Section>
     </>
   );
