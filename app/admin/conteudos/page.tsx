@@ -191,6 +191,11 @@ export default async function AdminConteudosPage({ searchParams }: AdminConteudo
               );
             })}
           </ul>
+          {explored.total > 0 ? <nav className={styles.pagination} aria-label="Páginas da biblioteca educacional">
+            <span>Página {explored.page} de {explored.pages}</span>
+            {explored.previous ? <Link href={adminEducationalLibraryHref(filters,explored.previous)}>Anterior</Link> : null}
+            {explored.next ? <Link href={adminEducationalLibraryHref(filters,explored.next)}>Próxima</Link> : null}
+          </nav> : null}
           </>
         )}
       </Section>
