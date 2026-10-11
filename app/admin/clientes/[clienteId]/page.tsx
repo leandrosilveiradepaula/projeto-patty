@@ -410,7 +410,7 @@ export default async function AdminClienteDetailPage({
                               description:
                                 "A cliente registrou uma nova solicitação depois do último treino publicado. Revise o pedido antes de decidir se haverá outra prescrição.",
                               eyebrow: "Ação da Patty",
-                              href: `/admin/clientes/${client.id}/treino#solicitacao-treino`,
+                              href: `/admin/clientes/${client.id}/treino#pedido-treino-${orderedTrainingRequests[0].id}`,
                               label: "Revisar solicitação",
                               title: "Nova solicitação de treino",
                             }
@@ -419,8 +419,8 @@ export default async function AdminClienteDetailPage({
                               description:
                                 "Existe solicitação de treino registrada e ainda não há prescrição criada.",
                               eyebrow: "Ação da Patty",
-                              href: `/admin/clientes/${client.id}/treino`,
-                              label: "Criar treino",
+                              href: `/admin/clientes/${client.id}/treino#pedido-treino-${orderedTrainingRequests[0].id}`,
+                              label: "Revisar pedido e criar treino",
                               title: "Treino solicitado",
                             }
                           : weeklyFeedbackChannelNeedsSetup
