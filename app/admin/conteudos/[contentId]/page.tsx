@@ -243,8 +243,21 @@ export default async function AdminEducationalContentDetailPage({
         description="Histórico factual das versões já existentes."
         title="Versões"
       >
+        <form action={"/admin/conteudos/"+content.id} method="get" className={styles.historyFilters}>
+          <label>Buscar número ou título<input type="search" name="busca" defaultValue={filters.query} maxLength={120} /></label>
+          <label>Estado<select name="estado" defaultValue={filters.status}><option value="all">Todas</option><option value="draft">Rascunhos</option><option value="published">Publicadas</option></select></label>
+          <label>Arquivo<select name="arquivo" defaultValue={filters.asset}><option value="all">Todos</option><option value="with-asset">Com arquivo</option><option value="without-asset">Sem arquivo</option></select></label>
+          <label>Ordem<select name="ordem" defaultValue={filters.order}><option value="newest">Versões recentes</option><option value="oldest">Versões antigas</option><option value="title">Título</option></select></label>
+          <button type="submit">Filtrar versões</button>
+          <Link href={contentVersionArchiveHref("/admin/conteudos/"+content.id,readContentVersionFilter({}),1)}>Limpar filtros</Link>
+        </form>
+        <p className={styles.description}>Total: {archive.counts.total} · Publicadas: {archive.counts.published} · Rascunhos: {archive.counts.draft} · Com arquivo: {archive.counts.withAsset} · Sem arquivo: {archive.counts.withoutAsset}</p>
+        <p role="status" className={styles.description}>Exibindo {archive.from}–{archive.to} de {archive.total} versões encontradas.</p>
+        {archive.invalidPage ? <p role="status">Página indisponível; exibindo uma página válida.</p> : null}
+        {archive.selectedHidden ? <p role="status">A versão selecionada não corresponde aos filtros. Limpe os filtros para consultá-la.</p> : null}
+        {archive.total===0 ? <p>Nenhuma versão corresponde aos filtros.</p> : null}
         <ol className={styles.history}>
-          {versions.map((version) => (
+          {archive.items.map((version) => (
             <li id={`versao-conteudo-${version.id}`} key={version.id}>
               <Card variant="subtle">
                 <div className={styles.header}>
