@@ -1,3 +1,4 @@
+import { ClientPublishedHistoryExplorer, ClientPublishedNutritionExplorer } from "@/components/client/ClientPublishedProtocolExplorer";
 import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
 import { ClientProtocolNutrition } from "@/components/client/ClientProtocolNutrition";
 import { buildClientPublishedNutritionView, publishedVariationAnchor, publishedVersionHref, selectClientPublishedVersion } from "@/lib/protocol/client-published-view";
@@ -86,6 +87,7 @@ export default async function ClienteProtocoloPage({ searchParams }: { searchPar
                 ? "Esta é uma versão anterior preservada no histórico, não necessariamente seu plano vigente."
                 : "Última versão liberada pela Patty. Nenhuma fase ou etapa diária é escolhida automaticamente."}
             >
+              {publications && publication ? <ClientPublishedHistoryExplorer publications={publications.map(item=>({id:item.id,versionNumber:item.versionNumber,publishedAt:item.publishedAt,protocolType:item.protocolType}))} selectedId={publication.id}/> : null}
               {selection.isHistorical ? (
                 <p className={styles.historyNotice}>Você está consultando uma publicação anterior. Para conferir a versão vigente, selecione Plano atual acima.</p>
               ) : null}
@@ -111,6 +113,7 @@ export default async function ClienteProtocoloPage({ searchParams }: { searchPar
                     <span>{view.cycleCount} ciclo(s)</span>
                     <span>{view.stepCount} etapa(s)</span>
                   </div>
+                  <ClientPublishedNutritionExplorer view={view} publicationId={publication.id}/>
                   <nav aria-label="Seções do plano alimentar" className={styles.sectionNavigation}>
                     <a href={`#ciclos-${publication.id}`}>Consultar ciclos</a>
                     <a href={`#variacoes-${publication.id}`}>Consultar refeições e doses</a>
