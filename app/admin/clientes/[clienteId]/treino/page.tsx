@@ -133,7 +133,7 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
   const sortedOpenItems = [...openItems].sort(
     (a, b) => a.position - b.position || a.id.localeCompare(b.id),
   );
-  const previousPublished = publishedVersions[1] ?? null;
+  const previousPublished = openVersion ? latestPublished : publishedVersions[1] ?? null;
   const sortedPublishedItems = latestPublished
     ? sortedHistoryItemsByVersion.get(latestPublished.id) ?? []
     : [];
