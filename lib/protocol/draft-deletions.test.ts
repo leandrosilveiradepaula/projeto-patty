@@ -17,18 +17,23 @@ function functionSource(source: string, name: string): string {
 
 test("draft dose deletion requires a returned row and refuses silent zero-row success", () => {
   const code = functionSource(dataAccess, "deleteAccessibleMealDoseAllocation");
-  assert.match(code, /\.delete\(\)\s*\.eq\("id", doseAllocationId\)\s*\.select\("id"\)\s*\.maybeSingle\(\)/);
+  assert.match(code, /\.delete\(\)/);
+  for (const col of ["id", "meal_id", "dose_type", "dose_quantity"]) assert.ok(code.includes(`.eq("${col}",`));
+  assert.match(code, /\.select\("id"\)\s*\.maybeSingle\(\)/);
   assert.match(code, /if \(!data\)\s*\{\s*throw new Error\(/);
   const action = functionSource(actions, "removeProtocolMealDose");
-  assert.match(action, /await deleteAccessibleMealDoseAllocation\(doseAllocationId\)/);
+  assert.match(action, /await deleteAccessibleMealDoseAllocation\(\{/);
   assert.match(action, /catch\s*\{/);
 });
 
 test("empty meal deletion only reports success when a row was removed", () => {
   const code = functionSource(dataAccess, "deleteAccessibleEmptyMeal");
   assert.match(code, /\.select\("id", \{ count: "exact", head: true \}\)/);
-  assert.match(code, /if \(\(count \?\? 0\) > 0\)\s*\{\s*return false;/);
-  assert.match(code, /\.eq\("id", input\.mealId\)\s*\.eq\("meal_plan_variant_id", input\.variantId\)\s*\.select\("id"\)\s*\.maybeSingle\(\)/);
+  assert.match(code, /if \(\(count \?\? 0\) > 0\)\s*(?:\{\s*)?return false;/);
+  assert.match(code, /\.eq\("id", input\.mealId\)/);
+  assert.match(code, /\.eq\("meal_plan_variant_id", input\.variantId\)/);
+  assert.match(code, /\.eq\("position", input\.originalPosition\)/);
+  assert.match(code, /\.select\("id"\)\.maybeSingle\(\)/);
   assert.match(code, /return Boolean\(data\);/);
   const action = functionSource(actions, "removeProtocolMeal");
   assert.match(action, /if \(!removed\)\s*\{\s*return\s*\{/);
@@ -37,8 +42,12 @@ test("empty meal deletion only reports success when a row was removed", () => {
 test("empty variant deletion only reports success when a row was removed", () => {
   const code = functionSource(dataAccess, "deleteAccessibleEmptyMealPlanVariant");
   assert.match(code, /\.select\("id", \{ count: "exact", head: true \}\)/);
-  assert.match(code, /if \(\(count \?\? 0\) > 0\)\s*\{\s*return false;/);
-  assert.match(code, /\.eq\("id", input\.variantId\)\s*\.eq\("meal_plan_version_id", input\.mealPlanVersionId\)\s*\.select\("id"\)\s*\.maybeSingle\(\)/);
+  assert.match(code, /if \(\(count \?\? 0\) > 0\)\s*(?:\{\s*)?return false;/);
+  assert.match(code, /\.eq\("id", input\.variantId\)/);
+  assert.match(code, /\.eq\("meal_plan_version_id", input\.mealPlanVersionId\)/);
+  assert.match(code, /\.eq\("variant_key", input\.originalVariantKey\)/);
+  assert.match(code, /\.eq\("variant_id", input\.variantId\)/);
+  assert.match(code, /\.select\("id"\)\.maybeSingle\(\)/);
   assert.match(code, /return Boolean\(data\);/);
   const action = functionSource(actions, "removeProtocolMealPlanVariant");
   assert.match(action, /if \(!removed\)\s*\{\s*return\s*\{/);

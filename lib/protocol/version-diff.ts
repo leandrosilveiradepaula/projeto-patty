@@ -1,9 +1,13 @@
 export type ProtocolPlanSnapshot = {
   cycles: Array<{
-    steps: Array<unknown>;
+    steps: Array<{ position: number; variantKey: string }>;
   }>;
   variants: Array<{
+    label: string | null;
+    variantKey: string;
     meals: Array<{
+      label: string | null;
+      position: number;
       doseAllocations: Array<{
         doseQuantity: number;
         doseType: string;
@@ -100,6 +104,25 @@ export function buildProtocolPlanComparison(
       label: "Passos de ciclo",
     },
   ];
+
+  // Exact cycle sequences matter operationally even when counts are unchanged.
+  // Compare only persisted labels/positions/keys, never infer a nutritional schedule.
+  const variantLabel = (plan: ProtocolPlanSnapshot, key: string) =>
+    plan?.variants.find((variant) => variant.variantKey === key)?.label ?? key;
+  const displayCycles = (plan: ProtocolPlanSnapshot) => !plan ? "Nenhum ciclo" :
+    plan.cycles.length === 0 ? "Nenhum ciclo" :
+      plan.cycles.map((cycle, index) =>
+        `Ciclo ${index + 1}: ${cycle.steps
+          .map((step) => `${step.position}. ${variantLabel(plan, step.variantKey)}`)
+          .join(" → ") || "vazio"}`
+      ).join(" | ");
+  if (displayCycles(currentPlan) !== displayCycles(basePlan)) {
+    rows.push({
+      label: "Ordem e variações dos ciclos",
+      baseValue: displayCycles(basePlan),
+      currentValue: displayCycles(currentPlan),
+    });
+  }
 
   const doseTypes = [...new Set([
     ...base.doseTotals.keys(),
