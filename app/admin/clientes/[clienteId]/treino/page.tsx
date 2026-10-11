@@ -382,7 +382,7 @@ export default async function AdminClientTrainingPage({ params }: Props) {
                   <p className={styles.meta}>
                     Solicitado em {formatDateTime(request.requested_at)}
                     {" · "}{trainingRequestOriginLabel(request.recorded_by_profile_id, client.profile_id, "admin")}
-                    {request.profiles?.display_name?.trim()}
+                    {request.profiles?.display_name?.trim()
                       ? ` · registrado por ${request.profiles.display_name.trim()}`
                       : ""}
                   </p>
