@@ -12,7 +12,6 @@ import { newestExerciseLibrarySummaries } from "@/lib/training/exercise-library-
 import { matchingExerciseNameVersion, readExerciseCatalogStatus, readExerciseCatalogTerm } from "@/lib/training/exercise-admin-directory";
 import { listExerciseVersionsVisibleToCurrentAdmin, listExercisesForCurrentAdmin } from "@/lib/supabase/data-access";
 import Link from "next/link";
-import { readClientDirectorySearchTerm } from "@/lib/clients/client-directory-search";
 import styles from "./page.module.css";
 
 
