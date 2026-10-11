@@ -1,23 +1,7 @@
 "use client";
-
-import { useActionState, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-
-import {
-  type ClientRegistrationFormState,
-  updateCurrentClientRegistrationAction,
-} from "@/app/cliente/perfil/actions";
-import { Alert } from "@/components/ui/Alert";
-import { Button } from "@/components/ui/Button";
-import { FormField } from "@/components/ui/FormField";
-import { TextInput } from "@/components/ui/TextInput";
-
-import styles from "./ClientRegistrationEditForm.module.css";
-
-const initialState: ClientRegistrationFormState = {
-  message: null,
-  success: false,
-};
+import { ClientRegistrationEditor } from "@/components/client/ClientRegistrationEditor";
+import { updateCurrentClientRegistrationAction } from "@/app/cliente/perfil/actions";
+import type { ClientRegistrationInput } from "@/lib/clients/registration";
 
 type ClientRegistrationEditFormProps = {
   city?: string;
@@ -26,131 +10,9 @@ type ClientRegistrationEditFormProps = {
   phone?: string;
   updatedAt?: string | null;
 };
-
-export function ClientRegistrationEditForm({
-  city,
-  contactEmail,
-  instagram,
-  phone,
-  updatedAt,
-}: ClientRegistrationEditFormProps) {
-  const [state, formAction, isPending] = useActionState(
-    updateCurrentClientRegistrationAction,
-    initialState,
-  );
-
-  const router = useRouter();
-  const inFlightRef = useRef(false);
-  const [editedSinceResult, setEditedSinceResult] = useState(false);
-
-  useEffect(() => {
-    inFlightRef.current = false;
-    if (state.success) {
-      setEditedSinceResult(false);
-      router.refresh();
-    }
-  }, [state, router]);
-
-  return (
-    <form
-      action={formAction}
-      aria-busy={isPending}
-      className={styles.form}
-      onChange={() => setEditedSinceResult(true)}
-      onSubmit={(event) => {
-        if (inFlightRef.current || isPending) {
-          event.preventDefault();
-          return;
-        }
-        inFlightRef.current = true;
-      }}
-    >
-      <input name="expectedUpdatedAt" type="hidden" value={updatedAt ?? ""} />
-      {isPending ? <p role="status">Salvando o Cadastro Atual…</p> : null}
-      {state.message && !editedSinceResult ? (
-        <Alert
-          live={state.success ? "polite" : "assertive"}
-          title={state.success ? "Cadastro atualizado" : "Não foi possível atualizar"}
-          variant={state.success ? "success" : "critical"}
-        >
-          {state.message}
-        </Alert>
-      ) : null}
-
-      <div className={styles.grid}>
-        <FormField id="registration-city" label="Cidade">
-          {(fieldProps) => (
-            <TextInput
-              {...fieldProps}
-              disabled={isPending}
-              autoComplete="address-level2"
-              defaultValue={city}
-              maxLength={120}
-              name="city"
-            />
-          )}
-        </FormField>
-
-        <FormField id="registration-phone" label="Telefone">
-          {(fieldProps) => (
-            <TextInput
-              {...fieldProps}
-              disabled={isPending}
-              autoComplete="tel"
-              defaultValue={phone}
-              inputMode="tel"
-              maxLength={40}
-              name="phone"
-            />
-          )}
-        </FormField>
-
-        <FormField
-          description="Pode coincidir com o email de acesso, mas continua sendo um dado de contato separado."
-          id="registration-contact-email"
-          label="Email de contato"
-        >
-          {(fieldProps) => (
-            <TextInput
-              {...fieldProps}
-              disabled={isPending}
-              autoComplete="email"
-              defaultValue={contactEmail}
-              maxLength={254}
-              name="contactEmail"
-              type="email"
-            />
-          )}
-        </FormField>
-
-        <FormField
-          description="Dado informativo. Não é enviado à IA por padrão."
-          id="registration-instagram"
-          label="Instagram"
-        >
-          {(fieldProps) => (
-            <TextInput
-              {...fieldProps}
-              disabled={isPending}
-              defaultValue={instagram}
-              maxLength={100}
-              name="instagram"
-            />
-          )}
-        </FormField>
-      </div>
-
-      <p className={styles.notice}>
-        Este formulário altera somente o Cadastro Atual. Ele não modifica
-        respostas históricas da Anamnese nem o email usado para entrar na conta.
-      </p>
-
-      {state.message?.includes("alterado em outra sessão") && !editedSinceResult ? (
-        <Button onClick={() => router.refresh()} type="button" variant="secondary">Recarregar dados atuais</Button>
-      ) : null}
-      <Button disabled={isPending} loading={isPending} type="submit">
-        Salvar Cadastro Atual
-      </Button>
-    </form>
-  );
+export function ClientRegistrationEditForm({city,contactEmail,instagram,phone,updatedAt}:ClientRegistrationEditFormProps){
+  const values:ClientRegistrationInput={city:city??null,contactEmail:contactEmail??null,instagram:instagram??null,phone:phone??null};
+  return <ClientRegistrationEditor initialValues={values} updatedAt={updatedAt??null}
+    action={updateCurrentClientRegistrationAction}
+    notice="Este formulário altera somente o Cadastro Atual. Ele não modifica respostas históricas da Anamnese nem o email usado para entrar na conta."/>;
 }
