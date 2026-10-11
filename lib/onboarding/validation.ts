@@ -104,3 +104,46 @@ export function confirmedNewClientInvitation(data: FormData): boolean {
   const entries = data.getAll("confirmNewClient");
   return entries.length === 1 && entries[0] === "yes";
 }
+
+/**
+ * Client and admin account access share the same technical password bounds.
+ * This never stores, logs, returns, or serializes a submitted password.
+ */
+export type AccessPasswordField = "password" | "passwordConfirmation";
+export type AccessPasswordIssues = { password: string | null; passwordConfirmation: string | null };
+
+export function accessPasswordIssues(password: string, confirmation: string): AccessPasswordIssues {
+  const passwordResult = validateActivationPassword(password, password);
+  const passwordError = passwordResult.ok ? null : passwordResult.message;
+  const confirmationError = !confirmation
+    ? "Confirme a senha para continuar."
+    : password !== confirmation
+      ? "As senhas informadas não coincidem."
+      : null;
+  return { password: passwordError, passwordConfirmation: confirmationError };
+}
+
+/**
+ * Reject duplicates and uploaded files before any Supabase Auth mutation.
+ * Do not echo a credential back to a caller, even on validation errors.
+ */
+export function readSingleStringFormValue(formData: FormData, name: string): string | null {
+  const entries = formData.getAll(name);
+  return entries.length === 1 && typeof entries[0] === "string" ? entries[0] : null;
+}
+export type ParsedAccessPassword =
+  | { ok: true; password: string }
+  | { ok: false; message: string; field: AccessPasswordField };
+
+export function parseAccessPasswordForm(formData: FormData): ParsedAccessPassword {
+  const password = readSingleStringFormValue(formData, "password");
+  const confirmation = readSingleStringFormValue(formData, "passwordConfirmation");
+  if (password === null) return { ok: false, field: "password", message: "Informe apenas uma senha válida." };
+  if (confirmation === null) return { ok: false, field: "passwordConfirmation", message: "Informe apenas uma confirmação válida." };
+  const validation = validateActivationPassword(password, confirmation);
+  if (!validation.ok) {
+    const field: AccessPasswordField = password.length < 8 || password.length > 128 ? "password" : "passwordConfirmation";
+    return { ok: false, field, message: validation.message };
+  }
+  return { ok: true, password };
+}
