@@ -3,6 +3,7 @@ import { ClientHistoryDisclosure } from "@/components/client/ClientHistoryDisclo
 import { Alert } from "@/components/ui/Alert";
 import { publishedTrainingVersions } from "@/lib/training/published-versions";
 import { isTrainingRequestAfterPublication } from "@/lib/training/request-follow-up";
+import { trainingRequestOriginLabel } from "@/lib/training/request-origin";
 import { newestTrainingRequests } from "@/lib/training/operational-order";
 import { Badge } from "@/components/ui/Badge";
 import { ClientTrainingRequestForm } from "@/components/client/ClientTrainingRequestForm";
@@ -252,6 +253,7 @@ export default async function ClientTrainingPage() {
                   {formatDateTime(orderedRequests[0].requested_at)}
                 </Badge>
               </div>
+              <p className={styles.meta}>{trainingRequestOriginLabel(orderedRequests[0].recorded_by_profile_id, client.profile_id, "client")}</p>
               <p className={styles.note}>
                 {orderedRequests[0].note?.trim() || "Sem observação adicional."}
               </p>
@@ -272,6 +274,7 @@ export default async function ClientTrainingPage() {
                             {formatDateTime(request.requested_at)}
                           </Badge>
                         </div>
+                        <p className={styles.meta}>{trainingRequestOriginLabel(request.recorded_by_profile_id, client.profile_id, "client")}</p>
                         <p className={styles.note}>
                           {request.note?.trim() || "Sem observação adicional."}
                         </p>

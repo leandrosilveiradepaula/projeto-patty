@@ -3,6 +3,7 @@ import { Alert } from "@/components/ui/Alert";
 import { publishedTrainingVersions } from "@/lib/training/published-versions";
 import { ClientHistoryDisclosure } from "@/components/client/ClientHistoryDisclosure";
 import { isTrainingRequestAfterPublication } from "@/lib/training/request-follow-up";
+import { trainingRequestOriginLabel } from "@/lib/training/request-origin";
 import { newestTrainingRequests, newestUnpublishedTrainingVersion } from "@/lib/training/operational-order";
 import { orderPublishedExerciseOptions } from "@/lib/training/exercise-selection";
 
@@ -66,10 +67,9 @@ export default async function AdminClientTrainingPage({ params }: Props) {
     notFound();
   }
 
-  const [requests, plan, exerciseVersions] = await Promise.all([
+  const [requests, plan] = await Promise.all([
     listAccessibleClientTrainingRequests(client.id),
     getAccessibleClientTrainingPlan(client.id),
-    listExerciseVersionsVisibleToCurrentAdmin(),
   ]);
 
   const orderedRequests = newestTrainingRequests(requests);
@@ -80,6 +80,11 @@ export default async function AdminClientTrainingPage({ params }: Props) {
     (left, right) => right.version_number - left.version_number || left.id.localeCompare(right.id),
   );
   const openVersion = newestUnpublishedTrainingVersion(versions);
+  // Read-only inspection never needs the global exercise catalog.
+  // Load it only while the professional can actually edit a draft.
+  const exerciseVersions = openVersion && !openVersion.reviewed_at
+    ? await listExerciseVersionsVisibleToCurrentAdmin()
+    : [];
   const publishedVersions = publishedTrainingVersions(versions);
   const latestPublished = publishedVersions[0] ?? null;
   const newRequestAfterPublication = Boolean(
@@ -163,7 +168,7 @@ export default async function AdminClientTrainingPage({ params }: Props) {
       ) : null}
 
       <Section
-        description="A prescrição só é liberada depois de solicitação da cliente. Salvar não publica; revisão e publicação são etapas separadas."
+        description="A prescrição depende de uma solicitação registrada pela cliente ou pela Patty. Salvar não publica; revisão e publicação são etapas separadas."
         id="prescricao-treino"
         title="Prescrição de treino"
       >
@@ -191,6 +196,7 @@ export default async function AdminClientTrainingPage({ params }: Props) {
               {!openVersion.reviewed_at ? (
                 <AdminTrainingPlanDraftForm
                   clientId={client.id}
+                  key={JSON.stringify([openVersion.id, openVersion.title, openVersion.notes])}
                   notes={openVersion.notes}
                   title={openVersion.title}
                   trainingPlanVersionId={openVersion.id}
@@ -341,6 +347,14 @@ export default async function AdminClientTrainingPage({ params }: Props) {
                   ? `${requests.length} solicitação(ões) registrada(s) no histórico.`
                   : "Nenhuma solicitação de treino registrada até o momento."}
               </p>
+              {orderedRequests[0] ? (
+                <p>
+                  Última solicitação: {formatDateTime(orderedRequests[0].requested_at)}
+                  {" · "}{trainingRequestOriginLabel(orderedRequests[0].recorded_by_profile_id, client.profile_id, "admin")}
+                  .{" "}
+                  <a className={styles.link} href={`#pedido-treino-${orderedRequests[0].id}`}>Abrir solicitação exata</a>
+                </p>
+              ) : null}
             </div>
           </Card>
           <Card>
@@ -367,6 +381,7 @@ export default async function AdminClientTrainingPage({ params }: Props) {
                 <Card variant="subtle">
                   <p className={styles.meta}>
                     Solicitado em {formatDateTime(request.requested_at)}
+                    {" · "}{trainingRequestOriginLabel(request.recorded_by_profile_id, client.profile_id, "admin")}
                     {request.profiles?.display_name?.trim()
                       ? ` · registrado por ${request.profiles.display_name.trim()}`
                       : ""}
