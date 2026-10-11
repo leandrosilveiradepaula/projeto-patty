@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {findPublishedHistory,paginatePublishedHistory,readPublishedHistoryPage,adjacentPublishedVersions,
   normalizePublishedSearch, publishedProtocolDate, summarizePublishedNutrition, labelPublishedDoseType,
-  publishedNutritionDoseTypes, publishedVariantMatches, formatPublishedDoseAmount,
+  publishedNutritionDoseTypes, publishedVariantMatches, publishedMealMatches, formatPublishedDoseAmount,
 } from "./client-published-explorer.ts";
 import {buildClientPublishedNutritionView} from "./client-published-view.ts";
 
@@ -69,4 +69,13 @@ test("variant search includes meal names without changing stored variants",()=>{
  assert.deepEqual(publishedVariantMatches(plan,"dia 1","carbohydrate").map(v=>v.id),[]);
  assert.deepEqual(publishedVariantMatches(plan,["array"],"all").map(v=>v.id),["one","two"]);
  assert.deepEqual(plan.variants.map(v=>v.id),["one","two"]);
+});
+
+test("meal search and dose constraints must belong to the same recorded meal",()=>{
+ assert.deepEqual(publishedMealMatches(plan,"cafe","protein").map(x=>x.id),["m1"]);
+ assert.deepEqual(publishedMealMatches(plan,"cafe","carbohydrate").map(x=>x.id),[]);
+ assert.deepEqual(publishedMealMatches(plan,"","carbohydrate").map(x=>x.id),["m3"]);
+ assert.deepEqual(publishedMealMatches(plan,"dia 2","carbohydrate").map(x=>x.id),["m3"]);
+ assert.deepEqual(publishedVariantMatches(plan,"cafe","carbohydrate").map(x=>x.id),[]);
+ assert.deepEqual(publishedMealMatches(plan,"","not-a-published-dose"),[]);
 });
