@@ -1,3 +1,4 @@
+import { groupCheckinCorrectionHistory, checkinCorrectionAuthor, formatCheckinAuditDate } from "@/lib/checkins/correction-audit";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { CheckinActionForm, CheckinSubmitButton } from "@/components/checkins/CheckinActionForm";
@@ -84,6 +85,8 @@ export default async function AdminClientCheckinsPage({
       recentActivityEvents.map((event) => event.id),
     ),
   ]);
+  const liquidHistory = groupCheckinCorrectionHistory(liquidCorrections);
+  const activityHistory = groupCheckinCorrectionHistory(activityCorrections);
   const latestLiquidCorrectionByEvent = latestCheckinCorrectionsByEvent(liquidCorrections);
   const latestActivityCorrectionByEvent = latestCheckinCorrectionsByEvent(activityCorrections);
 
@@ -179,6 +182,7 @@ export default async function AdminClientCheckinsPage({
                         className={styles.form}
                       >
                         <input name="eventId" type="hidden" value={event.id} />
+                            <input name="expectedCorrectionId" type="hidden" value={correction?.id ?? ""} />
                         {selectedDay ? <input name="historyDay" type="hidden" value={selectedDay} /> : null}
                         <label className={styles.field}>
                           <span>Quantidade em mL</span>
@@ -254,6 +258,7 @@ export default async function AdminClientCheckinsPage({
                         className={styles.actions}
                       >
                         <input name="eventId" type="hidden" value={event.id} />
+                            <input name="expectedCorrectionId" type="hidden" value={correction?.id ?? ""} />
                         {selectedDay ? <input name="historyDay" type="hidden" value={selectedDay} /> : null}
                         <CheckinSubmitButton name="didActivity"  value="yes" variant="secondary">
                           Corrigir para Sim

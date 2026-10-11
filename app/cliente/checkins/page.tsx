@@ -1,3 +1,4 @@
+import { groupCheckinCorrectionHistory, checkinCorrectionAuthor, formatCheckinAuditDate } from "@/lib/checkins/correction-audit";
 import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
 import {
   addLiquidIntakeAction,
@@ -101,6 +102,8 @@ export default async function ClientCheckinsPage({
       [...activityEvents, ...historicalActivityEvents].map((event) => event.id),
     ),
   ]);
+  const liquidHistory = groupCheckinCorrectionHistory(liquidCorrections);
+  const activityHistory = groupCheckinCorrectionHistory(activityCorrections);
   const latestLiquidCorrectionByEvent = latestCheckinCorrectionsByEvent(liquidCorrections);
   const latestActivityCorrectionByEvent = latestCheckinCorrectionsByEvent(activityCorrections);
 
@@ -295,6 +298,7 @@ export default async function ClientCheckinsPage({
               <summary>Corrigir resposta de hoje</summary>
               <CheckinActionForm action={correctActivityCheckinAction} className={styles.activityActions}>
                 <input name="eventId" type="hidden" value={latestActivity.id} />
+                <input name="expectedCorrectionId" type="hidden" value={latestActivityCorrection?.id ?? ""} />
                 <CheckinSubmitButton name="didActivity"  value="yes" variant="secondary">
                   Corrigir para Sim
                 </CheckinSubmitButton>
@@ -329,6 +333,7 @@ export default async function ClientCheckinsPage({
                           <summary>Corrigir este registro anterior</summary>
                           <CheckinActionForm action={correctActivityCheckinAction} className={styles.activityActions}>
                             <input name="eventId" type="hidden" value={event.id} />
+                            <input name="expectedCorrectionId" type="hidden" value={latestActivityCorrectionByEvent.get(event.id)?.id ?? ""} />
                             <CheckinSubmitButton name="didActivity" value="yes" variant="secondary">Corrigir para Sim</CheckinSubmitButton>
                             <CheckinSubmitButton name="didActivity" value="no" variant="secondary">Corrigir para Não</CheckinSubmitButton>
                           </CheckinActionForm>
@@ -390,6 +395,7 @@ export default async function ClientCheckinsPage({
                     <summary>Corrigir registro</summary>
                     <CheckinActionForm action={correctLiquidIntakeAction} className={styles.form}>
                       <input name="eventId" type="hidden" value={event.id} />
+                            <input name="expectedCorrectionId" type="hidden" value={latestLiquidCorrectionByEvent.get(event.id)?.id ?? ""} />
                       <input name="historyDay" type="hidden" value={selectedDay} />
                       <label className={styles.field}>
                         <span>Quantidade em mL</span>
@@ -462,6 +468,7 @@ export default async function ClientCheckinsPage({
                         <summary>Corrigir resposta deste dia</summary>
                         <CheckinActionForm action={correctActivityCheckinAction} className={styles.activityActions}>
                           <input name="eventId" type="hidden" value={event.id} />
+                            <input name="expectedCorrectionId" type="hidden" value={latestActivityCorrectionByEvent.get(event.id)?.id ?? ""} />
                           <input name="historyDay" type="hidden" value={selectedDay} />
                           <CheckinSubmitButton name="didActivity"  value="yes" variant="secondary">Corrigir para Sim</CheckinSubmitButton>
                           <CheckinSubmitButton name="didActivity"  value="no" variant="secondary">Corrigir para Não</CheckinSubmitButton>
