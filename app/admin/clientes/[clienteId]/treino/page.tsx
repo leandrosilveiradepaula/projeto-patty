@@ -1,4 +1,7 @@
 import { notFound } from "next/navigation";
+import { TrainingVersionComparisonView } from "@/components/training/TrainingVersionComparisonView";
+import { compareTrainingVersions, paginateTrainingRequests, trainingRequestHistoryHref } from "@/lib/training/version-inspection";
+import Link from "next/link";
 import { Alert } from "@/components/ui/Alert";
 import { publishedTrainingVersions } from "@/lib/training/published-versions";
 import { ClientHistoryDisclosure } from "@/components/client/ClientHistoryDisclosure";
@@ -33,6 +36,7 @@ type Props = {
   params: Promise<{
     clienteId: string;
   }>;
+  searchParams: Promise<{ pedidos?: string }>;
 };
 
 function formatDateTime(value: string) {
@@ -59,8 +63,8 @@ function versionStatus(version: {
   return { label: "Rascunho", variant: "warning" as const };
 }
 
-export default async function AdminClientTrainingPage({ params }: Props) {
-  const { clienteId } = await params;
+export default async function AdminClientTrainingPage({ params, searchParams }: Props) {
+  const [{ clienteId }, { pedidos }] = await Promise.all([params, searchParams]);
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(clienteId)) notFound();
   const client = await getAccessibleClient(clienteId);
 
@@ -74,6 +78,7 @@ export default async function AdminClientTrainingPage({ params }: Props) {
   ]);
 
   const orderedRequests = newestTrainingRequests(requests);
+  const requestPage = paginateTrainingRequests(orderedRequests, pedidos);
   const versions = plan
     ? await listAccessibleClientTrainingPlanVersions(plan.id)
     : [];
@@ -128,10 +133,18 @@ export default async function AdminClientTrainingPage({ params }: Props) {
   const sortedOpenItems = [...openItems].sort(
     (a, b) => a.position - b.position || a.id.localeCompare(b.id),
   );
+  const previousPublished = publishedVersions[1] ?? null;
   const sortedPublishedItems = latestPublished
     ? sortedHistoryItemsByVersion.get(latestPublished.id) ?? []
     : [];
 
+  const inspectedVersion = openVersion ?? latestPublished;
+  const comparison = inspectedVersion ? compareTrainingVersions(
+    previousPublished,
+    previousPublished ? sortedHistoryItemsByVersion.get(previousPublished.id) ?? [] : [],
+    inspectedVersion,
+    openVersion ? sortedOpenItems : sortedPublishedItems,
+  ) : null;
   const exerciseOptions = orderPublishedExerciseOptions(
     exerciseVersions
       .filter((exercise) => Boolean(exercise.published_at))
@@ -339,6 +352,17 @@ export default async function AdminClientTrainingPage({ params }: Props) {
         )}
       </Section>
 
+      {comparison ? (
+        <Section title="Comparar versões do treino" id="comparar-versoes-treino"
+          description="Confira as mudanças registradas antes de revisar ou publicar. Nenhuma diferença determina progressão automaticamente.">
+          <Card className={styles.card}>
+            <TrainingVersionComparisonView comparison={comparison} />
+            {previousPublished ? <a className={styles.link} href={`#versao-treino-${previousPublished.id}`}>Abrir publicação anterior completa</a> : null}
+            {openVersion ? <a className={styles.link} href="#prescricao-treino">Voltar à edição do rascunho</a> : null}
+          </Card>
+        </Section>
+      ) : null}
+
       <Section
         action={
           <Badge variant={requests.length > 0 ? "positive" : "neutral"}>
@@ -388,7 +412,7 @@ export default async function AdminClientTrainingPage({ params }: Props) {
           />
         ) : (
           <ol className={styles.history}>
-            {orderedRequests.map((request) => (
+            {requestPage.items.map((request) => (
               <li id={`pedido-treino-${request.id}`} key={request.id}>
                 <Card variant="subtle">
                   <p className={styles.meta}>
@@ -406,6 +430,14 @@ export default async function AdminClientTrainingPage({ params }: Props) {
             ))}
           </ol>
         )}
+        {requestPage.invalid ? <p role="status" className={styles.description}>Página solicitada inválida. Exibindo uma página disponível do histórico.</p> : null}
+        {requestPage.total > 0 ? (
+          <nav aria-label="Navegar solicitações de treino" className={styles.versionNavigation}>
+            <span>{requestPage.from}–{requestPage.to} de {requestPage.total} solicitações · Página {requestPage.page} de {requestPage.pageCount}</span>
+            {requestPage.previous ? <Link href={trainingRequestHistoryHref(`/admin/clientes/${client.id}/treino`,requestPage.previous,"historico-solicitacoes-treino")}>Anterior</Link> : null}
+            {requestPage.next ? <Link href={trainingRequestHistoryHref(`/admin/clientes/${client.id}/treino`,requestPage.next,"historico-solicitacoes-treino")}>Próxima</Link> : null}
+          </nav>
+        ) : null}
       </Section>
 
       <Section
