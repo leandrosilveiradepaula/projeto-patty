@@ -46,13 +46,6 @@ async function createFirstProtocolAction(formData: FormData) {
   if (existing.length > 0) {
     const versions = await listAccessibleProtocolVersionsForProtocols(existing.map((item) => item.id));
     const versionedIds = new Set(versions.map((version) => version.protocol_id));
-  const [approvals, publications] = await Promise.all([
-    listAccessibleProtocolVersionApprovals(versions.map(version => version.id)),
-    listAccessibleProtocolPublications(versions.map(version => version.id)),
-  ]);
-  const summaries = buildProtocolOperationalSummaries(
-    protocols.map(protocol => protocol.id), versions, approvals, publications,
-  );
     const destination = existingProtocolNavigation(existing, versionedIds);
     if (destination?.kind === "recover") {
       redirect(`/admin/clientes/${client.id}/protocolos?recuperacao=necessaria#protocolo-${destination.id}`);
@@ -163,6 +156,13 @@ export default async function AdminClientProtocolsPage({
   const protocols = await listAccessibleProtocolsForClient(client.id);
   const versions = await listAccessibleProtocolVersionsForProtocols(protocols.map((item) => item.id));
   const versionedIds = new Set(versions.map((version) => version.protocol_id));
+  const [approvals, publications] = await Promise.all([
+    listAccessibleProtocolVersionApprovals(versions.map(version => version.id)),
+    listAccessibleProtocolPublications(versions.map(version => version.id)),
+  ]);
+  const summaries = buildProtocolOperationalSummaries(
+    protocols.map(protocol => protocol.id), versions, approvals, publications,
+  );
   const displayName = client.full_name?.trim() || client.profiles?.display_name?.trim();
 
   return (
