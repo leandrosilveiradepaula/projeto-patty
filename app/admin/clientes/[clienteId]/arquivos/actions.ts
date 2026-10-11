@@ -12,6 +12,7 @@ import {
   type PrivateFileKind,
   validatePrivateFile,
 } from "@/lib/validation/private-files";
+import { readPrivateFileUploadSessionStatus } from "@/lib/files/private-file-upload-session-status";
 import { isUuid } from "@/lib/validation/uuid";
 
 export type AdminPrivateFileUploadSessionInput = {
@@ -194,4 +195,19 @@ export async function releaseAdminPrivateFileToClientAction(
       success: false,
     };
   }
+}
+
+/** A Patty so verifica o estado das sessoes que ela mesma criou para esta cliente. */
+export async function checkAdminPrivateFileUploadSessionStatusAction(
+  clientId: string,
+  sessionId: string,
+) {
+  const auth = await requireRole("admin");
+  if (!isUuid(clientId)) return { status: "unavailable" as const };
+
+  return readPrivateFileUploadSessionStatus({
+    actorProfileId: auth.profileId,
+    clientId,
+    sessionId,
+  });
 }

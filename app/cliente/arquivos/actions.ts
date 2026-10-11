@@ -10,6 +10,7 @@ import {
   type PrivateFileKind,
   validatePrivateFile,
 } from "@/lib/validation/private-files";
+import { readPrivateFileUploadSessionStatus } from "@/lib/files/private-file-upload-session-status";
 import { isUuid } from "@/lib/validation/uuid";
 
 export type CreateClientFileUploadSessionInput = {
@@ -125,4 +126,17 @@ export async function finalizeClientFileUploadSessionAction(sessionId: string) {
     ok: true as const,
     result,
   };
+}
+
+/** Consulta somente a sessao criada por esta cliente, sob o RLS existente. */
+export async function checkClientFileUploadSessionStatusAction(sessionId: string) {
+  const auth = await requireRole("client");
+  const client = await getCurrentClient();
+  if (!client) return { status: "unavailable" as const };
+
+  return readPrivateFileUploadSessionStatus({
+    actorProfileId: auth.profileId,
+    clientId: client.id,
+    sessionId,
+  });
 }
