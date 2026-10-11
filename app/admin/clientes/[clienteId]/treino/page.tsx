@@ -3,6 +3,7 @@ import { Alert } from "@/components/ui/Alert";
 import { publishedTrainingVersions } from "@/lib/training/published-versions";
 import { ClientHistoryDisclosure } from "@/components/client/ClientHistoryDisclosure";
 import { isTrainingRequestAfterPublication } from "@/lib/training/request-follow-up";
+import { trainingRequestOriginLabel } from "@/lib/training/request-origin";
 import { newestTrainingRequests, newestUnpublishedTrainingVersion } from "@/lib/training/operational-order";
 import { orderPublishedExerciseOptions } from "@/lib/training/exercise-selection";
 
@@ -346,6 +347,14 @@ export default async function AdminClientTrainingPage({ params }: Props) {
                   ? `${requests.length} solicitação(ões) registrada(s) no histórico.`
                   : "Nenhuma solicitação de treino registrada até o momento."}
               </p>
+              {orderedRequests[0] ? (
+                <p>
+                  Última solicitação: {formatDateTime(orderedRequests[0].requested_at)}
+                  {" · "}{trainingRequestOriginLabel(orderedRequests[0].recorded_by_profile_id, client.profile_id, "admin")}
+                  .{" "}
+                  <a className={styles.link} href={`#pedido-treino-${orderedRequests[0].id}`}>Abrir solicitação exata</a>
+                </p>
+              ) : null}
             </div>
           </Card>
           <Card>
@@ -372,7 +381,8 @@ export default async function AdminClientTrainingPage({ params }: Props) {
                 <Card variant="subtle">
                   <p className={styles.meta}>
                     Solicitado em {formatDateTime(request.requested_at)}
-                    {request.profiles?.display_name?.trim()
+                    {" · "}{trainingRequestOriginLabel(request.recorded_by_profile_id, client.profile_id, "admin")}
+                    {request.profiles?.display_name?.trim()}
                       ? ` · registrado por ${request.profiles.display_name.trim()}`
                       : ""}
                   </p>
