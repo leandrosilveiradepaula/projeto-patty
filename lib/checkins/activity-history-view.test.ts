@@ -23,7 +23,8 @@ test("client history reads a selected activity day without changing today's reco
 test("admin Check-ins date filter also applies to activity history", () => {
   const page = read("app/admin/clientes/[clienteId]/checkins/page.tsx");
   assert.match(page, /listAccessibleClientActivityCheckinEvents\(client\.id, selectedDay \?\? undefined\)/);
-  assert.match(page, /selectedDay \? activityEvents : activityEvents\.slice\(0, 30\)/);
+  assert.match(page, /const recentActivityEvents = activityEvents;/);
+  assert.match(page, /exploreActivityCheckins\(recentActivityEvents/);
   assert.match(page, /name="historyDay" type="hidden" value=\{selectedDay\}/);
 });
 
