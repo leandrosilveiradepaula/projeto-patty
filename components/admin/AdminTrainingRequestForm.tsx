@@ -48,6 +48,7 @@ export function AdminTrainingRequestForm({
         }
         inFlightRef.current = true;
       }} ref={formRef}>
+      {isPending ? <p role="status">Registrando solicitação…</p> : null}
       {state.message && (!state.success || !allowNext) ? (
         <Alert
           live={state.success ? "polite" : "assertive"}
@@ -56,6 +57,9 @@ export function AdminTrainingRequestForm({
         >
           {state.message}
         </Alert>
+      ) : null}
+      {!state.success && state.message ? (
+        <p><a href="#historico-solicitacoes-treino">Conferir histórico antes de reenviar</a></p>
       ) : null}
       <FormField
         description="Opcional. Registre contexto factual da solicitação sem prescrever ou gerar treino neste passo."

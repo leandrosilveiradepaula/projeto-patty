@@ -60,7 +60,7 @@ export async function requestTrainingAction(
     };
   } catch {
     return {
-      message: "Sua solicitação não foi registrada. Tente novamente.",
+      message: "Não foi possível confirmar a solicitação. Confira o histórico antes de repetir, para evitar duplicidade.",
       success: false,
     };
   }

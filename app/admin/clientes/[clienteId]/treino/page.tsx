@@ -377,6 +377,7 @@ export default async function AdminClientTrainingPage({ params }: Props) {
       <Section
         action={<Badge variant="neutral">{requests.length} registro(s)</Badge>}
         description="Histórico preservado das solicitações registradas para esta cliente."
+        id="historico-solicitacoes-treino"
         title="Histórico de solicitações"
       >
         {requests.length === 0 ? (

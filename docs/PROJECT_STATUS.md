@@ -1,3 +1,7 @@
+## Solicitações de treino — recuperação de erros de rede - 2026-10-11
+
+Corrigidas mensagens que anteriormente afirmavam que uma solicitação não havia sido registrada mesmo quando o resultado do servidor era incerto. Os formulários da Patty e da cliente preservam observações em caso de erro, indicam processamento e oferecem link direto ao histórico antes de repetir. A ação de registro permanece autenticada e a solicitação não cria nem publica treino. Essas melhorias reduzem duplicidades acidentais mas não constituem idempotência entre dispositivos. E2E autenticado real pendente.
+
 ## Auditoria operacional: filtros nos arquivos privados — 2026-10-11
 
 O histórico da cliente permite filtrar fotos, exames e documentos. A Patty pode filtrar também pela origem e pela situação de liberação sem alterar a autorização de acesso nem tornar uploads administrativos visíveis. A listagem apresenta totais completos e filtrados, identifica melhor arquivos de autoria não confirmada, trata datas inválidas e arquivos muito pequenos com unidades apropriadas. Os filtros de URL aceitam apenas valores conhecidos, rejeitando parâmetros repetidos/inválidos. Consultas continuam autenticadas e client-scoped, usando as rotas privadas existentes de visualização e download. Nenhuma modificação de RLS, Storage, migrations, telemetria, conteúdo binário ou publicação automática. E2E autenticado real pendente.
