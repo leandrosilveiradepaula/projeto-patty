@@ -13,6 +13,9 @@ export type ClientRegistrationFormState = {
   outcome?: "saved" | "unchanged" | "invalid" | "conflict" | "error";
   field?: import("@/lib/clients/registration").ClientRegistrationField;
   current?: import("@/lib/clients/registration").ClientRegistrationSnapshot;
+  updatedAt?: string | null;
+};
+
 export async function updateCurrentClientRegistrationAction(
   _state: ClientRegistrationFormState,
   formData: FormData,
@@ -77,9 +80,6 @@ export async function updateCurrentClientRegistrationAction(
   return {
     ...writeResult,
     message: writeResult?.outcome === "unchanged" ? "Cadastro já está atualizado. Nenhuma gravação nova foi necessária." : "Cadastro atual atualizado com sucesso.",
-    success: true,
-  };
-}esso.",
     success: true,
   };
 }
