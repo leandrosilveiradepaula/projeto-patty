@@ -3941,3 +3941,8 @@ A cliente pode escolher outra publicação já autorizada do próprio protocolo 
 ## Filtros e paginação do histórico administrativo de versões de protocolo (2026-10-11)
 
 O editor profissional apresenta busca por número da versão, filtro por estados derivados exclusivamente das linhas persistidas (rascunho, em revisão, aprovada, publicada), ordenação e paginação, com indicação de total e seleção exata por URL. A base da versão e o histórico completo permanecem no banco; busca e paginação não apagam nem publicam registros. A seleção de versão fora dos filtros informa a incompatibilidade. Nenhuma regra clínica nova, alteração de RLS/schema nem lifecycle automático. Validação E2E autenticada e revisão visual mobile seguem pendentes.
+
+
+## Auditoria estrutural das versões de protocolo (2026-10-11)
+
+No editor profissional, filtros e contagens permitem localizar versões com ou sem plano alimentar persistido, com ciclos ou com lançamentos de doses. A busca usa exclusivamente a estrutura associada à versão consultável, não presume que um plano ausente foi preenchido, não valida critérios clínicos nem modifica qualquer etapa de aprovação/publicação. O histórico segue integralmente preservado; não há migration, alteração RLS/Auth ou automação profissional. E2E autenticado e revisão visual mobile pendentes.
