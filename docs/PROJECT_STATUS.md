@@ -1,3 +1,7 @@
+## Configurações: histórico comparável e prevenção de versões sem mudanças — 2026-10-11
+
+A tela administrativa de configurações passa a expor conteúdo integral de versões anteriores e diferenças factuais por campo em relação à versão precedente, distinguindo ativação, aposentadoria e estado ativo. As três ações de edição rejeitam criação de versões idênticas à configuração atual, inclusive quando apenas a ordem das chaves JSON mudou. Não altera templates existentes, motor determinístico, gates de ativação, permissões nem parâmetros profissionais. Testes de comparação e regressões acompanham o pacote; homologação autenticada real permanece pendente.
+
 ## Navegação do plano alimentar publicado — 2026-10-11
 
 Cliente consulta uma publicação exata já liberada, distingue plano atual de versões anteriores, navega por ciclo/etapa/variação e lê refeições e doses sem expor chaves internas de rascunho. Variações seguem a ordem técnica factual de criação; não há escolha automática de dia/fase, macro ou publicação. Detalhes em `docs/AUDIT_CLIENT_PUBLISHED_PROTOCOL_NAVIGATION_2026_10_11.md`. E2E autenticado continua pendente. A migration de edição manual dos ciclos (#682) ainda precisa ser conciliada com o histórico de aplicação remota.

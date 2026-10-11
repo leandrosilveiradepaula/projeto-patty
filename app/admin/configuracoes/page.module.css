@@ -269,3 +269,13 @@
 
 .editorFieldset { display: grid; min-width: 0; gap: var(--space-3); margin: 0; padding: 0; border: 0; }
 .editorFieldset[disabled] { opacity: 0.75; }
+
+.historyHeader { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-2); }
+.versionChanges { padding: var(--space-2) 0; min-width: 0; }
+.versionChanges > summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; color: var(--color-brand-strong); font-weight: 600; }
+.versionChanges > summary:focus-visible { outline: 3px solid var(--color-accent); outline-offset: 2px; }
+.changeTableWrap { max-width: 100%; overflow-x: auto; }
+.changeTable { width: 100%; border-collapse: collapse; font-size: var(--text-body-small-size); }
+.changeTable th, .changeTable td { border-bottom: 1px solid var(--color-border); text-align: left; padding: var(--space-2); vertical-align: top; overflow-wrap: anywhere; min-width: 7rem; }
+.changeTable th { font-weight: 600; }
+.changeTable small { color: var(--color-text-muted); font-weight: 400; }
