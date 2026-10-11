@@ -5,9 +5,11 @@ import { revalidatePath } from "next/cache";
 import { canPublishEducationalContentVersion } from "@/lib/content/publication-eligibility";
 import { parseContentDisplayOrder } from "@/lib/content/display-order";
 import { verifyPrivateBlobAsset } from "@/lib/content/private-blob-integrity";
+import { inspectEducationalAssetRegistration } from "@/lib/content/asset-registration-recovery";
 import { requireRole } from "@/lib/supabase/auth";
 import {
   createAccessibleEducationalContentAsset,
+  listEducationalContentAssetsForCurrentAdmin,
   createAccessibleEducationalContentVersion,
   getAccessibleEducationalContentForCurrentAdmin,
   listEducationalContentAssetsForCurrentAdmin,
@@ -267,22 +269,78 @@ export async function registerEducationalContentAssetAction(
     throw new Error("MIME type inválido");
   }
 
-  await verifyPrivateBlobAsset({
-    byteSize,
-    contentType,
-    sha256Hex,
-    storagePath,
-  });
+  const expectedAsset = { byteSize, contentType, sha256Hex, storagePath };
+  const existing = await listEducationalContentAssetsForCurrentAdmin(versionId);
+  const currentState = inspectEducationalAssetRegistration(existing, expectedAsset);
+  if (currentState === "conflict") {
+    throw new Error("Esta versão já possui outro arquivo registrado. Verifique a versão atual.");
+  }
 
-  await createAccessibleEducationalContentAsset({
-    byteSize,
-    contentType,
-    sha256Hex,
-    storagePath,
-    versionId,
-  });
+  if (currentState !== "registered") {
+    await verifyPrivateBlobAsset({
+      byteSize,
+      contentType,
+      sha256Hex,
+      storagePath,
+    });
+
+    try {
+      await createAccessibleEducationalContentAsset({
+        byteSize,
+        contentType,
+        sha256Hex,
+        storagePath,
+        versionId,
+      });
+    } catch {
+      // A concurrent request might have committed before the transport failed.
+      // Confirm the exact object instead of treating a unique violation as success.
+      const afterFailure = await listEducationalContentAssetsForCurrentAdmin(versionId);
+      if (inspectEducationalAssetRegistration(afterFailure, expectedAsset) !== "registered") {
+        throw new Error("Registro do asset não confirmado. Consulte o histórico da versão.");
+      }
+    }
+  }
 
   revalidatePath("/admin/conteudos/" + contentId);
   revalidatePath("/admin/pendencias");
   revalidatePath("/admin");
+}
+
+
+/**
+ * Read-only, admin-scoped reconciliation of an uncertain asset registration.
+ * Never returns the private storage path, SHA, signed URL or object bytes.
+ */
+export async function inspectEducationalContentAssetRegistrationAction(
+  contentId: string,
+  versionId: string,
+  expected: { storagePath: string; byteSize: number; contentType: string; sha256Hex: string },
+): Promise<{ status: "registered" | "not_registered" | "conflict" | "unavailable" }> {
+  await requireRole("admin");
+
+  if (!isUuid(contentId) || !isUuid(versionId) ||
+      !expected || typeof expected.storagePath !== "string" || expected.storagePath.length > 1024 ||
+      !Number.isSafeInteger(expected.byteSize) || expected.byteSize <= 0 ||
+      typeof expected.contentType !== "string" || expected.contentType.length > 255 ||
+      typeof expected.sha256Hex !== "string" || !/^[a-f0-9]{64}$/.test(expected.sha256Hex)) {
+    return { status: "unavailable" };
+  }
+
+  try {
+    const content = await getAccessibleEducationalContentForCurrentAdmin(contentId);
+    if (!content) return { status: "unavailable" };
+    const versions = await listEducationalContentVersionsForCurrentAdmin(contentId);
+    const version = versions.find((item) => item.id === versionId);
+    if (!version) return { status: "unavailable" };
+
+    const assets = await listEducationalContentAssetsForCurrentAdmin(versionId);
+    const status = inspectEducationalAssetRegistration(assets, expected);
+    if (status === "not_registered" && version.published_at) {
+      return { status: "conflict" };
+    }
+    return { status };
+  } catch {
+    return { status: "unavailable" };
+  }
 }
