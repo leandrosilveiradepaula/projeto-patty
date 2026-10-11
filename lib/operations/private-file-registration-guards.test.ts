@@ -20,10 +20,11 @@ test("private path builder validates file kind and extension type", () => {
 });
 
 test("optional registration fields reject non-string values rather than clearing existing data", () => {
-  assert.match(registration, /if \(value === null\)/);
-  assert.match(registration, /throw new Error\("invalid_type"\)/);
+  assert.match(registration, /entries.length > 1/);
+  assert.match(registration, /typeof entries\[0\] !== "string"/);
 });
 
 test("invalid registration field types return a useful error", () => {
-  assert.match(registration, /Um dos campos do cadastro é inválido ou ultrapassa o limite permitido/);
+  assert.match(registration, /getClientRegistrationFieldError\(field.key, raw\)/);
+  assert.match(registration, /field: field.key, message: issue/);
 });

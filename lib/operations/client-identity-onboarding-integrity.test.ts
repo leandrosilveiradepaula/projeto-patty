@@ -15,4 +15,7 @@ test("invites, recovery and registration show busy states",()=>{
  for(const p of ["components/admin/ClientInviteForm.tsx","components/admin/ManualClientInviteForm.tsx","components/admin/AdminClientRecoveryLinkForm.tsx","components/admin/AdminClientRegistrationEditForm.tsx","components/client/ClientRegistrationEditForm.tsx"]){
   const s=read(p);assert.match(s,/role="status"/);assert.match(s,/aria-busy=\{isPending\}/);
  }
+ const editor=read("components/client/ClientRegistrationEditor.tsx");
+ assert.match(editor,/role="status"/);
+ assert.match(editor,/aria-busy=\{pending\}/);
 });

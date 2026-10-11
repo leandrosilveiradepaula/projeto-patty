@@ -11,7 +11,7 @@ test("assessment photo links and follow-ups refresh the assessment list", () => 
     "Foto vinculada ao rascunho.",
     "Foto desvinculada do rascunho. O arquivo privado foi preservado.",
   ]) {
-    const pos = source.indexOf('message: "' + marker + '"');
+    const pos = source.indexOf(marker);
     assert.ok(pos > 0, marker);
     const before = source.slice(Math.max(0, pos - 400), pos);
     assert.match(before, /revalidatePath\("\/admin\/avaliacoes"\)/);

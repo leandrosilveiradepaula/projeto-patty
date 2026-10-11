@@ -35,17 +35,11 @@ test("both roles validate scope before privileged version-checked write", () => 
   }
 });
 
-test("client and professional editors submit exact loaded version and show a refresh action", () => {
-  for (const form of ["components/client/ClientRegistrationEditForm.tsx","components/admin/AdminClientRegistrationEditForm.tsx"]) {
-    const source = read(form);
-    assert.match(source, /name="expectedUpdatedAt"/);
-    assert.match(source, /value=\{updatedAt \?\? ""\}/);
-    assert.match(source, /Recarregar dados atuais/);
-    assert.match(source, /router\.refresh\(\)/);
-  }
-  for(const path of ["app/cliente/perfil/page.tsx","app/admin/clientes/[clienteId]/page.tsx"]) {
-    assert.match(read(path), /updatedAt=\{registration\?\.updated_at \?\? null\}/);
-  }
+test("client and professional editors preserve exact server version and allow explicit conflict review", () => {
+ const shared=read("components/client/ClientRegistrationEditor.tsx");
+ for (const marker of ['name="expectedUpdatedAt"','value={baselineVersion??""}',"state.current","reviewServer","Descartar meu rascunho e usar dados atuais","router.refresh()"])assert.ok(shared.includes(marker),marker);
+ for(const file of ["components/client/ClientRegistrationEditForm.tsx","components/admin/AdminClientRegistrationEditForm.tsx"])assert.ok(read(file).includes("ClientRegistrationEditor"));
+ for(const page of ["app/cliente/perfil/page.tsx","app/admin/clientes/[clienteId]/page.tsx"])assert.match(read(page), /updatedAt=\{registration\?\.updated_at \?\? null\}/);
 });
 
 test("contact details are not confused with authentication identity or anamnesis", () => {
