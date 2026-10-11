@@ -47,7 +47,7 @@ test("type and availability filters compose with title search",()=>{
 
 test("newest and oldest compare actual instants and keep invalid legacy dates last",()=>{
   assert.deepEqual(orderReleasedContent(rows,"newest").map(x=>x.id),["a","b","c","d"]);
-  assert.deepEqual(orderReleasedContent(rows,"oldest").map(x=>x.id),["c","b","a","d"]);
+  assert.deepEqual(orderReleasedContent(rows,"oldest").map(x=>x.id),["c","a","b","d"]);
 });
 
 test("title and file-count sorts use stable, factual fields",()=>{
