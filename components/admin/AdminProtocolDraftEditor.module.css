@@ -164,3 +164,38 @@
   gap: var(--space-2);
   align-items: center;
 }
+
+.cycleEditor, .cyclePanel, .cycleSteps, .cycleStep, .cycleStepActions, .cycleStepForm {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.cycleEditor {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-4);
+}
+
+.cyclePanel {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  background: var(--color-surface);
+  padding: var(--space-4);
+}
+
+.cycleSteps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.cycleStep {
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+}
+
+.cycleStepActions {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  align-items: start;
+}

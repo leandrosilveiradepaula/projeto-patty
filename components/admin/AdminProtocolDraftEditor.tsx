@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 
 import {
   addProtocolMeal,
+  addProtocolMealPlanCycle,
+  editProtocolMealPlanCycle,
+  removeProtocolMealPlanCycle,
   addProtocolMealDose,
   addProtocolMealPlanVariant,
   createProtocolMealPlan,
@@ -18,6 +21,7 @@ import {
 } from "@/app/admin/protocolos/[protocoloId]/actions";
 import type { AdminProtocolVersionPlanData } from "@/components/admin/AdminProtocolVersionPlan";
 import { Alert } from "@/components/ui/Alert";
+import { serializeDraftCycleSteps } from "@/lib/protocol/cycle-editor";
 import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/FormField";
 import { TextInput } from "@/components/ui/TextInput";
@@ -588,6 +592,146 @@ function DoseRow({
   );
 }
 
+
+type Cycle = NonNullable<AdminProtocolVersionPlanData>["cycles"][number];
+type Variant = NonNullable<AdminProtocolVersionPlanData>["variants"][number];
+
+function AddCycleForm({ mealPlanVersionId, protocolId, protocolVersionId }: {
+  mealPlanVersionId: string; protocolId: string; protocolVersionId: string;
+}) {
+  const action = addProtocolMealPlanCycle.bind(null, protocolId, protocolVersionId, mealPlanVersionId);
+  const [state, formAction, pending] = useActionState(action, initialState);
+  usePersistedProtocolRefresh(state);
+  const submitGuard = useProtocolDraftSubmitGuard(state, pending, { blockAfterSuccess: true });
+  return <form action={formAction} onSubmit={submitGuard} aria-busy={pending} className={styles.form}>
+    <ActionFeedback state={state} />
+    <Button size="compact" disabled={pending || state.success} loading={pending} type="submit">Criar ciclo vazio</Button>
+  </form>;
+}
+
+function CycleStepForm({
+  cycle, mealPlanVersionId, operation, position, protocolId, protocolVersionId, variants,
+}: {
+  cycle: Cycle;
+  mealPlanVersionId: string;
+  operation: "add" | "replace" | "move_up" | "move_down" | "remove";
+  position?: number;
+  protocolId: string;
+  protocolVersionId: string;
+  variants: Variant[];
+}) {
+  const action = editProtocolMealPlanCycle.bind(null, protocolId, protocolVersionId, mealPlanVersionId, cycle.id);
+  const [state, formAction, pending] = useActionState(action, initialState);
+  usePersistedProtocolRefresh(state);
+  const submitGuard = useProtocolDraftSubmitGuard(state, pending, { blockAfterSuccess: true });
+  const [confirmRemoval, setConfirmRemoval] = useState(false);
+  const isSelect = operation === "add" || operation === "replace";
+  const isRemove = operation === "remove";
+  const names: Record<typeof operation, string> = {
+    add: "Adicionar etapa",
+    replace: "Trocar variação",
+    move_up: "Subir",
+    move_down: "Descer",
+    remove: "Remover etapa",
+  };
+  return <form action={formAction} onSubmit={submitGuard} aria-busy={pending} className={styles.cycleStepForm}>
+    <input type="hidden" name="operation" value={operation} />
+    <input type="hidden" name="expectedSteps" value={serializeDraftCycleSteps(cycle.steps)} />
+    {position !== undefined ? <input type="hidden" name="position" value={position} /> : null}
+    <ActionFeedback state={state} />
+    {isSelect ? (
+      <label className={styles.selectField}>
+        <span>{operation === "add" ? "Variação para nova etapa" : "Nova variação"}</span>
+        <select name="variantId" required disabled={pending} defaultValue={operation === "replace" ?
+          cycle.steps.find((step) => step.position === position)?.variantId : ""}>
+          <option value="">Selecione uma variação</option>
+          {variants.map((variant) => (
+            <option key={variant.id} value={variant.id}>{variant.label ?? variant.variantKey}</option>
+          ))}
+        </select>
+      </label>
+    ) : null}
+    {isRemove && !confirmRemoval ? (
+      <Button type="button" size="compact" variant="danger" disabled={pending || state.success}
+        onClick={() => setConfirmRemoval(true)}>Remover etapa</Button>
+    ) : (
+      <div className={styles.confirmActions}>
+        {isRemove ? <Button size="compact" type="button" variant="ghost" disabled={pending}
+          onClick={() => setConfirmRemoval(false)}>Cancelar</Button> : null}
+        <Button type="submit" size="compact" variant={isRemove ? "danger" : "secondary"}
+          disabled={pending || state.success || (isSelect && variants.length === 0)} loading={pending}>
+          {isRemove ? "Confirmar remoção" : names[operation]}
+        </Button>
+      </div>
+    )}
+  </form>;
+}
+
+function RemoveEmptyCycleForm({ cycle, mealPlanVersionId, protocolId, protocolVersionId }: {
+  cycle: Cycle; mealPlanVersionId: string; protocolId: string; protocolVersionId: string;
+}) {
+  const action = removeProtocolMealPlanCycle.bind(null, protocolId, protocolVersionId, mealPlanVersionId, cycle.id);
+  const [state, formAction, pending] = useActionState(action, initialState);
+  const [confirm, setConfirm] = useState(false);
+  usePersistedProtocolRefresh(state);
+  const submitGuard = useProtocolDraftSubmitGuard(state, pending, { blockAfterSuccess: true });
+  return <form action={formAction} onSubmit={submitGuard} aria-busy={pending} className={styles.inlineAction}>
+    <ActionFeedback state={state} />
+    {!confirm ? <Button type="button" size="compact" variant="danger" disabled={pending || state.success}
+      onClick={() => setConfirm(true)}>Excluir ciclo vazio</Button> :
+      <div className={styles.confirmActions}>
+        <Button type="button" variant="ghost" size="compact" disabled={pending}
+          onClick={() => setConfirm(false)}>Cancelar</Button>
+        <Button type="submit" variant="danger" size="compact" disabled={pending || state.success}
+          loading={pending}>Confirmar exclusão do ciclo</Button>
+      </div>}
+  </form>;
+}
+
+function ManualCycleEditor({ plan, protocolId, protocolVersionId }: {
+  plan: AdminProtocolVersionPlanData; protocolId: string; protocolVersionId: string;
+}) {
+  return <section className={styles.cycleEditor} aria-label="Montagem manual dos ciclos">
+    <h5>Ciclos alimentares</h5>
+    <p className={styles.help}>
+      Opcional. Escolha a sequência manualmente, incluindo repetições quando necessário.
+      O sistema não determina fases, alternâncias ou duração. Apenas versões enviadas para revisão poderão ser aprovadas e publicadas.
+    </p>
+    <AddCycleForm mealPlanVersionId={plan.id} protocolId={protocolId} protocolVersionId={protocolVersionId} />
+    {plan.cycles.length === 0 ? <p className={styles.empty}>Nenhum ciclo registrado neste rascunho.</p> : null}
+    {plan.cycles.map((cycle, cycleIndex) => (
+      <section className={styles.cyclePanel} key={cycle.id}>
+        <h6>Ciclo {cycleIndex + 1} · {cycle.steps.length} etapa(s)</h6>
+        {cycle.steps.length === 0 ? (
+          <p className={styles.empty}>Este ciclo está vazio. Adicione uma variação ou exclua o ciclo.</p>
+        ) : <ol className={styles.cycleSteps}>
+          {cycle.steps.map((step, index) => (
+            <li key={step.position} className={styles.cycleStep}>
+              <strong>Etapa {index + 1}: {step.variantLabel ?? step.variantKey}</strong>
+              <div className={styles.cycleStepActions}>
+                <CycleStepForm cycle={cycle} mealPlanVersionId={plan.id} operation="replace" position={step.position}
+                  protocolId={protocolId} protocolVersionId={protocolVersionId} variants={plan.variants} />
+                {index > 0 ? <CycleStepForm cycle={cycle} mealPlanVersionId={plan.id} operation="move_up"
+                  position={step.position} protocolId={protocolId} protocolVersionId={protocolVersionId} variants={plan.variants} /> : null}
+                {index < cycle.steps.length - 1 ? <CycleStepForm cycle={cycle} mealPlanVersionId={plan.id}
+                  operation="move_down" position={step.position} protocolId={protocolId} protocolVersionId={protocolVersionId}
+                  variants={plan.variants} /> : null}
+                <CycleStepForm cycle={cycle} mealPlanVersionId={plan.id} operation="remove"
+                  position={step.position} protocolId={protocolId} protocolVersionId={protocolVersionId} variants={plan.variants} />
+              </div>
+            </li>
+          ))}
+        </ol>}
+        {plan.variants.length > 0 ? <CycleStepForm cycle={cycle} mealPlanVersionId={plan.id} operation="add"
+          protocolId={protocolId} protocolVersionId={protocolVersionId} variants={plan.variants} /> :
+          <p className={styles.empty}>Cadastre uma variação alimentar antes de adicionar etapas.</p>}
+        {cycle.steps.length === 0 ? <RemoveEmptyCycleForm cycle={cycle} mealPlanVersionId={plan.id}
+          protocolId={protocolId} protocolVersionId={protocolVersionId} /> : null}
+      </section>
+    ))}
+  </section>;
+}
+
 type AdminProtocolDraftEditorProps = {
   plan: AdminProtocolVersionPlanData | null;
   protocolId: string;
@@ -622,6 +766,8 @@ export function AdminProtocolDraftEditor({
           </p>
         </div>
       </div>
+
+      <ManualCycleEditor plan={plan} protocolId={protocolId} protocolVersionId={protocolVersionId} />
 
       <AddVariantForm
         mealPlanVersionId={plan.id}
