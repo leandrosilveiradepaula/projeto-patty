@@ -17,7 +17,8 @@ test("client views date and exact released versions without implicit completion"
  assert.match(p,/formatReleaseDate\(release.released_at\)/);
  assert.match(p,/releasedVersionIds = Array\.from\(new Set\(/);
  assert.match(p,/listEducationalContentAssetsForCurrentClientVersions/);
- assert.match(p,/\{visibleReleases.length\} versão\(ões\) liberada\(s\)/);
+ assert.match(p,/ClientReleasedContentExplorer entries=\{explorerEntries\}/);
+ assert.match(read("components/client/ClientReleasedContentExplorer.tsx"),/\{entries.length\} versão\(ões\) liberada\(s\)/);
  assert.doesNotMatch(p,/updateClientContentProgress|markContentCompleted/);
 });
 test("manual release remains confirmed, server-validated, and single submission",()=>{
