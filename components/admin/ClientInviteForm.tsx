@@ -89,7 +89,7 @@ export function ClientInviteForm({ onProvisioningAttempt }: { onProvisioningAtte
         )}
       </FormField>
 
-      <Button loading={isPending} type="submit">
+      <Button disabled={isPending} loading={isPending} type="submit">
         Criar cliente e enviar convite
       </Button>
     </form>

@@ -56,6 +56,7 @@ export function AdminClientRecoveryLinkForm({
         inFlightRef.current = true;
       }}
     >
+      {isPending ? <p role="status">Gerando link individual…</p> : null}
       {state.message ? (
         <Alert
           live="polite"
@@ -66,7 +67,7 @@ export function AdminClientRecoveryLinkForm({
         </Alert>
       ) : null}
 
-      <Button disabled={Boolean(state.recoveryLink)} loading={isPending} onClick={() => setCopyStatus(null)} type="submit">
+      <Button disabled={isPending || Boolean(state.recoveryLink)} loading={isPending} onClick={() => setCopyStatus(null)} type="submit">
         Gerar link de recuperação
       </Button>
 

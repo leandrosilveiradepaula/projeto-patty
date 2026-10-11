@@ -66,6 +66,7 @@ export function ClientRegistrationEditForm({
       }}
     >
       <input name="expectedUpdatedAt" type="hidden" value={updatedAt ?? ""} />
+      {isPending ? <p role="status">Salvando o Cadastro Atual…</p> : null}
       {state.message && !editedSinceResult ? (
         <Alert
           live={state.success ? "polite" : "assertive"}

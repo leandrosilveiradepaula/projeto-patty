@@ -111,7 +111,8 @@ export function ManualClientInviteForm({ onProvisioningAttempt }: { onProvisioni
         )}
       </FormField>
 
-      <Button disabled={state.success} loading={isPending} type="submit">
+      {isPending ? <p role="status">Verificando o acesso da cliente…</p> : null}
+      <Button disabled={state.success || isPending} loading={isPending} type="submit">
         Gerar link de ativação
       </Button>
 

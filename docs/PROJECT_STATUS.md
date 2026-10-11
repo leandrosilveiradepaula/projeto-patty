@@ -1,3 +1,7 @@
+## Auditoria de identidade, cadastro e onboarding — 2026-10-11
+
+Proteção otimista de nome profissional canônico e nome de perfil vinculado; filtros condicionais atômicos impedem sobrescrita por edição concorrente. Preservada a distinção entre Client, Profile, Auth e Cadastro Atual. Campos originais são verificados no servidor e conflitos oferecem recarregamento. Convites, recuperação assistida e edições de contato passam a indicar processamento. Nenhum link foi persistido nem logado; nenhuma mudança em RLS, migrations, email de login, políticas de identidade ou métodos da Patty. E2E com Supabase real permanece pendente.
+
 ## Auditoria integrada — integridade de edição e remoção de treino
 
 Data: 2026-10-11. Branch: `codex/training-item-complete-concurrency-v178`. Estado: implementado no código, testes de CI pendentes; sem deploy.
