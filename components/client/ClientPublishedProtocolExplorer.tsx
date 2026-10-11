@@ -3,7 +3,7 @@ import {useState} from "react";
 import Link from "next/link";
 import {
   findPublishedHistory,paginatePublishedHistory,adjacentPublishedVersions,
-  publishedProtocolDate,publishedNutritionDoseTypes,publishedVariantMatches,normalizePublishedSearch,
+  publishedProtocolDate,publishedNutritionDoseTypes,publishedVariantMatches,publishedMealMatches,
   summarizePublishedNutrition,formatPublishedDoseAmount,labelPublishedDoseType,
 } from "@/lib/protocol/client-published-explorer";
 import {publishedVariationAnchor,publishedMealAnchor,publishedCycleAnchor,publishedVersionHref,type buildClientPublishedNutritionView} from "@/lib/protocol/client-published-view";
@@ -67,6 +67,8 @@ export function ClientPublishedNutritionExplorer({view,publicationId}:{view:Publ
  const [showTotals,setShowTotals]=useState(false);
  const types=publishedNutritionDoseTypes(view);
  const matches=publishedVariantMatches(view,query,doseType);
+ const mealMatches=publishedMealMatches(view,query,doseType);
+ const isFiltering=Boolean(query.trim())||doseType!=="all";
  const summary=summarizePublishedNutrition(view);
  return <div className={styles.panel} aria-label="Explorar variações publicadas">
   <h4>Localizar refeições no plano publicado</h4>
@@ -83,17 +85,18 @@ export function ClientPublishedNutritionExplorer({view,publicationId}:{view:Publ
    </label>
   </div>
   <p role="status">{matches.length} de {view.variants.length} variações encontradas.</p>
-  {matches.length===0?<button type="button" onClick={()=>{setQuery("");setDoseType("all")}}>Limpar pesquisa</button>:null}
+  {isFiltering?<button type="button" onClick={()=>{setQuery("");setDoseType("all")}}>Limpar pesquisa</button>:null}
   <ul className={styles.results}>{matches.map(v=><li key={v.id}>
    <a href={"#"+publishedVariationAnchor(publicationId,v.id)}>{v.label}</a>
    <span>{v.meals} refeição(ões)</span>
   </li>)}</ul>
-  {query.trim() ? <div className={styles.directory}>
-    <strong>Refeições que correspondem à pesquisa</strong>
-    <ul>{view.variants.flatMap(variant => variant.meals
-      .filter(meal => normalizePublishedSearch(variant.label + " " + meal.label)
-        .includes(normalizePublishedSearch(query)))
-      .map(meal => <li key={meal.id}><a href={"#"+publishedMealAnchor(publicationId,meal.id)}>{variant.label} · {meal.label}</a></li>))}</ul>
+  {isFiltering ? <div className={styles.directory}>
+    <strong>Refeições que correspondem aos filtros</strong>
+    <p role="status">{mealMatches.length} refeição(ões) encontradas nos registros publicados.</p>
+    {mealMatches.length === 0 ? <p>Não há refeições com a combinação de pesquisa e doses selecionada.</p> : null}
+    <ul>{mealMatches.map(meal => <li key={meal.id}>
+      <a href={"#"+publishedMealAnchor(publicationId,meal.id)}>{meal.variantLabel} · {meal.label}</a>
+    </li>)}</ul>
   </div> : null}
   {view.cycles.length > 1 ? <nav aria-label="Ir para ciclo publicado" className={styles.inline}>
     {view.cycles.map((cycle,index) => <a key={cycle.id} href={"#"+publishedCycleAnchor(publicationId,cycle.id)}>Ciclo {index+1}</a>)}
