@@ -9,7 +9,7 @@ function stableValue(value: Json): Json {
   if (value !== null && typeof value === "object") {
     return Object.fromEntries(
       Object.entries(value).sort(([a], [b]) => a.localeCompare(b))
-        .map(([key, item]) => [key, stableValue(item)]),
+        .map(([key, item]) => [key, stableValue(item ?? null)]),
     );
   }
   return value;
@@ -47,7 +47,7 @@ function configurationLeafMap(input: Json) {
       const entries = Object.entries(value);
       if (entries.length > 0) {
         for (const [key, item] of entries) {
-          walk(item, path ? path + "." + key : key);
+          walk(item ?? null, path ? path + "." + key : key);
         }
         return;
       }
