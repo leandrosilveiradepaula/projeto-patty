@@ -56,7 +56,7 @@ export function ClientContentReleaseForm({
       aria-busy={isPending}
       className={styles.form}
       onSubmit={(event) => {
-        if (submitInFlightRef.current || !confirmRelease || !selectedVersion) {
+        if (submitInFlightRef.current || isPending || state.success || !confirmRelease || !selectedVersion) {
           event.preventDefault();
           return;
         }
@@ -83,7 +83,7 @@ export function ClientContentReleaseForm({
           <select
             {...fieldProps}
             className={styles.select}
-            disabled={isPending}
+            disabled={isPending || state.success}
             name="educationalContentVersionId"
             onChange={(event) => {
               setSelectedVersionId(event.target.value);
@@ -105,6 +105,12 @@ export function ClientContentReleaseForm({
         )}
       </FormField>
 
+      {selectedVersion ? (
+        <p className={styles.notice} role="status">
+          Selecionado: {selectedVersion.title} · versão {selectedVersion.versionNumber}.
+          Esta escolha não altera liberações anteriores.
+        </p>
+      ) : null}
       <p className={styles.notice}>
         O servidor também valida a existência do asset no momento da liberação,
         evitando que uma chamada direta crie um release sem arquivo.
@@ -120,16 +126,16 @@ export function ClientContentReleaseForm({
             Confirmar liberação de <strong>{selectedVersion.title} · versão {selectedVersion.versionNumber}</strong> para esta cliente?
             A liberação será individual e permanecerá vinculada exatamente a esta versão.
           </p>
-          <Button disabled={isPending} onClick={() => setConfirmRelease(false)} type="button" variant="ghost">
+          <Button disabled={isPending || state.success} onClick={() => setConfirmRelease(false)} type="button" variant="ghost">
             Cancelar
           </Button>
-          <Button disabled={isPending} loading={isPending} type="submit">
+          <Button disabled={isPending || state.success} loading={isPending} type="submit">
             Confirmar liberação
           </Button>
         </div>
       ) : (
         <Button
-          disabled={!selectedVersion || isPending}
+          disabled={!selectedVersion || isPending || state.success}
           onClick={() => setConfirmRelease(true)}
           type="button"
         >
