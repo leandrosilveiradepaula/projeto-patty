@@ -1,3 +1,7 @@
+## Inspecao de versoes de treino — 2026-10-11
+
+Treino individual: a Patty passa a comparar o rascunho ou versao revisada com a publicacao anterior, vendo titulo, observacoes e diferencas exatas de exercicios por posicao, series, repeticoes, descanso e orientacoes. A cliente pode inspecionar diferencas factuais entre as duas publicacoes mais recentes sem visualizar rascunho. Pedidos anteriores recebem paginacao de leitura sem perda de historico. Posicoes duplicadas no legado sao marcadas ambiguas; a equivalencia de posicao nao autoriza inferir progressao de exercicios, metas ou series. A revisao/aprovacao/publicacao segue exclusivamente manual. Sem alteracao de migrations, RLS, Supabase ou dados reais. Homologacao E2E autenticada continua pendente.
+
 ## Arquivos privados — historico com ordenacao e paginacao (2026-10-11)
 
 Cliente e Patty recebem controles de ordenacao cronologica, tamanho e categoria, com recortes de doze arquivos por pagina e contagens do universo autorizado. A Patty possui navegacao independente para pendentes e historico. Sao preservados upload autenticado, RLS, auditoria de visualizacao, liberacao manual, autoria, URLs sem dados pessoais e historico completo. Nao sao introduzidos schema, migrations ou novas regras de negocio. E2E autenticado segue pendente.

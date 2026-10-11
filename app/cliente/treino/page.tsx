@@ -1,3 +1,5 @@
+import { compareTrainingVersions, paginateTrainingRequests, trainingRequestHistoryHref } from "@/lib/training/version-inspection";
+import { TrainingVersionComparisonView } from "@/components/training/TrainingVersionComparisonView";
 import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
 import { ClientHistoryDisclosure } from "@/components/client/ClientHistoryDisclosure";
 import { Alert } from "@/components/ui/Alert";
@@ -31,7 +33,8 @@ function formatDateTime(value: string) {
   }).format(new Date(value));
 }
 
-export default async function ClientTrainingPage() {
+export default async function ClientTrainingPage({ searchParams }: { searchParams: Promise<{ pedidos?: string }> }) {
+  const { pedidos } = await searchParams;
   const client = await getCurrentClient();
 
   if (!client) {
@@ -48,6 +51,7 @@ export default async function ClientTrainingPage() {
     getAccessibleClientTrainingPlan(client.id),
   ]);
   const orderedRequests = newestTrainingRequests(requests);
+  const requestPage = paginateTrainingRequests(orderedRequests.slice(1), pedidos);
   const trainingVersions = trainingPlan
     ? await listAccessibleClientTrainingPlanVersions(trainingPlan.id)
     : [];
@@ -69,6 +73,13 @@ export default async function ClientTrainingPage() {
     ),
   }));
   const trainingItems = publishedItems[0]?.items ?? [];
+  const previousPublishedTraining = publishedItems[1] ?? null;
+  const comparison = latestPublished ? compareTrainingVersions(
+    previousPublishedTraining?.version ?? null,
+    previousPublishedTraining?.items ?? [],
+    latestPublished,
+    trainingItems,
+  ) : null;
   const newRequestAfterPublication = Boolean(
     latestPublished && orderedRequests[0] &&
     isTrainingRequestAfterPublication(orderedRequests[0].requested_at, latestPublished.published_at),
@@ -181,6 +192,14 @@ export default async function ClientTrainingPage() {
         )}
       </Section>
 
+      {comparison && previousPublishedTraining ? (
+        <Section title="O que mudou no treino publicado" description="Comparação factual com a publicação anterior. Alterações registradas não representam recomendação de progressão.">
+          <ClientHistoryDisclosure summary="Comparar treino atual com o anterior" className={styles.previousTraining}>
+            <div className={styles.previousTrainingBody}><TrainingVersionComparisonView comparison={comparison} /></div>
+          </ClientHistoryDisclosure>
+        </Section>
+      ) : null}
+
       {publishedItems.length > 1 ? (
         <Section
           description="Histórico das prescrições que a Patty publicou para você. Rascunhos e versões apenas revisadas não aparecem aqui."
@@ -262,10 +281,10 @@ export default async function ClientTrainingPage() {
               <ClientHistoryDisclosure
                 className={styles.olderRequests}
                 id="solicitacoes-anteriores"
-                summary={`Ver ${orderedRequests.length - 1} solicitação(ões) anterior(es)`}
+                summary={`Ver solicitações anteriores (${orderedRequests.length - 1} no histórico)`}
               >
                 <ol className={styles.list}>
-                  {orderedRequests.slice(1).map((request) => (
+                  {requestPage.items.map((request) => (
                     <li id={`pedido-treino-${request.id}`} key={request.id}>
                       <Card className={styles.entry} variant="subtle">
                         <div className={styles.header}>
@@ -282,6 +301,12 @@ export default async function ClientTrainingPage() {
                     </li>
                   ))}
                 </ol>
+                {requestPage.invalid ? <p role="status" className={styles.note}>Página solicitada indisponível; exibimos o histórico disponível.</p> : null}
+                <nav aria-label="Páginas das solicitações anteriores" className={styles.publishedNavigation}>
+                  <span>{requestPage.from}–{requestPage.to} de {requestPage.total} solicitações anteriores · Página {requestPage.page} de {requestPage.pageCount}</span>
+                  {requestPage.previous ? <Link href={trainingRequestHistoryHref("/cliente/treino", requestPage.previous, "suas-solicitacoes")}>Anterior</Link> : null}
+                  {requestPage.next ? <Link href={trainingRequestHistoryHref("/cliente/treino", requestPage.next, "suas-solicitacoes")}>Próxima</Link> : null}
+                </nav>
               </ClientHistoryDisclosure>
             ) : null}
           </div>
