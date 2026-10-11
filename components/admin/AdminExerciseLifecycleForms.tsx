@@ -56,6 +56,7 @@ export function AdminExerciseDraftEditForm({
     try {
       const data = new FormData();
       data.set("exerciseName", normalizedName);
+      data.set("expectedName", initialName);
       await updateExerciseDraftAction(exerciseId, versionId, data);
       setMessage("Rascunho atualizado. A publicação continua sendo uma etapa manual.");
       setSuccess(true);
