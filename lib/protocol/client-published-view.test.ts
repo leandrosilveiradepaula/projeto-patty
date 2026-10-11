@@ -6,6 +6,8 @@ import {
   buildClientPublishedNutritionView,
   publishedMealLabel,
   publishedVariationAnchor,
+  publishedMealAnchor,
+  publishedCycleAnchor,
   publishedVariationLabel,
   publishedVersionHref,
   selectClientPublishedVersion,
@@ -104,4 +106,10 @@ test("publication and variant anchors use stable, version-scoped destinations", 
     "variacao-" + ids.publication + "-" + ids.variantA);
   assert.equal(publishedVersionHref(ids.publication),
     "/cliente/protocolo?publicacao=" + ids.publication + "#publicacao-" + ids.publication);
+});
+
+test("meal and cycle anchors are isolated by the exact publication and row", () => {
+  assert.equal(publishedMealAnchor(ids.publication,"meal-a"),"refeicao-"+ids.publication+"-meal-a");
+  assert.equal(publishedCycleAnchor(ids.publication,"cycle-a"),"ciclo-"+ids.publication+"-cycle-a");
+  assert.notEqual(publishedMealAnchor(ids.current,"meal-a"),publishedMealAnchor(ids.publication,"meal-a"));
 });
