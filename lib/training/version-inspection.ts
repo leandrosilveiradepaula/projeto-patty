@@ -26,8 +26,8 @@ export type TrainingComparisonChange = {
 };
 export type TrainingPositionComparison = {
   position: number;
-  before: TrainingComparisonItem | null;
-  after: TrainingComparisonItem | null;
+  before: Pick<TrainingComparisonItem, "position" | "exercise_name"> | null;
+  after: Pick<TrainingComparisonItem, "position" | "exercise_name"> | null;
   state: "included" | "removed" | "changed" | "unchanged" | "ambiguous";
   changes: TrainingComparisonChange[];
   beforeCount: number;
@@ -119,8 +119,8 @@ export function compareTrainingVersions(
       position,
       beforeCount: previous.length,
       afterCount: current.length,
-      before: previous[0] ?? null,
-      after: current[0] ?? null,
+      before: previous[0] ? { position, exercise_name: previous[0].exercise_name } : null,
+      after: current[0] ? { position, exercise_name: current[0].exercise_name } : null,
     };
     if (previous.length > 1 || current.length > 1) return { ...common, state: "ambiguous", changes: [] };
     if (previous.length === 0) return { ...common, state: "included", changes: [] };
