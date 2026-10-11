@@ -1,3 +1,4 @@
+import { trainingClientArchivedVersionHref } from "@/lib/training/history-navigation";
 import { parseClientTrainingArchiveFilters, exploreClientTrainingArchive, trainingClientArchiveHref } from "@/lib/training/history-navigation";
 import { selectPublishedTrainingComparison, trainingVersionComparisonHref, clientTrainingRequestExactHref } from "@/lib/training/history-navigation";
 import { parseTrainingRequestFilters, exploreTrainingRequests, trainingRequestFilteredHref } from "@/lib/training/history-navigation";
@@ -121,7 +122,7 @@ export default async function ClientTrainingPage({ searchParams }: { searchParam
       {publishedItems.length > 1 ? (
         <nav aria-label="Ir para treino publicado" className={styles.publishedNavigation}>
           {publishedItems.map(({ version }, index) => (
-            <a href={`#treino-versao-${version.id}`} key={version.id}>
+            <a href={index === 0 ? `#treino-versao-${version.id}` : trainingClientArchivedVersionHref("/cliente/treino",publishedItems.slice(1),version.id,requestFilters) ?? "#historico-versoes-treino"} key={version.id}>
               {index === 0 ? `Treino atual · versão ${version.version_number}` : `Versão anterior ${version.version_number}`}
             </a>
           ))}
