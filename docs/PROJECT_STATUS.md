@@ -3931,3 +3931,8 @@ No workspace profissional de uma cliente, cada protocolo mostra a situação fac
 ## Pesquisa de refeições do protocolo publicado — correspondência factual (2026-10-11)
 
 A pesquisa da cliente cruza o termo digitado com o tipo de dose da **mesma refeição publicada**, evitando resultados incorretos quando o termo pertence a uma refeição e a dose a outra da mesma variação. A navegação informa a contagem de refeições encontradas e indica combinações sem registros, sem alterar nenhuma dose nem escolher fase/dia. Variações vazias permanecem consultáveis quando compatíveis com busca textual. Lançamentos de doses repetidos são renderizados separadamente com chaves estáveis; quantidades não finitas/negativas não são exibidas como dose válida. Tudo usa dados já publicados sob autorização existente; sem regra clínica nova, RLS, migrations ou publicação automática. CI automatizado não equivale a E2E autenticado.
+
+
+## Comparação factual entre publicações do protocolo da cliente (2026-10-11)
+
+A cliente pode escolher outra publicação já autorizada do próprio protocolo como base para comparar registros de versões. A página mostra diferenças estruturais (variações, refeições, alocações, ciclos e sua sequência textual) e totais registrados de doses **em todas as variações**; esses totais não constituem meta diária, orientação de fase ou decisão nutricional. Apenas publicações reais entram na comparação, IDs inválidos retornam à publicação anterior sem distinguir recursos de outras contas, e rascunhos/variant keys não são expostos. Se houver quantidades de doses inválidas em qualquer uma das versões, as somas são omitidas. Sem novas regras clínicas, mudanças RLS/Auth, migrações, aprovação ou publicação automática; E2E autenticado continua pendente.
