@@ -210,7 +210,7 @@ export async function recordTrainingRequestAction(
   } catch {
     return {
       message:
-        "Não foi possível registrar a solicitação de treino. Confirme seu acesso e MFA e tente novamente.",
+        "Não foi possível confirmar o registro. Confira o histórico antes de repetir, para evitar duplicidade. Verifique também seu acesso e MFA.",
       success: false,
     };
   }

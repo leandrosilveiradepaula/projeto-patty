@@ -46,6 +46,7 @@ export function ClientTrainingRequestForm() {
         }
         inFlightRef.current = true;
       }} ref={formRef}>
+      {isPending ? <p role="status">Registrando solicitação…</p> : null}
       {state.message && (!state.success || !allowNext) ? (
         <Alert
           live={state.success ? "polite" : "assertive"}
@@ -56,6 +57,9 @@ export function ClientTrainingRequestForm() {
         </Alert>
       ) : null}
 
+      {!state.success && state.message ? (
+        <p><a href="#suas-solicitacoes">Conferir histórico antes de reenviar</a></p>
+      ) : null}
       <FormField
         description="Opcional. Use este campo para registrar algo importante sobre a solicitação."
         id="client-training-request-note"
