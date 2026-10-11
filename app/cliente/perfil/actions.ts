@@ -3,15 +3,16 @@
 import { revalidatePath } from "next/cache";
 
 import { ClientRegistrationConflictError, upsertClientRegistrationPrivileged } from "@/lib/clients/registration-admin";
-import { parseClientRegistrationForm } from "@/lib/clients/registration";
+import { parseClientRegistrationForm, clientRegistrationSnapshotFromRow } from "@/lib/clients/registration";
 import { requireRole } from "@/lib/supabase/auth";
-import { getCurrentClient } from "@/lib/supabase/data-access";
+import { getAccessibleClientRegistration, getCurrentClient } from "@/lib/supabase/data-access";
 
 export type ClientRegistrationFormState = {
   message: string | null;
   success: boolean;
-};
-
+  outcome?: "saved" | "unchanged" | "invalid" | "conflict" | "error";
+  field?: import("@/lib/clients/registration").ClientRegistrationField;
+  current?: import("@/lib/clients/registration").ClientRegistrationSnapshot;
 export async function updateCurrentClientRegistrationAction(
   _state: ClientRegistrationFormState,
   formData: FormData,
@@ -31,6 +32,8 @@ export async function updateCurrentClientRegistrationAction(
   if (!parsed.ok) {
     return {
       message: parsed.message,
+      field: parsed.field,
+      outcome: "invalid",
       success: false,
     };
   }
@@ -40,15 +43,20 @@ export async function updateCurrentClientRegistrationAction(
     return { message: "A versão do cadastro é inválida. Atualize a página.", success: false };
   }
 
+  let writeResult: { outcome: "saved" | "unchanged"; updatedAt: string | null } | null = null;
   try {
-    await upsertClientRegistrationPrivileged({
+    const saved = await upsertClientRegistrationPrivileged({
       clientId: client.id,
       expectedUpdatedAt: expectedRaw || null,
       registration: parsed.value,
     });
+    writeResult = { outcome: saved.status, updatedAt: saved.registration?.updated_at ?? null };
   } catch (error) {
     if (error instanceof ClientRegistrationConflictError) {
+      const current = await getAccessibleClientRegistration(client.id);
       return {
+        current: clientRegistrationSnapshotFromRow(current),
+        outcome: "conflict",
         message: "Este cadastro foi alterado em outra sessão. Atualize a página e confira os dados antes de salvar novamente.",
         success: false,
       };
@@ -67,7 +75,11 @@ export async function updateCurrentClientRegistrationAction(
   revalidatePath("/cliente/perfil");
 
   return {
-    message: "Cadastro atual atualizado com sucesso.",
+    ...writeResult,
+    message: writeResult?.outcome === "unchanged" ? "Cadastro já está atualizado. Nenhuma gravação nova foi necessária." : "Cadastro atual atualizado com sucesso.",
+    success: true,
+  };
+}esso.",
     success: true,
   };
 }
