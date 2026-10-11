@@ -187,7 +187,11 @@ export default async function AdminConfiguracoesPage({
                   </dl>
 
                   {active && assessmentSchedulePreferences ? (
-                    <AdminConfigurationMutationForm\n                      key={active.id}\n                      run={(data) => updateAssessmentSchedulePreferencesAction(template.id, active.id, data)}\n                      submitLabel="Criar nova versão das preferências"\n                    >
+                    <AdminConfigurationMutationForm
+                      key={active.id}
+                      run={(data) => updateAssessmentSchedulePreferencesAction(template.id, active.id, data)}
+                      submitLabel="Criar nova versão das preferências"
+                    >
                       <div>
                         <h3 className={styles.editorTitle}>
                           Preferências de agenda das avaliações
@@ -225,7 +229,11 @@ export default async function AdminConfiguracoesPage({
                       </Button>
                     </AdminConfigurationMutationForm>
                   ) : active && weeklyFeedbackSchedule ? (
-                    <AdminConfigurationMutationForm\n                      key={active.id}\n                      run={(data) => updateWeeklyFeedbackScheduleAction(template.id, active.id, data)}\n                      submitLabel="Criar nova versão da agenda"\n                    >
+                    <AdminConfigurationMutationForm
+                      key={active.id}
+                      run={(data) => updateWeeklyFeedbackScheduleAction(template.id, active.id, data)}
+                      submitLabel="Criar nova versão da agenda"
+                    >
                       <div>
                         <h3 className={styles.editorTitle}>Agenda do Feedback Semanal</h3>
                         <p className={styles.editorDescription}>
@@ -287,7 +295,11 @@ export default async function AdminConfiguracoesPage({
                       
                     </AdminConfigurationMutationForm>
                   ) : active && editableParameters.length > 0 ? (
-                    <AdminConfigurationMutationForm\n                      key={active.id}\n                      run={(data) => updateMethodConfigurationAction(template.id, active.id, data)}\n                      submitLabel="Criar nova versão"\n                    >
+                    <AdminConfigurationMutationForm
+                      key={active.id}
+                      run={(data) => updateMethodConfigurationAction(template.id, active.id, data)}
+                      submitLabel="Criar nova versão"
+                    >
                       <div>
                         <h3 className={styles.editorTitle}>Parâmetros editáveis</h3>
                         <p className={styles.editorDescription}>
