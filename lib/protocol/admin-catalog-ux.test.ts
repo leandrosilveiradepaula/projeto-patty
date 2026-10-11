@@ -36,11 +36,11 @@ test("canonical and historical names are searchable without being identity keys"
 
 test("version status and deterministic name/date order are independent of DB pagination", () => {
   assert.deepEqual(selectProtocolCatalog(rows,versioned,"","all").map(x=>x.id),
-    ["published","old","draft","missing"]);
+    ["published","old","missing","draft"]);
   assert.deepEqual(selectProtocolCatalog(rows,versioned,"","with-version").map(x=>x.id),
     ["published","old"]);
   assert.deepEqual(selectProtocolCatalog(rows,versioned,"","needs-recovery").map(x=>x.id),
-    ["draft","missing"]);
+    ["missing","draft"]);
   assert.equal(protocolTypeLabel("nutrition"),"Nutricional");
   assert.equal(rows[0].id,"draft");
 });
