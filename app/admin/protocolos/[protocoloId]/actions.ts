@@ -440,9 +440,9 @@ export async function removeProtocolMealDose(
   _formData: FormData,
 ): Promise<ProtocolLifecycleFormState> {
   await requireRole("admin");
-  const originalMealId = parseOriginalDraftId(formData.get("originalMealId"));
-  const originalDoseType = parseOriginalDraftDoseType(formData.get("originalDoseType"));
-  const originalQuantity = parseOriginalDraftDoseQuantity(formData.get("originalDoseQuantity"));
+  const originalMealId = parseOriginalDraftId(_formData.get("originalMealId"));
+  const originalDoseType = parseOriginalDraftDoseType(_formData.get("originalDoseType"));
+  const originalQuantity = parseOriginalDraftDoseQuantity(_formData.get("originalDoseQuantity"));
   if (!originalMealId || !originalDoseType || originalQuantity === null) {
     return { message: "Referência original da dose inválida. Atualize a página.", success: false };
   }
