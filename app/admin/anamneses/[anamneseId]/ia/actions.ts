@@ -3,12 +3,27 @@
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/supabase/auth";
 import { isUuid } from "@/lib/validation/uuid";
+import { assertAiExecutionBelongsToSubmission } from "@/lib/ai/execution-submission-boundary";
+import { getAccessibleAnamnesisSubmission, listAccessibleAiAnamnesisExecutions } from "@/lib/supabase/data-access";
 import {
   executeOpenAiAnamnesisReview,
   OpenAiAnamnesisReviewExecutionError,
 } from "@/lib/ai/openai-provider";
 import { recordAiFindingAction } from "@/lib/ai/finding-actions";
 import { recoverInternalStartedAiExecution } from "@/lib/ai/ai-execution-persistence";
+
+async function requireExactAccessibleAiExecution(
+  submissionId: string,
+  executionId: string,
+  state: "started" | "completed",
+) {
+  const submission = await getAccessibleAnamnesisSubmission(submissionId);
+  if (!submission?.submitted_at) {
+    throw new Error("Anamnese não disponível para esta ação.");
+  }
+  const executions = await listAccessibleAiAnamnesisExecutions(submission.id);
+  assertAiExecutionBelongsToSubmission(submission, executions, executionId, state);
+}
 
 export type AdminAiReviewFormState = {
   executionId?: string;
@@ -96,6 +111,8 @@ export async function acceptAiFindingAsInternalObservation(
     throw new Error("Índice de achado inválido.");
   }
 
+  await requireExactAccessibleAiExecution(submissionId, executionId, "completed");
+
   await recordAiFindingAction({
     action: "accepted_internal_observation",
     actedByProfileId: auth.profileId,
@@ -165,6 +182,8 @@ export async function recoverStartedAiExecution(
       "Informe um motivo de recuperação entre 10 e 500 caracteres.",
     );
   }
+
+  await requireExactAccessibleAiExecution(submissionId, executionId, "started");
 
   await recoverInternalStartedAiExecution({
     executionId,
