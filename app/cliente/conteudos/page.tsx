@@ -14,6 +14,14 @@ import {
 import styles from "./page.module.css";
 import Link from "next/link";
 
+function formatReleaseDate(value: string) {
+  if (!Number.isFinite(Date.parse(value))) return "Data não disponível";
+  return new Intl.DateTimeFormat("pt-BR", {
+    dateStyle: "short",
+    timeZone: "America/Sao_Paulo",
+  }).format(new Date(value));
+}
+
 export default async function ClienteConteudosPage() {
   const client = await getCurrentClient();
   const releases = client
@@ -27,9 +35,10 @@ export default async function ClienteConteudosPage() {
   const releasedVersions = visibleReleases.map(
     (release) => release.educational_content_versions!,
   );
+  const releasedVersionIds = Array.from(new Set(releasedVersions.map((version) => version.id)));
   const assets = client
     ? await listEducationalContentAssetsForCurrentClientVersions(
-        releasedVersions.map((version) => version.id),
+        releasedVersionIds,
       )
     : [];
   const assetsByVersion = new Map<
@@ -77,6 +86,9 @@ export default async function ClienteConteudosPage() {
               {missingVersionCount} liberação(ões) possuem versão indisponível para consulta. A Patty pode verificar o registro.
             </p>
           ) : null}
+          <p className={styles.summary} role="status">
+            {visibleReleases.length} versão(ões) liberada(s) para você.
+          </p>
           <ul className={styles.contentList}>
             {visibleReleases.map((release) => {
               const contentVersion = release.educational_content_versions;
@@ -95,8 +107,8 @@ export default async function ClienteConteudosPage() {
                     category={contentVersion.category_key ?? "Não informado"}
                     meta={
                       releaseAssets.length > 0
-                        ? `Versão ${contentVersion.version_number} · ${releaseAssets.length} arquivo(s) disponível(is)`
-                        : `Versão ${contentVersion.version_number} · arquivo ainda indisponível`
+                        ? `Versão ${contentVersion.version_number} · liberada em ${formatReleaseDate(release.released_at)} · ${releaseAssets.length} arquivo(s) disponível(is)`
+                        : `Versão ${contentVersion.version_number} · liberada em ${formatReleaseDate(release.released_at)} · arquivo ainda indisponível`
                     }
                     action={releaseAssets.length > 0 ? (
                       <ul className={styles.assetList} aria-label={`Arquivos liberados de ${contentVersion.title}`}>

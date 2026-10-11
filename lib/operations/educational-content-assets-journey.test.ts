@@ -69,7 +69,7 @@ test("Patty sees factual asset counts for every exact released version", () => {
   assert.ok(admin.includes("assetCountsByVersionId.get(contentVersion.id) ?? 0"));
   assert.ok(admin.includes('id={`liberacao-${release.id}`}'));
   assert.ok(admin.includes('"Arquivo registrado"'));
-  assert.ok(admin.includes('"Liberado sem arquivo"'));
+  assert.ok(admin.includes('"Arquivo não localizado"'));
   assert.ok(!admin.includes('"Disponível para abrir"'));
 });
 
@@ -78,7 +78,7 @@ test("professional asset inspection remains in the library, not a synthetic clie
   assert.ok(admin.includes('href={'));
   assert.ok(admin.includes("Conferir arquivos na biblioteca"));
   assert.ok(admin.includes("Verificar arquivo desta versão"));
-  assert.ok(admin.includes('href={`/admin/conteudos/${version.educational_content_id}`}'));
+  assert.ok(admin.includes('href={`/admin/conteudos/${version.educational_content_id}?versao=${version.id}#assets-do-conteudo`}'));
   assert.ok(!admin.includes("storage_path"));
 });
 
