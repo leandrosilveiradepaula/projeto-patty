@@ -3936,3 +3936,8 @@ A pesquisa da cliente cruza o termo digitado com o tipo de dose da **mesma refei
 ## Comparação factual entre publicações do protocolo da cliente (2026-10-11)
 
 A cliente pode escolher outra publicação já autorizada do próprio protocolo como base para comparar registros de versões. A página mostra diferenças estruturais (variações, refeições, alocações, ciclos e sua sequência textual) e totais registrados de doses **em todas as variações**; esses totais não constituem meta diária, orientação de fase ou decisão nutricional. Apenas publicações reais entram na comparação, IDs inválidos retornam à publicação anterior sem distinguir recursos de outras contas, e rascunhos/variant keys não são expostos. Se houver quantidades de doses inválidas em qualquer uma das versões, as somas são omitidas. Sem novas regras clínicas, mudanças RLS/Auth, migrações, aprovação ou publicação automática; E2E autenticado continua pendente.
+
+
+## Filtros e paginação do histórico administrativo de versões de protocolo (2026-10-11)
+
+O editor profissional apresenta busca por número da versão, filtro por estados derivados exclusivamente das linhas persistidas (rascunho, em revisão, aprovada, publicada), ordenação e paginação, com indicação de total e seleção exata por URL. A base da versão e o histórico completo permanecem no banco; busca e paginação não apagam nem publicam registros. A seleção de versão fora dos filtros informa a incompatibilidade. Nenhuma regra clínica nova, alteração de RLS/schema nem lifecycle automático. Validação E2E autenticada e revisão visual mobile seguem pendentes.
