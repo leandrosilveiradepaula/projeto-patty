@@ -23,8 +23,8 @@ function part(name: string, next: string) {
   return source.slice(start, end);
 }
 
-test("all ten real draft mutation forms block rapid duplicate submissions", () => {
-  assert.equal((source.match(/onSubmit=\{(?:submitGuard|updateSubmitGuard|removeSubmitGuard)\}/g) ?? []).length, 10);
+test("all thirteen real draft mutation forms block rapid duplicate submissions", () => {
+  assert.equal((source.match(/onSubmit=\{(?:submitGuard|updateSubmitGuard|removeSubmitGuard)\}/g) ?? []).length, 13);
   assert.match(source, /inFlightRef\.current \|\| pending/);
   assert.match(source, /event\.preventDefault\(\)/);
   assert.match(source, /inFlightRef\.current = true/);
