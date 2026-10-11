@@ -1,3 +1,7 @@
+## Auditoria operacional: filtros nos arquivos privados — 2026-10-11
+
+O histórico da cliente permite filtrar fotos, exames e documentos. A Patty pode filtrar também pela origem e pela situação de liberação sem alterar a autorização de acesso nem tornar uploads administrativos visíveis. A listagem apresenta totais completos e filtrados, identifica melhor arquivos de autoria não confirmada, trata datas inválidas e arquivos muito pequenos com unidades apropriadas. Os filtros de URL aceitam apenas valores conhecidos, rejeitando parâmetros repetidos/inválidos. Consultas continuam autenticadas e client-scoped, usando as rotas privadas existentes de visualização e download. Nenhuma modificação de RLS, Storage, migrations, telemetria, conteúdo binário ou publicação automática. E2E autenticado real pendente.
+
 ## Auditoria de identidade, cadastro e onboarding — 2026-10-11
 
 Proteção otimista de nome profissional canônico e nome de perfil vinculado; filtros condicionais atômicos impedem sobrescrita por edição concorrente. Preservada a distinção entre Client, Profile, Auth e Cadastro Atual. Campos originais são verificados no servidor e conflitos oferecem recarregamento. Convites, recuperação assistida e edições de contato passam a indicar processamento. Nenhum link foi persistido nem logado; nenhuma mudança em RLS, migrations, email de login, políticas de identidade ou métodos da Patty. E2E com Supabase real permanece pendente.
