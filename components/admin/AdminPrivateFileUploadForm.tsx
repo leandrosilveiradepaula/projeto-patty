@@ -185,7 +185,7 @@ export function AdminPrivateFileUploadForm({
     setIsPending(true);
     setMessage(null);
     try {
-      const response = await checkAdminPrivateFileUploadSessionStatusAction(clientId, sessionId);
+      const response = await checkAdminPrivateFileUploadSessionStatusAction(clientId, recoverySessionId);
       const decision = privateFileUploadRecoveryDecision(response.status);
       setMessage(decision.message);
       if (decision.next === "confirmed") {
