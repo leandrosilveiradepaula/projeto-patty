@@ -16,7 +16,7 @@ test("private file directory preserves inactive history with clear navigation", 
 test("real administrative directory controls handle repeated search query keys", () => {
   for (const path of ["app/admin/arquivos/page.tsx", "app/admin/clientes/page.tsx", "app/admin/exercicios/page.tsx", "app/admin/configuracoes/page.tsx"]) {
     const page = read(path);
-    assert.match(page, /readClientDirectorySearchTerm\(q\)/, path);
+    assert.match(page, path.includes("exercicios") ? /readExerciseCatalogTerm\(q\)/ : /readClientDirectorySearchTerm\(q\)/, path);
     assert.match(page, /maxLength=\{120\}/, path);
     assert.doesNotMatch(page, /q\?\.trim\(\)/, path);
   }

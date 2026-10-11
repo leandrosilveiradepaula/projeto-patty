@@ -4,6 +4,8 @@ import {
   AdminExerciseCreateVersionForm,
 } from "@/components/admin/AdminExerciseLifecycleForms";
 import { Badge } from "@/components/ui/Badge";
+import { AdminExerciseRecoverInitialVersionForm } from "@/components/admin/AdminExerciseRecoverInitialVersionForm";
+import { exerciseCatalogBackHref, readExerciseCatalogStatus, readExerciseCatalogTerm } from "@/lib/training/exercise-admin-directory";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -21,6 +23,7 @@ import styles from "./page.module.css";
 
 type PageProps = {
   params: Promise<{ exerciseId: string }>;
+  searchParams: Promise<{ q?: string; status?: string }>;
 };
 
 function formatDateTime(value: string) {
@@ -32,8 +35,11 @@ function formatDateTime(value: string) {
   }).format(new Date(value));
 }
 
-export default async function AdminExerciseDetailPage({ params }: PageProps) {
-  const { exerciseId } = await params;
+export default async function AdminExerciseDetailPage({ params, searchParams }: PageProps) {
+  const [{ exerciseId }, filters] = await Promise.all([params, searchParams]);
+  const term = readExerciseCatalogTerm(filters.q);
+  const status = readExerciseCatalogStatus(filters.status);
+  const backHref = exerciseCatalogBackHref(term, status);
 
   if (!isUuid(exerciseId)) {
     notFound();
@@ -62,7 +68,7 @@ export default async function AdminExerciseDetailPage({ params }: PageProps) {
     <>
       <PageHeader
         actions={
-          <Link className={styles.backLink} href="/admin/exercicios">
+          <Link className={styles.backLink} href={backHref}>
             Voltar à biblioteca
           </Link>
         }
@@ -84,7 +90,7 @@ export default async function AdminExerciseDetailPage({ params }: PageProps) {
               <AdminExerciseDraftEditForm
                 exerciseId={exercise.id}
                 initialName={draft.name}
-                key={draft.id}
+                key={`${draft.id}:${draft.name}`}
                 versionId={draft.id}
               />
             </Card>
@@ -125,16 +131,22 @@ export default async function AdminExerciseDetailPage({ params }: PageProps) {
             />
           </Card>
         ) : (
-          <EmptyState
-            description="Este exercício não possui versão disponível. Isso indica um estado incompleto que precisa de revisão."
-            title="Sem versão"
-          />
+          <Card>
+            <h2 className={styles.cardTitle}>Recuperar versão inicial</h2>
+            <p className={styles.description}>
+              O cadastro principal existe, mas sua primeira versão não foi registrada.
+              Informe o nome para retomar a versão 1 como rascunho, sem publicar
+              nem atribuir este exercício a nenhuma cliente.
+            </p>
+            <AdminExerciseRecoverInitialVersionForm exerciseId={exercise.id} />
+          </Card>
         )}
       </Section>
 
       <Section
         description="Histórico das versões da biblioteca profissional. A cliente somente vê exercícios escolhidos e publicados no treino individual."
         title="Histórico de versões"
+        id="historico-exercicio"
       >
         {versions.length === 0 ? (
           <EmptyState
@@ -159,7 +171,7 @@ export default async function AdminExerciseDetailPage({ params }: PageProps) {
                           : " · ainda em rascunho"}
                       </p>
                     </div>
-                    <Badge variant={version.published_at ? "neutral" : "warning"}>
+                    <Badge variant={version.published_at ? "positive" : "warning"}>
                       {version.published_at ? "Publicado" : "Rascunho"}
                     </Badge>
                   </div>

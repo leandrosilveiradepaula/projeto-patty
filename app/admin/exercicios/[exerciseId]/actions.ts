@@ -59,6 +59,11 @@ export async function updateExerciseDraftAction(
     throw new Error("Versão de exercício inválida");
   }
 
+  const expectedName = formData.get("expectedName");
+  if (typeof expectedName !== "string" || expectedName.length > 200) {
+    throw new Error("Atualize a página para editar a versão atual.");
+  }
+
   const { versions } = await loadExerciseState(exerciseId);
   const draft = findSingleDraftExerciseVersion(versions);
 
@@ -68,6 +73,7 @@ export async function updateExerciseDraftAction(
 
   await updateAccessibleExerciseDraftVersion({
     exerciseId,
+    expectedName,
     name: readExerciseName(formData),
     versionId,
   });
@@ -141,4 +147,53 @@ export async function createNextExerciseVersionAction(exerciseId: string) {
   revalidatePath("/admin/pendencias");
   revalidatePath("/admin/exercicios");
   revalidatePath("/admin/exercicios/" + exerciseId);
+}
+
+export type RecoverInitialExerciseVersionResult =
+  | { success: true; message: string }
+  | { success: false; message: string };
+
+export async function recoverInitialExerciseVersionAction(
+  exerciseId: string,
+  formData: FormData,
+): Promise<RecoverInitialExerciseVersionResult> {
+  await requireRole("admin");
+
+  if (!isUuid(exerciseId)) {
+    return { success: false, message: "Identificador de exercício inválido." };
+  }
+
+  let name: string;
+  try {
+    name = readExerciseName(formData);
+  } catch {
+    return { success: false, message: "Informe um nome de exercício com até 200 caracteres." };
+  }
+
+  const exercise = await getAccessibleExerciseForCurrentAdmin(exerciseId);
+  if (!exercise) {
+    return { success: false, message: "Exercício indisponível. Volte à biblioteca." };
+  }
+
+  // A second request must never create a later version through recovery.
+  const existing = await listExerciseVersionsForCurrentAdmin(exerciseId);
+  if (existing.length > 0) {
+    return { success: false, message: "Uma versão já existe. Atualize esta página antes de continuar." };
+  }
+
+  try {
+    await createAccessibleExerciseVersion({ exerciseId, name, versionNumber: 1 });
+  } catch {
+    // A competing writer or uncertain commit may have completed the insert.
+    return {
+      success: false,
+      message: "Rascunho não confirmado. Recarregue esta página e confira o histórico antes de repetir.",
+    };
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
+  revalidatePath("/admin/exercicios");
+  revalidatePath("/admin/exercicios/" + exerciseId);
+  return { success: true, message: "Versão inicial registrada como rascunho. A publicação continua manual." };
 }

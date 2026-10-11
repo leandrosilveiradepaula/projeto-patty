@@ -1894,6 +1894,25 @@ export async function listExerciseVersionsVisibleToCurrentAdmin() {
   });
 }
 
+/** Lists parents even when a failed initial save left no version. Uses the
+ * existing authenticated admin RLS, never service role. */
+export async function listExercisesForCurrentAdmin() {
+  const supabase = await createClient();
+  const rows = await collectTrainingPagedRows((from, to) =>
+    supabase.from("exercises")
+      .select("id, created_at")
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
+  return rows.sort((left, right) => {
+    const a = Date.parse(left.created_at);
+    const b = Date.parse(right.created_at);
+    return (Number.isFinite(b) ? b : -Infinity) -
+      (Number.isFinite(a) ? a : -Infinity) || left.id.localeCompare(right.id);
+  });
+}
+
 export async function getAccessibleExerciseForCurrentAdmin(exerciseId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -1977,6 +1996,7 @@ export async function createAccessibleExerciseVersion(input: {
 
 export async function updateAccessibleExerciseDraftVersion(input: {
   exerciseId: string;
+  expectedName: string;
   name: string;
   versionId: string;
 }) {
@@ -1986,6 +2006,8 @@ export async function updateAccessibleExerciseDraftVersion(input: {
     .update({ name: input.name })
     .eq("id", input.versionId)
     .eq("exercise_id", input.exerciseId)
+    // Refuse silent overwrite of a draft changed in another tab/session.
+    .eq("name", input.expectedName)
     .is("published_at", null)
     .select("id, exercise_id, version_number, name, published_at, created_at")
     .single();
