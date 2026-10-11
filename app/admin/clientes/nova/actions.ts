@@ -9,15 +9,16 @@ import {
   inviteAndProvisionClient,
 } from "@/lib/onboarding/client-invitation";
 import {
-  normalizeInvitationEmail,
-  validateClientDisplayName,
-  validateInvitationEmail,
+  confirmedNewClientInvitation,
+  parseInvitationFormFields,
 } from "@/lib/onboarding/validation";
 import { requireRole } from "@/lib/supabase/auth";
 import { ClientAccessLinkOriginError, resolveTrustedClientAccessOrigin } from "@/lib/onboarding/trusted-client-access-origin";
 
 export type InviteClientState = {
   message: string | null;
+  /** Only pre-provider validation failures can be retried without reconciling Auth. */
+  retryable?: boolean;
 };
 
 export async function inviteClient(
@@ -25,34 +26,19 @@ export async function inviteClient(
   formData: FormData,
 ): Promise<InviteClientState> {
   await requireRole("admin");
-  const displayNameValue = formData.get("displayName");
-  if (displayNameValue !== null && typeof displayNameValue !== "string") {
-    return { message: "Informe um nome válido para a cliente." };
+  const parsed = parseInvitationFormFields(formData);
+  if (!parsed.ok) return { message: parsed.message, retryable: true };
+  if (!confirmedNewClientInvitation(formData)) {
+    return { message: "Confirme que deseja criar uma nova conta para esta cliente.", retryable: true };
   }
-  const displayName =
-    typeof displayNameValue === "string" ? displayNameValue.trim() : "";
-  const emailValue = formData.get("email");
-  if (emailValue !== null && typeof emailValue !== "string") {
-    return { message: "Informe um email válido para a cliente." };
-  }
-  const email = typeof emailValue === "string" ? emailValue : "";
-  const displayNameValidation = validateClientDisplayName(displayName);
-  const emailValidation = validateInvitationEmail(email);
-
-  if (!displayNameValidation.ok) {
-    return { message: displayNameValidation.message };
-  }
-
-  if (!emailValidation.ok) {
-    return { message: emailValidation.message };
-  }
+  const { displayName, email } = parsed.value;
 
   let provisionedClientId: string | null = null;
 
   try {
     const provisioned = await inviteAndProvisionClient({
       displayName,
-      email: normalizeInvitationEmail(email),
+      email,
     });
     provisionedClientId = provisioned.clientId;
   } catch (error) {
@@ -103,6 +89,7 @@ export type ManualInviteClientState = {
   clientId: string | null;
   message: string | null;
   success: boolean;
+  retryable?: boolean;
 };
 
 export async function generateManualClientInvite(
@@ -110,37 +97,18 @@ export async function generateManualClientInvite(
   formData: FormData,
 ): Promise<ManualInviteClientState> {
   await requireRole("admin");
-  const displayNameValue = formData.get("displayName");
-  if (displayNameValue !== null && typeof displayNameValue !== "string") {
-    return { activationLink: null, clientId: null, message: "Informe um nome válido para a cliente.", success: false };
+  const parsed = parseInvitationFormFields(formData);
+  if (!parsed.ok) {
+    return { activationLink: null, clientId: null, message: parsed.message, retryable: true, success: false };
   }
-  const displayName =
-    typeof displayNameValue === "string" ? displayNameValue.trim() : "";
-  const emailValue = formData.get("email");
-  if (emailValue !== null && typeof emailValue !== "string") {
-    return { activationLink: null, clientId: null, message: "Informe um email válido para a cliente.", success: false };
-  }
-  const email = typeof emailValue === "string" ? emailValue : "";
-  const displayNameValidation = validateClientDisplayName(displayName);
-  const emailValidation = validateInvitationEmail(email);
-
-  if (!displayNameValidation.ok) {
+  if (!confirmedNewClientInvitation(formData)) {
     return {
-      activationLink: null,
-      clientId: null,
-      message: displayNameValidation.message,
-      success: false,
+      activationLink: null, clientId: null,
+      message: "Confirme que deseja criar uma nova conta para esta cliente.",
+      retryable: true, success: false,
     };
   }
-
-  if (!emailValidation.ok) {
-    return {
-      activationLink: null,
-      clientId: null,
-      message: emailValidation.message,
-      success: false,
-    };
-  }
+  const { displayName, email } = parsed.value;
 
   // Resolve a trusted origin before creating any one-time Auth token/user.
   // Never embed a token in a URL derived from the request Host headers.
@@ -153,6 +121,7 @@ export async function generateManualClientInvite(
       activationLink: null,
       clientId: null,
       message: "O endereço seguro do aplicativo não está configurado. Nenhum convite ou conta foi criado.",
+      retryable: true,
       success: false,
     };
   }
@@ -160,7 +129,7 @@ export async function generateManualClientInvite(
   try {
     const result = await generateManualInviteAndProvisionClient({
       displayName,
-      email: normalizeInvitationEmail(email),
+      email,
     });
     revalidatePath("/admin");
     revalidatePath("/admin/pendencias");

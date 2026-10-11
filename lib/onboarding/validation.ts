@@ -60,3 +60,47 @@ export function validateActivationPassword(
 
   return { ok: true };
 }
+
+
+export type InvitationDraft = { displayName: string; email: string };
+export type InvitationField = keyof InvitationDraft;
+export type InvitationDraftValidation =
+  | { ok: true; value: InvitationDraft }
+  | { ok: false; field: InvitationField; message: string };
+
+/** Pure preflight used by browser and server, before provisioning any Auth user. */
+export function validateInvitationDraft(draft: InvitationDraft): InvitationDraftValidation {
+  const name = validateClientDisplayName(draft.displayName);
+  if (!name.ok) return { ok: false, field: "displayName", message: name.message };
+  const email = validateInvitationEmail(draft.email);
+  if (!email.ok) return { ok: false, field: "email", message: email.message };
+  return {
+    ok: true,
+    value: {
+      displayName: draft.displayName.trim(),
+      email: normalizeInvitationEmail(draft.email),
+    },
+  };
+}
+
+/** A duplicated FormData key is ambiguous and must not select the first value. */
+export function parseInvitationFormFields(data: FormData): InvitationDraftValidation {
+  const names = data.getAll("displayName");
+  if (names.length !== 1 || typeof names[0] !== "string") {
+    return { ok: false, field: "displayName", message: "Informe somente um nome de cliente válido." };
+  }
+  const emails = data.getAll("email");
+  if (emails.length !== 1 || typeof emails[0] !== "string") {
+    return { ok: false, field: "email", message: "Informe somente um email de acesso válido." };
+  }
+  return validateInvitationDraft({ displayName: names[0], email: emails[0] });
+}
+
+/**
+ * Explicit identity-creation confirmation is required in both invite paths.
+ * Do not infer it from an ordinary submit or from account recovery actions.
+ */
+export function confirmedNewClientInvitation(data: FormData): boolean {
+  const entries = data.getAll("confirmNewClient");
+  return entries.length === 1 && entries[0] === "yes";
+}
