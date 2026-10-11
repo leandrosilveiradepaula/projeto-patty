@@ -63,7 +63,7 @@ export async function getCurrentClient() {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("clients")
-    .select("id, profile_id, status, started_at, ended_at, created_at, updated_at")
+    .select("id, profile_id, full_name, status, started_at, ended_at, created_at, updated_at")
     .eq("profile_id", profileId)
     .maybeSingle();
 
