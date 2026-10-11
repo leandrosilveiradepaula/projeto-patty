@@ -15,14 +15,15 @@ const initialLoginState: LoginState = { message: null };
 export function LoginForm() {
   const [state, formAction, isPending] = useActionState(login, initialLoginState);
   return (
-    <form action={formAction} className={styles.form} noValidate>
+    <form action={formAction} aria-busy={isPending} className={styles.form}>
       {state.message ? <Alert live="assertive" title="Não foi possível entrar" variant="critical">{state.message}</Alert> : null}
       <FormField id="email" label="Email" required>
-        {(fieldProps) => <TextInput {...fieldProps} autoComplete="email" inputMode="email" name="email" required type="email" />}
+        {(fieldProps) => <TextInput {...fieldProps} autoComplete="email" disabled={isPending} inputMode="email" maxLength={254} name="email" required type="email" />}
       </FormField>
       <FormField id="password" label="Senha" required>
-        {(fieldProps) => <TextInput {...fieldProps} autoComplete="current-password" name="password" required type="password" />}
+        {(fieldProps) => <TextInput {...fieldProps} autoComplete="current-password" disabled={isPending} maxLength={128} name="password" required type="password" />}
       </FormField>
+      {isPending ? <p role="status">Aguarde a confirmação antes de tentar novamente.</p> : null}
       <Button loading={isPending} type="submit">Entrar</Button>
       <Link className={styles.recoveryLink} href="/recuperar-senha">
         Esqueci minha senha
