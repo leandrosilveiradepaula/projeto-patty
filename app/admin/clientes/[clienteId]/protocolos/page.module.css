@@ -70,3 +70,5 @@
   outline: 3px solid var(--color-accent);
   outline-offset: 3px;
 }
+
+.protocolSummary{display:grid;gap:var(--space-2);min-width:0}.protocolActions{display:flex;align-items:center;flex-wrap:wrap;gap:var(--space-2)}.protocolActions a{min-height:44px}@media(max-width:767px){.protocolActions{width:100%}.protocolActions a{width:100%}}
