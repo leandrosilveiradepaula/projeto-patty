@@ -40,3 +40,6 @@
   font-size: var(--text-body-small-size);
   line-height: var(--text-body-small-line-height);
 }
+
+.selectionReview {display:grid;gap:var(--space-2);min-width:0;padding:var(--space-3);border:1px solid var(--color-border);border-radius:var(--radius-medium)}
+.selectionReview p{margin:0;overflow-wrap:anywhere}.confirmation{display:flex;gap:var(--space-2);align-items:flex-start}.confirmation input{min-width:20px;min-height:20px}

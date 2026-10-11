@@ -14,14 +14,11 @@ import { createClient } from "@/lib/supabase/client";
 import type { PrivateFileKind } from "@/lib/validation/private-files";
 import { validatePrivateFileUploadSelection } from "@/lib/files/private-file-upload-selection";
 import { privateFileUploadProgressMessage, type PrivateFileUploadPhase } from "@/lib/files/private-file-upload-progress";
+import { privateFileSelectionReview, PRIVATE_FILE_ACCEPT, PRIVATE_FILE_KIND_LABELS } from "@/lib/files/private-file-upload-review";
 
 import styles from "./ClientPrivateFileUploadForm.module.css";
 
-const acceptByKind: Record<PrivateFileKind, string> = {
-  photo: ".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp",
-  exam: ".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png",
-  document: ".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png",
-};
+const acceptByKind = PRIVATE_FILE_ACCEPT;
 
 const errorMessages: Record<string, string> = {
   missing_file: "Selecione um arquivo não vazio para enviar.",
@@ -43,10 +40,15 @@ export function ClientPrivateFileUploadForm() {
   const [success, setSuccess] = useState(false);
   const [isPending, setIsPending] = useState(false);
   const [phase, setPhase] = useState<PrivateFileUploadPhase>(null);
+  const [selectedFile,setSelectedFile] = useState<File|null>(null);
+  const [selectionConfirmed,setSelectionConfirmed] = useState(false);
+  const [ambiguousCompletion,setAmbiguousCompletion] = useState(false);
+  const reviewed = privateFileSelectionReview(selectedFile,fileKind);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (inFlightRef.current) return;
+    if (inFlightRef.current || ambiguousCompletion || !selectionConfirmed) return;
+    if (!selectedFile || !reviewed.ok) {setMessage(reviewed.message);return;}
     setMessage(null);
     setSuccess(false);
     setPhase(null);
@@ -111,6 +113,7 @@ export function ClientPrivateFileUploadForm() {
       );
 
       if (!finalizationResult.ok) {
+        setAmbiguousCompletion(true);
         setMessage(
           errorMessages[finalizationResult.error] ??
             "Não foi possível confirmar o registro. Confira o histórico antes de enviar novamente.",
@@ -129,11 +132,15 @@ export function ClientPrivateFileUploadForm() {
 
       formRef.current?.reset();
       setFileKind("photo");
+      setSelectedFile(null);
+      setSelectionConfirmed(false);
+      setAmbiguousCompletion(false);
       setSuccess(true);
       setMessage("Arquivo enviado e validado com sucesso.");
       router.refresh();
     } catch {
       console.error("Private file upload flow failed");
+      if (finalizationStarted) setAmbiguousCompletion(true);
       setMessage(
         finalizationStarted
           ? "A confirmação do envio não foi concluída. Confira o histórico antes de tentar novamente."
@@ -172,6 +179,9 @@ export function ClientPrivateFileUploadForm() {
             name="fileKind"
             onChange={(event) => {
               setFileKind(event.target.value as PrivateFileKind);
+              setSelectedFile(null);
+              setSelectionConfirmed(false);
+              setAmbiguousCompletion(false);
               const input = formRef.current?.querySelector<HTMLInputElement>('input[name="file"]');
               if (input) input.value = "";
               setMessage(null);
@@ -204,7 +214,10 @@ export function ClientPrivateFileUploadForm() {
             className={styles.fileInput}
             disabled={isPending}
             name="file"
-            onChange={() => {
+            onChange={(event) => {
+              setSelectedFile(event.currentTarget.files?.[0] ?? null);
+              setSelectionConfirmed(false);
+              setAmbiguousCompletion(false);
               setMessage(null);
               setSuccess(false);
             }}
@@ -214,6 +227,20 @@ export function ClientPrivateFileUploadForm() {
         )}
       </FormField>
 
+      <div className={styles.selectionReview} aria-live="polite">
+        <strong>Conferência antes do envio</strong>
+        <p>Categoria: {PRIVATE_FILE_KIND_LABELS[fileKind]}. Limite permitido: {reviewed.maxSize}.</p>
+        {selectedFile ? <p>Arquivo selecionado: {reviewed.name} · {reviewed.size}</p> : <p>Nenhum arquivo selecionado.</p>}
+        <p>{reviewed.message}</p>
+        {selectedFile && reviewed.ok ? <label className={styles.confirmation}>
+          <input type="checkbox" checked={selectionConfirmed} disabled={isPending} onChange={event=>setSelectionConfirmed(event.target.checked)} />
+          Conferi o arquivo e a categoria antes de enviar.
+        </label> : null}
+      </div>
+      {ambiguousCompletion ? <div role="alert" className={styles.selectionReview}>
+        <p>A confirmação do envio pode ter sido concluída. Confira o histórico antes de repetir para evitar duplicidade.</p>
+        <Button type="button" variant="secondary" disabled={isPending} onClick={()=>{router.refresh();setAmbiguousCompletion(false);setSelectionConfirmed(false);}}>Conferi o histórico; permitir nova tentativa</Button>
+      </div> : null}
       <p className={styles.privacyNote}>
         O arquivo permanece privado. Ele só é registrado como recebido depois
         da validação do conteúdo no servidor.
@@ -225,7 +252,7 @@ export function ClientPrivateFileUploadForm() {
         </p>
       ) : null}
 
-      <Button disabled={isPending} loading={isPending} type="submit">
+      <Button disabled={isPending || !reviewed.ok || !selectionConfirmed || ambiguousCompletion} loading={isPending} type="submit">
         Enviar arquivo
       </Button>
     </form>
