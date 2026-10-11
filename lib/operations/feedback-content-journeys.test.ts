@@ -25,7 +25,7 @@ test("client weekly feedback has a non-submitting draft and text-limit guidance"
   assert.match(form, /maxLength=\{4000\}/);
   const controls = read("app/cliente/feedback-semanal/ClientWeeklyFeedbackSubmitControls.tsx");
   assert.match(source, /<ClientWeeklyFeedbackResponseForm/);
-  assert.match(form, /<ClientWeeklyFeedbackSubmitControls completed=\{submitted\} \/>/);
+  assert.match(form, /<ClientWeeklyFeedbackSubmitControls completed=\{submitted\} onBeforeSubmit=\{prepareSubmit\} \/>/);
   assert.match(controls, /name="intent" type="submit" value="save"/);
   assert.match(controls, /name="intent" type="submit" value="submit"/);
 });

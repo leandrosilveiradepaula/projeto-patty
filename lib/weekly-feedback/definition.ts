@@ -128,6 +128,80 @@ export function parseWeeklyFeedbackWholeNumber(raw: string): number | null {
   return Number.isSafeInteger(value) && value >= 0 ? value : null;
 }
 
+/**
+ * A validation issue never contains the value supplied by a client. It can
+ * safely be used for field-level guidance without logging sensitive answers.
+ */
+export class WeeklyFeedbackFieldValidationError extends Error {
+  readonly questionKey: string;
+
+  constructor(questionKey: string, message: string) {
+    super(message);
+    this.questionKey = questionKey;
+    this.name = "WeeklyFeedbackFieldValidationError";
+  }
+}
+
+export function getWeeklyFeedbackFieldError(
+  question: WeeklyFeedbackQuestion,
+  value: string,
+  finalSubmit: boolean,
+): string | null {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return finalSubmit && question.required ? "Preencha esta pergunta antes de enviar." : null;
+  }
+  if (question.inputType === "text") {
+    return trimmed.length > 4000 ? "A resposta ultrapassa 4.000 caracteres." : null;
+  }
+  const parsed = parseWeeklyFeedbackWholeNumber(trimmed);
+  if (parsed === null) {
+    return "Informe um número inteiro válido, sem sinais, decimais ou letras.";
+  }
+  if (question.inputType === "rating_0_10" && parsed > 10) {
+    return "A nota deve ficar entre 0 e 10.";
+  }
+  return null;
+}
+
+export function summarizeWeeklyFeedbackRequiredProgress(
+  questions: readonly WeeklyFeedbackQuestion[],
+  values: Readonly<Record<string, string>>,
+) {
+  let completed = 0;
+  let required = 0;
+  let requiredCompleted = 0;
+  let firstMissingRequired: string | null = null;
+  for (const question of questions) {
+    const hasValue = (values[question.key] ?? "").trim().length > 0;
+    if (hasValue) completed++;
+    if (question.required) {
+      required++;
+      if (hasValue) requiredCompleted++;
+      else if (!firstMissingRequired) firstMissingRequired = question.key;
+    }
+  }
+  return { completed, total: questions.length, required, requiredCompleted, firstMissingRequired };
+}
+
+export function firstInvalidWeeklyFeedbackField(
+  questions: readonly WeeklyFeedbackQuestion[],
+  values: Readonly<Record<string, string>>,
+  finalSubmit: boolean,
+): string | null {
+  for (const question of questions) {
+    if (getWeeklyFeedbackFieldError(question, values[question.key] ?? "", finalSubmit)) {
+      return question.key;
+    }
+  }
+  return null;
+}
+
+/** No inferred applicability: this is only a client-provided answer shortcut. */
+export function mayUseExplicitNotApplicable(question: WeeklyFeedbackQuestion) {
+  return question.allowsNotApplicable && question.inputType === "text";
+}
+
 export function buildWeeklyFeedbackAnswers(
   formData: FormData,
   definition: WeeklyFeedbackDefinition,
@@ -135,35 +209,31 @@ export function buildWeeklyFeedbackAnswers(
   const answers: Record<string, string | number> = {};
 
   for (const question of definition.questions) {
-    const rawValue = formData.get(question.key);
-
-    if (rawValue !== null && typeof rawValue !== "string") {
-      throw new Error(`Resposta inválida para ${question.label}`);
+    const received = formData.getAll(question.key);
+    // Ambiguous multi-valued answers must not silently pick an arbitrary first value.
+    if (received.length > 1 || (received.length === 1 && typeof received[0] !== "string")) {
+      throw new WeeklyFeedbackFieldValidationError(
+        question.key,
+        "Resposta inválida. Informe somente um valor para esta pergunta.",
+      );
     }
-    if (rawValue === null || rawValue.trim() === "") {
-      continue;
+    const raw = received.length === 1 ? received[0] as string : "";
+    const issue = getWeeklyFeedbackFieldError(question, raw, false);
+    if (issue) {
+      const legacyPrefix = issue.includes("ultrapassa")
+        ? "Resposta muito longa"
+        : issue.includes("nota")
+          ? "A nota deve ficar entre 0 e 10"
+          : "Resposta inválida";
+      throw new WeeklyFeedbackFieldValidationError(question.key, legacyPrefix + ": " + question.label + ". " + issue);
     }
-
-    if (question.inputType === "integer" || question.inputType === "rating_0_10") {
-      const parsed = parseWeeklyFeedbackWholeNumber(rawValue);
-
-      if (parsed === null) {
-        throw new Error(`Resposta inválida para ${question.label}`);
-      }
-
-      if (question.inputType === "rating_0_10" && parsed > 10) {
-        throw new Error(`A nota deve ficar entre 0 e 10: ${question.label}`);
-      }
-
-      answers[question.key] = parsed;
-      continue;
+    if (!raw.trim()) continue;
+    if (question.inputType === "text") {
+      answers[question.key] = raw.trim();
+    } else {
+      // getWeeklyFeedbackFieldError has already validated integer and rating limits.
+      answers[question.key] = parseWeeklyFeedbackWholeNumber(raw)!;
     }
-
-    const normalizedText = rawValue.trim();
-    if (normalizedText.length > 4000) {
-      throw new Error(`Resposta muito longa para ${question.label}`);
-    }
-    answers[question.key] = normalizedText;
   }
 
   return answers;
@@ -187,6 +257,9 @@ export function validateWeeklyFeedbackAnswers(
   );
 
   if (missing.length > 0) {
-    throw new Error("Preencha todas as perguntas obrigatórias antes de enviar.");
+    throw new WeeklyFeedbackFieldValidationError(
+      missing[0].key,
+      "Preencha todas as perguntas obrigatórias antes de enviar.",
+    );
   }
 }
