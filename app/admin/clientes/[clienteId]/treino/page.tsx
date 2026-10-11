@@ -66,10 +66,9 @@ export default async function AdminClientTrainingPage({ params }: Props) {
     notFound();
   }
 
-  const [requests, plan, exerciseVersions] = await Promise.all([
+  const [requests, plan] = await Promise.all([
     listAccessibleClientTrainingRequests(client.id),
     getAccessibleClientTrainingPlan(client.id),
-    listExerciseVersionsVisibleToCurrentAdmin(),
   ]);
 
   const orderedRequests = newestTrainingRequests(requests);
@@ -80,6 +79,11 @@ export default async function AdminClientTrainingPage({ params }: Props) {
     (left, right) => right.version_number - left.version_number || left.id.localeCompare(right.id),
   );
   const openVersion = newestUnpublishedTrainingVersion(versions);
+  // Read-only inspection never needs the global exercise catalog.
+  // Load it only while the professional can actually edit a draft.
+  const exerciseVersions = openVersion && !openVersion.reviewed_at
+    ? await listExerciseVersionsVisibleToCurrentAdmin()
+    : [];
   const publishedVersions = publishedTrainingVersions(versions);
   const latestPublished = publishedVersions[0] ?? null;
   const newRequestAfterPublication = Boolean(
@@ -163,7 +167,7 @@ export default async function AdminClientTrainingPage({ params }: Props) {
       ) : null}
 
       <Section
-        description="A prescrição só é liberada depois de solicitação da cliente. Salvar não publica; revisão e publicação são etapas separadas."
+        description="A prescrição depende de uma solicitação registrada pela cliente ou pela Patty. Salvar não publica; revisão e publicação são etapas separadas."
         id="prescricao-treino"
         title="Prescrição de treino"
       >
@@ -191,6 +195,7 @@ export default async function AdminClientTrainingPage({ params }: Props) {
               {!openVersion.reviewed_at ? (
                 <AdminTrainingPlanDraftForm
                   clientId={client.id}
+                  key={JSON.stringify([openVersion.id, openVersion.title, openVersion.notes])}
                   notes={openVersion.notes}
                   title={openVersion.title}
                   trainingPlanVersionId={openVersion.id}
