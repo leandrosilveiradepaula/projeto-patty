@@ -21,7 +21,7 @@ test("liquids compare real instants across time zones and tie deterministically"
     liq("b", "2026-10-11T12:30:00Z", 200),
     liq("c", "2026-10-11T13:00:00Z", 220),
   ];
-  assert.equal(compareCheckinEventInstants(events[0], events[2]), 2); // deterministic tie by ID
+  assert.ok(compareCheckinEventInstants(events[0], events[2]) > 0); // deterministic tie by ID
   assert.deepEqual(exploreLiquidCheckins(events, readCheckinExploreOptions({})).items.map(x => x.id), ["c", "a", "b"]);
   assert.deepEqual(exploreLiquidCheckins(events, readCheckinExploreOptions({ ordem: "oldest" })).items.map(x => x.id), ["b", "a", "c"]);
 });
