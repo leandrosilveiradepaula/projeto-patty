@@ -8,19 +8,10 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import { TextInput } from "@/components/ui/TextInput";
-import { summarizeLibraryVersions, matchesLibraryStatus } from "@/lib/content/admin-library-status";
 import { listEducationalContentVersionsForCurrentAdmin } from "@/lib/supabase/data-access";
 import Link from "next/link";
 import styles from "./page.module.css";
 
-
-function normalizeSearchValue(value: string) {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLocaleLowerCase("pt-BR")
-    .trim();
-}
 
 function formatPublishedDate(value: string) {
   if (!Number.isFinite(Date.parse(value))) return "Data indisponível";
@@ -39,28 +30,9 @@ type AdminConteudosPageProps = {
 export default async function AdminConteudosPage({ searchParams }: AdminConteudosPageProps) {
   const rawFilters=await searchParams;
   const filters=readLibraryExplorerFilters(rawFilters);
-  const {q,status}=rawFilters;
   const contentVersions = await listEducationalContentVersionsForCurrentAdmin();
-  const summaries = [...summarizeLibraryVersions(contentVersions, (version) => version.educational_content_id).values()]
-    .sort((left, right) => {
-      if (left.latestVersion.display_order !== right.latestVersion.display_order) {
-        return left.latestVersion.display_order - right.latestVersion.display_order;
-      }
-      return left.latestVersion.title.localeCompare(right.latestVersion.title, "pt-BR");
-    });
-  const contents = summaries;
   const explored=exploreAdminEducationalLibrary(contentVersions,filters);
-
-  const searchTerm = typeof q === "string" ? q.trim() : "";
-  const normalizedSearchTerm = normalizeSearchValue(searchTerm);
-  const statusFilter = status === "draft" || status === "published" ? status : "all";
-  const filteredContents = contents.filter((summary) => {
-    const matchesSearch = !normalizedSearchTerm ||
-      [summary.latestVersion, summary.latestPublishedVersion].some((version) =>
-        version !== null && normalizeSearchValue([version.title, version.category_key, version.content_type_key].filter(Boolean).join(" ")).includes(normalizedSearchTerm),
-      );
-    return matchesSearch && matchesLibraryStatus(summary, statusFilter);
-  });
+  const searchTerm=filters.query;
 
   return (
     <>
@@ -84,7 +56,7 @@ export default async function AdminConteudosPage({ searchParams }: AdminConteudo
         description="Itens publicados podem ser liberados por cliente. Rascunhos permanecem internos."
         title="Biblioteca educacional"
       >
-        {contents.length > 0 ? (
+        {explored.counters.total > 0 ? (
           <form action="/admin/conteudos" className={styles.filters} method="get">
             <label className={styles.searchField}>
               <span>Buscar conteúdo</span>
@@ -130,7 +102,7 @@ export default async function AdminConteudosPage({ searchParams }: AdminConteudo
         ) : null}
         <p className={styles.resultCount}>Total: {explored.counters.total} · Nunca publicados: {explored.counters.draftOnly} · Última versão publicada: {explored.counters.publishedCurrent} · Publicados com novo rascunho: {explored.counters.publishedWithDraft}</p>
         {explored.invalidPage ? <p role="status">Página indisponível; exibindo uma página válida.</p> : null}
-        {contents.length === 0 ? (
+        {explored.counters.total === 0 ? (
           <EmptyState
             description="Crie o primeiro rascunho para iniciar a biblioteca."
             title="A biblioteca educacional está vazia"
