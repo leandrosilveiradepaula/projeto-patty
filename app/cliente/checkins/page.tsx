@@ -409,7 +409,7 @@ export default async function ClientCheckinsPage({
         </form>
         <form action="/cliente/checkins#historico-liquidos" className={styles.form} method="get">
           {selectedDay !== today ? <input type="hidden" name="dia" value={selectedDay} /> : null}
-          <label className={styles.field}>Ordenar líquidos<select name="ordem" defaultValue={explorer.liquidSort}><option value="newest">Mais recentes</option><option value="oldest">Mais antigos</option><option value="amount-desc">Maior quantidade</option><option value="amount-asc">Menor quantidade</option></select></label>
+          <label className={styles.field}>Ordenar líquidos<select name="ordem" defaultValue={explorer.liquidSort}><option value="newest">Mais recentes</option><option value="oldest">Mais antigos</option><option value="amount-desc">Maior quantidade</option><option value="amount-asc">Volume crescente</option></select></label>
           <label className={styles.field}>Correções<select name="correcao" defaultValue={explorer.liquidCorrection}><option value="all">Todos</option><option value="corrected">Corrigidos</option><option value="original">Sem correção</option></select></label>
           <label className={styles.field}>Tipo de líquido<select name="tipo" defaultValue={explorer.liquidKind}><option value="all">Todos os tipos</option>{Array.from(new Set(displayedLiquidEvents.map(event=>event.effectiveLiquidKind))).map(kind=><option key={kind} value={kind}>{liquidTaxonomy.kinds.find(item=>item.key===kind)?.label ?? "Tipo histórico"}</option>)}</select></label>
           {explorer.activityFilter !== "all" ? <input type="hidden" name="atividade" value={explorer.activityFilter} /> : null}
