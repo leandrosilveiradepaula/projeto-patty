@@ -24,6 +24,7 @@ type ClientRegistrationEditFormProps = {
   contactEmail?: string;
   instagram?: string;
   phone?: string;
+  updatedAt?: string | null;
 };
 
 export function ClientRegistrationEditForm({
@@ -31,6 +32,7 @@ export function ClientRegistrationEditForm({
   contactEmail,
   instagram,
   phone,
+  updatedAt,
 }: ClientRegistrationEditFormProps) {
   const [state, formAction, isPending] = useActionState(
     updateCurrentClientRegistrationAction,
@@ -63,6 +65,7 @@ export function ClientRegistrationEditForm({
         inFlightRef.current = true;
       }}
     >
+      <input name="expectedUpdatedAt" type="hidden" value={updatedAt ?? ""} />
       {state.message && !editedSinceResult ? (
         <Alert
           live={state.success ? "polite" : "assertive"}
@@ -138,6 +141,9 @@ export function ClientRegistrationEditForm({
         respostas históricas da Anamnese nem o email usado para entrar na conta.
       </p>
 
+      {state.message?.includes("alterado em outra sessão") && !editedSinceResult ? (
+        <Button onClick={() => router.refresh()} type="button" variant="secondary">Recarregar dados atuais</Button>
+      ) : null}
       <Button disabled={isPending} loading={isPending} type="submit">
         Salvar Cadastro Atual
       </Button>
