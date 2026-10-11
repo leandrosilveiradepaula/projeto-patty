@@ -52,6 +52,7 @@ test("cliente consegue autenticar, enviar, listar e baixar arquivo privado", asy
       name: syntheticFileName,
     });
 
+    await page.getByRole("checkbox", { name: "Conferi o arquivo e a categoria antes de enviar." }).check();
     await page.getByRole("button", { name: "Enviar arquivo" }).click();
 
     await expect(

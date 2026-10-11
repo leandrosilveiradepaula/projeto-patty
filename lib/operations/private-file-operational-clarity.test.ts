@@ -62,7 +62,7 @@ for (const [label, form] of [["client", client], ["Patty", admin]] as const) {
     assert.ok(form.includes("setFileKind(event.target.value as PrivateFileKind)"));
     assert.ok(form.includes('input[name="file"]'));
     assert.ok(form.includes('if (input) input.value = ""'));
-    assert.ok(form.includes("onChange={() => {"));
+    assert.ok(form.includes("onChange={(event) => {"));
     assert.ok(form.includes("setMessage(null)"));
     assert.ok(form.includes("setSuccess(false)"));
     assert.ok(!form.includes("console.log(selectedFile)"));

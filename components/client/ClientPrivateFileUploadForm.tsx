@@ -2,8 +2,10 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { privateFileUploadRecoveryDecision } from "@/lib/files/private-file-upload-recovery-state";
 
 import {
+  checkClientFileUploadSessionStatusAction,
   createClientFileUploadSessionAction,
   finalizeClientFileUploadSessionAction,
 } from "@/app/cliente/arquivos/actions";
@@ -14,14 +16,11 @@ import { createClient } from "@/lib/supabase/client";
 import type { PrivateFileKind } from "@/lib/validation/private-files";
 import { validatePrivateFileUploadSelection } from "@/lib/files/private-file-upload-selection";
 import { privateFileUploadProgressMessage, type PrivateFileUploadPhase } from "@/lib/files/private-file-upload-progress";
+import { privateFileSelectionReview, PRIVATE_FILE_ACCEPT, PRIVATE_FILE_KIND_LABELS } from "@/lib/files/private-file-upload-review";
 
 import styles from "./ClientPrivateFileUploadForm.module.css";
 
-const acceptByKind: Record<PrivateFileKind, string> = {
-  photo: ".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp",
-  exam: ".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png",
-  document: ".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png",
-};
+const acceptByKind = PRIVATE_FILE_ACCEPT;
 
 const errorMessages: Record<string, string> = {
   missing_file: "Selecione um arquivo não vazio para enviar.",
@@ -43,22 +42,29 @@ export function ClientPrivateFileUploadForm() {
   const [success, setSuccess] = useState(false);
   const [isPending, setIsPending] = useState(false);
   const [phase, setPhase] = useState<PrivateFileUploadPhase>(null);
+  const [selectedFile,setSelectedFile] = useState<File|null>(null);
+  const [selectionConfirmed,setSelectionConfirmed] = useState(false);
+  const [ambiguousCompletion,setAmbiguousCompletion] = useState(false);
+  const [recoverySessionId,setRecoverySessionId] = useState<string | null>(null);
+  const [allowSameSessionRetry,setAllowSameSessionRetry] = useState(false);
+  const reviewed = privateFileSelectionReview(selectedFile,fileKind);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (inFlightRef.current) return;
+    if (inFlightRef.current || ambiguousCompletion || !selectionConfirmed) return;
+    if (!selectedFile || !reviewed.ok) {setMessage(reviewed.message);return;}
     setMessage(null);
     setSuccess(false);
     setPhase(null);
 
     const formData = new FormData(event.currentTarget);
-    const selectedFile = formData.get("file");
-    if (!(selectedFile instanceof File)) {
+    const submittedFile = formData.get("file");
+    if (!(submittedFile instanceof File)) {
       setMessage("Selecione um arquivo para enviar.");
       return;
     }
 
-    const selection = validatePrivateFileUploadSelection(selectedFile, fileKind);
+    const selection = validatePrivateFileUploadSelection(submittedFile, fileKind);
     if (!selection.ok) {
       setMessage(errorMessages[selection.error] ?? "Revise o formato e o tamanho do arquivo.");
       return;
@@ -90,9 +96,9 @@ export function ClientPrivateFileUploadForm() {
       const supabase = createClient();
       const { error: uploadError } = await supabase.storage
         .from("client-private")
-        .upload(sessionResult.session.objectPath, selectedFile, {
+        .upload(sessionResult.session.objectPath, submittedFile, {
           cacheControl: "3600",
-          contentType: selectedFile.type,
+          contentType: submittedFile.type,
           upsert: false,
         });
 
@@ -104,6 +110,7 @@ export function ClientPrivateFileUploadForm() {
         return;
       }
 
+      setRecoverySessionId(sessionResult.session.id);
       finalizationStarted = true;
       setPhase("verifying");
       const finalizationResult = await finalizeClientFileUploadSessionAction(
@@ -111,6 +118,7 @@ export function ClientPrivateFileUploadForm() {
       );
 
       if (!finalizationResult.ok) {
+        setAmbiguousCompletion(true);
         setMessage(
           errorMessages[finalizationResult.error] ??
             "Não foi possível confirmar o registro. Confira o histórico antes de enviar novamente.",
@@ -129,16 +137,96 @@ export function ClientPrivateFileUploadForm() {
 
       formRef.current?.reset();
       setFileKind("photo");
+      setSelectedFile(null);
+      setSelectionConfirmed(false);
+      setAmbiguousCompletion(false);
+      setRecoverySessionId(null);
+      setAllowSameSessionRetry(false);
       setSuccess(true);
       setMessage("Arquivo enviado e validado com sucesso.");
       router.refresh();
     } catch {
       console.error("Private file upload flow failed");
+      if (finalizationStarted) setAmbiguousCompletion(true);
       setMessage(
         finalizationStarted
           ? "A confirmação do envio não foi concluída. Confira o histórico antes de tentar novamente."
           : "O envio não foi concluído. Corrija a conexão ou tente novamente.",
       );
+    } finally {
+      inFlightRef.current = false;
+      setIsPending(false);
+      setPhase(null);
+    }
+  }
+
+  async function inspectUncertainSession() {
+    if (inFlightRef.current || !recoverySessionId) return;
+    inFlightRef.current = true;
+    setIsPending(true);
+    setMessage(null);
+    try {
+      const response = await checkClientFileUploadSessionStatusAction(recoverySessionId);
+      const decision = privateFileUploadRecoveryDecision(response.status);
+      setMessage(decision.message);
+      if (decision.next === "confirmed") {
+        formRef.current?.reset();
+        setFileKind("photo");
+        setSelectedFile(null);
+        setSelectionConfirmed(false);
+        setAmbiguousCompletion(false);
+        setRecoverySessionId(null);
+        setSuccess(true);
+        router.refresh();
+      } else if (decision.next === "resume") {
+        setAllowSameSessionRetry(true);
+      } else if (decision.next === "new_selection") {
+        setAmbiguousCompletion(false);
+        setRecoverySessionId(null);
+        setSelectedFile(null);
+        setSelectionConfirmed(false);
+        formRef.current?.reset();
+      }
+    } catch {
+      setMessage("Não foi possível consultar o estado do envio. Consulte o histórico antes de reenviar.");
+    } finally {
+      inFlightRef.current = false;
+      setIsPending(false);
+    }
+  }
+
+  async function resumeUncertainSession() {
+    const sessionId = recoverySessionId;
+    if (!sessionId || !allowSameSessionRetry || inFlightRef.current) return;
+    inFlightRef.current = true;
+    setIsPending(true);
+    setPhase("verifying");
+    setMessage(null);
+    setAllowSameSessionRetry(false);
+    try {
+      const result = await finalizeClientFileUploadSessionAction(sessionId);
+      if (result.ok && result.result.status === "accepted") {
+        formRef.current?.reset();
+        setFileKind("photo");
+        setSelectedFile(null);
+        setSelectionConfirmed(false);
+        setAmbiguousCompletion(false);
+        setRecoverySessionId(null);
+        setSuccess(true);
+        setMessage("Arquivo recebido e confirmado pelo servidor.");
+        router.refresh();
+      } else if (result.ok && result.result.status === "rejected") {
+        setAmbiguousCompletion(false);
+        setRecoverySessionId(null);
+        setSelectedFile(null);
+        setSelectionConfirmed(false);
+        formRef.current?.reset();
+        setMessage("A validação rejeitou o arquivo ou a sessão expirou. Selecione um arquivo válido para novo envio.");
+      } else {
+        setMessage("A confirmação ainda é incerta. Consulte o estado novamente.");
+      }
+    } catch {
+      setMessage("Ainda não foi possível concluir esta sessão. Consulte o estado novamente; não inicie outro envio.");
     } finally {
       inFlightRef.current = false;
       setIsPending(false);
@@ -172,6 +260,11 @@ export function ClientPrivateFileUploadForm() {
             name="fileKind"
             onChange={(event) => {
               setFileKind(event.target.value as PrivateFileKind);
+              setSelectedFile(null);
+              setSelectionConfirmed(false);
+              setAmbiguousCompletion(false);
+              setRecoverySessionId(null);
+              setAllowSameSessionRetry(false);
               const input = formRef.current?.querySelector<HTMLInputElement>('input[name="file"]');
               if (input) input.value = "";
               setMessage(null);
@@ -204,7 +297,12 @@ export function ClientPrivateFileUploadForm() {
             className={styles.fileInput}
             disabled={isPending}
             name="file"
-            onChange={() => {
+            onChange={(event) => {
+              setSelectedFile(event.currentTarget.files?.[0] ?? null);
+              setSelectionConfirmed(false);
+              setAmbiguousCompletion(false);
+              setRecoverySessionId(null);
+              setAllowSameSessionRetry(false);
               setMessage(null);
               setSuccess(false);
             }}
@@ -214,6 +312,25 @@ export function ClientPrivateFileUploadForm() {
         )}
       </FormField>
 
+      <div className={styles.selectionReview} aria-live="polite">
+        <strong>Conferência antes do envio</strong>
+        <p>Categoria: {PRIVATE_FILE_KIND_LABELS[fileKind]}. Limite permitido: {reviewed.maxSize}.</p>
+        {selectedFile ? <p>Arquivo selecionado: {reviewed.name} · {reviewed.size}</p> : <p>Nenhum arquivo selecionado.</p>}
+        <p>{reviewed.message}</p>
+        {selectedFile && reviewed.ok ? <label className={styles.confirmation}>
+          <input type="checkbox" checked={selectionConfirmed} disabled={isPending} onChange={event=>setSelectionConfirmed(event.target.checked)} />
+          Conferi o arquivo e a categoria antes de enviar.
+        </label> : null}
+      </div>
+      {ambiguousCompletion ? <div role="alert" className={styles.selectionReview}>
+        <p>A confirmação do envio é incerta. Consulte o histórico e o estado desta sessão antes de enviar novamente.</p>
+        <p>Você pode verificar a sessão original sem enviar uma segunda cópia.</p>
+        <Button type="button" variant="secondary" disabled={isPending || !recoverySessionId} onClick={inspectUncertainSession}>Consultar estado do envio</Button>
+        {allowSameSessionRetry ? (
+          <Button type="button" variant="secondary" disabled={isPending} onClick={resumeUncertainSession}>Concluir esta mesma sessão</Button>
+        ) : null}
+        <a href="#lista-arquivos">Consultar histórico nesta página</a>
+      </div> : null}
       <p className={styles.privacyNote}>
         O arquivo permanece privado. Ele só é registrado como recebido depois
         da validação do conteúdo no servidor.
@@ -225,7 +342,7 @@ export function ClientPrivateFileUploadForm() {
         </p>
       ) : null}
 
-      <Button disabled={isPending} loading={isPending} type="submit">
+      <Button disabled={isPending || !reviewed.ok || !selectionConfirmed || ambiguousCompletion} loading={isPending} type="submit">
         Enviar arquivo
       </Button>
     </form>
