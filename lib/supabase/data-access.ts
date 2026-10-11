@@ -3010,7 +3010,7 @@ export async function listPublishedProtocolsForCurrentClient(
     collectPublishedProtocolRows(mealPlanVersionIds, (ids, from, to) =>
       supabase
         .from("meal_plan_cycles")
-        .select("id, meal_plan_version_id")
+        .select("id, meal_plan_version_id, created_at")
         .in("meal_plan_version_id", ids)
         .order("meal_plan_version_id", { ascending: true })
         .order("created_at", { ascending: true })
