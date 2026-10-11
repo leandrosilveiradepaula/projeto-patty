@@ -3,10 +3,10 @@ import {useState} from "react";
 import Link from "next/link";
 import {
   findPublishedHistory,paginatePublishedHistory,adjacentPublishedVersions,
-  publishedProtocolDate,publishedNutritionDoseTypes,publishedVariantMatches,
+  publishedProtocolDate,publishedNutritionDoseTypes,publishedVariantMatches,normalizePublishedSearch,
   summarizePublishedNutrition,formatPublishedDoseAmount,labelPublishedDoseType,
 } from "@/lib/protocol/client-published-explorer";
-import {publishedVariationAnchor,publishedVersionHref,type buildClientPublishedNutritionView} from "@/lib/protocol/client-published-view";
+import {publishedVariationAnchor,publishedMealAnchor,publishedCycleAnchor,publishedVersionHref,type buildClientPublishedNutritionView} from "@/lib/protocol/client-published-view";
 import styles from "./ClientPublishedProtocolExplorer.module.css";
 
 type PublishedView=ReturnType<typeof buildClientPublishedNutritionView>;
@@ -88,6 +88,16 @@ export function ClientPublishedNutritionExplorer({view,publicationId}:{view:Publ
    <a href={"#"+publishedVariationAnchor(publicationId,v.id)}>{v.label}</a>
    <span>{v.meals} refeição(ões)</span>
   </li>)}</ul>
+  {query.trim() ? <div className={styles.directory}>
+    <strong>Refeições que correspondem à pesquisa</strong>
+    <ul>{view.variants.flatMap(variant => variant.meals
+      .filter(meal => normalizePublishedSearch(variant.label + " " + meal.label)
+        .includes(normalizePublishedSearch(query)))
+      .map(meal => <li key={meal.id}><a href={"#"+publishedMealAnchor(publicationId,meal.id)}>{variant.label} · {meal.label}</a></li>))}</ul>
+  </div> : null}
+  {view.cycles.length > 1 ? <nav aria-label="Ir para ciclo publicado" className={styles.inline}>
+    {view.cycles.map((cycle,index) => <a key={cycle.id} href={"#"+publishedCycleAnchor(publicationId,cycle.id)}>Ciclo {index+1}</a>)}
+  </nav> : null}
   {summary?<div>
    <button type="button" aria-expanded={showTotals} className={styles.toggle} onClick={()=>setShowTotals(x=>!x)}>
     {showTotals?"Ocultar contagem registrada":"Conferir contagem das doses registradas"}

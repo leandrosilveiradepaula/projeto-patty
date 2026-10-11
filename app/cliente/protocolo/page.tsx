@@ -1,7 +1,7 @@
 import { ClientPublishedHistoryExplorer, ClientPublishedNutritionExplorer } from "@/components/client/ClientPublishedProtocolExplorer";
 import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
 import { ClientProtocolNutrition } from "@/components/client/ClientProtocolNutrition";
-import { buildClientPublishedNutritionView, publishedVariationAnchor, publishedVersionHref, selectClientPublishedVersion } from "@/lib/protocol/client-published-view";
+import { buildClientPublishedNutritionView, publishedMealAnchor, publishedCycleAnchor, publishedVariationAnchor, publishedVersionHref, selectClientPublishedVersion } from "@/lib/protocol/client-published-view";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -126,7 +126,7 @@ export default async function ClienteProtocoloPage({ searchParams }: { searchPar
                     ) : (
                       <ol className={styles.cycles}>
                         {view.cycles.map((cycle, cycleIndex) => (
-                          <li className={styles.cycle} key={cycle.id}>
+                          <li className={styles.cycle} id={publishedCycleAnchor(publication.id,cycle.id)} key={cycle.id}>
                             <h4 className={styles.cycleName}>Ciclo {cycleIndex + 1}</h4>
                             {cycle.steps.length === 0 ? (
                               <p className={styles.cycleEmpty}>Sem etapas registradas.</p>
@@ -167,6 +167,7 @@ export default async function ClienteProtocoloPage({ searchParams }: { searchPar
                           doseGroups: meal.doseGroups,
                           label: meal.label,
                           order: meal.order,
+                          anchorId: publishedMealAnchor(publication.id,meal.id),
                         })),
                       }))}
                     />

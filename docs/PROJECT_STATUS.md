@@ -3911,3 +3911,8 @@ A cliente pode escolher explicitamente uma versão publicada do próprio treino 
 ## Histórico de versões de treino — navegação paginada (2026-10-11)
 
 A Patty pode consultar o histórico completo de versões individuais autorizadas, com busca por título/número, filtro factual de status (rascunho, revisado, publicado), ordenação e paginação. A cliente pode filtrar, ordenar e paginar apenas as versões publicadas anteriores, mantendo a publicação mais recente em destaque. Todos os filtros operam sobre linhas previamente autorizadas sob RLS; não alteram rascunhos, decisões profissionais, revisão, publicação, snapshots ou exercícios do arquivo histórico. Dados originais não são substituídos. A navegação móvel utiliza controles com alvos táteis mínimos. Testes/CI não equivalem a E2E autenticado nem a publicação na Vercel.
+
+
+## Navegação factual de refeições e ciclos publicados — 2026-10-11
+
+Na consulta de protocolo da cliente, cada refeição publicada e cada ciclo possuem âncora vinculada à publicação exata. A pesquisa de refeições pode apontar diretamente para cada refeição pelo título/variação, com normalização de acentos, e a lista de ciclos permite saltar para o ciclo registrado. Não atribui automaticamente um dia, variação, ciclo ou meta; não altera plano, doses, regras clínicas, publicação, RLS nem dados históricos. E2E autenticado não foi executado.
