@@ -3,7 +3,7 @@ import test from "node:test";
 import {
   parseTrainingRequestFilters, trainingRequestFactualOrigin, exploreTrainingRequests,
   trainingRequestFilteredHref, trainingRequestExactHref, trainingVersionExactHref,
-  trainingVersionPageHref, paginateTrainingVersions, selectPublishedTrainingComparison, trainingVersionComparisonHref, clientTrainingRequestExactHref, parseTrainingVersionFilters, exploreTrainingVersionHistory, parseClientTrainingArchiveFilters, exploreClientTrainingArchive,
+  trainingVersionPageHref, paginateTrainingVersions, selectPublishedTrainingComparison, trainingVersionComparisonHref, clientTrainingRequestExactHref, parseTrainingVersionFilters, exploreTrainingVersionHistory, parseClientTrainingArchiveFilters, exploreClientTrainingArchive, trainingAdminVersionHref, trainingClientArchivedVersionHref,
 } from "./history-navigation.ts";
 
 const rows = [
@@ -97,4 +97,16 @@ test("client archive excludes unpublished, supports oldest and page navigation",
  assert.equal(result.total,13);assert.equal(result.page,2);assert.equal(result.items.length,6);
  assert.equal(exploreClientTrainingArchive(rows,parseClientTrainingArchiveFilters({ordemTreino:"oldest"})).items[0].version.id,"12");
  assert.equal(exploreClientTrainingArchive(rows,parseClientTrainingArchiveFilters({buscaTreino:"treino 3"})).total,1);
+});
+
+test("professional version links target the exact archive page even after filtering",()=>{
+ const versions=Array.from({length:15},(_,i)=>({id:"v"+i,title:"Treino "+i,version_number:i+1,published_at:i%2?"2026-10-11T00:00:00Z":null,reviewed_at:null}));
+ const href=trainingAdminVersionHref("/admin/clientes/synthetic/treino",versions,"v13");
+ assert.equal(href,"/admin/clientes/synthetic/treino?versoes=3#versao-treino-v13");
+ assert.equal(trainingAdminVersionHref("/admin/clientes/synthetic/treino",versions,"not-authorized"),null);
+});
+test("client archive links reach the correct page without exposing drafts",()=>{
+ const previous=Array.from({length:15},(_,i)=>({version:{id:"p"+i,title:"Treino "+i,version_number:15-i,published_at:"2026-10-11T00:00:00Z"}}));
+ assert.equal(trainingClientArchivedVersionHref("/cliente/treino",previous,"p13"),"/cliente/treino?versoes=3#treino-versao-p13");
+ assert.equal(trainingClientArchivedVersionHref("/cliente/treino",previous,"missing"),null);
 });

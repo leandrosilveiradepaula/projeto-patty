@@ -1,3 +1,4 @@
+import { trainingAdminVersionHref, trainingRequestExactHref } from "@/lib/training/history-navigation";
 import { parseTrainingVersionFilters, exploreTrainingVersionHistory, trainingAdminVersionPageHref } from "@/lib/training/history-navigation";
 import { parseTrainingRequestFilters, exploreTrainingRequests, trainingRequestFilteredHref } from "@/lib/training/history-navigation";
 import { notFound } from "next/navigation";
@@ -184,7 +185,7 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
           {openVersion
             ? " Já existe um rascunho em preparação: confira se o pedido exige ajustes nessa versão antes de publicar."
             : " A publicação anterior continua disponível; nenhum novo treino é criado automaticamente."}
-          {" "}<a href={`#pedido-treino-${orderedRequests[0].id}`}>Ver solicitação</a>
+          {" "}<a href={trainingRequestExactHref(`/admin/clientes/${client.id}/treino`,orderedRequests,orderedRequests[0].id) ?? "#historico-solicitacoes-treino"}>Ver solicitação</a>
         </Alert>
       ) : null}
 
@@ -364,7 +365,7 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
           description="Confira as mudanças registradas antes de revisar ou publicar. Nenhuma diferença determina progressão automaticamente.">
           <Card className={styles.card}>
             <TrainingVersionComparisonView comparison={comparison} />
-            {previousPublished ? <a className={styles.link} href={`#versao-treino-${previousPublished.id}`}>Abrir publicação anterior completa</a> : null}
+            {previousPublished ? <a className={styles.link} href={trainingAdminVersionHref(`/admin/clientes/${client.id}/treino`,orderedVersions,previousPublished.id,requestFilters) ?? "#historico-versoes-treino"}>Abrir publicação anterior completa</a> : null}
             {openVersion ? <a className={styles.link} href="#prescricao-treino">Voltar à edição do rascunho</a> : null}
           </Card>
         </Section>
@@ -469,7 +470,7 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
             {publishedVersions.length > 0 ? (
               <nav aria-label="Ir para treino publicado no histórico" className={styles.versionNavigation}>
                 {publishedVersions.map((version) => (
-                  <a href={`#versao-treino-${version.id}`} key={version.id}>
+                  <a href={trainingAdminVersionHref(`/admin/clientes/${client.id}/treino`,orderedVersions,version.id,requestFilters) ?? "#historico-versoes-treino"} key={version.id}>
                     Versão {version.version_number} · {version.id === latestPublished?.id ? "Atual para cliente" : "Anterior"}
                   </a>
                 ))}
@@ -569,7 +570,7 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
                   Versão {latestPublished.version_number}
                 </p>
                 <h2 className={styles.title}>{latestPublished.title}</h2>
-                  <a className={styles.link} href={`#versao-treino-${latestPublished.id}`}>Conferir versão publicada no histórico</a>
+                  <a className={styles.link} href={trainingAdminVersionHref(`/admin/clientes/${client.id}/treino`,orderedVersions,latestPublished.id,requestFilters) ?? "#historico-versoes-treino"}>Conferir versão publicada no histórico</a>
               </div>
               <Badge variant="neutral">Publicado</Badge>
             </div>
