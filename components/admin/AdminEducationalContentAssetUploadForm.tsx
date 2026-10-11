@@ -3,7 +3,7 @@
 import { type FormEvent, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { registerEducationalContentAssetAction } from "@/app/admin/conteudos/[contentId]/actions";
+import { inspectEducationalContentAssetRegistrationAction, registerEducationalContentAssetAction } from "@/app/admin/conteudos/[contentId]/actions";
 import { Button } from "@/components/ui/Button";
 import { EDUCATIONAL_ASSET_MIME_TYPES, validateEducationalAssetUploadSelection } from "@/lib/content/asset-upload-selection";
 
@@ -50,8 +50,11 @@ export function AdminEducationalContentAssetUploadForm({
   const [uploaded, setUploaded] = useState<UploadedAsset | null>(null);
   const [busy, setBusy] = useState(false);
   const [registerBusy, setRegisterBusy] = useState(false);
+  const [inspectionBusy, setInspectionBusy] = useState(false);
+  const [registrationUncertain, setRegistrationUncertain] = useState(false);
   const uploadInFlightRef = useRef(false);
   const registerInFlightRef = useRef(false);
+  const inspectInFlightRef = useRef(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
@@ -61,7 +64,7 @@ export function AdminEducationalContentAssetUploadForm({
   );
 
   async function uploadSelectedFile() {
-    if (uploadInFlightRef.current || registerInFlightRef.current || uploaded) {
+    if (uploadInFlightRef.current || registerInFlightRef.current || inspectInFlightRef.current || uploaded) {
       return;
     }
 
@@ -120,6 +123,7 @@ export function AdminEducationalContentAssetUploadForm({
         );
       }
 
+      setRegistrationUncertain(false);
       setUploaded({
         byteSize: file.size,
         contentType: file.type,
@@ -141,7 +145,7 @@ export function AdminEducationalContentAssetUploadForm({
 
   async function registerUploadedAsset(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!uploaded || registerInFlightRef.current || uploadInFlightRef.current) return;
+    if (!uploaded || registerInFlightRef.current || uploadInFlightRef.current || inspectInFlightRef.current || registrationUncertain) return;
     registerInFlightRef.current = true;
     setRegisterBusy(true);
     setStatus("Validando o asset no servidor e registrando os metadados…");
@@ -149,12 +153,14 @@ export function AdminEducationalContentAssetUploadForm({
       await registerAction(new FormData(event.currentTarget));
       setStatus("Asset privado registrado com sucesso. Ainda não foi publicado nem liberado.");
       setUploaded(null);
+      setRegistrationUncertain(false);
       setFile(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
       router.refresh();
     } catch {
+      setRegistrationUncertain(true);
       setStatus(
-        "Não foi possível registrar o asset verificado. O upload não será repetido automaticamente. Revise e tente registrar novamente.",
+        "Não foi possível confirmar o registro do asset. O upload não será repetido automaticamente. Consulte o estado no servidor antes de tentar registrar novamente.",
       );
     } finally {
       registerInFlightRef.current = false;
@@ -162,17 +168,56 @@ export function AdminEducationalContentAssetUploadForm({
     }
   }
 
+  async function inspectRegistration() {
+    if (!uploaded || inspectInFlightRef.current || uploadInFlightRef.current || registerInFlightRef.current) return;
+    inspectInFlightRef.current = true;
+    setInspectionBusy(true);
+    setStatus("Conferindo se o registro deste arquivo existe no servidor…");
+    try {
+      const result = await inspectEducationalContentAssetRegistrationAction(contentId, versionId, {
+        storagePath: uploaded.pathname,
+        byteSize: uploaded.byteSize,
+        contentType: uploaded.contentType,
+        sha256Hex: uploaded.sha256Hex,
+      });
+      if (result.status === "registered") {
+        setRegistrationUncertain(false);
+        setUploaded(null);
+        setFile(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+        setStatus("Registro confirmado no servidor. A publicação e a liberação continuam manuais.");
+        router.refresh();
+      } else if (result.status === "not_registered") {
+        setRegistrationUncertain(false);
+        setStatus("O servidor não encontrou um registro para este arquivo. Você pode repetir somente o registro dos metadados, sem transferir o arquivo novamente.");
+      } else if (result.status === "conflict") {
+        setRegistrationUncertain(true);
+        setStatus("Existe outro registro ou a versão mudou. Confira os arquivos da versão antes de tomar qualquer ação.");
+      } else {
+        setRegistrationUncertain(true);
+        setStatus("Não foi possível verificar o registro neste momento. Consulte o histórico da versão e tente verificar novamente; não envie outra cópia.");
+      }
+    } catch {
+      setRegistrationUncertain(true);
+      setStatus("Falha ao consultar o registro. Consulte os arquivos da versão antes de reenviar.");
+    } finally {
+      inspectInFlightRef.current = false;
+      setInspectionBusy(false);
+    }
+  }
+
   return (
-    <div aria-busy={busy || registerBusy} className={styles.uploadPanel}>
+    <div aria-busy={busy || registerBusy || inspectionBusy} className={styles.uploadPanel}>
       <label className={styles.field}>
         <span>Arquivo aprovado para upload privado</span>
         <input
           accept={EDUCATIONAL_ASSET_MIME_TYPES.join(",")}
-          disabled={busy || registerBusy}
+          disabled={busy || registerBusy || inspectionBusy || registrationUncertain}
           ref={fileInputRef}
           onChange={(event) => {
             setFile(event.target.files?.[0] ?? null);
             setUploaded(null);
+            setRegistrationUncertain(false);
             setStatus(null);
           }}
           type="file"
@@ -181,7 +226,7 @@ export function AdminEducationalContentAssetUploadForm({
 
       <div className={styles.uploadActions}>
         <Button
-          disabled={!file || busy || registerBusy || uploaded !== null}
+          disabled={!file || busy || registerBusy || inspectionBusy || uploaded !== null}
           onClick={uploadSelectedFile}
           type="button"
         >
@@ -201,6 +246,14 @@ export function AdminEducationalContentAssetUploadForm({
         </p>
       ) : null}
 
+      {registrationUncertain && uploaded ? (
+        <div className={styles.uploadSummary} role="alert">
+          <p>O upload já foi transferido, mas ainda não sabemos se o registro foi concluído. Não inicie outro envio antes de consultar esta mesma versão.</p>
+          <Button type="button" variant="secondary" disabled={busy || registerBusy || inspectionBusy} onClick={inspectRegistration}>
+            {inspectionBusy ? "Verificando…" : "Consultar estado do registro"}
+          </Button>
+        </div>
+      ) : null}
       {uploaded ? (
         <form className={styles.form} onSubmit={registerUploadedAsset}>
           <input name="storagePath" type="hidden" value={uploaded.pathname} />
@@ -236,7 +289,7 @@ export function AdminEducationalContentAssetUploadForm({
             </span>
           </label>
 
-          <Button disabled={busy || registerBusy} loading={registerBusy} type="submit">
+          <Button disabled={busy || registerBusy || inspectionBusy || registrationUncertain} loading={registerBusy} type="submit">
             Registrar asset verificado
           </Button>
         </form>
