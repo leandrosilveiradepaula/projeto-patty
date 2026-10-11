@@ -71,7 +71,9 @@ test("authenticated correction paths still validate ownership and only append co
   assert.ok(adminAction.includes('requireRole("admin")'));
   assert.ok(adminAction.includes('getAccessibleClient(clientId)'));
   for (const source of [clientAction, adminAction]) {
-    assert.ok(source.includes("events.find((item) => item.id === eventId)"));
+    assert.ok(source.includes("getAccessibleClientLiquidIntakeEvent(client.id, eventId)"));
+    assert.ok(source.includes("getAccessibleClientActivityCheckinEvent(client.id, eventId)"));
+    assert.ok(source.includes("checkinCorrectionSnapshotMatches(expected.id, latest)"));
     assert.ok(source.includes("createAccessibleClientLiquidIntakeEventCorrection({"));
     assert.ok(source.includes("createAccessibleClientActivityCheckinEventCorrection({"));
     assert.ok(source.includes('revalidatePath("/cliente/checkins")'));

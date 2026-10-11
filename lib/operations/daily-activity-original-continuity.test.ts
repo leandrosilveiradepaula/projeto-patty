@@ -81,7 +81,7 @@ test("same-day corrections and historical filters retain their original IDs and 
   assert.ok(page.includes('name="historyDay"'));
   assert.ok(page.includes('id={`atividade-${event.id}`}'));
   assert.ok(actions.includes('isUuid(eventId)'));
-  assert.ok(actions.includes("const event = events.find((item) => item.id === eventId)"));
+  assert.ok(actions.includes("const event = await getAccessibleClientActivityCheckinEvent(client.id, eventId)"));
   assert.ok(actions.includes("revalidateCheckinJourneys(client.id)"));
 });
 

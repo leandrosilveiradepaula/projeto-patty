@@ -9,6 +9,8 @@ import { loadSupportedLiquidTaxonomy } from "@/lib/method/liquid-taxonomy-loader
 import { createLiquidIntakeWithMethodSnapshot } from "@/lib/method/liquid-persistence";
 import { requireRole } from "@/lib/supabase/auth";
 import { isUuid } from "@/lib/validation/uuid";
+import { parseExpectedCheckinCorrectionId, checkinCorrectionSnapshotMatches, liquidCorrectionChangesValue, activityCorrectionChangesValue } from "@/lib/checkins/correction-audit";
+import { latestCheckinCorrectionsByEvent } from "@/lib/checkins/effective-corrections";
 import {
   createAccessibleClientActivityCheckinEventCorrection,
   createAccessibleClientLiquidIntakeEventCorrection,
@@ -16,10 +18,14 @@ import {
   getCurrentClient,
   listAccessibleClientActivityCheckinEvents,
   listAccessibleClientLiquidIntakeEvents,
+  getAccessibleClientLiquidIntakeEvent,
+  getAccessibleClientActivityCheckinEvent,
+  listAccessibleClientLiquidIntakeEventCorrections,
+  listAccessibleClientActivityCheckinEventCorrections,
 } from "@/lib/supabase/data-access";
 
 function correctionRedirect(
-  status: "correction-invalid" | "correction-error" | "correction-recorded",
+  status: "correction-invalid" | "correction-error" | "correction-recorded" | "correction-conflict" | "correction-unchanged",
   formData: FormData,
   kind: "liquido" | "atividade",
 ) {
@@ -165,8 +171,9 @@ export async function correctLiquidIntakeAction(formData: FormData) {
     redirect(correctionRedirect("correction-invalid", formData, "liquido"));
   }
 
-  const events = await listAccessibleClientLiquidIntakeEvents(client.id);
-  const event = events.find((item) => item.id === eventId);
+  const expected = parseExpectedCheckinCorrectionId(formData.get("expectedCorrectionId"));
+  if (!expected.valid) redirect(correctionRedirect("correction-invalid", formData, "liquido"));
+  const event = await getAccessibleClientLiquidIntakeEvent(client.id, eventId);
 
   if (!event) redirect(correctionRedirect("correction-invalid", formData, "liquido"));
 
@@ -178,6 +185,13 @@ export async function correctLiquidIntakeAction(formData: FormData) {
 
   if (!liquidKind) redirect(correctionRedirect("correction-invalid", formData, "liquido"));
 
+  const latest = latestCheckinCorrectionsByEvent(await listAccessibleClientLiquidIntakeEventCorrections([eventId])).get(eventId);
+  if (!checkinCorrectionSnapshotMatches(expected.id, latest)) {
+    redirect(correctionRedirect("correction-conflict", formData, "liquido"));
+  }
+  if (!liquidCorrectionChangesValue(event, latest, amountMl, liquidKind.key)) {
+    redirect(correctionRedirect("correction-unchanged", formData, "liquido"));
+  }
   try {
     await createAccessibleClientLiquidIntakeEventCorrection({
       amountMl,
@@ -211,11 +225,19 @@ export async function correctActivityCheckinAction(formData: FormData) {
     redirect(correctionRedirect("correction-invalid", formData, "atividade"));
   }
 
-  const events = await listAccessibleClientActivityCheckinEvents(client.id);
-  const event = events.find((item) => item.id === eventId);
+  const expected = parseExpectedCheckinCorrectionId(formData.get("expectedCorrectionId"));
+  if (!expected.valid) redirect(correctionRedirect("correction-invalid", formData, "atividade"));
+  const event = await getAccessibleClientActivityCheckinEvent(client.id, eventId);
 
   if (!event) redirect(correctionRedirect("correction-invalid", formData, "atividade"));
 
+  const latest = latestCheckinCorrectionsByEvent(await listAccessibleClientActivityCheckinEventCorrections([eventId])).get(eventId);
+  if (!checkinCorrectionSnapshotMatches(expected.id, latest)) {
+    redirect(correctionRedirect("correction-conflict", formData, "atividade"));
+  }
+  if (!activityCorrectionChangesValue(event, latest, event.checkin_date, rawValue === "yes")) {
+    redirect(correctionRedirect("correction-unchanged", formData, "atividade"));
+  }
   try {
     await createAccessibleClientActivityCheckinEventCorrection({
       checkinDate: event.checkin_date,
