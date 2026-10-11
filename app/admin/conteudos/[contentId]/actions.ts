@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { canPublishEducationalContentVersion } from "@/lib/content/publication-eligibility";
 import { parseContentDisplayOrder } from "@/lib/content/display-order";
 import { verifyPrivateBlobAsset } from "@/lib/content/private-blob-integrity";
+import { isEducationalAssetUploadPathForVersion } from "@/lib/content/private-educational-asset-path";
 import { requireRole } from "@/lib/supabase/auth";
 import {
   createAccessibleEducationalContentAsset,
@@ -265,6 +266,16 @@ export async function registerEducationalContentAssetAction(
 
   if (contentType.length > 255 || !/^[a-zA-Z0-9][a-zA-Z0-9._+-]*\/[a-zA-Z0-9][a-zA-Z0-9._+-]*$/.test(contentType)) {
     throw new Error("MIME type inválido");
+  }
+
+  if (!isEducationalAssetUploadPathForVersion({ contentId, versionId, storagePath, contentType })) {
+    throw new Error("O arquivo privado não pertence a esta versão de conteúdo");
+  }
+
+  // Reject repeated attempts before re-reading a potentially large video.
+  // The database's unique (version, asset_key) remains the final guard.
+  if ((await listEducationalContentAssetsForCurrentAdmin(versionId)).length > 0) {
+    throw new Error("Esta versão já possui um asset privado registrado");
   }
 
   await verifyPrivateBlobAsset({

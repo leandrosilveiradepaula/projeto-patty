@@ -1,4 +1,5 @@
 import { createPrivateBlobUploadUrl } from "@/lib/content/private-blob-upload-url";
+import { createEducationalAssetUploadPath } from "@/lib/content/private-educational-asset-path";
 import { requireRole } from "@/lib/supabase/auth";
 import {
   getAccessibleEducationalContentForCurrentAdmin,
@@ -12,14 +13,6 @@ type AdminEducationalContentUploadRouteProps = {
     contentId: string;
   }>;
 };
-
-const EXTENSION_BY_CONTENT_TYPE = new Map([
-  ["application/pdf", "pdf"],
-  ["image/jpeg", "jpg"],
-  ["image/png", "png"],
-  ["image/webp", "webp"],
-  ["video/mp4", "mp4"],
-]);
 
 function isUploadRequestBody(value: unknown): value is {
   byteSize: number;
@@ -65,9 +58,13 @@ export async function POST(
     return Response.json({ error: "Dados do arquivo inválidos" }, { status: 400 });
   }
 
-  const extension = EXTENSION_BY_CONTENT_TYPE.get(body.contentType);
+  const pathname = createEducationalAssetUploadPath({
+    contentId,
+    versionId: body.versionId,
+    contentType: body.contentType,
+  });
 
-  if (!extension) {
+  if (!pathname) {
     return Response.json(
       { error: "Tipo de arquivo não permitido para a biblioteca educacional" },
       { status: 400 },
@@ -100,9 +97,6 @@ export async function POST(
       { status: 409 },
     );
   }
-
-  const pathname =
-    `educational-${contentId}-${body.versionId}-primary.${extension}`;
 
   try {
     const upload = await createPrivateBlobUploadUrl({
