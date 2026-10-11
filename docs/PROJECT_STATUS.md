@@ -1,3 +1,7 @@
+## Arquivos privados — historico com ordenacao e paginacao (2026-10-11)
+
+Cliente e Patty recebem controles de ordenacao cronologica, tamanho e categoria, com recortes de doze arquivos por pagina e contagens do universo autorizado. A Patty possui navegacao independente para pendentes e historico. Sao preservados upload autenticado, RLS, auditoria de visualizacao, liberacao manual, autoria, URLs sem dados pessoais e historico completo. Nao sao introduzidos schema, migrations ou novas regras de negocio. E2E autenticado segue pendente.
+
 ## Evolução da cliente — exploração factual do histórico de medidas — 2026-10-11
 
 A jornada de medidas finalizadas recebe filtros por medida e por quantidade de observações (todas/3/6/12), comparação explícita do primeiro e último ponto visíveis, gráfico ilustrativo sem escala temporal e tabela de valores como fonte de precisão. A seleção utiliza apenas índices de séries já autorizadas, sem identificadores clínicos na URL. A primeira variação dentro do recorte permanece ausente; não se usa uma observação escondida como base. Valores exibidos têm até quatro casas decimais para não ocultar diferenças pequenas. Não há score, limiar de significância, diagnóstico, recomendação, comparação de unidades diferentes, aprovação ou progressão de fase. O acesso permanece no RPC autenticado de avaliações finalizadas e nenhuma migration/RLS é alterada. Testes de parâmetros, limites numéricos, ordenação e neutralidade acompanham o pacote; homologação autenticada real segue pendente.
