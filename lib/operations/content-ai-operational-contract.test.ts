@@ -7,7 +7,9 @@ const read = (p: string) => readFileSync(new URL("../../" + p, import.meta.url),
 test("asset metadata rejects truncated and unsafe numbers", () => {
   const source = read("app/admin/conteudos/[contentId]/actions.ts");
   assert.doesNotMatch(source, /Number\.parseInt\(/);
-  assert.match(source, /Number\.isSafeInteger\(value\)/);
+  const order = read("lib/content/display-order.ts");
+  assert.match(source, /parseContentDisplayOrder\(formData.get\("displayOrder"\)\)/);
+  assert.match(order, /Number\\.isSafeInteger\\(value\\)/);
   assert.match(source, /Number\.isSafeInteger\(byteSize\)/);
   assert.match(source, /verifyPrivateBlobAsset\(/);
 });
