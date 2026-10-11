@@ -13,8 +13,8 @@ test("client history reads a selected activity day without changing today's reco
   const page = read("app/cliente/checkins/page.tsx");
   assert.match(page, /listAccessibleClientActivityCheckinEvents\(client\.id, today\)/);
   assert.match(page, /listAccessibleClientActivityCheckinEvents\(client\.id, selectedDay\)/);
-  assert.match(page, /historicalActivityEvents\.map/);
-  assert.match(page, /historicalActivityEvents\.length === 0/);
+  assert.match(page, /historicalActivityEvents\)\.map\(event/);
+  assert.match(page, /exploredActivities\.total === 0/);
   assert.match(page, /latestActivityCorrectionByEvent\.get\(event\.id\)/);
   assert.match(page, /name="historyDay" type="hidden" value=\{selectedDay\}/);
   assert.match(page, /correctActivityCheckinAction/);
