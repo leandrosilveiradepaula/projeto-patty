@@ -21,7 +21,7 @@ const initialState: ManualInviteClientState = {
   success: false,
 };
 
-export function ManualClientInviteForm() {
+export function ManualClientInviteForm({ onProvisioningAttempt }: { onProvisioningAttempt?: () => void } = {}) {
   const [state, formAction, isPending] = useActionState(
     generateManualClientInvite,
     initialState,
@@ -59,6 +59,7 @@ export function ManualClientInviteForm() {
           return;
         }
         inFlightRef.current = true;
+        onProvisioningAttempt?.();
       }}
     >
       {state.message ? (

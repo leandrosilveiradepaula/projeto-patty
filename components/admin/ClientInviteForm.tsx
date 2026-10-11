@@ -15,7 +15,7 @@ import styles from "./ClientInviteForm.module.css";
 
 const initialState: InviteClientState = { message: null };
 
-export function ClientInviteForm() {
+export function ClientInviteForm({ onProvisioningAttempt }: { onProvisioningAttempt?: () => void } = {}) {
   const [state, formAction, isPending] = useActionState(
     inviteClient,
     initialState,
@@ -37,6 +37,7 @@ export function ClientInviteForm() {
           return;
         }
         inFlightRef.current = true;
+        onProvisioningAttempt?.();
       }}
     >
       {state.message ? (

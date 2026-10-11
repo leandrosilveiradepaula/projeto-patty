@@ -1,6 +1,4 @@
-import { ClientInviteForm } from "@/components/admin/ClientInviteForm";
-import { ManualClientInviteForm } from "@/components/admin/ManualClientInviteForm";
-import { Card } from "@/components/ui/Card";
+import { ClientInvitationMethodChooser } from "@/components/admin/ClientInvitationMethodChooser";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 
@@ -12,23 +10,11 @@ export default function NovaClientePage() {
         eyebrow="Admin"
         title="Convidar cliente"
       />
-
       <Section
-        description="Cria a conta e solicita ao Supabase o envio do convite. Use somente quando o email automático estiver configurado."
-        title="Enviar convite automaticamente"
+        description="Escolha um dos dois procedimentos. Apenas o selecionado fica disponível. Não é um recurso de reenvio para conta já criada."
+        title="Ativação de nova cliente"
       >
-        <Card>
-          <ClientInviteForm />
-        </Card>
-      </Section>
-
-      <Section
-        description="Cria a conta e gera um link individual. Copie antes de sair da página e envie apenas à cliente correspondente. Não é um recurso de reenvio para conta já criada."
-        title="Gerar link para envio manual"
-      >
-        <Card>
-          <ManualClientInviteForm />
-        </Card>
+        <ClientInvitationMethodChooser />
       </Section>
     </>
   );
