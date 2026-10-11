@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -34,13 +34,21 @@ export function ProtocolCloneVersionAction({
   );
   const [state, formAction, isPending] = useActionState(action, initialState);
   const router = useRouter();
+  const inFlightRef = useRef(false);
 
   useEffect(() => {
+    inFlightRef.current = false;
     if (state.success) router.refresh();
   }, [state, router]);
 
   return (
-    <form action={formAction} className={styles.form}>
+    <form action={formAction} aria-busy={isPending} className={styles.form} onSubmit={(event) => {
+      if (inFlightRef.current || isPending || state.success) {
+        event.preventDefault();
+        return;
+      }
+      inFlightRef.current = true;
+    }}>
       {state.message ? (
         <Alert
           live={state.success ? "polite" : "assertive"}
@@ -59,7 +67,7 @@ export function ProtocolCloneVersionAction({
         copiando o plano alimentar, variantes, refeições, doses e ciclos
         persistidos. Aprovação e publicação não são copiadas.
       </p>
-      <Button disabled={state.success} loading={isPending} type="submit" variant="secondary">
+      <Button disabled={isPending || state.success} loading={isPending} type="submit" variant="secondary">
         Criar novo rascunho a partir desta versão
       </Button>
     </form>
