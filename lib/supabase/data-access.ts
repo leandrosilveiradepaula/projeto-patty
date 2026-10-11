@@ -1963,18 +1963,18 @@ export async function getAccessibleExerciseForCurrentAdmin(exerciseId: string) {
 
 export async function listExerciseVersionsForCurrentAdmin(exerciseId: string) {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("exercise_versions")
-    .select("id, exercise_id, version_number, name, published_at, created_at")
-    .eq("exercise_id", exerciseId)
-    .order("version_number", { ascending: false })
-    .order("id", { ascending: true });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  const rows = await collectTrainingPagedRows((from, to) =>
+    supabase
+      .from("exercise_versions")
+      .select("id, exercise_id, version_number, name, published_at, created_at")
+      .eq("exercise_id", exerciseId)
+      .order("version_number", { ascending: false })
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
+  return rows.sort((left, right) =>
+    right.version_number - left.version_number || left.id.localeCompare(right.id),
+  );
 }
 
 export async function createAccessibleExercise() {
