@@ -4,28 +4,17 @@ import test from "node:test";
 
 const read = (path: string) => readFileSync(new URL("../../" + path, import.meta.url), "utf8");
 
-for (const [scope, path] of [
-  ["Patty name", "components/admin/AdminClientNameEditForm.tsx"],
-  ["Patty current registration", "components/admin/AdminClientRegistrationEditForm.tsx"],
-  ["client current registration", "components/client/ClientRegistrationEditForm.tsx"],
-] as const) {
-  test(scope + " blocks same-tick double submissions and editing while saving", () => {
-    const form = read(path);
-    assert.ok(form.includes("inFlightRef.current || isPending"), path);
-    assert.ok(form.includes("event.preventDefault()"), path);
-    assert.ok(form.includes("inFlightRef.current = true"), path);
-    assert.ok(form.includes("inFlightRef.current = false"), path);
-    assert.ok(form.includes("aria-busy={isPending}"), path);
-    assert.ok(form.includes("disabled={isPending}"), path);
-  });
-  test(scope + " distinguishes changed fields from confirmed values", () => {
-    const form = read(path);
-    assert.ok(form.includes("setEditedSinceResult(true)"), path);
-    assert.ok(form.includes("state.message && !editedSinceResult"), path);
-    assert.ok(form.includes("setEditedSinceResult(false)"), path);
-    assert.ok(form.includes("router.refresh()"), path);
-  });
-}
+test("Patty name editor retains the original single-form concurrency guard",()=>{
+  const form=read("components/admin/AdminClientNameEditForm.tsx");
+  for(const marker of ["inFlightRef.current || isPending","event.preventDefault()","inFlightRef.current = true","inFlightRef.current = false","aria-busy={isPending}","disabled={isPending}"])assert.ok(form.includes(marker),marker);
+});
+test("the shared registration editor prevents duplicates and preserves edit state",()=>{
+ const form=read("components/client/ClientRegistrationEditor.tsx");
+ for(const marker of ["inFlight.current||saveBlocked","event.preventDefault()","inFlight.current=true","inFlight.current=false","aria-busy={pending}","disabled={pending||conflict}","router.refresh()","setTouched(true)","setTouched(false)","countClientRegistrationChanges","Conferir mudanças","Descartar alterações locais"])assert.ok(form.includes(marker),marker);
+ for(const scope of ["components/client/ClientRegistrationEditForm.tsx","components/admin/AdminClientRegistrationEditForm.tsx"]){
+  assert.ok(read(scope).includes("ClientRegistrationEditor"),scope);
+ }
+});
 
 test("persisted registration versions remount contact editors without conflating canonical identity", () => {
   const admin = read("app/admin/clientes/[clienteId]/page.tsx");

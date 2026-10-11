@@ -1,12 +1,16 @@
 import "server-only";
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { ClientRegistrationInput } from "@/lib/clients/registration";
+import {
+  clientRegistrationSnapshotFromRow,
+  equalClientRegistration,
+  hasClientRegistrationValues,
+  type ClientRegistrationInput,
+} from "@/lib/clients/registration";
 
 /**
- * A client and a professional can edit the same Cadastro Atual.
- * The caller must first resolve and authorize the exact client. This privileged
- * function only performs the version-checked write, never authorization.
+ * The caller must authorize the exact client before this privileged operation.
+ * A stale page never gets to overwrite the saved values. No RLS grant changes.
  */
 export class ClientRegistrationConflictError extends Error {
   constructor() {
@@ -21,6 +25,26 @@ export async function upsertClientRegistrationPrivileged(input: {
   registration: ClientRegistrationInput;
 }) {
   const supabase = createAdminClient();
+  const { data: current, error: readError } = await supabase
+    .from("client_registration")
+    .select("client_id, city, phone, contact_email, instagram, created_at, updated_at")
+    .eq("client_id", input.clientId)
+    .maybeSingle();
+
+  if (readError) throw readError;
+
+  // Missing/created/updated are distinct versions. A lookup is only to detect
+  // no-op writes; the subsequent UPDATE still uses an atomic timestamp filter.
+  if ((current?.updated_at ?? null) !== input.expectedUpdatedAt) {
+    throw new ClientRegistrationConflictError();
+  }
+
+  const savedValues = clientRegistrationSnapshotFromRow(current).values;
+  if (equalClientRegistration(savedValues, input.registration) ||
+    (!current && !hasClientRegistrationValues(input.registration))) {
+    return { registration: current, status: "unchanged" as const };
+  }
+
   const values = {
     city: input.registration.city,
     contact_email: input.registration.contactEmail,
@@ -30,8 +54,7 @@ export async function upsertClientRegistrationPrivileged(input: {
   };
 
   if (input.expectedUpdatedAt === null) {
-    // If another actor created the first record, INSERT fails on client_id's
-    // existing primary key instead of overwriting that actor's saved data.
+    // Insert only for an absent row; a concurrent first write fails on PK.
     const { data, error } = await supabase
       .from("client_registration")
       .insert({ client_id: input.clientId, ...values })
@@ -40,11 +63,9 @@ export async function upsertClientRegistrationPrivileged(input: {
 
     if (error?.code === "23505") throw new ClientRegistrationConflictError();
     if (error) throw error;
-    return data;
+    return { registration: data, status: "saved" as const };
   }
 
-  // One atomic compare-and-update; a separate SELECT followed by UPDATE would
-  // still lose concurrent changes. No deletion or history rewrite occurs.
   const { data, error } = await supabase
     .from("client_registration")
     .update(values)
@@ -55,5 +76,5 @@ export async function upsertClientRegistrationPrivileged(input: {
 
   if (error) throw error;
   if (!data) throw new ClientRegistrationConflictError();
-  return data;
+  return { registration: data, status: "saved" as const };
 }

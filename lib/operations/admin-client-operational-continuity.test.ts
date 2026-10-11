@@ -17,9 +17,10 @@ test("professional client name refreshes canonical identity after success", () =
 
 test("changing Cadastro Atual refreshes visible contact details without changing login email", () => {
   const form = read("components/admin/AdminClientRegistrationEditForm.tsx");
-  assert.ok(form.includes('router.refresh()'));
-  assert.ok(form.includes('name="contactEmail"'));
-  assert.ok(form.includes('email operacional de contato') || form.includes('Email operacional de contato'));
+  const shared = read("components/client/ClientRegistrationEditor.tsx");
+  assert.ok(shared.includes("router.refresh()"));
+  assert.ok(shared.includes("CLIENT_REGISTRATION_FIELDS"));
+  assert.ok(shared.includes("Contato operacional, independente do email de login."));
   const action = read("app/admin/clientes/[clienteId]/actions.ts");
   assert.ok(action.includes("parseClientRegistrationForm(formData)"));
   assert.ok(action.includes("upsertClientRegistrationPrivileged"));
