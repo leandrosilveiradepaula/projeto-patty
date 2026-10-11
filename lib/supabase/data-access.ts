@@ -6,6 +6,7 @@ import { collectTrainingHistoryRows, collectTrainingPagedRows } from "@/lib/trai
 import { collectLibraryPages, collectLibraryVersionRows } from "@/lib/content/library-pagination";
 import { collectAnamnesisHistoryRows } from "@/lib/anamnesis/history-pagination";
 import { collectPublishedProtocolRows } from "@/lib/protocol/published-read-pagination";
+import { collectProtocolCatalogPages } from "@/lib/protocol/catalog-pagination";
 
 import type { Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
@@ -2039,7 +2040,7 @@ export async function publishAccessibleExerciseVersion(input: {
 
 export async function listAccessibleProtocols() {
   const supabase = await createClient();
-  const rows = await collectPublishedProtocolRows([true], (_scope, from, to) =>
+  const rows = await collectProtocolCatalogPages((from, to) =>
     supabase
       .from("protocols")
       .select("id, client_id, protocol_type, created_at, clients(id, full_name, profiles(display_name))")
