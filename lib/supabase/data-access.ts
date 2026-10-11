@@ -1,3 +1,4 @@
+import { collectAdminDirectoryPages, orderAdminRecords } from "@/lib/operations/admin-directory-pagination";
 import { collectAiPages, collectAiPagesForIds, orderAiHistoryByCreatedAt } from "@/lib/ai/history-pagination";
 import { collectConfigurationPages, collectConfigurationVersionRows } from "@/lib/configuration/catalog-pagination";
 import { collectPrivateFilePages, orderPrivateFileHistory } from "@/lib/files/private-file-pagination";
@@ -81,18 +82,20 @@ export async function getCurrentClient() {
 
 export async function listClientsAssignedToCurrentAdmin() {
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const rows = await collectAdminDirectoryPages((from, to) => supabase
     .from("client_assignments")
-    .select(
-      "client_id, assigned_at, clients(id, profile_id, full_name, status, started_at, ended_at, profiles(display_name))",
-    )
-    .is("ended_at", null);
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+    .select("client_id, assigned_at, clients(id, profile_id, full_name, status, started_at, ended_at, profiles(display_name))")
+    .is("ended_at", null)
+    .order("assigned_at", { ascending: false })
+    .order("client_id", { ascending: true })
+    .range(from, to));
+  return rows.sort((a, b) => {
+    const aTime = Date.parse(a.assigned_at);
+    const bTime = Date.parse(b.assigned_at);
+    return (Number.isFinite(bTime) ? bTime : -Infinity) -
+      (Number.isFinite(aTime) ? aTime : -Infinity) ||
+      a.client_id.localeCompare(b.client_id);
+  });
 }
 
 export async function listMethodConfigurationCatalogForCurrentAdmin() {
@@ -1444,16 +1447,13 @@ export async function createAccessibleClientContentRelease(
 
 export async function listAccessibleClientAssessments() {
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const rows = await collectAdminDirectoryPages((from, to) => supabase
     .from("client_assessments")
     .select("id, client_id, assessed_at, assessment_kind, method_configuration_snapshot_set_id, created_by_profile_id, finalized_at, finalized_by_profile_id, clients(id, full_name, profiles(display_name))")
-    .order("assessed_at", { ascending: false });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+    .order("assessed_at", { ascending: false })
+    .order("id", { ascending: true })
+    .range(from, to));
+  return orderAdminRecords(rows, (row) => row.assessed_at);
 }
 
 export async function getAccessibleClientAssessment(assessmentId: string) {
