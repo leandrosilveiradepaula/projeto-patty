@@ -55,7 +55,7 @@ export function compareCheckinEventInstants(
 
 function matchesOrigin(
   recordedBy: string | undefined,
-  clientProfileId: string | undefined,
+  clientProfileId: string | null | undefined,
   filter: CheckinExploreOrigin,
 ) {
   if (filter === "all") return true;
@@ -70,7 +70,7 @@ export function exploreLiquidCheckins<T extends {
   effectiveAmountMl: number;
   effectiveLiquidKind: string;
   wasCorrected: boolean;
-}>(events: readonly T[], options: CheckinExploreOptions, clientProfileId?: string) {
+}>(events: readonly T[], options: CheckinExploreOptions, clientProfileId?: string | null) {
   const filtered = events.filter(e =>
     (options.liquidKind === "all" || e.effectiveLiquidKind === options.liquidKind) &&
     (options.liquidCorrection === "all" || e.wasCorrected === (options.liquidCorrection === "corrected")) &&
@@ -94,7 +94,7 @@ export function exploreActivityCheckins<T extends {
   recorded_by_profile_id?: string;
   didActivityEffective: boolean;
   wasCorrected: boolean;
-}>(events: readonly T[], options: CheckinExploreOptions, clientProfileId?: string) {
+}>(events: readonly T[], options: CheckinExploreOptions, clientProfileId?: string | null) {
   const filtered = events.filter(e =>
     (options.activityFilter === "all" || e.didActivityEffective === (options.activityFilter === "yes")) &&
     (options.activityCorrection === "all" || e.wasCorrected === (options.activityCorrection === "corrected")) &&
