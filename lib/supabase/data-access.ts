@@ -6,6 +6,7 @@ import { collectTrainingHistoryRows, collectTrainingPagedRows } from "@/lib/trai
 import { collectLibraryPages, collectLibraryVersionRows } from "@/lib/content/library-pagination";
 import { collectAnamnesisHistoryRows } from "@/lib/anamnesis/history-pagination";
 import { collectPublishedProtocolRows } from "@/lib/protocol/published-read-pagination";
+import { collectProtocolCatalogPages } from "@/lib/protocol/catalog-pagination";
 
 import type { Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
@@ -2039,19 +2040,21 @@ export async function publishAccessibleExerciseVersion(input: {
 
 export async function listAccessibleProtocols() {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("protocols")
-    .select("id, client_id, protocol_type, created_at, clients(id, full_name, profiles(display_name))")
-    .order("created_at", { ascending: false })
-    .order("id", { ascending: true });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  const rows = await collectProtocolCatalogPages((from, to) =>
+    supabase
+      .from("protocols")
+      .select("id, client_id, protocol_type, created_at, clients(id, full_name, profiles(display_name))")
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
+  return rows.sort((left, right) => {
+    const a = Date.parse(left.created_at);
+    const b = Date.parse(right.created_at);
+    return (Number.isFinite(b) ? b : -Infinity) -
+      (Number.isFinite(a) ? a : -Infinity) || left.id.localeCompare(right.id);
+  });
 }
-
 
 export async function createAccessibleProtocol(input: {
   clientId: string;
@@ -2134,18 +2137,21 @@ export async function deleteAccessibleProtocolWithoutVersions(protocolId: string
 
 export async function listAccessibleProtocolsForClient(clientId: string) {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("protocols")
-    .select("id, client_id, protocol_type, created_at")
-    .eq("client_id", clientId)
-    .order("created_at", { ascending: false })
-    .order("id", { ascending: true });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  const rows = await collectPublishedProtocolRows([clientId], (ids, from, to) =>
+    supabase
+      .from("protocols")
+      .select("id, client_id, protocol_type, created_at")
+      .in("client_id", ids)
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
+  return rows.sort((left, right) => {
+    const a = Date.parse(left.created_at);
+    const b = Date.parse(right.created_at);
+    return (Number.isFinite(b) ? b : -Infinity) -
+      (Number.isFinite(a) ? a : -Infinity) || left.id.localeCompare(right.id);
+  });
 }
 
 export async function getAccessibleProtocol(protocolId: string) {

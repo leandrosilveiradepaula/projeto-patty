@@ -92,7 +92,7 @@ test("review, approval, and publication refresh only after confirmed server resp
   const action = read("components/admin/ProtocolLifecycleAction.tsx");
   assert.ok(action.includes("if (state.success) router.refresh()"));
   assert.ok(action.includes("disabled={isPending || state.success}"));
-  assert.ok(action.includes("disabled={state.success}"));
+  assert.ok(action.includes("disabled={isPending || state.success}"));
   for (const field of ["confirmSubmission", "confirmApproval", "confirmPublication"]) {
     assert.ok(action.includes(field), field);
   }
@@ -102,7 +102,7 @@ test("cloning a persisted version refreshes the new draft and blocks duplicate s
   const action = read("components/admin/ProtocolCloneVersionAction.tsx");
   assert.ok(action.includes("cloneProtocolVersionDraft.bind"));
   assert.ok(action.includes("if (state.success) router.refresh()"));
-  assert.ok(action.includes("disabled={state.success}"));
+  assert.ok(action.includes("disabled={isPending || state.success}"));
 });
 
 test("the draft editor continues to prevent publication by itself and retains editable states", () => {
