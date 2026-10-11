@@ -92,7 +92,7 @@ test("client educational library is newest-first, tied to explicitly released ex
   assert.ok(clientPage.includes("newestClientContentReleases(releases ?? [])"));
   assert.ok(clientPage.includes("visibleReleases"));
   assert.ok(clientPage.includes("educational_content_versions"));
-  assert.ok(clientPage.includes("id={`conteudo-liberado-${release.id}`}"));
+  assert.ok(read("components/client/ClientReleasedContentExplorer.tsx").includes("id={`conteudo-liberado-${entry.id}`}"));
   assert.ok(clientPage.includes("orderReleasedEducationalAssets("));
   assert.ok(clientPage.includes('href={`/cliente/conteudos/assets/${asset.id}`}'));
   assert.ok(clientPage.includes("releaseAssets.map((asset, index) =>"));

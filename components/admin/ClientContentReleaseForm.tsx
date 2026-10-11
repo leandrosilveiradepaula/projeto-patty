@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
+import { normalizedReleasedContentSearch } from "@/lib/content/release-explorer";
 import { useRouter } from "next/navigation";
 
 import {
@@ -38,8 +39,22 @@ export function ClientContentReleaseForm({
   const router = useRouter();
   const [selectedVersionId, setSelectedVersionId] = useState("");
   const [confirmRelease, setConfirmRelease] = useState(false);
+  const [query, setQuery] = useState("");
   const submitInFlightRef = useRef(false);
   const selectedVersion = options.find((option) => option.id === selectedVersionId);
+  const visibleOptions = useMemo(() => {
+    const needle = normalizedReleasedContentSearch(query);
+    const candidates = needle
+      ? options.filter((option) => normalizedReleasedContentSearch(
+          option.title + " versão " + option.versionNumber,
+        ).includes(needle))
+      : options;
+    // Never remove a selected option silently while typing a new search.
+    return selectedVersion && !candidates.some((option) => option.id === selectedVersion.id)
+      ? [selectedVersion, ...candidates]
+      : candidates;
+  }, [options, query, selectedVersion]);
+
 
   useEffect(() => {
     submitInFlightRef.current = false;
@@ -73,6 +88,16 @@ export function ClientContentReleaseForm({
         </Alert>
       ) : null}
 
+      <label className={styles.searchField}>
+        <span>Localizar material publicado</span>
+        <input type="search" maxLength={160} value={query} disabled={isPending || state.success}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Busque pelo título ou número da versão" />
+      </label>
+      <p className={styles.notice} role="status">{visibleOptions.length} de {options.length} versão(ões) na seleção.</p>
+      {query.trim() && visibleOptions.length === 0 ? (
+        <p className={styles.notice}>Nenhuma versão corresponde à busca. Limpe o texto para consultar todas as versões disponíveis.</p>
+      ) : null}
       <FormField
         description="Somente versões publicadas com arquivo privado registrado podem ser liberadas. A liberação aponta para esta versão exata."
         id="educational-content-version"
@@ -95,7 +120,7 @@ export function ClientContentReleaseForm({
             <option disabled value="">
               Selecione uma versão publicada
             </option>
-            {options.map((option) => (
+            {visibleOptions.map((option) => (
               <option key={option.id} value={option.id}>
                 {option.title} · versão {option.versionNumber}
                 {option.hasAsset ? "" : " · indisponível"}

@@ -11,7 +11,7 @@ test("only exact versions released to the current client are displayed", () => {
   assert.ok(client.includes("listCurrentClientContentReleases(client.id)"));
   assert.ok(client.includes("visibleReleases"));
   assert.ok(client.includes("release.educational_content_versions"));
-  assert.ok(client.includes('id={`conteudo-liberado-${release.id}`}'));
+  assert.ok(read("components/client/ClientReleasedContentExplorer.tsx").includes('id={`conteudo-liberado-${entry.id}`}'));
   assert.ok(!client.includes("listEducationalContentVersionsForCurrentAdmin"));
 });
 
@@ -55,9 +55,9 @@ test("the client only claims available files when a returned asset exists", () =
 
 test("partial missing version joins produce an operational notice instead of silently disappearing", () => {
   assert.ok(client.includes("missingVersionCount = orderedReleases.length - visibleReleases.length"));
-  assert.ok(client.includes("missingVersionCount > 0"));
-  assert.ok(client.includes('role="status"'));
-  assert.ok(client.includes("A Patty pode verificar o registro"));
+  assert.ok(read("components/client/ClientReleasedContentExplorer.tsx").includes("missingVersionCount > 0"));
+  assert.ok(read("components/client/ClientReleasedContentExplorer.tsx").includes('role="status"'));
+  assert.ok(read("components/client/ClientReleasedContentExplorer.tsx").includes("A Patty pode verificar o registro"));
   assert.ok(admin.includes("missingReleaseVersions = newestReleases.length - visibleReleases.length"));
   assert.ok(admin.includes("Versões liberadas indisponíveis"));
   assert.ok(admin.includes("missingReleaseVersions > 0"));
