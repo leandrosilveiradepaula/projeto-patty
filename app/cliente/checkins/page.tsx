@@ -1,3 +1,4 @@
+import { readCheckinExploreOptions, exploreLiquidCheckins, exploreActivityCheckins, checkinExploreHref } from "@/lib/checkins/history-explorer";
 import { groupCheckinCorrectionHistory, checkinCorrectionAuthor, formatCheckinAuditDate } from "@/lib/checkins/correction-audit";
 import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
 import {
@@ -60,13 +61,15 @@ function formatMl(value: number) {
 }
 
 type ClientCheckinsPageProps = {
-  searchParams: Promise<{ status?: string; dia?: string }>;
+  searchParams: Promise<{ status?: string; dia?: string; ordem?: string; correcao?: string; tipo?: string; atividade?: string; atividadeCorrecao?: string; lp?: string; ap?: string }>;
 };
 
 export default async function ClientCheckinsPage({
   searchParams,
 }: ClientCheckinsPageProps) {
-  const { status, dia } = await searchParams;
+  const query = await searchParams;
+  const { status, dia } = query;
+  const explorer = readCheckinExploreOptions(query);
   const client = await getCurrentClient();
 
   if (!client) {
@@ -133,6 +136,16 @@ export default async function ClientCheckinsPage({
   const waterMl = displayedLiquidEvents
     .filter((event) => pureWaterKindKeys.has(event.effectiveLiquidKind))
     .reduce((sum, event) => sum + event.effectiveAmountMl, 0);
+  const exploredLiquids = exploreLiquidCheckins(displayedLiquidEvents, explorer);
+  const exploredActivities = exploreActivityCheckins(
+    (selectedDay === today ? activityEvents : historicalActivityEvents).map(event => ({
+      ...event, didActivityEffective: latestActivityCorrectionByEvent.get(event.id)?.corrected_did_activity ?? event.did_activity,
+      wasCorrected: latestActivityCorrectionByEvent.has(event.id),
+    })), explorer,
+  );
+  const explorerQuery = {dia: selectedDay === today ? undefined : selectedDay, ordem:explorer.liquidSort, correcao:explorer.liquidCorrection, tipo:explorer.liquidKind, atividade:explorer.activityFilter, atividadeCorrecao:explorer.activityCorrection, lp:String(explorer.liquidPage), ap:String(explorer.activityPage)};
+  const liquidHref = (page:number) => checkinExploreHref("/cliente/checkins",explorerQuery,{lp:String(page)})+"#historico-liquidos";
+  const activityHref = (page:number) => checkinExploreHref("/cliente/checkins",explorerQuery,{ap:String(page)})+"#historico-atividade";
   const latestActivity = activityEvents[0] ?? null;
   const latestActivityCorrection = latestActivity
     ? latestActivityCorrectionByEvent.get(latestActivity.id)
@@ -383,6 +396,7 @@ export default async function ClientCheckinsPage({
       </Section>
 
       <Section
+        id="historico-liquidos"
         description="Consulte um dia específico para corrigir registros antigos sem apagar o valor original."
         title={selectedDay === today ? "Histórico de líquidos de hoje" : `Histórico de líquidos de ${selectedDay}`}
       >
@@ -393,7 +407,18 @@ export default async function ClientCheckinsPage({
           <Button type="submit" variant="secondary">Consultar histórico</Button>
           {selectedDay !== today ? <Link href="/cliente/checkins">Voltar para hoje</Link> : null}
         </form>
-        {displayedLiquidEvents.length === 0 ? (
+        <form action="/cliente/checkins#historico-liquidos" className={styles.form} method="get">
+          {selectedDay !== today ? <input type="hidden" name="dia" value={selectedDay} /> : null}
+          <label className={styles.field}>Ordenar líquidos<select name="ordem" defaultValue={explorer.liquidSort}><option value="newest">Mais recentes</option><option value="oldest">Mais antigos</option><option value="amount-desc">Maior quantidade</option></select></label>
+          <label className={styles.field}>Correções<select name="correcao" defaultValue={explorer.liquidCorrection}><option value="all">Todos</option><option value="corrected">Corrigidos</option><option value="original">Sem correção</option></select></label>
+          <label className={styles.field}>Tipo de líquido<select name="tipo" defaultValue={explorer.liquidKind}><option value="all">Todos os tipos</option>{Array.from(new Set(displayedLiquidEvents.map(event=>event.effectiveLiquidKind))).map(kind=><option key={kind} value={kind}>{liquidTaxonomy.kinds.find(item=>item.key===kind)?.label ?? "Tipo histórico"}</option>)}</select></label>
+          {explorer.activityFilter !== "all" ? <input type="hidden" name="atividade" value={explorer.activityFilter} /> : null}
+          {explorer.activityCorrection !== "all" ? <input type="hidden" name="atividadeCorrecao" value={explorer.activityCorrection} /> : null}
+          <Button type="submit" variant="secondary">Filtrar líquidos</Button>
+          <Link href={checkinExploreHref("/cliente/checkins", {dia: selectedDay === today ? undefined : selectedDay}, {})+"#historico-liquidos"}>Limpar filtros</Link>
+        </form>
+        <p className={styles.note}>Exibindo {exploredLiquids.items.length} de {exploredLiquids.total} registros encontrados. Total do dia acima inclui todos os tipos e correções.</p>
+        {exploredLiquids.total === 0 ? (
           <EmptyState
             description={selectedDay === today ? "Não há líquidos registrados hoje. Se desejar informar um consumo, use o formulário acima; não existe meta automática de hidratação." : "Não há líquidos registrados no dia selecionado."}
             title={selectedDay === today ? "Nenhum líquido registrado hoje" : "Nenhum líquido neste dia"}
@@ -401,7 +426,7 @@ export default async function ClientCheckinsPage({
           />
         ) : (
           <ol className={styles.historyList}>
-            {displayedLiquidEvents.map((event) => {
+            {exploredLiquids.items.map((event) => {
               const kindSelection = liquidCorrectionSelection(event.effectiveLiquidKind, activeLiquidKindKeys);
               return (
               <li id={`liquido-${event.id}`} key={event.id}>
@@ -478,20 +503,29 @@ export default async function ClientCheckinsPage({
             })}
           </ol>
         )}
+        {exploredLiquids.pages > 1 ? <nav aria-label="Páginas de líquidos" className={styles.form}>{exploredLiquids.page > 1 ? <Link href={liquidHref(exploredLiquids.page-1)}>Página anterior</Link> : null}<span>Página {exploredLiquids.page} de {exploredLiquids.pages}</span>{exploredLiquids.page < exploredLiquids.pages ? <Link href={liquidHref(exploredLiquids.page+1)}>Próxima página</Link> : null}</nav> : null}
       </Section>
       {selectedDay !== today ? (
         <Section
           description="Respostas factuais do dia escolhido, sem alterar o check-in de hoje. As correções preservam o registro original."
+          id="historico-atividade"
           title={`Atividade física em ${selectedDay}`}
         >
-          {historicalActivityEvents.length === 0 ? (
+          <form action="/cliente/checkins#historico-atividade" className={styles.form} method="get">
+            <input type="hidden" name="dia" value={selectedDay} />
+            <label className={styles.field}>Resposta<select name="atividade" defaultValue={explorer.activityFilter}><option value="all">Todas</option><option value="yes">Sim</option><option value="no">Não</option></select></label>
+            <label className={styles.field}>Correções<select name="atividadeCorrecao" defaultValue={explorer.activityCorrection}><option value="all">Todas</option><option value="corrected">Corrigidas</option><option value="original">Sem correção</option></select></label>
+            <Button type="submit" variant="secondary">Filtrar atividades</Button>
+          </form>
+          <p className={styles.note}>{exploredActivities.total} resposta(s) encontradas.</p>
+          {exploredActivities.total === 0 ? (
             <EmptyState
               description="Nenhuma resposta de atividade física foi registrada para o dia selecionado."
               title="Sem atividade registrada neste dia"
             />
           ) : (
             <ol className={styles.historyList}>
-              {historicalActivityEvents.map((event) => {
+              {exploredActivities.items.map((event) => {
                 const correction = latestActivityCorrectionByEvent.get(event.id);
                 const didActivity = correction?.corrected_did_activity ?? event.did_activity;
                 return (
@@ -534,6 +568,7 @@ export default async function ClientCheckinsPage({
               })}
             </ol>
           )}
+          {exploredActivities.pages > 1 ? <nav aria-label="Páginas de atividade" className={styles.form}>{exploredActivities.page > 1 ? <Link href={activityHref(exploredActivities.page-1)}>Anterior</Link> : null}<span>Página {exploredActivities.page} de {exploredActivities.pages}</span>{exploredActivities.page < exploredActivities.pages ? <Link href={activityHref(exploredActivities.page+1)}>Próxima</Link> : null}</nav> : null}
         </Section>
       ) : null}
       <ClientJourneyNextSteps areas={["feedback","protocol","index"]} />
