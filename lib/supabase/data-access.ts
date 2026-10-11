@@ -185,6 +185,30 @@ export async function listAccessibleClientHydrationTargets(clientId: string) {
   return data;
 }
 
+export async function getAccessibleClientLiquidIntakeEvent(clientId: string, eventId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_liquid_intake_events")
+    .select("id, client_id, recorded_by_profile_id, amount_ml, liquid_kind, method_configuration_snapshot_set_id, recorded_at")
+    .eq("client_id", clientId)
+    .eq("id", eventId)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+export async function getAccessibleClientActivityCheckinEvent(clientId: string, eventId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_activity_checkin_events")
+    .select("id, client_id, recorded_by_profile_id, checkin_date, did_activity, recorded_at")
+    .eq("client_id", clientId)
+    .eq("id", eventId)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
 export async function listAccessibleClientLiquidIntakeEvents(
   clientId: string,
   recordedFrom?: string,
