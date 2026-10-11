@@ -42,7 +42,7 @@ test("access forms have native field validation and block inputs while saving", 
     assert.doesNotMatch(source, /noValidate/);
     assert.match(source, /aria-busy=\{isPending\}/);
     assert.match(source, /disabled=\{isPending\}/);
-    assert.match(source, /<Button loading=\{isPending\} type="submit">/);
+    assert.match(source, /<Button (?:disabled=\{isPending\|\|[^}]+\} )?loading=\{isPending\} type="submit">/);
     assert.match(source, /<p role="status">/);
   }
   const shared=read("components/auth/AccessPasswordForm.tsx");
