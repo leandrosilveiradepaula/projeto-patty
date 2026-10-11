@@ -1,3 +1,4 @@
+import { buildProtocolOperationalSummaries, protocolOperationalStatusLabel, protocolPublicationDate, operationalProtocolVersionHref } from "@/lib/protocol/operational-catalog";
 import { AdminProtocolInitialVersionForm } from "@/components/admin/AdminProtocolInitialVersionForm";
 import { existingProtocolNavigation } from "@/lib/protocol/admin-catalog-ux";
 import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
@@ -14,6 +15,8 @@ import {
   listAccessibleProtocolsForClient,
   listAccessibleProtocolVersions,
   listAccessibleProtocolVersionsForProtocols,
+  listAccessibleProtocolPublications,
+  listAccessibleProtocolVersionApprovals,
 } from "@/lib/supabase/data-access";
 import { requireRole } from "@/lib/supabase/auth";
 import Link from "next/link";
@@ -43,6 +46,13 @@ async function createFirstProtocolAction(formData: FormData) {
   if (existing.length > 0) {
     const versions = await listAccessibleProtocolVersionsForProtocols(existing.map((item) => item.id));
     const versionedIds = new Set(versions.map((version) => version.protocol_id));
+  const [approvals, publications] = await Promise.all([
+    listAccessibleProtocolVersionApprovals(versions.map(version => version.id)),
+    listAccessibleProtocolPublications(versions.map(version => version.id)),
+  ]);
+  const summaries = buildProtocolOperationalSummaries(
+    protocols.map(protocol => protocol.id), versions, approvals, publications,
+  );
     const destination = existingProtocolNavigation(existing, versionedIds);
     if (destination?.kind === "recover") {
       redirect(`/admin/clientes/${client.id}/protocolos?recuperacao=necessaria#protocolo-${destination.id}`);
@@ -203,33 +213,32 @@ export default async function AdminClientProtocolsPage({
           />
         ) : (
           <ol className={styles.protocolList}>
-            {protocols.map((protocol) => (
-              <li className={styles.protocolItem} id={`protocolo-${protocol.id}`} key={protocol.id}>
-                <div>
-                  <h2 className={styles.protocolTitle}>
-                    {formatProtocolType(protocol.protocol_type)}
-                  </h2>
-                  <p className={styles.protocolMeta}>
-                    Criado em {formatCreatedAt(protocol.created_at)}
-                  </p>
+            {protocols.map((protocol) => {
+              const facts = summaries.get(protocol.id);
+              const latest = facts?.latestVersion ?? null;
+              const published = facts?.lastPublishedVersion ?? null;
+              const latestHref = operationalProtocolVersionHref(protocol.id,latest);
+              const publishedHref = operationalProtocolVersionHref(protocol.id,published);
+              return <li className={styles.protocolItem} id={`protocolo-${protocol.id}`} key={protocol.id}>
+                <div className={styles.protocolSummary}>
+                  <h2 className={styles.protocolTitle}>{formatProtocolType(protocol.protocol_type)}</h2>
+                  <p className={styles.protocolMeta}>Criado em {formatCreatedAt(protocol.created_at)}</p>
+                  <p className={styles.protocolMeta}>Situação: {facts ? protocolOperationalStatusLabel(facts.latestStatus) : "Indisponível"}</p>
+                  {latest ? <p className={styles.protocolMeta}>Última versão: {latest.version_number} · {facts?.versionCount ?? 0} versão(ões)</p> : null}
+                  {published ? <p className={styles.protocolMeta}>Última publicação: versão {published.version_number} · {protocolPublicationDate(facts?.lastPublishedAt ?? null)}</p> : <p className={styles.protocolMeta}>Nenhuma publicação registrada neste protocolo.</p>}
+                  {facts?.hasUnpublishedNewerVersion ? <p role="status" className={styles.protocolMeta}>Existe versão mais recente não publicada. A publicação anterior continua vigente.</p> : null}
                 </div>
-                {versionedIds.has(protocol.id) ? (
-                  <Link
-                    aria-label={`Ver histórico do protocolo ${formatProtocolType(protocol.protocol_type)} criado em ${formatCreatedAt(protocol.created_at)}`}
-                    className={styles.actionLink}
-                    href={`/admin/protocolos/${protocol.id}`}
-                  >
-                    Ver histórico
-                  </Link>
-                ) : (
-                  <AdminProtocolInitialVersionForm
-                    action={resumeVersionlessProtocolAction}
-                    clientId={client.id}
-                    protocolId={protocol.id}
-                  />
-                )}
-              </li>
-            ))}
+                <div className={styles.protocolActions}>
+                  {versionedIds.has(protocol.id) ? <>
+                    <Link className={styles.actionLink} href={latestHref ?? `/admin/protocolos/${protocol.id}`}>Abrir versão atual de trabalho</Link>
+                    {publishedHref ? <Link className={styles.actionLink} href={publishedHref}>Consultar última publicada</Link> : null}
+                    <Link className={styles.actionLink} href={`/admin/protocolos/${protocol.id}`}>Histórico completo</Link>
+                  </> : <AdminProtocolInitialVersionForm
+                    action={resumeVersionlessProtocolAction} clientId={client.id} protocolId={protocol.id}
+                  />}
+                </div>
+              </li>;
+            })}
           </ol>
         )}
       </Section>
