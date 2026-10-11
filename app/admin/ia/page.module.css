@@ -84,3 +84,89 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 0.875rem;
+  margin-bottom: 1.25rem;
+}
+
+.field {
+  display: grid;
+  flex: 1 1 180px;
+  min-width: 0;
+  gap: 0.5rem;
+}
+
+.field span {
+  font-size: var(--text-body-medium-size);
+  font-weight: 700;
+}
+
+.field select {
+  min-height: 44px;
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  padding: 0.65rem;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  font: inherit;
+}
+
+.field select:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.resultCount, .notice, .missingLink {
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-medium-size);
+}
+
+.notice {
+  margin-bottom: 1rem;
+}
+
+.actionLinks {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.pagination a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-brand-strong);
+  font-weight: 700;
+}
+
+.pagination span {
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 720px) {
+  .filters {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .field, .filters button {
+    width: 100%;
+    flex-basis: auto;
+  }
+}
