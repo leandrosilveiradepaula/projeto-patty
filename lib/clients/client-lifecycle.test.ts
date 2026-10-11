@@ -43,7 +43,8 @@ test("admin can repair a legacy missing client name without changing Auth", () =
   assert.match(helper, /createAdminClient/);
   assert.match(helper, /from\("profiles"\)/);
   assert.match(helper, /display_name: input\.displayName/);
-  assert.match(helper, /\.select\("id"\)\s*\.single\(\)/);
+  assert.match(helper, /\.select\("id"\)\.maybeSingle\(\)/);
+  assert.match(helper, /if \(!data\) throw new ClientNameConflictError\(\)/);
   assert.match(helper, /from\("clients"\)/);
   assert.match(helper, /full_name: input\.displayName/);
   assert.match(helper, /\.is\("profile_id", null\)/);
