@@ -9,7 +9,8 @@ import { Section } from "@/components/ui/Section";
 import { TextInput } from "@/components/ui/TextInput";
 import { summarizeLibraryVersions, matchesLibraryStatus } from "@/lib/content/admin-library-status";
 import { newestExerciseLibrarySummaries } from "@/lib/training/exercise-library-order";
-import { listExerciseVersionsVisibleToCurrentAdmin } from "@/lib/supabase/data-access";
+import { matchingExerciseNameVersion, readExerciseCatalogStatus, readExerciseCatalogTerm } from "@/lib/training/exercise-admin-directory";
+import { listExerciseVersionsVisibleToCurrentAdmin, listExercisesForCurrentAdmin } from "@/lib/supabase/data-access";
 import Link from "next/link";
 import { readClientDirectorySearchTerm } from "@/lib/clients/client-directory-search";
 import styles from "./page.module.css";
@@ -39,20 +40,34 @@ type AdminExerciciosPageProps = {
 
 export default async function AdminExerciciosPage({ searchParams }: AdminExerciciosPageProps) {
   const { q, status } = await searchParams;
-  const exerciseVersions = await listExerciseVersionsVisibleToCurrentAdmin();
+  const [exerciseVersions, exerciseParents] = await Promise.all([
+    listExerciseVersionsVisibleToCurrentAdmin(),
+    listExercisesForCurrentAdmin(),
+  ]);
   const summaries = newestExerciseLibrarySummaries(
     [...summarizeLibraryVersions(exerciseVersions, (version) => version.exercise_id).values()],
   );
   const exercises = summaries;
 
-  const searchTerm = readClientDirectorySearchTerm(q);
+  const searchTerm = readExerciseCatalogTerm(q);
   const normalizedSearchTerm = normalizeSearchValue(searchTerm);
-  const statusFilter = status === "draft" || status === "published" ? status : "all";
+  const statusFilter = readExerciseCatalogStatus(status);
+  const versionsByExercise = new Map<string, typeof exerciseVersions>();
+  for (const version of exerciseVersions) {
+    const current = versionsByExercise.get(version.exercise_id) ?? [];
+    current.push(version);
+    versionsByExercise.set(version.exercise_id, current);
+  }
+  const incompleteParents = exerciseParents.filter((parent) => !versionsByExercise.has(parent.id));
+  const filteredIncomplete = statusFilter === "all" || statusFilter === "incomplete"
+    ? incompleteParents.filter(() => !normalizedSearchTerm)
+    : [];
   const filteredExercises = exercises.filter((summary) => {
     const matchesSearch = !normalizedSearchTerm ||
       normalizeSearchValue(summary.latestVersion.name).includes(normalizedSearchTerm) ||
-      (summary.latestPublishedVersion !== null && normalizeSearchValue(summary.latestPublishedVersion.name).includes(normalizedSearchTerm));
-    return matchesSearch && matchesLibraryStatus(summary, statusFilter);
+      (summary.latestPublishedVersion !== null && normalizeSearchValue(summary.latestPublishedVersion.name).includes(normalizedSearchTerm)) ||
+      Boolean(matchingExerciseNameVersion(versionsByExercise.get(summary.latestVersion.exercise_id) ?? [], searchTerm));
+    return matchesSearch && statusFilter !== "incomplete" && matchesLibraryStatus(summary, statusFilter);
   });
 
   return (
@@ -95,6 +110,7 @@ export default async function AdminExerciciosPage({ searchParams }: AdminExercic
                 <option value="all">Todos</option>
                 <option value="draft">Rascunhos</option>
                 <option value="published">Publicados</option>
+                <option value="incomplete">Sem versão inicial</option>
               </select>
             </label>
             <Button type="submit" variant="secondary">Filtrar</Button>
@@ -103,20 +119,24 @@ export default async function AdminExerciciosPage({ searchParams }: AdminExercic
             ) : null}
           </form>
         ) : null}
-        {exercises.length === 0 ? (
+        <p className={styles.resultCount} role="status">
+          {filteredExercises.length + filteredIncomplete.length} resultado(s) · {incompleteParents.length} cadastro(s) sem versão inicial.
+        </p>
+        {exercises.length === 0 && incompleteParents.length === 0 ? (
           <EmptyState
             description="Crie o primeiro exercício para iniciar a biblioteca."
             title="A biblioteca de exercícios está vazia"
           />
-        ) : filteredExercises.length === 0 ? (
+        ) : filteredExercises.length === 0 && filteredIncomplete.length === 0 ? (
           <EmptyState
             description="Ajuste a busca ou limpe os filtros para voltar a ver a biblioteca completa."
             title="Nenhum exercício encontrado"
+            action={<Link className={styles.clearLink} href="/admin/exercicios">Limpar busca e filtros</Link>}
           />
         ) : (
           <>
             <p className={styles.resultCount}>
-              {filteredExercises.length} de {exercises.length} exercício(s)
+              {filteredExercises.length} exercício(s) com versão encontrados.
             </p>
             <ul className={styles.exerciseList}>
             {filteredExercises.map(({ latestVersion: exerciseVersion, latestPublishedVersion }) => {
@@ -133,7 +153,10 @@ export default async function AdminExerciciosPage({ searchParams }: AdminExercic
                       <Link
                         aria-label={`Abrir exercício ${exerciseVersion.name}`}
                         className={styles.openLink}
-                        href={"/admin/exercicios/" + exerciseVersion.exercise_id}
+                        href={"/admin/exercicios/" + exerciseVersion.exercise_id +
+                          (searchTerm || statusFilter !== "all"
+                            ? "?q=" + encodeURIComponent(searchTerm) + "&status=" + encodeURIComponent(statusFilter)
+                            : "")}
                       >
                         Abrir
                       </Link>
@@ -142,7 +165,10 @@ export default async function AdminExerciciosPage({ searchParams }: AdminExercic
                       "Versão " +
                       exerciseVersion.version_number +
                       ". " +
-                      publishedMeta
+                      publishedMeta +
+                      (searchTerm && matchingExerciseNameVersion(versionsByExercise.get(exerciseVersion.exercise_id) ?? [], searchTerm)?.id !== exerciseVersion.id
+                        ? " Correspondência encontrada também no histórico."
+                        : "")
                     }
                     name={exerciseVersion.name}
                     status={
@@ -159,6 +185,21 @@ export default async function AdminExerciciosPage({ searchParams }: AdminExercic
               );
             })}
           </ul>
+          {filteredIncomplete.length > 0 ? (
+            <ul className={styles.exerciseList} aria-label="Cadastros sem versão inicial">
+              {filteredIncomplete.map((parent) => (
+                <li key={parent.id} className={styles.incompleteRow}>
+                  <div>
+                    <strong>Exercício sem versão inicial</strong>
+                    <p>O cadastro existe, mas nenhuma versão foi registrada. Recupere o rascunho sem publicar.</p>
+                  </div>
+                  <Link className={styles.openLink} href={`/admin/exercicios/${parent.id}?status=incomplete`}>
+                    Retomar versão inicial
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : null}
           </>
         )}
       </Section>
