@@ -14,7 +14,9 @@ test("new client onboarding requires a valid name and starts active", () => {
   const actions = read("app/admin/clientes/nova/actions.ts");
   const invitation = read("lib/onboarding/client-invitation.ts");
 
-  assert.match(actions, /validateClientDisplayName/);
+  assert.match(actions, /parseInvitationFormFields/);
+  const validation=read("lib/onboarding/validation.ts");
+  assert.match(validation, /validateClientDisplayName\(draft.displayName\)/);
   assert.match(invitation, /displayName\.length < 2/);
   assert.match(invitation, /status: "active"/);
 });
