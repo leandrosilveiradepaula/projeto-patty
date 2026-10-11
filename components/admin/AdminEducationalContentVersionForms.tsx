@@ -9,6 +9,7 @@ import {
   updateEducationalContentDraftAction,
 } from "@/app/admin/conteudos/[contentId]/actions";
 import { Alert } from "@/components/ui/Alert";
+import { MAX_CONTENT_DISPLAY_ORDER } from "@/lib/content/display-order";
 import { Button } from "@/components/ui/Button";
 import styles from "@/app/admin/conteudos/[contentId]/page.module.css";
 
@@ -108,7 +109,7 @@ export function AdminEducationalContentDraftSaveForm({
       </label>
       <label className={styles.field}>
         <span>Ordem de exibição</span>
-        <input defaultValue={displayOrder} min="0" name="displayOrder" required type="number" />
+        <input defaultValue={displayOrder} max={MAX_CONTENT_DISPLAY_ORDER} min="1" name="displayOrder" required step="1" type="number" />
       </label>
     </VersionMutationForm>
   );

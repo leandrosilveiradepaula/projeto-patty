@@ -143,7 +143,9 @@ export default async function AdminEducationalContentDetailPage({
             />
             <p className={styles.description}>
               {currentCanPublish
-                ? "Publicar torna a versão elegível para liberação manual por cliente. Não há liberação automática."
+                ? currentAssets.length > 0
+                  ? "Após publicar, esta versão com arquivo poderá ser liberada manualmente para cada cliente. Não há liberação automática."
+                  : "Este tipo pode ser publicado sem arquivo, mas uma versão publicada não aceita anexos posteriores e não poderá ser liberada sem arquivo. Para distribuição, registre um arquivo no rascunho antes de publicar."
                 : "Esta versão é de vídeo e ainda não possui asset privado verificado registrado. O upload e o registro do asset precisam acontecer antes da publicação."}
             </p>
           </Card>
