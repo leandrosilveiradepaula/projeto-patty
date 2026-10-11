@@ -62,13 +62,13 @@ export function AdminPrivateFileUploadForm({
     setPhase(null);
 
     const formData = new FormData(event.currentTarget);
-    const selectedFile = formData.get("file");
-    if (!(selectedFile instanceof File)) {
+    const submittedFile = formData.get("file");
+    if (!(submittedFile instanceof File)) {
       setMessage("Selecione um arquivo para enviar.");
       return;
     }
 
-    const selection = validatePrivateFileUploadSelection(selectedFile, fileKind);
+    const selection = validatePrivateFileUploadSelection(submittedFile, fileKind);
     if (!selection.ok) {
       setMessage(errorMessages[selection.error] ?? "Revise o formato e o tamanho do arquivo.");
       return;
@@ -106,9 +106,9 @@ export function AdminPrivateFileUploadForm({
         .uploadToSignedUrl(
           sessionResult.session.objectPath,
           sessionResult.session.token,
-          selectedFile,
+          submittedFile,
           {
-            contentType: selectedFile.type,
+            contentType: submittedFile.type,
             upsert: false,
           },
         );

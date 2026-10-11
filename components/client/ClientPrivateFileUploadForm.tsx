@@ -54,13 +54,13 @@ export function ClientPrivateFileUploadForm() {
     setPhase(null);
 
     const formData = new FormData(event.currentTarget);
-    const selectedFile = formData.get("file");
-    if (!(selectedFile instanceof File)) {
+    const submittedFile = formData.get("file");
+    if (!(submittedFile instanceof File)) {
       setMessage("Selecione um arquivo para enviar.");
       return;
     }
 
-    const selection = validatePrivateFileUploadSelection(selectedFile, fileKind);
+    const selection = validatePrivateFileUploadSelection(submittedFile, fileKind);
     if (!selection.ok) {
       setMessage(errorMessages[selection.error] ?? "Revise o formato e o tamanho do arquivo.");
       return;
@@ -92,9 +92,9 @@ export function ClientPrivateFileUploadForm() {
       const supabase = createClient();
       const { error: uploadError } = await supabase.storage
         .from("client-private")
-        .upload(sessionResult.session.objectPath, selectedFile, {
+        .upload(sessionResult.session.objectPath, submittedFile, {
           cacheControl: "3600",
-          contentType: selectedFile.type,
+          contentType: submittedFile.type,
           upsert: false,
         });
 
