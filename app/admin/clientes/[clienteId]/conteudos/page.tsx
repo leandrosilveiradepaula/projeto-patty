@@ -15,6 +15,7 @@ import {
   listEducationalContentVersionsForCurrentAdmin,
 } from "@/lib/supabase/data-access";
 import { notFound } from "next/navigation";
+import { isUuid } from "@/lib/validation/uuid";
 import Link from "next/link";
 import styles from "./page.module.css";
 
@@ -30,9 +31,8 @@ function formatRecordedDate(value: string | null) {
   }
 
   return new Intl.DateTimeFormat("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
+    dateStyle: "short",
+    timeStyle: "short",
     timeZone: "America/Sao_Paulo",
   }).format(new Date(value));
 }
@@ -41,6 +41,7 @@ export default async function AdminClientContentPage({
   params,
 }: AdminClientContentPageProps) {
   const { clienteId } = await params;
+  if (!isUuid(clienteId)) notFound();
   const client = await getAccessibleClient(clienteId);
 
   if (!client) {
@@ -51,9 +52,15 @@ export default async function AdminClientContentPage({
     listContentReleasesForAccessibleClient(client.id),
     listEducationalContentVersionsForCurrentAdmin(),
   ]);
-  const assets = await listEducationalContentAssetsForCurrentAdminVersions(
-    contentVersions.map((version) => version.id),
-  );
+  // Asset availability is needed for published candidates and historic
+  // releases only, never for unrelated drafts in the global library.
+  const assetVersionIds = Array.from(new Set([
+    ...contentVersions.filter((version) => version.published_at !== null).map((version) => version.id),
+    ...releases.flatMap((release) => release.educational_content_versions?.id
+      ? [release.educational_content_versions.id]
+      : []),
+  ]));
+  const assets = await listEducationalContentAssetsForCurrentAdminVersions(assetVersionIds);
   const assetCountsByVersionId = new Map<string, number>();
   for (const asset of assets) {
     const versionId = asset.educational_content_version_id;
@@ -119,13 +126,14 @@ export default async function AdminClientContentPage({
             <p className={styles.notice}>
               {publishedVersionsAwaitingAsset.length} versão(ões) publicada(s) ainda
               não possuem arquivo privado registrado e, por segurança operacional,
-              não aparecem como opção de nova liberação. Registre e verifique o asset
-              na biblioteca antes de liberar para a cliente.
+              não aparecem como opção de nova liberação. Versões já publicadas
+              não podem receber novos arquivos: prepare uma nova versão em rascunho,
+              registre e verifique o asset e publique essa nova versão antes de liberar.
             </p>
             <ul className={styles.contentList}>
               {sortClientContentReleaseOptions(publishedVersionsAwaitingAsset).map((version) => (
                 <li key={version.id}>
-                  <Link href={`/admin/conteudos/${version.educational_content_id}`}>
+                  <Link href={`/admin/conteudos/${version.educational_content_id}?versao=${version.id}#assets-do-conteudo`}>
                     {version.title} · versão {version.version_number} · verificar na biblioteca
                   </Link>
                 </li>
@@ -133,6 +141,9 @@ export default async function AdminClientContentPage({
             </ul>
           </Card>
         ) : null}
+        <p className={styles.notice} role="status">
+          {availableVersions.length} versão(ões) publicada(s), com arquivo registrado e ainda não liberada(s) para esta cliente.
+        </p>
         {availableVersions.length === 0 ? (
           <EmptyState
             description={
@@ -162,6 +173,9 @@ export default async function AdminClientContentPage({
         description="Conteúdos já liberados para esta cliente."
         title="Conteúdos liberados"
       >
+        <p className={styles.notice}>
+          {visibleReleases.length} liberação(ões) com versão consultável no histórico desta cliente.
+        </p>
         {visibleReleases.length === 0 ? (
           <EmptyState
             description={missingReleaseVersions > 0
@@ -189,7 +203,7 @@ export default async function AdminClientContentPage({
                 <li id={`liberacao-${release.id}`} key={release.id}>
                   <ContentListItem
                     category={contentVersion.category_key ?? "Não informado"}
-                    meta={`Versão ${contentVersion.version_number} · ${assetCountsByVersionId.get(contentVersion.id) ?? 0} arquivo(s) registrado(s). Liberado em ${formatRecordedDate(release.released_at)}.`}
+                    meta={`Versão ${contentVersion.version_number} · ${assetCountsByVersionId.get(contentVersion.id) ?? 0} arquivo(s) registrado(s) nesta consulta. Liberado em ${formatRecordedDate(release.released_at)}.`}
                     action={
                       <Link href={
                         parentContentIdByVersionId.has(contentVersion.id)
@@ -211,7 +225,7 @@ export default async function AdminClientContentPage({
                       >
                         {versionIdsWithAssets.has(contentVersion.id)
                           ? "Arquivo registrado"
-                          : "Liberado sem arquivo"}
+                          : "Arquivo não localizado"}
                       </Badge>
                     }
                     title={contentVersion.title}
