@@ -22,7 +22,7 @@ export function PasswordResetForm() {
   );
 
   return (
-    <form action={formAction} className={styles.form} noValidate>
+    <form action={formAction} aria-busy={isPending} className={styles.form}>
       {state.message ? (
         <Alert live="assertive" title="Não foi possível redefinir" variant="critical">
           {state.message}
@@ -33,8 +33,11 @@ export function PasswordResetForm() {
           <TextInput
             {...fieldProps}
             autoComplete="new-password"
+            disabled={isPending}
             minLength={8}
+            maxLength={128}
             name="password"
+            disabled={isPending}
             required
             type="password"
           />
@@ -46,12 +49,14 @@ export function PasswordResetForm() {
             {...fieldProps}
             autoComplete="new-password"
             minLength={8}
+            maxLength={128}
             name="passwordConfirmation"
             required
             type="password"
           />
         )}
       </FormField>
+      {isPending ? <p role="status">Aguarde a confirmação antes de tentar novamente.</p> : null}
       <Button loading={isPending} type="submit">
         Salvar nova senha
       </Button>

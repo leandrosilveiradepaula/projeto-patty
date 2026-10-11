@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useActionState } from "react";
 
 import {
@@ -28,7 +27,7 @@ export function PasswordRecoveryRequestForm() {
   if (state.success) {
     return (
       <div className={styles.successState}>
-        <Alert live="polite" title="Email enviado" variant="success">
+        <Alert live="polite" title="Solicitação recebida" variant="success">
           {state.message ??
             "Se este email estiver cadastrado, você receberá um link para redefinir sua senha."}
         </Alert>
@@ -36,15 +35,15 @@ export function PasswordRecoveryRequestForm() {
           Abra sua caixa de entrada e clique no link de recuperação para
           continuar. Você não precisa informar o email novamente nesta tela.
         </p>
-        <Link className={styles.retryLink} href="/recuperar-senha">
+        <a className={styles.retryLink} href="/recuperar-senha">
           Solicitar outro link
-        </Link>
+        </a>
       </div>
     );
   }
 
   return (
-    <form action={formAction} className={styles.form} noValidate>
+    <form action={formAction} aria-busy={isPending} className={styles.form}>
       {state.message ? (
         <Alert
           live="assertive"
@@ -60,12 +59,15 @@ export function PasswordRecoveryRequestForm() {
             {...fieldProps}
             autoComplete="email"
             inputMode="email"
+            maxLength={254}
             name="email"
+            disabled={isPending}
             required
             type="email"
           />
         )}
       </FormField>
+      {isPending ? <p role="status">Aguarde a confirmação antes de tentar novamente.</p> : null}
       <Button loading={isPending} type="submit">
         Enviar link de recuperação
       </Button>

@@ -22,18 +22,22 @@ export function ImplicitRecoverySessionBridge() {
     }
 
     void (async () => {
-      const supabase = createClient();
-      const { error } = await supabase.auth.setSession({
-        access_token: parsed.accessToken,
-        refresh_token: parsed.refreshToken,
-      });
+      try {
+        const supabase = createClient();
+        const { error } = await supabase.auth.setSession({
+          access_token: parsed.accessToken,
+          refresh_token: parsed.refreshToken,
+        });
 
-      if (error) {
+        if (error) {
+          window.location.replace("/redefinir-senha?error=invalid");
+          return;
+        }
+
+        window.location.replace("/redefinir-senha");
+      } catch {
         window.location.replace("/redefinir-senha?error=invalid");
-        return;
       }
-
-      window.location.replace("/redefinir-senha");
     })();
   }, []);
 
