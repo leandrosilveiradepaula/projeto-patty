@@ -61,7 +61,7 @@ test("training history navigation points to published version IDs, not drafts or
   assert.ok(training.includes("publishedTrainingVersions(trainingVersions)"));
   assert.ok(training.includes("publishedItems.length > 1"));
   assert.ok(training.includes('aria-label="Ir para treino publicado"'));
-  assert.ok(training.includes('href={`#treino-versao-${version.id}`}'));
+  assert.ok(training.includes('trainingClientArchivedVersionHref('));
   assert.ok(training.includes('id={`treino-versao-${latestPublished.id}`}'));
   assert.ok(training.includes('id={`treino-versao-${version.id}`}'));
   assert.ok(training.includes("<ClientHistoryDisclosure"));

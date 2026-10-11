@@ -55,7 +55,7 @@ test("historical professional version uses a native disclosure which reveals dee
   assert.ok(disclosure.includes("window.addEventListener(\"hashchange\", revealTarget)"));
   assert.ok(disclosure.includes("details.contains(target)"));
   assert.ok(admin.includes('aria-label="Ir para treino publicado no histórico"'));
-  assert.ok(admin.includes('href={`#versao-treino-${version.id}`}'));
+  assert.ok(admin.includes('trainingAdminVersionHref('));
 });
 
 test("drafts and reviewed versions keep metadata only and never masquerade as published", () => {
@@ -72,7 +72,7 @@ test("drafts and reviewed versions keep metadata only and never masquerade as pu
 test("the current professional published preview reuses exactly the same archived items", () => {
   assert.ok(admin.includes("sortedHistoryItemsByVersion.get(latestPublished.id) ?? []"));
   assert.ok(admin.includes("sortedPublishedItems.map((item) =>"));
-  assert.ok(admin.includes('href={`#versao-treino-${latestPublished.id}`}'));
+  assert.ok(admin.includes('trainingAdminVersionHref('));
   assert.ok(admin.includes('Conferir versão publicada no histórico'));
 });
 
