@@ -1,3 +1,4 @@
+import { compareClientPublishedNutrition, selectClientPublishedComparison } from "@/lib/protocol/client-published-comparison";
 import { ClientPublishedHistoryExplorer, ClientPublishedNutritionExplorer } from "@/components/client/ClientPublishedProtocolExplorer";
 import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
 import { ClientProtocolNutrition } from "@/components/client/ClientProtocolNutrition";
@@ -29,8 +30,8 @@ function formatProtocolType(value: string) {
   return value;
 }
 
-export default async function ClienteProtocoloPage({ searchParams }: { searchParams: Promise<{ publicacao?: string }> }) {
-  const { publicacao } = await searchParams;
+export default async function ClienteProtocoloPage({ searchParams }: { searchParams: Promise<{ publicacao?: string; comparacao?: string }> }) {
+  const { publicacao, comparacao } = await searchParams;
   const client = await getCurrentClient();
   const publications = client
     ? await listPublishedProtocolsForCurrentClient(client.id)
@@ -39,6 +40,10 @@ export default async function ClienteProtocoloPage({ searchParams }: { searchPar
   const selection = selectClientPublishedVersion(publications ?? [], publicacao);
   const publication = publications?.find((item) => item.id === selection.selectedId) ?? null;
   const view = publication?.mealPlan ? buildClientPublishedNutritionView(publication.mealPlan) : null;
+  const comparisonChoice = selectClientPublishedComparison(publications ?? [],selection.selectedId,comparacao);
+  const baseline = comparisonChoice.baseline;
+  const baselineView = baseline?.mealPlan ? buildClientPublishedNutritionView(baseline.mealPlan) : null;
+  const comparison = publication && baseline ? compareClientPublishedNutrition(view,baselineView) : null;
 
   return (
     <>
@@ -178,6 +183,39 @@ export default async function ClienteProtocoloPage({ searchParams }: { searchPar
           ) : null}
         </div>
       )}
+      {client && publication && publications && publications.length > 1 ? (
+        <Section id="comparar-protocolos" title="Comparar publicações aprovadas" description="Comparação descritiva entre duas publicações liberadas pela Patty. Mudanças nos registros não indicam recomendação, melhora, piora ou meta diária.">
+          <form action="/cliente/protocolo" method="get" className={styles.compareForm}>
+            <input type="hidden" name="publicacao" value={publication.id}/>
+            <label>Comparar com a publicação
+              <select name="comparacao" defaultValue={baseline?.id ?? ""}>
+                {baseline ? null : <option value="">Escolha uma publicação</option>}
+                {comparisonChoice.options.map(item => <option key={item.id} value={item.id}>Versão {item.versionNumber} · {formatPublishedAt(item.publishedAt)}</option>)}
+              </select>
+            </label>
+            <button type="submit">Comparar versões</button>
+          </form>
+          {comparisonChoice.invalid ? <p role="status" className={styles.historyNotice}>A versão de comparação solicitada não está disponível para esta conta. Usando a publicação anterior, quando existente.</p> : null}
+          {!baseline ? <EmptyState title="Escolha outra publicação" description="Não há publicação anterior à selecionada. Selecione outra versão publicada para comparar seus registros." /> : null}
+          {baseline && comparison ? <>
+            <p className={styles.historyNotice}>Comparando versão {baseline.versionNumber} ({formatPublishedAt(baseline.publishedAt)}) com versão {publication.versionNumber} ({formatPublishedAt(publication.publishedAt)}). Os totais incluem todas as variações registradas; não são uma orientação para o dia.</p>
+            <p role="status" className={styles.historyNotice}>{comparison.changed} característica(s) estrutural(is) com diferença registrada.</p>
+            {comparison.totalsOmitted ? <p role="alert" className={styles.historyNotice}>Existem {comparison.invalidDoseRecords} lançamento(s) de doses com quantidades inválidas. A soma de doses foi omitida nesta comparação; consulte a Patty.</p> : null}
+            <div className={styles.compareScroll}>
+              <table className={styles.compareTable}>
+                <thead><tr><th scope="col">Registro</th><th scope="col">Versão {baseline.versionNumber}</th><th scope="col">Versão {publication.versionNumber}</th></tr></thead>
+                <tbody>{comparison.rows.map(row => <tr key={row.label}>
+                  <th scope="row">{row.label}</th><td>{row.baseline}</td><td>{row.selected}</td>
+                </tr>)}</tbody>
+              </table>
+            </div>
+            <nav aria-label="Consultar publicações comparadas" className={styles.sectionNavigation}>
+              <Link href={publishedVersionHref(baseline.id)}>Abrir versão {baseline.versionNumber}</Link>
+              <Link href={publishedVersionHref(publication.id)}>Abrir versão {publication.versionNumber}</Link>
+            </nav>
+          </> : null}
+        </Section>
+      ) : null}
       <ClientJourneyNextSteps areas={["feedback","training","contents","index"]} />
     </>
   );
