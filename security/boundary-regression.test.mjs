@@ -1326,7 +1326,14 @@ test("initial activation supports admin and client but preserves admin MFA routi
     "utf8",
   );
 
-  assert.match(page, /Boolean\(context\?\.role\)/);
+  const activationGate = await readFile(
+    path.join(ROOT, "components", "auth", "ActivationSessionGate.tsx"),
+    "utf8",
+  );
+  assert.match(page, /getCurrentAuthContext\(\)/);
+  assert.match(page, /<ActivationSessionGate invalid=/);
+  assert.match(activationGate, /phase === "ready" && role && !invalid/);
+  assert.match(activationGate, /parseImplicitInviteFragment\(window\.location\.hash\)/);
   assert.match(action, /getCurrentAuthContext\(\)/);
   assert.match(action, /context\.role === "admin" \? "\/mfa\/admin\/setup" : "\/cliente\/anamnese"/);
   assert.doesNotMatch(action, /requireRoleIdentity\("client"\)/);
