@@ -69,13 +69,13 @@ test("educational release requires one explicit confirmation and blocks a second
   assert.ok(releaseForm.includes("event.preventDefault()"));
   assert.ok(releaseForm.includes("router.refresh()"));
   assert.ok(releaseForm.includes("Confirmar liberação"));
-  assert.ok(releaseForm.includes("disabled={isPending}"));
+  assert.ok(releaseForm.includes("disabled={isPending || state.success}"));
 });
 
 test("Patty sees which specific published content versions are awaiting an asset", () => {
   assert.ok(adminPage.includes("publishedVersionsAwaitingAsset"));
   assert.ok(adminPage.includes("sortClientContentReleaseOptions(publishedVersionsAwaitingAsset)"));
-  assert.ok(adminPage.includes('href={`/admin/conteudos/${version.educational_content_id}`}'));
+  assert.ok(adminPage.includes('href={`/admin/conteudos/${version.educational_content_id}?versao=${version.id}#assets-do-conteudo`'));
   assert.ok(adminPage.includes("não aparecem como opção de nova liberação"));
 });
 
