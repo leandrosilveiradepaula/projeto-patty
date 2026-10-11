@@ -21,7 +21,7 @@ test("both upload forms preflight using the same metadata validator as the serve
 test("both file upload journeys block duplicate submit until their async flow completes", () => {
   for (const source of [client, admin]) {
     assert.ok(source.includes("const inFlightRef = useRef(false)"));
-    assert.ok(source.includes("if (inFlightRef.current) return"));
+    assert.ok(source.includes("if (inFlightRef.current || ambiguousCompletion || !selectionConfirmed) return"));
     assert.ok(source.includes("inFlightRef.current = true"));
     assert.ok(source.includes("inFlightRef.current = false"));
     assert.ok(source.includes("aria-busy={isPending}"));
