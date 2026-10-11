@@ -63,7 +63,7 @@ test("client receives links to exact released snapshots without exposing drafts"
   const page=read("app/cliente/protocolo/page.tsx");
   assert.match(page,/listPublishedProtocolsForCurrentClient/);
   assert.match(page,/publications\.length > 1/);
-  assert.match(page,/aria-label="Ir para plano publicado"/);
+  assert.match(page,/aria-label="Consultar versões publicadas"/);
   assert.match(page,/id=\{\`publicacao-\$\{publication\.id\}\`\}/);
 });
 
