@@ -21,6 +21,7 @@ import {
 } from "@/app/admin/protocolos/[protocoloId]/actions";
 import type { AdminProtocolVersionPlanData } from "@/components/admin/AdminProtocolVersionPlan";
 import { Alert } from "@/components/ui/Alert";
+import { draftPlanAnchor, draftVariantAddAnchor, draftCycleAddAnchor, draftVariantAnchor, draftMealAnchor, draftCycleAnchor } from "@/lib/protocol/draft-navigation";
 import { serializeDraftCycleSteps } from "@/lib/protocol/cycle-editor";
 import { serializeOriginalDraftLabel } from "@/lib/protocol/draft-snapshots";
 import { Button } from "@/components/ui/Button";
@@ -720,7 +721,7 @@ function RemoveEmptyCycleForm({ cycle, mealPlanVersionId, protocolId, protocolVe
 function ManualCycleEditor({ plan, protocolId, protocolVersionId }: {
   plan: AdminProtocolVersionPlanData; protocolId: string; protocolVersionId: string;
 }) {
-  return <section className={styles.cycleEditor} aria-label="Montagem manual dos ciclos">
+  return <section className={styles.cycleEditor} id={draftCycleAddAnchor()} aria-label="Montagem manual dos ciclos">
     <h5>Ciclos alimentares</h5>
     <p className={styles.help}>
       Opcional. Escolha a sequência manualmente, incluindo repetições quando necessário.
@@ -729,7 +730,7 @@ function ManualCycleEditor({ plan, protocolId, protocolVersionId }: {
     <AddCycleForm mealPlanVersionId={plan.id} protocolId={protocolId} protocolVersionId={protocolVersionId} />
     {plan.cycles.length === 0 ? <p className={styles.empty}>Nenhum ciclo registrado neste rascunho.</p> : null}
     {plan.cycles.map((cycle, cycleIndex) => (
-      <section className={styles.cyclePanel} key={cycle.id}>
+      <section className={styles.cyclePanel} id={draftCycleAnchor(cycle.id)} key={cycle.id}>
         <h6>Ciclo {cycleIndex + 1} · {cycle.steps.length} etapa(s)</h6>
         {cycle.steps.length === 0 ? (
           <p className={styles.empty}>Este ciclo está vazio. Adicione uma variação ou exclua o ciclo.</p>
@@ -774,7 +775,7 @@ export function AdminProtocolDraftEditor({
 }: AdminProtocolDraftEditorProps) {
   if (!plan) {
     return (
-      <div className={styles.editor}>
+      <div className={styles.editor} id={draftPlanAnchor()}>
         <h5>Montagem do rascunho</h5>
         <CreatePlanForm
           protocolId={protocolId}
@@ -785,7 +786,7 @@ export function AdminProtocolDraftEditor({
   }
 
   return (
-    <div className={styles.editor}>
+    <div className={styles.editor} id={draftPlanAnchor()}>
       <div className={styles.heading}>
         <div>
           <h5>Montagem do rascunho</h5>
@@ -798,16 +799,16 @@ export function AdminProtocolDraftEditor({
 
       <ManualCycleEditor plan={plan} protocolId={protocolId} protocolVersionId={protocolVersionId} />
 
-      <AddVariantForm
+      <div id={draftVariantAddAnchor()}><AddVariantForm
         mealPlanVersionId={plan.id}
         protocolId={protocolId}
         protocolVersionId={protocolVersionId}
-      />
+      /></div>
 
       {plan.variants.length > 0 ? (
         <div className={styles.variants}>
           {plan.variants.map((variant) => (
-            <section className={styles.variant} key={variant.id}>
+            <section className={styles.variant} id={draftVariantAnchor(variant.id)} key={variant.id}>
               <div className={styles.variantHeader}>
                 <h6>{variant.label ?? "Variação sem nome"}</h6>
                 <span>{variant.meals.length} refeição(ões)</span>
@@ -842,7 +843,7 @@ export function AdminProtocolDraftEditor({
               {variant.meals.length > 0 ? (
                 <div className={styles.meals}>
                   {variant.meals.map((meal) => (
-                    <div className={styles.meal} key={meal.id}>
+                    <div className={styles.meal} id={draftMealAnchor(meal.id)} key={meal.id}>
                       <div className={styles.mealHeader}>
                         <strong>{meal.label ?? `Refeição ${meal.position}`}</strong>
                         <span>{meal.doseAllocations.length} macro(s)</span>
