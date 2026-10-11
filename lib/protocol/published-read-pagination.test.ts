@@ -83,6 +83,7 @@ test("the client UI still shows only publications and renders immutable meal sna
   const page = read("app/cliente/protocolo/page.tsx");
   assert.match(page, /listPublishedProtocolsForCurrentClient\(client\.id\)/);
   assert.match(page, /Nenhum protocolo foi publicado para você/);
-  assert.match(page, /doseGroups: meal\.doseAllocations/);
+  assert.match(page, /doseGroups: meal\.doseGroups/);
+  assert.match(page, /buildClientPublishedNutritionView\(publication\.mealPlan\)/);
   assert.doesNotMatch(page, /listAccessibleProtocolVersions/);
 });

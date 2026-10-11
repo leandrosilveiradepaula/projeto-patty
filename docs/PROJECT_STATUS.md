@@ -1,3 +1,7 @@
+## Navegação do plano alimentar publicado — 2026-10-11
+
+Cliente consulta uma publicação exata já liberada, distingue plano atual de versões anteriores, navega por ciclo/etapa/variação e lê refeições e doses sem expor chaves internas de rascunho. Variações seguem a ordem técnica factual de criação; não há escolha automática de dia/fase, macro ou publicação. Detalhes em `docs/AUDIT_CLIENT_PUBLISHED_PROTOCOL_NAVIGATION_2026_10_11.md`. E2E autenticado continua pendente. A migration de edição manual dos ciclos (#682) ainda precisa ser conciliada com o histórico de aplicação remota.
+
 ## Protocolos: concorrência de edição manual e comparação de ciclos — 2026-10-11
 
 A auditoria seguinte ao editor de ciclos corrigiu atualizações silenciosas de variações, refeições e doses, exclusão de dose alterada em outra aba, exclusão de refeição com dados de origem obsoletos e remoção de variações ainda presentes em ciclos. A comparação factual entre versões agora informa a sequência persistida dos ciclos. Nenhum comportamento nutricional automático, schema ou RLS foi alterado. E2E autenticado com Supabase real permanece pendente. Consulte `docs/AUDIT_PROTOCOL_DRAFT_CONCURRENCY_2026_10_11.md`.

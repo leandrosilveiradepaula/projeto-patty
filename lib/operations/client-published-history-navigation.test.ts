@@ -38,21 +38,22 @@ test("historical assessment still uses the same accessible native disclosure", (
   assert.ok(!disclosure.includes("open={true}"));
 });
 
-test("previously released nutritional protocol anchors now reveal the selected immutable publication", () => {
+test("client selects one published nutritional version using its authorized publication ID", () => {
   assert.ok(protocol.includes("listPublishedProtocolsForCurrentClient(client.id)"));
-  assert.ok(protocol.includes('href={`#publicacao-${publication.id}`}'));
+  assert.ok(protocol.includes("selectClientPublishedVersion(publications ?? [], publicacao)"));
+  assert.ok(protocol.includes("publishedVersionHref(item.id)"));
   assert.ok(protocol.includes('id={`publicacao-${publication.id}`}'));
-  assert.ok(protocol.includes("<ClientHistoryDisclosure"));
-  assert.ok(protocol.includes('key={publication.id}'));
-  assert.ok(protocol.includes("publicationIndex === 0"));
+  assert.ok(protocol.includes("publication.id"));
+  assert.ok(protocol.includes("selection.isHistorical"));
+  assert.ok(protocol.includes("Nenhuma fase ou etapa diária é escolhida automaticamente"));
   assert.ok(!protocol.includes("createAccessibleProtocol("));
 });
 
 test("same-day published protocol links distinguish records without assuming a clinical phase", () => {
-  assert.ok(protocol.includes("publications.map((publication, index) =>"));
-  assert.ok(protocol.includes("Plano anterior"));
-  assert.ok(protocol.includes("index + 1"));
-  assert.ok(protocol.includes("publication.versionNumber"));
+  assert.ok(protocol.includes("publications.map((item, index) =>"));
+  assert.ok(protocol.includes("Versão"));
+  assert.ok(protocol.includes("index === 0"));
+  assert.ok(protocol.includes("item.versionNumber"));
   assert.ok(!protocol.includes("Cutting 3"));
 });
 
