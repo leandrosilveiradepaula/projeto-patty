@@ -23,7 +23,7 @@ test("factual evolution shows observations separately from comparisons on both s
     assert.ok(source.includes("coverage.singleObservationSeriesCount > 0"), path);
     assert.ok(source.includes("mesma medida e unidade"), path);
     assert.ok(source.includes("buildFactualProgressSeries("), path);
-    assert.ok(source.includes('id={`medida-${index}`}'), path);
+    assert.ok(source.includes(path.startsWith("app/cliente/") ? 'id={`medida-${originalIndex}`}' : 'id={`medida-${index}`}'), path);
     assert.ok(!source.includes("series.indexOf(item)"), path);
     assert.ok(!source.includes("melhora automática"), path);
   }
