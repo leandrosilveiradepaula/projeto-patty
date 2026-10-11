@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { canPublishEducationalContentVersion } from "@/lib/content/publication-eligibility";
+import { parseContentDisplayOrder } from "@/lib/content/display-order";
 import { verifyPrivateBlobAsset } from "@/lib/content/private-blob-integrity";
 import { requireRole } from "@/lib/supabase/auth";
 import {
@@ -33,13 +34,10 @@ function readTitle(formData: FormData) {
 }
 
 function readDisplayOrder(formData: FormData) {
-  const raw = formData.get("displayOrder");
-  const value = typeof raw === "string" && /^(0|[1-9][0-9]*)$/.test(raw.trim()) ? Number(raw.trim()) : Number.NaN;
-
-  if (!Number.isSafeInteger(value) || value < 0) {
-    throw new Error("Informe uma ordem de exibição válida");
+  const value = parseContentDisplayOrder(formData.get("displayOrder"));
+  if (value === null) {
+    throw new Error("Informe uma ordem inteira entre 1 e 2147483647.");
   }
-
   return value;
 }
 

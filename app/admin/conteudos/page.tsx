@@ -1,4 +1,4 @@
-import { createEducationalContentDraftAction } from "@/app/admin/conteudos/actions";
+import { AdminEducationalContentCreateForm } from "@/components/admin/AdminEducationalContentCreateForm";
 import { ContentListItem } from "@/components/admin/ContentListItem";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -22,6 +22,7 @@ function normalizeSearchValue(value: string) {
 }
 
 function formatPublishedDate(value: string) {
+  if (!Number.isFinite(Date.parse(value))) return "Data indisponível";
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     month: "2-digit",
@@ -46,7 +47,7 @@ export default async function AdminConteudosPage({ searchParams }: AdminConteudo
     });
   const contents = summaries;
 
-  const searchTerm = q?.trim() ?? "";
+  const searchTerm = typeof q === "string" ? q.trim() : "";
   const normalizedSearchTerm = normalizeSearchValue(searchTerm);
   const statusFilter = status === "draft" || status === "published" ? status : "all";
   const filteredContents = contents.filter((summary) => {
@@ -70,26 +71,12 @@ export default async function AdminConteudosPage({ searchParams }: AdminConteudo
         title="Novo conteúdo educacional"
       >
         <Card className={styles.createCard}>
-          <form action={createEducationalContentDraftAction} className={styles.createForm}>
-            <label className={styles.field}>
-              <span>Título</span>
-              <input
-                maxLength={200}
-                name="title"
-                placeholder="Ex.: Como utilizar a balança de alimentos"
-                required
-              />
-            </label>
-            <label className={styles.orderField}>
-              <span>Ordem</span>
-              <input defaultValue="0" min="0" name="displayOrder" required type="number" />
-            </label>
-            <Button type="submit">Criar rascunho</Button>
-          </form>
+          <AdminEducationalContentCreateForm />
         </Card>
       </Section>
 
       <Section
+        id="biblioteca-conteudos"
         description="Itens publicados podem ser liberados por cliente. Rascunhos permanecem internos."
         title="Biblioteca educacional"
       >
