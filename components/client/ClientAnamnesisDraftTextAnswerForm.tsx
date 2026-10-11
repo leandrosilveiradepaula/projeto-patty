@@ -21,6 +21,7 @@ type ClientAnamnesisDraftTextAnswerFormProps = {
   initialValue: string;
   label: string;
   questionId: string;
+  initialAnswerExists: boolean;
   required: boolean;
   submissionId: string;
 };
@@ -29,6 +30,7 @@ export function ClientAnamnesisDraftTextAnswerForm({
   initialValue,
   label,
   questionId,
+  initialAnswerExists,
   required,
   submissionId,
 }: ClientAnamnesisDraftTextAnswerFormProps) {
@@ -40,6 +42,7 @@ export function ClientAnamnesisDraftTextAnswerForm({
   const [state, formAction, isPending] = useActionState(action, initialState);
   const [value, setValue] = useState(initialValue);
   const formRef = useRef<HTMLFormElement>(null);
+  const persistedExistsRef = useRef(initialAnswerExists);
   const lastSavedValueRef = useRef(initialValue);
   const pendingValueRef = useRef<string | null>(null);
   const failedValueRef = useRef<string | null>(null);
@@ -51,6 +54,7 @@ export function ClientAnamnesisDraftTextAnswerForm({
 
     if (state.success) {
       lastSavedValueRef.current = pendingValueRef.current;
+      persistedExistsRef.current = true;
       failedValueRef.current = null;
       pendingValueRef.current = null;
       return;
@@ -97,6 +101,8 @@ export function ClientAnamnesisDraftTextAnswerForm({
 
   return (
     <form action={formAction} className={styles.form} ref={formRef}>
+      <input name="expectedAnswerExists" type="hidden" value={persistedExistsRef.current ? "1" : "0"} />
+      <input name="expectedAnswerValue" type="hidden" value={persistedExistsRef.current ? (lastSavedValueRef.current ?? "") : ""} />
       {state.message && !state.success ? (
         <Alert
           live="assertive"

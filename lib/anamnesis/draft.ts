@@ -145,7 +145,7 @@ async function updateDraftAnswer(
   const { data, error } = await supabase
     .from("anamnesis_answers")
     .update({ answer_value: input.answerValue })
-     .eq("id", input.answerId)
+    .eq("id", input.answerId)
     .eq("answer_value", draftAnswerJsonbFilter(input.expectedAnswerValue))
     .select("id, submission_id, question_id, answer_value, updated_at")
     .maybeSingle();
