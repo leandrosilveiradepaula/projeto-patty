@@ -1,3 +1,4 @@
+import { selectPublishedTrainingComparison, trainingVersionComparisonHref, clientTrainingRequestExactHref } from "@/lib/training/history-navigation";
 import { parseTrainingRequestFilters, exploreTrainingRequests, trainingRequestFilteredHref } from "@/lib/training/history-navigation";
 import { compareTrainingVersions, paginateTrainingRequests, trainingRequestHistoryHref } from "@/lib/training/version-inspection";
 import { TrainingVersionComparisonView } from "@/components/training/TrainingVersionComparisonView";
@@ -34,9 +35,9 @@ function formatDateTime(value: string) {
   }).format(new Date(value));
 }
 
-export default async function ClientTrainingPage({ searchParams }: { searchParams: Promise<{ pedidos?: string; origem?: string; observacao?: string; periodo?: string; ordem?: string }> }) {
+export default async function ClientTrainingPage({ searchParams }: { searchParams: Promise<{ pedidos?: string; origem?: string; observacao?: string; periodo?: string; ordem?: string; comparar?: string }> }) {
   const search = await searchParams;
-  const { pedidos } = search;
+  const { pedidos, comparar } = search;
   const requestFilters = parseTrainingRequestFilters(search);
   const client = await getCurrentClient();
 
@@ -78,11 +79,15 @@ export default async function ClientTrainingPage({ searchParams }: { searchParam
   }));
   const trainingItems = publishedItems[0]?.items ?? [];
   const previousPublishedTraining = publishedItems[1] ?? null;
-  const comparison = latestPublished ? compareTrainingVersions(
-    previousPublishedTraining?.version ?? null,
-    previousPublishedTraining?.items ?? [],
-    latestPublished,
-    trainingItems,
+  const comparisonSelection = selectPublishedTrainingComparison(publishedVersions, comparar);
+  const comparedIndex = publishedItems.findIndex(row => row.version.id === comparisonSelection.selected?.id);
+  const compared = comparedIndex >= 0 ? publishedItems[comparedIndex] : null;
+  const priorCompared = comparedIndex >= 0 ? publishedItems[comparedIndex + 1] ?? null : null;
+  const comparison = compared ? compareTrainingVersions(
+    priorCompared?.version ?? null,
+    priorCompared?.items ?? [],
+    compared.version,
+    compared.items,
   ) : null;
   const newRequestAfterPublication = Boolean(
     latestPublished && orderedRequests[0] &&
@@ -106,7 +111,7 @@ export default async function ClientTrainingPage({ searchParams }: { searchParam
           Uma nova solicitação de treino foi registrada depois da publicação atual.
           A Patty poderá revisar o pedido e decidir se é necessária uma nova prescrição.
           Enquanto isso, o treino já publicado continua disponível abaixo.
-          {" "}<a href={`#pedido-treino-${orderedRequests[0].id}`}>Ver solicitação</a>
+          {" "}<a href={clientTrainingRequestExactHref("/cliente/treino",orderedRequests,orderedRequests[0].id) ?? "#suas-solicitacoes"}>Ver solicitação</a>
         </Alert>
       ) : null}
 
@@ -196,8 +201,14 @@ export default async function ClientTrainingPage({ searchParams }: { searchParam
         )}
       </Section>
 
-      {comparison && previousPublishedTraining ? (
-        <Section title="O que mudou no treino publicado" description="Comparação factual com a publicação anterior. Alterações registradas não representam recomendação de progressão.">
+      {publishedItems.length > 1 ? (
+        <nav aria-label="Comparar publicações de treino" className={styles.publishedNavigation}>
+          {publishedVersions.map(version => <Link key={version.id} href={trainingVersionComparisonHref("/cliente/treino",publishedVersions,version.id,requestFilters) ?? "/cliente/treino"}>Comparar versão {version.version_number}</Link>)}
+        </nav>
+      ) : null}
+      {comparisonSelection.invalid ? <p role="status" className={styles.note}>A versão solicitada não está publicada ou não está disponível neste histórico. Exibindo a publicação atual.</p> : null}
+      {comparison && priorCompared ? (
+        <Section id="comparar-publicacoes-treino" title="O que mudou no treino publicado" description="Comparação factual entre a publicação escolhida e sua antecessora cronológica. Alterações não representam recomendação de progressão.">
           <ClientHistoryDisclosure summary="Comparar treino atual com o anterior" className={styles.previousTraining}>
             <div className={styles.previousTrainingBody}><TrainingVersionComparisonView comparison={comparison} /></div>
           </ClientHistoryDisclosure>

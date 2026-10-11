@@ -66,6 +66,7 @@ test("training history navigation points to published version IDs, not drafts or
   assert.ok(training.includes('id={`treino-versao-${version.id}`}'));
   assert.ok(training.includes("<ClientHistoryDisclosure"));
   assert.ok(training.includes("publishedItems.slice(1)"));
+  assert.ok(training.includes("trainingVersionComparisonHref("));
   assert.ok(!training.includes("AdminTrainingPlanLifecycleAction"));
 });
 
@@ -74,7 +75,7 @@ test("older training requests are individually reachable inside a closed request
   assert.ok(training.includes('id={`pedido-treino-${request.id}`}'));
   assert.ok(training.includes("exploreTrainingRequests(orderedRequests,requestFilters,client.profile_id,latestPublished?.published_at,true)"));
   assert.ok(read("lib/training/history-navigation.ts").includes("excludeNewest ? latest.slice(1) : latest"));
-  assert.ok(training.includes('href={`#pedido-treino-${orderedRequests[0].id}`}'));
+  assert.ok(training.includes('clientTrainingRequestExactHref("/cliente/treino",orderedRequests,orderedRequests[0].id)'));
   assert.ok(disclosure.includes("details.contains(target)"));
 });
 

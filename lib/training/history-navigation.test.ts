@@ -3,7 +3,7 @@ import test from "node:test";
 import {
   parseTrainingRequestFilters, trainingRequestFactualOrigin, exploreTrainingRequests,
   trainingRequestFilteredHref, trainingRequestExactHref, trainingVersionExactHref,
-  trainingVersionPageHref, paginateTrainingVersions, selectPublishedTrainingComparison,
+  trainingVersionPageHref, paginateTrainingVersions, selectPublishedTrainingComparison, trainingVersionComparisonHref, clientTrainingRequestExactHref,
 } from "./history-navigation.ts";
 
 const rows = [
@@ -68,4 +68,17 @@ test("published comparison selects exact version and its chronological predecess
  assert.deepEqual([res.selected?.id,res.previous?.id,res.invalid],["new","old",false]);
  assert.deepEqual([selectPublishedTrainingComparison(input,"old").previous,selectPublishedTrainingComparison(input,"missing").invalid],[null,true]);
  assert.equal(selectPublishedTrainingComparison([{id:"draft",published_at:null}],"draft").selected,null);
+});
+
+test("direct historical client request navigation accounts for featured latest request",()=>{
+ const list=Array.from({length:25},(_,i)=>({id:"id"+i,requested_at:new Date(Date.UTC(2026,9,25-i)).toISOString(),recorded_by_profile_id:"client",note:null}));
+ assert.equal(clientTrainingRequestExactHref("/cliente/treino",list,"id0"),"/cliente/treino#pedido-treino-id0");
+ assert.equal(clientTrainingRequestExactHref("/cliente/treino",list,"id11"),"/cliente/treino?pedidos=2#pedido-treino-id11");
+ assert.equal(clientTrainingRequestExactHref("/cliente/treino",list,"missing"),null);
+});
+test("comparison links refuse draft/unknown versions and retain exact published ID",()=>{
+ const versions=[{id:"v1",published_at:"2026-10-09T10:00:00Z"},{id:"v2",published_at:"2026-10-10T10:00:00Z"},{id:"draft",published_at:null}];
+ assert.equal(trainingVersionComparisonHref("/cliente/treino",versions,"draft"),null);
+ assert.equal(trainingVersionComparisonHref("/cliente/treino",versions,"missing"),null);
+ assert.equal(trainingVersionComparisonHref("/cliente/treino",versions,"v1"),"/cliente/treino?comparar=v1#comparar-publicacoes-treino");
 });
