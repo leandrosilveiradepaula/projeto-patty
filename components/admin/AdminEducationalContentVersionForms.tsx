@@ -62,7 +62,7 @@ function VersionMutationForm({
     <form
       aria-busy={busy}
       className={styles.form}
-      onChange={() => { if (result && !result.success) setResult(null); }}
+      onChange={() => { if (result) setResult(null); }}
       onSubmit={submit}
     >
       {result ? (
