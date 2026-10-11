@@ -1,3 +1,4 @@
+import {readLibraryExplorerFilters,exploreAdminEducationalLibrary,adminEducationalLibraryHref} from "@/lib/content/admin-library-explorer";
 import { AdminEducationalContentCreateForm } from "@/components/admin/AdminEducationalContentCreateForm";
 import { ContentListItem } from "@/components/admin/ContentListItem";
 import { Badge } from "@/components/ui/Badge";
@@ -7,19 +8,10 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import { TextInput } from "@/components/ui/TextInput";
-import { summarizeLibraryVersions, matchesLibraryStatus } from "@/lib/content/admin-library-status";
 import { listEducationalContentVersionsForCurrentAdmin } from "@/lib/supabase/data-access";
 import Link from "next/link";
 import styles from "./page.module.css";
 
-
-function normalizeSearchValue(value: string) {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLocaleLowerCase("pt-BR")
-    .trim();
-}
 
 function formatPublishedDate(value: string) {
   if (!Number.isFinite(Date.parse(value))) return "Data indisponível";
@@ -32,31 +24,15 @@ function formatPublishedDate(value: string) {
 }
 
 type AdminConteudosPageProps = {
-  searchParams: Promise<{ q?: string; status?: string }>;
+  searchParams: Promise<{ q?: string; status?: string; estado?: string; categoria?: string; tipo?: string; ordem?: string; pagina?: string }>;
 };
 
 export default async function AdminConteudosPage({ searchParams }: AdminConteudosPageProps) {
-  const { q, status } = await searchParams;
+  const rawFilters=await searchParams;
+  const filters=readLibraryExplorerFilters(rawFilters);
   const contentVersions = await listEducationalContentVersionsForCurrentAdmin();
-  const summaries = [...summarizeLibraryVersions(contentVersions, (version) => version.educational_content_id).values()]
-    .sort((left, right) => {
-      if (left.latestVersion.display_order !== right.latestVersion.display_order) {
-        return left.latestVersion.display_order - right.latestVersion.display_order;
-      }
-      return left.latestVersion.title.localeCompare(right.latestVersion.title, "pt-BR");
-    });
-  const contents = summaries;
-
-  const searchTerm = typeof q === "string" ? q.trim() : "";
-  const normalizedSearchTerm = normalizeSearchValue(searchTerm);
-  const statusFilter = status === "draft" || status === "published" ? status : "all";
-  const filteredContents = contents.filter((summary) => {
-    const matchesSearch = !normalizedSearchTerm ||
-      [summary.latestVersion, summary.latestPublishedVersion].some((version) =>
-        version !== null && normalizeSearchValue([version.title, version.category_key, version.content_type_key].filter(Boolean).join(" ")).includes(normalizedSearchTerm),
-      );
-    return matchesSearch && matchesLibraryStatus(summary, statusFilter);
-  });
+  const explored=exploreAdminEducationalLibrary(contentVersions,filters);
+  const searchTerm=filters.query;
 
   return (
     <>
@@ -80,7 +56,7 @@ export default async function AdminConteudosPage({ searchParams }: AdminConteudo
         description="Itens publicados podem ser liberados por cliente. Rascunhos permanecem internos."
         title="Biblioteca educacional"
       >
-        {contents.length > 0 ? (
+        {explored.counters.total > 0 ? (
           <form action="/admin/conteudos" className={styles.filters} method="get">
             <label className={styles.searchField}>
               <span>Buscar conteúdo</span>
@@ -93,24 +69,45 @@ export default async function AdminConteudosPage({ searchParams }: AdminConteudo
             </label>
             <label className={styles.statusField}>
               <span>Status</span>
-              <select defaultValue={statusFilter} name="status">
+              <select defaultValue={filters.state} name="estado">
                 <option value="all">Todos</option>
-                <option value="draft">Rascunhos</option>
-                <option value="published">Publicados</option>
+                <option value="latest-draft">Última versão rascunho</option>
+                <option value="draft-only">Nunca publicado</option>
+                <option value="published-current">Última versão publicada</option>
+                <option value="published-with-draft">Publicado com novo rascunho</option>
+                <option value="any-published">Com alguma publicação</option>
               </select>
             </label>
+            <label className={styles.statusField}><span>Categoria</span><select name="categoria" defaultValue={filters.category}>
+              <option value="all">Todas</option>
+              {explored.facets.categories.map(value=><option key={value} value={value}>{value}</option>)}
+            </select></label>
+            <label className={styles.statusField}><span>Tipo</span><select name="tipo" defaultValue={filters.type}>
+              <option value="all">Todos</option>
+              {explored.facets.types.map(value=><option key={value} value={value}>{value}</option>)}
+            </select></label>
+            <label className={styles.statusField}><span>Ordenação</span><select name="ordem" defaultValue={filters.order}>
+              <option value="display">Ordem da biblioteca</option>
+              <option value="title">Título</option>
+              <option value="created-recent">Criação recente</option>
+              <option value="created-oldest">Criação antiga</option>
+              <option value="published-recent">Última publicação</option>
+              <option value="version">Número da versão</option>
+            </select></label>
             <Button type="submit" variant="secondary">Filtrar</Button>
-            {searchTerm || statusFilter !== "all" ? (
+            {filters.query || filters.state !== "all" || filters.category !== "all" || filters.type !== "all" || filters.order !== "display" ? (
               <Link className={styles.clearLink} href="/admin/conteudos">Limpar</Link>
             ) : null}
           </form>
         ) : null}
-        {contents.length === 0 ? (
+        <p className={styles.resultCount}>Total: {explored.counters.total} · Nunca publicados: {explored.counters.draftOnly} · Última versão publicada: {explored.counters.publishedCurrent} · Publicados com novo rascunho: {explored.counters.publishedWithDraft}</p>
+        {explored.invalidPage ? <p role="status">Página indisponível; exibindo uma página válida.</p> : null}
+        {explored.counters.total === 0 ? (
           <EmptyState
             description="Crie o primeiro rascunho para iniciar a biblioteca."
             title="A biblioteca educacional está vazia"
           />
-        ) : filteredContents.length === 0 ? (
+        ) : explored.total === 0 ? (
           <EmptyState
             description="Ajuste a busca ou limpe os filtros para voltar a ver a biblioteca completa."
             title="Nenhum conteúdo encontrado"
@@ -118,10 +115,10 @@ export default async function AdminConteudosPage({ searchParams }: AdminConteudo
         ) : (
           <>
             <p className={styles.resultCount}>
-              {filteredContents.length} de {contents.length} conteúdo(s)
+              {explored.from}–{explored.to} de {explored.total} conteúdo(s) encontrado(s)
             </p>
             <ul className={styles.contentList}>
-            {filteredContents.map(({ latestVersion: contentVersion, latestPublishedVersion }) => {
+            {explored.items.map(({ latestVersion: contentVersion, latestPublishedVersion }) => {
               const publishedMeta = contentVersion.published_at
                 ? "Publicado em " + formatPublishedDate(contentVersion.published_at) + "."
                 : latestPublishedVersion
@@ -166,6 +163,11 @@ export default async function AdminConteudosPage({ searchParams }: AdminConteudo
               );
             })}
           </ul>
+          {explored.total > 0 ? <nav className={styles.pagination} aria-label="Páginas da biblioteca educacional">
+            <span>Página {explored.page} de {explored.pages}</span>
+            {explored.previous ? <Link href={adminEducationalLibraryHref(filters,explored.previous)}>Anterior</Link> : null}
+            {explored.next ? <Link href={adminEducationalLibraryHref(filters,explored.next)}>Próxima</Link> : null}
+          </nav> : null}
           </>
         )}
       </Section>
