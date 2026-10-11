@@ -1,3 +1,7 @@
+## Cliente — navegação e leitura factual dos protocolos publicados (2026-10-11)
+
+A cliente pode buscar/publicações liberadas por versão, data e área, ordenar o histórico autorizado e navegar em páginas, com atalhos para publicações adjacentes e retorno ao plano atual. Dentro da publicação selecionada, localiza variações por nomes de refeições, pesquisa tipos de dose existentes, acessa os destinos exatos no documento e consulta somatórios estritamente factuais, com detalhamento por variação. Os somatórios de todas as variações não são prescrição diária, não escolhem etapa, não calculam macro ou permitem edição. Listagem/seleção usam exclusivamente publicações consultadas sob Auth/RLS. Sem migrations, publicação automática ou alteração das decisões da Patty. Teste autenticado real continua pendente.
+
 ## Protocolos — mapa operacional de pendências do rascunho (2026-10-11)
 
 Editor de rascunho alimentar: contagens factuais de variações, refeições, doses, ciclos e etapas, todas as pendências técnicas da estrutura mínima com links diretos para os registros, pesquisa local de itens e avisos informativos sobre nomes repetidos, variações não usadas e referências ausentes de ciclos. Destinos usam IDs já autorizados pelo workspace e permanecem na interface admin. Os critérios existentes de revisão permanecem intactos, sem regras clínicas, scores, novo gate, publicação automática ou migration. A validação E2E autenticada permanece pendente.
