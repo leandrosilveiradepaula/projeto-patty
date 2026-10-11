@@ -3901,3 +3901,8 @@ A Patty pode filtrar as liberações da cliente por título/categoria/tipo, disp
 ## Histórico de solicitações de treino: filtros factuais — 2026-10-11
 
 A Patty e a cliente podem consultar solicitações de treino já registradas filtrando por autoria factual (cliente, profissional, origem desconhecida), existência de observação, ordem cronológica e momento em relação à última publicação. A cliente continua visualizando a solicitação mais recente separadamente e filtra somente as anteriores. Os filtros não alteram registros, não sugerem frequência de treino, não inferem progressão, não geram prescrição e não publicam automaticamente. As consultas continuam usando dados acessíveis sob Auth, assignment e RLS existentes; não há migration nem alteração de permissões. A verificação E2E autenticada e a publicação efetiva permanecem distintas do CI de código.
+
+
+## Comparação histórica selecionável do treino publicado — 2026-10-11
+
+A cliente pode escolher explicitamente uma versão publicada do próprio treino para comparar com a publicação imediatamente anterior na cronologia autorizada. Seleção inválida volta à versão publicada mais recente com aviso, sem acesso a rascunhos, sem inferir progressão, sem mudar prescrição e sem expor identificadores de catálogo nas diferenças. O alerta de nova solicitação aponta para o registro factual atual. Nenhuma migration, RLS ou publicação foi executada; validação E2E autenticada com Supabase real continua separada de testes automatizados.
