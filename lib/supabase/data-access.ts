@@ -669,6 +669,11 @@ export async function updateAccessibleClientTrainingPlanItem(input: {
   expectedExerciseName: string;
   expectedSetsText: string;
   expectedRepetitionsText: string;
+  expectedRestText: string | null;
+  expectedExecutionNotes: string | null;
+  expectedExerciseVersionId: string | null;
+  expectedPosition: number;
+  trainingPlanVersionId: string;
   itemId: string;
   position: number;
   repetitionsText: string;
@@ -676,7 +681,7 @@ export async function updateAccessibleClientTrainingPlanItem(input: {
   setsText: string;
 }) {
   const supabase = await createClient();
-  const { data, error } = await supabase
+  let query = supabase
     .from("client_training_plan_items")
     .update({
       execution_notes: input.executionNotes,
@@ -688,11 +693,22 @@ export async function updateAccessibleClientTrainingPlanItem(input: {
       sets_text: input.setsText,
     })
     .eq("id", input.itemId)
+    .eq("training_plan_version_id", input.trainingPlanVersionId)
+    .eq("position", input.expectedPosition)
     .eq("exercise_name", input.expectedExerciseName)
     .eq("sets_text", input.expectedSetsText)
-    .eq("repetitions_text", input.expectedRepetitionsText)
-    .select("id")
-    .maybeSingle();
+    .eq("repetitions_text", input.expectedRepetitionsText);
+  query = input.expectedRestText === null
+    ? query.is("rest_text", null)
+    : query.eq("rest_text", input.expectedRestText);
+  query = input.expectedExecutionNotes === null
+    ? query.is("execution_notes", null)
+    : query.eq("execution_notes", input.expectedExecutionNotes);
+  query = input.expectedExerciseVersionId === null
+    ? query.is("exercise_version_id", null)
+    : query.eq("exercise_version_id", input.expectedExerciseVersionId);
+
+  const { data, error } = await query.select("id").maybeSingle();
 
   if (error) {
     throw error;
@@ -701,14 +717,37 @@ export async function updateAccessibleClientTrainingPlanItem(input: {
   requireConfirmedTrainingMutation(data);
 }
 
-export async function deleteAccessibleClientTrainingPlanItem(itemId: string) {
+export async function deleteAccessibleClientTrainingPlanItem(input: {
+  itemId: string;
+  trainingPlanVersionId: string;
+  expectedName: string;
+  expectedSets: string;
+  expectedRepetitions: string;
+  expectedPosition: number;
+  expectedRestText: string | null;
+  expectedExecutionNotes: string | null;
+  expectedExerciseVersionId: string | null;
+}) {
   const supabase = await createClient();
-  const { data, error } = await supabase
+  let query = supabase
     .from("client_training_plan_items")
     .delete()
-    .eq("id", itemId)
-    .select("id")
-    .maybeSingle();
+    .eq("id", input.itemId)
+    .eq("training_plan_version_id", input.trainingPlanVersionId)
+    .eq("exercise_name", input.expectedName)
+    .eq("sets_text", input.expectedSets)
+    .eq("repetitions_text", input.expectedRepetitions)
+    .eq("position", input.expectedPosition);
+  query = input.expectedRestText === null
+    ? query.is("rest_text", null)
+    : query.eq("rest_text", input.expectedRestText);
+  query = input.expectedExecutionNotes === null
+    ? query.is("execution_notes", null)
+    : query.eq("execution_notes", input.expectedExecutionNotes);
+  query = input.expectedExerciseVersionId === null
+    ? query.is("exercise_version_id", null)
+    : query.eq("exercise_version_id", input.expectedExerciseVersionId);
+  const { data, error } = await query.select("id").maybeSingle();
 
   if (error) {
     throw error;

@@ -231,11 +231,12 @@ export default async function AdminClientTrainingPage({ params }: Props) {
                         clientId={client.id}
                         exerciseOptions={exerciseOptions}
                         key={JSON.stringify([
-                          item.id, item.exercise_version_id, item.exercise_name,
+                          item.id, item.position, item.exercise_version_id, item.exercise_name,
                           item.sets_text, item.repetitions_text, item.rest_text, item.execution_notes,
                         ])}
                         item={{
                           executionNotes: item.execution_notes,
+                          position: item.position,
                           exerciseName: item.exercise_name,
                           exerciseVersionId: item.exercise_version_id,
                           id: item.id,
@@ -249,6 +250,15 @@ export default async function AdminClientTrainingPage({ params }: Props) {
                         clientId={client.id}
                         itemId={item.id}
                         itemLabel={item.exercise_name}
+                        expectedItem={{
+                          exerciseName: item.exercise_name,
+                          setsText: item.sets_text,
+                          repetitionsText: item.repetitions_text,
+                          position: item.position,
+                          restText: item.rest_text,
+                          executionNotes: item.execution_notes,
+                          exerciseVersionId: item.exercise_version_id,
+                        }}
                         mode="delete"
                         trainingPlanVersionId={openVersion.id}
                       />

@@ -87,6 +87,27 @@ function optionalText(
   return normalized;
 }
 
+function optionalUuid(formData: FormData, key: string, label: string) {
+  const raw = formData.get(key);
+  if (raw === null || raw === "") return null;
+  if (typeof raw !== "string" || !isUuid(raw)) {
+    throw new Error(`${label} é inválido. Atualize o treino e tente novamente.`);
+  }
+  return raw;
+}
+
+function positivePosition(formData: FormData, key: string) {
+  const raw = formData.get(key);
+  if (typeof raw !== "string" || !/^[1-9][0-9]*$/.test(raw)) {
+    throw new Error("Posição original inválida. Atualize o treino.");
+  }
+  const value = Number(raw);
+  if (!Number.isSafeInteger(value) || value > 2147483647) {
+    throw new Error("Posição original inválida. Atualize o treino.");
+  }
+  return value;
+}
+
 async function requireAccessibleTrainingContext(clientId: string) {
   await requireRole("admin");
 
@@ -397,6 +418,23 @@ export async function updateTrainingPlanItemAction(
     const expectedExerciseName = requiredText(formData, "expectedExerciseName", 200, "Exercício original");
     const expectedSetsText = requiredText(formData, "expectedSetsText", 80, "Séries originais");
     const expectedRepetitionsText = requiredText(formData, "expectedRepetitionsText", 80, "Repetições originais");
+    const expectedRestText = optionalText(formData, "expectedRestText", 120, "Descanso original");
+    const expectedExecutionNotes = optionalText(formData, "expectedExecutionNotes", 2000, "Orientações originais");
+    const expectedExerciseVersionId = optionalUuid(formData, "expectedExerciseVersionId", "Referência original do exercício");
+    const expectedPosition = positivePosition(formData, "expectedPosition");
+
+    if (
+      existing.exercise_name !== expectedExerciseName ||
+      existing.sets_text !== expectedSetsText ||
+      existing.repetitions_text !== expectedRepetitionsText ||
+      existing.rest_text !== expectedRestText ||
+      existing.execution_notes !== expectedExecutionNotes ||
+      existing.exercise_version_id !== expectedExerciseVersionId ||
+      existing.position !== expectedPosition
+    ) {
+      return initialError("O exercício mudou desde que esta tela foi aberta. Atualize o treino antes de salvar.");
+    }
+
     await updateAccessibleClientTrainingPlanItem({
       executionNotes,
       exerciseName,
@@ -404,6 +442,11 @@ export async function updateTrainingPlanItemAction(
       expectedExerciseName,
       expectedSetsText,
       expectedRepetitionsText,
+      expectedRestText,
+      expectedExecutionNotes,
+      expectedExerciseVersionId,
+      expectedPosition,
+      trainingPlanVersionId: version.id,
       itemId: existing.id,
       position: existing.position,
       repetitionsText,
@@ -431,7 +474,7 @@ export async function deleteTrainingPlanItemAction(
   trainingPlanVersionId: string,
   itemId: string,
   _state: TrainingPlanFormState,
-  _formData: FormData,
+  formData: FormData,
 ): Promise<TrainingPlanFormState> {
   try {
     const { client, version } = await requireAccessibleTrainingVersion(
@@ -449,11 +492,41 @@ export async function deleteTrainingPlanItemAction(
 
     const items = await listAccessibleClientTrainingPlanItems(version.id);
 
-    if (!items.some((item) => item.id === itemId)) {
+    const existing = items.find((item) => item.id === itemId);
+    if (!existing) {
       return initialError("Exercício não encontrado nesta versão.");
     }
 
-    await deleteAccessibleClientTrainingPlanItem(itemId);
+    const expectedName = requiredText(formData, "expectedName", 200, "Exercício original");
+    const expectedSets = requiredText(formData, "expectedSets", 80, "Séries originais");
+    const expectedRepetitions = requiredText(formData, "expectedRepetitions", 80, "Repetições originais");
+    const expectedPosition = positivePosition(formData, "expectedPosition");
+    const expectedRestText = optionalText(formData, "expectedRestText", 120, "Descanso original");
+    const expectedExecutionNotes = optionalText(formData, "expectedExecutionNotes", 2000, "Orientações originais");
+    const expectedExerciseVersionId = optionalUuid(formData, "expectedExerciseVersionId", "Referência original do exercício");
+    if (
+      existing.exercise_name !== expectedName ||
+      existing.sets_text !== expectedSets ||
+      existing.repetitions_text !== expectedRepetitions ||
+      existing.position !== expectedPosition ||
+      existing.rest_text !== expectedRestText ||
+      existing.execution_notes !== expectedExecutionNotes ||
+      existing.exercise_version_id !== expectedExerciseVersionId
+    ) {
+      return initialError("Este exercício foi alterado. Atualize o treino antes de removê-lo.");
+    }
+
+    await deleteAccessibleClientTrainingPlanItem({
+      itemId: existing.id,
+      trainingPlanVersionId: version.id,
+      expectedName,
+      expectedSets,
+      expectedRepetitions,
+      expectedPosition,
+      expectedRestText,
+      expectedExecutionNotes,
+      expectedExerciseVersionId,
+    });
     revalidateTraining(client.id);
 
     return {

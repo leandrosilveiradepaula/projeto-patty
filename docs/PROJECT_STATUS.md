@@ -1,3 +1,29 @@
+## Auditoria integrada — integridade de edição e remoção de treino
+
+Data: 2026-10-11. Branch: `codex/training-item-complete-concurrency-v178`. Estado: implementado no código, testes de CI pendentes; sem deploy.
+
+## Objetivo
+Impedir que a Patty perca edições do rascunho ou remova um exercício que outra sessão já atualizou. Complementa a proteção parcial do PR #677, sem criar regras de treino.
+
+## Correções verificáveis
+1. Comparar `rest_text` original ao editar.
+2. Comparar `execution_notes` original ao editar.
+3. Comparar `exercise_version_id` original ao editar.
+4. Comparar `position` original ao editar.
+5. Escopar SQL do update à `training_plan_version_id` esperada.
+6. Usar `IS NULL` para campos históricos nulos, distinguindo ausência de texto.
+7. Validar o identificador de exercício original como UUID opcional, sem aceitar File.
+8. Validar posição original como inteiro positivo no limite int4.
+9. Comparar os snapshots do formulário ao registro lido pelo servidor.
+10. Rejeitar conflito material com mensagem de recarregamento antes do update.
+11. Enviar snapshots originais completos no formulário de edição.
+12. Validar snapshots completos antes de uma remoção.
+13. Escopar exclusão ao registro e à versão do treino.
+14. Fazer delete condicional de todos os campos originais, inclusive nulos, contra corrida entre leitura e escrita.
+15. Remontar o formulário quando posição/ordem persistida mudar e manter o histórico/revisão/publicação intactos.
+
+Veja `docs/AUDIT_TRAINING_ITEM_CONCURRENCY_2026_10_11.md` para escopo, riscos e testes.
+
 ## Auditoria integrada - edição concorrente de treinos - 2026-10-11
 
 Pacote operacional: (1) valida identificador de cliente antes da consulta; (2) não altera versão revisada; (3) não altera versão publicada; (4) compara título original antes de salvar; (5) compara observações originais inclusive null; (6) rejeita edição de treino cuja versão mudou; (7) envia valores originais sem confiar na UI como autorização; (8) compara nome original do exercício; (9) compara séries originais; (10) compara repetições originais; (11) rejeita alterações concorrentes confirmando resultado real do update; (12) preserva os valores digitados se houver conflito; (13) mostra retorno de falha existente sem publicar; (14) bloqueia envio repetido durante processamento; (15) mantém confirmação humana de revisão e publicação. São verificações de integridade complementares, sem assumir idempotência global. Não alteradas migrations, RLS, parâmetros de treino ou publicação. E2E real permanece pendente.

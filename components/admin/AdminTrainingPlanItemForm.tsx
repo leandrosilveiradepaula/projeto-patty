@@ -31,6 +31,7 @@ type ExerciseOption = {
 
 type Item = {
   executionNotes: string | null;
+  position: number;
   exerciseName: string;
   exerciseVersionId: string | null;
   id: string;
@@ -110,6 +111,10 @@ export function AdminTrainingPlanItemForm({
           <input name="expectedExerciseName" type="hidden" value={item.exerciseName} />
           <input name="expectedSetsText" type="hidden" value={item.setsText} />
           <input name="expectedRepetitionsText" type="hidden" value={item.repetitionsText} />
+          <input name="expectedRestText" type="hidden" value={item.restText ?? ""} />
+          <input name="expectedExecutionNotes" type="hidden" value={item.executionNotes ?? ""} />
+          <input name="expectedExerciseVersionId" type="hidden" value={item.exerciseVersionId ?? ""} />
+          <input name="expectedPosition" type="hidden" value={item.position} />
         </>
       ) : null}
       {state.message ? (
