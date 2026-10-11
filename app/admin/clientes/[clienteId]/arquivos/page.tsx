@@ -12,12 +12,12 @@ import { listAccessibleClientFiles } from "@/lib/supabase/data-access";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { isUuid } from "@/lib/validation/uuid";
+import { formatPrivateFileRecordedAt, formatPrivateFileSize, isPrivateFilePendingProfessionalRelease, matchesPrivateFileFilters, privateFileOriginLabel, readPrivateFileKindFilter, readPrivateFileOriginFilter, readPrivateFileViewFilter } from "@/lib/files/private-file-history-view";
 import styles from "./page.module.css";
 
 type AdminClientFilesPageProps = {
-  params: Promise<{
-    clienteId: string;
-  }>;
+  params: Promise<{ clienteId: string }>;
+  searchParams: Promise<{ categoria?: string; origem?: string; visualizacao?: string }>;
 };
 
 const fileKindLabels: Record<string, string> = {
@@ -54,8 +54,9 @@ function formatCreatedAt(value: string) {
 
 export default async function AdminClientFilesPage({
   params,
+  searchParams,
 }: AdminClientFilesPageProps) {
-  const { clienteId } = await params;
+  const [{ clienteId }, filters] = await Promise.all([params, searchParams]);
   if (!isUuid(clienteId)) notFound();
 
   const [client, files] = await Promise.all([
@@ -68,16 +69,13 @@ export default async function AdminClientFilesPage({
   }
 
   const displayName = client.full_name?.trim() || client.profiles?.display_name?.trim();
-  const pendingReleaseFiles = files.filter(
-    (file) =>
-      !file.client_visible_at &&
-      file.uploaded_by_profile_id !== client.profile_id,
-  );
-  const historyFiles = files.filter(
-    (file) =>
-      file.client_visible_at ||
-      file.uploaded_by_profile_id === client.profile_id,
-  );
+  const kind = readPrivateFileKindFilter(filters.categoria);
+  const origin = readPrivateFileOriginFilter(filters.origem);
+  const view = readPrivateFileViewFilter(filters.visualizacao);
+  const filteredFiles = files.filter(file => matchesPrivateFileFilters(file, client.profile_id, kind, origin));
+  const pendingReleaseFiles = filteredFiles.filter(file => isPrivateFilePendingProfessionalRelease(file, client.profile_id));
+  const historyFiles = filteredFiles.filter(file => !isPrivateFilePendingProfessionalRelease(file, client.profile_id));
+  const totalPending = files.filter(file => isPrivateFilePendingProfessionalRelease(file, client.profile_id)).length;
 
   return (
     <>
@@ -95,7 +93,29 @@ export default async function AdminClientFilesPage({
         <AdminPrivateFileUploadForm clientId={client.id} />
       </Section>
 
-      <div id="aguardando-liberacao">
+      <Section title="Filtrar arquivos" description="Os filtros alteram apenas esta visualização administrativa; não modificam a visibilidade de nenhum arquivo.">
+        <form action={`/admin/clientes/${client.id}/arquivos`} method="get" className={styles.fileFilters}>
+          <label>Categoria
+            <select name="categoria" defaultValue={kind}>
+              <option value="all">Todas</option><option value="photo">Fotos</option><option value="exam">Exames</option><option value="document">Documentos</option>
+            </select>
+          </label>
+          <label>Origem
+            <select name="origem" defaultValue={origin}>
+              <option value="all">Todas</option><option value="client">Cliente</option><option value="team">Equipe ou não identificada</option>
+            </select>
+          </label>
+          <label>Exibição
+            <select name="visualizacao" defaultValue={view}>
+              <option value="all">Tudo</option><option value="pending">Aguardando liberação</option><option value="history">Histórico</option>
+            </select>
+          </label>
+          <button type="submit">Filtrar</button>
+          <Link href={`/admin/clientes/${client.id}/arquivos`}>Limpar filtros</Link>
+        </form>
+        <p role="status">{filteredFiles.length} de {files.length} arquivo(s) · {totalPending} aguardando liberação no total.</p>
+      </Section>
+      {view !== "history" ? <div id="aguardando-liberacao">
         <Section
           action={<Badge variant={pendingReleaseFiles.length > 0 ? "warning" : "neutral"}>{pendingReleaseFiles.length} pendente(s)</Badge>}
           description="Arquivos administrativos ainda ocultos para a cliente. Revise cada arquivo antes de decidir se deve liberá-lo."
@@ -120,9 +140,7 @@ export default async function AdminClientFilesPage({
                         {fileKindLabels[file.file_kind] ?? file.file_kind}
                       </Badge>
                       <Badge variant="neutral">
-                        {file.uploaded_by_profile_id === client.profile_id
-                          ? "Enviado pela cliente"
-                          : "Upload administrativo"}
+                        {privateFileOriginLabel(file, client.profile_id, "admin")}
                       </Badge>
                       <Badge variant={file.client_visible_at ? "positive" : "neutral"}>
                         {file.client_visible_at
@@ -133,8 +151,8 @@ export default async function AdminClientFilesPage({
                   </div>
                   <dl className={styles.fileMeta}>
                     <div><dt>Tipo</dt><dd>{file.mime_type || "Não informado"}</dd></div>
-                    <div><dt>Tamanho</dt><dd>{formatFileSize(file.byte_size)}</dd></div>
-                    <div><dt>Cadastrado em</dt><dd>{formatCreatedAt(file.created_at)}</dd></div>
+                    <div><dt>Tamanho</dt><dd>{formatPrivateFileSize(file.byte_size)}</dd></div>
+                    <div><dt>Cadastrado em</dt><dd>{formatPrivateFileRecordedAt(file.created_at)}</dd></div>
                   </dl>
                   <div className={styles.fileActions}>
                     {isPreviewablePrivateFileMimeType(file.mime_type) ? (
@@ -165,9 +183,9 @@ export default async function AdminClientFilesPage({
           </ul>
           )}
         </Section>
-      </div>
+      </div> : null}
 
-      <Section
+      {view !== "pending" ? <Section
         description="Histórico privado de arquivos já liberados e de arquivos enviados pela própria cliente. Upload administrativo oculto permanece em Aguardando liberação."
         title="Histórico de arquivos"
       >
@@ -194,9 +212,7 @@ export default async function AdminClientFilesPage({
                         {fileKindLabels[file.file_kind] ?? file.file_kind}
                       </Badge>
                       <Badge variant="neutral">
-                        {file.uploaded_by_profile_id === client.profile_id
-                          ? "Enviado pela cliente"
-                          : "Upload administrativo"}
+                        {privateFileOriginLabel(file, client.profile_id, "admin")}
                       </Badge>
                       <Badge variant={file.client_visible_at ? "positive" : "neutral"}>
                         {file.client_visible_at
@@ -207,8 +223,8 @@ export default async function AdminClientFilesPage({
                   </div>
                   <dl className={styles.fileMeta}>
                     <div><dt>Tipo</dt><dd>{file.mime_type || "Não informado"}</dd></div>
-                    <div><dt>Tamanho</dt><dd>{formatFileSize(file.byte_size)}</dd></div>
-                    <div><dt>Cadastrado em</dt><dd>{formatCreatedAt(file.created_at)}</dd></div>
+                    <div><dt>Tamanho</dt><dd>{formatPrivateFileSize(file.byte_size)}</dd></div>
+                    <div><dt>Cadastrado em</dt><dd>{formatPrivateFileRecordedAt(file.created_at)}</dd></div>
                   </dl>
                   <div className={styles.fileActions}>
                     {isPreviewablePrivateFileMimeType(file.mime_type) ? (
@@ -238,7 +254,7 @@ export default async function AdminClientFilesPage({
             ))}
           </ul>
         )}
-      </Section>
+      </Section> : null}
     </>
   );
 }
