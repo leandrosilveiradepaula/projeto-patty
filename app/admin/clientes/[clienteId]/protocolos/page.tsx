@@ -1,3 +1,5 @@
+import { AdminProtocolInitialVersionForm } from "@/components/admin/AdminProtocolInitialVersionForm";
+import { existingProtocolNavigation } from "@/lib/protocol/admin-catalog-ux";
 import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { Badge } from "@/components/ui/Badge";
@@ -13,7 +15,6 @@ import {
   listAccessibleProtocolVersions,
   listAccessibleProtocolVersionsForProtocols,
 } from "@/lib/supabase/data-access";
-import { Button } from "@/components/ui/Button";
 import { requireRole } from "@/lib/supabase/auth";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -42,10 +43,11 @@ async function createFirstProtocolAction(formData: FormData) {
   if (existing.length > 0) {
     const versions = await listAccessibleProtocolVersionsForProtocols(existing.map((item) => item.id));
     const versionedIds = new Set(versions.map((version) => version.protocol_id));
-    if (!versionedIds.has(existing[0].id)) {
-      redirect(`/admin/clientes/${client.id}/protocolos?recuperacao=necessaria`);
+    const destination = existingProtocolNavigation(existing, versionedIds);
+    if (destination?.kind === "recover") {
+      redirect(`/admin/clientes/${client.id}/protocolos?recuperacao=necessaria#protocolo-${destination.id}`);
     }
-    redirect(`/admin/protocolos/${existing[0].id}`);
+    if (destination) redirect(`/admin/protocolos/${destination.id}`);
   }
 
   const protocol = await createAccessibleProtocol({
@@ -119,7 +121,7 @@ async function resumeVersionlessProtocolAction(formData: FormData) {
 
 type AdminClientProtocolsPageProps = {
   params: Promise<{ clienteId: string }>;
-  searchParams: Promise<{ recuperacao?: string }>;
+  searchParams: Promise<{ recuperacao?: string | string[] }>;
 };
 
 function formatProtocolType(value: string) {
@@ -141,6 +143,7 @@ export default async function AdminClientProtocolsPage({
   searchParams,
 }: AdminClientProtocolsPageProps) {
   const [{ clienteId }, { recuperacao }] = await Promise.all([params, searchParams]);
+  if (!isUuid(clienteId)) notFound();
   const client = await getAccessibleClient(clienteId);
 
   if (!client) {
@@ -181,7 +184,7 @@ export default async function AdminClientProtocolsPage({
         description="Consulte o histórico de protocolos desta cliente."
         title="Protocolos"
       >
-        {recuperacao ? (
+        {typeof recuperacao === "string" && ["necessaria", "criacao", "erro"].includes(recuperacao) ? (
           <Alert title="Verifique a versão inicial" variant={recuperacao === "necessaria" ? "warning" : "critical"}>
             {recuperacao === "necessaria"
               ? "Um protocolo foi registrado sem versão inicial. Use Retomar versão inicial para continuar."
@@ -193,10 +196,7 @@ export default async function AdminClientProtocolsPage({
         {protocols.length === 0 ? (
           <EmptyState
             action={
-              <form action={createFirstProtocolAction}>
-                <input name="clientId" type="hidden" value={client.id} />
-                <Button type="submit">Criar primeiro protocolo</Button>
-              </form>
+              <AdminProtocolInitialVersionForm action={createFirstProtocolAction} clientId={client.id} />
             }
             description="Crie o primeiro protocolo nutricional para iniciar a versão 1 em rascunho. Nada será publicado para a cliente até passar por revisão, aprovação e publicação manual."
             title="Sem protocolos registrados"
@@ -204,7 +204,7 @@ export default async function AdminClientProtocolsPage({
         ) : (
           <ol className={styles.protocolList}>
             {protocols.map((protocol) => (
-              <li className={styles.protocolItem} key={protocol.id}>
+              <li className={styles.protocolItem} id={`protocolo-${protocol.id}`} key={protocol.id}>
                 <div>
                   <h2 className={styles.protocolTitle}>
                     {formatProtocolType(protocol.protocol_type)}
@@ -222,11 +222,11 @@ export default async function AdminClientProtocolsPage({
                     Ver histórico
                   </Link>
                 ) : (
-                  <form action={resumeVersionlessProtocolAction}>
-                    <input name="clientId" type="hidden" value={client.id} />
-                    <input name="protocolId" type="hidden" value={protocol.id} />
-                    <Button type="submit" variant="secondary">Retomar versão inicial</Button>
-                  </form>
+                  <AdminProtocolInitialVersionForm
+                    action={resumeVersionlessProtocolAction}
+                    clientId={client.id}
+                    protocolId={protocol.id}
+                  />
                 )}
               </li>
             ))}
