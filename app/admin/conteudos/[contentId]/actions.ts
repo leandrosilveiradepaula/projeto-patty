@@ -12,7 +12,6 @@ import {
   listEducationalContentAssetsForCurrentAdmin,
   createAccessibleEducationalContentVersion,
   getAccessibleEducationalContentForCurrentAdmin,
-  listEducationalContentAssetsForCurrentAdmin,
   listEducationalContentVersionsForCurrentAdmin,
   publishAccessibleEducationalContentVersion,
   updateAccessibleEducationalContentDraftVersion,
