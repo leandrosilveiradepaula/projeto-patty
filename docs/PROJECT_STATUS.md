@@ -1,3 +1,7 @@
+## Ciclo de acesso: ativação e recuperação de senha — 2026-10-11
+
+Ativação e redefinição usam formulário de senha compartilhado, com validação determinística por campo, confirmação, feedback de comprimento sem classificar força, controle explícito de visualização da senha, bloqueio de submissões duplicadas e orientação para retomar o fluxo quando o link expirar. A camada server-side rejeita valores duplicados, uploads e ausência de campos em ativação, recuperação e login antes de contatar Supabase Auth. Não há cadastro autônomo, reenvio automático de convite, tokens em logs ou alteração de MFA, RLS, migrations ou critérios profissionais. Teste E2E autenticado de recebimento do link real permanece pendente.
+
 ## Onboarding — preflight de novas contas (2026-10-11)
 
 Ambas as alternativas administrativas (convite via email e link manual) agora requerem confirmação explícita de que se trata de conta nova, além de validar nome e email de acesso com as mesmas regras no browser e no servidor, antes de qualquer operação no Supabase Auth. O servidor rejeita chaves duplicadas e arquivos em campos de identidade, evitando escolher silenciosamente um valor arbitrário. Validação pre-provisionamento pode ser refeita; falhas após interação com o provedor continuam bloqueando reenvio até revisão para não duplicar identidades. Não é novo fluxo de reenvio, recuperação nem alteração de regras profissionais. Email de login segue diferente de contato. E2E de envio real e entrega SMTP não foram executados. Sem migrations/RLS.

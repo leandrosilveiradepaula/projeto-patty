@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 
 import {
   type PasswordRecoveryRequestState,
@@ -10,6 +10,7 @@ import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/FormField";
 import { TextInput } from "@/components/ui/TextInput";
+import { validateInvitationEmail } from "@/lib/onboarding/validation";
 
 import styles from "./PasswordRecoveryRequestForm.module.css";
 
@@ -23,6 +24,11 @@ export function PasswordRecoveryRequestForm() {
     requestPasswordRecovery,
     initialState,
   );
+  const [email,setEmail]=useState("");
+  const [attempted,setAttempted]=useState(false);
+  const inFlight=useRef(false);
+  const emailValid=validateInvitationEmail(email).ok;
+  useEffect(()=>{inFlight.current=false},[state]);
 
   if (state.success) {
     return (
@@ -43,7 +49,7 @@ export function PasswordRecoveryRequestForm() {
   }
 
   return (
-    <form action={formAction} aria-busy={isPending} className={styles.form}>
+    <form action={formAction} aria-busy={isPending} className={styles.form} onSubmit={event=>{setAttempted(true);if(inFlight.current||isPending||!emailValid){event.preventDefault();return;}inFlight.current=true;}}>
       {state.message ? (
         <Alert
           live="assertive"
@@ -61,14 +67,17 @@ export function PasswordRecoveryRequestForm() {
             inputMode="email"
             maxLength={254}
             name="email"
+            value={email}
+            onChange={event=>setEmail(event.target.value)}
             disabled={isPending}
             required
             type="email"
           />
         )}
       </FormField>
+      {attempted && !emailValid?<p role="alert">Confira o email de acesso informado.</p>:null}
       {isPending ? <p role="status">Aguarde a confirmação antes de tentar novamente.</p> : null}
-      <Button loading={isPending} type="submit">
+      <Button disabled={isPending||!emailValid} loading={isPending} type="submit">
         Enviar link de recuperação
       </Button>
     </form>
