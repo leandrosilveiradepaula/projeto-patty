@@ -22,6 +22,7 @@ import {
 import type { AdminProtocolVersionPlanData } from "@/components/admin/AdminProtocolVersionPlan";
 import { Alert } from "@/components/ui/Alert";
 import { serializeDraftCycleSteps } from "@/lib/protocol/cycle-editor";
+import { serializeOriginalDraftLabel } from "@/lib/protocol/draft-snapshots";
 import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/FormField";
 import { TextInput } from "@/components/ui/TextInput";
@@ -312,6 +313,7 @@ function UpdateVariantForm({
 
   return (
     <form action={formAction} aria-busy={pending} onSubmit={submitGuard} className={styles.inlineEdit}>
+      <input type="hidden" name="originalLabel" value={serializeOriginalDraftLabel(label)} />
       <ActionFeedback state={state} />
       <FormField
         id={`variant-edit-${variantId}`}
@@ -338,11 +340,15 @@ function UpdateVariantForm({
 }
 
 function RemoveVariantForm({
+  label,
+  variantKey,
   mealPlanVersionId,
   protocolId,
   protocolVersionId,
   variantId,
 }: {
+  label: string | null;
+  variantKey: string;
   mealPlanVersionId: string;
   protocolId: string;
   protocolVersionId: string;
@@ -362,6 +368,8 @@ function RemoveVariantForm({
 
   return (
     <form action={formAction} aria-busy={pending} onSubmit={submitGuard} className={styles.inlineAction}>
+      <input type="hidden" name="originalLabel" value={serializeOriginalDraftLabel(label)} />
+      <input type="hidden" name="originalVariantKey" value={variantKey} />
       <ActionFeedback state={state} />
       {!confirmRemoval ? (
         <Button disabled={pending || state.success} onClick={() => setConfirmRemoval(true)} size="compact" type="button" variant="danger">
@@ -386,11 +394,15 @@ function RemoveVariantForm({
 
 function UpdateMealForm({
   label,
+  position,
+  variantId,
   mealId,
   mealPlanVersionId,
   protocolId,
   protocolVersionId,
 }: {
+  position: number;
+  variantId: string;
   label: string | null;
   mealId: string;
   mealPlanVersionId: string;
@@ -410,6 +422,9 @@ function UpdateMealForm({
 
   return (
     <form action={formAction} aria-busy={pending} onSubmit={submitGuard} className={styles.inlineEdit}>
+      <input type="hidden" name="originalLabel" value={serializeOriginalDraftLabel(label)} />
+      <input type="hidden" name="originalPosition" value={position} />
+      <input type="hidden" name="originalVariantId" value={variantId} />
       <ActionFeedback state={state} />
       <FormField id={`meal-edit-${mealId}`} label="Nome da refeição" required>
         {(fieldProps) => (
@@ -432,12 +447,16 @@ function UpdateMealForm({
 }
 
 function RemoveMealForm({
+  label,
+  position,
   mealId,
   mealPlanVersionId,
   protocolId,
   protocolVersionId,
   variantId,
 }: {
+  label: string | null;
+  position: number;
   mealId: string;
   mealPlanVersionId: string;
   protocolId: string;
@@ -459,6 +478,8 @@ function RemoveMealForm({
 
   return (
     <form action={formAction} aria-busy={pending} onSubmit={submitGuard} className={styles.inlineAction}>
+      <input type="hidden" name="originalLabel" value={serializeOriginalDraftLabel(label)} />
+      <input type="hidden" name="originalPosition" value={position} />
       <ActionFeedback state={state} />
       {!confirmRemoval ? (
         <Button disabled={pending || state.success} onClick={() => setConfirmRemoval(true)} size="compact" type="button" variant="danger">
@@ -483,10 +504,12 @@ function RemoveMealForm({
 
 function DoseRow({
   dose,
+  mealId,
   mealPlanVersionId,
   protocolId,
   protocolVersionId,
 }: {
+  mealId: string;
   dose: { doseQuantity: number; doseType: string; id: string };
   mealPlanVersionId: string;
   protocolId: string;
@@ -536,6 +559,9 @@ function DoseRow({
         <strong>{label}</strong>
       </div>
       <form action={updateFormAction} aria-busy={updatePending || removePending} onSubmit={updateSubmitGuard} className={styles.doseEdit}>
+        <input type="hidden" name="originalMealId" value={mealId} />
+        <input type="hidden" name="originalDoseType" value={dose.doseType} />
+        <input type="hidden" name="originalDoseQuantity" value={dose.doseQuantity} />
         <ActionFeedback state={updateState} />
         <FormField
           id={`dose-edit-${dose.id}`}
@@ -569,6 +595,9 @@ function DoseRow({
         </Button>
       </form>
       <form action={removeFormAction} aria-busy={updatePending || removePending} onSubmit={removeSubmitGuard} className={styles.inlineAction}>
+        <input type="hidden" name="originalMealId" value={mealId} />
+        <input type="hidden" name="originalDoseType" value={dose.doseType} />
+        <input type="hidden" name="originalDoseQuantity" value={dose.doseQuantity} />
         <ActionFeedback state={removeState} />
         {!confirmDoseRemoval ? (
           <Button disabled={updatePending || removePending || removeState.success} onClick={() => setConfirmDoseRemoval(true)} size="compact" type="button" variant="danger">
@@ -794,6 +823,8 @@ export function AdminProtocolDraftEditor({
 
               {variant.meals.length === 0 ? (
                 <RemoveVariantForm
+                  label={variant.label}
+                  variantKey={variant.variantKey}
                   mealPlanVersionId={plan.id}
                   protocolId={protocolId}
                   protocolVersionId={protocolVersionId}
@@ -819,6 +850,8 @@ export function AdminProtocolDraftEditor({
 
                       <UpdateMealForm
                         label={meal.label}
+                        position={meal.position}
+                        variantId={variant.id}
                         mealId={meal.id}
                         mealPlanVersionId={plan.id}
                         protocolId={protocolId}
@@ -827,6 +860,8 @@ export function AdminProtocolDraftEditor({
 
                       {meal.doseAllocations.length === 0 ? (
                         <RemoveMealForm
+                          label={meal.label}
+                          position={meal.position}
                           mealId={meal.id}
                           mealPlanVersionId={plan.id}
                           protocolId={protocolId}
@@ -838,6 +873,7 @@ export function AdminProtocolDraftEditor({
                           {meal.doseAllocations.map((dose) => (
                             <DoseRow
                               dose={dose}
+                              mealId={meal.id}
                               key={dose.id}
                               mealPlanVersionId={plan.id}
                               protocolId={protocolId}
