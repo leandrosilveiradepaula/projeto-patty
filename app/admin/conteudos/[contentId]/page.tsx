@@ -1,3 +1,4 @@
+import {readContentVersionFilter,inspectContentVersionArchive,contentVersionArchiveHref} from "@/lib/content/version-archive";
 import {
   AdminEducationalContentDraftSaveForm,
   AdminEducationalContentNewVersionForm,
@@ -13,6 +14,7 @@ import {
   getAccessibleEducationalContentForCurrentAdmin,
   listEducationalContentAssetsForCurrentAdmin,
   listEducationalContentVersionsForCurrentAdmin,
+  listEducationalContentAssetsForCurrentAdminVersions,
 } from "@/lib/supabase/data-access";
 import { canPublishEducationalContentVersion } from "@/lib/content/publication-eligibility";
 import { isUuid } from "@/lib/validation/uuid";
@@ -23,7 +25,7 @@ import styles from "./page.module.css";
 
 type PageProps = {
   params: Promise<{ contentId: string }>;
-  searchParams: Promise<{ versao?: string }>;
+  searchParams: Promise<{ versao?: string; busca?: string; estado?: string; arquivo?: string; ordem?: string; pagina?: string }>;
 };
 
 function formatDateTime(value: string) {
@@ -39,7 +41,9 @@ export default async function AdminEducationalContentDetailPage({
   params,
   searchParams,
 }: PageProps) {
-  const [{ contentId }, { versao }] = await Promise.all([params, searchParams]);
+  const [{ contentId }, raw] = await Promise.all([params, searchParams]);
+  const {versao}=raw;
+  const filters=readContentVersionFilter(raw);
 
   if (!isUuid(contentId)) {
     notFound();
@@ -53,6 +57,12 @@ export default async function AdminEducationalContentDetailPage({
 
   const versions = await listEducationalContentVersionsForCurrentAdmin(content.id);
   const current = versions[0] ?? null;
+  const allAssetRefs=await listEducationalContentAssetsForCurrentAdminVersions(versions.map(v=>v.id));
+  const assetCounts=new Map<string,number>();
+  for(const asset of allAssetRefs){
+    assetCounts.set(asset.educational_content_version_id,(assetCounts.get(asset.educational_content_version_id)??0)+1);
+  }
+  const archive=inspectContentVersionArchive(versions,assetCounts,filters,versao);
   // Only a version already visible under the professional RLS can be inspected.
   const inspected = versions.find((version) => version.id === versao) ?? current;
   const [currentAssets, inspectedAssets] = await Promise.all([
@@ -229,6 +239,7 @@ export default async function AdminEducationalContentDetailPage({
       </Section>
 
       <Section
+        id="historico-versoes-conteudos"
         description="Histórico factual das versões já existentes."
         title="Versões"
       >
