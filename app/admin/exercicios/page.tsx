@@ -74,6 +74,7 @@ export default async function AdminExerciciosPage({ searchParams }: AdminExercic
 
       <Section
         description="Catálogo profissional. Somente exercícios selecionados em treinos individuais e publicados pela Patty ficam visíveis às respectivas clientes."
+        id="biblioteca-exercicios"
         title="Biblioteca de exercícios"
       >
         {exercises.length > 0 ? (
