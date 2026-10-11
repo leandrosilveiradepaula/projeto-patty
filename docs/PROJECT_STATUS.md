@@ -3906,3 +3906,8 @@ A Patty e a cliente podem consultar solicitações de treino já registradas fil
 ## Comparação histórica selecionável do treino publicado — 2026-10-11
 
 A cliente pode escolher explicitamente uma versão publicada do próprio treino para comparar com a publicação imediatamente anterior na cronologia autorizada. Seleção inválida volta à versão publicada mais recente com aviso, sem acesso a rascunhos, sem inferir progressão, sem mudar prescrição e sem expor identificadores de catálogo nas diferenças. O alerta de nova solicitação aponta para o registro factual atual. Nenhuma migration, RLS ou publicação foi executada; validação E2E autenticada com Supabase real continua separada de testes automatizados.
+
+
+## Histórico de versões de treino — navegação paginada (2026-10-11)
+
+A Patty pode consultar o histórico completo de versões individuais autorizadas, com busca por título/número, filtro factual de status (rascunho, revisado, publicado), ordenação e paginação. A cliente pode filtrar, ordenar e paginar apenas as versões publicadas anteriores, mantendo a publicação mais recente em destaque. Todos os filtros operam sobre linhas previamente autorizadas sob RLS; não alteram rascunhos, decisões profissionais, revisão, publicação, snapshots ou exercícios do arquivo histórico. Dados originais não são substituídos. A navegação móvel utiliza controles com alvos táteis mínimos. Testes/CI não equivalem a E2E autenticado nem a publicação na Vercel.
