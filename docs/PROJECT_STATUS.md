@@ -1,3 +1,7 @@
+## Check-ins: trilha completa de correções e validação de edição atual — 2026-10-11
+
+Cliente e Patty passam a consultar o histórico cronológico completo das correções de líquidos e atividades, com dados originais, instante e indicação de autoria por papel. A ação identifica a correção vigente esperada e evita novas correções com valores idênticos; operações usam leitura de evento exato sob autenticação/RLS. Corridas entre duas sessões ainda não têm idempotência transacional garantida e devem ser homologadas com duas sessões reais. Preservados eventos append-only, separação do acompanhamento, ausência de meta automática de hidratação e permissões anteriores. Nenhuma migration ou regra clínica nova.
+
 ## Configurações: histórico comparável e prevenção de versões sem mudanças — 2026-10-11
 
 A tela administrativa de configurações passa a expor conteúdo integral de versões anteriores e diferenças factuais por campo em relação à versão precedente, distinguindo ativação, aposentadoria e estado ativo. As três ações de edição rejeitam criação de versões idênticas à configuração atual, inclusive quando apenas a ordem das chaves JSON mudou. Não altera templates existentes, motor determinístico, gates de ativação, permissões nem parâmetros profissionais. Testes de comparação e regressões acompanham o pacote; homologação autenticada real permanece pendente.
