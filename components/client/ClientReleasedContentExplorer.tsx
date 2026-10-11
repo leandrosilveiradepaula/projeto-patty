@@ -102,13 +102,13 @@ export function ClientReleasedContentExplorer({ entries, missingVersionCount }: 
       </div>
       <p className={styles.summary} role="status" aria-live="polite">
         {filtered.length === 0 ? "Nenhum conteúdo corresponde aos filtros." :
-          \`Mostrando \${paged.first}–\${paged.last} de \${filtered.length} conteúdo(s) encontrado(s).\`}
+          `Mostrando ${paged.first}–${paged.last} de ${filtered.length} conteúdo(s) encontrado(s).`}
       </p>
       {filtered.length === 0 ? (
         <div className={styles.empty}>Ajuste a busca ou limpe os filtros. Nenhuma liberação foi removida.</div>
       ) : (
         <ul className={styles.list}>
-          {paged.items.map((entry) => <li key={entry.id} id={\`conteudo-liberado-\${entry.id}\`} className={styles.item}>{entry.content}</li>)}
+          {paged.items.map((entry) => <li key={entry.id} id={`conteudo-liberado-${entry.id}`} className={styles.item}>{entry.content}</li>)}
         </ul>
       )}
       {paged.pages > 1 ? <nav aria-label="Páginas da biblioteca liberada" className={styles.pagination}>
