@@ -79,3 +79,9 @@ test("meal search and dose constraints must belong to the same recorded meal",()
  assert.deepEqual(publishedVariantMatches(plan,"cafe","carbohydrate").map(x=>x.id),[]);
  assert.deepEqual(publishedMealMatches(plan,"","not-a-published-dose"),[]);
 });
+
+test("empty published variants remain navigable by their name without manufacturing meals",()=>{
+ const empty=buildClientPublishedNutritionView({variants:[{id:"empty",label:"Variação sem refeições",variantKey:"opaque",meals:[]}],cycles:[]});
+ assert.deepEqual(publishedVariantMatches(empty,"variacao","all").map(x=>x.id),["empty"]);
+ assert.deepEqual(publishedMealMatches(empty,"variacao","all"),[]);
+});
