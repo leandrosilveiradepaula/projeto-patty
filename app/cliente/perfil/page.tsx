@@ -1,6 +1,7 @@
 import { ClientProfileOverview } from "@/components/client/ClientProfileOverview";
 import { ClientRegistrationEditForm } from "@/components/client/ClientRegistrationEditForm";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { Section } from "@/components/ui/Section";
 import {
   getAccessibleClientRegistration,
@@ -29,7 +30,7 @@ export default async function ClientePerfilPage() {
         title="Acesso à conta"
       >
         <ClientProfileOverview
-          displayName={profile?.display_name ?? undefined}
+          displayName={client?.full_name?.trim() || profile?.display_name?.trim() || undefined}
           loginEmail={loginEmail ?? undefined}
         />
       </Section>
@@ -37,6 +38,9 @@ export default async function ClientePerfilPage() {
         description="Estas informações representam o cadastro atual de contato."
         title="Cadastro atual"
       >
+        {!client ? (
+          <EmptyState title="Cadastro ainda não vinculado" description="Esta conta não possui um cadastro profissional vinculado. Entre em contato com a Patty para regularizar o acesso antes de atualizar os dados de contato." />
+        ) : (
         <ClientRegistrationEditForm
           key={registration?.updated_at ?? "new"}
           city={registration?.city ?? undefined}
@@ -45,6 +49,7 @@ export default async function ClientePerfilPage() {
           phone={registration?.phone ?? undefined}
           updatedAt={registration?.updated_at ?? null}
         />
+        )}
       </Section>
     </>
   );
