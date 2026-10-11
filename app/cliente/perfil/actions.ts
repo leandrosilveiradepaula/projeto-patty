@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
-import { upsertClientRegistrationPrivileged } from "@/lib/clients/registration-admin";
+import { ClientRegistrationConflictError, upsertClientRegistrationPrivileged } from "@/lib/clients/registration-admin";
 import { parseClientRegistrationForm } from "@/lib/clients/registration";
 import { requireRole } from "@/lib/supabase/auth";
 import { getCurrentClient } from "@/lib/supabase/data-access";
@@ -35,12 +35,24 @@ export async function updateCurrentClientRegistrationAction(
     };
   }
 
+  const expectedRaw = formData.get("expectedUpdatedAt");
+  if (typeof expectedRaw !== "string" || (expectedRaw !== "" && !Number.isFinite(Date.parse(expectedRaw)))) {
+    return { message: "A versão do cadastro é inválida. Atualize a página.", success: false };
+  }
+
   try {
     await upsertClientRegistrationPrivileged({
       clientId: client.id,
+      expectedUpdatedAt: expectedRaw || null,
       registration: parsed.value,
     });
-  } catch {
+  } catch (error) {
+    if (error instanceof ClientRegistrationConflictError) {
+      return {
+        message: "Este cadastro foi alterado em outra sessão. Atualize a página e confira os dados antes de salvar novamente.",
+        success: false,
+      };
+    }
     return {
       message:
         "Não foi possível atualizar seu cadastro atual. Tente novamente.",
