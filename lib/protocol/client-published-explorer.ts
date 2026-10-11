@@ -132,12 +132,32 @@ export function publishedNutritionDoseTypes(view: PublishedView):string[]{
   return [...found].sort((a,b)=>labelPublishedDoseType(a).localeCompare(labelPublishedDoseType(b),"pt-BR"));
 }
 
+/** Matches a specific published meal, never a different meal in the same variant. */
+export function publishedMealMatches(view:PublishedView, rawSearch:unknown, rawDoseType:unknown){
+  const query=normalized(rawSearch);
+  const doseType=typeof rawDoseType==="string" ? rawDoseType : "all";
+  const knownTypes=new Set(publishedNutritionDoseTypes(view));
+  if(doseType!=="all"&&!knownTypes.has(doseType))return [];
+  return view.variants.flatMap(variant =>
+    variant.meals.filter(meal => {
+      const phrase=normalized(variant.label+" "+meal.label);
+      const matchesText=!query||phrase.includes(query);
+      const matchesDose=doseType==="all"||meal.doseGroups.some(group=>group.doseType===doseType);
+      return matchesText&&matchesDose;
+    }).map(meal=>({
+      id:meal.id,label:meal.label,position:meal.order,variantId:variant.id,
+      variantLabel:variant.label,doseTypes:meal.doseGroups.map(x=>x.doseType),
+    })),
+  );
+}
+
 /** Search is a navigation aid; it does NOT change/pick the client's active phase. */
 export function publishedVariantMatches(view:PublishedView, rawTerm:unknown, doseType:string):Array<{id:string;label:string;meals:number}> {
-  const term=normalized(rawTerm);
-  return view.variants.filter(v=>{
-    const termMatch=!term || normalized(v.label).includes(term) || v.meals.some(meal=>normalized(meal.label).includes(term));
-    const typeMatch=doseType==="all" || v.meals.some(meal=>meal.doseGroups.some(g=>g.doseType===doseType));
-    return termMatch && typeMatch;
-  }).map(v=>({id:v.id,label:v.label,meals:v.meals.length}));
+  const matches=publishedMealMatches(view,rawTerm,doseType);
+  const matchedVariantIds=new Set(matches.map(meal=>meal.variantId));
+  return view.variants.filter(variant=>{
+    // Keep empty variants discoverable when there are no search constraints.
+    if(variant.meals.length===0&&normalizePublishedSearch(rawTerm)===""&&doseType==="all")return true;
+    return matchedVariantIds.has(variant.id);
+  }).map(variant=>({id:variant.id,label:variant.label,meals:variant.meals.length}));
 }
