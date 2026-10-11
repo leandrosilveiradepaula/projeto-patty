@@ -3,7 +3,7 @@ import test from "node:test";
 import {
   parseTrainingRequestFilters, trainingRequestFactualOrigin, exploreTrainingRequests,
   trainingRequestFilteredHref, trainingRequestExactHref, trainingVersionExactHref,
-  trainingVersionPageHref, paginateTrainingVersions, selectPublishedTrainingComparison, trainingVersionComparisonHref, clientTrainingRequestExactHref,
+  trainingVersionPageHref, paginateTrainingVersions, selectPublishedTrainingComparison, trainingVersionComparisonHref, clientTrainingRequestExactHref, parseTrainingVersionFilters, exploreTrainingVersionHistory, parseClientTrainingArchiveFilters, exploreClientTrainingArchive,
 } from "./history-navigation.ts";
 
 const rows = [
@@ -81,4 +81,20 @@ test("comparison links refuse draft/unknown versions and retain exact published 
  assert.equal(trainingVersionComparisonHref("/cliente/treino",versions,"draft"),null);
  assert.equal(trainingVersionComparisonHref("/cliente/treino",versions,"missing"),null);
  assert.equal(trainingVersionComparisonHref("/cliente/treino",versions,"v1"),"/cliente/treino?comparar=v1#comparar-publicacoes-treino");
+});
+
+test("professional version archive filters published, reviewed, and draft without reclassifying",()=>{
+ const rows=[{id:"a",title:"Revisão inicial",version_number:1,reviewed_at:null,published_at:null},{id:"b",title:"Treino completo",version_number:2,reviewed_at:"2026-10-01T10:00:00Z",published_at:null},{id:"c",title:"Treino final",version_number:3,reviewed_at:"2026-10-01T10:00:00Z",published_at:"2026-10-02T10:00:00Z"}];
+ assert.equal(exploreTrainingVersionHistory(rows,parseTrainingVersionFilters({estadoVersao:"draft"})).items[0].id,"a");
+ assert.equal(exploreTrainingVersionHistory(rows,parseTrainingVersionFilters({estadoVersao:"reviewed"})).items[0].id,"b");
+ assert.equal(exploreTrainingVersionHistory(rows,parseTrainingVersionFilters({estadoVersao:"published"})).items[0].id,"c");
+ assert.deepEqual(exploreTrainingVersionHistory(rows,parseTrainingVersionFilters({ordemVersao:"number-asc"})).items.map(x=>x.id),["a","b","c"]);
+ assert.equal(exploreTrainingVersionHistory(rows,parseTrainingVersionFilters({buscaVersao:"revisao"})).total,1);
+});
+test("client archive excludes unpublished, supports oldest and page navigation",()=>{
+ const rows=Array.from({length:14},(_,i)=>({version:{id:String(i),title:"Treino "+i,version_number:15-i,published_at:i===13?null:new Date(Date.UTC(2026,9,15-i)).toISOString()}}));
+ const result=exploreClientTrainingArchive(rows,parseClientTrainingArchiveFilters({versoes:"2"}));
+ assert.equal(result.total,13);assert.equal(result.page,2);assert.equal(result.items.length,6);
+ assert.equal(exploreClientTrainingArchive(rows,parseClientTrainingArchiveFilters({ordemTreino:"oldest"})).items[0].version.id,"12");
+ assert.equal(exploreClientTrainingArchive(rows,parseClientTrainingArchiveFilters({buscaTreino:"treino 3"})).total,1);
 });
