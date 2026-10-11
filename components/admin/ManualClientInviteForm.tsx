@@ -51,11 +51,9 @@ export function ManualClientInviteForm({ onProvisioningAttempt }: { onProvisioni
   const [draft,setDraft] = useState({displayName:"",email:""});
   const validation=validateInvitationDraft(draft);
   const [fieldErrors,setFieldErrors] = useState(false);
-  const [allowRetry,setAllowRetry]=useState(false);
   const inFlightRef = useRef(false);
   useEffect(() => {
     inFlightRef.current = false;
-    if (state.message && state.retryable) setAllowRetry(true);
   }, [state]);
 
   return (
