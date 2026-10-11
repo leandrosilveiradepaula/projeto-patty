@@ -47,7 +47,7 @@ test("manual invitation can be copied after success but cannot be accidentally p
   const form = read("components/admin/ManualClientInviteForm.tsx");
   assert.ok(!form.includes('className={styles.form} noValidate'));
   assert.ok(form.includes('disabled={state.success || isPending} loading={isPending} type="submit"'));
-  assert.ok(form.includes('disabled={state.success}'));
+  assert.ok(form.includes('disabled={state.success || isPending}'));
   assert.ok(form.includes('state.activationLink'));
   assert.ok(form.includes('copyActivationLink'));
   assert.ok(form.includes('href={`/admin/clientes/${state.clientId}?onboarding=link-generated`}'));
