@@ -35,7 +35,7 @@ export default async function ClientePage() {
     getCurrentUserProfile(),
     getCurrentClient(),
   ]);
-  const displayName = profile?.display_name?.trim();
+  const displayName = client?.full_name?.trim() || profile?.display_name?.trim();
 
   if (!client) {
     return (
