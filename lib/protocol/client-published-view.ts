@@ -2,6 +2,16 @@ import type { CurrentClientPublishedProtocol } from "../supabase/data-access.ts"
 
 export type PublishedNutritionPlan = NonNullable<CurrentClientPublishedProtocol["mealPlan"]>;
 
+
+/** Exact targets inside one published, RLS-authorized nutritional snapshot. */
+export function publishedMealAnchor(publicationId: string, mealId: string) {
+  return "refeicao-" + publicationId + "-" + mealId;
+}
+
+export function publishedCycleAnchor(publicationId: string, cycleId: string) {
+  return "ciclo-" + publicationId + "-" + cycleId;
+}
+
 export function publishedVariationAnchor(publicationId: string, variantId: string) {
   return "variacao-" + publicationId + "-" + variantId;
 }
