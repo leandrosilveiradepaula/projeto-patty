@@ -69,7 +69,7 @@ test("Patty sees factual asset counts for every exact released version", () => {
   assert.ok(admin.includes("assetCountsByVersionId.get(contentVersion.id) ?? 0"));
   assert.ok(admin.includes('id={`liberacao-${release.id}`}'));
   assert.ok(admin.includes('"Arquivo registrado"'));
-  assert.ok(admin.includes('"Liberado sem arquivo"'));
+  assert.ok(admin.includes('"Arquivo não localizado"'));
   assert.ok(!admin.includes('"Disponível para abrir"'));
 });
 
