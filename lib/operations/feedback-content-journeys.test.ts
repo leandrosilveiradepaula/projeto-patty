@@ -34,7 +34,7 @@ test("content release requires selected exact version and explicit professional 
   const source = read("components/admin/ClientContentReleaseForm.tsx");
   assert.match(source, /setConfirmRelease\(true\)/);
   assert.match(source, /Confirmar liberação/);
-  assert.match(source, /disabled=\{!selectedVersion \|\| isPending\}/);
+  assert.match(source, /disabled=\{!selectedVersion \|\| isPending \|\| state.success\}/);
   assert.match(source, /setConfirmRelease\(false\)/);
   assert.match(source, /if \(state\.success\)/);
   assert.match(source, /router\.refresh\(\)/);
