@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { endCurrentAdminClientAssignments } from "@/lib/assignments/client-assignment-admin";
-import { upsertClientRegistrationPrivileged } from "@/lib/clients/registration-admin";
+import { ClientRegistrationConflictError, upsertClientRegistrationPrivileged } from "@/lib/clients/registration-admin";
 import {
   activateWeeklyFeedbackNotificationPreference,
   type WeeklyFeedbackNotificationChannel,
@@ -234,12 +234,24 @@ export async function updateAdminClientRegistrationAction(
     };
   }
 
+  const expectedRaw = formData.get("expectedUpdatedAt");
+  if (typeof expectedRaw !== "string" || (expectedRaw !== "" && !Number.isFinite(Date.parse(expectedRaw)))) {
+    return { message: "A versão do cadastro é inválida. Atualize a página.", success: false };
+  }
+
   try {
     await upsertClientRegistrationPrivileged({
       clientId: client.id,
+      expectedUpdatedAt: expectedRaw || null,
       registration: parsed.value,
     });
-  } catch {
+  } catch (error) {
+    if (error instanceof ClientRegistrationConflictError) {
+      return {
+        message: "Este cadastro foi alterado em outra sessão. Atualize a página e confira os dados antes de salvar novamente.",
+        success: false,
+      };
+    }
     return {
       message:
         "Não foi possível atualizar o Cadastro Atual. Confirme seu acesso e MFA e tente novamente.",
