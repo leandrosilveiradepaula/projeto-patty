@@ -1,3 +1,4 @@
+import { parseClientTrainingArchiveFilters, exploreClientTrainingArchive, trainingClientArchiveHref } from "@/lib/training/history-navigation";
 import { selectPublishedTrainingComparison, trainingVersionComparisonHref, clientTrainingRequestExactHref } from "@/lib/training/history-navigation";
 import { parseTrainingRequestFilters, exploreTrainingRequests, trainingRequestFilteredHref } from "@/lib/training/history-navigation";
 import { compareTrainingVersions, paginateTrainingRequests, trainingRequestHistoryHref } from "@/lib/training/version-inspection";
@@ -35,10 +36,11 @@ function formatDateTime(value: string) {
   }).format(new Date(value));
 }
 
-export default async function ClientTrainingPage({ searchParams }: { searchParams: Promise<{ pedidos?: string; origem?: string; observacao?: string; periodo?: string; ordem?: string; comparar?: string }> }) {
+export default async function ClientTrainingPage({ searchParams }: { searchParams: Promise<{ pedidos?: string; origem?: string; observacao?: string; periodo?: string; ordem?: string; comparar?: string; buscaTreino?: string; ordemTreino?: string; versoes?: string }> }) {
   const search = await searchParams;
   const { pedidos, comparar } = search;
   const requestFilters = parseTrainingRequestFilters(search);
+  const archiveFilters = parseClientTrainingArchiveFilters(search);
   const client = await getCurrentClient();
 
   if (!client) {
@@ -77,6 +79,7 @@ export default async function ClientTrainingPage({ searchParams }: { searchParam
       (a, b) => a.position - b.position || a.id.localeCompare(b.id),
     ),
   }));
+  const archived = exploreClientTrainingArchive(publishedItems.slice(1),archiveFilters);
   const trainingItems = publishedItems[0]?.items ?? [];
   const previousPublishedTraining = publishedItems[1] ?? null;
   const comparisonSelection = selectPublishedTrainingComparison(publishedVersions, comparar);
@@ -220,8 +223,17 @@ export default async function ClientTrainingPage({ searchParams }: { searchParam
           description="Histórico das prescrições que a Patty publicou para você. Rascunhos e versões apenas revisadas não aparecem aqui."
           title="Treinos anteriores"
         >
-          <div className={styles.previousTrainings}>
-            {publishedItems.slice(1).map(({ version, items }) => (
+          <form method="get" action="/cliente/treino" className={styles.archiveFilters}>
+            <label>Buscar treino anterior<input type="search" name="buscaTreino" maxLength={120} defaultValue={archiveFilters.query} placeholder="Título ou versão" /></label>
+            <label>Ordenar<select name="ordemTreino" defaultValue={archiveFilters.order}><option value="newest">Mais recentes</option><option value="oldest">Mais antigos</option><option value="title">Título</option></select></label>
+            <button type="submit">Filtrar</button>
+            <Link href={trainingClientArchiveHref("/cliente/treino",parseClientTrainingArchiveFilters({}),1,requestFilters,comparar)}>Limpar filtros</Link>
+          </form>
+          <p role="status" className={styles.note}>Exibindo {archived.from}–{archived.to} de {archived.total} versões anteriores.</p>
+          {archived.invalid ? <p role="status">Página solicitada indisponível; exibimos uma página válida.</p> : null}
+          {archived.total === 0 ? <p className={styles.note}>Nenhum treino anterior corresponde à busca.</p> : null}
+          <div className={styles.previousTrainings} id="historico-versoes-treino">
+            {archived.items.map(({ version, items }) => (
               <ClientHistoryDisclosure
                 className={styles.previousTraining}
                 id={`treino-versao-${version.id}`}
@@ -254,6 +266,11 @@ export default async function ClientTrainingPage({ searchParams }: { searchParam
               </ClientHistoryDisclosure>
             ))}
           </div>
+          {archived.total > 0 ? <nav aria-label="Páginas de treinos anteriores" className={styles.publishedNavigation}>
+            <span>Página {archived.page} de {archived.pageCount}</span>
+            {archived.previous ? <Link href={trainingClientArchiveHref("/cliente/treino",archiveFilters,archived.previous,requestFilters,comparar)}>Anterior</Link> : null}
+            {archived.next ? <Link href={trainingClientArchiveHref("/cliente/treino",archiveFilters,archived.next,requestFilters,comparar)}>Próxima</Link> : null}
+          </nav> : null}
         </Section>
       ) : null}
 
