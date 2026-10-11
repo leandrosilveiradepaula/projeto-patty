@@ -17,7 +17,7 @@ test("admin and client progress provide accessible per-measure anchors",()=>{
  for(const page of ["app/cliente/evolucao/page.tsx","app/admin/clientes/[clienteId]/evolucao/page.tsx"]){
   const s=read(page);
   assert.match(s,/aria-label="Ir para medida"/);
-  assert.match(s,/id=\{\`medida-\$\{index\}\`\}/);
+  assert.match(s, page.includes("cliente/evolucao") ? /id=\{\`medida-\$\{originalIndex\}\`\}/ : /id=\{\`medida-\$\{index\}\`\}/);
   assert.match(s,/series\.length > 1/);
  }
 });
