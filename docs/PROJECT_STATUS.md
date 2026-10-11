@@ -3946,3 +3946,8 @@ O editor profissional apresenta busca por número da versão, filtro por estados
 ## Auditoria estrutural das versões de protocolo (2026-10-11)
 
 No editor profissional, filtros e contagens permitem localizar versões com ou sem plano alimentar persistido, com ciclos ou com lançamentos de doses. A busca usa exclusivamente a estrutura associada à versão consultável, não presume que um plano ausente foi preenchido, não valida critérios clínicos nem modifica qualquer etapa de aprovação/publicação. O histórico segue integralmente preservado; não há migration, alteração RLS/Auth ou automação profissional. E2E autenticado e revisão visual mobile pendentes.
+
+
+## Catálogo administrativo da biblioteca educacional — consulta completa (2026-10-11)
+
+O painel da Patty permite buscar títulos e metadados autorizados, filtrar por categoria, tipo e situação factual da última versão (nunca publicada, publicação vigente, publicada com novo rascunho), ordenar e paginar sem truncar o conjunto. Contagens distinguem conteúdos em rascunho de versões históricas publicadas e não criam liberação por fase/cliente. Filtros antigos de rascunho/publicado continuam reconhecidos. Leitura das versões com permissão atual e sem mudanças RLS/Auth, migrations ou publicação automática; validação E2E autenticada não foi executada.
