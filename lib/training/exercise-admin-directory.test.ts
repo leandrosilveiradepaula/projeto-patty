@@ -1,0 +1,5 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { exerciseCatalogBackHref, matchingExerciseNameVersion, readExerciseCatalogStatus, readExerciseCatalogTerm } from "./exercise-admin-directory.ts";
+test("query parsing ignores invalid repeated values",()=>{ assert.equal(readExerciseCatalogTerm(["a","b"]),""); assert.equal(readExerciseCatalogTerm(" x "),"x"); assert.equal(readExerciseCatalogTerm("x".repeat(130)).length,120); assert.equal(readExerciseCatalogStatus("incomplete"),"incomplete"); assert.equal(readExerciseCatalogStatus(["draft"]),"all"); });
+test("historical names match without changing canonical displayed name",()=>{ const versions=[{id:"a",name:"Agachamento",version_number:2},{id:"b",name:"Flexão",version_number:1}]; assert.equal(matchingExerciseNameVersion(versions,"flexao")?.id,"b"); assert.equal(matchingExerciseNameVersion(versions,"outro"),null); assert.equal(exerciseCatalogBackHref("teste","draft"),"/admin/exercicios?q=teste&status=draft"); });
