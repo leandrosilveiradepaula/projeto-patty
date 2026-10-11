@@ -1,3 +1,4 @@
+import { ClientReleasedContentExplorer, type ReleasedContentDisplayEntry } from "@/components/client/ClientReleasedContentExplorer";
 import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
 import { newestClientContentReleases } from "@/lib/content/release-order";
 import { educationalAssetKind, educationalAssetOpenLabel, educationalAssetSize, orderReleasedEducationalAssets } from "@/lib/content/client-assets";
@@ -52,45 +53,7 @@ export default async function ClienteConteudosPage() {
     assetsByVersion.set(asset.educational_content_version_id, current);
   }
 
-  return (
-    <>
-      <PageHeader
-        description="Conteúdos educacionais liberados para a sua conta."
-        eyebrow="Cliente"
-        title="Conteúdos"
-      />
-      <Section
-        description="Cada item corresponde à versão específica que foi liberada para você."
-        title="Biblioteca educacional"
-      >
-        {!client ? (
-          <EmptyState
-            description="Esta conta ainda não está vinculada a um cadastro de cliente. Os conteúdos permanecem privados até que o vínculo e a liberação estejam disponíveis."
-            title="Conteúdos indisponíveis"
-            action={<Link href="/cliente">Voltar ao início</Link>}
-          />
-        ) : visibleReleases.length === 0 ? (
-          <EmptyState
-            description={
-              orderedReleases.length > 0
-                ? "Há registros de liberação, mas as respectivas versões não estão disponíveis para consulta nesta conta. Solicite a verificação à Patty."
-                : "Ainda não há conteúdos liberados pela Patty para sua conta. As liberações dependem de uma decisão profissional e aparecerão aqui."
-            }
-            title="Nenhum conteúdo foi liberado para você ainda"
-            action={<Link href="/cliente">Voltar ao início</Link>}
-          />
-        ) : (
-          <>
-          {missingVersionCount > 0 ? (
-            <p className={styles.notice} role="status">
-              {missingVersionCount} liberação(ões) possuem versão indisponível para consulta. A Patty pode verificar o registro.
-            </p>
-          ) : null}
-          <p className={styles.summary} role="status">
-            {visibleReleases.length} versão(ões) liberada(s) para você.
-          </p>
-          <ul className={styles.contentList}>
-            {visibleReleases.map((release) => {
+  const explorerEntries: ReleasedContentDisplayEntry[] = visibleReleases.map((release): ReleasedContentDisplayEntry | null => {
               const contentVersion = release.educational_content_versions;
               if (!contentVersion) {
                 return null;
@@ -101,8 +64,14 @@ export default async function ClienteConteudosPage() {
               );
               const hasPrimaryAsset = releaseAssets.some((asset) => asset.asset_key === "primary");
 
-              return (
-                <li id={`conteudo-liberado-${release.id}`} key={release.id}>
+              return {
+                id: release.id,
+                title: contentVersion.title,
+                category: contentVersion.category_key ?? "Não informado",
+                type: contentVersion.content_type_key ?? "Não informado",
+                releasedAt: release.released_at,
+                assetCount: releaseAssets.length,
+                content: (
                   <ClientContentCard
                     category={contentVersion.category_key ?? "Não informado"}
                     meta={
@@ -145,12 +114,23 @@ export default async function ClienteConteudosPage() {
                     title={contentVersion.title}
                     type={contentVersion.content_type_key ?? "Não informado"}
                   />
-                </li>
-              );
-            })}
-          </ul>
-          </>
-        )}
+              )
+              };
+            }).filter((entry): entry is ReleasedContentDisplayEntry => entry !== null);
+
+  return (
+    <>
+      <PageHeader
+        description="Conteúdos educacionais liberados para a sua conta."
+        eyebrow="Cliente"
+        title="Conteúdos"
+      />
+      <Section description="Cada item corresponde à versão específica que foi liberada para você." title="Biblioteca educacional">
+        {!client ? (
+          <EmptyState description="Esta conta ainda não está vinculada a um cadastro de cliente. Os conteúdos permanecem privados até que o vínculo e a liberação estejam disponíveis." title="Conteúdos indisponíveis" action={<Link href="/cliente">Voltar ao início</Link>} />
+        ) : visibleReleases.length === 0 ? (
+          <EmptyState description={orderedReleases.length > 0 ? "Há registros de liberação, mas as respectivas versões não estão disponíveis para consulta nesta conta. Solicite a verificação à Patty." : "Ainda não há conteúdos liberados pela Patty para sua conta. As liberações dependem de uma decisão profissional e aparecerão aqui."} title="Nenhum conteúdo foi liberado para você ainda" action={<Link href="/cliente">Voltar ao início</Link>} />
+        ) : <ClientReleasedContentExplorer entries={explorerEntries} missingVersionCount={missingVersionCount} />}
       </Section>
       <ClientJourneyNextSteps areas={["protocol","training","index"]} />
     </>
