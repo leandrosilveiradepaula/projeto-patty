@@ -193,7 +193,7 @@ export default async function AdminClientContentPage({
                     action={
                       <Link href={
                         parentContentIdByVersionId.has(contentVersion.id)
-                          ? `/admin/conteudos/${parentContentIdByVersionId.get(contentVersion.id)}`
+                          ? `/admin/conteudos/${parentContentIdByVersionId.get(contentVersion.id)}?versao=${contentVersion.id}#assets-do-conteudo`
                           : "/admin/conteudos"
                       }>
                         {versionIdsWithAssets.has(contentVersion.id)
