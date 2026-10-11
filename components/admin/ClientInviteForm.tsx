@@ -1,6 +1,7 @@
+import { validateInvitationDraft } from "@/lib/onboarding/validation";
 "use client";
 
-import { useActionState, useRef, useEffect } from "react";
+import { useActionState, useRef, useEffect, useState } from "react";
 
 import {
   type InviteClientState,
@@ -21,9 +22,15 @@ export function ClientInviteForm({ onProvisioningAttempt }: { onProvisioningAtte
     initialState,
   );
 
+  const [confirmed,setConfirmed] = useState(false);
+  const [draft,setDraft] = useState({displayName:"",email:""});
+  const validation=validateInvitationDraft(draft);
+  const [fieldErrors,setFieldErrors] = useState(false);
+  const [allowRetry,setAllowRetry]=useState(false);
   const inFlightRef = useRef(false);
   useEffect(() => {
     inFlightRef.current = false;
+    if (state.message && state.retryable) setAllowRetry(true);
   }, [state]);
 
   return (
@@ -32,7 +39,8 @@ export function ClientInviteForm({ onProvisioningAttempt }: { onProvisioningAtte
       aria-busy={isPending}
       className={styles.form}
       onSubmit={(event) => {
-        if (inFlightRef.current || isPending) {
+        if (inFlightRef.current || isPending || !validation.ok || !confirmed) {
+          setFieldErrors(true);
           event.preventDefault();
           return;
         }
@@ -40,6 +48,7 @@ export function ClientInviteForm({ onProvisioningAttempt }: { onProvisioningAtte
         onProvisioningAttempt?.();
       }}
     >
+      <input type="hidden" name="confirmNewClient" value={confirmed?"yes":"no"} />
       {state.message ? (
         <Alert
           live="assertive"
@@ -64,6 +73,9 @@ export function ClientInviteForm({ onProvisioningAttempt }: { onProvisioningAtte
             maxLength={120}
             minLength={2}
             name="displayName"
+            value={draft.displayName}
+            onChange={event=>{setDraft(previous=>({...previous,displayName:event.target.value}));setFieldErrors(false);}}
+            aria-invalid={fieldErrors && !validation.ok && validation.field==="displayName"}
             required
             type="text"
           />
@@ -84,14 +96,23 @@ export function ClientInviteForm({ onProvisioningAttempt }: { onProvisioningAtte
             disabled={isPending}
             maxLength={254}
             name="email"
+            value={draft.email}
+            onChange={event=>{setDraft(previous=>({...previous,email:event.target.value}));setFieldErrors(false);}}
+            aria-invalid={fieldErrors && !validation.ok && validation.field==="email"}
             required
             type="email"
           />
         )}
       </FormField>
 
+      {fieldErrors && !validation.ok ? <p role="alert">{validation.message}</p> : null}
+      <label style={{display:"flex",gap:"0.75rem",alignItems:"flex-start"}}>
+        <input type="checkbox" checked={confirmed} disabled={isPending} onChange={event=>setConfirmed(event.target.checked)} />
+        Confirmo que este é um cadastro novo, não um reenvio ou recuperação de acesso.
+      </label>
+      {state.message && state.retryable ? <p role="status">Validação concluída antes de criar a identidade. Corrija os campos e tente novamente.</p> : null}
       {isPending ? <p role="status">Verificando o acesso da cliente…</p> : null}
-      <Button disabled={isPending} loading={isPending} type="submit">
+      <Button disabled={isPending || !confirmed || !validation.ok} loading={isPending} type="submit">
         Criar cliente e enviar convite
       </Button>
     </form>
