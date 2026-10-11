@@ -7,6 +7,8 @@ import { checkinHistorySearch, parseCheckinHistoryDay } from "@/lib/checkins/his
 import { parsePositiveCheckinMl } from "@/lib/checkins/amount";
 import { loadSupportedLiquidTaxonomy } from "@/lib/method/liquid-taxonomy-loader";
 import { isUuid } from "@/lib/validation/uuid";
+import { parseExpectedCheckinCorrectionId, checkinCorrectionSnapshotMatches, liquidCorrectionChangesValue, activityCorrectionChangesValue } from "@/lib/checkins/correction-audit";
+import { latestCheckinCorrectionsByEvent } from "@/lib/checkins/effective-corrections";
 import { requireRole } from "@/lib/supabase/auth";
 import {
   createAccessibleClientActivityCheckinEventCorrection,
@@ -14,6 +16,10 @@ import {
   getAccessibleClient,
   listAccessibleClientActivityCheckinEvents,
   listAccessibleClientLiquidIntakeEvents,
+  getAccessibleClientLiquidIntakeEvent,
+  getAccessibleClientActivityCheckinEvent,
+  listAccessibleClientLiquidIntakeEventCorrections,
+  listAccessibleClientActivityCheckinEventCorrections,
 } from "@/lib/supabase/data-access";
 
 function adminCheckinsPath(clientId: string, status?: string) {
@@ -23,7 +29,7 @@ function adminCheckinsPath(clientId: string, status?: string) {
 
 function correctionReturnPath(
   clientId: string,
-  status: "correction-invalid" | "correction-error" | "correction-recorded",
+  status: "correction-invalid" | "correction-error" | "correction-recorded" | "correction-conflict" | "correction-unchanged",
   formData: FormData,
   kind: "liquido" | "atividade",
 ) {
@@ -64,8 +70,9 @@ export async function correctClientLiquidIntakeAction(
     redirect(correctionReturnPath(clientId, "correction-invalid", formData, "liquido"));
   }
 
-  const events = await listAccessibleClientLiquidIntakeEvents(client.id);
-  const event = events.find((item) => item.id === eventId);
+  const expected = parseExpectedCheckinCorrectionId(formData.get("expectedCorrectionId"));
+  if (!expected.valid) redirect(correctionReturnPath(clientId, "correction-invalid", formData, "liquido"));
+  const event = await getAccessibleClientLiquidIntakeEvent(client.id, eventId);
 
   if (!event) redirect(correctionReturnPath(clientId, "correction-invalid", formData, "liquido"));
 
@@ -77,6 +84,13 @@ export async function correctClientLiquidIntakeAction(
 
   if (!liquidKind) redirect(correctionReturnPath(clientId, "correction-invalid", formData, "liquido"));
 
+  const latest = latestCheckinCorrectionsByEvent(await listAccessibleClientLiquidIntakeEventCorrections([eventId])).get(eventId);
+  if (!checkinCorrectionSnapshotMatches(expected.id, latest)) {
+    redirect(correctionReturnPath(clientId, "correction-conflict", formData, "liquido"));
+  }
+  if (!liquidCorrectionChangesValue(event, latest, amountMl, liquidKind.key)) {
+    redirect(correctionReturnPath(clientId, "correction-unchanged", formData, "liquido"));
+  }
   try {
     await createAccessibleClientLiquidIntakeEventCorrection({
       amountMl,
@@ -119,11 +133,19 @@ export async function correctClientActivityCheckinAction(
     redirect(correctionReturnPath(clientId, "correction-invalid", formData, "atividade"));
   }
 
-  const events = await listAccessibleClientActivityCheckinEvents(client.id);
-  const event = events.find((item) => item.id === eventId);
+  const expected = parseExpectedCheckinCorrectionId(formData.get("expectedCorrectionId"));
+  if (!expected.valid) redirect(correctionReturnPath(clientId, "correction-invalid", formData, "atividade"));
+  const event = await getAccessibleClientActivityCheckinEvent(client.id, eventId);
 
   if (!event) redirect(correctionReturnPath(clientId, "correction-invalid", formData, "atividade"));
 
+  const latest = latestCheckinCorrectionsByEvent(await listAccessibleClientActivityCheckinEventCorrections([eventId])).get(eventId);
+  if (!checkinCorrectionSnapshotMatches(expected.id, latest)) {
+    redirect(correctionReturnPath(clientId, "correction-conflict", formData, "atividade"));
+  }
+  if (!activityCorrectionChangesValue(event, latest, event.checkin_date, rawValue === "yes")) {
+    redirect(correctionReturnPath(clientId, "correction-unchanged", formData, "atividade"));
+  }
   try {
     await createAccessibleClientActivityCheckinEventCorrection({
       checkinDate: event.checkin_date,
