@@ -1,4 +1,4 @@
-import { createExerciseAction } from "@/app/admin/exercicios/actions";
+import { AdminExerciseCreateForm } from "@/components/admin/AdminExerciseCreateForm";
 import { ExerciseListItem } from "@/components/admin/ExerciseListItem";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -23,6 +23,7 @@ function normalizeSearchValue(value: string) {
 }
 
 function formatPublishedDate(value: string) {
+  if (!Number.isFinite(Date.parse(value))) return "Data indisponível";
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     month: "2-digit",
@@ -66,18 +67,7 @@ export default async function AdminExerciciosPage({ searchParams }: AdminExercic
         title="Novo exercício"
       >
         <Card className={styles.createCard}>
-          <form action={createExerciseAction} className={styles.createForm}>
-            <label className={styles.field}>
-              <span>Nome do exercício</span>
-              <input
-                maxLength={200}
-                name="exerciseName"
-                placeholder="Ex.: Agachamento"
-                required
-              />
-            </label>
-            <Button type="submit">Criar rascunho</Button>
-          </form>
+          <AdminExerciseCreateForm />
         </Card>
       </Section>
 
