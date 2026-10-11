@@ -9,7 +9,7 @@ test("asset metadata rejects truncated and unsafe numbers", () => {
   assert.doesNotMatch(source, /Number\.parseInt\(/);
   const order = read("lib/content/display-order.ts");
   assert.match(source, /parseContentDisplayOrder\(formData.get\("displayOrder"\)\)/);
-  assert.match(order, /Number\\.isSafeInteger\\(value\\)/);
+  assert.match(order, /Number\.isSafeInteger\(value\)/);
   assert.match(source, /Number\.isSafeInteger\(byteSize\)/);
   assert.match(source, /verifyPrivateBlobAsset\(/);
 });
