@@ -1,4 +1,4 @@
-import { readCheckinExploreOptions, exploreLiquidCheckins, exploreActivityCheckins, checkinExploreHref } from "@/lib/checkins/history-explorer";
+import { readCheckinExploreOptions, exploreLiquidCheckins, exploreActivityCheckins, checkinExploreHref, checkinExplorerQuery, checkinExplorerClearQuery } from "@/lib/checkins/history-explorer";
 import { groupCheckinCorrectionHistory, checkinCorrectionAuthor, formatCheckinAuditDate } from "@/lib/checkins/correction-audit";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
@@ -31,7 +31,7 @@ import styles from "./page.module.css";
 
 type PageProps = {
   params: Promise<{ clienteId: string }>;
-  searchParams: Promise<{ status?: string; dia?: string; ordem?: string; correcao?: string; tipo?: string; atividade?: string; atividadeCorrecao?: string; lp?: string; ap?: string }>;
+  searchParams: Promise<{ status?: string; dia?: string; ordem?: string; correcao?: string; tipo?: string; atividade?: string; atividadeCorrecao?: string; origemLiquido?: string; origemAtividade?: string; ordemAtividade?: string; lp?: string; ap?: string }>;
 };
 
 function formatMl(value: number) {
@@ -78,8 +78,8 @@ export default async function AdminClientCheckinsPage({
     liquidTaxonomy.kinds.map((kind) => [kind.key, kind.label]),
   );
 
-  const recentLiquidEvents = selectedRange ? liquidEvents : liquidEvents.slice(0, 30);
-  const recentActivityEvents = selectedDay ? activityEvents : activityEvents.slice(0, 30);
+  const recentLiquidEvents = liquidEvents;
+  const recentActivityEvents = activityEvents;
   const [liquidCorrections, activityCorrections] = await Promise.all([
     listAccessibleClientLiquidIntakeEventCorrections(
       recentLiquidEvents.map((event) => event.id),
@@ -98,13 +98,13 @@ export default async function AdminClientCheckinsPage({
     effectiveLiquidKind:latestLiquidCorrectionByEvent.get(event.id)?.corrected_liquid_kind ?? event.liquid_kind,
     wasCorrected:latestLiquidCorrectionByEvent.has(event.id),
   }));
-  const exploredLiquids = exploreLiquidCheckins(effectiveLiquidEvents,explorer);
+  const exploredLiquids = exploreLiquidCheckins(effectiveLiquidEvents,explorer,client.profile_id);
   const exploredActivities = exploreActivityCheckins(recentActivityEvents.map(event => ({
     ...event, didActivityEffective:latestActivityCorrectionByEvent.get(event.id)?.corrected_did_activity ?? event.did_activity,
     wasCorrected:latestActivityCorrectionByEvent.has(event.id),
-  })),explorer);
+  })),explorer,client.profile_id);
   const base = `/admin/clientes/${client.id}/checkins`;
-  const exploreQuery = {dia:selectedDay ?? undefined, ordem:explorer.liquidSort, correcao:explorer.liquidCorrection, tipo:explorer.liquidKind, atividade:explorer.activityFilter, atividadeCorrecao:explorer.activityCorrection, lp:String(explorer.liquidPage), ap:String(explorer.activityPage)};
+  const exploreQuery = checkinExplorerQuery(explorer,selectedDay ?? undefined,{liquid:exploredLiquids.page,activity:exploredActivities.page});
   return (
     <>
       <ClientWorkspaceHeader
@@ -161,7 +161,7 @@ export default async function AdminClientCheckinsPage({
       </Section>
 
       <Section
-        description={selectedRange ? "Registros do dia selecionado. Cada item mostra o valor vigente e preserva o original quando corrigido." : "Até 30 registros recentes de ingestão. Cada item mostra o valor vigente e preserva o original quando corrigido."}
+        description={selectedRange ? "Registros do dia selecionado. Cada item mostra o valor vigente e preserva o original quando corrigido." : "Histórico completo de ingestão, com navegação por páginas. Cada item mostra o valor vigente e preserva o original quando corrigido."}
         id="historico-liquidos"
         title="Líquidos recentes"
       >
@@ -179,13 +179,19 @@ export default async function AdminClientCheckinsPage({
         ) : null}
         <form action={base+"#historico-liquidos"} className={styles.form} method="get">
           {selectedDay ? <input name="dia" type="hidden" value={selectedDay} /> : null}
-          <label className={styles.field}>Ordem<select name="ordem" defaultValue={explorer.liquidSort}><option value="newest">Mais recentes</option><option value="oldest">Mais antigos</option><option value="amount-desc">Maior volume</option></select></label>
+          <label className={styles.field}>Ordem<select name="ordem" defaultValue={explorer.liquidSort}><option value="newest">Mais recentes</option><option value="oldest">Mais antigos</option><option value="amount-desc">Maior volume</option><option value="amount-asc">Menor volume</option></select></label>
           <label className={styles.field}>Correção<select name="correcao" defaultValue={explorer.liquidCorrection}><option value="all">Todas</option><option value="corrected">Corrigidas</option><option value="original">Sem correção</option></select></label>
           <label className={styles.field}>Tipo<select name="tipo" defaultValue={explorer.liquidKind}><option value="all">Todos</option>{Array.from(new Set(effectiveLiquidEvents.map(e=>e.effectiveLiquidKind))).map(kind=><option value={kind} key={kind}>{liquidLabelsByKey.get(kind) ?? "Tipo histórico"}</option>)}</select></label>
+          <label className={styles.field}>Enviado por<select name="origemLiquido" defaultValue={explorer.liquidOrigin}><option value="all">Todas as origens</option><option value="client">Cliente</option><option value="professional">Profissional</option></select></label>
+          {exploreQuery.atividade && exploreQuery.atividade !== "all" ? <input type="hidden" name="atividade" value={exploreQuery.atividade} /> : null}
+          {exploreQuery.atividadeCorrecao && exploreQuery.atividadeCorrecao !== "all" ? <input type="hidden" name="atividadeCorrecao" value={exploreQuery.atividadeCorrecao} /> : null}
+          {exploreQuery.origemAtividade && exploreQuery.origemAtividade !== "all" ? <input type="hidden" name="origemAtividade" value={exploreQuery.origemAtividade} /> : null}
+          {exploreQuery.ordemAtividade && exploreQuery.ordemAtividade !== "newest" ? <input type="hidden" name="ordemAtividade" value={exploreQuery.ordemAtividade} /> : null}
           <Button type="submit" variant="secondary">Filtrar</Button>
-          <Link href={checkinExploreHref(base,{dia:selectedDay ?? undefined},{})+"#historico-liquidos"}>Limpar filtros</Link>
+          <Link href={checkinExploreHref(base,checkinExplorerClearQuery(explorer,selectedDay ?? undefined,"liquid",{activity:exploredActivities.page}),{})+"#historico-liquidos"}>Limpar filtros</Link>
         </form>
-        <p className={styles.description}>{exploredLiquids.total} registro(s) encontrado(s).</p>
+        <p className={styles.description}>Exibindo {exploredLiquids.first}–{exploredLiquids.last} de {exploredLiquids.total} registro(s) após os filtros.</p>
+        {exploredLiquids.outOfRange ? <p role="status" className={styles.description}>Página solicitada indisponível; exibimos a última página válida.</p> : null}
         {exploredLiquids.total === 0 ? (
           <p className={styles.description}>Ainda não existem registros de líquidos desta cliente para consultar ou corrigir.</p>
         ) : (
@@ -266,7 +272,7 @@ export default async function AdminClientCheckinsPage({
       </Section>
 
       <Section
-        description={selectedDay ? "Respostas registradas para o dia selecionado. Correções preservam o original." : "Até 30 registros recentes de atividade. A data do check-in pode ser diferente da data em que a resposta foi registrada; correções preservam o original."}
+        description={selectedDay ? "Respostas registradas para o dia selecionado. Correções preservam o original." : "Histórico completo de atividade, com navegação por páginas. A data do check-in pode ser diferente da data em que a resposta foi registrada; correções preservam o original."}
         id="historico-atividade"
         title={selectedDay ? `Atividade física em ${selectedDay}` : "Atividade física recente"}
       >
@@ -274,9 +280,17 @@ export default async function AdminClientCheckinsPage({
           {selectedDay ? <input name="dia" type="hidden" value={selectedDay} /> : null}
           <label className={styles.field}>Resposta<select name="atividade" defaultValue={explorer.activityFilter}><option value="all">Todas</option><option value="yes">Sim</option><option value="no">Não</option></select></label>
           <label className={styles.field}>Correções<select name="atividadeCorrecao" defaultValue={explorer.activityCorrection}><option value="all">Todas</option><option value="corrected">Corrigidas</option><option value="original">Sem correção</option></select></label>
+          <label className={styles.field}>Ordem<select name="ordemAtividade" defaultValue={explorer.activitySort}><option value="newest">Mais recentes</option><option value="oldest">Mais antigas</option></select></label>
+          <label className={styles.field}>Enviado por<select name="origemAtividade" defaultValue={explorer.activityOrigin}><option value="all">Todas as origens</option><option value="client">Cliente</option><option value="professional">Profissional</option></select></label>
+          {exploreQuery.ordem && exploreQuery.ordem !== "newest" ? <input type="hidden" name="ordem" value={exploreQuery.ordem} /> : null}
+          {exploreQuery.correcao && exploreQuery.correcao !== "all" ? <input type="hidden" name="correcao" value={exploreQuery.correcao} /> : null}
+          {exploreQuery.tipo && exploreQuery.tipo !== "all" ? <input type="hidden" name="tipo" value={exploreQuery.tipo} /> : null}
+          {exploreQuery.origemLiquido && exploreQuery.origemLiquido !== "all" ? <input type="hidden" name="origemLiquido" value={exploreQuery.origemLiquido} /> : null}
           <Button type="submit" variant="secondary">Filtrar atividade</Button>
+          <Link href={checkinExploreHref(base,checkinExplorerClearQuery(explorer,selectedDay ?? undefined,"activity",{liquid:exploredLiquids.page}),{})+"#historico-atividade"}>Limpar filtros de atividade</Link>
         </form>
-        <p className={styles.description}>{exploredActivities.total} resposta(s) encontrada(s).</p>
+        <p className={styles.description}>Exibindo {exploredActivities.first}–{exploredActivities.last} de {exploredActivities.total} resposta(s) após os filtros.</p>
+        {exploredActivities.outOfRange ? <p role="status" className={styles.description}>Página solicitada indisponível; exibimos a última página válida.</p> : null}
         {exploredActivities.total === 0 ? (
           <p className={styles.description}>Ainda não existem check-ins de atividade desta cliente para consultar ou corrigir.</p>
         ) : (
