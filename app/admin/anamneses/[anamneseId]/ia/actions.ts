@@ -149,6 +149,8 @@ export async function createPattyNoteFromAiFinding(
     throw new Error("A anotação profissional deve ter no máximo 4.000 caracteres.");
   }
 
+  await requireExactAccessibleAiExecution(submissionId, executionId, "completed");
+
   await recordAiFindingAction({
     action: "converted_to_patty_note",
     actedByProfileId: auth.profileId,
