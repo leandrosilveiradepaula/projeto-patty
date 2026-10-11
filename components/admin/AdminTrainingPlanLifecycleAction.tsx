@@ -40,6 +40,15 @@ type Props =
       mode: "delete";
       trainingPlanVersionId: string;
       itemLabel?: string;
+      expectedItem: {
+        exerciseName: string;
+        setsText: string;
+        repetitionsText: string;
+        position: number;
+        restText: string | null;
+        executionNotes: string | null;
+        exerciseVersionId: string | null;
+      };
       disabled?: boolean;
     };
 
@@ -111,6 +120,17 @@ export function AdminTrainingPlanLifecycleAction(props: Props) {
       }
       inFlightRef.current = true;
     }}>
+      {props.mode === "delete" ? (
+        <>
+          <input name="expectedName" type="hidden" value={props.expectedItem.exerciseName} />
+          <input name="expectedSets" type="hidden" value={props.expectedItem.setsText} />
+          <input name="expectedRepetitions" type="hidden" value={props.expectedItem.repetitionsText} />
+          <input name="expectedPosition" type="hidden" value={props.expectedItem.position} />
+          <input name="expectedRestText" type="hidden" value={props.expectedItem.restText ?? ""} />
+          <input name="expectedExecutionNotes" type="hidden" value={props.expectedItem.executionNotes ?? ""} />
+          <input name="expectedExerciseVersionId" type="hidden" value={props.expectedItem.exerciseVersionId ?? ""} />
+        </>
+      ) : null}
       {state.message ? (
         <Alert
           live={state.success ? "polite" : "assertive"}
