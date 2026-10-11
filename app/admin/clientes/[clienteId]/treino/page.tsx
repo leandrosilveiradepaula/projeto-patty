@@ -1,3 +1,4 @@
+import { parseTrainingRequestFilters, exploreTrainingRequests, trainingRequestFilteredHref } from "@/lib/training/history-navigation";
 import { notFound } from "next/navigation";
 import { TrainingVersionComparisonView } from "@/components/training/TrainingVersionComparisonView";
 import { compareTrainingVersions, paginateTrainingRequests, trainingRequestHistoryHref } from "@/lib/training/version-inspection";
@@ -36,7 +37,7 @@ type Props = {
   params: Promise<{
     clienteId: string;
   }>;
-  searchParams: Promise<{ pedidos?: string }>;
+  searchParams: Promise<{ pedidos?: string; origem?: string; observacao?: string; periodo?: string; ordem?: string }>;
 };
 
 function formatDateTime(value: string) {
@@ -64,7 +65,9 @@ function versionStatus(version: {
 }
 
 export default async function AdminClientTrainingPage({ params, searchParams }: Props) {
-  const [{ clienteId }, { pedidos }] = await Promise.all([params, searchParams]);
+  const [{ clienteId }, search] = await Promise.all([params, searchParams]);
+  const { pedidos } = search;
+  const requestFilters = parseTrainingRequestFilters(search);
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(clienteId)) notFound();
   const client = await getAccessibleClient(clienteId);
 
@@ -78,7 +81,7 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
   ]);
 
   const orderedRequests = newestTrainingRequests(requests);
-  const requestPage = paginateTrainingRequests(orderedRequests, pedidos);
+
   const versions = plan
     ? await listAccessibleClientTrainingPlanVersions(plan.id)
     : [];
@@ -93,6 +96,7 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
     : [];
   const publishedVersions = publishedTrainingVersions(versions);
   const latestPublished = publishedVersions[0] ?? null;
+  const requestPage = exploreTrainingRequests(orderedRequests,requestFilters,client.profile_id,latestPublished?.published_at);
   const newRequestAfterPublication = Boolean(
     orderedRequests[0] && latestPublished &&
     isTrainingRequestAfterPublication(orderedRequests[0].requested_at, latestPublished.published_at),
@@ -404,6 +408,12 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
         id="historico-solicitacoes-treino"
         title="Histórico de solicitações"
       >
+<form method="get" className={styles.versionNavigation}>
+<label>Origem<select name="origem" defaultValue={requestFilters.origin}><option value="all">Todas</option><option value="client">Cliente</option><option value="professional">Profissional</option><option value="unknown">Não identificada</option></select></label>
+<label>Observação<select name="observacao" defaultValue={requestFilters.notes}><option value="all">Todas</option><option value="with-note">Com observação</option><option value="without-note">Sem observação</option></select></label>
+<label>Momento<select name="periodo" defaultValue={requestFilters.period}><option value="all">Qualquer</option><option value="after-publication">Após publicação</option><option value="before-or-at-publication">Até publicação</option></select></label>
+<label>Ordem<select name="ordem" defaultValue={requestFilters.order}><option value="newest">Recentes</option><option value="oldest">Antigas</option></select></label>
+<button type="submit">Filtrar solicitações</button><Link href={`/admin/clientes/${client.id}/treino#historico-solicitacoes-treino`}>Limpar filtros</Link></form>
         {requests.length === 0 ? (
           <EmptyState
             description="Nenhuma solicitação registrada. Se houver pedido da cliente, registre-o no formulário de Solicitação do serviço acima."
@@ -430,12 +440,13 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
             ))}
           </ol>
         )}
+        {requests.length > 0 && requestPage.total === 0 ? <p role="status">Nenhuma solicitação corresponde aos filtros.</p> : null}
         {requestPage.invalid ? <p role="status" className={styles.description}>Página solicitada inválida. Exibindo uma página disponível do histórico.</p> : null}
         {requestPage.total > 0 ? (
           <nav aria-label="Navegar solicitações de treino" className={styles.versionNavigation}>
             <span>{requestPage.from}–{requestPage.to} de {requestPage.total} solicitações · Página {requestPage.page} de {requestPage.pageCount}</span>
-            {requestPage.previous ? <Link href={trainingRequestHistoryHref(`/admin/clientes/${client.id}/treino`,requestPage.previous,"historico-solicitacoes-treino")}>Anterior</Link> : null}
-            {requestPage.next ? <Link href={trainingRequestHistoryHref(`/admin/clientes/${client.id}/treino`,requestPage.next,"historico-solicitacoes-treino")}>Próxima</Link> : null}
+            {requestPage.previous ? <Link href={trainingRequestFilteredHref(`/admin/clientes/${client.id}/treino`,requestFilters,requestPage.previous,"historico-solicitacoes-treino")}>Anterior</Link> : null}
+            {requestPage.next ? <Link href={trainingRequestFilteredHref(`/admin/clientes/${client.id}/treino`,requestFilters,requestPage.next,"historico-solicitacoes-treino")}>Próxima</Link> : null}
           </nav>
         ) : null}
       </Section>
