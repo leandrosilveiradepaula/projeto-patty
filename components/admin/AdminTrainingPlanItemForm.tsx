@@ -97,7 +97,7 @@ export function AdminTrainingPlanItemForm({
       aria-busy={isPending}
       className={styles.form}
       onSubmit={(event) => {
-        if (inFlightRef.current || missingHistoricalVersion) {
+        if (inFlightRef.current || isPending || missingHistoricalVersion) {
           event.preventDefault();
           return;
         }
@@ -105,6 +105,13 @@ export function AdminTrainingPlanItemForm({
       }}
       ref={formRef}
     >
+      {item ? (
+        <>
+          <input name="expectedExerciseName" type="hidden" value={item.exerciseName} />
+          <input name="expectedSetsText" type="hidden" value={item.setsText} />
+          <input name="expectedRepetitionsText" type="hidden" value={item.repetitionsText} />
+        </>
+      ) : null}
       {state.message ? (
         <Alert
           live={state.success ? "polite" : "assertive"}

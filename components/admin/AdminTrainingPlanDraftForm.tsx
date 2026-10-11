@@ -52,12 +52,18 @@ export function AdminTrainingPlanDraftForm({
 
   return (
     <form action={formAction} aria-busy={isPending} className={styles.form} onSubmit={(event) => {
-      if (inFlightRef.current || (!trainingPlanVersionId && state.success)) {
+      if (inFlightRef.current || isPending || (!trainingPlanVersionId && state.success)) {
         event.preventDefault();
         return;
       }
       inFlightRef.current = true;
     }}>
+      {trainingPlanVersionId ? (
+        <>
+          <input name="expectedTitle" type="hidden" value={title ?? ""} />
+          <input name="expectedNotes" type="hidden" value={notes ?? ""} />
+        </>
+      ) : null}
       {state.message ? (
         <Alert
           live={state.success ? "polite" : "assertive"}

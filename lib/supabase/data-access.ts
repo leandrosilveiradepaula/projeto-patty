@@ -600,20 +600,25 @@ export async function createAccessibleClientTrainingPlanDraft(input: {
 export async function updateAccessibleClientTrainingPlanDraft(input: {
   notes: string | null;
   title: string;
+  expectedTitle: string;
+  expectedNotes: string | null;
   trainingPlanVersionId: string;
 }) {
   const supabase = await createClient();
-  const { data, error } = await supabase
+  let query = supabase
     .from("client_training_plan_versions")
     .update({
       notes: input.notes,
       title: input.title,
     })
     .eq("id", input.trainingPlanVersionId)
+    .eq("title", input.expectedTitle)
     .is("reviewed_at", null)
-    .is("published_at", null)
-    .select("id")
-    .maybeSingle();
+    .is("published_at", null);
+  query = input.expectedNotes === null
+    ? query.is("notes", null)
+    : query.eq("notes", input.expectedNotes);
+  const { data, error } = await query.select("id").maybeSingle();
 
   if (error) {
     throw error;
@@ -661,6 +666,9 @@ export async function updateAccessibleClientTrainingPlanItem(input: {
   executionNotes: string | null;
   exerciseName: string;
   exerciseVersionId: string | null;
+  expectedExerciseName: string;
+  expectedSetsText: string;
+  expectedRepetitionsText: string;
   itemId: string;
   position: number;
   repetitionsText: string;
@@ -680,6 +688,9 @@ export async function updateAccessibleClientTrainingPlanItem(input: {
       sets_text: input.setsText,
     })
     .eq("id", input.itemId)
+    .eq("exercise_name", input.expectedExerciseName)
+    .eq("sets_text", input.expectedSetsText)
+    .eq("repetitions_text", input.expectedRepetitionsText)
     .select("id")
     .maybeSingle();
 
