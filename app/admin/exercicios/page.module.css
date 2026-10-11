@@ -11,9 +11,29 @@
 }
 
 .createForm {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: var(--space-3);
   align-items: end;
+}
+
+.createFeedback {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.createHistoryLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--color-brand-strong);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.createHistoryLink:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
 }
 
 .field {
@@ -51,8 +71,8 @@
 
 @media (max-width: 720px) {
   .createForm {
+    grid-template-columns: minmax(0, 1fr);
     align-items: stretch;
-    flex-direction: column;
   }
 }
 

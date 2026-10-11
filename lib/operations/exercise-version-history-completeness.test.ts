@@ -20,14 +20,15 @@ test("professional version history is complete, ordered and RLS scoped", () => {
   assert.doesNotMatch(code, /createAdminClient|service_role/);
 });
 
-test("catalog creation keeps server redirect and blocks rapid duplicate submissions", () => {
+test("catalog creation returns a confirmed result and blocks rapid duplicates", () => {
   assert.match(listing, /<AdminExerciseCreateForm/);
-  assert.match(creation, /action=\{createExerciseAction\}/);
+  assert.match(creation, /await createExerciseAction\(data\)/);
   assert.match(creation, /inFlight\.current = true/);
   assert.match(creation, /event\.preventDefault\(\)/);
   assert.match(creation, /aria-busy=\{pending\}/);
-  assert.match(creation, /disabled=\{pending\}/);
+  assert.match(creation, /disabled=\{pending \|\| Boolean\(createdId\)\}/);
   assert.match(creation, /required/);
+  assert.match(creation, /router\.push\("\/admin\/exercicios\/" \+ result\.exerciseId\)/);
 });
 
 test("legacy timestamps cannot crash historical exercise pages", () => {
