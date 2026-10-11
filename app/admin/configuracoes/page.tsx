@@ -1,3 +1,4 @@
+import { AdminConfigurationMutationForm } from "@/components/admin/AdminConfigurationMutationForm";
 import {
   updateAssessmentSchedulePreferencesAction,
   updateMethodConfigurationAction,
@@ -186,14 +187,7 @@ export default async function AdminConfiguracoesPage({
                   </dl>
 
                   {active && assessmentSchedulePreferences ? (
-                    <form
-                      action={updateAssessmentSchedulePreferencesAction.bind(
-                        null,
-                        template.id,
-                        active.id,
-                      )}
-                      className={styles.editor}
-                    >
+                    <AdminConfigurationMutationForm\n                      key={active.id}\n                      run={(data) => updateAssessmentSchedulePreferencesAction(template.id, active.id, data)}\n                      submitLabel="Criar nova versão das preferências"\n                    >
                       <div>
                         <h3 className={styles.editorTitle}>
                           Preferências de agenda das avaliações
@@ -229,16 +223,9 @@ export default async function AdminConfiguracoesPage({
                       <Button type="submit">
                         Criar nova versão das preferências
                       </Button>
-                    </form>
+                    </AdminConfigurationMutationForm>
                   ) : active && weeklyFeedbackSchedule ? (
-                    <form
-                      action={updateWeeklyFeedbackScheduleAction.bind(
-                        null,
-                        template.id,
-                        active.id,
-                      )}
-                      className={styles.editor}
-                    >
+                    <AdminConfigurationMutationForm\n                      key={active.id}\n                      run={(data) => updateWeeklyFeedbackScheduleAction(template.id, active.id, data)}\n                      submitLabel="Criar nova versão da agenda"\n                    >
                       <div>
                         <h3 className={styles.editorTitle}>Agenda do Feedback Semanal</h3>
                         <p className={styles.editorDescription}>
@@ -297,17 +284,10 @@ export default async function AdminConfiguracoesPage({
                         </p>
                       </div>
 
-                      <Button type="submit">Criar nova versão da agenda</Button>
-                    </form>
+                      
+                    </AdminConfigurationMutationForm>
                   ) : active && editableParameters.length > 0 ? (
-                    <form
-                      action={updateMethodConfigurationAction.bind(
-                        null,
-                        template.id,
-                        active.id,
-                      )}
-                      className={styles.editor}
-                    >
+                    <AdminConfigurationMutationForm\n                      key={active.id}\n                      run={(data) => updateMethodConfigurationAction(template.id, active.id, data)}\n                      submitLabel="Criar nova versão"\n                    >
                       <div>
                         <h3 className={styles.editorTitle}>Parâmetros editáveis</h3>
                         <p className={styles.editorDescription}>
@@ -338,8 +318,8 @@ export default async function AdminConfiguracoesPage({
                         ))}
                       </div>
 
-                      <Button type="submit">Criar nova versão</Button>
-                    </form>
+                      
+                    </AdminConfigurationMutationForm>
                   ) : active ? (
                     <p className={styles.readOnlyNotice}>
                       Este template possui estrutura protegida e continua somente leitura nesta etapa.
