@@ -79,6 +79,7 @@ test("admin envia arquivo oculto, libera explicitamente e cliente passa a ver", 
       name: syntheticFileName,
     });
 
+    await adminPage.getByRole("checkbox", { name: "Conferi o arquivo e a categoria antes de enviar." }).check();
     await adminPage.getByRole("button", { name: "Enviar arquivo" }).click();
 
     await expect(

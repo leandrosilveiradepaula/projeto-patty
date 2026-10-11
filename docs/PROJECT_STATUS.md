@@ -1,3 +1,7 @@
+## Arquivos privados — conferência do envio e recuperação explícita (2026-10-11)
+
+Cliente e Patty conferem nome, categoria, tamanho e limite antes de abrir uma sessão privada. A ação de envio exige confirmação explícita do arquivo escolhido e limpa a confirmação quando arquivo ou categoria mudar. Erros após início da finalização têm alerta de resultado potencialmente ambíguo e exigem conferência do histórico antes de repetir; a interface não declara sucesso antes da verificação server-side de MIME/conteúdo. Os arquivos permanecem privados, o upload profissional segue oculto até liberação explícita e as permissões RLS, armazenamento, histórico, endpoints e migrations permanecem inalterados. Homologação E2E autenticada ainda depende de ambiente real.
+
 ## Cliente — navegação e leitura factual dos protocolos publicados (2026-10-11)
 
 A cliente pode buscar/publicações liberadas por versão, data e área, ordenar o histórico autorizado e navegar em páginas, com atalhos para publicações adjacentes e retorno ao plano atual. Dentro da publicação selecionada, localiza variações por nomes de refeições, pesquisa tipos de dose existentes, acessa os destinos exatos no documento e consulta somatórios estritamente factuais, com detalhamento por variação. Os somatórios de todas as variações não são prescrição diária, não escolhem etapa, não calculam macro ou permitem edição. Listagem/seleção usam exclusivamente publicações consultadas sob Auth/RLS. Sem migrations, publicação automática ou alteração das decisões da Patty. Teste autenticado real continua pendente.
