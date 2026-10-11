@@ -1,3 +1,4 @@
+import { collectConfigurationPages, collectConfigurationVersionRows } from "@/lib/configuration/catalog-pagination";
 import { collectPrivateFilePages, orderPrivateFileHistory } from "@/lib/files/private-file-pagination";
 import { collectCheckinHistoryPages, collectCheckinCorrectionRows, newestFirstByInstant } from "@/lib/checkins/history-pagination";
 import "server-only";
@@ -95,35 +96,34 @@ export async function listClientsAssignedToCurrentAdmin() {
 
 export async function listMethodConfigurationCatalogForCurrentAdmin() {
   const supabase = await createClient();
-  const { data: templates, error: templatesError } = await supabase
+  const templates = await collectConfigurationPages((from, to) => supabase
     .from("method_configuration_templates")
     .select(
       "id, template_key, domain_key, config_schema_key, display_name, description, created_by_kind, created_at",
     )
     .order("domain_key", { ascending: true })
-    .order("display_name", { ascending: true });
+    .order("display_name", { ascending: true })
+    .order("id", { ascending: true })
+    .range(from, to));
 
-  if (templatesError) {
-    throw templatesError;
-  }
 
   if (templates.length === 0) {
     return [];
   }
 
   const templateIds = templates.map((template) => template.id);
-  const { data: versions, error: versionsError } = await supabase
+  const versions = await collectConfigurationVersionRows(templateIds, (ids, from, to) => supabase
     .from("method_configuration_versions")
     .select(
       "id, template_id, version_number, schema_version, configuration, source_kind, source_reference, created_by_kind, created_at, activated_at, retired_at",
     )
-    .in("template_id", templateIds)
-    .order("version_number", { ascending: false });
+    .in("template_id", ids)
+    .order("version_number", { ascending: false })
+    .order("id", { ascending: true })
+    .range(from, to));
 
-  if (versionsError) {
-    throw versionsError;
-  }
 
+  versions.sort((a,b) => b.version_number-a.version_number || a.id.localeCompare(b.id));
   const versionsByTemplate = new Map<
     string,
     typeof versions
