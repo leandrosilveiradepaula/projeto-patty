@@ -1,3 +1,7 @@
+## Evolução factual: legibilidade de diferenças numéricas — 2026-10-11
+
+Cliente e profissional passam a compartilhar formatação resistente a datas legadas inválidas e valores não finitos, distinguindo ausência de comparação anterior de diferença efetivamente igual a zero. O rótulo das tabelas passa a dizer "Diferença vs. anterior" para não atribuir interpretação clínica ao número. Cálculos, seleções de avaliações, correções já efetivadas na RPC protegida e permissões permanecem inalterados. Homologação E2E autenticada pendente.
+
 ## Check-ins: trilha completa de correções e validação de edição atual — 2026-10-11
 
 Cliente e Patty passam a consultar o histórico cronológico completo das correções de líquidos e atividades, com dados originais, instante e indicação de autoria por papel. A ação identifica a correção vigente esperada e evita novas correções com valores idênticos; operações usam leitura de evento exato sob autenticação/RLS. Corridas entre duas sessões ainda não têm idempotência transacional garantida e devem ser homologadas com duas sessões reais. Preservados eventos append-only, separação do acompanhamento, ausência de meta automática de hidratação e permissões anteriores. Nenhuma migration ou regra clínica nova.
