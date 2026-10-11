@@ -8,7 +8,7 @@ import styles from "./page.module.css";
 
 // A action do formulário permanece no servidor; este componente apenas expõe o
 // estado da submissão real e impede uma segunda intenção simultânea.
-export function ClientWeeklyFeedbackSubmitControls({ completed = false }: { completed?: boolean }) {
+export function ClientWeeklyFeedbackSubmitControls({ completed = false, onBeforeSubmit }: { completed?: boolean; onBeforeSubmit?: (intent: "save" | "submit") => boolean }) {
   const { pending, data } = useFormStatus();
   const intent = data?.get("intent");
 
@@ -18,6 +18,7 @@ export function ClientWeeklyFeedbackSubmitControls({ completed = false }: { comp
         <Button
           disabled={pending || completed}
           formNoValidate
+          onClick={(event) => { if (onBeforeSubmit && !onBeforeSubmit("save")) event.preventDefault(); }}
           loading={pending && intent === "save"}
           name="intent" type="submit" value="save" variant="secondary"
         >
@@ -25,6 +26,7 @@ export function ClientWeeklyFeedbackSubmitControls({ completed = false }: { comp
         </Button>
         <Button
           disabled={pending || completed}
+          onClick={(event) => { if (onBeforeSubmit && !onBeforeSubmit("submit")) event.preventDefault(); }}
           loading={pending && intent === "submit"}
           name="intent" type="submit" value="submit"
         >

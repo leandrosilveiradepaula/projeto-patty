@@ -4,9 +4,11 @@ import { revalidatePath } from "next/cache";
 
 import {
   buildWeeklyFeedbackAnswers,
+  WeeklyFeedbackFieldValidationError,
   parseWeeklyFeedbackDefinition,
   validateWeeklyFeedbackAnswers,
 } from "@/lib/weekly-feedback/definition";
+import { fingerprintWeeklyFeedbackAnswers, validWeeklyFeedbackFingerprint } from "@/lib/weekly-feedback/draft-fingerprint";
 import { requireRole } from "@/lib/supabase/auth";
 import {
   getCurrentClient,
@@ -27,6 +29,7 @@ export type WeeklyFeedbackSaveOutcome =
 export type WeeklyFeedbackSaveFormState = {
   message: string | null;
   outcome: WeeklyFeedbackSaveOutcome;
+  questionKey?: string | null;
 };
 
 export async function saveWeeklyFeedbackAction(
@@ -54,6 +57,14 @@ export async function saveWeeklyFeedbackAction(
     };
   }
 
+  const expectedFingerprint = formData.get("expectedFingerprint");
+  if (!validWeeklyFeedbackFingerprint(expectedFingerprint)) {
+    return { outcome: "invalid", message: "Atualize a página para confirmar a versão do rascunho antes de salvar." };
+  }
+  if (fingerprintWeeklyFeedbackAnswers(feedback.answers) !== expectedFingerprint) {
+    return { outcome: "conflict", message: "As respostas foram alteradas em outra sessão desde a abertura deste formulário. Seu texto permanece na tela; atualize a página e confira as respostas salvas antes de decidir o que reenviar." };
+  }
+
   const version = feedback.weekly_feedback_form_versions;
   const definition = version
     ? parseWeeklyFeedbackDefinition(version.definition)
@@ -70,8 +81,9 @@ export async function saveWeeklyFeedbackAction(
     if (submit) {
       validateWeeklyFeedbackAnswers(answers, definition);
     }
-  } catch {
+  } catch (error) {
     return {
+      questionKey: error instanceof WeeklyFeedbackFieldValidationError ? error.questionKey : null,
       outcome: "invalid",
       message: "Revise os campos numéricos, os limites e as perguntas obrigatórias antes de tentar novamente.",
     };
@@ -80,6 +92,7 @@ export async function saveWeeklyFeedbackAction(
   let saved;
   try {
     saved = await updateCurrentClientWeeklyFeedback({
+      expectedAnswers: feedback.answers,
       answers,
       clientId: client.id,
       feedbackId,

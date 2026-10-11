@@ -3300,6 +3300,7 @@ export async function getCurrentClientWeeklyFeedback(
 }
 
 export async function updateCurrentClientWeeklyFeedback(input: {
+  expectedAnswers: Json;
   answers: Json;
   clientId: string;
   feedbackId: string;
@@ -3315,6 +3316,7 @@ export async function updateCurrentClientWeeklyFeedback(input: {
     .eq("id", input.feedbackId)
     .eq("client_id", input.clientId)
     .is("submitted_at", null)
+    .filter("answers", "eq", JSON.stringify(input.expectedAnswers))
     .select(
       "id, client_id, form_version_id, period_start, period_end, due_at, request_source, schedule_configuration_version_id, answers, submitted_at, created_at",
     )

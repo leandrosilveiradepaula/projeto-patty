@@ -1,3 +1,4 @@
+import { fingerprintWeeklyFeedbackAnswers } from "@/lib/weekly-feedback/draft-fingerprint";
 import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
 import { ClientWeeklyFeedbackResponseForm } from "./ClientWeeklyFeedbackResponseForm";
 import { Alert } from "@/components/ui/Alert";
@@ -146,6 +147,8 @@ export default async function ClientWeeklyFeedbackPage() {
                           <p className={styles.meta}>Definição do formulário indisponível.</p>
                         ) : (
                           <ClientWeeklyFeedbackResponseForm
+                            key={feedback.id + ":" + fingerprintWeeklyFeedbackAnswers(feedback.answers)}
+                            expectedFingerprint={fingerprintWeeklyFeedbackAnswers(feedback.answers)}
                             feedbackId={feedback.id}
                             initialValues={Object.fromEntries(
                               definition.questions.map((question) => [

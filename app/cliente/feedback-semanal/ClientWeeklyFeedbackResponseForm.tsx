@@ -12,7 +12,7 @@ import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { TextInput } from "@/components/ui/TextInput";
 import { Textarea } from "@/components/ui/Textarea";
-import type { WeeklyFeedbackQuestion } from "@/lib/weekly-feedback/definition";
+import { getWeeklyFeedbackFieldError, summarizeWeeklyFeedbackRequiredProgress, firstInvalidWeeklyFeedbackField, mayUseExplicitNotApplicable, type WeeklyFeedbackQuestion } from "@/lib/weekly-feedback/definition";
 
 import styles from "./page.module.css";
 
@@ -23,12 +23,14 @@ const initialState: WeeklyFeedbackSaveFormState = {
 
 type Props = {
   feedbackId: string;
+  expectedFingerprint: string;
   initialValues: Record<string, string>;
   questions: WeeklyFeedbackQuestion[];
 };
 
 export function ClientWeeklyFeedbackResponseForm({
   feedbackId,
+  expectedFingerprint,
   initialValues,
   questions,
 }: Props) {
@@ -38,6 +40,10 @@ export function ClientWeeklyFeedbackResponseForm({
   // No health answers are copied to URLs, local storage or logs.
   const [values, setValues] = useState(initialValues);
   const [editedSinceLastSave, setEditedSinceLastSave] = useState(false);
+  const [attemptedFinalSubmit, setAttemptedFinalSubmit] = useState(false);
+  const [touchedKeys, setTouchedKeys] = useState<string[]>([]);
+  const firstInvalid = firstInvalidWeeklyFeedbackField(questions, values, attemptedFinalSubmit);
+  const progress = summarizeWeeklyFeedbackRequiredProgress(questions, values);
   const inFlightRef = useRef(false);
   const router = useRouter();
   const submitted = state.outcome === "submitted";
@@ -55,6 +61,24 @@ export function ClientWeeklyFeedbackResponseForm({
     setEditedSinceLastSave(true);
   }
 
+  function prepareSubmit(intent: "save" | "submit") {
+    if (intent === "submit") {
+      setAttemptedFinalSubmit(true);
+      const invalid = firstInvalidWeeklyFeedbackField(questions, values, true);
+      if (invalid) {
+        document.getElementById("weekly-feedback-answer-" + invalid)?.focus();
+        return false;
+      }
+    } else {
+      const invalid = firstInvalidWeeklyFeedbackField(questions, values, false);
+      if (invalid) {
+        document.getElementById("weekly-feedback-answer-" + invalid)?.focus();
+        return false;
+      }
+    }
+    return true;
+  }
+
   const confirmed = (state.outcome === "draft-saved" && !editedSinceLastSave) || submitted;
   const failed = state.outcome === "invalid" ||
     state.outcome === "conflict" ||
@@ -64,6 +88,7 @@ export function ClientWeeklyFeedbackResponseForm({
   return (
     <form
       action={formAction}
+      noValidate
       aria-busy={isPending}
       className={styles.form}
       onSubmit={(event) => {
@@ -74,6 +99,13 @@ export function ClientWeeklyFeedbackResponseForm({
         inFlightRef.current = true;
       }}
     >
+      <input type="hidden" name="expectedFingerprint" value={expectedFingerprint} />
+      <div className={styles.formProgress} role="status" aria-live="polite">
+        <strong>{progress.requiredCompleted} de {progress.required} perguntas obrigatórias preenchidas</strong>
+        <span>{progress.completed} de {progress.total} respostas iniciadas</span>
+        <progress max={progress.required || 1} value={progress.requiredCompleted} aria-label="Progresso do preenchimento obrigatório" />
+        {progress.firstMissingRequired ? <button type="button" className={styles.jumpLink} onClick={() => document.getElementById("weekly-feedback-answer-" + progress.firstMissingRequired)?.focus()}>Ir para primeira obrigatória pendente</button> : <span>Obrigatórias preenchidas. Revise e envie quando estiver pronta.</span>}
+      </div>
       {state.message && (failed || confirmed) ? (
         <Alert
           live={failed ? "assertive" : "polite"}
@@ -83,43 +115,66 @@ export function ClientWeeklyFeedbackResponseForm({
           {state.message}
         </Alert>
       ) : null}
-      {questions.map((question) => (
-        <label className={styles.field} key={question.key}>
-          <span>{question.label}</span>
-          {question.allowsNotApplicable ? (
-            <small>Quando não se aplicar ao seu protocolo, escreva “Não se aplica”.</small>
-          ) : null}
-          {question.inputType === "text" ? (
-            <Textarea
-              disabled={isPending || submitted}
-              maxLength={4000}
-              name={question.key}
-              onChange={(event) => updateAnswer(question.key, event.target.value)}
-              required={question.required}
-              rows={3}
-              value={values[question.key] ?? ""}
-            />
-          ) : (
-            <TextInput
-              disabled={isPending || submitted}
-              max={question.inputType === "rating_0_10" ? 10 : undefined}
-              min={0}
-              name={question.key}
-              onChange={(event) => updateAnswer(question.key, event.target.value)}
-              required={question.required}
-              step={1}
-              type="number"
-              value={values[question.key] ?? ""}
-            />
-          )}
-        </label>
-      ))}
+      {questions.map((question, index) => {
+        const fieldId = "weekly-feedback-answer-" + question.key;
+        const error = getWeeklyFeedbackFieldError(question, values[question.key] ?? "", attemptedFinalSubmit);
+        const showError = error && (attemptedFinalSubmit || touchedKeys.includes(question.key));
+        return (
+          <div className={styles.field} key={question.key}>
+            <label htmlFor={fieldId}>
+              <span className={styles.fieldNumber}>Pergunta {index + 1} de {questions.length}</span>
+              <span>{question.label}</span>
+              {question.required ? <span className={styles.requiredMark}>Obrigatória</span> : <span className={styles.optionalMark}>Opcional</span>}
+            </label>
+            {mayUseExplicitNotApplicable(question) ? (
+              <div className={styles.fieldHelper}>
+                <small>Se a pergunta não fizer parte da sua rotina, você pode registrar “Não se aplica”.</small>
+                <button type="button" disabled={isPending || submitted} onClick={() => updateAnswer(question.key, "Não se aplica")}>Marcar não se aplica</button>
+              </div>
+            ) : null}
+            {question.inputType === "text" ? (
+              <Textarea
+                aria-invalid={Boolean(showError)}
+                aria-describedby={showError ? fieldId + "-error" : undefined}
+                id={fieldId}
+                disabled={isPending || submitted}
+                maxLength={4000}
+                name={question.key}
+                onBlur={() => setTouchedKeys(previous => previous.includes(question.key) ? previous : [...previous, question.key])}
+                onChange={(event) => updateAnswer(question.key, event.target.value)}
+                required={question.required}
+                rows={3}
+                value={values[question.key] ?? ""}
+              />
+            ) : (
+              <TextInput
+                aria-invalid={Boolean(showError)}
+                aria-describedby={showError ? fieldId + "-error" : undefined}
+                id={fieldId}
+                disabled={isPending || submitted}
+                max={question.inputType === "rating_0_10" ? 10 : undefined}
+                min={0}
+                name={question.key}
+                onBlur={() => setTouchedKeys(previous => previous.includes(question.key) ? previous : [...previous, question.key])}
+                onChange={(event) => updateAnswer(question.key, event.target.value)}
+                required={question.required}
+                step={1}
+                type="number"
+                inputMode="numeric"
+                value={values[question.key] ?? ""}
+              />
+            )}
+            {showError ? <small id={fieldId + "-error"} role="alert" className={styles.fieldError}>{error}</small> : null}
+            {question.inputType === "text" ? <small className={styles.fieldMeta}>{(values[question.key] ?? "").length} / 4000 caracteres</small> : null}
+          </div>
+        );
+      })}
       {editedSinceLastSave && !isPending ? (
         <p aria-live="polite" className={styles.meta}>
           Alterações ainda não salvas. Salve o rascunho antes de sair.
         </p>
       ) : null}
-      <ClientWeeklyFeedbackSubmitControls completed={submitted} />
+      <ClientWeeklyFeedbackSubmitControls completed={submitted} onBeforeSubmit={prepareSubmit} />
       {state.outcome === "conflict" ? (
         <Button onClick={() => router.refresh()} type="button" variant="secondary">
           Conferir situação atual
