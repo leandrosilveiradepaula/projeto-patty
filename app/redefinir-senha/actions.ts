@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 
-import { validateActivationPassword } from "@/lib/onboarding/validation";
+import { parseAccessPasswordForm } from "@/lib/onboarding/validation";
 import { createClient } from "@/lib/supabase/server";
 
 export type PasswordResetState = {
@@ -13,17 +13,9 @@ export async function resetPassword(
   _: PasswordResetState,
   formData: FormData,
 ): Promise<PasswordResetState> {
-  const passwordValue = formData.get("password");
-  const confirmationValue = formData.get("passwordConfirmation");
-  const password = typeof passwordValue === "string" ? passwordValue : "";
-  const confirmation =
-    typeof confirmationValue === "string" ? confirmationValue : "";
-
-  const validation = validateActivationPassword(password, confirmation);
-
-  if (!validation.ok) {
-    return { message: validation.message };
-  }
+  const parsed = parseAccessPasswordForm(formData);
+  if (!parsed.ok) return { message: parsed.message };
+  const password = parsed.password;
 
   const supabase = await createClient();
   const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
