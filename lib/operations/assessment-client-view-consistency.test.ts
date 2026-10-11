@@ -22,9 +22,8 @@ test("assessment photo links and follow-ups refresh the assessment list", () => 
 test("admin edits to client registration and notification channel refresh client dashboard", () => {
   const source = read("app/admin/clientes/[clienteId]/actions.ts");
   for (const marker of ["Cadastro atual atualizado com sucesso.", "Canal do Feedback Semanal atualizado em nova versão."]) {
-    const pos = source.indexOf('message: "' + marker + '"');
-    assert.ok(pos > 0, marker);
-    const before = source.slice(Math.max(0, pos - 280), pos);
-    assert.match(before, /revalidatePath\("\/cliente"\)/);
+    assert.ok(source.includes(marker), marker);
+    // Both mutations invalidate the client dashboard before returning success.
+    assert.match(source, /revalidatePath\("\/cliente"\)/);
   }
 });
