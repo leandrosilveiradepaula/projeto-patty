@@ -110,3 +110,5 @@
     align-items: stretch;
   }
 }
+
+.filters{grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr))}.pagination{display:flex;align-items:center;flex-wrap:wrap;justify-content:center;gap:var(--space-3);margin-top:var(--space-4)}.pagination a{display:inline-flex;min-height:44px;align-items:center}.pagination a:focus-visible{outline:3px solid var(--color-accent);outline-offset:2px}
