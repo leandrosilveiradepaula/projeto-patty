@@ -1,3 +1,4 @@
+import { collectCheckinHistoryPages, collectCheckinCorrectionRows, newestFirstByInstant } from "@/lib/checkins/history-pagination";
 import "server-only";
 import { collectScopedClientOperationalRows } from "@/lib/operations/client-operational-pagination";
 import { collectTrainingHistoryRows, collectTrainingPagedRows } from "@/lib/training/history-batches";
@@ -186,27 +187,16 @@ export async function listAccessibleClientLiquidIntakeEvents(
   recordedBefore?: string,
 ) {
   const supabase = await createClient();
-  let query = supabase
-    .from("client_liquid_intake_events")
-    .select("id, client_id, recorded_by_profile_id, amount_ml, liquid_kind, method_configuration_snapshot_set_id, recorded_at")
-    .eq("client_id", clientId)
-    .order("recorded_at", { ascending: false })
-    .order("id", { ascending: false });
-
-  if (recordedFrom) {
-    query = query.gte("recorded_at", recordedFrom);
-  }
-  if (recordedBefore) {
-    query = query.lt("recorded_at", recordedBefore);
-  }
-
-  const { data, error } = await query;
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  const rows = await collectCheckinHistoryPages((from, to) => {
+    let query = supabase
+      .from("client_liquid_intake_events")
+      .select("id, client_id, recorded_by_profile_id, amount_ml, liquid_kind, method_configuration_snapshot_set_id, recorded_at")
+      .eq("client_id", clientId);
+    if (recordedFrom) query = query.gte("recorded_at", recordedFrom);
+    if (recordedBefore) query = query.lt("recorded_at", recordedBefore);
+    return query.order("recorded_at", { ascending: false }).order("id", { ascending: false }).range(from, to);
+  });
+  return newestFirstByInstant(rows, (row) => row.recorded_at);
 }
 
 export async function listAccessibleClientActivityCheckinEvents(
@@ -214,63 +204,44 @@ export async function listAccessibleClientActivityCheckinEvents(
   checkinDate?: string,
 ) {
   const supabase = await createClient();
-  let query = supabase
-    .from("client_activity_checkin_events")
-    .select("id, client_id, recorded_by_profile_id, checkin_date, did_activity, recorded_at")
-    .eq("client_id", clientId)
-    .order("checkin_date", { ascending: false })
-    .order("recorded_at", { ascending: false })
-    .order("id", { ascending: false });
-
-  if (checkinDate) {
-    query = query.eq("checkin_date", checkinDate);
-  }
-
-  const { data, error } = await query;
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  const rows = await collectCheckinHistoryPages((from, to) => {
+    let query = supabase
+      .from("client_activity_checkin_events")
+      .select("id, client_id, recorded_by_profile_id, checkin_date, did_activity, recorded_at")
+      .eq("client_id", clientId);
+    if (checkinDate) query = query.eq("checkin_date", checkinDate);
+    return query.order("checkin_date", { ascending: false }).order("recorded_at", { ascending: false }).order("id", { ascending: false }).range(from, to);
+  });
+  return rows.sort((a, b) => b.checkin_date.localeCompare(a.checkin_date) ||
+    (Date.parse(b.recorded_at) || 0) - (Date.parse(a.recorded_at) || 0) || b.id.localeCompare(a.id));
 }
 
 export async function listAccessibleClientLiquidIntakeEventCorrections(
   eventIds: string[],
 ) {
-  if (eventIds.length === 0) return [];
-
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const rows = await collectCheckinCorrectionRows(eventIds, (ids, from, to) => supabase
     .from("client_liquid_intake_event_corrections")
-    .select(
-      "id, event_id, corrected_amount_ml, corrected_liquid_kind, corrected_recorded_at, corrected_by_profile_id, created_at",
-    )
-    .in("event_id", eventIds)
+    .select("id, event_id, corrected_amount_ml, corrected_liquid_kind, corrected_recorded_at, corrected_by_profile_id, created_at")
+    .in("event_id", ids)
     .order("created_at", { ascending: false })
-    .order("id", { ascending: false });
-
-  if (error) throw error;
-  return data;
+    .order("id", { ascending: false })
+    .range(from, to));
+  return newestFirstByInstant(rows, (row) => row.created_at);
 }
 
 export async function listAccessibleClientActivityCheckinEventCorrections(
   eventIds: string[],
 ) {
-  if (eventIds.length === 0) return [];
-
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const rows = await collectCheckinCorrectionRows(eventIds, (ids, from, to) => supabase
     .from("client_activity_checkin_event_corrections")
-    .select(
-      "id, event_id, corrected_checkin_date, corrected_did_activity, corrected_by_profile_id, created_at",
-    )
-    .in("event_id", eventIds)
+    .select("id, event_id, corrected_checkin_date, corrected_did_activity, corrected_by_profile_id, created_at")
+    .in("event_id", ids)
     .order("created_at", { ascending: false })
-    .order("id", { ascending: false });
-
-  if (error) throw error;
-  return data;
+    .order("id", { ascending: false })
+    .range(from, to));
+  return newestFirstByInstant(rows, (row) => row.created_at);
 }
 
 export async function createAccessibleClientLiquidIntakeEventCorrection(input: {
