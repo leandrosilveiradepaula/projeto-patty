@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
-  buildProtocolDraftNavigation, searchDraftDirectory, draftDoseAddAnchor,
+  buildProtocolDraftNavigation, searchDraftDirectory,
   draftMealAnchor, draftCycleAnchor, draftVariantAnchor,
 } from "./draft-navigation.ts";
 const one = {
