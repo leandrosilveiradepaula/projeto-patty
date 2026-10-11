@@ -9,7 +9,7 @@ import { Section } from "@/components/ui/Section";
 import { TextInput } from "@/components/ui/TextInput";
 import { summarizeLibraryVersions, matchesLibraryStatus } from "@/lib/content/admin-library-status";
 import { newestExerciseLibrarySummaries } from "@/lib/training/exercise-library-order";
-import { matchingExerciseNameVersion, readExerciseCatalogStatus, readExerciseCatalogTerm } from "@/lib/training/exercise-admin-directory";
+import { matchingExerciseNameVersion, readExerciseCatalogStatus, readExerciseCatalogTerm, readExerciseCatalogSort, sortExerciseCatalog, paginateExerciseCatalog, exerciseCatalogHref, catalogVisiblePageNumbers } from "@/lib/training/exercise-admin-directory";
 import { listExerciseVersionsVisibleToCurrentAdmin, listExercisesForCurrentAdmin } from "@/lib/supabase/data-access";
 import Link from "next/link";
 import styles from "./page.module.css";
@@ -34,11 +34,11 @@ function formatPublishedDate(value: string) {
 }
 
 type AdminExerciciosPageProps = {
-  searchParams: Promise<{ q?: string; status?: string }>;
+  searchParams: Promise<{ q?: string; status?: string; ordem?: string; pagina?: string }>;
 };
 
 export default async function AdminExerciciosPage({ searchParams }: AdminExerciciosPageProps) {
-  const { q, status } = await searchParams;
+  const { q, status, ordem, pagina } = await searchParams;
   const [exerciseVersions, exerciseParents] = await Promise.all([
     listExerciseVersionsVisibleToCurrentAdmin(),
     listExercisesForCurrentAdmin(),
@@ -51,6 +51,7 @@ export default async function AdminExerciciosPage({ searchParams }: AdminExercic
   const searchTerm = readExerciseCatalogTerm(q);
   const normalizedSearchTerm = normalizeSearchValue(searchTerm);
   const statusFilter = readExerciseCatalogStatus(status);
+  const sort = readExerciseCatalogSort(ordem);
   const versionsByExercise = new Map<string, typeof exerciseVersions>();
   for (const version of exerciseVersions) {
     const current = versionsByExercise.get(version.exercise_id) ?? [];
@@ -69,6 +70,13 @@ export default async function AdminExerciciosPage({ searchParams }: AdminExercic
     return matchesSearch && statusFilter !== "incomplete" && matchesLibraryStatus(summary, statusFilter);
   });
 
+  const orderable = sortExerciseCatalog(filteredExercises,sort);
+  const ordered = [
+    ...orderable.map(summary => ({key:summary.latestVersion.exercise_id,summary,parent:null as (typeof incompleteParents)[number] | null})),
+    ...filteredIncomplete.map(parent => ({key:parent.id,summary:null as (typeof filteredExercises)[number] | null,parent})),
+  ];
+  const listing = paginateExerciseCatalog(ordered,pagina);
+  const pageHref = (page:number) => exerciseCatalogHref({term:searchTerm,status:statusFilter,sort,page,anchor:"biblioteca-exercicios"});
   return (
     <>
       <PageHeader
@@ -112,15 +120,23 @@ export default async function AdminExerciciosPage({ searchParams }: AdminExercic
                 <option value="incomplete">Sem versão inicial</option>
               </select>
             </label>
+            <label className={styles.statusField}><span>Ordenar</span>
+              <select name="ordem" defaultValue={sort}>
+                <option value="recent">Mais recentes</option><option value="oldest">Mais antigos</option>
+                <option value="name-asc">Nome A–Z</option><option value="name-desc">Nome Z–A</option>
+                <option value="published">Publicação recente</option><option value="versions">Mais versões</option>
+              </select>
+            </label>
             <Button type="submit" variant="secondary">Filtrar</Button>
-            {searchTerm || statusFilter !== "all" ? (
+            {searchTerm || statusFilter !== "all" || sort !== "recent" ? (
               <Link className={styles.clearLink} href="/admin/exercicios">Limpar</Link>
             ) : null}
           </form>
         ) : null}
         <p className={styles.resultCount} role="status">
-          {filteredExercises.length + filteredIncomplete.length} resultado(s) · {incompleteParents.length} cadastro(s) sem versão inicial.
+          {listing.total} resultado(s) · {incompleteParents.length} cadastro(s) sem versão inicial.
         </p>
+        {listing.invalid ? <p role="status" className={styles.resultCount}>Página inválida ou fora do intervalo; exibindo uma página disponível.</p> : null}
         {exercises.length === 0 && incompleteParents.length === 0 ? (
           <EmptyState
             description="Crie o primeiro exercício para iniciar a biblioteca."
@@ -135,10 +151,11 @@ export default async function AdminExerciciosPage({ searchParams }: AdminExercic
         ) : (
           <>
             <p className={styles.resultCount}>
-              {filteredExercises.length} exercício(s) com versão encontrados.
+              {listing.from}–{listing.to} de {listing.total} registro(s) · Página {listing.page} de {listing.pages}.
             </p>
             <ul className={styles.exerciseList}>
-            {filteredExercises.map(({ latestVersion: exerciseVersion, latestPublishedVersion }) => {
+            {listing.items.filter(entry => entry.summary).map(({ summary }) => {
+              const { latestVersion: exerciseVersion, latestPublishedVersion } = summary!;
               const publishedMeta = exerciseVersion.published_at
                 ? "Publicado em " + formatPublishedDate(exerciseVersion.published_at) + "."
                 : latestPublishedVersion
@@ -152,10 +169,7 @@ export default async function AdminExerciciosPage({ searchParams }: AdminExercic
                       <Link
                         aria-label={`Abrir exercício ${exerciseVersion.name}`}
                         className={styles.openLink}
-                        href={"/admin/exercicios/" + exerciseVersion.exercise_id +
-                          (searchTerm || statusFilter !== "all"
-                            ? "?q=" + encodeURIComponent(searchTerm) + "&status=" + encodeURIComponent(statusFilter)
-                            : "")}
+                        href={"/admin/exercicios/" + exerciseVersion.exercise_id + pageHref(listing.page).replace("/admin/exercicios","").split("#")[0]}
                       >
                         Abrir
                       </Link>
@@ -184,15 +198,15 @@ export default async function AdminExerciciosPage({ searchParams }: AdminExercic
               );
             })}
           </ul>
-          {filteredIncomplete.length > 0 ? (
+          {listing.items.some(entry=>entry.parent) ? (
             <ul className={styles.exerciseList} aria-label="Cadastros sem versão inicial">
-              {filteredIncomplete.map((parent) => (
-                <li key={parent.id} className={styles.incompleteRow}>
+              {listing.items.filter(entry=>entry.parent).map(({parent}) => (
+                <li key={parent!.id} className={styles.incompleteRow}>
                   <div>
                     <strong>Exercício sem versão inicial</strong>
                     <p>O cadastro existe, mas nenhuma versão foi registrada. Recupere o rascunho sem publicar.</p>
                   </div>
-                  <Link className={styles.openLink} href={`/admin/exercicios/${parent.id}?status=incomplete`}>
+                  <Link className={styles.openLink} href={`/admin/exercicios/${parent!.id}?status=incomplete&ordem=${sort}&pagina=${listing.page}`}>
                     Retomar versão inicial
                   </Link>
                 </li>
@@ -201,6 +215,14 @@ export default async function AdminExerciciosPage({ searchParams }: AdminExercic
           ) : null}
           </>
         )}
+        {listing.total > 0 ? <nav aria-label="Páginas da biblioteca de exercícios" className={styles.pagination}>
+          <p>{listing.from}–{listing.to} de {listing.total} · Página {listing.page} de {listing.pages}</p>
+          {listing.previous ? <Link href={pageHref(listing.previous)}>Anterior</Link> : null}
+          {catalogVisiblePageNumbers(listing.page,listing.pages).map(n=>n===listing.page
+            ? <strong aria-current="page" key={n}>Página {n}</strong>
+            : <Link href={pageHref(n)} key={n}>Página {n}</Link>)}
+          {listing.next ? <Link href={pageHref(listing.next)}>Próxima</Link> : null}
+        </nav> : null}
       </Section>
     </>
   );
