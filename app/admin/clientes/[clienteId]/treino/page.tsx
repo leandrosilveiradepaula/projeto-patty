@@ -413,6 +413,10 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
         title="Histórico de solicitações"
       >
 <form method="get" className={styles.versionNavigation}>
+{archiveFilters.query ? <input type="hidden" name="buscaVersao" value={archiveFilters.query}/> : null}
+{archiveFilters.status !== "all" ? <input type="hidden" name="estadoVersao" value={archiveFilters.status}/> : null}
+{archiveFilters.order !== "number-desc" ? <input type="hidden" name="ordemVersao" value={archiveFilters.order}/> : null}
+{archive.page > 1 ? <input type="hidden" name="versoes" value={archive.page}/> : null}
 <label>Origem<select name="origem" defaultValue={requestFilters.origin}><option value="all">Todas</option><option value="client">Cliente</option><option value="professional">Profissional</option><option value="unknown">Não identificada</option></select></label>
 <label>Observação<select name="observacao" defaultValue={requestFilters.notes}><option value="all">Todas</option><option value="with-note">Com observação</option><option value="without-note">Sem observação</option></select></label>
 <label>Momento<select name="periodo" defaultValue={requestFilters.period}><option value="all">Qualquer</option><option value="after-publication">Após publicação</option><option value="before-or-at-publication">Até publicação</option></select></label>
@@ -449,8 +453,8 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
         {requestPage.total > 0 ? (
           <nav aria-label="Navegar solicitações de treino" className={styles.versionNavigation}>
             <span>{requestPage.from}–{requestPage.to} de {requestPage.total} solicitações · Página {requestPage.page} de {requestPage.pageCount}</span>
-            {requestPage.previous ? <Link href={trainingRequestFilteredHref(`/admin/clientes/${client.id}/treino`,requestFilters,requestPage.previous,"historico-solicitacoes-treino")}>Anterior</Link> : null}
-            {requestPage.next ? <Link href={trainingRequestFilteredHref(`/admin/clientes/${client.id}/treino`,requestFilters,requestPage.next,"historico-solicitacoes-treino")}>Próxima</Link> : null}
+            {requestPage.previous ? <Link href={trainingRequestFilteredHref(`/admin/clientes/${client.id}/treino`,requestFilters,requestPage.previous,"historico-solicitacoes-treino",archive.page,{professional:archiveFilters})}>Anterior</Link> : null}
+            {requestPage.next ? <Link href={trainingRequestFilteredHref(`/admin/clientes/${client.id}/treino`,requestFilters,requestPage.next,"historico-solicitacoes-treino",archive.page,{professional:archiveFilters})}>Próxima</Link> : null}
           </nav>
         ) : null}
       </Section>
@@ -477,6 +481,11 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
               </nav>
             ) : null}
             <form method="get" className={styles.versionFilters}>
+{requestFilters.origin !== "all" ? <input type="hidden" name="origem" value={requestFilters.origin}/> : null}
+{requestFilters.notes !== "all" ? <input type="hidden" name="observacao" value={requestFilters.notes}/> : null}
+{requestFilters.period !== "all" ? <input type="hidden" name="periodo" value={requestFilters.period}/> : null}
+{requestFilters.order !== "newest" ? <input type="hidden" name="ordem" value={requestFilters.order}/> : null}
+{requestPage.page > 1 ? <input type="hidden" name="pedidos" value={requestPage.page}/> : null}
               <label>Buscar versão<input type="search" name="buscaVersao" defaultValue={archiveFilters.query} maxLength={120} placeholder="Número ou título" /></label>
               <label>Estado<select name="estadoVersao" defaultValue={archiveFilters.status}><option value="all">Todos</option><option value="published">Publicados</option><option value="reviewed">Revisados</option><option value="draft">Rascunhos</option></select></label>
               <label>Ordem<select name="ordemVersao" defaultValue={archiveFilters.order}><option value="number-desc">Versão decrescente</option><option value="number-asc">Versão crescente</option><option value="title">Título</option></select></label>

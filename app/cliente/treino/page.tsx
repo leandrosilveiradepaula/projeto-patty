@@ -87,6 +87,7 @@ export default async function ClientTrainingPage({ searchParams }: { searchParam
   const comparedIndex = publishedItems.findIndex(row => row.version.id === comparisonSelection.selected?.id);
   const compared = comparedIndex >= 0 ? publishedItems[comparedIndex] : null;
   const priorCompared = comparedIndex >= 0 ? publishedItems[comparedIndex + 1] ?? null : null;
+  const verifiedComparisonId = comparisonSelection.invalid ? null : comparisonSelection.selected?.id ?? null;
   const comparison = compared ? compareTrainingVersions(
     priorCompared?.version ?? null,
     priorCompared?.items ?? [],
@@ -207,7 +208,7 @@ export default async function ClientTrainingPage({ searchParams }: { searchParam
 
       {publishedItems.length > 1 ? (
         <nav aria-label="Comparar publicações de treino" className={styles.publishedNavigation}>
-          {publishedVersions.map(version => <Link key={version.id} href={trainingVersionComparisonHref("/cliente/treino",publishedVersions,version.id,requestFilters) ?? "/cliente/treino"}>Comparar versão {version.version_number}</Link>)}
+          {publishedVersions.map(version => <Link key={version.id} href={trainingVersionComparisonHref("/cliente/treino",publishedVersions,version.id,requestFilters,archiveFilters,archived.page) ?? "/cliente/treino"}>Comparar versão {version.version_number}</Link>)}
         </nav>
       ) : null}
       {comparisonSelection.invalid ? <p role="status" className={styles.note}>A versão solicitada não está publicada ou não está disponível neste histórico. Exibindo a publicação atual.</p> : null}
@@ -225,10 +226,16 @@ export default async function ClientTrainingPage({ searchParams }: { searchParam
           title="Treinos anteriores"
         >
           <form method="get" action="/cliente/treino" className={styles.archiveFilters}>
+            {requestFilters.origin !== "all" ? <input type="hidden" name="origem" value={requestFilters.origin} /> : null}
+            {requestFilters.notes !== "all" ? <input type="hidden" name="observacao" value={requestFilters.notes} /> : null}
+            {requestFilters.period !== "all" ? <input type="hidden" name="periodo" value={requestFilters.period} /> : null}
+            {requestFilters.order !== "newest" ? <input type="hidden" name="ordem" value={requestFilters.order} /> : null}
+            {requestPage.page > 1 ? <input type="hidden" name="pedidos" value={requestPage.page} /> : null}
+            {verifiedComparisonId ? <input type="hidden" name="comparar" value={verifiedComparisonId} /> : null}
             <label>Buscar treino anterior<input type="search" name="buscaTreino" maxLength={120} defaultValue={archiveFilters.query} placeholder="Título ou versão" /></label>
             <label>Ordenar<select name="ordemTreino" defaultValue={archiveFilters.order}><option value="newest">Mais recentes</option><option value="oldest">Mais antigos</option><option value="title">Título</option></select></label>
             <button type="submit">Filtrar</button>
-            <Link href={trainingClientArchiveHref("/cliente/treino",parseClientTrainingArchiveFilters({}),1,requestFilters,comparar)}>Limpar filtros</Link>
+            <Link href={trainingClientArchiveHref("/cliente/treino",parseClientTrainingArchiveFilters({}),1,requestFilters,verifiedComparisonId)}>Limpar filtros</Link>
           </form>
           <p role="status" className={styles.note}>Exibindo {archived.from}–{archived.to} de {archived.total} versões anteriores.</p>
           {archived.invalid ? <p role="status">Página solicitada indisponível; exibimos uma página válida.</p> : null}
@@ -269,8 +276,8 @@ export default async function ClientTrainingPage({ searchParams }: { searchParam
           </div>
           {archived.total > 0 ? <nav aria-label="Páginas de treinos anteriores" className={styles.publishedNavigation}>
             <span>Página {archived.page} de {archived.pageCount}</span>
-            {archived.previous ? <Link href={trainingClientArchiveHref("/cliente/treino",archiveFilters,archived.previous,requestFilters,comparar)}>Anterior</Link> : null}
-            {archived.next ? <Link href={trainingClientArchiveHref("/cliente/treino",archiveFilters,archived.next,requestFilters,comparar)}>Próxima</Link> : null}
+            {archived.previous ? <Link href={trainingClientArchiveHref("/cliente/treino",archiveFilters,archived.previous,requestFilters,verifiedComparisonId)}>Anterior</Link> : null}
+            {archived.next ? <Link href={trainingClientArchiveHref("/cliente/treino",archiveFilters,archived.next,requestFilters,verifiedComparisonId)}>Próxima</Link> : null}
           </nav> : null}
         </Section>
       ) : null}
@@ -317,6 +324,10 @@ export default async function ClientTrainingPage({ searchParams }: { searchParam
                 summary={`Ver solicitações anteriores (${orderedRequests.length - 1} no histórico)`}
               >
 <form method="get" action="/cliente/treino" className={styles.publishedNavigation}>
+{archiveFilters.query ? <input type="hidden" name="buscaTreino" value={archiveFilters.query} /> : null}
+{archiveFilters.order !== "newest" ? <input type="hidden" name="ordemTreino" value={archiveFilters.order} /> : null}
+{archived.page > 1 ? <input type="hidden" name="versoes" value={archived.page} /> : null}
+{verifiedComparisonId ? <input type="hidden" name="comparar" value={verifiedComparisonId} /> : null}
 <label>Origem<select name="origem" defaultValue={requestFilters.origin}><option value="all">Todas</option><option value="client">Você</option><option value="professional">Equipe</option><option value="unknown">Não identificada</option></select></label>
 <label>Observação<select name="observacao" defaultValue={requestFilters.notes}><option value="all">Todas</option><option value="with-note">Com observação</option><option value="without-note">Sem observação</option></select></label>
 <label>Momento<select name="periodo" defaultValue={requestFilters.period}><option value="all">Qualquer</option><option value="after-publication">Após publicação</option><option value="before-or-at-publication">Até publicação</option></select></label>
@@ -344,8 +355,8 @@ export default async function ClientTrainingPage({ searchParams }: { searchParam
                 {requestPage.invalid ? <p role="status" className={styles.note}>Página solicitada indisponível; exibimos o histórico disponível.</p> : null}
                 <nav aria-label="Páginas das solicitações anteriores" className={styles.publishedNavigation}>
                   <span>{requestPage.from}–{requestPage.to} de {requestPage.total} solicitações anteriores · Página {requestPage.page} de {requestPage.pageCount}</span>
-                  {requestPage.previous ? <Link href={trainingRequestFilteredHref("/cliente/treino",requestFilters,requestPage.previous,"solicitacoes-anteriores")}>Anterior</Link> : null}
-                  {requestPage.next ? <Link href={trainingRequestFilteredHref("/cliente/treino",requestFilters,requestPage.next,"solicitacoes-anteriores")}>Próxima</Link> : null}
+                  {requestPage.previous ? <Link href={trainingRequestFilteredHref("/cliente/treino",requestFilters,requestPage.previous,"solicitacoes-anteriores",archived.page,{client:archiveFilters,comparisonId:verifiedComparisonId})}>Anterior</Link> : null}
+                  {requestPage.next ? <Link href={trainingRequestFilteredHref("/cliente/treino",requestFilters,requestPage.next,"solicitacoes-anteriores",archived.page,{client:archiveFilters,comparisonId:verifiedComparisonId})}>Próxima</Link> : null}
                 </nav>
               </ClientHistoryDisclosure>
             ) : null}
