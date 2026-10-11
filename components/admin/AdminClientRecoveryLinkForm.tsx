@@ -23,6 +23,7 @@ export function AdminClientRecoveryLinkForm({
   clientId: string;
 }) {
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
+  const linkFieldRef = useRef<HTMLTextAreaElement>(null);
   const [state, formAction, isPending] = useActionState(
     generateManualRecoveryLinkAction.bind(null, clientId),
     initialState,
@@ -34,6 +35,8 @@ export function AdminClientRecoveryLinkForm({
       await navigator.clipboard.writeText(state.recoveryLink);
       setCopyStatus("Link copiado.");
     } catch {
+      linkFieldRef.current?.focus();
+      linkFieldRef.current?.select();
       setCopyStatus("Não foi possível copiar automaticamente. Selecione o link acima e copie manualmente.");
     }
   }
@@ -56,6 +59,7 @@ export function AdminClientRecoveryLinkForm({
         inFlightRef.current = true;
       }}
     >
+      {isPending ? <p role="status">Gerando link individual…</p> : null}
       {state.message ? (
         <Alert
           live="polite"
@@ -66,7 +70,7 @@ export function AdminClientRecoveryLinkForm({
         </Alert>
       ) : null}
 
-      <Button disabled={Boolean(state.recoveryLink)} loading={isPending} onClick={() => setCopyStatus(null)} type="submit">
+      <Button disabled={isPending || Boolean(state.recoveryLink)} loading={isPending} onClick={() => setCopyStatus(null)} type="submit">
         Gerar link de recuperação
       </Button>
 
@@ -79,6 +83,7 @@ export function AdminClientRecoveryLinkForm({
           <textarea
             className={styles.value}
             id="client-recovery-link"
+            ref={linkFieldRef}
             readOnly
             rows={4}
             value={state.recoveryLink}

@@ -19,7 +19,7 @@ import {
   createAccessibleClientTrainingRequest,
   getAccessibleClient,
 } from "@/lib/supabase/data-access";
-import { updateClientProfileDisplayNamePrivileged, updateStandaloneClientFullNamePrivileged } from "@/lib/clients/client-profile-admin";
+import { ClientNameConflictError, updateClientProfileDisplayNamePrivileged, updateStandaloneClientFullNamePrivileged } from "@/lib/clients/client-profile-admin";
 import { validateClientDisplayName } from "@/lib/onboarding/validation";
 import { ClientAccessLinkOriginError, resolveTrustedClientAccessOrigin } from "@/lib/onboarding/trusted-client-access-origin";
 import { isUuid } from "@/lib/validation/uuid";
@@ -95,21 +95,52 @@ export async function updateAdminClientDisplayNameAction(
     };
   }
 
+  const expectedCanonical = formData.get("expectedCanonicalName");
+  const expectedProfile = formData.get("expectedProfileName");
+  if (
+    typeof expectedCanonical !== "string" ||
+    typeof expectedProfile !== "string" ||
+    expectedCanonical.length < 2 || expectedCanonical.length > 120 ||
+    expectedProfile.length > 120
+  ) {
+    return { message: "A versão do nome está inválida. Recarregue o cadastro antes de salvar.", success: false };
+  }
+  if (
+    client.full_name !== expectedCanonical ||
+    (client.profiles?.display_name ?? "") !== expectedProfile
+  ) {
+    return {
+      message: "O nome da cliente foi alterado em outra sessão. Recarregue os dados atuais antes de salvar.",
+      success: false,
+    };
+  }
+  if (displayName === expectedCanonical && (!client.profile_id || displayName === expectedProfile)) {
+    return { message: "O nome já está atualizado.", success: true };
+  }
+
   try {
     if (client.profile_id) {
       await updateClientProfileDisplayNamePrivileged({
         displayName,
+        expectedDisplayName: expectedProfile || null,
         profileId: client.profile_id,
       });
     } else {
       await updateStandaloneClientFullNamePrivileged({
         clientId: client.id,
         displayName,
+        expectedFullName: expectedCanonical,
       });
     }
-  } catch {
+  } catch (error) {
+    if (error instanceof ClientNameConflictError) {
+      return {
+        message: "O nome da cliente foi alterado em outra sessão. Recarregue os dados atuais antes de salvar.",
+        success: false,
+      };
+    }
     return {
-      message: "Não foi possível atualizar o nome da cliente.",
+      message: "Não foi possível confirmar a alteração do nome. Confira o cadastro antes de repetir.",
       success: false,
     };
   }

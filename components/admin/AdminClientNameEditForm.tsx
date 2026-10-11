@@ -22,11 +22,15 @@ const initialState: AdminClientDisplayNameFormState = {
 type AdminClientNameEditFormProps = {
   clientId: string;
   displayName?: string;
+  canonicalName: string;
+  profileName: string | null;
 };
 
 export function AdminClientNameEditForm({
   clientId,
   displayName,
+  canonicalName,
+  profileName,
 }: AdminClientNameEditFormProps) {
   const action = updateAdminClientDisplayNameAction.bind(null, clientId);
   const [state, formAction, isPending] = useActionState(action, initialState);
@@ -56,6 +60,8 @@ export function AdminClientNameEditForm({
         inFlightRef.current = true;
       }}
     >
+      <input name="expectedCanonicalName" type="hidden" value={canonicalName} />
+      <input name="expectedProfileName" type="hidden" value={profileName ?? ""} />
       {state.message && !editedSinceResult ? (
         <Alert
           live={state.success ? "polite" : "assertive"}
@@ -79,6 +85,7 @@ export function AdminClientNameEditForm({
             disabled={isPending}
               defaultValue={displayName}
             maxLength={120}
+            minLength={2}
             name="displayName"
             required
             type="text"
@@ -86,6 +93,11 @@ export function AdminClientNameEditForm({
         )}
       </FormField>
 
+      {state.message?.includes("alterado em outra sessão") && !editedSinceResult ? (
+        <Button onClick={() => router.refresh()} type="button" variant="secondary">
+          Recarregar nome atual
+        </Button>
+      ) : null}
       <Button disabled={isPending} loading={isPending} type="submit">
         Salvar nome
       </Button>

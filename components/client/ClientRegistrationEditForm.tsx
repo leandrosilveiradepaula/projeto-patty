@@ -66,6 +66,7 @@ export function ClientRegistrationEditForm({
       }}
     >
       <input name="expectedUpdatedAt" type="hidden" value={updatedAt ?? ""} />
+      {isPending ? <p role="status">Salvando o Cadastro Atual…</p> : null}
       {state.message && !editedSinceResult ? (
         <Alert
           live={state.success ? "polite" : "assertive"}
@@ -82,6 +83,7 @@ export function ClientRegistrationEditForm({
             <TextInput
               {...fieldProps}
               disabled={isPending}
+              autoComplete="address-level2"
               defaultValue={city}
               maxLength={120}
               name="city"
@@ -94,6 +96,7 @@ export function ClientRegistrationEditForm({
             <TextInput
               {...fieldProps}
               disabled={isPending}
+              autoComplete="tel"
               defaultValue={phone}
               inputMode="tel"
               maxLength={40}
@@ -111,6 +114,7 @@ export function ClientRegistrationEditForm({
             <TextInput
               {...fieldProps}
               disabled={isPending}
+              autoComplete="email"
               defaultValue={contactEmail}
               maxLength={254}
               name="contactEmail"

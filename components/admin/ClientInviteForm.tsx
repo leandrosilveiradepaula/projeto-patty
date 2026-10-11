@@ -62,6 +62,7 @@ export function ClientInviteForm({ onProvisioningAttempt }: { onProvisioningAtte
             autoComplete="name"
             disabled={isPending}
             maxLength={120}
+            minLength={2}
             name="displayName"
             required
             type="text"
@@ -89,7 +90,8 @@ export function ClientInviteForm({ onProvisioningAttempt }: { onProvisioningAtte
         )}
       </FormField>
 
-      <Button loading={isPending} type="submit">
+      {isPending ? <p role="status">Verificando o acesso da cliente…</p> : null}
+      <Button disabled={isPending} loading={isPending} type="submit">
         Criar cliente e enviar convite
       </Button>
     </form>
