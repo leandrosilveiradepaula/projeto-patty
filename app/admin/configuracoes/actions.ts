@@ -18,6 +18,7 @@ import {
 import { requireRole } from "@/lib/supabase/auth";
 import { listMethodConfigurationCatalogForCurrentAdmin } from "@/lib/supabase/data-access";
 import { isUuid } from "@/lib/validation/uuid";
+import { configurationsEqual } from "@/lib/configuration/history-view";
 
 function readNumericValue(formData: FormData, key: string) {
   const raw = formData.get("parameter." + key);
@@ -87,6 +88,10 @@ export async function updateMethodConfigurationAction(
     active.configuration,
     updates,
   );
+
+  if (configurationsEqual(active.configuration, configuration)) {
+    throw new Error("Nenhum valor foi alterado. Edite um parâmetro antes de criar uma nova versão.");
+  }
 
   await activateMethodConfigurationVersion({
     actorProfileId: auth.profileId,

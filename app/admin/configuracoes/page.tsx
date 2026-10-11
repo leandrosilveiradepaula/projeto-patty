@@ -25,6 +25,7 @@ import { listMethodConfigurationCatalogForCurrentAdmin } from "@/lib/supabase/da
 import Link from "next/link";
 import { readClientDirectorySearchTerm } from "@/lib/clients/client-directory-search";
 import styles from "./page.module.css";
+import { formatConfigurationDate, formatConfigurationPath, summarizeConfigurationHistory } from "@/lib/configuration/history-view";
 
 function normalizeSearchValue(value: string) {
   return value
@@ -37,6 +38,7 @@ function normalizeSearchValue(value: string) {
 function formatDate(value: string | null) {
   if (!value) return "—";
 
+  if (!Number.isFinite(Date.parse(value))) return "Data indisponível";
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     month: "2-digit",
@@ -131,6 +133,7 @@ export default async function AdminConfiguracoesPage({
             <div className={styles.grid}>
             {filteredTemplates.map((template) => {
               const active = template.activeVersion;
+              const versionHistory = summarizeConfigurationHistory(template.versions, active?.id ?? null);
               const editableParameters = active
                 ? listEditableNumericParameters(
                     template.config_schema_key,
@@ -355,22 +358,47 @@ export default async function AdminConfiguracoesPage({
                     </details>
                   ) : null}
 
-                  {template.versions.length > 1 ? (
+                  {versionHistory.length > 0 ? (
                     <details className={styles.details}>
-                      <summary>Ver histórico de versões</summary>
+                      <summary>Consultar histórico e diferenças entre versões ({versionHistory.length})</summary>
+                      <p className={styles.editorDescription}>
+                        Comparações factuais com a versão anterior registrada. Não representam orientação profissional nem alteram os valores vigentes.
+                      </p>
                       <ol className={styles.history}>
-                        {template.versions.map((version) => (
+                        {versionHistory.map((version) => (
                           <li key={version.id}>
-                            <strong>v{version.version_number}</strong>
+                            <div className={styles.historyHeader}>
+                              <strong>v{version.version_number}{version.isActive ? " · ativa" : ""}</strong>
+                              <span>{formatConfigurationDate(version.created_at)}</span>
+                            </div>
                             <span>
-                              criada em {formatDate(version.created_at)}
-                              {version.activated_at
-                                ? ` · ativada em ${formatDate(version.activated_at)}`
-                                : " · nunca ativada"}
-                              {version.retired_at
-                                ? ` · aposentada em ${formatDate(version.retired_at)}`
-                                : ""}
+                              {version.activated_at ? `Ativada em ${formatConfigurationDate(version.activated_at)}` : "Nunca ativada"}
+                              {version.retired_at ? ` · aposentada em ${formatConfigurationDate(version.retired_at)}` : ""}
                             </span>
+                            {version.previousNumber !== null ? (
+                              <details className={styles.versionChanges}>
+                                <summary>Comparar v{version.previousNumber} com v{version.version_number} · {version.changeCount} mudança(s)</summary>
+                                {version.changes.length === 0 ? (
+                                  <p className={styles.editorDescription}>Nenhuma diferença no conteúdo registrado.</p>
+                                ) : (
+                                  <div className={styles.changeTableWrap}>
+                                    <table className={styles.changeTable}>
+                                      <thead><tr><th scope="col">Campo</th><th scope="col">Antes</th><th scope="col">Depois</th></tr></thead>
+                                      <tbody>{version.changes.map((change) => (
+                                        <tr key={change.path}>
+                                          <th scope="row">{formatConfigurationPath(change.path)} <small>({change.kind})</small></th>
+                                          <td>{change.previous}</td><td>{change.current}</td>
+                                        </tr>
+                                      ))}</tbody>
+                                    </table>
+                                  </div>
+                                )}
+                              </details>
+                            ) : <span>Primeira versão registrada — sem versão anterior.</span>}
+                            <details className={styles.versionChanges}>
+                              <summary>Consultar valores completos da v{version.version_number}</summary>
+                              <pre className={styles.code}>{formatConfiguration(version.configuration)}</pre>
+                            </details>
                           </li>
                         ))}
                       </ol>
