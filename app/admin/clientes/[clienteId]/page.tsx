@@ -914,6 +914,7 @@ export default async function AdminClienteDetailPage({
           contactEmail={registration?.contact_email ?? undefined}
           instagram={registration?.instagram ?? undefined}
             phone={registration?.phone ?? undefined}
+            updatedAt={registration?.updated_at ?? null}
           />
         </div>
       </Section>
