@@ -32,8 +32,10 @@ test("protocol plan comparison reports factual structure and dose totals", () =>
       cycles: [],
       variants: [
         {
+          label: "A", variantKey: "a",
           meals: [
             {
+              label: "Primeira", position: 1,
               doseAllocations: [
                 { doseQuantity: 2, doseType: "protein" },
                 { doseQuantity: 2, doseType: "carbohydrate" },
