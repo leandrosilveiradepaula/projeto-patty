@@ -13,6 +13,7 @@ import {
 } from "@/lib/supabase/data-access";
 
 import styles from "./page.module.css";
+import { formatPrivateFileRecordedAt, formatPrivateFileSize, readPrivateFileKindFilter } from "@/lib/files/private-file-history-view";
 
 const fileKindLabels: Record<string, string> = {
   document: "Documento",
@@ -46,7 +47,9 @@ function formatCreatedAt(value: string) {
   }).format(new Date(value));
 }
 
-export default async function ClientFilesPage() {
+export default async function ClientFilesPage({ searchParams }: { searchParams: Promise<{ categoria?: string }> }) {
+  const { categoria } = await searchParams;
+  const kind = readPrivateFileKindFilter(categoria);
   const client = await getCurrentClient();
 
   if (!client) {
@@ -59,6 +62,7 @@ export default async function ClientFilesPage() {
   }
 
   const files = await listCurrentClientFiles(client.id);
+  const filteredFiles = files.filter(file => kind === "all" || file.file_kind === kind);
 
   return (
     <>
@@ -76,20 +80,32 @@ export default async function ClientFilesPage() {
         <ClientPrivateFileUploadForm />
       </Section>
 
+      <Section title="Filtrar meus arquivos" description="Escolha a categoria para localizar documentos do seu acompanhamento.">
+        <form action="/cliente/arquivos" method="get" className={styles.fileFilters}>
+          <label>Categoria
+            <select name="categoria" defaultValue={kind}>
+              <option value="all">Todas</option><option value="photo">Fotos</option><option value="exam">Exames</option><option value="document">Documentos</option>
+            </select>
+          </label>
+          <button type="submit">Filtrar</button>
+          <Link href="/cliente/arquivos">Limpar filtros</Link>
+        </form>
+        <p role="status">{filteredFiles.length} de {files.length} arquivo(s) disponível(is).</p>
+      </Section>
       <Section
-        action={<Badge variant="neutral">{files.length} arquivo(s)</Badge>}
+        action={<Badge variant="neutral">{filteredFiles.length} arquivo(s)</Badge>}
         description="Aqui aparecem os arquivos já validados e liberados para sua conta."
         title="Histórico"
       >
-        {files.length === 0 ? (
+        {filteredFiles.length === 0 ? (
           <EmptyState
-            description="Ainda não há arquivos disponíveis no histórico. Você pode enviar uma foto, um exame ou um documento pelo formulário acima."
+            description={files.length === 0 ? "Ainda não há arquivos disponíveis no histórico. Você pode enviar uma foto, um exame ou um documento pelo formulário acima." : "Nenhum arquivo corresponde à categoria escolhida. Limpe os filtros para consultar os demais arquivos."}
             title="Nenhum arquivo disponível"
-            action={<a href="#enviar-arquivo">Ir para envio</a>}
+            action={files.length === 0 ? <a href="#enviar-arquivo">Ir para envio</a> : <Link href="/cliente/arquivos">Limpar filtros</Link>}
           />
         ) : (
           <ul className={styles.fileList}>
-            {files.map((file) => (
+            {filteredFiles.map((file) => (
               <li key={file.id}>
                 <Card className={styles.fileCard}>
                   <div className={styles.fileHeader}>
@@ -108,11 +124,11 @@ export default async function ClientFilesPage() {
                     </div>
                     <div>
                       <dt>Tamanho</dt>
-                      <dd>{formatFileSize(file.byte_size)}</dd>
+                      <dd>{formatPrivateFileSize(file.byte_size)}</dd>
                     </div>
                     <div>
                       <dt>Enviado em</dt>
-                      <dd>{formatCreatedAt(file.created_at)}</dd>
+                      <dd>{formatPrivateFileRecordedAt(file.created_at)}</dd>
                     </div>
                   </dl>
                   <div className={styles.fileActions}>
