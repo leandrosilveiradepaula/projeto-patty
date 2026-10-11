@@ -1,3 +1,4 @@
+import { collectPrivateFilePages, orderPrivateFileHistory } from "@/lib/files/private-file-pagination";
 import { collectCheckinHistoryPages, collectCheckinCorrectionRows, newestFirstByInstant } from "@/lib/checkins/history-pagination";
 import "server-only";
 import { collectScopedClientOperationalRows } from "@/lib/operations/client-operational-pagination";
@@ -1727,39 +1728,33 @@ export async function getAccessiblePhotoFileForAdminViewing(fileId: string) {
 
 export async function listCurrentClientFiles(clientId: string) {
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const rows = await collectPrivateFilePages((from, to) => supabase
     .from("client_files")
     .select(
       "id, client_id, file_kind, original_filename, mime_type, byte_size, created_at, uploaded_by_profile_id, client_visible_at, client_visibility_set_by_profile_id",
     )
     .eq("client_id", clientId)
     .order("created_at", { ascending: false })
-    .order("id", { ascending: true });
+    .order("id", { ascending: true })
+    .range(from, to));
 
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  return orderPrivateFileHistory(rows);
 }
 
 
 export async function listAccessibleClientFiles(clientId: string) {
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const rows = await collectPrivateFilePages((from, to) => supabase
     .from("client_files")
     .select(
       "id, client_id, file_kind, original_filename, mime_type, byte_size, created_at, uploaded_by_profile_id, client_visible_at, client_visibility_set_by_profile_id",
     )
     .eq("client_id", clientId)
     .order("created_at", { ascending: false })
-    .order("id", { ascending: true });
+    .order("id", { ascending: true })
+    .range(from, to));
 
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  return orderPrivateFileHistory(rows);
 }
 
 export async function listAccessibleClientFilesForClients(clientIds: string[]) {
