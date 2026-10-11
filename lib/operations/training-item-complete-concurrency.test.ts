@@ -1,0 +1,13 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import test from "node:test";
+const read=(p:string)=>readFileSync(new URL("../../"+p,import.meta.url),"utf8");
+const data=read("lib/supabase/data-access.ts");
+const actions=read("app/admin/clientes/[clienteId]/treino/actions.ts");
+const form=read("components/admin/AdminTrainingPlanItemForm.tsx");
+const lifecycle=read("components/admin/AdminTrainingPlanLifecycleAction.tsx");
+const page=read("app/admin/clientes/[clienteId]/treino/page.tsx");
+test("item updates compare complete server-side snapshots",()=>{const s=data.slice(data.indexOf("export async function updateAccessibleClientTrainingPlanItem("),data.indexOf("export async function deleteAccessibleClientTrainingPlanItem("));for(const key of ["expectedRestText","expectedExecutionNotes","expectedExerciseVersionId","expectedPosition","trainingPlanVersionId"])assert.ok(s.includes(key),key);for(const column of ["rest_text","execution_notes","exercise_version_id","training_plan_version_id","position"])assert.ok(s.includes(column),column);assert.match(s,/requireConfirmedTrainingMutation\(data\)/);});
+test("deletes compare complete original row and remain version scoped",()=>{const s=data.slice(data.indexOf("export async function deleteAccessibleClientTrainingPlanItem("),data.indexOf("export async function reviewAccessibleClientTrainingPlanVersion("));for(const key of ["expectedRestText","expectedExecutionNotes","expectedExerciseVersionId","expectedPosition","trainingPlanVersionId"])assert.ok(s.includes(key),key);assert.match(s,/\.eq\("training_plan_version_id", input.trainingPlanVersionId\)/);assert.match(s,/requireConfirmedTrainingMutation\(data\)/);});
+test("server validates stale rows and original identifiers",()=>{for(const key of ["existing.rest_text !== expectedRestText","existing.execution_notes !== expectedExecutionNotes","existing.exercise_version_id !== expectedExerciseVersionId","existing.position !== expectedPosition","optionalUuid(formData","positivePosition(formData"])assert.ok(actions.includes(key),key);assert.match(actions,/Atualize o treino antes de removê-lo/);});
+test("editor and removal forms provide original values from the same visible row",()=>{for(const key of ["expectedRestText","expectedExecutionNotes","expectedExerciseVersionId","expectedPosition"])assert.ok(form.includes('name="'+key+'"'),key);for(const key of ["expectedRestText","expectedExecutionNotes","expectedExerciseVersionId","expectedPosition"])assert.ok(lifecycle.includes('name="'+key+'"'),key);assert.match(page,/expectedItem=\{\{/);assert.match(page,/mode="review"/);assert.match(page,/mode="publish"/);});
