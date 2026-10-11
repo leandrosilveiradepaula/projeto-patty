@@ -8,16 +8,9 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import { TextInput } from "@/components/ui/TextInput";
 import { listClientsForPrivateFileAdministration } from "@/lib/files/private-file-admin";
+import { matchesClientDirectoryName, orderClientsForPrivateFileDirectory, readClientDirectorySearchTerm } from "@/lib/clients/client-directory-search";
 
 import styles from "./page.module.css";
-
-function normalizeSearchValue(value: string) {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLocaleLowerCase("pt-BR")
-    .trim();
-}
 
 type AdminPrivateFilesPageProps = {
   searchParams: Promise<{ q?: string }>;
@@ -30,15 +23,12 @@ export default async function AdminPrivateFilesPage({
     searchParams,
     listClientsForPrivateFileAdministration(),
   ]);
-  const searchTerm = q?.trim() ?? "";
-  const normalizedSearchTerm = normalizeSearchValue(searchTerm);
-  const filteredClients = normalizedSearchTerm
-    ? clients.filter((client) =>
-        normalizeSearchValue(client.full_name ?? client.profiles?.display_name ?? "").includes(
-          normalizedSearchTerm,
-        ),
-      )
-    : clients;
+  const searchTerm = readClientDirectorySearchTerm(q);
+  const filteredClients = orderClientsForPrivateFileDirectory(
+    clients.filter((client) => matchesClientDirectoryName(
+      searchTerm, client.full_name, client.profiles?.display_name,
+    )),
+  );
 
   return (
     <>
@@ -50,7 +40,7 @@ export default async function AdminPrivateFilesPage({
 
       <Section
         action={<Badge variant="neutral">{clients.length} cliente(s)</Badge>}
-        description="Encontre uma cliente para consultar ou enviar arquivos."
+        description="Encontre clientes ativas e inativas para consultar arquivos privados. O encerramento não elimina o histórico."
         title="Clientes"
       >
         <form action="/admin/arquivos" className={styles.searchForm} method="get">
@@ -62,6 +52,7 @@ export default async function AdminPrivateFilesPage({
               defaultValue={searchTerm}
               id="file-client-search"
               name="q"
+              maxLength={120}
               placeholder="Digite o nome da cliente"
               type="search"
             />
@@ -85,6 +76,7 @@ export default async function AdminPrivateFilesPage({
           <EmptyState
             description={`Não encontramos nenhuma cliente com “${searchTerm}”.`}
             title="Nenhuma cliente encontrada"
+            action={<Link href="/admin/arquivos">Limpar busca</Link>}
           />
         ) : (
           <>
@@ -109,6 +101,8 @@ export default async function AdminPrivateFilesPage({
                           {displayName || "Cliente sem nome informado"}
                         </h2>
                         <p className={styles.clientMeta}>
+                          {client.status === "inactive" ? "Cliente inativa" : "Cliente ativa"}
+                          {" · "}
                           {client.profile_id ? "Cadastro vinculado" : "Cadastro incompleto"}
                         </p>
                       </div>

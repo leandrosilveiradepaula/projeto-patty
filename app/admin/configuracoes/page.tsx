@@ -23,6 +23,7 @@ import {
 import { parseWeeklyFeedbackScheduleConfiguration } from "@/lib/configuration/weekly-feedback-schedule";
 import { listMethodConfigurationCatalogForCurrentAdmin } from "@/lib/supabase/data-access";
 import Link from "next/link";
+import { readClientDirectorySearchTerm } from "@/lib/clients/client-directory-search";
 import styles from "./page.module.css";
 
 function normalizeSearchValue(value: string) {
@@ -57,7 +58,7 @@ export default async function AdminConfiguracoesPage({
 }: AdminConfiguracoesPageProps) {
   const { q, domain } = await searchParams;
   const templates = await listMethodConfigurationCatalogForCurrentAdmin();
-  const searchTerm = q?.trim() ?? "";
+  const searchTerm = readClientDirectorySearchTerm(q);
   const normalizedSearchTerm = normalizeSearchValue(searchTerm);
   const domains = [...new Set(templates.map((template) => template.domain_key))].sort(
     (left, right) => left.localeCompare(right, "pt-BR"),
@@ -102,6 +103,7 @@ export default async function AdminConfiguracoesPage({
                 <TextInput
                   defaultValue={searchTerm}
                   name="q"
+                maxLength={120}
                   placeholder="Nome, domínio ou chave"
                   type="search"
                 />
