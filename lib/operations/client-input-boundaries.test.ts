@@ -10,13 +10,13 @@ const feedback = read("app/cliente/feedback-semanal/actions.ts");
 test("client liquid correction requires a UUID before reading event history", () => {
   const section = checkins.slice(checkins.indexOf("export async function correctLiquidIntakeAction"), checkins.indexOf("export async function correctActivityCheckinAction"));
   assert.ok(section.indexOf("!isUuid(eventId)") >= 0);
-  assert.ok(section.indexOf("!isUuid(eventId)") < section.indexOf("listAccessibleClientLiquidIntakeEvents"));
+  assert.ok(section.indexOf("!isUuid(eventId)") < section.indexOf("getAccessibleClientLiquidIntakeEvent(client.id, eventId)"));
 });
 
 test("client activity correction requires a UUID before reading event history", () => {
   const section = checkins.slice(checkins.indexOf("export async function correctActivityCheckinAction"));
   assert.ok(section.indexOf("!isUuid(eventId)") >= 0);
-  assert.ok(section.indexOf("!isUuid(eventId)") < section.indexOf("listAccessibleClientActivityCheckinEvents"));
+  assert.ok(section.indexOf("!isUuid(eventId)") < section.indexOf("getAccessibleClientActivityCheckinEvent(client.id, eventId)"));
 });
 
 test("client training requests reject file-valued notes", () => {
