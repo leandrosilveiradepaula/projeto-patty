@@ -82,6 +82,7 @@ export function AdminClientRegistrationEditForm({
             <TextInput
               {...fieldProps}
               disabled={isPending}
+              autoComplete="address-level2"
               defaultValue={city}
               maxLength={120}
               name="city"
@@ -94,6 +95,7 @@ export function AdminClientRegistrationEditForm({
             <TextInput
               {...fieldProps}
               disabled={isPending}
+              autoComplete="tel"
               defaultValue={phone}
               inputMode="tel"
               maxLength={40}
@@ -111,6 +113,7 @@ export function AdminClientRegistrationEditForm({
             <TextInput
               {...fieldProps}
               disabled={isPending}
+              autoComplete="email"
               defaultValue={contactEmail}
               maxLength={254}
               name="contactEmail"

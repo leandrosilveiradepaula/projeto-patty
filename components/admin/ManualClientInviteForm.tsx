@@ -27,6 +27,7 @@ export function ManualClientInviteForm({ onProvisioningAttempt }: { onProvisioni
     initialState,
   );
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
+  const linkFieldRef = useRef<HTMLTextAreaElement>(null);
 
   async function copyActivationLink() {
     if (!state.activationLink) {
@@ -37,6 +38,8 @@ export function ManualClientInviteForm({ onProvisioningAttempt }: { onProvisioni
       await navigator.clipboard.writeText(state.activationLink);
       setCopyStatus("Link copiado.");
     } catch {
+      linkFieldRef.current?.focus();
+      linkFieldRef.current?.select();
       setCopyStatus(
         "Não foi possível copiar automaticamente. Selecione o link abaixo e copie manualmente.",
       );
@@ -124,6 +127,7 @@ export function ManualClientInviteForm({ onProvisioningAttempt }: { onProvisioni
           <textarea
             className={styles.linkValue}
             id="manual-activation-link"
+            ref={linkFieldRef}
             readOnly
             rows={4}
             value={state.activationLink}

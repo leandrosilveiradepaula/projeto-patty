@@ -85,6 +85,7 @@ export function AdminClientNameEditForm({
             disabled={isPending}
               defaultValue={displayName}
             maxLength={120}
+            minLength={2}
             name="displayName"
             required
             type="text"

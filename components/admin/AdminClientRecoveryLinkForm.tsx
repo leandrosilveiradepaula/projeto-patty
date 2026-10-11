@@ -23,6 +23,7 @@ export function AdminClientRecoveryLinkForm({
   clientId: string;
 }) {
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
+  const linkFieldRef = useRef<HTMLTextAreaElement>(null);
   const [state, formAction, isPending] = useActionState(
     generateManualRecoveryLinkAction.bind(null, clientId),
     initialState,
@@ -34,6 +35,8 @@ export function AdminClientRecoveryLinkForm({
       await navigator.clipboard.writeText(state.recoveryLink);
       setCopyStatus("Link copiado.");
     } catch {
+      linkFieldRef.current?.focus();
+      linkFieldRef.current?.select();
       setCopyStatus("Não foi possível copiar automaticamente. Selecione o link acima e copie manualmente.");
     }
   }
@@ -80,6 +83,7 @@ export function AdminClientRecoveryLinkForm({
           <textarea
             className={styles.value}
             id="client-recovery-link"
+            ref={linkFieldRef}
             readOnly
             rows={4}
             value={state.recoveryLink}

@@ -62,6 +62,7 @@ export function ClientInviteForm({ onProvisioningAttempt }: { onProvisioningAtte
             autoComplete="name"
             disabled={isPending}
             maxLength={120}
+            minLength={2}
             name="displayName"
             required
             type="text"
