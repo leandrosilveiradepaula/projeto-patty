@@ -14,10 +14,11 @@ import { notFound } from "next/navigation";
 import { isUuid } from "@/lib/validation/uuid";
 import { formatPrivateFileRecordedAt, formatPrivateFileSize, isPrivateFilePendingProfessionalRelease, matchesPrivateFileFilters, privateFileOriginLabel, readPrivateFileKindFilter, readPrivateFileOriginFilter, readPrivateFileViewFilter } from "@/lib/files/private-file-history-view";
 import styles from "./page.module.css";
+import { paginatePrivateFileHistory, privateFileHistoryHref, readPrivateFileHistoryPage, readPrivateFileHistorySort, sortPrivateFileHistory, countPrivateFileCategories, visiblePrivateFilePageNumbers, privateFileHistoryCounts } from "@/lib/files/private-file-history-workspace";
 
 type AdminClientFilesPageProps = {
   params: Promise<{ clienteId: string }>;
-  searchParams: Promise<{ categoria?: string; origem?: string; visualizacao?: string }>;
+  searchParams: Promise<{ categoria?: string; origem?: string; visualizacao?: string; ordem?: string; paginaPendentes?: string; paginaHistorico?: string }>;
 };
 
 const fileKindLabels: Record<string, string> = {
@@ -72,10 +73,24 @@ export default async function AdminClientFilesPage({
   const kind = readPrivateFileKindFilter(filters.categoria);
   const origin = readPrivateFileOriginFilter(filters.origem);
   const view = readPrivateFileViewFilter(filters.visualizacao);
+  const order = readPrivateFileHistorySort(filters.ordem);
+  const requestedPending = readPrivateFileHistoryPage(filters.paginaPendentes);
+  const requestedHistory = readPrivateFileHistoryPage(filters.paginaHistorico);
+  const counts = privateFileHistoryCounts(files, client.profile_id);
+  const kinds = countPrivateFileCategories(files);
+  const basePath = `/admin/clientes/${client.id}/arquivos`;
+  const navigate = (target: "pending" | "history", page: number) => privateFileHistoryHref(basePath, {
+    categoria: kind, origem: origin, visualizacao: view, ordem: order.value,
+    paginaPendentes: target === "pending" ? page : pendingPage.page,
+    paginaHistorico: target === "history" ? page : historyPage.page,
+    anchor: target === "pending" ? "aguardando-liberacao" : "historico-arquivos",
+  });
   const filteredFiles = files.filter(file => matchesPrivateFileFilters(file, client.profile_id, kind, origin));
   const pendingReleaseFiles = filteredFiles.filter(file => isPrivateFilePendingProfessionalRelease(file, client.profile_id));
   const historyFiles = filteredFiles.filter(file => !isPrivateFilePendingProfessionalRelease(file, client.profile_id));
-  const totalPending = files.filter(file => isPrivateFilePendingProfessionalRelease(file, client.profile_id)).length;
+  const totalPending = counts.pending;
+  const pendingPage = paginatePrivateFileHistory(sortPrivateFileHistory(pendingReleaseFiles, order.value), requestedPending.page);
+  const historyPage = paginatePrivateFileHistory(sortPrivateFileHistory(historyFiles, order.value), requestedHistory.page);
 
   return (
     <>
@@ -110,10 +125,22 @@ export default async function AdminClientFilesPage({
               <option value="all">Tudo</option><option value="pending">Aguardando liberação</option><option value="history">Histórico</option>
             </select>
           </label>
+          <label>Ordenação
+            <select name="ordem" defaultValue={order.value}>
+              <option value="newest">Mais recentes</option>
+              <option value="oldest">Mais antigos</option>
+              <option value="largest">Maiores arquivos</option>
+              <option value="smallest">Menores arquivos</option>
+              <option value="kind">Por categoria</option>
+            </select>
+          </label>
           <button type="submit">Filtrar</button>
           <Link href={`/admin/clientes/${client.id}/arquivos`}>Limpar filtros</Link>
         </form>
-        <p role="status">{filteredFiles.length} de {files.length} arquivo(s) · {totalPending} aguardando liberação no total.</p>
+        <p role="status">{filteredFiles.length} de {counts.all} arquivo(s) · {totalPending} aguardando liberação no total. Fotos: {kinds.photo}, exames: {kinds.exam}, documentos: {kinds.document}. Enviados pela cliente: {counts.client}; equipe ou autoria desconhecida: {counts.team}.</p>
+        {(order.invalid || requestedPending.invalid || requestedHistory.invalid || pendingPage.outOfRange || historyPage.outOfRange) ? (
+          <p className={styles.filterNotice} role="status">Um filtro de ordenação ou página não é válido. Exibimos somente registros autorizados em uma página disponível.</p>
+        ) : null}
       </Section>
       {view !== "history" ? <div id="aguardando-liberacao">
         <Section
@@ -128,7 +155,7 @@ export default async function AdminClientFilesPage({
             />
           ) : (
           <ul className={styles.fileList}>
-            {pendingReleaseFiles.map((file: (typeof files)[number]) => (
+            {pendingPage.items.map((file: (typeof files)[number]) => (
               <li id={`arquivo-pendente-${file.id}`} key={file.id}>
                 <Card className={styles.fileCard}>
                   <div className={styles.fileHeader}>
@@ -182,10 +209,21 @@ export default async function AdminClientFilesPage({
             ))}
           </ul>
           )}
+          {pendingPage.total > 0 ? (
+            <nav aria-label="Páginas aguardando liberação" className={styles.pagination}>
+              <p>{pendingPage.first}–{pendingPage.last} de {pendingPage.total} pendente(s) · Página {pendingPage.page} de {pendingPage.pageCount}</p>
+              {pendingPage.previous ? <Link href={navigate("pending", pendingPage.previous)}>Anterior</Link> : null}
+              {visiblePrivateFilePageNumbers(pendingPage.page, pendingPage.pageCount).map((number) =>
+                number === pendingPage.page ? <strong aria-current="page" key={number}>Página {number}</strong> :
+                <Link key={number} href={navigate("pending", number)} aria-label={`Ir para página ${number} dos pendentes`}>{number}</Link>
+              )}
+              {pendingPage.next ? <Link href={navigate("pending", pendingPage.next)}>Próxima</Link> : null}
+            </nav>
+          ) : null}
         </Section>
       </div> : null}
 
-      {view !== "pending" ? <Section
+      {view !== "pending" ? <div id="historico-arquivos" className={styles.historyAnchor}><Section
         description="Histórico privado de arquivos já liberados e de arquivos enviados pela própria cliente. Upload administrativo oculto permanece em Aguardando liberação."
         title="Histórico de arquivos"
       >
@@ -200,7 +238,7 @@ export default async function AdminClientFilesPage({
           />
         ) : (
           <ul className={styles.fileList}>
-            {historyFiles.map((file: (typeof files)[number]) => (
+            {historyPage.items.map((file: (typeof files)[number]) => (
               <li key={file.id}>
                 <Card className={styles.fileCard}>
                   <div className={styles.fileHeader}>
@@ -254,7 +292,18 @@ export default async function AdminClientFilesPage({
             ))}
           </ul>
         )}
-      </Section> : null}
+        {historyPage.total > 0 ? (
+          <nav aria-label="Páginas do histórico privado" className={styles.pagination}>
+            <p>{historyPage.first}–{historyPage.last} de {historyPage.total} arquivo(s) · Página {historyPage.page} de {historyPage.pageCount}</p>
+            {historyPage.previous ? <Link href={navigate("history", historyPage.previous)}>Anterior</Link> : null}
+            {visiblePrivateFilePageNumbers(historyPage.page, historyPage.pageCount).map((number) =>
+              number === historyPage.page ? <strong aria-current="page" key={number}>Página {number}</strong> :
+              <Link key={number} href={navigate("history", number)} aria-label={`Ir para página ${number} do histórico`}>{number}</Link>
+            )}
+            {historyPage.next ? <Link href={navigate("history", historyPage.next)}>Próxima</Link> : null}
+          </nav>
+        ) : null}
+      </Section></div> : null}
     </>
   );
 }
