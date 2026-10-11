@@ -21,9 +21,11 @@ test("password recovery shares invitation email validation", () => {
 });
 
 test("both invitation flows reject non-text client names", () => {
-  assert.equal(invitations.split('displayNameValue !== null && typeof displayNameValue !== "string"').length - 1, 2);
+  assert.equal(invitations.split("parseInvitationFormFields(formData)").length-1,2);
+  assert.match(read("lib/onboarding/validation.ts"), /typeof names\[0\] !== "string"/);
 });
 
 test("both invitation flows reject non-text login emails", () => {
-  assert.equal(invitations.split('emailValue !== null && typeof emailValue !== "string"').length - 1, 2);
+  assert.equal(invitations.split("parseInvitationFormFields(formData)").length-1,2);
+  assert.match(read("lib/onboarding/validation.ts"), /typeof emails\[0\] !== "string"/);
 });
