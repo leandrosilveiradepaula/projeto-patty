@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { collectAiPagesForIds } from "@/lib/ai/history-pagination";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -62,25 +63,20 @@ function createFindingActionsAdminClient() {
 }
 
 export async function listAccessibleAiFindingActions(executionIds: string[]) {
-  if (executionIds.length === 0) {
-    return [] as AiFindingActionRow[];
-  }
-
   const supabase = await createFindingActionsClient();
-  const { data, error } = await supabase
+  const rows = await collectAiPagesForIds(executionIds, (ids, from, to) => supabase
     .from("ai_finding_actions")
-    .select(
-      "id, execution_id, client_id, finding_index, finding_snapshot, action, acted_by_profile_id, anamnesis_review_id, created_at",
-    )
-    .in("execution_id", executionIds)
+    .select("id, execution_id, client_id, finding_index, finding_snapshot, action, acted_by_profile_id, anamnesis_review_id, created_at")
+    .in("execution_id", ids)
     .order("created_at", { ascending: true })
-    .order("id", { ascending: true });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+    .order("id", { ascending: true })
+    .range(from, to));
+  return rows.sort((a, b) => {
+    const at = Date.parse(a.created_at);
+    const bt = Date.parse(b.created_at);
+    return (Number.isFinite(at) ? at : -Infinity) -
+      (Number.isFinite(bt) ? bt : -Infinity) || a.id.localeCompare(b.id);
+  });
 }
 
 export async function recordAiFindingAction(input: {
