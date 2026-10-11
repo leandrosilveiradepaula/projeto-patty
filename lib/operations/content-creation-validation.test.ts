@@ -47,5 +47,7 @@ test("creation never publishes or releases content and validation stays server-s
   assert.doesNotMatch(create, /publishAccessibleEducationalContentVersion|createAccessibleClientContentRelease/);
   assert.match(page, /formatPublishedDate/);
   assert.match(page, /!Number\.isFinite\(Date\.parse\(value\)\)/);
-  assert.match(page, /typeof q === "string"/);
+  assert.match(page, /readLibraryExplorerFilters\(rawFilters\)/);
+  const parser=read("lib/content/admin-library-explorer.ts");
+  assert.match(parser, /typeof raw\.q==="string"/);
 });
