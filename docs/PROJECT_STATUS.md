@@ -3926,3 +3926,8 @@ A Patty pode filtrar o catálogo de protocolos por estado factual da versão mai
 ## Área de protocolos da cliente para a Patty — ciclo de aprovação explícito (2026-10-11)
 
 No workspace profissional de uma cliente, cada protocolo mostra a situação factual da última versão, número total de versões, existência e data da última publicação e diferença entre rascunho atual e plano liberado. Há links distintos para última versão de trabalho, última publicação e histórico completo, sempre resolvidos sobre registros já acessíveis por RLS. Criar versão inicial e recuperar protocolo sem versões seguem ações humanas existentes. Sem aprovar/publicar automaticamente, sem alterar schema, RLS, regras clínicas ou snapshots; E2E autenticado e conferência visual com dados sintéticos seguem pendentes.
+
+
+## Pesquisa de refeições do protocolo publicado — correspondência factual (2026-10-11)
+
+A pesquisa da cliente cruza o termo digitado com o tipo de dose da **mesma refeição publicada**, evitando resultados incorretos quando o termo pertence a uma refeição e a dose a outra da mesma variação. A navegação informa a contagem de refeições encontradas e indica combinações sem registros, sem alterar nenhuma dose nem escolher fase/dia. Variações vazias permanecem consultáveis quando compatíveis com busca textual. Lançamentos de doses repetidos são renderizados separadamente com chaves estáveis; quantidades não finitas/negativas não são exibidas como dose válida. Tudo usa dados já publicados sob autorização existente; sem regra clínica nova, RLS, migrations ou publicação automática. CI automatizado não equivale a E2E autenticado.
