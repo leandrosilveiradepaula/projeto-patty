@@ -5,7 +5,7 @@ import {
 } from "@/components/admin/AdminExerciseLifecycleForms";
 import { Badge } from "@/components/ui/Badge";
 import { AdminExerciseRecoverInitialVersionForm } from "@/components/admin/AdminExerciseRecoverInitialVersionForm";
-import { exerciseCatalogBackHref, readExerciseCatalogStatus, readExerciseCatalogTerm } from "@/lib/training/exercise-admin-directory";
+import { exerciseCatalogHref, readExerciseCatalogStatus, readExerciseCatalogTerm, readExerciseCatalogSort, readExerciseCatalogPage } from "@/lib/training/exercise-admin-directory";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -23,7 +23,7 @@ import styles from "./page.module.css";
 
 type PageProps = {
   params: Promise<{ exerciseId: string }>;
-  searchParams: Promise<{ q?: string; status?: string }>;
+  searchParams: Promise<{ q?: string; status?: string; ordem?: string; pagina?: string }>;
 };
 
 function formatDateTime(value: string) {
@@ -39,7 +39,7 @@ export default async function AdminExerciseDetailPage({ params, searchParams }: 
   const [{ exerciseId }, filters] = await Promise.all([params, searchParams]);
   const term = readExerciseCatalogTerm(filters.q);
   const status = readExerciseCatalogStatus(filters.status);
-  const backHref = exerciseCatalogBackHref(term, status);
+  const backHref = exerciseCatalogHref({term,status,sort:readExerciseCatalogSort(filters.ordem),page:readExerciseCatalogPage(filters.pagina).page,anchor:"biblioteca-exercicios"});
 
   if (!isUuid(exerciseId)) {
     notFound();

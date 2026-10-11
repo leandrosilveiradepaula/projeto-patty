@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { isHistoricalExerciseSelectionUnavailable, orderPublishedExerciseOptions } from "./exercise-selection.ts";
+import { isHistoricalExerciseSelectionUnavailable, orderPublishedExerciseOptions, filterPublishedExerciseOptions,selectedExerciseOption,readExerciseSelectionQuery } from "./exercise-selection.ts";
 
 const options = [
   { id: "remada-v1", name: "Remada", versionNumber: 1 },
@@ -28,4 +28,11 @@ test("same-name same-version options tie-break deterministically by UUID", () =>
     { id:"a",name:"Ombro",versionNumber:2 },
   ];
   assert.deepEqual(orderPublishedExerciseOptions(rows).map(x=>x.id),["a","b"]);
+});
+
+test("searches published options without accents and preserves an exact version ID",()=>{
+ assert.deepEqual(filterPublishedExerciseOptions(options,"AGACHAMENTo").map(x=>x.id),["agachamento-v3","agachamento-v1"]);
+ assert.equal(selectedExerciseOption(options,"agachamento-v1")?.versionNumber,1);
+ assert.equal(selectedExerciseOption(options,"no-version"),null);
+ assert.equal(readExerciseSelectionQuery(["duplicated"]),"");
 });

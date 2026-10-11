@@ -14,7 +14,7 @@ import { FormField } from "@/components/ui/FormField";
 import { TextInput } from "@/components/ui/TextInput";
 import { Textarea } from "@/components/ui/Textarea";
 
-import { isHistoricalExerciseSelectionUnavailable } from "@/lib/training/exercise-selection";
+import { filterPublishedExerciseOptions, readExerciseSelectionQuery, selectedExerciseOption, isHistoricalExerciseSelectionUnavailable } from "@/lib/training/exercise-selection";
 
 import styles from "./AdminTrainingPlanForms.module.css";
 
@@ -67,10 +67,15 @@ export function AdminTrainingPlanItemForm({
       );
   const [state, formAction, isPending] = useActionState(action, initialState);
   const [selectedExerciseId, setSelectedExerciseId] = useState(item?.exerciseVersionId ?? "");
+  const [exerciseSearch,setExerciseSearch]=useState("");
+  const [showAll,setShowAll]=useState(false);
+  const filteredOptions=filterPublishedExerciseOptions(exerciseOptions,readExerciseSelectionQuery(exerciseSearch));
+  const visibleOptions=showAll?filteredOptions:filteredOptions.slice(0,25);
+  const selectedFromCatalog=selectedExerciseOption(exerciseOptions,selectedExerciseId);
   const formRef = useRef<HTMLFormElement>(null);
   const inFlightRef = useRef(false);
   const router = useRouter();
-  const selectedExercise = exerciseOptions.find((exercise) => exercise.id === selectedExerciseId);
+  const selectedExercise = selectedFromCatalog;
   const missingHistoricalVersion = isHistoricalExerciseSelectionUnavailable(
     item?.exerciseVersionId,
     selectedExerciseId,
@@ -135,6 +140,14 @@ export function AdminTrainingPlanItemForm({
 
       <label className={styles.field}>
         <span>Exercício da biblioteca (opcional)</span>
+        <input className={styles.select} type="search" value={exerciseSearch}
+          onChange={event=>{setExerciseSearch(event.target.value);setShowAll(false);}}
+          placeholder="Buscar pelo nome do exercício"
+          aria-label="Buscar exercício na biblioteca publicada" maxLength={120}
+          disabled={isPending} />
+        <small role="status">{filteredOptions.length} versão(ões) publicada(s) correspondente(s).
+          {filteredOptions.length>25&&!showAll?" Exibindo as primeiras 25; refine a busca ou mostre todas.":""}
+        </small>
         <select
           className={styles.select}
           disabled={isPending}
@@ -148,7 +161,9 @@ export function AdminTrainingPlanItemForm({
               Versão original indisponível — selecione uma versão publicada ou nome manual
             </option>
           ) : null}
-          {exerciseOptions.map((exercise) => (
+          {selectedFromCatalog && !visibleOptions.some(e=>e.id===selectedFromCatalog.id) ?
+            <option value={selectedFromCatalog.id}>{selectedFromCatalog.name} · v{selectedFromCatalog.versionNumber} · seleção preservada</option> : null}
+          {visibleOptions.map((exercise) => (
             <option key={exercise.id} value={exercise.id}>
               {exercise.name} · v{exercise.versionNumber}
             </option>
@@ -162,6 +177,7 @@ export function AdminTrainingPlanItemForm({
             : "Sem versão selecionada: informe o nome manual abaixo para a prescrição."}
         </small>
       </label>
+      {filteredOptions.length>25?<Button type="button" variant="secondary" disabled={isPending} onClick={()=>setShowAll(v=>!v)}>{showAll?"Mostrar primeiras 25":"Mostrar todas as versões encontradas"}</Button>:null}
 
       <FormField
         description="Obrigatório somente quando nenhum exercício da biblioteca for selecionado."
@@ -250,6 +266,7 @@ export function AdminTrainingPlanItemForm({
         )}
       </FormField>
 
+      <p className={styles.notice}>O exercício selecionado é associado a uma versão exata da biblioteca. Salvar não revisa nem publica o treino.</p>
       <p className={styles.notice}>
         Carga/peso não é prescrita como valor fixo nesta versão do produto; ela
         depende da capacidade da paciente.
