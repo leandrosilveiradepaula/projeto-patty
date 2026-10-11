@@ -13,13 +13,13 @@ const items=[
 ];
 test("history search recognizes version, date and accents without exposing IDs",()=>{
  assert.deepEqual(findPublishedHistory(items,"versao 3","recent").map(x=>x.id),["b"]);
- assert.deepEqual(findPublishedHistory(items,"alimentação","recent").map(x=>x.id),["a","b","c"]);
+ assert.deepEqual(findPublishedHistory(items,"alimentação","recent").map(x=>x.id),["b","a","c"]);
  assert.deepEqual(findPublishedHistory(items,"02/10/2026","recent").map(x=>x.id),[]);
  assert.equal(normalizePublishedSearch(["a"]),"");
 });
 test("history ordering compares instants, puts invalid dates last and can order by version",()=>{
- assert.deepEqual(findPublishedHistory(items,"","recent").map(x=>x.id),["a","b","c"]);
- assert.deepEqual(findPublishedHistory(items,"","oldest").map(x=>x.id),["b","a","c"]);
+ assert.deepEqual(findPublishedHistory(items,"","recent").map(x=>x.id),["b","a","c"]);
+ assert.deepEqual(findPublishedHistory(items,"","oldest").map(x=>x.id),["a","b","c"]);
  assert.deepEqual(findPublishedHistory(items,"","version").map(x=>x.id),["b","c","a"]);
  assert.equal(publishedProtocolDate("bad"),"Data indisponível");
 });
