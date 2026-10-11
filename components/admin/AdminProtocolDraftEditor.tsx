@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -47,6 +47,36 @@ function usePersistedProtocolRefresh(
 }
 
 
+/**
+ * Form actions may be submitted twice before React renders isPending.
+ * Keep a synchronous, per-form lock until a new action result is received.
+ * The dose row also shares a lock between its edit and delete forms.
+ * This protects one mounted browser form, not cross-session idempotency.
+ */
+function useProtocolDraftSubmitGuard(
+  state: ProtocolLifecycleFormState,
+  pending: boolean,
+  options?: { blockAfterSuccess?: boolean; sharedLock?: { current: boolean } },
+) {
+  const inFlightRef = useRef(false);
+  const sharedLock = options?.sharedLock;
+  const blockAfterSuccess = options?.blockAfterSuccess ?? false;
+
+  useEffect(() => {
+    inFlightRef.current = false;
+    if (sharedLock) sharedLock.current = false;
+  }, [state, sharedLock]);
+
+  return (event: FormEvent<HTMLFormElement>) => {
+    if (inFlightRef.current || pending || (blockAfterSuccess && state.success) || sharedLock?.current) {
+      event.preventDefault();
+      return;
+    }
+    inFlightRef.current = true;
+    if (sharedLock) sharedLock.current = true;
+  };
+}
+
 function ActionFeedback({
   state,
 }: {
@@ -77,14 +107,15 @@ function CreatePlanForm({
   const action = createProtocolMealPlan.bind(null, protocolId, protocolVersionId);
   const [state, formAction, pending] = useActionState(action, initialState);
   usePersistedProtocolRefresh(state);
+  const submitGuard = useProtocolDraftSubmitGuard(state, pending, { blockAfterSuccess: true });
 
   return (
-    <form action={formAction} className={styles.form}>
+    <form action={formAction} aria-busy={pending} onSubmit={submitGuard} className={styles.form}>
       <ActionFeedback state={state} />
       <p className={styles.help}>
         Inicie a estrutura alimentar deste rascunho. Isso não publica nada para a cliente.
       </p>
-      <Button loading={pending} type="submit">
+      <Button disabled={pending} loading={pending} type="submit">
         Iniciar estrutura alimentar
       </Button>
     </form>
@@ -109,9 +140,10 @@ function AddVariantForm({
   const [state, formAction, pending] = useActionState(action, initialState);
   const formRef = useRef<HTMLFormElement>(null);
   usePersistedProtocolRefresh(state, formRef);
+  const submitGuard = useProtocolDraftSubmitGuard(state, pending);
 
   return (
-    <form action={formAction} className={styles.form} ref={formRef}>
+    <form action={formAction} aria-busy={pending} onSubmit={submitGuard} className={styles.form} ref={formRef}>
       <ActionFeedback state={state} />
       <FormField
         description="Ex.: Linear, Dia 1, Dia 2, Low ou High. Use apenas nomes que façam sentido para este protocolo."
@@ -121,6 +153,7 @@ function AddVariantForm({
       >
         {(fieldProps) => (
           <TextInput
+            disabled={pending}
             {...fieldProps}
             maxLength={120}
             name="label"
@@ -129,7 +162,7 @@ function AddVariantForm({
           />
         )}
       </FormField>
-      <Button loading={pending} type="submit">
+      <Button disabled={pending} loading={pending} type="submit">
         Adicionar variação
       </Button>
     </form>
@@ -157,9 +190,10 @@ function AddMealForm({
   const [state, formAction, pending] = useActionState(action, initialState);
   const formRef = useRef<HTMLFormElement>(null);
   usePersistedProtocolRefresh(state, formRef);
+  const submitGuard = useProtocolDraftSubmitGuard(state, pending);
 
   return (
-    <form action={formAction} className={styles.form} ref={formRef}>
+    <form action={formAction} aria-busy={pending} onSubmit={submitGuard} className={styles.form} ref={formRef}>
       <ActionFeedback state={state} />
       <FormField
         description="A posição é definida automaticamente pela ordem de inclusão."
@@ -169,6 +203,7 @@ function AddMealForm({
       >
         {(fieldProps) => (
           <TextInput
+            disabled={pending}
             {...fieldProps}
             maxLength={120}
             name="label"
@@ -177,7 +212,7 @@ function AddMealForm({
           />
         )}
       </FormField>
-      <Button loading={pending} size="compact" type="submit">
+      <Button disabled={pending} loading={pending} size="compact" type="submit">
         Adicionar refeição
       </Button>
     </form>
@@ -205,13 +240,14 @@ function AddDoseForm({
   const [state, formAction, pending] = useActionState(action, initialState);
   const formRef = useRef<HTMLFormElement>(null);
   usePersistedProtocolRefresh(state, formRef);
+  const submitGuard = useProtocolDraftSubmitGuard(state, pending);
 
   return (
-    <form action={formAction} className={styles.doseForm} ref={formRef}>
+    <form action={formAction} aria-busy={pending} onSubmit={submitGuard} className={styles.doseForm} ref={formRef}>
       <ActionFeedback state={state} />
       <label className={styles.selectField}>
         <span>Macro</span>
-        <select name="doseType" required>
+        <select disabled={pending} name="doseType" required>
           <option value="">Selecione</option>
           <option value="protein">Proteína</option>
           <option value="carbohydrate">Carboidrato</option>
@@ -226,6 +262,7 @@ function AddDoseForm({
       >
         {(fieldProps) => (
           <TextInput
+            disabled={pending}
             {...fieldProps}
             inputMode="decimal"
             max="999"
@@ -237,7 +274,7 @@ function AddDoseForm({
           />
         )}
       </FormField>
-      <Button loading={pending} size="compact" type="submit">
+      <Button disabled={pending} loading={pending} size="compact" type="submit">
         Adicionar dose
       </Button>
     </form>
@@ -267,9 +304,10 @@ function UpdateVariantForm({
   );
   const [state, formAction, pending] = useActionState(action, initialState);
   usePersistedProtocolRefresh(state);
+  const submitGuard = useProtocolDraftSubmitGuard(state, pending);
 
   return (
-    <form action={formAction} className={styles.inlineEdit}>
+    <form action={formAction} aria-busy={pending} onSubmit={submitGuard} className={styles.inlineEdit}>
       <ActionFeedback state={state} />
       <FormField
         id={`variant-edit-${variantId}`}
@@ -278,6 +316,7 @@ function UpdateVariantForm({
       >
         {(fieldProps) => (
           <TextInput
+            disabled={pending}
             {...fieldProps}
             defaultValue={label ?? ""}
             maxLength={120}
@@ -287,7 +326,7 @@ function UpdateVariantForm({
           />
         )}
       </FormField>
-      <Button loading={pending} size="compact" type="submit" variant="secondary">
+      <Button disabled={pending} loading={pending} size="compact" type="submit" variant="secondary">
         Salvar nome
       </Button>
     </form>
@@ -315,22 +354,23 @@ function RemoveVariantForm({
   const [state, formAction, pending] = useActionState(action, initialState);
   const [confirmRemoval, setConfirmRemoval] = useState(false);
   usePersistedProtocolRefresh(state);
+  const submitGuard = useProtocolDraftSubmitGuard(state, pending, { blockAfterSuccess: true });
 
   return (
-    <form action={formAction} className={styles.inlineAction}>
+    <form action={formAction} aria-busy={pending} onSubmit={submitGuard} className={styles.inlineAction}>
       <ActionFeedback state={state} />
       {!confirmRemoval ? (
-        <Button onClick={() => setConfirmRemoval(true)} size="compact" type="button" variant="danger">
+        <Button disabled={pending || state.success} onClick={() => setConfirmRemoval(true)} size="compact" type="button" variant="danger">
           Remover variação vazia
         </Button>
       ) : (
         <>
           <p className={styles.help}>Confirma remover esta variação do rascunho? Esta ação não altera versões já publicadas.</p>
           <div className={styles.confirmActions}>
-            <Button disabled={pending} onClick={() => setConfirmRemoval(false)} size="compact" type="button" variant="ghost">
+            <Button disabled={pending || state.success} onClick={() => setConfirmRemoval(false)} size="compact" type="button" variant="ghost">
               Cancelar
             </Button>
-            <Button loading={pending} size="compact" type="submit" variant="danger">
+            <Button disabled={pending} loading={pending} size="compact" type="submit" variant="danger">
               Confirmar remoção
             </Button>
           </div>
@@ -362,13 +402,15 @@ function UpdateMealForm({
   );
   const [state, formAction, pending] = useActionState(action, initialState);
   usePersistedProtocolRefresh(state);
+  const submitGuard = useProtocolDraftSubmitGuard(state, pending);
 
   return (
-    <form action={formAction} className={styles.inlineEdit}>
+    <form action={formAction} aria-busy={pending} onSubmit={submitGuard} className={styles.inlineEdit}>
       <ActionFeedback state={state} />
       <FormField id={`meal-edit-${mealId}`} label="Nome da refeição" required>
         {(fieldProps) => (
           <TextInput
+            disabled={pending}
             {...fieldProps}
             defaultValue={label ?? ""}
             maxLength={120}
@@ -378,7 +420,7 @@ function UpdateMealForm({
           />
         )}
       </FormField>
-      <Button loading={pending} size="compact" type="submit" variant="secondary">
+      <Button disabled={pending} loading={pending} size="compact" type="submit" variant="secondary">
         Salvar nome
       </Button>
     </form>
@@ -409,22 +451,23 @@ function RemoveMealForm({
   const [state, formAction, pending] = useActionState(action, initialState);
   const [confirmRemoval, setConfirmRemoval] = useState(false);
   usePersistedProtocolRefresh(state);
+  const submitGuard = useProtocolDraftSubmitGuard(state, pending, { blockAfterSuccess: true });
 
   return (
-    <form action={formAction} className={styles.inlineAction}>
+    <form action={formAction} aria-busy={pending} onSubmit={submitGuard} className={styles.inlineAction}>
       <ActionFeedback state={state} />
       {!confirmRemoval ? (
-        <Button onClick={() => setConfirmRemoval(true)} size="compact" type="button" variant="danger">
+        <Button disabled={pending || state.success} onClick={() => setConfirmRemoval(true)} size="compact" type="button" variant="danger">
           Remover refeição vazia
         </Button>
       ) : (
         <>
           <p className={styles.help}>Confirma remover esta refeição do rascunho? Esta ação não altera versões já publicadas.</p>
           <div className={styles.confirmActions}>
-            <Button disabled={pending} onClick={() => setConfirmRemoval(false)} size="compact" type="button" variant="ghost">
+            <Button disabled={pending || state.success} onClick={() => setConfirmRemoval(false)} size="compact" type="button" variant="ghost">
               Cancelar
             </Button>
-            <Button loading={pending} size="compact" type="submit" variant="danger">
+            <Button disabled={pending} loading={pending} size="compact" type="submit" variant="danger">
               Confirmar remoção
             </Button>
           </div>
@@ -470,6 +513,9 @@ function DoseRow({
   const [confirmDoseRemoval, setConfirmDoseRemoval] = useState(false);
   usePersistedProtocolRefresh(updateState);
   usePersistedProtocolRefresh(removeState);
+  const doseMutationLock = useRef(false);
+  const updateSubmitGuard = useProtocolDraftSubmitGuard(updateState, updatePending, { sharedLock: doseMutationLock });
+  const removeSubmitGuard = useProtocolDraftSubmitGuard(removeState, removePending, { blockAfterSuccess: true, sharedLock: doseMutationLock });
 
   const label =
     dose.doseType === "protein"
@@ -485,7 +531,7 @@ function DoseRow({
       <div className={styles.doseIdentity}>
         <strong>{label}</strong>
       </div>
-      <form action={updateFormAction} className={styles.doseEdit}>
+      <form action={updateFormAction} aria-busy={updatePending || removePending} onSubmit={updateSubmitGuard} className={styles.doseEdit}>
         <ActionFeedback state={updateState} />
         <FormField
           id={`dose-edit-${dose.id}`}
@@ -495,6 +541,7 @@ function DoseRow({
         >
           {(fieldProps) => (
             <TextInput
+              disabled={updatePending || removePending}
               {...fieldProps}
               defaultValue={String(dose.doseQuantity)}
               inputMode="decimal"
@@ -508,6 +555,7 @@ function DoseRow({
           )}
         </FormField>
         <Button
+          disabled={updatePending || removePending}
           loading={updatePending}
           size="compact"
           type="submit"
@@ -516,20 +564,20 @@ function DoseRow({
           Salvar dose
         </Button>
       </form>
-      <form action={removeFormAction} className={styles.inlineAction}>
+      <form action={removeFormAction} aria-busy={updatePending || removePending} onSubmit={removeSubmitGuard} className={styles.inlineAction}>
         <ActionFeedback state={removeState} />
         {!confirmDoseRemoval ? (
-          <Button onClick={() => setConfirmDoseRemoval(true)} size="compact" type="button" variant="danger">
+          <Button disabled={updatePending || removePending || removeState.success} onClick={() => setConfirmDoseRemoval(true)} size="compact" type="button" variant="danger">
             Remover dose
           </Button>
         ) : (
           <>
             <p className={styles.help}>Confirma remover esta dose do rascunho?</p>
             <div className={styles.confirmActions}>
-              <Button disabled={removePending} onClick={() => setConfirmDoseRemoval(false)} size="compact" type="button" variant="ghost">
+              <Button disabled={updatePending || removePending || removeState.success} onClick={() => setConfirmDoseRemoval(false)} size="compact" type="button" variant="ghost">
                 Cancelar
               </Button>
-              <Button loading={removePending} size="compact" type="submit" variant="danger">
+              <Button disabled={updatePending || removePending || removeState.success} loading={removePending} size="compact" type="submit" variant="danger">
                 Confirmar remoção
               </Button>
             </div>
