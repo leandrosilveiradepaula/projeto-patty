@@ -18,7 +18,8 @@ test("password recovery refuses to request a token without a configured trusted 
 
 test("password recovery validates email length and type", () => {
   assert.match(recovery, /validateInvitationEmail\(email\)\.ok/);
-  assert.match(recovery, /rawEmail !== null && typeof rawEmail !== "string"/);
+  assert.match(recovery, /readSingleStringFormValue\(formData,"email"\)/);
+  assert.match(validation, /entries.length === 1 && typeof entries\[0\] === "string"/);
 });
 
 test("new invitations reject excessively long authentication email addresses", () => {
