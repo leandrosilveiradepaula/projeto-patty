@@ -1,3 +1,4 @@
+import { readCheckinExploreOptions, exploreLiquidCheckins, exploreActivityCheckins, checkinExploreHref } from "@/lib/checkins/history-explorer";
 import { groupCheckinCorrectionHistory, checkinCorrectionAuthor, formatCheckinAuditDate } from "@/lib/checkins/correction-audit";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
@@ -30,7 +31,7 @@ import styles from "./page.module.css";
 
 type PageProps = {
   params: Promise<{ clienteId: string }>;
-  searchParams: Promise<{ status?: string; dia?: string }>;
+  searchParams: Promise<{ status?: string; dia?: string; ordem?: string; correcao?: string; tipo?: string; atividade?: string; atividadeCorrecao?: string; lp?: string; ap?: string }>;
 };
 
 function formatMl(value: number) {
@@ -53,7 +54,9 @@ export default async function AdminClientCheckinsPage({
   searchParams,
 }: PageProps) {
   const { clienteId } = await params;
-  const { status, dia } = await searchParams;
+  const query = await searchParams;
+  const { status, dia } = query;
+  const explorer = readCheckinExploreOptions(query);
   const client = await getAccessibleClient(clienteId);
 
   if (!client) {
@@ -90,6 +93,18 @@ export default async function AdminClientCheckinsPage({
   const latestLiquidCorrectionByEvent = latestCheckinCorrectionsByEvent(liquidCorrections);
   const latestActivityCorrectionByEvent = latestCheckinCorrectionsByEvent(activityCorrections);
 
+  const effectiveLiquidEvents = recentLiquidEvents.map(event => ({
+    ...event, effectiveAmountMl:latestLiquidCorrectionByEvent.get(event.id)?.corrected_amount_ml ?? event.amount_ml,
+    effectiveLiquidKind:latestLiquidCorrectionByEvent.get(event.id)?.corrected_liquid_kind ?? event.liquid_kind,
+    wasCorrected:latestLiquidCorrectionByEvent.has(event.id),
+  }));
+  const exploredLiquids = exploreLiquidCheckins(effectiveLiquidEvents,explorer);
+  const exploredActivities = exploreActivityCheckins(recentActivityEvents.map(event => ({
+    ...event, didActivityEffective:latestActivityCorrectionByEvent.get(event.id)?.corrected_did_activity ?? event.did_activity,
+    wasCorrected:latestActivityCorrectionByEvent.has(event.id),
+  })),explorer);
+  const base = `/admin/clientes/${client.id}/checkins`;
+  const exploreQuery = {dia:selectedDay ?? undefined, ordem:explorer.liquidSort, correcao:explorer.liquidCorrection, tipo:explorer.liquidKind, atividade:explorer.activityFilter, atividadeCorrecao:explorer.activityCorrection, lp:String(explorer.liquidPage), ap:String(explorer.activityPage)};
   return (
     <>
       <ClientWorkspaceHeader
@@ -147,6 +162,7 @@ export default async function AdminClientCheckinsPage({
 
       <Section
         description={selectedRange ? "Registros do dia selecionado. Cada item mostra o valor vigente e preserva o original quando corrigido." : "Até 30 registros recentes de ingestão. Cada item mostra o valor vigente e preserva o original quando corrigido."}
+        id="historico-liquidos"
         title="Líquidos recentes"
       >
         <form action={`/admin/clientes/${client.id}/checkins`} className={styles.form} method="get">
@@ -161,11 +177,20 @@ export default async function AdminClientCheckinsPage({
             Nenhuma categoria ativa está disponível para correção neste momento; os registros históricos continuam visíveis.
           </Alert>
         ) : null}
-        {recentLiquidEvents.length === 0 ? (
+        <form action={base+"#historico-liquidos"} className={styles.form} method="get">
+          {selectedDay ? <input name="dia" type="hidden" value={selectedDay} /> : null}
+          <label className={styles.field}>Ordem<select name="ordem" defaultValue={explorer.liquidSort}><option value="newest">Mais recentes</option><option value="oldest">Mais antigos</option><option value="amount-desc">Maior volume</option></select></label>
+          <label className={styles.field}>Correção<select name="correcao" defaultValue={explorer.liquidCorrection}><option value="all">Todas</option><option value="corrected">Corrigidas</option><option value="original">Sem correção</option></select></label>
+          <label className={styles.field}>Tipo<select name="tipo" defaultValue={explorer.liquidKind}><option value="all">Todos</option>{Array.from(new Set(effectiveLiquidEvents.map(e=>e.effectiveLiquidKind))).map(kind=><option value={kind} key={kind}>{liquidLabelsByKey.get(kind) ?? "Tipo histórico"}</option>)}</select></label>
+          <Button type="submit" variant="secondary">Filtrar</Button>
+          <Link href={checkinExploreHref(base,{dia:selectedDay ?? undefined},{})+"#historico-liquidos"}>Limpar filtros</Link>
+        </form>
+        <p className={styles.description}>{exploredLiquids.total} registro(s) encontrado(s).</p>
+        {exploredLiquids.total === 0 ? (
           <p className={styles.description}>Ainda não existem registros de líquidos desta cliente para consultar ou corrigir.</p>
         ) : (
           <ol className={styles.list}>
-            {recentLiquidEvents.map((event) => {
+            {exploredLiquids.items.map((event) => {
               const correction = latestLiquidCorrectionByEvent.get(event.id);
               const effectiveAmount = correction?.corrected_amount_ml ?? event.amount_ml;
               const effectiveKind = correction?.corrected_liquid_kind ?? event.liquid_kind;
@@ -237,17 +262,26 @@ export default async function AdminClientCheckinsPage({
             })}
           </ol>
         )}
+        {exploredLiquids.pages > 1 ? <nav aria-label="Páginas de líquidos" className={styles.form}>{exploredLiquids.page > 1 ? <Link href={checkinExploreHref(base,exploreQuery,{lp:String(exploredLiquids.page-1)})+"#historico-liquidos"}>Anterior</Link> : null}<span>Página {exploredLiquids.page} de {exploredLiquids.pages}</span>{exploredLiquids.page < exploredLiquids.pages ? <Link href={checkinExploreHref(base,exploreQuery,{lp:String(exploredLiquids.page+1)})+"#historico-liquidos"}>Próxima</Link> : null}</nav> : null}
       </Section>
 
       <Section
         description={selectedDay ? "Respostas registradas para o dia selecionado. Correções preservam o original." : "Até 30 registros recentes de atividade. A data do check-in pode ser diferente da data em que a resposta foi registrada; correções preservam o original."}
+        id="historico-atividade"
         title={selectedDay ? `Atividade física em ${selectedDay}` : "Atividade física recente"}
       >
-        {recentActivityEvents.length === 0 ? (
+        <form action={base+"#historico-atividade"} className={styles.form} method="get">
+          {selectedDay ? <input name="dia" type="hidden" value={selectedDay} /> : null}
+          <label className={styles.field}>Resposta<select name="atividade" defaultValue={explorer.activityFilter}><option value="all">Todas</option><option value="yes">Sim</option><option value="no">Não</option></select></label>
+          <label className={styles.field}>Correções<select name="atividadeCorrecao" defaultValue={explorer.activityCorrection}><option value="all">Todas</option><option value="corrected">Corrigidas</option><option value="original">Sem correção</option></select></label>
+          <Button type="submit" variant="secondary">Filtrar atividade</Button>
+        </form>
+        <p className={styles.description}>{exploredActivities.total} resposta(s) encontrada(s).</p>
+        {exploredActivities.total === 0 ? (
           <p className={styles.description}>Ainda não existem check-ins de atividade desta cliente para consultar ou corrigir.</p>
         ) : (
           <ol className={styles.list}>
-            {recentActivityEvents.map((event) => {
+            {exploredActivities.items.map((event) => {
               const correction = latestActivityCorrectionByEvent.get(event.id);
               const effectiveDidActivity =
                 correction?.corrected_did_activity ?? event.did_activity;
@@ -314,6 +348,7 @@ export default async function AdminClientCheckinsPage({
             })}
           </ol>
         )}
+        {exploredActivities.pages > 1 ? <nav aria-label="Páginas de atividade" className={styles.form}>{exploredActivities.page > 1 ? <Link href={checkinExploreHref(base,exploreQuery,{ap:String(exploredActivities.page-1)})+"#historico-atividade"}>Anterior</Link> : null}<span>Página {exploredActivities.page} de {exploredActivities.pages}</span>{exploredActivities.page < exploredActivities.pages ? <Link href={checkinExploreHref(base,exploreQuery,{ap:String(exploredActivities.page+1)})+"#historico-atividade"}>Próxima</Link> : null}</nav> : null}
       </Section>
     </>
   );
