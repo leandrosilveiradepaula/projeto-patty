@@ -9,7 +9,8 @@ const actions = read("app/admin/conteudos/[contentId]/actions.ts");
 const forms = read("components/admin/AdminEducationalContentVersionForms.tsx");
 
 test("professional historical lookup selects the exact authorized version and its assets", () => {
-  assert.match(detail, /searchParams: Promise<\{ versao\?: string \}>/);
+  assert.match(detail, /searchParams: Promise<\{ versao\?: string;/);
+  assert.match(detail, /readContentVersionFilter\(raw\)/);
   assert.match(detail, /versions\.find\(\(version\) => version\.id === versao\) \?\? current/);
   assert.match(detail, /listEducationalContentAssetsForCurrentAdmin\(inspected\.id\)/);
   assert.match(detail, /visibleAssets\.map\(\(asset\)/);
