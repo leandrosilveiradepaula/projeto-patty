@@ -197,10 +197,14 @@ export async function updateTrainingPlanDraftAction(
 
     const title = requiredText(formData, "title", 160, "Título");
     const notes = optionalText(formData, "notes", 4000, "Observações");
+    const expectedTitle = requiredText(formData, "expectedTitle", 160, "Título original");
+    const expectedNotes = optionalText(formData, "expectedNotes", 4000, "Observações originais");
 
     await updateAccessibleClientTrainingPlanDraft({
       notes,
       title,
+      expectedTitle,
+      expectedNotes,
       trainingPlanVersionId: version.id,
     });
 
@@ -390,10 +394,16 @@ export async function updateTrainingPlanItemAction(
     const restText = optionalText(formData, "restText", 120, "Tempo de descanso");
     const setsText = requiredText(formData, "setsText", 80, "Séries");
 
+    const expectedExerciseName = requiredText(formData, "expectedExerciseName", 200, "Exercício original");
+    const expectedSetsText = requiredText(formData, "expectedSetsText", 80, "Séries originais");
+    const expectedRepetitionsText = requiredText(formData, "expectedRepetitionsText", 80, "Repetições originais");
     await updateAccessibleClientTrainingPlanItem({
       executionNotes,
       exerciseName,
       exerciseVersionId,
+      expectedExerciseName,
+      expectedSetsText,
+      expectedRepetitionsText,
       itemId: existing.id,
       position: existing.position,
       repetitionsText,
