@@ -212,9 +212,9 @@ export default async function AdminClientCheckinsPage({
                       </CheckinActionForm>
 {(liquidHistory.get(event.id)?.length ?? 0) > 0 ? (
   <details className={styles.correction}>
-    <summary>Histórico de correções (liquidHistory.get(event.id)?.length})</summary>
+    <summary>Histórico de correções ({liquidHistory.get(event.id)?.length})</summary>
     <ol className={styles.auditHistory}>
-      <li>Original · formatDate(event.recorded_at)} · formatMl(event.amount_ml)} · {checkinCorrectionAuthor(event.recorded_by_profile_id, client.profile_id)}</li>
+      <li>Original · {formatCheckinAuditDate(event.recorded_at)} · {formatMl(event.amount_ml)} · {checkinCorrectionAuthor(event.recorded_by_profile_id, client.profile_id)}</li>
       {liquidHistory.get(event.id)?.map((item) => (
         <li key={item.id}>
           Correção · {formatCheckinAuditDate(item.created_at)} · {formatMl(item.corrected_amount_ml)}
@@ -275,7 +275,7 @@ export default async function AdminClientCheckinsPage({
       ))}
     </ol>
   </details>
-) : null
+) : null}
                     {correction ? (
                       <p className={styles.description}>
                         Original: {event.did_activity ? "Sim" : "Não"} em {event.checkin_date}.
