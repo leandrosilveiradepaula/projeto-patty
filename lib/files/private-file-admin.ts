@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createAdminClient } from "@/lib/supabase/admin";
+import { collectPrivateFilePages, orderPrivateFileHistory } from "@/lib/files/private-file-pagination";
 import { classifyPrivateFileReleasePostcondition } from "@/lib/files/private-file-release-postcondition";
 import type { PrivateFileKind } from "@/lib/validation/private-files";
 
@@ -8,16 +9,14 @@ const PRIVATE_FILE_BUCKET = "client-private";
 
 export async function listClientsForPrivateFileAdministration() {
   const admin = createAdminClient();
-  const { data, error } = await admin
+  // Only the dedicated administrative workspace calls this privileged read.
+  const rows = await collectPrivateFilePages((from, to) => admin
     .from("clients")
     .select("id, profile_id, full_name, created_at, profiles(display_name)")
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: true })
+    .range(from, to));
+  return orderPrivateFileHistory(rows);
 }
 
 export async function getClientForPrivateFileAdministration(clientId: string) {
