@@ -3916,3 +3916,8 @@ A Patty pode consultar o histórico completo de versões individuais autorizadas
 ## Navegação factual de refeições e ciclos publicados — 2026-10-11
 
 Na consulta de protocolo da cliente, cada refeição publicada e cada ciclo possuem âncora vinculada à publicação exata. A pesquisa de refeições pode apontar diretamente para cada refeição pelo título/variação, com normalização de acentos, e a lista de ciclos permite saltar para o ciclo registrado. Não atribui automaticamente um dia, variação, ciclo ou meta; não altera plano, doses, regras clínicas, publicação, RLS nem dados históricos. E2E autenticado não foi executado.
+
+
+## Diretório profissional de protocolos — estados operacionais — 2026-10-11
+
+A Patty pode filtrar o catálogo de protocolos por estado factual da versão mais recente (sem versão, rascunho, submetido à revisão, aprovado sem publicação, publicado), por existência de publicação anterior com versão mais recente pendente, por tipo e ordenar resultados. A página exibe contagens globais do conjunto autorizado, número da versão e publicação cronológica efetiva, com navegação paginada. A classificação não infere decisão profissional, não aprova nem publica; cada sinal deriva de evento persistido consultável sob RLS. Uma versão submetida não equivale a aprovada; aprovada não equivale a publicada. Nenhuma migration e nenhuma alteração de RLS. Testes automatizados não substituem validação E2E autenticada.
