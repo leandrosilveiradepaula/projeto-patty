@@ -3921,3 +3921,8 @@ Na consulta de protocolo da cliente, cada refeição publicada e cada ciclo poss
 ## Diretório profissional de protocolos — estados operacionais — 2026-10-11
 
 A Patty pode filtrar o catálogo de protocolos por estado factual da versão mais recente (sem versão, rascunho, submetido à revisão, aprovado sem publicação, publicado), por existência de publicação anterior com versão mais recente pendente, por tipo e ordenar resultados. A página exibe contagens globais do conjunto autorizado, número da versão e publicação cronológica efetiva, com navegação paginada. A classificação não infere decisão profissional, não aprova nem publica; cada sinal deriva de evento persistido consultável sob RLS. Uma versão submetida não equivale a aprovada; aprovada não equivale a publicada. Nenhuma migration e nenhuma alteração de RLS. Testes automatizados não substituem validação E2E autenticada.
+
+
+## Área de protocolos da cliente para a Patty — ciclo de aprovação explícito (2026-10-11)
+
+No workspace profissional de uma cliente, cada protocolo mostra a situação factual da última versão, número total de versões, existência e data da última publicação e diferença entre rascunho atual e plano liberado. Há links distintos para última versão de trabalho, última publicação e histórico completo, sempre resolvidos sobre registros já acessíveis por RLS. Criar versão inicial e recuperar protocolo sem versões seguem ações humanas existentes. Sem aprovar/publicar automaticamente, sem alterar schema, RLS, regras clínicas ou snapshots; E2E autenticado e conferência visual com dados sintéticos seguem pendentes.
