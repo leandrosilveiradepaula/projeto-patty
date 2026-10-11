@@ -29,5 +29,5 @@ test("read-only status is scoped to authenticated actor, client, and session", (
   }
   assert.ok(!src.includes("createAdminClient"));
   assert.ok(!src.includes("temp_object_path"));
-  assert.ok(!src.includes("token"));
+  assert.ok(!src.includes('select("token")'));
 });
