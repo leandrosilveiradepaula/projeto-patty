@@ -49,10 +49,10 @@ test("cycle absent is optional and unreferenced is not a validation blocker",()=
   assert.equal(ready.unreferencedVariantCount,0);
 });
 test("repeated labels remain individually addressable; name repetition is information only",()=>{
-  const plan={variants:[one.variants[0],{...one.variants[0],id:"v3",meals:[one.variants[0].meals[0]]}],cycles:[]};
+  const plan={variants:[{...one.variants[0],meals:[one.variants[0].meals[0]]},{...one.variants[0],id:"v3",meals:[one.variants[0].meals[0]]}],cycles:[]};
   const result=buildProtocolDraftNavigation(plan);
   assert.equal(result.repeatedNameCount,1);
-  assert.notEqual(result.directory[0].href,result.directory[3].href);
+  assert.notEqual(result.directory[0].href,result.directory[2].href);
   assert.equal(result.ready,true);
 });
 test("broken target flagged factually without inventing a protocol rule",()=>{
