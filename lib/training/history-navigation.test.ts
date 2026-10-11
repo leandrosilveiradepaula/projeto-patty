@@ -3,7 +3,7 @@ import test from "node:test";
 import {
   parseTrainingRequestFilters, trainingRequestFactualOrigin, exploreTrainingRequests,
   trainingRequestFilteredHref, trainingRequestExactHref, trainingVersionExactHref,
-  trainingVersionPageHref, paginateTrainingVersions, selectPublishedTrainingComparison, trainingVersionComparisonHref, clientTrainingRequestExactHref, parseTrainingVersionFilters, exploreTrainingVersionHistory, parseClientTrainingArchiveFilters, exploreClientTrainingArchive, trainingAdminVersionHref, trainingClientArchivedVersionHref,
+  trainingVersionPageHref, paginateTrainingVersions, selectPublishedTrainingComparison, trainingVersionComparisonHref, clientTrainingRequestExactHref, parseTrainingVersionFilters, exploreTrainingVersionHistory, parseClientTrainingArchiveFilters, exploreClientTrainingArchive, trainingAdminVersionHref, trainingClientArchivedVersionHref, trainingClientArchiveHref, trainingRequestFilteredHref, parseTrainingVersionFilters, parseClientTrainingArchiveFilters,
 } from "./history-navigation.ts";
 
 const rows = [
@@ -109,4 +109,18 @@ test("client archive links reach the correct page without exposing drafts",()=>{
  const previous=Array.from({length:15},(_,i)=>({version:{id:"p"+i,title:"Treino "+i,version_number:15-i,published_at:"2026-10-11T00:00:00Z"}}));
  assert.equal(trainingClientArchivedVersionHref("/cliente/treino",previous,"p13"),"/cliente/treino?versoes=3#treino-versao-p13");
  assert.equal(trainingClientArchivedVersionHref("/cliente/treino",previous,"missing"),null);
+});
+
+test("request navigation preserves the independent archive controls",()=>{
+ const f=parseTrainingRequestFilters({origem:"client"});
+ const professional=parseTrainingVersionFilters({buscaVersao:"Completo",estadoVersao:"published",ordemVersao:"title"});
+ const client=parseClientTrainingArchiveFilters({buscaTreino:"Treino",ordemTreino:"oldest"});
+ const admin=trainingRequestFilteredHref("/admin/test/treino",f,2,"historico-solicitacoes-treino",3,{professional});
+ assert.match(admin,/buscaVersao=Completo/);assert.match(admin,/estadoVersao=published/);assert.match(admin,/versoes=3/);
+ const user=trainingRequestFilteredHref("/cliente/treino",f,2,"solicitacoes-anteriores",2,{client,comparisonId:"published-id"});
+ assert.match(user,/buscaTreino=Treino/);assert.match(user,/ordemTreino=oldest/);assert.match(user,/comparar=published-id/);
+});
+test("archive page change retains request filter state and verified comparison",()=>{
+ const link=trainingClientArchiveHref("/cliente/treino",parseClientTrainingArchiveFilters({buscaTreino:"a"}),3,parseTrainingRequestFilters({origem:"professional",pedidos:"2"}),"publication");
+ assert.match(link,/origem=professional/);assert.match(link,/pedidos=2/);assert.match(link,/versoes=3/);assert.match(link,/comparar=publication/);
 });
