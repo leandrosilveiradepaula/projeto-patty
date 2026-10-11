@@ -24,10 +24,10 @@ test("private upload prevents duplicate grants and duplicate binary PUTs", () =>
   assert.ok(upload.includes("const uploadInFlightRef = useRef(false)"));
   assert.ok(upload.includes("uploadInFlightRef.current = true"));
   assert.ok(upload.includes("uploadInFlightRef.current = false"));
-  assert.ok(upload.includes("uploadInFlightRef.current || registerInFlightRef.current || uploaded"));
+  assert.ok(upload.includes("uploadInFlightRef.current || registerInFlightRef.current || inspectInFlightRef.current || uploaded"));
   assert.ok(upload.includes("uploaded !== null"));
-  assert.ok(upload.includes("aria-busy={busy || registerBusy}"));
-  assert.ok(upload.includes('disabled={busy || registerBusy}'));
+  assert.ok(upload.includes("aria-busy={busy || registerBusy || inspectionBusy}"));
+  assert.ok(upload.includes('disabled={busy || registerBusy || inspectionBusy || registrationUncertain}'));
 });
 
 test("private upload never claims registration, publication or release merely after PUT success", () => {

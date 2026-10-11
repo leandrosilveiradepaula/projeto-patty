@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { createPrivateBlobUploadUrl } from "@/lib/content/private-blob-upload-url";
 import { requireRole } from "@/lib/supabase/auth";
 import {
@@ -102,7 +103,7 @@ export async function POST(
   }
 
   const pathname =
-    `educational-${contentId}-${body.versionId}-primary.${extension}`;
+    `educational/${randomUUID()}.${extension}`;
 
   try {
     const upload = await createPrivateBlobUploadUrl({
