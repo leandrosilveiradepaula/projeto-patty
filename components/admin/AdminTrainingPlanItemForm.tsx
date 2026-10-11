@@ -14,8 +14,7 @@ import { FormField } from "@/components/ui/FormField";
 import { TextInput } from "@/components/ui/TextInput";
 import { Textarea } from "@/components/ui/Textarea";
 
-import { filterPublishedExerciseOptions, readExerciseSelectionQuery, selectedExerciseOption } from "@/lib/training/exercise-selection";
-import { isHistoricalExerciseSelectionUnavailable } from "@/lib/training/exercise-selection";
+import { filterPublishedExerciseOptions, readExerciseSelectionQuery, selectedExerciseOption, isHistoricalExerciseSelectionUnavailable } from "@/lib/training/exercise-selection";
 
 import styles from "./AdminTrainingPlanForms.module.css";
 
@@ -170,7 +169,6 @@ export function AdminTrainingPlanItemForm({
             </option>
           ))}
         </select>
-        {filteredOptions.length>25?<Button type="button" variant="secondary" disabled={isPending} onClick={()=>setShowAll(v=>!v)}>{showAll?"Mostrar primeiras 25":"Mostrar todas as versões encontradas"}</Button>:null}
         <small>
           {missingHistoricalVersion
             ? "Esta versão vinculada não está disponível no catálogo. A referência original foi preservada; selecione explicitamente outra versão publicada ou nome manual antes de salvar."
@@ -179,6 +177,7 @@ export function AdminTrainingPlanItemForm({
             : "Sem versão selecionada: informe o nome manual abaixo para a prescrição."}
         </small>
       </label>
+      {filteredOptions.length>25?<Button type="button" variant="secondary" disabled={isPending} onClick={()=>setShowAll(v=>!v)}>{showAll?"Mostrar primeiras 25":"Mostrar todas as versões encontradas"}</Button>:null}
 
       <FormField
         description="Obrigatório somente quando nenhum exercício da biblioteca for selecionado."
