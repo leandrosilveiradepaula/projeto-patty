@@ -133,11 +133,11 @@ export function parseWeeklyFeedbackWholeNumber(raw: string): number | null {
  * safely be used for field-level guidance without logging sensitive answers.
  */
 export class WeeklyFeedbackFieldValidationError extends Error {
-  constructor(
-    public readonly questionKey: string,
-    message: string,
-  ) {
+  readonly questionKey: string;
+
+  constructor(questionKey: string, message: string) {
     super(message);
+    this.questionKey = questionKey;
     this.name = "WeeklyFeedbackFieldValidationError";
   }
 }
