@@ -33,7 +33,6 @@ export function PasswordResetForm() {
           <TextInput
             {...fieldProps}
             autoComplete="new-password"
-            disabled={isPending}
             minLength={8}
             maxLength={128}
             name="password"
