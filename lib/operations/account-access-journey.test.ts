@@ -36,8 +36,6 @@ test("both invite and recovery fragments handle rejected session promises", () =
 test("access forms have native field validation and block inputs while saving", () => {
   for (const path of [
     "components/auth/LoginForm.tsx",
-    "components/auth/ClientActivationPasswordForm.tsx",
-    "components/auth/PasswordResetForm.tsx",
     "components/auth/PasswordRecoveryRequestForm.tsx",
   ]) {
     const source = read(path);
@@ -56,10 +54,15 @@ test("input lengths match server validation and recovery never promises delivery
   const recovery = read("components/auth/PasswordRecoveryRequestForm.tsx");
   assert.match(login, /maxLength=\{254\}/);
   assert.match(login, /maxLength=\{128\}/);
-  for (const source of [activation, reset]) {
-    assert.equal(source.match(/maxLength=\{128\}/g)?.length, 2);
-    assert.equal(source.match(/minLength=\{8\}/g)?.length, 2);
-  }
+  const shared = read("components/auth/AccessPasswordForm.tsx");
+  assert.match(activation, /<AccessPasswordForm/);
+  assert.match(reset, /<AccessPasswordForm/);
+  assert.equal(shared.match(/maxLength=\{128\}/g)?.length, 2);
+  assert.equal(shared.match(/minLength=\{8\}/g)?.length, 2);
+  assert.match(shared, /aria-busy=\{pending\}/);
+  assert.match(shared, /disabled=\{pending\}/);
+  assert.match(shared, /<Button type="submit" loading=\{pending\}/);
+  assert.doesNotMatch(shared, /noValidate/);
   assert.match(recovery, /maxLength=\{254\}/);
   assert.match(recovery, /title="Solicitação recebida"/);
   assert.match(recovery, /<a className=\{styles.retryLink\} href="\/recuperar-senha">/);
