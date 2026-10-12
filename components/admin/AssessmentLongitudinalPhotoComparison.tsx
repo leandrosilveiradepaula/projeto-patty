@@ -74,7 +74,7 @@ export function AssessmentLongitudinalPhotoComparison<T extends AssessmentPhotoC
             <img src={`/admin/fotos/${file.id}`} alt={label + " selecionada para comparação manual"} loading="lazy" referrerPolicy="no-referrer" />
           </figure>)}
         </div> : null}
-      </>}
+      </> : null}
     </>}
     <Link href={`/admin/clientes/${clientId}/arquivos`} className={styles.link}>Abrir arquivos privados da cliente</Link>
   </div>;
