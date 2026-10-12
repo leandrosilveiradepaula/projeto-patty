@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/supabase/auth";
 import {
   createAccessibleClientTrainingPlanDraft,
+  copyAccessiblePublishedTrainingPlanItems,
   createAccessibleClientTrainingPlanItem,
   deleteAccessibleClientTrainingPlanItem,
   getAccessibleClient,
@@ -656,5 +657,55 @@ export async function copyPublishedTrainingItemAction(
     return { message: "Exercício copiado para o rascunho. Revise os dados antes de publicar.", success: true };
   } catch {
     return initialError("Não foi possível copiar o exercício. Atualize a página e tente novamente.");
+  }
+}
+
+/** Explicit human operation; copies a full published item set in one insert statement. */
+export async function copyPublishedTrainingVersionItemsAction(
+  clientId: string,
+  draftVersionId: string,
+  sourceVersionId: string,
+  _state: TrainingPlanFormState,
+  formData: FormData,
+): Promise<TrainingPlanFormState> {
+  try {
+    const { client, plan, version: draft } = await requireAccessibleTrainingVersion(clientId, draftVersionId);
+    if (draft.reviewed_at || draft.published_at) return initialError("O treino atual não está editável.");
+    if (!isUuid(sourceVersionId) || sourceVersionId === draft.id) return initialError("Versão de origem inválida.");
+    if (formData.getAll("confirmCopyAll").length !== 1 || formData.get("confirmCopyAll") !== "yes") {
+      return initialError("Confirme que deseja copiar os itens da versão publicada.");
+    }
+    const versions = await listAccessibleClientTrainingPlanVersions(plan.id);
+    const origin = versions.find((version) => version.id === sourceVersionId && version.published_at !== null);
+    if (!origin) return initialError("Publicação de origem indisponível.");
+    const [sourceItems, currentItems] = await Promise.all([
+      listAccessibleClientTrainingPlanItems(origin.id),
+      listAccessibleClientTrainingPlanItems(draft.id),
+    ]);
+    if (currentItems.length !== 0) return initialError("O rascunho já contém exercícios. Use a cópia individual para evitar duplicações.");
+    if (sourceItems.length === 0) return initialError("A versão publicada não tem exercícios a copiar.");
+    if (sourceItems.length > 500) return initialError("Quantidade de exercícios excede o limite operacional. Faça cópias individuais.");
+    const exerciseVersions = await listExerciseVersionsVisibleToCurrentAdmin();
+    const publishedIds = new Set(exerciseVersions.filter((exercise) => exercise.published_at !== null).map((exercise) => exercise.id));
+    if (sourceItems.some((item) => item.exercise_version_id && !publishedIds.has(item.exercise_version_id))) {
+      return initialError("Há referências de biblioteca sem versão publicada disponível. Faça a seleção manual antes de copiar.");
+    }
+    const ordered = [...sourceItems].sort((a,b) => a.position - b.position || a.id.localeCompare(b.id));
+    await copyAccessiblePublishedTrainingPlanItems({
+      trainingPlanVersionId: draft.id,
+      items: ordered.map((item, index) => ({
+        position: index + 1,
+        exerciseVersionId: item.exercise_version_id,
+        exerciseName: item.exercise_name,
+        setsText: item.sets_text,
+        repetitionsText: item.repetitions_text,
+        restText: item.rest_text,
+        executionNotes: item.execution_notes,
+      })),
+    });
+    revalidateTraining(client.id);
+    return { message: "Itens copiados. Revise cada exercício antes da revisão e publicação do treino.", success: true };
+  } catch {
+    return initialError("Não foi possível copiar os itens. Nada deve ser considerado publicado; confira o rascunho antes de tentar novamente.");
   }
 }
