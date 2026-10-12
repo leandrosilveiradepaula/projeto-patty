@@ -22,6 +22,11 @@ const areas = [
     title: "Check-ins",
   },
   {
+    description: "Consulte lembretes realmente entregues dentro do aplicativo e abra seus feedbacks pendentes.",
+    href: "/cliente/avisos",
+    title: "Meus avisos",
+  },
+  {
     description: "Responda ou continue o formulário semanal solicitado pela Patty.",
     href: "/cliente/feedback-semanal",
     title: "Feedback semanal",

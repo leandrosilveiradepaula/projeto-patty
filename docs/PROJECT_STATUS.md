@@ -1,3 +1,7 @@
+## Central de avisos dentro do aplicativo (2026-10-12)
+
+A cliente agora dispõe da área autenticada `/cliente/avisos` para consultar os eventos de lembrete de Feedback Semanal efetivamente entregues no canal `in_app`, sempre associados a solicitação da própria cliente já visível sob RLS. A central informa período e instante registrado, distingue solicitação respondida de pendente sem alegar leitura automática e leva diretamente ao feedback pendente; mensagens email/WhatsApp bloqueadas ou enfileiradas não aparecem como avisos entregues. O acesso foi integrado à navegação "Mais" e ao alerta do painel inicial. Não se criou nova entrega, cron, política, migration, pontuação de adesão nem transmissão de respostas. E2E autenticado real pendente.
+
 ## Arquivos privados — navegação direta entre páginas (2026-10-12)
 
 O diretório da Patty permite acesso direto às páginas próximas e às extremidades sem precisar percorrer todas as páginas sequencialmente. Estados vazios de filtros combinados indicam todos os critérios, não apenas a busca textual. O conjunto consultado e as autorizações permanecem iguais; sem alteração de Auth/RLS, migration, liberação ou persistência. E2E autenticado pendente.

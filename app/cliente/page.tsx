@@ -19,6 +19,7 @@ import Link from "next/link";
 import { latestPublishedTrainingVersion } from "@/lib/training/published-versions";
 import { loadClientClarificationSummary } from "@/lib/follow-up/client-clarification-summary-loader";
 import { firstPendingClientWeeklyFeedback } from "@/lib/follow-up/client-weekly-feedback-order";
+import { clientInAppFeedbackNotices } from "@/lib/notifications/client-in-app-inbox";
 import styles from "./page.module.css";
 
 function saoPauloDate(value: Date | string) {
@@ -88,13 +89,9 @@ export default async function ClientePage() {
       .filter((feedback) => !feedback.submitted_at)
       .map((feedback) => feedback.id),
   );
-  const hasDeliveredWeeklyFeedbackReminder = weeklyFeedbackNotificationEvents.some(
-    (event) =>
-      event.event_key.startsWith("weekly_feedback_reminder:") &&
-      event.channel_key === "in_app" &&
-      event.delivery_state === "delivered" &&
-      pendingWeeklyFeedbackIds.has(event.weekly_feedback_id),
-  );
+  const hasDeliveredWeeklyFeedbackReminder = clientInAppFeedbackNotices(
+    weeklyFeedbackNotificationEvents, weeklyFeedbacks, client.id,
+  ).some(notice => notice.status === "pending");
   const hasActivityCheckinToday = activityEvents.length > 0;
   const hasPendingDailyCheckin = !hasActivityCheckinToday;
   const dailyCheckinDescription =
@@ -275,7 +272,7 @@ export default async function ClientePage() {
       {hasDeliveredWeeklyFeedbackReminder &&
       pendingFeedbackHref && primaryAction.href !== pendingFeedbackHref ? (
         <Alert
-          action={<Link href={pendingFeedbackHref}>Responder agora</Link>}
+          action={<Link href="/cliente/avisos">Ver meus avisos</Link>}
           title="Feedback Semanal pendente"
           variant="info"
         >
