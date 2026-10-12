@@ -401,7 +401,7 @@ export function buildOperationalPendingItems(
         createdAt: training.createdAt,
         description:
           "Existe solicitação de treino registrada, mas nenhum plano de treino foi criado para esta cliente.",
-        href: `/admin/clientes/${training.clientId}/treino#solicitacao-treino`,
+        href: `/admin/clientes/${training.clientId}/treino?pedidoExato=${training.id}#pedido-treino-${training.id}`,
         id: `training-request:${training.id}`,
         kind: "training_requested_without_plan",
         statusLabel: "Solicitado, sem plano",
@@ -417,7 +417,7 @@ export function buildOperationalPendingItems(
         createdAt: training.createdAt,
         description:
           "Uma nova solicitação de treino foi registrada depois da última publicação. Revise o pedido e decida manualmente se será necessária uma nova prescrição; o treino publicado permanece disponível.",
-        href: `/admin/clientes/${training.clientId}/treino#solicitacao-treino`,
+        href: `/admin/clientes/${training.clientId}/treino?pedidoExato=${training.id}#pedido-treino-${training.id}`,
         id: `training-request-followup:${training.id}`,
         kind: "training_request_after_publication",
         statusLabel: "Nova solicitação",
@@ -654,7 +654,7 @@ export function buildOperationalPendingItems(
         execution.purposeKey === "anamnesis_review" &&
         execution.anamnesisSubmissionId
           ? `/admin/anamneses/${execution.anamnesisSubmissionId}/ia`
-          : "/admin/ia",
+          : `/admin/ia?execucao=${execution.id}#execucao-ia-${execution.id}`,
       id: `ai:${execution.id}`,
       kind: "ai_execution_started",
       statusLabel: "Started",

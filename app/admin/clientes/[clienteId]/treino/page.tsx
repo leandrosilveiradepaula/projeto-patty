@@ -1,3 +1,5 @@
+import { authorizedExactRecordPage } from "@/lib/operations/exact-record-navigation";
+import { TRAINING_REQUESTS_PER_PAGE } from "@/lib/training/version-inspection";
 import { trainingAdminVersionHref, trainingRequestExactHref } from "@/lib/training/history-navigation";
 import { parseTrainingVersionFilters, exploreTrainingVersionHistory, trainingAdminVersionPageHref } from "@/lib/training/history-navigation";
 import { parseTrainingRequestFilters, exploreTrainingRequests, trainingRequestFilteredHref } from "@/lib/training/history-navigation";
@@ -41,7 +43,7 @@ type Props = {
   params: Promise<{
     clienteId: string;
   }>;
-  searchParams: Promise<{ pedidos?: string; origem?: string; observacao?: string; periodo?: string; ordem?: string; buscaVersao?: string; estadoVersao?: string; ordemVersao?: string; versoes?: string; reutilizarPublicado?: string }>;
+  searchParams: Promise<{ pedidos?: string; origem?: string; observacao?: string; periodo?: string; ordem?: string; buscaVersao?: string; estadoVersao?: string; ordemVersao?: string; versoes?: string; reutilizarPublicado?: string; pedidoExato?: string }>;
 };
 
 function formatDateTime(value: string) {
@@ -86,6 +88,14 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
   ]);
 
   const orderedRequests = newestTrainingRequests(requests);
+  const exactRequestPage = authorizedExactRecordPage(orderedRequests, search.pedidoExato, TRAINING_REQUESTS_PER_PAGE);
+  if (exactRequestPage !== null) {
+    requestFilters.origin = "all";
+    requestFilters.notes = "all";
+    requestFilters.period = "all";
+    requestFilters.order = "newest";
+    requestFilters.page = String(exactRequestPage);
+  }
 
   const versions = plan
     ? await listAccessibleClientTrainingPlanVersions(plan.id)
@@ -411,7 +421,7 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
                   Última solicitação: {formatDateTime(orderedRequests[0].requested_at)}
                   {" · "}{trainingRequestOriginLabel(orderedRequests[0].recorded_by_profile_id, client.profile_id, "admin")}
                   .{" "}
-                  <a className={styles.link} href={`#pedido-treino-${orderedRequests[0].id}`}>Abrir solicitação exata</a>
+                  <a className={styles.link} href={trainingRequestExactHref(`/admin/clientes/${client.id}/treino`, orderedRequests, orderedRequests[0].id) ?? "#historico-solicitacoes-treino"}>Abrir solicitação exata</a>
                 </p>
               ) : null}
             </div>
