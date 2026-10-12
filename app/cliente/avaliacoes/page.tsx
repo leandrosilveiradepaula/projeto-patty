@@ -1,3 +1,4 @@
+import { readAssessmentExplorer, exploreAssessmentMeasures, assessmentExplorerHref } from "@/lib/evaluations/client-assessment-explorer";
 import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
 import { ClientAssessmentHistoryDisclosure } from "./ClientAssessmentHistoryDisclosure";
 import { Badge } from "@/components/ui/Badge";
@@ -28,7 +29,7 @@ function formatNumber(value: number) {
   }).format(value);
 }
 
-export default async function ClientAssessmentsPage() {
+export default async function ClientAssessmentsPage({searchParams}:{searchParams:Promise<{medidas?:string;pagina?:string}>}) {
   const client = await getCurrentClient();
   if (!client) return <EmptyState title="Cadastro não vinculado" description="Esta conta ainda não está vinculada a um cadastro de cliente." />;
   const [rows, historical] = await Promise.all([
@@ -36,6 +37,8 @@ export default async function ClientAssessmentsPage() {
     listCurrentClientFinalizedAssessmentHeaders(),
   ]);
   const items = completeClientAssessmentHistory(historical, rows);
+  const options=readAssessmentExplorer(await searchParams);
+  const history=exploreAssessmentMeasures(items,options);
 
   return (
     <>
@@ -46,22 +49,36 @@ export default async function ClientAssessmentsPage() {
       />
 
       <Section
+        id="historico-avaliacoes"
         description="Os registros aparecem da avaliação mais recente para a mais antiga."
         title="Histórico"
       >
+        {items.length>0 ? <form method="get" action="/cliente/avaliacoes" className={styles.explorerFilters}>
+          <label>Medidas<select name="medidas" defaultValue={options.measure}>
+            <option value="all">Todas as avaliações</option>
+            <option value="with">Com medidas disponíveis</option>
+            <option value="without">Sem medidas disponíveis</option>
+          </select></label>
+          <button type="submit">Filtrar avaliações</button>
+          {options.measure!=="all"?<Link href="/cliente/avaliacoes">Limpar</Link>:null}
+        </form>:null}
+        {options.invalid||options.page>history.pages?<p role="status">Página ou filtro indisponível; exibindo somente suas avaliações autorizadas.</p>:null}
         {items.length === 0 ? (
           <EmptyState
             description="Ainda não há avaliações finalizadas disponíveis. Consulte esta área quando houver novas avaliações concluídas pela Patty."
             title="Nenhuma avaliação disponível"
             action={<Link href="/cliente/mais">Ver outras áreas</Link>}
           />
+        ) : history.total === 0 ? (
+          <EmptyState title="Nenhuma avaliação encontrada" description="Os filtros não correspondem às suas avaliações finalizadas." action={<Link href="/cliente/avaliacoes">Ver todas</Link>} />
         ) : (
           <>
-            {items.length > 1 ? (
+            <p role="status">Exibindo {history.from}–{history.to} de {history.total} avaliações encontradas.</p>
+            {history.items.length > 1 ? (
               <nav aria-label="Ir para avaliação" className={styles.historyNavigation}>
-                {items.map((assessment, index) => (
+                {history.items.map((assessment, index) => (
                   <a href={`#avaliacao-${assessment.id}`} key={assessment.id}>
-                    Avaliação {index + 1}: {formatDate(assessment.assessedAt)}
+                    Avaliação {history.from + index}: {formatDate(assessment.assessedAt)}
                   </a>
                 ))}
               </nav>
@@ -72,7 +89,8 @@ export default async function ClientAssessmentsPage() {
               </Link>
             </div>
             <div className={styles.list}>
-              {items.map((assessment, assessmentIndex) => {
+              {history.items.map((assessment, localIndex) => {
+                const assessmentIndex=items.findIndex(item=>item.id===assessment.id);
                 const assessmentId = assessment.id;
                 const content = (
                   <Card className={styles.card}>
@@ -129,6 +147,11 @@ export default async function ClientAssessmentsPage() {
                 );
               })}
             </div>
+            {history.pages>1?<nav className={styles.explorerPages} aria-label="Páginas do histórico de avaliações">
+              <span>Página {history.page} de {history.pages}</span>
+              {history.page>1?<Link href={assessmentExplorerHref(options.measure,history.page-1)}>Anterior</Link>:null}
+              {history.page<history.pages?<Link href={assessmentExplorerHref(options.measure,history.page+1)}>Próxima</Link>:null}
+            </nav>:null}
           </>
         )}
       </Section>
