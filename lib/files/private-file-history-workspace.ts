@@ -1,7 +1,25 @@
 import type { PrivateFileKindFilter, PrivateFileOriginFilter, PrivateFileViewFilter } from "./private-file-history-view.ts";
+import { isPreviewablePrivateFileMimeType } from "./private-file-preview.ts";
 import { isPrivateFileFromClient, isPrivateFilePendingProfessionalRelease } from "./private-file-history-view.ts";
 
-export type PrivateFileHistorySort = "newest" | "oldest" | "largest" | "smallest" | "kind";
+export type PrivateFileHistorySort = "newest" | "oldest" | "largest" | "smallest" | "kind" | "released";
+export type PrivateFilePreviewFilter = "all" | "previewable" | "download_only";
+
+export function readPrivateFilePreviewFilter(raw: unknown): { value: PrivateFilePreviewFilter; invalid: boolean } {
+  if (raw === undefined || raw === "all") return { value: "all", invalid: false };
+  if (raw === "previewable" || raw === "download_only") return { value: raw, invalid: false };
+  return { value: "all", invalid: true };
+}
+
+/** Filters already-authorized file metadata; never grants access to a file. */
+export function matchesPrivateFilePreviewFilter(
+  mimeType: string | null,
+  filter: PrivateFilePreviewFilter,
+): boolean {
+  if (filter === "all") return true;
+  const previewable = isPreviewablePrivateFileMimeType(mimeType);
+  return filter === "previewable" ? previewable : !previewable;
+}
 export type PrivateFilePageParameter = "pagina" | "paginaPendentes" | "paginaHistorico";
 export const PRIVATE_FILE_HISTORY_PAGE_SIZE = 12;
 
@@ -19,7 +37,7 @@ export function readPrivateFileHistorySort(raw: unknown): {
   invalid: boolean;
 } {
   if (raw === undefined || raw === "newest") return { value: "newest", invalid: false };
-  if (raw === "oldest" || raw === "largest" || raw === "smallest" || raw === "kind") {
+  if (raw === "oldest" || raw === "largest" || raw === "smallest" || raw === "kind" || raw === "released") {
     return { value: raw, invalid: false };
   }
   return { value: "newest", invalid: true };
@@ -38,7 +56,8 @@ export function readPrivateFileHistoryPage(raw: unknown): {
   return { page, invalid: false };
 }
 
-function recordInstant(value: string): number | null {
+function recordInstant(value: string | null): number | null {
+  if (value === null) return null;
   const timestamp = Date.parse(value);
   return Number.isFinite(timestamp) ? timestamp : null;
 }
@@ -71,6 +90,11 @@ export function sortPrivateFileHistory<T extends FileHistoryRecord>(
       primary = bySize(order === "smallest");
     } else if (order === "kind") {
       primary = left.file_kind.localeCompare(right.file_kind, "pt-BR");
+    } else if (order === "released") {
+      const a = recordInstant(left.client_visible_at);
+      const b = recordInstant(right.client_visible_at);
+      if (a === null || b === null) primary = a === null ? (b === null ? 0 : 1) : -1;
+      else primary = b - a;
     }
     // Tie-break by latest stored time, then opaque ID: deterministic across pages.
     const secondary = when();
@@ -123,6 +147,7 @@ export function visiblePrivateFilePageNumbers(page: number, total: number): numb
 export type PrivateFileHistoryUrlState = {
   categoria?: PrivateFileKindFilter;
   origem?: PrivateFileOriginFilter;
+  formato?: PrivateFilePreviewFilter;
   visualizacao?: PrivateFileViewFilter;
   ordem?: PrivateFileHistorySort;
   pagina?: number;
@@ -136,6 +161,7 @@ export function privateFileHistoryHref(basePath: string, state: PrivateFileHisto
   const params = new URLSearchParams();
   if (state.categoria && state.categoria !== "all") params.set("categoria", state.categoria);
   if (state.origem && state.origem !== "all") params.set("origem", state.origem);
+  if (state.formato && state.formato !== "all") params.set("formato", state.formato);
   if (state.visualizacao && state.visualizacao !== "all") params.set("visualizacao", state.visualizacao);
   if (state.ordem && state.ordem !== "newest") params.set("ordem", state.ordem);
   const pages = ["pagina", "paginaPendentes", "paginaHistorico"] as const;
