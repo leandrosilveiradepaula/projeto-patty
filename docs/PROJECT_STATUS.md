@@ -1,3 +1,7 @@
+## Auth — campos únicos de senha e recuperação (2026-10-12)
+
+As ações de ativação, redefinição e solicitação de recuperação rejeitam campos de senha/confirmação/email duplicados ou enviados como arquivos antes de chamar o Supabase Auth. O navegador mantém o formulário existente; não há nova política de senha, alteração de token, sessão, reset ou role. A validação nunca devolve as credenciais nas mensagens de erro. Testes usam somente credenciais sintéticas; verificação E2E autenticada não foi executada.
+
 ## Seleção de exercícios publicados em treinos individuais (2026-10-12)
 
 No formulário administrativo real de composição e edição de itens do treino, a Patty pode buscar por nome sem acentos entre as versões publicadas já autorizadas, abrir resultados além dos 25 iniciais e preservar a versão selecionada mesmo se não corresponder à busca. O ID da versão continua sendo a referência persistida; toda gravação passa pelas Server Actions existentes, com revisão e publicação profissional separadas. A biblioteca global não fica acessível às clientes. Sem migration, nova regra de prescrição, mudança de RLS ou automação de treino. A validação E2E autenticada ainda é pendente.

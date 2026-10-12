@@ -104,3 +104,20 @@ export function confirmedNewClientInvitation(data: FormData): boolean {
   const entries = data.getAll("confirmNewClient");
   return entries.length === 1 && entries[0] === "yes";
 }
+
+/** Exact single-value credentials reject duplicate keys and files before Auth operations. */
+export function readSingleStringFormValue(formData: FormData, name: string): string | null {
+  const values = formData.getAll(name);
+  return values.length === 1 && typeof values[0] === "string" ? values[0] : null;
+}
+export function parseAccessPasswordForm(formData: FormData):
+  | { ok: true; password: string }
+  | { ok: false; message: string } {
+  const password = readSingleStringFormValue(formData, "password");
+  const confirmation = readSingleStringFormValue(formData, "passwordConfirmation");
+  if (password === null || confirmation === null) {
+    return { ok: false, message: "Informe uma senha e uma confirmação válidas, uma vez cada." };
+  }
+  const validation = validateActivationPassword(password, confirmation);
+  return validation.ok ? { ok: true, password } : { ok: false, message: validation.message };
+}

@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 
-import { validateActivationPassword } from "@/lib/onboarding/validation";
+import { parseAccessPasswordForm } from "@/lib/onboarding/validation";
 import { getCurrentAuthContext } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
 
@@ -20,17 +20,9 @@ export async function setInitialClientPassword(
     redirect("/login");
   }
 
-  const passwordValue = formData.get("password");
-  const confirmationValue = formData.get("passwordConfirmation");
-  const password = typeof passwordValue === "string" ? passwordValue : "";
-  const confirmation =
-    typeof confirmationValue === "string" ? confirmationValue : "";
-
-  const validation = validateActivationPassword(password, confirmation);
-
-  if (!validation.ok) {
-    return { message: validation.message };
-  }
+  const parsed = parseAccessPasswordForm(formData);
+  if (!parsed.ok) return { message: parsed.message };
+  const password = parsed.password;
 
   const supabase = await createClient();
   const { error } = await supabase.auth.updateUser({ password });
