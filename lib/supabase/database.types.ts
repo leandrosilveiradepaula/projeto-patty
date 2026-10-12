@@ -3511,6 +3511,14 @@ export type Database = {
         Args: { p_now?: string }
         Returns: number
       }
+      list_current_client_finalized_assessment_headers: {
+        Args: never
+        Returns: {
+          id: string
+          assessed_at: string
+          finalized_at: string
+        }[]
+      }
       list_current_client_finalized_assessment_measurements: {
         Args: never
         Returns: {

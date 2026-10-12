@@ -8,7 +8,7 @@ import { Section } from "@/components/ui/Section";
 import Link from "next/link";
 import { formatProfessionalMeasurementLabel } from "@/lib/evaluations/professional-view";
 import { completeClientAssessmentHistory } from "@/lib/evaluations/client-assessment-history";
-import { getCurrentClient, listAccessibleAssessmentsForClient, listCurrentClientFinalizedAssessmentMeasurements } from "@/lib/supabase/data-access";
+import { getCurrentClient, listCurrentClientFinalizedAssessmentHeaders, listCurrentClientFinalizedAssessmentMeasurements } from "@/lib/supabase/data-access";
 
 import styles from "./page.module.css";
 
@@ -33,7 +33,7 @@ export default async function ClientAssessmentsPage() {
   if (!client) return <EmptyState title="Cadastro não vinculado" description="Esta conta ainda não está vinculada a um cadastro de cliente." />;
   const [rows, historical] = await Promise.all([
     listCurrentClientFinalizedAssessmentMeasurements(),
-    listAccessibleAssessmentsForClient(client.id),
+    listCurrentClientFinalizedAssessmentHeaders(),
   ]);
   const items = completeClientAssessmentHistory(historical, rows);
 

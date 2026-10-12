@@ -1725,6 +1725,32 @@ export async function listCurrentClientFinalizedAssessmentMeasurements() {
   return data;
 }
 
+export async function listCurrentClientFinalizedAssessmentHeaders() {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc(
+    "list_current_client_finalized_assessment_headers",
+  );
+
+  if (error) {
+    // The reviewed migration is deployed separately from the Next.js release.
+    // Keep the pre-migration measurement-backed history available meanwhile.
+    if (error.code === "PGRST202") {
+      const { data: measurements, error: measurementsError } = await supabase.rpc(
+        "list_current_client_finalized_assessment_measurements",
+      );
+      if (measurementsError) throw measurementsError;
+      return [...new Map(measurements.map((row) => [row.assessment_id, {
+        id: row.assessment_id,
+        assessed_at: row.assessed_at,
+        finalized_at: row.assessed_at,
+      }])).values()];
+    }
+    throw error;
+  }
+
+  return data;
+}
+
 export async function listAccessibleAssessmentsForClient(clientId: string) {
   const supabase = await createClient();
   const rows = await collectAdminDirectoryPages((from, to) => supabase

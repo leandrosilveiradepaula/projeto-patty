@@ -799,6 +799,7 @@ const REVIEWED_SECURITY_DEFINER_MIGRATIONS = new Set([
   "20260930152158_harden_ai_finding_action_boundary.sql",
   "20261004132902_secure_client_assessment_effective_read.sql",
   "20261004132955_move_client_assessment_reader_to_private_schema.sql",
+  "20261012150000_allow_own_finalized_assessment_history.sql",
 ]);
 
 test("database migrations avoid unsafe authorization shortcuts", async () => {
@@ -1465,4 +1466,17 @@ test("OpenAI Anamnesis review remains server-only and stateless", async () => {
 
   assert.match(adapter, /store:\s*false/);
   assert.doesNotMatch(adapter, /source_answer_id.*JSON\.stringify/);
+});
+
+test("new assessment header SECURITY DEFINER remains scoped and private", async () => {
+  const sql = await readFile(
+    path.join(ROOT, "supabase", "migrations", "20261012150000_allow_own_finalized_assessment_history.sql"),
+    "utf8",
+  );
+  assert.match(sql, /create function app_private\.list_current_client_finalized_assessment_headers\(\)[\s\S]*security definer/i);
+  assert.match(sql, /where c\.profile_id = \(select auth\.uid\(\)\)/i);
+  assert.match(sql, /ca\.finalized_at is not null/i);
+  assert.match(sql, /returns table\s*\(\s*id uuid,\s*assessed_at timestamptz,\s*finalized_at timestamptz\s*\)/i);
+  assert.match(sql, /create function public\.list_current_client_finalized_assessment_headers\(\)[\s\S]*security invoker/i);
+  assert.match(sql, /revoke execute on function public\.list_current_client_finalized_assessment_headers\(\)\s+from public, anon/i);
 });
