@@ -40,7 +40,7 @@ type Props = {
   params: Promise<{
     clienteId: string;
   }>;
-  searchParams: Promise<{ pedidos?: string; origem?: string; observacao?: string; periodo?: string; ordem?: string; buscaVersao?: string; estadoVersao?: string; ordemVersao?: string; versoes?: string }>;
+  searchParams: Promise<{ pedidos?: string; origem?: string; observacao?: string; periodo?: string; ordem?: string; buscaVersao?: string; estadoVersao?: string; ordemVersao?: string; versoes?: string; reutilizarPublicado?: string }>;
 };
 
 function formatDateTime(value: string) {
@@ -356,7 +356,21 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
                 ? "A versão publicada permanece preservada. O novo rascunho será uma nova versão independente."
                 : "O rascunho só ficará visível para a cliente depois de revisão e publicação."}
             </p>
-            <AdminTrainingPlanDraftForm clientId={client.id} />
+            {latestPublished ? (
+              <div className={styles.summary}>
+                <p>Você pode começar em branco ou carregar apenas o título e as observações gerais do treino publicado. Confira e ajuste as informações antes de salvar. Nenhum exercício é copiado nesta etapa.</p>
+                {search.reutilizarPublicado === "sim" ? (
+                  <Link className={styles.link} href={`/admin/clientes/${client.id}/treino#prescricao-treino`}>Começar com campos em branco</Link>
+                ) : (
+                  <Link className={styles.link} href={`/admin/clientes/${client.id}/treino?reutilizarPublicado=sim#prescricao-treino`}>Preencher com título e observações publicados</Link>
+                )}
+              </div>
+            ) : null}
+            <AdminTrainingPlanDraftForm
+              clientId={client.id}
+              title={latestPublished && search.reutilizarPublicado === "sim" ? latestPublished.title : undefined}
+              notes={latestPublished && search.reutilizarPublicado === "sim" ? latestPublished.notes : undefined}
+            />
           </Card>
         )}
       </Section>
