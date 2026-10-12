@@ -121,3 +121,18 @@ export function parseAccessPasswordForm(formData: FormData):
   const validation = validateActivationPassword(password, confirmation);
   return validation.ok ? { ok: true, password } : { ok: false, message: validation.message };
 }
+
+/** Field-specific guidance shares exact server-side password bounds. */
+export function accessPasswordIssues(password: string, confirmation: string): {
+  password: string | null; passwordConfirmation: string | null;
+} {
+  const result = validateActivationPassword(password, password);
+  return {
+    password: result.ok ? null : result.message,
+    passwordConfirmation: !confirmation
+      ? "Confirme a senha para continuar."
+      : password !== confirmation
+        ? "As senhas informadas não coincidem."
+        : null,
+  };
+}
