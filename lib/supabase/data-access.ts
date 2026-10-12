@@ -692,6 +692,37 @@ export async function createAccessibleClientTrainingPlanItem(input: {
   return data;
 }
 
+/** One SQL insert statement: either all authorized copied items persist or none do. */
+export async function copyAccessiblePublishedTrainingPlanItems(input: {
+  trainingPlanVersionId: string;
+  items: Array<{
+    position: number;
+    exerciseVersionId: string | null;
+    exerciseName: string;
+    setsText: string;
+    repetitionsText: string;
+    restText: string | null;
+    executionNotes: string | null;
+  }>;
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("client_training_plan_items")
+    .insert(input.items.map((item) => ({
+      training_plan_version_id: input.trainingPlanVersionId,
+      position: item.position,
+      exercise_version_id: item.exerciseVersionId,
+      exercise_name: item.exerciseName,
+      sets_text: item.setsText,
+      repetitions_text: item.repetitionsText,
+      rest_text: item.restText,
+      execution_notes: item.executionNotes,
+    })))
+    .select("id");
+  if (error) throw error;
+  if (data.length !== input.items.length) throw new Error("Quantidade inserida não confirmada.");
+  return data;
+}
+
 export async function updateAccessibleClientTrainingPlanItem(input: {
   executionNotes: string | null;
   exerciseName: string;
