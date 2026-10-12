@@ -1,3 +1,4 @@
+import { formatAdministrativeAssessmentDate, orderAdministrativeAssessments } from "@/lib/evaluations/administrative-assessment-history";
 import { AssessmentCreateForm } from "@/components/admin/AssessmentCreateForm";
 import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
@@ -26,15 +27,6 @@ type AdminClientAssessmentsPageProps = {
   }>;
 };
 
-function formatAssessmentDate(value: string) {
-  return new Intl.DateTimeFormat("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    timeZone: "America/Sao_Paulo",
-  }).format(new Date(value));
-}
-
 export default async function AdminClientAssessmentsPage({
   params,
 }: AdminClientAssessmentsPageProps) {
@@ -51,10 +43,11 @@ export default async function AdminClientAssessmentsPage({
       loadSupportedAssessmentKindOptions(),
       loadAssessmentSchedulePreferences(),
     ]);
-  const draftAssessments = assessments.filter(
+  const orderedAssessments = orderAdministrativeAssessments(assessments);
+  const draftAssessments = orderedAssessments.filter(
     (assessment) => !assessment.finalized_at,
   );
-  const finalizedAssessments = assessments.filter(
+  const finalizedAssessments = orderedAssessments.filter(
     (assessment) => Boolean(assessment.finalized_at),
   );
   const displayName = client.full_name?.trim() || client.profiles?.display_name?.trim();
@@ -144,7 +137,7 @@ export default async function AdminClientAssessmentsPage({
                       Continuar avaliação
                     </Link>
                   }
-                  evaluationDate={formatAssessmentDate(assessment.assessed_at)}
+                  evaluationDate={formatAdministrativeAssessmentDate(assessment.assessed_at)}
                   meta={
                     resolveSupportedAssessmentKindOption(
                       assessmentKinds.options,
@@ -185,7 +178,7 @@ export default async function AdminClientAssessmentsPage({
                       Ver avaliação
                     </Link>
                   }
-                  evaluationDate={formatAssessmentDate(assessment.assessed_at)}
+                  evaluationDate={formatAdministrativeAssessmentDate(assessment.assessed_at)}
                   meta={
                     resolveSupportedAssessmentKindOption(
                       assessmentKinds.options,

@@ -1,3 +1,4 @@
+import { formatAdministrativeAssessmentDate, orderAdministrativeAssessments } from "@/lib/evaluations/administrative-assessment-history";
 import { EvaluationListItem } from "@/components/admin/EvaluationListItem";
 import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -11,20 +12,13 @@ import { listAccessibleClientAssessments } from "@/lib/supabase/data-access";
 import Link from "next/link";
 import styles from "./page.module.css";
 
-function formatAssessmentDate(value: string) {
-  return new Intl.DateTimeFormat("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    timeZone: "America/Sao_Paulo",
-  }).format(new Date(value));
-}
-
 export default async function AdminAvaliacoesPage() {
   const [assessments, assessmentKinds] = await Promise.all([
     listAccessibleClientAssessments(),
     loadSupportedAssessmentKindOptions(),
   ]);
+
+  const orderedAssessments = orderAdministrativeAssessments(assessments);
 
   return (
     <>
@@ -37,7 +31,7 @@ export default async function AdminAvaliacoesPage() {
         description="As avaliações mais recentes aparecem primeiro."
         title="Histórico de avaliações"
       >
-        {assessments.length === 0 ? (
+        {orderedAssessments.length === 0 ? (
           <EmptyState
             action={
               <Link className={styles.actionLink} href="/admin/clientes">
@@ -49,7 +43,7 @@ export default async function AdminAvaliacoesPage() {
           />
         ) : (
           <ul className={styles.evaluationList}>
-            {assessments.map((assessment) => {
+            {orderedAssessments.map((assessment) => {
               const displayName = assessment.clients?.full_name?.trim() || assessment.clients?.profiles?.display_name?.trim();
 
               return (
@@ -65,7 +59,7 @@ export default async function AdminAvaliacoesPage() {
                       </Link>
                     }
                     clientLabel={displayName || "Cliente sem nome informado"}
-                    evaluationDate={formatAssessmentDate(assessment.assessed_at)}
+                    evaluationDate={formatAdministrativeAssessmentDate(assessment.assessed_at)}
                     meta={
                       resolveSupportedAssessmentKindOption(
                         assessmentKinds.options,

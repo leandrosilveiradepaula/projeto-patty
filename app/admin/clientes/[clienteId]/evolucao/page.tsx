@@ -1,3 +1,4 @@
+import { formatAdministrativeAssessmentDate, orderAdministrativeAssessments } from "@/lib/evaluations/administrative-assessment-history";
 import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { Badge } from "@/components/ui/Badge";
@@ -22,15 +23,6 @@ type PageProps = {
   params: Promise<{ clienteId: string }>;
 };
 
-function formatAssessmentDate(value: string) {
-  return new Intl.DateTimeFormat("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    timeZone: "America/Sao_Paulo",
-    year: "numeric",
-  }).format(new Date(value));
-}
-
 function formatNumber(value: number) {
   return new Intl.NumberFormat("pt-BR", {
     maximumFractionDigits: 2,
@@ -51,8 +43,10 @@ export default async function AdminClientProgressPage({ params }: PageProps) {
     notFound();
   }
 
-  const assessments = (await listAccessibleAssessmentsForClient(client.id)).filter(
-    (assessment) => Boolean(assessment.finalized_at),
+  const assessments = orderAdministrativeAssessments(
+    (await listAccessibleAssessmentsForClient(client.id)).filter(
+      (assessment) => Boolean(assessment.finalized_at),
+    ),
   );
 
   const assessmentSnapshots = await Promise.all(
@@ -145,7 +139,7 @@ export default async function AdminClientProgressPage({ params }: PageProps) {
                     <tbody>
                       {item.points.map((point) => (
                         <tr key={point.assessmentId}>
-                          <td data-label="Data">{formatAssessmentDate(point.assessedAt)}</td>
+                          <td data-label="Data">{formatAdministrativeAssessmentDate(point.assessedAt)}</td>
                           <td data-label="Valor">
                             {formatNumber(point.value)} {item.unit}
                           </td>
@@ -155,7 +149,7 @@ export default async function AdminClientProgressPage({ params }: PageProps) {
                           </td>
                           <td data-label="Avaliação">
                             <Link
-                              aria-label={`Abrir avaliação de ${formatAssessmentDate(point.assessedAt)} para ${item.label}`}
+                              aria-label={`Abrir avaliação de ${formatAdministrativeAssessmentDate(point.assessedAt)} para ${item.label}`}
                               className={styles.detailLink}
                               href={"/admin/avaliacoes/" + point.assessmentId}
                             >

@@ -55,7 +55,10 @@ test("professional comparison links to the authorized previous assessment, not a
   assert.ok(page.includes("Abrir avaliação anterior de"));
   assert.ok(page.includes("getAccessibleClientAssessment(avaliacaoId)"));
   assert.ok(page.includes("listAccessibleAssessmentsForClient(assessment.client_id)"));
-  assert.ok(page.includes("new Date(assessment.assessed_at).getTime()"));
+  assert.ok(page.includes("findPreviousFinalizedAssessment(assessment, clientAssessments)"));
+  const selector = read("lib/evaluations/administrative-assessment-history.ts");
+  assert.ok(selector.includes("Boolean(assessment.finalized_at)"));
+  assert.ok(selector.includes("at < currentInstant"));
 });
 
 test("measurement comparison rows avoid colliding when two raw keys share a display label", () => {
