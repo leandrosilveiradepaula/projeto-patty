@@ -149,3 +149,15 @@
   font-size: var(--text-body-medium-size);
   line-height: var(--text-body-medium-line-height);
 }
+
+.explorerFilters{display:flex;flex-wrap:wrap;align-items:end;gap:var(--space-3);margin-bottom:var(--space-4)}
+.explorerFilters label{display:grid;gap:var(--space-2);color:var(--color-text-secondary);min-width:11rem}
+.explorerFilters select{min-height:44px;background:var(--color-surface);color:var(--color-text-primary);border:1px solid var(--color-border);border-radius:var(--radius-medium);padding:var(--space-2)}
+.explorerFilters select:focus-visible{outline:3px solid var(--color-accent);outline-offset:2px}
+.factualSummary{display:flex;flex-wrap:wrap;gap:var(--space-4);margin:0}
+.factualSummary div{display:grid;gap:var(--space-1)}
+.factualSummary dt{color:var(--color-text-secondary);font-size:var(--text-body-small-size)}
+.factualSummary dd{margin:0;font-weight:600;color:var(--color-text-primary)}
+.plot{padding:var(--space-3);border:1px solid var(--color-border);border-radius:var(--radius-medium)}
+.plot svg{display:block;width:100%;max-height:220px}
+.plot p{color:var(--color-text-secondary);font-size:var(--text-body-small-size);margin:var(--space-2) 0 0}
