@@ -1,3 +1,4 @@
+import { authorizedExactRecordPage } from "@/lib/operations/exact-record-navigation";
 import { readAiQueueQuery, exploreAiQueue, aiQueueHref } from "@/lib/operations/ai-execution-explorer";
 import Link from "next/link";
 
@@ -27,10 +28,19 @@ function purposeLabel(value: string) {
   return "Análise assistiva";
 }
 
-export default async function AdminAiPage({searchParams}:{searchParams:Promise<{q?:string;tipo?:string;pagina?:string}>}) {
+export default async function AdminAiPage({searchParams}:{searchParams:Promise<{q?:string;tipo?:string;pagina?:string; execucao?:string}>}) {
   const executions = await listAccessibleNonterminalAiExecutions();
   const types=[...new Set(executions.map(e=>e.purpose_key))];
-  const query=readAiQueueQuery(await searchParams,types);
+  const providers=[...new Set(executions.flatMap(e=>e.provider?[e.provider]:[]))].sort();
+  const rawQuery = await searchParams;
+  const query = readAiQueueQuery(rawQuery,types);
+  const exactPage = authorizedExactRecordPage(executions,rawQuery.execucao,12);
+  if (exactPage !== null) {
+    query.text = "";
+    query.purpose = "all";
+    query.provider = "all";
+    query.page = exactPage;
+  }
   const explored=exploreAiQueue(executions,query);
 
   return (
@@ -54,6 +64,7 @@ export default async function AdminAiPage({searchParams}:{searchParams:Promise<{
           <form action="/admin/ia" method="get" className={styles.filters}>
             <label>Buscar cliente<input name="q" type="search" defaultValue={query.text} maxLength={100}/></label>
             <label>Tipo<select name="tipo" defaultValue={query.purpose}><option value="all">Todos</option>{types.map(kind=><option value={kind} key={kind}>{purposeLabel(kind)}</option>)}</select></label>
+            <label>Provedor<select name="provedor" defaultValue={query.provider}><option value="all">Todos</option>{providers.map(provider=><option value={provider} key={provider}>{provider}</option>)}</select></label>
             <button type="submit">Localizar análise</button>
             <Link href="/admin/ia">Limpar</Link>
           </form>
@@ -77,7 +88,7 @@ export default async function AdminAiPage({searchParams}:{searchParams:Promise<{
               const submissionId = execution.anamnesis_submission_id;
 
               return (
-                <li key={execution.id}>
+                <li key={execution.id} id={`execucao-ia-${execution.id}`}>
                   <Card className={styles.executionCard} variant="subtle">
                     <div className={styles.executionMain}>
                       <div className={styles.executionHeading}>
@@ -94,6 +105,14 @@ export default async function AdminAiPage({searchParams}:{searchParams:Promise<{
                         <div>
                           <dt>Iniciada em</dt>
                           <dd>{formatExecutionDate(execution.created_at)}</dd>
+                        </div>
+                        <div>
+                          <dt>Provedor registrado</dt>
+                          <dd>{execution.provider ?? "Não informado"}</dd>
+                        </div>
+                        <div>
+                          <dt>Modelo registrado</dt>
+                          <dd>{execution.model_identifier ?? "Não informado"}</dd>
                         </div>
 
                       </dl>

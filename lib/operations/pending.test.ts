@@ -664,7 +664,7 @@ test("training lifecycle facts become Patty operational pendings", () => {
   assert.deepEqual(
     items.map((item) => item.href),
     [
-      "/admin/clientes/client-1/treino#solicitacao-treino",
+      "/admin/clientes/client-1/treino?pedidoExato=request-1#pedido-treino-request-1",
       "/admin/clientes/client-2/treino#prescricao-treino",
       "/admin/clientes/client-3/treino#prescricao-treino",
     ],
@@ -692,7 +692,7 @@ test("a training request after publication is a Patty follow-up, never automatic
   assert.equal(items.length, 1);
   assert.equal(items[0].kind, "training_request_after_publication");
   assert.equal(items[0].id, "training-request-followup:new-request");
-  assert.equal(items[0].href, "/admin/clientes/client-new-request/treino#solicitacao-treino");
+  assert.equal(items[0].href, "/admin/clientes/client-new-request/treino?pedidoExato=new-request#pedido-treino-new-request");
   assert.equal(getOperationalPendingGroup(items[0]), "patty");
   assert.match(items[0].description, /decida manualmente/);
 });
@@ -1064,7 +1064,7 @@ test("non-anamnesis AI execution keeps the generic operations fallback", () => {
     ],
   });
 
-  assert.equal(items[0]?.href, "/admin/ia");
+  assert.equal(items[0]?.href, "/admin/ia?execucao=execution-generic#execucao-ia-execution-generic");
 });
 
 test("protocol drafts remain actionable alongside released and pending versions", () => {
