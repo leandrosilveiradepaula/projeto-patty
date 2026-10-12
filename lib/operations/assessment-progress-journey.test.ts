@@ -20,8 +20,8 @@ test("factual evolution shows observations separately from comparisons on both s
   for (const path of ["app/cliente/evolucao/page.tsx","app/admin/clientes/[clienteId]/evolucao/page.tsx"]) {
     const source = read(path);
     assert.ok(source.includes("summarizeFactualProgressCoverage(series)"), path);
-    assert.ok(source.includes("coverage.comparableSeriesCount === 0"), path);
-    assert.ok(source.includes("coverage.singleObservationSeriesCount > 0"), path);
+    assert.ok(source.includes(path.startsWith("app/cliente/") ? "coverage.comparableSeriesCount === 0" : "visibleCoverage.comparableSeriesCount === 0"), path);
+    assert.ok(source.includes(path.startsWith("app/cliente/") ? "coverage.singleObservationSeriesCount > 0" : "visibleCoverage.singleObservationSeriesCount > 0"), path);
     assert.ok(source.includes("mesma medida e unidade"), path);
     assert.ok(source.includes("buildFactualProgressSeries("), path);
     assert.ok(source.includes(path.startsWith("app/cliente/") ? 'id={`medida-${originalIndex}`}' : 'id={`medida-${index}`}'), path);
@@ -49,7 +49,7 @@ test("professional evolution retains authorized detail links and effective corre
   assert.ok(source.includes("notFound()"));
   assert.ok(source.includes("applyAssessmentMeasurementCorrections("));
   assert.ok(source.includes("listAccessibleAssessmentMeasurementCorrections("));
-  assert.ok(source.includes("coverage.comparableSeriesCount"));
+  assert.ok(source.includes("visibleCoverage.comparableSeriesCount"));
 });
 
 test("client assessment and evolution read only finalized effective measurements", () => {
