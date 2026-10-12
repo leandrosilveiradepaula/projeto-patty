@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { isHistoricalExerciseSelectionUnavailable, orderPublishedExerciseOptions } from "./exercise-selection.ts";
+import { isHistoricalExerciseSelectionUnavailable, orderPublishedExerciseOptions, filterPublishedExerciseOptions, selectedExerciseOption, readExerciseSelectionQuery } from "./exercise-selection.ts";
 
 const options = [
   { id: "remada-v1", name: "Remada", versionNumber: 1 },
@@ -28,4 +28,22 @@ test("same-name same-version options tie-break deterministically by UUID", () =>
     { id:"a",name:"Ombro",versionNumber:2 },
   ];
   assert.deepEqual(orderPublishedExerciseOptions(rows).map(x=>x.id),["a","b"]);
+});
+
+test("published catalog query ignores accents without mutating the source or selecting a different version", () => {
+  const catalog = [
+    { id: "v1", name: "Elevação Lateral", versionNumber: 1 },
+    { id: "v2", name: "Elevação Lateral", versionNumber: 2 },
+    { id: "v3", name: "Remada", versionNumber: 1 },
+  ];
+  assert.deepEqual(filterPublishedExerciseOptions(catalog, "elevacao").map(x => x.id), ["v2", "v1"]);
+  assert.equal(selectedExerciseOption(catalog, "v1")?.id, "v1");
+  assert.equal(selectedExerciseOption(catalog, "missing"), null);
+  assert.equal(catalog[0].id, "v1");
+  assert.deepEqual(filterPublishedExerciseOptions(catalog, null).map(x => x.id), ["v2", "v1", "v3"]);
+});
+test("query is normalized to a bounded string, regardless of untrusted input", () => {
+  assert.equal(readExerciseSelectionQuery({ query: "Remada" }), "");
+  assert.equal(readExerciseSelectionQuery("  Remada  "), "Remada");
+  assert.equal(readExerciseSelectionQuery("x".repeat(300)).length, 120);
 });
