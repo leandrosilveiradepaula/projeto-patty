@@ -1,3 +1,4 @@
+import { formatFactualAssessmentDate, formatFactualMeasurement, formatFactualDelta } from "@/lib/evaluations/progress-format";
 import { formatAdministrativeAssessmentDate, orderAdministrativeAssessments } from "@/lib/evaluations/administrative-assessment-history";
 import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
@@ -22,18 +23,6 @@ import styles from "./page.module.css";
 type PageProps = {
   params: Promise<{ clienteId: string }>;
 };
-
-function formatNumber(value: number) {
-  return new Intl.NumberFormat("pt-BR", {
-    maximumFractionDigits: 2,
-  }).format(value);
-}
-
-function formatDelta(value: number | null) {
-  if (value === null) return "—";
-  const prefix = value > 0 ? "+" : "";
-  return prefix + formatNumber(value);
-}
 
 export default async function AdminClientProgressPage({ params }: PageProps) {
   const { clienteId } = await params;
@@ -132,7 +121,7 @@ export default async function AdminClientProgressPage({ params }: PageProps) {
                       <tr>
                         <th>Data</th>
                         <th>Valor</th>
-                        <th>Variação vs. anterior</th>
+                        <th>Diferença vs. anterior</th>
                         <th>Avaliação</th>
                       </tr>
                     </thead>
@@ -141,11 +130,10 @@ export default async function AdminClientProgressPage({ params }: PageProps) {
                         <tr key={point.assessmentId}>
                           <td data-label="Data">{formatAdministrativeAssessmentDate(point.assessedAt)}</td>
                           <td data-label="Valor">
-                            {formatNumber(point.value)} {item.unit}
+                            {formatFactualMeasurement(point.value)} {item.unit}
                           </td>
-                          <td data-label="Variação vs. anterior">
-                            {formatDelta(point.deltaFromPrevious)}
-                            {point.deltaFromPrevious === null ? "" : " " + item.unit}
+                          <td data-label="Diferença vs. anterior">
+                            {formatFactualDelta(point.deltaFromPrevious, item.unit)}
                           </td>
                           <td data-label="Avaliação">
                             <Link
