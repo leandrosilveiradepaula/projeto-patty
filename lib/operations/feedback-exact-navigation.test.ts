@@ -23,5 +23,5 @@ test("professional pending links resolve to the exact record in the authorized c
   assert.match(admin, /id=\{\x60feedback-pendente-\$\{feedback.id\}\x60\}/);
   assert.match(admin, /id=\{\x60feedback-enviado-\$\{feedback.id\}\x60\}/);
   assert.match(admin, /orderClientWeeklyFeedbacks\(feedbacks\)/);
-  assert.doesNotMatch(page, /createAdminClient\(/);
+  assert.doesNotMatch(admin, /createAdminClient\(/);
 });
