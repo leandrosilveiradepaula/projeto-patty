@@ -1,3 +1,7 @@
+## Evolução profissional — paridade factual com os filtros de observação (2026-10-12)
+
+No histórico longitudinal da cliente, a Patty pode selecionar a medida, limitar observações por quantidade e conferir uma tabela de diferenças matemáticas, um resumo de extremos e um traçado factual com dados de avaliações finalizadas/corrigidas. As medições são lidas pelo fluxo client-scoped já protegido e a seleção é índice da série autorizada, sem expor chaves de saúde na URL. Gráfico sem escala cronológica real e sem interpretação de melhora ou piora. Nenhuma nova regra de avaliação, RLS, schema, persistência ou IA. CI não equivale a E2E autenticado.
+
 ## Esteira 37 — navegação profissional do acompanhamento individual (2026-10-12)
 
 Pacote de duas melhorias operacionais relacionadas, na jornada administrativa da cliente: (1) avaliações em rascunho e finalizadas filtráveis por tipo configurado e mês local, com ordenação factual e paginação independente, preservando links e a criação manual; (2) histórico de Feedback Semanal filtrável por origem registrada e paginação independente entre pendentes e enviados, incluindo tratamento de datas legadas inválidas. Parâmetros repetidos e inválidos recebem fallback explícito, sem ampliar visibilidade. Sem novos scores, fórmulas, regras clínicas, mudanças RLS, escrita em banco, migrations ou publicação automática. CI e homologação E2E autenticada são evidências separadas.
