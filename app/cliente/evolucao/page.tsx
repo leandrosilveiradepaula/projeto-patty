@@ -129,7 +129,7 @@ export default async function ClientProgressPage({ searchParams }: {
                     <Badge variant="neutral">{item.points.length} registro(s)</Badge>
                     {item.points.length > 0 ? (
                       <Badge variant="neutral">
-                        Atual: {formatFactualMeasurement(item.points[item.points.length - 1].value)} {item.unit}
+                        Atual: {precisionSafeProgressNumber(item.points[item.points.length - 1].value)} {item.unit}
                       </Badge>
                     ) : null}
                   </div>
