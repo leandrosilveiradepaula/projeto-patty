@@ -1,3 +1,7 @@
+## Painel de pendências — tolerância a registros com timestamp inválido (2026-10-12)
+
+Na fila administrativa, uma data de criação historicamente inválida não deve provocar `RangeError` e derrubar a visualização de todas as pendências. O registro permanece listado, identificável e navegável com marcador factual de data indisponível; horários válidos continuam em `America/Sao_Paulo`. A ordenação, acesso client-scoped, estado da pendência e origem do dado não foram alterados. Sem persistência, migration, RLS ou regra profissional; E2E autenticado ainda pendente.
+
 ## Feedback Semanal — datas históricas inválidas não interrompem a jornada (2026-10-12)
 
 A área autenticada de Feedback Semanal exibe marcador factual de indisponibilidade para datas de período inválidas ou impossíveis (inclusive datas que o JavaScript normalizaria silenciosamente), e omite prazos historicamente inválidos em vez de disparar `RangeError` e indisponibilizar formulários e histórico. Datas válidas preservam o calendário do período e o prazo no fuso America/Sao_Paulo. Nenhum registro é corrigido automaticamente, prazo é reagendado ou política de agendamento alterada. Sem RLS, migration, score ou regra clínica. Validação CI necessária; E2E autenticado pendente.
