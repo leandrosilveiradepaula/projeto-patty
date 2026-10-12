@@ -1,3 +1,4 @@
+import { formatFactualAssessmentDate, formatFactualMeasurement, formatFactualDelta } from "@/lib/evaluations/progress-format";
 import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
@@ -13,27 +14,6 @@ import { summarizeFactualProgressCoverage } from "@/lib/evaluations/progress-jou
 import { listCurrentClientFinalizedAssessmentMeasurements } from "@/lib/supabase/data-access";
 
 import styles from "./page.module.css";
-
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    timeZone: "America/Sao_Paulo",
-    year: "numeric",
-  }).format(new Date(value));
-}
-
-function formatNumber(value: number) {
-  return new Intl.NumberFormat("pt-BR", {
-    maximumFractionDigits: 2,
-  }).format(value);
-}
-
-function formatDelta(value: number | null) {
-  if (value === null) return "—";
-  const prefix = value > 0 ? "+" : "";
-  return prefix + formatNumber(value);
-}
 
 export default async function ClientProgressPage({ searchParams }: {
   searchParams: Promise<{ serie?: string; janela?: string }>;
@@ -149,7 +129,7 @@ export default async function ClientProgressPage({ searchParams }: {
                     <Badge variant="neutral">{item.points.length} registro(s)</Badge>
                     {item.points.length > 0 ? (
                       <Badge variant="neutral">
-                        Atual: {formatNumber(item.points[item.points.length - 1].value)} {item.unit}
+                        Atual: {formatFactualMeasurement(item.points[item.points.length - 1].value)} {item.unit}
                       </Badge>
                     ) : null}
                   </div>
@@ -174,18 +154,18 @@ export default async function ClientProgressPage({ searchParams }: {
                       <tr>
                         <th>Data</th>
                         <th>Valor</th>
-                        <th>Variação vs. anterior</th>
+                        <th>Diferença vs. anterior</th>
                         <th>Avaliação</th>
                       </tr>
                     </thead>
                     <tbody>
                       {item.points.map((point) => (
                         <tr key={point.assessmentId}>
-                          <td data-label="Data">{formatDate(point.assessedAt)}</td>
+                          <td data-label="Data">{formatFactualAssessmentDate(point.assessedAt)}</td>
                           <td data-label="Valor">
                             {precisionSafeProgressNumber(point.value)} {item.unit}
                           </td>
-                          <td data-label="Variação vs. anterior">
+                          <td data-label="Diferença vs. anterior">
                             {precisionSafeProgressDelta(point.deltaFromPrevious)}
                             {point.deltaFromPrevious === null
                               ? ""
@@ -193,7 +173,7 @@ export default async function ClientProgressPage({ searchParams }: {
                           </td>
                           <td data-label="Avaliação">
                             <Link
-                              aria-label={`Abrir avaliação de ${formatDate(point.assessedAt)} para ${item.label}`}
+                              aria-label={`Abrir avaliação de ${formatFactualAssessmentDate(point.assessedAt)} para ${item.label}`}
                               className={styles.assessmentDetailLink}
                               href={`/cliente/avaliacoes#avaliacao-${point.assessmentId}`}
                             >
