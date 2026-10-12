@@ -26,12 +26,12 @@ export function readProfessionalFeedbackHistoryQuery(raw:ProfessionalFeedbackHis
       || (raw.enviados!==undefined && !validPage(raw.enviados)),
   };
 }
-export function filterProfessionalFeedbacks<T extends { request_source: string; submitted_at: string|null; period_start: string }>(
+export function filterProfessionalFeedbacks<T extends { request_source: string; submitted_at: string|null; period_start?: string }>(
   rows:readonly T[],origin:ProfessionalFeedbackFilter,submitted:boolean,year="all",
 ):T[]{
   return rows.filter(row=>(submitted?row.submitted_at!==null:row.submitted_at===null)
     && (origin==="all" || row.request_source===origin)
-    && (year==="all" || row.period_start.startsWith(year+"-")));
+    && (year==="all" || row.period_start?.startsWith(year+"-")));
 
 }
 export const PROFESSIONAL_WEEKLY_FEEDBACK_PAGE_SIZE=10;
