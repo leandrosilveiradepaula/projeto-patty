@@ -12,7 +12,7 @@ test("client assessment history sorts by date independent of RPC ordering",()=>{
  assert.match(s,/completeClientAssessmentHistory\(historical, rows\)/);
  const helper=read("lib/evaluations/client-assessment-history.ts");
  assert.match(helper,/newestFactualAssessments\(/);
- assert.match(helper,/finalized_at !== null/);
+ assert.match(helper,/finalized_at\s*!==\s*null/);
  assert.match(s,/id=\{\`avaliacao-\$\{assessmentId\}\`\}/);
  assert.match(s,/aria-label="Ir para avaliação"/);
 });
