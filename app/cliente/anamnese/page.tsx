@@ -9,6 +9,11 @@ import {
   listAccessibleAnamnesisSubmissions,
 } from "@/lib/supabase/data-access";
 import { getCurrentClientAnamnesisStartAvailability } from "@/lib/anamnesis/start";
+import {
+  clientAnamnesisHistoryHref,
+  exploreClientAnamnesisHistory,
+  readClientAnamnesisHistoryFilters,
+} from "@/lib/anamnesis/client-submissions-explorer";
 import { loadClientClarificationSummary } from "@/lib/follow-up/client-clarification-summary-loader";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
@@ -16,6 +21,7 @@ import { startClientAnamnesisDraft } from "./actions";
 import styles from "./page.module.css";
 
 function formatDateTime(value: string) {
+  if (!Number.isFinite(Date.parse(value))) return "Data indisponível";
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     hour: "2-digit",
@@ -26,7 +32,12 @@ function formatDateTime(value: string) {
   }).format(new Date(value));
 }
 
-export default async function ClienteAnamnesePage() {
+type ClienteAnamnesePageProps = {
+  searchParams: Promise<{ estado?: string; pendencia?: string; versao?: string; ordem?: string; pagina?: string }>;
+};
+
+export default async function ClienteAnamnesePage({ searchParams }: ClienteAnamnesePageProps) {
+  const filters = readClientAnamnesisHistoryFilters(await searchParams);
   const client = await getCurrentClient();
   const [submissions, startAvailability] = client
     ? await Promise.all([
@@ -38,6 +49,8 @@ export default async function ClienteAnamnesePage() {
   const clarificationSummary = await loadClientClarificationSummary(
     (submissions ?? []).filter((item) => item.submitted_at !== null).map((item) => item.id),
   );
+
+  const explored = exploreClientAnamnesisHistory(submissions ?? [], clarificationSummary.bySubmission, filters);
 
   const hasCurrentDraft =
     startAvailability.available &&
@@ -75,6 +88,7 @@ export default async function ClienteAnamnesePage() {
         </Section>
       ) : null}
       <Section
+        id="historico-anamnese"
         description="Cada registro preserva a versão de formulário usada no momento da submissão."
         title="Histórico"
       >
@@ -90,8 +104,44 @@ export default async function ClienteAnamnesePage() {
             action={<Link href="/cliente">Voltar ao início</Link>}
           />
         ) : (
+          <>
+            <p className={styles.historySummary} role="status">
+              {explored.summary.drafts} rascunho(s) · {explored.summary.submitted} enviada(s) · {explored.summary.awaitingClient} com esclarecimento aguardando sua resposta · {explored.summary.awaitingProfessional} aguardando revisão da Patty.
+            </p>
+            <form action="/cliente/anamnese" className={styles.historyFilters} method="get">
+              <label>Situação
+                <select name="estado" defaultValue={filters.status}>
+                  <option value="all">Todas</option><option value="draft">Rascunhos</option><option value="submitted">Enviadas</option>
+                </select>
+              </label>
+              <label>Esclarecimentos
+                <select name="pendencia" defaultValue={filters.attention}>
+                  <option value="all">Todos</option><option value="client">Aguardando minha resposta</option><option value="professional">Aguardando a Patty</option><option value="none">Sem esclarecimento aberto</option>
+                </select>
+              </label>
+              <label>Versão do formulário
+                <select name="versao" defaultValue={filters.version}>
+                  <option value="all">Todas</option>
+                  {explored.versions.map((version) => <option key={version} value={String(version)}>Versão {version}</option>)}
+                  <option value="none">Sem versão identificada</option>
+                </select>
+              </label>
+              <label>Ordem
+                <select name="ordem" defaultValue={filters.order}>
+                  <option value="newest">Mais recentes</option><option value="oldest">Mais antigas</option>
+                </select>
+              </label>
+              <button type="submit">Filtrar</button>
+              <Link href="/cliente/anamnese#historico-anamnese">Limpar filtros</Link>
+            </form>
+            <p className={styles.historySummary} role="status">
+              Exibindo {explored.first}–{explored.last} de {explored.total} registro(s) encontrado(s).
+            </p>
+            {explored.total === 0 ? (
+              <EmptyState title="Nenhuma Anamnese corresponde aos filtros" description="Ajuste a seleção acima para consultar os registros anteriores. Nenhuma resposta foi removida." action={<Link href="/cliente/anamnese#historico-anamnese">Ver todo o histórico</Link>} />
+            ) : (
           <ol className={styles.submissionList}>
-            {submissions?.map((submission) => {
+            {explored.items.map((submission) => {
               const version = submission.anamnesis_form_versions;
               const clarification = clarificationSummary.bySubmission.get(submission.id);
               const pendingClarificationHref =
@@ -145,6 +195,15 @@ export default async function ClienteAnamnesePage() {
               );
             })}
           </ol>
+            )}
+            {explored.pages > 1 ? (
+              <nav aria-label="Páginas do histórico de Anamnese" className={styles.historyPages}>
+                {explored.previous ? <Link href={clientAnamnesisHistoryHref(filters, explored.previous)}>Anterior</Link> : <span>Anterior</span>}
+                <span>Página {explored.page} de {explored.pages}</span>
+                {explored.next ? <Link href={clientAnamnesisHistoryHref(filters, explored.next)}>Próxima</Link> : <span>Próxima</span>}
+              </nav>
+            ) : null}
+          </>
         )}
       </Section>
       <ClientJourneyNextSteps areas={["assessments","files","index"]} />
