@@ -86,6 +86,9 @@ export default async function ClientePage() {
   const pendingFeedbackHref = firstPendingFeedback
     ? `/cliente/feedback-semanal#feedback-pendente-${firstPendingFeedback.id}`
     : null;
+  const otherPendingFeedbacks = weeklyFeedbacks
+    .filter(feedback => feedback.submitted_at === null && feedback.id !== firstPendingFeedback?.id)
+    .slice(0, 5);
   const pendingWeeklyFeedbackIds = new Set(
     weeklyFeedbacks
       .filter((feedback) => !feedback.submitted_at)
@@ -212,6 +215,11 @@ export default async function ClientePage() {
               Feedback Semanal ({pendingWeeklyFeedbackIds.size})
             </Link>
           ) : null}
+          {otherPendingFeedbacks.map(feedback => (
+            <Link key={feedback.id} className={styles.routineActionLink} href={`/cliente/feedback-semanal#feedback-pendente-${feedback.id}`}>
+              Semana de {feedback.period_start}
+            </Link>
+          ))}
           {hasDeliveredWeeklyFeedbackReminder ? (
             <Link className={styles.routineActionLink} href="/cliente/avisos">Ver avisos entregues</Link>
           ) : null}
