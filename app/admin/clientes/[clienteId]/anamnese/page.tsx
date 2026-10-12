@@ -84,7 +84,8 @@ export default async function AdminClienteAnamnesePage({
           <button type="submit">Filtrar</button>
           <Link href={`/admin/clientes/${client.id}/anamnese`}>Limpar</Link>
         </form>
-        {selected.invalid?<p role="status">Consulta ajustada para uma versão ou página disponível.</p>:null}
+        {selected.invalid || selected.pending>pendingHistory.pages || selected.submitted>submittedHistory.pages ? <p role="status">Consulta ajustada para uma versão ou página disponível.</p> : null}
+        <p role="status">{pendingHistory.total} de {pendingSubmissions.length} rascunho(s) · {submittedHistory.total} de {submittedSubmissions.length} enviada(s) correspondem ao filtro.</p>
       </Section> : null}
       {pendingSubmissions.length > 0 ? (
         <Section
@@ -93,6 +94,7 @@ export default async function AdminClienteAnamnesePage({
           id="anamnese-pending"
         title="Aguardando cliente"
         >
+          {pendingHistory.total === 0 ? <EmptyState title="Nenhum rascunho nesta versão" description="Há rascunhos anteriores, mas nenhum corresponde à versão selecionada." action={<Link href={`/admin/clientes/${client.id}/anamnese#anamnese-pending`}>Ver todas as versões</Link>} /> : null}
           <ol className={styles.submissionList}>
             {pendingHistory.items.map((submission) => {
               const version = submission.anamnesis_form_versions;
@@ -144,6 +146,7 @@ export default async function AdminClienteAnamnesePage({
           />
         ) : (
           <>
+          {submittedHistory.total === 0 ? <EmptyState title="Nenhuma Anamnese enviada nesta versão" description="As versões enviadas anteriormente continuam preservadas." action={<Link href={`/admin/clientes/${client.id}/anamnese#anamnese-submitted`}>Ver todas</Link>} /> : null}
           <ol className={styles.submissionList}>
             {submittedHistory.items.map((submission) => {
               const version = submission.anamnesis_form_versions;
