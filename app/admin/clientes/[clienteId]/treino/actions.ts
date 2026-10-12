@@ -605,3 +605,56 @@ export async function publishTrainingPlanVersionAction(
     );
   }
 }
+
+/** Explicitly copy one immutable published item into the current editable draft. */
+export async function copyPublishedTrainingItemAction(
+  clientId: string,
+  draftVersionId: string,
+  publishedVersionId: string,
+  sourceItemId: string,
+  _state: TrainingPlanFormState,
+  formData: FormData,
+): Promise<TrainingPlanFormState> {
+  try {
+    const { client, plan, version: draft } = await requireAccessibleTrainingVersion(clientId, draftVersionId);
+    if (draft.reviewed_at || draft.published_at) return initialError("O rascunho não está mais editável.");
+    if (!isUuid(publishedVersionId) || !isUuid(sourceItemId)) return initialError("Origem inválida.");
+    if (formData.getAll("confirmCopy").length !== 1 || formData.get("confirmCopy") !== "yes") {
+      return initialError("Confirme a cópia do item publicado.");
+    }
+    const versions = await listAccessibleClientTrainingPlanVersions(plan.id);
+    const sourceVersion = versions.find((v) => v.id === publishedVersionId && v.published_at !== null);
+    if (!sourceVersion || sourceVersion.id === draft.id) return initialError("Versão de origem publicada não encontrada.");
+    const [sourceItems, currentItems] = await Promise.all([
+      listAccessibleClientTrainingPlanItems(sourceVersion.id),
+      listAccessibleClientTrainingPlanItems(draft.id),
+    ]);
+    const source = sourceItems.find((item) => item.id === sourceItemId);
+    if (!source) return initialError("O exercício original não está disponível nesta publicação.");
+    const nextPosition = currentItems.reduce((max, item) => Math.max(max, item.position), 0) + 1;
+    if (!Number.isSafeInteger(nextPosition) || nextPosition > 2147483647) {
+      return initialError("Não foi possível determinar a posição do novo item.");
+    }
+    // Do not silently switch a historical linked exercise to another library version.
+    if (source.exercise_version_id) {
+      const available = await listExerciseVersionsVisibleToCurrentAdmin();
+      if (!available.some((exercise) =>
+        exercise.id === source.exercise_version_id && exercise.published_at !== null
+      )) return initialError("A versão histórica do exercício não está disponível. Adicione manualmente uma versão publicada.");
+    }
+    await createAccessibleClientTrainingPlanItem({
+      trainingPlanVersionId: draft.id,
+      position: nextPosition,
+      exerciseVersionId: source.exercise_version_id,
+      exerciseName: source.exercise_name,
+      setsText: source.sets_text,
+      repetitionsText: source.repetitions_text,
+      restText: source.rest_text,
+      executionNotes: source.execution_notes,
+    });
+    revalidateTraining(client.id);
+    return { message: "Exercício copiado para o rascunho. Revise os dados antes de publicar.", success: true };
+  } catch {
+    return initialError("Não foi possível copiar o exercício. Atualize a página e tente novamente.");
+  }
+}
