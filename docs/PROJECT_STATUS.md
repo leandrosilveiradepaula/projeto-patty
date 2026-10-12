@@ -1,3 +1,7 @@
+## Evolução — diferenças numéricas factuais (2026-10-12)
+
+As telas administrativa e da cliente distinguem a ausência de observação anterior de uma diferença numérica real igual a zero. As datas históricas inválidas mostram marcador indisponível sem interromper a consulta; diferenças são apresentadas como fatos, sem score ou julgamento de melhora/piora. Na cliente, a formatação já existente de quatro casas decimais é mantida para não esconder medições; no admin permanece a precisão já utilizada de duas casas. A evolução ainda deriva exclusivamente de avaliações finalizadas e visíveis sob RLS, sem modificar medidas ou regras do método. E2E autenticado pendente.
+
 ## Ativação e redefinição — formulário compartilhado de senha (2026-10-12)
 
 A ativação de conta e a recuperação da senha agora utilizam o mesmo formulário funcional com confirmação e validação visível dos limites existentes (8–128 caracteres), controles de revelar/ocultar cada campo e proteção contra reenvio concorrente. Os endpoints e callbacks do Auth existentes permanecem como única autoridade para mudar credenciais; dados não são persistidos no browser nem expostos em URL/log. A ativação administrativa continua exigindo MFA posterior; não há novas regras de senha nem alteração de RLS/Auth/schema. E2E autenticado e envio real de email não validados.
