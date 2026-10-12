@@ -63,6 +63,7 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
   // Exact record navigation ignores presentation filters that could hide the linked record.
   if (exactPendingPage!==null || exactSubmittedPage!==null) {
     options.origin="all";
+    options.year="all";
     options.pendingPage=exactPendingPage??1;
     options.submittedPage=exactSubmittedPage??1;
   }
