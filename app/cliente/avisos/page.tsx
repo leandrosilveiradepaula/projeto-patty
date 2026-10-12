@@ -1,5 +1,7 @@
-import { readClientNoticeQuery, exploreClientNotices, clientNoticesHref } from "@/lib/notifications/client-in-app-inbox-explorer";
+import { readClientNoticeQuery, exploreClientNotices, clientNoticesHref, availableClientNoticeYears } from "@/lib/notifications/client-in-app-inbox-explorer";
 import { Button } from "@/components/ui/Button";
+import { orderClientWeeklyFeedbacks } from "@/lib/follow-up/client-weekly-feedback-order";
+import { clientSubmittedFeedbackHref } from "@/lib/follow-up/client-weekly-feedback-explorer";
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
@@ -19,7 +21,7 @@ import {
 
 import styles from "./page.module.css";
 
-export default async function ClientNotificationsPage({ searchParams }: { searchParams: Promise<{ situacao?: string; pagina?: string }> }) {
+export default async function ClientNotificationsPage({ searchParams }: { searchParams: Promise<{ situacao?: string; ano?: string; pagina?: string }> }) {
   const client = await getCurrentClient();
   if (!client) {
     return <EmptyState title="Avisos indisponíveis" description="Seu cadastro de cliente ainda não está vinculado à conta." />;
@@ -31,7 +33,9 @@ export default async function ClientNotificationsPage({ searchParams }: { search
   ]);
   const notices = clientInAppFeedbackNotices(events, feedbacks, client.id);
   const outstanding = notices.filter(row => row.status === "pending").length;
-  const query=readClientNoticeQuery(await searchParams);
+  const noticeYears = availableClientNoticeYears(notices);
+  const submittedFeedbacks = orderClientWeeklyFeedbacks(feedbacks).filter(feedback => feedback.submitted_at !== null);
+  const query=readClientNoticeQuery(await searchParams,noticeYears);
   const explored=exploreClientNotices(notices,query);
 
   return (
@@ -53,8 +57,14 @@ export default async function ClientNotificationsPage({ searchParams }: { search
                 <option value="responded">Já respondidos</option>
               </select>
             </label>
+            <label>Ano
+              <select name="ano" defaultValue={query.year}>
+                <option value="all">Todos os anos</option>
+                {noticeYears.map(year => <option key={year} value={year}>{year}</option>)}
+              </select>
+            </label>
             <Button type="submit" variant="secondary">Filtrar avisos</Button>
-            {query.status !== "all" ? <Link href="/cliente/avisos">Limpar</Link> : null}
+            {query.status !== "all" || query.year !== "all" ? <Link href="/cliente/avisos">Limpar</Link> : null}
           </form>
           <p role="status">{explored.total} de {notices.length} aviso(s) correspondente(s).</p>
           {query.invalid || query.page>explored.pageCount ? <p role="status">Página ou filtro indisponível. Exibimos avisos já autorizados.</p> : null}
@@ -85,8 +95,8 @@ export default async function ClientNotificationsPage({ searchParams }: { search
                       Abrir Feedback Semanal pendente
                     </Link>
                   ) : (
-                    <Link className={styles.action} href="/cliente/feedback-semanal">
-                      Consultar histórico de respostas
+                    <Link className={styles.action} href={clientSubmittedFeedbackHref(submittedFeedbacks, feedback.id) ?? "/cliente/feedback-semanal#historico-enviado"}>
+                      Abrir resposta enviada
                     </Link>
                   )}
                 </Card>
@@ -95,8 +105,8 @@ export default async function ClientNotificationsPage({ searchParams }: { search
           </ol>
           {explored.pageCount>1 ? <nav aria-label="Páginas de avisos" className={styles.pages}>
             <span>Página {explored.page} de {explored.pageCount}</span>
-            {explored.page>1 ? <Link href={clientNoticesHref(query.status,explored.page-1)}>Anterior</Link> : null}
-            {explored.page<explored.pageCount ? <Link href={clientNoticesHref(query.status,explored.page+1)}>Próxima</Link> : null}
+            {explored.page>1 ? <Link href={clientNoticesHref(query.status,explored.page-1,query.year)}>Anterior</Link> : null}
+            {explored.page<explored.pageCount ? <Link href={clientNoticesHref(query.status,explored.page+1,query.year)}>Próxima</Link> : null}
           </nav> : null}
           </>
         )}

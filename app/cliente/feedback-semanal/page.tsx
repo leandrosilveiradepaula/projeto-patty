@@ -1,4 +1,4 @@
-import { availableClientFeedbackHistoryYears, readClientFeedbackHistoryQuery, exploreClientFeedbackHistory, clientFeedbackHistoryHref } from "@/lib/follow-up/client-weekly-feedback-explorer";
+import { availableClientFeedbackHistoryYears, readClientFeedbackHistoryQuery, exploreClientFeedbackHistory, clientFeedbackHistoryHref, formatClientFeedbackHistoryMonth } from "@/lib/follow-up/client-weekly-feedback-explorer";
 import { Button } from "@/components/ui/Button";
 import { fingerprintWeeklyFeedbackAnswers } from "@/lib/weekly-feedback/draft-fingerprint";
 import { ClientHistoryDisclosure } from "@/components/client/ClientHistoryDisclosure";
@@ -28,7 +28,7 @@ import { formatWeeklyFeedbackPeriodDate, formatWeeklyFeedbackDueDate } from "@/l
 const formatDate = formatWeeklyFeedbackPeriodDate;
 const formatDueAt = formatWeeklyFeedbackDueDate;
 
-export default async function ClientWeeklyFeedbackPage({ searchParams }: { searchParams: Promise<{ origem?: string; ano?: string; pagina?: string }> }) {
+export default async function ClientWeeklyFeedbackPage({ searchParams }: { searchParams: Promise<{ origem?: string; ano?: string; mes?: string; pagina?: string }> }) {
   const client = await getCurrentClient();
 
   if (!client) {
@@ -194,8 +194,16 @@ export default async function ClientWeeklyFeedbackPage({ searchParams }: { searc
                     {years.map(year => <option value={year} key={year}>{year}</option>)}
                   </select>
                 </label>
+                <label>Mês
+                  <select name="mes" defaultValue={historyFilters.month}>
+                    <option value="all">Todos os meses</option>
+                    {Array.from({ length: 12 }, (_, month) => String(month + 1).padStart(2, "0")).map(month => (
+                      <option key={month} value={month}>{formatClientFeedbackHistoryMonth(month)}</option>
+                    ))}
+                  </select>
+                </label>
                 <Button type="submit" variant="secondary">Filtrar</Button>
-                {(historyFilters.origin!=="all"||historyFilters.year!=="all") ? <Link href="/cliente/feedback-semanal#historico-enviado">Limpar</Link> : null}
+                {(historyFilters.origin!=="all"||historyFilters.year!=="all"||historyFilters.month!=="all") ? <Link href="/cliente/feedback-semanal#historico-enviado">Limpar</Link> : null}
               </form>
               <p role="status">{submittedHistory.total} de {submittedFeedbacks.length} resposta(s) encontrada(s).</p>
               {historyFilters.invalid || historyFilters.page>submittedHistory.pages ? <Alert title="Consulta ajustada" variant="info">Exibindo somente histórico disponível nesta conta.</Alert> : null}
@@ -206,6 +214,8 @@ export default async function ClientWeeklyFeedbackPage({ searchParams }: { searc
                 description="Ainda não existe Feedback Semanal enviado no histórico. Respostas futuras ficarão preservadas aqui para consulta."
                 title="Nenhum feedback enviado ainda"
               />
+            ) : submittedHistory.total === 0 ? (
+              <EmptyState title="Nenhuma resposta encontrada" description="Não há feedbacks enviados com os filtros selecionados." action={<Link href="/cliente/feedback-semanal#historico-enviado">Ver histórico completo</Link>} />
             ) : (
               <>
               <ol className={styles.historyList}>
