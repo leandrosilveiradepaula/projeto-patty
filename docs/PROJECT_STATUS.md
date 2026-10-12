@@ -1,3 +1,7 @@
+## Correção de autorização para histórico finalizado da cliente (2026-10-12)
+
+Auditoria da RLS remota identificou que `client_assessments` estava sem policy de leitura para a própria cliente: a migration de leitura efetiva de medidas havia removido a policy anterior. A nova migration `20261012150000_allow_own_finalized_assessment_history.sql` restaura somente SELECT de cabeçalhos de avaliações finalizadas pertencentes ao `clients.profile_id = auth.uid()`. Não concede acesso a drafts, medidas brutas, correções, fotos, outras clientes ou mutações. A leitura de medidas continua via RPC existente. **Estado: migration adicionada ao repositório, não aplicada remotamente**; a jornada do PR #738 permanece incompleta em produção até aplicação controlada e verificação autenticada.
+
 ## Histórico da cliente inclui avaliações finalizadas sem medidas (2026-10-12)
 
 A tela de avaliações da cliente passa a listar todas as avaliações finalizadas acessíveis à própria sessão, mesmo se não houver qualquer medida liberada ou registrada, diferenciando explicitamente ausência de medidas de ausência de avaliação. A lista usa `getCurrentClient` e consulta RLS de avaliações do próprio `client_id`; somente avaliações com `finalized_at` são exibidas. Medidas órfãs/inacessíveis não criam avaliações fictícias. Não amplia leitura de drafts, fotos, observações profissionais ou outros recursos. Sem migrations, mudança de Auth/RLS/schema ou IA. E2E autenticado pendente.
