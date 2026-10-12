@@ -192,6 +192,12 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
                 </li>
               );
             })}
+          </ol>
+          {pendingPage.pageCount > 1 ? <nav aria-label="Páginas de feedbacks pendentes" className={styles.explorerPages}>
+            <span>Página {pendingPage.page} de {pendingPage.pageCount}</span>
+            {pendingPage.page > 1 ? <Link href={professionalFeedbackHistoryHref(client.id,{...options,pendingPage:pendingPage.page-1,submittedPage:submittedPage.page},"pending")}>Anterior</Link> : null}
+            {pendingPage.page < pendingPage.pageCount ? <Link href={professionalFeedbackHistoryHref(client.id,{...options,pendingPage:pendingPage.page+1,submittedPage:submittedPage.page},"pending")}>Próxima</Link> : null}
+          </nav> : null}
           </>
         )}
       </Section>
