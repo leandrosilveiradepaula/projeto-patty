@@ -1,4 +1,4 @@
-import { formatFactualAssessmentDate, formatFactualMeasurement, formatFactualDelta } from "@/lib/evaluations/progress-format";
+import { formatFactualAssessmentDate } from "@/lib/evaluations/progress-format";
 import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
@@ -166,10 +166,9 @@ export default async function ClientProgressPage({ searchParams }: {
                             {precisionSafeProgressNumber(point.value)} {item.unit}
                           </td>
                           <td data-label="Diferença vs. anterior">
-                            {precisionSafeProgressDelta(point.deltaFromPrevious)}
-                            {point.deltaFromPrevious === null
-                              ? ""
-                              : " " + item.unit}
+                            {point.deltaFromPrevious === null || !Number.isFinite(point.deltaFromPrevious)
+                              ? "Sem comparação anterior"
+                              : precisionSafeProgressDelta(point.deltaFromPrevious) + " " + item.unit}
                           </td>
                           <td data-label="Avaliação">
                             <Link
