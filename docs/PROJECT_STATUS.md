@@ -1,3 +1,7 @@
+## Feedback semanal — destinos exatos e recuperação de pendências (2026-10-12)
+
+Links do painel inicial, da central de avisos e da fila da Patty passam a abrir a solicitação pendente exata de Feedback Semanal, mesmo quando a semana correspondente não é a primeira da lista. Os formulários da cliente ficam em disclosures acessíveis que revelam o alvo de hash e preservam a possibilidade de abrir/fechar manualmente; o primeiro pendente continua aberto por padrão. A Patty navega diretamente ao registro autorizado e vê as solicitações em ordem factual; histórico enviado mantém IDs navegáveis. Nenhuma resposta de saúde entra no link. Não muda geração semanal, canal de entrega, validação, RLS/Auth, versionamento, publish ou banco. E2E autenticado em produção pendente.
+
 ## Anamnese — revisão profissional histórica integral (2026-10-12)
 
 As notas internas append-only de Anamnese passam a ser recuperadas integralmente sob Auth/RLS, inclusive quando o número excede uma página do PostgREST ou a consulta agrega muitas submissões. Os resumos de cada submissão apresentam contagem factual de notas e acesso à última revisão exata; a tela de revisão permite saltar à nota específica sem sobrescrever conteúdo. Datas legadas inválidas não interrompem a leitura. Correções da resposta original, esclarecimentos, autoria e autorização permanecem separados. Sem alteração de schema, migrations, RLS, lógica de IA, score ou publicação. E2E autenticado real pendente.

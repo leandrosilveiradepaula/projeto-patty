@@ -1,4 +1,5 @@
 import { fingerprintWeeklyFeedbackAnswers } from "@/lib/weekly-feedback/draft-fingerprint";
+import { ClientHistoryDisclosure } from "@/components/client/ClientHistoryDisclosure";
 import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
 import { ClientWeeklyFeedbackResponseForm } from "./ClientWeeklyFeedbackResponseForm";
 import { Alert } from "@/components/ui/Alert";
@@ -94,6 +95,15 @@ export default async function ClientWeeklyFeedbackPage() {
             description="Respostas ainda não enviadas. Abra a semana desejada para continuar um rascunho ou concluir o envio."
             title="Pendentes"
           >
+            {pendingFeedbacks.length > 1 ? (
+              <nav aria-label="Ir para Feedback Semanal pendente" className={styles.feedbackNavigation}>
+                {pendingFeedbacks.map((feedback, index) => (
+                  <a href={`#feedback-pendente-${feedback.id}`} key={feedback.id}>
+                    {index + 1}. Semana de {formatDate(feedback.period_start)} a {formatDate(feedback.period_end)}
+                  </a>
+                ))}
+              </nav>
+            ) : null}
             {pendingFeedbacks.length === 0 ? (
               <EmptyState
                 description="Não há Feedback Semanal aguardando sua resposta neste momento. Novas solicitações aparecerão aqui quando estiverem disponíveis."
@@ -108,19 +118,20 @@ export default async function ClientWeeklyFeedbackPage() {
                     : null;
 
                   return (
-                    <li id={`feedback-pendente-${feedback.id}`} key={feedback.id}>
-                      <details
+                    <li key={feedback.id}>
+                      <ClientHistoryDisclosure
                         className={styles.pendingItem}
-                        open={feedbackIndex === 0}
-                      >
-                        <summary className={styles.pendingSummary}>
+                        defaultOpen={feedbackIndex === 0}
+                        id={`feedback-pendente-${feedback.id}`}
+                        summary={<span className={styles.pendingSummary}>
                           <span>
                             Semana de {formatDate(feedback.period_start)} a {formatDate(feedback.period_end)}
                           </span>
                           <Badge variant="warning">
                             {feedbackIndex === 0 ? "Responder agora" : "Pendente"}
                           </Badge>
-                        </summary>
+                        </span>}
+                      >
                         <div className={styles.pendingContent}>
                       <Card className={styles.card}>
                         {inAppReminderFeedbackIds.has(feedback.id) ? (
@@ -161,7 +172,7 @@ export default async function ClientWeeklyFeedbackPage() {
                         )}
                       </Card>
                         </div>
-                      </details>
+                      </ClientHistoryDisclosure>
                     </li>
                   );
                 })}
@@ -189,13 +200,8 @@ export default async function ClientWeeklyFeedbackPage() {
 
                   return (
                     <li key={feedback.id}>
-                      <details className={styles.historyItem}>
-                        <summary>
-                          <span>
-                            Semana de {formatDate(feedback.period_start)} a {formatDate(feedback.period_end)}
-                          </span>
-                          <Badge variant="positive">Enviado</Badge>
-                        </summary>
+                      <ClientHistoryDisclosure className={styles.historyItem} id={`feedback-enviado-${feedback.id}`} summary={<><span>Semana de {formatDate(feedback.period_start)} a {formatDate(feedback.period_end)}</span><Badge variant="positive">Enviado</Badge></>}>
+
                         <div className={styles.historyContent}>
                           {feedback.due_at ? (
                             <p className={styles.meta}>
@@ -217,7 +223,7 @@ export default async function ClientWeeklyFeedbackPage() {
                             </dl>
                           )}
                         </div>
-                      </details>
+                      </ClientHistoryDisclosure>
                     </li>
                   );
                 })}
