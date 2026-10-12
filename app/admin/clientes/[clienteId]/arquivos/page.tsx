@@ -1,3 +1,4 @@
+import { PrivatePhotoComparison } from "@/components/files/PrivatePhotoComparison";
 import { AdminPrivateFileReleaseForm } from "@/components/admin/AdminPrivateFileReleaseForm";
 import { isPreviewablePrivateFileMimeType } from "@/lib/files/private-file-preview";
 import { AdminPrivateFileUploadForm } from "@/components/admin/AdminPrivateFileUploadForm";
@@ -18,7 +19,7 @@ import { matchesPrivateFilePreviewFilter, paginatePrivateFileHistory, privateFil
 
 type AdminClientFilesPageProps = {
   params: Promise<{ clienteId: string }>;
-  searchParams: Promise<{ categoria?: string; origem?: string; formato?: string; visualizacao?: string; ordem?: string; paginaPendentes?: string; paginaHistorico?: string }>;
+  searchParams: Promise<{ categoria?: string; origem?: string; formato?: string; visualizacao?: string; ordem?: string; paginaPendentes?: string; paginaHistorico?: string; fotoAntes?: string; fotoDepois?: string }>;
 };
 
 const fileKindLabels: Record<string, string> = {
@@ -103,6 +104,7 @@ export default async function AdminClientFilesPage({
         status={<Badge variant="neutral">{files.length} arquivo(s)</Badge>}
       />
       <ClientWorkspaceNav activeArea="arquivos" clientId={client.id} />
+      <PrivatePhotoComparison files={files} clientId={client.id} before={filters.fotoAntes} after={filters.fotoDepois} path={`/admin/clientes/${client.id}/arquivos`} fileRoute="/admin/arquivos" />
       <Section
         description="Envie o arquivo em nome da cliente. O upload administrativo permanece privado e oculto até a decisão explícita de liberação."
         title="Enviar arquivo em nome da cliente"

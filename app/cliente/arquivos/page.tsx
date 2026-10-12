@@ -1,3 +1,4 @@
+import { PrivatePhotoComparison } from "@/components/files/PrivatePhotoComparison";
 import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
 import { ClientPrivateFileUploadForm } from "@/components/client/ClientPrivateFileUploadForm";
 import { isPreviewablePrivateFileMimeType } from "@/lib/files/private-file-preview";
@@ -49,8 +50,8 @@ function formatCreatedAt(value: string) {
   }).format(new Date(value));
 }
 
-export default async function ClientFilesPage({ searchParams }: { searchParams: Promise<{ categoria?: string; origem?: string; formato?: string; ordem?: string; pagina?: string }> }) {
-  const { categoria, origem, formato, ordem, pagina } = await searchParams;
+export default async function ClientFilesPage({ searchParams }: { searchParams: Promise<{ categoria?: string; origem?: string; formato?: string; ordem?: string; pagina?: string; fotoAntes?: string; fotoDepois?: string }> }) {
+  const { categoria, origem, formato, ordem, pagina, fotoAntes, fotoDepois } = await searchParams;
   const kind = readPrivateFileKindFilter(categoria);
   const origin = readPrivateFileOriginFilter(origem);
   const preview = readPrivateFilePreviewFilter(formato);
@@ -89,6 +90,7 @@ export default async function ClientFilesPage({ searchParams }: { searchParams: 
         title="Meus arquivos"
       />
 
+      <PrivatePhotoComparison files={files} clientId={client.id} before={fotoAntes} after={fotoDepois} path="/cliente/arquivos" fileRoute="/cliente/arquivos" />
       <Section
         id="enviar-arquivo"
         description="O arquivo passa por uma validação antes de entrar no seu histórico."
