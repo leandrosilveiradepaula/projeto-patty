@@ -26,7 +26,7 @@ test("AI recovery navigation resolves exact authorized execution and exposes onl
  assert.match(page,/rawQuery.execucao/);
  assert.match(page,/execution.provider/);
  assert.match(page,/execution.model_identifier/);
- assert.match(page,/id={`execucao-ia-${execution.id}`}/);
+ assert.ok(page.includes("id={\`execucao-ia-${execution.id}\`}"));
 });
 test("non-Anamnese AI queue item opens the matching recovery entry",()=>{
  const queue=buildOperationalPendingItems({...basic,aiExecutions:[{clientId:"client-x",clientLabel:"X",createdAt:"2026-10-12T12:00:00Z",id:"run-37",purposeKey:"unknown"}]});
