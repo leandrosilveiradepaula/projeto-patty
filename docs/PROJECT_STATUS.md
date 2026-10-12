@@ -1,3 +1,7 @@
+## Ativação e redefinição — formulário compartilhado de senha (2026-10-12)
+
+A ativação de conta e a recuperação da senha agora utilizam o mesmo formulário funcional com confirmação e validação visível dos limites existentes (8–128 caracteres), controles de revelar/ocultar cada campo e proteção contra reenvio concorrente. Os endpoints e callbacks do Auth existentes permanecem como única autoridade para mudar credenciais; dados não são persistidos no browser nem expostos em URL/log. A ativação administrativa continua exigindo MFA posterior; não há novas regras de senha nem alteração de RLS/Auth/schema. E2E autenticado e envio real de email não validados.
+
 ## Auth — campos únicos de senha e recuperação (2026-10-12)
 
 As ações de ativação, redefinição e solicitação de recuperação rejeitam campos de senha/confirmação/email duplicados ou enviados como arquivos antes de chamar o Supabase Auth. O navegador mantém o formulário existente; não há nova política de senha, alteração de token, sessão, reset ou role. A validação nunca devolve as credenciais nas mensagens de erro. Testes usam somente credenciais sintéticas; verificação E2E autenticada não foi executada.
