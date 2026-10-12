@@ -174,7 +174,7 @@ export default async function ClientProgressPage({ searchParams }: {
                             <Link
                               aria-label={`Abrir avaliação de ${formatFactualAssessmentDate(point.assessedAt)} para ${item.label}`}
                               className={styles.assessmentDetailLink}
-                              href={`/cliente/avaliacoes#avaliacao-${point.assessmentId}`}
+                              href={`/cliente/avaliacoes?avaliacao=${point.assessmentId}#avaliacao-${point.assessmentId}`}
                             >
                               Ir à avaliação
                             </Link>
