@@ -9,7 +9,7 @@ import {
 
 const rows = [
   { id: "draft", created_at: "2026-10-02T10:00:00Z", submitted_at: null, anamnesis_form_versions: { version_number: 2 } },
-  { id: "response", created_at: "2026-10-01T20:00:00-03:00", submitted_at: "2026-10-02", anamnesis_form_versions: { version_number: 2 } },
+  { id: "response", created_at: "2026-10-02T20:00:00-03:00", submitted_at: "2026-10-02", anamnesis_form_versions: { version_number: 2 } },
   { id: "review", created_at: "2026-09-01T00:00:00Z", submitted_at: "2026-09-02", anamnesis_form_versions: { version_number: 1 } },
   { id: "legacy", created_at: "invalid-legacy-date", submitted_at: "2026-08-03", anamnesis_form_versions: null },
 ];
