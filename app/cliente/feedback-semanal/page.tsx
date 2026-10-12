@@ -21,23 +21,10 @@ import styles from "./page.module.css";
 import Link from "next/link";
 import { orderClientWeeklyFeedbacks } from "@/lib/follow-up/client-weekly-feedback-order";
 
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    timeZone: "America/Sao_Paulo",
-  }).format(new Date(value + "T12:00:00-03:00"));
-}
+import { formatWeeklyFeedbackPeriodDate, formatWeeklyFeedbackDueDate } from "@/lib/weekly-feedback/date-format";
 
-function formatDueAt(value: string | null) {
-  if (!value) return null;
-  return new Intl.DateTimeFormat("pt-BR", {
-    dateStyle: "short",
-    timeStyle: "short",
-    timeZone: "America/Sao_Paulo",
-  }).format(new Date(value));
-}
+const formatDate = formatWeeklyFeedbackPeriodDate;
+const formatDueAt = formatWeeklyFeedbackDueDate;
 
 export default async function ClientWeeklyFeedbackPage() {
   const client = await getCurrentClient();
