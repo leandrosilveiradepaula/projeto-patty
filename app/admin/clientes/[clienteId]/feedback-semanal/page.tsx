@@ -1,5 +1,5 @@
 import { authorizedExactRecordPage } from "@/lib/operations/exact-record-navigation";
-import { readProfessionalFeedbackHistoryQuery, filterProfessionalFeedbacks, paginateProfessionalFeedbacks, professionalFeedbackHistoryHref } from "@/lib/follow-up/professional-weekly-feedback-explorer";
+import { professionalFeedbackYears, readProfessionalFeedbackHistoryQuery, filterProfessionalFeedbacks, paginateProfessionalFeedbacks, professionalFeedbackHistoryHref } from "@/lib/follow-up/professional-weekly-feedback-explorer";
 import { formatWeeklyFeedbackPeriodDate } from "@/lib/weekly-feedback/date-format";
 import { Button } from "@/components/ui/Button";
 import { orderClientWeeklyFeedbacks } from "@/lib/follow-up/client-weekly-feedback-order";
@@ -25,7 +25,7 @@ import styles from "./page.module.css";
 
 type PageProps = {
   params: Promise<{ clienteId: string }>;
-  searchParams: Promise<{ origem?: string; pendentes?: string; enviados?: string; registro?: string }>;
+  searchParams: Promise<{ origem?: string; ano?: string; pendentes?: string; enviados?: string; registro?: string }>;
 };
 
 const formatDate = formatWeeklyFeedbackPeriodDate;
@@ -56,7 +56,8 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
   const rawPendingCount=orderedFeedbacks.filter(f=>f.submitted_at===null).length;
   const rawSubmittedCount=orderedFeedbacks.length-rawPendingCount;
   const rawQuery=await searchParams;
-  const options=readProfessionalFeedbackHistoryQuery(rawQuery);
+  const years=professionalFeedbackYears(orderedFeedbacks);
+  const options=readProfessionalFeedbackHistoryQuery(rawQuery,years);
   const exactPendingPage=authorizedExactRecordPage(orderedFeedbacks.filter(f=>f.submitted_at===null),rawQuery.registro,10);
   const exactSubmittedPage=authorizedExactRecordPage(orderedFeedbacks.filter(f=>f.submitted_at!==null),rawQuery.registro,10);
   // Exact record navigation ignores presentation filters that could hide the linked record.
@@ -65,8 +66,8 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
     options.pendingPage=exactPendingPage??1;
     options.submittedPage=exactSubmittedPage??1;
   }
-  const pendingFeedbacks=filterProfessionalFeedbacks(orderedFeedbacks,options.origin,false);
-  const submittedFeedbacks=filterProfessionalFeedbacks(orderedFeedbacks,options.origin,true);
+  const pendingFeedbacks=filterProfessionalFeedbacks(orderedFeedbacks,options.origin,false,options.year);
+  const submittedFeedbacks=filterProfessionalFeedbacks(orderedFeedbacks,options.origin,true,options.year);
   const pendingPage=paginateProfessionalFeedbacks(pendingFeedbacks,options.pendingPage);
   const submittedPage=paginateProfessionalFeedbacks(submittedFeedbacks,options.submittedPage);
   const displayName = client.full_name?.trim() || client.profiles?.display_name?.trim();
@@ -127,8 +128,9 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
               <option value="manual">Manual</option>
             </select>
           </label>
+          <label>Ano<select name="ano" defaultValue={options.year}><option value="all">Todos os anos</option>{years.map(year=><option key={year} value={year}>{year}</option>)}</select></label>
           <Button type="submit" variant="secondary">Filtrar histórico</Button>
-          {options.origin !== "all" ? <Link href={`/admin/clientes/${client.id}/feedback-semanal`}>Limpar</Link> : null}
+          {options.origin !== "all" || options.year !== "all" ? <Link href={`/admin/clientes/${client.id}/feedback-semanal`}>Limpar</Link> : null}
         </form>
         <p role="status">{pendingFeedbacks.length} de {rawPendingCount} pendente(s) · {submittedFeedbacks.length} de {rawSubmittedCount} enviado(s) no filtro atual.</p>
         {options.invalid || options.pendingPage > pendingPage.pageCount || options.submittedPage > submittedPage.pageCount ? (
