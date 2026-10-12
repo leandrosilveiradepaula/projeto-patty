@@ -8,7 +8,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import { TextInput } from "@/components/ui/TextInput";
 import { listClientsForPrivateFileAdministration } from "@/lib/files/private-file-admin";
-import { matchesClientDirectoryName, matchesPrivateFileDirectoryFilters, orderClientsForPrivateFileDirectory, paginatePrivateFileDirectory, privateFileDirectoryHref, readClientDirectorySearchTerm, readPrivateFileDirectoryLinkFilter, readPrivateFileDirectoryPage, readPrivateFileDirectoryStatus } from "@/lib/clients/client-directory-search";
+import { matchesClientDirectoryName, matchesPrivateFileDirectoryFilters, orderClientsForPrivateFileDirectory, paginatePrivateFileDirectory, privateFileDirectoryHref, readClientDirectorySearchTerm, readPrivateFileDirectoryLinkFilter, readPrivateFileDirectoryPage, readPrivateFileDirectoryStatus, visiblePrivateFileDirectoryPages } from "@/lib/clients/client-directory-search";
 
 import styles from "./page.module.css";
 
@@ -102,7 +102,7 @@ export default async function AdminPrivateFilesPage({
           />
         ) : filteredClients.length === 0 ? (
           <EmptyState
-            description={`Não encontramos nenhuma cliente com “${searchTerm}”.`}
+            description="Nenhuma cliente corresponde à combinação de busca, situação e vínculo da conta."
             title="Nenhuma cliente encontrada"
             action={<Link href="/admin/arquivos">Limpar busca</Link>}
           />
@@ -142,7 +142,11 @@ export default async function AdminPrivateFilesPage({
             {page.pageCount > 1 ? (
               <nav aria-label="Páginas das clientes com arquivos privados" className={styles.directoryPagination}>
                 {page.page > 1 ? <Link href={href(page.page - 1)}>Anterior</Link> : null}
-                <span>Página {page.page} de {page.pageCount}</span>
+                {visiblePrivateFileDirectoryPages(page.page, page.pageCount).map(number =>
+                  number === page.page
+                    ? <strong key={number} aria-current="page">Página {number}</strong>
+                    : <Link key={number} href={href(number)} aria-label={`Ir para página ${number}`}>{number}</Link>
+                )}
                 {page.page < page.pageCount ? <Link href={href(page.page + 1)}>Próxima</Link> : null}
               </nav>
             ) : null}
