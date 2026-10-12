@@ -1725,6 +1725,19 @@ export async function listCurrentClientFinalizedAssessmentMeasurements() {
   return data;
 }
 
+export async function listCurrentClientFinalizedAssessmentHeaders() {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc(
+    "list_current_client_finalized_assessment_headers",
+  );
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
 export async function listAccessibleAssessmentsForClient(clientId: string) {
   const supabase = await createClient();
   const rows = await collectAdminDirectoryPages((from, to) => supabase
