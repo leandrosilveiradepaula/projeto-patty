@@ -118,6 +118,7 @@ export default async function AdminAvaliacoesPage({ searchParams }: { searchPara
                 <li key={assessment.id}>
                   <EvaluationListItem
                     action={
+                      <>
                       <Link className={styles.clientLink} href={`/admin/clientes/${assessment.clientId}`}>Ver cliente</Link>
                       <Link
                         aria-label={`Ver avaliação de ${displayName || "cliente sem nome informado"}`}
@@ -126,6 +127,7 @@ export default async function AdminAvaliacoesPage({ searchParams }: { searchPara
                       >
                         Ver avaliação
                       </Link>
+                      </>
                     }
                     clientLabel={displayName || "Cliente sem nome informado"}
                     evaluationDate={formatAdministrativeAssessmentDate(assessment.assessed_at)}
