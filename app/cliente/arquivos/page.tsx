@@ -13,9 +13,9 @@ import {
 } from "@/lib/supabase/data-access";
 
 import styles from "./page.module.css";
-import { formatPrivateFileRecordedAt, formatPrivateFileSize, readPrivateFileKindFilter } from "@/lib/files/private-file-history-view";
+import { formatPrivateFileRecordedAt, formatPrivateFileSize, matchesPrivateFileFilters, privateFileOriginLabel, readPrivateFileKindFilter, readPrivateFileOriginFilter } from "@/lib/files/private-file-history-view";
 
-import { paginatePrivateFileHistory, privateFileHistoryHref, readPrivateFileHistoryPage, readPrivateFileHistorySort, sortPrivateFileHistory, countPrivateFileCategories, visiblePrivateFilePageNumbers } from "@/lib/files/private-file-history-workspace";
+import { matchesPrivateFilePreviewFilter, paginatePrivateFileHistory, privateFileHistoryHref, readPrivateFileHistoryPage, readPrivateFileHistorySort, readPrivateFilePreviewFilter, sortPrivateFileHistory, countPrivateFileCategories, visiblePrivateFilePageNumbers } from "@/lib/files/private-file-history-workspace";
 
 const fileKindLabels: Record<string, string> = {
   document: "Documento",
@@ -49,9 +49,14 @@ function formatCreatedAt(value: string) {
   }).format(new Date(value));
 }
 
-export default async function ClientFilesPage({ searchParams }: { searchParams: Promise<{ categoria?: string; ordem?: string; pagina?: string }> }) {
-  const { categoria, ordem, pagina } = await searchParams;
+export default async function ClientFilesPage({ searchParams }: { searchParams: Promise<{ categoria?: string; origem?: string; formato?: string; ordem?: string; pagina?: string }> }) {
+  const { categoria, origem, formato, ordem, pagina } = await searchParams;
   const kind = readPrivateFileKindFilter(categoria);
+  const origin = readPrivateFileOriginFilter(origem);
+  const preview = readPrivateFilePreviewFilter(formato);
+  const invalidScopeFilter =
+    (categoria !== undefined && categoria !== "all" && kind === "all") ||
+    (origem !== undefined && origem !== "all" && origin === "all");
   const client = await getCurrentClient();
 
   if (!client) {
@@ -66,11 +71,15 @@ export default async function ClientFilesPage({ searchParams }: { searchParams: 
   const files = await listCurrentClientFiles(client.id);
   const order = readPrivateFileHistorySort(ordem);
   const requestedPage = readPrivateFileHistoryPage(pagina);
-  const filteredFiles = sortPrivateFileHistory(files.filter(file => kind === "all" || file.file_kind === kind), order.value);
+  const filteredFiles = sortPrivateFileHistory(
+    files.filter(file => matchesPrivateFileFilters(file, client.profile_id, kind, origin)
+      && matchesPrivateFilePreviewFilter(file.mime_type, preview.value)),
+    order.value,
+  );
   const visiblePage = paginatePrivateFileHistory(filteredFiles, requestedPage.page);
   const categories = countPrivateFileCategories(files);
   const historyPath = "/cliente/arquivos";
-  const historyHref = (page: number) => privateFileHistoryHref(historyPath, { categoria: kind, ordem: order.value, pagina: page, anchor: "lista-arquivos" });
+  const historyHref = (page: number) => privateFileHistoryHref(historyPath, { categoria: kind, origem: origin, formato: preview.value, ordem: order.value, pagina: page, anchor: "lista-arquivos" });
 
   return (
     <>
@@ -95,6 +104,20 @@ export default async function ClientFilesPage({ searchParams }: { searchParams: 
               <option value="all">Todas</option><option value="photo">Fotos</option><option value="exam">Exames</option><option value="document">Documentos</option>
             </select>
           </label>
+          <label>Origem
+            <select name="origem" defaultValue={origin}>
+              <option value="all">Todas</option>
+              <option value="client">Enviados por mim</option>
+              <option value="team">Equipe ou origem não identificada</option>
+            </select>
+          </label>
+          <label>Disponibilidade
+            <select name="formato" defaultValue={preview.value}>
+              <option value="all">Todos os formatos</option>
+              <option value="previewable">Com prévia compatível</option>
+              <option value="download_only">Apenas download</option>
+            </select>
+          </label>
           <label>Ordenação
             <select name="ordem" defaultValue={order.value}>
               <option value="newest">Mais recentes</option>
@@ -102,6 +125,7 @@ export default async function ClientFilesPage({ searchParams }: { searchParams: 
               <option value="largest">Maiores arquivos</option>
               <option value="smallest">Menores arquivos</option>
               <option value="kind">Por categoria</option>
+              <option value="released">Disponibilizados mais recentemente</option>
             </select>
           </label>
           <button type="submit">Filtrar</button>
@@ -110,7 +134,7 @@ export default async function ClientFilesPage({ searchParams }: { searchParams: 
         <p role="status">{filteredFiles.length} de {files.length} arquivo(s) disponível(is) · Fotos: {categories.photo}, exames: {categories.exam}, documentos: {categories.document}.</p>
       </Section>
       <div id="lista-arquivos" className={styles.historyAnchor}>
-      {(order.invalid || requestedPage.invalid || visiblePage.outOfRange) ? (
+      {(invalidScopeFilter || preview.invalid || order.invalid || requestedPage.invalid || visiblePage.outOfRange) ? (
         <p className={styles.filterNotice} role="status">O filtro ou a página solicitada não está disponível. Exibimos uma página válida dos seus arquivos autorizados.</p>
       ) : null}
       <Section
@@ -120,7 +144,7 @@ export default async function ClientFilesPage({ searchParams }: { searchParams: 
       >
         {filteredFiles.length === 0 ? (
           <EmptyState
-            description={files.length === 0 ? "Ainda não há arquivos disponíveis no histórico. Você pode enviar uma foto, um exame ou um documento pelo formulário acima." : "Nenhum arquivo corresponde à categoria escolhida. Limpe os filtros para consultar os demais arquivos."}
+            description={files.length === 0 ? "Ainda não há arquivos disponíveis no histórico. Você pode enviar uma foto, um exame ou um documento pelo formulário acima." : "Nenhum arquivo corresponde aos filtros escolhidos. Limpe os filtros para consultar os demais arquivos."}
             title="Nenhum arquivo disponível"
             action={files.length === 0 ? <a href="#enviar-arquivo">Ir para envio</a> : <Link href="/cliente/arquivos">Limpar filtros</Link>}
           />
@@ -134,9 +158,14 @@ export default async function ClientFilesPage({ searchParams }: { searchParams: 
                       {file.original_filename?.trim() ||
                         "Arquivo sem nome informado"}
                     </h3>
-                    <Badge variant="neutral">
-                      {fileKindLabels[file.file_kind] ?? file.file_kind}
-                    </Badge>
+                    <div className={styles.fileBadges}>
+                      <Badge variant="neutral">
+                        {fileKindLabels[file.file_kind] ?? file.file_kind}
+                      </Badge>
+                      <Badge variant="neutral">
+                        {privateFileOriginLabel(file, client.profile_id, "client")}
+                      </Badge>
+                    </div>
                   </div>
                   <dl className={styles.fileMeta}>
                     <div>
@@ -148,9 +177,15 @@ export default async function ClientFilesPage({ searchParams }: { searchParams: 
                       <dd>{formatPrivateFileSize(file.byte_size)}</dd>
                     </div>
                     <div>
-                      <dt>Enviado em</dt>
+                      <dt>Registrado em</dt>
                       <dd>{formatPrivateFileRecordedAt(file.created_at)}</dd>
                     </div>
+                    {file.client_visible_at ? (
+                      <div>
+                        <dt>Disponível para você desde</dt>
+                        <dd>{formatPrivateFileRecordedAt(file.client_visible_at)}</dd>
+                      </div>
+                    ) : null}
                   </dl>
                   <div className={styles.fileActions}>
                     {isPreviewablePrivateFileMimeType(file.mime_type) ? (

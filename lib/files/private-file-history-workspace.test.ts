@@ -9,6 +9,8 @@ import {
   readPrivateFileHistoryPage,
   readPrivateFileHistorySort,
   sortPrivateFileHistory,
+  readPrivateFilePreviewFilter,
+  matchesPrivateFilePreviewFilter,
   visiblePrivateFilePageNumbers,
 } from "./private-file-history-workspace.ts";
 
@@ -18,7 +20,7 @@ const released = { ...pending, id:"released", created_at:"2026-10-11T03:00:00-03
 const older = { ...pending, id:"older", created_at:"2026-10-01T06:00:00Z", byte_size:0, file_kind:"exam" };
 
 test("strict sort parser rejects arrays, prototype pollution, empty and unknown values", () => {
-  for (const value of ["newest", "oldest", "largest", "smallest", "kind"] as const) {
+  for (const value of ["newest", "oldest", "largest", "smallest", "kind", "released"] as const) {
     assert.deepEqual(readPrivateFileHistorySort(value), { value, invalid: false });
   }
   for (const value of [null, "", ["kind"], "__proto__", "name", "random", "size"]) {
@@ -97,4 +99,27 @@ test("counts distinguish client versus team, pending versus visible and unrecogn
   assert.deepEqual(privateFileHistoryCounts(rows,"person"),{all:5,client:2,team:3,pending:2,history:3});
   assert.deepEqual(countPrivateFileCategories(rows),{all:5,photo:1,exam:2,document:1,other:1});
   assert.deepEqual(countPrivateFileCategories([]),{all:0,photo:0,exam:0,document:0,other:0});
+});
+
+test("preview filter accepts only recognized values and uses MIME allowlist", () => {
+  assert.deepEqual(readPrivateFilePreviewFilter(undefined), {value:"all",invalid:false});
+  assert.deepEqual(readPrivateFilePreviewFilter("previewable"), {value:"previewable",invalid:false});
+  assert.deepEqual(readPrivateFilePreviewFilter("download_only"), {value:"download_only",invalid:false});
+  for (const invalid of [["previewable"],"",null,"__proto__"]) {
+    assert.deepEqual(readPrivateFilePreviewFilter(invalid), {value:"all",invalid:true});
+  }
+  assert.equal(matchesPrivateFilePreviewFilter("application/pdf","previewable"),true);
+  assert.equal(matchesPrivateFilePreviewFilter("image/jpeg","previewable"),true);
+  assert.equal(matchesPrivateFilePreviewFilter("video/mp4","previewable"),false);
+  assert.equal(matchesPrivateFilePreviewFilter(null,"download_only"),true);
+  assert.equal(matchesPrivateFilePreviewFilter("application/pdf","download_only"),false);
+});
+
+test("release ordering respects real timestamps and places unreleased last", () => {
+  const recent = {...pending,id:"recent",client_visible_at:"2026-10-11T09:00:00Z"};
+  const old = {...pending,id:"old",client_visible_at:"2026-10-10T10:00:00Z"};
+  const invalid = {...pending,id:"invalid",client_visible_at:"bad"};
+  assert.deepEqual(sortPrivateFileHistory([pending,old,invalid,recent],"released").map(x=>x.id),["recent","old","invalid","pending"]);
+  const link=privateFileHistoryHref("/cliente/arquivos",{origem:"team",formato:"download_only",ordem:"released",pagina:2});
+  assert.equal(link,"/cliente/arquivos?origem=team&formato=download_only&ordem=released&pagina=2");
 });

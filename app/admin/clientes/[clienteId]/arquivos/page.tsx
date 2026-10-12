@@ -14,11 +14,11 @@ import { notFound } from "next/navigation";
 import { isUuid } from "@/lib/validation/uuid";
 import { formatPrivateFileRecordedAt, formatPrivateFileSize, isPrivateFilePendingProfessionalRelease, matchesPrivateFileFilters, privateFileOriginLabel, readPrivateFileKindFilter, readPrivateFileOriginFilter, readPrivateFileViewFilter } from "@/lib/files/private-file-history-view";
 import styles from "./page.module.css";
-import { paginatePrivateFileHistory, privateFileHistoryHref, readPrivateFileHistoryPage, readPrivateFileHistorySort, sortPrivateFileHistory, countPrivateFileCategories, visiblePrivateFilePageNumbers, privateFileHistoryCounts } from "@/lib/files/private-file-history-workspace";
+import { matchesPrivateFilePreviewFilter, paginatePrivateFileHistory, privateFileHistoryHref, readPrivateFileHistoryPage, readPrivateFileHistorySort, readPrivateFilePreviewFilter, sortPrivateFileHistory, countPrivateFileCategories, visiblePrivateFilePageNumbers, privateFileHistoryCounts } from "@/lib/files/private-file-history-workspace";
 
 type AdminClientFilesPageProps = {
   params: Promise<{ clienteId: string }>;
-  searchParams: Promise<{ categoria?: string; origem?: string; visualizacao?: string; ordem?: string; paginaPendentes?: string; paginaHistorico?: string }>;
+  searchParams: Promise<{ categoria?: string; origem?: string; formato?: string; visualizacao?: string; ordem?: string; paginaPendentes?: string; paginaHistorico?: string }>;
 };
 
 const fileKindLabels: Record<string, string> = {
@@ -72,6 +72,7 @@ export default async function AdminClientFilesPage({
   const displayName = client.full_name?.trim() || client.profiles?.display_name?.trim();
   const kind = readPrivateFileKindFilter(filters.categoria);
   const origin = readPrivateFileOriginFilter(filters.origem);
+  const preview = readPrivateFilePreviewFilter(filters.formato);
   const view = readPrivateFileViewFilter(filters.visualizacao);
   const order = readPrivateFileHistorySort(filters.ordem);
   const requestedPending = readPrivateFileHistoryPage(filters.paginaPendentes);
@@ -80,12 +81,13 @@ export default async function AdminClientFilesPage({
   const kinds = countPrivateFileCategories(files);
   const basePath = `/admin/clientes/${client.id}/arquivos`;
   const navigate = (target: "pending" | "history", page: number) => privateFileHistoryHref(basePath, {
-    categoria: kind, origem: origin, visualizacao: view, ordem: order.value,
+    categoria: kind, origem: origin, formato: preview.value, visualizacao: view, ordem: order.value,
     paginaPendentes: target === "pending" ? page : pendingPage.page,
     paginaHistorico: target === "history" ? page : historyPage.page,
     anchor: target === "pending" ? "aguardando-liberacao" : "historico-arquivos",
   });
-  const filteredFiles = files.filter(file => matchesPrivateFileFilters(file, client.profile_id, kind, origin));
+  const filteredFiles = files.filter(file => matchesPrivateFileFilters(file, client.profile_id, kind, origin)
+    && matchesPrivateFilePreviewFilter(file.mime_type, preview.value));
   const pendingReleaseFiles = filteredFiles.filter(file => isPrivateFilePendingProfessionalRelease(file, client.profile_id));
   const historyFiles = filteredFiles.filter(file => !isPrivateFilePendingProfessionalRelease(file, client.profile_id));
   const totalPending = counts.pending;
@@ -120,6 +122,13 @@ export default async function AdminClientFilesPage({
               <option value="all">Todas</option><option value="client">Cliente</option><option value="team">Equipe ou não identificada</option>
             </select>
           </label>
+          <label>Disponibilidade
+            <select name="formato" defaultValue={preview.value}>
+              <option value="all">Todos os formatos</option>
+              <option value="previewable">Com prévia compatível</option>
+              <option value="download_only">Apenas download</option>
+            </select>
+          </label>
           <label>Exibição
             <select name="visualizacao" defaultValue={view}>
               <option value="all">Tudo</option><option value="pending">Aguardando liberação</option><option value="history">Histórico</option>
@@ -132,13 +141,14 @@ export default async function AdminClientFilesPage({
               <option value="largest">Maiores arquivos</option>
               <option value="smallest">Menores arquivos</option>
               <option value="kind">Por categoria</option>
+              <option value="released">Disponibilizados mais recentemente</option>
             </select>
           </label>
           <button type="submit">Filtrar</button>
           <Link href={`/admin/clientes/${client.id}/arquivos`}>Limpar filtros</Link>
         </form>
         <p role="status">{filteredFiles.length} de {counts.all} arquivo(s) · {totalPending} aguardando liberação no total. Fotos: {kinds.photo}, exames: {kinds.exam}, documentos: {kinds.document}. Enviados pela cliente: {counts.client}; equipe ou autoria desconhecida: {counts.team}.</p>
-        {(order.invalid || requestedPending.invalid || requestedHistory.invalid || pendingPage.outOfRange || historyPage.outOfRange) ? (
+        {(preview.invalid || order.invalid || requestedPending.invalid || requestedHistory.invalid || pendingPage.outOfRange || historyPage.outOfRange) ? (
           <p className={styles.filterNotice} role="status">Um filtro de ordenação ou página não é válido. Exibimos somente registros autorizados em uma página disponível.</p>
         ) : null}
       </Section>
@@ -180,6 +190,7 @@ export default async function AdminClientFilesPage({
                     <div><dt>Tipo</dt><dd>{file.mime_type || "Não informado"}</dd></div>
                     <div><dt>Tamanho</dt><dd>{formatPrivateFileSize(file.byte_size)}</dd></div>
                     <div><dt>Cadastrado em</dt><dd>{formatPrivateFileRecordedAt(file.created_at)}</dd></div>
+                    {file.client_visible_at ? <div><dt>Liberado em</dt><dd>{formatPrivateFileRecordedAt(file.client_visible_at)}</dd></div> : null}
                   </dl>
                   <div className={styles.fileActions}>
                     {isPreviewablePrivateFileMimeType(file.mime_type) ? (
@@ -263,6 +274,7 @@ export default async function AdminClientFilesPage({
                     <div><dt>Tipo</dt><dd>{file.mime_type || "Não informado"}</dd></div>
                     <div><dt>Tamanho</dt><dd>{formatPrivateFileSize(file.byte_size)}</dd></div>
                     <div><dt>Cadastrado em</dt><dd>{formatPrivateFileRecordedAt(file.created_at)}</dd></div>
+                    {file.client_visible_at ? <div><dt>Liberado em</dt><dd>{formatPrivateFileRecordedAt(file.client_visible_at)}</dd></div> : null}
                   </dl>
                   <div className={styles.fileActions}>
                     {isPreviewablePrivateFileMimeType(file.mime_type) ? (
