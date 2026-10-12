@@ -3,7 +3,7 @@
 import { ClientAccessLinkOriginError, resolveTrustedClientAccessOrigin } from "@/lib/onboarding/trusted-client-access-origin";
 
 import { createClient } from "@/lib/supabase/server";
-import { validateInvitationEmail } from "@/lib/onboarding/validation";
+import { readSingleStringFormValue, validateInvitationEmail } from "@/lib/onboarding/validation";
 
 export type PasswordRecoveryRequestState = {
   message: string | null;
@@ -14,8 +14,8 @@ export async function requestPasswordRecovery(
   _: PasswordRecoveryRequestState,
   formData: FormData,
 ): Promise<PasswordRecoveryRequestState> {
-  const rawEmail = formData.get("email");
-  if (rawEmail !== null && typeof rawEmail !== "string") {
+  const rawEmail = readSingleStringFormValue(formData, "email");
+  if (rawEmail === null) {
     return { message: "Informe um email válido.", success: false };
   }
   const email = typeof rawEmail === "string" ? rawEmail.trim() : "";
