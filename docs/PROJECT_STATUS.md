@@ -1,3 +1,7 @@
+## Seleção de exercícios publicados em treinos individuais (2026-10-12)
+
+No formulário administrativo real de composição e edição de itens do treino, a Patty pode buscar por nome sem acentos entre as versões publicadas já autorizadas, abrir resultados além dos 25 iniciais e preservar a versão selecionada mesmo se não corresponder à busca. O ID da versão continua sendo a referência persistida; toda gravação passa pelas Server Actions existentes, com revisão e publicação profissional separadas. A biblioteca global não fica acessível às clientes. Sem migration, nova regra de prescrição, mudança de RLS ou automação de treino. A validação E2E autenticada ainda é pendente.
+
 ## Feedback semanal — destinos exatos e recuperação de pendências (2026-10-12)
 
 Links do painel inicial, da central de avisos e da fila da Patty passam a abrir a solicitação pendente exata de Feedback Semanal, mesmo quando a semana correspondente não é a primeira da lista. Os formulários da cliente ficam em disclosures acessíveis que revelam o alvo de hash e preservam a possibilidade de abrir/fechar manualmente; o primeiro pendente continua aberto por padrão. A Patty navega diretamente ao registro autorizado e vê as solicitações em ordem factual; histórico enviado mantém IDs navegáveis. Nenhuma resposta de saúde entra no link. Não muda geração semanal, canal de entrega, validação, RLS/Auth, versionamento, publish ou banco. E2E autenticado em produção pendente.
