@@ -9,7 +9,10 @@ const read=(p:string)=>fs.readFileSync(path.join(root,p),"utf8");
 
 test("client assessment history sorts by date independent of RPC ordering",()=>{
  const s=read("app/cliente/avaliacoes/page.tsx");
- assert.match(s,/newestFactualAssessments\(/);
+ assert.match(s,/completeClientAssessmentHistory\(historical, rows\)/);
+ const helper=read("lib/evaluations/client-assessment-history.ts");
+ assert.match(helper,/newestFactualAssessments\(/);
+ assert.match(helper,/finalized_at\s*!==\s*null/);
  assert.match(s,/id=\{\`avaliacao-\$\{assessmentId\}\`\}/);
  assert.match(s,/aria-label="Ir para avaliação"/);
 });

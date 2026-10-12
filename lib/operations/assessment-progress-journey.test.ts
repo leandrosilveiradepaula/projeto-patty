@@ -7,7 +7,8 @@ const read = (p: string) => readFileSync(new URL("../../" + p, import.meta.url),
 test("factual assessment history uses shared chronological ordering and preserves source IDs", () => {
   const history = read("app/cliente/avaliacoes/page.tsx");
   const helper = read("lib/evaluations/progress-journey.ts");
-  assert.ok(history.includes("newestFactualAssessments("));
+  assert.ok(history.includes("completeClientAssessmentHistory(historical, rows)"));
+  assert.ok(read("lib/evaluations/client-assessment-history.ts").includes("newestFactualAssessments("));
   assert.ok(helper.includes("Date.parse(left.assessedAt)"));
   assert.ok(helper.includes("Date.parse(right.assessedAt)"));
   assert.ok(history.includes('id={`avaliacao-${assessmentId}`}'));
