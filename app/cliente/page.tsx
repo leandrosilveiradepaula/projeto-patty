@@ -19,6 +19,7 @@ import Link from "next/link";
 import { latestPublishedTrainingVersion } from "@/lib/training/published-versions";
 import { loadClientClarificationSummary } from "@/lib/follow-up/client-clarification-summary-loader";
 import { firstPendingClientWeeklyFeedback } from "@/lib/follow-up/client-weekly-feedback-order";
+import { formatWeeklyFeedbackDueDate } from "@/lib/weekly-feedback/date-format";
 import { clientInAppFeedbackNotices } from "@/lib/notifications/client-in-app-inbox";
 import styles from "./page.module.css";
 
@@ -81,6 +82,7 @@ export default async function ClientePage() {
     (submission) => submission.submitted_at !== null,
   );
   const firstPendingFeedback = firstPendingClientWeeklyFeedback(weeklyFeedbacks);
+  const pendingFeedbackDeadline = firstPendingFeedback?.due_at ? formatWeeklyFeedbackDueDate(firstPendingFeedback.due_at) : null;
   const pendingFeedbackHref = firstPendingFeedback
     ? `/cliente/feedback-semanal#feedback-pendente-${firstPendingFeedback.id}`
     : null;
@@ -127,7 +129,8 @@ export default async function ClientePage() {
             badge: `${pendingWeeklyFeedbackIds.size} pendente(s)`,
             badgeVariant: "warning" as const,
             description:
-              "Continue um rascunho ou envie o Feedback Semanal solicitado pela Patty.",
+              "Continue um rascunho ou envie o Feedback Semanal solicitado pela Patty." +
+              (pendingFeedbackDeadline ? " Prazo informado: " + pendingFeedbackDeadline + "." : ""),
             href: pendingFeedbackHref,
             label: "Responder Feedback Semanal",
           }
@@ -209,6 +212,9 @@ export default async function ClientePage() {
               Feedback Semanal ({pendingWeeklyFeedbackIds.size})
             </Link>
           ) : null}
+          {hasDeliveredWeeklyFeedbackReminder ? (
+            <Link className={styles.routineActionLink} href="/cliente/avisos">Ver avisos entregues</Link>
+          ) : null}
           {primaryAction.href !== "/cliente/protocolo" && protocols.length > 0 ? (
             <Link className={styles.routineActionLink} href="/cliente/protocolo">
               Ver protocolo
@@ -220,6 +226,9 @@ export default async function ClientePage() {
             </Link>
           ) : null}
         </div>
+        {pendingFeedbackDeadline && primaryAction.href !== pendingFeedbackHref ? (
+          <p className={styles.statusNote} role="status">Prazo informado para o Feedback Semanal pendente: {pendingFeedbackDeadline}.</p>
+        ) : null}
         {clarificationSummary.awaitingProfessional > 0 ? (
           <p className={styles.statusNote} role="status">
             {clarificationSummary.awaitingProfessional} esclarecimento(s) respondido(s) aguardam revisão da Patty.
