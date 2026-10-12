@@ -10,16 +10,9 @@ import Link from "next/link";
 
 import styles from "./page.module.css";
 
-function formatDateTime(value: string) {
-  return new Intl.DateTimeFormat("pt-BR", {
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    month: "2-digit",
-    timeZone: "America/Sao_Paulo",
-    year: "numeric",
-  }).format(new Date(value));
-}
+import { formatPendingQueueDateTime } from "@/lib/operations/pending-date";
+
+const formatDateTime = formatPendingQueueDateTime;
 
 function PendingList({
   items,
