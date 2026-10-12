@@ -1,3 +1,6 @@
+import { readProfessionalFeedbackHistoryQuery, filterProfessionalFeedbacks, paginateProfessionalFeedbacks, professionalFeedbackHistoryHref } from "@/lib/follow-up/professional-weekly-feedback-explorer";
+import { formatWeeklyFeedbackPeriodDate } from "@/lib/weekly-feedback/date-format";
+import { Button } from "@/components/ui/Button";
 import { orderClientWeeklyFeedbacks } from "@/lib/follow-up/client-weekly-feedback-order";
 import { AdminWeeklyFeedbackRequestForm } from "@/components/admin/AdminWeeklyFeedbackRequestForm";
 import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
@@ -21,16 +24,10 @@ import styles from "./page.module.css";
 
 type PageProps = {
   params: Promise<{ clienteId: string }>;
+  searchParams: Promise<{ origem?: string; pendentes?: string; enviados?: string }>;
 };
 
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    timeZone: "America/Sao_Paulo",
-  }).format(new Date(value + "T12:00:00-03:00"));
-}
+const formatDate = formatWeeklyFeedbackPeriodDate;
 
 function formatDateTime(value: string | null) {
   if (!value) return "Sem prazo configurado";
@@ -42,7 +39,7 @@ function formatDateTime(value: string | null) {
   }).format(new Date(value));
 }
 
-export default async function AdminClientWeeklyFeedbackPage({ params }: PageProps) {
+export default async function AdminClientWeeklyFeedbackPage({ params, searchParams }: PageProps) {
   const { clienteId } = await params;
   const client = await getAccessibleClient(clienteId);
 
@@ -55,12 +52,13 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
   ]);
   const reminderEventsByFeedbackId = latestReminderEventByFeedback(notificationEvents);
   const orderedFeedbacks = orderClientWeeklyFeedbacks(feedbacks);
-  const pendingFeedbacks = orderedFeedbacks.filter(
-    (feedback) => feedback.submitted_at === null,
-  );
-  const submittedFeedbacks = orderedFeedbacks.filter(
-    (feedback) => feedback.submitted_at !== null,
-  );
+  const rawPendingCount=orderedFeedbacks.filter(f=>f.submitted_at===null).length;
+  const rawSubmittedCount=orderedFeedbacks.length-rawPendingCount;
+  const options=readProfessionalFeedbackHistoryQuery(await searchParams);
+  const pendingFeedbacks=filterProfessionalFeedbacks(orderedFeedbacks,options.origin,false);
+  const submittedFeedbacks=filterProfessionalFeedbacks(orderedFeedbacks,options.origin,true);
+  const pendingPage=paginateProfessionalFeedbacks(pendingFeedbacks,options.pendingPage);
+  const submittedPage=paginateProfessionalFeedbacks(submittedFeedbacks,options.submittedPage);
   const displayName = client.full_name?.trim() || client.profiles?.display_name?.trim();
 
   return (
@@ -110,6 +108,23 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
         </Card>
       </Section>
 
+      <Section title="Localizar feedbacks" description="Filtre pela origem registrada, sem alterar respostas, prazos ou automações.">
+        <form method="get" action={`/admin/clientes/${client.id}/feedback-semanal`} className={styles.explorerFilters}>
+          <label>Origem
+            <select name="origem" defaultValue={options.origin}>
+              <option value="all">Todas as origens</option>
+              <option value="schedule">Automática</option>
+              <option value="manual">Manual</option>
+            </select>
+          </label>
+          <Button type="submit" variant="secondary">Filtrar histórico</Button>
+          {options.origin !== "all" ? <Link href={`/admin/clientes/${client.id}/feedback-semanal`}>Limpar</Link> : null}
+        </form>
+        <p role="status">{pendingFeedbacks.length} de {rawPendingCount} pendente(s) · {submittedFeedbacks.length} de {rawSubmittedCount} enviado(s) no filtro atual.</p>
+        {options.invalid || options.pendingPage > pendingPage.pageCount || options.submittedPage > submittedPage.pageCount ? (
+          <p role="status">Página ou filtro inválido. Exibimos apenas registros autorizados em uma página válida.</p>
+        ) : null}
+      </Section>
       <div id="feedback-pendentes">
       <Section
         action={
@@ -122,7 +137,7 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
       >
         {pendingFeedbacks.length > 1 ? (
           <nav aria-label="Localizar Feedback Semanal pendente" className={styles.feedbackNavigation}>
-            {pendingFeedbacks.map((feedback, index) => (
+            {pendingPage.items.map((feedback, index) => (
               <a href={`#feedback-pendente-${feedback.id}`} key={feedback.id}>
                 {index + 1}. {formatDate(feedback.period_start)} a {formatDate(feedback.period_end)}
               </a>
@@ -136,8 +151,9 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
             action={<a href="#solicitar-feedback">Ir para solicitação</a>}
           />
         ) : (
+          <>
           <ol className={styles.list}>
-            {pendingFeedbacks.map((feedback) => {
+            {pendingPage.items.map((feedback) => {
               const version = feedback.weekly_feedback_form_versions;
               const reminderEvent = reminderEventsByFeedbackId.get(feedback.id);
               const reminderStatus = describeAdminFeedbackReminder(reminderEvent);
@@ -177,10 +193,17 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
               );
             })}
           </ol>
+          {pendingPage.pageCount > 1 ? <nav aria-label="Páginas de feedbacks pendentes" className={styles.explorerPages}>
+            <span>Página {pendingPage.page} de {pendingPage.pageCount}</span>
+            {pendingPage.page > 1 ? <Link href={professionalFeedbackHistoryHref(client.id,{...options,pendingPage:pendingPage.page-1,submittedPage:submittedPage.page},"pending")}>Anterior</Link> : null}
+            {pendingPage.page < pendingPage.pageCount ? <Link href={professionalFeedbackHistoryHref(client.id,{...options,pendingPage:pendingPage.page+1,submittedPage:submittedPage.page},"pending")}>Próxima</Link> : null}
+          </nav> : null}
+          </>
         )}
       </Section>
       </div>
 
+      <div id="feedback-enviados">
       <Section
         action={<Badge variant="neutral">{submittedFeedbacks.length} enviado(s)</Badge>}
         description="Respostas efetivamente enviadas pela cliente, preservadas para consulta e decisão profissional da Patty."
@@ -192,8 +215,9 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
             title="Nenhum feedback enviado ainda"
           />
         ) : (
+          <>
           <ol className={styles.historyList}>
-            {submittedFeedbacks.map((feedback) => {
+            {submittedPage.items.map((feedback) => {
               const version = feedback.weekly_feedback_form_versions;
               const definition = version
                 ? parseWeeklyFeedbackDefinition(version.definition)
@@ -238,8 +262,15 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
               );
             })}
           </ol>
+          {submittedPage.pageCount > 1 ? <nav aria-label="Páginas do histórico enviado" className={styles.explorerPages}>
+            <span>Página {submittedPage.page} de {submittedPage.pageCount}</span>
+            {submittedPage.page > 1 ? <Link href={professionalFeedbackHistoryHref(client.id,{...options,pendingPage:pendingPage.page,submittedPage:submittedPage.page-1},"submitted")}>Anterior</Link> : null}
+            {submittedPage.page < submittedPage.pageCount ? <Link href={professionalFeedbackHistoryHref(client.id,{...options,pendingPage:pendingPage.page,submittedPage:submittedPage.page+1},"submitted")}>Próxima</Link> : null}
+          </nav> : null}
+          </>
         )}
       </Section>
+      </div>
     </>
   );
 }

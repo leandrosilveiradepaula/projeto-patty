@@ -97,7 +97,7 @@ test("pending assessments remain navigable with explicit empty state", () => {
   assert.match(page, /id="avaliacoes-em-andamento"/);
   assert.match(page, /title="Nenhuma avaliação em andamento"/);
   assert.match(page, /draftAssessments\.length === 0/);
-  assert.match(page, /draftAssessments\.map/);
+  assert.match(page, /draftPagination\.items\.map/);
 });
 
 test("effective corrected measurements are labeled accurately and can be recorrected", () => {

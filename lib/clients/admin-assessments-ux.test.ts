@@ -16,6 +16,6 @@ test("admin assessments separate drafts from finalized history", () => {
   assert.match(page, /title="Em andamento"/);
   assert.match(page, /title="Histórico finalizado"/);
   assert.match(page, /Continuar avaliação/);
-  assert.match(page, /draftAssessments\.map/);
-  assert.match(page, /finalizedAssessments\.map/);
+  assert.match(page, /draftPagination\.items\.map/);
+  assert.match(page, /historyPagination\.items\.map/);
 });
