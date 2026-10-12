@@ -95,6 +95,15 @@ export default async function ClientWeeklyFeedbackPage() {
             description="Respostas ainda não enviadas. Abra a semana desejada para continuar um rascunho ou concluir o envio."
             title="Pendentes"
           >
+            {pendingFeedbacks.length > 1 ? (
+              <nav aria-label="Ir para Feedback Semanal pendente" className={styles.feedbackNavigation}>
+                {pendingFeedbacks.map((feedback, index) => (
+                  <a href={`#feedback-pendente-${feedback.id}`} key={feedback.id}>
+                    {index + 1}. Semana de {formatDate(feedback.period_start)} a {formatDate(feedback.period_end)}
+                  </a>
+                ))}
+              </nav>
+            ) : null}
             {pendingFeedbacks.length === 0 ? (
               <EmptyState
                 description="Não há Feedback Semanal aguardando sua resposta neste momento. Novas solicitações aparecerão aqui quando estiverem disponíveis."
