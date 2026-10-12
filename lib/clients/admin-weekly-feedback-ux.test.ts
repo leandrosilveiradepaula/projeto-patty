@@ -15,8 +15,8 @@ test("admin weekly feedback separates pending work from submitted history", () =
 
   assert.match(page, /title="Pendentes"/);
   assert.match(page, /title="Histórico enviado"/);
-  assert.match(page, /pendingFeedbacks\.map/);
-  assert.match(page, /submittedFeedbacks\.map/);
+  assert.match(page, /pendingPage\.items\.map/);
+  assert.match(page, /submittedPage\.items\.map/);
   assert.match(page, /<details className=\{styles\.historyItem\} id=/);
 });
 
