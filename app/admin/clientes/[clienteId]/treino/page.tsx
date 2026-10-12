@@ -16,6 +16,7 @@ import { orderPublishedExerciseOptions } from "@/lib/training/exercise-selection
 import { AdminTrainingPlanDraftForm } from "@/components/admin/AdminTrainingPlanDraftForm";
 import { AdminTrainingPlanItemForm } from "@/components/admin/AdminTrainingPlanItemForm";
 import { AdminTrainingPublishedItemCopy } from "@/components/admin/AdminTrainingPublishedItemCopy";
+import { AdminTrainingCopyPublishedVersion } from "@/components/admin/AdminTrainingCopyPublishedVersion";
 import { AdminTrainingPlanLifecycleAction } from "@/components/admin/AdminTrainingPlanLifecycleAction";
 import { AdminTrainingRequestForm } from "@/components/admin/AdminTrainingRequestForm";
 import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
@@ -538,6 +539,14 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
                         }
                       >
                         <div className={styles.publishedHistoryBody}>
+                          {openVersion && !openVersion.reviewed_at && sortedOpenItems.length === 0 && versionItems.length > 0 ? (
+                            <AdminTrainingCopyPublishedVersion
+                              clientId={client.id}
+                              draftVersionId={openVersion.id}
+                              publishedVersionId={version.id}
+                              numberOfItems={versionItems.length}
+                            />
+                          ) : null}
                           <p className={styles.description}>
                             Esta é a versão publicada para a cliente. A consulta do histórico não permite editar nem republicar este registro. Quando existir um rascunho editável, a Patty poderá copiar explicitamente um exercício para revisá-lo na nova versão, sem modificar esta publicação.
                           </p>
