@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { matchesClientDirectoryName, matchesPrivateFileDirectoryFilters, orderClientsForPrivateFileDirectory, paginatePrivateFileDirectory, privateFileDirectoryHref, readClientDirectorySearchTerm, readPrivateFileDirectoryLinkFilter, readPrivateFileDirectoryPage, readPrivateFileDirectoryStatus } from "./client-directory-search.ts";
+import { matchesClientDirectoryName, matchesPrivateFileDirectoryFilters, orderClientsForPrivateFileDirectory, paginatePrivateFileDirectory, privateFileDirectoryHref, readClientDirectorySearchTerm, readPrivateFileDirectoryLinkFilter, readPrivateFileDirectoryPage, readPrivateFileDirectoryStatus, visiblePrivateFileDirectoryPages } from "./client-directory-search.ts";
 
 test("read query parameters safely", () => {
   assert.equal(readClientDirectorySearchTerm("  Maria  "), "Maria");
@@ -47,4 +47,10 @@ test("directory query pages are strict, bounded and preserve safe criteria",()=>
   assert.deepEqual([last.first,last.last,last.total,last.pageCount,last.outOfRange],[41,43,43,3,true]);
   assert.deepEqual(last.items,[{id:40},{id:41},{id:42}]);
   assert.equal(privateFileDirectoryHref({q:"Maria",status:"inactive",link:"unlinked",page:3}),"/admin/arquivos?q=Maria&situacao=inactive&conta=unlinked&pagina=3");
+});
+
+test("direct directory pages retain endpoints and a bounded window",()=>{
+  assert.deepEqual(visiblePrivateFileDirectoryPages(50,100),[1,48,49,50,51,52,100]);
+  assert.deepEqual(visiblePrivateFileDirectoryPages(1,1),[1]);
+  assert.deepEqual(visiblePrivateFileDirectoryPages(1,0),[]);
 });
