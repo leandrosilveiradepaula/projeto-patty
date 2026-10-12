@@ -169,11 +169,17 @@ export default async function ClientWeeklyFeedbackPage({ searchParams }: { searc
                   );
                 })}
               </ol>
-              {submittedHistory.pages>1 ? <nav className={styles.historyPages} aria-label="Páginas do histórico enviado">
-                <span>Página {submittedHistory.page} de {submittedHistory.pages}</span>
-                {submittedHistory.page>1 ? <Link href={clientFeedbackHistoryHref(historyFilters,submittedHistory.page-1)}>Anterior</Link> : null}
-                {submittedHistory.page<submittedHistory.pages ? <Link href={clientFeedbackHistoryHref(historyFilters,submittedHistory.page+1)}>Próxima</Link> : null}
-              </nav> : null}
+              {submittedHistory.pages > 1 ? (
+                <nav className={styles.historyPages} aria-label="Páginas do histórico enviado">
+                  <span>Página {submittedHistory.page} de {submittedHistory.pages}</span>
+                  {submittedHistory.page > 1 ? (
+                    <Link href={clientFeedbackHistoryHref(historyFilters, submittedHistory.page - 1)}>Anterior</Link>
+                  ) : null}
+                  {submittedHistory.page < submittedHistory.pages ? (
+                    <Link href={clientFeedbackHistoryHref(historyFilters, submittedHistory.page + 1)}>Próxima</Link>
+                  ) : null}
+                </nav>
+              ) : null}
               </>
             )}
           </Section>
