@@ -1064,7 +1064,7 @@ test("non-anamnesis AI execution keeps the generic operations fallback", () => {
     ],
   });
 
-  assert.equal(items[0]?.href, "/admin/ia?execucao=ai-orphan#execucao-ia-ai-orphan");
+  assert.equal(items[0]?.href, "/admin/ia?execucao=execution-generic#execucao-ia-execution-generic");
 });
 
 test("protocol drafts remain actionable alongside released and pending versions", () => {
