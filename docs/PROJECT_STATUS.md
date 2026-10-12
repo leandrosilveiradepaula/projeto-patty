@@ -1,3 +1,7 @@
+## Treino individual — reaproveitamento explícito de item publicado (2026-10-12)
+
+Na jornada de prescrição, a Patty pode selecionar um exercício do histórico publicado da mesma cliente e copiá-lo, individualmente e de forma explícita, para um rascunho ainda editável. A operação usa sessão/RLS, exige versão de origem publicada no mesmo plano, item histórico existente, destino não revisado e versão de exercício ainda publicada caso haja vínculo com biblioteca. Posições e conteúdo de origem são preservados como dados, exceto a nova posição no destino. A cópia não altera a publicação anterior, não transfere dados entre clientes, não revisa nem publica o rascunho e nunca monta treinos automaticamente. A action de cópia individual não é transação de duplicação integral de plano; edição concorrente permanece sujeita às constraints existentes. E2E autenticado pendente.
+
 ## Evolução — diferenças numéricas factuais (2026-10-12)
 
 As telas administrativa e da cliente distinguem a ausência de observação anterior de uma diferença numérica real igual a zero. As datas históricas inválidas mostram marcador indisponível sem interromper a consulta; diferenças são apresentadas como fatos, sem score ou julgamento de melhora/piora. Na cliente, a formatação já existente de quatro casas decimais é mantida para não esconder medições; no admin permanece a precisão já utilizada de duas casas. A evolução ainda deriva exclusivamente de avaliações finalizadas e visíveis sob RLS, sem modificar medidas ou regras do método. E2E autenticado pendente.
