@@ -1,3 +1,7 @@
+## Arquivos privados — navegação direta entre páginas (2026-10-12)
+
+O diretório da Patty permite acesso direto às páginas próximas e às extremidades sem precisar percorrer todas as páginas sequencialmente. Estados vazios de filtros combinados indicam todos os critérios, não apenas a busca textual. O conjunto consultado e as autorizações permanecem iguais; sem alteração de Auth/RLS, migration, liberação ou persistência. E2E autenticado pendente.
+
 ## Diretório de arquivos privados — localização de clientes (2026-10-12)
 
 A Patty pode filtrar clientes na área administrativa de arquivos por situação ativa/inativa e conta Auth vinculada/não vinculada, combinando os critérios com busca por nome, além de navegar no diretório completo em páginas de vinte. Contagens do universo consultado e links paginados preservam filtros; os links de detalhe continuam usando exclusivamente o ID da cliente. Status profissional e vínculo Auth não são usados como autorização. Nenhum schema/RLS/Auth, upload, liberação ou migration foi alterado. E2E autenticado continua pendente.

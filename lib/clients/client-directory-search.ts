@@ -96,3 +96,11 @@ export function paginatePrivateFileDirectory<T>(rows: readonly T[], requested: n
     outOfRange: requested > pageCount,
   };
 }
+
+/** Short navigation window keeps first/last page reachable for large directories. */
+export function visiblePrivateFileDirectoryPages(current: number, total: number): number[] {
+  if (total <= 0) return [];
+  const pages = new Set<number>([1, total]);
+  for (let page = Math.max(1, current - 2); page <= Math.min(total, current + 2); page++) pages.add(page);
+  return [...pages].sort((a, b) => a - b);
+}

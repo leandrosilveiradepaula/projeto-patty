@@ -105,3 +105,5 @@
 .directoryPagination a { display: inline-flex; align-items: center; min-height: 44px; border: 1px solid var(--color-border); border-radius: var(--radius-small); padding: var(--space-2) var(--space-3); }
 .directoryPagination :is(a, select):focus-visible, .directoryFilters select:focus-visible { outline: 3px solid var(--color-accent); outline-offset: 2px; }
 @media (max-width: 640px) { .directoryFilters { display: grid; } }
+
+.directoryPagination strong { display: inline-flex; align-items: center; padding: var(--space-2) var(--space-3); min-height: 44px; border: 1px solid var(--color-border); border-radius: var(--radius-small); }
