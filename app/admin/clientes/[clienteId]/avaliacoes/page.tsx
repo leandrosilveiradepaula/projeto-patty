@@ -195,7 +195,6 @@ export default async function AdminClientAssessmentsPage({
                 />
               </li>
             ))}
-          <>
           </ul>
           {draftPagination.pageCount > 1 ? (
             <nav className={styles.pages} aria-label="Páginas de avaliações em andamento">
@@ -247,7 +246,6 @@ export default async function AdminClientAssessmentsPage({
                 />
               </li>
             ))}
-          <>
           </ul>
           {historyPagination.pageCount > 1 ? (
             <nav className={styles.pages} aria-label="Páginas do histórico finalizado">
