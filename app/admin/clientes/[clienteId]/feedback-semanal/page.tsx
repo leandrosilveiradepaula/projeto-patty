@@ -120,6 +120,15 @@ export default async function AdminClientWeeklyFeedbackPage({ params }: PageProp
         description="Solicitações registradas que ainda aguardam envio da cliente. A ausência de resposta não exige revisão profissional imediata."
         title="Pendentes"
       >
+        {pendingFeedbacks.length > 1 ? (
+          <nav aria-label="Localizar Feedback Semanal pendente" className={styles.feedbackNavigation}>
+            {pendingFeedbacks.map((feedback, index) => (
+              <a href={`#feedback-pendente-${feedback.id}`} key={feedback.id}>
+                {index + 1}. {formatDate(feedback.period_start)} a {formatDate(feedback.period_end)}
+              </a>
+            ))}
+          </nav>
+        ) : null}
         {pendingFeedbacks.length === 0 ? (
           <EmptyState
             description="Não existem solicitações abertas aguardando a cliente. Se precisar criar uma solicitação manual específica, use o formulário acima."
