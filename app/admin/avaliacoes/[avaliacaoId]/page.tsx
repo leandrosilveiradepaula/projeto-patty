@@ -1,3 +1,4 @@
+import { findPreviousFinalizedAssessment, formatAdministrativeAssessmentDate } from "@/lib/evaluations/administrative-assessment-history";
 import { AssessmentCorrectionForm } from "@/components/admin/AssessmentCorrectionForm";
 import {
   AssessmentDeleteMeasurementButton,
@@ -61,16 +62,8 @@ const professionalDecisionLabels: Record<string, string> = {
   simplify: "Simplificar",
 };
 
-function formatAssessmentDate(value: string) {
-  return new Intl.DateTimeFormat("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    timeZone: "America/Sao_Paulo",
-  }).format(new Date(value));
-}
-
 function formatRecordDateTime(value: string) {
+  if (!Number.isFinite(Date.parse(value))) return "Data indisponível";
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     hour: "2-digit",
@@ -95,7 +88,7 @@ function formatFileMetadata(
     parts.push(mimeType);
   }
 
-  if (typeof byteSize === "number") {
+  if (typeof byteSize === "number" && Number.isSafeInteger(byteSize) && byteSize >= 0) {
     parts.push(
       new Intl.NumberFormat("pt-BR", {
         maximumFractionDigits: 1,
@@ -151,14 +144,7 @@ export default async function AdminAvaliacaoDetailPage({
     measurementCorrections,
   );
 
-  const previousAssessment =
-    clientAssessments.find(
-      (item) =>
-        item.id !== assessment.id &&
-        Boolean(item.finalized_at) &&
-        new Date(item.assessed_at).getTime() <
-          new Date(assessment.assessed_at).getTime(),
-    ) ?? null;
+  const previousAssessment = findPreviousFinalizedAssessment(assessment, clientAssessments);
   const previousRawMeasurements = previousAssessment
     ? await listAccessibleAssessmentMeasurements(previousAssessment.id)
     : [];
@@ -186,7 +172,7 @@ export default async function AdminAvaliacaoDetailPage({
       id: file.id,
       label:
         file.original_filename?.trim() ||
-        `Foto de ${formatAssessmentDate(file.created_at)}`,
+        `Foto de ${formatAdministrativeAssessmentDate(file.created_at)}`,
     }));
   const displayName = assessment.clients?.full_name?.trim() || assessment.clients?.profiles?.display_name?.trim();
   const internalNotes = followUps.filter(
@@ -230,7 +216,7 @@ export default async function AdminAvaliacaoDetailPage({
             Voltar às avaliações da cliente
           </Link>
         }
-        meta={`${formatAssessmentDate(assessment.assessed_at)} · ${
+        meta={`${formatAdministrativeAssessmentDate(assessment.assessed_at)} · ${
           selectedAssessmentKind?.label ?? "Legada / não classificada"
         }`}
         displayName={displayName}
@@ -380,15 +366,15 @@ export default async function AdminAvaliacaoDetailPage({
         {previousAssessment && factualComparison.length > 0 ? (
           <div className={styles.comparisonStack}>
             <EvaluationMeasureComparison
-              currentDate={formatAssessmentDate(assessment.assessed_at)}
+              currentDate={formatAdministrativeAssessmentDate(assessment.assessed_at)}
               items={factualComparison}
-              previousDate={formatAssessmentDate(previousAssessment.assessed_at)}
+              previousDate={formatAdministrativeAssessmentDate(previousAssessment.assessed_at)}
             />
             <Link
               className={styles.backLink}
               href={`/admin/avaliacoes/${previousAssessment.id}`}
             >
-              Abrir avaliação anterior de {formatAssessmentDate(previousAssessment.assessed_at)}
+              Abrir avaliação anterior de {formatAdministrativeAssessmentDate(previousAssessment.assessed_at)}
             </Link>
           </div>
         ) : (
