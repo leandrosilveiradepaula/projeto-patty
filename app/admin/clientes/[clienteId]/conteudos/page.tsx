@@ -95,7 +95,7 @@ export default async function AdminClientContentPage({
   );
   const missingReleaseVersions = newestReleases.length - visibleReleases.length;
   const exactPage = authorizedExactRecordPage(
-    filterProfessionalReleases(visibleReleases, assetCountsByVersionId, { query: "", availability: "all", order: "newest", page: 1 }).items,
+    newestClientContentReleases(visibleReleases),
     rawFilters.liberacao, 12,
   );
   if (exactPage !== null) {
