@@ -15,6 +15,7 @@ import { orderPublishedExerciseOptions } from "@/lib/training/exercise-selection
 
 import { AdminTrainingPlanDraftForm } from "@/components/admin/AdminTrainingPlanDraftForm";
 import { AdminTrainingPlanItemForm } from "@/components/admin/AdminTrainingPlanItemForm";
+import { AdminTrainingPublishedItemCopy } from "@/components/admin/AdminTrainingPublishedItemCopy";
 import { AdminTrainingPlanLifecycleAction } from "@/components/admin/AdminTrainingPlanLifecycleAction";
 import { AdminTrainingRequestForm } from "@/components/admin/AdminTrainingRequestForm";
 import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
@@ -524,7 +525,7 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
                       >
                         <div className={styles.publishedHistoryBody}>
                           <p className={styles.description}>
-                            Esta é a versão publicada para a cliente. A consulta do histórico não permite editar nem republicar este registro.
+                            Esta versão publicada é imutável. Quando existir um rascunho editável, a Patty pode copiar explicitamente um exercício deste histórico para revisá-lo no novo treino, sem modificar a publicação anterior.
                           </p>
                           {version.notes ? <p className={styles.note}>Orientações gerais: {version.notes}</p> : null}
                           {versionItems.length === 0 ? (
@@ -539,6 +540,14 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
                                     {item.rest_text ? ` · descanso ${item.rest_text}` : ""}
                                   </span>
                                   {item.execution_notes ? <small>Orientações: {item.execution_notes}</small> : null}
+                                  {openVersion && !openVersion.reviewed_at ? (
+                                    <AdminTrainingPublishedItemCopy
+                                      clientId={client.id}
+                                      draftVersionId={openVersion.id}
+                                      publishedVersionId={version.id}
+                                      sourceItemId={item.id}
+                                    />
+                                  ) : null}
                                 </li>
                               ))}
                             </ol>
