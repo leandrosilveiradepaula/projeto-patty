@@ -7,8 +7,8 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import Link from "next/link";
 import { formatProfessionalMeasurementLabel } from "@/lib/evaluations/professional-view";
-import { newestFactualAssessments } from "@/lib/evaluations/progress-journey";
-import { listCurrentClientFinalizedAssessmentMeasurements } from "@/lib/supabase/data-access";
+import { completeClientAssessmentHistory } from "@/lib/evaluations/client-assessment-history";
+import { getCurrentClient, listAccessibleAssessmentsForClient, listCurrentClientFinalizedAssessmentMeasurements } from "@/lib/supabase/data-access";
 
 import styles from "./page.module.css";
 
@@ -29,30 +29,13 @@ function formatNumber(value: number) {
 }
 
 export default async function ClientAssessmentsPage() {
-  const rows = await listCurrentClientFinalizedAssessmentMeasurements();
-  const assessments = new Map<
-    string,
-    {
-      assessedAt: string;
-      measurements: typeof rows;
-    }
-  >();
-
-  for (const row of rows) {
-    const current = assessments.get(row.assessment_id) ?? {
-      assessedAt: row.assessed_at,
-      measurements: [],
-    };
-    current.measurements.push(row);
-    assessments.set(row.assessment_id, current);
-  }
-
-  const items = newestFactualAssessments(
-    [...assessments.entries()].map(([id, assessment]) => ({
-      id,
-      ...assessment,
-    })),
-  );
+  const client = await getCurrentClient();
+  if (!client) return <EmptyState title="Cadastro não vinculado" description="Esta conta ainda não está vinculada a um cadastro de cliente." />;
+  const [rows, historical] = await Promise.all([
+    listCurrentClientFinalizedAssessmentMeasurements(),
+    listAccessibleAssessmentsForClient(client.id),
+  ]);
+  const items = completeClientAssessmentHistory(historical, rows);
 
   return (
     <>
@@ -68,7 +51,7 @@ export default async function ClientAssessmentsPage() {
       >
         {items.length === 0 ? (
           <EmptyState
-            description="Ainda não há avaliações finalizadas com medidas disponíveis. Consulte esta área quando houver novas avaliações concluídas pela Patty."
+            description="Ainda não há avaliações finalizadas disponíveis. Consulte esta área quando houver novas avaliações concluídas pela Patty."
             title="Nenhuma avaliação disponível"
             action={<Link href="/cliente/mais">Ver outras áreas</Link>}
           />
@@ -106,6 +89,9 @@ export default async function ClientAssessmentsPage() {
                         </Badge>
                       </div>
                     </div>
+                    {assessment.measurements.length === 0 ? (
+                      <p role="status">Avaliação finalizada, sem medidas disponíveis para consulta.</p>
+                    ) : null}
                     <dl className={styles.measurements}>
                       {assessment.measurements.map((measurement) => (
                         <div
