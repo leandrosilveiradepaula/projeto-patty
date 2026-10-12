@@ -18,6 +18,7 @@ const clientNavigationItems: ClientNavigationItem[] = [
 ];
 
 const moreSectionPrefixes = [
+  "/cliente/avisos",
   "/cliente/anamnese",
   "/cliente/avaliacoes",
   "/cliente/evolucao",
