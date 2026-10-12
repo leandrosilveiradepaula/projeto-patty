@@ -1,3 +1,4 @@
+import { authorizedExactRecordPage } from "@/lib/operations/exact-record-navigation";
 import { readAssessmentExplorer, exploreAssessmentMeasures, assessmentExplorerHref } from "@/lib/evaluations/client-assessment-explorer";
 import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
 import { ClientAssessmentHistoryDisclosure } from "./ClientAssessmentHistoryDisclosure";
@@ -29,7 +30,7 @@ function formatNumber(value: number) {
   }).format(value);
 }
 
-export default async function ClientAssessmentsPage({searchParams}:{searchParams:Promise<{medidas?:string;pagina?:string}>}) {
+export default async function ClientAssessmentsPage({searchParams}:{searchParams:Promise<{medidas?:string;pagina?:string;avaliacao?:string}>}) {
   const client = await getCurrentClient();
   if (!client) return <EmptyState title="Cadastro não vinculado" description="Esta conta ainda não está vinculada a um cadastro de cliente." />;
   const [rows, historical] = await Promise.all([
@@ -37,7 +38,10 @@ export default async function ClientAssessmentsPage({searchParams}:{searchParams
     listCurrentClientFinalizedAssessmentHeaders(),
   ]);
   const items = completeClientAssessmentHistory(historical, rows);
-  const options=readAssessmentExplorer(await searchParams);
+  const raw=await searchParams;
+  const options=readAssessmentExplorer(raw);
+  const exact=authorizedExactRecordPage(items,raw.avaliacao,12);
+  if(exact!==null){options.measure="all";options.page=exact;}
   const history=exploreAssessmentMeasures(items,options);
 
   return (
