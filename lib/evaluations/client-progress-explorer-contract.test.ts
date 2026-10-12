@@ -24,7 +24,7 @@ test("query controls preserve factual series and never publish patient data in t
   assert.match(helper,/measurement identifiers in URLs/);
 });
 test("links continue opening the exact finalized client assessment, not an administrative route", () => {
-  assert.ok(page.includes('href={`/cliente/avaliacoes#avaliacao-${point.assessmentId}`}'));
+  assert.ok(page.includes('href={`/cliente/avaliacoes?avaliacao=${point.assessmentId}#avaliacao-${point.assessmentId}`}'));
   assert.doesNotMatch(page,/href=\{\`\/admin\/avaliacoes/);
 });
 test("factual visualization keeps the exact table and no verdict on health goals", () => {

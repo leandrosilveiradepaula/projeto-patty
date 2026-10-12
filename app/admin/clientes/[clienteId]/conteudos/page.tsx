@@ -1,3 +1,4 @@
+import { authorizedExactRecordPage } from "@/lib/operations/exact-record-navigation";
 import { filterProfessionalReleases, readProfessionalReleaseOptions, professionalReleaseHref } from "@/lib/content/professional-release-explorer";
 import { ClientContentReleaseForm } from "@/components/admin/ClientContentReleaseForm";
 import { isContentVersionReleaseEligible } from "@/lib/content/release-eligibility";
@@ -22,7 +23,7 @@ import styles from "./page.module.css";
 
 type AdminClientContentPageProps = {
   params: Promise<{ clienteId: string }>;
-  searchParams: Promise<{ q?: string; arquivo?: string; ordem?: string; pagina?: string }>;
+  searchParams: Promise<{ q?: string; arquivo?: string; ordem?: string; pagina?: string; liberacao?: string }>;
 };
 
 function formatRecordedDate(value: string | null) {
@@ -41,7 +42,8 @@ export default async function AdminClientContentPage({
   params, searchParams,
 }: AdminClientContentPageProps) {
   const { clienteId } = await params;
-  const filters = readProfessionalReleaseOptions(await searchParams);
+  const rawFilters = await searchParams;
+  const filters = readProfessionalReleaseOptions(rawFilters);
   if (!isUuid(clienteId)) notFound();
   const client = await getAccessibleClient(clienteId);
 
@@ -92,6 +94,16 @@ export default async function AdminClientContentPage({
     (release) => Boolean(release.educational_content_versions),
   );
   const missingReleaseVersions = newestReleases.length - visibleReleases.length;
+  const exactPage = authorizedExactRecordPage(
+    newestClientContentReleases(visibleReleases),
+    rawFilters.liberacao, 12,
+  );
+  if (exactPage !== null) {
+    filters.query = "";
+    filters.availability = "all";
+    filters.order = "newest";
+    filters.page = exactPage;
+  }
   const explored = filterProfessionalReleases(visibleReleases, assetCountsByVersionId, filters);
   const baseHref = `/admin/clientes/${client.id}/conteudos`;
   const publishedVersionsAwaitingAsset = contentVersions.filter(

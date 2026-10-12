@@ -21,7 +21,7 @@ test("pending private file link targets one identifiable release card rather tha
       fileId: "file-x", fileKind: "exam", originalFilename: "exame.pdf",
     }],
   });
-  assert.equal(items[0]?.href, "/admin/clientes/client-x/arquivos#arquivo-pendente-file-x");
+  assert.equal(items[0]?.href, "/admin/clientes/client-x/arquivos?arquivoPendente=file-x#arquivo-pendente-file-x");
   const page = read("app/admin/clientes/[clienteId]/arquivos/page.tsx");
   assert.ok(page.includes('id={`arquivo-pendente-${file.id}`}'));
   assert.ok(page.includes("AdminPrivateFileReleaseForm"));
@@ -35,7 +35,7 @@ test("released content with missing asset links to its exact historical release"
       releaseId: "release-x", versionId: "version-x", title: "Material", hasAsset: false,
     }],
   });
-  assert.equal(items[0]?.href, "/admin/clientes/client-x/conteudos#liberacao-release-x");
+  assert.equal(items[0]?.href, "/admin/clientes/client-x/conteudos?liberacao=release-x#liberacao-release-x");
   const page = read("app/admin/clientes/[clienteId]/conteudos/page.tsx");
   assert.ok(page.includes('id={`liberacao-${release.id}`}'));
   assert.ok(page.includes("parentContentIdByVersionId.has(contentVersion.id)"));

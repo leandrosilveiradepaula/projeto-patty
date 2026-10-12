@@ -1,3 +1,4 @@
+import { readAdminAnamnesisQuery, filterAdminAnamneses, pageAdminAnamneses, adminAnamnesisHref } from "@/lib/anamnesis/admin-client-anamnesis-explorer";
 import { summarizeAnamnesisReviewHistory } from "@/lib/anamnesis/review-summary";
 import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
 import { loadClientClarificationSummary } from "@/lib/follow-up/client-clarification-summary-loader";
@@ -16,9 +17,8 @@ import { notFound } from "next/navigation";
 import styles from "./page.module.css";
 
 type AdminClienteAnamnesePageProps = {
-  params: Promise<{
-    clienteId: string;
-  }>;
+  params: Promise<{ clienteId: string }>;
+  searchParams: Promise<{ versao?: string; pendentes?: string; enviadas?: string }>;
 };
 
 function formatDateTime(value: string) {
@@ -35,6 +35,7 @@ function formatDateTime(value: string) {
 
 export default async function AdminClienteAnamnesePage({
   params,
+  searchParams,
 }: AdminClienteAnamnesePageProps) {
   const { clienteId } = await params;
   const client = await getAccessibleClient(clienteId);
@@ -50,6 +51,10 @@ export default async function AdminClienteAnamnesePage({
   const submittedSubmissions = submissions.filter(
     (submission) => Boolean(submission.submitted_at),
   );
+  const versions=[...new Set(submissions.flatMap(x=>x.anamnesis_form_versions?.version_number?[x.anamnesis_form_versions.version_number]:[]))].sort((a,b)=>b-a);
+  const selected=readAdminAnamnesisQuery(await searchParams,versions);
+  const pendingHistory=pageAdminAnamneses(filterAdminAnamneses(pendingSubmissions,selected.version),selected.pending);
+  const submittedHistory=pageAdminAnamneses(filterAdminAnamneses(submittedSubmissions,selected.version),selected.submitted);
   const submittedIds = submittedSubmissions.map((submission) => submission.id);
   const [reviews, clarificationSummary] = await Promise.all([
     listAccessibleAnamnesisReviewsForSubmissions(submittedIds),
@@ -68,14 +73,28 @@ export default async function AdminClienteAnamnesePage({
         status={<Badge variant="neutral">{submissions.length} registro(s)</Badge>}
       />
       <ClientWorkspaceNav activeArea="anamnese" clientId={client.id} />
+      {submissions.length>0 ? <Section title="Localizar versões da Anamnese" description="A consulta não altera respostas originais nem notas profissionais.">
+        <form className={styles.historyFilters} action={`/admin/clientes/${client.id}/anamnese`} method="get">
+          <label>Versão do formulário
+            <select name="versao" defaultValue={selected.version}>
+              <option value="all">Todas</option>
+              {versions.map(version=><option key={version} value={String(version)}>Versão {version}</option>)}
+            </select>
+          </label>
+          <button type="submit">Filtrar</button>
+          <Link href={`/admin/clientes/${client.id}/anamnese`}>Limpar</Link>
+        </form>
+        {selected.invalid?<p role="status">Consulta ajustada para uma versão ou página disponível.</p>:null}
+      </Section> : null}
       {pendingSubmissions.length > 0 ? (
         <Section
           action={<Badge variant="warning">{pendingSubmissions.length} pendente(s)</Badge>}
           description="Rascunhos iniciados pela cliente, ainda não enviados. Eles não equivalem a Anamnese concluída nem geram revisão profissional nesta lista."
-          title="Aguardando cliente"
+          id="anamnese-pending"
+        title="Aguardando cliente"
         >
           <ol className={styles.submissionList}>
-            {pendingSubmissions.map((submission) => {
+            {pendingHistory.items.map((submission) => {
               const version = submission.anamnesis_form_versions;
 
               return (
@@ -102,10 +121,16 @@ export default async function AdminClienteAnamnesePage({
               );
             })}
           </ol>
+          {pendingHistory.pages>1?<nav className={styles.historyPages} aria-label="Páginas de Anamneses pendentes">
+            <span>Página {pendingHistory.page} de {pendingHistory.pages}</span>
+            {pendingHistory.page>1?<Link href={adminAnamnesisHref(client.id,selected.version,pendingHistory.page-1,submittedHistory.page,"pending")}>Anterior</Link>:null}
+            {pendingHistory.page<pendingHistory.pages?<Link href={adminAnamnesisHref(client.id,selected.version,pendingHistory.page+1,submittedHistory.page,"pending")}>Próxima</Link>:null}
+          </nav>:null}
         </Section>
       ) : null}
       <Section
         description="Somente Anamneses efetivamente enviadas aparecem aqui. As respostas originais e a versão utilizada permanecem preservadas para consulta."
+        id="anamnese-submitted"
         title="Histórico enviado"
       >
         {submittedSubmissions.length === 0 ? (
@@ -118,8 +143,9 @@ export default async function AdminClienteAnamnesePage({
             title="Sem Anamnese enviada"
           />
         ) : (
+          <>
           <ol className={styles.submissionList}>
-            {submittedSubmissions.map((submission) => {
+            {submittedHistory.items.map((submission) => {
               const version = submission.anamnesis_form_versions;
               const clarification = clarificationSummary.bySubmission.get(submission.id);
               const awaitingClient = clarification?.awaitingClient ?? 0;
@@ -211,6 +237,12 @@ export default async function AdminClienteAnamnesePage({
               );
             })}
           </ol>
+          {submittedHistory.pages>1?<nav className={styles.historyPages} aria-label="Páginas de Anamneses enviadas">
+            <span>Página {submittedHistory.page} de {submittedHistory.pages}</span>
+            {submittedHistory.page>1?<Link href={adminAnamnesisHref(client.id,selected.version,pendingHistory.page,submittedHistory.page-1,"submitted")}>Anterior</Link>:null}
+            {submittedHistory.page<submittedHistory.pages?<Link href={adminAnamnesisHref(client.id,selected.version,pendingHistory.page,submittedHistory.page+1,"submitted")}>Próxima</Link>:null}
+          </nav>:null}
+          </>
         )}
       </Section>
     </>

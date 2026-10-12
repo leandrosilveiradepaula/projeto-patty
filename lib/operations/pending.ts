@@ -508,7 +508,7 @@ export function buildOperationalPendingItems(
       clientLabel: file.clientLabel,
       createdAt: file.createdAt,
       description: `O arquivo "${file.originalFilename}" foi enviado administrativamente e permanece privado. Revise o arquivo e decida explicitamente se ele deve ser liberado para a cliente.`,
-      href: `/admin/clientes/${file.clientId}/arquivos#arquivo-pendente-${file.fileId}`,
+      href: `/admin/clientes/${file.clientId}/arquivos?arquivoPendente=${file.fileId}#arquivo-pendente-${file.fileId}`,
       id: `private-file-release:${file.fileId}`,
       kind: "private_file_pending_release",
       statusLabel: "Aguardando liberação",
@@ -526,7 +526,7 @@ export function buildOperationalPendingItems(
       clientLabel: release.clientLabel,
       createdAt: release.createdAt,
       description: `O conteúdo "${release.title}" foi liberado para a cliente, mas a versão exata ainda não possui asset privado registrado. A liberação permanece auditável, porém o arquivo não pode ser aberto.`,
-      href: `/admin/clientes/${release.clientId}/conteudos#liberacao-${release.releaseId}`,
+      href: `/admin/clientes/${release.clientId}/conteudos?liberacao=${release.releaseId}#liberacao-${release.releaseId}`,
       id: `content-release-asset:${release.releaseId}`,
       kind: "content_released_without_asset",
       statusLabel: "Liberado sem arquivo",
@@ -550,7 +550,7 @@ export function buildOperationalPendingItems(
       description: dueAtPassed
         ? `O Feedback Semanal referente a ${feedback.periodStart} ate ${feedback.periodEnd} continua sem envio final e o prazo informado (${feedback.dueAt}) ja passou. Isso nao aplica nenhuma consequencia automatica ao atendimento.`
         : `O Feedback Semanal referente a ${feedback.periodStart} ate ${feedback.periodEnd} foi solicitado e ainda nao possui envio final da cliente.`,
-      href: `/admin/clientes/${feedback.clientId}/feedback-semanal#feedback-pendente-${feedback.id}`,
+      href: `/admin/clientes/${feedback.clientId}/feedback-semanal?registro=${feedback.id}#feedback-pendente-${feedback.id}`,
       id: `weekly-feedback:${feedback.id}`,
       kind: "weekly_feedback_awaiting_response",
       statusLabel: dueAtPassed ? "Prazo informado ultrapassado" : "Aguardando resposta",

@@ -34,7 +34,7 @@ test("older assessments are opened on demand and can still be toggled manually",
 test("same-day assessment navigation labels are distinguishable without invented version numbers", () => {
   const page = read("app/cliente/avaliacoes/page.tsx");
   assert.ok(page.includes("items.map((assessment, index) =>"));
-  assert.ok(page.includes("Avaliação {index + 1}: {formatDate(assessment.assessedAt)}"));
+  assert.ok(page.includes("Avaliação {history.from + index}: {formatDate(assessment.assessedAt)}"));
   assert.ok(page.includes("assessmentIndex + 1"));
   assert.ok(page.includes("items.length"));
   assert.ok(page.includes("summary={"));
@@ -43,7 +43,7 @@ test("same-day assessment navigation labels are distinguishable without invented
 test("evolution links still resolve to the exact client-side historical assessment", () => {
   const progress = read("app/cliente/evolucao/page.tsx");
   const history = read("app/cliente/avaliacoes/page.tsx");
-  assert.ok(progress.includes('href={`/cliente/avaliacoes#avaliacao-${point.assessmentId}`}'));
+  assert.ok(progress.includes('href={`/cliente/avaliacoes?avaliacao=${point.assessmentId}#avaliacao-${point.assessmentId}`}'));
   assert.ok(history.includes('id={`avaliacao-${assessmentId}`}'));
   assert.ok(!progress.includes("/admin/avaliacoes/"));
 });
