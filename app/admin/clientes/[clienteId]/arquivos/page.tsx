@@ -1,3 +1,4 @@
+import { authorizedExactRecordPage } from "@/lib/operations/exact-record-navigation";
 import { PrivatePhotoComparison } from "@/components/files/PrivatePhotoComparison";
 import { AdminPrivateFileReleaseForm } from "@/components/admin/AdminPrivateFileReleaseForm";
 import { isPreviewablePrivateFileMimeType } from "@/lib/files/private-file-preview";
@@ -19,7 +20,7 @@ import { matchesPrivateFilePreviewFilter, paginatePrivateFileHistory, privateFil
 
 type AdminClientFilesPageProps = {
   params: Promise<{ clienteId: string }>;
-  searchParams: Promise<{ categoria?: string; origem?: string; formato?: string; visualizacao?: string; ordem?: string; paginaPendentes?: string; paginaHistorico?: string; fotoAntes?: string; fotoDepois?: string }>;
+  searchParams: Promise<{ categoria?: string; origem?: string; formato?: string; visualizacao?: string; ordem?: string; paginaPendentes?: string; paginaHistorico?: string; fotoAntes?: string; fotoDepois?: string; arquivoPendente?: string }>;
 };
 
 const fileKindLabels: Record<string, string> = {
@@ -92,7 +93,9 @@ export default async function AdminClientFilesPage({
   const pendingReleaseFiles = filteredFiles.filter(file => isPrivateFilePendingProfessionalRelease(file, client.profile_id));
   const historyFiles = filteredFiles.filter(file => !isPrivateFilePendingProfessionalRelease(file, client.profile_id));
   const totalPending = counts.pending;
-  const pendingPage = paginatePrivateFileHistory(sortPrivateFileHistory(pendingReleaseFiles, order.value), requestedPending.page);
+  const sortedPending = sortPrivateFileHistory(pendingReleaseFiles, order.value);
+  const exactPendingPage = authorizedExactRecordPage(sortedPending, filters.arquivoPendente, 12);
+  const pendingPage = paginatePrivateFileHistory(sortedPending, exactPendingPage ?? requestedPending.page);
   const historyPage = paginatePrivateFileHistory(sortPrivateFileHistory(historyFiles, order.value), requestedHistory.page);
 
   return (
