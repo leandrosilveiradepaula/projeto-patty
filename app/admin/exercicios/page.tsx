@@ -1,3 +1,4 @@
+import { readExerciseDirectoryPage, paginateExerciseDirectory, exerciseDirectoryPageHref } from "@/lib/training/exercise-admin-directory";
 import { AdminExerciseCreateForm } from "@/components/admin/AdminExerciseCreateForm";
 import { ExerciseListItem } from "@/components/admin/ExerciseListItem";
 import { Badge } from "@/components/ui/Badge";
@@ -34,11 +35,11 @@ function formatPublishedDate(value: string) {
 }
 
 type AdminExerciciosPageProps = {
-  searchParams: Promise<{ q?: string; status?: string }>;
+  searchParams: Promise<{ q?: string; status?: string; pagina?: string }>;
 };
 
 export default async function AdminExerciciosPage({ searchParams }: AdminExerciciosPageProps) {
-  const { q, status } = await searchParams;
+  const { q, status, pagina } = await searchParams;
   const [exerciseVersions, exerciseParents] = await Promise.all([
     listExerciseVersionsVisibleToCurrentAdmin(),
     listExercisesForCurrentAdmin(),
@@ -68,6 +69,15 @@ export default async function AdminExerciciosPage({ searchParams }: AdminExercic
       Boolean(matchingExerciseNameVersion(versionsByExercise.get(summary.latestVersion.exercise_id) ?? [], searchTerm));
     return matchesSearch && statusFilter !== "incomplete" && matchesLibraryStatus(summary, statusFilter);
   });
+
+  const pageRequest = readExerciseDirectoryPage(pagina);
+  const orderedCatalog = [
+    ...filteredExercises.map(summary => ({ type: "versioned" as const, summary })),
+    ...filteredIncomplete.map(parent => ({ type: "incomplete" as const, parent })),
+  ];
+  const directory = paginateExerciseDirectory(orderedCatalog, pageRequest.page);
+  const shownExercises = directory.items.filter((item): item is Extract<typeof directory.items[number], { type: "versioned" }> => item.type === "versioned").map(item => item.summary);
+  const shownIncomplete = directory.items.filter((item): item is Extract<typeof directory.items[number], { type: "incomplete" }> => item.type === "incomplete").map(item => item.parent);
 
   return (
     <>
@@ -121,6 +131,9 @@ export default async function AdminExerciciosPage({ searchParams }: AdminExercic
         <p className={styles.resultCount} role="status">
           {filteredExercises.length + filteredIncomplete.length} resultado(s) · {incompleteParents.length} cadastro(s) sem versão inicial.
         </p>
+        {pageRequest.invalid || pageRequest.page > directory.pageCount ? (
+          <p className={styles.resultCount} role="status">Página indisponível. Exibindo uma página válida da biblioteca.</p>
+        ) : null}
         {exercises.length === 0 && incompleteParents.length === 0 ? (
           <EmptyState
             description="Crie o primeiro exercício para iniciar a biblioteca."
@@ -138,7 +151,7 @@ export default async function AdminExerciciosPage({ searchParams }: AdminExercic
               {filteredExercises.length} exercício(s) com versão encontrados.
             </p>
             <ul className={styles.exerciseList}>
-            {filteredExercises.map(({ latestVersion: exerciseVersion, latestPublishedVersion }) => {
+            {shownExercises.map(({ latestVersion: exerciseVersion, latestPublishedVersion }) => {
               const publishedMeta = exerciseVersion.published_at
                 ? "Publicado em " + formatPublishedDate(exerciseVersion.published_at) + "."
                 : latestPublishedVersion
@@ -184,9 +197,9 @@ export default async function AdminExerciciosPage({ searchParams }: AdminExercic
               );
             })}
           </ul>
-          {filteredIncomplete.length > 0 ? (
+          {shownIncomplete.length > 0 ? (
             <ul className={styles.exerciseList} aria-label="Cadastros sem versão inicial">
-              {filteredIncomplete.map((parent) => (
+              {shownIncomplete.map((parent) => (
                 <li key={parent.id} className={styles.incompleteRow}>
                   <div>
                     <strong>Exercício sem versão inicial</strong>
@@ -201,6 +214,13 @@ export default async function AdminExerciciosPage({ searchParams }: AdminExercic
           ) : null}
           </>
         )}
+        {directory.total > 0 ? (
+          <nav className={styles.directoryPages} aria-label="Páginas da biblioteca de exercícios">
+            <span>Exibindo {directory.first}–{directory.last} de {directory.total} · Página {directory.page} de {directory.pageCount}</span>
+            {directory.page > 1 ? <Link href={exerciseDirectoryPageHref(searchTerm, statusFilter, directory.page - 1)}>Anterior</Link> : null}
+            {directory.page < directory.pageCount ? <Link href={exerciseDirectoryPageHref(searchTerm, statusFilter, directory.page + 1)}>Próxima</Link> : null}
+          </nav>
+        ) : null}
       </Section>
     </>
   );
