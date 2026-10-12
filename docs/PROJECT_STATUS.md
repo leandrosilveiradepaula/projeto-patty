@@ -1,3 +1,7 @@
+## Diretório de arquivos privados — localização de clientes (2026-10-12)
+
+A Patty pode filtrar clientes na área administrativa de arquivos por situação ativa/inativa e conta Auth vinculada/não vinculada, combinando os critérios com busca por nome, além de navegar no diretório completo em páginas de vinte. Contagens do universo consultado e links paginados preservam filtros; os links de detalhe continuam usando exclusivamente o ID da cliente. Status profissional e vínculo Auth não são usados como autorização. Nenhum schema/RLS/Auth, upload, liberação ou migration foi alterado. E2E autenticado continua pendente.
+
 ## Arquivos privados — leitura por origem, compatibilidade de prévia e liberação (2026-10-12)
 
 Nas telas de arquivos da cliente e no workspace administrativo da Patty, os registros previamente autorizados podem ser refinados por origem, por disponibilidade de prévia (PDF/imagens compatíveis) versus apenas download, e ordenados pelo instante real em que foram liberados, com registros sem data de liberação ao final. A cliente visualiza a origem factual conforme o profile atual e a data registrada de liberação, quando existente; a Patty também visualiza a data nos históricos. São filtros sobre metadados retornados sob Auth/RLS existente, sem liberar arquivos, revelar paths, modificar upload ou aplicar migrations. Origem legada sem autoria permanece indeterminada. E2E autenticado e verificação do comportamento real do Storage ainda pendentes.
