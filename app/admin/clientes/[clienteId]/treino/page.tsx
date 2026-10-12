@@ -525,7 +525,7 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
                       >
                         <div className={styles.publishedHistoryBody}>
                           <p className={styles.description}>
-                            Esta versão publicada é imutável. Quando existir um rascunho editável, a Patty pode copiar explicitamente um exercício deste histórico para revisá-lo no novo treino, sem modificar a publicação anterior.
+                            Esta é a versão publicada para a cliente. A consulta do histórico não permite editar nem republicar este registro. Quando existir um rascunho editável, a Patty poderá copiar explicitamente um exercício para revisá-lo na nova versão, sem modificar esta publicação.
                           </p>
                           {version.notes ? <p className={styles.note}>Orientações gerais: {version.notes}</p> : null}
                           {versionItems.length === 0 ? (
