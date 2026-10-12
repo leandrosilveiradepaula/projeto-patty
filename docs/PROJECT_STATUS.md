@@ -1,3 +1,7 @@
+## Área da cliente — feedbacks enviados e avisos históricos navegáveis (2026-10-12)
+
+Feedback Semanal preserva todos os formulários pendentes, rascunhos e envios individuais na ordem anterior, enquanto o histórico enviado passa a ter filtro de origem/ano e paginação local apenas sobre respostas autenticadas acessíveis. Os avisos efetivamente entregues no aplicativo são filtráveis por situação factual pendente/respondido e possuem paginação, sem serem tratados como automaticamente lidos. Nada é publicado, editado ou reenviado pela navegação. Sem mudanças de RLS, schema ou agenda; E2E autenticado deve ser validado separadamente.
+
 ## Evolução profissional — paridade factual com os filtros de observação (2026-10-12)
 
 No histórico longitudinal da cliente, a Patty pode selecionar a medida, limitar observações por quantidade e conferir uma tabela de diferenças matemáticas, um resumo de extremos e um traçado factual com dados de avaliações finalizadas/corrigidas. As medições são lidas pelo fluxo client-scoped já protegido e a seleção é índice da série autorizada, sem expor chaves de saúde na URL. Gráfico sem escala cronológica real e sem interpretação de melhora ou piora. Nenhuma nova regra de avaliação, RLS, schema, persistência ou IA. CI não equivale a E2E autenticado.

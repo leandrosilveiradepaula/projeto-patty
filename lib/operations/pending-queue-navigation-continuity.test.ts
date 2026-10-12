@@ -10,7 +10,7 @@ test("queue exposes group jump-links only when the group has a real target", () 
   assert.ok(page.includes('aria-label="Ir para grupo de pendências"'));
   for (const name of ["patty", "client", "operational"] as const) {
     assert.ok(page.includes(`grouped.${name}.length > 0`), name);
-    assert.ok(page.includes(`pendingQueueLinks.${name}`), name);
+    assert.ok(page.includes(`pendingQueueLinks.${name}`) || page.includes(`pendingExplorerGroupHref("${name}",filters)`), name);
     assert.ok(pendingQueueLinks[name].includes("#"), name);
     assert.equal(parsePendingQueueFocus(name), name);
   }

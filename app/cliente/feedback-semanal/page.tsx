@@ -1,3 +1,5 @@
+import { availableClientFeedbackHistoryYears, readClientFeedbackHistoryQuery, exploreClientFeedbackHistory, clientFeedbackHistoryHref } from "@/lib/follow-up/client-weekly-feedback-explorer";
+import { Button } from "@/components/ui/Button";
 import { fingerprintWeeklyFeedbackAnswers } from "@/lib/weekly-feedback/draft-fingerprint";
 import { ClientHistoryDisclosure } from "@/components/client/ClientHistoryDisclosure";
 import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
@@ -26,7 +28,7 @@ import { formatWeeklyFeedbackPeriodDate, formatWeeklyFeedbackDueDate } from "@/l
 const formatDate = formatWeeklyFeedbackPeriodDate;
 const formatDueAt = formatWeeklyFeedbackDueDate;
 
-export default async function ClientWeeklyFeedbackPage() {
+export default async function ClientWeeklyFeedbackPage({ searchParams }: { searchParams: Promise<{ origem?: string; ano?: string; pagina?: string }> }) {
   const client = await getCurrentClient();
 
   if (!client) {
@@ -60,6 +62,9 @@ export default async function ClientWeeklyFeedbackPage() {
     (feedback) => feedback.submitted_at !== null,
   );
 
+  const years=availableClientFeedbackHistoryYears(submittedFeedbacks);
+  const historyFilters=readClientFeedbackHistoryQuery(await searchParams,years);
+  const submittedHistory=exploreClientFeedbackHistory(submittedFeedbacks,historyFilters);
   return (
     <>
       <PageHeader
@@ -168,18 +173,43 @@ export default async function ClientWeeklyFeedbackPage() {
           </Section>
 
           <Section
+            id="historico-enviado"
             action={<Badge variant="neutral">{submittedFeedbacks.length} enviado(s)</Badge>}
             description="Consulte respostas já enviadas. Esses registros permanecem preservados e não podem ser editados por aqui."
             title="Histórico enviado"
           >
+            {submittedFeedbacks.length > 0 ? (
+              <>
+              <form className={styles.historyFilters} action="/cliente/feedback-semanal" method="get">
+                <label>Origem
+                  <select name="origem" defaultValue={historyFilters.origin}>
+                    <option value="all">Todas</option>
+                    <option value="manual">Manual</option>
+                    <option value="schedule">Automática</option>
+                  </select>
+                </label>
+                <label>Ano
+                  <select name="ano" defaultValue={historyFilters.year}>
+                    <option value="all">Todos os anos</option>
+                    {years.map(year => <option value={year} key={year}>{year}</option>)}
+                  </select>
+                </label>
+                <Button type="submit" variant="secondary">Filtrar</Button>
+                {(historyFilters.origin!=="all"||historyFilters.year!=="all") ? <Link href="/cliente/feedback-semanal#historico-enviado">Limpar</Link> : null}
+              </form>
+              <p role="status">{submittedHistory.total} de {submittedFeedbacks.length} resposta(s) encontrada(s).</p>
+              {historyFilters.invalid || historyFilters.page>submittedHistory.pages ? <Alert title="Consulta ajustada" variant="info">Exibindo somente histórico disponível nesta conta.</Alert> : null}
+              </>
+            ) : null}
             {submittedFeedbacks.length === 0 ? (
               <EmptyState
                 description="Ainda não existe Feedback Semanal enviado no histórico. Respostas futuras ficarão preservadas aqui para consulta."
                 title="Nenhum feedback enviado ainda"
               />
             ) : (
+              <>
               <ol className={styles.historyList}>
-                {submittedFeedbacks.map((feedback) => {
+                {submittedHistory.items.map((feedback) => {
                   const version = feedback.weekly_feedback_form_versions;
                   const definition = version
                     ? parseWeeklyFeedbackDefinition(version.definition)
@@ -215,6 +245,14 @@ export default async function ClientWeeklyFeedbackPage() {
                   );
                 })}
               </ol>
+              {submittedHistory.pages > 1 ? (
+                <nav className={styles.historyPages} aria-label="Páginas do histórico enviado">
+                  <span>Página {submittedHistory.page} de {submittedHistory.pages}</span>
+                  {submittedHistory.page > 1 ? <Link href={clientFeedbackHistoryHref(historyFilters, submittedHistory.page - 1)}>Anterior</Link> : null}
+                  {submittedHistory.page < submittedHistory.pages ? <Link href={clientFeedbackHistoryHref(historyFilters, submittedHistory.page + 1)}>Próxima</Link> : null}
+                </nav>
+              ) : null}
+              </>
             )}
           </Section>
         </>
