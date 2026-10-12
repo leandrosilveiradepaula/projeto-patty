@@ -1,3 +1,7 @@
+## Histórico da cliente inclui avaliações finalizadas sem medidas (2026-10-12)
+
+A tela de avaliações da cliente passa a listar todas as avaliações finalizadas acessíveis à própria sessão, mesmo se não houver qualquer medida liberada ou registrada, diferenciando explicitamente ausência de medidas de ausência de avaliação. A lista usa `getCurrentClient` e consulta RLS de avaliações do próprio `client_id`; somente avaliações com `finalized_at` são exibidas. Medidas órfãs/inacessíveis não criam avaliações fictícias. Não amplia leitura de drafts, fotos, observações profissionais ou outros recursos. Sem migrations, mudança de Auth/RLS/schema ou IA. E2E autenticado pendente.
+
 ## Comparação manual de fotos vinculadas entre avaliações (2026-10-12)
 
 A página administrativa de uma avaliação permite escolher outra avaliação finalizada da mesma cliente que seja estritamente anterior no tempo e comparar duas fotos vinculadas às respectivas avaliações. A seleção é resolvida a partir das associações RLS já recuperadas, não de IDs arbitrários da URL; arquivos são carregados exclusivamente pelas rotas privadas atuais e não se conclui melhora, diagnóstico, adesão ou progressão automática. A avaliação atual não precisa estar finalizada para a consulta visual, mas o registro anterior precisa estar finalizado. Nenhum vínculo é alterado, nenhum arquivo é liberado à cliente e não há migration, schema ou regra clínica nova. E2E autenticado e renderização em produção pendentes.
