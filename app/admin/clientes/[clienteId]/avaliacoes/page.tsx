@@ -1,3 +1,8 @@
+import { availableAdminAssessmentMonths, exploreAdminAssessmentDirectory, paginateAdminAssessments } from "@/lib/evaluations/admin-assessment-explorer";
+import { readClientAssessmentDirectory, clientAssessmentDirectoryFilters, clientAssessmentDirectoryHref } from "@/lib/evaluations/client-assessment-directory";
+import { labelAdminAssessmentMonth } from "@/lib/evaluations/admin-assessment-explorer";
+import { Button } from "@/components/ui/Button";
+import { Alert } from "@/components/ui/Alert";
 import { formatAdministrativeAssessmentDate, orderAdministrativeAssessments } from "@/lib/evaluations/administrative-assessment-history";
 import { AssessmentCreateForm } from "@/components/admin/AssessmentCreateForm";
 import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
@@ -22,13 +27,13 @@ import { notFound } from "next/navigation";
 import styles from "./page.module.css";
 
 type AdminClientAssessmentsPageProps = {
-  params: Promise<{
-    clienteId: string;
-  }>;
+  params: Promise<{ clienteId: string }>;
+  searchParams: Promise<{ tipo?: string; mes?: string; ordem?: string; rascunhos?: string; historico?: string }>;
 };
 
 export default async function AdminClientAssessmentsPage({
   params,
+  searchParams,
 }: AdminClientAssessmentsPageProps) {
   const { clienteId } = await params;
   const client = await getAccessibleClient(clienteId);
@@ -44,12 +49,23 @@ export default async function AdminClientAssessmentsPage({
       loadAssessmentSchedulePreferences(),
     ]);
   const orderedAssessments = orderAdministrativeAssessments(assessments);
-  const draftAssessments = orderedAssessments.filter(
-    (assessment) => !assessment.finalized_at,
-  );
-  const finalizedAssessments = orderedAssessments.filter(
-    (assessment) => Boolean(assessment.finalized_at),
-  );
+  const kinds = assessmentKinds.options.map(option => option.historicalCode);
+  const mapped = orderedAssessments.map(assessment => ({
+    ...assessment, clientId: assessment.client_id,
+    clientName: client.full_name,
+    legacyClientName: client.profiles?.display_name ?? null,
+    assessedAt: assessment.assessed_at,
+    finalizedAt: assessment.finalized_at,
+    kind: assessment.assessment_kind,
+  }));
+  const months = availableAdminAssessmentMonths(mapped);
+  const { filters, draftPage, historyPage, invalid } =
+    readClientAssessmentDirectory(await searchParams, kinds, months.months);
+  const draftAssessments = exploreAdminAssessmentDirectory(mapped, clientAssessmentDirectoryFilters(filters, "draft"), kinds);
+  const finalizedAssessments = exploreAdminAssessmentDirectory(mapped, clientAssessmentDirectoryFilters(filters, "finalized"), kinds);
+  const draftPagination = paginateAdminAssessments(draftAssessments, draftPage);
+  const historyPagination = paginateAdminAssessments(finalizedAssessments, historyPage);
+  const hasFilters = filters.kind !== "all" || filters.month !== "all" || filters.order !== "newest";
   const displayName = client.full_name?.trim() || client.profiles?.display_name?.trim();
   const kindOptions = assessmentKinds.options.map((option) => ({
     label: option.label,
@@ -113,6 +129,36 @@ export default async function AdminClientAssessmentsPage({
           />
         </Card>
       </Section>
+      {invalid || draftPage > draftPagination.pageCount || historyPage > historyPagination.pageCount ? (
+        <Alert variant="info" title="Consulta ajustada">Um filtro ou página não está disponível. Exibimos o histórico autorizado em uma página válida.</Alert>
+      ) : null}
+      <Section title="Localizar avaliações" description="Busca por tipo, mês e situação já registrada, sem modificar nenhuma avaliação.">
+        <form action={`/admin/clientes/${client.id}/avaliacoes`} method="get" className={styles.filters}>
+          <label>Tipo
+            <select name="tipo" defaultValue={filters.kind}>
+              <option value="all">Todos</option>
+              {assessmentKinds.options.map(option => <option key={option.historicalCode} value={option.historicalCode}>{option.label}</option>)}
+              <option value="legacy">Legadas / não classificadas</option>
+            </select>
+          </label>
+          <label>Mês
+            <select name="mes" defaultValue={filters.month}>
+              <option value="all">Todos os meses</option>
+              {months.months.map(month => <option key={month} value={month}>{labelAdminAssessmentMonth(month)}</option>)}
+              {months.hasInvalidDate ? <option value="invalid">Data indisponível</option> : null}
+            </select>
+          </label>
+          <label>Ordem
+            <select name="ordem" defaultValue={filters.order}>
+              <option value="newest">Mais recentes</option>
+              <option value="oldest">Mais antigas</option>
+            </select>
+          </label>
+          <Button variant="secondary" type="submit">Filtrar</Button>
+          {hasFilters ? <Link href={`/admin/clientes/${client.id}/avaliacoes`}>Limpar</Link> : null}
+        </form>
+        <p role="status">{draftAssessments.length} rascunho(s) · {finalizedAssessments.length} finalizada(s) nos filtros atuais.</p>
+      </Section>
       <Section
           action={<Badge variant={draftAssessments.length > 0 ? "warning" : "neutral"}>{draftAssessments.length} rascunho(s)</Badge>}
           description="Retome um rascunho existente para revisar as medidas e finalizar explicitamente quando estiver pronto. Criar outra avaliação não conclui a anterior."
@@ -126,7 +172,7 @@ export default async function AdminClientAssessmentsPage({
             />
           ) : (
           <ul className={styles.evaluationList}>
-            {draftAssessments.map((assessment) => (
+            {draftPagination.items.map((assessment) => (
               <li key={assessment.id}>
                 <EvaluationListItem
                   action={
@@ -148,12 +194,22 @@ export default async function AdminClientAssessmentsPage({
                 />
               </li>
             ))}
+          <>
           </ul>
+          {draftPagination.pageCount > 1 ? (
+            <nav className={styles.pages} aria-label="Páginas de avaliações em andamento">
+              <span>Página {draftPagination.page} de {draftPagination.pageCount}</span>
+              {draftPagination.page > 1 ? <Link href={clientAssessmentDirectoryHref(client.id, filters, draftPagination.page - 1, historyPagination.page, "draft")}>Anterior</Link> : null}
+              {draftPagination.page < draftPagination.pageCount ? <Link href={clientAssessmentDirectoryHref(client.id, filters, draftPagination.page + 1, historyPagination.page, "draft")}>Próxima</Link> : null}
+            </nav>
+          ) : null}
+          </>
           )}
         </Section>
 
       <Section
         description="Somente avaliações finalizadas aparecem aqui, preservadas da mais recente para a mais antiga. Rascunhos permanecem em Em andamento."
+        id="historico-finalizado"
         title="Histórico finalizado"
       >
         {finalizedAssessments.length === 0 ? (
@@ -167,7 +223,7 @@ export default async function AdminClientAssessmentsPage({
           />
         ) : (
           <ul className={styles.evaluationList}>
-            {finalizedAssessments.map((assessment) => (
+            {historyPagination.items.map((assessment) => (
               <li key={assessment.id}>
                 <EvaluationListItem
                   action={
@@ -189,7 +245,16 @@ export default async function AdminClientAssessmentsPage({
                 />
               </li>
             ))}
+          <>
           </ul>
+          {historyPagination.pageCount > 1 ? (
+            <nav className={styles.pages} aria-label="Páginas do histórico finalizado">
+              <span>Página {historyPagination.page} de {historyPagination.pageCount}</span>
+              {historyPagination.page > 1 ? <Link href={clientAssessmentDirectoryHref(client.id, filters, draftPagination.page, historyPagination.page - 1, "history")}>Anterior</Link> : null}
+              {historyPagination.page < historyPagination.pageCount ? <Link href={clientAssessmentDirectoryHref(client.id, filters, draftPagination.page, historyPagination.page + 1, "history")}>Próxima</Link> : null}
+            </nav>
+          ) : null}
+          </>
         )}
       </Section>
     </>
