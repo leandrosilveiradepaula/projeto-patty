@@ -1,7 +1,7 @@
 export type ClientNoticeStatus = "all" | "pending" | "responded";
 export type ClientNoticeQuery = { situacao?: unknown; pagina?: unknown };
 export const CLIENT_NOTICE_PAGE_SIZE = 12;
-export function readClientNoticeQuery(query:ClientNoticeQuery){
+export function readClientNoticeQuery(query:ClientNoticeQuery):{status:ClientNoticeStatus;page:number;invalid:boolean}{
  const status=query.situacao==="pending"||query.situacao==="responded"?query.situacao:"all";
  const pageValid=typeof query.pagina==="string"&&/^[1-9][0-9]{0,5}$/.test(query.pagina);
  return {status,page:pageValid?Number(query.pagina):1,invalid:
