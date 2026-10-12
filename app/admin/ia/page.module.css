@@ -84,3 +84,8 @@
     grid-template-columns: 1fr;
   }
 }
+
+.filters,.pages{display:flex;flex-wrap:wrap;gap:var(--space-3);align-items:end;margin:0 0 var(--space-4)}
+.filters label{display:grid;gap:var(--space-2);color:var(--color-text-secondary)}
+.filters input,.filters select{min-height:44px;border:1px solid var(--color-border);border-radius:var(--radius-medium);padding:var(--space-2);background:var(--color-surface);color:var(--color-text-primary)}
+.pages a{min-height:44px;display:inline-flex;align-items:center;padding:var(--space-2) var(--space-3);border:1px solid var(--color-border);border-radius:var(--radius-medium)}
