@@ -10,6 +10,7 @@ import { listAccessibleNonterminalAiExecutions } from "@/lib/supabase/data-acces
 import styles from "./page.module.css";
 
 function formatExecutionDate(value: string) {
+  if (!Number.isFinite(Date.parse(value))) return "Data indisponível";
   return new Intl.DateTimeFormat("pt-BR", {
     dateStyle: "short",
     timeStyle: "short",
