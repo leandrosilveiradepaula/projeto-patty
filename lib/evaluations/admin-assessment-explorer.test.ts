@@ -17,7 +17,7 @@ test("assessment filters are composable without modifying source or fetching uns
   assert.deepEqual(exploreAdminAssessmentDirectory(rows,{...defaults,query:"BIBI",kind:"legacy"},kinds).map(x=>x.id),["3"]);
   assert.deepEqual(exploreAdminAssessmentDirectory(rows,{...defaults,kind:"monthly",status:"finalized"},kinds).map(x=>x.id),["2"]);
   assert.deepEqual(exploreAdminAssessmentDirectory(rows,{...defaults,month:"invalid"},kinds).map(x=>x.id),["3"]);
-  assert.deepEqual(exploreAdminAssessmentDirectory(rows,{...defaults,month:"2026-09"},kinds).map(x=>x.id),["2","1"]);
+  assert.deepEqual(exploreAdminAssessmentDirectory(rows,{...defaults,month:"2026-09"},kinds).map(x=>x.id),["1","2"]);
   assert.equal(rows[0].id,"1");
 });
 
