@@ -1,3 +1,7 @@
+## Esteira 37 — navegação profissional do acompanhamento individual (2026-10-12)
+
+Pacote de duas melhorias operacionais relacionadas, na jornada administrativa da cliente: (1) avaliações em rascunho e finalizadas filtráveis por tipo configurado e mês local, com ordenação factual e paginação independente, preservando links e a criação manual; (2) histórico de Feedback Semanal filtrável por origem registrada e paginação independente entre pendentes e enviados, incluindo tratamento de datas legadas inválidas. Parâmetros repetidos e inválidos recebem fallback explícito, sem ampliar visibilidade. Sem novos scores, fórmulas, regras clínicas, mudanças RLS, escrita em banco, migrations ou publicação automática. CI e homologação E2E autenticada são evidências separadas.
+
 ## Biblioteca profissional de exercícios — paginação sem perda de cadastros recuperáveis (2026-10-12)
 
 O catálogo administrativo pagina conjuntamente exercícios versionados e cadastros sem versão inicial (em ordem estável), mantendo contagem global e links de recuperação, mesmo quando um resultado recuperável cai na segunda página ou posterior. A paginação valida limites dos parâmetros e preserva busca e status, sem alterar o escopo de RLS ou a seleção de exercícios por cliente. Nenhuma publicação, prescrição, decisão de treino, migration ou mudança de autorização. CI e E2E autenticado são verificações separadas.
