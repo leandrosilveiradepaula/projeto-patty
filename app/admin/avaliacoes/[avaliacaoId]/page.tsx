@@ -1,4 +1,6 @@
 import { findPreviousFinalizedAssessment, formatAdministrativeAssessmentDate } from "@/lib/evaluations/administrative-assessment-history";
+import { earlierFinalizedPhotoAssessmentOptions, selectEarlierPhotoAssessment } from "@/lib/evaluations/assessment-photo-comparison";
+import { AssessmentLongitudinalPhotoComparison } from "@/components/admin/AssessmentLongitudinalPhotoComparison";
 import { AssessmentCorrectionForm } from "@/components/admin/AssessmentCorrectionForm";
 import {
   AssessmentDeleteMeasurementButton,
@@ -53,6 +55,7 @@ type AdminAvaliacaoDetailPageProps = {
   params: Promise<{
     avaliacaoId: string;
   }>;
+  searchParams: Promise<{ fotoAvaliacaoAnterior?: string; fotoAnterior?: string; fotoAtual?: string }>;
 };
 
 const professionalDecisionLabels: Record<string, string> = {
@@ -101,8 +104,9 @@ function formatFileMetadata(
 
 export default async function AdminAvaliacaoDetailPage({
   params,
+  searchParams,
 }: AdminAvaliacaoDetailPageProps) {
-  const { avaliacaoId } = await params;
+  const [{ avaliacaoId }, filters] = await Promise.all([params, searchParams]);
 
   if (!isUuid(avaliacaoId)) {
     notFound();
@@ -144,6 +148,11 @@ export default async function AdminAvaliacaoDetailPage({
     measurementCorrections,
   );
 
+  const photoAssessmentOptions = earlierFinalizedPhotoAssessmentOptions(assessment, clientAssessments);
+  const photoAssessmentSelection = selectEarlierPhotoAssessment(photoAssessmentOptions, filters.fotoAvaliacaoAnterior);
+  const previousAssessmentPhotos = photoAssessmentSelection.assessment
+    ? await listAccessibleAssessmentPhotoFiles(photoAssessmentSelection.assessment.id)
+    : [];
   const previousAssessment = findPreviousFinalizedAssessment(assessment, clientAssessments);
   const previousRawMeasurements = previousAssessment
     ? await listAccessibleAssessmentMeasurements(previousAssessment.id)
@@ -433,6 +442,26 @@ export default async function AdminAvaliacaoDetailPage({
             />
           </Card>
         )}
+      </Section>
+      <Section
+        id="comparar-fotos-avaliacoes"
+        title="Comparação fotográfica entre avaliações"
+        description="Conferência visual manual de imagens vinculadas a avaliações da mesma cliente. A avaliação de referência deve estar finalizada e ser anterior no tempo."
+      >
+        <Card>
+          <AssessmentLongitudinalPhotoComparison
+            assessmentId={assessment.id}
+            clientId={assessment.client_id}
+            currentDate={assessment.assessed_at}
+            earlierAssessments={photoAssessmentOptions}
+            selectedAssessment={photoAssessmentSelection.assessment}
+            earlierFiles={previousAssessmentPhotos}
+            currentFiles={photoFiles}
+            requestedEarlierPhoto={filters.fotoAnterior}
+            requestedCurrentPhoto={filters.fotoAtual}
+            invalidAssessment={photoAssessmentSelection.invalid}
+          />
+        </Card>
       </Section>
       {isDraft ? (
         <Section
