@@ -1,3 +1,7 @@
+## Biblioteca profissional de exercícios — paginação sem perda de cadastros recuperáveis (2026-10-12)
+
+O catálogo administrativo pagina conjuntamente exercícios versionados e cadastros sem versão inicial (em ordem estável), mantendo contagem global e links de recuperação, mesmo quando um resultado recuperável cai na segunda página ou posterior. A paginação valida limites dos parâmetros e preserva busca e status, sem alterar o escopo de RLS ou a seleção de exercícios por cliente. Nenhuma publicação, prescrição, decisão de treino, migration ou mudança de autorização. CI e E2E autenticado são verificações separadas.
+
 ## Avaliações administrativas — explorador do histórico autorizado (2026-10-12)
 
 A tela de avaliações da Patty passa a oferecer busca por nome profissional e alias de perfil, filtro de rascunho/finalizada, tipo conforme catálogo versionado ativo, mês calculado em America/Sao_Paulo, datas inválidas, ordenação por instante e cliente, contadores factuais e paginação de registros autorizados. Preserva links para avaliação exata e cliente; filtros usam apenas resultados da consulta RLS existente e não autorizam recursos por parâmetros de URL. Histórico completo é recuperado antes da paginação local, inclusive registros legados; nenhum cliente inativo é descartado pela UI. As opções do tipo derivam do catálogo configurado. Sem mudança de métodos, decisões clínicas, persistência, grants, schema ou RLS. E2E autenticado e deploy ainda dependem de verificação.
