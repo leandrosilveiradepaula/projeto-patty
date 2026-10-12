@@ -99,6 +99,10 @@ export default async function AdminAiPage({searchParams}:{searchParams:Promise<{
                       </dl>
                     </div>
 
+                    <div className={styles.executionActions}>
+                    {execution.client_id ? (
+                      <Link className={styles.actionLink} href={`/admin/clientes/${execution.client_id}`}>Ver contexto da cliente</Link>
+                    ) : null}
                     {submissionId ? (
                       <Link
                         aria-label={`Abrir revisão da Anamnese de ${displayName || "cliente sem nome informado"}`}
@@ -108,6 +112,7 @@ export default async function AdminAiPage({searchParams}:{searchParams:Promise<{
                         Abrir revisão da Anamnese
                       </Link>
                     ) : null}
+                    </div>
                   </Card>
                 </li>
               );
