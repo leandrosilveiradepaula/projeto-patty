@@ -171,6 +171,7 @@ export default async function AdminClientAssessmentsPage({
               title="Nenhuma avaliação em andamento"
             />
           ) : (
+          <>
           <ul className={styles.evaluationList}>
             {draftPagination.items.map((assessment) => (
               <li key={assessment.id}>
@@ -222,6 +223,7 @@ export default async function AdminClientAssessmentsPage({
             title="Nenhuma avaliação finalizada"
           />
         ) : (
+          <>
           <ul className={styles.evaluationList}>
             {historyPagination.items.map((assessment) => (
               <li key={assessment.id}>
