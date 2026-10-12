@@ -1,3 +1,4 @@
+import { authorizedExactRecordPage } from "@/lib/operations/exact-record-navigation";
 import { readProfessionalFeedbackHistoryQuery, filterProfessionalFeedbacks, paginateProfessionalFeedbacks, professionalFeedbackHistoryHref } from "@/lib/follow-up/professional-weekly-feedback-explorer";
 import { formatWeeklyFeedbackPeriodDate } from "@/lib/weekly-feedback/date-format";
 import { Button } from "@/components/ui/Button";
@@ -24,7 +25,7 @@ import styles from "./page.module.css";
 
 type PageProps = {
   params: Promise<{ clienteId: string }>;
-  searchParams: Promise<{ origem?: string; pendentes?: string; enviados?: string }>;
+  searchParams: Promise<{ origem?: string; pendentes?: string; enviados?: string; registro?: string }>;
 };
 
 const formatDate = formatWeeklyFeedbackPeriodDate;
@@ -54,7 +55,16 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
   const orderedFeedbacks = orderClientWeeklyFeedbacks(feedbacks);
   const rawPendingCount=orderedFeedbacks.filter(f=>f.submitted_at===null).length;
   const rawSubmittedCount=orderedFeedbacks.length-rawPendingCount;
-  const options=readProfessionalFeedbackHistoryQuery(await searchParams);
+  const rawQuery=await searchParams;
+  const options=readProfessionalFeedbackHistoryQuery(rawQuery);
+  const exactPendingPage=authorizedExactRecordPage(orderedFeedbacks.filter(f=>f.submitted_at===null),rawQuery.registro,10);
+  const exactSubmittedPage=authorizedExactRecordPage(orderedFeedbacks.filter(f=>f.submitted_at!==null),rawQuery.registro,10);
+  // Exact record navigation ignores presentation filters that could hide the linked record.
+  if (exactPendingPage!==null || exactSubmittedPage!==null) {
+    options.origin="all";
+    options.pendingPage=exactPendingPage??1;
+    options.submittedPage=exactSubmittedPage??1;
+  }
   const pendingFeedbacks=filterProfessionalFeedbacks(orderedFeedbacks,options.origin,false);
   const submittedFeedbacks=filterProfessionalFeedbacks(orderedFeedbacks,options.origin,true);
   const pendingPage=paginateProfessionalFeedbacks(pendingFeedbacks,options.pendingPage);
