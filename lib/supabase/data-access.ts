@@ -9,6 +9,7 @@ import { collectScopedClientOperationalRows } from "@/lib/operations/client-oper
 import { collectTrainingHistoryRows, collectTrainingPagedRows } from "@/lib/training/history-batches";
 import { collectLibraryPages, collectLibraryVersionRows } from "@/lib/content/library-pagination";
 import { collectAnamnesisHistoryRows } from "@/lib/anamnesis/history-pagination";
+import { compareAnamnesisReviewChronology } from "@/lib/anamnesis/review-summary";
 import { collectPublishedProtocolRows } from "@/lib/protocol/published-read-pagination";
 import { collectProtocolCatalogPages } from "@/lib/protocol/catalog-pagination";
 
@@ -1125,45 +1126,36 @@ export async function createAccessibleAnamnesisClarificationResponse(input: {
 
 export async function listAccessibleAnamnesisReviews(submissionId: string) {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("anamnesis_reviews")
-    .select(
-      "id, submission_id, reviewer_profile_id, note, created_at, profiles(display_name)",
-    )
-    .eq("submission_id", submissionId)
-    .order("created_at", { ascending: true })
-    .order("id", { ascending: true });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  const rows = await collectAnamnesisHistoryRows([submissionId], (ids, from, to) =>
+    supabase.from("anamnesis_reviews")
+      .select("id, submission_id, reviewer_profile_id, note, created_at, profiles(display_name)")
+      .in("submission_id", ids)
+      .order("created_at", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
+  return rows.sort(compareAnamnesisReviewChronology);
 }
 
 export async function listAccessibleAnamnesisReviewsForSubmissions(
   submissionIds: string[],
 ) {
   if (submissionIds.length === 0) return [];
-
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("anamnesis_reviews")
-    .select(
-      "id, submission_id, reviewer_profile_id, note, created_at, profiles(display_name)",
-    )
-    .in("submission_id", submissionIds)
-    .order("submission_id", { ascending: true })
-    .order("created_at", { ascending: true })
-    .order("id", { ascending: true });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  const rows = await collectAnamnesisHistoryRows(submissionIds, (ids, from, to) =>
+    supabase.from("anamnesis_reviews")
+      .select("id, submission_id, reviewer_profile_id, note, created_at, profiles(display_name)")
+      .in("submission_id", ids)
+      .order("submission_id", { ascending: true })
+      .order("created_at", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
+  return rows.sort((left, right) =>
+    left.submission_id.localeCompare(right.submission_id) ||
+    compareAnamnesisReviewChronology(left, right),
+  );
 }
-
 
 export async function createAccessibleAnamnesisReview(
   submissionId: string,
