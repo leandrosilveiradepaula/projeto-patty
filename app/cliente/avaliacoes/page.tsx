@@ -1,4 +1,6 @@
 import { authorizedExactRecordPage } from "@/lib/operations/exact-record-navigation";
+import { buildFactualProgressSeries } from "@/lib/evaluations/progress-view";
+import { assessmentMeasureHistoryHref, assessmentProgressReturn } from "@/lib/evaluations/assessment-progress-navigation";
 import { readAssessmentExplorer, exploreAssessmentMeasures, assessmentExplorerHref } from "@/lib/evaluations/client-assessment-explorer";
 import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
 import { ClientAssessmentHistoryDisclosure } from "./ClientAssessmentHistoryDisclosure";
@@ -31,15 +33,17 @@ function formatNumber(value: number) {
   }).format(value);
 }
 
-export default async function ClientAssessmentsPage({searchParams}:{searchParams:Promise<{medidas?:string;pagina?:string;avaliacao?:string}>}) {
+export default async function ClientAssessmentsPage({searchParams}:{searchParams:Promise<{medidas?:string;pagina?:string;avaliacao?:string;origemSerie?:string;origemJanela?:string}>}) {
   const client = await getCurrentClient();
   if (!client) return <EmptyState title="Cadastro não vinculado" description="Esta conta ainda não está vinculada a um cadastro de cliente." />;
   const assessmentHistory = await listCurrentClientFinalizedAssessmentHistory();
   const items = completeClientAssessmentHistory(assessmentHistory.headers, assessmentHistory.measurements);
   const raw=await searchParams;
+  const progressSeries = buildFactualProgressSeries(items);
   const options=readAssessmentExplorer(raw);
   const exact=authorizedExactRecordPage(items,raw.avaliacao,12);
   if(exact!==null){options.measure="all";options.page=exact;}
+  const progressReturn = exact === null ? null : assessmentProgressReturn(raw, progressSeries);
   const history=exploreAssessmentMeasures(items,options);
 
   return (
@@ -61,6 +65,12 @@ export default async function ClientAssessmentsPage({searchParams}:{searchParams
         description="Os registros aparecem da avaliação mais recente para a mais antiga."
         title="Histórico"
       >
+        {progressReturn ? (
+          <nav aria-label="Retornar à evolução consultada" className={styles.returnPanel}>
+            <p>Você veio da evolução de <strong>{progressReturn.label}</strong>.</p>
+            <Link href={progressReturn.href}>Voltar à mesma medida e observações</Link>
+          </nav>
+        ) : null}
         {items.length>0 ? <form method="get" action="/cliente/avaliacoes" className={styles.explorerFilters}>
           <label>Medidas<select name="medidas" defaultValue={options.measure}>
             <option value="all">Todas as avaliações</option>
@@ -129,9 +139,17 @@ export default async function ClientAssessmentsPage({searchParams}:{searchParams
                               measurement.measurement_key,
                             )}
                           </dt>
-                          <dd>
-                            {formatNumber(measurement.measurement_value)}{" "}
-                            {measurement.unit}
+                          <dd className={styles.measureValue}>
+                            <span>{formatNumber(measurement.measurement_value)} {measurement.unit}</span>
+                            {assessmentMeasureHistoryHref(progressSeries, measurement) ? (
+                              <Link
+                                aria-label={`Ver histórico de ${formatProfessionalMeasurementLabel(measurement.measurement_key)} (${measurement.unit})`}
+                                className={styles.measureLink}
+                                href={assessmentMeasureHistoryHref(progressSeries, measurement)!}
+                              >
+                                Ver histórico da medida
+                              </Link>
+                            ) : null}
                           </dd>
                         </div>
                       ))}

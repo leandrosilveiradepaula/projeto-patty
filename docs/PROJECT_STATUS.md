@@ -1,3 +1,7 @@
+## Jornada da cliente: ida e volta entre avaliações e evolução (2026-10-13)
+
+A consulta de medidas em uma avaliação finalizada oferece navegação para o histórico factual da mesma medida e unidade, sem classificação automática de resultado. Ao abrir uma avaliação a partir de um ponto da evolução, o link usa exclusivamente a avaliação já autorizada e conserva a medida numérica selecionada e a quantidade de observações; a avaliação disponibiliza retorno contextual somente quando a medida contém o registro autorizado. Links forjados, antigos ou inválidos não produzem retorno contextual nem novas consultas privilegiadas. Histórico, correções, RLS e decisões profissionais são preservados. Regressões sintéticas foram adicionadas; CI e homologação autenticada devem ser verificados separadamente.
+
 ## Jornada da cliente: protocolo publicado, orientações e biblioteca (2026-10-13)
 
 A publicação autorizada passou a oferecer navegação contextual entre ciclos, refeições/doses, biblioteca educacional efetivamente liberada e Feedback Semanal. Os links de seções apontam para a publicação exata selecionada, inclusive no histórico, e não inferem substituições ou equivalências automáticas. A página de conteúdos facilita o retorno ao protocolo e ao feedback. O navegador de variações tolera hashes malformados sem quebrar a tela e orienta o foco acessível após troca. Nenhuma liberação, nova prescrição, score ou regra clínica foi criada. Testes unitários e CI não equivalem a E2E com login real.

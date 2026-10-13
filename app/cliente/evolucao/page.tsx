@@ -1,5 +1,6 @@
 import { formatFactualAssessmentDate } from "@/lib/evaluations/progress-format";
 import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
+import { assessmentDetailFromProgressHref } from "@/lib/evaluations/assessment-progress-navigation";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -174,7 +175,7 @@ export default async function ClientProgressPage({ searchParams }: {
                             <Link
                               aria-label={`Abrir avaliação de ${formatFactualAssessmentDate(point.assessedAt)} para ${item.label}`}
                               className={styles.assessmentDetailLink}
-                              href={`/cliente/avaliacoes?avaliacao=${point.assessmentId}#avaliacao-${point.assessmentId}`}
+                              href={assessmentDetailFromProgressHref(point.assessmentId, originalIndex + 1, observationWindow.value)}
                             >
                               Ir à avaliação
                             </Link>
