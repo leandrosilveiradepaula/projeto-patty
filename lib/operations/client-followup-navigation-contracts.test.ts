@@ -24,7 +24,7 @@ test("pending feedback card has the real deep-link anchor and opens selected new
   assert.match(page, /<ClientWeeklyFeedbackResponseForm/);
   assert.match(response, /saveWeeklyFeedbackAction\.bind\(null, feedbackId\)/);
   const controls = read("app/cliente/feedback-semanal/ClientWeeklyFeedbackSubmitControls.tsx");
-  assert.match(response, /<ClientWeeklyFeedbackSubmitControls completed=\{submitted\} onBeforeSubmit=\{prepareSubmit\} \/>/);
+  assert.match(response, /<ClientWeeklyFeedbackSubmitControls completed=\{submitted\} reviewing=\{reviewOpen\} onBeforeSubmit=\{prepareSubmit\} \/>/);
   assert.match(controls, /value="save"/);
   assert.match(controls, /value="submit"/);
   assert.ok(!page.includes("publishProtocolVersion"));

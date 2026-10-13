@@ -16,6 +16,7 @@ import {
   updateCurrentClientWeeklyFeedback,
 } from "@/lib/supabase/data-access";
 import { isUuid } from "@/lib/validation/uuid";
+import { readSingleStringFormValue } from "@/lib/validation/form-fields";
 
 export type WeeklyFeedbackSaveOutcome =
   | "idle"
@@ -44,7 +45,7 @@ export async function saveWeeklyFeedbackAction(
     return { outcome: "unavailable", message: "Feedback indisponível. Confira seu acesso." };
   }
 
-  const intent = formData.get("intent");
+  const intent = readSingleStringFormValue(formData, "intent");
   if (intent !== "save" && intent !== "submit") {
     return { outcome: "invalid", message: "Escolha salvar o rascunho ou enviar o feedback." };
   }
@@ -57,7 +58,7 @@ export async function saveWeeklyFeedbackAction(
     };
   }
 
-  const expectedFingerprint = formData.get("expectedFingerprint");
+  const expectedFingerprint = readSingleStringFormValue(formData, "expectedFingerprint");
   if (!validWeeklyFeedbackFingerprint(expectedFingerprint)) {
     return { outcome: "invalid", message: "Atualize a página para confirmar a versão do rascunho antes de salvar." };
   }

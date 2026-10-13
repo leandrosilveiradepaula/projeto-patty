@@ -1,3 +1,7 @@
+## Jornada de Feedback Semanal — revisão integral da experiência (2026-10-13)
+
+O formulário da cliente preserva respostas controladas, orienta o progresso apenas com respostas válidas, separa a revisão visível do envio definitivo em duas ações explícitas, indica mudanças não salvas e avisa antes de sair do navegador com alterações pendentes. As actions reforçam a validação de intenção e fingerprint únicos e rejeitam campos ambíguos. A apresentação de revisão é responsiva. Nenhuma resposta é enviada à IA, gravada em localStorage ou incluída em URL. Preservado o método, a versão do questionário, o fluxo de rascunho e o envio final. CI e merge não equivalem a homologação autenticada ou publicação.
+
 ## Esteira 53 — confirmação no servidor para treino individual (2026-10-13)
 
 Revisão, publicação e remoção de exercício em rascunho agora exigem confirmação explícita e única verificada pela server action, além da UI; os campos textuais/UUID/posição rejeitam parâmetros repetidos ou arquivos em operações de edição. Preserva revisão e publicação manuais da Patty, histórico de versões, RLS e ausência de automação clínica. Sem alteração de schema, migrations, dados reais ou autorização. Testes e CI não comprovam homologação autenticada.

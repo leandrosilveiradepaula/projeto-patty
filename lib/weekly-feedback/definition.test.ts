@@ -6,6 +6,7 @@ import {
   parseWeeklyFeedbackWholeNumber,
   parseWeeklyFeedbackDefinition,
   validateWeeklyFeedbackAnswers,
+  summarizeWeeklyFeedbackRequiredProgress,
   type WeeklyFeedbackDefinition,
 } from "./definition.ts";
 
@@ -119,4 +120,18 @@ test("feedback submission validates numeric types and bounds", () => {
   for (const answers of [{ treinos: -1, nota: 7 }, { treinos: 1.5, nota: 7 }, { treinos: 2, nota: 11 }, { treinos: "2", nota: 7 }]) {
     assert.throws(() => validateWeeklyFeedbackAnswers(answers as never, definition), /inválidas/);
   }
+});
+
+test("progress only counts valid answers, including valid zero, not malformed values", () => {
+  const p = summarizeWeeklyFeedbackRequiredProgress(definition.questions, {
+    treinos:"3abc", nota:"0", comentario:" ",
+  });
+  assert.equal(p.requiredCompleted, 1);
+  assert.equal(p.completed, 1);
+  assert.equal(p.firstMissingRequired, "treinos");
+  const complete = summarizeWeeklyFeedbackRequiredProgress(definition.questions, {
+    treinos:"3", nota:"10", comentario:"Tudo bem",
+  });
+  assert.equal(complete.requiredCompleted, 2);
+  assert.equal(complete.completed, 3);
 });
