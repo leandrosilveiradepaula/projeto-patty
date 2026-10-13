@@ -1,3 +1,7 @@
+## Esteira 46 — integridade de formulários sensíveis (2026-10-13)
+
+Login, edições de rascunho alimentar e confirmações de submissão, aprovação e publicação não aceitam mais valores duplicados ou upload em campos escalares críticos: campos devem conter exatamente um valor de texto. Não foi alterado o sequenciamento de revisão profissional, Auth/MFA, RLS, SQL ou política de publicação. Testes de regressão cobrem campos ausentes, duplicados e com arquivo. A integração e homologação autenticada são etapas distintas, e as duas migrations previamente identificadas continuam pendentes.
+
 ## Esteira 45 — smoke autenticado pós-migrations (2026-10-13)
 
 Workflow manual `e2e-post-migration-runtime.yml` preparado para execução **após** aplicar pelo CLI as migrations `20261011063500` e `20261012150000` e confirmar deploy. Usa somente conta sintética efêmera, testa login, acesso ao histórico de avaliações, RPC de cabeçalhos e rejeição de ciclo inexistente sem alterar dados. Cleanup obrigatório; a presença do workflow e sua verificação sintática no CI não comprovam E2E executado. Nenhuma migration aplicada nesta esteira.
