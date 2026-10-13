@@ -323,7 +323,7 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
                   />
                 </Card>
 
-                <Card className={styles.reviewCard}>
+                <Card className={styles.reviewCard} id="conferencia-treino">
                   <div>
                     <h2 className={styles.title}>Revisão profissional</h2>
                     <p className={styles.description}>
@@ -342,7 +342,7 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
                 </Card>
               </>
             ) : (
-              <Card className={styles.reviewCard}>
+              <Card className={styles.reviewCard} id="publicar-treino">
                 <div>
                   <h2 className={styles.title}>Publicar para a cliente</h2>
                   <p className={styles.description}>
