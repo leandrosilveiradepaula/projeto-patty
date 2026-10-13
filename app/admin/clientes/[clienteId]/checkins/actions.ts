@@ -134,11 +134,11 @@ export async function correctClientActivityCheckinAction(
     !isUuid(eventId) ||
     (rawValue !== "yes" && rawValue !== "no")
   ) {
-    redirect(correctionReturnPath(clientId, "correction-invalid", formData, "atividade", event));
+    redirect(correctionReturnPath(clientId, "correction-invalid", formData, "atividade");
   }
 
   const expected = parseExpectedCheckinCorrectionId(formData.get("expectedCorrectionId"));
-  if (!expected.valid) redirect(correctionReturnPath(clientId, "correction-invalid", formData, "atividade", event));
+  if (!expected.valid) redirect(correctionReturnPath(clientId, "correction-invalid", formData, "atividade");
   const event = await getAccessibleClientActivityCheckinEvent(client.id, eventId);
 
   if (!event) redirect(correctionReturnPath(clientId, "correction-invalid", formData, "atividade", event));
