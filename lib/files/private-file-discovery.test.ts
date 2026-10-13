@@ -51,3 +51,16 @@ test("client and admin metadata filters read only previously authorized file arr
   assert.doesNotMatch(s,/service_role|object_path|createAdminClient/);
  }
 });
+
+test("name completeness and invalid/missing release timestamp stay distinct",()=>{
+ const q=readPrivateFileDiscovery({nome:"unnamed",estadoLiberacao:"missing"});
+ assert.deepEqual(records.filter(r=>matchesPrivateFileDiscovery(r,q)).map(r=>r.id),["c"]);
+ const invalid = {...records[2],client_visible_at:"invalid-date"};
+ assert.equal(matchesPrivateFileDiscovery(invalid,readPrivateFileDiscovery({estadoLiberacao:"invalid"})),true);
+ assert.equal(matchesPrivateFileDiscovery(invalid,readPrivateFileDiscovery({estadoLiberacao:"missing"})),false);
+});
+test("oldest release chronology excludes unreleased timestamps from top of sorted archive",()=>{
+ const sort=sortPrivateFileHistory([...records,{...records[0],id:"d",client_visible_at:"2025-03-01T12:00:00Z"}],"released-oldest");
+ assert.equal(sort[0].id,"d");
+ assert.equal(sort[1].id,"a");
+});
