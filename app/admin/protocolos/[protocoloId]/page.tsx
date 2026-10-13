@@ -32,6 +32,7 @@ import {
   getProtocolDraftReadiness,
 } from "@/lib/protocol/draft-readiness";
 import { buildProtocolDraftNavigation } from "@/lib/protocol/draft-navigation";
+import { ProtocolWorkspaceJourney } from "@/components/admin/ProtocolWorkspaceJourney";
 import { ProtocolDraftCompletionMap } from "@/components/admin/ProtocolDraftCompletionMap";
 import { getProtocolLifecycleAction } from "@/lib/protocol/lifecycle";
 import { latestPublishedProtocolVersionId, requestedProtocolVersion } from "@/lib/protocol/history-navigation";
@@ -251,6 +252,7 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
                     }
                   >
                     <div className={styles.versionBody}>
+                  <ProtocolWorkspaceJourney action={lifecycleAction} hasPlan={Boolean(mealPlan)} ready={draftReadiness.ready} versionNumber={version.version_number} />
                   <dl className={styles.versionFacts}>
                     <div><dt>Estrutura alimentar</dt><dd>{structureFacts ? structureFacts.variantCount+" variações · "+structureFacts.mealCount+" refeições · "+structureFacts.allocationCount+" doses registradas · "+structureFacts.cycleCount+" ciclos" : "Plano não registrado"}</dd></div>
                     <div>
@@ -342,7 +344,7 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
                       </div>
                     </>
                   ) : null}
-                  <div className={styles.versionPlan}>
+                  <div className={styles.versionPlan} id="conferencia-plano">
                     <h4>Estrutura alimentar desta versão</h4>
                     <p>
                       Revisão factual do plano persistido antes de qualquer ação
@@ -367,7 +369,7 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
                       />
                     </div>
                   ) : null}
-                  <div className={styles.lifecycleAction}>
+                  <div className={styles.lifecycleAction} id="acao-protocolo">
                     <h4>Próxima ação manual</h4>
                     {lifecycleAction === "complete" ? (
                       <p className={styles.lifecycleComplete}>
