@@ -1,3 +1,7 @@
+## Esteira 42 — busca operacional de pendências com reset contextual (2026-10-13)
+
+O explorador de pendências passa a iniciar uma nova aplicação de filtros na primeira página de cada fila e sem foco herdado em grupo anterior. A navegação explícita entre páginas ainda preserva filtros e páginas dos demais grupos. Filtros avançados permanecem disponíveis via details/summary acessível, expandidos quando critérios avançados estão ativos, com apresentação responsiva; a descrição das listas acompanha a ordenação escolhida, sem sugerir prioridade clínica. Alteração somente de UI e navegação sobre registros já autorizados, sem mudanças de Auth, RLS, SQL, dados, regras profissionais ou publicações. Testes e CI não equivalem a homologação autenticada nem a deploy.
+
 ## Esteira 41 — triagem por área em pendências (2026-10-13)
 
 A triagem por área operacional combina busca por cliente e tipo com filtros factuais de responsável, ano e mês civil de São Paulo, intervalo inclusivo, disponibilidade da data histórica, vínculo de cliente e repetição de pendências por cliente; inclui ordenações por antiguidade, recência, cliente e tipo. As filas de Patty, cliente e sistema têm paginação independente e links que preservam os critérios das outras filas. Contagens de registros, clientes distintos e data de registro mais antiga são calculadas exclusivamente sobre pendências já autorizadas. A classificação é para navegação, não prioridade clínica. Sem mudanças de schema, RLS, métodos, alertas ou decisões automáticas. PR e CI não significam deploy autenticado.
