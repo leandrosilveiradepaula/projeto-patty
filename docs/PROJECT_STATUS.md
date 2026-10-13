@@ -1,3 +1,7 @@
+## Esteira 38 — continuidade segura do explorador de Check-ins (2026-10-13)
+
+Correcoes de liquidos e atividade realizadas pela cliente ou pela Patty passam a devolver aos historicos seus filtros, ordenacao e paginas a partir de parametros previamente validados, sem permitir que dados do formulario definam destino, cliente, identificadores ou datas. Registros exatos sao localizados somente entre eventos ja autorizados: a busca preserva filtros compativeis e so relaxa filtros da mesma area quando eles ocultariam o evento, mantendo o estado da outra area. Formularios de filtro conservam a pagina da area oposta. Nenhuma regra profissional, meta de hidratacao, schema, grants, RLS, arquivos ou historico append-only e alterado. Testes e CI nao equivalem a homologacao autenticada nem a deploy de producao.
+
 ## Esteira 37 — continuidade de correções de Check-ins (2026-10-12)
 
 Correções de líquido/atividade, tanto na visão profissional quanto na cliente, preservam o ID do registro na navegação de sucesso, conflito, valor inalterado ou erro. As telas localizam a página exata pela ordem factual dos registros previamente autorizados e limpam apenas filtros incompatíveis que ocultariam o registro. A consulta não amplia RLS, não altera as respostas/correções históricas, não produz metas de hidratação nem score de adesão. Testes com dados sintéticos verificam a página correta e ausência de acesso cruzado. A homologação autenticada e o deploy remoto permanecem separados.
