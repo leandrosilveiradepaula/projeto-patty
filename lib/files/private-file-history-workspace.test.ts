@@ -20,7 +20,7 @@ const released = { ...pending, id:"released", created_at:"2026-10-11T03:00:00-03
 const older = { ...pending, id:"older", created_at:"2026-10-01T06:00:00Z", byte_size:0, file_kind:"exam" };
 
 test("strict sort parser rejects arrays, prototype pollution, empty and unknown values", () => {
-  for (const value of ["newest", "oldest", "largest", "smallest", "kind", "released"] as const) {
+  for (const value of ["newest", "oldest", "largest", "smallest", "kind", "released", "name-asc", "name-desc", "mime"] as const) {
     assert.deepEqual(readPrivateFileHistorySort(value), { value, invalid: false });
   }
   for (const value of [null, "", ["kind"], "__proto__", "name", "random", "size"]) {
