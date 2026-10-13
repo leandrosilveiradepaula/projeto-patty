@@ -1,3 +1,7 @@
+## Esteira 41 — triagem por área em pendências (2026-10-13)
+
+A triagem por área operacional combina busca por cliente e tipo com filtros factuais de responsável, ano e mês civil de São Paulo, intervalo inclusivo, disponibilidade da data histórica, vínculo de cliente e repetição de pendências por cliente; inclui ordenações por antiguidade, recência, cliente e tipo. As filas de Patty, cliente e sistema têm paginação independente e links que preservam os critérios das outras filas. Contagens de registros, clientes distintos e data de registro mais antiga são calculadas exclusivamente sobre pendências já autorizadas. A classificação é para navegação, não prioridade clínica. Sem mudanças de schema, RLS, métodos, alertas ou decisões automáticas. PR e CI não significam deploy autenticado.
+
 ## Esteira 40 — calendário de arquivos e comparação fotográfica (2026-10-13)
 
 As datas de registro e liberação dos arquivos privados passam a ser filtradas pelo mesmo calendário civil de São Paulo exibido nas telas, evitando divergências próximas da meia-noite e da virada de ano. Datas inválidas permanecem identificadas, sem correção ou inferência automática. A comparação de fotos apresenta datas consistentes e navegação anterior/seguinte exclusivamente entre fotos previamente autorizadas para o mesmo cadastro. Não existem novas rotas de acesso, alterações no Storage, RLS, publicação nem análise de imagem. Validação autenticada e deploy devem ser comprovados separadamente.
