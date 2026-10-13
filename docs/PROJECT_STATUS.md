@@ -1,3 +1,7 @@
+## Jornada profissional de protocolos alimentares — 2026-10-13
+
+O workspace da Patty agora apresenta etapas factuais de montagem, submissão, aprovação e publicação da versão, com navegação para conferência e ação profissional. O editor apresenta variações, refeições/doses e depois ciclos, deixando renomeações opcionais recolhidas para reduzir ruído visual. O mapa prévio de pendências e o snapshot de conferência permanecem. Nenhuma regra matemática, dose, meta, fase, automação clínica ou autorização foi alterada; ações finais ainda dependem de confirmação explícita da Patty. CI não comprova E2E autenticado.
+
 ## Jornada profissional de treino — preparação, revisão e publicação (2026-10-13)
 
 A área administrativa de treino agora mostra etapas operacionais com estado derivado dos dados reais (solicitação, montagem, revisão disponível, versão revisada para publicação ou publicação atual), próxima ação ancorada e orientação contextual. Os editores de exercícios do rascunho são expansíveis sob demanda, reduzindo ruído visual na conferência de conjuntos grandes. Navegação, resumos e campos são responsivos e acessíveis via teclado. As validações existentes do servidor, RLS, seleção manual de exercícios, versão exata publicada, congelamento após revisão e aprovação/publicação profissional permanecem inalteradas. Não cria score, progressão ou regra de treino. CI não substitui teste autenticado em celular.
