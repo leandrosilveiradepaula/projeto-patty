@@ -24,7 +24,9 @@ export function ClientPublishedNutritionBrowser({ publicationId, variants }: Pro
 
   useEffect(() => {
     function synchronizeWithAnchor() {
-      const hash = decodeURIComponent(window.location.hash.slice(1));
+      let hash: string;
+      try { hash = decodeURIComponent(window.location.hash.slice(1)); }
+      catch { return; }
       if (!hash) return;
       const matching = variants.find((variant) =>
         variant.anchorId === hash || variant.meals.some((meal) => meal.anchorId === hash)
@@ -56,6 +58,7 @@ export function ClientPublishedNutritionBrowser({ publicationId, variants }: Pro
     if (next < 0 || next >= variants.length) return;
     setSelectedId(variants[next].id);
     setShowAll(false);
+    document.getElementById(`published-variant-${publicationId}`)?.focus();
   };
 
   return (

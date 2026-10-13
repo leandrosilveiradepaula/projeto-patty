@@ -1,3 +1,7 @@
+## Jornada da cliente: protocolo publicado, orientações e biblioteca (2026-10-13)
+
+A publicação autorizada passou a oferecer navegação contextual entre ciclos, refeições/doses, biblioteca educacional efetivamente liberada e Feedback Semanal. Os links de seções apontam para a publicação exata selecionada, inclusive no histórico, e não inferem substituições ou equivalências automáticas. A página de conteúdos facilita o retorno ao protocolo e ao feedback. O navegador de variações tolera hashes malformados sem quebrar a tela e orienta o foco acessível após troca. Nenhuma liberação, nova prescrição, score ou regra clínica foi criada. Testes unitários e CI não equivalem a E2E com login real.
+
 ## Consulta guiada do protocolo alimentar publicado — 2026-10-13
 
 A cliente dispõe de leitor focado de uma variação por vez, navegação anterior/próxima e seleção direta, com opção de exibir todas as variações. Links dos ciclos e da pesquisa continuam vinculados às âncoras da variação/refeição do snapshot autorizado, inclusive com foco acessível. O navegador é responsivo e não grava preferência de fase, progresso ou adesão; não associa etapa a dia da semana nem escolhe orientação profissional. Histórico e comparação de publicações permanecem. Sem migrations, regras clínicas ou alteração de dados. Homologação autenticada em dispositivos reais ainda é etapa distinta do CI.
