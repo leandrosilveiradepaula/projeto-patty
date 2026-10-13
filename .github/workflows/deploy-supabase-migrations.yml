@@ -85,13 +85,41 @@ jobs:
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-        run: npx supabase migration list
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx supabase migration list 2>&1 | tee "$RUNNER_TEMP/patty-migration-history.txt"
 
       - name: Preview pending migrations
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-        run: npx supabase db push --dry-run
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx supabase db push --dry-run 2>&1 | tee "$RUNNER_TEMP/patty-migration-preview.txt"
+
+      - name: Publish non-mutating migration preview in job summary
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "## Supabase schema preview"
+            echo ""
+            echo "Commit: \`$GITHUB_SHA\`"
+            echo ""
+            echo "Preview is informational. No schema apply occurs on a push."
+            for report in patty-migration-history.txt patty-migration-preview.txt; do
+              if test -f "$RUNNER_TEMP/$report"; then
+                echo ""
+                echo "### $report"
+                echo '~~~text'
+                cat "$RUNNER_TEMP/$report"
+                echo '~~~'
+              fi
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Apply pending migrations
         if: github.event_name == 'workflow_dispatch' && inputs.mode == 'apply' && inputs.confirmation == 'APPLY'
