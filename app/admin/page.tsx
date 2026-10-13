@@ -48,6 +48,7 @@ export default async function AdminPage() {
     (item) => item.kind === "ai_execution_started",
   ).length;
   const nextPattyItems = groupedPendingItems.patty.slice(0, 3);
+  const nextClientItems = groupedPendingItems.client.slice(0, 3);
   const recoveryTasks = pendingItems.filter(item =>
     item.kind === "weekly_feedback_reminder_blocked" ||
     item.kind === "content_released_without_asset" ||
@@ -199,6 +200,30 @@ export default async function AdminPage() {
         <Section title="Acompanhamento da Patty">
           <p role="status">Não há ações da Patty registradas nesta fila no momento. Os demais grupos continuam disponíveis para consulta.</p>
           <Link className={styles.sectionLink} href="/admin/pendencias">Consultar fila completa</Link>
+        </Section>
+      ) : null}
+      {nextClientItems.length > 0 ? (
+        <Section
+          action={<Link className={styles.sectionLink} href={pendingQueueLinks.client}>Ver fila aguardando cliente</Link>}
+          description="Respostas e preenchimentos que dependem da cliente. Consulte o registro original antes de decidir qualquer intervenção."
+          title="Aguardando resposta da cliente"
+        >
+          <ol className={styles.pendingPreviewList}>
+            {nextClientItems.map((item) => (
+              <li key={item.id}>
+                <PendingItemCard
+                  title={item.title}
+                  description={item.description}
+                  meta={`${item.clientLabel} · ${formatDateTime(item.createdAt)}`}
+                  status={<Badge variant="neutral">{item.statusLabel}</Badge>}
+                  action={<div className={styles.pendingActions}>
+                    <Link className={styles.metricLink} href={item.href}>Abrir registro</Link>
+                    {item.clientId ? <Link className={styles.secondaryLink} href={`/admin/clientes/${item.clientId}`}>Ver cliente</Link> : null}
+                  </div>}
+                />
+              </li>
+            ))}
+          </ol>
         </Section>
       ) : null}
       {recoveryTasks.length > 0 ? (
