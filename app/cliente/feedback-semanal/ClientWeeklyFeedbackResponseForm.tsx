@@ -88,7 +88,10 @@ export function ClientWeeklyFeedbackResponseForm({
         return false;
       }
     }
-    if (intent === "submit") setReviewOpen(true);
+    if (intent === "submit" && !reviewOpen) {
+      setReviewOpen(true);
+      return false;
+    }
     return true;
   }
 
