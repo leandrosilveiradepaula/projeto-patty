@@ -23,3 +23,12 @@ test("both professional and client correction flows retain their authorized reco
   assert.doesNotMatch(page,/service_role|createAdminClient/);
  }
 });
+
+test("client always renders the paged activity history, including today, for exact correction anchors",()=>{
+  const page=load("app/cliente/checkins/page.tsx");
+  assert.match(page,/title=\{selectedDay === today \? "Histórico de atividade física de hoje"/);
+  assert.doesNotMatch(page,/\{selectedDay !== today \? \(\s*<Section\s+description="Respostas factuais do dia escolhido/);
+  assert.match(page,/id=\{\x60atividade-\$\{event.id\}\x60\}/);
+  assert.match(page,/exactActivity=authorizedExactRecordPage/);
+  assert.match(page,/exploredActivities\.items\.map/);
+});
