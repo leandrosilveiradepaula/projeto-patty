@@ -41,6 +41,8 @@ export default async function AdminAvaliacoesPage({ searchParams }: { searchPara
   const isFiltered = Boolean(filters.query) || filters.kind !== "all" || filters.status !== "all" || filters.month !== "all" || filters.order !== "newest";
   const draftCount = mapped.filter(row => row.finalizedAt === null).length;
   const finalizedCount = mapped.length - draftCount;
+  const draftFilterHref = adminAssessmentDirectoryHref({ ...filters, status: "draft" }, 1);
+  const finalizedFilterHref = adminAssessmentDirectoryHref({ ...filters, status: "finalized" }, 1);
 
   return (
     <>
@@ -58,8 +60,8 @@ export default async function AdminAvaliacoesPage({ searchParams }: { searchPara
       >
         <div className={styles.summary} role="status">
           <span>{mapped.length} avaliação(ões)</span>
-          <span>{draftCount} rascunho(s)</span>
-          <span>{finalizedCount} finalizada(s)</span>
+          <Link href={draftFilterHref} aria-current={filters.status === "draft" ? "page" : undefined}>{draftCount} rascunho(s) · Ver rascunhos</Link>
+          <Link href={finalizedFilterHref} aria-current={filters.status === "finalized" ? "page" : undefined}>{finalizedCount} finalizada(s) · Ver finalizadas</Link>
         </div>
         <form className={styles.filterForm} method="get" action="/admin/avaliacoes">
           <label className={styles.field}>Buscar cliente
@@ -125,7 +127,7 @@ export default async function AdminAvaliacoesPage({ searchParams }: { searchPara
                         className={styles.actionLink}
                         href={`/admin/avaliacoes/${assessment.id}`}
                       >
-                        Ver avaliação
+                        {assessment.finalized_at ? "Ver avaliação" : "Continuar avaliação"}
                       </Link>
                       </>
                     }
