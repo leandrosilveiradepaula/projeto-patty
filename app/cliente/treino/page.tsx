@@ -5,6 +5,7 @@ import { parseTrainingRequestFilters, exploreTrainingRequests, trainingRequestFi
 import { compareTrainingVersions, paginateTrainingRequests, trainingRequestHistoryHref } from "@/lib/training/version-inspection";
 import { TrainingVersionComparisonView } from "@/components/training/TrainingVersionComparisonView";
 import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
+import { ClientWorkoutGuide } from "@/components/client/ClientWorkoutGuide";
 import { ClientHistoryDisclosure } from "@/components/client/ClientHistoryDisclosure";
 import { Alert } from "@/components/ui/Alert";
 import { publishedTrainingVersions } from "@/lib/training/published-versions";
@@ -159,33 +160,7 @@ export default async function ClientTrainingPage({ searchParams }: { searchParam
                 Nenhum exercício consta nesta versão publicada. Confira com a Patty antes de iniciar o treino.
               </Alert>
             ) : (
-            <ol className={styles.workoutList}>
-              {trainingItems.map((item) => (
-                <li key={item.id}>
-                  <Card className={styles.workoutItem} variant="subtle">
-                    <div className={styles.header}>
-                      <strong>
-                        {item.position}. {item.exercise_name}
-                      </strong>
-                      <Badge variant="neutral">
-                        {item.sets_text} séries
-                      </Badge>
-                    </div>
-                    <p className={styles.workoutDetail}>
-                      Repetições: {item.repetitions_text}
-                      {item.rest_text
-                        ? ` · Descanso: ${item.rest_text}`
-                        : ""}
-                    </p>
-                    {item.execution_notes ? (
-                      <p className={styles.note}>
-                        Orientações: {item.execution_notes}
-                      </p>
-                    ) : null}
-                  </Card>
-                </li>
-              ))}
-            </ol>
+            <ClientWorkoutGuide items={trainingItems} />
             )}
           </Card>
           <Alert title="Sobre carga e peso" variant="info">
