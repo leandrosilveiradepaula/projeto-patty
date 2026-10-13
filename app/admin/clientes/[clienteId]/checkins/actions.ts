@@ -44,7 +44,9 @@ function correctionReturnPath(
   const anchor = typeof eventId === "string" && isUuid(eventId)
     ? `#${kind}-${eventId}`
     : "";
-  return adminCheckinsPath(clientId, status) + checkinHistorySearch(day) + anchor;
+  const exactQuery = typeof eventId === "string" && isUuid(eventId)
+    ? `&${kind === "liquido" ? "liquidoExato" : "atividadeExata"}=${eventId}` : "";
+  return adminCheckinsPath(clientId, status) + checkinHistorySearch(day) + exactQuery + anchor;
 }
 
 export async function correctClientLiquidIntakeAction(
