@@ -156,8 +156,9 @@ function safeStateParams(state:{query:string;kind:string;area?:PendingArea|null;
  return params;
 }
 export function pendingExplorerGroupHref(group:OperationalPendingGroup,state:Parameters<typeof safeStateParams>[0]){
- const params=safeStateParams(state);
+ const params=new URLSearchParams();
  params.set("grupo",group);
+ for(const [key,value] of safeStateParams(state).entries())params.set(key,value);
  const hash=group==="patty"?"acao-da-patty":group==="client"?"aguardando-cliente":"operacional-do-sistema";
  return "/admin/pendencias?"+params.toString()+"#"+hash;
 }
