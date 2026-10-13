@@ -53,8 +53,8 @@ function formatCreatedAt(value: string) {
   }).format(new Date(value));
 }
 
-export default async function ClientFilesPage({ searchParams }: { searchParams: Promise<{ categoria?: string; origem?: string; formato?: string; ordem?: string; pagina?: string; fotoAntes?: string; fotoDepois?: string; ano?: string; tamanho?: string; mes?: string; minKb?: string; maxKb?: string; grupoMime?: string; integridadeData?: string; anoLiberacao?: string; mesLiberacao?: string; nome?: string; estadoLiberacao?: string; arquivo?: string }> }) {
-  const { categoria, origem, formato, ordem, pagina, fotoAntes, fotoDepois, ano, tamanho, mes, minKb, maxKb, grupoMime, integridadeData, anoLiberacao, mesLiberacao, nome, estadoLiberacao, arquivo } = await searchParams;
+export default async function ClientFilesPage({ searchParams }: { searchParams: Promise<{ categoria?: string; origem?: string; formato?: string; ordem?: string; pagina?: string; fotoAntes?: string; fotoDepois?: string; ano?: string; tamanho?: string; mes?: string; dataInicial?: string; dataFinal?: string; minKb?: string; maxKb?: string; grupoMime?: string; integridadeData?: string; anoLiberacao?: string; mesLiberacao?: string; nome?: string; estadoLiberacao?: string; arquivo?: string }> }) {
+  const { categoria, origem, formato, ordem, pagina, fotoAntes, fotoDepois, ano, tamanho, mes, dataInicial, dataFinal, minKb, maxKb, grupoMime, integridadeData, anoLiberacao, mesLiberacao, nome, estadoLiberacao, arquivo } = await searchParams;
   const kind = readPrivateFileKindFilter(categoria);
   const origin = readPrivateFileOriginFilter(origem);
   const preview = readPrivateFilePreviewFilter(formato);
@@ -77,7 +77,7 @@ export default async function ClientFilesPage({ searchParams }: { searchParams: 
   const releaseYears = privateFileReleaseYears(files);
   const exactFile = typeof arquivo === "string" && files.some(row=>row.id===arquivo);
   const metadata = exactFile ? { year:"all", size:"all" as const, invalid:false } : readPrivateFileMetadataFilters({ano,tamanho},years);
-  const discovery=readPrivateFileDiscovery(exactFile ? {} : {mes,minKb,maxKb,grupoMime,integridadeData,anoLiberacao,mesLiberacao,nome,estadoLiberacao}, releaseYears);
+  const discovery=readPrivateFileDiscovery(exactFile ? {} : {mes,dataInicial,dataFinal,minKb,maxKb,grupoMime,integridadeData,anoLiberacao,mesLiberacao,nome,estadoLiberacao}, releaseYears);
   const displayKind = exactFile ? "all" as const : kind;
   const displayOrigin = exactFile ? "all" as const : origin;
   const displayPreview = exactFile ? {value:"all" as const,invalid:false} : preview;
@@ -94,7 +94,7 @@ export default async function ClientFilesPage({ searchParams }: { searchParams: 
   const visiblePage = paginatePrivateFileHistory(filteredFiles, exactPage ?? requestedPage.page);
   const categories = countPrivateFileCategories(files);
   const historyPath = "/cliente/arquivos";
-  const historyHref = (page: number) => privateFileHistoryHref(historyPath, { categoria: displayKind, origem: displayOrigin, formato: displayPreview.value, ordem: order.value, ano: metadata.year, tamanho:metadata.size,mes:discovery.month,minKb:discovery.minKb,maxKb:discovery.maxKb,grupoMime:discovery.mimeFamily,integridadeData:discovery.recordedValidity,anoLiberacao:discovery.releaseYear,mesLiberacao:discovery.releaseMonth,nome:discovery.namePresence,estadoLiberacao:discovery.releaseState,pagina: page, anchor: "lista-arquivos" });
+  const historyHref = (page: number) => privateFileHistoryHref(historyPath, { categoria: displayKind, origem: displayOrigin, formato: displayPreview.value, ordem: order.value, ano: metadata.year, tamanho:metadata.size,mes:discovery.month,dataInicial:discovery.fromDate,dataFinal:discovery.toDate,minKb:discovery.minKb,maxKb:discovery.maxKb,grupoMime:discovery.mimeFamily,integridadeData:discovery.recordedValidity,anoLiberacao:discovery.releaseYear,mesLiberacao:discovery.releaseMonth,nome:discovery.namePresence,estadoLiberacao:discovery.releaseState,pagina: page, anchor: "lista-arquivos" });
 
   return (
     <>
@@ -145,7 +145,9 @@ export default async function ClientFilesPage({ searchParams }: { searchParams: 
               <option value="all">Todos</option><option value="known">Com tamanho registrado</option><option value="unknown">Tamanho não informado</option>
             </select>
           </label>
-                     <label>Mês de registro<select name="mes" defaultValue={discovery.month}><option value="all">Todos</option>{PRIVATE_FILE_DISCOVERY_MONTHS.map(month=><option key={month} value={month}>{month}</option>)}</select></label>
+                     <label>Registro desde<input name="dataInicial" type="date" defaultValue={discovery.fromDate ?? ""} /></label>
+           <label>Registro até<input name="dataFinal" type="date" defaultValue={discovery.toDate ?? ""} /></label>
+           <label>Mês de registro<select name="mes" defaultValue={discovery.month}><option value="all">Todos</option>{PRIVATE_FILE_DISCOVERY_MONTHS.map(month=><option key={month} value={month}>{month}</option>)}</select></label>
            <label>Tamanho mínimo (KB)<input name="minKb" type="number" min="0" max="2097151" defaultValue={discovery.minKb ?? ""} /></label>
            <label>Tamanho máximo (KB)<input name="maxKb" type="number" min="0" max="2097151" defaultValue={discovery.maxKb ?? ""} /></label>
            <label>Família do formato<select name="grupoMime" defaultValue={discovery.mimeFamily}><option value="all">Todas</option><option value="image">Imagens</option><option value="pdf">PDF</option><option value="video">Vídeos</option><option value="audio">Áudios</option><option value="other">Outros</option><option value="unknown">Não informado</option></select></label>
