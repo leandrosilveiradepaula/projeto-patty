@@ -1,4 +1,5 @@
 import { comparePlanVariantRegistration } from "@/lib/protocol/variant-registration-order";
+import { measurementBackedAssessmentHeaders } from "@/lib/evaluations/client-assessment-history";
 import { collectAdminDirectoryPages, orderAdminRecords } from "@/lib/operations/admin-directory-pagination";
 import { collectAiPages, collectAiPagesForIds, orderAiHistoryByCreatedAt } from "@/lib/ai/history-pagination";
 import { collectConfigurationPages, collectConfigurationVersionRows } from "@/lib/configuration/catalog-pagination";
@@ -1725,30 +1726,29 @@ export async function listCurrentClientFinalizedAssessmentMeasurements() {
   return data;
 }
 
-export async function listCurrentClientFinalizedAssessmentHeaders() {
+export async function listCurrentClientFinalizedAssessmentHistory() {
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc(
+  const { data: measurements, error: measurementsError } = await supabase.rpc(
+    "list_current_client_finalized_assessment_measurements",
+  );
+  if (measurementsError) throw measurementsError;
+
+  const { data: headers, error: headersError } = await supabase.rpc(
     "list_current_client_finalized_assessment_headers",
   );
-
-  if (error) {
-    // The reviewed migration is deployed separately from the Next.js release.
-    // Keep the pre-migration measurement-backed history available meanwhile.
-    if (error.code === "PGRST202") {
-      const { data: measurements, error: measurementsError } = await supabase.rpc(
-        "list_current_client_finalized_assessment_measurements",
-      );
-      if (measurementsError) throw measurementsError;
-      return [...new Map(measurements.map((row) => [row.assessment_id, {
-        id: row.assessment_id,
-        assessed_at: row.assessed_at,
-        finalized_at: row.assessed_at,
-      }])).values()];
-    }
-    throw error;
+  if (!headersError) {
+    return { headers, measurements, complete: true as const };
   }
-
-  return data;
+  if (headersError.code === "PGRST202" || headersError.code === "42883") {
+    // The pre-migration read can only enumerate assessments with measurements.
+    // Do not report this compatibility view as a complete history.
+    return {
+      headers: measurementBackedAssessmentHeaders(measurements),
+      measurements,
+      complete: false as const,
+    };
+  }
+  throw headersError;
 }
 
 export async function listAccessibleAssessmentsForClient(clientId: string) {
