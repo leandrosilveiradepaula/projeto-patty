@@ -17,6 +17,9 @@ if (!baseUrl || !url || !secret || !email || !password || !profileId) {
 if (!/^e2e-canonical-[0-9a-f]+@example\.invalid$/.test(email)) {
   throw new Error("Refusing to run post-migration smoke with a non-synthetic client.");
 }
+if (expectedAssessmentId && !/^[0-9a-f-]{36}$/i.test(expectedAssessmentId)) {
+  throw new Error("Invalid synthetic assessment fixture ID.");
+}
 if (!/^[0-9a-f-]{36}$/i.test(profileId)) {
   throw new Error("Invalid synthetic E2E profile ID.");
 }
@@ -61,6 +64,7 @@ test("cliente sintética lê somente seu histórico e não pode editar ciclo ine
     expect(headers.error).toBeNull();
     if (expectedAssessmentId) {
       expect(headers.data.some(row => row.id === expectedAssessmentId)).toBe(true);
+      expect(headers.data.every(row => row.id === expectedAssessmentId)).toBe(true);
     } else {
       expect(headers.data).toEqual([]);
     }
