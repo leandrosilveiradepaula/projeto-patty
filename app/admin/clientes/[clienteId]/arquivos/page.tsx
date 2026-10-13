@@ -1,3 +1,5 @@
+import { availablePrivateFileYears, matchesPrivateFileMetadata, readPrivateFileMetadataFilters, type PrivateFileMetadataFilters } from "@/lib/files/private-file-metadata-filters";
+import type { PrivateFileViewFilter } from "@/lib/files/private-file-history-view";
 import { authorizedExactRecordPage } from "@/lib/operations/exact-record-navigation";
 import { PrivatePhotoComparison } from "@/components/files/PrivatePhotoComparison";
 import { AdminPrivateFileReleaseForm } from "@/components/admin/AdminPrivateFileReleaseForm";
@@ -20,7 +22,7 @@ import { matchesPrivateFilePreviewFilter, paginatePrivateFileHistory, privateFil
 
 type AdminClientFilesPageProps = {
   params: Promise<{ clienteId: string }>;
-  searchParams: Promise<{ categoria?: string; origem?: string; formato?: string; visualizacao?: string; ordem?: string; paginaPendentes?: string; paginaHistorico?: string; fotoAntes?: string; fotoDepois?: string; arquivoPendente?: string }>;
+  searchParams: Promise<{ categoria?: string; origem?: string; formato?: string; visualizacao?: string; ordem?: string; paginaPendentes?: string; paginaHistorico?: string; fotoAntes?: string; fotoDepois?: string; arquivoPendente?: string; arquivoHistorico?: string; ano?: string; tamanho?: string }>;
 };
 
 const fileKindLabels: Record<string, string> = {
@@ -72,31 +74,44 @@ export default async function AdminClientFilesPage({
   }
 
   const displayName = client.full_name?.trim() || client.profiles?.display_name?.trim();
-  const kind = readPrivateFileKindFilter(filters.categoria);
-  const origin = readPrivateFileOriginFilter(filters.origem);
-  const preview = readPrivateFilePreviewFilter(filters.formato);
-  const view = readPrivateFileViewFilter(filters.visualizacao);
-  const order = readPrivateFileHistorySort(filters.ordem);
+  // Resolve opaque IDs only inside files already returned for this professional and client.
+  const pendingTarget = typeof filters.arquivoPendente === "string" && files.some(file =>
+    file.id === filters.arquivoPendente && isPrivateFilePendingProfessionalRelease(file,client.profile_id));
+  const historyTarget = !pendingTarget && typeof filters.arquivoHistorico === "string" && files.some(file =>
+    file.id === filters.arquivoHistorico && !isPrivateFilePendingProfessionalRelease(file,client.profile_id));
+  const hasExactTarget = pendingTarget || historyTarget;
+  const years=availablePrivateFileYears(files);
+  const metadata:PrivateFileMetadataFilters=hasExactTarget
+    ? {year:"all",size:"all",invalid:false}
+    : readPrivateFileMetadataFilters({ano:filters.ano,tamanho:filters.tamanho},years);
+  const kind=readPrivateFileKindFilter(hasExactTarget?undefined:filters.categoria);
+  const origin=readPrivateFileOriginFilter(hasExactTarget?undefined:filters.origem);
+  const preview=readPrivateFilePreviewFilter(hasExactTarget?undefined:filters.formato);
+  const view:PrivateFileViewFilter = pendingTarget ? "pending" : historyTarget ? "history" : readPrivateFileViewFilter(filters.visualizacao);
+  const order=readPrivateFileHistorySort(hasExactTarget?undefined:filters.ordem);
   const requestedPending = readPrivateFileHistoryPage(filters.paginaPendentes);
   const requestedHistory = readPrivateFileHistoryPage(filters.paginaHistorico);
   const counts = privateFileHistoryCounts(files, client.profile_id);
   const kinds = countPrivateFileCategories(files);
   const basePath = `/admin/clientes/${client.id}/arquivos`;
   const navigate = (target: "pending" | "history", page: number) => privateFileHistoryHref(basePath, {
-    categoria: kind, origem: origin, formato: preview.value, visualizacao: view, ordem: order.value,
+    categoria: kind, origem: origin, formato: preview.value, visualizacao: view, ordem: order.value, ano: metadata.year, tamanho:metadata.size,
     paginaPendentes: target === "pending" ? page : pendingPage.page,
     paginaHistorico: target === "history" ? page : historyPage.page,
     anchor: target === "pending" ? "aguardando-liberacao" : "historico-arquivos",
   });
   const filteredFiles = files.filter(file => matchesPrivateFileFilters(file, client.profile_id, kind, origin)
-    && matchesPrivateFilePreviewFilter(file.mime_type, preview.value));
+    && matchesPrivateFilePreviewFilter(file.mime_type, preview.value)
+    && matchesPrivateFileMetadata(file,metadata));
   const pendingReleaseFiles = filteredFiles.filter(file => isPrivateFilePendingProfessionalRelease(file, client.profile_id));
   const historyFiles = filteredFiles.filter(file => !isPrivateFilePendingProfessionalRelease(file, client.profile_id));
   const totalPending = counts.pending;
   const sortedPending = sortPrivateFileHistory(pendingReleaseFiles, order.value);
   const exactPendingPage = authorizedExactRecordPage(sortedPending, filters.arquivoPendente, 12);
   const pendingPage = paginatePrivateFileHistory(sortedPending, exactPendingPage ?? requestedPending.page);
-  const historyPage = paginatePrivateFileHistory(sortPrivateFileHistory(historyFiles, order.value), requestedHistory.page);
+  const sortedHistory=sortPrivateFileHistory(historyFiles,order.value);
+  const exactHistoryPage=authorizedExactRecordPage(sortedHistory,filters.arquivoHistorico,12);
+  const historyPage=paginatePrivateFileHistory(sortedHistory,exactHistoryPage??requestedHistory.page);
 
   return (
     <>
@@ -139,6 +154,17 @@ export default async function AdminClientFilesPage({
               <option value="all">Tudo</option><option value="pending">Aguardando liberação</option><option value="history">Histórico</option>
             </select>
           </label>
+          <label>Ano de registro
+            <select name="ano" defaultValue={metadata.year}>
+              <option value="all">Todos os anos</option>
+              {years.map(year=><option key={year} value={year}>{year}</option>)}
+            </select>
+          </label>
+          <label>Metadados de tamanho
+            <select name="tamanho" defaultValue={metadata.size}>
+              <option value="all">Todos</option><option value="known">Tamanho registrado</option><option value="unknown">Tamanho ausente</option>
+            </select>
+          </label>
           <label>Ordenação
             <select name="ordem" defaultValue={order.value}>
               <option value="newest">Mais recentes</option>
@@ -153,7 +179,7 @@ export default async function AdminClientFilesPage({
           <Link href={`/admin/clientes/${client.id}/arquivos`}>Limpar filtros</Link>
         </form>
         <p role="status">{filteredFiles.length} de {counts.all} arquivo(s) · {totalPending} aguardando liberação no total. Fotos: {kinds.photo}, exames: {kinds.exam}, documentos: {kinds.document}. Enviados pela cliente: {counts.client}; equipe ou autoria desconhecida: {counts.team}.</p>
-        {(preview.invalid || order.invalid || requestedPending.invalid || requestedHistory.invalid || pendingPage.outOfRange || historyPage.outOfRange) ? (
+        {(metadata.invalid || preview.invalid || order.invalid || requestedPending.invalid || requestedHistory.invalid || pendingPage.outOfRange || historyPage.outOfRange) ? (
           <p className={styles.filterNotice} role="status">Um filtro de ordenação ou página não é válido. Exibimos somente registros autorizados em uma página disponível.</p>
         ) : null}
       </Section>
@@ -255,7 +281,7 @@ export default async function AdminClientFilesPage({
         ) : (
           <ul className={styles.fileList}>
             {historyPage.items.map((file: (typeof files)[number]) => (
-              <li key={file.id}>
+              <li id={`arquivo-historico-${file.id}`} key={file.id}>
                 <Card className={styles.fileCard}>
                   <div className={styles.fileHeader}>
                     <h3 className={styles.fileTitle}>
@@ -300,6 +326,7 @@ export default async function AdminClientFilesPage({
                     >
                       Baixar arquivo
                     </Link>
+                    <Link className={styles.downloadLink} href={`${basePath}?arquivoHistorico=${file.id}#arquivo-historico-${file.id}`}>Abrir registro no histórico</Link>
                     {!file.client_visible_at && file.uploaded_by_profile_id !== client.profile_id ? (
                       <AdminPrivateFileReleaseForm clientId={client.id} fileId={file.id} fileName={file.original_filename?.trim() || "Arquivo sem nome informado"} />
                     ) : null}

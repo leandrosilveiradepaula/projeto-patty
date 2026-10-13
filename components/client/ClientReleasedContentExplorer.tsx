@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   filterReleasedContent, hasActiveReleasedContentFilters, INITIAL_RELEASE_FILTERS,
   paginateReleasedContent, releasePageForExactId, releasedContentFacetOptions,
-  releasedContentTotals, type ReleasedContentEntry,
+  releasedContentTotals, releasedContentYears, type ReleasedContentEntry,
   type ReleasedContentFilters, type ReleasedContentAvailability,
   type ReleasedContentOrder,
 } from "@/lib/content/release-explorer";
@@ -22,6 +22,7 @@ export function ClientReleasedContentExplorer({ entries, missingVersionCount }: 
   const [page, setPage] = useState(1);
   const facets = useMemo(() => releasedContentFacetOptions(entries), [entries]);
   const totals = useMemo(() => releasedContentTotals(entries), [entries]);
+  const years = useMemo(() => releasedContentYears(entries), [entries]);
   const filtered = useMemo(() => filterReleasedContent(entries, filters), [entries, filters]);
   const paged = useMemo(() => paginateReleasedContent(filtered, page), [filtered, page]);
 
@@ -79,6 +80,12 @@ export function ClientReleasedContentExplorer({ entries, missingVersionCount }: 
           <select value={filters.type} onChange={(event)=>change({type:event.target.value})}>
             <option value="all">Todos os tipos</option>
             {facets.types.map((type)=><option value={type} key={type}>{type}</option>)}
+          </select>
+        </label>
+        <label className={styles.field}><span>Ano de liberação</span>
+          <select value={filters.year ?? "all"} onChange={event=>change({year:event.target.value})}>
+            <option value="all">Todos os anos</option>
+            {years.map(year=><option key={year} value={year}>{year}</option>)}
           </select>
         </label>
         <label className={styles.field}><span>Arquivo</span>

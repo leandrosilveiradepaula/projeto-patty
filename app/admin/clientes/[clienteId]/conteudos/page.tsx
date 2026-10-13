@@ -1,5 +1,5 @@
 import { authorizedExactRecordPage } from "@/lib/operations/exact-record-navigation";
-import { filterProfessionalReleases, readProfessionalReleaseOptions, professionalReleaseHref } from "@/lib/content/professional-release-explorer";
+import { filterProfessionalReleases, readProfessionalReleaseOptions, professionalReleaseHref, professionalContentReleaseYears } from "@/lib/content/professional-release-explorer";
 import { ClientContentReleaseForm } from "@/components/admin/ClientContentReleaseForm";
 import { isContentVersionReleaseEligible } from "@/lib/content/release-eligibility";
 import { newestClientContentReleases, sortClientContentReleaseOptions } from "@/lib/content/release-order";
@@ -23,7 +23,7 @@ import styles from "./page.module.css";
 
 type AdminClientContentPageProps = {
   params: Promise<{ clienteId: string }>;
-  searchParams: Promise<{ q?: string; arquivo?: string; ordem?: string; pagina?: string; liberacao?: string }>;
+  searchParams: Promise<{ q?: string; arquivo?: string; ordem?: string; pagina?: string; liberacao?: string; ano?: string }>;
 };
 
 function formatRecordedDate(value: string | null) {
@@ -94,6 +94,7 @@ export default async function AdminClientContentPage({
     (release) => Boolean(release.educational_content_versions),
   );
   const missingReleaseVersions = newestReleases.length - visibleReleases.length;
+  const releaseYears = professionalContentReleaseYears(visibleReleases);
   const exactPage = authorizedExactRecordPage(
     newestClientContentReleases(visibleReleases),
     rawFilters.liberacao, 12,
@@ -102,6 +103,7 @@ export default async function AdminClientContentPage({
     filters.query = "";
     filters.availability = "all";
     filters.order = "newest";
+    filters.year = "all";
     filters.page = exactPage;
   }
   const explored = filterProfessionalReleases(visibleReleases, assetCountsByVersionId, filters);
@@ -196,6 +198,7 @@ export default async function AdminClientContentPage({
           <form action={baseHref} className={styles.historyFilters} method="get">
             <label>Buscar<input type="search" name="q" maxLength={160} defaultValue={filters.query} placeholder="Título, categoria ou tipo" /></label>
             <label>Arquivo<select name="arquivo" defaultValue={filters.availability}><option value="all">Todos</option><option value="available">Com arquivo</option><option value="missing">Sem arquivo</option></select></label>
+            <label>Ano<select name="ano" defaultValue={filters.year ?? "all"}><option value="all">Todos os anos</option>{releaseYears.map(year=><option key={year} value={year}>{year}</option>)}</select></label>
             <label>Ordem<select name="ordem" defaultValue={filters.order}><option value="newest">Mais recentes</option><option value="oldest">Mais antigas</option><option value="title">Título</option></select></label>
             <button type="submit">Filtrar</button>
             <Link href={baseHref + "#historico-liberacoes"}>Limpar filtros</Link>
