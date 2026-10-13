@@ -32,9 +32,9 @@ test("client and professional views source the scoped lists and existing guarded
  const component=read("components/files/PrivatePhotoComparison.tsx");
  assert.match(client,/listCurrentClientFiles\(client.id\)/);
  assert.match(admin,/listAccessibleClientFiles\(clienteId\)/);
- assert.match(component,/eligiblePrivatePhotos\(files,clientId\)/);
+ assert.match(component,/eligiblePrivatePhotos\(files,\s*clientId\)/);
  assert.match(component,/resolvePrivatePhotoPair\(photos,before,after\)/);
- assert.match(component,/fileRoute\+"\/"\+file.id\+"\?preview=1"/);
+ assert.match(component,/fileRoute\s*\+\s*"\/"\s*\+\s*file.id\s*\+\s*"\?preview=1"/);
  assert.doesNotMatch(component,/createSignedUrl|service_role|object_path|bucket_id/);
 });
 
