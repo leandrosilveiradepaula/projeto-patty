@@ -96,6 +96,12 @@ export default async function AdminClientAssessmentsPage({
         }
       />
       <ClientWorkspaceNav activeArea="avaliacoes" clientId={client.id} />
+      <nav aria-label="Navegação das avaliações da cliente" className={styles.filters}>
+        <Link href="#nova-avaliacao">Nova avaliação</Link>
+        <Link href="#avaliacoes-em-andamento">Em andamento ({draftAssessments.length})</Link>
+        <Link href="#historico-finalizado">Histórico finalizado ({finalizedAssessments.length})</Link>
+        <Link href="/admin/avaliacoes">Todas as avaliações</Link>
+      </nav>
       <Section
         description="Após finalizar uma avaliação, consulte a evolução factual e retome a preparação do protocolo na mesma área da cliente."
         title="Próximos passos"
@@ -115,6 +121,7 @@ export default async function AdminClientAssessmentsPage({
           </Link>
         }
         description="Crie uma avaliação em rascunho. O registro permanece editável até a finalização explícita."
+        id="nova-avaliacao"
         title="Nova avaliação"
       >
         <Card>
