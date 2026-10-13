@@ -1,5 +1,5 @@
 import { authorizedExactRecordPage } from "@/lib/operations/exact-record-navigation";
-import { checkinCorrectionReturnQuery, resolveCheckinExactTarget } from "@/lib/checkins/history-explorer";
+import { checkinCorrectionReturnQuery, resolveCheckinExactTarget, availableCheckinHistoryYears, liquidHistoryCalendarDate } from "@/lib/checkins/history-explorer";
 import { readCheckinExploreOptions, exploreLiquidCheckins, exploreActivityCheckins, checkinExploreHref, checkinExplorerQuery, checkinExplorerClearQuery } from "@/lib/checkins/history-explorer";
 import { groupCheckinCorrectionHistory, checkinCorrectionAuthor, formatCheckinAuditDate } from "@/lib/checkins/correction-audit";
 import { Alert } from "@/components/ui/Alert";
@@ -99,12 +99,16 @@ export default async function AdminClientCheckinsPage({
     ...event, effectiveAmountMl:latestLiquidCorrectionByEvent.get(event.id)?.corrected_amount_ml ?? event.amount_ml,
     effectiveLiquidKind:latestLiquidCorrectionByEvent.get(event.id)?.corrected_liquid_kind ?? event.liquid_kind,
     wasCorrected:latestLiquidCorrectionByEvent.has(event.id),
+    lastCorrectedAt:latestLiquidCorrectionByEvent.get(event.id)?.created_at ?? null,
   }));
   const effectiveActivityEvents = recentActivityEvents.map(event => ({
     ...event,
     didActivityEffective: latestActivityCorrectionByEvent.get(event.id)?.corrected_did_activity ?? event.did_activity,
     wasCorrected: latestActivityCorrectionByEvent.has(event.id),
+    lastCorrectedAt: latestActivityCorrectionByEvent.get(event.id)?.created_at ?? null,
   }));
+  const liquidYears=availableCheckinHistoryYears(effectiveLiquidEvents.map(event=>liquidHistoryCalendarDate(event.recorded_at)));
+  const activityYears=availableCheckinHistoryYears(effectiveActivityEvents.map(event=>event.checkin_date ?? null));
   const scopedLiquid = (opts: typeof explorer) => exploreLiquidCheckins(effectiveLiquidEvents, opts, client.profile_id);
   const scopedActivity = (opts: typeof explorer) => exploreActivityCheckins(effectiveActivityEvents, opts, client.profile_id);
   const exactLiquid = resolveCheckinExactTarget(effectiveLiquidEvents, query.liquidoExato, explorer, "liquid", (_, opts) => scopedLiquid(opts));
@@ -188,12 +192,19 @@ export default async function AdminClientCheckinsPage({
           </Alert>
         ) : null}
         <form action={base+"#historico-liquidos"} className={styles.form} method="get">
+          <label className={styles.field}>Ano dos líquidos<select name="anoLiquido" defaultValue={explorer.liquidYear}><option value="all">Todos</option>{liquidYears.map(year=><option key={year} value={year}>{year}</option>)}</select></label>
+          <label className={styles.field}>Mês dos líquidos<select name="mesLiquido" defaultValue={explorer.liquidMonth}><option value="all">Todos</option>{Array.from({length:12},(_,i)=>String(i+1).padStart(2,"0")).map(month=><option key={month} value={month}>{month}</option>)}</select></label>
+          <label className={styles.field}>Mínimo (mL)<input type="number" min="1" max="2147483647" name="minMl" defaultValue={explorer.minimumMl ?? ""}/></label>
+          <label className={styles.field}>Máximo (mL)<input type="number" min="1" max="2147483647" name="maxMl" defaultValue={explorer.maximumMl ?? ""}/></label>
           <input type="hidden" name="ap" value={exploredActivities.page} />
           {selectedDay ? <input name="dia" type="hidden" value={selectedDay} /> : null}
-          <label className={styles.field}>Ordem<select name="ordem" defaultValue={explorer.liquidSort}><option value="newest">Mais recentes</option><option value="oldest">Mais antigos</option><option value="amount-desc">Maior volume</option><option value="amount-asc">Menor volume</option></select></label>
+          <label className={styles.field}>Ordem<select name="ordem" defaultValue={explorer.liquidSort}><option value="newest">Mais recentes</option><option value="oldest">Mais antigos</option><option value="amount-desc">Maior volume</option><option value="amount-asc">Menor volume</option><option value="recent-correction">Correção mais recente</option></select></label>
           <label className={styles.field}>Correção<select name="correcao" defaultValue={explorer.liquidCorrection}><option value="all">Todas</option><option value="corrected">Corrigidas</option><option value="original">Sem correção</option></select></label>
           <label className={styles.field}>Tipo<select name="tipo" defaultValue={explorer.liquidKind}><option value="all">Todos</option>{Array.from(new Set(effectiveLiquidEvents.map(e=>e.effectiveLiquidKind))).map(kind=><option value={kind} key={kind}>{liquidLabelsByKey.get(kind) ?? "Tipo histórico"}</option>)}</select></label>
           <label className={styles.field}>Enviado por<select name="origemLiquido" defaultValue={explorer.liquidOrigin}><option value="all">Todas as origens</option><option value="client">Cliente</option><option value="professional">Profissional</option></select></label>
+          {explorer.activityYear !== "all" ? <input type="hidden" name="anoAtividade" value={explorer.activityYear} /> : null}
+          {explorer.activityMonth !== "all" ? <input type="hidden" name="mesAtividade" value={explorer.activityMonth} /> : null}
+          {explorer.activityRepeated !== "all" ? <input type="hidden" name="repeticaoAtividade" value={explorer.activityRepeated} /> : null}
           {exploreQuery.atividade && exploreQuery.atividade !== "all" ? <input type="hidden" name="atividade" value={exploreQuery.atividade} /> : null}
           {exploreQuery.atividadeCorrecao && exploreQuery.atividadeCorrecao !== "all" ? <input type="hidden" name="atividadeCorrecao" value={exploreQuery.atividadeCorrecao} /> : null}
           {exploreQuery.origemAtividade && exploreQuery.origemAtividade !== "all" ? <input type="hidden" name="origemAtividade" value={exploreQuery.origemAtividade} /> : null}
@@ -289,12 +300,19 @@ export default async function AdminClientCheckinsPage({
         title={selectedDay ? `Atividade física em ${selectedDay}` : "Atividade física recente"}
       >
         <form action={base+"#historico-atividade"} className={styles.form} method="get">
+          <label className={styles.field}>Ano da atividade<select name="anoAtividade" defaultValue={explorer.activityYear}><option value="all">Todos</option>{activityYears.map(year=><option key={year} value={year}>{year}</option>)}</select></label>
+          <label className={styles.field}>Mês da atividade<select name="mesAtividade" defaultValue={explorer.activityMonth}><option value="all">Todos</option>{Array.from({length:12},(_,i)=>String(i+1).padStart(2,"0")).map(month=><option key={month} value={month}>{month}</option>)}</select></label>
+          <label className={styles.field}>Registros no mesmo dia<select name="repeticaoAtividade" defaultValue={explorer.activityRepeated}><option value="all">Todos</option><option value="multiple">Dias com mais de uma resposta</option><option value="single">Dias com uma resposta</option></select></label>
           <input type="hidden" name="lp" value={exploredLiquids.page} />
           {selectedDay ? <input name="dia" type="hidden" value={selectedDay} /> : null}
           <label className={styles.field}>Resposta<select name="atividade" defaultValue={explorer.activityFilter}><option value="all">Todas</option><option value="yes">Sim</option><option value="no">Não</option></select></label>
           <label className={styles.field}>Correções<select name="atividadeCorrecao" defaultValue={explorer.activityCorrection}><option value="all">Todas</option><option value="corrected">Corrigidas</option><option value="original">Sem correção</option></select></label>
-          <label className={styles.field}>Ordem<select name="ordemAtividade" defaultValue={explorer.activitySort}><option value="newest">Mais recentes</option><option value="oldest">Mais antigas</option></select></label>
+          <label className={styles.field}>Ordem<select name="ordemAtividade" defaultValue={explorer.activitySort}><option value="newest">Mais recentes</option><option value="oldest">Mais antigas</option><option value="recent-correction">Correção mais recente</option></select></label>
           <label className={styles.field}>Enviado por<select name="origemAtividade" defaultValue={explorer.activityOrigin}><option value="all">Todas as origens</option><option value="client">Cliente</option><option value="professional">Profissional</option></select></label>
+          {explorer.liquidYear !== "all" ? <input type="hidden" name="anoLiquido" value={explorer.liquidYear} /> : null}
+          {explorer.liquidMonth !== "all" ? <input type="hidden" name="mesLiquido" value={explorer.liquidMonth} /> : null}
+          {explorer.minimumMl !== null ? <input type="hidden" name="minMl" value={explorer.minimumMl} /> : null}
+          {explorer.maximumMl !== null ? <input type="hidden" name="maxMl" value={explorer.maximumMl} /> : null}
           {exploreQuery.ordem && exploreQuery.ordem !== "newest" ? <input type="hidden" name="ordem" value={exploreQuery.ordem} /> : null}
           {exploreQuery.correcao && exploreQuery.correcao !== "all" ? <input type="hidden" name="correcao" value={exploreQuery.correcao} /> : null}
           {exploreQuery.tipo && exploreQuery.tipo !== "all" ? <input type="hidden" name="tipo" value={exploreQuery.tipo} /> : null}
