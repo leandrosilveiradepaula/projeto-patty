@@ -515,11 +515,10 @@ export default async function ClientCheckinsPage({
         )}
         {exploredLiquids.pages > 1 ? <nav aria-label="Páginas de líquidos" className={styles.form}>{exploredLiquids.page > 1 ? <Link href={liquidHref(exploredLiquids.page-1)}>Página anterior</Link> : null}<span>Página {exploredLiquids.page} de {exploredLiquids.pages}</span>{exploredLiquids.page < exploredLiquids.pages ? <Link href={liquidHref(exploredLiquids.page+1)}>Próxima página</Link> : null}</nav> : null}
       </Section>
-      {selectedDay !== today ? (
-        <Section
-          description="Respostas factuais do dia escolhido, sem alterar o check-in de hoje. As correções preservam o registro original."
+      <Section
+          description={selectedDay === today ? "Histórico das respostas de hoje, com consulta e correções que preservam o registro original." : "Respostas factuais do dia escolhido, sem alterar o check-in de hoje. As correções preservam o registro original."}
           id="historico-atividade"
-          title={`Atividade física em ${selectedDay}`}
+          title={selectedDay === today ? "Histórico de atividade física de hoje" : `Atividade física em ${selectedDay}`}
         >
           <form action="/cliente/checkins#historico-atividade" className={styles.form} method="get">
             <input type="hidden" name="dia" value={selectedDay} />
@@ -584,7 +583,6 @@ export default async function ClientCheckinsPage({
           )}
           {exploredActivities.pages > 1 ? <nav aria-label="Páginas de atividade" className={styles.form}>{exploredActivities.page > 1 ? <Link href={activityHref(exploredActivities.page-1)}>Anterior</Link> : null}<span>Página {exploredActivities.page} de {exploredActivities.pages}</span>{exploredActivities.page < exploredActivities.pages ? <Link href={activityHref(exploredActivities.page+1)}>Próxima</Link> : null}</nav> : null}
         </Section>
-      ) : null}
       <ClientJourneyNextSteps areas={["feedback","protocol","index"]} />
     </>
   );
