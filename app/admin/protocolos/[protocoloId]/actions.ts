@@ -10,6 +10,7 @@ import { parseOriginalDraftLabel, parseOriginalDraftDoseQuantity, parseOriginalD
 import { applyDraftCycleOperation, parseDraftCycleSteps, sameDraftCycleSteps } from "@/lib/protocol/cycle-editor";
 import { protocolCycleEditFailureMessage } from "@/lib/protocol/cycle-edit-error";
 import { isUuid } from "@/lib/validation/uuid";
+import { readSingleStringFormValue, isSingleConfirmedFormValue } from "@/lib/validation/form-fields";
 import {
   formatProtocolDraftReadiness,
   getProtocolDraftReadiness,
@@ -243,8 +244,8 @@ export async function addProtocolMealDose(
 ): Promise<ProtocolLifecycleFormState> {
   await requireRole("admin");
 
-  const doseTypeValue = formData.get("doseType");
-  const quantityValue = formData.get("doseQuantity");
+  const doseTypeValue = readSingleStringFormValue(formData, "doseType");
+  const quantityValue = readSingleStringFormValue(formData, "doseQuantity");
   const doseType =
     doseTypeValue === "protein" ||
     doseTypeValue === "carbohydrate" ||
@@ -300,7 +301,7 @@ export async function updateProtocolMealPlanVariantLabel(
 ): Promise<ProtocolLifecycleFormState> {
   await requireRole("admin");
   const label = parseTrimmedText(formData, "label", 120);
-  const originalLabel = parseOriginalDraftLabel(formData.get("originalLabel"));
+  const originalLabel = parseOriginalDraftLabel(readSingleStringFormValue(formData, "originalLabel"));
   if (!originalLabel.valid) return { message: "Referência original inválida. Atualize a página.", success: false };
 
   if (!label) {
@@ -348,15 +349,15 @@ export async function updateProtocolMealLabel(
 ): Promise<ProtocolLifecycleFormState> {
   await requireRole("admin");
   const label = parseTrimmedText(formData, "label", 120);
-  const originalLabel = parseOriginalDraftLabel(formData.get("originalLabel"));
+  const originalLabel = parseOriginalDraftLabel(readSingleStringFormValue(formData, "originalLabel"));
   if (!originalLabel.valid) return { message: "Referência original inválida. Atualize a página.", success: false };
 
   if (!label) {
     return { message: "Informe um nome válido para a refeição.", success: false };
   }
 
-  const originalPosition = parseOriginalDraftPosition(formData.get("originalPosition"));
-  const originalVariantId = parseOriginalDraftId(formData.get("originalVariantId"));
+  const originalPosition = parseOriginalDraftPosition(readSingleStringFormValue(formData, "originalPosition"));
+  const originalVariantId = parseOriginalDraftId(readSingleStringFormValue(formData, "originalVariantId"));
   if (!originalPosition || !originalVariantId) return { message: "Referência da refeição inválida. Atualize a página.", success: false };
   const accessible = await getAccessibleVersionLifecycle(protocolId, protocolVersionId);
 
@@ -393,16 +394,16 @@ export async function updateProtocolMealDose(
   formData: FormData,
 ): Promise<ProtocolLifecycleFormState> {
   await requireRole("admin");
-  const quantityValue = formData.get("doseQuantity");
+  const quantityValue = readSingleStringFormValue(formData, "doseQuantity");
   const doseQuantity = parseProtocolDraftDoseQuantity(quantityValue);
 
   if (doseQuantity === null) {
     return { message: "Informe uma quantidade de dose válida.", success: false };
   }
 
-  const originalMealId = parseOriginalDraftId(formData.get("originalMealId"));
-  const originalDoseType = parseOriginalDraftDoseType(formData.get("originalDoseType"));
-  const originalQuantity = parseOriginalDraftDoseQuantity(formData.get("originalDoseQuantity"));
+  const originalMealId = parseOriginalDraftId(readSingleStringFormValue(formData, "originalMealId"));
+  const originalDoseType = parseOriginalDraftDoseType(readSingleStringFormValue(formData, "originalDoseType"));
+  const originalQuantity = parseOriginalDraftDoseQuantity(readSingleStringFormValue(formData, "originalDoseQuantity"));
   if (!originalMealId || !originalDoseType || originalQuantity === null) {
     return { message: "Referência original da dose inválida. Atualize a página.", success: false };
   }
@@ -441,9 +442,9 @@ export async function removeProtocolMealDose(
   _formData: FormData,
 ): Promise<ProtocolLifecycleFormState> {
   await requireRole("admin");
-  const originalMealId = parseOriginalDraftId(_formData.get("originalMealId"));
-  const originalDoseType = parseOriginalDraftDoseType(_formData.get("originalDoseType"));
-  const originalQuantity = parseOriginalDraftDoseQuantity(_formData.get("originalDoseQuantity"));
+  const originalMealId = parseOriginalDraftId(readSingleStringFormValue(_formData, "originalMealId"));
+  const originalDoseType = parseOriginalDraftDoseType(readSingleStringFormValue(_formData, "originalDoseType"));
+  const originalQuantity = parseOriginalDraftDoseQuantity(readSingleStringFormValue(_formData, "originalDoseQuantity"));
   if (!originalMealId || !originalDoseType || originalQuantity === null) {
     return { message: "Referência original da dose inválida. Atualize a página.", success: false };
   }
@@ -482,8 +483,8 @@ export async function removeProtocolMeal(
   _formData: FormData,
 ): Promise<ProtocolLifecycleFormState> {
   await requireRole("admin");
-  const originalLabel = parseOriginalDraftLabel(_formData.get("originalLabel"));
-  const originalPosition = parseOriginalDraftPosition(_formData.get("originalPosition"));
+  const originalLabel = parseOriginalDraftLabel(readSingleStringFormValue(_formData, "originalLabel"));
+  const originalPosition = parseOriginalDraftPosition(readSingleStringFormValue(_formData, "originalPosition"));
   if (!originalLabel.valid || !originalPosition) return { message: "Referência original inválida. Atualize a página.", success: false };
   const accessible = await getAccessibleVersionLifecycle(protocolId, protocolVersionId);
 
@@ -534,8 +535,8 @@ export async function removeProtocolMealPlanVariant(
   _formData: FormData,
 ): Promise<ProtocolLifecycleFormState> {
   await requireRole("admin");
-  const originalLabel = parseOriginalDraftLabel(_formData.get("originalLabel"));
-  const originalVariantKey = parseOriginalVariantKey(_formData.get("originalVariantKey"));
+  const originalLabel = parseOriginalDraftLabel(readSingleStringFormValue(_formData, "originalLabel"));
+  const originalVariantKey = parseOriginalVariantKey(readSingleStringFormValue(_formData, "originalVariantKey"));
   if (!originalLabel.valid || !originalVariantKey) return { message: "Referência original inválida. Atualize a página.", success: false };
   const accessible = await getAccessibleVersionLifecycle(protocolId, protocolVersionId);
 
@@ -617,17 +618,17 @@ export async function editProtocolMealPlanCycle(
   formData: FormData,
 ): Promise<ProtocolLifecycleFormState> {
   await requireRole("admin");
-  const operation = formData.get("operation");
+  const operation = readSingleStringFormValue(formData, "operation");
   const validOperations = ["add", "replace", "move_up", "move_down", "remove"] as const;
   if (!validOperations.some((item) => item === operation)) {
     return { success: false, message: "Selecione uma alteração válida." };
   }
-  const positionInput = formData.get("position");
+  const positionInput = readSingleStringFormValue(formData, "position");
   const position = typeof positionInput === "string" && /^[1-9][0-9]*$/.test(positionInput) &&
     Number.isSafeInteger(Number(positionInput)) ? Number(positionInput) : null;
-  const variantInput = formData.get("variantId");
+  const variantInput = readSingleStringFormValue(formData, "variantId");
   const variantId = typeof variantInput === "string" && isUuid(variantInput) ? variantInput : null;
-  const expected = parseDraftCycleSteps(formData.get("expectedSteps"));
+  const expected = parseDraftCycleSteps(readSingleStringFormValue(formData, "expectedSteps"));
   if (!expected) {
     return { success: false, message: "A referência da edição é inválida. Atualize a página." };
   }
@@ -704,7 +705,7 @@ export async function submitProtocolVersionForReview(
 ): Promise<ProtocolLifecycleFormState> {
   await requireRole("admin");
 
-  if (formData.get("confirmSubmission") !== "yes") {
+  if (!isSingleConfirmedFormValue(formData, "confirmSubmission")) {
     return {
       message: "Confirme que a versão está pronta para ser congelada e revisada.",
       success: false,
@@ -779,7 +780,7 @@ export async function approveProtocolVersion(
 ): Promise<ProtocolLifecycleFormState> {
   const context = await requireRole("admin");
 
-  if (formData.get("confirmApproval") !== "yes") {
+  if (!isSingleConfirmedFormValue(formData, "confirmApproval")) {
     return {
       message: "Confirme explicitamente sua aprovação desta versão.",
       success: false,
@@ -836,7 +837,7 @@ export async function publishProtocolVersion(
 ): Promise<ProtocolLifecycleFormState> {
   const context = await requireRole("admin");
 
-  if (formData.get("confirmPublication") !== "yes") {
+  if (!isSingleConfirmedFormValue(formData, "confirmPublication")) {
     return {
       message: "Confirme explicitamente a publicação desta versão.",
       success: false,

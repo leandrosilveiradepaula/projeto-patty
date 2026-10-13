@@ -78,5 +78,5 @@ test("destructive operations still require explicit confirmation and stop after 
   assert.match(part("CreatePlanForm", "AddVariantForm"), /blockAfterSuccess: true/);
   assert.doesNotMatch(source, /publishProtocolVersion\.bind/);
   assert.match(server, /requireRole\("admin"\)/);
-  assert.match(server, /formData\.get\("confirmPublication"\) !== "yes"/);
+  assert.match(server, /!isSingleConfirmedFormValue\(formData, "confirmPublication"\)/);
 });

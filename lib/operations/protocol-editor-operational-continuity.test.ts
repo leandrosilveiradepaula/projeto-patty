@@ -81,7 +81,7 @@ test("deleting a dose is confirmed separately from editing quantity", () => {
 test("client-facing snapshot remains isolated from the editable draft and may only be published manually", () => {
   const server = read("app/admin/protocolos/[protocoloId]/actions.ts");
   assert.ok(server.includes('requireRole("admin")'));
-  assert.ok(server.includes('formData.get("confirmPublication") !== "yes"'));
+  assert.ok(server.includes('!isSingleConfirmedFormValue(formData, "confirmPublication")'));
   assert.ok(server.includes("createAccessibleProtocolPublication({"));
   const client = read("app/cliente/protocolo/page.tsx");
   assert.ok(client.includes("listPublishedProtocolsForCurrentClient"));
