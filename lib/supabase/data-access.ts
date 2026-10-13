@@ -2482,6 +2482,23 @@ export type AccessibleProtocolVersionMealPlan = {
   }>;
 };
 
+/**
+ * Readiness probe does not mutate data: the all-zero synthetic UUID cannot
+ * refer to a valid plan. Only SQLSTATE P0002 proves that the RPC executed.
+ * This check is not permission to bypass the professional workflow.
+ */
+export async function probeDraftCycleWriter() {
+  const supabase = await createClient();
+  const nonexistentId = "00000000-0000-4000-8000-000000000000";
+  const { error } = await supabase.rpc("replace_draft_meal_plan_cycle_steps", {
+    p_cycle_id: nonexistentId,
+    p_meal_plan_version_id: nonexistentId,
+    p_expected_steps: [],
+    p_variant_ids: [],
+  });
+  return error;
+}
+
 export async function createAccessibleMealPlanCycle(input: {
   clientId: string;
   mealPlanVersionId: string;
