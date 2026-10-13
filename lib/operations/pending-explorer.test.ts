@@ -21,3 +21,10 @@ test("invalid and repeated query filters cannot widen the queue",()=>{
  assert.equal(ok.invalid,false);
  assert.equal(pendingExplorerGroupHref("patty",ok),"/admin/pendencias?grupo=patty&q=%C3%89rica&tipo=assessment_draft#acao-da-patty");
 });
+
+test("area composes with existing client and type search without changing scoped items",()=>{
+ const state=readPendingExplorerQuery({area:"assessments",q:"Érica"},items.map(i=>i.kind));
+ assert.deepEqual(explorePendingClientQueue(items,state).map(i=>i.id),["a"]);
+ assert.equal(pendingExplorerGroupHref("patty",state),"/admin/pendencias?grupo=patty&q=%C3%89rica&area=assessments#acao-da-patty");
+ assert.equal(readPendingExplorerQuery({area:["assessments"]},items.map(i=>i.kind)).invalid,true);
+});
