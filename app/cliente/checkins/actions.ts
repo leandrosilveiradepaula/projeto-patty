@@ -34,7 +34,9 @@ function correctionRedirect(
   const anchor = typeof eventId === "string" && isUuid(eventId)
     ? `#${kind}-${eventId}`
     : "";
-  return "/cliente/checkins?status=" + status + checkinHistorySearch(day) + anchor;
+  const exactQuery = typeof eventId === "string" && isUuid(eventId)
+    ? `&${kind === "liquido" ? "liquidoExato" : "atividadeExata"}=${eventId}` : "";
+  return "/cliente/checkins?status=" + status + checkinHistorySearch(day) + exactQuery + anchor;
 }
 
 function currentSaoPauloDate() {

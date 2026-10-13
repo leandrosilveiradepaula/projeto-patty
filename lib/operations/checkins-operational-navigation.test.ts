@@ -45,7 +45,7 @@ test("admin invalid day shows explicit feedback rather than silently returning r
 test("both correction flows preserve selected day on errors and success", () => {
   assert.ok(adminAction.includes("function correctionReturnPath("));
   assert.ok(adminAction.includes('parseCheckinHistoryDay(formData.get("historyDay"), today)'));
-  assert.ok(adminAction.includes("checkinHistorySearch(day) + anchor"));
+  assert.ok(adminAction.includes("checkinHistorySearch(day) + exactQuery + anchor"));
   for (const state of ["correction-invalid", "correction-error", "correction-recorded"]) {
     assert.ok(adminAction.includes(`correctionReturnPath(clientId, "${state}", formData, "liquido")`));
     assert.ok(adminAction.includes(`correctionReturnPath(clientId, "${state}", formData, "atividade")`));

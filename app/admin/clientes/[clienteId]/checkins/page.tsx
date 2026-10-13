@@ -1,3 +1,5 @@
+import { authorizedExactRecordPage } from "@/lib/operations/exact-record-navigation";
+import { CHECKIN_EXPLORER_PAGE_SIZE } from "@/lib/checkins/history-explorer";
 import { readCheckinExploreOptions, exploreLiquidCheckins, exploreActivityCheckins, checkinExploreHref, checkinExplorerQuery, checkinExplorerClearQuery } from "@/lib/checkins/history-explorer";
 import { groupCheckinCorrectionHistory, checkinCorrectionAuthor, formatCheckinAuditDate } from "@/lib/checkins/correction-audit";
 import { Alert } from "@/components/ui/Alert";
@@ -31,7 +33,7 @@ import styles from "./page.module.css";
 
 type PageProps = {
   params: Promise<{ clienteId: string }>;
-  searchParams: Promise<{ status?: string; dia?: string; ordem?: string; correcao?: string; tipo?: string; atividade?: string; atividadeCorrecao?: string; origemLiquido?: string; origemAtividade?: string; ordemAtividade?: string; lp?: string; ap?: string }>;
+  searchParams: Promise<{ status?: string; dia?: string; ordem?: string; correcao?: string; tipo?: string; atividade?: string; atividadeCorrecao?: string; origemLiquido?: string; origemAtividade?: string; ordemAtividade?: string; lp?: string; ap?: string; liquidoExato?: string; atividadeExata?: string }>;
 };
 
 function formatMl(value: number) {
@@ -98,6 +100,10 @@ export default async function AdminClientCheckinsPage({
     effectiveLiquidKind:latestLiquidCorrectionByEvent.get(event.id)?.corrected_liquid_kind ?? event.liquid_kind,
     wasCorrected:latestLiquidCorrectionByEvent.has(event.id),
   }));
+  const exactLiquid=authorizedExactRecordPage(exploreLiquidCheckins(effectiveLiquidEvents,{...explorer,liquidSort:"newest",liquidCorrection:"all",liquidKind:"all",liquidOrigin:"all",liquidPage:1},client.profile_id).orderedIds.map(id=>({id})),query.liquidoExato,CHECKIN_EXPLORER_PAGE_SIZE);
+  const exactActivity=authorizedExactRecordPage(exploreActivityCheckins(recentActivityEvents.map(event=>({...event,didActivityEffective:latestActivityCorrectionByEvent.get(event.id)?.corrected_did_activity??event.did_activity,wasCorrected:latestActivityCorrectionByEvent.has(event.id)})),{...explorer,activitySort:"newest",activityFilter:"all",activityCorrection:"all",activityOrigin:"all",activityPage:1},client.profile_id).orderedIds.map(id=>({id})),query.atividadeExata,CHECKIN_EXPLORER_PAGE_SIZE);
+  if(exactLiquid!==null){explorer.liquidKind="all";explorer.liquidCorrection="all";explorer.liquidOrigin="all";explorer.liquidSort="newest";explorer.liquidPage=exactLiquid;}
+  if(exactActivity!==null){explorer.activityFilter="all";explorer.activityCorrection="all";explorer.activityOrigin="all";explorer.activitySort="newest";explorer.activityPage=exactActivity;}
   const exploredLiquids = exploreLiquidCheckins(effectiveLiquidEvents,explorer,client.profile_id);
   const exploredActivities = exploreActivityCheckins(recentActivityEvents.map(event => ({
     ...event, didActivityEffective:latestActivityCorrectionByEvent.get(event.id)?.corrected_did_activity ?? event.did_activity,

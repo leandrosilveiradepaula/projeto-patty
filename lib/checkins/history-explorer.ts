@@ -115,6 +115,7 @@ export function paginateCheckinEvents<T>(events: readonly T[], requestedPage: nu
     : 1;
   return {
     items: events.slice((page - 1) * CHECKIN_EXPLORER_PAGE_SIZE, page * CHECKIN_EXPLORER_PAGE_SIZE),
+    orderedIds: events.map(item => (item as { id: string }).id),
     total,
     page,
     pages,

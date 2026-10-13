@@ -1,3 +1,7 @@
+## Esteira 37 — continuidade de correções de Check-ins (2026-10-12)
+
+Correções de líquido/atividade, tanto na visão profissional quanto na cliente, preservam o ID do registro na navegação de sucesso, conflito, valor inalterado ou erro. As telas localizam a página exata pela ordem factual dos registros previamente autorizados e limpam apenas filtros incompatíveis que ocultariam o registro. A consulta não amplia RLS, não altera as respostas/correções históricas, não produz metas de hidratação nem score de adesão. Testes com dados sintéticos verificam a página correta e ausência de acesso cruzado. A homologação autenticada e o deploy remoto permanecem separados.
+
 ## Esteira 37 — busca em arquivos privados e conteúdos liberados (2026-10-12)
 
 Alterações de consulta e navegação limitadas a registros já acessíveis: filtros por ano e presença de metadados de tamanho dos arquivos privados para cliente e Patty, navegação direta ao arquivo no histórico privado, localização de arquivos pendentes mesmo com filtros anteriores, preservação de critérios ao paginar, e filtro por ano de liberação dos conteúdos educacionais da cliente e da Patty. Nenhum nome de arquivo é acrescentado à URL de filtros; somente IDs opacos de registros já autorizados para navegação e nunca como prova de autorização. Não há mudança de grants, RLS, publicações, schema ou decisão clínica. Testes, estilos e documentação são suporte. Somente contabilizar melhorias independentes após CI e merge.
