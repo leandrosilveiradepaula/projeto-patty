@@ -17,9 +17,10 @@ test("comparison contains only scoped eligible photos, without mutating list",()
 test("both selections must be distinct and from authorized list",()=>{
  const own=eligiblePrivatePhotos(records,"own");
  assert.deepEqual(resolvePrivatePhotoPair(own,undefined,undefined),{state:"unselected"});
- for(const [a,b] of [["photo-a","photo-a"],["photo-a","other"],["other","photo-b"],["exam","photo-b"],["photo-b","unsupported"],["photo-a",undefined],[["photo-a"],"photo-b"]]){
+ for(const [a,b] of [["photo-a","photo-a"],["photo-a","other"],["other","photo-b"],["exam","photo-b"],["photo-b","unsupported"],[["photo-a"],"photo-b"]]){
   assert.deepEqual(resolvePrivatePhotoPair(own,a,b),{state:"invalid"});
  }
+ assert.deepEqual(resolvePrivatePhotoPair(own,"photo-a",undefined),{state:"partial",beforeId:"photo-a",afterId:null});
  const selection=resolvePrivatePhotoPair(own,"photo-a","photo-b");
  assert.equal(selection.state,"ready");
  if(selection.state==="ready")assert.deepEqual([selection.before.id,selection.after.id],["photo-a","photo-b"]);
