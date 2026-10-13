@@ -1,3 +1,7 @@
+## Esteira 45 — smoke autenticado pós-migrations (2026-10-13)
+
+Workflow manual `e2e-post-migration-runtime.yml` preparado para execução **após** aplicar pelo CLI as migrations `20261011063500` e `20261012150000` e confirmar deploy. Usa somente conta sintética efêmera, testa login, acesso ao histórico de avaliações, RPC de cabeçalhos e rejeição de ciclo inexistente sem alterar dados. Cleanup obrigatório; a presença do workflow e sua verificação sintática no CI não comprovam E2E executado. Nenhuma migration aplicada nesta esteira.
+
 ## Esteira 44 — transparência do histórico parcial de avaliações (2026-10-13)
 
 Consulta somente-leitura confirmou que a migration `20261012150000_allow_own_finalized_assessment_history.sql` ainda não consta no Supabase remoto. Enquanto a RPC de cabeçalhos de avaliações finalizadas não está disponível, o portal pode enumerar somente avaliações com medidas retornadas pela RPC de medidas existente, já autorizada. A tela agora identifica o histórico como **parcial**, inclusive quando não encontra avaliações com medidas, em vez de afirmar incorretamente ausência de avaliações finalizadas. A leitura combina medidas/cabeçalhos numa única função de acesso, preserva isolamento por cliente e nunca inventa avaliações ou datas. Quando a RPC versionada for aplicada pelo procedimento aprovado, a sinalização deixa de aparecer automaticamente e avaliações finalizadas sem medidas poderão ser mostradas. Sem migrations aplicadas, novas permissões, SQL ou alteração de registros. CI, deploy e homologação autenticada são etapas distintas.
