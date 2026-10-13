@@ -1,9 +1,10 @@
+import { authorizedCorrectionHistoryDay } from "@/lib/checkins/correction-return-day";
 "use server";
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { checkinHistorySearch, parseCheckinHistoryDay } from "@/lib/checkins/history-day";
+import { checkinHistorySearch } from "@/lib/checkins/history-day";
 import { parsePositiveCheckinMl } from "@/lib/checkins/amount";
 import { loadSupportedLiquidTaxonomy } from "@/lib/method/liquid-taxonomy-loader";
 import { isUuid } from "@/lib/validation/uuid";
@@ -32,6 +33,7 @@ function correctionReturnPath(
   status: "correction-invalid" | "correction-error" | "correction-recorded" | "correction-conflict" | "correction-unchanged",
   formData: FormData,
   kind: "liquido" | "atividade",
+  event?: { recorded_at?: string | null; checkin_date?: string | null } | null,
 ) {
   const today = new Intl.DateTimeFormat("en-CA", {
     day: "2-digit",
@@ -39,7 +41,7 @@ function correctionReturnPath(
     timeZone: "America/Sao_Paulo",
     year: "numeric",
   }).format(new Date());
-  const day = parseCheckinHistoryDay(formData.get("historyDay"), today);
+  const day = authorizedCorrectionHistoryDay(kind, event, formData.get("historyDay"), today);
   const eventId = formData.get("eventId");
   const anchor = typeof eventId === "string" && isUuid(eventId)
     ? `#${kind}-${eventId}`
@@ -76,7 +78,7 @@ export async function correctClientLiquidIntakeAction(
   if (!expected.valid) redirect(correctionReturnPath(clientId, "correction-invalid", formData, "liquido"));
   const event = await getAccessibleClientLiquidIntakeEvent(client.id, eventId);
 
-  if (!event) redirect(correctionReturnPath(clientId, "correction-invalid", formData, "liquido"));
+  if (!event) redirect(correctionReturnPath(clientId, "correction-invalid", formData, "liquido", event));
 
   const taxonomy = await loadSupportedLiquidTaxonomy();
   const liquidKind =
@@ -84,14 +86,14 @@ export async function correctClientLiquidIntakeAction(
       ? taxonomy.kinds.find((kind) => kind.key === rawKind) ?? null
       : null;
 
-  if (!liquidKind) redirect(correctionReturnPath(clientId, "correction-invalid", formData, "liquido"));
+  if (!liquidKind) redirect(correctionReturnPath(clientId, "correction-invalid", formData, "liquido", event));
 
   const latest = latestCheckinCorrectionsByEvent(await listAccessibleClientLiquidIntakeEventCorrections([eventId])).get(eventId);
   if (!checkinCorrectionSnapshotMatches(expected.id, latest)) {
-    redirect(correctionReturnPath(clientId, "correction-conflict", formData, "liquido"));
+    redirect(correctionReturnPath(clientId, "correction-conflict", formData, "liquido", event));
   }
   if (!liquidCorrectionChangesValue(event, latest, amountMl, liquidKind.key)) {
-    redirect(correctionReturnPath(clientId, "correction-unchanged", formData, "liquido"));
+    redirect(correctionReturnPath(clientId, "correction-unchanged", formData, "liquido", event));
   }
   try {
     await createAccessibleClientLiquidIntakeEventCorrection({
@@ -102,7 +104,7 @@ export async function correctClientLiquidIntakeAction(
       recordedAt: event.recorded_at,
     });
   } catch {
-    redirect(correctionReturnPath(clientId, "correction-error", formData, "liquido"));
+    redirect(correctionReturnPath(clientId, "correction-error", formData, "liquido", event));
   }
 
   revalidatePath("/admin");
@@ -111,7 +113,7 @@ export async function correctClientLiquidIntakeAction(
   revalidatePath(adminCheckinsPath(clientId));
   revalidatePath("/cliente");
   revalidatePath("/cliente/checkins");
-  redirect(correctionReturnPath(clientId, "correction-recorded", formData, "liquido"));
+  redirect(correctionReturnPath(clientId, "correction-recorded", formData, "liquido", event));
 }
 
 export async function correctClientActivityCheckinAction(
@@ -132,21 +134,21 @@ export async function correctClientActivityCheckinAction(
     !isUuid(eventId) ||
     (rawValue !== "yes" && rawValue !== "no")
   ) {
-    redirect(correctionReturnPath(clientId, "correction-invalid", formData, "atividade"));
+    redirect(correctionReturnPath(clientId, "correction-invalid", formData, "atividade", event));
   }
 
   const expected = parseExpectedCheckinCorrectionId(formData.get("expectedCorrectionId"));
-  if (!expected.valid) redirect(correctionReturnPath(clientId, "correction-invalid", formData, "atividade"));
+  if (!expected.valid) redirect(correctionReturnPath(clientId, "correction-invalid", formData, "atividade", event));
   const event = await getAccessibleClientActivityCheckinEvent(client.id, eventId);
 
-  if (!event) redirect(correctionReturnPath(clientId, "correction-invalid", formData, "atividade"));
+  if (!event) redirect(correctionReturnPath(clientId, "correction-invalid", formData, "atividade", event));
 
   const latest = latestCheckinCorrectionsByEvent(await listAccessibleClientActivityCheckinEventCorrections([eventId])).get(eventId);
   if (!checkinCorrectionSnapshotMatches(expected.id, latest)) {
-    redirect(correctionReturnPath(clientId, "correction-conflict", formData, "atividade"));
+    redirect(correctionReturnPath(clientId, "correction-conflict", formData, "atividade", event));
   }
   if (!activityCorrectionChangesValue(event, latest, event.checkin_date, rawValue === "yes")) {
-    redirect(correctionReturnPath(clientId, "correction-unchanged", formData, "atividade"));
+    redirect(correctionReturnPath(clientId, "correction-unchanged", formData, "atividade", event));
   }
   try {
     await createAccessibleClientActivityCheckinEventCorrection({
@@ -156,7 +158,7 @@ export async function correctClientActivityCheckinAction(
       eventId,
     });
   } catch {
-    redirect(correctionReturnPath(clientId, "correction-error", formData, "atividade"));
+    redirect(correctionReturnPath(clientId, "correction-error", formData, "atividade", event));
   }
 
   revalidatePath("/admin");
@@ -165,5 +167,5 @@ export async function correctClientActivityCheckinAction(
   revalidatePath(adminCheckinsPath(clientId));
   revalidatePath("/cliente");
   revalidatePath("/cliente/checkins");
-  redirect(correctionReturnPath(clientId, "correction-recorded", formData, "atividade"));
+  redirect(correctionReturnPath(clientId, "correction-recorded", formData, "atividade", event));
 }
