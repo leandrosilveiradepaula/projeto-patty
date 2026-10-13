@@ -173,11 +173,13 @@ export function summarizeWeeklyFeedbackRequiredProgress(
   let requiredCompleted = 0;
   let firstMissingRequired: string | null = null;
   for (const question of questions) {
-    const hasValue = (values[question.key] ?? "").trim().length > 0;
-    if (hasValue) completed++;
+    const raw = values[question.key] ?? "";
+    const hasValue = raw.trim().length > 0;
+    const valid = hasValue && !getWeeklyFeedbackFieldError(question, raw, false);
+    if (valid) completed++;
     if (question.required) {
       required++;
-      if (hasValue) requiredCompleted++;
+      if (valid) requiredCompleted++;
       else if (!firstMissingRequired) firstMissingRequired = question.key;
     }
   }
