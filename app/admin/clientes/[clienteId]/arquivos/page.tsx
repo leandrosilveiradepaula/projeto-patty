@@ -1,3 +1,4 @@
+import { readPrivateFileDiscovery, matchesPrivateFileDiscovery, privateFileReleaseYears, PRIVATE_FILE_DISCOVERY_MONTHS } from "@/lib/files/private-file-discovery";
 import { availablePrivateFileYears, matchesPrivateFileMetadata, readPrivateFileMetadataFilters, type PrivateFileMetadataFilters } from "@/lib/files/private-file-metadata-filters";
 import type { PrivateFileViewFilter } from "@/lib/files/private-file-history-view";
 import { authorizedExactRecordPage } from "@/lib/operations/exact-record-navigation";
@@ -22,7 +23,7 @@ import { matchesPrivateFilePreviewFilter, paginatePrivateFileHistory, privateFil
 
 type AdminClientFilesPageProps = {
   params: Promise<{ clienteId: string }>;
-  searchParams: Promise<{ categoria?: string; origem?: string; formato?: string; visualizacao?: string; ordem?: string; paginaPendentes?: string; paginaHistorico?: string; fotoAntes?: string; fotoDepois?: string; arquivoPendente?: string; arquivoHistorico?: string; ano?: string; tamanho?: string }>;
+  searchParams: Promise<{ categoria?: string; origem?: string; formato?: string; visualizacao?: string; ordem?: string; paginaPendentes?: string; paginaHistorico?: string; fotoAntes?: string; fotoDepois?: string; arquivoPendente?: string; arquivoHistorico?: string; ano?: string; tamanho?: string; mes?: string; dataInicial?: string; dataFinal?: string; minKb?: string; maxKb?: string; grupoMime?: string; integridadeData?: string; anoLiberacao?: string; mesLiberacao?: string }>;
 };
 
 const fileKindLabels: Record<string, string> = {
@@ -81,6 +82,8 @@ export default async function AdminClientFilesPage({
     file.id === filters.arquivoHistorico && !isPrivateFilePendingProfessionalRelease(file,client.profile_id));
   const hasExactTarget = pendingTarget || historyTarget;
   const years=availablePrivateFileYears(files);
+  const releaseYears=privateFileReleaseYears(files);
+  const discovery=readPrivateFileDiscovery(hasExactTarget ? {} : filters,releaseYears);
   const metadata:PrivateFileMetadataFilters=hasExactTarget
     ? {year:"all",size:"all",invalid:false}
     : readPrivateFileMetadataFilters({ano:filters.ano,tamanho:filters.tamanho},years);
@@ -95,14 +98,15 @@ export default async function AdminClientFilesPage({
   const kinds = countPrivateFileCategories(files);
   const basePath = `/admin/clientes/${client.id}/arquivos`;
   const navigate = (target: "pending" | "history", page: number) => privateFileHistoryHref(basePath, {
-    categoria: kind, origem: origin, formato: preview.value, visualizacao: view, ordem: order.value, ano: metadata.year, tamanho:metadata.size,
+    categoria: kind, origem: origin, formato: preview.value, visualizacao: view, ordem: order.value, ano: metadata.year, tamanho:metadata.size, mes:discovery.month,dataInicial:discovery.fromDate,dataFinal:discovery.toDate,minKb:discovery.minKb,maxKb:discovery.maxKb,grupoMime:discovery.mimeFamily,integridadeData:discovery.recordedValidity,anoLiberacao:discovery.releaseYear,mesLiberacao:discovery.releaseMonth,nome:discovery.namePresence,estadoLiberacao:discovery.releaseState,
     paginaPendentes: target === "pending" ? page : pendingPage.page,
     paginaHistorico: target === "history" ? page : historyPage.page,
     anchor: target === "pending" ? "aguardando-liberacao" : "historico-arquivos",
   });
   const filteredFiles = files.filter(file => matchesPrivateFileFilters(file, client.profile_id, kind, origin)
     && matchesPrivateFilePreviewFilter(file.mime_type, preview.value)
-    && matchesPrivateFileMetadata(file,metadata));
+    && matchesPrivateFileMetadata(file,metadata)
+    && matchesPrivateFileDiscovery(file,discovery));
   const pendingReleaseFiles = filteredFiles.filter(file => isPrivateFilePendingProfessionalRelease(file, client.profile_id));
   const historyFiles = filteredFiles.filter(file => !isPrivateFilePendingProfessionalRelease(file, client.profile_id));
   const totalPending = counts.pending;
@@ -165,21 +169,32 @@ export default async function AdminClientFilesPage({
               <option value="all">Todos</option><option value="known">Tamanho registrado</option><option value="unknown">Tamanho ausente</option>
             </select>
           </label>
-          <label>Ordenação
+                     <label>Registro desde<input name="dataInicial" type="date" defaultValue={discovery.fromDate ?? ""} /></label>
+           <label>Registro até<input name="dataFinal" type="date" defaultValue={discovery.toDate ?? ""} /></label>
+           <label>Mês de registro<select name="mes" defaultValue={discovery.month}><option value="all">Todos</option>{PRIVATE_FILE_DISCOVERY_MONTHS.map(month=><option key={month} value={month}>{month}</option>)}</select></label>
+           <label>Tamanho mínimo (KB)<input name="minKb" type="number" min="0" max="2097151" defaultValue={discovery.minKb ?? ""} /></label>
+           <label>Tamanho máximo (KB)<input name="maxKb" type="number" min="0" max="2097151" defaultValue={discovery.maxKb ?? ""} /></label>
+           <label>Família do formato<select name="grupoMime" defaultValue={discovery.mimeFamily}><option value="all">Todas</option><option value="image">Imagens</option><option value="pdf">PDF</option><option value="video">Vídeos</option><option value="audio">Áudios</option><option value="other">Outros</option><option value="unknown">Não informado</option></select></label>
+           <label>Data de registro<select name="integridadeData" defaultValue={discovery.recordedValidity}><option value="all">Todas</option><option value="valid">Data válida</option><option value="invalid">Data indisponível</option></select></label>
+           <label>Ano de liberação<select name="anoLiberacao" defaultValue={discovery.releaseYear}><option value="all">Todos</option>{releaseYears.map(year=><option key={year} value={year}>{year}</option>)}</select></label>
+           <label>Mês de liberação<select name="mesLiberacao" defaultValue={discovery.releaseMonth}><option value="all">Todos</option>{PRIVATE_FILE_DISCOVERY_MONTHS.map(month=><option key={month} value={month}>{month}</option>)}</select></label>
+           <label>Disponibilidade do nome<select name="nome" defaultValue={discovery.namePresence}><option value="all">Todos</option><option value="named">Com nome</option><option value="unnamed">Sem nome</option></select></label>
+           <label>Data de liberação<select name="estadoLiberacao" defaultValue={discovery.releaseState}><option value="all">Todas</option><option value="valid">Válida</option><option value="missing">Ausente</option><option value="invalid">Inválida</option></select></label>
+           <label>Ordenação
             <select name="ordem" defaultValue={order.value}>
               <option value="newest">Mais recentes</option>
               <option value="oldest">Mais antigos</option>
               <option value="largest">Maiores arquivos</option>
               <option value="smallest">Menores arquivos</option>
               <option value="kind">Por categoria</option>
-              <option value="released">Disponibilizados mais recentemente</option>
+              <option value="released">Disponibilizados mais recentemente</option><option value="released-oldest">Disponibilizados há mais tempo</option><option value="name-asc">Nome A–Z</option><option value="name-desc">Nome Z–A</option><option value="mime">Tipo MIME</option>
             </select>
           </label>
           <button type="submit">Filtrar</button>
           <Link href={`/admin/clientes/${client.id}/arquivos`}>Limpar filtros</Link>
         </form>
         <p role="status">{filteredFiles.length} de {counts.all} arquivo(s) · {totalPending} aguardando liberação no total. Fotos: {kinds.photo}, exames: {kinds.exam}, documentos: {kinds.document}. Enviados pela cliente: {counts.client}; equipe ou autoria desconhecida: {counts.team}.</p>
-        {(metadata.invalid || preview.invalid || order.invalid || requestedPending.invalid || requestedHistory.invalid || pendingPage.outOfRange || historyPage.outOfRange) ? (
+        {(discovery.invalid || metadata.invalid || preview.invalid || order.invalid || requestedPending.invalid || requestedHistory.invalid || pendingPage.outOfRange || historyPage.outOfRange) ? (
           <p className={styles.filterNotice} role="status">Um filtro de ordenação ou página não é válido. Exibimos somente registros autorizados em uma página disponível.</p>
         ) : null}
       </Section>

@@ -2,7 +2,7 @@ import type { PrivateFileKindFilter, PrivateFileOriginFilter, PrivateFileViewFil
 import { isPreviewablePrivateFileMimeType } from "./private-file-preview.ts";
 import { isPrivateFileFromClient, isPrivateFilePendingProfessionalRelease } from "./private-file-history-view.ts";
 
-export type PrivateFileHistorySort = "newest" | "oldest" | "largest" | "smallest" | "kind" | "released";
+export type PrivateFileHistorySort = "newest" | "oldest" | "largest" | "smallest" | "kind" | "released" | "released-oldest" | "name-asc" | "name-desc" | "mime";
 export type PrivateFilePreviewFilter = "all" | "previewable" | "download_only";
 
 export function readPrivateFilePreviewFilter(raw: unknown): { value: PrivateFilePreviewFilter; invalid: boolean } {
@@ -30,6 +30,8 @@ export type FileHistoryRecord = {
   byte_size: number | null;
   uploaded_by_profile_id: string | null;
   client_visible_at: string | null;
+  original_filename?: string | null;
+  mime_type?: string | null;
 };
 
 export function readPrivateFileHistorySort(raw: unknown): {
@@ -37,7 +39,7 @@ export function readPrivateFileHistorySort(raw: unknown): {
   invalid: boolean;
 } {
   if (raw === undefined || raw === "newest") return { value: "newest", invalid: false };
-  if (raw === "oldest" || raw === "largest" || raw === "smallest" || raw === "kind" || raw === "released") {
+  if (raw === "oldest" || raw === "largest" || raw === "smallest" || raw === "kind" || raw === "released" || raw === "released-oldest" || raw === "name-asc" || raw === "name-desc" || raw === "mime") {
     return { value: raw, invalid: false };
   }
   return { value: "newest", invalid: true };
@@ -90,11 +92,17 @@ export function sortPrivateFileHistory<T extends FileHistoryRecord>(
       primary = bySize(order === "smallest");
     } else if (order === "kind") {
       primary = left.file_kind.localeCompare(right.file_kind, "pt-BR");
-    } else if (order === "released") {
+    } else if (order === "name-asc" || order === "name-desc") {
+      const name = (value?: string | null) => typeof value === "string" ? value.trim() : "";
+      const a = name(left.original_filename), b = name(right.original_filename);
+      primary = !a || !b ? (!a && !b ? 0 : !a ? 1 : -1) : (order === "name-asc" ? 1 : -1) * a.localeCompare(b,"pt-BR",{sensitivity:"base"});
+    } else if (order === "mime") {
+      primary = (left.mime_type ?? "").localeCompare(right.mime_type ?? "", "pt-BR");
+    } else if (order === "released" || order === "released-oldest") {
       const a = recordInstant(left.client_visible_at);
       const b = recordInstant(right.client_visible_at);
       if (a === null || b === null) primary = a === null ? (b === null ? 0 : 1) : -1;
-      else primary = b - a;
+      else primary = order === "released-oldest" ? a - b : b - a;
     }
     // Tie-break by latest stored time, then opaque ID: deterministic across pages.
     const secondary = when();
@@ -151,6 +159,17 @@ export type PrivateFileHistoryUrlState = {
   visualizacao?: PrivateFileViewFilter;
   ordem?: PrivateFileHistorySort;
   ano?: string;
+  mes?: string;
+  dataInicial?: string | null;
+  dataFinal?: string | null;
+  minKb?: number | null;
+  maxKb?: number | null;
+  grupoMime?: string;
+  integridadeData?: string;
+  anoLiberacao?: string;
+  mesLiberacao?: string;
+  nome?: string;
+  estadoLiberacao?: string;
   tamanho?: "all" | "known" | "unknown";
   pagina?: number;
   paginaPendentes?: number;
@@ -167,6 +186,15 @@ export function privateFileHistoryHref(basePath: string, state: PrivateFileHisto
   if (state.visualizacao && state.visualizacao !== "all") params.set("visualizacao", state.visualizacao);
   if (state.ordem && state.ordem !== "newest") params.set("ordem", state.ordem);
   if (state.ano && /^\d{4}$/.test(state.ano)) params.set("ano", state.ano);
+  if (state.mes && /^(0[1-9]|1[0-2])$/.test(state.mes)) params.set("mes", state.mes);
+  for (const key of ["dataInicial","dataFinal"] as const) if (state[key] && /^\d{4}-\d{2}-\d{2}$/.test(state[key]!)) params.set(key,state[key]!);
+  for (const field of ["minKb","maxKb"] as const) { const v = state[field]; if (typeof v === "number" && Number.isSafeInteger(v) && v >= 0 && v <= 2097151) params.set(field,String(v)); }
+  if (state.grupoMime && ["image","pdf","video","audio","other","unknown"].includes(state.grupoMime)) params.set("grupoMime",state.grupoMime);
+  if (state.integridadeData && ["valid","invalid"].includes(state.integridadeData)) params.set("integridadeData",state.integridadeData);
+  if (state.anoLiberacao && /^\d{4}$/.test(state.anoLiberacao)) params.set("anoLiberacao",state.anoLiberacao);
+  if (state.mesLiberacao && /^(0[1-9]|1[0-2])$/.test(state.mesLiberacao)) params.set("mesLiberacao",state.mesLiberacao);
+  if (state.nome && ["named","unnamed"].includes(state.nome)) params.set("nome",state.nome);
+  if (state.estadoLiberacao && ["valid","missing","invalid"].includes(state.estadoLiberacao)) params.set("estadoLiberacao",state.estadoLiberacao);
   if (state.tamanho && state.tamanho !== "all" && (state.tamanho === "known" || state.tamanho === "unknown")) params.set("tamanho", state.tamanho);
   const pages = ["pagina", "paginaPendentes", "paginaHistorico"] as const;
   for (const name of pages) {
