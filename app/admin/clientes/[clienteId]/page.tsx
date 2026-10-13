@@ -635,8 +635,8 @@ export default async function AdminClienteDetailPage({
                         ? "Não iniciada"
                         : "Revisada"}
               </Badge>
-              <Link className={styles.journeyLink} href={`/admin/clientes/${client.id}/anamnese`}>
-                Abrir Anamnese
+              <Link className={styles.journeyLink} href={anamnesisPattyAction?.reviewPending ? `/admin/anamneses/${anamnesisPattyAction.submission.id}/revisao` : `/admin/clientes/${client.id}/anamnese`}>
+                {anamnesisPattyAction?.reviewPending ? "Revisar Anamnese" : "Abrir Anamnese"
               </Link>
               {anamnesisAnsweredClarification?.firstAwaitingProfessionalRequestId ? (
                 <Link
@@ -687,8 +687,8 @@ export default async function AdminClienteDetailPage({
                     ? "Finalizada"
                     : "Não iniciada"}
               </Badge>
-              <Link className={styles.journeyLink} href={`/admin/clientes/${client.id}/avaliacoes`}>
-                Abrir avaliações
+              <Link className={styles.journeyLink} href={assessmentDraft ? `/admin/avaliacoes/${assessmentDraft.id}` : `/admin/clientes/${client.id}/avaliacoes#${hasFinalizedAssessment ? "historico-finalizado" : "nova-avaliacao"}`}>
+                {assessmentDraft ? "Continuar avaliação" : hasFinalizedAssessment ? "Ver histórico" : "Criar avaliação"
               </Link>
             </div>
           </li>
@@ -737,8 +737,8 @@ export default async function AdminClienteDetailPage({
                       ? "Em preparação"
                       : "Não iniciado"}
               </Badge>
-              <Link className={styles.journeyLink} href={`/admin/clientes/${client.id}/protocolos`}>
-                Abrir protocolos
+              <Link className={styles.journeyLink} href={protocolAction ? `/admin/protocolos/${protocolAction.protocol.id}?versao=${protocolAction.version.version_number}#versao-${protocolAction.version.version_number}` : protocolDraftAction ? `/admin/protocolos/${protocolDraftAction.protocol.id}?versao=${protocolDraftAction.version.version_number}#versao-${protocolDraftAction.version.version_number}` : `/admin/clientes/${client.id}/protocolos`}>
+                {protocolAction ? "Revisar versão pendente" : protocolDraftAction ? "Continuar rascunho" : "Abrir protocolos"
               </Link>
             </div>
           </li>
