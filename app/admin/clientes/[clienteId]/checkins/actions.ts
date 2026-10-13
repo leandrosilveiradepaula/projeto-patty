@@ -1,5 +1,6 @@
-import { authorizedCorrectionHistoryDay } from "@/lib/checkins/correction-return-day";
 "use server";
+
+import { authorizedCorrectionHistoryDay } from "@/lib/checkins/correction-return-day";
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
