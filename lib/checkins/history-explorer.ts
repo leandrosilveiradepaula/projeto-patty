@@ -1,9 +1,10 @@
 /** Only presentation of already authorized, factual check-in history. */
-export type CheckinExploreSort = "newest" | "oldest" | "amount-desc" | "amount-asc";
+export type CheckinExploreSort = "newest" | "oldest" | "amount-desc" | "amount-asc" | "recent-correction";
 export type CheckinExploreCorrection = "all" | "corrected" | "original";
 export type CheckinExploreActivity = "all" | "yes" | "no";
 export type CheckinExploreOrigin = "all" | "client" | "professional";
-export type CheckinExploreActivitySort = "newest" | "oldest";
+export type CheckinExploreActivitySort = "newest" | "oldest" | "recent-correction";
+export type CheckinExploreRepeated = "all" | "multiple" | "single";
 export type CheckinExploreOptions = {
   liquidSort: CheckinExploreSort;
   liquidCorrection: CheckinExploreCorrection;
@@ -15,6 +16,13 @@ export type CheckinExploreOptions = {
   activitySort: CheckinExploreActivitySort;
   liquidPage: number;
   activityPage: number;
+  liquidYear: string;
+  liquidMonth: string;
+  activityYear: string;
+  activityMonth: string;
+  minimumMl: number | null;
+  maximumMl: number | null;
+  activityRepeated: CheckinExploreRepeated;
 };
 
 export const CHECKIN_EXPLORER_PAGE_SIZE = 12;
@@ -27,17 +35,29 @@ export function readCheckinExploreOptions(query: Record<string, unknown>): Check
     if (typeof value !== "string" || !/^[1-9][0-9]{0,4}$/.test(value)) return 1;
     return Math.min(Number(value), 10000);
   };
+  const amount = (value: unknown): number | null => typeof value === "string" && /^[1-9][0-9]{0,9}$/.test(value) && Number(value) <= 2147483647 ? Number(value) : null;
+  const year = (value: unknown) => typeof value === "string" && /^(19|20)[0-9]{2}$/.test(value) ? value : "all";
+  const month = (value: unknown) => typeof value === "string" && /^(0[1-9]|1[0-2])$/.test(value) ? value : "all";
+  const min = amount(query.minMl);
+  const max = amount(query.maxMl);
   return {
-    liquidSort: pick(query.ordem, ["newest", "oldest", "amount-desc", "amount-asc"], "newest"),
+    liquidSort: pick(query.ordem, ["newest", "oldest", "amount-desc", "amount-asc", "recent-correction"], "newest"),
     liquidCorrection: pick(query.correcao, ["all", "corrected", "original"], "all"),
     liquidKind: typeof query.tipo === "string" && /^[a-zA-Z0-9_-]{1,80}$/.test(query.tipo) ? query.tipo : "all",
     liquidOrigin: pick(query.origemLiquido, ["all", "client", "professional"], "all"),
     activityFilter: pick(query.atividade, ["all", "yes", "no"], "all"),
     activityCorrection: pick(query.atividadeCorrecao, ["all", "corrected", "original"], "all"),
     activityOrigin: pick(query.origemAtividade, ["all", "client", "professional"], "all"),
-    activitySort: pick(query.ordemAtividade, ["newest", "oldest"], "newest"),
+    activitySort: pick(query.ordemAtividade, ["newest", "oldest", "recent-correction"], "newest"),
     liquidPage: page(query.lp),
     activityPage: page(query.ap),
+    liquidYear: year(query.anoLiquido),
+    liquidMonth: month(query.mesLiquido),
+    activityYear: year(query.anoAtividade),
+    activityMonth: month(query.mesAtividade),
+    minimumMl: min !== null && max !== null && min > max ? null : min,
+    maximumMl: min !== null && max !== null && min > max ? null : max,
+    activityRepeated: pick(query.repeticaoAtividade, ["all", "multiple", "single"], "all"),
   };
 }
 
@@ -53,6 +73,28 @@ export function compareCheckinEventInstants(
   return right - left || b.id.localeCompare(a.id);
 }
 
+/** Sao Paulo civil date for factual liquid histories (not a hydration target). */
+export function liquidHistoryCalendarDate(value: string): string | null {
+  if (!Number.isFinite(Date.parse(value))) return null;
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Sao_Paulo", year: "numeric", month: "2-digit", day: "2-digit",
+  }).format(new Date(value));
+}
+export function availableCheckinHistoryYears(dates: readonly (string | null)[]): string[] {
+  return Array.from(new Set(dates.filter((d): d is string => typeof d === "string" && /^\\d{4}-\\d{2}-\\d{2}$/.test(d)).map(d=>d.slice(0,4)))).sort().reverse();
+}
+function dateMatchesFilter(date: string | null, year: string, month: string): boolean {
+  return (year === "all" && month === "all") || (date !== null &&
+    (year === "all" || date.slice(0,4) === year) &&
+    (month === "all" || date.slice(5,7) === month));
+}
+function checkinCorrectionSort(a: { lastCorrectedAt?: string | null }, b: { lastCorrectedAt?: string | null }): number {
+  const instant = (value?: string | null) => {
+    const parsed = value ? Date.parse(value) : NaN;
+    return Number.isFinite(parsed) ? parsed : -Infinity;
+  };
+  return instant(b.lastCorrectedAt) - instant(a.lastCorrectedAt) || 0;
+}
 function matchesOrigin(
   recordedBy: string | undefined,
   clientProfileId: string | null | undefined,
@@ -70,12 +112,19 @@ export function exploreLiquidCheckins<T extends {
   effectiveAmountMl: number;
   effectiveLiquidKind: string;
   wasCorrected: boolean;
+  lastCorrectedAt?: string | null;
 }>(events: readonly T[], options: CheckinExploreOptions, clientProfileId?: string | null) {
   const filtered = events.filter(e =>
+    dateMatchesFilter(liquidHistoryCalendarDate(e.recorded_at), options.liquidYear, options.liquidMonth) &&
+    (options.minimumMl === null || e.effectiveAmountMl >= options.minimumMl) &&
+    (options.maximumMl === null || e.effectiveAmountMl <= options.maximumMl) &&
     (options.liquidKind === "all" || e.effectiveLiquidKind === options.liquidKind) &&
     (options.liquidCorrection === "all" || e.wasCorrected === (options.liquidCorrection === "corrected")) &&
     matchesOrigin(e.recorded_by_profile_id, clientProfileId, options.liquidOrigin)
   ).slice().sort((a, b) => {
+    if (options.liquidSort === "recent-correction") {
+      return checkinCorrectionSort(a,b) || compareCheckinEventInstants(a,b);
+    }
     if (options.liquidSort === "amount-desc" || options.liquidSort === "amount-asc") {
       const amountDifference = a.effectiveAmountMl - b.effectiveAmountMl;
       return (options.liquidSort === "amount-desc" ? -amountDifference : amountDifference) ||
@@ -94,14 +143,20 @@ export function exploreActivityCheckins<T extends {
   recorded_by_profile_id?: string;
   didActivityEffective: boolean;
   wasCorrected: boolean;
+  lastCorrectedAt?: string | null;
 }>(events: readonly T[], options: CheckinExploreOptions, clientProfileId?: string | null) {
+  const dayCounts = new Map<string, number>();
+  for(const e of events) dayCounts.set(e.checkin_date ?? "", (dayCounts.get(e.checkin_date ?? "") ?? 0) + 1);
   const filtered = events.filter(e =>
+    dateMatchesFilter(e.checkin_date ?? null, options.activityYear, options.activityMonth) &&
+    (options.activityRepeated === "all" || ((dayCounts.get(e.checkin_date ?? "") ?? 0) > 1) === (options.activityRepeated === "multiple")) &&
     (options.activityFilter === "all" || e.didActivityEffective === (options.activityFilter === "yes")) &&
     (options.activityCorrection === "all" || e.wasCorrected === (options.activityCorrection === "corrected")) &&
     matchesOrigin(e.recorded_by_profile_id, clientProfileId, options.activityOrigin)
   ).slice().sort((a, b) => {
     const byDate = (b.checkin_date ?? "").localeCompare(a.checkin_date ?? "");
     const newer = byDate || compareCheckinEventInstants(a, b);
+    if (options.activitySort === "recent-correction") return checkinCorrectionSort(a,b) || newer;
     return options.activitySort === "oldest" ? -newer : newer;
   });
   return paginateCheckinEvents(filtered, options.activityPage);
@@ -142,10 +197,17 @@ export function checkinExplorerQuery(
   return {
     dia: selectedDay,
     ordem: options.liquidSort,
+    anoLiquido: options.liquidYear,
+    mesLiquido: options.liquidMonth,
+    minMl: options.minimumMl === null ? undefined : String(options.minimumMl),
+    maxMl: options.maximumMl === null ? undefined : String(options.maximumMl),
     correcao: options.liquidCorrection,
     tipo: options.liquidKind,
     origemLiquido: options.liquidOrigin,
     atividade: options.activityFilter,
+    anoAtividade: options.activityYear,
+    mesAtividade: options.activityMonth,
+    repeticaoAtividade: options.activityRepeated,
     atividadeCorrecao: options.activityCorrection,
     origemAtividade: options.activityOrigin,
     ordemAtividade: options.activitySort,
@@ -163,9 +225,9 @@ export function checkinExplorerClearQuery(
 ) {
   const query = checkinExplorerQuery(options, day, pages);
   if (target === "liquid") {
-    for (const key of ["ordem", "correcao", "tipo", "origemLiquido", "lp"]) delete query[key];
+    for (const key of ["ordem", "correcao", "tipo", "origemLiquido", "anoLiquido", "mesLiquido", "minMl", "maxMl", "lp"]) delete query[key];
   } else {
-    for (const key of ["atividade", "atividadeCorrecao", "origemAtividade", "ordemAtividade", "ap"]) delete query[key];
+    for (const key of ["atividade", "atividadeCorrecao", "origemAtividade", "ordemAtividade", "anoAtividade", "mesAtividade", "repeticaoAtividade", "ap"]) delete query[key];
   }
   return query;
 }
@@ -213,8 +275,8 @@ export function resolveCheckinExactTarget<T extends { id: string }>(
     return section === "liquid" ? { ...options, liquidPage: existing } : { ...options, activityPage: existing };
   }
   const relaxed: CheckinExploreOptions = section === "liquid"
-    ? { ...options, liquidKind: "all", liquidOrigin: "all", liquidCorrection: "all", liquidPage: 1 }
-    : { ...options, activityFilter: "all", activityOrigin: "all", activityCorrection: "all", activityPage: 1 };
+    ? { ...options, liquidKind: "all", liquidOrigin: "all", liquidCorrection: "all", liquidYear: "all", liquidMonth: "all", minimumMl: null, maximumMl: null, liquidPage: 1 }
+    : { ...options, activityFilter: "all", activityOrigin: "all", activityCorrection: "all", activityYear: "all", activityMonth: "all", activityRepeated: "all", activityPage: 1 };
   const fallback = pageFor(relaxed);
   if (fallback === null) return options;
   return section === "liquid" ? { ...relaxed, liquidPage: fallback } : { ...relaxed, activityPage: fallback };
