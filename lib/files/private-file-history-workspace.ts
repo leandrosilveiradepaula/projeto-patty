@@ -2,7 +2,7 @@ import type { PrivateFileKindFilter, PrivateFileOriginFilter, PrivateFileViewFil
 import { isPreviewablePrivateFileMimeType } from "./private-file-preview.ts";
 import { isPrivateFileFromClient, isPrivateFilePendingProfessionalRelease } from "./private-file-history-view.ts";
 
-export type PrivateFileHistorySort = "newest" | "oldest" | "largest" | "smallest" | "kind" | "released";
+export type PrivateFileHistorySort = "newest" | "oldest" | "largest" | "smallest" | "kind" | "released" | "name-asc" | "name-desc" | "mime";
 export type PrivateFilePreviewFilter = "all" | "previewable" | "download_only";
 
 export function readPrivateFilePreviewFilter(raw: unknown): { value: PrivateFilePreviewFilter; invalid: boolean } {
@@ -30,6 +30,8 @@ export type FileHistoryRecord = {
   byte_size: number | null;
   uploaded_by_profile_id: string | null;
   client_visible_at: string | null;
+  original_filename?: string | null;
+  mime_type?: string | null;
 };
 
 export function readPrivateFileHistorySort(raw: unknown): {
@@ -37,7 +39,7 @@ export function readPrivateFileHistorySort(raw: unknown): {
   invalid: boolean;
 } {
   if (raw === undefined || raw === "newest") return { value: "newest", invalid: false };
-  if (raw === "oldest" || raw === "largest" || raw === "smallest" || raw === "kind" || raw === "released") {
+  if (raw === "oldest" || raw === "largest" || raw === "smallest" || raw === "kind" || raw === "released" || raw === "name-asc" || raw === "name-desc" || raw === "mime") {
     return { value: raw, invalid: false };
   }
   return { value: "newest", invalid: true };
@@ -90,6 +92,12 @@ export function sortPrivateFileHistory<T extends FileHistoryRecord>(
       primary = bySize(order === "smallest");
     } else if (order === "kind") {
       primary = left.file_kind.localeCompare(right.file_kind, "pt-BR");
+    } else if (order === "name-asc" || order === "name-desc") {
+      const name = (value?: string | null) => typeof value === "string" ? value.trim() : "";
+      const a = name(left.original_filename), b = name(right.original_filename);
+      primary = !a || !b ? (!a && !b ? 0 : !a ? 1 : -1) : (order === "name-asc" ? 1 : -1) * a.localeCompare(b,"pt-BR",{sensitivity:"base"});
+    } else if (order === "mime") {
+      primary = (left.mime_type ?? "").localeCompare(right.mime_type ?? "", "pt-BR");
     } else if (order === "released") {
       const a = recordInstant(left.client_visible_at);
       const b = recordInstant(right.client_visible_at);
