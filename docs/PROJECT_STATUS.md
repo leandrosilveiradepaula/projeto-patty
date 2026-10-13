@@ -1,3 +1,7 @@
+## Esteira 52 — confiabilidade dos lembretes semanais por email (2026-10-13)
+
+Links de Feedback Semanal enviados pelo worker Gmail usam a origem confiável configurada para o aplicativo, resolvida antes de reivindicar qualquer tentativa; não dependem do host da requisição ao cron. Se SMTP estiver ausente o endpoint autenticado retorna 503 com `configured=false`; se um lote tiver falhas de envio retorna 207 e contagens auditáveis, não sucesso integral. Nenhum destinatário, agenda, regra da Patty, Auth/RLS, dado de cliente ou migration foi alterado. CI não comprova entrega de email real ou operação do cron em produção.
+
 ## Esteira 51 — acesso assistido: login e recuperação com validação local (2026-10-13)
 
 O login e a solicitação de recuperação passaram a usar valores controlados e feedback acessível por campo, com a validação determinística de email já existente no servidor. O login permite mostrar/ocultar a senha sem alterar o valor e os dois formulários recusam submissão inválida ou repetida enquanto a tentativa está pendente. O servidor continua responsável por autenticar, emitir links, rejeitar campos duplicados e devolver mensagens sem revelar existência de conta; a interface não registra email, senha ou token em logs, storage ou URL. Essa entrega não altera Auth, MFA, RLS, provider SMTP nem o ciclo de contas. Execução de CI não comprova entrega SMTP, autenticação E2E nem publicação Vercel; essas verificações continuam separadas.
