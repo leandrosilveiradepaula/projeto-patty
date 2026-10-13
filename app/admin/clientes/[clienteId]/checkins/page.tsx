@@ -1,5 +1,5 @@
 import { authorizedExactRecordPage } from "@/lib/operations/exact-record-navigation";
-import { CHECKIN_EXPLORER_PAGE_SIZE } from "@/lib/checkins/history-explorer";
+import { checkinCorrectionReturnQuery, resolveCheckinExactTarget } from "@/lib/checkins/history-explorer";
 import { readCheckinExploreOptions, exploreLiquidCheckins, exploreActivityCheckins, checkinExploreHref, checkinExplorerQuery, checkinExplorerClearQuery } from "@/lib/checkins/history-explorer";
 import { groupCheckinCorrectionHistory, checkinCorrectionAuthor, formatCheckinAuditDate } from "@/lib/checkins/correction-audit";
 import { Alert } from "@/components/ui/Alert";
@@ -100,16 +100,20 @@ export default async function AdminClientCheckinsPage({
     effectiveLiquidKind:latestLiquidCorrectionByEvent.get(event.id)?.corrected_liquid_kind ?? event.liquid_kind,
     wasCorrected:latestLiquidCorrectionByEvent.has(event.id),
   }));
-  const exactLiquid=authorizedExactRecordPage(exploreLiquidCheckins(effectiveLiquidEvents,{...explorer,liquidSort:"newest",liquidCorrection:"all",liquidKind:"all",liquidOrigin:"all",liquidPage:1},client.profile_id).orderedIds.map(id=>({id})),query.liquidoExato,CHECKIN_EXPLORER_PAGE_SIZE);
-  const exactActivity=authorizedExactRecordPage(exploreActivityCheckins(recentActivityEvents.map(event=>({...event,didActivityEffective:latestActivityCorrectionByEvent.get(event.id)?.corrected_did_activity??event.did_activity,wasCorrected:latestActivityCorrectionByEvent.has(event.id)})),{...explorer,activitySort:"newest",activityFilter:"all",activityCorrection:"all",activityOrigin:"all",activityPage:1},client.profile_id).orderedIds.map(id=>({id})),query.atividadeExata,CHECKIN_EXPLORER_PAGE_SIZE);
-  if(exactLiquid!==null){explorer.liquidKind="all";explorer.liquidCorrection="all";explorer.liquidOrigin="all";explorer.liquidSort="newest";explorer.liquidPage=exactLiquid;}
-  if(exactActivity!==null){explorer.activityFilter="all";explorer.activityCorrection="all";explorer.activityOrigin="all";explorer.activitySort="newest";explorer.activityPage=exactActivity;}
+  const effectiveActivityEvents = recentActivityEvents.map(event => ({
+    ...event,
+    didActivityEffective: latestActivityCorrectionByEvent.get(event.id)?.corrected_did_activity ?? event.did_activity,
+    wasCorrected: latestActivityCorrectionByEvent.has(event.id),
+  }));
+  const scopedLiquid = (opts: typeof explorer) => exploreLiquidCheckins(effectiveLiquidEvents, opts, client.profile_id);
+  const scopedActivity = (opts: typeof explorer) => exploreActivityCheckins(effectiveActivityEvents, opts, client.profile_id);
+  const exactLiquid = resolveCheckinExactTarget(effectiveLiquidEvents, query.liquidoExato, explorer, "liquid", (_, opts) => scopedLiquid(opts));
+  const exactActivity = resolveCheckinExactTarget(effectiveActivityEvents, query.atividadeExata, exactLiquid, "activity", (_, opts) => scopedActivity(opts));
+  Object.assign(explorer, exactActivity);
   const exploredLiquids = exploreLiquidCheckins(effectiveLiquidEvents,explorer,client.profile_id);
-  const exploredActivities = exploreActivityCheckins(recentActivityEvents.map(event => ({
-    ...event, didActivityEffective:latestActivityCorrectionByEvent.get(event.id)?.corrected_did_activity ?? event.did_activity,
-    wasCorrected:latestActivityCorrectionByEvent.has(event.id),
-  })),explorer,client.profile_id);
+  const exploredActivities = scopedActivity(explorer);
   const base = `/admin/clientes/${client.id}/checkins`;
+  const correctionReturnQuery = checkinCorrectionReturnQuery({ ...explorer, liquidPage: exploredLiquids.page, activityPage: exploredActivities.page });
   const exploreQuery = checkinExplorerQuery(explorer,selectedDay ?? undefined,{liquid:exploredLiquids.page,activity:exploredActivities.page});
   return (
     <>
@@ -184,6 +188,7 @@ export default async function AdminClientCheckinsPage({
           </Alert>
         ) : null}
         <form action={base+"#historico-liquidos"} className={styles.form} method="get">
+          <input type="hidden" name="ap" value={exploredActivities.page} />
           {selectedDay ? <input name="dia" type="hidden" value={selectedDay} /> : null}
           <label className={styles.field}>Ordem<select name="ordem" defaultValue={explorer.liquidSort}><option value="newest">Mais recentes</option><option value="oldest">Mais antigos</option><option value="amount-desc">Maior volume</option><option value="amount-asc">Menor volume</option></select></label>
           <label className={styles.field}>Correção<select name="correcao" defaultValue={explorer.liquidCorrection}><option value="all">Todas</option><option value="corrected">Corrigidas</option><option value="original">Sem correção</option></select></label>
@@ -228,6 +233,7 @@ export default async function AdminClientCheckinsPage({
                         className={styles.form}
                       >
                         <input name="eventId" type="hidden" value={event.id} />
+                        <input name="returnExplorer" type="hidden" value={correctionReturnQuery} />
                             <input name="expectedCorrectionId" type="hidden" value={correction?.id ?? ""} />
                         {selectedDay ? <input name="historyDay" type="hidden" value={selectedDay} /> : null}
                         <label className={styles.field}>
@@ -283,6 +289,7 @@ export default async function AdminClientCheckinsPage({
         title={selectedDay ? `Atividade física em ${selectedDay}` : "Atividade física recente"}
       >
         <form action={base+"#historico-atividade"} className={styles.form} method="get">
+          <input type="hidden" name="lp" value={exploredLiquids.page} />
           {selectedDay ? <input name="dia" type="hidden" value={selectedDay} /> : null}
           <label className={styles.field}>Resposta<select name="atividade" defaultValue={explorer.activityFilter}><option value="all">Todas</option><option value="yes">Sim</option><option value="no">Não</option></select></label>
           <label className={styles.field}>Correções<select name="atividadeCorrecao" defaultValue={explorer.activityCorrection}><option value="all">Todas</option><option value="corrected">Corrigidas</option><option value="original">Sem correção</option></select></label>
@@ -347,6 +354,7 @@ export default async function AdminClientCheckinsPage({
                         className={styles.actions}
                       >
                         <input name="eventId" type="hidden" value={event.id} />
+                        <input name="returnExplorer" type="hidden" value={correctionReturnQuery} />
                             <input name="expectedCorrectionId" type="hidden" value={correction?.id ?? ""} />
                         {selectedDay ? <input name="historyDay" type="hidden" value={selectedDay} /> : null}
                         <CheckinSubmitButton name="didActivity"  value="yes" variant="secondary">
