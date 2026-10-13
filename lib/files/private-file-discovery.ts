@@ -12,6 +12,8 @@ export type PrivateFileDiscovery = {
   recordedValidity: FileRecordedValidity;
   releaseYear: string;
   releaseMonth: string;
+  namePresence: "all" | "named" | "unnamed";
+  releaseState: "all" | "valid" | "missing" | "invalid";
   invalid: boolean;
 };
 export type PrivateFileDiscoverySource = {
@@ -19,6 +21,7 @@ export type PrivateFileDiscoverySource = {
   byte_size: number | null;
   mime_type: string | null;
   client_visible_at: string | null;
+  original_filename?: string | null;
 };
 const months = Array.from({length:12},(_,i)=>String(i+1).padStart(2,"0"));
 const mimeFamilies = ["all","image","pdf","video","audio","other","unknown"] as const;
@@ -40,18 +43,22 @@ export function privateFileReleaseYears(rows:readonly {client_visible_at:string|
 }
 export function readPrivateFileDiscovery(raw:{
   mes?:unknown;minKb?:unknown;maxKb?:unknown;grupoMime?:unknown;integridadeData?:unknown;
-  anoLiberacao?:unknown;mesLiberacao?:unknown;
+  anoLiberacao?:unknown;mesLiberacao?:unknown;nome?:unknown;estadoLiberacao?:unknown;
 }, allowedReleaseYears:readonly string[]=[]):PrivateFileDiscovery {
   const month=select(raw.mes,months), min=kilo(raw.minKb), max=kilo(raw.maxKb);
   const mime=select(raw.grupoMime,mimeFamilies),validity=select(raw.integridadeData,validityValues);
   const releaseYear=select(raw.anoLiberacao,allowedReleaseYears);
   const releaseMonth=select(raw.mesLiberacao,months);
+  const name=select(raw.nome,["all","named","unnamed"]);
+  const releaseState=select(raw.estadoLiberacao,["all","valid","missing","invalid"]);
   const backwards=min.value!==null&&max.value!==null&&min.value>max.value;
   return {
     month:month.value,minKb:backwards?null:min.value,maxKb:backwards?null:max.value,
     mimeFamily:mime.value as FileMimeFamily,recordedValidity:validity.value as FileRecordedValidity,
     releaseYear:releaseYear.value,releaseMonth:releaseMonth.value,
-    invalid:month.invalid||min.invalid||max.invalid||mime.invalid||validity.invalid||releaseYear.invalid||releaseMonth.invalid||backwards,
+    namePresence:name.value as PrivateFileDiscovery["namePresence"],
+    releaseState:releaseState.value as PrivateFileDiscovery["releaseState"],
+    invalid:month.invalid||min.invalid||max.invalid||mime.invalid||validity.invalid||releaseYear.invalid||releaseMonth.invalid||name.invalid||releaseState.invalid||backwards,
   };
 }
 function actualMimeFamily(value:string|null):Exclude<FileMimeFamily,"all"> {
@@ -74,7 +81,11 @@ export function matchesPrivateFileDiscovery(file:PrivateFileDiscoverySource,quer
   if(query.minKb!==null&&(!known||bytes<query.minKb*1024))return false;
   if(query.maxKb!==null&&(!known||bytes>query.maxKb*1024))return false;
   if(query.mimeFamily!=="all"&&actualMimeFamily(file.mime_type)!==query.mimeFamily)return false;
+  const named=typeof file.original_filename==="string" && file.original_filename.trim().length>0;
+  if(query.namePresence!=="all" && named!==(query.namePresence==="named"))return false;
   const released=file.client_visible_at?Date.parse(file.client_visible_at):NaN;
+  const releaseType = file.client_visible_at===null ? "missing" : Number.isFinite(released) ? "valid" : "invalid";
+  if(query.releaseState!=="all" && releaseType!==query.releaseState)return false;
   if(query.releaseYear!=="all"&&(!Number.isFinite(released)||new Date(released).getUTCFullYear().toString()!==query.releaseYear))return false;
   if(query.releaseMonth!=="all"&&(!Number.isFinite(released)||new Date(released).getUTCMonth()+1!==Number(query.releaseMonth)))return false;
   return true;
