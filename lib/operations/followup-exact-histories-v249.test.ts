@@ -29,7 +29,9 @@ test("historical operational links preserve exact page while still using scoped 
  assert.match(professional,/authorizedExactRecordPage/);
  assert.match(files,/authorizedExactRecordPage/);
  assert.match(releases,/authorizedExactRecordPage/);
- assert.match(evolution,/avaliacoes\?avaliacao=\$\{point.assessmentId\}/);
+ assert.match(evolution,/assessmentDetailFromProgressHref\(point\.assessmentId, originalIndex \+ 1, observationWindow\.value\)/);
+ const nav=read("lib/evaluations/assessment-progress-navigation.ts");
+ assert.match(nav,/avaliacao: assessmentId/);
  assert.match(clientAssessments,/authorizedExactRecordPage\(items,raw.avaliacao,12\)/);
  for(const page of [professional,files,releases,clientAssessments])assert.doesNotMatch(page,/service_role|createAdminClient/);
 });
