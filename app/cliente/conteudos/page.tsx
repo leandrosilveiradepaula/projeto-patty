@@ -121,7 +121,7 @@ export default async function ClienteConteudosPage() {
   return (
     <>
       <PageHeader
-        description="Conteúdos educacionais liberados para a sua conta."
+        description="Consulte somente os materiais que a Patty liberou para sua conta. Use o protocolo publicado para conferir refeições e doses."
         eyebrow="Cliente"
         title="Conteúdos"
       />
@@ -132,7 +132,7 @@ export default async function ClienteConteudosPage() {
           <EmptyState description={orderedReleases.length > 0 ? "Há registros de liberação, mas as respectivas versões não estão disponíveis para consulta nesta conta. Solicite a verificação à Patty." : "Ainda não há conteúdos liberados pela Patty para sua conta. As liberações dependem de uma decisão profissional e aparecerão aqui."} title="Nenhum conteúdo foi liberado para você ainda" action={<Link href="/cliente">Voltar ao início</Link>} />
         ) : <ClientReleasedContentExplorer entries={explorerEntries} missingVersionCount={missingVersionCount} />}
       </Section>
-      <ClientJourneyNextSteps areas={["protocol","training","index"]} />
+      <ClientJourneyNextSteps areas={["protocol","feedback","training","index"]} />
     </>
   );
 }
