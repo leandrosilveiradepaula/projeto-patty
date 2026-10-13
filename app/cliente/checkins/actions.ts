@@ -226,11 +226,11 @@ export async function correctActivityCheckinAction(formData: FormData) {
     !isUuid(eventId) ||
     (rawValue !== "yes" && rawValue !== "no")
   ) {
-    redirect(correctionRedirect("correction-invalid", formData, "atividade");
+    redirect(correctionRedirect("correction-invalid", formData, "atividade"));
   }
 
   const expected = parseExpectedCheckinCorrectionId(formData.get("expectedCorrectionId"));
-  if (!expected.valid) redirect(correctionRedirect("correction-invalid", formData, "atividade");
+  if (!expected.valid) redirect(correctionRedirect("correction-invalid", formData, "atividade"));
   const event = await getAccessibleClientActivityCheckinEvent(client.id, eventId);
 
   if (!event) redirect(correctionRedirect("correction-invalid", formData, "atividade", event));
