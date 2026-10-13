@@ -23,7 +23,7 @@ import { matchesPrivateFilePreviewFilter, paginatePrivateFileHistory, privateFil
 
 type AdminClientFilesPageProps = {
   params: Promise<{ clienteId: string }>;
-  searchParams: Promise<{ categoria?: string; origem?: string; formato?: string; visualizacao?: string; ordem?: string; paginaPendentes?: string; paginaHistorico?: string; fotoAntes?: string; fotoDepois?: string; arquivoPendente?: string; arquivoHistorico?: string; ano?: string; tamanho?: string; mes?: string; minKb?: string; maxKb?: string; grupoMime?: string; integridadeData?: string; anoLiberacao?: string; mesLiberacao?: string }>;
+  searchParams: Promise<{ categoria?: string; origem?: string; formato?: string; visualizacao?: string; ordem?: string; paginaPendentes?: string; paginaHistorico?: string; fotoAntes?: string; fotoDepois?: string; arquivoPendente?: string; arquivoHistorico?: string; ano?: string; tamanho?: string; mes?: string; dataInicial?: string; dataFinal?: string; minKb?: string; maxKb?: string; grupoMime?: string; integridadeData?: string; anoLiberacao?: string; mesLiberacao?: string }>;
 };
 
 const fileKindLabels: Record<string, string> = {
@@ -98,7 +98,7 @@ export default async function AdminClientFilesPage({
   const kinds = countPrivateFileCategories(files);
   const basePath = `/admin/clientes/${client.id}/arquivos`;
   const navigate = (target: "pending" | "history", page: number) => privateFileHistoryHref(basePath, {
-    categoria: kind, origem: origin, formato: preview.value, visualizacao: view, ordem: order.value, ano: metadata.year, tamanho:metadata.size, mes:discovery.month,minKb:discovery.minKb,maxKb:discovery.maxKb,grupoMime:discovery.mimeFamily,integridadeData:discovery.recordedValidity,anoLiberacao:discovery.releaseYear,mesLiberacao:discovery.releaseMonth,nome:discovery.namePresence,estadoLiberacao:discovery.releaseState,
+    categoria: kind, origem: origin, formato: preview.value, visualizacao: view, ordem: order.value, ano: metadata.year, tamanho:metadata.size, mes:discovery.month,dataInicial:discovery.fromDate,dataFinal:discovery.toDate,minKb:discovery.minKb,maxKb:discovery.maxKb,grupoMime:discovery.mimeFamily,integridadeData:discovery.recordedValidity,anoLiberacao:discovery.releaseYear,mesLiberacao:discovery.releaseMonth,nome:discovery.namePresence,estadoLiberacao:discovery.releaseState,
     paginaPendentes: target === "pending" ? page : pendingPage.page,
     paginaHistorico: target === "history" ? page : historyPage.page,
     anchor: target === "pending" ? "aguardando-liberacao" : "historico-arquivos",
@@ -169,7 +169,9 @@ export default async function AdminClientFilesPage({
               <option value="all">Todos</option><option value="known">Tamanho registrado</option><option value="unknown">Tamanho ausente</option>
             </select>
           </label>
-                     <label>Mês de registro<select name="mes" defaultValue={discovery.month}><option value="all">Todos</option>{PRIVATE_FILE_DISCOVERY_MONTHS.map(month=><option key={month} value={month}>{month}</option>)}</select></label>
+                     <label>Registro desde<input name="dataInicial" type="date" defaultValue={discovery.fromDate ?? ""} /></label>
+           <label>Registro até<input name="dataFinal" type="date" defaultValue={discovery.toDate ?? ""} /></label>
+           <label>Mês de registro<select name="mes" defaultValue={discovery.month}><option value="all">Todos</option>{PRIVATE_FILE_DISCOVERY_MONTHS.map(month=><option key={month} value={month}>{month}</option>)}</select></label>
            <label>Tamanho mínimo (KB)<input name="minKb" type="number" min="0" max="2097151" defaultValue={discovery.minKb ?? ""} /></label>
            <label>Tamanho máximo (KB)<input name="maxKb" type="number" min="0" max="2097151" defaultValue={discovery.maxKb ?? ""} /></label>
            <label>Família do formato<select name="grupoMime" defaultValue={discovery.mimeFamily}><option value="all">Todas</option><option value="image">Imagens</option><option value="pdf">PDF</option><option value="video">Vídeos</option><option value="audio">Áudios</option><option value="other">Outros</option><option value="unknown">Não informado</option></select></label>
