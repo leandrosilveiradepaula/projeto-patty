@@ -1,3 +1,7 @@
+## Esteira 51 — acesso assistido: login e recuperação com validação local (2026-10-13)
+
+O login e a solicitação de recuperação passaram a usar valores controlados e feedback acessível por campo, com a validação determinística de email já existente no servidor. O login permite mostrar/ocultar a senha sem alterar o valor e os dois formulários recusam submissão inválida ou repetida enquanto a tentativa está pendente. O servidor continua responsável por autenticar, emitir links, rejeitar campos duplicados e devolver mensagens sem revelar existência de conta; a interface não registra email, senha ou token em logs, storage ou URL. Essa entrega não altera Auth, MFA, RLS, provider SMTP nem o ciclo de contas. Execução de CI não comprova entrega SMTP, autenticação E2E nem publicação Vercel; essas verificações continuam separadas.
+
 ## Esteira 48 — evitar ciclos vazios sem editor disponível (2026-10-13)
 
 A criação manual de um ciclo em rascunho agora exige previamente evidência de que a RPC atômica de edição está acessível: probe autenticado sem mutação, com UUIDs sintéticos inexistentes, só aceita o erro controlado `P0002` como prova de execução. RPC ausente ou falha não verificada bloqueiam a criação sem deixar ciclo vazio inutilizável. Preserva revisão da Patty e todas as políticas RLS; nenhuma migration foi aplicada e testes sintáticos/CI não equivalem a E2E autenticado. A implantação versionada das migrations `20261011063500` e `20261012150000` continua pendente.
