@@ -1,3 +1,4 @@
+import { privateFileSaoPauloDay, privateFileSaoPauloYear } from "./private-file-calendar.ts";
 /**
  * Query-only exploration of metadata already returned by an authorized file read.
  * Never pass a filename, object path, token or medical content through these filters.
@@ -46,8 +47,7 @@ function safeDay(raw:unknown):{value:string|null;invalid:boolean}{
   return Number.isFinite(date.getTime())&&date.toISOString().slice(0,10)===raw?{value:raw,invalid:false}:{value:null,invalid:true};
 }
 export function privateFileReleaseYears(rows:readonly {client_visible_at:string|null}[]):string[]{
-  return [...new Set(rows.map(row=>row.client_visible_at).filter((value):value is string=>typeof value==="string"&&Number.isFinite(Date.parse(value)))
-    .map(value=>new Date(value).getUTCFullYear().toString()))].sort().reverse();
+  return [...new Set(rows.map(row=>privateFileSaoPauloYear(row.client_visible_at)).filter((value):value is string=>value!==null))].sort().reverse();
 }
 export function readPrivateFileDiscovery(raw:{
   mes?:unknown;dataInicial?:unknown;dataFinal?:unknown;minKb?:unknown;maxKb?:unknown;grupoMime?:unknown;integridadeData?:unknown;
@@ -85,9 +85,10 @@ export function matchesPrivateFileDiscovery(file:PrivateFileDiscoverySource,quer
   const created=Date.parse(file.created_at);
   const valid=Number.isFinite(created);
   if(query.recordedValidity!=="all"&&valid!==(query.recordedValidity==="valid"))return false;
-  if(query.fromDate!==null&&(!valid||new Date(created).toISOString().slice(0,10)<query.fromDate))return false;
-  if(query.toDate!==null&&(!valid||new Date(created).toISOString().slice(0,10)>query.toDate))return false;
-  if(query.month!=="all"&&(!valid||new Date(created).getUTCMonth()+1!==Number(query.month)))return false;
+  const recordedDay=privateFileSaoPauloDay(file.created_at);
+  if(query.fromDate!==null&&(!recordedDay||recordedDay<query.fromDate))return false;
+  if(query.toDate!==null&&(!recordedDay||recordedDay>query.toDate))return false;
+  if(query.month!=="all"&&(!valid||recordedDay?.slice(5,7)!==query.month))return false;
   const bytes=file.byte_size;
   const known=typeof bytes==="number"&&Number.isSafeInteger(bytes)&&bytes>=0;
   if(query.minKb!==null&&(!known||bytes<query.minKb*1024))return false;
@@ -98,7 +99,7 @@ export function matchesPrivateFileDiscovery(file:PrivateFileDiscoverySource,quer
   const released=file.client_visible_at?Date.parse(file.client_visible_at):NaN;
   const releaseType = file.client_visible_at===null ? "missing" : Number.isFinite(released) ? "valid" : "invalid";
   if(query.releaseState!=="all" && releaseType!==query.releaseState)return false;
-  if(query.releaseYear!=="all"&&(!Number.isFinite(released)||new Date(released).getUTCFullYear().toString()!==query.releaseYear))return false;
-  if(query.releaseMonth!=="all"&&(!Number.isFinite(released)||new Date(released).getUTCMonth()+1!==Number(query.releaseMonth)))return false;
+  if(query.releaseYear!=="all"&&(!Number.isFinite(released)||privateFileSaoPauloYear(file.client_visible_at)!==query.releaseYear))return false;
+  if(query.releaseMonth!=="all"&&(!Number.isFinite(released)||privateFileSaoPauloDay(file.client_visible_at)?.slice(5,7)!==query.releaseMonth))return false;
   return true;
 }
