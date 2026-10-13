@@ -322,7 +322,7 @@ export default async function ClientCheckinsPage({
             </p>
           )}
           {latestActivity ? (
-            <details className={styles.correction} id={`atividade-${latestActivity.id}`}>
+            <details className={styles.correction} id={`atividade-atual-${latestActivity.id}`}>
               <summary>Corrigir resposta de hoje</summary>
               <CheckinActionForm action={correctActivityCheckinAction} className={styles.activityActions}>
                 <input name="eventId" type="hidden" value={latestActivity.id} />
@@ -356,7 +356,7 @@ export default async function ClientCheckinsPage({
                   const correction = latestActivityCorrectionByEvent.get(event.id);
                   const didActivity = correction?.corrected_did_activity ?? event.did_activity;
                   return (
-                    <li id={`atividade-${event.id}`} key={event.id}>
+                    <li id={`atividade-resumo-${event.id}`} key={event.id}>
                       <div className={styles.additionalActivityRecord}>
                         <p className={styles.note}>Registrado em {formatRecordedAt(event.recorded_at)}</p>
                         <p>Resposta: <strong>{didActivity ? "Sim" : "Não"}</strong>{correction ? " (corrigida)" : ""}</p>

@@ -28,11 +28,11 @@ test("admin Check-ins date filter also applies to activity history", () => {
   assert.match(page, /name="historyDay" type="hidden" value=\{selectedDay\}/);
 });
 
-test("both correction actions retain the selected day and enforce safe millilitres", () => {
+test("both correction actions derive an authorized return day and enforce safe millilitres", () => {
   for (const file of ["app/cliente/checkins/actions.ts", "app/admin/clientes/[clienteId]/checkins/actions.ts"]) {
     const source = read(file);
     assert.match(source, /parsePositiveCheckinMl\(rawAmount\)/);
-    assert.match(source, /parseCheckinHistoryDay\(formData\.get\("historyDay"\)/);
+    assert.match(source, /authorizedCorrectionHistoryDay\(kind, event, formData\.get\("historyDay"\)/);
     assert.doesNotMatch(source, /Number\.parseInt\(rawAmount/);
   }
 });

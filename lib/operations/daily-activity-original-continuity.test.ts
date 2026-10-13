@@ -51,7 +51,7 @@ test("duplicate prevention is not misreported as a successful new activity write
 test("existing daily check-in uses historical correction, not another initial submission", () => {
   assert.ok(page.includes("latestActivity ? ("));
   assert.ok(page.includes("action={correctActivityCheckinAction}"));
-  assert.ok(page.includes('id={`atividade-${latestActivity.id}`}'));
+  assert.ok(page.includes('id={`atividade-atual-${latestActivity.id}`}'));
   assert.ok(page.includes('value={latestActivity.id}'));
   assert.ok(actions.includes("createAccessibleClientActivityCheckinEventCorrection({"));
   assert.ok(actions.includes("checkinDate: event.checkin_date"));
