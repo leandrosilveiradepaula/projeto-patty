@@ -100,8 +100,8 @@ export default async function AdminClientCheckinsPage({
     effectiveLiquidKind:latestLiquidCorrectionByEvent.get(event.id)?.corrected_liquid_kind ?? event.liquid_kind,
     wasCorrected:latestLiquidCorrectionByEvent.has(event.id),
   }));
-  const exactLiquid=authorizedExactRecordPage(effectiveLiquidEvents,query.liquidoExato,CHECKIN_EXPLORER_PAGE_SIZE);
-  const exactActivity=authorizedExactRecordPage(recentActivityEvents,query.atividadeExata,CHECKIN_EXPLORER_PAGE_SIZE);
+  const exactLiquid=authorizedExactRecordPage(exploreLiquidCheckins(effectiveLiquidEvents,{...explorer,liquidSort:"newest",liquidCorrection:"all",liquidKind:"all",liquidOrigin:"all",liquidPage:1},client.profile_id).orderedIds.map(id=>({id})),query.liquidoExato,CHECKIN_EXPLORER_PAGE_SIZE);
+  const exactActivity=authorizedExactRecordPage(exploreActivityCheckins(recentActivityEvents.map(event=>({...event,didActivityEffective:latestActivityCorrectionByEvent.get(event.id)?.corrected_did_activity??event.did_activity,wasCorrected:latestActivityCorrectionByEvent.has(event.id)})),{...explorer,activitySort:"newest",activityFilter:"all",activityCorrection:"all",activityOrigin:"all",activityPage:1},client.profile_id).orderedIds.map(id=>({id})),query.atividadeExata,CHECKIN_EXPLORER_PAGE_SIZE);
   if(exactLiquid!==null){explorer.liquidKind="all";explorer.liquidCorrection="all";explorer.liquidOrigin="all";explorer.liquidSort="newest";explorer.liquidPage=exactLiquid;}
   if(exactActivity!==null){explorer.activityFilter="all";explorer.activityCorrection="all";explorer.activityOrigin="all";explorer.activitySort="newest";explorer.activityPage=exactActivity;}
   const exploredLiquids = exploreLiquidCheckins(effectiveLiquidEvents,explorer,client.profile_id);
