@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {readCheckinExploreOptions,exploreLiquidCheckins,exploreActivityCheckins,checkinExploreHref,checkinCorrectionReturnQuery,readCheckinCorrectionReturnQuery,resolveCheckinExactTarget} from "./history-explorer.ts";
+import {readCheckinExploreOptions,exploreLiquidCheckins,exploreActivityCheckins,checkinExploreHref,checkinCorrectionReturnQuery,readCheckinCorrectionReturnQuery,resolveCheckinExactTarget,availableCheckinHistoryYears,liquidHistoryCalendarDate} from "./history-explorer.ts";
 test("validates untrusted search fields and bounds page numbers",()=>{
  const q=readCheckinExploreOptions({ordem:"invalid",correcao:"corrected",tipo:"foo bar",lp:"-1",ap:"999999",atividade:"no"});
  assert.equal(q.liquidSort,"newest");assert.equal(q.liquidCorrection,"corrected");assert.equal(q.liquidKind,"all");
@@ -65,4 +65,34 @@ test("correction form return context rejects injected client IDs, statuses, date
  for(const key of ["status","dia","clientId","dest"])assert.equal(values.has(key),false);
  assert.equal(readCheckinCorrectionReturnQuery("x".repeat(513)),"");
  assert.equal(readCheckinCorrectionReturnQuery(null),"");
+});
+
+test("factual period, amount and repeat filters never infer clinical targets",()=>{
+ const liquids=[
+  {id:"a",recorded_at:"2026-10-10T01:00:00Z",effectiveAmountMl:150,effectiveLiquidKind:"water",wasCorrected:false},
+  {id:"b",recorded_at:"2026-10-10T14:00:00Z",effectiveAmountMl:650,effectiveLiquidKind:"water",wasCorrected:true},
+  {id:"c",recorded_at:"2025-10-10T14:00:00Z",effectiveAmountMl:650,effectiveLiquidKind:"water",wasCorrected:false}
+ ];
+ assert.equal(liquidHistoryCalendarDate(liquids[0].recorded_at),"2026-10-09");
+ assert.deepEqual(availableCheckinHistoryYears(liquids.map(l=>liquidHistoryCalendarDate(l.recorded_at))),["2026","2025"]);
+ const options=readCheckinExploreOptions({anoLiquido:"2026",mesLiquido:"10",minMl:"200",maxMl:"700"});
+ assert.deepEqual(exploreLiquidCheckins(liquids,options).items.map(l=>l.id),["b"]);
+ const events=[{id:"a",recorded_at:"2026-10-10T10:00:00Z",checkin_date:"2026-10-10",didActivityEffective:true,wasCorrected:false},
+ {id:"b",recorded_at:"2026-10-10T11:00:00Z",checkin_date:"2026-10-10",didActivityEffective:false,wasCorrected:false},
+ {id:"c",recorded_at:"2026-10-11T10:00:00Z",checkin_date:"2026-10-11",didActivityEffective:true,wasCorrected:false}];
+ assert.deepEqual(exploreActivityCheckins(events,readCheckinExploreOptions({repeticaoAtividade:"multiple"})).items.map(e=>e.id),["b","a"]);
+ assert.deepEqual(exploreActivityCheckins(events,readCheckinExploreOptions({repeticaoAtividade:"single"})).items.map(e=>e.id),["c"]);
+});
+test("correction recency sorts actual correction time, with unchanged records last",()=>{
+ const arr=[{id:"a",recorded_at:"2026-10-11T10:00:00Z",effectiveAmountMl:10,effectiveLiquidKind:"water",wasCorrected:false},
+ {id:"b",recorded_at:"2026-10-09T10:00:00Z",effectiveAmountMl:10,effectiveLiquidKind:"water",wasCorrected:true,lastCorrectedAt:"2026-10-12T10:00:00Z"},
+ {id:"c",recorded_at:"2026-10-10T10:00:00Z",effectiveAmountMl:10,effectiveLiquidKind:"water",wasCorrected:true,lastCorrectedAt:"2026-10-13T10:00:00Z"}];
+ assert.deepEqual(exploreLiquidCheckins(arr,readCheckinExploreOptions({ordem:"recent-correction"})).items.map(x=>x.id),["c","b","a"]);
+});
+test("invalid year month and quantity bounds fail to permitted defaults",()=>{
+ const o=readCheckinExploreOptions({anoLiquido:"2026x",mesAtividade:"22",minMl:"-1",maxMl:"99999999999999",repeticaoAtividade:"random"});
+ assert.equal(o.liquidYear,"all"); assert.equal(o.activityMonth,"all");assert.equal(o.minimumMl,null);
+ assert.equal(o.maximumMl,null);assert.equal(o.activityRepeated,"all");
+ const r=readCheckinExploreOptions({minMl:"700",maxMl:"200"});
+ assert.equal(r.minimumMl,null);assert.equal(r.maximumMl,null);
 });
