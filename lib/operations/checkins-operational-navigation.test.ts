@@ -42,15 +42,17 @@ test("admin invalid day shows explicit feedback rather than silently returning r
   assert.ok(admin.includes('parseCheckinHistoryDay(dia, today)'));
 });
 
-test("both correction flows preserve selected day on errors and success", () => {
+test("correction redirects use the authorized event day on success and errors", () => {
   assert.ok(adminAction.includes("function correctionReturnPath("));
-  assert.ok(adminAction.includes('parseCheckinHistoryDay(formData.get("historyDay"), today)'));
+  assert.ok(adminAction.includes('authorizedCorrectionHistoryDay(kind, event, formData.get("historyDay"), today)'));
+  assert.ok(clientAction.includes('authorizedCorrectionHistoryDay(kind, event, formData.get("historyDay"), currentSaoPauloDate())'));
   assert.ok(adminAction.includes("checkinHistorySearch(day) + exactQuery + anchor"));
   for (const state of ["correction-invalid", "correction-error", "correction-recorded"]) {
-    assert.ok(adminAction.includes(`correctionReturnPath(clientId, "${state}", formData, "liquido")`));
-    assert.ok(adminAction.includes(`correctionReturnPath(clientId, "${state}", formData, "atividade")`));
-    assert.ok(clientAction.includes(`correctionRedirect("${state}", formData, "liquido")`));
-    assert.ok(clientAction.includes(`correctionRedirect("${state}", formData, "atividade")`));
+    for (const kind of ["liquido", "atividade"]) {
+      for (const source of [adminAction, clientAction]) {
+        assert.ok(source.includes(`"${state}", formData, "${kind}", event)`));
+      }
+    }
   }
 });
 
@@ -63,7 +65,7 @@ test("deep link anchors are built only from validated event UUIDs", () => {
     assert.ok(source.includes('id={`liquido-${event.id}`}'));
     assert.ok(source.includes('id={`atividade-${event.id}`}'));
   }
-  assert.ok(client.includes('id={`atividade-${latestActivity.id}`}'));
+  assert.ok(client.includes('id={`atividade-atual-${latestActivity.id}`}'));
 });
 
 test("authenticated correction paths still validate ownership and only append corrections", () => {
