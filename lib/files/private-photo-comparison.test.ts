@@ -46,3 +46,10 @@ test("adjacent photo navigation never crosses the eligible client-scoped selecti
  assert.equal(privatePhotoDisplayDate("2026-10-13T01:00:00Z"),"2026-10-12");
  assert.equal(privatePhotoDisplayDate("bad"),"Data indisponível");
 });
+
+test("comparison interface hides adjacent links that collide with opposing photo",async()=>{
+ const {readFileSync}=await import("node:fs");
+ const s=readFileSync(new URL("../../components/files/PrivatePhotoComparison.tsx",import.meta.url),"utf8");
+ assert.match(s,/adjacentPrivatePhoto\(photos,selection.before.id,1\)\?\.id!==selection.after.id/);
+ assert.match(s,/adjacentPrivatePhoto\(photos,selection.after.id,-1\)\?\.id!==selection.before.id/);
+});
