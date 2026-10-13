@@ -1,3 +1,7 @@
+## Esteira 48 — evitar ciclos vazios sem editor disponível (2026-10-13)
+
+A criação manual de um ciclo em rascunho agora exige previamente evidência de que a RPC atômica de edição está acessível: probe autenticado sem mutação, com UUIDs sintéticos inexistentes, só aceita o erro controlado `P0002` como prova de execução. RPC ausente ou falha não verificada bloqueiam a criação sem deixar ciclo vazio inutilizável. Preserva revisão da Patty e todas as políticas RLS; nenhuma migration foi aplicada e testes sintáticos/CI não equivalem a E2E autenticado. A implantação versionada das migrations `20261011063500` e `20261012150000` continua pendente.
+
 ## Esteira 46 — integridade de formulários sensíveis (2026-10-13)
 
 Login, edições de rascunho alimentar e confirmações de submissão, aprovação e publicação não aceitam mais valores duplicados ou upload em campos escalares críticos: campos devem conter exatamente um valor de texto. Não foi alterado o sequenciamento de revisão profissional, Auth/MFA, RLS, SQL ou política de publicação. Testes de regressão cobrem campos ausentes, duplicados e com arquivo. A integração e homologação autenticada são etapas distintas, e as duas migrations previamente identificadas continuam pendentes.
