@@ -34,7 +34,8 @@ test("client evolution links exactly to the historical assessment that supplied 
   const evolution = read("app/cliente/evolucao/page.tsx");
   const history = read("app/cliente/avaliacoes/page.tsx");
   const css = read("app/cliente/avaliacoes/page.module.css");
-  assert.ok(evolution.includes('href={`/cliente/avaliacoes?avaliacao=${point.assessmentId}#avaliacao-${point.assessmentId}`}'));
+  assert.match(evolution, /assessmentDetailFromProgressHref\(point\.assessmentId, originalIndex \+ 1, observationWindow\.value\)/);
+  assert.match(read("lib/evaluations/assessment-progress-navigation.ts"), /avaliacao: assessmentId/);
   assert.ok(evolution.includes("Ir à avaliação"));
   assert.ok(history.includes('id={`avaliacao-${assessmentId}`}'));
   assert.ok(css.includes(".historyItem:target"));
