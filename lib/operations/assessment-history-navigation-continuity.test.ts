@@ -43,7 +43,8 @@ test("same-day assessment navigation labels are distinguishable without invented
 test("evolution links still resolve to the exact client-side historical assessment", () => {
   const progress = read("app/cliente/evolucao/page.tsx");
   const history = read("app/cliente/avaliacoes/page.tsx");
-  assert.ok(progress.includes('href={`/cliente/avaliacoes?avaliacao=${point.assessmentId}#avaliacao-${point.assessmentId}`}'));
+  assert.match(progress, /assessmentDetailFromProgressHref\(point\.assessmentId, originalIndex \+ 1, observationWindow\.value\)/);
+  assert.match(read("lib/evaluations/assessment-progress-navigation.ts"), /avaliacao: assessmentId/);
   assert.ok(history.includes('id={`avaliacao-${assessmentId}`}'));
   assert.ok(!progress.includes("/admin/avaliacoes/"));
 });
