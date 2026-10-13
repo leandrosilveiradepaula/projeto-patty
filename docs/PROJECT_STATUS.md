@@ -1,6 +1,6 @@
 ## Esteira 41 — triagem por área em pendências (2026-10-13)
 
-Filtro por área operacional compõe a busca já existente por cliente e tipo e preserva os atalhos de grupo. As contagens provêm somente da fila acessível à Patty sob as permissões existentes; classificação é para navegação, não prioridade clínica. Sem mudanças de schema, RLS, métodos, alertas ou decisões automáticas. PR e CI não significam deploy autenticado.
+A triagem por área operacional combina busca por cliente e tipo com filtros factuais de responsável, ano e mês civil de São Paulo, intervalo inclusivo, disponibilidade da data histórica, vínculo de cliente e repetição de pendências por cliente; inclui ordenações por antiguidade, recência, cliente e tipo. As filas de Patty, cliente e sistema têm paginação independente e links que preservam os critérios das outras filas. Contagens de registros, clientes distintos e data de registro mais antiga são calculadas exclusivamente sobre pendências já autorizadas. A classificação é para navegação, não prioridade clínica. Sem mudanças de schema, RLS, métodos, alertas ou decisões automáticas. PR e CI não significam deploy autenticado.
 
 ## Esteira 40 — calendário de arquivos e comparação fotográfica (2026-10-13)
 
