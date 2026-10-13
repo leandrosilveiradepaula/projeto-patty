@@ -1,5 +1,6 @@
 import { compareClientPublishedNutrition, selectClientPublishedComparison } from "@/lib/protocol/client-published-comparison";
 import { ClientPublishedHistoryExplorer, ClientPublishedNutritionExplorer } from "@/components/client/ClientPublishedProtocolExplorer";
+import { ClientNutritionSupportNavigation } from "@/components/client/ClientNutritionSupportNavigation";
 import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
 import { ClientPublishedNutritionBrowser } from "@/components/client/ClientPublishedNutritionBrowser";
 import { buildClientPublishedNutritionView, publishedMealAnchor, publishedCycleAnchor, publishedVariationAnchor, publishedVersionHref, selectClientPublishedVersion } from "@/lib/protocol/client-published-view";
@@ -119,6 +120,7 @@ export default async function ClienteProtocoloPage({ searchParams }: { searchPar
                     <span>{view.stepCount} etapa(s)</span>
                   </div>
                   <ClientPublishedNutritionExplorer view={view} publicationId={publication.id}/>
+                  <ClientNutritionSupportNavigation historical={selection.isHistorical} publicationId={publication.id} />
                   <nav aria-label="Seções do plano alimentar" className={styles.sectionNavigation}>
                     <a href={`#ciclos-${publication.id}`}>Consultar ciclos</a>
                     <a href={`#variacoes-${publication.id}`}>Consultar refeições e doses</a>
