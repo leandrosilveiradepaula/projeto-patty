@@ -150,6 +150,8 @@ export type PrivateFileHistoryUrlState = {
   formato?: PrivateFilePreviewFilter;
   visualizacao?: PrivateFileViewFilter;
   ordem?: PrivateFileHistorySort;
+  ano?: string;
+  tamanho?: "all" | "known" | "unknown";
   pagina?: number;
   paginaPendentes?: number;
   paginaHistorico?: number;
@@ -164,6 +166,8 @@ export function privateFileHistoryHref(basePath: string, state: PrivateFileHisto
   if (state.formato && state.formato !== "all") params.set("formato", state.formato);
   if (state.visualizacao && state.visualizacao !== "all") params.set("visualizacao", state.visualizacao);
   if (state.ordem && state.ordem !== "newest") params.set("ordem", state.ordem);
+  if (state.ano && /^\\d{4}$/.test(state.ano)) params.set("ano", state.ano);
+  if (state.tamanho && state.tamanho !== "all" && (state.tamanho === "known" || state.tamanho === "unknown")) params.set("tamanho", state.tamanho);
   const pages = ["pagina", "paginaPendentes", "paginaHistorico"] as const;
   for (const name of pages) {
     const number = state[name];

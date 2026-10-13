@@ -1,3 +1,5 @@
+import { authorizedExactRecordPage } from "@/lib/operations/exact-record-navigation";
+import { availablePrivateFileYears, matchesPrivateFileMetadata, readPrivateFileMetadataFilters } from "@/lib/files/private-file-metadata-filters";
 import { PrivatePhotoComparison } from "@/components/files/PrivatePhotoComparison";
 import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
 import { ClientPrivateFileUploadForm } from "@/components/client/ClientPrivateFileUploadForm";
@@ -50,8 +52,8 @@ function formatCreatedAt(value: string) {
   }).format(new Date(value));
 }
 
-export default async function ClientFilesPage({ searchParams }: { searchParams: Promise<{ categoria?: string; origem?: string; formato?: string; ordem?: string; pagina?: string; fotoAntes?: string; fotoDepois?: string }> }) {
-  const { categoria, origem, formato, ordem, pagina, fotoAntes, fotoDepois } = await searchParams;
+export default async function ClientFilesPage({ searchParams }: { searchParams: Promise<{ categoria?: string; origem?: string; formato?: string; ordem?: string; pagina?: string; fotoAntes?: string; fotoDepois?: string; ano?: string; tamanho?: string; arquivo?: string }> }) {
+  const { categoria, origem, formato, ordem, pagina, fotoAntes, fotoDepois, ano, tamanho, arquivo } = await searchParams;
   const kind = readPrivateFileKindFilter(categoria);
   const origin = readPrivateFileOriginFilter(origem);
   const preview = readPrivateFilePreviewFilter(formato);
@@ -70,17 +72,25 @@ export default async function ClientFilesPage({ searchParams }: { searchParams: 
   }
 
   const files = await listCurrentClientFiles(client.id);
-  const order = readPrivateFileHistorySort(ordem);
+  const years = availablePrivateFileYears(files);
+  const exactFile = typeof arquivo === "string" && files.some(row=>row.id===arquivo);
+  const metadata = exactFile ? { year:"all", size:"all" as const, invalid:false } : readPrivateFileMetadataFilters({ano,tamanho},years);
+  const displayKind = exactFile ? "all" as const : kind;
+  const displayOrigin = exactFile ? "all" as const : origin;
+  const displayPreview = exactFile ? {value:"all" as const,invalid:false} : preview;
+  const order = readPrivateFileHistorySort(exactFile ? undefined : ordem);
   const requestedPage = readPrivateFileHistoryPage(pagina);
   const filteredFiles = sortPrivateFileHistory(
-    files.filter(file => matchesPrivateFileFilters(file, client.profile_id, kind, origin)
-      && matchesPrivateFilePreviewFilter(file.mime_type, preview.value)),
+    files.filter(file => matchesPrivateFileFilters(file, client.profile_id, displayKind, displayOrigin)
+      && matchesPrivateFilePreviewFilter(file.mime_type, displayPreview.value)
+      && matchesPrivateFileMetadata(file,metadata)),
     order.value,
   );
-  const visiblePage = paginatePrivateFileHistory(filteredFiles, requestedPage.page);
+  const exactPage = authorizedExactRecordPage(filteredFiles,arquivo,12);
+  const visiblePage = paginatePrivateFileHistory(filteredFiles, exactPage ?? requestedPage.page);
   const categories = countPrivateFileCategories(files);
   const historyPath = "/cliente/arquivos";
-  const historyHref = (page: number) => privateFileHistoryHref(historyPath, { categoria: kind, origem: origin, formato: preview.value, ordem: order.value, pagina: page, anchor: "lista-arquivos" });
+  const historyHref = (page: number) => privateFileHistoryHref(historyPath, { categoria: displayKind, origem: displayOrigin, formato: displayPreview.value, ordem: order.value, ano: metadata.year, tamanho:metadata.size, pagina: page, anchor: "lista-arquivos" });
 
   return (
     <>
@@ -102,22 +112,33 @@ export default async function ClientFilesPage({ searchParams }: { searchParams: 
       <Section title="Filtrar meus arquivos" description="Escolha a categoria para localizar documentos do seu acompanhamento.">
         <form action="/cliente/arquivos" method="get" className={styles.fileFilters}>
           <label>Categoria
-            <select name="categoria" defaultValue={kind}>
+            <select name="categoria" defaultValue={displayKind}>
               <option value="all">Todas</option><option value="photo">Fotos</option><option value="exam">Exames</option><option value="document">Documentos</option>
             </select>
           </label>
           <label>Origem
-            <select name="origem" defaultValue={origin}>
+            <select name="origem" defaultValue={displayOrigin}>
               <option value="all">Todas</option>
               <option value="client">Enviados por mim</option>
               <option value="team">Equipe ou origem não identificada</option>
             </select>
           </label>
           <label>Disponibilidade
-            <select name="formato" defaultValue={preview.value}>
+            <select name="formato" defaultValue={displayPreview.value}>
               <option value="all">Todos os formatos</option>
               <option value="previewable">Com prévia compatível</option>
               <option value="download_only">Apenas download</option>
+            </select>
+          </label>
+          <label>Ano do arquivo
+            <select name="ano" defaultValue={metadata.year}>
+              <option value="all">Todos os anos</option>
+              {years.map(year=><option key={year} value={year}>{year}</option>)}
+            </select>
+          </label>
+          <label>Metadados do tamanho
+            <select name="tamanho" defaultValue={metadata.size}>
+              <option value="all">Todos</option><option value="known">Com tamanho registrado</option><option value="unknown">Tamanho não informado</option>
             </select>
           </label>
           <label>Ordenação
@@ -136,7 +157,7 @@ export default async function ClientFilesPage({ searchParams }: { searchParams: 
         <p role="status">{filteredFiles.length} de {files.length} arquivo(s) disponível(is) · Fotos: {categories.photo}, exames: {categories.exam}, documentos: {categories.document}.</p>
       </Section>
       <div id="lista-arquivos" className={styles.historyAnchor}>
-      {(invalidScopeFilter || preview.invalid || order.invalid || requestedPage.invalid || visiblePage.outOfRange) ? (
+      {(invalidScopeFilter || metadata.invalid || displayPreview.invalid || order.invalid || requestedPage.invalid || visiblePage.outOfRange) ? (
         <p className={styles.filterNotice} role="status">O filtro ou a página solicitada não está disponível. Exibimos uma página válida dos seus arquivos autorizados.</p>
       ) : null}
       <Section
@@ -153,7 +174,7 @@ export default async function ClientFilesPage({ searchParams }: { searchParams: 
         ) : (
           <ul className={styles.fileList}>
             {visiblePage.items.map((file) => (
-              <li key={file.id}>
+              <li id={`arquivo-historico-${file.id}`} key={file.id}>
                 <Card className={styles.fileCard}>
                   <div className={styles.fileHeader}>
                     <h3 className={styles.fileTitle}>
@@ -190,6 +211,7 @@ export default async function ClientFilesPage({ searchParams }: { searchParams: 
                     ) : null}
                   </dl>
                   <div className={styles.fileActions}>
+                    <Link className={styles.downloadLink} href={`/cliente/arquivos?arquivo=${file.id}#arquivo-historico-${file.id}`}>Abrir registro no histórico</Link>
                     {isPreviewablePrivateFileMimeType(file.mime_type) ? (
                       <a
                         aria-label={`Visualizar ${file.original_filename?.trim() || "arquivo sem nome informado"}`}
