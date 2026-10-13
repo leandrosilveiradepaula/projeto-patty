@@ -1,9 +1,10 @@
+import { authorizedCorrectionHistoryDay } from "@/lib/checkins/correction-return-day";
 "use server";
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { checkinHistorySearch, parseCheckinHistoryDay } from "@/lib/checkins/history-day";
+import { checkinHistorySearch } from "@/lib/checkins/history-day";
 import { parsePositiveCheckinMl } from "@/lib/checkins/amount";
 import { loadSupportedLiquidTaxonomy } from "@/lib/method/liquid-taxonomy-loader";
 import { createLiquidIntakeWithMethodSnapshot } from "@/lib/method/liquid-persistence";
@@ -28,8 +29,9 @@ function correctionRedirect(
   status: "correction-invalid" | "correction-error" | "correction-recorded" | "correction-conflict" | "correction-unchanged",
   formData: FormData,
   kind: "liquido" | "atividade",
+  event?: { recorded_at?: string | null; checkin_date?: string | null } | null,
 ) {
-  const day = parseCheckinHistoryDay(formData.get("historyDay"), currentSaoPauloDate());
+  const day = authorizedCorrectionHistoryDay(kind, event, formData.get("historyDay"), currentSaoPauloDate());
   const eventId = formData.get("eventId");
   const anchor = typeof eventId === "string" && isUuid(eventId)
     ? `#${kind}-${eventId}`
@@ -177,7 +179,7 @@ export async function correctLiquidIntakeAction(formData: FormData) {
   if (!expected.valid) redirect(correctionRedirect("correction-invalid", formData, "liquido"));
   const event = await getAccessibleClientLiquidIntakeEvent(client.id, eventId);
 
-  if (!event) redirect(correctionRedirect("correction-invalid", formData, "liquido"));
+  if (!event) redirect(correctionRedirect("correction-invalid", formData, "liquido", event));
 
   const taxonomy = await loadSupportedLiquidTaxonomy();
   const liquidKind =
@@ -185,14 +187,14 @@ export async function correctLiquidIntakeAction(formData: FormData) {
       ? taxonomy.kinds.find((kind) => kind.key === rawKind) ?? null
       : null;
 
-  if (!liquidKind) redirect(correctionRedirect("correction-invalid", formData, "liquido"));
+  if (!liquidKind) redirect(correctionRedirect("correction-invalid", formData, "liquido", event));
 
   const latest = latestCheckinCorrectionsByEvent(await listAccessibleClientLiquidIntakeEventCorrections([eventId])).get(eventId);
   if (!checkinCorrectionSnapshotMatches(expected.id, latest)) {
-    redirect(correctionRedirect("correction-conflict", formData, "liquido"));
+    redirect(correctionRedirect("correction-conflict", formData, "liquido", event));
   }
   if (!liquidCorrectionChangesValue(event, latest, amountMl, liquidKind.key)) {
-    redirect(correctionRedirect("correction-unchanged", formData, "liquido"));
+    redirect(correctionRedirect("correction-unchanged", formData, "liquido", event));
   }
   try {
     await createAccessibleClientLiquidIntakeEventCorrection({
@@ -203,11 +205,11 @@ export async function correctLiquidIntakeAction(formData: FormData) {
       recordedAt: event.recorded_at,
     });
   } catch {
-    redirect(correctionRedirect("correction-error", formData, "liquido"));
+    redirect(correctionRedirect("correction-error", formData, "liquido", event));
   }
 
   revalidateCheckinJourneys(client.id);
-  redirect(correctionRedirect("correction-recorded", formData, "liquido"));
+  redirect(correctionRedirect("correction-recorded", formData, "liquido", event));
 }
 
 export async function correctActivityCheckinAction(formData: FormData) {
@@ -224,21 +226,21 @@ export async function correctActivityCheckinAction(formData: FormData) {
     !isUuid(eventId) ||
     (rawValue !== "yes" && rawValue !== "no")
   ) {
-    redirect(correctionRedirect("correction-invalid", formData, "atividade"));
+    redirect(correctionRedirect("correction-invalid", formData, "atividade", event));
   }
 
   const expected = parseExpectedCheckinCorrectionId(formData.get("expectedCorrectionId"));
-  if (!expected.valid) redirect(correctionRedirect("correction-invalid", formData, "atividade"));
+  if (!expected.valid) redirect(correctionRedirect("correction-invalid", formData, "atividade", event));
   const event = await getAccessibleClientActivityCheckinEvent(client.id, eventId);
 
-  if (!event) redirect(correctionRedirect("correction-invalid", formData, "atividade"));
+  if (!event) redirect(correctionRedirect("correction-invalid", formData, "atividade", event));
 
   const latest = latestCheckinCorrectionsByEvent(await listAccessibleClientActivityCheckinEventCorrections([eventId])).get(eventId);
   if (!checkinCorrectionSnapshotMatches(expected.id, latest)) {
-    redirect(correctionRedirect("correction-conflict", formData, "atividade"));
+    redirect(correctionRedirect("correction-conflict", formData, "atividade", event));
   }
   if (!activityCorrectionChangesValue(event, latest, event.checkin_date, rawValue === "yes")) {
-    redirect(correctionRedirect("correction-unchanged", formData, "atividade"));
+    redirect(correctionRedirect("correction-unchanged", formData, "atividade", event));
   }
   try {
     await createAccessibleClientActivityCheckinEventCorrection({
@@ -248,9 +250,9 @@ export async function correctActivityCheckinAction(formData: FormData) {
       eventId,
     });
   } catch {
-    redirect(correctionRedirect("correction-error", formData, "atividade"));
+    redirect(correctionRedirect("correction-error", formData, "atividade", event));
   }
 
   revalidateCheckinJourneys(client.id);
-  redirect(correctionRedirect("correction-recorded", formData, "atividade"));
+  redirect(correctionRedirect("correction-recorded", formData, "atividade", event));
 }
