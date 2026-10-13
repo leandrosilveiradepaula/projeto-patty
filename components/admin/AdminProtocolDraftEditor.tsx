@@ -797,9 +797,9 @@ export function AdminProtocolDraftEditor({
         </div>
       </div>
 
-      <ManualCycleEditor plan={plan} protocolId={protocolId} protocolVersionId={protocolVersionId} />
 
-      <div id={draftVariantAddAnchor()}><AddVariantForm
+
+      <div className={styles.variantCreate} id={draftVariantAddAnchor()}><h6>1. Cadastrar variações</h6><AddVariantForm
         mealPlanVersionId={plan.id}
         protocolId={protocolId}
         protocolVersionId={protocolVersionId}
@@ -814,13 +814,13 @@ export function AdminProtocolDraftEditor({
                 <span>{variant.meals.length} refeição(ões)</span>
               </div>
 
-              <UpdateVariantForm
+              <details className={styles.optionalEditor}><summary>Renomear variação</summary><div className={styles.optionalEditorBody}><UpdateVariantForm
                 label={variant.label}
                 mealPlanVersionId={plan.id}
                 protocolId={protocolId}
                 protocolVersionId={protocolVersionId}
                 variantId={variant.id}
-              />
+              /></div></details>
 
               {variant.meals.length === 0 ? (
                 <RemoveVariantForm
@@ -849,7 +849,7 @@ export function AdminProtocolDraftEditor({
                         <span>{meal.doseAllocations.length} macro(s)</span>
                       </div>
 
-                      <UpdateMealForm
+                      <details className={styles.optionalEditor}><summary>Renomear refeição</summary><div className={styles.optionalEditorBody}><UpdateMealForm
                         label={meal.label}
                         position={meal.position}
                         variantId={variant.id}
@@ -857,7 +857,7 @@ export function AdminProtocolDraftEditor({
                         mealPlanVersionId={plan.id}
                         protocolId={protocolId}
                         protocolVersionId={protocolVersionId}
-                      />
+                      /></div></details>
 
                       {meal.doseAllocations.length === 0 ? (
                         <RemoveMealForm
@@ -902,6 +902,7 @@ export function AdminProtocolDraftEditor({
       ) : (
         <p className={styles.empty}>Adicione a primeira variação alimentar.</p>
       )}
+      <ManualCycleEditor plan={plan} protocolId={protocolId} protocolVersionId={protocolVersionId} />
     </div>
   );
 }
