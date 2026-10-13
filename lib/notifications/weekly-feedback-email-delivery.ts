@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createAdminClient } from "@/lib/supabase/admin";
+import { resolveTrustedClientAccessOrigin } from "@/lib/onboarding/trusted-client-access-origin";
 import {
   getGmailSmtpConfig,
   sendGmailSmtpEmail,
@@ -38,9 +39,8 @@ export type WeeklyFeedbackEmailDeliveryResult = {
 };
 
 export async function deliverWeeklyFeedbackReminderEmails(input: {
-  appOrigin: string;
   batchSize?: number;
-}): Promise<WeeklyFeedbackEmailDeliveryResult> {
+} = {}): Promise<WeeklyFeedbackEmailDeliveryResult> {
   const smtpConfig = getGmailSmtpConfig();
 
   if (!smtpConfig) {
@@ -52,7 +52,9 @@ export async function deliverWeeklyFeedbackReminderEmails(input: {
     };
   }
 
-  const appOrigin = new URL(input.appOrigin).origin;
+  // Resolve from deployment configuration before acquiring any email claims.
+  // The HTTP request Host/Origin is never a trusted destination for clients.
+  const appOrigin = resolveTrustedClientAccessOrigin();
   const batchSize = Math.min(
     Math.max(input.batchSize ?? DEFAULT_BATCH_SIZE, 1),
     50,
