@@ -169,3 +169,53 @@ export function checkinExplorerClearQuery(
   }
   return query;
 }
+
+
+/** Only the presentation filters/pagination are allowed through a correction form.
+ * No client IDs, days, statuses or destination URLs are accepted from the form.
+ */
+export function checkinCorrectionReturnQuery(options: CheckinExploreOptions): string {
+  const fields = checkinExplorerQuery(options, undefined);
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(fields)) {
+    if (value && value !== "all" && !((key === "lp" || key === "ap") && value === "1")) {
+      params.set(key, value);
+    }
+  }
+  return params.toString();
+}
+
+export function readCheckinCorrectionReturnQuery(raw: FormDataEntryValue | null): string {
+  if (typeof raw !== "string" || raw.length > 512) return "";
+  const input = new URLSearchParams(raw);
+  const safe = readCheckinExploreOptions(Object.fromEntries(input));
+  return checkinCorrectionReturnQuery(safe);
+}
+
+/** Resolve a target only in a list already read under the current user's RLS scope.
+ * Keep current filters if possible; relax only incompatible filters in the target section.
+ * Preserve both section sort orders and all filters for the other section.
+ */
+export function resolveCheckinExactTarget<T extends { id: string }>(
+  records: readonly T[],
+  targetId: unknown,
+  options: CheckinExploreOptions,
+  section: "liquid" | "activity",
+  select: (records: readonly T[], options: CheckinExploreOptions) => { orderedIds: string[] },
+): CheckinExploreOptions {
+  if (typeof targetId !== "string" || !targetId || targetId.length > 128) return options;
+  const pageFor = (value: CheckinExploreOptions): number | null => {
+    const index = select(records, value).orderedIds.indexOf(targetId);
+    return index === -1 ? null : Math.floor(index / CHECKIN_EXPLORER_PAGE_SIZE) + 1;
+  };
+  const existing = pageFor(options);
+  if (existing !== null) {
+    return section === "liquid" ? { ...options, liquidPage: existing } : { ...options, activityPage: existing };
+  }
+  const relaxed: CheckinExploreOptions = section === "liquid"
+    ? { ...options, liquidKind: "all", liquidOrigin: "all", liquidCorrection: "all", liquidPage: 1 }
+    : { ...options, activityFilter: "all", activityOrigin: "all", activityCorrection: "all", activityPage: 1 };
+  const fallback = pageFor(relaxed);
+  if (fallback === null) return options;
+  return section === "liquid" ? { ...relaxed, liquidPage: fallback } : { ...relaxed, activityPage: fallback };
+}
