@@ -1,3 +1,5 @@
+import { authorizedExactRecordPage } from "@/lib/operations/exact-record-navigation";
+import { CHECKIN_EXPLORER_PAGE_SIZE } from "@/lib/checkins/history-explorer";
 import { readCheckinExploreOptions, exploreLiquidCheckins, exploreActivityCheckins, checkinExploreHref, checkinExplorerQuery, checkinExplorerClearQuery } from "@/lib/checkins/history-explorer";
 import { groupCheckinCorrectionHistory, checkinCorrectionAuthor, formatCheckinAuditDate } from "@/lib/checkins/correction-audit";
 import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
@@ -61,7 +63,7 @@ function formatMl(value: number) {
 }
 
 type ClientCheckinsPageProps = {
-  searchParams: Promise<{ status?: string; dia?: string; ordem?: string; correcao?: string; tipo?: string; atividade?: string; atividadeCorrecao?: string; origemLiquido?: string; origemAtividade?: string; ordemAtividade?: string; lp?: string; ap?: string }>;
+  searchParams: Promise<{ status?: string; dia?: string; ordem?: string; correcao?: string; tipo?: string; atividade?: string; atividadeCorrecao?: string; origemLiquido?: string; origemAtividade?: string; ordemAtividade?: string; lp?: string; ap?: string; liquidoExato?: string; atividadeExata?: string }>;
 };
 
 export default async function ClientCheckinsPage({
@@ -136,6 +138,10 @@ export default async function ClientCheckinsPage({
   const waterMl = displayedLiquidEvents
     .filter((event) => pureWaterKindKeys.has(event.effectiveLiquidKind))
     .reduce((sum, event) => sum + event.effectiveAmountMl, 0);
+  const exactLiquid=authorizedExactRecordPage(displayedLiquidEvents,query.liquidoExato,CHECKIN_EXPLORER_PAGE_SIZE);
+  const exactActivity=authorizedExactRecordPage((selectedDay === today ? activityEvents : historicalActivityEvents),query.atividadeExata,CHECKIN_EXPLORER_PAGE_SIZE);
+  if(exactLiquid!==null){explorer.liquidKind="all";explorer.liquidCorrection="all";explorer.liquidOrigin="all";explorer.liquidSort="newest";explorer.liquidPage=exactLiquid;}
+  if(exactActivity!==null){explorer.activityFilter="all";explorer.activityCorrection="all";explorer.activityOrigin="all";explorer.activitySort="newest";explorer.activityPage=exactActivity;}
   const exploredLiquids = exploreLiquidCheckins(displayedLiquidEvents, explorer, client.profile_id);
   const exploredActivities = exploreActivityCheckins(
     (selectedDay === today ? activityEvents : historicalActivityEvents).map(event => ({
