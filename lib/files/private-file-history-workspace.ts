@@ -2,7 +2,7 @@ import type { PrivateFileKindFilter, PrivateFileOriginFilter, PrivateFileViewFil
 import { isPreviewablePrivateFileMimeType } from "./private-file-preview.ts";
 import { isPrivateFileFromClient, isPrivateFilePendingProfessionalRelease } from "./private-file-history-view.ts";
 
-export type PrivateFileHistorySort = "newest" | "oldest" | "largest" | "smallest" | "kind" | "released" | "name-asc" | "name-desc" | "mime";
+export type PrivateFileHistorySort = "newest" | "oldest" | "largest" | "smallest" | "kind" | "released" | "released-oldest" | "name-asc" | "name-desc" | "mime";
 export type PrivateFilePreviewFilter = "all" | "previewable" | "download_only";
 
 export function readPrivateFilePreviewFilter(raw: unknown): { value: PrivateFilePreviewFilter; invalid: boolean } {
@@ -39,7 +39,7 @@ export function readPrivateFileHistorySort(raw: unknown): {
   invalid: boolean;
 } {
   if (raw === undefined || raw === "newest") return { value: "newest", invalid: false };
-  if (raw === "oldest" || raw === "largest" || raw === "smallest" || raw === "kind" || raw === "released" || raw === "name-asc" || raw === "name-desc" || raw === "mime") {
+  if (raw === "oldest" || raw === "largest" || raw === "smallest" || raw === "kind" || raw === "released" || raw === "released-oldest" || raw === "name-asc" || raw === "name-desc" || raw === "mime") {
     return { value: raw, invalid: false };
   }
   return { value: "newest", invalid: true };
@@ -98,11 +98,11 @@ export function sortPrivateFileHistory<T extends FileHistoryRecord>(
       primary = !a || !b ? (!a && !b ? 0 : !a ? 1 : -1) : (order === "name-asc" ? 1 : -1) * a.localeCompare(b,"pt-BR",{sensitivity:"base"});
     } else if (order === "mime") {
       primary = (left.mime_type ?? "").localeCompare(right.mime_type ?? "", "pt-BR");
-    } else if (order === "released") {
+    } else if (order === "released" || order === "released-oldest") {
       const a = recordInstant(left.client_visible_at);
       const b = recordInstant(right.client_visible_at);
       if (a === null || b === null) primary = a === null ? (b === null ? 0 : 1) : -1;
-      else primary = b - a;
+      else primary = order === "released-oldest" ? a - b : b - a;
     }
     // Tie-break by latest stored time, then opaque ID: deterministic across pages.
     const secondary = when();
@@ -166,6 +166,8 @@ export type PrivateFileHistoryUrlState = {
   integridadeData?: string;
   anoLiberacao?: string;
   mesLiberacao?: string;
+  nome?: string;
+  estadoLiberacao?: string;
   tamanho?: "all" | "known" | "unknown";
   pagina?: number;
   paginaPendentes?: number;
@@ -188,6 +190,8 @@ export function privateFileHistoryHref(basePath: string, state: PrivateFileHisto
   if (state.integridadeData && ["valid","invalid"].includes(state.integridadeData)) params.set("integridadeData",state.integridadeData);
   if (state.anoLiberacao && /^\d{4}$/.test(state.anoLiberacao)) params.set("anoLiberacao",state.anoLiberacao);
   if (state.mesLiberacao && /^(0[1-9]|1[0-2])$/.test(state.mesLiberacao)) params.set("mesLiberacao",state.mesLiberacao);
+  if (state.nome && ["named","unnamed"].includes(state.nome)) params.set("nome",state.nome);
+  if (state.estadoLiberacao && ["valid","missing","invalid"].includes(state.estadoLiberacao)) params.set("estadoLiberacao",state.estadoLiberacao);
   if (state.tamanho && state.tamanho !== "all" && (state.tamanho === "known" || state.tamanho === "unknown")) params.set("tamanho", state.tamanho);
   const pages = ["pagina", "paginaPendentes", "paginaHistorico"] as const;
   for (const name of pages) {
