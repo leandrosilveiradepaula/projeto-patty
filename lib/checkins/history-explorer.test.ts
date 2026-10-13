@@ -21,3 +21,6 @@ test("correction filter and out of range pages are safe",()=>{
 test("links retain safe selected filters without patient identifiers",()=>{
  assert.equal(checkinExploreHref("/cliente/checkins",{dia:"2026-10-11",correcao:"corrected",lp:"2"},{lp:"3"}),"/cliente/checkins?dia=2026-10-11&correcao=corrected&lp=3");
 });
+test("preserves numeric liquid kind 1 without exposing default pagination",()=>{
+ assert.equal(checkinExploreHref("/cliente/checkins",{tipo:"1",lp:"1",ap:"2"},{}),"/cliente/checkins?tipo=1&ap=2");
+});
