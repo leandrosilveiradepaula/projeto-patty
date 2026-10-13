@@ -1,3 +1,7 @@
+## Jornada profissional de treino — preparação, revisão e publicação (2026-10-13)
+
+A área administrativa de treino agora mostra etapas operacionais com estado derivado dos dados reais (solicitação, montagem, revisão disponível, versão revisada para publicação ou publicação atual), próxima ação ancorada e orientação contextual. Os editores de exercícios do rascunho são expansíveis sob demanda, reduzindo ruído visual na conferência de conjuntos grandes. Navegação, resumos e campos são responsivos e acessíveis via teclado. As validações existentes do servidor, RLS, seleção manual de exercícios, versão exata publicada, congelamento após revisão e aprovação/publicação profissional permanecem inalteradas. Não cria score, progressão ou regra de treino. CI não substitui teste autenticado em celular.
+
 ## Jornada completa de consulta do treino publicado — 2026-10-13
 
 A cliente pode consultar o treino individual publicado como uma sequência de exercícios com seleção direta, anterior/próximo, indicador de posição, orientações profissionais e séries/repetições/descanso preservados do snapshot publicado. A visualização é responsiva, com foco por teclado e sem gravar marcações, adesão ou execução. Biblioteca global e rascunhos não são expostos à cliente; histórico e comparação de versões permanecem separados da versão atual. Sem regras automáticas de progressão ou mudanças no banco. Typecheck/CI não substituem homologação autenticada em celular.
