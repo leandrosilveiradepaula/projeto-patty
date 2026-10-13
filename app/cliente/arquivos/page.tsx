@@ -104,7 +104,7 @@ export default async function ClientFilesPage({ searchParams }: { searchParams: 
         title="Meus arquivos"
       />
 
-      <PrivatePhotoComparison files={files} clientId={client.id} before={fotoAntes} after={fotoDepois} path="/cliente/arquivos" fileRoute="/cliente/arquivos" />
+      <PrivatePhotoComparison files={files} clientId={client.id} before={fotoAntes} after={fotoDepois} path="/cliente/arquivos" fileRoute="/cliente/arquivos" returnHref={privateFileHistoryHref("/cliente/arquivos",{categoria:kind,origem:origin,formato:preview.value,ordem:readPrivateFileHistorySort(ordem).value})} />
       <Section
         id="enviar-arquivo"
         description="O arquivo passa por uma validação antes de entrar no seu histórico."
