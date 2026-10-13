@@ -1,3 +1,4 @@
+import { privateFileSaoPauloDay } from "./private-file-calendar.ts";
 /** Only photo assets already returned by a scoped file query are comparison candidates. */
 export type PrivatePhotoCandidate = {
   id: string;
@@ -57,4 +58,18 @@ export function resolvePrivatePhotoPair<T extends PrivatePhotoCandidate>(
   const after = eligiblePhotos.find((file) => file.id === afterId);
   if (!before || !after) return { state: "invalid" };
   return { state: "ready", before, after };
+}
+
+export function privatePhotoDisplayDate(value: string): string {
+  return privateFileSaoPauloDay(value) ?? "Data indisponível";
+}
+export function privatePhotoPosition<T extends PrivatePhotoCandidate>(photos: readonly T[], id: string): number {
+  return photos.findIndex(photo=>photo.id===id);
+}
+export function adjacentPrivatePhoto<T extends PrivatePhotoCandidate>(
+  photos: readonly T[], id: string, movement: -1 | 1,
+): T | null {
+  const index = privatePhotoPosition(photos,id);
+  const next = index + movement;
+  return index >= 0 && next >= 0 && next < photos.length ? photos[next] : null;
 }
