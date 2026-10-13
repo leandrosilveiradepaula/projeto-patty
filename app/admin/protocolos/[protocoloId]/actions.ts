@@ -8,6 +8,7 @@ import { buildProtocolCloneSnapshot } from "@/lib/protocol/clone-snapshot";
 import { parseProtocolDraftDoseQuantity } from "@/lib/protocol/dose-entry";
 import { parseOriginalDraftLabel, parseOriginalDraftDoseQuantity, parseOriginalDraftDoseType, parseOriginalDraftId, parseOriginalDraftPosition, parseOriginalVariantKey } from "@/lib/protocol/draft-snapshots";
 import { applyDraftCycleOperation, parseDraftCycleSteps, sameDraftCycleSteps } from "@/lib/protocol/cycle-editor";
+import { protocolCycleEditFailureMessage } from "@/lib/protocol/cycle-edit-error";
 import { isUuid } from "@/lib/validation/uuid";
 import {
   formatProtocolDraftReadiness,
@@ -656,8 +657,8 @@ export async function editProtocolMealPlanCycle(
     await replaceAccessibleDraftMealPlanCycleSteps({
       cycleId, mealPlanVersionId, expectedSteps: expected, variantIds: variants,
     });
-  } catch {
-    return { success: false, message: "Não foi possível confirmar a alteração. Outra sessão pode ter mudado o ciclo; atualize e confira antes de repetir." };
+  } catch (error) {
+    return { success: false, message: protocolCycleEditFailureMessage(error) };
   }
   revalidateProtocolPaths(protocolId, accessible.protocol.client_id);
   return { success: true, message: "Sequência do ciclo registrada no rascunho." };
