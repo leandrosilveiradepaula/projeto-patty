@@ -68,6 +68,17 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
   const areaCounts=countPendingAreas(explorePendingClientQueue(allItems,{...filters,area:null}));
   const grouped = groupOperationalPendingItems(items);
   const pages={patty:paginatePendingQueue(grouped.patty,filters.pattyPage),client:paginatePendingQueue(grouped.client,filters.clientPage),operational:paginatePendingQueue(grouped.operational,filters.operationalPage)};
+  const hasAdvancedFilters = filters.sort !== "oldest" || filters.year !== "all" ||
+    filters.month !== "all" || Boolean(filters.fromDate || filters.toDate) ||
+    filters.dateValidity !== "all" || filters.clientScope !== "all" ||
+    filters.multiple !== "all";
+  const sortDescriptions = {
+    oldest: "Registros mais antigos primeiro dentro de cada grupo. A posição na fila não indica prioridade clínica.",
+    newest: "Registros mais recentes primeiro dentro de cada grupo. A posição na fila não indica prioridade clínica.",
+    "client-asc": "Pendências por nome da cliente, de A a Z, dentro de cada grupo. A posição não indica prioridade clínica.",
+    "client-desc": "Pendências por nome da cliente, de Z a A, dentro de cada grupo. A posição não indica prioridade clínica.",
+    type: "Pendências ordenadas pelo tipo de ação dentro de cada grupo. A posição não indica prioridade clínica.",
+  }[filters.sort];
 
   return (
     <>
@@ -98,6 +109,9 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
           <label>Responsável pela próxima ação
             <select name="responsavel" defaultValue={filters.responsible}><option value="all">Todos</option><option value="patty">Patty</option><option value="client">Cliente</option><option value="operational">Sistema</option></select>
           </label>
+          <details className={styles.advancedFilters} open={hasAdvancedFilters}>
+            <summary>Filtros avançados{hasAdvancedFilters ? " (aplicados)" : ""}</summary>
+            <div className={styles.advancedFiltersContent}>
           <label>Ordenação
             <select name="ordem" defaultValue={filters.sort}><option value="oldest">Mais antigas</option><option value="newest">Mais recentes</option><option value="client-asc">Cliente A–Z</option><option value="client-desc">Cliente Z–A</option><option value="type">Tipo de ação A–Z</option></select>
           </label>
@@ -112,10 +126,8 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
           <label>Integridade da data<select name="integridadeData" defaultValue={filters.dateValidity}><option value="all">Todas</option><option value="valid">Válidas</option><option value="invalid">Datas indisponíveis</option></select></label>
           <label>Vínculo cadastral<select name="vinculo" defaultValue={filters.clientScope}><option value="all">Todos</option><option value="client">Com cadastro de cliente</option><option value="system">Sem vínculo de cliente</option></select></label>
           <label>Várias pendências da mesma cliente<select name="multiplas" defaultValue={filters.multiple}><option value="all">Todas</option><option value="multiple">Com várias pendências</option><option value="single">Com uma pendência</option></select></label>
-          <input type="hidden" name="paginaPatty" value={pages.patty.page}/>
-          <input type="hidden" name="paginaCliente" value={pages.client.page}/>
-          <input type="hidden" name="paginaSistema" value={pages.operational.page}/>
-          {focusedGroup ? <input type="hidden" name="grupo" value={focusedGroup}/> : null}
+            </div>
+          </details>
           <Button type="submit" variant="secondary">Filtrar</Button>
           {filters.query || filters.kind!=="all" || filters.area || filters.responsible!=="all" || filters.sort!=="oldest" || filters.year!=="all" || filters.month!=="all" || filters.fromDate || filters.toDate || filters.dateValidity!=="all" || filters.clientScope!=="all" || filters.multiple!=="all" ? <Link href="/admin/pendencias">Limpar</Link> : null}
         </form>
@@ -123,7 +135,7 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
         {filters.invalid ? <Alert variant="info" title="Consulta ajustada">Um parâmetro inválido foi ignorado. Exibimos apenas pendências autorizadas.</Alert> : null}
       </Section>
       <Section
-        description="As pendências continuam ordenadas por antiguidade dentro de cada grupo, mas agora ficam separadas pelo tipo de ação necessária."
+        description={sortDescriptions}
         title="Registros que exigem acompanhamento"
       >
         {items.length > 0 ? (
