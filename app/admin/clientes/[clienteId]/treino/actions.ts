@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { requireRole } from "@/lib/supabase/auth";
+import { isSingleConfirmedFormValue } from "@/lib/validation/form-fields";
 import {
   createAccessibleClientTrainingPlanDraft,
   copyAccessiblePublishedTrainingPlanItems,
@@ -36,13 +37,22 @@ function isUuid(value: string) {
   );
 }
 
+/** Reject ambiguous training mutations before any write, including hidden snapshots. */
+function trainingFormText(formData: FormData, key: string, label: string): string | null {
+  const values = formData.getAll(key);
+  if (values.length > 1 || (values.length === 1 && typeof values[0] !== "string")) {
+    throw new Error(`${label} contém valores repetidos ou inválidos. Atualize o treino.`);
+  }
+  return values.length === 1 ? values[0] as string : null;
+}
+
 function requiredText(
   formData: FormData,
   key: string,
   maxLength: number,
   label: string,
 ) {
-  const value = formData.get(key);
+  const value = trainingFormText(formData, key, label);
 
   if (typeof value !== "string") {
     throw new Error(`${label} é obrigatório.`);
@@ -65,7 +75,7 @@ function optionalText(
   maxLength: number,
   label: string,
 ) {
-  const value = formData.get(key);
+  const value = trainingFormText(formData, key, label);
 
   if (value === null) {
     return null;
@@ -89,7 +99,7 @@ function optionalText(
 }
 
 function optionalUuid(formData: FormData, key: string, label: string) {
-  const raw = formData.get(key);
+  const raw = trainingFormText(formData, key, label);
   if (raw === null || raw === "") return null;
   if (typeof raw !== "string" || !isUuid(raw)) {
     throw new Error(`${label} é inválido. Atualize o treino e tente novamente.`);
@@ -98,7 +108,7 @@ function optionalUuid(formData: FormData, key: string, label: string) {
 }
 
 function positivePosition(formData: FormData, key: string) {
-  const raw = formData.get(key);
+  const raw = trainingFormText(formData, key, "Posição original");
   if (typeof raw !== "string" || !/^[1-9][0-9]*$/.test(raw)) {
     throw new Error("Posição original inválida. Atualize o treino.");
   }
@@ -261,7 +271,7 @@ export async function addTrainingPlanItemAction(
       return initialError("Esta versão não aceita novos exercícios.");
     }
 
-    const exerciseVersionRaw = formData.get("exerciseVersionId");
+    const exerciseVersionRaw = trainingFormText(formData, "exerciseVersionId", "Versão do exercício");
     if (exerciseVersionRaw !== null && typeof exerciseVersionRaw !== "string") {
       return initialError("A versão do exercício selecionado é inválida.");
     }
@@ -369,7 +379,7 @@ export async function updateTrainingPlanItemAction(
       return initialError("Exercício não encontrado nesta versão.");
     }
 
-    const exerciseVersionRaw = formData.get("exerciseVersionId");
+    const exerciseVersionRaw = trainingFormText(formData, "exerciseVersionId", "Versão do exercício");
     if (exerciseVersionRaw !== null && typeof exerciseVersionRaw !== "string") {
       return initialError("A versão do exercício selecionado é inválida.");
     }
@@ -490,6 +500,9 @@ export async function deleteTrainingPlanItemAction(
     if (version.reviewed_at || version.published_at) {
       return initialError("Esta versão não está mais editável.");
     }
+    if (!isSingleConfirmedFormValue(formData, "confirmDelete")) {
+      return initialError("Confirme explicitamente a remoção do exercício do rascunho.");
+    }
 
     const items = await listAccessibleClientTrainingPlanItems(version.id);
 
@@ -558,6 +571,9 @@ export async function reviewTrainingPlanVersionAction(
     if (version.reviewed_at || version.published_at) {
       return initialError("Esta versão já foi revisada.");
     }
+    if (!isSingleConfirmedFormValue(_formData, "confirmReview")) {
+      return initialError("Confirme explicitamente a revisão desta versão do treino.");
+    }
 
     await reviewAccessibleClientTrainingPlanVersion(version.id);
     revalidateTraining(client.id);
@@ -589,6 +605,9 @@ export async function publishTrainingPlanVersionAction(
 
     if (!version.reviewed_at || version.published_at) {
       return initialError("A versão precisa estar revisada e ainda não publicada.");
+    }
+    if (!isSingleConfirmedFormValue(_formData, "confirmPublish")) {
+      return initialError("Confirme explicitamente a publicação desta versão para a cliente.");
     }
 
     await publishAccessibleClientTrainingPlanVersion(version.id);
