@@ -81,7 +81,7 @@ export function liquidHistoryCalendarDate(value: string): string | null {
   }).format(new Date(value));
 }
 export function availableCheckinHistoryYears(dates: readonly (string | null)[]): string[] {
-  return Array.from(new Set(dates.filter((d): d is string => typeof d === "string" && /^\\d{4}-\\d{2}-\\d{2}$/.test(d)).map(d=>d.slice(0,4)))).sort().reverse();
+  return Array.from(new Set(dates.filter((d): d is string => typeof d === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d)).map(d=>d.slice(0,4)))).sort().reverse();
 }
 function dateMatchesFilter(date: string | null, year: string, month: string): boolean {
   return (year === "all" && month === "all") || (date !== null &&
