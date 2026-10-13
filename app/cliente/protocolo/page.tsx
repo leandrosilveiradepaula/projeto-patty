@@ -1,7 +1,7 @@
 import { compareClientPublishedNutrition, selectClientPublishedComparison } from "@/lib/protocol/client-published-comparison";
 import { ClientPublishedHistoryExplorer, ClientPublishedNutritionExplorer } from "@/components/client/ClientPublishedProtocolExplorer";
 import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
-import { ClientProtocolNutrition } from "@/components/client/ClientProtocolNutrition";
+import { ClientPublishedNutritionBrowser } from "@/components/client/ClientPublishedNutritionBrowser";
 import { buildClientPublishedNutritionView, publishedMealAnchor, publishedCycleAnchor, publishedVariationAnchor, publishedVersionHref, selectClientPublishedVersion } from "@/lib/protocol/client-published-view";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
@@ -163,16 +163,17 @@ export default async function ClienteProtocoloPage({ searchParams }: { searchPar
                         ))}
                       </nav>
                     ) : null}
-                    <ClientProtocolNutrition
-                      variants={view.variants.map((variant) => ({
+                    <ClientPublishedNutritionBrowser
+                      publicationId={publication.id}
+                      variants={view.variants.map(variant => ({
                         id: variant.id,
                         anchorId: publishedVariationAnchor(publication.id, variant.id),
                         label: variant.label,
-                        meals: variant.meals.map((meal) => ({
+                        meals: variant.meals.map(meal => ({
                           doseGroups: meal.doseGroups,
                           label: meal.label,
                           order: meal.order,
-                          anchorId: publishedMealAnchor(publication.id,meal.id),
+                          anchorId: publishedMealAnchor(publication.id, meal.id),
                         })),
                       }))}
                     />
