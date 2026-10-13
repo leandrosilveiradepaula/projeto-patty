@@ -9,7 +9,7 @@ const read=(p:string)=>fs.readFileSync(path.join(root,p),"utf8");
 
 test("client assessment history sorts by date independent of RPC ordering",()=>{
  const s=read("app/cliente/avaliacoes/page.tsx");
- assert.match(s,/completeClientAssessmentHistory\(historical, rows\)/);
+ assert.match(s,/completeClientAssessmentHistory\\(assessmentHistory\\.headers, assessmentHistory\\.measurements\\)/);
  const helper=read("lib/evaluations/client-assessment-history.ts");
  assert.match(helper,/newestFactualAssessments\(/);
  assert.match(helper,/finalized_at\s*!==\s*null/);
