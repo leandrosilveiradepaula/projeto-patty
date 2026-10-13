@@ -89,3 +89,10 @@ test("client and Patty keep factual liquid records separate from any hydration t
   assert.ok(!client.includes("35 *"));
   assert.ok(!admin.includes("0.7 *"));
 });
+
+test("correction form return URLs are only parsed through the allowlisted explorer",()=>{
+ for(const source of [clientAction,adminAction]){
+  assert.ok(source.includes('readCheckinCorrectionReturnQuery(formData.get("returnExplorer"))'));
+  assert.ok(source.includes('returnQuery ? "&" + returnQuery : ""'));
+ }
+});

@@ -1,6 +1,7 @@
 "use server";
 
 import { authorizedCorrectionHistoryDay } from "@/lib/checkins/correction-return-day";
+import { readCheckinCorrectionReturnQuery } from "@/lib/checkins/history-explorer";
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -47,9 +48,10 @@ function correctionReturnPath(
   const anchor = typeof eventId === "string" && isUuid(eventId)
     ? `#${kind}-${eventId}`
     : "";
+  const returnQuery = readCheckinCorrectionReturnQuery(formData.get("returnExplorer"));
   const exactQuery = typeof eventId === "string" && isUuid(eventId)
     ? `&${kind === "liquido" ? "liquidoExato" : "atividadeExata"}=${eventId}` : "";
-  return adminCheckinsPath(clientId, status) + checkinHistorySearch(day) + exactQuery + anchor;
+  return adminCheckinsPath(clientId, status) + (returnQuery ? "&" + returnQuery : "") + checkinHistorySearch(day) + exactQuery + anchor;
 }
 
 export async function correctClientLiquidIntakeAction(

@@ -19,7 +19,7 @@ test("both professional and client correction flows retain their authorized reco
   assert.match(actions,/atividadeExata/);
   assert.match(page,/query.liquidoExato/);
   assert.match(page,/query.atividadeExata/);
-  assert.match(page,/orderedIds/);
+  assert.match(page,/resolveCheckinExactTarget/);
   assert.doesNotMatch(page,/service_role|createAdminClient/);
  }
 });
@@ -29,6 +29,18 @@ test("client always renders the paged activity history, including today, for exa
   assert.match(page,/title=\{selectedDay === today \? "Histórico de atividade física de hoje"/);
   assert.doesNotMatch(page,/\{selectedDay !== today \? \(\s*<Section\s+description="Respostas factuais do dia escolhido/);
   assert.match(page,/id=\{\x60atividade-\$\{event.id\}\x60\}/);
-  assert.match(page,/exactActivity=authorizedExactRecordPage/);
+  assert.match(page,/resolveCheckinExactTarget\(effectiveActivityEvents/);
   assert.match(page,/exploredActivities\.items\.map/);
+});
+
+test("both workspaces retain filter state, pages and allowlist correction returns",()=>{
+ for(const area of ["app/cliente/checkins","app/admin/clientes/[clienteId]/checkins"]){
+  const page=load(area+"/page.tsx"),actions=load(area+"/actions.ts");
+  assert.match(page,/name="returnExplorer"/);
+  assert.match(page,/checkinCorrectionReturnQuery/);
+  assert.match(page,/name="ap" value=\{exploredActivities.page\}/);
+  assert.match(page,/name="lp" value=\{exploredLiquids.page\}/);
+  assert.match(page,/resolveCheckinExactTarget/);
+  assert.match(actions,/readCheckinCorrectionReturnQuery\(formData.get\("returnExplorer"\)\)/);
+ }
 });

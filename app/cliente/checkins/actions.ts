@@ -1,6 +1,7 @@
 "use server";
 
 import { authorizedCorrectionHistoryDay } from "@/lib/checkins/correction-return-day";
+import { readCheckinCorrectionReturnQuery } from "@/lib/checkins/history-explorer";
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -37,9 +38,10 @@ function correctionRedirect(
   const anchor = typeof eventId === "string" && isUuid(eventId)
     ? `#${kind}-${eventId}`
     : "";
+  const returnQuery = readCheckinCorrectionReturnQuery(formData.get("returnExplorer"));
   const exactQuery = typeof eventId === "string" && isUuid(eventId)
     ? `&${kind === "liquido" ? "liquidoExato" : "atividadeExata"}=${eventId}` : "";
-  return "/cliente/checkins?status=" + status + checkinHistorySearch(day) + exactQuery + anchor;
+  return "/cliente/checkins?status=" + status + (returnQuery ? "&" + returnQuery : "") + checkinHistorySearch(day) + exactQuery + anchor;
 }
 
 function currentSaoPauloDate() {
