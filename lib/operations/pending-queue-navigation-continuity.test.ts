@@ -36,3 +36,30 @@ test("group navigation works by keyboard and does not require client-only state"
   assert.ok(css.includes('min-height: 44px'));
   assert.ok(page.includes('aria-current={focusedGroup === "patty"'));
 });
+
+test("applying a new search does not silently keep stale pages or group focus", () => {
+  assert.ok(page.includes('<form action="/admin/pendencias" method="get"'));
+  for (const key of ["paginaPatty", "paginaCliente", "paginaSistema", "grupo"]) {
+    assert.equal(page.includes(`<input type="hidden" name="${key}"`), false, key);
+  }
+  // Explicit page links still retain pagination and other active query criteria.
+  for (const group of ["patty", "client", "operational"]) {
+    assert.ok(page.includes(`pendingExplorerPageHref("${group}",filters`), group);
+  }
+});
+
+test("advanced pending filters remain discoverable, visible when applied and usable on mobile", () => {
+  assert.ok(page.includes('<details className={styles.advancedFilters} open={hasAdvancedFilters}>'));
+  assert.ok(page.includes('<summary>Filtros avançados{hasAdvancedFilters ? " (aplicados)" : ""}</summary>'));
+  assert.ok(page.includes('filters.dateValidity !== "all"'));
+  assert.ok(page.includes('filters.multiple !== "all"'));
+  assert.ok(css.includes('.advancedFilters > summary:focus-visible'));
+  assert.ok(css.includes('grid-template-columns: minmax(0, 1fr)'));
+});
+
+test("pending group explanation follows the selected order rather than claiming oldest for every mode", () => {
+  assert.ok(page.includes('description={sortDescriptions}'));
+  assert.ok(page.includes('Registros mais recentes primeiro'));
+  assert.ok(page.includes('Pendências por nome da cliente, de Z a A'));
+  assert.ok(page.includes('Pendências ordenadas pelo tipo de ação'));
+});
