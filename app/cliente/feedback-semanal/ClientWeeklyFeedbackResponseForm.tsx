@@ -45,8 +45,11 @@ export function ClientWeeklyFeedbackResponseForm({
   const firstInvalid = firstInvalidWeeklyFeedbackField(questions, values, attemptedFinalSubmit);
   const progress = summarizeWeeklyFeedbackRequiredProgress(questions, values);
   const inFlightRef = useRef(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  const [reviewOpen, setReviewOpen] = useState(false);
   const router = useRouter();
   const submitted = state.outcome === "submitted";
+  const dirty = editedSinceLastSave && !submitted;
 
   useEffect(() => {
     inFlightRef.current = false;
@@ -56,9 +59,17 @@ export function ClientWeeklyFeedbackResponseForm({
     }
   }, [state, router]);
 
+  useEffect(() => {
+    if (!dirty) return;
+    const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [dirty]);
+
   function updateAnswer(key: string, next: string) {
     setValues((previous) => ({ ...previous, [key]: next }));
     setEditedSinceLastSave(true);
+    setReviewOpen(false);
   }
 
   function prepareSubmit(intent: "save" | "submit") {
@@ -66,6 +77,7 @@ export function ClientWeeklyFeedbackResponseForm({
       setAttemptedFinalSubmit(true);
       const invalid = firstInvalidWeeklyFeedbackField(questions, values, true);
       if (invalid) {
+        setReviewOpen(false);
         document.getElementById("weekly-feedback-answer-" + invalid)?.focus();
         return false;
       }
@@ -76,6 +88,7 @@ export function ClientWeeklyFeedbackResponseForm({
         return false;
       }
     }
+    if (intent === "submit") setReviewOpen(true);
     return true;
   }
 
@@ -87,6 +100,7 @@ export function ClientWeeklyFeedbackResponseForm({
 
   return (
     <form
+      ref={formRef}
       action={formAction}
       noValidate
       aria-busy={isPending}
@@ -101,6 +115,7 @@ export function ClientWeeklyFeedbackResponseForm({
     >
       <input type="hidden" name="expectedFingerprint" value={expectedFingerprint} />
       <div className={styles.formProgress} role="status" aria-live="polite">
+        <span className={styles.fieldMeta}>Etapa 1 de 2 · Preencher e revisar</span>
         <strong>{progress.requiredCompleted} de {progress.required} perguntas obrigatórias preenchidas</strong>
         <span>{progress.completed} de {progress.total} respostas iniciadas</span>
         <progress max={progress.required || 1} value={progress.requiredCompleted} aria-label="Progresso do preenchimento obrigatório" />
@@ -169,10 +184,25 @@ export function ClientWeeklyFeedbackResponseForm({
           </div>
         );
       })}
-      {editedSinceLastSave && !isPending ? (
+      {dirty && !isPending ? (
         <p aria-live="polite" className={styles.meta}>
           Alterações ainda não salvas. Salve o rascunho antes de sair.
         </p>
+      ) : null}
+      {reviewOpen && !submitted ? (
+        <section className={styles.reviewPanel} aria-label="Revisão antes do envio">
+          <h3>Revise antes de enviar</h3>
+          <p>As respostas enviadas ficam registradas e não poderão ser alteradas por esta tela.</p>
+          <dl className={styles.answers}>
+            {questions.map(question => (
+              <div key={question.key}>
+                <dt>{question.label}</dt>
+                <dd>{values[question.key]?.trim() || "Sem resposta"}</dd>
+              </div>
+            ))}
+          </dl>
+          <Button type="button" variant="secondary" onClick={() => setReviewOpen(false)}>Voltar e editar</Button>
+        </section>
       ) : null}
       <ClientWeeklyFeedbackSubmitControls completed={submitted} onBeforeSubmit={prepareSubmit} />
       {state.outcome === "conflict" ? (
