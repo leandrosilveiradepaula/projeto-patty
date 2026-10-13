@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { eligiblePrivatePhotos, resolvePrivatePhotoPair } from "./private-photo-comparison.ts";
+import { eligiblePrivatePhotos, resolvePrivatePhotoPair,adjacentPrivatePhoto,privatePhotoDisplayDate } from "./private-photo-comparison.ts";
 const records=[
  {id:"photo-a",client_id:"own",file_kind:"photo",mime_type:"image/jpeg",original_filename:"A.jpg",created_at:"2026-10-01T10:00:00Z"},
  {id:"photo-b",client_id:"own",file_kind:"photo",mime_type:"image/png",original_filename:"B.png",created_at:"2026-10-02T10:00:00Z"},
@@ -35,4 +35,14 @@ test("client and professional views source the scoped lists and existing guarded
  assert.match(component,/resolvePrivatePhotoPair\(photos,before,after\)/);
  assert.match(component,/fileRoute\+"\/"\+file.id\+"\?preview=1"/);
  assert.doesNotMatch(component,/createSignedUrl|service_role|object_path|bucket_id/);
+});
+
+test("adjacent photo navigation never crosses the eligible client-scoped selection",()=>{
+ const photos=eligiblePrivatePhotos(records,"own");
+ assert.equal(adjacentPrivatePhoto(photos,"photo-b",-1),null);
+ assert.equal(adjacentPrivatePhoto(photos,"photo-b",1)?.id,"photo-a");
+ assert.equal(adjacentPrivatePhoto(photos,"photo-a",-1)?.id,"photo-b");
+ assert.equal(adjacentPrivatePhoto(photos,"other",1),null);
+ assert.equal(privatePhotoDisplayDate("2026-10-13T01:00:00Z"),"2026-10-12");
+ assert.equal(privatePhotoDisplayDate("bad"),"Data indisponível");
 });
