@@ -8,12 +8,13 @@ import {
 } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
 import { validateInvitationEmail } from "@/lib/onboarding/validation";
+import { readSingleStringFormValue } from "@/lib/validation/form-fields";
 
 export type LoginState = { message: string | null };
 
 export async function login(_: LoginState, formData: FormData): Promise<LoginState> {
-  const email = formData.get("email");
-  const password = formData.get("password");
+  const email = readSingleStringFormValue(formData, "email");
+  const password = readSingleStringFormValue(formData, "password");
 
   if (
     typeof email !== "string" ||
