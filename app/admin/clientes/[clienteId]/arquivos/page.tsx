@@ -98,7 +98,7 @@ export default async function AdminClientFilesPage({
   const kinds = countPrivateFileCategories(files);
   const basePath = `/admin/clientes/${client.id}/arquivos`;
   const navigate = (target: "pending" | "history", page: number) => privateFileHistoryHref(basePath, {
-    categoria: kind, origem: origin, formato: preview.value, visualizacao: view, ordem: order.value, ano: metadata.year, tamanho:metadata.size, mes:discovery.month,minKb:discovery.minKb,maxKb:discovery.maxKb,grupoMime:discovery.mimeFamily,integridadeData:discovery.recordedValidity,anoLiberacao:discovery.releaseYear,mesLiberacao:discovery.releaseMonth,
+    categoria: kind, origem: origin, formato: preview.value, visualizacao: view, ordem: order.value, ano: metadata.year, tamanho:metadata.size, mes:discovery.month,minKb:discovery.minKb,maxKb:discovery.maxKb,grupoMime:discovery.mimeFamily,integridadeData:discovery.recordedValidity,anoLiberacao:discovery.releaseYear,mesLiberacao:discovery.releaseMonth,nome:discovery.namePresence,estadoLiberacao:discovery.releaseState,
     paginaPendentes: target === "pending" ? page : pendingPage.page,
     paginaHistorico: target === "history" ? page : historyPage.page,
     anchor: target === "pending" ? "aguardando-liberacao" : "historico-arquivos",
@@ -176,6 +176,8 @@ export default async function AdminClientFilesPage({
            <label>Data de registro<select name="integridadeData" defaultValue={discovery.recordedValidity}><option value="all">Todas</option><option value="valid">Data válida</option><option value="invalid">Data indisponível</option></select></label>
            <label>Ano de liberação<select name="anoLiberacao" defaultValue={discovery.releaseYear}><option value="all">Todos</option>{releaseYears.map(year=><option key={year} value={year}>{year}</option>)}</select></label>
            <label>Mês de liberação<select name="mesLiberacao" defaultValue={discovery.releaseMonth}><option value="all">Todos</option>{PRIVATE_FILE_DISCOVERY_MONTHS.map(month=><option key={month} value={month}>{month}</option>)}</select></label>
+           <label>Disponibilidade do nome<select name="nome" defaultValue={discovery.namePresence}><option value="all">Todos</option><option value="named">Com nome</option><option value="unnamed">Sem nome</option></select></label>
+           <label>Data de liberação<select name="estadoLiberacao" defaultValue={discovery.releaseState}><option value="all">Todas</option><option value="valid">Válida</option><option value="missing">Ausente</option><option value="invalid">Inválida</option></select></label>
            <label>Ordenação
             <select name="ordem" defaultValue={order.value}>
               <option value="newest">Mais recentes</option>
@@ -183,7 +185,7 @@ export default async function AdminClientFilesPage({
               <option value="largest">Maiores arquivos</option>
               <option value="smallest">Menores arquivos</option>
               <option value="kind">Por categoria</option>
-              <option value="released">Disponibilizados mais recentemente</option><option value="name-asc">Nome A–Z</option><option value="name-desc">Nome Z–A</option><option value="mime">Tipo MIME</option>
+              <option value="released">Disponibilizados mais recentemente</option><option value="released-oldest">Disponibilizados há mais tempo</option><option value="name-asc">Nome A–Z</option><option value="name-desc">Nome Z–A</option><option value="mime">Tipo MIME</option>
             </select>
           </label>
           <button type="submit">Filtrar</button>
