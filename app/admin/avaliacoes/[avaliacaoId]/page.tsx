@@ -240,6 +240,13 @@ export default async function AdminAvaliacaoDetailPage({
         activeArea="avaliacoes"
         clientId={assessment.client_id}
       />
+      <nav aria-label="Continuidade do atendimento após avaliação" className={styles.continuityNav}>
+        <Link href={`/admin/clientes/${assessment.client_id}/avaliacoes#historico-finalizado`}>Histórico de avaliações</Link>
+        <Link href={`/admin/clientes/${assessment.client_id}/evolucao`}>Evolução das medidas</Link>
+        <Link href="#acompanhamento">{isDraft ? "Acompanhamento após finalização" : "Registrar acompanhamento"}</Link>
+        <Link href="#historico-profissional">Decisões registradas ({followUps.length})</Link>
+        <Link href={`/admin/clientes/${assessment.client_id}/protocolos`}>Protocolos da cliente</Link>
+      </nav>
       <PageSectionNav
         items={[
           ...(isDraft
