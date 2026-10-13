@@ -7,7 +7,7 @@ const read = (p: string) => readFileSync(new URL("../../" + p, import.meta.url),
 test("factual assessment history uses shared chronological ordering and preserves source IDs", () => {
   const history = read("app/cliente/avaliacoes/page.tsx");
   const helper = read("lib/evaluations/progress-journey.ts");
-  assert.ok(history.includes("completeClientAssessmentHistory(historical, rows)"));
+  assert.ok(history.includes("completeClientAssessmentHistory(assessmentHistory.headers, assessmentHistory.measurements)"));
   assert.ok(read("lib/evaluations/client-assessment-history.ts").includes("newestFactualAssessments("));
   assert.ok(helper.includes("Date.parse(left.assessedAt)"));
   assert.ok(helper.includes("Date.parse(right.assessedAt)"));
@@ -55,7 +55,7 @@ test("professional evolution retains authorized detail links and effective corre
 test("client assessment and evolution read only finalized effective measurements", () => {
   for (const path of ["app/cliente/avaliacoes/page.tsx","app/cliente/evolucao/page.tsx"]) {
     const source = read(path);
-    assert.ok(source.includes("listCurrentClientFinalizedAssessmentMeasurements()"));
+    assert.ok(source.includes(path === "app/cliente/avaliacoes/page.tsx" ? "listCurrentClientFinalizedAssessmentHistory()" : "listCurrentClientFinalizedAssessmentMeasurements()"));
     assert.ok(!source.includes("createAdminClient"));
     assert.ok(!source.includes("assessment_measurement_corrections"));
   }
