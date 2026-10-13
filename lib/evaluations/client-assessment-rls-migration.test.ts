@@ -12,7 +12,7 @@ const access = readFileSync(new URL("../supabase/data-access.ts", import.meta.ur
 test("client-facing RPC exposes only id and dates, not professional metadata", () => {
   assert.match(sql, /returns table\s*\(\s*id uuid,\s*assessed_at timestamptz,\s*finalized_at timestamptz\s*\)/i);
   assert.doesNotMatch(sql, /create policy|on public\.assessment_measurements|grant select/i);
-  assert.match(page, /listCurrentClientFinalizedAssessmentHeaders\(\)/);
+  assert.match(page, /listCurrentClientFinalizedAssessmentHistory\\(\\)/);
   assert.doesNotMatch(page, /listAccessibleAssessmentsForClient\(/);
   assert.match(access, /list_current_client_finalized_assessment_headers/);
 });
