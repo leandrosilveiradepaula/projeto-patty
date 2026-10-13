@@ -8,7 +8,7 @@ import { buildProtocolCloneSnapshot } from "@/lib/protocol/clone-snapshot";
 import { parseProtocolDraftDoseQuantity } from "@/lib/protocol/dose-entry";
 import { parseOriginalDraftLabel, parseOriginalDraftDoseQuantity, parseOriginalDraftDoseType, parseOriginalDraftId, parseOriginalDraftPosition, parseOriginalVariantKey } from "@/lib/protocol/draft-snapshots";
 import { applyDraftCycleOperation, parseDraftCycleSteps, sameDraftCycleSteps } from "@/lib/protocol/cycle-editor";
-import { protocolCycleEditFailureMessage } from "@/lib/protocol/cycle-edit-error";
+import { protocolCycleEditFailureMessage, draftCycleWriterReadiness } from "@/lib/protocol/cycle-edit-error";
 import { isUuid } from "@/lib/validation/uuid";
 import { readSingleStringFormValue, isSingleConfirmedFormValue } from "@/lib/validation/form-fields";
 import {
@@ -23,6 +23,7 @@ import {
   createAccessibleMealPlanVariant,
   createAccessibleMealPlanVersion,
   createAccessibleMealPlanCycle,
+  probeDraftCycleWriter,
   replaceAccessibleDraftMealPlanCycleSteps,
   deleteAccessibleEmptyMealPlanCycle,
   deleteAccessibleEmptyMeal,
@@ -599,6 +600,13 @@ export async function addProtocolMealPlanCycle(
   const plans = await listAccessibleProtocolVersionMealPlans([protocolVersionId]);
   if (!plans.some((plan) => plan.id === mealPlanVersionId)) {
     return { success: false, message: "O plano alimentar não está acessível." };
+  }
+  // Avoid creating a stranded empty cycle when the atomic editor RPC is not deployed.
+  const writerStatus = draftCycleWriterReadiness(await probeDraftCycleWriter());
+  if (writerStatus !== "available") {
+    return { success: false, message: writerStatus === "missing"
+      ? "O editor de ciclos ainda não está disponível no banco. Nenhum ciclo foi criado; solicite a atualização técnica."
+      : "Não foi possível verificar a disponibilidade do editor de ciclos. Nenhum ciclo foi criado; tente novamente após a verificação técnica." };
   }
   try {
     await createAccessibleMealPlanCycle({ clientId: accessible.protocol.client_id, mealPlanVersionId });
