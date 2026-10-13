@@ -195,15 +195,14 @@ export default async function AdminClientProgressPage({ params, searchParams }: 
                           </td>
                           <td data-label="Avaliação e acompanhamento">
                             <div className={styles.observationActions}>
-                            <Link
+                              <Link
                               aria-label={`Abrir avaliação de ${formatAdministrativeAssessmentDate(point.assessedAt)} para ${item.label}`}
                               className={styles.detailLink}
                               href={"/admin/avaliacoes/" + point.assessmentId}
                             >
                               Abrir avaliação
                             </Link>
-                            {" · "}
-                            <Link
+                              <Link
                               aria-label={`Consultar acompanhamento da avaliação de ${formatAdministrativeAssessmentDate(point.assessedAt)}`}
                               className={styles.detailLink}
                               href={"/admin/avaliacoes/" + point.assessmentId + "#historico-profissional"}
