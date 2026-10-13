@@ -1,3 +1,4 @@
+import { PENDING_AREA_OPTIONS, countPendingAreas } from "@/lib/operations/pending-area-filter";
 import { readPendingExplorerQuery, explorePendingClientQueue, pendingExplorerGroupHref } from "@/lib/operations/pending-explorer";
 import { Button } from "@/components/ui/Button";
 import { Alert } from "@/components/ui/Alert";
@@ -55,7 +56,7 @@ function PendingList({
   );
 }
 
-export default async function AdminPendenciasPage({ searchParams }: { searchParams: Promise<{ grupo?: string; q?: string; tipo?: string }> }) {
+export default async function AdminPendenciasPage({ searchParams }: { searchParams: Promise<{ grupo?: string; q?: string; tipo?: string; area?: string }> }) {
   const rawQuery = await searchParams;
   const focusedGroup = parsePendingQueueFocus(rawQuery.grupo);
   const allItems = await getOperationalPendingItemsForCurrentAdmin();
@@ -63,6 +64,7 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
     .sort((a,b)=>a.label.localeCompare(b.label,"pt-BR"));
   const filters = readPendingExplorerQuery(rawQuery,kindOptions.map(item=>item.kind));
   const items = explorePendingClientQueue(allItems,filters);
+  const areaCounts=countPendingAreas(explorePendingClientQueue(allItems,{...filters,area:null}));
   const grouped = groupOperationalPendingItems(items);
 
   return (
@@ -85,9 +87,15 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
               {kindOptions.map(option=><option key={option.kind} value={option.kind}>{option.label}</option>)}
             </select>
           </label>
+          <label>Área operacional
+            <select name="area" defaultValue={filters.area??"all"}>
+              <option value="all">Todas as áreas</option>
+              {PENDING_AREA_OPTIONS.map(option=><option key={option.value} value={option.value}>{option.label} ({areaCounts.get(option.value)??0})</option>)}
+            </select>
+          </label>
           {focusedGroup ? <input type="hidden" name="grupo" value={focusedGroup}/> : null}
           <Button type="submit" variant="secondary">Filtrar</Button>
-          {filters.query || filters.kind!=="all" ? <Link href="/admin/pendencias">Limpar</Link> : null}
+          {filters.query || filters.kind!=="all" || filters.area ? <Link href="/admin/pendencias">Limpar</Link> : null}
         </form>
         <p role="status">Exibindo {items.length} de {allItems.length} pendência(s).</p>
         {filters.invalid ? <Alert variant="info" title="Consulta ajustada">Um parâmetro inválido foi ignorado. Exibimos apenas pendências autorizadas.</Alert> : null}
@@ -117,7 +125,7 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
         ) : null}
         {items.length === 0 ? (
           <EmptyState
-            description={allItems.length===0 ? "Nenhuma ação da Patty, espera de cliente ou pendência operacional consta nesta fila no momento." : "Nenhuma pendência corresponde aos filtros atuais."}
+            description={allItems.length===0 ? "Nenhuma ação da Patty, espera de cliente ou pendência operacional consta nesta fila no momento." : "Nenhuma pendência corresponde aos filtros atuais. Você pode limpar os filtros para consultar a fila completa."}
             title={allItems.length===0 ? "Tudo em dia" : "Nenhum resultado"}
           />
         ) : (
