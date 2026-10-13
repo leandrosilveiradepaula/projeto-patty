@@ -24,7 +24,7 @@ test("admin Check-ins date filter also applies to activity history", () => {
   const page = read("app/admin/clientes/[clienteId]/checkins/page.tsx");
   assert.match(page, /listAccessibleClientActivityCheckinEvents\(client\.id, selectedDay \?\? undefined\)/);
   assert.match(page, /const recentActivityEvents = activityEvents;/);
-  assert.match(page, /exploreActivityCheckins\(recentActivityEvents/);
+  assert.match(page, /exploreActivityCheckins\(effectiveActivityEvents/);
   assert.match(page, /name="historyDay" type="hidden" value=\{selectedDay\}/);
 });
 
