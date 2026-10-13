@@ -32,3 +32,14 @@ test("both training item mutations validate every input before persistence", () 
 test("training item insertion guards against unsafe position values", () => {
   assert.match(add, /!Number\.isSafeInteger\(nextPosition\) \|\| nextPosition < 1/);
 });
+
+
+test("review, publication and deletion require unique explicit confirmation", () => {
+  const forms=readFileSync(new URL("../../components/admin/AdminTrainingPlanLifecycleAction.tsx",import.meta.url),"utf8");
+  for(const [field,call] of [["confirmReview","reviewAccessibleClientTrainingPlanVersion"],["confirmPublish","publishAccessibleClientTrainingPlanVersion"],["confirmDelete","deleteAccessibleClientTrainingPlanItem"]]) {
+    const guard=source.indexOf('isSingleConfirmedFormValue('+ (field==="confirmDelete"?"formData":"_formData") +', "'+field+'")');
+    const mutation=source.indexOf("await "+call+"(");
+    assert.ok(guard>=0 && guard<mutation,field);
+    assert.ok(forms.includes('"'+field+'"'));
+  }
+});

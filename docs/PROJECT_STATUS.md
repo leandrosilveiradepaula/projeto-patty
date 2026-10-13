@@ -1,3 +1,7 @@
+## Esteira 53 — confirmação no servidor para treino individual (2026-10-13)
+
+Revisão, publicação e remoção de exercício em rascunho agora exigem confirmação explícita e única verificada pela server action, além da UI; os campos textuais/UUID/posição rejeitam parâmetros repetidos ou arquivos em operações de edição. Preserva revisão e publicação manuais da Patty, histórico de versões, RLS e ausência de automação clínica. Sem alteração de schema, migrations, dados reais ou autorização. Testes e CI não comprovam homologação autenticada.
+
 ## Esteira 52 — confiabilidade dos lembretes semanais por email (2026-10-13)
 
 Links de Feedback Semanal enviados pelo worker Gmail usam a origem confiável configurada para o aplicativo, resolvida antes de reivindicar qualquer tentativa; não dependem do host da requisição ao cron. Se SMTP estiver ausente o endpoint autenticado retorna 503 com `configured=false`; se um lote tiver falhas de envio retorna 207 e contagens auditáveis, não sucesso integral. Nenhum destinatário, agenda, regra da Patty, Auth/RLS, dado de cliente ou migration foi alterado. CI não comprova entrega de email real ou operação do cron em produção.
