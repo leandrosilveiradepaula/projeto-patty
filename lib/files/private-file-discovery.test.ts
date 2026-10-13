@@ -64,3 +64,17 @@ test("oldest release chronology excludes unreleased timestamps from top of sorte
  assert.equal(sort[0].id,"d");
  assert.equal(sort[1].id,"a");
 });
+
+test("upload date range boundaries are inclusive and invalid calendar days fail closed to defaults",()=>{
+ const q=readPrivateFileDiscovery({dataInicial:"2026-10-10",dataFinal:"2026-10-10"});
+ assert.equal(q.invalid,false);
+ assert.deepEqual(records.filter(r=>matchesPrivateFileDiscovery(r,q)).map(r=>r.id),["a"]);
+ assert.equal(readPrivateFileDiscovery({dataInicial:"2026-02-30"}).invalid,true);
+ const inverted=readPrivateFileDiscovery({dataInicial:"2026-10-11",dataFinal:"2026-10-10"});
+ assert.equal(inverted.invalid,true);
+ assert.equal(inverted.fromDate,null);
+ assert.equal(inverted.toDate,null);
+ const href=privateFileHistoryHref("/cliente/arquivos",{dataInicial:"2026-10-01",dataFinal:"2026-10-30"});
+ assert.match(href,/dataInicial=2026-10-01/);
+ assert.match(href,/dataFinal=2026-10-30/);
+});
