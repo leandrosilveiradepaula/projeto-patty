@@ -120,6 +120,7 @@ export function AdminTrainingPlanLifecycleAction(props: Props) {
       }
       inFlightRef.current = true;
     }}>
+      <input type="hidden" name={props.mode === "delete" ? "confirmDelete" : props.mode === "review" ? "confirmReview" : "confirmPublish"} value="yes" />
       {props.mode === "delete" ? (
         <>
           <input name="expectedName" type="hidden" value={props.expectedItem.exerciseName} />
