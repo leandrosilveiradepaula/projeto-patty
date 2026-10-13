@@ -86,6 +86,11 @@ export default async function AdminClientProgressPage({ params, searchParams }: 
       />
 
       <ClientWorkspaceNav activeArea="evolucao" clientId={client.id} />
+      <nav aria-label="Continuidade após consultar evolução" className={styles.measureNavigation}>
+        <Link href={`/admin/clientes/${client.id}/avaliacoes#historico-finalizado`}>Histórico de avaliações</Link>
+        <Link href={`/admin/clientes/${client.id}/avaliacoes#nova-avaliacao`}>Nova avaliação</Link>
+        <Link href={`/admin/clientes/${client.id}/protocolos`}>Protocolos da cliente</Link>
+      </nav>
 
       {(observationWindow.invalid || measureSelection.invalid) ? (
         <Alert title="Filtro indisponível" variant="info">Um filtro não é válido. Exibimos somente dados autorizados com a seleção padrão.</Alert>
@@ -175,7 +180,7 @@ export default async function AdminClientProgressPage({ params, searchParams }: 
                         <th>Data</th>
                         <th>Valor</th>
                         <th>Diferença vs. anterior</th>
-                        <th>Avaliação</th>
+                        <th>Avaliação e acompanhamento</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -188,13 +193,21 @@ export default async function AdminClientProgressPage({ params, searchParams }: 
                           <td data-label="Diferença vs. anterior">
                             {formatFactualDelta(point.deltaFromPrevious, item.unit)}
                           </td>
-                          <td data-label="Avaliação">
+                          <td data-label="Avaliação e acompanhamento">
                             <Link
                               aria-label={`Abrir avaliação de ${formatAdministrativeAssessmentDate(point.assessedAt)} para ${item.label}`}
                               className={styles.detailLink}
                               href={"/admin/avaliacoes/" + point.assessmentId}
                             >
-                              Abrir
+                              Abrir avaliação
+                            </Link>
+                            {" · "}
+                            <Link
+                              aria-label={`Consultar acompanhamento da avaliação de ${formatAdministrativeAssessmentDate(point.assessedAt)}`}
+                              className={styles.detailLink}
+                              href={"/admin/avaliacoes/" + point.assessmentId + "#historico-profissional"}
+                            >
+                              Histórico profissional
                             </Link>
                           </td>
                         </tr>
