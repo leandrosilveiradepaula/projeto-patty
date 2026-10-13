@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import styles from "@/app/admin/clientes/[clienteId]/treino/page.module.css";
 
-export type TrainingWorkspaceStage = "request" | "compose" | "publish" | "published";
+export type TrainingWorkspaceStage = "request" | "compose" | "review" | "publish" | "published";
 
 type Props = {
   exerciseCount: number;
@@ -17,13 +17,15 @@ const stages = [
 ] as const;
 
 export function AdminTrainingWorkflowOverview({ stage, exerciseCount }: Props) {
-  const activeIndex = stage === "request" ? 0 : stage === "compose" ? 1 : 3;
-  const completedThrough = stage === "published" ? 3 : stage === "publish" ? 2 : stage === "compose" ? 0 : -1;
+  const activeIndex = stage === "request" ? 0 : stage === "compose" ? 1 : stage === "review" ? 2 : 3;
+  const completedThrough = stage === "published" ? 3 : stage === "publish" ? 2 : stage === "review" ? 1 : stage === "compose" ? 0 : -1;
   const next = stage === "request"
     ? { label: "Registrar solicitação", href: "#solicitacao-treino" }
     : stage === "compose"
       ? { label: "Continuar montagem do treino", href: "#prescricao-treino" }
-      : stage === "publish"
+      : stage === "review"
+        ? { label: "Conferir antes de revisar", href: "#conferencia-treino" }
+        : stage === "publish"
         ? { label: "Conferir versão antes de publicar", href: "#publicar-treino" }
         : { label: "Consultar versões publicadas", href: "#historico-versoes-treino" };
 
@@ -52,7 +54,7 @@ export function AdminTrainingWorkflowOverview({ stage, exerciseCount }: Props) {
           );
         })}
       </ol>
-      {stage === "compose" ? (
+      {(stage === "compose" || stage === "review") ? (
         <p className={styles.workflowHint} role="status">
           {exerciseCount === 0
             ? "O rascunho ainda não tem exercícios. Adicione e confira os itens antes de solicitar a revisão."
