@@ -227,7 +227,7 @@ export default async function AdminPage() {
         </Section>
       ) : null}
       {recoveryTasks.length > 0 ? (
-        <Section title="Pendências que exigem recuperação" description="Atalhos para registros técnicos já identificados na fila autorizada. A ordem não representa prioridade clínica.">
+        <Section title="Pendências que exigem recuperação" description="Atalhos para registros técnicos já identificados na fila autorizada. A ordem não representa prioridade clínica." action={<Link className={styles.sectionLink} href={pendingQueueLinks.operational}>Ver fila operacional</Link>}>
           <ol className={styles.pendingPreviewList}>
             {recoveryTasks.map(item => (
               <li key={item.id}>
@@ -236,7 +236,10 @@ export default async function AdminPage() {
                   description={item.description}
                   meta={`${item.clientLabel} · ${formatDateTime(item.createdAt)}`}
                   status={<Badge variant="warning">{item.statusLabel}</Badge>}
-                  action={<Link className={styles.metricLink} href={item.href}>Abrir recuperação</Link>}
+                  action={<div className={styles.pendingActions}>
+                    <Link className={styles.metricLink} href={item.href}>Abrir recuperação</Link>
+                    {item.clientId ? <Link className={styles.secondaryLink} href={`/admin/clientes/${item.clientId}`}>Ver cliente</Link> : null}
+                  </div>}
                 />
               </li>
             ))}
