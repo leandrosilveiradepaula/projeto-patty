@@ -86,7 +86,7 @@ test("assessment disclosure does not bypass finalized client data access or prof
   const progress = read("app/cliente/evolucao/page.tsx");
   const disclosure = read("components/client/ClientHistoryDisclosure.tsx");
   for (const source of [history, progress]) {
-    assert.ok(source.includes("listCurrentClientFinalizedAssessmentMeasurements()"));
+    assert.ok(source.includes(source === history ? "listCurrentClientFinalizedAssessmentHistory()" : "listCurrentClientFinalizedAssessmentMeasurements()"));
     assert.ok(!source.includes("createAdminClient"));
     assert.ok(!source.includes("assessment_measurement_corrections"));
   }

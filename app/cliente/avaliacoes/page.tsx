@@ -3,6 +3,7 @@ import { readAssessmentExplorer, exploreAssessmentMeasures, assessmentExplorerHr
 import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
 import { ClientAssessmentHistoryDisclosure } from "./ClientAssessmentHistoryDisclosure";
 import { Badge } from "@/components/ui/Badge";
+import { Alert } from "@/components/ui/Alert";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -10,7 +11,7 @@ import { Section } from "@/components/ui/Section";
 import Link from "next/link";
 import { formatProfessionalMeasurementLabel } from "@/lib/evaluations/professional-view";
 import { completeClientAssessmentHistory } from "@/lib/evaluations/client-assessment-history";
-import { getCurrentClient, listCurrentClientFinalizedAssessmentHeaders, listCurrentClientFinalizedAssessmentMeasurements } from "@/lib/supabase/data-access";
+import { getCurrentClient, listCurrentClientFinalizedAssessmentHistory } from "@/lib/supabase/data-access";
 
 import styles from "./page.module.css";
 
@@ -33,11 +34,8 @@ function formatNumber(value: number) {
 export default async function ClientAssessmentsPage({searchParams}:{searchParams:Promise<{medidas?:string;pagina?:string;avaliacao?:string}>}) {
   const client = await getCurrentClient();
   if (!client) return <EmptyState title="Cadastro não vinculado" description="Esta conta ainda não está vinculada a um cadastro de cliente." />;
-  const [rows, historical] = await Promise.all([
-    listCurrentClientFinalizedAssessmentMeasurements(),
-    listCurrentClientFinalizedAssessmentHeaders(),
-  ]);
-  const items = completeClientAssessmentHistory(historical, rows);
+  const assessmentHistory = await listCurrentClientFinalizedAssessmentHistory();
+  const items = completeClientAssessmentHistory(assessmentHistory.headers, assessmentHistory.measurements);
   const raw=await searchParams;
   const options=readAssessmentExplorer(raw);
   const exact=authorizedExactRecordPage(items,raw.avaliacao,12);
@@ -51,6 +49,12 @@ export default async function ClientAssessmentsPage({searchParams}:{searchParams
         eyebrow="Cliente"
         title="Avaliações e medidas"
       />
+
+      {!assessmentHistory.complete ? (
+        <Alert variant="warning" live="polite" title="Histórico de avaliações parcialmente disponível">
+          Algumas avaliações finalizadas sem medidas podem não aparecer neste momento. O sistema está exibindo apenas os registros de medidas acessíveis, sem concluir que não existem outras avaliações. Nenhum dado foi alterado.
+        </Alert>
+      ) : null}
 
       <Section
         id="historico-avaliacoes"
@@ -69,7 +73,7 @@ export default async function ClientAssessmentsPage({searchParams}:{searchParams
         {options.invalid||options.page>history.pages?<p role="status">Página ou filtro indisponível; exibindo somente suas avaliações autorizadas.</p>:null}
         {items.length === 0 ? (
           <EmptyState
-            description="Ainda não há avaliações finalizadas disponíveis. Consulte esta área quando houver novas avaliações concluídas pela Patty."
+            description={assessmentHistory.complete ? "Ainda não há avaliações finalizadas disponíveis. Consulte esta área quando houver novas avaliações concluídas pela Patty." : "Nenhuma avaliação com medidas está disponível nesta consulta parcial. Podem existir avaliações finalizadas sem medidas que ainda não aparecem."}
             title="Nenhuma avaliação disponível"
             action={<Link href="/cliente/mais">Ver outras áreas</Link>}
           />

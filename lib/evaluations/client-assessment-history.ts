@@ -9,3 +9,21 @@ export function completeClientAssessmentHistory<T extends ClientAssessmentMeasur
  for(const m of measurements){const row=visible.get(m.assessment_id);if(row)row.measurements.push(m);}
  return newestFactualAssessments([...visible.values()]);
 }
+
+/**
+ * Temporary compatibility path while the finalized-header RPC is unavailable.
+ * Only measured assessments can be derived from the existing authorized
+ * measurement RPC. This is NOT a complete assessment history.
+ */
+export function measurementBackedAssessmentHeaders<T extends ClientAssessmentMeasure>(
+  measurements: readonly T[],
+): ClientAssessmentHistoryVersion[] {
+  return [...new Map(measurements.map((measurement) => [
+    measurement.assessment_id,
+    {
+      id: measurement.assessment_id,
+      assessed_at: measurement.assessed_at,
+      finalized_at: measurement.assessed_at,
+    },
+  ])).values()];
+}

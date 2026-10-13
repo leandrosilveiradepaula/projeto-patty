@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {completeClientAssessmentHistory} from "./client-assessment-history.ts";
+import {completeClientAssessmentHistory, measurementBackedAssessmentHeaders} from "./client-assessment-history.ts";
 test("finalized assessments without any measurement remain visible, drafts do not",()=>{
  const assessments=[
   {id:"older",assessed_at:"2026-09-01T10:00:00Z",finalized_at:"2026-09-01T11:00:00Z"},
@@ -21,4 +21,16 @@ test("finalized assessments without any measurement remain visible, drafts do no
 test("no disclosed finalized assessment is invented from out-of-scope measurements",()=>{
  const rows=completeClientAssessmentHistory([], [{assessment_id:"other",assessed_at:"2026-10-01T10:00:00Z"}]);
  assert.deepEqual(rows,[]);
+});
+
+test("compatibility fallback includes only measured assessments and never invents unmeasured headers",()=>{
+ const rows=[
+  {assessment_id:"first",assessed_at:"2026-09-10T12:00:00Z"},
+  {assessment_id:"first",assessed_at:"2026-09-10T12:00:00Z"},
+  {assessment_id:"second",assessed_at:"2026-09-11T12:00:00Z"},
+ ];
+ const headers=measurementBackedAssessmentHeaders(rows);
+ assert.deepEqual(headers.map(h=>h.id),["first","second"]);
+ assert.deepEqual(completeClientAssessmentHistory(headers,rows).map(h=>h.id),["second","first"]);
+ assert.deepEqual(measurementBackedAssessmentHeaders([]),[]);
 });
