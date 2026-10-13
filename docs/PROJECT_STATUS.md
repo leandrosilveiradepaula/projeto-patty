@@ -1,3 +1,7 @@
+## Consulta guiada do protocolo alimentar publicado — 2026-10-13
+
+A cliente dispõe de leitor focado de uma variação por vez, navegação anterior/próxima e seleção direta, com opção de exibir todas as variações. Links dos ciclos e da pesquisa continuam vinculados às âncoras da variação/refeição do snapshot autorizado, inclusive com foco acessível. O navegador é responsivo e não grava preferência de fase, progresso ou adesão; não associa etapa a dia da semana nem escolhe orientação profissional. Histórico e comparação de publicações permanecem. Sem migrations, regras clínicas ou alteração de dados. Homologação autenticada em dispositivos reais ainda é etapa distinta do CI.
+
 ## Jornada profissional de protocolos alimentares — 2026-10-13
 
 O workspace da Patty agora apresenta etapas factuais de montagem, submissão, aprovação e publicação da versão, com navegação para conferência e ação profissional. O editor apresenta variações, refeições/doses e depois ciclos, deixando renomeações opcionais recolhidas para reduzir ruído visual. O mapa prévio de pendências e o snapshot de conferência permanecem. Nenhuma regra matemática, dose, meta, fase, automação clínica ou autorização foi alterada; ações finais ainda dependem de confirmação explícita da Patty. CI não comprova E2E autenticado.
