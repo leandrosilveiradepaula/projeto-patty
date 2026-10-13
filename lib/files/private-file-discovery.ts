@@ -6,6 +6,8 @@ export type FileMimeFamily = "all" | "image" | "pdf" | "video" | "audio" | "othe
 export type FileRecordedValidity = "all" | "valid" | "invalid";
 export type PrivateFileDiscovery = {
   month: string;
+  fromDate: string | null;
+  toDate: string | null;
   minKb: number | null;
   maxKb: number | null;
   mimeFamily: FileMimeFamily;
@@ -37,15 +39,23 @@ function kilo(raw: unknown) : {value:number|null;invalid:boolean} {
   const value=Number(raw);
   return Number.isSafeInteger(value)&&value<=2097151?{value,invalid:false}:{value:null,invalid:true};
 }
+function safeDay(raw:unknown):{value:string|null;invalid:boolean}{
+  if(raw===undefined||raw==="")return {value:null,invalid:false};
+  if(typeof raw!=="string"||!/^\d{4}-\d{2}-\d{2}$/.test(raw))return {value:null,invalid:true};
+  const date=new Date(raw+"T00:00:00Z");
+  return Number.isFinite(date.getTime())&&date.toISOString().slice(0,10)===raw?{value:raw,invalid:false}:{value:null,invalid:true};
+}
 export function privateFileReleaseYears(rows:readonly {client_visible_at:string|null}[]):string[]{
   return [...new Set(rows.map(row=>row.client_visible_at).filter((value):value is string=>typeof value==="string"&&Number.isFinite(Date.parse(value)))
     .map(value=>new Date(value).getUTCFullYear().toString()))].sort().reverse();
 }
 export function readPrivateFileDiscovery(raw:{
-  mes?:unknown;minKb?:unknown;maxKb?:unknown;grupoMime?:unknown;integridadeData?:unknown;
+  mes?:unknown;dataInicial?:unknown;dataFinal?:unknown;minKb?:unknown;maxKb?:unknown;grupoMime?:unknown;integridadeData?:unknown;
   anoLiberacao?:unknown;mesLiberacao?:unknown;nome?:unknown;estadoLiberacao?:unknown;
 }, allowedReleaseYears:readonly string[]=[]):PrivateFileDiscovery {
   const month=select(raw.mes,months), min=kilo(raw.minKb), max=kilo(raw.maxKb);
+  const from=safeDay(raw.dataInicial), to=safeDay(raw.dataFinal);
+  const invertedDays=from.value!==null&&to.value!==null&&from.value>to.value;
   const mime=select(raw.grupoMime,mimeFamilies),validity=select(raw.integridadeData,validityValues);
   const releaseYear=select(raw.anoLiberacao,allowedReleaseYears);
   const releaseMonth=select(raw.mesLiberacao,months);
@@ -53,12 +63,12 @@ export function readPrivateFileDiscovery(raw:{
   const releaseState=select(raw.estadoLiberacao,["all","valid","missing","invalid"]);
   const backwards=min.value!==null&&max.value!==null&&min.value>max.value;
   return {
-    month:month.value,minKb:backwards?null:min.value,maxKb:backwards?null:max.value,
+    month:month.value,fromDate:invertedDays?null:from.value,toDate:invertedDays?null:to.value,minKb:backwards?null:min.value,maxKb:backwards?null:max.value,
     mimeFamily:mime.value as FileMimeFamily,recordedValidity:validity.value as FileRecordedValidity,
     releaseYear:releaseYear.value,releaseMonth:releaseMonth.value,
     namePresence:name.value as PrivateFileDiscovery["namePresence"],
     releaseState:releaseState.value as PrivateFileDiscovery["releaseState"],
-    invalid:month.invalid||min.invalid||max.invalid||mime.invalid||validity.invalid||releaseYear.invalid||releaseMonth.invalid||name.invalid||releaseState.invalid||backwards,
+    invalid:month.invalid||min.invalid||max.invalid||mime.invalid||validity.invalid||releaseYear.invalid||releaseMonth.invalid||name.invalid||releaseState.invalid||backwards||from.invalid||to.invalid||invertedDays,
   };
 }
 function actualMimeFamily(value:string|null):Exclude<FileMimeFamily,"all"> {
@@ -75,6 +85,8 @@ export function matchesPrivateFileDiscovery(file:PrivateFileDiscoverySource,quer
   const created=Date.parse(file.created_at);
   const valid=Number.isFinite(created);
   if(query.recordedValidity!=="all"&&valid!==(query.recordedValidity==="valid"))return false;
+  if(query.fromDate!==null&&(!valid||new Date(created).toISOString().slice(0,10)<query.fromDate))return false;
+  if(query.toDate!==null&&(!valid||new Date(created).toISOString().slice(0,10)>query.toDate))return false;
   if(query.month!=="all"&&(!valid||new Date(created).getUTCMonth()+1!==Number(query.month)))return false;
   const bytes=file.byte_size;
   const known=typeof bytes==="number"&&Number.isSafeInteger(bytes)&&bytes>=0;
