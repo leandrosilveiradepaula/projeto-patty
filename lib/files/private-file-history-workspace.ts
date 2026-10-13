@@ -159,6 +159,13 @@ export type PrivateFileHistoryUrlState = {
   visualizacao?: PrivateFileViewFilter;
   ordem?: PrivateFileHistorySort;
   ano?: string;
+  mes?: string;
+  minKb?: number | null;
+  maxKb?: number | null;
+  grupoMime?: string;
+  integridadeData?: string;
+  anoLiberacao?: string;
+  mesLiberacao?: string;
   tamanho?: "all" | "known" | "unknown";
   pagina?: number;
   paginaPendentes?: number;
@@ -175,6 +182,12 @@ export function privateFileHistoryHref(basePath: string, state: PrivateFileHisto
   if (state.visualizacao && state.visualizacao !== "all") params.set("visualizacao", state.visualizacao);
   if (state.ordem && state.ordem !== "newest") params.set("ordem", state.ordem);
   if (state.ano && /^\d{4}$/.test(state.ano)) params.set("ano", state.ano);
+  if (state.mes && /^(0[1-9]|1[0-2])$/.test(state.mes)) params.set("mes", state.mes);
+  for (const field of ["minKb","maxKb"] as const) { const v = state[field]; if (typeof v === "number" && Number.isSafeInteger(v) && v >= 0 && v <= 2097151) params.set(field,String(v)); }
+  if (state.grupoMime && ["image","pdf","video","audio","other","unknown"].includes(state.grupoMime)) params.set("grupoMime",state.grupoMime);
+  if (state.integridadeData && ["valid","invalid"].includes(state.integridadeData)) params.set("integridadeData",state.integridadeData);
+  if (state.anoLiberacao && /^\d{4}$/.test(state.anoLiberacao)) params.set("anoLiberacao",state.anoLiberacao);
+  if (state.mesLiberacao && /^(0[1-9]|1[0-2])$/.test(state.mesLiberacao)) params.set("mesLiberacao",state.mesLiberacao);
   if (state.tamanho && state.tamanho !== "all" && (state.tamanho === "known" || state.tamanho === "unknown")) params.set("tamanho", state.tamanho);
   const pages = ["pagina", "paginaPendentes", "paginaHistorico"] as const;
   for (const name of pages) {
