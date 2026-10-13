@@ -194,6 +194,7 @@ export default async function AdminClientProgressPage({ params, searchParams }: 
                             {formatFactualDelta(point.deltaFromPrevious, item.unit)}
                           </td>
                           <td data-label="Avaliação e acompanhamento">
+                            <div className={styles.observationActions}>
                             <Link
                               aria-label={`Abrir avaliação de ${formatAdministrativeAssessmentDate(point.assessedAt)} para ${item.label}`}
                               className={styles.detailLink}
@@ -209,6 +210,7 @@ export default async function AdminClientProgressPage({ params, searchParams }: 
                             >
                               Histórico profissional
                             </Link>
+                            </div>
                           </td>
                         </tr>
                       ))}
