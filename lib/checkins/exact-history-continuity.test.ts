@@ -29,7 +29,7 @@ test("client always renders the paged activity history, including today, for exa
   assert.match(page,/title=\{selectedDay === today \? "Histórico de atividade física de hoje"/);
   assert.doesNotMatch(page,/\{selectedDay !== today \? \(\s*<Section\s+description="Respostas factuais do dia escolhido/);
   assert.match(page,/id=\{\x60atividade-\$\{event.id\}\x60\}/);
-  assert.match(page,/exactActivity=authorizedExactRecordPage/);
+  assert.match(page,/resolveCheckinExactTarget\(effectiveActivityEvents/);
   assert.match(page,/exploredActivities\.items\.map/);
 });
 
