@@ -129,7 +129,7 @@ export function paginateCheckinEvents<T>(events: readonly T[], requestedPage: nu
 export function checkinExploreHref(base: string, query: Record<string, string | undefined>, patch: Record<string, string>) {
   const search = new URLSearchParams();
   for (const [key, val] of Object.entries({ ...query, ...patch })) {
-    if (val && val !== "all" && val !== "1") search.set(key, val);
+    if (val && val !== "all" && !((key === "lp" || key === "ap") && val === "1")) search.set(key, val);
   }
   return base + (search.size ? "?" + search.toString() : "");
 }
