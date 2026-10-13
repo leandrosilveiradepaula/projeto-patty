@@ -9,6 +9,7 @@ const secret = process.env.E2E_SUPABASE_SECRET_KEY;
 const email = process.env.E2E_CANONICAL_EMAIL;
 const password = process.env.E2E_CANONICAL_PASSWORD;
 const profileId = process.env.E2E_CANONICAL_PROFILE_ID;
+const expectedAssessmentId = process.env.E2E_SYNTHETIC_FINALIZED_ASSESSMENT_ID;
 
 if (!baseUrl || !url || !secret || !email || !password || !profileId) {
   throw new Error("Post-migration smoke requires the canonical synthetic E2E environment.");
@@ -35,8 +36,13 @@ test("cliente sintética consulta histórico completo sem alerta de schema pende
   await expect(
     page.getByText("Histórico de avaliações parcialmente disponível"),
   ).toHaveCount(0);
-  // A disposable newly created client must not inherit another client's history.
-  await expect(page.getByRole("heading", { name: "Nenhuma avaliação disponível" })).toBeVisible();
+  // A synthetic fixture can additionally prove that unmeasured finalized records are displayed.
+  if (expectedAssessmentId) {
+    await expect(page.locator(`#avaliacao-${expectedAssessmentId}`)).toHaveCount(1);
+    await expect(page.getByText("Avaliação finalizada, sem medidas disponíveis para consulta.")).toBeVisible();
+  } else {
+    await expect(page.getByRole("heading", { name: "Nenhuma avaliação disponível" })).toBeVisible();
+  }
 });
 
 test("cliente sintética lê somente seu histórico e não pode editar ciclo inexistente", async () => {
@@ -53,7 +59,11 @@ test("cliente sintética lê somente seu histórico e não pode editar ciclo ine
   try {
     const headers = await client.rpc("list_current_client_finalized_assessment_headers");
     expect(headers.error).toBeNull();
-    expect(headers.data).toEqual([]);
+    if (expectedAssessmentId) {
+      expect(headers.data.some(row => row.id === expectedAssessmentId)).toBe(true);
+    } else {
+      expect(headers.data).toEqual([]);
+    }
 
     // Nonexistent UUIDs guarantee no client, draft or meal plan is modified.
     // P0002 is raised only after the authenticated RPC has been reached.
