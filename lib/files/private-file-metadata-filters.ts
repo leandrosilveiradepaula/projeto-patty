@@ -1,3 +1,4 @@
+import { privateFileSaoPauloDay, privateFileSaoPauloYear } from "./private-file-calendar.ts";
 /**
  * Presentation-only discovery of already-authorized private-file metadata.
  * Neither this module nor its query strings convey filenames or access tokens.
@@ -5,8 +6,7 @@
 export type PrivateFileSizeCompleteness = "all" | "known" | "unknown";
 export type PrivateFileMetadataFilters = { year: string; size: PrivateFileSizeCompleteness; invalid: boolean };
 export function privateFileRecordYear(value: string): string | null {
-  if (!Number.isFinite(Date.parse(value))) return null;
-  return new Date(value).getUTCFullYear().toString();
+  return privateFileSaoPauloYear(value);
 }
 export function availablePrivateFileYears(rows: readonly { created_at: string }[]): string[] {
   return [...new Set(rows.map(row=>privateFileRecordYear(row.created_at)).filter((year):year is string=>year!==null))]
