@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 
 import {
   type PasswordRecoveryRequestState,
@@ -10,6 +10,7 @@ import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/FormField";
 import { TextInput } from "@/components/ui/TextInput";
+import { validateInvitationEmail } from "@/lib/onboarding/validation";
 
 import styles from "./PasswordRecoveryRequestForm.module.css";
 
@@ -23,6 +24,15 @@ export function PasswordRecoveryRequestForm() {
     requestPasswordRecovery,
     initialState,
   );
+
+  const [email, setEmail] = useState("");
+  const [emailTouched, setEmailTouched] = useState(false);
+  const inFlightRef = useRef(false);
+  const emailValid = validateInvitationEmail(email).ok;
+
+  useEffect(() => {
+    if (!isPending) inFlightRef.current = false;
+  }, [isPending, state]);
 
   if (state.success) {
     return (
@@ -43,7 +53,14 @@ export function PasswordRecoveryRequestForm() {
   }
 
   return (
-    <form action={formAction} aria-busy={isPending} className={styles.form}>
+    <form action={formAction} aria-busy={isPending} className={styles.form} onSubmit={(event) => {
+      setEmailTouched(true);
+      if (inFlightRef.current || isPending || !emailValid) {
+        event.preventDefault();
+        return;
+      }
+      inFlightRef.current = true;
+    }}>
       {state.message ? (
         <Alert
           live="assertive"
@@ -53,7 +70,12 @@ export function PasswordRecoveryRequestForm() {
           {state.message}
         </Alert>
       ) : null}
-      <FormField id="recovery-email" label="Email" required>
+      <FormField
+        id="recovery-email"
+        label="Email"
+        required
+        error={emailTouched && !emailValid ? "Informe um email de acesso válido." : undefined}
+      >
         {(fieldProps) => (
           <TextInput
             {...fieldProps}
@@ -61,14 +83,17 @@ export function PasswordRecoveryRequestForm() {
             inputMode="email"
             maxLength={254}
             name="email"
+            onBlur={() => setEmailTouched(true)}
+            onChange={(event) => setEmail(event.target.value)}
+            value={email}
             disabled={isPending}
             required
             type="email"
           />
         )}
       </FormField>
-      {isPending ? <p role="status">Aguarde a confirmação antes de tentar novamente.</p> : null}
-      <Button loading={isPending} type="submit">
+      {isPending ? <p role="status">Registrando a solicitação. Não envie novamente.</p> : null}
+      <Button disabled={isPending} loading={isPending} type="submit">
         Enviar link de recuperação
       </Button>
     </form>
