@@ -13,7 +13,7 @@ test("professional workflow remains request -> compose -> review -> publish, nev
  assert.match(overview,/Publicação/);
  assert.match(overview,/Nada é liberado automaticamente/);
  assert.match(page,/requests\.length === 0 \? "request"/);
- assert.match(page,/openVersion\.reviewed_at \? "publish" : "compose"/);
+ assert.match(page,/openVersion\.reviewed_at \? "publish" : sortedOpenItems\.length > 0 \? "review" : "compose"/);
  assert.match(page,/mode="review"/);
  assert.match(page,/mode="publish"/);
 });
