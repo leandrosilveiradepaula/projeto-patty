@@ -207,7 +207,7 @@ export function ClientWeeklyFeedbackResponseForm({
           <Button type="button" variant="secondary" onClick={() => setReviewOpen(false)}>Voltar e editar</Button>
         </section>
       ) : null}
-      <ClientWeeklyFeedbackSubmitControls completed={submitted} onBeforeSubmit={prepareSubmit} />
+      <ClientWeeklyFeedbackSubmitControls completed={submitted} reviewing={reviewOpen} onBeforeSubmit={prepareSubmit} />
       {state.outcome === "conflict" ? (
         <Button onClick={() => router.refresh()} type="button" variant="secondary">
           Conferir situação atual
