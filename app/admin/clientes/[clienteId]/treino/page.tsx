@@ -190,7 +190,7 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
       />
 
       <ClientWorkspaceNav activeArea="treino" clientId={client.id} />
-      <AdminTrainingWorkflowOverview stage={requests.length === 0 ? "request" : openVersion ? openVersion.reviewed_at ? "publish" : "compose" : latestPublished ? "published" : "compose"} exerciseCount={sortedOpenItems.length} />
+      <AdminTrainingWorkflowOverview stage={requests.length === 0 ? "request" : openVersion ? openVersion.reviewed_at ? "publish" : sortedOpenItems.length > 0 ? "review" : "compose" : latestPublished ? "published" : "compose"} exerciseCount={sortedOpenItems.length} />
 
       {newRequestAfterPublication ? (
         <Alert title="Nova solicitação após o treino publicado" variant="warning">
