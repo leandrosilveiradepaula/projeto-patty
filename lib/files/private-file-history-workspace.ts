@@ -160,6 +160,8 @@ export type PrivateFileHistoryUrlState = {
   ordem?: PrivateFileHistorySort;
   ano?: string;
   mes?: string;
+  dataInicial?: string | null;
+  dataFinal?: string | null;
   minKb?: number | null;
   maxKb?: number | null;
   grupoMime?: string;
@@ -185,6 +187,7 @@ export function privateFileHistoryHref(basePath: string, state: PrivateFileHisto
   if (state.ordem && state.ordem !== "newest") params.set("ordem", state.ordem);
   if (state.ano && /^\d{4}$/.test(state.ano)) params.set("ano", state.ano);
   if (state.mes && /^(0[1-9]|1[0-2])$/.test(state.mes)) params.set("mes", state.mes);
+  for (const key of ["dataInicial","dataFinal"] as const) if (state[key] && /^\d{4}-\d{2}-\d{2}$/.test(state[key]!)) params.set(key,state[key]!);
   for (const field of ["minKb","maxKb"] as const) { const v = state[field]; if (typeof v === "number" && Number.isSafeInteger(v) && v >= 0 && v <= 2097151) params.set(field,String(v)); }
   if (state.grupoMime && ["image","pdf","video","audio","other","unknown"].includes(state.grupoMime)) params.set("grupoMime",state.grupoMime);
   if (state.integridadeData && ["valid","invalid"].includes(state.integridadeData)) params.set("integridadeData",state.integridadeData);
