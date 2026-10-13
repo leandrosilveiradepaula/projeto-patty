@@ -1,5 +1,6 @@
 import { readClientNoticeQuery, exploreClientNotices, clientNoticesHref, availableClientNoticeYears } from "@/lib/notifications/client-in-app-inbox-explorer";
 import { Button } from "@/components/ui/Button";
+import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
 import { orderClientWeeklyFeedbacks } from "@/lib/follow-up/client-weekly-feedback-order";
 import { clientSubmittedFeedbackHref } from "@/lib/follow-up/client-weekly-feedback-explorer";
 import Link from "next/link";
@@ -42,7 +43,12 @@ export default async function ClientNotificationsPage({ searchParams }: { search
     <>
       <PageHeader eyebrow="Cliente" title="Avisos no aplicativo"
         description="Consulte lembretes já entregues no aplicativo sobre seus Feedbacks Semanais. Avisos não substituem o acompanhamento da Patty." />
+      {outstanding > 0 ? <nav aria-label="Feedbacks aguardando resposta" className={styles.pendingShortcut}>
+        <p><strong>{outstanding} aviso(s)</strong> relacionado(s) a feedbacks ainda pendentes.</p>
+        <Link className={styles.action} href="/cliente/avisos?situacao=pending#lista-avisos">Ver apenas pendentes</Link>
+      </nav> : null}
       <Section
+        id="lista-avisos"
         title="Seus avisos registrados"
         action={<Badge variant={outstanding > 0 ? "warning" : "neutral"}>{outstanding} aguardando resposta</Badge>}
         description="Os avisos são históricos e não são marcados como lidos automaticamente. Responder um Feedback Semanal muda a situação factual dele, mas preserva o aviso."
@@ -66,7 +72,7 @@ export default async function ClientNotificationsPage({ searchParams }: { search
             <Button type="submit" variant="secondary">Filtrar avisos</Button>
             {query.status !== "all" || query.year !== "all" ? <Link href="/cliente/avisos">Limpar</Link> : null}
           </form>
-          <p role="status">{explored.total} de {notices.length} aviso(s) correspondente(s).</p>
+          <p role="status">Exibindo {explored.first}–{explored.last} de {explored.total} aviso(s) encontrado(s), entre {notices.length} registrado(s).</p>
           {query.invalid || query.page>explored.pageCount ? <p role="status">Página ou filtro indisponível. Exibimos avisos já autorizados.</p> : null}
           </>
         ) : null}
@@ -111,7 +117,7 @@ export default async function ClientNotificationsPage({ searchParams }: { search
           </>
         )}
       </Section>
-      <Link className={styles.action} href="/cliente">Voltar ao início</Link>
+      <ClientJourneyNextSteps areas={["feedback","checkins","index"]} />
     </>
   );
 }
