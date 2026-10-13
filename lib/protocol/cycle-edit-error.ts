@@ -12,3 +12,16 @@ export function protocolCycleEditFailureMessage(error: unknown): string {
   }
   return "Não foi possível confirmar a alteração. Nenhuma gravação foi confirmada; atualize e confira o ciclo antes de repetir.";
 }
+
+/**
+ * Safe capability probe for the atomic writer. P0002 means the authenticated
+ * function executed and rejected the intentionally nonexistent plan.
+ * A success response, unknown code or transport failure is NOT proof of readiness.
+ */
+export function draftCycleWriterReadiness(error: unknown): "available" | "missing" | "unverified" {
+  const code = error && typeof error === "object"
+    ? (error as { code?: unknown }).code : null;
+  if (code === "P0002") return "available";
+  if (code === "PGRST202" || code === "42883") return "missing";
+  return "unverified";
+}
