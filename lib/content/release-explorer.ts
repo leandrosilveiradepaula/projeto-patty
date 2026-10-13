@@ -23,6 +23,7 @@ export type ReleasedContentFilters = {
   type: string;
   availability: ReleasedContentAvailability;
   order: ReleasedContentOrder;
+  year?: string;
 };
 
 export const INITIAL_RELEASE_FILTERS: Readonly<ReleasedContentFilters> = {
@@ -31,6 +32,7 @@ export const INITIAL_RELEASE_FILTERS: Readonly<ReleasedContentFilters> = {
   type: "all",
   availability: "all",
   order: "newest",
+  year: "all",
 };
 
 export function normalizedReleasedContentSearch(value: string): string {
@@ -102,6 +104,7 @@ export function filterReleasedContent<T extends ReleasedContentEntry>(
 ): T[] {
   const query = normalizedReleasedContentSearch(filters.query);
   return orderReleasedContent(records.filter((record) => {
+    if (filters.year && filters.year !== "all" && (!Number.isFinite(Date.parse(record.releasedAt)) || new Date(record.releasedAt).getUTCFullYear().toString() !== filters.year)) return false;
     if (filters.category !== "all" && record.category !== filters.category) return false;
     if (filters.type !== "all" && record.type !== filters.type) return false;
     if (filters.availability === "available" && record.assetCount <= 0) return false;
@@ -148,5 +151,9 @@ export function hasActiveReleasedContentFilters(filters: ReleasedContentFilters)
     filters.category !== "all" ||
     filters.type !== "all" ||
     filters.availability !== "all" ||
-    filters.order !== "newest";
+    filters.order !== "newest" || (filters.year !== undefined && filters.year !== "all");
+}
+
+export function releasedContentYears(records: readonly ReleasedContentEntry[]): string[] {
+ return [...new Set(records.map(x=>Number.isFinite(Date.parse(x.releasedAt))?String(new Date(x.releasedAt).getUTCFullYear()):"").filter(Boolean))].sort().reverse();
 }
