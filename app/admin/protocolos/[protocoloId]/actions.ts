@@ -442,9 +442,9 @@ export async function removeProtocolMealDose(
   _formData: FormData,
 ): Promise<ProtocolLifecycleFormState> {
   await requireRole("admin");
-  const originalMealId = parseOriginalDraftId(_readSingleStringFormValue(formData, "originalMealId"));
-  const originalDoseType = parseOriginalDraftDoseType(_readSingleStringFormValue(formData, "originalDoseType"));
-  const originalQuantity = parseOriginalDraftDoseQuantity(_readSingleStringFormValue(formData, "originalDoseQuantity"));
+  const originalMealId = parseOriginalDraftId(readSingleStringFormValue(_formData, "originalMealId"));
+  const originalDoseType = parseOriginalDraftDoseType(readSingleStringFormValue(_formData, "originalDoseType"));
+  const originalQuantity = parseOriginalDraftDoseQuantity(readSingleStringFormValue(_formData, "originalDoseQuantity"));
   if (!originalMealId || !originalDoseType || originalQuantity === null) {
     return { message: "Referência original da dose inválida. Atualize a página.", success: false };
   }
@@ -483,8 +483,8 @@ export async function removeProtocolMeal(
   _formData: FormData,
 ): Promise<ProtocolLifecycleFormState> {
   await requireRole("admin");
-  const originalLabel = parseOriginalDraftLabel(_readSingleStringFormValue(formData, "originalLabel"));
-  const originalPosition = parseOriginalDraftPosition(_readSingleStringFormValue(formData, "originalPosition"));
+  const originalLabel = parseOriginalDraftLabel(readSingleStringFormValue(_formData, "originalLabel"));
+  const originalPosition = parseOriginalDraftPosition(readSingleStringFormValue(_formData, "originalPosition"));
   if (!originalLabel.valid || !originalPosition) return { message: "Referência original inválida. Atualize a página.", success: false };
   const accessible = await getAccessibleVersionLifecycle(protocolId, protocolVersionId);
 
@@ -535,8 +535,8 @@ export async function removeProtocolMealPlanVariant(
   _formData: FormData,
 ): Promise<ProtocolLifecycleFormState> {
   await requireRole("admin");
-  const originalLabel = parseOriginalDraftLabel(_readSingleStringFormValue(formData, "originalLabel"));
-  const originalVariantKey = parseOriginalVariantKey(_readSingleStringFormValue(formData, "originalVariantKey"));
+  const originalLabel = parseOriginalDraftLabel(readSingleStringFormValue(_formData, "originalLabel"));
+  const originalVariantKey = parseOriginalVariantKey(readSingleStringFormValue(_formData, "originalVariantKey"));
   if (!originalLabel.valid || !originalVariantKey) return { message: "Referência original inválida. Atualize a página.", success: false };
   const accessible = await getAccessibleVersionLifecycle(protocolId, protocolVersionId);
 
