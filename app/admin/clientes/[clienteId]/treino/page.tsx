@@ -15,6 +15,7 @@ import { trainingRequestOriginLabel } from "@/lib/training/request-origin";
 import { newestTrainingRequests, newestUnpublishedTrainingVersion } from "@/lib/training/operational-order";
 import { orderPublishedExerciseOptions } from "@/lib/training/exercise-selection";
 
+import { AdminTrainingWorkflowOverview } from "@/components/admin/AdminTrainingWorkflowOverview";
 import { AdminTrainingPlanDraftForm } from "@/components/admin/AdminTrainingPlanDraftForm";
 import { AdminTrainingPlanItemForm } from "@/components/admin/AdminTrainingPlanItemForm";
 import { AdminTrainingPublishedItemCopy } from "@/components/admin/AdminTrainingPublishedItemCopy";
@@ -189,6 +190,7 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
       />
 
       <ClientWorkspaceNav activeArea="treino" clientId={client.id} />
+      <AdminTrainingWorkflowOverview stage={requests.length === 0 ? "request" : openVersion ? openVersion.reviewed_at ? "publish" : "compose" : latestPublished ? "published" : "compose"} exerciseCount={sortedOpenItems.length} />
 
       {newRequestAfterPublication ? (
         <Alert title="Nova solicitação após o treino publicado" variant="warning">
@@ -260,7 +262,7 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
 
                   {!openVersion.reviewed_at ? (
                     <>
-                      <AdminTrainingPlanItemForm
+                      <details className={styles.exerciseEditor}><summary>Editar exercício {item.position} · {item.exercise_name}</summary><div className={styles.exerciseEditorBody}><AdminTrainingPlanItemForm
                         clientId={client.id}
                         exerciseOptions={exerciseOptions}
                         key={JSON.stringify([
@@ -278,7 +280,7 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
                           setsText: item.sets_text,
                         }}
                         trainingPlanVersionId={openVersion.id}
-                      />
+                      /></div></details>
                       <AdminTrainingPlanLifecycleAction
                         clientId={client.id}
                         itemId={item.id}
