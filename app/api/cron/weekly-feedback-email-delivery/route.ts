@@ -11,13 +11,10 @@ export async function GET(request: Request) {
     return Response.json({ ok: false }, { status: 401 });
   }
 
-  const origin = new URL(request.url).origin;
-  const result = await deliverWeeklyFeedbackReminderEmails({
-    appOrigin: origin,
-  });
+  const result = await deliverWeeklyFeedbackReminderEmails();
 
   return Response.json({
-    ok: true,
+    ok: result.configured && result.failed === 0,
     ...result,
-  });
+  }, { status: !result.configured ? 503 : result.failed > 0 ? 207 : 200 });
 }
