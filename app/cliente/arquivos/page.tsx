@@ -1,3 +1,4 @@
+import { readPrivateFileDiscovery, matchesPrivateFileDiscovery, privateFileReleaseYears, PRIVATE_FILE_DISCOVERY_MONTHS } from "@/lib/files/private-file-discovery";
 import { authorizedExactRecordPage } from "@/lib/operations/exact-record-navigation";
 import { availablePrivateFileYears, matchesPrivateFileMetadata, readPrivateFileMetadataFilters } from "@/lib/files/private-file-metadata-filters";
 import { PrivatePhotoComparison } from "@/components/files/PrivatePhotoComparison";
@@ -52,8 +53,8 @@ function formatCreatedAt(value: string) {
   }).format(new Date(value));
 }
 
-export default async function ClientFilesPage({ searchParams }: { searchParams: Promise<{ categoria?: string; origem?: string; formato?: string; ordem?: string; pagina?: string; fotoAntes?: string; fotoDepois?: string; ano?: string; tamanho?: string; arquivo?: string }> }) {
-  const { categoria, origem, formato, ordem, pagina, fotoAntes, fotoDepois, ano, tamanho, arquivo } = await searchParams;
+export default async function ClientFilesPage({ searchParams }: { searchParams: Promise<{ categoria?: string; origem?: string; formato?: string; ordem?: string; pagina?: string; fotoAntes?: string; fotoDepois?: string; ano?: string; tamanho?: string; mes?: string; minKb?: string; maxKb?: string; grupoMime?: string; integridadeData?: string; anoLiberacao?: string; mesLiberacao?: string; arquivo?: string }> }) {
+  const { categoria, origem, formato, ordem, pagina, fotoAntes, fotoDepois, ano, tamanho, mes, minKb, maxKb, grupoMime, integridadeData, anoLiberacao, mesLiberacao, arquivo } = await searchParams;
   const kind = readPrivateFileKindFilter(categoria);
   const origin = readPrivateFileOriginFilter(origem);
   const preview = readPrivateFilePreviewFilter(formato);
@@ -73,8 +74,10 @@ export default async function ClientFilesPage({ searchParams }: { searchParams: 
 
   const files = await listCurrentClientFiles(client.id);
   const years = availablePrivateFileYears(files);
+  const releaseYears = privateFileReleaseYears(files);
   const exactFile = typeof arquivo === "string" && files.some(row=>row.id===arquivo);
   const metadata = exactFile ? { year:"all", size:"all" as const, invalid:false } : readPrivateFileMetadataFilters({ano,tamanho},years);
+  const discovery=readPrivateFileDiscovery(exactFile ? {} : {mes,minKb,maxKb,grupoMime,integridadeData,anoLiberacao,mesLiberacao}, releaseYears);
   const displayKind = exactFile ? "all" as const : kind;
   const displayOrigin = exactFile ? "all" as const : origin;
   const displayPreview = exactFile ? {value:"all" as const,invalid:false} : preview;
@@ -83,14 +86,15 @@ export default async function ClientFilesPage({ searchParams }: { searchParams: 
   const filteredFiles = sortPrivateFileHistory(
     files.filter(file => matchesPrivateFileFilters(file, client.profile_id, displayKind, displayOrigin)
       && matchesPrivateFilePreviewFilter(file.mime_type, displayPreview.value)
-      && matchesPrivateFileMetadata(file,metadata)),
+      && matchesPrivateFileMetadata(file,metadata)
+      && matchesPrivateFileDiscovery(file,discovery)),
     order.value,
   );
   const exactPage = authorizedExactRecordPage(filteredFiles,arquivo,12);
   const visiblePage = paginatePrivateFileHistory(filteredFiles, exactPage ?? requestedPage.page);
   const categories = countPrivateFileCategories(files);
   const historyPath = "/cliente/arquivos";
-  const historyHref = (page: number) => privateFileHistoryHref(historyPath, { categoria: displayKind, origem: displayOrigin, formato: displayPreview.value, ordem: order.value, ano: metadata.year, tamanho:metadata.size, pagina: page, anchor: "lista-arquivos" });
+  const historyHref = (page: number) => privateFileHistoryHref(historyPath, { categoria: displayKind, origem: displayOrigin, formato: displayPreview.value, ordem: order.value, ano: metadata.year, tamanho:metadata.size,mes:discovery.month,minKb:discovery.minKb,maxKb:discovery.maxKb,grupoMime:discovery.mimeFamily,integridadeData:discovery.recordedValidity,anoLiberacao:discovery.releaseYear,mesLiberacao:discovery.releaseMonth,pagina: page, anchor: "lista-arquivos" });
 
   return (
     <>
@@ -141,14 +145,21 @@ export default async function ClientFilesPage({ searchParams }: { searchParams: 
               <option value="all">Todos</option><option value="known">Com tamanho registrado</option><option value="unknown">Tamanho não informado</option>
             </select>
           </label>
-          <label>Ordenação
+                     <label>Mês de registro<select name="mes" defaultValue={discovery.month}><option value="all">Todos</option>{PRIVATE_FILE_DISCOVERY_MONTHS.map(month=><option key={month} value={month}>{month}</option>)}</select></label>
+           <label>Tamanho mínimo (KB)<input name="minKb" type="number" min="0" max="2097151" defaultValue={discovery.minKb ?? ""} /></label>
+           <label>Tamanho máximo (KB)<input name="maxKb" type="number" min="0" max="2097151" defaultValue={discovery.maxKb ?? ""} /></label>
+           <label>Família do formato<select name="grupoMime" defaultValue={discovery.mimeFamily}><option value="all">Todas</option><option value="image">Imagens</option><option value="pdf">PDF</option><option value="video">Vídeos</option><option value="audio">Áudios</option><option value="other">Outros</option><option value="unknown">Não informado</option></select></label>
+           <label>Data de registro<select name="integridadeData" defaultValue={discovery.recordedValidity}><option value="all">Todas</option><option value="valid">Data válida</option><option value="invalid">Data indisponível</option></select></label>
+           <label>Ano de liberação<select name="anoLiberacao" defaultValue={discovery.releaseYear}><option value="all">Todos</option>{releaseYears.map(year=><option key={year} value={year}>{year}</option>)}</select></label>
+           <label>Mês de liberação<select name="mesLiberacao" defaultValue={discovery.releaseMonth}><option value="all">Todos</option>{PRIVATE_FILE_DISCOVERY_MONTHS.map(month=><option key={month} value={month}>{month}</option>)}</select></label>
+           <label>Ordenação
             <select name="ordem" defaultValue={order.value}>
               <option value="newest">Mais recentes</option>
               <option value="oldest">Mais antigos</option>
               <option value="largest">Maiores arquivos</option>
               <option value="smallest">Menores arquivos</option>
               <option value="kind">Por categoria</option>
-              <option value="released">Disponibilizados mais recentemente</option>
+              <option value="released">Disponibilizados mais recentemente</option><option value="name-asc">Nome A–Z</option><option value="name-desc">Nome Z–A</option><option value="mime">Tipo MIME</option>
             </select>
           </label>
           <button type="submit">Filtrar</button>
@@ -157,7 +168,7 @@ export default async function ClientFilesPage({ searchParams }: { searchParams: 
         <p role="status">{filteredFiles.length} de {files.length} arquivo(s) disponível(is) · Fotos: {categories.photo}, exames: {categories.exam}, documentos: {categories.document}.</p>
       </Section>
       <div id="lista-arquivos" className={styles.historyAnchor}>
-      {(invalidScopeFilter || metadata.invalid || displayPreview.invalid || order.invalid || requestedPage.invalid || visiblePage.outOfRange) ? (
+      {(invalidScopeFilter || discovery.invalid || metadata.invalid || displayPreview.invalid || order.invalid || requestedPage.invalid || visiblePage.outOfRange) ? (
         <p className={styles.filterNotice} role="status">O filtro ou a página solicitada não está disponível. Exibimos uma página válida dos seus arquivos autorizados.</p>
       ) : null}
       <Section
