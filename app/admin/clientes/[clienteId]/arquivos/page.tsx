@@ -1,4 +1,6 @@
 import { readPrivateFileDiscovery, matchesPrivateFileDiscovery, privateFileReleaseYears, PRIVATE_FILE_DISCOVERY_MONTHS } from "@/lib/files/private-file-discovery";
+import { readClientDirectoryReturn, withClientDirectoryReturn } from "@/lib/operations/client-directory-return";
+import { readPendingQueueReturn, withPendingQueueReturn } from "@/lib/operations/pending-queue-return";
 import { availablePrivateFileYears, matchesPrivateFileMetadata, readPrivateFileMetadataFilters, type PrivateFileMetadataFilters } from "@/lib/files/private-file-metadata-filters";
 import type { PrivateFileViewFilter } from "@/lib/files/private-file-history-view";
 import { authorizedExactRecordPage } from "@/lib/operations/exact-record-navigation";
@@ -23,7 +25,7 @@ import { matchesPrivateFilePreviewFilter, paginatePrivateFileHistory, privateFil
 
 type AdminClientFilesPageProps = {
   params: Promise<{ clienteId: string }>;
-  searchParams: Promise<{ categoria?: string; origem?: string; formato?: string; visualizacao?: string; ordem?: string; paginaPendentes?: string; paginaHistorico?: string; fotoAntes?: string; fotoDepois?: string; arquivoPendente?: string; arquivoHistorico?: string; ano?: string; tamanho?: string; mes?: string; dataInicial?: string; dataFinal?: string; minKb?: string; maxKb?: string; grupoMime?: string; integridadeData?: string; anoLiberacao?: string; mesLiberacao?: string; nome?: string; estadoLiberacao?: string }>;
+  searchParams: Promise<{ categoria?: string; origem?: string; formato?: string; visualizacao?: string; ordem?: string; paginaPendentes?: string; paginaHistorico?: string; fotoAntes?: string; fotoDepois?: string; arquivoPendente?: string; arquivoHistorico?: string; ano?: string; tamanho?: string; mes?: string; dataInicial?: string; dataFinal?: string; minKb?: string; maxKb?: string; grupoMime?: string; integridadeData?: string; anoLiberacao?: string; mesLiberacao?: string; nome?: string; estadoLiberacao?: string; filaRetorno?: string; listaQ?: string; listaView?: string; listaPagina?: string }>;
 };
 
 const fileKindLabels: Record<string, string> = {
@@ -63,6 +65,9 @@ export default async function AdminClientFilesPage({
   searchParams,
 }: AdminClientFilesPageProps) {
   const [{ clienteId }, filters] = await Promise.all([params, searchParams]);
+  const directoryReturn = readClientDirectoryReturn(filters);
+  const queueReturn = readPendingQueueReturn(filters.filaRetorno);
+  const withReturn = (href: string) => withPendingQueueReturn(withClientDirectoryReturn(href, directoryReturn), queueReturn ?? "");
   if (!isUuid(clienteId)) notFound();
 
   const [client, files] = await Promise.all([
@@ -145,11 +150,15 @@ export default async function AdminClientFilesPage({
       {hasExactTarget ? (
         <p role="status" className={styles.filterNotice}>
           Arquivo localizado entre os registros autorizados. Os filtros anteriores foram desconsiderados para exibir o arquivo solicitado.{" "}
-          <Link href={basePath}>Voltar à lista completa de arquivos</Link>
+          <Link href={withReturn(basePath)}>Voltar à lista completa de arquivos</Link>
         </p>
       ) : null}
       <Section title="Filtrar arquivos" description="Os filtros alteram apenas esta visualização administrativa; não modificam a visibilidade de nenhum arquivo.">
         <form action={`/admin/clientes/${client.id}/arquivos`} method="get" className={styles.fileFilters}>
+          {queueReturn ? <input type="hidden" name="filaRetorno" value={queueReturn} /> : null}
+          {directoryReturn.q ? <input type="hidden" name="listaQ" value={directoryReturn.q} /> : null}
+          {directoryReturn.view !== "all" ? <input type="hidden" name="listaView" value={directoryReturn.view} /> : null}
+          {directoryReturn.page && directoryReturn.page > 1 ? <input type="hidden" name="listaPagina" value={directoryReturn.page} /> : null}
           <label>Categoria
             <select name="categoria" defaultValue={kind}>
               <option value="all">Todas</option><option value="photo">Fotos</option><option value="exam">Exames</option><option value="document">Documentos</option>
@@ -210,7 +219,7 @@ export default async function AdminClientFilesPage({
             </div>
           </details>
           <button type="submit">Filtrar</button>
-          <Link href={`/admin/clientes/${client.id}/arquivos`}>Limpar filtros</Link>
+          <Link href={withReturn(`/admin/clientes/${client.id}/arquivos`)}>Limpar filtros</Link>
         </form>
         <p role="status">{filteredFiles.length} de {counts.all} arquivo(s) · {totalPending} aguardando liberação no total. Fotos: {kinds.photo}, exames: {kinds.exam}, documentos: {kinds.document}. Enviados pela cliente: {counts.client}; equipe ou autoria desconhecida: {counts.team}.</p>
         {(discovery.invalid || metadata.invalid || preview.invalid || order.invalid || requestedPending.invalid || requestedHistory.invalid || pendingPage.outOfRange || historyPage.outOfRange) ? (
@@ -227,7 +236,7 @@ export default async function AdminClientFilesPage({
             <EmptyState
               description={totalPending > 0 ? "Existem arquivos aguardando liberação, mas nenhum corresponde aos filtros selecionados. Limpe os filtros para revisar as pendências." : "Nenhum upload administrativo está aguardando liberação nesta cliente."}
               title={hasFilteredOutPending ? "Nenhum pendente neste filtro" : "Sem arquivos pendentes"}
-              action={hasFilteredOutPending ? <Link href={`${basePath}#aguardando-liberacao`}>Limpar filtros e revisar pendências</Link> : undefined}
+              action={hasFilteredOutPending ? <Link href={withReturn(`${basePath}#aguardando-liberacao`)}>Limpar filtros e revisar pendências</Link> : undefined}
             />
           ) : (
           <ul className={styles.fileList}>
@@ -263,7 +272,7 @@ export default async function AdminClientFilesPage({
                       <a
                         aria-label={`Visualizar ${file.original_filename?.trim() || "arquivo sem nome informado"}`}
                         className={styles.downloadLink}
-                        href={`/admin/arquivos/${file.id}?preview=1`}
+                        href={withReturn(`/admin/arquivos/${file.id}?preview=1`)}
                         rel="noopener noreferrer"
                         target="_blank"
                       >
@@ -273,7 +282,7 @@ export default async function AdminClientFilesPage({
                     <Link
                       aria-label={`Baixar ${file.original_filename?.trim() || "arquivo sem nome informado"}`}
                       className={styles.downloadLink}
-                      href={`/admin/arquivos/${file.id}`}
+                      href={withReturn(`/admin/arquivos/${file.id}`)}
                     >
                       Baixar arquivo
                     </Link>
@@ -289,12 +298,12 @@ export default async function AdminClientFilesPage({
           {pendingPage.total > 0 ? (
             <nav aria-label="Páginas aguardando liberação" className={styles.pagination}>
               <p>{pendingPage.first}–{pendingPage.last} de {pendingPage.total} pendente(s) · Página {pendingPage.page} de {pendingPage.pageCount}</p>
-              {pendingPage.previous ? <Link href={navigate("pending", pendingPage.previous)}>Anterior</Link> : null}
+              {pendingPage.previous ? <Link href={withReturn(navigate("pending", pendingPage.previous))}>Anterior</Link> : null}
               {visiblePrivateFilePageNumbers(pendingPage.page, pendingPage.pageCount).map((number) =>
                 number === pendingPage.page ? <strong aria-current="page" key={number}>Página {number}</strong> :
-                <Link key={number} href={navigate("pending", number)} aria-label={`Ir para página ${number} dos pendentes`}>{number}</Link>
+                <Link key={number} href={withReturn(navigate("pending", number))} aria-label={`Ir para página ${number} dos pendentes`}>{number}</Link>
               )}
-              {pendingPage.next ? <Link href={navigate("pending", pendingPage.next)}>Próxima</Link> : null}
+              {pendingPage.next ? <Link href={withReturn(navigate("pending", pendingPage.next))}>Próxima</Link> : null}
             </nav>
           ) : null}
         </Section>
@@ -313,7 +322,7 @@ export default async function AdminClientFilesPage({
                 : "Ainda não há arquivos privados cadastrados. Para adicionar um, use o formulário de envio acima."
             }
             title={totalHistory > 0 ? "Nenhum arquivo neste filtro" : "Sem arquivos no histórico"}
-            action={totalHistory > 0 ? <Link href={basePath + "#historico-arquivos"}>Limpar filtros e ver histórico</Link> : undefined}
+            action={totalHistory > 0 ? <Link href={withReturn(basePath + "#historico-arquivos")}>Limpar filtros e ver histórico</Link> : undefined}
           />
         ) : (
           <ul className={styles.fileList}>
@@ -349,7 +358,7 @@ export default async function AdminClientFilesPage({
                       <a
                         aria-label={`Visualizar ${file.original_filename?.trim() || "arquivo sem nome informado"}`}
                         className={styles.downloadLink}
-                        href={`/admin/arquivos/${file.id}?preview=1`}
+                        href={withReturn(`/admin/arquivos/${file.id}?preview=1`)}
                         rel="noopener noreferrer"
                         target="_blank"
                       >
@@ -359,11 +368,11 @@ export default async function AdminClientFilesPage({
                     <Link
                       aria-label={`Baixar ${file.original_filename?.trim() || "arquivo sem nome informado"}`}
                       className={styles.downloadLink}
-                      href={`/admin/arquivos/${file.id}`}
+                      href={withReturn(`/admin/arquivos/${file.id}`)}
                     >
                       Baixar arquivo
                     </Link>
-                    <Link className={styles.downloadLink} href={`${basePath}?arquivoHistorico=${file.id}#arquivo-historico-${file.id}`}>Abrir registro no histórico</Link>
+                    <Link className={styles.downloadLink} href={withReturn(`${basePath}?arquivoHistorico=${file.id}#arquivo-historico-${file.id}`)}>Abrir registro no histórico</Link>
                     {!file.client_visible_at && file.uploaded_by_profile_id !== client.profile_id ? (
                       <AdminPrivateFileReleaseForm clientId={client.id} fileId={file.id} fileName={file.original_filename?.trim() || "Arquivo sem nome informado"} />
                     ) : null}
@@ -376,12 +385,12 @@ export default async function AdminClientFilesPage({
         {historyPage.total > 0 ? (
           <nav aria-label="Páginas do histórico privado" className={styles.pagination}>
             <p>{historyPage.first}–{historyPage.last} de {historyPage.total} arquivo(s) · Página {historyPage.page} de {historyPage.pageCount}</p>
-            {historyPage.previous ? <Link href={navigate("history", historyPage.previous)}>Anterior</Link> : null}
+            {historyPage.previous ? <Link href={withReturn(navigate("history", historyPage.previous))}>Anterior</Link> : null}
             {visiblePrivateFilePageNumbers(historyPage.page, historyPage.pageCount).map((number) =>
               number === historyPage.page ? <strong aria-current="page" key={number}>Página {number}</strong> :
-              <Link key={number} href={navigate("history", number)} aria-label={`Ir para página ${number} do histórico`}>{number}</Link>
+              <Link key={number} href={withReturn(navigate("history", number))} aria-label={`Ir para página ${number} do histórico`}>{number}</Link>
             )}
-            {historyPage.next ? <Link href={navigate("history", historyPage.next)}>Próxima</Link> : null}
+            {historyPage.next ? <Link href={withReturn(navigate("history", historyPage.next))}>Próxima</Link> : null}
           </nav>
         ) : null}
       </Section></div> : null}
