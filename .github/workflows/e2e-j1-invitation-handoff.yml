@@ -1,97 +1,29 @@
-name: J1 authenticated invitation handoff
+name: J1 administrative handoff - manual evidence pending
 
+# Patty is the only production administrator. Do not run automated admin
+# browser authentication with her personal password or MFA seed in GitHub.
 on:
   workflow_dispatch:
-  workflow_run:
-    workflows:
-      - Validate application
-    types:
-      - completed
-  status:
-  schedule:
-    - cron: '13 14 * * 1-5'
 
 permissions:
   contents: read
-  actions: read
-
-concurrency:
-  group: patty-j1-synthetic-onboarding
-  cancel-in-progress: false
 
 jobs:
-  j1-invitation-handoff:
-    if: >-
-      github.repository == 'leandrosilveiradepaula/projeto-patty' &&
-      github.ref == 'refs/heads/master' &&
-      (
-        github.event_name == 'workflow_dispatch' ||
-        github.event_name == 'schedule' ||
-        (github.event_name == 'status' && github.event.context == 'Vercel' &&
-         github.event.state == 'success' && github.event.sha == github.sha) ||
-        (github.event_name == 'workflow_run' &&
-         github.event.workflow_run.name == 'Validate application' &&
-         github.event.workflow_run.event == 'push' &&
-         github.event.workflow_run.conclusion == 'success' &&
-         github.event.workflow_run.head_sha == github.sha)
-      )
+  admin-manual-evidence:
+    if: github.repository == 'leandrosilveiradepaula/projeto-patty' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-24.04
-    timeout-minutes: 16
+    timeout-minutes: 2
     steps:
-      - name: Checkout trusted master
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          persist-credentials: false
-          ref: master
-
-      - name: Set up Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
-        with:
-          node-version: '22'
-          cache: npm
-
-      - name: Check master CI and Vercel publication for exact SHA
-        id: preflight
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node .github/scripts/j1-production-preflight.mjs
-
-      - name: Verify required test-only environment without disclosing credentials
-        if: steps.preflight.outputs.ready == 'true'
-        env:
-          E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
-          E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
-          E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
-          E2E_ADMIN_TOTP_SECRET: ${{ secrets.E2E_ADMIN_TOTP_SECRET }}
-          E2E_SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.E2E_SUPABASE_SECRET_KEY }}
+      - name: Record human-admin blocker without using credentials
         shell: bash
         run: |
-          set -euo pipefail
-          for name in E2E_BASE_URL E2E_ADMIN_EMAIL E2E_ADMIN_PASSWORD E2E_ADMIN_TOTP_SECRET E2E_SUPABASE_SECRET_KEY; do
-            if [ -z "${!name}" ]; then
-              echo "::error::J1 required secret missing: ${name}"
-              exit 1
-            fi
-          done
-
-      - name: Install application and browser testing dependencies
-        if: steps.preflight.outputs.ready == 'true'
-        run: |
-          npm ci
-          npm install --no-save --package-lock=false @playwright/test@1.55.0
-          npx playwright install --with-deps chromium
-
-      - name: Authenticated J1.01-03 browser journey and verified cleanup
-        if: steps.preflight.outputs.ready == 'true'
-        env:
-          E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
-          E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
-          E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
-          E2E_ADMIN_TOTP_SECRET: ${{ secrets.E2E_ADMIN_TOTP_SECRET }}
-          E2E_SUPABASE_URL: https://hqanoskwjvpbgavppcud.supabase.co
-          E2E_SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.E2E_SUPABASE_SECRET_KEY }}
-        run: npx playwright test e2e/j1-manual-invitation-handoff.spec.mjs --reporter=line --workers=1
-
-      - name: Explain blocked run
-        if: steps.preflight.outputs.ready != 'true'
-        run: echo 'J1 E2E not executed; deployment/CI preflight blocked. See workflow summary.'
+          echo "J1.01 and J1.05-07: BLOCKED - authorized Patty session required."
+          echo "Never set E2E_ADMIN_TOTP_SECRET with Patty personal MFA in GitHub."
+          echo "No automatic admin access or synthetic database mutation was attempted."
+          echo "Only the independent synthetic-client J1 smoke may run automatically."
+          {
+            echo "### J1 administrative journey is NOT HOMOLOGATED"
+            echo "No admin browser test was executed."
+            echo "Patty is the sole administrator in production; professional actions need authorized human evidence."
+            echo "The synthetic-client Playwright test is a separate workflow."
+          } >> "$GITHUB_STEP_SUMMARY"

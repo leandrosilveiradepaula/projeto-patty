@@ -1,20 +1,50 @@
 name: E2E client onboarding activation smoke
 
+# No admin session or TOTP: this test uses a disposable synthetic client
+# linked to the existing Patty profile, in the same production Supabase.
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows:
+      - Validate application
+    types:
+      - completed
+  status:
+  schedule:
+    - cron: "17 14 * * 1-5"
 
 permissions:
   contents: read
+  actions: read
+
+concurrency:
+  group: patty-j1-synthetic-client-smoke
+  cancel-in-progress: false
 
 jobs:
   client-onboarding-activation-smoke:
-    if: github.ref == 'refs/heads/master'
+    if: >-
+      github.repository == 'leandrosilveiradepaula/projeto-patty' &&
+      github.ref == 'refs/heads/master' &&
+      (
+        github.event_name == 'workflow_dispatch' ||
+        github.event_name == 'schedule' ||
+        (github.event_name == 'status' && github.event.context == 'Vercel' &&
+         github.event.state == 'success' && github.event.sha == github.sha) ||
+        (github.event_name == 'workflow_run' &&
+         github.event.workflow_run.name == 'Validate application' &&
+         (github.event.workflow_run.event == 'push' ||
+          github.event.workflow_run.event == 'workflow_dispatch') &&
+         github.event.workflow_run.conclusion == 'success' &&
+         github.event.workflow_run.head_sha == github.sha)
+      )
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 16
     steps:
-      - name: Checkout repository
+      - name: Checkout trusted master
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
+          ref: master
           persist-credentials: false
 
       - name: Set up Node.js
@@ -23,35 +53,44 @@ jobs:
           node-version: "22"
           cache: npm
 
-      - name: Validate E2E secrets
-        shell: bash
+      - name: Confirm exact master CI and published runtime
+        id: preflight
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node .github/scripts/j1-production-preflight.mjs
+
+      - name: Verify synthetic-only E2E configuration
+        if: steps.preflight.outputs.ready == 'true'
         env:
           E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
           E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
           E2E_SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.E2E_SUPABASE_SECRET_KEY }}
+        shell: bash
         run: |
-          missing=0
+          set -euo pipefail
           for name in E2E_BASE_URL E2E_ADMIN_EMAIL E2E_SUPABASE_SECRET_KEY; do
             if [ -z "${!name}" ]; then
-              echo "::error::Missing required secret or reusable fallback: ${name}"
-              missing=1
+              echo "::error::Missing J1 client test credential: ${name}"
+              exit 1
             fi
           done
-          exit "${missing}"
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Install application dependencies and Chromium
+        if: steps.preflight.outputs.ready == 'true'
+        run: |
+          npm ci
+          npm install --no-save --package-lock=false @playwright/test@1.55.0
+          npx playwright install --with-deps chromium
 
-      - name: Install Playwright test runner
-        run: npm install --no-save --package-lock=false @playwright/test@1.55.0
-
-      - name: Install Chromium
-        run: npx playwright install --with-deps chromium
-
-      - name: Run production onboarding activation smoke test
+      - name: Execute J1 mobile activation, registration and anamnesis draft
+        if: steps.preflight.outputs.ready == 'true'
         env:
           E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
           E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
-          E2E_SUPABASE_URL: "https://hqanoskwjvpbgavppcud.supabase.co"
+          E2E_SUPABASE_URL: https://hqanoskwjvpbgavppcud.supabase.co
           E2E_SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.E2E_SUPABASE_SECRET_KEY }}
-        run: npx playwright test e2e/client-onboarding-activation.spec.mjs --reporter=line
+        run: npx playwright test e2e/client-onboarding-activation.spec.mjs --reporter=line --workers=1
+
+      - name: Record blocked production preflight
+        if: steps.preflight.outputs.ready != 'true'
+        run: echo 'J1 client test did not access Supabase; verify CI/deployment evidence in summary.'
