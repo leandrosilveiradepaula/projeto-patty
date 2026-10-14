@@ -1,4 +1,6 @@
 import { authorizedExactRecordPage } from "@/lib/operations/exact-record-navigation";
+import { readClientDirectoryReturn, withClientDirectoryReturn } from "@/lib/operations/client-directory-return";
+import { readPendingQueueReturn, withPendingQueueReturn } from "@/lib/operations/pending-queue-return";
 import { TRAINING_REQUESTS_PER_PAGE } from "@/lib/training/version-inspection";
 import { trainingAdminVersionHref, trainingRequestExactHref } from "@/lib/training/history-navigation";
 import { parseTrainingVersionFilters, exploreTrainingVersionHistory, trainingAdminVersionPageHref } from "@/lib/training/history-navigation";
@@ -44,7 +46,7 @@ type Props = {
   params: Promise<{
     clienteId: string;
   }>;
-  searchParams: Promise<{ pedidos?: string; origem?: string; observacao?: string; periodo?: string; ordem?: string; buscaVersao?: string; estadoVersao?: string; ordemVersao?: string; versoes?: string; reutilizarPublicado?: string; pedidoExato?: string }>;
+  searchParams: Promise<{ pedidos?: string; origem?: string; observacao?: string; periodo?: string; ordem?: string; buscaVersao?: string; estadoVersao?: string; ordemVersao?: string; versoes?: string; reutilizarPublicado?: string; pedidoExato?: string; filaRetorno?: string; listaQ?: string; listaView?: string; listaPagina?: string }>;
 };
 
 function formatDateTime(value: string) {
@@ -74,6 +76,9 @@ function versionStatus(version: {
 export default async function AdminClientTrainingPage({ params, searchParams }: Props) {
   const [{ clienteId }, search] = await Promise.all([params, searchParams]);
   const { pedidos } = search;
+  const directoryReturn = readClientDirectoryReturn(search);
+  const queueReturn = readPendingQueueReturn(search.filaRetorno);
+  const withReturn = (href: string) => withPendingQueueReturn(withClientDirectoryReturn(href, directoryReturn), queueReturn ?? "");
   const requestFilters = parseTrainingRequestFilters(search);
   const archiveFilters = parseTrainingVersionFilters(search);
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(clienteId)) notFound();
@@ -199,7 +204,7 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
           {openVersion
             ? " Já existe um rascunho em preparação: confira se o pedido exige ajustes nessa versão antes de publicar."
             : " A publicação anterior continua disponível; nenhum novo treino é criado automaticamente."}
-          {" "}<a href={trainingRequestExactHref(`/admin/clientes/${client.id}/treino`,orderedRequests,orderedRequests[0].id) ?? "#historico-solicitacoes-treino"}>Ver solicitação</a>
+          {" "}<a href={withReturn(trainingRequestExactHref(`/admin/clientes/${client.id}/treino`,orderedRequests,orderedRequests[0].id) ?? "#historico-solicitacoes-treino")}>Ver solicitação</a>
         </Alert>
       ) : null}
 
@@ -373,9 +378,9 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
               <div className={styles.summary}>
                 <p>Você pode começar em branco ou carregar apenas o título e as observações gerais do treino publicado. Confira e ajuste as informações antes de salvar. Nenhum exercício é copiado nesta etapa.</p>
                 {search.reutilizarPublicado === "sim" ? (
-                  <Link className={styles.link} href={`/admin/clientes/${client.id}/treino#prescricao-treino`}>Começar com campos em branco</Link>
+                  <Link className={styles.link} href={withReturn(`/admin/clientes/${client.id}/treino#prescricao-treino`)}>Começar com campos em branco</Link>
                 ) : (
-                  <Link className={styles.link} href={`/admin/clientes/${client.id}/treino?reutilizarPublicado=sim#prescricao-treino`}>Preencher com título e observações publicados</Link>
+                  <Link className={styles.link} href={withReturn(`/admin/clientes/${client.id}/treino?reutilizarPublicado=sim#prescricao-treino`)}>Preencher com título e observações publicados</Link>
                 )}
               </div>
             ) : null}
@@ -393,7 +398,7 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
           description="Confira as mudanças registradas antes de revisar ou publicar. Nenhuma diferença determina progressão automaticamente.">
           <Card className={styles.card}>
             <TrainingVersionComparisonView comparison={comparison} />
-            {previousPublished ? <a className={styles.link} href={trainingAdminVersionHref(`/admin/clientes/${client.id}/treino`,orderedVersions,previousPublished.id,requestFilters) ?? "#historico-versoes-treino"}>Abrir publicação anterior completa</a> : null}
+            {previousPublished ? <a className={styles.link} href={withReturn(trainingAdminVersionHref(`/admin/clientes/${client.id}/treino`,orderedVersions,previousPublished.id,requestFilters) ?? "#historico-versoes-treino")}>Abrir publicação anterior completa</a> : null}
             {openVersion ? <a className={styles.link} href="#prescricao-treino">Voltar à edição do rascunho</a> : null}
           </Card>
         </Section>
@@ -423,7 +428,7 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
                   Última solicitação: {formatDateTime(orderedRequests[0].requested_at)}
                   {" · "}{trainingRequestOriginLabel(orderedRequests[0].recorded_by_profile_id, client.profile_id, "admin")}
                   .{" "}
-                  <a className={styles.link} href={trainingRequestExactHref(`/admin/clientes/${client.id}/treino`, orderedRequests, orderedRequests[0].id) ?? "#historico-solicitacoes-treino"}>Abrir solicitação exata</a>
+                  <a className={styles.link} href={withReturn(trainingRequestExactHref(`/admin/clientes/${client.id}/treino`, orderedRequests, orderedRequests[0].id) ?? "#historico-solicitacoes-treino")}>Abrir solicitação exata</a>
                 </p>
               ) : null}
             </div>
@@ -441,6 +446,10 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
         title="Histórico de solicitações"
       >
 <form method="get" className={styles.versionNavigation}>
+            {queueReturn ? <input type="hidden" name="filaRetorno" value={queueReturn} /> : null}
+            {directoryReturn.q ? <input type="hidden" name="listaQ" value={directoryReturn.q} /> : null}
+            {directoryReturn.view !== "all" ? <input type="hidden" name="listaView" value={directoryReturn.view} /> : null}
+            {directoryReturn.page && directoryReturn.page > 1 ? <input type="hidden" name="listaPagina" value={directoryReturn.page} /> : null}
 {archiveFilters.query ? <input type="hidden" name="buscaVersao" value={archiveFilters.query}/> : null}
 {archiveFilters.status !== "all" ? <input type="hidden" name="estadoVersao" value={archiveFilters.status}/> : null}
 {archiveFilters.order !== "number-desc" ? <input type="hidden" name="ordemVersao" value={archiveFilters.order}/> : null}
@@ -449,7 +458,7 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
 <label>Observação<select name="observacao" defaultValue={requestFilters.notes}><option value="all">Todas</option><option value="with-note">Com observação</option><option value="without-note">Sem observação</option></select></label>
 <label>Momento<select name="periodo" defaultValue={requestFilters.period}><option value="all">Qualquer</option><option value="after-publication">Após publicação</option><option value="before-or-at-publication">Até publicação</option></select></label>
 <label>Ordem<select name="ordem" defaultValue={requestFilters.order}><option value="newest">Recentes</option><option value="oldest">Antigas</option></select></label>
-<button type="submit">Filtrar solicitações</button><Link href={`/admin/clientes/${client.id}/treino#historico-solicitacoes-treino`}>Limpar filtros</Link></form>
+<button type="submit">Filtrar solicitações</button><Link href={withReturn(`/admin/clientes/${client.id}/treino#historico-solicitacoes-treino`)}>Limpar filtros</Link></form>
         {requests.length === 0 ? (
           <EmptyState
             description="Nenhuma solicitação registrada. Se houver pedido da cliente, registre-o no formulário de Solicitação do serviço acima."
@@ -481,8 +490,8 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
         {requestPage.total > 0 ? (
           <nav aria-label="Navegar solicitações de treino" className={styles.versionNavigation}>
             <span>{requestPage.from}–{requestPage.to} de {requestPage.total} solicitações · Página {requestPage.page} de {requestPage.pageCount}</span>
-            {requestPage.previous ? <Link href={trainingRequestFilteredHref(`/admin/clientes/${client.id}/treino`,requestFilters,requestPage.previous,"historico-solicitacoes-treino",archive.page,{professional:archiveFilters})}>Anterior</Link> : null}
-            {requestPage.next ? <Link href={trainingRequestFilteredHref(`/admin/clientes/${client.id}/treino`,requestFilters,requestPage.next,"historico-solicitacoes-treino",archive.page,{professional:archiveFilters})}>Próxima</Link> : null}
+            {requestPage.previous ? <Link href={withReturn(trainingRequestFilteredHref(`/admin/clientes/${client.id}/treino`,requestFilters,requestPage.previous,"historico-solicitacoes-treino",archive.page,{professional:archiveFilters}))}>Anterior</Link> : null}
+            {requestPage.next ? <Link href={withReturn(trainingRequestFilteredHref(`/admin/clientes/${client.id}/treino`,requestFilters,requestPage.next,"historico-solicitacoes-treino",archive.page,{professional:archiveFilters}))}>Próxima</Link> : null}
           </nav>
         ) : null}
       </Section>
@@ -502,13 +511,17 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
             {publishedVersions.length > 0 ? (
               <nav aria-label="Ir para treino publicado no histórico" className={styles.versionNavigation}>
                 {publishedVersions.map((version) => (
-                  <a href={trainingAdminVersionHref(`/admin/clientes/${client.id}/treino`,orderedVersions,version.id,requestFilters) ?? "#historico-versoes-treino"} key={version.id}>
+                  <a href={withReturn(trainingAdminVersionHref(`/admin/clientes/${client.id}/treino`,orderedVersions,version.id,requestFilters) ?? "#historico-versoes-treino")} key={version.id}>
                     Versão {version.version_number} · {version.id === latestPublished?.id ? "Atual para cliente" : "Anterior"}
                   </a>
                 ))}
               </nav>
             ) : null}
             <form method="get" className={styles.versionFilters}>
+            {queueReturn ? <input type="hidden" name="filaRetorno" value={queueReturn} /> : null}
+            {directoryReturn.q ? <input type="hidden" name="listaQ" value={directoryReturn.q} /> : null}
+            {directoryReturn.view !== "all" ? <input type="hidden" name="listaView" value={directoryReturn.view} /> : null}
+            {directoryReturn.page && directoryReturn.page > 1 ? <input type="hidden" name="listaPagina" value={directoryReturn.page} /> : null}
 {requestFilters.origin !== "all" ? <input type="hidden" name="origem" value={requestFilters.origin}/> : null}
 {requestFilters.notes !== "all" ? <input type="hidden" name="observacao" value={requestFilters.notes}/> : null}
 {requestFilters.period !== "all" ? <input type="hidden" name="periodo" value={requestFilters.period}/> : null}
@@ -518,7 +531,7 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
               <label>Estado<select name="estadoVersao" defaultValue={archiveFilters.status}><option value="all">Todos</option><option value="published">Publicados</option><option value="reviewed">Revisados</option><option value="draft">Rascunhos</option></select></label>
               <label>Ordem<select name="ordemVersao" defaultValue={archiveFilters.order}><option value="number-desc">Versão decrescente</option><option value="number-asc">Versão crescente</option><option value="title">Título</option></select></label>
               <button type="submit">Filtrar versões</button>
-              <Link href={trainingAdminVersionPageHref("/admin/clientes/"+client.id+"/treino",1,parseTrainingVersionFilters({}),requestFilters)}>Limpar filtros de versões</Link>
+              <Link href={withReturn(trainingAdminVersionPageHref("/admin/clientes/"+client.id+"/treino",1,parseTrainingVersionFilters({}),requestFilters))}>Limpar filtros de versões</Link>
             </form>
             <p role="status" className={styles.description}>Exibindo {archive.from}–{archive.to} de {archive.total} versão(ões) encontradas.</p>
             {archive.total === 0 ? <p className={styles.description}>Nenhuma versão corresponde aos filtros.</p> : null}
@@ -604,8 +617,8 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
             </ol>
             {archive.total > 0 ? <nav aria-label="Páginas do histórico de versões" className={styles.versionNavigation}>
               <span>Página {archive.page} de {archive.pageCount}</span>
-              {archive.previous ? <Link href={trainingAdminVersionPageHref("/admin/clientes/"+client.id+"/treino",archive.previous,archiveFilters,requestFilters)}>Anterior</Link> : null}
-              {archive.next ? <Link href={trainingAdminVersionPageHref("/admin/clientes/"+client.id+"/treino",archive.next,archiveFilters,requestFilters)}>Próxima</Link> : null}
+              {archive.previous ? <Link href={withReturn(trainingAdminVersionPageHref("/admin/clientes/"+client.id+"/treino",archive.previous,archiveFilters,requestFilters))}>Anterior</Link> : null}
+              {archive.next ? <Link href={withReturn(trainingAdminVersionPageHref("/admin/clientes/"+client.id+"/treino",archive.next,archiveFilters,requestFilters))}>Próxima</Link> : null}
             </nav> : null}
           </>
         )}
@@ -623,7 +636,7 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
                   Versão {latestPublished.version_number}
                 </p>
                 <h2 className={styles.title}>{latestPublished.title}</h2>
-                  <a className={styles.link} href={trainingAdminVersionHref(`/admin/clientes/${client.id}/treino`,orderedVersions,latestPublished.id,requestFilters) ?? "#historico-versoes-treino"}>Conferir versão publicada no histórico</a>
+                  <a className={styles.link} href={withReturn(trainingAdminVersionHref(`/admin/clientes/${client.id}/treino`,orderedVersions,latestPublished.id,requestFilters) ?? "#historico-versoes-treino")}>Conferir versão publicada no histórico</a>
               </div>
               <Badge variant="neutral">Publicado</Badge>
             </div>
