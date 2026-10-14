@@ -9,7 +9,7 @@ import { Section } from "@/components/ui/Section";
 import { getOperationalPendingItemsForCurrentAdmin } from "@/lib/operations/pending-data";
 import { readClientDirectoryPendingView, matchesClientDirectoryPendingView, countClientDirectoryPendingViews, CLIENT_DIRECTORY_PENDING_VIEW_LABELS } from "@/lib/operations/client-directory-pending-view";
 import { withClientDirectoryReturn } from "@/lib/operations/client-directory-return";
-import { summarizeClientPendingItems } from "@/lib/operations/client-pending-summary";
+import { summarizeClientPendingItems, describeClientPendingSummary } from "@/lib/operations/client-pending-summary";
 import { listClientsAssignedToCurrentAdmin } from "@/lib/supabase/data-access";
 import Link from "next/link";
 import styles from "./page.module.css";
@@ -190,8 +190,8 @@ export default async function AdminClientesPage({
                             {secondPattyPending.title}
                           </Link>
                         ) : null}
-                        {pendingSummary?.waiting ? <Link className={styles.secondaryActionLink} href={`/admin/pendencias?cliente=${client.id}&responsavel=client#aguardando-cliente`}>Aguardando cliente ({pendingSummary.waiting})</Link> : null}
-                        {pendingSummary?.operational ? <Link className={styles.secondaryActionLink} href={`/admin/pendencias?cliente=${client.id}&responsavel=operational#operacional-do-sistema`}>Operacionais ({pendingSummary.operational})</Link> : null}
+                        {pendingSummary?.waiting ? <Link className={styles.secondaryActionLink} href={withClientDirectoryReturn(`/admin/pendencias?cliente=${client.id}&responsavel=client#aguardando-cliente`,directoryReturn)}>Aguardando cliente ({pendingSummary.waiting})</Link> : null}
+                        {pendingSummary?.operational ? <Link className={styles.secondaryActionLink} href={withClientDirectoryReturn(`/admin/pendencias?cliente=${client.id}&responsavel=operational#operacional-do-sistema`,directoryReturn)}>Operacionais ({pendingSummary.operational})</Link> : null}
                         </div></details> : null}
                         {pendingSummary?.total ? <Link className={styles.secondaryActionLink} href={withClientDirectoryReturn(`/admin/pendencias?cliente=${client.id}`,directoryReturn)}>Todas as pendências ({pendingSummary.total})</Link> : null}
                         <Link
@@ -207,13 +207,7 @@ export default async function AdminClientesPage({
                         </Link>
                       </div>
                     }
-                    meta={
-                      !client.profile_id
-                        ? "Vincule a identidade de acesso da cliente para concluir o cadastro."
-                        : nextPattyPending
-                          ? `${nextPattyPending.title} · ${clientPattyPendingItems.length} item(ns) na fila da Patty`
-                          : pendingSummary?.waiting ? `Aguardando cliente: ${pendingSummary.waiting} pendência(s)` : pendingSummary?.operational ? `Pendências operacionais: ${pendingSummary.operational}` : "Sem pendências registradas"
-                    }
+                    meta={!client.profile_id ? `Identidade de acesso pendente · ${describeClientPendingSummary(pendingSummary)}` : describeClientPendingSummary(pendingSummary)}
                     name={displayName || "Nome ausente — registro legado"}
                     secondary={
                       !displayName

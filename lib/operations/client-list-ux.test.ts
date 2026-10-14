@@ -71,3 +71,10 @@ test("secondary client actions are disclosed on demand without hiding primary na
  assert.match(page,/Abrir acompanhamento de/);
  assert.match(css,/\.moreActions > summary:focus-visible/);
 });
+
+test("directory preserves return context in secondary group links and shows complete status",()=>{
+ const page=read("app/admin/clientes/page.tsx");
+ assert.match(page,/withClientDirectoryReturn\(\x60\/admin\/pendencias\?cliente=\$\{client\.id\}&responsavel=client#aguardando-cliente\x60,directoryReturn\)/);
+ assert.match(page,/withClientDirectoryReturn\(\x60\/admin\/pendencias\?cliente=\$\{client\.id\}&responsavel=operational#operacional-do-sistema\x60,directoryReturn\)/);
+ assert.match(page,/describeClientPendingSummary\(pendingSummary\)/);
+});
