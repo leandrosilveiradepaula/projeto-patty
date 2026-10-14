@@ -31,3 +31,10 @@ test("professional exact submitted feedback opens its authorized answer disclosu
   assert.match(admin, /open=\{exactSubmittedPage !== null && rawQuery\.registro === feedback\.id\}/);
   assert.match(admin, /authorizedExactRecordPage\(orderedFeedbacks\.filter\(f=>f\.submitted_at!==null\),rawQuery\.registro,10\)/);
 });
+
+test("professional exact feedback navigation explains temporary filter reset", () => {
+  const admin = read("app/admin/clientes/[clienteId]/feedback-semanal/page.tsx");
+  assert.match(admin, /exactRecordLocated \? \(/);
+  assert.match(admin, /Os filtros de origem e ano foram desconsiderados/);
+  assert.match(admin, /Voltar ao histórico completo/);
+});
