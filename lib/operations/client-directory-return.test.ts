@@ -14,3 +14,9 @@ test("invalid navigation context never creates external redirects or unsafe view
  assert.equal(withClientDirectoryReturn("https://example.com",state),"https://example.com");
  assert.equal(withClientDirectoryReturn("//example.com",state),"//example.com");
 });
+
+test("directory page survives client and queue navigation",()=>{
+ const state=readClientDirectoryReturn({listaQ:"Ana",listaView:"patty",listaPagina:"3"});
+ assert.equal(clientDirectoryReturnHref(state),"/admin/clientes?q=Ana&view=patty&pagina=3");
+ assert.equal(withClientDirectoryReturn("/admin/pendencias?cliente=123",state),"/admin/pendencias?cliente=123&listaQ=Ana&listaView=patty&listaPagina=3");
+});
