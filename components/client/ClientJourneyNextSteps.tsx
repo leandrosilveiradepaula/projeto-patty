@@ -8,6 +8,7 @@ const destinations = {
   progress: { href: "/cliente/evolucao", label: "Minha evolução" },
   protocol: { href: "/cliente/protocolo", label: "Meu protocolo" },
   feedback: { href: "/cliente/feedback-semanal", label: "Feedback semanal" },
+  notices: { href: "/cliente/avisos", label: "Meus avisos" },
   checkins: { href: "/cliente/checkins", label: "Check-ins" },
   training: { href: "/cliente/treino", label: "Meu treino" },
   contents: { href: "/cliente/conteudos", label: "Conteúdos liberados" },
