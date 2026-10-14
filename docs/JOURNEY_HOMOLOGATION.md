@@ -1,3 +1,11 @@
+## J1 — resíduo sintético removido e recuperação privilegiada desativada (2026-10-14)
+
+**FATO CONFIRMADO POR EXECUÇÃO REAL:** o PR #845 foi mergeado após CI PASS. O workflow confiável [38655756684](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38655756684) realizou `One-time J1 synthetic recovery: cleaned` usando Auth UUID, email, Client UUID e data de criação previamente conferidos; **não** buscou nem apagou contas reais por prefixo. Consulta **somente leitura após a limpeza** no Supabase de produção confirmou todos os contadores **zero** para Auth, Profile, papel, Client, assignment, Cadastro Atual e outras identidades recentes com o padrão sintético da J1.
+
+**Próxima ação de manutenção:** remover da branch os três artefatos estritamente temporários (`j1-one-time-fixture-recovery.yml`, `j1-onetime-orphan-recovery.mjs` e seu teste) para impedir que continuem carregando a chave server-side nas próximas execuções do CI. Acrescentar testes determinísticos que simulem completamente a limpeza independente e confirmem recusa de papel privilegiado, anamnese enviada, protocolo e divergência de vínculo **antes** de qualquer mutação.
+
+**Estado separado:** cleanup real comprovado; CI e publicação do pacote de retirada dependem da validação própria; o E2E com escrita em produção permanece **DESABILITADO** por `J1_E2E_ENABLE`, e a J1 inteira permanece **NÃO HOMOLOGADA**. Não confundir a correção de um resíduo técnico com a conclusão do atendimento.
+
 ## J1 — recuperação única do resíduo sintético da run 38637655316 (2026-10-14)
 
 **Read-only verificado neste ciclo:** existe precisamente uma identidade Auth com email no padrão sintético `e2e-onboarding-[hex16]@example.invalid`, criada em 2026-10-14 às 21:07 UTC, um Client/Profile correspondente e um assignment; **zero** Cadastro Atual, submissões de Anamnese, protocolos e papéis privilegiados. Não extrapolar este resultado para outros clientes ou contas.
