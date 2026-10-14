@@ -495,6 +495,7 @@ export default async function AdminClienteDetailPage({
       />
 
       <ClientWorkspaceNav clientId={client.id} />
+      <p><Link href={`/admin/pendencias?cliente=${client.id}`}>Ver pendências desta cliente</Link></p>
       <PageSectionNav
         items={[
           { href: "#proxima-acao", label: "Próxima ação" },
