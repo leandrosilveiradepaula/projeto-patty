@@ -24,7 +24,9 @@ test("admin dashboard exposes all operational pending groups", () => {
 test("admin dashboard pending preview links to record and client context", () => {
   const page = read("app/admin/page.tsx");
 
-  assert.match(page, /href=\{item\.href\}/);
-  assert.match(page, /\/admin\/clientes\/\$\{item\.clientId\}/);
-  assert.match(page, /Ver fila completa/);
+  for (const group of ["patty", "client", "operational"]) {
+    assert.ok(page.includes("withPendingQueueReturn(item.href, pendingQueueLinks." + group + ")"),group);
+    assert.ok(page.includes("withPendingQueueReturn(`/admin/clientes/${item.clientId}`, pendingQueueLinks." + group + ")"),group);
+  }
+  assert.match(page, /Ver todas as ações da Patty/);
 });
