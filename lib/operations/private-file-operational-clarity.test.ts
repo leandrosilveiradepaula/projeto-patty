@@ -90,7 +90,7 @@ test("file history avoids broken dates, negative sizes and non-finite numbers", 
 
 test("private files remain viewed through authorized server routes, not raw storage URLs", () => {
   assert.ok(clientPage.includes('href={`/cliente/arquivos/${file.id}`}'));
-  assert.ok(adminPage.includes('href={`/admin/arquivos/${file.id}`}'));
+  assert.ok(adminPage.includes('href={withReturn(`/admin/arquivos/${file.id}`)}'));
   assert.ok(client.includes('createClientFileUploadSessionAction('));
   assert.ok(admin.includes('createAdminPrivateFileUploadSessionAction('));
   assert.ok(!clientPage.includes("object_path"));
