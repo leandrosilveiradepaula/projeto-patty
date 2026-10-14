@@ -136,9 +136,12 @@ async function cleanupSyntheticClient({ clientId, profileId, email }) {
   }
 }
 
-test("convite sintetico ativa conta, cria senha e permite novo login", async ({
+test("J1: cliente sintetica ativa acesso, salva Cadastro Atual e retoma Anamnese", async ({
   browser,
 }) => {
+  // 30s, the default Playwright timeout, is shorter than a full browser
+  // journey with real Auth, server actions, verification and safe cleanup.
+  test.setTimeout(180_000);
   const unique = randomBytes(8).toString("hex");
   const email = `e2e-onboarding-${unique}@example.invalid`;
   const password = `E2E-Onboarding-${unique}-Aa1!`;
@@ -285,11 +288,19 @@ test("convite sintetico ativa conta, cria senha e permite novo login", async ({
     await expect(loginPage.getByRole("link",{name:"Continuar rascunho"}))
       .toHaveAttribute("href",`/cliente/anamnese/${draftId}`);
   } finally {
-    await loginContext?.close();
-    await activationContext?.close();
-
+    // A timed-out Playwright test may already have closed browser contexts.
+    // Their errors MUST NOT prevent server-side deletion of the verified
+    // disposable synthetic identity. A cleanup failure still fails the job.
+    const closeResults = await Promise.allSettled([
+      loginContext?.close(),
+      activationContext?.close(),
+    ]);
+    if (closeResults.some(result => result.status === "rejected")) {
+      console.warn("J1 browser context was already closed; proceeding with safe fixture cleanup.");
+    }
     if (profileId) {
       await cleanupSyntheticClient({ clientId, profileId, email });
+      console.log("J1 synthetic fixture cleanup completed.");
     }
   }
 });
