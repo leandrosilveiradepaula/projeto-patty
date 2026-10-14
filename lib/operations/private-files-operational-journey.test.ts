@@ -82,7 +82,8 @@ test("file queue keeps a stable pending anchor and an explicit empty state", () 
   const page = read("app/admin/clientes/[clienteId]/arquivos/page.tsx");
   assert.ok(page.includes('id="aguardando-liberacao"'));
   assert.ok(page.includes("pendingReleaseFiles.length === 0"));
-  assert.ok(page.includes('title="Sem arquivos pendentes"'));
+  assert.ok(page.includes('title={hasFilteredOutPending ? "Nenhum pendente neste filtro" : "Sem arquivos pendentes"}'));
+  assert.ok(page.includes('title={totalHistory > 0 ? "Nenhum arquivo neste filtro" : "Sem arquivos no histórico"}'));
   assert.ok(!page.includes('{pendingReleaseFiles.length > 0 ? (\n        <div id="aguardando-liberacao">'));
 });
 
