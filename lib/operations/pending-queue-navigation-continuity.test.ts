@@ -65,7 +65,7 @@ test("pending group explanation follows the selected order rather than claiming 
 });
 
 test("filtered empty queue offers explicit recovery without claiming no operational work", () => {
-  assert.match(page, /allItems\.length===0 \? "Tudo em dia" : "Nenhum resultado"/);
-  assert.match(page, /Limpar filtros e ver toda a fila/);
-  assert.match(page, /action=\{allItems\.length > 0 \?/);
+  assert.match(page, /allItems\.length===0 && !filters\.invalidClient \? "Tudo em dia" : "Nenhum resultado"/);
+  assert.match(page, /Limpar filtros/);
+  assert.match(page, /action=\{allItems\.length > 0 \|\| filters\.invalidClient \?/);
 });

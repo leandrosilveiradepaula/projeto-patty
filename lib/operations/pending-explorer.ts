@@ -17,10 +17,11 @@ export type PendingExplorerState = {
  dateValidity: "all" | "valid" | "invalid";
  clientScope: "all" | "client" | "system"; multiple: "all" | "multiple" | "single";
  pattyPage: number; clientPage: number; operationalPage: number;
- invalid: boolean;
+ invalidClient: boolean; invalid: boolean;
 };
 export const PENDING_EXPLORER_MONTHS = Array.from({length:12},(_,i)=>String(i+1).padStart(2,"0"));
 export const PENDING_GROUP_PAGE_SIZE=15;
+const CLIENT_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function pick<T extends string>(raw:unknown, options:readonly T[], fallback:T):{value:T;invalid:boolean}{
  if(raw===undefined||raw===fallback)return {value:fallback,invalid:false};
@@ -49,7 +50,8 @@ export function pendingQueueYears(items:readonly Pick<OperationalPendingItem,"cr
 }
 export function readPendingExplorerQuery(raw:PendingExplorerQuery,knownKinds:readonly OperationalPendingItemKind[],knownYears:readonly string[]=[]):PendingExplorerState{
  const query=typeof raw.q==="string"?raw.q.trim().slice(0,120):"";
- const clientId = typeof raw.cliente === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(raw.cliente) ? raw.cliente.toLowerCase() : null;
+ const clientId = typeof raw.cliente === "string" && CLIENT_ID_PATTERN.test(raw.cliente) ? raw.cliente.toLowerCase() : null;
+ const invalidClient = raw.cliente !== undefined && clientId === null;
  const kind=pick(raw.tipo,["all",...knownKinds] as const,"all" as const);
  const areaValue=raw.area===undefined||raw.area==="all"||raw.area===""?null:parsePendingArea(raw.area);
  const areaInvalid=raw.area!==undefined&&raw.area!==""&&raw.area!=="all"&&areaValue===null;
@@ -68,18 +70,20 @@ export function readPendingExplorerQuery(raw:PendingExplorerQuery,knownKinds:rea
   fromDate:inverse?null:from.value,toDate:inverse?null:to.value,
   dateValidity:validity.value,clientScope:scope.value,multiple:multiple.value,
   pattyPage:patty.value,clientPage:client.value,operationalPage:operational.value,
-  invalid:(raw.cliente!==undefined && clientId===null)||areaInvalid||kind.invalid||responsible.invalid||sort.invalid||year.invalid||month.invalid||
+  invalidClient,
+  invalid:invalidClient||areaInvalid||kind.invalid||responsible.invalid||sort.invalid||year.invalid||month.invalid||
     from.invalid||to.invalid||inverse||validity.invalid||scope.invalid||multiple.invalid||
     patty.invalid||client.invalid||operational.invalid||(raw.q!==undefined&&typeof raw.q!=="string"),
  };
 }
 /** The array is already scoped by the authenticated data-access read. No new fetch is performed. */
 export function explorePendingClientQueue<T extends OperationalPendingItem>(
- items:readonly T[],state:{query:string;kind:string;clientId?:string|null;area?:PendingArea|null;
+ items:readonly T[],state:{query:string;kind:string;clientId?:string|null;invalidClient?:boolean;area?:PendingArea|null;
  responsible?:OperationalPendingGroup|"all";sort?:PendingExplorerSort;year?:string;month?:string;
  fromDate?:string|null;toDate?:string|null;dateValidity?:"all"|"valid"|"invalid";
  clientScope?:"all"|"client"|"system";multiple?:"all"|"multiple"|"single"},
 ):T[]{
+ if(state.invalidClient)return [];
  const search=normalizeClientDirectorySearch(state.query);
  const candidates=items.filter(item=>{
   if(state.clientId && item.clientId !== state.clientId)return false;
@@ -157,6 +161,12 @@ function safeStateParams(state:{query:string;kind:string;clientId?:string|null;a
   if(page&&page>1)params.set(key,String(page));
  }
  return params;
+}
+/** Reset visible filters while retaining a valid client scope. */
+export function pendingExplorerResetHref(clientId:string|null):string{
+ return clientId && CLIENT_ID_PATTERN.test(clientId)
+  ? "/admin/pendencias?cliente="+encodeURIComponent(clientId.toLowerCase())
+  : "/admin/pendencias";
 }
 export function pendingExplorerGroupHref(group:OperationalPendingGroup,state:Parameters<typeof safeStateParams>[0]){
  const params=new URLSearchParams();

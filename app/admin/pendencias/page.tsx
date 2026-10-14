@@ -1,5 +1,5 @@
 import { PENDING_AREA_OPTIONS, countPendingAreas } from "@/lib/operations/pending-area-filter";
-import { readPendingExplorerQuery, explorePendingClientQueue, pendingExplorerGroupHref, pendingExplorerPageHref, paginatePendingQueue, pendingQueueYears, countPendingQueueClients, pendingQueueOldestDate, PENDING_EXPLORER_MONTHS } from "@/lib/operations/pending-explorer";
+import { readPendingExplorerQuery, explorePendingClientQueue, pendingExplorerGroupHref, pendingExplorerPageHref, paginatePendingQueue, pendingQueueYears, countPendingQueueClients, pendingQueueOldestDate, pendingExplorerResetHref, PENDING_EXPLORER_MONTHS } from "@/lib/operations/pending-explorer";
 import { Button } from "@/components/ui/Button";
 import { Alert } from "@/components/ui/Alert";
 import { PendingItemCard } from "@/components/admin/PendingItemCard";
@@ -66,6 +66,7 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
   const filters = readPendingExplorerQuery(rawQuery,kindOptions.map(item=>item.kind),years);
   const items = explorePendingClientQueue(allItems,filters);
   const scopedClient = filters.clientId ? allItems.find(item => item.clientId === filters.clientId) : null;
+  const resetHref = pendingExplorerResetHref(filters.clientId);
   const areaCounts=countPendingAreas(explorePendingClientQueue(allItems,{...filters,area:null}));
   const grouped = groupOperationalPendingItems(items);
   const pages={patty:paginatePendingQueue(grouped.patty,filters.pattyPage),client:paginatePendingQueue(grouped.client,filters.clientPage),operational:paginatePendingQueue(grouped.operational,filters.operationalPage)};
@@ -93,7 +94,7 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
       <Section title="Localizar pendências" description="Busque por cliente ou tipo já registrado. A pesquisa não muda prioridade nem autorização.">
         {scopedClient ? <div className={styles.scopedClient}><strong>Fila de {scopedClient.clientLabel}</strong><span>Exibindo apenas pendências desta cliente já autorizadas para seu acesso.</span><Link href="/admin/pendencias">Ver fila de todas as clientes</Link></div> : null}
         <form action="/admin/pendencias" method="get" className={styles.explorerFilters}>
-          {scopedClient ? <input type="hidden" name="cliente" value={scopedClient.clientId!} /> : null}
+          {filters.clientId ? <input type="hidden" name="cliente" value={filters.clientId} /> : null}
           <label>Cliente
             <input name="q" type="search" maxLength={120} placeholder="Nome da cliente" defaultValue={filters.query}/>
           </label>
@@ -132,10 +133,10 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
             </div>
           </details>
           <Button type="submit" variant="secondary">Filtrar</Button>
-          {filters.clientId || filters.query || filters.kind!=="all" || filters.area || filters.responsible!=="all" || filters.sort!=="oldest" || filters.year!=="all" || filters.month!=="all" || filters.fromDate || filters.toDate || filters.dateValidity!=="all" || filters.clientScope!=="all" || filters.multiple!=="all" ? <Link href="/admin/pendencias">Limpar</Link> : null}
+          {filters.query || filters.kind!=="all" || filters.area || filters.responsible!=="all" || filters.sort!=="oldest" || filters.year!=="all" || filters.month!=="all" || filters.fromDate || filters.toDate || filters.dateValidity!=="all" || filters.clientScope!=="all" || filters.multiple!=="all" ? <Link href={resetHref}>Limpar filtros</Link> : null}
         </form>
         <p role="status">Exibindo {items.length} de {allItems.length} pendência(s), referentes a {countPendingQueueClients(items)} cliente(s).{pendingQueueOldestDate(items) ? ` Registro válido mais antigo: ${formatDateTime(pendingQueueOldestDate(items)!)}` : ""}</p>
-        {filters.invalid ? <Alert variant="info" title="Consulta ajustada">Um parâmetro inválido foi ignorado. Exibimos apenas pendências autorizadas.</Alert> : null}
+        {filters.invalidClient ? <Alert variant="warning" title="Cliente inválida">O identificador da cliente é inválido. Nenhuma pendência foi exibida. Volte à fila geral para consultar os registros autorizados.</Alert> : filters.invalid ? <Alert variant="info" title="Consulta ajustada">Um parâmetro inválido foi ignorado. Exibimos apenas pendências autorizadas.</Alert> : null}
       </Section>
       <Section
         description={sortDescriptions}
@@ -163,8 +164,8 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
         {items.length === 0 ? (
           <EmptyState
             description={allItems.length===0 ? "Nenhuma ação da Patty, espera de cliente ou pendência operacional consta nesta fila no momento." : "Nenhuma pendência corresponde aos filtros atuais. Você pode limpar os filtros para consultar a fila completa."}
-            title={allItems.length===0 ? "Tudo em dia" : "Nenhum resultado"}
-            action={allItems.length > 0 ? <Link href="/admin/pendencias">Limpar filtros e ver toda a fila</Link> : undefined}
+            title={allItems.length===0 && !filters.invalidClient ? "Tudo em dia" : "Nenhum resultado"}
+            action={allItems.length > 0 || filters.invalidClient ? <Link href={resetHref}>Limpar filtros</Link> : undefined}
           />
         ) : (
           <div className={styles.groups}>

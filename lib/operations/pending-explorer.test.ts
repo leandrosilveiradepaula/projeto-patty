@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { readPendingExplorerQuery, explorePendingClientQueue, pendingExplorerGroupHref, pendingExplorerPageHref,paginatePendingQueue,pendingQueueYears,pendingQueueCivilDay,countPendingQueueClients,pendingQueueOldestDate } from "./pending-explorer.ts";
+import { readPendingExplorerQuery, explorePendingClientQueue, pendingExplorerGroupHref, pendingExplorerPageHref,pendingExplorerResetHref,paginatePendingQueue,pendingQueueYears,pendingQueueCivilDay,countPendingQueueClients,pendingQueueOldestDate } from "./pending-explorer.ts";
 import type { OperationalPendingItem } from "./pending.ts";
 const items:OperationalPendingItem[]=[
  {id:"a",clientId:"client-a",clientLabel:"Érica",createdAt:"2026-10-10T10:00:00Z",description:"",href:"/admin/a",kind:"assessment_draft",statusLabel:"Rascunho",title:"Avaliação"},
@@ -76,4 +76,13 @@ test("client-scoped pending queue validates identifiers and preserves scope in n
  const invalid=readPendingExplorerQuery({cliente:"../../other"},scoped.map(item=>item.kind));
  assert.equal(invalid.invalid,true);
  assert.equal(invalid.clientId,null);
+});
+
+test("malformed client filter cannot silently expand the authorized queue",()=>{
+ const state=readPendingExplorerQuery({cliente:"../../invalid"},items.map(item=>item.kind));
+ assert.equal(state.invalidClient,true);
+ assert.deepEqual(explorePendingClientQueue(items,state),[]);
+ assert.equal(pendingExplorerResetHref(state.clientId),"/admin/pendencias");
+ const id="11111111-1111-4111-8111-111111111111";
+ assert.equal(pendingExplorerResetHref(id),"/admin/pendencias?cliente="+id);
 });
