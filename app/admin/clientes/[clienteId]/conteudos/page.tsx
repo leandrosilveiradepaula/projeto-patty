@@ -1,4 +1,6 @@
 import { authorizedExactRecordPage } from "@/lib/operations/exact-record-navigation";
+import { readClientDirectoryReturn, withClientDirectoryReturn } from "@/lib/operations/client-directory-return";
+import { readPendingQueueReturn, withPendingQueueReturn } from "@/lib/operations/pending-queue-return";
 import { filterProfessionalReleases, readProfessionalReleaseOptions, professionalReleaseHref, professionalContentReleaseYears } from "@/lib/content/professional-release-explorer";
 import { ClientContentReleaseForm } from "@/components/admin/ClientContentReleaseForm";
 import { isContentVersionReleaseEligible } from "@/lib/content/release-eligibility";
@@ -23,7 +25,7 @@ import styles from "./page.module.css";
 
 type AdminClientContentPageProps = {
   params: Promise<{ clienteId: string }>;
-  searchParams: Promise<{ q?: string; arquivo?: string; ordem?: string; pagina?: string; liberacao?: string; ano?: string }>;
+  searchParams: Promise<{ q?: string; arquivo?: string; ordem?: string; pagina?: string; liberacao?: string; ano?: string; filaRetorno?: string; listaQ?: string; listaView?: string; listaPagina?: string }>;
 };
 
 function formatRecordedDate(value: string | null) {
@@ -43,6 +45,9 @@ export default async function AdminClientContentPage({
 }: AdminClientContentPageProps) {
   const { clienteId } = await params;
   const rawFilters = await searchParams;
+  const directoryReturn = readClientDirectoryReturn(rawFilters);
+  const queueReturn = readPendingQueueReturn(rawFilters.filaRetorno);
+  const withReturn = (href: string) => withPendingQueueReturn(withClientDirectoryReturn(href, directoryReturn), queueReturn ?? "");
   const filters = readProfessionalReleaseOptions(rawFilters);
   if (!isUuid(clienteId)) notFound();
   const client = await getAccessibleClient(clienteId);
@@ -129,9 +134,9 @@ export default async function AdminClientContentPage({
         description="A liberação individual depende da versão publicada e do arquivo privado verificado. Consulte as demais áreas sem perder o contexto da cliente."
         title="Continuar atendimento"
       >
-        <Link href={`/admin/clientes/${client.id}/protocolos`}>Protocolos da cliente</Link>
+        <Link href={withReturn(`/admin/clientes/${client.id}/protocolos`)}>Protocolos da cliente</Link>
         {" · "}
-        <Link href={`/admin/clientes/${client.id}/feedback-semanal`}>Feedback semanal</Link>
+        <Link href={withReturn(`/admin/clientes/${client.id}/feedback-semanal`)}>Feedback semanal</Link>
       </Section>
       <div id="liberar-conteudo">
       <Section
@@ -150,7 +155,7 @@ export default async function AdminClientContentPage({
             <ul className={styles.contentList}>
               {sortClientContentReleaseOptions(publishedVersionsAwaitingAsset).map((version) => (
                 <li key={version.id}>
-                  <Link href={`/admin/conteudos/${version.educational_content_id}?versao=${version.id}#assets-do-conteudo`}>
+                  <Link href={withReturn(`/admin/conteudos/${version.educational_content_id}?versao=${version.id}#assets-do-conteudo`)}>
                     {version.title} · versão {version.version_number} · verificar na biblioteca
                   </Link>
                 </li>
@@ -169,7 +174,7 @@ export default async function AdminClientContentPage({
                 : "Não há versão publicada disponível para uma nova liberação nesta cliente."
             }
             title="Nenhum conteúdo disponível para liberar"
-            action={<Link href="/admin/conteudos">Gerenciar biblioteca de conteúdos</Link>}
+            action={<Link href={withReturn("/admin/conteudos")}>Gerenciar biblioteca de conteúdos</Link>}
           />
         ) : (
           <Card>
@@ -196,12 +201,16 @@ export default async function AdminClientContentPage({
         </p>
         {visibleReleases.length > 0 ? (
           <form action={baseHref} className={styles.historyFilters} method="get">
+             {queueReturn ? <input type="hidden" name="filaRetorno" value={queueReturn} /> : null}
+             {directoryReturn.q ? <input type="hidden" name="listaQ" value={directoryReturn.q} /> : null}
+             {directoryReturn.view !== "all" ? <input type="hidden" name="listaView" value={directoryReturn.view} /> : null}
+             {directoryReturn.page && directoryReturn.page > 1 ? <input type="hidden" name="listaPagina" value={directoryReturn.page} /> : null}
             <label>Buscar<input type="search" name="q" maxLength={160} defaultValue={filters.query} placeholder="Título, categoria ou tipo" /></label>
             <label>Arquivo<select name="arquivo" defaultValue={filters.availability}><option value="all">Todos</option><option value="available">Com arquivo</option><option value="missing">Sem arquivo</option></select></label>
             <label>Ano<select name="ano" defaultValue={filters.year ?? "all"}><option value="all">Todos os anos</option>{releaseYears.map(year=><option key={year} value={year}>{year}</option>)}</select></label>
             <label>Ordem<select name="ordem" defaultValue={filters.order}><option value="newest">Mais recentes</option><option value="oldest">Mais antigas</option><option value="title">Título</option></select></label>
             <button type="submit">Filtrar</button>
-            <Link href={baseHref + "#historico-liberacoes"}>Limpar filtros</Link>
+            <Link href={withReturn(baseHref + "#historico-liberacoes")}>Limpar filtros</Link>
           </form>
         ) : null}
         {visibleReleases.length > 0 ? <p role="status" className={styles.notice}>Exibindo {explored.first}–{explored.last} de {explored.total} liberações encontradas.</p> : null}
@@ -211,7 +220,7 @@ export default async function AdminClientContentPage({
               ? "Há liberações registradas, mas nenhuma versão está disponível nesta consulta. Verifique os registros da biblioteca."
               : "Ainda não há conteúdo liberado para esta cliente. Verifique as versões disponíveis acima ou prepare o material na biblioteca administrativa."}
             title={missingReleaseVersions > 0 ? "Versões liberadas indisponíveis" : "Nenhum conteúdo foi liberado para esta cliente"}
-            action={<Link href="/admin/conteudos">Abrir biblioteca de conteúdos</Link>}
+            action={<Link href={withReturn("/admin/conteudos")}>Abrir biblioteca de conteúdos</Link>}
           />
         ) : (
           <>
@@ -235,11 +244,11 @@ export default async function AdminClientContentPage({
                     category={contentVersion.category_key ?? "Não informado"}
                     meta={`Versão ${contentVersion.version_number} · ${assetCountsByVersionId.get(contentVersion.id) ?? 0} arquivo(s) registrado(s) nesta consulta. Liberado em ${formatRecordedDate(release.released_at)}.`}
                     action={
-                      <Link href={
+                      <Link href={withReturn(
                         parentContentIdByVersionId.has(contentVersion.id)
                           ? `/admin/conteudos/${parentContentIdByVersionId.get(contentVersion.id)}?versao=${contentVersion.id}#assets-do-conteudo`
                           : "/admin/conteudos"
-                      }>
+                      )}>
                         {versionIdsWithAssets.has(contentVersion.id)
                           ? "Conferir arquivos na biblioteca"
                           : "Verificar arquivo desta versão"}
@@ -266,9 +275,9 @@ export default async function AdminClientContentPage({
             })}
           </ul>
           {explored.pages > 1 ? <nav className={styles.historyPages} aria-label="Páginas do histórico">
-            {explored.previous ? <Link href={professionalReleaseHref(baseHref, filters, explored.previous)}>Anterior</Link> : <span>Anterior</span>}
+            {explored.previous ? <Link href={withReturn(professionalReleaseHref(baseHref, filters, explored.previous))}>Anterior</Link> : <span>Anterior</span>}
             <span>Página {explored.page} de {explored.pages}</span>
-            {explored.next ? <Link href={professionalReleaseHref(baseHref, filters, explored.next)}>Próxima</Link> : <span>Próxima</span>}
+            {explored.next ? <Link href={withReturn(professionalReleaseHref(baseHref, filters, explored.next))}>Próxima</Link> : <span>Próxima</span>}
           </nav> : null}
           </>
         )}
