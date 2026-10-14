@@ -67,3 +67,25 @@ test("an already deleted synthetic Auth cannot conceal remaining Client state",a
  await assert.rejects(cleanupExactJ1Fixture(admin,fixture({profileId:id}),env),
    /Orphaned synthetic profile\/client/);
 });
+
+test("privileged or ambiguous synthetic identities are never deleted",async()=>{
+ const auth = {id,email,created_at:new Date().toISOString()};
+ for (const role of ["admin","staff"]) {
+   let mutations=0;
+   const admin={
+     auth:{admin:{getUserById:async()=>({error:null,data:{user:auth}})}},
+     from(table){
+       return {
+         select(){return {eq(){
+           if(table==="user_roles") return Promise.resolve({data:[{role}],error:null});
+           mutations++;throw new Error("Unexpected client fetch after privileged identity");
+         }};},
+         delete(){mutations++;throw new Error("Unauthorized delete");}
+       };
+     }
+   };
+   await assert.rejects(cleanupExactJ1Fixture(admin,fixture({profileId:id}),env),
+     /non-client privileges/);
+   assert.equal(mutations,0);
+ }
+});
