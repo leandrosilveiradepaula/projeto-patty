@@ -1,4 +1,9 @@
+"use client";
+
+import { Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { readClientDirectoryReturn, withClientDirectoryReturn } from "@/lib/operations/client-directory-return";
 
 import { Badge } from "@/components/ui/Badge";
 import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
@@ -29,13 +34,15 @@ function formatDateTime(value: string) {
   }).format(new Date(value));
 }
 
-export function AdminAnamnesisWorkspaceHeader({
+function AdminAnamnesisWorkspaceHeaderContent({
   activeSection,
   clientId,
   displayName,
   submissionId,
   submittedAt,
 }: AdminAnamnesisWorkspaceHeaderProps) {
+  const searchParams = useSearchParams();
+  const directoryReturn = readClientDirectoryReturn({ listaQ: searchParams?.get("listaQ") ?? undefined, listaView: searchParams?.get("listaView") ?? undefined, listaPagina: searchParams?.get("listaPagina") ?? undefined });
   const items: Array<{
     href: string;
     key: AdminAnamnesisWorkspaceSection;
@@ -78,7 +85,7 @@ export function AdminAnamnesisWorkspaceHeader({
         actions={
           <Link
             className={styles.backLink}
-            href={`/admin/clientes/${clientId}/anamnese`}
+            href={withClientDirectoryReturn(`/admin/clientes/${clientId}/anamnese`,directoryReturn)}
           >
             Voltar ao histórico da Anamnese
           </Link>
@@ -105,7 +112,7 @@ export function AdminAnamnesisWorkspaceHeader({
             <Link
               aria-current={active ? "page" : undefined}
               className={active ? styles.activeLink : styles.link}
-              href={item.href}
+              href={withClientDirectoryReturn(item.href,directoryReturn)}
               key={item.key}
             >
               {item.label}
@@ -115,4 +122,8 @@ export function AdminAnamnesisWorkspaceHeader({
       </nav>
     </>
   );
+}
+
+export function AdminAnamnesisWorkspaceHeader(props: AdminAnamnesisWorkspaceHeaderProps) {
+  return <Suspense fallback={null}><AdminAnamnesisWorkspaceHeaderContent {...props} /></Suspense>;
 }

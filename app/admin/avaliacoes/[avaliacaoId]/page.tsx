@@ -1,3 +1,4 @@
+import { readClientDirectoryReturn, withClientDirectoryReturn } from "@/lib/operations/client-directory-return";
 import { findPreviousFinalizedAssessment, formatAdministrativeAssessmentDate } from "@/lib/evaluations/administrative-assessment-history";
 import { earlierFinalizedPhotoAssessmentOptions, selectEarlierPhotoAssessment } from "@/lib/evaluations/assessment-photo-comparison";
 import { AssessmentLongitudinalPhotoComparison } from "@/components/admin/AssessmentLongitudinalPhotoComparison";
@@ -55,7 +56,7 @@ type AdminAvaliacaoDetailPageProps = {
   params: Promise<{
     avaliacaoId: string;
   }>;
-  searchParams: Promise<{ fotoAvaliacaoAnterior?: string; fotoAnterior?: string; fotoAtual?: string }>;
+  searchParams: Promise<{ fotoAvaliacaoAnterior?: string; fotoAnterior?: string; fotoAtual?: string; listaQ?: string; listaView?: string; listaPagina?: string }>;
 };
 
 const professionalDecisionLabels: Record<string, string> = {
@@ -107,6 +108,7 @@ export default async function AdminAvaliacaoDetailPage({
   searchParams,
 }: AdminAvaliacaoDetailPageProps) {
   const [{ avaliacaoId }, filters] = await Promise.all([params, searchParams]);
+  const directoryReturn = readClientDirectoryReturn(filters);
 
   if (!isUuid(avaliacaoId)) {
     notFound();
@@ -220,7 +222,7 @@ export default async function AdminAvaliacaoDetailPage({
         actions={
           <Link
             className={styles.backLink}
-            href={`/admin/clientes/${assessment.client_id}/avaliacoes`}
+            href={withClientDirectoryReturn(`/admin/clientes/${assessment.client_id}/avaliacoes`,directoryReturn)}
           >
             Voltar às avaliações da cliente
           </Link>
@@ -241,10 +243,10 @@ export default async function AdminAvaliacaoDetailPage({
         clientId={assessment.client_id}
       />
       <nav aria-label="Continuidade do atendimento após avaliação" className={styles.continuityNav}>
-        <Link href={`/admin/clientes/${assessment.client_id}/avaliacoes#${isDraft ? "avaliacoes-em-andamento" : "historico-finalizado"}`}>{isDraft ? "Voltar aos rascunhos" : "Histórico finalizado"}</Link>
-        <Link href={`/admin/clientes/${assessment.client_id}/evolucao`}>Evolução das medidas</Link>
+        <Link href={withClientDirectoryReturn(`/admin/clientes/${assessment.client_id}/avaliacoes#${isDraft ? "avaliacoes-em-andamento" : "historico-finalizado"}`,directoryReturn)}>{isDraft ? "Voltar aos rascunhos" : "Histórico finalizado"}</Link>
+        <Link href={withClientDirectoryReturn(`/admin/clientes/${assessment.client_id}/evolucao`,directoryReturn)}>Evolução das medidas</Link>
         <Link href="#historico-profissional">Histórico profissional ({followUps.length} registro(s))</Link>
-        <Link href={`/admin/clientes/${assessment.client_id}/protocolos`}>Protocolos da cliente</Link>
+        <Link href={withClientDirectoryReturn(`/admin/clientes/${assessment.client_id}/protocolos`,directoryReturn)}>Protocolos da cliente</Link>
       </nav>
       <PageSectionNav
         items={[
@@ -387,7 +389,7 @@ export default async function AdminAvaliacaoDetailPage({
             />
             <Link
               className={styles.backLink}
-              href={`/admin/avaliacoes/${previousAssessment.id}`}
+              href={withClientDirectoryReturn(`/admin/avaliacoes/${previousAssessment.id}`,directoryReturn)}
             >
               Abrir avaliação anterior de {formatAdministrativeAssessmentDate(previousAssessment.assessed_at)}
             </Link>
@@ -414,7 +416,7 @@ export default async function AdminAvaliacaoDetailPage({
             {availablePhotos.length === 0 ? (
               <p className={styles.cardDescription}>
                 Não há outras fotos privadas disponíveis para vincular. Se precisar cadastrar uma nova foto,
-                acesse os <Link href={`/admin/clientes/${assessment.client_id}/arquivos`}>arquivos privados da cliente</Link>.
+                acesse os <Link href={withClientDirectoryReturn(`/admin/clientes/${assessment.client_id}/arquivos`,directoryReturn)}>arquivos privados da cliente</Link>.
               </p>
             ) : null}
           </Card>

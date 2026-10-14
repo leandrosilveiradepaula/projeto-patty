@@ -1,3 +1,4 @@
+import { readClientDirectoryReturn, withClientDirectoryReturn } from "@/lib/operations/client-directory-return";
 import {parseVersionFilter,exploreProtocolVersions,protocolVersionExplorerHref,indexProtocolVersionStructures,summarizeProtocolVersionArchive} from "@/lib/protocol/version-explorer";
 import { AdminMealDraftGuidance } from "@/components/admin/AdminMealDraftGuidance";
 import { AdminProtocolDraftEditor } from "@/components/admin/AdminProtocolDraftEditor";
@@ -42,7 +43,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import styles from "./page.module.css";
 
-type AdminProtocoloDetailPageProps = { params: Promise<{ protocoloId: string }>; searchParams: Promise<{ versao?: string; buscar?: string; estado?: string; ordem?: string; pagina?: string; estrutura?: string }> };
+type AdminProtocoloDetailPageProps = { params: Promise<{ protocoloId: string }>; searchParams: Promise<{ versao?: string; buscar?: string; estado?: string; ordem?: string; pagina?: string; estrutura?: string; listaQ?: string; listaView?: string; listaPagina?: string }> };
 
 function formatDateTime(value: string | null | undefined) {
   if (!value || !Number.isFinite(Date.parse(value))) {
@@ -79,6 +80,7 @@ function getLifecyclePresentation(input: {
 export default async function AdminProtocoloDetailPage({ params, searchParams }: AdminProtocoloDetailPageProps) {
   const { protocoloId } = await params;
   const search = await searchParams;
+  const directoryReturn = readClientDirectoryReturn(search);
   const { versao: requestedVersion } = search;
   const filters = parseVersionFilter(search);
 
@@ -141,7 +143,7 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
         actions={
           <Link
             className={styles.backLink}
-            href={`/admin/clientes/${protocol.client_id}/protocolos`}
+            href={withClientDirectoryReturn(`/admin/clientes/${protocol.client_id}/protocolos`,directoryReturn)}
           >
             Voltar aos protocolos da cliente
           </Link>
@@ -179,6 +181,9 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
         ) : (
           <>
             <form method="get" className={styles.versionFilters}>
+              {directoryReturn.q ? <input type="hidden" name="listaQ" value={directoryReturn.q} /> : null}
+              {directoryReturn.view !== "all" ? <input type="hidden" name="listaView" value={directoryReturn.view} /> : null}
+              {directoryReturn.page && directoryReturn.page > 1 ? <input type="hidden" name="listaPagina" value={directoryReturn.page} /> : null}
               <label>Buscar número da versão<input type="search" name="buscar" maxLength={120} defaultValue={filters.term} placeholder="Ex.: 3" /></label>
               <label>Situação<select name="estado" defaultValue={filters.status}><option value="all">Todas</option><option value="draft">Rascunho</option><option value="review">Em revisão</option><option value="approved">Aprovada, não publicada</option><option value="published">Publicada</option></select></label>
               <label>Estrutura alimentar<select name="estrutura" defaultValue={filters.structure}>
@@ -190,7 +195,7 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
               </select></label>
               <label>Ordem<select name="ordem" defaultValue={filters.order}><option value="newest">Versões recentes</option><option value="oldest">Versões antigas</option></select></label>
               <button type="submit">Aplicar filtros</button>
-              <Link className={styles.backLink} href={protocolVersionExplorerHref("/admin/protocolos/"+protocol.id,parseVersionFilter({}),1)}>Limpar filtros</Link>
+              <Link className={styles.backLink} href={withClientDirectoryReturn(protocolVersionExplorerHref("/admin/protocolos/"+protocol.id,parseVersionFilter({}),1),directoryReturn)}>Limpar filtros</Link>
             </form>
             <p className={styles.versionFactsSummary}>Total: {archiveSummary.total} · Rascunho: {archiveSummary.draft} · Revisão: {archiveSummary.review} · Aprovadas: {archiveSummary.approved} · Publicadas: {archiveSummary.published} · Sem plano: {archiveSummary.missingPlan} · Com ciclos: {archiveSummary.withCycles} · Com doses: {archiveSummary.withDoses}</p>
             <p role="status">{archive.from}–{archive.to} de {archive.total} versões encontradas.</p>
@@ -396,8 +401,8 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
           </ol>
           {archive.total>0 ? <nav className={styles.versionPaging} aria-label="Páginas do histórico de versões">
             <span>Página {archive.page} de {archive.pages}</span>
-            {archive.previous ? <Link href={protocolVersionExplorerHref("/admin/protocolos/"+protocol.id,filters,archive.previous)}>Anterior</Link> : null}
-            {archive.next ? <Link href={protocolVersionExplorerHref("/admin/protocolos/"+protocol.id,filters,archive.next)}>Próxima</Link> : null}
+            {archive.previous ? <Link href={withClientDirectoryReturn(protocolVersionExplorerHref("/admin/protocolos/"+protocol.id,filters,archive.previous),directoryReturn)}>Anterior</Link> : null}
+            {archive.next ? <Link href={withClientDirectoryReturn(protocolVersionExplorerHref("/admin/protocolos/"+protocol.id,filters,archive.next),directoryReturn)}>Próxima</Link> : null}
           </nav> : null}
           </>
         )}

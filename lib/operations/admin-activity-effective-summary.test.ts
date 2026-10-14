@@ -41,7 +41,7 @@ test("summary returns directly to the selected historical event, filtered by ori
   assert.ok(overview.includes("latestActivityHistoryHref"));
   assert.ok(overview.includes("latestActivity.checkin_date"));
   assert.ok(overview.includes('#atividade-${latestActivity.id}'));
-  assert.ok(overview.includes('href={latestActivityHistoryHref}'));
+  assert.ok(overview.includes('href={withClientDirectoryReturn(latestActivityHistoryHref,directoryReturn)}'));
   assert.ok(history.includes('id={`atividade-${event.id}`}'));
   assert.ok(history.includes("parseCheckinHistoryDay(dia, today)"));
   assert.ok(history.includes("listAccessibleClientActivityCheckinEvents(client.id, selectedDay ?? undefined)"));
