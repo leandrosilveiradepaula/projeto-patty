@@ -17,8 +17,8 @@ test("queue exposes group jump-links only when the group has a real target", () 
 });
 
 test("focused groups keep collapsible client/operational queues accessible", () => {
-  assert.ok(page.includes('open={focusedGroup === "client"}'));
-  assert.ok(page.includes('open={focusedGroup === "operational"}'));
+  assert.ok(page.includes('open={focusedGroup === "client" || (!focusedGroup && (filters.responsible === "client" || filters.clientPage > 1))}'));
+  assert.ok(page.includes('open={focusedGroup === "operational" || (!focusedGroup && (filters.responsible === "operational" || filters.operationalPage > 1))}'));
   assert.ok(page.includes('id="acao-da-patty"'));
   assert.ok(page.includes('id="aguardando-cliente"'));
   assert.ok(page.includes('id="operacional-do-sistema"'));
