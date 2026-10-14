@@ -267,7 +267,7 @@ export default async function ClientWeeklyFeedbackPage({ searchParams }: { searc
           </Section>
         </>
       )}
-      <ClientJourneyNextSteps areas={["checkins","protocol","index"]} />
+      <ClientJourneyNextSteps areas={["notices","checkins","protocol","index"]} />
     </>
   );
 }
