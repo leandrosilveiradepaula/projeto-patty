@@ -164,7 +164,12 @@ test("J1: convite manual real, ativação móvel, perfil persistido e retomada d
     const client = await clientContext.newPage();
     await test.step("cliente ativa a conta pelo link individual no celular", async () => {
       await client.goto(activationLink);
-      await expect(client).toHaveURL(/\/ativar-conta\/?$/);
+      // Do not use a URL assertion here: Playwright can print a one-time token
+      // from an unexpected URL into the CI log if the redirect fails.
+      if (new URL(client.url()).searchParams.has("token_hash")) {
+        throw new Error("Activation did not consume the one-time token safely.");
+      }
+      await expect(client.getByRole("heading",{name:"Ativar sua conta"})).toBeVisible();
       await client.getByLabel("Crie sua senha").fill(password);
       await client.getByLabel("Confirme sua senha").fill(password);
       await client.getByRole("button",{name:"Criar senha e continuar"}).click();
