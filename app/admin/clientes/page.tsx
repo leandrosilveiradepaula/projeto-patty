@@ -7,7 +7,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { TextInput } from "@/components/ui/TextInput";
 import { Section } from "@/components/ui/Section";
 import { getOperationalPendingItemsForCurrentAdmin } from "@/lib/operations/pending-data";
-import { groupOperationalPendingItems } from "@/lib/operations/pending";
+import { summarizeClientPendingItems } from "@/lib/operations/client-pending-summary";
 import { listClientsAssignedToCurrentAdmin } from "@/lib/supabase/data-access";
 import Link from "next/link";
 import styles from "./page.module.css";
@@ -50,23 +50,9 @@ export default async function AdminClientesPage({
       sensitivity: "base",
     });
   });
-  const pattyPendingItems = groupOperationalPendingItems(pendingItems).patty;
-  const pattyPendingItemsByClientId = new Map<
-    string,
-    typeof pattyPendingItems
-  >();
-
-  for (const item of pattyPendingItems) {
-    if (!item.clientId) {
-      continue;
-    }
-
-    const current = pattyPendingItemsByClientId.get(item.clientId) ?? [];
-    current.push(item);
-    pattyPendingItemsByClientId.set(item.clientId, current);
-  }
-  const clientsWithPattyActions = clients.filter(client => pattyPendingItemsByClientId.has(client.id)).length;
-  const actionablePattyItems = clients.reduce((count, client) => count + (pattyPendingItemsByClientId.get(client.id)?.length ?? 0), 0);
+  const pendingByClientId = summarizeClientPendingItems(pendingItems);
+  const clientsWithPattyActions = clients.filter(client => (pendingByClientId.get(client.id)?.patty.length ?? 0) > 0).length;
+  const actionablePattyItems = clients.reduce((count, client) => count + (pendingByClientId.get(client.id)?.patty.length ?? 0), 0);
   const searchTerm = readClientDirectorySearchTerm(q);
   const viewFilter = view === "patty" ? "patty" : "all";
   const filteredClients = clients.filter((client) => {
@@ -74,12 +60,12 @@ export default async function AdminClientesPage({
       searchTerm, client.full_name, client.profiles?.display_name,
     );
     const matchesView =
-      viewFilter === "all" || pattyPendingItemsByClientId.has(client.id);
+      viewFilter === "all" || (pendingByClientId.get(client.id)?.patty.length ?? 0) > 0;
 
     return matchesSearch && matchesView;
   });
 
-  const visiblePattyActions = filteredClients.reduce((count, client) => count + (pattyPendingItemsByClientId.get(client.id)?.length ?? 0), 0);
+  const visiblePattyActions = filteredClients.reduce((count, client) => count + (pendingByClientId.get(client.id)?.patty.length ?? 0), 0);
 
   return (
     <>
@@ -169,8 +155,8 @@ export default async function AdminClientesPage({
             <ul className={styles.clientList}>
             {filteredClients.map((client) => {
               const displayName = client.full_name?.trim() || client.profiles?.display_name?.trim();
-              const clientPattyPendingItems =
-                pattyPendingItemsByClientId.get(client.id) ?? [];
+              const pendingSummary = pendingByClientId.get(client.id);
+              const clientPattyPendingItems = pendingSummary?.patty ?? [];
               const nextPattyPending = clientPattyPendingItems[0] ?? null;
               const secondPattyPending = clientPattyPendingItems.find(
                 (item) => item.href !== nextPattyPending?.href,
@@ -199,7 +185,7 @@ export default async function AdminClientesPage({
                             {secondPattyPending.title}
                           </Link>
                         ) : null}
-                        {clientPattyPendingItems.length > 0 ? <Link className={styles.secondaryActionLink} href={`/admin/pendencias?cliente=${client.id}`}>Todas as pendências ({clientPattyPendingItems.length})</Link> : null}
+                        {pendingSummary?.total ? <Link className={styles.secondaryActionLink} href={`/admin/pendencias?cliente=${client.id}`}>Todas as pendências ({pendingSummary.total})</Link> : null}
                         <Link
                           aria-label={`Abrir acompanhamento de ${displayName || "registro legado sem nome"}`}
                           className={
@@ -218,7 +204,7 @@ export default async function AdminClientesPage({
                         ? "Vincule a identidade de acesso da cliente para concluir o cadastro."
                         : nextPattyPending
                           ? `${nextPattyPending.title} · ${clientPattyPendingItems.length} item(ns) na fila da Patty`
-                          : "Sem item na fila da Patty"
+                          : pendingSummary?.waiting ? `Aguardando cliente: ${pendingSummary.waiting} pendência(s)` : pendingSummary?.operational ? `Pendências operacionais: ${pendingSummary.operational}` : "Sem pendências registradas"
                     }
                     name={displayName || "Nome ausente — registro legado"}
                     secondary={
