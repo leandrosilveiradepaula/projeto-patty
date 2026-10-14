@@ -1,0 +1,41 @@
+name: Auto-merge validated journeys
+
+# Runs only trusted code from master. Does not checkout or execute PR files.
+on:
+  workflow_run:
+    workflows:
+      - Validate application
+    types:
+      - completed
+  schedule:
+    - cron: "*/20 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+concurrency:
+  group: patty-safe-automerge
+  cancel-in-progress: false
+
+jobs:
+  auto-merge:
+    if: github.repository == 'leandrosilveiradepaula/projeto-patty'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout trusted master policy only
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: master
+          persist-credentials: false
+
+      - name: Verify merge gate script syntax
+        run: node --check .github/scripts/journey-automerge.mjs
+
+      - name: Merge eligible CI-approved journey PRs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node .github/scripts/journey-automerge.mjs
