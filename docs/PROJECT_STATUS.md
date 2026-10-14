@@ -1,3 +1,7 @@
+## J1: aproveitar release READY sem disfarçar master desatualizado (2026-10-14)
+
+A evidência da Vercel aponta `f0cbfcf6` (PR #834) **Ready/Production**, enquanto `2cbe9d10` (PR #835) permanece rate limited. A comparação GitHub confirmou que #835 alterou só CI, docs e testes, não o runtime. Para destravar a **execução real** de J1.01–03, o preflight passa a aceitar especificamente a release f0cb após reconciliação automática de CI do master, status Vercel da versão publicada e comparação integral de arquivos permitidos. Qualquer alteração de runtime reprova o gate. Evidência de execução autenticada ainda não existe; a J1 continua **NÃO HOMOLOGADA**. Referência: `docs/JOURNEY_HOMOLOGATION.md`.
+
 ## J1: execução sem intervenção após CI e deploy do mesmo SHA (2026-10-14)
 
 Para eliminar dependência de acionamento manual, o workflow autenticado da J1 é notificado pelo sucesso do deploy Vercel no commit do `master` e pela conclusão do CI no mesmo SHA, além de manter agendamento como fallback. Ele só poderá usar credentials sintéticas após gate server-side independente confirmar **ambos** CI e deploy no commit exato; eventos de PR, branches externas, status Vercel com falha e SHAs antigos são descartados. O commit `f0cbfcf6b6967755d3a6a614d418b1dd0f9bb529` já recebeu status Vercel `success - Deployment has completed`, mas o E2E específico ainda precisa efetivamente executar; não considerar isso homologação J1. Comportamento e estados documentados em `docs/JOURNEY_HOMOLOGATION.md`.
