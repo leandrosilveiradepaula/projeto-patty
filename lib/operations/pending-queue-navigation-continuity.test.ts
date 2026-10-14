@@ -77,3 +77,12 @@ test("client-specific pending queue resolves authorized assignments independentl
  assert.match(page,/Voltar ao acompanhamento/);
  assert.match(page,/unavailableClient \? \[\] : explorePendingClientQueue/);
 });
+
+test("pending filters, group links, pages and client links preserve directory return context",()=>{
+ assert.match(page,/name="listaQ" value=\{directoryReturn\.q\}/);
+ assert.match(page,/name="listaView" value=\{directoryReturn\.view\}/);
+ assert.match(page,/withClientDirectoryReturn\(pendingExplorerGroupHref\("client",filters\), directoryReturn\)/);
+ assert.match(page,/withClientDirectoryReturn\(pendingExplorerPageHref\("operational",filters,pages\.operational\.page\+1\), directoryReturn\)/);
+ assert.match(page,/withClientDirectoryReturn\(pendingExplorerResetHref\(filters\.clientId\), directoryReturn\)/);
+ assert.match(page,/withClientDirectoryReturn\(\x60\/admin\/clientes\/\$\{item\.clientId\}\x60, directoryReturn\)/);
+});
