@@ -1,4 +1,6 @@
 import { readAdminAnamnesisQuery, filterAdminAnamneses, pageAdminAnamneses, adminAnamnesisHref } from "@/lib/anamnesis/admin-client-anamnesis-explorer";
+import { readClientDirectoryReturn, withClientDirectoryReturn } from "@/lib/operations/client-directory-return";
+import { readPendingQueueReturn, withPendingQueueReturn } from "@/lib/operations/pending-queue-return";
 import { summarizeAnamnesisReviewHistory } from "@/lib/anamnesis/review-summary";
 import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
 import { loadClientClarificationSummary } from "@/lib/follow-up/client-clarification-summary-loader";
@@ -18,7 +20,7 @@ import styles from "./page.module.css";
 
 type AdminClienteAnamnesePageProps = {
   params: Promise<{ clienteId: string }>;
-  searchParams: Promise<{ versao?: string; pendentes?: string; enviadas?: string }>;
+  searchParams: Promise<{ versao?: string; pendentes?: string; enviadas?: string; filaRetorno?: string; listaQ?: string; listaView?: string; listaPagina?: string }>;
 };
 
 function formatDateTime(value: string) {
@@ -37,7 +39,10 @@ export default async function AdminClienteAnamnesePage({
   params,
   searchParams,
 }: AdminClienteAnamnesePageProps) {
-  const { clienteId } = await params;
+  const [{ clienteId }, rawQuery] = await Promise.all([params, searchParams]);
+  const directoryReturn = readClientDirectoryReturn(rawQuery);
+  const queueReturn = readPendingQueueReturn(rawQuery.filaRetorno);
+  const navigate = (href: string) => withPendingQueueReturn(withClientDirectoryReturn(href, directoryReturn), queueReturn ?? "");
   const client = await getAccessibleClient(clienteId);
 
   if (!client) {
@@ -52,7 +57,7 @@ export default async function AdminClienteAnamnesePage({
     (submission) => Boolean(submission.submitted_at),
   );
   const versions=[...new Set(submissions.flatMap(x=>x.anamnesis_form_versions?.version_number?[x.anamnesis_form_versions.version_number]:[]))].sort((a,b)=>b-a);
-  const selected=readAdminAnamnesisQuery(await searchParams,versions);
+  const selected=readAdminAnamnesisQuery(rawQuery,versions);
   const pendingHistory=pageAdminAnamneses(filterAdminAnamneses(pendingSubmissions,selected.version),selected.pending);
   const submittedHistory=pageAdminAnamneses(filterAdminAnamneses(submittedSubmissions,selected.version),selected.submitted);
   const submittedIds = submittedSubmissions.map((submission) => submission.id);
@@ -75,6 +80,10 @@ export default async function AdminClienteAnamnesePage({
       <ClientWorkspaceNav activeArea="anamnese" clientId={client.id} />
       {submissions.length>0 ? <Section title="Localizar versões da Anamnese" description="A consulta não altera respostas originais nem notas profissionais.">
         <form className={styles.historyFilters} action={`/admin/clientes/${client.id}/anamnese`} method="get">
+          {queueReturn ? <input type="hidden" name="filaRetorno" value={queueReturn} /> : null}
+          {directoryReturn.q ? <input type="hidden" name="listaQ" value={directoryReturn.q} /> : null}
+          {directoryReturn.view !== "all" ? <input type="hidden" name="listaView" value={directoryReturn.view} /> : null}
+          {directoryReturn.page && directoryReturn.page > 1 ? <input type="hidden" name="listaPagina" value={directoryReturn.page} /> : null}
           <label>Versão do formulário
             <select name="versao" defaultValue={selected.version}>
               <option value="all">Todas</option>
@@ -82,7 +91,7 @@ export default async function AdminClienteAnamnesePage({
             </select>
           </label>
           <button type="submit">Filtrar</button>
-          <Link href={`/admin/clientes/${client.id}/anamnese`}>Limpar</Link>
+          <Link href={navigate(`/admin/clientes/${client.id}/anamnese`)}>Limpar</Link>
         </form>
         {selected.invalid || selected.pending>pendingHistory.pages || selected.submitted>submittedHistory.pages ? <p role="status">Consulta ajustada para uma versão ou página disponível.</p> : null}
         <p role="status">{pendingHistory.total} de {pendingSubmissions.length} rascunho(s) · {submittedHistory.total} de {submittedSubmissions.length} enviada(s) correspondem ao filtro.</p>
@@ -94,7 +103,7 @@ export default async function AdminClienteAnamnesePage({
           id="anamnese-pending"
         title="Aguardando cliente"
         >
-          {pendingHistory.total === 0 ? <EmptyState title="Nenhum rascunho nesta versão" description="Há rascunhos anteriores, mas nenhum corresponde à versão selecionada." action={<Link href={`/admin/clientes/${client.id}/anamnese#anamnese-pending`}>Limpar filtro e ver todas as versões</Link>} /> : null}
+          {pendingHistory.total === 0 ? <EmptyState title="Nenhum rascunho nesta versão" description="Há rascunhos anteriores, mas nenhum corresponde à versão selecionada." action={<Link href={navigate(`/admin/clientes/${client.id}/anamnese#anamnese-pending`)}>Limpar filtro e ver todas as versões</Link>} /> : null}
           <ol className={styles.submissionList}>
             {pendingHistory.items.map((submission) => {
               const version = submission.anamnesis_form_versions;
@@ -125,8 +134,8 @@ export default async function AdminClienteAnamnesePage({
           </ol>
           {pendingHistory.pages>1?<nav className={styles.historyPages} aria-label="Páginas de Anamneses pendentes">
             <span>Página {pendingHistory.page} de {pendingHistory.pages}</span>
-            {pendingHistory.page>1?<Link href={adminAnamnesisHref(client.id,selected.version,pendingHistory.page-1,submittedHistory.page,"pending")}>Anterior</Link>:null}
-            {pendingHistory.page<pendingHistory.pages?<Link href={adminAnamnesisHref(client.id,selected.version,pendingHistory.page+1,submittedHistory.page,"pending")}>Próxima</Link>:null}
+            {pendingHistory.page>1?<Link href={navigate(adminAnamnesisHref(client.id,selected.version,pendingHistory.page-1,submittedHistory.page,"pending"))}>Anterior</Link>:null}
+            {pendingHistory.page<pendingHistory.pages?<Link href={navigate(adminAnamnesisHref(client.id,selected.version,pendingHistory.page+1,submittedHistory.page,"pending"))}>Próxima</Link>:null}
           </nav>:null}
         </Section>
       ) : null}
@@ -146,7 +155,7 @@ export default async function AdminClienteAnamnesePage({
           />
         ) : (
           <>
-          {submittedHistory.total === 0 ? <EmptyState title="Nenhuma Anamnese enviada nesta versão" description="As versões enviadas anteriormente continuam preservadas." action={<Link href={`/admin/clientes/${client.id}/anamnese#anamnese-submitted`}>Limpar filtro e ver todas as versões</Link>} /> : null}
+          {submittedHistory.total === 0 ? <EmptyState title="Nenhuma Anamnese enviada nesta versão" description="As versões enviadas anteriormente continuam preservadas." action={<Link href={navigate(`/admin/clientes/${client.id}/anamnese#anamnese-submitted`)}>Limpar filtro e ver todas as versões</Link>} /> : null}
           <ol className={styles.submissionList}>
             {submittedHistory.items.map((submission) => {
               const version = submission.anamnesis_form_versions;
@@ -191,7 +200,7 @@ export default async function AdminClienteAnamnesePage({
                         <dd>{awaitingProfessional}</dd>
                       </div>
                     </dl>
-                    {reviewSummary ? <Link className={styles.detailLink} href={`/admin/anamneses/${submission.id}/revisao#revisao-${reviewSummary.latest.id}`}>Consultar última nota interna · {formatDateTime(reviewSummary.latest.created_at)}</Link> : null}
+                    {reviewSummary ? <Link className={styles.detailLink} href={navigate(`/admin/anamneses/${submission.id}/revisao#revisao-${reviewSummary.latest.id}`)}>Consultar última nota interna · {formatDateTime(reviewSummary.latest.created_at)}</Link> : null}
                     {!hasProfessionalNote ? (
                       <p className={styles.submissionMeta}>
                         Esta submissão ainda não possui nota de revisão profissional registrada.
@@ -205,7 +214,7 @@ export default async function AdminClienteAnamnesePage({
                     {awaitingProfessional > 0 && clarification?.firstAwaitingProfessionalRequestId ? (
                       <Link
                         className={styles.detailLink}
-                        href={`/admin/anamneses/${submission.id}/esclarecimentos#esclarecimento-${clarification.firstAwaitingProfessionalRequestId}`}
+                        href={navigate(`/admin/anamneses/${submission.id}/esclarecimentos#esclarecimento-${clarification.firstAwaitingProfessionalRequestId}`)}
                       >
                         Revisar {awaitingProfessional} complemento(s) da cliente
                       </Link>
@@ -213,27 +222,27 @@ export default async function AdminClienteAnamnesePage({
                     {awaitingClient > 0 && clarification?.firstAwaitingClientRequestId ? (
                       <Link
                         className={styles.detailLink}
-                        href={`/admin/anamneses/${submission.id}/esclarecimentos#esclarecimento-${clarification.firstAwaitingClientRequestId}`}
+                        href={navigate(`/admin/anamneses/${submission.id}/esclarecimentos#esclarecimento-${clarification.firstAwaitingClientRequestId}`)}
                       >
                         Ver {awaitingClient} pedido(s) aguardando resposta da cliente
                       </Link>
                     ) : null}
                     <Link
                       className={styles.detailLink}
-                      href={`/admin/anamneses/${submission.id}`}
+                      href={navigate(`/admin/anamneses/${submission.id}`)}
                     >
                       Ver respostas originais
                     </Link>
-                    <Link className={styles.detailLink} href={`/admin/anamneses/${submission.id}/revisao`}>
+                    <Link className={styles.detailLink} href={navigate(`/admin/anamneses/${submission.id}/revisao`)}>
                       {hasProfessionalNote ? "Consultar revisão profissional" : "Registrar revisão profissional"}
                     </Link>
-                    <Link className={styles.detailLink} href={`/admin/anamneses/${submission.id}/esclarecimentos`}>
+                    <Link className={styles.detailLink} href={navigate(`/admin/anamneses/${submission.id}/esclarecimentos`)}>
                       Consultar esclarecimentos
                     </Link>
-                    <Link className={styles.detailLink} href={`/admin/anamneses/${submission.id}/correcoes`}>
+                    <Link className={styles.detailLink} href={navigate(`/admin/anamneses/${submission.id}/correcoes`)}>
                       Consultar correções
                     </Link>
-                    <Link className={styles.detailLink} href={`/admin/anamneses/${submission.id}/ia`}>
+                    <Link className={styles.detailLink} href={navigate(`/admin/anamneses/${submission.id}/ia`)}>
                       Consultar análise assistiva
                     </Link>
                   </Card>
@@ -243,8 +252,8 @@ export default async function AdminClienteAnamnesePage({
           </ol>
           {submittedHistory.pages>1?<nav className={styles.historyPages} aria-label="Páginas de Anamneses enviadas">
             <span>Página {submittedHistory.page} de {submittedHistory.pages}</span>
-            {submittedHistory.page>1?<Link href={adminAnamnesisHref(client.id,selected.version,pendingHistory.page,submittedHistory.page-1,"submitted")}>Anterior</Link>:null}
-            {submittedHistory.page<submittedHistory.pages?<Link href={adminAnamnesisHref(client.id,selected.version,pendingHistory.page,submittedHistory.page+1,"submitted")}>Próxima</Link>:null}
+            {submittedHistory.page>1?<Link href={navigate(adminAnamnesisHref(client.id,selected.version,pendingHistory.page,submittedHistory.page-1,"submitted"))}>Anterior</Link>:null}
+            {submittedHistory.page<submittedHistory.pages?<Link href={navigate(adminAnamnesisHref(client.id,selected.version,pendingHistory.page,submittedHistory.page+1,"submitted"))}>Próxima</Link>:null}
           </nav>:null}
           </>
         )}
