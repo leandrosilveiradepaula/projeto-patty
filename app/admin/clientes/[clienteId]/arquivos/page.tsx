@@ -94,6 +94,12 @@ export default async function AdminClientFilesPage({
   const order=readPrivateFileHistorySort(hasExactTarget?undefined:filters.ordem);
   const requestedPending = readPrivateFileHistoryPage(filters.paginaPendentes);
   const requestedHistory = readPrivateFileHistoryPage(filters.paginaHistorico);
+  const hasAdvancedFileFilters = metadata.year !== "all" || metadata.size !== "all" ||
+    discovery.month !== "all" || Boolean(discovery.fromDate || discovery.toDate) ||
+    discovery.minKb !== null || discovery.maxKb !== null || discovery.mimeFamily !== "all" ||
+    discovery.recordedValidity !== "all" || discovery.releaseYear !== "all" ||
+    discovery.releaseMonth !== "all" || discovery.namePresence !== "all" ||
+    discovery.releaseState !== "all" || order.value !== "newest";
   const counts = privateFileHistoryCounts(files, client.profile_id);
   const kinds = countPrivateFileCategories(files);
   const basePath = `/admin/clientes/${client.id}/arquivos`;
@@ -159,6 +165,9 @@ export default async function AdminClientFilesPage({
               <option value="all">Tudo</option><option value="pending">Aguardando liberação</option><option value="history">Histórico</option>
             </select>
           </label>
+          <details className={styles.advancedFileFilters} open={hasAdvancedFileFilters}>
+            <summary>Filtros avançados{hasAdvancedFileFilters ? " (aplicados)" : ""}</summary>
+            <div className={styles.advancedFileFiltersContent}>
           <label>Ano de registro
             <select name="ano" defaultValue={metadata.year}>
               <option value="all">Todos os anos</option>
@@ -191,6 +200,8 @@ export default async function AdminClientFilesPage({
               <option value="released">Disponibilizados mais recentemente</option><option value="released-oldest">Disponibilizados há mais tempo</option><option value="name-asc">Nome A–Z</option><option value="name-desc">Nome Z–A</option><option value="mime">Tipo MIME</option>
             </select>
           </label>
+            </div>
+          </details>
           <button type="submit">Filtrar</button>
           <Link href={`/admin/clientes/${client.id}/arquivos`}>Limpar filtros</Link>
         </form>
