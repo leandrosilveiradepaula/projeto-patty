@@ -92,3 +92,10 @@ test("both release form instances receive the actual filename, not an unrelated 
   const occurrences = page.split('fileName={file.original_filename?.trim() || "Arquivo sem nome informado"}').length - 1;
   assert.equal(occurrences, 2);
 });
+
+test("authorized private file deep links explain temporary filter reset", () => {
+  const page = readFileSync(new URL("../../app/admin/clientes/[clienteId]/arquivos/page.tsx", import.meta.url), "utf8");
+  assert.match(page, /hasExactTarget \? \(/);
+  assert.match(page, /Os filtros anteriores foram desconsiderados/);
+  assert.match(page, /Voltar à lista completa de arquivos/);
+});
