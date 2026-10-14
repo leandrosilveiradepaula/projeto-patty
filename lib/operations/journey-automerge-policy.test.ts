@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { evaluateMergeContract, sensitivePath } from "../../.github/scripts/journey-automerge.mjs";
+// Import the trusted .mjs runtime without treating it as a typed application module.
+const gateModule = "../../.github/scripts/" + "journey-automerge.mjs";
+const { evaluateMergeContract, sensitivePath } = await import(gateModule);
 
 const repository = "leandrosilveiradepaula/projeto-patty";
 const owner = "leandrosilveiradepaula";
