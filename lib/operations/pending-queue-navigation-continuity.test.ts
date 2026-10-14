@@ -122,3 +122,13 @@ test("record links carry exact queue page and the admin shell exposes explicit r
  assert.match(page,/pendingExplorerPageHref\("client",filters,pages\.client\.page\)/);
  assert.match(page,/pendingExplorerPageHref\("operational",filters,pages\.operational\.page\)/);
 });
+
+test("client overview links and workspace navigation retain the validated queue return",()=>{
+ const clientNav=readFileSync(new URL("../../components/admin/ClientWorkspaceNav.tsx",import.meta.url),"utf8");
+ const anamnesisNav=readFileSync(new URL("../../components/admin/AdminAnamnesisWorkspaceHeader.tsx",import.meta.url),"utf8");
+ assert.match(page,/withPendingQueueReturn\(withClientDirectoryReturn\(\x60\/admin\/clientes\/\$\{item\.clientId\}\x60, directoryReturn\), queueReturnHref\)/);
+ assert.match(clientNav,/readPendingQueueReturn\(searchParams\?\.get\("filaRetorno"\)\)/);
+ assert.match(clientNav,/withPendingQueueReturn\(withClientDirectoryReturn\(href, directoryReturn\),queueReturn\)/);
+ assert.match(anamnesisNav,/readPendingQueueReturn\(searchParams\?\.get\("filaRetorno"\)\)/);
+ assert.match(anamnesisNav,/href=\{navigate\(item\.href\)\}/);
+});
