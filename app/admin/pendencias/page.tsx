@@ -1,4 +1,4 @@
-import { readClientDirectoryReturn, clientDirectoryReturnHref, withClientDirectoryReturn } from "@/lib/operations/client-directory-return";
+import { readClientDirectoryReturn, clientDirectoryReturnHref, withClientDirectoryReturn, type ClientDirectoryReturn } from "@/lib/operations/client-directory-return";
 import { PENDING_AREA_OPTIONS, countPendingAreas } from "@/lib/operations/pending-area-filter";
 import { readPendingExplorerQuery, explorePendingClientQueue, pendingExplorerGroupHref, pendingExplorerPageHref, paginatePendingQueue, pendingQueueYears, countPendingQueueClients, pendingQueueOldestDate, pendingExplorerResetHref, PENDING_EXPLORER_MONTHS } from "@/lib/operations/pending-explorer";
 import { Button } from "@/components/ui/Button";
@@ -23,8 +23,10 @@ const formatDateTime = formatPendingQueueDateTime;
 function PendingList({
   items,
   group,
+  directoryReturn,
 }: {
   group: "patty" | "client" | "operational";
+  directoryReturn: ClientDirectoryReturn;
   items: Awaited<ReturnType<typeof getOperationalPendingItemsForCurrentAdmin>>;
 }) {
   return (
@@ -40,7 +42,7 @@ function PendingList({
                 {item.clientId ? (
                   <Link
                     className={styles.clientLink}
-                    href={`/admin/clientes/${item.clientId}`}
+                    href={withClientDirectoryReturn(`/admin/clientes/${item.clientId}`, directoryReturn)}
                   >
                     Ver cliente
                   </Link>
@@ -71,7 +73,8 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
   const unavailableClient = Boolean(filters.clientId && !scopedClient);
   const scopedItems = filters.clientId ? (scopedClient ? allItems.filter(item => item.clientId === filters.clientId) : []) : allItems;
   const items = unavailableClient ? [] : explorePendingClientQueue(scopedItems,filters);
-  const resetHref = pendingExplorerResetHref(filters.clientId);
+  const resetHref = withClientDirectoryReturn(pendingExplorerResetHref(filters.clientId), directoryReturn);
+  const fullQueueHref = withClientDirectoryReturn("/admin/pendencias", directoryReturn);
   const areaCounts=countPendingAreas(explorePendingClientQueue(scopedItems,{...filters,area:null}));
   const grouped = groupOperationalPendingItems(items);
   const pages={patty:paginatePendingQueue(grouped.patty,filters.pattyPage),client:paginatePendingQueue(grouped.client,filters.clientPage),operational:paginatePendingQueue(grouped.operational,filters.operationalPage)};
@@ -97,10 +100,12 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
       />
 
       <Section title="Localizar pendências" description="Busque por cliente ou tipo já registrado. A pesquisa não muda prioridade nem autorização.">
-        {scopedClient ? <div className={styles.scopedClient}><strong>Fila de {scopedClient.full_name?.trim() || scopedClient.profiles?.display_name?.trim() || "cliente sem nome"}</strong><span>Exibindo apenas pendências desta cliente já autorizadas para seu acesso.</span><Link href={withClientDirectoryReturn(`/admin/clientes/${scopedClient.id}`,directoryReturn)}>Voltar ao acompanhamento</Link><Link href={clientDirectoryReturnHref(directoryReturn)}>Voltar à lista de clientes</Link><Link href="/admin/pendencias">Ver fila de todas as clientes</Link></div> : null}
-        {unavailableClient ? <Alert variant="warning" title="Cliente indisponível">Não foi possível localizar um acompanhamento autorizado para esta cliente. Nenhuma pendência individual foi exibida. <Link href="/admin/pendencias">Voltar à fila geral</Link></Alert> : null}
+        {scopedClient ? <div className={styles.scopedClient}><strong>Fila de {scopedClient.full_name?.trim() || scopedClient.profiles?.display_name?.trim() || "cliente sem nome"}</strong><span>Exibindo apenas pendências desta cliente já autorizadas para seu acesso.</span><Link href={withClientDirectoryReturn(`/admin/clientes/${scopedClient.id}`,directoryReturn)}>Voltar ao acompanhamento</Link><Link href={clientDirectoryReturnHref(directoryReturn)}>Voltar à lista de clientes</Link><Link href={fullQueueHref}>Ver fila de todas as clientes</Link></div> : null}
+        {unavailableClient ? <Alert variant="warning" title="Cliente indisponível">Não foi possível localizar um acompanhamento autorizado para esta cliente. Nenhuma pendência individual foi exibida. <Link href={fullQueueHref}>Voltar à fila geral</Link></Alert> : null}
         <form action="/admin/pendencias" method="get" className={styles.explorerFilters}>
           {scopedClient ? <input type="hidden" name="cliente" value={scopedClient.id} /> : null}
+          {directoryReturn.q ? <input type="hidden" name="listaQ" value={directoryReturn.q} /> : null}
+          {directoryReturn.view !== "all" ? <input type="hidden" name="listaView" value={directoryReturn.view} /> : null}
           <label>Cliente
             <input name="q" type="search" maxLength={120} placeholder="Nome da cliente" defaultValue={filters.query}/>
           </label>
@@ -151,17 +156,17 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
         {items.length > 0 ? (
           <nav aria-label="Ir para grupo de pendências" className={styles.groupNavigation}>
             {grouped.patty.length > 0 ? (
-              <Link aria-current={focusedGroup === "patty" ? "location" : undefined} href={pendingExplorerGroupHref("patty",filters)}>
+              <Link aria-current={focusedGroup === "patty" ? "location" : undefined} href={withClientDirectoryReturn(pendingExplorerGroupHref("patty",filters), directoryReturn)}>
                 Ação da Patty ({grouped.patty.length})
               </Link>
             ) : <span>Ação da Patty (0)</span>}
             {grouped.client.length > 0 ? (
-              <Link aria-current={focusedGroup === "client" ? "location" : undefined} href={pendingExplorerGroupHref("client",filters)}>
+              <Link aria-current={focusedGroup === "client" ? "location" : undefined} href={withClientDirectoryReturn(pendingExplorerGroupHref("client",filters), directoryReturn)}>
                 Aguardando cliente ({grouped.client.length})
               </Link>
             ) : <span>Aguardando cliente (0)</span>}
             {grouped.operational.length > 0 ? (
-              <Link aria-current={focusedGroup === "operational" ? "location" : undefined} href={pendingExplorerGroupHref("operational",filters)}>
+              <Link aria-current={focusedGroup === "operational" ? "location" : undefined} href={withClientDirectoryReturn(pendingExplorerGroupHref("operational",filters), directoryReturn)}>
                 Operacional do sistema ({grouped.operational.length})
               </Link>
             ) : <span>Operacional do sistema (0)</span>}
@@ -171,7 +176,7 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
           <EmptyState
             description={unavailableClient ? "Não foi possível confirmar o acesso a esta cliente." : scopedClient && scopedItems.length===0 ? "Não há pendências registradas para esta cliente neste momento." : scopedItems.length===0 ? "Nenhuma ação da Patty, espera de cliente ou pendência operacional consta nesta fila no momento." : "Nenhuma pendência corresponde aos filtros atuais."}
             title={scopedClient && scopedItems.length===0 ? "Sem pendências desta cliente" : scopedItems.length===0 && !filters.invalidClient && !unavailableClient ? "Tudo em dia" : "Nenhum resultado"}
-            action={scopedItems.length > 0 || filters.invalidClient || unavailableClient ? <Link href={unavailableClient ? "/admin/pendencias" : resetHref}>Limpar filtros</Link> : undefined}
+            action={scopedItems.length > 0 || filters.invalidClient || unavailableClient ? <Link href={unavailableClient ? fullQueueHref : resetHref}>Limpar filtros</Link> : undefined}
           />
         ) : (
           <div className={styles.groups}>
@@ -182,7 +187,7 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
                   : focusedGroup === "client"
                     ? "Nenhuma pendência aguardando cliente nesta fila no momento."
                     : "Nenhuma pendência operacional do sistema nesta fila no momento."}
-                <Link className={styles.clientLink} href="/admin/pendencias">Limpar filtros e ver toda a fila</Link>
+                <Link className={styles.clientLink} href={fullQueueHref}>Limpar filtros e ver toda a fila</Link>
               </div>
             ) : null}
             {grouped.patty.length > 0 ? (
@@ -194,11 +199,11 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
                   </div>
                   <Badge variant="warning">{grouped.patty.length}</Badge>
                 </div>
-                <PendingList group="patty" items={pages.patty.items} />
+                <PendingList group="patty" items={pages.patty.items} directoryReturn={directoryReturn} />
                   <nav aria-label="Páginas de patty" className={styles.groupNavigation}>
-                    {pages.patty.page>1?<Link href={pendingExplorerPageHref("patty",filters,pages.patty.page-1)}>Anterior</Link>:null}
+                    {pages.patty.page>1?<Link href={withClientDirectoryReturn(pendingExplorerPageHref("patty",filters,pages.patty.page-1), directoryReturn)}>Anterior</Link>:null}
                     <span>Página {pages.patty.page} de {pages.patty.pageCount} · {pages.patty.from}–{pages.patty.to} de {pages.patty.total}</span>
-                    {pages.patty.page<pages.patty.pageCount?<Link href={pendingExplorerPageHref("patty",filters,pages.patty.page+1)}>Próxima</Link>:null}
+                    {pages.patty.page<pages.patty.pageCount?<Link href={withClientDirectoryReturn(pendingExplorerPageHref("patty",filters,pages.patty.page+1), directoryReturn)}>Próxima</Link>:null}
                   </nav>
               </section>
             ) : null}
@@ -213,11 +218,11 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
                   <Badge variant="neutral">{grouped.client.length}</Badge>
                 </summary>
                 <div className={styles.collapsibleContent}>
-                  <PendingList group="client" items={pages.client.items} />
+                  <PendingList group="client" items={pages.client.items} directoryReturn={directoryReturn} />
                   <nav aria-label="Páginas de client" className={styles.groupNavigation}>
-                    {pages.client.page>1?<Link href={pendingExplorerPageHref("client",filters,pages.client.page-1)}>Anterior</Link>:null}
+                    {pages.client.page>1?<Link href={withClientDirectoryReturn(pendingExplorerPageHref("client",filters,pages.client.page-1), directoryReturn)}>Anterior</Link>:null}
                     <span>Página {pages.client.page} de {pages.client.pageCount} · {pages.client.from}–{pages.client.to} de {pages.client.total}</span>
-                    {pages.client.page<pages.client.pageCount?<Link href={pendingExplorerPageHref("client",filters,pages.client.page+1)}>Próxima</Link>:null}
+                    {pages.client.page<pages.client.pageCount?<Link href={withClientDirectoryReturn(pendingExplorerPageHref("client",filters,pages.client.page+1), directoryReturn)}>Próxima</Link>:null}
                   </nav>
                 </div>
               </details>
@@ -233,11 +238,11 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
                   <Badge variant="warning">{grouped.operational.length}</Badge>
                 </summary>
                 <div className={styles.collapsibleContent}>
-                  <PendingList group="operational" items={pages.operational.items} />
+                  <PendingList group="operational" items={pages.operational.items} directoryReturn={directoryReturn} />
                   <nav aria-label="Páginas de operational" className={styles.groupNavigation}>
-                    {pages.operational.page>1?<Link href={pendingExplorerPageHref("operational",filters,pages.operational.page-1)}>Anterior</Link>:null}
+                    {pages.operational.page>1?<Link href={withClientDirectoryReturn(pendingExplorerPageHref("operational",filters,pages.operational.page-1), directoryReturn)}>Anterior</Link>:null}
                     <span>Página {pages.operational.page} de {pages.operational.pageCount} · {pages.operational.from}–{pages.operational.to} de {pages.operational.total}</span>
-                    {pages.operational.page<pages.operational.pageCount?<Link href={pendingExplorerPageHref("operational",filters,pages.operational.page+1)}>Próxima</Link>:null}
+                    {pages.operational.page<pages.operational.pageCount?<Link href={withClientDirectoryReturn(pendingExplorerPageHref("operational",filters,pages.operational.page+1), directoryReturn)}>Próxima</Link>:null}
                   </nav>
                 </div>
               </details>

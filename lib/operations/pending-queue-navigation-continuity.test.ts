@@ -26,9 +26,9 @@ test("focused groups keep collapsible client/operational queues accessible", () 
 
 test("queue distinguishes waiting on client from professional/operational alerts", () => {
   assert.ok(page.includes('variant={group === "client" ? "neutral" : "warning"}'));
-  assert.ok(page.includes('<PendingList group="client" items={pages.client.items} />'));
-  assert.ok(page.includes('<PendingList group="patty" items={pages.patty.items} />'));
-  assert.ok(page.includes('<PendingList group="operational" items={pages.operational.items} />'));
+  assert.ok(page.includes('<PendingList group="client" items={pages.client.items} directoryReturn={directoryReturn} />'));
+  assert.ok(page.includes('<PendingList group="patty" items={pages.patty.items} directoryReturn={directoryReturn} />'));
+  assert.ok(page.includes('<PendingList group="operational" items={pages.operational.items} directoryReturn={directoryReturn} />'));
 });
 
 test("group navigation works by keyboard and does not require client-only state", () => {
@@ -76,4 +76,13 @@ test("client-specific pending queue resolves authorized assignments independentl
  assert.match(page,/scopedClient && scopedItems\.length===0/);
  assert.match(page,/Voltar ao acompanhamento/);
  assert.match(page,/unavailableClient \? \[\] : explorePendingClientQueue/);
+});
+
+test("pending filters, group links, pages and client links preserve directory return context",()=>{
+ assert.match(page,/name="listaQ" value=\{directoryReturn\.q\}/);
+ assert.match(page,/name="listaView" value=\{directoryReturn\.view\}/);
+ assert.match(page,/withClientDirectoryReturn\(pendingExplorerGroupHref\("client",filters\), directoryReturn\)/);
+ assert.match(page,/withClientDirectoryReturn\(pendingExplorerPageHref\("operational",filters,pages\.operational\.page\+1\), directoryReturn\)/);
+ assert.match(page,/withClientDirectoryReturn\(pendingExplorerResetHref\(filters\.clientId\), directoryReturn\)/);
+ assert.match(page,/withClientDirectoryReturn\(\x60\/admin\/clientes\/\$\{item\.clientId\}\x60, directoryReturn\)/);
 });
