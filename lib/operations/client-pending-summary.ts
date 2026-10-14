@@ -29,3 +29,14 @@ export function summarizeClientPendingItems(items: readonly OperationalPendingIt
   }
   return result;
 }
+
+/** Factual queue summary only: no clinical priority or adherence inference. */
+export function describeClientPendingSummary(summary: ClientPendingSummary | undefined): string {
+  if (!summary || summary.total === 0) return "Sem pendências registradas";
+  const parts: string[] = [];
+  const patty = summary.patty.length;
+  if (patty) parts.push(`${patty} ${patty === 1 ? "ação" : "ações"} da Patty`);
+  if (summary.waiting) parts.push(`${summary.waiting} aguardando cliente`);
+  if (summary.operational) parts.push(`${summary.operational} ${summary.operational === 1 ? "pendência operacional" : "pendências operacionais"}`);
+  return parts.join(" · ");
+}
