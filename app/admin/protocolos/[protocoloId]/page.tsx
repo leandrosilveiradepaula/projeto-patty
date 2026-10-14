@@ -181,6 +181,9 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
         ) : (
           <>
             <form method="get" className={styles.versionFilters}>
+              {directoryReturn.q ? <input type="hidden" name="listaQ" value={directoryReturn.q} /> : null}
+              {directoryReturn.view !== "all" ? <input type="hidden" name="listaView" value={directoryReturn.view} /> : null}
+              {directoryReturn.page && directoryReturn.page > 1 ? <input type="hidden" name="listaPagina" value={directoryReturn.page} /> : null}
               <label>Buscar número da versão<input type="search" name="buscar" maxLength={120} defaultValue={filters.term} placeholder="Ex.: 3" /></label>
               <label>Situação<select name="estado" defaultValue={filters.status}><option value="all">Todas</option><option value="draft">Rascunho</option><option value="review">Em revisão</option><option value="approved">Aprovada, não publicada</option><option value="published">Publicada</option></select></label>
               <label>Estrutura alimentar<select name="estrutura" defaultValue={filters.structure}>
