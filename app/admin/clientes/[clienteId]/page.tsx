@@ -1,3 +1,4 @@
+import { readClientDirectoryReturn, clientDirectoryReturnHref, withClientDirectoryReturn } from "@/lib/operations/client-directory-return";
 import { AdminClientNameEditForm } from "@/components/admin/AdminClientNameEditForm";
 import { summarizeClientClarifications } from "@/lib/follow-up/client-clarification-summary";
 import { latestCheckinCorrectionsByEvent } from "@/lib/checkins/effective-corrections";
@@ -49,6 +50,8 @@ type AdminClienteDetailPageProps = {
   }>;
   searchParams: Promise<{
     onboarding?: string;
+    listaQ?: string;
+    listaView?: string;
   }>;
 };
 
@@ -66,6 +69,7 @@ export default async function AdminClienteDetailPage({
   searchParams,
 }: AdminClienteDetailPageProps) {
   const [{ clienteId }, query] = await Promise.all([params, searchParams]);
+  const directoryReturn = readClientDirectoryReturn(query);
   const client = await getAccessibleClient(clienteId);
 
   if (!client) {
@@ -495,7 +499,7 @@ export default async function AdminClienteDetailPage({
       />
 
       <ClientWorkspaceNav clientId={client.id} />
-      <p><Link href={`/admin/pendencias?cliente=${client.id}`}>Ver pendências desta cliente</Link></p>
+      <nav aria-label="Retornar à lista de clientes"><Link href={clientDirectoryReturnHref(directoryReturn)}>Voltar à lista de clientes</Link> · <Link href={withClientDirectoryReturn(`/admin/pendencias?cliente=${client.id}`,directoryReturn)}>Ver pendências desta cliente</Link></nav>
       <PageSectionNav
         items={[
           { href: "#proxima-acao", label: "Próxima ação" },
