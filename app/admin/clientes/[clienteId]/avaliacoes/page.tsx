@@ -1,4 +1,6 @@
 import { availableAdminAssessmentMonths, exploreAdminAssessmentDirectory, paginateAdminAssessments } from "@/lib/evaluations/admin-assessment-explorer";
+import { readClientDirectoryReturn, withClientDirectoryReturn } from "@/lib/operations/client-directory-return";
+import { readPendingQueueReturn, withPendingQueueReturn } from "@/lib/operations/pending-queue-return";
 import { readClientAssessmentDirectory, clientAssessmentDirectoryFilters, clientAssessmentDirectoryHref } from "@/lib/evaluations/client-assessment-directory";
 import { labelAdminAssessmentMonth } from "@/lib/evaluations/admin-assessment-explorer";
 import { Button } from "@/components/ui/Button";
@@ -28,14 +30,17 @@ import styles from "./page.module.css";
 
 type AdminClientAssessmentsPageProps = {
   params: Promise<{ clienteId: string }>;
-  searchParams: Promise<{ tipo?: string; mes?: string; ordem?: string; rascunhos?: string; historico?: string }>;
+  searchParams: Promise<{ tipo?: string; mes?: string; ordem?: string; rascunhos?: string; historico?: string; filaRetorno?: string; listaQ?: string; listaView?: string; listaPagina?: string }>;
 };
 
 export default async function AdminClientAssessmentsPage({
   params,
   searchParams,
 }: AdminClientAssessmentsPageProps) {
-  const { clienteId } = await params;
+  const [{ clienteId }, rawQuery] = await Promise.all([params, searchParams]);
+  const directoryReturn = readClientDirectoryReturn(rawQuery);
+  const queueReturn = readPendingQueueReturn(rawQuery.filaRetorno);
+  const navigate = (href: string) => withPendingQueueReturn(withClientDirectoryReturn(href, directoryReturn), queueReturn ?? "");
   const client = await getAccessibleClient(clienteId);
 
   if (!client) {
@@ -60,7 +65,7 @@ export default async function AdminClientAssessmentsPage({
   }));
   const months = availableAdminAssessmentMonths(mapped);
   const { filters, draftPage, historyPage, invalid } =
-    readClientAssessmentDirectory(await searchParams, kinds, months.months);
+    readClientAssessmentDirectory(rawQuery, kinds, months.months);
   const draftAssessments = exploreAdminAssessmentDirectory(mapped, clientAssessmentDirectoryFilters(filters, "draft"), kinds);
   const finalizedAssessments = exploreAdminAssessmentDirectory(mapped, clientAssessmentDirectoryFilters(filters, "finalized"), kinds);
   const draftPagination = paginateAdminAssessments(draftAssessments, draftPage);
@@ -100,23 +105,23 @@ export default async function AdminClientAssessmentsPage({
         <Link href="#nova-avaliacao">Nova avaliação</Link>
         <Link href="#avaliacoes-em-andamento">Em andamento ({draftAssessments.length})</Link>
         <Link href="#historico-finalizado">Histórico finalizado ({finalizedAssessments.length})</Link>
-        <Link href="/admin/avaliacoes">Todas as avaliações</Link>
+        <Link href={navigate("/admin/avaliacoes")}>Todas as avaliações</Link>
       </nav>
       <Section
         description="Após finalizar uma avaliação, consulte a evolução factual e retome a preparação do protocolo na mesma área da cliente."
         title="Próximos passos"
       >
-        <Link className={styles.actionLink} href={`/admin/clientes/${client.id}/evolucao`}>
+        <Link className={styles.actionLink} href={navigate(`/admin/clientes/${client.id}/evolucao`)}>
           Comparar medidas finalizadas
         </Link>
         {" · "}
-        <Link className={styles.actionLink} href={`/admin/clientes/${client.id}/protocolos`}>
+        <Link className={styles.actionLink} href={navigate(`/admin/clientes/${client.id}/protocolos`)}>
           Abrir protocolos da cliente
         </Link>
       </Section>
       <Section
         action={
-          <Link className={styles.actionLink} href={`/admin/clientes/${client.id}/evolucao`}>
+          <Link className={styles.actionLink} href={navigate(`/admin/clientes/${client.id}/evolucao`)}>
             Ver evolução
           </Link>
         }
@@ -141,6 +146,10 @@ export default async function AdminClientAssessmentsPage({
       ) : null}
       <Section title="Localizar avaliações" description="Busca por tipo, mês e situação já registrada, sem modificar nenhuma avaliação.">
         <form action={`/admin/clientes/${client.id}/avaliacoes`} method="get" className={styles.filters}>
+          {queueReturn ? <input type="hidden" name="filaRetorno" value={queueReturn} /> : null}
+          {directoryReturn.q ? <input type="hidden" name="listaQ" value={directoryReturn.q} /> : null}
+          {directoryReturn.view !== "all" ? <input type="hidden" name="listaView" value={directoryReturn.view} /> : null}
+          {directoryReturn.page && directoryReturn.page > 1 ? <input type="hidden" name="listaPagina" value={directoryReturn.page} /> : null}
           <label>Tipo
             <select name="tipo" defaultValue={filters.kind}>
               <option value="all">Todos</option>
@@ -162,7 +171,7 @@ export default async function AdminClientAssessmentsPage({
             </select>
           </label>
           <Button variant="secondary" type="submit">Filtrar</Button>
-          {hasFilters ? <Link href={`/admin/clientes/${client.id}/avaliacoes`}>Limpar</Link> : null}
+          {hasFilters ? <Link href={navigate(`/admin/clientes/${client.id}/avaliacoes`)}>Limpar</Link> : null}
         </form>
         <p role="status">{draftAssessments.length} rascunho(s) · {finalizedAssessments.length} finalizada(s) nos filtros atuais.</p>
       </Section>
@@ -186,7 +195,7 @@ export default async function AdminClientAssessmentsPage({
                   action={
                     <Link
                       className={styles.actionLink}
-                      href={`/admin/avaliacoes/${assessment.id}`}
+                      href={navigate(`/admin/avaliacoes/${assessment.id}`)}
                     >
                       Continuar avaliação
                     </Link>
@@ -206,8 +215,8 @@ export default async function AdminClientAssessmentsPage({
           {draftPagination.pageCount > 1 ? (
             <nav className={styles.pages} aria-label="Páginas de avaliações em andamento">
               <span>Página {draftPagination.page} de {draftPagination.pageCount}</span>
-              {draftPagination.page > 1 ? <Link href={clientAssessmentDirectoryHref(client.id, filters, draftPagination.page - 1, historyPagination.page, "draft")}>Anterior</Link> : null}
-              {draftPagination.page < draftPagination.pageCount ? <Link href={clientAssessmentDirectoryHref(client.id, filters, draftPagination.page + 1, historyPagination.page, "draft")}>Próxima</Link> : null}
+              {draftPagination.page > 1 ? <Link href={navigate(clientAssessmentDirectoryHref(client.id, filters, draftPagination.page - 1, historyPagination.page, "draft"))}>Anterior</Link> : null}
+              {draftPagination.page < draftPagination.pageCount ? <Link href={navigate(clientAssessmentDirectoryHref(client.id, filters, draftPagination.page + 1, historyPagination.page, "draft"))}>Próxima</Link> : null}
             </nav>
           ) : null}
           </>
@@ -237,7 +246,7 @@ export default async function AdminClientAssessmentsPage({
                   action={
                     <Link
                       className={styles.actionLink}
-                      href={`/admin/avaliacoes/${assessment.id}`}
+                      href={navigate(`/admin/avaliacoes/${assessment.id}`)}
                     >
                       Ver avaliação
                     </Link>
@@ -257,8 +266,8 @@ export default async function AdminClientAssessmentsPage({
           {historyPagination.pageCount > 1 ? (
             <nav className={styles.pages} aria-label="Páginas do histórico finalizado">
               <span>Página {historyPagination.page} de {historyPagination.pageCount}</span>
-              {historyPagination.page > 1 ? <Link href={clientAssessmentDirectoryHref(client.id, filters, draftPagination.page, historyPagination.page - 1, "history")}>Anterior</Link> : null}
-              {historyPagination.page < historyPagination.pageCount ? <Link href={clientAssessmentDirectoryHref(client.id, filters, draftPagination.page, historyPagination.page + 1, "history")}>Próxima</Link> : null}
+              {historyPagination.page > 1 ? <Link href={navigate(clientAssessmentDirectoryHref(client.id, filters, draftPagination.page, historyPagination.page - 1, "history"))}>Anterior</Link> : null}
+              {historyPagination.page < historyPagination.pageCount ? <Link href={navigate(clientAssessmentDirectoryHref(client.id, filters, draftPagination.page, historyPagination.page + 1, "history"))}>Próxima</Link> : null}
             </nav>
           ) : null}
           </>
