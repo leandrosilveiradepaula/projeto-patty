@@ -114,3 +114,9 @@
 .fileFilters select:focus-visible,.fileFilters button:focus-visible{outline:3px solid var(--color-accent);outline-offset:2px}
 .fileList li[id]{scroll-margin-top:var(--space-6)}
 .fileList li[id]:target{outline:2px solid var(--color-brand);outline-offset:3px;border-radius:var(--radius-medium)}
+
+.advancedFileFilters { flex-basis: 100%; min-width: 0; border: 1px solid var(--color-border); border-radius: var(--radius-small); padding: var(--space-3); }
+.advancedFileFilters > summary { cursor: pointer; font-weight: var(--text-label-medium-weight); color: var(--color-text-primary); min-height: 44px; align-content: center; }
+.advancedFileFilters > summary:focus-visible { outline: 3px solid var(--color-accent); outline-offset: 2px; }
+.advancedFileFiltersContent { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: var(--space-3); padding-top: var(--space-3); }
+.advancedFileFiltersContent label { min-width: 0; }
