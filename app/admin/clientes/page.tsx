@@ -8,6 +8,7 @@ import { TextInput } from "@/components/ui/TextInput";
 import { Section } from "@/components/ui/Section";
 import { getOperationalPendingItemsForCurrentAdmin } from "@/lib/operations/pending-data";
 import { readClientDirectoryPendingView, matchesClientDirectoryPendingView, countClientDirectoryPendingViews, CLIENT_DIRECTORY_PENDING_VIEW_LABELS } from "@/lib/operations/client-directory-pending-view";
+import { withClientDirectoryReturn } from "@/lib/operations/client-directory-return";
 import { summarizeClientPendingItems } from "@/lib/operations/client-pending-summary";
 import { listClientsAssignedToCurrentAdmin } from "@/lib/supabase/data-access";
 import Link from "next/link";
@@ -56,6 +57,7 @@ export default async function AdminClientesPage({
   const actionablePattyItems = clients.reduce((count, client) => count + (pendingByClientId.get(client.id)?.patty.length ?? 0), 0);
   const searchTerm = readClientDirectorySearchTerm(q);
   const viewFilter = readClientDirectoryPendingView(view);
+  const directoryReturn = { q: searchTerm, view: viewFilter };
   const viewCounts = countClientDirectoryPendingViews(clients.map(client=>client.id),pendingByClientId);
   const filteredClients = clients.filter((client) => {
     const matchesSearch = matchesClientDirectoryName(
@@ -191,7 +193,7 @@ export default async function AdminClientesPage({
                         {pendingSummary?.waiting ? <Link className={styles.secondaryActionLink} href={`/admin/pendencias?cliente=${client.id}&responsavel=client#aguardando-cliente`}>Aguardando cliente ({pendingSummary.waiting})</Link> : null}
                         {pendingSummary?.operational ? <Link className={styles.secondaryActionLink} href={`/admin/pendencias?cliente=${client.id}&responsavel=operational#operacional-do-sistema`}>Operacionais ({pendingSummary.operational})</Link> : null}
                         </div></details> : null}
-                        {pendingSummary?.total ? <Link className={styles.secondaryActionLink} href={`/admin/pendencias?cliente=${client.id}`}>Todas as pendências ({pendingSummary.total})</Link> : null}
+                        {pendingSummary?.total ? <Link className={styles.secondaryActionLink} href={withClientDirectoryReturn(`/admin/pendencias?cliente=${client.id}`,directoryReturn)}>Todas as pendências ({pendingSummary.total})</Link> : null}
                         <Link
                           aria-label={`Abrir acompanhamento de ${displayName || "registro legado sem nome"}`}
                           className={
@@ -199,7 +201,7 @@ export default async function AdminClientesPage({
                               ? styles.secondaryActionLink
                               : styles.actionLink
                           }
-                          href={`/admin/clientes/${client.id}`}
+                          href={withClientDirectoryReturn(`/admin/clientes/${client.id}`,directoryReturn)}
                         >
                           {nextPattyPending ? "Ver cliente" : "Abrir"}
                         </Link>
