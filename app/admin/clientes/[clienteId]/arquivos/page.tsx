@@ -23,7 +23,7 @@ import { matchesPrivateFilePreviewFilter, paginatePrivateFileHistory, privateFil
 
 type AdminClientFilesPageProps = {
   params: Promise<{ clienteId: string }>;
-  searchParams: Promise<{ categoria?: string; origem?: string; formato?: string; visualizacao?: string; ordem?: string; paginaPendentes?: string; paginaHistorico?: string; fotoAntes?: string; fotoDepois?: string; arquivoPendente?: string; arquivoHistorico?: string; ano?: string; tamanho?: string; mes?: string; dataInicial?: string; dataFinal?: string; minKb?: string; maxKb?: string; grupoMime?: string; integridadeData?: string; anoLiberacao?: string; mesLiberacao?: string }>;
+  searchParams: Promise<{ categoria?: string; origem?: string; formato?: string; visualizacao?: string; ordem?: string; paginaPendentes?: string; paginaHistorico?: string; fotoAntes?: string; fotoDepois?: string; arquivoPendente?: string; arquivoHistorico?: string; ano?: string; tamanho?: string; mes?: string; dataInicial?: string; dataFinal?: string; minKb?: string; maxKb?: string; grupoMime?: string; integridadeData?: string; anoLiberacao?: string; mesLiberacao?: string; nome?: string; estadoLiberacao?: string }>;
 };
 
 const fileKindLabels: Record<string, string> = {
@@ -110,6 +110,7 @@ export default async function AdminClientFilesPage({
   const pendingReleaseFiles = filteredFiles.filter(file => isPrivateFilePendingProfessionalRelease(file, client.profile_id));
   const historyFiles = filteredFiles.filter(file => !isPrivateFilePendingProfessionalRelease(file, client.profile_id));
   const totalPending = counts.pending;
+  const hasFilteredOutPending = totalPending > 0 && pendingReleaseFiles.length === 0;
   const sortedPending = sortPrivateFileHistory(pendingReleaseFiles, order.value);
   const exactPendingPage = authorizedExactRecordPage(sortedPending, filters.arquivoPendente, 12);
   const pendingPage = paginatePrivateFileHistory(sortedPending, exactPendingPage ?? requestedPending.page);
@@ -206,8 +207,9 @@ export default async function AdminClientFilesPage({
         >
           {pendingReleaseFiles.length === 0 ? (
             <EmptyState
-              description="Nenhum upload administrativo está aguardando liberação nesta cliente."
-              title="Sem arquivos pendentes"
+              description={totalPending > 0 ? "Existem arquivos aguardando liberação, mas nenhum corresponde aos filtros selecionados. Limpe os filtros para revisar as pendências." : "Nenhum upload administrativo está aguardando liberação nesta cliente."}
+              title={totalPending > 0 ? "Nenhuma pendência neste filtro" : "Sem arquivos pendentes"}
+              action={hasFilteredOutPending ? <Link href={`${basePath}#aguardando-liberacao`}>Limpar filtros e revisar pendências</Link> : undefined}
             />
           ) : (
           <ul className={styles.fileList}>
