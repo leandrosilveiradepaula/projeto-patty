@@ -142,6 +142,23 @@ test("J1: cliente sintetica ativa acesso, salva Cadastro Atual e retoma Anamnese
   // 30s, the default Playwright timeout, is shorter than a full browser
   // journey with real Auth, server actions, verification and safe cleanup.
   test.setTimeout(180_000);
+  // Reconcile exactly one disposable residue identified from the timed-out
+  // J1 production run 38635848243. The Auth ID, client ID and synthetic email
+  // were independently verified in read-only database queries. This is NOT a
+  // generic cleanup by prefix, and will never touch an unrelated identity.
+  const previousFixture = {
+    profileId: "35cebc3e-88e3-4545-80d5-7077c72a5c9b",
+    clientId: "be7de089-57d4-4f76-9b3f-6a51b0084a3d",
+    email: "e2e-onboarding-9ca6493db29a1767@example.invalid",
+  };
+  const previous = await admin.auth.admin.getUserById(previousFixture.profileId);
+  if (!previous.error && previous.data.user) {
+    if (previous.data.user.email !== previousFixture.email) {
+      throw new Error("Known J1 synthetic residue no longer matches its Auth owner.");
+    }
+    await cleanupSyntheticClient(previousFixture);
+    console.log("Previous J1 synthetic residue safely reconciled.");
+  }
   const unique = randomBytes(8).toString("hex");
   const email = `e2e-onboarding-${unique}@example.invalid`;
   const password = `E2E-Onboarding-${unique}-Aa1!`;
