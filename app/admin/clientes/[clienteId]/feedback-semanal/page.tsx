@@ -71,6 +71,7 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
   const submittedFeedbacks=filterProfessionalFeedbacks(orderedFeedbacks,options.origin,true,options.year);
   const pendingPage=paginateProfessionalFeedbacks(pendingFeedbacks,options.pendingPage);
   const submittedPage=paginateProfessionalFeedbacks(submittedFeedbacks,options.submittedPage);
+  const exactRecordLocated = exactPendingPage !== null || exactSubmittedPage !== null;
   const displayName = client.full_name?.trim() || client.profiles?.display_name?.trim();
 
   return (
@@ -120,6 +121,12 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
         </Card>
       </Section>
 
+      {exactRecordLocated ? (
+        <p role="status" className={styles.exactRecordNotice}>
+          Registro localizado no histórico autorizado. Os filtros de origem e ano foram desconsiderados para mostrar o feedback solicitado.{" "}
+          <Link href={`/admin/clientes/${client.id}/feedback-semanal`}>Voltar ao histórico completo</Link>
+        </p>
+      ) : null}
       <Section title="Localizar feedbacks" description="Filtre pela origem registrada, sem alterar respostas, prazos ou automações.">
         <form method="get" action={`/admin/clientes/${client.id}/feedback-semanal`} className={styles.explorerFilters}>
           <label>Origem
