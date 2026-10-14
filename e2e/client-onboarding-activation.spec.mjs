@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import { expect, test } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 
@@ -53,7 +54,7 @@ async function findAdminProfileId(email) {
 async function cleanupSyntheticClient({ clientId, profileId, email }) {
   // Destructive service-role cleanup is reserved for this exact synthetic
   // identity. Never delete a user selected only by a supplied profile ID.
-  if (!/^e2e-onboarding-[0-9]+@example\.invalid$/.test(email ?? "")) {
+  if (!/^e2e-onboarding-[0-9a-f]{16}@example\.invalid$/.test(email ?? "")) {
     throw new Error("Refusing cleanup of a non-synthetic onboarding identity.");
   }
   const authUser = await admin.auth.admin.getUserById(profileId);
@@ -70,6 +71,35 @@ async function cleanupSyntheticClient({ clientId, profileId, email }) {
     if (linkedClient.error || linkedClient.data?.profile_id !== profileId) {
       throw new Error("Synthetic client ownership verification failed.");
     }
+    // This test now visits Cadastro Atual and creates an unsubmitted
+    // Anamnese draft. Refuse cleanup when the synthetic client has any
+    // submitted professional history, rather than deleting real history.
+    const submissions = await admin.from("anamnesis_submissions")
+      .select("id, submitted_at").eq("client_id", clientId);
+    if (submissions.error) throw submissions.error;
+    if (submissions.data.some(item => item.submitted_at !== null)) {
+      throw new Error("Refusing cleanup of a submitted Anamnese.");
+    }
+    const protocols = await admin.from("protocols")
+      .select("id").eq("client_id", clientId).limit(1);
+    if (protocols.error) throw protocols.error;
+    if (protocols.data.length > 0) {
+      throw new Error("Refusing cleanup of professional protocol history.");
+    }
+    for (const submission of submissions.data) {
+      const answers = await admin.from("anamnesis_answers")
+        .delete().eq("submission_id", submission.id);
+      if (answers.error) throw answers.error;
+      const draft = await admin.from("anamnesis_submissions").delete()
+        .eq("id", submission.id).eq("client_id", clientId)
+        .is("submitted_at", null).select("id").single();
+      if (draft.error || !draft.data) {
+        throw draft.error ?? new Error("Synthetic draft deletion was not verified.");
+      }
+    }
+    const registration = await admin.from("client_registration")
+      .delete().eq("client_id", clientId);
+    if (registration.error) throw registration.error;
     const assignment = await admin
       .from("client_assignments")
       .delete()
@@ -109,7 +139,7 @@ async function cleanupSyntheticClient({ clientId, profileId, email }) {
 test("convite sintetico ativa conta, cria senha e permite novo login", async ({
   browser,
 }) => {
-  const unique = Date.now();
+  const unique = randomBytes(8).toString("hex");
   const email = `e2e-onboarding-${unique}@example.invalid`;
   const password = `E2E-Onboarding-${unique}-Aa1!`;
 
@@ -169,14 +199,17 @@ test("convite sintetico ativa conta, cria senha e permite novo login", async ({
 
     if (assignment.error) throw assignment.error;
 
-    activationContext = await browser.newContext({ baseURL: baseUrl });
+    activationContext = await browser.newContext({ baseURL: baseUrl, viewport: {width:390,height:844}, isMobile:true, hasTouch:true });
     const activationPage = await activationContext.newPage();
 
     await activationPage.goto(
       `/auth/confirm?token_hash=${encodeURIComponent(tokenHash)}&type=invite`,
     );
-
-    await expect(activationPage).toHaveURL(/\/ativar-conta\/?$/);
+    // An unexpected redirect must not print a one-time activation token
+    // into a Playwright failed-URL assertion.
+    if (new URL(activationPage.url()).searchParams.has("token_hash")) {
+      throw new Error("One-time activation token remained in the browser URL.");
+    }
     await expect(
       activationPage.getByRole("heading", { name: "Ativar sua conta" }),
     ).toBeVisible();
@@ -197,7 +230,42 @@ test("convite sintetico ativa conta, cria senha e permite novo login", async ({
     if (authUser.error) throw authUser.error;
     expect(authUser.data.user.email_confirmed_at).toBeTruthy();
 
-    loginContext = await browser.newContext({ baseURL: baseUrl });
+    // The client flow continues through the real UI, without a second
+    // admin identity, MFA bypass or user data outside this fixture.
+    await test.step("salva e recupera Cadastro Atual no celular", async () => {
+      await activationPage.goto("/cliente/perfil");
+      await activationPage.getByLabel("Cidade").fill("Cidade Sintética J1");
+      await activationPage.getByRole("button", {name:"Salvar Cadastro Atual"}).click();
+      await expect.poll(async () => {
+        const registration = await admin.from("client_registration")
+          .select("city").eq("client_id", clientId).maybeSingle();
+        if (registration.error) throw registration.error;
+        return registration.data?.city ?? null;
+      }, {timeout:20_000}).toBe("Cidade Sintética J1");
+      await activationPage.reload();
+      await expect(activationPage.getByLabel("Cidade")).toHaveValue("Cidade Sintética J1");
+    });
+
+    let draftId = null;
+    await test.step("inicia e retoma a mesma Anamnese versionada", async () => {
+      await activationPage.goto("/cliente/anamnese");
+      await activationPage.getByRole("button", {name:"Começar Anamnese"}).click();
+      await expect(activationPage).toHaveURL(/\/cliente\/anamnese\/[0-9a-f-]{36}\/?$/);
+      draftId = activationPage.url().split("/").at(-1);
+      const rows = await admin.from("anamnesis_submissions")
+        .select("id,client_id,form_version_id,submitted_at")
+        .eq("client_id",clientId);
+      if (rows.error) throw rows.error;
+      expect(rows.data).toHaveLength(1);
+      expect(rows.data[0].id).toBe(draftId);
+      expect(rows.data[0].submitted_at).toBeNull();
+      expect(rows.data[0].form_version_id).toBeTruthy();
+      await activationPage.goto("/cliente/anamnese");
+      const resume = activationPage.getByRole("link",{name:"Continuar rascunho"});
+      await expect(resume).toHaveAttribute("href",`/cliente/anamnese/${draftId}`);
+    });
+
+    loginContext = await browser.newContext({ baseURL: baseUrl, viewport:{width:390,height:844}, isMobile:true, hasTouch:true });
     const loginPage = await loginContext.newPage();
 
     await loginPage.goto("/login");
@@ -206,6 +274,9 @@ test("convite sintetico ativa conta, cria senha e permite novo login", async ({
     await loginPage.getByRole("button", { name: "Entrar" }).click();
 
     await expect(loginPage).toHaveURL(/\/cliente\/?$/);
+    await loginPage.goto("/cliente/anamnese");
+    await expect(loginPage.getByRole("link",{name:"Continuar rascunho"}))
+      .toHaveAttribute("href",`/cliente/anamnese/${draftId}`);
   } finally {
     await loginContext?.close();
     await activationContext?.close();
