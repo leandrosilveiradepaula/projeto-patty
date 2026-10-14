@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
+import { listClientsAssignedToCurrentAdmin } from "@/lib/supabase/data-access";
 import { getOperationalPendingItemsForCurrentAdmin } from "@/lib/operations/pending-data";
 import { groupOperationalPendingItems } from "@/lib/operations/pending";
 import { parsePendingQueueFocus } from "@/lib/operations/pending-navigation";
@@ -59,15 +60,17 @@ function PendingList({
 export default async function AdminPendenciasPage({ searchParams }: { searchParams: Promise<{ grupo?: string; q?: string; cliente?: string; tipo?: string; area?: string; responsavel?: string; ordem?: string; ano?: string; mes?: string; dataInicial?: string; dataFinal?: string; integridadeData?: string; vinculo?: string; multiplas?: string; paginaPatty?: string; paginaCliente?: string; paginaSistema?: string }> }) {
   const rawQuery = await searchParams;
   const focusedGroup = parsePendingQueueFocus(rawQuery.grupo);
-  const allItems = await getOperationalPendingItemsForCurrentAdmin();
+  const [allItems, assignments] = await Promise.all([getOperationalPendingItemsForCurrentAdmin(), listClientsAssignedToCurrentAdmin()]);
   const kindOptions = [...new Map(allItems.map(item=>[item.kind,{kind:item.kind,label:item.title}])).values()]
     .sort((a,b)=>a.label.localeCompare(b.label,"pt-BR"));
   const years=pendingQueueYears(allItems);
   const filters = readPendingExplorerQuery(rawQuery,kindOptions.map(item=>item.kind),years);
-  const items = explorePendingClientQueue(allItems,filters);
-  const scopedClient = filters.clientId ? allItems.find(item => item.clientId === filters.clientId) : null;
+  const scopedClient = filters.clientId ? assignments.find(assignment => assignment.clients?.id === filters.clientId)?.clients : null;
+  const unavailableClient = Boolean(filters.clientId && !scopedClient);
+  const scopedItems = filters.clientId ? (scopedClient ? allItems.filter(item => item.clientId === filters.clientId) : []) : allItems;
+  const items = unavailableClient ? [] : explorePendingClientQueue(scopedItems,filters);
   const resetHref = pendingExplorerResetHref(filters.clientId);
-  const areaCounts=countPendingAreas(explorePendingClientQueue(allItems,{...filters,area:null}));
+  const areaCounts=countPendingAreas(explorePendingClientQueue(scopedItems,{...filters,area:null}));
   const grouped = groupOperationalPendingItems(items);
   const pages={patty:paginatePendingQueue(grouped.patty,filters.pattyPage),client:paginatePendingQueue(grouped.client,filters.clientPage),operational:paginatePendingQueue(grouped.operational,filters.operationalPage)};
   const hasAdvancedFilters = filters.sort !== "oldest" || filters.year !== "all" ||
@@ -92,9 +95,10 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
       />
 
       <Section title="Localizar pendências" description="Busque por cliente ou tipo já registrado. A pesquisa não muda prioridade nem autorização.">
-        {scopedClient ? <div className={styles.scopedClient}><strong>Fila de {scopedClient.clientLabel}</strong><span>Exibindo apenas pendências desta cliente já autorizadas para seu acesso.</span><Link href="/admin/pendencias">Ver fila de todas as clientes</Link></div> : null}
+        {scopedClient ? <div className={styles.scopedClient}><strong>Fila de {scopedClient.full_name?.trim() || scopedClient.profiles?.display_name?.trim() || "cliente sem nome"}</strong><span>Exibindo apenas pendências desta cliente já autorizadas para seu acesso.</span><Link href={`/admin/clientes/${scopedClient.id}`}>Voltar ao acompanhamento</Link><Link href="/admin/pendencias">Ver fila de todas as clientes</Link></div> : null}
+        {unavailableClient ? <Alert variant="warning" title="Cliente indisponível">Não foi possível localizar um acompanhamento autorizado para esta cliente. Nenhuma pendência individual foi exibida. <Link href="/admin/pendencias">Voltar à fila geral</Link></Alert> : null}
         <form action="/admin/pendencias" method="get" className={styles.explorerFilters}>
-          {filters.clientId ? <input type="hidden" name="cliente" value={filters.clientId} /> : null}
+          {scopedClient ? <input type="hidden" name="cliente" value={scopedClient.id} /> : null}
           <label>Cliente
             <input name="q" type="search" maxLength={120} placeholder="Nome da cliente" defaultValue={filters.query}/>
           </label>
@@ -135,7 +139,7 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
           <Button type="submit" variant="secondary">Filtrar</Button>
           {filters.query || filters.kind!=="all" || filters.area || filters.responsible!=="all" || filters.sort!=="oldest" || filters.year!=="all" || filters.month!=="all" || filters.fromDate || filters.toDate || filters.dateValidity!=="all" || filters.clientScope!=="all" || filters.multiple!=="all" ? <Link href={resetHref}>Limpar filtros</Link> : null}
         </form>
-        <p role="status">Exibindo {items.length} de {allItems.length} pendência(s), referentes a {countPendingQueueClients(items)} cliente(s).{pendingQueueOldestDate(items) ? ` Registro válido mais antigo: ${formatDateTime(pendingQueueOldestDate(items)!)}` : ""}</p>
+        <p role="status">Exibindo {items.length} de {scopedItems.length} pendência(s), referentes a {countPendingQueueClients(items)} cliente(s).{pendingQueueOldestDate(items) ? ` Registro válido mais antigo: ${formatDateTime(pendingQueueOldestDate(items)!)}` : ""}</p>
         {filters.invalidClient ? <Alert variant="warning" title="Cliente inválida">O identificador da cliente é inválido. Nenhuma pendência foi exibida. Volte à fila geral para consultar os registros autorizados.</Alert> : filters.invalid ? <Alert variant="info" title="Consulta ajustada">Um parâmetro inválido foi ignorado. Exibimos apenas pendências autorizadas.</Alert> : null}
       </Section>
       <Section
@@ -163,9 +167,9 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
         ) : null}
         {items.length === 0 ? (
           <EmptyState
-            description={allItems.length===0 ? "Nenhuma ação da Patty, espera de cliente ou pendência operacional consta nesta fila no momento." : "Nenhuma pendência corresponde aos filtros atuais. Você pode limpar os filtros para consultar a fila completa."}
-            title={allItems.length===0 && !filters.invalidClient ? "Tudo em dia" : "Nenhum resultado"}
-            action={allItems.length > 0 || filters.invalidClient ? <Link href={resetHref}>Limpar filtros</Link> : undefined}
+            description={unavailableClient ? "Não foi possível confirmar o acesso a esta cliente." : scopedClient && scopedItems.length===0 ? "Não há pendências registradas para esta cliente neste momento." : scopedItems.length===0 ? "Nenhuma ação da Patty, espera de cliente ou pendência operacional consta nesta fila no momento." : "Nenhuma pendência corresponde aos filtros atuais."}
+            title={scopedClient && scopedItems.length===0 ? "Sem pendências desta cliente" : scopedItems.length===0 && !filters.invalidClient && !unavailableClient ? "Tudo em dia" : "Nenhum resultado"}
+            action={scopedItems.length > 0 || filters.invalidClient || unavailableClient ? <Link href={unavailableClient ? "/admin/pendencias" : resetHref}>Limpar filtros</Link> : undefined}
           />
         ) : (
           <div className={styles.groups}>
