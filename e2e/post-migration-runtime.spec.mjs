@@ -44,7 +44,7 @@ test("cliente sintética consulta histórico completo sem alerta de schema pende
     await expect(page.locator(`#avaliacao-${expectedAssessmentId}`)).toHaveCount(1);
     await expect(page.getByText("Avaliação finalizada, sem medidas disponíveis para consulta.")).toBeVisible();
   } else {
-    await expect(page.getByRole("heading", { name: "Nenhuma avaliação disponível" })).toBeVisible();
+    await expect(page.getByText("Nenhuma avaliação disponível", { exact: true })).toBeVisible();
   }
 });
 
