@@ -20,3 +20,10 @@ test("directory page survives client and queue navigation",()=>{
  assert.equal(clientDirectoryReturnHref(state),"/admin/clientes?q=Ana&view=patty&pagina=3");
  assert.equal(withClientDirectoryReturn("/admin/pendencias?cliente=123",state),"/admin/pendencias?cliente=123&listaQ=Ana&listaView=patty&listaPagina=3");
 });
+
+test("contextual navigation does not duplicate return parameters or lose fragments",()=>{
+ const state=readClientDirectoryReturn({listaQ:"Ana",listaView:"waiting",listaPagina:"2"});
+ const first=withClientDirectoryReturn("/admin/clientes/123/avaliacoes?fotoAtual=1#historico",state);
+ assert.equal(first,"/admin/clientes/123/avaliacoes?fotoAtual=1&listaQ=Ana&listaView=waiting&listaPagina=2#historico");
+ assert.equal(withClientDirectoryReturn(first,state),first);
+});
