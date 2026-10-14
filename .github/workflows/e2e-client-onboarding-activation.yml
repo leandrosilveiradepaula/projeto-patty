@@ -10,8 +10,6 @@ on:
     types:
       - completed
   status:
-  schedule:
-    - cron: "17 14 * * 1-5"
 
 permissions:
   contents: read
@@ -26,7 +24,6 @@ jobs:
     if: >-
       github.repository == 'leandrosilveiradepaula/projeto-patty' &&
       github.ref == 'refs/heads/master' &&
-      vars.J1_E2E_ENABLE == 'true' &&
       (
         github.event_name == 'workflow_dispatch' ||
         github.event_name == 'schedule' ||
@@ -95,8 +92,8 @@ jobs:
 
       # This is a *separate process*: Playwright timeout/crash can no longer
       # prevent cleanup of the exact synthetic identity recorded in RUNNER_TEMP.
-      # A cleanup error fails the job. The job remains disabled by default
-      # until J1_E2E_ENABLE is deliberately enabled after safety review.
+      # A cleanup error fails the job. Execution is limited to trusted master
+      # CI / exact Vercel publication events or explicit dispatch; no schedule.
       - name: Independent verified synthetic fixture cleanup
         if: always() && steps.browser.outcome != 'skipped' && steps.preflight.outputs.ready == 'true'
         env:
