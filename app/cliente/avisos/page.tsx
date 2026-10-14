@@ -43,6 +43,9 @@ export default async function ClientNotificationsPage({ searchParams }: { search
     <>
       <PageHeader eyebrow="Cliente" title="Avisos no aplicativo"
         description="Consulte lembretes já entregues no aplicativo sobre seus Feedbacks Semanais. Avisos não substituem o acompanhamento da Patty." />
+      <nav aria-label="Acessar acompanhamento semanal" className={styles.pendingShortcut}>
+        <Link className={styles.action} href="/cliente/feedback-semanal">Consultar todos os Feedbacks Semanais</Link>
+      </nav>
       {outstanding > 0 ? <nav aria-label="Feedbacks aguardando resposta" className={styles.pendingShortcut}>
         <p><strong>{outstanding} aviso(s)</strong> relacionado(s) a feedbacks ainda pendentes.</p>
         <Link className={styles.action} href="/cliente/avisos?situacao=pending#lista-avisos">Ver apenas pendentes</Link>
