@@ -33,7 +33,7 @@ test("J1 live browser smoke only runs after trusted master preflight",()=>{
  assert.match(workflow,/if: steps\.preflight\.outputs\.ready == .true./);
  assert.match(workflow,/--workers=1/);
  assert.match(workflow,/workflow_dispatch:/);
- assert.match(workflow,/schedule:/);
+ assert.doesNotMatch(workflow,/schedule:/);
  assert.doesNotMatch(workflow,/pull_request:/);
  assert.doesNotMatch(workflow,/permissions:\s*contents: write/);
 });
@@ -221,4 +221,20 @@ test("real J1 timeout never suppresses cleanup of exact synthetic identities",()
  assert.match(clientSpec,/Refusing cleanup of professional protocol history/);
  assert.match(clientSpec,/Synthetic client ownership verification failed/);
  assert.doesNotMatch(clientSpec,/catch\s*\([^)]*\)\s*\{\s*\}\s*;?\s*\/\/\s*cleanup/i);
+});
+
+test("J1 synthetic-only E2E resumes solely on trusted deploy/CI events with independent cleanup",()=>{
+ assert.doesNotMatch(workflow,/J1_E2E_ENABLE/);
+ assert.doesNotMatch(workflow,/schedule:/);
+ assert.match(workflow,/github\.event\.workflow_run\.head_sha == github\.sha/);
+ assert.match(workflow,/github\.event\.workflow_run\.conclusion == 'success'/);
+ assert.match(workflow,/github\.event\.state == 'success'/);
+ assert.match(workflow,/github\.event\.sha == github\.sha/);
+ assert.match(workflow,/preflight\.outputs\.ready == 'true'/);
+ assert.match(workflow,/node \.github\/scripts\/j1-production-preflight\.mjs/);
+ assert.match(workflow,/if: always\(\) && steps\.browser\.outcome != 'skipped'/);
+ assert.match(workflow,/J1_FIXTURE_CLEANUP_EXECUTE: "true"/);
+ assert.match(workflow,/node e2e\/helpers\/j1-independent-cleanup\.mjs/);
+ assert.doesNotMatch(workflow,/E2E_ADMIN_PASSWORD:|E2E_ADMIN_TOTP_SECRET:/);
+ assert.doesNotMatch(workflow,/pull_request:/);
 });
