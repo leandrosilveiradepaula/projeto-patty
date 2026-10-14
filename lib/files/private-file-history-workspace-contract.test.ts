@@ -20,6 +20,6 @@ test("client file history stays authorized and never releases hidden files",()=>
 test("private download destinations remain behind authorized server routes",()=>{
   const admin=read("app/admin/clientes/[clienteId]/arquivos/page.tsx");
   const client=read("app/cliente/arquivos/page.tsx");
-  assert.ok(admin.includes("href={`/admin/arquivos/${file.id}`}"));
+  assert.ok(admin.includes("href={withReturn(`/admin/arquivos/${file.id}`)}"));
   assert.ok(client.includes("href={`/cliente/arquivos/${file.id}`}"));
 });
