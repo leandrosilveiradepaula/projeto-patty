@@ -1,3 +1,7 @@
+## J1.02–03 — recuperação do resíduo e resultado da segunda execução de navegador (2026-10-14)
+
+A run [38636904607](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38636904607) foi executada **contra o commit `7ab8f9da` publicado em Production**, com CI do mesmo SHA. Os logs confirmaram que o usuário e cliente de teste residual foram reconciliados por Auth/email/client ID exatos e que a fixture desta run também foi limpa. Consulta SQL somente leitura retornou **0** contas e clientes de `e2e-onboarding-%@example.invalid` recentes. Resultado da jornada: **FALHA em seletor ambíguo do teste** ao validar a página Anamnese, não evidência de defeito da página. Corrigido por `exact: true`, sem alterar aplicativo ou banco. Removida a recuperação especial do resíduo após confirmação do cleanup; permanece o `finally` protegido para fixtures futuras. Próximo E2E deverá comprovar Cadastro Atual, reabertura da Anamnese e novo login. A J1 integral continua NÃO HOMOLOGADA.
+
 ## J1.02–03 — evidência do primeiro browser E2E e incidente de cleanup (2026-10-14)
 
 - **CI e deployment:** SHA `862758de` validado, runtime de produção equivalente `32c9c4fa` READY.

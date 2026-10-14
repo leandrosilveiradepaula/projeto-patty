@@ -206,12 +206,17 @@ test("mobile client-only E2E covers persistence and stops before any professiona
  assert.equal(workflow.includes("E2E_ADMIN_PASSWORD"),false);
 });
 
+test("Anamnese heading locator is unique on the real client page",()=>{
+ assert.match(clientSpec,/getByRole\("heading", \{ name: "Anamnese", exact: true \}\)/);
+ assert.doesNotMatch(clientSpec,/getByRole\("heading", \{ name: "Anamnese" \}\)/);
+ assert.doesNotMatch(clientSpec,/previousFixture/);
+});
 test("real J1 timeout never suppresses cleanup of exact synthetic identities",()=>{
  assert.match(clientSpec,/test\.setTimeout\(180_000\)/);
  assert.match(clientSpec,/Promise\.allSettled\(/);
  assert.match(clientSpec,/cleanupSyntheticClient\(\{ clientId, profileId, email \}\)/);
- assert.match(clientSpec,/cleanupSyntheticClient\(previousFixture\)/);
- assert.match(clientSpec,/previous\.data\.user\.email !== previousFixture\.email/);
+
+
  assert.match(clientSpec,/Refusing cleanup of a submitted Anamnese/);
  assert.match(clientSpec,/Refusing cleanup of professional protocol history/);
  assert.match(clientSpec,/Synthetic client ownership verification failed/);

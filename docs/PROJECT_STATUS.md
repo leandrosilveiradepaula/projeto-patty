@@ -1,3 +1,7 @@
+## J1 — cleanup sintético confirmado; próximo defeito de seletor Playwright (2026-10-14)
+
+A run real [38636904607](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38636904607) comprovou `Previous J1 synthetic residue safely reconciled` e `J1 synthetic fixture cleanup completed`. Consulta direta de integridade ao Supabase de produção após a run confirmou **zero** usuários Auth e **zero** clientes sintéticos do prefixo `e2e-onboarding-*` criados nas últimas quatro horas. A UI de ativação conduziu à página de Anamnese. A falha seguinte foi **somente de automação**: locator `getByRole('heading',{name:'Anamnese'})` retornou o h1, o título de começar e o título da versão; strict-mode violation. O seletor agora exige `exact: true` e a lógica de recuperação pontual (já executada) foi retirada do teste. O E2E precisa ser reexecutado para comprovar os próximos passos; **J1 ainda não homologada**.
+
 ## J1 — primeira execução real do Playwright e correção da limpeza sintética (2026-10-14)
 
 **Evidência real:** run [38635848243](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38635848243) usou CI do `master` e Vercel READY de runtime equivalente, validou credenciais de fixture e **iniciou o Playwright** no Supabase de produção. O teste falhou no timeout default de **30 s** e `browserContext.close()` lançou exceção antes do cleanup. Consulta read-only de dados sintéticos confirmou **uma** identidade `e2e-onboarding-<hex>@example.invalid` e seu vínculo `Client` residuais, sem Anamnese nem protocolo, gerados naquela execução.
