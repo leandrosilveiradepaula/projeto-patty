@@ -161,6 +161,7 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
           <EmptyState
             description={allItems.length===0 ? "Nenhuma ação da Patty, espera de cliente ou pendência operacional consta nesta fila no momento." : "Nenhuma pendência corresponde aos filtros atuais. Você pode limpar os filtros para consultar a fila completa."}
             title={allItems.length===0 ? "Tudo em dia" : "Nenhum resultado"}
+            action={allItems.length > 0 ? <Link href="/admin/pendencias">Limpar filtros e ver toda a fila</Link> : undefined}
           />
         ) : (
           <div className={styles.groups}>
@@ -171,7 +172,7 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
                   : focusedGroup === "client"
                     ? "Nenhuma pendência aguardando cliente nesta fila no momento."
                     : "Nenhuma pendência operacional do sistema nesta fila no momento."}
-                <Link className={styles.clientLink} href="/admin/pendencias">Ver toda a fila</Link>
+                <Link className={styles.clientLink} href="/admin/pendencias">Limpar filtros e ver toda a fila</Link>
               </div>
             ) : null}
             {grouped.patty.length > 0 ? (

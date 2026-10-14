@@ -63,3 +63,9 @@ test("pending group explanation follows the selected order rather than claiming 
   assert.ok(page.includes('Pendências por nome da cliente, de Z a A'));
   assert.ok(page.includes('Pendências ordenadas pelo tipo de ação'));
 });
+
+test("filtered empty queue offers explicit recovery without claiming no operational work", () => {
+  assert.match(page, /allItems\.length===0 \? "Tudo em dia" : "Nenhum resultado"/);
+  assert.match(page, /Limpar filtros e ver toda a fila/);
+  assert.match(page, /action=\{allItems\.length > 0 \?/);
+});
