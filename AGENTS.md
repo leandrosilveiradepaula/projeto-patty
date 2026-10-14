@@ -77,15 +77,21 @@ Secrets devem permanecer fora do Git.
 
 RLS sera obrigatoria quando o Supabase for implementado.
 
-## Controle de versao
+## Controle de versao e autorizacao de merge (atualizado em 2026-10-14)
 
-### DECISAO CONFIRMADA
+### AUTORIZACAO EXPLICITA DO RESPONSAVEL
 
-Nao fazer commit, push, merge, rebase, tag ou pull request sem instrucao explicita.
+O responsavel ja autorizou criacao de branches, commits, pushes, PRs, correcoes de CI e **merge automatico de PRs elegiveis** durante o desenvolvimento do Projeto Patty. Nao pedir novamente "prossiga" ou autorizacao rotineira de merge. Esta decisao substitui a proibicao generica anterior neste escopo.
 
-Nao criar branches sem instrucao explicita.
+A esteira `.github/workflows/auto-merge-journeys.yml` permite merge automatico **apenas** quando o commit exato do PR tiver passado integralmente pelo workflow `Validate application`, cumprir o contrato de jornada e nao modificar arquivos sensiveis definidos pelo gate versionado. Merge nao significa deploy ou homologacao.
 
-Nao apagar historico nem sobrescrever versoes antigas sem instrucao explicita e justificativa clara.
+Mudancas em workflows, Auth/RLS, migrations, controles de IA/saude, seguranca, arquivos confidenciais, alteracoes destrutivas e regras profissionais **nao** entram no auto-merge: requerem revisao especifica antes da integracao. Falhas do CI sao corrigidas na mesma branch, nunca por PR corretivo paralelo. Nao enfraquecer testes, RLS ou gates para obter verde.
+
+O trabalho deve ser estruturado por **jornada completa**, com um objetivo e inicio/fim observaveis, e nunca por contagem artificial de blocos ou PRs. O contrato da jornada, evidencias e impedimentos ficam em `docs/JOURNEY_HOMOLOGATION.md`.
+
+Uma jornada permanece NAO HOMOLOGADA ate execucao autenticada fim a fim, verificacao de persistencia e escopo de acesso, confirmacao do SHA publicado na producao e evidencia de uso em mobile. CI verde isolado nao confirma nada disso.
+
+Nao apagar historico nem sobrescrever versoes antigas sem justificativa e verificacao de seguranca.
 
 ## Relatorios
 
