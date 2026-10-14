@@ -1,3 +1,7 @@
+## Decisão operacional recente — nenhum staging para J1 (2026-10-14)
+
+O responsável reafirmou que a Jornada 1 deve continuar usando o Supabase de produção atual. Não provisionar um segundo banco Supabase/staging para contornar o bloqueio de autenticação dos testes. Seguir o modelo de dois ambientes existente (desenvolvimento e produção). A Patty continua como única administradora de produção; a validação administrativa deve usar sessão da Patty sem exportar credenciais ou seed TOTP para CI. Fixtures de cliente estritamente sintéticas e cleanup controlado são exigidos, e os critérios/impedimentos de homologação estão em `docs/JOURNEY_HOMOLOGATION.md`.
+
 # Arquitetura
 
 ## Stack definida
