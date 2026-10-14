@@ -1,3 +1,4 @@
+import { PendingQueuePager } from "@/components/admin/PendingQueuePager";
 import { readClientDirectoryReturn, clientDirectoryReturnHref, withClientDirectoryReturn, type ClientDirectoryReturn } from "@/lib/operations/client-directory-return";
 import { PENDING_AREA_OPTIONS, countPendingAreas } from "@/lib/operations/pending-area-filter";
 import { readPendingExplorerQuery, explorePendingClientQueue, pendingExplorerGroupHref, pendingExplorerPageHref, paginatePendingQueue, pendingQueueYears, countPendingQueueClients, pendingQueueOldestDate, pendingExplorerResetHref, PENDING_EXPLORER_MONTHS } from "@/lib/operations/pending-explorer";
@@ -201,11 +202,7 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
                   <Badge variant="warning">{grouped.patty.length}</Badge>
                 </div>
                 <PendingList group="patty" items={pages.patty.items} directoryReturn={directoryReturn} />
-                  <nav aria-label="Páginas de patty" className={styles.groupNavigation}>
-                    {pages.patty.page>1?<Link href={withClientDirectoryReturn(pendingExplorerPageHref("patty",filters,pages.patty.page-1), directoryReturn)}>Anterior</Link>:null}
-                    <span>Página {pages.patty.page} de {pages.patty.pageCount} · {pages.patty.from}–{pages.patty.to} de {pages.patty.total}</span>
-                    {pages.patty.page<pages.patty.pageCount?<Link href={withClientDirectoryReturn(pendingExplorerPageHref("patty",filters,pages.patty.page+1), directoryReturn)}>Próxima</Link>:null}
-                  </nav>
+                  <PendingQueuePager group="patty" page={pages.patty} filters={filters} directoryReturn={directoryReturn} />
               </section>
             ) : null}
 
@@ -220,11 +217,7 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
                 </summary>
                 <div className={styles.collapsibleContent}>
                   <PendingList group="client" items={pages.client.items} directoryReturn={directoryReturn} />
-                  <nav aria-label="Páginas de client" className={styles.groupNavigation}>
-                    {pages.client.page>1?<Link href={withClientDirectoryReturn(pendingExplorerPageHref("client",filters,pages.client.page-1), directoryReturn)}>Anterior</Link>:null}
-                    <span>Página {pages.client.page} de {pages.client.pageCount} · {pages.client.from}–{pages.client.to} de {pages.client.total}</span>
-                    {pages.client.page<pages.client.pageCount?<Link href={withClientDirectoryReturn(pendingExplorerPageHref("client",filters,pages.client.page+1), directoryReturn)}>Próxima</Link>:null}
-                  </nav>
+                  <PendingQueuePager group="client" page={pages.client} filters={filters} directoryReturn={directoryReturn} />
                 </div>
               </details>
             ) : null}
@@ -240,11 +233,7 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
                 </summary>
                 <div className={styles.collapsibleContent}>
                   <PendingList group="operational" items={pages.operational.items} directoryReturn={directoryReturn} />
-                  <nav aria-label="Páginas de operational" className={styles.groupNavigation}>
-                    {pages.operational.page>1?<Link href={withClientDirectoryReturn(pendingExplorerPageHref("operational",filters,pages.operational.page-1), directoryReturn)}>Anterior</Link>:null}
-                    <span>Página {pages.operational.page} de {pages.operational.pageCount} · {pages.operational.from}–{pages.operational.to} de {pages.operational.total}</span>
-                    {pages.operational.page<pages.operational.pageCount?<Link href={withClientDirectoryReturn(pendingExplorerPageHref("operational",filters,pages.operational.page+1), directoryReturn)}>Próxima</Link>:null}
-                  </nav>
+                  <PendingQueuePager group="operational" page={pages.operational} filters={filters} directoryReturn={directoryReturn} />
                 </div>
               </details>
             ) : null}

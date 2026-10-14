@@ -257,3 +257,8 @@
 .scopedClient span { color: var(--color-text-secondary); }
 .scopedClient a { min-height: 44px; display: inline-flex; align-items: center; color: var(--color-brand-strong); text-decoration: underline; }
 .scopedClient a:focus-visible { outline: 3px solid var(--color-brand); outline-offset: 2px; }
+
+.pageNumber { display: inline-flex; gap: var(--space-1); align-items: center; padding: 0 !important; border: 0 !important; }
+.pageNumber strong { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; border: 1px solid var(--color-brand); border-radius: var(--radius-medium); color: var(--color-text-primary); }
+.pageNumber > a { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; }
+.pageNumber > span { border: 0; padding: 0 var(--space-1); }
