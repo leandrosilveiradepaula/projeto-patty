@@ -3,15 +3,22 @@ import { fileURLToPath } from "node:url";
 
 // Last production deployment confirmed READY for the J1 UI. This is a
 // temporary, explicit evidence anchor, never an arbitrary stale deployment.
-const verifiedDeployedCommit = "f0cbfcf6b6967755d3a6a614d418b1dd0f9bb529";
+const verifiedDeployedCommit = "32c9c4faf807a2fc083c30b9f6f3ad97677ef051";
 
 // Fail closed unless EVERY change since the deployed commit is strictly
 // test/CI/documentation. Do not use broad directories or extensions here.
 const NON_RUNTIME_CHANGES = new Set([
+  // Explicit changes from the last READY production application runtime:
+  // J1 test workflow, E2E-only synthetic fixture, CI regression and
+  // documentation. Never allow generic e2e/, app/, supabase/ or lib/.
+  ".github/workflows/e2e-client-onboarding-activation.yml",
   ".github/workflows/e2e-j1-invitation-handoff.yml",
   ".github/scripts/j1-production-preflight.mjs",
+  "docs/ARCHITECTURE.md",
+  "docs/DECISIONS.md",
   "docs/JOURNEY_HOMOLOGATION.md",
   "docs/PROJECT_STATUS.md",
+  "e2e/client-onboarding-activation.spec.mjs",
   "lib/operations/j1-authenticated-handoff-gate.test.ts",
 ]);
 

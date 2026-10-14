@@ -1,3 +1,7 @@
+## J1 — gate do último runtime READY aplicado ao teste sintético completo da cliente (2026-10-14)
+
+Após o PR #839, o HEAD `d9642ce4` recebeu `Vercel: Deployment rate limited`. Entretanto `32c9c4fa` permanece READY e o compare comprovou **nenhuma diferença de runtime** entre ambos: dois commits e oito arquivos exclusivamente de CI/E2E/docs. O preflight foi atualizado para aceitar temporariamente **somente esse SHA publicado**, com allowlist explícita e recusa de qualquer mudança em app/banco/RLS/Auth/dependências; assim o E2E da cliente pode executar sem forçar outro deployment. O teste administrativo com MFA pessoal permanece desativado e não homologado. Registrar run efetiva, cleanup e falhas após execução; este PR não constitui evidência de browser PASS.
+
 ## Jornada 1 — E2E real da cliente sintética com produção, sem MFA administrativo automatizado (2026-10-14)
 
 **Pacote em validação.** Auditoria do workflow `J1 authenticated invitation handoff` comprovou que o GitHub Actions continuava executando automaticamente um login administrativo impossível sem o segredo `E2E_ADMIN_TOTP_SECRET` (run `38632189398`, falha **antes** do Playwright). A decisão vigente mantém a Patty como única admin no Supabase real e proíbe exportar suas credenciais/MFA para o CI.
