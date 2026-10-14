@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 // Import the trusted .mjs runtime without treating it as a typed application module.
 const gateModule = "../../.github/scripts/" + "journey-automerge.mjs";
-const { evaluateMergeContract, sensitivePath } = await import(gateModule);
+const { evaluateMergeContract, sensitivePath, shouldDeferToNativeAutoMerge } = await import(gateModule);
 
 const repository = "leandrosilveiradepaula/projeto-patty";
 const owner = "leandrosilveiradepaula";
@@ -47,4 +47,12 @@ test("deletions and docs-only changes cannot pass the merge gate",()=>{
  assert.equal(evaluateMergeContract(pr(),[{filename:"app/admin/page.tsx",status:"removed"}],owner,repository).allowed,false);
  assert.equal(evaluateMergeContract(pr(),files("docs/PROJECT_STATUS.md"),owner,repository).allowed,false);
  assert.equal(evaluateMergeContract(pr(),[],owner,repository).allowed,false);
+});
+
+test("native GitHub auto-merge takes precedence over the custom merge worker",()=>{
+ assert.equal(shouldDeferToNativeAutoMerge({allow_auto_merge:true}),true);
+ assert.equal(shouldDeferToNativeAutoMerge({allow_auto_merge:false}),false);
+ assert.equal(shouldDeferToNativeAutoMerge({}),false);
+ assert.equal(shouldDeferToNativeAutoMerge(null),false);
+ assert.equal(shouldDeferToNativeAutoMerge({allow_auto_merge:"true"}),false);
 });
