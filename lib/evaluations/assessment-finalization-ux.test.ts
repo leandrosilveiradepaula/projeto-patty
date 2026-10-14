@@ -22,7 +22,8 @@ test("assessment finalization button follows the deterministic server readiness"
 test("assessment photo workflow links to the existing private file workspace",()=>{
  const page=read("app/admin/avaliacoes/[avaliacaoId]/page.tsx");
  assert.match(page,/availablePhotos\.length === 0/);
- assert.match(page,/withClientDirectoryReturn\(\`\/admin\/clientes\/\$\{assessment\.client_id\}\/arquivos\`,directoryReturn\)/);
+ assert.match(page,/href=\{navigate\(\`\/admin\/clientes\/\$\{assessment\.client_id\}\/arquivos\`\)\}/);
+ assert.match(page,/withPendingQueueReturn\(withClientDirectoryReturn\(href,directoryReturn\),queueReturn \?\? ""\)/);
 });
 
 test("assessment draft removal and photo linking require a confirmed affected row", () => {
