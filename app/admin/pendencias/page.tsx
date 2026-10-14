@@ -1,4 +1,5 @@
 import { PendingQueuePager } from "@/components/admin/PendingQueuePager";
+import { withPendingQueueReturn } from "@/lib/operations/pending-queue-return";
 import { readClientDirectoryReturn, clientDirectoryReturnHref, withClientDirectoryReturn, type ClientDirectoryReturn } from "@/lib/operations/client-directory-return";
 import { PENDING_AREA_OPTIONS, countPendingAreas } from "@/lib/operations/pending-area-filter";
 import { readPendingExplorerQuery, explorePendingClientQueue, pendingExplorerGroupHref, pendingExplorerPageHref, paginatePendingQueue, pendingQueueYears, countPendingQueueClients, pendingQueueOldestDate, pendingExplorerResetHref, PENDING_EXPLORER_MONTHS } from "@/lib/operations/pending-explorer";
@@ -25,7 +26,9 @@ function PendingList({
   items,
   group,
   directoryReturn,
+  queueReturnHref,
 }: {
+  queueReturnHref: string;
   group: "patty" | "client" | "operational";
   directoryReturn: ClientDirectoryReturn;
   items: Awaited<ReturnType<typeof getOperationalPendingItemsForCurrentAdmin>>;
@@ -37,7 +40,7 @@ function PendingList({
           <PendingItemCard
             action={
               <div className={styles.actions}>
-                <Link className={styles.actionLink} href={withClientDirectoryReturn(item.href, directoryReturn)}>
+                <Link className={styles.actionLink} href={withPendingQueueReturn(withClientDirectoryReturn(item.href, directoryReturn), queueReturnHref)}>
                   Abrir registro
                 </Link>
                 {item.clientId ? (
@@ -79,6 +82,11 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
   const areaCounts=countPendingAreas(explorePendingClientQueue(scopedItems,{...filters,area:null}));
   const grouped = groupOperationalPendingItems(items);
   const pages={patty:paginatePendingQueue(grouped.patty,filters.pattyPage),client:paginatePendingQueue(grouped.client,filters.clientPage),operational:paginatePendingQueue(grouped.operational,filters.operationalPage)};
+  const queueReturnHrefs={
+    patty:withClientDirectoryReturn(pendingExplorerPageHref("patty",filters,pages.patty.page),directoryReturn),
+    client:withClientDirectoryReturn(pendingExplorerPageHref("client",filters,pages.client.page),directoryReturn),
+    operational:withClientDirectoryReturn(pendingExplorerPageHref("operational",filters,pages.operational.page),directoryReturn),
+  };
   const hasAdvancedFilters = filters.sort !== "oldest" || filters.year !== "all" ||
     filters.month !== "all" || Boolean(filters.fromDate || filters.toDate) ||
     filters.dateValidity !== "all" || filters.clientScope !== "all" ||
@@ -201,7 +209,7 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
                   </div>
                   <Badge variant="warning">{grouped.patty.length}</Badge>
                 </div>
-                <PendingList group="patty" items={pages.patty.items} directoryReturn={directoryReturn} />
+                <PendingList group="patty" items={pages.patty.items} directoryReturn={directoryReturn} queueReturnHref={queueReturnHrefs.patty} />
                   <PendingQueuePager group="patty" page={pages.patty} filters={filters} directoryReturn={directoryReturn} />
               </section>
             ) : null}
@@ -216,7 +224,7 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
                   <Badge variant="neutral">{grouped.client.length}</Badge>
                 </summary>
                 <div className={styles.collapsibleContent}>
-                  <PendingList group="client" items={pages.client.items} directoryReturn={directoryReturn} />
+                  <PendingList group="client" items={pages.client.items} directoryReturn={directoryReturn} queueReturnHref={queueReturnHrefs.client} />
                   <PendingQueuePager group="client" page={pages.client} filters={filters} directoryReturn={directoryReturn} />
                 </div>
               </details>
@@ -232,7 +240,7 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
                   <Badge variant="warning">{grouped.operational.length}</Badge>
                 </summary>
                 <div className={styles.collapsibleContent}>
-                  <PendingList group="operational" items={pages.operational.items} directoryReturn={directoryReturn} />
+                  <PendingList group="operational" items={pages.operational.items} directoryReturn={directoryReturn} queueReturnHref={queueReturnHrefs.operational} />
                   <PendingQueuePager group="operational" page={pages.operational} filters={filters} directoryReturn={directoryReturn} />
                 </div>
               </details>

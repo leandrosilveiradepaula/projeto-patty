@@ -27,9 +27,9 @@ test("focused groups keep collapsible client/operational queues accessible", () 
 
 test("queue distinguishes waiting on client from professional/operational alerts", () => {
   assert.ok(page.includes('variant={group === "client" ? "neutral" : "warning"}'));
-  assert.ok(page.includes('<PendingList group="client" items={pages.client.items} directoryReturn={directoryReturn} />'));
-  assert.ok(page.includes('<PendingList group="patty" items={pages.patty.items} directoryReturn={directoryReturn} />'));
-  assert.ok(page.includes('<PendingList group="operational" items={pages.operational.items} directoryReturn={directoryReturn} />'));
+  assert.ok(page.includes('<PendingList group="client" items={pages.client.items} directoryReturn={directoryReturn} queueReturnHref={queueReturnHrefs.client} />'));
+  assert.ok(page.includes('<PendingList group="patty" items={pages.patty.items} directoryReturn={directoryReturn} queueReturnHref={queueReturnHrefs.patty} />'));
+  assert.ok(page.includes('<PendingList group="operational" items={pages.operational.items} directoryReturn={directoryReturn} queueReturnHref={queueReturnHrefs.operational} />'));
 });
 
 test("group navigation works by keyboard and does not require client-only state", () => {
@@ -89,7 +89,7 @@ test("pending filters, group links, pages and client links preserve directory re
 });
 
 test("pending queue record action keeps validated directory return context",()=>{
- assert.match(page,/href=\{withClientDirectoryReturn\(item\.href, directoryReturn\)\}/);
+ assert.match(page,/href=\{withPendingQueueReturn\(withClientDirectoryReturn\(item\.href, directoryReturn\), queueReturnHref\)\}/);
 });
 
 test("queue groups use a single numbered pager with accessible current-page semantics",()=>{
@@ -114,4 +114,11 @@ test("direct page jump retains the selected group and its current filter context
  assert.match(pager,/Atualizar endereço/);
  assert.match(css,/\.pageJump input:focus-visible/);
  assert.match(css,/\.pageJump button:focus-visible/);
+});
+
+test("record links carry exact queue page and the admin shell exposes explicit return",()=>{
+ assert.match(page,/const queueReturnHrefs=/);
+ assert.match(page,/pendingExplorerPageHref\("patty",filters,pages\.patty\.page\)/);
+ assert.match(page,/pendingExplorerPageHref\("client",filters,pages\.client\.page\)/);
+ assert.match(page,/pendingExplorerPageHref\("operational",filters,pages\.operational\.page\)/);
 });

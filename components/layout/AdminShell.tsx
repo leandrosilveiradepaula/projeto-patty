@@ -1,4 +1,6 @@
 import type { HTMLAttributes, ReactNode } from "react";
+import { Suspense } from "react";
+import { PendingQueueReturnBanner } from "@/components/admin/PendingQueueReturnBanner";
 import styles from "./AdminShell.module.css";
 
 export type AdminShellProps = HTMLAttributes<HTMLDivElement> & {
@@ -25,7 +27,10 @@ export function AdminShell({
       </aside>
       <div className={styles.workspace}>
         {header ? <header className={styles.header}>{header}</header> : null}
-        <main className={styles.main}>{children}</main>
+        <main className={styles.main}>
+          <Suspense fallback={null}><PendingQueueReturnBanner /></Suspense>
+          {children}
+        </main>
       </div>
     </div>
   );
