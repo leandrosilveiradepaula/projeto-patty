@@ -78,3 +78,11 @@ test("directory preserves return context in secondary group links and shows comp
  assert.match(page,/withClientDirectoryReturn\(\x60\/admin\/pendencias\?cliente=\$\{client\.id\}&responsavel=operational#operacional-do-sistema\x60,directoryReturn\)/);
  assert.match(page,/describeClientPendingSummary\(pendingSummary\)/);
 });
+
+test("client directory paginates filtered results and keeps a return page",()=>{
+ const page=read("app/admin/clientes/page.tsx");
+ assert.match(page,/paginateClientDirectory\(filteredClients, requestedPage\.page\)/);
+ assert.match(page,/pagedClients\.items\.map/);
+ assert.match(page,/clientDirectoryPageHref/);
+ assert.match(page,/directoryReturn\.page = pagedClients\.page/);
+});
