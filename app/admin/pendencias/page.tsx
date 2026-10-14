@@ -193,7 +193,7 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
             ) : null}
 
             {grouped.client.length > 0 ? (
-              <details className={styles.collapsibleGroup} id="aguardando-cliente" open={focusedGroup === "client"}>
+              <details className={styles.collapsibleGroup} id="aguardando-cliente" open={focusedGroup === "client" || (!focusedGroup && (filters.responsible === "client" || filters.clientPage > 1))}>
                 <summary className={styles.groupSummary}>
                   <span>
                     <strong>Aguardando cliente</strong>
@@ -213,7 +213,7 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
             ) : null}
 
             {grouped.operational.length > 0 ? (
-              <details className={styles.collapsibleGroup} id="operacional-do-sistema" open={focusedGroup === "operational"}>
+              <details className={styles.collapsibleGroup} id="operacional-do-sistema" open={focusedGroup === "operational" || (!focusedGroup && (filters.responsible === "operational" || filters.operationalPage > 1))}>
                 <summary className={styles.groupSummary}>
                   <span>
                     <strong>Operacional do sistema</strong>
