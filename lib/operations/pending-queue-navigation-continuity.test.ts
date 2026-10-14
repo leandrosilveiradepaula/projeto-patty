@@ -26,7 +26,7 @@ test("focused groups keep collapsible client/operational queues accessible", () 
 
 test("queue distinguishes waiting on client from professional/operational alerts", () => {
   assert.ok(page.includes('variant={group === "client" ? "neutral" : "warning"}'));
-  assert.ok(page.includes('<PendingList group="client" items={pages.client.items} />'));
+  assert.ok(page.includes('<PendingList group="client" items={pages.client.items} directoryReturn={directoryReturn} />'));
   assert.ok(page.includes('<PendingList group="patty" items={pages.patty.items} />'));
   assert.ok(page.includes('<PendingList group="operational" items={pages.operational.items} />'));
 });
