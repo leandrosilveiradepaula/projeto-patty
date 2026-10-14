@@ -102,3 +102,16 @@ test("queue groups use a single numbered pager with accessible current-page sema
  assert.match(pager,/page\.to/);
  assert.match(css,/\.pageNumber strong/);
 });
+
+test("direct page jump retains the selected group and its current filter context",()=>{
+ assert.match(pager,/page\.pageCount>7/);
+ assert.match(pager,/method="get"/);
+ assert.match(pager,/name=\{PAGE_KEYS\[group\]\}/);
+ assert.match(pager,/jumpParams\.delete\(PAGE_KEYS\[group\]\)/);
+ assert.match(pager,/jumpParams\.entries\(\)/);
+ assert.match(pager,/GROUP_ANCHORS\[group\]/);
+ assert.match(pager,/page\.adjusted/);
+ assert.match(pager,/Atualizar endereço/);
+ assert.match(css,/\.pageJump input:focus-visible/);
+ assert.match(css,/\.pageJump button:focus-visible/);
+});
