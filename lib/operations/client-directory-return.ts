@@ -42,5 +42,11 @@ export function withClientDirectoryReturn(href: string, state: ClientDirectoryRe
   const hashIndex = href.indexOf("#");
   const path = hashIndex >= 0 ? href.slice(0, hashIndex) : href;
   const hash = hashIndex >= 0 ? href.slice(hashIndex) : "";
-  return path + (path.includes("?") ? "&" : "?") + params.toString() + hash;
+  const questionIndex = path.indexOf("?");
+  const pathname = questionIndex >= 0 ? path.slice(0, questionIndex) : path;
+  const existing = new URLSearchParams(questionIndex >= 0 ? path.slice(questionIndex + 1) : "");
+  // Reuse a canonical single value, even if a link already carries return params.
+  for (const [key, value] of params) existing.set(key, value);
+  const query = existing.toString();
+  return pathname + (query ? "?" + query : "") + hash;
 }
