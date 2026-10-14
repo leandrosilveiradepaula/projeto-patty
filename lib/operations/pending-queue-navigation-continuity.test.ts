@@ -65,7 +65,15 @@ test("pending group explanation follows the selected order rather than claiming 
 });
 
 test("filtered empty queue offers explicit recovery without claiming no operational work", () => {
-  assert.match(page, /allItems\.length===0 && !filters\.invalidClient \? "Tudo em dia" : "Nenhum resultado"/);
+  assert.match(page, /scopedItems\.length===0 && !filters\.invalidClient && !unavailableClient \? "Tudo em dia" : "Nenhum resultado"/);
   assert.match(page, /Limpar filtros/);
-  assert.match(page, /action=\{allItems\.length > 0 \|\| filters\.invalidClient \?/);
+  assert.match(page, /action=\{scopedItems\.length > 0 \|\| filters\.invalidClient \|\| unavailableClient \?/);
+});
+
+test("client-specific pending queue resolves authorized assignments independently of pending items",()=>{
+ assert.match(page,/listClientsAssignedToCurrentAdmin/);
+ assert.match(page,/assignment\.clients\?\.id === filters\.clientId/);
+ assert.match(page,/scopedClient && scopedItems\.length===0/);
+ assert.match(page,/Voltar ao acompanhamento/);
+ assert.match(page,/unavailableClient \? \[\] : explorePendingClientQueue/);
 });
