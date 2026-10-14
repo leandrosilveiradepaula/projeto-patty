@@ -1,4 +1,6 @@
 import { buildProtocolOperationalSummaries, protocolOperationalStatusLabel, protocolPublicationDate, operationalProtocolVersionHref } from "@/lib/protocol/operational-catalog";
+import { readClientDirectoryReturn, withClientDirectoryReturn } from "@/lib/operations/client-directory-return";
+import { readPendingQueueReturn, withPendingQueueReturn } from "@/lib/operations/pending-queue-return";
 import { AdminProtocolInitialVersionForm } from "@/components/admin/AdminProtocolInitialVersionForm";
 import { existingProtocolNavigation } from "@/lib/protocol/admin-catalog-ux";
 import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
@@ -124,7 +126,7 @@ async function resumeVersionlessProtocolAction(formData: FormData) {
 
 type AdminClientProtocolsPageProps = {
   params: Promise<{ clienteId: string }>;
-  searchParams: Promise<{ recuperacao?: string | string[] }>;
+  searchParams: Promise<{ recuperacao?: string | string[]; filaRetorno?: string; listaQ?: string; listaView?: string; listaPagina?: string }>;
 };
 
 function formatProtocolType(value: string) {
@@ -145,7 +147,11 @@ export default async function AdminClientProtocolsPage({
   params,
   searchParams,
 }: AdminClientProtocolsPageProps) {
-  const [{ clienteId }, { recuperacao }] = await Promise.all([params, searchParams]);
+  const [{ clienteId }, rawQuery] = await Promise.all([params, searchParams]);
+  const { recuperacao } = rawQuery;
+  const directoryReturn = readClientDirectoryReturn(rawQuery);
+  const queueReturn = readPendingQueueReturn(rawQuery.filaRetorno);
+  const navigate = (href: string) => withPendingQueueReturn(withClientDirectoryReturn(href, directoryReturn), queueReturn ?? "");
   if (!isUuid(clienteId)) notFound();
   const client = await getAccessibleClient(clienteId);
 
@@ -178,15 +184,15 @@ export default async function AdminClientProtocolsPage({
         description="A publicação depende de revisão e aprovação explícitas. Depois, continue o acompanhamento nas áreas reais da cliente."
         title="Continuidade do acompanhamento"
       >
-        <Link className={styles.actionLink} href={`/admin/clientes/${client.id}/feedback-semanal`}>
+        <Link className={styles.actionLink} href={navigate(`/admin/clientes/${client.id}/feedback-semanal`)}>
           Acompanhar feedback semanal
         </Link>
         {" · "}
-        <Link className={styles.actionLink} href={`/admin/clientes/${client.id}/treino`}>
+        <Link className={styles.actionLink} href={navigate(`/admin/clientes/${client.id}/treino`)}>
           Consultar treino
         </Link>
         {" · "}
-        <Link className={styles.actionLink} href={`/admin/clientes/${client.id}/conteudos`}>
+        <Link className={styles.actionLink} href={navigate(`/admin/clientes/${client.id}/conteudos`)}>
           Liberar conteúdos
         </Link>
       </Section>
@@ -230,9 +236,9 @@ export default async function AdminClientProtocolsPage({
                 </div>
                 <div className={styles.protocolActions}>
                   {versionedIds.has(protocol.id) ? <>
-                    <Link className={styles.actionLink} href={latestHref ?? `/admin/protocolos/${protocol.id}`}>Abrir versão atual de trabalho</Link>
-                    {publishedHref ? <Link className={styles.actionLink} href={publishedHref}>Consultar última publicada</Link> : null}
-                    <Link className={styles.actionLink} href={`/admin/protocolos/${protocol.id}`}>Histórico completo</Link>
+                    <Link className={styles.actionLink} href={navigate(latestHref ?? `/admin/protocolos/${protocol.id}`)}>Abrir versão atual de trabalho</Link>
+                    {publishedHref ? <Link className={styles.actionLink} href={navigate(publishedHref)}>Consultar última publicada</Link> : null}
+                    <Link className={styles.actionLink} href={navigate(`/admin/protocolos/${protocol.id}`)}>Histórico completo</Link>
                   </> : <AdminProtocolInitialVersionForm
                     action={resumeVersionlessProtocolAction} clientId={client.id} protocolId={protocol.id}
                   />}
