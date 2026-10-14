@@ -497,6 +497,7 @@ export default async function AdminClienteDetailPage({
       <ClientWorkspaceNav clientId={client.id} />
       <PageSectionNav
         items={[
+          { href: "#proxima-acao", label: "Próxima ação" },
           { href: "#fluxo-atendimento", label: "Fluxo" },
           { href: "#visao-acompanhamento", label: "Complementares" },
           { href: "#cadastro-atual", label: "Cadastro" },
@@ -517,7 +518,7 @@ export default async function AdminClienteDetailPage({
         </Alert>
       ) : null}
 
-      <section className={styles.nextAction} aria-labelledby="next-action-title">
+      <section className={styles.nextAction} id="proxima-acao" aria-labelledby="next-action-title">
         <div>
           <p className={styles.nextActionEyebrow}>{nextOperationalAction.eyebrow}</p>
           <h2 className={styles.nextActionTitle} id="next-action-title">
