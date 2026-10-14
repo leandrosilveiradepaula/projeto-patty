@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { readClientDirectoryReturn, withClientDirectoryReturn } from "@/lib/operations/client-directory-return";
@@ -33,7 +34,7 @@ function formatDateTime(value: string) {
   }).format(new Date(value));
 }
 
-export function AdminAnamnesisWorkspaceHeader({
+function AdminAnamnesisWorkspaceHeaderContent({
   activeSection,
   clientId,
   displayName,
@@ -121,4 +122,8 @@ export function AdminAnamnesisWorkspaceHeader({
       </nav>
     </>
   );
+}
+
+export function AdminAnamnesisWorkspaceHeader(props: AdminAnamnesisWorkspaceHeaderProps) {
+  return <Suspense fallback={null}><AdminAnamnesisWorkspaceHeaderContent {...props} /></Suspense>;
 }
