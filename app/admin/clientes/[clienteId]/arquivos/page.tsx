@@ -139,7 +139,7 @@ export default async function AdminClientFilesPage({
         status={<Badge variant="neutral">{files.length} arquivo(s)</Badge>}
       />
       <ClientWorkspaceNav activeArea="arquivos" clientId={client.id} />
-      <PrivatePhotoComparison files={files} clientId={client.id} before={filters.fotoAntes} after={filters.fotoDepois} path={`/admin/clientes/${client.id}/arquivos`} fileRoute="/admin/arquivos" returnHref={privateFileHistoryHref(`/admin/clientes/${client.id}/arquivos`,{categoria:readPrivateFileKindFilter(filters.categoria),origem:readPrivateFileOriginFilter(filters.origem),formato:readPrivateFilePreviewFilter(filters.formato).value,visualizacao:readPrivateFileViewFilter(filters.visualizacao),ordem:readPrivateFileHistorySort(filters.ordem).value})} />
+      <PrivatePhotoComparison files={files} clientId={client.id} before={filters.fotoAntes} after={filters.fotoDepois} path={`/admin/clientes/${client.id}/arquivos`} fileRoute="/admin/arquivos" returnHref={withReturn(privateFileHistoryHref(`/admin/clientes/${client.id}/arquivos`,{categoria:readPrivateFileKindFilter(filters.categoria),origem:readPrivateFileOriginFilter(filters.origem),formato:readPrivateFilePreviewFilter(filters.formato).value,visualizacao:readPrivateFileViewFilter(filters.visualizacao),ordem:readPrivateFileHistorySort(filters.ordem).value}))} />
       <Section
         description="Envie o arquivo em nome da cliente. O upload administrativo permanece privado e oculto até a decisão explícita de liberação."
         title="Enviar arquivo em nome da cliente"
