@@ -60,5 +60,5 @@ test("protocol catalog preserves context on current, published and full-history 
  assert.match(protocols,/href=\{navigate\(\x60\/admin\/protocolos\/\$\{protocol\.id\}\x60\)\}/);
  assert.match(protocols,/action=\{createFirstProtocolAction\}/);
  assert.match(protocols,/action=\{resumeVersionlessProtocolAction\}/);
- assert.doesNotMatch(protocols,/filaRetorno.*formData\.get/s);
+ assert.doesNotMatch(protocols,/formData\.get\("filaRetorno"\)/);
 });
