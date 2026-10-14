@@ -82,7 +82,7 @@ test("J1 triggers only from trusted master CI or matching Vercel status",()=>{
  assert.match(workflow,/steps\.preflight\.outputs\.ready == 'true'/);
 });
 
-const verifiedRelease = "f0cbfcf6b6967755d3a6a614d418b1dd0f9bb529";
+const verifiedRelease = "32c9c4faf807a2fc083c30b9f6f3ad97677ef051";
 function equivalentDiff(paths:string[]) {
  return {
   base_commit:{sha:verifiedRelease}, merge_base_commit:{sha:verifiedRelease},
@@ -105,6 +105,31 @@ test("READY production from the previous SHA can be tested only if app runtime i
   fallbackCommit:verifiedRelease,fallbackStatuses:[vercel],comparison:diff,
  });
  assert.deepEqual(verdict,{ready:true,failures:[],testedCommit:verifiedRelease,runtimeEquivalentFallback:true});
+});
+test("only audited J1 synthetic E2E and documentation changes may use READY runtime",()=>{
+ const allowed = [
+  ".github/workflows/e2e-client-onboarding-activation.yml",
+  ".github/workflows/e2e-j1-invitation-handoff.yml",
+  ".github/scripts/j1-production-preflight.mjs",
+  "docs/ARCHITECTURE.md",
+  "docs/DECISIONS.md",
+  "docs/JOURNEY_HOMOLOGATION.md",
+  "docs/PROJECT_STATUS.md",
+  "e2e/client-onboarding-activation.spec.mjs",
+  "lib/operations/j1-authenticated-handoff-gate.test.ts",
+ ];
+ assert.equal(verifiedEquivalentRuntime(verifiedRelease,commit,equivalentDiff(allowed)),true);
+ for(const path of [
+  "e2e/other-synthetic-test.spec.mjs",
+  ".github/workflows/auto-merge-journeys.yml",
+  ".github/scripts/journey-automerge.mjs",
+  "lib/clients/registration.ts",
+  "components/client/ClientRegistrationEditor.tsx",
+  "supabase/migrations/202610140001_bad.sql",
+  "package-lock.json",
+ ]){
+  assert.equal(verifiedEquivalentRuntime(verifiedRelease,commit,equivalentDiff([...allowed,path])),false,path);
+ }
 });
 test("older READY must never authorize runtime or dependency changes",()=>{
  for(const sensitive of [
