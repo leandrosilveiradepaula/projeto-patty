@@ -151,3 +151,10 @@
 .queueLink { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-brand-strong); text-decoration: underline; text-underline-offset: 3px; }
 .queueLink:focus-visible { outline: 3px solid var(--color-brand); outline-offset: 3px; }
 @media (max-width: 640px) { .queueSummary { align-items: stretch; } .queueLink { width: 100%; } }
+
+.moreActions { max-width: 100%; }
+.moreActions > summary { display: flex; align-items: center; min-height: 44px; padding: var(--space-2) var(--space-3); cursor: pointer; color: var(--color-brand-strong); border-radius: var(--radius-medium); }
+.moreActions > summary:hover { text-decoration: underline; }
+.moreActions > summary:focus-visible { outline: 3px solid var(--color-brand); outline-offset: 2px; }
+.moreActionsContent { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
+@media (max-width: 640px) { .moreActions { width: 100%; } .moreActionsContent { display: grid; grid-template-columns: 1fr; } }
