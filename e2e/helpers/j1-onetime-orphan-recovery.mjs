@@ -16,8 +16,8 @@ export function oneTimeLedger(env = process.env, at = Date.now()) {
       env.GITHUB_REPOSITORY !== "leandrosilveiradepaula/projeto-patty" ||
       env.GITHUB_REF !== "refs/heads/master" ||
       env.J1_EXACT_ORPHAN_RECOVERY !== "true" ||
-      !/^\\d+$/.test(env.GITHUB_RUN_ID ?? "") ||
-      !/^\\d+$/.test(env.GITHUB_RUN_ATTEMPT ?? "")) {
+      !/^[0-9]+$/.test(env.GITHUB_RUN_ID ?? "") ||
+      !/^[0-9]+$/.test(env.GITHUB_RUN_ATTEMPT ?? "")) {
     throw new Error("Exact J1 orphan recovery is restricted to trusted master workflow");
   }
   const born = Date.parse(KNOWN_ORPHAN.createdAt);
