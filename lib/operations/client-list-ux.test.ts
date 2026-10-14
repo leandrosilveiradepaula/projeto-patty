@@ -31,7 +31,7 @@ test("client list sorts named clients alphabetically and keeps unnamed clients l
 test("filtered client directory counts only visible Patty actions", () => {
   const page = read("app/admin/clientes/page.tsx");
   assert.match(page, /visiblePattyActions = filteredClients\.reduce/);
-  assert.match(page, /\{visiblePendingItems\} pendência\(s\) nas clientes exibidas, incluindo \{visiblePattyActions\} ação\(ões\) da Patty/);
+  assert.match(page, /\{visiblePendingItems\} pendência\(s\) nesses resultados, incluindo \{visiblePattyActions\} ação\(ões\) da Patty/);
   assert.match(page, /<p role="status">\{viewFilter !== "all"/);
 });
 
@@ -92,4 +92,12 @@ test("directory renders numbered pages with current-page semantics",()=>{
  assert.match(page,/visibleClientDirectoryPages\(pagedClients\.page,pagedClients\.pageCount\)/);
  assert.match(page,/aria-current="page"/);
  assert.match(page,/Ir para página/);
+});
+
+test("directory filters count only name matches and action links preserve return context",()=>{
+ const page=read("app/admin/clientes/page.tsx");
+ assert.match(page,/countClientDirectoryPendingViews\(nameMatchedClients\.map/);
+ assert.match(page,/href=\{withClientDirectoryReturn\(nextPattyPending\.href,directoryReturn\)\}/);
+ assert.match(page,/href=\{withClientDirectoryReturn\(secondPattyPending\.href,directoryReturn\)\}/);
+ assert.match(page,/resultados filtrados/);
 });

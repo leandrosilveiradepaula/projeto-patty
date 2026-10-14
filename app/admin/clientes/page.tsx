@@ -61,16 +61,13 @@ export default async function AdminClientesPage({
   const viewFilter = readClientDirectoryPendingView(view);
   const requestedPage = readClientDirectoryPage(pagina);
   const directoryReturn = { q: searchTerm, view: viewFilter, page: requestedPage.page };
-  const viewCounts = countClientDirectoryPendingViews(clients.map(client=>client.id),pendingByClientId);
-  const filteredClients = clients.filter((client) => {
-    const matchesSearch = matchesClientDirectoryName(
-      searchTerm, client.full_name, client.profiles?.display_name,
-    );
-    const matchesView =
-      matchesClientDirectoryPendingView(pendingByClientId.get(client.id),viewFilter);
-
-    return matchesSearch && matchesView;
-  });
+  const nameMatchedClients = clients.filter((client) => matchesClientDirectoryName(
+    searchTerm, client.full_name, client.profiles?.display_name,
+  ));
+  const viewCounts = countClientDirectoryPendingViews(nameMatchedClients.map(client=>client.id),pendingByClientId);
+  const filteredClients = nameMatchedClients.filter((client) =>
+    matchesClientDirectoryPendingView(pendingByClientId.get(client.id),viewFilter)
+  );
 
   const pagedClients = paginateClientDirectory(filteredClients, requestedPage.page);
   directoryReturn.page = pagedClients.page;
@@ -113,7 +110,7 @@ export default async function AdminClientesPage({
       >
         <div className={styles.queueSummary}>
           <p role="status"><strong>{clientsWithPattyActions} cliente(s)</strong> com {actionablePattyItems} ação(ões) da Patty nos acompanhamentos autorizados.</p>
-          <Link className={styles.queueLink} href="/admin/pendencias?responsavel=patty">Abrir fila de ações da Patty</Link>
+          <Link className={styles.queueLink} href={withClientDirectoryReturn("/admin/pendencias?responsavel=patty",directoryReturn)}>Abrir fila de ações da Patty</Link>
         </div>
         <form action="/admin/clientes" className={styles.searchForm} method="get">
           <label className={styles.searchLabel} htmlFor="client-search">
@@ -158,7 +155,7 @@ export default async function AdminClientesPage({
           <>
             {searchTerm || viewFilter !== "all" ? (
               <p className={styles.resultCount}>
-                {filteredClients.length} de {clients.length} cliente(s) exibida(s) · {visiblePendingItems} pendência(s) nas clientes exibidas, incluindo {visiblePattyActions} ação(ões) da Patty.
+                {filteredClients.length} de {clients.length} cliente(s) nos resultados filtrados · {visiblePendingItems} pendência(s) nesses resultados, incluindo {visiblePattyActions} ação(ões) da Patty.
               </p>
             ) : null}
             {requestedPage.invalid || pagedClients.adjusted ? <p role="status" className={styles.resultCount}>Página solicitada indisponível. Exibindo a página {pagedClients.page} de {pagedClients.pageCount}.</p> : null}
@@ -182,7 +179,7 @@ export default async function AdminClientesPage({
                           <Link
                             aria-label={`Abrir ${nextPattyPending.title.toLocaleLowerCase("pt-BR")} de ${displayName || "registro legado sem nome"}`}
                             className={styles.actionLink}
-                            href={nextPattyPending.href}
+                            href={withClientDirectoryReturn(nextPattyPending.href,directoryReturn)}
                           >
                             {nextPattyPending.title}
                           </Link>
@@ -192,7 +189,7 @@ export default async function AdminClientesPage({
                           <Link
                             aria-label={`Abrir outra ação: ${secondPattyPending.title.toLocaleLowerCase("pt-BR")} de ${displayName || "registro legado sem nome"}`}
                             className={styles.secondaryActionLink}
-                            href={secondPattyPending.href}
+                            href={withClientDirectoryReturn(secondPattyPending.href,directoryReturn)}
                           >
                             {secondPattyPending.title}
                           </Link>

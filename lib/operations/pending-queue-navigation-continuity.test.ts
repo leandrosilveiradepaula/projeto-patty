@@ -86,3 +86,7 @@ test("pending filters, group links, pages and client links preserve directory re
  assert.match(page,/withClientDirectoryReturn\(pendingExplorerResetHref\(filters\.clientId\), directoryReturn\)/);
  assert.match(page,/withClientDirectoryReturn\(\x60\/admin\/clientes\/\$\{item\.clientId\}\x60, directoryReturn\)/);
 });
+
+test("pending queue record action keeps validated directory return context",()=>{
+ assert.match(page,/href=\{withClientDirectoryReturn\(item\.href, directoryReturn\)\}/);
+});

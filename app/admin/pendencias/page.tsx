@@ -36,7 +36,7 @@ function PendingList({
           <PendingItemCard
             action={
               <div className={styles.actions}>
-                <Link className={styles.actionLink} href={item.href}>
+                <Link className={styles.actionLink} href={withClientDirectoryReturn(item.href, directoryReturn)}>
                   Abrir registro
                 </Link>
                 {item.clientId ? (
