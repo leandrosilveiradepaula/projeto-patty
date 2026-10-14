@@ -142,6 +142,12 @@ export default async function AdminClientFilesPage({
         <AdminPrivateFileUploadForm clientId={client.id} />
       </Section>
 
+      {hasExactTarget ? (
+        <p role="status" className={styles.filterNotice}>
+          Arquivo localizado entre os registros autorizados. Os filtros anteriores foram desconsiderados para exibir o arquivo solicitado.{" "}
+          <Link href={basePath}>Voltar à lista completa de arquivos</Link>
+        </p>
+      ) : null}
       <Section title="Filtrar arquivos" description="Os filtros alteram apenas esta visualização administrativa; não modificam a visibilidade de nenhum arquivo.">
         <form action={`/admin/clientes/${client.id}/arquivos`} method="get" className={styles.fileFilters}>
           <label>Categoria
