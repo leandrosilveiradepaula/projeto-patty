@@ -31,7 +31,7 @@ test("client list sorts named clients alphabetically and keeps unnamed clients l
 test("filtered client directory counts only visible Patty actions", () => {
   const page = read("app/admin/clientes/page.tsx");
   assert.match(page, /visiblePattyActions = filteredClients\.reduce/);
-  assert.match(page, /\{visiblePattyActions\} ação\(ões\) da Patty nas clientes exibidas/);
+  assert.match(page, /\{visiblePendingItems\} pendência\(s\) nas clientes exibidas, incluindo \{visiblePattyActions\} ação\(ões\) da Patty/);
   assert.match(page, /<p role="status">\{viewFilter !== "all"/);
 });
 
@@ -52,4 +52,12 @@ test("directory links to every pending group for each authorized client",()=>{
  assert.match(page,/Todas as pendências \(\{pendingSummary\.total\}\)/);
  assert.match(page,/pendingSummary\?\.waiting/);
  assert.match(page,/pendingSummary\?\.operational/);
+});
+
+test("directory offers contextual waiting and operational pending group links",()=>{
+ const page=read("app/admin/clientes/page.tsx");
+ assert.match(page,/responsavel=client#aguardando-cliente/);
+ assert.match(page,/responsavel=operational#operacional-do-sistema/);
+ assert.match(page,/Aguardando cliente \(\{pendingSummary\.waiting\}\)/);
+ assert.match(page,/Operacionais \(\{pendingSummary\.operational\}\)/);
 });

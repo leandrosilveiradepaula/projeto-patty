@@ -67,6 +67,7 @@ export default async function AdminClientesPage({
     return matchesSearch && matchesView;
   });
 
+  const visiblePendingItems = filteredClients.reduce((count, client) => count + (pendingByClientId.get(client.id)?.total ?? 0), 0);
   const visiblePattyActions = filteredClients.reduce((count, client) => count + (pendingByClientId.get(client.id)?.patty.length ?? 0), 0);
 
   return (
@@ -100,7 +101,7 @@ export default async function AdminClientesPage({
             Convidar cliente
           </Link>
         }
-        description="Busque por nome ou filtre clientes com ação da Patty. Este filtro não inclui itens aguardando resposta da cliente."
+        description="Busque pelo nome ou filtre por ações da Patty, respostas aguardadas, pendências operacionais e clientes sem pendências."
         title="Em acompanhamento"
       >
         <div className={styles.queueSummary}>
@@ -150,7 +151,7 @@ export default async function AdminClientesPage({
           <>
             {searchTerm || viewFilter !== "all" ? (
               <p className={styles.resultCount}>
-                {filteredClients.length} de {clients.length} cliente(s) exibida(s) · {visiblePattyActions} ação(ões) da Patty nas clientes exibidas.
+                {filteredClients.length} de {clients.length} cliente(s) exibida(s) · {visiblePendingItems} pendência(s) nas clientes exibidas, incluindo {visiblePattyActions} ação(ões) da Patty.
               </p>
             ) : null}
             <ul className={styles.clientList}>
@@ -186,6 +187,8 @@ export default async function AdminClientesPage({
                             {secondPattyPending.title}
                           </Link>
                         ) : null}
+                        {pendingSummary?.waiting ? <Link className={styles.secondaryActionLink} href={`/admin/pendencias?cliente=${client.id}&responsavel=client#aguardando-cliente`}>Aguardando cliente ({pendingSummary.waiting})</Link> : null}
+                        {pendingSummary?.operational ? <Link className={styles.secondaryActionLink} href={`/admin/pendencias?cliente=${client.id}&responsavel=operational#operacional-do-sistema`}>Operacionais ({pendingSummary.operational})</Link> : null}
                         {pendingSummary?.total ? <Link className={styles.secondaryActionLink} href={`/admin/pendencias?cliente=${client.id}`}>Todas as pendências ({pendingSummary.total})</Link> : null}
                         <Link
                           aria-label={`Abrir acompanhamento de ${displayName || "registro legado sem nome"}`}
