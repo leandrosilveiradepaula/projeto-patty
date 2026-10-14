@@ -18,3 +18,17 @@ test("ambiguous provisioning errors never unlock a second Auth creation path",()
  const compensationFailure={message:"Compensação falhou",success:false,retryable:false};
  assert.equal(mayChangeInvitationMethodAfterFailure(compensationFailure),false);
 });
+
+test("both invite paths use the same retry guard, without a second provisioning call",async()=>{
+ const { readFileSync } = await import("node:fs");
+ const read=(p:string)=>readFileSync(new URL("../../"+p,import.meta.url),"utf8");
+ const chooser=read("components/admin/ClientInvitationMethodChooser.tsx");
+ for(const p of ["components/admin/ClientInviteForm.tsx","components/admin/ManualClientInviteForm.tsx"]){
+  const form=read(p);
+  assert.match(form,/mayChangeInvitationMethodAfterFailure\(state\)/);
+  assert.match(form,/onSafeRetryAllowed\?\.\(\)/);
+  assert.match(form,/onProvisioningAttempt\?\.\(\)/);
+ }
+ assert.match(chooser,/unlockSafeRetry = useCallback\(\(\) => setAttempted\(false\)/);
+ assert.equal(chooser.split("onSafeRetryAllowed={unlockSafeRetry}").length-1,2);
+});
