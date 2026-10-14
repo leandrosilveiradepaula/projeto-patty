@@ -1,3 +1,9 @@
+## J1 — primeira execução real do Playwright e correção da limpeza sintética (2026-10-14)
+
+**Evidência real:** run [38635848243](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38635848243) usou CI do `master` e Vercel READY de runtime equivalente, validou credenciais de fixture e **iniciou o Playwright** no Supabase de produção. O teste falhou no timeout default de **30 s** e `browserContext.close()` lançou exceção antes do cleanup. Consulta read-only de dados sintéticos confirmou **uma** identidade `e2e-onboarding-<hex>@example.invalid` e seu vínculo `Client` residuais, sem Anamnese nem protocolo, gerados naquela execução.
+
+O pacote atual corrige com timeout de 180 s, fechamento por `Promise.allSettled` sem impedir cleanup server-side e reconciliação **somente da identidade/resíduo sintético exatos e auditados**, com confirmação de Auth/email/client e recusa de apagar histórico submetido ou protocolos. Não apagar dados reais, não enfraquecer MFA ou RLS; se lookup/Auth divergir, falhar fechado. **CI e código ainda não comprovam cleanup efetivo**: após merge, confirmar pelo log do browser e por consulta restrita de resíduo. J1.01–10 continua NÃO HOMOLOGADA.
+
 ## J1 — gate do último runtime READY aplicado ao teste sintético completo da cliente (2026-10-14)
 
 Após o PR #839, o HEAD `d9642ce4` recebeu `Vercel: Deployment rate limited`. Entretanto `32c9c4fa` permanece READY e o compare comprovou **nenhuma diferença de runtime** entre ambos: dois commits e oito arquivos exclusivamente de CI/E2E/docs. O preflight foi atualizado para aceitar temporariamente **somente esse SHA publicado**, com allowlist explícita e recusa de qualquer mudança em app/banco/RLS/Auth/dependências; assim o E2E da cliente pode executar sem forçar outro deployment. O teste administrativo com MFA pessoal permanece desativado e não homologado. Registrar run efetiva, cleanup e falhas após execução; este PR não constitui evidência de browser PASS.
