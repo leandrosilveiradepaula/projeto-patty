@@ -242,7 +242,7 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
 
               return (
                 <li key={feedback.id}>
-                  <details className={styles.historyItem} id={`feedback-enviado-${feedback.id}`}>
+                  <details className={styles.historyItem} id={`feedback-enviado-${feedback.id}`} open={exactSubmittedPage !== null && rawQuery.registro === feedback.id}>
                     <summary>
                       <span>
                         {formatDate(feedback.period_start)} a {formatDate(feedback.period_end)}

@@ -25,3 +25,9 @@ test("professional pending links resolve to the exact record in the authorized c
   assert.match(admin, /orderClientWeeklyFeedbacks\(feedbacks\)/);
   assert.doesNotMatch(admin, /createAdminClient\(/);
 });
+
+test("professional exact submitted feedback opens its authorized answer disclosure", () => {
+  const admin = read("app/admin/clientes/[clienteId]/feedback-semanal/page.tsx");
+  assert.match(admin, /open=\{exactSubmittedPage !== null && rawQuery\.registro === feedback\.id\}/);
+  assert.match(admin, /authorizedExactRecordPage\(orderedFeedbacks\.filter\(f=>f\.submitted_at!==null\),rawQuery\.registro,10\)/);
+});
