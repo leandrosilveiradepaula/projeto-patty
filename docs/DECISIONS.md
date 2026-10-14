@@ -1,3 +1,20 @@
+## 2026-10-14 — J1 usa o banco de produção existente, sem novo staging
+
+### DECISÃO DE PRODUTO / OPERAÇÃO CONFIRMADA PELO RESPONSÁVEL
+
+O Projeto Patty continuará usando **o mesmo Supabase de produção** para a Jornada 1. Não criar outro projeto Supabase, banco staging ou ambiente de homologação separado neste momento.
+
+### LIMITES DE SEGURANÇA QUE CONTINUAM OBRIGATÓRIOS
+
+- A Patty segue sendo a única conta administrativa de negócio no MVP. **Não provisionar segundo `user_roles.role = admin` na produção para executar testes**, pois a exceção vigente de acesso a arquivos privados pressupõe uma única administradora.
+- Não copiar, inspecionar, alterar ou apagar dados de clientes reais como parte dos testes. Fixtures devem ser sintéticas, com identificação e limpeza verificável; testes destrutivos não devem atingir histórico profissional.
+- Nunca pedir nem armazenar em GitHub Actions senha, seed TOTP ou sessão da conta pessoal da Patty para automatizar login administrativo.
+- Trechos administrativos que dependem da Patty serão **homologados manualmente com a sessão dela**, enquanto as verificações automatizadas seguras permanecem separadas. Se não houver operador autenticado, marcar a etapa como bloqueada, não como aprovada.
+- O workflow E2E de convite que solicita `E2E_ADMIN_TOTP_SECRET` permanece **não executável no modelo atual**; não preenchê-lo com MFA real nem criar segundo admin para fazê-lo passar. Uma alteração futura desse fluxo exige revisão específica de segurança.
+- CI, deploy e a execução de partes do E2E não bastam para classificar a J1 inteira como homologada.
+
+Esta decisão substitui a proposta operacional de criar staging para resolver a issue #837. Não modifica o modelo de permissões, Auth, RLS ou a arquitetura de produção.
+
 ## 2026-10-07 - Runtime de hidratacao reconciliado com a regra vigente
 
 ### DECISAO TECNICA / PRODUTO
