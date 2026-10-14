@@ -27,3 +27,10 @@ test("client list sorts named clients alphabetically and keeps unnamed clients l
   assert.match(page, /if \(!leftName\) return 1/);
   assert.match(page, /if \(!rightName\) return -1/);
 });
+
+test("filtered client directory counts only visible Patty actions", () => {
+  const page = read("app/admin/clientes/page.tsx");
+  assert.match(page, /visiblePattyActions = filteredClients\.reduce/);
+  assert.match(page, /\{visiblePattyActions\} ação\(ões\) da Patty nas clientes exibidas/);
+  assert.match(page, /<p role="status">\{viewFilter === "patty"/);
+});

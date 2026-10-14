@@ -79,6 +79,8 @@ export default async function AdminClientesPage({
     return matchesSearch && matchesView;
   });
 
+  const visiblePattyActions = filteredClients.reduce((count, client) => count + (pattyPendingItemsByClientId.get(client.id)?.length ?? 0), 0);
+
   return (
     <>
       <PageHeader
@@ -154,14 +156,14 @@ export default async function AdminClientesPage({
           <p className={styles.emptyMessage}>Nenhuma cliente está em acompanhamento no momento.</p>
         ) : filteredClients.length === 0 ? (
           <div className={styles.emptyMessage}>
-            <p>{viewFilter === "patty" ? (searchTerm ? `Nenhuma cliente com ação da Patty corresponde à busca por “${searchTerm}”.` : "Nenhuma cliente em acompanhamento possui ação da Patty nesta fila.") : `Nenhuma cliente corresponde à busca por “${searchTerm}”.`}</p>
+            <p role="status">{viewFilter === "patty" ? (searchTerm ? `Nenhuma cliente com ação da Patty corresponde à busca por “${searchTerm}”.` : "Nenhuma cliente em acompanhamento possui ação da Patty nesta fila.") : `Nenhuma cliente corresponde à busca por “${searchTerm}”.`}</p>
             <Link className={styles.clearLink} href="/admin/clientes">Limpar filtros</Link>
           </div>
         ) : (
           <>
             {searchTerm || viewFilter !== "all" ? (
               <p className={styles.resultCount}>
-                {filteredClients.length} de {clients.length} cliente(s) exibida(s).
+                {filteredClients.length} de {clients.length} cliente(s) exibida(s) · {visiblePattyActions} ação(ões) da Patty nas clientes exibidas.
               </p>
             ) : null}
             <ul className={styles.clientList}>
