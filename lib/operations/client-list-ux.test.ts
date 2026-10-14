@@ -34,3 +34,11 @@ test("filtered client directory counts only visible Patty actions", () => {
   assert.match(page, /\{visiblePattyActions\} ação\(ões\) da Patty nas clientes exibidas/);
   assert.match(page, /<p role="status">\{viewFilter === "patty"/);
 });
+
+test("client directory offers a second distinct Patty action without replacing client access", () => {
+  const page = read("app/admin/clientes/page.tsx");
+  assert.match(page, /secondPattyPending = clientPattyPendingItems\[1\]/);
+  assert.match(page, /secondPattyPending\.href/);
+  assert.match(page, /Outra ação/);
+  assert.match(page, /Abrir acompanhamento de/);
+});
