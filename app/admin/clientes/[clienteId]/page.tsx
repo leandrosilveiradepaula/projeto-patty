@@ -1,4 +1,5 @@
 import { readClientDirectoryReturn, clientDirectoryReturnHref, withClientDirectoryReturn } from "@/lib/operations/client-directory-return";
+import { readPendingQueueReturn, withPendingQueueReturn } from "@/lib/operations/pending-queue-return";
 import { AdminClientNameEditForm } from "@/components/admin/AdminClientNameEditForm";
 import { summarizeClientClarifications } from "@/lib/follow-up/client-clarification-summary";
 import { latestCheckinCorrectionsByEvent } from "@/lib/checkins/effective-corrections";
@@ -53,6 +54,7 @@ type AdminClienteDetailPageProps = {
     listaQ?: string;
     listaView?: string;
     listaPagina?: string;
+    filaRetorno?: string;
   }>;
 };
 
@@ -71,6 +73,7 @@ export default async function AdminClienteDetailPage({
 }: AdminClienteDetailPageProps) {
   const [{ clienteId }, query] = await Promise.all([params, searchParams]);
   const directoryReturn = readClientDirectoryReturn(query);
+  const queueReturn = readPendingQueueReturn(query.filaRetorno);
   const client = await getAccessibleClient(clienteId);
 
   if (!client) {
@@ -535,11 +538,11 @@ export default async function AdminClienteDetailPage({
           </p>
         </div>
         {nextOperationalAction.href.startsWith("#") ? (
-          <a className={styles.nextActionLink} href={withClientDirectoryReturn(nextOperationalAction.href,directoryReturn)}>
+          <a className={styles.nextActionLink} href={withPendingQueueReturn(withClientDirectoryReturn(nextOperationalAction.href,directoryReturn),queueReturn ?? "")}>
             {nextOperationalAction.label}
           </a>
         ) : (
-          <Link className={styles.nextActionLink} href={withClientDirectoryReturn(nextOperationalAction.href,directoryReturn)}>
+          <Link className={styles.nextActionLink} href={withPendingQueueReturn(withClientDirectoryReturn(nextOperationalAction.href,directoryReturn),queueReturn ?? "")}>
             {nextOperationalAction.label}
           </Link>
         )}
@@ -642,13 +645,13 @@ export default async function AdminClienteDetailPage({
                         ? "Não iniciada"
                         : "Revisada"}
               </Badge>
-              <Link className={styles.journeyLink} href={withClientDirectoryReturn(anamnesisPattyAction?.reviewPending ? `/admin/anamneses/${anamnesisPattyAction.submission.id}/revisao` : `/admin/clientes/${client.id}/anamnese`,directoryReturn)}>
+              <Link className={styles.journeyLink} href={withPendingQueueReturn(withClientDirectoryReturn(anamnesisPattyAction?.reviewPending ? `/admin/anamneses/${anamnesisPattyAction.submission.id}/revisao` : `/admin/clientes/${client.id}/anamnese`,directoryReturn),queueReturn ?? "")}>
                 {anamnesisPattyAction?.reviewPending ? "Revisar Anamnese" : "Abrir Anamnese"}
               </Link>
               {anamnesisAnsweredClarification?.firstAwaitingProfessionalRequestId ? (
                 <Link
                   className={styles.journeyLink}
-                  href={withClientDirectoryReturn(`/admin/anamneses/${anamnesisAnsweredClarification.submission.id}/esclarecimentos#esclarecimento-${anamnesisAnsweredClarification.firstAwaitingProfessionalRequestId}`,directoryReturn)}
+                  href={withPendingQueueReturn(withClientDirectoryReturn(`/admin/anamneses/${anamnesisAnsweredClarification.submission.id}/esclarecimentos#esclarecimento-${anamnesisAnsweredClarification.firstAwaitingProfessionalRequestId}`,directoryReturn),queueReturn ?? "")}
                 >
                   Revisar complemento(s) ({clarificationSummary.awaitingProfessional})
                 </Link>
@@ -656,7 +659,7 @@ export default async function AdminClienteDetailPage({
               {anamnesisClientWait ? (
                 <Link
                   className={styles.journeyLink}
-                  href={withClientDirectoryReturn(`/admin/anamneses/${anamnesisClientWait.submissionId}/esclarecimentos#esclarecimento-${anamnesisClientWait.id}`,directoryReturn)}
+                  href={withPendingQueueReturn(withClientDirectoryReturn(`/admin/anamneses/${anamnesisClientWait.submissionId}/esclarecimentos#esclarecimento-${anamnesisClientWait.id}`,directoryReturn),queueReturn ?? "")}
                 >
                   Ver aguardando cliente ({clarificationSummary.awaitingClient})
                 </Link>
@@ -694,7 +697,7 @@ export default async function AdminClienteDetailPage({
                     ? "Finalizada"
                     : "Não iniciada"}
               </Badge>
-              <Link className={styles.journeyLink} href={withClientDirectoryReturn(assessmentDraft ? `/admin/avaliacoes/${assessmentDraft.id}` : `/admin/clientes/${client.id}/avaliacoes#${hasFinalizedAssessment ? "historico-finalizado" : "nova-avaliacao"}`,directoryReturn)}>
+              <Link className={styles.journeyLink} href={withPendingQueueReturn(withClientDirectoryReturn(assessmentDraft ? `/admin/avaliacoes/${assessmentDraft.id}` : `/admin/clientes/${client.id}/avaliacoes#${hasFinalizedAssessment ? "historico-finalizado" : "nova-avaliacao"}`,directoryReturn),queueReturn ?? "")}>
                 {assessmentDraft ? "Continuar avaliação" : hasFinalizedAssessment ? "Ver histórico" : "Criar avaliação"}
               </Link>
             </div>
@@ -744,7 +747,7 @@ export default async function AdminClienteDetailPage({
                       ? "Em preparação"
                       : "Não iniciado"}
               </Badge>
-              <Link className={styles.journeyLink} href={withClientDirectoryReturn(protocolAction ? `/admin/protocolos/${protocolAction.protocol.id}?versao=${protocolAction.version.version_number}#versao-${protocolAction.version.version_number}` : protocolDraftAction ? `/admin/protocolos/${protocolDraftAction.protocol.id}?versao=${protocolDraftAction.version.version_number}#versao-${protocolDraftAction.version.version_number}` : `/admin/clientes/${client.id}/protocolos`,directoryReturn)}>
+              <Link className={styles.journeyLink} href={withPendingQueueReturn(withClientDirectoryReturn(protocolAction ? `/admin/protocolos/${protocolAction.protocol.id}?versao=${protocolAction.version.version_number}#versao-${protocolAction.version.version_number}` : protocolDraftAction ? `/admin/protocolos/${protocolDraftAction.protocol.id}?versao=${protocolDraftAction.version.version_number}#versao-${protocolDraftAction.version.version_number}` : `/admin/clientes/${client.id}/protocolos`,directoryReturn),queueReturn ?? "")}>
                 {protocolAction ? "Revisar versão pendente" : protocolDraftAction ? "Continuar rascunho" : "Abrir protocolos"}
               </Link>
             </div>
@@ -780,7 +783,7 @@ export default async function AdminClienteDetailPage({
                     ? `Aguardando cliente · ${pendingWeeklyFeedbackCount}`
                     : "Ativo"}
               </Badge>
-              <Link className={styles.journeyLink} href={withClientDirectoryReturn(`/admin/clientes/${client.id}/feedback-semanal`,directoryReturn)}>
+              <Link className={styles.journeyLink} href={withPendingQueueReturn(withClientDirectoryReturn(`/admin/clientes/${client.id}/feedback-semanal`,directoryReturn),queueReturn ?? "")}>
                 Abrir acompanhamento
               </Link>
             </div>
@@ -812,7 +815,7 @@ export default async function AdminClienteDetailPage({
         title="Atalhos complementares"
       >
         <div className={styles.areaGrid}>
-          <Link className={styles.cardLink} href={withClientDirectoryReturn(`/admin/clientes/${client.id}/evolucao`,directoryReturn)}>
+          <Link className={styles.cardLink} href={withPendingQueueReturn(withClientDirectoryReturn(`/admin/clientes/${client.id}/evolucao`,directoryReturn),queueReturn ?? "")}>
             <Card className={styles.infoCard}>
               <div className={styles.cardHeader}>
                 <h3 className={styles.cardTitle}>Evolução</h3>
@@ -826,7 +829,7 @@ export default async function AdminClienteDetailPage({
             </Card>
           </Link>
 
-          <Link className={styles.cardLink} href={withClientDirectoryReturn(`/admin/clientes/${client.id}/arquivos`,directoryReturn)}>
+          <Link className={styles.cardLink} href={withPendingQueueReturn(withClientDirectoryReturn(`/admin/clientes/${client.id}/arquivos`,directoryReturn),queueReturn ?? "")}>
             <Card className={styles.infoCard}>
               <div className={styles.cardHeader}>
                 <h3 className={styles.cardTitle}>Arquivos</h3>
@@ -844,7 +847,7 @@ export default async function AdminClienteDetailPage({
             </Card>
           </Link>
 
-          <Link className={styles.cardLink} href={withClientDirectoryReturn(`/admin/clientes/${client.id}/conteudos`,directoryReturn)}>
+          <Link className={styles.cardLink} href={withPendingQueueReturn(withClientDirectoryReturn(`/admin/clientes/${client.id}/conteudos`,directoryReturn),queueReturn ?? "")}>
             <Card className={styles.infoCard}>
               <div className={styles.cardHeader}>
                 <h3 className={styles.cardTitle}>Conteúdos</h3>
@@ -858,7 +861,7 @@ export default async function AdminClienteDetailPage({
             </Card>
           </Link>
 
-          <Link className={styles.cardLink} href={withClientDirectoryReturn(latestActivityHistoryHref,directoryReturn)}>
+          <Link className={styles.cardLink} href={withPendingQueueReturn(withClientDirectoryReturn(latestActivityHistoryHref,directoryReturn),queueReturn ?? "")}>
             <Card className={styles.infoCard}>
               <div className={styles.cardHeader}>
                 <h3 className={styles.cardTitle}>Check-ins</h3>
@@ -872,7 +875,7 @@ export default async function AdminClienteDetailPage({
             </Card>
           </Link>
 
-          <Link className={styles.cardLink} href={withClientDirectoryReturn(`/admin/clientes/${client.id}/treino`,directoryReturn)}>
+          <Link className={styles.cardLink} href={withPendingQueueReturn(withClientDirectoryReturn(`/admin/clientes/${client.id}/treino`,directoryReturn),queueReturn ?? "")}>
             <Card className={styles.infoCard}>
               <div className={styles.cardHeader}>
                 <h3 className={styles.cardTitle}>Treino</h3>
