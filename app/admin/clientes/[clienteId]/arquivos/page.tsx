@@ -116,6 +116,7 @@ export default async function AdminClientFilesPage({
   const pendingReleaseFiles = filteredFiles.filter(file => isPrivateFilePendingProfessionalRelease(file, client.profile_id));
   const historyFiles = filteredFiles.filter(file => !isPrivateFilePendingProfessionalRelease(file, client.profile_id));
   const totalPending = counts.pending;
+  const totalHistory = counts.all - counts.pending;
   const hasFilteredOutPending = totalPending > 0 && pendingReleaseFiles.length === 0;
   const sortedPending = sortPrivateFileHistory(pendingReleaseFiles, order.value);
   const exactPendingPage = authorizedExactRecordPage(sortedPending, filters.arquivoPendente, 12);
@@ -219,7 +220,7 @@ export default async function AdminClientFilesPage({
           {pendingReleaseFiles.length === 0 ? (
             <EmptyState
               description={totalPending > 0 ? "Existem arquivos aguardando liberação, mas nenhum corresponde aos filtros selecionados. Limpe os filtros para revisar as pendências." : "Nenhum upload administrativo está aguardando liberação nesta cliente."}
-              title="Sem arquivos pendentes"
+              title={hasFilteredOutPending ? "Nenhum pendente neste filtro" : "Sem arquivos pendentes"}
               action={hasFilteredOutPending ? <Link href={`${basePath}#aguardando-liberacao`}>Limpar filtros e revisar pendências</Link> : undefined}
             />
           ) : (
@@ -299,12 +300,14 @@ export default async function AdminClientFilesPage({
       >
         {historyFiles.length === 0 ? (
           <EmptyState
-            description={
-              pendingReleaseFiles.length > 0
-                ? "Os uploads administrativos pendentes aparecem acima. Depois da liberação, eles passam para este histórico."
-                 : "Ainda não há arquivos privados cadastrados. Para adicionar um, use o formulário de envio acima."
+            description={totalHistory > 0
+              ? "Há arquivos no histórico, mas nenhum corresponde aos filtros selecionados. Limpe os filtros para consultá-los."
+              : totalPending > 0
+                ? "Os uploads administrativos ainda aguardam decisão de liberação e não fazem parte deste histórico."
+                : "Ainda não há arquivos privados cadastrados. Para adicionar um, use o formulário de envio acima."
             }
-            title="Sem arquivos no histórico"
+            title={totalHistory > 0 ? "Nenhum arquivo neste filtro" : "Sem arquivos no histórico"}
+            action={totalHistory > 0 ? <Link href={basePath + "#historico-arquivos"}>Limpar filtros e ver histórico</Link> : undefined}
           />
         ) : (
           <ul className={styles.fileList}>
