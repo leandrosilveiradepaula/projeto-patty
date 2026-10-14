@@ -86,3 +86,10 @@ test("malformed client filter cannot silently expand the authorized queue",()=>{
  const id="11111111-1111-4111-8111-111111111111";
  assert.equal(pendingExplorerResetHref(id),"/admin/pendencias?cliente="+id);
 });
+
+test("default oldest sorting is chronological even when source arrives newest first",()=>{
+ const rows=[{...items[0],id:"new",createdAt:"2026-10-14T10:00:00Z"},{...items[0],id:"old",createdAt:"2026-10-10T10:00:00Z"},{...items[0],id:"invalid",createdAt:"invalid"}];
+ assert.deepEqual(explorePendingClientQueue(rows,{query:"",kind:"all"}).map(x=>x.id),["old","new","invalid"]);
+ assert.deepEqual(explorePendingClientQueue(rows,{query:"",kind:"all",sort:"newest"}).map(x=>x.id),["new","old","invalid"]);
+ assert.equal(rows[0].id,"new");
+});
