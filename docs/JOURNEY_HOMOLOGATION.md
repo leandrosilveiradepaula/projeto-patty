@@ -1,3 +1,11 @@
+## J1.02–03 — evidência do primeiro browser E2E e incidente de cleanup (2026-10-14)
+
+- **CI e deployment:** SHA `862758de` validado, runtime de produção equivalente `32c9c4fa` READY.
+- **Playwright realmente executado:** workflow [38635848243](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38635848243), no banco de produção com fixture sintética.
+- **Resultado:** FALHOU por timeout geral padrão de 30 s; erro de encerramento do contexto ocultou a etapa original e impediu executar a limpeza. Consulta de integridade restrita confirmou um cadastro/Auth fictício residual daquela run, sem dados de Anamnese ou protocolo. Isso **não** é homologação.
+- **Correção sob teste:** timeout explícito de 180 s, cleanup sempre tentado após `Promise.allSettled` dos contextos mesmo se Playwright já os tiver fechado; reconciliação da fixture residual **por IDs/email exatos previamente auditados**, não por busca ou exclusão de clientes em geral. Erro de cleanup deve falhar o teste, nunca ser ignorado.
+- **Próxima evidência obrigatória:** depois do próximo teste, verificar que o resíduo anterior foi removido e que nenhuma nova fixture restou, que Cadastro Atual persistiu, anamnese ficou retomável e login novo funcionou. Não alegar PASS com base em CI de um PR.
+
 ## J1 — usar runtime publicado equivalente para executar teste real da cliente (2026-10-14)
 
 **Verificação factual:** `32c9c4faf807a2fc083c30b9f6f3ad97677ef051` é o último commit confirmado pela Vercel como **Ready/Production**. A comparação GitHub `32c9c4fa..d9642ce4` mostrou exatamente dois commits e oito arquivos modificados: workflow e spec E2E da cliente, workflow E2E administrativo, teste do gate e docs ARCHITECTURE/DECISIONS/JOURNEY_HOMOLOGATION/PROJECT_STATUS — **nenhuma modificação ao aplicativo, ao banco, RLS, Auth ou dependências**.
