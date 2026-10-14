@@ -52,6 +52,7 @@ type AdminClienteDetailPageProps = {
     onboarding?: string;
     listaQ?: string;
     listaView?: string;
+    listaPagina?: string;
   }>;
 };
 
