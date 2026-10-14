@@ -22,8 +22,8 @@ test("dashboard shortcuts target the correct queue section", () => {
 });
 test("queue opens only requested collapsible group", () => {
   const page = read("app/admin/pendencias/page.tsx");
-  assert.match(page, /open=\{focusedGroup === "client"\}/);
-  assert.match(page, /open=\{focusedGroup === "operational"\}/);
+  assert.match(page, /open=\{focusedGroup === "client" \|\|/);
+  assert.match(page, /open=\{focusedGroup === "operational" \|\|/);
   assert.match(page, /id="acao-da-patty"/);
   assert.match(page, /focusedGroup && grouped\[focusedGroup\]\.length === 0/);
 });
