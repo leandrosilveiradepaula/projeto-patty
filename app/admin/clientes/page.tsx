@@ -178,6 +178,7 @@ export default async function AdminClientesPage({
                             {nextPattyPending.title}
                           </Link>
                         ) : null}
+                        {secondPattyPending || pendingSummary?.waiting || pendingSummary?.operational ? <details className={styles.moreActions}><summary>Outras opções</summary><div className={styles.moreActionsContent}>
                         {secondPattyPending ? (
                           <Link
                             aria-label={`Abrir outra ação: ${secondPattyPending.title.toLocaleLowerCase("pt-BR")} de ${displayName || "registro legado sem nome"}`}
@@ -189,6 +190,7 @@ export default async function AdminClientesPage({
                         ) : null}
                         {pendingSummary?.waiting ? <Link className={styles.secondaryActionLink} href={`/admin/pendencias?cliente=${client.id}&responsavel=client#aguardando-cliente`}>Aguardando cliente ({pendingSummary.waiting})</Link> : null}
                         {pendingSummary?.operational ? <Link className={styles.secondaryActionLink} href={`/admin/pendencias?cliente=${client.id}&responsavel=operational#operacional-do-sistema`}>Operacionais ({pendingSummary.operational})</Link> : null}
+                        </div></details> : null}
                         {pendingSummary?.total ? <Link className={styles.secondaryActionLink} href={`/admin/pendencias?cliente=${client.id}`}>Todas as pendências ({pendingSummary.total})</Link> : null}
                         <Link
                           aria-label={`Abrir acompanhamento de ${displayName || "registro legado sem nome"}`}
