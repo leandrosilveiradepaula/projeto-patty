@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { clientDirectoryReturnHref, readClientDirectoryReturn, withClientDirectoryReturn } from "@/lib/operations/client-directory-return";
+import { readPendingQueueReturn, withPendingQueueReturn } from "@/lib/operations/pending-queue-return";
 
 import styles from "./ClientWorkspaceNav.module.css";
 
@@ -36,7 +37,8 @@ function ClientWorkspaceNavContent({
     listaView: searchParams?.get("listaView") ?? undefined,
     listaPagina: searchParams?.get("listaPagina") ?? undefined,
   });
-  const navigate = (href: string) => withClientDirectoryReturn(href, directoryReturn);
+  const queueReturn = readPendingQueueReturn(searchParams?.get("filaRetorno"));
+  const navigate = (href: string) => queueReturn ? withPendingQueueReturn(withClientDirectoryReturn(href, directoryReturn),queueReturn) : withClientDirectoryReturn(href, directoryReturn);
   const base = `/admin/clientes/${clientId}`;
   const items: Array<{
     area: ClientWorkspaceArea;
