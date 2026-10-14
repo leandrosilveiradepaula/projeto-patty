@@ -252,3 +252,8 @@
     max-width: 100%;
   }
 }
+
+.scopedClient { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4); padding: var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-medium); }
+.scopedClient span { color: var(--color-text-secondary); }
+.scopedClient a { min-height: 44px; display: inline-flex; align-items: center; color: var(--color-brand-strong); text-decoration: underline; }
+.scopedClient a:focus-visible { outline: 3px solid var(--color-brand); outline-offset: 2px; }

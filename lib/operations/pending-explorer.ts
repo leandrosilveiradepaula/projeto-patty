@@ -5,13 +5,13 @@ import { normalizeClientDirectorySearch } from "../clients/client-directory-sear
 
 export type PendingExplorerSort = "oldest" | "newest" | "client-asc" | "client-desc" | "type";
 export type PendingExplorerQuery = {
- q?: unknown; tipo?: unknown; area?: unknown; responsavel?: unknown; ordem?: unknown;
+ q?: unknown; cliente?: unknown; tipo?: unknown; area?: unknown; responsavel?: unknown; ordem?: unknown;
  ano?: unknown; mes?: unknown; dataInicial?: unknown; dataFinal?: unknown;
  integridadeData?: unknown; vinculo?: unknown; multiplas?: unknown;
  paginaPatty?: unknown; paginaCliente?: unknown; paginaSistema?: unknown;
 };
 export type PendingExplorerState = {
- query: string; kind: OperationalPendingItemKind | "all"; area: PendingArea | null;
+ query: string; clientId: string | null; kind: OperationalPendingItemKind | "all"; area: PendingArea | null;
  responsible: OperationalPendingGroup | "all"; sort: PendingExplorerSort;
  year: string; month: string; fromDate: string | null; toDate: string | null;
  dateValidity: "all" | "valid" | "invalid";
@@ -49,6 +49,7 @@ export function pendingQueueYears(items:readonly Pick<OperationalPendingItem,"cr
 }
 export function readPendingExplorerQuery(raw:PendingExplorerQuery,knownKinds:readonly OperationalPendingItemKind[],knownYears:readonly string[]=[]):PendingExplorerState{
  const query=typeof raw.q==="string"?raw.q.trim().slice(0,120):"";
+ const clientId = typeof raw.cliente === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(raw.cliente) ? raw.cliente.toLowerCase() : null;
  const kind=pick(raw.tipo,["all",...knownKinds] as const,"all" as const);
  const areaValue=raw.area===undefined||raw.area==="all"||raw.area===""?null:parsePendingArea(raw.area);
  const areaInvalid=raw.area!==undefined&&raw.area!==""&&raw.area!=="all"&&areaValue===null;
@@ -63,24 +64,25 @@ export function readPendingExplorerQuery(raw:PendingExplorerQuery,knownKinds:rea
  const multiple=pick(raw.multiplas,["all","multiple","single"] as const,"all");
  const patty=parsePage(raw.paginaPatty),client=parsePage(raw.paginaCliente),operational=parsePage(raw.paginaSistema);
  return {
-  query,kind:kind.value,area:areaValue,responsible:responsible.value,sort:sort.value,year:year.value,month:month.value,
+  query,clientId,kind:kind.value,area:areaValue,responsible:responsible.value,sort:sort.value,year:year.value,month:month.value,
   fromDate:inverse?null:from.value,toDate:inverse?null:to.value,
   dateValidity:validity.value,clientScope:scope.value,multiple:multiple.value,
   pattyPage:patty.value,clientPage:client.value,operationalPage:operational.value,
-  invalid:areaInvalid||kind.invalid||responsible.invalid||sort.invalid||year.invalid||month.invalid||
+  invalid:(raw.cliente!==undefined && clientId===null)||areaInvalid||kind.invalid||responsible.invalid||sort.invalid||year.invalid||month.invalid||
     from.invalid||to.invalid||inverse||validity.invalid||scope.invalid||multiple.invalid||
     patty.invalid||client.invalid||operational.invalid||(raw.q!==undefined&&typeof raw.q!=="string"),
  };
 }
 /** The array is already scoped by the authenticated data-access read. No new fetch is performed. */
 export function explorePendingClientQueue<T extends OperationalPendingItem>(
- items:readonly T[],state:{query:string;kind:string;area?:PendingArea|null;
+ items:readonly T[],state:{query:string;kind:string;clientId?:string|null;area?:PendingArea|null;
  responsible?:OperationalPendingGroup|"all";sort?:PendingExplorerSort;year?:string;month?:string;
  fromDate?:string|null;toDate?:string|null;dateValidity?:"all"|"valid"|"invalid";
  clientScope?:"all"|"client"|"system";multiple?:"all"|"multiple"|"single"},
 ):T[]{
  const search=normalizeClientDirectorySearch(state.query);
  const candidates=items.filter(item=>{
+  if(state.clientId && item.clientId !== state.clientId)return false;
   if(search&&!normalizeClientDirectorySearch(item.clientLabel).includes(search))return false;
   if(state.kind!=="all"&&item.kind!==state.kind)return false;
   if(state.area&&PENDING_AREA_BY_KIND[item.kind]!==state.area)return false;
@@ -132,13 +134,14 @@ export function pendingQueueOldestDate(items:readonly Pick<OperationalPendingIte
  for(const item of items){const t=Date.parse(item.createdAt);if(Number.isFinite(t)&&t<oldest)oldest=t;}
  return Number.isFinite(oldest)?new Date(oldest).toISOString():null;
 }
-function safeStateParams(state:{query:string;kind:string;area?:PendingArea|null;
+function safeStateParams(state:{query:string;kind:string;clientId?:string|null;area?:PendingArea|null;
  responsible?:OperationalPendingGroup|"all";sort?:PendingExplorerSort;year?:string;month?:string;
  fromDate?:string|null;toDate?:string|null;dateValidity?:"all"|"valid"|"invalid";
  clientScope?:"all"|"client"|"system";multiple?:"all"|"multiple"|"single";
  pattyPage?:number;clientPage?:number;operationalPage?:number}):URLSearchParams{
  const params=new URLSearchParams();
  if(state.query)params.set("q",state.query.slice(0,120));
+ if(state.clientId)params.set("cliente",state.clientId);
  if(state.kind!=="all")params.set("tipo",state.kind);
  if(state.area)params.set("area",state.area);
  if(state.responsible&&state.responsible!=="all")params.set("responsavel",state.responsible);
