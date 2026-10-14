@@ -61,6 +61,13 @@ export async function cleanupExactJ1Fixture(admin, ledger, env=process.env) {
     throw new Error("Synthetic Auth identity was not created by this run");
   }
 
+  // An Auth identity with admin/staff permissions is NEVER a disposable
+  // client fixture, even if a matching email somehow appeared.
+  const roles = demand(await admin.from("user_roles").select("role").eq("profile_id",auth.id));
+  if (roles.some(row => row.role !== "client") || roles.length > 1) {
+    throw new Error("Refusing cleanup of an identity with non-client privileges");
+  }
+
   const clients = demand(await admin.from("clients").select("id,profile_id").eq("profile_id",auth.id));
   if (clients.length > 1 || (clients.length === 1 && !UUID.test(clients[0].id)) ||
       (clients.length === 1 && clients[0].profile_id !== auth.id) ||
