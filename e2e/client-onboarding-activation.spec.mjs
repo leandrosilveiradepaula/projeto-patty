@@ -151,6 +151,7 @@ test("J1: cliente sintetica ativa acesso, salva Cadastro Atual e retoma Anamnese
   let clientId = null;
   let activationContext = null;
   let loginContext = null;
+  let loginPage = null;
   let anonymousContext = null;
   let activationPage = null;
   let tokenHash = null;
@@ -308,7 +309,7 @@ test("J1: cliente sintetica ativa acesso, salva Cadastro Atual e retoma Anamnese
 
     await test.step("J1 return: independent mobile client login", async () => {
     loginContext = await browser.newContext({ baseURL: baseUrl, viewport:{width:390,height:844}, isMobile:true, hasTouch:true });
-    const loginPage = await loginContext.newPage();
+    loginPage = await loginContext.newPage();
 
     await loginPage.goto("/login");
     await loginPage.getByLabel("Email").fill(email);
