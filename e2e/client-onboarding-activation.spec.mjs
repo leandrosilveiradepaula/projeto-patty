@@ -202,9 +202,16 @@ test("convite sintetico ativa conta, cria senha e permite novo login", async ({
     activationContext = await browser.newContext({ baseURL: baseUrl, viewport: {width:390,height:844}, isMobile:true, hasTouch:true });
     const activationPage = await activationContext.newPage();
 
-    await activationPage.goto(
-      `/auth/confirm?token_hash=${encodeURIComponent(tokenHash)}&type=invite`,
-    );
+    // Keep the one-time token out of navigation APIs and failure messages.
+    // The browser constructs its redirect without passing secrets to the
+    // Playwright URL assertion, trace or reporter.
+    await activationPage.goto("/login");
+    await activationPage.evaluate((hashedToken) => {
+      const destination = new URL("/auth/confirm", window.location.origin);
+      destination.searchParams.set("token_hash", hashedToken);
+      destination.searchParams.set("type", "invite");
+      window.location.replace(destination.pathname + destination.search);
+    }, tokenHash);
     // An unexpected redirect must not print a one-time activation token
     // into a Playwright failed-URL assertion.
     if (new URL(activationPage.url()).searchParams.has("token_hash")) {
