@@ -23,6 +23,7 @@ async function exactAuth(admin, ledger) {
   // identity and persisting its Auth ID in the ledger. Recover *only* by the
   // unique random fixture email and a creation time tied to this run.
   let found = null;
+  let reachedLastPage = false;
   for (let page = 1; page <= 20; page++) {
     const response = await admin.auth.admin.listUsers({page,perPage:1000});
     const users = demand(response)?.users ?? [];
@@ -31,8 +32,9 @@ async function exactAuth(admin, ledger) {
       if (found) throw new Error("Ambiguous synthetic Auth identity");
       found = user;
     }
-    if (users.length < 1000) break;
+    if (users.length < 1000) { reachedLastPage = true; break; }
   }
+  if (!reachedLastPage) throw new Error("Auth pagination incomplete; refuse to assume fixture absent");
   return found;
 }
 
@@ -46,12 +48,14 @@ export async function cleanupExactJ1Fixture(admin, ledger, env=process.env) {
     if (ledger.profileId) {
       const profile = demand(await admin.from("profiles").select("id").eq("id",ledger.profileId));
       const client = demand(await admin.from("clients").select("id").eq("profile_id",ledger.profileId));
-      if (profile.length || client.length) throw new Error("Orphaned synthetic profile/client after Auth deletion");
+      const roles = demand(await admin.from("user_roles").select("profile_id").eq("profile_id",ledger.profileId));
+      if (profile.length || client.length || roles.length) throw new Error("Orphaned synthetic profile/client after Auth deletion");
     }
     return "already-clean";
   }
   if (!UUID.test(auth.id) || auth.email !== ledger.email ||
       (ledger.profileId && ledger.profileId !== auth.id) ||
+      !Number.isFinite(Date.parse(auth.created_at ?? "")) ||
       Date.parse(auth.created_at ?? "") < ledger.startedAt - 60000 ||
       Date.parse(auth.created_at ?? "") > Date.now() + 60000) {
     throw new Error("Synthetic Auth identity was not created by this run");
