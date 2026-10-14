@@ -78,7 +78,7 @@ test("professional asset inspection remains in the library, not a synthetic clie
   assert.ok(admin.includes('href={'));
   assert.ok(admin.includes("Conferir arquivos na biblioteca"));
   assert.ok(admin.includes("Verificar arquivo desta versão"));
-  assert.ok(admin.includes('href={`/admin/conteudos/${version.educational_content_id}?versao=${version.id}#assets-do-conteudo`}'));
+  assert.ok(admin.includes('href={withReturn(`/admin/conteudos/${version.educational_content_id}?versao=${version.id}#assets-do-conteudo`)}'));
   assert.ok(!admin.includes("storage_path"));
 });
 

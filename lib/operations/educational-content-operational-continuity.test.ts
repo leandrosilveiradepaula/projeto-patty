@@ -75,7 +75,7 @@ test("educational release requires one explicit confirmation and blocks a second
 test("Patty sees which specific published content versions are awaiting an asset", () => {
   assert.ok(adminPage.includes("publishedVersionsAwaitingAsset"));
   assert.ok(adminPage.includes("sortClientContentReleaseOptions(publishedVersionsAwaitingAsset)"));
-  assert.ok(adminPage.includes('href={`/admin/conteudos/${version.educational_content_id}?versao=${version.id}#assets-do-conteudo`'));
+  assert.ok(adminPage.includes('href={withReturn(`/admin/conteudos/${version.educational_content_id}?versao=${version.id}#assets-do-conteudo`)}'));
   assert.ok(adminPage.includes("não aparecem como opção de nova liberação"));
 });
 

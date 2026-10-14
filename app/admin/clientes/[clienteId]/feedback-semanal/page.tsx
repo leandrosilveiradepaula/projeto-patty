@@ -1,4 +1,6 @@
 import { authorizedExactRecordPage } from "@/lib/operations/exact-record-navigation";
+import { readClientDirectoryReturn, withClientDirectoryReturn } from "@/lib/operations/client-directory-return";
+import { readPendingQueueReturn, withPendingQueueReturn } from "@/lib/operations/pending-queue-return";
 import { professionalFeedbackYears, readProfessionalFeedbackHistoryQuery, filterProfessionalFeedbacks, paginateProfessionalFeedbacks, professionalFeedbackHistoryHref } from "@/lib/follow-up/professional-weekly-feedback-explorer";
 import { formatWeeklyFeedbackPeriodDate } from "@/lib/weekly-feedback/date-format";
 import { Button } from "@/components/ui/Button";
@@ -25,7 +27,7 @@ import styles from "./page.module.css";
 
 type PageProps = {
   params: Promise<{ clienteId: string }>;
-  searchParams: Promise<{ origem?: string; ano?: string; pendentes?: string; enviados?: string; registro?: string }>;
+  searchParams: Promise<{ origem?: string; ano?: string; pendentes?: string; enviados?: string; registro?: string; filaRetorno?: string; listaQ?: string; listaView?: string; listaPagina?: string }>;
 };
 
 const formatDate = formatWeeklyFeedbackPeriodDate;
@@ -56,6 +58,9 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
   const rawPendingCount=orderedFeedbacks.filter(f=>f.submitted_at===null).length;
   const rawSubmittedCount=orderedFeedbacks.length-rawPendingCount;
   const rawQuery=await searchParams;
+  const directoryReturn = readClientDirectoryReturn(rawQuery);
+  const queueReturn = readPendingQueueReturn(rawQuery.filaRetorno);
+  const withReturn = (href: string) => withPendingQueueReturn(withClientDirectoryReturn(href,directoryReturn),queueReturn ?? "");
   const years=professionalFeedbackYears(orderedFeedbacks);
   const options=readProfessionalFeedbackHistoryQuery(rawQuery,years);
   const exactPendingPage=authorizedExactRecordPage(orderedFeedbacks.filter(f=>f.submitted_at===null),rawQuery.registro,10);
@@ -92,11 +97,11 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
         description="As respostas enviadas são informações para avaliação da Patty; não provocam alteração automática de protocolo."
         title="Consultar contexto do acompanhamento"
       >
-        <Link href={`/admin/clientes/${client.id}/avaliacoes`}>Avaliações</Link>
+        <Link href={withReturn(`/admin/clientes/${client.id}/avaliacoes`)}>Avaliações</Link>
         {" · "}
-        <Link href={`/admin/clientes/${client.id}/checkins`}>Check-ins</Link>
+        <Link href={withReturn(`/admin/clientes/${client.id}/checkins`)}>Check-ins</Link>
         {" · "}
-        <Link href={`/admin/clientes/${client.id}/protocolos`}>Protocolos</Link>
+        <Link href={withReturn(`/admin/clientes/${client.id}/protocolos`)}>Protocolos</Link>
       </Section>
 
       <Section
@@ -124,11 +129,15 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
       {exactRecordLocated ? (
         <p role="status" className={styles.exactRecordNotice}>
           Registro localizado no histórico autorizado. Os filtros de origem e ano foram desconsiderados para mostrar o feedback solicitado.{" "}
-          <Link href={`/admin/clientes/${client.id}/feedback-semanal`}>Voltar ao histórico completo</Link>
+          <Link href={withReturn(`/admin/clientes/${client.id}/feedback-semanal`)}>Voltar ao histórico completo</Link>
         </p>
       ) : null}
       <Section title="Localizar feedbacks" description="Filtre pela origem registrada, sem alterar respostas, prazos ou automações.">
         <form method="get" action={`/admin/clientes/${client.id}/feedback-semanal`} className={styles.explorerFilters}>
+          {queueReturn ? <input type="hidden" name="filaRetorno" value={queueReturn} /> : null}
+          {directoryReturn.q ? <input type="hidden" name="listaQ" value={directoryReturn.q} /> : null}
+          {directoryReturn.view !== "all" ? <input type="hidden" name="listaView" value={directoryReturn.view} /> : null}
+          {directoryReturn.page && directoryReturn.page > 1 ? <input type="hidden" name="listaPagina" value={directoryReturn.page} /> : null}
           <label>Origem
             <select name="origem" defaultValue={options.origin}>
               <option value="all">Todas as origens</option>
@@ -138,7 +147,7 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
           </label>
           <label>Ano<select name="ano" defaultValue={options.year}><option value="all">Todos os anos</option>{years.map(year=><option key={year} value={year}>{year}</option>)}</select></label>
           <Button type="submit" variant="secondary">Filtrar histórico</Button>
-          {options.origin !== "all" || options.year !== "all" ? <Link href={`/admin/clientes/${client.id}/feedback-semanal`}>Limpar</Link> : null}
+          {options.origin !== "all" || options.year !== "all" ? <Link href={withReturn(`/admin/clientes/${client.id}/feedback-semanal`)}>Limpar</Link> : null}
         </form>
         <p role="status">{pendingFeedbacks.length} de {rawPendingCount} pendente(s) · {submittedFeedbacks.length} de {rawSubmittedCount} enviado(s) no filtro atual.</p>
         {options.invalid || options.pendingPage > pendingPage.pageCount || options.submittedPage > submittedPage.pageCount ? (
@@ -158,14 +167,14 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
         {pendingFeedbacks.length > 1 ? (
           <nav aria-label="Localizar Feedback Semanal pendente" className={styles.feedbackNavigation}>
             {pendingPage.items.map((feedback, index) => (
-              <a href={`#feedback-pendente-${feedback.id}`} key={feedback.id}>
+              <a href={withReturn(`#feedback-pendente-${feedback.id}`)} key={feedback.id}>
                 {index + 1}. {formatDate(feedback.period_start)} a {formatDate(feedback.period_end)}
               </a>
             ))}
           </nav>
         ) : null}
         {pendingFeedbacks.length === 0 && rawPendingCount > 0 ? (
-          <EmptyState title="Nenhum pendente neste filtro" description="Há solicitações pendentes, mas nenhuma corresponde à origem ou ao ano selecionados." action={<Link href={`/admin/clientes/${client.id}/feedback-semanal#feedback-pendentes`}>Ver todos os pendentes</Link>} />
+          <EmptyState title="Nenhum pendente neste filtro" description="Há solicitações pendentes, mas nenhuma corresponde à origem ou ao ano selecionados." action={<Link href={withReturn(`/admin/clientes/${client.id}/feedback-semanal#feedback-pendentes`)}>Ver todos os pendentes</Link>} />
         ) : pendingFeedbacks.length === 0 ? (
           <EmptyState
             description="Não existem solicitações abertas aguardando a cliente. Se precisar criar uma solicitação manual específica, use o formulário acima."
@@ -204,7 +213,7 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
                       <strong>Lembrete:</strong>{" "}
                       {reminderStatus?.label ?? "nenhum evento de lembrete registrado."}
                        {reminderStatus?.nextStep ? (
-                         <> · <Link href={`/admin/clientes/${client.id}#${reminderStatus.nextStep.anchor}`}>{reminderStatus.nextStep.label}</Link></>
+                         <> · <Link href={withReturn(`/admin/clientes/${client.id}#${reminderStatus.nextStep.anchor}`)}>{reminderStatus.nextStep.label}</Link></>
                        ) : null}
                     </p>
                     <p className={styles.meta}>
@@ -217,8 +226,8 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
           </ol>
           {pendingPage.pageCount > 1 ? <nav aria-label="Páginas de feedbacks pendentes" className={styles.explorerPages}>
             <span>Página {pendingPage.page} de {pendingPage.pageCount}</span>
-            {pendingPage.page > 1 ? <Link href={professionalFeedbackHistoryHref(client.id,{...options,pendingPage:pendingPage.page-1,submittedPage:submittedPage.page},"pending")}>Anterior</Link> : null}
-            {pendingPage.page < pendingPage.pageCount ? <Link href={professionalFeedbackHistoryHref(client.id,{...options,pendingPage:pendingPage.page+1,submittedPage:submittedPage.page},"pending")}>Próxima</Link> : null}
+            {pendingPage.page > 1 ? <Link href={withReturn(professionalFeedbackHistoryHref(client.id,{...options,pendingPage:pendingPage.page-1,submittedPage:submittedPage.page},"pending"))}>Anterior</Link> : null}
+            {pendingPage.page < pendingPage.pageCount ? <Link href={withReturn(professionalFeedbackHistoryHref(client.id,{...options,pendingPage:pendingPage.page+1,submittedPage:submittedPage.page},"pending"))}>Próxima</Link> : null}
           </nav> : null}
           </>
         )}
@@ -232,7 +241,7 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
         title="Histórico enviado"
       >
         {submittedFeedbacks.length === 0 && rawSubmittedCount > 0 ? (
-          <EmptyState title="Nenhum envio neste filtro" description="As respostas já registradas continuam no histórico; limpe os filtros." action={<Link href={`/admin/clientes/${client.id}/feedback-semanal#feedback-enviados`}>Ver todos os envios</Link>} />
+          <EmptyState title="Nenhum envio neste filtro" description="As respostas já registradas continuam no histórico; limpe os filtros." action={<Link href={withReturn(`/admin/clientes/${client.id}/feedback-semanal#feedback-enviados`)}>Ver todos os envios</Link>} />
         ) : submittedFeedbacks.length === 0 ? (
           <EmptyState
             description="Ainda não há respostas enviadas pela cliente. Solicitações abertas, quando existentes, permanecem na seção Pendentes."
@@ -288,8 +297,8 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
           </ol>
           {submittedPage.pageCount > 1 ? <nav aria-label="Páginas do histórico enviado" className={styles.explorerPages}>
             <span>Página {submittedPage.page} de {submittedPage.pageCount}</span>
-            {submittedPage.page > 1 ? <Link href={professionalFeedbackHistoryHref(client.id,{...options,pendingPage:pendingPage.page,submittedPage:submittedPage.page-1},"submitted")}>Anterior</Link> : null}
-            {submittedPage.page < submittedPage.pageCount ? <Link href={professionalFeedbackHistoryHref(client.id,{...options,pendingPage:pendingPage.page,submittedPage:submittedPage.page+1},"submitted")}>Próxima</Link> : null}
+            {submittedPage.page > 1 ? <Link href={withReturn(professionalFeedbackHistoryHref(client.id,{...options,pendingPage:pendingPage.page,submittedPage:submittedPage.page-1},"submitted"))}>Anterior</Link> : null}
+            {submittedPage.page < submittedPage.pageCount ? <Link href={withReturn(professionalFeedbackHistoryHref(client.id,{...options,pendingPage:pendingPage.page,submittedPage:submittedPage.page+1},"submitted"))}>Próxima</Link> : null}
           </nav> : null}
           </>
         )}
