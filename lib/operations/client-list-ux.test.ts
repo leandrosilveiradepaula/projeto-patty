@@ -44,3 +44,12 @@ test("client directory offers a second distinct Patty action without replacing c
   assert.match(page, /\{nextPattyPending\.title\}/);
   assert.match(page, /Abrir acompanhamento de/);
 });
+
+test("directory links to every pending group for each authorized client",()=>{
+ const page=read("app/admin/clientes/page.tsx");
+ assert.match(page,/summarizeClientPendingItems\(pendingItems\)/);
+ assert.match(page,/pendingSummary\?\.total/);
+ assert.match(page,/Todas as pendências \(\{pendingSummary\.total\}\)/);
+ assert.match(page,/pendingSummary\?\.waiting/);
+ assert.match(page,/pendingSummary\?\.operational/);
+});
