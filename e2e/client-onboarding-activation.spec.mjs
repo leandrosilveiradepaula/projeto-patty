@@ -142,7 +142,7 @@ test("J1: cliente sintetica ativa acesso, salva Cadastro Atual e retoma Anamnese
 }) => {
   // 30s, the default Playwright timeout, is shorter than a full browser
   // journey with real Auth, server actions, verification and safe cleanup.
-  test.setTimeout(180_000);
+  test.setTimeout(210_000);
   const unique = randomBytes(8).toString("hex");
   const email = `e2e-onboarding-${unique}@example.invalid`;
   const password = `E2E-Onboarding-${unique}-Aa1!`;
@@ -151,6 +151,7 @@ test("J1: cliente sintetica ativa acesso, salva Cadastro Atual e retoma Anamnese
   let clientId = null;
   let activationContext = null;
   let loginContext = null;
+  let anonymousContext = null;
   let activationPage = null;
   let tokenHash = null;
   const ledger = {
@@ -274,6 +275,11 @@ test("J1: cliente sintetica ativa acesso, salva Cadastro Atual e retoma Anamnese
       }, {timeout:20_000}).toBe("Cidade Sintética J1");
       await activationPage.reload();
       await expect(activationPage.getByLabel("Cidade")).toHaveValue("Cidade Sintética J1");
+      const layout = await activationPage.evaluate(() => ({
+        viewport: document.documentElement.clientWidth,
+        scroll: document.documentElement.scrollWidth,
+      }));
+      expect(layout.scroll, "Cadastro Atual must fit mobile viewport").toBeLessThanOrEqual(layout.viewport + 1);
     }, { timeout: 35_000 });
 
     let draftId = null;
@@ -293,6 +299,11 @@ test("J1: cliente sintetica ativa acesso, salva Cadastro Atual e retoma Anamnese
       await activationPage.goto("/cliente/anamnese");
       const resume = activationPage.getByRole("link",{name:"Continuar rascunho"});
       await expect(resume).toHaveAttribute("href",`/cliente/anamnese/${draftId}`);
+      const layout = await activationPage.evaluate(() => ({
+        viewport: document.documentElement.clientWidth,
+        scroll: document.documentElement.scrollWidth,
+      }));
+      expect(layout.scroll, "Anamnese must fit mobile viewport").toBeLessThanOrEqual(layout.viewport + 1);
     }, { timeout: 35_000 });
 
     await test.step("J1 return: independent mobile client login", async () => {
@@ -309,11 +320,27 @@ test("J1: cliente sintetica ativa acesso, salva Cadastro Atual e retoma Anamnese
     await expect(loginPage.getByRole("link",{name:"Continuar rascunho"}))
       .toHaveAttribute("href",`/cliente/anamnese/${draftId}`);
     }, { timeout: 35_000 });
+
+    await test.step("J1 authorization: anonymous session and client cannot access privileged records", async () => {
+      anonymousContext = await browser.newContext({
+        baseURL: baseUrl, viewport: {width:390,height:844}, isMobile:true, hasTouch:true,
+      });
+      const visitor = await anonymousContext.newPage();
+      await visitor.goto(`/cliente/anamnese/${draftId}`);
+      await expect(visitor).toHaveURL(/\/login\/?(?:[?].*)?$/);
+      await visitor.goto("/cliente/perfil");
+      await expect(visitor).toHaveURL(/\/login\/?(?:[?].*)?$/);
+
+      // Existing authenticated client session must not enter Patty's admin UI.
+      await loginPage.goto("/admin/pendencias");
+      await expect(loginPage).toHaveURL(/\/login\/?(?:[?].*)?$/);
+    }, {timeout:30_000});
   } finally {
     // A timed-out Playwright test may already have closed browser contexts.
     // Their errors MUST NOT prevent server-side deletion of the verified
     // disposable synthetic identity. A cleanup failure still fails the job.
     const closeResults = await Promise.allSettled([
+      anonymousContext?.close(),
       loginContext?.close(),
       activationContext?.close(),
     ]);
