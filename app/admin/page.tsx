@@ -8,6 +8,7 @@ import { Section } from "@/components/ui/Section";
 import { getOperationalPendingItemsForCurrentAdmin } from "@/lib/operations/pending-data";
 import { groupOperationalPendingItems } from "@/lib/operations/pending";
 import { pendingQueueLinks } from "@/lib/operations/pending-navigation";
+import { withPendingQueueReturn } from "@/lib/operations/pending-queue-return";
 import {
   getCurrentUserProfile,
   listAccessibleClientAssessments,
@@ -49,11 +50,7 @@ export default async function AdminPage() {
   ).length;
   const nextPattyItems = groupedPendingItems.patty.slice(0, 3);
   const nextClientItems = groupedPendingItems.client.slice(0, 3);
-  const recoveryTasks = pendingItems.filter(item =>
-    item.kind === "weekly_feedback_reminder_blocked" ||
-    item.kind === "content_released_without_asset" ||
-    item.kind === "private_file_pending_release",
-  ).slice(0, 3);
+  const nextOperationalItems = groupedPendingItems.operational.slice(0, 3);
 
   return (
     <>
@@ -159,8 +156,8 @@ export default async function AdminPage() {
       {nextPattyItems.length > 0 ? (
         <Section
           action={
-            <Link className={styles.sectionLink} href="/admin/pendencias">
-              Ver fila completa
+            <Link className={styles.sectionLink} href={pendingQueueLinks.patty}>
+              Ver todas as ações da Patty
             </Link>
           }
           description="Os três itens mais antigos da fila de ação da Patty. A ordem é cronológica e não representa prioridade clínica."
@@ -172,13 +169,13 @@ export default async function AdminPage() {
                 <PendingItemCard
                   action={
                     <div className={styles.pendingActions}>
-                      <Link className={styles.metricLink} href={item.href}>
+                      <Link className={styles.metricLink} href={withPendingQueueReturn(item.href, pendingQueueLinks.patty)}>
                         Abrir registro
                       </Link>
                       {item.clientId ? (
                         <Link
                           className={styles.secondaryLink}
-                          href={`/admin/clientes/${item.clientId}`}
+                          href={withPendingQueueReturn(`/admin/clientes/${item.clientId}`, pendingQueueLinks.patty)}
                         >
                           Ver cliente
                         </Link>
@@ -217,8 +214,8 @@ export default async function AdminPage() {
                   meta={`${item.clientLabel} · ${formatDateTime(item.createdAt)}`}
                   status={<Badge variant="neutral">{item.statusLabel}</Badge>}
                   action={<div className={styles.pendingActions}>
-                    <Link className={styles.metricLink} href={item.href}>Abrir registro</Link>
-                    {item.clientId ? <Link className={styles.secondaryLink} href={`/admin/clientes/${item.clientId}`}>Ver cliente</Link> : null}
+                    <Link className={styles.metricLink} href={withPendingQueueReturn(item.href, pendingQueueLinks.client)}>Abrir registro</Link>
+                    {item.clientId ? <Link className={styles.secondaryLink} href={withPendingQueueReturn(`/admin/clientes/${item.clientId}`, pendingQueueLinks.client)}>Ver cliente</Link> : null}
                   </div>}
                 />
               </li>
@@ -226,19 +223,19 @@ export default async function AdminPage() {
           </ol>
         </Section>
       ) : null}
-      {recoveryTasks.length > 0 ? (
-        <Section title="Pendências que exigem recuperação" description="Atalhos para registros técnicos já identificados na fila autorizada. A ordem não representa prioridade clínica." action={<Link className={styles.sectionLink} href={pendingQueueLinks.operational}>Ver fila operacional</Link>}>
+      {nextOperationalItems.length > 0 ? (
+        <Section title="Acompanhamento operacional" description="Execuções e ocorrências técnicas registradas. Nem todo item representa falha ou exige intervenção imediata; a ordem não representa prioridade clínica." action={<Link className={styles.sectionLink} href={pendingQueueLinks.operational}>Ver fila operacional completa</Link>}>
           <ol className={styles.pendingPreviewList}>
-            {recoveryTasks.map(item => (
+            {nextOperationalItems.map(item => (
               <li key={item.id}>
                 <PendingItemCard
                   title={item.title}
                   description={item.description}
                   meta={`${item.clientLabel} · ${formatDateTime(item.createdAt)}`}
-                  status={<Badge variant="warning">{item.statusLabel}</Badge>}
+                  status={<Badge variant={item.kind === "ai_execution_started" ? "neutral" : "warning"}>{item.statusLabel}</Badge>}
                   action={<div className={styles.pendingActions}>
-                    <Link className={styles.metricLink} href={item.href}>Abrir recuperação</Link>
-                    {item.clientId ? <Link className={styles.secondaryLink} href={`/admin/clientes/${item.clientId}`}>Ver cliente</Link> : null}
+                    <Link className={styles.metricLink} href={withPendingQueueReturn(item.href, pendingQueueLinks.operational)}>Consultar registro operacional</Link>
+                    {item.clientId ? <Link className={styles.secondaryLink} href={withPendingQueueReturn(`/admin/clientes/${item.clientId}`, pendingQueueLinks.operational)}>Ver cliente</Link> : null}
                   </div>}
                 />
               </li>
