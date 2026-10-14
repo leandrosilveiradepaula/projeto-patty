@@ -1,4 +1,4 @@
-import { readClientDirectoryPage, paginateClientDirectory, clientDirectoryPageHref } from "@/lib/clients/client-directory-pagination";
+import { readClientDirectoryPage, paginateClientDirectory, clientDirectoryPageHref, visibleClientDirectoryPages } from "@/lib/clients/client-directory-pagination";
 import { ClientListItem } from "@/components/admin/ClientListItem";
 import { matchesClientDirectoryName, readClientDirectorySearchTerm } from "@/lib/clients/client-directory-search";
 import { Alert } from "@/components/ui/Alert";
@@ -246,7 +246,7 @@ export default async function AdminClientesPage({
             </ul>
             {pagedClients.pageCount > 1 ? <nav aria-label="Páginas da lista de clientes" className={styles.pagination}>
               {pagedClients.page > 1 ? <Link href={clientDirectoryPageHref({q:searchTerm,view:viewFilter,page:pagedClients.page-1})}>Anterior</Link> : <span>Anterior</span>}
-              <span>Página {pagedClients.page} de {pagedClients.pageCount}</span>
+              {visibleClientDirectoryPages(pagedClients.page,pagedClients.pageCount).map((pageNumber,index,pages)=><span key={pageNumber} className={styles.pageNumber}>{index>0 && pageNumber-pages[index-1]>1 ? <span aria-hidden="true">…</span> : null}{pageNumber===pagedClients.page ? <strong aria-current="page">{pageNumber}</strong> : <Link aria-label={`Ir para página ${pageNumber}`} href={clientDirectoryPageHref({q:searchTerm,view:viewFilter,page:pageNumber})}>{pageNumber}</Link>}</span>)}
               {pagedClients.page < pagedClients.pageCount ? <Link href={clientDirectoryPageHref({q:searchTerm,view:viewFilter,page:pagedClients.page+1})}>Próxima</Link> : <span>Próxima</span>}
             </nav> : null}
           </>
