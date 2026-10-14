@@ -152,6 +152,9 @@ test("J1: cliente sintetica ativa acesso, salva Cadastro Atual e retoma Anamnese
     email: "e2e-onboarding-9ca6493db29a1767@example.invalid",
   };
   const previous = await admin.auth.admin.getUserById(previousFixture.profileId);
+  if (previous.error && previous.error.status !== 404) {
+    throw new Error("Cannot establish status of the known synthetic residue.");
+  }
   if (!previous.error && previous.data.user) {
     if (previous.data.user.email !== previousFixture.email) {
       throw new Error("Known J1 synthetic residue no longer matches its Auth owner.");
