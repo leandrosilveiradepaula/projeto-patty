@@ -30,3 +30,19 @@ test("assessment and protocol detail pages preserve directory return on navigati
  assert.match(protocol,/withClientDirectoryReturn\(protocolVersionExplorerHref/);
  assert.match(protocol,/name="listaQ" value=\{directoryReturn\.q\}/);
 });
+
+test("client overview carries validated pending queue context into actions and area cards",()=>{
+ const page=read("app/admin/clientes/[clienteId]/page.tsx");
+ assert.match(page,/readPendingQueueReturn\(query\.filaRetorno\)/);
+ assert.match(page,/withPendingQueueReturn\(withClientDirectoryReturn\(nextOperationalAction\.href,directoryReturn\),queueReturn \?\? ""\)/);
+ assert.match(page,/withPendingQueueReturn\(withClientDirectoryReturn\(latestActivityHistoryHref,directoryReturn\),queueReturn \?\? ""\)/);
+});
+test("assessment and protocol details keep queue context on cross-area navigation",()=>{
+ const assessment=read("app/admin/avaliacoes/[avaliacaoId]/page.tsx");
+ const protocol=read("app/admin/protocolos/[protocoloId]/page.tsx");
+ for(const source of [assessment,protocol]){
+  assert.match(source,/readPendingQueueReturn/);
+  assert.match(source,/withPendingQueueReturn\(withClientDirectoryReturn\(href,directoryReturn\),queueReturn \?\? ""\)/);
+ }
+ assert.match(protocol,/name="filaRetorno" value=\{queueReturn\}/);
+});
