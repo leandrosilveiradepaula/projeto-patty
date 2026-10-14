@@ -7,10 +7,10 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"../..");
 const read=(file:string)=>fs.readFileSync(path.join(root,file),"utf8");
 test("client overview preserves directory return on its operational actions and cards",()=>{
  const page=read("app/admin/clientes/[clienteId]/page.tsx");
- assert.match(page,/withClientDirectoryReturn\(nextOperationalAction\.href,directoryReturn\)/);
- assert.match(page,/withClientDirectoryReturn\(latestActivityHistoryHref,directoryReturn\)/);
- assert.match(page,/withClientDirectoryReturn\(\x60\/admin\/clientes\/\$\{client\.id\}\/feedback-semanal\x60,directoryReturn\)/);
- assert.match(page,/withClientDirectoryReturn\(\x60\/admin\/clientes\/\$\{client\.id\}\/arquivos\x60,directoryReturn\)/);
+ assert.match(page,/withPendingQueueReturn\(withClientDirectoryReturn\(nextOperationalAction\.href,directoryReturn\),queueReturn \?\? ""\)/);
+ assert.match(page,/withPendingQueueReturn\(withClientDirectoryReturn\(latestActivityHistoryHref,directoryReturn\),queueReturn \?\? ""\)/);
+ assert.match(page,/withPendingQueueReturn\(withClientDirectoryReturn\(\x60\/admin\/clientes\/\$\{client\.id\}\/feedback-semanal\x60,directoryReturn\),queueReturn \?\? ""\)/);
+ assert.match(page,/withPendingQueueReturn\(withClientDirectoryReturn\(\x60\/admin\/clientes\/\$\{client\.id\}\/arquivos\x60,directoryReturn\),queueReturn \?\? ""\)/);
 });
 test("anamnesis submission workspace preserves context across review and clarification tabs",()=>{
  const page=read("components/admin/AdminAnamnesisWorkspaceHeader.tsx");
@@ -25,8 +25,24 @@ test("assessment and protocol detail pages preserve directory return on navigati
  const assessment=read("app/admin/avaliacoes/[avaliacaoId]/page.tsx");
  const protocol=read("app/admin/protocolos/[protocoloId]/page.tsx");
  assert.match(assessment,/const directoryReturn = readClientDirectoryReturn\(filters\)/);
- assert.match(assessment,/withClientDirectoryReturn\(\x60\/admin\/avaliacoes\/\$\{previousAssessment\.id\}\x60,directoryReturn\)/);
+ assert.match(assessment,/href=\{navigate\(\x60\/admin\/avaliacoes\/\$\{previousAssessment\.id\}\x60\)\}/);
  assert.match(protocol,/const directoryReturn = readClientDirectoryReturn\(search\)/);
- assert.match(protocol,/withClientDirectoryReturn\(protocolVersionExplorerHref/);
+ assert.match(protocol,/href=\{navigate\(protocolVersionExplorerHref/);
  assert.match(protocol,/name="listaQ" value=\{directoryReturn\.q\}/);
+});
+
+test("client overview carries validated pending queue context into actions and area cards",()=>{
+ const page=read("app/admin/clientes/[clienteId]/page.tsx");
+ assert.match(page,/readPendingQueueReturn\(query\.filaRetorno\)/);
+ assert.match(page,/withPendingQueueReturn\(withClientDirectoryReturn\(nextOperationalAction\.href,directoryReturn\),queueReturn \?\? ""\)/);
+ assert.match(page,/withPendingQueueReturn\(withClientDirectoryReturn\(latestActivityHistoryHref,directoryReturn\),queueReturn \?\? ""\)/);
+});
+test("assessment and protocol details keep queue context on cross-area navigation",()=>{
+ const assessment=read("app/admin/avaliacoes/[avaliacaoId]/page.tsx");
+ const protocol=read("app/admin/protocolos/[protocoloId]/page.tsx");
+ for(const source of [assessment,protocol]){
+  assert.match(source,/readPendingQueueReturn/);
+  assert.match(source,/withPendingQueueReturn\(withClientDirectoryReturn\(href,directoryReturn\),queueReturn \?\? ""\)/);
+ }
+ assert.match(protocol,/name="filaRetorno" value=\{queueReturn\}/);
 });

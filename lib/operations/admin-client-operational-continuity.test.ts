@@ -117,7 +117,7 @@ test("overview still surfaces a later training request while a draft is under re
   assert.ok(page.includes("newTrainingRequestAfterPublication && openTrainingVersion"));
   assert.ok(page.includes("Confirme") || page.includes("Confira"));
   assert.ok(page.includes("treino em edição") || page.includes("rascunho de treino em edição"));
-  assert.ok(page.includes('href={withClientDirectoryReturn(`/admin/clientes/${client.id}/treino`,directoryReturn)}'));
+  assert.ok(page.includes('href={withPendingQueueReturn(withClientDirectoryReturn(`/admin/clientes/${client.id}/treino`,directoryReturn),queueReturn ?? "")}'));
 });
 
 test("onboarding and canonical registration remain separate from Auth profile or contact email", () => {
