@@ -66,3 +66,16 @@ test("new E2E scripts parse before any secret or published runtime is available"
   assert.doesNotThrow(()=>execFileSync(process.execPath,["--check",absolute.pathname],{stdio:"pipe"}),file);
  }
 });
+
+test("J1 triggers only from trusted master CI or matching Vercel status",()=>{
+ assert.match(workflow,/workflow_run:/);
+ assert.match(workflow,/status:/);
+ assert.match(workflow,/github\.event\.context == 'Vercel'/);
+ assert.match(workflow,/github\.event\.state == 'success'/);
+ assert.match(workflow,/github\.event\.sha == github\.sha/);
+ assert.match(workflow,/github\.event\.workflow_run\.event == 'push'/);
+ assert.match(workflow,/github\.event\.workflow_run\.conclusion == 'success'/);
+ assert.match(workflow,/github\.event\.workflow_run\.head_sha == github\.sha/);
+ assert.match(workflow,/github\.ref == 'refs\/heads\/master'/);
+ assert.match(workflow,/steps\.preflight\.outputs\.ready == 'true'/);
+});
