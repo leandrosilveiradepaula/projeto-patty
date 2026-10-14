@@ -1,3 +1,13 @@
+## J1.02–03 — primeiro percurso real aprovado, com persistência e limpeza (2026-10-14)
+
+**EVIDÊNCIA EXECUTADA:** [GitHub Actions 38656714848](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38656714848), no `master` `b84925d4`, com Vercel Production READY e CI do mesmo SHA aprovados. Playwright Chromium concluiu **1 teste PASS em 25,4 s**, incluindo: ativação da conta sintética com viewport 390×844, definição de senha, login da cliente, Cadastro Atual salvo e lido novamente do banco e do formulário após reload, início de rascunho versionado de Anamnese, retomada do mesmo ID e novo login independente.
+
+**LIMPEZA REAL:** o browser registrou `J1 synthetic fixture cleanup completed`; o pós-job independente executou e confirmou `J1 exact-fixture cleanup: already-clean`. Consulta **somente leitura posterior no Supabase de produção** confirmou 0 Auth sintéticas recentes, 0 Clients sintéticos e 0 assignments sintéticos. Evidências de cleanup e teste são independentes de `Validate application`.
+
+**ESCOPOS AINDA NÃO HOMOLOGADOS:** a cliente sintética foi provisionada exclusivamente para E2E via API server-side; o fluxo real de convite pela Patty, uploads/exames privados, submissão final da anamnese, avaliação, revisão e publicação do protocolo e visualização do conteúdo liberado **não** foram executados neste cenário. Dados profissionais continuam com revisão humana. Não declarar J1 integral homologada.
+
+**Próxima ampliação segura da mesma execução:** validar os redirects reais de sessão anônima ao tentar acessar perfil e Anamnese privada e de uma sessão cliente ao tentar acessar pendências administrativas, além de verificar ausência de overflow horizontal nas telas móveis de Cadastro Atual e Anamnese. Esses novos asserts dependem da próxima execução do browser; são `PENDENTES` até run comprovada.
+
 ## J1 — retomada controlada do navegador com limpeza independente verificada (2026-10-14)
 
 **Base de decisão técnica:** o resíduo sintético foi removido no workflow [38655756684](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38655756684), com resposta `cleaned`, e a consulta somente leitura após a operação retornou zero Auth/Clients/assignments/client_registration recentes com os identificadores de teste. O PR #846 removeu o workflow temporário privilegiado e acrescentou testes da limpeza independente, cobrindo um ciclo completo de criação/remoção de dados sintéticos e bloqueios antes de deletar dados com papel privilegiado, Anamnese enviada, protocolo ou vínculo divergente. Nenhum segundo administrador foi criado.
