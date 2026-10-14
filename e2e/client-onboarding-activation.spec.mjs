@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { expect, test } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
+import { writeFixtureLedger } from "./helpers/j1-fixture-ledger.mjs";
 
 const baseUrl = process.env.E2E_BASE_URL?.replace(/\/$/, "");
 const adminEmail = process.env.E2E_ADMIN_EMAIL;
@@ -150,8 +151,20 @@ test("J1: cliente sintetica ativa acesso, salva Cadastro Atual e retoma Anamnese
   let clientId = null;
   let activationContext = null;
   let loginContext = null;
+  let activationPage = null;
+  let tokenHash = null;
+  const ledger = {
+    runId: process.env.GITHUB_RUN_ID,
+    attempt: process.env.GITHUB_RUN_ATTEMPT,
+    startedAt: Date.now(),
+    email, profileId: null, clientId: null,
+  };
 
+  // Persist before generating Auth: an external cleanup step survives even a
+  // Playwright process kill, rather than relying on a JS finally callback.
+  await writeFixtureLedger(ledger);
   try {
+    await test.step("J1 fixture: provisioning synthetic account and assignment", async () => {
     const staffProfileId = await findAdminProfileId(adminEmail);
 
     const generated = await admin.auth.admin.generateLink({
@@ -162,7 +175,9 @@ test("J1: cliente sintetica ativa acesso, salva Cadastro Atual e retoma Anamnese
     if (generated.error) throw generated.error;
 
     profileId = generated.data.user.id;
-    const tokenHash = generated.data.properties.hashed_token;
+    ledger.profileId = profileId;
+    await writeFixtureLedger(ledger);
+    tokenHash = generated.data.properties.hashed_token;
 
     if (!profileId || !tokenHash) {
       throw new Error("Supabase did not return the invite user and token hash.");
@@ -194,6 +209,8 @@ test("J1: cliente sintetica ativa acesso, salva Cadastro Atual e retoma Anamnese
 
     if (client.error) throw client.error;
     clientId = client.data.id;
+    ledger.clientId = clientId;
+    await writeFixtureLedger(ledger);
 
     const assignment = await admin.from("client_assignments").insert({
       client_id: clientId,
@@ -201,9 +218,11 @@ test("J1: cliente sintetica ativa acesso, salva Cadastro Atual e retoma Anamnese
     });
 
     if (assignment.error) throw assignment.error;
+    }, { timeout: 45_000 });
 
+    await test.step("J1 activation: mobile invitation and password", async () => {
     activationContext = await browser.newContext({ baseURL: baseUrl, viewport: {width:390,height:844}, isMobile:true, hasTouch:true });
-    const activationPage = await activationContext.newPage();
+    activationPage = await activationContext.newPage();
 
     // Keep the one-time token out of navigation APIs and failure messages.
     // The browser constructs its redirect without passing secrets to the
@@ -239,6 +258,7 @@ test("J1: cliente sintetica ativa acesso, salva Cadastro Atual e retoma Anamnese
 
     if (authUser.error) throw authUser.error;
     expect(authUser.data.user.email_confirmed_at).toBeTruthy();
+    }, { timeout: 45_000 });
 
     // The client flow continues through the real UI, without a second
     // admin identity, MFA bypass or user data outside this fixture.
@@ -254,7 +274,7 @@ test("J1: cliente sintetica ativa acesso, salva Cadastro Atual e retoma Anamnese
       }, {timeout:20_000}).toBe("Cidade Sintética J1");
       await activationPage.reload();
       await expect(activationPage.getByLabel("Cidade")).toHaveValue("Cidade Sintética J1");
-    });
+    }, { timeout: 35_000 });
 
     let draftId = null;
     await test.step("inicia e retoma a mesma Anamnese versionada", async () => {
@@ -273,8 +293,9 @@ test("J1: cliente sintetica ativa acesso, salva Cadastro Atual e retoma Anamnese
       await activationPage.goto("/cliente/anamnese");
       const resume = activationPage.getByRole("link",{name:"Continuar rascunho"});
       await expect(resume).toHaveAttribute("href",`/cliente/anamnese/${draftId}`);
-    });
+    }, { timeout: 35_000 });
 
+    await test.step("J1 return: independent mobile client login", async () => {
     loginContext = await browser.newContext({ baseURL: baseUrl, viewport:{width:390,height:844}, isMobile:true, hasTouch:true });
     const loginPage = await loginContext.newPage();
 
@@ -287,6 +308,7 @@ test("J1: cliente sintetica ativa acesso, salva Cadastro Atual e retoma Anamnese
     await loginPage.goto("/cliente/anamnese");
     await expect(loginPage.getByRole("link",{name:"Continuar rascunho"}))
       .toHaveAttribute("href",`/cliente/anamnese/${draftId}`);
+    }, { timeout: 35_000 });
   } finally {
     // A timed-out Playwright test may already have closed browser contexts.
     // Their errors MUST NOT prevent server-side deletion of the verified
