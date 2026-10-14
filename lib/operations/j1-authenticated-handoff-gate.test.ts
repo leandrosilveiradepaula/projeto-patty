@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const gateModule = "../../.github/scripts/" + "j1-production-preflight.mjs";
-const { readinessForSyntheticE2E } = await import(gateModule);
+const { readinessForSyntheticE2E, verifiedEquivalentRuntime } = await import(gateModule);
 const workflow = readFileSync(new URL("../../.github/workflows/e2e-j1-invitation-handoff.yml",import.meta.url),"utf8");
 const spec = readFileSync(new URL("../../e2e/j1-manual-invitation-handoff.spec.mjs",import.meta.url),"utf8");
 const commit = "a".repeat(40);
@@ -12,7 +12,7 @@ const approved = {head_sha:commit,status:"completed",conclusion:"success",event:
 const vercel = {context:"Vercel",state:"success"};
 
 test("J1 partial smoke is barred unless master CI AND Vercel match exact commit",()=>{
- assert.deepEqual(readinessForSyntheticE2E({commit,validationRuns:[approved],statuses:[vercel]}),{ready:true,failures:[]});
+ assert.deepEqual(readinessForSyntheticE2E({commit,validationRuns:[approved],statuses:[vercel]}),{ready:true,failures:[],testedCommit:commit,runtimeEquivalentFallback:false});
  const blocked = [
   {commit,validationRuns:[],statuses:[vercel]},
   {commit,validationRuns:[{...approved,head_sha:"b".repeat(40)}],statuses:[vercel]},
@@ -78,4 +78,74 @@ test("J1 triggers only from trusted master CI or matching Vercel status",()=>{
  assert.match(workflow,/github\.event\.workflow_run\.head_sha == github\.sha/);
  assert.match(workflow,/github\.ref == 'refs\/heads\/master'/);
  assert.match(workflow,/steps\.preflight\.outputs\.ready == 'true'/);
+});
+
+const verifiedRelease = "f0cbfcf6b6967755d3a6a614d418b1dd0f9bb529";
+function equivalentDiff(paths:string[]) {
+ return {
+  base_commit:{sha:verifiedRelease}, merge_base_commit:{sha:verifiedRelease},
+  status:"ahead", behind_by:0, ahead_by:2,
+  commits:[{sha:"b".repeat(40)},{sha:commit}],
+  files:paths.map(filename=>({filename,status:"modified"})),
+ };
+}
+test("READY production from the previous SHA can be tested only if app runtime is unchanged",()=>{
+ const onlySafeChanges=[
+  ".github/workflows/e2e-j1-invitation-handoff.yml",
+  "lib/operations/j1-authenticated-handoff-gate.test.ts",
+  ".github/scripts/j1-production-preflight.mjs",
+  "docs/PROJECT_STATUS.md",
+ ];
+ const diff=equivalentDiff(onlySafeChanges);
+ assert.equal(verifiedEquivalentRuntime(verifiedRelease,commit,diff),true);
+ const verdict=readinessForSyntheticE2E({
+  commit,validationRuns:[approved],statuses:[{context:"Vercel",state:"failure"}],
+  fallbackCommit:verifiedRelease,fallbackStatuses:[vercel],comparison:diff,
+ });
+ assert.deepEqual(verdict,{ready:true,failures:[],testedCommit:verifiedRelease,runtimeEquivalentFallback:true});
+});
+test("older READY must never authorize runtime or dependency changes",()=>{
+ for(const sensitive of [
+  "app/admin/page.tsx","components/admin/ClientInvitationMethodChooser.tsx",
+  "lib/onboarding/validation.ts","lib/operations/pending.ts",
+  "e2e/j1-manual-invitation-handoff.spec.mjs","package.json",
+  "next.config.ts","public/logo.svg","supabase/migrations/xyz.sql",
+  ".github/workflows/validate.yml",".github/scripts/journey-automerge.mjs",
+ ]) {
+  const diff=equivalentDiff(["docs/PROJECT_STATUS.md",sensitive]);
+  assert.equal(verifiedEquivalentRuntime(verifiedRelease,commit,diff),false,sensitive);
+  const blocked=readinessForSyntheticE2E({
+   commit,validationRuns:[approved],statuses:[{context:"Vercel",state:"failure"}],
+   fallbackCommit:verifiedRelease,fallbackStatuses:[vercel],comparison:diff,
+  });
+  assert.equal(blocked.ready,false,sensitive);
+ }
+});
+test("never accept unrelated, truncated or unconfirmed comparisons",()=>{
+ const valid=equivalentDiff(["docs/PROJECT_STATUS.md"]);
+ const cases=[
+  {...valid,status:"diverged"},
+  {...valid,behind_by:1},
+  {...valid,base_commit:{sha:"c".repeat(40)}},
+  {...valid,merge_base_commit:{sha:"c".repeat(40)}},
+  {...valid,ahead_by:301},
+  {...valid,commits:[]},
+  {...valid,files:[]},
+  {...valid,files:[{filename:"docs/PROJECT_STATUS.md",status:"removed"}]},
+  {...valid,files:[{filename:"docs/PROJECT_STATUS.md",status:"renamed",previous_filename:"other"}]},
+ ];
+ for(const bad of cases)assert.equal(verifiedEquivalentRuntime(verifiedRelease,commit,bad),false);
+ assert.equal(readinessForSyntheticE2E({
+  commit,validationRuns:[approved],statuses:[],
+  fallbackCommit:verifiedRelease,fallbackStatuses:[{context:"Vercel",state:"failure"}],
+  comparison:valid,
+ }).ready,false);
+ assert.equal(readinessForSyntheticE2E({
+  commit,validationRuns:[],statuses:[],
+  fallbackCommit:verifiedRelease,fallbackStatuses:[vercel],comparison:valid,
+ }).ready,false);
+ assert.equal(readinessForSyntheticE2E({
+  commit,validationRuns:[approved],statuses:[],
+  fallbackCommit:"c".repeat(40),fallbackStatuses:[vercel],comparison:valid,
+ }).ready,false);
 });
