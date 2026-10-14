@@ -84,6 +84,7 @@ jobs:
           npx playwright install --with-deps chromium
 
       - name: Execute J1 mobile activation, registration and anamnesis draft
+        id: browser
         if: steps.preflight.outputs.ready == 'true'
         env:
           E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
@@ -91,6 +92,18 @@ jobs:
           E2E_SUPABASE_URL: https://hqanoskwjvpbgavppcud.supabase.co
           E2E_SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.E2E_SUPABASE_SECRET_KEY }}
         run: npx playwright test e2e/client-onboarding-activation.spec.mjs --reporter=line --workers=1
+
+      # This is a *separate process*: Playwright timeout/crash can no longer
+      # prevent cleanup of the exact synthetic identity recorded in RUNNER_TEMP.
+      # A cleanup error fails the job. The job remains disabled by default
+      # until J1_E2E_ENABLE is deliberately enabled after safety review.
+      - name: Independent verified synthetic fixture cleanup
+        if: always() && steps.browser.outcome != 'skipped' && steps.preflight.outputs.ready == 'true'
+        env:
+          J1_FIXTURE_CLEANUP_EXECUTE: "true"
+          E2E_SUPABASE_URL: https://hqanoskwjvpbgavppcud.supabase.co
+          E2E_SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.E2E_SUPABASE_SECRET_KEY }}
+        run: node e2e/helpers/j1-independent-cleanup.mjs
 
       - name: Record blocked production preflight
         if: steps.preflight.outputs.ready != 'true'
