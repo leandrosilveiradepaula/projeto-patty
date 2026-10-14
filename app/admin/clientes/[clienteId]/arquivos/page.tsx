@@ -208,7 +208,7 @@ export default async function AdminClientFilesPage({
           {pendingReleaseFiles.length === 0 ? (
             <EmptyState
               description={totalPending > 0 ? "Existem arquivos aguardando liberação, mas nenhum corresponde aos filtros selecionados. Limpe os filtros para revisar as pendências." : "Nenhum upload administrativo está aguardando liberação nesta cliente."}
-              title={totalPending > 0 ? "Nenhuma pendência neste filtro" : "Sem arquivos pendentes"}
+              title="Sem arquivos pendentes"
               action={hasFilteredOutPending ? <Link href={`${basePath}#aguardando-liberacao`}>Limpar filtros e revisar pendências</Link> : undefined}
             />
           ) : (
