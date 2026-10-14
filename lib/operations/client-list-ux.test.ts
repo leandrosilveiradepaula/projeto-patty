@@ -14,7 +14,7 @@ test("client list exposes the oldest Patty action directly", () => {
   const page = read("app/admin/clientes/page.tsx");
 
   assert.match(page, /clientPattyPendingItems\[0\]/);
-  assert.match(page, /Abrir ação/);
+  assert.match(page, /\{nextPattyPending\.title\}/);
   assert.match(page, /nextPattyPending\.href/);
   assert.match(page, /Ação da Patty/);
   assert.match(page, /Ver cliente/);
