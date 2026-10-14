@@ -1,10 +1,20 @@
+## J1 — Fluxo real da cliente com Supabase de produção e nenhuma segunda admin (2026-10-14)
+
+**Em implementação até o CI e a execução serem verificados.** O fluxo automático da cliente foi ampliado a partir de `e2e/client-onboarding-activation.spec.mjs` e usa apenas identidade `e2e-onboarding-<hex>@example.invalid` temporária, criada por script servidor com validação de vínculo ao identificador Auth/Client. A mesma cliente fictícia é ativada em viewport móvel, efetua login novamente, salva o **Cadastro Atual** e confere a persistência por reload e pelo banco, inicia a Anamnese versionada e retoma exatamente o rascunho. O cleanup só elimina a identidade sintética verificada, confere exclusões por IDs e **se recusa a apagar qualquer Anamnese enviada ou protocolo profissional**.
+
+**Automação:** `.github/workflows/e2e-client-onboarding-activation.yml` roda após CI do `master`/status Vercel de sucesso e como verificação programada ou manual, mas somente se `j1-production-preflight.mjs` confirmar build/deploy do commit em produção (ou equivalência de runtime validada) antes de carregar credenciais. Usa `E2E_BASE_URL`, email já existente da admin **apenas para vincular a fixture à Patty** e chave server-side protegida para essa operação, nunca senha/sessão/MFA da Patty. Não cria papel `admin` novo. O teste não envia Anamnese final nem publica protocolo.
+
+**Administração:** o workflow anterior `e2e-j1-invitation-handoff.yml`, que tentava automatizar login da Patty exigindo `E2E_ADMIN_TOTP_SECRET`, foi retirado dos gatilhos automáticos. Agora registra apenas **pendência de evidência humana** quando invocado manualmente; não acessa Auth, banco ou segredos. J1.01 (convite real pela Patty) e J1.05–07 (análise, avaliação, aprovação/publicação) continuam **BLOQUEADAS** até execução pela Patty em sessão autorizada, com dado sintético, sem exportação de MFA.
+
+**Estados:** testes estáticos/CI não equivalem a E2E real. Após o primeiro run automático, registrar URL e SHA, eventual defeito, limpeza da fixture, e estados distintos. A J1 integral segue **NÃO HOMOLOGADA**. O teste do cliente cobre somente parte de J1.02–03, sem autorização para afirmar conclusão da jornada profissional.
+
 ## Decisão operacional vigente — J1 no Supabase de produção (2026-10-14)
 
 **Banco único, sem staging.** O responsável decidiu manter o Supabase de produção existente. A Jornada 1 poderá usar registros exclusivamente sintéticos, com controle de identidade, autorização e cleanup. **Nenhum segundo admin técnico será criado em produção**: a exceção vigente de acesso administrativo a arquivos privados pressupõe a Patty como única administradora.
 
 **Modelo de homologação:** etapas administrativas devem ser percorridas com a sessão pessoal da Patty, por ela, sem compartilhar senha, MFA TOTP ou sessão com GitHub Actions/automação. O restante pode usar testes não administrativos seguros, dados sintéticos e verificações determinísticas. Evidência manual e automatizada serão registradas separadamente. Sem acesso administrativo autorizado, os passos de administração continuam BLOQUEADOS, nunca PASS.
 
-**Workflow existente:** `e2e-j1-invitation-handoff.yml` exige `E2E_ADMIN_TOTP_SECRET`; **não inserir a chave MFA real da Patty** nem criar papel admin na produção para suprir esse requisito. Esse E2E permanece bloqueado até revisão técnica que preserve a única admin. O bloqueio documentado na issue #837 é de autenticação de teste, não de Vercel, banco novo ou mudança de RLS.
+**Workflow administrativo legado:** o acionamento automático que exigia `E2E_ADMIN_TOTP_SECRET` foi desativado. Não inserir a chave MFA da Patty; o fluxo administrativo permanece pendente de evidência humana, enquanto um workflow independente testa automaticamente apenas a cliente sintética.
 
 **Critério de segurança:** nenhuma homologação poderá apagar ou expor dados reais, compartilhar dados sensíveis ou usar service role em browser. Não fabricar evidência de execução.
 
