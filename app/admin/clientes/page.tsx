@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { TextInput } from "@/components/ui/TextInput";
 import { Section } from "@/components/ui/Section";
 import { getOperationalPendingItemsForCurrentAdmin } from "@/lib/operations/pending-data";
+import { readClientDirectoryPendingView, matchesClientDirectoryPendingView, countClientDirectoryPendingViews, CLIENT_DIRECTORY_PENDING_VIEW_LABELS } from "@/lib/operations/client-directory-pending-view";
 import { summarizeClientPendingItems } from "@/lib/operations/client-pending-summary";
 import { listClientsAssignedToCurrentAdmin } from "@/lib/supabase/data-access";
 import Link from "next/link";
@@ -54,13 +55,14 @@ export default async function AdminClientesPage({
   const clientsWithPattyActions = clients.filter(client => (pendingByClientId.get(client.id)?.patty.length ?? 0) > 0).length;
   const actionablePattyItems = clients.reduce((count, client) => count + (pendingByClientId.get(client.id)?.patty.length ?? 0), 0);
   const searchTerm = readClientDirectorySearchTerm(q);
-  const viewFilter = view === "patty" ? "patty" : "all";
+  const viewFilter = readClientDirectoryPendingView(view);
+  const viewCounts = countClientDirectoryPendingViews(clients.map(client=>client.id),pendingByClientId);
   const filteredClients = clients.filter((client) => {
     const matchesSearch = matchesClientDirectoryName(
       searchTerm, client.full_name, client.profiles?.display_name,
     );
     const matchesView =
-      viewFilter === "all" || (pendingByClientId.get(client.id)?.patty.length ?? 0) > 0;
+      matchesClientDirectoryPendingView(pendingByClientId.get(client.id),viewFilter);
 
     return matchesSearch && matchesView;
   });
@@ -124,8 +126,7 @@ export default async function AdminClientesPage({
               defaultValue={viewFilter}
               name="view"
             >
-              <option value="all">Todas em acompanhamento</option>
-              <option value="patty">Com ação da Patty ({clientsWithPattyActions})</option>
+              {(Object.keys(CLIENT_DIRECTORY_PENDING_VIEW_LABELS) as Array<keyof typeof CLIENT_DIRECTORY_PENDING_VIEW_LABELS>).map(key=><option key={key} value={key}>{CLIENT_DIRECTORY_PENDING_VIEW_LABELS[key]} ({viewCounts[key]})</option>)}
             </select>
             <Button type="submit" variant="secondary">
               Filtrar
@@ -142,7 +143,7 @@ export default async function AdminClientesPage({
           <p className={styles.emptyMessage}>Nenhuma cliente está em acompanhamento no momento.</p>
         ) : filteredClients.length === 0 ? (
           <div className={styles.emptyMessage}>
-            <p role="status">{viewFilter === "patty" ? (searchTerm ? `Nenhuma cliente com ação da Patty corresponde à busca por “${searchTerm}”.` : "Nenhuma cliente em acompanhamento possui ação da Patty nesta fila.") : `Nenhuma cliente corresponde à busca por “${searchTerm}”.`}</p>
+            <p role="status">{viewFilter !== "all" ? `Nenhuma cliente no grupo “${CLIENT_DIRECTORY_PENDING_VIEW_LABELS[viewFilter]}” corresponde aos filtros atuais.` : `Nenhuma cliente corresponde à busca por “${searchTerm}”.`}</p>
             <Link className={styles.clearLink} href="/admin/clientes">Limpar filtros</Link>
           </div>
         ) : (
