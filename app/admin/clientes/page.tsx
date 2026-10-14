@@ -172,6 +172,7 @@ export default async function AdminClientesPage({
               const clientPattyPendingItems =
                 pattyPendingItemsByClientId.get(client.id) ?? [];
               const nextPattyPending = clientPattyPendingItems[0] ?? null;
+              const secondPattyPending = clientPattyPendingItems[1] ?? null;
 
               return (
                 <li key={client.id}>
@@ -185,6 +186,15 @@ export default async function AdminClientesPage({
                             href={nextPattyPending.href}
                           >
                             Abrir ação
+                          </Link>
+                        ) : null}
+                        {secondPattyPending ? (
+                          <Link
+                            aria-label={`Abrir outra ação: ${secondPattyPending.title.toLocaleLowerCase("pt-BR")} de ${displayName || "registro legado sem nome"}`}
+                            className={styles.secondaryActionLink}
+                            href={secondPattyPending.href}
+                          >
+                            Outra ação
                           </Link>
                         ) : null}
                         <Link
