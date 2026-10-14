@@ -32,7 +32,7 @@ test("filtered client directory counts only visible Patty actions", () => {
   const page = read("app/admin/clientes/page.tsx");
   assert.match(page, /visiblePattyActions = filteredClients\.reduce/);
   assert.match(page, /\{visiblePattyActions\} ação\(ões\) da Patty nas clientes exibidas/);
-  assert.match(page, /<p role="status">\{viewFilter === "patty"/);
+  assert.match(page, /<p role="status">\{viewFilter !== "all"/);
 });
 
 test("client directory offers a second distinct Patty action without replacing client access", () => {
