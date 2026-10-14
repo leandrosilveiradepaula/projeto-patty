@@ -94,7 +94,7 @@ export default async function AdminClienteAnamnesePage({
           id="anamnese-pending"
         title="Aguardando cliente"
         >
-          {pendingHistory.total === 0 ? <EmptyState title="Nenhum rascunho nesta versão" description="Há rascunhos anteriores, mas nenhum corresponde à versão selecionada." action={<Link href={`/admin/clientes/${client.id}/anamnese#anamnese-pending`}>Ver todas as versões</Link>} /> : null}
+          {pendingHistory.total === 0 ? <EmptyState title="Nenhum rascunho nesta versão" description="Há rascunhos anteriores, mas nenhum corresponde à versão selecionada." action={<Link href={`/admin/clientes/${client.id}/anamnese#anamnese-pending`}>Limpar filtro e ver todas as versões</Link>} /> : null}
           <ol className={styles.submissionList}>
             {pendingHistory.items.map((submission) => {
               const version = submission.anamnesis_form_versions;
@@ -146,7 +146,7 @@ export default async function AdminClienteAnamnesePage({
           />
         ) : (
           <>
-          {submittedHistory.total === 0 ? <EmptyState title="Nenhuma Anamnese enviada nesta versão" description="As versões enviadas anteriormente continuam preservadas." action={<Link href={`/admin/clientes/${client.id}/anamnese#anamnese-submitted`}>Ver todas</Link>} /> : null}
+          {submittedHistory.total === 0 ? <EmptyState title="Nenhuma Anamnese enviada nesta versão" description="As versões enviadas anteriormente continuam preservadas." action={<Link href={`/admin/clientes/${client.id}/anamnese#anamnese-submitted`}>Limpar filtro e ver todas as versões</Link>} /> : null}
           <ol className={styles.submissionList}>
             {submittedHistory.items.map((submission) => {
               const version = submission.anamnesis_form_versions;
@@ -154,6 +154,7 @@ export default async function AdminClienteAnamnesePage({
               const awaitingClient = clarification?.awaitingClient ?? 0;
               const awaitingProfessional = clarification?.awaitingProfessional ?? 0;
               const hasProfessionalNote = reviewedSubmissionIds.has(submission.id);
+              const requiresProfessionalAttention = !hasProfessionalNote || awaitingProfessional > 0;
               const reviewSummary = reviewSummaries.get(submission.id);
 
               return (
@@ -170,7 +171,7 @@ export default async function AdminClienteAnamnesePage({
                           Enviada em {formatDateTime(submission.submitted_at!)}
                         </p>
                       </div>
-                      <Badge variant="neutral">Enviada</Badge>
+                      <Badge variant={requiresProfessionalAttention ? "warning" : awaitingClient > 0 ? "info" : "positive"}>{!hasProfessionalNote ? "Revisão pendente" : awaitingProfessional > 0 ? "Complemento para revisar" : awaitingClient > 0 ? "Aguardando cliente" : "Revisada"}</Badge>
                     </div>
                     <dl className={styles.submissionDetails}>
                       <div>
@@ -224,7 +225,7 @@ export default async function AdminClienteAnamnesePage({
                       Ver respostas originais
                     </Link>
                     <Link className={styles.detailLink} href={`/admin/anamneses/${submission.id}/revisao`}>
-                      Abrir revisão profissional
+                      {hasProfessionalNote ? "Consultar revisão profissional" : "Registrar revisão profissional"}
                     </Link>
                     <Link className={styles.detailLink} href={`/admin/anamneses/${submission.id}/esclarecimentos`}>
                       Consultar esclarecimentos
