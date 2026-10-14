@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { summarizeClientPendingItems } from "./client-pending-summary.ts";
+import { summarizeClientPendingItems, describeClientPendingSummary } from "./client-pending-summary.ts";
 import type { OperationalPendingItem } from "./pending.ts";
 
 const base:OperationalPendingItem={id:"a",clientId:"client-1",clientLabel:"Teste",createdAt:"2026-10-14T10:00:00Z",description:"",href:"/admin/test",kind:"assessment_draft",statusLabel:"Rascunho",title:"Avaliação"};
@@ -17,4 +17,10 @@ test("directory summary counts all pending groups without mixing clients",()=>{
 test("first Patty action is oldest even if upstream rows are newest first",()=>{
  const result=summarizeClientPendingItems([{...base,id:"new"},{...base,id:"old",createdAt:"2026-10-10T10:00:00Z"},{...base,id:"invalid",createdAt:"invalid"}]);
  assert.deepEqual(result.get("client-1")?.patty.map(x=>x.id),["old","new","invalid"]);
+});
+
+test("client cards describe all pending groups without clinical prioritization",()=>{
+ assert.equal(describeClientPendingSummary(undefined),"Sem pendências registradas");
+ assert.equal(describeClientPendingSummary({patty:[base],waiting:2,operational:1,total:4}),"1 ação da Patty · 2 aguardando cliente · 1 pendência operacional");
+ assert.equal(describeClientPendingSummary({patty:[],waiting:0,operational:2,total:2}),"2 pendências operacionais");
 });
