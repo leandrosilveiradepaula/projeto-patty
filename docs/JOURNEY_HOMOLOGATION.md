@@ -1,3 +1,13 @@
+## Decisão operacional vigente — J1 no Supabase de produção (2026-10-14)
+
+**Banco único, sem staging.** O responsável decidiu manter o Supabase de produção existente. A Jornada 1 poderá usar registros exclusivamente sintéticos, com controle de identidade, autorização e cleanup. **Nenhum segundo admin técnico será criado em produção**: a exceção vigente de acesso administrativo a arquivos privados pressupõe a Patty como única administradora.
+
+**Modelo de homologação:** etapas administrativas devem ser percorridas com a sessão pessoal da Patty, por ela, sem compartilhar senha, MFA TOTP ou sessão com GitHub Actions/automação. O restante pode usar testes não administrativos seguros, dados sintéticos e verificações determinísticas. Evidência manual e automatizada serão registradas separadamente. Sem acesso administrativo autorizado, os passos de administração continuam BLOQUEADOS, nunca PASS.
+
+**Workflow existente:** `e2e-j1-invitation-handoff.yml` exige `E2E_ADMIN_TOTP_SECRET`; **não inserir a chave MFA real da Patty** nem criar papel admin na produção para suprir esse requisito. Esse E2E permanece bloqueado até revisão técnica que preserve a única admin. O bloqueio documentado na issue #837 é de autenticação de teste, não de Vercel, banco novo ou mudança de RLS.
+
+**Critério de segurança:** nenhuma homologação poderá apagar ou expor dados reais, compartilhar dados sensíveis ou usar service role em browser. Não fabricar evidência de execução.
+
 ## J1 — Uso estrito do último deployment READY quando master mudou somente testes/CI (2026-10-14)
 
 A tela da Vercel confirmou em Production o deployment `f0cbfcf6b6967755d3a6a614d418b1dd0f9bb529` como **Ready** para o PR #834, com o teste J1.01–03 já incorporado. O commit seguinte de master (`2cbe9d1060d8659a418491759ba9b73c75f6f7e6`, PR #835) modificou somente workflow de testes, documentação e teste de contrato; **não alterou app, autenticação, renderização, migrations ou dependências**.
