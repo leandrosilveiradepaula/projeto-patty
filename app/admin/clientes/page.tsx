@@ -65,6 +65,8 @@ export default async function AdminClientesPage({
     current.push(item);
     pattyPendingItemsByClientId.set(item.clientId, current);
   }
+  const clientsWithPattyActions = clients.filter(client => pattyPendingItemsByClientId.has(client.id)).length;
+  const actionablePattyItems = clients.reduce((count, client) => count + (pattyPendingItemsByClientId.get(client.id)?.length ?? 0), 0);
   const searchTerm = readClientDirectorySearchTerm(q);
   const viewFilter = view === "patty" ? "patty" : "all";
   const filteredClients = clients.filter((client) => {
@@ -111,6 +113,10 @@ export default async function AdminClientesPage({
         description="Busque por nome ou filtre clientes com ação da Patty. Este filtro não inclui itens aguardando resposta da cliente."
         title="Em acompanhamento"
       >
+        <div className={styles.queueSummary}>
+          <p role="status"><strong>{clientsWithPattyActions} cliente(s)</strong> com {actionablePattyItems} ação(ões) da Patty nos acompanhamentos autorizados.</p>
+          <Link className={styles.queueLink} href="/admin/pendencias?responsavel=patty">Abrir fila de ações da Patty</Link>
+        </div>
         <form action="/admin/clientes" className={styles.searchForm} method="get">
           <label className={styles.searchLabel} htmlFor="client-search">
             Buscar cliente
@@ -131,7 +137,7 @@ export default async function AdminClientesPage({
               name="view"
             >
               <option value="all">Todas em acompanhamento</option>
-              <option value="patty">Com ação da Patty</option>
+              <option value="patty">Com ação da Patty ({clientsWithPattyActions})</option>
             </select>
             <Button type="submit" variant="secondary">
               Filtrar
