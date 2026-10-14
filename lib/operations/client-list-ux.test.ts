@@ -14,7 +14,7 @@ test("client list exposes the oldest Patty action directly", () => {
   const page = read("app/admin/clientes/page.tsx");
 
   assert.match(page, /clientPattyPendingItems\[0\]/);
-  assert.match(page, /Abrir ação/);
+  assert.match(page, /\{nextPattyPending\.title\}/);
   assert.match(page, /nextPattyPending\.href/);
   assert.match(page, /Ação da Patty/);
   assert.match(page, /Ver cliente/);
@@ -37,8 +37,10 @@ test("filtered client directory counts only visible Patty actions", () => {
 
 test("client directory offers a second distinct Patty action without replacing client access", () => {
   const page = read("app/admin/clientes/page.tsx");
-  assert.match(page, /secondPattyPending = clientPattyPendingItems\[1\]/);
+  assert.match(page, /secondPattyPending = clientPattyPendingItems\.find/);
+  assert.match(page, /item\.href !== nextPattyPending\?\.href/);
   assert.match(page, /secondPattyPending\.href/);
-  assert.match(page, /Outra ação/);
+  assert.match(page, /\{secondPattyPending\.title\}/);
+  assert.match(page, /\{nextPattyPending\.title\}/);
   assert.match(page, /Abrir acompanhamento de/);
 });

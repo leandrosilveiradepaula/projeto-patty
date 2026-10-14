@@ -172,7 +172,9 @@ export default async function AdminClientesPage({
               const clientPattyPendingItems =
                 pattyPendingItemsByClientId.get(client.id) ?? [];
               const nextPattyPending = clientPattyPendingItems[0] ?? null;
-              const secondPattyPending = clientPattyPendingItems[1] ?? null;
+              const secondPattyPending = clientPattyPendingItems.find(
+                (item) => item.href !== nextPattyPending?.href,
+              ) ?? null;
 
               return (
                 <li key={client.id}>
@@ -185,7 +187,7 @@ export default async function AdminClientesPage({
                             className={styles.actionLink}
                             href={nextPattyPending.href}
                           >
-                            Abrir ação
+                            {nextPattyPending.title}
                           </Link>
                         ) : null}
                         {secondPattyPending ? (
@@ -194,7 +196,7 @@ export default async function AdminClientesPage({
                             className={styles.secondaryActionLink}
                             href={secondPattyPending.href}
                           >
-                            Outra ação
+                            {secondPattyPending.title}
                           </Link>
                         ) : null}
                         <Link
