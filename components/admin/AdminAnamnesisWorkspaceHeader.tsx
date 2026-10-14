@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { readClientDirectoryReturn, withClientDirectoryReturn } from "@/lib/operations/client-directory-return";
+import { readPendingQueueReturn, withPendingQueueReturn } from "@/lib/operations/pending-queue-return";
 
 import { Badge } from "@/components/ui/Badge";
 import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
@@ -43,6 +44,8 @@ function AdminAnamnesisWorkspaceHeaderContent({
 }: AdminAnamnesisWorkspaceHeaderProps) {
   const searchParams = useSearchParams();
   const directoryReturn = readClientDirectoryReturn({ listaQ: searchParams?.get("listaQ") ?? undefined, listaView: searchParams?.get("listaView") ?? undefined, listaPagina: searchParams?.get("listaPagina") ?? undefined });
+  const queueReturn = readPendingQueueReturn(searchParams?.get("filaRetorno"));
+  const navigate = (href: string) => queueReturn ? withPendingQueueReturn(withClientDirectoryReturn(href,directoryReturn),queueReturn) : withClientDirectoryReturn(href,directoryReturn);
   const items: Array<{
     href: string;
     key: AdminAnamnesisWorkspaceSection;
@@ -85,7 +88,7 @@ function AdminAnamnesisWorkspaceHeaderContent({
         actions={
           <Link
             className={styles.backLink}
-            href={withClientDirectoryReturn(`/admin/clientes/${clientId}/anamnese`,directoryReturn)}
+            href={navigate(`/admin/clientes/${clientId}/anamnese`)}
           >
             Voltar ao histórico da Anamnese
           </Link>
@@ -112,7 +115,7 @@ function AdminAnamnesisWorkspaceHeaderContent({
             <Link
               aria-current={active ? "page" : undefined}
               className={active ? styles.activeLink : styles.link}
-              href={withClientDirectoryReturn(item.href,directoryReturn)}
+              href={navigate(item.href)}
               key={item.key}
             >
               {item.label}

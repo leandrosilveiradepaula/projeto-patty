@@ -46,7 +46,7 @@ function PendingList({
                 {item.clientId ? (
                   <Link
                     className={styles.clientLink}
-                    href={withClientDirectoryReturn(`/admin/clientes/${item.clientId}`, directoryReturn)}
+                    href={withPendingQueueReturn(withClientDirectoryReturn(`/admin/clientes/${item.clientId}`, directoryReturn), queueReturnHref)}
                   >
                     Ver cliente
                   </Link>

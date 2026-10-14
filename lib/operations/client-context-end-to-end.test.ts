@@ -14,8 +14,11 @@ test("client overview preserves directory return on its operational actions and 
 });
 test("anamnesis submission workspace preserves context across review and clarification tabs",()=>{
  const page=read("components/admin/AdminAnamnesisWorkspaceHeader.tsx");
- assert.match(page,/withClientDirectoryReturn\(item\.href,directoryReturn\)/);
- assert.match(page,/withClientDirectoryReturn\(\x60\/admin\/clientes\/\$\{clientId\}\/anamnese\x60,directoryReturn\)/);
+ assert.match(page,/href=\{navigate\(item\.href\)\}/);
+ assert.match(page,/href=\{navigate\(\x60\/admin\/clientes\/\$\{clientId\}\/anamnese\x60\)\}/);
+ assert.match(page,/withClientDirectoryReturn\(href,directoryReturn\)/);
+ assert.match(page,/readPendingQueueReturn\(searchParams\?\.get\("filaRetorno"\)\)/);
+ assert.match(page,/withPendingQueueReturn\(withClientDirectoryReturn\(href,directoryReturn\),queueReturn\)/);
  assert.match(page,/<Suspense fallback=/);
 });
 test("assessment and protocol detail pages preserve directory return on navigation",()=>{
