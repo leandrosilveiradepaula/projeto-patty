@@ -199,6 +199,7 @@ export default async function AdminClientesPage({
                             {secondPattyPending.title}
                           </Link>
                         ) : null}
+                        {clientPattyPendingItems.length > 0 ? <Link className={styles.secondaryActionLink} href={`/admin/pendencias?cliente=${client.id}`}>Todas as pendências ({clientPattyPendingItems.length})</Link> : null}
                         <Link
                           aria-label={`Abrir acompanhamento de ${displayName || "registro legado sem nome"}`}
                           className={
