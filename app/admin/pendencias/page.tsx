@@ -56,7 +56,7 @@ function PendingList({
   );
 }
 
-export default async function AdminPendenciasPage({ searchParams }: { searchParams: Promise<{ grupo?: string; q?: string; tipo?: string; area?: string; responsavel?: string; ordem?: string; ano?: string; mes?: string; dataInicial?: string; dataFinal?: string; integridadeData?: string; vinculo?: string; multiplas?: string; paginaPatty?: string; paginaCliente?: string; paginaSistema?: string }> }) {
+export default async function AdminPendenciasPage({ searchParams }: { searchParams: Promise<{ grupo?: string; q?: string; cliente?: string; tipo?: string; area?: string; responsavel?: string; ordem?: string; ano?: string; mes?: string; dataInicial?: string; dataFinal?: string; integridadeData?: string; vinculo?: string; multiplas?: string; paginaPatty?: string; paginaCliente?: string; paginaSistema?: string }> }) {
   const rawQuery = await searchParams;
   const focusedGroup = parsePendingQueueFocus(rawQuery.grupo);
   const allItems = await getOperationalPendingItemsForCurrentAdmin();
@@ -65,6 +65,7 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
   const years=pendingQueueYears(allItems);
   const filters = readPendingExplorerQuery(rawQuery,kindOptions.map(item=>item.kind),years);
   const items = explorePendingClientQueue(allItems,filters);
+  const scopedClient = filters.clientId ? allItems.find(item => item.clientId === filters.clientId) : null;
   const areaCounts=countPendingAreas(explorePendingClientQueue(allItems,{...filters,area:null}));
   const grouped = groupOperationalPendingItems(items);
   const pages={patty:paginatePendingQueue(grouped.patty,filters.pattyPage),client:paginatePendingQueue(grouped.client,filters.clientPage),operational:paginatePendingQueue(grouped.operational,filters.operationalPage)};
@@ -90,7 +91,9 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
       />
 
       <Section title="Localizar pendências" description="Busque por cliente ou tipo já registrado. A pesquisa não muda prioridade nem autorização.">
+        {scopedClient ? <div className={styles.scopedClient}><strong>Fila de {scopedClient.clientLabel}</strong><span>Exibindo apenas pendências desta cliente já autorizadas para seu acesso.</span><Link href="/admin/pendencias">Ver fila de todas as clientes</Link></div> : null}
         <form action="/admin/pendencias" method="get" className={styles.explorerFilters}>
+          {scopedClient ? <input type="hidden" name="cliente" value={scopedClient.clientId!} /> : null}
           <label>Cliente
             <input name="q" type="search" maxLength={120} placeholder="Nome da cliente" defaultValue={filters.query}/>
           </label>
@@ -129,7 +132,7 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
             </div>
           </details>
           <Button type="submit" variant="secondary">Filtrar</Button>
-          {filters.query || filters.kind!=="all" || filters.area || filters.responsible!=="all" || filters.sort!=="oldest" || filters.year!=="all" || filters.month!=="all" || filters.fromDate || filters.toDate || filters.dateValidity!=="all" || filters.clientScope!=="all" || filters.multiple!=="all" ? <Link href="/admin/pendencias">Limpar</Link> : null}
+          {filters.clientId || filters.query || filters.kind!=="all" || filters.area || filters.responsible!=="all" || filters.sort!=="oldest" || filters.year!=="all" || filters.month!=="all" || filters.fromDate || filters.toDate || filters.dateValidity!=="all" || filters.clientScope!=="all" || filters.multiple!=="all" ? <Link href="/admin/pendencias">Limpar</Link> : null}
         </form>
         <p role="status">Exibindo {items.length} de {allItems.length} pendência(s), referentes a {countPendingQueueClients(items)} cliente(s).{pendingQueueOldestDate(items) ? ` Registro válido mais antigo: ${formatDateTime(pendingQueueOldestDate(items)!)}` : ""}</p>
         {filters.invalid ? <Alert variant="info" title="Consulta ajustada">Um parâmetro inválido foi ignorado. Exibimos apenas pendências autorizadas.</Alert> : null}
