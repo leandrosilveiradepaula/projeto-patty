@@ -1,3 +1,4 @@
+import { readClientDirectoryPage, paginateClientDirectory, clientDirectoryPageHref } from "@/lib/clients/client-directory-pagination";
 import { ClientListItem } from "@/components/admin/ClientListItem";
 import { matchesClientDirectoryName, readClientDirectorySearchTerm } from "@/lib/clients/client-directory-search";
 import { Alert } from "@/components/ui/Alert";
@@ -25,13 +26,14 @@ type AdminClientesPageProps = {
     onboarding?: string;
     q?: string;
     view?: string;
+    pagina?: string;
   }>;
 };
 
 export default async function AdminClientesPage({
   searchParams,
 }: AdminClientesPageProps) {
-  const { assignment, onboarding, q, view } = await searchParams;
+  const { assignment, onboarding, q, view, pagina } = await searchParams;
   const [assignments, pendingItems] = await Promise.all([
     listClientsAssignedToCurrentAdmin(),
     getOperationalPendingItemsForCurrentAdmin(),
@@ -57,7 +59,8 @@ export default async function AdminClientesPage({
   const actionablePattyItems = clients.reduce((count, client) => count + (pendingByClientId.get(client.id)?.patty.length ?? 0), 0);
   const searchTerm = readClientDirectorySearchTerm(q);
   const viewFilter = readClientDirectoryPendingView(view);
-  const directoryReturn = { q: searchTerm, view: viewFilter };
+  const requestedPage = readClientDirectoryPage(pagina);
+  const directoryReturn = { q: searchTerm, view: viewFilter, page: requestedPage.page };
   const viewCounts = countClientDirectoryPendingViews(clients.map(client=>client.id),pendingByClientId);
   const filteredClients = clients.filter((client) => {
     const matchesSearch = matchesClientDirectoryName(
@@ -69,6 +72,8 @@ export default async function AdminClientesPage({
     return matchesSearch && matchesView;
   });
 
+  const pagedClients = paginateClientDirectory(filteredClients, requestedPage.page);
+  directoryReturn.page = pagedClients.page;
   const visiblePendingItems = filteredClients.reduce((count, client) => count + (pendingByClientId.get(client.id)?.total ?? 0), 0);
   const visiblePattyActions = filteredClients.reduce((count, client) => count + (pendingByClientId.get(client.id)?.patty.length ?? 0), 0);
 
@@ -156,8 +161,10 @@ export default async function AdminClientesPage({
                 {filteredClients.length} de {clients.length} cliente(s) exibida(s) · {visiblePendingItems} pendência(s) nas clientes exibidas, incluindo {visiblePattyActions} ação(ões) da Patty.
               </p>
             ) : null}
+            {requestedPage.invalid || pagedClients.adjusted ? <p role="status" className={styles.resultCount}>Página solicitada indisponível. Exibindo a página {pagedClients.page} de {pagedClients.pageCount}.</p> : null}
+            <p className={styles.resultCount} role="status">Exibindo clientes {pagedClients.first}–{pagedClients.last} de {pagedClients.total} resultado(s).</p>
             <ul className={styles.clientList}>
-            {filteredClients.map((client) => {
+            {pagedClients.items.map((client) => {
               const displayName = client.full_name?.trim() || client.profiles?.display_name?.trim();
               const pendingSummary = pendingByClientId.get(client.id);
               const clientPattyPendingItems = pendingSummary?.patty ?? [];
@@ -237,6 +244,11 @@ export default async function AdminClientesPage({
               );
             })}
             </ul>
+            {pagedClients.pageCount > 1 ? <nav aria-label="Páginas da lista de clientes" className={styles.pagination}>
+              {pagedClients.page > 1 ? <Link href={clientDirectoryPageHref({q:searchTerm,view:viewFilter,page:pagedClients.page-1})}>Anterior</Link> : <span>Anterior</span>}
+              <span>Página {pagedClients.page} de {pagedClients.pageCount}</span>
+              {pagedClients.page < pagedClients.pageCount ? <Link href={clientDirectoryPageHref({q:searchTerm,view:viewFilter,page:pagedClients.page+1})}>Próxima</Link> : <span>Próxima</span>}
+            </nav> : null}
           </>
         )}
       </Section>
