@@ -78,6 +78,7 @@ export default async function ClientFilesPage({ searchParams }: { searchParams: 
   const exactFile = typeof arquivo === "string" && files.some(row=>row.id===arquivo);
   const metadata = exactFile ? { year:"all", size:"all" as const, invalid:false } : readPrivateFileMetadataFilters({ano,tamanho},years);
   const discovery=readPrivateFileDiscovery(exactFile ? {} : {mes,dataInicial,dataFinal,minKb,maxKb,grupoMime,integridadeData,anoLiberacao,mesLiberacao,nome,estadoLiberacao}, releaseYears);
+  const advancedFiltersActive = !exactFile && [mes,dataInicial,dataFinal,minKb,maxKb,grupoMime,integridadeData,anoLiberacao,mesLiberacao,nome,estadoLiberacao].some(value => typeof value === "string" && value !== "" && value !== "all");
   const displayKind = exactFile ? "all" as const : kind;
   const displayOrigin = exactFile ? "all" as const : origin;
   const displayPreview = exactFile ? {value:"all" as const,invalid:false} : preview;
@@ -145,6 +146,9 @@ export default async function ClientFilesPage({ searchParams }: { searchParams: 
               <option value="all">Todos</option><option value="known">Com tamanho registrado</option><option value="unknown">Tamanho não informado</option>
             </select>
           </label>
+          <details className={styles.advancedFilters} open={advancedFiltersActive}>
+            <summary>Mais filtros de arquivos${advancedFiltersActive ? " · filtros avançados ativos" : ""}</summary>
+            <div className={styles.advancedFilterFields}>
                      <label>Registro desde<input name="dataInicial" type="date" defaultValue={discovery.fromDate ?? ""} /></label>
            <label>Registro até<input name="dataFinal" type="date" defaultValue={discovery.toDate ?? ""} /></label>
            <label>Mês de registro<select name="mes" defaultValue={discovery.month}><option value="all">Todos</option>{PRIVATE_FILE_DISCOVERY_MONTHS.map(month=><option key={month} value={month}>{month}</option>)}</select></label>
@@ -156,7 +160,9 @@ export default async function ClientFilesPage({ searchParams }: { searchParams: 
            <label>Mês de liberação<select name="mesLiberacao" defaultValue={discovery.releaseMonth}><option value="all">Todos</option>{PRIVATE_FILE_DISCOVERY_MONTHS.map(month=><option key={month} value={month}>{month}</option>)}</select></label>
            <label>Disponibilidade do nome<select name="nome" defaultValue={discovery.namePresence}><option value="all">Todos</option><option value="named">Com nome</option><option value="unnamed">Sem nome</option></select></label>
            <label>Data de liberação<select name="estadoLiberacao" defaultValue={discovery.releaseState}><option value="all">Todas</option><option value="valid">Válida</option><option value="missing">Ausente</option><option value="invalid">Inválida</option></select></label>
-           <label>Ordenação
+             </div>
+          </details>
+          <label>Ordenação
             <select name="ordem" defaultValue={order.value}>
               <option value="newest">Mais recentes</option>
               <option value="oldest">Mais antigos</option>
