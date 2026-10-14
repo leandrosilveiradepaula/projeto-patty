@@ -212,7 +212,7 @@ test("Anamnese heading locator is unique on the real client page",()=>{
  assert.doesNotMatch(clientSpec,/previousFixture/);
 });
 test("real J1 timeout never suppresses cleanup of exact synthetic identities",()=>{
- assert.match(clientSpec,/test\.setTimeout\(180_000\)/);
+ assert.match(clientSpec,/test\.setTimeout\(210_000\)/);
  assert.match(clientSpec,/Promise\.allSettled\(/);
  assert.match(clientSpec,/cleanupSyntheticClient\(\{ clientId, profileId, email \}\)/);
 
@@ -237,4 +237,18 @@ test("J1 synthetic-only E2E resumes solely on trusted deploy/CI events with inde
  assert.match(workflow,/node e2e\/helpers\/j1-independent-cleanup\.mjs/);
  assert.doesNotMatch(workflow,/E2E_ADMIN_PASSWORD:|E2E_ADMIN_TOTP_SECRET:/);
  assert.doesNotMatch(workflow,/pull_request:/);
+});
+
+test("J1 real-browser security evidence checks anonymous and client role boundaries",()=>{
+ assert.match(clientSpec,/J1 authorization: anonymous session and client cannot access privileged records/);
+ assert.match(clientSpec,/anonymousContext = await browser\.newContext/);
+ assert.match(clientSpec,/visitor\.goto\(\x60\/cliente\/anamnese\/\$\{draftId\}\x60\)/);
+ assert.match(clientSpec,/visitor\.goto\("\/cliente\/perfil"\)/);
+ assert.match(clientSpec,/loginPage\.goto\("\/admin\/pendencias"\)/);
+ assert.match(clientSpec,/await expect\(visitor\)\.toHaveURL\(/);
+ assert.match(clientSpec,/await expect\(loginPage\)\.toHaveURL\(/);
+ assert.match(clientSpec,/anonymousContext\?\.close\(\)/);
+ assert.match(clientSpec,/Cadastro Atual must fit mobile viewport/);
+ assert.match(clientSpec,/Anamnese must fit mobile viewport/);
+ assert.match(clientSpec,/document\.documentElement\.scrollWidth/);
 });
