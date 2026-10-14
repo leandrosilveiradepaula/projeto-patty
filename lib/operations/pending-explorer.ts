@@ -134,6 +134,14 @@ export function paginatePendingQueue<T>(items:readonly T[],requested:number):Pen
  return {items:selected,page,pageCount,total:items.length,from:items.length?from+1:0,
    to:from+selected.length,adjusted:safe!==page};
 }
+/** Small, stable page window for each independently paginated queue group. */
+export function visiblePendingQueuePages(current: number, total: number): number[] {
+ if(!Number.isSafeInteger(total)||total<1)return [];
+ const selected=Number.isSafeInteger(current)?Math.min(Math.max(current,1),total):1;
+ const pages=new Set<number>([1,total]);
+ for(let page=Math.max(1,selected-2);page<=Math.min(total,selected+2);page++)pages.add(page);
+ return [...pages].sort((a,b)=>a-b);
+}
 export function countPendingQueueClients(items:readonly Pick<OperationalPendingItem,"clientId">[]):number{
  return new Set(items.map(x=>x.clientId).filter((x):x is string=>Boolean(x))).size;
 }
