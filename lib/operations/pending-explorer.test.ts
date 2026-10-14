@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { readPendingExplorerQuery, explorePendingClientQueue, pendingExplorerGroupHref, pendingExplorerPageHref,pendingExplorerResetHref,paginatePendingQueue,pendingQueueYears,pendingQueueCivilDay,countPendingQueueClients,pendingQueueOldestDate } from "./pending-explorer.ts";
+import { readPendingExplorerQuery, explorePendingClientQueue, pendingExplorerGroupHref, pendingExplorerPageHref,pendingExplorerResetHref,paginatePendingQueue,visiblePendingQueuePages,pendingQueueYears,pendingQueueCivilDay,countPendingQueueClients,pendingQueueOldestDate } from "./pending-explorer.ts";
 import type { OperationalPendingItem } from "./pending.ts";
 const items:OperationalPendingItem[]=[
  {id:"a",clientId:"client-a",clientLabel:"Érica",createdAt:"2026-10-10T10:00:00Z",description:"",href:"/admin/a",kind:"assessment_draft",statusLabel:"Rascunho",title:"Avaliação"},
@@ -92,4 +92,13 @@ test("default oldest sorting is chronological even when source arrives newest fi
  assert.deepEqual(explorePendingClientQueue(rows,{query:"",kind:"all"}).map(x=>x.id),["old","new","invalid"]);
  assert.deepEqual(explorePendingClientQueue(rows,{query:"",kind:"all",sort:"newest"}).map(x=>x.id),["new","old","invalid"]);
  assert.equal(rows[0].id,"new");
+});
+
+test("pending group page numbers show first last and nearby pages without duplicates",()=>{
+ assert.deepEqual(visiblePendingQueuePages(1,1),[1]);
+ assert.deepEqual(visiblePendingQueuePages(1,10),[1,2,3,10]);
+ assert.deepEqual(visiblePendingQueuePages(5,10),[1,3,4,5,6,7,10]);
+ assert.deepEqual(visiblePendingQueuePages(10,10),[1,8,9,10]);
+ assert.deepEqual(visiblePendingQueuePages(99,10),[1,8,9,10]);
+ assert.deepEqual(visiblePendingQueuePages(1,0),[]);
 });
