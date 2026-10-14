@@ -86,3 +86,10 @@ test("client directory paginates filtered results and keeps a return page",()=>{
  assert.match(page,/clientDirectoryPageHref/);
  assert.match(page,/directoryReturn\.page = pagedClients\.page/);
 });
+
+test("directory renders numbered pages with current-page semantics",()=>{
+ const page=read("app/admin/clientes/page.tsx");
+ assert.match(page,/visibleClientDirectoryPages\(pagedClients\.page,pagedClients\.pageCount\)/);
+ assert.match(page,/aria-current="page"/);
+ assert.match(page,/Ir para página/);
+});

@@ -36,3 +36,14 @@ export function clientDirectoryPageHref(state: { q: string; view: ClientDirector
   const query = params.toString();
   return "/admin/clientes" + (query ? "?" + query : "");
 }
+
+/** Bounded page window: first/last and the current page's two neighbors. */
+export function visibleClientDirectoryPages(current: number, total: number): number[] {
+  if (!Number.isSafeInteger(total) || total < 1) return [];
+  const selected = Number.isSafeInteger(current) ? Math.min(Math.max(current, 1), total) : 1;
+  const pages = new Set<number>([1, total]);
+  for (let page = Math.max(1, selected - 2); page <= Math.min(total, selected + 2); page++) {
+    pages.add(page);
+  }
+  return [...pages].sort((a, b) => a - b);
+}

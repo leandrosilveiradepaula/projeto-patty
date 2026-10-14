@@ -163,3 +163,7 @@
 .pagination a, .pagination span { display: inline-flex; align-items: center; min-height: 44px; padding: var(--space-2) var(--space-3); }
 .pagination a { color: var(--color-brand-strong); }
 .pagination a:focus-visible { outline: 3px solid var(--color-brand); outline-offset: 2px; }
+
+.pagination .pageNumber { gap: var(--space-1); padding: 0; }
+.pagination .pageNumber strong { display: inline-flex; min-width: 44px; min-height: 44px; align-items: center; justify-content: center; border: 1px solid var(--color-border); border-radius: var(--radius-medium); }
+.pagination .pageNumber a { min-width: 44px; justify-content: center; }

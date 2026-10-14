@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { readClientDirectoryPage, paginateClientDirectory, clientDirectoryPageHref } from "./client-directory-pagination.ts";
+import { readClientDirectoryPage, paginateClientDirectory, clientDirectoryPageHref, visibleClientDirectoryPages } from "./client-directory-pagination.ts";
 
 test("directory pagination preserves filter and clamps out of range pages",()=>{
  const rows=Array.from({length:45},(_,i)=>i+1);
@@ -14,4 +14,11 @@ test("directory pagination preserves filter and clamps out of range pages",()=>{
 test("invalid page query falls back safely",()=>{
  for(const raw of ["0","-1","1.5","9999999",["2"],"foo"])assert.deepEqual(readClientDirectoryPage(raw),{page:1,invalid:true});
  assert.deepEqual(readClientDirectoryPage("2"),{page:2,invalid:false});
+});
+
+test("numbered page window includes edges and nearby pages without duplicates",()=>{
+ assert.deepEqual(visibleClientDirectoryPages(6,12),[1,4,5,6,7,8,12]);
+ assert.deepEqual(visibleClientDirectoryPages(1,2),[1,2]);
+ assert.deepEqual(visibleClientDirectoryPages(99,4),[1,2,3,4]);
+ assert.deepEqual(visibleClientDirectoryPages(1,0),[]);
 });
