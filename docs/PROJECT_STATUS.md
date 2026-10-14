@@ -1,3 +1,7 @@
+## Jornada 1 — decisão de ambiente e próximo impedimento (2026-10-14)
+
+**Decisão vigente:** manter o Supabase de produção existente, sem criar staging. `docs/DECISIONS.md` e `docs/JOURNEY_HOMOLOGATION.md` registram a decisão e o procedimento. O merge automático já está funcionando; a implantação Vercel de `32c9c4fa` foi confirmada. O E2E administrativo chegou à etapa de checagem de `E2E_ADMIN_TOTP_SECRET` (run `38627803759`) e **não executou Playwright nem criou fixture**. Não criar outra conta admin na produção para destravar: os acessos a arquivos privados pressupõem uma única administradora. Não inserir o MFA da Patty em secrets. A primeira parte da J1 precisa ser verificada com sessão da Patty em homologação manual controlada e dados fictícios; os testes automatizados viáveis continuam separados. **J1 NÃO HOMOLOGADA**.
+
 ## J1: aproveitar release READY sem disfarçar master desatualizado (2026-10-14)
 
 A evidência da Vercel aponta `f0cbfcf6` (PR #834) **Ready/Production**, enquanto `2cbe9d10` (PR #835) permanece rate limited. A comparação GitHub confirmou que #835 alterou só CI, docs e testes, não o runtime. Para destravar a **execução real** de J1.01–03, o preflight passa a aceitar especificamente a release f0cb após reconciliação automática de CI do master, status Vercel da versão publicada e comparação integral de arquivos permitidos. Qualquer alteração de runtime reprova o gate. Evidência de execução autenticada ainda não existe; a J1 continua **NÃO HOMOLOGADA**. Referência: `docs/JOURNEY_HOMOLOGATION.md`.
