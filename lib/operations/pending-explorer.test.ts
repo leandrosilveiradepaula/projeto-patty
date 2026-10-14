@@ -64,3 +64,16 @@ test("untrusted dates, sort modes and page params are normalized",()=>{
  assert.equal(bad.invalid,true);assert.equal(bad.sort,"oldest");assert.equal(bad.month,"all");assert.equal(bad.pattyPage,1);
  assert.equal(bad.fromDate,null);assert.equal(bad.multiple,"all");
 });
+
+test("client-scoped pending queue validates identifiers and preserves scope in navigation",()=>{
+ const id="11111111-1111-4111-8111-111111111111";
+ const scoped=[{...items[0],clientId:id},{...items[1],clientId:"22222222-2222-4222-8222-222222222222"}];
+ const state=readPendingExplorerQuery({cliente:id},scoped.map(item=>item.kind));
+ assert.equal(state.invalid,false);
+ assert.equal(state.clientId,id);
+ assert.deepEqual(explorePendingClientQueue(scoped,state).map(item=>item.id),["a"]);
+ assert.match(pendingExplorerPageHref("patty",state,2),/cliente=11111111-1111-4111-8111-111111111111/);
+ const invalid=readPendingExplorerQuery({cliente:"../../other"},scoped.map(item=>item.kind));
+ assert.equal(invalid.invalid,true);
+ assert.equal(invalid.clientId,null);
+});
