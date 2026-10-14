@@ -18,7 +18,7 @@ test("client workspace uses tabs on desktop and a select on mobile", () => {
   assert.match(component, /className=\{styles\.mobileNav\}/);
   assert.match(component, /<select/);
   assert.match(component, /router\.push\(event\.target\.value\)/);
-  assert.match(component, /value=\{items\.find\(\(item\) => item\.area === resolvedActiveArea\)\?\.href \?\? base\}/);
+  assert.match(component, /value=\{navigate\(items\.find\(\(item\) => item\.area === resolvedActiveArea\)\?\.href \?\? base\)\}/);
 
   assert.match(css, /\.mobileNav \{\s*display: none;/);
   assert.match(

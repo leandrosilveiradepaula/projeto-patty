@@ -1,7 +1,9 @@
 "use client";
 
+import { Suspense } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { clientDirectoryReturnHref, readClientDirectoryReturn, withClientDirectoryReturn } from "@/lib/operations/client-directory-return";
 
 import styles from "./ClientWorkspaceNav.module.css";
 
@@ -22,12 +24,19 @@ type ClientWorkspaceNavProps = {
   clientId: string;
 };
 
-export function ClientWorkspaceNav({
+function ClientWorkspaceNavContent({
   activeArea,
   clientId,
 }: ClientWorkspaceNavProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const directoryReturn = readClientDirectoryReturn({
+    listaQ: searchParams?.get("listaQ") ?? undefined,
+    listaView: searchParams?.get("listaView") ?? undefined,
+    listaPagina: searchParams?.get("listaPagina") ?? undefined,
+  });
+  const navigate = (href: string) => withClientDirectoryReturn(href, directoryReturn);
   const base = `/admin/clientes/${clientId}`;
   const items: Array<{
     area: ClientWorkspaceArea;
@@ -62,6 +71,11 @@ export function ClientWorkspaceNav({
 
   return (
     <>
+      {resolvedActiveArea !== "visao-geral" ? (
+        <nav aria-label="Retornar à lista de clientes" className={styles.returnNavigation}>
+          <Link href={clientDirectoryReturnHref(directoryReturn)}>Voltar à lista de clientes</Link>
+        </nav>
+      ) : null}
       <nav aria-label="Áreas da cliente" className={styles.nav}>
         {items.map((item) => {
           const isActive = resolvedActiveArea === item.area;
@@ -70,7 +84,7 @@ export function ClientWorkspaceNav({
             <Link
               aria-current={isActive ? "page" : undefined}
               className={isActive ? styles.activeLink : styles.link}
-              href={item.href}
+              href={navigate(item.href)}
               key={item.href}
             >
               {item.label}
@@ -86,10 +100,10 @@ export function ClientWorkspaceNav({
             aria-label="Área da cliente"
             className={styles.mobileSelect}
             onChange={(event) => router.push(event.target.value)}
-            value={items.find((item) => item.area === resolvedActiveArea)?.href ?? base}
+            value={navigate(items.find((item) => item.area === resolvedActiveArea)?.href ?? base)}
           >
             {items.map((item) => (
-              <option key={item.href} value={item.href}>
+              <option key={item.href} value={navigate(item.href)}>
                 {item.label}
               </option>
             ))}
@@ -97,5 +111,14 @@ export function ClientWorkspaceNav({
         </label>
       </nav>
     </>
+  );
+}
+
+/** Isolate useSearchParams behind Suspense to avoid a client-side rendering bailout. */
+export function ClientWorkspaceNav(props: ClientWorkspaceNavProps) {
+  return (
+    <Suspense fallback={<nav aria-label="Áreas da cliente" className={styles.returnNavigation}><Link href="/admin/clientes">Voltar à lista de clientes</Link></nav>}>
+      <ClientWorkspaceNavContent {...props} />
+    </Suspense>
   );
 }
