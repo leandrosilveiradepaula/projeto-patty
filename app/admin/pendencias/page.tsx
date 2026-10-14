@@ -1,3 +1,4 @@
+import { readClientDirectoryReturn, clientDirectoryReturnHref, withClientDirectoryReturn } from "@/lib/operations/client-directory-return";
 import { PENDING_AREA_OPTIONS, countPendingAreas } from "@/lib/operations/pending-area-filter";
 import { readPendingExplorerQuery, explorePendingClientQueue, pendingExplorerGroupHref, pendingExplorerPageHref, paginatePendingQueue, pendingQueueYears, countPendingQueueClients, pendingQueueOldestDate, pendingExplorerResetHref, PENDING_EXPLORER_MONTHS } from "@/lib/operations/pending-explorer";
 import { Button } from "@/components/ui/Button";
@@ -57,9 +58,10 @@ function PendingList({
   );
 }
 
-export default async function AdminPendenciasPage({ searchParams }: { searchParams: Promise<{ grupo?: string; q?: string; cliente?: string; tipo?: string; area?: string; responsavel?: string; ordem?: string; ano?: string; mes?: string; dataInicial?: string; dataFinal?: string; integridadeData?: string; vinculo?: string; multiplas?: string; paginaPatty?: string; paginaCliente?: string; paginaSistema?: string }> }) {
+export default async function AdminPendenciasPage({ searchParams }: { searchParams: Promise<{ grupo?: string; q?: string; cliente?: string; listaQ?: string; listaView?: string; tipo?: string; area?: string; responsavel?: string; ordem?: string; ano?: string; mes?: string; dataInicial?: string; dataFinal?: string; integridadeData?: string; vinculo?: string; multiplas?: string; paginaPatty?: string; paginaCliente?: string; paginaSistema?: string }> }) {
   const rawQuery = await searchParams;
   const focusedGroup = parsePendingQueueFocus(rawQuery.grupo);
+  const directoryReturn = readClientDirectoryReturn(rawQuery);
   const [allItems, assignments] = await Promise.all([getOperationalPendingItemsForCurrentAdmin(), listClientsAssignedToCurrentAdmin()]);
   const kindOptions = [...new Map(allItems.map(item=>[item.kind,{kind:item.kind,label:item.title}])).values()]
     .sort((a,b)=>a.label.localeCompare(b.label,"pt-BR"));
@@ -95,7 +97,7 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
       />
 
       <Section title="Localizar pendências" description="Busque por cliente ou tipo já registrado. A pesquisa não muda prioridade nem autorização.">
-        {scopedClient ? <div className={styles.scopedClient}><strong>Fila de {scopedClient.full_name?.trim() || scopedClient.profiles?.display_name?.trim() || "cliente sem nome"}</strong><span>Exibindo apenas pendências desta cliente já autorizadas para seu acesso.</span><Link href={`/admin/clientes/${scopedClient.id}`}>Voltar ao acompanhamento</Link><Link href="/admin/pendencias">Ver fila de todas as clientes</Link></div> : null}
+        {scopedClient ? <div className={styles.scopedClient}><strong>Fila de {scopedClient.full_name?.trim() || scopedClient.profiles?.display_name?.trim() || "cliente sem nome"}</strong><span>Exibindo apenas pendências desta cliente já autorizadas para seu acesso.</span><Link href={withClientDirectoryReturn(`/admin/clientes/${scopedClient.id}`,directoryReturn)}>Voltar ao acompanhamento</Link><Link href={clientDirectoryReturnHref(directoryReturn)}>Voltar à lista de clientes</Link><Link href="/admin/pendencias">Ver fila de todas as clientes</Link></div> : null}
         {unavailableClient ? <Alert variant="warning" title="Cliente indisponível">Não foi possível localizar um acompanhamento autorizado para esta cliente. Nenhuma pendência individual foi exibida. <Link href="/admin/pendencias">Voltar à fila geral</Link></Alert> : null}
         <form action="/admin/pendencias" method="get" className={styles.explorerFilters}>
           {scopedClient ? <input type="hidden" name="cliente" value={scopedClient.id} /> : null}
