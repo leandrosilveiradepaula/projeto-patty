@@ -25,4 +25,5 @@ test("assessment and protocol detail pages preserve directory return on navigati
  assert.match(assessment,/withClientDirectoryReturn\(\x60\/admin\/avaliacoes\/\$\{previousAssessment\.id\}\x60,directoryReturn\)/);
  assert.match(protocol,/const directoryReturn = readClientDirectoryReturn\(search\)/);
  assert.match(protocol,/withClientDirectoryReturn\(protocolVersionExplorerHref/);
+ assert.match(protocol,/name="listaQ" value=\{directoryReturn\.q\}/);
 });
