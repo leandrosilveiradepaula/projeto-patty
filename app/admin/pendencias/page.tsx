@@ -60,7 +60,7 @@ function PendingList({
   );
 }
 
-export default async function AdminPendenciasPage({ searchParams }: { searchParams: Promise<{ grupo?: string; q?: string; cliente?: string; listaQ?: string; listaView?: string; tipo?: string; area?: string; responsavel?: string; ordem?: string; ano?: string; mes?: string; dataInicial?: string; dataFinal?: string; integridadeData?: string; vinculo?: string; multiplas?: string; paginaPatty?: string; paginaCliente?: string; paginaSistema?: string }> }) {
+export default async function AdminPendenciasPage({ searchParams }: { searchParams: Promise<{ grupo?: string; q?: string; cliente?: string; listaQ?: string; listaView?: string; listaPagina?: string; tipo?: string; area?: string; responsavel?: string; ordem?: string; ano?: string; mes?: string; dataInicial?: string; dataFinal?: string; integridadeData?: string; vinculo?: string; multiplas?: string; paginaPatty?: string; paginaCliente?: string; paginaSistema?: string }> }) {
   const rawQuery = await searchParams;
   const focusedGroup = parsePendingQueueFocus(rawQuery.grupo);
   const directoryReturn = readClientDirectoryReturn(rawQuery);
@@ -106,6 +106,7 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
           {scopedClient ? <input type="hidden" name="cliente" value={scopedClient.id} /> : null}
           {directoryReturn.q ? <input type="hidden" name="listaQ" value={directoryReturn.q} /> : null}
           {directoryReturn.view !== "all" ? <input type="hidden" name="listaView" value={directoryReturn.view} /> : null}
+          {directoryReturn.page && directoryReturn.page > 1 ? <input type="hidden" name="listaPagina" value={directoryReturn.page} /> : null}
           <label>Cliente
             <input name="q" type="search" maxLength={120} placeholder="Nome da cliente" defaultValue={filters.query}/>
           </label>
