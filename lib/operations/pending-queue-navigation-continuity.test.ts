@@ -4,6 +4,7 @@ import test from "node:test";
 import { pendingQueueLinks, parsePendingQueueFocus } from "./pending-navigation.ts";
 
 const page = readFileSync(new URL("../../app/admin/pendencias/page.tsx", import.meta.url), "utf8");
+const pager = readFileSync(new URL("../../components/admin/PendingQueuePager.tsx", import.meta.url), "utf8");
 const css = readFileSync(new URL("../../app/admin/pendencias/page.module.css", import.meta.url), "utf8");
 
 test("queue exposes group jump-links only when the group has a real target", () => {
@@ -44,7 +45,7 @@ test("applying a new search does not silently keep stale pages or group focus", 
   }
   // Explicit page links still retain pagination and other active query criteria.
   for (const group of ["patty", "client", "operational"]) {
-    assert.ok(page.includes(`pendingExplorerPageHref("${group}",filters`), group);
+    assert.ok(page.includes(`<PendingQueuePager group="${group}"`), group);
   }
 });
 
@@ -82,11 +83,22 @@ test("pending filters, group links, pages and client links preserve directory re
  assert.match(page,/name="listaQ" value=\{directoryReturn\.q\}/);
  assert.match(page,/name="listaView" value=\{directoryReturn\.view\}/);
  assert.match(page,/withClientDirectoryReturn\(pendingExplorerGroupHref\("client",filters\), directoryReturn\)/);
- assert.match(page,/withClientDirectoryReturn\(pendingExplorerPageHref\("operational",filters,pages\.operational\.page\+1\), directoryReturn\)/);
+ assert.match(pager,/withClientDirectoryReturn\(pendingExplorerPageHref\(group,filters,number\),directoryReturn\)/);
  assert.match(page,/withClientDirectoryReturn\(pendingExplorerResetHref\(filters\.clientId\), directoryReturn\)/);
  assert.match(page,/withClientDirectoryReturn\(\x60\/admin\/clientes\/\$\{item\.clientId\}\x60, directoryReturn\)/);
 });
 
 test("pending queue record action keeps validated directory return context",()=>{
  assert.match(page,/href=\{withClientDirectoryReturn\(item\.href, directoryReturn\)\}/);
+});
+
+test("queue groups use a single numbered pager with accessible current-page semantics",()=>{
+ for(const group of ["patty","client","operational"]){
+  assert.match(page,new RegExp(`<PendingQueuePager group="${group}"`));
+ }
+ assert.match(pager,/visiblePendingQueuePages\(page\.page,page\.pageCount\)/);
+ assert.match(pager,/aria-current="page"/);
+ assert.match(pager,/page\.from/);
+ assert.match(pager,/page\.to/);
+ assert.match(css,/\.pageNumber strong/);
 });
