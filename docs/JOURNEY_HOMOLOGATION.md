@@ -1,3 +1,11 @@
+## J1 — usar runtime publicado equivalente para executar teste real da cliente (2026-10-14)
+
+**Verificação factual:** `32c9c4faf807a2fc083c30b9f6f3ad97677ef051` é o último commit confirmado pela Vercel como **Ready/Production**. A comparação GitHub `32c9c4fa..d9642ce4` mostrou exatamente dois commits e oito arquivos modificados: workflow e spec E2E da cliente, workflow E2E administrativo, teste do gate e docs ARCHITECTURE/DECISIONS/JOURNEY_HOMOLOGATION/PROJECT_STATUS — **nenhuma modificação ao aplicativo, ao banco, RLS, Auth ou dependências**.
+
+O preflight J1 usa esse **commit publicado específico** como fallback com allowlist exata, valida CI do SHA atual, status Vercel `success` do commit publicado, merge-base, total de commits e arquivos não-runtime. Qualquer alteração de runtime, arquivo não previsto ou histórico divergente impede a execução e não será ignorada por CI verde. A URL/produto efetivamente testados continuam sendo o runtime publicado de 32c9, enquanto o HEAD do CI é documentado separadamente. Isso não autoriza testes administrativos automáticos com MFA da Patty.
+
+**Próximo marco real:** execução do Playwright `E2E client onboarding activation smoke`, contendo ativação móvel, Cadastro Atual, anamnese e novo login de cliente estritamente sintética, com cleanup por identidade. CI desta alteração e merge **não** equivalem à execução do browser. J1 inteira continua NÃO HOMOLOGADA; passos da Patty exigem sessão humana autorizada.
+
 ## J1 — Fluxo real da cliente com Supabase de produção e nenhuma segunda admin (2026-10-14)
 
 **Em implementação até o CI e a execução serem verificados.** O fluxo automático da cliente foi ampliado a partir de `e2e/client-onboarding-activation.spec.mjs` e usa apenas identidade `e2e-onboarding-<hex>@example.invalid` temporária, criada por script servidor com validação de vínculo ao identificador Auth/Client. A mesma cliente fictícia é ativada em viewport móvel, efetua login novamente, salva o **Cadastro Atual** e confere a persistência por reload e pelo banco, inicia a Anamnese versionada e retoma exatamente o rascunho. O cleanup só elimina a identidade sintética verificada, confere exclusões por IDs e **se recusa a apagar qualquer Anamnese enviada ou protocolo profissional**.
