@@ -1,6 +1,7 @@
 "use client";
 
 import { validateInvitationDraft } from "@/lib/onboarding/validation";
+import { mayChangeInvitationMethodAfterFailure } from "@/lib/onboarding/invitation-method-safety";
 
 import { useActionState, useState, useRef, useEffect } from "react";
 
@@ -23,7 +24,7 @@ const initialState: ManualInviteClientState = {
   success: false,
 };
 
-export function ManualClientInviteForm({ onProvisioningAttempt }: { onProvisioningAttempt?: () => void } = {}) {
+export function ManualClientInviteForm({ onProvisioningAttempt, onSafeRetryAllowed }: { onProvisioningAttempt?: () => void; onSafeRetryAllowed?: () => void } = {}) {
   const [state, formAction, isPending] = useActionState(
     generateManualClientInvite,
     initialState,
@@ -55,7 +56,8 @@ export function ManualClientInviteForm({ onProvisioningAttempt }: { onProvisioni
   const inFlightRef = useRef(false);
   useEffect(() => {
     inFlightRef.current = false;
-  }, [state]);
+    if (mayChangeInvitationMethodAfterFailure(state)) onSafeRetryAllowed?.();
+  }, [state, onSafeRetryAllowed]);
 
   return (
     <form
