@@ -107,17 +107,21 @@ export function explorePendingClientQueue<T extends OperationalPendingItem>(
  const filtered=candidates.filter(item=>!state.multiple||state.multiple==="all"||
    (item.clientId!==null&&((counts.get(item.clientId)??0)>1)===(state.multiple==="multiple")));
  const sort=state.sort??"oldest";
- if(sort==="oldest")return filtered;
  const time=(row:T):number=>{const date=Date.parse(row.createdAt);return Number.isFinite(date)?date:NaN;};
- return filtered.slice().sort((a,b)=>{
+ // Invalid timestamps always follow valid timestamps; ordering is stable across requests.
+ const byDate=(a:T,b:T,descending=false):number=>{
   const at=time(a),bt=time(b);
-  const byDate= !Number.isFinite(at)||!Number.isFinite(bt)
-   ? (!Number.isFinite(at)&&!Number.isFinite(bt)?0:!Number.isFinite(at)?1:-1)
-   : (sort==="newest"?bt-at:at-bt);
+  const validA=Number.isFinite(at),validB=Number.isFinite(bt);
+  if(validA!==validB)return validA?-1:1;
+  return validA?(descending?bt-at:at-bt):0;
+ };
+ return filtered.slice().sort((a,b)=>{
+  const chronological=byDate(a,b,sort==="newest");
+  if(sort==="oldest"||sort==="newest")return chronological||a.id.localeCompare(b.id);
   const name=a.clientLabel.localeCompare(b.clientLabel,"pt-BR",{sensitivity:"base"});
   const type=a.title.localeCompare(b.title,"pt-BR",{sensitivity:"base"});
-  const priority=sort==="newest"?byDate:sort==="client-asc"?name:sort==="client-desc"?-name:type;
-  return priority||byDate||a.id.localeCompare(b.id);
+  const primary=sort==="client-asc"?name:sort==="client-desc"?-name:type;
+  return primary||byDate(a,b)||a.id.localeCompare(b.id);
  });
 }
 export type PendingQueuePage<T>= {items:T[];page:number;pageCount:number;total:number;from:number;to:number;adjusted:boolean};
