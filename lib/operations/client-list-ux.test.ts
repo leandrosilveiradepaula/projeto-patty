@@ -61,3 +61,13 @@ test("directory offers contextual waiting and operational pending group links",(
  assert.match(page,/Aguardando cliente \(\{pendingSummary\.waiting\}\)/);
  assert.match(page,/Operacionais \(\{pendingSummary\.operational\}\)/);
 });
+
+test("secondary client actions are disclosed on demand without hiding primary navigation",()=>{
+ const page=read("app/admin/clientes/page.tsx");
+ const css=read("app/admin/clientes/page.module.css");
+ assert.match(page,/<details className=\{styles\.moreActions\}>/);
+ assert.match(page,/<summary>Outras opções<\/summary>/);
+ assert.match(page,/Todas as pendências \(\{pendingSummary\.total\}\)/);
+ assert.match(page,/Abrir acompanhamento de/);
+ assert.match(css,/\.moreActions > summary:focus-visible/);
+});
