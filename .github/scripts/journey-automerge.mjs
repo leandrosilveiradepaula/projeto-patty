@@ -17,6 +17,11 @@ export function sensitivePath(path) {
   return SENSITIVE.some((pattern) => pattern.test(path));
 }
 
+/** GitHub's native setting becomes the single merge owner when enabled. */
+export function shouldDeferToNativeAutoMerge(settings) {
+  return settings?.allow_auto_merge === true;
+}
+
 export function evaluateMergeContract(pr, files, owner, repository) {
   const problems = [];
   if (pr.state !== "open" || pr.draft) problems.push("PR fechado ou draft");
@@ -70,6 +75,13 @@ async function run() {
       throw new Error(response.status + " " + path + ": " + message);
     }
     return response.status === 204 ? null : response.json();
+  }
+
+  // Fail closed if settings cannot be verified, rather than race a native merge.
+  const settings = await api("/repos/" + repository);
+  if (shouldDeferToNativeAutoMerge(settings)) {
+    console.log("Native auto-merge is enabled; custom merge worker stays inactive.");
+    return;
   }
 
   const prs = await api("/repos/" + repository + "/pulls?state=open&base=master&per_page=100");
