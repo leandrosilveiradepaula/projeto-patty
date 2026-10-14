@@ -26,6 +26,7 @@ jobs:
     if: >-
       github.repository == 'leandrosilveiradepaula/projeto-patty' &&
       github.ref == 'refs/heads/master' &&
+      vars.J1_E2E_ENABLE == 'true' &&
       (
         github.event_name == 'workflow_dispatch' ||
         github.event_name == 'schedule' ||
