@@ -1,3 +1,4 @@
+import { readClientDirectoryPage } from "../clients/client-directory-pagination.ts";
 import { readClientDirectorySearchTerm } from "../clients/client-directory-search.ts";
 import { readClientDirectoryPendingView, type ClientDirectoryPendingView } from "./client-directory-pending-view.ts";
 
@@ -5,12 +6,14 @@ import { readClientDirectoryPendingView, type ClientDirectoryPendingView } from 
 export type ClientDirectoryReturn = {
   q: string;
   view: ClientDirectoryPendingView;
+  page?: number;
 };
 
-export function readClientDirectoryReturn(raw: { listaQ?: unknown; listaView?: unknown }): ClientDirectoryReturn {
+export function readClientDirectoryReturn(raw: { listaQ?: unknown; listaView?: unknown; listaPagina?: unknown }): ClientDirectoryReturn {
   return {
     q: readClientDirectorySearchTerm(raw.listaQ),
     view: readClientDirectoryPendingView(raw.listaView),
+    page: readClientDirectoryPage(raw.listaPagina).page,
   };
 }
 
@@ -18,6 +21,7 @@ export function clientDirectoryReturnParams(state: ClientDirectoryReturn): URLSe
   const params = new URLSearchParams();
   if (state.q) params.set("listaQ", readClientDirectorySearchTerm(state.q));
   if (state.view !== "all") params.set("listaView", readClientDirectoryPendingView(state.view));
+  if (state.page && state.page > 1) params.set("listaPagina", String(state.page));
   return params;
 }
 
@@ -25,6 +29,7 @@ export function clientDirectoryReturnHref(state: ClientDirectoryReturn): string 
   const params = new URLSearchParams();
   if (state.q) params.set("q", readClientDirectorySearchTerm(state.q));
   if (state.view !== "all") params.set("view", readClientDirectoryPendingView(state.view));
+  if (state.page && state.page > 1) params.set("pagina", String(state.page));
   const query = params.toString();
   return "/admin/clientes" + (query ? "?" + query : "");
 }
