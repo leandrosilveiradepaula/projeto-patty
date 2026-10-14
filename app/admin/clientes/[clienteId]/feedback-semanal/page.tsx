@@ -157,8 +157,9 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
             ))}
           </nav>
         ) : null}
-        {rawPendingCount > 0 && pendingPage.total === 0 ? <EmptyState title="Nenhum pendente neste filtro" description="Há solicitações pendentes, mas nenhuma corresponde à origem ou ao ano selecionados." action={<Link href={`/admin/clientes/${client.id}/feedback-semanal#feedback-pendentes`}>Ver todos os pendentes</Link>} /> : null}
-        {pendingFeedbacks.length === 0 ? (
+        {pendingFeedbacks.length === 0 && rawPendingCount > 0 ? (
+          <EmptyState title="Nenhum pendente neste filtro" description="Há solicitações pendentes, mas nenhuma corresponde à origem ou ao ano selecionados." action={<Link href={`/admin/clientes/${client.id}/feedback-semanal#feedback-pendentes`}>Ver todos os pendentes</Link>} />
+        ) : pendingFeedbacks.length === 0 ? (
           <EmptyState
             description="Não existem solicitações abertas aguardando a cliente. Se precisar criar uma solicitação manual específica, use o formulário acima."
             title="Nenhum feedback pendente"
@@ -223,8 +224,9 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
         description="Respostas efetivamente enviadas pela cliente, preservadas para consulta e decisão profissional da Patty."
         title="Histórico enviado"
       >
-        {rawSubmittedCount > 0 && submittedPage.total === 0 ? <EmptyState title="Nenhum envio neste filtro" description="As respostas já registradas continuam no histórico; limpe os filtros." action={<Link href={`/admin/clientes/${client.id}/feedback-semanal#feedback-enviados`}>Ver todos os envios</Link>} /> : null}
-        {submittedFeedbacks.length === 0 ? (
+        {submittedFeedbacks.length === 0 && rawSubmittedCount > 0 ? (
+          <EmptyState title="Nenhum envio neste filtro" description="As respostas já registradas continuam no histórico; limpe os filtros." action={<Link href={`/admin/clientes/${client.id}/feedback-semanal#feedback-enviados`}>Ver todos os envios</Link>} />
+        ) : submittedFeedbacks.length === 0 ? (
           <EmptyState
             description="Ainda não há respostas enviadas pela cliente. Solicitações abertas, quando existentes, permanecem na seção Pendentes."
             title="Nenhum feedback enviado ainda"
