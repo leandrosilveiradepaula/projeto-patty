@@ -1,3 +1,4 @@
+import { clientInAppFeedbackNotices } from "@/lib/notifications/client-in-app-inbox";
 import { availableClientFeedbackHistoryYears, readClientFeedbackHistoryQuery, exploreClientFeedbackHistory, clientFeedbackHistoryHref, formatClientFeedbackHistoryMonth } from "@/lib/follow-up/client-weekly-feedback-explorer";
 import { Button } from "@/components/ui/Button";
 import { fingerprintWeeklyFeedbackAnswers } from "@/lib/weekly-feedback/draft-fingerprint";
@@ -44,15 +45,12 @@ export default async function ClientWeeklyFeedbackPage({ searchParams }: { searc
     listAccessibleWeeklyFeedbacksForClient(client.id),
     listAccessibleClientNotificationEvents(client.id),
   ]);
+  // Use the same client-scoped, delivered-only projection as the inbox.
+  // An event alone must not imply a reminder for a different feedback.
   const inAppReminderFeedbackIds = new Set(
-    notificationEvents
-      .filter(
-        (event) =>
-          event.event_key.startsWith("weekly_feedback_reminder:") &&
-          event.channel_key === "in_app" &&
-          event.delivery_state === "delivered",
-      )
-      .map((event) => event.weekly_feedback_id),
+    clientInAppFeedbackNotices(notificationEvents, feedbacks, client.id)
+      .filter((notice) => notice.status === "pending")
+      .map((notice) => notice.feedback.id),
   );
   const orderedFeedbacks = orderClientWeeklyFeedbacks(feedbacks);
   const pendingFeedbacks = orderedFeedbacks.filter(
