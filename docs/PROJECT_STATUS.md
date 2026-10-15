@@ -1,3 +1,7 @@
+## J1.05–10 — dependência de homologação profissional (2026-10-15 UTC)
+
+O `master` `0eac9b72` teve CI e Playwright da cliente PASS, mas **não** há prova autenticada de aprovação/publicação manual da Patty. Consulta agregada somente leitura à produção confirmou **2 clientes, 1 Anamnese submetida, 0 avaliações, 0 protocolos, 0 versões, 0 aprovações e 0 publicações**. Assim, J1.05–10 permanecem **NÃO HOMOLOGADAS**; ausência de execução profissional não é falha comprovada de runtime. O roteiro em `docs/J1_PROFESSIONAL_RELEASE_HOMOLOGATION.md` define marcos, verificações de autorização, MFA e acesso da cliente, sem criar dados fictícios, expor PII ou burlar controles. O histórico e a distinção implementação/CI/deployment/homologação devem ser preservados.
+
 ## J1.04 — upload privado sintético autenticado: PASS parcial (2026-10-15 UTC)
 
 O `master` `87084814` teve CI PASS [38670537867](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38670537867). O Playwright móvel autenticado [38670631202](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38670631202) obteve **1 PASS em 39,3 s**, incluindo envio de PNG estritamente sintético pela cliente, sessão de upload `accepted`, verificação de titularidade, bucket/caminho privado e persistência após recarregar a lista. Browser cleanup e cleanup independente passaram (`already-clean`). Consulta somente leitura confirmou zero Auth/Clients e zero arquivos/sessões com filename do teste. Não houve alteração de permissões, RLS ou schema.

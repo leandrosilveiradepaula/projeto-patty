@@ -1,3 +1,11 @@
+## J1.05–10 — bloqueio de prova profissional fim a fim (2026-10-15 UTC)
+
+**FATO CONFIRMADO por consulta read-only ao Supabase de produção:** 2 clientes, 1 Anamnese submetida, **0 avaliações, 0 protocolos, 0 versões, 0 aprovações e 0 publicações**. O `master` `0eac9b72` tem CI PASS [#38757814943](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38757814943) e Playwright cliente PASS [#38757884934](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38757884934), mas **não** executou aprovação/publicação pela Patty autenticada. Ausência de publicação impede conferir a leitura de um protocolo realmente aprovado; não prova defeito no fluxo.
+
+**DECISÃO TÉCNICA:** roteiro objetivo e restrito de homologação profissional em `docs/J1_PROFESSIONAL_RELEASE_HOMOLOGATION.md`. Não criar aprovações sintéticas via SQL, não contornar MFA/RLS e não publicar dados fictícios para clientes reais. J1.05–10 continuam **NÃO HOMOLOGADAS**, condicionadas a uma execução legitimamente autorizada e observável.
+
+---
+
 ## J1.04 — prova autenticada de upload de foto privada: PASS parcial (2026-10-15 UTC)
 
 **FATO CONFIRMADO:** `master` `870848146afb931d8209f18656b738e4036d7c8d` concluiu `Validate application` com PASS ([38670537867](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38670537867)). O workflow Playwright [38670631202](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38670631202) concluiu **1 PASS (39,3 s)** na jornada móvel sintética. Além de ativação/Cadastro Atual/Anamnese retomável, percorreu a interface `/cliente/arquivos`, selecionou um PNG inteiramente sintético, confirmou upload, verificou no banco metadados do único arquivo, dono, escopo privado, sessão `accepted`, e confirmou o registro após reload.
