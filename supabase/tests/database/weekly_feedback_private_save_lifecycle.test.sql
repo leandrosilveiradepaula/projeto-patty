@@ -2,7 +2,7 @@
 -- Exercises the actual RLS/invoker boundary from publication -> request ->
 -- partial save -> CAS conflict -> definitive submit -> admin history.
 begin;
-select plan(20);
+select plan(21);
 
 select has_function('public', 'save_client_weekly_feedback_if_unchanged', array['uuid','uuid','jsonb','jsonb','boolean']);
 select ok(
