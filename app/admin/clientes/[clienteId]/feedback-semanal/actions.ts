@@ -7,6 +7,7 @@ import { requireRole } from "@/lib/supabase/auth";
 import {
   createAccessibleWeeklyFeedbackRequest,
   getAccessibleClient,
+  getAccessibleWeeklyFeedbackForPeriod,
   getLatestPublishedWeeklyFeedbackFormVersion,
   hasAccessibleProtocolPublicationForClient,
 } from "@/lib/supabase/data-access";
@@ -15,7 +16,25 @@ import { isUuid } from "@/lib/validation/uuid";
 export type WeeklyFeedbackRequestFormState = {
   message: string | null;
   success: boolean;
+  feedbackId?: string;
+  feedbackSubmitted?: boolean;
 };
+
+function existingRequestState(row: { id: string; submitted_at: string | null }): WeeklyFeedbackRequestFormState {
+  return {
+    message: row.submitted_at
+      ? "Este período já tem um Feedback Semanal enviado. Abra o registro existente."
+      : "Este período já tem um Feedback Semanal solicitado. Abra a solicitação existente.",
+    success: false,
+    feedbackId: row.id,
+    feedbackSubmitted: row.submitted_at !== null,
+  };
+}
+
+function isDuplicatePeriodError(error: unknown) {
+  return typeof error === "object" && error !== null &&
+    "code" in error && error.code === "23505";
+}
 
 export async function createWeeklyFeedbackRequestAction(
   clientId: string,
@@ -67,6 +86,11 @@ export async function createWeeklyFeedbackRequestAction(
     };
   }
 
+  // An identical client/period is unique in PostgreSQL, including automatic
+  // requests. Offer the existing authorized record rather than a generic error.
+  const existing = await getAccessibleWeeklyFeedbackForPeriod(clientId, periodStart, periodEnd);
+  if (existing) return existingRequestState(existing);
+
   const formVersion = await getLatestPublishedWeeklyFeedbackFormVersion();
 
   if (!formVersion) {
@@ -81,8 +105,9 @@ export async function createWeeklyFeedbackRequestAction(
     return { message: "Informe um prazo válido ou deixe o campo em branco.", success: false };
   }
 
+  let created;
   try {
-    await createAccessibleWeeklyFeedbackRequest({
+    created = await createAccessibleWeeklyFeedbackRequest({
       clientId,
       dueAt: deadline.dueAt,
       formVersionId: formVersion.id,
@@ -90,7 +115,13 @@ export async function createWeeklyFeedbackRequestAction(
       periodStart,
       requestedByProfileId: auth.profileId,
     });
-  } catch {
+  } catch (error) {
+    // Race with a second tab or scheduled generation: the unique constraint
+    // is authoritative. Re-read the authorized row after a 23505 conflict.
+    if (isDuplicatePeriodError(error)) {
+      const concurrent = await getAccessibleWeeklyFeedbackForPeriod(clientId, periodStart, periodEnd);
+      if (concurrent) return existingRequestState(concurrent);
+    }
     return {
       message:
         "Não foi possível criar a solicitação. Confira o período e tente novamente.",
@@ -108,5 +139,7 @@ export async function createWeeklyFeedbackRequestAction(
   return {
     message: "Feedback Semanal solicitado para a cliente.",
     success: true,
+    feedbackId: created.id,
+    feedbackSubmitted: false,
   };
 }
