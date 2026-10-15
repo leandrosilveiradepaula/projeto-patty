@@ -39,4 +39,5 @@ export async function checkJ1SyntheticPrivatePhoto({ page, admin, clientId, prof
   expect(sessions.data[0].status).toBe("accepted");
   await page.reload();
   await expect(page.getByRole("heading",{name,exact:true})).toBeVisible();
+  return file.id;
 }
