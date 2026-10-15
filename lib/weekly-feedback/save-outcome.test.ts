@@ -23,9 +23,9 @@ test("weekly feedback refuses stale submissions and only confirms persisted upda
   assert.match(actions, /if \(!saved\)/);
   const start = data.indexOf("export async function updateCurrentClientWeeklyFeedback(");
   const end = data.indexOf("\nexport ", start + 30);
-  const writer = data.slice(start, end);
+  const writer = data.slice(start, end === -1 ? undefined : end);
   const sql = read("supabase/migrations/20261015171900_private_weekly_feedback_atomic_save.sql");
-  assert.ok(start >= 0 && end > start);
+  assert.ok(start >= 0 && (end === -1 || end > start));
   // The last-mile CAS now runs atomically in the invoker SQL function, not
   // through a PostgREST GET/URL query leaking private answer snapshots.
   assert.match(writer, /supabase\.rpc\(\s*"save_client_weekly_feedback_if_unchanged"/);
