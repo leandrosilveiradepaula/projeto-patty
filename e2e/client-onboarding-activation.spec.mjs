@@ -245,11 +245,15 @@ test("J1: cliente sintetica ativa acesso, salva Cadastro Atual e retoma Anamnese
       activationPage.getByRole("heading", { name: "Ativar sua conta" }),
     ).toBeVisible();
 
+    // Do not type into a controlled React form before hydration: server
+    // markup may still accept DOM input while client state is not yet wired.
+    await expect(activationPage.locator('form[data-interactive="true"]'))
+      .toBeVisible({timeout:15_000});
     await activationPage.getByLabel("Crie sua senha").fill(password);
     await activationPage.getByLabel("Confirme sua senha").fill(password);
-    await activationPage
-      .getByRole("button", { name: "Criar senha e continuar" })
-      .click();
+    const activate = activationPage.getByRole("button", { name: "Criar senha e continuar" });
+    await expect(activate).toBeEnabled({timeout:10_000});
+    await activate.click();
 
     await expect(activationPage).toHaveURL(/\/cliente\/anamnese\/?$/);
     await expect(
