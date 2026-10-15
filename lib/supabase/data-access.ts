@@ -1751,6 +1751,27 @@ export async function listCurrentClientFinalizedAssessmentHistory() {
   throw headersError;
 }
 
+/**
+ * Narrow, client-scoped candidates for an explicit professional decision
+ * after consulting weekly feedback. This only loads assessment headers.
+ * The authenticated caller and existing RLS/MFA are authoritative.
+ */
+export async function listRecentFinalizedAssessmentsForClient(clientId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_assessments")
+    .select("id, client_id, assessed_at, finalized_at")
+    .eq("client_id", clientId)
+    .not("finalized_at", "is", null)
+    .order("assessed_at", { ascending: false })
+    .order("id", { ascending: false })
+    .limit(5);
+
+  if (error) throw error;
+  if (data === null) throw new Error("Não foi possível consultar as avaliações finalizadas.");
+  return data;
+}
+
 export async function listAccessibleAssessmentsForClient(clientId: string) {
   const supabase = await createClient();
   const rows = await collectAdminDirectoryPages((from, to) => supabase
