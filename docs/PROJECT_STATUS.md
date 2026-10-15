@@ -1,8 +1,14 @@
-## 2026-10-15 — J2: visão operacional conjunta de solicitações e recebimentos (branch em validação)
+## 2026-10-15 — J2: navegador autenticado com Supabase local (PR em validação)
+
+### DECISÃO TÉCNICA DE TESTE — SOMENTE AMBIENTE SINTÉTICO DESCARTÁVEL
+
+Novo smoke Playwright do Feedback Semanal com Next.js e Supabase PostgreSQL/Auth/RLS **locais**: publicação sintética prévia (somente fixture), solicitação por admin com TOTP/MFA real, cliente móvel salva/retoma rascunho, CAS concorrente é rejeitado, revisa e envia as 21 respostas sintéticas, Patty consulta histórico enviado; outra cliente, profissional sem assignment e visitante não podem ler/alterar. Validação explícita de valores originais, imutabilidade após envio e largura mobile. O teste falha se a URL apontar fora de `127.0.0.1`, nunca recebe credenciais de produção e descarta o banco ao fim. Workflow CI isolado com MFA habilitado apenas no arquivo local efêmero do runner, sem alterar config permanente nem migrations. **Estado: implementado na branch; execução CI ainda precisa passar antes da conclusão.** A execução local NÃO representa homologação profissional na produção nem prova o SHA publicado pela Vercel.
+
+## 2026-10-15 — J2: visão operacional conjunta de solicitações e recebimentos (PR #886 integrado)
 
 ### DECISÃO TÉCNICA/PRODUTO — MESMO DOMÍNIO, SEM NOVO ESTADO CLÍNICO
 
-A caixa administrativa do Feedback Semanal passa a oferecer **Recebidos** e **Aguardando cliente** sob os mesmos filtros por cliente atribuído, origem, mês da semana de referência e paginação. A visão pendente consulta somente metadados das solicitações sem `submitted_at`, nunca os rascunhos/respostas sensíveis; a visão recebida preserva o loader original. Cada item leva ao histórico original com verificação de acesso atual. Prazo só aparece quando foi explicitamente gravado, sem inferir atraso clínico, suspensão, adesão ou revisão da Patty. Filtros de situação inválidos falham fechados, RLS/MFA permanecem inalterados e atalhos do painel levam às duas situações. Implementação e testes em branch; CI, merge, deployment e homologação permanecem estados separados. Sem migrations.
+A caixa administrativa do Feedback Semanal passa a oferecer **Recebidos** e **Aguardando cliente** sob os mesmos filtros por cliente atribuído, origem, mês da semana de referência e paginação. A visão pendente consulta somente metadados das solicitações sem `submitted_at`, nunca os rascunhos/respostas sensíveis; a visão recebida preserva o loader original. Cada item leva ao histórico original com verificação de acesso atual. Prazo só aparece quando foi explicitamente gravado, sem inferir atraso clínico, suspensão, adesão ou revisão da Patty. Filtros de situação inválidos falham fechados, RLS/MFA permanecem inalterados e atalhos do painel levam às duas situações. PR #886 integrado ao `master` `a27ee51a` com CI do PR PASS. CI pós-merge iniciou; Vercel retornou `build-rate-limit` nesse SHA, então publicação atualizada não comprovada. Homologação profissional pendente. Sem migrations.
 
 ## 2026-10-15 — J2: primeiro Feedback Semanal → decisão profissional manual (PR #885 integrado)
 
