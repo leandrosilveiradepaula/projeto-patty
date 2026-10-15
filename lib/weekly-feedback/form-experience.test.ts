@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readFileSync } from "node:fs";
+import { weeklyFeedbackAnswerFieldId } from "./field-ids.ts";
 
 import {
   buildWeeklyFeedbackAnswers,
@@ -59,4 +61,27 @@ test("does not substitute a canned not-applicable answer for an empty client res
   const form=new FormData();
   form.set("texto", "");
   assert.deepEqual(buildWeeklyFeedbackAnswers(form, {questions:qs,schemaVersion:1,sourceReference:null}), {});
+});
+
+test("multiple pending weeks keep all answer labels, errors and focus targets distinct", () => {
+  const weekA = "11111111-1111-4111-8111-111111111111";
+  const weekB = "22222222-2222-4222-8222-222222222222";
+  const a = weeklyFeedbackAnswerFieldId(weekA, "treinos");
+  const b = weeklyFeedbackAnswerFieldId(weekB, "treinos");
+  assert.notEqual(a, b);
+  assert.equal(weeklyFeedbackAnswerFieldId(weekA, "treinos"), a);
+  assert.notEqual(weeklyFeedbackAnswerFieldId(weekA, "nota"), a);
+  assert.ok(!a.includes("resposta da cliente"));
+  assert.equal(weeklyFeedbackAnswerFieldId("a-b", "c") === weeklyFeedbackAnswerFieldId("a", "b-c"), false);
+  const form = readFileSync(new URL("../../app/cliente/feedback-semanal/ClientWeeklyFeedbackResponseForm.tsx", import.meta.url), "utf8");
+  assert.match(form, /const fieldId = weeklyFeedbackAnswerFieldId\(feedbackId, question\.key\)/);
+  assert.match(form, /weeklyFeedbackAnswerFieldId\(feedbackId, invalid\)/);
+  assert.match(form, /weeklyFeedbackAnswerFieldId\(feedbackId, firstMissingRequired\)/);
+  assert.match(form, /weeklyFeedbackAnswerFieldId\(feedbackId, state\.questionKey\)/);
+  assert.match(form, /aria-describedby=\{showError \? fieldId \+ "-error"/);
+  assert.doesNotMatch(form, /document\.getElementById\("weekly-feedback-answer-" \+/);
+  const e2e = readFileSync(new URL("../../e2e/j2-weekly-feedback-lifecycle.spec.mjs", import.meta.url), "utf8");
+  assert.match(e2e, /locator\("#feedback-pendente-" \+ feedbackId \+ " form"\)/);
+  assert.match(e2e, /answerInput\(question\.key\)/);
+  assert.doesNotMatch(e2e, /#weekly-feedback-answer-q|\#weekly-feedback-answer-" \+/);
 });

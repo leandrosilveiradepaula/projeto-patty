@@ -19,6 +19,8 @@ import {
   type WeeklyFeedbackCollisionChoice,
 } from "@/lib/weekly-feedback/draft-reconciliation";
 
+import { weeklyFeedbackAnswerFieldId } from "@/lib/weekly-feedback/field-ids";
+
 import styles from "./page.module.css";
 
 const initialState: WeeklyFeedbackSaveFormState = {
@@ -57,6 +59,8 @@ export function ClientWeeklyFeedbackResponseForm({
   const [touchedKeys, setTouchedKeys] = useState<string[]>([]);
   const firstInvalid = firstInvalidWeeklyFeedbackField(questions, values, attemptedFinalSubmit);
   const progress = summarizeWeeklyFeedbackRequiredProgress(questions, values);
+  // Store the key in a stable const so TypeScript narrows it inside onClick.
+  const firstMissingRequired = progress.firstMissingRequired;
   const inFlightRef = useRef(false);
   const formRef = useRef<HTMLFormElement>(null);
   const [reviewOpen, setReviewOpen] = useState(false);
@@ -90,6 +94,13 @@ export function ClientWeeklyFeedbackResponseForm({
     }
   }, [editedSinceLastSave, expectedFingerprint, initialValues, newerServerSnapshot]);
 
+  // Server-reported validation must focus this feedback, not another pending week.
+  useEffect(() => {
+    if (state.outcome === "invalid" && state.questionKey) {
+      document.getElementById(weeklyFeedbackAnswerFieldId(feedbackId, state.questionKey))?.focus();
+    }
+  }, [state, feedbackId]);
+
   useEffect(() => {
     if (!dirty) return;
     const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
@@ -110,13 +121,13 @@ export function ClientWeeklyFeedbackResponseForm({
       const invalid = firstInvalidWeeklyFeedbackField(questions, values, true);
       if (invalid) {
         setReviewOpen(false);
-        document.getElementById("weekly-feedback-answer-" + invalid)?.focus();
+        document.getElementById(weeklyFeedbackAnswerFieldId(feedbackId, invalid))?.focus();
         return false;
       }
     } else {
       const invalid = firstInvalidWeeklyFeedbackField(questions, values, false);
       if (invalid) {
-        document.getElementById("weekly-feedback-answer-" + invalid)?.focus();
+        document.getElementById(weeklyFeedbackAnswerFieldId(feedbackId, invalid))?.focus();
         return false;
       }
     }
@@ -173,7 +184,7 @@ export function ClientWeeklyFeedbackResponseForm({
         <strong>{progress.requiredCompleted} de {progress.required} perguntas obrigatórias preenchidas</strong>
         <span>{progress.completed} de {progress.total} respostas iniciadas</span>
         <progress max={progress.required || 1} value={progress.requiredCompleted} aria-label="Progresso do preenchimento obrigatório" />
-        {progress.firstMissingRequired ? <button type="button" className={styles.jumpLink} onClick={() => document.getElementById("weekly-feedback-answer-" + progress.firstMissingRequired)?.focus()}>Ir para primeira obrigatória pendente</button> : <span>Obrigatórias preenchidas. Revise e envie quando estiver pronta.</span>}
+        {firstMissingRequired ? <button type="button" className={styles.jumpLink} onClick={() => document.getElementById(weeklyFeedbackAnswerFieldId(feedbackId, firstMissingRequired))?.focus()}>Ir para primeira obrigatória pendente</button> : <span>Obrigatórias preenchidas. Revise e envie quando estiver pronta.</span>}
       </div>
       {state.message && (failed || confirmed) ? (
         <Alert
@@ -185,7 +196,7 @@ export function ClientWeeklyFeedbackResponseForm({
         </Alert>
       ) : null}
       {questions.map((question, index) => {
-        const fieldId = "weekly-feedback-answer-" + question.key;
+        const fieldId = weeklyFeedbackAnswerFieldId(feedbackId, question.key);
         const error = getWeeklyFeedbackFieldError(question, values[question.key] ?? "", attemptedFinalSubmit);
         const showError = error && (attemptedFinalSubmit || touchedKeys.includes(question.key));
         return (
