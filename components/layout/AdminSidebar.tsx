@@ -16,6 +16,7 @@ const adminNavigationItems: AdminNavigationItem[] = [
   { href: "/admin", label: "Início" },
   { href: "/admin/pendencias", label: "Pendências" },
   { href: "/admin/clientes", label: "Clientes" },
+  { href: "/admin/feedback-semanal", label: "Feedbacks" },
   { href: "/admin/arquivos", label: "Arquivos" },
   { href: "/admin/avaliacoes", label: "Avaliações" },
   { href: "/admin/protocolos", label: "Protocolos" },
