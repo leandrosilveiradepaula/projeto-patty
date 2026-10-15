@@ -44,3 +44,12 @@ test("draft anchors for multiple versions are scoped by version UUID",()=>{
  assert.ok(journey.includes('`#rascunho-plano-iniciar-${versionId}`'));
  assert.ok(map.includes("rascunho-pendencias-titulo-${versionNumber}"));
 });
+
+test("frozen incomplete version cannot offer an approval or publication action in UI",()=>{
+ const check=page.indexOf(') : !draftReadiness.ready ? (');
+ const action=page.indexOf('<ProtocolLifecycleAction',check);
+ assert.ok(check>0 && action>check);
+ assert.ok(page.includes('lifecycleAction !== "submit"'));
+ assert.ok(page.includes("Não é possível aprovar ou publicar esta versão."));
+ assert.ok(page.includes("criar um novo rascunho"));
+});
