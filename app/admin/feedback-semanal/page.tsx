@@ -190,7 +190,7 @@ export default async function AdminReceivedWeeklyFeedbackPage({ searchParams }: 
                   <PendingItemCard
                     title={"Semana de " + formatWeeklyFeedbackPeriodDate(feedback.period_start) + " a " + formatWeeklyFeedbackPeriodDate(feedback.period_end)}
                     meta={(clientNames.get(feedback.client_id) ?? "Cliente sem nome informado") + " · Recebido em " + formatSubmittedAt(feedback.submitted_at)}
-                    description={"Solicitação " + weeklyFeedbackOriginLabel(feedback.request_source).toLowerCase()}
+                    description={"Origem: " + weeklyFeedbackOriginLabel(feedback.request_source)}
                     status={<Badge variant="positive">Enviado</Badge>}
                     action={
                       <div className={styles.actions}>
