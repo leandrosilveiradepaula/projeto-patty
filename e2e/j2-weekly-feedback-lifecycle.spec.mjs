@@ -289,7 +289,15 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
     await test.step("caixa profissional mostra a solicitação pendente, sem expor respostas", async () => {
       await adminPage.goto("/admin/feedback-semanal?situacao=pendentes&cliente=" + clientId);
       await expect(adminPage.getByRole("heading", { name: "Aguardando resposta da cliente" })).toBeVisible();
-      await expect(adminPage.getByRole("link", { name: "Abrir solicitação" })).toBeVisible();
+      await adminPage.getByRole("link", { name: "Abrir solicitação" }).click();
+      await expect(adminPage.locator("#feedback-pendente-" + feedbackId)).toBeVisible();
+      await expect(adminPage.getByRole("link", {
+        name: "Voltar à caixa de Feedbacks Semanais",
+      })).toHaveAttribute("href",
+        "/admin/feedback-semanal?situacao=pendentes&cliente=" + clientId + "#aguardando-cliente");
+      await adminPage.getByRole("link", { name: "Voltar à caixa de Feedbacks Semanais" }).click();
+      await expect(adminPage).toHaveURL(/situacao=pendentes/);
+      await expect(adminPage.getByRole("heading", { name: "Aguardando resposta da cliente" })).toBeVisible();
     });
 
     const clientPage = await clientContext.newPage();
@@ -438,11 +446,19 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
     });
 
     await test.step("Patty autenticada vê envio na caixa e abre a resposta original", async () => {
-      await adminPage.goto("/admin/feedback-semanal?cliente=" + clientId);
+      await adminPage.goto("/admin/feedback-semanal?cliente=" + clientId + "&origem=manual&mes=2026-10");
       await expect(adminPage.getByRole("heading", { name: "Histórico de recebimentos" })).toBeVisible();
       await adminPage.getByRole("link", { name: "Abrir respostas originais" }).click();
       await expect(adminPage.locator("#feedback-enviado-" + feedbackId)).toBeVisible();
       await expect(adminPage.getByText("Resposta sintética J2 exclusivamente local").first()).toBeVisible();
+      await expect(adminPage.getByRole("link", {
+        name: "Voltar à caixa de Feedbacks Semanais",
+      })).toHaveAttribute("href",
+        "/admin/feedback-semanal?cliente=" + clientId + "&origem=manual&mes=2026-10#recebidos");
+      await adminPage.getByRole("link", { name: "Voltar à caixa de Feedbacks Semanais" }).click();
+      await expect(adminPage.getByRole("heading", { name: "Histórico de recebimentos" })).toBeVisible();
+      await expect(adminPage.locator('select[name="origem"]')).toHaveValue("manual");
+      await expect(adminPage.locator('input[name="mes"]')).toHaveValue("2026-10");
     });
 
     await test.step("outra cliente, outro profissional e anônimo não acessam o registro", async () => {

@@ -1,6 +1,7 @@
 import { readClientDirectoryReturn, withClientDirectoryReturn } from "@/lib/operations/client-directory-return";
 import { readPendingQueueReturn, withPendingQueueReturn } from "@/lib/operations/pending-queue-return";
 import { readWeeklyComparisonReturn, readWeeklyFeedbackDecisionReturn } from "@/lib/follow-up/weekly-feedback-professional-handoff";
+import { readWeeklyFeedbackInboxReturn, withWeeklyFeedbackInboxReturn } from "@/lib/follow-up/weekly-feedback-inbox-return";
 import { receivedWeeklyFeedbackExactHref } from "@/lib/follow-up/recent-weekly-feedbacks";
 import { weeklyFeedbackComparisonHref } from "@/lib/follow-up/weekly-feedback-comparison";
 import { findPreviousFinalizedAssessment, formatAdministrativeAssessmentDate } from "@/lib/evaluations/administrative-assessment-history";
@@ -60,7 +61,7 @@ type AdminAvaliacaoDetailPageProps = {
   params: Promise<{
     avaliacaoId: string;
   }>;
-  searchParams: Promise<{ fotoAvaliacaoAnterior?: string; fotoAnterior?: string; fotoAtual?: string; listaQ?: string; listaView?: string; listaPagina?: string; filaRetorno?: string; feedbackAtual?: string | string[]; feedbackAnterior?: string | string[] }>;
+  searchParams: Promise<{ fotoAvaliacaoAnterior?: string; fotoAnterior?: string; fotoAtual?: string; listaQ?: string; listaView?: string; listaPagina?: string; filaRetorno?: string; feedbackAtual?: string | string[]; feedbackAnterior?: string | string[]; caixaRetorno?: string | string[] }>;
 };
 
 const professionalDecisionLabels: Record<string, string> = {
@@ -114,7 +115,9 @@ export default async function AdminAvaliacaoDetailPage({
   const [{ avaliacaoId }, filters] = await Promise.all([params, searchParams]);
   const directoryReturn = readClientDirectoryReturn(filters);
   const queueReturn = readPendingQueueReturn(filters.filaRetorno);
+  const inboxReturn = readWeeklyFeedbackInboxReturn(filters.caixaRetorno);
   const navigate = (href:string) => withPendingQueueReturn(withClientDirectoryReturn(href,directoryReturn),queueReturn ?? "");
+  const backToFeedback = (href: string) => withWeeklyFeedbackInboxReturn(navigate(href), inboxReturn ?? "");
 
   if (!isUuid(avaliacaoId)) {
     notFound();
@@ -261,7 +264,7 @@ export default async function AdminAvaliacaoDetailPage({
         <Link href={navigate(`/admin/clientes/${assessment.client_id}/evolucao`)}>Evolução das medidas</Link>
         <Link href="#historico-profissional">Histórico profissional ({followUps.length} registro(s))</Link>
         {comparisonReturn ? (
-          <Link href={navigate(weeklyFeedbackComparisonHref(
+          <Link href={backToFeedback(weeklyFeedbackComparisonHref(
             assessment.client_id,
             comparisonReturn.currentId,
             comparisonReturn.previousId,
@@ -270,12 +273,15 @@ export default async function AdminAvaliacaoDetailPage({
           </Link>
         ) : null}
         {submittedReturn?.kind === "submitted" ? (
-          <Link href={navigate(receivedWeeklyFeedbackExactHref({
+          <Link href={backToFeedback(receivedWeeklyFeedbackExactHref({
             id: submittedReturn.currentId,
             client_id: assessment.client_id,
           }))}>
             Voltar ao Feedback Semanal enviado
           </Link>
+        ) : null}
+        {inboxReturn && submittedReturn ? (
+          <Link href={inboxReturn}>Voltar à caixa de Feedbacks Semanais</Link>
         ) : null}
         <Link href={navigate(`/admin/clientes/${assessment.client_id}/protocolos`)}>Protocolos da cliente</Link>
       </nav>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { readWeeklyFeedbackInboxReturn, withWeeklyFeedbackInboxReturn } from "@/lib/follow-up/weekly-feedback-inbox-return";
 import { notFound } from "next/navigation";
 
 import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
@@ -34,6 +35,7 @@ type PageProps = {
   searchParams: Promise<{
     atual?: string | string[];
     anterior?: string | string[];
+    caixaRetorno?: string | string[];
   }>;
 };
 
@@ -75,6 +77,7 @@ function QuestionAnswerList({ answers, definition }: {
 
 export default async function AdminWeeklyFeedbackComparisonPage({ params, searchParams }: PageProps) {
   const [{ clienteId }, requested] = await Promise.all([params, searchParams]);
+  const inboxReturn = readWeeklyFeedbackInboxReturn(requested.caixaRetorno);
   if (!isUuid(clienteId) ||
       typeof requested.atual !== "string" || !isUuid(requested.atual) ||
       typeof requested.anterior !== "string" || !isUuid(requested.anterior) ||
@@ -123,8 +126,8 @@ export default async function AdminWeeklyFeedbackComparisonPage({ params, search
         description="Visualização das respostas originais enviadas. Não é análise de IA, nota automática de adesão, revisão concluída nem decisão de mudar o protocolo."
       >
         <nav aria-label="Retorno à consulta de feedbacks" className={styles.links}>
-          <Link href={receivedWeeklyFeedbackExactHref(current)}>Voltar ao feedback selecionado</Link>
-          <Link href="/admin/feedback-semanal">Caixa de recebimentos</Link>
+          <Link href={withWeeklyFeedbackInboxReturn(receivedWeeklyFeedbackExactHref(current), inboxReturn ?? "")}>Voltar ao feedback selecionado</Link>
+          <Link href={inboxReturn ?? "/admin/feedback-semanal"}>Caixa de recebimentos</Link>
           <Link href={`/admin/clientes/${client.id}/avaliacoes`}>Avaliações da cliente</Link>
           <Link href={`/admin/clientes/${client.id}/protocolos`}>Protocolos da cliente</Link>
         </nav>
@@ -197,8 +200,9 @@ export default async function AdminWeeklyFeedbackComparisonPage({ params, search
                 <div className={styles.decisionChoice}>
                   <span>Avaliação finalizada de {formatAdministrativeAssessmentDate(assessment.assessed_at)}</span>
                   <Link
-                    href={manualAssessmentDecisionFromComparisonHref(
-                      assessment.id, current.id, previous.id,
+                    href={withWeeklyFeedbackInboxReturn(
+                      manualAssessmentDecisionFromComparisonHref(assessment.id, current.id, previous.id),
+                      inboxReturn ?? "",
                     )}
                   >
                     Abrir avaliação e registrar decisão manual

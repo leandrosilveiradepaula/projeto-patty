@@ -22,6 +22,7 @@ import {
   weeklyFeedbackPendingInboxHref,
 } from "@/lib/follow-up/pending-weekly-feedback-inbox";
 import { listPendingWeeklyFeedbackHeadersForClients } from "@/lib/follow-up/pending-weekly-feedback-loader";
+import { weeklyFeedbackInboxReturnHref, withWeeklyFeedbackInboxReturn } from "@/lib/follow-up/weekly-feedback-inbox-return";
 import { listClientsAssignedToCurrentAdmin } from "@/lib/supabase/data-access";
 import { formatWeeklyFeedbackPeriodDate } from "@/lib/weekly-feedback/date-format";
 import styles from "./page.module.css";
@@ -83,6 +84,11 @@ export default async function AdminReceivedWeeklyFeedbackPage({ searchParams }: 
   const results = exploreReceivedWeeklyFeedbacks(receivedHeaders, safeFilters, clientIds);
   const pendingResults = explorePendingWeeklyFeedbacks(pendingHeaders, safeFilters, clientIds);
   const activeResults = isPending ? pendingResults : results;
+  // Preserve only a validated navigation context, never permission to read a client.
+  const inboxReturnHref = invalidSelection ? "" : weeklyFeedbackInboxReturnHref(
+    filters, situation.situation, activeResults.page,
+  );
+  const fromInbox = (href: string) => withWeeklyFeedbackInboxReturn(href, inboxReturnHref);
   const hasFilters = isPending || filters.clientId !== "all" ||
     filters.origin !== "all" || filters.month !== "all";
 
@@ -179,7 +185,7 @@ export default async function AdminReceivedWeeklyFeedbackPage({ searchParams }: 
                     status={<Badge variant="warning">Aguardando cliente</Badge>}
                     action={
                       <div className={styles.actions}>
-                        <Link className={styles.actionLink} href={pendingWeeklyFeedbackExactHref(feedback)}>Abrir solicitação</Link>
+                        <Link className={styles.actionLink} href={fromInbox(pendingWeeklyFeedbackExactHref(feedback))}>Abrir solicitação</Link>
                         <Link className={styles.secondaryLink} href={"/admin/clientes/" + feedback.client_id}>Ver acompanhamento</Link>
                       </div>
                     }
@@ -194,7 +200,7 @@ export default async function AdminReceivedWeeklyFeedbackPage({ searchParams }: 
                     status={<Badge variant="positive">Enviado</Badge>}
                     action={
                       <div className={styles.actions}>
-                        <Link className={styles.actionLink} href={receivedWeeklyFeedbackExactHref(feedback)}>Abrir respostas originais</Link>
+                        <Link className={styles.actionLink} href={fromInbox(receivedWeeklyFeedbackExactHref(feedback))}>Abrir respostas originais</Link>
                         <Link className={styles.secondaryLink} href={"/admin/clientes/" + feedback.client_id}>Ver acompanhamento</Link>
                       </div>
                     }

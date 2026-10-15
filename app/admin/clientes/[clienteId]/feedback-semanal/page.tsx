@@ -1,4 +1,5 @@
 import { authorizedExactRecordPage } from "@/lib/operations/exact-record-navigation";
+import { readWeeklyFeedbackInboxReturn, withWeeklyFeedbackInboxReturn } from "@/lib/follow-up/weekly-feedback-inbox-return";
 import { previousSubmittedFeedbackByPeriod, weeklyFeedbackComparisonHref } from "@/lib/follow-up/weekly-feedback-comparison";
 import { formatAdministrativeAssessmentDate } from "@/lib/evaluations/administrative-assessment-history";
 import {
@@ -34,7 +35,7 @@ import styles from "./page.module.css";
 
 type PageProps = {
   params: Promise<{ clienteId: string }>;
-  searchParams: Promise<{ origem?: string; ano?: string; pendentes?: string; enviados?: string; registro?: string; filaRetorno?: string; listaQ?: string; listaView?: string; listaPagina?: string }>;
+  searchParams: Promise<{ origem?: string; ano?: string; pendentes?: string; enviados?: string; registro?: string; filaRetorno?: string; listaQ?: string; listaView?: string; listaPagina?: string; caixaRetorno?: string | string[] }>;
 };
 
 const formatDate = formatWeeklyFeedbackPeriodDate;
@@ -74,6 +75,7 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
     client.id,
   );
   const rawQuery=await searchParams;
+  const inboxReturn = readWeeklyFeedbackInboxReturn(rawQuery.caixaRetorno);
   const directoryReturn = readClientDirectoryReturn(rawQuery);
   const queueReturn = readPendingQueueReturn(rawQuery.filaRetorno);
   const withReturn = (href: string) => withPendingQueueReturn(withClientDirectoryReturn(href,directoryReturn),queueReturn ?? "");
@@ -113,7 +115,7 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
         description="As respostas enviadas são informações para avaliação da Patty; não provocam alteração automática de protocolo."
         title="Consultar contexto do acompanhamento"
       >
-        <Link href="/admin/feedback-semanal">Voltar à caixa de Feedbacks Semanais</Link>
+        <Link href={inboxReturn ?? "/admin/feedback-semanal"}>Voltar à caixa de Feedbacks Semanais</Link>
         {" · "}
         <Link href={withReturn(`/admin/clientes/${client.id}/avaliacoes`)}>Avaliações</Link>
         {" · "}
@@ -310,7 +312,10 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
                       )}
                       {comparisonPrevious ? (
                         <div className={styles.comparisonAction}>
-                          <Link href={withReturn(weeklyFeedbackComparisonHref(client.id, feedback.id, comparisonPrevious.id))}>
+                          <Link href={withWeeklyFeedbackInboxReturn(
+                            withReturn(weeklyFeedbackComparisonHref(client.id, feedback.id, comparisonPrevious.id)),
+                            inboxReturn ?? "",
+                          )}>
                             Comparar com o Feedback Semanal de período anterior
                           </Link>
                         </div>
@@ -327,10 +332,10 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
                             {manualDecisionChoices.map((assessment) => (
                               <li key={assessment.id}>
                                 <span>Avaliação finalizada de {formatAdministrativeAssessmentDate(assessment.assessed_at)}</span>
-                                <Link href={withReturn(manualAssessmentDecisionFromSubmittedFeedbackHref(
-                                  assessment.id,
-                                  feedback.id,
-                                ))}>
+                                <Link href={withWeeklyFeedbackInboxReturn(
+                                  withReturn(manualAssessmentDecisionFromSubmittedFeedbackHref(assessment.id, feedback.id)),
+                                  inboxReturn ?? "",
+                                )}>
                                   Abrir para decisão manual
                                 </Link>
                               </li>
