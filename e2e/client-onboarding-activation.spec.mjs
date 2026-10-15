@@ -378,6 +378,40 @@ test("J1: cliente sintetica ativa acesso, salva Cadastro Atual e retoma Anamnese
       .toHaveValue("Cidade Sintética J1 B");
     }, { timeout: 35_000 });
 
+    await test.step("J1.10: unpublished protocol remains invisible to its own client", async () => {
+      // This disposable client has no professional protocol. Keep it that way:
+      // no synthetic medical prescriptions, approvals or publications in production.
+      const [drafts, versions, publications] = await Promise.all([
+        admin.from("protocols").select("id").eq("client_id",clientId).limit(1),
+        admin.from("protocol_versions").select("id").eq("client_id",clientId).limit(1),
+        admin.from("protocol_publications").select("id").eq("client_id",clientId).limit(1),
+      ]);
+      for (const result of [drafts, versions, publications]) {
+        if (result.error) throw result.error;
+        expect(result.data).toHaveLength(0);
+      }
+
+      await loginPage.goto("/cliente/protocolo");
+      await expect(loginPage.getByRole("heading",{name:"Meu protocolo",exact:true})).toBeVisible();
+      await expect(loginPage.getByText("Nenhum protocolo foi publicado para você",{exact:true}))
+        .toBeVisible();
+      // A query-string publication ID is NOT authorization to read a draft,
+      // unpublished version, or another client's publication.
+      const inaccessiblePublicationId = `00000000-0000-4000-8000-${unique.slice(0,12)}`;
+      await loginPage.goto(`/cliente/protocolo?publicacao=${inaccessiblePublicationId}`);
+      await expect(loginPage.getByText("Nenhum protocolo foi publicado para você",{exact:true}))
+        .toBeVisible();
+      await loginPage.reload();
+      await expect(loginPage.getByText("Nenhum protocolo foi publicado para você",{exact:true}))
+        .toBeVisible();
+      const layout = await loginPage.evaluate(() => ({
+        viewport: document.documentElement.clientWidth,
+        scroll: document.documentElement.scrollWidth,
+      }));
+      expect(layout.scroll,"Unpublished protocol state must fit mobile viewport")
+        .toBeLessThanOrEqual(layout.viewport + 1);
+    }, {timeout:35_000});
+
     let syntheticPrivateFileId = null;
     await test.step("J1 private photo: verified upload and persisted history", async () => {
       syntheticPrivateFileId = await checkJ1SyntheticPrivatePhoto({page:loginPage,admin,clientId,profileId,unique});
