@@ -80,3 +80,20 @@ test("destructive operations still require explicit confirmation and stop after 
   assert.match(server, /requireRole\("admin"\)/);
   assert.match(server, /!isSingleConfirmedFormValue\(formData, "confirmPublication"\)/);
 });
+
+test("human approval and publication revalidate the persisted exact-version plan",()=>{
+ for(const [action,write] of [
+  ["approveProtocolVersion","createAccessibleProtocolVersionApproval"],
+  ["publishProtocolVersion","createAccessibleProtocolPublication"],
+ ] as const){
+  const start=server.indexOf("export async function "+action+"(");
+  const end=server.indexOf("\nexport async function ",start+30);
+  const section=server.slice(start,end);
+  const validation=section.indexOf("getProtocolDraftReadiness(savedPlans[0] ?? null)");
+  const persisted=section.indexOf("listAccessibleProtocolVersionMealPlans([accessible.version.id])");
+  const writePos=section.indexOf("await "+write+"(");
+  assert.ok(persisted>=0 && validation>persisted && writePos>validation,action);
+  assert.ok(section.includes("if (!readiness.ready)"),action);
+  assert.ok(section.includes("success: false"),action);
+ }
+});
