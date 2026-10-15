@@ -252,3 +252,21 @@ test("J1 real-browser security evidence checks anonymous and client role boundar
  assert.match(clientSpec,/Anamnese must fit mobile viewport/);
  assert.match(clientSpec,/document\.documentElement\.scrollWidth/);
 });
+
+test("J1 real E2E saves one version-scoped, non-clinical Anamnese answer through UI",()=>{
+ assert.match(clientSpec,/J1 Anamnese: editar resposta informativa e persistir sem duplicar/);
+ assert.match(clientSpec,/\.eq\("form_version_id",draftFormVersionId\)/);
+ assert.match(clientSpec,/\.eq\("question_key","city"\)/);
+ assert.match(clientSpec,/expect\(question\.data\.answer_type\)\.toBe\("text"\)/);
+ assert.match(clientSpec,/locator\(\x60#anamnesis-draft-answer-\$\{cityQuestionId\}\x60\)/);
+ assert.match(clientSpec,/await field\.fill\("Cidade Sintética J1 A"\)/);
+ assert.match(clientSpec,/await field\.fill\("Cidade Sintética J1 B"\)/);
+ assert.match(clientSpec,/\.eq\("submission_id",draftId\)/);
+ assert.match(clientSpec,/\.eq\("question_id",cityQuestionId\)/);
+ assert.match(clientSpec,/await expect\.poll\(storedValues/);
+ assert.match(clientSpec,/\.toEqual\(\["Cidade Sintética J1 B"\]\)/);
+ assert.match(clientSpec,/await activationPage\.reload\(\)/);
+ assert.match(clientSpec,/await loginPage\.goto\(\x60\/cliente\/anamnese\/\$\{draftId\}\x60\)/);
+ assert.match(clientSpec,/expect\(submission\.data\.submitted_at\)\.toBeNull\(\)/);
+ assert.match(clientSpec,/cleanupSyntheticClient\(\{ clientId, profileId, email \}\)/);
+});
