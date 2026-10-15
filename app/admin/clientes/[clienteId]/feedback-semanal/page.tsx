@@ -1,4 +1,5 @@
 import { authorizedExactRecordPage } from "@/lib/operations/exact-record-navigation";
+import { previousSubmittedFeedbackByPeriod, weeklyFeedbackComparisonHref } from "@/lib/follow-up/weekly-feedback-comparison";
 import { readClientDirectoryReturn, withClientDirectoryReturn } from "@/lib/operations/client-directory-return";
 import { readPendingQueueReturn, withPendingQueueReturn } from "@/lib/operations/pending-queue-return";
 import { professionalFeedbackYears, readProfessionalFeedbackHistoryQuery, filterProfessionalFeedbacks, paginateProfessionalFeedbacks, professionalFeedbackHistoryHref } from "@/lib/follow-up/professional-weekly-feedback-explorer";
@@ -251,6 +252,7 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
           <>
           <ol className={styles.historyList}>
             {submittedPage.items.map((feedback) => {
+              const comparisonPrevious = previousSubmittedFeedbackByPeriod(orderedFeedbacks, feedback.id);
               const version = feedback.weekly_feedback_form_versions;
               const definition = version
                 ? parseWeeklyFeedbackDefinition(version.definition)
@@ -289,6 +291,13 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
                       ) : (
                         <p className={styles.meta}>Definição do formulário indisponível.</p>
                       )}
+                      {comparisonPrevious ? (
+                        <div className={styles.comparisonAction}>
+                          <Link href={withReturn(weeklyFeedbackComparisonHref(client.id, feedback.id, comparisonPrevious.id))}>
+                            Comparar com o Feedback Semanal de período anterior
+                          </Link>
+                        </div>
+                      ) : null}
                     </div>
                   </details>
                 </li>

@@ -1,8 +1,14 @@
-## 2026-10-15 — J2: caixa de recebimentos do Feedback Semanal (PR em validação)
+## 2026-10-15 — J2: comparação manual de respostas semanais (branch em validação)
+
+### DECISÃO TÉCNICA DE PRODUTO — VISUALIZAÇÃO SOMENTE LEITURA
+
+A Patty pode abrir dois Feedbacks Semanais já enviados da mesma cliente com assignment ativo, comparando o período selecionado com o período anterior por `period_start`. Quando a versão exata do questionário é igual, os pares são alinhados por pergunta original; versões diferentes aparecem separadamente para não inventar equivalência. Não há cálculo de adesão, IA, sugestão de conduta, mudança de protocolo nem estado "lido/revisado". A seleção exige UUIDs válidos, registros enviados e mesma cliente; a leitura busca somente os dois registros via Supabase autenticado e RLS/MFA atuais. A ação de comparação não altera histórico e não utiliza `service_role`. CI, merge, publicação e homologação ainda pendentes; sem migrations.
+
+## 2026-10-15 — J2: caixa de recebimentos do Feedback Semanal (PR #882 integrado)
 
 ### DECISÃO TÉCNICA DE INTERFACE — SEM REVISÃO PROFISSIONAL INFERIDA
 
-Uma lista administrativa de todos os Feedbacks Semanais enviados está preparada: acesso apenas por assignment vigente/RLS/MFA, filtros por cliente/origem/mês de início da semana, paginação e navegação até a resposta exata. A consulta global usa somente cabeçalhos sem respostas sensíveis; resultados de filtros inválidos ou cliente não autorizada falham fechados. O painel e o menu administrativo recebem atalhos. Estado: implementado na branch; CI, merge, publicação e homologação ainda requerem evidências. Não há migration, automação clínica nem estado artificial de "lido/revisado".
+Uma lista administrativa de todos os Feedbacks Semanais enviados está preparada: acesso apenas por assignment vigente/RLS/MFA, filtros por cliente/origem/mês de início da semana, paginação e navegação até a resposta exata. A consulta global usa somente cabeçalhos sem respostas sensíveis; resultados de filtros inválidos ou cliente não autorizada falham fechados. O painel e o menu administrativo recebem atalhos. PR #882 integrado ao `master` `d1342a2c`, com `Validate application` PASS e status Vercel SUCCESS no SHA correspondente. A homologação profissional da J2 ainda não ocorreu. Não há migration, automação clínica nem estado artificial de "lido/revisado".
 
 ## 2026-10-15 — J2: recebimentos semanais no painel da Patty (PR #881 integrado)
 

@@ -3416,3 +3416,29 @@ export async function updateCurrentClientWeeklyFeedback(input: {
 
   return data?.[0] ?? null;
 }
+
+/**
+ * Reads exactly two submitted source records for an authenticated professional
+ * comparison. Existing RLS and admin MFA still decide visibility. The record
+ * IDs are UUID-only route parameters; answers never enter URL query filters.
+ * Never use an admin/service-role bypass for this data.
+ */
+export async function listAccessibleSubmittedWeeklyFeedbackPair(
+  clientId: string,
+  feedbackIds: readonly [string, string],
+) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_weekly_feedbacks")
+    .select(
+      "id, client_id, form_version_id, period_start, period_end, submitted_at, answers, weekly_feedback_form_versions(id, version_number, title, definition)",
+    )
+    .eq("client_id", clientId)
+    .in("id", [...feedbackIds])
+    .not("submitted_at", "is", null)
+    .limit(2);
+
+  if (error) throw error;
+  if (data === null) throw new Error("Não foi possível carregar a comparação de feedbacks.");
+  return data;
+}
