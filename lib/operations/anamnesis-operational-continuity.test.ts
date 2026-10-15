@@ -46,6 +46,19 @@ test("professional review notes are private, bounded and refreshed after persist
   assert.ok(action.includes("createAccessibleAnamnesisReview("));
 });
 
+test("professional notes require submitted Anamnese in both server action and workspace", () => {
+  const action = read("app/admin/anamneses/[anamneseId]/revisao/actions.ts");
+  const page = read("app/admin/anamneses/[anamneseId]/revisao/page.tsx");
+  const guard = action.indexOf("if (!submission.submitted_at)");
+  const write = action.indexOf("await createAccessibleAnamnesisReview(");
+  assert.ok(guard >= 0 && write > guard, "reject drafts before any professional note write");
+  assert.ok(page.includes("submission.submitted_at ? ("));
+  assert.ok(page.includes("Aguardando envio final da cliente"));
+  assert.ok(page.includes("AdminAnamnesisReviewForm submissionId={submission.id}"));
+  assert.ok(page.includes(`/admin/clientes/${submission.client_id}/avaliacoes`));
+  assert.ok(page.includes("listAccessibleAnamnesisReviews(submission.id)"));
+});
+
 test("historical correction refreshes the visible effective value while preserving originals", () => {
   const form = read("components/admin/AdminAnamnesisCorrectionForm.tsx");
   const page = read("app/admin/anamneses/[anamneseId]/correcoes/page.tsx");
