@@ -287,6 +287,9 @@ export default async function AdminPage() {
           <Link className={styles.quickAction} href="/admin/feedback-semanal">
             Feedbacks recebidos
           </Link>
+          <Link className={styles.quickAction} href="/admin/feedback-semanal?situacao=pendentes">
+            Feedbacks aguardando cliente
+          </Link>
           <Link className={styles.quickAction} href="/admin/conteudos">
             Abrir conteúdos
           </Link>
