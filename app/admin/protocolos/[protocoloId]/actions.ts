@@ -815,6 +815,18 @@ export async function approveProtocolVersion(
     };
   }
 
+  // Revalidate persisted structure at the irreversible human decision boundary.
+  // Existing submissions can be legacy/incomplete; an approval alone cannot
+  // establish that a plan is safe to expose to the client.
+  const savedPlans = await listAccessibleProtocolVersionMealPlans([accessible.version.id]);
+  const readiness = getProtocolDraftReadiness(savedPlans[0] ?? null);
+  if (!readiness.ready) {
+    return {
+      message: "Esta versão não possui estrutura alimentar completa para esta operação. " + formatProtocolDraftReadiness(readiness.reasons),
+      success: false,
+    };
+  }
+
   try {
     await createAccessibleProtocolVersionApproval({
       approvedByProfileId: context.profileId,
@@ -868,6 +880,18 @@ export async function publishProtocolVersion(
     return {
       message:
         "Esta versão não está no estado permitido para publicação.",
+      success: false,
+    };
+  }
+
+  // Revalidate persisted structure at the irreversible human decision boundary.
+  // Existing submissions can be legacy/incomplete; an approval alone cannot
+  // establish that a plan is safe to expose to the client.
+  const savedPlans = await listAccessibleProtocolVersionMealPlans([accessible.version.id]);
+  const readiness = getProtocolDraftReadiness(savedPlans[0] ?? null);
+  if (!readiness.ready) {
+    return {
+      message: "Esta versão não possui estrutura alimentar completa para esta operação. " + formatProtocolDraftReadiness(readiness.reasons),
       success: false,
     };
   }
