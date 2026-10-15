@@ -8,7 +8,7 @@ const access = read("lib/supabase/data-access.ts");
 const start = access.indexOf("export async function updateCurrentClientWeeklyFeedback(");
 const end = access.indexOf("\nexport ", start + 50);
 const save = access.slice(start, end === -1 ? undefined : end);
-const sql = read("supabase/migrations/20261015171900_private_weekly_feedback_atomic_save.sql");
+const sql = read("supabase/migrations/20261015171859_private_weekly_feedback_atomic_save.sql");
 
 test("client writes weekly health answers through authenticated POST RPC, never URL filters", () => {
   assert.ok(start > 0 && (end === -1 || end > start));
