@@ -3396,24 +3396,23 @@ export async function updateCurrentClientWeeklyFeedback(input: {
   submit: boolean;
 }) {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("client_weekly_feedbacks")
-    .update({
-      answers: input.answers,
-      submitted_at: input.submit ? new Date().toISOString() : null,
-    })
-    .eq("id", input.feedbackId)
-    .eq("client_id", input.clientId)
-    .is("submitted_at", null)
-    .filter("answers", "eq", JSON.stringify(input.expectedAnswers))
-    .select(
-      "id, client_id, form_version_id, period_start, period_end, due_at, request_source, schedule_configuration_version_id, answers, submitted_at, created_at",
-    )
-    .maybeSingle();
+  // Never serialize medical/behavioral answers into PostgREST URL filters.
+  // The SECURITY INVOKER function compares the previous JSON atomically in SQL
+  // and requires the current Auth user to own this client (plus existing RLS).
+  const { data, error } = await supabase.rpc(
+    "save_client_weekly_feedback_if_unchanged",
+    {
+      p_client_id: input.clientId,
+      p_feedback_id: input.feedbackId,
+      p_expected_answers: input.expectedAnswers,
+      p_answers: input.answers,
+      p_submit: input.submit,
+    },
+  );
 
   if (error) {
     throw error;
   }
 
-  return data;
+  return data?.[0] ?? null;
 }
