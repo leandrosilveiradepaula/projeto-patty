@@ -64,6 +64,13 @@ export async function cleanupExactJ1PrivateFiles(admin, {clientId,profileId,emai
   ]);
   const files=demand(filesResult),sessions=demand(sessionsResult),accessEvents=demand(accessResult);
   const plan=verifyDisposablePrivateFileSet({clientId,profileId,email,files,sessions,accessEvents});
+  // Preserve professional audit history even when the actor is Patty,
+  // rather than the disposable client. No fixture may erase audited files.
+  if (plan.files.length) {
+    const audit=demand(await admin.from("client_file_access_events")
+      .select("id").eq("requested_file_id",plan.files[0].id).limit(1));
+    if (audit.length) throw new Error("Refusing cleanup of a professionally audited private file");
+  }
   // This is deliberately exact-path deletion (never storage.list/remove prefix).
   const paths=[...plan.files.map(x=>x.path),...plan.sessions.map(x=>x.path)];
   if (paths.length) {
