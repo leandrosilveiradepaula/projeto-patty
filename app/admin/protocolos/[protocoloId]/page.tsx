@@ -385,9 +385,10 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
                         Esta versão já foi publicada. Nenhuma ação adicional de
                         lifecycle está disponível para este registro.
                       </p>
-                    ) : lifecycleAction === "submit" && !draftReadiness.ready ? (
-                      <Alert title="Rascunho ainda incompleto" variant="warning">
+                    ) : !draftReadiness.ready ? (
+                      <Alert title={lifecycleAction === "submit" ? "Rascunho ainda incompleto" : "Versão congelada com estrutura incompleta"} variant="warning">
                         {formatProtocolDraftReadiness(draftReadiness.reasons)}
+                        {lifecycleAction !== "submit" ? " Não é possível aprovar ou publicar esta versão. Utilize a ação de criar um novo rascunho a partir dela para corrigir a estrutura e submetê-la novamente." : ""}
                       </Alert>
                     ) : (
                       <ProtocolLifecycleAction
