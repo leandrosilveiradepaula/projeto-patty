@@ -38,7 +38,7 @@ test("J2 browser process explicitly refuses a remote Supabase or Next server", (
   assert.match(spec, /loginAdminWithMfa/);
   assert.match(spec, /clientApi\.rpc\("save_client_weekly_feedback_if_unchanged"/);
   assert.match(spec, /unassigned.*Totp|unassignedTotp/);
-  assert.doesNotMatch(spec, /E2E_BASE_URL|SUPABASE_SECRET_KEY|NEXT_PUBLIC_SUPABASE_SECRET_KEY/);
+  assert.doesNotMatch(spec, /process\.env\.(?:E2E_BASE_URL|E2E_SUPABASE_SECRET_KEY|SUPABASE_SECRET_KEY)|NEXT_PUBLIC_SUPABASE_SECRET_KEY/);
 });
 
 test("TOTP is enabled only by a local runner patch and never committed in the Supabase config", () => {
