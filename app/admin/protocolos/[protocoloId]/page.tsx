@@ -229,7 +229,7 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
                 submittedForReview: Boolean(version.submitted_for_review_at),
               });
               const draftReadiness = getProtocolDraftReadiness(mealPlan);
-              const draftNavigation = !version.submitted_for_review_at ? buildProtocolDraftNavigation(mealPlan) : null;
+              const draftNavigation = !version.submitted_for_review_at ? buildProtocolDraftNavigation(mealPlan, version.id) : null;
               const isCurrentVersion = versions[0]?.id === version.id;
               const isLatestPublishedVersion = version.id === latestPublishedId;
               const isRequestedVersion = version.version_number === selectedVersionNumber;
@@ -261,7 +261,7 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
                     }
                   >
                     <div className={styles.versionBody}>
-                  <ProtocolWorkspaceJourney action={lifecycleAction} hasPlan={Boolean(mealPlan)} ready={draftReadiness.ready} versionNumber={version.version_number} />
+                  <ProtocolWorkspaceJourney action={lifecycleAction} hasPlan={Boolean(mealPlan)} ready={draftReadiness.ready} versionNumber={version.version_number} versionId={version.id} />
                   <dl className={styles.versionFacts}>
                     <div><dt>Estrutura alimentar</dt><dd>{structureFacts ? structureFacts.variantCount+" variações · "+structureFacts.mealCount+" refeições · "+structureFacts.allocationCount+" doses registradas · "+structureFacts.cycleCount+" ciclos" : "Plano não registrado"}</dd></div>
                     <div>
@@ -343,7 +343,7 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
                           variantSummaries={summarizeMealDraftPlan(mealPlan)}
                         />
                       </div>
-                      {draftNavigation ? <ProtocolDraftCompletionMap navigation={draftNavigation} /> : null}
+                      {draftNavigation ? <ProtocolDraftCompletionMap navigation={draftNavigation} versionNumber={version.version_number} /> : null}
                       <div className={styles.versionPlan}>
                         <AdminProtocolDraftEditor
                           plan={mealPlan}
