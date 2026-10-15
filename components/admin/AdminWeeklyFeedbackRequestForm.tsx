@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 import {
   type WeeklyFeedbackRequestFormState,
@@ -61,10 +62,13 @@ export function AdminWeeklyFeedbackRequestForm({
       {state.message ? (
         <Alert
           live={state.success ? "polite" : "assertive"}
-          title={state.success ? "Feedback solicitado" : "Não foi possível solicitar"}
-          variant={state.success ? "success" : "critical"}
+          title={state.success ? "Feedback solicitado" : state.feedbackId ? "Solicitação já existente" : "Não foi possível solicitar"}
+          variant={state.success ? "success" : state.feedbackId ? "info" : "critical"}
         >
           {state.message}
+          {state.feedbackId ? (
+            <>{" "}<Link href={`/admin/clientes/${clientId}/feedback-semanal?registro=${state.feedbackId}#feedback-${state.feedbackSubmitted ? "enviados" : "pendentes"}`}>Abrir registro exato</Link></>
+          ) : null}
         </Alert>
       ) : null}
       <label className={styles.field}>

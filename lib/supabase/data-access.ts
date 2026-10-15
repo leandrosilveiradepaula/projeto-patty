@@ -3315,6 +3315,27 @@ export async function listAccessibleWeeklyFeedbacksForClient(clientId: string) {
   );
 }
 
+/** A narrow, authorized period lookup for manual-request recovery.
+ * Do not load answers or health content just to locate an existing request.
+ */
+export async function getAccessibleWeeklyFeedbackForPeriod(
+  clientId: string,
+  periodStart: string,
+  periodEnd: string,
+) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_weekly_feedbacks")
+    .select("id, submitted_at")
+    .eq("client_id", clientId)
+    .eq("period_start", periodStart)
+    .eq("period_end", periodEnd)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
 export async function createAccessibleWeeklyFeedbackRequest(input: {
   clientId: string;
   dueAt: string | null;
