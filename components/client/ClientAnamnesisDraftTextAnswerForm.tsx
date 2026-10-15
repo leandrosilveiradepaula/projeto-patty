@@ -42,10 +42,12 @@ export function ClientAnamnesisDraftTextAnswerForm({
   const [state, formAction, isPending] = useActionState(action, initialState);
   const [value, setValue] = useState(initialValue);
   const formRef = useRef<HTMLFormElement>(null);
-  const persistedExistsRef = useRef(initialAnswerExists);
-  const lastSavedValueRef = useRef(initialValue);
+  // A successful server action must update React state, not only refs: the
+  // saved indicator and the next optimistic concurrency expectation depend on it.
+  const [persistedExists, setPersistedExists] = useState(initialAnswerExists);
+  const [lastSavedValue, setLastSavedValue] = useState(initialValue);
+  const [failedValue, setFailedValue] = useState<string | null>(null);
   const pendingValueRef = useRef<string | null>(null);
-  const failedValueRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (pendingValueRef.current === null) {
@@ -53,15 +55,15 @@ export function ClientAnamnesisDraftTextAnswerForm({
     }
 
     if (state.success) {
-      lastSavedValueRef.current = pendingValueRef.current;
-      persistedExistsRef.current = true;
-      failedValueRef.current = null;
+      setLastSavedValue(pendingValueRef.current);
+      setPersistedExists(true);
+      setFailedValue(null);
       pendingValueRef.current = null;
       return;
     }
 
     if (state.message) {
-      failedValueRef.current = pendingValueRef.current;
+      setFailedValue(pendingValueRef.current);
       pendingValueRef.current = null;
     }
   }, [state]);
@@ -70,12 +72,13 @@ export function ClientAnamnesisDraftTextAnswerForm({
     if (
       isPending ||
       pendingValueRef.current !== null ||
-      value === lastSavedValueRef.current
+      value === lastSavedValue
     ) {
       return;
     }
 
     pendingValueRef.current = value;
+    setFailedValue(null);
     formRef.current?.requestSubmit();
   }
 
@@ -83,8 +86,8 @@ export function ClientAnamnesisDraftTextAnswerForm({
     if (
       isPending ||
       pendingValueRef.current !== null ||
-      value === lastSavedValueRef.current ||
-      value === failedValueRef.current
+      value === lastSavedValue ||
+      value === failedValue
     ) {
       return;
     }
@@ -95,14 +98,14 @@ export function ClientAnamnesisDraftTextAnswerForm({
     }, 900);
 
     return () => window.clearTimeout(timeoutId);
-  }, [isPending, state, value]);
+  }, [isPending, state, value, lastSavedValue, failedValue]);
 
-  const saved = state.success && value === lastSavedValueRef.current;
+  const saved = state.success && value === lastSavedValue;
 
   return (
     <form action={formAction} className={styles.form} ref={formRef}>
-      <input name="expectedAnswerExists" type="hidden" value={persistedExistsRef.current ? "1" : "0"} />
-      <input name="expectedAnswerValue" type="hidden" value={persistedExistsRef.current ? (lastSavedValueRef.current ?? "") : ""} />
+      <input name="expectedAnswerExists" type="hidden" value={persistedExists ? "1" : "0"} />
+      <input name="expectedAnswerValue" type="hidden" value={persistedExists ? lastSavedValue : ""} />
       {state.message && !state.success ? (
         <Alert
           live="assertive"
@@ -129,7 +132,7 @@ export function ClientAnamnesisDraftTextAnswerForm({
           />
         )}
       </FormField>
-      {state.message && !state.success && value !== lastSavedValueRef.current ? (
+      {state.message && !state.success && value !== lastSavedValue ? (
         <Button disabled={isPending || pendingValueRef.current !== null} onClick={saveIfChanged} size="compact" type="button" variant="secondary">
           Tentar salvar novamente
         </Button>
@@ -139,7 +142,7 @@ export function ClientAnamnesisDraftTextAnswerForm({
           ? "Salvando..."
           : saved
             ? "Salvo automaticamente."
-            : value === lastSavedValueRef.current
+            : value === lastSavedValue
               ? "Resposta salva."
               : state.message && !state.success
                 ? "Não salvo. Sua resposta ainda está no campo."

@@ -345,6 +345,7 @@ test("J1: cliente sintetica ativa acesso, salva Cadastro Atual e retoma Anamnese
       }
       await expect.poll(storedValues,{timeout:20_000}).toEqual(["Cidade Sintética J1 A"]);
 
+      await expect(activationPage.getByText("Salvo automaticamente.", {exact:true})).toBeVisible({timeout:15_000});
       await field.fill("Cidade Sintética J1 B");
       await field.blur();
       await expect.poll(storedValues,{timeout:20_000}).toEqual(["Cidade Sintética J1 B"]);

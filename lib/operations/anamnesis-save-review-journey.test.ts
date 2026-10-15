@@ -19,8 +19,13 @@ test("client can explicitly refresh factual saved-answer progress without full b
 test("text draft save failure preserves entered text and provides a direct retry", () => {
   const source = read("components/client/ClientAnamnesisDraftTextAnswerForm.tsx");
   assert.ok(source.includes("pendingValueRef.current = value"));
-  assert.ok(source.includes("lastSavedValueRef.current"));
-  assert.ok(source.includes("failedValueRef.current"));
+  assert.ok(source.includes("const [lastSavedValue, setLastSavedValue] = useState(initialValue)"));
+  assert.ok(source.includes("const [failedValue, setFailedValue] = useState<string | null>(null)"));
+  assert.ok(source.includes("setLastSavedValue(pendingValueRef.current)"));
+  assert.ok(source.includes("setPersistedExists(true)"));
+  assert.ok(source.includes("value={persistedExists ? lastSavedValue : \"\"}"));
+  assert.ok(source.includes("value === lastSavedValue"));
+  assert.ok(source.includes("value === failedValue"));
   assert.ok(source.includes("onBlur={saveIfChanged}"));
   assert.ok(source.includes("onClick={saveIfChanged}"));
   assert.ok(source.includes("Tentar salvar novamente"));
