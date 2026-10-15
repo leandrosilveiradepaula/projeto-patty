@@ -1,4 +1,4 @@
-import { orderClientWeeklyFeedbacks } from "@/lib/follow-up/client-weekly-feedback-order";
+import { orderClientWeeklyFeedbacks } from "./client-weekly-feedback-order.ts";
 
 export type SubmittedWeeklyFeedbackReference = {
   id: string;
