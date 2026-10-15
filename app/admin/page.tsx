@@ -166,6 +166,7 @@ export default async function AdminPage() {
         <Section
           description="Últimos cinco envios do Feedback Semanal das clientes sob seu acompanhamento atual. Recebimento não significa leitura, revisão nem decisão profissional."
           title="Feedbacks Semanais recebidos"
+          action={<Link className={styles.sectionLink} href="/admin/feedback-semanal">Ver todos os recebimentos</Link>}
         >
           <ol className={styles.pendingPreviewList}>
             {latestReceivedFeedbacks.map((feedback) => (
@@ -282,6 +283,9 @@ export default async function AdminPage() {
           </Link>
           <Link className={styles.quickAction} href="/admin/pendencias">
             Revisar pendências
+          </Link>
+          <Link className={styles.quickAction} href="/admin/feedback-semanal">
+            Feedbacks recebidos
           </Link>
           <Link className={styles.quickAction} href="/admin/conteudos">
             Abrir conteúdos

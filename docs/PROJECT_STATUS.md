@@ -1,8 +1,14 @@
-## 2026-10-15 — J2: recebimentos semanais no painel da Patty (branch em validação)
+## 2026-10-15 — J2: caixa de recebimentos do Feedback Semanal (PR em validação)
+
+### DECISÃO TÉCNICA DE INTERFACE — SEM REVISÃO PROFISSIONAL INFERIDA
+
+Uma lista administrativa de todos os Feedbacks Semanais enviados está preparada: acesso apenas por assignment vigente/RLS/MFA, filtros por cliente/origem/mês de início da semana, paginação e navegação até a resposta exata. A consulta global usa somente cabeçalhos sem respostas sensíveis; resultados de filtros inválidos ou cliente não autorizada falham fechados. O painel e o menu administrativo recebem atalhos. Estado: implementado na branch; CI, merge, publicação e homologação ainda requerem evidências. Não há migration, automação clínica nem estado artificial de "lido/revisado".
+
+## 2026-10-15 — J2: recebimentos semanais no painel da Patty (PR #881 integrado)
 
 ### DECISÃO TÉCNICA / PRODUTO — SEM NOVA REGRA CLÍNICA
 
-O painel administrativo passa a exibir os cinco Feedbacks Semanais enviados mais recentes das clientes com acompanhamento autorizado, com data de recebimento e link ao registro exato. A consulta é limitada, usa RLS/MFA e não carrega respostas de saúde no resumo. A exibição de um envio **não** cria estado de leitura/revisão, pendência clínica, resposta da Patty ou decisão automática. Implementado na branch; CI, merge, deployment e homologação profissional ainda não comprovados. Sem alteração de migrations.
+O painel administrativo passa a exibir os cinco Feedbacks Semanais enviados mais recentes das clientes com acompanhamento autorizado, com data de recebimento e link ao registro exato. A consulta é limitada, usa RLS/MFA e não carrega respostas de saúde no resumo. A exibição de um envio **não** cria estado de leitura/revisão, pendência clínica, resposta da Patty ou decisão automática. PR #881 integrado no master `adbee9dc`, com CI `Validate application` PASS e status Vercel success. Homologação profissional da J2 ainda não executada. Sem alteração de migrations.
 
 ## 2026-10-15 — J2: cobertura de revogacao do Feedback Semanal (PR em validacao)
 
