@@ -11,6 +11,10 @@ const png = Buffer.from(
  */
 export async function checkJ1SyntheticPrivatePhoto({ page, admin, clientId, profileId, unique }) {
   const name = "e2e-j1-" + unique + ".png";
+  // Inspect only metadata: never mint signed links or create audit events.
+  const bucket = await admin.storage.getBucket("client-private");
+  if (bucket.error) throw bucket.error;
+  expect(bucket.data?.public, "Client photos must remain in a private bucket").toBe(false);
   await page.goto("/cliente/arquivos");
   await expect(page.getByRole("heading", { name: "Meus arquivos", exact: true })).toBeVisible();
   await page.locator('input[name="file"]').setInputFiles({name, mimeType:"image/png", buffer:png});
@@ -37,7 +41,17 @@ export async function checkJ1SyntheticPrivatePhoto({ page, admin, clientId, prof
   if(sessions.error) throw sessions.error;
   expect(sessions.data).toHaveLength(1);
   expect(sessions.data[0].status).toBe("accepted");
+  const accessEvents = await admin.from("client_file_access_events")
+    .select("id").eq("requested_file_id",file.id);
+  if (accessEvents.error) throw accessEvents.error;
+  expect(accessEvents.data, "No file-view audit trail should be erased by a synthetic fixture").toHaveLength(0);
   await page.reload();
   await expect(page.getByRole("heading",{name,exact:true})).toBeVisible();
+  const layout = await page.evaluate(() => ({
+    viewport:document.documentElement.clientWidth,
+    scroll:document.documentElement.scrollWidth,
+  }));
+  expect(layout.scroll, "Private file history must fit the mobile viewport")
+    .toBeLessThanOrEqual(layout.viewport + 1);
   return file.id;
 }

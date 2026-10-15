@@ -397,6 +397,8 @@ test("J1: cliente sintetica ativa acesso, salva Cadastro Atual e retoma Anamnese
       expect(syntheticPrivateFileId).toMatch(/^[0-9a-f-]{36}$/i);
       await visitor.goto(`/cliente/arquivos/${syntheticPrivateFileId}?preview=1`);
       await expect(visitor).toHaveURL(/\/login\/?(?:[?].*)?$/);
+      await visitor.goto(`/cliente/arquivos/${syntheticPrivateFileId}`);
+      await expect(visitor).toHaveURL(/\/login\/?(?:[?].*)?$/);
 
       // Existing authenticated client session must not enter Patty's admin UI.
       await loginPage.goto("/admin/pendencias");
