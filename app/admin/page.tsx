@@ -1,6 +1,9 @@
 import Link from "next/link";
 
 import { AdminMetricCard } from "@/components/admin/AdminMetricCard";
+import { listRecentSubmittedWeeklyFeedbacksForClients } from "@/lib/follow-up/recent-weekly-feedback-loader";
+import { receivedWeeklyFeedbackExactHref } from "@/lib/follow-up/recent-weekly-feedbacks";
+import { formatWeeklyFeedbackPeriodDate } from "@/lib/weekly-feedback/date-format";
 import { PendingItemCard } from "@/components/admin/PendingItemCard";
 import { Badge } from "@/components/ui/Badge";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -38,6 +41,12 @@ export default async function AdminPage() {
     getOperationalPendingItemsForCurrentAdmin(),
   ]);
 
+  const assignedClientIds = assignments.flatMap(assignment => assignment.clients?.id ? [assignment.clients.id] : []);
+  const assignedClientLabels = new Map(assignments.flatMap(assignment => assignment.clients
+    ? [[assignment.clients.id, assignment.clients.full_name?.trim() || assignment.clients.profiles?.display_name?.trim() || "Cliente sem nome informado"] as const]
+    : [],
+  ));
+  const latestReceivedFeedbacks = await listRecentSubmittedWeeklyFeedbacksForClients(assignedClientIds);
   const assignedCount = assignments.length;
   const assessmentCount = assessments.length;
   const protocolCount = protocols.length;
@@ -153,6 +162,26 @@ export default async function AdminPage() {
         </div>
       </Section>
 
+      {latestReceivedFeedbacks.length > 0 ? (
+        <Section
+          description="Últimos cinco envios do Feedback Semanal das clientes sob seu acompanhamento atual. Recebimento não significa leitura, revisão nem decisão profissional."
+          title="Feedbacks Semanais recebidos"
+        >
+          <ol className={styles.pendingPreviewList}>
+            {latestReceivedFeedbacks.map((feedback) => (
+              <li key={feedback.id}>
+                <PendingItemCard
+                  title={`Feedback Semanal · ${formatWeeklyFeedbackPeriodDate(feedback.period_start)} a ${formatWeeklyFeedbackPeriodDate(feedback.period_end)}`}
+                  description="Respostas enviadas e preservadas no histórico. Abra o registro para consultar o conteúdo original."
+                  meta={`${assignedClientLabels.get(feedback.client_id) ?? "Cliente sem nome informado"} · Enviado em ${formatDateTime(feedback.submitted_at)}`}
+                  status={<Badge variant="positive">Enviado</Badge>}
+                  action={<Link className={styles.metricLink} href={receivedWeeklyFeedbackExactHref(feedback)}>Abrir respostas</Link>}
+                />
+              </li>
+            ))}
+          </ol>
+        </Section>
+      ) : null}
       {nextPattyItems.length > 0 ? (
         <Section
           action={

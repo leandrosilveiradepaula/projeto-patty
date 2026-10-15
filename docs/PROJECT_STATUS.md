@@ -1,3 +1,9 @@
+## 2026-10-15 — J2: recebimentos semanais no painel da Patty (branch em validação)
+
+### DECISÃO TÉCNICA / PRODUTO — SEM NOVA REGRA CLÍNICA
+
+O painel administrativo passa a exibir os cinco Feedbacks Semanais enviados mais recentes das clientes com acompanhamento autorizado, com data de recebimento e link ao registro exato. A consulta é limitada, usa RLS/MFA e não carrega respostas de saúde no resumo. A exibição de um envio **não** cria estado de leitura/revisão, pendência clínica, resposta da Patty ou decisão automática. Implementado na branch; CI, merge, deployment e homologação profissional ainda não comprovados. Sem alteração de migrations.
+
 ## 2026-10-15 — J2: cobertura de revogacao do Feedback Semanal (PR em validacao)
 
 ### FATO DE IMPLEMENTACAO DE TESTE (NAO HOMOLOGACAO)
