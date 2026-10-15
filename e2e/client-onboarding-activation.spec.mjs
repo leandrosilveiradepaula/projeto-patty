@@ -378,8 +378,9 @@ test("J1: cliente sintetica ativa acesso, salva Cadastro Atual e retoma Anamnese
       .toHaveValue("Cidade Sintética J1 B");
     }, { timeout: 35_000 });
 
+    let syntheticPrivateFileId = null;
     await test.step("J1 private photo: verified upload and persisted history", async () => {
-      await checkJ1SyntheticPrivatePhoto({page:loginPage,admin,clientId,profileId,unique});
+      syntheticPrivateFileId = await checkJ1SyntheticPrivatePhoto({page:loginPage,admin,clientId,profileId,unique});
     }, {timeout:55000});
 
     await test.step("J1 authorization: anonymous session and client cannot access privileged records", async () => {
@@ -390,6 +391,11 @@ test("J1: cliente sintetica ativa acesso, salva Cadastro Atual e retoma Anamnese
       await visitor.goto(`/cliente/anamnese/${draftId}`);
       await expect(visitor).toHaveURL(/\/login\/?(?:[?].*)?$/);
       await visitor.goto("/cliente/perfil");
+      await expect(visitor).toHaveURL(/\/login\/?(?:[?].*)?$/);
+      // No signed URL or private bytes are exposed to anonymous visitors.
+      // Do not preview the file in an authenticated session: it must retain audit history.
+      expect(syntheticPrivateFileId).toMatch(/^[0-9a-f-]{36}$/i);
+      await visitor.goto(`/cliente/arquivos/${syntheticPrivateFileId}?preview=1`);
       await expect(visitor).toHaveURL(/\/login\/?(?:[?].*)?$/);
 
       // Existing authenticated client session must not enter Patty's admin UI.
