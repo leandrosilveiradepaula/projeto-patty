@@ -2,7 +2,7 @@
 -- Exercises the actual RLS/invoker boundary from publication -> request ->
 -- partial save -> CAS conflict -> definitive submit -> admin history.
 begin;
-select plan(30);
+select plan(34);
 
 select has_function('public', 'save_client_weekly_feedback_if_unchanged', array['uuid','uuid','jsonb','jsonb','boolean']);
 select ok(
@@ -89,6 +89,48 @@ select lives_ok(
 );
 
 select is((select count(*) from public.client_weekly_feedbacks), 1::bigint, 'professional reads the requested client-scoped feedback');
+-- Assigned professionals can read pending requests but cannot write answers.
+select is(
+  (with attempted as (
+    update public.client_weekly_feedbacks
+    set answers = '{"q01":99}'::jsonb
+    where id = 'f1600000-0000-0000-0000-000000000001'
+    returning id
+  ) select count(*) from attempted),
+  0::bigint,
+  'assigned admin cannot directly change pending answers'
+);
+reset role;
+
+-- Assert client isolation while the request is still pending, not just after
+-- submission (where submitted_at would independently prevent writes).
+set local role authenticated;
+select set_config('request.jwt.claim.sub','f1100000-0000-0000-0000-000000000003',true);
+select set_config('request.jwt.claims','{"sub":"f1100000-0000-0000-0000-000000000003","aal":"aal1","role":"authenticated"}',true);
+select is(
+  (select count(*) from public.client_weekly_feedbacks),
+  0::bigint,
+  'another client cannot see a pending weekly feedback'
+);
+select is(
+  (select count(*) from public.save_client_weekly_feedback_if_unchanged(
+    'f1200000-0000-0000-0000-000000000001',
+    'f1600000-0000-0000-0000-000000000001',
+    '{}'::jsonb, '{"q01":99}'::jsonb, false
+  )),
+  0::bigint,
+  'another client cannot write the pending request using CAS'
+);
+select is(
+  (with attempted as (
+    update public.client_weekly_feedbacks
+    set answers = '{"q01":99}'::jsonb
+    where id = 'f1600000-0000-0000-0000-000000000001'
+    returning id
+  ) select count(*) from attempted),
+  0::bigint,
+  'another client cannot write pending answers through direct SQL'
+);
 reset role;
 
 set local role authenticated;
