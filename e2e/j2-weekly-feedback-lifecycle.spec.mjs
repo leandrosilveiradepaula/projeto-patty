@@ -410,9 +410,18 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
       expect(Object.keys(submitted.answers)).toHaveLength(21);
       expect(submitted.answers.q01).toBe(2);
       expect(submitted.answers.q17).toBe(7);
+      // Navigation is only emitted after the server action confirmed persistence.
+      await expect(clientPage.getByText("Envio confirmado", { exact: true })).toBeVisible();
+      await expect(clientPage).toHaveURL(new RegExp("registro=" + feedbackId));
+      await expect(clientPage.locator("#feedback-enviado-" + feedbackId)).toHaveAttribute("open", "");
+      await expect(clientPage.getByText("Resposta sintética J2 exclusivamente local").first()).toBeVisible();
       await clientPage.reload();
+      await expect(clientPage.getByText("Envio confirmado", { exact: true })).toBeVisible();
       await expect(clientPage.getByRole("heading", { name: "Histórico enviado" })).toBeVisible();
       await expect(clientPage.locator("#feedback-pendente-" + feedbackId)).toHaveCount(0);
+      // A forged/unknown record identifier must never create a confirmation.
+      await clientPage.goto("/cliente/feedback-semanal?registro=00000000-0000-4000-8000-000000000000");
+      await expect(clientPage.getByText("Envio confirmado", { exact: true })).toHaveCount(0);
     });
 
     await test.step("envio original fica imutável, inclusive na RPC de uma sessão antiga", async () => {

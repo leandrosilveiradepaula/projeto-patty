@@ -1,3 +1,15 @@
+## 2026-10-15 — J2: diagnóstico e correção de confirmação após envio (PR #890, em validação)
+
+**FATO TESTADO:** no SHA `09837fe7`, `Validate application` concluiu com sucesso; o Playwright local gravou e verificou todas as 21 respostas sintéticas, mas não encontrou a confirmação da UI. A action revalidava a página, removendo o componente antes de seu efeito de redirecionamento. **CORREÇÃO IMPLEMENTADA NA BRANCH:** redirecionamento exclusivamente no caminho de sucesso da action autenticada, após escrita CAS confirmada e invalidação da rota. Ao abrir o histórico, o servidor reautoriza o ID submetido antes de mostrar confirmação. Falhas e rascunhos não navegam. CI e E2E do novo commit ainda precisam passar; merge, deploy e homologação profissional permanecem pendentes.
+
+---
+## 2026-10-15 — J2: fechamento de confirmação e navegação exata (PR em validação)
+
+**FATO CONFIRMADO:** PR #889 mergeado no `master` `ff2f05b991f9d19735bda09e55b348cb8af92ce8`; no HEAD do PR (`06ee99b5`) tanto `Validate application` quanto `Validate J2 local browser lifecycle` foram aprovados. O CI pós-merge foi iniciado. Vercel ainda responde `build-rate-limit` e a versão de produção não está demonstrada.
+
+**CORREÇÃO DE PRODUTO EM BRANCH:** após envio definitivo da cliente, a interface navegará ao registro confirmado no histórico em vez de perder a mensagem quando o formulário sai da lista de pendentes. O parâmetro contém somente ID; a confirmação e a página certa dependem de `submitted_at` e da lista previamente autorizada do Supabase. Ações administrativas de abrir uma solicitação existente e abrir registros pendentes usarão âncoras precisas. Playwright local será ampliado para confirmar o recebimento real e recusar confirmação por ID não autorizado. **Ainda não integrado, publicado ou homologado.** O conjunto não modifica migrations, permissões, decisões clínicas ou publicações.
+
+---
 ## 2026-10-15 — J2: validação autenticada local concluída; produção pendente
 
 **FATO CONFIRMADO:** PR #887 mergeado no `master` `0bd84021d0af39ef11a254253fda9406a173052c`; [Validate application pós-merge #38814525538](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38814525538) = PASS. [Playwright E2E J2 local #38813434552](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38813434552) = PASS no SHA pré-merge, inclusive encerramento/limpeza do banco descartável. A execução percorreu login administrativo MFA, solicitação após publicação sintética prévia, cliente móvel, rascunho, persistência, CAS, envio de 21 respostas sintéticas, história original e negação a acesso cruzado; nenhuma resposta real foi utilizada. São evidências de **J2 TESTADA EM AMBIENTE LOCAL**, não de publicação/homologação profissional em produção.

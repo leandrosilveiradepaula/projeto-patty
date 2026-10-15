@@ -69,7 +69,8 @@ function safeInstant(value: string) {
 /** Navigation params convey an ID only; the detail page rechecks RLS and exact record. */
 export function pendingWeeklyFeedbackExactHref(record: Pick<PendingWeeklyFeedbackHeader, "client_id" | "id">) {
   return "/admin/clientes/" + encodeURIComponent(record.client_id) +
-    "/feedback-semanal?registro=" + encodeURIComponent(record.id);
+    "/feedback-semanal?registro=" + encodeURIComponent(record.id) +
+    "#feedback-pendente-" + encodeURIComponent(record.id);
 }
 
 export function weeklyFeedbackPendingInboxHref(

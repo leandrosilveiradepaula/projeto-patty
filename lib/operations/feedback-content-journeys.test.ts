@@ -87,8 +87,8 @@ test("both new and preexisting weekly feedback requests open their authorized ex
   const form = read("components/admin/AdminWeeklyFeedbackRequestForm.tsx");
   const page = read("app/admin/clientes/[clienteId]/feedback-semanal/page.tsx");
   assert.match(form, /state\.feedbackId \? \(/);
-  assert.match(form, /registro=\$\{state\.feedbackId\}/);
-  assert.match(form, /state\.feedbackSubmitted \? "enviados" : "pendentes"/);
+  assert.match(form, /registro=\$\{encodeURIComponent\(state\.feedbackId\)\}/);
+  assert.match(form, /#feedback-\$\{state\.feedbackSubmitted \? "enviado" : "pendente"\}-\$\{encodeURIComponent\(state\.feedbackId\)\}/);
   assert.match(form, /Abrir registro exato/);
   assert.match(page, /authorizedExactRecordPage\(/);
   assert.match(page, /exactRecordLocated/);

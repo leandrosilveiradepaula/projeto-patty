@@ -6,7 +6,10 @@ const read = (path: string) => readFileSync(new URL("../../" + path, import.meta
 test("failed weekly feedback saves do not navigate away or discard unsaved health answers", () => {
   const action = read("app/cliente/feedback-semanal/actions.ts");
   const form = read("app/cliente/feedback-semanal/ClientWeeklyFeedbackResponseForm.tsx");
-  assert.doesNotMatch(action, /redirect\(/);
+  // Only a confirmed final send navigates. Invalid/conflicting saves return
+  // without triggering a redirect or discarding unsaved client answers.
+  assert.match(action, /if \(submit\) \{\s*\/\/[^]*?redirect\("\/cliente\/feedback-semanal\?registro=" \+ id/);
+  assert.ok(action.indexOf("if (!saved)") < action.lastIndexOf("redirect("));
   for (const status of ["invalid", "save-error", "conflict"]) {
     assert.ok(action.includes('outcome: "' + status + '"'));
   }
@@ -23,11 +26,15 @@ test("the two intents stay separate and never mislabel incomplete persistence as
   assert.ok(action.includes('const submit = intent === "submit"'));
   assert.ok(action.includes("validateWeeklyFeedbackAnswers(answers, definition)"));
   assert.ok(action.includes("saved = await updateCurrentClientWeeklyFeedback({"));
-  assert.ok(action.includes('outcome: submit ? "submitted" : "draft-saved"'));
+  assert.ok(action.includes('outcome: "draft-saved"'));
+  assert.ok(action.includes('if (submit) {'));
+  assert.ok(action.includes('redirect("/cliente/feedback-semanal?registro="'));
   assert.ok(form.includes('state.outcome === "draft-saved"'));
   assert.ok(form.includes('state.outcome === "submitted"'));
-  assert.ok(form.includes('if (state.outcome === "draft-saved" || state.outcome === "submitted")'));
+  assert.ok(form.includes('state.outcome === "draft-saved"'));
   assert.ok(form.includes("router.refresh()"));
+  assert.ok(!form.includes("router.replace("));
+  assert.ok(action.includes("encodeURIComponent(feedbackId)"));
 });
 
 test("weekly feedback retry controls block simultaneous writes while preserving typed fields", () => {

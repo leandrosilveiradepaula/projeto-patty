@@ -101,7 +101,7 @@ test("pending links preserve filters, contain identifiers only, and never imply 
   assert.equal(weeklyFeedbackPendingInboxHref(readReceivedWeeklyFeedbackQuery({}, []), 1),
     "/admin/feedback-semanal?situacao=pendentes#aguardando-cliente");
   const link = pendingWeeklyFeedbackExactHref(request("feedback-1", "client-1"));
-  assert.equal(link, "/admin/clientes/client-1/feedback-semanal?registro=feedback-1");
+  assert.equal(link, "/admin/clientes/client-1/feedback-semanal?registro=feedback-1#feedback-pendente-feedback-1");
   assert.doesNotMatch(link, /answers|respostas|health|sent|submitted/);
 });
 

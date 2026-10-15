@@ -78,7 +78,9 @@ export function ClientWeeklyFeedbackResponseForm({
   useEffect(() => {
     inFlightRef.current = false;
     setMergedAfterConflict(false);
-    if (state.outcome === "draft-saved" || state.outcome === "submitted") {
+    // A draft remains editable and refreshes here. The definitive send is
+    // redirected by the server after persistence, before this form unmounts.
+    if (state.outcome === "draft-saved") {
       setEditedSinceLastSave(false);
       router.refresh();
     }
