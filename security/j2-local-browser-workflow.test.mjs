@@ -36,6 +36,9 @@ test("J2 browser process explicitly refuses a remote Supabase or Next server", (
   assert.match(spec, /e2e-j2-/);
   assert.match(spec, /example\\\.invalid/);
   assert.match(spec, /loginAdminWithMfa/);
+  assert.match(spec, /supabase_db_projeto-patty/);
+  assert.match(spec, /execFileSync\("docker"/);
+  assert.doesNotMatch(spec, /service\.from\(/);
   assert.match(spec, /clientApi\.rpc\("save_client_weekly_feedback_if_unchanged"/);
   assert.match(spec, /unassigned.*Totp|unassignedTotp/);
   assert.doesNotMatch(spec, /process\.env\.(?:E2E_BASE_URL|E2E_SUPABASE_SECRET_KEY|SUPABASE_SECRET_KEY)|NEXT_PUBLIC_SUPABASE_SECRET_KEY/);

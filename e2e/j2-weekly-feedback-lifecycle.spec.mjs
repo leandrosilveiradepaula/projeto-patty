@@ -1,4 +1,5 @@
 import { randomBytes } from "node:crypto";
+import { execFileSync } from "node:child_process";
 import { expect, test } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import { generateTotp, loginAdminWithMfa } from "./helpers/admin-auth.mjs";
@@ -29,10 +30,57 @@ function signedClient() {
   });
 }
 
-async function insert(table, record) {
-  const { data, error } = await service.from(table).insert(record).select("id").single();
-  if (error || !data?.id) throw error ?? new Error("Synthetic fixture insert failed");
-  return data.id;
+// The local CLI deliberately does not auto-grant service_role database table
+// privileges. Fixture and observation use the PostgreSQL owner INSIDE the
+// disposable local DB container, leaving all grants and RLS unchanged.
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const allowedTables = new Set([
+  "profiles", "user_roles", "clients", "client_assignments",
+  "protocols", "protocol_versions", "protocol_version_approvals", "protocol_publications",
+]);
+
+function localSql(query) {
+  if (process.env.J2_E2E_LOCAL_ONLY !== "true" ||
+      supabaseUrl !== "http://127.0.0.1:54321") {
+    throw new Error("Local SQL fixture cannot execute outside the disposable Supabase runner");
+  }
+  return execFileSync("docker", [
+    "exec", "-i", "supabase_db_projeto-patty",
+    "psql", "-X", "-q", "-U", "postgres", "-d", "postgres",
+    "-A", "-t", "-v", "ON_ERROR_STOP=1",
+  ], { input: query.trimEnd() + "\n", encoding: "utf8", timeout: 12000 }).trim();
+}
+
+function sqlLiteral(value) {
+  if (value === null) return "NULL";
+  if (typeof value !== "string" && typeof value !== "number") {
+    throw new Error("Unsupported local fixture value");
+  }
+  return "'" + String(value).replaceAll("'", "''") + "'";
+}
+
+function insert(table, record) {
+  if (!allowedTables.has(table)) throw new Error("Local fixture table not allowed");
+  const entries = Object.entries(record);
+  const keys = entries.map(([key]) => {
+    if (!/^[a-z_]+$/.test(key)) throw new Error("Invalid fixture column name");
+    return key;
+  });
+  const values = entries.map(([, value]) => sqlLiteral(value));
+  const returned = localSql(
+    "insert into public." + table +
+    " (" + keys.join(", ") + ") values (" + values.join(", ") + ") returning id;",
+  );
+  if (!UUID.test(returned)) throw new Error("Local fixture insert returned no valid UUID");
+  return returned;
+}
+
+function localSelect(query) {
+  const output = localSql(
+    "select coalesce(json_agg(row_to_json(t)), '[]'::json)::text " +
+    "from (" + query + ") as t;",
+  );
+  return JSON.parse(output);
 }
 
 async function createIdentity(role, label, nonce) {
@@ -46,12 +94,8 @@ async function createIdentity(role, label, nonce) {
   });
   if (error || !data?.user?.id) throw error ?? new Error("Synthetic Auth user unavailable");
   const id = data.user.id;
-  const profile = await service.from("profiles")
-    .insert({ id, display_name: "E2E J2 " + label });
-  if (profile.error) throw profile.error;
-  const userRole = await service.from("user_roles")
-    .insert({ profile_id: id, role });
-  if (userRole.error) throw userRole.error;
+  insert("profiles", { id, display_name: "E2E J2 " + label });
+  insert("user_roles", { profile_id: id, role });
   return { id, email, password };
 }
 
@@ -88,11 +132,16 @@ async function loginClient(page, identity) {
 }
 
 async function feedbackRecord(clientId, periodStart) {
-  const result = await service.from("client_weekly_feedbacks")
-    .select("id, client_id, form_version_id, request_source, answers, submitted_at")
-    .eq("client_id", clientId).eq("period_start", periodStart).maybeSingle();
-  if (result.error) throw result.error;
-  return result.data;
+  if (!UUID.test(clientId) || !/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(periodStart)) {
+    throw new Error("Invalid local feedback lookup keys");
+  }
+  const rows = localSelect(
+    "select id, client_id, form_version_id, request_source, answers, submitted_at " +
+    "from public.client_weekly_feedbacks where client_id = " + sqlLiteral(clientId) +
+    " and period_start = " + sqlLiteral(periodStart),
+  );
+  if (rows.length > 1) throw new Error("Synthetic feedback unique period was violated");
+  return rows[0] ?? null;
 }
 
 async function seedPublishedProtocol(staffProfileId, clientId) {
@@ -223,10 +272,12 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
     });
 
     await test.step("cliente revisa as 21 respostas sintéticas e envia definitivamente", async () => {
-      const formVersion = await service.from("weekly_feedback_form_versions")
-        .select("definition").eq("id", initial.form_version_id).single();
-      if (formVersion.error) throw formVersion.error;
-      const questions = formVersion.data.definition?.questions;
+      if (!UUID.test(initial.form_version_id)) throw new Error("Invalid local form version");
+      const version = localSelect(
+        "select definition from public.weekly_feedback_form_versions where id = " +
+        sqlLiteral(initial.form_version_id),
+      );
+      const questions = version[0]?.definition?.questions;
       expect(Array.isArray(questions)).toBe(true);
       expect(questions).toHaveLength(21);
       for (const question of questions) {
