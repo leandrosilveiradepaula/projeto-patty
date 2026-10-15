@@ -254,6 +254,19 @@ export function operationalProtocolVersionHref(protocolId:string,version:Protoco
   return "/admin/protocolos/"+encodeURIComponent(protocolId)+"?versao="+
     encodeURIComponent(String(version.version_number))+"#versao-"+version.version_number;
 }
+/**
+ * Factual next action shown to the professional for the exact latest version.
+ * This text never executes lifecycle transitions or grants publication rights.
+ */
+export function protocolNextActionLabel(status: ProtocolOperationalStatus, versionNumber: number) {
+  switch (status) {
+    case "draft": return `Continuar rascunho · versão ${versionNumber}`;
+    case "under-review": return `Revisar versão ${versionNumber}`;
+    case "approved": return `Publicar versão ${versionNumber}`;
+    case "published": return `Consultar versão ${versionNumber} publicada`;
+    case "missing-version": return "Recuperar versão inicial";
+  }
+}
 export function protocolOperationalStatusLabel(status:ProtocolOperationalStatus){
   switch(status){
     case "missing-version":return "Recuperação necessária";
