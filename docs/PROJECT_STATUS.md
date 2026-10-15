@@ -1,8 +1,14 @@
-## 2026-10-15 — J2: continuidade da comparação para decisão manual (PR em validação)
+## 2026-10-15 — J2: primeiro Feedback Semanal → decisão profissional manual (branch em validação)
+
+### DECISÃO TÉCNICA DE PRODUTO — FECHAR CAMINHO SEM COMPARAÇÃO ANTERIOR
+
+O histórico administrativo de um Feedback Semanal **já enviado** passa a oferecer continuidade para uma decisão profissional mesmo quando é a primeira resposta da cliente (não existe período anterior para comparar). Ao abrir as respostas originais, a Patty pode expandir a escolha de até cinco avaliações finalizadas e autorizadas da mesma cliente, abrir explicitamente o formulário profissional que já existe e retornar ao feedback de origem. A escolha permanece manual: nenhuma avaliação é presumida correta, nenhuma observação é copiada, nenhum feedback é marcado como revisado, e nenhum protocolo/fase é alterado ou publicado automaticamente. Sem avaliação finalizada, a interface orienta a consultar avaliações, sem criar decisão prematura. A identidade, assignment ativo, MFA, RLS, registro original e histórico permanecem requisitos. O link transporta somente UUIDs; o retorno revalida acesso ao registro. Sem migration nem alteração de schema. Implementado na branch; CI, merge, deployment e homologação precisam ser comprovados.
+
+## 2026-10-15 — J2: continuidade da comparação para decisão manual (PR #884 integrado)
 
 ### DECISÃO TÉCNICA/PRODUTO — REUTILIZA O FLUXO PROFISSIONAL EXISTENTE
 
-A comparação de Feedbacks Semanais oferece uma escolha explícita entre até cinco avaliações **finalizadas** e autorizadas da cliente. Somente após a escolha a Patty navega para o formulário profissional preexistente daquela avaliação, registra uma decisão manual com justificativa e pode retornar à comparação. O registro profissional permanece vinculado **à avaliação selecionada**; nenhum vínculo por feedback, status de leitura/revisão, classificação de adesão, alteração de protocolo ou publicação é criado automaticamente. A lista usa apenas metadados de avaliação, Supabase autenticado, MFA/RLS existentes e fail-closed para assignment sem acesso. IDs do retorno são validados e nunca concedem autorização. Sem migrations, alterações de policy nem dados reais. Implementado na branch; CI, merge, deployment e homologação ainda dependem de comprovação.
+A comparação de Feedbacks Semanais oferece uma escolha explícita entre até cinco avaliações **finalizadas** e autorizadas da cliente. Somente após a escolha a Patty navega para o formulário profissional preexistente daquela avaliação, registra uma decisão manual com justificativa e pode retornar à comparação. O registro profissional permanece vinculado **à avaliação selecionada**; nenhum vínculo por feedback, status de leitura/revisão, classificação de adesão, alteração de protocolo ou publicação é criado automaticamente. A lista usa apenas metadados de avaliação, Supabase autenticado, MFA/RLS existentes e fail-closed para assignment sem acesso. IDs do retorno são validados e nunca concedem autorização. Sem migrations, alterações de policy nem dados reais. PR #884 integrado ao `master` `1bb706f8`, com validação de aplicação PASS, pipeline de merge PASS e Vercel SUCCESS no commit de merge. Homologação profissional autenticada da J2 ainda pendente.
 
 ## 2026-10-15 — J2: comparação manual de respostas semanais (PR #883 integrado)
 
