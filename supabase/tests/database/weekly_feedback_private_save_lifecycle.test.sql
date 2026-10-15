@@ -90,14 +90,13 @@ select lives_ok(
 
 select is((select count(*) from public.client_weekly_feedbacks), 1::bigint, 'professional reads the requested client-scoped feedback');
 -- Assigned professionals can read pending requests but cannot write answers.
-select is(
-  (with attempted as (
+select is_empty(
+  $sql$
     update public.client_weekly_feedbacks
     set answers = '{"q01":99}'::jsonb
     where id = 'f1600000-0000-0000-0000-000000000001'
     returning id
-  ) select count(*) from attempted),
-  0::bigint,
+  $sql$,
   'assigned admin cannot directly change pending answers'
 );
 reset role;
@@ -121,14 +120,13 @@ select is(
   0::bigint,
   'another client cannot write the pending request using CAS'
 );
-select is(
-  (with attempted as (
+select is_empty(
+  $sql$
     update public.client_weekly_feedbacks
     set answers = '{"q01":99}'::jsonb
     where id = 'f1600000-0000-0000-0000-000000000001'
     returning id
-  ) select count(*) from attempted),
-  0::bigint,
+  $sql$,
   'another client cannot write pending answers through direct SQL'
 );
 reset role;
