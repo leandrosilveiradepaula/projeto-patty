@@ -1,3 +1,9 @@
+## J1.04 — upload privado sintético autenticado: PASS parcial (2026-10-15 UTC)
+
+O `master` `87084814` teve CI PASS [38670537867](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38670537867). O Playwright móvel autenticado [38670631202](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38670631202) obteve **1 PASS em 39,3 s**, incluindo envio de PNG estritamente sintético pela cliente, sessão de upload `accepted`, verificação de titularidade, bucket/caminho privado e persistência após recarregar a lista. Browser cleanup e cleanup independente passaram (`already-clean`). Consulta somente leitura confirmou zero Auth/Clients e zero arquivos/sessões com filename do teste. Não houve alteração de permissões, RLS ou schema.
+
+A Vercel rate-limitou o commit atual; o preflight verificou runtime equivalente ao último deployment READY `35304fec` somente porque a diferença era restrita a testes/CI autorizados. **Ainda não homologar toda a J1.04:** prévia, download, acesso cruzado e recovery permanecem sem prova real. J1.01 e J1.05–10 também não homologadas. Fonte detalhada: `docs/JOURNEY_HOMOLOGATION.md`.
+
 ## J1 — primeira rodada móvel ampliada com autorização e limpeza: PASS comprovado (2026-10-14)
 
 No `master` `71a5d11c`, a run Playwright [38658460493](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38658460493) concluiu **1 PASS em 28,4 s**, com teste real de ativação sintética, persistência do Cadastro Atual, retomada da Anamnese, novo login, bloqueio de acesso anônimo e de cliente à área admin, viewport móvel e limpeza independente (`already-clean`). Consulta SQL somente leitura confirmou **zero** Auth, Clients e assignments do prefixo sintético após o teste. Não é homologação integral da J1.
