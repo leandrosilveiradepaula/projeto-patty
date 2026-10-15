@@ -62,9 +62,13 @@ test("input lengths match server validation and recovery never promises delivery
   assert.match(reset, /<AccessPasswordForm/);
   assert.equal(shared.match(/maxLength=\{128\}/g)?.length, 2);
   assert.equal(shared.match(/minLength=\{8\}/g)?.length, 2);
-  assert.match(shared, /aria-busy=\{pending\}/);
-  assert.match(shared, /disabled=\{pending\}/);
-  assert.match(shared, /<Button type="submit" loading=\{pending\}/);
+  assert.match(shared, /aria-busy=\{pending\|\|!interactive\}/);
+  assert.match(shared, /disabled=\{pending\|\|!interactive\}/);
+  assert.match(shared, /<Button type="submit" loading=\{pending\} disabled=\{pending\|\|!interactive\|\|!canSubmit\}/);
+  assert.match(shared, /data-interactive=\{interactive\?"true":"false"\}/);
+  assert.match(shared, /useEffect\(\(\)=>\{setInteractive\(true\)\},\[\]\)/);
+  assert.match(shared, /<p role="status" className=\{styles\.hint\}>Preparando formulário para digitação/);
+  assert.match(shared, /inFlight\.current\|\|pending\|\|!interactive\|\|!canSubmit/);
   assert.doesNotMatch(shared, /noValidate/);
   assert.match(recovery, /maxLength=\{254\}/);
   assert.match(recovery, /title="Solicitação recebida"/);
