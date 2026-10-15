@@ -3373,6 +3373,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      save_client_weekly_feedback_if_unchanged: {
+        Args: {
+          p_client_id: string
+          p_feedback_id: string
+          p_expected_answers: Json
+          p_answers: Json
+          p_submit: boolean
+        }
+        Returns: Database["public"]["Tables"]["client_weekly_feedbacks"]["Row"][]
+      }
       activate_client_notification_preference_version_server: {
         Args: {
           p_actor_profile_id: string
