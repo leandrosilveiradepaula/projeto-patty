@@ -1,3 +1,12 @@
+## 2026-10-15 — J2: validação autenticada local concluída; produção pendente
+
+**FATO CONFIRMADO:** PR #887 mergeado no `master` `0bd84021d0af39ef11a254253fda9406a173052c`; [Validate application pós-merge #38814525538](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38814525538) = PASS. [Playwright E2E J2 local #38813434552](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38813434552) = PASS no SHA pré-merge, inclusive encerramento/limpeza do banco descartável. A execução percorreu login administrativo MFA, solicitação após publicação sintética prévia, cliente móvel, rascunho, persistência, CAS, envio de 21 respostas sintéticas, história original e negação a acesso cruzado; nenhuma resposta real foi utilizada. São evidências de **J2 TESTADA EM AMBIENTE LOCAL**, não de publicação/homologação profissional em produção.
+
+**BLOQUEIO DE RELEASE:** Vercel ainda informa `build-rate-limit` no SHA do merge, portanto a versão publicada mais recente não foi comprovada. A homologação com Patty/admin real, leitura por cliente real autorizada e evidência do SHA efetivamente deployado **permanecem pendentes**, sem suspender o desenvolvimento de melhorias localmente.
+
+**CORREÇÃO FUNCIONAL EM PREPARAÇÃO:** conflito entre rascunhos de duas sessões pode causar perda de texto local pelo remount ao atualizar. O próximo PR deve preservar edição não salva, comparar a versão atual autorizada, exigir escolha explícita para perguntas alteradas nas duas sessões e continuar usando o compare-and-swap autenticado. Testes determinísticos e navegador real local precisam comprovar a recuperação; não criar estado de revisão profissional nem regra clínica.
+
+---
 ## 2026-10-15 — J1 encerrada por aceite do responsável; início de J2
 
 ### DECISÃO DE GESTÃO DO PROJETO (RESPONSÁVEL)

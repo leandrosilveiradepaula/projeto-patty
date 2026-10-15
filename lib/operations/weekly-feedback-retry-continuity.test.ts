@@ -37,7 +37,7 @@ test("weekly feedback retry controls block simultaneous writes while preserving 
   assert.ok(form.includes("inFlightRef.current = false"));
   assert.ok(form.includes("aria-busy={isPending}"));
   assert.ok(form.includes("disabled={isPending || submitted}"));
-  assert.ok(buttons.includes("disabled={pending || completed}"));
+  assert.ok(buttons.includes("disabled={pending || completed || blocked}"));
   assert.ok(buttons.includes('name="intent" type="submit" value="save"'));
   assert.ok(buttons.includes('name="intent" type="submit" value="submit"'));
 });
@@ -49,4 +49,20 @@ test("server still checks scope and prevents stale and duplicate feedback writes
   assert.ok(action.includes("if (!feedback || feedback.submitted_at)"));
   assert.ok(action.includes("if (!saved)"));
   assert.ok(action.includes("revalidatePath"));
+});
+
+test("a server refresh cannot silently unmount or overwrite unsaved client answers after CAS conflict", () => {
+  const page = read("app/cliente/feedback-semanal/page.tsx");
+  const form = read("app/cliente/feedback-semanal/ClientWeeklyFeedbackResponseForm.tsx");
+  assert.match(page, /key=\{feedback\.id\}/);
+  assert.doesNotMatch(page, /key=\{feedback\.id \+ ":"/);
+  assert.match(form, /value=\{draftBase\.fingerprint\}/);
+  assert.match(form, /newerServerSnapshot && !editedSinceLastSave/);
+  assert.match(form, /reconcileWeeklyFeedbackDrafts\(/);
+  assert.match(form, /blocked=\{newerServerSnapshot\}/);
+  assert.match(form, /Combinar respostas para continuar/);
+  assert.match(form, /Manter minha edição/);
+  assert.match(form, /Usar a versão salva/);
+  assert.match(form, /Conferir versão salva/);
+  assert.doesNotMatch(form, /localStorage|sessionStorage|console\.log|navigator\.clipboard/);
 });

@@ -13,6 +13,11 @@ import { Button } from "@/components/ui/Button";
 import { TextInput } from "@/components/ui/TextInput";
 import { Textarea } from "@/components/ui/Textarea";
 import { getWeeklyFeedbackFieldError, summarizeWeeklyFeedbackRequiredProgress, firstInvalidWeeklyFeedbackField, mayUseExplicitNotApplicable, type WeeklyFeedbackQuestion } from "@/lib/weekly-feedback/definition";
+import {
+  compareWeeklyFeedbackDrafts,
+  reconcileWeeklyFeedbackDrafts,
+  type WeeklyFeedbackCollisionChoice,
+} from "@/lib/weekly-feedback/draft-reconciliation";
 
 import styles from "./page.module.css";
 
@@ -39,6 +44,14 @@ export function ClientWeeklyFeedbackResponseForm({
   // Controlled fields retain what the client typed after any failed action.
   // No health answers are copied to URLs, local storage or logs.
   const [values, setValues] = useState(initialValues);
+  // A stable component key keeps unsaved answers in memory after router.refresh.
+  // Keep the OLD CAS fingerprint until the client explicitly reconciles edits.
+  const [draftBase, setDraftBase] = useState(() => ({
+    fingerprint: expectedFingerprint,
+    values: initialValues,
+  }));
+  const [collisionChoices, setCollisionChoices] = useState<Record<string, WeeklyFeedbackCollisionChoice>>({});
+  const [mergedAfterConflict, setMergedAfterConflict] = useState(false);
   const [editedSinceLastSave, setEditedSinceLastSave] = useState(false);
   const [attemptedFinalSubmit, setAttemptedFinalSubmit] = useState(false);
   const [touchedKeys, setTouchedKeys] = useState<string[]>([]);
@@ -50,14 +63,32 @@ export function ClientWeeklyFeedbackResponseForm({
   const router = useRouter();
   const submitted = state.outcome === "submitted";
   const dirty = editedSinceLastSave && !submitted;
+  const newerServerSnapshot = draftBase.fingerprint !== expectedFingerprint;
+  const questionKeys = questions.map((question) => question.key);
+  const differences = newerServerSnapshot
+    ? compareWeeklyFeedbackDrafts(questionKeys, draftBase.values, values, initialValues)
+    : [];
+  const overlapping = differences.filter((difference) => difference.collision);
+  const missingChoices = overlapping.some((difference) => !collisionChoices[difference.key]);
 
   useEffect(() => {
     inFlightRef.current = false;
+    setMergedAfterConflict(false);
     if (state.outcome === "draft-saved" || state.outcome === "submitted") {
       setEditedSinceLastSave(false);
       router.refresh();
     }
   }, [state, router]);
+
+  useEffect(() => {
+    // When nothing was edited locally, a refreshed server snapshot can be
+    // adopted as-is. Never do this while there are unsaved local answers.
+    if (newerServerSnapshot && !editedSinceLastSave) {
+      setDraftBase({ fingerprint: expectedFingerprint, values: initialValues });
+      setValues(initialValues);
+      setCollisionChoices({});
+    }
+  }, [editedSinceLastSave, expectedFingerprint, initialValues, newerServerSnapshot]);
 
   useEffect(() => {
     if (!dirty) return;
@@ -73,6 +104,7 @@ export function ClientWeeklyFeedbackResponseForm({
   }
 
   function prepareSubmit(intent: "save" | "submit") {
+    if (newerServerSnapshot) return false;
     if (intent === "submit") {
       setAttemptedFinalSubmit(true);
       const invalid = firstInvalidWeeklyFeedbackField(questions, values, true);
@@ -95,6 +127,25 @@ export function ClientWeeklyFeedbackResponseForm({
     return true;
   }
 
+  function combineAfterReview() {
+    const reconciled = reconcileWeeklyFeedbackDrafts(
+      questionKeys,
+      draftBase.values,
+      values,
+      initialValues,
+      collisionChoices,
+    );
+    if (!reconciled) return;
+    setValues(reconciled);
+    setDraftBase({ fingerprint: expectedFingerprint, values: initialValues });
+    setEditedSinceLastSave(questionKeys.some((key) => reconciled[key] !== (initialValues[key] ?? "")));
+    setCollisionChoices({});
+    setAttemptedFinalSubmit(false);
+    setTouchedKeys([]);
+    setReviewOpen(false);
+    setMergedAfterConflict(true);
+  }
+
   const confirmed = (state.outcome === "draft-saved" && !editedSinceLastSave) || submitted;
   const failed = state.outcome === "invalid" ||
     state.outcome === "conflict" ||
@@ -109,14 +160,14 @@ export function ClientWeeklyFeedbackResponseForm({
       aria-busy={isPending}
       className={styles.form}
       onSubmit={(event) => {
-        if (inFlightRef.current || isPending || submitted) {
+        if (inFlightRef.current || isPending || submitted || newerServerSnapshot) {
           event.preventDefault();
           return;
         }
         inFlightRef.current = true;
       }}
     >
-      <input type="hidden" name="expectedFingerprint" value={expectedFingerprint} />
+      <input type="hidden" name="expectedFingerprint" value={draftBase.fingerprint} />
       <div className={styles.formProgress} role="status" aria-live="polite">
         <span className={styles.fieldMeta}>Etapa 1 de 2 · Preencher e revisar</span>
         <strong>{progress.requiredCompleted} de {progress.required} perguntas obrigatórias preenchidas</strong>
@@ -192,6 +243,48 @@ export function ClientWeeklyFeedbackResponseForm({
           Alterações ainda não salvas. Salve o rascunho antes de sair.
         </p>
       ) : null}
+      {newerServerSnapshot ? (
+        <section className={styles.conflictPanel} aria-label="Conferir alterações entre sessões">
+          <h3>Há outra versão salva deste rascunho</h3>
+          <p>Suas respostas digitadas nesta aba continuam aqui. Os campos que você não modificou usarão a versão salva. Os campos editados nas duas sessões precisam de sua escolha.</p>
+          <p>{differences.filter((item) => item.savedChanged).length} campo(s) alterado(s) em outra sessão; {overlapping.length} com respostas diferentes nas duas versões.</p>
+          {overlapping.map((difference) => {
+            const question = questions.find((entry) => entry.key === difference.key);
+            return (
+              <fieldset className={styles.conflictField} key={difference.key}>
+                <legend>{question?.label ?? "Resposta em conflito"}</legend>
+                <p><strong>Minha edição:</strong> <span className={styles.conflictAnswer}>{values[difference.key] || "Sem resposta"}</span></p>
+                <p><strong>Versão salva:</strong> <span className={styles.conflictAnswer}>{initialValues[difference.key] || "Sem resposta"}</span></p>
+                <label>
+                  <input
+                    checked={collisionChoices[difference.key] === "mine"}
+                    name={"conflict-" + feedbackId + "-" + difference.key}
+                    onChange={() => setCollisionChoices((previous) => ({ ...previous, [difference.key]: "mine" }))}
+                    type="radio"
+                    value="mine"
+                  />
+                  Manter minha edição
+                </label>
+                <label>
+                  <input
+                    checked={collisionChoices[difference.key] === "saved"}
+                    name={"conflict-" + feedbackId + "-" + difference.key}
+                    onChange={() => setCollisionChoices((previous) => ({ ...previous, [difference.key]: "saved" }))}
+                    type="radio"
+                    value="saved"
+                  />
+                  Usar a versão salva
+                </label>
+              </fieldset>
+            );
+          })}
+          <Button disabled={isPending || missingChoices} onClick={combineAfterReview} type="button" variant="secondary">
+            Combinar respostas para continuar
+          </Button>
+          {missingChoices ? <p role="status">Escolha qual resposta manter em cada pergunta alterada nas duas sessões.</p> : null}
+          <p>A combinação é feita apenas nesta tela. Para gravar, você ainda precisa salvar o rascunho ou confirmar o envio definitivo. Uma nova mudança simultânea continuará protegida pelo bloqueio de concorrência.</p>
+        </section>
+      ) : null}
       {reviewOpen && !submitted ? (
         <section className={styles.reviewPanel} aria-label="Revisão antes do envio">
           <h3>Revise antes de enviar</h3>
@@ -207,11 +300,24 @@ export function ClientWeeklyFeedbackResponseForm({
           <Button type="button" variant="secondary" onClick={() => setReviewOpen(false)}>Voltar e editar</Button>
         </section>
       ) : null}
-      <ClientWeeklyFeedbackSubmitControls completed={submitted} reviewing={reviewOpen} onBeforeSubmit={prepareSubmit} />
-      {state.outcome === "conflict" ? (
-        <Button onClick={() => router.refresh()} type="button" variant="secondary">
-          Conferir situação atual
-        </Button>
+      <ClientWeeklyFeedbackSubmitControls
+        blocked={newerServerSnapshot}
+        completed={submitted}
+        reviewing={reviewOpen}
+        onBeforeSubmit={prepareSubmit}
+      />
+      {state.outcome === "conflict" && !newerServerSnapshot && !mergedAfterConflict ? (
+        <div className={styles.conflictPrompt}>
+          <p>Se ainda houver rascunho pendente, suas edições serão mantidas nesta tela ao conferir a versão salva. Se outra sessão já enviou o feedback definitivamente, a edição poderá ser encerrada.</p>
+          <Button onClick={() => { setReviewOpen(false); router.refresh(); }} type="button" variant="secondary">
+            Conferir versão salva
+          </Button>
+        </div>
+      ) : null}
+      {mergedAfterConflict ? (
+        <p role="status" className={styles.meta}>
+          Respostas combinadas nesta tela, mas ainda não salvas. Use Salvar rascunho ou confirme o envio.
+        </p>
       ) : null}
     </form>
   );
