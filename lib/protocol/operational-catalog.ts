@@ -267,6 +267,28 @@ export function protocolNextActionLabel(status: ProtocolOperationalStatus, versi
     case "missing-version": return "Recuperar versão inicial";
   }
 }
+/**
+ * Point to the exact authorized version's next MANUAL step. The URL only
+ * navigates; it never changes review, approval, or publication state.
+ * The version is expanded by the existing ?versao= selector before scrolling.
+ */
+export function operationalProtocolNextActionHref(
+  protocolId: string,
+  version: ProtocolVersionFact | null,
+  status: ProtocolOperationalStatus,
+) {
+  const selected = operationalProtocolVersionHref(protocolId, version);
+  if (!selected || !version || status === "missing-version") return null;
+  const base = selected.split("#")[0];
+  const suffix = status === "draft"
+    ? "rascunho-plano-iniciar-" + version.id
+    : status === "under-review"
+      ? "conferencia-plano-" + version.version_number
+      : status === "approved"
+        ? "acao-protocolo-" + version.version_number
+        : "versao-" + version.version_number;
+  return base + "#" + suffix;
+}
 export function protocolOperationalStatusLabel(status:ProtocolOperationalStatus){
   switch(status){
     case "missing-version":return "Recuperação necessária";
