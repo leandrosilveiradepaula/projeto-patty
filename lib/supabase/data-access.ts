@@ -3217,23 +3217,26 @@ export async function listPublishedProtocolsForCurrentClient(
               cycles: (cyclesByMealPlanVersionId.get(mealPlan.id) ?? []).map(
                 (cycle) => ({
                   id: cycle.id,
-                  steps: (stepsByCycleId.get(cycle.id) ?? []).flatMap((step) => {
+                  steps: (stepsByCycleId.get(cycle.id) ?? []).map((step) => {
                     const variant = variantsById.get(step.variant_id);
 
-                    // A cycle may reference only a variation in its own
-                    // published meal-plan snapshot, never another version.
+                    // Preserve the step and its position, but never expose an
+                    // inaccessible variation ID or label from another plan.
                     if (!variant || variant.meal_plan_version_id !== mealPlan.id) {
-                      return [];
+                      return {
+                        position: step.position,
+                        variantId: "",
+                        variantKey: "",
+                        variantLabel: null,
+                      };
                     }
 
-                    return [
-                      {
-                        position: step.position,
-                        variantId: variant.id,
-                        variantKey: variant.variant_key,
-                        variantLabel: variant.label,
-                      },
-                    ];
+                    return {
+                      position: step.position,
+                      variantId: variant.id,
+                      variantKey: variant.variant_key,
+                      variantLabel: variant.label,
+                    };
                   }),
                 }),
               ),
