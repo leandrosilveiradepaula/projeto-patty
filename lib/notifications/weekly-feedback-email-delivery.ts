@@ -71,6 +71,7 @@ export async function deliverWeeklyFeedbackReminderEmails(input: {
 
   for (const claim of claims ?? []) {
     let result: Awaited<ReturnType<typeof sendGmailSmtpEmail>>;
+    let failureCode = "gmail_smtp_error";
 
     try {
       // All per-claim preparation belongs inside the recovery boundary:
@@ -107,6 +108,7 @@ export async function deliverWeeklyFeedbackReminderEmails(input: {
           .maybeSingle(),
       ]);
       if ([feedback, notification, preference, contact, assignment].some(row => row.error)) {
+        failureCode = "eligibility_check_error";
         throw new Error("Could not revalidate weekly feedback email eligibility");
       }
       const eligibilityIssue = checkWeeklyFeedbackEmailEligibility(claim, {
@@ -117,6 +119,7 @@ export async function deliverWeeklyFeedbackReminderEmails(input: {
         activeAssignment: assignment.data,
       });
       if (eligibilityIssue) {
+        failureCode = "eligibility_changed";
         throw new Error("Weekly feedback email no longer eligible: " + eligibilityIssue);
       }
 
@@ -137,7 +140,7 @@ export async function deliverWeeklyFeedbackReminderEmails(input: {
         "fail_weekly_feedback_email_delivery_server",
         {
           p_attempt_id: claim.attempt_id,
-          p_failure_code: "gmail_smtp_error",
+          p_failure_code: failureCode,
           p_failure_message: safeFailureMessage(error),
         },
       );
