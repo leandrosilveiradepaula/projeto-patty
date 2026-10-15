@@ -1,3 +1,9 @@
+## 2026-10-15 — J2: retorno contextual da caixa de Feedbacks (PR em validação)
+
+**DECISÃO TÉCNICA/PRODUTO:** ao sair da caixa administrativa de recebidos ou aguardando cliente para abrir o feedback exato, preservar o filtro por cliente, origem, mês, situação e página efetiva. A Patty poderá voltar à mesma visão também após consultar comparação ou formulário de decisão manual de avaliação finalizada. O parâmetro `caixaRetorno` é apenas navegação: URL local da caixa, keys em allowlist, valores limitados, cliente em formato UUID, hash coerente e nenhuma concessão de autorização; filtros são revalidados contra assignments atuais pelo inbox. Dados de saúde não entram na URL. Links forjados não permitem redirecionamento externo. Playwright local com fixture sintética e testes unitários serão executados no CI. **Ainda em branch, sem validação, merge, deployment ou homologação profissional.** Sem migrations, schema, RLS, IA ou conduta automática.
+
+---
+
 ## 2026-10-15 — J2: PR #890 integrado, testes aprovados e Vercel publicada
 
 **FATO CONFIRMADO:** PR #890 foi mergeado no `master` `217f66695cc86e5a4fdafeaae39473bcd2c58d35`. No HEAD `220e6d08b21aec058ae9f71635fa4672cf6f36f6` os checks `validate` e `weekly-feedback-browser` concluíram com sucesso. No commit de merge, `validate` concluiu com sucesso e o status Vercel retornou `success` (`Deployment has completed`). A confirmação persistente de envio definitivo e o retorno ao registro exato foram integrados e publicados. **Não houve homologação profissional autenticada pela Patty em produção**; testes locais com dados sintéticos não substituem essa etapa. O status histórico dos PRs anteriores permanece abaixo como registro temporal, não como estado atual do #890.

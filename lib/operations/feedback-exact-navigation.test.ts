@@ -60,5 +60,22 @@ test("admin links to pending or submitted records use exact authorized anchors",
   const form = read("components/admin/AdminWeeklyFeedbackRequestForm.tsx");
   const page = read("app/admin/clientes/[clienteId]/feedback-semanal/page.tsx");
   assert.match(form, /#feedback-\$\{state\.feedbackSubmitted \? "enviado" : "pendente"\}-\$\{encodeURIComponent\(state\.feedbackId\)\}/);
-  assert.match(page, /href="\/admin\/feedback-semanal"/);
+  assert.match(page, /inboxReturn \?\? "\/admin\/feedback-semanal"/);
+});
+
+test("J2 inbox context survives exact record, comparison and manual assessment return", () => {
+  const inbox = read("app/admin/feedback-semanal/page.tsx");
+  const detail = read("app/admin/clientes/[clienteId]/feedback-semanal/page.tsx");
+  const compare = read("app/admin/clientes/[clienteId]/feedback-semanal/comparar/page.tsx");
+  const assessment = read("app/admin/avaliacoes/[avaliacaoId]/page.tsx");
+  assert.match(inbox, /weeklyFeedbackInboxReturnHref\(/);
+  assert.match(inbox, /fromInbox\(pendingWeeklyFeedbackExactHref\(feedback\)\)/);
+  assert.match(inbox, /fromInbox\(receivedWeeklyFeedbackExactHref\(feedback\)\)/);
+  assert.match(detail, /readWeeklyFeedbackInboxReturn\(rawQuery\.caixaRetorno\)/);
+  assert.match(detail, /withWeeklyFeedbackInboxReturn\(/);
+  assert.match(compare, /readWeeklyFeedbackInboxReturn\(requested\.caixaRetorno\)/);
+  assert.match(compare, /withWeeklyFeedbackInboxReturn\(receivedWeeklyFeedbackExactHref\(current\)/);
+  assert.match(assessment, /readWeeklyFeedbackInboxReturn\(filters\.caixaRetorno\)/);
+  assert.match(assessment, /backToFeedback\(weeklyFeedbackComparisonHref\(/);
+  assert.match(assessment, /backToFeedback\(receivedWeeklyFeedbackExactHref\(/);
 });
