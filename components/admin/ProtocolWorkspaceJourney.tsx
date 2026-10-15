@@ -10,22 +10,23 @@ type Props = {
 
 const stages = [
   { label: "Montagem", description: "Editar a estrutura alimentar", anchor: "rascunho-plano-iniciar" },
-  { label: "Revisão", description: "Submeter a versão para revisão", anchor: "conferencia-plano" },
+  { label: "Revisão", description: "Conferir a versão submetida antes de aprovar", anchor: "conferencia-plano" },
   { label: "Aprovação", description: "Registrar aprovação profissional", anchor: "acao-protocolo" },
   { label: "Publicação", description: "Liberar a versão aprovada", anchor: "acao-protocolo" },
 ] as const;
 
 /** A display of persisted lifecycle facts, not an automatic clinical decision. */
 export function ProtocolWorkspaceJourney({ action, hasPlan, ready, versionNumber }: Props) {
-  const active = action === "submit" ? 0 : action === "approve" ? 2 : action === "publish" ? 3 : 4;
+  // Submeter não comprova revisão humana: a etapa Revisão fica ativa até a aprovação.
+  const active = action === "submit" ? 0 : action === "approve" ? 1 : action === "publish" ? 3 : 4;
   const next = action === "submit"
-    ? { href: hasPlan && ready ? "#conferencia-plano" : "#rascunho-plano-iniciar",
+    ? { href: hasPlan && ready ? `#conferencia-plano-${versionNumber}` : "#rascunho-plano-iniciar",
         label: hasPlan && ready ? "Conferir estrutura antes de submeter" : "Continuar montagem" }
     : action === "approve"
-      ? { href: "#acao-protocolo", label: "Ir para aprovação" }
+      ? { href: `#conferencia-plano-${versionNumber}`, label: "Conferir antes da aprovação" }
       : action === "publish"
-        ? { href: "#acao-protocolo", label: "Ir para publicação" }
-        : { href: "#conferencia-plano", label: "Consultar versão publicada" };
+        ? { href: `#acao-protocolo-${versionNumber}`, label: "Ir para publicação" }
+        : { href: `#conferencia-plano-${versionNumber}`, label: "Consultar versão publicada" };
 
   return (
     <section className={styles.journey} aria-label={`Etapas da versão ${versionNumber}`}>
