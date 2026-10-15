@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import { writeFixtureLedger } from "./helpers/j1-fixture-ledger.mjs";
 import { cleanupExactJ1PrivateFiles } from "./helpers/j1-private-file-cleanup.mjs";
+import { checkJ1SyntheticPrivatePhoto } from "./helpers/j1-private-photo-browser.mjs";
 
 const baseUrl = process.env.E2E_BASE_URL?.replace(/\/$/, "");
 const adminEmail = process.env.E2E_ADMIN_EMAIL;
@@ -376,6 +377,10 @@ test("J1: cliente sintetica ativa acesso, salva Cadastro Atual e retoma Anamnese
     await expect(loginPage.locator(`#anamnesis-draft-answer-${cityQuestionId}`))
       .toHaveValue("Cidade Sintética J1 B");
     }, { timeout: 35_000 });
+
+    await test.step("J1 private photo: verified upload and persisted history", async () => {
+      await checkJ1SyntheticPrivatePhoto({page:loginPage,admin,clientId,profileId,unique});
+    }, {timeout:55000});
 
     await test.step("J1 authorization: anonymous session and client cannot access privileged records", async () => {
       anonymousContext = await browser.newContext({
