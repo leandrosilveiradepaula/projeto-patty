@@ -18,3 +18,11 @@ test("notice journey retains actionable feedback and other client destinations",
  assert.match(page,/feedback-pendente-\$\{feedback\.id\}/);
  assert.match(page,/ClientJourneyNextSteps areas=\{\["feedback","checkins","index"\]\}/);
 });
+
+test("weekly feedback only displays in-app reminders already verified by the client inbox",()=>{
+ const page=read("app/cliente/feedback-semanal/page.tsx");
+ assert.match(page,/clientInAppFeedbackNotices\(notificationEvents, feedbacks, client\.id\)/);
+ assert.match(page,/notice\.status === "pending"/);
+ assert.match(page,/notice\.feedback\.id/);
+ assert.doesNotMatch(page,/\.map\(\(event\) => event\.weekly_feedback_id\)/);
+});
