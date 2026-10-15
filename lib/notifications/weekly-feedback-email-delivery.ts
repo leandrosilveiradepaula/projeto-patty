@@ -1,5 +1,7 @@
 import "server-only";
 
+import { formatWeeklyFeedbackPeriodDate } from "@/lib/weekly-feedback/date-format";
+
 import { createAdminClient } from "@/lib/supabase/admin";
 import { resolveTrustedClientAccessOrigin } from "@/lib/onboarding/trusted-client-access-origin";
 import {
@@ -10,12 +12,12 @@ import {
 const DEFAULT_BATCH_SIZE = 10;
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    timeZone: "America/Sao_Paulo",
-  }).format(new Date(value + "T12:00:00-03:00"));
+  // Never normalize an invalid calendar day into a different period.
+  const formatted = formatWeeklyFeedbackPeriodDate(value);
+  if (formatted === "Data indisponível") {
+    throw new Error("Invalid weekly feedback period date");
+  }
+  return formatted;
 }
 
 function safeFailureMessage(error: unknown) {
@@ -76,24 +78,26 @@ export async function deliverWeeklyFeedbackReminderEmails(input: {
   let failed = 0;
 
   for (const claim of claims ?? []) {
-    const feedbackUrl = new URL("/cliente/feedback-semanal", appOrigin);
-    const subject = "Lembrete do seu Feedback Semanal";
-    const bodyText = [
-      "Olá,",
-      "",
-      `Seu Feedback Semanal referente ao período de ${formatDate(claim.period_start)} a ${formatDate(claim.period_end)} ainda está disponível para preenchimento no aplicativo.`,
-      "",
-      "Acesse:",
-      feedbackUrl.toString(),
-      "",
-      "Este lembrete não altera seu atendimento automaticamente.",
-      "",
-      "Consultoria Corpo e Mente - Patty",
-    ].join("\n");
-
     let result: Awaited<ReturnType<typeof sendGmailSmtpEmail>>;
 
     try {
+      // All per-claim preparation belongs inside the recovery boundary:
+      // one malformed legacy period must not strand the claimed batch.
+      const feedbackUrl = new URL("/cliente/feedback-semanal", appOrigin);
+      const subject = "Lembrete do seu Feedback Semanal";
+      const bodyText = [
+        "Olá,",
+        "",
+        `Seu Feedback Semanal referente ao período de ${formatDate(claim.period_start)} a ${formatDate(claim.period_end)} ainda está disponível para preenchimento no aplicativo.`,
+        "",
+        "Acesse:",
+        feedbackUrl.toString(),
+        "",
+        "Este lembrete não altera seu atendimento automaticamente.",
+        "",
+        "Consultoria Corpo e Mente - Patty",
+      ].join("\n");
+
       result = await sendGmailSmtpEmail(smtpConfig, {
         bodyText,
         messageId: `<weekly-feedback-${claim.notification_event_id}@projeto-patty.local>`,
