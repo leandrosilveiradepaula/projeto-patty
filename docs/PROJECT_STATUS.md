@@ -1,3 +1,9 @@
+## 2026-10-15 — J2: cobertura de revogacao do Feedback Semanal (PR em validacao)
+
+### FATO DE IMPLEMENTACAO DE TESTE (NAO HOMOLOGACAO)
+
+O PR #878 ja integrou ao master o ciclo PostgreSQL local de Feedback Semanal com 25 assercoes e CI aprovado. Uma regressao complementar local usa a mesma fixture sintetica e rollback para verificar: leitura da resposta original pelo admin atribuido com AAL2; bloqueio de admin em AAL1; perda imediata da leitura apos encerramento do assignment; preservacao do historico para a propria cliente; bloqueio de SELECT anonimo. O teste passa de 25 a 30 assercoes. Nao foram modificadas migrations, schema, RLS, dados reais ou backend em producao. Resultado CI da nova branch ainda nao confirmado; J2 nao esta homologada por este teste de banco.
+
 ## 2026-10-15 — J1 encerrada por aceite do responsável; início de J2
 
 ### DECISÃO DE GESTÃO DO PROJETO (RESPONSÁVEL)
