@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { readFixtureLedger, removeFixtureLedger, validateFixtureLedger } from "./j1-fixture-ledger.mjs";
+import { cleanupExactJ1PrivateFiles } from "./j1-private-file-cleanup.mjs";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const EMAIL = /^e2e-onboarding-[0-9a-f]{16}@example\.invalid$/;
@@ -90,6 +91,13 @@ export async function cleanupExactJ1Fixture(admin, ledger, env=process.env) {
     const protocols = demand(await admin.from("protocols").select("id").eq("client_id",client.id).limit(1));
     if (protocols.length) throw new Error("Refusing cleanup of professional protocol");
   }
+
+  // File/storage cleanup is scoped to the same verified Auth+Client;
+  // reject foreign uploads, audit history or professional release BEFORE
+  // deleting any clinical draft, client assignment or Auth identity.
+  if (client) await cleanupExactJ1PrivateFiles(admin,{
+    clientId:client.id,profileId:auth.id,email:ledger.email,
+  });
 
   // All ownership checks above must pass before the first delete. Every
   // delete is scoped to this one exact verified Auth/Client identity.
