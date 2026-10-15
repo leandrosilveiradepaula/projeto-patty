@@ -55,7 +55,7 @@ test("professional notes require submitted Anamnese in both server action and wo
   assert.ok(page.includes("submission.submitted_at ? ("));
   assert.ok(page.includes("Aguardando envio final da cliente"));
   assert.ok(page.includes("AdminAnamnesisReviewForm submissionId={submission.id}"));
-  assert.ok(page.includes(`/admin/clientes/${submission.client_id}/avaliacoes`));
+  assert.ok(page.includes("`/admin/clientes/${submission.client_id}/avaliacoes`"));
   assert.ok(page.includes("listAccessibleAnamnesisReviews(submission.id)"));
 });
 
