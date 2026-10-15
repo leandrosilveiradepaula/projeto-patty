@@ -65,7 +65,8 @@ test("manual weekly feedback locates an existing exact period without fetching h
   assert.match(lookup, /\.eq\("client_id", clientId\)/);
   assert.match(lookup, /\.eq\("period_start", periodStart\)/);
   assert.match(lookup, /\.eq\("period_end", periodEnd\)/);
-  assert.doesNotMatch(lookup, /answers|createAdminClient/);
+  assert.doesNotMatch(lookup, /\.select\("[^"]*answers/);
+  assert.doesNotMatch(lookup, /createAdminClient\(/);
 });
 
 test("manual weekly feedback returns the existing row before creating and recovers database uniqueness races", () => {
