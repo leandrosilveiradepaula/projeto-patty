@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import { expect, test } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import { writeFixtureLedger } from "./helpers/j1-fixture-ledger.mjs";
+import { cleanupExactJ1PrivateFiles } from "./helpers/j1-private-file-cleanup.mjs";
 
 const baseUrl = process.env.E2E_BASE_URL?.replace(/\/$/, "");
 const adminEmail = process.env.E2E_ADMIN_EMAIL;
@@ -87,6 +88,7 @@ async function cleanupSyntheticClient({ clientId, profileId, email }) {
     if (protocols.data.length > 0) {
       throw new Error("Refusing cleanup of professional protocol history.");
     }
+    await cleanupExactJ1PrivateFiles(admin,{clientId,profileId,email});
     for (const submission of submissions.data) {
       const answers = await admin.from("anamnesis_answers")
         .delete().eq("submission_id", submission.id);
