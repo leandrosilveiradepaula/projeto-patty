@@ -43,7 +43,7 @@ test("only still-pending requests for currently assigned clients appear", () => 
   ];
   const filters = readReceivedWeeklyFeedbackQuery({ origem: "schedule" }, ["own", "assigned-two"]);
   const result = explorePendingWeeklyFeedbacks(rows, filters, ["own", "assigned-two"]);
-  assert.deepEqual(result.items.map(row => row.id), ["pending-another-assigned", "pending-own"]);
+  assert.deepEqual(result.items.map(row => row.id), ["pending-own", "pending-another-assigned"]);
   assert.equal(result.total, 2);
   assert.equal(rows.length, 5);
   assert.equal(rows[0].submitted_at, null);
