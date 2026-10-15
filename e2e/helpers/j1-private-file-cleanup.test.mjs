@@ -78,7 +78,7 @@ test("foreign private files and audited records block all destructive mutations"
  for(const patch of [
   {client_files:[{...file,uploaded_by_profile_id:clientId}]},
   {client_files:[{...file,file_kind:"document"}]},
-  {client_file_upload_sessions:[{...session,client_id:profileId}]},
+  {client_file_upload_sessions:[{...session,requester_profile_id:clientId}]},
   {client_file_access_events:[{id:"audit",actor_profile_id:profileId,requested_file_id:fileId}]},
   {client_file_access_events:[{id:"professional-audit",actor_profile_id:"55555555-5555-4555-8555-555555555555",requested_file_id:fileId}]},
   {client_files:[file,file]},
