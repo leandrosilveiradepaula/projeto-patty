@@ -1,3 +1,9 @@
+## 2026-10-15 — J2: PR #890 integrado, testes aprovados e Vercel publicada
+
+**FATO CONFIRMADO:** PR #890 foi mergeado no `master` `217f66695cc86e5a4fdafeaae39473bcd2c58d35`. No HEAD `220e6d08b21aec058ae9f71635fa4672cf6f36f6` os checks `validate` e `weekly-feedback-browser` concluíram com sucesso. No commit de merge, `validate` concluiu com sucesso e o status Vercel retornou `success` (`Deployment has completed`). A confirmação persistente de envio definitivo e o retorno ao registro exato foram integrados e publicados. **Não houve homologação profissional autenticada pela Patty em produção**; testes locais com dados sintéticos não substituem essa etapa. O status histórico dos PRs anteriores permanece abaixo como registro temporal, não como estado atual do #890.
+
+---
+
 ## 2026-10-15 — J2: correção do redirect pós-envio no PR #890 (CI em execução)
 
 ### FATO OBSERVADO EM PLAYWRIGHT / DECISÃO TÉCNICA
