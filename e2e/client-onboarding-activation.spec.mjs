@@ -288,6 +288,8 @@ test("J1: cliente sintetica ativa acesso, salva Cadastro Atual e retoma Anamnese
     }, { timeout: 35_000 });
 
     let draftId = null;
+    let draftFormVersionId = null;
+    let cityQuestionId = null;
     await test.step("inicia e retoma a mesma Anamnese versionada", async () => {
       await activationPage.goto("/cliente/anamnese");
       await activationPage.getByRole("button", {name:"Começar Anamnese"}).click();
@@ -301,6 +303,7 @@ test("J1: cliente sintetica ativa acesso, salva Cadastro Atual e retoma Anamnese
       expect(rows.data[0].id).toBe(draftId);
       expect(rows.data[0].submitted_at).toBeNull();
       expect(rows.data[0].form_version_id).toBeTruthy();
+      draftFormVersionId = rows.data[0].form_version_id;
       await activationPage.goto("/cliente/anamnese");
       const resume = activationPage.getByRole("link",{name:"Continuar rascunho"});
       await expect(resume).toHaveAttribute("href",`/cliente/anamnese/${draftId}`);
@@ -310,6 +313,48 @@ test("J1: cliente sintetica ativa acesso, salva Cadastro Atual e retoma Anamnese
       }));
       expect(layout.scroll, "Anamnese must fit mobile viewport").toBeLessThanOrEqual(layout.viewport + 1);
     }, { timeout: 35_000 });
+
+    await test.step("J1 Anamnese: editar resposta informativa e persistir sem duplicar", async () => {
+      // Only a non-clinical question from the EXACT published version linked
+      // to this synthetic draft. Do not guess question IDs or write health data.
+      const question = await admin.from("anamnesis_questions")
+        .select("id,question_key,answer_type")
+        .eq("form_version_id",draftFormVersionId)
+        .eq("question_key","city")
+        .single();
+      if (question.error) throw question.error;
+      expect(question.data.question_key).toBe("city");
+      expect(question.data.answer_type).toBe("text");
+      cityQuestionId = question.data.id;
+
+      await activationPage.goto(`/cliente/anamnese/${draftId}`);
+      const field = activationPage.locator(`#anamnesis-draft-answer-${cityQuestionId}`);
+      await expect(field).toBeVisible();
+      await field.fill("Cidade Sintética J1 A");
+      await field.blur();
+
+      async function storedValues() {
+        const answers = await admin.from("anamnesis_answers")
+          .select("answer_value")
+          .eq("submission_id",draftId)
+          .eq("question_id",cityQuestionId);
+        if (answers.error) throw answers.error;
+        return answers.data.map(answer => answer.answer_value);
+      }
+      await expect.poll(storedValues,{timeout:20_000}).toEqual(["Cidade Sintética J1 A"]);
+
+      await field.fill("Cidade Sintética J1 B");
+      await field.blur();
+      await expect.poll(storedValues,{timeout:20_000}).toEqual(["Cidade Sintética J1 B"]);
+      await activationPage.reload();
+      await expect(activationPage.locator(`#anamnesis-draft-answer-${cityQuestionId}`))
+        .toHaveValue("Cidade Sintética J1 B");
+
+      const submission = await admin.from("anamnesis_submissions")
+        .select("submitted_at").eq("id",draftId).single();
+      if (submission.error) throw submission.error;
+      expect(submission.data.submitted_at).toBeNull();
+    },{timeout:45_000});
 
     await test.step("J1 return: independent mobile client login", async () => {
     loginContext = await browser.newContext({ baseURL: baseUrl, viewport:{width:390,height:844}, isMobile:true, hasTouch:true });
@@ -324,6 +369,9 @@ test("J1: cliente sintetica ativa acesso, salva Cadastro Atual e retoma Anamnese
     await loginPage.goto("/cliente/anamnese");
     await expect(loginPage.getByRole("link",{name:"Continuar rascunho"}))
       .toHaveAttribute("href",`/cliente/anamnese/${draftId}`);
+    await loginPage.goto(`/cliente/anamnese/${draftId}`);
+    await expect(loginPage.locator(`#anamnesis-draft-answer-${cityQuestionId}`))
+      .toHaveValue("Cidade Sintética J1 B");
     }, { timeout: 35_000 });
 
     await test.step("J1 authorization: anonymous session and client cannot access privileged records", async () => {
