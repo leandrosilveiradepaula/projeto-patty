@@ -21,11 +21,15 @@ function fakeStore({privileged=false,submitted=false,protocol=false,foreignClien
     client_registration:[{client_id:clientId,city:"Cidade Sintetica"}],
     anamnesis_submissions:[{id:draftId,client_id:clientId,submitted_at:submitted?"2026-10-14T13:00:00Z":null}],
     anamnesis_answers:[{submission_id:draftId}],
+    client_files:[],
+    client_file_upload_sessions:[],
+    client_file_access_events:[],
     protocols:protocol?[{id:"66666666-6666-4666-8666-666666666666",client_id:clientId}]:[],
   };
   let authPresent=true;
   const mutations=[];
   const admin={
+    storage:{from(bucket){if(bucket!=="client-private")throw new Error("Unexpected storage");return {async remove(paths){if(paths.length)throw new Error("Unexpected file fixture");return {error:null}}}}},
     auth:{admin:{
       async getUserById(id){
         if(id!==profileId) throw new Error("Unexpected Auth ID");
