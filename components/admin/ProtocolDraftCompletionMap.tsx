@@ -13,11 +13,11 @@ type Navigation={
  missingCycleTargetCount:number;
  cyclePresent:boolean;
 };
-export function ProtocolDraftCompletionMap({navigation}:{navigation:Navigation}){
+export function ProtocolDraftCompletionMap({navigation,versionNumber}:{navigation:Navigation;versionNumber:number}){
  const [term,setTerm]=useState("");
  const matches=searchDraftDirectory(navigation.directory,term);
- return <section className={styles.root} aria-labelledby="rascunho-pendencias-titulo">
-  <h4 id="rascunho-pendencias-titulo">Mapa do rascunho alimentar</h4>
+ return <section className={styles.root} aria-labelledby={`rascunho-pendencias-titulo-${versionNumber}`}>
+  <h4 id={`rascunho-pendencias-titulo-${versionNumber}`}>Mapa do rascunho alimentar</h4>
   <p role="status">{navigation.ready?"Estrutura mínima completa para envio à revisão. A aprovação e publicação continuam manuais.":navigation.issues.length+" pendência(s) técnicas de preenchimento para conferir."}</p>
   <dl className={styles.counts}>
    {([["Variações",navigation.totals.variants],["Refeições",navigation.totals.meals],["Doses",navigation.totals.doses],["Ciclos",navigation.totals.cycles],["Etapas",navigation.totals.steps]] as const).map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}

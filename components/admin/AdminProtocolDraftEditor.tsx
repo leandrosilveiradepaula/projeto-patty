@@ -721,7 +721,7 @@ function RemoveEmptyCycleForm({ cycle, mealPlanVersionId, protocolId, protocolVe
 function ManualCycleEditor({ plan, protocolId, protocolVersionId }: {
   plan: AdminProtocolVersionPlanData; protocolId: string; protocolVersionId: string;
 }) {
-  return <section className={styles.cycleEditor} id={draftCycleAddAnchor()} aria-label="Montagem manual dos ciclos">
+  return <section className={styles.cycleEditor} id={draftCycleAddAnchor(protocolVersionId)} aria-label="Montagem manual dos ciclos">
     <h5>Ciclos alimentares</h5>
     <p className={styles.help}>
       Opcional. Escolha a sequência manualmente, incluindo repetições quando necessário.
@@ -775,7 +775,7 @@ export function AdminProtocolDraftEditor({
 }: AdminProtocolDraftEditorProps) {
   if (!plan) {
     return (
-      <div className={styles.editor} id={draftPlanAnchor()}>
+      <div className={styles.editor} id={draftPlanAnchor(protocolVersionId)}>
         <h5>Montagem do rascunho</h5>
         <CreatePlanForm
           protocolId={protocolId}
@@ -786,7 +786,7 @@ export function AdminProtocolDraftEditor({
   }
 
   return (
-    <div className={styles.editor} id={draftPlanAnchor()}>
+    <div className={styles.editor} id={draftPlanAnchor(protocolVersionId)}>
       <div className={styles.heading}>
         <div>
           <h5>Montagem do rascunho</h5>
@@ -799,7 +799,7 @@ export function AdminProtocolDraftEditor({
 
 
 
-      <div className={styles.variantCreate} id={draftVariantAddAnchor()}><h6>1. Cadastrar variações</h6><AddVariantForm
+      <div className={styles.variantCreate} id={draftVariantAddAnchor(protocolVersionId)}><h6>1. Cadastrar variações</h6><AddVariantForm
         mealPlanVersionId={plan.id}
         protocolId={protocolId}
         protocolVersionId={protocolVersionId}

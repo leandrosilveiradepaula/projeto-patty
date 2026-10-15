@@ -32,9 +32,9 @@ export type DraftDirectoryItem = {
   description: string;
   kind: "variant" | "meal" | "cycle";
 };
-export function draftPlanAnchor() { return "rascunho-plano-iniciar"; }
-export function draftVariantAddAnchor() { return "rascunho-variacao-adicionar"; }
-export function draftCycleAddAnchor() { return "rascunho-ciclo-adicionar"; }
+export function draftPlanAnchor(version: string = "") { return "rascunho-plano-iniciar" + (version ? "-" + version : ""); }
+export function draftVariantAddAnchor(version: string = "") { return "rascunho-variacao-adicionar" + (version ? "-" + version : ""); }
+export function draftCycleAddAnchor(version: string = "") { return "rascunho-ciclo-adicionar" + (version ? "-" + version : ""); }
 export function draftVariantAnchor(id: string) { return "rascunho-variacao-" + id; }
 export function draftMealAnchor(id: string) { return "rascunho-refeicao-" + id; }
 export function draftDoseAddAnchor(id: string) { return "rascunho-dose-adicionar-" + id; }
@@ -51,14 +51,14 @@ export function searchDraftDirectory(items: readonly DraftDirectoryItem[], value
     normalizeDraftSearch(item.label).includes(needle) ||
     normalizeDraftSearch(item.description).includes(needle));
 }
-export function buildProtocolDraftNavigation(plan: DraftNavigationPlan | null) {
+export function buildProtocolDraftNavigation(plan: DraftNavigationPlan | null, version: string = "") {
   const readiness = getProtocolDraftReadiness(plan);
   const issues: DraftCompletionIssue[] = [];
   const directory: DraftDirectoryItem[] = [];
   const empty = { variants: 0, meals: 0, doses: 0, cycles: 0, steps: 0 };
   if (!plan) {
     issues.push({ key: "plan", kind: "plan", label: "Iniciar estrutura alimentar",
-      detail: "Nenhum plano alimentar foi criado nesta versão.", href: "#" + draftPlanAnchor() });
+      detail: "Nenhum plano alimentar foi criado nesta versão.", href: "#" + draftPlanAnchor(version) });
     return { ready: false, issues, directory, totals: empty, unreferencedVariantCount: 0,
       repeatedNameCount: 0, missingCycleTargetCount: 0, cyclePresent: false };
   }
@@ -72,7 +72,7 @@ export function buildProtocolDraftNavigation(plan: DraftNavigationPlan | null) {
   };
   if (plan.variants.length === 0) {
     issues.push({ key: "variants", kind: "variant", label: "Adicionar primeira variação",
-      detail: "Ainda não há variações alimentares registradas.", href: "#" + draftVariantAddAnchor() });
+      detail: "Ainda não há variações alimentares registradas.", href: "#" + draftVariantAddAnchor(version) });
   }
   const useCount = new Map<string, number>();
   const names = new Map<string, number>();

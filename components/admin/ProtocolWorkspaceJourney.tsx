@@ -6,6 +6,7 @@ type Props = {
   hasPlan: boolean;
   ready: boolean;
   versionNumber: number;
+  versionId: string;
 };
 
 const stages = [
@@ -16,11 +17,11 @@ const stages = [
 ] as const;
 
 /** A display of persisted lifecycle facts, not an automatic clinical decision. */
-export function ProtocolWorkspaceJourney({ action, hasPlan, ready, versionNumber }: Props) {
+export function ProtocolWorkspaceJourney({ action, hasPlan, ready, versionNumber, versionId }: Props) {
   // Submeter não comprova revisão humana: a etapa Revisão fica ativa até a aprovação.
   const active = action === "submit" ? 0 : action === "approve" ? 1 : action === "publish" ? 3 : 4;
   const next = action === "submit"
-    ? { href: hasPlan && ready ? `#conferencia-plano-${versionNumber}` : "#rascunho-plano-iniciar",
+    ? { href: hasPlan && ready ? `#conferencia-plano-${versionNumber}` : `#rascunho-plano-iniciar-${versionId}`,
         label: hasPlan && ready ? "Conferir estrutura antes de submeter" : "Continuar montagem" }
     : action === "approve"
       ? { href: `#conferencia-plano-${versionNumber}`, label: "Conferir antes da aprovação" }
