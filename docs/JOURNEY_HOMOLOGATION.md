@@ -1,3 +1,11 @@
+## J1 — ativação intermitente: prevenir digitação antes da hidratação (2026-10-14)
+
+**FATO OBSERVADO:** no novo percurso com checks móveis/de autorização, o workflow [38657414114](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38657414114) chegou ao Playwright autenticado, mas falhou na etapa de criação de senha: o botão `Criar senha e continuar` permaneceu desabilitado e o passo atingiu 45 s. Na execução anterior [38656714848](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38656714848), a mesma ativação funcionou e o cenário completo passou. O navegador realizou cleanup e o pós-processo independente confirmou `already-clean`; consulta somente leitura de produção confirmou zero Auth/Clients sintéticos restantes.
+
+**HIPÓTESE TÉCNICA:** existe janela entre HTML inicial e hidratação React na qual eventos sobre campos controlados não atualizam o estado, deixando o botão desabilitado. Ainda não há prova definitiva de causa-raiz; o produto deve evitar qualquer digitação antes de o formulário estar interativo. A correção torna os campos e botões inicialmente indisponíveis, exibe orientação `Preparando formulário para digitação`, marca `data-interactive` após hidratação e só aceita submit quando interativo. O E2E aguarda explicitamente `data-interactive=true` e botão habilitado. Preserva validação de senha, server action, Auth e MFA. A hipótese só será avaliada como mitigada após nova execução real.
+
+**Pendências reais:** ainda não avaliados nesse segundo run: acesso negado anônimo/admin e overflow horizontal. O PASS do percurso anterior permanece válido para o escopo anterior; a J1 inteira continua NÃO HOMOLOGADA.
+
 ## J1.02–03 — primeiro percurso real aprovado, com persistência e limpeza (2026-10-14)
 
 **EVIDÊNCIA EXECUTADA:** [GitHub Actions 38656714848](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38656714848), no `master` `b84925d4`, com Vercel Production READY e CI do mesmo SHA aprovados. Playwright Chromium concluiu **1 teste PASS em 25,4 s**, incluindo: ativação da conta sintética com viewport 390×844, definição de senha, login da cliente, Cadastro Atual salvo e lido novamente do banco e do formulário após reload, início de rascunho versionado de Anamnese, retomada do mesmo ID e novo login independente.
