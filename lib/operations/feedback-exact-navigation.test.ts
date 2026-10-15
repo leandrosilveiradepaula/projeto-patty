@@ -79,3 +79,12 @@ test("J2 inbox context survives exact record, comparison and manual assessment r
   assert.match(assessment, /backToFeedback\(weeklyFeedbackComparisonHref\(/);
   assert.match(assessment, /backToFeedback\(receivedWeeklyFeedbackExactHref\(/);
 });
+
+test("J2 inbox to client workspace preserves only validated local return context", () => {
+  const inbox = read("app/admin/feedback-semanal/page.tsx");
+  const workspace = read("app/admin/clientes/[clienteId]/page.tsx");
+  assert.match(inbox, /fromInbox\("\/admin\/clientes\/" \+ feedback\.client_id\)/);
+  assert.match(workspace, /readWeeklyFeedbackInboxReturn\(query\.caixaRetorno\)/);
+  assert.match(workspace, /inboxReturn \? \(/);
+  assert.match(workspace, /href=\{inboxReturn\}/);
+});

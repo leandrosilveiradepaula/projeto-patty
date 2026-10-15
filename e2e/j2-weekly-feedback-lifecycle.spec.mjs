@@ -289,6 +289,14 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
     await test.step("caixa profissional mostra a solicitação pendente, sem expor respostas", async () => {
       await adminPage.goto("/admin/feedback-semanal?situacao=pendentes&cliente=" + clientId);
       await expect(adminPage.getByRole("heading", { name: "Aguardando resposta da cliente" })).toBeVisible();
+      await expect(adminPage.getByText("Nenhum evento de lembrete registrado", { exact: false })).toBeVisible();
+      await adminPage.getByRole("link", { name: "Ver acompanhamento" }).click();
+      await expect(adminPage.getByRole("link", {
+        name: "Voltar à caixa de Feedbacks Semanais",
+      })).toHaveAttribute("href",
+        "/admin/feedback-semanal?situacao=pendentes&cliente=" + clientId + "#aguardando-cliente");
+      await adminPage.getByRole("link", { name: "Voltar à caixa de Feedbacks Semanais" }).click();
+      await expect(adminPage.getByRole("heading", { name: "Aguardando resposta da cliente" })).toBeVisible();
       await adminPage.getByRole("link", { name: "Abrir solicitação" }).click();
       await expect(adminPage.locator("#feedback-pendente-" + feedbackId)).toBeVisible();
       await expect(adminPage.getByRole("link", {
