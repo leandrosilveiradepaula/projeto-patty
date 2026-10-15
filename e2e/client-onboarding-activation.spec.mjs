@@ -412,6 +412,30 @@ test("J1: cliente sintetica ativa acesso, salva Cadastro Atual e retoma Anamnese
         .toBeLessThanOrEqual(layout.viewport + 1);
     }, {timeout:35_000});
 
+    await test.step("J2.01: Feedback Semanal is unavailable before the first published protocol", async () => {
+      // Same disposable client; no health questionnaire or professional records
+      // are created. The first publication is the confirmed eligibility gate.
+      const [published, requested] = await Promise.all([
+        admin.from("protocol_publications").select("id").eq("client_id",clientId).limit(1),
+        admin.from("client_weekly_feedbacks").select("id").eq("client_id",clientId).limit(1),
+      ]);
+      for (const result of [published, requested]) {
+        if (result.error) throw result.error;
+        expect(result.data).toHaveLength(0);
+      }
+      await loginPage.goto("/cliente/feedback-semanal");
+      await expect(loginPage.getByRole("heading",{name:"Feedback Semanal",exact:true})).toBeVisible();
+      await expect(loginPage.getByText("Nenhum feedback solicitado",{exact:true})).toBeVisible();
+      await loginPage.reload();
+      await expect(loginPage.getByText("Nenhum feedback solicitado",{exact:true})).toBeVisible();
+      const layout = await loginPage.evaluate(() => ({
+        viewport: document.documentElement.clientWidth,
+        scroll: document.documentElement.scrollWidth,
+      }));
+      expect(layout.scroll,"J2 weekly-feedback empty state must fit mobile viewport")
+        .toBeLessThanOrEqual(layout.viewport + 1);
+    }, {timeout:35_000});
+
     let syntheticPrivateFileId = null;
     await test.step("J1 private photo: verified upload and persisted history", async () => {
       syntheticPrivateFileId = await checkJ1SyntheticPrivatePhoto({page:loginPage,admin,clientId,profileId,unique});

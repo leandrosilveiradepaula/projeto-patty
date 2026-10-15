@@ -1,3 +1,17 @@
+## 2026-10-15 — J1 encerrada por aceite do responsável; início de J2
+
+### DECISÃO DE GESTÃO DO PROJETO (RESPONSÁVEL)
+
+O responsável autorizou encerrar o ciclo de implementação J1 e avançar à J2, deixando para outra ocasião a homologação profissional presencial/autenticada.
+
+### STATUS TÉCNICO DISTINTO DO ACEITE
+
+O `master` `ef75722c3778400fe72004b64f1b127d458db999` teve `Validate application` PASS [#38767824936](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38767824936), E2E cliente PASS [#38767986491](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38767986491) e Vercel deployment concluído. A aprovação e publicação reais pela Patty com MFA, seguidas de leitura da exata versão publicada pela cliente, **não foram executadas**. Portanto, J1 = **ENCERRADA POR ACEITE PARA AVANÇAR**, **HOMOLOGAÇÃO PROFISSIONAL PENDENTE**. Não reclassificar testes não feitos como PASS.
+
+### ESCOPO TÉCNICO INICIAL DE J2 (PROPOSTO, NÃO REGRA PROFISSIONAL NOVA)
+
+Iniciar pela continuidade após primeiro protocolo publicado: solicitação e resposta do Feedback Semanal, pendências/revisão e retorno da cliente. A elegibilidade pelo primeiro `protocol_publications` e o agendamento parametrizado já são regras confirmadas documentadas em `WEEKLY_FEEDBACK.md`. Preservar dados originais, histórico, autorização de cliente e decisões humanas. Nenhuma regra de adesão, IA ou envio externo adicional é inferida.
+
 ## J1.05–10 — bloqueio de prova profissional fim a fim (2026-10-15 UTC)
 
 **FATO CONFIRMADO por consulta read-only ao Supabase de produção:** 2 clientes, 1 Anamnese submetida, **0 avaliações, 0 protocolos, 0 versões, 0 aprovações e 0 publicações**. O `master` `0eac9b72` tem CI PASS [#38757814943](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38757814943) e Playwright cliente PASS [#38757884934](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38757884934), mas **não** executou aprovação/publicação pela Patty autenticada. Ausência de publicação impede conferir a leitura de um protocolo realmente aprovado; não prova defeito no fluxo.
