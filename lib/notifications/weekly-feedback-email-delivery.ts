@@ -1,6 +1,6 @@
 import "server-only";
 
-import { formatWeeklyFeedbackPeriodDate } from "@/lib/weekly-feedback/date-format";
+import { buildWeeklyFeedbackEmailContent } from "@/lib/notifications/weekly-feedback-email-content";
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { resolveTrustedClientAccessOrigin } from "@/lib/onboarding/trusted-client-access-origin";
@@ -10,15 +10,6 @@ import {
 } from "@/lib/notifications/gmail-smtp";
 
 const DEFAULT_BATCH_SIZE = 10;
-
-function formatDate(value: string) {
-  // Never normalize an invalid calendar day into a different period.
-  const formatted = formatWeeklyFeedbackPeriodDate(value);
-  if (formatted === "Data indisponível") {
-    throw new Error("Invalid weekly feedback period date");
-  }
-  return formatted;
-}
 
 function safeFailureMessage(error: unknown) {
   const message =
@@ -83,20 +74,11 @@ export async function deliverWeeklyFeedbackReminderEmails(input: {
     try {
       // All per-claim preparation belongs inside the recovery boundary:
       // one malformed legacy period must not strand the claimed batch.
-      const feedbackUrl = new URL("/cliente/feedback-semanal", appOrigin);
-      const subject = "Lembrete do seu Feedback Semanal";
-      const bodyText = [
-        "Olá,",
-        "",
-        `Seu Feedback Semanal referente ao período de ${formatDate(claim.period_start)} a ${formatDate(claim.period_end)} ainda está disponível para preenchimento no aplicativo.`,
-        "",
-        "Acesse:",
-        feedbackUrl.toString(),
-        "",
-        "Este lembrete não altera seu atendimento automaticamente.",
-        "",
-        "Consultoria Corpo e Mente - Patty",
-      ].join("\n");
+      const { subject, bodyText } = buildWeeklyFeedbackEmailContent({
+        appOrigin,
+        periodStart: claim.period_start,
+        periodEnd: claim.period_end,
+      });
 
       result = await sendGmailSmtpEmail(smtpConfig, {
         bodyText,
