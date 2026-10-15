@@ -12,7 +12,7 @@ const png = Buffer.from(
 export async function checkJ1SyntheticPrivatePhoto({ page, admin, clientId, profileId, unique }) {
   const name = "e2e-j1-" + unique + ".png";
   await page.goto("/cliente/arquivos");
-  await expect(page.getByRole("heading", { name: "Meus arquivos" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Meus arquivos", exact: true })).toBeVisible();
   await page.locator('input[name="file"]').setInputFiles({name, mimeType:"image/png", buffer:png});
   await page.getByRole("checkbox",{name:"Conferi o arquivo e a categoria antes de enviar."}).check();
   await page.getByRole("button",{name:"Enviar arquivo"}).click();
