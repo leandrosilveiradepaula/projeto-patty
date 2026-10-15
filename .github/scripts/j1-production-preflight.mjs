@@ -1,9 +1,10 @@
 import { appendFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
-// Last production deployment confirmed READY for the J1 UI. This is a
+// Last verified Vercel production deployment for J1. The commit below had
+// success status and #854 added only exact E2E test files. This is a
 // temporary, explicit evidence anchor, never an arbitrary stale deployment.
-const verifiedDeployedCommit = "32c9c4faf807a2fc083c30b9f6f3ad97677ef051";
+const verifiedDeployedCommit = "35304fec723f011ec8c113938e2700a45cdfe132";
 
 // Fail closed unless EVERY change since the deployed commit is strictly
 // test/CI/documentation. Do not use broad directories or extensions here.
@@ -19,6 +20,7 @@ const NON_RUNTIME_CHANGES = new Set([
   "docs/JOURNEY_HOMOLOGATION.md",
   "docs/PROJECT_STATUS.md",
   "e2e/client-onboarding-activation.spec.mjs",
+  "e2e/helpers/j1-private-photo-browser.mjs",
   "lib/operations/j1-authenticated-handoff-gate.test.ts",
 ]);
 
