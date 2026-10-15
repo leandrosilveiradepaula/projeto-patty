@@ -212,9 +212,30 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
       });
       await adminPage.goto("/admin/clientes/" + clientId + "/feedback-semanal");
       await expect(adminPage.getByRole("heading", { name: "Solicitar Feedback Semanal" })).toBeVisible();
-      await adminPage.getByLabel("Semana de referência · início").fill(periodStart);
-      await adminPage.getByLabel("Semana de referência · fim").fill(periodEnd);
-      await adminPage.getByRole("button", { name: "Criar solicitação" }).click();
+
+      const startInput = adminPage.getByLabel("Semana de referência · início");
+      const endInput = adminPage.getByLabel("Semana de referência · fim");
+      const submitRequest = adminPage.getByRole("button", { name: "Criar solicitação" });
+
+      // This is a client-controlled form. In Next dev the initial RSC HTML
+      // may be visible before React has attached onChange. A fill made before
+      // hydration can be reset without an actionable error on submit.
+      // The end-date min attribute is set ONLY by the React start-date state:
+      // require that real onChange/hydration occurred before submitting.
+      await expect(startInput).toBeVisible();
+      await expect.poll(async () => {
+        await startInput.fill(periodStart);
+        return await endInput.getAttribute("min");
+      }, { timeout: 20_000, message: "Waiting for hydrated weekly request form" })
+        .toBe(periodStart);
+      await endInput.fill(periodEnd);
+      await expect(endInput).toHaveValue(periodEnd);
+      await expect(submitRequest).toBeEnabled();
+      expect(
+        await submitRequest.evaluate((button) => button.form?.checkValidity() ?? false),
+        "The synthetic request must pass native date constraints before submitting",
+      ).toBe(true);
+      await submitRequest.click();
       try {
         await expect.poll(async () => {
           const row = await feedbackRecord(clientId, periodStart);
@@ -240,9 +261,20 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
         const successVisible = await adminPage.getByText(
           "Feedback Semanal solicitado para a cliente.", { exact: true },
         ).isVisible();
+        // Report only transport/UI states, never user input, health answers,
+        // auth tokens, full URLs, HTML content or console output.
+        const buttonPresent = await submitRequest.count() === 1;
+        const formValid = buttonPresent
+          ? await submitRequest.evaluate((button) => button.form?.checkValidity() ?? false)
+          : null;
+        const hydrated = await endInput.count() === 1
+          ? (await endInput.getAttribute("min")) === periodStart
+          : false;
         throw new Error(
           "Synthetic admin request not persisted; successVisible=" + successVisible +
-          "; knownErrorIndexes=" + JSON.stringify(states),
+          "; knownErrorIndexes=" + JSON.stringify(states) +
+          "; path=" + new URL(adminPage.url()).pathname +
+          "; formValid=" + formValid + "; hydrated=" + hydrated,
         );
       }
     });
