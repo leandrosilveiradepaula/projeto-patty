@@ -4,7 +4,7 @@
 
 **BLOQUEIO DE RELEASE:** Vercel ainda informa `build-rate-limit` no SHA do merge, portanto a versão publicada mais recente não foi comprovada. A homologação com Patty/admin real, leitura por cliente real autorizada e evidência do SHA efetivamente deployado **permanecem pendentes**, sem suspender o desenvolvimento de melhorias localmente.
 
-**CORREÇÃO FUNCIONAL EM PREPARAÇÃO:** conflito entre rascunhos de duas sessões pode causar perda de texto local pelo remount ao atualizar. O próximo PR deve preservar edição não salva, comparar a versão atual autorizada, exigir escolha explícita para perguntas alteradas nas duas sessões e continuar usando o compare-and-swap autenticado. Testes determinísticos e navegador real local precisam comprovar a recuperação; não criar estado de revisão profissional nem regra clínica.
+**CORREÇÃO FUNCIONAL IMPLEMENTADA/TESTADA EM BRANCH:** PR #888 (`b41adfce`) resolve perda de respostas locais no refresh de uma edição concorrente: o formulário mantém identidade estável e comparação com fingerprint anterior, exige escolha explícita para divergências e só grava com ação consciente após reconciliar. [CI completo #38816639283](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38816639283) = PASS, [E2E local com duas sessões #38816639406](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38816639406) = PASS, cleanup de Supabase local = PASS. **PR ainda aberto; não publicado ou homologado em produção**. RLS/MFA/CAS intactos; nenhum estado de revisão profissional, regra clínica ou publicação foi criado.
 
 ---
 ## 2026-10-15 — J1 encerrada por aceite do responsável; início de J2
