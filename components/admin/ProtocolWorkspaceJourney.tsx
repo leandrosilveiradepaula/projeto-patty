@@ -20,7 +20,7 @@ export function ProtocolWorkspaceJourney({ action, hasPlan, ready, versionNumber
   // Submeter não comprova revisão humana: a etapa Revisão fica ativa até a aprovação.
   const active = action === "submit" ? 0 : action === "approve" ? 1 : action === "publish" ? 3 : 4;
   const next = action === "submit"
-    ? { href: hasPlan && ready ? `#conferencia-plano-${versionNumber}` : "#rascunho-plano-iniciar",
+    ? { href: hasPlan && ready ? `#conferencia-plano-${versionNumber}` : `#rascunho-plano-iniciar-${versionNumber}`,
         label: hasPlan && ready ? "Conferir estrutura antes de submeter" : "Continuar montagem" }
     : action === "approve"
       ? { href: `#conferencia-plano-${versionNumber}`, label: "Conferir antes da aprovação" }
