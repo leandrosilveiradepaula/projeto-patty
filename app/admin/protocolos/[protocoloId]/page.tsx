@@ -353,7 +353,7 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
                       </div>
                     </>
                   ) : null}
-                  <div className={styles.versionPlan} id="conferencia-plano">
+                  <div className={styles.versionPlan} id={`conferencia-plano-${version.version_number}`}>
                     <h4>Estrutura alimentar desta versão</h4>
                     <p>
                       Revisão factual do plano persistido antes de qualquer ação
@@ -378,7 +378,7 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
                       />
                     </div>
                   ) : null}
-                  <div className={styles.lifecycleAction} id="acao-protocolo">
+                  <div className={styles.lifecycleAction} id={`acao-protocolo-${version.version_number}`}>
                     <h4>Próxima ação manual</h4>
                     {lifecycleAction === "complete" ? (
                       <p className={styles.lifecycleComplete}>
