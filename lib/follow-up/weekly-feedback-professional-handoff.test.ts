@@ -68,8 +68,8 @@ test("comparison offers an explicit decision route without creating, sending or 
   assert.match(compare, /manualAssessmentDecisionFromComparisonHref\(/);
   assert.match(compare, /Nenhuma avaliação finalizada/);
   assert.match(compare, /A decisão ficará registrada na avaliação escolhida/);
-  assert.match(evaluation, /readWeeklyComparisonReturn\(filters\.feedbackAtual, filters\.feedbackAnterior\)/);
-  assert.match(evaluation, /weeklyFeedbackComparisonHref\(assessment\.client_id/);
+  assert.match(evaluation, /readWeeklyComparisonReturn\(\s*filters\.feedbackAtual,\s*filters\.feedbackAnterior,?\s*\)/);
+  assert.match(evaluation, /weeklyFeedbackComparisonHref\(\s*assessment\.client_id/);
   assert.match(evaluation, /Voltar à comparação dos Feedbacks Semanais/);
   assert.doesNotMatch(compare, /addProfessionalFollowUp|createAccessibleProfessionalFollowUp|\.insert\(|\.update\(/);
 });
