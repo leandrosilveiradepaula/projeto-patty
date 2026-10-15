@@ -364,14 +364,12 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
       // have already been sent. Assert the *rendered access boundary* rather
       // than treating transport status alone as proof of data isolation.
       expect([200, 404], "navigation should complete at an access boundary").toContain(denied?.status());
-      await expect(unassignedPage.getByRole("heading", {
-        name: "Página ou registro indisponível",
-      })).toBeVisible();
+      await expect(unassignedPage.getByText("Página ou registro indisponível", { exact: true })).toBeVisible();
       await expect(unassignedPage.locator("#feedback-enviado-" + feedbackId)).toHaveCount(0);
       await expect(unassignedPage.getByText("Resposta sintética J2 exclusivamente local")).toHaveCount(0);
 
       await unassignedPage.goto("/admin/feedback-semanal?cliente=" + clientId);
-      await expect(unassignedPage.getByRole("heading", { name: "Filtros indisponíveis" })).toBeVisible();
+      await expect(unassignedPage.getByText("Filtros indisponíveis", { exact: true })).toBeVisible();
       await expect(unassignedPage.getByRole("link", { name: "Abrir respostas originais" })).toHaveCount(0);
     });
   } finally {
