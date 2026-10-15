@@ -28,6 +28,13 @@ export async function addAnamnesisReviewNote(
     };
   }
 
+  if (!submission.submitted_at) {
+    return {
+      message: "Aguarde o envio final da Anamnese pela cliente antes de registrar revisão profissional.",
+      success: false,
+    };
+  }
+
   const value = formData.get("note");
 
   if (typeof value !== "string" || !value.trim()) {
