@@ -1,6 +1,7 @@
 import "server-only";
 
 import { buildWeeklyFeedbackEmailContent } from "@/lib/notifications/weekly-feedback-email-content";
+import { checkWeeklyFeedbackEmailEligibility } from "@/lib/notifications/weekly-feedback-email-eligibility";
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { resolveTrustedClientAccessOrigin } from "@/lib/onboarding/trusted-client-access-origin";
@@ -70,10 +71,58 @@ export async function deliverWeeklyFeedbackReminderEmails(input: {
 
   for (const claim of claims ?? []) {
     let result: Awaited<ReturnType<typeof sendGmailSmtpEmail>>;
+    let failureCode = "gmail_smtp_error";
 
     try {
       // All per-claim preparation belongs inside the recovery boundary:
       // one malformed legacy period must not strand the claimed batch.
+      // Recheck the live state immediately before SMTP. A claim can become
+      // stale if the client submits, Patty changes channel/contact, or the
+      // assignment ends after the database claim was acquired.
+      const [feedback, notification, preference, contact, assignment] = await Promise.all([
+        admin.from("client_weekly_feedbacks")
+          .select("client_id, submitted_at, period_start, period_end")
+          .eq("id", claim.weekly_feedback_id)
+          .eq("client_id", claim.client_id)
+          .maybeSingle(),
+        admin.from("client_notification_events")
+          .select("client_id, weekly_feedback_id, channel_key, preference_version_id, delivery_state")
+          .eq("id", claim.notification_event_id)
+          .eq("client_id", claim.client_id)
+          .maybeSingle(),
+        admin.from("client_notification_preference_versions")
+          .select("id, client_id, purpose_key, channel_key, retired_at")
+          .eq("client_id", claim.client_id)
+          .eq("purpose_key", "weekly_feedback")
+          .is("retired_at", null)
+          .maybeSingle(),
+        admin.from("client_registration")
+          .select("client_id, contact_email")
+          .eq("client_id", claim.client_id)
+          .maybeSingle(),
+        admin.from("client_assignments")
+          .select("client_id")
+          .eq("client_id", claim.client_id)
+          .is("ended_at", null)
+          .limit(1)
+          .maybeSingle(),
+      ]);
+      if ([feedback, notification, preference, contact, assignment].some(row => row.error)) {
+        failureCode = "eligibility_check_error";
+        throw new Error("Could not revalidate weekly feedback email eligibility");
+      }
+      const eligibilityIssue = checkWeeklyFeedbackEmailEligibility(claim, {
+        feedback: feedback.data,
+        notification: notification.data,
+        preference: preference.data,
+        contact: contact.data,
+        activeAssignment: assignment.data,
+      });
+      if (eligibilityIssue) {
+        failureCode = "eligibility_changed";
+        throw new Error("Weekly feedback email no longer eligible: " + eligibilityIssue);
+      }
+
       const { subject, bodyText } = buildWeeklyFeedbackEmailContent({
         appOrigin,
         periodStart: claim.period_start,
@@ -91,7 +140,7 @@ export async function deliverWeeklyFeedbackReminderEmails(input: {
         "fail_weekly_feedback_email_delivery_server",
         {
           p_attempt_id: claim.attempt_id,
-          p_failure_code: "gmail_smtp_error",
+          p_failure_code: failureCode,
           p_failure_message: safeFailureMessage(error),
         },
       );

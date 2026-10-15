@@ -29,3 +29,20 @@ test("bad period in one claimed reminder fails individually and does not halt su
   assert.match(worker,/p_attempt_id: claim\.attempt_id/);
   assert.match(worker,/failed \+= 1/);
 });
+
+test("send is gated on fresh pending feedback, current contact, preference and assignment", () => {
+  const claim = worker.indexOf("for (const claim of claims ?? [])");
+  const verify = worker.indexOf("checkWeeklyFeedbackEmailEligibility(claim", claim);
+  const send = worker.indexOf("sendGmailSmtpEmail(smtpConfig", claim);
+  assert.ok(claim >= 0 && verify > claim && send > verify);
+  for (const table of [
+    "client_weekly_feedbacks", "client_notification_events",
+    "client_notification_preference_versions", "client_registration", "client_assignments",
+  ]) {
+    assert.ok(worker.includes('.from("' + table + '")'), table);
+  }
+  assert.match(worker, /p_failure_code: failureCode/);
+  assert.match(worker, /failureCode = "eligibility_changed"/);
+  assert.match(worker, /failureCode = "eligibility_check_error"/);
+  assert.doesNotMatch(worker, /\.select\("answers/);
+});
