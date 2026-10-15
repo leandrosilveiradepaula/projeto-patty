@@ -2,7 +2,7 @@
 -- Exercises the actual RLS/invoker boundary from publication -> request ->
 -- partial save -> CAS conflict -> definitive submit -> admin history.
 begin;
-select plan(25);
+select plan(30);
 
 select has_function('public', 'save_client_weekly_feedback_if_unchanged', array['uuid','uuid','jsonb','jsonb','boolean']);
 select ok(
@@ -226,6 +226,21 @@ select is(
   1::bigint,
   'assigned professional reads the submitted client answers'
 );
+select is(
+  (select answers->>'q18' from public.client_weekly_feedbacks
+   where id='f1600000-0000-0000-0000-000000000001'
+     and submitted_at is not null),
+  'sem dificuldade'::text,
+  'assigned professional reads the exact submitted original answer'
+);
+-- MFA remains mandatory even while the assignment is active.
+select set_config('request.jwt.claims','{"sub":"f1100000-0000-0000-0000-000000000001","aal":"aal1","role":"authenticated"}',true);
+select is(
+  (select count(*) from public.client_weekly_feedbacks where submitted_at is not null),
+  0::bigint,
+  'assigned professional at AAL1 cannot read sensitive feedback'
+);
+select set_config('request.jwt.claims','{"sub":"f1100000-0000-0000-0000-000000000001","aal":"aal2","role":"authenticated"}',true);
 select set_config('request.jwt.claim.sub','f1100000-0000-0000-0000-000000000004',true);
 select set_config('request.jwt.claims','{"sub":"f1100000-0000-0000-0000-000000000004","aal":"aal2","role":"authenticated"}',true);
 select is(
@@ -234,7 +249,37 @@ select is(
   'unassigned professional cannot read submitted answers despite admin MFA'
 );
 reset role;
+
+-- Revoke assignment in the same rollback-only fixture, never on production.
+update public.client_assignments
+set ended_at = now()
+where client_id = 'f1200000-0000-0000-0000-000000000001'
+  and staff_profile_id = 'f1100000-0000-0000-0000-000000000001'
+  and ended_at is null;
+
+set local role authenticated;
+select set_config('request.jwt.claim.sub','f1100000-0000-0000-0000-000000000001',true);
+select set_config('request.jwt.claims','{"sub":"f1100000-0000-0000-0000-000000000001","aal":"aal2","role":"authenticated"}',true);
+select is(
+  (select count(*) from public.client_weekly_feedbacks where submitted_at is not null),
+  0::bigint,
+  'ended assignment immediately revokes professional read despite AAL2'
+);
+select set_config('request.jwt.claim.sub','f1100000-0000-0000-0000-000000000002',true);
+select set_config('request.jwt.claims','{"sub":"f1100000-0000-0000-0000-000000000002","aal":"aal1","role":"authenticated"}',true);
+select is(
+  (select count(*) from public.client_weekly_feedbacks where submitted_at is not null),
+  1::bigint,
+  'client retains her own submitted history after assignment ends'
+);
+reset role;
+
 set local role anon;
+select throws_ok(
+  $sql$ select * from public.client_weekly_feedbacks $sql$,
+  '42501',null,
+  'anonymous cannot read the submitted client feedback'
+);
 select throws_ok(
   $sql$ select * from public.save_client_weekly_feedback_if_unchanged(
     'f1200000-0000-0000-0000-000000000001',
