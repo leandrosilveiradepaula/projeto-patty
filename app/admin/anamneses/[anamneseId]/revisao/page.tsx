@@ -62,15 +62,26 @@ export default async function AnamnesisReviewPage({
         Estas notas são registros profissionais append-only. Não alteram as
         respostas originais da cliente e não são exibidas para ela.
       </p>
-      <Section
-        description="A nova nota será registrada em seu perfil e preservada como histórico interno."
-        id="nova-revisao"
-        title="Adicionar nota interna"
-      >
-        <Card>
-          <AdminAnamnesisReviewForm submissionId={submission.id} />
-        </Card>
-      </Section>
+      {submission.submitted_at ? (
+        <Section
+          description="A nova nota será registrada em seu perfil e preservada como histórico interno."
+          id="nova-revisao"
+          title="Adicionar nota interna"
+        >
+          <Card>
+            <AdminAnamnesisReviewForm submissionId={submission.id} />
+          </Card>
+        </Section>
+      ) : (
+        <Section title="Aguardando envio final da cliente" description="O rascunho permanece preservado. A revisão profissional só começa após o envio final explícito.">
+          <Link href={`/admin/clientes/${submission.client_id}/anamnese`}>Consultar status da Anamnese</Link>
+        </Section>
+      )}
+      {submission.submitted_at ? (
+        <p className={styles.notice}>
+          Após registrar suas observações, continue no <Link href={`/admin/clientes/${submission.client_id}/avaliacoes`}>histórico de avaliações da cliente</Link>. A decisão profissional e a finalização da avaliação são ações separadas.
+        </p>
+      ) : null}
       <Section
         description="Registros anteriores em ordem cronológica, sem edição ou sobrescrita."
         title="Histórico de revisões"
