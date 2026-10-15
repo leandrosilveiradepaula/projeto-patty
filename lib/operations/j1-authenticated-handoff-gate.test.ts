@@ -82,7 +82,7 @@ test("J1 triggers only from trusted master CI or matching Vercel status",()=>{
  assert.match(workflow,/steps\.preflight\.outputs\.ready == 'true'/);
 });
 
-const verifiedRelease = "32c9c4faf807a2fc083c30b9f6f3ad97677ef051";
+const verifiedRelease = "35304fec723f011ec8c113938e2700a45cdfe132";
 function equivalentDiff(paths:string[]) {
  return {
   base_commit:{sha:verifiedRelease}, merge_base_commit:{sha:verifiedRelease},
@@ -116,6 +116,7 @@ test("only audited J1 synthetic E2E and documentation changes may use READY runt
   "docs/JOURNEY_HOMOLOGATION.md",
   "docs/PROJECT_STATUS.md",
   "e2e/client-onboarding-activation.spec.mjs",
+  "e2e/helpers/j1-private-photo-browser.mjs",
   "lib/operations/j1-authenticated-handoff-gate.test.ts",
  ];
  assert.equal(verifiedEquivalentRuntime(verifiedRelease,commit,equivalentDiff(allowed)),true);
@@ -129,6 +130,13 @@ test("only audited J1 synthetic E2E and documentation changes may use READY runt
   "package-lock.json",
  ]){
   assert.equal(verifiedEquivalentRuntime(verifiedRelease,commit,equivalentDiff([...allowed,path])),false,path);
+ }
+});
+test("J1 private photo synthetic helper is exclusively E2E and may use identical READY runtime",()=>{
+ const diff=equivalentDiff(["e2e/client-onboarding-activation.spec.mjs","e2e/helpers/j1-private-photo-browser.mjs"]);
+ assert.equal(verifiedEquivalentRuntime(verifiedRelease,commit,diff),true);
+ for(const bad of ["e2e/helpers/other.mjs","components/client/ClientPrivateFileUploadForm.tsx","app/cliente/arquivos/actions.ts"]){
+  assert.equal(verifiedEquivalentRuntime(verifiedRelease,commit,equivalentDiff([...diff.files.map(f=>f.filename),bad])),false,bad);
  }
 });
 test("older READY must never authorize runtime or dependency changes",()=>{
