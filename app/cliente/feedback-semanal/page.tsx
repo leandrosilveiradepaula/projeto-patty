@@ -148,7 +148,7 @@ export default async function ClientWeeklyFeedbackPage({ searchParams }: { searc
                           <p className={styles.meta}>Definição do formulário indisponível.</p>
                         ) : (
                           <ClientWeeklyFeedbackResponseForm
-                            key={feedback.id + ":" + fingerprintWeeklyFeedbackAnswers(feedback.answers)}
+                            key={feedback.id}
                             expectedFingerprint={fingerprintWeeklyFeedbackAnswers(feedback.answers)}
                             feedbackId={feedback.id}
                             initialValues={Object.fromEntries(

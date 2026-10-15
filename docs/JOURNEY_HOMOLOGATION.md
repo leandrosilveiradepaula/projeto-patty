@@ -1,3 +1,12 @@
+## 2026-10-15 — J2: validação autenticada local concluída; produção pendente
+
+**FATO CONFIRMADO:** PR #887 mergeado no `master` `0bd84021d0af39ef11a254253fda9406a173052c`; [Validate application pós-merge #38814525538](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38814525538) = PASS. [Playwright E2E J2 local #38813434552](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38813434552) = PASS no SHA pré-merge, inclusive encerramento/limpeza do banco descartável. A execução percorreu login administrativo MFA, solicitação após publicação sintética prévia, cliente móvel, rascunho, persistência, CAS, envio de 21 respostas sintéticas, história original e negação a acesso cruzado; nenhuma resposta real foi utilizada. São evidências de **J2 TESTADA EM AMBIENTE LOCAL**, não de publicação/homologação profissional em produção.
+
+**BLOQUEIO DE RELEASE:** Vercel ainda informa `build-rate-limit` no SHA do merge, portanto a versão publicada mais recente não foi comprovada. A homologação com Patty/admin real, leitura por cliente real autorizada e evidência do SHA efetivamente deployado **permanecem pendentes**, sem suspender o desenvolvimento de melhorias localmente.
+
+**CORREÇÃO FUNCIONAL IMPLEMENTADA/TESTADA EM BRANCH:** PR #888 (`b41adfce`) resolve perda de respostas locais no refresh de uma edição concorrente: o formulário mantém identidade estável e comparação com fingerprint anterior, exige escolha explícita para divergências e só grava com ação consciente após reconciliar. [CI completo #38816639283](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38816639283) = PASS, [E2E local com duas sessões #38816639406](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38816639406) = PASS, cleanup de Supabase local = PASS. **PR ainda aberto; não publicado ou homologado em produção**. RLS/MFA/CAS intactos; nenhum estado de revisão profissional, regra clínica ou publicação foi criado.
+
+---
 ## 2026-10-15 — J1 encerrada por aceite do responsável; início de J2
 
 ### DECISÃO DE GESTÃO DO PROJETO (RESPONSÁVEL)

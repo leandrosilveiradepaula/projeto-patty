@@ -218,3 +218,37 @@
   .reviewPanel button { width: 100%; }
   .formProgress { min-width: 0; }
 }
+
+/* J2: explicit conflict resolution without browser storage or navigation. */
+.conflictPanel {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: var(--space-4);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-large);
+  background: var(--color-surface);
+}
+.conflictPanel h3, .conflictPanel p { margin: 0; }
+.conflictField {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+}
+.conflictField legend { padding: 0 var(--space-2); font-weight: 700; }
+.conflictField label { display: flex; align-items: center; gap: var(--space-2); min-height: 44px; }
+.conflictField input { width: 20px; height: 20px; flex: none; }
+.conflictAnswer { white-space: pre-wrap; overflow-wrap: anywhere; }
+.conflictPanel > button { justify-self: start; }
+@media (max-width: 640px) {
+  .conflictPanel { padding: var(--space-3); }
+  .conflictPanel > button { width: 100%; }
+}
+.conflictPrompt { display: grid; gap: var(--space-3); }
+.conflictPrompt p { margin: 0; }
+.conflictPrompt button { justify-self: start; }
+@media (max-width: 640px) { .conflictPrompt button { width: 100%; } }
