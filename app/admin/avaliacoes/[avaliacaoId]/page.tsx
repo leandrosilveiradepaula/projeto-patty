@@ -1,5 +1,7 @@
 import { readClientDirectoryReturn, withClientDirectoryReturn } from "@/lib/operations/client-directory-return";
 import { readPendingQueueReturn, withPendingQueueReturn } from "@/lib/operations/pending-queue-return";
+import { readWeeklyComparisonReturn } from "@/lib/follow-up/weekly-feedback-professional-handoff";
+import { weeklyFeedbackComparisonHref } from "@/lib/follow-up/weekly-feedback-comparison";
 import { findPreviousFinalizedAssessment, formatAdministrativeAssessmentDate } from "@/lib/evaluations/administrative-assessment-history";
 import { earlierFinalizedPhotoAssessmentOptions, selectEarlierPhotoAssessment } from "@/lib/evaluations/assessment-photo-comparison";
 import { AssessmentLongitudinalPhotoComparison } from "@/components/admin/AssessmentLongitudinalPhotoComparison";
@@ -57,7 +59,7 @@ type AdminAvaliacaoDetailPageProps = {
   params: Promise<{
     avaliacaoId: string;
   }>;
-  searchParams: Promise<{ fotoAvaliacaoAnterior?: string; fotoAnterior?: string; fotoAtual?: string; listaQ?: string; listaView?: string; listaPagina?: string; filaRetorno?: string }>;
+  searchParams: Promise<{ fotoAvaliacaoAnterior?: string; fotoAnterior?: string; fotoAtual?: string; listaQ?: string; listaView?: string; listaPagina?: string; filaRetorno?: string; feedbackAtual?: string | string[]; feedbackAnterior?: string | string[] }>;
 };
 
 const professionalDecisionLabels: Record<string, string> = {
@@ -123,6 +125,11 @@ export default async function AdminAvaliacaoDetailPage({
     notFound();
   }
 
+  // Navigation only. The destination rechecks the two records under the
+  // current admin session and never trusts these query parameters for access.
+  const comparisonReturn = readWeeklyComparisonReturn(
+    filters.feedbackAtual, filters.feedbackAnterior,
+  );
   const isDraft = !assessment.finalized_at;
   const assessmentKinds = await loadSupportedAssessmentKindOptions();
   const selectedAssessmentKind = resolveSupportedAssessmentKindOption(
@@ -249,6 +256,15 @@ export default async function AdminAvaliacaoDetailPage({
         <Link href={navigate(`/admin/clientes/${assessment.client_id}/avaliacoes#${isDraft ? "avaliacoes-em-andamento" : "historico-finalizado"}`)}>{isDraft ? "Voltar aos rascunhos" : "Histórico finalizado"}</Link>
         <Link href={navigate(`/admin/clientes/${assessment.client_id}/evolucao`)}>Evolução das medidas</Link>
         <Link href="#historico-profissional">Histórico profissional ({followUps.length} registro(s))</Link>
+        {comparisonReturn ? (
+          <Link href={navigate(weeklyFeedbackComparisonHref(
+            assessment.client_id,
+            comparisonReturn.currentId,
+            comparisonReturn.previousId,
+          ))}>
+            Voltar à comparação dos Feedbacks Semanais
+          </Link>
+        ) : null}
         <Link href={navigate(`/admin/clientes/${assessment.client_id}/protocolos`)}>Protocolos da cliente</Link>
       </nav>
       <PageSectionNav
@@ -504,6 +520,9 @@ export default async function AdminAvaliacaoDetailPage({
         id="acompanhamento"
         title="Registrar acompanhamento"
       >
+        {comparisonReturn ? (
+          <p>Você chegou aqui após consultar dois Feedbacks Semanais. Esta decisão será registrada nesta avaliação finalizada, não nos feedbacks; o sistema não marca respostas como revisadas nem altera o protocolo automaticamente.</p>
+        ) : null}
         {isDraft ? (
           <Card variant="subtle">
             <EmptyState

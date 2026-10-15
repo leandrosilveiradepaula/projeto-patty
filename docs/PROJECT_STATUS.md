@@ -1,8 +1,14 @@
-## 2026-10-15 — J2: comparação manual de respostas semanais (branch em validação)
+## 2026-10-15 — J2: continuidade da comparação para decisão manual (PR em validação)
+
+### DECISÃO TÉCNICA/PRODUTO — REUTILIZA O FLUXO PROFISSIONAL EXISTENTE
+
+A comparação de Feedbacks Semanais oferece uma escolha explícita entre até cinco avaliações **finalizadas** e autorizadas da cliente. Somente após a escolha a Patty navega para o formulário profissional preexistente daquela avaliação, registra uma decisão manual com justificativa e pode retornar à comparação. O registro profissional permanece vinculado **à avaliação selecionada**; nenhum vínculo por feedback, status de leitura/revisão, classificação de adesão, alteração de protocolo ou publicação é criado automaticamente. A lista usa apenas metadados de avaliação, Supabase autenticado, MFA/RLS existentes e fail-closed para assignment sem acesso. IDs do retorno são validados e nunca concedem autorização. Sem migrations, alterações de policy nem dados reais. Implementado na branch; CI, merge, deployment e homologação ainda dependem de comprovação.
+
+## 2026-10-15 — J2: comparação manual de respostas semanais (PR #883 integrado)
 
 ### DECISÃO TÉCNICA DE PRODUTO — VISUALIZAÇÃO SOMENTE LEITURA
 
-A Patty pode abrir dois Feedbacks Semanais já enviados da mesma cliente com assignment ativo, comparando o período selecionado com o período anterior por `period_start`. Quando a versão exata do questionário é igual, os pares são alinhados por pergunta original; versões diferentes aparecem separadamente para não inventar equivalência. Não há cálculo de adesão, IA, sugestão de conduta, mudança de protocolo nem estado "lido/revisado". A seleção exige UUIDs válidos, registros enviados e mesma cliente; a leitura busca somente os dois registros via Supabase autenticado e RLS/MFA atuais. A ação de comparação não altera histórico e não utiliza `service_role`. CI, merge, publicação e homologação ainda pendentes; sem migrations.
+A Patty pode abrir dois Feedbacks Semanais já enviados da mesma cliente com assignment ativo, comparando o período selecionado com o período anterior por `period_start`. Quando a versão exata do questionário é igual, os pares são alinhados por pergunta original; versões diferentes aparecem separadamente para não inventar equivalência. Não há cálculo de adesão, IA, sugestão de conduta, mudança de protocolo nem estado "lido/revisado". A seleção exige UUIDs válidos, registros enviados e mesma cliente; a leitura busca somente os dois registros via Supabase autenticado e RLS/MFA atuais. A ação de comparação não altera histórico e não utiliza `service_role`. PR #883 mergeado no `master` `500c5fb7` com `Validate application` PASS. **Vercel falhou com `build-rate-limit` no commit de merge**, portanto a publicação desta versão não foi comprovada. Homologação profissional pendente; sem migrations.
 
 ## 2026-10-15 — J2: caixa de recebimentos do Feedback Semanal (PR #882 integrado)
 

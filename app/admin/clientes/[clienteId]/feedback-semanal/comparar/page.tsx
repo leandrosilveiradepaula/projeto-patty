@@ -2,6 +2,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
+import { formatAdministrativeAssessmentDate } from "@/lib/evaluations/administrative-assessment-history";
+import {
+  manualAssessmentDecisionFromComparisonHref,
+  manualDecisionAssessmentChoices,
+} from "@/lib/follow-up/weekly-feedback-professional-handoff";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
@@ -11,6 +16,7 @@ import { receivedWeeklyFeedbackExactHref } from "@/lib/follow-up/recent-weekly-f
 import {
   getAccessibleClient,
   listAccessibleSubmittedWeeklyFeedbackPair,
+  listRecentFinalizedAssessmentsForClient,
 } from "@/lib/supabase/data-access";
 import type { Json } from "@/lib/supabase/database.types";
 import {
@@ -97,6 +103,10 @@ export default async function AdminWeeklyFeedbackComparisonPage({ params, search
     ? parseWeeklyFeedbackDefinition(previousVersion.definition)
     : null;
   const sameVersion = current.form_version_id === previous.form_version_id;
+  // Load only assessment headers, after the submitted same-client pair was
+  // confirmed under RLS. Never choose an assessment on Patty's behalf.
+  const finalizedAssessments = await listRecentFinalizedAssessmentsForClient(client.id);
+  const choices = manualDecisionAssessmentChoices(finalizedAssessments, client.id);
 
   return (
     <>
@@ -172,6 +182,39 @@ export default async function AdminWeeklyFeedbackComparisonPage({ params, search
             </div>
           </>
         )}
+      </Section>
+
+      <Section
+        id="continuar-acompanhamento"
+        title="Continuar acompanhamento profissional"
+        description="A comparação é somente uma referência. Para registrar uma decisão, escolha conscientemente uma avaliação finalizada da cliente; o formulário e o histórico de decisões já existem nessa avaliação."
+      >
+        <p>A decisão ficará registrada na avaliação escolhida, não no Feedback Semanal. O sistema não identifica automaticamente qual avaliação corresponde a estas respostas nem marca os feedbacks como revisados.</p>
+        {choices.length > 0 ? (
+          <ol className={styles.decisionChoices}>
+            {choices.map((assessment) => (
+              <li key={assessment.id}>
+                <div className={styles.decisionChoice}>
+                  <span>Avaliação finalizada de {formatAdministrativeAssessmentDate(assessment.assessed_at)}</span>
+                  <Link
+                    href={manualAssessmentDecisionFromComparisonHref(
+                      assessment.id, current.id, previous.id,
+                    )}
+                  >
+                    Abrir avaliação e registrar decisão manual
+                  </Link>
+                </div>
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <p role="status">Nenhuma avaliação finalizada está disponível neste acompanhamento. A decisão profissional existente exige uma avaliação finalizada; esta comparação não cria nem finaliza avaliações.</p>
+        )}
+        <nav aria-label="Outras etapas de acompanhamento" className={styles.links}>
+          <Link href={`/admin/clientes/${client.id}/avaliacoes`}>Ver todas as avaliações e rascunhos</Link>
+          <Link href={`/admin/clientes/${client.id}/protocolos`}>Consultar protocolos sem publicar alterações</Link>
+        </nav>
+        <p>O registro exige decisão e justificativa explícitas da Patty; não modifica automaticamente protocolo, fase ou publicação. O histórico permanece na avaliação escolhida.</p>
       </Section>
     </>
   );
