@@ -1,5 +1,10 @@
 import { authorizedExactRecordPage } from "@/lib/operations/exact-record-navigation";
 import { previousSubmittedFeedbackByPeriod, weeklyFeedbackComparisonHref } from "@/lib/follow-up/weekly-feedback-comparison";
+import { formatAdministrativeAssessmentDate } from "@/lib/evaluations/administrative-assessment-history";
+import {
+  manualAssessmentDecisionFromSubmittedFeedbackHref,
+  manualDecisionAssessmentChoices,
+} from "@/lib/follow-up/weekly-feedback-professional-handoff";
 import { readClientDirectoryReturn, withClientDirectoryReturn } from "@/lib/operations/client-directory-return";
 import { readPendingQueueReturn, withPendingQueueReturn } from "@/lib/operations/pending-queue-return";
 import { professionalFeedbackYears, readProfessionalFeedbackHistoryQuery, filterProfessionalFeedbacks, paginateProfessionalFeedbacks, professionalFeedbackHistoryHref } from "@/lib/follow-up/professional-weekly-feedback-explorer";
@@ -22,6 +27,7 @@ import {
   hasAccessibleProtocolPublicationForClient,
   listAccessibleClientNotificationEvents,
   listAccessibleWeeklyFeedbacksForClient,
+  listRecentFinalizedAssessmentsForClient,
 } from "@/lib/supabase/data-access";
 import { notFound } from "next/navigation";
 import styles from "./page.module.css";
@@ -58,6 +64,15 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
   const orderedFeedbacks = orderClientWeeklyFeedbacks(feedbacks);
   const rawPendingCount=orderedFeedbacks.filter(f=>f.submitted_at===null).length;
   const rawSubmittedCount=orderedFeedbacks.length-rawPendingCount;
+  // One submitted feedback is enough to continue manually; comparing two is optional.
+  // Reuse the same RLS-scoped, header-only assessment candidates as comparison.
+  const finalizedAssessmentCandidates = rawSubmittedCount > 0
+    ? await listRecentFinalizedAssessmentsForClient(client.id)
+    : [];
+  const manualDecisionChoices = manualDecisionAssessmentChoices(
+    finalizedAssessmentCandidates,
+    client.id,
+  );
   const rawQuery=await searchParams;
   const directoryReturn = readClientDirectoryReturn(rawQuery);
   const queueReturn = readPendingQueueReturn(rawQuery.filaRetorno);
@@ -298,6 +313,37 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
                           </Link>
                         </div>
                       ) : null}
+                      <details className={styles.manualDecisionDisclosure}>
+                        <summary>Continuar com decisão profissional</summary>
+                        <p className={styles.meta}>
+                          Escolha explicitamente uma avaliação finalizada da cliente. A decisão será
+                          registrada nessa avaliação, não neste feedback. Nada será marcado como
+                          revisado ou alterado automaticamente.
+                        </p>
+                        {manualDecisionChoices.length > 0 ? (
+                          <ul className={styles.manualDecisionList}>
+                            {manualDecisionChoices.map((assessment) => (
+                              <li key={assessment.id}>
+                                <span>Avaliação finalizada de {formatAdministrativeAssessmentDate(assessment.assessed_at)}</span>
+                                <Link href={withReturn(manualAssessmentDecisionFromSubmittedFeedbackHref(
+                                  assessment.id,
+                                  feedback.id,
+                                ))}>
+                                  Abrir para decisão manual
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className={styles.meta}>
+                            Nenhuma avaliação finalizada está disponível neste acompanhamento.
+                            O registro profissional exige avaliação finalizada.{" "}
+                            <Link href={withReturn("/admin/clientes/" + client.id + "/avaliacoes")}>
+                              Consultar avaliações
+                            </Link>
+                          </p>
+                        )}
+                      </details>
                     </div>
                   </details>
                 </li>

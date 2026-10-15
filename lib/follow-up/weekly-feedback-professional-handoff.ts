@@ -58,3 +58,30 @@ export function manualAssessmentDecisionFromComparisonHref(
   });
   return `/admin/avaliacoes/${encodeURIComponent(assessmentId)}?${params.toString()}#acompanhamento`;
 }
+
+/**
+ * Explicit return destination for a professional decision, including the
+ * FIRST submitted feedback (which has no previous period to compare).
+ * Navigational IDs cannot grant data access or mark feedback as reviewed.
+ */
+export type WeeklyFeedbackDecisionReturn =
+  | { kind: "submitted"; currentId: string }
+  | ({ kind: "comparison" } & WeeklyComparisonReturn);
+
+export function readWeeklyFeedbackDecisionReturn(
+  current: unknown,
+  previous: unknown,
+): WeeklyFeedbackDecisionReturn | null {
+  if (typeof current !== "string" || !isUuid(current)) return null;
+  if (previous === undefined) return { kind: "submitted", currentId: current };
+  const pair = readWeeklyComparisonReturn(current, previous);
+  return pair ? { kind: "comparison", ...pair } : null;
+}
+
+export function manualAssessmentDecisionFromSubmittedFeedbackHref(
+  assessmentId: string,
+  submittedId: string,
+): string {
+  const params = new URLSearchParams({ feedbackAtual: submittedId });
+  return "/admin/avaliacoes/" + encodeURIComponent(assessmentId) + "?" + params.toString() + "#acompanhamento";
+}

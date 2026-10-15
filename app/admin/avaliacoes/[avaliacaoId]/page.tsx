@@ -1,6 +1,7 @@
 import { readClientDirectoryReturn, withClientDirectoryReturn } from "@/lib/operations/client-directory-return";
 import { readPendingQueueReturn, withPendingQueueReturn } from "@/lib/operations/pending-queue-return";
-import { readWeeklyComparisonReturn } from "@/lib/follow-up/weekly-feedback-professional-handoff";
+import { readWeeklyComparisonReturn, readWeeklyFeedbackDecisionReturn } from "@/lib/follow-up/weekly-feedback-professional-handoff";
+import { receivedWeeklyFeedbackExactHref } from "@/lib/follow-up/recent-weekly-feedbacks";
 import { weeklyFeedbackComparisonHref } from "@/lib/follow-up/weekly-feedback-comparison";
 import { findPreviousFinalizedAssessment, formatAdministrativeAssessmentDate } from "@/lib/evaluations/administrative-assessment-history";
 import { earlierFinalizedPhotoAssessmentOptions, selectEarlierPhotoAssessment } from "@/lib/evaluations/assessment-photo-comparison";
@@ -128,6 +129,9 @@ export default async function AdminAvaliacaoDetailPage({
   // Navigation only. The destination rechecks the two records under the
   // current admin session and never trusts these query parameters for access.
   const comparisonReturn = readWeeklyComparisonReturn(
+    filters.feedbackAtual, filters.feedbackAnterior,
+  );
+  const submittedReturn = readWeeklyFeedbackDecisionReturn(
     filters.feedbackAtual, filters.feedbackAnterior,
   );
   const isDraft = !assessment.finalized_at;
@@ -263,6 +267,14 @@ export default async function AdminAvaliacaoDetailPage({
             comparisonReturn.previousId,
           ))}>
             Voltar à comparação dos Feedbacks Semanais
+          </Link>
+        ) : null}
+        {submittedReturn?.kind === "submitted" ? (
+          <Link href={navigate(receivedWeeklyFeedbackExactHref({
+            id: submittedReturn.currentId,
+            client_id: assessment.client_id,
+          }))}>
+            Voltar ao Feedback Semanal enviado
           </Link>
         ) : null}
         <Link href={navigate(`/admin/clientes/${assessment.client_id}/protocolos`)}>Protocolos da cliente</Link>
@@ -522,6 +534,9 @@ export default async function AdminAvaliacaoDetailPage({
       >
         {comparisonReturn ? (
           <p>Você chegou aqui após consultar dois Feedbacks Semanais. Esta decisão será registrada nesta avaliação finalizada, não nos feedbacks; o sistema não marca respostas como revisadas nem altera o protocolo automaticamente.</p>
+        ) : null}
+        {submittedReturn?.kind === "submitted" ? (
+          <p>Você chegou após consultar um Feedback Semanal enviado. A decisão será registrada nesta avaliação finalizada, não no feedback. O envio continua preservado sem marcação automática de revisão ou mudança de protocolo.</p>
         ) : null}
         {isDraft ? (
           <Card variant="subtle">

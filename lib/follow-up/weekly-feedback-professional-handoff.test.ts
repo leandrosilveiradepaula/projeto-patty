@@ -5,7 +5,9 @@ import test from "node:test";
 import {
   manualDecisionAssessmentChoices,
   manualAssessmentDecisionFromComparisonHref,
+  manualAssessmentDecisionFromSubmittedFeedbackHref,
   readWeeklyComparisonReturn,
+  readWeeklyFeedbackDecisionReturn,
 } from "./weekly-feedback-professional-handoff.ts";
 
 const clientA = "a1100000-0000-4000-8000-000000000001";
@@ -97,4 +99,72 @@ test("narrow assessment candidates read no health answers and retain authenticat
   assert.match(body, /\.not\("finalized_at", "is", null\)/);
   assert.match(body, /\.limit\(5\)/);
   assert.doesNotMatch(body, /answers|service_role|createAdminClient/);
+});
+
+test("first submitted feedback has a safe manual handoff without any previous period", () => {
+  assert.deepEqual(
+    readWeeklyFeedbackDecisionReturn(current, undefined),
+    { kind: "submitted", currentId: current },
+  );
+  assert.deepEqual(
+    readWeeklyFeedbackDecisionReturn(current, previous),
+    { kind: "comparison", currentId: current, previousId: previous },
+  );
+  assert.equal(
+    manualAssessmentDecisionFromSubmittedFeedbackHref(assessment, current),
+    "/admin/avaliacoes/" + assessment + "?feedbackAtual=" + current + "#acompanhamento",
+  );
+});
+
+test("invalid, ambiguous, or mismatched submitted feedback navigation cannot create a return destination", () => {
+  for (const [currentInput, previousInput] of [
+    [undefined, undefined],
+    [[current], undefined],
+    ["not-uuid", undefined],
+    [current, null],
+    [current, ""],
+    [current, [previous]],
+    [current, current],
+    [current, "not-uuid"],
+  ]) {
+    assert.equal(readWeeklyFeedbackDecisionReturn(currentInput, previousInput), null);
+  }
+});
+
+test("each submitted feedback offers a manual decision path, including the first one", () => {
+  const history = read("app/admin/clientes/[clienteId]/feedback-semanal/page.tsx");
+  const assessmentDetail = read("app/admin/avaliacoes/[avaliacaoId]/page.tsx");
+  assert.match(history, /rawSubmittedCount > 0/);
+  assert.match(history, /listRecentFinalizedAssessmentsForClient\(client\.id\)/);
+  assert.match(history, /manualDecisionAssessmentChoices\(\s*finalizedAssessmentCandidates,\s*client\.id/);
+  assert.match(history, /submittedPage\.items\.map\(\(feedback\) =>/);
+  assert.match(history, /<details className=\{styles\.manualDecisionDisclosure\}>/);
+  assert.match(history, /Continuar com decisão profissional/);
+  assert.match(history, /manualAssessmentDecisionFromSubmittedFeedbackHref\(\s*assessment\.id,\s*feedback\.id/);
+  assert.match(history, /Nenhuma avaliação finalizada está disponível/);
+  assert.match(history, /O registro profissional exige avaliação finalizada/);
+  assert.match(assessmentDetail, /readWeeklyFeedbackDecisionReturn\(\s*filters\.feedbackAtual,\s*filters\.feedbackAnterior/);
+  assert.match(assessmentDetail, /submittedReturn\?\.kind === "submitted"/);
+  assert.match(assessmentDetail, /receivedWeeklyFeedbackExactHref\(\{\s*id: submittedReturn\.currentId,\s*client_id: assessment\.client_id/);
+  assert.match(assessmentDetail, /Voltar ao Feedback Semanal enviado/);
+  assert.doesNotMatch(history, /weekly_feedback.*update|\\.insert\(["']professional_follow_ups/);
+});
+
+test("manual feedback handoff keeps the professional action and RLS constraints unchanged", () => {
+  const access = read("lib/supabase/data-access.ts");
+  const history = read("app/admin/clientes/[clienteId]/feedback-semanal/page.tsx");
+  const action = read("app/admin/avaliacoes/[avaliacaoId]/actions.ts");
+  const first = access.indexOf("export async function listRecentFinalizedAssessmentsForClient(");
+  assert.ok(first >= 0);
+  const loader = access.slice(first, first + 820);
+  assert.match(loader, /createClient\(\)/);
+  assert.match(loader, /\.eq\("client_id", clientId\)/);
+  assert.match(loader, /\.not\("finalized_at", "is", null\)/);
+  assert.match(loader, /\.limit\(5\)/);
+  assert.doesNotMatch(loader, /answers|service_role|createAdminClient/);
+  assert.match(history, /manualDecisionAssessmentChoices/);
+  assert.match(action, /await requireRole\("admin"\)/);
+  assert.match(action, /if \(!assessment\.finalized_at\)/);
+  assert.match(action, /createAccessibleProfessionalFollowUp/);
+  assert.doesNotMatch(action, /markWeeklyFeedbackReviewed|update.*feedback.*reviewed/i);
 });
