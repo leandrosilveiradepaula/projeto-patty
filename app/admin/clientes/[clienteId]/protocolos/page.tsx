@@ -1,4 +1,4 @@
-import { buildProtocolOperationalSummaries, protocolOperationalStatusLabel, protocolPublicationDate, operationalProtocolVersionHref, protocolNextActionLabel } from "@/lib/protocol/operational-catalog";
+import { buildProtocolOperationalSummaries, protocolOperationalStatusLabel, protocolPublicationDate, operationalProtocolVersionHref, operationalProtocolNextActionHref, protocolNextActionLabel } from "@/lib/protocol/operational-catalog";
 import { readClientDirectoryReturn, withClientDirectoryReturn } from "@/lib/operations/client-directory-return";
 import { readPendingQueueReturn, withPendingQueueReturn } from "@/lib/operations/pending-queue-return";
 import { AdminProtocolInitialVersionForm } from "@/components/admin/AdminProtocolInitialVersionForm";
@@ -223,7 +223,7 @@ export default async function AdminClientProtocolsPage({
               const facts = summaries.get(protocol.id);
               const latest = facts?.latestVersion ?? null;
               const published = facts?.lastPublishedVersion ?? null;
-              const latestHref = operationalProtocolVersionHref(protocol.id,latest);
+              const latestHref = operationalProtocolNextActionHref(protocol.id,latest,facts?.latestStatus ?? "missing-version");
               const publishedHref = operationalProtocolVersionHref(protocol.id,published);
               return <li className={styles.protocolItem} id={`protocolo-${protocol.id}`} key={protocol.id}>
                 <div className={styles.protocolSummary}>
