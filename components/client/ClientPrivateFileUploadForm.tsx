@@ -256,7 +256,7 @@ export function ClientPrivateFileUploadForm() {
           <select
             {...fieldProps}
             className={styles.select}
-            disabled={isPending}
+            disabled={isPending || ambiguousCompletion}
             name="fileKind"
             onChange={(event) => {
               setFileKind(event.target.value as PrivateFileKind);
@@ -295,7 +295,7 @@ export function ClientPrivateFileUploadForm() {
             {...fieldProps}
             accept={acceptByKind[fileKind]}
             className={styles.fileInput}
-            disabled={isPending}
+            disabled={isPending || ambiguousCompletion}
             name="file"
             onChange={(event) => {
               setSelectedFile(event.currentTarget.files?.[0] ?? null);
