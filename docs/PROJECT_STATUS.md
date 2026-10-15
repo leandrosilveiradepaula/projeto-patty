@@ -1,3 +1,9 @@
+## 2026-10-15 — J2: confirmação de envio e retorno aos registros exatos (PR em validação)
+
+### DECISÃO TÉCNICA/PRODUTO — CONTINUIDADE DE NAVEGAÇÃO, SEM NOVO ESTADO CLÍNICO
+
+O PR #889 foi integrado ao `master` `ff2f05b9` com validações **Validate application** e **Playwright J2 local** aprovadas no commit `06ee99b5`. A versão da Vercel permanece não comprovada por `build-rate-limit` no commit de merge; homologação profissional não ocorreu. A próxima correção da J2 preserva confirmação de envio na navegação para um registro **já submetido**, resolve o destino exclusivamente dentro da lista autorizada da cliente e desconsidera filtros/paginação que ocultariam a resposta enviada. Os atalhos administrativos passam a apontar para âncoras da solicitação/resposta exata e o histórico oferece retorno à caixa de Feedbacks. Sem dados de saúde na URL, alteração de respostas, estado de revisão, regra profissional, migrations, schema, RLS, Auth ou IA. A confirmação de interface não é uma revisão da Patty. **PR em branch, ainda não mergeado nem publicado; CI do novo commit deverá confirmar os testes.**
+
 ## 2026-10-15 — J2: recuperação de edição concorrente no Feedback Semanal (PR em validação)
 
 ### DECISÃO TÉCNICA/PRODUTO — PROTEÇÃO DO RASCUNHO, NÃO REGRA CLÍNICA

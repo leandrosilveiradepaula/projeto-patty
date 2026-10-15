@@ -38,3 +38,25 @@ test("professional exact feedback navigation explains temporary filter reset", (
   assert.match(admin, /Os filtros de origem e ano foram desconsiderados/);
   assert.match(admin, /Voltar ao histórico completo/);
 });
+
+
+test("client final send is confirmed by its authorized submitted record, not by URL alone", () => {
+  const page = read("app/cliente/feedback-semanal/page.tsx");
+  const form = read("app/cliente/feedback-semanal/ClientWeeklyFeedbackResponseForm.tsx");
+  assert.match(page, /authorizedExactRecordPage\(\s*submittedFeedbacks, rawQuery\.registro, CLIENT_FEEDBACK_HISTORY_PAGE_SIZE/);
+  assert.match(page, /confirmedFeedback = exactSubmittedPage === null/);
+  assert.match(page, /confirmedFeedback \? \(/);
+  assert.match(page, /title="Envio confirmado"/);
+  assert.match(page, /historyFilters\.page = exactSubmittedPage/);
+  assert.match(page, /id=\{\x60feedback-enviado-\$\{feedback\.id\}\x60\}/);
+  assert.match(form, /state\.outcome === "submitted"/);
+  assert.match(form, /router\.replace\("\/cliente\/feedback-semanal\?registro=" \+ id/);
+  assert.doesNotMatch(form, /localStorage|sessionStorage|console\.log/);
+});
+
+test("admin links to pending or submitted records use exact authorized anchors", () => {
+  const form = read("components/admin/AdminWeeklyFeedbackRequestForm.tsx");
+  const page = read("app/admin/clientes/[clienteId]/feedback-semanal/page.tsx");
+  assert.match(form, /#feedback-\$\{state\.feedbackSubmitted \? "enviado" : "pendente"\}-\$\{encodeURIComponent\(state\.feedbackId\)\}/);
+  assert.match(page, /href="\/admin\/feedback-semanal"/);
+});

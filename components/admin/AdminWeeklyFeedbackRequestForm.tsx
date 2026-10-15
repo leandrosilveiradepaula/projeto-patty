@@ -67,7 +67,7 @@ export function AdminWeeklyFeedbackRequestForm({
         >
           {state.message}
           {state.feedbackId ? (
-            <>{" "}<Link href={`/admin/clientes/${clientId}/feedback-semanal?registro=${state.feedbackId}#feedback-${state.feedbackSubmitted ? "enviados" : "pendentes"}`}>Abrir registro exato</Link></>
+            <>{" "}<Link href={`/admin/clientes/${encodeURIComponent(clientId)}/feedback-semanal?registro=${encodeURIComponent(state.feedbackId)}#feedback-${state.feedbackSubmitted ? "enviado" : "pendente"}-${encodeURIComponent(state.feedbackId)}`}>Abrir registro exato</Link></>
           ) : null}
         </Alert>
       ) : null}

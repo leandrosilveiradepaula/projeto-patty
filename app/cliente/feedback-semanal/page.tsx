@@ -1,5 +1,6 @@
 import { clientInAppFeedbackNotices } from "@/lib/notifications/client-in-app-inbox";
-import { availableClientFeedbackHistoryYears, readClientFeedbackHistoryQuery, exploreClientFeedbackHistory, clientFeedbackHistoryHref, formatClientFeedbackHistoryMonth } from "@/lib/follow-up/client-weekly-feedback-explorer";
+import { availableClientFeedbackHistoryYears, readClientFeedbackHistoryQuery, exploreClientFeedbackHistory, clientFeedbackHistoryHref, formatClientFeedbackHistoryMonth, CLIENT_FEEDBACK_HISTORY_PAGE_SIZE } from "@/lib/follow-up/client-weekly-feedback-explorer";
+import { authorizedExactRecordPage } from "@/lib/operations/exact-record-navigation";
 import { Button } from "@/components/ui/Button";
 import { fingerprintWeeklyFeedbackAnswers } from "@/lib/weekly-feedback/draft-fingerprint";
 import { ClientHistoryDisclosure } from "@/components/client/ClientHistoryDisclosure";
@@ -29,7 +30,7 @@ import { formatWeeklyFeedbackPeriodDate, formatWeeklyFeedbackDueDate } from "@/l
 const formatDate = formatWeeklyFeedbackPeriodDate;
 const formatDueAt = formatWeeklyFeedbackDueDate;
 
-export default async function ClientWeeklyFeedbackPage({ searchParams }: { searchParams: Promise<{ origem?: string; ano?: string; mes?: string; pagina?: string }> }) {
+export default async function ClientWeeklyFeedbackPage({ searchParams }: { searchParams: Promise<{ origem?: string | string[]; ano?: string | string[]; mes?: string | string[]; pagina?: string | string[]; registro?: string | string[] }> }) {
   const client = await getCurrentClient();
 
   if (!client) {
@@ -60,9 +61,25 @@ export default async function ClientWeeklyFeedbackPage({ searchParams }: { searc
     (feedback) => feedback.submitted_at !== null,
   );
 
-  const years=availableClientFeedbackHistoryYears(submittedFeedbacks);
-  const historyFilters=readClientFeedbackHistoryQuery(await searchParams,years);
-  const submittedHistory=exploreClientFeedbackHistory(submittedFeedbacks,historyFilters);
+  const rawQuery = await searchParams;
+  const years = availableClientFeedbackHistoryYears(submittedFeedbacks);
+  const historyFilters = readClientFeedbackHistoryQuery(rawQuery, years);
+  // An ID in the URL never proves submission or grants access. Resolve it only
+  // inside the signed-in client's RLS-scoped, definitively submitted records.
+  const exactSubmittedPage = authorizedExactRecordPage(
+    submittedFeedbacks, rawQuery.registro, CLIENT_FEEDBACK_HISTORY_PAGE_SIZE,
+  );
+  const confirmedFeedback = exactSubmittedPage === null
+    ? null : submittedFeedbacks.find((feedback) => feedback.id === rawQuery.registro) ?? null;
+  if (exactSubmittedPage !== null) {
+    // A previously selected year, month or page cannot hide the exact receipt.
+    historyFilters.origin = "all";
+    historyFilters.year = "all";
+    historyFilters.month = "all";
+    historyFilters.page = exactSubmittedPage;
+    historyFilters.invalid = false;
+  }
+  const submittedHistory = exploreClientFeedbackHistory(submittedFeedbacks, historyFilters);
   return (
     <>
       <PageHeader
@@ -70,6 +87,14 @@ export default async function ClientWeeklyFeedbackPage({ searchParams }: { searc
         eyebrow="Cliente"
         title="Feedback Semanal"
       />
+      {confirmedFeedback ? (
+        <Alert title="Envio confirmado" variant="success" live="polite">
+          O Feedback Semanal de {formatDate(confirmedFeedback.period_start)} a {formatDate(confirmedFeedback.period_end)}
+          {" "}está enviado e preservado no histórico. A Patty poderá consultar suas respostas;
+          isso não significa que já foram revisadas.{" "}
+          <Link href="/cliente/feedback-semanal#historico-enviado">Ver todo o histórico</Link>.
+        </Alert>
+      ) : null}
       {feedbacks.length === 0 ? (
         <Section title="Seus feedbacks">
           <EmptyState

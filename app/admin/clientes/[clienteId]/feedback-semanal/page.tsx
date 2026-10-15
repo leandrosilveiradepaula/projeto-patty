@@ -113,6 +113,8 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
         description="As respostas enviadas são informações para avaliação da Patty; não provocam alteração automática de protocolo."
         title="Consultar contexto do acompanhamento"
       >
+        <Link href="/admin/feedback-semanal">Voltar à caixa de Feedbacks Semanais</Link>
+        {" · "}
         <Link href={withReturn(`/admin/clientes/${client.id}/avaliacoes`)}>Avaliações</Link>
         {" · "}
         <Link href={withReturn(`/admin/clientes/${client.id}/checkins`)}>Check-ins</Link>

@@ -26,8 +26,11 @@ test("the two intents stay separate and never mislabel incomplete persistence as
   assert.ok(action.includes('outcome: submit ? "submitted" : "draft-saved"'));
   assert.ok(form.includes('state.outcome === "draft-saved"'));
   assert.ok(form.includes('state.outcome === "submitted"'));
-  assert.ok(form.includes('if (state.outcome === "draft-saved" || state.outcome === "submitted")'));
+  assert.ok(form.includes('if (state.outcome === "submitted")'));
+  assert.ok(form.includes('state.outcome === "draft-saved"'));
   assert.ok(form.includes("router.refresh()"));
+  assert.ok(form.includes("router.replace("));
+  assert.ok(form.includes("encodeURIComponent(feedbackId)"));
 });
 
 test("weekly feedback retry controls block simultaneous writes while preserving typed fields", () => {
