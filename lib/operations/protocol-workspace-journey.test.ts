@@ -31,3 +31,16 @@ test("each version navigates to its own review and publication and review remain
  assert.ok(page.includes('id={`conferencia-plano-${version.version_number}`}'));
  assert.ok(page.includes('id={`acao-protocolo-${version.version_number}`}'));
 });
+
+test("draft anchors for multiple versions are scoped by version UUID",()=>{
+ const anchors=read("lib/protocol/draft-navigation.ts");
+ const map=read("components/admin/ProtocolDraftCompletionMap.tsx");
+ assert.ok(page.includes("buildProtocolDraftNavigation(mealPlan, version.id)"));
+ assert.ok(page.includes("versionId={version.id}"));
+ assert.ok(anchors.includes('draftPlanAnchor(version)'));
+ assert.ok(anchors.includes('draftVariantAddAnchor(version)'));
+ assert.ok(editor.includes("draftPlanAnchor(protocolVersionId)"));
+ assert.ok(editor.includes("draftCycleAddAnchor(protocolVersionId)"));
+ assert.ok(journey.includes('`#rascunho-plano-iniciar-${versionId}`'));
+ assert.ok(map.includes("rascunho-pendencias-titulo-${versionNumber}"));
+});
