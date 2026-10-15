@@ -37,3 +37,11 @@ test("professional and published variant ordering use creation time instead of o
   assert.doesNotMatch(professional, /order\("variant_key"/);
   assert.doesNotMatch(client, /order\("variant_key"/);
 });
+
+
+test("cycle step cannot resolve a variation from another published meal plan", () => {
+  const access = read("lib/supabase/data-access.ts");
+  const client = access.slice(access.indexOf("export async function listPublishedProtocolsForCurrentClient"),access.indexOf("export async function hasAccessibleProtocolPublicationForClient"));
+  assert.match(client,/variant\.meal_plan_version_id !== mealPlan\.id/);
+  assert.match(client,/variantsById\.get\(step\.variant_id\)/);
+});

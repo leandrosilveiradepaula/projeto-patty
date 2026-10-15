@@ -3220,7 +3220,9 @@ export async function listPublishedProtocolsForCurrentClient(
                   steps: (stepsByCycleId.get(cycle.id) ?? []).flatMap((step) => {
                     const variant = variantsById.get(step.variant_id);
 
-                    if (!variant) {
+                    // A cycle may reference only a variation in its own
+                    // published meal-plan snapshot, never another version.
+                    if (!variant || variant.meal_plan_version_id !== mealPlan.id) {
                       return [];
                     }
 
