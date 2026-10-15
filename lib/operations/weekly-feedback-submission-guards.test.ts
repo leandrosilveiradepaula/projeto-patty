@@ -49,10 +49,10 @@ test("both feedback intents share actual form pending state without changing ser
   assert.ok(form.includes("<ClientWeeklyFeedbackResponseForm"));
   const response = read("app/cliente/feedback-semanal/ClientWeeklyFeedbackResponseForm.tsx");
   assert.ok(response.includes("saveWeeklyFeedbackAction.bind(null, feedbackId)"));
-  assert.ok(response.includes("<ClientWeeklyFeedbackSubmitControls completed={submitted} reviewing={reviewOpen} onBeforeSubmit={prepareSubmit} />"));
+  assert.match(response, /<ClientWeeklyFeedbackSubmitControls\s+blocked=\{newerServerSnapshot\}\s+completed=\{submitted\}\s+reviewing=\{reviewOpen\}\s+onBeforeSubmit=\{prepareSubmit\}\s*\/>/);
   assert.ok(controls.includes('import { useFormStatus } from "react-dom"'));
   assert.ok(controls.includes("const { pending, data } = useFormStatus()"));
-  assert.ok(controls.includes("disabled={pending || completed}"));
+  assert.ok(controls.includes("disabled={pending || completed || blocked}"));
   assert.ok(controls.includes("loading={pending && intent === \"save\"}"));
   assert.ok(controls.includes("loading={pending && intent === \"submit\"}"));
   assert.ok(controls.includes('formNoValidate'));
