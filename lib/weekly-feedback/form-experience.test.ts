@@ -76,8 +76,12 @@ test("multiple pending weeks keep all answer labels, errors and focus targets di
   const form = readFileSync(new URL("../../app/cliente/feedback-semanal/ClientWeeklyFeedbackResponseForm.tsx", import.meta.url), "utf8");
   assert.match(form, /const fieldId = weeklyFeedbackAnswerFieldId\(feedbackId, question\.key\)/);
   assert.match(form, /weeklyFeedbackAnswerFieldId\(feedbackId, invalid\)/);
-  assert.match(form, /weeklyFeedbackAnswerFieldId\(feedbackId, progress\.firstMissingRequired\)/);
+  assert.match(form, /weeklyFeedbackAnswerFieldId\(feedbackId, firstMissingRequired\)/);
   assert.match(form, /weeklyFeedbackAnswerFieldId\(feedbackId, state\.questionKey\)/);
   assert.match(form, /aria-describedby=\{showError \? fieldId \+ "-error"/);
   assert.doesNotMatch(form, /document\.getElementById\("weekly-feedback-answer-" \+/);
+  const e2e = readFileSync(new URL("../../e2e/j2-weekly-feedback-lifecycle.spec.mjs", import.meta.url), "utf8");
+  assert.match(e2e, /locator\("#feedback-pendente-" \+ feedbackId \+ " form"\)/);
+  assert.match(e2e, /answerInput\(question\.key\)/);
+  assert.doesNotMatch(e2e, /#weekly-feedback-answer-q|\#weekly-feedback-answer-" \+/);
 });

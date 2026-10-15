@@ -59,6 +59,8 @@ export function ClientWeeklyFeedbackResponseForm({
   const [touchedKeys, setTouchedKeys] = useState<string[]>([]);
   const firstInvalid = firstInvalidWeeklyFeedbackField(questions, values, attemptedFinalSubmit);
   const progress = summarizeWeeklyFeedbackRequiredProgress(questions, values);
+  // Store the key in a stable const so TypeScript narrows it inside onClick.
+  const firstMissingRequired = progress.firstMissingRequired;
   const inFlightRef = useRef(false);
   const formRef = useRef<HTMLFormElement>(null);
   const [reviewOpen, setReviewOpen] = useState(false);
@@ -182,7 +184,7 @@ export function ClientWeeklyFeedbackResponseForm({
         <strong>{progress.requiredCompleted} de {progress.required} perguntas obrigatórias preenchidas</strong>
         <span>{progress.completed} de {progress.total} respostas iniciadas</span>
         <progress max={progress.required || 1} value={progress.requiredCompleted} aria-label="Progresso do preenchimento obrigatório" />
-        {progress.firstMissingRequired ? <button type="button" className={styles.jumpLink} onClick={() => document.getElementById(weeklyFeedbackAnswerFieldId(feedbackId, progress.firstMissingRequired))?.focus()}>Ir para primeira obrigatória pendente</button> : <span>Obrigatórias preenchidas. Revise e envie quando estiver pronta.</span>}
+        {firstMissingRequired ? <button type="button" className={styles.jumpLink} onClick={() => document.getElementById(weeklyFeedbackAnswerFieldId(feedbackId, firstMissingRequired))?.focus()}>Ir para primeira obrigatória pendente</button> : <span>Obrigatórias preenchidas. Revise e envie quando estiver pronta.</span>}
       </div>
       {state.message && (failed || confirmed) ? (
         <Alert
