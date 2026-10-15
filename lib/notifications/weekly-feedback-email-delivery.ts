@@ -1,5 +1,7 @@
 import "server-only";
 
+import { buildWeeklyFeedbackEmailContent } from "@/lib/notifications/weekly-feedback-email-content";
+
 import { createAdminClient } from "@/lib/supabase/admin";
 import { resolveTrustedClientAccessOrigin } from "@/lib/onboarding/trusted-client-access-origin";
 import {
@@ -8,15 +10,6 @@ import {
 } from "@/lib/notifications/gmail-smtp";
 
 const DEFAULT_BATCH_SIZE = 10;
-
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    timeZone: "America/Sao_Paulo",
-  }).format(new Date(value + "T12:00:00-03:00"));
-}
 
 function safeFailureMessage(error: unknown) {
   const message =
@@ -76,24 +69,17 @@ export async function deliverWeeklyFeedbackReminderEmails(input: {
   let failed = 0;
 
   for (const claim of claims ?? []) {
-    const feedbackUrl = new URL("/cliente/feedback-semanal", appOrigin);
-    const subject = "Lembrete do seu Feedback Semanal";
-    const bodyText = [
-      "Olá,",
-      "",
-      `Seu Feedback Semanal referente ao período de ${formatDate(claim.period_start)} a ${formatDate(claim.period_end)} ainda está disponível para preenchimento no aplicativo.`,
-      "",
-      "Acesse:",
-      feedbackUrl.toString(),
-      "",
-      "Este lembrete não altera seu atendimento automaticamente.",
-      "",
-      "Consultoria Corpo e Mente - Patty",
-    ].join("\n");
-
     let result: Awaited<ReturnType<typeof sendGmailSmtpEmail>>;
 
     try {
+      // All per-claim preparation belongs inside the recovery boundary:
+      // one malformed legacy period must not strand the claimed batch.
+      const { subject, bodyText } = buildWeeklyFeedbackEmailContent({
+        appOrigin,
+        periodStart: claim.period_start,
+        periodEnd: claim.period_end,
+      });
+
       result = await sendGmailSmtpEmail(smtpConfig, {
         bodyText,
         messageId: `<weekly-feedback-${claim.notification_event_id}@projeto-patty.local>`,

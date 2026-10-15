@@ -16,3 +16,16 @@ test("cron does not report success when SMTP is absent or some messages fail", (
   assert.match(route, /!result\.configured \? 503 : result\.failed > 0 \? 207 : 200/);
   assert.match(route, /authorization !== `Bearer \$\{cronSecret\}`/);
 });
+
+test("bad period in one claimed reminder fails individually and does not halt subsequent claims", () => {
+  const loop = worker.indexOf("for (const claim of claims ?? [])");
+  const recovery = worker.indexOf("try {", loop);
+  const content = worker.indexOf("buildWeeklyFeedbackEmailContent({", loop);
+  const delivery = worker.indexOf("sendGmailSmtpEmail(smtpConfig, {", loop);
+  const failure = worker.indexOf('"fail_weekly_feedback_email_delivery_server"', loop);
+  const next = worker.indexOf("continue;", failure);
+  assert.ok(loop >= 0 && recovery > loop && content > recovery && delivery > content);
+  assert.ok(failure > delivery && next > failure);
+  assert.match(worker,/p_attempt_id: claim\.attempt_id/);
+  assert.match(worker,/failed \+= 1/);
+});
