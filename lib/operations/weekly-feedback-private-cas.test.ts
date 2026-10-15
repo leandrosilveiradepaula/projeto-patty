@@ -7,11 +7,11 @@ const read = (path: string) => readFileSync(new URL("../../" + path, import.meta
 const access = read("lib/supabase/data-access.ts");
 const start = access.indexOf("export async function updateCurrentClientWeeklyFeedback(");
 const end = access.indexOf("\nexport ", start + 50);
-const save = access.slice(start, end);
+const save = access.slice(start, end === -1 ? undefined : end);
 const sql = read("supabase/migrations/20261015171900_private_weekly_feedback_atomic_save.sql");
 
 test("client writes weekly health answers through authenticated POST RPC, never URL filters", () => {
-  assert.ok(start > 0 && end > start);
+  assert.ok(start > 0 && (end === -1 || end > start));
   assert.match(save, /supabase\.rpc\(\s*"save_client_weekly_feedback_if_unchanged"/);
   assert.match(save, /p_expected_answers: input\.expectedAnswers/);
   assert.match(save, /p_answers: input\.answers/);
