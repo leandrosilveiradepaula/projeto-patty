@@ -3,7 +3,7 @@ import test from "node:test";
 import {
  buildProtocolOperationalSummaries, readOperationalProtocolFilters,
  exploreOperationalProtocolCatalog, operationalProtocolCatalogHref,
- operationalProtocolVersionHref, protocolOperationalStatusLabel,
+ operationalProtocolVersionHref, operationalProtocolNextActionHref, protocolOperationalStatusLabel,
  protocolPublicationDate,readProtocolCatalogPage,protocolNextActionLabel,
 } from "./operational-catalog.ts";
 
@@ -141,4 +141,14 @@ test("professional protocol action labels preserve exact manual lifecycle stages
  assert.equal(protocolNextActionLabel("approved",2),"Publicar versão 2");
  assert.equal(protocolNextActionLabel("published",2),"Consultar versão 2 publicada");
  assert.equal(protocolNextActionLabel("missing-version",2),"Recuperar versão inicial");
+});
+
+test("manual protocol handoff targets the exact version and lifecycle section",()=>{
+ const v={id:"version-uuid",protocol_id:"protocol-uuid",version_number:4,created_at:"2026-10-15T00:00:00Z",submitted_for_review_at:null};
+ const base="/admin/protocolos/protocol-uuid?versao=4#";
+ assert.equal(operationalProtocolNextActionHref("protocol-uuid",v,"draft"),base+"rascunho-plano-iniciar-version-uuid");
+ assert.equal(operationalProtocolNextActionHref("protocol-uuid",v,"under-review"),base+"conferencia-plano-4");
+ assert.equal(operationalProtocolNextActionHref("protocol-uuid",v,"approved"),base+"acao-protocolo-4");
+ assert.equal(operationalProtocolNextActionHref("protocol-uuid",v,"published"),base+"versao-4");
+ assert.equal(operationalProtocolNextActionHref("protocol-uuid",null,"missing-version"),null);
 });
