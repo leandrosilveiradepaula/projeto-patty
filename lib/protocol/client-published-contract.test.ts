@@ -45,3 +45,15 @@ test("cycle step cannot resolve a variation from another published meal plan", (
   assert.match(client,/variant\.meal_plan_version_id !== mealPlan\.id/);
   assert.match(client,/variantsById\.get\(step\.variant_id\)/);
 });
+
+test("unavailable cross-plan cycle step retains position without exposing foreign identifiers", () => {
+  const access = read("lib/supabase/data-access.ts");
+  const start = access.indexOf("export async function listPublishedProtocolsForCurrentClient");
+  const section = access.slice(start,access.indexOf("export async function hasAccessibleProtocolPublicationForClient",start));
+  assert.match(section,/stepsByCycleId\.get\(cycle\.id\) \?\? \[\]\)\.map\(/);
+  assert.match(section,/variant\.meal_plan_version_id !== mealPlan\.id/);
+  assert.match(section,/variantId: ""/);
+  assert.match(section,/variantKey: ""/);
+  assert.match(section,/variantLabel: null/);
+  assert.doesNotMatch(section,/stepsByCycleId\.get\(cycle\.id\) \?\? \[\]\)\.flatMap\(/);
+});
