@@ -1,0 +1,133 @@
+name: Validate J2 local browser lifecycle
+
+# A complete real-browser lifecycle with synthetic identities, a local
+# PostgreSQL/Supabase and local Next.js; never any production credentials.
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/validate-j2-weekly-feedback-browser.yml"
+      - "e2e/j2-weekly-feedback-lifecycle.spec.mjs"
+      - "e2e/helpers/admin-auth.mjs"
+      - "app/cliente/feedback-semanal/**"
+      - "app/admin/clientes/[clienteId]/feedback-semanal/**"
+      - "app/admin/feedback-semanal/**"
+      - "lib/follow-up/**"
+      - "lib/weekly-feedback/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: j2-local-feedback-browser-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  weekly-feedback-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      SUPABASE_TELEMETRY_DISABLED: "1"
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - name: Checkout exact PR HEAD
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install pinned application dependencies
+        run: npm ci
+
+      - name: Enable MFA only in disposable local Supabase runner
+        run: |
+          node <<'NODE'
+          const {readFileSync,writeFileSync}=require("node:fs");
+          const path="supabase/config.toml";
+          const text=readFileSync(path,"utf8");
+          const before="[auth.mfa.totp]\nenroll_enabled = false\nverify_enabled = false";
+          const after="[auth.mfa.totp]\nenroll_enabled = true\nverify_enabled = true";
+          if (text.split(before).length !== 2) throw new Error("Unexpected local MFA config; refusing to relax boundaries");
+          writeFileSync(path,text.replace(before,after));
+          NODE
+          git diff --check
+
+      - name: Start disposable local Supabase
+        run: npx supabase start
+
+      - name: Reset local database from committed migrations
+        run: npx supabase db reset
+
+      - name: Export local public configuration without exposing service key
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx supabase status -o env > "$RUNNER_TEMP/j2-local-status"
+          chmod 600 "$RUNNER_TEMP/j2-local-status"
+          set -a
+          source "$RUNNER_TEMP/j2-local-status"
+          set +a
+          test "$API_URL" = "http://127.0.0.1:54321"
+          test -n "$ANON_KEY"
+          test -n "$SERVICE_ROLE_KEY"
+          echo "::add-mask::$ANON_KEY"
+          echo "::add-mask::$SERVICE_ROLE_KEY"
+          echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL" >> "$GITHUB_ENV"
+          echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$ANON_KEY" >> "$GITHUB_ENV"
+          echo "J2_E2E_BASE_URL=http://127.0.0.1:3000" >> "$GITHUB_ENV"
+
+      - name: Install Playwright Chromium in ephemeral runner
+        run: |
+          npm install --no-save --package-lock=false @playwright/test@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Start local Next.js and confirm login is responsive
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run dev -- --hostname 127.0.0.1 --port 3000 > "$RUNNER_TEMP/j2-next.log" 2>&1 &
+          echo "$!" > "$RUNNER_TEMP/j2-next.pid"
+          for attempt in $(seq 1 90); do
+            if curl --max-time 3 -fsS http://127.0.0.1:3000/login > /dev/null 2>&1; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "::error::Local Next.js login never became ready"
+          tail -n 80 "$RUNNER_TEMP/j2-next.log"
+          exit 1
+
+      - name: Playwright authenticated local full weekly feedback lifecycle
+        env:
+          J2_E2E_LOCAL_ONLY: "true"
+        shell: bash
+        run: |
+          set -euo pipefail
+          set -a
+          source "$RUNNER_TEMP/j2-local-status"
+          set +a
+          export J2_E2E_SUPABASE_URL="$API_URL"
+          export J2_E2E_ANON_KEY="$ANON_KEY"
+          export J2_E2E_SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY"
+          npx playwright test e2e/j2-weekly-feedback-lifecycle.spec.mjs --reporter=line --workers=1
+
+      - name: Stop disposable services and erase local test state
+        if: always()
+        shell: bash
+        run: |
+          if [ -f "$RUNNER_TEMP/j2-next.pid" ]; then
+            kill "$(cat "$RUNNER_TEMP/j2-next.pid")" 2>/dev/null || true
+          fi
+          npx supabase stop --no-backup || true
+          rm -f "$RUNNER_TEMP/j2-local-status" "$RUNNER_TEMP/j2-next.pid"
+
+      - name: Explain local E2E scope
+        if: always()
+        run: |
+          echo "J2 browser tests use only disposable local Supabase and synthetic identities."
+          echo "Professional production MFA, deployment and human homologation remain separate."
