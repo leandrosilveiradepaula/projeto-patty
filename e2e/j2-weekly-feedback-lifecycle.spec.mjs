@@ -69,7 +69,8 @@ function insert(table, record) {
   const values = entries.map(([, value]) => sqlLiteral(value));
   const returned = localSql(
     "insert into public." + table +
-    " (" + keys.join(", ") + ") values (" + values.join(", ") + ") returning id;",
+    " (" + keys.join(", ") + ") values (" + values.join(", ") + ") returning " +
+    (table === "user_roles" ? "profile_id" : "id") + ";",
   );
   if (!UUID.test(returned)) throw new Error("Local fixture insert returned no valid UUID");
   return returned;
