@@ -215,10 +215,36 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
       await adminPage.getByLabel("Semana de referência · início").fill(periodStart);
       await adminPage.getByLabel("Semana de referência · fim").fill(periodEnd);
       await adminPage.getByRole("button", { name: "Criar solicitação" }).click();
-      await expect.poll(async () => {
-        const row = await feedbackRecord(clientId, periodStart);
-        return row?.request_source ?? null;
-      }, { timeout: 25_000 }).toBe("manual");
+      try {
+        await expect.poll(async () => {
+          const row = await feedbackRecord(clientId, periodStart);
+          return row?.request_source ?? null;
+        }, { timeout: 25_000 }).toBe("manual");
+      } catch {
+        // Report only known operational states, never any form values,
+        // session cookies, request payloads or client health information.
+        const knownFailureLabels = [
+          "O Feedback Semanal só pode ser solicitado depois que a cliente receber o primeiro protocolo publicado.",
+          "Nenhuma versão publicada do Feedback Semanal está disponível.",
+          "Informe um período válido.",
+          "A data final não pode ser anterior à data inicial.",
+          "Não foi possível criar a solicitação. Confira o período e tente novamente.",
+          "Este período já tem um Feedback Semanal solicitado. Abra a solicitação existente.",
+        ];
+        const states = [];
+        for (const label of knownFailureLabels) {
+          if (await adminPage.getByText(label, { exact: true }).isVisible()) {
+            states.push(knownFailureLabels.indexOf(label));
+          }
+        }
+        const successVisible = await adminPage.getByText(
+          "Feedback Semanal solicitado para a cliente.", { exact: true },
+        ).isVisible();
+        throw new Error(
+          "Synthetic admin request not persisted; successVisible=" + successVisible +
+          "; knownErrorIndexes=" + JSON.stringify(states),
+        );
+      }
     });
 
     const initial = await feedbackRecord(clientId, periodStart);
