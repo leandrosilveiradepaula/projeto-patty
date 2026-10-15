@@ -2,7 +2,7 @@
 -- Exercises the actual RLS/invoker boundary from publication -> request ->
 -- partial save -> CAS conflict -> definitive submit -> admin history.
 begin;
-select plan(21);
+select plan(25);
 
 select has_function('public', 'save_client_weekly_feedback_if_unchanged', array['uuid','uuid','jsonb','jsonb','boolean']);
 select ok(
@@ -23,17 +23,20 @@ insert into auth.users (id, email, raw_user_meta_data)
 values
   ('f1100000-0000-0000-0000-000000000001', 'j2-admin@example.test', '{}'),
   ('f1100000-0000-0000-0000-000000000002', 'j2-client-a@example.test', '{}'),
-  ('f1100000-0000-0000-0000-000000000003', 'j2-client-b@example.test', '{}');
+  ('f1100000-0000-0000-0000-000000000003', 'j2-client-b@example.test', '{}'),
+  ('f1100000-0000-0000-0000-000000000004', 'j2-admin-unassigned@example.test', '{}');
 insert into public.profiles (id, display_name)
 values
   ('f1100000-0000-0000-0000-000000000001', 'Synthetic J2 Admin'),
   ('f1100000-0000-0000-0000-000000000002', 'Synthetic J2 Client A'),
-  ('f1100000-0000-0000-0000-000000000003', 'Synthetic J2 Client B');
+  ('f1100000-0000-0000-0000-000000000003', 'Synthetic J2 Client B'),
+  ('f1100000-0000-0000-0000-000000000004', 'Synthetic J2 Unassigned Admin');
 insert into public.user_roles (profile_id, role)
 values
   ('f1100000-0000-0000-0000-000000000001', 'admin'),
   ('f1100000-0000-0000-0000-000000000002', 'client'),
-  ('f1100000-0000-0000-0000-000000000003', 'client');
+  ('f1100000-0000-0000-0000-000000000003', 'client'),
+  ('f1100000-0000-0000-0000-000000000004', 'admin');
 insert into public.clients (id, profile_id, full_name, status)
 values
   ('f1200000-0000-0000-0000-000000000001', 'f1100000-0000-0000-0000-000000000002', 'Synthetic Client A', 'active'),
@@ -135,6 +138,28 @@ select is(
   0::bigint,
   'spoofing another client id returns no mutation'
 );
+-- A malformed/incomplete final submission must not convert a valid draft
+-- into submitted history: the existing database trigger remains authoritative.
+select throws_ok(
+  $sql$
+    select * from public.save_client_weekly_feedback_if_unchanged(
+      'f1200000-0000-0000-0000-000000000001',
+      'f1600000-0000-0000-0000-000000000001',
+      '{"q01":0,"q03":"rascunho sintetico"}'::jsonb,
+      '{"q01":0,"q03":"rascunho sintetico"}'::jsonb,
+      true
+    )
+  $sql$,
+  '23514',null,
+  'incomplete weekly feedback cannot be submitted by calling RPC directly'
+);
+select is(
+  (select submitted_at is null and answers = '{"q01":0,"q03":"rascunho sintetico"}'::jsonb
+   from public.client_weekly_feedbacks
+   where id='f1600000-0000-0000-0000-000000000001'),
+  true,
+  'rejected submission preserves the original unsent draft'
+);
 select is(
   (select count(*) from public.save_client_weekly_feedback_if_unchanged(
     'f1200000-0000-0000-0000-000000000001',
@@ -156,6 +181,13 @@ select is(
 select ok(
   (select submitted_at is not null from public.client_weekly_feedbacks where id='f1600000-0000-0000-0000-000000000001'),
   'the submitted timestamp is persisted'
+);
+select is(
+  (select count(*) from public.client_weekly_feedbacks feedback,
+          lateral jsonb_object_keys(feedback.answers) as answer(key)
+   where feedback.id='f1600000-0000-0000-0000-000000000001'),
+  21::bigint,
+  'definitive submission persists all 21 original synthetic answers'
 );
 select is(
   (select count(*) from public.save_client_weekly_feedback_if_unchanged(
@@ -193,6 +225,13 @@ select is(
   (select count(*) from public.client_weekly_feedbacks where submitted_at is not null),
   1::bigint,
   'assigned professional reads the submitted client answers'
+);
+select set_config('request.jwt.claim.sub','f1100000-0000-0000-0000-000000000004',true);
+select set_config('request.jwt.claims','{"sub":"f1100000-0000-0000-0000-000000000004","aal":"aal2","role":"authenticated"}',true);
+select is(
+  (select count(*) from public.client_weekly_feedbacks where submitted_at is not null),
+  0::bigint,
+  'unassigned professional cannot read submitted answers despite admin MFA'
 );
 reset role;
 set local role anon;
