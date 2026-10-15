@@ -78,18 +78,13 @@ export function ClientWeeklyFeedbackResponseForm({
   useEffect(() => {
     inFlightRef.current = false;
     setMergedAfterConflict(false);
-    if (state.outcome === "submitted") {
-      setEditedSinceLastSave(false);
-      // The form is removed after a final send. Navigate to a server-verified
-      // receipt instead of losing the success message during router.refresh().
-      // The URL carries only the opaque feedback identifier, never answers.
-      const id = encodeURIComponent(feedbackId);
-      router.replace("/cliente/feedback-semanal?registro=" + id + "#feedback-enviado-" + id);
-    } else if (state.outcome === "draft-saved") {
+    // A draft remains editable and refreshes here. The definitive send is
+    // redirected by the server after persistence, before this form unmounts.
+    if (state.outcome === "draft-saved") {
       setEditedSinceLastSave(false);
       router.refresh();
     }
-  }, [state, router, feedbackId]);
+  }, [state, router]);
 
   useEffect(() => {
     // When nothing was edited locally, a refreshed server snapshot can be

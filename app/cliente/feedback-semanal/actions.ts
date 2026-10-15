@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 import {
   buildWeeklyFeedbackAnswers,
@@ -120,10 +121,18 @@ export async function saveWeeklyFeedbackAction(
   revalidatePath("/cliente");
   revalidatePath("/cliente/feedback-semanal");
 
+  if (submit) {
+    // A successful submission removes this form from the revalidated RSC tree.
+    // Navigate from the server after the atomic write: a client useEffect on
+    // an unmounted form cannot reliably display the receipt. This is reached
+    // only after the authenticated, CAS-protected mutation returned a row.
+    // The destination rechecks the exact submitted ID through client RLS.
+    const id = encodeURIComponent(feedbackId);
+    redirect("/cliente/feedback-semanal?registro=" + id + "#feedback-enviado-" + id);
+  }
+
   return {
-    outcome: submit ? "submitted" : "draft-saved",
-    message: submit
-      ? "Feedback enviado e preservado. A Patty poderá consultar as respostas."
-      : "Rascunho salvo. Você pode continuar e enviar em outro momento.",
+    outcome: "draft-saved",
+    message: "Rascunho salvo. Você pode continuar e enviar em outro momento.",
   };
 }

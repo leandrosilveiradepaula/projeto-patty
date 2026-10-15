@@ -1,3 +1,9 @@
+## 2026-10-15 — J2: correção do redirect pós-envio no PR #890 (CI em execução)
+
+### FATO OBSERVADO EM PLAYWRIGHT / DECISÃO TÉCNICA
+
+No commit `09837fe7`, o workflow de aplicação passou, mas o E2E de navegador falhou após provar que as 21 respostas sintéticas já haviam sido gravadas. A confirmação de envio não apareceu porque a navegação dependia de um `useEffect` montado em formulário removido pela revalidação da página. A correção da mesma branch faz `redirect` na server action **apenas após** o salvamento transacional confirmado e a revalidação. Erros de validação, conflito CAS ou falha de persistência retornam ao formulário sem redirecionar. O destino revalida a resposta submetida através do escopo autenticado da cliente, e a URL carrega somente o ID. A gravação de rascunhos e o histórico original permanecem inalterados. Nenhuma regra de avaliação, score, RLS, migration, conteúdo clínico ou publicação automática foi incluída. **Ainda não mergeado, publicado ou homologado; aguardar CI + E2E neste commit.**
+
 ## 2026-10-15 — J2: confirmação de envio e retorno aos registros exatos (PR em validação)
 
 ### DECISÃO TÉCNICA/PRODUTO — CONTINUIDADE DE NAVEGAÇÃO, SEM NOVO ESTADO CLÍNICO

@@ -1,3 +1,8 @@
+## 2026-10-15 — J2: diagnóstico e correção de confirmação após envio (PR #890, em validação)
+
+**FATO TESTADO:** no SHA `09837fe7`, `Validate application` concluiu com sucesso; o Playwright local gravou e verificou todas as 21 respostas sintéticas, mas não encontrou a confirmação da UI. A action revalidava a página, removendo o componente antes de seu efeito de redirecionamento. **CORREÇÃO IMPLEMENTADA NA BRANCH:** redirecionamento exclusivamente no caminho de sucesso da action autenticada, após escrita CAS confirmada e invalidação da rota. Ao abrir o histórico, o servidor reautoriza o ID submetido antes de mostrar confirmação. Falhas e rascunhos não navegam. CI e E2E do novo commit ainda precisam passar; merge, deploy e homologação profissional permanecem pendentes.
+
+---
 ## 2026-10-15 — J2: fechamento de confirmação e navegação exata (PR em validação)
 
 **FATO CONFIRMADO:** PR #889 mergeado no `master` `ff2f05b991f9d19735bda09e55b348cb8af92ce8`; no HEAD do PR (`06ee99b5`) tanto `Validate application` quanto `Validate J2 local browser lifecycle` foram aprovados. O CI pós-merge foi iniciado. Vercel ainda responde `build-rate-limit` e a versão de produção não está demonstrada.
