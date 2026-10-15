@@ -29,6 +29,13 @@ test("unconfirmed server finalization blocks automatic retries and preserves pri
  assert.ok(admin.includes("Ele permanece oculto para a cliente"));
  assert.ok(client.includes("Arquivo enviado e validado com sucesso."));
 });
+test("uncertain client upload locks replacement selection until recovery",()=>{
+ assert.ok(client.includes('disabled={isPending || ambiguousCompletion}'));
+ assert.ok(client.includes('setAmbiguousCompletion(true)'));
+ assert.ok(client.includes('Consultar estado do envio'));
+ assert.ok(client.includes('Concluir esta mesma sessão'));
+ assert.ok(client.includes('if (inFlightRef.current || ambiguousCompletion || !selectionConfirmed)'));
+});
 test("no client sees signed admin upload token or admin release action",()=>{
  assert.ok(admin.includes("uploadToSignedUrl("));
  assert.ok(client.includes(".upload(sessionResult.session.objectPath"));
