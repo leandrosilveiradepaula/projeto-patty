@@ -1,11 +1,11 @@
-name: E2E J2 weekly feedback local
+name: Validate J2 local browser lifecycle
 
 # A complete real-browser lifecycle with synthetic identities, a local
 # PostgreSQL/Supabase and local Next.js; never any production credentials.
 on:
   pull_request:
     paths:
-      - ".github/workflows/e2e-j2-weekly-feedback-local.yml"
+      - ".github/workflows/validate-j2-weekly-feedback-browser.yml"
       - "e2e/j2-weekly-feedback-lifecycle.spec.mjs"
       - "e2e/helpers/admin-auth.mjs"
       - "app/cliente/feedback-semanal/**"
