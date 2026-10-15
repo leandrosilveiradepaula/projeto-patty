@@ -53,3 +53,42 @@ test("content release continues checking exact version and permissions on the se
   assert.match(source, /isContentVersionReleaseEligible/);
   assert.match(source, /createAccessibleClientContentRelease/);
 });
+
+
+test("manual weekly feedback locates an existing exact period without fetching health answers", () => {
+  const access = read("lib/supabase/data-access.ts");
+  const start = access.indexOf("export async function getAccessibleWeeklyFeedbackForPeriod(");
+  const end = access.indexOf("export async function createAccessibleWeeklyFeedbackRequest(", start);
+  const lookup = access.slice(start, end);
+  assert.ok(start > 0 && end > start);
+  assert.match(lookup, /\.select\("id, submitted_at"\)/);
+  assert.match(lookup, /\.eq\("client_id", clientId\)/);
+  assert.match(lookup, /\.eq\("period_start", periodStart\)/);
+  assert.match(lookup, /\.eq\("period_end", periodEnd\)/);
+  assert.doesNotMatch(lookup, /answers|createAdminClient/);
+});
+
+test("manual weekly feedback returns the existing row before creating and recovers database uniqueness races", () => {
+  const action = read("app/admin/clientes/[clienteId]/feedback-semanal/actions.ts");
+  const lookup = action.indexOf("getAccessibleWeeklyFeedbackForPeriod(clientId, periodStart, periodEnd)");
+  const write = action.indexOf("createAccessibleWeeklyFeedbackRequest({");
+  assert.ok(lookup >= 0 && write > lookup);
+  assert.match(action, /if \(existing\) return existingRequestState\(existing\)/);
+  assert.match(action, /isDuplicatePeriodError\(error\)/);
+  assert.match(action, /getAccessibleWeeklyFeedbackForPeriod\(clientId, periodStart, periodEnd\)/);
+  assert.match(action, /if \(concurrent\) return existingRequestState\(concurrent\)/);
+  assert.match(action, /error\.code === "23505"/);
+  assert.match(action, /feedbackId: created\.id/);
+  assert.doesNotMatch(action, /\.from\("client_weekly_feedbacks"\)\.upsert/);
+});
+
+test("both new and preexisting weekly feedback requests open their authorized exact record", () => {
+  const form = read("components/admin/AdminWeeklyFeedbackRequestForm.tsx");
+  const page = read("app/admin/clientes/[clienteId]/feedback-semanal/page.tsx");
+  assert.match(form, /state\.feedbackId \? \(/);
+  assert.match(form, /registro=\$\{state\.feedbackId\}/);
+  assert.match(form, /state\.feedbackSubmitted \? "enviados" : "pendentes"/);
+  assert.match(form, /Abrir registro exato/);
+  assert.match(page, /authorizedExactRecordPage\(/);
+  assert.match(page, /exactRecordLocated/);
+});
