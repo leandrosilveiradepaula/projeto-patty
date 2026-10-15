@@ -4,7 +4,7 @@ import {
  buildProtocolOperationalSummaries, readOperationalProtocolFilters,
  exploreOperationalProtocolCatalog, operationalProtocolCatalogHref,
  operationalProtocolVersionHref, protocolOperationalStatusLabel,
- protocolPublicationDate,readProtocolCatalogPage,
+ protocolPublicationDate,readProtocolCatalogPage,protocolNextActionLabel,
 } from "./operational-catalog.ts";
 
 const protocols=[
@@ -133,4 +133,12 @@ test("exact version navigation cannot fabricate a version if no RLS-visible row"
  assert.equal(operationalProtocolVersionHref("p",versions[0]),"/admin/protocolos/p?versao=1#versao-1");
  assert.equal(protocolOperationalStatusLabel("approved"),"Aprovado, ainda não publicado");
  assert.equal(protocolPublicationDate("bad"),"Data indisponível");
+});
+
+test("professional protocol action labels preserve exact manual lifecycle stages",()=>{
+ assert.equal(protocolNextActionLabel("draft",2),"Continuar rascunho · versão 2");
+ assert.equal(protocolNextActionLabel("under-review",2),"Revisar versão 2");
+ assert.equal(protocolNextActionLabel("approved",2),"Publicar versão 2");
+ assert.equal(protocolNextActionLabel("published",2),"Consultar versão 2 publicada");
+ assert.equal(protocolNextActionLabel("missing-version",2),"Recuperar versão inicial");
 });

@@ -123,3 +123,13 @@ test("assessment operations still require admin, persist before cache invalidati
   assert.match(action, /revalidatePath\("\/cliente\/evolucao"\)/);
   assert.ok(!draft.includes("publishProtocolVersion"));
 });
+
+test("finalized evaluation offers client-scoped protocol continuation without automatic publication", () => {
+ const page = read("app/admin/avaliacoes/[avaliacaoId]/page.tsx");
+ const directory = read("app/admin/clientes/[clienteId]/protocolos/page.tsx");
+ assert.ok(page.includes('title="Continuar para o protocolo"'));
+ assert.ok(page.includes('!isDraft ? ('));
+ assert.ok(page.includes('`/admin/clientes/${assessment.client_id}/protocolos`'));
+ assert.ok(directory.includes("protocolNextActionLabel(facts.latestStatus, latest.version_number)"));
+ assert.ok(!page.includes("publishProtocolVersion("));
+});

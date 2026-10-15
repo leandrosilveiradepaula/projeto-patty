@@ -1,4 +1,4 @@
-import { buildProtocolOperationalSummaries, protocolOperationalStatusLabel, protocolPublicationDate, operationalProtocolVersionHref } from "@/lib/protocol/operational-catalog";
+import { buildProtocolOperationalSummaries, protocolOperationalStatusLabel, protocolPublicationDate, operationalProtocolVersionHref, protocolNextActionLabel } from "@/lib/protocol/operational-catalog";
 import { readClientDirectoryReturn, withClientDirectoryReturn } from "@/lib/operations/client-directory-return";
 import { readPendingQueueReturn, withPendingQueueReturn } from "@/lib/operations/pending-queue-return";
 import { AdminProtocolInitialVersionForm } from "@/components/admin/AdminProtocolInitialVersionForm";
@@ -236,7 +236,7 @@ export default async function AdminClientProtocolsPage({
                 </div>
                 <div className={styles.protocolActions}>
                   {versionedIds.has(protocol.id) ? <>
-                    <Link className={styles.actionLink} href={navigate(latestHref ?? `/admin/protocolos/${protocol.id}`)}>Abrir versão atual de trabalho</Link>
+                    <Link className={styles.actionLink} href={navigate(latestHref ?? `/admin/protocolos/${protocol.id}`)}>{latest && facts ? protocolNextActionLabel(facts.latestStatus, latest.version_number) : "Abrir versão atual de trabalho"}</Link>
                     {publishedHref ? <Link className={styles.actionLink} href={navigate(publishedHref)}>Consultar última publicada</Link> : null}
                     <Link className={styles.actionLink} href={navigate(`/admin/protocolos/${protocol.id}`)}>Histórico completo</Link>
                   </> : <AdminProtocolInitialVersionForm

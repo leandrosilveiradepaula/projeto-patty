@@ -489,6 +489,16 @@ export default async function AdminAvaliacaoDetailPage({
           </Card>
         </Section>
       ) : null}
+      {!isDraft ? (
+        <Section
+          title="Continuar para o protocolo"
+          description="Esta avaliação foi finalizada. Consulte os protocolos da mesma cliente para preparar ou revisar uma versão; aprovação e publicação continuam ações explícitas e separadas da Patty."
+        >
+          <Link className={styles.backLink} href={navigate(`/admin/clientes/${assessment.client_id}/protocolos`)}>
+            Abrir protocolos desta cliente
+          </Link>
+        </Section>
+      ) : null}
       <Section
         description="Decisões profissionais são registradas somente depois que a coleta da avaliação foi finalizada."
         id="acompanhamento"
