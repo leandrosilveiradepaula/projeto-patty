@@ -31,7 +31,7 @@ export function weeklyFeedbackQuestionNavigationLabel(
   };
   // The option contains only the form definition and a factual completion
   // hint. Never interpolate response content, including health answers.
-  const cleanLabel = question.label.replace(/\\s+/g, " ").trim();
+  const cleanLabel = question.label.replace(/\s+/g, " ").trim();
   const clipped = cleanLabel.length > 78 ? cleanLabel.slice(0, 77).trimEnd() + "…" : cleanLabel;
   return "Pergunta " + (index + 1) + " · " +
     labels[weeklyFeedbackQuestionCompletion(question, answer)] + " · " + clipped;
