@@ -163,7 +163,17 @@ function latestVersion(protocolId){
   return items.at(-1);
 }
 async function openVersion(page,protocolId,number){
-  const response=await page.goto("/admin/protocolos/"+protocolId+"?versao="+number);
+  // A server-side read can hang without producing a rendered error page.
+  // Bound navigation independently from the full E2E timeout and never log
+  // request URLs, protocol identifiers or private response bodies.
+  let response;
+  try {
+    response=await page.goto("/admin/protocolos/"+protocolId+"?versao="+number,{
+      waitUntil:"domcontentloaded",timeout:25000,
+    });
+  } catch {
+    throw new Error("J4_ADMIN_VERSION_NAVIGATION_TIMEOUT_OR_NETWORK_FAILURE");
+  }
   const container=page.locator("#versao-"+number);
   await expect.poll(async()=>{
     if(await container.isVisible()) return "version-visible";
