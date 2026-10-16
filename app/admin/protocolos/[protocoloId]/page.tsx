@@ -78,6 +78,19 @@ function getLifecyclePresentation(input: {
   return { label: "Rascunho", variant: "neutral" as const };
 }
 
+// Diagnostic labels are static; never emit query errors, client IDs or health data.
+async function observeProtocolLoad<T>(
+  stage: "protocol" | "versions" | "approvals" | "publications" | "meal-plans",
+  task: Promise<T>,
+): Promise<T> {
+  try {
+    return await task;
+  } catch (error) {
+    console.error("J4_ADMIN_LOAD_FAILURE:" + stage);
+    throw error;
+  }
+}
+
 export default async function AdminProtocoloDetailPage({ params, searchParams }: AdminProtocoloDetailPageProps) {
   const { protocoloId } = await params;
   const search = await searchParams;
@@ -89,11 +102,11 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
 
   if (!isUuid(protocoloId)) notFound();
 
-  const protocol = await getAccessibleProtocol(protocoloId);
+  const protocol = await observeProtocolLoad("protocol", getAccessibleProtocol(protocoloId));
 
   if (!protocol) notFound();
 
-  const versions = await listAccessibleProtocolVersions(protocol.id);
+  const versions = await observeProtocolLoad("versions", listAccessibleProtocolVersions(protocol.id));
   const hasEditableDraft = versions.some(
     (version) => !version.submitted_for_review_at,
   );
@@ -115,9 +128,9 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
 
   const versionIds = versions.map((version) => version.id);
   const [approvals, publications, mealPlans] = await Promise.all([
-    listAccessibleProtocolVersionApprovals(versionIds),
-    listAccessibleProtocolPublications(versionIds),
-    listAccessibleProtocolVersionMealPlans(versionIds),
+    observeProtocolLoad("approvals", listAccessibleProtocolVersionApprovals(versionIds)),
+    observeProtocolLoad("publications", listAccessibleProtocolPublications(versionIds)),
+    observeProtocolLoad("meal-plans", listAccessibleProtocolVersionMealPlans(versionIds)),
   ]);
   const selectedVersionNumber = requestedProtocolVersion(requestedVersion, versions);
   const latestPublishedId = latestPublishedProtocolVersionId(versions, publications);
