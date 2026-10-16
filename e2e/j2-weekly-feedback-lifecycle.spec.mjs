@@ -678,6 +678,125 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
         sqlLiteral(clientId))).toHaveLength(1);
     });
 
+    await test.step("agenda gera semana anterior e lembrete in-app acessível sem novo estado clínico", async () => {
+      // Run the existing server-side cron functions with deterministic local
+      // timestamps; no cron, role grant or production schedule is modified.
+      await adminPage.goto("/admin/clientes/" + clientId + "#preferencia-feedback");
+      const preference = adminPage.locator("#preferencia-feedback");
+      await expect(preference).toBeVisible();
+      await preference.locator('select[name="channel"]').selectOption("in_app");
+      const preferenceHttpStatuses = [];
+      const observePreferencePost = (response) => {
+        // Status codes only: never capture cookies, URLs, headers or bodies.
+        if (response.request().method() === "POST" && response.url().startsWith(baseUrl)) {
+          preferenceHttpStatuses.push(response.status());
+        }
+      };
+      adminPage.on("response", observePreferencePost);
+      try {
+        await preference.getByRole("button", { name: "Salvar canal" }).click();
+        // An action error is distinct from a delayed write or transient UI remount.
+        // Do not turn a failed preference action into a synthetic DB fixture.
+        await expect.poll(async () => {
+          const stored = localSelect(
+            "select channel_key from public.client_notification_preference_versions " +
+            "where client_id = " + sqlLiteral(clientId) +
+            " and purpose_key = 'weekly_feedback' and retired_at is null",
+          ).map((row) => row.channel_key);
+          if (stored.length === 1 && stored[0] === "in_app") return "persisted";
+          if (await preference.getByText("Não foi possível atualizar", { exact: true }).count()) {
+            // Only expose one of the action's fixed, non-sensitive UI error
+            // categories. Never print response bodies, PII, cookies or tokens.
+            const knownErrors = [
+              ["invalid-client", "Cliente inválida para configurar o canal do Feedback Semanal."],
+              ["invalid-version", "A versão atual da preferência é inválida. Atualize a página."],
+              ["assignment", "Esta cliente não está acessível para sua atribuição atual."],
+              ["invalid-channel", "Selecione um canal válido para o Feedback Semanal."],
+              ["persistence", "Não foi possível alterar o canal. A configuração pode ter mudado; atualize a página e tente novamente."],
+            ];
+            for (const [code, label] of knownErrors) {
+              if (await preference.getByText(label, { exact: true }).count()) {
+                return "action-rejected:" + code;
+              }
+            }
+            return "action-rejected:unknown";
+          }
+          const currentPath = new URL(adminPage.url()).pathname;
+          if (currentPath.startsWith("/mfa/") || currentPath === "/login") return "authorization-redirect";
+          if (preferenceHttpStatuses.some((status) => status >= 400)) return "http-failure";
+          if (preferenceHttpStatuses.length) return "post-completed-without-persistence";
+          return "post-not-observed";
+        }, { timeout: 25_000 }).toBe("persisted");
+      } finally {
+        adminPage.off("response", observePreferencePost);
+      }
+      await expect(preference.getByText(
+        "Notificação dentro do aplicativo está operacional.", { exact: true },
+      )).toBeVisible({ timeout: 15_000 });
+
+      const scheduleStart = "2026-10-12";
+      const scheduleEnd = "2026-10-18";
+      const generated = localSelect(
+        "select public.generate_scheduled_weekly_feedback_requests(" +
+          "'2026-10-19 11:00:00+00'::timestamptz) as result",
+      );
+      expect(generated[0].result).toBe(1);
+      const scheduled = localSelect(
+        "select id, period_start, period_end, request_source, submitted_at, requested_by_profile_id, " +
+        "schedule_configuration_version_id from public.client_weekly_feedbacks " +
+        "where client_id = " + sqlLiteral(clientId) +
+        " and period_start = " + sqlLiteral(scheduleStart),
+      );
+      expect(scheduled).toHaveLength(1);
+      const scheduledId = scheduled[0].id;
+      expect(scheduled[0].period_end).toBe(scheduleEnd);
+      expect(scheduled[0].request_source).toBe("schedule");
+      expect(scheduled[0].requested_by_profile_id).toBeNull();
+      expect(scheduled[0].schedule_configuration_version_id).toMatch(UUID);
+      expect(scheduled[0].submitted_at).toBeNull();
+      expect(localSelect(
+        "select public.generate_scheduled_weekly_feedback_requests(" +
+          "'2026-10-19 11:00:00+00'::timestamptz) as result",
+      )[0].result).toBe(0);
+
+      expect(localSelect(
+        "select public.generate_weekly_feedback_reminder_events(" +
+          "'2026-10-20 15:17:00+00'::timestamptz) as result",
+      )[0].result).toBe(0);
+      expect(localSelect(
+        "select public.generate_weekly_feedback_reminder_events(" +
+          "'2026-10-21 15:17:00+00'::timestamptz) as result",
+      )[0].result).toBe(1);
+      expect(localSelect(
+        "select public.generate_weekly_feedback_reminder_events(" +
+          "'2026-10-21 18:00:00+00'::timestamptz) as result",
+      )[0].result).toBe(0);
+      const notice = localSelect(
+        "select client_id, channel_key, delivery_state, delivered_at " +
+        "from public.client_notification_events where weekly_feedback_id = " + sqlLiteral(scheduledId),
+      );
+      expect(notice).toHaveLength(1);
+      expect(notice[0].client_id).toBe(clientId);
+      expect(notice[0].channel_key).toBe("in_app");
+      expect(notice[0].delivery_state).toBe("delivered");
+      expect(notice[0].delivered_at).not.toBeNull();
+
+      await clientPage.goto("/cliente/avisos");
+      await expect(clientPage.getByRole("heading", { name: "Avisos no aplicativo" })).toBeVisible();
+      const pendingNotice = clientPage.getByRole("link", { name: "Abrir Feedback Semanal pendente" });
+      await expect(pendingNotice).toHaveCount(1);
+      await pendingNotice.click();
+      await expect(clientPage.locator("#feedback-pendente-" + scheduledId)).toBeVisible();
+      await expect(clientPage).toHaveURL(new RegExp("#feedback-pendente-" + scheduledId + "$"));
+
+      await adminPage.goto("/admin/feedback-semanal?situacao=pendentes&cliente=" + clientId +
+        "&origem=schedule&mes=2026-10");
+      await expect(adminPage.getByText("Último evento registrado:", { exact: false })).toBeVisible();
+      await adminPage.getByRole("link", { name: "Abrir solicitação" }).click();
+      await expect(adminPage.locator("#feedback-pendente-" + scheduledId)).toBeVisible();
+      expect((await feedbackRecord(clientId, scheduleStart)).submitted_at).toBeNull();
+    });
+
     await test.step("outra cliente, outro profissional e anônimo não acessam o registro", async () => {
       const login = await otherApi.auth.signInWithPassword({
         email: other.email, password: other.password,
