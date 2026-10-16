@@ -500,7 +500,10 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
       await adminPage.goto("/admin/clientes/" + clientId + "/feedback-semanal");
       const from = adminPage.getByLabel("Semana de referência · início");
       const to = adminPage.getByLabel("Semana de referência · fim");
+      // Clearing first guarantees a real change event even when the date
+      // was filled before Next.js finished hydrating this second request.
       await expect.poll(async () => {
+        await from.fill("");
         await from.fill(previousStart);
         return await to.getAttribute("min");
       }, { timeout: 20_000 }).toBe(previousStart);
