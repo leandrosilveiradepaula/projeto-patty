@@ -325,7 +325,7 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
                             Comparar com o Feedback Semanal de período anterior
                           </Link>
                           <details className={styles.comparisonChoiceDisclosure}>
-                            <summary>Escolher outra semana anterior para comparar</summary>
+                            <summary>Escolher semana anterior específica para comparar</summary>
                             <form
                               action={`/admin/clientes/${encodeURIComponent(client.id)}/feedback-semanal/comparar`}
                               className={styles.comparisonChoiceForm}
