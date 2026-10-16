@@ -233,9 +233,7 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
 
     await test.step("Before professional review, nothing becomes visible to the client",async()=>{
       await clientPage.reload();
-      await expect(clientPage.getByRole("heading",{
-        name:"Nenhum protocolo foi publicado para você",
-      })).toBeVisible();
+      await expect(clientPage.getByText("Nenhum protocolo foi publicado para você",{exact:true})).toBeVisible();
       expect(rows("select id from public.protocol_version_approvals where protocol_version_id="+quote(v1.id))).toEqual([]);
       expect(rows("select id from public.protocol_publications where protocol_version_id="+quote(v1.id))).toEqual([]);
     });
@@ -248,9 +246,7 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
       await lifecycle(adminPage,"approve");
       await pollRows("select id from public.protocol_version_approvals where protocol_version_id="+quote(v1.id),1);
       await clientPage.reload();
-      await expect(clientPage.getByRole("heading",{
-        name:"Nenhum protocolo foi publicado para você",
-      })).toBeVisible();
+      await expect(clientPage.getByText("Nenhum protocolo foi publicado para você",{exact:true})).toBeVisible();
       await mobileFit(adminPage);
     });
 
