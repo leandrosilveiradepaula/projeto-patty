@@ -269,8 +269,27 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
     await test.step("Clone v1 to editable v2; immutable publication remains current",async()=>{
       await openVersion(adminPage,protocolId,1);
       await actionFrom(adminPage,"Criar novo rascunho a partir desta versão");
-      await expect.poll(()=>rows("select count(*)::int as total from public.protocol_versions"+
-        " where protocol_id="+quote(protocolId))[0]?.total,{timeout:25000}).toBe(2);
+      // Distinguish a rejected server action from delayed persistence without
+      // logging responses, client data, credentials or SQL diagnostics.
+      await expect.poll(async()=>{
+        const saved=rows("select count(*)::int as total from public.protocol_versions"+
+          " where protocol_id="+quote(protocolId))[0]?.total;
+        if(saved===2)return "created";
+        if(saved!==1)return "unexpected-version-count";
+        const knownErrors=[
+          ["access-denied","Esta versão não está acessível para sua atribuição atual."],
+          ["source-not-frozen","Somente versões já submetidas e congeladas podem servir como base para um novo rascunho."],
+          ["no-result","A nova versão não foi criada."],
+          ["rpc-rejected","Não foi possível criar o novo rascunho. Confirme seu acesso, MFA e tente novamente."],
+        ];
+        for(const [code,visibleText] of knownErrors) {
+          if(await adminPage.getByText(visibleText,{exact:true}).count())
+            return "action-rejected:"+code;
+        }
+        if(await adminPage.getByText("Não foi possível criar o rascunho",{exact:true}).count())
+          return "action-rejected:unknown";
+        return "pending";
+      },{timeout:25000}).toBe("created");
       v2=latestVersion(protocolId);
       expect(v2.version_number).toBe(2);
       expect(v2.submitted_for_review_at).toBeNull();
