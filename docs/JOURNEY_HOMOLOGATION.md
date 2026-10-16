@@ -1,3 +1,15 @@
+## J3 — Evolução, reavaliações e comparação histórica: cobertura autenticada em validação (2026-10-16)
+
+**OBJETIVO:** verificar o percurso integrado já publicado entre evolução filtrada, seleção de duas avaliações finalizadas, correção histórica efetiva, escolha de duas fotos privadas, ida e volta do detalhe e proteção client-scoped. A Patty interpreta e registra decisões manualmente; o teste não a substitui.
+
+**IMPLEMENTADO NA BRANCH (AINDA NÃO APROVADO PELO CI):** `e2e/j3-assessment-evolution-lifecycle.spec.mjs` com quatro usuários sintéticos, dois administradores com MFA (um sem assignment), duas clientes, avaliações finalizadas e rascunho, medidas com correção append-only, três fotos PNG sintéticas em bucket privado; `.github/workflows/validate-j3-assessment-browser.yml` cria Supabase local descartável e Next.js e executa Playwright móvel. O teste compara diferença corrigida, não comparabilidade, navegação/retorno, validação de seleção adulterada, carregamento real de fotos privadas, isolamento de fotos e avaliações, ausência de mutação de protocolos e persistência do registro original. Cleanup total via `supabase stop --no-backup` mesmo quando há falha.
+
+**SEGURANÇA:** URLs locais obrigatórias; nenhuma credencial externa, paciente real ou bypass de RLS. Alteração de GitHub Actions exige **revisão humana específica antes de merge**, mesmo com checks verdes. O objetivo é E2E técnico com fixture local, não homologação pela Patty no runtime publicado.
+
+**CRITÉRIOS PENDENTES:** validar build + testes e Playwright na revisão exata do PR, corrigir falhas na mesma branch, revisão específica do workflow e, em etapa separada, comprovar a navegação profissional na produção com sessão legítima, sem fixtures falsas ou dados reais em logs.
+
+---
+
 ## J2 — Feedback Semanal e acompanhamento profissional: pronta para homologação técnica do percurso principal (2026-10-16)
 
 **CLASSIFICAÇÃO:** implementada, E2E local autenticado aprovado, mergeada e publicada; **homologação profissional em produção ainda NÃO executada**. Este bloco é o estado atual e substitui anotações históricas abaixo intituladas “em validação”, sem reescrever as evidências da época.
