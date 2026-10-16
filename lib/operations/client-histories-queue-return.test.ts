@@ -48,17 +48,17 @@ test("anamnesis history retains the original queue on filters, review, clarifica
  assert.match(anamnesis,/name="filaRetorno" value=\{queueReturn\}/);
  assert.match(anamnesis,/name="listaView" value=\{directoryReturn\.view\}/);
  assert.match(anamnesis,/readAdminAnamnesisQuery\(rawQuery,versions\)/);
- assert.match(anamnesis,/href=\{continueFromFeedback\(adminAnamnesisHref/);
+ assert.match(anamnesis,/href=\{navigate\(adminAnamnesisHref/);
  for(const target of ["revisao","esclarecimentos","correcoes","ia"]){
   assert.ok(anamnesis.includes("/" + target),target);
  }
- assert.match(anamnesis,/href=\{continueFromFeedback\(\x60\/admin\/anamneses\/\$\{submission\.id\}\x60\)\}/);
+ assert.match(anamnesis,/href=\{navigate\(\x60\/admin\/anamneses\/\$\{submission\.id\}\x60\)\}/);
 });
 
 test("protocol catalog preserves context on current, published and full-history links without touching actions",()=>{
- assert.match(protocols,/href=\{continueFromFeedback\(latestHref \?\?/);
- assert.match(protocols,/href=\{continueFromFeedback\(publishedHref\)\}/);
- assert.match(protocols,/href=\{continueFromFeedback\(\x60\/admin\/protocolos\/\$\{protocol\.id\}\x60\)\}/);
+ assert.match(protocols,/href=\{navigate\(latestHref \?\?/);
+ assert.match(protocols,/href=\{navigate\(publishedHref\)\}/);
+ assert.match(protocols,/href=\{navigate\(\x60\/admin\/protocolos\/\$\{protocol\.id\}\x60\)\}/);
  assert.match(protocols,/action=\{createFirstProtocolAction\}/);
  assert.match(protocols,/action=\{resumeVersionlessProtocolAction\}/);
  assert.doesNotMatch(protocols,/formData\.get\("filaRetorno"\)/);
