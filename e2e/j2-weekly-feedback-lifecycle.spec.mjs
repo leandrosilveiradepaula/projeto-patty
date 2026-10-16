@@ -492,6 +492,74 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
       await expect(adminPage.locator('input[name="mes"]')).toHaveValue("2026-10");
     });
 
+    await test.step("Patty compara duas semanas e filtra somente respostas literalmente diferentes", async () => {
+      // Create a second historical period through the actual protected admin
+      // request workflow, never through a fixture or a service-role write.
+      const previousStart = "2026-09-28";
+      const previousEnd = "2026-10-04";
+      await adminPage.goto("/admin/clientes/" + clientId + "/feedback-semanal");
+      const from = adminPage.getByLabel("Semana de referência · início");
+      const to = adminPage.getByLabel("Semana de referência · fim");
+      await expect.poll(async () => {
+        await from.fill(previousStart);
+        return await to.getAttribute("min");
+      }, { timeout: 20_000 }).toBe(previousStart);
+      await to.fill(previousEnd);
+      await expect(adminPage.getByRole("button", { name: "Criar solicitação" })).toBeEnabled();
+      await adminPage.getByRole("button", { name: "Criar solicitação" }).click();
+      await expect.poll(async () => (await feedbackRecord(clientId, previousStart))?.request_source ?? null, {
+        timeout: 25_000,
+      }).toBe("manual");
+      const older = await feedbackRecord(clientId, previousStart);
+      expect(older?.id).toBeTruthy();
+      expect(older?.submitted_at).toBeNull();
+      const olderId = older.id;
+
+      await clientPage.goto("/cliente/feedback-semanal");
+      const olderInput = (key) => clientPage.locator("#feedback-pendente-" + olderId + " form")
+        .locator('[name="' + key + '"]');
+      // The two periods share a form version; one synthetic rating differs.
+      // It is only a data-difference fixture, NOT an adherence signal.
+      const definition = localSelect(
+        "select definition from public.weekly_feedback_form_versions where id = " +
+        sqlLiteral(older.form_version_id),
+      );
+      const oldQuestions = definition[0]?.definition?.questions;
+      expect(oldQuestions).toHaveLength(21);
+      for (const question of oldQuestions) {
+        const value = question.input_type === "integer" ? "2" :
+          question.input_type === "rating_0_10" ? "7" :
+            "Resposta sintética J2 exclusivamente local";
+        await expect(olderInput(question.key)).toBeVisible();
+        await olderInput(question.key).fill(value);
+      }
+      const priorForm = clientPage.locator("#feedback-pendente-" + olderId + " form");
+      await priorForm.getByRole("button", { name: "Revisar respostas para enviar" }).click();
+      await expect(priorForm.getByRole("button", { name: "Confirmar envio definitivo" })).toBeVisible();
+      await priorForm.getByRole("button", { name: "Confirmar envio definitivo" }).click();
+      await expect.poll(async () => (await feedbackRecord(clientId, previousStart))?.submitted_at ?? null, {
+        timeout: 30_000,
+      }).not.toBeNull();
+
+      await adminPage.goto("/admin/clientes/" + clientId + "/feedback-semanal?registro=" + feedbackId);
+      await expect(adminPage.locator("#feedback-enviado-" + feedbackId)).toBeVisible();
+      await adminPage.locator("#feedback-enviado-" + feedbackId).getByRole("link", {
+        name: "Comparar com o Feedback Semanal de período anterior",
+      }).click();
+      await expect(adminPage.getByRole("heading", {
+        name: "Comparação factual de dois Feedbacks Semanais",
+      })).toBeVisible();
+      await expect(adminPage.getByText("1 de 21 pergunta(s) com respostas diferentes.")).toBeVisible();
+      await expect(adminPage.locator('[data-comparison-answer="true"]')).toHaveCount(21);
+      await adminPage.getByRole("link", { name: "Somente respostas diferentes" }).click();
+      await expect(adminPage).toHaveURL(/visao=diferentes/);
+      await expect(adminPage.locator('[data-comparison-answer="true"]')).toHaveCount(1);
+      await expect(adminPage.locator('[data-comparison-answer="true"]').getByText("8", { exact: true })).toBeVisible();
+      await expect(adminPage.locator('[data-comparison-answer="true"]').getByText("7", { exact: true })).toBeVisible();
+      await adminPage.getByRole("link", { name: "Todas as respostas" }).click();
+      await expect(adminPage.locator('[data-comparison-answer="true"]')).toHaveCount(21);
+    });
+
     await test.step("outra cliente, outro profissional e anônimo não acessam o registro", async () => {
       const login = await otherApi.auth.signInWithPassword({
         email: other.email, password: other.password,
