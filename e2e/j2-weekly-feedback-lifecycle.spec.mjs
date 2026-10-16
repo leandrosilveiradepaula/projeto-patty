@@ -336,9 +336,8 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
       await expect(answerInput("q01")).toHaveValue("2");
       // A 21-question mobile form can jump directly to its last answer
       // without changing the saved draft or leaking answers into the URL.
-      const questionNav = clientPage.locator(
-        "#feedback-pendente-" + feedbackId + ' select[aria-label="Ir para uma pergunta"]',
-      );
+      const questionNav = clientPage.locator("#feedback-pendente-" + feedbackId + " form")
+        .getByRole("combobox", { name: "Ir para uma pergunta" });
       await expect(questionNav).toBeVisible();
       await expect(questionNav.locator("option", { hasText: "Pergunta 1 · Preenchida" })).toHaveCount(1);
       await questionNav.selectOption("q21");
