@@ -1,3 +1,11 @@
+## 2026-10-16 — J3: retorno da comparação de fotos à avaliação (em validação)
+
+**CONTINUIDADE FUNCIONAL:** na comparação de duas avaliações já finalizadas e autorizadas, a Patty pode escolher fotos privadas e abrir uma das avaliações, mantendo os IDs opacos da dupla de avaliações e das duas fotos para retornar à seleção exata. Os identificadores da dupla são revalidados na avaliação de destino; os de arquivos são apenas estado de navegação, e a comparação de destino revalida os vínculos de cada foto e a rota privada de leitura antes de exibi-las. Ausência, repetição ou adulteração não amplia permissões nem cria classificação clínica. Testes determinísticos cobrem ida/volta e rejeição de IDs malformados.
+
+**ESTADO:** implementação em branch; `Validate application`, merge, deploy e E2E autenticado de J3 precisam de evidência distinta. Não altera Auth, RLS, Storage, migrations ou regras profissionais.
+
+---
+
 ## 2026-10-16 — J3: comparação visual de fotos vinculadas às duas avaliações (em validação)
 
 **ESCOPO FUNCIONAL:** dentro da comparação histórica factual, a Patty escolhe explicitamente uma foto de cada uma das duas avaliações finalizadas selecionadas. A interface não solicita as imagens antes de ambas serem escolhidas. A lista de vínculos de cada avaliação é buscada sob a sessão administrativa e RLS existente; a rota privada de cada foto revalida autorização. Arquivos inválidos, ausentes, repetidos ou não vinculados são recusados sem usar caminhos arbitrários de Storage.
