@@ -68,7 +68,7 @@ test("reminder query is metadata-only, RLS-scoped and bounded by visible page", 
   // Match actual PostgREST column lists, not explanatory source comments.
   // Every projection must stay metadata-only; adding a second sensitive
   // select must fail this test even when the first one remains unchanged.
-  const projections = [...loader.matchAll(/\\.select\\("([^"]+)"\\)/g)].map((match) => match[1]);
+  const projections = loader.split(".select(").slice(1).map((tail) => tail.slice(1, tail.indexOf('")')));
   assert.deepEqual(projections, [
     "id, client_id, weekly_feedback_id, event_key, channel_key, delivery_state, created_at",
   ]);
