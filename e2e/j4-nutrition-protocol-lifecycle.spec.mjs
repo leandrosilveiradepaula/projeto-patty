@@ -166,8 +166,12 @@ async function openVersion(page,protocolId,number){
       return "no-matching-versions";
     if(await page.getByText("Application error",{exact:false}).count())
       return "application-error";
-    if(await page.locator("nextjs-portal").count())
-      return "nextjs-dev-error-overlay";
+    if(await page.getByRole("heading",{name:"Não foi possível carregar esta área",exact:true}).count())
+      return "admin-error-boundary";
+    if(await page.locator('[data-nextjs-dialog-overlay]').count())
+      return "nextjs-error-dialog";
+    // A nextjs-portal element also exists on HEALTHY dev pages, so it
+    // cannot be used to classify a rendering failure.
     // Only categorical observations, never the document text, HTML,
     // cookies, SQL rows, URL parameters or sensitive protocol content.
     const details=await page.locator('[id^="versao-"]').count();
@@ -296,6 +300,8 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
           return "server-http-"+publicationResponse.status();
         if(await clientPage.getByText("Application error",{exact:false}).count())
           return "render-error";
+        if(await clientPage.getByRole("heading",{name:"Algo não carregou corretamente",exact:true}).count())
+          return "client-error-boundary";
         if(await clientPage.locator('[data-nextjs-dialog-overlay]').count())
           return "nextjs-error-dialog";
         if(path!=="/cliente/protocolo")return "unexpected-route";
