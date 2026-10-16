@@ -686,13 +686,17 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
       await expect(preference).toBeVisible();
       await preference.locator('select[name="channel"]').selectOption("in_app");
       await preference.getByRole("button", { name: "Salvar canal" }).click();
-      await expect(adminPage.getByText("Canal atualizado", { exact: true })).toBeVisible();
-      // The persisted active version, not a transient toast, proves the write.
+      // The versioned form remounts after router.refresh on success, so its
+      // transient success alert can disappear before the browser sees it.
+      // Prove actual persistence and the server-rendered active status instead.
       await expect.poll(() => localSelect(
         "select channel_key from public.client_notification_preference_versions " +
         "where client_id = " + sqlLiteral(clientId) +
         " and purpose_key = 'weekly_feedback' and retired_at is null",
       ).map((row) => row.channel_key), { timeout: 20_000 }).toEqual(["in_app"]);
+      await expect(preference.getByText(
+        "Notificação dentro do aplicativo está operacional.", { exact: true },
+      )).toBeVisible({ timeout: 15_000 });
 
       const scheduleStart = "2026-10-12";
       const scheduleEnd = "2026-10-18";
