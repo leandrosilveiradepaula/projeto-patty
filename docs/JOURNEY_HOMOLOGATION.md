@@ -1,3 +1,9 @@
+## 2026-10-15 — J2: evidência operacional do lembrete na caixa administrativa (proposta)
+
+**ESCOPO TÉCNICO:** renderizar na listagem pendente somente o último evento persistido do lembrete ligado a uma solicitação efetivamente pendente da página autorizada; restringir por cliente e por feedback exato, não carregar respostas sensíveis, não confundir SMTP aceito com leitura da cliente e não presumir falha por ausência de evento. Oferecer atalhos para Cadastro Atual e configuração individual quando a causa persistida os indicar. Preservar retorno à caixa com contexto somente por URL local validada. **CRITÉRIOS DE ACEITAÇÃO:** testes unitários de seleção/ordenamento por timestamp, descarte de eventos de outra cliente/feedback submetido/fora da página; testes de proteção da leitura RLS/metadata-only; Playwright local com cliente sintética, admin MFA e retorno após consulta; limpeza do banco local. **STATUS:** em branch; CI/E2E, merge, deployment e homologação profissional ainda não comprovados. Sem alterações de migrations, RLS, ações de envio ou regras clínicas.
+
+---
+
 ## 2026-10-15 — J2: PR #890 integrado, testes aprovados e Vercel publicada
 
 **FATO CONFIRMADO:** PR #890 foi mergeado no `master` `217f66695cc86e5a4fdafeaae39473bcd2c58d35`. No HEAD `220e6d08b21aec058ae9f71635fa4672cf6f36f6` os checks `validate` e `weekly-feedback-browser` concluíram com sucesso. No commit de merge, `validate` concluiu com sucesso e o status Vercel retornou `success` (`Deployment has completed`). A confirmação persistente de envio definitivo e o retorno ao registro exato foram integrados e publicados. **Não houve homologação profissional autenticada pela Patty em produção**; testes locais com dados sintéticos não substituem essa etapa. O status histórico dos PRs anteriores permanece abaixo como registro temporal, não como estado atual do #890.
