@@ -678,6 +678,79 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
         sqlLiteral(clientId))).toHaveLength(1);
     });
 
+    await test.step("agenda gera semana anterior e lembrete in-app acessível sem novo estado clínico", async () => {
+      // Run the existing server-side cron functions with deterministic local
+      // timestamps; no cron, role grant or production schedule is modified.
+      await adminPage.goto("/admin/clientes/" + clientId + "#preferencia-feedback");
+      const preference = adminPage.locator("#preferencia-feedback");
+      await expect(preference).toBeVisible();
+      await preference.locator('select[name="channel"]').selectOption("in_app");
+      await preference.getByRole("button", { name: "Salvar canal" }).click();
+      await expect(adminPage.getByText("Canal atualizado", { exact: true })).toBeVisible();
+
+      const scheduleStart = "2026-10-12";
+      const scheduleEnd = "2026-10-18";
+      const generated = localSelect(
+        "select public.generate_scheduled_weekly_feedback_requests(" +
+          "'2026-10-19 11:00:00+00'::timestamptz) as result",
+      );
+      expect(generated[0].result).toBe(1);
+      const scheduled = localSelect(
+        "select id, period_start, period_end, request_source, submitted_at, requested_by_profile_id, " +
+        "schedule_configuration_version_id from public.client_weekly_feedbacks " +
+        "where client_id = " + sqlLiteral(clientId) +
+        " and period_start = " + sqlLiteral(scheduleStart),
+      );
+      expect(scheduled).toHaveLength(1);
+      const scheduledId = scheduled[0].id;
+      expect(scheduled[0].period_end).toBe(scheduleEnd);
+      expect(scheduled[0].request_source).toBe("schedule");
+      expect(scheduled[0].requested_by_profile_id).toBeNull();
+      expect(scheduled[0].schedule_configuration_version_id).toMatch(UUID);
+      expect(scheduled[0].submitted_at).toBeNull();
+      expect(localSelect(
+        "select public.generate_scheduled_weekly_feedback_requests(" +
+          "'2026-10-19 11:00:00+00'::timestamptz) as result",
+      )[0].result).toBe(0);
+
+      expect(localSelect(
+        "select public.generate_weekly_feedback_reminder_events(" +
+          "'2026-10-20 15:17:00+00'::timestamptz) as result",
+      )[0].result).toBe(0);
+      expect(localSelect(
+        "select public.generate_weekly_feedback_reminder_events(" +
+          "'2026-10-21 15:17:00+00'::timestamptz) as result",
+      )[0].result).toBe(1);
+      expect(localSelect(
+        "select public.generate_weekly_feedback_reminder_events(" +
+          "'2026-10-21 18:00:00+00'::timestamptz) as result",
+      )[0].result).toBe(0);
+      const notice = localSelect(
+        "select client_id, channel_key, delivery_state, delivered_at " +
+        "from public.client_notification_events where weekly_feedback_id = " + sqlLiteral(scheduledId),
+      );
+      expect(notice).toHaveLength(1);
+      expect(notice[0].client_id).toBe(clientId);
+      expect(notice[0].channel_key).toBe("in_app");
+      expect(notice[0].delivery_state).toBe("delivered");
+      expect(notice[0].delivered_at).not.toBeNull();
+
+      await clientPage.goto("/cliente/avisos");
+      await expect(clientPage.getByRole("heading", { name: "Avisos no aplicativo" })).toBeVisible();
+      const pendingNotice = clientPage.getByRole("link", { name: "Abrir Feedback Semanal pendente" });
+      await expect(pendingNotice).toHaveCount(1);
+      await pendingNotice.click();
+      await expect(clientPage.locator("#feedback-pendente-" + scheduledId)).toBeVisible();
+      await expect(clientPage).toHaveURL(new RegExp("#feedback-pendente-" + scheduledId + "$"));
+
+      await adminPage.goto("/admin/feedback-semanal?situacao=pendentes&cliente=" + clientId +
+        "&origem=schedule&mes=2026-10");
+      await expect(adminPage.getByText("Último evento registrado:", { exact: false })).toBeVisible();
+      await adminPage.getByRole("link", { name: "Abrir solicitação" }).click();
+      await expect(adminPage.locator("#feedback-pendente-" + scheduledId)).toBeVisible();
+      expect((await feedbackRecord(clientId, scheduleStart)).submitted_at).toBeNull();
+    });
+
     await test.step("outra cliente, outro profissional e anônimo não acessam o registro", async () => {
       const login = await otherApi.auth.signInWithPassword({
         email: other.email, password: other.password,
