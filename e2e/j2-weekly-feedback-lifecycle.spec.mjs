@@ -687,6 +687,12 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
       await preference.locator('select[name="channel"]').selectOption("in_app");
       await preference.getByRole("button", { name: "Salvar canal" }).click();
       await expect(adminPage.getByText("Canal atualizado", { exact: true })).toBeVisible();
+      // The persisted active version, not a transient toast, proves the write.
+      await expect.poll(() => localSelect(
+        "select channel_key from public.client_notification_preference_versions " +
+        "where client_id = " + sqlLiteral(clientId) +
+        " and purpose_key = 'weekly_feedback' and retired_at is null",
+      ).map((row) => row.channel_key), { timeout: 20_000 }).toEqual(["in_app"]);
 
       const scheduleStart = "2026-10-12";
       const scheduleEnd = "2026-10-18";
