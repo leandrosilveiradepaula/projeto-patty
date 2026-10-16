@@ -1,3 +1,11 @@
+## 2026-10-16 — J2: seleção histórica explícita para comparação (branch em teste)
+
+A comparação atual oferece a semana submetida anterior mais próxima. A melhoria proposta permite abrir o histórico original de uma semana enviada, escolher outro período anterior também submetido e comparar exatamente os dois registros, sem mudar dados ou estado profissional. A lista deriva somente da cliente autorizada e não inclui rascunhos, outras clientes, semanas iguais ou posteriores. A comparação continua revalidando UUIDs, client ID, `submitted_at` e ordem de períodos via consulta exata RLS/MFA. Para versões diferentes do questionário, não realizar correspondência entre perguntas. Respostas não aparecem em URLs ou no seletor.
+
+**CRITÉRIOS:** (1) teste unitário garante ordem decrescente de períodos anteriores, exclusão de rascunho/outra cliente/semana igual/futura e não alteração da entrada; (2) E2E com duas semanas sintéticas submetidas via UI prova escolha consciente por formulário GET, acesso profissional e ausência de respostas na URL; (3) testes já existentes da comparação e de permissões seguem verdes; (4) Supabase de testes é descartado e a homologação em produção permanece pendente. **Status:** implementação em branch, ainda sem checks, merge ou deployment. O PR #896 foi mergeado em `deaf6f31`, com CI pós-merge e Vercel aprovados.
+
+---
+
 ## 2026-10-16 — J2: identificar diferenças textuais entre semanas sem decisão automatizada (em validação)
 
 **ESCOPO DA MELHORIA:** duas respostas de cliente, ambas definitivamente submetidas e autorizadas pela RLS/admin MFA, podem ser exibidas com todas as perguntas ou somente aquelas cujos textos originais diferem. A versão do questionário deve coincidir; caso contrário, preservar enunciados históricos independentes sem comparar nem produzir contagem. A contagem é estritamente factual, **não score de adesão, classificação clínica, revisão ou recomendação**. A Patty escolhe manualmente qualquer avaliação posterior; não se registra revisão nem mudança de protocolo.
