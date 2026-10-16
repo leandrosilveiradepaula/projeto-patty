@@ -1,6 +1,6 @@
 import { authorizedExactRecordPage } from "@/lib/operations/exact-record-navigation";
 import { readWeeklyFeedbackInboxReturn, withWeeklyFeedbackInboxReturn } from "@/lib/follow-up/weekly-feedback-inbox-return";
-import { previousSubmittedFeedbackByPeriod, weeklyFeedbackComparisonHref } from "@/lib/follow-up/weekly-feedback-comparison";
+import { olderSubmittedFeedbackChoices, previousSubmittedFeedbackByPeriod, weeklyFeedbackComparisonHref } from "@/lib/follow-up/weekly-feedback-comparison";
 import { formatAdministrativeAssessmentDate } from "@/lib/evaluations/administrative-assessment-history";
 import {
   manualAssessmentDecisionFromSubmittedFeedbackHref,
@@ -276,6 +276,7 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
           <>
           <ol className={styles.historyList}>
             {submittedPage.items.map((feedback) => {
+              const comparisonChoices = olderSubmittedFeedbackChoices(orderedFeedbacks, feedback.id);
               const comparisonPrevious = previousSubmittedFeedbackByPeriod(orderedFeedbacks, feedback.id);
               const version = feedback.weekly_feedback_form_versions;
               const definition = version
@@ -323,6 +324,34 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
                           )}>
                             Comparar com o Feedback Semanal de período anterior
                           </Link>
+                          <details className={styles.comparisonChoiceDisclosure}>
+                            <summary>Escolher outra semana anterior para comparar</summary>
+                            <form
+                              action={`/admin/clientes/${encodeURIComponent(client.id)}/feedback-semanal/comparar`}
+                              className={styles.comparisonChoiceForm}
+                              method="get"
+                            >
+                              <input name="atual" type="hidden" value={feedback.id} />
+                              {inboxReturn ? <input name="caixaRetorno" type="hidden" value={inboxReturn} /> : null}
+                              <label>
+                                Semana anterior enviada
+                                <select defaultValue="" name="anterior" required>
+                                  <option value="">Selecione a semana anterior</option>
+                                  {comparisonChoices.map((older) => (
+                                    <option key={older.id} value={older.id}>
+                                      {formatDate(older.period_start)} a {formatDate(older.period_end)}
+                                      {" · versão "}{older.weekly_feedback_form_versions?.version_number ?? "indisponível"}
+                                    </option>
+                                  ))}
+                                </select>
+                              </label>
+                              <Button type="submit" variant="secondary">Comparar semanas selecionadas</Button>
+                            </form>
+                            <p className={styles.meta}>
+                              Somente semanas já enviadas. A comparação apenas consulta as respostas;
+                              não marca revisão ou altera o protocolo.
+                            </p>
+                          </details>
                         </div>
                       ) : null}
                       <details className={styles.manualDecisionDisclosure}>
