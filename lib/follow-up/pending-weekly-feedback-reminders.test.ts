@@ -75,5 +75,8 @@ test("reminder query is metadata-only, RLS-scoped and bounded by visible page", 
   assert.doesNotMatch(loader, /service_role|createAdminClient/);
   assert.match(page, /listReminderEventsForVisiblePendingFeedbacks\(pendingResults\.items\)/);
   assert.match(page, /latestVisiblePendingReminderEvents\(pendingResults\.items, reminderEvents\)/);
-  assert.match(page, /Nenhum evento de lembrete registrado/);
+  // UI now delegates source-aware text to the shared pure presenter.
+  assert.match(page, /describeWeeklyFeedbackReminderEvidence\(feedback\.request_source, reminderByFeedback\.get\(feedback\.id\)\)/);
+  const presentation = read("lib/follow-up/weekly-feedback-reminder-presentation.ts");
+  assert.match(presentation, /Nenhum evento de lembrete registrado/);
 });

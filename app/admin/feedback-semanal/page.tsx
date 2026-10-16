@@ -25,7 +25,7 @@ import { listPendingWeeklyFeedbackHeadersForClients } from "@/lib/follow-up/pend
 import { weeklyFeedbackInboxReturnHref, withWeeklyFeedbackInboxReturn } from "@/lib/follow-up/weekly-feedback-inbox-return";
 import { listReminderEventsForVisiblePendingFeedbacks } from "@/lib/follow-up/pending-weekly-feedback-reminder-loader";
 import { latestVisiblePendingReminderEvents } from "@/lib/follow-up/pending-weekly-feedback-reminders";
-import { describeAdminFeedbackReminder } from "@/lib/operations/admin-feedback-reminder";
+import { describeWeeklyFeedbackReminderEvidence } from "@/lib/follow-up/weekly-feedback-reminder-presentation";
 import { listClientsAssignedToCurrentAdmin } from "@/lib/supabase/data-access";
 import { formatWeeklyFeedbackPeriodDate } from "@/lib/weekly-feedback/date-format";
 import styles from "./page.module.css";
@@ -184,7 +184,7 @@ export default async function AdminReceivedWeeklyFeedbackPage({ searchParams }: 
             </p>
             <ol className={styles.list}>
               {isPending ? pendingResults.items.map((feedback) => {
-                const reminderStatus = describeAdminFeedbackReminder(reminderByFeedback.get(feedback.id));
+                const reminderStatus = describeWeeklyFeedbackReminderEvidence(feedback.request_source, reminderByFeedback.get(feedback.id));
                 return (
                 <li key={feedback.id}>
                   <PendingItemCard
@@ -193,7 +193,7 @@ export default async function AdminReceivedWeeklyFeedbackPage({ searchParams }: 
                     description={<>
                       Origem: {weeklyFeedbackOriginLabel(feedback.request_source)}
                       {feedback.due_at ? " · Prazo informado: " + formatSubmittedAt(feedback.due_at) : " · Sem prazo definido"}
-                      {" · Lembrete: "}{reminderStatus?.label ?? "Nenhum evento de lembrete registrado"}
+                      {" · "}{reminderStatus.label}
                     </>}
                     status={<Badge variant="warning">Aguardando cliente</Badge>}
                     action={

@@ -1,3 +1,11 @@
+## 2026-10-16 — J2: proveniência do lembrete e continuidade de filtros (branch em validação)
+
+**STATUS CONFIRMADO PR #893:** merge `5a339f897a8b03682b7066b6601d326d71904134`; `validate` e Playwright autenticado local passaram no HEAD pré-merge `ff481d1b`; CI pós-merge `validate` PASS; Vercel limitada por frequência (não publicada). Homologação profissional pendente.
+
+**OBJETIVO DO PACOTE NOVO:** em solicitação manual sem evento, explicar ausência de lembrete automático (a geração existente limita o job a `request_source = schedule`). Em agendada sem evento, reconhecer somente a ausência de evento registrado. Quando houver evento real, mostrar o **último evento registrado**, sem afirmar estado atual do canal ou prova de leitura. Preservar `caixaRetorno` após filtrar, paginar ou navegar no histórico individual da cliente. **CRITÉRIOS:** testes unitários de origem/evento e E2E manual com filtro→retorno, checks `Validate application` e `weekly-feedback-browser` com cleanup sintético. Sem dados reais, mudanças de schema/RLS, automação de notificações ou decisão clínica. **Ainda não integrado, validado pelo CI nem publicado nesta anotação.**
+
+---
+
 ## 2026-10-15 — J2: evidência operacional do lembrete na caixa administrativa (proposta)
 
 **ESCOPO TÉCNICO:** renderizar na listagem pendente somente o último evento persistido do lembrete ligado a uma solicitação efetivamente pendente da página autorizada; restringir por cliente e por feedback exato, não carregar respostas sensíveis, não confundir SMTP aceito com leitura da cliente e não presumir falha por ausência de evento. Oferecer atalhos para Cadastro Atual e configuração individual quando a causa persistida os indicar. Preservar retorno à caixa com contexto somente por URL local validada. **CRITÉRIOS DE ACEITAÇÃO:** testes unitários de seleção/ordenamento por timestamp, descarte de eventos de outra cliente/feedback submetido/fora da página; testes de proteção da leitura RLS/metadata-only; Playwright local com cliente sintética, admin MFA e retorno após consulta; limpeza do banco local. **STATUS:** em branch; CI/E2E, merge, deployment e homologação profissional ainda não comprovados. Sem alterações de migrations, RLS, ações de envio ou regras clínicas.

@@ -1,3 +1,11 @@
+## 2026-10-16 — J2: PR #893 integrado; clareza dos lembretes e retorno aos filtros (em validação)
+
+**FATO CONFIRMADO:** PR #893 mergeado no `master` `5a339f897a8b03682b7066b6601d326d71904134`. No HEAD `ff481d1b199986c7ba1eadb24284cfbeafe577ea`, checks `validate` e `weekly-feedback-browser` concluíram com sucesso. `validate` pós-merge também passou. **Vercel no SHA de merge = `failure` por `Deployment rate limited — retry in 24 hours`.** Não considerar essa versão publicada; homologação profissional ainda não executada.
+
+**MELHORIA DE PRODUTO EM BRANCH:** distinguir ausência de lembrete automático em solicitação manual de ausência de evento em solicitação agendada. Eventos persistidos são explicitamente históricos (podem preceder mudança de canal/contato); não afirmar recebimento/leitura, falta de adesão ou revisão. Reutilizar o mesmo rótulo factual na caixa e no detalhe, identificar origem desconhecida sem tratá-la como manual e preservar `caixaRetorno` inclusive após filtrar o histórico individual. Testes unitários e E2E local sintético fazem parte do pacote. Sem migration, RLS, envio externo, IA ou regra profissional nova. **Ainda não integrado, homologado nem publicado.**
+
+---
+
 ## 2026-10-15 — J2: metadados de lembretes na caixa operacional (branch em validação)
 
 **DECISÃO TÉCNICA/PRODUTO:** a visão administrativa "Aguardando cliente" exibirá, para cada solicitação da página atual, o último evento registrado de lembrete/entrega. Distinguirá a disponibilidade no app, aceitação SMTP sem prova de leitura, fila de envio, falha de entrega e bloqueios por canal/contato/provedor; a ausência de evento não é falha inferida. A Patty poderá abrir o Cadastro Atual ou a preferência de canal já existentes e voltar à listagem original, sem perder os filtros. A consulta é exclusivamente de metadados da página pendente autorizada (máximo de 15 registros), com sessão Supabase/RLS/MFA/assignment vigente; não busca rascunhos, respostas, emails ou telefones. Nenhuma automação clínica, regra de adesão, reenvio, nova notificação, prazo profissional, migration ou alteração RLS é adicionada. **Implementado em branch; CI e navegador autenticado sintético pendentes; não mergeado/publicado/homologado.**

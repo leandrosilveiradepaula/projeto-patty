@@ -15,7 +15,9 @@ test("manual weekly feedback checks dates and refreshes only after a confirmed r
 test("professional reminder uses persisted latest event, not first incidental item", () => {
   const page = read("app/admin/clientes/[clienteId]/feedback-semanal/page.tsx");
   assert.match(page, /latestReminderEventByFeedback\(notificationEvents\)/);
-  assert.match(page, /describeAdminFeedbackReminder\(reminderEvent\)/);
+  assert.match(page, /describeWeeklyFeedbackReminderEvidence\(feedback\.request_source, reminderEvent\)/);
+  const presentation = read("lib/follow-up/weekly-feedback-reminder-presentation.ts");
+  assert.match(presentation, /describeAdminFeedbackReminder\(lastEvent\)/);
 });
 
 test("client weekly feedback has a non-submitting draft and text-limit guidance", () => {
