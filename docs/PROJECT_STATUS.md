@@ -1,3 +1,13 @@
+## 2026-10-16 — J3: comparação visual de fotos vinculadas às duas avaliações (em validação)
+
+**ESCOPO FUNCIONAL:** dentro da comparação histórica factual, a Patty escolhe explicitamente uma foto de cada uma das duas avaliações finalizadas selecionadas. A interface não solicita as imagens antes de ambas serem escolhidas. A lista de vínculos de cada avaliação é buscada sob a sessão administrativa e RLS existente; a rota privada de cada foto revalida autorização. Arquivos inválidos, ausentes, repetidos ou não vinculados são recusados sem usar caminhos arbitrários de Storage.
+
+**CONTINUIDADE:** as duas avaliações originais podem ser abertas a partir da comparação e o retorno preserva o par somente após verificação de que ambos os registros continuam finalizados e autorizados àquela cliente. A seleção das fotos não decide evolução clínica; nenhuma publicação, correção histórica, alteração de protocolo ou inferência da IA é executada.
+
+**STATUS:** implementado na branch, aguardando CI, revisão e confirmação do SHA publicado. Não é homologação profissional autenticada.
+
+---
+
 ## 2026-10-16 — J3: comparação manual de duas avaliações finalizadas (branch, em validação)
 
 **DECISÃO TÉCNICA:** a Patty poderá escolher duas avaliações finalizadas, da mesma cliente e sob o assignment atual, para consultar lado a lado os valores efetivos (corrigidos, quando aplicável). A diferença exibida é **comparação menos referência**, apenas quando existem a mesma chave e a mesma unidade nos dois registros; registros ausentes ou incompatíveis ficam explicitamente não comparáveis. Não há interpretação clínica, classificação de melhora/piora, score, ajuste ou publicação automática.

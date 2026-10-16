@@ -22,3 +22,15 @@ test("differences are factual and only comparable within exact key and unit",()=
  assert.equal(rows.find(x=>x.unit==="mm")?.difference,null);
  assert.ok(rows.every(x=>!["melhora","piora"].includes(x.label)));
 });
+
+test("assessment comparison origin revalidates both finalized IDs and the opened assessment",async()=>{
+ const { readAssessmentPairFromDetail, assessmentFromSelectedPairHref, selectedAssessmentPairHref } = await import("./assessment-pair-comparison.ts");
+ const selected=readAssessmentPairFromDetail({pareamentoReferencia:a,pareamentoComparacao:b},[a,b],b);
+ assert.deepEqual(selected,{referenceId:a,comparisonId:b});
+ assert.equal(readAssessmentPairFromDetail({pareamentoReferencia:a,pareamentoComparacao:b},[a],b),null);
+ assert.equal(readAssessmentPairFromDetail({pareamentoReferencia:a,pareamentoComparacao:b},[a,b],c),null);
+ assert.equal(readAssessmentPairFromDetail({pareamentoReferencia:[a],pareamentoComparacao:b},[a,b],b),null);
+ assert.equal(assessmentFromSelectedPairHref(c,{referenceId:a,comparisonId:b}),"/admin/avaliacoes/"+c);
+ assert.equal(new URL(assessmentFromSelectedPairHref(b,selected!),"https://example.org").searchParams.get("pareamentoReferencia"),a);
+ assert.equal(new URL(selectedAssessmentPairHref(c,selected!),"https://example.org").hash,"#comparacao-resultados");
+});
