@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { readWeeklyFeedbackInboxReturn, withWeeklyFeedbackInboxReturn } from "@/lib/follow-up/weekly-feedback-inbox-return";
+import { compareSameVersionWeeklyFeedbackAnswers, readWeeklyFeedbackAnswerView, weeklyFeedbackAnswerViewHref } from "@/lib/follow-up/weekly-feedback-factual-differences";
 import { notFound } from "next/navigation";
 
 import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
@@ -36,6 +37,7 @@ type PageProps = {
     atual?: string | string[];
     anterior?: string | string[];
     caixaRetorno?: string | string[];
+    visao?: string | string[];
   }>;
 };
 
@@ -78,6 +80,7 @@ function QuestionAnswerList({ answers, definition }: {
 export default async function AdminWeeklyFeedbackComparisonPage({ params, searchParams }: PageProps) {
   const [{ clienteId }, requested] = await Promise.all([params, searchParams]);
   const inboxReturn = readWeeklyFeedbackInboxReturn(requested.caixaRetorno);
+  const answerView = readWeeklyFeedbackAnswerView(requested.visao);
   if (!isUuid(clienteId) ||
       typeof requested.atual !== "string" || !isUuid(requested.atual) ||
       typeof requested.anterior !== "string" || !isUuid(requested.anterior) ||
@@ -106,6 +109,22 @@ export default async function AdminWeeklyFeedbackComparisonPage({ params, search
     ? parseWeeklyFeedbackDefinition(previousVersion.definition)
     : null;
   const sameVersion = current.form_version_id === previous.form_version_id;
+  const comparison = sameVersion && currentDefinition && previousDefinition
+    ? compareSameVersionWeeklyFeedbackAnswers({
+        currentVersionId: current.form_version_id,
+        previousVersionId: previous.form_version_id,
+        questions: currentDefinition.questions,
+        currentAnswers: current.answers,
+        previousAnswers: previous.answers,
+      })
+    : null;
+  const visibleComparisonRows = comparison?.rows.filter(
+    (row) => answerView.view !== "diferentes" || row.different,
+  ) ?? [];
+  const viewHref = (view: "todas" | "diferentes") => withWeeklyFeedbackInboxReturn(
+    weeklyFeedbackAnswerViewHref(client.id, current.id, previous.id, view),
+    inboxReturn ?? "",
+  );
   // Load only assessment headers, after the submitted same-client pair was
   // confirmed under RLS. Never choose an assessment on Patty's behalf.
   const finalizedAssessments = await listRecentFinalizedAssessmentsForClient(client.id);
@@ -150,23 +169,48 @@ export default async function AdminWeeklyFeedbackComparisonPage({ params, search
             Consulte as respostas no histórico original da cliente.
           </Alert>
         ) : sameVersion ? (
-          <div className={styles.rows}>
-            {currentDefinition.questions.map((question) => (
-              <section className={styles.comparisonRow} key={question.key}>
-                <h3>{question.label}</h3>
-                <div className={styles.answerPair}>
-                  <div>
-                    <strong>Período anterior</strong>
-                    <p>{answerText(previous.answers, question.key)}</p>
-                  </div>
-                  <div>
-                    <strong>Período selecionado</strong>
-                    <p>{answerText(current.answers, question.key)}</p>
-                  </div>
-                </div>
-              </section>
-            ))}
-          </div>
+          <>
+            <section id="respostas-comparadas" className={styles.differenceSummary} aria-label="Filtro factual de respostas comparadas">
+              <p role="status">
+                {comparison?.differentCount ?? 0} de {comparison?.rows.length ?? 0} pergunta(s) com respostas diferentes.
+              </p>
+              <p>Comparação literal das respostas originais, não de adesão, melhora, piora, evolução ou revisão profissional.</p>
+              {answerView.invalid ? (
+                <Alert title="Filtro de comparação ajustado" variant="info">
+                  Filtro inválido. Exibindo todas as respostas das duas semanas autorizadas.
+                </Alert>
+              ) : null}
+              <nav className={styles.differenceFilters} aria-label="Exibir respostas comparadas">
+                <Link aria-current={answerView.view === "todas" ? "page" : undefined} href={viewHref("todas")}>Todas as respostas</Link>
+                <Link aria-current={answerView.view === "diferentes" ? "page" : undefined} href={viewHref("diferentes")}>Somente respostas diferentes</Link>
+              </nav>
+            </section>
+            {visibleComparisonRows.length === 0 ? (
+              <p role="status" className={styles.noDifferences}>
+                Nenhuma resposta diferente entre estas duas semanas, conforme o questionário versionado.
+                Isso não indica adesão ou resultado clínico.
+              </p>
+            ) : (
+              <div className={styles.rows}>
+                {visibleComparisonRows.map((row) => (
+                  <section className={styles.comparisonRow} data-comparison-answer="true" key={row.question.key}>
+                    <h3>{row.question.label}</h3>
+                    <p className={styles.differenceLabel}>{row.different ? "Respostas diferentes" : "Respostas iguais"}</p>
+                    <div className={styles.answerPair}>
+                      <div>
+                        <strong>Período anterior</strong>
+                        <p>{row.previous || "Sem resposta registrada"}</p>
+                      </div>
+                      <div>
+                        <strong>Período selecionado</strong>
+                        <p>{row.current || "Sem resposta registrada"}</p>
+                      </div>
+                    </div>
+                  </section>
+                ))}
+              </div>
+            )}
+          </>
         ) : (
           <>
             <Alert title="Questionários de versões diferentes" variant="info">
