@@ -65,7 +65,14 @@ test("reminder query is metadata-only, RLS-scoped and bounded by visible page", 
   assert.match(loader, /\.in\("client_id", ids\)/);
   assert.match(loader, /\.in\("weekly_feedback_id", feedbackIds\)/);
   assert.match(loader, /\.select\("id, client_id, weekly_feedback_id, event_key, channel_key, delivery_state, created_at"\)/);
-  assert.doesNotMatch(loader, /service_role|createAdminClient|answers|contact_email|phone/);
+  // Match actual PostgREST column lists, not explanatory source comments.
+  // Every projection must stay metadata-only; adding a second sensitive
+  // select must fail this test even when the first one remains unchanged.
+  const projections = [...loader.matchAll(/\\.select\\("([^"]+)"\\)/g)].map((match) => match[1]);
+  assert.deepEqual(projections, [
+    "id, client_id, weekly_feedback_id, event_key, channel_key, delivery_state, created_at",
+  ]);
+  assert.doesNotMatch(loader, /service_role|createAdminClient/);
   assert.match(page, /listReminderEventsForVisiblePendingFeedbacks\(pendingResults\.items\)/);
   assert.match(page, /latestVisiblePendingReminderEvents\(pendingResults\.items, reminderEvents\)/);
   assert.match(page, /Nenhum evento de lembrete registrado/);
