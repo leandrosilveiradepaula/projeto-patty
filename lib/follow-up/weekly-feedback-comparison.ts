@@ -9,25 +9,37 @@ export type SubmittedWeeklyFeedbackReference = {
 };
 
 /**
- * A "previous" record means an earlier reference period, not a previously
- * received email or an arbitrary older submission instant. This navigation
- * is factual: it does not infer adherence, progress or a professional action.
+ * Chronological choices only: a submitted earlier reference period of the
+ * SAME authorized client. Drafts, same-period requests and future periods
+ * cannot become a comparison baseline. This does not authorize access:
+ * the comparison route must independently verify both IDs under RLS.
+ */
+export function olderSubmittedFeedbackChoices<T extends SubmittedWeeklyFeedbackReference>(
+  records: readonly T[],
+  currentId: string,
+): T[] {
+  const current = records.find((record) =>
+    record.id === currentId && record.submitted_at !== null
+  );
+  if (!current) return [];
+  return orderClientWeeklyFeedbacks(records.filter((record) =>
+    record.id !== current.id &&
+    record.client_id === current.client_id &&
+    record.submitted_at !== null &&
+    record.period_start < current.period_start
+  ));
+}
+
+/**
+ * The default historical baseline is the nearest earlier submitted period,
+ * not the most recently delivered notification or a draft. The professional
+ * may instead explicitly choose an older submitted period.
  */
 export function previousSubmittedFeedbackByPeriod<T extends SubmittedWeeklyFeedbackReference>(
   records: readonly T[],
   currentId: string,
 ): T | null {
-  const submitted = orderClientWeeklyFeedbacks(
-    records.filter((record) => record.submitted_at !== null),
-  );
-  const index = submitted.findIndex((record) => record.id === currentId);
-  if (index < 0) return null;
-
-  const current = submitted[index];
-  return submitted.slice(index + 1).find(
-    (record) => record.client_id === current.client_id &&
-      record.period_start < current.period_start,
-  ) ?? null;
+  return olderSubmittedFeedbackChoices(records, currentId)[0] ?? null;
 }
 
 export type ComparedWeeklyFeedbackReference = Pick<

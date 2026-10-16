@@ -561,6 +561,22 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
       await expect(adminPage.locator('[data-comparison-answer="true"]').getByText("7", { exact: true })).toBeVisible();
       await adminPage.getByRole("link", { name: "Todas as respostas" }).click();
       await expect(adminPage.locator('[data-comparison-answer="true"]')).toHaveCount(21);
+
+      // Alternative historical comparison uses the real GET selector.
+      // The detail and comparison routes both re-check current admin access.
+      await adminPage.getByRole("link", { name: "Voltar ao feedback selecionado" }).click();
+      const selectedFeedback = adminPage.locator("#feedback-enviado-" + feedbackId);
+      await expect(selectedFeedback).toBeVisible();
+      await selectedFeedback.getByText("Escolher semana anterior específica para comparar").click();
+      const historicalForm = selectedFeedback.locator('form[action$="/feedback-semanal/comparar"]');
+      const previousSelector = historicalForm.getByRole("combobox", { name: "Semana anterior enviada" });
+      await expect(previousSelector).toBeVisible();
+      await previousSelector.selectOption(olderId);
+      await historicalForm.getByRole("button", { name: "Comparar semanas selecionadas" }).click();
+      await expect(adminPage).toHaveURL(new RegExp("atual=" + feedbackId + "&anterior=" + olderId));
+      await expect(adminPage.getByText("1 de 21 pergunta(s) com respostas diferentes.")).toBeVisible();
+      const compareParams = new URL(adminPage.url()).searchParams;
+      expect([...compareParams.keys()]).toEqual(["atual", "anterior"]);
     });
 
     await test.step("outra cliente, outro profissional e anônimo não acessam o registro", async () => {

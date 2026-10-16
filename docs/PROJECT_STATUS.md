@@ -1,3 +1,13 @@
+## 2026-10-16 — J2: escolha explícita da semana histórica de comparação (em validação)
+
+**FATO CONFIRMADO:** PR #896 mergeado no `master` `deaf6f31c57f6d047213155cef3346260589b58b`. `validate` e `weekly-feedback-browser` passaram no HEAD `501949e1b43fc9c3e25920abe6ccb7cdb27b3bd5`; `validate` pós-merge também passou. A Vercel retornou `success` no SHA de merge. **Publicação técnica não substitui homologação profissional autenticada da J2**, ainda pendente.
+
+**DECISÃO TÉCNICA/PRODUTO EM BRANCH:** além do atalho à semana submetida imediatamente anterior, a Patty poderá escolher explicitamente outro período histórico enviado da mesma cliente para comparação factual. Opções são derivadas da lista de feedbacks atualmente autorizados, limitadas a períodos anteriores, excluem rascunhos, outros clientes e período igual/mais recente, e mostram só período/versão do questionário. O formulário GET contém apenas IDs opacos e eventual retorno da caixa validado, sem respostas ou dados de saúde. A rota de destino mantém consulta exata da dupla sob Auth/RLS/AAL2, valida submissões, vínculo de cliente e ordem temporal. Versões diferentes continuam sem equivalência automática; não há revisão concluída, score de adesão ou decisão clínica. **Nenhuma migration, RLS, IA, notificação, publicação ou escrita de feedback.**
+
+**ACEITAÇÃO:** teste determinístico de seleção de semanas autorizadas e ordenação, checagens de rota segura, Playwright autenticado selecionando explicitamente a semana anterior e conferindo IDs/retorno, além de `Validate application`, cleanup do banco local e documentação. **Branch ainda não validada, mergeada, publicada nem homologada.**
+
+---
+
 ## 2026-10-16 — J2: comparação factual focada nas respostas diferentes (branch em validação)
 
 **FATO CONFIRMADO:** PR #895 mergeado no `master` `38d03d567657abc29e9ce13d6ac1d2b0a19b95e6`. Ambos os checks no head pré-merge `7fd5b6921336b063d45fb998c3d74458efc41104` passaram. O CI `validate` pós-merge também passou e Vercel retornou `success` (`Deployment has completed`). Isso **não é homologação profissional de J2**.

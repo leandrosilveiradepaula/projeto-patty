@@ -4,6 +4,7 @@ import test from "node:test";
 
 import {
   previousSubmittedFeedbackByPeriod,
+  olderSubmittedFeedbackChoices,
   selectAuthorizedSubmittedFeedbackPair,
   weeklyFeedbackComparisonHref,
 } from "./weekly-feedback-comparison.ts";
@@ -121,4 +122,38 @@ test("same-version comparison is explicitly factual, with no automated adherence
   assert.match(page, /data-comparison-answer="true"/);
   assert.match(page, /answerView\.view !== "diferentes" \|\| row\.different/);
   assert.doesNotMatch(page, /scoreAdesao|computedAdherence|autoAdvanceProtocol/);
+});
+
+test("professional can explicitly choose any earlier submitted week, not just the nearest", () => {
+  const rows = [
+    fact("past-old", client, "2026-09-15", "2026-10-18T09:00:00Z"),
+    fact("current", client, "2026-10-13", "2026-10-16T09:00:00Z"),
+    fact("draft", client, "2026-10-06", null),
+    fact("other", "client-b", "2026-10-06", "2026-10-16T08:00:00Z"),
+    fact("past-nearest", client, "2026-09-29", "2026-10-18T12:00:00Z"),
+    fact("same-period", client, "2026-10-13", "2026-10-15T08:00:00Z"),
+    fact("future", client, "2026-10-20", "2026-10-19T08:00:00Z"),
+  ];
+  assert.deepEqual(
+    olderSubmittedFeedbackChoices(rows, "current").map(row => row.id),
+    ["past-nearest", "past-old"],
+  );
+  assert.equal(previousSubmittedFeedbackByPeriod(rows, "current")?.id, "past-nearest");
+  assert.deepEqual(olderSubmittedFeedbackChoices(rows, "draft"), []);
+  assert.deepEqual(olderSubmittedFeedbackChoices(rows, "missing"), []);
+  assert.equal(rows[0].id, "past-old");
+});
+
+test("historical comparison selector submits only exact IDs and optional validated return context", () => {
+  const page = read("app/admin/clientes/[clienteId]/feedback-semanal/page.tsx");
+  const comparison = read("app/admin/clientes/[clienteId]/feedback-semanal/comparar/page.tsx");
+  assert.match(page, /olderSubmittedFeedbackChoices\(orderedFeedbacks, feedback\.id\)/);
+  assert.match(page, /name="atual" type="hidden" value=\{feedback\.id\}/);
+  assert.match(page, /name="anterior"/);
+  assert.match(page, /name="caixaRetorno" type="hidden" value=\{inboxReturn\}/);
+  assert.match(page, /comparisonChoices\.map\(\(older\) => \(/);
+  assert.match(page, /older\.id\} value=\{older\.id\}/);
+  assert.match(comparison, /selectAuthorizedSubmittedFeedbackPair\(/);
+  assert.match(comparison, /if \(!pair\) notFound\(\)/);
+  assert.doesNotMatch(page, /name="answers"|name="pontuacao"|autoReview/);
 });

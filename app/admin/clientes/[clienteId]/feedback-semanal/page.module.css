@@ -211,3 +211,46 @@
     align-items: flex-start;
   }
 }
+
+
+/* Explicit historical baseline: labels and opaque IDs only, no health text. */
+.comparisonChoiceDisclosure {
+  padding-top: var(--space-2);
+}
+.comparisonChoiceDisclosure > summary {
+  cursor: pointer;
+  min-height: 44px;
+  align-content: center;
+  color: var(--color-brand-strong);
+  font-weight: 600;
+}
+.comparisonChoiceDisclosure > summary:focus-visible,
+.comparisonChoiceForm select:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.comparisonChoiceForm {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: end;
+  margin: var(--space-3) 0;
+}
+.comparisonChoiceForm label {
+  display: grid;
+  flex: 1 1 240px;
+  min-width: 0;
+  gap: var(--space-2);
+  font-weight: 600;
+}
+.comparisonChoiceForm select {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  font: inherit;
+}
