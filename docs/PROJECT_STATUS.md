@@ -1,3 +1,13 @@
+## 2026-10-16 — J3 proposta técnica: continuidade da evolução filtrada à avaliação (em validação)
+
+**ESCOPO TÉCNICO, NÃO REGRA PROFISSIONAL:** preservar, no workspace da Patty, a medida selecionada e a janela factual de observações ao abrir uma avaliação finalizada a partir da evolução. O destino revalida o registro com RLS/assignment atual e só oferece retorno quando o ID realmente integra a série de medidas efetivas e finalizadas, sob o filtro informado. Links contêm somente UUIDs opacos, índice numérico e a janela permitida (`all/3/6/12`); nenhum nome de medida, resposta ou valor de saúde entra na URL.
+
+**IMPLEMENTADO NA BRANCH, AINDA NÃO TESTADO/INTEGRADO/PUBLICADO:** helper e loader compartilhado entre visão de evolução e validação do retorno, links à avaliação exata e ao histórico profissional. A comparação, decisão, correção histórica e publicação continuam sob as ações humanas existentes, sem mudança de regra clínica, SQL ou RLS.
+
+**ACEITAÇÃO PENDENTE:** executar `Validate application` no HEAD exato, incluindo build e regressões de autorização, antes de qualquer merge; conferir navegação móvel autenticada na próxima homologação. Mudança não declara J3 homologada nem reabre a J2 tecnicamente concluída.
+
+---
+
 ## 2026-10-16 — J2: percurso principal tecnicamente pronto para homologação profissional
 
 **FATO CONFIRMADO (estado atual; registros abaixo são históricos):** PRs [#898](https://github.com/leandrosilveiradepaula/projeto-patty/pull/898), [#899](https://github.com/leandrosilveiradepaula/projeto-patty/pull/899) e [#900](https://github.com/leandrosilveiradepaula/projeto-patty/pull/900) integrados. `master` no merge #900: `266ffba76f52b79383dcc0686a4000a174a0ce87`. No HEAD exato do #900 `4c81f4459cb84a075d2f1eb7b6e0ae205d68468b`, `Validate application` e Playwright J2 autenticado concluíram **PASS**, inclusive teardown do Supabase local descartável; no merge, `validate` e smoke de ativação concluíram **PASS**. O status Vercel para `266ffba7` foi **success**. Isso confirma código, testes, merge e publicação, **não** o aceite profissional.

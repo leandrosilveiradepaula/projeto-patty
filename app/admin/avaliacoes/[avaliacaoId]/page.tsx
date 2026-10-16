@@ -5,6 +5,8 @@ import { readWeeklyFeedbackInboxReturn, withWeeklyFeedbackInboxReturn } from "@/
 import { receivedWeeklyFeedbackExactHref } from "@/lib/follow-up/recent-weekly-feedbacks";
 
 import { findPreviousFinalizedAssessment, formatAdministrativeAssessmentDate } from "@/lib/evaluations/administrative-assessment-history";
+import { readAdminAssessmentProgressReturn, withAdminAssessmentProgressContext } from "@/lib/evaluations/admin-assessment-progress-navigation";
+import { loadAccessibleAdminClientProgress } from "@/lib/evaluations/admin-client-progress-loader";
 import { earlierFinalizedPhotoAssessmentOptions, selectEarlierPhotoAssessment } from "@/lib/evaluations/assessment-photo-comparison";
 import { AssessmentLongitudinalPhotoComparison } from "@/components/admin/AssessmentLongitudinalPhotoComparison";
 import { AssessmentCorrectionForm } from "@/components/admin/AssessmentCorrectionForm";
@@ -61,7 +63,7 @@ type AdminAvaliacaoDetailPageProps = {
   params: Promise<{
     avaliacaoId: string;
   }>;
-  searchParams: Promise<{ fotoAvaliacaoAnterior?: string; fotoAnterior?: string; fotoAtual?: string; listaQ?: string; listaView?: string; listaPagina?: string; filaRetorno?: string; feedbackAtual?: string | string[]; feedbackAnterior?: string | string[]; feedbackVisao?: string | string[]; caixaRetorno?: string | string[] }>;
+  searchParams: Promise<{ fotoAvaliacaoAnterior?: string; fotoAnterior?: string; fotoAtual?: string; listaQ?: string; listaView?: string; listaPagina?: string; filaRetorno?: string; feedbackAtual?: string | string[]; feedbackAnterior?: string | string[]; feedbackVisao?: string | string[]; caixaRetorno?: string | string[]; origemAvaliacao?: string | string[]; origemSerie?: string | string[]; origemJanela?: string | string[] }>;
 };
 
 const professionalDecisionLabels: Record<string, string> = {
@@ -138,6 +140,14 @@ export default async function AdminAvaliacaoDetailPage({
     filters.feedbackAtual, filters.feedbackAnterior,
   );
   const isDraft = !assessment.finalized_at;
+  // Recreate the authorized series at the destination; a URL is never proof
+  // of assignment, finalization, measurement identity or current access.
+  const progressReturn = !isDraft
+    ? readAdminAssessmentProgressReturn(
+        filters, assessment.client_id,
+        (await loadAccessibleAdminClientProgress(assessment.client_id)).series,
+      )
+    : null;
   const assessmentKinds = await loadSupportedAssessmentKindOptions();
   const selectedAssessmentKind = resolveSupportedAssessmentKindOption(
     assessmentKinds.options,
@@ -261,7 +271,7 @@ export default async function AdminAvaliacaoDetailPage({
       />
       <nav aria-label="Continuidade do atendimento após avaliação" className={styles.continuityNav}>
         <Link href={navigate(`/admin/clientes/${assessment.client_id}/avaliacoes#${isDraft ? "avaliacoes-em-andamento" : "historico-finalizado"}`)}>{isDraft ? "Voltar aos rascunhos" : "Histórico finalizado"}</Link>
-        <Link href={navigate(`/admin/clientes/${assessment.client_id}/evolucao`)}>Evolução das medidas</Link>
+        <Link href={progressReturn ? progressReturn.href : navigate(`/admin/clientes/${assessment.client_id}/evolucao`)}>{progressReturn ? "Voltar à medida filtrada: " + progressReturn.label : "Evolução das medidas"}</Link>
         <Link href="#historico-profissional">Histórico profissional ({followUps.length} registro(s))</Link>
         {comparisonReturn ? (
           <Link href={backToFeedback(weeklyFeedbackComparisonReturnHref(
@@ -426,7 +436,10 @@ export default async function AdminAvaliacaoDetailPage({
             />
             <Link
               className={styles.backLink}
-              href={navigate(`/admin/avaliacoes/${previousAssessment.id}`)}
+              href={withAdminAssessmentProgressContext(
+                navigate(`/admin/avaliacoes/${previousAssessment.id}`),
+                progressReturn?.context ?? null,
+              )}
             >
               Abrir avaliação anterior de {formatAdministrativeAssessmentDate(previousAssessment.assessed_at)}
             </Link>

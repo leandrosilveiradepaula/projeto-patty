@@ -52,7 +52,8 @@ test("evolution links still resolve to the exact client-side historical assessme
 test("professional comparison links to the authorized previous assessment, not an arbitrary client", () => {
   const page = read("app/admin/avaliacoes/[avaliacaoId]/page.tsx");
   assert.ok(page.includes("previousAssessment && factualComparison.length > 0"));
-  assert.ok(page.includes('href={navigate(`/admin/avaliacoes/${previousAssessment.id}`)}'));
+  assert.ok(page.includes("href={withAdminAssessmentProgressContext("));
+  assert.ok(page.includes('navigate(`/admin/avaliacoes/${previousAssessment.id}`)'));
   assert.ok(page.includes("Abrir avaliação anterior de"));
   assert.ok(page.includes("getAccessibleClientAssessment(avaliacaoId)"));
   assert.ok(page.includes("listAccessibleAssessmentsForClient(assessment.client_id)"));

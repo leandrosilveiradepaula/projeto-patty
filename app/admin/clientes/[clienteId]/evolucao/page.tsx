@@ -2,22 +2,17 @@ import { parseProgressObservationWindow, parseProgressMeasureSelection, sliceFac
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { formatFactualAssessmentDate, formatFactualMeasurement, formatFactualDelta } from "@/lib/evaluations/progress-format";
-import { formatAdministrativeAssessmentDate, orderAdministrativeAssessments } from "@/lib/evaluations/administrative-assessment-history";
+import { formatAdministrativeAssessmentDate } from "@/lib/evaluations/administrative-assessment-history";
+import { adminAssessmentDetailFromProgressHref } from "@/lib/evaluations/admin-assessment-progress-navigation";
+import { loadAccessibleAdminClientProgress } from "@/lib/evaluations/admin-client-progress-loader";
 import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Section } from "@/components/ui/Section";
-import { listAccessibleAssessmentMeasurementCorrections } from "@/lib/evaluations/measurement-correction-store";
-import { applyAssessmentMeasurementCorrections } from "@/lib/evaluations/measurement-corrections";
-import { buildFactualProgressSeries } from "@/lib/evaluations/progress-view";
 import { summarizeFactualProgressCoverage } from "@/lib/evaluations/progress-journey";
-import {
-  getAccessibleClient,
-  listAccessibleAssessmentMeasurements,
-  listAccessibleAssessmentsForClient,
-} from "@/lib/supabase/data-access";
+import { getAccessibleClient } from "@/lib/supabase/data-access";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -36,34 +31,7 @@ export default async function AdminClientProgressPage({ params, searchParams }: 
     notFound();
   }
 
-  const assessments = orderAdministrativeAssessments(
-    (await listAccessibleAssessmentsForClient(client.id)).filter(
-      (assessment) => Boolean(assessment.finalized_at),
-    ),
-  );
-
-  const assessmentSnapshots = await Promise.all(
-    assessments.map(async (assessment) => {
-      const rawMeasurements = await listAccessibleAssessmentMeasurements(
-        assessment.id,
-      );
-      const corrections = await listAccessibleAssessmentMeasurementCorrections(
-        rawMeasurements.map((measurement) => measurement.id),
-      );
-      const measurements = applyAssessmentMeasurementCorrections(
-        rawMeasurements,
-        corrections,
-      );
-
-      return {
-        assessedAt: assessment.assessed_at,
-        id: assessment.id,
-        measurements,
-      };
-    }),
-  );
-
-  const series = buildFactualProgressSeries(assessmentSnapshots);
+  const { assessments, series } = await loadAccessibleAdminClientProgress(client.id);
   const coverage = summarizeFactualProgressCoverage(series);
   const rawFilters=await searchParams;
   const observationWindow=parseProgressObservationWindow(rawFilters.janela);
@@ -198,14 +166,14 @@ export default async function AdminClientProgressPage({ params, searchParams }: 
                               <Link
                               aria-label={`Abrir avaliação de ${formatAdministrativeAssessmentDate(point.assessedAt)} para ${item.label}`}
                               className={styles.detailLink}
-                              href={"/admin/avaliacoes/" + point.assessmentId}
+                              href={adminAssessmentDetailFromProgressHref(point.assessmentId, index+1, observationWindow.value)}
                             >
                               Abrir avaliação
                             </Link>
                               <Link
                               aria-label={`Consultar acompanhamento da avaliação de ${formatAdministrativeAssessmentDate(point.assessedAt)}`}
                               className={styles.detailLink}
-                              href={"/admin/avaliacoes/" + point.assessmentId + "#historico-profissional"}
+                              href={adminAssessmentDetailFromProgressHref(point.assessmentId, index+1, observationWindow.value, "history")}
                             >
                               Histórico profissional
                             </Link>

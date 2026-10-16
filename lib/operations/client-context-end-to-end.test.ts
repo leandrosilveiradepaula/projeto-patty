@@ -25,7 +25,9 @@ test("assessment and protocol detail pages preserve directory return on navigati
  const assessment=read("app/admin/avaliacoes/[avaliacaoId]/page.tsx");
  const protocol=read("app/admin/protocolos/[protocoloId]/page.tsx");
  assert.match(assessment,/const directoryReturn = readClientDirectoryReturn\(filters\)/);
- assert.match(assessment,/href=\{navigate\(\x60\/admin\/avaliacoes\/\$\{previousAssessment\.id\}\x60\)\}/);
+ assert.match(assessment,/href=\{withAdminAssessmentProgressContext\(/);
+ assert.match(assessment,/navigate\(\x60\/admin\/avaliacoes\/\$\{previousAssessment\.id\}\x60\)/);
+ assert.match(assessment,/withPendingQueueReturn\(withClientDirectoryReturn\(href,directoryReturn\),queueReturn \?\? ""\)/);
  assert.match(protocol,/const directoryReturn = readClientDirectoryReturn\(search\)/);
  assert.match(protocol,/href=\{navigate\(protocolVersionExplorerHref/);
  assert.match(protocol,/name="listaQ" value=\{directoryReturn\.q\}/);
