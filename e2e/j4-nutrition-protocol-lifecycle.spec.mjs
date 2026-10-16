@@ -168,9 +168,7 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
     const otherPage=await otherCtx.newPage();
     await loginAdminWithMfa(adminPage,{email:staff.email,password:staff.password,totpSecret:totp});
     await loginClient(clientPage,owner);
-    await expect(clientPage.getByRole("heading",{
-      name:"Nenhum protocolo foi publicado para você",
-    })).toBeVisible();
+    await expect(clientPage.getByText("Nenhum protocolo foi publicado para você",{exact:true})).toBeVisible();
 
     let protocolId;
     let v1;
@@ -243,7 +241,7 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
       expect(firstPublication.protocol_version_id).toBe(v1.id);
       await clientPage.reload();
       await expect(clientPage.getByRole("heading",{name:"Meu protocolo"})).toBeVisible();
-      await expect(clientPage.getByRole("heading",{name:"Nenhum protocolo foi publicado para você"})).toHaveCount(0);
+      await expect(clientPage.getByText("Nenhum protocolo foi publicado para você",{exact:true})).toHaveCount(0);
       await expect(clientPage.getByText("J4 Linear sintético").first()).toBeVisible();
       await expect(clientPage.getByText("J4 Almoço sintético").first()).toBeVisible();
       await mobileFit(clientPage);
