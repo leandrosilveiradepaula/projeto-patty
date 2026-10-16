@@ -1,3 +1,13 @@
+## 2026-10-16 — J2: comparação factual focada nas respostas diferentes (branch em validação)
+
+**FATO CONFIRMADO:** PR #895 mergeado no `master` `38d03d567657abc29e9ce13d6ac1d2b0a19b95e6`. Ambos os checks no head pré-merge `7fd5b6921336b063d45fb998c3d74458efc41104` passaram. O CI `validate` pós-merge também passou e Vercel retornou `success` (`Deployment has completed`). Isso **não é homologação profissional de J2**.
+
+**DECISÃO TÉCNICA/PRODUTO EM BRANCH:** na comparação de duas semanas **submetidas e autorizadas** do mesmo cliente, quando a versão exata do questionário coincide, mostrar contagem puramente descritiva de perguntas com conteúdo original igual/diferente e oferecer alternância entre todas as perguntas e somente as diferentes. Comparação por texto canônico (número `0` e string `"0"` equivalem pela representação original); ausência de ambas as respostas é igualdade de ausência, não adesão. **Versões diferentes continuam sem equivalência automática**, com duas listas independentes. Nenhuma interpretação de qualidade, progresso, melhora, adesão, urgência ou recomendação de protocolo é gerada. URLs contêm só IDs já existentes, filtro de visualização e eventual retorno local validado. A autorização continua na consulta exata RLS da dupla; nenhuma escrita, IA, migration, modificação de dados de saúde ou estado de revisão é criada.
+
+**CRITÉRIOS DE ACEITAÇÃO:** unit tests de equivalência por versão, ausências, normalização dos tipos e filtros inválidos; E2E local autenticado criando duas solicitações manuais via UI, envio definitivo de 21 respostas por cliente sintética, leitura profissional e filtro de 21 para 1 resposta diferente; testes de controle de acesso já existentes, cleanup da fixture. CI do novo head, merge, publicação e homologação profissional **ainda não comprovados**.
+
+---
+
 ## 2026-10-16 — J2: navegação móvel das perguntas e edição na revisão (branch em validação)
 
 **FATO CONFIRMADO:** PR #894 mergeado no `master` `afb6eda9e98f3f8b1f462043ec31a20ee7e093c5`. `Validate application` e `weekly-feedback-browser` passaram no HEAD pré-merge `0363039ea91ad58e1c83e5baf8278d5e94d1134b`. O status Vercel pós-merge retornou `success` (`Deployment has completed`). CI pós-merge é verificado separadamente; não há homologação profissional autenticada da J2 em produção.

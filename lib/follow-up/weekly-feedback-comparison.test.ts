@@ -111,3 +111,14 @@ test("professional history offers side-by-side consultation only for a submitted
   assert.match(page, /weeklyFeedbackComparisonHref\(client\.id, feedback\.id, comparisonPrevious\.id\)/);
   assert.match(page, /Comparar com o Feedback Semanal de período anterior/);
 });
+
+test("same-version comparison is explicitly factual, with no automated adherence", () => {
+  const page = read("app/admin/clientes/[clienteId]/feedback-semanal/comparar/page.tsx");
+  assert.match(page, /compareSameVersionWeeklyFeedbackAnswers\(/);
+  assert.match(page, /questionário versionado/);
+  assert.match(page, /Somente respostas diferentes/);
+  assert.match(page, /Todas as respostas/);
+  assert.match(page, /data-comparison-answer="true"/);
+  assert.match(page, /answerView\.view !== "diferentes" \|\| row\.different/);
+  assert.doesNotMatch(page, /scoreAdesao|computedAdherence|autoAdvanceProtocol/);
+});

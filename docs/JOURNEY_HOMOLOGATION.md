@@ -1,3 +1,13 @@
+## 2026-10-16 — J2: identificar diferenças textuais entre semanas sem decisão automatizada (em validação)
+
+**ESCOPO DA MELHORIA:** duas respostas de cliente, ambas definitivamente submetidas e autorizadas pela RLS/admin MFA, podem ser exibidas com todas as perguntas ou somente aquelas cujos textos originais diferem. A versão do questionário deve coincidir; caso contrário, preservar enunciados históricos independentes sem comparar nem produzir contagem. A contagem é estritamente factual, **não score de adesão, classificação clínica, revisão ou recomendação**. A Patty escolhe manualmente qualquer avaliação posterior; não se registra revisão nem mudança de protocolo.
+
+**TESTE REQUERIDO:** criar duas solicitações pela UI autenticada; enviar cada uma com respostas sintéticas ao mesmo questionário versionado, variando apenas a questão sintética `q17`; confirmar persistência de ambas; visualizar 21 perguntas, ativar "Somente respostas diferentes" e ver 1 pergunta, retornar às 21; assegurar somente IDs no URL, sem respostas e sem deslocar autorização. `Validate application` e `weekly-feedback-browser` devem concluir no head com limpeza local. Também verificar versões distintas via testes unitários. **STATUS:** implementação em branch, CI, merge, deploy e homologação ainda pendentes.
+
+**REFERÊNCIA ANTERIOR:** PR #895 mergeado no `master` `38d03d56`; Validate pós-merge e status Vercel `success`. A publicação não substitui homologação profissional.
+
+---
+
 ## 2026-10-16 — J2: preenchimento móvel e revisão corrigível (em validação)
 
 **OBJETIVO:** concluir a usabilidade do Feedback Semanal de 21 perguntas no celular, sem comprometer rascunhos, envio definitivo e autorização. Na versão em branch, a cliente encontra uma pergunta por seletor acessível com estado factual de preenchimento, pode saltar diretamente para ela, recebe foco na revisão final e pode voltar a editar uma resposta específica. O seletor não envia dados, não calcula adesão e não usa armazenamento de navegador. Os campos e as ações autenticadas existentes permanecem intactos.

@@ -172,3 +172,60 @@
     flex-direction: column;
   }
 }
+
+
+/* Factual answer differences only: never an adherence or health score. */
+.differenceSummary {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
+  background: var(--color-surface);
+  scroll-margin-top: var(--space-5);
+}
+.differenceSummary p { margin: 0; }
+.differenceSummary p:first-child { font-weight: 700; }
+.differenceSummary p:nth-child(2) {
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-small-size);
+}
+.differenceFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.differenceFilters a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  color: var(--color-brand-strong);
+}
+.differenceFilters a[aria-current="page"] {
+  border-color: var(--color-brand);
+  font-weight: 700;
+  text-decoration: underline;
+}
+.differenceFilters a:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.differenceLabel {
+  margin: 0 0 var(--space-3);
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-small-size);
+}
+.noDifferences {
+  margin: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  background: var(--color-surface);
+}
+@media (max-width: 720px) {
+  .differenceFilters { display: grid; }
+}
