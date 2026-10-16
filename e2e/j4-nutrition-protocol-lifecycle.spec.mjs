@@ -257,8 +257,22 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
       firstPublication=(await pollRows("select id,protocol_version_id from public.protocol_publications"+
         " where protocol_version_id="+quote(v1.id),1))[0];
       expect(firstPublication.protocol_version_id).toBe(v1.id);
-      await clientPage.reload();
-      await expect(clientPage.getByRole("heading",{name:"Meu protocolo"})).toBeVisible();
+      const publicationResponse=await clientPage.reload();
+      // A missing title could mean login redirect, server failure or a
+      // render error, not necessarily absent publication. Record only a
+      // categorical browser state and HTTP status (never page contents).
+      await expect.poll(async()=>{
+        if(await clientPage.getByRole("heading",{name:"Meu protocolo",exact:true}).count())
+          return "page-rendered";
+        const path=new URL(clientPage.url()).pathname;
+        if(path==="/login")return "redirected-to-login";
+        if(publicationResponse?.status()===500)return "server-http-500";
+        if(publicationResponse && publicationResponse.status()>=400)
+          return "server-http-"+publicationResponse.status();
+        if(await clientPage.getByText("Application error",{exact:false}).count())
+          return "render-error";
+        return path==="/cliente/protocolo" ? "missing-title-on-route" : "unexpected-route";
+      },{timeout:16000}).toBe("page-rendered");
       await expect(clientPage.getByText("Nenhum protocolo foi publicado para você",{exact:true})).toHaveCount(0);
       await expect(clientPage.getByText("J4 Linear sintético").first()).toBeVisible();
       await expect(clientPage.getByText("J4 Almoço sintético").first()).toBeVisible();
