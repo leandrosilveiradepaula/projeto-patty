@@ -296,7 +296,19 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
           return "server-http-"+publicationResponse.status();
         if(await clientPage.getByText("Application error",{exact:false}).count())
           return "render-error";
-        return path==="/cliente/protocolo" ? "missing-title-on-route" : "unexpected-route";
+        if(await clientPage.locator('[data-nextjs-dialog-overlay]').count())
+          return "nextjs-error-dialog";
+        if(path!=="/cliente/protocolo")return "unexpected-route";
+        // Only safe, quantitative DOM evidence: never extract page text,
+        // HTML, error messages, tokens, IDs, URLs or nutritional data.
+        const h1Count=await clientPage.locator("h1").count();
+        const mainCount=await clientPage.locator("main").count();
+        const noProtocol=await clientPage.getByText("Nenhum protocolo foi publicado para você",{exact:true}).count();
+        const hasCurrent=await clientPage.getByRole("heading",{name:"Plano atual",exact:true}).count();
+        const portalCount=await clientPage.locator("nextjs-portal").count();
+        return "route-no-title:h1="+h1Count+";main="+mainCount+
+          ";empty="+Number(noProtocol>0)+";current="+Number(hasCurrent>0)+
+          ";portal="+Number(portalCount>0);
       },{timeout:16000}).toBe("page-rendered");
       await expect(clientPage.getByText("Nenhum protocolo foi publicado para você",{exact:true})).toHaveCount(0);
       await expect(clientPage.getByText("J4 Linear sintético").first()).toBeVisible();
