@@ -64,7 +64,7 @@ type AdminAvaliacaoDetailPageProps = {
   params: Promise<{
     avaliacaoId: string;
   }>;
-  searchParams: Promise<{ fotoAvaliacaoAnterior?: string; fotoAnterior?: string; fotoAtual?: string; listaQ?: string; listaView?: string; listaPagina?: string; filaRetorno?: string; feedbackAtual?: string | string[]; feedbackAnterior?: string | string[]; feedbackVisao?: string | string[]; caixaRetorno?: string | string[]; origemAvaliacao?: string | string[]; origemSerie?: string | string[]; origemJanela?: string | string[]; pareamentoReferencia?: string | string[]; pareamentoComparacao?: string | string[] }>;
+  searchParams: Promise<{ fotoAvaliacaoAnterior?: string; fotoAnterior?: string; fotoAtual?: string; listaQ?: string; listaView?: string; listaPagina?: string; filaRetorno?: string; feedbackAtual?: string | string[]; feedbackAnterior?: string | string[]; feedbackVisao?: string | string[]; caixaRetorno?: string | string[]; origemAvaliacao?: string | string[]; origemSerie?: string | string[]; origemJanela?: string | string[]; pareamentoReferencia?: string | string[]; pareamentoComparacao?: string | string[]; pareamentoFotoReferencia?: string | string[]; pareamentoFotoComparacao?: string | string[] }>;
 };
 
 const professionalDecisionLabels: Record<string, string> = {
@@ -272,7 +272,7 @@ export default async function AdminAvaliacaoDetailPage({
         clientId={assessment.client_id}
       />
       <nav aria-label="Continuidade do atendimento após avaliação" className={styles.continuityNav}>
-        {selectedPair ? <Link href={selectedAssessmentPairHref(assessment.client_id, selectedPair)}>Voltar à comparação de avaliações e fotos</Link> : null}
+        {selectedPair ? <Link href={selectedAssessmentPairHref(assessment.client_id, selectedPair, {referencePhotoId:filters.pareamentoFotoReferencia,comparisonPhotoId:filters.pareamentoFotoComparacao})}>Voltar à comparação de avaliações e fotos</Link> : null}
         <Link href={navigate(`/admin/clientes/${assessment.client_id}/avaliacoes#${isDraft ? "avaliacoes-em-andamento" : "historico-finalizado"}`)}>{isDraft ? "Voltar aos rascunhos" : "Histórico finalizado"}</Link>
         <Link href={progressReturn ? progressReturn.href : navigate(`/admin/clientes/${assessment.client_id}/evolucao`)}>{progressReturn ? "Voltar à medida filtrada: " + progressReturn.label : "Evolução das medidas"}</Link>
         <Link href="#historico-profissional">Histórico profissional ({followUps.length} registro(s))</Link>
