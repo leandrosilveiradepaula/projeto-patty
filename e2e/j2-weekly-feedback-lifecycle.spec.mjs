@@ -643,6 +643,41 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
       await expect(adminPage.locator('[data-comparison-answer="true"]')).toHaveCount(1);
     });
 
+    await test.step("feedback enviado abre avaliacao existente ou novo rascunho com retorno autorizado", async () => {
+      await adminPage.goto("/admin/clientes/" + clientId + "/feedback-semanal?registro=" + feedbackId);
+      const submittedCard = adminPage.locator("#feedback-enviado-" + feedbackId);
+      await expect(submittedCard).toBeVisible();
+      await submittedCard.getByRole("link", {
+        name: "Criar ou retomar avaliação para este feedback",
+      }).click();
+      await expect(adminPage).toHaveURL(new RegExp(
+        "/admin/clientes/" + clientId + "/avaliacoes\\?feedbackAtual=" + feedbackId,
+      ));
+      await expect(adminPage.getByText("Continuidade do Feedback Semanal", { exact: true })).toBeVisible();
+      await adminPage.getByRole("link", { name: "Voltar às respostas originais" }).click();
+      await expect(adminPage.locator("#feedback-enviado-" + feedbackId)).toBeVisible();
+
+      await adminPage.getByRole("link", {
+        name: "Criar ou retomar avaliação para este feedback",
+      }).click();
+      await expect(adminPage.getByRole("heading", { name: "Nova avaliação" })).toBeVisible();
+      await adminPage.locator('select[name="assessmentKind"]').selectOption("monthly");
+      await adminPage.locator('input[name="assessedAt"]').fill("2026-10-15");
+      await adminPage.getByRole("button", { name: "Criar rascunho de avaliação" }).click();
+      await expect(adminPage).toHaveURL(new RegExp(
+        "/admin/avaliacoes/[0-9a-f-]+\\?feedbackAtual=" + feedbackId + "#coleta",
+      ));
+      await expect(adminPage.getByRole("link", {
+        name: "Voltar ao Feedback Semanal enviado",
+      })).toBeVisible();
+      await adminPage.getByRole("link", { name: "Voltar ao Feedback Semanal enviado" }).click();
+      await expect(adminPage.locator("#feedback-enviado-" + feedbackId)).toBeVisible();
+      // Rascunho criado pela Patty não publica protocolo e não altera a resposta.
+      expect((await feedbackRecord(clientId, periodStart)).answers.q17).toBe(8);
+      expect(localSelect("select id from public.protocol_publications where client_id = " +
+        sqlLiteral(clientId))).toHaveLength(1);
+    });
+
     await test.step("outra cliente, outro profissional e anônimo não acessam o registro", async () => {
       const login = await otherApi.auth.signInWithPassword({
         email: other.email, password: other.password,

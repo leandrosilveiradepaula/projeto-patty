@@ -106,3 +106,26 @@ export function manualAssessmentDecisionFromSubmittedFeedbackHref(
   const params = new URLSearchParams({ feedbackAtual: submittedId });
   return "/admin/avaliacoes/" + encodeURIComponent(assessmentId) + "?" + params.toString() + "#acompanhamento";
 }
+
+/** Context is navigation only; destination pages and writes recheck RLS. */
+export function withSubmittedWeeklyFeedbackAssessmentContext(
+  href: string,
+  feedbackId: string | null,
+): string {
+  if (!feedbackId || !isUuid(feedbackId) || !href.startsWith("/admin/") || href.startsWith("//")) return href;
+  const hashIndex = href.indexOf("#");
+  const pathWithQuery = hashIndex < 0 ? href : href.slice(0, hashIndex);
+  const hash = hashIndex < 0 ? "" : href.slice(hashIndex);
+  const queryIndex = pathWithQuery.indexOf("?");
+  const pathname = queryIndex < 0 ? pathWithQuery : pathWithQuery.slice(0, queryIndex);
+  const params = new URLSearchParams(queryIndex < 0 ? "" : pathWithQuery.slice(queryIndex + 1));
+  params.set("feedbackAtual", feedbackId);
+  return pathname + "?" + params.toString() + hash;
+}
+
+export function assessmentDirectoryFromSubmittedFeedbackHref(clientId: string, feedbackId: string): string {
+  if (!isUuid(clientId) || !isUuid(feedbackId)) return "/admin/feedback-semanal";
+  return withSubmittedWeeklyFeedbackAssessmentContext(
+    "/admin/clientes/" + encodeURIComponent(clientId) + "/avaliacoes#nova-avaliacao", feedbackId,
+  );
+}

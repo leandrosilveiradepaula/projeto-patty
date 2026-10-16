@@ -19,6 +19,8 @@ const initialState: CreateAssessmentState = {
 
 type AssessmentCreateFormProps = {
   clientId: string;
+  feedbackId?: string | null;
+  inboxReturn?: string | null;
   kindOptions: Array<{
     label: string;
     semanticKey: "basic" | "complete";
@@ -32,6 +34,8 @@ type AssessmentCreateFormProps = {
 
 export function AssessmentCreateForm({
   clientId,
+  feedbackId,
+  inboxReturn,
   kindOptions,
   schedulePreferences,
 }: AssessmentCreateFormProps) {
@@ -56,6 +60,8 @@ export function AssessmentCreateForm({
 
   return (
     <form action={formAction} aria-busy={isPending} className={styles.form} onSubmit={guardSubmit}>
+      {feedbackId ? <input type="hidden" name="feedbackAtual" value={feedbackId} /> : null}
+      {feedbackId && inboxReturn ? <input type="hidden" name="caixaRetorno" value={inboxReturn} /> : null}
       {state.message ? (
         <Alert live="assertive" title="Não foi possível criar" variant="critical">
           {state.message}

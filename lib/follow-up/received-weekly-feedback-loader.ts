@@ -2,6 +2,7 @@ import "server-only";
 
 import { collectScopedClientOperationalRows } from "@/lib/operations/client-operational-pagination";
 import { createClient } from "@/lib/supabase/server";
+import { isUuid } from "@/lib/validation/uuid";
 import {
   receivedWeeklyFeedbackMonthBounds,
   type ReceivedWeeklyFeedbackFilters,
@@ -37,4 +38,22 @@ export async function listReceivedWeeklyFeedbackHeadersForClients(
       .order("id", { ascending: false })
       .range(from, to);
   });
+}
+
+/** Resolve one submitted receipt through the caller's RLS session.
+ * Navigation must never fetch health answers or drafts unnecessarily. */
+export async function findReceivedWeeklyFeedbackHeaderForClient(
+  clientId: string,
+  feedbackId: unknown,
+) {
+  if (!isUuid(clientId) || typeof feedbackId !== "string" || !isUuid(feedbackId)) return null;
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("client_weekly_feedbacks")
+    .select("id, client_id, period_start, period_end, submitted_at")
+    .eq("client_id", clientId)
+    .eq("id", feedbackId)
+    .not("submitted_at", "is", null)
+    .maybeSingle();
+  if (error || !data || data.client_id !== clientId || !data.submitted_at) return null;
+  return data;
 }

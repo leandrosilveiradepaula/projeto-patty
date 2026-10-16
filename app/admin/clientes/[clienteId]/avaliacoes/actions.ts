@@ -5,6 +5,9 @@ import { revalidatePath } from "next/cache";
 
 import { loadSupportedAssessmentKindOptions } from "@/lib/evaluations/assessment-configuration-loader";
 import { parseAssessmentDate } from "@/lib/evaluations/assessment-draft";
+import { findReceivedWeeklyFeedbackHeaderForClient } from "@/lib/follow-up/received-weekly-feedback-loader";
+import { readWeeklyFeedbackInboxReturn, withWeeklyFeedbackInboxReturn } from "@/lib/follow-up/weekly-feedback-inbox-return";
+import { withSubmittedWeeklyFeedbackAssessmentContext } from "@/lib/follow-up/weekly-feedback-professional-handoff";
 import { isUuid } from "@/lib/validation/uuid";
 import { requireRole } from "@/lib/supabase/auth";
 import {
@@ -55,6 +58,8 @@ export async function createAssessmentAction(
     };
   }
 
+  const submittedFeedback = await findReceivedWeeklyFeedbackHeaderForClient(client.id, formData.get("feedbackAtual"));
+  const inboxReturn = readWeeklyFeedbackInboxReturn(formData.get("caixaRetorno"));
   let assessment;
 
   try {
@@ -76,5 +81,12 @@ export async function createAssessmentAction(
   revalidatePath("/admin/avaliacoes");
   revalidatePath(`/admin/clientes/${client.id}`);
   revalidatePath(`/admin/clientes/${client.id}/avaliacoes`);
-  redirect(`/admin/avaliacoes/${assessment.id}`);
+  const destination = submittedFeedback
+    ? withWeeklyFeedbackInboxReturn(
+        withSubmittedWeeklyFeedbackAssessmentContext(
+          `/admin/avaliacoes/${assessment.id}#coleta`, submittedFeedback.id,
+        ), inboxReturn ?? "",
+      )
+    : `/admin/avaliacoes/${assessment.id}`;
+  redirect(destination);
 }

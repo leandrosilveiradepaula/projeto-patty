@@ -37,10 +37,11 @@ test("assessment history keeps navigation through filter resets, two independent
  assert.match(assessments,/name="listaQ" value=\{directoryReturn\.q\}/);
  assert.match(assessments,/name="listaPagina" value=\{directoryReturn\.page\}/);
  assert.match(assessments,/readClientAssessmentDirectory\(rawQuery, kinds, months\.months\)/);
- assert.match(assessments,/href=\{navigate\(clientAssessmentDirectoryHref/);
- assert.match(assessments,/href=\{navigate\(\x60\/admin\/avaliacoes\/\$\{assessment\.id\}\x60\)\}/);
- assert.match(assessments,/href=\{navigate\(\x60\/admin\/clientes\/\$\{client\.id\}\/avaliacoes\x60\)\}/);
- assert.match(assessments,/href=\{navigate\("\/admin\/avaliacoes"\)\}/);
+ assert.match(assessments,/withSubmittedWeeklyFeedbackAssessmentContext\(navigate\(href\), submittedFeedback\?\.id \?\? null\)/);
+ assert.match(assessments,/href=\{continueFromFeedback\(clientAssessmentDirectoryHref/);
+ assert.match(assessments,/href=\{continueFromFeedback\(\x60\/admin\/avaliacoes\/\$\{assessment\.id\}\x60\)\}/);
+ assert.match(assessments,/href=\{continueFromFeedback\(\x60\/admin\/clientes\/\$\{client\.id\}\/avaliacoes\x60\)\}/);
+ assert.match(assessments,/href=\{continueFromFeedback\("\/admin\/avaliacoes"\)\}/);
 });
 
 test("anamnesis history retains the original queue on filters, review, clarifications and pagination",()=>{
