@@ -20,7 +20,8 @@ import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Section } from "@/components/ui/Section";
 import Link from "next/link";
-import { describeAdminFeedbackReminder } from "@/lib/operations/admin-feedback-reminder";
+import { describeWeeklyFeedbackReminderEvidence } from "@/lib/follow-up/weekly-feedback-reminder-presentation";
+import { weeklyFeedbackOriginLabel } from "@/lib/follow-up/pending-weekly-feedback-inbox";
 import { latestReminderEventByFeedback } from "@/lib/operations/feedback-reminder-order";
 import { parseWeeklyFeedbackDefinition, readWeeklyFeedbackAnswer } from "@/lib/weekly-feedback/definition";
 import {
@@ -78,7 +79,10 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
   const inboxReturn = readWeeklyFeedbackInboxReturn(rawQuery.caixaRetorno);
   const directoryReturn = readClientDirectoryReturn(rawQuery);
   const queueReturn = readPendingQueueReturn(rawQuery.filaRetorno);
-  const withReturn = (href: string) => withPendingQueueReturn(withClientDirectoryReturn(href,directoryReturn),queueReturn ?? "");
+  const withReturn = (href: string) => withWeeklyFeedbackInboxReturn(
+    withPendingQueueReturn(withClientDirectoryReturn(href, directoryReturn), queueReturn ?? ""),
+    inboxReturn ?? "",
+  );
   const years=professionalFeedbackYears(orderedFeedbacks);
   const options=readProfessionalFeedbackHistoryQuery(rawQuery,years);
   const exactPendingPage=authorizedExactRecordPage(orderedFeedbacks.filter(f=>f.submitted_at===null),rawQuery.registro,10);
@@ -155,6 +159,7 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
       <Section title="Localizar feedbacks" description="Filtre pela origem registrada, sem alterar respostas, prazos ou automações.">
         <form method="get" action={`/admin/clientes/${client.id}/feedback-semanal`} className={styles.explorerFilters}>
           {queueReturn ? <input type="hidden" name="filaRetorno" value={queueReturn} /> : null}
+          {inboxReturn ? <input type="hidden" name="caixaRetorno" value={inboxReturn} /> : null}
           {directoryReturn.q ? <input type="hidden" name="listaQ" value={directoryReturn.q} /> : null}
           {directoryReturn.view !== "all" ? <input type="hidden" name="listaView" value={directoryReturn.view} /> : null}
           {directoryReturn.page && directoryReturn.page > 1 ? <input type="hidden" name="listaPagina" value={directoryReturn.page} /> : null}
@@ -207,7 +212,7 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
             {pendingPage.items.map((feedback) => {
               const version = feedback.weekly_feedback_form_versions;
               const reminderEvent = reminderEventsByFeedbackId.get(feedback.id);
-              const reminderStatus = describeAdminFeedbackReminder(reminderEvent);
+              const reminderStatus = describeWeeklyFeedbackReminderEvidence(feedback.request_source, reminderEvent);
 
               return (
                 <li id={`feedback-pendente-${feedback.id}`} key={feedback.id}>
@@ -226,12 +231,12 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
                       <Badge variant="warning">Aguardando cliente</Badge>
                     </div>
                     <p className={styles.meta}>
-                      Origem: {feedback.request_source === "schedule" ? "Automática" : "Manual"}
+                      Origem: {weeklyFeedbackOriginLabel(feedback.request_source)}
                     </p>
                     <p className={styles.meta}>Prazo: {formatDateTime(feedback.due_at)}</p>
                     <p className={styles.reminderStatus}>
-                      <strong>Lembrete:</strong>{" "}
-                      {reminderStatus?.label ?? "nenhum evento de lembrete registrado."}
+                      <strong>Notificações:</strong>{" "}
+                      {reminderStatus.label}
                        {reminderStatus?.nextStep ? (
                          <> · <Link href={withReturn(`/admin/clientes/${client.id}#${reminderStatus.nextStep.anchor}`)}>{reminderStatus.nextStep.label}</Link></>
                        ) : null}
@@ -293,7 +298,7 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
                           : "Versão indisponível"}
                       </p>
                       <p className={styles.meta}>
-                        Origem: {feedback.request_source === "schedule" ? "Automática" : "Manual"}
+                        Origem: {weeklyFeedbackOriginLabel(feedback.request_source)}
                       </p>
                       <p className={styles.meta}>Prazo: {formatDateTime(feedback.due_at)}</p>
                       {definition ? (
