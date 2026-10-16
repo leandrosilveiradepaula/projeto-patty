@@ -34,3 +34,25 @@ test("assessment comparison origin revalidates both finalized IDs and the opened
  assert.equal(new URL(assessmentFromSelectedPairHref(b,selected!),"https://example.org").searchParams.get("pareamentoReferencia"),a);
  assert.equal(new URL(selectedAssessmentPairHref(c,selected!),"https://example.org").hash,"#comparacao-resultados");
 });
+
+test("photo selection survives the assessment roundtrip without trusting photo IDs",async()=>{
+ const { assessmentFromSelectedPairHref, selectedAssessmentPairHref }=await import("./assessment-pair-comparison.ts");
+ const refPhoto="44444444-4444-4444-8444-444444444444";
+ const cmpPhoto="55555555-5555-4555-8555-555555555555";
+ const pair={referenceId:a,comparisonId:b};
+ const detail=assessmentFromSelectedPairHref(b,pair,{referencePhotoId:refPhoto,comparisonPhotoId:cmpPhoto});
+ const u=new URL(detail,"https://example.invalid");
+ assert.equal(u.searchParams.get("pareamentoFotoReferencia"),refPhoto);
+ assert.equal(u.searchParams.get("pareamentoFotoComparacao"),cmpPhoto);
+ const back=selectedAssessmentPairHref(c,pair,{
+  referencePhotoId:u.searchParams.get("pareamentoFotoReferencia"),
+  comparisonPhotoId:u.searchParams.get("pareamentoFotoComparacao"),
+ });
+ const returned=new URL(back,"https://example.invalid");
+ assert.equal(returned.searchParams.get("fotoReferencia"),refPhoto);
+ assert.equal(returned.searchParams.get("fotoComparacao"),cmpPhoto);
+ assert.equal(returned.hash,"#comparacao-resultados");
+ const forged=assessmentFromSelectedPairHref(b,pair,{referencePhotoId:"not-a-uuid",comparisonPhotoId:cmpPhoto});
+ assert.equal(new URL(forged,"https://example.invalid").searchParams.has("pareamentoFotoReferencia"),false);
+ assert.equal(new URL(assessmentFromSelectedPairHref(b,pair,{referencePhotoId:refPhoto,comparisonPhotoId:refPhoto}),"https://example.invalid").searchParams.has("pareamentoFotoComparacao"),false);
+});

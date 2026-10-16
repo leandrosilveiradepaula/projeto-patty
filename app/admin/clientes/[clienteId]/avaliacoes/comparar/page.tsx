@@ -62,8 +62,8 @@ export default async function CompareClientAssessments({params,searchParams}:Pro
     </tbody></table></div>
     {rows.length===0?<p>Não existem medidas em nenhum dos dois registros selecionados.</p>:null}
     <nav className={styles.actions} aria-label="Abrir avaliações comparadas">
-      <Link href={assessmentFromSelectedPairHref(pair.referenceId,pair)}>Abrir avaliação de referência</Link>
-      <Link href={assessmentFromSelectedPairHref(pair.comparisonId,pair)}>Abrir avaliação de comparação</Link>
+      <Link href={assessmentFromSelectedPairHref(pair.referenceId,pair,photoPair?.state === "ready" ? {referencePhotoId:photoPair.earlier.id,comparisonPhotoId:photoPair.current.id} : undefined)}>Abrir avaliação de referência</Link>
+      <Link href={assessmentFromSelectedPairHref(pair.comparisonId,pair,photoPair?.state === "ready" ? {referencePhotoId:photoPair.earlier.id,comparisonPhotoId:photoPair.current.id} : undefined)}>Abrir avaliação de comparação</Link>
     </nav>
     <section className={styles.photoSection} aria-labelledby="comparacao-fotos">
       <h3 id="comparacao-fotos">Comparação visual das fotos privadas</h3>
