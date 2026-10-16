@@ -567,7 +567,7 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
       await adminPage.getByRole("link", { name: "Voltar ao feedback selecionado" }).click();
       const selectedFeedback = adminPage.locator("#feedback-enviado-" + feedbackId);
       await expect(selectedFeedback).toBeVisible();
-      await selectedFeedback.getByText("Escolher outra semana anterior para comparar").click();
+      await selectedFeedback.getByText("Escolher semana anterior específica para comparar").click();
       const historicalForm = selectedFeedback.locator('form[action$="/feedback-semanal/comparar"]');
       const previousSelector = historicalForm.getByRole("combobox", { name: "Semana anterior enviada" });
       await expect(previousSelector).toBeVisible();
