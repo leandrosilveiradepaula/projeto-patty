@@ -142,7 +142,7 @@ export default async function AdminAvaliacaoDetailPage({
   const isDraft = !assessment.finalized_at;
   // Recreate the authorized series at the destination; a URL is never proof
   // of assignment, finalization, measurement identity or current access.
-  const progressReturn = !isDraft && filters.origemAvaliacao === assessment.id
+  const progressReturn = !isDraft
     ? readAdminAssessmentProgressReturn(
         filters, assessment.client_id,
         (await loadAccessibleAdminClientProgress(assessment.client_id)).series,

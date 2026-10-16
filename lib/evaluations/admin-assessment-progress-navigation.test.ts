@@ -31,6 +31,14 @@ test("return is allowed only for a point in the currently authorized measure ser
  assert.equal(readAdminAssessmentProgressReturn({...raw,origemSerie:String(series.findIndex(s=>s.key==="cintura")+1)},client,series),null);
  assert.equal(readAdminAssessmentProgressReturn(raw,"not-a-uuid",series),null);
 });
+test("the previous assessment may keep an origin if both records are accessible in the same client",()=>{
+ const from=readAdminAssessmentProgressReturn(raw,client,series);
+ assert.equal(from?.context.assessmentId,b);
+ const previous=withAdminAssessmentProgressContext("/admin/avaliacoes/"+a,from?.context??null);
+ const u=new URL(previous,"https://app.example");
+ assert.equal(u.pathname,"/admin/avaliacoes/"+a);
+ assert.equal(readAdminAssessmentProgressReturn(Object.fromEntries(u.searchParams),client,series)?.href,from?.href);
+});
 test("carry valid origin only inside assessment workspace",()=>{
  const context=readAdminAssessmentProgressReturn(raw,client,series)?.context??null;
  const next=withAdminAssessmentProgressContext("/admin/avaliacoes/"+a+"#comparacao",context);

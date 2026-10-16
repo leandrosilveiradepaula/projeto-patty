@@ -23,7 +23,12 @@ test("factual evolution shows observations separately from comparisons on both s
     assert.ok(source.includes(path.startsWith("app/cliente/") ? "coverage.comparableSeriesCount === 0" : "visibleCoverage.comparableSeriesCount === 0"), path);
     assert.ok(source.includes(path.startsWith("app/cliente/") ? "coverage.singleObservationSeriesCount > 0" : "visibleCoverage.singleObservationSeriesCount > 0"), path);
     assert.ok(source.includes("mesma medida e unidade"), path);
-    assert.ok(source.includes("buildFactualProgressSeries("), path);
+    if (path.startsWith("app/cliente/")) {
+      assert.ok(source.includes("buildFactualProgressSeries("), path);
+    } else {
+      assert.ok(source.includes("loadAccessibleAdminClientProgress(client.id)"), path);
+      assert.ok(read("lib/evaluations/admin-client-progress-loader.ts").includes("buildFactualProgressSeries("), path);
+    }
     assert.ok(source.includes(path.startsWith("app/cliente/") ? 'id={`medida-${originalIndex}`}' : 'id={`medida-${index}`}'), path);
     assert.ok(!source.includes("series.indexOf(item)"), path);
     assert.ok(!source.includes("melhora automática"), path);
@@ -45,11 +50,14 @@ test("client evolution links exactly to the historical assessment that supplied 
 
 test("professional evolution retains authorized detail links and effective corrections", () => {
   const source = read("app/admin/clientes/[clienteId]/evolucao/page.tsx");
-  assert.ok(source.includes('href={"/admin/avaliacoes/" + point.assessmentId}'));
+  assert.ok(source.includes("adminAssessmentDetailFromProgressHref(point.assessmentId, index+1, observationWindow.value)"));
   assert.ok(source.includes("getAccessibleClient(clienteId)"));
   assert.ok(source.includes("notFound()"));
-  assert.ok(source.includes("applyAssessmentMeasurementCorrections("));
-  assert.ok(source.includes("listAccessibleAssessmentMeasurementCorrections("));
+  const loader = read("lib/evaluations/admin-client-progress-loader.ts");
+  assert.ok(loader.includes("applyAssessmentMeasurementCorrections("));
+  assert.ok(loader.includes("listAccessibleAssessmentMeasurementCorrections("));
+  assert.ok(loader.includes("listAccessibleAssessmentsForClient(clientId)"));
+  assert.ok(loader.includes("Boolean(assessment.finalized_at)"));
   assert.ok(source.includes("visibleCoverage.comparableSeriesCount"));
 });
 

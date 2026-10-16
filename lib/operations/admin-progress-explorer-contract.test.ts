@@ -3,15 +3,19 @@ import test from "node:test";
 import { readFileSync } from "node:fs";
 import { parseProgressObservationWindow, parseProgressMeasureSelection, sliceFactualSeries, factualObservationPlot, summarizeFactualSeriesWindow } from "../evaluations/client-progress-explorer.ts";
 const page=readFileSync(new URL("../../app/admin/clientes/[clienteId]/evolucao/page.tsx",import.meta.url),"utf8");
+const loader=readFileSync(new URL("../evaluations/admin-client-progress-loader.ts",import.meta.url),"utf8");
 test("professional progress explorer uses only previously authorized finalized measurements",()=>{
- assert.match(page,/listAccessibleAssessmentsForClient\(client.id\)/);
- assert.match(page,/Boolean\(assessment.finalized_at\)/);
- assert.match(page,/applyAssessmentMeasurementCorrections/);
+ assert.match(page,/loadAccessibleAdminClientProgress\(client.id\)/);
+ assert.match(loader,/listAccessibleAssessmentsForClient\(clientId\)/);
+ assert.match(loader,/Boolean\(assessment.finalized_at\)/);
+ assert.match(loader,/applyAssessmentMeasurementCorrections/);
+ assert.match(loader,/listAccessibleAssessmentMeasurementCorrections/);
  assert.match(page,/parseProgressObservationWindow\(rawFilters.janela\)/);
  assert.match(page,/parseProgressMeasureSelection\(rawFilters.serie,series.length\)/);
  assert.match(page,/sliceFactualSeries/);
  assert.match(page,/factualObservationPlot/);
  assert.doesNotMatch(page,/service_role|createClient\(.*service/);
+ assert.doesNotMatch(loader,/service_role|createClient\(.*service/);
 });
 test("observation filters do not invent clinical meaning or carry measurement names in URLs",()=>{
  assert.deepEqual(parseProgressObservationWindow(["3"]),{value:"all",invalid:true});
