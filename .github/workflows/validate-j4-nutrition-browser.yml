@@ -130,11 +130,13 @@ jobs:
             "too many requests", "TypeError", "ReferenceError"];
           const categories = known.filter(term => data.toLowerCase().includes(term.toLowerCase()));
           const loadStages = ["protocol","versions","approvals","publications","meal-plans"];
+          const mealStages = ["plans","variants","cycles","meals","steps","doses"];
+          const mealFailure = mealStages.find(stage => data.includes("J4_MEAL_PLAN_LOAD_FAILURE:" + stage)) ?? "none-detected";
           const loadFailure = loadStages.find(stage => data.includes("J4_ADMIN_LOAD_FAILURE:" + stage)) ?? "none-detected";
           process.stdout.write("J4 server diagnostics: SQLSTATE=" +
             (codes.length ? [...new Set(codes)].join(",") : "none-detected") +
             "; categories=" + (categories.length ? categories.join(",") : "unclassified") +
-            "; admin-load=" + loadFailure + "\n");
+            "; admin-load=" + loadFailure + "; meal-load=" + mealFailure + "\n");
           NODE
 
       - name: Destroy all disposable services
