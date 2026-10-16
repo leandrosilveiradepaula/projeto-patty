@@ -705,7 +705,21 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
           ).map((row) => row.channel_key);
           if (stored.length === 1 && stored[0] === "in_app") return "persisted";
           if (await preference.getByText("Não foi possível atualizar", { exact: true }).count()) {
-            return "action-rejected";
+            // Only expose one of the action's fixed, non-sensitive UI error
+            // categories. Never print response bodies, PII, cookies or tokens.
+            const knownErrors = [
+              ["invalid-client", "Cliente inválida para configurar o canal do Feedback Semanal."],
+              ["invalid-version", "A versão atual da preferência é inválida. Atualize a página."],
+              ["assignment", "Esta cliente não está acessível para sua atribuição atual."],
+              ["invalid-channel", "Selecione um canal válido para o Feedback Semanal."],
+              ["persistence", "Não foi possível alterar o canal. A configuração pode ter mudado; atualize a página e tente novamente."],
+            ];
+            for (const [code, label] of knownErrors) {
+              if (await preference.getByText(label, { exact: true }).count()) {
+                return "action-rejected:" + code;
+              }
+            }
+            return "action-rejected:unknown";
           }
           const currentPath = new URL(adminPage.url()).pathname;
           if (currentPath.startsWith("/mfa/") || currentPath === "/login") return "authorization-redirect";
