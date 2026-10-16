@@ -40,3 +40,59 @@ export function compareFinalizedAssessmentPair(
     };
   });
 }
+
+export type AuthorizedAssessmentPair = {
+  referenceId: string;
+  comparisonId: string;
+};
+
+/** Selection and origin URLs carry only opaque IDs. Authorization is checked
+ * against the currently visible FINALIZED assessments at every destination. */
+export function readAssessmentPairFromDetail(
+  raw: { pareamentoReferencia?: unknown; pareamentoComparacao?: unknown },
+  finalizedAssessmentIds: readonly string[],
+  currentAssessmentId: string,
+): AuthorizedAssessmentPair | null {
+  const pair = selectFinalizedAssessmentPair({
+    referencia: raw.pareamentoReferencia,
+    comparacao: raw.pareamentoComparacao,
+  }, finalizedAssessmentIds);
+  if (!pair || (currentAssessmentId !== pair.referenceId &&
+                currentAssessmentId !== pair.comparisonId)) return null;
+  return pair;
+}
+
+export function selectedAssessmentPairHref(
+  clientId: string,
+  pair: AuthorizedAssessmentPair,
+): string {
+  if (!isUuid(clientId) || !isUuid(pair.referenceId) ||
+      !isUuid(pair.comparisonId) || pair.referenceId === pair.comparisonId) {
+    return "/admin/clientes";
+  }
+  const search = new URLSearchParams({
+    referencia: pair.referenceId,
+    comparacao: pair.comparisonId,
+  });
+  return "/admin/clientes/" + clientId + "/avaliacoes/comparar?" +
+    search.toString() + "#comparacao-resultados";
+}
+
+/** Builds a detail deep link only from an already authorized comparison. */
+export function assessmentFromSelectedPairHref(
+  assessmentId: string,
+  pair: AuthorizedAssessmentPair,
+): string {
+  if (!isUuid(assessmentId)) return "/admin/avaliacoes";
+  const base = "/admin/avaliacoes/" + assessmentId;
+  if (!isUuid(pair.referenceId) || !isUuid(pair.comparisonId) ||
+      pair.referenceId === pair.comparisonId ||
+      (assessmentId !== pair.referenceId && assessmentId !== pair.comparisonId)) {
+    return base;
+  }
+  const search = new URLSearchParams({
+    pareamentoReferencia: pair.referenceId,
+    pareamentoComparacao: pair.comparisonId,
+  });
+  return base + "?" + search.toString();
+}
