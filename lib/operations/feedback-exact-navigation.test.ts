@@ -76,7 +76,8 @@ test("J2 inbox context survives exact record, comparison and manual assessment r
   assert.match(compare, /readWeeklyFeedbackInboxReturn\(requested\.caixaRetorno\)/);
   assert.match(compare, /withWeeklyFeedbackInboxReturn\(receivedWeeklyFeedbackExactHref\(current\)/);
   assert.match(assessment, /readWeeklyFeedbackInboxReturn\(filters\.caixaRetorno\)/);
-  assert.match(assessment, /backToFeedback\(weeklyFeedbackComparisonHref\(/);
+  assert.match(assessment, /backToFeedback\(weeklyFeedbackComparisonReturnHref\(/);
+  assert.match(assessment, /readWeeklyComparisonReturn\(/);
   assert.match(assessment, /backToFeedback\(receivedWeeklyFeedbackExactHref\(/);
 });
 

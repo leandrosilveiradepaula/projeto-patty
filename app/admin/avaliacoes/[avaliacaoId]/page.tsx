@@ -1,9 +1,9 @@
 import { readClientDirectoryReturn, withClientDirectoryReturn } from "@/lib/operations/client-directory-return";
 import { readPendingQueueReturn, withPendingQueueReturn } from "@/lib/operations/pending-queue-return";
-import { readWeeklyComparisonReturn, readWeeklyFeedbackDecisionReturn } from "@/lib/follow-up/weekly-feedback-professional-handoff";
+import { readWeeklyComparisonReturn, readWeeklyFeedbackDecisionReturn, weeklyFeedbackComparisonReturnHref } from "@/lib/follow-up/weekly-feedback-professional-handoff";
 import { readWeeklyFeedbackInboxReturn, withWeeklyFeedbackInboxReturn } from "@/lib/follow-up/weekly-feedback-inbox-return";
 import { receivedWeeklyFeedbackExactHref } from "@/lib/follow-up/recent-weekly-feedbacks";
-import { weeklyFeedbackComparisonHref } from "@/lib/follow-up/weekly-feedback-comparison";
+
 import { findPreviousFinalizedAssessment, formatAdministrativeAssessmentDate } from "@/lib/evaluations/administrative-assessment-history";
 import { earlierFinalizedPhotoAssessmentOptions, selectEarlierPhotoAssessment } from "@/lib/evaluations/assessment-photo-comparison";
 import { AssessmentLongitudinalPhotoComparison } from "@/components/admin/AssessmentLongitudinalPhotoComparison";
@@ -61,7 +61,7 @@ type AdminAvaliacaoDetailPageProps = {
   params: Promise<{
     avaliacaoId: string;
   }>;
-  searchParams: Promise<{ fotoAvaliacaoAnterior?: string; fotoAnterior?: string; fotoAtual?: string; listaQ?: string; listaView?: string; listaPagina?: string; filaRetorno?: string; feedbackAtual?: string | string[]; feedbackAnterior?: string | string[]; caixaRetorno?: string | string[] }>;
+  searchParams: Promise<{ fotoAvaliacaoAnterior?: string; fotoAnterior?: string; fotoAtual?: string; listaQ?: string; listaView?: string; listaPagina?: string; filaRetorno?: string; feedbackAtual?: string | string[]; feedbackAnterior?: string | string[]; feedbackVisao?: string | string[]; caixaRetorno?: string | string[] }>;
 };
 
 const professionalDecisionLabels: Record<string, string> = {
@@ -264,10 +264,10 @@ export default async function AdminAvaliacaoDetailPage({
         <Link href={navigate(`/admin/clientes/${assessment.client_id}/evolucao`)}>Evolução das medidas</Link>
         <Link href="#historico-profissional">Histórico profissional ({followUps.length} registro(s))</Link>
         {comparisonReturn ? (
-          <Link href={backToFeedback(weeklyFeedbackComparisonHref(
+          <Link href={backToFeedback(weeklyFeedbackComparisonReturnHref(
             assessment.client_id,
-            comparisonReturn.currentId,
-            comparisonReturn.previousId,
+            comparisonReturn,
+            filters.feedbackVisao,
           ))}>
             Voltar à comparação dos Feedbacks Semanais
           </Link>
@@ -539,7 +539,12 @@ export default async function AdminAvaliacaoDetailPage({
         title="Registrar acompanhamento"
       >
         {comparisonReturn ? (
-          <p>Você chegou aqui após consultar dois Feedbacks Semanais. Esta decisão será registrada nesta avaliação finalizada, não nos feedbacks; o sistema não marca respostas como revisadas nem altera o protocolo automaticamente.</p>
+          <p>
+            Você chegou aqui após consultar dois Feedbacks Semanais.
+            A comparação será reaberta com as mesmas semanas e o filtro de respostas escolhido.
+            Esta decisão será registrada nesta avaliação finalizada, não nos feedbacks;
+            o sistema não marca respostas como revisadas nem altera o protocolo automaticamente.
+          </p>
         ) : null}
         {submittedReturn?.kind === "submitted" ? (
           <p>Você chegou após consultar um Feedback Semanal enviado. A decisão será registrada nesta avaliação finalizada, não no feedback. O envio continua preservado sem marcação automática de revisão ou mudança de protocolo.</p>
