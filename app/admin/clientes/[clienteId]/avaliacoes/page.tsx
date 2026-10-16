@@ -129,6 +129,9 @@ export default async function AdminClientAssessmentsPage({
         <Link href="#historico-finalizado">Histórico finalizado ({finalizedAssessments.length})</Link>
         <Link href={continueFromFeedback("/admin/avaliacoes")}>Todas as avaliações</Link>
       </nav>
+      <Section title="Comparação histórica" description="Escolha duas avaliações finalizadas para consultar lado a lado medidas efetivas, sem classificação clínica automática.">
+        <Link className={styles.actionLink} href={continueFromFeedback(`/admin/clientes/${client.id}/avaliacoes/comparar`)}>Comparar duas avaliações</Link>
+      </Section>
       <Section
         description="Após finalizar uma avaliação, consulte a evolução factual e retome a preparação do protocolo na mesma área da cliente."
         title="Próximos passos"

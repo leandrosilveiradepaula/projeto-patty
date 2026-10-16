@@ -1,3 +1,11 @@
+## 2026-10-16 — J3: comparação manual de duas avaliações finalizadas (branch, em validação)
+
+**DECISÃO TÉCNICA:** a Patty poderá escolher duas avaliações finalizadas, da mesma cliente e sob o assignment atual, para consultar lado a lado os valores efetivos (corrigidos, quando aplicável). A diferença exibida é **comparação menos referência**, apenas quando existem a mesma chave e a mesma unidade nos dois registros; registros ausentes ou incompatíveis ficam explicitamente não comparáveis. Não há interpretação clínica, classificação de melhora/piora, score, ajuste ou publicação automática.
+
+**IMPLEMENTADO NA BRANCH, NÃO CONFUNDIR COM TESTADO/MERGEADO/PUBLICADO:** rota administrativa de comparação, seleção validada contra IDs carregados pela sessão/RLS, tela móvel, navegação para os registros e testes determinísticos de seleções inválidas e diferenças. **ACEITAÇÃO:** executar CI completo no SHA, revalidar regressões e homologar uso autenticado e mobile em momento específico; nenhuma migration/alteração de Auth/RLS.
+
+---
+
 ## 2026-10-16 — J3 proposta técnica: continuidade da evolução filtrada à avaliação (em validação)
 
 **ESCOPO TÉCNICO, NÃO REGRA PROFISSIONAL:** preservar, no workspace da Patty, a medida selecionada e a janela factual de observações ao abrir uma avaliação finalizada a partir da evolução. O destino revalida o registro com RLS/assignment atual e só oferece retorno quando o ID realmente integra a série de medidas efetivas e finalizadas, sob o filtro informado. Links contêm somente UUIDs opacos, índice numérico e a janela permitida (`all/3/6/12`); nenhum nome de medida, resposta ou valor de saúde entra na URL.
