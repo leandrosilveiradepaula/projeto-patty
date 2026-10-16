@@ -110,6 +110,27 @@ jobs:
           export J4_E2E_SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY"
           npx playwright test e2e/j4-nutrition-protocol-lifecycle.spec.mjs --reporter=line --workers=1
 
+      - name: Classify local server errors without disclosing log content
+        if: failure()
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require("node:fs");
+          const filename = process.env.RUNNER_TEMP + "/j4-next.log";
+          const data = fs.existsSync(filename) ? fs.readFileSync(filename, "utf8") : "";
+          // Output only SQLSTATE and known error classes. Never print freeform
+          // messages, stack traces, protocol values, URLs, identities or tokens.
+          const codes = [...data.matchAll(/(?:code|sqlstate):\\s*['"]?([A-Z0-9]{5})['"]?/gi)]
+            .map(match => match[1].toUpperCase());
+          const known = ["permission denied", "infinite recursion", "row-level security",
+            "violates", "column", "relation", "query returned", "unexpected null",
+            "too many requests", "TypeError", "ReferenceError"];
+          const categories = known.filter(term => data.toLowerCase().includes(term.toLowerCase()));
+          process.stdout.write("J4 server diagnostics: SQLSTATE=" +
+            (codes.length ? [...new Set(codes)].join(",") : "none-detected") +
+            "; categories=" + (categories.length ? categories.join(",") : "unclassified") + "\\n");
+          NODE
+
       - name: Destroy all disposable services
         if: always()
         shell: bash
