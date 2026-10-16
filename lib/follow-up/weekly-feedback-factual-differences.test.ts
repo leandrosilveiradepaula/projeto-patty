@@ -69,7 +69,7 @@ test("professional comparison keeps authorization and original-version gates bef
   assert.match(page, /sameVersion && currentDefinition && previousDefinition/);
   assert.match(page, /compareSameVersionWeeklyFeedbackAnswers\(/);
   assert.match(page, /readWeeklyFeedbackAnswerView\(requested\.visao\)/);
-  assert.match(page, /comparison\.rows\.filter\(/);
+  assert.match(page, /comparison\?\.rows\.filter\(/);
   assert.match(page, /Questionários de versões diferentes/);
   assert.match(page, /withWeeklyFeedbackInboxReturn\(/);
   assert.doesNotMatch(page, /createAdminClient|service_role|\.update\(|\.insert\(|\.delete\(/);
