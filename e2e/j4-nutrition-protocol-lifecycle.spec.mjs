@@ -94,12 +94,34 @@ async function pollRows(query,length){
   return rows(query);
 }
 async function mobileFit(page){
-  const s=await page.evaluate(()=>({
-    width:document.documentElement.clientWidth,
-    scroll:document.documentElement.scrollWidth,
-  }));
-  expect(s.scroll,"Protocol workspace must fit a mobile viewport")
-    .toBeLessThanOrEqual(s.width+1);
+  const s=await page.evaluate(()=>{
+    const width=document.documentElement.clientWidth;
+    const scroll=document.documentElement.scrollWidth;
+    // Diagnostics expose only element tag/class and geometry, never protocol
+    // values, labels, HTML, URLs, form contents or account identifiers.
+    const offenders=[...document.querySelectorAll("body *")]
+      .filter(node=>{
+        const box=node.getBoundingClientRect();
+        return box.width>0 && box.right>width+1 &&
+          getComputedStyle(node).display!=="none";
+      })
+      .slice(0,14)
+      .map(node=>{
+        const box=node.getBoundingClientRect();
+        return {
+          tag:node.tagName.toLowerCase(),
+          classes:typeof node.className==="string" ? node.className.slice(0,100):"",
+          parent:typeof node.parentElement?.className==="string" ?
+            node.parentElement.className.slice(0,100):"",
+          left:Math.round(box.left),right:Math.round(box.right),
+          width:Math.round(box.width),
+        };
+      });
+    return {width,scroll,offenders};
+  });
+  if(s.scroll>s.width+1){
+    throw new Error("J4 mobile overflow (geometry/classes only): "+JSON.stringify(s));
+  }
 }
 async function actionFrom(page,buttonName,callback){
   const form=page.locator("form").filter({
