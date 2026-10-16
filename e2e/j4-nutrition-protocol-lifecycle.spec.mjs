@@ -83,6 +83,9 @@ async function loginClient(page,identity){
   await page.getByLabel("Email").fill(identity.email);
   await page.getByLabel("Senha").fill(identity.password);
   await page.getByRole("button",{name:"Entrar"}).click();
+  // Wait for server action to finish, set its Auth cookies and redirect.
+  // Navigating immediately can abort the action and create a false auth failure.
+  await expect(page).toHaveURL(/\/cliente\/?$/,{timeout:20000});
   await page.goto("/cliente/protocolo");
   await expect(page.getByRole("heading",{name:"Meu protocolo",exact:true})).toBeVisible();
 }
