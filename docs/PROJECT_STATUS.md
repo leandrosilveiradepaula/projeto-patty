@@ -1,3 +1,13 @@
+## 2026-10-16 — J2: continuidade da comparação filtrada à avaliação manual (PR em validação)
+
+**FATO CONFIRMADO:** PR #897 mergeado no `master` `049dae997a338f5bd4680d5d7ca2f2411d0fcf79`. Os checks pré-merge `validate` e `weekly-feedback-browser` foram aprovados no HEAD `f5c4933c83fffc7e1b46dd93490acf2458c066d9`. A Vercel no commit de merge retornou `failure` por **rate limit (retry in 24 hours)**; este SHA **não deve ser declarado publicado**. A homologação profissional J2 continua pendente.
+
+**DECISÃO TÉCNICA/PRODUTO EM BRANCH (NÃO INTEGRADA):** preservar, ao entrar na avaliação finalizada pela comparação factual da J2, os dois IDs de feedback e a preferência *Somente respostas diferentes*. Ao retornar da avaliação, reabrir exatamente a comparação, com `visao=diferentes` somente quando explicitamente escolhida e validada. Qualquer valor ambíguo, array, URL externa ou opção não conhecida é descartado, retornando à visão padrão sem ampliar acesso. O registro da Patty permanece o procedimento manual existente: exige escolha de decisão e justificativa, com autoria/histórico próprios da avaliação; não marca feedback como revisado, não atribui adesão, não modifica nem publica protocolo. Nomes e dados de saúde não entram na URL; o par continua revalidado por RLS + submissão + cliente na comparação.
+
+**ACEITAÇÃO PENDENTE:** testes determinísticos de URLs/contexto, E2E sintético com duas semanas enviadas, avaliação finalizada fictícia local, registro manual com MFA e confirmação de persistência, retorno ao filtro de 1 resposta diferente, nenhuma publicação adicional e negativa de acesso a profissional sem assignment. CI, merge, deployment e homologação devem ser confirmados separadamente. **Sem migrations, Auth/RLS, alteração de regras, automação de decisões ou dados reais.**
+
+---
+
 ## 2026-10-16 — J2: escolha explícita da semana histórica de comparação (em validação)
 
 **FATO CONFIRMADO:** PR #896 mergeado no `master` `deaf6f31c57f6d047213155cef3346260589b58b`. `validate` e `weekly-feedback-browser` passaram no HEAD `501949e1b43fc9c3e25920abe6ccb7cdb27b3bd5`; `validate` pós-merge também passou. A Vercel retornou `success` no SHA de merge. **Publicação técnica não substitui homologação profissional autenticada da J2**, ainda pendente.

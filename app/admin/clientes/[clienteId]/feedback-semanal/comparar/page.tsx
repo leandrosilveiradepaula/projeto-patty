@@ -245,7 +245,7 @@ export default async function AdminWeeklyFeedbackComparisonPage({ params, search
                   <span>Avaliação finalizada de {formatAdministrativeAssessmentDate(assessment.assessed_at)}</span>
                   <Link
                     href={withWeeklyFeedbackInboxReturn(
-                      manualAssessmentDecisionFromComparisonHref(assessment.id, current.id, previous.id),
+                      manualAssessmentDecisionFromComparisonHref(assessment.id, current.id, previous.id, answerView.view),
                       inboxReturn ?? "",
                     )}
                   >

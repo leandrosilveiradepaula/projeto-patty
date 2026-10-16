@@ -8,6 +8,7 @@ import {
   manualAssessmentDecisionFromSubmittedFeedbackHref,
   readWeeklyComparisonReturn,
   readWeeklyFeedbackDecisionReturn,
+  weeklyFeedbackComparisonReturnHref,
 } from "./weekly-feedback-professional-handoff.ts";
 
 const clientA = "a1100000-0000-4000-8000-000000000001";
@@ -71,7 +72,7 @@ test("comparison offers an explicit decision route without creating, sending or 
   assert.match(compare, /Nenhuma avaliação finalizada/);
   assert.match(compare, /A decisão ficará registrada na avaliação escolhida/);
   assert.match(evaluation, /readWeeklyComparisonReturn\(\s*filters\.feedbackAtual,\s*filters\.feedbackAnterior,?\s*\)/);
-  assert.match(evaluation, /weeklyFeedbackComparisonHref\(\s*assessment\.client_id/);
+  assert.match(evaluation, /weeklyFeedbackComparisonReturnHref\(\s*assessment\.client_id/);
   assert.match(evaluation, /Voltar à comparação dos Feedbacks Semanais/);
   assert.doesNotMatch(compare, /addProfessionalFollowUp|createAccessibleProfessionalFollowUp|\.insert\(|\.update\(/);
 });
@@ -167,4 +168,63 @@ test("manual feedback handoff keeps the professional action and RLS constraints 
   assert.match(action, /if \(!assessment\.finalized_at\)/);
   assert.match(action, /createAccessibleProfessionalFollowUp/);
   assert.doesNotMatch(action, /markWeeklyFeedbackReviewed|update.*feedback.*reviewed/i);
+});
+
+test("comparison handoff returns to the exact two weeks and difference-only view", () => {
+  const filtered = manualAssessmentDecisionFromComparisonHref(assessment, current, previous, "diferentes");
+  assert.equal(filtered,
+    "/admin/avaliacoes/" + assessment + "?feedbackAtual=" + current +
+    "&feedbackAnterior=" + previous + "&feedbackVisao=diferentes#acompanhamento");
+  const parsed = new URL(filtered, "https://patty.invalid");
+  assert.deepEqual([...parsed.searchParams.keys()],
+    ["feedbackAtual","feedbackAnterior","feedbackVisao"]);
+  const pair = readWeeklyComparisonReturn(parsed.searchParams.get("feedbackAtual"),
+    parsed.searchParams.get("feedbackAnterior"));
+  assert.ok(pair);
+  assert.equal(weeklyFeedbackComparisonReturnHref(clientA, pair, parsed.searchParams.get("feedbackVisao")),
+    "/admin/clientes/" + clientA +
+    "/feedback-semanal/comparar?atual=" + current + "&anterior=" + previous +
+    "&visao=diferentes#respostas-comparadas");
+
+  const withoutFilter = manualAssessmentDecisionFromComparisonHref(assessment, current, previous);
+  assert.equal(withoutFilter,
+    "/admin/avaliacoes/" + assessment + "?feedbackAtual=" + current +
+    "&feedbackAnterior=" + previous + "#acompanhamento");
+  assert.equal(weeklyFeedbackComparisonReturnHref(clientA, pair, undefined),
+    "/admin/clientes/" + clientA + "/feedback-semanal/comparar?atual=" + current +
+    "&anterior=" + previous);
+});
+
+test("tampered view cannot inject external routes, patient answers or unrecognized filters", () => {
+  const valid = readWeeklyComparisonReturn(current, previous);
+  assert.ok(valid);
+  for (const payload of [
+    "javascript:alert(1)", "//external.example", ["diferentes","todas"],
+    { location: "/cliente" }, null, "", "DIFERENTES", "resposta sintética",
+  ]) {
+    const back = weeklyFeedbackComparisonReturnHref(clientA, valid, payload);
+    assert.equal(back,
+      "/admin/clientes/" + clientA + "/feedback-semanal/comparar?atual=" + current +
+      "&anterior=" + previous);
+  }
+  const path = manualAssessmentDecisionFromComparisonHref(
+    assessment, current, previous, "javascript:alert(1)" as "diferentes",
+  );
+  assert.equal(path.includes("feedbackVisao"), false);
+});
+
+test("authorized comparison and finalized assessment preserve view through manual decision", () => {
+  const comparison = read("app/admin/clientes/[clienteId]/feedback-semanal/comparar/page.tsx");
+  const assessment = read("app/admin/avaliacoes/[avaliacaoId]/page.tsx");
+  assert.match(comparison, /manualAssessmentDecisionFromComparisonHref\(assessment\.id, current\.id, previous\.id, answerView\.view\)/);
+  assert.match(assessment, /feedbackVisao\?: string \| string\[\]/);
+  assert.match(assessment, /weeklyFeedbackComparisonReturnHref\(/);
+  assert.match(assessment, /readWeeklyComparisonReturn\(/);
+  assert.match(assessment, /backToFeedback\(/);
+  assert.match(assessment, /Voltar à comparação dos Feedbacks Semanais/);
+  const action = read("app/admin/avaliacoes/[avaliacaoId]/actions.ts");
+  assert.match(action, /await requireRole\("admin"\)/);
+  assert.match(action, /if \(!assessment\.finalized_at\)/);
+  assert.match(action, /createAccessibleProfessionalFollowUp\(/);
+  assert.doesNotMatch(action, /markWeeklyFeedbackReviewed|update.*client_weekly_feedbacks|publish.*protocol/i);
 });

@@ -1,3 +1,13 @@
+## 2026-10-16 — J2: da comparação filtrada à decisão profissional e retorno (em validação)
+
+**OBJETIVO:** na análise factual, Patty abre uma avaliação previamente finalizada e decide manualmente usando o formulário de acompanhamento já existente, podendo voltar à mesma dupla de semanas com a visualização *Somente respostas diferentes* preservada. A ação não vincula automaticamente o feedback à decisão e não indica revisão concluída; decisão, motivo e observações ficam no histórico da avaliação, não nas respostas originais.
+
+**CRITÉRIOS DE ACEITAÇÃO TÉCNICA:** helper de navegação aceita somente IDs válidos e estado da visualização em whitelist. Filtragem ambígua ou adulterada não gera redirecionamento nem amplia acesso. Playwright autenticado local cria a cliente/protocolo e dois feedbacks sintéticos, prepara avaliação finalizada **exclusivamente como fixture** no Supabase descartável, submete ambos os feedbacks pela UI, compara as semanas, seleciona visualização de respostas diferentes, abre avaliação com MFA, registra decisão manual e justifica, verifica persistência, volta ao mesmo par e confirma filtro, ausência de publicação adicional e negação a administrador sem assignment. A limpeza local é obrigatória. O CI `Validate application` e `weekly-feedback-browser` deve passar no commit exato.
+
+**ESTADO:** implementação em branch ainda não integrada, testada no CI, publicada ou homologada. PR #897 foi mergeado no `master` `049dae99`; status Vercel deste SHA: rate limit, não publicado. Homologação real por Patty continua pendente mesmo que o E2E sintético passe.
+
+---
+
 ## 2026-10-16 — J2: seleção histórica explícita para comparação (branch em teste)
 
 A comparação atual oferece a semana submetida anterior mais próxima. A melhoria proposta permite abrir o histórico original de uma semana enviada, escolher outro período anterior também submetido e comparar exatamente os dois registros, sem mudar dados ou estado profissional. A lista deriva somente da cliente autorizada e não inclui rascunhos, outras clientes, semanas iguais ou posteriores. A comparação continua revalidando UUIDs, client ID, `submitted_at` e ordem de períodos via consulta exata RLS/MFA. Para versões diferentes do questionário, não realizar correspondência entre perguntas. Respostas não aparecem em URLs ou no seletor.

@@ -1,4 +1,6 @@
 import { isUuid } from "../validation/uuid.ts";
+import { readWeeklyFeedbackAnswerView, weeklyFeedbackAnswerViewHref, type WeeklyFeedbackAnswerView } from "./weekly-feedback-factual-differences.ts";
+import { weeklyFeedbackComparisonHref } from "./weekly-feedback-comparison.ts";
 
 export type FinalizedAssessmentChoice = {
   id: string;
@@ -51,12 +53,31 @@ export function manualAssessmentDecisionFromComparisonHref(
   assessmentId: string,
   currentId: string,
   previousId: string,
+  view: WeeklyFeedbackAnswerView = "todas",
 ): string {
   const params = new URLSearchParams({
     feedbackAtual: currentId,
     feedbackAnterior: previousId,
   });
+  // Carry presentation state only, never health answers or a decision.
+  if (view === "diferentes") params.set("feedbackVisao", "diferentes");
   return `/admin/avaliacoes/${encodeURIComponent(assessmentId)}?${params.toString()}#acompanhamento`;
+}
+
+/** The assessment is a separate authorized page. Return links can contain
+ * only validated opaque record IDs and a known presentation mode. The
+ * destination comparison independently checks assignment, AAL2 and both
+ * submitted records again; this function grants no access.
+ */
+export function weeklyFeedbackComparisonReturnHref(
+  clientId: string,
+  pair: WeeklyComparisonReturn,
+  rawView: unknown,
+): string {
+  const view = readWeeklyFeedbackAnswerView(rawView);
+  return !view.invalid && view.view === "diferentes"
+    ? weeklyFeedbackAnswerViewHref(clientId, pair.currentId, pair.previousId, "diferentes")
+    : weeklyFeedbackComparisonHref(clientId, pair.currentId, pair.previousId);
 }
 
 /**

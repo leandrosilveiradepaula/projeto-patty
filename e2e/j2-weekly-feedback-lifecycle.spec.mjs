@@ -37,6 +37,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-
 const allowedTables = new Set([
   "profiles", "user_roles", "clients", "client_assignments",
   "protocols", "protocol_versions", "protocol_version_approvals", "protocol_publications",
+  "client_assessments", // Synthetic local finalized evaluation for manual J2 handoff.
 ]);
 
 function localSql(query) {
@@ -185,6 +186,17 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
     client_id: clientId, staff_profile_id: admin.id,
   });
   await seedPublishedProtocol(admin.id, clientId);
+  // A finalized assessment is a fixture prerequisite to testing the manual
+  // handoff, NOT an automatically generated assessment or professional act.
+  // This insert is restricted to the disposable local PostgreSQL container.
+  const finalizedAssessmentId = await insert("client_assessments", {
+    client_id: clientId,
+    assessed_at: "2026-10-13T12:00:00Z",
+    assessment_kind: "monthly",
+    created_by_profile_id: admin.id,
+    finalized_at: "2026-10-14T12:00:00Z",
+    finalized_by_profile_id: admin.id,
+  });
 
   const adminTotp = await enrollLocalTotp(admin);
   const unassignedTotp = await enrollLocalTotp(unassigned);
@@ -579,6 +591,58 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
       expect([...compareParams.keys()]).toEqual(["atual", "anterior"]);
     });
 
+    await test.step("Patty retorna da decisão manual à comparação com as diferenças filtradas", async () => {
+      // Reuse the exact pair created and submitted via the authenticated UI.
+      // No responses, clinical texts or internal records enter the navigation URL.
+      const comparisonPage = new URL(adminPage.url());
+      const currentId = comparisonPage.searchParams.get("atual");
+      const previousId = comparisonPage.searchParams.get("anterior");
+      expect(currentId).toBe(feedbackId);
+      expect(previousId).toMatch(UUID);
+      await adminPage.getByRole("link", { name: "Somente respostas diferentes" }).click();
+      await expect(adminPage.locator('[data-comparison-answer="true"]')).toHaveCount(1);
+      const manualLink = adminPage.getByRole("link", {
+        name: "Abrir avaliação e registrar decisão manual",
+      });
+      await expect(manualLink).toHaveAttribute("href", new RegExp(
+        "feedbackAtual=" + feedbackId + "&feedbackAnterior=" + previousId +
+        "&feedbackVisao=diferentes",
+      ));
+      await manualLink.click();
+      await expect(adminPage).toHaveURL(new RegExp("/admin/avaliacoes/" + finalizedAssessmentId));
+      await expect(adminPage.getByRole("link", {
+        name: "Voltar à comparação dos Feedbacks Semanais",
+      })).toHaveAttribute("href", new RegExp(
+        "atual=" + feedbackId + "&anterior=" + previousId + "&visao=diferentes#respostas-comparadas",
+      ));
+
+      const decisionCount = () => localSelect(
+        "select id, professional_decision, decision_reason from public.professional_follow_ups" +
+        " where assessment_id = " + sqlLiteral(finalizedAssessmentId),
+      );
+      expect(decisionCount()).toHaveLength(0);
+      await adminPage.locator('select[name="professionalDecision"]').selectOption("maintain");
+      await adminPage.locator('textarea[name="decisionReason"]').fill(
+        "Manter até revisão individual da avaliação sintética J2.",
+      );
+      await adminPage.getByRole("button", { name: "Registrar acompanhamento", exact: true }).click();
+      await expect(adminPage.getByText("Acompanhamento profissional registrado.")).toBeVisible();
+      await expect.poll(() => decisionCount().length, { timeout: 20_000 }).toBe(1);
+      expect(decisionCount()[0].professional_decision).toBe("maintain");
+      expect((await feedbackRecord(clientId, periodStart)).answers.q17).toBe(8);
+      const publications = localSelect(
+        "select id from public.protocol_publications where client_id = " + sqlLiteral(clientId),
+      );
+      expect(publications).toHaveLength(1);
+
+      await adminPage.getByRole("link", {
+        name: "Voltar à comparação dos Feedbacks Semanais",
+      }).click();
+      await expect(adminPage).toHaveURL(/visao=diferentes#respostas-comparadas/);
+      await expect(adminPage.getByText("1 de 21 pergunta(s) com respostas diferentes.")).toBeVisible();
+      await expect(adminPage.locator('[data-comparison-answer="true"]')).toHaveCount(1);
+    });
+
     await test.step("outra cliente, outro profissional e anônimo não acessam o registro", async () => {
       const login = await otherApi.auth.signInWithPassword({
         email: other.email, password: other.password,
@@ -620,6 +684,10 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
       await expect(unassignedPage.getByText("Página ou registro indisponível", { exact: true })).toBeVisible();
       await expect(unassignedPage.locator("#feedback-enviado-" + feedbackId)).toHaveCount(0);
       await expect(unassignedPage.getByText("Resposta sintética J2 exclusivamente local")).toHaveCount(0);
+
+      await unassignedPage.goto("/admin/avaliacoes/" + finalizedAssessmentId);
+      await expect(unassignedPage.getByText("Página ou registro indisponível", { exact: true })).toBeVisible();
+      await expect(unassignedPage.getByRole("button", { name: "Registrar acompanhamento" })).toHaveCount(0);
 
       await unassignedPage.goto("/admin/feedback-semanal?cliente=" + clientId);
       await expect(unassignedPage.getByText("Filtros indisponíveis", { exact: true })).toBeVisible();
