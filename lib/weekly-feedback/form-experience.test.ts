@@ -85,3 +85,23 @@ test("multiple pending weeks keep all answer labels, errors and focus targets di
   assert.match(e2e, /answerInput\(question\.key\)/);
   assert.doesNotMatch(e2e, /#weekly-feedback-answer-q|\#weekly-feedback-answer-" \+/);
 });
+
+test("mobile client form exposes direct question navigation without storing or submitting health answers", () => {
+  const form = readFileSync(new URL("../../app/cliente/feedback-semanal/ClientWeeklyFeedbackResponseForm.tsx", import.meta.url), "utf8");
+  assert.match(form, /weeklyFeedbackQuestionNavigationId\(feedbackId\)/);
+  assert.match(form, /weeklyFeedbackQuestionNavigationLabel\(question, index, values\[question\.key\] \?\? ""\)/);
+  assert.match(form, /event\.currentTarget\.value = "";/);
+  assert.match(form, /if \(!questions\.some\(\(question\) => question\.key === key\)\) return;/);
+  assert.match(form, /focusQuestion\(key\);/);
+  assert.match(form, /Navegar não salva nem envia o feedback/);
+  assert.doesNotMatch(form, /localStorage|sessionStorage|console\.log/);
+});
+
+test("final review focuses its heading and edits a specific question without triggering submit", () => {
+  const form = readFileSync(new URL("../../app/cliente/feedback-semanal/ClientWeeklyFeedbackResponseForm.tsx", import.meta.url), "utf8");
+  assert.match(form, /if \(reviewOpen\) reviewHeadingRef\.current\?\.focus\(\)/);
+  assert.match(form, /ref=\{reviewHeadingRef\} tabIndex=\{-1\}/);
+  assert.match(form, /Editar pergunta \{index \+ 1\}/);
+  assert.match(form, /setReviewOpen\(false\);\s*focusQuestion\(question\.key\);/);
+  assert.match(form, /type="button"\s*>\s*Editar pergunta/);
+});
