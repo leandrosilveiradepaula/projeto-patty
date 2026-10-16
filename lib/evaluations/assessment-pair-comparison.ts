@@ -65,6 +65,7 @@ export function readAssessmentPairFromDetail(
 export function selectedAssessmentPairHref(
   clientId: string,
   pair: AuthorizedAssessmentPair,
+  photos?: { referencePhotoId?: unknown; comparisonPhotoId?: unknown },
 ): string {
   if (!isUuid(clientId) || !isUuid(pair.referenceId) ||
       !isUuid(pair.comparisonId) || pair.referenceId === pair.comparisonId) {
@@ -74,6 +75,14 @@ export function selectedAssessmentPairHref(
     referencia: pair.referenceId,
     comparacao: pair.comparisonId,
   });
+  // The IDs are non-sensitive opaque references. The destination always
+  // revalidates both IDs against the currently authorized photo associations.
+  if (typeof photos?.referencePhotoId === "string" && isUuid(photos.referencePhotoId) &&
+      typeof photos?.comparisonPhotoId === "string" && isUuid(photos.comparisonPhotoId) &&
+      photos.referencePhotoId !== photos.comparisonPhotoId) {
+    search.set("fotoReferencia", photos.referencePhotoId);
+    search.set("fotoComparacao", photos.comparisonPhotoId);
+  }
   return "/admin/clientes/" + clientId + "/avaliacoes/comparar?" +
     search.toString() + "#comparacao-resultados";
 }
@@ -82,6 +91,7 @@ export function selectedAssessmentPairHref(
 export function assessmentFromSelectedPairHref(
   assessmentId: string,
   pair: AuthorizedAssessmentPair,
+  photos?: { referencePhotoId?: unknown; comparisonPhotoId?: unknown },
 ): string {
   if (!isUuid(assessmentId)) return "/admin/avaliacoes";
   const base = "/admin/avaliacoes/" + assessmentId;
@@ -94,5 +104,11 @@ export function assessmentFromSelectedPairHref(
     pareamentoReferencia: pair.referenceId,
     pareamentoComparacao: pair.comparisonId,
   });
+  if (typeof photos?.referencePhotoId === "string" && isUuid(photos.referencePhotoId) &&
+      typeof photos?.comparisonPhotoId === "string" && isUuid(photos.comparisonPhotoId) &&
+      photos.referencePhotoId !== photos.comparisonPhotoId) {
+    search.set("pareamentoFotoReferencia", photos.referencePhotoId);
+    search.set("pareamentoFotoComparacao", photos.comparisonPhotoId);
+  }
   return base + "?" + search.toString();
 }
