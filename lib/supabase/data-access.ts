@@ -2823,6 +2823,23 @@ export async function deleteAccessibleEmptyMealPlanVariant(input: {
   if (error) throw error;
   return Boolean(data);
 }
+// Static, local-only diagnostics; no error messages, URLs or row values.
+async function observeLocalMealPlanLoad<T>(
+  stage: "plans" | "variants" | "cycles" | "meals" | "steps" | "doses",
+  promise: Promise<T>,
+): Promise<T> {
+  try { return await promise; }
+  catch (error) {
+    if (process.env.NEXT_PUBLIC_SUPABASE_URL === "http://127.0.0.1:54321") {
+      const value = (error as {code?: unknown})?.code;
+      const code = typeof value === "string" &&
+        /^(?:[0-9A-Z]{5}|PGRST[0-9]{3})$/.test(value) ? value : "unknown";
+      console.error("J4_MEAL_PLAN_LOAD_FAILURE:" + stage + ";code=" + code);
+    }
+    throw error;
+  }
+}
+
 export async function listAccessibleProtocolVersionMealPlans(
   protocolVersionIds: string[],
 ): Promise<AccessibleProtocolVersionMealPlan[]> {
@@ -2831,7 +2848,7 @@ export async function listAccessibleProtocolVersionMealPlans(
   }
 
   const supabase = await createClient();
-  const plans = await collectPublishedProtocolRows(protocolVersionIds, (ids, from, to) =>
+  const plans = await observeLocalMealPlanLoad("plans", collectPublishedProtocolRows(protocolVersionIds, (ids, from, to) =>
     supabase
       .from("meal_plan_versions")
       .select("id, protocol_version_id, food_equivalent_catalog_version_id")
@@ -2839,7 +2856,7 @@ export async function listAccessibleProtocolVersionMealPlans(
       .order("protocol_version_id", { ascending: true })
       .order("id", { ascending: true })
       .range(from, to),
-  );
+  ));
 
   const planIds = plans.map((plan) => plan.id);
 
@@ -2848,7 +2865,7 @@ export async function listAccessibleProtocolVersionMealPlans(
   }
 
   const [variants, cycles] = await Promise.all([
-    collectPublishedProtocolRows(planIds, (ids, from, to) =>
+    observeLocalMealPlanLoad("variants", collectPublishedProtocolRows(planIds, (ids, from, to) =>
       supabase
         .from("meal_plan_variants")
         .select("id, meal_plan_version_id, variant_key, label, created_at")
@@ -2857,8 +2874,8 @@ export async function listAccessibleProtocolVersionMealPlans(
         .order("created_at", { ascending: true })
         .order("id", { ascending: true })
         .range(from, to),
-    ),
-    collectPublishedProtocolRows(planIds, (ids, from, to) =>
+    )),
+    observeLocalMealPlanLoad("cycles", collectPublishedProtocolRows(planIds, (ids, from, to) =>
       supabase
         .from("meal_plan_cycles")
         .select("id, meal_plan_version_id, created_at")
@@ -2867,14 +2884,14 @@ export async function listAccessibleProtocolVersionMealPlans(
         .order("created_at", { ascending: true })
         .order("id", { ascending: true })
         .range(from, to),
-    ),
+    )),
   ]);
 
   const variantIds = variants.map((variant) => variant.id);
   const cycleIds = cycles.map((cycle) => cycle.id);
 
   const [meals, cycleSteps] = await Promise.all([
-    collectPublishedProtocolRows(variantIds, (ids, from, to) =>
+    observeLocalMealPlanLoad("meals", collectPublishedProtocolRows(variantIds, (ids, from, to) =>
       supabase
         .from("meals")
         .select("id, meal_plan_variant_id, position, label")
@@ -2883,8 +2900,8 @@ export async function listAccessibleProtocolVersionMealPlans(
         .order("position", { ascending: true })
         .order("id", { ascending: true })
         .range(from, to),
-    ),
-    collectPublishedProtocolRows(cycleIds, (ids, from, to) =>
+    )),
+    observeLocalMealPlanLoad("steps", collectPublishedProtocolRows(cycleIds, (ids, from, to) =>
       supabase
         .from("meal_plan_cycle_steps")
         .select("cycle_id, meal_plan_version_id, variant_id, position")
@@ -2892,11 +2909,11 @@ export async function listAccessibleProtocolVersionMealPlans(
         .order("cycle_id", { ascending: true })
         .order("position", { ascending: true })
         .range(from, to),
-    ),
+    )),
   ]);
 
   const mealIds = meals.map((meal) => meal.id);
-  const doseAllocations = await collectPublishedProtocolRows(mealIds, (ids, from, to) =>
+  const doseAllocations = await observeLocalMealPlanLoad("doses", collectPublishedProtocolRows(mealIds, (ids, from, to) =>
     supabase
       .from("meal_dose_allocations")
       .select("id, meal_id, dose_type, dose_quantity")
@@ -2905,7 +2922,7 @@ export async function listAccessibleProtocolVersionMealPlans(
       .order("dose_type", { ascending: true })
       .order("id", { ascending: true })
       .range(from, to),
-  );
+  ));
 
   // Each batch is ordered by the database. Restore a deterministic global
   // presentation order after combining batches without changing snapshot data.
