@@ -103,21 +103,87 @@ async function enrollTotp(user) {
     await api.auth.signOut();
   }
 }
+// The production finalization boundary requires two versioned snapshots.
+// The fixture uses the same active catalog and definition instead of direct
+// state edits or weakening any constraints in the disposable local database.
+function activeTemplate(key) {
+  const rows = select(
+    "select v.id, v.configuration from public.method_configuration_versions v " +
+    "join public.method_configuration_templates t on t.id = v.template_id " +
+    "where t.template_key = " + literal(key) +
+    " and v.activated_at is not null and v.retired_at is null",
+  );
+  if (rows.length !== 1 || !UUID.test(rows[0].id))
+    throw new Error("Expected exactly one active synthetic method version");
+  return rows[0];
+}
+function basicMethod() {
+  const catalog = activeTemplate("evaluation.assessment_kind_catalog");
+  const kind = catalog.configuration?.entries?.find(entry =>
+    entry.historicalCode === "fortnightly" && entry.semanticKey === "basic");
+  if (!kind) throw new Error("Basic assessment absent from active local catalog");
+  const definition = activeTemplate("evaluation.assessment_definition." + kind.semanticKey);
+  if (definition.configuration?.kindKey !== kind.semanticKey ||
+      !Array.isArray(definition.configuration.requiredMeasurements))
+    throw new Error("Active local assessment definition is inconsistent");
+  return { catalog, kind, definition };
+}
 function createDraft(clientId, creator, date) {
   return insert("client_assessments", {
     client_id: clientId, assessed_at: date,
-    assessment_kind: "monthly", created_by_profile_id: creator,
+    assessment_kind: "fortnightly", created_by_profile_id: creator,
   });
 }
-function finalize(assessmentId, actor) {
+async function satisfyRequiredSyntheticItems(id, clientId, staffId, method) {
+  const keys = new Set(select(
+    "select measurement_key from public.assessment_measurements where assessment_id = " +
+    literal(id),
+  ).map(row=>row.measurement_key));
+  for (const requirement of method.definition.configuration.requiredMeasurements) {
+    if (keys.has(requirement.key)) continue;
+    // Local-only synthetic sample to satisfy the current versioned definition;
+    // never a clinical default and never copied to another environment.
+    insert("assessment_measurements", {
+      assessment_id:id, measurement_key:requirement.key,
+      measurement_value:88, unit:"cm",
+    });
+  }
+  const minimum=method.definition.configuration.photoRequirement?.minimumCount ?? 0;
+  if (!Number.isSafeInteger(minimum) || minimum<0 || minimum>15)
+    throw new Error("Unexpected local assessment photo requirement");
+  const count=select(
+    "select client_file_id from public.assessment_files where assessment_id = " +
+    literal(id),
+  ).length;
+  for(let index=count;index<minimum;index++)
+    await addPhoto(id,clientId,staffId,"required-"+index);
+}
+function finalize(assessmentId, actor, method) {
   if (!UUID.test(assessmentId) || !UUID.test(actor))
-    throw new Error("Invalid synthetic assessment finalization");
-  sql("update public.client_assessments set finalized_at = now()," +
-    " finalized_by_profile_id = " + literal(actor) +
-    " where id = " + literal(assessmentId) + " and finalized_at is null;");
-  if (select("select id from public.client_assessments where id = " +
-      literal(assessmentId) + " and finalized_at is not null").length !== 1)
-    throw new Error("Synthetic assessment not finalized");
+    throw new Error("Invalid synthetic finalization");
+  const {catalog,kind,definition}=method;
+  const result=sql("select public.finalize_assessment_from_method_snapshot(" +
+    literal(assessmentId)+"::uuid,"+literal(actor)+"::uuid," +
+    literal(catalog.id)+"::uuid," +
+    literal(JSON.stringify(catalog.configuration))+"::jsonb," +
+    literal(JSON.stringify({
+      historical_code:kind.historicalCode,semantic_key:kind.semanticKey,label:kind.label,
+    }))+"::jsonb," +
+    literal(definition.id)+"::uuid," +
+    literal(JSON.stringify(definition.configuration))+"::jsonb," +
+    literal(JSON.stringify({kind_key:kind.semanticKey,can_finalize:true}))+"::jsonb);");
+  if (!UUID.test(result)) throw new Error("Method snapshot was not persisted");
+  expect(select(
+    "select id from public.client_assessments where id = "+literal(assessmentId) +
+    " and finalized_at is not null and method_configuration_snapshot_set_id = "+literal(result),
+  )).toHaveLength(1);
+  const fragments=select(
+    "select template_key from public.method_configuration_snapshots where snapshot_set_id = " +
+    literal(result),
+  ).map(row=>row.template_key).sort();
+  expect(fragments).toEqual([
+    "evaluation.assessment_definition.basic","evaluation.assessment_kind_catalog",
+  ]);
 }
 async function addPhoto(assessmentId, clientId, uploaderProfileId, label) {
   if (![assessmentId, clientId, uploaderProfileId].every(id => UUID.test(id)))
@@ -162,6 +228,8 @@ test("J3: MFA, corrected measurements, two private photos, return and RLS", asyn
     profile_id: foreign.id, full_name: "Outra cliente sintética J3", status: "active",
   });
   insert("client_assignments", { client_id: clientId, staff_profile_id: admin.id });
+  // Second professional is assigned only to a different local test client.
+  insert("client_assignments", { client_id: foreignClientId, staff_profile_id: unassigned.id });
   const olderId = createDraft(clientId, admin.id, "2026-09-10T12:00:00Z");
   const newerId = createDraft(clientId, admin.id, "2026-10-10T12:00:00Z");
   const draftId = createDraft(clientId, admin.id, "2026-10-11T12:00:00Z");
@@ -186,12 +254,23 @@ test("J3: MFA, corrected measurements, two private photos, return and RLS", asyn
     assessment_id: newerId, measurement_key: "quadril",
     measurement_value: 100, unit: "cm",
   });
+  // Additional observation is intentionally absent from the older assessment.
+  insert("assessment_measurements", {
+    assessment_id: newerId, measurement_key: "j3_medida_sem_referencia",
+    measurement_value: 55, unit: "cm",
+  });
   const photoA = await addPhoto(olderId, clientId, admin.id, "reference");
   const photoB = await addPhoto(newerId, clientId, admin.id, "comparison");
   const photoForeign = await addPhoto(foreignId, foreignClientId, unassigned.id, "foreign");
-  finalize(olderId, admin.id);
-  finalize(newerId, admin.id);
-  finalize(foreignId, unassigned.id);
+  const method=basicMethod();
+  for(const [assessId,subjectId,staffId] of [
+    [olderId,clientId,admin.id],
+    [newerId,clientId,admin.id],
+    [foreignId,foreignClientId,unassigned.id],
+  ]) {
+    await satisfyRequiredSyntheticItems(assessId,subjectId,staffId,method);
+    finalize(assessId,staffId,method);
+  }
   // Existing append-only correction mechanism, synthetic local fixture.
   insert("assessment_measurement_corrections", {
     assessment_measurement_id: oldWeightId,
@@ -253,8 +332,8 @@ test("J3: MFA, corrected measurements, two private photos, return and RLS", asyn
       await expect(weight.getByRole("cell",{name:"71 kg"})).toBeVisible();
       await expect(weight.getByRole("cell",{name:"69 kg"})).toBeVisible();
       await expect(weight.getByRole("cell",{name:"-2 kg"})).toBeVisible();
-      const hip = page.getByRole("row",{name:/Quadril \(cm\)/});
-      await expect(hip.getByRole("cell",{name:"Não comparável"})).toBeVisible();
+      const unmatched = page.getByRole("row",{name:/j3_medida_sem_referencia \(cm\)/});
+      await expect(unmatched.getByRole("cell",{name:"Não comparável"})).toBeVisible();
       await expect(page.locator('img[src^="/admin/fotos/"]')).toHaveCount(0);
       await mobileWidth(page);
     });
