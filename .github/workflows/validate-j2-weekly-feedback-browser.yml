@@ -90,7 +90,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npm run dev -- --hostname 127.0.0.1 --port 3000 > "$RUNNER_TEMP/j2-next.log" 2>&1 &
+          # Only the ephemeral Next.js SERVER receives its local admin key.
+          # Never write it to GITHUB_ENV, NEXT_PUBLIC_*, output or test logs.
+          source "$RUNNER_TEMP/j2-local-status"
+          test "$API_URL" = "http://127.0.0.1:54321"
+          test -n "$SERVICE_ROLE_KEY"
+          SUPABASE_SECRET_KEY="$SERVICE_ROLE_KEY" npm run dev -- --hostname 127.0.0.1 --port 3000 > "$RUNNER_TEMP/j2-next.log" 2>&1 &
           echo "$!" > "$RUNNER_TEMP/j2-next.pid"
           for attempt in $(seq 1 90); do
             if curl --max-time 3 -fsS http://127.0.0.1:3000/login > /dev/null 2>&1; then
