@@ -150,9 +150,22 @@ function latestVersion(protocolId){
   return items.at(-1);
 }
 async function openVersion(page,protocolId,number){
-  await page.goto("/admin/protocolos/"+protocolId+"?versao="+number);
+  const response=await page.goto("/admin/protocolos/"+protocolId+"?versao="+number);
   const container=page.locator("#versao-"+number);
-  await expect(container).toBeVisible();
+  await expect.poll(async()=>{
+    if(await container.isVisible()) return "version-visible";
+    const path=new URL(page.url()).pathname;
+    if(path==="/login")return "redirected-to-login";
+    if(response?.status()===500)return "server-http-500";
+    if(response && response.status()>=400)return "http-"+response.status();
+    if(await page.getByText("Página ou registro indisponível",{exact:true}).count())
+      return "access-denied";
+    if(await page.getByText("A versão solicitada não corresponde aos filtros. Limpe os filtros para consultá-la.",{exact:true}).count())
+      return "selection-filtered-out";
+    if(await page.getByText("Não existem versões que correspondam aos filtros.",{exact:true}).count())
+      return "no-matching-versions";
+    return "pending-render";
+  },{timeout:15000}).toBe("version-visible");
   return container;
 }
 
