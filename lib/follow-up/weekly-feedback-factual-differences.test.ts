@@ -58,7 +58,10 @@ test("navigation URL includes only opaque IDs and view, never the answer text", 
   assert.equal(url, "/admin/clientes/client-1/feedback-semanal/comparar?atual=current-1&anterior=previous-1&visao=diferentes#respostas-comparadas");
   assert.equal(weeklyFeedbackAnswerViewHref("client-1","current-1","previous-1","todas"),
     "/admin/clientes/client-1/feedback-semanal/comparar?atual=current-1&anterior=previous-1#respostas-comparadas");
-  assert.doesNotMatch(url, /saude|resposta|conteudo|protocolo/);
+  const parsed = new URL(url, "https://patty.invalid");
+  assert.deepEqual([...parsed.searchParams.keys()], ["atual", "anterior", "visao"]);
+  assert.equal(parsed.pathname, "/admin/clientes/client-1/feedback-semanal/comparar");
+  assert.equal(parsed.hash, "#respostas-comparadas");
 });
 
 test("professional comparison keeps authorization and original-version gates before differences", () => {
