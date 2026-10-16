@@ -334,6 +334,17 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
 
       await clientPage.reload();
       await expect(answerInput("q01")).toHaveValue("2");
+      // A 21-question mobile form can jump directly to its last answer
+      // without changing the saved draft or leaking answers into the URL.
+      const questionNav = clientPage.locator("#feedback-pendente-" + feedbackId + " form")
+        .getByRole("combobox", { name: "Ir para uma pergunta" });
+      await expect(questionNav).toBeVisible();
+      await expect(questionNav.locator("option", { hasText: "Pergunta 1 · Preenchida" })).toHaveCount(1);
+      await questionNav.selectOption("q21");
+      await expect(answerInput("q21")).toBeFocused();
+      await expect(questionNav).toHaveValue("");
+      await expect(answerInput("q21")).toHaveValue("");
+      expect((await feedbackRecord(clientId, periodStart)).answers).toEqual({ q01: 2 });
       const dimensions = await clientPage.evaluate(() => ({
         width: document.documentElement.clientWidth,
         scroll: document.documentElement.scrollWidth,
@@ -420,7 +431,15 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
         await input.fill(value);
       }
       await clientPage.getByRole("button", { name: "Revisar respostas para enviar" }).click();
+      await expect(clientPage.getByRole("heading", { name: "Revise antes de enviar" })).toBeFocused();
       await expect(clientPage.getByRole("button", { name: "Confirmar envio definitivo" })).toBeVisible();
+      await clientPage.getByRole("button", { name: "Editar pergunta 17" }).click();
+      await expect(answerInput("q17")).toBeFocused();
+      await expect(clientPage.getByRole("heading", { name: "Revise antes de enviar" })).toHaveCount(0);
+      await answerInput("q17").fill("8");
+      expect((await feedbackRecord(clientId, periodStart)).submitted_at).toBeNull();
+      await clientPage.getByRole("button", { name: "Revisar respostas para enviar" }).click();
+      await expect(clientPage.getByRole("heading", { name: "Revise antes de enviar" })).toBeFocused();
       await clientPage.getByRole("button", { name: "Confirmar envio definitivo" }).click();
       await expect.poll(async () => {
         const row = await feedbackRecord(clientId, periodStart);
@@ -429,7 +448,7 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
       const submitted = await feedbackRecord(clientId, periodStart);
       expect(Object.keys(submitted.answers)).toHaveLength(21);
       expect(submitted.answers.q01).toBe(2);
-      expect(submitted.answers.q17).toBe(7);
+      expect(submitted.answers.q17).toBe(8);
       // Navigation is only emitted after the server action confirmed persistence.
       await expect(clientPage.getByText("Envio confirmado", { exact: true })).toBeVisible();
       await expect(clientPage).toHaveURL(new RegExp("registro=" + feedbackId));

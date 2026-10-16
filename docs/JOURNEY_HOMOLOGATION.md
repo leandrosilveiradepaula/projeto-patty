@@ -1,3 +1,13 @@
+## 2026-10-16 — J2: preenchimento móvel e revisão corrigível (em validação)
+
+**OBJETIVO:** concluir a usabilidade do Feedback Semanal de 21 perguntas no celular, sem comprometer rascunhos, envio definitivo e autorização. Na versão em branch, a cliente encontra uma pergunta por seletor acessível com estado factual de preenchimento, pode saltar diretamente para ela, recebe foco na revisão final e pode voltar a editar uma resposta específica. O seletor não envia dados, não calcula adesão e não usa armazenamento de navegador. Os campos e as ações autenticadas existentes permanecem intactos.
+
+**CRITÉRIOS DE ACEITAÇÃO:** (1) salvar rascunho e recarregar preserva valores; (2) navegar à pergunta 21 foca o campo exato, não modifica o banco ou a URL e não salta para outro feedback; (3) revisão recebe foco para leitura por teclado/leitor de tela; (4) editar a pergunta 17 antes de confirmar mantém o registro não enviado; (5) a confirmação persiste a resposta editada e permanece auditável; (6) `Validate application` e Playwright E2E autenticado local passam com fixture sintética e limpeza do Supabase; (7) homologação profissional e produção são avaliadas separadamente.
+
+**STATUS:** implementação em branch, testes CI ainda pendentes. O PR #894 foi mergeado em `afb6eda9` com Vercel `success` pós-merge; nenhuma homologação profissional de J2 foi realizada. Sem migrations, RLS, publicação IA, alteração de questionário ou regra clínica.
+
+---
+
 ## 2026-10-16 — J2: proveniência do lembrete e continuidade de filtros (branch em validação)
 
 **STATUS CONFIRMADO PR #893:** merge `5a339f897a8b03682b7066b6601d326d71904134`; `validate` e Playwright autenticado local passaram no HEAD pré-merge `ff481d1b`; CI pós-merge `validate` PASS; Vercel limitada por frequência (não publicada). Homologação profissional pendente.

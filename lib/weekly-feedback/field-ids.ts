@@ -6,3 +6,8 @@
 export function weeklyFeedbackAnswerFieldId(feedbackId: string, questionKey: string): string {
   return `weekly-feedback-answer-${feedbackId.length}-${encodeURIComponent(feedbackId)}-${encodeURIComponent(questionKey)}`;
 }
+
+/** Dedicated, per-feedback label target. Never collides with answer field IDs. */
+export function weeklyFeedbackQuestionNavigationId(feedbackId: string): string {
+  return "weekly-feedback-navigation-" + feedbackId.length + "-" + encodeURIComponent(feedbackId);
+}

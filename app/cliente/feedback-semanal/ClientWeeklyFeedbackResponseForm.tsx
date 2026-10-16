@@ -19,7 +19,8 @@ import {
   type WeeklyFeedbackCollisionChoice,
 } from "@/lib/weekly-feedback/draft-reconciliation";
 
-import { weeklyFeedbackAnswerFieldId } from "@/lib/weekly-feedback/field-ids";
+import { weeklyFeedbackAnswerFieldId, weeklyFeedbackQuestionNavigationId } from "@/lib/weekly-feedback/field-ids";
+import { weeklyFeedbackQuestionNavigationLabel } from "@/lib/weekly-feedback/question-navigation";
 
 import styles from "./page.module.css";
 
@@ -63,6 +64,7 @@ export function ClientWeeklyFeedbackResponseForm({
   const firstMissingRequired = progress.firstMissingRequired;
   const inFlightRef = useRef(false);
   const formRef = useRef<HTMLFormElement>(null);
+  const reviewHeadingRef = useRef<HTMLHeadingElement>(null);
   const [reviewOpen, setReviewOpen] = useState(false);
   const router = useRouter();
   const submitted = state.outcome === "submitted";
@@ -96,6 +98,12 @@ export function ClientWeeklyFeedbackResponseForm({
     }
   }, [editedSinceLastSave, expectedFingerprint, initialValues, newerServerSnapshot]);
 
+  // Opening the review inserts it above the submit buttons. Move focus so
+  // mobile and screen-reader users do not miss the review or send by mistake.
+  useEffect(() => {
+    if (reviewOpen) reviewHeadingRef.current?.focus();
+  }, [reviewOpen]);
+
   // Server-reported validation must focus this feedback, not another pending week.
   useEffect(() => {
     if (state.outcome === "invalid" && state.questionKey) {
@@ -109,6 +117,13 @@ export function ClientWeeklyFeedbackResponseForm({
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
   }, [dirty]);
+
+  function focusQuestion(key: string) {
+    // Navigation is scoped to this feedback, even when multiple weeks reuse
+    // the same questionnaire keys on the same client page.
+    if (!questions.some((question) => question.key === key)) return;
+    document.getElementById(weeklyFeedbackAnswerFieldId(feedbackId, key))?.focus();
+  }
 
   function updateAnswer(key: string, next: string) {
     setValues((previous) => ({ ...previous, [key]: next }));
@@ -187,6 +202,31 @@ export function ClientWeeklyFeedbackResponseForm({
         <span>{progress.completed} de {progress.total} respostas iniciadas</span>
         <progress max={progress.required || 1} value={progress.requiredCompleted} aria-label="Progresso do preenchimento obrigatório" />
         {firstMissingRequired ? <button type="button" className={styles.jumpLink} onClick={() => document.getElementById(weeklyFeedbackAnswerFieldId(feedbackId, firstMissingRequired))?.focus()}>Ir para primeira obrigatória pendente</button> : <span>Obrigatórias preenchidas. Revise e envie quando estiver pronta.</span>}
+      </div>
+      <div className={styles.questionNavigator}>
+        <label htmlFor={weeklyFeedbackQuestionNavigationId(feedbackId)}>
+          Ir para uma pergunta
+        </label>
+        <select
+          defaultValue=""
+          disabled={isPending || submitted}
+          id={weeklyFeedbackQuestionNavigationId(feedbackId)}
+          onChange={(event) => {
+            const key = event.currentTarget.value;
+            // Keep the prompt selected so the same question can be visited
+            // repeatedly without touching answers or form submission.
+            event.currentTarget.value = "";
+            focusQuestion(key);
+          }}
+        >
+          <option value="">Selecione uma pergunta para navegar</option>
+          {questions.map((question, index) => (
+            <option key={question.key} value={question.key}>
+              {weeklyFeedbackQuestionNavigationLabel(question, index, values[question.key] ?? "")}
+            </option>
+          ))}
+        </select>
+        <small>Os indicadores mostram apenas o preenchimento. Navegar não salva nem envia o feedback.</small>
       </div>
       {state.message && (failed || confirmed) ? (
         <Alert
@@ -300,13 +340,24 @@ export function ClientWeeklyFeedbackResponseForm({
       ) : null}
       {reviewOpen && !submitted ? (
         <section className={styles.reviewPanel} aria-label="Revisão antes do envio">
-          <h3>Revise antes de enviar</h3>
+          <h3 ref={reviewHeadingRef} tabIndex={-1}>Revise antes de enviar</h3>
           <p>As respostas enviadas ficam registradas e não poderão ser alteradas por esta tela.</p>
           <dl className={styles.answers}>
-            {questions.map(question => (
+            {questions.map((question, index) => (
               <div key={question.key}>
                 <dt>{question.label}</dt>
                 <dd>{values[question.key]?.trim() || "Sem resposta"}</dd>
+                <button
+                  className={styles.reviewEditButton}
+                  disabled={isPending}
+                  onClick={() => {
+                    setReviewOpen(false);
+                    focusQuestion(question.key);
+                  }}
+                  type="button"
+                >
+                  Editar pergunta {index + 1}
+                </button>
               </div>
             ))}
           </dl>
