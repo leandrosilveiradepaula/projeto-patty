@@ -1,3 +1,24 @@
+## J2 — Feedback Semanal e acompanhamento profissional: pronta para homologação técnica do percurso principal (2026-10-16)
+
+**CLASSIFICAÇÃO:** implementada, E2E local autenticado aprovado, mergeada e publicada; **homologação profissional em produção ainda NÃO executada**. Este bloco é o estado atual e substitui anotações históricas abaixo intituladas “em validação”, sem reescrever as evidências da época.
+
+| Dimensão | Evidência confirmada | Estado |
+| --- | --- | --- |
+| Código integrado | PRs #898, #899 e #900 mergeados; `master` `266ffba76f52b79383dcc0686a4000a174a0ce87` | INTEGRADO |
+| Validação do #900 | `Validate application` [run 38898606333](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38898606333) no HEAD `4c81f4459cb84a075d2f1eb7b6e0ae205d68468b` | PASS |
+| Fluxo autenticado | [Playwright J2 38898606608](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38898606608): admin com MFA, cliente sintética no celular, isolamento por assignment/RLS, histórico, avaliação manual, geração agendada e lembrete in-app; banco local descartado | PASS LOCAL, NÃO HOMOLOGAÇÃO |
+| Pós-merge | [Validate 38899139789](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38899139789) e [onboarding smoke 38899190943](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38899190943) no mesmo SHA do `master` | PASS |
+| Runtime | Status GitHub `Vercel: success — Deployment has completed` no `master` `266ffba7` | PUBLICADO |
+| RPC de preferência | Consulta **somente leitura** a privilégios no catálogo de produção: `service_role` autorizado na função e tabelas necessárias; `anon` e `authenticated` sem EXECUTE na RPC | METADADOS CONFERIDOS, SEM TESTE DE ESCRITA REAL |
+| Aprovação da Patty | Sessão e aceite profissional no runtime publicado | **PENDENTE** |
+
+**Início do percurso:** após primeira publicação legítima de protocolo, Patty solicita Feedback Semanal ou a agenda versionada cria a semana anterior. **Fim do percurso:** cliente responde e envia; Patty consulta o registro original, compara semanas sem interpretação clínica, registra decisão manual na avaliação existente ou cria rascunho conscientemente, preserva contexto, autoria e histórico. Um lembrete in-app de quarta-feira para solicitação agendada e ainda pendente é evidência de disponibilidade no aplicativo, não leitura da cliente.
+
+**Checklist mínimo ainda pendente, a executar pela profissional:** (1) confirmar que a versão publicada permanece a esperada e entrar com sua própria sessão administrativa/MFA; (2) percorrer uma solicitação elegível e a visão móvel autorizada da cliente, sem compartilhar credenciais ou inserir fixture sintética em produção; (3) conferir rascunho, envio definitivo, recebimento e histórico da semana exata; (4) verificar comparação, persistência da decisão manual e retorno ao filtro sem alterar protocolo; (5) conferir permissão negada a perfis sem assignment em ambiente de teste seguro; (6) observar aviso agendado e canal configurado quando houver solicitação real elegível, distinguindo ausência de evento de falha; (7) registrar quem executou, data, SHA, resultado e pendências, com aceite explícito da Patty. Nunca tratar CI, credenciais de serviço ou dados reais improvisados como substitutos desse processo.
+
+**Limites conhecidos / fora de escopo:** email depende de SMTP/configuração e validação de entrega externa; WhatsApp não tem provedor ativado. Não inferir revisão profissional concluída, classificação de adesão, suspensão de atendimento, diagnóstico, mudança de fase ou publicação automática. Regras e perguntas profissionais ainda abertas em `docs/WEEKLY_FEEDBACK.md` e `docs/OPEN_QUESTIONS.md` não são fechadas por este aceite. O PR #900 concedeu os privilégios estritamente necessários **somente ao PostgreSQL descartável do runner**, sem modificar migrations ou permissões de produção.
+
+---
 ## 2026-10-16 — J2: da comparação filtrada à decisão profissional e retorno (em validação)
 
 **OBJETIVO:** na análise factual, Patty abre uma avaliação previamente finalizada e decide manualmente usando o formulário de acompanhamento já existente, podendo voltar à mesma dupla de semanas com a visualização *Somente respostas diferentes* preservada. A ação não vincula automaticamente o feedback à decisão e não indica revisão concluída; decisão, motivo e observações ficam no histórico da avaliação, não nas respostas originais.

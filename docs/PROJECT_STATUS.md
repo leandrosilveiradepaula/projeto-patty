@@ -1,3 +1,15 @@
+## 2026-10-16 — J2: percurso principal tecnicamente pronto para homologação profissional
+
+**FATO CONFIRMADO (estado atual; registros abaixo são históricos):** PRs [#898](https://github.com/leandrosilveiradepaula/projeto-patty/pull/898), [#899](https://github.com/leandrosilveiradepaula/projeto-patty/pull/899) e [#900](https://github.com/leandrosilveiradepaula/projeto-patty/pull/900) integrados. `master` no merge #900: `266ffba76f52b79383dcc0686a4000a174a0ce87`. No HEAD exato do #900 `4c81f4459cb84a075d2f1eb7b6e0ae205d68468b`, `Validate application` e Playwright J2 autenticado concluíram **PASS**, inclusive teardown do Supabase local descartável; no merge, `validate` e smoke de ativação concluíram **PASS**. O status Vercel para `266ffba7` foi **success**. Isso confirma código, testes, merge e publicação, **não** o aceite profissional.
+
+**ESCOPO FUNCIONAL COBERTO:** solicitações manuais e agendadas após protocolo publicado; formulário versionado e móvel de 21 perguntas, rascunho, concorrência e envio definitivo; histórico e comparação factual de semanas; decisão **manual** na avaliação, com retorno ao contexto; geração idempotente do período anterior; lembrete de quarta-feira `in_app` visível para a cliente e identificado pela Patty. Exercitados com identidades e respostas **sintéticas locais**, inclusive MFA/escopo de assignment. Sem diagnóstico, score, revisão automática nem nova publicação de protocolo.
+
+**VERIFICAÇÃO ADICIONAL READ-ONLY (2026-10-16):** catálogo do Supabase de produção confirma que a RPC de preferência existe, que `service_role` tem os privilégios de função e tabelas necessários consultados, e que `anon` e `authenticated` não têm EXECUTE nessa RPC. Nenhum dado de cliente ou grant de produção foi alterado. Os grants adicionais do PR #900 são **exclusivos do runner local**.
+
+**ESTADO:** J2 **TECNICAMENTE PRONTA PARA HOMOLOGAÇÃO DO FLUXO PRINCIPAL**, **NÃO HOMOLOGADA PELA PATTY**. Falta sessão profissional legítima com MFA, navegação móvel real e confirmação factual no runtime publicado, sem criar registros fictícios ou contornar autorizações. Canais externos dependem de integração/configuração própria; questões profissionais abertas continuam pendentes. Checklist e evidências: [docs/JOURNEY_HOMOLOGATION.md](./JOURNEY_HOMOLOGATION.md), seção J2. Avançar a outra jornada após aceite explícito, sem confundir maturidade técnica com homologação.
+
+---
+
 ## 2026-10-16 — J2: continuidade da comparação filtrada à avaliação manual (PR em validação)
 
 **FATO CONFIRMADO:** PR #897 mergeado no `master` `049dae997a338f5bd4680d5d7ca2f2411d0fcf79`. Os checks pré-merge `validate` e `weekly-feedback-browser` foram aprovados no HEAD `f5c4933c83fffc7e1b46dd93490acf2458c066d9`. A Vercel no commit de merge retornou `failure` por **rate limit (retry in 24 hours)**; este SHA **não deve ser declarado publicado**. A homologação profissional J2 continua pendente.
