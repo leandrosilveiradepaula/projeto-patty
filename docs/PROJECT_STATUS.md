@@ -1,3 +1,11 @@
+## 2026-10-15 — J2: metadados de lembretes na caixa operacional (branch em validação)
+
+**DECISÃO TÉCNICA/PRODUTO:** a visão administrativa "Aguardando cliente" exibirá, para cada solicitação da página atual, o último evento registrado de lembrete/entrega. Distinguirá a disponibilidade no app, aceitação SMTP sem prova de leitura, fila de envio, falha de entrega e bloqueios por canal/contato/provedor; a ausência de evento não é falha inferida. A Patty poderá abrir o Cadastro Atual ou a preferência de canal já existentes e voltar à listagem original, sem perder os filtros. A consulta é exclusivamente de metadados da página pendente autorizada (máximo de 15 registros), com sessão Supabase/RLS/MFA/assignment vigente; não busca rascunhos, respostas, emails ou telefones. Nenhuma automação clínica, regra de adesão, reenvio, nova notificação, prazo profissional, migration ou alteração RLS é adicionada. **Implementado em branch; CI e navegador autenticado sintético pendentes; não mergeado/publicado/homologado.**
+
+**FATO CONFIRMADO ANTERIOR:** PR #892 mergeado no `master` `84bd2cab9677797e2d6e2175434fbb73f93b4b75`, com testes `validate` e `weekly-feedback-browser` aprovados no HEAD `ac7cbaa600b825c850081680ce1b45f9684a9181` antes do merge. O estado de deploy e a homologação profissional exigem provas separadas.
+
+---
+
 ## 2026-10-15 — J2: retorno contextual da caixa de Feedbacks (PR em validação)
 
 **DECISÃO TÉCNICA/PRODUTO:** ao sair da caixa administrativa de recebidos ou aguardando cliente para abrir o feedback exato, preservar o filtro por cliente, origem, mês, situação e página efetiva. A Patty poderá voltar à mesma visão também após consultar comparação ou formulário de decisão manual de avaliação finalizada. O parâmetro `caixaRetorno` é apenas navegação: URL local da caixa, keys em allowlist, valores limitados, cliente em formato UUID, hash coerente e nenhuma concessão de autorização; filtros são revalidados contra assignments atuais pelo inbox. Dados de saúde não entram na URL. Links forjados não permitem redirecionamento externo. Playwright local com fixture sintética e testes unitários serão executados no CI. **Ainda em branch, sem validação, merge, deployment ou homologação profissional.** Sem migrations, schema, RLS, IA ou conduta automática.

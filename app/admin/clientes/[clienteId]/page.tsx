@@ -1,5 +1,6 @@
 import { readClientDirectoryReturn, clientDirectoryReturnHref, withClientDirectoryReturn } from "@/lib/operations/client-directory-return";
 import { readPendingQueueReturn, withPendingQueueReturn } from "@/lib/operations/pending-queue-return";
+import { readWeeklyFeedbackInboxReturn } from "@/lib/follow-up/weekly-feedback-inbox-return";
 import { AdminClientNameEditForm } from "@/components/admin/AdminClientNameEditForm";
 import { summarizeClientClarifications } from "@/lib/follow-up/client-clarification-summary";
 import { latestCheckinCorrectionsByEvent } from "@/lib/checkins/effective-corrections";
@@ -55,6 +56,7 @@ type AdminClienteDetailPageProps = {
     listaView?: string;
     listaPagina?: string;
     filaRetorno?: string;
+    caixaRetorno?: string | string[];
   }>;
 };
 
@@ -74,6 +76,7 @@ export default async function AdminClienteDetailPage({
   const [{ clienteId }, query] = await Promise.all([params, searchParams]);
   const directoryReturn = readClientDirectoryReturn(query);
   const queueReturn = readPendingQueueReturn(query.filaRetorno);
+  const inboxReturn = readWeeklyFeedbackInboxReturn(query.caixaRetorno);
   const client = await getAccessibleClient(clienteId);
 
   if (!client) {
@@ -503,7 +506,7 @@ export default async function AdminClienteDetailPage({
       />
 
       <ClientWorkspaceNav clientId={client.id} />
-      <nav aria-label="Retornar à lista de clientes"><Link href={clientDirectoryReturnHref(directoryReturn)}>Voltar à lista de clientes</Link> · <Link href={withClientDirectoryReturn(`/admin/pendencias?cliente=${client.id}`,directoryReturn)}>Ver pendências desta cliente</Link></nav>
+      <nav aria-label="Retornar à lista de clientes"><Link href={clientDirectoryReturnHref(directoryReturn)}>Voltar à lista de clientes</Link> · <Link href={withClientDirectoryReturn(`/admin/pendencias?cliente=${client.id}`,directoryReturn)}>Ver pendências desta cliente</Link>{inboxReturn ? (<> · <Link href={inboxReturn}>Voltar à caixa de Feedbacks Semanais</Link></>) : null}</nav>
       <PageSectionNav
         items={[
           { href: "#proxima-acao", label: "Próxima ação" },

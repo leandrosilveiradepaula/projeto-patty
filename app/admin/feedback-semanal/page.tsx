@@ -23,6 +23,9 @@ import {
 } from "@/lib/follow-up/pending-weekly-feedback-inbox";
 import { listPendingWeeklyFeedbackHeadersForClients } from "@/lib/follow-up/pending-weekly-feedback-loader";
 import { weeklyFeedbackInboxReturnHref, withWeeklyFeedbackInboxReturn } from "@/lib/follow-up/weekly-feedback-inbox-return";
+import { listReminderEventsForVisiblePendingFeedbacks } from "@/lib/follow-up/pending-weekly-feedback-reminder-loader";
+import { latestVisiblePendingReminderEvents } from "@/lib/follow-up/pending-weekly-feedback-reminders";
+import { describeAdminFeedbackReminder } from "@/lib/operations/admin-feedback-reminder";
 import { listClientsAssignedToCurrentAdmin } from "@/lib/supabase/data-access";
 import { formatWeeklyFeedbackPeriodDate } from "@/lib/weekly-feedback/date-format";
 import styles from "./page.module.css";
@@ -84,6 +87,11 @@ export default async function AdminReceivedWeeklyFeedbackPage({ searchParams }: 
   const results = exploreReceivedWeeklyFeedbacks(receivedHeaders, safeFilters, clientIds);
   const pendingResults = explorePendingWeeklyFeedbacks(pendingHeaders, safeFilters, clientIds);
   const activeResults = isPending ? pendingResults : results;
+  // No event lookup for received feedbacks, invalid filters or other pages.
+  const reminderEvents = isPending && !invalidSelection
+    ? await listReminderEventsForVisiblePendingFeedbacks(pendingResults.items)
+    : [];
+  const reminderByFeedback = latestVisiblePendingReminderEvents(pendingResults.items, reminderEvents);
   // Preserve only a validated navigation context, never permission to read a client.
   const inboxReturnHref = invalidSelection ? "" : weeklyFeedbackInboxReturnHref(
     filters, situation.situation, activeResults.page,
@@ -175,23 +183,32 @@ export default async function AdminReceivedWeeklyFeedbackPage({ searchParams }: 
               {isPending ? " solicitações abertas" : " recebimentos"}, por {isPending ? "semana de referência" : "data de envio"}.
             </p>
             <ol className={styles.list}>
-              {isPending ? pendingResults.items.map((feedback) => (
+              {isPending ? pendingResults.items.map((feedback) => {
+                const reminderStatus = describeAdminFeedbackReminder(reminderByFeedback.get(feedback.id));
+                return (
                 <li key={feedback.id}>
                   <PendingItemCard
                     title={"Semana de " + formatWeeklyFeedbackPeriodDate(feedback.period_start) + " a " + formatWeeklyFeedbackPeriodDate(feedback.period_end)}
                     meta={(clientNames.get(feedback.client_id) ?? "Cliente sem nome informado") + " · Solicitado em " + formatSubmittedAt(feedback.created_at)}
-                    description={"Origem: " + weeklyFeedbackOriginLabel(feedback.request_source) +
-                      (feedback.due_at ? " · Prazo informado: " + formatSubmittedAt(feedback.due_at) : " · Sem prazo definido")}
+                    description={<>
+                      Origem: {weeklyFeedbackOriginLabel(feedback.request_source)}
+                      {feedback.due_at ? " · Prazo informado: " + formatSubmittedAt(feedback.due_at) : " · Sem prazo definido"}
+                      {" · Lembrete: "}{reminderStatus?.label ?? "Nenhum evento de lembrete registrado"}
+                    </>}
                     status={<Badge variant="warning">Aguardando cliente</Badge>}
                     action={
                       <div className={styles.actions}>
                         <Link className={styles.actionLink} href={fromInbox(pendingWeeklyFeedbackExactHref(feedback))}>Abrir solicitação</Link>
-                        <Link className={styles.secondaryLink} href={"/admin/clientes/" + feedback.client_id}>Ver acompanhamento</Link>
+                        {reminderStatus?.nextStep ? (
+                          <Link className={styles.secondaryLink} href={fromInbox(`/admin/clientes/${feedback.client_id}#${reminderStatus.nextStep.anchor}`)}>{reminderStatus.nextStep.label}</Link>
+                        ) : null}
+                        <Link className={styles.secondaryLink} href={fromInbox("/admin/clientes/" + feedback.client_id)}>Ver acompanhamento</Link>
                       </div>
                     }
                   />
                 </li>
-              )) : results.items.map((feedback) => (
+                );
+              }) : results.items.map((feedback) => (
                 <li key={feedback.id}>
                   <PendingItemCard
                     title={"Semana de " + formatWeeklyFeedbackPeriodDate(feedback.period_start) + " a " + formatWeeklyFeedbackPeriodDate(feedback.period_end)}
@@ -201,7 +218,7 @@ export default async function AdminReceivedWeeklyFeedbackPage({ searchParams }: 
                     action={
                       <div className={styles.actions}>
                         <Link className={styles.actionLink} href={fromInbox(receivedWeeklyFeedbackExactHref(feedback))}>Abrir respostas originais</Link>
-                        <Link className={styles.secondaryLink} href={"/admin/clientes/" + feedback.client_id}>Ver acompanhamento</Link>
+                        <Link className={styles.secondaryLink} href={fromInbox("/admin/clientes/" + feedback.client_id)}>Ver acompanhamento</Link>
                       </div>
                     }
                   />
