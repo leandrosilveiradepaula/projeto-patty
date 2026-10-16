@@ -82,11 +82,14 @@ jobs:
           npm install --no-save --package-lock=false @playwright/test@1.55.0
           npx playwright install --with-deps chromium
 
-      - name: Start local Next.js
+      - name: Build and start production-mode Next.js locally
         shell: bash
         run: |
           set -euo pipefail
-          npm run dev -- --hostname 127.0.0.1 --port 3000 > "$RUNNER_TEMP/j4-next.log" 2>&1 &
+          # The browser should exercise a stable production build, not an
+          # on-demand dev compiler alongside Chromium and local Supabase.
+          npm run build
+          npm run start -- --hostname 127.0.0.1 --port 3000 > "$RUNNER_TEMP/j4-next.log" 2>&1 &
           echo "$!" > "$RUNNER_TEMP/j4-next.pid"
           for attempt in $(seq 1 90); do
             if curl -fsS --max-time 3 http://127.0.0.1:3000/login >/dev/null 2>&1; then exit 0; fi
