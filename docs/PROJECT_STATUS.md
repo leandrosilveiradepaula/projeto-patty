@@ -1,3 +1,13 @@
+## 2026-10-16 — J2: navegação móvel das perguntas e edição na revisão (branch em validação)
+
+**FATO CONFIRMADO:** PR #894 mergeado no `master` `afb6eda9e98f3f8b1f462043ec31a20ee7e093c5`. `Validate application` e `weekly-feedback-browser` passaram no HEAD pré-merge `0363039ea91ad58e1c83e5baf8278d5e94d1134b`. O status Vercel pós-merge retornou `success` (`Deployment has completed`). CI pós-merge é verificado separadamente; não há homologação profissional autenticada da J2 em produção.
+
+**DECISÃO TÉCNICA/PRODUTO EM BRANCH:** melhorar a jornada móvel da cliente nas 21 perguntas sem alterar o formulário versionado: índice por questão com estado de preenchimento puramente factual (preenchida, obrigatória pendente, opcional vazia ou resposta inválida), acesso direto por teclado/tela de toque, foco acessível na revisão antes do envio e botão explícito para voltar e editar uma resposta específica. **O índice não calcula adesão, não interpreta dados de saúde e não cria regras profissionais.** O índice só contém rótulos de perguntas e indicadores de preenchimento; não envia nem persiste respostas, não modifica `FormData`, URLs, Auth/RLS, CAS, servidor, armazenamento, schema ou migrations. Os fluxos de salvar rascunho, tratar conflito e confirmar envio definitivo permanecem separados e explícitos.
+
+**ACEITAÇÃO PENDENTE:** testes unitários de estado/ausência de dados sensíveis e isolamento de múltiplos feedbacks; Playwright mobile com retomada de rascunho, salto até a pergunta 21, revisão focada, edição da pergunta 17 antes do envio definitivo e checagem da persistência; `Validate application` e `weekly-feedback-browser` no SHA exato. **Ainda não testado, mergeado, publicado nem homologado.** Fora de escopo: IA, decisões de avaliação, score de adesão ou alteração de cadências e canais.
+
+---
+
 ## 2026-10-16 — J2: PR #893 integrado; clareza dos lembretes e retorno aos filtros (em validação)
 
 **FATO CONFIRMADO:** PR #893 mergeado no `master` `5a339f897a8b03682b7066b6601d326d71904134`. No HEAD `ff481d1b199986c7ba1eadb24284cfbeafe577ea`, checks `validate` e `weekly-feedback-browser` concluíram com sucesso. `validate` pós-merge também passou. **Vercel no SHA de merge = `failure` por `Deployment rate limited — retry in 24 hours`.** Não considerar essa versão publicada; homologação profissional ainda não executada.
