@@ -119,7 +119,9 @@ function finalize(assessmentId, actor) {
       literal(assessmentId) + " and finalized_at is not null").length !== 1)
     throw new Error("Synthetic assessment not finalized");
 }
-async function addPhoto(assessmentId, clientId, label) {
+async function addPhoto(assessmentId, clientId, uploaderProfileId, label) {
+  if (![assessmentId, clientId, uploaderProfileId].every(id => UUID.test(id)))
+    throw new Error("Invalid local synthetic photo ownership");
   const id = randomUUID();
   const path = "clients/" + clientId + "/photo/" + id + ".png";
   const uploaded = await service.storage.from("client-private")
@@ -129,6 +131,7 @@ async function addPhoto(assessmentId, clientId, label) {
     id, client_id: clientId, file_kind: "photo", bucket_id: "client-private",
     object_path: path, original_filename: "j3-" + label + ".png",
     mime_type: "image/png", byte_size: png.length,
+    uploaded_by_profile_id: uploaderProfileId,
   });
   sql("insert into public.assessment_files(assessment_id,client_id,client_file_id)" +
     " values (" + literal(assessmentId) + "," + literal(clientId) + "," +
@@ -183,9 +186,9 @@ test("J3: MFA, corrected measurements, two private photos, return and RLS", asyn
     assessment_id: newerId, measurement_key: "quadril",
     measurement_value: 100, unit: "cm",
   });
-  const photoA = await addPhoto(olderId, clientId, "reference");
-  const photoB = await addPhoto(newerId, clientId, "comparison");
-  const photoForeign = await addPhoto(foreignId, foreignClientId, "foreign");
+  const photoA = await addPhoto(olderId, clientId, admin.id, "reference");
+  const photoB = await addPhoto(newerId, clientId, admin.id, "comparison");
+  const photoForeign = await addPhoto(foreignId, foreignClientId, unassigned.id, "foreign");
   finalize(olderId, admin.id);
   finalize(newerId, admin.id);
   finalize(foreignId, unassigned.id);
