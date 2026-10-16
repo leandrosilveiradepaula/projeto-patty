@@ -1,3 +1,13 @@
+## J4 — Protocolo alimentar: ciclo completo autenticado em validação (2026-10-16)
+
+**OBJETIVO:** comprovar no navegador a jornada profissional existente: criar protocolo e versão inicial -> montar plano manual com variação, refeição e doses -> submeter para revisão -> aprovação explícita -> publicação exata -> cliente lê sua versão publicada -> clonar rascunho independente -> editar -> nova revisão, aprovação e publicação -> cliente consulta histórico sem que o rascunho substitua sua versão atual.
+
+**IMPLEMENTADO NA BRANCH, AINDA NÃO HOMOLOGADO:** `e2e/j4-nutrition-protocol-lifecycle.spec.mjs` e `.github/workflows/validate-j4-nutrition-browser.yml`, com administradores MFA, clientes diferentes, acesso client-scoped, browser móvel, PostgreSQL/Supabase descartável e identidade sintética. Conferir eventos persistidos, identidade exata das versões, imutabilidade da versão anterior, ausência de leitura do rascunho pelo cliente e acesso negado a usuário sem assignment. Não interpreta adesão, não escolhe fase, não cria doses clínicas como defaults, não publica por IA.
+
+**VALIDAÇÃO PENDENTE:** checks `Validate application` e `nutrition-lifecycle-browser` no SHA exato, revisão específica do workflow sensível e homologação profissional posterior pela Patty no runtime publicado. CI local verde não substitui aceitação humana.
+
+---
+
 ## J3 — Evolução, reavaliações e comparação histórica: cobertura autenticada em validação (2026-10-16)
 
 **OBJETIVO:** verificar o percurso integrado já publicado entre evolução filtrada, seleção de duas avaliações finalizadas, correção histórica efetiva, escolha de duas fotos privadas, ida e volta do detalhe e proteção client-scoped. A Patty interpreta e registra decisões manualmente; o teste não a substitui.
