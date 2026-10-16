@@ -130,6 +130,16 @@ async function actionFrom(page,buttonName,callback){
   await expect(form).toHaveCount(1);
   if(callback) await callback(form);
   await form.getByRole("button",{name:buttonName,exact:true}).click();
+  // Persisted SQL may become visible before a Server Action has returned.
+  // Wait for the browser to acknowledge the action before navigating again.
+  if(buttonName==="Iniciar estrutura alimentar") {
+    await expect(page.getByRole("button",{name:"Adicionar variação",exact:true}))
+      .toBeVisible({timeout:30000});
+  }else{
+    const successTitle=buttonName==="Criar novo rascunho a partir desta versão"
+      ? "Novo rascunho criado" : "Alteração salva";
+    await expect(form.getByText(successTitle,{exact:true})).toBeVisible({timeout:30000});
+  }
 }
 async function lifecycle(page,kind){
   const values={
@@ -142,6 +152,9 @@ async function lifecycle(page,kind){
   await expect(form).toHaveCount(1);
   await form.locator('input[name="'+action.check+'"]').check();
   await form.getByRole("button",{name:action.button,exact:true}).click();
+  // An action is complete only after the refreshed UI moves to the next
+  // manual lifecycle state. A database poll alone can race React/Next.js.
+  await expect(form).toHaveCount(0,{timeout:30000});
 }
 function latestVersion(protocolId){
   const items=rows("select id,version_number,submitted_for_review_at from public.protocol_versions"+
