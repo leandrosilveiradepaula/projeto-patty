@@ -685,15 +685,37 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
       const preference = adminPage.locator("#preferencia-feedback");
       await expect(preference).toBeVisible();
       await preference.locator('select[name="channel"]').selectOption("in_app");
-      await preference.getByRole("button", { name: "Salvar canal" }).click();
-      // The versioned form remounts after router.refresh on success, so its
-      // transient success alert can disappear before the browser sees it.
-      // Prove actual persistence and the server-rendered active status instead.
-      await expect.poll(() => localSelect(
-        "select channel_key from public.client_notification_preference_versions " +
-        "where client_id = " + sqlLiteral(clientId) +
-        " and purpose_key = 'weekly_feedback' and retired_at is null",
-      ).map((row) => row.channel_key), { timeout: 20_000 }).toEqual(["in_app"]);
+      const preferenceHttpStatuses = [];
+      const observePreferencePost = (response) => {
+        // Status codes only: never capture cookies, URLs, headers or bodies.
+        if (response.request().method() === "POST" && response.url().startsWith(baseUrl)) {
+          preferenceHttpStatuses.push(response.status());
+        }
+      };
+      adminPage.on("response", observePreferencePost);
+      try {
+        await preference.getByRole("button", { name: "Salvar canal" }).click();
+        // An action error is distinct from a delayed write or transient UI remount.
+        // Do not turn a failed preference action into a synthetic DB fixture.
+        await expect.poll(async () => {
+          const stored = localSelect(
+            "select channel_key from public.client_notification_preference_versions " +
+            "where client_id = " + sqlLiteral(clientId) +
+            " and purpose_key = 'weekly_feedback' and retired_at is null",
+          ).map((row) => row.channel_key);
+          if (stored.length === 1 && stored[0] === "in_app") return "persisted";
+          if (await preference.getByText("Não foi possível atualizar", { exact: true }).count()) {
+            return "action-rejected";
+          }
+          const currentPath = new URL(adminPage.url()).pathname;
+          if (currentPath.startsWith("/mfa/") || currentPath === "/login") return "authorization-redirect";
+          if (preferenceHttpStatuses.some((status) => status >= 400)) return "http-failure";
+          if (preferenceHttpStatuses.length) return "post-completed-without-persistence";
+          return "post-not-observed";
+        }, { timeout: 25_000 }).toBe("persisted");
+      } finally {
+        adminPage.off("response", observePreferencePost);
+      }
       await expect(preference.getByText(
         "Notificação dentro do aplicativo está operacional.", { exact: true },
       )).toBeVisible({ timeout: 15_000 });
