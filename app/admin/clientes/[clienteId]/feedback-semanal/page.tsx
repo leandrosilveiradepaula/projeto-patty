@@ -5,6 +5,7 @@ import { formatAdministrativeAssessmentDate } from "@/lib/evaluations/administra
 import {
   manualAssessmentDecisionFromSubmittedFeedbackHref,
   manualDecisionAssessmentChoices,
+  assessmentDirectoryFromSubmittedFeedbackHref,
 } from "@/lib/follow-up/weekly-feedback-professional-handoff";
 import { readClientDirectoryReturn, withClientDirectoryReturn } from "@/lib/operations/client-directory-return";
 import { readPendingQueueReturn, withPendingQueueReturn } from "@/lib/operations/pending-queue-return";
@@ -385,6 +386,12 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
                           </p>
                         )}
                       </details>
+                      <p className={styles.meta}>
+                        Se precisar preparar outra avaliação, a coleta e a finalização continuam manuais.{" "}
+                        <Link href={withReturn(assessmentDirectoryFromSubmittedFeedbackHref(client.id, feedback.id))}>
+                          Criar ou retomar avaliação para este feedback
+                        </Link>
+                      </p>
                     </div>
                   </details>
                 </li>
