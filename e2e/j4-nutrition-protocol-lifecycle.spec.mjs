@@ -164,6 +164,18 @@ async function openVersion(page,protocolId,number){
       return "selection-filtered-out";
     if(await page.getByText("Não existem versões que correspondam aos filtros.",{exact:true}).count())
       return "no-matching-versions";
+    if(await page.getByText("Application error",{exact:false}).count())
+      return "application-error";
+    if(await page.locator("nextjs-portal").count())
+      return "nextjs-dev-error-overlay";
+    // Only categorical observations, never the document text, HTML,
+    // cookies, SQL rows, URL parameters or sensitive protocol content.
+    const details=await page.locator('[id^="versao-"]').count();
+    if(details>0)return "version-missing-from-"+details+"-visible-records";
+    if(await page.getByRole("heading",{name:"Versões e histórico",exact:true}).count())
+      return "history-rendered-without-version-elements";
+    if(await page.locator("main").count())
+      return "main-rendered-without-history";
     return "pending-render";
   },{timeout:15000}).toBe("version-visible");
   return container;
