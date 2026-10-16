@@ -1,5 +1,10 @@
 import { availableAdminAssessmentMonths, exploreAdminAssessmentDirectory, paginateAdminAssessments } from "@/lib/evaluations/admin-assessment-explorer";
 import { readClientDirectoryReturn, withClientDirectoryReturn } from "@/lib/operations/client-directory-return";
+import { readWeeklyFeedbackInboxReturn, withWeeklyFeedbackInboxReturn } from "@/lib/follow-up/weekly-feedback-inbox-return";
+import { withSubmittedWeeklyFeedbackAssessmentContext } from "@/lib/follow-up/weekly-feedback-professional-handoff";
+import { findReceivedWeeklyFeedbackHeaderForClient } from "@/lib/follow-up/received-weekly-feedback-loader";
+import { receivedWeeklyFeedbackExactHref } from "@/lib/follow-up/recent-weekly-feedbacks";
+import { formatWeeklyFeedbackPeriodDate } from "@/lib/weekly-feedback/date-format";
 import { readPendingQueueReturn, withPendingQueueReturn } from "@/lib/operations/pending-queue-return";
 import { readClientAssessmentDirectory, clientAssessmentDirectoryFilters, clientAssessmentDirectoryHref } from "@/lib/evaluations/client-assessment-directory";
 import { labelAdminAssessmentMonth } from "@/lib/evaluations/admin-assessment-explorer";
@@ -30,7 +35,7 @@ import styles from "./page.module.css";
 
 type AdminClientAssessmentsPageProps = {
   params: Promise<{ clienteId: string }>;
-  searchParams: Promise<{ tipo?: string; mes?: string; ordem?: string; rascunhos?: string; historico?: string; filaRetorno?: string; listaQ?: string; listaView?: string; listaPagina?: string }>;
+  searchParams: Promise<{ tipo?: string; mes?: string; ordem?: string; rascunhos?: string; historico?: string; filaRetorno?: string; listaQ?: string; listaView?: string; listaPagina?: string; feedbackAtual?: string | string[]; caixaRetorno?: string | string[] }>;
 };
 
 export default async function AdminClientAssessmentsPage({
@@ -46,6 +51,13 @@ export default async function AdminClientAssessmentsPage({
   if (!client) {
     notFound();
   }
+
+  const submittedFeedback = await findReceivedWeeklyFeedbackHeaderForClient(client.id, rawQuery.feedbackAtual);
+  const inboxReturn = readWeeklyFeedbackInboxReturn(rawQuery.caixaRetorno);
+  const continueFromFeedback = (href: string) => withWeeklyFeedbackInboxReturn(
+    withSubmittedWeeklyFeedbackAssessmentContext(navigate(href), submittedFeedback?.id ?? null),
+    submittedFeedback ? inboxReturn ?? "" : "",
+  );
 
   const [assessments, assessmentKinds, assessmentSchedulePreferences] =
     await Promise.all([
@@ -101,27 +113,37 @@ export default async function AdminClientAssessmentsPage({
         }
       />
       <ClientWorkspaceNav activeArea="avaliacoes" clientId={client.id} />
+      {submittedFeedback ? (
+        <Alert title="Continuidade do Feedback Semanal" variant="info">
+          Respostas enviadas para a semana de {formatWeeklyFeedbackPeriodDate(submittedFeedback.period_start)} a{" "}
+          {formatWeeklyFeedbackPeriodDate(submittedFeedback.period_end)}. Escolha uma avaliação existente ou
+          crie um rascunho, com coleta e finalização manuais. Nenhuma avaliação é vinculada automaticamente.{" "}
+          <Link href={withWeeklyFeedbackInboxReturn(
+            receivedWeeklyFeedbackExactHref(submittedFeedback), inboxReturn ?? "",
+          )}>Voltar às respostas originais</Link>.
+        </Alert>
+      ) : null}
       <nav aria-label="Navegação das avaliações da cliente" className={styles.filters}>
         <Link href="#nova-avaliacao">Nova avaliação</Link>
         <Link href="#avaliacoes-em-andamento">Em andamento ({draftAssessments.length})</Link>
         <Link href="#historico-finalizado">Histórico finalizado ({finalizedAssessments.length})</Link>
-        <Link href={navigate("/admin/avaliacoes")}>Todas as avaliações</Link>
+        <Link href={continueFromFeedback("/admin/avaliacoes")}>Todas as avaliações</Link>
       </nav>
       <Section
         description="Após finalizar uma avaliação, consulte a evolução factual e retome a preparação do protocolo na mesma área da cliente."
         title="Próximos passos"
       >
-        <Link className={styles.actionLink} href={navigate(`/admin/clientes/${client.id}/evolucao`)}>
+        <Link className={styles.actionLink} href={continueFromFeedback(`/admin/clientes/${client.id}/evolucao`)}>
           Comparar medidas finalizadas
         </Link>
         {" · "}
-        <Link className={styles.actionLink} href={navigate(`/admin/clientes/${client.id}/protocolos`)}>
+        <Link className={styles.actionLink} href={continueFromFeedback(`/admin/clientes/${client.id}/protocolos`)}>
           Abrir protocolos da cliente
         </Link>
       </Section>
       <Section
         action={
-          <Link className={styles.actionLink} href={navigate(`/admin/clientes/${client.id}/evolucao`)}>
+          <Link className={styles.actionLink} href={continueFromFeedback(`/admin/clientes/${client.id}/evolucao`)}>
             Ver evolução
           </Link>
         }
@@ -132,6 +154,8 @@ export default async function AdminClientAssessmentsPage({
         <Card>
           <AssessmentCreateForm
             clientId={client.id}
+            feedbackId={submittedFeedback?.id ?? null}
+            inboxReturn={submittedFeedback ? inboxReturn : null}
             kindOptions={kindOptions}
             schedulePreferences={{
               basicPlacementLabel:
@@ -147,6 +171,8 @@ export default async function AdminClientAssessmentsPage({
       <Section title="Localizar avaliações" description="Busca por tipo, mês e situação já registrada, sem modificar nenhuma avaliação.">
         <form action={`/admin/clientes/${client.id}/avaliacoes`} method="get" className={styles.filters}>
           {queueReturn ? <input type="hidden" name="filaRetorno" value={queueReturn} /> : null}
+          {submittedFeedback ? <input type="hidden" name="feedbackAtual" value={submittedFeedback.id} /> : null}
+          {submittedFeedback && inboxReturn ? <input type="hidden" name="caixaRetorno" value={inboxReturn} /> : null}
           {directoryReturn.q ? <input type="hidden" name="listaQ" value={directoryReturn.q} /> : null}
           {directoryReturn.view !== "all" ? <input type="hidden" name="listaView" value={directoryReturn.view} /> : null}
           {directoryReturn.page && directoryReturn.page > 1 ? <input type="hidden" name="listaPagina" value={directoryReturn.page} /> : null}
@@ -171,7 +197,7 @@ export default async function AdminClientAssessmentsPage({
             </select>
           </label>
           <Button variant="secondary" type="submit">Filtrar</Button>
-          {hasFilters ? <Link href={navigate(`/admin/clientes/${client.id}/avaliacoes`)}>Limpar</Link> : null}
+          {hasFilters ? <Link href={continueFromFeedback(`/admin/clientes/${client.id}/avaliacoes`)}>Limpar</Link> : null}
         </form>
         <p role="status">{draftAssessments.length} rascunho(s) · {finalizedAssessments.length} finalizada(s) nos filtros atuais.</p>
       </Section>
@@ -195,7 +221,7 @@ export default async function AdminClientAssessmentsPage({
                   action={
                     <Link
                       className={styles.actionLink}
-                      href={navigate(`/admin/avaliacoes/${assessment.id}`)}
+                      href={continueFromFeedback(`/admin/avaliacoes/${assessment.id}`)}
                     >
                       Continuar avaliação
                     </Link>
@@ -215,8 +241,8 @@ export default async function AdminClientAssessmentsPage({
           {draftPagination.pageCount > 1 ? (
             <nav className={styles.pages} aria-label="Páginas de avaliações em andamento">
               <span>Página {draftPagination.page} de {draftPagination.pageCount}</span>
-              {draftPagination.page > 1 ? <Link href={navigate(clientAssessmentDirectoryHref(client.id, filters, draftPagination.page - 1, historyPagination.page, "draft"))}>Anterior</Link> : null}
-              {draftPagination.page < draftPagination.pageCount ? <Link href={navigate(clientAssessmentDirectoryHref(client.id, filters, draftPagination.page + 1, historyPagination.page, "draft"))}>Próxima</Link> : null}
+              {draftPagination.page > 1 ? <Link href={continueFromFeedback(clientAssessmentDirectoryHref(client.id, filters, draftPagination.page - 1, historyPagination.page, "draft"))}>Anterior</Link> : null}
+              {draftPagination.page < draftPagination.pageCount ? <Link href={continueFromFeedback(clientAssessmentDirectoryHref(client.id, filters, draftPagination.page + 1, historyPagination.page, "draft"))}>Próxima</Link> : null}
             </nav>
           ) : null}
           </>
@@ -246,7 +272,7 @@ export default async function AdminClientAssessmentsPage({
                   action={
                     <Link
                       className={styles.actionLink}
-                      href={navigate(`/admin/avaliacoes/${assessment.id}`)}
+                      href={continueFromFeedback(`/admin/avaliacoes/${assessment.id}`)}
                     >
                       Ver avaliação
                     </Link>
@@ -266,8 +292,8 @@ export default async function AdminClientAssessmentsPage({
           {historyPagination.pageCount > 1 ? (
             <nav className={styles.pages} aria-label="Páginas do histórico finalizado">
               <span>Página {historyPagination.page} de {historyPagination.pageCount}</span>
-              {historyPagination.page > 1 ? <Link href={navigate(clientAssessmentDirectoryHref(client.id, filters, draftPagination.page, historyPagination.page - 1, "history"))}>Anterior</Link> : null}
-              {historyPagination.page < historyPagination.pageCount ? <Link href={navigate(clientAssessmentDirectoryHref(client.id, filters, draftPagination.page, historyPagination.page + 1, "history"))}>Próxima</Link> : null}
+              {historyPagination.page > 1 ? <Link href={continueFromFeedback(clientAssessmentDirectoryHref(client.id, filters, draftPagination.page, historyPagination.page - 1, "history"))}>Anterior</Link> : null}
+              {historyPagination.page < historyPagination.pageCount ? <Link href={continueFromFeedback(clientAssessmentDirectoryHref(client.id, filters, draftPagination.page, historyPagination.page + 1, "history"))}>Próxima</Link> : null}
             </nav>
           ) : null}
           </>
