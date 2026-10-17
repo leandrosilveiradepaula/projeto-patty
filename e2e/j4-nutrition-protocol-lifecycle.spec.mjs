@@ -411,13 +411,17 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
       assertDoseRlsVisibility(staff.id,firstMealId,"aal2",1);
       assertDoseRlsVisibility(staff.id,firstMealId,"aal1",0);
       assertDoseRlsVisibility(unrelatedStaff.id,firstMealId,"aal2",0);
-      // A historical, ended assignment must not restore access to this client.
-      insert("client_assignments",{
+      // Prove revocation, not just non-access with an already-ended record:
+      // the same AAL2 administrator can read while assigned and loses access
+      // immediately after assignment closure. Everything is local synthetic.
+      const revocableAssignmentId=insert("client_assignments",{
         client_id:clientId,
         staff_profile_id:unrelatedStaff.id,
-        assigned_at:"2026-10-16T11:00:00Z",
-        ended_at:"2026-10-16T12:00:00Z",
       });
+      assertDoseRlsVisibility(unrelatedStaff.id,firstMealId,"aal2",1);
+      expect(sql("update public.client_assignments set ended_at=now()"+
+        " where id="+quote(revocableAssignmentId)+" returning id;"))
+        .toBe(revocableAssignmentId);
       assertDoseRlsVisibility(unrelatedStaff.id,firstMealId,"aal2",0);
       assertDoseRlsVisibility(owner.id,firstMealId,"aal1",0);
       assertDoseRlsVisibility(unrelatedOwner.id,firstMealId,"aal1",0);
@@ -454,6 +458,7 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
         " where protocol_version_id="+quote(v1.id),1))[0];
       expect(firstPublication.protocol_version_id).toBe(v1.id);
       assertDoseRlsVisibility(owner.id,firstMealId,"aal1",1);
+      assertDoseRlsVisibility(staff.id,firstMealId,"aal1",0);
       assertDoseRlsVisibility(unrelatedOwner.id,firstMealId,"aal1",0);
       assertDoseRlsVisibility(unrelatedStaff.id,firstMealId,"aal2",0);
       const publicationResponse=await clientPage.reload();
@@ -493,6 +498,7 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
     });
 
     let v2;
+    let secondMealId;
     await test.step("Clone v1 to editable v2; immutable publication remains current",async()=>{
       await openVersion(adminPage,protocolId,1);
       await actionFrom(adminPage,"Criar novo rascunho a partir desta versão");
@@ -527,6 +533,8 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
         " join public.meal_plan_versions p on p.id=v.meal_plan_version_id"+
         " where p.protocol_version_id="+quote(v2.id));
       expect(meal2).toHaveLength(1);
+      secondMealId=meal2[0].id;
+      assertDoseRlsVisibility(owner.id,secondMealId,"aal1",0);
       await openVersion(adminPage,protocolId,2);
       await actionFrom(adminPage,"Salvar dose",async form=>{
         await form.locator('input[name="doseQuantity"]').fill("2.25");
@@ -543,6 +551,7 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
         " where p.protocol_version_id="+quote(v1.id));
       expect(savedV1).toHaveLength(1);
       expect(Number(savedV1[0].dose_quantity)).toBe(1.5);
+      assertDoseRlsVisibility(owner.id,secondMealId,"aal1",0);
       await clientPage.reload();
       await expect(clientPage.getByText("J4 Almoço sintético").first()).toBeVisible();
       expect(rows("select id from public.protocol_publications where client_id="+quote(clientId))).toHaveLength(1);
@@ -556,12 +565,16 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
       await openVersion(adminPage,protocolId,2);
       await lifecycle(adminPage,"approve");
       await pollRows("select id from public.protocol_version_approvals where protocol_version_id="+quote(v2.id),1);
+      assertDoseRlsVisibility(owner.id,secondMealId,"aal1",0);
       await clientPage.reload();
       expect(rows("select id from public.protocol_publications where client_id="+quote(clientId))).toHaveLength(1);
       await openVersion(adminPage,protocolId,2);
       await lifecycle(adminPage,"publish");
       secondPublication=(await pollRows("select id,protocol_version_id from public.protocol_publications"+
         " where protocol_version_id="+quote(v2.id),1))[0];
+      assertDoseRlsVisibility(owner.id,secondMealId,"aal1",1);
+      assertDoseRlsVisibility(owner.id,firstMealId,"aal1",1);
+      assertDoseRlsVisibility(unrelatedOwner.id,secondMealId,"aal1",0);
       await clientPage.reload();
       await expect(clientPage.getByRole("heading",{name:"Plano atual"})).toBeVisible();
       const history=clientPage.getByRole("navigation",{name:"Consultar versões publicadas"});
