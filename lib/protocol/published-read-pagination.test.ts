@@ -12,6 +12,26 @@ import {
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const read = (p: string) => fs.readFileSync(path.join(root, p), "utf8");
 
+test("dose batches fit in a single page under the schema's three-type uniqueness constraint", () => {
+  const migration = read("supabase/migrations/20260918185509_create_versioned_meal_plan_structure.sql");
+  const allocationTable = migration.slice(
+    migration.indexOf("create table public.meal_dose_allocations"),
+    migration.indexOf("create index", migration.indexOf("create table public.meal_dose_allocations")),
+  );
+  assert.match(allocationTable, /unique\\s*\\(meal_id,\\s*dose_type\\)/);
+  assert.match(allocationTable, /dose_type in \\('protein',\\s*'carbohydrate',\\s*'fat'\\)/);
+  assert.ok(PUBLISHED_PROTOCOL_ID_BATCH_SIZE * 3 < PUBLISHED_PROTOCOL_PAGE_SIZE);
+  const access = read("lib/supabase/data-access.ts");
+  const admin = access.slice(
+    access.indexOf("export async function listAccessibleProtocolVersionMealPlans"),
+    access.indexOf("export type CurrentClientPublishedProtocol"),
+  );
+  const doses = admin.slice(admin.indexOf('.from("meal_dose_allocations")'),admin.indexOf("  ));",admin.indexOf('.from("meal_dose_allocations")')));
+  assert.match(doses,/\\.in\\("meal_id", ids\\)/);
+  assert.match(doses,/\\.range\\(from, to\\)/);
+  assert.doesNotMatch(doses,/\\.order\\(/);
+});
+
 test("no accessible publications result in no child queries", async () => {
   let calls = 0;
   assert.deepEqual(await collectPublishedProtocolRows([], async () => {
