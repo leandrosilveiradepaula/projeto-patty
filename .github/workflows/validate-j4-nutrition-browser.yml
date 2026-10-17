@@ -1,0 +1,162 @@
+name: Validate J4 local nutrition lifecycle browser
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/validate-j4-nutrition-browser.yml"
+      - "e2e/j4-nutrition-protocol-lifecycle.spec.mjs"
+      - "e2e/helpers/admin-auth.mjs"
+      - "app/admin/protocolos/**"
+      - "app/admin/clientes/[clienteId]/protocolos/**"
+      - "app/cliente/protocolo/**"
+      - "lib/protocol/**"
+      - "supabase/migrations/*meal_dose_select_rls*.sql"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: j4-nutrition-browser-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  nutrition-lifecycle-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      SUPABASE_TELEMETRY_DISABLED: "1"
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - name: Checkout exact commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Node 22
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install pinned dependencies
+        run: npm ci
+
+      - name: Enable local-only admin TOTP
+        run: |
+          node <<'NODE'
+          const {readFileSync,writeFileSync}=require("node:fs");
+          const p="supabase/config.toml",v=readFileSync(p,"utf8");
+          const from="[auth.mfa.totp]\nenroll_enabled = false\nverify_enabled = false";
+          const to="[auth.mfa.totp]\nenroll_enabled = true\nverify_enabled = true";
+          if(v.split(from).length!==2)throw Error("Unknown Supabase MFA config");
+          writeFileSync(p,v.replace(from,to));
+          NODE
+          git diff --check
+
+      - name: Start disposable local Supabase
+        run: npx supabase start
+
+      - name: Reset local database with committed migrations
+        run: npx supabase db reset
+
+      - name: Export local public configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx supabase status -o env > "$RUNNER_TEMP/j4-local-status"
+          chmod 600 "$RUNNER_TEMP/j4-local-status"
+          set -a
+          source "$RUNNER_TEMP/j4-local-status"
+          set +a
+          test "$API_URL" = "http://127.0.0.1:54321"
+          test -n "$ANON_KEY"
+          test -n "$SERVICE_ROLE_KEY"
+          echo "::add-mask::$ANON_KEY"
+          echo "::add-mask::$SERVICE_ROLE_KEY"
+          echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL" >> "$GITHUB_ENV"
+          echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$ANON_KEY" >> "$GITHUB_ENV"
+          echo "J4_E2E_BASE_URL=http://127.0.0.1:3000" >> "$GITHUB_ENV"
+
+      - name: Install Chromium
+        run: |
+          npm install --no-save --package-lock=false @playwright/test@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Build and start production-mode Next.js locally
+        shell: bash
+        run: |
+          set -euo pipefail
+          # The browser should exercise a stable production build, not an
+          # on-demand dev compiler alongside Chromium and local Supabase.
+          npm run build
+          npm run start -- --hostname 127.0.0.1 --port 3000 > "$RUNNER_TEMP/j4-next.log" 2>&1 &
+          echo "$!" > "$RUNNER_TEMP/j4-next.pid"
+          for attempt in $(seq 1 90); do
+            if curl -fsS --max-time 3 http://127.0.0.1:3000/login >/dev/null 2>&1; then exit 0; fi
+            sleep 2
+          done
+          echo "::error::Disposable Next.js login not ready"
+          tail -n 35 "$RUNNER_TEMP/j4-next.log"
+          exit 1
+
+      - name: Playwright J4 full nutrition lifecycle
+        env:
+          J4_E2E_LOCAL_ONLY: "true"
+        shell: bash
+        run: |
+          set -euo pipefail
+          set -a
+          source "$RUNNER_TEMP/j4-local-status"
+          set +a
+          export J4_E2E_SUPABASE_URL="$API_URL"
+          export J4_E2E_ANON_KEY="$ANON_KEY"
+          export J4_E2E_SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY"
+          npx playwright test e2e/j4-nutrition-protocol-lifecycle.spec.mjs --reporter=line --workers=1
+
+      - name: Classify local server errors without disclosing log content
+        if: failure()
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require("node:fs");
+          const filename = process.env.RUNNER_TEMP + "/j4-next.log";
+          const data = fs.existsSync(filename) ? fs.readFileSync(filename, "utf8") : "";
+          // Output only SQLSTATE and known error classes. Never print freeform
+          // messages, stack traces, protocol values, URLs, identities or tokens.
+          const codes = [...data.matchAll(/(?:code|sqlstate):\s*['"]?([A-Z0-9]{5})['"]?/gi)]
+            .map(match => match[1].toUpperCase());
+          const known = ["permission denied", "infinite recursion", "row-level security",
+            "violates", "column", "relation", "query returned", "unexpected null",
+            "too many requests", "TypeError", "ReferenceError"];
+          const categories = known.filter(term => data.toLowerCase().includes(term.toLowerCase()));
+          const loadStages = ["protocol","versions","approvals","publications","meal-plans"];
+          const mealStages = ["plans","variants","cycles","meals","steps","doses"];
+          const mealFailure = mealStages.find(stage => data.includes("J4_MEAL_PLAN_LOAD_FAILURE:" + stage)) ?? "none-detected";
+          // A whitelist-bound SQLSTATE/PostgREST code is safe to expose;
+          // never print the raw database exception or application logs.
+          const mealCodes = [...data.matchAll(/J4_MEAL_PLAN_LOAD_FAILURE:(?:plans|variants|cycles|meals|steps|doses);code=([A-Z0-9]{5}|PGRST[0-9]{3}|unknown)/g)]
+            .map(match => match[1]);
+          const loadFailure = loadStages.find(stage => data.includes("J4_ADMIN_LOAD_FAILURE:" + stage)) ?? "none-detected";
+          process.stdout.write("J4 server diagnostics: SQLSTATE=" +
+            (codes.length ? [...new Set(codes)].join(",") : "none-detected") +
+            "; categories=" + (categories.length ? categories.join(",") : "unclassified") +
+            "; admin-load=" + loadFailure + "; meal-load=" + mealFailure +
+            "; meal-code=" + (mealCodes.length ? [...new Set(mealCodes)].join(",") : "none-detected") + "\n");
+          NODE
+
+      - name: Destroy all disposable services
+        if: always()
+        shell: bash
+        run: |
+          if [ -f "$RUNNER_TEMP/j4-next.pid" ]; then
+            kill "$(cat "$RUNNER_TEMP/j4-next.pid")" 2>/dev/null || true
+          fi
+          npx supabase stop --no-backup || true
+          rm -f "$RUNNER_TEMP/j4-next.pid" "$RUNNER_TEMP/j4-local-status"
+
+      - name: Report scope
+        if: always()
+        run: |
+          echo "Local synthetic J4 browser test only. No real accounts, production DB or external SMTP."
+          echo "Professional acceptance in production remains separate."
