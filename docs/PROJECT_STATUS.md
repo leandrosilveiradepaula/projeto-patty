@@ -1,3 +1,13 @@
+## 2026-10-17 — J4 PR #907: reducao de custo RLS na leitura das doses (validacao tecnica local)
+
+**EVIDENCIA CONFIRMADA NO COMMIT `d9dc827a`:** [Validate application #39069061840](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39069061840), [foundation pgTAP #39069061827](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39069061827) e [Playwright J4 #39069061821](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39069061821) passaram em ambiente CI local, com banco descartavel e limpeza. Consulta autenticada de `meal_dose_allocations` passou de timeout no EXPLAIN para custo estimado 14 (baseline sem RLS: 13), inclusive leitura de doses em estados draft, submetido e aprovado. J4 integral foi exercitada com contas exclusivamente sinteticas, MFA, revisao/publicacao manual e historico de versoes.
+
+**IMPLEMENTADO NA BRANCH, NAO APLICADO A PRODUCAO:** `supabase/migrations/20261017203000_optimize_meal_dose_select_rls.sql` introduz funcao privada `SECURITY INVOKER` que consulta a autorizacao RLS existente de `meals`; evita expansao custosa da policy de doses, sem `SECURITY DEFINER`, sem service role no browser, sem modificar policies de escrita ou imutabilidade. A migration foi aplicada apenas no reset local descartavel. Testes J4 adicionais na mesma branch cobrem encerramento de assignment, grants para anon, natureza nao privilegiada da funcao e ausencia de acesso antes da publicacao; necessitam reconfirmacao no SHA de entrega.
+
+**PENDENCIAS EXPLICITAS:** checks verdes no SHA final, revisao humana especifica de RLS/workflow, merge manual, aplicacao/deploy em ambiente autorizado, verificacao do SHA publicado e homologacao da Patty em mobile; nenhum desses estados e implicado pelo CI local. Sem novas regras de nutricao/IA.
+
+---
+
 ## 2026-10-16 — J3: retorno da comparação de fotos à avaliação (em validação)
 
 **CONTINUIDADE FUNCIONAL:** na comparação de duas avaliações já finalizadas e autorizadas, a Patty pode escolher fotos privadas e abrir uma das avaliações, mantendo os IDs opacos da dupla de avaliações e das duas fotos para retornar à seleção exata. Os identificadores da dupla são revalidados na avaliação de destino; os de arquivos são apenas estado de navegação, e a comparação de destino revalida os vínculos de cada foto e a rota privada de leitura antes de exibi-las. Ausência, repetição ou adulteração não amplia permissões nem cria classificação clínica. Testes determinísticos cobrem ida/volta e rejeição de IDs malformados.

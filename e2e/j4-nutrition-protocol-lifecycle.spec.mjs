@@ -344,6 +344,11 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
   insert("client_assignments",{client_id:otherClientId,staff_profile_id:unrelatedStaff.id});
   const totp=await enrollMfa(staff);
   const otherTotp=await enrollMfa(unrelatedStaff);
+  // SQL-level structural checks in the disposable database. In particular,
+  // the authorization helper must remain INVOKER (never a privileged bypass).
+  expect(sql("select prosecdef from pg_proc where oid='app_private.can_select_meal_doses_for_meal(uuid)'::regprocedure;")).toBe("f");
+  expect(sql("select has_table_privilege('anon','public.meal_dose_allocations','SELECT');")).toBe("f");
+  expect(sql("select has_function_privilege('anon','app_private.can_select_meal_doses_for_meal(uuid)','EXECUTE');")).toBe("f");
 
   const adminCtx=await browser.newContext({
     baseURL,viewport:{width:390,height:844},isMobile:true,hasTouch:true,
@@ -406,6 +411,13 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
       assertDoseRlsVisibility(staff.id,firstMealId,"aal2",1);
       assertDoseRlsVisibility(staff.id,firstMealId,"aal1",0);
       assertDoseRlsVisibility(unrelatedStaff.id,firstMealId,"aal2",0);
+      // A historical, ended assignment must not restore access to this client.
+      insert("client_assignments",{
+        client_id:clientId,
+        staff_profile_id:unrelatedStaff.id,
+        ended_at:"2026-10-16T12:00:00Z",
+      });
+      assertDoseRlsVisibility(unrelatedStaff.id,firstMealId,"aal2",0);
       assertDoseRlsVisibility(owner.id,firstMealId,"aal1",0);
       assertDoseRlsVisibility(unrelatedOwner.id,firstMealId,"aal1",0);
       await mobileFit(adminPage);
@@ -427,6 +439,7 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
       await lifecycle(adminPage,"approve");
       await pollRows("select id from public.protocol_version_approvals where protocol_version_id="+quote(v1.id),1);
       probeAuthenticatedDoseRead(staff.id,firstMealId,"approved");
+      assertDoseRlsVisibility(owner.id,firstMealId,"aal1",0);
       await clientPage.reload();
       await expect(clientPage.getByText("Nenhum protocolo foi publicado para você",{exact:true})).toBeVisible();
       await mobileFit(adminPage);
