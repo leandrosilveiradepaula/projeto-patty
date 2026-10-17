@@ -415,6 +415,7 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
       insert("client_assignments",{
         client_id:clientId,
         staff_profile_id:unrelatedStaff.id,
+        assigned_at:"2026-10-16T11:00:00Z",
         ended_at:"2026-10-16T12:00:00Z",
       });
       assertDoseRlsVisibility(unrelatedStaff.id,firstMealId,"aal2",0);
