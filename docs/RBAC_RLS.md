@@ -337,6 +337,12 @@ Protocolos e planos usam grants explicitos e RLS. Cliente nao recebe escrita e s
 
 Patty/admin precisa de role relacional `admin` e assignment ativo para leitura interna. A escrita de protocolo e plano e limitada ao draft; triggers tambem recusam mutacao apos submissao para revisao. `anon`, admin sem assignment e assignment encerrado nao recebem acesso.
 
+### FATO TÉCNICO CONFIRMADO NO SAAS — OTIMIZAÇÃO DE SELECT DE DOSES (2026-10-17)
+
+A migration `20261017203000_optimize_meal_dose_select_rls.sql` foi aplicada no Supabase de produção do Projeto Corpo e Mente após merge do PR #907. A policy `meal_doses_select_assigned_or_published` em `meal_dose_allocations` utiliza `app_private.can_select_meal_doses_for_meal(meal_id)` em `SECURITY INVOKER`, consultando somente refeições que o próprio usuário pode ler sob a RLS de `public.meals`. A função privada não usa `SECURITY DEFINER`. Após a aplicação, foram verificados RLS habilitada, `anon` sem EXECUTE, `authenticated` com EXECUTE, policy de MFA `RESTRICTIVE` e três policies de escrita ainda presentes. A migration foi registrada com a mesma versão do arquivo no repositório, sem entradas duplicadas.
+
+Um `EXPLAIN` sem executar a consulta, usando sessão `authenticated` simulada por JWT e IDs sintéticos inexistentes, produziu custo estimado `6,74` com o índice `meal_dose_allocations_meal_id_idx`, sem timeout de planejamento de 4 segundos. O teste não leu dados reais, não confirma latência do fluxo real nem substitui verificação profissional/mobile. Mudanças futuras na policy `SELECT` de `meals` podem afetar as doses e exigem nova regressão do isolamento. [Evidências e pendências](./JOURNEY_HOMOLOGATION.md).
+
 O catalogo de equivalentes continua interno: cliente nao recebe grant ou policy de leitura. Admin com role e ao menos um assignment ativo pode administra-lo; o mecanismo administrativo detalhado permanece aberto.
 
 ## Implementacao BACKEND-BUNDLE-04
