@@ -10,6 +10,7 @@ on:
       - "app/admin/clientes/[clienteId]/protocolos/**"
       - "app/cliente/protocolo/**"
       - "lib/protocol/**"
+      - "supabase/migrations/*meal_dose_select_rls*.sql"
   workflow_dispatch:
 
 permissions:
