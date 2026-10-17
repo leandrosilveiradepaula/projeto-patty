@@ -107,7 +107,7 @@ function probeAuthenticatedDoseRead(staffProfileId,mealId,stage){
     "set local request.jwt.claim.sub = "+quote(staffProfileId)+";",
     "select id,meal_id,dose_type,dose_quantity from public.meal_dose_allocations"+
       " where meal_id in ("+quote(mealId)+")"+
-      " order by meal_id asc,dose_type asc,id asc limit 500;",
+      " order by id asc limit 500;",
     "rollback;",
   ].join("\n");
   try {
