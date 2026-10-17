@@ -171,6 +171,23 @@ function traceSyntheticDoseRlsDepth(staffProfileId,ids){
   }
 }
 
+// Prove the same row-scoped read restrictions under real authenticated SQL.
+// Restricted to the disposable database and fixed synthetic UUID inputs.
+function assertDoseRlsVisibility(profileId,mealId,aal,expectedCount){
+  if(!UUID.test(profileId)||!UUID.test(mealId)||
+    !["aal1","aal2"].includes(aal)||![0,1].includes(expectedCount))
+    throw new Error("Invalid synthetic RLS visibility test");
+  const claims=JSON.stringify({sub:profileId,role:"authenticated",aal});
+  const output=sql([
+    "begin;","set local role authenticated;",
+    "set local request.jwt.claims = "+quote(claims)+";",
+    "set local request.jwt.claim.sub = "+quote(profileId)+";",
+    "select count(*) from public.meal_dose_allocations where meal_id="+quote(mealId)+";",
+    "rollback;",
+  ].join("\n"));
+  expect(Number(output)).toBe(expectedCount);
+}
+
 function probeAuthenticatedDoseRead(staffProfileId,mealId,stage){
   if(!UUID.test(staffProfileId)||!UUID.test(mealId)||
     !["draft","submitted","approved"].includes(stage))
@@ -386,6 +403,11 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
       traceSyntheticDoseRlsDepth(staff.id,{version:v1.id,plan:plan.id,variant:variant.id,meal:firstMealId});
       compareSyntheticDosePlans(staff.id,firstMealId);
       probeAuthenticatedDoseRead(staff.id,firstMealId,"draft");
+      assertDoseRlsVisibility(staff.id,firstMealId,"aal2",1);
+      assertDoseRlsVisibility(staff.id,firstMealId,"aal1",0);
+      assertDoseRlsVisibility(unrelatedStaff.id,firstMealId,"aal2",0);
+      assertDoseRlsVisibility(owner.id,firstMealId,"aal1",0);
+      assertDoseRlsVisibility(unrelatedOwner.id,firstMealId,"aal1",0);
       await mobileFit(adminPage);
     });
 
@@ -417,6 +439,9 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
       firstPublication=(await pollRows("select id,protocol_version_id from public.protocol_publications"+
         " where protocol_version_id="+quote(v1.id),1))[0];
       expect(firstPublication.protocol_version_id).toBe(v1.id);
+      assertDoseRlsVisibility(owner.id,firstMealId,"aal1",1);
+      assertDoseRlsVisibility(unrelatedOwner.id,firstMealId,"aal1",0);
+      assertDoseRlsVisibility(unrelatedStaff.id,firstMealId,"aal2",0);
       const publicationResponse=await clientPage.reload();
       // A missing title could mean login redirect, server failure or a
       // render error, not necessarily absent publication. Record only a
