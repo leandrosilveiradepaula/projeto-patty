@@ -133,6 +133,44 @@ function compareSyntheticDosePlans(staffProfileId,mealId){
     }
   }
 }
+// Local-only, read-only planner-depth trace. Identify the first RLS table
+// whose policy expansion becomes expensive before changing any authorization.
+// EXPLAIN does not execute SQL; report only rounded planner estimates.
+function traceSyntheticDoseRlsDepth(staffProfileId,ids){
+  const candidates=[
+    ["protocol-versions","protocol_versions","id",ids.version],
+    ["meal-plan-versions","meal_plan_versions","id",ids.plan],
+    ["meal-plan-variants","meal_plan_variants","id",ids.variant],
+    ["meals","meals","id",ids.meal],
+    ["meal-doses","meal_dose_allocations","meal_id",ids.meal],
+  ];
+  if(process.env.J4_E2E_LOCAL_ONLY!=="true"||
+    apiURL!=="http://127.0.0.1:54321"||
+    !UUID.test(staffProfileId)||
+    candidates.some(([, , ,id])=>!UUID.test(id)))
+    throw new Error("RLS trace is restricted to synthetic local identifiers");
+  const claims=JSON.stringify({sub:staffProfileId,role:"authenticated",aal:"aal2"});
+  for(const [label,table,column,id] of candidates){
+    const query="explain (format json, costs true) select id from public."+
+      table+" where "+column+" = "+quote(id)+" limit 500;";
+    try{
+      const raw=sql([
+        "begin;","set local statement_timeout = '4s';",
+        "set local role authenticated;",
+        "set local request.jwt.claims = "+quote(claims)+";",
+        "set local request.jwt.claim.sub = "+quote(staffProfileId)+";",
+        query,"rollback;",
+      ].join("\n"));
+      const plan=JSON.parse(raw)?.[0]?.Plan;
+      const cost=Number(plan?.["Total Cost"]);
+      console.log("J4_RLS_DEPTH:"+label+":cost="+
+        (Number.isFinite(cost)?Math.round(cost):"unavailable"));
+    }catch{
+      console.log("J4_RLS_DEPTH:"+label+":unavailable-or-timeout");
+    }
+  }
+}
+
 function probeAuthenticatedDoseRead(staffProfileId,mealId,stage){
   if(!UUID.test(staffProfileId)||!UUID.test(mealId)||
     !["draft","submitted","approved"].includes(stage))
@@ -345,6 +383,7 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
         " where meal_id="+quote(meal.id),1);
       expect(doses[0].dose_type).toBe("protein");
       expect(Number(doses[0].dose_quantity)).toBe(1.5);
+      traceSyntheticDoseRlsDepth(staff.id,{version:v1.id,plan:plan.id,variant:variant.id,meal:firstMealId});
       compareSyntheticDosePlans(staff.id,firstMealId);
       probeAuthenticatedDoseRead(staff.id,firstMealId,"draft");
       await mobileFit(adminPage);
