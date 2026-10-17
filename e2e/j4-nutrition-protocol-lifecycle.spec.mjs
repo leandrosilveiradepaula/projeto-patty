@@ -93,6 +93,28 @@ async function pollRows(query,length){
   await expect.poll(()=>rows(query).length,{timeout:25000}).toBe(length);
   return rows(query);
 }
+// Synthetic local-only authorization probe; never print SQL errors or data.
+function probeAuthenticatedDoseRead(staffProfileId,mealId,stage){
+  if(!UUID.test(staffProfileId)||!UUID.test(mealId)||
+    !["draft","submitted","approved"].includes(stage))
+    throw new Error("Invalid synthetic dose probe");
+  const claims=JSON.stringify({sub:staffProfileId,role:"authenticated",aal:"aal2"});
+  const command=[
+    "begin;",
+    "set local role authenticated;",
+    "set local statement_timeout = '5s';",
+    "set local request.jwt.claims = "+quote(claims)+";",
+    "set local request.jwt.claim.sub = "+quote(staffProfileId)+";",
+    "select count(*) from public.meal_dose_allocations where meal_id="+quote(mealId)+";",
+    "rollback;",
+  ].join("\n");
+  try {
+    sql(command);
+    console.log("J4_AUTH_DOSE_PROBE:"+stage+":completed");
+  } catch {
+    console.log("J4_AUTH_DOSE_PROBE:"+stage+":failed-or-timed-out");
+  }
+}
 async function mobileFit(page){
   const s=await page.evaluate(()=>{
     const width=document.documentElement.clientWidth;
@@ -246,6 +268,7 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
 
     let protocolId;
     let v1;
+    let firstMealId;
     await test.step("Create first protocol and draft through authenticated admin UI",async()=>{
       await adminPage.goto("/admin/clientes/"+clientId+"/protocolos");
       await adminPage.getByRole("button",{name:"Criar primeiro protocolo"}).click();
@@ -276,10 +299,12 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
         await form.locator('input[name="doseQuantity"]').fill("1.5");
       });
       const meal=rows("select id from public.meals where meal_plan_variant_id="+quote(variant.id))[0];
+      firstMealId=meal.id;
       const doses=await pollRows("select id,dose_type,dose_quantity from public.meal_dose_allocations"+
         " where meal_id="+quote(meal.id),1);
       expect(doses[0].dose_type).toBe("protein");
       expect(Number(doses[0].dose_quantity)).toBe(1.5);
+      probeAuthenticatedDoseRead(staff.id,firstMealId,"draft");
       await mobileFit(adminPage);
     });
 
@@ -294,9 +319,11 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
       await openVersion(adminPage,protocolId,1);
       await lifecycle(adminPage,"submit");
       await expect.poll(()=>latestVersion(protocolId).submitted_for_review_at!==null,{timeout:25000}).toBe(true);
+      probeAuthenticatedDoseRead(staff.id,firstMealId,"submitted");
       await openVersion(adminPage,protocolId,1);
       await lifecycle(adminPage,"approve");
       await pollRows("select id from public.protocol_version_approvals where protocol_version_id="+quote(v1.id),1);
+      probeAuthenticatedDoseRead(staff.id,firstMealId,"approved");
       await clientPage.reload();
       await expect(clientPage.getByText("Nenhum protocolo foi publicado para você",{exact:true})).toBeVisible();
       await mobileFit(adminPage);
