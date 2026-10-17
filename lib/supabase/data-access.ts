@@ -2918,10 +2918,9 @@ export async function listAccessibleProtocolVersionMealPlans(
       .from("meal_dose_allocations")
       .select("id, meal_id, dose_type, dose_quantity")
       .in("meal_id", ids)
-      // Stable unique-key pagination. The grouped presentation order is
-      // restored after all batches are fetched; the RLS-filtered SQL query
-      // need not evaluate a three-column sort for every page.
-      .order("id", { ascending: true })
+      // The DB restricts each meal to one dose per each of three types.
+      // A 100-meal batch therefore has at most 300 rows (< 500/page):
+      // no SQL ordering is needed; deterministic display sorting follows.
       .range(from, to),
   ));
 
