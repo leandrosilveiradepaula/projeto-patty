@@ -105,7 +105,9 @@ function probeAuthenticatedDoseRead(staffProfileId,mealId,stage){
     "set local statement_timeout = '5s';",
     "set local request.jwt.claims = "+quote(claims)+";",
     "set local request.jwt.claim.sub = "+quote(staffProfileId)+";",
-    "select count(*) from public.meal_dose_allocations where meal_id="+quote(mealId)+";",
+    "select id,meal_id,dose_type,dose_quantity from public.meal_dose_allocations"+
+      " where meal_id in ("+quote(mealId)+")"+
+      " order by meal_id asc,dose_type asc,id asc limit 500;",
     "rollback;",
   ].join("\n");
   try {
