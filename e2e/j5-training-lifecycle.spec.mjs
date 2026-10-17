@@ -185,9 +185,9 @@ test("J5: client requests, Patty reviews/publishes exact training versions and a
     const adminRoute = "/admin/clientes/" + clientId + "/treino";
     await test.step("No prescription is created before a request", async () => {
       await adminPage.goto(adminRoute);
-      await expect(adminPage.getByRole("heading", { name: "Treino ainda não solicitado" })).toBeVisible();
+      await expect(adminPage.getByText("Treino ainda não solicitado", { exact: true })).toBeVisible();
       expect(rows("select id from public.client_training_plans where client_id=" + literal(clientId))).toEqual([]);
-      await expect(clientPage.getByRole("heading", { name: "Nenhum treino publicado" })).toBeVisible();
+      await expect(clientPage.getByText("Nenhum treino publicado", { exact: true })).toBeVisible();
     });
 
     await test.step("Client requests training using own session", async () => {
@@ -214,7 +214,7 @@ test("J5: client requests, Patty reviews/publishes exact training versions and a
       expect(visibleCount(staff.id, "aal1", "client_training_plan_versions", first.id)).toBe(0);
       expect(visibleCount(unassigned.id, "aal2", "client_training_plan_versions", first.id)).toBe(0);
       expect(visibleCount(owner.id, "aal1", "client_training_plan_versions", first.id)).toBe(0);
-      await expect(clientPage.getByRole("heading", { name: "Nenhum treino publicado" })).toBeVisible();
+      await expect(clientPage.getByText("Nenhum treino publicado", { exact: true })).toBeVisible();
       await expect(adminPage.getByRole("heading", { name: "Adicionar exercício" })).toBeVisible();
       await adminPage.getByLabel("Nome manual do exercício").fill("J5 Exercicio manual");
       await adminPage.getByLabel("Séries", { exact: true }).fill("3");
@@ -235,7 +235,7 @@ test("J5: client requests, Patty reviews/publishes exact training versions and a
       expect(versions(clientId)[0].published_at).toBeNull();
       expect(visibleCount(owner.id, "aal1", "client_training_plan_versions", first.id)).toBe(0);
       await clientPage.reload();
-      await expect(clientPage.getByRole("heading", { name: "Nenhum treino publicado" })).toBeVisible();
+      await expect(clientPage.getByText("Nenhum treino publicado", { exact: true })).toBeVisible();
       await expect(adminPage.getByRole("heading", { name: "Publicar para a cliente" })).toBeVisible();
       await adminPage.getByRole("button", { name: "Publicar treino" }).click();
       await adminPage.getByRole("button", { name: "Confirmar publicação" }).click();
@@ -246,7 +246,7 @@ test("J5: client requests, Patty reviews/publishes exact training versions and a
       await clientPage.reload();
       await expect(clientPage.getByRole("heading", { name: "J5 Treino A sintetico" })).toBeVisible();
       await expect(clientPage.getByText("J5 Exercicio manual", { exact: false }).first()).toBeVisible();
-      await expect(foreignPage.getByRole("heading", { name: "Nenhum treino publicado" })).toBeVisible();
+      await expect(foreignPage.getByText("Nenhum treino publicado", { exact: true })).toBeVisible();
       await mobileWidth(clientPage);
     });
 
