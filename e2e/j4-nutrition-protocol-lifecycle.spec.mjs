@@ -94,6 +94,45 @@ async function pollRows(query,length){
   return rows(query);
 }
 // Synthetic local-only authorization probe; never print SQL errors or data.
+// Inspect query *plans*, never data, solely inside the disposable local DB.
+// Compare PostgreSQL's owner (RLS-bypassing baseline) to the authenticated
+// session (RLS enabled). This does not change any grants, policies or data.
+function compareSyntheticDosePlans(staffProfileId,mealId){
+  if(!UUID.test(staffProfileId)||!UUID.test(mealId)||
+    apiURL!=="http://127.0.0.1:54321"||
+    process.env.J4_E2E_LOCAL_ONLY!=="true")
+    throw new Error("Invalid local-only query plan probe");
+  const claims=JSON.stringify({sub:staffProfileId,role:"authenticated",aal:"aal2"});
+  const query="explain (format json, costs true) "+
+    "select id,meal_id,dose_type,dose_quantity "+
+    "from public.meal_dose_allocations where meal_id in ("+quote(mealId)+") limit 500;";
+  const scenarios=[
+    {label:"owner-baseline",setup:[]},
+    {label:"authenticated-rls",setup:[
+      "set local role authenticated;",
+      "set local request.jwt.claims = "+quote(claims)+";",
+      "set local request.jwt.claim.sub = "+quote(staffProfileId)+";",
+    ]},
+  ];
+  for(const scenario of scenarios){
+    try{
+      const raw=sql([
+        "begin;","set local statement_timeout = '4s';",
+        ...scenario.setup,query,"rollback;",
+      ].join("\n"));
+      const plan=JSON.parse(raw)?.[0]?.Plan;
+      const cost=Number(plan?.["Total Cost"]);
+      const estimatedRows=Number(plan?.["Plan Rows"]);
+      const safeCost=Number.isFinite(cost)?Math.round(cost):"unavailable";
+      const safeRows=Number.isFinite(estimatedRows)?Math.round(estimatedRows):"unavailable";
+      // Fixed field names, synthetic-row estimates and numeric costs only.
+      console.log("J4_DOSE_QUERY_PLAN:"+scenario.label+
+        ":cost="+safeCost+":estimated-rows="+safeRows);
+    }catch{
+      console.log("J4_DOSE_QUERY_PLAN:"+scenario.label+":unavailable-or-timeout");
+    }
+  }
+}
 function probeAuthenticatedDoseRead(staffProfileId,mealId,stage){
   if(!UUID.test(staffProfileId)||!UUID.test(mealId)||
     !["draft","submitted","approved"].includes(stage))
@@ -306,6 +345,7 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
         " where meal_id="+quote(meal.id),1);
       expect(doses[0].dose_type).toBe("protein");
       expect(Number(doses[0].dose_quantity)).toBe(1.5);
+      compareSyntheticDosePlans(staff.id,firstMealId);
       probeAuthenticatedDoseRead(staff.id,firstMealId,"draft");
       await mobileFit(adminPage);
     });
