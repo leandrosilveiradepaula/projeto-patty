@@ -272,6 +272,12 @@ test("J5: client requests, Patty reviews/publishes exact training versions and a
       await adminPage.getByRole("checkbox", { name: /Confirmo a cópia dos exercícios/ }).check();
       await adminPage.getByRole("button", { name: "Copiar exercícios publicados" }).click();
       await expect.poll(() => items(second.id).length, { timeout: 25000 }).toBe(1);
+      // The copy form intentionally does not trigger router.refresh. Read the
+      // persisted item in a fresh server-rendered view before editing it.
+      await adminPage.reload();
+      await expect(adminPage.locator("summary").filter({
+        hasText: "Editar exercício 1 · J5 Exercicio manual",
+      })).toBeVisible();
       copied = items(second.id)[0];
       expect(copied.id).not.toBe(firstItem.id);
       expect(copied.exercise_name).toBe(firstItem.exercise_name);
