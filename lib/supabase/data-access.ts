@@ -2918,8 +2918,9 @@ export async function listAccessibleProtocolVersionMealPlans(
       .from("meal_dose_allocations")
       .select("id, meal_id, dose_type, dose_quantity")
       .in("meal_id", ids)
-      .order("meal_id", { ascending: true })
-      .order("dose_type", { ascending: true })
+      // Stable unique-key pagination. The grouped presentation order is
+      // restored after all batches are fetched; the RLS-filtered SQL query
+      // need not evaluate a three-column sort for every page.
       .order("id", { ascending: true })
       .range(from, to),
   ));
