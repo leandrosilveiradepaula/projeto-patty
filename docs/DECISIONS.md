@@ -1,3 +1,19 @@
+## 2026-10-17 — Registro técnico pós-merge da J4 e aplicação da migration RLS
+
+### FATO OPERACIONAL CONFIRMADO (NÃO É REGRA PROFISSIONAL)
+
+A Jornada 4 de protocolo alimentar teve PR [#907](https://github.com/leandrosilveiradepaula/projeto-patty/pull/907) integrado ao `master` `5fce2a6820a80324af987a6cc2d9863cb72f7a63`; a Vercel informou `success` no deployment do mesmo commit e o CI local J4 passou ([Playwright #39070861572](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39070861572)). Em 2026-10-17, a migration `20261017203000_optimize_meal_dose_select_rls.sql` foi aplicada no Supabase SaaS do Projeto Corpo e Mente via integração administrativa autorizada, com o histórico remoto reconciliado para o identificador oficial do repositório. A execução de `Deploy Supabase migrations` na integração do PR foi somente dry-run; não deve ser citada como aplicação.
+
+### DECISÃO TÉCNICA PRESERVADA
+
+A otimização da policy SELECT de `meal_dose_allocations` reutiliza a RLS de `public.meals` por função privada `SECURITY INVOKER`, sem bypass privilegiado. A verificação no catálogo confirmou grants, RLS, MFA `RESTRICTIVE` e policies de escrita intactas. A análise de planejamento em produção utilizou somente IDs fictícios e `EXPLAIN` (custo estimado `6,74` com índice), sem acessar registros de clientes; não substitui homologação autenticada real. O histórico de migrations tinha 88 versões tanto no GitHub quanto no SaaS após a aplicação.
+
+### QUESTÃO OPERACIONAL AINDA ABERTA
+
+A J4 permanece **NÃO HOMOLOGADA PELA PATTY**: falta uso profissional autêntico em mobile, publicação deliberada apenas quando apropriada e verificação da versão publicada/isolamento para cliente autorizada. Não criar segundo admin, dados falsos em produção, senha/TOTP em CI ou publicação automática da IA para suprir essa evidência. A pendência do Security Advisor sobre proteção contra senhas vazadas é separada e não altera o resultado da migration.
+
+---
+
 ## 2026-10-15 — J1 encerrada por aceite do responsável; início de J2
 
 ### DECISÃO DE GESTÃO DO PROJETO (RESPONSÁVEL)
