@@ -1,3 +1,19 @@
+## 2026-10-18 — J5 integrada e migration de concorrência aplicada no Supabase SaaS
+
+### FATO CONFIRMADO, NÃO REGRA DO MÉTODO
+
+PR [#909](https://github.com/leandrosilveiradepaula/projeto-patty/pull/909) mergeado ao `master` `2c363c98687c7dd14745f39a91bf9e3ec509c4c6`, Vercel `success` nesse SHA e validação pós-merge [#39132547136](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39132547136) PASS. No head pré-merge `d7839c02`, Playwright J5 [#39085576476](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39085576476), foundation e Validate também PASS no Supabase local descartável; teste concorrente com AAL2 e cliente sintética confirmou uma versão aberta por vez.
+
+### DECISÃO TÉCNICA IMPLEMENTADA E APLICADA
+
+A migration `20261018005000_fix_training_draft_concurrency_lock.sql` foi aplicada ao Supabase SaaS via integração administrativa autorizada em 2026-10-18 e reconciliada à versão do repositório (89 versões de cada lado, nenhuma duplicação). `create_client_training_plan_draft` usa `SECURITY INVOKER` e advisory lock transacional por cliente no lugar de `SELECT FOR UPDATE`. Foram confirmados RLS ativa, EXECUTE da RPC para `authenticated`, UPDATE negado diretamente na tabela e 3 policies de tabela preservadas. A prévia do workflow GitHub [#39132547148](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39132547148) não realizou a aplicação. Nenhum dado de cliente foi usado na verificação de metadados.
+
+### QUESTÃO OPERACIONAL AINDA ABERTA
+
+A J5 continua **NÃO HOMOLOGADA PROFISSIONALMENTE** pela Patty: falta confirmação da navegação autenticada e do fluxo real em mobile no SaaS, publicação apenas deliberada da Patty e aceite. O CI sintético não substitui essas evidências. Não derivar parâmetros automáticos de treino destes exemplos.
+
+---
+
 ## 2026-10-17 — Registro técnico pós-merge da J4 e aplicação da migration RLS
 
 ### FATO OPERACIONAL CONFIRMADO (NÃO É REGRA PROFISSIONAL)
