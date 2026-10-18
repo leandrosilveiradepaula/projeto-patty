@@ -1,0 +1,152 @@
+name: Validate J6 local educational release lifecycle browser
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/validate-j6-educational-release-browser.yml"
+      - "e2e/j6-educational-release-lifecycle.spec.mjs"
+      - "e2e/helpers/admin-auth.mjs"
+      - "app/admin/conteudos/**"
+      - "app/admin/clientes/[clienteId]/conteudos/**"
+      - "app/cliente/conteudos/**"
+      - "components/admin/AdminEducationalContent**"
+      - "components/admin/ClientContentReleaseForm**"
+      - "components/client/ClientReleasedContentExplorer**"
+      - "lib/content/**"
+      - "supabase/migrations/*educational_content*.sql"
+      - "supabase/migrations/*client_content_releases*.sql"
+      - "supabase/tests/database/educational_content_release_insert_rls.test.sql"
+      # Keep this journey's acceptance contract aligned with its live E2E evidence.
+      - "docs/JOURNEY_HOMOLOGATION.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: j6-educational-release-browser-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  educational-release-lifecycle-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      SUPABASE_TELEMETRY_DISABLED: "1"
+      NEXT_TELEMETRY_DISABLED: "1"
+      # Fake metadata is NEVER a physically stored Blob object.
+      BLOB_READ_WRITE_TOKEN: ""
+    steps:
+      - name: Checkout exact reviewed commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Set up pinned Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install pinned dependencies
+        run: npm ci
+
+      - name: Enable disposable TOTP locally
+        run: |
+          node <<'NODE'
+          const {readFileSync,writeFileSync}=require("node:fs");
+          const p="supabase/config.toml",v=readFileSync(p,"utf8");
+          const from="[auth.mfa.totp]\nenroll_enabled = false\nverify_enabled = false";
+          const to="[auth.mfa.totp]\nenroll_enabled = true\nverify_enabled = true";
+          if(v.split(from).length!==2)throw Error("Unknown local TOTP config");
+          writeFileSync(p,v.replace(from,to));
+          NODE
+          git diff --check
+
+      - name: Start disposable local Supabase
+        run: npx supabase start
+
+      - name: Reset database using committed migrations
+        run: npx supabase db reset
+
+      - name: Verify J6 RLS with pgTAP on disposable database
+        run: npx supabase test db supabase/tests/database/educational_content_release_insert_rls.test.sql
+
+      - name: Export only local public runtime variables
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx supabase status -o env > "$RUNNER_TEMP/j6-local-status"
+          chmod 600 "$RUNNER_TEMP/j6-local-status"
+          set -a
+          source "$RUNNER_TEMP/j6-local-status"
+          set +a
+          test "$API_URL" = "http://127.0.0.1:54321"
+          test -n "$ANON_KEY"
+          test -n "$SERVICE_ROLE_KEY"
+          echo "::add-mask::$ANON_KEY"
+          echo "::add-mask::$SERVICE_ROLE_KEY"
+          echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL" >> "$GITHUB_ENV"
+          echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$ANON_KEY" >> "$GITHUB_ENV"
+          echo "J6_E2E_BASE_URL=http://127.0.0.1:3000" >> "$GITHUB_ENV"
+
+      - name: Install pinned Playwright Chromium
+        run: |
+          npm install --no-save --package-lock=false @playwright/test@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Build and start local production-mode Next.js
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run build
+          npm run start -- --hostname 127.0.0.1 --port 3000 > "$RUNNER_TEMP/j6-next.log" 2>&1 &
+          echo "$!" > "$RUNNER_TEMP/j6-next.pid"
+          for attempt in $(seq 1 90); do
+            if curl -fsS --max-time 3 http://127.0.0.1:3000/login >/dev/null 2>&1; then exit 0; fi
+            sleep 2
+          done
+          echo "::error::J6 disposable Next.js not ready"
+          exit 1
+
+      - name: Playwright J6 full educational release lifecycle
+        env:
+          J6_E2E_LOCAL_ONLY: "true"
+        shell: bash
+        run: |
+          set -euo pipefail
+          set -a
+          source "$RUNNER_TEMP/j6-local-status"
+          set +a
+          export J6_E2E_SUPABASE_URL="$API_URL"
+          export J6_E2E_ANON_KEY="$ANON_KEY"
+          export J6_E2E_SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY"
+          npx playwright test e2e/j6-educational-release-lifecycle.spec.mjs --reporter=line --workers=1
+
+      - name: Classify errors without exposing logs or sensitive fields
+        if: failure()
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs=require("node:fs");
+          const file=process.env.RUNNER_TEMP+"/j6-next.log";
+          const data=fs.existsSync(file)?fs.readFileSync(file,"utf8"):"";
+          const codes=[...data.matchAll(/(?:code|sqlstate):\s*['"]?([A-Z0-9]{5})['"]?/gi)]
+            .map(match=>match[1].toUpperCase());
+          const known=["permission denied","infinite recursion","row-level security",
+            "violates","TypeError","ReferenceError","statement timeout"];
+          const categories=known.filter(value=>data.toLowerCase().includes(value.toLowerCase()));
+          process.stdout.write("J6 server diagnostics: SQLSTATE="+
+            (codes.length?[...new Set(codes)].join(","):"none-detected")+
+            "; categories="+(categories.length?categories.join(","):"unclassified")+"\n");
+          NODE
+
+      - name: Destroy all disposable services
+        if: always()
+        shell: bash
+        run: |
+          if [ -f "$RUNNER_TEMP/j6-next.pid" ]; then
+            kill "$(cat "$RUNNER_TEMP/j6-next.pid")" 2>/dev/null || true
+          fi
+          npx supabase stop --no-backup
+          rm -f "$RUNNER_TEMP/j6-local-status" "$RUNNER_TEMP/j6-next.pid" "$RUNNER_TEMP/j6-next.log"

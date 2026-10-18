@@ -178,7 +178,10 @@ export default async function AdminClientContentPage({
           />
         ) : (
           <Card>
+            {/* Reset the action state after an authorized release enters the
+                server history so another manual release remains possible. */}
             <ClientContentReleaseForm
+              key={`${client.id}:${releases.length}`}
               clientId={client.id}
               options={availableVersions.map((version) => ({
                 id: version.id,
