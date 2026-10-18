@@ -1,3 +1,11 @@
+## 2026-10-18 — J6: vídeo aprovado reobtido e integridade SHA-256 confirmada (sem upload)
+
+**PRE-FLIGHT COMPROVADO:** o original aprovado `MovaviClips_Video_20220217-143151.mp4` foi reobtido em modo leitura do Google Drive (ID registrado no lote `educational_media_migration_batch_1.json`), e os bytes foram conferidos em ambiente temporário: **123.262.796 bytes**, MIME `video/mp4`, SHA-256 **`ee05d6c12ea02db283234f5d69a09ff60c4d831183fe6715d7aa9848e76905b1`**, igual ao valor esperado do manifesto. O Drive original não foi modificado e nenhum conteúdo foi anexado a logs ou PR.
+
+**ESTADOS SEPARADOS:** reobtenção/integridade da **fonte** confirmadas; **upload no Vercel Blob privado ainda não executado**, nenhuma integridade/entrega do **objeto de destino** demonstrada, nenhum asset registrado no Supabase SaaS, nenhuma publicação ou liberação efetuada. O rascunho v1 aprovado continua não publicado, com zero asset e zero release em verificação de banco somente-leitura. Usar o arquivo somente por fluxo de upload seguro e autorizado, com conferência posterior de bytes/metadata e validação de entrega privada (vídeo >100 MB). O PR #911 e a migration seguem sujeitos à revisão humana específica antes do merge.
+
+---
+
 ## 2026-10-18 — J6: navegacao por versao liberada e recuperacao de filtros (PR em validacao)
 
 **DECISAO TECNICA DE PRODUTO:** a biblioteca da cliente deve abrir links para releases exatos ja autorizados mesmo quando estiverem fora da primeira pagina. Uma hash sem release correspondente, malformada ou de outra cliente nao gera busca adicional, permissao nem divulgacao de dados. A navegacao trata hashchange na mesma tela, revela a pagina e direciona foco/rolagem ao item existente; atualizacoes de dados sem mudanca da hash nao apagam filtros escolhidos pela usuaria. Quando a busca nao encontra resultados, a cliente recebe um controle direto para voltar aos conteudos liberados.
