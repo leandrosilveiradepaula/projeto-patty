@@ -15,6 +15,7 @@ on:
       - "lib/content/**"
       - "supabase/migrations/*educational_content*.sql"
       - "supabase/migrations/*client_content_releases*.sql"
+      - "supabase/tests/database/educational_content_release_insert_rls.test.sql"
   workflow_dispatch:
 
 permissions:
@@ -65,6 +66,9 @@ jobs:
 
       - name: Reset database using committed migrations
         run: npx supabase db reset
+
+      - name: Verify J6 RLS with pgTAP on disposable database
+        run: npx supabase test db supabase/tests/database/educational_content_release_insert_rls.test.sql
 
       - name: Export only local public runtime variables
         shell: bash
