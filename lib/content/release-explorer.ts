@@ -160,6 +160,28 @@ export function releasePageForExactId(
   return index < 0 ? null : Math.floor(index / RELEASE_EXPLORER_PAGE_SIZE) + 1;
 }
 
+/** Resolve a hash only among content versions already authorized and loaded by
+ * the client's server-side query. No new data request or access grant occurs.
+ */
+export function authorizedReleasedContentHash(
+  rows: readonly ReleasedContentEntry[],
+  hash: string,
+): { id: string; page: number } | null {
+  const prefix = "#conteudo-liberado-";
+  if (!hash.startsWith(prefix)) return null;
+  const encodedId = hash.slice(prefix.length);
+  if (!encodedId || encodedId.length > 256) return null;
+
+  let id: string;
+  try {
+    id = decodeURIComponent(encodedId);
+  } catch {
+    return null;
+  }
+  const page = releasePageForExactId(rows, id);
+  return page === null ? null : { id, page };
+}
+
 export function hasActiveReleasedContentFilters(filters: ReleasedContentFilters) {
   return filters.query.trim() !== "" ||
     filters.category !== "all" ||
