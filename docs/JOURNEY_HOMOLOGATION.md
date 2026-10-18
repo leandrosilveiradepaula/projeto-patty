@@ -1,3 +1,23 @@
+## J5 — Treino individual: Playwright autenticado PASS; merge e aplicação de migration pendentes (2026-10-17)
+
+**OBJETIVO:** cliente solicita treino com sessão própria → Patty/admin sob MFA AAL2 vê o pedido → cria prescrição manual versionada com exercício → revisão separada de publicação → cliente vê apenas a versão exata publicada → v2 nasce em rascunho, permite copiar explicitamente os exercícios de v1 sem sobrescrevê-la → revisão/publicação independentes de v2 e preservação de histórico.
+
+**EVIDÊNCIAS NO SHA `f04561ec82eb4915a898b80afe7863ae1dc10db3` (PR [#909](https://github.com/leandrosilveiradepaula/projeto-patty/pull/909)):**
+- [Validate application #39084707797](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39084707797): **PASS**.
+- [Validate method configuration foundation #39084707779](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39084707779): **PASS** com migration no Supabase local descartável.
+- [Playwright J5 #39084707782](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39084707782): **1 PASS (15,8s)**, incluindo navegação mobile 390 px, criação e publicação pelas telas autenticadas, versões 1/2, cópia manual independente, preservação de histórico, cliente titular/terceira, admin sem assignment, admin AAL1 e controle SQL RLS. O step `Destroy all disposable services` passou.
+- **Nenhum dado pessoal, credencial de produção, IA ou alteração do SaaS** foi utilizado pelo teste.
+
+**PROBLEMA DETECTADO E REPARADO NA BRANCH:** a RPC `create_client_training_plan_draft` executava `SELECT FOR UPDATE` em `client_training_plans`, exigindo o grant `UPDATE` ausente por segurança. Um teste somente de privilégio, sem linhas reais, confirmou `42501` no SaaS. Nova migration `20261018005000_fix_training_draft_concurrency_lock.sql` faz `CREATE OR REPLACE FUNCTION` e usa `pg_advisory_xact_lock` por cliente antes da criação do rascunho. Preserva `SECURITY INVOKER`, assignment ativo, MFA, verificação de solicitação e índices que impedem dois rascunhos abertos; sem alargar grants/RLS. Testes locais passaram, mas a migration **NÃO ESTÁ APLICADA AO SAAS**.
+
+**REGRESSÃO CONCORRENTE ADICIONAL:** após publicar v1/v2, o E2E passa a confirmar que admin sem assignment não cria rascunho nem com AAL2, e que dois RPCs autenticados simultâneos para a mesma cliente resultam em apenas um draft v3; cliente segue vendo somente v2 publicada. O caso utiliza somente sessões e identidades sintéticas em Supabase descartável. Essa ampliação exige novo PASS no SHA final e não altera a migration ou os privilégios.
+
+**GATE HUMANO:** revisão específica de migration e GitHub Actions antes do merge, mesmo com CI PASS; após o merge confirmar Vercel e aplicar a migration em operação controlada, verificando grants, função e ausência de duplicidade no histórico de migrations. Homologação profissional em produção com a Patty e clientes autorizadas é etapa independente. **STATUS:** aprovado nos três workflows do SHA `f04561ec`; aguardando revalidação do commit documental, revisão e merge; não publicado/homologado.
+
+**FORA DE ESCOPO:** novas fórmulas, pesos/cargas fixos, progressão, score de adesão, IA decisória, alteração de políticas RLS, ampliação de grants, criação de identidades sintéticas em produção ou publicação automática.
+
+---
+
 ## J4 — Protocolo alimentar: integrado e aplicado; homologação profissional pendente (2026-10-17)
 
 **OBJETIVO:** comprovar o percurso profissional existente: criar versão alimentar manualmente → montar plano, refeição e doses → submeter para revisão → aprovação explícita → publicação da versão exata → cliente vê apenas o publicado → clonar v2 independente e preservar v1/histórico. IA não toma decisões de protocolo nem publica.
@@ -20,15 +40,14 @@
 ---
 
 
-## J3 — Evolução, reavaliações e comparação histórica: cobertura autenticada em validação (2026-10-16)
+## J3 — Evolução, reavaliações e comparação histórica: CI local aprovado e código publicado (2026-10-17)
 
-**OBJETIVO:** verificar o percurso integrado já publicado entre evolução filtrada, seleção de duas avaliações finalizadas, correção histórica efetiva, escolha de duas fotos privadas, ida e volta do detalhe e proteção client-scoped. A Patty interpreta e registra decisões manualmente; o teste não a substitui.
+**FATO ATUAL CONFIRMADO:** os PRs #902 a [#906](https://github.com/leandrosilveiradepaula/projeto-patty/pull/906) foram mergeados no `master`. No HEAD `df1d3cff` do PR #906, [Validate #38921177840](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38921177840) e [Playwright J3 #38921178037](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/38921178037) passaram. Merge commit `affe5b727150f15e359a24811890f06a781bac52` teve deployment Vercel `success`. Evidências históricas posteriores intituladas "em validação" retratam o estado anterior à integração, não a situação vigente.
 
-**IMPLEMENTADO NA BRANCH (AINDA NÃO APROVADO PELO CI):** `e2e/j3-assessment-evolution-lifecycle.spec.mjs` com quatro usuários sintéticos, dois administradores com MFA (um sem assignment), duas clientes, avaliações finalizadas e rascunho, medidas com correção append-only, três fotos PNG sintéticas em bucket privado; `.github/workflows/validate-j3-assessment-browser.yml` cria Supabase local descartável e Next.js e executa Playwright móvel. O teste compara diferença corrigida, não comparabilidade, navegação/retorno, validação de seleção adulterada, carregamento real de fotos privadas, isolamento de fotos e avaliações, ausência de mutação de protocolos e persistência do registro original. Cleanup total via `supabase stop --no-backup` mesmo quando há falha.
+**ESCOPO VALIDADO NO AMBIENTE SINTÉTICO:** evolução filtrada → avaliação específica → retorno com filtro, comparação de duas avaliações finalizadas, medidas corrigidas em trilha auditável, seleção de fotos privadas das duas avaliações, navegação ao detalhe e volta ao par/fotos, leitura sob RLS/MFA, cliente terceira/admin sem assignment bloqueados, sem publicação clínica ou mutação de protocolos. Supabase local descartado; fotos PNG e identidades exclusivamente sintéticas.
 
-**SEGURANÇA:** URLs locais obrigatórias; nenhuma credencial externa, paciente real ou bypass de RLS. Alteração de GitHub Actions exige **revisão humana específica antes de merge**, mesmo com checks verdes. O objetivo é E2E técnico com fixture local, não homologação pela Patty no runtime publicado.
+**HOMOLOGAÇÃO PROFISSIONAL AINDA PENDENTE:** sessão legítima da Patty com MFA e contexto de cliente autorizado no site publicado, conferência mobile de comparação e fotos privadas, navegação/retorno, preservação de original/correção e registro do aceite. Não criar clientes fictícias nem exportar imagens de saúde para logs/tickets; se não for possível verificar a etapa, registrar como não executada, não como PASS.
 
-**CRITÉRIOS PENDENTES:** validar build + testes e Playwright na revisão exata do PR, corrigir falhas na mesma branch, revisão específica do workflow e, em etapa separada, comprovar a navegação profissional na produção com sessão legítima, sem fixtures falsas ou dados reais em logs.
 
 ---
 
