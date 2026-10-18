@@ -178,10 +178,9 @@ export default async function AdminClientContentPage({
           />
         ) : (
           <Card>
+            {/* Reset the action state after an authorized release enters the
+                server history so another manual release remains possible. */}
             <ClientContentReleaseForm
-              // Remount after a real release enters the server history.
-              // Otherwise useActionState can remain successful and block the
-              // next manual release for this same client.
               key={`${client.id}:${releases.length}`}
               clientId={client.id}
               options={availableVersions.map((version) => ({
