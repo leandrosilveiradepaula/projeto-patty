@@ -85,19 +85,25 @@ insert into public.educational_content_versions
 values
 ('b6400000-0000-4000-8000-000000000001','b6300000-0000-4000-8000-000000000001',1,'J6 synthetic published v1',1,null),
 ('b6400000-0000-4000-8000-000000000002','b6300000-0000-4000-8000-000000000001',2,'J6 synthetic published v2',2,now()),
-('b6400000-0000-4000-8000-000000000003','b6300000-0000-4000-8000-000000000001',3,'J6 synthetic draft v3',3,null);
+('b6400000-0000-4000-8000-000000000003','b6300000-0000-4000-8000-000000000001',3,'J6 synthetic draft v3',3,null),
+('b6400000-0000-4000-8000-000000000004','b6300000-0000-4000-8000-000000000001',4,'J6 synthetic eligible v4',4,null);
 
 -- Fixture metadata is not a real Blob. Attach to draft, then publish v1.
 -- Leave published v2 without an asset to prove the database rejects a
 -- direct INSERT even when the caller has elevated database privileges.
+-- Published v4 carries synthetic metadata specifically for negative auth
+-- scenarios, so the asset guard cannot mask MFA/assignment policy errors.
 insert into public.educational_content_assets
 (educational_content_version_id,asset_key,storage_provider,storage_path,content_type,byte_size,sha256_hex)
 values
 ('b6400000-0000-4000-8000-000000000001','primary','vercel_blob',
- 'j6-pgtap-nonexistent/v1.pdf','application/pdf',32,repeat('a',64));
+ 'j6-pgtap-nonexistent/v1.pdf','application/pdf',32,repeat('a',64)),
+('b6400000-0000-4000-8000-000000000004','primary','vercel_blob',
+ 'j6-pgtap-nonexistent/v4.pdf','application/pdf',32,repeat('b',64));
 update public.educational_content_versions
 set published_at=now()
-where id='b6400000-0000-4000-8000-000000000001';
+where id in ('b6400000-0000-4000-8000-000000000001',
+             'b6400000-0000-4000-8000-000000000004');
 
 select throws_ok(
   $sql$ insert into public.client_content_releases
@@ -164,7 +170,7 @@ select throws_ok(
   $sql$ insert into public.client_content_releases
        (client_id,educational_content_version_id,released_by_profile_id)
        values ('b6200000-0000-4000-8000-000000000001',
-               'b6400000-0000-4000-8000-000000000002',
+               'b6400000-0000-4000-8000-000000000004',
                'b6100000-0000-4000-8000-000000000002') $sql$,
   '42501',null,
   'unassigned admin cannot release to this client'
@@ -180,7 +186,7 @@ select throws_ok(
   $sql$ insert into public.client_content_releases
        (client_id,educational_content_version_id,released_by_profile_id)
        values ('b6200000-0000-4000-8000-000000000001',
-               'b6400000-0000-4000-8000-000000000002',
+               'b6400000-0000-4000-8000-000000000004',
                'b6100000-0000-4000-8000-000000000001') $sql$,
   '23514',null,
   'assigned admin without MFA AAL2 cannot release (invoker trigger cannot see version)'
@@ -193,7 +199,7 @@ select throws_ok(
   $sql$ insert into public.client_content_releases
        (client_id,educational_content_version_id,released_by_profile_id)
        values ('b6200000-0000-4000-8000-000000000001',
-               'b6400000-0000-4000-8000-000000000002',
+               'b6400000-0000-4000-8000-000000000004',
                'b6100000-0000-4000-8000-000000000003') $sql$,
   '23514',null,
   'client cannot self-release a version that is not released to client'
@@ -221,7 +227,7 @@ select throws_ok(
   $sql$ insert into public.client_content_releases
        (client_id,educational_content_version_id,released_by_profile_id)
        values ('b6200000-0000-4000-8000-000000000001',
-               'b6400000-0000-4000-8000-000000000002',
+               'b6400000-0000-4000-8000-000000000004',
                'b6100000-0000-4000-8000-000000000002') $sql$,
   '42501',null,
   'assigned admin cannot impersonate releasing profile'
@@ -250,7 +256,7 @@ select throws_ok(
   $sql$ insert into public.client_content_releases
        (client_id,educational_content_version_id,released_by_profile_id)
        values ('b6200000-0000-4000-8000-000000000001',
-               'b6400000-0000-4000-8000-000000000002',
+               'b6400000-0000-4000-8000-000000000004',
                'b6100000-0000-4000-8000-000000000001') $sql$,
   '42501',null,
   'ended assignment cannot release a later version'
