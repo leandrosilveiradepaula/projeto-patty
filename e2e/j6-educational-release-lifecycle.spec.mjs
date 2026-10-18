@@ -1,0 +1,335 @@
+import { randomBytes } from "node:crypto";
+import { execFileSync } from "node:child_process";
+import { createClient } from "@supabase/supabase-js";
+import { expect, test } from "@playwright/test";
+import { generateTotp, loginAdminWithMfa } from "./helpers/admin-auth.mjs";
+
+// All writes and fake media metadata stay in the disposable local database.
+// This test NEVER uploads or distributes a real file and cannot verify Blob.
+const baseURL = process.env.J6_E2E_BASE_URL;
+const apiURL = process.env.J6_E2E_SUPABASE_URL;
+const anonKey = process.env.J6_E2E_ANON_KEY;
+const serviceKey = process.env.J6_E2E_SERVICE_ROLE_KEY;
+if (process.env.J6_E2E_LOCAL_ONLY !== "true" ||
+    baseURL !== "http://127.0.0.1:3000" ||
+    apiURL !== "http://127.0.0.1:54321" || !anonKey || !serviceKey) {
+  throw new Error("J6 browser test requires disposable localhost services");
+}
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const fixtureTables = new Set([
+  "profiles", "user_roles", "clients", "client_assignments",
+  // Only synthetic Blob *metadata*, explicitly NOT a physically stored file.
+  "educational_content_assets",
+]);
+const service = createClient(apiURL, serviceKey, {
+  auth: { autoRefreshToken: false, persistSession: false },
+});
+function anonClient() {
+  return createClient(apiURL, anonKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+}
+function literal(value) {
+  if (value === null) return "NULL";
+  if (!["string", "number"].includes(typeof value))
+    throw new TypeError("Unsupported synthetic SQL value");
+  return "'" + String(value).replaceAll("'", "''") + "'";
+}
+function sql(statement) {
+  if (process.env.J6_E2E_LOCAL_ONLY !== "true" ||
+      apiURL !== "http://127.0.0.1:54321")
+    throw new Error("Local-only SQL boundary rejected");
+  return execFileSync("docker", [
+    "exec", "-i", "supabase_db_projeto-patty", "psql",
+    "-X", "-q", "-U", "postgres", "-d", "postgres",
+    "-A", "-t", "-v", "ON_ERROR_STOP=1",
+  ], { input: statement.trimEnd() + "\n", encoding: "utf8", timeout: 12000 }).trim();
+}
+function rows(query) {
+  return JSON.parse(sql(
+    "select coalesce(json_agg(row_to_json(t)),'[]'::json)::text from (" +
+    query + ") t;",
+  ));
+}
+function insert(table, fields) {
+  if (!fixtureTables.has(table) ||
+      !Object.keys(fields).every(k => /^[a-z_]+$/.test(k)))
+    throw new Error("Fixture table/column is not permitted");
+  const pk = table === "user_roles" ? "profile_id" : "id";
+  const id = sql("insert into public." + table + " (" +
+    Object.keys(fields).join(",") + ") values (" +
+    Object.values(fields).map(literal).join(",") +
+    ") returning " + pk + ";");
+  if (!UUID.test(id)) throw new Error("Fixture INSERT returned no UUID");
+  return id;
+}
+async function identity(role, label, nonce) {
+  const email = "e2e-j6-" + label + "-" + nonce + "@example.invalid";
+  if (!/^e2e-j6-(staff|unassigned|owner|foreign)-[0-9a-f]{16}@example\.invalid$/.test(email))
+    throw new Error("Only local synthetic identities are permitted");
+  const password = "J6-" + randomBytes(18).toString("base64url") + "-Aa1!";
+  const created = await service.auth.admin.createUser({
+    email, password, email_confirm: true,
+  });
+  if (created.error || !created.data?.user?.id)
+    throw created.error ?? new Error("Synthetic Auth setup failed");
+  const id = created.data.user.id;
+  insert("profiles", { id, display_name: "J6 synthetic " + label });
+  insert("user_roles", { profile_id: id, role });
+  return { id, email, password };
+}
+async function enrollTotp(user) {
+  const api = anonClient();
+  const signed = await api.auth.signInWithPassword({
+    email: user.email, password: user.password,
+  });
+  if (signed.error) throw signed.error;
+  try {
+    const enrolled = await api.auth.mfa.enroll({
+      factorType: "totp", friendlyName: "J6 disposable TOTP",
+    });
+    if (enrolled.error) throw enrolled.error;
+    const challenged = await api.auth.mfa.challenge({ factorId: enrolled.data.id });
+    if (challenged.error) throw challenged.error;
+    const verified = await api.auth.mfa.verify({
+      factorId: enrolled.data.id,
+      challengeId: challenged.data.id,
+      code: generateTotp(enrolled.data.totp.secret),
+    });
+    if (verified.error) throw verified.error;
+    return enrolled.data.totp.secret;
+  } finally {
+    await api.auth.signOut();
+  }
+}
+async function loginClient(page, user) {
+  await page.goto("/login");
+  await page.getByLabel("Email").fill(user.email);
+  await page.getByLabel("Senha").fill(user.password);
+  await page.getByRole("button", { name: "Entrar" }).click();
+  await expect(page).toHaveURL(/\/cliente\/?$/, { timeout: 20000 });
+  await page.goto("/cliente/conteudos");
+  await expect(page.getByRole("heading", { name: "Conteúdos", exact: true })).toBeVisible();
+}
+async function pollRows(query, expected) {
+  await expect.poll(() => rows(query).length, { timeout: 25000 }).toBe(expected);
+  return rows(query);
+}
+function versions(contentId) {
+  return rows("select id,educational_content_id,version_number,title,published_at" +
+    " from public.educational_content_versions where educational_content_id=" +
+    literal(contentId) + " order by version_number");
+}
+function releases(clientId) {
+  return rows("select id,educational_content_version_id" +
+    " from public.client_content_releases where client_id=" +
+    literal(clientId) + " order by released_at,id");
+}
+// Only count isolated rows under real authenticated RLS, never service role.
+function visibleCount(profileId, aal, table, rowId) {
+  if (!UUID.test(profileId) || !UUID.test(rowId) ||
+      !["aal1", "aal2"].includes(aal) ||
+      !["educational_content_versions", "educational_content_assets", "client_content_releases"].includes(table))
+    throw new Error("Invalid synthetic RLS visibility probe");
+  const claims = JSON.stringify({ sub: profileId, role: "authenticated", aal });
+  return Number(sql([
+    "begin;",
+    "set local statement_timeout='5s';",
+    "set local role authenticated;",
+    "set local request.jwt.claims=" + literal(claims) + ";",
+    "set local request.jwt.claim.sub=" + literal(profileId) + ";",
+    "select count(*) from public." + table + " where id=" + literal(rowId) + ";",
+    "rollback;",
+  ].join("\n")));
+}
+async function assertMobile(page) {
+  const x = await page.evaluate(() => ({
+    width: document.documentElement.scrollWidth,
+    viewport: window.innerWidth,
+  }));
+  expect(x.width).toBeLessThanOrEqual(x.viewport + 2);
+}
+
+test.use({ baseURL });
+
+test("J6: versioned content releases require exact published version and synthetic asset metadata", async ({ browser }) => {
+  test.setTimeout(360000);
+  const nonce = randomBytes(8).toString("hex");
+  const staff = await identity("admin", "staff", nonce);
+  const unassigned = await identity("admin", "unassigned", nonce);
+  const owner = await identity("client", "owner", nonce);
+  const foreign = await identity("client", "foreign", nonce);
+  const clientId = insert("clients", {
+    profile_id: owner.id, full_name: "J6 Cliente sintetica", status: "active",
+  });
+  insert("clients", {
+    profile_id: foreign.id, full_name: "J6 Outra cliente sintetica", status: "active",
+  });
+  insert("client_assignments", { client_id: clientId, staff_profile_id: staff.id });
+  const totp = await enrollTotp(staff);
+  await enrollTotp(unassigned);
+  const adminCtx = await browser.newContext({
+    baseURL, viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true,
+  });
+  const ownerCtx = await browser.newContext({
+    baseURL, viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true,
+  });
+  const foreignCtx = await browser.newContext({ baseURL });
+  try {
+    const admin = await adminCtx.newPage();
+    const client = await ownerCtx.newPage();
+    const outsider = await foreignCtx.newPage();
+    await loginAdminWithMfa(admin, {
+      email: staff.email, password: staff.password, totpSecret: totp,
+    });
+    await loginClient(client, owner);
+    await loginClient(outsider, foreign);
+    await expect(client.getByText("Nenhum conteúdo foi liberado para você ainda", {
+      exact: true,
+    })).toBeVisible();
+
+    let contentId;
+    let v1;
+    await test.step("Admin creates first draft but neither client sees it", async () => {
+      await admin.goto("/admin/conteudos");
+      await admin.getByLabel("Título", { exact: true }).fill("J6 material sem arquivo sintetico");
+      await admin.getByRole("button", { name: "Criar rascunho" }).click();
+      const saved = await pollRows(
+        "select c.id from public.educational_contents c" +
+        " join public.educational_content_versions v on v.educational_content_id=c.id" +
+        " where v.title=" + literal("J6 material sem arquivo sintetico"), 1,
+      );
+      contentId = saved[0].id;
+      expect(contentId).toMatch(UUID);
+      await expect(admin).toHaveURL(new RegExp("/admin/conteudos/" + contentId));
+      v1 = versions(contentId)[0];
+      expect(v1.version_number).toBe(1);
+      expect(v1.published_at).toBeNull();
+      expect(visibleCount(owner.id, "aal1", "educational_content_versions", v1.id)).toBe(0);
+      expect(visibleCount(foreign.id, "aal1", "educational_content_versions", v1.id)).toBe(0);
+      expect(visibleCount(staff.id, "aal1", "educational_content_versions", v1.id)).toBe(0);
+      expect(visibleCount(staff.id, "aal2", "educational_content_versions", v1.id)).toBe(1);
+      await assertMobile(admin);
+    });
+
+    await test.step("Published metadata without file is not releasable to a client", async () => {
+      await admin.getByLabel(/Confirmo que a versão 1 foi revisada/).check();
+      await admin.getByRole("button", { name: "Publicar versão" }).click();
+      await expect.poll(() => Boolean(versions(contentId)[0]?.published_at), {
+        timeout: 25000,
+      }).toBe(true);
+      await admin.goto("/admin/clientes/" + clientId + "/conteudos");
+      await expect(admin.getByText("Nenhum conteúdo disponível para liberar", {
+        exact: true,
+      })).toBeVisible();
+      expect(releases(clientId)).toHaveLength(0);
+      expect(visibleCount(owner.id, "aal1", "educational_content_versions", v1.id)).toBe(0);
+      await client.reload();
+      await expect(client.getByText("Nenhum conteúdo foi liberado para você ainda", {
+        exact: true,
+      })).toBeVisible();
+    });
+
+    let v2;
+    let syntheticAssetId;
+    await test.step("New draft is versioned and a local-only asset metadata fixture is added", async () => {
+      await admin.goto("/admin/conteudos/" + contentId);
+      await admin.getByRole("button", { name: "Criar nova versão" }).click();
+      await expect.poll(() => versions(contentId).length, { timeout: 25000 }).toBe(2);
+      v2 = versions(contentId)[1];
+      expect(v2.version_number).toBe(2);
+      expect(v2.published_at).toBeNull();
+      await admin.reload();
+      await admin.getByLabel("Título", { exact: true }).fill("J6 material com asset sintetico");
+      await admin.getByRole("button", { name: "Salvar rascunho" }).click();
+      await expect.poll(() => versions(contentId)[1].title, { timeout: 25000 })
+        .toBe("J6 material com asset sintetico");
+      // Explicit metadata-only seam for the disposable DB: no Blob upload,
+      // no verified object, and NO real material or release authorization.
+      syntheticAssetId = insert("educational_content_assets", {
+        educational_content_version_id: v2.id,
+        asset_key: "primary",
+        storage_provider: "vercel_blob",
+        storage_path: "j6-local-nonexistent/" + nonce + "/no-object.pdf",
+        content_type: "application/pdf",
+        byte_size: 32,
+        sha256_hex: "a".repeat(64),
+      });
+      expect(visibleCount(owner.id, "aal1", "educational_content_assets", syntheticAssetId)).toBe(0);
+      expect(visibleCount(staff.id, "aal1", "educational_content_assets", syntheticAssetId)).toBe(0);
+      expect(visibleCount(staff.id, "aal2", "educational_content_assets", syntheticAssetId)).toBe(1);
+      await admin.reload();
+      await expect(admin.getByText("Nenhum asset registrado")).toHaveCount(0);
+      await assertMobile(admin);
+    });
+
+    let releaseId;
+    await test.step("Manual publication then individual release grants only the exact version", async () => {
+      await admin.getByLabel(/Confirmo que a versão 2 foi revisada/).check();
+      await admin.getByRole("button", { name: "Publicar versão" }).click();
+      await expect.poll(() => Boolean(versions(contentId)[1]?.published_at), {
+        timeout: 25000,
+      }).toBe(true);
+      expect(visibleCount(owner.id, "aal1", "educational_content_versions", v2.id)).toBe(0);
+      await admin.goto("/admin/clientes/" + clientId + "/conteudos");
+      await expect(admin.getByRole("heading", { name: "Liberar conteúdo" })).toBeVisible();
+      await admin.getByLabel("Versão de conteúdo").selectOption(v2.id);
+      await admin.getByRole("button", { name: "Revisar liberação" }).click();
+      await admin.getByRole("button", { name: "Confirmar liberação" }).click();
+      const recorded = await pollRows(
+        "select id from public.client_content_releases where client_id=" +
+        literal(clientId) + " and educational_content_version_id=" + literal(v2.id), 1,
+      );
+      releaseId = recorded[0].id;
+      expect(visibleCount(owner.id, "aal1", "client_content_releases", releaseId)).toBe(1);
+      expect(visibleCount(owner.id, "aal1", "educational_content_versions", v2.id)).toBe(1);
+      expect(visibleCount(owner.id, "aal1", "educational_content_assets", syntheticAssetId)).toBe(1);
+      expect(visibleCount(owner.id, "aal1", "educational_content_versions", v1.id)).toBe(0);
+      expect(visibleCount(foreign.id, "aal1", "client_content_releases", releaseId)).toBe(0);
+      expect(visibleCount(foreign.id, "aal1", "educational_content_assets", syntheticAssetId)).toBe(0);
+      expect(visibleCount(unassigned.id, "aal2", "client_content_releases", releaseId)).toBe(0);
+      expect(visibleCount(staff.id, "aal1", "client_content_releases", releaseId)).toBe(0);
+      await client.reload();
+      await expect(client.getByText("J6 material com asset sintetico", { exact: true })).toBeVisible();
+      await expect(client.getByText("J6 material sem arquivo sintetico", { exact: true })).toHaveCount(0);
+      await outsider.reload();
+      await expect(outsider.getByText("Nenhum conteúdo foi liberado para você ainda", {
+        exact: true,
+      })).toBeVisible();
+      await assertMobile(client);
+    });
+
+    await test.step("Local-only metadata does not pretend missing Blob bytes were delivered", async () => {
+      // This intentionally fake path has NO Vercel Blob object behind it.
+      // A missing provider/physical blob must not be mistaken for delivery.
+      const url = "/cliente/conteudos/assets/" + syntheticAssetId;
+      const ownerResponse = await ownerCtx.request.get(url, { maxRedirects: 0 });
+      expect(ownerResponse.status()).toBe(404);
+      const foreignResponse = await foreignCtx.request.get(url, { maxRedirects: 0 });
+      expect(foreignResponse.status()).toBe(404);
+      expect(rows("select client_content_release_id from public.client_content_progress" +
+        " where client_id=" + literal(clientId))).toHaveLength(0);
+    });
+
+    await test.step("New published version does not silently replace release of v2", async () => {
+      await admin.goto("/admin/conteudos/" + contentId);
+      await admin.getByRole("button", { name: "Criar nova versão" }).click();
+      await expect.poll(() => versions(contentId).length, { timeout: 25000 }).toBe(3);
+      const v3 = versions(contentId)[2];
+      expect(v3.version_number).toBe(3);
+      await admin.reload();
+      await admin.getByLabel(/Confirmo que a versão 3 foi revisada/).check();
+      await admin.getByRole("button", { name: "Publicar versão" }).click();
+      await expect.poll(() => Boolean(versions(contentId)[2]?.published_at), {
+        timeout: 25000,
+      }).toBe(true);
+      expect(releases(clientId)).toHaveLength(1);
+      expect(visibleCount(owner.id, "aal1", "educational_content_versions", v3.id)).toBe(0);
+      await client.reload();
+      await expect(client.getByText("J6 material com asset sintetico", { exact: true })).toBeVisible();
+      await expect(client.getByText("J6 material sem arquivo sintetico", { exact: true })).toHaveCount(0);
+    });
+  } finally {
+    await Promise.all([adminCtx.close(), ownerCtx.close(), foreignCtx.close()]);
+  }
+});
