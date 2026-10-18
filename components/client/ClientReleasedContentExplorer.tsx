@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   filterReleasedContent, hasActiveReleasedContentFilters, INITIAL_RELEASE_FILTERS,
-  paginateReleasedContent, releasePageForExactId, releasedContentFacetOptions,
+  paginateReleasedContent, authorizedReleasedContentHash, releasedContentFacetOptions,
   releasedContentTotals, releasedContentYears, type ReleasedContentEntry,
   type ReleasedContentFilters, type ReleasedContentAvailability,
   type ReleasedContentOrder,
@@ -20,6 +20,8 @@ export function ClientReleasedContentExplorer({ entries, missingVersionCount }: 
 }) {
   const [filters, setFilters] = useState<ReleasedContentFilters>({...INITIAL_RELEASE_FILTERS});
   const [page, setPage] = useState(1);
+  const [pendingTarget, setPendingTarget] = useState<string | null>(null);
+  const handledHash = useRef<string | null>(null);
   const facets = useMemo(() => releasedContentFacetOptions(entries), [entries]);
   const totals = useMemo(() => releasedContentTotals(entries), [entries]);
   const years = useMemo(() => releasedContentYears(entries), [entries]);
@@ -27,28 +29,43 @@ export function ClientReleasedContentExplorer({ entries, missingVersionCount }: 
   const paged = useMemo(() => paginateReleasedContent(filtered, page), [filtered, page]);
 
   const change = (update: Partial<ReleasedContentFilters>) => {
+    setPendingTarget(null);
     setFilters((current) => ({...current, ...update}));
     setPage(1);
   };
 
   useEffect(() => {
-    const target = window.location.hash;
-    if (!target.startsWith("#conteudo-liberado-")) return;
-    let id: string;
-    try { id = decodeURIComponent(target.slice("#conteudo-liberado-".length)); }
-    catch { return; }
-    // If someone arrives with a link to an exact authorized release, reveal
-    // its existing position; do not expose unseen releases or fetch anything.
-    const selected = entries.find((entry) => entry.id === id);
-    if (!selected) return;
-    const nextPage = releasePageForExactId(entries, selected.id);
-    if (nextPage !== null) {
+    const revealAuthorizedHash = () => {
+      const hash = window.location.hash;
+      // A server refresh can replace entries without changing the URL. Do not
+      // unexpectedly clear manually selected filters after that refresh.
+      if (hash === handledHash.current) return;
+      handledHash.current = hash;
+      const target = authorizedReleasedContentHash(entries, hash);
+      if (!target) return;
       setFilters({...INITIAL_RELEASE_FILTERS});
-      setPage(nextPage);
-    }
+      setPage(target.page);
+      setPendingTarget(target.id);
+    };
+
+    revealAuthorizedHash();
+    window.addEventListener("hashchange", revealAuthorizedHash);
+    return () => window.removeEventListener("hashchange", revealAuthorizedHash);
   }, [entries]);
 
+  useEffect(() => {
+    if (!pendingTarget) return;
+    // The target may belong to a later page and was absent at initial load.
+    // Wait until React has rendered that page before focusing and scrolling.
+    const item = document.getElementById(`conteudo-liberado-${pendingTarget}`);
+    if (!item) return;
+    item.focus({preventScroll: true});
+    item.scrollIntoView({block: "start"});
+    setPendingTarget(null);
+  }, [pendingTarget, paged.items]);
+
   const choosePage = (next: number) => {
+    setPendingTarget(null);
     setPage(next);
     document.getElementById("biblioteca-educacional")?.scrollIntoView({block: "start"});
   };
@@ -104,7 +121,7 @@ export function ClientReleasedContentExplorer({ entries, missingVersionCount }: 
           </select>
         </label>
         {hasActiveReleasedContentFilters(filters) ? (
-          <button type="button" onClick={()=>{setFilters({...INITIAL_RELEASE_FILTERS});setPage(1);}} className={styles.reset}>Limpar filtros</button>
+          <button type="button" onClick={()=>{setPendingTarget(null);setFilters({...INITIAL_RELEASE_FILTERS});setPage(1);}} className={styles.reset}>Limpar filtros</button>
         ) : null}
       </div>
       <p className={styles.summary} role="status" aria-live="polite">
@@ -112,10 +129,17 @@ export function ClientReleasedContentExplorer({ entries, missingVersionCount }: 
           `Mostrando ${paged.first}–${paged.last} de ${filtered.length} conteúdo(s) encontrado(s).`}
       </p>
       {filtered.length === 0 ? (
-        <div className={styles.empty}>Ajuste a busca ou limpe os filtros. Nenhuma liberação foi removida.</div>
+        <div className={styles.empty}>
+          <p>Ajuste a busca ou limpe os filtros. Nenhuma liberação foi removida.</p>
+          <button type="button" className={styles.reset} onClick={() => {
+            setPendingTarget(null);
+            setFilters({...INITIAL_RELEASE_FILTERS});
+            setPage(1);
+          }}>Exibir todos os conteúdos liberados</button>
+        </div>
       ) : (
         <ul className={styles.list}>
-          {paged.items.map((entry) => <li key={entry.id} id={`conteudo-liberado-${entry.id}`} className={styles.item}>{entry.content}</li>)}
+          {paged.items.map((entry) => <li key={entry.id} id={`conteudo-liberado-${entry.id}`} tabIndex={-1} className={styles.item}>{entry.content}</li>)}
         </ul>
       )}
       {paged.pages > 1 ? <nav aria-label="Páginas da biblioteca liberada" className={styles.pagination}>

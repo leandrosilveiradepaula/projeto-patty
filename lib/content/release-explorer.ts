@@ -39,6 +39,20 @@ export function normalizedReleasedContentSearch(value: string): string {
   return value.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR").trim().replace(/\s+/g, " ");
 }
 
+// Calendar years must match the date visible to clients and the Patty admin
+// panel; UTC dates close to midnight can still be the previous local year.
+const RELEASE_YEAR_FORMATTER = new Intl.DateTimeFormat("en-US", {
+  year: "numeric",
+  timeZone: "America/Sao_Paulo",
+});
+
+export function releaseDisplayYear(value: string): string | null {
+  const instant = Date.parse(value);
+  return Number.isFinite(instant)
+    ? RELEASE_YEAR_FORMATTER.format(new Date(instant))
+    : null;
+}
+
 function releaseInstant(value: string): number | null {
   const instant = Date.parse(value);
   return Number.isFinite(instant) ? instant : null;
@@ -104,7 +118,7 @@ export function filterReleasedContent<T extends ReleasedContentEntry>(
 ): T[] {
   const query = normalizedReleasedContentSearch(filters.query);
   return orderReleasedContent(records.filter((record) => {
-    if (filters.year && filters.year !== "all" && (!Number.isFinite(Date.parse(record.releasedAt)) || new Date(record.releasedAt).getUTCFullYear().toString() !== filters.year)) return false;
+    if (filters.year && filters.year !== "all" && releaseDisplayYear(record.releasedAt) !== filters.year) return false;
     if (filters.category !== "all" && record.category !== filters.category) return false;
     if (filters.type !== "all" && record.type !== filters.type) return false;
     if (filters.availability === "available" && record.assetCount <= 0) return false;
@@ -146,6 +160,28 @@ export function releasePageForExactId(
   return index < 0 ? null : Math.floor(index / RELEASE_EXPLORER_PAGE_SIZE) + 1;
 }
 
+/** Resolve a hash only among content versions already authorized and loaded by
+ * the client's server-side query. No new data request or access grant occurs.
+ */
+export function authorizedReleasedContentHash(
+  rows: readonly ReleasedContentEntry[],
+  hash: string,
+): { id: string; page: number } | null {
+  const prefix = "#conteudo-liberado-";
+  if (!hash.startsWith(prefix)) return null;
+  const encodedId = hash.slice(prefix.length);
+  if (!encodedId || encodedId.length > 256) return null;
+
+  let id: string;
+  try {
+    id = decodeURIComponent(encodedId);
+  } catch {
+    return null;
+  }
+  const page = releasePageForExactId(rows, id);
+  return page === null ? null : { id, page };
+}
+
 export function hasActiveReleasedContentFilters(filters: ReleasedContentFilters) {
   return filters.query.trim() !== "" ||
     filters.category !== "all" ||
@@ -155,5 +191,5 @@ export function hasActiveReleasedContentFilters(filters: ReleasedContentFilters)
 }
 
 export function releasedContentYears(records: readonly ReleasedContentEntry[]): string[] {
- return [...new Set(records.map(x=>Number.isFinite(Date.parse(x.releasedAt))?String(new Date(x.releasedAt).getUTCFullYear()):"").filter(Boolean))].sort().reverse();
+ return [...new Set(records.map(x => releaseDisplayYear(x.releasedAt)).filter((year): year is string => year !== null))].sort().reverse();
 }

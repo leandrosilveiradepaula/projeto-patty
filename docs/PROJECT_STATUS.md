@@ -1,3 +1,11 @@
+## 2026-10-18 — J6: navegacao por versao liberada e recuperacao de filtros (PR em validacao)
+
+**DECISAO TECNICA DE PRODUTO:** a biblioteca da cliente deve abrir links para releases exatos ja autorizados mesmo quando estiverem fora da primeira pagina. Uma hash sem release correspondente, malformada ou de outra cliente nao gera busca adicional, permissao nem divulgacao de dados. A navegacao trata hashchange na mesma tela, revela a pagina e direciona foco/rolagem ao item existente; atualizacoes de dados sem mudanca da hash nao apagam filtros escolhidos pela usuaria. Quando a busca nao encontra resultados, a cliente recebe um controle direto para voltar aos conteudos liberados.
+
+**ESCOPO:** somente filtro/navegacao client-side em `ClientReleasedContentExplorer`, helper deterministico e testes. Sem Auth, RLS, migration, publicacao, release ou upload; a consulta do servidor permanece client-scoped. O PR #911 continua separado e com revisao especifica de RLS/workflow pendente. Testes e merge/deploy deste pacote precisam ser confirmados no SHA exato; nao interpretar este registro como homologacao da J6.
+
+---
+
 ## 2026-10-18 — J6: biblioteca educacional e liberação individual (validação técnica em branch)
 
 **FATO DO RUNTIME EXISTENTE:** cadastro de conteúdo educacional, versões em rascunho, publicação explícita, assets privados, liberação de versão exata para cliente atribuída e consulta no portal já estão implementados. A liberação de versão publicada **exige asset privado registrado** e não ocorre por fase. A entrega física via Vercel Blob requer arquivo real, direitos autorizados e integridade verificada; não se infere de metadados.
