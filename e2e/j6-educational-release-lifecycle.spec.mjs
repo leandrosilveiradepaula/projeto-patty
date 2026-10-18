@@ -409,10 +409,13 @@ test("J6: versioned content releases require exact published version and synthet
 
     await test.step("Two manual releases work consecutively without reloading the admin page", async () => {
       // The previous action returned success. The refreshed server history
-      // must reset the form's action state, or the second release is blocked.
-      await expect(admin.getByRole("button", { name: "Revisar liberação" }))
+      // must reset the form's action state. The review button intentionally
+      // stays disabled until the professional selects another exact version.
+      await expect(admin.getByLabel("Versão de conteúdo"))
         .toBeEnabled({ timeout: 20000 });
       await admin.getByLabel("Versão de conteúdo").selectOption(secondVersion.id);
+      await expect(admin.getByRole("button", { name: "Revisar liberação" }))
+        .toBeEnabled({ timeout: 20000 });
       await admin.getByRole("button", { name: "Revisar liberação" }).click();
       await admin.getByRole("button", { name: "Confirmar liberação" }).click();
       await expect.poll(async () => {
