@@ -183,6 +183,14 @@ test("J5: client requests, Patty reviews/publishes exact training versions and a
     await loginClient(foreignPage, foreign);
 
     const adminRoute = "/admin/clientes/" + clientId + "/treino";
+    // The versioned database migration must fix the missing UPDATE privilege
+    // without widening access to the client_training_plans table.
+    expect(sql("select has_table_privilege('authenticated',"+
+      "'public.client_training_plans','UPDATE');")).toBe("f");
+    expect(sql("select pg_get_functiondef("+
+      "'public.create_client_training_plan_draft(uuid,text,text)'::regprocedure)"+
+      " like '%pg_advisory_xact_lock%';")).toBe("t");
+
     await test.step("No prescription is created before a request", async () => {
       await adminPage.goto(adminRoute);
       await expect(adminPage.getByText("Treino ainda não solicitado", { exact: true })).toBeVisible();

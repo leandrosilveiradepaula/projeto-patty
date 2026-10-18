@@ -13,6 +13,7 @@ on:
       - "components/client/ClientWorkoutGuide**"
       - "lib/training/**"
       - "supabase/migrations/*client_training*.sql"
+      - "supabase/migrations/*training_draft*.sql"
   workflow_dispatch:
 
 permissions:

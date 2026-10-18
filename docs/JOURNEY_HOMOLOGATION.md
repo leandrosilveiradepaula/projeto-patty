@@ -6,6 +6,8 @@
 
 **CRITÉRIOS DE ACEITAÇÃO:** `Validate application` e Playwright J5 devem passar **no HEAD exato**; nenhuma criação de versão antes de solicitação; rascunho e versão apenas revisada não aparecem para a cliente; publicação exige ação humana explícita; v2 não sobrescreve v1; outra cliente/admin sem assignment e admin sem MFA não leem dados; UI mobile navegável. O workflow de GitHub Actions é sensível e exige revisão humana própria, mesmo com CI verde.
 
+**CORREÇÃO TÉCNICA EM VALIDAÇÃO:** identificada ausência de privilégio para o `SELECT FOR UPDATE` da RPC de criação de rascunho. Migration `20261018005000_fix_training_draft_concurrency_lock.sql` proposta na mesma branch substitui esse lock por advisory lock transacional client-scoped, preservando a role `authenticated` sem privilégio `UPDATE` na tabela de plano, `SECURITY INVOKER`, assignment e MFA. Migration ainda não aplicada em produção nem aprovada pelo CI final; requer revisão humana específica.
+
 **LIMITE:** nenhuma nova fórmula, séries/repetições/carga default, progressão clínica, score, integração de IA, mudança de RLS, schema ou publicação automatizada. O resultado de ambiente descartável não homologa a sessão da Patty na produção. **STATUS:** branch em CI, não mergeada/publicada/homologada no momento deste registro; atualizar após o resultado.
 
 ---
