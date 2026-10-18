@@ -142,6 +142,26 @@ function visibleCount(profileId, aal, table, rowId) {
     "rollback;",
   ].join("\n")));
 }
+// Roll back the insert, but exercise the exact INSERT policy and FK/trigger
+// under authenticated/AAL2 with synthetic IDs. Never commit a test release.
+function assertLocalReleaseInsertAllowed(staffId, clientId, versionId) {
+  if (![staffId, clientId, versionId].every(x => UUID.test(x))) {
+    throw new Error("Invalid synthetic release probe");
+  }
+  const jwt = JSON.stringify({ sub: staffId, role: "authenticated", aal: "aal2" });
+  const result = sql([
+    "begin;",
+    "set local statement_timeout='5s';",
+    "set local role authenticated;",
+    "set local request.jwt.claims=" + literal(jwt) + ";",
+    "set local request.jwt.claim.sub=" + literal(staffId) + ";",
+    "insert into public.client_content_releases (client_id, educational_content_version_id, released_by_profile_id)",
+    " values (" + [clientId, versionId, staffId].map(literal).join(",") + ") returning id;",
+    "rollback;",
+  ].join("\n"));
+  expect(result).toMatch(UUID);
+}
+
 async function assertMobile(page) {
   const x = await page.evaluate(() => ({
     width: document.documentElement.scrollWidth,
@@ -273,9 +293,19 @@ test("J6: versioned content releases require exact published version and synthet
       expect(visibleCount(owner.id, "aal1", "educational_content_versions", v2.id)).toBe(0);
       await admin.goto("/admin/clientes/" + clientId + "/conteudos");
       await expect(admin.getByRole("heading", { name: "Liberar conteúdo" })).toBeVisible();
+      // Separate RLS/trigger authorization from the server action/UI layer.
+      assertLocalReleaseInsertAllowed(staff.id, clientId, v2.id);
       await admin.getByLabel("Versão de conteúdo").selectOption(v2.id);
       await admin.getByRole("button", { name: "Revisar liberação" }).click();
       await admin.getByRole("button", { name: "Confirmar liberação" }).click();
+      // Distinguish an action rejection from an action that never submitted.
+      await expect.poll(async () => {
+        if (releases(clientId).some(r => r.educational_content_version_id === v2.id))
+          return "recorded";
+        if (await admin.getByText("Não foi possível liberar", { exact: true }).count())
+          return "action-rejected";
+        return "pending";
+      }, { timeout: 20000 }).toBe("recorded");
       const recorded = await pollRows(
         "select id from public.client_content_releases where client_id=" +
         literal(clientId) + " and educational_content_version_id=" + literal(v2.id), 1,
