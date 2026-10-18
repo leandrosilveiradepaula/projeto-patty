@@ -65,8 +65,8 @@ create policy "client_content_releases_admin_assigned_insert"
 -- already requires an asset before release; direct REST INSERT must not
 -- bypass that requirement. Only registered metadata is checked here: this
 -- cannot prove the remote Blob exists or that distribution is licensed.
--- Existing releases remain unchanged. No SECURITY DEFINER, RLS bypass or
--- additional grants are introduced.
+-- Existing releases remain unchanged. The function runs as invoker;
+-- row-level policies and all grants remain unchanged.
 create or replace function public.require_published_educational_content_version_for_release()
 returns trigger
 language plpgsql
