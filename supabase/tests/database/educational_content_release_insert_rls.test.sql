@@ -134,6 +134,9 @@ select throws_ok(
   'unassigned admin cannot release to this client'
 );
 
+-- BEFORE INSERT published-version trigger runs as the caller before the
+-- INSERT WITH CHECK. AAL1 cannot SELECT the protected version, so the
+-- unchanged trigger raises 23514 before the release INSERT policy executes.
 select set_config('request.jwt.claim.sub','b6100000-0000-4000-8000-000000000001',true);
 select set_config('request.jwt.claims',
   '{"sub":"b6100000-0000-4000-8000-000000000001","aal":"aal1","role":"authenticated"}',true);
@@ -143,8 +146,8 @@ select throws_ok(
        values ('b6200000-0000-4000-8000-000000000001',
                'b6400000-0000-4000-8000-000000000002',
                'b6100000-0000-4000-8000-000000000001') $sql$,
-  '42501',null,
-  'assigned admin without MFA AAL2 cannot release'
+  '23514',null,
+  'assigned admin without MFA AAL2 cannot release (invoker trigger cannot see version)'
 );
 
 select set_config('request.jwt.claim.sub','b6100000-0000-4000-8000-000000000003',true);
@@ -156,8 +159,8 @@ select throws_ok(
        values ('b6200000-0000-4000-8000-000000000001',
                'b6400000-0000-4000-8000-000000000002',
                'b6100000-0000-4000-8000-000000000003') $sql$,
-  '42501',null,
-  'client cannot self-release published material'
+  '23514',null,
+  'client cannot self-release a version that is not released to client'
 );
 select is(
   (select count(*) from public.client_content_releases
