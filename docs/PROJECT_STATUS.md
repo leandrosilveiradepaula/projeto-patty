@@ -1,3 +1,17 @@
+## 2026-10-18 — Decisão de processo: homologação profissional única ao final das jornadas
+
+**DECISÃO CONFIRMADA PELO RESPONSÁVEL:** separar conclusão técnica de cada jornada da homologação profissional, que será executada conjuntamente quando todas as jornadas em escopo estiverem prontas. **Não** antecipar aceite: manter documentação e evidências técnicas por jornada. A decisão não adia revisões obrigatórias de segurança, migration, RLS, CI, merge, deploy, verificação de arquivos privados ou aprovação/publicação humana; essas etapas continuam exigidas antes de declarar implantação técnica concluída. Fonte normativa: `docs/DECISIONS.md`; roteiro operacional: `docs/JOURNEY_HOMOLOGATION.md`.
+
+---
+
+## 2026-10-18 — J6: regressão de integridade em mídia privada >100 MB (em validação)
+
+**OBJETIVO TÉCNICO:** testar o verificador de SHA-256 no servidor com um stream MP4 **inteiramente sintético** de 123.262.796 bytes, mesmo tamanho do arquivo aprovado da balança, gerado em blocos de 256 KiB, sem armazenar bytes reais ou depender do Blob. O teste confirma aceitação do tamanho e digest corretos e rejeição de um byte corrompido sem mudança do comprimento. Ele **não demonstra upload, Range HTTP, reprodução ou disponibilidade no Vercel**.
+
+**ESCOPO:** teste determinístico `lib/content/private-blob-stream-integrity.test.ts`, sem alterações em Auth, RLS, schemas, provider SDK, mídia real ou publicação. É independente do PR #911, que mantém a revisão específica de segurança e a migration não aplicada. A validação e integração deste pacote devem ser confirmadas no SHA final.
+
+---
+
 ## 2026-10-18 — J6: vídeo aprovado reobtido e integridade SHA-256 confirmada (sem upload)
 
 **PRE-FLIGHT COMPROVADO:** o original aprovado `MovaviClips_Video_20220217-143151.mp4` foi reobtido em modo leitura do Google Drive (ID registrado no lote `educational_media_migration_batch_1.json`), e os bytes foram conferidos em ambiente temporário: **123.262.796 bytes**, MIME `video/mp4`, SHA-256 **`ee05d6c12ea02db283234f5d69a09ff60c4d831183fe6715d7aa9848e76905b1`**, igual ao valor esperado do manifesto. O Drive original não foi modificado e nenhum conteúdo foi anexado a logs ou PR.

@@ -1,3 +1,17 @@
+## 2026-10-18 — Homologação profissional conjunta após conclusão técnica das jornadas
+
+### DECISÃO OPERACIONAL CONFIRMADA PELO RESPONSÁVEL
+
+A homologação profissional do Projeto Patty será executada **em uma rodada conjunta, ao final da implantação técnica das jornadas**, e não de forma obrigatória ao término de cada J1/J2/J3/J4/J5/J6 individualmente. Esta decisão define a ordem do trabalho e não cria uma regra clínica ou profissional da Patty.
+
+As jornadas podem prosseguir para desenvolvimento, testes, revisão de segurança, integração, aplicação controlada de migrations e deploy, sempre com status separado. **Implementado, testado, mergeado, publicado, migration aplicada e homologado não são equivalentes.** Até a sessão final, o estado correto permanece **homologação profissional pendente**, mesmo quando CI e deployment estiverem verdes.
+
+**A postergação não dispensa:** revisão específica antes de integrar migrations, workflows e outros arquivos sensíveis; RLS, MFA e isolamento; testes necessários em cada SHA; uso de dados sintéticos em CI; verificação técnica de uploads/entrega privada no ambiente real; aprovação/publicação/liberação explícitas pela Patty. Nunca criar conteúdo, protocolo ou cliente fictício no SaaS para simular aceitação profissional.
+
+A sessão conjunta usará os roteiros e evidências preservados em `docs/JOURNEY_HOMOLOGATION.md` e somente receberá status de homologação após execução autenticada e aceite real documentado. Data da sessão e operador permanecem por definir.
+
+---
+
 ## 2026-10-18 — J5 integrada e migration de concorrência aplicada no Supabase SaaS
 
 ### FATO CONFIRMADO, NÃO REGRA DO MÉTODO

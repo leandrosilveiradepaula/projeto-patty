@@ -69,3 +69,66 @@ test("interrupted stream does not create a verified result", async () => {
     stream, expectedByteSize: pdf.length, expectedSha256Hex: sha(pdf), expectedContentType:"application/pdf",
   }), /transport failure/);
 });
+
+test("verifies a synthetic MP4 over 100 MB incrementally and rejects a changed chunk", async () => {
+  // Same size as the approved food-scale video, but entirely generated here:
+  // no private bytes, client identity, or credential enters the repository.
+  const size = 123_262_796;
+  const chunkSize = 256 * 1024;
+  const signature = Buffer.from([0,0,0,20,102,116,121,112,105,115,111,109,0,0,0,0]);
+  const makeChunk = (start: number) => {
+    const chunk = Buffer.alloc(Math.min(chunkSize, size - start), 0x5a);
+    if (start === 0) signature.copy(chunk);
+    return chunk;
+  };
+  const expectedHash = createHash("sha256");
+  for (let offset = 0; offset < size; offset += chunkSize) {
+    expectedHash.update(makeChunk(offset));
+  }
+  const digest = expectedHash.digest("hex");
+  const middleByte = Math.floor(size / 2);
+
+  function syntheticStream(corrupt = false) {
+    let offset = 0;
+    let chunks = 0;
+    return {
+      stream: new ReadableStream<Uint8Array>({
+        pull(controller) {
+          if (offset >= size) {
+            controller.close();
+            return;
+          }
+          const chunk = makeChunk(offset);
+          if (corrupt && middleByte >= offset && middleByte < offset + chunk.length) {
+            chunk[middleByte - offset] ^= 1;
+          }
+          chunks += 1;
+          offset += chunk.length;
+          controller.enqueue(chunk);
+        },
+      }),
+      chunkCount: () => chunks,
+    };
+  }
+
+  const valid = syntheticStream();
+  const verified = await verifyEducationalAssetBody({
+    stream: valid.stream,
+    expectedByteSize: size,
+    expectedSha256Hex: digest,
+    expectedContentType: "video/mp4",
+  });
+  assert.deepEqual(verified, { byteSize: size, sha256Hex: digest });
+  assert.ok(valid.chunkCount() > 400, "synthetic test must stream in small chunks");
+
+  await assert.rejects(
+    verifyEducationalAssetBody({
+      stream: syntheticStream(true).stream,
+      expectedByteSize: size,
+      expectedSha256Hex: digest,
+      expectedContentType: "video/mp4",
+    }),
+    /SHA-256/,
+    "a different byte at the same size must fail closed",
+  );
+});

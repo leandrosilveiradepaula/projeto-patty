@@ -1,3 +1,13 @@
+## Decisão operacional de 2026-10-18 — homologação profissional conjunta
+
+A decisão do responsável é realizar a homologação profissional em uma **rodada única após completar as jornadas técnicas**, inclusive J6. Os roteiros existentes abaixo continuam válidos, mas **não são executados nem considerados aprovados antecipadamente**. A execução futura exige sessão real da Patty com MFA, autorização de cliente, visualização mobile, validação de releases/versões e aceite específico por jornada; não registrar dados pessoais nos artefatos.
+
+**Gates técnicos continuam obrigatórios antes da rodada conjunta:** CI no SHA final, revisão específica de RLS/workflows/segurança, merge elegível, migration aplicada e conferida no SaaS quando pertinente, Vercel deployment concluído e prova da entrega de arquivos privados com integridade. A decisão de adiar homologação profissional **não** autoriza a IA a publicar conteúdos, criar clientes de teste em produção nem passar por cima de autorização humana para mudanças sensíveis.
+
+**Controle:** J1 e J2 encerradas para avanço; J3/J4/J5 mantêm seus estados técnicos descritos; J6 depende do PR #911, migration e vídeo real para fechamento de implantação. Nenhuma jornada é reclassificada como homologada sem evidência da sessão conjunta.
+
+---
+
 ## J6 — Biblioteca educacional: versões e liberação por cliente (validação em branch, 2026-10-18)
 
 **OBJETIVO:** Patty cria rascunho → revisa e publica a versão conscientemente → asset privado verificado deve acompanhar liberação → Patty seleciona versão exata e cliente atribuída → cliente vê somente o liberado → versões futuras não alteram releases anteriores. Nenhuma liberação por fase, progresso implícito ou publicação por IA.
