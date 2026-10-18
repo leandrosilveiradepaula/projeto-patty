@@ -1,3 +1,15 @@
+## J6 — Biblioteca educacional: versões e liberação por cliente (validação em branch, 2026-10-18)
+
+**OBJETIVO:** Patty cria rascunho → revisa e publica a versão conscientemente → asset privado verificado deve acompanhar liberação → Patty seleciona versão exata e cliente atribuída → cliente vê somente o liberado → versões futuras não alteram releases anteriores. Nenhuma liberação por fase, progresso implícito ou publicação por IA.
+
+**TESTE LOCAL PROPOSTO:** PR [#911](https://github.com/leandrosilveiradepaula/projeto-patty/pull/911), `e2e/j6-educational-release-lifecycle.spec.mjs` e `.github/workflows/validate-j6-educational-release-browser.yml`, com UI/admin e cliente, MFA, assignment, isolamento RLS, histórico e mobile em Supabase descartável. O ramo positivo de release usa uma fixture de **metadados sintéticos** em `educational_content_assets`, com path opaco deliberadamente inexistente no Blob. Testa autorização e metadata de liberação; **não** é upload real, verificação física do objeto, material licenciado nem entrega da mídia. O teste exige 404 para objeto inexistente e nenhum progresso automático. O ramo sem asset comprova que publicar metadata não libera conteúdo.
+
+**ACEITAÇÃO TÉCNICA PARCIAL:** `Validate application` e Playwright J6 PASS no SHA final; rascunho e publicação sem release ocultos da cliente; admin sem assignment e cliente terceira não veem releases; admin precisa MFA; somente v2 explicitamente liberada é visível; v1/v3 não se liberam automaticamente; asset sintético não fornece bytes; teardown local concluído.
+
+**PENDÊNCIA DE HOMOLOGAÇÃO INTEGRAL:** transferência do material autorizado ao Blob privado, conferência real SHA-256/tamanho/MIME, entrega do vídeo original de 123.262.796 bytes, registro/versionamento e liberação pela Patty, licenciamento e sessão real da cliente em mobile. O PR não faz uploads, não contorna verificação e **J6 permanece NÃO HOMOLOGADA**. Revisão humana obrigatória do workflow sensível antes do merge; nunca criar clientes reais de teste.
+
+---
+
 ## J5 — Treino individual: integrado, migration aplicada, homologação profissional pendente (2026-10-18)
 
 **OBJETIVO E FLUXO:** cliente solicita treino na própria sessão → Patty/admin com MFA AAL2 cria versão manual com exercício → revisão explícita → publicação deliberada da versão exata → cliente acessa somente o publicado → v2 independente pode copiar exercícios da v1 sem alterá-la, exige nova revisão/publicação e mantém histórico. Nenhuma decisão profissional é automatizada.

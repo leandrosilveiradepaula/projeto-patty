@@ -1,3 +1,13 @@
+## 2026-10-18 — J6: biblioteca educacional e liberação individual (validação técnica em branch)
+
+**FATO DO RUNTIME EXISTENTE:** cadastro de conteúdo educacional, versões em rascunho, publicação explícita, assets privados, liberação de versão exata para cliente atribuída e consulta no portal já estão implementados. A liberação de versão publicada **exige asset privado registrado** e não ocorre por fase. A entrega física via Vercel Blob requer arquivo real, direitos autorizados e integridade verificada; não se infere de metadados.
+
+**TAREFA EM DESENVOLVIMENTO:** PR [#911](https://github.com/leandrosilveiradepaula/projeto-patty/pull/911), com Playwright J6 em Supabase e Next.js descartáveis: criação pela UI sob MFA; publicação sem arquivo e bloqueio de liberação; v2 com **metadados de asset sintéticos inseridos exclusivamente como fixture local**, publicação explícita, liberação individual e leitura somente da versão liberada sob RLS; isolamento cliente titular/terceira, admin sem assignment e admin sem MFA; v3 publicada sem substituir v2; rota de objeto inexistente fechada e sem progresso automático. A fixture **não faz upload nem comprova direitos, SHA-256 real, verificação do objeto ou entrega Blob**.
+
+**ESTADO:** PR em preparação; CI, merge, deploy e homologação J6 ainda não confirmados. Nenhuma migration, regra profissional, grant ou dado real será alterado. A distribuição do vídeo da balança aprovado pela Patty segue condicionada à cópia e validação privada do arquivo superior a 100 MB, conforme [CONTENT_LIBRARY.md](./CONTENT_LIBRARY.md).
+
+---
+
 ## 2026-10-18 — J5: código e migration publicados; homologação profissional pendente
 
 **FATO TÉCNICO OPERACIONAL ATUAL (substitui os registros históricos abaixo):** [PR #909](https://github.com/leandrosilveiradepaula/projeto-patty/pull/909) mergeado no `master` `2c363c98687c7dd14745f39a91bf9e3ec509c4c6`; [Validate application pós-merge #39132547136](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39132547136) PASS e Vercel reportou `success` para esse SHA. No HEAD de desenvolvimento `d7839c0223860556a9fe8c9bf6ff8c839235429a`, [Validate #39085576486](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39085576486), [foundation pgTAP #39085576477](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39085576477) e [Playwright J5 #39085576476](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39085576476) PASS (1 teste em 17,2s; Supabase local descartado com sucesso).

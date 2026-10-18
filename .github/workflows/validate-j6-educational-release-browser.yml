@@ -3,7 +3,7 @@ name: Validate J6 local educational release lifecycle browser
 on:
   pull_request:
     paths:
-      - ".github/workflows/validate-j6-training-browser.yml"
+      - ".github/workflows/validate-j6-educational-release-browser.yml"
       - "e2e/j6-educational-release-lifecycle.spec.mjs"
       - "e2e/helpers/admin-auth.mjs"
       - "app/admin/conteudos/**"
@@ -21,7 +21,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: j6-training-browser-${{ github.ref }}
+  group: j6-educational-release-browser-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -31,6 +31,8 @@ jobs:
     env:
       SUPABASE_TELEMETRY_DISABLED: "1"
       NEXT_TELEMETRY_DISABLED: "1"
+      # Fake metadata is NEVER a physically stored Blob object.
+      BLOB_READ_WRITE_TOKEN: ""
     steps:
       - name: Checkout exact reviewed commit
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
