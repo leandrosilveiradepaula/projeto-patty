@@ -312,6 +312,8 @@ test("J6: versioned content releases require exact published version and synthet
       await assertMobile(admin);
     });
 
+    const secondTitle = "J6 segundo material sintetico";
+    let secondVersion;
     let releaseId;
     await test.step("Manual publication then individual release grants only the exact version", async () => {
       await admin.getByLabel(/Confirmo que a versão 2 foi revisada/).check();
@@ -320,6 +322,40 @@ test("J6: versioned content releases require exact published version and synthet
         timeout: 25000,
       }).toBe(true);
       expect(visibleCount(owner.id, "aal1", "educational_content_versions", v2.id)).toBe(0);
+
+      // Prepare a second distinct published material BEFORE the first manual
+      // release. Both options must be available within the same admin form.
+      // This fixture uses only synthetic metadata in the disposable database.
+      await admin.goto("/admin/conteudos");
+      await admin.getByLabel("Título", { exact: true }).fill(secondTitle);
+      await admin.getByRole("button", { name: "Criar rascunho" }).click();
+      const secondContent = await pollRows(
+        "select c.id from public.educational_contents c" +
+        " join public.educational_content_versions v on v.educational_content_id=c.id" +
+        " where v.title=" + literal(secondTitle), 1,
+      );
+      const secondContentId = secondContent[0].id;
+      expect(secondContentId).toMatch(UUID);
+      await expect(admin).toHaveURL(new RegExp("/admin/conteudos/" + secondContentId));
+      secondVersion = versions(secondContentId)[0];
+      expect(secondVersion.published_at).toBeNull();
+      insert("educational_content_assets", {
+        educational_content_version_id: secondVersion.id,
+        asset_key: "primary",
+        storage_provider: "vercel_blob",
+        storage_path: "j6-local-nonexistent/" + nonce + "/second-object.pdf",
+        content_type: "application/pdf",
+        byte_size: 32,
+        sha256_hex: "b".repeat(64),
+      });
+      await admin.reload();
+      await admin.getByLabel(/Confirmo que a versão 1 foi revisada/).check();
+      await admin.getByRole("button", { name: "Publicar versão" }).click();
+      await expect.poll(() => Boolean(versions(secondContentId)[0]?.published_at), {
+        timeout: 25000,
+      }).toBe(true);
+      expect(visibleCount(owner.id, "aal1", "educational_content_versions", secondVersion.id)).toBe(0);
+
       await admin.goto("/admin/clientes/" + clientId + "/conteudos");
       await expect(admin.getByRole("heading", { name: "Liberar conteúdo" })).toBeVisible();
       // Guard the RLS fix structurally; a privileged helper could make the
@@ -371,6 +407,38 @@ test("J6: versioned content releases require exact published version and synthet
       await assertMobile(client);
     });
 
+    await test.step("Two manual releases work consecutively without reloading the admin page", async () => {
+      // The previous action returned success. The refreshed server history
+      // must reset the form's action state, or the second release is blocked.
+      await expect(admin.getByRole("button", { name: "Revisar liberação" }))
+        .toBeEnabled({ timeout: 20000 });
+      await admin.getByLabel("Versão de conteúdo").selectOption(secondVersion.id);
+      await admin.getByRole("button", { name: "Revisar liberação" }).click();
+      await admin.getByRole("button", { name: "Confirmar liberação" }).click();
+      await expect.poll(async () => {
+        if (releases(clientId).some(r => r.educational_content_version_id === secondVersion.id))
+          return "recorded";
+        if (await admin.getByText("Não foi possível liberar", { exact: true }).count())
+          return "action-rejected";
+        return "pending";
+      }, { timeout: 20000 }).toBe("recorded");
+      const recorded = await pollRows(
+        "select id from public.client_content_releases where client_id=" +
+        literal(clientId) + " and educational_content_version_id=" +
+        literal(secondVersion.id), 1,
+      );
+      expect(releases(clientId)).toHaveLength(2);
+      expect(visibleCount(owner.id, "aal1", "client_content_releases", recorded[0].id)).toBe(1);
+      expect(visibleCount(owner.id, "aal1", "educational_content_versions", secondVersion.id)).toBe(1);
+      expect(visibleCount(foreign.id, "aal1", "client_content_releases", recorded[0].id)).toBe(0);
+      expect(visibleCount(unassigned.id, "aal2", "client_content_releases", recorded[0].id)).toBe(0);
+      await client.reload();
+      await expect(client.getByText(secondTitle, { exact: true })).toBeVisible();
+      await expect(client.getByText("J6 material com asset sintetico", { exact: true })).toBeVisible();
+      await assertMobile(admin);
+      await assertMobile(client);
+    });
+
     await test.step("Local-only metadata does not pretend missing Blob bytes were delivered", async () => {
       // This intentionally fake path has NO Vercel Blob object behind it.
       // A missing provider/physical blob must not be mistaken for delivery.
@@ -395,7 +463,7 @@ test("J6: versioned content releases require exact published version and synthet
       await expect.poll(() => Boolean(versions(contentId)[2]?.published_at), {
         timeout: 25000,
       }).toBe(true);
-      expect(releases(clientId)).toHaveLength(1);
+      expect(releases(clientId)).toHaveLength(2);
       expect(visibleCount(owner.id, "aal1", "educational_content_versions", v3.id)).toBe(0);
       await client.reload();
       await expect(client.getByText("J6 material com asset sintetico", { exact: true })).toBeVisible();

@@ -179,6 +179,10 @@ export default async function AdminClientContentPage({
         ) : (
           <Card>
             <ClientContentReleaseForm
+              // Remount after a real release enters the server history.
+              // Otherwise useActionState can remain successful and block the
+              // next manual release for this same client.
+              key={`${client.id}:${releases.length}`}
               clientId={client.id}
               options={availableVersions.map((version) => ({
                 id: version.id,
