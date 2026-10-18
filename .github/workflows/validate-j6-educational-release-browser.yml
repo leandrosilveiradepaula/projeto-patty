@@ -16,6 +16,8 @@ on:
       - "supabase/migrations/*educational_content*.sql"
       - "supabase/migrations/*client_content_releases*.sql"
       - "supabase/tests/database/educational_content_release_insert_rls.test.sql"
+      # Keep this journey's acceptance contract aligned with its live E2E evidence.
+      - "docs/JOURNEY_HOMOLOGATION.md"
   workflow_dispatch:
 
 permissions:
