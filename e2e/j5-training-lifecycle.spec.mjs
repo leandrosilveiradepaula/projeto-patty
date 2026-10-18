@@ -321,8 +321,11 @@ test("J5: client requests, Patty reviews/publishes exact training versions and a
       await loginAdminWithMfa(outsiderPage, {
         email: unassigned.email, password: unassigned.password, totpSecret: otherTotp,
       });
-      const response = await outsiderPage.goto(adminRoute);
-      expect(response?.status()).toBe(404);
+      // Next.js can return HTTP 200 for streamed notFound boundaries. Assert
+      // absence of the private workspace, and independently prove SQL RLS.
+      await outsiderPage.goto(adminRoute);
+      await expect(outsiderPage.getByRole("heading", { name: "Prescrição de treino" })).toHaveCount(0);
+      await expect(outsiderPage.getByText("J5 Treino B sintetico", { exact: false })).toHaveCount(0);
       expect(visibleCount(unassigned.id, "aal2", "client_training_plan_versions", second.id)).toBe(0);
     });
   } finally {
