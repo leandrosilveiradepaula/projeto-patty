@@ -95,6 +95,33 @@ async function enrollTotp(user) {
     await api.auth.signOut();
   }
 }
+// Authenticate a separate, real AAL2 API session only against the disposable
+// Supabase. It exercises concurrent HTTP RPC transactions under the same
+// caller's RLS, without service-role privileges or synthetic SQL overrides.
+async function authenticatedAdminApi(user, totpSecret) {
+  const api = anonClient();
+  const signIn = await api.auth.signInWithPassword({
+    email: user.email, password: user.password,
+  });
+  if (signIn.error) throw signIn.error;
+  const factors = await api.auth.mfa.listFactors();
+  if (factors.error) throw factors.error;
+  const factorId = factors.data?.totp?.find(factor => factor.status === "verified")?.id;
+  if (!factorId) throw new Error("Verified synthetic TOTP factor missing");
+  const challenge = await api.auth.mfa.challenge({ factorId });
+  if (challenge.error) throw challenge.error;
+  const verification = await api.auth.mfa.verify({
+    factorId,
+    challengeId: challenge.data.id,
+    code: generateTotp(totpSecret),
+  });
+  if (verification.error) throw verification.error;
+  const assurance = await api.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (assurance.error || assurance.data?.currentLevel !== "aal2")
+    throw new Error("J5 synthetic API caller did not reach AAL2");
+  return api;
+}
+
 async function loginClient(page, user) {
   await page.goto("/login");
   await page.getByLabel("Email").fill(user.email);
@@ -327,6 +354,58 @@ test("J5: client requests, Patty reviews/publishes exact training versions and a
       await expect(outsiderPage.getByRole("heading", { name: "Prescrição de treino" })).toHaveCount(0);
       await expect(outsiderPage.getByText("J5 Treino B sintetico", { exact: false })).toHaveCount(0);
       expect(visibleCount(unassigned.id, "aal2", "client_training_plan_versions", second.id)).toBe(0);
+    });
+
+    await test.step("Concurrent authenticated draft RPCs serialize per client without extra grants", async () => {
+      // AAL2 alone never grants access without an active assignment.
+      const strangerApi = await authenticatedAdminApi(unassigned, otherTotp);
+      try {
+        const denied = await strangerApi.rpc("create_client_training_plan_draft", {
+          p_client_id: clientId,
+          p_title: "J5 forbidden third draft",
+          p_notes: null,
+        });
+        expect(denied.data).toBeNull();
+        expect(denied.error?.code).toBe("42501");
+        expect(versions(clientId)).toHaveLength(2);
+      } finally {
+        await strangerApi.auth.signOut();
+      }
+
+      // Both calls use the same real AAL2 admin JWT but separate HTTP
+      // transactions. Only one draft may open; the other must be rejected.
+      const api = await authenticatedAdminApi(staff, totp);
+      try {
+        const requests = await Promise.all([
+          api.rpc("create_client_training_plan_draft", {
+            p_client_id: clientId,
+            p_title: "J5 simultaneous A",
+            p_notes: null,
+          }),
+          api.rpc("create_client_training_plan_draft", {
+            p_client_id: clientId,
+            p_title: "J5 simultaneous B",
+            p_notes: null,
+          }),
+        ]);
+        const successes = requests.filter(result => !result.error);
+        const rejected = requests.filter(result => result.error);
+        expect(successes).toHaveLength(1);
+        expect(rejected).toHaveLength(1);
+        expect(rejected[0].error.code).toBe("23505");
+        expect(successes[0].data).toMatch(UUID);
+        expect(versions(clientId)).toHaveLength(3);
+        const draft = versions(clientId)[2];
+        expect(draft.id).toBe(successes[0].data);
+        expect(draft.version_number).toBe(3);
+        expect(draft.reviewed_at).toBeNull();
+        expect(draft.published_at).toBeNull();
+        expect(visibleCount(owner.id, "aal1", "client_training_plan_versions", draft.id)).toBe(0);
+        await clientPage.reload();
+        await expect(clientPage.getByRole("heading", { name: "J5 Treino B sintetico" })).toBeVisible();
+      } finally {
+        await api.auth.signOut();
+      }
     });
   } finally {
     await Promise.all([adminCtx.close(), clientCtx.close(), outsiderCtx.close(), foreignCtx.close()]);
