@@ -6,6 +6,8 @@
 
 **ACEITAÇÃO TÉCNICA PARCIAL:** `Validate application` e Playwright J6 PASS no SHA final; rascunho e publicação sem release ocultos da cliente; admin sem assignment e cliente terceira não veem releases; admin precisa MFA; somente v2 explicitamente liberada é visível; v1/v3 não se liberam automaticamente; asset sintético não fornece bytes; teardown local concluído.
 
+**CORREÇÃO NECESSÁRIA DETECTADA PELO E2E:** INSERT de `client_content_releases` recursava na policy SELECT de `educational_content_versions`, que voltava à tabela de liberações. O erro foi reproduzido em transação que terminou em ROLLBACK no Supabase local. A migration `20261018143000_fix_client_content_releases_insert_rls_recursion.sql` quebra somente a dependência circular de planejamento, delegando checagem de publicação a função privada PL/pgSQL `SECURITY INVOKER`. Conserva author=auth.uid(), admin, assignment ativo, MFA AAL2, trigger de versão publicada e grants anteriores; sem `SECURITY DEFINER`. **Ainda não validada no SHA final nem aplicada à produção.**
+
 **PENDÊNCIA DE HOMOLOGAÇÃO INTEGRAL:** transferência do material autorizado ao Blob privado, conferência real SHA-256/tamanho/MIME, entrega do vídeo original de 123.262.796 bytes, registro/versionamento e liberação pela Patty, licenciamento e sessão real da cliente em mobile. O PR não faz uploads, não contorna verificação e **J6 permanece NÃO HOMOLOGADA**. Revisão humana obrigatória do workflow sensível antes do merge; nunca criar clientes reais de teste.
 
 ---

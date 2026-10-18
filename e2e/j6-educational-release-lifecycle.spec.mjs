@@ -293,6 +293,19 @@ test("J6: versioned content releases require exact published version and synthet
       expect(visibleCount(owner.id, "aal1", "educational_content_versions", v2.id)).toBe(0);
       await admin.goto("/admin/clientes/" + clientId + "/conteudos");
       await expect(admin.getByRole("heading", { name: "Liberar conteúdo" })).toBeVisible();
+      // Guard the RLS fix structurally; a privileged helper could make the
+      // test green while silently bypassing release authorization.
+      expect(sql("select prosecdef from pg_proc where oid=" +
+        "'app_private.educational_content_version_is_published_for_release(uuid)'::regprocedure;")).toBe("f");
+      expect(sql("select has_function_privilege('anon'," +
+        "'app_private.educational_content_version_is_published_for_release(uuid)','EXECUTE');")).toBe("f");
+      expect(sql("select has_function_privilege('authenticated'," +
+        "'app_private.educational_content_version_is_published_for_release(uuid)','EXECUTE');")).toBe("t");
+      expect(sql("select qual is null and with_check like " +
+        "'%educational_content_version_is_published_for_release%'" +
+        " from pg_policies where schemaname='public' and " +
+        "tablename='client_content_releases' and " +
+        "policyname='client_content_releases_admin_assigned_insert';")).toBe("t");
       // Separate RLS/trigger authorization from the server action/UI layer.
       assertLocalReleaseInsertAllowed(staff.id, clientId, v2.id);
       await admin.getByLabel("Versão de conteúdo").selectOption(v2.id);
