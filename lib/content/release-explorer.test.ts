@@ -6,7 +6,7 @@ import {
   filterReleasedContent, hasActiveReleasedContentFilters,
   normalizedReleasedContentSearch, orderReleasedContent,
   paginateReleasedContent, releasedContentFacetOptions, releasedContentTotals,
-  releasePageForExactId, releaseDisplayYear, releasedContentYears,
+  releasePageForExactId, releaseDisplayYear, releasedContentYears, authorizedReleasedContentHash,
   type ReleasedContentEntry,
 } from "./release-explorer.ts";
 
@@ -124,4 +124,37 @@ test("release year facets and filters match Sao Paulo display dates across midni
   );
   // Invalid historical timestamps are not invented into a year.
   assert.equal(filterReleasedContent(examples, INITIAL_RELEASE_FILTERS).length, 3);
+});
+
+test("deep links resolve only already authorized released entries, including late pages", () => {
+  const many = Array.from({length: RELEASE_EXPLORER_PAGE_SIZE * 2 + 1}, (_, i) => ({
+    ...rows[0],
+    id: "release-" + String(i),
+    releasedAt: new Date(Date.UTC(2026, 9, i + 1)).toISOString(),
+  }));
+  assert.deepEqual(
+    authorizedReleasedContentHash(many, "#conteudo-liberado-release-0"),
+    {id: "release-0", page: 3},
+  );
+  assert.deepEqual(
+    authorizedReleasedContentHash(many, "#conteudo-liberado-release-24"),
+    {id: "release-24", page: 1},
+  );
+  assert.deepEqual(
+    authorizedReleasedContentHash(many, "#conteudo-liberado-release%2D12"),
+    {id: "release-12", page: 2},
+  );
+  // The anchor never triggers a search or invents another client's release.
+  for (const hash of [
+    "#conteudo-liberado-release-absent",
+    "#conteudo-liberado-",
+    "#conteudo-liberado-%",
+    "#conteudo-liberado-%E0%A4%A",
+    "#outro-modulo-release-0",
+    "#conteudo-liberado-" + "x".repeat(300),
+  ]) {
+    assert.equal(authorizedReleasedContentHash(many, hash), null);
+  }
+  assert.equal(authorizedReleasedContentHash([], "#conteudo-liberado-release-0"), null);
+  assert.equal(many[0].id, "release-0");
 });

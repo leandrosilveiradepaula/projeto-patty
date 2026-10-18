@@ -1,3 +1,11 @@
+## 2026-10-18 — J6: navegacao por versao liberada e recuperacao de filtros (PR em validacao)
+
+**DECISAO TECNICA DE PRODUTO:** a biblioteca da cliente deve abrir links para releases exatos ja autorizados mesmo quando estiverem fora da primeira pagina. Uma hash sem release correspondente, malformada ou de outra cliente nao gera busca adicional, permissao nem divulgacao de dados. A navegacao trata hashchange na mesma tela, revela a pagina e direciona foco/rolagem ao item existente; atualizacoes de dados sem mudanca da hash nao apagam filtros escolhidos pela usuaria. Quando a busca nao encontra resultados, a cliente recebe um controle direto para voltar aos conteudos liberados.
+
+**ESCOPO:** somente filtro/navegacao client-side em `ClientReleasedContentExplorer`, helper deterministico e testes. Sem Auth, RLS, migration, publicacao, release ou upload; a consulta do servidor permanece client-scoped. O PR #911 continua separado e com revisao especifica de RLS/workflow pendente. Testes e merge/deploy deste pacote precisam ser confirmados no SHA exato; nao interpretar este registro como homologacao da J6.
+
+---
+
 ## 2026-10-18 — J5: código e migration publicados; homologação profissional pendente
 
 **FATO TÉCNICO OPERACIONAL ATUAL (substitui os registros históricos abaixo):** [PR #909](https://github.com/leandrosilveiradepaula/projeto-patty/pull/909) mergeado no `master` `2c363c98687c7dd14745f39a91bf9e3ec509c4c6`; [Validate application pós-merge #39132547136](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39132547136) PASS e Vercel reportou `success` para esse SHA. No HEAD de desenvolvimento `d7839c0223860556a9fe8c9bf6ff8c839235429a`, [Validate #39085576486](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39085576486), [foundation pgTAP #39085576477](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39085576477) e [Playwright J5 #39085576476](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39085576476) PASS (1 teste em 17,2s; Supabase local descartado com sucesso).
