@@ -3,7 +3,7 @@
 -- Every row is synthetic; the surrounding transaction is rolled back.
 begin;
 
-select plan(23);
+select plan(26);
 
 select ok(
   to_regprocedure('app_private.educational_content_version_is_published_for_release(uuid)') is not null,
@@ -13,6 +13,11 @@ select ok(
   not (select prosecdef from pg_proc
        where oid='app_private.educational_content_version_is_published_for_release(uuid)'::regprocedure),
   'private lookup is SECURITY INVOKER, never definer'
+);
+select ok(
+  not (select prosecdef from pg_proc
+       where oid='public.require_published_educational_content_version_for_release()'::regprocedure),
+  'release integrity trigger runs as invoker, never definer'
 );
 select ok(
   not has_function_privilege('anon',
@@ -78,9 +83,31 @@ insert into public.educational_contents (id) values
 insert into public.educational_content_versions
 (id,educational_content_id,version_number,title,display_order,published_at)
 values
-('b6400000-0000-4000-8000-000000000001','b6300000-0000-4000-8000-000000000001',1,'J6 synthetic published v1',1,now()),
+('b6400000-0000-4000-8000-000000000001','b6300000-0000-4000-8000-000000000001',1,'J6 synthetic published v1',1,null),
 ('b6400000-0000-4000-8000-000000000002','b6300000-0000-4000-8000-000000000001',2,'J6 synthetic published v2',2,now()),
 ('b6400000-0000-4000-8000-000000000003','b6300000-0000-4000-8000-000000000001',3,'J6 synthetic draft v3',3,null);
+
+-- Fixture metadata is not a real Blob. Attach to draft, then publish v1.
+-- Leave published v2 without an asset to prove the database rejects a
+-- direct INSERT even when the caller has elevated database privileges.
+insert into public.educational_content_assets
+(educational_content_version_id,asset_key,storage_provider,storage_path,content_type,byte_size,sha256_hex)
+values
+('b6400000-0000-4000-8000-000000000001','primary','vercel_blob',
+ 'j6-pgtap-nonexistent/v1.pdf','application/pdf',32,repeat('a',64));
+update public.educational_content_versions
+set published_at=now()
+where id='b6400000-0000-4000-8000-000000000001';
+
+select throws_ok(
+  $sql$ insert into public.client_content_releases
+       (client_id,educational_content_version_id,released_by_profile_id)
+       values ('b6200000-0000-4000-8000-000000000001',
+               'b6400000-0000-4000-8000-000000000002',
+               'b6100000-0000-4000-8000-000000000001') $sql$,
+  '23514',null,
+  'even privileged direct INSERT cannot release published version without asset'
+);
 
 set local role authenticated;
 select set_config('request.jwt.claim.sub','b6100000-0000-4000-8000-000000000001',true);
@@ -96,6 +123,15 @@ select ok(
   not app_private.educational_content_version_is_published_for_release(
     'b6400000-0000-4000-8000-000000000003'),
   'draft v3 is never eligible via lookup'
+);
+select throws_ok(
+  $sql$ insert into public.client_content_releases
+       (client_id,educational_content_version_id,released_by_profile_id)
+       values ('b6200000-0000-4000-8000-000000000001',
+               'b6400000-0000-4000-8000-000000000002',
+               'b6100000-0000-4000-8000-000000000001') $sql$,
+  '23514',null,
+  'assigned admin AAL2 cannot bypass asset requirement by direct INSERT'
 );
 select lives_ok(
   $sql$ insert into public.client_content_releases

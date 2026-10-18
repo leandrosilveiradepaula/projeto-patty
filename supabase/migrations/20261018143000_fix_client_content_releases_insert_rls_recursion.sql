@@ -60,3 +60,42 @@ create policy "client_content_releases_admin_assigned_insert"
 
 -- The restrictive admin MFA policy on the release table and the
 -- require_published_educational_content_version_for_release trigger remain.
+
+-- Reuse the existing trigger as an independent integrity guard. The UI
+-- already requires an asset before release; direct REST INSERT must not
+-- bypass that requirement. Only registered metadata is checked here: this
+-- cannot prove the remote Blob exists or that distribution is licensed.
+-- Existing releases remain unchanged. No SECURITY DEFINER, RLS bypass or
+-- additional grants are introduced.
+create or replace function public.require_published_educational_content_version_for_release()
+returns trigger
+language plpgsql
+security invoker
+set search_path = pg_catalog
+as $$
+begin
+  if not exists (
+    select 1
+    from public.educational_content_versions v
+    where v.id = new.educational_content_version_id
+      and v.published_at is not null
+  ) then
+    raise exception 'content release requires a published educational content version'
+      using errcode = '23514';
+  end if;
+
+  if not exists (
+    select 1
+    from public.educational_content_assets a
+    where a.educational_content_version_id = new.educational_content_version_id
+  ) then
+    raise exception 'content release requires a registered private asset'
+      using errcode = '23514';
+  end if;
+
+  return new;
+end;
+$$;
+
+revoke execute on function public.require_published_educational_content_version_for_release()
+  from public, anon, authenticated;

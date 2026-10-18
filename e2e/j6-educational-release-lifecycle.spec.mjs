@@ -162,6 +162,32 @@ function assertLocalReleaseInsertAllowed(staffId, clientId, versionId) {
   expect(result).toMatch(UUID);
 }
 
+function assertLocalReleaseInsertRejectedWithoutAsset(staffId, clientId, versionId) {
+  if (![staffId, clientId, versionId].every(x => UUID.test(x)))
+    throw new Error("Invalid synthetic release rejection probe");
+  const claims = JSON.stringify({ sub: staffId, role: "authenticated", aal: "aal2" });
+  const result = sql([
+    "begin;",
+    "set local statement_timeout='5s';",
+    "set local role authenticated;",
+    "set local request.jwt.claims=" + literal(claims) + ";",
+    "set local request.jwt.claim.sub=" + literal(staffId) + ";",
+    "do $guard$ begin",
+    "  begin",
+    "    insert into public.client_content_releases",
+    "      (client_id, educational_content_version_id, released_by_profile_id)",
+    "      values (" + [clientId, versionId, staffId].map(literal).join(",") + ");",
+    "    raise exception 'unprotected release insert' using errcode='XX000';",
+    "  exception when check_violation then",
+    "    null;",
+    "  end;",
+    "end $guard$;",
+    "select 'blocked-without-asset';",
+    "rollback;",
+  ].join("\n"));
+  expect(result).toBe("blocked-without-asset");
+}
+
 async function assertMobile(page) {
   const x = await page.evaluate(() => ({
     width: document.documentElement.scrollWidth,
@@ -243,6 +269,9 @@ test("J6: versioned content releases require exact published version and synthet
         exact: true,
       })).toBeVisible();
       expect(releases(clientId)).toHaveLength(0);
+      // The server action is not the only protection: REST/SQL INSERT as an
+      // authorized AAL2 professional must also fail on missing asset metadata.
+      assertLocalReleaseInsertRejectedWithoutAsset(staff.id, clientId, v1.id);
       expect(visibleCount(owner.id, "aal1", "educational_content_versions", v1.id)).toBe(0);
       await client.reload();
       await expect(client.getByText("Nenhum conteúdo foi liberado para você ainda", {
