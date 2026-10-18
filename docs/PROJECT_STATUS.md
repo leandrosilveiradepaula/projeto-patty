@@ -1,3 +1,11 @@
+## 2026-10-18 — J6: regressão de integridade em mídia privada >100 MB (em validação)
+
+**OBJETIVO TÉCNICO:** testar o verificador de SHA-256 no servidor com um stream MP4 **inteiramente sintético** de 123.262.796 bytes, mesmo tamanho do arquivo aprovado da balança, gerado em blocos de 256 KiB, sem armazenar bytes reais ou depender do Blob. O teste confirma aceitação do tamanho e digest corretos e rejeição de um byte corrompido sem mudança do comprimento. Ele **não demonstra upload, Range HTTP, reprodução ou disponibilidade no Vercel**.
+
+**ESCOPO:** teste determinístico `lib/content/private-blob-stream-integrity.test.ts`, sem alterações em Auth, RLS, schemas, provider SDK, mídia real ou publicação. É independente do PR #911, que mantém a revisão específica de segurança e a migration não aplicada. A validação e integração deste pacote devem ser confirmadas no SHA final.
+
+---
+
 ## 2026-10-18 — J6: navegacao por versao liberada e recuperacao de filtros (PR em validacao)
 
 **DECISAO TECNICA DE PRODUTO:** a biblioteca da cliente deve abrir links para releases exatos ja autorizados mesmo quando estiverem fora da primeira pagina. Uma hash sem release correspondente, malformada ou de outra cliente nao gera busca adicional, permissao nem divulgacao de dados. A navegacao trata hashchange na mesma tela, revela a pagina e direciona foco/rolagem ao item existente; atualizacoes de dados sem mudanca da hash nao apagam filtros escolhidos pela usuaria. Quando a busca nao encontra resultados, a cliente recebe um controle direto para voltar aos conteudos liberados.
