@@ -53,7 +53,7 @@ function rows(query) {
 }
 function insert(table, fields) {
   if (!fixtureTables.has(table) ||
-      !Object.keys(fields).every(k => /^[a-z_]+$/.test(k)))
+      !Object.keys(fields).every(k => /^[a-z][a-z0-9_]*$/.test(k)))
     throw new Error("Fixture table/column is not permitted");
   const pk = table === "user_roles" ? "profile_id" : "id";
   const id = sql("insert into public." + table + " (" +
