@@ -1,4 +1,4 @@
-import { normalizedReleasedContentSearch, paginateReleasedContent } from "./release-explorer.ts";
+import { normalizedReleasedContentSearch, paginateReleasedContent, releaseDisplayYear } from "./release-explorer.ts";
 import { newestClientContentReleases } from "./release-order.ts";
 export type ProfessionalReleaseFilters = { query: string; availability: "all"|"available"|"missing"; order:"newest"|"oldest"|"title"; page:number; year?:string };
 export function readProfessionalReleaseOptions(raw: Record<string,unknown>): ProfessionalReleaseFilters {
@@ -10,10 +10,26 @@ export function filterProfessionalReleases<T extends ReleaseRow>(rows:readonly T
  const filtered=newestClientContentReleases(rows).filter(row=>{
  const version=row.educational_content_versions;if(!version)return false;
  const count=assets.get(version.id)??0;
- if(filters.year && filters.year!=="all" && (!Number.isFinite(Date.parse(row.released_at)) || String(new Date(row.released_at).getUTCFullYear())!==filters.year))return false;
+ if(filters.year && filters.year!=="all" && releaseDisplayYear(row.released_at)!==filters.year)return false;
  return (filters.availability==="all"||(filters.availability==="available"?count>0:count===0))&&(!query||normalizedReleasedContentSearch([version.title,version.category_key,version.content_type_key].filter(Boolean).join(" ")).includes(query));
  });
- const ordered=filters.order==="oldest"?[...filtered].reverse():filters.order==="title"?[...filtered].sort((a,b)=>(a.educational_content_versions?.title??"").localeCompare(b.educational_content_versions?.title??"","pt-BR",{sensitivity:"base"})||a.id.localeCompare(b.id)):filtered;
+ // Reversing newest-first rows would move invalid legacy dates to the top.
+ const ordered = filters.order === "oldest"
+   ? [...filtered].sort((a, b) => {
+     const left = Date.parse(a.released_at);
+     const right = Date.parse(b.released_at);
+     const leftValid = Number.isFinite(left), rightValid = Number.isFinite(right);
+     if (!leftValid || !rightValid) {
+       return leftValid ? -1 : rightValid ? 1 : a.id.localeCompare(b.id);
+     }
+     return left - right || a.id.localeCompare(b.id);
+   })
+   : filters.order === "title"
+     ? [...filtered].sort((a, b) =>
+       (a.educational_content_versions?.title ?? "").localeCompare(
+         b.educational_content_versions?.title ?? "", "pt-BR", { sensitivity: "base" },
+       ) || a.id.localeCompare(b.id))
+     : filtered;
  const result=paginateReleasedContent(ordered,filters.page);
  return {...result,previous:result.page>1?result.page-1:null,next:result.page<result.pages?result.page+1:null};
 }
@@ -22,5 +38,5 @@ export function professionalReleaseHref(base:string,filters:ProfessionalReleaseF
 }
 
 export function professionalContentReleaseYears(rows: readonly { released_at:string }[]): string[] {
- return [...new Set(rows.map(x=>Number.isFinite(Date.parse(x.released_at))?String(new Date(x.released_at).getUTCFullYear()):"").filter(Boolean))].sort().reverse();
+ return [...new Set(rows.map(x => releaseDisplayYear(x.released_at)).filter((year): year is string => year !== null))].sort().reverse();
 }

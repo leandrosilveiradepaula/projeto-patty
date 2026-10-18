@@ -6,7 +6,7 @@ import {
   filterReleasedContent, hasActiveReleasedContentFilters,
   normalizedReleasedContentSearch, orderReleasedContent,
   paginateReleasedContent, releasedContentFacetOptions, releasedContentTotals,
-  releasePageForExactId,
+  releasePageForExactId, releaseDisplayYear, releasedContentYears,
   type ReleasedContentEntry,
 } from "./release-explorer.ts";
 
@@ -102,4 +102,26 @@ test("query and facets are purely in browser state, not a search endpoint",()=>{
   assert.equal(hasActiveReleasedContentFilters({...INITIAL_RELEASE_FILTERS,order:"title"}),true);
   assert.equal(hasActiveReleasedContentFilters({...INITIAL_RELEASE_FILTERS,query:"  "}),false);
   assert.equal(hasActiveReleasedContentFilters({...INITIAL_RELEASE_FILTERS,query:"guia"}),true);
+});
+
+test("release year facets and filters match Sao Paulo display dates across midnight UTC", () => {
+  const examples: ReleasedContentEntry[] = [
+    { ...rows[0], id: "2026-local", releasedAt: "2027-01-01T01:59:59Z" },
+    { ...rows[0], id: "2027-local", releasedAt: "2027-01-01T03:00:00Z" },
+    { ...rows[0], id: "invalid", releasedAt: "invalid historical date" },
+  ];
+  assert.equal(releaseDisplayYear("2026-01-01T02:30:00Z"), "2025");
+  assert.equal(releaseDisplayYear("2026-01-01T03:00:00Z"), "2026");
+  assert.equal(releaseDisplayYear("invalid historical date"), null);
+  assert.deepEqual(releasedContentYears(examples), ["2027", "2026"]);
+  assert.deepEqual(
+    filterReleasedContent(examples, { ...INITIAL_RELEASE_FILTERS, year: "2026" }).map(x => x.id),
+    ["2026-local"],
+  );
+  assert.deepEqual(
+    filterReleasedContent(examples, { ...INITIAL_RELEASE_FILTERS, year: "2027" }).map(x => x.id),
+    ["2027-local"],
+  );
+  // Invalid historical timestamps are not invented into a year.
+  assert.equal(filterReleasedContent(examples, INITIAL_RELEASE_FILTERS).length, 3);
 });
