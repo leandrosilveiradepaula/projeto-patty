@@ -39,6 +39,20 @@ export function normalizedReleasedContentSearch(value: string): string {
   return value.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR").trim().replace(/\s+/g, " ");
 }
 
+// Calendar years must match the date visible to clients and the Patty admin
+// panel; UTC dates close to midnight can still be the previous local year.
+const RELEASE_YEAR_FORMATTER = new Intl.DateTimeFormat("en-US", {
+  year: "numeric",
+  timeZone: "America/Sao_Paulo",
+});
+
+export function releaseDisplayYear(value: string): string | null {
+  const instant = Date.parse(value);
+  return Number.isFinite(instant)
+    ? RELEASE_YEAR_FORMATTER.format(new Date(instant))
+    : null;
+}
+
 function releaseInstant(value: string): number | null {
   const instant = Date.parse(value);
   return Number.isFinite(instant) ? instant : null;
@@ -104,7 +118,7 @@ export function filterReleasedContent<T extends ReleasedContentEntry>(
 ): T[] {
   const query = normalizedReleasedContentSearch(filters.query);
   return orderReleasedContent(records.filter((record) => {
-    if (filters.year && filters.year !== "all" && (!Number.isFinite(Date.parse(record.releasedAt)) || new Date(record.releasedAt).getUTCFullYear().toString() !== filters.year)) return false;
+    if (filters.year && filters.year !== "all" && releaseDisplayYear(record.releasedAt) !== filters.year) return false;
     if (filters.category !== "all" && record.category !== filters.category) return false;
     if (filters.type !== "all" && record.type !== filters.type) return false;
     if (filters.availability === "available" && record.assetCount <= 0) return false;
@@ -155,5 +169,5 @@ export function hasActiveReleasedContentFilters(filters: ReleasedContentFilters)
 }
 
 export function releasedContentYears(records: readonly ReleasedContentEntry[]): string[] {
- return [...new Set(records.map(x=>Number.isFinite(Date.parse(x.releasedAt))?String(new Date(x.releasedAt).getUTCFullYear()):"").filter(Boolean))].sort().reverse();
+ return [...new Set(records.map(x => releaseDisplayYear(x.releasedAt)).filter((year): year is string => year !== null))].sort().reverse();
 }
