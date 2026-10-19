@@ -1,3 +1,15 @@
+## 2026-10-19 — J7: prova integrada local aprovada e PR #921 implantado
+
+**FATOS CONFIRMADOS:** [PR #921](https://github.com/leandrosilveiradepaula/projeto-patty/pull/921) mergeado no `master` em `72fd2fbf076aa82e6bc489cc1c08f8936775ac51`. Os checks `Validate application`, `Validate method configuration foundation`, `Validate J6 local educational release lifecycle browser` e `Validate J7 local AI review lifecycle browser` terminaram em **success** no head exato revisado `316d9b24b477e8212a464fe643b238d139e3a698`. O deployment Vercel de produção desse merge foi confirmado como **READY**.
+
+**ESCOPO EFETIVAMENTE TESTADO (local/descartável):** no Supabase local + Next.js local, com dados inteiramente sintéticos e TOTP MFA, o Playwright J7 validou análise sintética historizada, zero achados, saída com referência cruzada inválida, decisão profissional separada de aceitação/anotação, histórico original imutável, recuperação humana de execução iniciada, visão mobile e restrição de leitura a cliente/admin sem assignment. O resultado de acesso negado é conferido pela UI de `registro indisponível`, ausência de conteúdo sensível e RLS: o streaming Next.js pode retornar status HTTP 200 mesmo quando a Server Component renderiza not-found. A suíte pgTAP incluiu os 16 asserts existentes.
+
+**ISOLAMENTO DA CORREÇÃO DE TESTES:** grants mínimos para `service_role` foram reproduzidos **somente** no Supabase descartável do runner para igualar os grants que já existem em produção; schema, RLS, roles `anon`/`authenticated` e SaaS não foram alterados. A execução requereu URL local fixa, recusou ambiente remoto, manteve `OPENAI_API_KEY` vazio e `OPENAI_HEALTH_DATA_PROCESSING_ENABLED=false`. Sem dados reais, geração de protocolo, publicação ou liberações.
+
+**CLASSIFICAÇÃO:** fundação técnica e teste integrado **implementados, testados, mergeados e publicados como código**. **J7 não homologada** e execução com dados reais não autorizada: pendem validação profissional no mobile e no ambiente real, autorização/verificação de retenção de dados de saúde do provider (ZDR/MAM ou equivalente aprovado), credenciais e aprovação da Patty, antes de habilitar a chamada externa. CI sintético não prova conformidade contratual de IA nem autoriza publicar conteúdo.
+
+---
+
 ## 2026-10-19 — J7: teste de ciclo completo de revisão assistiva, local e sintético (PR em validação)
 
 **OBJETIVO:** demonstrar o caminho de ponta a ponta da J7 sem ativar IA externa nem processar dados reais: Anamnese submetida em banco descartável → registros de execução e resultados exclusivamente sintéticos → leitura autenticada de admin com MFA AAL2 → decisões humanas separadas → persistência imutável → isolamento de acesso de outra conta e cliente.
