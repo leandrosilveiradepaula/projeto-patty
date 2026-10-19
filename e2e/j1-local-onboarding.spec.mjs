@@ -122,6 +122,20 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
     baseURL, viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true,
   });
   const page = await context.newPage();
+  const sessionResponses = [];
+  // Capture only HTTP status and whether the server authorized an app role.
+  // Never retain or print tokens, cookies, response bodies or profile IDs.
+  page.on("response", (response) => {
+    if (new URL(response.url()).pathname !== "/ativar-conta/session") return;
+    void response.json()
+      .then((payload) => {
+        const roleKind =
+          payload?.role === "client" || payload?.role === "admin"
+            ? "authorized" : "not-authorized";
+        sessionResponses.push(response.status() + ":" + roleKind);
+      })
+      .catch(() => sessionResponses.push(response.status() + ":unreadable"));
+  });
 
   await test.step("activate invitation without exposing its one-time token", async () => {
     await page.goto("/login");
@@ -172,6 +186,14 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
           literal(invite.profileId) + " and role='client';",
         "rollback;",
       ].join("\n")) === "1";
+      // Probe the server independently while preserving the original browser
+      // failure. This does not retry activation or suppress the failed test.
+      const probe = await page.request.get("/ativar-conta/session", {
+        failOnStatusCode: false,
+      });
+      const probeResult = probe.ok() ? await probe.json().catch(() => null) : null;
+      const probeAuthorized =
+        probeResult?.role === "client" || probeResult?.role === "admin";
       // Check whether a fresh GET with the established cookie repairs a
       // stale server component render. Diagnostic only: original failure is
       // still a failure and cannot be hidden by an automatic retry.
@@ -185,7 +207,10 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
         ", signed=" + Boolean(account?.signed) +
         ", authCookiePresent=" + authCookiePresent +
         ", roleVisibleUnderRls=" + roleVisible +
-        ", freshGetFormVisible=" + freshFormVisible,
+        ", freshGetFormVisible=" + freshFormVisible +
+        ", sessionEndpointResponses=" + sessionResponses.join(";") +
+        ", probeHttp=" + probe.status() +
+        ", probeRoleAuthorized=" + probeAuthorized,
       );
     }
     // The fresh session route derives the authorized role from cookies and
