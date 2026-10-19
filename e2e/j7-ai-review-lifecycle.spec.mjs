@@ -295,8 +295,24 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
           : message.includes("row-level security")
             ? "rls"
             : "other";
+    // Only expose a fixed allowlist of table identifiers, never raw DB errors
+    // or synthetic answers. This identifies the missing grant without
+    // altering privileges to get the test green.
+    const table = /permission denied for table ([a-z_]+)/.exec(message)?.[1];
+    const allowlistedTables = new Set([
+      "ai_executions", "ai_execution_outputs", "ai_execution_sources",
+      "ai_execution_failure_responses", "client_assignments", "user_roles",
+      "profiles", "clients", "anamnesis_submissions",
+    ]);
+    const safeTable = table && allowlistedTables.has(table) ? table : "unspecified";
+    const grants = rows("select " +
+      "has_table_privilege('service_role','public.ai_executions','UPDATE') as can_update_execution," +
+      "has_table_privilege('service_role','public.client_assignments','SELECT') as can_read_assignment," +
+      "has_table_privilege('service_role','public.user_roles','SELECT') as can_read_roles")[0];
     throw new Error("J7 local recovery RPC failed: SQLSTATE " +
-      (probe.error.code ?? "unknown") + ", category=" + category);
+      (probe.error.code ?? "unknown") + ", category=" + category +
+      ", relation=" + safeTable +
+      ", local_role_grants=" + JSON.stringify(grants));
   }
   expect(executionRows(probeExecutionId)[0].status).toBe("failed");
 
