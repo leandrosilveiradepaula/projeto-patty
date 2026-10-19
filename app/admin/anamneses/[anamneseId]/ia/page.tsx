@@ -13,6 +13,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { Section } from "@/components/ui/Section";
 import { getOpenAiProviderReadiness } from "@/lib/ai/openai-provider";
 import { presentStoredAiReview } from "@/lib/ai/anamnesis-review-history";
+import { auditFindingActionLinks } from "@/lib/ai/finding-action-integrity";
 import { listAccessibleAiFindingActions } from "@/lib/ai/finding-actions";
 import { ANAMNESIS_QUESTION_KEYS } from "@/lib/anamnesis/question-keys";
 import { requiresAiExecutionRecoveryReview } from "@/lib/ai/execution-lifecycle";
@@ -82,14 +83,13 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
   // This display allowlist checks question ownership; original execution validation
   // remains responsible for deciding which unanswered questions were applicable.
   const allowedQuestionIds = new Set(questions.map((question) => question.id));
-  // The persisted schema can retain more than one human action per finding.
-  // Never silently overwrite an earlier independent decision in the UI.
-  const findingActionsByKey = new Map<string, typeof findingActions>();
+  // Keep every RLS-visible historical action, even if its snapshot cannot
+  // safely be associated with the currently validated original output.
+  const findingActionsByExecutionId = new Map<string, typeof findingActions>();
   for (const action of findingActions) {
-    const key = action.execution_id + ":" + action.finding_index;
-    const existing = findingActionsByKey.get(key) ?? [];
+    const existing = findingActionsByExecutionId.get(action.execution_id) ?? [];
     existing.push(action);
-    findingActionsByKey.set(key, existing);
+    findingActionsByExecutionId.set(action.execution_id, existing);
   }
   const financialQuestion = questions.find(
     (question) =>
@@ -160,6 +160,10 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
                 status: execution.status,
               });
               const findings = review.findings;
+              const audit = auditFindingActionLinks(
+                findings,
+                findingActionsByExecutionId.get(execution.id) ?? [],
+              );
 
               return (
                 <Card className={styles.entry} key={execution.id}>
@@ -245,9 +249,72 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
                     </p>
                   ) : null}
 
+                  {review.state === "ready" && findings.length > 0 ? (
+                    <div className={styles.actionSummary}>
+                      <p role="status">
+                        {audit.reviewedCount} de {findings.length} achado(s) com
+                        decisão humana vinculada; {audit.pendingIndices.length} aguardando
+                        decisão.
+                      </p>
+                      {audit.pendingIndices.length > 0 ? (
+                        <Link
+                          className={styles.sourceLink}
+                          href={`#achado-ia-${execution.id}-${audit.pendingIndices[0]}`}
+                        >
+                          Ir ao primeiro achado aguardando decisão
+                        </Link>
+                      ) : null}
+                    </div>
+                  ) : null}
+
+                  {audit.unmatchedActions.length > 0 ? (
+                    <div className={styles.integrityHistory}>
+                      <Alert title="Vínculo histórico de decisão exige conferência" variant="warning">
+                        {audit.unmatchedActions.length} registro(s) de decisão
+                        preservado(s), mas sem correspondência confirmada com o
+                        achado original validado. Não atribua estas decisões a
+                        outros achados. A verificação deve ser técnica e humana.
+                      </Alert>
+                      <details className={styles.integrityDetails}>
+                        <summary>Consultar decisões históricas sem vínculo confirmado</summary>
+                        <ul className={styles.integrityList}>
+                          {audit.unmatchedActions.map((action) => (
+                            <li key={action.id}>
+                              <p className={styles.meta}>
+                                {action.action === "converted_to_patty_note"
+                                  ? "Anotação profissional"
+                                  : "Observação interna"} registrada em{" "}
+                                {formatDateTime(action.created_at)}.
+                              </p>
+                              <p className={styles.meta}>
+                                Responsável: {action.actor_display_name || "Nome não disponível"}.
+                                Índice histórico: {action.finding_index}.
+                              </p>
+                              <details className={styles.actorAudit}>
+                                <summary>Ver identificadores de auditoria</summary>
+                                <code>Ação: {action.id}</code>
+                                <code>Perfil: {action.acted_by_profile_id}</code>
+                              </details>
+                              {action.action === "converted_to_patty_note" &&
+                              action.anamnesis_review_id &&
+                              isUuid(action.anamnesis_review_id) ? (
+                                <Link
+                                  className={styles.sourceLink}
+                                  href={`/admin/anamneses/${submission.id}/revisao#revisao-${action.anamnesis_review_id}`}
+                                >
+                                  Abrir anotação profissional registrada
+                                </Link>
+                              ) : null}
+                            </li>
+                          ))}
+                        </ul>
+                      </details>
+                    </div>
+                  ) : null}
+
                   {findings.map((finding, index) => {
-                    const actionKey = execution.id + ":" + index;
-                    const recordedActions = findingActionsByKey.get(actionKey) ?? [];
+                    const recordedActions = audit.matchedByIndex.get(index) ?? [];
+                    const hasRecordedAction = audit.lockedIndices.has(index);
                     const acceptedAsObservation = recordedActions.some(
                       (action) => action.action === "accepted_internal_observation",
                     );
@@ -272,7 +339,9 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
                     return (
                       <div
                         className={styles.finding}
+                        id={`achado-ia-${execution.id}-${index}`}
                         key={`${execution.id}-${index}`}
+                        tabIndex={-1}
                       >
                         <h3 className={styles.title}>
                           {findingLabel(finding.type)}
@@ -339,6 +408,14 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
                             </Alert>
                           ) : null}
 
+                          {hasRecordedAction && recordedActions.length === 0 ? (
+                            <Alert title="Decisão histórica não associável" variant="warning">
+                              Existe decisão registrada neste índice, mas sua
+                              cópia imutável não coincide com o achado exibido.
+                              Nenhuma nova ação está disponível até a conferência técnica.
+                            </Alert>
+                          ) : null}
+
                           {recordedActions.map((action) => (
                             <div key={action.id}>
                               <p className={styles.meta}>
@@ -368,7 +445,7 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
                             </div>
                           ))}
 
-                          {recordedActions.length === 0 ? (
+                          {!hasRecordedAction ? (
                             <>
                               <form
                                 action={acceptAiFindingAsInternalObservation.bind(
