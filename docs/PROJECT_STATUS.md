@@ -1,3 +1,11 @@
+## 2026-10-19 — J7: auditabilidade visível das decisões humanas
+
+**ESCOPO:** o histórico da IA exibe estados de execução em português e a data registrada de cada decisão profissional já persistida, ao lado da observação aceita ou anotação criada. A fonte da data é `ai_finding_actions.created_at`; datas legadas inválidas usam fallback neutro. A saída original permanece imutável.
+
+**FORA DE ESCOPO:** nenhuma alteração em banco, RLS, Auth, execução de IA, modelo, gate de saúde, textos originais, publicações, atribuições ou liberações. Testes apenas sintéticos. O gate de dados reais permanece fechado. **CRITÉRIOS:** CI verde no SHA exato, data exibida somente para ação humana existente, nenhuma inferência de resultado ou decisão. Homologação profissional continua conjunta.
+
+---
+
 ## 2026-10-19 — Início técnico da J7: Anamnese assistida por IA, revisão humana e histórico auditável
 
 **ESCOPO TÉCNICO PROPOSTO (não regra profissional):** após a J6, a J7 fica delimitada à análise assistiva da Anamnese e às decisões internas da Patty. O fluxo-alvo é Anamnese originalmente submetida → contexto minimizado → execução assistiva somente quando o gate externo estiver autorizado → saída validada e historizada → achados exibidos em separado → observação/anotação da Patty independente → auditoria. **A IA nunca publica, diagnostica, decide fase, cria protocolo ou envia comunicação automática.**
