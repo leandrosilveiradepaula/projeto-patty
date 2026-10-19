@@ -1,3 +1,15 @@
+## 2026-10-19 — Consolidação pré-homologação: J1 local e aposentadoria do smoke em produção
+
+**FATO CONFIRMADO:** no mesmo `master` `fe261cec051ff843ffc72b66c5329552b6634628`, o workflow de onboarding da J1 passou na run `39312400602` e falhou na run `39312497722`. A falha aconteceu após clicar em `Começar Anamnese`: a URL permaneceu em `/cliente/anamnese` durante a asserção de 5 segundos, sem alcançar `/cliente/anamnese/{uuid}`. O mesmo código ter passado antes **não** comprova inexistência de defeito intermitente; os logs disponíveis também não provam causa raiz (hidratação, redirect, backend ou condição de corrida).
+
+**DECISÃO DE SEGURANÇA:** o workflow legado `e2e-client-onboarding-activation.yml`, que criava e apagava contas sintéticas no **Supabase de produção**, foi aposentado. O script legado é conservado para auditoria e bloqueado contra execução direta. A nova suíte `validate-j1-local-onboarding-browser.yml` usa exclusivamente Next.js local e Supabase descartável `127.0.0.1`, sem secrets de produção, sem agendamento/trigger de deploy e sem OpenAI externa. Cria identidades e formulário **exclusivamente sintéticos** locais; destrói integralmente os serviços após a execução. Verifica convite, ativação, Cadastro Atual, um único rascunho versionado, resposta informativa persistida, retomada no mobile e isolamento anônimo/AAL1. Não altera a RLS, Auth ou migrations aplicadas.
+
+**MELHORIA FUNCIONAL DELIMITADA:** o botão `Começar Anamnese` ganhou indicador de envio e bloqueio de clique duplicado enquanto o server action está pendente, preservando a ação já existente e o redirect. A interface expõe sinal de hidratação para o teste aguardá-la antes de interagir. Isso evita falsos positivos de clique antecipado, mas **não** substitui a validação do backend nem permite declarar a falha original resolvida sem execução do cenário descartável.
+
+**CRITÉRIOS DE ACEITE:** `Validate application` incluindo os contratos de segurança, `Validate J1 local client onboarding browser` e regressões relevantes aprovados no SHA exato; CI pós-merge e deployment conferidos. **FORA DE ESCOPO:** Auth/RLS/grants, schema, bases de produção, formulários reais da Patty, dados reais, provider externo e homologação final. Os oito PRs legados abertos serão triados em pacote separado antes do teste operacional conjunto, que **será a última atividade do projeto**, não desta etapa técnica.
+
+---
+
 ## 2026-10-19 — J7 encerrada tecnicamente no escopo assistivo e sintético (NÃO HOMOLOGADA)
 
 **ESTADO:** `J7 IMPLEMENTADA / TESTADA COM DADOS SINTÉTICOS / MERGEADA / PUBLICADA COMO CÓDIGO`. A homologação profissional conjunta e a autorização para processar dados reais de saúde na OpenAI **não foram realizadas**. Não interpretar CI ou deployment `READY` como homologação de uso profissional.
