@@ -8,6 +8,7 @@ import { presentStoredAiReview } from "@/lib/ai/anamnesis-review-history";
 import {
   getAccessibleAnamnesisSubmission,
   listAccessibleAiAnamnesisExecutions,
+  listAccessibleAiAnamnesisAnswerSources,
   listAccessibleAiExecutionOutputs,
   listAccessibleAnamnesisAnswers,
   listAccessibleAnamnesisQuestions,
@@ -42,14 +43,25 @@ async function requireExactAccessibleAiExecution(
   }
   const execution = executions.find((item) => item.id === executionId);
   if (!execution) throw new Error("Execução indisponível para decisão humana.");
-  const [answers, questions, outputs] = await Promise.all([
+  const [answers, questions, outputs, sources] = await Promise.all([
     listAccessibleAnamnesisAnswers(submission.id),
     listAccessibleAnamnesisQuestions(submission.form_version_id),
     listAccessibleAiExecutionOutputs([executionId]),
+    listAccessibleAiAnamnesisAnswerSources([executionId]),
   ]);
+  const authorizedAnswerIds = new Set(answers.map((answer) => answer.id));
+  const recordedSourceAnswerIds = new Set<string>();
+  for (const source of sources) {
+    if (
+      source.execution_id === executionId &&
+      source.anamnesis_submission_id === submission.id &&
+      source.anamnesis_answer_id &&
+      authorizedAnswerIds.has(source.anamnesis_answer_id)
+    ) recordedSourceAnswerIds.add(source.anamnesis_answer_id);
+  }
   const result = presentStoredAiReview({
     allowedQuestionIds: new Set(questions.map((question) => question.id)),
-    allowedSourceAnswerIds: new Set(answers.map((answer) => answer.id)),
+    allowedSourceAnswerIds: recordedSourceAnswerIds,
     completedAt: execution.completed_at,
     content: outputs.find((output) => output.execution_id === executionId)?.content,
     failedAt: execution.failed_at,
