@@ -79,7 +79,7 @@ export default async function AdminAnamnesisDetailPage({
     listAccessibleClientFiles(submission.client_id),
   ]);
 
-  const displayName = submission.clients?.profiles?.display_name?.trim();
+  const displayName = submission.clients?.full_name?.trim() || submission.clients?.profiles?.display_name?.trim();
   const formVersion = submission.anamnesis_form_versions;
   const answersByQuestionId = new Map(
     answers.map((answer) => [answer.question_id, answer]),
@@ -345,7 +345,12 @@ export default async function AdminAnamnesisDetailPage({
                           : "Não respondida";
 
                         return (
-                          <Card className={styles.questionCard} key={question.id}>
+                          <Card
+                            className={styles.questionCard}
+                            id={`resposta-${question.id}`}
+                            key={question.id}
+                            tabIndex={-1}
+                          >
                             <div className={styles.questionHeader}>
                               <div>
                                 <p className={styles.questionKey}>
