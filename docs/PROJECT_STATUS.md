@@ -1,3 +1,13 @@
+## 2026-10-19 — J1: confirmação de corrida de cookie pós-convite no Playwright descartável
+
+**DIAGNÓSTICO REPRODUZIDO:** a execução [J1 local #39337587280](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39337587280) confirmou `sessionEndpointResponses=200:not-authorized` no primeiro GET uncached de autorização, seguido de `probeHttp=200` com papel autorizado **na mesma sessão**, antes mesmo do GET de navegação. Auth confirmou o convite, login e cookie; RLS confirmou `client`. Portanto, existe uma janela observável na propagação das credenciais de convite para requisições subsequentes. Não é evidência de falha de RLS nem de token inválido. Esta corrida explica a renderização inicial desatualizada, mas não antecipa aceitação de correção.
+
+**CORREÇÃO DETERMINÍSTICA SOB TESTE:** quando a primeira Server Component veio sem papel, o client consulta uma rota de **leitura** server-side `/ativar-conta/session`, com `cache: no-store` e cookies same-origin, em no máximo 4 tentativas (imediata, após 250 ms, 750 ms e 1.500 ms). **Somente** `role: null` permite aguardar nova conferência; formato inesperado, erro HTTP e falta persistente de papel continuam falhando fechado. Cada resposta é autorizada novamente pelo servidor via `getCurrentAuthContext`/RLS e a ação de senha continua protegida no servidor. Nenhum intervalo infinito, papel controlado pelo browser, bypass MFA ou saída original modificada.
+
+**TESTE/ACEITE:** workflow J1 com Supabase/Next descartáveis e cliente sintética percorre token de convite → autorização conferida após propagação → senha → Cadastro Atual → rascunho único da Anamnese versionada → retomada/resposta original → isolamento; regressões J6/J7, `Validate application` e boundary tests verdes no head exato. Não usar o smoke legado com usuários fictícios na produção. **PENDENTE:** comprovar CI verde e merge/deployment; homologação operacional da Patty permanece a última tarefa do projeto.
+
+---
+
 ## 2026-10-19 — J1: evitar renderização stale após convite com consulta de sessão autenticada (PR #931)
 
 **EVIDÊNCIA CONFIRMADA DO TESTE LOCAL:** no último head anterior do PR #931, o browser recebeu cookie de sessão e a identidade sintética estava confirmada em Auth, com papel `client` consultável sob RLS. A tela de ativação ainda falhou no handoff (`phase=auth-error`), mas um GET fresco com o mesmo cookie exibia o formulário. A tentativa anterior de somente uma recarga da página foi insuficiente. **Não classificar como falha de token, schema ou RLS sem prova adicional.**
