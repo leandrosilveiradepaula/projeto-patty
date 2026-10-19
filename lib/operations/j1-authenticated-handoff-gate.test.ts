@@ -5,7 +5,8 @@ import test from "node:test";
 
 const gateModule = "../../.github/scripts/" + "j1-production-preflight.mjs";
 const { readinessForSyntheticE2E, verifiedEquivalentRuntime } = await import(gateModule);
-const workflow = readFileSync(new URL("../../.github/workflows/e2e-client-onboarding-activation.yml",import.meta.url),"utf8");
+const workflow = readFileSync(new URL("../../.github/workflows/validate-j1-local-onboarding-browser.yml",import.meta.url),"utf8");
+const localSpec = readFileSync(new URL("../../e2e/j1-local-onboarding.spec.mjs",import.meta.url),"utf8");
 const adminWorkflow = readFileSync(new URL("../../.github/workflows/e2e-j1-invitation-handoff.yml",import.meta.url),"utf8");
 const clientSpec = readFileSync(new URL("../../e2e/client-onboarding-activation.spec.mjs",import.meta.url),"utf8");
 const spec = readFileSync(new URL("../../e2e/j1-manual-invitation-handoff.spec.mjs",import.meta.url),"utf8");
@@ -27,15 +28,16 @@ test("J1 partial smoke is barred unless master CI AND Vercel match exact commit"
  for(const item of blocked)assert.equal(readinessForSyntheticE2E(item).ready,false);
 });
 
-test("J1 live browser smoke only runs after trusted master preflight",()=>{
- assert.match(workflow,/github\.ref == .refs\/heads\/master./);
- assert.match(workflow,/node \.github\/scripts\/j1-production-preflight\.mjs/);
- assert.match(workflow,/if: steps\.preflight\.outputs\.ready == .true./);
- assert.match(workflow,/--workers=1/);
+test("J1 live browser smoke uses only disposable localhost and no production credentials",()=>{
+ assert.match(workflow,/pull_request:/);
  assert.match(workflow,/workflow_dispatch:/);
- assert.doesNotMatch(workflow,/schedule:/);
- assert.doesNotMatch(workflow,/pull_request:/);
- assert.doesNotMatch(workflow,/permissions:\s*contents: write/);
+ assert.match(workflow,/J1_E2E_LOCAL_ONLY: "true"/);
+ assert.match(workflow,/npx supabase start/);
+ assert.match(workflow,/npx supabase stop --no-backup/);
+ assert.match(workflow,/j1-local-onboarding\.spec\.mjs/);
+ assert.match(workflow,/--workers=1/);
+ assert.doesNotMatch(workflow,/secrets\.|workflow_run:|status:|schedule:/);
+ assert.doesNotMatch(workflow,/j1-production-preflight|E2E_ADMIN_EMAIL|hqanoskwjvpbgavppcud/);
 });
 
 test("J1 test checks the actual UI handoff and protects temporary Auth data",()=>{
@@ -62,24 +64,21 @@ test("J1 test checks the actual UI handoff and protects temporary Auth data",()=
 });
 
 test("new E2E scripts parse before any secret or published runtime is available",()=>{
- const files=[".github/scripts/j1-production-preflight.mjs","e2e/j1-manual-invitation-handoff.spec.mjs","e2e/client-onboarding-activation.spec.mjs"];
+ const files=[".github/scripts/j1-production-preflight.mjs","e2e/j1-manual-invitation-handoff.spec.mjs","e2e/client-onboarding-activation.spec.mjs","e2e/j1-local-onboarding.spec.mjs"];
  for(const file of files){
   const absolute=new URL("../../"+file,import.meta.url);
   assert.doesNotThrow(()=>execFileSync(process.execPath,["--check",absolute.pathname],{stdio:"pipe"}),file);
  }
 });
 
-test("J1 triggers only from trusted master CI or matching Vercel status",()=>{
- assert.match(workflow,/workflow_run:/);
- assert.match(workflow,/status:/);
- assert.match(workflow,/github\.event\.context == 'Vercel'/);
- assert.match(workflow,/github\.event\.state == 'success'/);
- assert.match(workflow,/github\.event\.sha == github\.sha/);
- assert.match(workflow,/github\.event\.workflow_run\.event == 'push'/);
- assert.match(workflow,/github\.event\.workflow_run\.conclusion == 'success'/);
- assert.match(workflow,/github\.event\.workflow_run\.head_sha == github\.sha/);
- assert.match(workflow,/github\.ref == 'refs\/heads\/master'/);
- assert.match(workflow,/steps\.preflight\.outputs\.ready == 'true'/);
+test("J1 local run is not triggered by production deploy or CI and refuses remote URLs",()=>{
+ assert.doesNotMatch(workflow,/github\.event\.context|github\.event\.workflow_run/);
+ assert.doesNotMatch(workflow,/preflight\.outputs/);
+ assert.match(localSpec,/J1_E2E_LOCAL_ONLY !== "true"/);
+ assert.match(localSpec,/baseURL !== "http:\/\/127\.0\.0\.1:3000"/);
+ assert.match(localSpec,/apiURL !== "http:\/\/127\.0\.0\.1:54321"/);
+ assert.match(localSpec,/Boolean\(process\.env\.OPENAI_API_KEY\)/);
+ assert.match(localSpec,/seedPublishedAnamnesis/);
 });
 
 const verifiedRelease = "35304fec723f011ec8c113938e2700a45cdfe132";
@@ -207,9 +206,10 @@ test("mobile client-only E2E covers persistence and stops before any professiona
  ]){
   assert.ok(clientSpec.includes(needle),needle);
  }
- assert.match(workflow,/preflight\.outputs\.ready == 'true'/);
- assert.match(workflow,/client-onboarding-activation\.spec\.mjs/);
+ assert.match(workflow,/j1-local-onboarding\.spec\.mjs/);
  assert.match(workflow,/--workers=1/);
+ assert.match(localSpec,/expect\(drafts\)\.toHaveLength\(1\)/);
+ assert.match(localSpec,/form\[data-interactive="true"\]/);
  assert.equal(workflow.includes("E2E_ADMIN_TOTP_SECRET"),false);
  assert.equal(workflow.includes("E2E_ADMIN_PASSWORD"),false);
 });
@@ -231,20 +231,15 @@ test("real J1 timeout never suppresses cleanup of exact synthetic identities",()
  assert.doesNotMatch(clientSpec,/catch\s*\([^)]*\)\s*\{\s*\}\s*;?\s*\/\/\s*cleanup/i);
 });
 
-test("J1 synthetic-only E2E resumes solely on trusted deploy/CI events with independent cleanup",()=>{
- assert.doesNotMatch(workflow,/J1_E2E_ENABLE/);
- assert.doesNotMatch(workflow,/schedule:/);
- assert.match(workflow,/github\.event\.workflow_run\.head_sha == github\.sha/);
- assert.match(workflow,/github\.event\.workflow_run\.conclusion == 'success'/);
- assert.match(workflow,/github\.event\.state == 'success'/);
- assert.match(workflow,/github\.event\.sha == github\.sha/);
- assert.match(workflow,/preflight\.outputs\.ready == 'true'/);
- assert.match(workflow,/node \.github\/scripts\/j1-production-preflight\.mjs/);
- assert.match(workflow,/if: always\(\) && steps\.browser\.outcome != 'skipped'/);
- assert.match(workflow,/J1_FIXTURE_CLEANUP_EXECUTE: "true"/);
- assert.match(workflow,/node e2e\/helpers\/j1-independent-cleanup\.mjs/);
- assert.doesNotMatch(workflow,/E2E_ADMIN_PASSWORD:|E2E_ADMIN_TOTP_SECRET:/);
- assert.doesNotMatch(workflow,/pull_request:/);
+test("J1 local E2E has independent disposable cleanup and no hosted fixture secrets",()=>{
+ assert.match(workflow,/if: always\(\)/);
+ assert.match(workflow,/npx supabase stop --no-backup/);
+ assert.match(workflow,/J1_E2E_BASE_URL=http:\/\/127\.0\.0\.1:3000/);
+ assert.match(workflow,/test "\$API_URL" = "http:\/\/127\.0\.0\.1:54321"/);
+ assert.match(localSpec,/throw new Error\("J1 local SQL boundary rejected"\)/);
+ assert.doesNotMatch(workflow,/J1_FIXTURE_CLEANUP_EXECUTE|node e2e\/helpers\/j1-independent-cleanup/);
+ assert.doesNotMatch(workflow,/E2E_ADMIN_PASSWORD:|E2E_ADMIN_TOTP_SECRET:|secrets\./);
+ assert.match(workflow,/pull_request:/);
 });
 
 test("J1 real-browser security evidence checks anonymous and client role boundaries",()=>{
