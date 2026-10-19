@@ -1,3 +1,13 @@
+## 2026-10-19 — J6: reprodução inline e avanço do vídeo confirmados na interface de produção (homologação conjunta pendente)
+
+**EVIDÊNCIA OBSERVADA:** após o merge do [PR #917](https://github.com/leandrosilveiradepaula/projeto-patty/pull/917), commit `c9317f80ae4f627917d7c4fc8960650bd5966e31`, o deployment da Vercel foi confirmado como `READY`. A captura compartilhada pelo operador mostra o player HTML5 do asset `primary` reproduzindo no próprio aplicativo (posição `0:01` de `2:21`) e botão de download separado. Em seguida, o operador confirmou explicitamente **“Functional”** em resposta ao teste de avançar a reprodução para aproximadamente `1:10`. A confirmação é suficiente como evidência operacional relatada de **reprodução e busca no navegador** naquela sessão, mas **não** equivale a inspeção independente dos headers HTTP `206 Content-Range`, prova de isolamento de cliente em produção ou aceite profissional.
+
+**CONFERÊNCIA REMOTA NO MESMO DIA:** Vercel `projeto-patty-blob` segue **privado e disponível**, com 1 objeto / 123.262.796 bytes. Supabase: 1 asset associado à versão `ae45c5db-e6af-46db-9230-b05bc4f5a5bd`; migration J6 `20261018143000` registrada, versão **não publicada**, **0 client releases**. Os workflows `Validate application` e `Validate J6 local educational release lifecycle browser` passaram no PR #917; o último usa apenas dados sintéticos e não prova mídia real. A interface estava identificada como `E2E Admin` na captura: **não presumir que a sessão é a conta profissional real da Patty**.
+
+**CLASSIFICAÇÃO:** fluxo técnico do vídeo (upload, integridade, registro, visualização, avanço) concluído na sessão observada; **J6 implantada tecnicamente com ressalvas de aceite**. Permanecem para a homologação conjunta: login da Patty com MFA, cliente autorizada x terceira cliente, verificação de acesso/Range em produção com instrumentação quando necessário, mobile, publicação e liberação por decisão humana. **Não publicar, liberar ou homologar automaticamente.** O original no Drive permanece preservado.
+
+---
+
 ## 2026-10-19 — J6: player para vídeo educacional privado (validação da reprodução pendente)
 
 **FATO OBSERVADO:** após upload do MP4 de 123.262.796 bytes ao Vercel Blob privado e registro do asset `primary`, o link administrativo **Abrir arquivo privado** iniciou o download do MP4 no navegador. Isso comprova acesso ao arquivo naquela sessão, **não** comprova reprodução inline nem busca/Range. O arquivo permanece no store `projeto-patty-blob` privado, a versão 1 permanece **rascunho**, sem publicação nem liberações a clientes.
