@@ -246,6 +246,17 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
       label: "J7 pergunta sintética opcional", display_order: 3, answer_type: "text", required: false,
     }),
   ];
+  questionIds.push(insert("anamnesis_questions", {
+    form_version_id: formVersionId,
+    section_id: sectionId,
+    question_key: "j7-not-applicable",
+    label: "J7 pergunta condicional não aplicável",
+    display_order: 4,
+    answer_type: "text",
+    required: false,
+    applicability_source_question_id: questionIds[0],
+    applicability_expected_answer: JSON.stringify("Resposta diferente da sintética A"),
+  }));
   sql("update public.anamnesis_form_versions set published_at=statement_timestamp()" +
     " where id=" + literal(formVersionId) + ";");
 
@@ -319,6 +330,28 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
       explanation: "J7 achado sintético de resposta não incluída nesta execução.",
     }],
   });
+  const falselyMissingAnsweredExecutionId = createExecution(
+    ownerClientId, submission.submissionId, staff.id, promptId,
+  );
+  completeExecution(falselyMissingAnsweredExecutionId, ownerClientId, {
+    findings: [{
+      type: "missing_answer",
+      source_answer_ids: [],
+      target_question_id: questionIds[0],
+      explanation: "J7 alegação sintética falsa sobre pergunta já respondida.",
+    }],
+  });
+  const falselyMissingHiddenExecutionId = createExecution(
+    ownerClientId, submission.submissionId, staff.id, promptId,
+  );
+  completeExecution(falselyMissingHiddenExecutionId, ownerClientId, {
+    findings: [{
+      type: "missing_answer",
+      source_answer_ids: [],
+      target_question_id: questionIds[3],
+      explanation: "J7 alegação sintética falsa sobre pergunta condicional não aplicável.",
+    }],
+  });
   const startedExecutionId = createExecution(ownerClientId, submission.submissionId, staff.id, promptId);
 
   // Independent service-only RPC probe on a separate disposable execution.
@@ -388,7 +421,13 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
     await expect(admin.getByText("J7 Cliente Sintética", { exact: true })).toBeVisible();
     await expect(admin.getByRole("button", { name: "Executar análise assistida" })).toBeDisabled();
     await expect(admin.getByText("Execução concluída sem achados para revisão.", { exact: true })).toBeVisible();
-    await expect(admin.getByText("Resultado da IA indisponível para revisão", { exact: true })).toHaveCount(2);
+    await expect(admin.getByText("Resultado da IA indisponível para revisão", { exact: true })).toHaveCount(4);
+    await expect(admin.getByText(
+      "J7 alegação sintética falsa sobre pergunta já respondida.", { exact: true },
+    )).toHaveCount(0);
+    await expect(admin.getByText(
+      "J7 alegação sintética falsa sobre pergunta condicional não aplicável.", { exact: true },
+    )).toHaveCount(0);
     await expect(admin.getByText("J7 achado sintético de resposta não incluída nesta execução.", { exact: true })).toHaveCount(0);
     expect(rows(
       "select anamnesis_answer_id from public.ai_execution_sources where execution_id=" +
