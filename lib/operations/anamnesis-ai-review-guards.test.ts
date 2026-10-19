@@ -79,3 +79,22 @@ test("J7 keeps every distinct persisted human action visible instead of silently
   assert.match(historyPage, /Mais de uma decisão registrada/);
   assert.match(historyPage, /recordedActions\.length === 0/);
 });
+
+test("J7 links validated finding sources to exact, authorized original questions", () => {
+  const originalPage = readFileSync(new URL("../../app/admin/anamneses/[anamneseId]/page.tsx", import.meta.url), "utf8");
+  const originalCss = readFileSync(new URL("../../app/admin/anamneses/[anamneseId]/page.module.css", import.meta.url), "utf8");
+  const aiCss = readFileSync(new URL("../../app/admin/anamneses/[anamneseId]/ia/page.module.css", import.meta.url), "utf8");
+  assert.ok(historyPage.includes("sourceReferences = finding.source_answer_ids.map"));
+  assert.ok(historyPage.includes("answersById.get(answerId)?.question_id"));
+  assert.ok(historyPage.includes("#resposta-${source.questionId}"));
+  assert.ok(historyPage.includes("#resposta-${finding.target_question_id}"));
+  assert.ok(historyPage.includes("Ver resposta original:"));
+  assert.ok(historyPage.includes("Ver pergunta original:"));
+  assert.ok(originalPage.includes("id={`resposta-${question.id}`}"));
+  assert.ok(originalPage.includes("getAccessibleAnamnesisSubmission(anamneseId)"));
+  assert.ok(originalPage.includes("listAccessibleAnamnesisAnswers(submission.id)"));
+  assert.ok(originalPage.includes("submission.clients?.full_name?.trim()"));
+  assert.ok(originalCss.includes(".questionCard:target"));
+  assert.ok(aiCss.includes(".sourceLink:focus-visible"));
+  assert.ok(!historyPage.includes("#resposta-${answerId}"));
+});
