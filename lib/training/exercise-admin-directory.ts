@@ -33,10 +33,14 @@ export function matchingExerciseNameVersion<T extends ExerciseNameVersion>(
 export function exerciseCatalogBackHref(
   term: string,
   status: ExerciseCatalogStatus,
+  sort: ExerciseCatalogSort = "recent",
+  page = 1,
 ): string {
   const params = new URLSearchParams();
   if (term) params.set("q", readExerciseCatalogTerm(term));
   if (status !== "all") params.set("status", status);
+  if (sort !== "recent") params.set("ordem", sort);
+  if (Number.isSafeInteger(page) && page > 1) params.set("pagina", String(page));
   const search = params.toString();
   return "/admin/exercicios" + (search ? "?" + search : "");
 }
@@ -65,10 +69,11 @@ export function paginateExerciseDirectory<T>(items: readonly T[], requested: num
   };
 }
 
-export function exerciseDirectoryPageHref(query: string, status: ExerciseCatalogStatus, page: number) {
+export function exerciseDirectoryPageHref(query: string, status: ExerciseCatalogStatus, page: number, sort: ExerciseCatalogSort = "recent") {
   const params = new URLSearchParams();
   if (query) params.set("q", readExerciseCatalogTerm(query));
   if (status !== "all") params.set("status", status);
+  if (sort !== "recent") params.set("ordem", sort);
   if (page > 1 && Number.isSafeInteger(page)) params.set("pagina", String(page));
   const suffix = params.toString();
   return "/admin/exercicios" + (suffix ? "?" + suffix : "") + "#biblioteca-exercicios";
