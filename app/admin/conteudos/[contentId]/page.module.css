@@ -71,6 +71,12 @@
   font-size: var(--font-size-sm);
 }
 
+/* Keep the inline video within the authorized asset card on narrow viewports. */
+.assetDetails {
+  min-width: 0;
+  flex: 1;
+}
+
 .assetList {
   display: grid;
   gap: var(--space-3);
