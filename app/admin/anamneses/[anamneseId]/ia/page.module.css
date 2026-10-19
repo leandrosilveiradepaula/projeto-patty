@@ -47,6 +47,20 @@
 .list {
   padding-left: var(--space-5);
 }
+.sourceLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--color-brand-strong);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  overflow-wrap: anywhere;
+}
+.sourceLink:focus-visible {
+  border-radius: var(--radius-medium);
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
+}
 
 .finding {
   display: grid;
