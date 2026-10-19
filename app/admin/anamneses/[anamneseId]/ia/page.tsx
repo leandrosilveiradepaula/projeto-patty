@@ -12,10 +12,10 @@ import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Section } from "@/components/ui/Section";
 import { getOpenAiProviderReadiness } from "@/lib/ai/openai-provider";
+import { presentStoredAiReview } from "@/lib/ai/anamnesis-review-history";
 import { listAccessibleAiFindingActions } from "@/lib/ai/finding-actions";
 import { ANAMNESIS_QUESTION_KEYS } from "@/lib/anamnesis/question-keys";
 import { requiresAiExecutionRecoveryReview } from "@/lib/ai/execution-lifecycle";
-import type { Json } from "@/lib/supabase/database.types";
 import {
   getAccessibleAnamnesisSubmission,
   listAccessibleAiAnamnesisExecutions,
@@ -31,54 +31,6 @@ type PageProps = {
   params: Promise<{ anamneseId: string }>;
 };
 
-type StoredFinding = {
-  explanation: string;
-  source_answer_ids: string[];
-  suggested_follow_up_question?: string;
-  target_question_id?: string;
-  type: string;
-};
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
-}
-
-function readStoredFindings(content: Json | undefined): StoredFinding[] {
-  if (!isRecord(content) || !Array.isArray(content.findings)) {
-    return [];
-  }
-
-  return content.findings.flatMap((value) => {
-    if (
-      !isRecord(value) ||
-      typeof value.type !== "string" ||
-      typeof value.explanation !== "string" ||
-      !Array.isArray(value.source_answer_ids)
-    ) {
-      return [];
-    }
-
-    return [
-      {
-        type: value.type,
-        explanation: value.explanation,
-        source_answer_ids: value.source_answer_ids.filter(
-          (id): id is string => typeof id === "string",
-        ),
-        ...(typeof value.target_question_id === "string"
-          ? { target_question_id: value.target_question_id }
-          : {}),
-        ...(typeof value.suggested_follow_up_question === "string"
-          ? {
-              suggested_follow_up_question:
-                value.suggested_follow_up_question,
-            }
-          : {}),
-      },
-    ];
-  });
-}
-
 function findingLabel(type: string) {
   if (type === "possible_contradiction") return "Possível contradição";
   if (type === "clarification_needed") return "Esclarecimento sugerido";
@@ -87,6 +39,7 @@ function findingLabel(type: string) {
 }
 
 function formatDateTime(value: string) {
+  if (!Number.isFinite(Date.parse(value))) return "Data indisponível";
   return new Intl.DateTimeFormat("pt-BR", {
     dateStyle: "short",
     timeStyle: "short",
@@ -124,6 +77,10 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
   const outputsByExecutionId = new Map(
     outputs.map((output) => [output.execution_id, output]),
   );
+  const allowedSourceAnswerIds = new Set(answers.map((answer) => answer.id));
+  // This display allowlist checks question ownership; original execution validation
+  // remains responsible for deciding which unanswered questions were applicable.
+  const allowedQuestionIds = new Set(questions.map((question) => question.id));
   const findingActionsByKey = new Map<
     string,
     "accepted_internal_observation" | "converted_to_patty_note"
@@ -147,7 +104,7 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
       <AdminAnamnesisWorkspaceHeader
         activeSection="ia"
         clientId={submission.client_id}
-        displayName={submission.clients?.profiles?.display_name}
+        displayName={submission.clients?.full_name?.trim() || submission.clients?.profiles?.display_name?.trim()}
         submissionId={submission.id}
         submittedAt={submission.submitted_at}
       />
@@ -193,7 +150,15 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
           <div className={styles.stack}>
             {executions.map((execution) => {
               const output = outputsByExecutionId.get(execution.id);
-              const findings = readStoredFindings(output?.content);
+              const review = presentStoredAiReview({
+                allowedQuestionIds,
+                allowedSourceAnswerIds,
+                completedAt: execution.completed_at,
+                content: output?.content,
+                failedAt: execution.failed_at,
+                status: execution.status,
+              });
+              const findings = review.findings;
 
               return (
                 <Card className={styles.entry} key={execution.id}>
@@ -256,7 +221,24 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
                   ) : null}
 
                   {execution.status === "completed" &&
-                  findings.length === 0 ? (
+                  review.state === "missing_output" ? (
+                    <Alert title="Resultado da IA não encontrado" variant="warning">
+                      A execução consta como concluída, mas não há resultado
+                      persistido para revisão. Nenhum achado pode ser aceito.
+                      O registro original foi preservado.
+                    </Alert>
+                  ) : null}
+
+                  {execution.status === "completed" &&
+                  review.state === "invalid_output" ? (
+                    <Alert title="Resultado da IA indisponível para revisão" variant="warning">
+                      Os dados registrados não passaram pela validação de
+                      integridade para exibição. Nenhum achado pode ser aceito
+                      ou convertido em anotação sem conferência técnica.
+                    </Alert>
+                  ) : null}
+
+                  {review.state === "ready" && findings.length === 0 ? (
                     <p className={styles.text}>
                       Execução concluída sem achados para revisão.
                     </p>
