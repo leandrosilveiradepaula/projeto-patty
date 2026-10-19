@@ -137,15 +137,37 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
     // Do not leak the one-time token into Playwright diagnostics. Classify
     // the *visible* activation boundary if the form does not become ready:
     // this distinguishes an invalid invite from missing session/hydration.
-    await expect.poll(async () => {
-      if (await page.locator('form[data-interactive="true"]').count()) return "ready";
-      if (await page.getByText("Link inválido ou expirado").count()) return "invalid-invite";
-      if (await page.getByText("Não foi possível validar o convite").count()) return "auth-error";
-      if (await page.getByText("Validando convite").count()) return "checking-session";
-      if (await page.locator('form[data-interactive="false"]').count()) return "form-hydrating";
-      return "not-rendered";
-    }, { timeout: 15000, message: "J1 local activation boundary classification (no tokens)" })
-      .toBe("ready");
+    let lastPhase = "not-rendered";
+    try {
+      await expect.poll(async () => {
+        if (await page.locator('form[data-interactive="true"]').count()) return lastPhase = "ready";
+        if (await page.getByText("Link inválido ou expirado").count()) return lastPhase = "invalid-invite";
+        if (await page.getByText("Não foi possível validar o convite").count()) return lastPhase = "auth-error";
+        if (await page.getByText("Validando convite").count()) return lastPhase = "checking-session";
+        if (await page.locator('form[data-interactive="false"]').count()) return lastPhase = "form-hydrating";
+        return lastPhase = "not-rendered";
+      }, { timeout: 15000, message: "J1 local activation boundary classification (no tokens)" })
+        .toBe("ready");
+    } catch {
+      // Diagnostics contain only booleans about the disposable identity,
+      // never user data, OTP/token values, cookie values or raw SQL errors.
+      const account = rows(
+        "select (email_confirmed_at is not null) as confirmed," +
+        " (last_sign_in_at is not null) as signed" +
+        " from auth.users where id=" + literal(invite.profileId),
+      )[0];
+      const callbackRejected = new URL(page.url()).searchParams.get("error") === "invalid";
+      const authCookiePresent = (await context.cookies()).some(
+        (cookie) => cookie.name.startsWith("sb-") && cookie.name.includes("auth-token"),
+      );
+      throw new Error(
+        "J1 synthetic invite activation blocked: phase=" + lastPhase +
+        ", callbackRejected=" + callbackRejected +
+        ", confirmed=" + Boolean(account?.confirmed) +
+        ", signed=" + Boolean(account?.signed) +
+        ", authCookiePresent=" + authCookiePresent,
+      );
+    }
     await page.getByLabel("Crie sua senha").fill(password);
     await page.getByLabel("Confirme sua senha").fill(password);
     await page.getByRole("button", { name: "Criar senha e continuar" }).click();
