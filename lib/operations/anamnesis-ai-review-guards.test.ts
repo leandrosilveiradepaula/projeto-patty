@@ -48,3 +48,13 @@ test("J7 prioritizes client identity and handles invalid historical dates safely
   assert.match(historyPage, /submission\.clients\?\.profiles\?\.display_name\?\.trim\(\)/);
   assert.match(historyPage, /if \(!Number\.isFinite\(Date\.parse\(value\)\)\) return "Data indisponível"/);
 });
+
+
+test("J7 links a recorded human note to the exact immutable review without exposing its content", () => {
+  assert.match(historyPage, /reviewId: action\.anamnesis_review_id/);
+  assert.match(historyPage, /recordedAction\?\.reviewId && isUuid\(recordedAction\.reviewId\)/);
+  assert.match(historyPage, /\/revisao#revisao-\$\{recordedAction\.reviewId\}/);
+  assert.match(historyPage, /Abrir anotação profissional exata/);
+  assert.match(historyPage, /!recordedAction \?/);
+  assert.doesNotMatch(historyPage, /href=\{.*finding\.explanation/);
+});
