@@ -10,7 +10,7 @@ const MISSING_QUESTION = "33333333-3333-4333-8333-333333333333";
 const OUTSIDER_QUESTION = "88888888-8888-4888-8888-888888888888";
 
 const allowedSourceAnswerIds = new Set([ANSWER_A, ANSWER_B]);
-const allowedQuestionIds = new Set([MISSING_QUESTION]);
+const allowedMissingTargetQuestionIds = new Set([MISSING_QUESTION]);
 const completedAt = "2026-10-19T03:00:00.000Z";
 
 function present(
@@ -18,7 +18,7 @@ function present(
   overrides: Partial<Parameters<typeof presentStoredAiReview>[0]> = {},
 ) {
   return presentStoredAiReview({
-    allowedQuestionIds,
+    allowedMissingTargetQuestionIds,
     allowedSourceAnswerIds,
     completedAt,
     content,
@@ -145,4 +145,40 @@ test("an answer owned by the same submission but absent from this execution's le
     "invalid_output",
   );
   assert.equal(present({ findings: [] }, { allowedSourceAnswerIds: new Set() }).state, "ready");
+});
+
+test("answered, not-applicable or non-minimized missing targets cannot become human actions", () => {
+  const claimedMissing = (questionId: string) => ({
+    findings: [{
+      type: "missing_answer",
+      source_answer_ids: [],
+      target_question_id: questionId,
+      explanation: "Ausência alegada em teste sintético.",
+    }],
+  });
+  assert.equal(present(claimedMissing(MISSING_QUESTION)).state, "ready");
+  assert.equal(
+    present(claimedMissing(MISSING_QUESTION), {
+      allowedMissingTargetQuestionIds: new Set(),
+    }).state,
+    "invalid_output",
+    "a question no longer confirmed as missing must be rejected",
+  );
+  assert.equal(
+    present(claimedMissing(OUTSIDER_QUESTION), {
+      allowedMissingTargetQuestionIds,
+    }).state,
+    "invalid_output",
+  );
+  assert.equal(
+    present(claimedMissing(MISSING_QUESTION), {
+      allowedMissingTargetQuestionIds: null,
+    }).state,
+    "invalid_output",
+    "invalid contextual integrity must block decisions, not invent an allowlist",
+  );
+  assert.equal(
+    present({ findings: [] }, { allowedMissingTargetQuestionIds: null }).state,
+    "invalid_output",
+  );
 });
