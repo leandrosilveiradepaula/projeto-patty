@@ -82,18 +82,14 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
   // This display allowlist checks question ownership; original execution validation
   // remains responsible for deciding which unanswered questions were applicable.
   const allowedQuestionIds = new Set(questions.map((question) => question.id));
-  const findingActionsByKey = new Map<
-    string,
-    { action: "accepted_internal_observation" | "converted_to_patty_note"; reviewId: string | null; createdAt: string }
-  >();
-
+  // The persisted schema can retain more than one human action per finding.
+  // Never silently overwrite an earlier independent decision in the UI.
+  const findingActionsByKey = new Map<string, typeof findingActions>();
   for (const action of findingActions) {
     const key = action.execution_id + ":" + action.finding_index;
-    findingActionsByKey.set(key, {
-      action: action.action,
-      reviewId: action.anamnesis_review_id,
-      createdAt: action.created_at,
-    });
+    const existing = findingActionsByKey.get(key) ?? [];
+    existing.push(action);
+    findingActionsByKey.set(key, existing);
   }
   const financialQuestion = questions.find(
     (question) =>
@@ -251,12 +247,13 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
 
                   {findings.map((finding, index) => {
                     const actionKey = execution.id + ":" + index;
-                    const recordedAction =
-                      findingActionsByKey.get(actionKey) ?? null;
-                    const acceptedAsObservation =
-                      recordedAction?.action === "accepted_internal_observation";
-                    const convertedToNote =
-                      recordedAction?.action === "converted_to_patty_note";
+                    const recordedActions = findingActionsByKey.get(actionKey) ?? [];
+                    const acceptedAsObservation = recordedActions.some(
+                      (action) => action.action === "accepted_internal_observation",
+                    );
+                    const convertedToNote = recordedActions.some(
+                      (action) => action.action === "converted_to_patty_note",
+                    );
                     const sourceLabels = finding.source_answer_ids.map(
                       (answerId) => {
                         const answer = answersById.get(answerId);
@@ -311,25 +308,40 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
                           ) : null}
 
                           {convertedToNote ? (
-                            <>
-                              <Badge variant="positive">
-                                Anotação profissional criada
-                              </Badge>
-                              {recordedAction?.reviewId && isUuid(recordedAction.reviewId) ? (
+                            <Badge variant="positive">
+                              Anotação profissional criada
+                            </Badge>
+                          ) : null}
+
+                          {recordedActions.length > 1 ? (
+                            <Alert title="Mais de uma decisão registrada" variant="warning">
+                              Existem decisões humanas distintas para este achado.
+                              Todas foram preservadas abaixo para conferência.
+                            </Alert>
+                          ) : null}
+
+                          {recordedActions.map((action) => (
+                            <div key={action.id}>
+                              <p className={styles.meta}>
+                                {action.action === "converted_to_patty_note"
+                                  ? "Anotação profissional"
+                                  : "Observação interna"} registrada em{" "}
+                                {formatDateTime(action.created_at)}. O achado
+                                original da IA foi preservado.
+                              </p>
+                              {action.action === "converted_to_patty_note" &&
+                              action.anamnesis_review_id &&
+                              isUuid(action.anamnesis_review_id) ? (
                                 <Link
-                                  href={`/admin/anamneses/${submission.id}/revisao#revisao-${recordedAction.reviewId}`}
+                                  href={`/admin/anamneses/${submission.id}/revisao#revisao-${action.anamnesis_review_id}`}
                                 >
                                   Abrir anotação profissional exata
                                 </Link>
                               ) : null}
-                            </>
-                          ) : null}
+                            </div>
+                          ))}
 
-                          {recordedAction ? (
-                            <p className={styles.meta}>Decisão profissional registrada em {formatDateTime(recordedAction.createdAt)}. O achado da IA foi preservado.</p>
-                          ) : null}
-
-                          {!recordedAction ? (
+                          {recordedActions.length === 0 ? (
                             <>
                               <form
                                 action={acceptAiFindingAsInternalObservation.bind(
