@@ -84,7 +84,7 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
   const allowedQuestionIds = new Set(questions.map((question) => question.id));
   const findingActionsByKey = new Map<
     string,
-    { action: "accepted_internal_observation" | "converted_to_patty_note"; reviewId: string | null }
+    { action: "accepted_internal_observation" | "converted_to_patty_note"; reviewId: string | null; createdAt: string }
   >();
 
   for (const action of findingActions) {
@@ -92,6 +92,7 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
     findingActionsByKey.set(key, {
       action: action.action,
       reviewId: action.anamnesis_review_id,
+      createdAt: action.created_at,
     });
   }
   const financialQuestion = questions.find(
@@ -170,7 +171,7 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
                     <h2 className={styles.title}>
                       {execution.provider} · {execution.model_identifier}
                     </h2>
-                    <Badge variant="neutral">{execution.status}</Badge>
+                    <Badge variant="neutral">{execution.status === "completed" ? "Concluída" : execution.status === "failed" ? "Falhou" : execution.status === "started" ? "Iniciada" : "Estado desconhecido"}</Badge>
                   </div>
 
                   <p className={styles.meta}>
@@ -322,6 +323,10 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
                                 </Link>
                               ) : null}
                             </>
+                          ) : null}
+
+                          {recordedAction ? (
+                            <p className={styles.meta}>Decisão profissional registrada em {formatDateTime(recordedAction.createdAt)}. O achado da IA foi preservado.</p>
                           ) : null}
 
                           {!recordedAction ? (
