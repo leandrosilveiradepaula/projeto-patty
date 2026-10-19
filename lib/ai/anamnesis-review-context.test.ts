@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   AnamnesisReviewContextBuildError,
   buildAnamnesisReviewContext,
+  reconstructStoredReviewMissingTargets,
 } from "./anamnesis-review-context.ts";
 
 const SUBMISSION = "10000000-0000-4000-8000-000000000001";
@@ -306,4 +307,41 @@ test("informational fields cannot be forced into the provider context", () => {
       error instanceof AnamnesisReviewContextBuildError &&
       error.code === "explicit_source_not_allowed",
   );
+});
+
+test("stored review uses the same missing-target applicability as original context", () => {
+  const relevantAnswers = answers.filter(
+    (answer) => answer.question_id !== questions[0].id &&
+      answer.question_id !== questions[4].id,
+  );
+  const allowed = reconstructStoredReviewMissingTargets({
+    answers: relevantAnswers,
+    formVersionId: VERSION,
+    questions,
+    submissionId: SUBMISSION,
+  });
+  assert.deepEqual([...allowed ?? []], [questions[0].id]);
+  assert.equal(allowed?.has(questions[1].id), false, "Instagram never becomes a missing target");
+  assert.equal(allowed?.has(questions[2].id), false, "financial field is explicit-only");
+  assert.equal(allowed?.has(questions[4].id), false, "conditional-hidden field is not missing");
+  assert.deepEqual(
+    [...reconstructStoredReviewMissingTargets({
+      answers,
+      formVersionId: VERSION,
+      questions,
+      submissionId: SUBMISSION,
+    }) ?? []],
+    [],
+    "answered question is not missing",
+  );
+});
+
+test("stored review fails closed on inconsistent answer ownership", () => {
+  const invalid = reconstructStoredReviewMissingTargets({
+    answers: [{ ...answers[0], submission_id: "10000000-0000-4000-8000-000000000099" }],
+    formVersionId: VERSION,
+    questions,
+    submissionId: SUBMISSION,
+  });
+  assert.equal(invalid, null);
 });
