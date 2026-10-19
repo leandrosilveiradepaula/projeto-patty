@@ -44,15 +44,15 @@ Uma primeira onda de revisao controlada foi registrada em `DRIVE_CONTENT_REVIEW_
 
 O video `Como utilizar a BALANCA DE ALIMENTOS` foi confirmado pela Patty como material da Consultoria/Patty, atual e autorizado para disponibilizacao as clientes.
 
-Ele e o primeiro conteudo atualmente elegivel para migracao controlada. Elegivel nao significa migrado ou publicado: o arquivo ainda precisa passar pela operacao tecnica de copia para o aplicativo, registro/versionamento e liberacao explicita.
+Ele e o primeiro conteudo que concluiu **migracao controlada e registro**: arquivo copiado ao Vercel Blob privado e vinculado a versao 1 em rascunho no Supabase em 2026-10-19. A migracao tecnica nao autoriza publicar nem liberar automaticamente; publicacao e liberacao de uma versao exata permanecem decisoes separadas da Patty.
 
-### BLOQUEIO TECNICO DE MIDIA
+### BLOQUEIO TECNICO HISTORICO DE MIDIA (RESOLVIDO NO PRIMEIRO LOTE)
 
 O arquivo aprovado da balanca possui 123.262.796 bytes (~117,6 MiB). O Supabase atual esta no plano Free e nao aceita uploads acima de 50 MB. Alem disso, o bucket `client-private` e exclusivo do dominio de arquivos privados de clientes e nao deve ser reaproveitado para conteudo educacional.
 
-A estrategia de armazenamento foi definida tecnicamente como Vercel Private Blob para a primeira versao operacional. O Supabase continua como fonte de verdade de metadata/versionamento/releases. A documentacao atual da Vercel recomenda cautela para entrega de blobs privados acima de 100 MB; como o video aprovado possui ~117,6 MiB, o store privado pode ser provisionado, mas publicacao/release desse arquivo exige validacao de entrega e transferencia no ambiente real antes de ser considerado operacional.
+A estrategia de armazenamento foi definida tecnicamente como Vercel Private Blob para a primeira versao operacional. O Supabase continua como fonte de verdade de metadata/versionamento/releases. Como o video aprovado possui ~117,6 MiB, a entrega do Blob privado acima de 100 MB exigiu verificacao real: transferencia, tamanho, MIME, hash SHA-256 e reproducao com avancar/seek no navegador foram observados em producao em 2026-10-19. Isso nao substitui a homologacao posterior de autorizacao das clientes, incluindo eventual inspecao de headers de Range.
 
-A fundacao de metadata de assets foi preparada em `educational_content_assets`. Em 2026-10-03 o store privado `projeto-patty-blob` foi criado e conectado ao projeto Vercel de producao, em `iad1`, usando a conexao OIDC padrao e sem token read-write persistente. O arquivo aprovado ainda nao foi copiado. A migracao fisica continua separada: baixar novamente o original, conferir SHA-256/tamanho/MIME, gerar path opaco, enviar ao Blob privado, verificar o objeto, registrar o asset na versao draft, revisar, publicar e liberar explicitamente.
+A fundacao de metadata de assets foi preparada em `educational_content_assets`. Em 2026-10-03 o store privado `projeto-patty-blob` foi criado e conectado ao projeto Vercel de producao, em `iad1`, usando a conexao OIDC padrao e sem token read-write persistente. **Naquela data** o arquivo aprovado ainda nao havia sido copiado. A copia, a integridade e o registro do asset foram concluidos em 2026-10-19; revisar/publicar/liberar continuam etapas profissionais deliberadas e separadas.
 
 A Patty confirmou tambem que a planilha historica `Sugestao de refeicoes` deve ser transformada em **conteudo educacional revisado** para clientes. O arquivo historico pode servir como fonte editorial, mas a versao publicada no aplicativo nao deve cristalizar seis refeicoes como regra, porque o metodo confirmado nao possui numero fixo de refeicoes.
 
@@ -88,7 +88,7 @@ O video `Como utilizar a BALANCA DE ALIMENTOS` e o primeiro item aprovado pela P
 
 ### QUESTAO ABERTA
 
-Ainda e necessario definir processo de revisao, aprovacao e versionamento dos conteudos.
+O ciclo tecnico de autoria, revisao de rascunho, publicacao manual de versao imutavel e liberacao individual de versao exata ja esta implementado e testado. Continua aberta somente a governanca editorial adicional (responsaveis, criterios e taxonomia), sem autorizar publicacao por IA ou por fase.
 
 ## Primeiro lote de migracao controlada
 
@@ -113,7 +113,7 @@ O Blob store privado esta criado/conectado. A fonte aprovada foi reobtida read-o
 
 ### ATUALIZAÇÃO OPERACIONAL — 2026-10-19
 
-O vídeo aprovado da balança foi enviado ao Vercel Blob **privado** e registrado em `educational_content_assets` (path opaco, 123.262.796 bytes, SHA-256 igual ao original). O link autenticado de acesso administrativo provocou **download** do MP4; isso não comprova visualização no navegador nem busca/Range. Foi iniciada uma correção apenas de interface, com player nativo e download separado, sob as rotas já autorizadas de admin e cliente. A versão continua em rascunho e nenhuma cliente recebeu o vídeo; a reprodução real e homologação conjunta continuam pendentes. As afirmações históricas acima sobre ausência de upload eram verdadeiras nos respectivos dias, mas não descrevem o estado atual.
+O vídeo aprovado da balança foi enviado ao Vercel Blob **privado** e registrado em `educational_content_assets` (path opaco, 123.262.796 bytes, SHA-256 igual ao original). O link autenticado de acesso administrativo provocou **download** do MP4; isso não comprova visualização no navegador nem busca/Range. Foi iniciada uma correção apenas de interface, com player nativo e download separado, sob as rotas já autorizadas de admin e cliente. A versão continua em rascunho e nenhuma cliente recebeu o vídeo. **Após o PR #917**, o operador confirmou que o player reproduz e permite avançar a gravação no aplicativo. Essa evidência foi observada em sessão identificada como `E2E Admin`; a homologação com a conta legítima da Patty, cliente autorizada/terceira e mobile continua pendente. As afirmações históricas acima sobre ausência de upload eram verdadeiras nos respectivos dias, mas não descrevem o estado atual.
 
 ## Gate de publicacao para conteudo em video
 
