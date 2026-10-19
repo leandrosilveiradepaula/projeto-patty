@@ -32,7 +32,7 @@ test("professional review note has explicit length limit", () => {
 test("J7 renders findings only from a validated, completed, in-scope result", () => {
   assert.match(historyPage, /presentStoredAiReview\(\{/);
   assert.match(historyPage, /allowedSourceAnswerIds/);
-  assert.match(historyPage, /allowedQuestionIds/);
+  assert.match(historyPage, /allowedMissingTargetQuestionIds/);
   assert.match(historyPage, /status: execution\.status/);
   assert.match(historyPage, /const findings = review\.findings/);
   assert.match(historyPage, /review\.state === "missing_output"/);
@@ -157,4 +157,21 @@ test("J7 validates the exact output again server-side before any privileged huma
     const privilegedAt = mutation.indexOf("await recordAiFindingAction(");
     assert.ok(guardedAt >= 0 && privilegedAt > guardedAt, name);
   }
+});
+
+test("J7 historic missing-answer claims obey the original versioned applicability boundary", () => {
+  const context = readFileSync(new URL("../../lib/ai/anamnesis-review-context.ts", import.meta.url), "utf8");
+  const history = readFileSync(new URL("../../lib/ai/anamnesis-review-history.ts", import.meta.url), "utf8");
+  assert.match(context, /export function reconstructStoredReviewMissingTargets\(/);
+  assert.match(context, /buildAnamnesisReviewContext\(input\)\.allowedMissingTargetQuestionIds/);
+  assert.match(context, /if \(error instanceof AnamnesisReviewContextBuildError\)/);
+  assert.match(historyPage, /reconstructStoredReviewMissingTargets\(\{/);
+  assert.match(historyPage, /allowedMissingTargetQuestionIds,/);
+  assert.match(ai, /reconstructStoredReviewMissingTargets\(\{/);
+  assert.match(ai, /allowedMissingTargetQuestionIds,/);
+  assert.match(history, /if \(input\.allowedMissingTargetQuestionIds === null\)/);
+  assert.match(history, /return hidden\("invalid_output"\)/);
+  assert.match(history, /allowedMissingTargetQuestionIds: input\.allowedMissingTargetQuestionIds/);
+  assert.ok(!historyPage.includes("const allowedQuestionIds = new Set(questions.map"));
+  assert.ok(!ai.includes("allowedQuestionIds: new Set(questions.map"));
 });
