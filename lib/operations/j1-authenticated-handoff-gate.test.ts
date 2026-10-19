@@ -283,6 +283,13 @@ test("J1 invite handoff requires a fresh, uncached server authorization read", (
  assert.match(gate,/fetch\("\/ativar-conta\/session", \{/);
  assert.match(gate,/cache: "no-store"/);
  assert.match(gate,/credentials: "same-origin"/);
+ assert.match(gate,/for \(const delayMs of \[0, 250, 750, 1500\]\)/,
+   "a stale callback can retry server reads only for a fixed small bound");
+ assert.match(gate,/if \(verified\.role !== null\)/,
+   "unexpected response shape must fail closed, not continue");
+ assert.doesNotMatch(gate,/while\s*\(true\)|setInterval\(/,
+   "session verification must never poll indefinitely");
+
  assert.match(gate,/verified\.role === "client" \|\| verified\.role === "admin"/);
  assert.match(gate,/setAuthorizedRole\(verified\.role\)/);
  assert.match(gate,/phase === "ready" && authorizedRole && !invalid/);
