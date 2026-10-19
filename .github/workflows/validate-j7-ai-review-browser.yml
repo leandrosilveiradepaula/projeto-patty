@@ -72,6 +72,50 @@ jobs:
       - name: Verify J7 AI RLS with pgTAP on disposable database
         run: npx supabase test db supabase/tests/database/ai_execution_boundary.test.sql
 
+      # The hosted Supabase project already grants these permissions to its
+      # backend service_role. Local Supabase CLI does not provision the same
+      # table ACLs after reset. Match *only* that backend role in this
+      # disposable container; never change Auth/RLS, client roles, or SaaS.
+      - name: Align local service-role ACL with hosted backend (disposable only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx supabase status -o env > "$RUNNER_TEMP/j7-local-acl-check"
+          chmod 600 "$RUNNER_TEMP/j7-local-acl-check"
+          set -a
+          source "$RUNNER_TEMP/j7-local-acl-check"
+          set +a
+          test "$API_URL" = "http://127.0.0.1:54321"
+          docker exec -i supabase_db_projeto-patty psql -X -q -v ON_ERROR_STOP=1 -U postgres -d postgres <<'SQL'
+          do $
+          begin
+            if not exists (
+              select 1 from pg_catalog.pg_roles
+              where rolname = 'service_role' and rolbypassrls
+            ) then
+              raise exception 'local backend service role is not the expected bypass role';
+            end if;
+            if has_table_privilege('authenticated', 'public.ai_executions', 'UPDATE')
+               or has_table_privilege('anon', 'public.ai_executions', 'UPDATE') then
+              raise exception 'unexpected client write privilege: refusing local ACL parity';
+            end if;
+          end $;
+          grant select, update on public.ai_executions to service_role;
+          grant select on public.user_roles, public.client_assignments to service_role;
+          do $
+          begin
+            if not has_table_privilege('service_role', 'public.ai_executions', 'UPDATE')
+               or not has_table_privilege('service_role', 'public.ai_executions', 'SELECT')
+               or not has_table_privilege('service_role', 'public.user_roles', 'SELECT')
+               or not has_table_privilege('service_role', 'public.client_assignments', 'SELECT')
+               or has_table_privilege('authenticated', 'public.ai_executions', 'UPDATE')
+               or has_table_privilege('anon', 'public.ai_executions', 'UPDATE') then
+              raise exception 'local ACL parity failed closed';
+            end if;
+          end $;
+          SQL
+          rm -f "$RUNNER_TEMP/j7-local-acl-check"
+
       - name: Export only local runtime variables with masked service secret
         shell: bash
         run: |
