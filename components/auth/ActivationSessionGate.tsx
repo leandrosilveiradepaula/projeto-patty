@@ -43,21 +43,34 @@ export function ActivationSessionGate({
       const controller = new AbortController();
       void (async () => {
         try {
-          const response = await fetch("/ativar-conta/session", {
-            cache: "no-store",
-            credentials: "same-origin",
-            headers: { Accept: "application/json" },
-            signal: controller.signal,
-          });
-          if (!response.ok) throw new Error("Session verification unavailable");
-          const verified = await response.json() as { role?: unknown };
-          if (controller.signal.aborted) return;
-          if (verified.role === "client" || verified.role === "admin") {
-            setAuthorizedRole(verified.role);
-            setPhase("ready");
-          } else {
-            setPhase("failed");
+          // The first uncached GET can still carry pre-confirmation cookies
+          // while the callback/proxy completes its Set-Cookie handoff. Only
+          // null roles are transient. Every attempt is independently
+          // authorized by the server; this loop is bounded and read-only.
+          for (const delayMs of [0, 250, 750, 1500]) {
+            if (delayMs > 0) {
+              await new Promise<void>((resolve) => setTimeout(resolve, delayMs));
+            }
+            if (controller.signal.aborted) return;
+            const response = await fetch("/ativar-conta/session", {
+              cache: "no-store",
+              credentials: "same-origin",
+              headers: { Accept: "application/json" },
+              signal: controller.signal,
+            });
+            if (!response.ok) throw new Error("Session verification unavailable");
+            const verified = await response.json() as { role?: unknown };
+            if (controller.signal.aborted) return;
+            if (verified.role === "client" || verified.role === "admin") {
+              setAuthorizedRole(verified.role);
+              setPhase("ready");
+              return;
+            }
+            if (verified.role !== null) {
+              throw new Error("Unexpected authorization response");
+            }
           }
+          setPhase("failed");
         } catch {
           if (!controller.signal.aborted) setPhase("failed");
         }
