@@ -32,7 +32,9 @@ test("J1 browser fixtures and writes are unreachable outside disposable localhos
   assert.match(script, /throw new Error\("J1 local SQL boundary rejected"\)/);
   assert.match(script, /const fixtureTables = new Set/);
   assert.match(script, /getPublishedAnamnesisFromMigrations\(\)/);
-  assert.match(script, /"client-anamnesis"/);
+  assert.match(script, /f\.form_key='client-anamnesis'/);
+  assert.match(script, /v\.published_at is not null/);
+  assert.doesNotMatch(script, /insert\("anamnesis_forms"/);
   assert.match(script, /"e2e-j1-owner-" \+ nonce \+ "@example\.invalid"/);
   assert.match(script, /form\[data-interactive="true"\]/);
   assert.match(script, /expect\(drafts\)\.toHaveLength\(1\)/);
