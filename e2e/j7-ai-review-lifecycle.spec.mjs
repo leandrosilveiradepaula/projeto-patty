@@ -284,7 +284,19 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
     p_reason: "J7 synthetic local service-role recovery preflight",
   });
   if (probe.error) {
-    throw new Error("J7 local recovery RPC failed with SQLSTATE " + (probe.error.code ?? "unknown"));
+    // Classification only: never log any raw DB response or synthetic answer.
+    const message = String(probe.error.message ?? "");
+    const category = message.includes("AI recovery requires an assigned admin")
+      ? "actor-not-assigned"
+      : message.includes("permission denied for function")
+        ? "function-execute-grant"
+        : message.includes("permission denied for table")
+          ? "table-privilege"
+          : message.includes("row-level security")
+            ? "rls"
+            : "other";
+    throw new Error("J7 local recovery RPC failed: SQLSTATE " +
+      (probe.error.code ?? "unknown") + ", category=" + category);
   }
   expect(executionRows(probeExecutionId)[0].status).toBe("failed");
 
