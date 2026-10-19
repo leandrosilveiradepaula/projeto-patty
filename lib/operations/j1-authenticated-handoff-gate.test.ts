@@ -273,3 +273,23 @@ test("J1 real E2E saves one version-scoped, non-clinical Anamnese answer through
  assert.match(clientSpec,/expect\(submission\.data\.submitted_at\)\.toBeNull\(\)/);
  assert.match(clientSpec,/cleanupSyntheticClient\(\{ clientId, profileId, email \}\)/);
 });
+
+test("J1 confirmed invitation refreshes stale server role once without trusting a browser flag", () => {
+ const gate = readFileSync(new URL("../../components/auth/ActivationSessionGate.tsx",import.meta.url),"utf8");
+ const activationPage = readFileSync(new URL("../../app/ativar-conta/page.tsx",import.meta.url),"utf8");
+ const auth = readFileSync(new URL("../../lib/supabase/auth.ts",import.meta.url),"utf8");
+ const serverAction = readFileSync(new URL("../../app/ativar-conta/actions.ts",import.meta.url),"utf8");
+ assert.match(gate,/supabase\.auth\.getUser\(\)/);
+ assert.match(gate,/if \(error \|\| !data\.user\)/);
+ assert.match(gate,/new URLSearchParams\(window\.location\.search\)\.get\("session_refresh"\) === "1"/);
+ assert.match(gate,/window\.location\.replace\("\/ativar-conta\?session_refresh=1"\)/);
+ assert.match(gate,/if \(role\) \{\s*setPhase\("ready"\)/);
+ assert.match(gate,/setPhase\("failed"\)/);
+ assert.doesNotMatch(gate,/data\.user[^\n]*setPhase\("ready"\)/);
+ assert.match(activationPage,/getCurrentAuthContext\(\)/);
+ assert.match(auth,/supabase\.auth\.getClaims\(\)/);
+ assert.match(auth,/getAuthContextForProfileId\(supabase, profileId\)/);
+ assert.match(serverAction,/getCurrentAuthContext\(\)/);
+ assert.match(serverAction,/supabase\.auth\.updateUser\(\{ password \}\)/);
+ assert.doesNotMatch(serverAction,/session_refresh|bypass|service_role/);
+});
