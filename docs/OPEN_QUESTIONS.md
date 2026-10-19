@@ -734,7 +734,7 @@ A Patty confirmou que o video historico `Como utilizar a BALANCA DE ALIMENTOS`:
 - continua atual;
 - pode ser disponibilizado as clientes no aplicativo.
 
-Esse video passa a ser o primeiro conteudo elegivel para um lote de migracao controlada. A migracao fisica, versionamento e release ainda precisam ser executados separadamente; essa confirmacao nao significa que o arquivo ja foi copiado ou publicado.
+Esse video foi o primeiro conteudo elegivel para um lote de migracao controlada. **Estado atualizado em 2026-10-19:** a migracao fisica para o Vercel Blob privado, a verificacao de integridade, o registro na versao 1 e a reproducao inline com avancar/seek na interface administrativa foram concluidos. A versao permanece em rascunho, sem publicacao nem liberacao. O teste observado foi na sessao identificada como E2E Admin e nao equivale a homologacao da Patty.
 
 A Patty tambem confirmou que a planilha historica `Sugestao de refeicoes` deve ser transformada em **conteudo educacional revisado para clientes**. A estrutura historica de seis refeicoes permanece exemplo e nao deve ser convertida em regra fixa de numero de refeicoes.
 
@@ -764,7 +764,7 @@ Quem pode registrar abertura e conclusao de conteudo, o que caracteriza `complet
 
 Quais regras futuras poderao justificar liberacao de conteudo por fase, sem criar automacao antes de validacao da Patty?
 
-### BLOQUEIO TECNICO IDENTIFICADO
+### BLOQUEIO TECNICO ORIGINAL (RESOLVIDO PARA O PRIMEIRO VIDEO)
 
 O primeiro video aprovado pela Patty, `Como utilizar a BALANCA DE ALIMENTOS`, possui 123.262.796 bytes (~117,6 MiB).
 
@@ -776,18 +776,21 @@ A infraestrutura tecnica escolhida para a midia educacional binaria e Vercel Pri
 
 O bucket `client-private` nao sera reutilizado e o original nao sera reduzido apenas para contornar limite.
 
-### PENDENCIA OPERACIONAL
+### ESTADO OPERACIONAL RECONCILIADO EM 2026-10-19
 
-Resolvido tecnicamente:
-- o Blob store privado foi criado/conectado ao projeto Vercel;
-- a UI administrativa ja mostra o estado de assets e permite registrar metadados verificados em versao draft;
-- registro exige path privado opaco, MIME, byte size e SHA-256, sem expor token ou URL publica.
+**Concluido tecnicamente no primeiro lote de video:**
+- Blob privado conectado ao projeto Vercel, arquivo MP4 transferido sem expor URL publica permanente ou token;
+- 123.262.796 bytes, MIME `video/mp4` e SHA-256 do destino conferidos com o original aprovado no Drive;
+- asset `primary` registrado no Supabase na versao 1 ainda em rascunho;
+- player HTML5 exibido no aplicativo e reproducao/avanco confirmados pelo operador na sessao identificada como `E2E Admin`.
 
-Ainda falta operacionalmente:
-- migrar o arquivo original aprovado;
-- conferir tamanho, MIME e SHA-256 contra a origem;
-- registrar o asset verificado na versao draft;
-- revisar/publicar/liberar explicitamente.
+**Ainda pendente, reservado para homologacao conjunta e decisao profissional:**
+- Patty validar o uso com sua propria conta e MFA AAL2, inclusive em mobile;
+- Patty definir/revisar os metadados editoriais ainda abertos, publicar a versao exata deliberadamente e liberar apenas a clientes escolhidas;
+- verificar em sessao real cliente autorizada vs. nao autorizada, historico da versao exata e isolamento, sem criar dados ficticios em producao;
+- confirmar `206 Content-Range` por instrumentacao se o aceite exigir comprovacao HTTP; a reproducao observada nao prova esses headers.
+
+A taxonomia completa, os criterios de progresso/conclusao e os lotes seguintes do Drive permanecem **questoes abertas separadas**. Nenhuma publicacao ou liberacao ocorreu ate esta conferência. Detalhes: `educational_media_migration_batch_1.json` e `JOURNEY_HOMOLOGATION.md`.
 
 ### QUESTAO ABERTA
 
