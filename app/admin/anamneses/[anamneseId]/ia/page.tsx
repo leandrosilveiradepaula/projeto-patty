@@ -24,6 +24,7 @@ import {
   listAccessibleAnamnesisQuestions,
 } from "@/lib/supabase/data-access";
 import { isUuid } from "@/lib/validation/uuid";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import styles from "./page.module.css";
 
@@ -83,12 +84,15 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
   const allowedQuestionIds = new Set(questions.map((question) => question.id));
   const findingActionsByKey = new Map<
     string,
-    "accepted_internal_observation" | "converted_to_patty_note"
+    { action: "accepted_internal_observation" | "converted_to_patty_note"; reviewId: string | null }
   >();
 
   for (const action of findingActions) {
     const key = action.execution_id + ":" + action.finding_index;
-    findingActionsByKey.set(key, action.action);
+    findingActionsByKey.set(key, {
+      action: action.action,
+      reviewId: action.anamnesis_review_id,
+    });
   }
   const financialQuestion = questions.find(
     (question) =>
@@ -249,9 +253,9 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
                     const recordedAction =
                       findingActionsByKey.get(actionKey) ?? null;
                     const acceptedAsObservation =
-                      recordedAction === "accepted_internal_observation";
+                      recordedAction?.action === "accepted_internal_observation";
                     const convertedToNote =
-                      recordedAction === "converted_to_patty_note";
+                      recordedAction?.action === "converted_to_patty_note";
                     const sourceLabels = finding.source_answer_ids.map(
                       (answerId) => {
                         const answer = answersById.get(answerId);
@@ -306,9 +310,18 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
                           ) : null}
 
                           {convertedToNote ? (
-                            <Badge variant="positive">
-                              Anotação profissional criada
-                            </Badge>
+                            <>
+                              <Badge variant="positive">
+                                Anotação profissional criada
+                              </Badge>
+                              {recordedAction?.reviewId && isUuid(recordedAction.reviewId) ? (
+                                <Link
+                                  href={`/admin/anamneses/${submission.id}/revisao#revisao-${recordedAction.reviewId}`}
+                                >
+                                  Abrir anotação profissional exata
+                                </Link>
+                              ) : null}
+                            </>
                           ) : null}
 
                           {!recordedAction ? (
