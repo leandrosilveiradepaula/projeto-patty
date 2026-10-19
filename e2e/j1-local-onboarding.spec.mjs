@@ -132,7 +132,12 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
         const roleKind =
           payload?.role === "client" || payload?.role === "admin"
             ? "authorized" : "not-authorized";
-        sessionResponses.push(response.status() + ":" + roleKind);
+        const sentCookieHeader = response.request().headers()["cookie"] ?? "";
+        const sentAuthCookie = sentCookieHeader.includes("sb-") &&
+          sentCookieHeader.includes("auth-token");
+        sessionResponses.push(
+          response.status() + ":" + roleKind + ":cookie-sent=" + sentAuthCookie,
+        );
       })
       .catch(() => sessionResponses.push(response.status() + ":unreadable"));
   });
@@ -188,6 +193,16 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       ].join("\n")) === "1";
       // Probe the server independently while preserving the original browser
       // failure. This does not retry activation or suppress the failed test.
+      const browserFetch = await page.evaluate(async () => {
+        const response = await fetch("/ativar-conta/session", {
+          cache: "no-store", credentials: "same-origin",
+        });
+        const payload = response.ok() ? await response.json().catch(() => null) : null;
+        return {
+          status: response.status,
+          authorized: payload?.role === "client" || payload?.role === "admin",
+        };
+      });
       const probe = await page.request.get("/ativar-conta/session", {
         failOnStatusCode: false,
       });
@@ -210,7 +225,9 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
         ", freshGetFormVisible=" + freshFormVisible +
         ", sessionEndpointResponses=" + sessionResponses.join(";") +
         ", probeHttp=" + probe.status() +
-        ", probeRoleAuthorized=" + probeAuthorized,
+        ", probeRoleAuthorized=" + probeAuthorized +
+        ", browserProbeHttp=" + browserFetch.status +
+        ", browserProbeRoleAuthorized=" + browserFetch.authorized,
       );
     }
     // The fresh session route derives the authorized role from cookies and
