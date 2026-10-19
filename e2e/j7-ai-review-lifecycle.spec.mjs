@@ -372,6 +372,7 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
       await next.click();
       await expect(admin).toHaveURL(new RegExp("#achado-ia-" + validExecutionId + "-0$"));
       await admin.getByText("Consultar decisões históricas sem vínculo confirmado", { exact: true }).click();
+      await admin.getByText("Ver identificadores de auditoria", { exact: true }).click();
       await expect(admin.getByText("Ação: " + inconsistentActionId, { exact: true })).toBeVisible();
       await admin.goto(reviewURL);
     });
