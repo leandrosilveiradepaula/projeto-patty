@@ -5,6 +5,7 @@ import { requireRole } from "@/lib/supabase/auth";
 import { isUuid } from "@/lib/validation/uuid";
 import { assertAiExecutionBelongsToSubmission } from "@/lib/ai/execution-submission-boundary";
 import { presentStoredAiReview } from "@/lib/ai/anamnesis-review-history";
+import { reconstructStoredReviewMissingTargets } from "@/lib/ai/anamnesis-review-context";
 import {
   getAccessibleAnamnesisSubmission,
   listAccessibleAiAnamnesisExecutions,
@@ -59,8 +60,14 @@ async function requireExactAccessibleAiExecution(
       authorizedAnswerIds.has(source.anamnesis_answer_id)
     ) recordedSourceAnswerIds.add(source.anamnesis_answer_id);
   }
+  const allowedMissingTargetQuestionIds = reconstructStoredReviewMissingTargets({
+    answers,
+    formVersionId: submission.form_version_id,
+    questions,
+    submissionId: submission.id,
+  });
   const result = presentStoredAiReview({
-    allowedQuestionIds: new Set(questions.map((question) => question.id)),
+    allowedMissingTargetQuestionIds,
     allowedSourceAnswerIds: recordedSourceAnswerIds,
     completedAt: execution.completed_at,
     content: outputs.find((output) => output.execution_id === executionId)?.content,
