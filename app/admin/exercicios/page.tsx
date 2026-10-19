@@ -1,4 +1,4 @@
-import { readExerciseDirectoryPage, paginateExerciseDirectory, exerciseDirectoryPageHref } from "@/lib/training/exercise-admin-directory";
+import { readExerciseDirectoryPage, paginateExerciseDirectory, exerciseDirectoryPageHref, exerciseCatalogBackHref, readExerciseCatalogSort, sortExerciseCatalog } from "@/lib/training/exercise-admin-directory";
 import { AdminExerciseCreateForm } from "@/components/admin/AdminExerciseCreateForm";
 import { ExerciseListItem } from "@/components/admin/ExerciseListItem";
 import { Badge } from "@/components/ui/Badge";
@@ -35,11 +35,11 @@ function formatPublishedDate(value: string) {
 }
 
 type AdminExerciciosPageProps = {
-  searchParams: Promise<{ q?: string; status?: string; pagina?: string }>;
+  searchParams: Promise<{ q?: string; status?: string; ordem?: string; pagina?: string }>;
 };
 
 export default async function AdminExerciciosPage({ searchParams }: AdminExerciciosPageProps) {
-  const { q, status, pagina } = await searchParams;
+  const { q, status, ordem, pagina } = await searchParams;
   const [exerciseVersions, exerciseParents] = await Promise.all([
     listExerciseVersionsVisibleToCurrentAdmin(),
     listExercisesForCurrentAdmin(),
@@ -52,6 +52,7 @@ export default async function AdminExerciciosPage({ searchParams }: AdminExercic
   const searchTerm = readExerciseCatalogTerm(q);
   const normalizedSearchTerm = normalizeSearchValue(searchTerm);
   const statusFilter = readExerciseCatalogStatus(status);
+  const sort = readExerciseCatalogSort(ordem);
   const versionsByExercise = new Map<string, typeof exerciseVersions>();
   for (const version of exerciseVersions) {
     const current = versionsByExercise.get(version.exercise_id) ?? [];
@@ -71,8 +72,19 @@ export default async function AdminExerciciosPage({ searchParams }: AdminExercic
   });
 
   const pageRequest = readExerciseDirectoryPage(pagina);
+  // The default keeps the existing order. Alternate orders use facts from
+  // the full RLS-authorized version history before pagination.
+  const orderedExercises = sort === "recent"
+    ? filteredExercises
+    : sortExerciseCatalog(
+        filteredExercises.map((summary) => ({
+          ...summary,
+          versionCount: versionsByExercise.get(summary.latestVersion.exercise_id)?.length ?? 0,
+        })),
+        sort,
+      );
   const orderedCatalog = [
-    ...filteredExercises.map(summary => ({ type: "versioned" as const, summary })),
+    ...orderedExercises.map(summary => ({ type: "versioned" as const, summary })),
     ...filteredIncomplete.map(parent => ({ type: "incomplete" as const, parent })),
   ];
   const directory = paginateExerciseDirectory(orderedCatalog, pageRequest.page);
@@ -122,8 +134,19 @@ export default async function AdminExerciciosPage({ searchParams }: AdminExercic
                 <option value="incomplete">Sem versão inicial</option>
               </select>
             </label>
+            <label className={styles.statusField}>
+              <span>Ordenar</span>
+              <select defaultValue={sort} name="ordem">
+                <option value="recent">Ordem atual</option>
+                <option value="oldest">Mais antigos</option>
+                <option value="name-asc">Nome A–Z</option>
+                <option value="name-desc">Nome Z–A</option>
+                <option value="published">Publicação mais recente</option>
+                <option value="versions">Mais versões registradas</option>
+              </select>
+            </label>
             <Button type="submit" variant="secondary">Filtrar</Button>
-            {searchTerm || statusFilter !== "all" ? (
+            {searchTerm || statusFilter !== "all" || sort !== "recent" ? (
               <Link className={styles.clearLink} href="/admin/exercicios">Limpar</Link>
             ) : null}
           </form>
@@ -166,9 +189,8 @@ export default async function AdminExerciciosPage({ searchParams }: AdminExercic
                         aria-label={`Abrir exercício ${exerciseVersion.name}`}
                         className={styles.openLink}
                         href={"/admin/exercicios/" + exerciseVersion.exercise_id +
-                          (searchTerm || statusFilter !== "all"
-                            ? "?q=" + encodeURIComponent(searchTerm) + "&status=" + encodeURIComponent(statusFilter)
-                            : "")}
+                          exerciseCatalogBackHref(searchTerm, statusFilter, sort, directory.page)
+                            .slice("/admin/exercicios".length)}
                       >
                         Abrir
                       </Link>
@@ -205,7 +227,7 @@ export default async function AdminExerciciosPage({ searchParams }: AdminExercic
                     <strong>Exercício sem versão inicial</strong>
                     <p>O cadastro existe, mas nenhuma versão foi registrada. Recupere o rascunho sem publicar.</p>
                   </div>
-                  <Link className={styles.openLink} href={`/admin/exercicios/${parent.id}?status=incomplete`}>
+                  <Link className={styles.openLink} href={`/admin/exercicios/${parent.id}${exerciseCatalogBackHref("", "incomplete", sort, directory.page).slice("/admin/exercicios".length)}`}>
                     Retomar versão inicial
                   </Link>
                 </li>
@@ -217,8 +239,8 @@ export default async function AdminExerciciosPage({ searchParams }: AdminExercic
         {directory.total > 0 ? (
           <nav className={styles.directoryPages} aria-label="Páginas da biblioteca de exercícios">
             <span>Exibindo {directory.first}–{directory.last} de {directory.total} · Página {directory.page} de {directory.pageCount}</span>
-            {directory.page > 1 ? <Link href={exerciseDirectoryPageHref(searchTerm, statusFilter, directory.page - 1)}>Anterior</Link> : null}
-            {directory.page < directory.pageCount ? <Link href={exerciseDirectoryPageHref(searchTerm, statusFilter, directory.page + 1)}>Próxima</Link> : null}
+            {directory.page > 1 ? <Link href={exerciseDirectoryPageHref(searchTerm, statusFilter, directory.page - 1, sort)}>Anterior</Link> : null}
+            {directory.page < directory.pageCount ? <Link href={exerciseDirectoryPageHref(searchTerm, statusFilter, directory.page + 1, sort)}>Próxima</Link> : null}
           </nav>
         ) : null}
       </Section>
