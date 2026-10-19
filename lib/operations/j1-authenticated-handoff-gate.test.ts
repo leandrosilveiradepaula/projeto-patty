@@ -274,18 +274,29 @@ test("J1 real E2E saves one version-scoped, non-clinical Anamnese answer through
  assert.match(clientSpec,/cleanupSyntheticClient\(\{ clientId, profileId, email \}\)/);
 });
 
-test("J1 callback refreshes stale server role once, with server-only access authorization", () => {
+test("J1 invite handoff requires a fresh, uncached server authorization read", () => {
  const gate = readFileSync(new URL("../../components/auth/ActivationSessionGate.tsx",import.meta.url),"utf8");
  const activationPage = readFileSync(new URL("../../app/ativar-conta/page.tsx",import.meta.url),"utf8");
+ const sessionRoute = readFileSync(new URL("../../app/ativar-conta/session/route.ts",import.meta.url),"utf8");
  const auth = readFileSync(new URL("../../lib/supabase/auth.ts",import.meta.url),"utf8");
  const serverAction = readFileSync(new URL("../../app/ativar-conta/actions.ts",import.meta.url),"utf8");
- assert.doesNotMatch(gate,/supabase\.auth\.getUser\(\)/);
- assert.match(gate,/new URLSearchParams\(window\.location\.search\)\.get\("session_refresh"\) === "1"/);
- assert.match(gate,/window\.location\.replace\("\/ativar-conta\?session_refresh=1"\)/);
- assert.match(gate,/if \(role\) \{\s*setPhase\("ready"\)/);
+ assert.match(gate,/fetch\("\/ativar-conta\/session", \{/);
+ assert.match(gate,/cache: "no-store"/);
+ assert.match(gate,/credentials: "same-origin"/);
+ assert.match(gate,/verified\.role === "client" \|\| verified\.role === "admin"/);
+ assert.match(gate,/setAuthorizedRole\(verified\.role\)/);
+ assert.match(gate,/phase === "ready" && authorizedRole && !invalid/);
+ assert.match(gate,/if \(!response\.ok\) throw new Error/);
  assert.match(gate,/setPhase\("failed"\)/);
- assert.doesNotMatch(gate,/session_refresh[^\n]*setPhase\("ready"\)/);
+ assert.doesNotMatch(gate,/session_refresh|supabase\.auth\.getUser\(\)/);
+ assert.match(sessionRoute,/getCurrentAuthContext\(\)/);
+ assert.match(sessionRoute,/export const dynamic = "force-dynamic"/);
+ assert.match(sessionRoute,/Cache-Control": "private, no-store, max-age=0"/);
+ assert.match(sessionRoute,/"Vary": "Cookie"/);
+ assert.match(sessionRoute,/context\?\.role === "client" \|\| context\?\.role === "admin"/);
+ assert.doesNotMatch(sessionRoute,/searchParams|createAdminClient|service_role/);
  assert.match(activationPage,/getCurrentAuthContext\(\)/);
+ assert.match(activationPage,/export const dynamic = "force-dynamic"/);
  assert.match(auth,/supabase\.auth\.getClaims\(\)/);
  assert.match(auth,/getAuthContextForProfileId\(supabase, profileId\)/);
  assert.match(serverAction,/getCurrentAuthContext\(\)/);
