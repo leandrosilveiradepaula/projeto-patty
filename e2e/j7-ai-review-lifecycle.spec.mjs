@@ -160,8 +160,8 @@ function createSubmission(clientId, formVersionId, questionIds) {
   expect(submitted).toBe(submissionId);
   return { submissionId, answerIds: [a, b] };
 }
-function createExecution(clientId, submissionId, actor, promptId) {
-  return insert("ai_executions", {
+function createExecution(clientId, submissionId, actor, promptId, includedAnswerIds = null) {
+  const executionId = insert("ai_executions", {
     client_id: clientId,
     anamnesis_submission_id: submissionId,
     purpose_key: "anamnesis_review",
@@ -170,6 +170,25 @@ function createExecution(clientId, submissionId, actor, promptId) {
     provider: "synthetic-only",
     model_identifier: "j7-local-fixture",
   });
+  // Simulate the immutable source ledger written by the production start RPC.
+  // Only disposable, local, synthetic rows are inserted here.
+  const allAnswerIds = rows(
+    "select id from public.anamnesis_answers where submission_id=" +
+    literal(submissionId) + " order by id",
+  ).map(row => row.id);
+  const included = new Set(includedAnswerIds ?? allAnswerIds);
+  for (const answerId of allAnswerIds) {
+    if (!included.has(answerId)) continue;
+    const sourceId = sql(
+      "insert into public.ai_execution_sources" +
+      " (execution_id,client_id,source_kind,anamnesis_answer_id,anamnesis_submission_id)" +
+      " values (" + [
+        executionId, clientId, "anamnesis_answer", answerId, submissionId,
+      ].map(literal).join(",") + ") returning id;",
+    );
+    expect(sourceId).toMatch(UUID);
+  }
+  return executionId;
 }
 function completeExecution(executionId, clientId, content) {
   // The DB enforces exactly one output for each completed execution.
@@ -287,6 +306,19 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
       explanation: "J7 conteúdo sintético com referência de outra cliente.",
     }],
   });
+  // Same-submission answer B exists, but only answer A was included when this
+  // separate execution started. This must fail exactly like a foreign source.
+  const unrecordedSourceExecutionId = createExecution(
+    ownerClientId, submission.submissionId, staff.id, promptId,
+    [submission.answerIds[0]],
+  );
+  completeExecution(unrecordedSourceExecutionId, ownerClientId, {
+    findings: [{
+      type: "clarification_needed",
+      source_answer_ids: [submission.answerIds[1]],
+      explanation: "J7 achado sintético de resposta não incluída nesta execução.",
+    }],
+  });
   const startedExecutionId = createExecution(ownerClientId, submission.submissionId, staff.id, promptId);
 
   // Independent service-only RPC probe on a separate disposable execution.
@@ -356,7 +388,12 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
     await expect(admin.getByText("J7 Cliente Sintética", { exact: true })).toBeVisible();
     await expect(admin.getByRole("button", { name: "Executar análise assistida" })).toBeDisabled();
     await expect(admin.getByText("Execução concluída sem achados para revisão.", { exact: true })).toBeVisible();
-    await expect(admin.getByText("Resultado da IA indisponível para revisão", { exact: true })).toBeVisible();
+    await expect(admin.getByText("Resultado da IA indisponível para revisão", { exact: true })).toHaveCount(2);
+    await expect(admin.getByText("J7 achado sintético de resposta não incluída nesta execução.", { exact: true })).toHaveCount(0);
+    expect(rows(
+      "select anamnesis_answer_id from public.ai_execution_sources where execution_id=" +
+      literal(unrecordedSourceExecutionId),
+    )).toEqual([{ anamnesis_answer_id: submission.answerIds[0] }]);
     await expect(admin.getByText("Execução sem estado terminal", { exact: true })).toBeVisible();
     await expect(admin.getByText("J7 conteúdo sintético com referência de outra cliente.", { exact: true })).toHaveCount(0);
     await expect(admin.getByText(validFindingText, { exact: true })).toBeVisible();
