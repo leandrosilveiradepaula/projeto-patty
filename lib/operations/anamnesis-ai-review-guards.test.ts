@@ -58,3 +58,13 @@ test("J7 links a recorded human note to the exact immutable review without expos
   assert.match(historyPage, /!recordedAction \?/);
   assert.doesNotMatch(historyPage, /href=\{.*finding\.explanation/);
 });
+
+test("J7 displays decision timestamp separately from immutable AI finding", () => {
+  assert.match(historyPage, /createdAt: action\.created_at/);
+  assert.match(historyPage, /formatDateTime\(recordedAction\.createdAt\)/);
+  assert.match(historyPage, /Decisão profissional registrada em/);
+  assert.match(historyPage, /O achado da IA foi preservado/);
+  assert.match(historyPage, /execution\.status === "completed" \? "Concluída"/);
+  assert.match(historyPage, /execution\.status === "failed" \? "Falhou"/);
+  assert.match(historyPage, /execution\.status === "started" \? "Iniciada"/);
+});
