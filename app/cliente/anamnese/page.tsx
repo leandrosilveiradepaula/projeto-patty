@@ -1,4 +1,5 @@
 import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
+import { StartAnamnesisForm } from "@/components/client/StartAnamnesisForm";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -15,7 +16,6 @@ import {
   readClientAnamnesisHistoryFilters,
 } from "@/lib/anamnesis/client-submissions-explorer";
 import { loadClientClarificationSummary } from "@/lib/follow-up/client-clarification-summary-loader";
-import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import { startClientAnamnesisDraft } from "./actions";
 import styles from "./page.module.css";
@@ -82,9 +82,7 @@ export default async function ClienteAnamnesePage({ searchParams }: ClienteAnamn
                 Você pode iniciar o rascunho, salvar as respostas e enviar a Anamnese quando todos os campos obrigatórios aplicáveis estiverem preenchidos e o consentimento final estiver marcado.
               </p>
             </div>
-            <form action={startClientAnamnesisDraft}>
-              <Button type="submit">Começar Anamnese</Button>
-            </form>
+            <StartAnamnesisForm action={startClientAnamnesisDraft} />
           </Card>
         </Section>
       ) : null}
