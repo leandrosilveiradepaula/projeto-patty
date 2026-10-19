@@ -51,20 +51,31 @@ test("J7 prioritizes client identity and handles invalid historical dates safely
 
 
 test("J7 links a recorded human note to the exact immutable review without exposing its content", () => {
-  assert.match(historyPage, /reviewId: action\.anamnesis_review_id/);
-  assert.match(historyPage, /recordedAction\?\.reviewId && isUuid\(recordedAction\.reviewId\)/);
-  assert.match(historyPage, /\/revisao#revisao-\$\{recordedAction\.reviewId\}/);
+  assert.match(historyPage, /action\.anamnesis_review_id/);
+  assert.match(historyPage, /isUuid\(action\.anamnesis_review_id\)/);
+  assert.match(historyPage, /\/revisao#revisao-\$\{action\.anamnesis_review_id\}/);
   assert.match(historyPage, /Abrir anotação profissional exata/);
-  assert.match(historyPage, /!recordedAction \?/);
+  assert.match(historyPage, /recordedActions\.length === 0 \?/);
   assert.doesNotMatch(historyPage, /href=\{.*finding\.explanation/);
 });
 
 test("J7 displays decision timestamp separately from immutable AI finding", () => {
-  assert.match(historyPage, /createdAt: action\.created_at/);
-  assert.match(historyPage, /formatDateTime\(recordedAction\.createdAt\)/);
-  assert.match(historyPage, /Decisão profissional registrada em/);
-  assert.match(historyPage, /O achado da IA foi preservado/);
+  assert.match(historyPage, /formatDateTime\(action\.created_at\)/);
+  assert.match(historyPage, /formatDateTime\(action\.created_at\)/);
+  assert.match(historyPage, /registra.+em/);
+  assert.match(historyPage, /original da IA foi preservado/);
   assert.match(historyPage, /execution\.status === "completed" \? "Concluída"/);
   assert.match(historyPage, /execution\.status === "failed" \? "Falhou"/);
   assert.match(historyPage, /execution\.status === "started" \? "Iniciada"/);
+});
+
+
+test("J7 keeps every distinct persisted human action visible instead of silently replacing it", () => {
+  assert.match(historyPage, /findingActionsByKey\.get\(key\) \?\? \[\]/);
+  assert.match(historyPage, /existing\.push\(action\)/);
+  assert.match(historyPage, /recordedActions\.map\(\(action\) =>/);
+  assert.match(historyPage, /key=\{action\.id\}/);
+  assert.match(historyPage, /recordedActions\.length > 1/);
+  assert.match(historyPage, /Mais de uma decisão registrada/);
+  assert.match(historyPage, /recordedActions\.length === 0/);
 });
