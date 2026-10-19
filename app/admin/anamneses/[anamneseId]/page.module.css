@@ -97,6 +97,12 @@
   display: grid;
   gap: var(--space-4);
   min-width: 0;
+  scroll-margin-top: var(--space-6);
+}
+.questionCard:target,
+.questionCard:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
 }
 
 .questionHeader {
