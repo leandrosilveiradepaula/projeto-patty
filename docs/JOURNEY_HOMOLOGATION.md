@@ -1,3 +1,13 @@
+## 2026-10-19 — J7: conferir proveniência contra fontes imutáveis por execução
+
+**FATO TÉCNICO:** `start_anamnesis_review_execution` já grava em `ai_execution_sources` as respostas efetivamente incluídas na execução (confirmação por catálogo SQL, sem consultar dados reais). Antes deste pacote, a exibição e a ação administrativa validavam IDs contra **todas as respostas da mesma Anamnese**, o que era insuficiente para demonstrar que uma resposta participou de determinada execução (ex.: inclusão financeira opt-in).
+
+**CORREÇÃO DETERMINÍSTICA:** leitura paginada por IDs das fontes de resposta sob sessão autenticada, RLS, AAL2 e assignment vigente; cada execução considera apenas IDs de respostas que pertençam à submissão autorizada **e** estejam no respectivo ledger imutável. Tanto a UI quanto os dois comandos de decisão aplicam essa fronteira antes de mostrar achados ou chamar a RPC privilegiada. Saída que alega origem em resposta não incluída é classificada como inválida, sem achados acionáveis e sem publicação; fonte ausente não é inventada. Registros de execução, respostas originais e decisões anteriores permanecem preservados.
+
+**ESCOPO/TESTES:** `lib/supabase/data-access.ts`, página/ações da J7, testes unitários e de contrato e Playwright de MFA/RLS com fixtures sintéticas; o cenário novo cria duas execuções sobre a **mesma** Anamnese, mas com subconjuntos diferentes de fontes, validando a recusa de referência que não participou daquela execução. `Validate application`, `Validate J7 local AI review lifecycle browser` e regressão J6 exigidos no SHA do PR. **FORA DE ESCOPO:** migrations, schema, Supabase SaaS write, alteração de RLS/Auth, dado real, fornecedor de IA ou gate, diagnóstico, mensagens e protocolos. **RISCO/COMPATIBILIDADE:** registros históricos sem proveniência suficiente são apresentados como saída inválida para ação, nunca reinterpretados ou apagados; investigar o ledger com autorização apropriada antes de qualquer correção. Gate `OPENAI_HEALTH_DATA_PROCESSING_ENABLED` permanece fechado e homologação profissional conjunta continua pendente.
+
+---
+
 ## 2026-10-19 — J7: conciliação de snapshots de decisões e próximos achados pendentes
 
 **FATO CONFIRMADO:** cada ação de `ai_finding_actions` persiste `finding_index` e `finding_snapshot`; o histórico administrativo anterior associava a decisão exclusivamente pelo índice. O schema de produção mantém `UNIQUE (execution_id, finding_index)`, auditado por catálogo, e nenhum dado real foi consultado. **RISCO POTENCIAL (não incidente confirmado):** uma ação histórica órfã ou uma divergência no conteúdo de saída pode tornar o índice insuficiente para atribuir a decisão corretamente.
