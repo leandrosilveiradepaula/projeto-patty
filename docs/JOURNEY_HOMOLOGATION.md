@@ -1,3 +1,17 @@
+## 2026-10-19 — J7: teste de ciclo completo de revisão assistiva, local e sintético (PR em validação)
+
+**OBJETIVO:** demonstrar o caminho de ponta a ponta da J7 sem ativar IA externa nem processar dados reais: Anamnese submetida em banco descartável → registros de execução e resultados exclusivamente sintéticos → leitura autenticada de admin com MFA AAL2 → decisões humanas separadas → persistência imutável → isolamento de acesso de outra conta e cliente.
+
+**ESCOPO:** novo `e2e/j7-ai-review-lifecycle.spec.mjs` e workflow `.github/workflows/validate-j7-ai-review-browser.yml`, com identidade e formulário sintéticos criados somente no Supabase local `127.0.0.1:54321`, Next.js local `127.0.0.1:3000` e dados `@example.invalid`. A execução testa findings válidos, saída com array vazio, saída com fonte de outra cliente recusada na interface, execução `started` com recuperação profissional manual, aceitação como observação interna, criação de nota da Patty com link da revisão exata, histórico original preservado, MFA obrigatório, RLS, acesso negado a admin sem assignment e cliente não titular. Os comandos do teste recusam qualquer ambiente não local. Os únicos segredos disponíveis ao backend no CI são chaves **do banco descartável**, mascaradas pelo GitHub; `OPENAI_API_KEY` vazio e `OPENAI_HEALTH_DATA_PROCESSING_ENABLED=false`.
+
+**ARQUIVOS PERMITIDOS:** somente script Playwright J7, workflow J7 e estes documentos de status/homologação. **FORA DO ESCOPO:** alterações em migrations, Supabase SaaS, Auth/RLS/políticas, schema, usuário/arquivo real, modelo/prompt da IA, envio de dados de saúde ao provider, liberação a cliente, publicação, diagnóstico e escolha de protocolo.
+
+**CRITÉRIOS DE ACEITE:** `Validate application` e `Validate J7 local AI review lifecycle browser` aprovados no commit exato; a segunda suíte inclui pgTAP `ai_execution_boundary.test.sql` e Playwright com DB descartável, checa objeto persistido e suas permissões; sem registrar histórico de clientes reais. Resultado do teste de integração **a confirmar no GitHub Actions**; CI verde não é homologação profissional. A J7 como um todo continua com gate de saúde fechado e homologação conjunta pendente.
+
+**RISCOS:** alteração em workflow e testes de segurança/IA exige integração específica conforme `AGENTS.md`. O teste manipula dados sintéticos diretamente no DB descartável para simular saída histórica sem chamar provider; isso não equivale a aceitar uma resposta OpenAI real. A versão aprovada de qualquer protocolo ou conteúdo continua sob controle humano.
+
+---
+
 ## 2026-10-19 — Início técnico da J7: Anamnese assistida por IA, revisão humana e histórico auditável
 
 **ESCOPO TÉCNICO PROPOSTO (não regra profissional):** após a J6, a J7 fica delimitada à análise assistiva da Anamnese e às decisões internas da Patty. O fluxo-alvo é Anamnese originalmente submetida → contexto minimizado → execução assistiva somente quando o gate externo estiver autorizado → saída validada e historizada → achados exibidos em separado → observação/anotação da Patty independente → auditoria. **A IA nunca publica, diagnostica, decide fase, cria protocolo ou envia comunicação automática.**
