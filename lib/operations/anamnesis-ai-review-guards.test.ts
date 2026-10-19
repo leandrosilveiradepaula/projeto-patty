@@ -146,7 +146,7 @@ test("J7 validates the exact output again server-side before any privileged huma
   assert.match(boundary, /listAccessibleAnamnesisQuestions\(submission\.form_version_id\)/);
   assert.match(boundary, /listAccessibleAiExecutionOutputs\(\[executionId\]\)/);
   assert.match(boundary, /presentStoredAiReview\(\{/);
-  assert.match(boundary, /allowedQuestionIds:/);
+  assert.match(boundary, /allowedMissingTargetQuestionIds,/);
   assert.match(boundary, /allowedSourceAnswerIds:/);
   assert.match(boundary, /result\.state !== "ready" \|\| !result\.findings\[findingIndex\]/);
   for (const name of ["acceptAiFindingAsInternalObservation", "createPattyNoteFromAiFinding"]) {
