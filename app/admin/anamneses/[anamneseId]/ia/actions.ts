@@ -4,7 +4,14 @@ import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/supabase/auth";
 import { isUuid } from "@/lib/validation/uuid";
 import { assertAiExecutionBelongsToSubmission } from "@/lib/ai/execution-submission-boundary";
-import { getAccessibleAnamnesisSubmission, listAccessibleAiAnamnesisExecutions } from "@/lib/supabase/data-access";
+import { presentStoredAiReview } from "@/lib/ai/anamnesis-review-history";
+import {
+  getAccessibleAnamnesisSubmission,
+  listAccessibleAiAnamnesisExecutions,
+  listAccessibleAiExecutionOutputs,
+  listAccessibleAnamnesisAnswers,
+  listAccessibleAnamnesisQuestions,
+} from "@/lib/supabase/data-access";
 import {
   executeOpenAiAnamnesisReview,
   OpenAiAnamnesisReviewExecutionError,
@@ -16,6 +23,7 @@ async function requireExactAccessibleAiExecution(
   submissionId: string,
   executionId: string,
   state: "started" | "completed",
+  findingIndex?: number,
 ) {
   const submission = await getAccessibleAnamnesisSubmission(submissionId);
   if (!submission?.submitted_at) {
@@ -23,6 +31,33 @@ async function requireExactAccessibleAiExecution(
   }
   const executions = await listAccessibleAiAnamnesisExecutions(submission.id);
   assertAiExecutionBelongsToSubmission(submission, executions, executionId, state);
+
+  // The server action is callable independently of the rendered UI. Before
+  // invoking its privileged, service-role-only RPC, apply the same fail-closed
+  // output validation used by the authorized review page. An index alone is
+  // not evidence that an AI finding belongs to this submitted Anamnese.
+  if (state !== "completed") return;
+  if (findingIndex === undefined || !Number.isSafeInteger(findingIndex) || findingIndex < 0) {
+    throw new Error("Índice de achado inválido.");
+  }
+  const execution = executions.find((item) => item.id === executionId);
+  if (!execution) throw new Error("Execução indisponível para decisão humana.");
+  const [answers, questions, outputs] = await Promise.all([
+    listAccessibleAnamnesisAnswers(submission.id),
+    listAccessibleAnamnesisQuestions(submission.form_version_id),
+    listAccessibleAiExecutionOutputs([executionId]),
+  ]);
+  const result = presentStoredAiReview({
+    allowedQuestionIds: new Set(questions.map((question) => question.id)),
+    allowedSourceAnswerIds: new Set(answers.map((answer) => answer.id)),
+    completedAt: execution.completed_at,
+    content: outputs.find((output) => output.execution_id === executionId)?.content,
+    failedAt: execution.failed_at,
+    status: execution.status,
+  });
+  if (result.state !== "ready" || !result.findings[findingIndex]) {
+    throw new Error("Achado da IA não disponível para decisão humana.");
+  }
 }
 
 export type AdminAiReviewFormState = {
@@ -111,7 +146,7 @@ export async function acceptAiFindingAsInternalObservation(
     throw new Error("Índice de achado inválido.");
   }
 
-  await requireExactAccessibleAiExecution(submissionId, executionId, "completed");
+  await requireExactAccessibleAiExecution(submissionId, executionId, "completed", findingIndex);
 
   await recordAiFindingAction({
     action: "accepted_internal_observation",
@@ -149,7 +184,7 @@ export async function createPattyNoteFromAiFinding(
     throw new Error("A anotação profissional deve ter no máximo 4.000 caracteres.");
   }
 
-  await requireExactAccessibleAiExecution(submissionId, executionId, "completed");
+  await requireExactAccessibleAiExecution(submissionId, executionId, "completed", findingIndex);
 
   await recordAiFindingAction({
     action: "converted_to_patty_note",
