@@ -296,7 +296,12 @@ test("J1: cliente sintetica ativa acesso, salva Cadastro Atual e retoma Anamnese
     await test.step("inicia e retoma a mesma Anamnese versionada", async () => {
       await activationPage.goto("/cliente/anamnese");
       await activationPage.getByRole("button", {name:"Começar Anamnese"}).click();
-      await expect(activationPage).toHaveURL(/\/cliente\/anamnese\/[0-9a-f-]{36}\/?$/);
+      // Cold production Server Actions may redirect after Playwright's default 5s.
+      // Do not repeat the click: the assertions below still verify exactly one draft.
+      await expect(activationPage).toHaveURL(
+        /\/cliente\/anamnese\/[0-9a-f-]{36}\/?$/,
+        { timeout: 20_000 },
+      );
       draftId = activationPage.url().split("/").at(-1);
       const rows = await admin.from("anamnesis_submissions")
         .select("id,client_id,form_version_id,submitted_at")
