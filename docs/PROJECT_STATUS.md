@@ -1,3 +1,13 @@
+## 2026-10-19 — J1: evitar renderização stale após convite com consulta de sessão autenticada (PR #931)
+
+**EVIDÊNCIA CONFIRMADA DO TESTE LOCAL:** no último head anterior do PR #931, o browser recebeu cookie de sessão e a identidade sintética estava confirmada em Auth, com papel `client` consultável sob RLS. A tela de ativação ainda falhou no handoff (`phase=auth-error`), mas um GET fresco com o mesmo cookie exibia o formulário. A tentativa anterior de somente uma recarga da página foi insuficiente. **Não classificar como falha de token, schema ou RLS sem prova adicional.**
+
+**CORREÇÃO TÉCNICA EM VALIDAÇÃO:** após o callback de convite, quando a primeira Server Component ainda apresenta papel nulo, `ActivationSessionGate` faz **uma única consulta GET same-origin**, sem cache e sem mutação, em `/ativar-conta/session`. O handler deriva `role` exclusivamente da sessão Supabase conferida em servidor (`getCurrentAuthContext`/`getClaims` e leitura de `user_roles` sob RLS), devolve somente papel autorizado ou `null` e responde `Cache-Control: private, no-store`, `Vary: Cookie`. Nem fragmento, URL, requisição do browser ou localStorage concedem papel; se não houver sessão válida o formulário continua bloqueado e o erro aparece. A renderização principal também é dinâmica; a escrita da senha permanece uma ação de servidor protegida independentemente do estado visual. Nenhum bypass Auth/MFA/RLS, segredo, migration ou produção alterado.
+
+**ACEITE OBRIGATÓRIO:** `Validate application`, `Validate J1 local client onboarding browser` e regressões J6/J7 verdes no head exato do PR #931; o browser autentica com convite sintético, confirma `role:null` antes e `role:client` após o callback, preenche senha, salva Cadastro Atual e uma única Anamnese versionada, retoma rascunho e recusa acesso cruzado. Supabase descartável somente `127.0.0.1`, OpenAI externa desabilitada, teardown obrigatório. A homologação operacional pela Patty **continua a última tarefa global**, depois de toda a consolidação técnica; não iniciar agora.
+
+---
+
 ## 2026-10-19 — J1: confirmação do convite e recuperação segura de papel após sessão
 
 **EVIDÊNCIA NOVA:** Playwright local do PR #931 isolou `phase=invalid-invite`, mas o callback não marcou o token como inválido; Auth confirmou o convite, registrou login, o navegador recebeu cookie de sessão, o papel `client` ficou visível sob a política RLS existente e um segundo GET genuíno para `/ativar-conta` tornou o formulário visível. Conclusão: o problema reproduzido é a **primeira renderização desatualizada de identidade após a confirmação**, não expiração de convite nem perda da autorização RLS.
