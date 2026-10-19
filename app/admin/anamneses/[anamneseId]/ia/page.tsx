@@ -20,6 +20,7 @@ import { requiresAiExecutionRecoveryReview } from "@/lib/ai/execution-lifecycle"
 import {
   getAccessibleAnamnesisSubmission,
   listAccessibleAiAnamnesisExecutions,
+  listAccessibleAiAnamnesisAnswerSources,
   listAccessibleAiExecutionOutputs,
   listAccessibleAnamnesisAnswers,
   listAccessibleAnamnesisQuestions,
@@ -67,8 +68,9 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
     listAccessibleAiAnamnesisExecutions(submission.id),
   ]);
   const executionIds = executions.map((execution) => execution.id);
-  const [outputs, findingActions] = await Promise.all([
+  const [outputs, sources, findingActions] = await Promise.all([
     listAccessibleAiExecutionOutputs(executionIds),
+    listAccessibleAiAnamnesisAnswerSources(executionIds),
     listAccessibleAiFindingActions(executionIds),
   ]);
   const readiness = getOpenAiProviderReadiness();
@@ -79,8 +81,22 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
   const outputsByExecutionId = new Map(
     outputs.map((output) => [output.execution_id, output]),
   );
-  const allowedSourceAnswerIds = new Set(answers.map((answer) => answer.id));
-  // This display allowlist checks question ownership; original execution validation
+  // Source provenance is both execution-scoped and submission-scoped.
+  // An answer belonging to this Anamnese is not necessarily an answer supplied
+  // to the AI in this particular execution.
+  const includedAnswerIdsByExecutionId = new Map<string, Set<string>>();
+  for (const source of sources) {
+    if (
+      source.anamnesis_submission_id !== submission.id ||
+      !source.anamnesis_answer_id ||
+      !answersById.has(source.anamnesis_answer_id)
+    ) continue;
+    const included = includedAnswerIdsByExecutionId.get(source.execution_id) ??
+      new Set<string>();
+    included.add(source.anamnesis_answer_id);
+    includedAnswerIdsByExecutionId.set(source.execution_id, included);
+  }
+  // Display validation checks question ownership; original execution validation
   // remains responsible for deciding which unanswered questions were applicable.
   const allowedQuestionIds = new Set(questions.map((question) => question.id));
   // Keep every RLS-visible historical action, even if its snapshot cannot
@@ -153,7 +169,8 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
               const output = outputsByExecutionId.get(execution.id);
               const review = presentStoredAiReview({
                 allowedQuestionIds,
-                allowedSourceAnswerIds,
+                allowedSourceAnswerIds:
+                  includedAnswerIdsByExecutionId.get(execution.id) ?? new Set<string>(),
                 completedAt: execution.completed_at,
                 content: output?.content,
                 failedAt: execution.failed_at,
