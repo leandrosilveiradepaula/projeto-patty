@@ -347,6 +347,31 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
     await expect(admin.getByText("J7 conteúdo sintético com referência de outra cliente.", { exact: true })).toHaveCount(0);
     await expect(admin.getByText(validFindingText, { exact: true })).toBeVisible();
 
+    await test.step("AI sources open exact original answers and missing questions on mobile", async () => {
+      const first = admin.getByText(validFindingText, { exact: true }).locator("..");
+      const source = first.getByRole("link", { name: "Ver resposta original: J7 pergunta sintética A" });
+      await expect(source).toHaveAttribute(
+        "href", "/admin/anamneses/" + submission.submissionId + "#resposta-" + questionIds[0],
+      );
+      await source.click();
+      const original = admin.locator('[id="resposta-' + questionIds[0] + '"]');
+      await expect(original).toBeVisible();
+      await expect(original).toContainText("J7 pergunta sintética A");
+      await expect(original).toContainText("J7 resposta sintética A");
+
+      await admin.goto(reviewURL);
+      const missing = admin.getByText("J7 resposta sintética opcional ausente.", { exact: true }).locator("..");
+      const missingLink = missing.getByRole("link", { name: "Ver pergunta original: J7 pergunta sintética opcional" });
+      await expect(missingLink).toHaveAttribute(
+        "href", "/admin/anamneses/" + submission.submissionId + "#resposta-" + questionIds[2],
+      );
+      await missingLink.click();
+      const target = admin.locator('[id="resposta-' + questionIds[2] + '"]');
+      await expect(target).toBeVisible();
+      await expect(target).toContainText("Não respondida");
+      await admin.goto(reviewURL);
+    });
+
     await test.step("Accepting a finding preserves output and records a separate decision", async () => {
       const finding = admin.getByText(validFindingText, { exact: true }).locator("..");
       await finding.getByRole("button", { name: "Aceitar como observação interna" }).click();

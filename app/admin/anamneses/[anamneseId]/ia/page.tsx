@@ -254,13 +254,15 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
                     const convertedToNote = recordedActions.some(
                       (action) => action.action === "converted_to_patty_note",
                     );
-                    const sourceLabels = finding.source_answer_ids.map(
+                    const sourceReferences = finding.source_answer_ids.map(
                       (answerId) => {
-                        const answer = answersById.get(answerId);
-                        return answer
-                          ? questionsById.get(answer.question_id)?.label ??
-                              "Resposta da Anamnese"
-                          : "Resposta da Anamnese";
+                        const questionId = answersById.get(answerId)?.question_id;
+                        const question = questionId ? questionsById.get(questionId) : null;
+                        return {
+                          answerId,
+                          label: question?.label ?? "Resposta da Anamnese",
+                          questionId: question?.id ?? null,
+                        };
                       },
                     );
                     const targetLabel = finding.target_question_id
@@ -276,16 +278,33 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
                           {findingLabel(finding.type)}
                         </h3>
                         <p className={styles.text}>{finding.explanation}</p>
-                        {sourceLabels.length > 0 ? (
+                        {sourceReferences.length > 0 ? (
                           <ul className={styles.list}>
-                            {sourceLabels.map((label, sourceIndex) => (
-                              <li key={`${label}-${sourceIndex}`}>{label}</li>
+                            {sourceReferences.map((source) => (
+                              <li key={source.answerId}>
+                                {source.questionId ? (
+                                  <Link
+                                    className={styles.sourceLink}
+                                    href={`/admin/anamneses/${submission.id}#resposta-${source.questionId}`}
+                                  >
+                                    Ver resposta original: {source.label}
+                                  </Link>
+                                ) : (
+                                  <span>Resposta original indisponível para navegação</span>
+                                )}
+                              </li>
                             ))}
                           </ul>
                         ) : null}
-                        {targetLabel ? (
+                        {targetLabel && finding.target_question_id ? (
                           <p className={styles.meta}>
-                            Pergunta relacionada: {targetLabel}
+                            Pergunta relacionada:{" "}
+                            <Link
+                              className={styles.sourceLink}
+                              href={`/admin/anamneses/${submission.id}#resposta-${finding.target_question_id}`}
+                            >
+                              Ver pergunta original: {targetLabel}
+                            </Link>
                           </p>
                         ) : null}
                         {finding.suggested_follow_up_question ? (
