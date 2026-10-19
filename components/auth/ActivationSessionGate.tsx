@@ -29,7 +29,34 @@ export function ActivationSessionGate({
 
     const parsed = parseImplicitInviteFragment(window.location.hash);
     if (parsed.kind === "none") {
-      setPhase(role ? "ready" : "invalid");
+      if (role) {
+        setPhase("ready");
+        return;
+      }
+
+      // GoTrue can confirm an invitation and set the browser cookies while
+      // the first Server Component still carries the pre-confirmation role.
+      // Only a verified browser session warrants one fresh server GET.
+      // Neither the query flag nor the browser session grants any access:
+      // the server must resolve the role again under the existing RLS.
+      if (new URLSearchParams(window.location.search).get("session_refresh") === "1") {
+        setPhase("failed");
+        return;
+      }
+      setPhase("checking");
+      void (async () => {
+        try {
+          const supabase = createClient();
+          const { data, error } = await supabase.auth.getUser();
+          if (error || !data.user) {
+            setPhase("invalid");
+            return;
+          }
+          window.location.replace("/ativar-conta?session_refresh=1");
+        } catch {
+          setPhase("failed");
+        }
+      })();
       return;
     }
 
