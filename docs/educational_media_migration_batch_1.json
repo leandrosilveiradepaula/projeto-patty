@@ -3,7 +3,7 @@
   "generated_at": "2026-09-24",
   "batch_key": "educational_media_batch_1_food_scale",
   "scope": "single approved educational media source; no upload, publication, or client release is performed by this manifest",
-  "batch_status": "upload_ready_manual_transfer_pending",
+  "batch_status": "private_blob_uploaded_asset_registered_delivery_test_pending",
   "items": [
     {
       "source": {
@@ -26,12 +26,14 @@
         "storage_provider": "vercel_blob",
         "blob_access": "private",
         "asset_key": "primary",
-        "storage_path": "educational-610df135-7c00-47a3-b978-2ba44411ae43-ae45c5db-e6af-46db-9230-b05bc4f5a5bd-primary.mp4",
+        "storage_path": "educational/81cc75c9-8c68-471e-856c-54fe588f62e4.mp4",
         "storage_path_policy": "system_generated_opaque_no_pii",
         "content_type": "video/mp4",
         "blob_store_name": "projeto-patty-blob",
         "blob_store_region": "iad1",
-        "blob_auth_mode": "oidc"
+        "blob_auth_mode": "oidc",
+        "planned_storage_path_before_browser_upload": "educational-610df135-7c00-47a3-b978-2ba44411ae43-ae45c5db-e6af-46db-9230-b05bc4f5a5bd-primary.mp4",
+        "storage_path_actual_note": "Path opaque gerado pelo fluxo autenticado de upload; o plano anterior foi preservado no campo planned_storage_path_before_browser_upload."
       },
       "integrity": {
         "expected_size_bytes": 123262796,
@@ -70,7 +72,12 @@
             "note": "Original approved Drive bytes streamed into a temporary work container and hashed; no Blob upload, version publication or client release."
           }
         ],
-        "latest_source_reverified_sha256_hex": "ee05d6c12ea02db283234f5d69a09ff60c4d831183fe6715d7aa9848e76905b1"
+        "latest_source_reverified_sha256_hex": "ee05d6c12ea02db283234f5d69a09ff60c4d831183fe6715d7aa9848e76905b1",
+        "destination_verification_status": "private_object_body_verified_by_server_before_registration",
+        "destination_verification_note": "O server action registerEducationalContentAssetAction, na primeira inserção, chama verifyPrivateBlobAsset, que confirma HEAD e lê o objeto privado, verifica tamanho, assinatura video/mp4 e SHA-256 em streaming usando timingSafeEqual. Metadados pós-registro conferidos no Supabase SaaS. Não substitui teste de reprodução autorizada.",
+        "destination_verified_size_bytes": 123262796,
+        "destination_verified_mime_type": "video/mp4",
+        "destination_verified_sha256_hex": "ee05d6c12ea02db283234f5d69a09ff60c4d831183fe6715d7aa9848e76905b1"
       },
       "supabase": {
         "educational_content_id": "610df135-7c00-47a3-b978-2ba44411ae43",
@@ -81,13 +88,17 @@
       "operation": {
         "blob_store_status": "created_connected_private",
         "source_download_status": "downloaded_reverified_for_upload",
-        "blob_upload_status": "not_started",
-        "asset_registration_status": "not_started",
+        "blob_upload_status": "uploaded_private_verified",
+        "asset_registration_status": "registered_in_production",
         "publication_status": "not_started",
         "client_release_status": "not_started",
         "blob_store_verified_at": "2026-10-03",
         "blob_store_verification_note": "Verified in the Vercel project dashboard: private store projeto-patty-blob, region iad1, connected to the projeto-patty project, empty at verification time, OIDC-style project connection without a long-lived read-write token.",
-        "draft_version_created_at": "2026-10-03"
+        "draft_version_created_at": "2026-10-03",
+        "blob_upload_verified_at": "2026-10-19",
+        "asset_registered_at_utc": "2026-10-19T02:03:27.962642Z",
+        "delivery_verification_status": "authenticated_playback_range_seek_pending",
+        "production_snapshot_note": "Private Blob store projeto-patty-blob: 1 object, 123262796 bytes, private, iad1; Supabase version ae45c5db...: 1 primary asset with matching path/MIME/size/SHA-256, unpublished, 0 client releases. No independent authorized playback yet; user UI shows E2E Admin so professional identity/acceptance must not be inferred."
       }
     }
   ],
@@ -104,5 +115,6 @@
     "human_review",
     "explicit_publication",
     "explicit_client_release"
-  ]
+  ],
+  "last_verified_at": "2026-10-19"
 }
