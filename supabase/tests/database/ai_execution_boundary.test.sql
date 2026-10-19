@@ -17,8 +17,8 @@ values
   ('fa000000-0000-4000-8000-000000000001','admin'),
   ('fa000000-0000-4000-8000-000000000002','client');
 
-insert into public.clients (id,profile_id)
-values ('fb000000-0000-4000-8000-000000000001','fa000000-0000-4000-8000-000000000002');
+insert into public.clients (id,profile_id,full_name,status)
+values ('fb000000-0000-4000-8000-000000000001','fa000000-0000-4000-8000-000000000002','AI Client Synthetic','active');
 
 insert into public.client_assignments (client_id,staff_profile_id)
 values ('fb000000-0000-4000-8000-000000000001','fa000000-0000-4000-8000-000000000001');
@@ -63,7 +63,7 @@ where id='e0000000-0000-4000-8000-000000000002';
 insert into public.ai_prompt_versions
   (id,prompt_key,version_number,content,created_by_profile_id)
 values
-  ('e2000000-0000-4000-8000-000000000001','anamnesis_review',1,'{}'::jsonb,'fa000000-0000-4000-8000-000000000001'),
+  ('e2000000-0000-4000-8000-000000000001','anamnesis_review',2,'{}'::jsonb,'fa000000-0000-4000-8000-000000000001'),
   ('e2000000-0000-4000-8000-000000000002','other_purpose',1,'{}'::jsonb,'fa000000-0000-4000-8000-000000000001');
 
 select throws_ok(
