@@ -12,7 +12,7 @@ test("AI review rejects invalid submission identifiers before execution", () => 
 });
 
 test("AI finding actions validate UUIDs and safe indexes", () => {
-  assert.equal(ai.split("!Number.isSafeInteger(findingIndex)").length - 1, 2);
+  assert.equal(ai.split("!Number.isSafeInteger(findingIndex)").length - 1, 3);
   assert.equal(ai.split("!isUuid(executionId)").length - 1, 3);
 });
 
@@ -133,4 +133,28 @@ test("J7 refuses to misattribute immutable human decisions to a mismatched AI fi
   assert.match(integrity, /findingSnapshotMatches\(action\.finding_snapshot, findings\[index\]\)/);
   assert.match(integrity, /lockedIndices\.add\(index\)/);
   assert.doesNotMatch(historyPage, /finding\.explanation[^\n]*href/);
+});
+
+test("J7 validates the exact output again server-side before any privileged human action", () => {
+  const start = ai.indexOf("async function requireExactAccessibleAiExecution(");
+  const end = ai.indexOf("export type AdminAiReviewFormState", start);
+  const boundary = ai.slice(start, end);
+  assert.ok(start >= 0 && end > start);
+  assert.match(boundary, /assertAiExecutionBelongsToSubmission\(/);
+  assert.match(boundary, /if \(state !== "completed"\) return/);
+  assert.match(boundary, /listAccessibleAnamnesisAnswers\(submission\.id\)/);
+  assert.match(boundary, /listAccessibleAnamnesisQuestions\(submission\.form_version_id\)/);
+  assert.match(boundary, /listAccessibleAiExecutionOutputs\(\[executionId\]\)/);
+  assert.match(boundary, /presentStoredAiReview\(\{/);
+  assert.match(boundary, /allowedQuestionIds:/);
+  assert.match(boundary, /allowedSourceAnswerIds:/);
+  assert.match(boundary, /result\.state !== "ready" \|\| !result\.findings\[findingIndex\]/);
+  for (const name of ["acceptAiFindingAsInternalObservation", "createPattyNoteFromAiFinding"]) {
+    const begin = ai.indexOf("export async function " + name);
+    const next = ai.indexOf("export async function ", begin + 20);
+    const mutation = ai.slice(begin, next < 0 ? undefined : next);
+    const guardedAt = mutation.indexOf('requireExactAccessibleAiExecution(submissionId, executionId, "completed", findingIndex)');
+    const privilegedAt = mutation.indexOf("await recordAiFindingAction(");
+    assert.ok(guardedAt >= 0 && privilegedAt > guardedAt, name);
+  }
 });
