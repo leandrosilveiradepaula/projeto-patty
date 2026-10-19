@@ -74,23 +74,27 @@ async function makeStaff(nonce) {
   insert("user_roles", { profile_id: id, role: "admin" });
   return id;
 }
-function seedPublishedAnamnesis() {
-  const formId = insert("anamnesis_forms", { form_key: "client-anamnesis" });
-  const versionId = insert("anamnesis_form_versions", {
-    form_id: formId, version_number: 1,
-  });
-  const sectionId = insert("anamnesis_sections", {
-    form_version_id: versionId, section_key: "j1-local",
-    title: "Cadastro sintético de Anamnese", display_order: 1,
-  });
-  const cityQuestionId = insert("anamnesis_questions", {
-    form_version_id: versionId, section_id: sectionId,
-    question_key: "city", label: "Cidade", display_order: 1,
-    answer_type: "text", required: false,
-  });
-  sql("update public.anamnesis_form_versions set published_at=statement_timestamp()" +
-    " where id=" + literal(versionId) + ";");
-  return { versionId, cityQuestionId };
+function getPublishedAnamnesisFromMigrations() {
+  // The committed migrations already publish the canonical v1 form. Never
+  // recreate or modify that form just to make an E2E pass.
+  const published = rows(
+    "select v.id as version_id, q.id as city_question_id" +
+    " from public.anamnesis_forms f" +
+    " join public.anamnesis_form_versions v on v.form_id=f.id" +
+    " join public.anamnesis_questions q on q.form_version_id=v.id" +
+    " where f.form_key='client-anamnesis' and v.published_at is not null" +
+    " and q.question_key='city' and q.answer_type='text'" +
+    " order by v.version_number desc limit 1",
+  );
+  if (published.length !== 1 ||
+      !UUID.test(published[0].version_id) ||
+      !UUID.test(published[0].city_question_id)) {
+    throw new Error("Committed canonical Anamnese version or city question missing");
+  }
+  return {
+    versionId: published[0].version_id,
+    cityQuestionId: published[0].city_question_id,
+  };
 }
 async function makeInvitedClient(staffId, nonce) {
   const email = "e2e-j1-owner-" + nonce + "@example.invalid";
@@ -111,7 +115,7 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
   test.setTimeout(240000);
   const nonce = randomBytes(8).toString("hex");
   const staffId = await makeStaff(nonce);
-  const { versionId, cityQuestionId } = seedPublishedAnamnesis();
+  const { versionId, cityQuestionId } = getPublishedAnamnesisFromMigrations();
   const invite = await makeInvitedClient(staffId, nonce);
   const password = "J1-" + randomBytes(17).toString("base64url") + "-Aa1!";
   const context = await browser.newContext({
