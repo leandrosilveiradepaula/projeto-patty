@@ -1,3 +1,13 @@
+## 2026-10-19 — J7: navegação exata às fontes da IA e integridade das decisões
+
+**FATO CONFIRMADO:** consulta somente ao catálogo do PostgreSQL do Projeto Corpo e Mente mostrou que a constraint vigente `ai_finding_actions_one_human_decision_per_finding` exige `UNIQUE (execution_id, finding_index)`. Isso não permite duas decisões humanas sobre o mesmo achado, mesmo se forem de tipos diferentes. A declaração anterior do PR #924 de que o banco permite múltiplas decisões para um achado estava incorreta; a apresentação defensiva do histórico é mantida sem mudança na constraint.
+
+**ESCOPO:** achados de IA com fontes validadas oferecem navegação por UUID da pergunta para sua resposta original exata na mesma submissão autorizada; perguntas ausentes levam à pergunta correspondente, sem inventar uma resposta. A interface original tem âncoras identificáveis, destaque por alvo, foco e leitura mobile. O nome do cadastro profissional prioriza `clients.full_name`. Testes de contrato e Playwright local sintético exercitam os links.
+
+**LIMITES E ACEITE:** nenhuma migration, RLS, Auth, alteração de banco ou saída original, dados reais, nova chamada OpenAI, protocolo, mensagem ou publicação automática. Gate de saúde continua fechado. Exigir `Validate application` e `Validate J7 local AI review lifecycle browser` verdes no SHA final antes de integrar. Homologação conjunta permanece pendente.
+
+---
+
 ## 2026-10-19 — J7: preservar múltiplas decisões humanas sobre o mesmo achado
 
 **FATO TÉCNICO:** a tabela `ai_finding_actions` permite registros de ações distintas (observação interna e anotação profissional) para um mesmo par execução/índice; a tela anterior usava `Map.set` com um único valor, apagando **apenas visualmente** uma decisão anterior quando ambas existiam. Os dados originais nunca foram apagados do banco.
