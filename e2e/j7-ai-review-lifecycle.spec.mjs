@@ -414,8 +414,13 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
       await loginAdminWithMfa(otherAdmin, {
         email: unassigned.email, password: unassigned.password, totpSecret: unassignedTotp,
       });
+      expect(scopedCount(unassigned.id, "aal2", "anamnesis_submissions", submission.submissionId)).toBe(0);
       const unauthorized = await otherAdmin.goto(reviewURL);
-      expect(unauthorized?.status()).toBe(404);
+      // Next.js can stream the shell with 200 before a Server Component calls
+      // notFound(). Verify the denial UI and RLS, never rely on status alone.
+      expect([200, 404]).toContain(unauthorized?.status());
+      await expect(otherAdmin.getByText("Página ou registro indisponível", { exact: true })).toBeVisible();
+      await expect(otherAdmin.getByText("J7 Cliente Sintética", { exact: true })).toHaveCount(0);
       await expect(otherAdmin.getByText(validFindingText, { exact: true })).toHaveCount(0);
       const clientPage = await clientContext.newPage();
       await loginClient(clientPage, owner);
