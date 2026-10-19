@@ -1,3 +1,13 @@
+## 2026-10-19 — J7: preservar múltiplas decisões humanas sobre o mesmo achado
+
+**FATO TÉCNICO:** a tabela `ai_finding_actions` permite registros de ações distintas (observação interna e anotação profissional) para um mesmo par execução/índice; a tela anterior usava `Map.set` com um único valor, apagando **apenas visualmente** uma decisão anterior quando ambas existiam. Os dados originais nunca foram apagados do banco.
+
+**CORREÇÃO DE INTERFACE:** agrupar todas as ações persistidas por execução/achado, exibi-las individualmente em ordem do histórico com suas datas e os links da nota exata, indicar explicitamente quando houver mais de uma decisão e impedir novos botões quando já existir qualquer decisão. Não altera regras de unicidade nem permite que a IA aceite decisões.
+
+**ESCOPO:** `app/admin/anamneses/[anamneseId]/ia/page.tsx`, teste de regressão `lib/operations/anamnesis-ai-review-guards.test.ts` e documentos de status. **FORA DE ESCOPO:** migrations, RLS, Auth, providers de IA, prompts, dados de saúde reais, regras profissionais, publicações e liberação a clientes. **ACEITE:** CI `Validate application` aprovado no commit exato, nenhuma ação passada descartada da UI, ausência de novas ações automáticas. Teste de navegador autenticado e homologação profissional permanecem separados.
+
+---
+
 ## 2026-10-19 — J7: prova integrada local aprovada e PR #921 implantado
 
 **FATOS CONFIRMADOS:** [PR #921](https://github.com/leandrosilveiradepaula/projeto-patty/pull/921) mergeado no `master` em `72fd2fbf076aa82e6bc489cc1c08f8936775ac51`. Os checks `Validate application`, `Validate method configuration foundation`, `Validate J6 local educational release lifecycle browser` e `Validate J7 local AI review lifecycle browser` terminaram em **success** no head exato revisado `316d9b24b477e8212a464fe643b238d139e3a698`. O deployment Vercel de produção desse merge foi confirmado como **READY**.
