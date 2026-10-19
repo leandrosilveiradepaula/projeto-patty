@@ -31,7 +31,7 @@ test("J1 browser fixtures and writes are unreachable outside disposable localhos
   assert.match(script, /Boolean\(process\.env\.OPENAI_API_KEY\)/);
   assert.match(script, /throw new Error\("J1 local SQL boundary rejected"\)/);
   assert.match(script, /const fixtureTables = new Set/);
-  assert.match(script, /seedPublishedAnamnesis\(\)/);
+  assert.match(script, /getPublishedAnamnesisFromMigrations\(\)/);
   assert.match(script, /"client-anamnesis"/);
   assert.match(script, /"e2e-j1-owner-" \+ nonce \+ "@example\.invalid"/);
   assert.match(script, /form\[data-interactive="true"\]/);
