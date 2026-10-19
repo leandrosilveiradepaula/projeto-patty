@@ -160,12 +160,28 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       const authCookiePresent = (await context.cookies()).some(
         (cookie) => cookie.name.startsWith("sb-") && cookie.name.includes("auth-token"),
       );
+      const roleVisible = sql([
+        "begin;",
+        "set local role authenticated;",
+        "set local request.jwt.claim.sub=" + literal(invite.profileId) + ";",
+        "select count(*) from public.user_roles where profile_id=" +
+          literal(invite.profileId) + " and role='client';",
+        "rollback;",
+      ].join("\n")) === "1";
+      // Check whether a fresh GET with the established cookie repairs a
+      // stale server component render. Diagnostic only: original failure is
+      // still a failure and cannot be hidden by an automatic retry.
+      await page.goto("/ativar-conta");
+      const freshFormVisible = await page.locator('form[data-interactive="true"]')
+        .isVisible().catch(() => false);
       throw new Error(
         "J1 synthetic invite activation blocked: phase=" + lastPhase +
         ", callbackRejected=" + callbackRejected +
         ", confirmed=" + Boolean(account?.confirmed) +
         ", signed=" + Boolean(account?.signed) +
-        ", authCookiePresent=" + authCookiePresent,
+        ", authCookiePresent=" + authCookiePresent +
+        ", roleVisibleUnderRls=" + roleVisible +
+        ", freshGetFormVisible=" + freshFormVisible,
       );
     }
     await page.getByLabel("Crie sua senha").fill(password);
