@@ -3,6 +3,7 @@ import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSte
 import { newestClientContentReleases } from "@/lib/content/release-order";
 import { educationalAssetKind, educationalAssetOpenLabel, educationalAssetSize, orderReleasedEducationalAssets } from "@/lib/content/client-assets";
 import { ClientContentCard } from "@/components/client/ClientContentCard";
+import { PrivateEducationalVideoPlayer } from "@/components/content/PrivateEducationalVideoPlayer";
 import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -89,14 +90,20 @@ export default async function ClienteConteudosPage() {
                           );
                           return (
                             <li className={styles.assetItem} key={asset.id}>
+                              {asset.content_type === "video/mp4" ? (
+                                <PrivateEducationalVideoPlayer
+                                  assetUrl={`/cliente/conteudos/assets/${asset.id}`}
+                                  title={contentVersion.title}
+                                />
+                              ) : null}
                               <a
-                                aria-label={`${label} de ${contentVersion.title} em nova aba`}
+                                aria-label={`${asset.content_type === "video/mp4" ? "Baixar vídeo" : label} de ${contentVersion.title} em nova aba`}
                                 className={styles.openLink}
                                 href={`/cliente/conteudos/assets/${asset.id}`}
                                 rel="noopener noreferrer"
                                 target="_blank"
                               >
-                                {label}
+                                {asset.content_type === "video/mp4" ? "Baixar vídeo" : label}
                               </a>
                               <span className={styles.assetMeta}>
                                 {educationalAssetKind(asset.content_type)} · {educationalAssetSize(asset.byte_size)}
