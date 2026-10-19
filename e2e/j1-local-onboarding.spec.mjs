@@ -197,7 +197,7 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
         const response = await fetch("/ativar-conta/session", {
           cache: "no-store", credentials: "same-origin",
         });
-        const payload = response.ok() ? await response.json().catch(() => null) : null;
+        const payload = response.ok ? await response.json().catch(() => null) : null;
         return {
           status: response.status,
           authorized: payload?.role === "client" || payload?.role === "admin",
