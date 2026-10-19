@@ -13,6 +13,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { Section } from "@/components/ui/Section";
 import { getOpenAiProviderReadiness } from "@/lib/ai/openai-provider";
 import { presentStoredAiReview } from "@/lib/ai/anamnesis-review-history";
+import { reconstructStoredReviewMissingTargets } from "@/lib/ai/anamnesis-review-context";
 import { auditFindingActionLinks } from "@/lib/ai/finding-action-integrity";
 import { listAccessibleAiFindingActions } from "@/lib/ai/finding-actions";
 import { ANAMNESIS_QUESTION_KEYS } from "@/lib/anamnesis/question-keys";
@@ -96,9 +97,15 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
     included.add(source.anamnesis_answer_id);
     includedAnswerIdsByExecutionId.set(source.execution_id, included);
   }
-  // Display validation checks question ownership; original execution validation
-  // remains responsible for deciding which unanswered questions were applicable.
-  const allowedQuestionIds = new Set(questions.map((question) => question.id));
+  // Reconstruct applicability using the same deterministic, minimized context
+  // rules used at execution preparation. Answered, conditional-hidden and
+  // informational questions must never be displayed as missing answers.
+  const allowedMissingTargetQuestionIds = reconstructStoredReviewMissingTargets({
+    answers,
+    formVersionId: submission.form_version_id,
+    questions,
+    submissionId: submission.id,
+  });
   // Keep every RLS-visible historical action, even if its snapshot cannot
   // safely be associated with the currently validated original output.
   const findingActionsByExecutionId = new Map<string, typeof findingActions>();
@@ -168,7 +175,7 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
             {executions.map((execution) => {
               const output = outputsByExecutionId.get(execution.id);
               const review = presentStoredAiReview({
-                allowedQuestionIds,
+                allowedMissingTargetQuestionIds,
                 allowedSourceAnswerIds:
                   includedAnswerIdsByExecutionId.get(execution.id) ?? new Set<string>(),
                 completedAt: execution.completed_at,

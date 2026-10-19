@@ -1,3 +1,13 @@
+## 2026-10-19 — J7: perguntas ausentes validadas contra aplicabilidade original
+
+**FATO TÉCNICO:** o histórico de resultados da IA anteriormente passava **todos** os IDs das perguntas da versão como `allowedMissingTargetQuestionIds` em `presentStoredAiReview`. Isso podia classificar como válido um achado `missing_answer` que se referisse a uma pergunta já respondida, condicional não aplicável ou informativa. A validação inicial feita antes de persistir um resultado já possui uma regra determinística mais restritiva em `buildAnamnesisReviewContext`.
+
+**CORREÇÃO FUNCIONAL:** o histórico da IA e ambos os comandos de decisão humana reconstruem o conjunto de perguntas realmente aplicáveis, ainda não respondidas e permitidas, com o **mesmo helper** já usado na preparação do contexto minimizado. Campos informativos e capacidade financeira seguem excluídos das perguntas ausentes. Inconsistência de submissão, versão ou respostas gera allowlist nula e saída não acionável; não há reinterpretação do texto original, apagamento de decisões ou publicação automática. A proveniência de respostas incluídas por execução e as regras RLS/MFA continuam separadas e obrigatórias.
+
+**ESCOPO:** `lib/ai/anamnesis-review-context.ts`, `lib/ai/anamnesis-review-history.ts`, página/ações administrativas J7, testes unitários/contratuais e Playwright sintético com uma pergunta já respondida e outra condicional não aplicável. **FORA DE ESCOPO:** schema, migrations, Auth/RLS/grants, Supabase de produção, provider OpenAI, dados reais, envio externo, mensagens, diagnósticos, protocolos e regras clínicas novas. **ACEITE:** `Validate application`, `Validate J7 local AI review lifecycle browser` e regressão J6 verdes no SHA exato; somente a pergunta sintética aplicável e realmente ausente permanece acionável. O gate externo de saúde segue **NÃO LIBERADO** e a homologação profissional continua reservada ao encerramento conjunto.
+
+---
+
 ## 2026-10-19 — J7: conferir proveniência contra fontes imutáveis por execução
 
 **FATO TÉCNICO:** `start_anamnesis_review_execution` já grava em `ai_execution_sources` as respostas efetivamente incluídas na execução (confirmação por catálogo SQL, sem consultar dados reais). Antes deste pacote, a exibição e a ação administrativa validavam IDs contra **todas as respostas da mesma Anamnese**, o que era insuficiente para demonstrar que uma resposta participou de determinada execução (ex.: inclusão financeira opt-in).

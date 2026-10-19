@@ -21,12 +21,13 @@ export type StoredAiReviewPresentation = {
  * incomplete, or cross-submission output must not become "no findings" and
  * must never offer professional action buttons.
  *
- * Allowlists here prove only that referenced IDs belong to this submission
- * and its form version. The original model-output validation remains the
- * authority on applicability at the moment the execution was recorded.
+ * Source allowlists prove recorded provenance for this exact execution.
+ * Missing targets are reconstructed from the submission's versioned answers
+ * and deterministic applicability rules, rather than all form questions.
+ * If this context is inconsistent, no historical finding is actionable.
  */
 export function presentStoredAiReview(input: {
-  allowedQuestionIds: ReadonlySet<string>;
+  allowedMissingTargetQuestionIds: ReadonlySet<string> | null;
   allowedSourceAnswerIds: ReadonlySet<string>;
   completedAt: string | null;
   content: unknown;
@@ -51,12 +52,16 @@ export function presentStoredAiReview(input: {
     return hidden("invalid_output");
   }
 
+  if (input.allowedMissingTargetQuestionIds === null) {
+    return hidden("invalid_output");
+  }
+
   if (input.content == null) {
     return hidden("missing_output");
   }
 
   const result = validateAnamnesisReviewOutput({
-    allowedMissingTargetQuestionIds: input.allowedQuestionIds,
+    allowedMissingTargetQuestionIds: input.allowedMissingTargetQuestionIds,
     allowedSourceAnswerIds: input.allowedSourceAnswerIds,
     value: input.content,
   });
