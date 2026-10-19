@@ -5,6 +5,7 @@ import {
   AdminEducationalContentPublishForm,
 } from "@/components/admin/AdminEducationalContentVersionForms";
 import { AdminEducationalContentAssetUploadForm } from "@/components/admin/AdminEducationalContentAssetUploadForm";
+import { PrivateEducationalVideoPlayer } from "@/components/content/PrivateEducationalVideoPlayer";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -207,7 +208,7 @@ export default async function AdminEducationalContentDetailPage({
               <li key={asset.id}>
                 <Card variant="subtle">
                   <div className={styles.header}>
-                    <div>
+                    <div className={styles.assetDetails}>
                       <strong>{asset.asset_key}</strong>
                       <p className={styles.description}>
                         {asset.content_type} · {asset.byte_size.toLocaleString("pt-BR")} bytes
@@ -221,12 +222,19 @@ export default async function AdminEducationalContentDetailPage({
                       <p className={styles.mono}>
                         SHA-256: {asset.sha256_hex}
                       </p>
+                      {asset.content_type === "video/mp4" ? (
+                        <PrivateEducationalVideoPlayer
+                          assetUrl={`/admin/conteudos/assets/${asset.id}`}
+                          title={inspected.title}
+                        />
+                      ) : null}
                       <Link
                         className={styles.backLink}
                         href={`/admin/conteudos/assets/${asset.id}`}
+                        rel="noopener noreferrer"
                         target="_blank"
                       >
-                        Abrir arquivo privado
+                        {asset.content_type === "video/mp4" ? "Baixar vídeo privado" : "Abrir arquivo privado"}
                       </Link>
                     </div>
                     <Badge variant="positive">Registrado</Badge>
