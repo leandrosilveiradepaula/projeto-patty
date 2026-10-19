@@ -1,3 +1,13 @@
+## 2026-10-19 — J7: autoria rastreável das decisões humanas sobre achados da IA
+
+**FATO CONFIRMADO:** `ai_finding_actions.acted_by_profile_id` é uma FK para `profiles.id` e registra o ator da decisão sem modificar a saída da IA. Consulta somente de metadados confirmou que a política RLS de `profiles` permite ao admin AAL2 seu próprio perfil e perfis das clientes sob assignment, **não** uma lista indiscriminada de todas as profissionais. Não houve leitura ou alteração de dados reais.
+
+**DECISÃO TÉCNICA:** a UI administrativa associa a cada ação já persistida sua data e o nome profissional **somente quando visível por RLS**, obtido por consulta autenticada separada após as ações client-scoped. Na ausência de nome autorizado, o texto é `Nome não disponível`; o identificador original `acted_by_profile_id` continua acessível num `details` recolhido para auditoria. O nome não pode substituir ou alterar o ID original, não é enviado à IA e não aparece na cliente. Consulta de atores usa lotes paginados e não utiliza service role. Não há novo direito de acesso, atribuição automática ou regra profissional.
+
+**OBJETIVO/ESCOPO:** completar a autoria auditável da Anamnese assistida J7; arquivos: consulta read-only das ações de IA, apresentação/CSS, contratos de RLS e Playwright local sintético com MFA AAL2, status de jornada. **FORA DE ESCOPO:** Auth, schema, migrations, RLS/grants, credenciais, dados reais, provider/prompt OpenAI, comunicações, protocolos e publicações. **CRITÉRIOS/TESTES:** CI `Validate application`, `Validate J7 local AI review lifecycle browser`, TypeScript/build, RLS e teste sintético de autoria após observação/nota profissional; PR no SHA exato. Como o pacote toca `lib/ai` e E2E, exige merge específico conforme `AGENTS.md`. **RISCO:** nomes de outros atores podem estar corretamente ocultos pela política RLS; não inferir nomes a partir de IDs ou permissões adicionais. Homologação conjunta e gate de saúde continuam pendentes.
+
+---
+
 ## 2026-10-19 — J7: navegação exata às fontes da IA e integridade das decisões
 
 **FATO CONFIRMADO:** consulta somente ao catálogo do PostgreSQL do Projeto Corpo e Mente mostrou que a constraint vigente `ai_finding_actions_one_human_decision_per_finding` exige `UNIQUE (execution_id, finding_index)`. Isso não permite duas decisões humanas sobre o mesmo achado, mesmo se forem de tipos diferentes. A declaração anterior do PR #924 de que o banco permite múltiplas decisões para um achado estava incorreta; a apresentação defensiva do histórico é mantida sem mudança na constraint.

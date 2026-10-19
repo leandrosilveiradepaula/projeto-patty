@@ -98,3 +98,19 @@ test("J7 links validated finding sources to exact, authorized original questions
   assert.ok(aiCss.includes(".sourceLink:focus-visible"));
   assert.ok(!historyPage.includes("#resposta-${answerId}"));
 });
+
+test("J7 shows immutable actor identity only with RLS-visible profile names", () => {
+  const actionsRead = readFileSync(new URL("../../lib/ai/finding-actions.ts", import.meta.url), "utf8");
+  const historyCss = readFileSync(new URL("../../app/admin/anamneses/[anamneseId]/ia/page.module.css", import.meta.url), "utf8");
+  assert.match(actionsRead, /orderedRows\.map\(\(action\) => action\.acted_by_profile_id\)/);
+  assert.match(actionsRead, /const profileSupabase = await createClient\(\)/);
+  assert.match(actionsRead, /\.from\("profiles"\)/);
+  assert.match(actionsRead, /\.select\("id, display_name"\)/);
+  assert.match(actionsRead, /actor_display_name: namesById\.get\(action\.acted_by_profile_id\) \?\? null/);
+  assert.match(historyPage, /Responsável pela decisão:/);
+  assert.match(historyPage, /action\.actor_display_name \|\| "Nome não disponível"/);
+  assert.match(historyPage, /action\.acted_by_profile_id/);
+  assert.match(historyPage, /Ver identificador do responsável/);
+  assert.match(historyCss, /\.actorAudit summary:focus-visible/);
+  assert.doesNotMatch(historyPage, /auth\.users|actor\.email|autoPublish/);
+});

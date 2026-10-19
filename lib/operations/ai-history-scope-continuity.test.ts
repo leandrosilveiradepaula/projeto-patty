@@ -19,3 +19,19 @@ test("all privileged actions verify the exact RLS-accessible submission and exec
  assert.match(s,/assertAiExecutionBelongsToSubmission\(/);
  assert.match(s,/requireRole\("admin"\)/);
 });
+
+test("actor names come only from RLS-visible profiles after scoped actions", () => {
+ const s=read("lib/ai/finding-actions.ts");
+ const a=s.slice(s.indexOf("export async function listAccessibleAiFindingActions("),s.indexOf("export async function recordAiFindingAction("));
+ assert.match(a,/const orderedRows = rows\.sort/);
+ assert.match(a,/if \(orderedRows\.length === 0\) return \[\]/);
+ assert.match(a,/const profileSupabase = await createClient\(\)/);
+ assert.match(a,/collectAiPagesForIds\(/);
+ assert.match(a,/orderedRows\.map\(\(action\) => action\.acted_by_profile_id\)/);
+ assert.match(a,/\.from\("profiles"\)/);
+ assert.match(a,/\.in\("id", ids\)/);
+ assert.match(a,/\.order\("id", \{ ascending: true \}\)/);
+ assert.match(a,/\.range\(from, to\)/);
+ assert.ok(a.indexOf('from("ai_finding_actions")')<a.indexOf('from("profiles")'));
+ assert.doesNotMatch(a,/createFindingActionsAdminClient\(|service_role/);
+});

@@ -380,6 +380,9 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
         " and finding_index=0 and action='accepted_internal_observation'",
       ).length, { timeout: 25000 }).toBe(1);
       await expect(admin.getByText("Aceito como observação interna", { exact: true })).toBeVisible();
+      await expect(finding.getByText("Responsável pela decisão: J7 Synthetic staff", { exact: true })).toBeVisible();
+      await finding.getByText("Ver identificador do responsável", { exact: true }).click();
+      await expect(finding.getByText(staff.id, { exact: true })).toBeVisible();
       expect(executionRows(validExecutionId)[0].content).toEqual({ findings: validFindings });
     });
 
@@ -396,6 +399,7 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
         " where execution_id=" + literal(validExecutionId) + " and finding_index=1",
       )[0];
       expect(action.finding_snapshot).toEqual(validFindings[1]);
+      await expect(finding.getByText("Responsável pela decisão: J7 Synthetic staff", { exact: true })).toBeVisible();
       const review = rows(
         "select id,submission_id,reviewer_profile_id,note from public.anamnesis_reviews" +
         " where id=" + literal(action.anamnesis_review_id),
