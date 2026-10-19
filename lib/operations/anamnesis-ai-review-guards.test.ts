@@ -55,7 +55,7 @@ test("J7 links a recorded human note to the exact immutable review without expos
   assert.match(historyPage, /isUuid\(action\.anamnesis_review_id\)/);
   assert.match(historyPage, /\/revisao#revisao-\$\{action\.anamnesis_review_id\}/);
   assert.match(historyPage, /Abrir anotação profissional exata/);
-  assert.match(historyPage, /recordedActions\.length === 0 \?/);
+  assert.match(historyPage, /!hasRecordedAction \?/);
   assert.doesNotMatch(historyPage, /href=\{.*finding\.explanation/);
 });
 
@@ -71,13 +71,13 @@ test("J7 displays decision timestamp separately from immutable AI finding", () =
 
 
 test("J7 keeps every distinct persisted human action visible instead of silently replacing it", () => {
-  assert.match(historyPage, /findingActionsByKey\.get\(key\) \?\? \[\]/);
+  assert.match(historyPage, /findingActionsByExecutionId\.get\(action\.execution_id\) \?\? \[\]/);
   assert.match(historyPage, /existing\.push\(action\)/);
   assert.match(historyPage, /recordedActions\.map\(\(action\) =>/);
   assert.match(historyPage, /key=\{action\.id\}/);
   assert.match(historyPage, /recordedActions\.length > 1/);
   assert.match(historyPage, /Mais de uma decisão registrada/);
-  assert.match(historyPage, /recordedActions\.length === 0/);
+  assert.match(historyPage, /!hasRecordedAction/);
 });
 
 test("J7 links validated finding sources to exact, authorized original questions", () => {
@@ -113,4 +113,24 @@ test("J7 shows immutable actor identity only with RLS-visible profile names", ()
   assert.match(historyPage, /Ver identificador do responsável/);
   assert.match(historyCss, /\.actorAudit summary:focus-visible/);
   assert.doesNotMatch(historyPage, /auth\.users|actor\.email|autoPublish/);
+});
+
+test("J7 refuses to misattribute immutable human decisions to a mismatched AI finding", () => {
+  const integrity = readFileSync(new URL("../../lib/ai/finding-action-integrity.ts", import.meta.url), "utf8");
+  const css = readFileSync(new URL("../../app/admin/anamneses/[anamneseId]/ia/page.module.css", import.meta.url), "utf8");
+  assert.match(historyPage, /auditFindingActionLinks\(/);
+  assert.match(historyPage, /findingActionsByExecutionId\.get\(execution\.id\)/);
+  assert.match(historyPage, /audit\.matchedByIndex\.get\(index\)/);
+  assert.match(historyPage, /audit\.lockedIndices\.has\(index\)/);
+  assert.match(historyPage, /hasRecordedAction && recordedActions\.length === 0/);
+  assert.match(historyPage, /Decisão histórica não associável/);
+  assert.match(historyPage, /audit\.unmatchedActions\.map\(\(action\) =>/);
+  assert.match(historyPage, /Vínculo histórico de decisão exige conferência/);
+  assert.match(historyPage, /audit\.pendingIndices\.length/);
+  assert.match(historyPage, /Ir ao primeiro achado aguardando decisão/);
+  assert.match(historyPage, /id=\{`achado-ia-\$\{execution\.id\}-\$\{index\}`\}/);
+  assert.match(css, /\.finding:target/);
+  assert.match(integrity, /findingSnapshotMatches\(action\.finding_snapshot, findings\[index\]\)/);
+  assert.match(integrity, /lockedIndices\.add\(index\)/);
+  assert.doesNotMatch(historyPage, /finding\.explanation[^\n]*href/);
 });
