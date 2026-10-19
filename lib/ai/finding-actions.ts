@@ -71,12 +71,34 @@ export async function listAccessibleAiFindingActions(executionIds: string[]) {
     .order("created_at", { ascending: true })
     .order("id", { ascending: true })
     .range(from, to));
-  return rows.sort((a, b) => {
+  const orderedRows = rows.sort((a, b) => {
     const at = Date.parse(a.created_at);
     const bt = Date.parse(b.created_at);
     return (Number.isFinite(at) ? at : -Infinity) -
       (Number.isFinite(bt) ? bt : -Infinity) || a.id.localeCompare(b.id);
   });
+  if (orderedRows.length === 0) return [];
+
+  // Only look up actors from already RLS-authorized action rows. The normal
+  // session/RLS also controls which profile names may be revealed; unavailable
+  // names never change the immutable recorded actor profile ID.
+  const profileSupabase = await createClient();
+  const actorProfiles = await collectAiPagesForIds(
+    orderedRows.map((action) => action.acted_by_profile_id),
+    (ids, from, to) => profileSupabase
+      .from("profiles")
+      .select("id, display_name")
+      .in("id", ids)
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
+  const namesById = new Map(
+    actorProfiles.map((profile) => [profile.id, profile.display_name?.trim() || null]),
+  );
+  return orderedRows.map((action) => ({
+    ...action,
+    actor_display_name: namesById.get(action.acted_by_profile_id) ?? null,
+  }));
 }
 
 export async function recordAiFindingAction(input: {
