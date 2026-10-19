@@ -111,6 +111,10 @@ O arquivo original deve permanecer preservado no Drive. O path final deve ser op
 O Blob store privado esta criado/conectado. A fonte aprovada foi reobtida read-only em 2026-10-07 e tamanho/MIME foram reconfirmados; o SHA-256 previamente verificado continua sendo gate e deve ser recomputado a partir dos bytes usados no upload. Nenhum upload Blob, registro de asset, publicacao ou release foi executado. O lote permanece fail-closed antes da transferencia fisica e da validacao de entrega privada do video acima de 100 MB.
 
 
+### ATUALIZAÇÃO OPERACIONAL — 2026-10-19
+
+O vídeo aprovado da balança foi enviado ao Vercel Blob **privado** e registrado em `educational_content_assets` (path opaco, 123.262.796 bytes, SHA-256 igual ao original). O link autenticado de acesso administrativo provocou **download** do MP4; isso não comprova visualização no navegador nem busca/Range. Foi iniciada uma correção apenas de interface, com player nativo e download separado, sob as rotas já autorizadas de admin e cliente. A versão continua em rascunho e nenhuma cliente recebeu o vídeo; a reprodução real e homologação conjunta continuam pendentes. As afirmações históricas acima sobre ausência de upload eram verdadeiras nos respectivos dias, mas não descrevem o estado atual.
+
 ## Gate de publicacao para conteudo em video
 
 ### DECISAO TECNICA DE PRODUTO
