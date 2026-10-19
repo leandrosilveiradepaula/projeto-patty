@@ -275,6 +275,19 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
   });
   const startedExecutionId = createExecution(ownerClientId, submission.submissionId, staff.id, promptId);
 
+  // Independent service-only RPC probe on a separate disposable execution.
+  // Failure is reported by SQLSTATE alone; no note, source or prompt is logged.
+  const probeExecutionId = createExecution(ownerClientId, submission.submissionId, staff.id, promptId);
+  const probe = await service.rpc("recover_started_ai_execution", {
+    p_execution_id: probeExecutionId,
+    p_recovered_by_profile_id: staff.id,
+    p_reason: "J7 synthetic local service-role recovery preflight",
+  });
+  if (probe.error) {
+    throw new Error("J7 local recovery RPC failed with SQLSTATE " + (probe.error.code ?? "unknown"));
+  }
+  expect(executionRows(probeExecutionId)[0].status).toBe("failed");
+
   expect(scopedCount(staff.id, "aal1", "ai_executions", validExecutionId)).toBe(0);
   expect(scopedCount(staff.id, "aal2", "ai_executions", validExecutionId)).toBe(1);
   expect(scopedCount(staff.id, "aal2", "ai_execution_outputs", validExecutionId)).toBe(1);
