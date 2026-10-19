@@ -892,6 +892,22 @@ export async function listAccessibleAiExecutionOutputs(executionIds: string[]) {
     .range(from, to));
 }
 
+/**
+ * Answer provenance is execution-scoped, not just submission-scoped.
+ * The caller's RLS/AAL2 assignment must authorize each immutable source.
+ * Missing source rows deliberately fail closed when validating findings.
+ */
+export async function listAccessibleAiAnamnesisAnswerSources(executionIds: string[]) {
+  const supabase = await createClient();
+  return collectAiPagesForIds(executionIds, (ids, from, to) => supabase
+    .from("ai_execution_sources")
+    .select("id, execution_id, anamnesis_answer_id, anamnesis_submission_id")
+    .eq("source_kind", "anamnesis_answer")
+    .in("execution_id", ids)
+    .order("id", { ascending: true })
+    .range(from, to));
+}
+
 export async function getLatestAccessibleAiPromptVersion(promptKey: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
