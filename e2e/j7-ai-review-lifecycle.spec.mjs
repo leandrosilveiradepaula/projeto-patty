@@ -263,6 +263,20 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
   ];
   completeExecution(validExecutionId, ownerClientId, { findings: validFindings });
 
+  // Deliberately inconsistent *synthetic* legacy action, inserted by the
+  // disposable localhost-only PostgreSQL fixture, never through the app.
+  // It verifies that the UI does not attach a decision to the wrong finding.
+  const inconsistentActionId = sql(
+    "insert into public.ai_finding_actions" +
+    " (execution_id,client_id,finding_index,finding_snapshot,action,acted_by_profile_id)" +
+    " values (" + [
+      validExecutionId, ownerClientId, 2,
+      { ...validFindings[2], explanation: "J7 cópia histórica sintética divergente." },
+      "accepted_internal_observation", staff.id,
+    ].map(literal).join(",") + ") returning id;",
+  );
+  expect(inconsistentActionId).toMatch(UUID);
+
   const emptyExecutionId = createExecution(ownerClientId, submission.submissionId, staff.id, promptId);
   completeExecution(emptyExecutionId, ownerClientId, { findings: [] });
   const invalidExecutionId = createExecution(ownerClientId, submission.submissionId, staff.id, promptId);
@@ -347,6 +361,21 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
     await expect(admin.getByText("J7 conteúdo sintético com referência de outra cliente.", { exact: true })).toHaveCount(0);
     await expect(admin.getByText(validFindingText, { exact: true })).toBeVisible();
 
+    await test.step("Inconsistent historical snapshots remain auditable but never become a decision on a different finding", async () => {
+      await expect(admin.getByText("Vínculo histórico de decisão exige conferência", { exact: true })).toBeVisible();
+      const inconsistent = admin.getByText("J7 resposta sintética opcional ausente.", { exact: true }).locator("..");
+      await expect(inconsistent.getByText("Decisão histórica não associável", { exact: true })).toBeVisible();
+      await expect(inconsistent.getByRole("button", { name: "Aceitar como observação interna" })).toHaveCount(0);
+      await expect(inconsistent.getByRole("button", { name: "Salvar como anotação da Patty" })).toHaveCount(0);
+      const next = admin.getByRole("link", { name: "Ir ao primeiro achado aguardando decisão" });
+      await expect(next).toHaveAttribute("href", "#achado-ia-" + validExecutionId + "-0");
+      await next.click();
+      await expect(admin).toHaveURL(new RegExp("#achado-ia-" + validExecutionId + "-0$"));
+      await admin.getByText("Consultar decisões históricas sem vínculo confirmado", { exact: true }).click();
+      await expect(admin.getByText("Ação: " + inconsistentActionId, { exact: true })).toBeVisible();
+      await admin.goto(reviewURL);
+    });
+
     await test.step("AI sources open exact original answers and missing questions on mobile", async () => {
       const first = admin.getByText(validFindingText, { exact: true }).locator("..");
       const source = first.getByRole("link", { name: "Ver resposta original: J7 pergunta sintética A" });
@@ -400,6 +429,7 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
       )[0];
       expect(action.finding_snapshot).toEqual(validFindings[1]);
       await expect(finding.getByText("Responsável pela decisão: J7 Synthetic staff", { exact: true })).toBeVisible();
+      await expect(admin.getByText("2 de 3 achado(s) com decisão humana vinculada; 0 aguardando decisão.", { exact: true })).toBeVisible();
       const review = rows(
         "select id,submission_id,reviewer_profile_id,note from public.anamnesis_reviews" +
         " where id=" + literal(action.anamnesis_review_id),
