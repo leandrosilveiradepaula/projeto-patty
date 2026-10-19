@@ -1,3 +1,13 @@
+## 2026-10-19 — J1: confirmação do convite e recuperação segura de papel após sessão
+
+**EVIDÊNCIA NOVA:** Playwright local do PR #931 isolou `phase=invalid-invite`, mas o callback não marcou o token como inválido; Auth confirmou o convite, registrou login, o navegador recebeu cookie de sessão, o papel `client` ficou visível sob a política RLS existente e um segundo GET genuíno para `/ativar-conta` tornou o formulário visível. Conclusão: o problema reproduzido é a **primeira renderização desatualizada de identidade após a confirmação**, não expiração de convite nem perda da autorização RLS.
+
+**CORREÇÃO TÉCNICA SOB TESTE:** quando a página recebe papel nulo sem fragmento de convite, o cliente primeiro verifica a sessão de maneira autenticada por `auth.getUser()`. Somente se houver usuário válido, faz **um único GET novo** com marcador `session_refresh=1`. O marcador não concede papel, não contém token e não libera formulário: a página refaz `getCurrentAuthContext()` no servidor e exige as mesmas políticas; na segunda leitura ainda sem role, apresenta erro e **não entra em loop nem ignora a autorização**. Sem sessão válida mantém o erro de convite, sem persistir ou expor credenciais. O início do rascunho continua ação server-side única com estado de pending.
+
+**TESTES/ACEITE:** contrato de segurança verifica a limitação do refresh e a validação server-side; teste J1 sintético percorre convite real, senha, cadastro, Anamnese versionada, duplicidade, retomada e isolamento no Supabase descartável; J6/J7 são regressões adicionais. Não alterar RLS/Auth/grants/migrations, banco de produção ou gate da IA. **Não declarar o defeito sanado nem a homologação concluída antes de CI completo e publicação no SHA exato.** O PR #933 foi encerrado sem merge por ser somente aumento de timeout; a triagem dos PRs antigos foi concluída, com #698 substituído pela PR #932 implantada. A homologação profissional da Patty permanece a **última tarefa global**.
+
+---
+
 ## 2026-10-19 — Consolidação pré-homologação: J1 local e aposentadoria do smoke em produção
 
 **FATO CONFIRMADO:** no mesmo `master` `fe261cec051ff843ffc72b66c5329552b6634628`, o workflow de onboarding da J1 passou na run `39312400602` e falhou na run `39312497722`. A falha aconteceu após clicar em `Começar Anamnese`: a URL permaneceu em `/cliente/anamnese` durante a asserção de 5 segundos, sem alcançar `/cliente/anamnese/{uuid}`. O mesmo código ter passado antes **não** comprova inexistência de defeito intermitente; os logs disponíveis também não provam causa raiz (hidratação, redirect, backend ou condição de corrida).
