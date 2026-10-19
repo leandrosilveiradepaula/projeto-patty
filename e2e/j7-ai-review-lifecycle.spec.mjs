@@ -147,11 +147,11 @@ function createSubmission(clientId, formVersionId, questionIds) {
   });
   const a = insert("anamnesis_answers", {
     submission_id: submissionId, form_version_id: formVersionId,
-    question_id: questionIds[0], answer_value: "J7 resposta sintética A",
+    question_id: questionIds[0], answer_value: JSON.stringify("J7 resposta sintética A"),
   });
   const b = insert("anamnesis_answers", {
     submission_id: submissionId, form_version_id: formVersionId,
-    question_id: questionIds[1], answer_value: "J7 resposta sintética B",
+    question_id: questionIds[1], answer_value: JSON.stringify("J7 resposta sintética B"),
   });
   const submitted = sql(
     "update public.anamnesis_submissions set submitted_at=statement_timestamp()" +
