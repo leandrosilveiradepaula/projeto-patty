@@ -20,6 +20,7 @@ export function ActivationSessionGate({
   const [phase, setPhase] = useState<Phase>(
     invalid ? "invalid" : role ? "ready" : "checking",
   );
+  const [authorizedRole, setAuthorizedRole] = useState<typeof role>(role);
 
   useEffect(() => {
     if (invalid) {
@@ -34,18 +35,34 @@ export function ActivationSessionGate({
         return;
       }
 
-      // The browser has just received GoTrue's callback cookies, but the
-      // initial Server Component may still contain the pre-confirmation role.
-      // Browser getUser() can itself lag behind this cookie handoff. A single
-      // fresh GET is safe: the *server* remains the sole role authority.
-      // The query parameter cannot grant a session, role or access.
-      if (new URLSearchParams(window.location.search).get("session_refresh") === "1") {
-        setPhase("failed");
-        return;
-      }
+      // Supabase has finished the invite callback, but the first Server
+      // Component can still carry a stale anonymous role. Request a fresh,
+      // private, uncached authorization read under the browser's new cookie.
+      // No query parameter or browser-supplied role may grant access.
       setPhase("checking");
-      window.location.replace("/ativar-conta?session_refresh=1");
-      return;
+      const controller = new AbortController();
+      void (async () => {
+        try {
+          const response = await fetch("/ativar-conta/session", {
+            cache: "no-store",
+            credentials: "same-origin",
+            headers: { Accept: "application/json" },
+            signal: controller.signal,
+          });
+          if (!response.ok) throw new Error("Session verification unavailable");
+          const verified = await response.json() as { role?: unknown };
+          if (controller.signal.aborted) return;
+          if (verified.role === "client" || verified.role === "admin") {
+            setAuthorizedRole(verified.role);
+            setPhase("ready");
+          } else {
+            setPhase("failed");
+          }
+        } catch {
+          if (!controller.signal.aborted) setPhase("failed");
+        }
+      })();
+      return () => controller.abort();
     }
 
     // Scrub one-time tokens before any asynchronous request.
@@ -79,8 +96,8 @@ export function ActivationSessionGate({
     })();
   }, [invalid, role]);
 
-  if (phase === "ready" && role && !invalid) {
-    return <ClientActivationPasswordForm role={role} />;
+  if (phase === "ready" && authorizedRole && !invalid) {
+    return <ClientActivationPasswordForm role={authorizedRole} />;
   }
   if (phase === "invalid") {
     return (
