@@ -1,3 +1,13 @@
+## 2026-10-18 — J6: merge, Vercel e migration de RLS aplicados (mídia privada pendente)
+
+**FATOS CONFIRMADOS:** PR [#911](https://github.com/leandrosilveiradepaula/projeto-patty/pull/911) integrado ao `master` no commit `4802f2ef72f555d59a0e9d12cde9c873f1b221cb`. GitHub Actions `Validate application` e prévia `Deploy Supabase migrations` passaram no SHA integrado ([validação](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39169643192), [prévia](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39169643195)); o status `Vercel` no GitHub é `success` para esse SHA. Esse status não substitui um teste do vídeo em produção.
+
+**BANCO APLICADO E CONFERIDO:** SQL exato do arquivo `supabase/migrations/20261018143000_fix_client_content_releases_insert_rls_recursion.sql` aplicado com sucesso ao Supabase SaaS `hqanoskwjvpbgavppcud` pela integração administrativa. O mecanismo de aplicação registrou inicialmente a versão temporal `20261019004359`; após conferir nome, comprimento e digest do SQL, o histórico oficial foi reconciliado de forma condicional para a versão do repositório `20261018143000`. O catálogo remoto confirma **90 migrations**, uma entrada J6 correspondente ao arquivo, função privada `SECURITY INVOKER`, RLS ativa em versões/assets/liberações, MFA `RESTRICTIVE`, autoria, assignment vigente, grants mínimos e trigger de publicação/asset ativo. Nenhuma cliente ou conteúdo foi alterado para teste; zero assets e zero liberações no SaaS.
+
+**PENDÊNCIA PARA IMPLANTAÇÃO TÉCNICA INTEGRAL:** transferência do vídeo aprovado ao Vercel Blob privado, verificação de tamanho/MIME/SHA-256 no objeto destino e entrega autenticada/isolamento/Range/reprodução. A integração operacional Vercel ainda não estava conectada no ChatGPT no momento desta consulta; **não** declarar mídia migrada, J6 integralmente implantada ou homologada. Publicação e liberação de conteúdos reais permanecem decisões exclusivas da Patty. Homologação profissional será conjunta após as jornadas.
+
+---
+
 ## 2026-10-18 — Decisão de processo: homologação profissional única ao final das jornadas
 
 **DECISÃO CONFIRMADA PELO RESPONSÁVEL:** separar conclusão técnica de cada jornada da homologação profissional, que será executada conjuntamente quando todas as jornadas em escopo estiverem prontas. **Não** antecipar aceite: manter documentação e evidências técnicas por jornada. A decisão não adia revisões obrigatórias de segurança, migration, RLS, CI, merge, deploy, verificação de arquivos privados ou aprovação/publicação humana; essas etapas continuam exigidas antes de declarar implantação técnica concluída. Fonte normativa: `docs/DECISIONS.md`; roteiro operacional: `docs/JOURNEY_HOMOLOGATION.md`.
