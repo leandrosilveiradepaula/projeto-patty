@@ -5,6 +5,10 @@ import { getCurrentAuthContext } from "@/lib/supabase/auth";
 
 import styles from "./page.module.css";
 
+// Authenticated RSC output must never be reused from an anonymous prefetch.
+export const dynamic = "force-dynamic";
+
+
 type ActivationPageProps = {
   searchParams: Promise<{
     error?: string;
