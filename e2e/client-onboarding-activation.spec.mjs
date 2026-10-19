@@ -1,3 +1,8 @@
+// Historical hosted-fixture smoke is retired. Keep the source only for
+// auditability and to validate its cleanup helpers. It must not be run:
+// production is never a test-fixture database.
+throw new Error("Legacy production J1 smoke retired; use the disposable J1 local workflow");
+
 import { randomBytes } from "node:crypto";
 import { expect, test } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
