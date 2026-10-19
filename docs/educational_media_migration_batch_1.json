@@ -3,7 +3,7 @@
   "generated_at": "2026-09-24",
   "batch_key": "educational_media_batch_1_food_scale",
   "scope": "single approved educational media source; no upload, publication, or client release is performed by this manifest",
-  "batch_status": "private_blob_uploaded_asset_registered_delivery_test_pending",
+  "batch_status": "private_blob_uploaded_asset_registered_inline_playback_observed",
   "items": [
     {
       "source": {
@@ -97,8 +97,9 @@
         "draft_version_created_at": "2026-10-03",
         "blob_upload_verified_at": "2026-10-19",
         "asset_registered_at_utc": "2026-10-19T02:03:27.962642Z",
-        "delivery_verification_status": "authenticated_playback_range_seek_pending",
-        "production_snapshot_note": "Private Blob store projeto-patty-blob: 1 object, 123262796 bytes, private, iad1; Supabase version ae45c5db...: 1 primary asset with matching path/MIME/size/SHA-256, unpublished, 0 client releases. No independent authorized playback yet; user UI shows E2E Admin so professional identity/acceptance must not be inferred."
+        "delivery_verification_status": "admin_e2e_session_inline_playback_and_seek_operator_confirmed",
+        "production_snapshot_note": "Private Blob store projeto-patty-blob: 1 object, 123262796 bytes, private, iad1; Supabase version ae45c5db...: 1 primary asset with matching path/MIME/size/SHA-256, unpublished, 0 client releases. No independent authorized playback yet; user UI shows E2E Admin so professional identity/acceptance must not be inferred.",
+        "delivery_verification_note": "Em produção no SHA c9317f80, captura mostra player reproduzindo MP4 em 0:01/2:21 e operador confirmou verbalmente o avanço da reprodução. Captura identifica E2E Admin. Não foram capturados headers 206/Content-Range, nem testada cliente em produção ou homologação Patty."
       }
     }
   ],
