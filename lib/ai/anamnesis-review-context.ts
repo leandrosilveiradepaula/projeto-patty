@@ -206,3 +206,24 @@ export function buildAnamnesisReviewContext(input: {
     sources,
   };
 }
+
+/**
+ * Reconstruct the same missing-question allowlist used when preparing a
+ * minimized Anamnese review. Stored history must not treat every question in
+ * the version as unanswered/applicable. Invalid source context fails closed.
+ *
+ * The historical output itself remains immutable; this only gates whether a
+ * previously stored finding may be offered for a new professional decision.
+ */
+export function reconstructStoredReviewMissingTargets(
+  input: Omit<Parameters<typeof buildAnamnesisReviewContext>[0], "explicitlyIncludedAnswerIds">,
+): ReadonlySet<string> | null {
+  try {
+    return buildAnamnesisReviewContext(input).allowedMissingTargetQuestionIds;
+  } catch (error) {
+    if (error instanceof AnamnesisReviewContextBuildError) {
+      return null;
+    }
+    throw error;
+  }
+}
