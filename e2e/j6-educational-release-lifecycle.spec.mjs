@@ -299,8 +299,8 @@ test("J6: versioned content releases require exact published version and synthet
         educational_content_version_id: v2.id,
         asset_key: "primary",
         storage_provider: "vercel_blob",
-        storage_path: "j6-local-nonexistent/" + nonce + "/no-object.pdf",
-        content_type: "application/pdf",
+        storage_path: "j6-local-nonexistent/" + nonce + "/no-object.mp4",
+        content_type: "video/mp4",
         byte_size: 32,
         sha256_hex: "a".repeat(64),
       });
@@ -309,6 +309,11 @@ test("J6: versioned content releases require exact published version and synthet
       expect(visibleCount(staff.id, "aal2", "educational_content_assets", syntheticAssetId)).toBe(1);
       await admin.reload();
       await expect(admin.getByText("Nenhum asset registrado")).toHaveCount(0);
+      const adminVideo = admin.getByLabel("Reproduzir vídeo: J6 material com asset sintetico");
+      await expect(adminVideo).toBeVisible();
+      await expect(adminVideo).toHaveAttribute("preload", "none");
+      await expect(adminVideo).toHaveAttribute("src", `/admin/conteudos/assets/${syntheticAssetId}`);
+      // No attempt to play: the local metadata does not have real Blob bytes.
       await assertMobile(admin);
     });
 
@@ -399,6 +404,10 @@ test("J6: versioned content releases require exact published version and synthet
       expect(visibleCount(staff.id, "aal1", "client_content_releases", releaseId)).toBe(0);
       await client.reload();
       await expect(client.getByText("J6 material com asset sintetico", { exact: true })).toBeVisible();
+      const clientVideo = client.getByLabel("Reproduzir vídeo: J6 material com asset sintetico");
+      await expect(clientVideo).toBeVisible();
+      await expect(clientVideo).toHaveAttribute("preload", "none");
+      await expect(clientVideo).toHaveAttribute("src", `/cliente/conteudos/assets/${syntheticAssetId}`);
       await expect(client.getByText("J6 material sem arquivo sintetico", { exact: true })).toHaveCount(0);
       await outsider.reload();
       await expect(outsider.getByText("Nenhum conteúdo foi liberado para você ainda", {
