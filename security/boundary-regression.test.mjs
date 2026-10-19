@@ -32,6 +32,7 @@ const ENTRYPOINT_RULES = new Map([
   ["app/api/cron/private-file-upload-cleanup/route.ts", "public-infrastructure"],
   ["app/api/cron/weekly-feedback-email-delivery/route.ts", "public-infrastructure"],
   ["app/ativar-conta/actions.ts", "authenticated-activation"],
+  ["app/ativar-conta/session/route.ts", "authenticated-activation-read"],
   ["app/auth/confirm/route.ts", "public-auth"],
   ["app/auth/recovery/route.ts", "public-auth"],
   ["app/auth/recovery-token/route.ts", "public-auth"],
@@ -133,6 +134,19 @@ test("classified protected entrypoints contain the expected authentication bound
         /createAdminClient\s*\(/,
         `${file} must not use the administrative client to set a user password`,
       );
+    }
+
+    if (rule === "authenticated-activation-read") {
+      assert.match(content, /getCurrentAuthContext\(\)/,
+        "Activation session lookup must be authenticated on the server");
+      assert.match(content, /context\?\.role === "client" \|\| context\?\.role === "admin"/,
+        "Only explicit, authorized app roles may be returned");
+      assert.match(content, /Cache-Control": "private, no-store/,
+        "Auth role responses must never be cached");
+      assert.match(content, /"Vary": "Cookie"/,
+        "Identity-scoped responses must vary by cookie");
+      assert.doesNotMatch(content, /createAdminClient\s*\(|service_role|user_metadata/,
+        "Role lookup must never gain privileges or trust user metadata");
     }
 
     if (rule === "public-infrastructure") {
@@ -1333,7 +1347,8 @@ test("initial activation supports admin and client but preserves admin MFA routi
   );
   assert.match(page, /getCurrentAuthContext\(\)/);
   assert.match(page, /<ActivationSessionGate invalid=/);
-  assert.match(activationGate, /phase === "ready" && role && !invalid/);
+  assert.match(activationGate, /phase === "ready" && authorizedRole && !invalid/);
+  assert.match(activationGate, /setAuthorizedRole\(verified\.role\)/);
   assert.match(activationGate, /parseImplicitInviteFragment\(window\.location\.hash\)/);
   assert.match(action, /getCurrentAuthContext\(\)/);
   assert.match(action, /context\.role === "admin" \? "\/mfa\/admin\/setup" : "\/cliente\/anamnese"/);
