@@ -48,6 +48,9 @@ jobs:
       - name: Install pinned dependencies
         run: npm ci
 
+      - name: Validate synthetic E2E JavaScript syntax
+        run: node --check e2e/j7-ai-review-lifecycle.spec.mjs
+
       - name: Enable disposable TOTP locally
         run: |
           node <<'NODE'
@@ -69,7 +72,7 @@ jobs:
       - name: Verify J7 AI RLS with pgTAP on disposable database
         run: npx supabase test db supabase/tests/database/ai_execution_boundary.test.sql
 
-      - name: Export only local public runtime variables
+      - name: Export only local runtime variables with masked service secret
         shell: bash
         run: |
           set -euo pipefail
