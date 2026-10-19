@@ -125,6 +125,10 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
 
   await test.step("activate invitation without exposing its one-time token", async () => {
     await page.goto("/login");
+    const anonymousSession = await page.request.get("/ativar-conta/session");
+    expect(anonymousSession.ok()).toBe(true);
+    expect(await anonymousSession.json()).toEqual({ role: null });
+    expect(anonymousSession.headers()["cache-control"]).toContain("no-store");
     await page.evaluate((token) => {
       const destination = new URL("/auth/confirm", window.location.origin);
       destination.searchParams.set("token_hash", token);
@@ -184,6 +188,12 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
         ", freshGetFormVisible=" + freshFormVisible,
       );
     }
+    // The fresh session route derives the authorized role from cookies and
+    // RLS, without trusting URL parameters or the stale Server Component.
+    const verifiedSession = await page.request.get("/ativar-conta/session");
+    expect(verifiedSession.ok()).toBe(true);
+    expect(await verifiedSession.json()).toEqual({ role: "client" });
+    expect(verifiedSession.headers()["cache-control"]).toContain("no-store");
     await page.getByLabel("Crie sua senha").fill(password);
     await page.getByLabel("Confirme sua senha").fill(password);
     await page.getByRole("button", { name: "Criar senha e continuar" }).click();
