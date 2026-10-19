@@ -78,7 +78,7 @@ test("J1 local run is not triggered by production deploy or CI and refuses remot
  assert.match(localSpec,/baseURL !== "http:\/\/127\.0\.0\.1:3000"/);
  assert.match(localSpec,/apiURL !== "http:\/\/127\.0\.0\.1:54321"/);
  assert.match(localSpec,/Boolean\(process\.env\.OPENAI_API_KEY\)/);
- assert.match(localSpec,/seedPublishedAnamnesis/);
+ assert.match(localSpec,/getPublishedAnamnesisFromMigrations/);
 });
 
 const verifiedRelease = "35304fec723f011ec8c113938e2700a45cdfe132";
