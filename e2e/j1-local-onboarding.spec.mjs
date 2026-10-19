@@ -134,7 +134,18 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
     if (new URL(page.url()).searchParams.has("token_hash"))
       throw new Error("One-time token remained in the browser URL");
     await expect(page.getByRole("heading", { name: "Ativar sua conta" })).toBeVisible();
-    await expect(page.locator('form[data-interactive="true"]')).toBeVisible({ timeout: 15000 });
+    // Do not leak the one-time token into Playwright diagnostics. Classify
+    // the *visible* activation boundary if the form does not become ready:
+    // this distinguishes an invalid invite from missing session/hydration.
+    await expect.poll(async () => {
+      if (await page.locator('form[data-interactive="true"]').count()) return "ready";
+      if (await page.getByText("Link inválido ou expirado").count()) return "invalid-invite";
+      if (await page.getByText("Não foi possível validar o convite").count()) return "auth-error";
+      if (await page.getByText("Validando convite").count()) return "checking-session";
+      if (await page.locator('form[data-interactive="false"]').count()) return "form-hydrating";
+      return "not-rendered";
+    }, { timeout: 15000, message: "J1 local activation boundary classification (no tokens)" })
+      .toBe("ready");
     await page.getByLabel("Crie sua senha").fill(password);
     await page.getByLabel("Confirme sua senha").fill(password);
     await page.getByRole("button", { name: "Criar senha e continuar" }).click();
