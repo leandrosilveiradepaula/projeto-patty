@@ -2,7 +2,7 @@ import assert from "node:assert/strict";import { readFileSync } from "node:fs";i
 const read=(p:string)=>readFileSync(new URL("../../"+p,import.meta.url),"utf8");
 test("execution and output history are complete under the caller's RLS",()=>{
  const s=read("lib/supabase/data-access.ts");
- for(const name of ["listAccessibleAiAnamnesisExecutions","listAccessibleNonterminalAiExecutions","listAccessibleAiExecutionOutputs"]){
+ for(const name of ["listAccessibleAiAnamnesisExecutions","listAccessibleNonterminalAiExecutions","listAccessibleAiExecutionOutputs","listAccessibleAiAnamnesisAnswerSources"]){
  const start=s.indexOf("export async function "+name+"("),end=s.indexOf("\nexport async function ",start+20),fn=s.slice(start,end);
  assert.ok(start>=0,name);assert.match(fn,/createClient\(\)/);assert.match(fn,/\.range\(from, to\)/);assert.doesNotMatch(fn,/createAdminClient|service_role/);
  }
@@ -34,4 +34,31 @@ test("actor names come only from RLS-visible profiles after scoped actions", () 
  assert.match(a,/\.range\(from, to\)/);
  assert.ok(a.indexOf('from("ai_finding_actions")')<a.indexOf('from("profiles")'));
  assert.doesNotMatch(a,/createFindingActionsAdminClient\(|service_role/);
+});
+
+test("each AI finding's cited answer is proven by immutable execution-scoped sources under RLS", () => {
+ const access = read("lib/supabase/data-access.ts");
+ const sourceStart = access.indexOf("export async function listAccessibleAiAnamnesisAnswerSources(");
+ const sourceEnd = access.indexOf("\nexport async function ", sourceStart + 20);
+ const source = access.slice(sourceStart, sourceEnd);
+ const page = read("app/admin/anamneses/[anamneseId]/ia/page.tsx");
+ const actions = read("app/admin/anamneses/[anamneseId]/ia/actions.ts");
+ assert.ok(sourceStart >= 0);
+ assert.match(source,/createClient\(\)/);
+ assert.match(source,/collectAiPagesForIds\(/);
+ assert.match(source,/\.from\("ai_execution_sources"\)/);
+ assert.match(source,/\.eq\("source_kind", "anamnesis_answer"\)/);
+ assert.match(source,/\.in\("execution_id", ids\)/);
+ assert.match(source,/\.range\(from, to\)/);
+ assert.doesNotMatch(source,/createAdminClient|service_role/);
+ assert.match(page,/listAccessibleAiAnamnesisAnswerSources\(executionIds\)/);
+ assert.match(page,/source\.anamnesis_submission_id !== submission\.id/);
+ assert.match(page,/answersById\.has\(source\.anamnesis_answer_id\)/);
+ assert.match(page,/includedAnswerIdsByExecutionId\.get\(execution\.id\)/);
+ assert.ok(!page.includes("const allowedSourceAnswerIds = new Set(answers.map"));
+ assert.match(actions,/listAccessibleAiAnamnesisAnswerSources\(\[executionId\]\)/);
+ assert.match(actions,/source\.execution_id === executionId/);
+ assert.match(actions,/source\.anamnesis_submission_id === submission\.id/);
+ assert.match(actions,/authorizedAnswerIds\.has\(source\.anamnesis_answer_id\)/);
+ assert.match(actions,/allowedSourceAnswerIds: recordedSourceAnswerIds/);
 });

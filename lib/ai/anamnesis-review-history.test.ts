@@ -124,3 +124,25 @@ test("nonterminal, failed and contradictory completion states cannot expose find
   assert.equal(present(valid, { completedAt: "invalid" }).state, "invalid_output");
   assert.equal(present(valid, { failedAt: completedAt }).state, "invalid_output");
 });
+
+test("an answer owned by the same submission but absent from this execution's ledger is not a valid source", () => {
+  const finding = (answerId: string) => ({
+    type: "clarification_needed",
+    source_answer_ids: [answerId],
+    explanation: "Exemplo sintético de proveniência.",
+  });
+  const recordedOnlyA = new Set([ANSWER_A]);
+  assert.equal(
+    present({ findings: [finding(ANSWER_A)] }, { allowedSourceAnswerIds: recordedOnlyA }).state,
+    "ready",
+  );
+  assert.equal(
+    present({ findings: [finding(ANSWER_B)] }, { allowedSourceAnswerIds: recordedOnlyA }).state,
+    "invalid_output",
+  );
+  assert.equal(
+    present({ findings: [finding(ANSWER_A)] }, { allowedSourceAnswerIds: new Set() }).state,
+    "invalid_output",
+  );
+  assert.equal(present({ findings: [] }, { allowedSourceAnswerIds: new Set() }).state, "ready");
+});
