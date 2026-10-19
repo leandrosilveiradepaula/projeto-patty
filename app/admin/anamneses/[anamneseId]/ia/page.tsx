@@ -348,6 +348,14 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
                                 {formatDateTime(action.created_at)}. O achado
                                 original da IA foi preservado.
                               </p>
+                              <p className={styles.meta}>
+                                Responsável pela decisão:{" "}
+                                {action.actor_display_name || "Nome não disponível"}
+                              </p>
+                              <details className={styles.actorAudit}>
+                                <summary>Ver identificador do responsável</summary>
+                                <code>{action.acted_by_profile_id}</code>
+                              </details>
                               {action.action === "converted_to_patty_note" &&
                               action.anamnesis_review_id &&
                               isUuid(action.anamnesis_review_id) ? (
