@@ -1,3 +1,11 @@
+## 2026-10-19 — J6: vídeo privado enviado e asset registrado (reprodução pendente)
+
+**FATOS CONFERIDOS EM PRODUÇÃO:** upload autenticado de `MovaviClips_Video_20220217-143151.mp4` para o store privado Vercel `projeto-patty-blob` (região `iad1`) concluído; o store mostra **1 objeto**, total **123.262.796 bytes**. A versão `ae45c5db-e6af-46db-9230-b05bc4f5a5bd` tem **1 asset `primary` registrado** no Supabase, com path real `educational/81cc75c9-8c68-471e-856c-54fe588f62e4.mp4`, MIME `video/mp4`, 123.262.796 bytes, SHA-256 `ee05d6c12ea02db283234f5d69a09ff60c4d831183fe6715d7aa9848e76905b1`, idêntico ao original aprovado no Google Drive. A ação de registro da aplicação exige autorização de admin e, para novo asset, chama `verifyPrivateBlobAsset`, que verifica o objeto privado por GET e recalcula digest, assinatura MP4 e tamanho antes de inserir os metadados. O manifesto `docs/educational_media_migration_batch_1.json` registra o path realmente gerado e preserva o path inicialmente planejado.
+
+**LIMITES DO ACEITE:** versão **ainda em rascunho**, **0 publicações**, **0 liberações para clientes**. O screenshot do operador mostra sessão identificada como `E2E Admin`; **não** tratar como aceite profissional da Patty ou homologação. Ainda falta verificar o link **Abrir arquivo privado** em sessão administrativa legítima, reprodução e busca/Range do vídeo e, na rodada conjunta posterior, autorização/isolamento de clientes. Não executar publicação ou liberação para fabricar teste. A mídia original continua preservada no Drive. **Implantação do binário e registro técnico concluídos; entrega autenticada real e homologação profissional pendentes.**
+
+---
+
 ## 2026-10-18 — J6: merge, Vercel e migration de RLS aplicados (mídia privada pendente)
 
 **FATOS CONFIRMADOS:** PR [#911](https://github.com/leandrosilveiradepaula/projeto-patty/pull/911) integrado ao `master` no commit `4802f2ef72f555d59a0e9d12cde9c873f1b221cb`. GitHub Actions `Validate application` e prévia `Deploy Supabase migrations` passaram no SHA integrado ([validação](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39169643192), [prévia](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39169643195)); o status `Vercel` no GitHub é `success` para esse SHA. Esse status não substitui um teste do vídeo em produção.
