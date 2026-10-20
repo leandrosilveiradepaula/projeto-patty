@@ -1,3 +1,19 @@
+## 2026-10-20 — Pré-homologação: arquivo administrativo oculto → liberação explícita → download da cliente
+
+**BASE TÉCNICA CONFIRMADA:** PR #937 mergeado como `04bb4980ae28b20549495ea54be6048b62344585`; seus checks pré-merge Validate application/J1/J6/J7 passaram, CI pós-merge success e Vercel READY no SHA correspondente. Homologação profissional da Patty não realizada.
+
+**OBJETIVO:** ampliar o teste J1 autenticado e descartável, na mesma cliente sintética e no mesmo Storage privado, para executar o upload pelo formulário administrativo real com MFA AAL2. Exigir um registro `client_files` e sessão `client_file_upload_sessions` aceitos com bytes reais no bucket privado, autor profissional, visibilidade inicial nula, download disponível só ao admin autorizado e ocultação da listagem/rota da própria cliente. Em seguida exigir confirmação humana `Liberar para cliente`, autor/timestamp de liberação persistidos, transição pendente → histórico, download da cliente com conteúdo exato e não titular ainda bloqueado. Comprovar também que não foi criada duplicata.
+
+**ESCOPO:** `e2e/j1-local-onboarding.spec.mjs`, workflow `validate-j1-local-onboarding-browser.yml` e docs de acompanhamento. Os metadados de ACL do Supabase publicado (sem ler clientes ou arquivos) confirmam `service_role` SELECT/INSERT/UPDATE em sessões e SELECT/INSERT/UPDATE em arquivos. O workflow só reproduz os grants técnicos faltantes no Docker local e confirma RLS ativa, `anon` e `authenticated` sem permissão de gravação. Nenhum grant remoto, Auth, schema, migration, regra profissional, arquivo real ou gate IA modificado. Smokes legados remotos continuam fora de escopo.
+
+**EVIDÊNCIA COMPLEMENTAR:** a segunda execução após CSS continuou com pointer intercept no ponto escolhido automaticamente pelo Playwright; porém `document.elementFromPoint` aplicado ao **centro geométrico** do botão retornou o próprio alvo. A próxima execução usa `locator.click({ position: centro })`, preservando o hit-test, o evento físico do browser e todas as asserções de autorização e persistência, sem `force: true` ou submit programático. Em eventual erro, registra apenas tags e retângulos numéricos da interface, sem dados pessoais ou credenciais. Não declarar corrigido até sucesso da J1.
+
+**FALHA E CORREÇÃO EM TESTE:** o primeiro run da suíte ampliada chegou ao arquivo pendente e ao checkbox de aprovação, mas o Playwright não conseguiu clicar em `Liberar para cliente`: metadados anteriores e o rótulo de confirmação interceptavam o ponteiro na tela móvel, até esgotar o timeout. A reparação é da **interface real**, não do teste: ações do arquivo passam a um grid de coluna única em até 640px, e o botão de aprovação recebe uma camada interativa própria. Permanecem exigidos clique humano nativo, persistência e RLS; nenhum `force` no Playwright. A validação no novo head continua obrigatória.
+
+**CRITÉRIOS DE ACEITAÇÃO:** `Validate application` e `Validate J1 local client onboarding browser` (mais regressões J6/J7 acionadas) devem concluir success no head exato. Corrigir falha na mesma branch; revisar diff; merge somente se elegível; conferir CI master e Vercel READY no commit integrado. **Estado no início da execução: em validação, não homologado.**
+
+---
+
 ## 2026-10-20 — Pré-homologação de arquivos privados: cliente → Patty MFA → cliente não titular
 
 **FATO DE BASE:** PR #936 integrado no `master` `09d16bd22fbe27a4c907553ac60c4de57d0f5d44`, `Validate application` pós-merge concluído em success e deployment Vercel READY no mesmo SHA. O upload/download sintético da cliente foi demonstrado em Supabase local, não em produção.

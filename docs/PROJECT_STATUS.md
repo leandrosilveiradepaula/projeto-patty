@@ -1,3 +1,21 @@
+## 2026-10-20 — PR #938: corrigir seleção do ponto de clique sem contornar autorização
+
+**EVIDÊNCIA:** última execução J1 [#39367931246](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39367931246) ainda falhou por interceptação do pointer ao usar `locator.click`, mesmo após o hit-test do centro, enquanto Validate application/J6/J7 passaram. A suíte permanece aberta. O teste passou a usar `page.mouse.click` (evento real do navegador) somente depois de verificar novamente com `document.elementFromPoint` que o centro da área está coberto pelo botão exato de liberação; sem `force`, disparo JavaScript nem redução do pós-estado em banco. Se houver interferência na geometria, a asserção falha fechada. Corrigir na mesma branch e obter success no SHA exato antes do merge; homologação da Patty permanece por último.
+
+---
+
+## 2026-10-20 — Arquivos privados: teste técnico de liberação administrativa (PR em preparação)
+
+**FATO ANTERIOR CONFIRMADO:** PR #937 foi mergeado com todas as quatro validações no head de revisão e com `Validate application` pós-merge [#39363131065](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39363131065) aprovado. Vercel `dpl_2etUvuYJrMWSPQ3MSBRau3NAUsZo` ficou READY no commit `04bb4980ae28b20549495ea54be6048b62344585`. O upload da cliente, download administrativo sob MFA e isolamento de outra cliente foram testados no localhost.
+
+**DIAGNÓSTICO SUBSEQUENTE:** após o ajuste de CSS mobile, a repetição ainda falhou no clique automático do Playwright: o alvo foi parcialmente interceptado por `Card`/`label`. Um hit-test feito **no centro geométrico** do próprio botão, imediatamente antes do clique, retornou `hitInButton=true`. Portanto o problema residual pode estar no ponto escolhido automaticamente/scroll em headless mobile; não foi demonstrado que todo o botão está obstruído. A próxima tentativa usa clique físico normal no centro comprovado (sem `force`) e coletará apenas geometria pós-scroll se falhar. Ainda **não concluído**.
+
+**REGRESSÃO DE INTERFACE DETECTADA:** o primeiro CI do PR #938 passou Validate application/J6/J7, mas a J1 falhou por timeout ao clicar no botão de liberação **visível e habilitado** em mobile. O log Playwright registrou interceptação de pointer-events por metadados da ficha e pelo label de confirmação. As asserções de upload, sessão aceita, ocultação para a cliente e download administrativo haviam passado. A correção mantém o clique real do navegador e organiza as ações em grid de coluna única no mobile, elevando a camada do botão; não usa `force: true`, não altera RLS/produção e exige nova validação completa no head atualizado. **Não considerar J1 aprovada até essa execução passar.**
+
+**PACOTE EM TESTE:** acrescentar à suíte J1 real/disposable o caminho inverso: Patty/AAL2 faz upload de PNG sintético para a cliente, o registro continua oculto, a profissional o libera explicitamente e então a cliente acessa os bytes exatos; outro cliente continua negado e não há registro duplicado. A paridade de `service_role` no workflow se limita às permissões técnicas **já existentes** no Supabase publicado; grants e RLS de produção permanecem inalterados. Não considerar concluído antes de CI, merge e publicação no SHA exato. Homologação operacional com a Patty será a última tarefa do projeto.
+
+---
+
 ## 2026-10-20 — Continuidade técnica após #936: autorização de arquivos privados por sessão
 
 **ESTADO PUBLICADO CONFIRMADO:** PR #936 mergeado como `09d16bd22fbe27a4c907553ac60c4de57d0f5d44`; `Validate application` pós-merge [#39361260442](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39361260442) success e Vercel `dpl_6GwyP4JahgQ8PWMYYgD8KzChmJ6D` READY no mesmo SHA. Nenhuma homologação profissional foi executada.

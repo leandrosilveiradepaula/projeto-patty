@@ -361,6 +361,7 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
   });
 
   let clientPrivateFile;
+  let foreignClientCredentials;
   await test.step("activated client uploads and retrieves only a private synthetic file", async () => {
     // Extend the disposable J1 session into the actual browser-to-Storage
     // upload/finalize path. Nothing is sent to the hosted Supabase.
@@ -515,6 +516,7 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
     // A different authenticated client may not list or download those bytes.
     const foreignEmail = "e2e-j1-foreign-" + nonce + "@example.invalid";
     const foreignPassword = "J1-" + randomBytes(16).toString("base64url") + "-Aa1!";
+    foreignClientCredentials = { email: foreignEmail, password: foreignPassword };
     const created = await service.auth.admin.createUser({
       email: foreignEmail, password: foreignPassword, email_confirm: true,
     });
@@ -544,6 +546,205 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
         literal(invite.clientId))).toHaveLength(1);
     } finally {
       await foreignContext.close();
+    }
+  });
+
+  await test.step("admin uploads hidden private file then explicitly releases exact bytes", async () => {
+    if (!clientPrivateFile || !foreignClientCredentials) {
+      throw new Error("Previous synthetic client and isolation proofs missing");
+    }
+    const filename = "j1-admin-pending-synthetic.png";
+    const png = clientPrivateFile.bytes;
+    const adminPath = "/admin/clientes/" + invite.clientId + "/arquivos";
+    const savedFiles = () => rows(
+      "select id,bucket_id,object_path,original_filename,file_kind,mime_type,byte_size," +
+      "uploaded_by_profile_id,client_visible_at,client_visibility_set_by_profile_id" +
+      " from public.client_files where client_id=" + literal(invite.clientId) +
+      " and original_filename=" + literal(filename),
+    );
+    const initialTotal = rows(
+      "select id from public.client_files where client_id=" + literal(invite.clientId),
+    ).length;
+    expect(savedFiles()).toEqual([]);
+    const adminContext = await browser.newContext({
+      baseURL, viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true,
+    });
+    const foreignContext = await browser.newContext({ baseURL });
+    try {
+      const adminPage = await adminContext.newPage();
+      await loginAdminWithMfa(adminPage, {
+        email: staff.email, password: staff.password, totpSecret: staffTotp,
+      });
+      await adminPage.goto(adminPath);
+      await expect(adminPage.getByRole("heading", {
+        name: "Enviar arquivo em nome da cliente",
+      })).toBeVisible();
+
+      // Upload through the real professional form and browser-to-signed-Storage
+      // path. Never seed private-file metadata directly for this proof.
+      await adminPage.locator('input[name="file"]').setInputFiles({
+        buffer: png, name: filename, mimeType: "image/png",
+      });
+      await adminPage.getByRole("checkbox", {
+        name: "Conferi o arquivo e a categoria antes de enviar.",
+      }).check();
+      await adminPage.getByRole("button", { name: "Enviar arquivo" }).click();
+      await expect.poll(() => savedFiles().length, { timeout: 30000 }).toBe(1);
+      const hidden = savedFiles()[0];
+      expect(hidden.id).toMatch(UUID);
+      expect(hidden.bucket_id).toBe("client-private");
+      expect(hidden.original_filename).toBe(filename);
+      expect(hidden.file_kind).toBe("photo");
+      expect(hidden.mime_type).toBe("image/png");
+      expect(Number(hidden.byte_size)).toBe(png.length);
+      expect(hidden.uploaded_by_profile_id).toBe(staffId);
+      expect(hidden.client_visible_at).toBeNull();
+      expect(hidden.client_visibility_set_by_profile_id).toBeNull();
+      expect(hidden.object_path.startsWith("clients/" + invite.clientId + "/")).toBe(true);
+      const recordedSession = rows(
+        "select id,status from public.client_file_upload_sessions where client_id=" +
+        literal(invite.clientId) + " and requester_profile_id=" + literal(staffId) +
+        " and original_filename=" + literal(filename),
+      );
+      expect(recordedSession).toHaveLength(1);
+      expect(recordedSession[0].status).toBe("accepted");
+      expect(rows("select id from public.client_files where client_id=" +
+        literal(invite.clientId))).toHaveLength(initialTotal + 1);
+
+      const stored = await service.storage.from("client-private").download(hidden.object_path);
+      if (stored.error || !stored.data) throw stored.error ?? new Error("Missing local admin file");
+      expect(Buffer.from(await stored.data.arrayBuffer())).toEqual(png);
+
+      // No release yet: even the owning client's authenticated session must
+      // neither list the administrative upload nor obtain a signed URL.
+      const ownerRoute = "/cliente/arquivos/" + hidden.id;
+      await page.goto("/cliente/arquivos");
+      await expect(page.getByRole("heading", { name: filename, exact: true })).toHaveCount(0);
+      expect((await page.request.get(ownerRoute, { maxRedirects: 0 })).status()).toBe(404);
+
+      await adminPage.goto(adminPath + "?arquivoPendente=" + hidden.id);
+      const pendingCard = adminPage.locator("#arquivo-pendente-" + hidden.id);
+      await expect(pendingCard).toBeVisible();
+      await expect(pendingCard.getByRole("heading", { name: filename, exact: true }))
+        .toBeVisible();
+      const privateAdminRoute = "/admin/arquivos/" + hidden.id;
+      const adminDownload = await adminPage.request.get(privateAdminRoute);
+      expect(adminDownload.status()).toBe(200);
+      expect(await adminDownload.body()).toEqual(png);
+
+      // Explicit human confirmation is mandatory. The action cannot publish
+      // simply because metadata exists or an admin viewed the file.
+      await pendingCard.getByRole("checkbox", {
+        name: /Confirmo que o arquivo/,
+      }).check();
+      const approvalButton = pendingCard.getByRole("button", {
+        name: "Liberar para cliente",
+      });
+      await approvalButton.scrollIntoViewIfNeeded();
+      // Fail fast on an obstructed mobile button. Only geometry and DOM tag
+      // names are logged; no private content, browser state, IDs or cookies.
+      const readSafeGeometry = () => approvalButton.evaluate((button) => {
+        const rect = (element) => {
+          if (!element) return null;
+          const box = element.getBoundingClientRect();
+          return {
+            x: Math.round(box.x), y: Math.round(box.y),
+            w: Math.round(box.width), h: Math.round(box.height),
+          };
+        };
+        const box = button.getBoundingClientRect();
+        const hit = document.elementFromPoint(
+          box.left + box.width / 2, box.top + box.height / 2,
+        );
+        const form = button.closest("form");
+        const label = form?.querySelector("label");
+        const card = button.closest("li");
+        return {
+          viewport: { width: innerWidth, height: innerHeight },
+          mobileLayout: matchMedia("(max-width: 640px)").matches,
+          button: rect(button), label: rect(label), form: rect(form),
+          actions: rect(form?.parentElement), card: rect(card),
+          hitTag: hit?.tagName ?? null,
+          hitInLabel: Boolean(label?.contains(hit)),
+          hitInButton: button === hit || button.contains(hit),
+          actionsDisplay: form?.parentElement
+            ? getComputedStyle(form.parentElement).display : null,
+          buttonZ: getComputedStyle(button).zIndex,
+        };
+      });
+      const geometry = await readSafeGeometry();
+      if (!geometry.hitInButton) {
+        console.info("J1 safe approval layout diagnostic:", JSON.stringify(geometry));
+      }
+      expect(geometry.hitInButton, "Mobile approval button must accept a pointer")
+        .toBe(true);
+      // Use the actual, browser-hit-tested center instead of Playwright's
+      // automatically chosen visible point. Still a normal physical click,
+      // with no force, DOM submission or bypass of button actionability.
+      try {
+        // Playwright boundingBox is in the emulated SCREEN coordinate system;
+        // DOM getBoundingClientRect / elementFromPoint operate in layout
+        // coordinates. Mobile viewport scaling can make the numbers differ.
+        // Never send screen coordinates back into document.elementFromPoint.
+        const buttonBox = await approvalButton.boundingBox();
+        const viewport = adminPage.viewportSize();
+        if (!buttonBox || !viewport)
+          throw new Error("Approval button or browser viewport unavailable");
+        const clickX = buttonBox.x + buttonBox.width / 2;
+        const clickY = buttonBox.y + buttonBox.height / 2;
+        expect(clickX > 0 && clickX < viewport.width &&
+          clickY > 0 && clickY < viewport.height,
+          "Approval button must be inside the visible mobile viewport").toBe(true);
+        // The layout-space hit test was already asserted above. The input is
+        // a real browser mouse event at the screen-space center, not a DOM
+        // submit, injected event, or forced interaction. Persisted state is
+        // checked immediately afterward.
+        await adminPage.mouse.click(clickX, clickY);
+      } catch (error) {
+        const after = await readSafeGeometry().catch(() => null);
+        console.info("J1 safe approval geometry after physical click:",
+          JSON.stringify({ before: geometry, after }));
+        throw error;
+      }
+      await expect.poll(() => savedFiles()[0]?.client_visible_at !== null, {
+        timeout: 20000,
+      }).toBe(true);
+      const released = savedFiles()[0];
+      expect(released.id).toBe(hidden.id);
+      expect(released.uploaded_by_profile_id).toBe(staffId);
+      expect(released.client_visibility_set_by_profile_id).toBe(staffId);
+      expect(released.client_visible_at).not.toBeNull();
+      await adminPage.reload();
+      await expect(adminPage.locator("#arquivo-pendente-" + hidden.id)).toHaveCount(0);
+      await expect(adminPage.locator("#arquivo-historico-" + hidden.id)).toBeVisible();
+
+      await page.reload();
+      await expect(page.getByRole("heading", { name: filename, exact: true })).toBeVisible();
+      const signed = await page.request.get(ownerRoute, { maxRedirects: 0 });
+      expect(signed.status()).toBe(307);
+      expect(signed.headers()["cache-control"]).toContain("no-store");
+      expect(new URL(signed.headers()["location"]).origin).toBe(apiURL);
+      const ownerDownload = await page.request.get(ownerRoute);
+      expect(ownerDownload.status()).toBe(200);
+      expect(await ownerDownload.body()).toEqual(png);
+
+      const foreignPage = await foreignContext.newPage();
+      await foreignPage.goto("/login");
+      await foreignPage.getByLabel("Email").fill(foreignClientCredentials.email);
+      await foreignPage.getByLabel("Senha").fill(foreignClientCredentials.password);
+      await foreignPage.getByRole("button", { name: "Entrar" }).click();
+      await expect(foreignPage).toHaveURL(/\/cliente\/?$/);
+      await foreignPage.goto("/cliente/arquivos");
+      await expect(foreignPage.getByRole("heading", { name: filename, exact: true }))
+        .toHaveCount(0);
+      expect((await foreignPage.request.get(ownerRoute, { maxRedirects: 0 })).status())
+        .toBe(404);
+      // An upload+release cycle creates one physical record, not duplicates.
+      expect(savedFiles()).toHaveLength(1);
+      expect(rows("select id from public.client_files where client_id=" +
+        literal(invite.clientId))).toHaveLength(initialTotal + 1);
+    } finally {
+      await Promise.allSettled([adminContext.close(), foreignContext.close()]);
     }
   });
 
