@@ -682,20 +682,23 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       // automatically chosen visible point. Still a normal physical click,
       // with no force, DOM submission or bypass of button actionability.
       try {
-        // Use browser input at the viewport center established by the
-        // pre-click hit test. Locator.click may scroll an already visible
-        // mobile target again and then choose a stale action point.
+        // Playwright boundingBox is in the emulated SCREEN coordinate system;
+        // DOM getBoundingClientRect / elementFromPoint operate in layout
+        // coordinates. Mobile viewport scaling can make the numbers differ.
+        // Never send screen coordinates back into document.elementFromPoint.
         const buttonBox = await approvalButton.boundingBox();
-        if (!buttonBox) throw new Error("Approval button lost its viewport box");
+        const viewport = adminPage.viewportSize();
+        if (!buttonBox || !viewport)
+          throw new Error("Approval button or browser viewport unavailable");
         const clickX = buttonBox.x + buttonBox.width / 2;
         const clickY = buttonBox.y + buttonBox.height / 2;
-        const targetReady = await approvalButton.evaluate((button, { x, y }) => {
-          const element = document.elementFromPoint(x, y);
-          return Boolean(element && (element === button || button.contains(element)));
-        }, { x: clickX, y: clickY });
-        // This assertion must pass before native mouse input; never force
-        // a click through another element or submit the form from JS.
-        expect(targetReady, "Native pointer must reach approval button").toBe(true);
+        expect(clickX > 0 && clickX < viewport.width &&
+          clickY > 0 && clickY < viewport.height,
+          "Approval button must be inside the visible mobile viewport").toBe(true);
+        // The layout-space hit test was already asserted above. The input is
+        // a real browser mouse event at the screen-space center, not a DOM
+        // submit, injected event, or forced interaction. Persisted state is
+        // checked immediately afterward.
         await adminPage.mouse.click(clickX, clickY);
       } catch (error) {
         const after = await readSafeGeometry().catch(() => null);
