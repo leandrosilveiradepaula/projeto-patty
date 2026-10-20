@@ -87,6 +87,27 @@
   justify-content: space-between;
 }
 
+/* Keep the approval action in its own row on narrow client workspaces.
+   A wrapping flex item could visually overlap the file metadata on mobile. */
+@media (max-width: 640px) {
+  .fileActions {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    justify-content: stretch;
+  }
+
+  .fileActions > form {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .fileActions > a {
+    justify-self: start;
+  }
+}
+
 .downloadLink:focus-visible {
   border-radius: var(--radius-medium);
   outline: 3px solid var(--color-accent);
