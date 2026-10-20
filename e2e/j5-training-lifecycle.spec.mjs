@@ -437,8 +437,10 @@ test("J5: client requests, Patty reviews/publishes exact training versions and a
       }).check();
       await adminPage.getByRole("button",{name:"Encerrar e marcar como inativa"}).click();
       await expect(adminPage).toHaveURL(/\/admin\/clientes\?assignment=ended$/,{timeout:30000});
+      await expect(adminPage.getByRole("heading",{name:"Acompanhamento encerrado"}))
+        .toBeVisible();
       await expect(adminPage.getByText(
-        "O vínculo atual foi encerrado e o histórico do assignment foi preservado.",
+        "A cliente agora está inativa. O acompanhamento atual foi encerrado e todo o histórico foi preservado.",
         {exact:true},
       )).toBeVisible();
 
