@@ -1,3 +1,9 @@
+## 2026-10-20 — PR #938: corrigir seleção do ponto de clique sem contornar autorização
+
+**EVIDÊNCIA:** última execução J1 [#39367931246](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39367931246) ainda falhou por interceptação do pointer ao usar `locator.click`, mesmo após o hit-test do centro, enquanto Validate application/J6/J7 passaram. A suíte permanece aberta. O teste passou a usar `page.mouse.click` (evento real do navegador) somente depois de verificar novamente com `document.elementFromPoint` que o centro da área está coberto pelo botão exato de liberação; sem `force`, disparo JavaScript nem redução do pós-estado em banco. Se houver interferência na geometria, a asserção falha fechada. Corrigir na mesma branch e obter success no SHA exato antes do merge; homologação da Patty permanece por último.
+
+---
+
 ## 2026-10-20 — Arquivos privados: teste técnico de liberação administrativa (PR em preparação)
 
 **FATO ANTERIOR CONFIRMADO:** PR #937 foi mergeado com todas as quatro validações no head de revisão e com `Validate application` pós-merge [#39363131065](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39363131065) aprovado. Vercel `dpl_2etUvuYJrMWSPQ3MSBRau3NAUsZo` ficou READY no commit `04bb4980ae28b20549495ea54be6048b62344585`. O upload da cliente, download administrativo sob MFA e isolamento de outra cliente foram testados no localhost.
