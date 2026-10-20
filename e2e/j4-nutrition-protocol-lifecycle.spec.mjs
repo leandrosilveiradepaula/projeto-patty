@@ -606,10 +606,12 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
       if(signed.error) throw signed.error;
       const privateVersions=await apiOther.from("protocol_versions")
         .select("id").eq("protocol_id",protocolId);
-      if(!privateVersions.error) expect(privateVersions.data).toEqual([]);
+      if(privateVersions.error && privateVersions.error.code!=="42501") throw privateVersions.error;
+      expect(privateVersions.data ?? []).toEqual([]);
       const privatePublications=await apiOther.from("protocol_publications")
         .select("id").eq("client_id",clientId);
-      if(!privatePublications.error) expect(privatePublications.data).toEqual([]);
+      if(privatePublications.error && privatePublications.error.code!=="42501") throw privatePublications.error;
+      expect(privatePublications.data ?? []).toEqual([]);
 
       const publications=rows("select id,protocol_version_id from public.protocol_publications"+
         " where client_id="+quote(clientId)+" order by published_at asc,id asc");
@@ -617,6 +619,7 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
       expect(rows("select id from public.protocol_version_approvals"+
         " where client_id="+quote(clientId))).toHaveLength(2);
       expect(rows("select id from public.protocols where client_id="+quote(otherClientId))).toEqual([]);
+      expect(rows("select id from public.client_weekly_feedbacks where client_id="+quote(clientId))).toEqual([]);
     });
   }finally{
     await Promise.allSettled([adminCtx.close(),clientCtx.close(),otherCtx.close(),anonCtx.close()]);
