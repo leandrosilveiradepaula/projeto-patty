@@ -7,7 +7,7 @@ O Supabase de produção contém **mais de um perfil com `user_roles.role='admin
 `docs/DECISIONS.md` (2026-10-14) e `docs/RBAC_RLS.md` definem **uma única administradora de negócio (Patty)** durante o MVP e proíbem criar segunda admin em produção para testes. A exceção atual de leitura de arquivos privados usa role relacional `admin` + MFA AAL2 e **pressupõe** exclusividade do papel; se outra admin concluir MFA, a exceção pode permitir leitura ampla de metadados/arquivos. Isso exige reconciliação antes de ampliar ou reimplantar policies de Storage.
 
 ### QUESTÕES / AÇÃO HUMANA ABERTA
-1. Conferir **em interface administrativa protegida** a finalidade e legitimidade de cada uma das três identidades `admin`, sem colar PII/tokens no repositório ou chat.
+1. Conferir **em interface administrativa protegida** a finalidade e legitimidade de cada identidade administrativa identificada `admin`, sem colar PII/tokens no repositório ou chat.
 2. Identificar qual conta é a administradora de negócio autorizada no MVP; não usar email como chave de relacionamento nem presumir titularidade pelo MFA.
 3. Definir recuperação/remoção **apenas do papel** de contas auxiliares ou testes, caso não autorizadas, mediante decisão e procedimento auditado; não excluir Auth, Profile, Client, assignments ou histórico automaticamente.
 4. Se for necessário manter mais de uma admin, **não aplicar** a exceção global baseada só em role: definir modelo de autorização client-scoped e a identidade aprovada da Patty **antes** de mudar RLS.
