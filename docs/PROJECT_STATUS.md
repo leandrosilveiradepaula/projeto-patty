@@ -1,3 +1,13 @@
+## 2026-10-20 — BLOQUEIO DE SEGURANÇA: múltiplas contas admin na produção
+
+**FATO CONFIRMADO (somente contagens, sem PII):** catálogo `public.user_roles` aponta **3 perfis distintos com role=admin**, todos com Auth; **1** dos 3 tem MFA verificado. A documentação operacional exige **somente a Patty** como administradora no MVP. Não inferir qual perfil corresponde à Patty ou que os demais sejam ilegítimos sem revisão humana. [Questão prioritária](OPEN_QUESTIONS.md), [issue #950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950).
+
+**IMPLICAÇÃO PARA A PR #949:** habilitar leitura de arquivo privado sem assignment a toda role `admin` poderia ampliar acesso aos três perfis. A migration proposta agora **falha antes de alterar RLS** se encontrar múltiplas roles administrativas. É possível validar o código no Supabase local descartável com uma admin sintética, mas **não é seguro aplicar no SaaS enquanto existirem três admins sem reconciliação autorizada**. Nenhuma identidade foi modificada e nenhuma migration foi aplicada em produção. A correção de teste de toque/PDF sintético da J6 permanece separada de entrega real Vercel Blob.
+
+**PR/CI:** não classificar J1 como corrigida em produção por CI verde e não fazer merge sem a revisão sensível de RLS e confirmação do gate de segurança. Próxima dependência humana: revisar papéis administrativos por canal privado e documentar a decisão (sem PII no GitHub); só então executar aplicação controlada e verificação. Homologação conjunta com Patty continua a última tarefa.
+
+---
+
 ## 2026-10-20 — J1: correção de autorização real proposta para Storage privado (PR #949)
 
 **FATO REPRODUZIDO EM CI:** após encerramento do assignment no Supabase **descartável**, a única admin AAL2 consegue listar os dois PNGs privados pela interface J1, mas `GET /admin/arquivos/[fileId]` retorna `404` em vez de emitir `307`. [J1 falhou no SHA `2cfc9176`](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39478159479), issue [#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951). O problema **não** foi reproduzido com dados reais ou contas de produção.
