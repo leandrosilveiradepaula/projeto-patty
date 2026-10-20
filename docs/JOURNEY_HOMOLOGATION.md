@@ -1,3 +1,15 @@
+## 2026-10-20 — J3 cliente mobile: avaliações finalizadas, correção histórica e navegação factual
+
+**Objetivo:** complementar o E2E J3 já aprovado para ações profissionais AAL2 em mobile com a navegação **cliente** em 390 px. Dados criados no banco descartável: duas avaliações finalizadas da titular, uma avaliação ainda rascunho e outra finalizada de cliente estrangeira, além de uma correção profissional registrada pela UI que preserva valor original. **Nenhum desses valores é prescrição clínica.**
+
+**Verificações novas:** login de conta cliente própria; somente avaliações finalizadas atribuídas à identidade correta; abertura do registro histórico exato por hash; observação corrigida vigente; link de histórico da medida no touch; seleção de `janela=3`, ligação profunda à avaliação exata e retorno à mesma medida/filtro mesmo após reload; largura total sem overflow; link de avaliação forjado não gera acesso nem retorno autorizado; outra cliente autenticada não recebe o histórico alheio. Nenhuma leitura gera nova correção, follow-up ou protocolo publicado.
+
+**Escopo:** exclusivamente `e2e/j3-assessment-evolution-lifecycle.spec.mjs` e documentos de estado. Fora de escopo: Auth/RLS/schema, migrations, dados reais, imagens clínicas, mudanças de método, autorização por email, publicação e homologação humana. Exigir `Validate application`, J3 Playwright e todas regressões iniciadas `SUCCESS` no mesmo SHA, diff revisado e PR mergeável; depois verificar CI pós-merge e Vercel produção READY no commit integrado. A homologação operacional conjunta da Patty será realizada por último.
+
+**Status inicial:** implementação enviada para validação técnica, não homologada profissionalmente.
+
+---
+
 ## 2026-10-20 — J1: preview privada no celular e negação de acesso AAL2 fora do assignment
 
 **OBJETIVO:** fechar a lacuna entre download privado já testado e a pré-visualização inline real (`?preview=1`) da cliente e da Patty. A suíte J1 usa dois PNGs locais físicos e cria a segunda profissional administrativa **sem assignment**, mas com autenticação MFA AAL2 válida, para provar `404` tanto em preview quanto em download. A versão liberada pela profissional exige clique humano na UI; antes disso, nem a própria cliente recebe uma URL de prévia. A prévia é aberta pelo link `Visualizar` em viewport 390 px e nova aba, sem expor tokens nos logs.

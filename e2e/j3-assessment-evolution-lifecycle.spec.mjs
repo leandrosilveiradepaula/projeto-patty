@@ -213,9 +213,18 @@ async function mobileWidth(page) {
     .toBeLessThanOrEqual(dimensions.viewport + 1);
 }
 
+async function loginClientMobile(page, identity) {
+  await page.goto("/login");
+  await page.getByLabel("Email").fill(identity.email);
+  await page.getByLabel("Senha").fill(identity.password);
+  await page.getByRole("button", { name: "Entrar" }).click();
+  // Wait for the real server action to establish auth cookies before navigation.
+  await expect(page).toHaveURL(/\/cliente\/?$/, { timeout: 20000 });
+}
+
 test.use({ baseURL });
 test("J3: MFA, corrected measurements, two private photos, return and RLS", async ({browser}) => {
-  test.setTimeout(270_000);
+  test.setTimeout(360_000);
   const nonce = randomBytes(8).toString("hex");
   const admin = await identity("admin", "staff", nonce);
   const unassigned = await identity("admin", "unassigned", nonce);
@@ -444,6 +453,134 @@ test("J3: MFA, corrected measurements, two private photos, return and RLS", asyn
         .select("id").in("id",[photoA,photoB]);
       if (foreignPhotos.error && foreignPhotos.error.code !== "42501") throw foreignPhotos.error;
       expect(foreignPhotos.data ?? []).toEqual([]);
+    });
+
+    await test.step("Client mobile reviews exact corrected history and returns to filtered evolution", async () => {
+      // J3 previously covered the professional UI on mobile but only used an
+      // API token to confirm the client's RLS scope. Use real authenticated
+      // client pages for both the owner and a different client.
+      const mobileOwner = await browser.newContext({
+        baseURL, viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true,
+      });
+      const mobileForeign = await browser.newContext({
+        baseURL, viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true,
+      });
+      try {
+        const ownerPage = await mobileOwner.newPage();
+        await loginClientMobile(ownerPage, owner);
+        await ownerPage.goto("/cliente/avaliacoes");
+        await expect(ownerPage.getByRole("heading", {
+          name: "Avaliações e medidas",
+        })).toBeVisible();
+        await expect(ownerPage.locator("#avaliacao-" + newerId)).toHaveCount(1);
+        await expect(ownerPage.locator("#avaliacao-" + olderId)).toHaveCount(1);
+        await expect(ownerPage.locator("#avaliacao-" + draftId)).toHaveCount(0);
+        await expect(ownerPage.locator("#avaliacao-" + foreignId)).toHaveCount(0);
+        await mobileWidth(ownerPage);
+
+        await ownerPage.goto("/cliente/avaliacoes?avaliacao=" + olderId +
+          "#avaliacao-" + olderId);
+        const correctedAssessment = ownerPage.locator("#avaliacao-" + olderId);
+        await expect(correctedAssessment).toBeVisible();
+        await expect(correctedAssessment.getByText("71 kg", { exact: true }))
+          .toBeVisible();
+        await expect(correctedAssessment.getByText("70 kg", { exact: true }))
+          .toHaveCount(0);
+        await mobileWidth(ownerPage);
+
+        // Only the current authorized assessment can produce the measure link.
+        const measureLink = correctedAssessment.getByRole("link", {
+          name: "Ver histórico de Peso (kg)",
+        });
+        await expect(measureLink).toBeVisible();
+        await measureLink.tap();
+        await expect(ownerPage.getByRole("heading", {
+          name: "Evolução", exact: true,
+        })).toBeVisible();
+        const selectedMeasure = new URL(ownerPage.url()).searchParams.get("serie");
+        expect(Number.isSafeInteger(Number(selectedMeasure)) &&
+          Number(selectedMeasure) > 0).toBe(true);
+        await expect(ownerPage.locator('select[name="serie"]'))
+          .toHaveValue(selectedMeasure);
+        await ownerPage.locator('select[name="janela"]').selectOption("3");
+        await ownerPage.getByRole("button", { name: "Aplicar filtros" }).tap();
+        await expect(ownerPage.locator('select[name="janela"]')).toHaveValue("3");
+        await mobileWidth(ownerPage);
+
+        const seriesCard = ownerPage.locator("#medida-" +
+          (Number(selectedMeasure) - 1));
+        const exactLinks = seriesCard.getByRole("link", {
+          name: /Abrir avaliação de/,
+        });
+        await expect(exactLinks).toHaveCount(2);
+        const chosenLink = exactLinks.first();
+        const target = new URL(await chosenLink.getAttribute("href"), baseURL);
+        expect(target.pathname).toBe("/cliente/avaliacoes");
+        expect([olderId, newerId]).toContain(target.searchParams.get("avaliacao"));
+        expect(target.searchParams.get("origemSerie")).toBe(selectedMeasure);
+        expect(target.searchParams.get("origemJanela")).toBe("3");
+        await chosenLink.tap();
+        await expect(ownerPage.getByRole("heading", {
+          name: "Avaliações e medidas",
+        })).toBeVisible();
+        await expect(ownerPage.getByRole("link", {
+          name: "Voltar à mesma medida e observações",
+        })).toBeVisible();
+        await mobileWidth(ownerPage);
+        await ownerPage.getByRole("link", {
+          name: "Voltar à mesma medida e observações",
+        }).tap();
+        // Next.js client navigation may commit after the touch event resolves.
+        // Wait for the *real* destination instead of reading the old URL;
+        // this still fails if the return never reaches the correct page.
+        await expect(ownerPage).toHaveURL(/\/cliente\/evolucao(?:[?#]|$)/, {
+          timeout: 20000,
+        });
+        const returned = new URL(ownerPage.url());
+        expect(returned.pathname).toBe("/cliente/evolucao");
+        expect(returned.searchParams.get("serie")).toBe(selectedMeasure);
+        expect(returned.searchParams.get("janela")).toBe("3");
+        await ownerPage.reload();
+        await expect(ownerPage.locator('select[name="janela"]')).toHaveValue("3");
+        await mobileWidth(ownerPage);
+
+        // Even a forged exact assessment ID must never reveal another client's
+        // assessment or give it a valid contextual return link.
+        await ownerPage.goto("/cliente/avaliacoes?avaliacao=" + foreignId +
+          "&origemSerie=" + selectedMeasure + "&origemJanela=3");
+        await expect(ownerPage.locator("#avaliacao-" + foreignId)).toHaveCount(0);
+        await expect(ownerPage.getByRole("link", {
+          name: "Voltar à mesma medida e observações",
+        })).toHaveCount(0);
+        await mobileWidth(ownerPage);
+
+        const foreignPage = await mobileForeign.newPage();
+        await loginClientMobile(foreignPage, foreign);
+        await foreignPage.goto("/cliente/avaliacoes?avaliacao=" + olderId +
+          "#avaliacao-" + olderId);
+        await expect(foreignPage.getByRole("heading", {
+          name: "Avaliações e medidas",
+        })).toBeVisible();
+        await expect(foreignPage.locator("#avaliacao-" + foreignId)).toHaveCount(1);
+        await expect(foreignPage.locator("#avaliacao-" + olderId)).toHaveCount(0);
+        await expect(foreignPage.locator("#avaliacao-" + newerId)).toHaveCount(0);
+        await mobileWidth(foreignPage);
+        await foreignPage.goto("/cliente/evolucao");
+        await expect(foreignPage.getByText("71 kg", { exact: true })).toHaveCount(0);
+        await expect(foreignPage.getByText("69 kg", { exact: true })).toHaveCount(0);
+        await mobileWidth(foreignPage);
+      } finally {
+        await Promise.allSettled([mobileOwner.close(), mobileForeign.close()]);
+      }
+      // Reading the mobile history cannot revise professional corrections,
+      // publish protocols, or create professional follow-ups.
+      expect(select("select id from public.assessment_measurement_corrections" +
+        " where assessment_measurement_id=" + literal(oldWeightId))).toHaveLength(1);
+      expect(select("select id from public.professional_follow_ups" +
+        " where assessment_id in (" + literal(olderId) + "," +
+        literal(newerId) + ")")).toHaveLength(0);
+      expect(select("select id from public.protocol_publications" +
+        " where client_id=" + literal(clientId))).toHaveLength(0);
     });
 
     const original = select("select measurement_value from public.assessment_measurements" +
