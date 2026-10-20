@@ -235,11 +235,18 @@ async function finalizedSyntheticAssessment(input){
     ?.finalized_at??null,{timeout:25000}).not.toBeNull();
   const finalized=clientAssessments().find(item=>item.id===assessmentId);
   expect(UUID.test(finalized?.method_configuration_snapshot_set_id)).toBe(true);
-  const snapshots=rows("select template_key from public.method_configuration_snapshots"+
+  const snapshots=rows("select template_key,resolved_configuration"+
+    " from public.method_configuration_snapshots"+
     " where snapshot_set_id="+quote(finalized.method_configuration_snapshot_set_id));
   expect(new Set(snapshots.map(row=>row.template_key))).toEqual(new Set([
     "evaluation.assessment_definition.basic","evaluation.assessment_kind_catalog",
   ]));
+  // The committed snapshot must match the original catalog JSON exactly.
+  // UI-normalized aliases are a separate representation, never persisted.
+  expect(snapshots.find(row=>row.template_key==="evaluation.assessment_definition.basic")
+    ?.resolved_configuration).toEqual(method.definition.configuration);
+  expect(snapshots.find(row=>row.template_key==="evaluation.assessment_kind_catalog")
+    ?.resolved_configuration).toEqual(method.catalog.configuration);
   await page.reload();
   await expect(page.getByRole("heading",{name:"Continuar para o protocolo"}))
     .toBeVisible();
