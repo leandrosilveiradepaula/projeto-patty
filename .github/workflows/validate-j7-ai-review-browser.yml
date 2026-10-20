@@ -14,6 +14,8 @@ on:
       - "supabase/migrations/*ai*.sql"
       - "supabase/tests/database/ai_execution_boundary.test.sql"
       - "docs/JOURNEY_HOMOLOGATION.md"
+      # Explicit all-journey regression only when the consolidated evidence matrix changes.
+      - "docs/PREHOMOLOGATION_MATRIX.md"
   workflow_dispatch:
 
 permissions:
