@@ -229,6 +229,8 @@ test("J5: client requests, Patty reviews/publishes exact training versions and a
       await clientPage.getByLabel("Observação", { exact: true }).fill("Pedido sintetico J5");
       await clientPage.getByRole("button", { name: "Solicitar treino" }).click();
       await pollRows("select id from public.client_training_requests where client_id=" + literal(clientId), 1);
+      await expect(clientPage.getByRole("button", { name: "Solicitar treino" })).toBeDisabled();
+      expect(rows("select id from public.client_training_requests where client_id=" + literal(clientId))).toHaveLength(1);
       expect(rows("select id from public.client_training_plans where client_id=" + literal(clientId))).toEqual([]);
       await adminPage.reload();
       await expect(adminPage.getByRole("heading", { name: "Criar primeiro treino" })).toBeVisible();
@@ -354,6 +356,8 @@ test("J5: client requests, Patty reviews/publishes exact training versions and a
       await expect(outsiderPage.getByRole("heading", { name: "Prescrição de treino" })).toHaveCount(0);
       await expect(outsiderPage.getByText("J5 Treino B sintetico", { exact: false })).toHaveCount(0);
       expect(visibleCount(unassigned.id, "aal2", "client_training_plan_versions", second.id)).toBe(0);
+      expect(visibleCount(unassigned.id, "aal2", "client_training_plan_items", copied.id)).toBe(0);
+      expect(visibleCount(foreign.id, "aal1", "client_training_plan_items", copied.id)).toBe(0);
     });
 
     await test.step("Concurrent authenticated draft RPCs serialize per client without extra grants", async () => {
@@ -401,6 +405,8 @@ test("J5: client requests, Patty reviews/publishes exact training versions and a
         expect(draft.reviewed_at).toBeNull();
         expect(draft.published_at).toBeNull();
         expect(visibleCount(owner.id, "aal1", "client_training_plan_versions", draft.id)).toBe(0);
+        expect(rows("select id from public.protocol_publications where client_id=" + literal(clientId))).toEqual([]);
+        expect(rows("select id from public.client_weekly_feedbacks where client_id=" + literal(clientId))).toEqual([]);
         await clientPage.reload();
         await expect(clientPage.getByRole("heading", { name: "J5 Treino B sintetico" })).toBeVisible();
       } finally {
