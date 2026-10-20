@@ -1,3 +1,11 @@
+## 2026-10-20 — J1/J6: gate administrativo antes de corrigir Storage no SaaS
+
+**Risco operacional confirmado:** 3 perfis distintos têm `role=admin` no Supabase de produção, embora `DECISIONS.md` estabeleça a única admin Patty. Apenas 1 perfil apresenta MFA verificado; essas contagens não identificam titulares nem comprovam abuso. A migration da PR #949 foi reforçada para **recusar aplicação se houver múltiplos admins**, sem tocar em contas nem alterar a policy parcialmente. A J1 local prova a regra projetada para uma admin; ela **não** valida concessão dessa exceção a outras identidades. [Pendência detalhada](OPEN_QUESTIONS.md).
+
+**Estado:** CI local e revisão específica de diff RLS são condições para merge. A aplicação no SaaS está **bloqueada por reconciliação humana de papéis**, independentemente do status verde da CI. O pipeline de migration no push é dry-run e não equivale a execução. Não remover usuários, MFA, papéis nem dados reais para fazer teste passar. J6 mobile com provedor PDF sintético continua cobertura técnica, não homologação real de Blob. [Issues #950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950) e [#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951).
+
+---
+
 ## 2026-10-20 — J1: exceção de arquivos privados após encerramento, correção de policy ainda não aplicada
 
 **Reprodução:** PR [#949](https://github.com/leandrosilveiradepaula/projeto-patty/pull/949) expôs um erro no CI sintético: a única admin MFA AAL2 visualiza `client_files` após encerrar o assignment, mas a rota de download devolve `404`. A policy `storage.objects` existente depende de `JOIN clients` para ambos os ramos, enquanto `clients` esconde a linha sem assignment. A regra confirmada do MVP em `RBAC_RLS.md` permite somente à **única admin Patty** arquivo privado sem assignment; proíbe provisionar segunda admin sem redesenho. Issues [#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951) (defeito) e [#950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950) (expansão insegura).
