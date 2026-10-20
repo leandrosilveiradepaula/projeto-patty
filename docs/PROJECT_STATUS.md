@@ -4,6 +4,8 @@
 
 **EM TESTE:** estender a suíte local J1 para verificar o handoff do arquivo privado sintético à Patty autenticada com MFA AAL2, recusando acesso de admin AAL1 e de cliente não titular. Preservar bytes, autoria, histórico e a exceção de acesso administrativo a arquivos privados confirmada em `RBAC_RLS.md`; sem novos grants, mudança de schema, dados reais ou uso do Supabase publicado. Critérios e escopo em `JOURNEY_HOMOLOGATION.md`. Executar e validar workflow antes de merge; homologação da Patty somente na última tarefa global.
 
+**EVIDÊNCIA DE FALHA E HIPÓTESE EM TESTE:** o primeiro E2E ampliado chegou à consulta do histórico administrativo, mas a linha criada pela cliente não apareceu no DOM; o log do servidor local acusou somente a categoria sanitizada `permission denied`. A consulta ao Supabase publicado foi restrita aos metadados ACL e confirmou RLS habilitada e `service_role` com SELECT em `clients` e `profiles`. O workflow local foi ajustado para reproduzir **apenas esses SELECTs no Docker descartável**, mantendo RLS e sem grants a anon/authenticated. Esta é uma hipótese de paridade do runner, não uma falha comprovada em produção; o fluxo continua **NÃO VALIDADO** até sucesso no novo head.
+
 ---
 
 ## 2026-10-20 — Teste técnico de arquivo privado da cliente, sem fixtures em produção
