@@ -472,14 +472,16 @@ export async function finalizeAssessmentAction(
       assessmentId: assessment.id,
       finalizedByProfileId: context.profileId,
       catalogTemplateVersionId: assessmentKinds.templateVersionId,
-      catalogConfiguration: assessmentKinds.configuration,
+      // Send the exact published configuration, not normalized aliases
+      // used only by the UI/readiness. SQL requires byte-equivalent JSONB.
+      catalogConfiguration: assessmentKinds.rawConfiguration,
       catalogResultValues: {
         historical_code: selectedKind.historicalCode,
         semantic_key: selectedKind.semanticKey,
         label: selectedKind.label,
       },
       definitionTemplateVersionId: definition.templateVersionId,
-      definitionConfiguration: definition.configuration,
+      definitionConfiguration: definition.rawConfiguration,
       definitionResultValues: {
         kind_key: selectedKind.semanticKey,
         can_finalize: readiness.canFinalizeDeterministically,
