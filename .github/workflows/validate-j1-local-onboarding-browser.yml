@@ -74,7 +74,9 @@ jobs:
           grant select, insert, update on table public.client_registration to service_role;
           do $
           begin
-            if not has_table_privilege('service_role','public.client_registration','SELECT,INSERT,UPDATE')
+            if (not has_table_privilege('service_role','public.client_registration','SELECT')
+              or not has_table_privilege('service_role','public.client_registration','INSERT')
+              or not has_table_privilege('service_role','public.client_registration','UPDATE'))
               or has_table_privilege('anon','public.client_registration','INSERT')
               or has_table_privilege('authenticated','public.client_registration','INSERT')
               or has_table_privilege('authenticated','public.client_registration','UPDATE')
