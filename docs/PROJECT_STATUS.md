@@ -4,6 +4,8 @@
 
 **LACUNA SEGUINTE, EM TESTE:** na ativação J1 exclusivamente local, usar sessão real da cliente sintética para enviar PNG descartável pelo formulário, validar registro persistido, bucket privado, bytes físicos, download autenticado, rejeição de tipo inválido e ausência de acesso anônimo. O isolamento entre clientes e admin AAL2 segue nas suítes J3/J4/J6/J7; o novo teste não altera RLS, migrations, secrets ou dados SaaS.
 
+**FATO / INVESTIGAÇÃO LOCAL:** o primeiro Playwright J1 falhou por seletor ambíguo (corrigido). A repetição chegou ao upload, mas não persistiu metadados em 30s e o servidor local emitiu a categoria sanitizada `permission denied`; a operação exata ainda não foi demonstrada. Consulta **somente aos metadados de ACL**, sem ler usuários, no Supabase SaaS confirmou que `service_role` já possui SELECT/UPDATE em `client_file_upload_sessions` e SELECT/INSERT/DELETE em `client_files`, ambas com RLS habilitada. A nova etapa J1 confere e reproduz essas permissões **exclusivamente no Docker local descartável**, nunca no banco remoto, e aborta se direitos de `anon`/`authenticated` estiverem ampliados ou RLS desabilitada. O teste agora identifica apenas categorias fixas de falha de upload, sem expor respostas, tokens ou bytes. Correção ainda **sujeita a CI no head exato**; não declarar resolvido até resultado positivo.
+
 **RESTRIÇÃO:** workflows antigos de smoke de arquivos via E2E_BASE_URL apontam para aplicação publicada e pressupõem contas de teste; não dispará-los para esta consolidação. A homologação profissional da Patty continua como última tarefa global.
 
 ---
