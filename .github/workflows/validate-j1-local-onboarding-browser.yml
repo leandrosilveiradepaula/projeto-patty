@@ -56,6 +56,20 @@ jobs:
       - name: Verify local-only browser fixture syntax
         run: node --check e2e/j1-local-onboarding.spec.mjs
 
+      - name: Enable staff MFA only inside disposable Supabase
+        run: |
+          node <<'NODE'
+          const { readFileSync, writeFileSync } = require("node:fs");
+          const path = "supabase/config.toml";
+          const current = readFileSync(path, "utf8");
+          const before = "[auth.mfa.totp]\nenroll_enabled = false\nverify_enabled = false";
+          const after = "[auth.mfa.totp]\nenroll_enabled = true\nverify_enabled = true";
+          if (current.split(before).length !== 2)
+            throw new Error("Unexpected local MFA configuration");
+          writeFileSync(path, current.replace(before, after));
+          NODE
+          git diff --check
+
       - name: Start disposable local Supabase
         run: npx supabase start
 
@@ -123,6 +137,39 @@ jobs:
                  where oid = 'public.client_files'::regclass)
             then
               raise exception 'Local private-file service-role parity failed closed';
+            end if;
+          end $boundary$;
+          SQL
+
+      # Production grants backend service_role SELECT on clients and profiles.
+      # The local CLI bootstrap can omit that parity for the admin file directory.
+      # This does NOT add permission to authenticated/anon or change RLS.
+      - name: Align disposable admin file-directory backend read grants
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -z "${SUPABASE_ACCESS_TOKEN:-}"
+          docker exec -i supabase_db_projeto-patty psql -X -q -U postgres -d postgres -v ON_ERROR_STOP=1 <<'SQL'
+          do $boundary$
+          begin
+            if not exists (
+              select 1 from pg_catalog.pg_roles
+              where rolname = 'service_role' and rolbypassrls
+            ) or not (select relrowsecurity from pg_class where oid = 'public.clients'::regclass)
+              or not (select relrowsecurity from pg_class where oid = 'public.profiles'::regclass)
+            then
+              raise exception 'Unexpected local client-directory boundary';
+            end if;
+          end $boundary$;
+          grant select on public.clients, public.profiles to service_role;
+          do $boundary$
+          begin
+            if not has_table_privilege('service_role','public.clients','SELECT')
+               or not has_table_privilege('service_role','public.profiles','SELECT')
+               or not (select relrowsecurity from pg_class where oid = 'public.clients'::regclass)
+               or not (select relrowsecurity from pg_class where oid = 'public.profiles'::regclass)
+            then
+              raise exception 'Local admin-directory service read parity failed';
             end if;
           end $boundary$;
           SQL

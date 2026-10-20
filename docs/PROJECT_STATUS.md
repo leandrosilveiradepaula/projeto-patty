@@ -1,3 +1,13 @@
+## 2026-10-20 — Continuidade técnica após #936: autorização de arquivos privados por sessão
+
+**ESTADO PUBLICADO CONFIRMADO:** PR #936 mergeado como `09d16bd22fbe27a4c907553ac60c4de57d0f5d44`; `Validate application` pós-merge [#39361260442](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39361260442) success e Vercel `dpl_6GwyP4JahgQ8PWMYYgD8KzChmJ6D` READY no mesmo SHA. Nenhuma homologação profissional foi executada.
+
+**EM TESTE:** estender a suíte local J1 para verificar o handoff do arquivo privado sintético à Patty autenticada com MFA AAL2, recusando acesso de admin AAL1 e de cliente não titular. Preservar bytes, autoria, histórico e a exceção de acesso administrativo a arquivos privados confirmada em `RBAC_RLS.md`; sem novos grants, mudança de schema, dados reais ou uso do Supabase publicado. Critérios e escopo em `JOURNEY_HOMOLOGATION.md`. Executar e validar workflow antes de merge; homologação da Patty somente na última tarefa global.
+
+**EVIDÊNCIA DE FALHA E HIPÓTESE EM TESTE:** o primeiro E2E ampliado chegou à consulta do histórico administrativo, mas a linha criada pela cliente não apareceu no DOM; o log do servidor local acusou somente a categoria sanitizada `permission denied`. A consulta ao Supabase publicado foi restrita aos metadados ACL e confirmou RLS habilitada e `service_role` com SELECT em `clients` e `profiles`. O workflow local foi ajustado para reproduzir **apenas esses SELECTs no Docker descartável**, mantendo RLS e sem grants a anon/authenticated. Esta é uma hipótese de paridade do runner, não uma falha comprovada em produção; o fluxo continua **NÃO VALIDADO** até sucesso no novo head.
+
+---
+
 ## 2026-10-20 — Teste técnico de arquivo privado da cliente, sem fixtures em produção
 
 **BASE PUBLICADA:** PR [#935](https://github.com/leandrosilveiradepaula/projeto-patty/pull/935) passou Validate application, Playwright J1/J4/J6/J7 no SHA de revisão; mergeado como 15809a5b5aaa9ba086a8229aa082bd4f618b1ccf, [CI pós-merge](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39358557604) success, deployment Vercel dpl_DBePizZJAZbjgDSJMSFTZtGxbcqH READY nesse commit. O percurso J4→J2 está comprovado localmente, sem homologação humana.

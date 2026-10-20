@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { createClient } from "@supabase/supabase-js";
 import { expect, test } from "@playwright/test";
+import { generateTotp, loginAdminWithMfa } from "./helpers/admin-auth.mjs";
 
 // The J1 smoke must never run against the hosted Supabase or public Vercel.
 // All synthetic identities, submissions and answers die with this local DB.
@@ -62,17 +63,42 @@ function insert(table, fields) {
 }
 async function makeStaff(nonce) {
   const email = "e2e-j1-staff-" + nonce + "@example.invalid";
+  const password = "J1-" + randomBytes(16).toString("base64url") + "-Aa1!";
   const result = await service.auth.admin.createUser({
-    email,
-    password: "J1-" + randomBytes(16).toString("base64url") + "-Aa1!",
-    email_confirm: true,
+    email, password, email_confirm: true,
   });
   if (result.error || !result.data?.user?.id)
     throw result.error ?? new Error("Local synthetic staff creation failed");
   const id = result.data.user.id;
   insert("profiles", { id, display_name: "J1 Synthetic staff" });
   insert("user_roles", { profile_id: id, role: "admin" });
-  return id;
+  return { id, email, password };
+}
+async function enrollStaffTotp(staff) {
+  const api = createClient(apiURL, anonKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+  const login = await api.auth.signInWithPassword({
+    email: staff.email, password: staff.password,
+  });
+  if (login.error) throw login.error;
+  try {
+    const factor = await api.auth.mfa.enroll({
+      factorType: "totp", friendlyName: "J1 disposable staff MFA",
+    });
+    if (factor.error) throw factor.error;
+    const challenge = await api.auth.mfa.challenge({ factorId: factor.data.id });
+    if (challenge.error) throw challenge.error;
+    const verified = await api.auth.mfa.verify({
+      factorId: factor.data.id,
+      challengeId: challenge.data.id,
+      code: generateTotp(factor.data.totp.secret),
+    });
+    if (verified.error) throw verified.error;
+    return factor.data.totp.secret;
+  } finally {
+    await api.auth.signOut();
+  }
 }
 function getPublishedAnamnesisFromMigrations() {
   // The committed migrations already publish the canonical v1 form. Never
@@ -112,9 +138,11 @@ async function makeInvitedClient(staffId, nonce) {
 }
 test.use({ baseURL });
 test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolation", async ({ browser }) => {
-  test.setTimeout(240000);
+  test.setTimeout(360000);
   const nonce = randomBytes(8).toString("hex");
-  const staffId = await makeStaff(nonce);
+  const staff = await makeStaff(nonce);
+  const staffId = staff.id;
+  const staffTotp = await enrollStaffTotp(staff);
   const { versionId, cityQuestionId } = getPublishedAnamnesisFromMigrations();
   const invite = await makeInvitedClient(staffId, nonce);
   const password = "J1-" + randomBytes(17).toString("base64url") + "-Aa1!";
@@ -332,6 +360,7 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       .toHaveValue("Cidade Sintética Editada");
   });
 
+  let clientPrivateFile;
   await test.step("activated client uploads and retrieves only a private synthetic file", async () => {
     // Extend the disposable J1 session into the actual browser-to-Storage
     // upload/finalize path. Nothing is sent to the hosted Supabase.
@@ -387,6 +416,7 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
     expect(saved.uploaded_by_profile_id).toBe(invite.profileId);
     expect(saved.client_visible_at).not.toBeNull();
     expect(saved.object_path.startsWith("clients/" + invite.clientId + "/")).toBe(true);
+    clientPrivateFile = { id: saved.id, filename, bytes: png };
     await page.reload();
     await expect(page.getByRole("heading", { name: filename, exact: true })).toBeVisible();
 
@@ -420,6 +450,100 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       expect(loginLocation.pathname).toBe("/login");
     } finally {
       await anonymous.close();
+    }
+  });
+
+  await test.step("private file remains accessible only with authorized sessions", async () => {
+    if (!clientPrivateFile || !UUID.test(clientPrivateFile.id)) {
+      throw new Error("Client upload proof missing");
+    }
+    const fileId = clientPrivateFile.id;
+    const adminFileRoute = "/admin/arquivos/" + fileId;
+    const clientFileRoute = "/cliente/arquivos/" + fileId;
+
+    // The same admin without AAL2 must be redirected to the MFA challenge.
+    const aal1Context = await browser.newContext({ baseURL });
+    try {
+      const aal1Page = await aal1Context.newPage();
+      await aal1Page.goto("/login");
+      await aal1Page.getByLabel("Email").fill(staff.email);
+      await aal1Page.getByLabel("Senha").fill(staff.password);
+      await aal1Page.getByRole("button", { name: "Entrar" }).click();
+      await expect(aal1Page).toHaveURL(/\/mfa\/admin\/challenge\/?$/);
+      const refused = await aal1Page.request.get(adminFileRoute, { maxRedirects: 0 });
+      expect([302, 303, 307, 308]).toContain(refused.status());
+      expect(new URL(refused.headers()["location"], baseURL).pathname).toBe(
+        "/mfa/admin/challenge",
+      );
+    } finally {
+      await aal1Context.close();
+    }
+
+    const adminContext = await browser.newContext({
+      baseURL, viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true,
+    });
+    try {
+      const adminPage = await adminContext.newPage();
+      await loginAdminWithMfa(adminPage, {
+        email: staff.email, password: staff.password, totpSecret: staffTotp,
+      });
+      await adminPage.goto("/admin/clientes/" + invite.clientId +
+        "/arquivos?arquivoHistorico=" + fileId);
+      await expect(adminPage.locator("#arquivo-historico-" + fileId)).toBeVisible();
+      await expect(adminPage.getByRole("heading", {
+        name: clientPrivateFile.filename, exact: true,
+      })).toBeVisible();
+      const signed = await adminPage.request.get(adminFileRoute, { maxRedirects: 0 });
+      expect(signed.status()).toBe(307);
+      expect(signed.headers()["cache-control"]).toContain("no-store");
+      expect(new URL(signed.headers()["location"]).origin).toBe(apiURL);
+      const retrieved = await adminPage.request.get(adminFileRoute);
+      expect(retrieved.status()).toBe(200);
+      expect(await retrieved.body()).toEqual(clientPrivateFile.bytes);
+      const original = rows(
+        "select uploaded_by_profile_id,client_visible_at,client_visibility_set_by_profile_id " +
+        "from public.client_files where id=" + literal(fileId),
+      );
+      expect(original).toHaveLength(1);
+      expect(original[0].uploaded_by_profile_id).toBe(invite.profileId);
+      expect(original[0].client_visibility_set_by_profile_id).toBe(invite.profileId);
+      expect(original[0].client_visible_at).not.toBeNull();
+    } finally {
+      await adminContext.close();
+    }
+
+    // A different authenticated client may not list or download those bytes.
+    const foreignEmail = "e2e-j1-foreign-" + nonce + "@example.invalid";
+    const foreignPassword = "J1-" + randomBytes(16).toString("base64url") + "-Aa1!";
+    const created = await service.auth.admin.createUser({
+      email: foreignEmail, password: foreignPassword, email_confirm: true,
+    });
+    if (created.error || !created.data?.user?.id)
+      throw created.error ?? new Error("Synthetic foreign client Auth failed");
+    const foreignId = created.data.user.id;
+    insert("profiles", { id: foreignId, display_name: "J1 foreign synthetic client" });
+    insert("user_roles", { profile_id: foreignId, role: "client" });
+    insert("clients", {
+      profile_id: foreignId, full_name: "J1 foreign synthetic client", status: "active",
+    });
+    const foreignContext = await browser.newContext({ baseURL });
+    try {
+      const foreignPage = await foreignContext.newPage();
+      await foreignPage.goto("/login");
+      await foreignPage.getByLabel("Email").fill(foreignEmail);
+      await foreignPage.getByLabel("Senha").fill(foreignPassword);
+      await foreignPage.getByRole("button", { name: "Entrar" }).click();
+      await expect(foreignPage).toHaveURL(/\/cliente\/?$/);
+      await foreignPage.goto("/cliente/arquivos");
+      await expect(foreignPage.getByRole("heading", {
+        name: clientPrivateFile.filename, exact: true,
+      })).toHaveCount(0);
+      const denied = await foreignPage.request.get(clientFileRoute, { maxRedirects: 0 });
+      expect(denied.status()).toBe(404);
+      expect(rows("select id from public.client_files where client_id=" +
+        literal(invite.clientId))).toHaveLength(1);
+    } finally {
+      await foreignContext.close();
     }
   });
 

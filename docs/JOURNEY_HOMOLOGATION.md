@@ -1,3 +1,15 @@
+## 2026-10-20 — Pré-homologação de arquivos privados: cliente → Patty MFA → cliente não titular
+
+**FATO DE BASE:** PR #936 integrado no `master` `09d16bd22fbe27a4c907553ac60c4de57d0f5d44`, `Validate application` pós-merge concluído em success e deployment Vercel READY no mesmo SHA. O upload/download sintético da cliente foi demonstrado em Supabase local, não em produção.
+
+**OBJETIVO DESTE PACOTE:** no mesmo teste J1 descartável que ativou uma cliente real de laboratório e criou fisicamente um PNG privado, comprovar que uma sessão admin AAL1 é redirecionada para MFA ao tentar baixá-lo, que Patty/admin com TOTP AAL2 visualiza o registro e recupera exatamente os bytes do Storage, que consultar o arquivo não altera sua autoria/visibilidade, e que outra cliente autenticada não consegue encontrá-lo nem obter o download. O acesso administrativo a arquivos privados sem assignment tem exceção MVP documentada em `RBAC_RLS.md`; este cenário usa assignment ativo e **não cria regra nova**.
+
+**ESCOPO/ARQUIVOS:** somente `e2e/j1-local-onboarding.spec.mjs`, `.github/workflows/validate-j1-local-onboarding-browser.yml` e documentação de status. A configuração TOTP é alterada **apenas** no arquivo descartável do runner, antes de `supabase start`. Contas/objetos são sintéticos em localhost, excluídos com `supabase stop --no-backup`. Sem migrations, Auth, RLS, novas permissões, dados no SaaS, fornecedor externo ou decisão profissional.
+
+**ACEITE:** Validate application, J1 browser e regressões J6/J7 (se acionadas) em success no SHA exato; GitHub mergeável, diff revisado, merge seguro, CI do master e deployment READY no commit publicado. Qualquer falha deve ser corrigida na mesma branch, sem reduzir asserções. **Estado durante desenvolvimento: aguardando evidência de CI; não é homologação operacional da Patty.**
+
+---
+
 ## 2026-10-20 — Arquivo privado: upload, finalização e download real no Supabase descartável
 
 **OBJETIVO:** ampliar exclusivamente a suíte de ativação sintética J1 para, após criar a sessão real da cliente, enviar um PNG de um pixel pelo próprio formulário de arquivos privados. Aceite exige exatamente uma linha em client_files vinculada ao ID da cliente, conteúdo físico exato no bucket client-private (public=false), visibilidade após reload, download via URL assinada apenas localhost, rejeição de arquivo inválido sem novo upload e navegação anônima redirecionada ao login. RLS, Auth, consentimento, revisão da Patty e limites de dados continuam inalterados; nenhum conteúdo de saúde real é utilizado.
