@@ -2,6 +2,8 @@
 
 **FATO ANTERIOR CONFIRMADO:** PR #937 foi mergeado com todas as quatro validações no head de revisão e com `Validate application` pós-merge [#39363131065](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39363131065) aprovado. Vercel `dpl_2etUvuYJrMWSPQ3MSBRau3NAUsZo` ficou READY no commit `04bb4980ae28b20549495ea54be6048b62344585`. O upload da cliente, download administrativo sob MFA e isolamento de outra cliente foram testados no localhost.
 
+**REGRESSÃO DE INTERFACE DETECTADA:** o primeiro CI do PR #938 passou Validate application/J6/J7, mas a J1 falhou por timeout ao clicar no botão de liberação **visível e habilitado** em mobile. O log Playwright registrou interceptação de pointer-events por metadados da ficha e pelo label de confirmação. As asserções de upload, sessão aceita, ocultação para a cliente e download administrativo haviam passado. A correção mantém o clique real do navegador e organiza as ações em grid de coluna única no mobile, elevando a camada do botão; não usa `force: true`, não altera RLS/produção e exige nova validação completa no head atualizado. **Não considerar J1 aprovada até essa execução passar.**
+
 **PACOTE EM TESTE:** acrescentar à suíte J1 real/disposable o caminho inverso: Patty/AAL2 faz upload de PNG sintético para a cliente, o registro continua oculto, a profissional o libera explicitamente e então a cliente acessa os bytes exatos; outro cliente continua negado e não há registro duplicado. A paridade de `service_role` no workflow se limita às permissões técnicas **já existentes** no Supabase publicado; grants e RLS de produção permanecem inalterados. Não considerar concluído antes de CI, merge e publicação no SHA exato. Homologação operacional com a Patty será a última tarefa do projeto.
 
 ---
