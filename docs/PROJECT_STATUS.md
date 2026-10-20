@@ -1,3 +1,13 @@
+## 2026-10-20 — J1: paridade explícita de grants do service_role no Supabase descartável
+
+**DIAGNÓSTICO CONFIRMADO:** após a correção do handoff por convite, o Playwright J1 chegou à edição de Cadastro Atual e falhou na operação real com `42501` (`localServiceRead=42501`, `localServiceInsert=42501`) no runner local [#39350786746](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39350786746). Foi verificado em consulta **somente de metadados de permissões**, sem ler qualquer cliente, que o banco publicado já possui `SELECT`, `INSERT` e `UPDATE` para `service_role` sobre `public.client_registration`; a tabela segue com RLS ativa. O Supabase descartável da CLI não reproduz essa autorização técnica nos fixtures.
+
+**CORREÇÃO ESTRITAMENTE NO TESTE LOCAL:** a nova etapa do workflow J1, após o `supabase db reset`, aplica somente `grant select, insert, update on public.client_registration to service_role` no container Docker local do banco descartável, reproduzindo os direitos técnicos **já existentes no banco publicado**. Falha imediatamente se qualquer operação requerida estiver ausente, se `anon`/ `authenticated` puderem escrever, se RLS estiver desligada ou se houver token de acesso remoto configurado. Não altera nenhuma migration, schema/RLS, grants remotos, production data, cliente real ou autorização frontend. A aplicação mantém a decisão de serviço técnico no backend somente após `requireRole('client')` e escopo de cliente. Contratos verificam que não é possível abrir escrita aos usuários regulares.
+
+**ESTADO:** o PR #931 continua **NÃO MERGEADO / NÃO HOMOLOGADO** até `Validate application`, Playwright J1 e regressões J6/J7 verdes no SHA exato, seguido de merge/deploy verificado. A homologação operacional pela Patty permanece a **última tarefa global**.
+
+---
+
 ## 2026-10-19 — J1: callback corrigido, validação avançou até Cadastro Atual (ainda não aprovado)
 
 **EVIDÊNCIA LOCAL:** na execução [#39349343021](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39349343021), o Playwright passou pela geração/consumo de convite, entrega de cookie OTP e ativação de senha após trocar o redirect absoluto reconstruído por `Location` relativa com a mesma origem. A falha anterior de autorização da tela de ativação **não se reproduziu nesta execução**. O teste avançou à gravação da Cidade no **Cadastro Atual** sintético, onde a asserção de persistência expirou com valor nulo. Portanto, J1 **ainda está em validação**, não implantada nem homologada.
