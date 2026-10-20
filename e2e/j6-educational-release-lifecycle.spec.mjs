@@ -492,22 +492,30 @@ test("J6: versioned content releases require exact published version and synthet
         nodes.some((node) => node.href.startsWith("http://127.0.0.1:54329/"))
       )).toBe(false);
 
+      const assetRoute = "/cliente/conteudos/assets/" + secondAssetId;
+      const requestedAsset = ownerCtx.waitForEvent("request", (request) =>
+        request.method() === "GET" &&
+        new URL(request.url()).pathname === assetRoute,
+      );
       const nextPage = ownerCtx.waitForEvent("page");
       await pdfLink.tap();
       const pdfTab = await nextPage;
       try {
-        await expect.poll(() => {
-          try {
-            return new URL(pdfTab.url()).origin === "http://127.0.0.1:54329";
-          } catch {
-            return false;
-          }
-        }, { timeout: 15000 }).toBe(true);
+        // Headless Chromium may leave its built-in PDF viewer tab at about:blank
+        // rather than expose the final private PDF URL. Prove the browser
+        // clicked the authenticated link and received the 307 instead.
+        const mediaRequest = await requestedAsset;
+        const mediaRedirect = await mediaRequest.response();
+        expect(mediaRedirect?.status()).toBe(307);
+        expect(mediaRedirect?.headers()["cache-control"]).toContain("no-store");
+        expect(new URL(mediaRedirect.headers()["location"]).origin)
+          .toBe("http://127.0.0.1:54329");
       } finally {
         await pdfTab.close();
       }
-      // Browser opening is not evidence of full consumption or completion.
-      // Exact byte delivery, SHA and Range are tested in the next step.
+      // A browser issuing a redirect is not evidence of visible PDF render,
+      // full consumption, or completion. Exact byte delivery, SHA and Range
+      // are tested independently via the same authorized application route.
       expect(rows("select client_content_release_id from public.client_content_progress" +
         " where client_id=" + literal(clientId))).toHaveLength(0);
       expect(releases(clientId)).toHaveLength(2);
