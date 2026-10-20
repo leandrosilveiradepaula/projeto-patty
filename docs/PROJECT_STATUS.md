@@ -1,3 +1,15 @@
+## 2026-10-20 — J1: prévia privada em celular e bloqueio da profissional não atribuída
+
+**BASE CONFIRMADA:** a [PR #946](https://github.com/leandrosilveiradepaula/projeto-patty/pull/946) foi mergeada em `1ae9d072ee60055ef9c5c15006714dc3b2d382bc`, com `Validate application` pós-merge [#39468330449](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39468330449) `success` e Vercel produção `READY` no mesmo commit. A navegação profissional J2 em mobile 390 px, sob MFA e dados sintéticos, passou no head pré-merge. Registros inferiores sobre #946 “em validação” são históricos.
+
+**NOVA LACUNA VERIFICÁVEL:** a J1 já entregava PNG físico por download, garantia upload/lifecycle/isolamento cliente e mostrava mídia privada no UI, mas não exercitava `?preview=1`, o link móvel `Visualizar` e a negativa por uma **segunda profissional autenticada AAL2 sem assignment**. Esta suíte agora usa os **mesmos dois objetos PNG sintéticos** (upload da cliente e upload profissional oculto até liberação humana) para verificar: link touch com nova aba, assinatura temporária apenas por rota Next, redirect 307 privado/no-store, entrega integral dos bytes no Supabase local, 404 antes da liberação, 404 para outra cliente e 404 para profissional sem vínculo no download e na prévia. Nenhum objeto real ou regra clínica é criado.
+
+**FRONTEIRA:** o bucket `client-private` e os arquivos do cliente permanecem privados; o E2E usa Auth/Storage/PostgreSQL descartáveis, conta profissional MFA efêmera e não envia conteúdo ou segredo ao CI remoto fora do próprio runner. Um token de URL assinada **já emitido** pode ser usado até sua expiração; revogação imediata de URL assinada existente **não é demonstrada nem prometida**. A rota emite TTL de 60 segundos para prévia e 300 segundos para download, somente após autorização no momento da requisição. Não modificar Auth, schema, migrations, RLS, grant, token, app runtime ou produzir logs de URLs assinadas.
+
+**CRITÉRIOS:** `Validate application` e `Validate J1 local client onboarding browser` concluídos `success` no SHA exato desta branch; inspecionar os diffs, corrigir falhas na mesma branch, merge apenas se seguro e depois verificar CI pós-merge e Vercel READY no SHA de integração. **Estado inicial do pacote: em teste; homologação profissional conjunta continua pendente como última tarefa.**
+
+---
+
 ## 2026-10-20 — Preparação operacional sem iniciar a homologação: J2 mobile profissional + roteiro seguro
 
 **BASE VERIFICADA:** `master` `5aae121511c7b4f51c62cad73f943e7d01090391`, PR [#945](https://github.com/leandrosilveiradepaula/projeto-patty/pull/945) integrada após **oito checks J1–J7 + Validate application no mesmo head**, validação geral pós-merge [#39466202205](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39466202205) `success`, Vercel produção `READY` no mesmo SHA e nenhuma PR aberta naquela consulta. A matriz técnica vigente continua em [PREHOMOLOGATION_MATRIX.md](PREHOMOLOGATION_MATRIX.md).
