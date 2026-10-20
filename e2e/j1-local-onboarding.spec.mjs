@@ -506,7 +506,8 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       );
       expect(original).toHaveLength(1);
       expect(original[0].uploaded_by_profile_id).toBe(invite.profileId);
-      expect(original[0].client_visibility_set_by_profile_id).toBeNull();
+      expect(original[0].client_visibility_set_by_profile_id).toBe(invite.profileId);
+      expect(original[0].client_visible_at).not.toBeNull();
     } finally {
       await adminContext.close();
     }
