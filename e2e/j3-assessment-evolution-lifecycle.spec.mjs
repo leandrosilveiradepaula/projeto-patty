@@ -530,6 +530,12 @@ test("J3: MFA, corrected measurements, two private photos, return and RLS", asyn
         await ownerPage.getByRole("link", {
           name: "Voltar à mesma medida e observações",
         }).tap();
+        // Next.js client navigation may commit after the touch event resolves.
+        // Wait for the *real* destination instead of reading the old URL;
+        // this still fails if the return never reaches the correct page.
+        await expect(ownerPage).toHaveURL(/\/cliente\/evolucao(?:[?#]|$)/, {
+          timeout: 20000,
+        });
         const returned = new URL(ownerPage.url());
         expect(returned.pathname).toBe("/cliente/evolucao");
         expect(returned.searchParams.get("serie")).toBe(selectedMeasure);
