@@ -60,7 +60,7 @@ jobs:
       - name: Reset local database with committed migrations
         run: npx supabase db reset
 
-      - name: Export local public configuration
+      - name: Export disposable localhost runtime configuration
         shell: bash
         run: |
           set -euo pipefail
@@ -72,10 +72,16 @@ jobs:
           test "$API_URL" = "http://127.0.0.1:54321"
           test -n "$ANON_KEY"
           test -n "$SERVICE_ROLE_KEY"
+          # This test runs strictly against disposable localhost services.
+          # The server-only Supabase admin client is required to finalize J3
+          # assessment snapshots, and must NEVER be exposed to browser code.
+          test -z "${SUPABASE_ACCESS_TOKEN:-}"
+          test -z "${SUPABASE_SECRET_KEY:-}"
           echo "::add-mask::$ANON_KEY"
           echo "::add-mask::$SERVICE_ROLE_KEY"
           echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL" >> "$GITHUB_ENV"
           echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$ANON_KEY" >> "$GITHUB_ENV"
+          echo "SUPABASE_SECRET_KEY=$SERVICE_ROLE_KEY" >> "$GITHUB_ENV"
           echo "J4_E2E_BASE_URL=http://127.0.0.1:3000" >> "$GITHUB_ENV"
 
       - name: Install Chromium
