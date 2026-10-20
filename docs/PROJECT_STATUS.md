@@ -1,3 +1,11 @@
+## 2026-10-20 — Arquivos privados: teste técnico de liberação administrativa (PR em preparação)
+
+**FATO ANTERIOR CONFIRMADO:** PR #937 foi mergeado com todas as quatro validações no head de revisão e com `Validate application` pós-merge [#39363131065](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39363131065) aprovado. Vercel `dpl_2etUvuYJrMWSPQ3MSBRau3NAUsZo` ficou READY no commit `04bb4980ae28b20549495ea54be6048b62344585`. O upload da cliente, download administrativo sob MFA e isolamento de outra cliente foram testados no localhost.
+
+**PACOTE EM TESTE:** acrescentar à suíte J1 real/disposable o caminho inverso: Patty/AAL2 faz upload de PNG sintético para a cliente, o registro continua oculto, a profissional o libera explicitamente e então a cliente acessa os bytes exatos; outro cliente continua negado e não há registro duplicado. A paridade de `service_role` no workflow se limita às permissões técnicas **já existentes** no Supabase publicado; grants e RLS de produção permanecem inalterados. Não considerar concluído antes de CI, merge e publicação no SHA exato. Homologação operacional com a Patty será a última tarefa do projeto.
+
+---
+
 ## 2026-10-20 — Continuidade técnica após #936: autorização de arquivos privados por sessão
 
 **ESTADO PUBLICADO CONFIRMADO:** PR #936 mergeado como `09d16bd22fbe27a4c907553ac60c4de57d0f5d44`; `Validate application` pós-merge [#39361260442](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39361260442) success e Vercel `dpl_6GwyP4JahgQ8PWMYYgD8KzChmJ6D` READY no mesmo SHA. Nenhuma homologação profissional foi executada.
