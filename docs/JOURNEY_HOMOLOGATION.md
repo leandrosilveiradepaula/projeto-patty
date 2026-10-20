@@ -1,3 +1,13 @@
+## 2026-10-20 — Correção de contrato J1: arquivos privados e única admin AAL2
+
+O teste anterior da J1 exigia, de uma **segunda admin sintética**, negação de arquivos privados sem assignment. Isso contradiz a exceção explícita em `RBAC_RLS.md` e `DECISIONS.md`: apenas a Patty é admin de negócio no MVP, e o papel `admin` com MFA AAL2 pode ler `client_files` e Storage sem vínculo corrente. A PR #949 registrou duas falhas consecutivas dessa asserção; **não** se tentou enfraquecer a política para satisfazer o CI. A [issue #950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950) conserva o risco do raio de acesso caso um segundo admin seja provisionado futuramente.
+
+A suíte J1 corrigida verifica **a regra efetivamente autorizada**: somente um admin na fixture descartável, encerramento de assignment local, acesso administrativo privado ainda autorizado sob AAL2, recusa de SELECT como AAL1 e manutenção das negativas já existentes a contas clientes estrangeiras, sem arquivos reais. A execução de qualquer segundo admin em produção continua proibida até novo projeto de autorização/revisão RLS. Histórico de testes anteriormente `success` não era evidência de bloqueio de uma segunda admin.
+
+A J6 deste pacote também exercita toque mobile no link privado para PDF local e confirma redirecionamento HTTP, mas não a renderização do viewer headless nem a Vercel real. Homologação operacional conjunta da Patty continua pendente como última tarefa.
+
+---
+
 ## 2026-10-20 — J6 cliente mobile: busca, download privado e ausência de telemetria implícita
 
 **Objetivo:** complementar a J6 (liberação humana e bytes sintéticos já testados) com o caminho **da interface da cliente** na biblioteca móvel de 390 px: busca por material exato publicado/liberado, exclusão visual do outro material pelo filtro, link `Abrir conteúdo` para a versão liberada sob `/cliente/conteudos/assets/[assetId]`, abertura por toque em nova aba privada do provedor local e retorno da busca. A URL assinada é criada pela rota autorizada e não é exposta no HTML. A abertura não cria registro de progresso, avaliação de consumo ou conclusão; a semântica de `client_content_progress` permanece **questão aberta** em `OPEN_QUESTIONS.md`.
