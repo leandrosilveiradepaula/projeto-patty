@@ -361,7 +361,23 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       "client_visible_at,object_path from public.client_files where client_id=" +
       literal(invite.clientId),
     );
-    await expect.poll(() => savedFiles().length, { timeout: 30000 }).toBe(1);
+    // Distinguish a real persistence delay from a failed action/Storage stage.
+    // Report only fixed categories; never include file content or credentials.
+    await expect.poll(async () => {
+      if (savedFiles().length === 1) return "persisted";
+      const errorStages = [
+        ["session-authorization", "Não foi possível autorizar este arquivo para upload."],
+        ["storage-transfer", "Não foi possível enviar o arquivo para a área temporária. Tente novamente."],
+        ["finalization", "Não foi possível confirmar o registro. Confira o histórico antes de enviar novamente."],
+        ["uncertain-finalization", "A confirmação do envio não foi concluída. Confira o histórico antes de tentar novamente."],
+        ["request-failure", "O envio não foi concluído. Corrija a conexão ou tente novamente."],
+        ["invalid-file", "O conteúdo real do arquivo não corresponde a um formato permitido."],
+      ];
+      for (const [stage, label] of errorStages) {
+        if (await page.getByText(label, { exact: true }).count()) return stage;
+      }
+      return "pending";
+    }, { timeout: 30000 }).toBe("persisted");
     const saved = savedFiles()[0];
     expect(saved.id).toMatch(UUID);
     expect(saved.original_filename).toBe(filename);
