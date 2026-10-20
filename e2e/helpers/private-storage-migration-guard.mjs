@@ -60,7 +60,8 @@ const policyFingerprintSql = [
 ].join("\n");
 const fingerprint = () => localSql(policyFingerprintSql);
 function assertTrue(query, label) {
-  if (localSql(query) !== "true") throw new Error("Local assertion failed: " + label);
+  // psql renders a PostgreSQL boolean as t/f (not JSON true/false).
+  if (localSql(query) !== "t") throw new Error("Local assertion failed: " + label);
 }
 const rlsInvariantSql = [
   "select (select relrowsecurity from pg_class",
