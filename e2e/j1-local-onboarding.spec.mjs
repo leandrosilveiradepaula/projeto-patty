@@ -643,7 +643,7 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       await approvalButton.scrollIntoViewIfNeeded();
       // Fail fast on an obstructed mobile button. Only geometry and DOM tag
       // names are logged; no private content, browser state, IDs or cookies.
-      const geometry = await approvalButton.evaluate((button) => {
+      const readSafeGeometry = () => approvalButton.evaluate((button) => {
         const rect = (element) => {
           if (!element) return null;
           const box = element.getBoundingClientRect();
@@ -672,12 +672,29 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
           buttonZ: getComputedStyle(button).zIndex,
         };
       });
+      const geometry = await readSafeGeometry();
       if (!geometry.hitInButton) {
         console.info("J1 safe approval layout diagnostic:", JSON.stringify(geometry));
       }
       expect(geometry.hitInButton, "Mobile approval button must accept a pointer")
         .toBe(true);
-      await approvalButton.click({ timeout: 10000 });
+      // Use the actual, browser-hit-tested center instead of Playwright's
+      // automatically chosen visible point. Still a normal physical click,
+      // with no force, DOM submission or bypass of button actionability.
+      try {
+        await approvalButton.click({
+          position: {
+            x: Math.floor(geometry.button.w / 2),
+            y: Math.floor(geometry.button.h / 2),
+          },
+          timeout: 10000,
+        });
+      } catch (error) {
+        const after = await readSafeGeometry().catch(() => null);
+        console.info("J1 safe approval geometry after physical click:",
+          JSON.stringify({ before: geometry, after }));
+        throw error;
+      }
       await expect.poll(() => savedFiles()[0]?.client_visible_at !== null, {
         timeout: 20000,
       }).toBe(true);
