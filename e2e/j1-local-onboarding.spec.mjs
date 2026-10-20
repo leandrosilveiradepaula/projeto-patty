@@ -122,6 +122,16 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
     baseURL, viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true,
   });
   const page = await context.newPage();
+  let callbackCookieHeaderPresent = false;
+  page.on("response", (response) => {
+    if (new URL(response.url()).pathname !== "/auth/confirm") return;
+    void response.allHeaders()
+      .then((headers) => {
+        // Boolean only; never capture OTPs, actual Set-Cookie or credentials.
+        callbackCookieHeaderPresent = Boolean(headers["set-cookie"]);
+      })
+      .catch(() => {});
+  });
   const sessionResponses = [];
   // Capture only HTTP status and whether the server authorized an app role.
   // Never retain or print tokens, cookies, response bodies or profile IDs.
@@ -157,6 +167,10 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
     if (new URL(page.url()).searchParams.has("token_hash"))
       throw new Error("One-time token remained in the browser URL");
     await expect(page.getByRole("heading", { name: "Ativar sua conta" })).toBeVisible();
+    await expect.poll(() => callbackCookieHeaderPresent, {
+      timeout: 5000,
+      message: "J1 OTP redirect must set an Auth session cookie on its returned response",
+    }).toBe(true);
     // Do not leak the one-time token into Playwright diagnostics. Classify
     // the *visible* activation boundary if the form does not become ready:
     // this distinguishes an invalid invite from missing session/hydration.
