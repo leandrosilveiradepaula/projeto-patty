@@ -1,3 +1,15 @@
+## 2026-10-20 — J3 finalizada tecnicamente pela interface; J4 → J2 → J3 com envio integral em teste
+
+**ESTADO PUBLICADO CONFIRMADO:** PR [#941](https://github.com/leandrosilveiradepaula/projeto-patty/pull/941) mergeada no `master` `c520f490516665a5aad3e233202af34f9d73279e`, `Validate application` pós-merge success e Vercel produção READY no mesmo SHA. Os cinco checks de PR passaram: J1, J3, J6, J7 e validação geral. A correção histórica J3 passa agora pela interface MFA AAL2 no Playwright; lançamento inicial permanece intacto e a autoria/persistência do histórico são comprovadas. A PR [#940](https://github.com/leandrosilveiradepaula/projeto-patty/pull/940) já havia criado e finalizado a avaliação inicial e a reavaliação pela interface, com snapshot de configuração ativo e finalização humana. As anotações anteriores nesta página sobre essas PRs "em correção/aguardando testes" retratam estados históricos, agora superados.
+
+**COBERTURA DE SETE JORNADAS:** o head da PR [#934](https://github.com/leandrosilveiradepaula/projeto-patty/pull/934) passou oito jobs no mesmo SHA (validação geral e Playwright J1 a J7). A PR #940 passou J1/J3/J4/J6/J7 + validação geral; a PR #941 passou J1/J3/J6/J7 + validação geral. **Isso não significa que todas as sete suítes tenham sido reexecutadas no commit atual**, nem homologação operacional da Patty.
+
+**PRÓXIMA LACUNA TÉCNICA EM TRATAMENTO:** no ciclo integrado J3 → J4 → J2 → J3, o Playwright da J4 já comprova duas avaliações J3 pela interface e publicação humana de duas versões do protocolo J4, mas o Feedback Semanal J2 chegava somente a rascunho salvo. A nova ampliação passa por revisão e envio definitivo da cliente na interface, verifica formulário versionado completo, confirmação, imutabilidade posterior, leitura profissional das respostas originais, isolamento por RLS e reavaliação J3 sem efeitos colaterais sobre publicação J4 ou histórico J2. Testar exclusivamente em localhost com dados sintéticos e MFA local, sem alterar método, schema, grants, RLS, arquivos privados reais ou cliente da produção.
+
+**ACEITE PARA ESTE PACOTE:** Playwright J4, validação geral e todas as regressões acionadas em success no SHA da PR; revisar diff, mergeabilidade e riscos antes do merge; depois CI pós-merge e Vercel READY no SHA exato. **Homologação operacional conjunta pela Patty permanece a última tarefa.**
+
+---
+
 ## 2026-10-20 — Teste UI da avaliação no fluxo integrado J3 → J4 → J2 → J3
 
 **ESTADO ANTERIOR PUBLICADO:** PR #939 mergeado (`7cabd679a35c9211f244badbefaed2eabddb53bf`), GitHub CI pós-merge success, Vercel READY. O teste integrado havia criado e finalizado avaliações J3 por fixture SQL descartável.
