@@ -1,3 +1,13 @@
+## 2026-10-20 — Índice vigente do aceite técnico das sete jornadas
+
+A **[matriz J1–J7](PREHOMOLOGATION_MATRIX.md)** é o quadro consolidado de alcance e limites dos E2E. Os registros cronológicos abaixo permanecem preservados como evidências históricas, inclusive casos inicialmente falhos, sem converter descrições de “PR pendente” daquele momento em estado atual.
+
+**GATE INTEGRAL:** a PR que cria a matriz deve ter `Validate application` + J1, J2, J3, J4, J5, J6 e J7 com sucesso **no mesmo head exato** (o primeiro precedente, PR #934, já passou em SHA anterior, mas não vale para o código posterior). Qualquer mudança na matriz é gatilho intencional dos sete workflows; edições rotineiras em documentação sem esse arquivo não forçam todas as jornadas. Conferir RLS/MFA, PR mergeável e workflows sensíveis antes de integrar. Depois confirmar CI pós-merge e Vercel produção READY no SHA de merge.
+
+**LIMITES:** nenhuma jornada é homologada profissionalmente por CI; não criar contas, publicações ou releases fictícios no Supabase SaaS. A última tarefa segue sendo a sessão operacional conjunta com a Patty, com aprovação humana e registro das pendências. O teste J6 de bytes usa emissor e provedor simulados, não distribuição real a clientes pela Vercel Blob.
+
+---
+
 ## 2026-10-20 — J6: bytes reais sintéticos após liberação humana e URL privada assinada simulada
 
 **BASE:** PR #943 mergeada em `7efa6c441226d54069d3600006ee40097903b984`, `Validate application` pós-merge `success`, Vercel produção READY no mesmo commit. J6 já exercita rascunhos, publicação manual de versões, releases exatos para uma cliente, isolamento RLS e metadata de mídia. A sessão real administrativa do vídeo da balança está documentada em `CONTENT_LIBRARY.md`; a mídia real permanece rascunho, sem release a cliente.

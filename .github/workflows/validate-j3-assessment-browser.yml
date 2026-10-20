@@ -11,6 +11,8 @@ on:
       - "app/admin/clientes/[clienteId]/avaliacoes/**"
       - "app/admin/avaliacoes/[avaliacaoId]/**"
       - "lib/evaluations/**"
+      # Explicit all-journey regression only when the consolidated evidence matrix changes.
+      - "docs/PREHOMOLOGATION_MATRIX.md"
   workflow_dispatch:
 
 permissions:

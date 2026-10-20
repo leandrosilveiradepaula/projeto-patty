@@ -11,6 +11,8 @@ on:
       - "app/cliente/protocolo/**"
       - "lib/protocol/**"
       - "supabase/migrations/*meal_dose_select_rls*.sql"
+      # Explicit all-journey regression only when the consolidated evidence matrix changes.
+      - "docs/PREHOMOLOGATION_MATRIX.md"
   workflow_dispatch:
 
 permissions:
