@@ -17,6 +17,8 @@ on:
       - "lib/onboarding/**"
       - "supabase/migrations/**"
       - "docs/JOURNEY_HOMOLOGATION.md"
+      # Explicit all-journey regression only when the consolidated evidence matrix changes.
+      - "docs/PREHOMOLOGATION_MATRIX.md"
   workflow_dispatch:
 
 permissions:
