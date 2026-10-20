@@ -175,7 +175,7 @@ async function mobileWidth(page) {
 test.use({ baseURL });
 
 test("J5: client requests, Patty reviews/publishes exact training versions and access stays isolated", async ({ browser }) => {
-  test.setTimeout(360000);
+  test.setTimeout(420000);
   const nonce = randomBytes(8).toString("hex");
   const staff = await identity("admin", "staff", nonce);
   const unassigned = await identity("admin", "unassigned", nonce);
@@ -412,6 +412,104 @@ test("J5: client requests, Patty reviews/publishes exact training versions and a
       } finally {
         await api.auth.signOut();
       }
+    });
+
+    await test.step("Ending assignment in MFA UI revokes former staff access and preserves J5 history", async () => {
+      // Preconditions are actual J5 publications and a local-only
+      // concurrent draft created by authenticated workflows above.
+      const assignment=rows("select id,ended_at from public.client_assignments"+
+        " where client_id="+literal(clientId)+
+        " and staff_profile_id="+literal(staff.id));
+      expect(assignment).toHaveLength(1);
+      expect(assignment[0].ended_at).toBeNull();
+      expect(rows("select status from public.clients where id="+literal(clientId)))
+        .toEqual([{status:"active"}]);
+      const allVersions=versions(clientId);
+      expect(allVersions.map(v=>Boolean(v.published_at))).toEqual([true,true,false]);
+
+      // Closing the professional relationship is the real authorized admin
+      // form action, not a fixture UPDATE of assignment or client status.
+      await adminPage.goto("/admin/clientes/"+clientId);
+      await expect(adminPage.getByRole("heading",{name:"Encerrar acompanhamento"}))
+        .toBeVisible();
+      await adminPage.getByRole("checkbox",{
+        name:/Confirmo que quero encerrar o acompanhamento atual/,
+      }).check();
+      await adminPage.getByRole("button",{name:"Encerrar e marcar como inativa"}).click();
+      await expect(adminPage).toHaveURL(/\/admin\/clientes\?assignment=ended$/,{timeout:30000});
+      // The success Alert renders a polite status region with a DIV title,
+      // not an h2/h3. Assert its actual accessible role and exact content.
+      const closedNotice=adminPage.getByRole("status").filter({
+        hasText:"Acompanhamento encerrado",
+      });
+      await expect(closedNotice).toHaveCount(1);
+      await expect(closedNotice.getByText("Acompanhamento encerrado",{exact:true}))
+        .toBeVisible();
+      await expect(closedNotice.getByText(
+        "A cliente agora está inativa. O acompanhamento atual foi encerrado e todo o histórico foi preservado.",
+        {exact:true},
+      )).toBeVisible();
+
+      await expect.poll(()=>{
+        const current=rows("select ended_at from public.client_assignments"+
+          " where id="+literal(assignment[0].id));
+        return current.length===1 && current[0].ended_at!==null;
+      },{timeout:25000}).toBe(true);
+      expect(rows("select status from public.clients where id="+literal(clientId)))
+        .toEqual([{status:"inactive"}]);
+      expect(versions(clientId)).toEqual(allVersions);
+
+      // A pre-existing AAL2 session must not retain permissions after the
+      // assignment ends, even for versions the same staff member published.
+      for(const version of [first,second,allVersions[2]]){
+        expect(visibleCount(staff.id,"aal2","client_training_plan_versions",version.id))
+          .toBe(0);
+      }
+      for(const item of [firstItem,copied]){
+        expect(visibleCount(staff.id,"aal2","client_training_plan_items",item.id))
+          .toBe(0);
+      }
+      const formerStaff=await authenticatedAdminApi(staff,totp);
+      try{
+        const read=await formerStaff.from("client_training_plan_versions")
+          .select("id").eq("id",second.id);
+        if(read.error && read.error.code!=="42501") throw read.error;
+        expect(read.data??[]).toEqual([]);
+      }finally{
+        await formerStaff.auth.signOut();
+      }
+      await adminPage.goto(adminRoute);
+      await expect(adminPage.getByRole("heading",{name:"Prescrição de treino"}))
+        .toHaveCount(0);
+      await expect(adminPage.getByText("J5 Treino B sintetico",{exact:false}))
+        .toHaveCount(0);
+
+      // History and exact releases survive deactivation. This does not
+      // publish the third draft, alter a nutrition protocol or create feedback.
+      expect(visibleCount(owner.id,"aal1","client_training_plan_versions",first.id))
+        .toBe(1);
+      expect(visibleCount(owner.id,"aal1","client_training_plan_versions",second.id))
+        .toBe(1);
+      expect(visibleCount(owner.id,"aal1","client_training_plan_versions",allVersions[2].id))
+        .toBe(0);
+      expect(visibleCount(owner.id,"aal1","client_training_plan_items",firstItem.id))
+        .toBe(1);
+      expect(visibleCount(owner.id,"aal1","client_training_plan_items",copied.id))
+        .toBe(1);
+      await clientPage.reload();
+      await expect(clientPage.getByRole("heading",{name:"J5 Treino B sintetico"}))
+        .toBeVisible();
+      await expect(clientPage.getByText("Versão 1 · J5 Treino A sintetico",{exact:false}).first())
+        .toBeVisible();
+      await expect(clientPage.getByText("J5 simultaneous",{exact:false}))
+        .toHaveCount(0);
+      expect(rows("select id from public.client_training_requests"+
+        " where client_id="+literal(clientId))).toHaveLength(1);
+      expect(rows("select id from public.protocol_publications"+
+        " where client_id="+literal(clientId))).toEqual([]);
+      expect(rows("select id from public.client_weekly_feedbacks"+
+        " where client_id="+literal(clientId))).toEqual([]);
+      await mobileWidth(clientPage);
     });
   } finally {
     await Promise.all([adminCtx.close(), clientCtx.close(), outsiderCtx.close(), foreignCtx.close()]);
