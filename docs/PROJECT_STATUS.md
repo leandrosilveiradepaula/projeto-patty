@@ -1,3 +1,12 @@
+## 2026-10-20 — Teste técnico de arquivo privado da cliente, sem fixtures em produção
+
+**BASE PUBLICADA:** PR [#935](https://github.com/leandrosilveiradepaula/projeto-patty/pull/935) passou Validate application, Playwright J1/J4/J6/J7 no SHA de revisão; mergeado como 15809a5b5aaa9ba086a8229aa082bd4f618b1ccf, [CI pós-merge](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39358557604) success, deployment Vercel dpl_DBePizZJAZbjgDSJMSFTZtGxbcqH READY nesse commit. O percurso J4→J2 está comprovado localmente, sem homologação humana.
+
+**LACUNA SEGUINTE, EM TESTE:** na ativação J1 exclusivamente local, usar sessão real da cliente sintética para enviar PNG descartável pelo formulário, validar registro persistido, bucket privado, bytes físicos, download autenticado, rejeição de tipo inválido e ausência de acesso anônimo. O isolamento entre clientes e admin AAL2 segue nas suítes J3/J4/J6/J7; o novo teste não altera RLS, migrations, secrets ou dados SaaS.
+
+**RESTRIÇÃO:** workflows antigos de smoke de arquivos via E2E_BASE_URL apontam para aplicação publicada e pressupõem contas de teste; não dispará-los para esta consolidação. A homologação profissional da Patty continua como última tarefa global.
+
+---
 ## 2026-10-20 — Consolidação J1–J7 validada; próximo teste integrado J4 → J2
 
 **FATO VERIFICADO:** PR [#934](https://github.com/leandrosilveiradepaula/projeto-patty/pull/934) foi mergeado como b19854b9bae00c2be99ba631576f2194eca7a4a3. Os oito checks do PR (Validate application e Playwright J1 a J7) terminaram em success no mesmo head de revisão, o [CI pós-merge do master](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39357713854) foi aprovado e a Vercel confirmou deployment dpl_2VXQouBcbMAeTBDhh2K1JaAQYLYV READY no mesmo commit para projeto-patty.vercel.app. Isso comprova testes técnicos sintéticos, **não** homologação com a Patty.
