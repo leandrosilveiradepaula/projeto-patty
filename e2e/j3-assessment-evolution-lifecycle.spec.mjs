@@ -271,12 +271,8 @@ test("J3: MFA, corrected measurements, two private photos, return and RLS", asyn
     await satisfyRequiredSyntheticItems(assessId,subjectId,staffId,method);
     finalize(assessId,staffId,method);
   }
-  // Existing append-only correction mechanism, synthetic local fixture.
-  insert("assessment_measurement_corrections", {
-    assessment_measurement_id: oldWeightId,
-    corrected_measurement_value: 71, corrected_unit: "kg",
-    corrected_by_profile_id: admin.id, note: "Correção sintética J3",
-  });
+  // Only the original assessment is a SQL fixture; the historical
+  // correction must be submitted through the real MFA-protected admin UI.
   const originalRows = select("select measurement_value from public.assessment_measurements" +
     " where id = " + literal(oldWeightId));
   expect(Number(originalRows[0].measurement_value)).toBe(70);
@@ -299,6 +295,43 @@ test("J3: MFA, corrected measurements, two private photos, return and RLS", asyn
     await loginAdminWithMfa(page, {
       email: admin.email, password: admin.password, totpSecret: adminTotp,
     });
+    await test.step("Finalized J3 record is read-only and MFA UI appends a correction", async () => {
+      await page.goto("/admin/avaliacoes/" + olderId);
+      await expect(page.getByRole("heading", {name:"Editar rascunho"})).toHaveCount(0);
+      await expect(page.getByRole("heading", {name:"Adicionar ou atualizar medida"})).toHaveCount(0);
+      await expect(page.getByRole("button", {name:"Finalizar avaliação"})).toHaveCount(0);
+
+      const weightItem = page.locator("#medidas li").filter({
+        has: page.locator("dt").getByText("Peso", {exact:true}),
+      });
+      await expect(weightItem).toHaveCount(1);
+      await weightItem.getByText("Corrigir lançamento", {exact:true}).click();
+      await weightItem.locator('input[name="correctedMeasurementValue"]').fill("71");
+      await weightItem.locator('input[name="correctedUnit"]').fill("kg");
+      await weightItem.locator('input[name="correctionNote"]').fill("Correção sintética J3");
+      await weightItem.getByRole("button", {name:"Registrar correção"}).click();
+
+      await expect.poll(() => select("select id from public.assessment_measurement_corrections"+
+        " where assessment_measurement_id="+literal(oldWeightId)).length, {timeout:25000}).toBe(1);
+      const corrections = select("select assessment_measurement_id,corrected_measurement_value,"+
+        "corrected_unit,corrected_by_profile_id,note from public.assessment_measurement_corrections"+
+        " where assessment_measurement_id="+literal(oldWeightId));
+      expect(corrections).toHaveLength(1);
+      expect(corrections[0].assessment_measurement_id).toBe(oldWeightId);
+      expect(Number(corrections[0].corrected_measurement_value)).toBe(71);
+      expect(corrections[0].corrected_unit).toBe("kg");
+      expect(corrections[0].corrected_by_profile_id).toBe(admin.id);
+      expect(corrections[0].note).toBe("Correção sintética J3");
+      expect(select("select measurement_value from public.assessment_measurements"+
+        " where id="+literal(oldWeightId)).map(row=>Number(row.measurement_value)))
+        .toEqual([70]);
+
+      await page.reload();
+      await expect(page.getByRole("heading", {name:"Histórico de correções"})).toBeVisible();
+      await expect(page.getByText("Corrigido para 71 kg.", {exact:false})).toBeVisible();
+      await mobileWidth(page);
+    });
+
     await test.step("Evolution opens exact authorized assessment and returns to filter", async () => {
       await page.goto("/admin/clientes/" + clientId + "/evolucao");
       await expect(page.getByRole("heading", {name: "Evolução", exact: true})).toBeVisible();
