@@ -1,3 +1,13 @@
+## 2026-10-20 — J3: percurso mobile da cliente, correção histórica e retorno exato à evolução
+
+**Base publicada confirmada:** PR [#947](https://github.com/leandrosilveiradepaula/projeto-patty/pull/947) mergeada em `af997dfa089af3b2b78cbe682db399fec3af9a7a`, `Validate application` pós-merge [#39470282878](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39470282878) `SUCCESS`, Vercel produção `READY` no mesmo commit. O cenário J1 prova prévia privada de PNG e negativa a profissional AAL2 sem assignment com banco e Storage descartáveis; não homologou arquivos reais.
+
+**Lacuna e tarefa:** J3 cobre a interface **profissional** em 390 px/touch, correções append-only e fotos privadas, mas só exercia RLS da **cliente** via API, sem percorrer suas telas de avaliações/evolução. O pacote amplia `e2e/j3-assessment-evolution-lifecycle.spec.mjs` com login normal de cliente titular e cliente estrangeira **sintéticas**, ambas no mobile 390 px: histórico de somente avaliações finalizadas; correção vigente 71 kg sem sobrescrever original 70 kg; filtro `Peso (kg)`/três observações; link profundo para avaliação exata, retorno aos filtros e manutenção após reload; prevenção de acesso à avaliação de outra cliente; ausência de score clínico e mutação implícita. Esses números são apenas fixture histórica de teste J3, não regra do método.
+
+**Segurança e estados:** nada real é criado, modificado ou publicado no SaaS. MFA, RLS, versionamento profissional, método parametrizado e autorização não são alterados. As assertions novas são feitas em Next.js autenticado sobre PostgreSQL/Auth/Storage local descartável. Não alterar Auth, schema, migrations, regras clínicas ou conteúdos. `Validate application` e browser J3 (mais regressões disparadas) precisam estar **todos SUCCESS no HEAD exato** antes do merge; CI pós-merge e Vercel READY são verificações posteriores separadas. **Estado atual do pacote: implementado na branch, pendente de CI; homologação operacional conjunta da Patty segue como última tarefa.**
+
+---
+
 ## 2026-10-20 — J1: prévia privada em celular e bloqueio da profissional não atribuída
 
 **BASE CONFIRMADA:** a [PR #946](https://github.com/leandrosilveiradepaula/projeto-patty/pull/946) foi mergeada em `1ae9d072ee60055ef9c5c15006714dc3b2d382bc`, com `Validate application` pós-merge [#39468330449](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39468330449) `success` e Vercel produção `READY` no mesmo commit. A navegação profissional J2 em mobile 390 px, sob MFA e dados sintéticos, passou no head pré-merge. Registros inferiores sobre #946 “em validação” são históricos.
