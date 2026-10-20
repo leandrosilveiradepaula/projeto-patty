@@ -1,3 +1,17 @@
+## 2026-10-20 — Integração J3 → J4 → J2 (envio definitivo) → J3
+
+**BASE CONSOLIDADA:** PR [#940](https://github.com/leandrosilveiradepaula/projeto-patty/pull/940) mergeada no commit `d6d330090347b0b5445fe353800c9ac0028f76fb`: avaliação inicial e reavaliação criadas/finalizadas via interface MFA AAL2, com medição, foto privada vinculada e snapshots originais versionados. PR [#941](https://github.com/leandrosilveiradepaula/projeto-patty/pull/941) mergeada como `c520f490516665a5aad3e233202af34f9d73279e`: histórico da correção de medida testado pela UI; todos checks exigidos verdes, CI pós-merge success e Vercel READY no mesmo SHA. Estados de "aguardando CI/merge" nos registros anteriores são históricos e foram superados.
+
+**LACUNA IDENTIFICADA:** a suíte integrada `e2e/j4-nutrition-protocol-lifecycle.spec.mjs` exercitava a solicitação J2 depois de publicação real J4, o rascunho da cliente e a prevenção de duplicidade, mas terminava sem o ato de envio definitivo; o envio e a leitura profissional eram exercitados apenas na suíte isolada J2 com publicação sintética previamente criada.
+
+**OBJETIVO / ESCOPO DO PACOTE:** depois do protocolo J4 realmente aprovado e publicado e da solicitação semanal, preencher a versão vigente do formulário J2 pela interface autenticada da mesma cliente, exigir tela de revisão e clique explícito de envio, persistir `submitted_at`, exigir todas as chaves originais do formulário versionado, navegar ao histórico enviado e conferir leitura original pela profissional MFA. Negar leitura à outra cliente; preservar exatamente duas publicações J4, sem gatilho de publicação ou alteração implícita. Concluir a segunda avaliação J3 no mesmo cliente e comprovar que ela não modifica respostas já enviadas nem a data de envio. O material fictício das respostas é apenas fixture de teste, não critério clínico. Preparação de identidades/ambiente continua local e descartável.
+
+**FORA DE ESCOPO:** alterar formulário profissional, regras clínicas, IA, relatórios, migrations, Auth, schema, RLS, Storage de produção e dados reais. Não substituir navegação por inserção SQL para a operação sob teste. **RISCO:** aumento do tempo da suíte J4 e dependência da versão ativa de perguntas; manter validações reais e corrigir eventuais falhas na mesma branch.
+
+**ACEITE:** `Validate application`, `Validate J4 local nutrition lifecycle browser` e regressões disparadas `success` no SHA exato da PR; revisão do diff, merge elegível, `Validate application` pós-merge e Vercel produção READY no commit final. A homologação profissional da Patty continua por último. **Estado inicial deste pacote: implementação enviada à PR e aguardando CI; não homologado operacionalmente.**
+
+---
+
 ## 2026-10-20 — J3: prova de correção histórica pela interface autenticada
 
 **BASE VERIFICADA:** PR #940 já integrada no `master` `d6d330090347b0b5445fe353800c9ac0028f76fb`; `Validate application` pós-merge success e Vercel produção READY no mesmo SHA. O teste J4 integrado agora cria e finaliza ambas avaliações J3 pela UI administrativa, preservando snapshots originais e isolamento.
