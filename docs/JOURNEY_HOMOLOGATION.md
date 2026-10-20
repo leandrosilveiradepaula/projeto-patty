@@ -1,3 +1,13 @@
+## 2026-10-20 — J6 cliente mobile: busca, download privado e ausência de telemetria implícita
+
+**Objetivo:** complementar a J6 (liberação humana e bytes sintéticos já testados) com o caminho **da interface da cliente** na biblioteca móvel de 390 px: busca por material exato publicado/liberado, exclusão visual do outro material pelo filtro, link `Abrir conteúdo` para a versão liberada sob `/cliente/conteudos/assets/[assetId]`, abertura por toque em nova aba privada do provedor local e retorno da busca. A URL assinada é criada pela rota autorizada e não é exposta no HTML. A abertura não cria registro de progresso, avaliação de consumo ou conclusão; a semântica de `client_content_progress` permanece **questão aberta** em `OPEN_QUESTIONS.md`.
+
+**Separação de evidências:** PDF físico, hash exato e Range pertencem **somente ao servidor sintético isolado do CI**; conteúdo real da balança já teve migração/reprodução administrativa documentadas em `CONTENT_LIBRARY.md`, mas release à cliente e distribuição real não foram homologados. O caso proposital de metadata sem objeto retorna 404 do provedor. Nenhum acesso fictício em SaaS, mudança de SDK, schema, Auth, RLS, grants, migração, rotina editorial ou publicação profissional por IA. O navegador Playwright não reproduz vídeo real no CI.
+
+**Critérios técnicos:** Playwright J6 `success` no mesmo SHA do Validate application e de regressões disparadas; desktop e mobile onde existentes, busca persistente na interação, link sem vazar token e nova aba; nenhuma escrita implícita de progresso. Verificar CI pós-merge e Vercel READY no SHA final. **Homologação operacional da Patty continua por último.**
+
+---
+
 ## 2026-10-20 — J3 cliente mobile: avaliações finalizadas, correção histórica e navegação factual
 
 **Objetivo:** complementar o E2E J3 já aprovado para ações profissionais AAL2 em mobile com a navegação **cliente** em 390 px. Dados criados no banco descartável: duas avaliações finalizadas da titular, uma avaliação ainda rascunho e outra finalizada de cliente estrangeira, além de uma correção profissional registrada pela UI que preserva valor original. **Nenhum desses valores é prescrição clínica.**
