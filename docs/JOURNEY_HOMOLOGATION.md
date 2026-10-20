@@ -1,3 +1,13 @@
+## 2026-10-20 — J1: exceção de arquivos privados após encerramento, correção de policy ainda não aplicada
+
+**Reprodução:** PR [#949](https://github.com/leandrosilveiradepaula/projeto-patty/pull/949) expôs um erro no CI sintético: a única admin MFA AAL2 visualiza `client_files` após encerrar o assignment, mas a rota de download devolve `404`. A policy `storage.objects` existente depende de `JOIN clients` para ambos os ramos, enquanto `clients` esconde a linha sem assignment. A regra confirmada do MVP em `RBAC_RLS.md` permite somente à **única admin Patty** arquivo privado sem assignment; proíbe provisionar segunda admin sem redesenho. Issues [#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951) (defeito) e [#950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950) (expansão insegura).
+
+**Correção sob gate sensível:** migration nova `supabase/migrations/20261020191000_fix_private_storage_admin_read_after_assignment.sql`: SELECT do `storage.objects` no bucket `client-private` mantém correspondência de objeto/metadado e separa ramo admin relacional de ramo titular/liberação. A restrição existente de AAL2 permanece, `anon` não recebe grant nem policy, e `clients` continua protegida por assignment. O E2E J1 comprova fluxo real de assinatura temporária após encerramento; negativas de outra cliente, AAL1, anônimo e objeto não autorizado continuam obrigatórias. **Não** passar serviço privilegiado pela UI para compensar falha de política.
+
+**Separação operacional:** mudança proposta não foi aplicada no SaaS pelo CI local. O workflow de migration em `master` faz **somente dry-run** em push; aplicar requer execução explícita controlada. Resultado `success` em Playwright local não comprova aplicação na produção. Após aplicar, conferir metadata de policy e status/deployment no mesmo SHA, sem expor registros de clientes. A homologação com Patty permanece por último.
+
+---
+
 ## 2026-10-20 — Correção de contrato J1: arquivos privados e única admin AAL2
 
 O teste anterior da J1 exigia, de uma **segunda admin sintética**, negação de arquivos privados sem assignment. Isso contradiz a exceção explícita em `RBAC_RLS.md` e `DECISIONS.md`: apenas a Patty é admin de negócio no MVP, e o papel `admin` com MFA AAL2 pode ler `client_files` e Storage sem vínculo corrente. A PR #949 registrou duas falhas consecutivas dessa asserção; **não** se tentou enfraquecer a política para satisfazer o CI. A [issue #950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950) conserva o risco do raio de acesso caso um segundo admin seja provisionado futuramente.
