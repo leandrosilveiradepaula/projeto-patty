@@ -437,9 +437,15 @@ test("J5: client requests, Patty reviews/publishes exact training versions and a
       }).check();
       await adminPage.getByRole("button",{name:"Encerrar e marcar como inativa"}).click();
       await expect(adminPage).toHaveURL(/\/admin\/clientes\?assignment=ended$/,{timeout:30000});
-      await expect(adminPage.getByRole("heading",{name:"Acompanhamento encerrado"}))
+      // The success Alert renders a polite status region with a DIV title,
+      // not an h2/h3. Assert its actual accessible role and exact content.
+      const closedNotice=adminPage.getByRole("status").filter({
+        hasText:"Acompanhamento encerrado",
+      });
+      await expect(closedNotice).toHaveCount(1);
+      await expect(closedNotice.getByText("Acompanhamento encerrado",{exact:true}))
         .toBeVisible();
-      await expect(adminPage.getByText(
+      await expect(closedNotice.getByText(
         "A cliente agora está inativa. O acompanhamento atual foi encerrado e todo o histórico foi preservado.",
         {exact:true},
       )).toBeVisible();
