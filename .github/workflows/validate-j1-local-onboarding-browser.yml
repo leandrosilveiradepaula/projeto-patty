@@ -93,8 +93,8 @@ jobs:
             exit 1
           fi
 
-      # The hosted database has SELECT/UPDATE on upload sessions and
-      # SELECT/INSERT/DELETE on file metadata for backend service_role.
+      # The hosted database has SELECT/INSERT/UPDATE on upload sessions and
+      # SELECT/INSERT/UPDATE/DELETE on file metadata for backend service_role.
       # Supabase CLI's disposable bootstrap may omit these backend-only ACLs.
       # Match verified production parity strictly in this Docker-local DB.
       - name: Align disposable private-file service-role grants with hosted backend
@@ -108,8 +108,10 @@ jobs:
             if not exists (
               select 1 from pg_catalog.pg_roles
               where rolname = 'service_role' and rolbypassrls
-            ) or has_table_privilege('authenticated', 'public.client_file_upload_sessions', 'UPDATE')
+            ) or has_table_privilege('authenticated', 'public.client_file_upload_sessions', 'INSERT')
+              or has_table_privilege('authenticated', 'public.client_file_upload_sessions', 'UPDATE')
               or has_table_privilege('authenticated', 'public.client_files', 'INSERT')
+              or has_table_privilege('authenticated', 'public.client_files', 'UPDATE')
               or has_table_privilege('authenticated', 'public.client_files', 'DELETE')
               or has_table_privilege('anon', 'public.client_file_upload_sessions', 'SELECT')
               or has_table_privilege('anon', 'public.client_files', 'SELECT')
@@ -117,17 +119,21 @@ jobs:
               raise exception 'Unexpected local private-file permissions before parity';
             end if;
           end $boundary$;
-          grant select, update on public.client_file_upload_sessions to service_role;
-          grant select, insert, delete on public.client_files to service_role;
+          grant select, insert, update on public.client_file_upload_sessions to service_role;
+          grant select, insert, update, delete on public.client_files to service_role;
           do $boundary$
           begin
             if not has_table_privilege('service_role', 'public.client_file_upload_sessions', 'SELECT')
+               or not has_table_privilege('service_role', 'public.client_file_upload_sessions', 'INSERT')
                or not has_table_privilege('service_role', 'public.client_file_upload_sessions', 'UPDATE')
                or not has_table_privilege('service_role', 'public.client_files', 'SELECT')
                or not has_table_privilege('service_role', 'public.client_files', 'INSERT')
+               or not has_table_privilege('service_role', 'public.client_files', 'UPDATE')
                or not has_table_privilege('service_role', 'public.client_files', 'DELETE')
-               or has_table_privilege('authenticated', 'public.client_file_upload_sessions', 'UPDATE')
+               or has_table_privilege('authenticated', 'public.client_file_upload_sessions', 'INSERT')
+              or has_table_privilege('authenticated', 'public.client_file_upload_sessions', 'UPDATE')
                or has_table_privilege('authenticated', 'public.client_files', 'INSERT')
+              or has_table_privilege('authenticated', 'public.client_files', 'UPDATE')
                or has_table_privilege('authenticated', 'public.client_files', 'DELETE')
                or has_table_privilege('anon', 'public.client_file_upload_sessions', 'SELECT')
                or has_table_privilege('anon', 'public.client_files', 'SELECT')
