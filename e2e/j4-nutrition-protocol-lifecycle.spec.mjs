@@ -1,4 +1,4 @@
-import {randomBytes} from "node:crypto";
+import {randomBytes,randomUUID} from "node:crypto";
 import {execFileSync} from "node:child_process";
 import {expect,test} from "@playwright/test";
 import {createClient} from "@supabase/supabase-js";
@@ -19,7 +19,10 @@ function anonClient(){
   return createClient(apiURL,anonKey,{auth:{autoRefreshToken:false,persistSession:false}});
 }
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const fixtureTables=new Set(["profiles","user_roles","clients","client_assignments"]);
+const fixtureTables=new Set([
+  "profiles","user_roles","clients","client_assignments",
+  "client_assessments","assessment_measurements","client_files",
+]);
 function quote(x){
   if(typeof x!=="string" && typeof x!=="number" && x!==null)
     throw new TypeError("Invalid local fixture parameter");
@@ -92,6 +95,96 @@ async function loginClient(page,identity){
 async function pollRows(query,length){
   await expect.poll(()=>rows(query).length,{timeout:25000}).toBe(length);
   return rows(query);
+}
+// The basic evaluation method is read from the active versioned catalog.
+// These weights and measurements are disposable test data, NOT clinical rules.
+const assessmentPng=Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9ZcokAAAAASUVORK5CYII=",
+  "base64",
+);
+function activeAssessmentTemplate(key){
+  const found=rows("select v.id,v.configuration from public.method_configuration_versions v"+
+    " join public.method_configuration_templates t on t.id=v.template_id"+
+    " where t.template_key="+quote(key)+
+    " and v.activated_at is not null and v.retired_at is null");
+  if(found.length!==1||!UUID.test(found[0].id))
+    throw new Error("Expected exactly one active local assessment template");
+  return found[0];
+}
+function basicAssessmentMethod(){
+  const catalog=activeAssessmentTemplate("evaluation.assessment_kind_catalog");
+  const kind=catalog.configuration?.entries?.find(item=>
+    item.historicalCode==="fortnightly"&&item.semanticKey==="basic");
+  if(!kind)throw new Error("Versioned basic assessment kind unavailable");
+  const definition=activeAssessmentTemplate("evaluation.assessment_definition."+kind.semanticKey);
+  if(definition.configuration?.kindKey!==kind.semanticKey||
+     !Array.isArray(definition.configuration.requiredMeasurements))
+    throw new Error("Invalid versioned assessment definition");
+  return {catalog,kind,definition};
+}
+async function finalizedSyntheticAssessment(input){
+  const {clientId,staffId,assessedAt,weight,waist,method}=input;
+  if(![clientId,staffId].every(id=>UUID.test(id))||
+     !Number.isFinite(weight)||!Number.isFinite(waist))
+    throw new Error("Invalid disposable J3 fixture");
+  const assessmentId=insert("client_assessments",{
+    client_id:clientId,assessed_at:assessedAt,
+    assessment_kind:"fortnightly",created_by_profile_id:staffId,
+  });
+  const recorded=new Set();
+  for(const item of [
+    {key:"peso",value:weight,unit:"kg"},
+    {key:"cintura",value:waist,unit:"cm"},
+  ]){
+    insert("assessment_measurements",{
+      assessment_id:assessmentId,measurement_key:item.key,
+      measurement_value:item.value,unit:item.unit,
+    });
+    recorded.add(item.key);
+  }
+  for(const requirement of method.definition.configuration.requiredMeasurements){
+    if(recorded.has(requirement.key))continue;
+    // Preserve the standalone J3 fixture approach to required synthetic keys.
+    insert("assessment_measurements",{
+      assessment_id:assessmentId,measurement_key:requirement.key,
+      measurement_value:88,unit:"cm",
+    });
+    recorded.add(requirement.key);
+  }
+  const minimum=method.definition.configuration.photoRequirement?.minimumCount??0;
+  if(!Number.isSafeInteger(minimum)||minimum<0||minimum>15)
+    throw new Error("Unexpected local assessment photo requirement");
+  for(let n=0;n<minimum;n++){
+    const photoId=randomUUID();
+    const objectPath="clients/"+clientId+"/photo/"+photoId+".png";
+    const upload=await service.storage.from("client-private").upload(
+      objectPath,assessmentPng,{contentType:"image/png",upsert:false});
+    if(upload.error)throw upload.error;
+    insert("client_files",{
+      id:photoId,client_id:clientId,file_kind:"photo",bucket_id:"client-private",
+      object_path:objectPath,original_filename:"j4-j3-synthetic-"+n+".png",
+      mime_type:"image/png",byte_size:assessmentPng.length,
+      uploaded_by_profile_id:staffId,
+    });
+    sql("insert into public.assessment_files(assessment_id,client_id,client_file_id)"+
+      " values ("+quote(assessmentId)+","+quote(clientId)+","+quote(photoId)+");");
+  }
+  const {catalog,kind,definition}=method;
+  const snapshotId=sql("select public.finalize_assessment_from_method_snapshot("+
+    quote(assessmentId)+"::uuid,"+quote(staffId)+"::uuid,"+
+    quote(catalog.id)+"::uuid,"+
+    quote(JSON.stringify(catalog.configuration))+"::jsonb,"+
+    quote(JSON.stringify({
+      historical_code:kind.historicalCode,semantic_key:kind.semanticKey,label:kind.label,
+    }))+"::jsonb,"+
+    quote(definition.id)+"::uuid,"+
+    quote(JSON.stringify(definition.configuration))+"::jsonb,"+
+    quote(JSON.stringify({kind_key:kind.semanticKey,can_finalize:true}))+"::jsonb);");
+  if(!UUID.test(snapshotId))throw new Error("Assessment snapshot not persisted");
+  expect(rows("select id from public.client_assessments where id="+quote(assessmentId)+
+    " and client_id="+quote(clientId)+" and finalized_at is not null"+
+    " and method_configuration_snapshot_set_id="+quote(snapshotId))).toHaveLength(1);
+  return {id:assessmentId,snapshotId};
 }
 // Synthetic local-only authorization probe; never print SQL errors or data.
 // Inspect query *plans*, never data, solely inside the disposable local DB.
@@ -366,6 +459,22 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
     await loginAdminWithMfa(adminPage,{email:staff.email,password:staff.password,totpSecret:totp});
     await loginClient(clientPage,owner);
     await expect(clientPage.getByText("Nenhum protocolo foi publicado para você",{exact:true})).toBeVisible();
+
+    const assessmentMethod=basicAssessmentMethod();
+    let initialAssessment;
+    await test.step("J3 finalized baseline precedes J4 professional publication",async()=>{
+      initialAssessment=await finalizedSyntheticAssessment({
+        clientId,staffId:staff.id,assessedAt:"2026-09-21T12:00:00Z",
+        weight:74,waist:84,method:assessmentMethod,
+      });
+      expect(rows("select id from public.protocol_publications where client_id="+quote(clientId)))
+        .toEqual([]);
+      expect(rows("select id from public.client_weekly_feedbacks where client_id="+quote(clientId)))
+        .toEqual([]);
+      await adminPage.goto("/admin/clientes/"+clientId+"/evolucao");
+      await expect(adminPage.getByRole("heading",{name:"Evolução",exact:true})).toBeVisible();
+      await mobileFit(adminPage);
+    });
 
     let protocolId;
     let v1;
@@ -698,6 +807,65 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
       expect(feedbackRows()[0].submitted_at).toBeNull();
       expect(rows("select id from public.protocol_publications"+
         " where client_id="+quote(clientId))).toHaveLength(2);
+    });
+
+    await test.step("J3 re-evaluation after J4 publication and J2 draft remains independent",async()=>{
+      const reevaluation=await finalizedSyntheticAssessment({
+        clientId,staffId:staff.id,assessedAt:"2026-10-12T12:00:00Z",
+        weight:72,waist:82,method:assessmentMethod,
+      });
+      expect(reevaluation.id).not.toBe(initialAssessment.id);
+      const twoFinalized=rows("select id,finalized_at,method_configuration_snapshot_set_id"+
+        " from public.client_assessments where client_id="+quote(clientId)+
+        " order by assessed_at asc,id asc");
+      expect(twoFinalized).toHaveLength(2);
+      expect(twoFinalized.map(item=>item.id)).toEqual([
+        initialAssessment.id,reevaluation.id,
+      ]);
+      expect(twoFinalized.every(item=>item.finalized_at&&item.method_configuration_snapshot_set_id))
+        .toBe(true);
+
+      const compareRoute="/admin/clientes/"+clientId+"/avaliacoes/comparar";
+      await adminPage.goto(compareRoute);
+      await expect(adminPage.getByRole("heading",{name:"Comparar duas avaliações"}))
+        .toBeVisible();
+      await adminPage.locator('select[name="referencia"]')
+        .selectOption(initialAssessment.id);
+      await adminPage.locator('select[name="comparacao"]')
+        .selectOption(reevaluation.id);
+      await adminPage.getByRole("button",{name:"Comparar avaliações"}).click();
+      await expect(adminPage.locator("#comparacao-resultados")).toBeVisible();
+      const weights=adminPage.getByRole("row",{name:/Peso \(kg\)/});
+      await expect(weights.getByRole("cell",{name:"74 kg"})).toBeVisible();
+      await expect(weights.getByRole("cell",{name:"72 kg"})).toBeVisible();
+      await expect(weights.getByRole("cell",{name:"-2 kg"})).toBeVisible();
+      await mobileFit(adminPage);
+
+      // A finalized assessment is historical evidence, never authorization
+      // for an automatic phase change, publication or feedback submission.
+      const publications=rows("select protocol_version_id from public.protocol_publications"+
+        " where client_id="+quote(clientId));
+      expect(publications).toHaveLength(2);
+      expect(new Set(publications.map(x=>x.protocol_version_id)))
+        .toEqual(new Set([v1.id,v2.id]));
+      const existingFeedback=rows("select id,answers,submitted_at from public.client_weekly_feedbacks"+
+        " where client_id="+quote(clientId));
+      expect(existingFeedback).toHaveLength(1);
+      expect(existingFeedback[0].answers).toEqual({q01:2});
+      expect(existingFeedback[0].submitted_at).toBeNull();
+
+      // The other client and unrelated AAL2 professional are never granted
+      // these client-scoped assessments by the re-evaluation.
+      const otherRead=await apiOther.from("client_assessments")
+        .select("id").in("id",[initialAssessment.id,reevaluation.id]);
+      if(otherRead.error&&otherRead.error.code!=="42501")throw otherRead.error;
+      expect(otherRead.data??[]).toEqual([]);
+      await otherPage.goto(compareRoute+"?referencia="+initialAssessment.id+
+        "&comparacao="+reevaluation.id);
+      await expect(otherPage.getByText("Página ou registro indisponível",{exact:true}))
+        .toBeVisible();
+      expect(rows("select id from public.client_assessments where client_id="+quote(otherClientId)))
+        .toEqual([]);
     });
   }finally{
     await Promise.allSettled([adminCtx.close(),clientCtx.close(),otherCtx.close(),anonCtx.close()]);

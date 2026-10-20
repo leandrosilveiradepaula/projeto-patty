@@ -1,3 +1,15 @@
+## 2026-10-20 — Pré-homologação integrada J3 → J4 → J2 → J3
+
+**BASE VERIFICADA:** PR #938 mergeado no `master` `344b7a40c29a8ef5196a605eba6130ca9787ce6e`, `Validate application` pós-merge `success` e Vercel produção `READY` no mesmo SHA. Fluxo de upload administrativo e liberação humana comprovado com dados sintéticos; a Patty ainda não realizou homologação operacional.
+
+**OBJETIVO / ACEITE:** na MESMA cliente sintética e no MESMO Supabase/PostgreSQL descartável do teste J4, criar uma avaliação J3 inicial finalizada com o catálogo/método versionado ativo; comprovar que avaliação não publica protocolo ou cria feedback. Executar a J4 real por navegador (rascunho → revisão → aprovação → publicação das versões 1 e 2), depois J2 real (solicitação manual, rascunho persistido, retomada, bloqueio de repetição) e finalmente finalizar reavaliação J3 distinta. Pela UI de comparação autenticada, conferir as duas avaliações e valores sintéticos distintos, enquanto exatamente duas versões nutricionais permanecem publicadas e o feedback original permanece não submetido e inalterado. Verificar também negativa de acesso de cliente estrangeira (RLS) e profissional não atribuído (AAL2), sem decisões clínicas automáticas.
+
+**ESCOPO:** `e2e/j4-nutrition-protocol-lifecycle.spec.mjs`, documentação e validação J4. A finalização de avaliações usa a função de snapshot já existente e o mesmo modelo de dados que a suíte J3; os cadastros sintéticos exigidos são inseridos somente no banco local e as fotos descartáveis ficam em Storage local privado. `74/72 kg` e outras medidas são dados de laboratório, **não regras nem resultados do método Patty**. Fora de escopo: código de produção, schema, grants, migrations, RLS, novos passos do método, IA externa e qualquer cliente de produção.
+
+**SEGURANÇA / PORTAS:** ambientes localhost obrigatórios, contas efêmeras, MFA, RLS e bucket privado. O PR só pode ser mergeado com `Validate application`, Playwright J4 e demais checks disparados em `success` no HEAD exato, seguido de CI pós-merge e Vercel READY no SHA publicado. Registro escrito não equivale a teste: **status inicial = implementação aguardando CI**. Homologação humana conjunta da Patty será a última tarefa do projeto.
+
+---
+
 ## 2026-10-20 — Pré-homologação: arquivo administrativo oculto → liberação explícita → download da cliente
 
 **BASE TÉCNICA CONFIRMADA:** PR #937 mergeado como `04bb4980ae28b20549495ea54be6048b62344585`; seus checks pré-merge Validate application/J1/J6/J7 passaram, CI pós-merge success e Vercel READY no SHA correspondente. Homologação profissional da Patty não realizada.

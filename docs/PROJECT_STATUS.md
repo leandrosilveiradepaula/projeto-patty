@@ -1,3 +1,11 @@
+## 2026-10-20 — Pacote J3 → J4 → J2 → J3 em validação técnica
+
+**BASE PUBLICADA:** PR #938 mergeado como `344b7a40c29a8ef5196a605eba6130ca9787ce6e`, CI pós-merge success e Vercel READY no mesmo commit. Nenhum merge depende de confirmação manual do responsável quando checks/proteções permitem.
+
+**NOVA LACUNA TRATADA:** a suíte J4 já comprova J4 → J2, mas não havia duas avaliações J3 finalizadas na mesma cliente antes e depois desse percurso. Ampliação E2E local acrescenta snapshot versionado inicial J3, mantém a publicação profissional J4 e o feedback J2, conclui reavaliação finalizada e exige comparação autenticada, histórico imutável, ausência de publicação/feedback implícitos e isolamento de não titular / admin não atribuído. Ver escopo e critérios em `JOURNEY_HOMOLOGATION.md`. Status: **aguardando testes e merge**; não homologado operacionalmente.
+
+---
+
 ## 2026-10-20 — PR #938: corrigir seleção do ponto de clique sem contornar autorização
 
 **EVIDÊNCIA:** última execução J1 [#39367931246](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39367931246) ainda falhou por interceptação do pointer ao usar `locator.click`, mesmo após o hit-test do centro, enquanto Validate application/J6/J7 passaram. A suíte permanece aberta. O teste passou a usar `page.mouse.click` (evento real do navegador) somente depois de verificar novamente com `document.elementFromPoint` que o centro da área está coberto pelo botão exato de liberação; sem `force`, disparo JavaScript nem redução do pós-estado em banco. Se houver interferência na geometria, a asserção falha fechada. Corrigir na mesma branch e obter success no SHA exato antes do merge; homologação da Patty permanece por último.
