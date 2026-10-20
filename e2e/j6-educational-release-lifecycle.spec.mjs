@@ -1,24 +1,28 @@
-import { randomBytes } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { createClient } from "@supabase/supabase-js";
 import { expect, test } from "@playwright/test";
 import { generateTotp, loginAdminWithMfa } from "./helpers/admin-auth.mjs";
+import { syntheticPdfBytes } from "./j6-blob-fixture/pdf.mjs";
 
-// All writes and fake media metadata stay in the disposable local database.
-// This test NEVER uploads or distributes a real file and cannot verify Blob.
+// All identity and release writes use a disposable local database.
+// The private PDF bytes are generated locally and served by an isolated
+// signed-URL transport mock, NOT Vercel Blob or real educational material.
 const baseURL = process.env.J6_E2E_BASE_URL;
 const apiURL = process.env.J6_E2E_SUPABASE_URL;
 const anonKey = process.env.J6_E2E_ANON_KEY;
 const serviceKey = process.env.J6_E2E_SERVICE_ROLE_KEY;
 if (process.env.J6_E2E_LOCAL_ONLY !== "true" ||
     baseURL !== "http://127.0.0.1:3000" ||
-    apiURL !== "http://127.0.0.1:54321" || !anonKey || !serviceKey) {
+    apiURL !== "http://127.0.0.1:54321" || !anonKey || !serviceKey ||
+    !/^[a-f0-9]{64}$/.test(process.env.J6_E2E_BLOB_FIXTURE_SECRET ?? "") ||
+    Boolean(process.env.BLOB_READ_WRITE_TOKEN) || Boolean(process.env.VERCEL_OIDC_TOKEN)) {
   throw new Error("J6 browser test requires disposable localhost services");
 }
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const fixtureTables = new Set([
   "profiles", "user_roles", "clients", "client_assignments",
-  // Only synthetic Blob *metadata*, explicitly NOT a physically stored file.
+  // Includes a deliberately nonexistent path and a separately served synthetic PDF.
   "educational_content_assets",
 ]);
 const service = createClient(apiURL, serviceKey, {
@@ -199,7 +203,7 @@ async function assertMobile(page) {
 test.use({ baseURL });
 
 test("J6: versioned content releases require exact published version and synthetic asset metadata", async ({ browser }) => {
-  test.setTimeout(360000);
+  test.setTimeout(420000);
   const nonce = randomBytes(8).toString("hex");
   const staff = await identity("admin", "staff", nonce);
   const unassigned = await identity("admin", "unassigned", nonce);
@@ -319,6 +323,7 @@ test("J6: versioned content releases require exact published version and synthet
 
     const secondTitle = "J6 segundo material sintetico";
     let secondVersion;
+    let secondAssetId;
     let releaseId;
     await test.step("Manual publication then individual release grants only the exact version", async () => {
       await admin.getByLabel(/Confirmo que a versão 2 foi revisada/).check();
@@ -344,15 +349,23 @@ test("J6: versioned content releases require exact published version and synthet
       await expect(admin).toHaveURL(new RegExp("/admin/conteudos/" + secondContentId));
       secondVersion = versions(secondContentId)[0];
       expect(secondVersion.published_at).toBeNull();
-      insert("educational_content_assets", {
+      // Only this second PDF exists physically in the local signed-media fixture.
+      // It is NOT a real Vercel object; client release is still required.
+      secondAssetId = insert("educational_content_assets", {
         educational_content_version_id: secondVersion.id,
         asset_key: "primary",
         storage_provider: "vercel_blob",
-        storage_path: "j6-local-nonexistent/" + nonce + "/second-object.pdf",
+        storage_path: "j6-local-verified/" + nonce + "/second-object.pdf",
         content_type: "application/pdf",
-        byte_size: 32,
-        sha256_hex: "b".repeat(64),
+        byte_size: syntheticPdfBytes.length,
+        sha256_hex: createHash("sha256").update(syntheticPdfBytes).digest("hex"),
       });
+      const beforeRelease = await ownerCtx.request.get(
+        "/cliente/conteudos/assets/" + secondAssetId, { maxRedirects: 0 },
+      );
+      expect(beforeRelease.status()).toBe(404);
+      expect(visibleCount(owner.id, "aal1", "educational_content_assets", secondAssetId))
+        .toBe(0);
       await admin.reload();
       await admin.getByLabel(/Confirmo que a versão 1 foi revisada/).check();
       await admin.getByRole("button", { name: "Publicar versão" }).click();
@@ -451,16 +464,92 @@ test("J6: versioned content releases require exact published version and synthet
       await assertMobile(client);
     });
 
-    await test.step("Local-only metadata does not pretend missing Blob bytes were delivered", async () => {
-      // This intentionally fake path has NO Vercel Blob object behind it.
-      // A missing provider/physical blob must not be mistaken for delivery.
+    await test.step("Physically missing media never counts as a successful download", async () => {
+      // Metadata alone may be releasable, but a valid signed redirect cannot
+      // create the underlying binary object. The provider simulator returns 404.
       const url = "/cliente/conteudos/assets/" + syntheticAssetId;
       const ownerResponse = await ownerCtx.request.get(url, { maxRedirects: 0 });
-      expect(ownerResponse.status()).toBe(404);
+      expect(ownerResponse.status()).toBe(307);
+      const missingLocation = ownerResponse.headers().location;
+      expect(new URL(missingLocation).origin).toBe("http://127.0.0.1:54329");
+      const missingBytes = await ownerCtx.request.get(missingLocation, { maxRedirects: 0 });
+      expect(missingBytes.status()).toBe(404);
       const foreignResponse = await foreignCtx.request.get(url, { maxRedirects: 0 });
       expect(foreignResponse.status()).toBe(404);
       expect(rows("select client_content_release_id from public.client_content_progress" +
         " where client_id=" + literal(clientId))).toHaveLength(0);
+    });
+
+    await test.step("Only released J6 PDF bytes are delivered, including private Range reads", async () => {
+      const route = "/cliente/conteudos/assets/" + secondAssetId;
+      expect(visibleCount(owner.id, "aal1", "educational_content_assets", secondAssetId))
+        .toBe(1);
+      expect(visibleCount(foreign.id, "aal1", "educational_content_assets", secondAssetId))
+        .toBe(0);
+
+      const foreignResponse = await foreignCtx.request.get(route, { maxRedirects: 0 });
+      expect(foreignResponse.status()).toBe(404);
+      const unauthenticated = await browser.newContext({ baseURL });
+      try {
+        const anonymous = await unauthenticated.request.get(route, { maxRedirects: 0 });
+        expect(anonymous.headers().location ?? "").not.toContain("127.0.0.1:54329");
+        expect(anonymous.status()).not.toBe(200);
+      } finally {
+        await unauthenticated.close();
+      }
+
+      const allowed = await ownerCtx.request.get(route, { maxRedirects: 0 });
+      expect(allowed.status()).toBe(307);
+      expect(allowed.headers()["cache-control"]).toContain("no-store");
+      expect(allowed.headers()["referrer-policy"]).toBe("no-referrer");
+      const url = allowed.headers().location;
+      expect(new URL(url).origin).toBe("http://127.0.0.1:54329");
+
+      const full = await ownerCtx.request.get(url, { maxRedirects: 0 });
+      expect(full.status()).toBe(200);
+      expect(full.headers()["content-type"]).toBe("application/pdf");
+      expect(full.headers()["content-length"]).toBe(String(syntheticPdfBytes.length));
+      expect(full.headers()["accept-ranges"]).toBe("bytes");
+      const deliveredBytes = await full.body();
+      expect(deliveredBytes.equals(syntheticPdfBytes)).toBe(true);
+      expect(createHash("sha256").update(deliveredBytes).digest("hex"))
+        .toBe(createHash("sha256").update(syntheticPdfBytes).digest("hex"));
+
+      const partial = await ownerCtx.request.get(url, {
+        maxRedirects: 0, headers: { Range: "bytes=0-15" },
+      });
+      expect(partial.status()).toBe(206);
+      expect(partial.headers()["content-range"])
+        .toBe("bytes 0-15/" + syntheticPdfBytes.length);
+      expect((await partial.body()).equals(syntheticPdfBytes.subarray(0, 16))).toBe(true);
+
+      const invalidRange = await ownerCtx.request.get(url, {
+        maxRedirects: 0, headers: { Range: "bytes=999999-" },
+      });
+      expect(invalidRange.status()).toBe(416);
+      expect(invalidRange.headers()["content-range"])
+        .toBe("bytes */" + syntheticPdfBytes.length);
+
+      const unsigned = await ownerCtx.request.get("http://127.0.0.1:54329/private", {
+        maxRedirects: 0,
+      });
+      expect(unsigned.status()).toBe(403);
+      const altered = new URL(url);
+      const ticket = altered.searchParams.get("ticket");
+      expect(ticket).toBeTruthy();
+      altered.searchParams.set("ticket", ticket.slice(0, -1) + (ticket.endsWith("0") ? "1" : "0"));
+      const forged = await ownerCtx.request.get(altered.toString(), { maxRedirects: 0 });
+      expect(forged.status()).toBe(403);
+
+      const adminRead = await adminCtx.request.get(
+        "/admin/conteudos/assets/" + secondAssetId, { maxRedirects: 0 },
+      );
+      expect(adminRead.status()).toBe(307);
+      expect(new URL(adminRead.headers().location).origin)
+        .toBe("http://127.0.0.1:54329");
+      expect(rows("select client_content_release_id from public.client_content_progress" +
+        " where client_id=" + literal(clientId))).toHaveLength(0);
+      await assertMobile(client);
     });
 
     await test.step("New published version does not silently replace release of v2", async () => {
