@@ -5,6 +5,7 @@ on:
     paths:
       - ".github/workflows/validate-j6-educational-release-browser.yml"
       - "e2e/j6-educational-release-lifecycle.spec.mjs"
+      - "e2e/j6-blob-fixture/**"
       - "e2e/helpers/admin-auth.mjs"
       - "app/admin/conteudos/**"
       - "app/admin/clientes/[clienteId]/conteudos/**"
@@ -34,7 +35,7 @@ jobs:
     env:
       SUPABASE_TELEMETRY_DISABLED: "1"
       NEXT_TELEMETRY_DISABLED: "1"
-      # Fake metadata is NEVER a physically stored Blob object.
+      # The real Blob provider/token must never be used in this CI journey.
       BLOB_READ_WRITE_TOKEN: ""
     steps:
       - name: Checkout exact reviewed commit
@@ -90,6 +91,21 @@ jobs:
           echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$ANON_KEY" >> "$GITHUB_ENV"
           echo "J6_E2E_BASE_URL=http://127.0.0.1:3000" >> "$GITHUB_ENV"
 
+      - name: Prepare localhost-only signed private Blob PDF fixture
+        shell: bash
+        env:
+          J6_E2E_LOCAL_ONLY: "true"
+        run: |
+          set -euo pipefail
+          test -z "${SUPABASE_ACCESS_TOKEN:-}"
+          test -z "${SUPABASE_SECRET_KEY:-}"
+          test -z "${BLOB_READ_WRITE_TOKEN:-}"
+          test -z "${VERCEL_OIDC_TOKEN:-}"
+          node e2e/j6-blob-fixture/prepare.mjs
+          # next.config.ts is changed ONLY in this disposable workspace.
+          # Production branches retain the normal Vercel Blob SDK.
+          git diff --check
+
       - name: Install pinned Playwright Chromium
         run: |
           npm install --no-save --package-lock=false @playwright/test@1.55.0
@@ -100,6 +116,13 @@ jobs:
         run: |
           set -euo pipefail
           npm run build
+          node e2e/j6-blob-fixture/server.mjs > "$RUNNER_TEMP/j6-blob-fixture.log" 2>&1 &
+          echo "$!" > "$RUNNER_TEMP/j6-blob-fixture.pid"
+          for attempt in $(seq 1 20); do
+            if curl -fsS --max-time 2 http://127.0.0.1:54329/healthz >/dev/null 2>&1; then break; fi
+            sleep 1
+          done
+          curl -fsS --max-time 3 http://127.0.0.1:54329/healthz >/dev/null
           npm run start -- --hostname 127.0.0.1 --port 3000 > "$RUNNER_TEMP/j6-next.log" 2>&1 &
           echo "$!" > "$RUNNER_TEMP/j6-next.pid"
           for attempt in $(seq 1 90); do
@@ -148,5 +171,9 @@ jobs:
           if [ -f "$RUNNER_TEMP/j6-next.pid" ]; then
             kill "$(cat "$RUNNER_TEMP/j6-next.pid")" 2>/dev/null || true
           fi
+          if [ -f "$RUNNER_TEMP/j6-blob-fixture.pid" ]; then
+            kill "$(cat "$RUNNER_TEMP/j6-blob-fixture.pid")" 2>/dev/null || true
+          fi
           npx supabase stop --no-backup
-          rm -f "$RUNNER_TEMP/j6-local-status" "$RUNNER_TEMP/j6-next.pid" "$RUNNER_TEMP/j6-next.log"
+          rm -f "$RUNNER_TEMP/j6-local-status" "$RUNNER_TEMP/j6-next.pid" "$RUNNER_TEMP/j6-next.log" \
+            "$RUNNER_TEMP/j6-blob-fixture.pid" "$RUNNER_TEMP/j6-blob-fixture.log"
