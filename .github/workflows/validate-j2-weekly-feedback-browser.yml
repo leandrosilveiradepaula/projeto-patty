@@ -13,6 +13,8 @@ on:
       - "app/admin/feedback-semanal/**"
       - "lib/follow-up/**"
       - "lib/weekly-feedback/**"
+      # Explicit all-journey regression only when the consolidated evidence matrix changes.
+      - "docs/PREHOMOLOGATION_MATRIX.md"
   workflow_dispatch:
 
 permissions:
