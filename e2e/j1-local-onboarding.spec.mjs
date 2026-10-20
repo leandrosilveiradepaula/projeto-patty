@@ -275,51 +275,20 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
     // the edit is not evidence of a failed database write.
     await expect(save).toBeEnabled({ timeout: 10000 });
     await save.click();
-    const observedRegistrationOutcome = async () => {
-      if (await page.getByText("Cadastro atual atualizado com sucesso.").count()) return "saved";
-      if (await page.getByText("Cadastro já está atualizado").count()) return "unchanged";
-      if (await page.getByText("Não foi possível localizar seu cadastro de cliente").count()) return "missing-client";
-      if (await page.getByText("Não foi possível atualizar seu cadastro atual").count()) return "write-error";
-      if (await page.getByText("Este cadastro foi alterado em outra sessão").count()) return "conflict";
-      if (await page.getByText("Não foi possível salvar").count()) return "error";
-      return "pending";
-    };
-    try {
-      await expect.poll(observedRegistrationOutcome, {
-        timeout: 12000,
-        message: "J1 contact edit must receive an explicit server result",
-      }).toBe("saved");
-    } catch {
-      // A failed UI write is NEVER turned into success by this probe. All
-      // diagnostics are from the disposable local DB, and the test still fails.
-      // Report only error categories and row existence, not SQL payloads.
-      const persisted = rows("select client_id,city from public.client_registration where client_id=" +
-        literal(invite.clientId));
-      const persistedCityMatches = persisted[0]?.city === "Cidade Sintética Local J1";
-      const saveDisabled = await save.isDisabled();
-      const readProbe = await service.from("client_registration")
-        .select("client_id").eq("client_id", invite.clientId).maybeSingle();
-      let insertProbe = "not-attempted";
-      if (persisted.length === 0) {
-        const probe = await service.from("client_registration")
-          .insert({ client_id: invite.clientId, city: "Cidade Sintética Local J1" })
-          .select("client_id").single();
-        insertProbe = probe.error?.code ?? "ok";
-      }
-      throw new Error(
-        "J1 synthetic registration failure: ui=" + await observedRegistrationOutcome() +
-        ", rowAlreadyExists=" + Boolean(persisted.length) +
-        ", persistedCityMatches=" + persistedCityMatches +
-        ", saveDisabled=" + saveDisabled +
-        ", localServiceRead=" + (readProbe.error?.code ?? "ok") +
-        ", localServiceInsert=" + insertProbe,
-      );
-    }
+    // The action revalidates the Server Component after a successful write,
+    // so its transient success message can unmount before Playwright polls it.
+    // Require durable evidence BOTH in PostgreSQL and in the settled client
+    // form, then confirm persistence again after a real page reload.
     await expect.poll(() => {
       const result = rows("select city from public.client_registration where client_id=" +
         literal(invite.clientId));
       return result[0]?.city ?? null;
     }, { timeout: 20000 }).toBe("Cidade Sintética Local J1");
+    const registrationForm = page.locator("form").filter({ has: save });
+    await expect(registrationForm).toHaveAttribute("aria-busy", "false");
+    await expect(page.getByText("Nenhuma mudança em relação aos dados salvos.")).toBeVisible();
+    await expect(save).toBeDisabled();
+    await expect(page.getByLabel("Cidade")).toHaveValue("Cidade Sintética Local J1");
     await page.reload();
     await expect(page.getByLabel("Cidade")).toHaveValue("Cidade Sintética Local J1");
   });
