@@ -1,3 +1,15 @@
+## 2026-10-20 — J1: preview privada no celular e negação de acesso AAL2 fora do assignment
+
+**OBJETIVO:** fechar a lacuna entre download privado já testado e a pré-visualização inline real (`?preview=1`) da cliente e da Patty. A suíte J1 usa dois PNGs locais físicos e cria a segunda profissional administrativa **sem assignment**, mas com autenticação MFA AAL2 válida, para provar `404` tanto em preview quanto em download. A versão liberada pela profissional exige clique humano na UI; antes disso, nem a própria cliente recebe uma URL de prévia. A prévia é aberta pelo link `Visualizar` em viewport 390 px e nova aba, sem expor tokens nos logs.
+
+**ESCOPO:** `e2e/j1-local-onboarding.spec.mjs`, este documento e `docs/PROJECT_STATUS.md`; J1 CI existente com banco/Storage/Auth descartáveis. Sem mudanças em aplicação, backend, RLS, workflow, migrations, ACL hospedada ou bibliotecas. Conferir `307`, `Cache-Control: private, no-store`, `Referrer-Policy: no-referrer`, origem localhost do redirect, PNG idêntico, `404` da cliente sem liberação/outra cliente e `404` da profissional sem vínculo nos dois arquivos.
+
+**LIMITAÇÃO:** não confundir autorização na emissão do signed URL com revogação de links já assinados, que expiram após seu próprio TTL; a J1 não testa servidor de produção nem visualização de documento real. Testes synthetic CI não substituem cliente autorizada, MFA real e verificações visuais finais no dispositivo. Homologação com Patty permanece a última tarefa.
+
+**ACEITE:** `Validate application` e browser J1 verdes no head exato, PR mergeável, diff revisado, depois CI pós-merge e Vercel READY no commit de merge. Estado inicial: enviado à verificação técnica, não homologado profissionalmente.
+
+---
+
 ## 2026-10-20 — Índice vigente do aceite técnico das sete jornadas
 
 A **[matriz J1–J7](PREHOMOLOGATION_MATRIX.md)** é o quadro consolidado de alcance e limites dos E2E. Os registros cronológicos abaixo permanecem preservados como evidências históricas, inclusive casos inicialmente falhos, sem converter descrições de “PR pendente” daquele momento em estado atual.
