@@ -348,7 +348,7 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
     expect(bucket.data.public, "Client file bucket must remain private").toBe(false);
 
     await page.goto("/cliente/arquivos");
-    await expect(page.getByRole("heading", { name: "Meus arquivos" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Meus arquivos", exact: true })).toBeVisible();
     await page.locator('input[name="file"]').setInputFiles({
       buffer: png, mimeType: "image/png", name: filename,
     });
