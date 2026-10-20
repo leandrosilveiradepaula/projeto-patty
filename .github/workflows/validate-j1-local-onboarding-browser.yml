@@ -56,6 +56,20 @@ jobs:
       - name: Verify local-only browser fixture syntax
         run: node --check e2e/j1-local-onboarding.spec.mjs
 
+      - name: Enable staff MFA only inside disposable Supabase
+        run: |
+          node <<'NODE'
+          const { readFileSync, writeFileSync } = require("node:fs");
+          const path = "supabase/config.toml";
+          const current = readFileSync(path, "utf8");
+          const before = "[auth.mfa.totp]\\nenroll_enabled = false\\nverify_enabled = false";
+          const after = "[auth.mfa.totp]\\nenroll_enabled = true\\nverify_enabled = true";
+          if (current.split(before).length !== 2)
+            throw new Error("Unexpected local MFA configuration");
+          writeFileSync(path, current.replace(before, after));
+          NODE
+          git diff --check
+
       - name: Start disposable local Supabase
         run: npx supabase start
 
