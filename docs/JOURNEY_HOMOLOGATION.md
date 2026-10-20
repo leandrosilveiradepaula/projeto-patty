@@ -1,3 +1,13 @@
+## 2026-10-19 — J1: causa raiz confirmada — redirect alterava host e perdia cookie de sessão
+
+**FATO REPRODUZIDO (sem dados reais):** o Playwright local da PR #931, execução [#39348786932](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39348786932), comprovou: conta e convite confirmados, papel client existente sob RLS, cookie presente com `secure=false`, `httpOnly=false`, `sameSite=Lax`, `path=/` e domínio loopback `127.0.0.1`, porém `pageIsLoopback=false` na tela de ativação. A chamada `fetch` do navegador não transmitiu cookie (`cookie-sent=false`) e recebeu `role:null`; o request de teste ao host de origem obteve o papel corretamente e novo `goto` corrigiu. **Causa:** construir `NextResponse.redirect` a partir de `request.nextUrl.clone()` pode usar o host interno da execução Next.js, diferente do host efetivo usado para receber o cookie. Isto é um defeito real da navegação de callback, não timeout, token inválido, RLS ou falha do método da Patty.
+
+**CORREÇÃO TÉCNICA SOB ACEITE:** o callback `/auth/confirm` retorna um `NextResponse` status 303 com `Location` **relativa e fixa** (`/ativar-conta` ou `/ativar-conta?error=invalid`), preservando a origem real do navegador sem confiar em cabeçalho Host, Referer, query ou URL externa. Cookies produzidos por `verifyOtp` continuam aplicados **na mesma resposta** e `Cache-Control: private, no-store`/ `Referrer-Policy: no-referrer` permanecem. Token_hash não integra a URL de destino. Ações de senha permanecem verificadas no servidor, e a consulta de papel auxilia apenas a recuperar sessão válida, nunca concede privilégios. Regressão E2E exige origem exata `127.0.0.1:3000` após callback e cookie no redirect; confirma o fluxo completo sintético J1 e RLS. Sem schema, migrations, segredos, dados reais, alteração de MFA ou chamadas externas.
+
+**PENDENTE:** CI completo J1/J6/J7 + Validate application no head final, merge seguro, pós-merge e implantação. Homologação profissional operacional da Patty será a última tarefa global.
+
+---
+
 ## 2026-10-19 — J1: callback de convite entrega cookies no próprio redirect (sob validação)
 
 **EVIDÊNCIA NOVA:** o Playwright local [run #39339372178](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39339372178) confirmou conta sintética, login, papel `client` sob RLS e resposta `200:not-authorized` nas chamadas `fetch` do navegador durante a ativação, mas `role` autorizado na requisição de teste e na navegação posterior. O problema persistiu após quatro releituras rápidas da rota e **não pode ser atribuído a um token inválido, papel inexistente ou uma necessidade de timeout maior**. Repetir polling sem diagnosticar a entrega dos cookies é insuficiente.
