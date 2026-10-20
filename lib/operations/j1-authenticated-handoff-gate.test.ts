@@ -310,3 +310,18 @@ test("J1 invite handoff requires a fresh, uncached server authorization read", (
  assert.match(serverAction,/supabase\.auth\.updateUser\(\{ password \}\)/);
  assert.doesNotMatch(serverAction,/session_refresh|bypass|service_role/);
 });
+
+test("J1 invite callback attaches verified session cookies to the returned redirect", () => {
+ const route = readFileSync(new URL("../../app/auth/confirm/route.ts",import.meta.url),"utf8");
+ assert.match(route,/createServerClient<Database>\(url, publishableKey, \{/);
+ assert.match(route,/cookies:\s*\{/);
+ assert.match(route,/getAll\(\)\s*\{\s*return request\.cookies\.getAll\(\)/);
+ assert.match(route,/response\.cookies\.set\(name, value, options\)/);
+ assert.match(route,/response\.headers\.set\(key, value\)/);
+ assert.match(route,/const \{ error \} = await supabase\.auth\.verifyOtp\(\{/);
+ assert.match(route,/if \(error\) return uncachedRedirect\(request, true\);\s*return response;/);
+ assert.match(route,/target\.search = ""/);
+ assert.match(route,/Cache-Control", "private, no-store, max-age=0"/);
+ assert.match(route,/Referrer-Policy", "no-referrer"/);
+ assert.doesNotMatch(route,/createAdminClient|service_role|console\.|getSession\(/);
+});
