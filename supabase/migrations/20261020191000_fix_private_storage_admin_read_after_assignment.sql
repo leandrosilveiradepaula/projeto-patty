@@ -1,4 +1,4 @@
--- Align the private Storage object SELECT policy with the confirmed single-admin
+-- Align the private Storage object SELECT policy with the confirmed sole-admin
 -- exception for client_files. The original 20260922230034 policy joined clients
 -- for *both* branches: after an assignment ended, clients RLS hid that row from
 -- the admin, preventing createSignedUrl even though client_files remained visible.
@@ -8,9 +8,9 @@
 -- policy. The MVP permits exactly one admin (Patty); adding a second admin
 -- requires a separate authorization redesign, see OPEN_QUESTIONS/issue #950.
 -- Deployment guard: the rule is approved only for the *sole* business
--- administrator. A production metadata audit on 2026-10-20 found three
--- DISTINCT profiles with role=admin. Never grant unassigned private-file
--- access to all three. Empty local databases are permitted for pgTAP/E2E;
+-- administrator. A production metadata audit on 2026-10-20 found multiple
+-- distinct profiles with role=admin. Never grant unassigned private-file
+-- access to multiple roles. Empty local databases are permitted for pgTAP/E2E;
 -- any environment with multiple admins must reconcile roles, with human
 -- authorization, before this migration can be applied. No user is deleted.
 do $private_file_admin_count_guard$
