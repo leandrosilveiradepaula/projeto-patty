@@ -643,6 +643,110 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
       await expect(adminPage.locator('[data-comparison-answer="true"]')).toHaveCount(1);
     });
 
+    await test.step("Patty AAL2 revisa Feedback Semanal em celular sem overflow ou ações implícitas", async () => {
+      // The existing E2E exercises the client on mobile and the professional
+      // on desktop. This second REAL authenticated browser checks the mobile
+      // professional inbox, original answers, comparison and assessment link.
+      // It does not perform another professional decision or alter health data.
+      const mobileContext = await browser.newContext({
+        baseURL: baseUrl,
+        viewport: { width: 390, height: 844 },
+        isMobile: true,
+        hasTouch: true,
+      });
+      const professionalDecisionsBefore = localSelect(
+        "select id, professional_decision, decision_reason from public.professional_follow_ups" +
+        " where assessment_id = " + sqlLiteral(finalizedAssessmentId) + " order by id",
+      );
+      const answersBefore = await feedbackRecord(clientId, periodStart);
+      const fitMobile = async (page, label) => {
+        const widths = await page.evaluate(() => ({
+          viewport: document.documentElement.clientWidth,
+          content: document.documentElement.scrollWidth,
+        }));
+        expect(widths.viewport, label + " viewport should be 390 CSS pixels").toBe(390);
+        expect(widths.content, label + " has no horizontal page overflow")
+          .toBeLessThanOrEqual(widths.viewport + 2);
+      };
+
+      try {
+        const mobileAdmin = await mobileContext.newPage();
+        await loginAdminWithMfa(mobileAdmin, {
+          email: admin.email,
+          password: admin.password,
+          totpSecret: adminTotp,
+        });
+        await mobileAdmin.goto("/admin/feedback-semanal?cliente=" + clientId +
+          "&origem=manual&mes=2026-10");
+        await expect(mobileAdmin.getByRole("heading", {
+          name: "Histórico de recebimentos",
+        })).toBeVisible();
+        await fitMobile(mobileAdmin, "J2 professional inbox");
+        const originalLink = mobileAdmin.getByRole("link", {
+          name: "Abrir respostas originais",
+        }).first();
+        await expect(originalLink).toBeVisible();
+        await originalLink.tap();
+
+        const originalCard = mobileAdmin.locator("#feedback-enviado-" + feedbackId);
+        await expect(originalCard).toBeVisible();
+        await expect(originalCard.getByText(
+          "Resposta sintética J2 exclusivamente local",
+        ).first()).toBeVisible();
+        await fitMobile(mobileAdmin, "J2 original answers");
+        const compare = originalCard.getByRole("link", {
+          name: "Comparar com o Feedback Semanal de período anterior",
+        });
+        await expect(compare).toBeVisible();
+        await compare.tap();
+        await expect(mobileAdmin.getByRole("heading", {
+          name: "Comparação factual de dois Feedbacks Semanais",
+        })).toBeVisible();
+        await expect(mobileAdmin.getByText(
+          "1 de 21 pergunta(s) com respostas diferentes.",
+        )).toBeVisible();
+        await fitMobile(mobileAdmin, "J2 weekly comparison");
+        await mobileAdmin.getByRole("link", {
+          name: "Somente respostas diferentes",
+        }).tap();
+        await expect(mobileAdmin.locator('[data-comparison-answer="true"]'))
+          .toHaveCount(1);
+        await fitMobile(mobileAdmin, "J2 one-answer comparison");
+
+        const evaluationLink = mobileAdmin.getByRole("link", {
+          name: "Abrir avaliação e registrar decisão manual",
+        });
+        await expect(evaluationLink).toBeVisible();
+        await evaluationLink.tap();
+        await expect(mobileAdmin).toHaveURL(new RegExp(
+          "/admin/avaliacoes/" + finalizedAssessmentId,
+        ));
+        await expect(mobileAdmin.getByRole("link", {
+          name: "Voltar à comparação dos Feedbacks Semanais",
+        })).toBeVisible();
+        await fitMobile(mobileAdmin, "J2 linked assessment");
+        await mobileAdmin.getByRole("link", {
+          name: "Voltar à comparação dos Feedbacks Semanais",
+        }).tap();
+        await expect(mobileAdmin.locator('[data-comparison-answer="true"]'))
+          .toHaveCount(1);
+        await fitMobile(mobileAdmin, "J2 comparison return");
+      } finally {
+        await mobileContext.close();
+      }
+      expect(localSelect(
+        "select id, professional_decision, decision_reason from public.professional_follow_ups" +
+        " where assessment_id = " + sqlLiteral(finalizedAssessmentId) + " order by id",
+      )).toEqual(professionalDecisionsBefore);
+      const answersAfter = await feedbackRecord(clientId, periodStart);
+      expect(answersAfter.answers).toEqual(answersBefore.answers);
+      expect(answersAfter.submitted_at).toBe(answersBefore.submitted_at);
+      expect(localSelect(
+        "select id from public.protocol_publications where client_id = " +
+        sqlLiteral(clientId),
+      )).toHaveLength(1);
+    });
+
     await test.step("feedback enviado abre avaliacao existente ou novo rascunho com retorno autorizado", async () => {
       await adminPage.goto("/admin/clientes/" + clientId + "/feedback-semanal?registro=" + feedbackId);
       const submittedCard = adminPage.locator("#feedback-enviado-" + feedbackId);
