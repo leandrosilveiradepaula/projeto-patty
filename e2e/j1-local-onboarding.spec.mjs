@@ -682,13 +682,22 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       // automatically chosen visible point. Still a normal physical click,
       // with no force, DOM submission or bypass of button actionability.
       try {
-        await approvalButton.click({
-          position: {
-            x: Math.floor(geometry.button.w / 2),
-            y: Math.floor(geometry.button.h / 2),
-          },
-          timeout: 10000,
-        });
+        // Use browser input at the viewport center established by the
+        // pre-click hit test. Locator.click may scroll an already visible
+        // mobile target again and then choose a stale action point.
+        const buttonBox = await approvalButton.boundingBox();
+        if (!buttonBox) throw new Error("Approval button lost its viewport box");
+        const clickX = buttonBox.x + buttonBox.width / 2;
+        const clickY = buttonBox.y + buttonBox.height / 2;
+        const targetReady = await adminPage.evaluate(({ x, y }) => {
+          const element = document.elementFromPoint(x, y);
+          const button = document.querySelector('button[type="submit"]');
+          return Boolean(element && button && button.contains(element));
+        }, { x: clickX, y: clickY });
+        // This assertion must pass before native mouse input; never force
+        // a click through another element or submit the form from JS.
+        expect(targetReady, "Native pointer must reach approval button").toBe(true);
+        await adminPage.mouse.click(clickX, clickY);
       } catch (error) {
         const after = await readSafeGeometry().catch(() => null);
         console.info("J1 safe approval geometry after physical click:",
