@@ -1,3 +1,11 @@
+## 2026-10-20 — Teste UI da avaliação no fluxo integrado J3 → J4 → J2 → J3
+
+**ESTADO ANTERIOR PUBLICADO:** PR #939 mergeado (`7cabd679a35c9211f244badbefaed2eabddb53bf`), GitHub CI pós-merge success, Vercel READY. O teste integrado havia criado e finalizado avaliações J3 por fixture SQL descartável.
+
+**PACOTE ATUAL, A VALIDAR:** usar formulário administrativo autenticado para criar cada rascunho de avaliação, persistir medidas obrigatórias e vínculo de foto, registrar confirmação humana na finalização e verificar snapshot imutável. Conserva J4 (protocolo revisado/publicado) e J2 (feedback manual, persistente e sem duplicação), comparação final e RLS. Somente `e2e/j4-nutrition-protocol-lifecycle.spec.mjs` e documentação; sem mudanças em produção, schema ou método. Critérios e limites em `JOURNEY_HOMOLOGATION.md`. **Ainda não mergeado nem homologado.**
+
+---
+
 ## 2026-10-20 — Pacote J3 → J4 → J2 → J3 em validação técnica
 
 **BASE PUBLICADA:** PR #938 mergeado como `344b7a40c29a8ef5196a605eba6130ca9787ce6e`, CI pós-merge success e Vercel READY no mesmo commit. Nenhum merge depende de confirmação manual do responsável quando checks/proteções permitem.
