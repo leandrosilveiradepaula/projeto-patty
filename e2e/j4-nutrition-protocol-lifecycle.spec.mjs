@@ -435,6 +435,13 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
       expect(rows("select id from public.protocol_publications where protocol_version_id="+quote(v1.id))).toEqual([]);
     });
 
+    await test.step("J2 feedback request remains blocked while J4 is still an unpublished draft",async()=>{
+      await adminPage.goto("/admin/clientes/"+clientId+"/feedback-semanal");
+      await expect(adminPage.getByRole("heading",{name:"Solicitar Feedback Semanal"})).toBeVisible();
+      await expect(adminPage.getByRole("button",{name:"Aguardando primeiro protocolo"})).toBeDisabled();
+      expect(rows("select id from public.client_weekly_feedbacks where client_id="+quote(clientId))).toEqual([]);
+    });
+
     await test.step("Explicit submission and approval do not publish the draft",async()=>{
       await openVersion(adminPage,protocolId,1);
       await lifecycle(adminPage,"submit");
@@ -620,6 +627,77 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
         " where client_id="+quote(clientId))).toHaveLength(2);
       expect(rows("select id from public.protocols where client_id="+quote(otherClientId))).toEqual([]);
       expect(rows("select id from public.client_weekly_feedbacks where client_id="+quote(clientId))).toEqual([]);
+    });
+
+    await test.step("J4 publication enables one real J2 request, client draft and duplicate prevention",async()=>{
+      // Continue with the SAME authorized client and real published protocol
+      // created above via the admin browser, not a seeded publication fixture.
+      const periodStart="2026-10-05",periodEnd="2026-10-11";
+      const feedbackRows=()=>rows("select id,client_id,request_source,requested_by_profile_id,"+
+        "period_start,period_end,answers,submitted_at from public.client_weekly_feedbacks"+
+        " where client_id="+quote(clientId)+" and period_start="+quote(periodStart));
+      expect(feedbackRows()).toEqual([]);
+      await adminPage.goto("/admin/clientes/"+clientId+"/feedback-semanal");
+      await expect(adminPage.getByRole("heading",{name:"Solicitar Feedback Semanal"})).toBeVisible();
+      const startInput=adminPage.getByLabel("Semana de referência · início");
+      const endInput=adminPage.getByLabel("Semana de referência · fim");
+      const requestButton=adminPage.getByRole("button",{name:"Criar solicitação"});
+      await expect(requestButton).toBeEnabled();
+      // The min attribute changes only after React hydrates the controlled form.
+      await expect.poll(async()=>{
+        await startInput.fill(periodStart);
+        return endInput.getAttribute("min");
+      },{timeout:20000}).toBe(periodStart);
+      await endInput.fill(periodEnd);
+      await expect(endInput).toHaveValue(periodEnd);
+      await requestButton.click();
+      await expect.poll(()=>feedbackRows().length,{timeout:30000}).toBe(1);
+      const record=feedbackRows()[0];
+      expect(record.id).toMatch(UUID);
+      expect(record.client_id).toBe(clientId);
+      expect(record.request_source).toBe("manual");
+      expect(record.requested_by_profile_id).toBe(staff.id);
+      expect(record.period_end).toBe(periodEnd);
+      expect(record.submitted_at).toBeNull();
+      expect(record.answers).toEqual({});
+      expect(rows("select protocol_version_id from public.protocol_publications"+
+        " where client_id="+quote(clientId))).toHaveLength(2);
+
+      await clientPage.goto("/cliente/feedback-semanal");
+      await expect(clientPage.getByRole("heading",{name:"Feedback Semanal",exact:true})).toBeVisible();
+      const pending=clientPage.locator("#feedback-pendente-"+record.id);
+      await expect(pending).toBeVisible();
+      const answer=pending.locator('form [name="q01"]');
+      await expect(answer).toBeVisible();
+      await answer.fill("2");
+      await pending.getByRole("button",{name:"Salvar rascunho"}).click();
+      await expect.poll(()=>feedbackRows()[0]?.answers,{timeout:30000}).toEqual({q01:2});
+      expect(feedbackRows()[0].submitted_at).toBeNull();
+      await clientPage.reload();
+      await expect(clientPage.locator("#feedback-pendente-"+record.id+
+        ' form [name="q01"]')).toHaveValue("2");
+      await mobileFit(clientPage);
+
+      const otherRead=await apiOther.from("client_weekly_feedbacks").select("id").eq("id",record.id);
+      if(otherRead.error && otherRead.error.code!=="42501") throw otherRead.error;
+      expect(otherRead.data ?? []).toEqual([]);
+
+      // Repeating the same period must return the existing authorized record,
+      // not a second request or a modified submission.
+      await adminPage.reload();
+      await expect.poll(async()=>{
+        await startInput.fill(periodStart);
+        return endInput.getAttribute("min");
+      },{timeout:20000}).toBe(periodStart);
+      await endInput.fill(periodEnd);
+      await requestButton.click();
+      await expect(adminPage.getByText("Solicitação já existente",{exact:true})).toBeVisible();
+      expect(feedbackRows()).toHaveLength(1);
+      expect(feedbackRows()[0].id).toBe(record.id);
+      expect(feedbackRows()[0].answers).toEqual({q01:2});
+      expect(feedbackRows()[0].submitted_at).toBeNull();
+      expect(rows("select id from public.protocol_publications"+
+        " where client_id="+quote(clientId))).toHaveLength(2);
     });
   }finally{
     await Promise.allSettled([adminCtx.close(),clientCtx.close(),otherCtx.close(),anonCtx.close()]);
