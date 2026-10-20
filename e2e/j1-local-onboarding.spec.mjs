@@ -167,6 +167,9 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
     if (new URL(page.url()).searchParams.has("token_hash"))
       throw new Error("One-time token remained in the browser URL");
     await expect(page.getByRole("heading", { name: "Ativar sua conta" })).toBeVisible();
+    // The OTP callback may not move from 127.0.0.1 to an internal localhost
+    // alias: host-only session cookies would no longer reach the browser.
+    expect(new URL(page.url()).origin).toBe(new URL(baseURL).origin);
     await expect.poll(() => callbackCookieHeaderPresent, {
       timeout: 5000,
       message: "J1 OTP redirect must set an Auth session cookie on its returned response",
