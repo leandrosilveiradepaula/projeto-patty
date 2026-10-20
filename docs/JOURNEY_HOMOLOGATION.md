@@ -1,3 +1,12 @@
+## 2026-10-20 — Arquivo privado: upload, finalização e download real no Supabase descartável
+
+**OBJETIVO:** ampliar exclusivamente a suíte de ativação sintética J1 para, após criar a sessão real da cliente, enviar um PNG de um pixel pelo próprio formulário de arquivos privados. Aceite exige exatamente uma linha em client_files vinculada ao ID da cliente, conteúdo físico exato no bucket client-private (public=false), visibilidade após reload, download via URL assinada apenas localhost, rejeição de arquivo inválido sem novo upload e navegação anônima redirecionada ao login. RLS, Auth, consentimento, revisão da Patty e limites de dados continuam inalterados; nenhum conteúdo de saúde real é utilizado.
+
+**ESCOPO:** E2E e documentação. Fora de escopo: novo schema/grants/RLS, uploads reais no SaaS, credenciais de produção, workflows legados de smoke remotos, IA e homologação operacional. Corrigir eventuais erros verificáveis apenas na mesma branch, sem flexibilizar asserções nem segredos.
+
+**BASE CONFIRMADA:** PR #935 mergeado 15809a5b5aaa9ba086a8229aa082bd4f618b1ccf, CI pós-merge success e Vercel READY no mesmo commit. Novo teste exige Validate application e Playwright J1 no HEAD exato, regressões acionadas, merge elegível, CI e Vercel no SHA publicado. Não é homologação humana.
+
+---
 ## 2026-10-20 — Integração J4 → J2: protocolo publicado habilita feedback, sem criação implícita
 
 **OBJETIVO / ACEITE TÉCNICO:** no mesmo teste Playwright e na mesma cliente sintética do PostgreSQL descartável, conferir o bloqueio de solicitação de Feedback Semanal quando a versão alimentar ainda é rascunho; publicar explicitamente a v1 e a v2 pelo fluxo profissional J4; confirmar que publicações não criam feedback por conta própria; então solicitar manualmente o Feedback Semanal pela interface autenticada, comprovar uma linha persistida, abrir na sessão da cliente, salvar e retomar rascunho, negar leitura por outra cliente, repetir o período sem duplicar linha nem modificar respostas/protocolos. MFA, RLS, localhost e teardown permanecem obrigatórios; não inclui diagnóstico, IA externa, nova regra do método, migration ou dado real. Teste detalhado de J2 continua independente e já foi validado.
