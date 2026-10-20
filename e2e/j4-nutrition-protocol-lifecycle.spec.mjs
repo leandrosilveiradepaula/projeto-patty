@@ -808,6 +808,65 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
       expect(rows("select id from public.protocol_publications"+
         " where client_id="+quote(clientId))).toHaveLength(2);
     });
+
+    await test.step("J3 re-evaluation after J4 publication and J2 draft remains independent",async()=>{
+      const reevaluation=await finalizedSyntheticAssessment({
+        clientId,staffId:staff.id,assessedAt:"2026-10-12T12:00:00Z",
+        weight:72,waist:82,method:assessmentMethod,
+      });
+      expect(reevaluation.id).not.toBe(initialAssessment.id);
+      const twoFinalized=rows("select id,finalized_at,method_configuration_snapshot_set_id"+
+        " from public.client_assessments where client_id="+quote(clientId)+
+        " order by assessed_at asc,id asc");
+      expect(twoFinalized).toHaveLength(2);
+      expect(twoFinalized.map(item=>item.id)).toEqual([
+        initialAssessment.id,reevaluation.id,
+      ]);
+      expect(twoFinalized.every(item=>item.finalized_at&&item.method_configuration_snapshot_set_id))
+        .toBe(true);
+
+      const compareRoute="/admin/clientes/"+clientId+"/avaliacoes/comparar";
+      await adminPage.goto(compareRoute);
+      await expect(adminPage.getByRole("heading",{name:"Comparar duas avaliações"}))
+        .toBeVisible();
+      await adminPage.locator('select[name="referencia"]')
+        .selectOption(initialAssessment.id);
+      await adminPage.locator('select[name="comparacao"]')
+        .selectOption(reevaluation.id);
+      await adminPage.getByRole("button",{name:"Comparar avaliações"}).click();
+      await expect(adminPage.locator("#comparacao-resultados")).toBeVisible();
+      const weights=adminPage.getByRole("row",{name:/Peso \(kg\)/});
+      await expect(weights.getByRole("cell",{name:"74 kg"})).toBeVisible();
+      await expect(weights.getByRole("cell",{name:"72 kg"})).toBeVisible();
+      await expect(weights.getByRole("cell",{name:"-2 kg"})).toBeVisible();
+      await mobileFit(adminPage);
+
+      // A finalized assessment is historical evidence, never authorization
+      // for an automatic phase change, publication or feedback submission.
+      const publications=rows("select protocol_version_id from public.protocol_publications"+
+        " where client_id="+quote(clientId));
+      expect(publications).toHaveLength(2);
+      expect(new Set(publications.map(x=>x.protocol_version_id)))
+        .toEqual(new Set([v1.id,v2.id]));
+      const existingFeedback=rows("select id,answers,submitted_at from public.client_weekly_feedbacks"+
+        " where client_id="+quote(clientId));
+      expect(existingFeedback).toHaveLength(1);
+      expect(existingFeedback[0].answers).toEqual({q01:2});
+      expect(existingFeedback[0].submitted_at).toBeNull();
+
+      // The other client and unrelated AAL2 professional are never granted
+      // these client-scoped assessments by the re-evaluation.
+      const otherRead=await apiOther.from("client_assessments")
+        .select("id").in("id",[initialAssessment.id,reevaluation.id]);
+      if(otherRead.error&&otherRead.error.code!=="42501")throw otherRead.error;
+      expect(otherRead.data??[]).toEqual([]);
+      await otherPage.goto(compareRoute+"?referencia="+initialAssessment.id+
+        "&comparacao="+reevaluation.id);
+      await expect(otherPage.getByText("Página ou registro indisponível",{exact:true}))
+        .toBeVisible();
+      expect(rows("select id from public.client_assessments where client_id="+quote(otherClientId)))
+        .toEqual([]);
+    });
   }finally{
     await Promise.allSettled([adminCtx.close(),clientCtx.close(),otherCtx.close(),anonCtx.close()]);
     await apiOther.auth.signOut();
