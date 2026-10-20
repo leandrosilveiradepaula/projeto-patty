@@ -1,3 +1,12 @@
+## 2026-10-20 — Integração J4 → J2: protocolo publicado habilita feedback, sem criação implícita
+
+**OBJETIVO / ACEITE TÉCNICO:** no mesmo teste Playwright e na mesma cliente sintética do PostgreSQL descartável, conferir o bloqueio de solicitação de Feedback Semanal quando a versão alimentar ainda é rascunho; publicar explicitamente a v1 e a v2 pelo fluxo profissional J4; confirmar que publicações não criam feedback por conta própria; então solicitar manualmente o Feedback Semanal pela interface autenticada, comprovar uma linha persistida, abrir na sessão da cliente, salvar e retomar rascunho, negar leitura por outra cliente, repetir o período sem duplicar linha nem modificar respostas/protocolos. MFA, RLS, localhost e teardown permanecem obrigatórios; não inclui diagnóstico, IA externa, nova regra do método, migration ou dado real. Teste detalhado de J2 continua independente e já foi validado.
+
+**EVIDÊNCIA BASE:** PR [#934](https://github.com/leandrosilveiradepaula/projeto-patty/pull/934) mergeado como b19854b9bae00c2be99ba631576f2194eca7a4a3, oito workflows J1–J7/Validate verdes no head exato, [CI pós-merge](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39357713854) aprovado e Vercel produção READY com o mesmo commit. Isto **não** é homologação humana.
+
+**PRÓXIMO GATE:** nova integração J4→J2 exige Validate application + Validate J4 local nutrition lifecycle browser verdes no head exato, inspeção do diff e merge seguro, seguido de CI pós-merge e Vercel no SHA integrado. Homologação operacional da Patty continua reservada para o final.
+
+---
 ## 2026-10-20 — Consolidação pré-homologação: regressões J2–J5 no HEAD integrado
 
 **OBJETIVO TÉCNICO:** executar novamente as suítes Playwright autenticadas J2, J3, J4 e J5 sobre um único HEAD com PostgreSQL/Supabase local descartável, contas sintéticas, MFA, RLS e navegação móvel. As evidências históricas de cada jornada continuam válidas para seus commits originais, mas não substituem execução na revisão atual.
