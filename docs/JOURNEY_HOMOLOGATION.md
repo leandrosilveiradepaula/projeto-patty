@@ -1,3 +1,13 @@
+## 2026-10-20 — J1: gravação confirmada, teste ajustado para evidência durável
+
+**FATO VERIFICADO:** no Playwright local [#39353118526](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39353118526), a mudança da Cidade foi **gravada corretamente** (`persistedCityMatches=true`) e o botão de salvar ficou desabilitado, sem alteração pendente. A asserção anterior exigia uma mensagem de sucesso transitória; `router.refresh()` após confirmação pode remontar a Server Component e remover essa mensagem antes da observação. Os testes J6/J7 e a validação geral continuaram verdes no head investigado. Isso é um problema de **observabilidade do teste**, não prova de falha de gravação.
+
+**CRITÉRIO CORRIGIDO SEM ABRANDAMENTO:** a E2E aguarda (1) o valor sintético exato no PostgreSQL descartável, (2) fim do `aria-busy` no formulário, (3) estado visível `Nenhuma mudança em relação aos dados salvos.`, (4) botão de salvamento desabilitado, (5) o mesmo campo exibido corretamente na UI e (6) a persistência após recarregar a página. Elimina a exigência de capturar um toast efêmero, mas **adiciona** comprovação de commit e assentamento do formulário. Remove probe de escrita administrativa na exceção de teste, para não alterar o dado que deveria ser verificado. Nenhuma mudança no runtime ou em banco de produção.
+
+**ESTADO:** PR #931 em CI; não mergear até J1, J6, J7 e validação geral aprovados no SHA exato. Homologação profissional da Patty permanece a última tarefa global.
+
+---
+
 ## 2026-10-20 — J1: paridade explícita de grants do service_role no Supabase descartável
 
 **DIAGNÓSTICO CONFIRMADO:** após a correção do handoff por convite, o Playwright J1 chegou à edição de Cadastro Atual e falhou na operação real com `42501` (`localServiceRead=42501`, `localServiceInsert=42501`) no runner local [#39350786746](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39350786746). Foi verificado em consulta **somente de metadados de permissões**, sem ler qualquer cliente, que o banco publicado já possui `SELECT`, `INSERT` e `UPDATE` para `service_role` sobre `public.client_registration`; a tabela segue com RLS ativa. O Supabase descartável da CLI não reproduz essa autorização técnica nos fixtures.
