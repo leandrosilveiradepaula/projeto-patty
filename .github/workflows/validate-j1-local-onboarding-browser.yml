@@ -62,6 +62,29 @@ jobs:
       - name: Apply committed database migrations locally
         run: npx supabase db reset
 
+      # Production already grants these three operations to service_role.
+      # Supabase CLI's disposable bootstrap may not replicate hosted grants.
+      # Match the VERIFIED production service-only boundary, not client rights.
+      - name: Align disposable service-role registration grants with production
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -z "${SUPABASE_ACCESS_TOKEN:-}"
+          docker exec -i supabase_db_projeto-patty psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres <<'SQL'
+          grant select, insert, update on table public.client_registration to service_role;
+          do $
+          begin
+            if not has_table_privilege('service_role','public.client_registration','SELECT,INSERT,UPDATE')
+              or has_table_privilege('anon','public.client_registration','INSERT')
+              or has_table_privilege('authenticated','public.client_registration','INSERT')
+              or has_table_privilege('authenticated','public.client_registration','UPDATE')
+              or not (select relrowsecurity from pg_class where oid='public.client_registration'::regclass)
+            then
+              raise exception 'J1 disposable registration role parity boundary failed';
+            end if;
+          end $;
+          SQL
+
       - name: Export only disposable localhost runtime variables
         shell: bash
         run: |
