@@ -137,12 +137,12 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
   // Never retain or print tokens, cookies, response bodies or profile IDs.
   page.on("response", (response) => {
     if (new URL(response.url()).pathname !== "/ativar-conta/session") return;
-    void response.json()
-      .then((payload) => {
+    void Promise.all([response.json(), response.request().allHeaders()])
+      .then(([payload, headers]) => {
         const roleKind =
           payload?.role === "client" || payload?.role === "admin"
             ? "authorized" : "not-authorized";
-        const sentCookieHeader = response.request().headers()["cookie"] ?? "";
+        const sentCookieHeader = headers["cookie"] ?? "";
         const sentAuthCookie = sentCookieHeader.includes("sb-") &&
           sentCookieHeader.includes("auth-token");
         sessionResponses.push(
@@ -194,9 +194,15 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
         " from auth.users where id=" + literal(invite.profileId),
       )[0];
       const callbackRejected = new URL(page.url()).searchParams.get("error") === "invalid";
-      const authCookiePresent = (await context.cookies()).some(
-        (cookie) => cookie.name.startsWith("sb-") && cookie.name.includes("auth-token"),
-      );
+      const sessionCookies = (await context.cookies())
+        .filter((cookie) => cookie.name.startsWith("sb-") && cookie.name.includes("auth-token"));
+      const authCookiePresent = sessionCookies.length > 0;
+      const cookieFlags = [...new Set(sessionCookies.map((cookie) =>
+        "secure=" + cookie.secure + ",httpOnly=" + cookie.httpOnly +
+        ",sameSite=" + cookie.sameSite + ",path=" + cookie.path +
+        ",domainIsLoopback=" + (cookie.domain === "127.0.0.1"),
+      ))].join(";");
+      const pageIsLoopback = new URL(page.url()).hostname === "127.0.0.1";
       const roleVisible = sql([
         "begin;",
         "set local role authenticated;",
@@ -241,7 +247,9 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
         ", probeHttp=" + probe.status() +
         ", probeRoleAuthorized=" + probeAuthorized +
         ", browserProbeHttp=" + browserFetch.status +
-        ", browserProbeRoleAuthorized=" + browserFetch.authorized,
+        ", browserProbeRoleAuthorized=" + browserFetch.authorized +
+        ", cookieFlags=" + cookieFlags +
+        ", pageIsLoopback=" + pageIsLoopback,
       );
     }
     // The fresh session route derives the authorized role from cookies and
