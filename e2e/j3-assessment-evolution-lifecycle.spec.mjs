@@ -403,10 +403,14 @@ test("J3: MFA, corrected measurements, two private photos, return and RLS", asyn
       if (otherLogin.error) throw otherLogin.error;
       const unauthorized = await otherClient.from("client_assessments")
         .select("id").in("id",[olderId,newerId]);
-      if (!unauthorized.error) expect(unauthorized.data).toEqual([]);
+      // Only an explicit RLS denial or an empty result is acceptable; a
+      // transport/backend error must not masquerade as privacy protection.
+      if (unauthorized.error && unauthorized.error.code !== "42501") throw unauthorized.error;
+      expect(unauthorized.data ?? []).toEqual([]);
       const foreignPhotos = await otherClient.from("client_files")
         .select("id").in("id",[photoA,photoB]);
-      if (!foreignPhotos.error) expect(foreignPhotos.data).toEqual([]);
+      if (foreignPhotos.error && foreignPhotos.error.code !== "42501") throw foreignPhotos.error;
+      expect(foreignPhotos.data ?? []).toEqual([]);
     });
 
     const original = select("select measurement_value from public.assessment_measurements" +
