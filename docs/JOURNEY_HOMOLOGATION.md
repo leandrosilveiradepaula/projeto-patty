@@ -1,3 +1,13 @@
+## 2026-10-20 — J1: prova de falha fechada da migration sob múltiplas roles administrativas
+
+**Motivo:** a migração `20261020191000_fix_private_storage_admin_read_after_assignment.sql` corrige o 404 de mídia privada de uma única admin em CI após o fim do assignment, mas não pode ser aplicada no SaaS enquanto existirem vários perfis `admin` sem reconciliação humana. GitHub/Vercel estão atualizados até PR #949; Supabase SaaS **não**.
+
+**Escopo estritamente técnico:** adicionar ao workflow `validate-j1-local-onboarding-browser.yml` um teste após Playwright J1: em Docker/Supabase descartável com uma admin sintética válida, inserir outra admin **local**, reaplicar **o próprio arquivo** da migration e exigir falha pelo texto exato do guard. Conferir antes/depois a fingerprint de policies privadas, RLS ativa e remoção da fixture de teste. Não simular aplicação no SaaS nem introduzir uma nova regra de perfil administrativo. Script exige `GITHUB_ACTIONS=true`, localhost no `NEXT_PUBLIC_SUPABASE_URL` e ausência de tokens/URLs de produção, para evitar execução remota.
+
+**Verificação e risco:** `Validate application` e J1 local `success` no SHA exato, mais regressões acionadas; inspeção sensível do workflow e script e merge elegível. Um teste que apenas detecta o bloqueio não o resolve. A sessão de homologação humana de J1–J7, incluindo arquivos reais e MFA, continua como **última tarefa**. A classificação privada dos perfis administrativos e autorização de mudança continuam pendentes de decisão humana.
+
+---
+
 ## 2026-10-20 — J1/J6: gate administrativo antes de corrigir Storage no SaaS
 
 **Risco operacional confirmado:** múltiplos perfis têm `role=admin` no Supabase de produção, embora `DECISIONS.md` estabeleça a única admin Patty. A análise de MFA não identifica titulares nem comprova abuso e não será detalhada neste repositório público. A migration da PR #949 foi reforçada para **recusar aplicação se houver múltiplos admins**, sem tocar em contas nem alterar a policy parcialmente. A J1 local prova a regra projetada para uma admin; ela **não** valida concessão dessa exceção a outras identidades. [Pendência detalhada](OPEN_QUESTIONS.md).
