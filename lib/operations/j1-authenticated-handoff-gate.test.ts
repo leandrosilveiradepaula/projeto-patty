@@ -328,3 +328,17 @@ test("J1 invite callback attaches verified session cookies to the returned redir
  assert.match(route,/Referrer-Policy", "no-referrer"/);
  assert.doesNotMatch(route,/createAdminClient|service_role|console\.|getSession\(/);
 });
+
+test("J1 local registration permissions match verified service-only production rights", () => {
+ assert.match(workflow,/Align disposable service-role registration grants with production/);
+ assert.match(workflow,/grant select, insert, update on table public\.client_registration to service_role;/);
+ assert.match(workflow,/test -z "\$\{SUPABASE_ACCESS_TOKEN:-\}"/);
+ assert.match(workflow,/has_table_privilege\('service_role','public\.client_registration','SELECT'\)/);
+ assert.match(workflow,/has_table_privilege\('service_role','public\.client_registration','INSERT'\)/);
+ assert.match(workflow,/has_table_privilege\('service_role','public\.client_registration','UPDATE'\)/);
+ assert.match(workflow,/has_table_privilege\('anon','public\.client_registration','INSERT'\)/);
+ assert.match(workflow,/has_table_privilege\('authenticated','public\.client_registration','INSERT'\)/);
+ assert.match(workflow,/has_table_privilege\('authenticated','public\.client_registration','UPDATE'\)/);
+ assert.match(workflow,/relrowsecurity/);
+ assert.doesNotMatch(workflow,/grant .*client_registration to authenticated|alter table public\.client_registration disable row level security/i);
+});
