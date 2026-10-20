@@ -6,6 +6,8 @@
 
 **ESCOPO:** `e2e/j1-local-onboarding.spec.mjs`, workflow `validate-j1-local-onboarding-browser.yml` e docs de acompanhamento. Os metadados de ACL do Supabase publicado (sem ler clientes ou arquivos) confirmam `service_role` SELECT/INSERT/UPDATE em sessões e SELECT/INSERT/UPDATE em arquivos. O workflow só reproduz os grants técnicos faltantes no Docker local e confirma RLS ativa, `anon` e `authenticated` sem permissão de gravação. Nenhum grant remoto, Auth, schema, migration, regra profissional, arquivo real ou gate IA modificado. Smokes legados remotos continuam fora de escopo.
 
+**FALHA E CORREÇÃO EM TESTE:** o primeiro run da suíte ampliada chegou ao arquivo pendente e ao checkbox de aprovação, mas o Playwright não conseguiu clicar em `Liberar para cliente`: metadados anteriores e o rótulo de confirmação interceptavam o ponteiro na tela móvel, até esgotar o timeout. A reparação é da **interface real**, não do teste: ações do arquivo passam a um grid de coluna única em até 640px, e o botão de aprovação recebe uma camada interativa própria. Permanecem exigidos clique humano nativo, persistência e RLS; nenhum `force` no Playwright. A validação no novo head continua obrigatória.
+
 **CRITÉRIOS DE ACEITAÇÃO:** `Validate application` e `Validate J1 local client onboarding browser` (mais regressões J6/J7 acionadas) devem concluir success no head exato. Corrigir falha na mesma branch; revisar diff; merge somente se elegível; conferir CI master e Vercel READY no commit integrado. **Estado no início da execução: em validação, não homologado.**
 
 ---
