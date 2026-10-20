@@ -61,8 +61,11 @@ function insert(table, fields) {
   if (!UUID.test(id)) throw new Error("Synthetic fixture insertion did not return UUID");
   return id;
 }
-async function makeStaff(nonce) {
-  const email = "e2e-j1-staff-" + nonce + "@example.invalid";
+async function makeStaff(nonce, label = "staff") {
+  if (!["staff", "unassigned"].includes(label)) {
+    throw new Error("J1 synthetic staff label rejected");
+  }
+  const email = "e2e-j1-" + label + "-" + nonce + "@example.invalid";
   const password = "J1-" + randomBytes(16).toString("base64url") + "-Aa1!";
   const result = await service.auth.admin.createUser({
     email, password, email_confirm: true,
@@ -70,7 +73,7 @@ async function makeStaff(nonce) {
   if (result.error || !result.data?.user?.id)
     throw result.error ?? new Error("Local synthetic staff creation failed");
   const id = result.data.user.id;
-  insert("profiles", { id, display_name: "J1 Synthetic staff" });
+  insert("profiles", { id, display_name: "J1 Synthetic " + label });
   insert("user_roles", { profile_id: id, role: "admin" });
   return { id, email, password };
 }
@@ -138,7 +141,7 @@ async function makeInvitedClient(staffId, nonce) {
 }
 test.use({ baseURL });
 test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolation", async ({ browser }) => {
-  test.setTimeout(360000);
+  test.setTimeout(420000);
   const nonce = randomBytes(8).toString("hex");
   const staff = await makeStaff(nonce);
   const staffId = staff.id;
@@ -435,6 +438,36 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
     expect(downloaded.status()).toBe(200);
     expect(await downloaded.body()).toEqual(png);
 
+    // The actual mobile UI opens an inline preview in a separate tab.
+    // Only the route issues the short-lived signed Storage URL; the UI
+    // must not embed an unauthenticated object URL in its HTML.
+    const previewRoute = fileRoute + "?preview=1";
+    const previewLink = page.getByRole("link", { name: "Visualizar " + filename });
+    await expect(previewLink).toHaveAttribute("href", previewRoute);
+    await expect(previewLink).toHaveAttribute("target", "_blank");
+    await expect(previewLink).toHaveAttribute("rel", /noopener.*noreferrer/);
+    const previewRedirect = await page.request.get(previewRoute, { maxRedirects: 0 });
+    expect(previewRedirect.status()).toBe(307);
+    expect(previewRedirect.headers()["cache-control"]).toContain("no-store");
+    expect(previewRedirect.headers()["referrer-policy"]).toBe("no-referrer");
+    expect(previewRedirect.headers()["x-robots-tag"]).toBe("noindex");
+    expect(new URL(previewRedirect.headers().location).origin).toBe(apiURL);
+    const previewBytes = await page.request.get(previewRoute);
+    expect(previewBytes.status()).toBe(200);
+    expect(await previewBytes.body()).toEqual(png);
+    const newTab = context.waitForEvent("page");
+    await previewLink.tap();
+    const previewTab = await newTab;
+    try {
+      // Compare origins only; never print the signed URL or token to CI.
+      await expect.poll(() => {
+        try { return new URL(previewTab.url()).origin === apiURL; }
+        catch { return false; }
+      }, { timeout: 15000 }).toBe(true);
+    } finally {
+      await previewTab.close();
+    }
+
     // Unsupported file content is rejected before issuing an upload session.
     await page.locator('input[name="file"]').setInputFiles({
       buffer: Buffer.from("synthetic invalid document"),
@@ -501,6 +534,24 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       const retrieved = await adminPage.request.get(adminFileRoute);
       expect(retrieved.status()).toBe(200);
       expect(await retrieved.body()).toEqual(clientPrivateFile.bytes);
+      const previewLink = adminPage.getByRole("link", {
+        name: "Visualizar " + clientPrivateFile.filename,
+      });
+      await expect(previewLink).toBeVisible();
+      await expect(previewLink).toHaveAttribute("target", "_blank");
+      const adminPreviewHref = await previewLink.getAttribute("href");
+      expect(new URL(adminPreviewHref, baseURL).pathname).toBe(adminFileRoute);
+      expect(new URL(adminPreviewHref, baseURL).searchParams.get("preview")).toBe("1");
+      const adminPreview = await adminPage.request.get(adminFileRoute + "?preview=1", {
+        maxRedirects: 0,
+      });
+      expect(adminPreview.status()).toBe(307);
+      expect(adminPreview.headers()["cache-control"]).toContain("no-store");
+      expect(adminPreview.headers()["referrer-policy"]).toBe("no-referrer");
+      expect(new URL(adminPreview.headers().location).origin).toBe(apiURL);
+      const inlineBytes = await adminPage.request.get(adminFileRoute + "?preview=1");
+      expect(inlineBytes.status()).toBe(200);
+      expect(await inlineBytes.body()).toEqual(clientPrivateFile.bytes);
       const original = rows(
         "select uploaded_by_profile_id,client_visible_at,client_visibility_set_by_profile_id " +
         "from public.client_files where id=" + literal(fileId),
@@ -542,6 +593,10 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       })).toHaveCount(0);
       const denied = await foreignPage.request.get(clientFileRoute, { maxRedirects: 0 });
       expect(denied.status()).toBe(404);
+      const previewDenied = await foreignPage.request.get(clientFileRoute + "?preview=1", {
+        maxRedirects: 0,
+      });
+      expect(previewDenied.status()).toBe(404);
       expect(rows("select id from public.client_files where client_id=" +
         literal(invite.clientId))).toHaveLength(1);
     } finally {
@@ -549,6 +604,7 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
     }
   });
 
+  let releasedAdminFileId;
   await test.step("admin uploads hidden private file then explicitly releases exact bytes", async () => {
     if (!clientPrivateFile || !foreignClientCredentials) {
       throw new Error("Previous synthetic client and isolation proofs missing");
@@ -621,6 +677,9 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       await page.goto("/cliente/arquivos");
       await expect(page.getByRole("heading", { name: filename, exact: true })).toHaveCount(0);
       expect((await page.request.get(ownerRoute, { maxRedirects: 0 })).status()).toBe(404);
+      expect((await page.request.get(ownerRoute + "?preview=1", {
+        maxRedirects: 0,
+      })).status()).toBe(404);
 
       await adminPage.goto(adminPath + "?arquivoPendente=" + hidden.id);
       const pendingCard = adminPage.locator("#arquivo-pendente-" + hidden.id);
@@ -714,6 +773,7 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       expect(released.uploaded_by_profile_id).toBe(staffId);
       expect(released.client_visibility_set_by_profile_id).toBe(staffId);
       expect(released.client_visible_at).not.toBeNull();
+      releasedAdminFileId = released.id;
       await adminPage.reload();
       await expect(adminPage.locator("#arquivo-pendente-" + hidden.id)).toHaveCount(0);
       await expect(adminPage.locator("#arquivo-historico-" + hidden.id)).toBeVisible();
@@ -727,6 +787,14 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       const ownerDownload = await page.request.get(ownerRoute);
       expect(ownerDownload.status()).toBe(200);
       expect(await ownerDownload.body()).toEqual(png);
+      const ownerPreview = await page.request.get(ownerRoute + "?preview=1", {
+        maxRedirects: 0,
+      });
+      expect(ownerPreview.status()).toBe(307);
+      expect(new URL(ownerPreview.headers().location).origin).toBe(apiURL);
+      const previewBytes = await page.request.get(ownerRoute + "?preview=1");
+      expect(previewBytes.status()).toBe(200);
+      expect(await previewBytes.body()).toEqual(png);
 
       const foreignPage = await foreignContext.newPage();
       await foreignPage.goto("/login");
@@ -739,6 +807,9 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
         .toHaveCount(0);
       expect((await foreignPage.request.get(ownerRoute, { maxRedirects: 0 })).status())
         .toBe(404);
+      expect((await foreignPage.request.get(ownerRoute + "?preview=1", {
+        maxRedirects: 0,
+      })).status()).toBe(404);
       // An upload+release cycle creates one physical record, not duplicates.
       expect(savedFiles()).toHaveLength(1);
       expect(rows("select id from public.client_files where client_id=" +
@@ -746,6 +817,42 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
     } finally {
       await Promise.allSettled([adminContext.close(), foreignContext.close()]);
     }
+  });
+
+  await test.step("unassigned AAL2 professional cannot preview or download either private file", async () => {
+    if (!clientPrivateFile || !UUID.test(releasedAdminFileId)) {
+      throw new Error("J1 local private-file prerequisites missing");
+    }
+    const unassigned = await makeStaff(nonce, "unassigned");
+    const unassignedTotp = await enrollStaffTotp(unassigned);
+    const unassignedContext = await browser.newContext({
+      baseURL, viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true,
+    });
+    try {
+      const unassignedPage = await unassignedContext.newPage();
+      await loginAdminWithMfa(unassignedPage, {
+        email: unassigned.email, password: unassigned.password,
+        totpSecret: unassignedTotp,
+      });
+      await unassignedPage.goto("/admin/clientes/" + invite.clientId + "/arquivos");
+      await expect(unassignedPage.getByRole("heading", {
+        name: clientPrivateFile.filename, exact: true,
+      })).toHaveCount(0);
+      for (const fileId of [clientPrivateFile.id, releasedAdminFileId]) {
+        for (const suffix of ["", "?preview=1"]) {
+          const denied = await unassignedPage.request.get(
+            "/admin/arquivos/" + fileId + suffix, { maxRedirects: 0 },
+          );
+          expect(denied.status(), "No signed private-file URL without active assignment")
+            .toBe(404);
+          expect(denied.headers().location ?? "").not.toContain("/storage/");
+        }
+      }
+    } finally {
+      await unassignedContext.close();
+    }
+    expect(rows("select id from public.client_files where client_id=" +
+      literal(invite.clientId))).toHaveLength(2);
   });
 
   await test.step("no anonymous or unrelated-client access to the draft", async () => {
