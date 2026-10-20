@@ -7,6 +7,7 @@ on:
     paths:
       - ".github/workflows/validate-j1-local-onboarding-browser.yml"
       - "e2e/j1-local-onboarding.spec.mjs"
+      - "e2e/helpers/private-storage-migration-guard.mjs"
       - "components/client/StartAnamnesisForm.tsx"
       - "app/cliente/anamnese/**"
       - "app/cliente/perfil/**"
@@ -56,7 +57,9 @@ jobs:
         run: npm ci
 
       - name: Verify local-only browser fixture syntax
-        run: node --check e2e/j1-local-onboarding.spec.mjs
+        run: |
+          node --check e2e/j1-local-onboarding.spec.mjs
+          node --check e2e/helpers/private-storage-migration-guard.mjs
 
       - name: Enable staff MFA only inside disposable Supabase
         run: |
@@ -233,6 +236,18 @@ jobs:
           export J1_E2E_ANON_KEY="$ANON_KEY"
           export J1_E2E_SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY"
           npx playwright test e2e/j1-local-onboarding.spec.mjs --reporter=line --workers=1
+
+      - name: Prove private Storage multi-admin guard fails closed in local Docker
+        shell: bash
+        env:
+          J1_E2E_LOCAL_ONLY: "true"
+        run: |
+          set -euo pipefail
+          # The prior J1 browser test created exactly one synthetic admin.
+          # The script inserts a second synthetic admin ONLY in Docker localhost,
+          # replays the committed migration, requires the pre-DROP rejection,
+          # compares policy fingerprints, and removes its fixture.
+          node e2e/helpers/private-storage-migration-guard.mjs
 
       - name: Classify local server errors without exposing sensitive logs
         if: failure()
