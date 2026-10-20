@@ -37,6 +37,21 @@ const complete: AssessmentDefinitionConfiguration = {
   },
 };
 
+test("UI alias normalization must not replace the exact active snapshot configuration", () => {
+  const original = structuredClone(basic);
+  const persistedSource = structuredClone(original);
+  const normalizedForUi = parseAssessmentDefinitionConfiguration(original);
+
+  // The source may contain aliases not repeating their own canonical key.
+  // Normalization enriches the UI view, but the snapshot RPC requires the
+  // unchanged JSONB of the active method version (not the enriched view).
+  assert.deepEqual(original, persistedSource);
+  assert.deepEqual(normalizedForUi.requiredMeasurements[0].aliases, ["peso", "weight"]);
+  assert.deepEqual(normalizedForUi.requiredMeasurements[2].aliases,
+    ["abdomen", "abdominal"]);
+  assert.notDeepEqual(normalizedForUi, persistedSource);
+});
+
 test("reproduces the confirmed Basic assessment catalog from configuration", () => {
   const result = buildConfigurableAssessmentReadiness(basic, {
     measurementKeys: ["Peso", "WAIST", "abdômen", "hip"],
