@@ -320,7 +320,10 @@ test("J1 invite callback attaches verified session cookies to the returned redir
  assert.match(route,/response\.headers\.set\(key, value\)/);
  assert.match(route,/const \{ error \} = await supabase\.auth\.verifyOtp\(\{/);
  assert.match(route,/if \(error\) return uncachedRedirect\(request, true\);\s*return response;/);
- assert.match(route,/target\.search = ""/);
+ assert.match(route,/Location: invalid \? "\/ativar-conta\?error=invalid" : "\/ativar-conta"/);
+ assert.match(route,/status: 303/);
+ assert.doesNotMatch(route,/nextUrl\.clone|headers\.get\(["']host["']\)|new URL\(["']\/ativar-conta/);
+
  assert.match(route,/Cache-Control", "private, no-store, max-age=0"/);
  assert.match(route,/Referrer-Policy", "no-referrer"/);
  assert.doesNotMatch(route,/createAdminClient|service_role|console\.|getSession\(/);
