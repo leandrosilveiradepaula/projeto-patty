@@ -1,3 +1,17 @@
+## 2026-10-20 — J6: bytes reais sintéticos após liberação humana e URL privada assinada simulada
+
+**BASE:** PR #943 mergeada em `7efa6c441226d54069d3600006ee40097903b984`, `Validate application` pós-merge `success`, Vercel produção READY no mesmo commit. J6 já exercita rascunhos, publicação manual de versões, releases exatos para uma cliente, isolamento RLS e metadata de mídia. A sessão real administrativa do vídeo da balança está documentada em `CONTENT_LIBRARY.md`; a mídia real permanece rascunho, sem release a cliente.
+
+**LACUNA E OBJETIVO:** a suíte J6 verificava que os caminhos de metadata inexistentes falhavam em abrir; isso não demonstrava bytes entregues por uma URL temporária após release autorizado. Estender o mesmo fluxo sintético: (1) publicar material sem asset e negar release; (2) manter um MP4 de metadata propositalmente inexistente e provar que assinatura não cria objeto; (3) cadastrar PDF fictício com hash e tamanho computados dos bytes que um servidor local realmente transmite; (4) negar leitura da cliente antes da liberação e de não titular/anon; (5) realizar release pelo formulário administrativo autenticado/AAL2; (6) verificar redirect `307` da rota da cliente para localhost com cache privado/no-store, `GET 200` com bytes e SHA-256 exatos, `Range 206`, faixa inválida `416`, assinatura ausente/adulterada recusada, leitura administrativa e ausência de escrita de progresso; (7) preservar a versão liberada quando uma nova versão do material é publicada.
+
+**AMBIENTE E SEGURANÇA:** exclusivamente GitHub Actions J6 + Next.js/Supabase descartáveis em localhost; configuração temporária **não comitada** substitui somente `@vercel/blob` do build CI por um emissor read-only de tickets HMAC e servidor de PDF gerado em memória em `127.0.0.1:54329`. Segredos gerados no próprio job; nenhum Blob real, arquivo de cliente, dado de saúde, Cloud SaaS nem modificação de grants, Auth, RLS ou migrations. A liberação continua por ação explícita da profissional; o PDF é apenas teste de transporte, **não decisão de publicar PDF ou regra profissional**. Verificar que workflow e mock se recusam a rodar com credenciais externas.
+
+**LIMITES DE EVIDÊNCIA:** a simulação não verifica SDK verdadeiro, OIDC, signed tokens reais do Vercel, CDN, performance/seek do vídeo >100 MB ou aceite profissional. Essas validações reais continuam na rodada operacional final, sem criar cliente artificial no SaaS. Diferenciar simulação de mediação HTTP e distribuição real na documentação.
+
+**ARQUIVOS/TESTES/ACEITE:** `e2e/j6-educational-release-lifecycle.spec.mjs`, `e2e/j6-blob-fixture/**`, `.github/workflows/validate-j6-educational-release-browser.yml`, `docs/PROJECT_STATUS.md`, este documento. Requer `Validate application`, Playwright J6, pgTAP J6 e todas regressões disparadas aprovados no mesmo SHA; revisão específica do workflow sensível, diff sem alterações de produção, merge somente se elegível, CI pós-merge e Vercel READY no SHA exato. **Estado inicial: implementação enviada à validação, não homologado pela Patty.**
+
+---
+
 ## 2026-10-20 — J5: encerramento de assignment sob MFA preserva o treino publicado
 
 **FATO BASE:** `master` `fc2aa2a9b52e1d5b536b8cb964f3c49f14811040` (PR #942) com `Validate application` pós-merge `success` e Vercel produção READY no mesmo commit. O histórico de treinos J5 já conta com solicitação da cliente, v1/v2 publicadas manualmente, v3 em rascunho e negação de profissional sem vínculo, mas faltava provar revogação de um vínculo que era válido antes.
