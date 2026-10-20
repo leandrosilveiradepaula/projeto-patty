@@ -70,22 +70,14 @@ jobs:
         run: |
           set -euo pipefail
           test -z "${SUPABASE_ACCESS_TOKEN:-}"
-          docker exec -i supabase_db_projeto-patty psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres <<'SQL'
-          grant select, insert, update on table public.client_registration to service_role;
-          do $
-          begin
-            if (not has_table_privilege('service_role','public.client_registration','SELECT')
-              or not has_table_privilege('service_role','public.client_registration','INSERT')
-              or not has_table_privilege('service_role','public.client_registration','UPDATE'))
-              or has_table_privilege('anon','public.client_registration','INSERT')
-              or has_table_privilege('authenticated','public.client_registration','INSERT')
-              or has_table_privilege('authenticated','public.client_registration','UPDATE')
-              or not (select relrowsecurity from pg_class where oid='public.client_registration'::regclass)
-            then
-              raise exception 'J1 disposable registration role parity boundary failed';
-            end if;
-          end $;
-          SQL
+          docker exec -i supabase_db_projeto-patty psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -c 'grant select, insert, update on table public.client_registration to service_role;'
+          permission_check="$(docker exec -i supabase_db_projeto-patty psql -X -q -A -t -v ON_ERROR_STOP=1 \
+            -U postgres -d postgres -c "select case when   has_table_privilege('service_role','public.client_registration','SELECT')   and has_table_privilege('service_role','public.client_registration','INSERT')   and has_table_privilege('service_role','public.client_registration','UPDATE')   and not has_table_privilege('anon','public.client_registration','INSERT')   and not has_table_privilege('authenticated','public.client_registration','INSERT')   and not has_table_privilege('authenticated','public.client_registration','UPDATE')   and (select relrowsecurity from pg_class where oid='public.client_registration'::regclass) then 'true' else 'false' end;")"
+          if [ "$permission_check" != "true" ]; then
+            echo "::error::J1 local technical registration grant parity failed"
+            exit 1
+          fi
 
       - name: Export only disposable localhost runtime variables
         shell: bash
