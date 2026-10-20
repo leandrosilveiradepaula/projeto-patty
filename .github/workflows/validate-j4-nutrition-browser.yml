@@ -73,21 +73,48 @@ jobs:
             if not exists (
               select 1 from pg_catalog.pg_roles
               where rolname='service_role' and rolbypassrls
-            ) or not (select relrowsecurity from pg_class where oid='public.client_assessments'::regclass)
-              or not (select relrowsecurity from pg_class where oid='public.method_configuration_snapshot_sets'::regclass)
-              or not (select relrowsecurity from pg_class where oid='public.method_configuration_snapshots'::regclass)
+            ) or exists (
+              select 1 from pg_class c
+              where c.oid in (
+                'public.client_assessments'::regclass,
+                'public.assessment_measurements'::regclass,
+                'public.assessment_files'::regclass,
+                'public.method_configuration_templates'::regclass,
+                'public.method_configuration_versions'::regclass,
+                'public.method_configuration_snapshot_sets'::regclass,
+                'public.method_configuration_snapshots'::regclass
+              ) and not c.relrowsecurity
+            )
             then
               raise exception 'Unexpected disposable assessment security boundary';
             end if;
           end $guard$;
           grant select, update on public.client_assessments to service_role;
-          grant select on public.client_assignments, public.user_roles to service_role;
+          -- The INVOKER snapshot RPC also reads these relations, even though
+          -- browser-authenticated users must not gain any extra privileges.
+          -- Hosted ACL metadata confirms these service-only reads already exist.
+          grant select on
+            public.client_assignments,
+            public.user_roles,
+            public.assessment_measurements,
+            public.assessment_files,
+            public.method_configuration_templates,
+            public.method_configuration_versions,
+            public.method_configuration_snapshot_sets,
+            public.method_configuration_snapshots
+          to service_role;
           do $guard$
           begin
             if not has_table_privilege('service_role','public.client_assessments','SELECT')
                or not has_table_privilege('service_role','public.client_assessments','UPDATE')
                or not has_table_privilege('service_role','public.client_assignments','SELECT')
                or not has_table_privilege('service_role','public.user_roles','SELECT')
+               or not has_table_privilege('service_role','public.assessment_measurements','SELECT')
+               or not has_table_privilege('service_role','public.assessment_files','SELECT')
+               or not has_table_privilege('service_role','public.method_configuration_versions','SELECT')
+               or not has_table_privilege('service_role','public.method_configuration_templates','SELECT')
+               or not has_table_privilege('service_role','public.method_configuration_snapshot_sets','SELECT')
+               or not has_table_privilege('service_role','public.method_configuration_snapshots','SELECT')
                or not has_table_privilege('service_role','public.method_configuration_snapshot_sets','INSERT')
                or not has_table_privilege('service_role','public.method_configuration_snapshots','INSERT')
                or not has_function_privilege(
