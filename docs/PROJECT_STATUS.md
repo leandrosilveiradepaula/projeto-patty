@@ -1,3 +1,15 @@
+## 2026-10-20 — Teste UI da avaliação no fluxo integrado J3 → J4 → J2 → J3
+
+**ESTADO ANTERIOR PUBLICADO:** PR #939 mergeado (`7cabd679a35c9211f244badbefaed2eabddb53bf`), GitHub CI pós-merge success, Vercel READY. O teste integrado havia criado e finalizado avaliações J3 por fixture SQL descartável.
+
+**FALHA TÉCNICA EM CORREÇÃO:** a primeira rodada do PR #940 teve quatro suites verdes e J4 vermelha: rascunho/medidas via UI persistiram, mas o clique de finalização não gerou `finalized_at` em 25s. A ação server-only existente precisa de `SUPABASE_SECRET_KEY`; o workflow J4 não exportava a chave para o Next.js local. Ajuste restrito ao runner descartável, com URL localhost, máscara e bloqueio de credenciais remotas. Nova execução obrigatória; sem merge antecipado. Evidência: [GitHub Actions #39442082412](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39442082412).
+
+**CAUSA ADICIONAL CONFIRMADA:** a J4 continuou falhando na finalização mesmo com o segredo server-side configurado (run [#39443422287](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39443422287)). A função SQL exige `p_definition_configuration` igual ao JSON original ativo; o loader apresentava aliases normalizados e a action enviava esse objeto modificado, por exemplo `["peso","weight"]` versus o original `["weight"]`. O pacote corrige esse contrato no código real, preserva original e vista normalizada separadamente, adiciona prova unitária/Playwright do snapshot exato e alinha somente grants técnicos no Docker local, mantendo o bloqueio de usuários comuns e anon. Não publicar antes de nova CI completa.
+
+**PACOTE ATUAL, A VALIDAR:** usar formulário administrativo autenticado para criar cada rascunho de avaliação, persistir medidas obrigatórias e vínculo de foto, registrar confirmação humana na finalização e verificar snapshot imutável. Conserva J4 (protocolo revisado/publicado) e J2 (feedback manual, persistente e sem duplicação), comparação final e RLS. Somente `e2e/j4-nutrition-protocol-lifecycle.spec.mjs` e documentação; sem mudanças em produção, schema ou método. Critérios e limites em `JOURNEY_HOMOLOGATION.md`. **Ainda não mergeado nem homologado.**
+
+---
+
 ## 2026-10-20 — Pacote J3 → J4 → J2 → J3 em validação técnica
 
 **BASE PUBLICADA:** PR #938 mergeado como `344b7a40c29a8ef5196a605eba6130ca9787ce6e`, CI pós-merge success e Vercel READY no mesmo commit. Nenhum merge depende de confirmação manual do responsável quando checks/proteções permitem.

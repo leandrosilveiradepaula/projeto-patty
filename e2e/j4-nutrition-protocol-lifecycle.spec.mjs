@@ -122,35 +122,79 @@ function basicAssessmentMethod(){
     throw new Error("Invalid versioned assessment definition");
   return {catalog,kind,definition};
 }
+// Exercise the real staff UI at both ends of the integrated J3-J4-J2-J3
+// cycle. The only seeded rows are ancillary synthetic comparison/photo data,
+// never the assessment draft or its professional finalization.
 async function finalizedSyntheticAssessment(input){
-  const {clientId,staffId,assessedAt,weight,waist,method}=input;
+  const {page,clientId,staffId,assessedAt,weight,waist,method}=input;
   if(![clientId,staffId].every(id=>UUID.test(id))||
      !Number.isFinite(weight)||!Number.isFinite(waist))
     throw new Error("Invalid disposable J3 fixture");
-  const assessmentId=insert("client_assessments",{
-    client_id:clientId,assessed_at:assessedAt,
-    assessment_kind:"fortnightly",created_by_profile_id:staffId,
-  });
+  const isoDate=assessedAt.slice(0,10);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(isoDate))
+    throw new Error("Invalid disposable assessment date");
+
+  const clientAssessments=()=>rows("select id,client_id,created_by_profile_id,"+
+    "assessed_at,assessment_kind,finalized_at,method_configuration_snapshot_set_id"+
+    " from public.client_assessments where client_id="+quote(clientId));
+  const countBefore=clientAssessments().length;
+  await page.goto("/admin/clientes/"+clientId+"/avaliacoes");
+  const creation=page.locator("#nova-avaliacao form");
+  await expect(creation).toHaveCount(1);
+  await creation.locator('select[name="assessmentKind"]').selectOption("fortnightly");
+  await creation.locator('input[name="assessedAt"]').fill(isoDate);
+  await creation.getByRole("button",{name:"Criar rascunho de avaliação"}).click();
+  await expect(page).toHaveURL(/\/admin\/avaliacoes\/[0-9a-f-]{36}/i,{timeout:25000});
+  const assessmentId=new URL(page.url()).pathname.split("/").at(-1);
+  if(!UUID.test(assessmentId))throw new Error("Staff UI did not create a valid assessment");
+  await expect.poll(()=>clientAssessments().length,{timeout:25000})
+    .toBe(countBefore+1);
+  const draft=clientAssessments().find(item=>item.id===assessmentId);
+  expect(draft?.client_id).toBe(clientId);
+  expect(draft?.created_by_profile_id).toBe(staffId);
+  expect(draft?.assessment_kind).toBe("fortnightly");
+  expect(draft?.assessed_at.slice(0,10)).toBe(isoDate);
+  expect(draft?.finalized_at).toBeNull();
+  expect(draft?.method_configuration_snapshot_set_id).toBeNull();
+  await expect(page.getByRole("heading",{name:"Editar rascunho"})).toBeVisible();
+
+  // Record active configuration's mandatory measurements through the browser
+  // form. Any other comparison keys are ancillary local synthetic fixture rows.
   const recorded=new Set();
+  const measures=method.definition.configuration.requiredMeasurements;
+  expect(measures.length,"Active basic method must define browser measurements")
+    .toBeGreaterThan(0);
+  for(const requirement of measures){
+    const key=requirement.key;
+    const value=key==="peso"?weight:key==="cintura"?waist:88;
+    const unit=key==="peso"?"kg":"cm";
+    const measureForm=page.locator("form").filter({
+      has:page.getByRole("button",{name:"Salvar medida",exact:true}),
+    });
+    await expect(measureForm).toHaveCount(1);
+    await measureForm.locator('select[name="measurementKey"]').selectOption(key);
+    await measureForm.locator('input[name="measurementValue"]').fill(String(value));
+    await measureForm.locator('input[name="unit"]').fill(unit);
+    await measureForm.getByRole("button",{name:"Salvar medida"}).click();
+    await expect.poll(()=>rows("select id from public.assessment_measurements"+
+      " where assessment_id="+quote(assessmentId)+
+      " and measurement_key="+quote(key)).length,{timeout:25000}).toBe(1);
+    recorded.add(key);
+    await page.reload();
+  }
   for(const item of [
     {key:"peso",value:weight,unit:"kg"},
     {key:"cintura",value:waist,unit:"cm"},
   ]){
+    if(recorded.has(item.key))continue;
     insert("assessment_measurements",{
       assessment_id:assessmentId,measurement_key:item.key,
       measurement_value:item.value,unit:item.unit,
     });
-    recorded.add(item.key);
   }
-  for(const requirement of method.definition.configuration.requiredMeasurements){
-    if(recorded.has(requirement.key))continue;
-    // Preserve the standalone J3 fixture approach to required synthetic keys.
-    insert("assessment_measurements",{
-      assessment_id:assessmentId,measurement_key:requirement.key,
-      measurement_value:88,unit:"cm",
-    });
-    recorded.add(requirement.key);
-  }
+
+  // The browser links real private synthetic Storage files. The fixture is
+  // the physically uploaded file, not a fake pre-linked assessment.
   const minimum=method.definition.configuration.photoRequirement?.minimumCount??0;
   if(!Number.isSafeInteger(minimum)||minimum<0||minimum>15)
     throw new Error("Unexpected local assessment photo requirement");
@@ -166,25 +210,47 @@ async function finalizedSyntheticAssessment(input){
       mime_type:"image/png",byte_size:assessmentPng.length,
       uploaded_by_profile_id:staffId,
     });
-    sql("insert into public.assessment_files(assessment_id,client_id,client_file_id)"+
-      " values ("+quote(assessmentId)+","+quote(clientId)+","+quote(photoId)+");");
+    await page.reload();
+    const photoForm=page.locator("form").filter({
+      has:page.getByRole("button",{name:"Vincular foto",exact:true}),
+    });
+    await expect(photoForm).toHaveCount(1);
+    await photoForm.locator('select[name="clientFileId"]').selectOption(photoId);
+    await photoForm.getByRole("button",{name:"Vincular foto"}).click();
+    await expect.poll(()=>rows("select client_file_id from public.assessment_files"+
+      " where assessment_id="+quote(assessmentId)+
+      " and client_file_id="+quote(photoId)).length,{timeout:25000}).toBe(1);
   }
-  const {catalog,kind,definition}=method;
-  const snapshotId=sql("select public.finalize_assessment_from_method_snapshot("+
-    quote(assessmentId)+"::uuid,"+quote(staffId)+"::uuid,"+
-    quote(catalog.id)+"::uuid,"+
-    quote(JSON.stringify(catalog.configuration))+"::jsonb,"+
-    quote(JSON.stringify({
-      historical_code:kind.historicalCode,semantic_key:kind.semanticKey,label:kind.label,
-    }))+"::jsonb,"+
-    quote(definition.id)+"::uuid,"+
-    quote(JSON.stringify(definition.configuration))+"::jsonb,"+
-    quote(JSON.stringify({kind_key:kind.semanticKey,can_finalize:true}))+"::jsonb);");
-  if(!UUID.test(snapshotId))throw new Error("Assessment snapshot not persisted");
-  expect(rows("select id from public.client_assessments where id="+quote(assessmentId)+
-    " and client_id="+quote(clientId)+" and finalized_at is not null"+
-    " and method_configuration_snapshot_set_id="+quote(snapshotId))).toHaveLength(1);
-  return {id:assessmentId,snapshotId};
+
+  await page.reload();
+  const finish=page.locator("form").filter({
+    has:page.getByRole("button",{name:"Finalizar avaliação",exact:true}),
+  });
+  await expect(finish).toHaveCount(1);
+  await expect(finish.getByRole("button",{name:"Finalizar avaliação"}))
+    .toBeEnabled();
+  await finish.getByRole("checkbox",{name:/Revisei data, tipo, medidas e fotos/}).check();
+  await finish.getByRole("button",{name:"Finalizar avaliação"}).click();
+  await expect.poll(()=>clientAssessments().find(item=>item.id===assessmentId)
+    ?.finalized_at??null,{timeout:25000}).not.toBeNull();
+  const finalized=clientAssessments().find(item=>item.id===assessmentId);
+  expect(UUID.test(finalized?.method_configuration_snapshot_set_id)).toBe(true);
+  const snapshots=rows("select template_key,resolved_configuration"+
+    " from public.method_configuration_snapshots"+
+    " where snapshot_set_id="+quote(finalized.method_configuration_snapshot_set_id));
+  expect(new Set(snapshots.map(row=>row.template_key))).toEqual(new Set([
+    "evaluation.assessment_definition.basic","evaluation.assessment_kind_catalog",
+  ]));
+  // The committed snapshot must match the original catalog JSON exactly.
+  // UI-normalized aliases are a separate representation, never persisted.
+  expect(snapshots.find(row=>row.template_key==="evaluation.assessment_definition.basic")
+    ?.resolved_configuration).toEqual(method.definition.configuration);
+  expect(snapshots.find(row=>row.template_key==="evaluation.assessment_kind_catalog")
+    ?.resolved_configuration).toEqual(method.catalog.configuration);
+  await page.reload();
+  await expect(page.getByRole("heading",{name:"Continuar para o protocolo"}))
+    .toBeVisible();
+  return {id:assessmentId,snapshotId:finalized.method_configuration_snapshot_set_id};
 }
 // Synthetic local-only authorization probe; never print SQL errors or data.
 // Inspect query *plans*, never data, solely inside the disposable local DB.
@@ -464,7 +530,7 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
     let initialAssessment;
     await test.step("J3 finalized baseline precedes J4 professional publication",async()=>{
       initialAssessment=await finalizedSyntheticAssessment({
-        clientId,staffId:staff.id,assessedAt:"2026-09-21T12:00:00Z",
+        page:adminPage,clientId,staffId:staff.id,assessedAt:"2026-09-21T12:00:00Z",
         weight:74,waist:84,method:assessmentMethod,
       });
       expect(rows("select id from public.protocol_publications where client_id="+quote(clientId)))
@@ -811,7 +877,7 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
 
     await test.step("J3 re-evaluation after J4 publication and J2 draft remains independent",async()=>{
       const reevaluation=await finalizedSyntheticAssessment({
-        clientId,staffId:staff.id,assessedAt:"2026-10-12T12:00:00Z",
+        page:adminPage,clientId,staffId:staff.id,assessedAt:"2026-10-12T12:00:00Z",
         weight:72,waist:82,method:assessmentMethod,
       });
       expect(reevaluation.id).not.toBe(initialAssessment.id);

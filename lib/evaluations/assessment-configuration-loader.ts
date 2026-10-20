@@ -1,5 +1,7 @@
 import "server-only";
 
+import type { Json } from "@/lib/supabase/database.types";
+
 import {
   parseAssessmentKindCatalogConfiguration,
   type AssessmentKindCatalogConfiguration,
@@ -12,7 +14,11 @@ import { isAssessmentKind, type AssessmentKind } from "./assessment-draft";
 import { createClient } from "@/lib/supabase/server";
 
 type LoadedConfiguration<T> = {
+  // Validated, normalized representation for UI/readiness.
   configuration: T;
+  // Exact JSON from the active version: the SQL snapshot RPC rejects any
+  // changed aliases/keys. Never use the normalized UI representation here.
+  rawConfiguration: Json;
   templateId: string;
   templateVersionId: string;
 };
@@ -65,6 +71,7 @@ export async function loadAssessmentKindCatalog(): Promise<
 
   return {
     ...loaded,
+    rawConfiguration: loaded.configuration,
     configuration: parseAssessmentKindCatalogConfiguration(loaded.configuration),
   };
 }
@@ -85,7 +92,7 @@ export async function loadAssessmentDefinition(
     throw new Error("Assessment definition kind does not match its template");
   }
 
-  return { ...loaded, configuration };
+  return { ...loaded, rawConfiguration: loaded.configuration, configuration };
 }
 
 
@@ -97,6 +104,7 @@ export type SupportedAssessmentKindOption = {
 
 export async function loadSupportedAssessmentKindOptions(): Promise<{
   configuration: AssessmentKindCatalogConfiguration;
+  rawConfiguration: Json;
   options: SupportedAssessmentKindOption[];
   templateId: string;
   templateVersionId: string;
@@ -131,6 +139,7 @@ export async function loadSupportedAssessmentKindOptions(): Promise<{
 
   return {
     configuration: loaded.configuration,
+    rawConfiguration: loaded.rawConfiguration,
     options,
     templateId: loaded.templateId,
     templateVersionId: loaded.templateVersionId,
