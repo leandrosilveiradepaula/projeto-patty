@@ -1,3 +1,15 @@
+## 2026-10-20 — J6: cliente abre PDF privado pela interface mobile (simulador local)
+
+**BASE TÉCNICA CONFIRMADA:** PR [#948](https://github.com/leandrosilveiradepaula/projeto-patty/pull/948) integrada ao `master` `acaee950221592e2ede323dac23425602e979448`, com [Validate application pós-merge #39473014609](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39473014609) `success` e Vercel produção `READY` no mesmo SHA. J1–J7 foram anteriormente testadas em conjunto na PR #945, mas cada PR posterior deve manter seu próprio gate de regressão.
+
+**LACUNA E ESCOPO:** o E2E J6 comprova release profissional explícito, isolamento cliente, autenticação, `307` privado, PDF binário sintético com SHA e Range, mas ainda não exercitava o **toque da cliente** na busca da biblioteca até a abertura do arquivo autorizado em nova aba. Este pacote amplia `e2e/j6-educational-release-lifecycle.spec.mjs` com visita mobile 390 px, pesquisa pelo título exato, filtro de versão, link sob domínio da aplicação, `rel=noopener noreferrer`, ausência de ticket no HTML, toque e nova aba com redirect para servidor **somente local** de PDF, retorno da busca e verificação de que nem `client_content_progress` nem releases se alteram por leitura.
+
+**RISCO QUE PERMANECE:** o mock local comprova o caminho cliente Next/Auth/RLS → URL assinada sintética → PDF sintético, mas não distribuição real, CDN, vídeo de 123 MB ou comportamento de seek/Range do Vercel Blob. Metadados de um asset podem existir sem bytes físicos; o teste de 404 do provedor distingue esse caso, e **a interface não deve ser considerada prova da existência remota apenas por exibir “Disponível”**. O vídeo aprovado da balança continua cadastrado em rascunho e sem release à cliente. Verificação de mídia real pela cliente autorizada permanece na última homologação; não criar cliente/release fictícios em produção.
+
+**ACEITE:** apenas suíte J6 sintética e documentação; `Validate application` + J6, J1/J7 e quaisquer regressões iniciadas `success` no HEAD da PR. Revisar escopo, corrigir falhas na mesma branch, merge somente com gate verde, e confirmar CI pós-merge + Vercel READY no SHA integrado. Nenhuma migration, regra clínica, storage externo, conta real, RLS ou runtime alterado. **Estado inicial: teste em validação; não homologado pela Patty.**
+
+---
+
 ## 2026-10-20 — J3: percurso mobile da cliente, correção histórica e retorno exato à evolução
 
 **Base publicada confirmada:** PR [#947](https://github.com/leandrosilveiradepaula/projeto-patty/pull/947) mergeada em `af997dfa089af3b2b78cbe682db399fec3af9a7a`, `Validate application` pós-merge [#39470282878](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39470282878) `SUCCESS`, Vercel produção `READY` no mesmo commit. O cenário J1 prova prévia privada de PNG e negativa a profissional AAL2 sem assignment com banco e Storage descartáveis; não homologou arquivos reais.
