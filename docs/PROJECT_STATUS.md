@@ -1,3 +1,15 @@
+## 2026-10-20 — Guard de migração de arquivos privados: teste real de rejeição sem alterar a produção
+
+**HEAD de referência:** `master` `d4feba572eb4ac0dfbecd5ac4859263d9e464f60`, PR [#949](https://github.com/leandrosilveiradepaula/projeto-patty/pull/949) integrada, CI pós-merge `SUCCESS` e Vercel produção `READY` no mesmo commit. O workflow de migrations só fez **dry-run**; a migration `20261020191000_fix_private_storage_admin_read_after_assignment.sql` continua **não aplicada** ao Supabase hospedado.
+
+**FATO E PENDÊNCIA:** a produção possui múltiplos perfis com role relacional `admin`. A exceção confirmada para arquivos privados sem assignment foi projetada para **a única administradora de negócio Patty**. Não identificar nem alterar essas contas por inferência, nem concluir que são ilegítimas. A revisão humana privada de papéis e a decisão de autorização permanecem obrigatórias: [issue #950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950), [issue #951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951) e [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
+
+**NOVO TESTE LOCAL (não muta produção):** `e2e/helpers/private-storage-migration-guard.mjs` agora executa **depois** do E2E J1 e usa somente `supabase_db_projeto-patty` descartável. O script exige inicialmente uma admin sintética, cria uma **segunda** identidade sintética local, executa o arquivo de migration versionado e exige a exceção **antes de DROP POLICY**. Compara a impressão digital SQL das policies `storage.objects` / `client_files` antes e depois, verifica que RLS segue habilitada e elimina a fixture no `finally`. Falha fechada se houver variáveis remotas ou o ambiente não for o localhost conhecido. O workflow J1 executa essa prova antes do teardown; `Validate application`, J1 e as regressões disparadas precisam ser `SUCCESS` no mesmo SHA da PR.
+
+**LIMITES:** aprovar esse teste **não autoriza executar `mode=apply`** em produção, não reconcilia quem é Patty, não resolve o risco atual de mais de uma role admin e não é homologação. Não alterar a migration já comitada/aplicada localmente, não remover guard, não mudar grants/RLS, não manipular Auth real. **Estado deste pacote: em validação técnica; produção continua bloqueada quanto à migration.**
+
+---
+
 ## 2026-10-20 — BLOQUEIO DE SEGURANÇA: múltiplas contas admin na produção
 
 **FATO CONFIRMADO (somente contagens, sem PII):** catálogo `public.user_roles` aponta **múltiplos perfis com role=admin**, todos com Auth; o status agregado de MFA não será publicado no repositório. A documentação operacional exige **somente a Patty** como administradora no MVP. Não inferir qual perfil corresponde à Patty ou que os demais sejam ilegítimos sem revisão humana. [Questão prioritária](OPEN_QUESTIONS.md), [issue #950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950).
