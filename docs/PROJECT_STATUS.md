@@ -1,3 +1,15 @@
+## 2026-10-20 — Reconciliação J1/J6: exceção da única administradora e abertura de PDF móvel
+
+**Descoberta em CI:** na PR [#949](https://github.com/leandrosilveiradepaula/projeto-patty/pull/949), duas execuções do teste J1 criaram uma segunda `user_roles.role='admin'` sintética e exigiram que essa admin AAL2 **sem assignment** fosse negada em `client_files`. A listagem exibiu um arquivo, e a asserção falhou. Essa exigência não corresponde à política **confirmada do MVP** em `docs/RBAC_RLS.md`, `docs/DECISIONS.md` (2026-10-14) e à migration `20260922230034_private_file_access_visibility_foundation.sql`: a exceção de arquivos privados usa `role=admin` + MFA AAL2, sem assignment, e **pressupõe uma única administradora de negócio (Patty)**. Não autorizar segundo admin em produção. Conflito e necessidade de endurecer o contrato antes de qualquer expansão de admins documentados em [issue #950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950).
+
+**AJUSTE DE TESTE — NÃO RLS:** a suíte J1 foi alterada para modelar **uma única administradora**, encerrar o assignment **somente no Supabase local descartável** e provar que a Patty sintética continua vendo/listando/baixando/visualizando seus arquivos privados com AAL2, mas a leitura direta como AAL1 retorna zero. Negativas obrigatórias a clientes estrangeiros e anônimos permanecem nas etapas existentes, sem alteração de grants/schema. Esta correção substitui somente o teste hipotético de segunda admin (incompatível com o modelo do MVP), **não declara isolamento de uma futura segunda admin**; esse risco continua aberto na issue #950. Os registros anteriores que diziam que qualquer segunda admin era bloqueada estão superados por essa reconciliação.
+
+**J6:** a mesma PR amplia o percurso móvel da cliente em biblioteca e exige `GET` autenticado emitido pelo navegador a `/cliente/conteudos/assets/[assetId]` e `307` para PDF sintético assinado; a aba do visualizador de PDF em Chromium headless pode permanecer em `about:blank`, portanto não serve como prova de renderização. SHA, bytes e Range seguem testados separadamente. Não há arquivo real de cliente nem release profissional. **CI do novo HEAD e merge ainda precisam ser confirmados.**
+
+**ACEITE:** Validate application, Playwright J1, J6, J7 e toda regressão acionada `SUCCESS` no mesmo SHA; revisão do diff de testes e documentos, sem mudanças de RLS/Auth/Storage real; CI pós-merge e Vercel READY no commit integrado. Homologação profissional conjunta permanece a última tarefa.
+
+---
+
 ## 2026-10-20 — J6: cliente abre PDF privado pela interface mobile (simulador local)
 
 **BASE TÉCNICA CONFIRMADA:** PR [#948](https://github.com/leandrosilveiradepaula/projeto-patty/pull/948) integrada ao `master` `acaee950221592e2ede323dac23425602e979448`, com [Validate application pós-merge #39473014609](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39473014609) `success` e Vercel produção `READY` no mesmo SHA. J1–J7 foram anteriormente testadas em conjunto na PR #945, mas cada PR posterior deve manter seu próprio gate de regressão.
