@@ -13,7 +13,8 @@ test("activation checks implicit invite fragments before presenting the account 
   assert.match(gate, /window\.history\.replaceState\(/);
   assert.match(gate, /supabase\.auth\.setSession\(/);
   assert.match(gate, /window\.location\.replace\("\/ativar-conta"\)/);
-  assert.match(gate, /phase === "ready" && role && !invalid/);
+  assert.match(gate, /phase === "ready" && authorizedRole && !invalid/);
+  assert.match(gate, /setAuthorizedRole\(verified\.role\)/);
   assert.match(gate, /phase === "invalid"/);
   assert.match(gate, /phase === "failed"/);
   assert.doesNotMatch(gate, /localStorage|sessionStorage|console\./);

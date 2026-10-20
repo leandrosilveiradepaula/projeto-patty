@@ -1,0 +1,155 @@
+name: Validate J1 local client onboarding browser
+
+# Replaces the historical production-fixture smoke. No production credentials,
+# hosted database, actual clients, or published Vercel environment are used.
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/validate-j1-local-onboarding-browser.yml"
+      - "e2e/j1-local-onboarding.spec.mjs"
+      - "components/client/StartAnamnesisForm.tsx"
+      - "app/cliente/anamnese/**"
+      - "app/cliente/perfil/**"
+      - "app/auth/confirm/**"
+      - "app/ativar-conta/**"
+      - "components/auth/**"
+      - "lib/anamnesis/**"
+      - "lib/onboarding/**"
+      - "supabase/migrations/**"
+      - "docs/JOURNEY_HOMOLOGATION.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: j1-local-client-onboarding-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  client-onboarding-activation-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      SUPABASE_TELEMETRY_DISABLED: "1"
+      NEXT_TELEMETRY_DISABLED: "1"
+      OPENAI_HEALTH_DATA_PROCESSING_ENABLED: "false"
+      OPENAI_API_KEY: ""
+      E2E_BASE_URL: ""
+      E2E_SUPABASE_URL: ""
+      E2E_SUPABASE_SECRET_KEY: ""
+    steps:
+      - name: Checkout exact reviewed commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Set up pinned Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install pinned dependencies
+        run: npm ci
+
+      - name: Verify local-only browser fixture syntax
+        run: node --check e2e/j1-local-onboarding.spec.mjs
+
+      - name: Start disposable local Supabase
+        run: npx supabase start
+
+      - name: Apply committed database migrations locally
+        run: npx supabase db reset
+
+      # Production already grants these three operations to service_role.
+      # Supabase CLI's disposable bootstrap may not replicate hosted grants.
+      # Match the VERIFIED production service-only boundary, not client rights.
+      - name: Align disposable service-role registration grants with production
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -z "${SUPABASE_ACCESS_TOKEN:-}"
+          docker exec -i supabase_db_projeto-patty psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -c 'grant select, insert, update on table public.client_registration to service_role;'
+          permission_check="$(docker exec -i supabase_db_projeto-patty psql -X -q -A -t -v ON_ERROR_STOP=1 \
+            -U postgres -d postgres -c "select case when   has_table_privilege('service_role','public.client_registration','SELECT')   and has_table_privilege('service_role','public.client_registration','INSERT')   and has_table_privilege('service_role','public.client_registration','UPDATE')   and not has_table_privilege('anon','public.client_registration','INSERT')   and not has_table_privilege('authenticated','public.client_registration','INSERT')   and not has_table_privilege('authenticated','public.client_registration','UPDATE')   and (select relrowsecurity from pg_class where oid='public.client_registration'::regclass) then 'true' else 'false' end;")"
+          if [ "$permission_check" != "true" ]; then
+            echo "::error::J1 local technical registration grant parity failed"
+            exit 1
+          fi
+
+      - name: Export only disposable localhost runtime variables
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx supabase status -o env > "$RUNNER_TEMP/j1-local-status"
+          chmod 600 "$RUNNER_TEMP/j1-local-status"
+          set -a
+          source "$RUNNER_TEMP/j1-local-status"
+          set +a
+          test "$API_URL" = "http://127.0.0.1:54321"
+          test -n "$ANON_KEY"
+          test -n "$SERVICE_ROLE_KEY"
+          echo "::add-mask::$ANON_KEY"
+          echo "::add-mask::$SERVICE_ROLE_KEY"
+          echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL" >> "$GITHUB_ENV"
+          echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$ANON_KEY" >> "$GITHUB_ENV"
+          echo "SUPABASE_SECRET_KEY=$SERVICE_ROLE_KEY" >> "$GITHUB_ENV"
+          echo "J1_E2E_BASE_URL=http://127.0.0.1:3000" >> "$GITHUB_ENV"
+
+      - name: Install pinned Playwright Chromium
+        run: |
+          npm install --no-save --package-lock=false @playwright/test@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Build and start disposable production-mode Next.js
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run build
+          npm run start -- --hostname 127.0.0.1 --port 3000 > "$RUNNER_TEMP/j1-next.log" 2>&1 &
+          echo "$!" > "$RUNNER_TEMP/j1-next.pid"
+          for attempt in $(seq 1 90); do
+            if curl -fsS --max-time 3 http://127.0.0.1:3000/login >/dev/null 2>&1; then exit 0; fi
+            sleep 2
+          done
+          echo "::error::J1 disposable Next.js not ready"
+          exit 1
+
+      - name: Playwright synthetic J1 invite, cadastro and versioned draft
+        shell: bash
+        env:
+          J1_E2E_LOCAL_ONLY: "true"
+        run: |
+          set -euo pipefail
+          set -a
+          source "$RUNNER_TEMP/j1-local-status"
+          set +a
+          export J1_E2E_SUPABASE_URL="$API_URL"
+          export J1_E2E_ANON_KEY="$ANON_KEY"
+          export J1_E2E_SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY"
+          npx playwright test e2e/j1-local-onboarding.spec.mjs --reporter=line --workers=1
+
+      - name: Classify local server errors without exposing sensitive logs
+        if: failure()
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require("node:fs");
+          const log = process.env.RUNNER_TEMP + "/j1-next.log";
+          const data = fs.existsSync(log) ? fs.readFileSync(log,"utf8") : "";
+          const errors = ["permission denied","row-level security","violates","TypeError","ReferenceError","statement timeout"];
+          process.stdout.write("J1 local server diagnostics: " +
+            (errors.filter(s=>data.toLowerCase().includes(s.toLowerCase())).join(",")||"unclassified") + "\n");
+          NODE
+
+      - name: Destroy all disposable services
+        if: always()
+        shell: bash
+        run: |
+          if [ -f "$RUNNER_TEMP/j1-next.pid" ]; then
+            kill "$(cat "$RUNNER_TEMP/j1-next.pid")" 2>/dev/null || true
+          fi
+          npx supabase stop --no-backup
+          rm -f "$RUNNER_TEMP/j1-local-status" "$RUNNER_TEMP/j1-next.pid" "$RUNNER_TEMP/j1-next.log"

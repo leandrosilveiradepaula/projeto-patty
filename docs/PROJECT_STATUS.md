@@ -1,3 +1,95 @@
+## 2026-10-20 — J1: gravação confirmada, teste ajustado para evidência durável
+
+**FATO VERIFICADO:** no Playwright local [#39353118526](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39353118526), a mudança da Cidade foi **gravada corretamente** (`persistedCityMatches=true`) e o botão de salvar ficou desabilitado, sem alteração pendente. A asserção anterior exigia uma mensagem de sucesso transitória; `router.refresh()` após confirmação pode remontar a Server Component e remover essa mensagem antes da observação. Os testes J6/J7 e a validação geral continuaram verdes no head investigado. Isso é um problema de **observabilidade do teste**, não prova de falha de gravação.
+
+**CRITÉRIO CORRIGIDO SEM ABRANDAMENTO:** a E2E aguarda (1) o valor sintético exato no PostgreSQL descartável, (2) fim do `aria-busy` no formulário, (3) estado visível `Nenhuma mudança em relação aos dados salvos.`, (4) botão de salvamento desabilitado, (5) o mesmo campo exibido corretamente na UI e (6) a persistência após recarregar a página. Elimina a exigência de capturar um toast efêmero, mas **adiciona** comprovação de commit e assentamento do formulário. Remove probe de escrita administrativa na exceção de teste, para não alterar o dado que deveria ser verificado. Nenhuma mudança no runtime ou em banco de produção.
+
+**ESTADO:** PR #931 em CI; não mergear até J1, J6, J7 e validação geral aprovados no SHA exato. Homologação profissional da Patty permanece a última tarefa global.
+
+---
+
+## 2026-10-20 — J1: paridade explícita de grants do service_role no Supabase descartável
+
+**DIAGNÓSTICO CONFIRMADO:** após a correção do handoff por convite, o Playwright J1 chegou à edição de Cadastro Atual e falhou na operação real com `42501` (`localServiceRead=42501`, `localServiceInsert=42501`) no runner local [#39350786746](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39350786746). Foi verificado em consulta **somente de metadados de permissões**, sem ler qualquer cliente, que o banco publicado já possui `SELECT`, `INSERT` e `UPDATE` para `service_role` sobre `public.client_registration`; a tabela segue com RLS ativa. O Supabase descartável da CLI não reproduz essa autorização técnica nos fixtures.
+
+**CORREÇÃO ESTRITAMENTE NO TESTE LOCAL:** a nova etapa do workflow J1, após o `supabase db reset`, aplica somente `grant select, insert, update on public.client_registration to service_role` no container Docker local do banco descartável, reproduzindo os direitos técnicos **já existentes no banco publicado**. Falha imediatamente se qualquer operação requerida estiver ausente, se `anon`/ `authenticated` puderem escrever, se RLS estiver desligada ou se houver token de acesso remoto configurado. Não altera nenhuma migration, schema/RLS, grants remotos, production data, cliente real ou autorização frontend. A aplicação mantém a decisão de serviço técnico no backend somente após `requireRole('client')` e escopo de cliente. Contratos verificam que não é possível abrir escrita aos usuários regulares.
+
+**ESTADO:** o PR #931 continua **NÃO MERGEADO / NÃO HOMOLOGADO** até `Validate application`, Playwright J1 e regressões J6/J7 verdes no SHA exato, seguido de merge/deploy verificado. A homologação operacional pela Patty permanece a **última tarefa global**.
+
+---
+
+## 2026-10-19 — J1: callback corrigido, validação avançou até Cadastro Atual (ainda não aprovado)
+
+**EVIDÊNCIA LOCAL:** na execução [#39349343021](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39349343021), o Playwright passou pela geração/consumo de convite, entrega de cookie OTP e ativação de senha após trocar o redirect absoluto reconstruído por `Location` relativa com a mesma origem. A falha anterior de autorização da tela de ativação **não se reproduziu nesta execução**. O teste avançou à gravação da Cidade no **Cadastro Atual** sintético, onde a asserção de persistência expirou com valor nulo. Portanto, J1 **ainda está em validação**, não implantada nem homologada.
+
+**DIAGNÓSTICO EM CURSO:** o formulário controlado de edição do Cadastro Atual agora espera botão habilitado após hidratação, verifica uma confirmação explícita do resultado da ação (salvo/erro/conflito) e **somente então** verifica a linha no banco. Não inserir dado fictício no Supabase de produção; não eliminar a asserção de persistência. A escrita é uma Server Action com `requireRole('client')`, cliente escopado e operador de versão, que permanece inalterada. O teste de contrato de callback foi alinhado à nova assinatura `uncachedRedirect(true)`; contrato de segurança e regressões J6/J7 continuam obrigatórios.
+
+**STATUS:** correção submetida na mesma branch do PR #931; CI/E2E do novo head pendente. Homologação operacional pela Patty continua expressamente a última etapa global.
+
+---
+
+## 2026-10-19 — J1: causa raiz confirmada — redirect alterava host e perdia cookie de sessão
+
+**FATO REPRODUZIDO (sem dados reais):** o Playwright local da PR #931, execução [#39348786932](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39348786932), comprovou: conta e convite confirmados, papel client existente sob RLS, cookie presente com `secure=false`, `httpOnly=false`, `sameSite=Lax`, `path=/` e domínio loopback `127.0.0.1`, porém `pageIsLoopback=false` na tela de ativação. A chamada `fetch` do navegador não transmitiu cookie (`cookie-sent=false`) e recebeu `role:null`; o request de teste ao host de origem obteve o papel corretamente e novo `goto` corrigiu. **Causa:** construir `NextResponse.redirect` a partir de `request.nextUrl.clone()` pode usar o host interno da execução Next.js, diferente do host efetivo usado para receber o cookie. Isto é um defeito real da navegação de callback, não timeout, token inválido, RLS ou falha do método da Patty.
+
+**CORREÇÃO TÉCNICA SOB ACEITE:** o callback `/auth/confirm` retorna um `NextResponse` status 303 com `Location` **relativa e fixa** (`/ativar-conta` ou `/ativar-conta?error=invalid`), preservando a origem real do navegador sem confiar em cabeçalho Host, Referer, query ou URL externa. Cookies produzidos por `verifyOtp` continuam aplicados **na mesma resposta** e `Cache-Control: private, no-store`/ `Referrer-Policy: no-referrer` permanecem. Token_hash não integra a URL de destino. Ações de senha permanecem verificadas no servidor, e a consulta de papel auxilia apenas a recuperar sessão válida, nunca concede privilégios. Regressão E2E exige origem exata `127.0.0.1:3000` após callback e cookie no redirect; confirma o fluxo completo sintético J1 e RLS. Sem schema, migrations, segredos, dados reais, alteração de MFA ou chamadas externas.
+
+**PENDENTE:** CI completo J1/J6/J7 + Validate application no head final, merge seguro, pós-merge e implantação. Homologação profissional operacional da Patty será a última tarefa global.
+
+---
+
+## 2026-10-19 — J1: callback de convite entrega cookies no próprio redirect (sob validação)
+
+**EVIDÊNCIA NOVA:** o Playwright local [run #39339372178](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39339372178) confirmou conta sintética, login, papel `client` sob RLS e resposta `200:not-authorized` nas chamadas `fetch` do navegador durante a ativação, mas `role` autorizado na requisição de teste e na navegação posterior. O problema persistiu após quatro releituras rápidas da rota e **não pode ser atribuído a um token inválido, papel inexistente ou uma necessidade de timeout maior**. Repetir polling sem diagnosticar a entrega dos cookies é insuficiente.
+
+**CORREÇÃO TÉCNICA:** `/auth/confirm` usa agora um Supabase SSR client associado à **mesma instância** `NextResponse.redirect` que retorna ao browser. O `setAll` instala os cookies da sessão OTP naquele redirect e propaga cabeçalhos de cache; `Cache-Control: private, no-store` e `Referrer-Policy: no-referrer` são preservados. O token_hash é removido da URL de destino. Convites ausentes ou rejeitados retornam um redirect próprio sem cookies de autenticação novos; nenhuma permissão é inferida do navegador ou query. `getCurrentAuthContext` + RLS continuam autorizando o formulário, a Server Action valida novamente a identidade e o MFA do admin continua obrigatório.
+
+**ACEITE / TESTES:** novo contrato exige `response.cookies.set` no objeto exato retornado e o teste Playwright descobre apenas a **presença** de `Set-Cookie` na resposta OTP (nunca valor, segredo ou e-mail), além do fluxo completo J1 e regressões J6/J7; CI verde no SHA exato antes de merge. Banco PostgreSQL e Auth continuam **somente locais e descartáveis**; nenhum dado real ou escrita na produção. Homologação operacional da Patty permanece **a última atividade global**.
+
+---
+
+## 2026-10-19 — J1: confirmação de corrida de cookie pós-convite no Playwright descartável
+
+**DIAGNÓSTICO REPRODUZIDO:** a execução [J1 local #39337587280](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39337587280) confirmou `sessionEndpointResponses=200:not-authorized` no primeiro GET uncached de autorização, seguido de `probeHttp=200` com papel autorizado **na mesma sessão**, antes mesmo do GET de navegação. Auth confirmou o convite, login e cookie; RLS confirmou `client`. Portanto, existe uma janela observável na propagação das credenciais de convite para requisições subsequentes. Não é evidência de falha de RLS nem de token inválido. Esta corrida explica a renderização inicial desatualizada, mas não antecipa aceitação de correção.
+
+**CORREÇÃO DETERMINÍSTICA SOB TESTE:** quando a primeira Server Component veio sem papel, o client consulta uma rota de **leitura** server-side `/ativar-conta/session`, com `cache: no-store` e cookies same-origin, em no máximo 4 tentativas (imediata, após 250 ms, 750 ms e 1.500 ms). **Somente** `role: null` permite aguardar nova conferência; formato inesperado, erro HTTP e falta persistente de papel continuam falhando fechado. Cada resposta é autorizada novamente pelo servidor via `getCurrentAuthContext`/RLS e a ação de senha continua protegida no servidor. Nenhum intervalo infinito, papel controlado pelo browser, bypass MFA ou saída original modificada.
+
+**TESTE/ACEITE:** workflow J1 com Supabase/Next descartáveis e cliente sintética percorre token de convite → autorização conferida após propagação → senha → Cadastro Atual → rascunho único da Anamnese versionada → retomada/resposta original → isolamento; regressões J6/J7, `Validate application` e boundary tests verdes no head exato. Não usar o smoke legado com usuários fictícios na produção. **PENDENTE:** comprovar CI verde e merge/deployment; homologação operacional da Patty permanece a última tarefa do projeto.
+
+---
+
+## 2026-10-19 — J1: evitar renderização stale após convite com consulta de sessão autenticada (PR #931)
+
+**EVIDÊNCIA CONFIRMADA DO TESTE LOCAL:** no último head anterior do PR #931, o browser recebeu cookie de sessão e a identidade sintética estava confirmada em Auth, com papel `client` consultável sob RLS. A tela de ativação ainda falhou no handoff (`phase=auth-error`), mas um GET fresco com o mesmo cookie exibia o formulário. A tentativa anterior de somente uma recarga da página foi insuficiente. **Não classificar como falha de token, schema ou RLS sem prova adicional.**
+
+**CORREÇÃO TÉCNICA EM VALIDAÇÃO:** após o callback de convite, quando a primeira Server Component ainda apresenta papel nulo, `ActivationSessionGate` faz **uma única consulta GET same-origin**, sem cache e sem mutação, em `/ativar-conta/session`. O handler deriva `role` exclusivamente da sessão Supabase conferida em servidor (`getCurrentAuthContext`/`getClaims` e leitura de `user_roles` sob RLS), devolve somente papel autorizado ou `null` e responde `Cache-Control: private, no-store`, `Vary: Cookie`. Nem fragmento, URL, requisição do browser ou localStorage concedem papel; se não houver sessão válida o formulário continua bloqueado e o erro aparece. A renderização principal também é dinâmica; a escrita da senha permanece uma ação de servidor protegida independentemente do estado visual. Nenhum bypass Auth/MFA/RLS, segredo, migration ou produção alterado.
+
+**ACEITE OBRIGATÓRIO:** `Validate application`, `Validate J1 local client onboarding browser` e regressões J6/J7 verdes no head exato do PR #931; o browser autentica com convite sintético, confirma `role:null` antes e `role:client` após o callback, preenche senha, salva Cadastro Atual e uma única Anamnese versionada, retoma rascunho e recusa acesso cruzado. Supabase descartável somente `127.0.0.1`, OpenAI externa desabilitada, teardown obrigatório. A homologação operacional pela Patty **continua a última tarefa global**, depois de toda a consolidação técnica; não iniciar agora.
+
+---
+
+## 2026-10-19 — J1: confirmação do convite e recuperação segura de papel após sessão
+
+**EVIDÊNCIA NOVA:** Playwright local do PR #931 isolou `phase=invalid-invite`, mas o callback não marcou o token como inválido; Auth confirmou o convite, registrou login, o navegador recebeu cookie de sessão, o papel `client` ficou visível sob a política RLS existente e um segundo GET genuíno para `/ativar-conta` tornou o formulário visível. Conclusão: o problema reproduzido é a **primeira renderização desatualizada de identidade após a confirmação**, não expiração de convite nem perda da autorização RLS.
+
+**CORREÇÃO TÉCNICA SOB TESTE:** quando a página recebe papel nulo sem fragmento de convite, a interface requisita novamente sua identidade ao próprio servidor. Sem confiar no estado ainda desatualizado de `auth.getUser()` no navegador, faz **um único GET novo** com marcador `session_refresh=1`. O marcador não concede papel, não contém token e não libera formulário: a página refaz `getCurrentAuthContext()` no servidor e exige as mesmas políticas; na segunda leitura ainda sem role, apresenta erro e **não entra em loop nem ignora a autorização**. Sem sessão válida mantém o erro de convite, sem persistir ou expor credenciais. O início do rascunho continua ação server-side única com estado de pending.
+
+**TESTES/ACEITE:** contrato de segurança verifica a limitação do refresh e a validação server-side; teste J1 sintético percorre convite real, senha, cadastro, Anamnese versionada, duplicidade, retomada e isolamento no Supabase descartável; J6/J7 são regressões adicionais. Não alterar RLS/Auth/grants/migrations, banco de produção ou gate da IA. **Não declarar o defeito sanado nem a homologação concluída antes de CI completo e publicação no SHA exato.** O PR #933 foi encerrado sem merge por ser somente aumento de timeout; a triagem dos PRs antigos foi concluída, com #698 substituído pela PR #932 implantada. A homologação profissional da Patty permanece a **última tarefa global**.
+
+---
+
+## 2026-10-19 — Consolidação pré-homologação: J1 local e aposentadoria do smoke em produção
+
+**FATO CONFIRMADO:** no mesmo `master` `fe261cec051ff843ffc72b66c5329552b6634628`, o workflow de onboarding da J1 passou na run `39312400602` e falhou na run `39312497722`. A falha aconteceu após clicar em `Começar Anamnese`: a URL permaneceu em `/cliente/anamnese` durante a asserção de 5 segundos, sem alcançar `/cliente/anamnese/{uuid}`. O mesmo código ter passado antes **não** comprova inexistência de defeito intermitente; os logs disponíveis também não provam causa raiz (hidratação, redirect, backend ou condição de corrida).
+
+**DECISÃO DE SEGURANÇA:** o workflow legado `e2e-client-onboarding-activation.yml`, que criava e apagava contas sintéticas no **Supabase de produção**, foi aposentado. O script legado é conservado para auditoria e bloqueado contra execução direta. A nova suíte `validate-j1-local-onboarding-browser.yml` usa exclusivamente Next.js local e Supabase descartável `127.0.0.1`, sem secrets de produção, sem agendamento/trigger de deploy e sem OpenAI externa. Cria identidades e formulário **exclusivamente sintéticos** locais; destrói integralmente os serviços após a execução. Verifica convite, ativação, Cadastro Atual, um único rascunho versionado, resposta informativa persistida, retomada no mobile e isolamento anônimo/AAL1. Não altera a RLS, Auth ou migrations aplicadas.
+
+**MELHORIA FUNCIONAL DELIMITADA:** o botão `Começar Anamnese` ganhou indicador de envio e bloqueio de clique duplicado enquanto o server action está pendente, preservando a ação já existente e o redirect. A interface expõe sinal de hidratação para o teste aguardá-la antes de interagir. Isso evita falsos positivos de clique antecipado, mas **não** substitui a validação do backend nem permite declarar a falha original resolvida sem execução do cenário descartável.
+
+**CRITÉRIOS DE ACEITE:** `Validate application` incluindo os contratos de segurança, `Validate J1 local client onboarding browser` e regressões relevantes aprovados no SHA exato; CI pós-merge e deployment conferidos. **FORA DE ESCOPO:** Auth/RLS/grants, schema, bases de produção, formulários reais da Patty, dados reais, provider externo e homologação final. Os oito PRs legados abertos serão triados em pacote separado antes do teste operacional conjunto, que **será a última atividade do projeto**, não desta etapa técnica.
+
+---
+
 ## 2026-10-19 — J7 encerrada tecnicamente no escopo assistivo e sintético (NÃO HOMOLOGADA)
 
 **ESTADO:** `J7 IMPLEMENTADA / TESTADA COM DADOS SINTÉTICOS / MERGEADA / PUBLICADA COMO CÓDIGO`. A homologação profissional conjunta e a autorização para processar dados reais de saúde na OpenAI **não foram realizadas**. Não interpretar CI ou deployment `READY` como homologação de uso profissional.

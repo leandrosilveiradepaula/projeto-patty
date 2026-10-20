@@ -5,7 +5,8 @@ import test from "node:test";
 
 const gateModule = "../../.github/scripts/" + "j1-production-preflight.mjs";
 const { readinessForSyntheticE2E, verifiedEquivalentRuntime } = await import(gateModule);
-const workflow = readFileSync(new URL("../../.github/workflows/e2e-client-onboarding-activation.yml",import.meta.url),"utf8");
+const workflow = readFileSync(new URL("../../.github/workflows/validate-j1-local-onboarding-browser.yml",import.meta.url),"utf8");
+const localSpec = readFileSync(new URL("../../e2e/j1-local-onboarding.spec.mjs",import.meta.url),"utf8");
 const adminWorkflow = readFileSync(new URL("../../.github/workflows/e2e-j1-invitation-handoff.yml",import.meta.url),"utf8");
 const clientSpec = readFileSync(new URL("../../e2e/client-onboarding-activation.spec.mjs",import.meta.url),"utf8");
 const spec = readFileSync(new URL("../../e2e/j1-manual-invitation-handoff.spec.mjs",import.meta.url),"utf8");
@@ -27,15 +28,16 @@ test("J1 partial smoke is barred unless master CI AND Vercel match exact commit"
  for(const item of blocked)assert.equal(readinessForSyntheticE2E(item).ready,false);
 });
 
-test("J1 live browser smoke only runs after trusted master preflight",()=>{
- assert.match(workflow,/github\.ref == .refs\/heads\/master./);
- assert.match(workflow,/node \.github\/scripts\/j1-production-preflight\.mjs/);
- assert.match(workflow,/if: steps\.preflight\.outputs\.ready == .true./);
- assert.match(workflow,/--workers=1/);
+test("J1 live browser smoke uses only disposable localhost and no production credentials",()=>{
+ assert.match(workflow,/pull_request:/);
  assert.match(workflow,/workflow_dispatch:/);
- assert.doesNotMatch(workflow,/schedule:/);
- assert.doesNotMatch(workflow,/pull_request:/);
- assert.doesNotMatch(workflow,/permissions:\s*contents: write/);
+ assert.match(workflow,/J1_E2E_LOCAL_ONLY: "true"/);
+ assert.match(workflow,/npx supabase start/);
+ assert.match(workflow,/npx supabase stop --no-backup/);
+ assert.match(workflow,/j1-local-onboarding\.spec\.mjs/);
+ assert.match(workflow,/--workers=1/);
+ assert.doesNotMatch(workflow,/secrets\.|workflow_run:|status:|schedule:/);
+ assert.doesNotMatch(workflow,/j1-production-preflight|E2E_ADMIN_EMAIL|hqanoskwjvpbgavppcud/);
 });
 
 test("J1 test checks the actual UI handoff and protects temporary Auth data",()=>{
@@ -62,24 +64,21 @@ test("J1 test checks the actual UI handoff and protects temporary Auth data",()=
 });
 
 test("new E2E scripts parse before any secret or published runtime is available",()=>{
- const files=[".github/scripts/j1-production-preflight.mjs","e2e/j1-manual-invitation-handoff.spec.mjs","e2e/client-onboarding-activation.spec.mjs"];
+ const files=[".github/scripts/j1-production-preflight.mjs","e2e/j1-manual-invitation-handoff.spec.mjs","e2e/client-onboarding-activation.spec.mjs","e2e/j1-local-onboarding.spec.mjs"];
  for(const file of files){
   const absolute=new URL("../../"+file,import.meta.url);
   assert.doesNotThrow(()=>execFileSync(process.execPath,["--check",absolute.pathname],{stdio:"pipe"}),file);
  }
 });
 
-test("J1 triggers only from trusted master CI or matching Vercel status",()=>{
- assert.match(workflow,/workflow_run:/);
- assert.match(workflow,/status:/);
- assert.match(workflow,/github\.event\.context == 'Vercel'/);
- assert.match(workflow,/github\.event\.state == 'success'/);
- assert.match(workflow,/github\.event\.sha == github\.sha/);
- assert.match(workflow,/github\.event\.workflow_run\.event == 'push'/);
- assert.match(workflow,/github\.event\.workflow_run\.conclusion == 'success'/);
- assert.match(workflow,/github\.event\.workflow_run\.head_sha == github\.sha/);
- assert.match(workflow,/github\.ref == 'refs\/heads\/master'/);
- assert.match(workflow,/steps\.preflight\.outputs\.ready == 'true'/);
+test("J1 local run is not triggered by production deploy or CI and refuses remote URLs",()=>{
+ assert.doesNotMatch(workflow,/github\.event\.context|github\.event\.workflow_run/);
+ assert.doesNotMatch(workflow,/preflight\.outputs/);
+ assert.match(localSpec,/J1_E2E_LOCAL_ONLY !== "true"/);
+ assert.match(localSpec,/baseURL !== "http:\/\/127\.0\.0\.1:3000"/);
+ assert.match(localSpec,/apiURL !== "http:\/\/127\.0\.0\.1:54321"/);
+ assert.match(localSpec,/Boolean\(process\.env\.OPENAI_API_KEY\)/);
+ assert.match(localSpec,/getPublishedAnamnesisFromMigrations/);
 });
 
 const verifiedRelease = "35304fec723f011ec8c113938e2700a45cdfe132";
@@ -207,9 +206,16 @@ test("mobile client-only E2E covers persistence and stops before any professiona
  ]){
   assert.ok(clientSpec.includes(needle),needle);
  }
- assert.match(workflow,/preflight\.outputs\.ready == 'true'/);
- assert.match(workflow,/client-onboarding-activation\.spec\.mjs/);
+ assert.match(workflow,/j1-local-onboarding\.spec\.mjs/);
  assert.match(workflow,/--workers=1/);
+ assert.match(localSpec,/expect\(drafts\)\.toHaveLength\(1\)/);
+ assert.match(localSpec,/Nenhuma mudança em relação aos dados salvos/);
+ assert.match(localSpec,/registrationForm\)\.toHaveAttribute\("aria-busy", "false"\)/);
+ assert.match(localSpec,/await expect\(save\)\.toBeDisabled\(\)/);
+ assert.match(localSpec,/select city from public\.client_registration/);
+ assert.doesNotMatch(localSpec,/insertProbe|localServiceInsert/,
+   "a failed test must not create a registration row as a diagnostic");
+ assert.match(localSpec,/form\[data-interactive="true"\]/);
  assert.equal(workflow.includes("E2E_ADMIN_TOTP_SECRET"),false);
  assert.equal(workflow.includes("E2E_ADMIN_PASSWORD"),false);
 });
@@ -231,20 +237,15 @@ test("real J1 timeout never suppresses cleanup of exact synthetic identities",()
  assert.doesNotMatch(clientSpec,/catch\s*\([^)]*\)\s*\{\s*\}\s*;?\s*\/\/\s*cleanup/i);
 });
 
-test("J1 synthetic-only E2E resumes solely on trusted deploy/CI events with independent cleanup",()=>{
- assert.doesNotMatch(workflow,/J1_E2E_ENABLE/);
- assert.doesNotMatch(workflow,/schedule:/);
- assert.match(workflow,/github\.event\.workflow_run\.head_sha == github\.sha/);
- assert.match(workflow,/github\.event\.workflow_run\.conclusion == 'success'/);
- assert.match(workflow,/github\.event\.state == 'success'/);
- assert.match(workflow,/github\.event\.sha == github\.sha/);
- assert.match(workflow,/preflight\.outputs\.ready == 'true'/);
- assert.match(workflow,/node \.github\/scripts\/j1-production-preflight\.mjs/);
- assert.match(workflow,/if: always\(\) && steps\.browser\.outcome != 'skipped'/);
- assert.match(workflow,/J1_FIXTURE_CLEANUP_EXECUTE: "true"/);
- assert.match(workflow,/node e2e\/helpers\/j1-independent-cleanup\.mjs/);
- assert.doesNotMatch(workflow,/E2E_ADMIN_PASSWORD:|E2E_ADMIN_TOTP_SECRET:/);
- assert.doesNotMatch(workflow,/pull_request:/);
+test("J1 local E2E has independent disposable cleanup and no hosted fixture secrets",()=>{
+ assert.match(workflow,/if: always\(\)/);
+ assert.match(workflow,/npx supabase stop --no-backup/);
+ assert.match(workflow,/J1_E2E_BASE_URL=http:\/\/127\.0\.0\.1:3000/);
+ assert.match(workflow,/test "\$API_URL" = "http:\/\/127\.0\.0\.1:54321"/);
+ assert.match(localSpec,/throw new Error\("J1 local SQL boundary rejected"\)/);
+ assert.doesNotMatch(workflow,/J1_FIXTURE_CLEANUP_EXECUTE|node e2e\/helpers\/j1-independent-cleanup/);
+ assert.doesNotMatch(workflow,/E2E_ADMIN_PASSWORD:|E2E_ADMIN_TOTP_SECRET:|secrets\./);
+ assert.match(workflow,/pull_request:/);
 });
 
 test("J1 real-browser security evidence checks anonymous and client role boundaries",()=>{
@@ -277,4 +278,73 @@ test("J1 real E2E saves one version-scoped, non-clinical Anamnese answer through
  assert.match(clientSpec,/await loginPage\.goto\(\x60\/cliente\/anamnese\/\$\{draftId\}\x60\)/);
  assert.match(clientSpec,/expect\(submission\.data\.submitted_at\)\.toBeNull\(\)/);
  assert.match(clientSpec,/cleanupSyntheticClient\(\{ clientId, profileId, email \}\)/);
+});
+
+test("J1 invite handoff requires a fresh, uncached server authorization read", () => {
+ const gate = readFileSync(new URL("../../components/auth/ActivationSessionGate.tsx",import.meta.url),"utf8");
+ const activationPage = readFileSync(new URL("../../app/ativar-conta/page.tsx",import.meta.url),"utf8");
+ const sessionRoute = readFileSync(new URL("../../app/ativar-conta/session/route.ts",import.meta.url),"utf8");
+ const auth = readFileSync(new URL("../../lib/supabase/auth.ts",import.meta.url),"utf8");
+ const serverAction = readFileSync(new URL("../../app/ativar-conta/actions.ts",import.meta.url),"utf8");
+ assert.match(gate,/fetch\("\/ativar-conta\/session", \{/);
+ assert.match(gate,/cache: "no-store"/);
+ assert.match(gate,/credentials: "same-origin"/);
+ assert.match(gate,/for \(const delayMs of \[0, 250, 750, 1500\]\)/,
+   "a stale callback can retry server reads only for a fixed small bound");
+ assert.match(gate,/if \(verified\.role !== null\)/,
+   "unexpected response shape must fail closed, not continue");
+ assert.doesNotMatch(gate,/while\s*\(true\)|setInterval\(/,
+   "session verification must never poll indefinitely");
+
+ assert.match(gate,/verified\.role === "client" \|\| verified\.role === "admin"/);
+ assert.match(gate,/setAuthorizedRole\(verified\.role\)/);
+ assert.match(gate,/phase === "ready" && authorizedRole && !invalid/);
+ assert.match(gate,/if \(!response\.ok\) throw new Error/);
+ assert.match(gate,/setPhase\("failed"\)/);
+ assert.doesNotMatch(gate,/session_refresh|supabase\.auth\.getUser\(\)/);
+ assert.match(sessionRoute,/getCurrentAuthContext\(\)/);
+ assert.match(sessionRoute,/export const dynamic = "force-dynamic"/);
+ assert.match(sessionRoute,/Cache-Control": "private, no-store, max-age=0"/);
+ assert.match(sessionRoute,/"Vary": "Cookie"/);
+ assert.match(sessionRoute,/context\?\.role === "client" \|\| context\?\.role === "admin"/);
+ assert.doesNotMatch(sessionRoute,/searchParams|createAdminClient|service_role/);
+ assert.match(activationPage,/getCurrentAuthContext\(\)/);
+ assert.match(activationPage,/export const dynamic = "force-dynamic"/);
+ assert.match(auth,/supabase\.auth\.getClaims\(\)/);
+ assert.match(auth,/getAuthContextForProfileId\(supabase, profileId\)/);
+ assert.match(serverAction,/getCurrentAuthContext\(\)/);
+ assert.match(serverAction,/supabase\.auth\.updateUser\(\{ password \}\)/);
+ assert.doesNotMatch(serverAction,/session_refresh|bypass|service_role/);
+});
+
+test("J1 invite callback attaches verified session cookies to the returned redirect", () => {
+ const route = readFileSync(new URL("../../app/auth/confirm/route.ts",import.meta.url),"utf8");
+ assert.match(route,/createServerClient<Database>\(url, publishableKey, \{/);
+ assert.match(route,/cookies:\s*\{/);
+ assert.match(route,/getAll\(\)\s*\{\s*return request\.cookies\.getAll\(\)/);
+ assert.match(route,/response\.cookies\.set\(name, value, options\)/);
+ assert.match(route,/response\.headers\.set\(key, value\)/);
+ assert.match(route,/const \{ error \} = await supabase\.auth\.verifyOtp\(\{/);
+ assert.match(route,/if \(error\) return uncachedRedirect\(true\);\s*return response;/);
+ assert.match(route,/Location: invalid \? "\/ativar-conta\?error=invalid" : "\/ativar-conta"/);
+ assert.match(route,/status: 303/);
+ assert.doesNotMatch(route,/nextUrl\.clone|headers\.get\(["']host["']\)|new URL\(["']\/ativar-conta/);
+
+ assert.match(route,/Cache-Control", "private, no-store, max-age=0"/);
+ assert.match(route,/Referrer-Policy", "no-referrer"/);
+ assert.doesNotMatch(route,/createAdminClient|service_role|console\.|getSession\(/);
+});
+
+test("J1 local registration permissions match verified service-only production rights", () => {
+ assert.match(workflow,/Align disposable service-role registration grants with production/);
+ assert.match(workflow,/grant select, insert, update on table public\.client_registration to service_role;/);
+ assert.match(workflow,/test -z "\$\{SUPABASE_ACCESS_TOKEN:-\}"/);
+ assert.match(workflow,/has_table_privilege\('service_role','public\.client_registration','SELECT'\)/);
+ assert.match(workflow,/has_table_privilege\('service_role','public\.client_registration','INSERT'\)/);
+ assert.match(workflow,/has_table_privilege\('service_role','public\.client_registration','UPDATE'\)/);
+ assert.match(workflow,/has_table_privilege\('anon','public\.client_registration','INSERT'\)/);
+ assert.match(workflow,/has_table_privilege\('authenticated','public\.client_registration','INSERT'\)/);
+ assert.match(workflow,/has_table_privilege\('authenticated','public\.client_registration','UPDATE'\)/);
+ assert.match(workflow,/relrowsecurity/);
+ assert.doesNotMatch(workflow,/grant .*client_registration to authenticated|alter table public\.client_registration disable row level security/i);
 });
