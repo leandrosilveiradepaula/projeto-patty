@@ -1,3 +1,17 @@
+## 2026-10-20 — J3: prova de correção histórica pela interface autenticada
+
+**BASE VERIFICADA:** PR #940 já integrada no `master` `d6d330090347b0b5445fe353800c9ac0028f76fb`; `Validate application` pós-merge success e Vercel produção READY no mesmo SHA. O teste J4 integrado agora cria e finaliza ambas avaliações J3 pela UI administrativa, preservando snapshots originais e isolamento.
+
+**LACUNA COBERTA NESTE PACOTE:** na suíte `e2e/j3-assessment-evolution-lifecycle.spec.mjs`, substituir a inserção SQL da correção histórica por fluxo real da UI AAL2 de avaliação finalizada. Validar que não aparecem controles de edição do rascunho ou nova finalização; abrir a correção do peso, fornecer valor, unidade e observação sintéticos, confirmar a única linha append-only, autoria e permanência do valor original em PostgreSQL descartável. Depois, exigir histórico visível pela UI, comparação corrigida (71 → 69 kg) e RLS já existente. Criação de identidades, fotos e avaliações sintéticas para pré-condições permanecem fixtures locais como antes.
+
+**OBJETIVO E ACEITE:** `Validate application` e `Validate J3 local assessment browser journey` no mesmo head de PR, revisar diff e riscos antes do merge. Após integração, verificar CI pós-merge e Vercel READY no commit exato.
+
+**FORA DE ESCOPO:** alterações de schema, grants, RLS, Auth, regras profissionais ou correções de dados reais; homologação operacional da Patty. Este teste não autoriza publicar ou diagnosticar automaticamente.
+
+**RISCO:** comportamento assíncrono do `router.refresh` e localização do formulário no mobile. Corrigir eventual falha na mesma branch, sem relaxar a checagem da autoria, persistência, isolamento e original imutável. **Estado inicial: alteração enviada ao PR, aguardando CI; não homologado profissionalmente.**
+
+---
+
 ## 2026-10-20 — J3 → J4 → J2 → J3: completar operações da avaliação na interface
 
 **FATO CONFIRMADO:** PR #939 mergeado como `7cabd679a35c9211f244badbefaed2eabddb53bf`, com cinco checks pré-merge aprovados, `Validate application` pós-merge success e Vercel produção READY no mesmo commit. A integração J3 → J4 → J2 → J3 é comprovada no banco descartável; no #939 a avaliação inicial e a reavaliação foram criadas e finalizadas por fixtures SQL locais, enquanto a comparação foi feita pelo browser.
