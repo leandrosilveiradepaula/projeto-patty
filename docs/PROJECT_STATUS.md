@@ -2,6 +2,8 @@
 
 **ESTADO ANTERIOR PUBLICADO:** PR #939 mergeado (`7cabd679a35c9211f244badbefaed2eabddb53bf`), GitHub CI pós-merge success, Vercel READY. O teste integrado havia criado e finalizado avaliações J3 por fixture SQL descartável.
 
+**FALHA TÉCNICA EM CORREÇÃO:** a primeira rodada do PR #940 teve quatro suites verdes e J4 vermelha: rascunho/medidas via UI persistiram, mas o clique de finalização não gerou `finalized_at` em 25s. A ação server-only existente precisa de `SUPABASE_SECRET_KEY`; o workflow J4 não exportava a chave para o Next.js local. Ajuste restrito ao runner descartável, com URL localhost, máscara e bloqueio de credenciais remotas. Nova execução obrigatória; sem merge antecipado. Evidência: [GitHub Actions #39442082412](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39442082412).
+
 **PACOTE ATUAL, A VALIDAR:** usar formulário administrativo autenticado para criar cada rascunho de avaliação, persistir medidas obrigatórias e vínculo de foto, registrar confirmação humana na finalização e verificar snapshot imutável. Conserva J4 (protocolo revisado/publicado) e J2 (feedback manual, persistente e sem duplicação), comparação final e RLS. Somente `e2e/j4-nutrition-protocol-lifecycle.spec.mjs` e documentação; sem mudanças em produção, schema ou método. Critérios e limites em `JOURNEY_HOMOLOGATION.md`. **Ainda não mergeado nem homologado.**
 
 ---
