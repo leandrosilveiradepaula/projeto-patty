@@ -1,3 +1,13 @@
+## 2026-10-20 — Consolidação pré-homologação: regressões J2–J5 no HEAD integrado
+
+**OBJETIVO TÉCNICO:** executar novamente as suítes Playwright autenticadas J2, J3, J4 e J5 sobre um único HEAD com PostgreSQL/Supabase local descartável, contas sintéticas, MFA, RLS e navegação móvel. As evidências históricas de cada jornada continuam válidas para seus commits originais, mas não substituem execução na revisão atual.
+
+**ESCOPO:** ampliar a asserção de notificações próprias da J2 (não titular); tornar obrigatório distinguir falta de linhas sob RLS de erro inesperado de leitura nas J3/J4; confirmar que publicação nutricional na J4 não cria feedback semanal automaticamente; na J5 confirmar prevenção de segunda solicitação involuntária, acesso a itens versionados limitado ao perfil/assignment e ausência de publicação nutricional ou feedback incidental. Atualizar `test:e2e-helpers` para verificar sintaxe J2–J7. Nenhum dado real, migration, regra profissional, permissão ou gate de IA será alterado.
+
+**ACEITE:** `Validate application` + Playwright J2/J3/J4/J5 com conclusão `success` no SHA final do PR; merge somente quando elegível e CI/release pós-merge verificados. Mudanças em testes/workflows exigem inspeção específica por não entrarem no gate simplificado de auto-merge. **Estado atual: aguardando execução do CI; NÃO homologado.** A homologação humana da Patty continuará sendo a última tarefa do projeto.
+
+---
+
 ## 2026-10-20 — J1: gravação confirmada, teste ajustado para evidência durável
 
 **FATO VERIFICADO:** no Playwright local [#39353118526](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39353118526), a mudança da Cidade foi **gravada corretamente** (`persistedCityMatches=true`) e o botão de salvar ficou desabilitado, sem alteração pendente. A asserção anterior exigia uma mensagem de sucesso transitória; `router.refresh()` após confirmação pode remontar a Server Component e remover essa mensagem antes da observação. Os testes J6/J7 e a validação geral continuaram verdes no head investigado. Isso é um problema de **observabilidade do teste**, não prova de falha de gravação.

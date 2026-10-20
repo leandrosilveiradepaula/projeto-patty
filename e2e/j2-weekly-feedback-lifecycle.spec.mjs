@@ -806,6 +806,12 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
         .select("id").eq("id", feedbackId);
       if (visible.error) throw visible.error;
       expect(visible.data).toEqual([]);
+      // A reminder is scoped to the same client as the feedback, even after
+      // an authorized scheduled generation and a manual submission.
+      const otherNotices = await otherApi.from("client_notification_events")
+        .select("id").eq("client_id", clientId);
+      if (otherNotices.error && otherNotices.error.code !== "42501") throw otherNotices.error;
+      expect(otherNotices.data ?? []).toEqual([]);
       const stolen = await otherApi.rpc("save_client_weekly_feedback_if_unchanged", {
         p_client_id: clientId, p_feedback_id: feedbackId,
         p_expected_answers: {}, p_answers: { q01: 9 }, p_submit: false,
