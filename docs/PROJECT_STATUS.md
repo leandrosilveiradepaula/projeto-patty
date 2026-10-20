@@ -1,3 +1,13 @@
+## 2026-10-19 — J1: callback de convite entrega cookies no próprio redirect (sob validação)
+
+**EVIDÊNCIA NOVA:** o Playwright local [run #39339372178](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39339372178) confirmou conta sintética, login, papel `client` sob RLS e resposta `200:not-authorized` nas chamadas `fetch` do navegador durante a ativação, mas `role` autorizado na requisição de teste e na navegação posterior. O problema persistiu após quatro releituras rápidas da rota e **não pode ser atribuído a um token inválido, papel inexistente ou uma necessidade de timeout maior**. Repetir polling sem diagnosticar a entrega dos cookies é insuficiente.
+
+**CORREÇÃO TÉCNICA:** `/auth/confirm` usa agora um Supabase SSR client associado à **mesma instância** `NextResponse.redirect` que retorna ao browser. O `setAll` instala os cookies da sessão OTP naquele redirect e propaga cabeçalhos de cache; `Cache-Control: private, no-store` e `Referrer-Policy: no-referrer` são preservados. O token_hash é removido da URL de destino. Convites ausentes ou rejeitados retornam um redirect próprio sem cookies de autenticação novos; nenhuma permissão é inferida do navegador ou query. `getCurrentAuthContext` + RLS continuam autorizando o formulário, a Server Action valida novamente a identidade e o MFA do admin continua obrigatório.
+
+**ACEITE / TESTES:** novo contrato exige `response.cookies.set` no objeto exato retornado e o teste Playwright descobre apenas a **presença** de `Set-Cookie` na resposta OTP (nunca valor, segredo ou e-mail), além do fluxo completo J1 e regressões J6/J7; CI verde no SHA exato antes de merge. Banco PostgreSQL e Auth continuam **somente locais e descartáveis**; nenhum dado real ou escrita na produção. Homologação operacional da Patty permanece **a última atividade global**.
+
+---
+
 ## 2026-10-19 — J1: confirmação de corrida de cookie pós-convite no Playwright descartável
 
 **DIAGNÓSTICO REPRODUZIDO:** a execução [J1 local #39337587280](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39337587280) confirmou `sessionEndpointResponses=200:not-authorized` no primeiro GET uncached de autorização, seguido de `probeHttp=200` com papel autorizado **na mesma sessão**, antes mesmo do GET de navegação. Auth confirmou o convite, login e cookie; RLS confirmou `client`. Portanto, existe uma janela observável na propagação das credenciais de convite para requisições subsequentes. Não é evidência de falha de RLS nem de token inválido. Esta corrida explica a renderização inicial desatualizada, mas não antecipa aceitação de correção.
