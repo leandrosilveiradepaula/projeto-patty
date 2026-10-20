@@ -209,6 +209,12 @@ test("mobile client-only E2E covers persistence and stops before any professiona
  assert.match(workflow,/j1-local-onboarding\.spec\.mjs/);
  assert.match(workflow,/--workers=1/);
  assert.match(localSpec,/expect\(drafts\)\.toHaveLength\(1\)/);
+ assert.match(localSpec,/Nenhuma mudança em relação aos dados salvos/);
+ assert.match(localSpec,/registrationForm\)\.toHaveAttribute\("aria-busy", "false"\)/);
+ assert.match(localSpec,/await expect\(save\)\.toBeDisabled\(\)/);
+ assert.match(localSpec,/select city from public\.client_registration/);
+ assert.doesNotMatch(localSpec,/insertProbe|localServiceInsert/,
+   "a failed test must not create a registration row as a diagnostic");
  assert.match(localSpec,/form\[data-interactive="true"\]/);
  assert.equal(workflow.includes("E2E_ADMIN_TOTP_SECRET"),false);
  assert.equal(workflow.includes("E2E_ADMIN_PASSWORD"),false);
