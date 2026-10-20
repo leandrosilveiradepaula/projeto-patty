@@ -689,10 +689,9 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
         if (!buttonBox) throw new Error("Approval button lost its viewport box");
         const clickX = buttonBox.x + buttonBox.width / 2;
         const clickY = buttonBox.y + buttonBox.height / 2;
-        const targetReady = await adminPage.evaluate(({ x, y }) => {
+        const targetReady = await approvalButton.evaluate((button, { x, y }) => {
           const element = document.elementFromPoint(x, y);
-          const button = document.querySelector('button[type="submit"]');
-          return Boolean(element && button && button.contains(element));
+          return Boolean(element && (element === button || button.contains(element)));
         }, { x: clickX, y: clickY });
         // This assertion must pass before native mouse input; never force
         // a click through another element or submit the form from JS.
