@@ -1,3 +1,10 @@
+## 2026-10-20 — Consolidação J1–J7 validada; próximo teste integrado J4 → J2
+
+**FATO VERIFICADO:** PR [#934](https://github.com/leandrosilveiradepaula/projeto-patty/pull/934) foi mergeado como b19854b9bae00c2be99ba631576f2194eca7a4a3. Os oito checks do PR (Validate application e Playwright J1 a J7) terminaram em success no mesmo head de revisão, o [CI pós-merge do master](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39357713854) foi aprovado e a Vercel confirmou deployment dpl_2VXQouBcbMAeTBDhh2K1JaAQYLYV READY no mesmo commit para projeto-patty.vercel.app. Isso comprova testes técnicos sintéticos, **não** homologação com a Patty.
+
+**PRÓXIMO ESCOPO:** ampliar Playwright J4 para ligar publicação manual de protocolo a solicitação real de Feedback Semanal no mesmo banco descartável e na mesma cliente, comprovando bloqueio antes da publicação, autorização depois, persistência, retomada, não titular, não duplicação e ausência de publicação/feedback implícitos. Não alterar Auth, RLS, migrations, regras clínicas, produção ou gate de dados de saúde. Evidências e critérios em [JOURNEY_HOMOLOGATION.md](./JOURNEY_HOMOLOGATION.md). Homologação operacional da Patty continua sendo a última tarefa global.
+
+---
 ## 2026-10-20 — J1: gravação confirmada, teste ajustado para evidência durável
 
 **FATO VERIFICADO:** no Playwright local [#39353118526](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39353118526), a mudança da Cidade foi **gravada corretamente** (`persistedCityMatches=true`) e o botão de salvar ficou desabilitado, sem alteração pendente. A asserção anterior exigia uma mensagem de sucesso transitória; `router.refresh()` após confirmação pode remontar a Server Component e remover essa mensagem antes da observação. Os testes J6/J7 e a validação geral continuaram verdes no head investigado. Isso é um problema de **observabilidade do teste**, não prova de falha de gravação.
