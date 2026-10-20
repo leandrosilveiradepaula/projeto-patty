@@ -60,6 +60,58 @@ jobs:
       - name: Reset local database with committed migrations
         run: npx supabase db reset
 
+      # Hosted Supabase grants backend service reads and assessment updates,
+      # but disposable CLI bootstrap can omit them. Mirror only these grants.
+      - name: Align disposable J3 finalization service grants with hosted backend
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -z "$(printenv SUPABASE_ACCESS_TOKEN || true)"
+          docker exec -i supabase_db_projeto-patty psql -X -q -U postgres -d postgres -v ON_ERROR_STOP=1 <<'SQL'
+          do $guard$
+          begin
+            if not exists (
+              select 1 from pg_catalog.pg_roles
+              where rolname='service_role' and rolbypassrls
+            ) or not (select relrowsecurity from pg_class where oid='public.client_assessments'::regclass)
+              or not (select relrowsecurity from pg_class where oid='public.method_configuration_snapshot_sets'::regclass)
+              or not (select relrowsecurity from pg_class where oid='public.method_configuration_snapshots'::regclass)
+            then
+              raise exception 'Unexpected disposable assessment security boundary';
+            end if;
+          end $guard$;
+          grant select, update on public.client_assessments to service_role;
+          grant select on public.client_assignments, public.user_roles to service_role;
+          do $guard$
+          begin
+            if not has_table_privilege('service_role','public.client_assessments','SELECT')
+               or not has_table_privilege('service_role','public.client_assessments','UPDATE')
+               or not has_table_privilege('service_role','public.client_assignments','SELECT')
+               or not has_table_privilege('service_role','public.user_roles','SELECT')
+               or not has_table_privilege('service_role','public.method_configuration_snapshot_sets','INSERT')
+               or not has_table_privilege('service_role','public.method_configuration_snapshots','INSERT')
+               or not has_function_privilege(
+                 'service_role',
+                 'public.finalize_assessment_from_method_snapshot(uuid,uuid,uuid,jsonb,jsonb,uuid,jsonb,jsonb)',
+                 'EXECUTE'
+               )
+               or has_function_privilege(
+                 'authenticated',
+                 'public.finalize_assessment_from_method_snapshot(uuid,uuid,uuid,jsonb,jsonb,uuid,jsonb,jsonb)',
+                 'EXECUTE'
+               )
+               or has_function_privilege(
+                 'anon',
+                 'public.finalize_assessment_from_method_snapshot(uuid,uuid,uuid,jsonb,jsonb,uuid,jsonb,jsonb)',
+                 'EXECUTE'
+               )
+               or has_column_privilege('authenticated','public.client_assessments','finalized_at','UPDATE')
+            then
+              raise exception 'Disposable J3 service parity or client write protection failed';
+            end if;
+          end $guard$;
+          SQL
+
       - name: Export disposable localhost runtime configuration
         shell: bash
         run: |
