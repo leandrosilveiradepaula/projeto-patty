@@ -637,7 +637,47 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       await pendingCard.getByRole("checkbox", {
         name: /Confirmo que o arquivo/,
       }).check();
-      await pendingCard.getByRole("button", { name: "Liberar para cliente" }).click();
+      const approvalButton = pendingCard.getByRole("button", {
+        name: "Liberar para cliente",
+      });
+      await approvalButton.scrollIntoViewIfNeeded();
+      // Fail fast on an obstructed mobile button. Only geometry and DOM tag
+      // names are logged; no private content, browser state, IDs or cookies.
+      const geometry = await approvalButton.evaluate((button) => {
+        const rect = (element) => {
+          if (!element) return null;
+          const box = element.getBoundingClientRect();
+          return {
+            x: Math.round(box.x), y: Math.round(box.y),
+            w: Math.round(box.width), h: Math.round(box.height),
+          };
+        };
+        const box = button.getBoundingClientRect();
+        const hit = document.elementFromPoint(
+          box.left + box.width / 2, box.top + box.height / 2,
+        );
+        const form = button.closest("form");
+        const label = form?.querySelector("label");
+        const card = button.closest("li");
+        return {
+          viewport: { width: innerWidth, height: innerHeight },
+          mobileLayout: matchMedia("(max-width: 640px)").matches,
+          button: rect(button), label: rect(label), form: rect(form),
+          actions: rect(form?.parentElement), card: rect(card),
+          hitTag: hit?.tagName ?? null,
+          hitInLabel: Boolean(label?.contains(hit)),
+          hitInButton: button === hit || button.contains(hit),
+          actionsDisplay: form?.parentElement
+            ? getComputedStyle(form.parentElement).display : null,
+          buttonZ: getComputedStyle(button).zIndex,
+        };
+      });
+      if (!geometry.hitInButton) {
+        console.info("J1 safe approval layout diagnostic:", JSON.stringify(geometry));
+      }
+      expect(geometry.hitInButton, "Mobile approval button must accept a pointer")
+        .toBe(true);
+      await approvalButton.click({ timeout: 10000 });
       await expect.poll(() => savedFiles()[0]?.client_visible_at !== null, {
         timeout: 20000,
       }).toBe(true);
