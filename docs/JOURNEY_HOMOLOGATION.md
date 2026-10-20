@@ -1,3 +1,13 @@
+## 2026-10-19 — J1: callback corrigido, validação avançou até Cadastro Atual (ainda não aprovado)
+
+**EVIDÊNCIA LOCAL:** na execução [#39349343021](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39349343021), o Playwright passou pela geração/consumo de convite, entrega de cookie OTP e ativação de senha após trocar o redirect absoluto reconstruído por `Location` relativa com a mesma origem. A falha anterior de autorização da tela de ativação **não se reproduziu nesta execução**. O teste avançou à gravação da Cidade no **Cadastro Atual** sintético, onde a asserção de persistência expirou com valor nulo. Portanto, J1 **ainda está em validação**, não implantada nem homologada.
+
+**DIAGNÓSTICO EM CURSO:** o formulário controlado de edição do Cadastro Atual agora espera botão habilitado após hidratação, verifica uma confirmação explícita do resultado da ação (salvo/erro/conflito) e **somente então** verifica a linha no banco. Não inserir dado fictício no Supabase de produção; não eliminar a asserção de persistência. A escrita é uma Server Action com `requireRole('client')`, cliente escopado e operador de versão, que permanece inalterada. O teste de contrato de callback foi alinhado à nova assinatura `uncachedRedirect(true)`; contrato de segurança e regressões J6/J7 continuam obrigatórios.
+
+**STATUS:** correção submetida na mesma branch do PR #931; CI/E2E do novo head pendente. Homologação operacional pela Patty continua expressamente a última etapa global.
+
+---
+
 ## 2026-10-19 — J1: causa raiz confirmada — redirect alterava host e perdia cookie de sessão
 
 **FATO REPRODUZIDO (sem dados reais):** o Playwright local da PR #931, execução [#39348786932](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39348786932), comprovou: conta e convite confirmados, papel client existente sob RLS, cookie presente com `secure=false`, `httpOnly=false`, `sameSite=Lax`, `path=/` e domínio loopback `127.0.0.1`, porém `pageIsLoopback=false` na tela de ativação. A chamada `fetch` do navegador não transmitiu cookie (`cookie-sent=false`) e recebeu `role:null`; o request de teste ao host de origem obteve o papel corretamente e novo `goto` corrigiu. **Causa:** construir `NextResponse.redirect` a partir de `request.nextUrl.clone()` pode usar o host interno da execução Next.js, diferente do host efetivo usado para receber o cookie. Isto é um defeito real da navegação de callback, não timeout, token inválido, RLS ou falha do método da Patty.
