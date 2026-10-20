@@ -293,8 +293,10 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       // A failed UI write is NEVER turned into success by this probe. All
       // diagnostics are from the disposable local DB, and the test still fails.
       // Report only error categories and row existence, not SQL payloads.
-      const persisted = rows("select client_id from public.client_registration where client_id=" +
+      const persisted = rows("select client_id,city from public.client_registration where client_id=" +
         literal(invite.clientId));
+      const persistedCityMatches = persisted[0]?.city === "Cidade Sintética Local J1";
+      const saveDisabled = await save.isDisabled();
       const readProbe = await service.from("client_registration")
         .select("client_id").eq("client_id", invite.clientId).maybeSingle();
       let insertProbe = "not-attempted";
@@ -307,6 +309,8 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       throw new Error(
         "J1 synthetic registration failure: ui=" + await observedRegistrationOutcome() +
         ", rowAlreadyExists=" + Boolean(persisted.length) +
+        ", persistedCityMatches=" + persistedCityMatches +
+        ", saveDisabled=" + saveDisabled +
         ", localServiceRead=" + (readProbe.error?.code ?? "ok") +
         ", localServiceInsert=" + insertProbe,
       );
