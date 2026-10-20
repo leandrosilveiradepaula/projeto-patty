@@ -270,7 +270,18 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
   await test.step("Cadastro Atual persists after mobile reload", async () => {
     await page.goto("/cliente/perfil");
     await page.getByLabel("Cidade").fill("Cidade Sintética Local J1");
-    await page.getByRole("button", { name: "Salvar Cadastro Atual" }).click();
+    const save = page.getByRole("button", { name: "Salvar Cadastro Atual" });
+    // React owns a controlled form. A click before its state has reflected
+    // the edit is not evidence of a failed database write.
+    await expect(save).toBeEnabled({ timeout: 10000 });
+    await save.click();
+    await expect.poll(async () => {
+      if (await page.getByText("Cadastro atual atualizado com sucesso.").count()) return "saved";
+      if (await page.getByText("Não foi possível salvar").count()) return "error";
+      if (await page.getByText("Alteração simultânea").count()) return "conflict";
+      return "pending";
+    }, { timeout: 18000, message: "J1 contact edit must receive an explicit server result" })
+      .toBe("saved");
     await expect.poll(() => {
       const result = rows("select city from public.client_registration where client_id=" +
         literal(invite.clientId));
