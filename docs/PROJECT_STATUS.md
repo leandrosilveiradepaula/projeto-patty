@@ -1,3 +1,49 @@
+## 2026-10-20 — BLOQUEIO DE SEGURANÇA: múltiplas contas admin na produção
+
+**FATO CONFIRMADO (somente contagens, sem PII):** catálogo `public.user_roles` aponta **múltiplos perfis com role=admin**, todos com Auth; o status agregado de MFA não será publicado no repositório. A documentação operacional exige **somente a Patty** como administradora no MVP. Não inferir qual perfil corresponde à Patty ou que os demais sejam ilegítimos sem revisão humana. [Questão prioritária](OPEN_QUESTIONS.md), [issue #950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950).
+
+**IMPLICAÇÃO PARA A PR #949:** habilitar leitura de arquivo privado sem assignment a toda role `admin` poderia ampliar acesso a perfis administrativos adicionais. A migration proposta agora **falha antes de alterar RLS** se encontrar múltiplas roles administrativas. É possível validar o código no Supabase local descartável com uma admin sintética, mas **não é seguro aplicar no SaaS enquanto existirem múltiplos admins sem reconciliação autorizada**. Nenhuma identidade foi modificada e nenhuma migration foi aplicada em produção. A correção de teste de toque/PDF sintético da J6 permanece separada de entrega real Vercel Blob.
+
+**PR/CI:** não classificar J1 como corrigida em produção por CI verde e não fazer merge sem a revisão sensível de RLS e confirmação do gate de segurança. Próxima dependência humana: revisar papéis administrativos por canal privado e documentar a decisão (sem PII no GitHub); só então executar aplicação controlada e verificação. Homologação conjunta com Patty continua a última tarefa.
+
+---
+
+## 2026-10-20 — J1: correção de autorização real proposta para Storage privado (PR #949)
+
+**FATO REPRODUZIDO EM CI:** após encerramento do assignment no Supabase **descartável**, a única admin AAL2 consegue listar os dois PNGs privados pela interface J1, mas `GET /admin/arquivos/[fileId]` retorna `404` em vez de emitir `307`. [J1 falhou no SHA `2cfc9176`](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39478159479), issue [#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951). O problema **não** foi reproduzido com dados reais ou contas de produção.
+
+**CAUSA TÉCNICA FUNDAMENTADA EM POLICIES EXISTENTES:** inspeção **somente de catálogo** em `pg_policies` no SaaS confirmou que a policy `client_private_storage_objects_select_visible_own_or_admin` tem `JOIN public.clients` obrigatório mesmo no ramo admin. A RLS de `clients` exige assignment ativo da profissional; já `client_files` permite à admin AAL2 leitura sem assignment, conforme `docs/RBAC_RLS.md`. O `JOIN` invisível impede `createSignedUrl` de alcançar o objeto após encerramento, embora os metadados continuem listáveis. A hipótese é verificada pelo E2E após aplicar migration em banco local.
+
+**CORREÇÃO PEQUENA PROPOSTA:** nova migration **aditiva ao histórico** `20261020191000_fix_private_storage_admin_read_after_assignment.sql`, que recria **somente** a policy SELECT de `storage.objects` para `client-private` em dois ramos independentes: (1) admin relacional AAL2 implícito via restrictive MFA preexistente + objeto com linha válida em `client_files`; (2) cliente titular + `client_visible_at` + client vinculado pela FK. Não usa service role no browser, não altera `clients`, `client_files`, outras policies, grants ou migrations antigas. A policy transversal `storage_objects_admin_mfa_aal2_required` permanece intacta. O **MVP tem uma única admin**, Patty; o risco de expandir para segunda admin, **proibida atualmente**, permanece questão de segurança [#950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950).
+
+**ESTADOS INDEPENDENTES:** migration *versionada/proposta* ≠ testada ≠ mergeada ≠ aplicada no Supabase SaaS. O workflow `Deploy Supabase migrations` é dry-run no push e exige `workflow_dispatch(mode=apply,confirmation=APPLY)` para aplicar. Sem aplicar, código publicado sozinho **não** corrige a falha de Storage em produção. CI J1/J6/J7 e Validate do novo HEAD precisam ser todos `SUCCESS` antes de qualquer integração, com **revisão específica de diff da policy**; após merge conferir dry-run de migrations. Homologação profissional conjunta segue sendo a última tarefa.
+
+---
+
+## 2026-10-20 — Reconciliação J1/J6: exceção da única administradora e abertura de PDF móvel
+
+**Descoberta em CI:** na PR [#949](https://github.com/leandrosilveiradepaula/projeto-patty/pull/949), duas execuções do teste J1 criaram uma segunda `user_roles.role='admin'` sintética e exigiram que essa admin AAL2 **sem assignment** fosse negada em `client_files`. A listagem exibiu um arquivo, e a asserção falhou. Essa exigência não corresponde à política **confirmada do MVP** em `docs/RBAC_RLS.md`, `docs/DECISIONS.md` (2026-10-14) e à migration `20260922230034_private_file_access_visibility_foundation.sql`: a exceção de arquivos privados usa `role=admin` + MFA AAL2, sem assignment, e **pressupõe uma única administradora de negócio (Patty)**. Não autorizar segundo admin em produção. Conflito e necessidade de endurecer o contrato antes de qualquer expansão de admins documentados em [issue #950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950).
+
+**AJUSTE DE TESTE — NÃO RLS:** a suíte J1 foi alterada para modelar **uma única administradora**, encerrar o assignment **somente no Supabase local descartável** e provar que a Patty sintética continua vendo/listando/baixando/visualizando seus arquivos privados com AAL2, mas a leitura direta como AAL1 retorna zero. Negativas obrigatórias a clientes estrangeiros e anônimos permanecem nas etapas existentes, sem alteração de grants/schema. Esta correção substitui somente o teste hipotético de segunda admin (incompatível com o modelo do MVP), **não declara isolamento de uma futura segunda admin**; esse risco continua aberto na issue #950. Os registros anteriores que diziam que qualquer segunda admin era bloqueada estão superados por essa reconciliação.
+
+**J6:** a mesma PR amplia o percurso móvel da cliente em biblioteca e exige `GET` autenticado emitido pelo navegador a `/cliente/conteudos/assets/[assetId]` e `307` para PDF sintético assinado; a aba do visualizador de PDF em Chromium headless pode permanecer em `about:blank`, portanto não serve como prova de renderização. SHA, bytes e Range seguem testados separadamente. Não há arquivo real de cliente nem release profissional. **CI do novo HEAD e merge ainda precisam ser confirmados.**
+
+**ACEITE:** Validate application, Playwright J1, J6, J7 e toda regressão acionada `SUCCESS` no mesmo SHA; revisão do diff de testes e documentos, sem mudanças de RLS/Auth/Storage real; CI pós-merge e Vercel READY no commit integrado. Homologação profissional conjunta permanece a última tarefa.
+
+---
+
+## 2026-10-20 — J6: cliente abre PDF privado pela interface mobile (simulador local)
+
+**BASE TÉCNICA CONFIRMADA:** PR [#948](https://github.com/leandrosilveiradepaula/projeto-patty/pull/948) integrada ao `master` `acaee950221592e2ede323dac23425602e979448`, com [Validate application pós-merge #39473014609](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39473014609) `success` e Vercel produção `READY` no mesmo SHA. J1–J7 foram anteriormente testadas em conjunto na PR #945, mas cada PR posterior deve manter seu próprio gate de regressão.
+
+**LACUNA E ESCOPO:** o E2E J6 comprova release profissional explícito, isolamento cliente, autenticação, `307` privado, PDF binário sintético com SHA e Range, mas ainda não exercitava o **toque da cliente** na busca da biblioteca até a abertura do arquivo autorizado em nova aba. Este pacote amplia `e2e/j6-educational-release-lifecycle.spec.mjs` com visita mobile 390 px, pesquisa pelo título exato, filtro de versão, link sob domínio da aplicação, `rel=noopener noreferrer`, ausência de ticket no HTML, toque e nova aba com redirect para servidor **somente local** de PDF, retorno da busca e verificação de que nem `client_content_progress` nem releases se alteram por leitura.
+
+**RISCO QUE PERMANECE:** o mock local comprova o caminho cliente Next/Auth/RLS → URL assinada sintética → PDF sintético, mas não distribuição real, CDN, vídeo de 123 MB ou comportamento de seek/Range do Vercel Blob. Metadados de um asset podem existir sem bytes físicos; o teste de 404 do provedor distingue esse caso, e **a interface não deve ser considerada prova da existência remota apenas por exibir “Disponível”**. O vídeo aprovado da balança continua cadastrado em rascunho e sem release à cliente. Verificação de mídia real pela cliente autorizada permanece na última homologação; não criar cliente/release fictícios em produção.
+
+**ACEITE:** apenas suíte J6 sintética e documentação; `Validate application` + J6, J1/J7 e quaisquer regressões iniciadas `success` no HEAD da PR. Revisar escopo, corrigir falhas na mesma branch, merge somente com gate verde, e confirmar CI pós-merge + Vercel READY no SHA integrado. Nenhuma migration, regra clínica, storage externo, conta real, RLS ou runtime alterado. **Estado inicial: teste em validação; não homologado pela Patty.**
+
+---
+
 ## 2026-10-20 — J3: percurso mobile da cliente, correção histórica e retorno exato à evolução
 
 **Base publicada confirmada:** PR [#947](https://github.com/leandrosilveiradepaula/projeto-patty/pull/947) mergeada em `af997dfa089af3b2b78cbe682db399fec3af9a7a`, `Validate application` pós-merge [#39470282878](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39470282878) `SUCCESS`, Vercel produção `READY` no mesmo commit. O cenário J1 prova prévia privada de PNG e negativa a profissional AAL2 sem assignment com banco e Storage descartáveis; não homologou arquivos reais.

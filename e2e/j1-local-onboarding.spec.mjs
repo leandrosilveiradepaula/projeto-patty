@@ -819,38 +819,69 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
     }
   });
 
-  await test.step("unassigned AAL2 professional cannot preview or download either private file", async () => {
+  await test.step("sole MVP admin retains private files after assignment ends, only with AAL2", async () => {
     if (!clientPrivateFile || !UUID.test(releasedAdminFileId)) {
       throw new Error("J1 local private-file prerequisites missing");
     }
-    const unassigned = await makeStaff(nonce, "unassigned");
-    const unassignedTotp = await enrollStaffTotp(unassigned);
-    const unassignedContext = await browser.newContext({
+    // Confirm the documented MVP invariant: there is exactly ONE admin.
+    // A second admin is not an eligible production test identity: current
+    // private-file RLS intentionally grants all admin roles an exception from
+    // active assignment, as documented in RBAC_RLS.md / DECISIONS.md.
+    expect(rows("select profile_id from public.user_roles where role='admin'"))
+      .toEqual([{ profile_id: staffId }]);
+    const assignments = rows("select id from public.client_assignments where client_id=" +
+      literal(invite.clientId) + " and staff_profile_id=" + literal(staffId) +
+      " and ended_at is null");
+    expect(assignments).toHaveLength(1);
+    const ended = sql("update public.client_assignments set ended_at=now() where id=" +
+      literal(assignments[0].id) + " and ended_at is null returning id;");
+    expect(ended).toBe(assignments[0].id);
+    expect(rows("select id from public.client_assignments where client_id=" +
+      literal(invite.clientId) + " and ended_at is null")).toHaveLength(0);
+
+    const adminContext = await browser.newContext({
       baseURL, viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true,
     });
     try {
-      const unassignedPage = await unassignedContext.newPage();
-      await loginAdminWithMfa(unassignedPage, {
-        email: unassigned.email, password: unassigned.password,
-        totpSecret: unassignedTotp,
+      const adminPage = await adminContext.newPage();
+      await loginAdminWithMfa(adminPage, {
+        email: staff.email, password: staff.password,
+        totpSecret: staffTotp,
       });
-      await unassignedPage.goto("/admin/clientes/" + invite.clientId + "/arquivos");
-      await expect(unassignedPage.getByRole("heading", {
+      await adminPage.goto("/admin/clientes/" + invite.clientId + "/arquivos");
+      // The actual Patty exception preserves read access even when the
+      // appointment ends. This does NOT authorize any additional admins.
+      await expect(adminPage.getByRole("heading", {
         name: clientPrivateFile.filename, exact: true,
-      })).toHaveCount(0);
+      })).toHaveCount(1);
       for (const fileId of [clientPrivateFile.id, releasedAdminFileId]) {
         for (const suffix of ["", "?preview=1"]) {
-          const denied = await unassignedPage.request.get(
+          const permitted = await adminPage.request.get(
             "/admin/arquivos/" + fileId + suffix, { maxRedirects: 0 },
           );
-          expect(denied.status(), "No signed private-file URL without active assignment")
-            .toBe(404);
-          expect(denied.headers().location ?? "").not.toContain("/storage/");
+          expect(permitted.status(), "Patty AAL2 retains private-file access").toBe(307);
+          expect(permitted.headers()["cache-control"]).toContain("no-store");
+          expect(new URL(permitted.headers().location).origin).toBe(apiURL);
         }
       }
     } finally {
-      await unassignedContext.close();
+      await adminContext.close();
     }
+    // The global admin-file exception still requires strong MFA; role alone
+    // with AAL1 must not reveal rows through the browser-facing Data API.
+    const aal1Claims = JSON.stringify({
+      sub: staffId, role: "authenticated", aal: "aal1",
+    });
+    const aal1Count = sql([
+      "begin;",
+      "set local role authenticated;",
+      "set local request.jwt.claims=" + literal(aal1Claims) + ";",
+      "set local request.jwt.claim.sub=" + literal(staffId) + ";",
+      "select count(*) from public.client_files where id in (" +
+        literal(clientPrivateFile.id) + "," + literal(releasedAdminFileId) + ");",
+      "rollback;",
+    ].join("\n"));
+    expect(Number(aal1Count)).toBe(0);
     expect(rows("select id from public.client_files where client_id=" +
       literal(invite.clientId))).toHaveLength(2);
   });

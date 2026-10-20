@@ -1,3 +1,41 @@
+## 2026-10-20 — J1/J6: gate administrativo antes de corrigir Storage no SaaS
+
+**Risco operacional confirmado:** múltiplos perfis têm `role=admin` no Supabase de produção, embora `DECISIONS.md` estabeleça a única admin Patty. A análise de MFA não identifica titulares nem comprova abuso e não será detalhada neste repositório público. A migration da PR #949 foi reforçada para **recusar aplicação se houver múltiplos admins**, sem tocar em contas nem alterar a policy parcialmente. A J1 local prova a regra projetada para uma admin; ela **não** valida concessão dessa exceção a outras identidades. [Pendência detalhada](OPEN_QUESTIONS.md).
+
+**Estado:** CI local e revisão específica de diff RLS são condições para merge. A aplicação no SaaS está **bloqueada por reconciliação humana de papéis**, independentemente do status verde da CI. O pipeline de migration no push é dry-run e não equivale a execução. Não remover usuários, MFA, papéis nem dados reais para fazer teste passar. J6 mobile com provedor PDF sintético continua cobertura técnica, não homologação real de Blob. [Issues #950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950) e [#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951).
+
+---
+
+## 2026-10-20 — J1: exceção de arquivos privados após encerramento, correção de policy ainda não aplicada
+
+**Reprodução:** PR [#949](https://github.com/leandrosilveiradepaula/projeto-patty/pull/949) expôs um erro no CI sintético: a única admin MFA AAL2 visualiza `client_files` após encerrar o assignment, mas a rota de download devolve `404`. A policy `storage.objects` existente depende de `JOIN clients` para ambos os ramos, enquanto `clients` esconde a linha sem assignment. A regra confirmada do MVP em `RBAC_RLS.md` permite somente à **única admin Patty** arquivo privado sem assignment; proíbe provisionar segunda admin sem redesenho. Issues [#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951) (defeito) e [#950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950) (expansão insegura).
+
+**Correção sob gate sensível:** migration nova `supabase/migrations/20261020191000_fix_private_storage_admin_read_after_assignment.sql`: SELECT do `storage.objects` no bucket `client-private` mantém correspondência de objeto/metadado e separa ramo admin relacional de ramo titular/liberação. A restrição existente de AAL2 permanece, `anon` não recebe grant nem policy, e `clients` continua protegida por assignment. O E2E J1 comprova fluxo real de assinatura temporária após encerramento; negativas de outra cliente, AAL1, anônimo e objeto não autorizado continuam obrigatórias. **Não** passar serviço privilegiado pela UI para compensar falha de política.
+
+**Separação operacional:** mudança proposta não foi aplicada no SaaS pelo CI local. O workflow de migration em `master` faz **somente dry-run** em push; aplicar requer execução explícita controlada. Resultado `success` em Playwright local não comprova aplicação na produção. Após aplicar, conferir metadata de policy e status/deployment no mesmo SHA, sem expor registros de clientes. A homologação com Patty permanece por último.
+
+---
+
+## 2026-10-20 — Correção de contrato J1: arquivos privados e única admin AAL2
+
+O teste anterior da J1 exigia, de uma **segunda admin sintética**, negação de arquivos privados sem assignment. Isso contradiz a exceção explícita em `RBAC_RLS.md` e `DECISIONS.md`: apenas a Patty é admin de negócio no MVP, e o papel `admin` com MFA AAL2 pode ler `client_files` e Storage sem vínculo corrente. A PR #949 registrou duas falhas consecutivas dessa asserção; **não** se tentou enfraquecer a política para satisfazer o CI. A [issue #950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950) conserva o risco do raio de acesso caso um segundo admin seja provisionado futuramente.
+
+A suíte J1 corrigida verifica **a regra efetivamente autorizada**: somente um admin na fixture descartável, encerramento de assignment local, acesso administrativo privado ainda autorizado sob AAL2, recusa de SELECT como AAL1 e manutenção das negativas já existentes a contas clientes estrangeiras, sem arquivos reais. A execução de qualquer segundo admin em produção continua proibida até novo projeto de autorização/revisão RLS. Histórico de testes anteriormente `success` não era evidência de bloqueio de uma segunda admin.
+
+A J6 deste pacote também exercita toque mobile no link privado para PDF local e confirma redirecionamento HTTP, mas não a renderização do viewer headless nem a Vercel real. Homologação operacional conjunta da Patty continua pendente como última tarefa.
+
+---
+
+## 2026-10-20 — J6 cliente mobile: busca, download privado e ausência de telemetria implícita
+
+**Objetivo:** complementar a J6 (liberação humana e bytes sintéticos já testados) com o caminho **da interface da cliente** na biblioteca móvel de 390 px: busca por material exato publicado/liberado, exclusão visual do outro material pelo filtro, link `Abrir conteúdo` para a versão liberada sob `/cliente/conteudos/assets/[assetId]`, abertura por toque em nova aba privada do provedor local e retorno da busca. A URL assinada é criada pela rota autorizada e não é exposta no HTML. A abertura não cria registro de progresso, avaliação de consumo ou conclusão; a semântica de `client_content_progress` permanece **questão aberta** em `OPEN_QUESTIONS.md`.
+
+**Separação de evidências:** PDF físico, hash exato e Range pertencem **somente ao servidor sintético isolado do CI**; conteúdo real da balança já teve migração/reprodução administrativa documentadas em `CONTENT_LIBRARY.md`, mas release à cliente e distribuição real não foram homologados. O caso proposital de metadata sem objeto retorna 404 do provedor. Nenhum acesso fictício em SaaS, mudança de SDK, schema, Auth, RLS, grants, migração, rotina editorial ou publicação profissional por IA. O navegador Playwright não reproduz vídeo real no CI.
+
+**Critérios técnicos:** Playwright J6 `success` no mesmo SHA do Validate application e de regressões disparadas; desktop e mobile onde existentes, busca persistente na interação, link sem vazar token e nova aba; nenhuma escrita implícita de progresso. Verificar CI pós-merge e Vercel READY no SHA final. **Homologação operacional da Patty continua por último.**
+
+---
+
 ## 2026-10-20 — J3 cliente mobile: avaliações finalizadas, correção histórica e navegação factual
 
 **Objetivo:** complementar o E2E J3 já aprovado para ações profissionais AAL2 em mobile com a navegação **cliente** em 390 px. Dados criados no banco descartável: duas avaliações finalizadas da titular, uma avaliação ainda rascunho e outra finalizada de cliente estrangeira, além de uma correção profissional registrada pela UI que preserva valor original. **Nenhum desses valores é prescrição clínica.**

@@ -1,3 +1,25 @@
+## PENDÊNCIA DE SEGURANÇA PRIORITÁRIA — múltiplos perfis `admin` na produção (20/10/2026)
+
+### FATO CONFIRMADO POR CONSULTA AGREGADA READ-ONLY
+O Supabase de produção contém **mais de um perfil com `user_roles.role='admin'`**, todos com identidade Auth existente; a verificação de MFA está restrita à auditoria privada; não publicar contagens de fatores. Foram consultadas **somente contagens agregadas**, sem nomes, emails, IDs de usuários, dados de cliente ou arquivos. Não concluir que algum deles é indevido, que houve vazamento ou que a conta com MFA pertence à Patty sem validação humana.
+
+### CONFLITO COM REGRA VIGENTE
+`docs/DECISIONS.md` (2026-10-14) e `docs/RBAC_RLS.md` definem **uma única administradora de negócio (Patty)** durante o MVP e proíbem criar segunda admin em produção para testes. A exceção atual de leitura de arquivos privados usa role relacional `admin` + MFA AAL2 e **pressupõe** exclusividade do papel; se outra admin concluir MFA, a exceção pode permitir leitura ampla de metadados/arquivos. Isso exige reconciliação antes de ampliar ou reimplantar policies de Storage.
+
+### QUESTÕES / AÇÃO HUMANA ABERTA
+1. Conferir **em interface administrativa protegida** a finalidade e legitimidade de cada identidade administrativa identificada `admin`, sem colar PII/tokens no repositório ou chat.
+2. Identificar qual conta é a administradora de negócio autorizada no MVP; não usar email como chave de relacionamento nem presumir titularidade pelo MFA.
+3. Definir recuperação/remoção **apenas do papel** de contas auxiliares ou testes, caso não autorizadas, mediante decisão e procedimento auditado; não excluir Auth, Profile, Client, assignments ou histórico automaticamente.
+4. Se for necessário manter mais de uma admin, **não aplicar** a exceção global baseada só em role: definir modelo de autorização client-scoped e a identidade aprovada da Patty **antes** de mudar RLS.
+5. Após resolução e documentação, executar nova verificação agregada da unicidade administrativa, CI no SHA aprovado e aplicação controlada de migration, seguida de auditoria de policies/Storage. A homologação profissional conjunta continua por último.
+
+### GUARDA IMPLEMENTADA MAS NÃO APLICADA
+A PR [#949](https://github.com/leandrosilveiradepaula/projeto-patty/pull/949) propõe `20261020191000_fix_private_storage_admin_read_after_assignment.sql`, agora com **bloqueio explícito de aplicação quando houver mais de uma role admin**. O workflow de deploy no push faz apenas dry-run. Com a **multiplicidade de admins identificada**, a migration deliberadamente **falharia antes de alterar** a policy. O E2E local pode testar com zero admins inicialmente e uma admin sintética durante a execução; isso **não** autoriza alteração na produção.
+
+Este bloqueio está vinculado à [issue #950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950) (multiplicidade administrativa) e à [issue #951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951) (acesso Storage após assignment encerrado).
+
+---
+
 ## PENDENCIA OPERACIONAL - reconciliacao de identidade Auth parcial apos falha de convite (2026-10-08)
 
 O fluxo de convite deixou de apagar automaticamente identidades retornadas pelo Supabase Auth em erro de provisionamento, pois a resposta do provedor nao comprova que aquela identidade foi criada na tentativa atual. Se isso ocorrer, o aplicativo preserva contas preexistentes e registros profissionais e informa que a origem/estado da identidade precisa ser verificado por operador autorizado antes de tentar novo convite. A revisao ou recuperacao segura de Auth parcialmente provisionado ainda nao possui fluxo operacional definitivo de reconciliacao; **nao** automatizar exclusao de usuarios, reenvio, uniao de identidades ou exclusao de historico por email. Registrar esse incidente sem PII em logs e definir mais tarde recuperacao controlada.

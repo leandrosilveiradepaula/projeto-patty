@@ -464,6 +464,70 @@ test("J6: versioned content releases require exact published version and synthet
       await assertMobile(client);
     });
 
+    await test.step("Client mobile searches the released library and opens only her exact PDF", async () => {
+      // This exercises the actual CLIENT touch UI. The provider behind the
+      // authorized redirect is local and synthetic, never the real Vercel Blob.
+      await client.goto("/cliente/conteudos");
+      const search = client.getByRole("searchbox", {
+        name: "Buscar na sua biblioteca",
+      });
+      await expect(search).toBeVisible();
+      await search.fill(secondTitle);
+      await expect(client.getByText(secondTitle, { exact: true })).toBeVisible();
+      await expect(client.getByText("J6 material com asset sintetico", {
+        exact: true,
+      })).toHaveCount(0);
+      await assertMobile(client);
+
+      const pdfLink = client.getByRole("link", {
+        name: "Abrir conteúdo de " + secondTitle + " em nova aba",
+      });
+      await expect(pdfLink).toBeVisible();
+      await expect(pdfLink).toHaveAttribute("href",
+        "/cliente/conteudos/assets/" + secondAssetId);
+      await expect(pdfLink).toHaveAttribute("target", "_blank");
+      await expect(pdfLink).toHaveAttribute("rel", /noopener.*noreferrer/);
+      // No signed private Blob ticket appears in server HTML or React props.
+      expect(await client.locator("a[href]").evaluateAll((nodes) =>
+        nodes.some((node) => node.href.startsWith("http://127.0.0.1:54329/"))
+      )).toBe(false);
+
+      const assetRoute = "/cliente/conteudos/assets/" + secondAssetId;
+      const requestedAsset = ownerCtx.waitForEvent("request", (request) =>
+        request.method() === "GET" &&
+        new URL(request.url()).pathname === assetRoute,
+      );
+      const nextPage = ownerCtx.waitForEvent("page");
+      await pdfLink.tap();
+      const pdfTab = await nextPage;
+      try {
+        // Headless Chromium may leave its built-in PDF viewer tab at about:blank
+        // rather than expose the final private PDF URL. Prove the browser
+        // clicked the authenticated link and received the 307 instead.
+        const mediaRequest = await requestedAsset;
+        const mediaRedirect = await mediaRequest.response();
+        expect(mediaRedirect?.status()).toBe(307);
+        expect(mediaRedirect?.headers()["cache-control"]).toContain("no-store");
+        expect(new URL(mediaRedirect.headers()["location"]).origin)
+          .toBe("http://127.0.0.1:54329");
+      } finally {
+        await pdfTab.close();
+      }
+      // A browser issuing a redirect is not evidence of visible PDF render,
+      // full consumption, or completion. Exact byte delivery, SHA and Range
+      // are tested independently via the same authorized application route.
+      expect(rows("select client_content_release_id from public.client_content_progress" +
+        " where client_id=" + literal(clientId))).toHaveLength(0);
+      expect(releases(clientId)).toHaveLength(2);
+
+      await search.fill("");
+      await expect(client.getByText("J6 material com asset sintetico", {
+        exact: true,
+      })).toBeVisible();
+      await expect(client.getByText(secondTitle, { exact: true })).toBeVisible();
+      await assertMobile(client);
+    });
+
     await test.step("Physically missing media never counts as a successful download", async () => {
       // Metadata alone may be releasable, but a valid signed redirect cannot
       // create the underlying binary object. The provider simulator returns 404.
