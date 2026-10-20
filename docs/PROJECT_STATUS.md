@@ -1,3 +1,15 @@
+## 2026-10-20 — ESTADO VIGENTE: matriz consolidada J1–J7 e gate de regressão integral
+
+**Fonte de leitura operacional atual:** [Matriz J1–J7](PREHOMOLOGATION_MATRIX.md), [decisão de homologação conjunta](DECISIONS.md) e os checks da PR que altera a matriz. Todas as entradas abaixo com “em preparação”, “aguardando CI” ou “não mergeado” são **instantâneos históricos** da data em que foram escritas, não o estado presente de uma PR encerrada.
+
+**BASE TÉCNICA CONFIRMADA antes do pacote de regressão integral:** `master` `17593d99086dc023207ed32606f52cf114c1b3c4`, PR [#944](https://github.com/leandrosilveiradepaula/projeto-patty/pull/944) mergeada, `Validate application` pós-merge [#39464236943](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39464236943) `success`, Vercel produção `READY` no mesmo SHA. PRs #940 a #944 tiveram integrações/evidências locais distintas e estão todas mergeadas; no entanto, **isso não prova** as sete suítes juntas sobre esse SHA.
+
+**NOVA VERIFICAÇÃO:** a matriz tem gatilho de PR proposital em cada workflow J1–J7, além de `Validate application`, para demonstrar o mesmo head de oito checks. A evidência válida é o status/commit exato dos checks da PR de consolidação, jamais a expressão “todos passaram” antes de apurados. Todos os jobs de navegador usam localhost e dados sintéticos. O workflow foi alterado somente para um gatilho de documentação dedicado, sem mudar scripts, Auth, schema, RLS ou runtime.
+
+**ESTADOS SEPARADOS:** o código está integrado e publicado até a base acima; as aprovações do pacote de consolidação exigem CI, merge e publicação próprios. A homologação profissional **não ocorreu** e será a última tarefa, em rodada conjunta com a Patty, conforme decisão de 2026-10-18. Conteúdo real ainda em rascunho não é automaticamente liberado. Questões de método seguem pendentes até confirmação documentada.
+
+---
+
 ## 2026-10-20 — J6: verificação local dos bytes físicos de mídia liberada
 
 **BASE PUBLICADA CONFIRMADA:** PR [#943](https://github.com/leandrosilveiradepaula/projeto-patty/pull/943) mergeada em `7efa6c441226d54069d3600006ee40097903b984`; cinco validações pré-merge no head final, `Validate application` pós-merge `success` e Vercel produção `READY` no mesmo SHA. O ciclo J5 de encerramento pela interface MFA com revogação da antiga profissional está comprovado sinteticamente. Documentos inferiores que indiquem PR #943 como pendente são registros históricos anteriores.
