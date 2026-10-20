@@ -487,7 +487,7 @@ async function openVersion(page,protocolId,number){
 
 test.use({baseURL});
 test("J4: admin manually drafts/reviews/approves/publishes, client sees exact versions",async({browser})=>{
-  test.setTimeout(360000);
+  test.setTimeout(420000);
   const nonce=randomBytes(8).toString("hex");
   const staff=await createIdentity("admin","admin",nonce);
   const unrelatedStaff=await createIdentity("admin","other-admin",nonce);
@@ -875,7 +875,77 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
         " where client_id="+quote(clientId))).toHaveLength(2);
     });
 
-    await test.step("J3 re-evaluation after J4 publication and J2 draft remains independent",async()=>{
+    let submittedFeedback;
+    await test.step("J2 client explicitly submits the same requested feedback and Patty reads it",async()=>{
+      const feedbackRows=()=>rows("select id,form_version_id,answers,submitted_at"+
+        " from public.client_weekly_feedbacks where client_id="+quote(clientId)+
+        " and period_start="+quote("2026-10-05"));
+      const current=feedbackRows();
+      expect(current).toHaveLength(1);
+      expect(current[0].submitted_at).toBeNull();
+      expect(UUID.test(current[0].form_version_id)).toBe(true);
+      const definitions=rows("select definition from public.weekly_feedback_form_versions"+
+        " where id="+quote(current[0].form_version_id));
+      expect(definitions).toHaveLength(1);
+      const questions=definitions[0].definition?.questions;
+      expect(Array.isArray(questions)).toBe(true);
+      expect(questions.length).toBeGreaterThan(0);
+
+      await clientPage.goto("/cliente/feedback-semanal");
+      const pending=clientPage.locator("#feedback-pendente-"+current[0].id);
+      await expect(pending).toBeVisible();
+      for(const question of questions){
+        if(typeof question.key!=="string" || !/^q[0-9]{2}$/.test(question.key))
+          throw new Error("Unexpected versioned local J2 question key");
+        const value=question.input_type==="integer"?"2":
+          question.input_type==="rating_0_10"?"7":
+          "Resposta sintética J2 exclusivamente local";
+        const answer=pending.locator('form [name="'+question.key+'"]');
+        await expect(answer).toBeVisible();
+        await answer.fill(value);
+      }
+      await pending.getByRole("button",{name:"Revisar respostas para enviar"}).click();
+      await expect(clientPage.getByRole("heading",{name:"Revise antes de enviar"}))
+        .toBeFocused();
+      // No automatic submission. A second deliberate click is required.
+      expect(feedbackRows()[0].submitted_at).toBeNull();
+      await clientPage.getByRole("button",{name:"Confirmar envio definitivo"}).click();
+      await expect.poll(()=>feedbackRows()[0]?.submitted_at??null,{timeout:30000})
+        .not.toBeNull();
+      submittedFeedback=feedbackRows()[0];
+      expect(submittedFeedback.id).toBe(current[0].id);
+      expect(Object.keys(submittedFeedback.answers).sort())
+        .toEqual(questions.map(q=>q.key).sort());
+      expect(submittedFeedback.answers.q01).toBe(2);
+      await expect(clientPage.getByText("Envio confirmado",{exact:true})).toBeVisible();
+      await expect(clientPage.locator("#feedback-pendente-"+current[0].id))
+        .toHaveCount(0);
+      await clientPage.reload();
+      await expect(clientPage.getByRole("heading",{name:"Histórico enviado"}))
+        .toBeVisible();
+      await mobileFit(clientPage);
+
+      const foreignRead=await apiOther.from("client_weekly_feedbacks")
+        .select("id,answers,submitted_at").eq("id",current[0].id);
+      if(foreignRead.error && foreignRead.error.code!=="42501")
+        throw foreignRead.error;
+      expect(foreignRead.data??[]).toEqual([]);
+
+      await adminPage.goto("/admin/feedback-semanal?cliente="+clientId+
+        "&origem=manual&mes=2026-10");
+      await expect(adminPage.getByRole("heading",{name:"Histórico de recebimentos"}))
+        .toBeVisible();
+      await adminPage.getByRole("link",{name:"Abrir respostas originais"}).click();
+      await expect(adminPage.locator("#feedback-enviado-"+current[0].id))
+        .toBeVisible();
+      await expect(adminPage.getByText("Resposta sintética J2 exclusivamente local").first())
+        .toBeVisible();
+      expect(rows("select id from public.protocol_publications"+
+        " where client_id="+quote(clientId))).toHaveLength(2);
+      await mobileFit(adminPage);
+    });
+
+    await test.step("J3 re-evaluation after J4 publication and submitted J2 remain independent",async()=>{
       const reevaluation=await finalizedSyntheticAssessment({
         page:adminPage,clientId,staffId:staff.id,assessedAt:"2026-10-12T12:00:00Z",
         weight:72,waist:82,method:assessmentMethod,
@@ -917,8 +987,9 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
       const existingFeedback=rows("select id,answers,submitted_at from public.client_weekly_feedbacks"+
         " where client_id="+quote(clientId));
       expect(existingFeedback).toHaveLength(1);
-      expect(existingFeedback[0].answers).toEqual({q01:2});
-      expect(existingFeedback[0].submitted_at).toBeNull();
+      expect(existingFeedback[0].id).toBe(submittedFeedback.id);
+      expect(existingFeedback[0].answers).toEqual(submittedFeedback.answers);
+      expect(existingFeedback[0].submitted_at).toBe(submittedFeedback.submitted_at);
 
       // The other client and unrelated AAL2 professional are never granted
       // these client-scoped assessments by the re-evaluation.
