@@ -1,3 +1,15 @@
+## 2026-10-20 — Preparação operacional sem iniciar a homologação: J2 mobile profissional + roteiro seguro
+
+**BASE VERIFICADA:** `master` `5aae121511c7b4f51c62cad73f943e7d01090391`, PR [#945](https://github.com/leandrosilveiradepaula/projeto-patty/pull/945) integrada após **oito checks J1–J7 + Validate application no mesmo head**, validação geral pós-merge [#39466202205](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39466202205) `success`, Vercel produção `READY` no mesmo SHA e nenhuma PR aberta naquela consulta. A matriz técnica vigente continua em [PREHOMOLOGATION_MATRIX.md](PREHOMOLOGATION_MATRIX.md).
+
+**LACUNA TÉCNICA OBJETIVA:** a suíte da J2 já prova formulário da cliente em mobile (390 px), mas fazia todo o caminho administrativo em desktop 1280 px, deixando sem comprovação a interface touch da Patty para recebimentos, respostas originais, comparação, filtro de diferenças e retorno à avaliação. O pacote estende `e2e/j2-weekly-feedback-lifecycle.spec.mjs` com **segunda sessão administrativa MFA AAL2 em viewport mobile/touch 390 px** no Supabase descartável, percorrendo as mesmas respostas sintéticas, verificando ausência de overflow e ausência de efeitos colaterais em decisões humanas, protocolo e respostas enviadas. Não cria decisão profissional nova, não publica nada e não relaxa RLS.
+
+**ROTEIRO OPERACIONAL PREPARADO:** [OPERATIONAL_ACCEPTANCE_RUNBOOK.md](OPERATIONAL_ACCEPTANCE_RUNBOOK.md) documenta pré-condições de acesso autorizado, MFA, versão publicada, limite dos testes de mídia J6, uso de dispositivo real e critérios de evidência para as sete jornadas. Esse roteiro **não inicia a sessão**, não pede credenciais, não cria clientes/convites de produção e não define novas regras do método.
+
+**ESCOPO E ACEITE:** apenas E2E J2 + este status + roteiro. `Validate application` e `Validate J2 local browser lifecycle` (mais regressões acionadas) precisam passar no **mesmo SHA da PR**; rever diff, reparar falhas na mesma branch e fazer merge somente com CI verde e mergeabilidade. Depois conferir CI pós-merge e Vercel `READY` no commit exato. Riscos: overflow em telas profissionais de comparação, sessão AAL2 touch adicional e tempo acrescido ao Playwright J2. **Estado inicial: pacote em validação, ainda não homologado profissionalmente.**
+
+---
+
 ## 2026-10-20 — ESTADO VIGENTE: matriz consolidada J1–J7 e gate de regressão integral
 
 **Fonte de leitura operacional atual:** [Matriz J1–J7](PREHOMOLOGATION_MATRIX.md), [decisão de homologação conjunta](DECISIONS.md) e os checks da PR que altera a matriz. Todas as entradas abaixo com “em preparação”, “aguardando CI” ou “não mergeado” são **instantâneos históricos** da data em que foram escritas, não o estado presente de uma PR encerrada.
