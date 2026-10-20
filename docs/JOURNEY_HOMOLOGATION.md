@@ -1,3 +1,15 @@
+## 2026-10-20 — J3 → J4 → J2 → J3: completar operações da avaliação na interface
+
+**FATO CONFIRMADO:** PR #939 mergeado como `7cabd679a35c9211f244badbefaed2eabddb53bf`, com cinco checks pré-merge aprovados, `Validate application` pós-merge success e Vercel produção READY no mesmo commit. A integração J3 → J4 → J2 → J3 é comprovada no banco descartável; no #939 a avaliação inicial e a reavaliação foram criadas e finalizadas por fixtures SQL locais, enquanto a comparação foi feita pelo browser.
+
+**OBJETIVO / ESCOPO DO NOVO PACOTE:** substituir no Playwright `e2e/j4-nutrition-protocol-lifecycle.spec.mjs` a criação/finalização SQL da J3 por operações reais, na mesma sessão admin MFA AAL2 e na mesma cliente sintética. Executar formulário `Nova avaliação`, persistir rascunho e autoria, salvar medidas obrigatórias reconhecidas pelo catálogo ativo, vincular arquivos PNG sintéticos privados previamente criados no Storage descartável, exigir confirmação explícita da finalização e verificar snapshot versionado persistido, autoria, única avaliação nova e congelamento. Repetir na reavaliação após o protocolo humano J4 v1/v2 e o rascunho J2, então comparar as duas pela interface. Continuar verificando RLS/negação a outra cliente e profissional não atribuído, e que a reavaliação não altera as publicações nem submete feedback. Medidas adicionais para comparação, somente quando fora do catálogo visível, podem continuar como fixtures locais declaradas; **nunca** regras clínicas.
+
+**FORA DE ESCOPO:** alterar código do produto, autorização, schema, migrations, grants ou RLS; produção, upload de fotos reais, fornecedor externo de saúde, diagnóstico, inferência de decisão da Patty ou homologação operacional. Dados sintéticos não equivalem a critérios profissionais. Ambiente local protegido por `J4_E2E_LOCAL_ONLY`, login AAL2, Storage não público e destruição sem backup.
+
+**ACEITE:** Validate application, J4 Playwright e regressões acionadas em success no mesmo HEAD de PR; corrigir na mesma branch sem reduzir asserções; revisar mergeabilidade e diff, realizar merge elegível, comprovar CI pós-merge e Vercel READY no SHA publicado. **Estado inicial: implementado, aguardando CI; não homologado pela Patty.**
+
+---
+
 ## 2026-10-20 — Pré-homologação integrada J3 → J4 → J2 → J3
 
 **BASE VERIFICADA:** PR #938 mergeado no `master` `344b7a40c29a8ef5196a605eba6130ca9787ce6e`, `Validate application` pós-merge `success` e Vercel produção `READY` no mesmo SHA. Fluxo de upload administrativo e liberação humana comprovado com dados sintéticos; a Patty ainda não realizou homologação operacional.
