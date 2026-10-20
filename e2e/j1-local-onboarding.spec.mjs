@@ -332,6 +332,97 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       .toHaveValue("Cidade Sintética Editada");
   });
 
+  await test.step("activated client uploads and retrieves only a private synthetic file", async () => {
+    // Extend the disposable J1 session into the actual browser-to-Storage
+    // upload/finalize path. Nothing is sent to the hosted Supabase.
+    const filename = "j1-synthetic-private.png";
+    const png = Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9ZcokAAAAASUVORK5CYII=",
+      "base64",
+    );
+    const initialFiles = rows("select id from public.client_files where client_id=" +
+      literal(invite.clientId));
+    expect(initialFiles).toHaveLength(0);
+    const bucket = await service.storage.getBucket("client-private");
+    if (bucket.error) throw bucket.error;
+    expect(bucket.data.public, "Client file bucket must remain private").toBe(false);
+
+    await page.goto("/cliente/arquivos");
+    await expect(page.getByRole("heading", { name: "Meus arquivos", exact: true })).toBeVisible();
+    await page.locator('input[name="file"]').setInputFiles({
+      buffer: png, mimeType: "image/png", name: filename,
+    });
+    await page.getByRole("checkbox", {
+      name: "Conferi o arquivo e a categoria antes de enviar.",
+    }).check();
+    await page.getByRole("button", { name: "Enviar arquivo" }).click();
+    const savedFiles = () => rows(
+      "select id,original_filename,file_kind,mime_type,byte_size,uploaded_by_profile_id," +
+      "client_visible_at,object_path from public.client_files where client_id=" +
+      literal(invite.clientId),
+    );
+    // Distinguish a real persistence delay from a failed action/Storage stage.
+    // Report only fixed categories; never include file content or credentials.
+    await expect.poll(async () => {
+      if (savedFiles().length === 1) return "persisted";
+      const errorStages = [
+        ["session-authorization", "Não foi possível autorizar este arquivo para upload."],
+        ["storage-transfer", "Não foi possível enviar o arquivo para a área temporária. Tente novamente."],
+        ["finalization", "Não foi possível confirmar o registro. Confira o histórico antes de enviar novamente."],
+        ["uncertain-finalization", "A confirmação do envio não foi concluída. Confira o histórico antes de tentar novamente."],
+        ["request-failure", "O envio não foi concluído. Corrija a conexão ou tente novamente."],
+        ["invalid-file", "O conteúdo real do arquivo não corresponde a um formato permitido."],
+      ];
+      for (const [stage, label] of errorStages) {
+        if (await page.getByText(label, { exact: true }).count()) return stage;
+      }
+      return "pending";
+    }, { timeout: 30000 }).toBe("persisted");
+    const saved = savedFiles()[0];
+    expect(saved.id).toMatch(UUID);
+    expect(saved.original_filename).toBe(filename);
+    expect(saved.file_kind).toBe("photo");
+    expect(saved.mime_type).toBe("image/png");
+    expect(Number(saved.byte_size)).toBe(png.length);
+    expect(saved.uploaded_by_profile_id).toBe(invite.profileId);
+    expect(saved.client_visible_at).not.toBeNull();
+    expect(saved.object_path.startsWith("clients/" + invite.clientId + "/")).toBe(true);
+    await page.reload();
+    await expect(page.getByRole("heading", { name: filename, exact: true })).toBeVisible();
+
+    const object = await service.storage.from("client-private").download(saved.object_path);
+    if (object.error || !object.data) throw object.error ?? new Error("Local file bytes missing");
+    expect(Buffer.from(await object.data.arrayBuffer())).toEqual(png);
+    const fileRoute = "/cliente/arquivos/" + saved.id;
+    const redirect = await page.request.get(fileRoute, { maxRedirects: 0 });
+    expect(redirect.status()).toBe(307);
+    expect(redirect.headers()["cache-control"]).toContain("no-store");
+    // Check only that the signed URL stays on disposable Supabase. Do not
+    // emit its credential or any response body into CI logs.
+    expect(new URL(redirect.headers()["location"]).origin).toBe(apiURL);
+    const downloaded = await page.request.get(fileRoute);
+    expect(downloaded.status()).toBe(200);
+    expect(await downloaded.body()).toEqual(png);
+
+    // Unsupported file content is rejected before issuing an upload session.
+    await page.locator('input[name="file"]').setInputFiles({
+      buffer: Buffer.from("synthetic invalid document"),
+      mimeType: "text/plain", name: "invalid.txt",
+    });
+    await expect(page.getByRole("button", { name: "Enviar arquivo" })).toBeDisabled();
+    expect(savedFiles()).toHaveLength(1);
+    const anonymous = await browser.newContext({ baseURL });
+    try {
+      const denied = await anonymous.request.get(fileRoute, { maxRedirects: 0 });
+      expect([302, 303, 307, 308]).toContain(denied.status());
+      const loginLocation = new URL(denied.headers()["location"], baseURL);
+      expect(loginLocation.origin).toBe(new URL(baseURL).origin);
+      expect(loginLocation.pathname).toBe("/login");
+    } finally {
+      await anonymous.close();
+    }
+  });
+
   await test.step("no anonymous or unrelated-client access to the draft", async () => {
     const other = await browser.newContext({ baseURL });
     const visitor = await other.newPage();
