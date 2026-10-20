@@ -1,3 +1,17 @@
+## 2026-10-20 — J5: encerramento de assignment sob MFA preserva o treino publicado
+
+**FATO BASE:** `master` `fc2aa2a9b52e1d5b536b8cb964f3c49f14811040` (PR #942) com `Validate application` pós-merge `success` e Vercel produção READY no mesmo commit. O histórico de treinos J5 já conta com solicitação da cliente, v1/v2 publicadas manualmente, v3 em rascunho e negação de profissional sem vínculo, mas faltava provar revogação de um vínculo que era válido antes.
+
+**OBJETIVO:** estender `e2e/j5-training-lifecycle.spec.mjs` para fechar a atribuição real pela UI administrativa autenticada (AAL2) e comprovar transição `client_assignments.ended_at: NULL → timestamp`, `clients.status: active → inactive`, revogação imediata do acesso da antiga profissional aos treinos v1/v2/v3 e exercícios, mesmo com sessão antiga, com negativa pela UI, SELECT autenticado e RLS de PostgreSQL. Confirmar preservação de todas as versões, histórico da cliente e ausência de publicação da v3. Sem automatizar decisão profissional de encerrar: o clique humano explícito faz parte do teste.
+
+**ESCOPOS PERMITIDOS:** `e2e/j5-training-lifecycle.spec.mjs`, `.github/workflows/validate-j5-training-browser.yml`, `docs/PROJECT_STATUS.md` e este documento. Servidor Next.js local, Supabase Auth/Storage/PostgreSQL descartáveis, contas sintéticas e MFA efêmero. A Server Action existente usa `SUPABASE_SECRET_KEY` server-only: o workflow J5 a alimenta somente com chave localhost gerada no próprio runner, mascarada e jamais exposta ao navegador; replica somente grants SELECT/UPDATE da `service_role` das tabelas de vínculo e clientes cujo ACL foi conferido no catálogo de produção. `authenticated`/ `anon` permanecem sem UPDATE, e RLS deve continuar ativa. Nenhuma migration.
+
+**FORA DE ESCOPO:** regras clínicas ou de treino, fechamento automático de cliente, alteração permanente de Auth/RLS/grants, schema, mudanças de dados reais, teste de arquivo real ou homologação profissional. A sessão conjunta com a Patty será a última tarefa.
+
+**ACEITE E RISCOS:** `Validate application` e Playwright J5 + regressões verdes no SHA exato, com evidência de persistência/autorização e verificação de layout móvel. Revise especificamente o workflow sensível, sua contenção a localhost, qualquer erro de permissão e o ciclo de UI; não relaxar RLS para obter CI verde. Após merge permitido, confirmar CI pós-merge, Vercel READY no mesmo SHA e registrar status. **Estado: pacote enviado para execução técnica, aguardando CI; homologação operacional pendente.**
+
+---
+
 ## 2026-10-20 — Integração J3 → J4 → J2 (envio definitivo) → J3
 
 **BASE CONSOLIDADA:** PR [#940](https://github.com/leandrosilveiradepaula/projeto-patty/pull/940) mergeada no commit `d6d330090347b0b5445fe353800c9ac0028f76fb`: avaliação inicial e reavaliação criadas/finalizadas via interface MFA AAL2, com medição, foto privada vinculada e snapshots originais versionados. PR [#941](https://github.com/leandrosilveiradepaula/projeto-patty/pull/941) mergeada como `c520f490516665a5aad3e233202af34f9d73279e`: histórico da correção de medida testado pela UI; todos checks exigidos verdes, CI pós-merge success e Vercel READY no mesmo SHA. Estados de "aguardando CI/merge" nos registros anteriores são históricos e foram superados.
