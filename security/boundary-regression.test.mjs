@@ -438,93 +438,59 @@ test("canonical E2E setup masks ephemeral credentials before exporting them", as
   );
 });
 
-test("conditional submit E2E uses only the ephemeral canonical client", async () => {
+test("retired conditional submit E2E has no executable SaaS path", async () => {
   const workflow = await readFile(
-    path.join(
-      ROOT,
-      ".github",
-      "workflows",
-      "e2e-client-anamnesis-conditional-submit.yml",
-    ),
-    "utf8",
+    path.join(ROOT, ".github", "workflows", "e2e-client-anamnesis-conditional-submit.yml"), "utf8",
   );
   const spec = await readFile(
-    path.join(ROOT, "e2e", "client-anamnesis-conditional-submit.spec.mjs"),
-    "utf8",
+    path.join(ROOT, "e2e", "client-anamnesis-conditional-submit.spec.mjs"), "utf8",
   );
 
+  // The archived spec may still describe safe fixture handling, but the
+  // manual workflow must never connect it to the real Supabase anymore.
+  assert.match(workflow, /LEGADO BLOQUEADO/);
+  assert.match(workflow, /Legacy production E2E disabled/);
+  assert.match(workflow, /^          exit 1$/m);
+  assert.doesNotMatch(workflow, /secrets\\.|node e2e\\/|npx playwright/);
   for (const required of [
-    "node e2e/setup-canonical-anamnesis-client.mjs",
-    "node e2e/cleanup-canonical-anamnesis-client.mjs",
-    "if: always()",
-    "E2E_CANONICAL_EMAIL",
-    "E2E_CANONICAL_PASSWORD",
+    "E2E_CANONICAL_EMAIL", "E2E_CANONICAL_PASSWORD",
     "E2E_CANONICAL_CLIENT_ID",
   ]) {
-    assert.equal(
-      workflow.includes(required) || spec.includes(required),
-      true,
-      "Conditional submit E2E must keep ephemeral-client boundary: " + required,
-    );
+    assert.ok(spec.includes(required), "Archived test source must preserve: " + required);
   }
-
   for (const forbidden of [
-    "E2E Correction Client",
-    "updateUserById",
-    "lockSyntheticClient",
+    "E2E Correction Client", "updateUserById", "lockSyntheticClient",
     "loadSyntheticClient",
   ]) {
-    assert.equal(
-      spec.includes(forbidden),
-      false,
-      "Conditional submit E2E must not depend on persistent fixture behavior: " +
-        forbidden,
-    );
+    assert.ok(!spec.includes(forbidden), "Archived client test must not depend on: " + forbidden);
   }
 });
 
-test("canonical consent E2E uses only the ephemeral canonical client", async () => {
+test("retired canonical consent E2E has no executable SaaS path", async () => {
   const workflow = await readFile(
-    path.join(
-      ROOT,
-      ".github",
-      "workflows",
-      "e2e-client-anamnesis-canonical-consent.yml",
-    ),
-    "utf8",
+    path.join(ROOT, ".github", "workflows", "e2e-client-anamnesis-canonical-consent.yml"), "utf8",
   );
   const spec = await readFile(
-    path.join(ROOT, "e2e", "client-anamnesis-canonical-consent.spec.mjs"),
-    "utf8",
+    path.join(ROOT, "e2e", "client-anamnesis-canonical-consent.spec.mjs"), "utf8",
   );
 
+  // The archived spec may still describe safe fixture handling, but the
+  // manual workflow must never connect it to the real Supabase anymore.
+  assert.match(workflow, /LEGADO BLOQUEADO/);
+  assert.match(workflow, /Legacy production E2E disabled/);
+  assert.match(workflow, /^          exit 1$/m);
+  assert.doesNotMatch(workflow, /secrets\\.|node e2e\\/|npx playwright/);
   for (const required of [
-    "node e2e/setup-canonical-anamnesis-client.mjs",
-    "node e2e/cleanup-canonical-anamnesis-client.mjs",
-    "if: always()",
-    "E2E_CANONICAL_EMAIL",
-    "E2E_CANONICAL_PASSWORD",
+    "E2E_CANONICAL_EMAIL", "E2E_CANONICAL_PASSWORD",
     "E2E_CANONICAL_CLIENT_ID",
   ]) {
-    assert.equal(
-      workflow.includes(required) || spec.includes(required),
-      true,
-      "Consent E2E must keep ephemeral-client boundary: " + required,
-    );
+    assert.ok(spec.includes(required), "Archived test source must preserve: " + required);
   }
-
   for (const forbidden of [
-    "E2E Correction Client",
-    "updateUserById",
-    "lockSyntheticClient",
+    "E2E Correction Client", "updateUserById", "lockSyntheticClient",
     "loadSyntheticClient",
   ]) {
-    assert.equal(
-      spec.includes(forbidden),
-      false,
-      "Consent E2E must not depend on persistent fixture behavior: " +
-        forbidden,
-    );
+    assert.ok(!spec.includes(forbidden), "Archived client test must not depend on: " + forbidden);
   }
 });
 
@@ -553,67 +519,44 @@ test("persistent Anamnesis E2E fixture usage stays limited to immutable-history 
       "admin-anamnesis-corrections.spec.mjs",
       "anamnesis-clarifications.spec.mjs",
     ],
-    "Persistent fixture/password rotation is allowed only where a submitted immutable Anamnesis history is required.",
+    "Only archived history-fixture sources should mention password rotation; no production workflow may execute them.",
   );
 });
 
-test("immutable-history Anamnesis E2E workflows stay manual-only", async () => {
-  const clarificationWorkflow = await readFile(
-    path.join(
-      ROOT,
-      ".github",
-      "workflows",
-      "e2e-anamnesis-clarifications.yml",
-    ),
-    "utf8",
-  );
-
-  assert.match(
-    clarificationWorkflow,
-    /on:\s*\n\s*workflow_dispatch:/,
-    "Clarification E2E must keep an explicit manual trigger.",
-  );
-
-  for (const forbidden of ["pull_request:", "push:", "schedule:"]) {
-    assert.equal(
-      clarificationWorkflow.includes(forbidden),
-      false,
-      "Immutable-history clarification E2E must not run automatically via " +
-        forbidden,
-    );
-  }
-
-  for (const required of [
-    "confirmation:",
-    "CREATE_E2E_HISTORY",
-    "github.ref == 'refs/heads/master'",
-    "inputs.confirmation == 'CREATE_E2E_HISTORY'",
+test("legacy immutable-history Anamnesis workflow is manual and fails closed", async () => {
+  const workflow = await readFile(path.join(
+    ROOT, ".github", "workflows", "e2e-anamnesis-clarifications.yml",
+  ), "utf8");
+  assert.match(workflow, /on:\\s*\\n\\s*workflow_dispatch:/);
+  assert.match(workflow, /LEGADO BLOQUEADO/);
+  assert.match(workflow, /Legacy production E2E disabled/);
+  assert.match(workflow, /^          exit 1$/m);
+  for (const forbidden of [
+    "pull_request:", "push:", "schedule:", "secrets.", "CREATE_E2E_HISTORY",
+    "npx playwright", "node e2e/",
   ]) {
-    assert.equal(
-      clarificationWorkflow.includes(required),
-      true,
-      "Immutable-history clarification E2E must require explicit production confirmation: " +
-        required,
-    );
+    assert.ok(!workflow.includes(forbidden), "Retired workflow must not include: " + forbidden);
   }
 });
 
-test("all production E2E workflows are restricted to master", async () => {
+test("legacy E2E cannot reach production; human-admin handoff stays manual-only", async () => {
   const workflowDirectory = path.join(ROOT, ".github", "workflows");
   const files = (await readdir(workflowDirectory))
-    .filter((file) => file.startsWith("e2e-") && file.endsWith(".yml"))
-    .sort();
-
-  assert.ok(files.length > 0, "Expected production E2E workflows.");
+    .filter((file) => file.startsWith("e2e-") && file.endsWith(".yml")).sort();
+  assert.ok(files.length > 0);
 
   for (const file of files) {
-    const content = await readFile(path.join(workflowDirectory, file), "utf8");
-
-    assert.equal(
-      content.includes("github.ref == 'refs/heads/master'"),
-      true,
-      file + " must refuse production E2E execution from non-master refs.",
-    );
+    const source = await readFile(path.join(workflowDirectory, file), "utf8");
+    assert.match(source, /workflow_dispatch:/);
+    assert.doesNotMatch(source, /\\$\\{\\{\\s*secrets\\./);
+    if (file === "e2e-j1-invitation-handoff.yml") {
+      assert.match(source, /github.ref == 'refs\\/heads\\/master'/);
+      assert.match(source, /No automatic admin access/);
+    } else {
+      assert.match(source, /LEGADO BLOQUEADO/, file);
+      assert.match(source, /^          exit 1$/m, file);
+      assert.doesNotMatch(source, /npx playwright|node e2e\\//, file);
+    }
   }
 });
 
