@@ -22,6 +22,43 @@ export function shouldDeferToNativeAutoMerge(settings) {
   return settings?.allow_auto_merge === true;
 }
 
+/**
+ * Preliminary GitHub release signals for the CURRENT master commit.
+ * A Vercel success status alone does not prove alias parity; the operator must
+ * still verify the READY production deployment and matching SHA after a merge.
+ * Do not stack new automatic merges behind a master without both signals.
+ */
+export function evaluateMasterReleaseGate(masterSha, validationRuns, commitStatuses) {
+  const problems = [];
+  if (typeof masterSha !== "string" || !/^[a-f0-9]{40}$/i.test(masterSha)) {
+    return { allowed: false, problems: ["Invalid master SHA"] };
+  }
+  if (!Array.isArray(validationRuns) || !Array.isArray(commitStatuses)) {
+    return { allowed: false, problems: ["Missing master validation or deployment signals"] };
+  }
+  // GitHub's workflow runs list is newest-first. Consider the latest run of
+  // the exact master SHA, including dispatch used after GITHUB_TOKEN merges.
+  const validation = validationRuns.find(run =>
+    run.head_sha === masterSha && run.head_branch === "master" &&
+    (run.event === "push" || run.event === "workflow_dispatch")
+  );
+  if (!validation || validation.status !== "completed" ||
+      validation.conclusion !== "success") {
+    problems.push("Validate application on current master is not successful");
+  }
+
+  // Combined-status endpoint returns latest statuses first. A previous
+  // success must not mask a newer pending/error state for this same SHA.
+  const vercel = commitStatuses.find(status => status.context === "Vercel");
+  const trustedTarget = "https://vercel.com/leandros-projects-102e32ab/projeto-patty/";
+  if (!vercel || vercel.state !== "success" ||
+      typeof vercel.target_url !== "string" ||
+      !vercel.target_url.startsWith(trustedTarget)) {
+    problems.push("Vercel status for current master is absent or not successful");
+  }
+  return { allowed: problems.length === 0, problems };
+}
+
 export function evaluateMergeContract(pr, files, owner, repository) {
   const problems = [];
   if (pr.state !== "open" || pr.draft) problems.push("PR fechado ou draft");
@@ -81,6 +118,22 @@ async function run() {
   const settings = await api("/repos/" + repository);
   if (shouldDeferToNativeAutoMerge(settings)) {
     console.log("Native auto-merge is enabled; custom merge worker stays inactive.");
+    return;
+  }
+
+  // This is a safety brake, not a deploy action: a missing master CI or
+  // Vercel status prevents subsequent merges until the release is recovered.
+  const master = await api("/repos/" + repository + "/branches/master");
+  const [masterRuns, masterStatuses] = await Promise.all([
+    api("/repos/" + repository + "/actions/workflows/validate.yml/runs?branch=master&per_page=40"),
+    api("/repos/" + repository + "/commits/" + master.commit.sha + "/status"),
+  ]);
+  const releaseGate = evaluateMasterReleaseGate(
+    master.commit.sha, masterRuns.workflow_runs, masterStatuses.statuses,
+  );
+  if (!releaseGate.allowed) {
+    console.log("Auto-merge deferred: master release signals incomplete: " +
+      releaseGate.problems.join("; "));
     return;
   }
 
