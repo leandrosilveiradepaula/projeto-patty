@@ -3,6 +3,7 @@ import { availableClientFeedbackHistoryYears, readClientFeedbackHistoryQuery, ex
 import { authorizedExactRecordPage } from "@/lib/operations/exact-record-navigation";
 import { Button } from "@/components/ui/Button";
 import { fingerprintWeeklyFeedbackAnswers } from "@/lib/weekly-feedback/draft-fingerprint";
+import { prepareClientPendingFeedback } from "@/lib/weekly-feedback/client-pending-summary";
 import { ClientHistoryDisclosure } from "@/components/client/ClientHistoryDisclosure";
 import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
 import { ClientWeeklyFeedbackResponseForm } from "./ClientWeeklyFeedbackResponseForm";
@@ -60,6 +61,15 @@ export default async function ClientWeeklyFeedbackPage({ searchParams }: { searc
   const submittedFeedbacks = orderedFeedbacks.filter(
     (feedback) => feedback.submitted_at !== null,
   );
+  const preparedPendingFeedbacks = pendingFeedbacks.map((feedback) => ({
+    feedback,
+    ...prepareClientPendingFeedback(
+      feedback.weekly_feedback_form_versions,
+      feedback.answers,
+    ),
+  }));
+  const firstRespondableFeedbackId =
+    preparedPendingFeedbacks.find((entry) => entry.definition !== null)?.feedback.id ?? null;
 
   const rawQuery = await searchParams;
   const years = availableClientFeedbackHistoryYears(submittedFeedbacks);
@@ -107,14 +117,15 @@ export default async function ClientWeeklyFeedbackPage({ searchParams }: { searc
         <>
           <Section
             action={<Badge variant={pendingFeedbacks.length > 0 ? "warning" : "neutral"}>{pendingFeedbacks.length} pendente(s)</Badge>}
-            description="Respostas ainda não enviadas. Abra a semana desejada para continuar um rascunho ou concluir o envio."
+            description="Respostas ainda não enviadas. O resumo mostra somente o preenchimento salvo de cada semana; abra a solicitação para continuar ou concluir."
             title="Pendentes"
           >
             {pendingFeedbacks.length > 1 ? (
               <nav aria-label="Ir para Feedback Semanal pendente" className={styles.feedbackNavigation}>
-                {pendingFeedbacks.map((feedback, index) => (
+                {preparedPendingFeedbacks.map(({ feedback, progress }, index) => (
                   <a href={`#feedback-pendente-${feedback.id}`} key={feedback.id}>
                     {index + 1}. Semana de {formatDate(feedback.period_start)} a {formatDate(feedback.period_end)}
+                    {progress ? ` · ${progress.requiredCompleted} de ${progress.required} obrigatórias preenchidas` : " · formulário indisponível"}
                   </a>
                 ))}
               </nav>
@@ -126,24 +137,26 @@ export default async function ClientWeeklyFeedbackPage({ searchParams }: { searc
               />
             ) : (
               <ol className={styles.list}>
-                {pendingFeedbacks.map((feedback, feedbackIndex) => {
-                  const version = feedback.weekly_feedback_form_versions;
-                  const definition = version
-                    ? parseWeeklyFeedbackDefinition(version.definition)
-                    : null;
+                {preparedPendingFeedbacks.map(({ feedback, definition, initialValues, progress }, feedbackIndex) => {
+                  const respondNow = feedback.id === firstRespondableFeedbackId;
 
                   return (
                     <li key={feedback.id}>
                       <ClientHistoryDisclosure
                         className={styles.pendingItem}
-                        defaultOpen={feedbackIndex === 0}
+                        defaultOpen={respondNow || (firstRespondableFeedbackId === null && feedbackIndex === 0)}
                         id={`feedback-pendente-${feedback.id}`}
                         summary={<span className={styles.pendingSummary}>
-                          <span>
-                            Semana de {formatDate(feedback.period_start)} a {formatDate(feedback.period_end)}
+                          <span className={styles.pendingOverview}>
+                            <span>Semana de {formatDate(feedback.period_start)} a {formatDate(feedback.period_end)}</span>
+                            <small>
+                              {progress
+                                ? `${progress.completed} de ${progress.total} respostas válidas salvas · ${progress.requiredCompleted} de ${progress.required} obrigatórias preenchidas`
+                                : "Formulário versionado indisponível para resposta"}
+                            </small>
                           </span>
-                          <Badge variant="warning">
-                            {feedbackIndex === 0 ? "Responder agora" : "Pendente"}
+                          <Badge variant={definition ? "warning" : "neutral"}>
+                            {!definition ? "Indisponível" : respondNow ? "Responder agora" : "Pendente"}
                           </Badge>
                         </span>}
                       >
@@ -170,18 +183,16 @@ export default async function ClientWeeklyFeedbackPage({ searchParams }: { searc
                         </div>
 
                         {!definition ? (
-                          <p className={styles.meta}>Definição do formulário indisponível.</p>
+                          <Alert title="Não é possível responder agora" variant="warning">
+                            A solicitação está preservada, mas a versão do formulário não está disponível.
+                            Entre em contato com a Patty antes de tentar novamente.
+                          </Alert>
                         ) : (
                           <ClientWeeklyFeedbackResponseForm
                             key={feedback.id}
                             expectedFingerprint={fingerprintWeeklyFeedbackAnswers(feedback.answers)}
                             feedbackId={feedback.id}
-                            initialValues={Object.fromEntries(
-                              definition.questions.map((question) => [
-                                question.key,
-                                readWeeklyFeedbackAnswer(feedback.answers, question.key),
-                              ]),
-                            )}
+                            initialValues={initialValues}
                             questions={definition.questions}
                           />
                         )}
