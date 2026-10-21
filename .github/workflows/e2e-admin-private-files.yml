@@ -1,5 +1,9 @@
-name: E2E admin private files smoke
+name: "LEGADO BLOQUEADO - E2E admin private files smoke"
 
+# Disabled by the documented production-only Patty administrator decision.
+# Historical implementation remains accessible through Git history.
+# It must not create synthetic identities/records, use production TOTP,
+# alter assignments or upload private files in the hosted Supabase.
 on:
   workflow_dispatch:
 
@@ -7,52 +11,21 @@ permissions:
   contents: read
 
 jobs:
-  admin-private-files-smoke:
-    if: github.ref == 'refs/heads/master'
+  legacy-smoke-blocked:
+    if: github.repository == 'leandrosilveiradepaula/projeto-patty'
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 2
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          persist-credentials: false
-
-      - name: Set up Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
-        with:
-          node-version: "22"
-
-      - name: Validate E2E secrets
+      - name: Block historical production E2E without loading secrets
         shell: bash
-        env:
-          E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
-          E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
-          E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
-          E2E_ADMIN_TOTP_SECRET: ${{ secrets.E2E_ADMIN_TOTP_SECRET }}
-          E2E_CLIENT_EMAIL: ${{ secrets.E2E_CLIENT_EMAIL }}
-          E2E_CLIENT_PASSWORD: ${{ secrets.E2E_CLIENT_PASSWORD }}
         run: |
-          missing=0
-          for name in E2E_BASE_URL E2E_ADMIN_EMAIL E2E_ADMIN_PASSWORD E2E_ADMIN_TOTP_SECRET E2E_CLIENT_EMAIL E2E_CLIENT_PASSWORD; do
-            if [ -z "${!name}" ]; then
-              echo "::error::Missing required secret: ${name}"
-              missing=1
-            fi
-          done
-          exit "${missing}"
-
-      - name: Install Playwright test runner
-        run: npm install --no-save --package-lock=false @playwright/test@1.55.0
-
-      - name: Install Chromium
-        run: npx playwright install --with-deps chromium
-
-      - name: Run production admin private-file smoke test
-        env:
-          E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
-          E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
-          E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
-          E2E_ADMIN_TOTP_SECRET: ${{ secrets.E2E_ADMIN_TOTP_SECRET }}
-          E2E_CLIENT_EMAIL: ${{ secrets.E2E_CLIENT_EMAIL }}
-          E2E_CLIENT_PASSWORD: ${{ secrets.E2E_CLIENT_PASSWORD }}
-        run: npx playwright test e2e/admin-private-files.spec.mjs --reporter=line
+          {
+            echo "### BLOQUEADO: smoke legado de arquivos privados administrativos"
+            echo ""
+            echo "Este workflow NAO executa testes nem acessa credenciais do Supabase SaaS."
+            echo "A decisao vigente proibe identidades sintéticas administrativas na producao e testes que alterem dados reais/historicos."
+            echo "Use os workflows Validate J1-J7 com Supabase descartavel para cobertura tecnica."
+            echo "Homologacao da Patty com sua sessao autorizada permanece a ultima etapa."
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "::error::Legacy production E2E disabled; see docs/LEGACY_PRODUCTION_E2E_BLOCK.md"
+          exit 1
