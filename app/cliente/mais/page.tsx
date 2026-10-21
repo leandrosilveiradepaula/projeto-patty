@@ -27,11 +27,6 @@ const areas = [
     title: "Meus avisos",
   },
   {
-    description: "Consulte suas pendências, respostas enviadas e avisos do acompanhamento em um só ponto de partida.",
-    href: "/cliente",
-    title: "Central do acompanhamento",
-  },
-  {
     description: "Responda ou continue o formulário semanal solicitado pela Patty.",
     href: "/cliente/feedback-semanal",
     title: "Feedback semanal",
