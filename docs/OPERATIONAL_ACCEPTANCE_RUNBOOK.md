@@ -4,10 +4,12 @@
 
 ## 1. Evidências técnicas disponíveis, sem extrapolação
 
-- Na [PR #945](https://github.com/leandrosilveiradepaula/projeto-patty/pull/945), `Validate application` e Playwright J1–J7 passaram no **mesmo head de teste** `3de83e958828196d22af0257465f6413532090fa`. A aprovação da suíte em localhost não constitui teste profissional real.
-- A integração foi publicada no `master` `5aae121511c7b4f51c62cad73f943e7d01090391`, com [validação geral pós-merge](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39466202205) `success` e Vercel `READY` no mesmo SHA. Antes de qualquer sessão futura, conferir novamente o **HEAD real daquele dia** e a publicação daquele SHA; os valores acima são históricos.
+- Na [PR #955](https://github.com/leandrosilveiradepaula/projeto-patty/pull/955), a recertificação consolidada **8/8 `SUCCESS` no mesmo head** `24d2bdd9b8e82c71170ac839461caad16eba6314` passou: `Validate application` e Playwright J1–J7 em localhost com banco/Auth/Storage descartáveis. É a evidência conjunta mais recente; não constitui teste profissional real. A aprovação anterior da [PR #945](https://github.com/leandrosilveiradepaula/projeto-patty/pull/945) é histórica.
+- As [PRs #957](https://github.com/leandrosilveiradepaula/projeto-patty/pull/957) e [#958](https://github.com/leandrosilveiradepaula/projeto-patty/pull/958) consolidaram o bloqueio de E2Es legados que modificavam produção e o guard de bootstrap de admin única. `master` `16fba37f09f53f188b8a5258a3ee9d6abe7a0566`, [CI pós-merge #39531246728](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39531246728) `success` e Vercel `READY` no mesmo commit. A J1 também passou no head da #958. Antes da sessão futura, confirmar novamente **HEAD = SHA publicado**; esta é uma fotografia histórica.
 - [Matriz técnica J1–J7](PREHOMOLOGATION_MATRIX.md) detalha o que os testes sintéticos provam e **não** provam. A migração real do vídeo `Como utilizar a BALANCA DE ALIMENTOS` está registrada em `CONTENT_LIBRARY.md`, mas o material continua em rascunho e **não foi publicado/liberado a cliente**.
-- A cobertura de navegação profissional da J2 em **390 px/touch** está sendo ampliada pela suíte `e2e/j2-weekly-feedback-lifecycle.spec.mjs`. Ela não substitui inspeção em aparelho real.
+- A navegação profissional da J2 em **390 px/touch** é coberta pela suíte local `e2e/j2-weekly-feedback-lifecycle.spec.mjs` aprovada no gate da #955. Ela não substitui inspeção em aparelho real.
+
+- Os nove workflows de E2E legados apontados ao Supabase SaaS foram desativados na [PR #957](https://github.com/leandrosilveiradepaula/projeto-patty/pull/957). A sessão humana **não** deve reativá-los ou guardar senha/TOTP da Patty no GitHub. Consulte [LEGACY_PRODUCTION_E2E_BLOCK.md](LEGACY_PRODUCTION_E2E_BLOCK.md) e [ADMIN_IDENTITY_RECONCILIATION.md](ADMIN_IDENTITY_RECONCILIATION.md).
 
 ## 2. Condições de entrada — confirmar somente na etapa final
 
@@ -15,6 +17,7 @@
 | --- | --- | --- |
 | Aplicação correta no ar | SHA do `master` = SHA do deployment de produção `READY`; CI do SHA sem falhas | Não iniciar |
 | Responsável autorizada | Patty na conta administrativa existente, login e MFA AAL2 pela interface normal; não compartilhar credenciais, TOTP ou cookies | Não iniciar operações administrativas |
+| Identidades e arquivos privados | Reconciliação privada e autorizada de todas as roles `admin` ([#950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950)); definição/execução controlada da migration de Storage pendente ([#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951)), quando aplicável | Não executar ou aceitar o cenário de download administrativo pós-encerramento enquanto a policy real estiver bloqueada |
 | Cliente participante | Perfil, Client e assignment atual coerentes; cliente real com autorização adequada para a sessão e conta própria. Não criar conta/registro fictício no SaaS para forçar a demonstração | Não usar dados ou conta de terceiro |
 | Dados e material | Somente registros de participante autorizado, arquivos e conteúdo com base de uso definida; sem upload de arquivo real em CI | Pular bloco e registrar pendência |
 | Roteiro e segurança | Dispositivos móveis/desktop definidos, operador, vínculo ativo e pessoas autorizadas, possibilidade de interromper ações sem publicar | Não aceitar o caso sem evidência |
