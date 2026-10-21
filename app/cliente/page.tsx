@@ -18,7 +18,7 @@ import {
 import Link from "next/link";
 import { latestPublishedTrainingVersion } from "@/lib/training/published-versions";
 import { loadClientClarificationSummary } from "@/lib/follow-up/client-clarification-summary-loader";
-import { firstPendingClientWeeklyFeedback, firstRespondableClientWeeklyFeedback } from "@/lib/follow-up/client-weekly-feedback-order";
+import { firstPendingClientWeeklyFeedback, firstRespondableClientWeeklyFeedback, orderClientWeeklyFeedbacks } from "@/lib/follow-up/client-weekly-feedback-order";
 import { formatWeeklyFeedbackDueDate } from "@/lib/weekly-feedback/date-format";
 import { clientInAppFeedbackNotices } from "@/lib/notifications/client-in-app-inbox";
 import styles from "./page.module.css";
@@ -84,12 +84,16 @@ export default async function ClientePage() {
   );
   const firstPendingFeedback = firstRespondableClientWeeklyFeedback(weeklyFeedbacks);
   const hasUnanswerablePendingFeedback = firstPendingFeedback === null && firstPendingClientWeeklyFeedback(weeklyFeedbacks) !== null;
+  const unavailablePendingFeedbackCount = weeklyFeedbacks.filter(
+    feedback => feedback.submitted_at === null && firstRespondableClientWeeklyFeedback([feedback]) === null,
+  ).length;
   const pendingFeedbackDeadline = firstPendingFeedback?.due_at ? formatWeeklyFeedbackDueDate(firstPendingFeedback.due_at) : null;
   const pendingFeedbackHref = firstPendingFeedback
     ? `/cliente/feedback-semanal#feedback-pendente-${firstPendingFeedback.id}`
     : null;
-  const otherPendingFeedbacks = weeklyFeedbacks
+  const otherPendingFeedbacks = orderClientWeeklyFeedbacks(weeklyFeedbacks)
     .filter(feedback => feedback.submitted_at === null && feedback.id !== firstPendingFeedback?.id)
+    .filter(feedback => firstRespondableClientWeeklyFeedback([feedback]) !== null)
     .slice(0, 5);
   const pendingWeeklyFeedbackIds = new Set(
     weeklyFeedbacks
@@ -262,6 +266,11 @@ export default async function ClientePage() {
                 </Link>
               ) : null}
             </div>
+            {unavailablePendingFeedbackCount > 0 && !hasUnanswerablePendingFeedback ? (
+              <p className={styles.statusNote} role="status">
+                {unavailablePendingFeedbackCount} solicitação(ões) de Feedback Semanal ainda pendente(s) estão com formulário indisponível. Consulte a área de Feedback Semanal ou fale com a Patty.
+              </p>
+            ) : null}
             {pendingFeedbackDeadline && primaryAction.href !== pendingFeedbackHref ? (
               <p className={styles.statusNote} role="status">Prazo informado para o Feedback Semanal pendente: {pendingFeedbackDeadline}.</p>
             ) : null}

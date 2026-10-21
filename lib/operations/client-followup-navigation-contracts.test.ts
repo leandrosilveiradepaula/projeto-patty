@@ -13,6 +13,10 @@ test("client home prioritizes factual pending feedback and targets an individual
   assert.match(home, /href=\{pendingFeedbackHref\}/);
   assert.match(home, /pendingFeedbackHref && primaryAction\.href !== pendingFeedbackHref/);
   assert.match(home, /pendingWeeklyFeedbackIds\.size/);
+  assert.match(home, /orderClientWeeklyFeedbacks\(weeklyFeedbacks\)/);
+  assert.match(home, /firstRespondableClientWeeklyFeedback\(\[feedback\]\)/);
+  assert.match(home, /unavailablePendingFeedbackCount > 0/);
+  assert.match(home, /formulário indisponível/);
 });
 
 test("pending feedback card has the real deep-link anchor and opens selected newest item", () => {
