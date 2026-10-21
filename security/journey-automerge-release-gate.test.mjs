@@ -81,6 +81,7 @@ test("master-only worker reads release signals and holds no Vercel credentials",
   assert.match(worker, /const master = await api\("\/repos\/" \+ repository \+ "\/branches\/master"\)/);
   assert.match(worker, /const releaseGate = evaluateMasterReleaseGate\(/);
   assert.match(worker, /if \(!releaseGate.allowed\)/);
+  assert.match(worker, /currentMaster\.commit\.sha !== master\.commit\.sha/);
   assert.match(workflow, /^  statuses: read\b/m);
   assert.match(workflow, /ref: master/);
   assert.doesNotMatch(workflow, /\$\{\{\s*secrets\.VERCEL_TOKEN/);
