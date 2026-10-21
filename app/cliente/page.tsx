@@ -48,6 +48,7 @@ export default async function ClientePage() {
     );
   }
 
+  const isInactive = client.status === "inactive";
   const today = saoPauloDate(new Date());
   const [
     anamneses,
@@ -98,11 +99,19 @@ export default async function ClientePage() {
     weeklyFeedbackNotificationEvents, weeklyFeedbacks, client.id,
   ).some(notice => notice.status === "pending");
   const hasActivityCheckinToday = activityEvents.length > 0;
-  const hasPendingDailyCheckin = !hasActivityCheckinToday;
+  const hasPendingDailyCheckin = !isInactive && !hasActivityCheckinToday;
   const dailyCheckinDescription =
     "Informe se realizou atividade física hoje. O registro de líquidos continua disponível em Check-ins, sem meta automática.";
-  const primaryAction = currentAnamnesisDraft
+  const primaryAction = isInactive
     ? {
+        badge: "Inativo",
+        badgeVariant: "neutral" as const,
+        description: "Seu acompanhamento foi encerrado. Os registros anteriores continuam disponíveis para consulta.",
+        href: "/cliente/mais",
+        label: "Consultar meu histórico",
+      }
+    : currentAnamnesisDraft
+      ? {
         badge: "Rascunho",
         badgeVariant: "warning" as const,
         description: "Há respostas salvas que ainda não foram enviadas.",
@@ -174,9 +183,17 @@ export default async function ClientePage() {
         eyebrow="Cliente"
         title="Área da cliente"
       />
+      {isInactive ? (
+        <Alert title="Acompanhamento inativo" variant="info">
+          Seu acompanhamento foi encerrado. Seus registros anteriores e os
+          materiais já liberados continuam disponíveis para consulta.
+        </Alert>
+      ) : null}
       <Section
-        description="Uma ação principal para você continuar sem precisar procurar o próximo passo."
-        title="O que fazer agora"
+        description={isInactive
+          ? "Consulte o histórico do atendimento encerrado."
+          : "Uma ação principal para você continuar sem precisar procurar o próximo passo."}
+        title={isInactive ? "Meu histórico" : "O que fazer agora"}
       >
         <Link className={styles.primaryActionLink} href={primaryAction.href}>
           <Card className={styles.primaryActionCard}>
@@ -198,6 +215,8 @@ export default async function ClientePage() {
           </Card>
         </Link>
 
+        {!isInactive ? (
+          <>
         <div className={styles.routineActions} aria-label="Acessos rápidos">
           {clarificationHref && primaryAction.href !== clarificationHref ? (
             <Link className={styles.routineActionLink} href={clarificationHref}>
@@ -243,11 +262,15 @@ export default async function ClientePage() {
             Seus complementos continuam registrados; você não precisa reenviar a Anamnese.
           </p>
         ) : null}
+          </>
+        ) : null}
       </Section>
 
       <Section
-        description="Acesse diretamente os registros e materiais do seu acompanhamento, sem depender da próxima ação sugerida."
-        title="Meu acompanhamento"
+        description={isInactive
+          ? "Seu histórico e as áreas de consulta permanecem acessíveis após o encerramento."
+          : "Acesse diretamente os registros e materiais do seu acompanhamento, sem depender da próxima ação sugerida."}
+        title={isInactive ? "Registros anteriores" : "Meu acompanhamento"
       >
         <div className={styles.routineActions} aria-label="Áreas do acompanhamento">
           <Link className={styles.routineActionLink} href="/cliente/mais">
@@ -286,7 +309,7 @@ export default async function ClientePage() {
         </div>
       </Section>
 
-      {hasDeliveredWeeklyFeedbackReminder &&
+      {!isInactive && hasDeliveredWeeklyFeedbackReminder &&
       pendingFeedbackHref && primaryAction.href !== pendingFeedbackHref ? (
         <Alert
           action={<Link href="/cliente/avisos">Ver meus avisos</Link>}
