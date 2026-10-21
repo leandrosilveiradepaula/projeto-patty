@@ -833,11 +833,9 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       literal(invite.clientId) + " and staff_profile_id=" + literal(staffId) +
       " and ended_at is null");
     expect(assignments).toHaveLength(1);
-    const ended = sql("update public.client_assignments set ended_at=now() where id=" +
-      literal(assignments[0].id) + " and ended_at is null returning id;");
-    expect(ended).toBe(assignments[0].id);
-    expect(rows("select id from public.client_assignments where client_id=" +
-      literal(invite.clientId) + " and ended_at is null")).toHaveLength(0);
+    const statusBefore = rows("select status from public.clients where id=" +
+      literal(invite.clientId));
+    expect(statusBefore).toEqual([{ status: "active" }]);
 
     const adminContext = await browser.newContext({
       baseURL, viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true,
@@ -848,6 +846,38 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
         email: staff.email, password: staff.password,
         totpSecret: staffTotp,
       });
+
+      // End the relationship through the SAME professional AAL2 UI used in
+      // production. A direct SQL UPDATE would miss the lifecycle boundary that
+      // also changes clients.status while preserving Auth and file history.
+      await adminPage.goto("/admin/clientes/" + invite.clientId);
+      await expect(adminPage.getByRole("heading", {
+        name: "Encerrar acompanhamento",
+      })).toBeVisible();
+      await adminPage.getByRole("checkbox", {
+        name: /Confirmo que quero encerrar o acompanhamento atual/,
+      }).check();
+      await adminPage.getByRole("button", {
+        name: "Encerrar e marcar como inativa",
+      }).click();
+      await expect(adminPage).toHaveURL(/\/admin\/clientes\?assignment=ended$/, {
+        timeout: 30000,
+      });
+      await expect(adminPage.getByRole("status").filter({
+        hasText: "Acompanhamento encerrado",
+      })).toHaveCount(1);
+      await expect.poll(() => {
+        const rowsAfter = rows(
+          "select id,ended_at from public.client_assignments where id=" +
+          literal(assignments[0].id),
+        );
+        return rowsAfter.length === 1 && rowsAfter[0].ended_at !== null;
+      }, { timeout: 25000 }).toBe(true);
+      expect(rows("select id from public.client_assignments where client_id=" +
+        literal(invite.clientId) + " and ended_at is null")).toHaveLength(0);
+      expect(rows("select status from public.clients where id=" +
+        literal(invite.clientId))).toEqual([{ status: "inactive" }]);
+
       await adminPage.goto("/admin/clientes/" + invite.clientId + "/arquivos");
       // The actual Patty exception preserves read access even when the
       // appointment ends. This does NOT authorize any additional admins.
