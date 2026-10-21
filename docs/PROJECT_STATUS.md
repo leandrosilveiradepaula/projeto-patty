@@ -1,18 +1,30 @@
-## 2026-10-20 — J7: integridade das fontes para análise assistiva da Anamnese (pacote em validação)
+## 2026-10-20 — J7: resposta e estado terminal contraditórios falham fechados (pacote em teste)
+
+**Problema confirmado no código, sem evidência de ocorrência no SaaS:** o extrator de resposta estruturada `extractOpenAiStructuredOutput` mantinha apenas o último `output_text` quando o provider devolvia mais de um candidato; um primeiro texto era silenciosamente descartado. Além disso, a guarda inicial `assertAiExecutionBelongsToSubmission` podia aceitar `status=completed` com `completed_at` e `failed_at` ao mesmo tempo. A apresentação posterior `presentStoredAiReview` já recusava o estado contraditório; este pacote alinha a guarda anterior às RPCs com essa regra.
+
+**Correção técnica na branch:** múltiplos `output_text` retornam `ambiguous_output_text`, aproveitando o fluxo já existente de persistência da falha e da resposta bruta, sem promover achado a decisão. Metadados de raciocínio com um único texto estruturado continuam permitidos; recusas explícitas continuam recusas. Execuções `completed` com `failed_at` não nulo ou `completed_at` inválido são recusadas antes da RPC privilegiada. Testes puramente sintéticos cobrem sucesso, duplicação, recusa, estado inválido, submissão alheia e recuperação manual de estado `started`.
+
+**Aceite ainda pendente:** `Validate application` (`test:ai` + typecheck/build) e Playwright J7 em Supabase descartável no mesmo SHA, inspeção do diff, merge somente após checks verdes, CI pós-merge e Vercel `READY`. Nenhum dado real de saúde foi enviado à OpenAI, nenhum prompt/schema/RLS/migration foi alterado, e IA continua sem publicar diretamente.
+
+**Bloqueios independentes:** as contas `admin` múltiplas de produção exigem reconciliação humana antes da migration Storage ([#950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950), [#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951)). A homologação conjunta da Patty permanece última etapa.
+
+---
+
+## 2026-10-20 — J7: integridade das fontes para análise assistiva da Anamnese (PR #961 integrada)
 
 **Objetivo técnico:** evitar mapeamento ambíguo de perguntas/respostas na análise assistiva. Um conjunto anormal de perguntas com `id` repetido pode carregar chaves de exclusão conflitantes; respostas de perguntas diferentes com o mesmo `answer.id` podem tornar citações não rastreáveis. O construtor da análise foi endurecido para rejeitar `duplicate_question_id` / `duplicate_answer_id` **antes da requisição externa**, e a reconstrução dos resultados históricos falha fechada em vez de propor ações derivadas de contexto inválido. A ausência dessas guardas era fato confirmado por inspeção do código; **não implica ocorrência ou vazamento no SaaS**.
 
 **Escopo:** `lib/ai/anamnesis-review-context.ts`, testes sintéticos e documentação J7; sem enviar Anamnese real à IA, alterar RLS/migrations/Storage, fluxos de publicação, decisões humanas ou regras profissionais. O `OPENAI_HEALTH_DATA_PROCESSING_ENABLED` permanece desativado no Playwright J7 descartável.
 
-**Aceite da PR:** `Validate application` e J7 `SUCCESS` no mesmo head, revisão específica da integridade de contexto, merge, CI pós-merge e Vercel `READY` no SHA integrado. Este registro é anterior ao resultado dos checks; `status=inactive` da J1 publicada na [PR #960](https://github.com/leandrosilveiradepaula/projeto-patty/pull/960) permanece independente. A homologação operacional conjunta continua última; a migration de Storage e a reconciliação humana #950/#951 não foram executadas.
+**Verificação concluída:** [PR #961](https://github.com/leandrosilveiradepaula/projeto-patty/pull/961) integrada ao SHA `700933e58b2dd6ce2ad925a3d24659e9b674350d` após quatro checks `SUCCESS` (Validate application, J1, J6 e J7) no mesmo head `75bc5b7d13378a7f5d40de4162c9698f8aaf9d93`. [CI pós-merge #39537842784](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39537842784) `success`; Vercel produção `READY` no SHA integrado. Homologação operacional conjunta e bloqueios #950/#951 permanecem pendentes.
 
 ---
 
-## 2026-10-20 — J1: painel da cliente inativa após encerramento (pacote em teste)
+## 2026-10-20 — J1: painel da cliente inativa após encerramento (PR #960 integrada)
 
 **Decisão de UX limitada, não regra clínica:** `clients.status=inactive` significa acompanhamento profissional encerrado, preservando histórico. Foi identificada a apresentação incorreta de ações diárias como prioridade da cliente após o encerramento. O pacote ajusta `app/cliente/page.tsx` para priorizar a consulta histórica e sinalizar claramente o estado inativo. Não bloqueia formulários por política implícita nem modifica Auth, RLS, Storage, migrations, versões aprovadas ou permissões. O cenário é acrescentado ao Playwright J1 depois do encerramento por interface AAL2; a cliente titular mantém os arquivos liberados e a cliente não titular continua isolada.
 
-**Aceite pendente:** `Validate application` e J1 local `SUCCESS` no mesmo commit, revisão de diff/mergeabilidade, merge e `Validate application` pós-merge/Vercel `READY` no novo SHA. Este registro é anterior à execução e não declara os gates aprovados. [#950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950)/[#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951) e a migration Storage seguem bloqueados; a homologação conjunta da Patty continua a última etapa.
+**Aceite técnico concluído:** [PR #960](https://github.com/leandrosilveiradepaula/projeto-patty/pull/960) integrada ao SHA `bb2ee64d9e6239489ca72feea42ad6c294f3773c`, quatro checks `SUCCESS` e [CI pós-merge #39535662555](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39535662555) `success`; Vercel `READY` no mesmo SHA. [#950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950)/[#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951) e migration Storage seguem bloqueados; homologação Patty por último.
 
 ---
 
