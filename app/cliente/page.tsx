@@ -217,50 +217,50 @@ export default async function ClientePage() {
 
         {!isInactive ? (
           <>
-        <div className={styles.routineActions} aria-label="Acessos rápidos">
-          {clarificationHref && primaryAction.href !== clarificationHref ? (
-            <Link className={styles.routineActionLink} href={clarificationHref}>
-              Esclarecimentos ({clarificationSummary.awaitingClient})
-            </Link>
-          ) : null}
-          {primaryAction.href !== "/cliente/checkins" &&
-          hasPendingDailyCheckin ? (
-            <Link className={styles.routineActionLink} href="/cliente/checkins">
-              Check-in do dia
-            </Link>
-          ) : null}
-          {pendingFeedbackHref && primaryAction.href !== pendingFeedbackHref ? (
-            <Link className={styles.routineActionLink} href={pendingFeedbackHref}>
-              Feedback Semanal ({pendingWeeklyFeedbackIds.size})
-            </Link>
-          ) : null}
-          {otherPendingFeedbacks.map(feedback => (
-            <Link key={feedback.id} className={styles.routineActionLink} href={`/cliente/feedback-semanal#feedback-pendente-${feedback.id}`}>
-              Semana de {feedback.period_start}
-            </Link>
-          ))}
-          {hasDeliveredWeeklyFeedbackReminder ? (
-            <Link className={styles.routineActionLink} href="/cliente/avisos">Ver avisos entregues</Link>
-          ) : null}
-          {primaryAction.href !== "/cliente/protocolo" && protocols.length > 0 ? (
-            <Link className={styles.routineActionLink} href="/cliente/protocolo">
-              Ver protocolo
-            </Link>
-          ) : null}
-          {primaryAction.href !== "/cliente/treino" && latestPublishedTraining ? (
-            <Link className={styles.routineActionLink} href="/cliente/treino">
-              Ver treino publicado
-            </Link>
-          ) : null}
-        </div>
-        {pendingFeedbackDeadline && primaryAction.href !== pendingFeedbackHref ? (
-          <p className={styles.statusNote} role="status">Prazo informado para o Feedback Semanal pendente: {pendingFeedbackDeadline}.</p>
-        ) : null}
-        {clarificationSummary.awaitingProfessional > 0 ? (
-          <p className={styles.statusNote} role="status">
-            {clarificationSummary.awaitingProfessional} esclarecimento(s) respondido(s) aguardam revisão da Patty.
-            Seus complementos continuam registrados; você não precisa reenviar a Anamnese.
-          </p>
+            <div className={styles.routineActions} aria-label="Acessos rápidos">
+              {clarificationHref && primaryAction.href !== clarificationHref ? (
+                <Link className={styles.routineActionLink} href={clarificationHref}>
+                  Esclarecimentos ({clarificationSummary.awaitingClient})
+                </Link>
+              ) : null}
+              {primaryAction.href !== "/cliente/checkins" &&
+              hasPendingDailyCheckin ? (
+                <Link className={styles.routineActionLink} href="/cliente/checkins">
+                  Check-in do dia
+                </Link>
+              ) : null}
+              {pendingFeedbackHref && primaryAction.href !== pendingFeedbackHref ? (
+                <Link className={styles.routineActionLink} href={pendingFeedbackHref}>
+                  Feedback Semanal ({pendingWeeklyFeedbackIds.size})
+                </Link>
+              ) : null}
+              {otherPendingFeedbacks.map(feedback => (
+                <Link key={feedback.id} className={styles.routineActionLink} href={`/cliente/feedback-semanal#feedback-pendente-${feedback.id}`}>
+                  Semana de {feedback.period_start}
+                </Link>
+              ))}
+              {hasDeliveredWeeklyFeedbackReminder ? (
+                <Link className={styles.routineActionLink} href="/cliente/avisos">Ver avisos entregues</Link>
+              ) : null}
+              {primaryAction.href !== "/cliente/protocolo" && protocols.length > 0 ? (
+                <Link className={styles.routineActionLink} href="/cliente/protocolo">
+                  Ver protocolo
+                </Link>
+              ) : null}
+              {primaryAction.href !== "/cliente/treino" && latestPublishedTraining ? (
+                <Link className={styles.routineActionLink} href="/cliente/treino">
+                  Ver treino publicado
+                </Link>
+              ) : null}
+            </div>
+            {pendingFeedbackDeadline && primaryAction.href !== pendingFeedbackHref ? (
+              <p className={styles.statusNote} role="status">Prazo informado para o Feedback Semanal pendente: {pendingFeedbackDeadline}.</p>
+            ) : null}
+            {clarificationSummary.awaitingProfessional > 0 ? (
+              <p className={styles.statusNote} role="status">
+                {clarificationSummary.awaitingProfessional} esclarecimento(s) respondido(s) aguardam revisão da Patty.
+                Seus complementos continuam registrados; você não precisa reenviar a Anamnese.
+              </p>
         ) : null}
           </>
         ) : null}
@@ -270,7 +270,7 @@ export default async function ClientePage() {
         description={isInactive
           ? "Seu histórico e as áreas de consulta permanecem acessíveis após o encerramento."
           : "Acesse diretamente os registros e materiais do seu acompanhamento, sem depender da próxima ação sugerida."}
-        title={isInactive ? "Registros anteriores" : "Meu acompanhamento"
+        title={isInactive ? "Registros anteriores" : "Meu acompanhamento"}
       >
         <div className={styles.routineActions} aria-label="Áreas do acompanhamento">
           <Link className={styles.routineActionLink} href="/cliente/mais">
