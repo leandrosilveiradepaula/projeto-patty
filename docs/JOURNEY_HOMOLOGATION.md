@@ -1,3 +1,13 @@
+## 2026-10-21 — #974: recertificação técnica J1–J7 não é homologação operacional
+
+**Escopo técnico:** a PR de recertificação reproduz e corrige falsos negativos das asserções que protegem o bootstrap administrativo e workflows locais/legados contra diferenças LF/CRLF e um prefixo de query, além de um probe J2 que tratava o atributo visual `min` derivado pelo React como prova de hidratação. O E2E agora confirma o valor nativo antes de submeter; a server action e sua validação continuam autoritativas. As guardas testadas permanecem fechadas: preflight da quantidade de admins antes de convite ou escrita, E2E legado de produção bloqueado e J2 exclusivamente localhost descartável. Não há mudança em runtime de método, RLS, migrations, armazenamento, dados reais ou IA.
+
+**Evidência requerida:** as regressões locais passam; a prova de recertificação do SHA final requer `Validate application` e os sete Playwright J1–J7 em `success` no mesmo head da PR, com Supabase, TOTP, identidades e dados sintéticos descartáveis. Não confundir essa prova com sessão autenticada no SaaS, persistência de produção, escopo de acesso real ou avaliação mobile da Patty.
+
+**Bloqueios preservados:** não realizar merge enquanto [#970](https://github.com/leandrosilveiradepaula/projeto-patty/issues/970) impedir a confirmação GitHub→Vercel; não forçar deploy ou modificar a integração. [#950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950)/[#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951) continuam exigir decisão humana antes de mudança de Storage/RLS. A homologação conjunta com a Patty permanece a última etapa, não iniciada.
+
+---
+
 ## 2026-10-21 — J7: ambiguidade do provider e estado terminal contraditório (PR #962 integrada; publicação bloqueada pela #970)
 
 **Fato do runtime:** `extractOpenAiStructuredOutput` selecionava o último texto estruturado quando o envelope `completed` possuía mais de um `output_text`, sem registrar que havia múltiplos candidatos. Na guarda de server actions `assertAiExecutionBelongsToSubmission`, um registro `completed` com `completed_at` válido e `failed_at` não nulo podia alcançar a etapa seguinte de leitura/validação; a apresentação `presentStoredAiReview` já bloqueava essa condição mais tarde. Não há evidência de exploração ou casos reais no SaaS.

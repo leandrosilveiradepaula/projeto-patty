@@ -23,8 +23,11 @@ for (const filename of legacyWorkflows) {
       new URL(".github/workflows/" + filename, root), "utf8",
     );
     assert.match(source, /^name: "LEGADO BLOQUEADO - /m);
-    assert.match(source, /^on:\n  workflow_dispatch:\s*$/m);
-    assert.match(source, /^permissions:\n  contents: read$/m);
+    // Git preserves the workflow's safety contract independently of checkout
+    // line endings. Accept CRLF and LF so a Windows checkout cannot turn the
+    // guard itself into a false-negative.
+    assert.match(source, /^on:\r?\n  workflow_dispatch:\s*$/m);
+    assert.match(source, /^permissions:\r?\n  contents: read$/m);
     assert.match(source, /^  legacy-smoke-blocked:$/m);
     assert.match(source, /Legacy production E2E disabled/);
     assert.match(source, /^          exit 1$/m);

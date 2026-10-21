@@ -229,17 +229,14 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
       const endInput = adminPage.getByLabel("Semana de referência · fim");
       const submitRequest = adminPage.getByRole("button", { name: "Criar solicitação" });
 
-      // This is a client-controlled form. In Next dev the initial RSC HTML
-      // may be visible before React has attached onChange. A fill made before
-      // hydration can be reset without an actionable error on submit.
-      // The end-date min attribute is set ONLY by the React start-date state:
-      // require that real onChange/hydration occurred before submitting.
+      // This is a progressively enhanced server-action form. The browser must
+      // retain the native date value before submission; the server action is
+      // still the authoritative validation boundary. Do not use React's
+      // derived `min` attribute as a hydration probe: it is a UX aid and its
+      // render timing is not a security or persistence contract.
       await expect(startInput).toBeVisible();
-      await expect.poll(async () => {
-        await startInput.fill(periodStart);
-        return await endInput.getAttribute("min");
-      }, { timeout: 20_000, message: "Waiting for hydrated weekly request form" })
-        .toBe(periodStart);
+      await startInput.fill(periodStart);
+      await expect(startInput).toHaveValue(periodStart);
       await endInput.fill(periodEnd);
       await expect(endInput).toHaveValue(periodEnd);
       await expect(submitRequest).toBeEnabled();

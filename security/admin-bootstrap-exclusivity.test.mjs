@@ -20,7 +20,9 @@ test("production bootstrap must check sole-admin role count before any Auth invi
   for (const expected of checks) {
     assert.ok(source.includes(expected), "Missing bootstrap security boundary: " + expected);
   }
-  const roleCount = source.indexOf('admin\n  .from("user_roles")');
+  // `await admin` prefixes the query; assert the query boundary itself so
+  // this ordering guard remains valid after that harmless syntax change.
+  const roleCount = source.indexOf('  .from("user_roles")');
   const preflight = source.indexOf("assertAdminBootstrapRoleCount(existingAdminCount);");
   const authLookup = source.indexOf("let user = await findUserByEmail(email);");
   const inviteGuard = source.indexOf("if (existingAdminCount !== 0)");
