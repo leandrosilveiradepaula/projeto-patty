@@ -35,7 +35,9 @@ test("atomic ledger survives a killed browser in owner-only temporary file",asyn
    await writeFixtureLedger(recorded,isolated);
    assert.equal((await readFixtureLedger(isolated)).clientId,recorded.clientId);
    const info=await stat(fixtureLedgerPath(isolated));
-   assert.equal(info.mode & 0o777,0o600);
+   // Windows stat does not expose the file ACL; the owner-only mode is asserted
+   // on the Linux GitHub Actions runner where the synthetic browser journey runs.
+   if(process.platform!=="win32") assert.equal(info.mode & 0o777,0o600);
    await removeFixtureLedger(isolated);
    await assert.rejects(readFixtureLedger(isolated),/ENOENT/);
  } finally {

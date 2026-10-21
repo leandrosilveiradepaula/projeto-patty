@@ -10,6 +10,7 @@ import {
   listAccessibleAnamnesisSubmissions,
 } from "@/lib/supabase/data-access";
 import { getCurrentClientAnamnesisStartAvailability } from "@/lib/anamnesis/start";
+import { orderClientAnamnesisDrafts } from "@/lib/anamnesis/client-draft-continuity";
 import {
   clientAnamnesisHistoryHref,
   exploreClientAnamnesisHistory,
@@ -53,13 +54,8 @@ export default async function ClienteAnamnesePage({ searchParams }: ClienteAnamn
 
   const explored = exploreClientAnamnesisHistory(submissions ?? [], clarificationSummary.bySubmission, filters);
 
-  const hasCurrentDraft =
-    startAvailability.available &&
-    submissions?.some(
-      (submission) =>
-        submission.form_version_id === startAvailability.formVersionId &&
-        submission.submitted_at === null,
-    );
+  const activeDrafts = orderClientAnamnesisDrafts(submissions ?? []);
+  const currentDraft = activeDrafts[0] ?? null;
 
   return (
     <>
@@ -68,7 +64,46 @@ export default async function ClienteAnamnesePage({ searchParams }: ClienteAnamn
         eyebrow="Cliente"
         title="Anamnese"
       />
-      {client && startAvailability.available && !hasCurrentDraft ? (
+      {currentDraft ? (
+        <Section
+          action={<Badge variant="warning">{activeDrafts.length} em andamento</Badge>}
+          description="Retome um rascunho já iniciado. Nenhuma nova versão é criada ao abrir um registro existente."
+          title="Rascunhos em andamento"
+        >
+          <ol className={styles.submissionList}>
+            {activeDrafts.map((submission) => {
+              const version = submission.anamnesis_form_versions;
+
+              return (
+                <li key={submission.id}>
+                  <Card className={styles.submissionCard}>
+                    <div className={styles.submissionHeader}>
+                      <div>
+                        <h2 className={styles.submissionTitle}>
+                          {version?.version_number
+                            ? `Anamnese · versão ${version.version_number}`
+                            : "Anamnese"}
+                        </h2>
+                        <p className={styles.submissionMeta}>
+                          Criada em {formatDateTime(submission.created_at)}
+                        </p>
+                      </div>
+                      <Badge variant="warning">Rascunho</Badge>
+                    </div>
+                    <Link
+                      className={styles.detailLink}
+                      href={`/cliente/anamnese/${submission.id}`}
+                    >
+                      Retomar rascunho
+                    </Link>
+                  </Card>
+                </li>
+              );
+            })}
+          </ol>
+        </Section>
+      ) : null}
+      {client && startAvailability.available && !currentDraft ? (
         <Section
           description="O rascunho será vinculado à versão oficial publicada da Anamnese. Você poderá salvar e continuar depois."
           title="Começar Anamnese"
