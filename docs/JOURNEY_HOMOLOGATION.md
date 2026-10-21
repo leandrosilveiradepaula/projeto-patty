@@ -1,3 +1,13 @@
+## 2026-10-20 — J1: encerramento autenticado e preservação do acesso a arquivos (teste em preparação)
+
+**Objetivo:** provar o ciclo completo da J1 em Docker descartável: após uploads e liberação explícita, a única admin sintética com MFA AAL2 encerra o acompanhamento **pela interface administrativa**. Verificar o registro histórico do assignment encerrado, `clients.status=inactive`, acesso continuado da administradora única aos arquivos e da cliente titular aos arquivos liberados, mantendo a negação a outra cliente e a AAL1. Isso exercita a transição de estado real, não um `UPDATE` direto de fixture.
+
+**Escopo:** somente `e2e/j1-local-onboarding.spec.mjs` e documentação. **Fora de escopo:** nenhuma alteração de runtime, migrations, RLS, identidades reais, Storage SaaS ou decisão profissional. A migration `20261020191000` permanece bloqueada pela multiplicidade de roles administrativas em produção ([#950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950), [#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951)).
+
+**Aceite:** Playwright J1, validação geral e regressões acionadas em `SUCCESS` no mesmo HEAD; merge seguro somente após checks e diff. Verificar CI pós-merge e deployment de produção `READY` no SHA integrado. Nenhum teste sintético substitui a homologação final com a Patty.
+
+---
+
 ## 2026-10-20 — J1: regressão da cliente após encerramento do assignment (proposta)
 
 **Objetivo e escopo:** complementar o E2E J1 já existente, no mesmo Supabase descartável, com sessões autenticadas da cliente titular e de outra cliente após encerrar o assignment da administradora sintética. Confirmar que os dois arquivos PNG previamente liberados continuam listados para a titular e retornam redirecionamento privado `307` com `Cache-Control: no-store` tanto para download quanto preview. Confirmar que a cliente não titular não vê esses arquivos nem consegue baixar/visualizar (`404`). Não expor URLs assinadas em logs.
