@@ -39,6 +39,7 @@ import { ProtocolDraftCompletionMap } from "@/components/admin/ProtocolDraftComp
 import { getProtocolLifecycleAction } from "@/lib/protocol/lifecycle";
 import { latestPublishedProtocolVersionId, requestedProtocolVersion } from "@/lib/protocol/history-navigation";
 import { buildProtocolPlanComparison } from "@/lib/protocol/version-diff";
+import { latestSubmittedAnamnesis } from "@/lib/anamnesis/submitted-order";
 import { isUuid } from "@/lib/validation/uuid";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -113,12 +114,11 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
   const anamneses = hasEditableDraft
     ? await listAccessibleAnamnesisSubmissions(protocol.client_id)
     : [];
-  const latestSubmittedAnamnesis =
-    anamneses.find((submission) => Boolean(submission.submitted_at)) ?? null;
-  const [foodQuestions, foodAnswers] = latestSubmittedAnamnesis
+  const latestSubmitted = latestSubmittedAnamnesis(anamneses);
+  const [foodQuestions, foodAnswers] = latestSubmitted
     ? await Promise.all([
-        listAccessibleAnamnesisQuestions(latestSubmittedAnamnesis.form_version_id),
-        listAccessibleAnamnesisAnswers(latestSubmittedAnamnesis.id),
+        listAccessibleAnamnesisQuestions(latestSubmitted.form_version_id),
+        listAccessibleAnamnesisAnswers(latestSubmitted.id),
       ])
     : [[], []];
   const foodContext = buildMealDraftAnamnesisContext(

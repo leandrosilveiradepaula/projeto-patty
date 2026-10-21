@@ -1,3 +1,15 @@
+## 2026-10-21 — Macrobloco J4–J6: contexto administrativo e liberação humana verificáveis
+
+**FATO CONFIRMADO:** no apoio factual ao rascunho de protocolo (J4), a escolha da “última Anamnese enviada” era derivada da ordem de criação do registro. Um rascunho iniciado antes e enviado depois podia, portanto, perder precedência para uma submissão criada mais recentemente. Não há evidência de ocorrência no SaaS; a inconsistência foi identificada por inspeção do fluxo e coberta com cenário sintético.
+
+**CORREÇÃO TÉCNICA LIMITADA:** o contexto de edição agora seleciona apenas submissões enviadas pela data/hora efetiva de `submitted_at`, compara instantes reais entre offsets, mantém desempate estável e não altera o array original. J5 e J6 foram auditadas contra os contratos existentes: solicitação individual, revisão/publicação e histórico de treino continuam separados; conteúdo publicado, asset privado e liberação por cliente continuam ações humanas explícitas e versionadas. Nenhuma regra nutricional, de treino ou progressão foi criada; Auth, RLS, MFA, migrations, schema, Storage, workflows e dados do SaaS não foram alterados.
+
+**EVIDÊNCIA TÉCNICA:** testes determinísticos de Anamnese, protocolos, treino, conteúdos e operações passaram localmente, além de `typecheck`, `build` e checagem de diff. A estação não possui Docker, então Playwright J4/J5/J6 com Supabase descartável permanece `NÃO EXECUTADO LOCALMENTE` e deve rodar nos workflows sintéticos do mesmo SHA da PR; isso não é homologação humana nem validação do SaaS.
+
+**PENDÊNCIAS:** a homologação operacional conjunta da Patty continua última etapa. Os bloqueios independentes de reconciliação administrativa e da migration Storage permanecem em [#950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950) e [#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951).
+
+---
+
 ## 2026-10-21 — Macrobloco J1–J3: continuidade de rascunhos e validação portátil
 
 **FATO CONFIRMADO:** a entrada de Anamnese considerava apenas rascunhos da versão atualmente publicada. Um rascunho ativo de versão anterior podia ficar sem atalho de retomada e a interface ainda oferecia iniciar outro registro. A lista principal também selecionava o primeiro retorno sem uma ordenação factual explícita.
