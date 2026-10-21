@@ -1,3 +1,5 @@
+import { prepareClientPendingFeedback } from "../weekly-feedback/client-pending-summary.ts";
+import type { Json } from "@/lib/supabase/database.types";
 export type ClientWeeklyFeedbackFact = {
   id: string;
   period_start: string;
@@ -30,4 +32,17 @@ export function firstPendingClientWeeklyFeedback<T extends ClientWeeklyFeedbackF
   rows: readonly T[],
 ): T | null {
   return orderClientWeeklyFeedbacks(rows).find((row) => row.submitted_at === null) ?? null;
+}
+
+/**
+ * Choose the first pending request that has a usable versioned form.
+ * Never infer a clinical priority or hide older requests.
+ */
+export function firstRespondableClientWeeklyFeedback<
+  T extends ClientWeeklyFeedbackFact & { weekly_feedback_form_versions: { definition: Json } | null; answers: Json },
+>(rows: readonly T[]): T | null {
+  return orderClientWeeklyFeedbacks(rows).find((row) =>
+    row.submitted_at === null &&
+    prepareClientPendingFeedback(row.weekly_feedback_form_versions, row.answers).definition !== null
+  ) ?? null;
 }

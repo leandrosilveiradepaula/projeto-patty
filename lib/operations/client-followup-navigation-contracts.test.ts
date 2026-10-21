@@ -6,7 +6,8 @@ const read = (path: string) => readFileSync(new URL("../../" + path, import.meta
 
 test("client home prioritizes factual pending feedback and targets an individual request", () => {
   const home = read("app/cliente/page.tsx");
-  assert.match(home, /firstPendingClientWeeklyFeedback\(weeklyFeedbacks\)/);
+  assert.match(home, /firstRespondableClientWeeklyFeedback\(weeklyFeedbacks\)/);
+  assert.match(home, /hasUnanswerablePendingFeedback/);
   assert.match(home, /feedback-pendente-\$\{firstPendingFeedback\.id\}/);
   assert.match(home, /href: pendingFeedbackHref/);
   assert.match(home, /href=\{pendingFeedbackHref\}/);
