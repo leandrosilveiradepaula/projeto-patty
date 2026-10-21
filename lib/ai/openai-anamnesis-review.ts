@@ -215,21 +215,21 @@ export function extractOpenAiStructuredOutput(
     }
   }
 
+  // Do not silently choose the last of multiple structured candidates.
+  // The existing failure ledger retains the raw response for audit instead.
+  if (outputTexts.length > 1) {
+    return {
+      ok: false,
+      code: "ambiguous_output_text",
+      message: "OpenAI response included multiple structured output texts.",
+    };
+  }
+
   if (outputTexts.length === 0 || !outputTexts[0]) {
     return {
       ok: false,
       code: "missing_output_text",
       message: "OpenAI response did not include structured output text.",
-    };
-  }
-
-  // Do not silently choose the last of multiple structured candidates.
-  // The existing failure ledger retains the raw response for audit instead.
-  if (outputTexts.length !== 1) {
-    return {
-      ok: false,
-      code: "ambiguous_output_text",
-      message: "OpenAI response included multiple structured output texts.",
     };
   }
 
