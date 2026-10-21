@@ -1,3 +1,11 @@
+## 2026-10-20 — J1: painel da cliente inativa após encerramento (pacote em teste)
+
+**Decisão de UX limitada, não regra clínica:** `clients.status=inactive` significa acompanhamento profissional encerrado, preservando histórico. Foi identificada a apresentação incorreta de ações diárias como prioridade da cliente após o encerramento. O pacote ajusta `app/cliente/page.tsx` para priorizar a consulta histórica e sinalizar claramente o estado inativo. Não bloqueia formulários por política implícita nem modifica Auth, RLS, Storage, migrations, versões aprovadas ou permissões. O cenário é acrescentado ao Playwright J1 depois do encerramento por interface AAL2; a cliente titular mantém os arquivos liberados e a cliente não titular continua isolada.
+
+**Aceite pendente:** `Validate application` e J1 local `SUCCESS` no mesmo commit, revisão de diff/mergeabilidade, merge e `Validate application` pós-merge/Vercel `READY` no novo SHA. Este registro é anterior à execução e não declara os gates aprovados. [#950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950)/[#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951) e a migration Storage seguem bloqueados; a homologação conjunta da Patty continua a última etapa.
+
+---
+
 ## 2026-10-20 — Situação técnica vigente após PRs #955–#958
 
 **BASE VERIFICADA:** `master` `16fba37f09f53f188b8a5258a3ee9d6abe7a0566` (merge da [PR #958](https://github.com/leandrosilveiradepaula/projeto-patty/pull/958)); [`Validate application` pós-merge #39531246728](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39531246728) `success` e Vercel produção `READY` no deployment `dpl_2TJZsf23HYYqVXbECmyXBVSesV3u`, ambos para o mesmo SHA. Nenhuma PR pendente na verificação.

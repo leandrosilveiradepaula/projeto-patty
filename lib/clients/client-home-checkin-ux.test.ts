@@ -13,7 +13,7 @@ function read(relativePath: string) {
 test("client home does not treat liquid intake as a required daily pending action", () => {
   const page = read("app/cliente/page.tsx");
 
-  assert.match(page, /const hasPendingDailyCheckin = !hasActivityCheckinToday/);
+  assert.match(page, /const hasPendingDailyCheckin = !isInactive && !hasActivityCheckinToday/);
   assert.match(page, /O registro de líquidos continua disponível em Check-ins, sem meta automática/);
   assert.doesNotMatch(page, /listAccessibleClientLiquidIntakeEvents/);
   assert.doesNotMatch(page, /hasLiquidCheckinToday/);
