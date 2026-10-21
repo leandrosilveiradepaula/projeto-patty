@@ -1,3 +1,13 @@
+## 2026-10-20 — J1: regressão da cliente após encerramento do assignment (proposta)
+
+**Objetivo e escopo:** complementar o E2E J1 já existente, no mesmo Supabase descartável, com sessões autenticadas da cliente titular e de outra cliente após encerrar o assignment da administradora sintética. Confirmar que os dois arquivos PNG previamente liberados continuam listados para a titular e retornam redirecionamento privado `307` com `Cache-Control: no-store` tanto para download quanto preview. Confirmar que a cliente não titular não vê esses arquivos nem consegue baixar/visualizar (`404`). Não expor URLs assinadas em logs.
+
+**Fora de escopo:** nenhuma conta de produção, política RLS, migration, dado real, regra clínica ou publicação de conteúdo. Esta regressão não resolve a multiplicidade de roles admin de produção e não autoriza `mode=apply` na migration `20261020191000` ([#950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950), [#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951)).
+
+**Aceite:** Playwright J1 com novos cenários aprovado no HEAD da PR, `Validate application` e todas as regressões disparadas no mesmo commit; somente depois considerar merge, verificar CI pós-merge e Vercel. Homologação da Patty continua última tarefa. **Esta anotação não declara testes concluídos.**
+
+---
+
 ## 2026-10-20 — J1: prova de falha fechada da migration sob múltiplas roles administrativas
 
 **Motivo:** a migração `20261020191000_fix_private_storage_admin_read_after_assignment.sql` corrige o 404 de mídia privada de uma única admin em CI após o fim do assignment, mas não pode ser aplicada no SaaS enquanto existirem vários perfis `admin` sem reconciliação humana. GitHub/Vercel estão atualizados até PR #949; Supabase SaaS **não**.

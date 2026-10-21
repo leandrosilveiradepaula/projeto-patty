@@ -867,6 +867,55 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
     } finally {
       await adminContext.close();
     }
+
+    // Ending a professional assignment must not revoke the client's own
+    // released-file history or make those files visible to another client.
+    // The earlier J1 checks ran before the assignment ended; verify this
+    // second boundary under real authenticated browser sessions as well.
+    const releasedFiles = [
+      { id: clientPrivateFile.id, filename: clientPrivateFile.filename },
+      { id: releasedAdminFileId, filename: "j1-admin-pending-synthetic.png" },
+    ];
+    await page.goto("/cliente/arquivos");
+    for (const file of releasedFiles) {
+      await expect(page.getByRole("heading", { name: file.filename, exact: true }))
+        .toBeVisible();
+      for (const suffix of ["", "?preview=1"]) {
+        const response = await page.request.get("/cliente/arquivos/" + file.id + suffix, {
+          maxRedirects: 0,
+        });
+        expect(response.status(), "Client retains released file after assignment ends")
+          .toBe(307);
+        expect(response.headers()["cache-control"]).toContain("no-store");
+        // Verify origin only: a signed URL or token must never reach CI logs.
+        expect(new URL(response.headers().location).origin).toBe(apiURL);
+      }
+    }
+    const foreignAfterEnd = await browser.newContext({ baseURL });
+    try {
+      const foreignPage = await foreignAfterEnd.newPage();
+      await foreignPage.goto("/login");
+      await foreignPage.getByLabel("Email").fill(foreignClientCredentials.email);
+      await foreignPage.getByLabel("Senha").fill(foreignClientCredentials.password);
+      await foreignPage.getByRole("button", { name: "Entrar" }).click();
+      await expect(foreignPage).toHaveURL(/\/cliente\/?$/);
+      await foreignPage.goto("/cliente/arquivos");
+      for (const file of releasedFiles) {
+        await expect(foreignPage.getByRole("heading", {
+          name: file.filename, exact: true,
+        })).toHaveCount(0);
+        for (const suffix of ["", "?preview=1"]) {
+          const response = await foreignPage.request.get(
+            "/cliente/arquivos/" + file.id + suffix, { maxRedirects: 0 },
+          );
+          expect(response.status(), "Other client stays denied after assignment ends")
+            .toBe(404);
+        }
+      }
+    } finally {
+      await foreignAfterEnd.close();
+    }
+
     // The global admin-file exception still requires strong MFA; role alone
     // with AAL1 must not reveal rows through the browser-facing Data API.
     const aal1Claims = JSON.stringify({
