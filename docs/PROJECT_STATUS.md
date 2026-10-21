@@ -1,3 +1,13 @@
+## 2026-10-21 — #974: recertificação técnica J1–J7 em preparação de PR
+
+**Fato técnico:** a recertificação local reproduziu falsos negativos em três testes de fronteira de segurança, causados por asserções dependentes de LF em checkout CRLF e por uma busca textual anterior ao prefixo `await` de uma query de preflight. A primeira CI J2 também expôs um probe de hidratação instável que usava o atributo visual `min`, embora a validação nativa e a server action sejam os limites autoritativos. As correções ficam restritas às asserções e ao probe E2E: mantêm a validação do workflow legado bloqueado, do workflow J2 local e da ordem obrigatória da contagem de roles administrativas antes de convite/escrita. Não há indicação de alteração do runtime protegido ou de incidente no SaaS.
+
+**Verificações locais aprovadas:** `test:validation`, `test:assignments`, `test:onboarding`, `test:anamnesis-draft`, `test:follow-up`, `test:evaluations`, `test:protocol`, `test:training`, `test:content`, `test:clients`, `test:operations`, `test:ai`, `test:configuration`, `test:method`, `test:security-boundaries`, `test:e2e-helpers`, `test:media-migration` e `test:drive-triage`. A PR deve executar `Validate application` e Playwright J1–J7 com Supabase descartável no mesmo SHA; esta estação não declara esses E2Es como execução local.
+
+**Estado e limites:** a PR fica sem merge enquanto o bloqueio de publicação [#970](https://github.com/leandrosilveiradepaula/projeto-patty/issues/970) não for resolvido por evidência operacional independente. Não foram alterados workflows, deployment, Vercel, Auth/RLS, migrations, schema, regras profissionais, dados reais ou provider de IA. Os bloqueios [#950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950)/[#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951), o gate de dados de saúde/IA e a homologação humana da Patty permanecem abertos.
+
+---
+
 ## 2026-10-21 — #971: auditoria do Macrobloco 3 — J7 IA assistiva
 
 **AUDITORIA CONCLUÍDA:** a leitura ponta a ponta do runtime e das regressões confirmou a separação entre Anamnese versionada, contexto minimizado, execução, saída original, achado, decisão humana e eventual anotação da Patty. O contexto exclui campos de contato/informativos e exige opt-in para capacidade financeira; o provider permanece bloqueado por `OPENAI_HEALTH_DATA_PROCESSING_ENABLED`; o resultado é validado contra fontes registradas na execução e revalidado antes de qualquer RPC privilegiada. Ações exigem sessão `admin` com MFA AAL2, submissão acessível e execução no estado terminal coerente. Não foi reproduzida nova falha no escopo não sensível.

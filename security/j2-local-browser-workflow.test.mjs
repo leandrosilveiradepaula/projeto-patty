@@ -13,7 +13,9 @@ const read = (path) => readFileSync(new URL(path, root), "utf8");
 test("J2 PR browser workflow has no external credentials or production endpoint", () => {
   const workflow = read(".github/workflows/validate-j2-weekly-feedback-browser.yml");
   assert.match(workflow, /^  pull_request:$/m);
-  assert.match(workflow, /^permissions:\n  contents: read$/m);
+  // The CI safety contract is content-based, not dependent on whether Git
+  // checked this YAML out with LF or CRLF line endings.
+  assert.match(workflow, /^permissions:\r?\n  contents: read$/m);
   assert.match(workflow, /persist-credentials: false/);
   assert.doesNotMatch(workflow, /\$\{\{\s*secrets\./);
   assert.match(workflow, /test "\$API_URL" = "http:\/\/127\.0\.0\.1:54321"/);

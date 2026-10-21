@@ -1,5 +1,17 @@
 # Matriz vigente de pré-homologação técnica — J1 a J7
 
+## 2026-10-21 — Recertificação técnica integral J1–J7 (#974, PR em preparação)
+
+**Objetivo e escopo:** recertificar os contratos técnicos já versionados das sete jornadas em uma única PR, usando os oito gates existentes (`Validate application` e Playwright local J1–J7) no mesmo SHA. A alteração deliberada desta matriz aciona os workflows por `pull_request.paths`; não há alteração em workflow, RLS, Auth, migration, schema, provider de IA, regra profissional ou ambiente de produção.
+
+**Falhas reproduzidas e correção limitada:** três asserções de fronteira de segurança geravam falsos negativos em checkout Windows: duas pressupunham LF em YAML protegido e uma procurava uma consulta de preflight sem o prefixo `await`. A primeira execução J2 também confirmou que usar o atributo visual `min` derivado pelo React como prova de hidratação era instável, embora a validação nativa e a server action continuem autoritativas. As asserções agora aceitam LF/CRLF e verificam a mesma query de preflight por seu trecho estável; o E2E confirma o valor nativo antes de submeter. O comportamento auditado continua exigindo contagem de admins antes de convite/escrita, workflow legado manual bloqueado e J2 local sem credenciais externas.
+
+**Evidência local:** `test:validation`, `test:assignments`, `test:onboarding`, `test:anamnesis-draft`, `test:follow-up`, `test:evaluations`, `test:protocol`, `test:training`, `test:content`, `test:clients`, `test:operations`, `test:ai`, `test:configuration`, `test:method`, `test:security-boundaries`, `test:e2e-helpers`, `test:media-migration` e `test:drive-triage` passaram após a correção. Playwright com Supabase descartável e a validação completa do build pertencem aos checks GitHub deste SHA; não foram declarados executados localmente nesta estação.
+
+**Critério para integração:** somente os oito checks `success` no mesmo `head_sha`, diff sem alterações sensíveis e base mergeável podem satisfazer a recertificação técnica. O estado da PR e seus checks são a evidência autoritativa do SHA final. A integração continua bloqueada enquanto [#970](https://github.com/leandrosilveiradepaula/projeto-patty/issues/970) não tiver recuperação comprovada do gate GitHub→Vercel; não disparar redeploy, push artificial, alteração de integração ou publicação.
+
+**Limites preservados:** [#950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950) e [#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951) continuam bloqueios de segurança separados. Nenhuma role, migration ou policy foi alterada. O gate de dados reais/IA e a homologação autenticada e humana da Patty permanecem pendentes e fora desta recertificação.
+
 **Atualizada em 2026-10-20.** Este documento é um índice operacional de evidências, não cria regra do método da Patty nem substitui `BUSINESS_RULES.md`, `DECISIONS.md` ou `OPEN_QUESTIONS.md`. Registros de PRs em andamento nos documentos cronológicos são históricos: consultar **GitHub HEAD + checks do commit exato** para o estado corrente.
 
 ## Gate de recertificação técnica integral após PRs #946–#954 (20/10/2026)
