@@ -1,6 +1,6 @@
 # Reconciliação privada de identidades administrativas — pré-requisito do MVP
 
-**Referência: 20/10/2026. Status: procedimento preparado, NÃO EXECUTADO.**
+**Referência: 20/10/2026. Status: procedimento humano preparado, NÃO EXECUTADO.** O guard técnico de bootstrap foi integrado pela [PR #958](https://github.com/leandrosilveiradepaula/projeto-patty/pull/958) no commit `16fba37f09f53f188b8a5258a3ee9d6abe7a0566`, com CI e Vercel `READY`. Essa integração não revogou nem identificou roles reais, não executou o bootstrap e não desbloqueou a migration.
 
 ## 1. Fato confirmado e limite
 

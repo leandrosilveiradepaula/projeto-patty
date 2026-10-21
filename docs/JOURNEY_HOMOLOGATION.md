@@ -1,3 +1,15 @@
+## 2026-10-20 — Gate conjunto de J1 a J7 APROVADO tecnicamente; homologação Patty pendente
+
+**Gate executado:** a [PR #955](https://github.com/leandrosilveiradepaula/projeto-patty/pull/955) integrou o head `24d2bdd9b8e82c71170ac839461caad16eba6314` depois de oito checks em `completed/success` — `Validate application` e Playwright J1–J7, todos no mesmo SHA e Supabase descartável. A falha J3 descrita no histórico logo abaixo foi **investigada e corrigida na mesma branch antes desse sucesso**; não permanece como check vermelho atual. Não houve uso de dados reais, autenticação Patty ou homologação profissional.
+
+**Gates posteriores:** [PR #957](https://github.com/leandrosilveiradepaula/projeto-patty/pull/957) bloqueou nove E2Es legados que poderiam alterar o SaaS; [PR #958](https://github.com/leandrosilveiradepaula/projeto-patty/pull/958) impôs exclusividade no comando de bootstrap e preservou Auth parcial. A PR #958 passou `Validate application` e [J1 local #39530705893](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39530705893) no head `37d782b4a74dfd3b28f362708f1e31540b09cd82`. Merge `master` `16fba37f09f53f188b8a5258a3ee9d6abe7a0566`, CI pós-merge [`success`](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39531246728) e Vercel produção `READY` no mesmo SHA. As sete suítes não foram reaplicadas juntas nesse merge apenas de segurança; a última prova 8/8 continua a da #955.
+
+**Limite:** arquivos privados da **única administradora Patty** continuam com a migration `20261020191000` bloqueada em produção por múltiplas roles `admin` não reconciliadas. [#950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950) requer decisão humana sobre identidade/roles; [#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951) permanece dependente antes de habilitar o download administrativo pós-encerramento no SaaS. RLS/MFA não foram enfraquecidos, a migration não foi aplicada e nenhuma conta real foi alterada.
+
+**Status correto das sete jornadas:** **tecnicamente recertificadas em CI, integradas e publicadas**, mas **NÃO HOMOLOGADAS OPERACIONALMENTE** pela Patty. Testes com dados e arquivos reais autorizados, revisão mobile e aceite da profissional serão a última tarefa, conforme [runbook conjunto](OPERATIONAL_ACCEPTANCE_RUNBOOK.md).
+
+---
+
 ## 2026-10-20 — J3: contrato de arquivos privados distinto do escopo de avaliação
 
 **FALHA REPRODUZIDA no gate J1–J7:** o E2E J3 executado em Supabase descartável com **duas admins sintéticas** exigia `404` da rota direta `/admin/fotos/[fileId]` para foto de cliente sem assignment, mas recebeu `307`. Isso não é evidência de vazamento real. A regra confirmada do MVP em [`RBAC_RLS.md`](RBAC_RLS.md) permite a exceção de arquivos privados para **uma única admin** com MFA AAL2, independentemente do assignment; uma segunda admin não pertence ao modelo de produção. Não alterar RLS de Storage ou enfraquecer MFA para satisfazer uma negativa inconsistente.

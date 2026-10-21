@@ -1,6 +1,6 @@
 # Bloqueio de E2E legados que usavam o Supabase de produção
 
-**Referência: 20/10/2026. Escopo: segurança técnica, sem regra profissional nova.** O Projeto Patty utiliza o mesmo Supabase SaaS de produção e não cria um segundo projeto staging. A decisão registrada em `DECISIONS.md` em 14/10/2026 proíbe a criação de outra admin na produção e proíbe uso de senha/TOTP pessoal da Patty no GitHub Actions. A homologação conjunta profissional será a última tarefa.
+**Referência: 20/10/2026. Escopo: segurança técnica, sem regra profissional nova.** [PR #957](https://github.com/leandrosilveiradepaula/projeto-patty/pull/957) integrada ao `master` `875bb2f6370a7625250e678348a0333755297c43`; `Validate application` pós-merge `SUCCESS` e Vercel produção `READY` nesse SHA. Nenhuma execução dos smokes aposentados foi disparada para verificar o bloqueio. O Projeto Patty utiliza o mesmo Supabase SaaS de produção e não cria um segundo projeto staging. A decisão registrada em `DECISIONS.md` em 14/10/2026 proíbe a criação de outra admin na produção e proíbe uso de senha/TOTP pessoal da Patty no GitHub Actions. A homologação conjunta profissional será a última tarefa.
 
 ## Fato e risco identificados
 
