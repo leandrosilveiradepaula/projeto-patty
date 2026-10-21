@@ -1,3 +1,15 @@
+## 2026-10-20 — J7: fontes da Anamnese com identificadores ambíguos não seguem para IA
+
+**Fato de leitura de código (sem dado real):** o construtor `lib/ai/anamnesis-review-context.ts` verificava a versão da pergunta, a relação da resposta com submissão/versão e respostas repetidas **para a mesma pergunta**, mas não rejeitava duas perguntas com o mesmo `id` nem o mesmo `answer.id` associado a perguntas diferentes. Isso poderia produzir aliases de evidência não unívocos quando os dados de entrada estivessem inconsistentes. No caso de uma duplicação com `question_key` conflitante, a exclusão de campos informativos poderia tornar-se ambígua. **Não há evidência de que isso tenha ocorrido na produção**.
+
+**Contrato técnico implementado na branch:** `buildAnamnesisReviewContext` rejeita `duplicate_question_id` e `duplicate_answer_id` antes de calcular aplicabilidade, montar fontes e fazer chamada externa. As demais exclusões continuam intactas: endereço, cidade, contatos, Instagram, escolaridade e consentimento permanecem fora do payload, e capacidade financeira segue somente por seleção explícita. Na reconstrução de achados armazenados, um contexto ambíguo produz `null` (falha fechada), **sem alterar histórico ou resultados aprovados**.
+
+**Critérios de aceite:** os dois cenários sintéticos são cobertos por `lib/ai/anamnesis-review-context.test.ts`, com checagem da reconstrução histórica; executar `Validate application` (`test:ai` + typecheck/build) e Playwright J7 em Supabase descartável no mesmo SHA, sem envio real de dados de saúde à OpenAI. Reprovação deve ser corrigida na **mesma branch**. A homologação conjunta da Patty continua por último.
+
+**Fora do escopo:** schema/RLS, migrations, prompts, modelos, dados reais, regras clínicas, fases e publicação. A proteção contra roles administrativas múltiplas continua independente ([#950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950), [#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951)).
+
+---
+
 ## 2026-10-20 — J1: continuidade da interface da cliente após encerramento (em validação)
 
 **Problema reproduzido na leitura do runtime:** a página inicial `app/cliente/page.tsx` promovia check-in diário, anamnese ou feedback pendente como **próxima ação** sem considerar `clients.status`. Isso contradizia a apresentação de `inactive` como cliente fora do acompanhamento ativo em `BUSINESS_RULES.md`, mesmo com o histórico preservado.
