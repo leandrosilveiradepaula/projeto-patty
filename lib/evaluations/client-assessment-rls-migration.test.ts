@@ -5,7 +5,7 @@ import { readFileSync } from "node:fs";
 const sql = readFileSync(
   new URL("../../supabase/migrations/20261012150000_allow_own_finalized_assessment_history.sql", import.meta.url),
   "utf8",
-);
+).replace(/\r\n/g, "\n");
 const page = readFileSync(new URL("../../app/cliente/avaliacoes/page.tsx", import.meta.url), "utf8");
 const access = readFileSync(new URL("../supabase/data-access.ts", import.meta.url), "utf8");
 

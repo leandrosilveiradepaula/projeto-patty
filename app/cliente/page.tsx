@@ -21,6 +21,7 @@ import { loadClientClarificationSummary } from "@/lib/follow-up/client-clarifica
 import { firstPendingClientWeeklyFeedback, firstRespondableClientWeeklyFeedback, orderClientWeeklyFeedbacks } from "@/lib/follow-up/client-weekly-feedback-order";
 import { formatWeeklyFeedbackDueDate } from "@/lib/weekly-feedback/date-format";
 import { clientInAppFeedbackNotices } from "@/lib/notifications/client-in-app-inbox";
+import { currentClientAnamnesisDraft } from "@/lib/anamnesis/client-draft-continuity";
 import styles from "./page.module.css";
 
 function saoPauloDate(value: Date | string) {
@@ -76,9 +77,7 @@ export default async function ClientePage() {
   const clarificationHref = clarificationSummary.firstAwaitingClient
     ? `/cliente/anamnese/${clarificationSummary.firstAwaitingClient.submissionId}/esclarecimentos#esclarecimento-${clarificationSummary.firstAwaitingClient.id}`
     : null;
-  const currentAnamnesisDraft = anamneses.find(
-    (submission) => submission.submitted_at === null,
-  );
+  const currentAnamnesisDraft = currentClientAnamnesisDraft(anamneses);
   const hasSubmittedAnamnesis = anamneses.some(
     (submission) => submission.submitted_at !== null,
   );

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 
 const gateModule = "../../.github/scripts/" + "j1-production-preflight.mjs";
 const { readinessForSyntheticE2E, verifiedEquivalentRuntime } = await import(gateModule);
@@ -67,7 +68,7 @@ test("new E2E scripts parse before any secret or published runtime is available"
  const files=[".github/scripts/j1-production-preflight.mjs","e2e/j1-manual-invitation-handoff.spec.mjs","e2e/client-onboarding-activation.spec.mjs","e2e/j1-local-onboarding.spec.mjs"];
  for(const file of files){
   const absolute=new URL("../../"+file,import.meta.url);
-  assert.doesNotThrow(()=>execFileSync(process.execPath,["--check",absolute.pathname],{stdio:"pipe"}),file);
+  assert.doesNotThrow(()=>execFileSync(process.execPath,["--check",fileURLToPath(absolute)],{stdio:"pipe"}),file);
  }
 });
 

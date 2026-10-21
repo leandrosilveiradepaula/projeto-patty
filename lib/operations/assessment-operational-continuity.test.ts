@@ -82,12 +82,13 @@ test("correction entry matches server note limit and refreshes effective values"
 
 test("professional follow-up refreshes decision history and enforces matching text length", () => {
   const form = read("components/admin/EvaluationProfessionalFollowUpForm.tsx");
+  const normalizedForm = form.replace(/\r\n/g, "\n");
   const action = read("app/admin/avaliacoes/[avaliacaoId]/actions.ts");
-  assert.match(form, /if \(state\.success\)/);
-  assert.match(form, /formRef\.current\?\.reset\(\)/);
-  assert.match(form, /router\.refresh\(\)/);
+  assert.match(normalizedForm, /if \(state\.success\)/);
+  assert.match(normalizedForm, /formRef\.current\?\.reset\(\)/);
+  assert.match(normalizedForm, /router\.refresh\(\)/);
   for (const field of ["difficulty", "adherencePerception", "decisionReason", "pattyObservation"]) {
-    assert.ok(form.includes(`maxLength={4000}\n            disabled={isPending || lockedAfterSuccess}\n            name="${field}"`), field);
+    assert.ok(normalizedForm.includes(`maxLength={4000}\n            disabled={isPending || lockedAfterSuccess}\n            name="${field}"`), field);
   }
   assert.match(action, /createAccessibleProfessionalFollowUp\(/);
 });

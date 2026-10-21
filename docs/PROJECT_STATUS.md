@@ -1,3 +1,15 @@
+## 2026-10-21 — Macrobloco J1–J3: continuidade de rascunhos e validação portátil
+
+**FATO CONFIRMADO:** a entrada de Anamnese considerava apenas rascunhos da versão atualmente publicada. Um rascunho ativo de versão anterior podia ficar sem atalho de retomada e a interface ainda oferecia iniciar outro registro. A lista principal também selecionava o primeiro retorno sem uma ordenação factual explícita.
+
+**CORREÇÃO TÉCNICA LIMITADA:** a cliente agora vê todos os rascunhos ativos ordenados por `created_at` (com desempate estável pelo identificador) e retoma o registro exato; enquanto houver rascunho, a interface não oferece criar outro. A mudança não altera submissões, versões, histórico, Auth, RLS, schema, migrations, permissões nem regras profissionais. J2 e J3 foram auditadas contra seus contratos atuais e mantêm histórico, estados explícitos e decisões humanas já implementados; nenhuma nova regra clínica foi criada.
+
+**EVIDÊNCIA TÉCNICA:** os testes determinísticos de Anamnese, feedback/cliente, avaliações e operações cobrem o comportamento e os limites de acesso. Testes estáticos de J1/J3 foram tornados portáveis entre Windows e Linux sem reduzir a asserção executada no runner Linux. A jornada Playwright local depende de Supabase/Docker descartável; a ausência de Docker nesta estação não é `PASS` e exige os gates sintéticos de CI no SHA da PR.
+
+**PENDÊNCIAS:** a homologação operacional conjunta da Patty continua última etapa e não é inferida de testes automatizados. Os bloqueios independentes de reconciliação administrativa e da migration Storage continuam em [#950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950) e [#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951).
+
+---
+
 ## 2026-10-20 — J7: resposta e estado terminal contraditórios falham fechados (pacote em teste)
 
 **Problema confirmado no código, sem evidência de ocorrência no SaaS:** o extrator de resposta estruturada `extractOpenAiStructuredOutput` mantinha apenas o último `output_text` quando o provider devolvia mais de um candidato; um primeiro texto era silenciosamente descartado. Além disso, a guarda inicial `assertAiExecutionBelongsToSubmission` podia aceitar `status=completed` com `completed_at` e `failed_at` ao mesmo tempo. A apresentação posterior `presentStoredAiReview` já recusava o estado contraditório; este pacote alinha a guarda anterior às RPCs com essa regra.
