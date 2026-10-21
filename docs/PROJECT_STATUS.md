@@ -1,3 +1,15 @@
+## 2026-10-20 — Baseline publicada após J1 #953/#954 e recertificação integral J1–J7
+
+**HEAD/publicação verificados:** `master` `a16234e528f4c8ba4bc3422df744547251b5babd`, merge da [PR #954](https://github.com/leandrosilveiradepaula/projeto-patty/pull/954), [`Validate application` pós-merge `SUCCESS`](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39525373760) e Vercel produção `READY` no mesmo SHA (`dpl_DegwY7D6HtWfCF2F6L2wRWzgSdaC`). A [PR #953](https://github.com/leandrosilveiradepaula/projeto-patty/pull/953) entrou antes, no merge `665d9875c652e2b6c729d8328f4a31e5fe5aecba`, com acesso da cliente titular aos arquivos liberados após o fim do assignment testado no Supabase descartável.
+
+**Escopo funcional já comprovado em CI local:** a #954 exercitou encerramento **pela UI administrativa com MFA AAL2**, preservou histórico de assignment, passou a cliente para `inactive`, manteve o acesso da titular e a exceção de arquivos da única admin, sem ampliar acesso de outra cliente. `Validate application`, J1, J6 e J7 passaram no mesmo head pré-merge `2b250aa68f8a9af9c259dcd7e7cbd9bfe974a853`. Isso **não** comprova todas as sete suítes no head mais recente nem homologação profissional.
+
+**Próxima execução:** disparar os workflows sintéticos J1–J7 no mesmo head de PR pela alteração deliberada de [`PREHOMOLOGATION_MATRIX.md`](PREHOMOLOGATION_MATRIX.md); exigir oito sucessos antes de merge, depois CI pós-merge e Vercel `READY` no SHA integrado. Não alterar runtime/RLS/migrations para obter aprovação.
+
+**Bloqueio de produção separado:** consulta agregada read-only confirmou múltiplos perfis com `user_roles.role=admin`, RLS do Storage/arquivos ativa e policy de MFA restritiva presente. A migration `20261020191000` permanece **não aplicada** no Supabase SaaS; [#950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950) e [#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951) exigem reconciliação de autorização humana antes de qualquer aplicação. Nenhuma identidade real foi alterada. A rodada conjunta de homologação da Patty segue **por último**, não iniciada.
+
+---
+
 ## 2026-10-20 — Guard de migração de arquivos privados: teste real de rejeição sem alterar a produção
 
 **HEAD de referência:** `master` `d4feba572eb4ac0dfbecd5ac4859263d9e464f60`, PR [#949](https://github.com/leandrosilveiradepaula/projeto-patty/pull/949) integrada, CI pós-merge `SUCCESS` e Vercel produção `READY` no mesmo commit. O workflow de migrations só fez **dry-run**; a migration `20261020191000_fix_private_storage_admin_read_after_assignment.sql` continua **não aplicada** ao Supabase hospedado.

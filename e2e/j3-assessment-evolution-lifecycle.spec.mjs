@@ -409,7 +409,7 @@ test("J3: MFA, corrected measurements, two private photos, return and RLS", asyn
       await mobileWidth(page);
     });
 
-    await test.step("Forged record, wrong-client photo and draft never reveal comparison",async()=>{
+    await test.step("Forged record, wrong-client photo selection and draft never reveal comparison",async()=>{
       await page.goto(pairRoute + "?referencia=" + olderId + "&comparacao=" + foreignId);
       await expect(page.getByText("Seleção indisponível",{exact:true})).toBeVisible();
       await expect(page.locator("#comparacao-resultados")).toHaveCount(0);
@@ -422,11 +422,15 @@ test("J3: MFA, corrected measurements, two private photos, return and RLS", asyn
       await page.goto("/admin/avaliacoes/" + newerId +
         "?pareamentoReferencia=" + olderId + "&pareamentoComparacao=" + foreignId);
       await expect(page.getByRole("link",{name:"Voltar à comparação de avaliações e fotos"})).toHaveCount(0);
-      const wrongPhoto = await page.request.get("/admin/fotos/" + photoForeign,{maxRedirects:0});
-      expect(wrongPhoto.status()).toBe(404);
+      // The comparison page itself must reject a foreign photo. Direct
+      // /admin/fotos authorization is intentionally governed by the separate
+      // sole-admin private-file exception, not by J3 assignment RLS. This
+      // disposable fixture has two administrative roles for assessment
+      // isolation, so asserting an admin 404 here would contradict RBAC_RLS.
+      // Never infer that a second admin is authorized in production.
     });
 
-    await test.step("Unassigned admin and other client cannot read records or private files",async()=>{
+    await test.step("Unassigned admin and other client cannot read J3 records; client private files stay isolated",async()=>{
       const wrongPage = await denied.newPage();
       await loginAdminWithMfa(wrongPage,{
         email: unassigned.email,password:unassigned.password,totpSecret:otherTotp,
@@ -434,8 +438,9 @@ test("J3: MFA, corrected measurements, two private photos, return and RLS", asyn
       await wrongPage.goto(pairRoute+"?referencia="+olderId+"&comparacao="+newerId);
       await expect(wrongPage.getByText("Página ou registro indisponível",{exact:true})).toBeVisible();
       await expect(wrongPage.getByText("71 kg",{exact:true})).toHaveCount(0);
-      const photoRequest = await wrongPage.request.get("/admin/fotos/" + photoA,{maxRedirects:0});
-      expect(photoRequest.status()).toBe(404);
+      // J3 assessment data must be denied without assignment. File download
+      // authorization for admins is a separate exception tested by J1 under
+      // the sole-admin MVP; this fixture's second admin must not redefine it.
       const visitor = await anonymous.newPage();
       await visitor.goto(pairRoute);
       await expect(visitor).toHaveURL(/\/login\/?$/);
