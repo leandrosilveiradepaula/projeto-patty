@@ -18,7 +18,7 @@ import {
 import Link from "next/link";
 import { latestPublishedTrainingVersion } from "@/lib/training/published-versions";
 import { loadClientClarificationSummary } from "@/lib/follow-up/client-clarification-summary-loader";
-import { firstPendingClientWeeklyFeedback, firstRespondableClientWeeklyFeedback } from "@/lib/follow-up/client-weekly-feedback-order";
+import { firstPendingClientWeeklyFeedback, firstRespondableClientWeeklyFeedback, orderClientWeeklyFeedbacks } from "@/lib/follow-up/client-weekly-feedback-order";
 import { formatWeeklyFeedbackDueDate } from "@/lib/weekly-feedback/date-format";
 import { clientInAppFeedbackNotices } from "@/lib/notifications/client-in-app-inbox";
 import styles from "./page.module.css";
@@ -88,8 +88,9 @@ export default async function ClientePage() {
   const pendingFeedbackHref = firstPendingFeedback
     ? `/cliente/feedback-semanal#feedback-pendente-${firstPendingFeedback.id}`
     : null;
-  const otherPendingFeedbacks = weeklyFeedbacks
+  const otherPendingFeedbacks = orderClientWeeklyFeedbacks(weeklyFeedbacks)
     .filter(feedback => feedback.submitted_at === null && feedback.id !== firstPendingFeedback?.id)
+    .filter(feedback => firstRespondableClientWeeklyFeedback([feedback]) !== null)
     .slice(0, 5);
   const pendingWeeklyFeedbackIds = new Set(
     weeklyFeedbacks
