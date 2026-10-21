@@ -1,5 +1,9 @@
-name: E2E post-migration runtime smoke
+name: "LEGADO BLOQUEADO - E2E post-migration runtime smoke"
 
+# Disabled by the documented production-only Patty administrator decision.
+# Historical implementation remains accessible through Git history.
+# It must not create synthetic identities/records, use production TOTP,
+# alter assignments or upload private files in the hosted Supabase.
 on:
   workflow_dispatch:
 
@@ -7,57 +11,21 @@ permissions:
   contents: read
 
 jobs:
-  post-migration-runtime:
-    if: github.ref == 'refs/heads/master'
+  legacy-smoke-blocked:
+    if: github.repository == 'leandrosilveiradepaula/projeto-patty'
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 2
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          persist-credentials: false
-
-      - name: Set up Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
-        with:
-          node-version: "22"
-          cache: npm
-
-      - name: Validate E2E secrets
+      - name: Block historical production E2E without loading secrets
         shell: bash
-        env:
-          E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
-          E2E_SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.E2E_SUPABASE_SECRET_KEY }}
         run: |
-          set -euo pipefail
-          for name in E2E_BASE_URL E2E_SUPABASE_SECRET_KEY; do
-            test -n "${!name}" || { echo "::error::Missing required E2E secret: ${name}"; exit 1; }
-          done
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Create synthetic canonical client
-        env:
-          E2E_SUPABASE_URL: "https://hqanoskwjvpbgavppcud.supabase.co"
-          E2E_SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.E2E_SUPABASE_SECRET_KEY }}
-        run: node e2e/setup-canonical-anamnesis-client.mjs
-
-      - name: Install Playwright
-        run: |
-          npm install --no-save --package-lock=false @playwright/test@1.55.0
-          npx playwright install --with-deps chromium
-
-      - name: Verify authenticated post-migration client journey
-        env:
-          E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
-          E2E_SUPABASE_URL: "https://hqanoskwjvpbgavppcud.supabase.co"
-          E2E_SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.E2E_SUPABASE_SECRET_KEY }}
-        run: npx playwright test e2e/post-migration-runtime.spec.mjs --reporter=line
-
-      - name: Cleanup synthetic canonical client
-        if: always()
-        env:
-          E2E_SUPABASE_URL: "https://hqanoskwjvpbgavppcud.supabase.co"
-          E2E_SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.E2E_SUPABASE_SECRET_KEY }}
-        run: node e2e/cleanup-canonical-anamnesis-client.mjs
+          {
+            echo "### BLOQUEADO: smoke legado de runtime pos-migration"
+            echo ""
+            echo "Este workflow NAO executa testes nem acessa credenciais do Supabase SaaS."
+            echo "A decisao vigente proibe identidades sintéticas administrativas na producao e testes que alterem dados reais/historicos."
+            echo "Use os workflows Validate J1-J7 com Supabase descartavel para cobertura tecnica."
+            echo "Homologacao da Patty com sua sessao autorizada permanece a ultima etapa."
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "::error::Legacy production E2E disabled; see docs/LEGACY_PRODUCTION_E2E_BLOCK.md"
+          exit 1
