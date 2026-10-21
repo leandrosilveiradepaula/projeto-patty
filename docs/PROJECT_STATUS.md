@@ -1,3 +1,13 @@
+## 2026-10-21 — #970: bloqueio de publicação GitHub → Vercel confirmado antes do build
+
+**FATOS VERIFICADOS:** a PR #969 foi integrada em `master` no commit `28c1db08f2c97f2153c5f0788151f00e5e413f84`. O projeto Vercel continua vinculado ao repositório GitHub `leandrosilveiradepaula/projeto-patty`, com `master` como production branch, e o `vercel.json` permite deployment de `master`. A listagem de deployments e a atividade do projeto não contêm objeto, estado, log ou check da Vercel para esse SHA; a produção permanece `READY` no SHA anterior `304024d6618ad8f2fd9b4497ce30674e5f85b341`.
+
+**DIAGNÓSTICO LIMITADO:** no feed público do GitHub, o merge da #969 aparece como `PullRequestEvent`, mas não há o `PushEvent` correspondente para `refs/heads/master`; também não foi iniciado o workflow `Validate application` pelo gatilho `push` nesse SHA (a validação existente foi manual). Como a Vercel não recebeu nem criou um deployment, não há log de build a depurar. Isso localiza a interrupção antes do build da Vercel, mas não identifica com segurança se a origem foi supressão/entrega do evento GitHub ou a autorização/entrega da GitHub App. A consulta de instalação da App não está disponível à credencial de diagnóstico atual.
+
+**NÃO EXECUTADO:** nenhuma configuração GitHub/Vercel, webhook, integração, branch de produção, redeploy, push artificial ou alias foi alterado. A retomada exige operador humano com acesso à integração para inspecionar/reautorizar as entregas e, separadamente, autorização explícita para qualquer recuperação controlada de produção. Este registro não declara o commit publicado nem altera os bloqueios [#950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950)/[#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951); a homologação da Patty continua pendente.
+
+---
+
 ## 2026-10-21 — Macrobloco J4–J6: contexto administrativo e liberação humana verificáveis
 
 **FATO CONFIRMADO:** no apoio factual ao rascunho de protocolo (J4), a escolha da “última Anamnese enviada” era derivada da ordem de criação do registro. Um rascunho iniciado antes e enviado depois podia, portanto, perder precedência para uma submissão criada mais recentemente. Não há evidência de ocorrência no SaaS; a inconsistência foi identificada por inspeção do fluxo e coberta com cenário sintético.
