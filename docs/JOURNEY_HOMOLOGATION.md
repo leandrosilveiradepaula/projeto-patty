@@ -1,22 +1,32 @@
+## 2026-10-20 — J7: ambiguidade do provider e estado terminal contraditório (em validação)
+
+**Fato do runtime:** `extractOpenAiStructuredOutput` selecionava o último texto estruturado quando o envelope `completed` possuía mais de um `output_text`, sem registrar que havia múltiplos candidatos. Na guarda de server actions `assertAiExecutionBelongsToSubmission`, um registro `completed` com `completed_at` válido e `failed_at` não nulo podia alcançar a etapa seguinte de leitura/validação; a apresentação `presentStoredAiReview` já bloqueava essa condição mais tarde. Não há evidência de exploração ou casos reais no SaaS.
+
+**Mudança preparada:** rejeitar dois ou mais candidatos `output_text` como `ambiguous_output_text`, mantendo a retenção auditável de falha já existente; permitir um único texto com metadados `reasoning` e preservar a detecção de `refusal`. Rejeitar `completed` contraditório ou timestamp inválido **antes de acessar a RPC privilegiada**. Os testes da J7 são sintéticos, sem provider externo e sem publicar achados automaticamente.
+
+**Critérios:** `npm run test:ai`, `Validate application` e Playwright J7 em Supabase descartável `SUCCESS` no commit exato, revisão do diff, CI pós-merge e Vercel `READY`. Não altera RLS, schema, prompts, direitos de dados, regras clínicas ou histórico. Reconciliar roles `admin` (#950) e migration de Storage (#951) continua tarefa humana separada; homologação da Patty é a última etapa.
+
+---
+
 ## 2026-10-20 — J7: fontes da Anamnese com identificadores ambíguos não seguem para IA
 
 **Fato de leitura de código (sem dado real):** o construtor `lib/ai/anamnesis-review-context.ts` verificava a versão da pergunta, a relação da resposta com submissão/versão e respostas repetidas **para a mesma pergunta**, mas não rejeitava duas perguntas com o mesmo `id` nem o mesmo `answer.id` associado a perguntas diferentes. Isso poderia produzir aliases de evidência não unívocos quando os dados de entrada estivessem inconsistentes. No caso de uma duplicação com `question_key` conflitante, a exclusão de campos informativos poderia tornar-se ambígua. **Não há evidência de que isso tenha ocorrido na produção**.
 
 **Contrato técnico implementado na branch:** `buildAnamnesisReviewContext` rejeita `duplicate_question_id` e `duplicate_answer_id` antes de calcular aplicabilidade, montar fontes e fazer chamada externa. As demais exclusões continuam intactas: endereço, cidade, contatos, Instagram, escolaridade e consentimento permanecem fora do payload, e capacidade financeira segue somente por seleção explícita. Na reconstrução de achados armazenados, um contexto ambíguo produz `null` (falha fechada), **sem alterar histórico ou resultados aprovados**.
 
-**Critérios de aceite:** os dois cenários sintéticos são cobertos por `lib/ai/anamnesis-review-context.test.ts`, com checagem da reconstrução histórica; executar `Validate application` (`test:ai` + typecheck/build) e Playwright J7 em Supabase descartável no mesmo SHA, sem envio real de dados de saúde à OpenAI. Reprovação deve ser corrigida na **mesma branch**. A homologação conjunta da Patty continua por último.
+**Evidência confirmada:** [PR #961](https://github.com/leandrosilveiradepaula/projeto-patty/pull/961) integrada com quatro checks `SUCCESS` (validação geral, J1, J6 e J7) no mesmo head `75bc5b7d13378a7f5d40de4162c9698f8aaf9d93`, sem envio de dados reais à OpenAI; [CI pós-merge #39537842784](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39537842784) `success`, Vercel `READY` em `700933e58b2dd6ce2ad925a3d24659e9b674350d`. Homologação conjunta Patty permanece por último.
 
 **Fora do escopo:** schema/RLS, migrations, prompts, modelos, dados reais, regras clínicas, fases e publicação. A proteção contra roles administrativas múltiplas continua independente ([#950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950), [#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951)).
 
 ---
 
-## 2026-10-20 — J1: continuidade da interface da cliente após encerramento (em validação)
+## 2026-10-20 — J1: continuidade da interface da cliente após encerramento (PR #960 integrada)
 
 **Problema reproduzido na leitura do runtime:** a página inicial `app/cliente/page.tsx` promovia check-in diário, anamnese ou feedback pendente como **próxima ação** sem considerar `clients.status`. Isso contradizia a apresentação de `inactive` como cliente fora do acompanhamento ativo em `BUSINESS_RULES.md`, mesmo com o histórico preservado.
 
 **Escopo de UX/produto:** quando `clients.status=inactive`, o painel exibe “Acompanhamento inativo”, prioriza “Consultar meu histórico” e mantém links de registros, avaliações, arquivos, conteúdos, protocolo e treino já acessíveis. A sugestão de tarefa diária e seus avisos deixam de aparecer na **home**; **nenhum** endpoint, autorização, direito de leitura, ação de check-in, rascunho, release ou regra do método foi alterado. As telas próprias de cada área e os dados anteriores não foram apagados ou desabilitados. Uma eventual regra de bloqueio de novas escritas para cliente inativa **não foi inferida** e permanece fora de escopo.
 
-**Evidência exigida:** testes unitários/estáticos de continuidade do painel e Playwright J1 em Supabase descartável: a admin AAL2 encerra o assignment pela UI, `clients.status` torna-se `inactive`, a cliente vê a home histórica sem CTA diário e ainda pode abrir arquivos previamente liberados; outra cliente continua negada. `Validate application` e J1 devem passar no mesmo head. Homologação operacional da Patty permanece reservada ao final.
+**Evidência confirmada:** [PR #960](https://github.com/leandrosilveiradepaula/projeto-patty/pull/960) integrada após quatro checks `SUCCESS`, incluindo Playwright J1 em Supabase descartável com encerramento pela UI autenticada AAL2, home de cliente `inactive` e preservação do acesso a arquivos previamente liberados. [CI pós-merge #39535662555](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39535662555) `success`, Vercel `READY` no merge `bb2ee64d9e6239489ca72feea42ad6c294f3773c`. Homologação operacional Patty permanece ao final.
 
 ---
 

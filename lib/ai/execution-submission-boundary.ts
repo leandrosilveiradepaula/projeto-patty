@@ -29,7 +29,11 @@ export function assertAiExecutionBelongsToSubmission(
   if (expectedState === "started" && (match.completed_at || match.failed_at)) {
     throw new AiExecutionScopeError();
   }
-  if (expectedState === "completed" && !match.completed_at) {
+  if (expectedState === "completed" && (
+    !match.completed_at ||
+    !Number.isFinite(Date.parse(match.completed_at)) ||
+    match.failed_at !== null
+  )) {
     throw new AiExecutionScopeError();
   }
 }

@@ -25,6 +25,7 @@ export type OpenAiStructuredExtractionResult =
         | "response_not_completed"
         | "refusal"
         | "missing_output_text"
+        | "ambiguous_output_text"
         | "invalid_json";
       message: string;
     };
@@ -188,7 +189,7 @@ export function extractOpenAiStructuredOutput(
     };
   }
 
-  let outputText: string | null = null;
+  const outputTexts: string[] = [];
 
   for (const item of response.output) {
     if (!isRecord(item) || item.type !== "message" || !Array.isArray(item.content)) {
@@ -209,12 +210,22 @@ export function extractOpenAiStructuredOutput(
       }
 
       if (content.type === "output_text" && typeof content.text === "string") {
-        outputText = content.text;
+        outputTexts.push(content.text);
       }
     }
   }
 
-  if (!outputText) {
+  // Do not silently choose the last of multiple structured candidates.
+  // The existing failure ledger retains the raw response for audit instead.
+  if (outputTexts.length > 1) {
+    return {
+      ok: false,
+      code: "ambiguous_output_text",
+      message: "OpenAI response included multiple structured output texts.",
+    };
+  }
+
+  if (outputTexts.length === 0 || !outputTexts[0]) {
     return {
       ok: false,
       code: "missing_output_text",
@@ -223,7 +234,7 @@ export function extractOpenAiStructuredOutput(
   }
 
   try {
-    return { ok: true, value: JSON.parse(outputText) };
+    return { ok: true, value: JSON.parse(outputTexts[0]) };
   } catch {
     return {
       ok: false,

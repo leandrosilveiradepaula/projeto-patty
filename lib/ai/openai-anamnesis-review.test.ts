@@ -174,6 +174,56 @@ test("extracts structured output and detects refusal/incomplete responses", () =
   );
 });
 
+test("rejects multiple structured text candidates rather than silently selecting the last", () => {
+  const ambiguous = extractOpenAiStructuredOutput({
+    status: "completed",
+    output: [
+      { type: "reasoning", summary: [] },
+      { type: "message", content: [{ type: "output_text", text: '{"findings":[]}' }] },
+      { type: "message", content: [{ type: "output_text", text: '{"findings":[{"type":"missing_answer"}]}' }] },
+    ],
+  });
+  assert.deepEqual(ambiguous, {
+    ok: false,
+    code: "ambiguous_output_text",
+    message: "OpenAI response included multiple structured output texts.",
+  });
+
+  assert.equal(extractOpenAiStructuredOutput({
+    status: "completed",
+    output: [{
+      type: "message",
+      content: [
+        { type: "output_text", text: "" },
+        { type: "output_text", text: '{"findings":[]}' },
+      ],
+    }],
+  }).ok, false, "blank extra output still makes response ambiguous");
+
+  // Reasoning metadata or unrelated output item types do not create another
+  // candidate, and a genuine provider refusal still rejects the response.
+  assert.deepEqual(extractOpenAiStructuredOutput({
+    status: "completed",
+    output: [
+      { type: "reasoning", summary: [] },
+      { type: "message", content: [{ type: "output_text", text: '{"findings":[]}' }] },
+    ],
+  }), { ok: true, value: { findings: [] } });
+
+  const refused = extractOpenAiStructuredOutput({
+    status: "completed",
+    output: [
+      { type: "message", content: [{ type: "output_text", text: '{"findings":[]}' }] },
+      { type: "message", content: [{ type: "refusal", refusal: "I cannot help." }] },
+    ],
+  });
+  assert.deepEqual(refused, {
+    ok: false,
+    code: "refusal",
+    message: "OpenAI refused the Anamnese review request.",
+  });
+});
+
 test("validates prompt content shape", () => {
   assert.deepEqual(
     parseAnamnesisReviewPromptContent({
