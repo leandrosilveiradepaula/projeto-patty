@@ -1,3 +1,13 @@
+## 2026-10-21 — Incidente MFA administrativo após F5: erro identificado e correção em PR
+
+**FATO TÉCNICO:** durante a ativação do MFA da administradora, o recarregamento da tela `/mfa/admin/setup` provocou `mfa_factor_name_conflict` (HTTP 422) porque o componente chamava `mfa.enroll()` automaticamente enquanto permanecia um TOTP **não verificado** com o mesmo nome. A causa foi observada em logs agregados do Auth, sem identificar usuário nem exibir token/segredo. O QR/chave da tentativa anterior foram expostos em captura e **não devem ser usados**. Não associar titularidade administrativa a email, MFA ou nome exibido sem conferir a identidade em ambiente privado.
+
+**CORREÇÃO PROPOSTA, AINDA NÃO INTEGRADA:** [issue #980](https://github.com/leandrosilveiradepaula/projeto-patty/issues/980) implementa inspeção de `mfa.listFactors().data.all` na montagem (sem criar ou excluir fator); TOTP verificado vai para challenge; pendência TOTP com nome exato só pode ser descartada por clique explícito na sessão do próprio usuário e após reconferência, gerando novo QR; fatores verificados, de outro tipo/nome ou situações ambíguas nunca são removidos. Foram adicionados testes do contrato de MFA e segurança. Alteração Auth **sensível** exige revisão específica/merge manual e prova de publicação no SHA integrado.
+
+**PRODUÇÃO:** enquanto a PR não for integrada e publicada, o comportamento atual ainda exibirá `MFA indisponível` na recarga. Não repetir F5 como tentativa de correção nem usar a chave exposta. Não foi alterado nenhum fator, senha, role, RLS, Storage ou dado de produção nesta tarefa. A reconciliação #950, migration #951 e homologação operacional final permanecem pendentes.
+
+---
+
 ## 2026-10-21 — Controle preventivo de merges e publicação (PR em avaliação)
 
 **BASE VERIFICADA:** a PR #975 completou 8/8 checks técnicos no mesmo head `4e2d8fb2716ab1fec40dcbc7c92471aa6fb53298`, foi integrada à `master` em `1238b98c98469047e39fcf32377f7fd699be14fa`, e o `Validate application` pós-merge de evento `push` [#39627204390](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39627204390) passou. A Vercel **não criou deployment automaticamente** para esse SHA; após recuperação explícita autorizada, [dpl_6j6UdqWhtGMK3RUQZ2v3gEtk1Qhp](https://vercel.com/leandros-projects-102e32ab/projeto-patty/6j6UdqWhtGMK3RUQZ2v3gEtk1Qhp) ficou `READY` no mesmo SHA e recebeu os aliases, inclusive `projeto-patty.vercel.app`. #970 continua aberta para a causa intermitente do gatilho automático.
