@@ -1,4 +1,4 @@
-import { prepareClientPendingFeedback } from "@/lib/weekly-feedback/client-pending-summary";
+import { prepareClientPendingFeedback } from "../weekly-feedback/client-pending-summary.ts";
 import type { Json } from "@/lib/supabase/database.types";
 export type ClientWeeklyFeedbackFact = {
   id: string;
