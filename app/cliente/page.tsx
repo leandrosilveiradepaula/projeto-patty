@@ -261,7 +261,7 @@ export default async function ClientePage() {
                 {clarificationSummary.awaitingProfessional} esclarecimento(s) respondido(s) aguardam revisão da Patty.
                 Seus complementos continuam registrados; você não precisa reenviar a Anamnese.
               </p>
-        ) : null}
+            ) : null}
           </>
         ) : null}
       </Section>
