@@ -18,7 +18,7 @@ import {
 import Link from "next/link";
 import { latestPublishedTrainingVersion } from "@/lib/training/published-versions";
 import { loadClientClarificationSummary } from "@/lib/follow-up/client-clarification-summary-loader";
-import { firstPendingClientWeeklyFeedback } from "@/lib/follow-up/client-weekly-feedback-order";
+import { firstPendingClientWeeklyFeedback, firstRespondableClientWeeklyFeedback } from "@/lib/follow-up/client-weekly-feedback-order";
 import { formatWeeklyFeedbackDueDate } from "@/lib/weekly-feedback/date-format";
 import { clientInAppFeedbackNotices } from "@/lib/notifications/client-in-app-inbox";
 import styles from "./page.module.css";
@@ -82,7 +82,8 @@ export default async function ClientePage() {
   const hasSubmittedAnamnesis = anamneses.some(
     (submission) => submission.submitted_at !== null,
   );
-  const firstPendingFeedback = firstPendingClientWeeklyFeedback(weeklyFeedbacks);
+  const firstPendingFeedback = firstRespondableClientWeeklyFeedback(weeklyFeedbacks);
+  const hasUnanswerablePendingFeedback = firstPendingFeedback === null && firstPendingClientWeeklyFeedback(weeklyFeedbacks) !== null;
   const pendingFeedbackDeadline = firstPendingFeedback?.due_at ? formatWeeklyFeedbackDueDate(firstPendingFeedback.due_at) : null;
   const pendingFeedbackHref = firstPendingFeedback
     ? `/cliente/feedback-semanal#feedback-pendente-${firstPendingFeedback.id}`
@@ -146,7 +147,15 @@ export default async function ClientePage() {
             href: pendingFeedbackHref,
             label: "Responder Feedback Semanal",
           }
-        : hasPendingDailyCheckin
+        : hasUnanswerablePendingFeedback
+      ? {
+          badge: "Atenção",
+          badgeVariant: "warning" as const,
+          description: "Existe um Feedback Semanal pendente, mas o formulário versionado está indisponível. Consulte a solicitação e entre em contato com a Patty.",
+          href: "/cliente/feedback-semanal",
+          label: "Ver feedback indisponível",
+        }
+    : hasPendingDailyCheckin
           ? {
               badge: "Hoje",
               badgeVariant: "neutral" as const,
