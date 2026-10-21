@@ -11,7 +11,10 @@ test("client dashboard and in-app inbox deep link opens the exact pending feedba
   assert.match(read("app/cliente/avisos/page.tsx"), /feedback-pendente-\$\{feedback.id\}/);
   assert.match(page, /id=\{\x60feedback-pendente-\$\{feedback.id\}\x60\}/);
   assert.match(page, /<ClientHistoryDisclosure/);
-  assert.match(page, /defaultOpen=\{feedbackIndex === 0\}/);
+  assert.match(page, /firstRespondableFeedbackId =/);
+  assert.match(page, /entry\.definition !== null/);
+  assert.match(page, /defaultOpen=\{respondNow \|\| \(firstRespondableFeedbackId === null && feedbackIndex === 0\)\}/);
+  assert.match(page, /!definition \? "Indisponível" : respondNow \? "Responder agora" : "Pendente"/);
   assert.match(disclosure, /window.addEventListener\("hashchange", revealTarget\)/);
   assert.match(disclosure, /details.open = true/);
   assert.match(page, /id=\{\x60feedback-enviado-\$\{feedback.id\}\x60\}/);
