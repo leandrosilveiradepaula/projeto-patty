@@ -1,3 +1,17 @@
+## 2026-10-20 — Provisionamento da admin única: preflight de exclusividade (pacote em validação)
+
+**FATO:** o workflow manual `bootstrap-patty-admin.yml` executava `scripts/bootstrap-admin.ts` com a chave privilegiada do SaaS e, apesar da confirmação `BOOTSTRAP_PATTY`, o script ainda poderia criar uma **segunda** role administrativa para outra identidade. Consulta de metadados read-only confirmou múltiplas roles `admin` atualmente, sem identificação de titulares ou inferência de ilegitimidade. A migration `20261020191000` permanece não aplicada.
+
+**DECISÃO VIGENTE:** somente uma admin de negócio (Patty) no MVP; não criar identidades extras para teste. **CORREÇÃO TÉCNICA PROPOSTA:** o script consulta contagem exata de admins antes de qualquer convite; recusa contagens inválidas ou multiplicidade, recusa convite/promoção de segunda admin, permite primeiro provisionamento com zero roles ou confirmação idempotente do perfil único. Novos testes de unidade e boundary verificam o preflight antes de qualquer escrita. O workflow manual e sua confirmação continuam intactos.
+
+**PRESERVAÇÃO DE AUTH:** a compensação em erro do mesmo bootstrap deixou de excluir automaticamente a identidade retornada por `inviteUserByEmail`. Somente linhas relacionais cuja inserção tenha sido confirmada nesta execução podem ser compensadas; uma identidade Auth parcialmente provisionada fica para reconciliação humana, conforme `OPEN_QUESTIONS.md`. Não há execução contra o SaaS neste pacote.
+
+**NÃO EXECUTADO EM PRODUÇÃO:** nenhuma identidade Auth/role/MFA/assignment foi lida nominalmente, criada, removida ou modificada; nenhuma migration/policy foi aplicada. O guard do bootstrap **não substitui** a RLS nem impede todos os caminhos externos de concessão de admin. [Procedimento para revisão humana privada](ADMIN_IDENTITY_RECONCILIATION.md), issues [#950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950)/[#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951).
+
+**ACEITE:** `Validate application` e `test:onboarding`/`test:security-boundaries` no SHA da PR, diff de script de provisionamento revisado especificamente, merge elegível, CI pós-merge e Vercel `READY` no commit publicado. Este registro é **anterior** à validação/merge e não os declara concluídos. Homologação da Patty continua última etapa.
+
+---
+
 ## 2026-10-20 — Gate proposto contra E2E legados em produção (pacote em validação)
 
 **FATO AUDITADO:** o `master` `d4ebf523ec3a1d860577281550634776017881be` tinha nove workflows manuais (`e2e-admin-anamnesis-corrections`, `e2e-admin-private-files`, `e2e-anamnesis-clarifications`, `e2e-client-anamnesis-canonical-consent`, `e2e-client-anamnesis-canonical-start`, `e2e-client-anamnesis-conditional-submit`, `e2e-end-client-assignment`, `e2e-post-migration-runtime`, `e2e-private-files`) com passos operacionais apontando para Supabase SaaS e/ou autenticação de admin sintética via GitHub. Mesmo com dados sintéticos, podiam persistir alterações reais em Auth/Storage/histórico de produção. Não há evidência nesta inspeção de execuções indevidas recentes.

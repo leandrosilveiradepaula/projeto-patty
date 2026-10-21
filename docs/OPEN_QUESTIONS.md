@@ -1,5 +1,7 @@
 ## PENDÊNCIA DE SEGURANÇA PRIORITÁRIA — múltiplos perfis `admin` na produção (20/10/2026)
 
+**PROCEDIMENTO HUMANO NÃO EXECUTADO:** [ADMIN_IDENTITY_RECONCILIATION.md](ADMIN_IDENTITY_RECONCILIATION.md) organiza a conferência privada de titulares, decisões e gate antes da migration. O novo preflight de `scripts/bootstrap-admin.ts` impede **esse provisionador** de criar outra role admin quando já existe uma, mas **não** reconcilia as identidades existentes nem substitui decisão humana. Nenhuma role foi modificada.
+
 ### FATO CONFIRMADO POR CONSULTA AGREGADA READ-ONLY
 O Supabase de produção contém **mais de um perfil com `user_roles.role='admin'`**, todos com identidade Auth existente; a verificação de MFA está restrita à auditoria privada; não publicar contagens de fatores. Foram consultadas **somente contagens agregadas**, sem nomes, emails, IDs de usuários, dados de cliente ou arquivos. Não concluir que algum deles é indevido, que houve vazamento ou que a conta com MFA pertence à Patty sem validação humana.
 
