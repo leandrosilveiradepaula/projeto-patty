@@ -141,8 +141,10 @@ try {
       cleanupFailed ||= Boolean(profileCleanup.error);
     }
 
-    const authCleanup = await admin.auth.admin.deleteUser(user.id);
-    cleanupFailed ||= Boolean(authCleanup.error);
+    // An Auth invitation response does not prove the returned identity was
+    // newly created by this attempt. Preserve Auth and flag reconciliation
+    // rather than risking deletion of a pre-existing account.
+    // Only relational rows positively inserted above may be compensated.
   }
 
   if (cleanupFailed) {
