@@ -1,3 +1,17 @@
+## 2026-10-20 — Gate proposto contra E2E legados em produção (pacote em validação)
+
+**FATO AUDITADO:** o `master` `d4ebf523ec3a1d860577281550634776017881be` tinha nove workflows manuais (`e2e-admin-anamnesis-corrections`, `e2e-admin-private-files`, `e2e-anamnesis-clarifications`, `e2e-client-anamnesis-canonical-consent`, `e2e-client-anamnesis-canonical-start`, `e2e-client-anamnesis-conditional-submit`, `e2e-end-client-assignment`, `e2e-post-migration-runtime`, `e2e-private-files`) com passos operacionais apontando para Supabase SaaS e/ou autenticação de admin sintética via GitHub. Mesmo com dados sintéticos, podiam persistir alterações reais em Auth/Storage/histórico de produção. Não há evidência nesta inspeção de execuções indevidas recentes.
+
+**DECISÃO VIGENTE:** `DECISIONS.md` (2026-10-14 e 2026-10-18) exige Patty como única administradora de negócio e reserva a homologação real ao final; não criar segundo admin nem inserir fixtures de E2E no Supabase hospedado para contornar testes. Há múltiplas roles `admin` já existentes no SaaS, pendentes de reconciliação humana. Esta auditoria não identifica titulares nem altera contas.
+
+**ALTERAÇÃO TÉCNICA EM PR (não antecipar estado de deploy):** os nove workflows de smoke legado foram convertidos em bloqueios explícitos de `workflow_dispatch`: um operador que os acionar recebe erro imediatamente, **antes de consumir secrets ou conectar-se ao SaaS**. As suítes `validate-j1` até `validate-j7` com banco/Auth/Storage descartáveis não foram alteradas. O teste `security/legacy-production-e2e-disabled.test.mjs` é coletado por `test:security-boundaries`; os quatro guias legados foram marcados como superados. Detalhes: [`LEGACY_PRODUCTION_E2E_BLOCK.md`](LEGACY_PRODUCTION_E2E_BLOCK.md).
+
+**ACEITE DO PACOTE:** revisão específica do diff de workflows e scripts, `Validate application` `SUCCESS` no head da PR, merge só após checagens, `Validate application` pós-merge e Vercel produção `READY` no SHA de integração. Não reativar fluxos por remover `exit 1` sem nova decisão técnica aprovada. Este registro é feito **antes** do CI/merge; não os declara concluídos.
+
+**PENDÊNCIAS INDEPENDENTES:** `bootstrap-patty-admin.yml` não é um E2E legado e requer auditoria específica posterior; [#950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950) e [#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951) seguem abertas. A migration Storage `20261020191000` não foi aplicada. Homologação profissional conjunta da Patty continua por último.
+
+---
+
 ## 2026-10-20 — Recertificação técnica conjunta J1–J7 concluída (PR #955)
 
 **FATO VERIFICADO NO GITHUB:** a [PR #955](https://github.com/leandrosilveiradepaula/projeto-patty/pull/955) foi integrada às 2026-10-21T01:32:21Z, após **oito workflows concluídos com `success` no mesmo head de PR** `24d2bdd9b8e82c71170ac839461caad16eba6314`: `Validate application`, Playwright J1, J2, J3, J4, J5, J6 e J7, todos usando dados e serviços locais descartáveis. A J3 foi corrigida na mesma branch: acesso a registros e comparações da avaliação permanece client-scoped, enquanto a exceção de download de fotos para a única admin AAL2 pertence ao contrato separado de arquivos privados; isso **não autoriza** segunda admin no MVP. O contrato e a reprodução estão registrados em [`JOURNEY_HOMOLOGATION.md`](JOURNEY_HOMOLOGATION.md).
