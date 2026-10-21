@@ -1,3 +1,15 @@
+## 2026-10-21 — MFA administrativo: cadastro retomado com segurança e confirmação operacional
+
+**CAUSA E CORREÇÃO:** o recarregamento da tela de MFA tentava iniciar outro TOTP, mas já existia um fator pendente, produzindo `mfa_factor_name_conflict` (HTTP 422). A [PR #981](https://github.com/leandrosilveiradepaula/projeto-patty/pull/981) corrigiu o fluxo para ler também fatores não verificados, não criar/remover no F5, bloquear ambiguidade e permitir renovação exclusivamente após clique explícito, com conferência do fator e do status. A [issue #980](https://github.com/leandrosilveiradepaula/projeto-patty/issues/980) foi encerrada.
+
+**EVIDÊNCIA DE INTEGRAÇÃO:** PR #981 integrada à `master` no SHA `dd9a0658f23d2824964c6824d4f1b15ebc635809`; [Validate application pós-merge #39666002267](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39666002267) e Playwright J1 sintético pré-merge aprovados. Deployment automático de produção `dpl_EwsLM5EC17iUVKnGR67gF7WJzs6o` ficou `READY` no mesmo SHA, incluindo alias `projeto-patty.vercel.app`.
+
+**RESULTADO OPERACIONAL LIMITADO:** a pessoa operadora informou sucesso ao completar a ativação. Uma consulta read-only de agregados do Supabase confirmou uma conta administrativa não E2E com 1 TOTP verificado e 0 fatores pendentes. A chave/QR anterior divulgados em captura não permaneceram em cadastro pendente e não devem ser reutilizados. Não foram incluídos identificadores, emails, tokens, chaves ou dados reais no repositório.
+
+**PENDÊNCIAS:** a confirmação profissional privada da identidade titular e a decisão formal sobre duas roles administrativas E2E continuam na [#950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950); uma identidade sintética ainda possui assignment ativo e existe histórico associado, portanto nenhuma role nem assignment foi alterado. [#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951) e a migration privada continuam bloqueadas. Fator TOTP verificado não prova AAL2 em todas as sessões. Homologação humana conjunta J1–J7 é a última etapa.
+
+---
+
 ## 2026-10-21 — Estabilização GitHub → CI → Vercel: gate integrado e atraso delimitado
 
 **CONTROLE INTEGRADO:** a PR #976 foi integrada em `master` no SHA `bad646e923b6e13523ebf977ff1ea7f16e787d2c`. Ela incorporou o release gate do worker: antes de um novo merge automático, `.github/scripts/journey-automerge.mjs` exige, no SHA exato então corrente da `master`, um `Validate application` concluído com sucesso e o status GitHub `Vercel: success` apontando para este projeto; depois reconfere o SHA antes de escrever. Ausência, pendência, erro ou URL de outro projeto bloqueiam o merge. Os testes de regressão desse gate e `test:security-boundaries` passaram localmente. Como a alteração envolve `.github/` e `security/`, ela foi tratada como mudança sensível, sem auto-merge.
@@ -11,6 +23,7 @@
 **LIMITES PRESERVADOS:** a execução pós-merge do worker para o `Validate application` de evento `push` foi corretamente ignorada — o worker só avalia validações de PR — e não houve PR funcional elegível para demonstrar o caminho positivo de auto-merge sem criar mudança artificial. #950/#951, o gate de dados reais/IA e a homologação humana da Patty permanecem pendentes. Nenhum Auth, RLS, migration, segredo, configuração de produção, redeploy forçado ou regra profissional foi alterado.
 
 ---
+
 ## 2026-10-21 — #974: recertificação técnica J1–J7 em preparação de PR
 
 **Fato técnico:** a recertificação local reproduziu falsos negativos em três testes de fronteira de segurança, causados por asserções dependentes de LF em checkout CRLF e por uma busca textual anterior ao prefixo `await` de uma query de preflight. A primeira CI J2 também expôs um probe de hidratação instável que usava o atributo visual `min`, embora a validação nativa e a server action sejam os limites autoritativos. As correções ficam restritas às asserções e ao probe E2E: mantêm a validação do workflow legado bloqueado, do workflow J2 local e da ordem obrigatória da contagem de roles administrativas antes de convite/escrita. Não há indicação de alteração do runtime protegido ou de incidente no SaaS.
