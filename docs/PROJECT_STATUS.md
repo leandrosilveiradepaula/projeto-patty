@@ -1,3 +1,13 @@
+## 2026-10-20 — J7: integridade das fontes para análise assistiva da Anamnese (pacote em validação)
+
+**Objetivo técnico:** evitar mapeamento ambíguo de perguntas/respostas na análise assistiva. Um conjunto anormal de perguntas com `id` repetido pode carregar chaves de exclusão conflitantes; respostas de perguntas diferentes com o mesmo `answer.id` podem tornar citações não rastreáveis. O construtor da análise foi endurecido para rejeitar `duplicate_question_id` / `duplicate_answer_id` **antes da requisição externa**, e a reconstrução dos resultados históricos falha fechada em vez de propor ações derivadas de contexto inválido. A ausência dessas guardas era fato confirmado por inspeção do código; **não implica ocorrência ou vazamento no SaaS**.
+
+**Escopo:** `lib/ai/anamnesis-review-context.ts`, testes sintéticos e documentação J7; sem enviar Anamnese real à IA, alterar RLS/migrations/Storage, fluxos de publicação, decisões humanas ou regras profissionais. O `OPENAI_HEALTH_DATA_PROCESSING_ENABLED` permanece desativado no Playwright J7 descartável.
+
+**Aceite da PR:** `Validate application` e J7 `SUCCESS` no mesmo head, revisão específica da integridade de contexto, merge, CI pós-merge e Vercel `READY` no SHA integrado. Este registro é anterior ao resultado dos checks; `status=inactive` da J1 publicada na [PR #960](https://github.com/leandrosilveiradepaula/projeto-patty/pull/960) permanece independente. A homologação operacional conjunta continua última; a migration de Storage e a reconciliação humana #950/#951 não foram executadas.
+
+---
+
 ## 2026-10-20 — J1: painel da cliente inativa após encerramento (pacote em teste)
 
 **Decisão de UX limitada, não regra clínica:** `clients.status=inactive` significa acompanhamento profissional encerrado, preservando histórico. Foi identificada a apresentação incorreta de ações diárias como prioridade da cliente após o encerramento. O pacote ajusta `app/cliente/page.tsx` para priorizar a consulta histórica e sinalizar claramente o estado inativo. Não bloqueia formulários por política implícita nem modifica Auth, RLS, Storage, migrations, versões aprovadas ou permissões. O cenário é acrescentado ao Playwright J1 depois do encerramento por interface AAL2; a cliente titular mantém os arquivos liberados e a cliente não titular continua isolada.
