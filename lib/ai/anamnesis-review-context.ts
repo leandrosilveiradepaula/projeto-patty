@@ -55,10 +55,12 @@ export type AnamnesisReviewContext = {
 
 export type AnamnesisReviewContextBuildErrorCode =
   | "question_form_version_mismatch"
+  | "duplicate_question_id"
   | "answer_submission_mismatch"
   | "answer_form_version_mismatch"
   | "answer_question_unknown"
   | "duplicate_answer_for_question"
+  | "duplicate_answer_id"
   | "explicit_source_unknown"
   | "explicit_source_not_allowed"
   | "explicit_source_not_applicable";
@@ -80,12 +82,24 @@ export function buildAnamnesisReviewContext(input: {
   questions: AnamnesisReviewContextQuestion[];
   submissionId: string;
 }): AnamnesisReviewContext {
+  // Fail closed before computing applicability or preparing provider sources:
+  // repeated identifiers would make one question/answer cite ambiguous.
+  // A duplicated private question ID with a different question_key could
+  // otherwise lose its explicit AI exclusion in one of the repeated rows.
+  const seenQuestionIds = new Set<string>();
+
   for (const question of input.questions) {
     if (question.form_version_id !== input.formVersionId) {
       throw new AnamnesisReviewContextBuildError(
         "question_form_version_mismatch",
       );
     }
+
+    if (seenQuestionIds.has(question.id)) {
+      throw new AnamnesisReviewContextBuildError("duplicate_question_id");
+    }
+
+    seenQuestionIds.add(question.id);
   }
 
   const questionsById = new Map(
@@ -111,6 +125,10 @@ export function buildAnamnesisReviewContext(input: {
       throw new AnamnesisReviewContextBuildError(
         "duplicate_answer_for_question",
       );
+    }
+
+    if (answersById.has(answer.id)) {
+      throw new AnamnesisReviewContextBuildError("duplicate_answer_id");
     }
 
     answersById.set(answer.id, answer);

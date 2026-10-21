@@ -345,3 +345,67 @@ test("stored review fails closed on inconsistent answer ownership", () => {
   });
   assert.equal(invalid, null);
 });
+
+test("duplicate question ids cannot bypass the exclusion of informational AI fields", () => {
+  // If an accidentally duplicated source row reuses the Instagram ID but
+  // carries an ordinary question key, the provider must receive NO context.
+  const ambiguousQuestions = [
+    questions[1],
+    { ...questions[1], question_key: "ordinary", label: "Untrusted duplicate" },
+  ];
+  const privateAnswer = [answers[1]];
+
+  assert.throws(
+    () => buildAnamnesisReviewContext({
+      answers: privateAnswer,
+      formVersionId: VERSION,
+      questions: ambiguousQuestions,
+      submissionId: SUBMISSION,
+    }),
+    (error) =>
+      error instanceof AnamnesisReviewContextBuildError &&
+      error.code === "duplicate_question_id",
+  );
+
+  assert.equal(
+    reconstructStoredReviewMissingTargets({
+      answers: privateAnswer,
+      formVersionId: VERSION,
+      questions: ambiguousQuestions,
+      submissionId: SUBMISSION,
+    }),
+    null,
+    "stored decisions fail closed on ambiguous question identity",
+  );
+});
+
+test("duplicate answer ids across questions cannot create ambiguous AI citations", () => {
+  const ambiguousAnswers = [
+    answers[0],
+    { ...answers[3], id: answers[0].id },
+  ];
+  const relevantQuestions = [questions[0], questions[3]];
+
+  assert.throws(
+    () => buildAnamnesisReviewContext({
+      answers: ambiguousAnswers,
+      formVersionId: VERSION,
+      questions: relevantQuestions,
+      submissionId: SUBMISSION,
+    }),
+    (error) =>
+      error instanceof AnamnesisReviewContextBuildError &&
+      error.code === "duplicate_answer_id",
+  );
+
+  assert.equal(
+    reconstructStoredReviewMissingTargets({
+      answers: ambiguousAnswers,
+      formVersionId: VERSION,
+      questions: relevantQuestions,
+      submissionId: SUBMISSION,
+    }),
+    null,
+    "stored findings must not rely on duplicate answer IDs",
+  );
+});
