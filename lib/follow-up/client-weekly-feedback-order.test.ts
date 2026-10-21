@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { firstPendingClientWeeklyFeedback, orderClientWeeklyFeedbacks } from "./client-weekly-feedback-order.ts";
+import { firstPendingClientWeeklyFeedback, firstRespondableClientWeeklyFeedback, orderClientWeeklyFeedbacks } from "./client-weekly-feedback-order.ts";
 
 const item = (id: string, period_start: string, created_at: string, submitted_at: string | null = null) =>
   ({ id, period_start, created_at, submitted_at });
@@ -36,4 +36,17 @@ test("equal request instants tie-break deterministically, without mutating input
   ];
   assert.deepEqual(orderClientWeeklyFeedbacks(rows).map(x=>x.id), ["b", "a"]);
   assert.equal(rows[0].id, "a");
+});
+
+test("dashboard skips unavailable pending forms without hiding those requests", () => {
+  const version = { definition: { schema_version: 1, questions: [
+    { key: "note", label: "Como foi?", input_type: "text", required: true },
+  ] } };
+  const rows = [
+    { ...item("older-answerable", "2026-10-01", "2026-10-02T12:00:00Z"), weekly_feedback_form_versions: version, answers: {} },
+    { ...item("newer-unavailable", "2026-10-08", "2026-10-09T12:00:00Z"), weekly_feedback_form_versions: null, answers: {} },
+  ];
+  assert.equal(firstPendingClientWeeklyFeedback(rows)?.id, "newer-unavailable");
+  assert.equal(firstRespondableClientWeeklyFeedback(rows)?.id, "older-answerable");
+  assert.equal(firstRespondableClientWeeklyFeedback(rows.slice(1)), null);
 });
