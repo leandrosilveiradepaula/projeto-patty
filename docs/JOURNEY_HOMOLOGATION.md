@@ -1,3 +1,11 @@
+## 2026-10-20 — J1 #954 integrada: encerramento pela UI, arquivos e histórico em CI local
+
+**Fato técnico:** a [PR #954](https://github.com/leandrosilveiradepaula/projeto-patty/pull/954) foi mergeada em `a16234e528f4c8ba4bc3422df744547251b5babd`, com `Validate application`, J1, J6 e J7 `success` no head testado `2b250aa68f8a9af9c259dcd7e7cbd9bfe974a853`. O pós-merge da aplicação também foi `success` e a Vercel produção confirmou `READY` no SHA integrado. A suíte J1 encerra o assignment pela interface AAL2 em banco descartável, confirma `clients.status=inactive` e preservação dos arquivos da titular; nenhuma identidade de produção ou arquivo real é usado.
+
+**Separação de estados:** as anotações abaixo com “teste em preparação” registram etapas anteriores, não o estado final da #954. O trabalho agora é recertificar J1–J7 juntas, conforme [matriz de pré-homologação](PREHOMOLOGATION_MATRIX.md). A exceção Storage de produção **permanece sem sua migration de correção aplicada**, bloqueada pela multiplicidade administrativa ([#950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950), [#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951)). CI local verde não é homologação da Patty.
+
+---
+
 ## 2026-10-20 — J1: encerramento autenticado e preservação do acesso a arquivos (teste em preparação)
 
 **Objetivo:** provar o ciclo completo da J1 em Docker descartável: após uploads e liberação explícita, a única admin sintética com MFA AAL2 encerra o acompanhamento **pela interface administrativa**. Verificar o registro histórico do assignment encerrado, `clients.status=inactive`, acesso continuado da administradora única aos arquivos e da cliente titular aos arquivos liberados, mantendo a negação a outra cliente e a AAL1. Isso exercita a transição de estado real, não um `UPDATE` direto de fixture.
