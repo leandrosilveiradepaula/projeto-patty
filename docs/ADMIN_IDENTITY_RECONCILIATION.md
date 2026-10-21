@@ -34,6 +34,8 @@ O CLI de provisionamento de admin (`scripts/bootstrap-admin.ts`) agora consulta 
 - 1 admin: permite apenas **verificação idempotente do mesmo perfil**, sem criar outra role;
 - 2 ou mais / contagem indisponível: recusa imediatamente, sem convite ou escrita.
 
+Se `inviteUserByEmail` retornar uma identidade e uma etapa subsequente falhar, **não excluir automaticamente o Auth User**: o retorno não comprova que a conta tenha sido criada nessa tentativa. A compensação técnica pode considerar somente linhas relacionais comprovadamente inseridas, sem apagar histórico. A identidade parcial fica para avaliação privada do operador; não reconciliar nem buscar por email como vínculo de domínio.
+
 Esse preflight é um bloqueio do **comando bootstrap**, não uma constraint transacional de unicidade do banco contra todos os meios de provisionamento. A migration `20261020191000` contém sua **própria guarda** de múltiplas admins. Não desativar nenhum guard para obter verde.
 
 Após a decisão humana e eventual procedimento separado, verificar **somente estados agregados**:
