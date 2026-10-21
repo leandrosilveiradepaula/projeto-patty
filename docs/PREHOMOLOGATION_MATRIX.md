@@ -1,5 +1,14 @@
 # Matriz vigente de pré-homologação técnica — J1 a J7
 
+## Recertificação J1–J7 concluída — baseline técnico de 21/10/2026
+
+- **PR #975:** [integrada](https://github.com/leandrosilveiradepaula/projeto-patty/pull/975) após `Validate application` e Playwright **J1–J7, 8/8 `success`** no mesmo head `4e2d8fb2716ab1fec40dcbc7c92471aa6fb53298`. As sete jornadas foram testadas com Supabase descartável; nenhum dado/conta real integrou as suites.
+- **Commit integrado:** `1238b98c98469047e39fcf32377f7fd699be14fa`; [Validate pós-merge #39627204390](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39627204390) `success` no SHA exato.
+- **Publicação recuperada, não automática:** o build automático não iniciou para esse merge. Após autorização específica, [deployment Vercel](https://vercel.com/leandros-projects-102e32ab/projeto-patty/6j6UdqWhtGMK3RUQZ2v3gEtk1Qhp) `READY` no SHA integrado e três aliases confirmados. O gatilho automático GitHub→Vercel segue sob investigação na [#970](https://github.com/leandrosilveiradepaula/projeto-patty/issues/970).
+- **Limites:** isso é recertificação técnica da base daquele SHA, **não homologação operacional**. A reconciliação privada de admin [#950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950), a migration Storage [#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951), o gate de dados reais/IA e a sessão humana da Patty continuam pendentes. Registros abaixo intitulados 'PR em preparação' descrevem a etapa histórica anterior a esta confirmação.
+
+---
+
 ## 2026-10-21 — Recertificação técnica integral J1–J7 (#974, PR em preparação)
 
 **Objetivo e escopo:** recertificar os contratos técnicos já versionados das sete jornadas em uma única PR, usando os oito gates existentes (`Validate application` e Playwright local J1–J7) no mesmo SHA. A alteração deliberada desta matriz aciona os workflows por `pull_request.paths`; não há alteração em workflow, RLS, Auth, migration, schema, provider de IA, regra profissional ou ambiente de produção.

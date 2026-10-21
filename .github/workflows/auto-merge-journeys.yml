@@ -15,6 +15,7 @@ permissions:
   contents: write
   pull-requests: write
   actions: write
+  statuses: read  # Only current master deployment signals; no production credentials
 
 concurrency:
   group: patty-safe-automerge

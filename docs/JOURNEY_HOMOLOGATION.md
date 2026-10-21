@@ -1,3 +1,11 @@
+## 2026-10-21 — Recertificação integrada J1–J7 e publicação recuperada
+
+**RECERTIFICAÇÃO TÉCNICA CONCLUÍDA, SEM HOMOLOGAÇÃO HUMANA:** [PR #975](https://github.com/leandrosilveiradepaula/projeto-patty/pull/975) passou oito checks simultâneos (`Validate application` + Playwright J1–J7 com Supabase/contas/arquivos sintéticos descartáveis) no mesmo head `4e2d8fb2716ab1fec40dcbc7c92471aa6fb53298`. Foi integrada no commit `1238b98c98469047e39fcf32377f7fd699be14fa`. O CI [#39627204390](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39627204390) pós-merge passou. O deployment automático falhou em disparar; uma recuperação de produção **explicitamente autorizada**, sem alteração de schema/segurança, resultou em [Vercel `READY`](https://vercel.com/leandros-projects-102e32ab/projeto-patty/6j6UdqWhtGMK3RUQZ2v3gEtk1Qhp) no mesmo SHA, com aliases verificados.
+
+**PENDÊNCIAS E LIMITES:** a causa do gatilho Vercel intermitente [#970](https://github.com/leandrosilveiradepaula/projeto-patty/issues/970) ainda não foi resolvida e não pode ser substituída por testes verdes. Múltiplas roles `admin` exigem reconciliação privada [#950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950) antes de executar a migration privada [#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951); gate OpenAI para dados reais não liberado. A sessão autenticada conjunta, persistência real, escopo de acesso de arquivos e UX mobile pela Patty **não começaram** e continuam como última tarefa.
+
+---
+
 ## 2026-10-21 — #974: recertificação técnica J1–J7 não é homologação operacional
 
 **Escopo técnico:** a PR de recertificação reproduz e corrige falsos negativos das asserções que protegem o bootstrap administrativo e workflows locais/legados contra diferenças LF/CRLF e um prefixo de query, além de um probe J2 que tratava o atributo visual `min` derivado pelo React como prova de hidratação. O E2E agora confirma o valor nativo antes de submeter; a server action e sua validação continuam autoritativas. As guardas testadas permanecem fechadas: preflight da quantidade de admins antes de convite ou escrita, E2E legado de produção bloqueado e J2 exclusivamente localhost descartável. Não há mudança em runtime de método, RLS, migrations, armazenamento, dados reais ou IA.
