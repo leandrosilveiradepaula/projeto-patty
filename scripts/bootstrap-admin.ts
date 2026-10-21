@@ -1,6 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
 
-import { resolveAdminBootstrapState } from "../lib/onboarding/admin-bootstrap.ts";
+import {
+  assertAdminBootstrapRoleCount,
+  assertSoleAdminBootstrapTransition,
+  resolveAdminBootstrapState,
+} from "../lib/onboarding/admin-bootstrap.ts";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const secretKey = process.env.SUPABASE_SECRET_KEY;
@@ -44,6 +48,17 @@ async function findUserByEmail(targetEmail: string) {
   throw new Error("Auth user pagination limit reached");
 }
 
+// Run the role-count preflight before even looking up or inviting Auth users.
+// An unexpected role count must stop this privileged operation without writes.
+const { count: existingAdminCount, error: adminCountError } = await admin
+  .from("user_roles")
+  .select("profile_id", { count: "exact", head: true })
+  .eq("role", "admin");
+if (adminCountError || existingAdminCount === null) {
+  throw new Error("Admin bootstrap cannot verify the current role count");
+}
+assertAdminBootstrapRoleCount(existingAdminCount);
+
 let user = await findUserByEmail(email);
 let invitedNow = false;
 let profileCreatedNow = false;
@@ -51,6 +66,9 @@ let roleCreatedNow = false;
 
 try {
   if (!user) {
+    if (existingAdminCount !== 0) {
+      throw new Error("Admin bootstrap refuses to invite a second administrator");
+    }
     const invitation = await admin.auth.admin.inviteUserByEmail(email);
 
     if (invitation.error || !invitation.data.user) {
@@ -74,6 +92,12 @@ try {
   const state = resolveAdminBootstrapState({
     clientLinked: Boolean(clientResult.data),
     roles: rolesResult.data.map((item) => item.role),
+  });
+  // This must happen before any profile/role INSERT. An existing admin only
+  // permits idempotent verification of that same profile, never promotion.
+  assertSoleAdminBootstrapTransition({
+    existingAdminCount,
+    targetState: state,
   });
 
   if (!profileResult.data) {
