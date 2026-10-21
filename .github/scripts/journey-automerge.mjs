@@ -178,6 +178,12 @@ async function run() {
       console.log("PR #" + snapshot.number + ": branch behind master; update and revalidate");
       continue;
     }
+    // Prevent a concurrent master update from invalidating the release gate.
+    const currentMaster = await api("/repos/" + repository + "/branches/master");
+    if (currentMaster.commit.sha !== master.commit.sha) {
+      console.log("PR #" + snapshot.number + ": master changed after release gate; defer merge");
+      continue;
+    }
     const dry = process.env.PATTY_AUTOMERGE_DRY_RUN === "true";
     if (dry) {
       console.log("DRY RUN: eligible PR #" + snapshot.number + " SHA " + live.head.sha);
