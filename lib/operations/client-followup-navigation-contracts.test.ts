@@ -19,7 +19,10 @@ test("pending feedback card has the real deep-link anchor and opens selected new
   assert.match(page, /orderClientWeeklyFeedbacks\(feedbacks\)/);
   assert.match(page, /orderedFeedbacks\.filter/);
   assert.match(page, /id=\{`feedback-pendente-\$\{feedback\.id\}`\}/);
-  assert.match(page, /defaultOpen=\{feedbackIndex === 0\}/);
+  assert.match(page, /firstRespondableFeedbackId =/);
+  assert.match(page, /entry\.definition !== null/);
+  assert.match(page, /defaultOpen=\{respondNow \|\| \(firstRespondableFeedbackId === null && feedbackIndex === 0\)\}/);
+  assert.match(page, /!definition \? "Indisponível" : respondNow \? "Responder agora" : "Pendente"/);
   const response = read("app/cliente/feedback-semanal/ClientWeeklyFeedbackResponseForm.tsx");
   assert.match(page, /<ClientWeeklyFeedbackResponseForm/);
   assert.match(response, /saveWeeklyFeedbackAction\.bind\(null, feedbackId\)/);
