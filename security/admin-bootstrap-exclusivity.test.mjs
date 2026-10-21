@@ -32,6 +32,11 @@ test("production bootstrap must check sole-admin role count before any Auth invi
   assert.ok(preflight < authLookup && authLookup < inviteGuard && inviteGuard < invite);
   assert.ok(invite < transition && transition < profileInsert && transition < roleInsert);
   assert.doesNotMatch(source, /console\.(?:log|error)\(.*(?:email|user\.id|profileId)/);
+  // A returned invitation identity may have existed before this attempt.
+  assert.doesNotMatch(source, /auth\.admin\.deleteUser\(/);
+  assert.match(source, /if \(invitedNow && user\)/);
+  assert.match(source, /if \(roleCreatedNow\)/);
+  assert.match(source, /if \(profileCreatedNow\)/);
 });
 
 test("privileged bootstrap remains manual, on master and without account secrets in workflow output", () => {
