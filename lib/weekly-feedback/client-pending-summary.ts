@@ -1,4 +1,4 @@
-import { parseWeeklyFeedbackDefinition, readWeeklyFeedbackAnswer, summarizeWeeklyFeedbackRequiredProgress } from "./definition";
+import { parseWeeklyFeedbackDefinition, readWeeklyFeedbackAnswer, summarizeWeeklyFeedbackRequiredProgress } from "./definition.ts";
 import type { Json } from "@/lib/supabase/database.types";
 
 /** UI-only projection of the already authorized, versioned feedback. */
