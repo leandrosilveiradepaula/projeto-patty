@@ -906,6 +906,21 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       { id: clientPrivateFile.id, filename: clientPrivateFile.filename },
       { id: releasedAdminFileId, filename: "j1-admin-pending-synthetic.png" },
     ];
+    // After the professional closes the assignment, the client's home must
+    // not promote a new daily task or draft as the next step. This is a UI
+    // priority only: all previously authorized resources remain accessible.
+    await page.goto("/cliente");
+    await expect(page.getByText("Acompanhamento inativo", { exact: true }))
+      .toBeVisible();
+    await expect(page.getByRole("heading", { name: "Consultar meu histórico" }))
+      .toBeVisible();
+    await expect(page.getByRole("heading", { name: "Fazer check-in do dia" }))
+      .toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "Preencher Anamnese" }))
+      .toHaveCount(0);
+    await expect(page.getByRole("link", { name: /Fotos e documentos/ }))
+      .toBeVisible();
+
     await page.goto("/cliente/arquivos");
     for (const file of releasedFiles) {
       await expect(page.getByRole("heading", { name: file.filename, exact: true }))
