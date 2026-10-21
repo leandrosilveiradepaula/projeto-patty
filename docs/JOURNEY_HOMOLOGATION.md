@@ -1,3 +1,13 @@
+## 2026-10-20 — J3: contrato de arquivos privados distinto do escopo de avaliação
+
+**FALHA REPRODUZIDA no gate J1–J7:** o E2E J3 executado em Supabase descartável com **duas admins sintéticas** exigia `404` da rota direta `/admin/fotos/[fileId]` para foto de cliente sem assignment, mas recebeu `307`. Isso não é evidência de vazamento real. A regra confirmada do MVP em [`RBAC_RLS.md`](RBAC_RLS.md) permite a exceção de arquivos privados para **uma única admin** com MFA AAL2, independentemente do assignment; uma segunda admin não pertence ao modelo de produção. Não alterar RLS de Storage ou enfraquecer MFA para satisfazer uma negativa inconsistente.
+
+**Correção estritamente de teste:** a J3 continua exigindo que **comparações e avaliações** de outra cliente ou profissional sem assignment sejam recusadas; o pareamento de foto estrangeira continua indisponível na UI. A negativa `404` de acesso direto `/admin/fotos` entre duas admins foi retirada por contradizer a policy de arquivos do MVP. J1 permanece responsável pela verificação da **única admin AAL2**, negação a AAL1/anônimos e de cliente não titular, inclusive depois do encerramento. A J3 também conserva a prova de que outra cliente não lê arquivos alheios sob RLS, sem dados reais.
+
+**Pendente e risco:** a observação local reforça a [issue #950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950): roles admin adicionais no SaaS exigem reconciliação humana e redesenho explícito antes de ampliar a exceção. A migration privada não foi aplicada; o teste corrigido **não** aprova segundo admin ou resolve #950/#951. Reexecutar todos os oito checks no novo head; não homologar as jornadas por CI.
+
+---
+
 ## 2026-10-20 — J1 #954 integrada: encerramento pela UI, arquivos e histórico em CI local
 
 **Fato técnico:** a [PR #954](https://github.com/leandrosilveiradepaula/projeto-patty/pull/954) foi mergeada em `a16234e528f4c8ba4bc3422df744547251b5babd`, com `Validate application`, J1, J6 e J7 `success` no head testado `2b250aa68f8a9af9c259dcd7e7cbd9bfe974a853`. O pós-merge da aplicação também foi `success` e a Vercel produção confirmou `READY` no SHA integrado. A suíte J1 encerra o assignment pela interface AAL2 em banco descartável, confirma `clients.status=inactive` e preservação dos arquivos da titular; nenhuma identidade de produção ou arquivo real é usado.
