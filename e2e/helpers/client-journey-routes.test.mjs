@@ -31,7 +31,7 @@ test("operational navigation smoke targets implemented client pages and their re
   }
 });
 
-test("production browser smoke uses only the ephemeral canonical client and preserves cleanup", () => {
+test("retired production browser workflow cannot invoke the synthetic client navigation smoke", () => {
   const script = read("e2e/client-operational-navigation.spec.mjs");
   const workflow = read(".github/workflows/e2e-client-anamnesis-canonical-start.yml");
 
@@ -44,12 +44,10 @@ test("production browser smoke uses only the ephemeral canonical client and pres
   assert.match(script, /Cidade Sintetica E2E/);
   assert.doesNotMatch(script, /\.from\("protocol_publications"\)\.insert|auth\.admin\.updateUserById/);
 
-  assert.match(workflow, /npx playwright test e2e\/client-operational-navigation\.spec\.mjs/);
-  assert.match(workflow, /- name: Cleanup ephemeral canonical E2E client\s*\n\s*if: always\(\)/);
-  assert.ok(
-    workflow.indexOf("Run production client operational navigation smoke") <
-      workflow.indexOf("Cleanup ephemeral canonical E2E client"),
-  );
+  assert.match(workflow, /LEGADO BLOQUEADO/);
+  assert.match(workflow, /Legacy production E2E disabled/);
+  assert.match(workflow, /^          exit 1$/m);
+  assert.doesNotMatch(workflow, /npx playwright test|node e2e\/|secrets\./);
 });
 
 test("registration E2E cleanup verifies synthetic ownership and removes the restrictive FK row first", () => {
@@ -75,9 +73,8 @@ test("unpublished protocol isolation uses synthetic draft and refuses historical
   assert.ok(cleanup.indexOf('from("protocols").select("id")') < cleanup.indexOf('from("clients").delete()'));
 });
 
-// The browser suites must test the actual automatic save workflow, not the
-// removed explicit save button. Otherwise the manually dispatched E2E never
-// exercises persistence at all.
+// The archived browser specs document the real automatic-save boundary;
+ // production workflow_dispatch is blocked and must not run them against SaaS.
 test("Anamnesis browser E2E matches automatic save controls and durable persistence", () => {
   const canonical = read("e2e/client-anamnesis-canonical-start.spec.mjs");
   const conditional = read("e2e/client-anamnesis-conditional-submit.spec.mjs");
@@ -98,6 +95,7 @@ test("Anamnesis browser E2E matches automatic save controls and durable persiste
   assert.match(submitForm, /Antes de enviar, confira as respostas/);
   assert.match(conditional, /Antes de enviar, confira as respostas/);
   const workflow = read(".github/workflows/e2e-client-anamnesis-conditional-submit.yml");
-  assert.match(workflow, /npx playwright test e2e\/client-anamnesis-conditional-submit\.spec\.mjs/);
-  assert.match(workflow, /if: always\(\)/);
+  assert.match(workflow, /LEGADO BLOQUEADO/);
+  assert.match(workflow, /^          exit 1$/m);
+  assert.doesNotMatch(workflow, /npx playwright test|node e2e\/|secrets\./);
 });

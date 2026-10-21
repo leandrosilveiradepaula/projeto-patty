@@ -1,22 +1,9 @@
-# E2E - arquivos privados administrativos
+# Arquivos privados administrativos — smoke legado bloqueado
 
-Este smoke test manual valida o fluxo administrativo usando somente contas sinteticas.
+**NÃO EXECUTAR ESTE SMOKE CONTRA O SUPABASE DE PRODUÇÃO.**
 
-Fluxo coberto:
+O roteiro histórico dependia de uma segunda admin sintética com TOTP em GitHub Actions, upload privado e liberação de arquivos de teste no SaaS. Isso conflita com a regra de uma única admin de negócio e com a política atual de manter dados de teste exclusivamente em ambiente descartável.
 
-`admin login -> /admin/arquivos -> cliente sintetica -> upload administrativo -> oculto para cliente -> liberacao explicita -> cliente ve -> download`
+O workflow `e2e-admin-private-files.yml` está bloqueado. Consulte [contenção de workflows legados](LEGACY_PRODUCTION_E2E_BLOCK.md). O cenário autorizado é coberto por `e2e/j1-local-onboarding.spec.mjs` em PostgreSQL/Auth/Storage locais, incluindo MFA AAL2, upload, liberação deliberada, `307` temporário, cliente não titular negada e histórico após encerramento.
 
-## Secrets necessarios no GitHub Actions
-
-- `E2E_BASE_URL`
-- `E2E_ADMIN_EMAIL`
-- `E2E_ADMIN_PASSWORD`
-- `E2E_ADMIN_TOTP_SECRET`
-- `E2E_CLIENT_EMAIL`
-- `E2E_CLIENT_PASSWORD`
-
-Nao usar credenciais ou dados reais.
-
-O teste usa o arquivo fixo `e2e-admin-private-file-smoke.png`. Na primeira execucao, ele verifica o estado oculto antes da liberacao. Em execucoes posteriores, se o arquivo ja estiver liberado, o teste reutiliza o mesmo registro e valida visibilidade e download, evitando acumulo de arquivos aceitos em producao.
-
-O smoke nao cria contas, nao altera schema/RLS e nao executa hard delete.
+A correção `20261020191000` de Storage **não foi aplicada ao SaaS** enquanto [#950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950) e [#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951) dependerem de reconciliação humana. A entrega de mídia real será verificada na homologação final autorizada, não por fixtures no SaaS.

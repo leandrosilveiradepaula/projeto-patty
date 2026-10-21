@@ -1,21 +1,9 @@
-# E2E - arquivos privados da cliente
+# Arquivos privados da cliente — smoke legado bloqueado
 
-Este smoke test e manual e usa somente uma conta sintetica de cliente.
+**NÃO ENVIAR ARQUIVOS DE TESTE AO SUPABASE DE PRODUÇÃO.**
 
-Fluxo coberto:
+O workflow manual `e2e-private-files.yml` usava conta sintética de cliente e podia gravar um PNG de teste no Storage SaaS. Foi desativado para evitar fixture persistente e resíduos no histórico. Não configurar `E2E_CLIENT_EMAIL`/`E2E_CLIENT_PASSWORD` de contas reais como substituto.
 
-`login -> area da cliente -> arquivos -> upload -> validacao -> historico -> download`
+Teste automatizado permitido: `e2e/j1-local-onboarding.spec.mjs` no Supabase local descartável verifica upload, arquivo oculto/liberado, download privado e negação de outra cliente, mesmo após encerramento. A J6 testa material educacional privado por simulador local; nenhum teste sintético garante reprodução de conteúdo real no Vercel Blob.
 
-## Secrets necessarios no GitHub Actions
-
-- `E2E_BASE_URL`: URL de producao da aplicacao.
-- `E2E_CLIENT_EMAIL`: email de uma conta sintetica com role `client`.
-- `E2E_CLIENT_PASSWORD`: senha dessa conta sintetica.
-
-Nao usar credenciais ou dados de cliente real.
-
-O teste usa o arquivo sintetico fixo `e2e-private-file-smoke.png`. Se ele ja existir no historico da conta de teste, o upload nao e repetido; o teste reutiliza o arquivo para validar historico e download. Isso evita acumulo de arquivos em producao.
-
-Execucao: GitHub Actions -> `E2E private files smoke` -> Run workflow.
-
-O teste nao cria conta, nao altera schema/RLS e nao usa `SUPABASE_SECRET_KEY`.
+Veja [bloqueio técnico dos smokes legados](LEGACY_PRODUCTION_E2E_BLOCK.md) e [roteiro de homologação conjunta](OPERATIONAL_ACCEPTANCE_RUNBOOK.md). Não publicar nem liberar conteúdo para testes sem decisão humana.

@@ -1,15 +1,9 @@
-# E2E - encerramento de assignment
+# Encerramento de acompanhamento — smoke legado bloqueado
 
-Smoke manual para validar o encerramento controlado de um assignment sintetico.
+**NÃO EXECUTAR O E2E ANTIGO EM PRODUÇÃO.**
 
-Fluxo:
+O workflow `e2e-end-client-assignment.yml` dependia da conta de admin sintética/TOTP e podia encerrar um assignment persistido no SaaS. Ele foi desativado, sem tocar em contas, assignments ou históricos existentes. Consulte [bloqueio de E2E legados](LEGACY_PRODUCTION_E2E_BLOCK.md).
 
-`admin login -> clientes atribuidos -> E2E Client -> encerrar atribuicao -> cliente deixa a lista ativa`
+O teste técnico atual é `e2e/j1-local-onboarding.spec.mjs` e o percurso de treino `e2e/j5-training-lifecycle.spec.mjs`: ambos usam identidades sintéticas e Supabase descartável, encerram pela UI autenticada com MFA AAL2, conferem `clients.status=inactive`, preservam histórico e comprovam isolamento. Essas suítes não homologam nenhuma operação profissional real.
 
-O teste usa apenas a conta administrativa sintetica, incluindo o MFA TOTP dessa conta, e depende de um assignment sintetico previamente ativo para exercitar a escrita na primeira execucao.
-
-Os secrets administrativos necessarios sao `E2E_ADMIN_EMAIL`, `E2E_ADMIN_PASSWORD` e `E2E_ADMIN_TOTP_SECRET`. A chave TOTP deve pertencer somente a conta E2E e nunca a conta real da Patty.
-
-Depois que o assignment ja estiver encerrado, execucoes seguintes confirmam o estado idempotente sem recriar vinculo nem conceder acesso.
-
-O smoke nao cria contas, nao cria assignments, nao altera schema/RLS e nao usa dados reais.
+Encerramento de vínculo real fica reservado à Patty, se necessário ao atendimento e expressamente autorizado na última sessão de homologação. Não usar um vínculo clínico real para simular resultado técnico.
