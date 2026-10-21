@@ -1,3 +1,17 @@
+## 2026-10-21 — Conta administrativa oficial e reconciliação E2E no SaaS
+
+### DECISÃO OPERACIONAL CONFIRMADA PELO RESPONSÁVEL
+
+A identidade não E2E com MFA TOTP verificado foi identificada privadamente e confirmada como a **conta oficial da Patty**, única administradora de negócio prevista para o MVP. O responsável autorizou expressamente retirar a role `admin` de duas contas sintéticas E2E e encerrar seu único assignment ativo, **sem excluir usuários, MFA, arquivos ou histórico**.
+
+### IMPLEMENTADO E VERIFICADO, SEM REGRA CLÍNICA NOVA
+
+A operação atômica no Supabase SaaS reduziu `admin` de **3 para 1**, encerrou **1 assignment sintético** e preservou duas identidades Auth/Profile E2E, dois assignments históricos, vínculos privados de arquivos e fator MFA verificado de teste. RLS, schema, policies, migrations, senhas e regras profissionais não foram alterados. A revogação de role não equivale a revogação criptográfica imediata de sessões Auth existentes; permissões administrativas continuam resolvidas pela role relacional em runtime. Reversão exige nova autorização e auditoria.
+
+A migration `20261020191000_fix_private_storage_admin_read_after_assignment.sql` ainda **não foi aplicada**: pré-condição de unicidade agora atendida, mas revisão e autorização próprias da [#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951) permanecem indispensáveis. [Detalhes e limites](ADMIN_IDENTITY_RECONCILIATION.md). Homologação profissional J1–J7 continua reservada ao final.
+
+---
+
 ## 2026-10-18 — Homologação profissional conjunta após conclusão técnica das jornadas
 
 ### DECISÃO OPERACIONAL CONFIRMADA PELO RESPONSÁVEL
