@@ -1,4 +1,5 @@
 import { prepareClientPendingFeedback } from "@/lib/weekly-feedback/client-pending-summary";
+import type { Json } from "@/lib/supabase/database.types";
 export type ClientWeeklyFeedbackFact = {
   id: string;
   period_start: string;
@@ -38,7 +39,7 @@ export function firstPendingClientWeeklyFeedback<T extends ClientWeeklyFeedbackF
  * Never infer a clinical priority or hide older requests.
  */
 export function firstRespondableClientWeeklyFeedback<
-  T extends ClientWeeklyFeedbackFact & { weekly_feedback_form_versions: { definition: import("@/lib/supabase/database.types").Json } | null; answers: import("@/lib/supabase/database.types").Json },
+  T extends ClientWeeklyFeedbackFact & { weekly_feedback_form_versions: { definition: Json } | null; answers: Json },
 >(rows: readonly T[]): T | null {
   return orderClientWeeklyFeedbacks(rows).find((row) =>
     row.submitted_at === null &&
