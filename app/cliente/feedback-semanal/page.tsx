@@ -4,6 +4,7 @@ import { authorizedExactRecordPage } from "@/lib/operations/exact-record-navigat
 import { Button } from "@/components/ui/Button";
 import { fingerprintWeeklyFeedbackAnswers } from "@/lib/weekly-feedback/draft-fingerprint";
 import { prepareClientPendingFeedback } from "@/lib/weekly-feedback/client-pending-summary";
+import { parseWeeklyFeedbackDefinition, readWeeklyFeedbackAnswer } from "@/lib/weekly-feedback/definition";
 import { ClientHistoryDisclosure } from "@/components/client/ClientHistoryDisclosure";
 import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
 import { ClientWeeklyFeedbackResponseForm } from "./ClientWeeklyFeedbackResponseForm";
