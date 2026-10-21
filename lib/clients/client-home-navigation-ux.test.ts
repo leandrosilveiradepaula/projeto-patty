@@ -13,7 +13,9 @@ function read(relativePath: string) {
 test("client home focuses on next action instead of duplicating the full area catalog", () => {
   const page = read("app/cliente/page.tsx");
 
-  assert.match(page, /title="O que fazer agora"/);
+  assert.match(page, /title=\{isInactive \? "Meu histórico" : "O que fazer agora"\}/);
+  assert.match(page, /const primaryAction = isInactive/);
+  assert.match(page, /label: "Consultar meu histórico"/);
   assert.doesNotMatch(page, /title="Seu acompanhamento"/);
   assert.doesNotMatch(page, /listCurrentClientContentReleases/);
   assert.doesNotMatch(page, /listCurrentClientFinalizedAssessmentMeasurements/);
