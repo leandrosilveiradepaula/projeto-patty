@@ -1,3 +1,13 @@
+## 2026-10-20 — J1: continuidade da interface da cliente após encerramento (em validação)
+
+**Problema reproduzido na leitura do runtime:** a página inicial `app/cliente/page.tsx` promovia check-in diário, anamnese ou feedback pendente como **próxima ação** sem considerar `clients.status`. Isso contradizia a apresentação de `inactive` como cliente fora do acompanhamento ativo em `BUSINESS_RULES.md`, mesmo com o histórico preservado.
+
+**Escopo de UX/produto:** quando `clients.status=inactive`, o painel exibe “Acompanhamento inativo”, prioriza “Consultar meu histórico” e mantém links de registros, avaliações, arquivos, conteúdos, protocolo e treino já acessíveis. A sugestão de tarefa diária e seus avisos deixam de aparecer na **home**; **nenhum** endpoint, autorização, direito de leitura, ação de check-in, rascunho, release ou regra do método foi alterado. As telas próprias de cada área e os dados anteriores não foram apagados ou desabilitados. Uma eventual regra de bloqueio de novas escritas para cliente inativa **não foi inferida** e permanece fora de escopo.
+
+**Evidência exigida:** testes unitários/estáticos de continuidade do painel e Playwright J1 em Supabase descartável: a admin AAL2 encerra o assignment pela UI, `clients.status` torna-se `inactive`, a cliente vê a home histórica sem CTA diário e ainda pode abrir arquivos previamente liberados; outra cliente continua negada. `Validate application` e J1 devem passar no mesmo head. Homologação operacional da Patty permanece reservada ao final.
+
+---
+
 ## 2026-10-20 — Gate conjunto de J1 a J7 APROVADO tecnicamente; homologação Patty pendente
 
 **Gate executado:** a [PR #955](https://github.com/leandrosilveiradepaula/projeto-patty/pull/955) integrou o head `24d2bdd9b8e82c71170ac839461caad16eba6314` depois de oito checks em `completed/success` — `Validate application` e Playwright J1–J7, todos no mesmo SHA e Supabase descartável. A falha J3 descrita no histórico logo abaixo foi **investigada e corrigida na mesma branch antes desse sucesso**; não permanece como check vermelho atual. Não houve uso de dados reais, autenticação Patty ou homologação profissional.
