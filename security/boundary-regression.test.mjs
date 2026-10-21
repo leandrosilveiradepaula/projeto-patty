@@ -451,7 +451,7 @@ test("retired conditional submit E2E has no executable SaaS path", async () => {
   assert.match(workflow, /LEGADO BLOQUEADO/);
   assert.match(workflow, /Legacy production E2E disabled/);
   assert.match(workflow, /^          exit 1$/m);
-  assert.doesNotMatch(workflow, /secrets\\.|node e2e\\/|npx playwright/);
+  assert.ok(!workflow.includes("secrets.") && !workflow.includes("node e2e/") && !workflow.includes("npx playwright"));
   for (const required of [
     "E2E_CANONICAL_EMAIL", "E2E_CANONICAL_PASSWORD",
     "E2E_CANONICAL_CLIENT_ID",
@@ -479,7 +479,7 @@ test("retired canonical consent E2E has no executable SaaS path", async () => {
   assert.match(workflow, /LEGADO BLOQUEADO/);
   assert.match(workflow, /Legacy production E2E disabled/);
   assert.match(workflow, /^          exit 1$/m);
-  assert.doesNotMatch(workflow, /secrets\\.|node e2e\\/|npx playwright/);
+  assert.ok(!workflow.includes("secrets.") && !workflow.includes("node e2e/") && !workflow.includes("npx playwright"));
   for (const required of [
     "E2E_CANONICAL_EMAIL", "E2E_CANONICAL_PASSWORD",
     "E2E_CANONICAL_CLIENT_ID",
@@ -527,7 +527,7 @@ test("legacy immutable-history Anamnesis workflow is manual and fails closed", a
   const workflow = await readFile(path.join(
     ROOT, ".github", "workflows", "e2e-anamnesis-clarifications.yml",
   ), "utf8");
-  assert.match(workflow, /on:\\s*\\n\\s*workflow_dispatch:/);
+  assert.ok(workflow.includes("workflow_dispatch:"));
   assert.match(workflow, /LEGADO BLOQUEADO/);
   assert.match(workflow, /Legacy production E2E disabled/);
   assert.match(workflow, /^          exit 1$/m);
@@ -548,14 +548,14 @@ test("legacy E2E cannot reach production; human-admin handoff stays manual-only"
   for (const file of files) {
     const source = await readFile(path.join(workflowDirectory, file), "utf8");
     assert.match(source, /workflow_dispatch:/);
-    assert.doesNotMatch(source, /\\$\\{\\{\\s*secrets\\./);
+    assert.ok(!source.includes("secrets."));
     if (file === "e2e-j1-invitation-handoff.yml") {
-      assert.match(source, /github.ref == 'refs\\/heads\\/master'/);
+      assert.ok(source.includes("github.ref == 'refs/heads/master'"));
       assert.match(source, /No automatic admin access/);
     } else {
       assert.match(source, /LEGADO BLOQUEADO/, file);
       assert.match(source, /^          exit 1$/m, file);
-      assert.doesNotMatch(source, /npx playwright|node e2e\\//, file);
+      assert.ok(!source.includes("npx playwright") && !source.includes("node e2e/"));
     }
   }
 });
