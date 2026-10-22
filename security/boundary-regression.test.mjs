@@ -178,7 +178,7 @@ test("classified protected entrypoints contain the expected authentication bound
       );
       assert.match(
         content,
-        /hasVerifiedRecoverySession\(claimsData\?\.claims\)/,
+        /hasServerRecoveryGrant\(claimsData\?\.claims\)/,
         `${file} must require verified recovery evidence, not any authenticated session`,
       );
       assert.doesNotMatch(
@@ -612,8 +612,9 @@ test("password reset gate prioritizes a recovery fragment and rejects an ordinar
   );
 
   assert.match(gate, /parseImplicitRecoveryFragment\(window\.location\.hash\)/);
-  assert.match(gate, /if \(parsed\.kind === "recovery"\)/);
-  assert.match(gate, /auth\.setSession\(\{/);
+  assert.match(gate, /parsed\.kind !== "none"/);
+  assert.match(gate, /window\.location\.replace\("\/redefinir-senha\?error=invalid"\)/);
+  assert.doesNotMatch(gate, /auth\.setSession\(\{/);
   assert.match(gate, /if \(hasVerifiedRecovery\)/);
   assert.match(gate, /return <PasswordResetForm \/>/);
   assert.doesNotMatch(gate, /console\.(log|info|warn|error)/);
