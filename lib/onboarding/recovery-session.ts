@@ -1,35 +1,24 @@
-type JwtClaims = Record<string, unknown>;
-
-function isNonEmptyString(value: unknown): value is string {
-  return typeof value === "string" && value.length > 0;
-}
+import { getRecoverySessionIdentity } from "./recovery-grant";
 
 /**
- * A password reset must be bound to a Supabase recovery session, not merely to
- * any authenticated browser. GoTrue encodes a PKCE recovery as `recovery`,
- * while its verified recovery OTP and legacy implicit flows encode the same
- * server-verified Auth exchange as `otp`. `getClaims()` verifies the JWT
- * before this predicate sees it; browser-provided values must never be passed
- * here as an authorization decision.
+ * Only the PKCE recovery method is independently identifiable from signed
+ * Supabase claims. GoTrue also uses amr=otp for ordinary passwordless logins,
+ * so that method MUST NEVER authorize a password reset by itself.
+ *
+ * Recovery via token_hash is proven separately by server-side
+ * verifyOtp({ type: "recovery" }) and a session-bound signed grant cookie.
+ * Browser-provided claims and query parameters do not authorize a reset.
  */
 export function hasVerifiedRecoverySession(claims: unknown): boolean {
-  if (!claims || typeof claims !== "object" || Array.isArray(claims)) {
+  if (!getRecoverySessionIdentity(claims) ||
+      !claims || typeof claims !== "object" || Array.isArray(claims)) {
     return false;
   }
-
-  const jwt = claims as JwtClaims;
-  if (!isNonEmptyString(jwt.sub) || !isNonEmptyString(jwt.session_id)) {
-    return false;
-  }
-
-  return Array.isArray(jwt.amr) && jwt.amr.some((entry) =>
-    Boolean(
-      entry &&
-        typeof entry === "object" &&
+  const methodList = (claims as Record<string, unknown>).amr;
+  return Array.isArray(methodList) && methodList.some(
+    (entry) =>
+      Boolean(entry && typeof entry === "object" &&
         !Array.isArray(entry) &&
-        (["recovery", "otp"] as const).includes(
-          (entry as Record<string, unknown>).method as "recovery" | "otp",
-        ),
-    ),
+        (entry as Record<string, unknown>).method === "recovery"),
   );
 }
