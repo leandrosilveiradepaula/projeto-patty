@@ -1,10 +1,18 @@
+## RESOLVIDO TECNICAMENTE — migration privada Storage #951 (21/10/2026)
+
+**AUTORIZADA E APLICADA:** o responsável autorizou executar apenas `20261020191000_fix_private_storage_admin_read_after_assignment.sql` pelo workflow oficial. O [run #39701416284](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39701416284) passou no commit `7e375f102cd51e4f1f27efc2d19de9763d2e320f` e o banco confirmou **91 migrations aplicadas de 91**. A policy SELECT `storage.objects` agora permite a exceção da única admin sem o JOIN `clients` no ramo administrativo; o ramo da cliente ainda exige titularidade e `client_visible_at`. Bucket privado, RLS de Storage/metadados e policies restritivas de MFA AAL2 foram preservados. A única admin com TOTP verificado permanece, sem assignments E2E ativos. Não houve alteração de schema/RLS por fora do versionamento nem criação de dados reais de teste.
+
+**NÃO HOMOLOGADO OPERACIONALMENTE:** falta navegação real autenticada, prova de URL privada assinada na sessão Patty AAL2, negação a cliente alheia e aceite mobile/profissional na rodada final J1–J7. É uma pendência de **homologação final**, não uma migration pendente. A [issue #951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951) mantém a evidência técnica.
+
+---
+
 ## RESOLVIDO — múltiplas contas administrativas E2E na produção (21/10/2026)
 
 **DECISÃO HUMANA E OPERAÇÃO CONFIRMADAS:** o responsável identificou privadamente a identidade oficial da Patty e autorizou a remoção somente das roles `admin` de duas contas E2E e o encerramento do único assignment de teste ativo. Uma operação atômica controlada reduziu as roles `admin` de **3 para 1** e os assignments E2E ativos de **1 para 0**, preservando dois usuários Auth, dois Profiles, dois assignments históricos, os metadados de arquivos e o MFA sintético. RLS continua ativa; nenhuma migration ou policy foi modificada.
 
 O histórico da decisão, limites de sessão/JWT, pré-condições e evidência agregada estão em [ADMIN_IDENTITY_RECONCILIATION.md](ADMIN_IDENTITY_RECONCILIATION.md) e na [issue #950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950). O contrato do MVP continua com **uma única administradora de negócio**: novos administradores exigem autorização e RLS client-scoped específicas, não apenas role adicional.
 
-**PENDÊNCIA INDEPENDENTE:** a migration `20261020191000_fix_private_storage_admin_read_after_assignment.sql` **não foi aplicada**. A unicidade administrativa deixou de ser bloqueio da sua guarda, mas a [issue #951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951) continua aberta para revisão, autorização específica de aplicação, execução pelo workflow versionado e validações posteriores. A homologação humana da Patty permanece a última etapa.
+**PENDÊNCIA INDEPENDENTE POSTERIORMENTE RESOLVIDA:** a migration `20261020191000_fix_private_storage_admin_read_after_assignment.sql` foi autorizada, aplicada pelo [workflow #39701416284](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39701416284) e verificada no Supabase de produção (91/91 migrations). As RLS/MFA restritivas permaneceram preservadas. **Ainda não houve teste de download autenticado na sessão real da Patty**; essa etapa integra a homologação profissional conjunta ao final, sem antecipação.
 
 ---
 
