@@ -1,3 +1,13 @@
+## 2026-10-21 — J1/Storage privado: migration aplicada; homologação profissional ainda não iniciada
+
+**CORREÇÃO DE PRODUÇÃO AUTORIZADA E EXECUTADA:** [workflow Deploy Supabase migrations #39701416284](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39701416284) passou em `master` `7e375f102cd51e4f1f27efc2d19de9763d2e320f`, aplicando exclusivamente `20261020191000_fix_private_storage_admin_read_after_assignment.sql` pelo procedimento versionado. O Supabase SaaS confirmou 91/91 migrations e a nova policy SELECT `storage.objects`: a única admin lê arquivo privado com metadado correspondente sem depender do JOIN `clients` que escondia o objeto após encerramento; cliente somente lê arquivo próprio explicitamente liberado. Bucket privado, RLS e MFA AAL2 restritivo foram preservados. A reconciliação administrativa #950 foi concluída antes da aplicação; segue uma única role `admin`.
+
+**PROVAS QUE NÃO FORAM EXECUTADAS:** a leitura de SQL/policy e CI sintético não demonstram download/preview autenticados em produção nem sessão atual de Patty em AAL2. Os casos positivos de URL temporária e negativos de cliente não titular/AAL1 devem continuar no roteiro da **homologação operacional conjunta J1–J7, última etapa**, juntamente com uso mobile e aceite real. Não usar dados reais em CI, não copiar tokens de URLs assinadas para logs e não declarar nenhuma jornada homologada antecipadamente.
+
+**REGISTROS HISTÓRICOS ABAIXO:** menções anteriores a múltiplas roles admins ou migration não aplicada referem-se a estados de 20/10 e foram superadas pela reconciliação em 21/10. Evidências contemporâneas em [#950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950), [#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951) e [PROJECT_STATUS.md](PROJECT_STATUS.md).
+
+---
+
 ## 2026-10-21 — Recertificação integrada J1–J7 e publicação recuperada
 
 **RECERTIFICAÇÃO TÉCNICA CONCLUÍDA, SEM HOMOLOGAÇÃO HUMANA:** [PR #975](https://github.com/leandrosilveiradepaula/projeto-patty/pull/975) passou oito checks simultâneos (`Validate application` + Playwright J1–J7 com Supabase/contas/arquivos sintéticos descartáveis) no mesmo head `4e2d8fb2716ab1fec40dcbc7c92471aa6fb53298`. Foi integrada no commit `1238b98c98469047e39fcf32377f7fd699be14fa`. O CI [#39627204390](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39627204390) pós-merge passou. O deployment automático falhou em disparar; uma recuperação de produção **explicitamente autorizada**, sem alteração de schema/segurança, resultou em [Vercel `READY`](https://vercel.com/leandros-projects-102e32ab/projeto-patty/6j6UdqWhtGMK3RUQZ2v3gEtk1Qhp) no mesmo SHA, com aliases verificados.
