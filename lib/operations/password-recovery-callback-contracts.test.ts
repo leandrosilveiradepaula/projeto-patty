@@ -29,3 +29,29 @@ test("recovery callback returns only same-origin, uncached 303 redirects", () =>
     assert.doesNotMatch(code, /nextUrl\.clone\(/);
   }
 });
+
+test("PKCE code exchange retains flow ID and rejects missing codes", () => {
+  const code = read("app/auth/recovery/route.ts");
+  assert.match(code, /if \(!code\) return uncachedRecoveryRedirect\(true\)/);
+  assert.match(code, /supabase\.auth\.exchangeCodeForSession\(/);
+  assert.match(code, /flowId \? \{ flowId \} : undefined/);
+});
+
+test("one-time recovery hash rejects wrong OTP types", () => {
+  const code = read("app/auth/recovery-token/route.ts");
+  assert.match(code, /if \(!tokenHash \|\| type !== "recovery"\)/);
+  assert.match(code, /supabase\.auth\.verifyOtp\(/);
+  assert.match(code, /type: "recovery"/);
+});
+
+test("reset page and action keep per-session safeguards", () => {
+  const page = read("app/redefinir-senha/page.tsx");
+  const action = read("app/redefinir-senha/actions.ts");
+  const form = read("components/auth/PasswordRecoveryRequestForm.tsx");
+  assert.match(page, /export const dynamic = "force-dynamic"/);
+  assert.match(action, /supabase\.auth\.getClaims\(\)/);
+  assert.match(action, /supabase\.auth\.updateUser\(\{ password \}\)/);
+  assert.match(action, /signOut\(\{ scope: "local" \}\)/);
+  assert.match(form, /mesmo navegador/);
+  assert.match(form, /uso único/);
+});
