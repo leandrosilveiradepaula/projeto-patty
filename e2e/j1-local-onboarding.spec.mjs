@@ -1079,7 +1079,7 @@ test("J1 local: recovery OTP replaces the correct session, changes only its pass
       expect(callback.headers().location).toBe("/redefinir-senha?error=invalid");
       expect(Boolean((await callback.allHeaders())["set-cookie"])).toBe(false);
       await expect(page.getByText("Link inválido ou expirado")).toBeVisible();
-      await expect(page.getByLabel("Nova senha", { exact: true })).toHaveCount(0);
+      await expect(page.locator('input[name="password"]')).toHaveCount(0);
     });
 
     await test.step("valid recovery replaces the unrelated session and persists its own cookie", async () => {
@@ -1106,10 +1106,10 @@ test("J1 local: recovery OTP replaces the correct session, changes only its pass
       });
       let phase = "password-input";
       try {
-        await page.getByLabel("Nova senha", { exact: true })
+        await page.locator('input[name="password"]')
           .fill(newPassword, { timeout: 10000 });
         phase = "confirmation-input";
-        await page.getByLabel("Confirmar nova senha", { exact: true })
+        await page.locator('input[name="passwordConfirmation"]')
           .fill(newPassword, { timeout: 10000 });
         const submit = page.getByRole("button", {
           name: "Salvar nova senha", exact: true,
@@ -1161,7 +1161,7 @@ test("J1 local: recovery OTP replaces the correct session, changes only its pass
       expect(replay.headers().location).toBe("/redefinir-senha?error=invalid");
       expect(Boolean((await replay.allHeaders())["set-cookie"])).toBe(false);
       await expect(page.getByText("Link inválido ou expirado")).toBeVisible();
-      await expect(page.getByLabel("Nova senha", { exact: true })).toHaveCount(0);
+      await expect(page.locator('input[name="password"]')).toHaveCount(0);
     });
   } finally {
     await context.close();
