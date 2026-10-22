@@ -1079,7 +1079,7 @@ test("J1 local: recovery OTP replaces the correct session, changes only its pass
       expect(callback.headers().location).toBe("/redefinir-senha?error=invalid");
       expect(Boolean((await callback.allHeaders())["set-cookie"])).toBe(false);
       await expect(page.getByText("Link inválido ou expirado")).toBeVisible();
-      await expect(page.getByLabel("Nova senha")).toHaveCount(0);
+      await expect(page.getByLabel("Nova senha", { exact: true })).toHaveCount(0);
     });
 
     await test.step("valid recovery replaces the unrelated session and persists its own cookie", async () => {
@@ -1093,7 +1093,7 @@ test("J1 local: recovery OTP replaces the correct session, changes only its pass
       await expect(page.locator('form[data-interactive="true"]')).toBeVisible();
       expect(new URL(page.url()).origin).toBe(new URL(baseURL).origin);
       expect(new URL(page.url()).search).toBe("");
-      await page.getByLabel("Nova senha").fill(newPassword);
+      await page.getByLabel("Nova senha", { exact: true }).fill(newPassword);
       await page.getByLabel("Confirmar nova senha").fill(newPassword);
       await page.getByRole("button", { name: "Salvar nova senha" }).click();
       await expect(page).toHaveURL(/\/login\?password=updated$/, { timeout: 30000 });
@@ -1120,7 +1120,7 @@ test("J1 local: recovery OTP replaces the correct session, changes only its pass
       expect(replay.headers().location).toBe("/redefinir-senha?error=invalid");
       expect(Boolean((await replay.allHeaders())["set-cookie"])).toBe(false);
       await expect(page.getByText("Link inválido ou expirado")).toBeVisible();
-      await expect(page.getByLabel("Nova senha")).toHaveCount(0);
+      await expect(page.getByLabel("Nova senha", { exact: true })).toHaveCount(0);
     });
   } finally {
     await context.close();
