@@ -176,6 +176,11 @@ test("classified protected entrypoints contain the expected authentication bound
         /auth\.getClaims\(\)/,
         `${file} must require an authenticated recovery session before changing credentials`,
       );
+      assert.match(
+        content,
+        /hasVerifiedRecoverySession\(claimsData\?\.claims\)/,
+        `${file} must require verified recovery evidence, not any authenticated session`,
+      );
       assert.doesNotMatch(
         content,
         /createAdminClient\s*\(/,
@@ -600,7 +605,7 @@ test("PKCE password recovery code is exchanged before rendering the reset form",
   assert.doesNotMatch(route, /console\.(log|info|warn|error)/);
 });
 
-test("password reset gate prioritizes recovery fragment over any existing server session", async () => {
+test("password reset gate prioritizes a recovery fragment and rejects an ordinary server session", async () => {
   const gate = await readFile(
     path.join(ROOT, "components", "auth", "PasswordResetSessionGate.tsx"),
     "utf8",
@@ -609,7 +614,7 @@ test("password reset gate prioritizes recovery fragment over any existing server
   assert.match(gate, /parseImplicitRecoveryFragment\(window\.location\.hash\)/);
   assert.match(gate, /if \(parsed\.kind === "recovery"\)/);
   assert.match(gate, /auth\.setSession\(\{/);
-  assert.match(gate, /if \(hasServerSession\)/);
+  assert.match(gate, /if \(hasVerifiedRecovery\)/);
   assert.match(gate, /return <PasswordResetForm \/>/);
   assert.doesNotMatch(gate, /console\.(log|info|warn|error)/);
 });

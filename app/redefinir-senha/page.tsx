@@ -5,6 +5,7 @@ import { PasswordResetSessionGate } from "@/components/auth/PasswordResetSession
 import { Alert } from "@/components/ui/Alert";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { hasVerifiedRecoverySession } from "@/lib/onboarding/recovery-session";
 import { createClient } from "@/lib/supabase/server";
 
 import styles from "./page.module.css";
@@ -36,8 +37,9 @@ export default async function ResetPasswordPage({
   }
 
   const supabase = await createClient();
-  const { data: claimsData } = await supabase.auth.getClaims();
-  const hasServerSession = typeof claimsData?.claims?.sub === "string";
+  const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
+  const hasVerifiedRecovery =
+    !claimsError && hasVerifiedRecoverySession(claimsData?.claims);
 
   return (
     <main className={styles.shell}>
@@ -54,7 +56,7 @@ export default async function ResetPasswordPage({
               Solicite um novo link de recuperação para continuar.
             </Alert>
           ) : (
-            <PasswordResetSessionGate hasServerSession={hasServerSession} />
+            <PasswordResetSessionGate hasVerifiedRecovery={hasVerifiedRecovery} />
           )}
         </Card>
         <Link className={styles.backLink} href="/recuperar-senha">

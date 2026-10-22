@@ -29,6 +29,49 @@ const fixtureTables = new Set([
 const service = createClient(apiURL, serviceKey, {
   auth: { autoRefreshToken: false, persistSession: false },
 });
+const inbucketUrl = "http://127.0.0.1:54324";
+
+async function waitForLocalRecoveryEmail(recipient, ignoredMessageIds = new Set()) {
+  // Inbucket is part of the disposable Supabase stack. Keep the recovery URL
+  // only in memory: it is an ephemeral credential, never test output.
+  const mailbox = recipient.split("@", 1)[0];
+  for (let attempt = 0; attempt < 80; attempt += 1) {
+    const list = await fetch(inbucketUrl + "/api/v1/mailbox/" +
+      encodeURIComponent(mailbox));
+    if (list.ok) {
+      const messages = await list.json();
+      const summary = Array.isArray(messages)
+        ? messages.find((message) =>
+          typeof message.id === "string" && !ignoredMessageIds.has(message.id),
+        )
+        : null;
+      if (summary?.id) {
+        const detail = await fetch(inbucketUrl + "/api/v1/mailbox/" +
+          encodeURIComponent(mailbox) + "/" + encodeURIComponent(summary.id));
+        if (detail.ok) {
+          const message = await detail.json();
+          const candidates = String(message.body?.text ?? "") + "\n" +
+            String(message.body?.html ?? "");
+          const urls = candidates.match(/https?:\/\/[^\s"'<>]+/g) ?? [];
+          for (const rawUrl of urls) {
+            try {
+              const url = new URL(rawUrl.replaceAll("&amp;", "&"));
+              if (url.origin === "http://127.0.0.1:54321" &&
+                  url.pathname === "/auth/v1/verify" &&
+                  url.searchParams.get("type") === "recovery") {
+                return { id: summary.id, url: url.toString() };
+              }
+            } catch {
+              // Ignore ordinary prose/HTML fragments; do not log message data.
+            }
+          }
+        }
+      }
+    }
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+  throw new Error("J1 local recovery email was not available in disposable Inbucket");
+}
 function literal(value) {
   if (value === null) return "NULL";
   if (typeof value !== "number" && typeof value !== "string")
@@ -1073,6 +1116,12 @@ test("J1 local: recovery OTP replaces the correct session, changes only its pass
       await expect(page).toHaveURL(/\/cliente\/?$/, { timeout: 20000 });
     });
 
+    await test.step("an ordinary existing session cannot open the reset form", async () => {
+      await page.goto("/redefinir-senha");
+      await expect(page.getByText("Link inválido ou expirado")).toBeVisible();
+      await expect(page.locator('input[name="password"]')).toHaveCount(0);
+    });
+
     await test.step("a callback with the wrong OTP type cannot show the reset form", async () => {
       const callback = await navigateToRecoveryHash("invite");
       expect(callback.status()).toBe(303);
@@ -1165,5 +1214,134 @@ test("J1 local: recovery OTP replaces the correct session, changes only its pass
     });
   } finally {
     await context.close();
+  }
+});
+
+test("J1 local: PKCE recovery email requires its original browser and a recovery session", async ({ browser }) => {
+  test.setTimeout(240000);
+  const nonce = randomBytes(8).toString("hex");
+  const makeRecoveryClient = async (label) => {
+    const email = "e2e-j1-pkce-" + label + "-" + nonce + "@example.invalid";
+    const password = "J1-" + randomBytes(17).toString("base64url") + "-Aa1!";
+    const created = await service.auth.admin.createUser({
+      email, password, email_confirm: true,
+    });
+    if (created.error || !UUID.test(created.data?.user?.id ?? "")) {
+      throw created.error ?? new Error("Local PKCE recovery identity creation failed");
+    }
+    const id = created.data.user.id;
+    insert("profiles", { id, display_name: "J1 Synthetic PKCE " + label });
+    insert("user_roles", { profile_id: id, role: "client" });
+    insert("clients", {
+      profile_id: id, full_name: "J1 Synthetic PKCE " + label,
+      status: "active",
+    });
+    return { email, password };
+  };
+  const existing = await makeRecoveryClient("existing");
+  const intended = await makeRecoveryClient("target");
+  const newPassword = "J1-" + randomBytes(19).toString("base64url") + "-Bb2!";
+  const requestContext = await browser.newContext({
+    baseURL, viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true,
+  });
+  const otherContext = await browser.newContext({ baseURL });
+  let successfulRecoveryLink = null;
+  let firstRecoveryMessageId = null;
+
+  const requestRecovery = async (page) => {
+    await page.goto("/recuperar-senha");
+    await page.getByLabel("Email").fill(intended.email);
+    await page.getByRole("button", { name: "Enviar link de recuperação" }).click();
+    await expect(page.getByText("Solicitação recebida")).toBeVisible({ timeout: 15000 });
+  };
+
+  try {
+    const requestPage = await requestContext.newPage();
+    const otherPage = await otherContext.newPage();
+
+    await test.step("a prior identity cannot unlock reset without a recovery session", async () => {
+      await requestPage.goto("/login");
+      await requestPage.getByLabel("Email").fill(existing.email);
+      await requestPage.getByLabel("Senha").fill(existing.password);
+      await requestPage.getByRole("button", { name: "Entrar" }).click();
+      await expect(requestPage).toHaveURL(/\/cliente\/?$/, { timeout: 20000 });
+      await requestPage.goto("/redefinir-senha");
+      await expect(requestPage.getByText("Link inválido ou expirado")).toBeVisible();
+      await expect(requestPage.locator('input[name="password"]')).toHaveCount(0);
+    });
+
+    await test.step("a PKCE email opened in another browser fails without its verifier", async () => {
+      await requestRecovery(requestPage);
+      const email = await waitForLocalRecoveryEmail(intended.email);
+      firstRecoveryMessageId = email.id;
+      const callback = otherPage.waitForResponse((response) =>
+        new URL(response.url()).pathname === "/auth/recovery",
+      );
+      await otherPage.goto(email.url);
+      const response = await callback;
+      expect(response.status()).toBe(303);
+      expect(response.headers().location).toBe("/redefinir-senha?error=invalid");
+      expect(Boolean((await response.allHeaders())["set-cookie"])).toBe(false);
+      await expect(otherPage.getByText("Link inválido ou expirado")).toBeVisible();
+      await expect(otherPage.locator('input[name="password"]')).toHaveCount(0);
+    });
+
+    await test.step("same-browser PKCE exchange changes only the recovery identity", async () => {
+      // Local Auth applies a one-second recovery-email rate limit. A fresh
+      // request is required because the prior code was intentionally consumed
+      // by the failed verifier exchange in the other browser.
+      await new Promise((resolve) => setTimeout(resolve, 1100));
+      await requestRecovery(requestPage);
+      const email = await waitForLocalRecoveryEmail(
+        intended.email,
+        new Set(firstRecoveryMessageId ? [firstRecoveryMessageId] : []),
+      );
+      successfulRecoveryLink = email.url;
+      const callback = requestPage.waitForResponse((response) =>
+        new URL(response.url()).pathname === "/auth/recovery",
+      );
+      await requestPage.goto(successfulRecoveryLink);
+      const response = await callback;
+      expect(response.status()).toBe(303);
+      expect(response.headers().location).toBe("/redefinir-senha");
+      expect(response.headers()["cache-control"]).toContain("no-store");
+      expect(response.headers()["referrer-policy"]).toBe("no-referrer");
+      expect(Boolean((await response.allHeaders())["set-cookie"])).toBe(true);
+      await expect(requestPage.locator('form[data-interactive="true"]')).toBeVisible();
+      await requestPage.locator('input[name="password"]').fill(newPassword);
+      await requestPage.locator('input[name="passwordConfirmation"]').fill(newPassword);
+      await requestPage.getByRole("button", { name: "Salvar nova senha", exact: true }).click();
+      await expect(requestPage).toHaveURL(/\/login\?password=updated$/, { timeout: 15000 });
+    });
+
+    await test.step("new password works, old password fails, and the link cannot replay", async () => {
+      const canLogin = async (email, password) => {
+        const probe = createClient(apiURL, anonKey, {
+          auth: { autoRefreshToken: false, persistSession: false },
+        });
+        const { error } = await probe.auth.signInWithPassword({ email, password });
+        if (!error) await probe.auth.signOut({ scope: "local" });
+        return !error;
+      };
+      expect(await canLogin(intended.email, newPassword)).toBe(true);
+      expect(await canLogin(intended.email, intended.password)).toBe(false);
+      expect(await canLogin(existing.email, existing.password)).toBe(true);
+      // The browser must receive no usable session when it repeats the consumed
+      // recovery URL. Keep that URL in-memory and out of diagnostics.
+      const replayCallback = requestPage.waitForResponse((response) =>
+        new URL(response.url()).pathname === "/auth/recovery",
+      );
+      if (!successfulRecoveryLink) {
+        throw new Error("J1 local PKCE recovery link was unexpectedly unavailable");
+      }
+      await requestPage.goto(successfulRecoveryLink);
+      const replay = await replayCallback;
+      expect(replay.status()).toBe(303);
+      expect(replay.headers().location).toBe("/redefinir-senha?error=invalid");
+      expect(Boolean((await replay.allHeaders())["set-cookie"])).toBe(false);
+      await expect(requestPage.getByText("Link inválido ou expirado")).toBeVisible();
+    });
+  } finally {
+    await Promise.allSettled([requestContext.close(), otherContext.close()]);
   }
 });

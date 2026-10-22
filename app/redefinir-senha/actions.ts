@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 
+import { hasVerifiedRecoverySession } from "@/lib/onboarding/recovery-session";
 import { parseAccessPasswordForm } from "@/lib/onboarding/validation";
 import { createClient } from "@/lib/supabase/server";
 
@@ -20,7 +21,7 @@ export async function resetPassword(
   const supabase = await createClient();
   const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
 
-  if (claimsError || typeof claimsData?.claims?.sub !== "string") {
+  if (claimsError || !hasVerifiedRecoverySession(claimsData?.claims)) {
     return {
       message:
         "Este link não é mais válido. Solicite uma nova recuperação de senha.",

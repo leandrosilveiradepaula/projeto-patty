@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import type { Database } from "@/lib/supabase/database.types";
 import { getSupabasePublicConfig } from "@/lib/supabase/env";
+import { hasVerifiedRecoverySession } from "@/lib/onboarding/recovery-session";
 
 function uncachedRecoveryRedirect(invalid = false) {
   // Keep the token hash out of redirects and avoid reconstructed internal
@@ -48,12 +49,17 @@ export async function GET(request: NextRequest) {
     },
   });
 
-  const { error } = await supabase.auth.verifyOtp({
+  const { data, error } = await supabase.auth.verifyOtp({
     token_hash: tokenHash,
     type: "recovery",
   });
 
-  // Reject invalid or consumed links without any incidental session cookies.
-  if (error) return uncachedRecoveryRedirect(true);
+  const { data: claimsData, error: claimsError } = data.session
+    ? await supabase.auth.getClaims(data.session.access_token)
+    : { data: null, error: new Error("Missing recovery session") };
+  // Reject invalid, consumed or non-recovery links without incidental cookies.
+  if (error || claimsError || !hasVerifiedRecoverySession(claimsData?.claims)) {
+    return uncachedRecoveryRedirect(true);
+  }
   return response;
 }

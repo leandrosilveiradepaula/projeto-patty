@@ -9,9 +9,9 @@ import { createClient } from "@/lib/supabase/client";
 import { PasswordResetForm } from "./PasswordResetForm";
 
 export function PasswordResetSessionGate({
-  hasServerSession,
+  hasVerifiedRecovery,
 }: {
-  hasServerSession: boolean;
+  hasVerifiedRecovery: boolean;
 }) {
   const [ready, setReady] = useState(false);
 
@@ -57,13 +57,13 @@ export function PasswordResetSessionGate({
       return;
     }
 
-    if (hasServerSession) {
+    if (hasVerifiedRecovery) {
       setReady(true);
       return;
     }
 
     window.location.replace("/redefinir-senha?error=invalid");
-  }, [hasServerSession]);
+  }, [hasVerifiedRecovery]);
 
   if (!ready) {
     return (

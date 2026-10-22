@@ -2,12 +2,12 @@
 
 **Corrigido e publicado:** callbacks de recovery com persistência explícita de cookies na resposta 303 (PR #984) e E2E sintético de OTP `token_hash` com isolamento entre contas, uso único e limpeza local (PR #986), integrados à `master`, CI pós-merge e deployment Vercel `READY` no mesmo SHA. Ver [AUTH_RECOVERY_979.md](AUTH_RECOVERY_979.md).
 
-**Ainda em aberto, sem regra automática ou implementação inferida:**
+**Em implementação e validação na PR sensível atual:**
 
-- reproduzir o pedido de e-mail em Supabase descartável e confirmar como o template efetivo entrega o código PKCE, incluindo mesmo navegador/perfil versus outro contexto, sem expor token/cookies;
-- definir prova de origem do fluxo de recuperação, vinculada à identidade/sessão corrente e compatível com OTP, PKCE e fragmento implícito, antes de liberar a tela de redefinição quando já existe outra sessão autenticada;
-- cobrir negativas de link consumido/expirado e potencial prefetch do provedor de e-mail, sem mudar templates SaaS sem decisão específica;
-- manter alterações de Auth em PR sensível com revisão específica e merge manual; não usar contas reais em CI e não antecipar homologação final Patty J1–J7.
+- a prova de origem passou a exigir os claims JWT verificados `sub`, `session_id` e `amr=recovery`; login comum, parâmetro e cookie aplicativo não autorizam reset;
+- o E2E local foi ampliado para pedido de e-mail e PKCE pelo Inbucket descartável, perfil original versus outro perfil, replay e sessão preexistente. A estação sem Docker não declara esse E2E aprovado: os checks J1 e Validate do SHA final são obrigatórios;
+- comportamento de expiração, prefetch/scanner e template/provedor SaaS continua aberto e não autoriza alterar configurações de produção;
+- a mudança de Auth mantém PR sensível, revisão específica e merge manual; não usa contas reais em CI nem antecipa homologação final Patty J1–J7.
 
 **Não é regra profissional:** estas são pendências técnicas de autenticação/UX, não do método da Patty.
 
