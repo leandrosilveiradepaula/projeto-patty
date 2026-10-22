@@ -39,7 +39,8 @@ export function AccessPasswordForm({action,mode,role}:{action:PasswordAction;mod
   </FormField>
   <button className={styles.toggle} type="button" disabled={pending||!interactive} onClick={()=>setShowConfirmation(s=>!s)} aria-pressed={showConfirmation}>{showConfirmation?"Ocultar confirmação":"Mostrar confirmação"}</button>
   {!interactive?<p role="status" className={styles.hint}>Preparando formulário para digitação…</p>:null}
-  <p role="status" className={styles.hint}>{password.length===0?"Informe uma senha nova.":password.length<8?"Faltam "+(8-password.length)+" caracteres para o mínimo.":password.length>128?"A senha ultrapassa o limite de 128 caracteres.":"Comprimento mínimo atendido."}</p>
+  <p role="status" className={styles.hint}>{password.length===0?"Informe uma senha nova.":password.length<8?"Faltam "+(8-password.length)+" caracteres para o mínimo.":password.length>128?"A senha ultrapassa o limite de 128 caracteres.":"Mínimo de 8 caracteres atendido."}</p>
+  <p className={styles.hint}>Dica de segurança: prefira uma senha longa e exclusiva, que você não utilize em outros serviços. O comprimento mínimo não garante que uma senha seja segura.</p>
   {touched&&!canSubmit?<p role="alert" className={styles.hint}>Revise os campos destacados antes de continuar.</p>:null}
   {pending?<p role="status">Confirmando alteração da senha. Não envie novamente.</p>:null}
   <Button type="submit" loading={pending} disabled={pending||!interactive||!canSubmit}>{mode==="activate"?"Criar senha e continuar":"Salvar nova senha"}</Button>
