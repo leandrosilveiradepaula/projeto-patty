@@ -3,7 +3,8 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import type { Database } from "@/lib/supabase/database.types";
 import { getSupabasePublicConfig } from "@/lib/supabase/env";
-import { hasVerifiedRecoverySession } from "@/lib/onboarding/recovery-session";
+import { getRecoverySessionIdentity } from "@/lib/onboarding/recovery-grant";
+import { issueRecoveryGrantCookie } from "@/lib/onboarding/recovery-grant-server";
 
 function uncachedRecoveryRedirect(invalid = false) {
   // Keep the token hash out of redirects and avoid reconstructed internal
@@ -58,7 +59,15 @@ export async function GET(request: NextRequest) {
     ? await supabase.auth.getClaims(data.session.access_token)
     : { data: null, error: new Error("Missing recovery session") };
   // Reject invalid, consumed or non-recovery links without incidental cookies.
-  if (error || claimsError || !hasVerifiedRecoverySession(claimsData?.claims)) {
+  const identity = getRecoverySessionIdentity(claimsData?.claims);
+  // verifyOtp with the literal type "recovery" is the server-verified proof
+  // of the email reset. The resulting JWT can have amr=otp, which ordinary
+  // passwordless sign-ins ALSO use; never trust that AMR without this exchange.
+  if (error || claimsError || !identity || !data.user ||
+      data.user.id !== identity.sub || !data.session) {
+    return uncachedRecoveryRedirect(true);
+  }
+  if (!issueRecoveryGrantCookie(response, claimsData?.claims)) {
     return uncachedRecoveryRedirect(true);
   }
   return response;
