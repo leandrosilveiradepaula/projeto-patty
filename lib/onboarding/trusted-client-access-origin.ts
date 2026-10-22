@@ -6,6 +6,7 @@
  */
 export type ClientAccessLinkEnvironment = {
   APP_PUBLIC_ORIGIN?: string;
+  J1_E2E_LOCAL_ONLY?: string;
   VERCEL_PROJECT_PRODUCTION_URL?: string;
   VERCEL_URL?: string;
   NODE_ENV?: string;
@@ -20,7 +21,7 @@ export class ClientAccessLinkOriginError extends Error {
 
 function isLocalDevelopmentOrigin(value: URL, env: ClientAccessLinkEnvironment) {
   return (
-    env.NODE_ENV === "development" &&
+    (env.NODE_ENV === "development" || env.J1_E2E_LOCAL_ONLY === "true") &&
     value.protocol === "http:" &&
     (value.hostname === "localhost" || value.hostname === "127.0.0.1" || value.hostname === "[::1]")
   );

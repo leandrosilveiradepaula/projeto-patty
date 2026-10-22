@@ -20,11 +20,10 @@ test("activation checks implicit invite fragments before presenting the account 
   assert.doesNotMatch(gate, /localStorage|sessionStorage|console\./);
 });
 
-test("both invite and recovery fragments handle rejected session promises", () => {
+test("invite bridges catch rejected sessions; password reset refuses unprovable implicit fragments", () => {
   for (const path of [
     "components/auth/ImplicitInviteSessionBridge.tsx",
     "components/auth/ImplicitRecoverySessionBridge.tsx",
-    "components/auth/PasswordResetSessionGate.tsx",
     "components/auth/ActivationSessionGate.tsx",
   ]) {
     const source = read(path);
@@ -32,6 +31,12 @@ test("both invite and recovery fragments handle rejected session promises", () =
     assert.match(source, /catch \{/);
     assert.match(source, /window\.history\.replaceState\(/);
   }
+  const gate = read("components/auth/PasswordResetSessionGate.tsx");
+  assert.match(gate, /parseImplicitRecoveryFragment\(window\.location\.hash\)/);
+  assert.match(gate, /parsed\.kind !== "none"/);
+  assert.match(gate, /window\.history\.replaceState\(/);
+  assert.match(gate, /window\.location\.replace\("\/redefinir-senha\?error=invalid"\)/);
+  assert.doesNotMatch(gate, /supabase\.auth\.setSession\(/);
 });
 
 test("access forms have native field validation and block inputs while saving", () => {

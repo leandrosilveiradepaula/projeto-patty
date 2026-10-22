@@ -3,6 +3,8 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import type { Database } from "@/lib/supabase/database.types";
 import { getSupabasePublicConfig } from "@/lib/supabase/env";
+import { hasVerifiedRecoverySession } from "@/lib/onboarding/recovery-session";
+import { issueRecoveryGrantCookie } from "@/lib/onboarding/recovery-grant-server";
 
 function uncachedRecoveryRedirect(invalid = false) {
   // Only use a relative, fixed Location: NextRequest.nextUrl may reconstruct
@@ -48,12 +50,27 @@ export async function GET(request: NextRequest) {
     },
   });
 
-  const { error } = await supabase.auth.exchangeCodeForSession(
+  const { data, error } = await supabase.auth.exchangeCodeForSession(
     code,
     flowId ? { flowId } : undefined,
   );
 
-  // Failed exchanges must never return cookies written to the success response.
-  if (error) return uncachedRecoveryRedirect(true);
+  // The reset page/action must never accept an ordinary existing session. The
+  // claim is verified by Supabase before it is used as recovery evidence.
+  const { data: claimsData, error: claimsError } = data.session
+    ? await supabase.auth.getClaims(data.session.access_token)
+    : { data: null, error: new Error("Missing recovery session") };
+  // Failed exchanges or non-recovery sessions must never return cookies written
+  // to the success response.
+  if (error || claimsError || !hasVerifiedRecoverySession(claimsData?.claims) ||
+      !data.session || claimsData?.claims?.sub !== data.session.user.id) {
+    return uncachedRecoveryRedirect(true);
+  }
+  // The signed, HttpOnly grant is minted ONLY after GoTrue has exchanged a
+  // recovery-specific PKCE code and Supabase has verified the resulting JWT.
+  // A normal email OTP login cannot mint a grant through this callback.
+  if (!issueRecoveryGrantCookie(response, claimsData.claims)) {
+    return uncachedRecoveryRedirect(true);
+  }
   return response;
 }

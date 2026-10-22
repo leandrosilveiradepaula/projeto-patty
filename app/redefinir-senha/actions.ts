@@ -2,6 +2,10 @@
 
 import { redirect } from "next/navigation";
 
+import {
+  clearRecoveryGrantActionCookie,
+  hasServerRecoveryGrant,
+} from "@/lib/onboarding/recovery-grant-server";
 import { parseAccessPasswordForm } from "@/lib/onboarding/validation";
 import { createClient } from "@/lib/supabase/server";
 
@@ -20,7 +24,7 @@ export async function resetPassword(
   const supabase = await createClient();
   const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
 
-  if (claimsError || typeof claimsData?.claims?.sub !== "string") {
+  if (claimsError || !(await hasServerRecoveryGrant(claimsData?.claims))) {
     return {
       message:
         "Este link não é mais válido. Solicite uma nova recuperação de senha.",
@@ -36,6 +40,9 @@ export async function resetPassword(
     };
   }
 
+  // Invalidate the short-lived reset grant before logging out. A subsequent
+  // ordinary login must never inherit the authorization to reset a password.
+  await clearRecoveryGrantActionCookie();
   await supabase.auth.signOut({ scope: "local" });
   redirect("/login?password=updated");
 }
