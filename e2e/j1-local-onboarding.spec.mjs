@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { createClient } from "@supabase/supabase-js";
+import { createServerClient } from "@supabase/ssr";
 import { expect, test } from "@playwright/test";
 import { generateTotp, loginAdminWithMfa } from "./helpers/admin-auth.mjs";
 
@@ -1285,6 +1286,59 @@ test("J1 local: PKCE recovery email requires its original browser and a recovery
       await requestPage.goto("/redefinir-senha");
       await expect(requestPage.getByText("Link inválido ou expirado")).toBeVisible();
       await expect(requestPage.locator('input[name="password"]')).toHaveCount(0);
+    });
+
+    await test.step("an ordinary passwordless OTP sign-in cannot authorize reset", async () => {
+      // A signed OTP-session JWT is also used for magic-link login. The
+      // recovery screen/action must require the separate server-issued grant
+      // from a true recovery exchange, not just JWT amr=otp.
+      const link = await service.auth.admin.generateLink({
+        type: "magiclink", email: existing.email,
+      });
+      const tokenHash = link.data?.properties?.hashed_token;
+      if (link.error || !tokenHash) {
+        throw link.error ?? new Error("Synthetic passwordless link not available");
+      }
+      const proof = createClient(apiURL, anonKey, {
+        auth: { autoRefreshToken: false, persistSession: false },
+      });
+      const verified = await proof.auth.verifyOtp({
+        token_hash: tokenHash, type: "magiclink",
+      });
+      if (verified.error || !verified.data.session) {
+        throw verified.error ?? new Error("Synthetic passwordless login failed");
+      }
+
+      // Let @supabase/ssr create the real chunked session-cookie format. No
+      // fake JWT or browser-controlled server claims are used for this test.
+      const jar = new Map();
+      const ssr = createServerClient(apiURL, anonKey, {
+        cookies: {
+          getAll: () => [...jar].map(([name, value]) => ({ name, value })),
+          setAll: (items) => items.forEach(({ name, value }) => jar.set(name, value)),
+        },
+      });
+      const set = await ssr.auth.setSession({
+        access_token: verified.data.session.access_token,
+        refresh_token: verified.data.session.refresh_token,
+      });
+      if (set.error || jar.size === 0) {
+        throw set.error ?? new Error("Synthetic passwordless cookie creation failed");
+      }
+      const otpContext = await browser.newContext({ baseURL });
+      try {
+        await otpContext.addCookies(
+          [...jar].filter(([, value]) => value.length > 0)
+            .map(([name, value]) => ({ name, value, url: baseURL })),
+        );
+        const otpPage = await otpContext.newPage();
+        await otpPage.goto("/redefinir-senha");
+        await expect(otpPage.getByText("Link inválido ou expirado")).toBeVisible();
+        await expect(otpPage.locator('input[name="password"]')).toHaveCount(0);
+      } finally {
+        await otpContext.close();
+        await proof.auth.signOut({ scope: "local" });
+      }
     });
 
     await test.step("a PKCE email opened in another browser fails without its verifier", async () => {
