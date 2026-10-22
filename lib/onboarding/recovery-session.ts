@@ -1,4 +1,4 @@
-import { getRecoverySessionIdentity } from "./recovery-grant";
+import { getRecoverySessionIdentity } from "./recovery-grant.ts";
 
 /**
  * Only the PKCE recovery method is independently identifiable from signed
