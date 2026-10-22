@@ -8,36 +8,28 @@ const baseClaims = {
   sub: "synthetic-user",
 };
 
-test("accepts the signed claim shapes GoTrue emits for recovery", () => {
-  assert.equal(
-    hasVerifiedRecoverySession({
-      ...baseClaims,
-      amr: [{ method: "recovery", timestamp: 1 }],
-    }),
-    true,
-  );
-  assert.equal(
-    hasVerifiedRecoverySession({
-      ...baseClaims,
-      amr: [{ method: "otp", timestamp: 1 }],
-    }),
-    true,
-  );
+test("only signed PKCE recovery AMR is specific to a recovery exchange", () => {
+  assert.equal(hasVerifiedRecoverySession({
+    ...baseClaims,
+    amr: [{ method: "recovery", timestamp: 1 }],
+  }), true);
 });
 
-test("does not treat an ordinary authenticated session as password recovery", () => {
-  assert.equal(
-    hasVerifiedRecoverySession({
-      ...baseClaims,
-      amr: [{ method: "password", timestamp: 1 }],
-    }),
-    false,
-  );
+test("ordinary password AND OTP / magic-link logins cannot authorize recovery", () => {
+  assert.equal(hasVerifiedRecoverySession({
+    ...baseClaims,
+    amr: [{ method: "password", timestamp: 1 }],
+  }), false);
+  assert.equal(hasVerifiedRecoverySession({
+    ...baseClaims,
+    amr: [{ method: "otp", timestamp: 1 }],
+  }), false);
 });
 
-test("fails closed for missing identity, session binding or recovery method", () => {
+test("fails closed for missing identity, session or verified recovery method", () => {
   assert.equal(hasVerifiedRecoverySession(null), false);
   assert.equal(hasVerifiedRecoverySession({ amr: [{ method: "recovery" }] }), false);
   assert.equal(hasVerifiedRecoverySession({ ...baseClaims, amr: [] }), false);
   assert.equal(hasVerifiedRecoverySession({ ...baseClaims, amr: "recovery" }), false);
+  assert.equal(hasVerifiedRecoverySession({ ...baseClaims, amr: [{ method: "otp" }] }), false);
 });
