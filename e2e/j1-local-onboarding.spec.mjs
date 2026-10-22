@@ -1348,18 +1348,57 @@ test("J1 local: PKCE recovery email requires its original browser and a recovery
       // The browser must receive no usable session when it repeats the consumed
       // recovery URL. Keep that URL in-memory and out of diagnostics.
       const recoveryPage = recoveryContext.pages()[0];
-      const replayCallback = recoveryPage.waitForResponse((response) =>
-        new URL(response.url()).pathname === "/auth/recovery",
-      );
       if (!successfulRecoveryLink) {
         throw new Error("J1 local PKCE recovery link was unexpectedly unavailable");
       }
-      await recoveryPage.goto(successfulRecoveryLink);
-      const replay = await replayCallback;
-      expect(replay.status()).toBe(303);
-      expect(replay.headers().location).toBe("/redefinir-senha?error=invalid");
-      expect(Boolean((await replay.allHeaders())["set-cookie"])).toBe(false);
+      // After a PKCE link is consumed, GoTrue may reject the second visit at
+      // /auth/v1/verify itself, before redirecting to our callback. Waiting
+      // unconditionally for /auth/recovery would hang even when replay was
+      // correctly rejected by the identity provider.
+      const callbackResponses = [];
+      const captureCallback = (response) => {
+        if (new URL(response.url()).pathname === "/auth/recovery") {
+          callbackResponses.push(response);
+        }
+      };
+      recoveryPage.on("response", captureCallback);
+      let providerRejected = false;
+      try {
+        // The in-memory URL contains a one-time token. Never expose it in
+        // assertion output, errors, traces or logged response details.
+        let replayNavigation;
+        try {
+          replayNavigation = await recoveryPage.goto(successfulRecoveryLink, {
+            waitUntil: "domcontentloaded", timeout: 20000,
+          });
+        } catch {
+          throw new Error("J1 local PKCE replay navigation failed");
+        }
+        if (callbackResponses.length > 0) {
+          const replay = callbackResponses.at(-1);
+          expect(replay.status()).toBe(303);
+          expect(replay.headers().location).toBe("/redefinir-senha?error=invalid");
+          expect(Boolean((await replay.allHeaders())["set-cookie"])).toBe(false);
+        } else {
+          // The consumed token must be rejected by GoTrue at its exact local
+          // verify endpoint; a successful provider response is a test failure.
+          const destination = new URL(recoveryPage.url());
+          expect(destination.origin).toBe(new URL(apiURL).origin);
+          expect(destination.pathname).toBe("/auth/v1/verify");
+          expect([400, 401, 403, 404, 410, 422]).toContain(
+            replayNavigation?.status(),
+          );
+          providerRejected = true;
+        }
+      } finally {
+        recoveryPage.off("response", captureCallback);
+      }
+      // Even after a provider-level rejection, a direct visit to the reset
+      // screen must not recover access through old cookies or prior sessions.
+      await recoveryPage.goto("/redefinir-senha");
       await expect(recoveryPage.getByText("Link inválido ou expirado")).toBeVisible();
+      await expect(recoveryPage.locator('input[name="password"]')).toHaveCount(0);
+      expect(providerRejected || callbackResponses.length > 0).toBe(true);
     });
   } finally {
     await Promise.allSettled([requestContext.close(), recoveryContext.close(), otherContext.close()]);
