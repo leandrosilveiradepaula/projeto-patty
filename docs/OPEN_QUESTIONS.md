@@ -1,15 +1,16 @@
 ## PENDÊNCIA TÉCNICA — recuperação de senha PKCE e sessão anterior (#979, 22/10/2026)
 
-**Corrigido e publicado:** callbacks de recovery com persistência explícita de cookies na resposta 303 (PR #984) e E2E sintético de OTP `token_hash` com isolamento entre contas, uso único e limpeza local (PR #986), integrados à `master`, CI pós-merge e deployment Vercel `READY` no mesmo SHA. Ver [AUTH_RECOVERY_979.md](AUTH_RECOVERY_979.md).
+**Confirmado e publicado:** PRs #984 e #986 registraram callbacks de recovery e E2E sintético de OTP. PR #997 atualizou Next.js para `16.4.2`, e o deployment Vercel de produção `dpl_GR4zroW3AePq13FdXrs4yUvDTvin` está `READY` no SHA `d2add311...`.
 
-**Em implementação e validação na PR sensível atual:**
+**Implementação proposta na PR sensível #995 — ainda NÃO testada nos checks finais:**
 
-- a prova de origem passou a exigir os claims JWT verificados `sub`, `session_id` e o `amr` emitido para recovery (`recovery` no PKCE, `otp` após OTP/implícito); login por senha, parâmetro e cookie aplicativo não autorizam reset;
-- o E2E local foi ampliado para pedido de e-mail e PKCE pelo Inbucket descartável, perfil original versus outro perfil, replay e sessão preexistente. A estação sem Docker não declara esse E2E aprovado: os checks J1 e Validate do SHA final são obrigatórios;
-- comportamento de expiração, prefetch/scanner e template/provedor SaaS continua aberto e não autoriza alterar configurações de produção;
-- a mudança de Auth mantém PR sensível, revisão específica e merge manual; não usa contas reais em CI nem antecipa homologação final Patty J1–J7.
+- JWT assinado com `amr=otp` é autenticação e não prova finalidade recovery. O grant de reset é emitido somente pelos callbacks após troca PKCE `amr=recovery` ou `verifyOtp(type=recovery)`, assinado pelo servidor com HMAC e vinculado à identidade + `session_id`, validade de 10 minutos, cookie `HttpOnly` e checagem novamente na server action.
+- Browser com login OTP/magic-link comum, mesmo autenticado, deve ser recusado na página e na action, sem alterar sua senha. Testes negativos sintéticos foram acrescentados, ainda aguardando execução remota.
+- Legacy implicit fragment, sem prova independente do tipo de autenticação, deve falhar fechado e orientar novo link PKCE. Compatibilidade futura segura é **questão aberta**, não regra implementada.
+- Replay, expiração operacional, scanners/prefetch, links cross-device e simultaneidade do grant exigem testes ou decisão técnica adicional. Não afirmar que o erro original do link inválido tenha causa comprovada.
+- Auth sensível exige revisão específica, checks de `Validate application` e J1 Playwright no mesmo SHA final e **merge manual**. Homologação profissional Patty J1–J7 permanece a última etapa.
 
-**Não é regra profissional:** estas são pendências técnicas de autenticação/UX, não do método da Patty.
+**Não é regra do método profissional:** este bloco trata exclusivamente de autenticação, segurança e UX.
 
 ---
 
