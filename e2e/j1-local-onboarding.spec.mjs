@@ -35,10 +35,12 @@ async function waitForLocalRecoveryEmail(recipient, ignoredMessageIds = new Set(
   // Inbucket is part of the disposable Supabase stack. Keep the recovery URL
   // only in memory: it is an ephemeral credential, never test output.
   const mailbox = recipient.split("@", 1)[0];
+  let state = "mailbox-api-unavailable";
   for (let attempt = 0; attempt < 80; attempt += 1) {
     const list = await fetch(inbucketUrl + "/api/v1/mailbox/" +
       encodeURIComponent(mailbox));
     if (list.ok) {
+      state = "mailbox-empty";
       const messages = await list.json();
       const summary = Array.isArray(messages)
         ? messages.find((message) => {
@@ -54,9 +56,11 @@ async function waitForLocalRecoveryEmail(recipient, ignoredMessageIds = new Set(
         ? String(summary.id)
         : null;
       if (messageId) {
+        state = "message-unreadable";
         const detail = await fetch(inbucketUrl + "/api/v1/mailbox/" +
           encodeURIComponent(mailbox) + "/" + encodeURIComponent(messageId));
         if (detail.ok) {
+          state = "recovery-url-missing";
           const message = await detail.json();
           const candidates = String(message.body?.text ?? message.text ?? "") + "\n" +
             String(message.body?.html ?? message.html ?? "");
@@ -78,7 +82,8 @@ async function waitForLocalRecoveryEmail(recipient, ignoredMessageIds = new Set(
     }
     await new Promise((resolve) => setTimeout(resolve, 250));
   }
-  throw new Error("J1 local recovery email was not available in disposable Inbucket");
+  // Fixed categories only: never include mailbox contents, URLs, codes or IDs.
+  throw new Error("J1 local recovery email was not available in disposable Inbucket: " + state);
 }
 function literal(value) {
   if (value === null) return "NULL";
