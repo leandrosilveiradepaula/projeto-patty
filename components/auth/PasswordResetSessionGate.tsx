@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 
 import { Alert } from "@/components/ui/Alert";
 import { parseImplicitRecoveryFragment } from "@/lib/onboarding/implicit-recovery";
-import { createClient } from "@/lib/supabase/client";
 
 import { PasswordResetForm } from "./PasswordResetForm";
 
@@ -18,36 +17,12 @@ export function PasswordResetSessionGate({
   useEffect(() => {
     const parsed = parseImplicitRecoveryFragment(window.location.hash);
 
-    if (parsed.kind === "recovery") {
-      window.history.replaceState(
-        null,
-        "",
-        window.location.pathname + window.location.search,
-      );
-
-      void (async () => {
-        try {
-          const supabase = createClient();
-          const { error } = await supabase.auth.setSession({
-            access_token: parsed.accessToken,
-            refresh_token: parsed.refreshToken,
-          });
-
-          if (error) {
-            window.location.replace("/redefinir-senha?error=invalid");
-            return;
-          }
-
-          window.location.replace("/redefinir-senha");
-        } catch {
-          window.location.replace("/redefinir-senha?error=invalid");
-        }
-      })();
-
-      return;
-    }
-
-    if (parsed.kind === "invalid") {
+    if (parsed.kind !== "none") {
+      // An implicit URL fragment is client-controlled. In particular a
+      // passwordless login and legacy implicit reset can both produce a JWT
+      // with amr=otp. No server-side callback can attest the recovery purpose,
+      // so never install that session or unlock password changes here.
+      // The customer can request a fresh PKCE recovery link instead.
       window.history.replaceState(
         null,
         "",
