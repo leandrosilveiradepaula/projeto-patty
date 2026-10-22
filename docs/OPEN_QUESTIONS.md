@@ -1,3 +1,18 @@
+## PENDÊNCIA TÉCNICA — recuperação de senha PKCE e sessão anterior (#979, 22/10/2026)
+
+**Corrigido e publicado:** callbacks de recovery com persistência explícita de cookies na resposta 303 (PR #984) e E2E sintético de OTP `token_hash` com isolamento entre contas, uso único e limpeza local (PR #986), integrados à `master`, CI pós-merge e deployment Vercel `READY` no mesmo SHA. Ver [AUTH_RECOVERY_979.md](AUTH_RECOVERY_979.md).
+
+**Ainda em aberto, sem regra automática ou implementação inferida:**
+
+- reproduzir o pedido de e-mail em Supabase descartável e confirmar como o template efetivo entrega o código PKCE, incluindo mesmo navegador/perfil versus outro contexto, sem expor token/cookies;
+- definir prova de origem do fluxo de recuperação, vinculada à identidade/sessão corrente e compatível com OTP, PKCE e fragmento implícito, antes de liberar a tela de redefinição quando já existe outra sessão autenticada;
+- cobrir negativas de link consumido/expirado e potencial prefetch do provedor de e-mail, sem mudar templates SaaS sem decisão específica;
+- manter alterações de Auth em PR sensível com revisão específica e merge manual; não usar contas reais em CI e não antecipar homologação final Patty J1–J7.
+
+**Não é regra profissional:** estas são pendências técnicas de autenticação/UX, não do método da Patty.
+
+---
+
 ## RESOLVIDO TECNICAMENTE — migration privada Storage #951 (21/10/2026)
 
 **AUTORIZADA E APLICADA:** o responsável autorizou executar apenas `20261020191000_fix_private_storage_admin_read_after_assignment.sql` pelo workflow oficial. O [run #39701416284](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39701416284) passou no commit `7e375f102cd51e4f1f27efc2d19de9763d2e320f` e o banco confirmou **91 migrations aplicadas de 91**. A policy SELECT `storage.objects` agora permite a exceção da única admin sem o JOIN `clients` no ramo administrativo; o ramo da cliente ainda exige titularidade e `client_visible_at`. Bucket privado, RLS de Storage/metadados e policies restritivas de MFA AAL2 foram preservados. A única admin com TOTP verificado permanece, sem assignments E2E ativos. Não houve alteração de schema/RLS por fora do versionamento nem criação de dados reais de teste.
