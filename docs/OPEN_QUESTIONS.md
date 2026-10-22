@@ -1,16 +1,17 @@
-## PENDÊNCIA TÉCNICA — recuperação de senha PKCE e sessão anterior (#979, 22/10/2026)
+## PENDÊNCIA TÉCNICA RESIDUAL — recuperação de senha (#979, 22/10/2026)
 
-**Confirmado e publicado:** PRs #984 e #986 registraram callbacks de recovery e E2E sintético de OTP. PR #997 atualizou Next.js para `16.4.2`, e o deployment Vercel de produção `dpl_GR4zroW3AePq13FdXrs4yUvDTvin` está `READY` no SHA `d2add311...`.
+**CORRIGIDO, TESTADO E PUBLICADO:** as PRs [#984](https://github.com/leandrosilveiradepaula/projeto-patty/pull/984), [#986](https://github.com/leandrosilveiradepaula/projeto-patty/pull/986) e [#995](https://github.com/leandrosilveiradepaula/projeto-patty/pull/995) corrigiram callbacks PKCE/OTP, preservação de cookies na resposta 303, isolamento de sessões, rejeição de magic-link comum e replay de links consumidos. A #995 usa grant HMAC `HttpOnly` de 10 minutos vinculado a `sub` e `session_id` após recovery verificado no servidor; página e server action exigem esse grant. O login comum `amr=otp` não equivale a recovery. Fragmentos implícitos sem prova server-side falham fechados e oferecem novo link PKCE.
 
-**Implementação proposta na PR sensível #995 — ainda NÃO testada nos checks finais:**
+**PROVAS TÉCNICAS:** no mesmo head `4e8bc02ada8654986f759becf9de2898afade3e8`, [Validate application #39842186759](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39842186759) e [Playwright J1 #39842186633](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39842186633) foram `success` (J1 `3 passed`, Storage guard e cleanup aprovados). Merge da #995 em `8e02a319511ea2bcace91f653cc004675ddd0a4e`, [CI `push` pós-merge #39844627287](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39844627287) `success` e Vercel `dpl_8Em7A58yaiBHF3KuFScF1EaJYeQx` `READY` com domínio `projeto-patty.vercel.app`. A atualização separada Next.js `16.4.2` da PR #997 já está publicada.
 
-- JWT assinado com `amr=otp` é autenticação e não prova finalidade recovery. O grant de reset é emitido somente pelos callbacks após troca PKCE `amr=recovery` ou `verifyOtp(type=recovery)`, assinado pelo servidor com HMAC e vinculado à identidade + `session_id`, validade de 10 minutos, cookie `HttpOnly` e checagem novamente na server action.
-- Browser com login OTP/magic-link comum, mesmo autenticado, deve ser recusado na página e na action, sem alterar sua senha. Testes negativos sintéticos foram acrescentados, ainda aguardando execução remota.
-- Legacy implicit fragment, sem prova independente do tipo de autenticação, deve falhar fechado e orientar novo link PKCE. Compatibilidade futura segura é **questão aberta**, não regra implementada.
-- Replay, expiração operacional, scanners/prefetch, links cross-device e simultaneidade do grant exigem testes ou decisão técnica adicional. Não afirmar que o erro original do link inválido tenha causa comprovada.
-- Auth sensível exige revisão específica, checks de `Validate application` e J1 Playwright no mesmo SHA final e **merge manual**. Homologação profissional Patty J1–J7 permanece a última etapa.
+**CONTINUAM ABERTOS, SEM INFERIR SOLUÇÃO:**
 
-**Não é regra do método profissional:** este bloco trata exclusivamente de autenticação, segurança e UX.
+- Causa histórica do e-mail com link inválido relatado pela Patty: não foi reproduzida causalmente; não atribuir a PKCE/cookies/scanners sem evidência.
+- Comportamento de scanners de e-mail e prefetch do provedor real, expiração no uso operacional e compatibilidade segura de links legados por fragmento implícito. Não modificar templates SaaS sem tarefa/autorização específica.
+- O grant HMAC curto não possui consumo atômico persistente entre requests concorrentes; a arquitetura de invalidação transacional, caso exigida, depende de desenho/testes adicionais, não de suposição de proteção automática.
+- Testes sintéticos não substituem homologação profissional por sessão real da Patty, que continua **última etapa conjunta J1–J7**.
+
+**PENDÊNCIAS INDEPENDENTES:** hardening de senhas vazadas do Auth SaaS [#985](https://github.com/leandrosilveiradepaula/projeto-patty/issues/985), dependente de suporte do plano e autorização; intermitência histórica GitHub→Vercel [#970](https://github.com/leandrosilveiradepaula/projeto-patty/issues/970), apesar do sucesso neste merge. Nenhuma regra profissional foi criada.
 
 ---
 
