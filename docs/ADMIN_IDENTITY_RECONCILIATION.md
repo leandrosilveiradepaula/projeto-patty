@@ -11,7 +11,17 @@
 - RLS continua habilitada em `public.client_files` e `storage.objects`, sem alterações em policies, schema, Storage ou migration.
 - Sessões Auth antigas não foram excluídas nem testadas com identidade antiga no SaaS. As boundaries de aplicativo e RLS consultam `user_roles`; **revogar a role não equivale a invalidar todos os tokens JWT**. Não foi criado snapshot persistente das timestamps originais das roles retiradas; qualquer reintegração exige nova autorização, revisão e auditoria.
 
-A [issue #950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950) registra a auditoria por contagens agregadas. A pré-condição de unicidade da migration `20261020191000_fix_private_storage_admin_read_after_assignment.sql` agora é atendida, porém **essa migration continua NÃO APLICADA**: revisão, aprovação específica e procedimento versionado da [issue #951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951) permanecem obrigatórios. Não executar migration por SQL ad hoc. Homologação operacional conjunta J1–J7 continua a última etapa.
+A [issue #950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950) registra a reconciliação administrativa. **Desdobramento em 21/10/2026:** a migration `20261020191000_fix_private_storage_admin_read_after_assignment.sql` foi expressamente autorizada e **aplicada pelo workflow GitHub oficial #39701416284**, passando de 90 para 91 migrations aplicadas (91/91). A policy Storage corrigida e a RLS/MFA restritivas foram verificadas diretamente no catálogo do Supabase. Isso não constitui homologação autenticada com sessão real Patty. Não executar migration por SQL ad hoc. Homologação operacional conjunta J1–J7 continua a última etapa.
+
+## Atualização de segurança de arquivos após reconciliação administrativa — 21/10/2026
+
+O gate de aplicação de Storage, anteriormente bloqueado por múltiplas admins, foi **cumprido e encerrado tecnicamente**. O responsável autorizou especificamente `20261020191000_fix_private_storage_admin_read_after_assignment.sql` e iniciou o [workflow #39701416284](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39701416284) em `master` (`7e375f102cd51e4f1f27efc2d19de9763d2e320f`). Todas as etapas do workflow terminaram `success`, incluindo dry-run, aplicação e inspeção de histórico; o Supabase confirmou **91/91 migrations**.
+
+A policy de leitura de `storage.objects` passou a selecionar, no ramo administrativo, o arquivo privado cujo objeto corresponde a um registro de `client_files` sem depender do JOIN `clients` que falhava após o término de assignment. A leitura pela cliente permanece restrita à própria identidade e a arquivo previamente liberado. Policies `RESTRICTIVE` MFA AAL2, bucket privado e RLS permanecem intactos; apenas uma identidade `admin` segue autorizada no MVP.
+
+**Limite:** nenhum download de arquivo real, URL assinada, teste com sessão AAL2 da Patty ou homologação profissional foram executados nesta etapa. O documento abaixo contém histórico de um bloqueio que já foi removido; não reutilizar suas antigas instruções de apply. A homologação conjunta J1–J7 continua a última tarefa.
+
+---
 
 ## Registro histórico — procedimento preparado em 20/10/2026, já superado
 

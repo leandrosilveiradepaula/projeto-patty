@@ -1,3 +1,17 @@
+## 2026-10-21 — Correção da policy SELECT Storage para a única administradora aplicada
+
+### DECISÃO DE SEGURANÇA CONFIRMADA E EXECUÇÃO AUTORIZADA
+
+Após a reconciliação da única conta administrativa de negócio, o responsável autorizou executar **somente** `20261020191000_fix_private_storage_admin_read_after_assignment.sql` no Supabase de produção, **exclusivamente** pelo workflow versionado `Deploy Supabase migrations`. A execução [#39701416284](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39701416284) terminou `success` no commit `7e375f102cd51e4f1f27efc2d19de9763d2e320f`; o inventário remoto passou de 90 para **91 migrations aplicadas**, coincidindo com as 91 do repositório.
+
+### RESULTADO TÉCNICO VERIFICADO, SEM NOVA REGRA PROFISSIONAL
+
+A policy permissiva de leitura de `storage.objects` para `client-private` agora separa dois ramos: (1) única admin autorizada com `role=admin` e metadado correspondente em `client_files`, **sem depender de `clients`/assignment no ramo admin**; (2) cliente titular com arquivo explicitamente liberado e correspondência com `clients.profile_id`. RLS e policies `RESTRICTIVE` de MFA AAL2 em `storage.objects` e `client_files` permanecem ativas; o bucket é privado. A migração não modificou Auth, usuários, RLS de outras tabelas nem regras nutricionais ou de treino.
+
+A [issue #951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951) registra as verificações de metadados. Isso não substitui o teste de download autenticado com a Patty em sessão AAL2 ou a homologação final J1–J7. Não inferir que múltiplos administradores possam compartilhar a exceção: a regra vigente continua com **somente Patty**. Mudança posterior no modelo exige novo desenho e autorização.
+
+---
+
 ## 2026-10-21 — Conta administrativa oficial e reconciliação E2E no SaaS
 
 ### DECISÃO OPERACIONAL CONFIRMADA PELO RESPONSÁVEL
@@ -8,7 +22,7 @@ A identidade não E2E com MFA TOTP verificado foi identificada privadamente e co
 
 A operação atômica no Supabase SaaS reduziu `admin` de **3 para 1**, encerrou **1 assignment sintético** e preservou duas identidades Auth/Profile E2E, dois assignments históricos, vínculos privados de arquivos e fator MFA verificado de teste. RLS, schema, policies, migrations, senhas e regras profissionais não foram alterados. A revogação de role não equivale a revogação criptográfica imediata de sessões Auth existentes; permissões administrativas continuam resolvidas pela role relacional em runtime. Reversão exige nova autorização e auditoria.
 
-A migration `20261020191000_fix_private_storage_admin_read_after_assignment.sql` ainda **não foi aplicada**: pré-condição de unicidade agora atendida, mas revisão e autorização próprias da [#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951) permanecem indispensáveis. [Detalhes e limites](ADMIN_IDENTITY_RECONCILIATION.md). Homologação profissional J1–J7 continua reservada ao final.
+A migration `20261020191000_fix_private_storage_admin_read_after_assignment.sql` foi **posteriormente autorizada e aplicada** pelo workflow oficial #39701416284, com 91/91 migrations no Supabase de produção e auditoria RLS/MFA pós-execução. [Detalhes e limites](ADMIN_IDENTITY_RECONCILIATION.md). Homologação profissional J1–J7 continua reservada ao final.
 
 ---
 

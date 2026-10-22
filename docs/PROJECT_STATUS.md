@@ -1,10 +1,20 @@
+## 2026-10-21 — #951: Migration Storage privado aplicada e verificada no Supabase SaaS
+
+**AUTORIZAÇÃO E APLICAÇÃO CONFIRMADAS:** após reconciliação da única administradora autorizada (#950), o responsável autorizou aplicar exclusivamente a migration `20261020191000_fix_private_storage_admin_read_after_assignment.sql` pelo workflow oficial. O [Deploy Supabase migrations #39701416284](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39701416284) concluiu `completed/success` no `master` `7e375f102cd51e4f1f27efc2d19de9763d2e320f`, incluindo `db push --dry-run`, aplicação e verificação final da lista de migrations. Antes havia 90/91 versões aplicadas; **agora são 91/91**, sem versão pendente.
+
+**AUDITORIA READ-ONLY DE PÓS-APLICAÇÃO:** a policy `storage.objects.client_private_storage_objects_select_visible_own_or_admin` passou a permitir, apenas à única admin com sessão autorizada, visualizar objeto com metadado correspondente em `client_files` mesmo após fim de assignment, sem depender da visibilidade de `clients` no ramo administrativo. O ramo da cliente continua exigindo titularidade e `client_visible_at` preenchido. Preservados: bucket `client-private` privado, RLS em `storage.objects` e `public.client_files`, policies restritivas de MFA AAL2, quantidades de policies (3 e 2), uma única role `admin` e ausência de assignment E2E ativo. Nada foi escrito por SQL ad hoc; nenhum arquivo/dado clínico real foi lido.
+
+**ESTADO E LIMITES:** migration **APLICADA E VERIFICADA TECNICAMENTE**. Isso não comprova uma sessão administrativa atual em AAL2, nem substitui download/preview autenticado pela Patty, aceite de interface mobile, publicação humana de protocolos ou homologação conjunta J1–J7, que continuam como **última etapa**. O Security Advisor mantém WARN independente para `auth_leaked_password_protection`; não foi alterado nesta tarefa. Evidências: [issue #951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951).
+
+---
+
 ## 2026-10-21 — Conta administrativa Patty única no SaaS: #950 reconciliada
 
 **DECISÃO/EXECUÇÃO AUTORIZADAS:** o responsável confirmou a conta oficial da Patty, com TOTP verificado, e autorizou retirar as duas roles administrativas E2E e encerrar o único assignment E2E ativo, preservando Auth Users, Profiles, MFA, arquivos e histórico. Operação atômica no Supabase SaaS concluída sob pré/pós-condições restritivas, com mutações por UUID de Profile/assignment (não email como chave de relacionamento).
 
 **VERIFICAÇÃO READ-ONLY:** `admin` **3 → 1** (titular Patty), roles E2E **2 → 0**, assignment de teste ativo **1 → 0**; dois registros históricos de assignment, duas identidades Auth/Profile E2E, um registro de upload, um de liberação e um TOTP E2E verificado preservados. A RLS de `client_files` e `storage.objects` permanece ativa; nenhuma policy, migration, schema, segredo, Auth User ou dado clínico foi alterado. Sessões antigas não foram apagadas; não afirmar revogação imediata de JWT sem teste de sessão e expiração.
 
-**GATE INDEPENDENTE:** [#950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950) documenta a reconciliação; [#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951) ainda requer revisão e autorização específica antes da migration `20261020191000_fix_private_storage_admin_read_after_assignment.sql`, que **continua NÃO APLICADA**. Homologação humana conjunta J1–J7 continua reservada ao fim. [Runbook atualizado](ADMIN_IDENTITY_RECONCILIATION.md).
+**GATE POSTERIORMENTE CUMPRIDO:** [#950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950) reconcilia as identidades, e a migration da [#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951) foi autorizada, aplicada e verificada em 21/10 via workflow oficial #39701416284. A homologação profissional conjunta J1–J7 permanece reservada ao final. [Runbook atualizado](ADMIN_IDENTITY_RECONCILIATION.md).
 
 ---
 
