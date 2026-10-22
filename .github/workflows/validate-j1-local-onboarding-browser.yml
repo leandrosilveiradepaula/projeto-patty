@@ -41,6 +41,10 @@ jobs:
       E2E_BASE_URL: ""
       E2E_SUPABASE_URL: ""
       E2E_SUPABASE_SECRET_KEY: ""
+      # Only the disposable loopback run may use HTTP while Next runs in
+      # production mode. This is not available to deployed environments.
+      J1_E2E_LOCAL_ONLY: "true"
+      APP_PUBLIC_ORIGIN: "http://127.0.0.1:3000"
     steps:
       - name: Checkout exact reviewed commit
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7

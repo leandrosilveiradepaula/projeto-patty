@@ -23,10 +23,22 @@ test("manual access links always use configured or Vercel-trusted deployment ori
   assert.equal(resolveTrustedClientAccessOrigin({ VERCEL_URL: "patty-preview.vercel.app", NODE_ENV: "production" }), "https://patty-preview.vercel.app");
   assert.equal(resolveTrustedClientAccessOrigin({ NODE_ENV: "development" }), "http://localhost:3000");
   assert.equal(resolveTrustedClientAccessOrigin({ APP_PUBLIC_ORIGIN: "http://localhost:3001", NODE_ENV: "development" }), "http://localhost:3001");
+  assert.equal(
+    resolveTrustedClientAccessOrigin({
+      APP_PUBLIC_ORIGIN: "http://127.0.0.1:3000",
+      J1_E2E_LOCAL_ONLY: "true",
+      NODE_ENV: "production",
+    }),
+    "http://127.0.0.1:3000",
+  );
 });
 
 test("origin resolver fails closed for an unconfigured production environment and untrusted URLs", () => {
   assert.throws(() => resolveTrustedClientAccessOrigin({ NODE_ENV: "production" }), ClientAccessLinkOriginError);
+  assert.throws(
+    () => resolveTrustedClientAccessOrigin({ APP_PUBLIC_ORIGIN: "http://127.0.0.1:3000", NODE_ENV: "production" }),
+    ClientAccessLinkOriginError,
+  );
   for (const raw of [
     "http://consultoria.example",
     "https://consultoria.example@evil.example",
