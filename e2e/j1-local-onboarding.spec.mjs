@@ -41,17 +41,25 @@ async function waitForLocalRecoveryEmail(recipient, ignoredMessageIds = new Set(
     if (list.ok) {
       const messages = await list.json();
       const summary = Array.isArray(messages)
-        ? messages.find((message) =>
-          typeof message.id === "string" && !ignoredMessageIds.has(message.id),
-        )
+        ? messages.find((message) => {
+          // Inbucket releases have represented IDs as either strings or
+          // numbers. Treat the opaque value uniformly without logging it.
+          const id = typeof message?.id === "string" || typeof message?.id === "number"
+            ? String(message.id)
+            : null;
+          return id !== null && !ignoredMessageIds.has(id);
+        })
         : null;
-      if (summary?.id) {
+      const messageId = typeof summary?.id === "string" || typeof summary?.id === "number"
+        ? String(summary.id)
+        : null;
+      if (messageId) {
         const detail = await fetch(inbucketUrl + "/api/v1/mailbox/" +
-          encodeURIComponent(mailbox) + "/" + encodeURIComponent(summary.id));
+          encodeURIComponent(mailbox) + "/" + encodeURIComponent(messageId));
         if (detail.ok) {
           const message = await detail.json();
-          const candidates = String(message.body?.text ?? "") + "\n" +
-            String(message.body?.html ?? "");
+          const candidates = String(message.body?.text ?? message.text ?? "") + "\n" +
+            String(message.body?.html ?? message.html ?? "");
           const urls = candidates.match(/https?:\/\/[^\s"'<>]+/g) ?? [];
           for (const rawUrl of urls) {
             try {
@@ -59,7 +67,7 @@ async function waitForLocalRecoveryEmail(recipient, ignoredMessageIds = new Set(
               if (url.origin === "http://127.0.0.1:54321" &&
                   url.pathname === "/auth/v1/verify" &&
                   url.searchParams.get("type") === "recovery") {
-                return { id: summary.id, url: url.toString() };
+                return { id: messageId, url: url.toString() };
               }
             } catch {
               // Ignore ordinary prose/HTML fragments; do not log message data.
