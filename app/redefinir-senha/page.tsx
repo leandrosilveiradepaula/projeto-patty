@@ -5,7 +5,7 @@ import { PasswordResetSessionGate } from "@/components/auth/PasswordResetSession
 import { Alert } from "@/components/ui/Alert";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { hasVerifiedRecoverySession } from "@/lib/onboarding/recovery-session";
+import { hasServerRecoveryGrant } from "@/lib/onboarding/recovery-grant-server";
 import { createClient } from "@/lib/supabase/server";
 
 import styles from "./page.module.css";
@@ -39,7 +39,7 @@ export default async function ResetPasswordPage({
   const supabase = await createClient();
   const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
   const hasVerifiedRecovery =
-    !claimsError && hasVerifiedRecoverySession(claimsData?.claims);
+    !claimsError && await hasServerRecoveryGrant(claimsData?.claims);
 
   return (
     <main className={styles.shell}>
