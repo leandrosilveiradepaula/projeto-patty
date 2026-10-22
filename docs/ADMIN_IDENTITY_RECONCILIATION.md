@@ -1,6 +1,21 @@
 # Reconciliação privada de identidades administrativas — pré-requisito do MVP
 
-**Referência: 20/10/2026. Status: procedimento humano preparado, NÃO EXECUTADO.** O guard técnico de bootstrap foi integrado pela [PR #958](https://github.com/leandrosilveiradepaula/projeto-patty/pull/958) no commit `16fba37f09f53f188b8a5258a3ee9d6abe7a0566`, com CI e Vercel `READY`. Essa integração não revogou nem identificou roles reais, não executou o bootstrap e não desbloqueou a migration.
+**ESTADO ATUAL: 21/10/2026 — RECONCILIAÇÃO EXECUTADA E VERIFICADA.** A titular oficial da Patty foi confirmada privadamente pelo responsável, que autorizou explicitamente a retirada de duas memberships administrativas E2E e o encerramento de um assignment sintético ativo. O plano de 20/10 reproduzido abaixo é registro histórico anterior à execução; não descreve o estado atual da produção.
+
+## Resultado confirmado da operação
+
+- Um único bloco SQL atômico verificou as pré-condições, encerrou por UUID o único assignment E2E ativo e removeu por UUID de perfil apenas duas linhas `user_roles.role = admin`. Qualquer divergência das condições abortaria a operação.
+- Roles `admin`: **3 antes / 1 depois**, permanecendo exclusivamente a conta oficial da Patty, com fator TOTP verificado.
+- As duas identidades E2E permanecem no Auth e em Profiles, agora **sem role de aplicação**; nenhum usuário nem fator MFA foi apagado.
+- Histórico de assignments E2E: **2 registros preservados**, nenhum ativo. Metadados históricos de arquivo: **1 upload e 1 liberação preservados**. MFA verificado de uma conta E2E também preservado.
+- RLS continua habilitada em `public.client_files` e `storage.objects`, sem alterações em policies, schema, Storage ou migration.
+- Sessões Auth antigas não foram excluídas nem testadas com identidade antiga no SaaS. As boundaries de aplicativo e RLS consultam `user_roles`; **revogar a role não equivale a invalidar todos os tokens JWT**. Não foi criado snapshot persistente das timestamps originais das roles retiradas; qualquer reintegração exige nova autorização, revisão e auditoria.
+
+A [issue #950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950) registra a auditoria por contagens agregadas. A pré-condição de unicidade da migration `20261020191000_fix_private_storage_admin_read_after_assignment.sql` agora é atendida, porém **essa migration continua NÃO APLICADA**: revisão, aprovação específica e procedimento versionado da [issue #951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951) permanecem obrigatórios. Não executar migration por SQL ad hoc. Homologação operacional conjunta J1–J7 continua a última etapa.
+
+## Registro histórico — procedimento preparado em 20/10/2026, já superado
+
+**Referência: 20/10/2026. Status histórico em 20/10: procedimento humano preparado, ainda não executado.** O guard técnico de bootstrap foi integrado pela [PR #958](https://github.com/leandrosilveiradepaula/projeto-patty/pull/958) no commit `16fba37f09f53f188b8a5258a3ee9d6abe7a0566`, com CI e Vercel `READY`. Essa integração não revogou nem identificou roles reais, não executou o bootstrap e não desbloqueou a migration.
 
 ## 1. Fato confirmado e limite
 

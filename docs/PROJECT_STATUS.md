@@ -1,3 +1,13 @@
+## 2026-10-21 — Conta administrativa Patty única no SaaS: #950 reconciliada
+
+**DECISÃO/EXECUÇÃO AUTORIZADAS:** o responsável confirmou a conta oficial da Patty, com TOTP verificado, e autorizou retirar as duas roles administrativas E2E e encerrar o único assignment E2E ativo, preservando Auth Users, Profiles, MFA, arquivos e histórico. Operação atômica no Supabase SaaS concluída sob pré/pós-condições restritivas, com mutações por UUID de Profile/assignment (não email como chave de relacionamento).
+
+**VERIFICAÇÃO READ-ONLY:** `admin` **3 → 1** (titular Patty), roles E2E **2 → 0**, assignment de teste ativo **1 → 0**; dois registros históricos de assignment, duas identidades Auth/Profile E2E, um registro de upload, um de liberação e um TOTP E2E verificado preservados. A RLS de `client_files` e `storage.objects` permanece ativa; nenhuma policy, migration, schema, segredo, Auth User ou dado clínico foi alterado. Sessões antigas não foram apagadas; não afirmar revogação imediata de JWT sem teste de sessão e expiração.
+
+**GATE INDEPENDENTE:** [#950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950) documenta a reconciliação; [#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951) ainda requer revisão e autorização específica antes da migration `20261020191000_fix_private_storage_admin_read_after_assignment.sql`, que **continua NÃO APLICADA**. Homologação humana conjunta J1–J7 continua reservada ao fim. [Runbook atualizado](ADMIN_IDENTITY_RECONCILIATION.md).
+
+---
+
 ## 2026-10-21 — MFA administrativo: cadastro retomado com segurança e confirmação operacional
 
 **CAUSA E CORREÇÃO:** o recarregamento da tela de MFA tentava iniciar outro TOTP, mas já existia um fator pendente, produzindo `mfa_factor_name_conflict` (HTTP 422). A [PR #981](https://github.com/leandrosilveiradepaula/projeto-patty/pull/981) corrigiu o fluxo para ler também fatores não verificados, não criar/remover no F5, bloquear ambiguidade e permitir renovação exclusivamente após clique explícito, com conferência do fator e do status. A [issue #980](https://github.com/leandrosilveiradepaula/projeto-patty/issues/980) foi encerrada.
@@ -6,7 +16,7 @@
 
 **RESULTADO OPERACIONAL LIMITADO:** a pessoa operadora informou sucesso ao completar a ativação. Uma consulta read-only de agregados do Supabase confirmou uma conta administrativa não E2E com 1 TOTP verificado e 0 fatores pendentes. A chave/QR anterior divulgados em captura não permaneceram em cadastro pendente e não devem ser reutilizados. Não foram incluídos identificadores, emails, tokens, chaves ou dados reais no repositório.
 
-**PENDÊNCIAS:** a confirmação profissional privada da identidade titular e a decisão formal sobre duas roles administrativas E2E continuam na [#950](https://github.com/leandrosilveiradepaula/projeto-patty/issues/950); uma identidade sintética ainda possui assignment ativo e existe histórico associado, portanto nenhuma role nem assignment foi alterado. [#951](https://github.com/leandrosilveiradepaula/projeto-patty/issues/951) e a migration privada continuam bloqueadas. Fator TOTP verificado não prova AAL2 em todas as sessões. Homologação humana conjunta J1–J7 é a última etapa.
+**DESDOBRAMENTO EM 21/10:** a titularidade foi confirmada e a reconciliação das duas roles E2E e do assignment sintético ativo foi concluída posteriormente. A migration #951 continua não aplicada, embora a unicidade administrativa esteja satisfeita. TOTP verificado não prova AAL2 em toda sessão; homologação J1–J7 segue para o final.
 
 ---
 
