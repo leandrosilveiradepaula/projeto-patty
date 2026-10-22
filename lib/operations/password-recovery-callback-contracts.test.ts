@@ -5,7 +5,7 @@ import test from "node:test";
 const read = (path: string) => readFileSync(new URL("../../" + path, import.meta.url), "utf8");
 const callbackPaths = ["app/auth/recovery/route.ts", "app/auth/recovery-token/route.ts"];
 
-test("recovery callback must return the response that received session cookies", () => {
+test("recovery callback returns session cookies only after verified recovery evidence", () => {
   for (const path of callbackPaths) {
     const code = read(path);
     assert.match(code, /createServerClient<Database>/);
@@ -13,7 +13,9 @@ test("recovery callback must return the response that received session cookies",
     assert.match(code, /request\.cookies\.getAll\(\)/);
     assert.match(code, /response\.cookies\.set\(name, value, options\)/);
     assert.match(code, /response\.headers\.set\(key, value\)/);
-    assert.match(code, /if \(error\) return uncachedRecoveryRedirect\(true\)/);
+    assert.match(code, /supabase\.auth\.getClaims\(data\.session\.access_token\)/);
+    assert.match(code, /hasVerifiedRecoverySession\(claimsData\?\.claims\)/);
+    assert.match(code, /if \(error \|\| claimsError \|\| !hasVerifiedRecoverySession\(claimsData\?\.claims\)\)/);
     assert.match(code, /return response;/);
     assert.doesNotMatch(code, /NextResponse\.redirect\(/);
   }
