@@ -42,8 +42,9 @@ export function PasswordRecoveryRequestForm() {
             "Se este email estiver cadastrado, você receberá um link para redefinir sua senha."}
         </Alert>
         <p className={styles.successHelp}>
-          Abra sua caixa de entrada e clique no link de recuperação para
-          continuar. Você não precisa informar o email novamente nesta tela.
+          Abra somente o link do email mais recente, no mesmo navegador,
+          perfil e dispositivo em que fez o pedido. O link é individual e de
+          uso único: não o compartilhe.
         </p>
         <a className={styles.retryLink} href="/recuperar-senha">
           Solicitar outro link

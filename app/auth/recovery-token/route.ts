@@ -1,18 +1,20 @@
-import type { EmailOtpType } from "@supabase/supabase-js";
+import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
-import { createClient } from "@/lib/supabase/server";
+import type { Database } from "@/lib/supabase/database.types";
+import { getSupabasePublicConfig } from "@/lib/supabase/env";
 
-function redirectTarget(request: NextRequest, invalid = false) {
-  const target = request.nextUrl.clone();
-  target.pathname = "/redefinir-senha";
-  target.search = "";
-
-  if (invalid) {
-    target.searchParams.set("error", "invalid");
-  }
-
-  return target;
+function uncachedRecoveryRedirect(invalid = false) {
+  // Keep the token hash out of redirects and avoid reconstructed internal
+  // hosts: the browser must receive the session cookie for its own origin.
+  return new NextResponse(null, {
+    status: 303,
+    headers: {
+      Location: invalid ? "/redefinir-senha?error=invalid" : "/redefinir-senha",
+      "Cache-Control": "private, no-store, max-age=0",
+      "Referrer-Policy": "no-referrer",
+    },
+  });
 }
 
 export async function GET(request: NextRequest) {
@@ -20,14 +22,38 @@ export async function GET(request: NextRequest) {
   const type = request.nextUrl.searchParams.get("type");
 
   if (!tokenHash || type !== "recovery") {
-    return NextResponse.redirect(redirectTarget(request, true));
+    return uncachedRecoveryRedirect(true);
   }
 
-  const supabase = await createClient();
-  const { error } = await supabase.auth.verifyOtp({
-    token_hash: tokenHash,
-    type: type as EmailOtpType,
+  // The verification callback has to attach Set-Cookie to the response that
+  // is actually returned; the generic RSC client cannot enforce this.
+  const response = uncachedRecoveryRedirect();
+  const { url, publishableKey } = getSupabasePublicConfig();
+  const supabase = createServerClient<Database>(url, publishableKey, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
+      },
+      setAll(cookiesToSet, headers) {
+        cookiesToSet.forEach(({ name, value, options }) => {
+          request.cookies.set(name, value);
+          response.cookies.set(name, value, options);
+        });
+        Object.entries(headers).forEach(([key, value]) => {
+          response.headers.set(key, value);
+        });
+        response.headers.set("Cache-Control", "private, no-store, max-age=0");
+        response.headers.set("Referrer-Policy", "no-referrer");
+      },
+    },
   });
 
-  return NextResponse.redirect(redirectTarget(request, Boolean(error)));
+  const { error } = await supabase.auth.verifyOtp({
+    token_hash: tokenHash,
+    type: "recovery",
+  });
+
+  // Reject invalid or consumed links without any incidental session cookies.
+  if (error) return uncachedRecoveryRedirect(true);
+  return response;
 }

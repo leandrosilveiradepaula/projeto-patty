@@ -9,6 +9,9 @@ import { createClient } from "@/lib/supabase/server";
 
 import styles from "./page.module.css";
 
+// The recovery view depends on per-request session cookies, never cached RSC.
+export const dynamic = "force-dynamic";
+
 type ResetPasswordPageProps = {
   searchParams: Promise<{
     code?: string;
