@@ -4,7 +4,7 @@
 
 **Em implementação e validação na PR sensível atual:**
 
-- a prova de origem passou a exigir os claims JWT verificados `sub`, `session_id` e `amr=recovery`; login comum, parâmetro e cookie aplicativo não autorizam reset;
+- a prova de origem passou a exigir os claims JWT verificados `sub`, `session_id` e o `amr` emitido para recovery (`recovery` no PKCE, `otp` após OTP/implícito); login por senha, parâmetro e cookie aplicativo não autorizam reset;
 - o E2E local foi ampliado para pedido de e-mail e PKCE pelo Inbucket descartável, perfil original versus outro perfil, replay e sessão preexistente. A estação sem Docker não declara esse E2E aprovado: os checks J1 e Validate do SHA final são obrigatórios;
 - comportamento de expiração, prefetch/scanner e template/provedor SaaS continua aberto e não autoriza alterar configurações de produção;
 - a mudança de Auth mantém PR sensível, revisão específica e merge manual; não usa contas reais em CI nem antecipa homologação final Patty J1–J7.

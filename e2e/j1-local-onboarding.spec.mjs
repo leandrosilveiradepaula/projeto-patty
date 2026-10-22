@@ -1244,6 +1244,9 @@ test("J1 local: PKCE recovery email requires its original browser and a recovery
   const requestContext = await browser.newContext({
     baseURL, viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true,
   });
+  const recoveryContext = await browser.newContext({
+    baseURL, viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true,
+  });
   const otherContext = await browser.newContext({ baseURL });
   let successfulRecoveryLink = null;
   let firstRecoveryMessageId = null;
@@ -1268,12 +1271,11 @@ test("J1 local: PKCE recovery email requires its original browser and a recovery
       await requestPage.goto("/redefinir-senha");
       await expect(requestPage.getByText("Link inválido ou expirado")).toBeVisible();
       await expect(requestPage.locator('input[name="password"]')).toHaveCount(0);
-      await requestPage.getByRole("button", { name: "Sair" }).click();
-      await expect(requestPage).toHaveURL(/\/login\/?$/, { timeout: 15000 });
     });
 
     await test.step("a PKCE email opened in another browser fails without its verifier", async () => {
-      await requestRecovery(requestPage);
+      const recoveryPage = await recoveryContext.newPage();
+      await requestRecovery(recoveryPage);
       const email = await waitForLocalRecoveryEmail(intended.email);
       firstRecoveryMessageId = email.id;
       const callback = otherPage.waitForResponse((response) =>
@@ -1293,27 +1295,28 @@ test("J1 local: PKCE recovery email requires its original browser and a recovery
       // request is required because the prior code was intentionally consumed
       // by the failed verifier exchange in the other browser.
       await new Promise((resolve) => setTimeout(resolve, 1100));
-      await requestRecovery(requestPage);
+      const recoveryPage = recoveryContext.pages()[0];
+      await requestRecovery(recoveryPage);
       const email = await waitForLocalRecoveryEmail(
         intended.email,
         new Set(firstRecoveryMessageId ? [firstRecoveryMessageId] : []),
       );
       successfulRecoveryLink = email.url;
-      const callback = requestPage.waitForResponse((response) =>
+      const callback = recoveryPage.waitForResponse((response) =>
         new URL(response.url()).pathname === "/auth/recovery",
       );
-      await requestPage.goto(successfulRecoveryLink);
+      await recoveryPage.goto(successfulRecoveryLink);
       const response = await callback;
       expect(response.status()).toBe(303);
       expect(response.headers().location).toBe("/redefinir-senha");
       expect(response.headers()["cache-control"]).toContain("no-store");
       expect(response.headers()["referrer-policy"]).toBe("no-referrer");
       expect(Boolean((await response.allHeaders())["set-cookie"])).toBe(true);
-      await expect(requestPage.locator('form[data-interactive="true"]')).toBeVisible();
-      await requestPage.locator('input[name="password"]').fill(newPassword);
-      await requestPage.locator('input[name="passwordConfirmation"]').fill(newPassword);
-      await requestPage.getByRole("button", { name: "Salvar nova senha", exact: true }).click();
-      await expect(requestPage).toHaveURL(/\/login\?password=updated$/, { timeout: 15000 });
+      await expect(recoveryPage.locator('form[data-interactive="true"]')).toBeVisible();
+      await recoveryPage.locator('input[name="password"]').fill(newPassword);
+      await recoveryPage.locator('input[name="passwordConfirmation"]').fill(newPassword);
+      await recoveryPage.getByRole("button", { name: "Salvar nova senha", exact: true }).click();
+      await expect(recoveryPage).toHaveURL(/\/login\?password=updated$/, { timeout: 15000 });
     });
 
     await test.step("new password works, old password fails, and the link cannot replay", async () => {
@@ -1330,20 +1333,21 @@ test("J1 local: PKCE recovery email requires its original browser and a recovery
       expect(await canLogin(existing.email, existing.password)).toBe(true);
       // The browser must receive no usable session when it repeats the consumed
       // recovery URL. Keep that URL in-memory and out of diagnostics.
-      const replayCallback = requestPage.waitForResponse((response) =>
+      const recoveryPage = recoveryContext.pages()[0];
+      const replayCallback = recoveryPage.waitForResponse((response) =>
         new URL(response.url()).pathname === "/auth/recovery",
       );
       if (!successfulRecoveryLink) {
         throw new Error("J1 local PKCE recovery link was unexpectedly unavailable");
       }
-      await requestPage.goto(successfulRecoveryLink);
+      await recoveryPage.goto(successfulRecoveryLink);
       const replay = await replayCallback;
       expect(replay.status()).toBe(303);
       expect(replay.headers().location).toBe("/redefinir-senha?error=invalid");
       expect(Boolean((await replay.allHeaders())["set-cookie"])).toBe(false);
-      await expect(requestPage.getByText("Link inválido ou expirado")).toBeVisible();
+      await expect(recoveryPage.getByText("Link inválido ou expirado")).toBeVisible();
     });
   } finally {
-    await Promise.allSettled([requestContext.close(), otherContext.close()]);
+    await Promise.allSettled([requestContext.close(), recoveryContext.close(), otherContext.close()]);
   }
 });
