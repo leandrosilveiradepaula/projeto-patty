@@ -1007,3 +1007,122 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
   expect(mobile.scroll).toBeLessThanOrEqual(mobile.viewport + 1);
   await context.close();
 });
+
+
+test("J1 local: recovery OTP replaces the correct session, changes only its password and rejects replay", async ({ browser }) => {
+  test.setTimeout(240000);
+  const nonce = randomBytes(8).toString("hex");
+  const makeRecoveryClient = async (label) => {
+    const email = "e2e-j1-recovery-" + label + "-" + nonce + "@example.invalid";
+    const password = "J1-" + randomBytes(17).toString("base64url") + "-Aa1!";
+    const created = await service.auth.admin.createUser({
+      email, password, email_confirm: true,
+    });
+    if (created.error || !UUID.test(created.data?.user?.id ?? "")) {
+      throw created.error ?? new Error("Local recovery identity creation failed");
+    }
+    const id = created.data.user.id;
+    insert("profiles", { id, display_name: "J1 Synthetic recovery " + label });
+    insert("user_roles", { profile_id: id, role: "client" });
+    insert("clients", {
+      profile_id: id, full_name: "J1 Synthetic recovery " + label,
+      status: "active",
+    });
+    return { email, password };
+  };
+
+  // All credentials, token hashes and password changes belong to the
+  // disposable Supabase; neither production nor a real mailbox is accessed.
+  const previouslySignedIn = await makeRecoveryClient("other");
+  const intended = await makeRecoveryClient("target");
+  const newPassword = "J1-" + randomBytes(19).toString("base64url") + "-Bb2!";
+  const generated = await service.auth.admin.generateLink({
+    type: "recovery", email: intended.email,
+  });
+  const tokenHash = generated.data?.properties?.hashed_token;
+  if (generated.error || !tokenHash) {
+    throw generated.error ?? new Error("Local recovery OTP generation failed");
+  }
+
+  const context = await browser.newContext({
+    baseURL, viewport: { width: 390, height: 844 },
+    isMobile: true, hasTouch: true,
+  });
+  try {
+    const page = await context.newPage();
+    const navigateToRecoveryHash = async (type) => {
+      // The one-time hash is never embedded in page.goto(), assertions,
+      // diagnostics or test titles. Do not print request URLs or cookies.
+      const callback = page.waitForResponse((response) =>
+        new URL(response.url()).pathname === "/auth/recovery-token",
+      );
+      await page.evaluate(({ hash, kind }) => {
+        const target = new URL("/auth/recovery-token", window.location.origin);
+        target.searchParams.set("token_hash", hash);
+        target.searchParams.set("type", kind);
+        window.location.replace(target.pathname + target.search);
+      }, { hash: tokenHash, kind: type });
+      return callback;
+    };
+
+    await test.step("start with a different signed-in synthetic client", async () => {
+      await page.goto("/login");
+      await page.getByLabel("Email").fill(previouslySignedIn.email);
+      await page.getByLabel("Senha").fill(previouslySignedIn.password);
+      await page.getByRole("button", { name: "Entrar" }).click();
+      await expect(page).toHaveURL(/\/cliente\/?$/, { timeout: 20000 });
+    });
+
+    await test.step("a callback with the wrong OTP type cannot show the reset form", async () => {
+      const callback = await navigateToRecoveryHash("invite");
+      expect(callback.status()).toBe(303);
+      expect(callback.headers().location).toBe("/redefinir-senha?error=invalid");
+      expect(Boolean((await callback.allHeaders())["set-cookie"])).toBe(false);
+      await expect(page.getByText("Link inválido ou expirado")).toBeVisible();
+      await expect(page.getByLabel("Nova senha")).toHaveCount(0);
+    });
+
+    await test.step("valid recovery replaces the unrelated session and persists its own cookie", async () => {
+      const callback = await navigateToRecoveryHash("recovery");
+      expect(callback.status()).toBe(303);
+      expect(callback.headers().location).toBe("/redefinir-senha");
+      expect(callback.headers()["cache-control"]).toContain("no-store");
+      expect(callback.headers()["referrer-policy"]).toBe("no-referrer");
+      expect(Boolean((await callback.allHeaders())["set-cookie"])).toBe(true);
+      await expect(page.getByRole("heading", { name: "Redefinir senha" })).toBeVisible();
+      await expect(page.locator('form[data-interactive="true"]')).toBeVisible();
+      expect(new URL(page.url()).origin).toBe(new URL(baseURL).origin);
+      expect(new URL(page.url()).search).toBe("");
+      await page.getByLabel("Nova senha").fill(newPassword);
+      await page.getByLabel("Confirmar nova senha").fill(newPassword);
+      await page.getByRole("button", { name: "Salvar nova senha" }).click();
+      await expect(page).toHaveURL(/\/login\?password=updated$/, { timeout: 30000 });
+      await expect(page.getByText("Senha atualizada")).toBeVisible();
+    });
+
+    await test.step("only the intended Auth account changed its password", async () => {
+      const canLogin = async (email, password) => {
+        const probe = createClient(apiURL, anonKey, {
+          auth: { autoRefreshToken: false, persistSession: false },
+        });
+        const { error } = await probe.auth.signInWithPassword({ email, password });
+        if (!error) await probe.auth.signOut({ scope: "local" });
+        return !error;
+      };
+      expect(await canLogin(intended.email, newPassword)).toBe(true);
+      expect(await canLogin(intended.email, intended.password)).toBe(false);
+      expect(await canLogin(previouslySignedIn.email, previouslySignedIn.password)).toBe(true);
+    });
+
+    await test.step("the used link cannot establish another recovery session", async () => {
+      const replay = await navigateToRecoveryHash("recovery");
+      expect(replay.status()).toBe(303);
+      expect(replay.headers().location).toBe("/redefinir-senha?error=invalid");
+      expect(Boolean((await replay.allHeaders())["set-cookie"])).toBe(false);
+      await expect(page.getByText("Link inválido ou expirado")).toBeVisible();
+      await expect(page.getByLabel("Nova senha")).toHaveCount(0);
+    });
+  } finally {
+    await context.close();
+  }
+});
