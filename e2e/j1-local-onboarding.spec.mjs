@@ -29,41 +29,42 @@ const fixtureTables = new Set([
 const service = createClient(apiURL, serviceKey, {
   auth: { autoRefreshToken: false, persistSession: false },
 });
-const inbucketUrl = "http://127.0.0.1:54324";
+const localMailUrl = "http://127.0.0.1:54324";
 
 async function waitForLocalRecoveryEmail(recipient, ignoredMessageIds = new Set()) {
-  // Inbucket is part of the disposable Supabase stack. Keep the recovery URL
+  // Mailpit is part of the disposable Supabase stack. Keep the recovery URL
   // only in memory: it is an ephemeral credential, never test output.
-  const mailbox = recipient.split("@", 1)[0];
-  let state = "mailbox-api-unavailable";
+  let state = "mail-api-unavailable";
   for (let attempt = 0; attempt < 80; attempt += 1) {
-    const list = await fetch(inbucketUrl + "/api/v1/mailbox/" +
-      encodeURIComponent(mailbox));
+    const list = await fetch(localMailUrl + "/api/v1/messages?limit=100");
     if (list.ok) {
       state = "mailbox-empty";
-      const messages = await list.json();
+      const listed = await list.json();
+      const messages = Array.isArray(listed) ? listed : listed.messages;
       const summary = Array.isArray(messages)
         ? messages.find((message) => {
-          // Inbucket releases have represented IDs as either strings or
-          // numbers. Treat the opaque value uniformly without logging it.
-          const id = typeof message?.id === "string" || typeof message?.id === "number"
-            ? String(message.id)
+          const id = message?.ID ?? message?.id;
+          const recipientAddresses = Array.isArray(message?.To ?? message?.to)
+            ? (message.To ?? message.to).map((entry) => entry?.Address ?? entry?.address ?? entry)
+            : [];
+          const opaqueId = typeof id === "string" || typeof id === "number"
+            ? String(id)
             : null;
-          return id !== null && !ignoredMessageIds.has(id);
+          return opaqueId !== null && recipientAddresses.includes(recipient) && !ignoredMessageIds.has(opaqueId);
         })
         : null;
-      const messageId = typeof summary?.id === "string" || typeof summary?.id === "number"
-        ? String(summary.id)
+      const rawId = summary?.ID ?? summary?.id;
+      const messageId = typeof rawId === "string" || typeof rawId === "number"
+        ? String(rawId)
         : null;
       if (messageId) {
         state = "message-unreadable";
-        const detail = await fetch(inbucketUrl + "/api/v1/mailbox/" +
-          encodeURIComponent(mailbox) + "/" + encodeURIComponent(messageId));
+        const detail = await fetch(localMailUrl + "/api/v1/message/" + encodeURIComponent(messageId));
         if (detail.ok) {
           state = "recovery-url-missing";
           const message = await detail.json();
-          const candidates = String(message.body?.text ?? message.text ?? "") + "\n" +
-            String(message.body?.html ?? message.html ?? "");
+          const candidates = String(message.Text ?? message.text ?? message.body?.text ?? "") + "\n" +
+            String(message.HTML ?? message.html ?? message.body?.html ?? "");
           const urls = candidates.match(/https?:\/\/[^\s"'<>]+/g) ?? [];
           for (const rawUrl of urls) {
             try {
@@ -83,7 +84,7 @@ async function waitForLocalRecoveryEmail(recipient, ignoredMessageIds = new Set(
     await new Promise((resolve) => setTimeout(resolve, 250));
   }
   // Fixed categories only: never include mailbox contents, URLs, codes or IDs.
-  throw new Error("J1 local recovery email was not available in disposable Inbucket: " + state);
+  throw new Error("J1 local recovery email was not available in disposable Mailpit: " + state);
 }
 function literal(value) {
   if (value === null) return "NULL";
