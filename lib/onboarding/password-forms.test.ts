@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import { accessPasswordIssues, parseAccessPasswordForm, readSingleStringFormValue } from "./validation.ts";
 
@@ -38,4 +39,20 @@ test("single-value reader does not pick first of conflicting inputs",()=>{
  assert.equal(readSingleStringFormValue(f,"email"),null);
  f.delete("email");assert.equal(readSingleStringFormValue(f,"email"),null);
  f.set("email","valid@example.com");assert.equal(readSingleStringFormValue(f,"email"),"valid@example.com");
+});
+
+test("senha mínima do Supabase Free continua aceita, recomendação visual não altera a política",()=>{
+ const minimum=data("12345678","12345678");
+ assert.deepEqual(parseAccessPasswordForm(minimum),{ok:true,password:"12345678"});
+ const maximum=data("x".repeat(128),"x".repeat(128));
+ assert.equal(parseAccessPasswordForm(maximum).ok,true);
+ assert.equal(parseAccessPasswordForm(data("x".repeat(129),"x".repeat(129))).ok,false);
+
+ const form=readFileSync(new URL("../../components/auth/AccessPasswordForm.tsx",import.meta.url),"utf8");
+ assert.match(form,/Mínimo de 8 caracteres atendido/);
+ assert.match(form,/prefira uma senha longa e exclusiva/);
+ assert.match(form,/O comprimento mínimo não garante que uma senha seja segura/);
+ assert.equal((form.match(/minLength=\{8\}/g)??[]).length,2);
+ assert.equal((form.match(/maxLength=\{128\}/g)??[]).length,2);
+ assert.match(form,/disabled=\{pending\|\|!interactive\|\|!canSubmit\}/);
 });
