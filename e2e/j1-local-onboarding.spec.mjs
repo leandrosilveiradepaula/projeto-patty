@@ -1434,14 +1434,29 @@ test("J1 local: PKCE recovery email requires its original browser and a recovery
           expect(replay.headers().location).toBe("/redefinir-senha?error=invalid");
           expect(Boolean((await replay.allHeaders())["set-cookie"])).toBe(false);
         } else {
-          // The consumed token must be rejected by GoTrue at its exact local
-          // verify endpoint; a successful provider response is a test failure.
+          // GoTrue can reject an already-used email token in two ways:
+          // return a 4xx on /auth/v1/verify, or redirect to the configured
+          // application recovery URL with an error query/fragment. A redirect
+          // without an explicit error is NOT sufficient evidence of rejection.
           const destination = new URL(recoveryPage.url());
-          expect(destination.origin).toBe(new URL(apiURL).origin);
-          expect(destination.pathname).toBe("/auth/v1/verify");
-          expect([400, 401, 403, 404, 410, 422]).toContain(
-            replayNavigation?.status(),
+          const providerOrigin = new URL(apiURL).origin;
+          const applicationOrigin = new URL(baseURL).origin;
+          const rejectedAtProvider =
+            destination.origin === providerOrigin &&
+            destination.pathname === "/auth/v1/verify" &&
+            [400, 401, 403, 404, 410, 422].includes(replayNavigation?.status());
+          const fragmentParams = new URLSearchParams(destination.hash.slice(1));
+          const errorFromProvider = ["error", "error_code"].some(
+            (key) => destination.searchParams.has(key) || fragmentParams.has(key),
           );
+          const rejectedByRedirect =
+            destination.origin === applicationOrigin &&
+            destination.pathname === "/redefinir-senha" &&
+            errorFromProvider;
+          if (!rejectedAtProvider && !rejectedByRedirect) {
+            // Do not echo the recovery URL: it can contain a one-time token.
+            throw new Error("Consumed PKCE link was not explicitly rejected by GoTrue");
+          }
           providerRejected = true;
         }
       } finally {
