@@ -27,7 +27,7 @@ test("browser cannot fabricate or tamper with a server recovery grant", () => {
   const grant = createRecoveryGrant(claims, key, now)!;
   const [body, mac] = grant.split(".");
   assert.equal(verifyRecoveryGrant(grant, claims, otherKey, now), false);
-  assert.equal(verifyRecoveryGrant(body + "." + mac.slice(0, -1) + (mac.endsWith("A") ? "B" : "A"), claims, key, now), false);
+  assert.equal(verifyRecoveryGrant(body + "." + (mac.startsWith("A") ? "B" : "A") + mac.slice(1), claims, key, now), false);
   assert.equal(verifyRecoveryGrant(body + ".fake", claims, key, now), false);
   assert.equal(verifyRecoveryGrant("otp", claims, key, now), false);
   assert.equal(verifyRecoveryGrant(undefined, claims, key, now), false);
