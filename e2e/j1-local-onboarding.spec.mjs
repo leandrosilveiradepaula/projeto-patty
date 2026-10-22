@@ -1268,6 +1268,8 @@ test("J1 local: PKCE recovery email requires its original browser and a recovery
       await requestPage.goto("/redefinir-senha");
       await expect(requestPage.getByText("Link inválido ou expirado")).toBeVisible();
       await expect(requestPage.locator('input[name="password"]')).toHaveCount(0);
+      await requestPage.getByRole("button", { name: "Sair" }).click();
+      await expect(requestPage).toHaveURL(/\/login\/?$/, { timeout: 15000 });
     });
 
     await test.step("a PKCE email opened in another browser fails without its verifier", async () => {

@@ -8,11 +8,18 @@ const baseClaims = {
   sub: "synthetic-user",
 };
 
-test("accepts only a signed recovery session claim shape", () => {
+test("accepts the signed claim shapes GoTrue emits for recovery", () => {
   assert.equal(
     hasVerifiedRecoverySession({
       ...baseClaims,
       amr: [{ method: "recovery", timestamp: 1 }],
+    }),
+    true,
+  );
+  assert.equal(
+    hasVerifiedRecoverySession({
+      ...baseClaims,
+      amr: [{ method: "otp", timestamp: 1 }],
     }),
     true,
   );
