@@ -1093,11 +1093,52 @@ test("J1 local: recovery OTP replaces the correct session, changes only its pass
       await expect(page.locator('form[data-interactive="true"]')).toBeVisible();
       expect(new URL(page.url()).origin).toBe(new URL(baseURL).origin);
       expect(new URL(page.url()).search).toBe("");
-      await page.getByLabel("Nova senha", { exact: true }).fill(newPassword);
-      await page.getByLabel("Confirmar nova senha").fill(newPassword);
-      await page.getByRole("button", { name: "Salvar nova senha" }).click();
-      await expect(page).toHaveURL(/\/login\?password=updated$/, { timeout: 30000 });
-      await expect(page.getByText("Senha atualizada")).toBeVisible();
+      // Bound each stage independently; a whole-test timeout obscures whether
+      // the browser is blocked by hydration, submission or the Auth callback.
+      // Record only phase/booleans/statuses, never values of credentials or URLs.
+      const actionStatuses = [];
+      page.on("response", (response) => {
+        const url = new URL(response.url());
+        if (url.pathname === "/redefinir-senha" &&
+            response.request().method() === "POST") {
+          actionStatuses.push(response.status());
+        }
+      });
+      let phase = "password-input";
+      try {
+        await page.getByLabel("Nova senha", { exact: true })
+          .fill(newPassword, { timeout: 10000 });
+        phase = "confirmation-input";
+        await page.getByLabel("Confirmar nova senha", { exact: true })
+          .fill(newPassword, { timeout: 10000 });
+        const submit = page.getByRole("button", {
+          name: "Salvar nova senha", exact: true,
+        });
+        phase = "submit-enabled";
+        await expect(submit).toBeEnabled({ timeout: 10000 });
+        phase = "submit-click";
+        await submit.click({ timeout: 20000 });
+        phase = "login-redirect";
+        await expect(page).toHaveURL(/\/login\?password=updated$/, {
+          timeout: 15000,
+        });
+        phase = "success-confirmation";
+        await expect(page.getByText("Senha atualizada"))
+          .toBeVisible({ timeout: 10000 });
+      } catch {
+        const formBusy = await page.locator("form").first()
+          .getAttribute("aria-busy", { timeout: 1500 })
+          .catch(() => "unavailable");
+        const hasErrorAlert = await page.getByRole("alert")
+          .count().then((count) => count > 0).catch(() => false);
+        const path = new URL(page.url()).pathname;
+        // Path is a fixed app route; never include the query or fragment.
+        throw new Error("J1 synthetic recovery blocked: phase=" + phase +
+          ", formBusy=" + formBusy +
+          ", hasErrorAlert=" + hasErrorAlert +
+          ", path=" + path +
+          ", actionHttpStatuses=" + actionStatuses.join(","));
+      }
     });
 
     await test.step("only the intended Auth account changed its password", async () => {
