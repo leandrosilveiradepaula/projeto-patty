@@ -66,10 +66,10 @@ test("mobile private-file release uses a dedicated, touchable confirmation row",
     path.join(root, "components/admin/AdminPrivateFileReleaseForm.module.css"), "utf8");
   const browser = fs.readFileSync(
     path.join(root, "e2e/j1-local-onboarding.spec.mjs"), "utf8");
-  assert.match(layout, /\.fileActions > form\s*\{[^}]*flex:\s*0 0 100%/s);
-  assert.match(layout, /\.fileActions > form\s*\{[^}]*z-index:\s*2/s);
-  assert.match(confirmation, /\.confirmation\s*\{[^}]*min-height:\s*44px/s);
-  assert.match(confirmation, /\.confirmation\s*\{[^}]*touch-action:\s*manipulation/s);
+  assert.match(layout, /\.fileActions > form\s*\{[^}]*flex:\s*0 0 100%/);
+  assert.match(layout, /\.fileActions > form\s*\{[^}]*z-index:\s*2/);
+  assert.match(confirmation, /\.confirmation\s*\{[^}]*min-height:\s*44px/);
+  assert.match(confirmation, /\.confirmation\s*\{[^}]*touch-action:\s*manipulation/);
   assert.ok(browser.includes("await releaseTouchTarget.tap({ timeout: 15000 })"));
   assert.ok(browser.includes("await expect(releaseCheckbox).toBeChecked()"));
 });
