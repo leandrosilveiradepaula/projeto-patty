@@ -130,9 +130,7 @@
 
 /* Native controls use their option/file-label intrinsic size by default.
    Constrain both simple and expanded filters to the mobile grid track. */
-.fileFilters label,
 .advancedFilterFields label {
-  min-width: 0;
   max-width: 100%;
 }
 
@@ -148,5 +146,10 @@
 @media (max-width: 640px) {
   .fileFilters {
     min-width: 0;
+  }
+
+  .fileFilters label {
+    min-width: 0;
+    max-width: 100%;
   }
 }
