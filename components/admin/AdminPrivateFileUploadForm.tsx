@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { privateFileUploadRecoveryDecision } from "@/lib/files/private-file-upload-recovery-state";
 
@@ -56,6 +56,25 @@ export function AdminPrivateFileUploadForm({
   const [recoverySessionId,setRecoverySessionId] = useState<string | null>(null);
   const [allowSameSessionRetry,setAllowSameSessionRetry] = useState(false);
   const reviewed = privateFileSelectionReview(selectedFile,fileKind);
+  const recoveryStorageKey = "patty.admin-private-upload-recovery." + clientId;
+
+  useEffect(() => {
+    const sessionId = window.sessionStorage.getItem(recoveryStorageKey);
+    if (!sessionId) return;
+    setRecoverySessionId(sessionId);
+    setAmbiguousCompletion(true);
+    setMessage("Há uma confirmação de upload pendente nesta sessão do navegador. Consulte o estado antes de enviar novamente.");
+  }, [recoveryStorageKey]);
+
+  function rememberRecoverySession(sessionId: string) {
+    window.sessionStorage.setItem(recoveryStorageKey, sessionId);
+    setRecoverySessionId(sessionId);
+  }
+
+  function forgetRecoverySession() {
+    window.sessionStorage.removeItem(recoveryStorageKey);
+    setRecoverySessionId(null);
+  }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -125,7 +144,7 @@ export function AdminPrivateFileUploadForm({
         return;
       }
 
-      setRecoverySessionId(sessionResult.session.id);
+      rememberRecoverySession(sessionResult.session.id);
       finalizationStarted = true;
       setPhase("verifying");
       const finalizationResult =
@@ -157,7 +176,7 @@ export function AdminPrivateFileUploadForm({
       setSelectedFile(null);
       setSelectionConfirmed(false);
       setAmbiguousCompletion(false);
-      setRecoverySessionId(null);
+      forgetRecoverySession();
       setAllowSameSessionRetry(false);
       setSuccess(true);
       setMessage(
@@ -198,12 +217,12 @@ export function AdminPrivateFileUploadForm({
         setSelectedFile(null);
         setSelectionConfirmed(false);
         setAmbiguousCompletion(false);
-        setRecoverySessionId(null);
+        forgetRecoverySession();
         setSuccess(true);
         router.refresh();
       } else if (decision.next === "new_selection") {
         setAmbiguousCompletion(false);
-        setRecoverySessionId(null);
+        forgetRecoverySession();
         setSelectedFile(null);
         setSelectionConfirmed(false);
         formRef.current?.reset();
@@ -232,13 +251,13 @@ export function AdminPrivateFileUploadForm({
         setSelectedFile(null);
         setSelectionConfirmed(false);
         setAmbiguousCompletion(false);
-        setRecoverySessionId(null);
+        forgetRecoverySession();
         setSuccess(true);
         setMessage("Arquivo recebido e confirmado pelo servidor.");
         router.refresh();
       } else if (result.ok && result.result.status === "rejected") {
         setAmbiguousCompletion(false);
-        setRecoverySessionId(null);
+        forgetRecoverySession();
         setSelectedFile(null);
         setSelectionConfirmed(false);
         formRef.current?.reset();
@@ -284,7 +303,7 @@ export function AdminPrivateFileUploadForm({
               setSelectedFile(null);
               setSelectionConfirmed(false);
               setAmbiguousCompletion(false);
-              setRecoverySessionId(null);
+              forgetRecoverySession();
               setAllowSameSessionRetry(false);
               const input = formRef.current?.querySelector<HTMLInputElement>('input[name="file"]');
               if (input) input.value = "";
@@ -322,7 +341,7 @@ export function AdminPrivateFileUploadForm({
               setSelectedFile(event.currentTarget.files?.[0] ?? null);
               setSelectionConfirmed(false);
               setAmbiguousCompletion(false);
-              setRecoverySessionId(null);
+              forgetRecoverySession();
               setAllowSameSessionRetry(false);
               setMessage(null);
               setSuccess(false);

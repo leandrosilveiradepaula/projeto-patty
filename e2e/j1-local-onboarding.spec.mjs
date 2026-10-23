@@ -423,6 +423,7 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
 
   let clientPrivateFile;
   let foreignClientCredentials;
+  let interruptedUploadSessionId;
   await test.step("activated client uploads and retrieves only a private synthetic file", async () => {
     // Extend the disposable J1 session into the actual browser-to-Storage
     // upload/finalize path. Nothing is sent to the hosted Supabase.
@@ -545,6 +546,71 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
     }
   });
 
+  await test.step("an interrupted private upload restores and finalizes only its original session", async () => {
+    const filename = "j1-synthetic-interrupted-private.png";
+    const png = Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9ZcokAAAAASUVORK5CYII=",
+      "base64",
+    );
+    // This is the state left after a successful private transfer when the
+    // browser loses the final server-action response. The fixture uses only
+    // the disposable service role; the browser still uses its client session.
+    const created = await service
+      .from("client_file_upload_sessions")
+      .insert({
+        claimed_mime_type: "image/png",
+        client_id: invite.clientId,
+        declared_byte_size: png.length,
+        file_extension: "png",
+        file_kind: "photo",
+        original_filename: filename,
+        requester_profile_id: invite.profileId,
+      })
+      .select("id,temp_object_path")
+      .single();
+    if (created.error || !created.data?.temp_object_path) {
+      throw created.error ?? new Error("Synthetic interrupted upload session was not created");
+    }
+    interruptedUploadSessionId = created.data.id;
+    const transferred = await service.storage.from("client-private").upload(
+      created.data.temp_object_path,
+      png,
+      { contentType: "image/png", upsert: false },
+    );
+    if (transferred.error) throw transferred.error;
+
+    await page.goto("/cliente/arquivos");
+    await page.evaluate((sessionId) => {
+      window.sessionStorage.setItem("patty.client-private-upload-recovery", sessionId);
+    }, interruptedUploadSessionId);
+    await page.reload();
+    await expect(page.getByText(
+      "Há uma confirmação de upload pendente nesta sessão do navegador. Consulte o estado antes de enviar novamente.",
+      { exact: true },
+    )).toBeVisible();
+    await expect(page.locator('select[name="fileKind"]')).toBeDisabled();
+    await expect(page.locator('input[name="file"]')).toBeDisabled();
+    await expect(page.getByRole("button", { name: "Enviar arquivo" })).toBeDisabled();
+
+    await page.getByRole("button", { name: "Consultar estado do envio" }).click();
+    await expect(page.getByText(
+      "O arquivo foi transferido, mas a sessão ainda aguarda finalização. Você pode concluir esta mesma sessão, sem enviar outro arquivo.",
+      { exact: true },
+    )).toBeVisible();
+    const resume = page.getByRole("button", { name: "Concluir esta mesma sessão" });
+    await resume.dblclick();
+    await expect.poll(() => rows(
+      "select status from public.client_file_upload_sessions where id=" + literal(interruptedUploadSessionId),
+    ), { timeout: 20000 }).toEqual([{ status: "accepted" }]);
+    expect(rows(
+      "select id from public.client_files where client_id=" + literal(invite.clientId) +
+      " and original_filename=" + literal(filename),
+    )).toHaveLength(1);
+    await expect.poll(() => page.evaluate(() =>
+      window.sessionStorage.getItem("patty.client-private-upload-recovery"),
+    )).toBeNull();
+  });
+
   await test.step("private file remains accessible only with authorized sessions", async () => {
     if (!clientPrivateFile || !UUID.test(clientPrivateFile.id)) {
       throw new Error("Client upload proof missing");
@@ -646,6 +712,20 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       await foreignPage.getByRole("button", { name: "Entrar" }).click();
       await expect(foreignPage).toHaveURL(/\/cliente\/?$/);
       await foreignPage.goto("/cliente/arquivos");
+      if (!interruptedUploadSessionId) {
+        throw new Error("Synthetic interrupted upload recovery proof missing");
+      }
+      // A stale opaque browser marker cannot cross the RLS/session boundary.
+      await foreignPage.evaluate((sessionId) => {
+        window.sessionStorage.setItem("patty.client-private-upload-recovery", sessionId);
+      }, interruptedUploadSessionId);
+      await foreignPage.reload();
+      await foreignPage.getByRole("button", { name: "Consultar estado do envio" }).click();
+      await expect(foreignPage.getByText(
+        "Não foi possível confirmar o estado desta sessão. Consulte o histórico antes de decidir por um novo envio.",
+        { exact: true },
+      )).toBeVisible();
+      await expect(foreignPage.getByRole("button", { name: "Concluir esta mesma sessão" })).toHaveCount(0);
       await expect(foreignPage.getByRole("heading", {
         name: clientPrivateFile.filename, exact: true,
       })).toHaveCount(0);

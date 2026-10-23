@@ -45,5 +45,17 @@ test("both private upload forms lock selection while completion is uncertain", (
     assert.match(src, /setAllowSameSessionRetry\(decision\.next === "resume"\)/, form);
     assert.match(src, /setAllowSameSessionRetry\(false\);\s*try \{\s*const response = await check(?:AdminPrivateFile|ClientFile)UploadSessionStatusAction/, form);
     assert.doesNotMatch(src, /else if \(decision\.next === "resume"\) \{\s*setAllowSameSessionRetry\(true\)/, form);
+    assert.match(src, /sessionStorage\.setItem\(recoveryStorageKey, sessionId\)/, form);
+    assert.match(src, /sessionStorage\.removeItem\(recoveryStorageKey\)/, form);
+    assert.match(src, /setAmbiguousCompletion\(true\)/, form);
   }
+});
+
+test("J6 asset registration restores only opaque local review metadata and keeps the server decision authoritative", () => {
+  const src = readFileSync(new URL("../../components/admin/AdminEducationalContentAssetUploadForm.tsx", import.meta.url), "utf8");
+  assert.match(src, /patty\.educational-asset-registration\.\$\{contentId\}\.\$\{versionId\}/);
+  assert.match(src, /sessionStorage\.setItem\(recoveryStorageKey, JSON\.stringify\(asset\)\)/);
+  assert.match(src, /sessionStorage\.removeItem\(recoveryStorageKey\)/);
+  assert.match(src, /inspectEducationalContentAssetRegistrationAction\(contentId, versionId/);
+  assert.match(src, /disabled=\{busy \|\| registerBusy \|\| inspectionBusy \|\| registrationUncertain\}\s+name="confirmVerified"/);
 });

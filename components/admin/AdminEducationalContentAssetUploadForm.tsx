@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useMemo, useRef, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { inspectEducationalContentAssetRegistrationAction, registerEducationalContentAssetAction } from "@/app/admin/conteudos/[contentId]/actions";
@@ -26,6 +26,15 @@ type UploadedAsset = {
   sha256Hex: string;
 };
 
+function isUploadedAsset(value: unknown): value is UploadedAsset {
+  if (!value || typeof value !== "object") return false;
+  const asset = value as Partial<UploadedAsset>;
+  return typeof asset.pathname === "string"
+    && typeof asset.contentType === "string"
+    && typeof asset.byteSize === "number"
+    && typeof asset.sha256Hex === "string";
+}
+
 function hexFromBuffer(buffer: ArrayBuffer) {
   return Array.from(new Uint8Array(buffer), (byte) =>
     byte.toString(16).padStart(2, "0"),
@@ -45,6 +54,7 @@ export function AdminEducationalContentAssetUploadForm({
   contentId: string;
   versionId: string;
 }) {
+  const recoveryStorageKey = `patty.educational-asset-registration.${contentId}.${versionId}`;
   const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [uploaded, setUploaded] = useState<UploadedAsset | null>(null);
@@ -57,6 +67,33 @@ export function AdminEducationalContentAssetUploadForm({
   const inspectInFlightRef = useRef(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    const persisted = window.sessionStorage.getItem(recoveryStorageKey);
+    if (!persisted) return;
+
+    try {
+      const asset = JSON.parse(persisted) as unknown;
+      if (!isUploadedAsset(asset)) throw new Error("invalid recovery data");
+      // This metadata only restores the local review UI. The server still
+      // authorizes the authenticated staff member and content/version scope.
+      setUploaded(asset);
+      setRegistrationUncertain(true);
+      setStatus("Há um registro de asset pendente nesta sessão do navegador. Consulte o estado antes de registrar novamente.");
+    } catch {
+      window.sessionStorage.removeItem(recoveryStorageKey);
+    }
+  }, [recoveryStorageKey]);
+
+  function rememberUploadedAsset(asset: UploadedAsset) {
+    window.sessionStorage.setItem(recoveryStorageKey, JSON.stringify(asset));
+    setUploaded(asset);
+  }
+
+  function forgetUploadedAsset() {
+    window.sessionStorage.removeItem(recoveryStorageKey);
+    setUploaded(null);
+  }
 
   const registerAction = useMemo(
     () => registerEducationalContentAssetAction.bind(null, contentId, versionId),
@@ -124,7 +161,7 @@ export function AdminEducationalContentAssetUploadForm({
       }
 
       setRegistrationUncertain(false);
-      setUploaded({
+      rememberUploadedAsset({
         byteSize: file.size,
         contentType: file.type,
         pathname: grant.pathname,
@@ -152,7 +189,7 @@ export function AdminEducationalContentAssetUploadForm({
     try {
       await registerAction(new FormData(event.currentTarget));
       setStatus("Asset privado registrado com sucesso. Ainda não foi publicado nem liberado.");
-      setUploaded(null);
+      forgetUploadedAsset();
       setRegistrationUncertain(false);
       setFile(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -182,7 +219,7 @@ export function AdminEducationalContentAssetUploadForm({
       });
       if (result.status === "registered") {
         setRegistrationUncertain(false);
-        setUploaded(null);
+        forgetUploadedAsset();
         setFile(null);
         if (fileInputRef.current) fileInputRef.current.value = "";
         setStatus("Registro confirmado no servidor. A publicação e a liberação continuam manuais.");
@@ -216,7 +253,7 @@ export function AdminEducationalContentAssetUploadForm({
           ref={fileInputRef}
           onChange={(event) => {
             setFile(event.target.files?.[0] ?? null);
-            setUploaded(null);
+            forgetUploadedAsset();
             setRegistrationUncertain(false);
             setStatus(null);
           }}
@@ -277,7 +314,7 @@ export function AdminEducationalContentAssetUploadForm({
 
           <label className={styles.confirmation}>
             <input
-              disabled={registerBusy}
+              disabled={busy || registerBusy || inspectionBusy || registrationUncertain}
               name="confirmVerified"
               required
               type="checkbox"

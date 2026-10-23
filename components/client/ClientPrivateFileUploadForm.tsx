@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { privateFileUploadRecoveryDecision } from "@/lib/files/private-file-upload-recovery-state";
 
@@ -21,6 +21,7 @@ import { privateFileSelectionReview, PRIVATE_FILE_ACCEPT, PRIVATE_FILE_KIND_LABE
 import styles from "./ClientPrivateFileUploadForm.module.css";
 
 const acceptByKind = PRIVATE_FILE_ACCEPT;
+const recoveryStorageKey = "patty.client-private-upload-recovery";
 
 const errorMessages: Record<string, string> = {
   missing_file: "Selecione um arquivo não vazio para enviar.",
@@ -48,6 +49,26 @@ export function ClientPrivateFileUploadForm() {
   const [recoverySessionId,setRecoverySessionId] = useState<string | null>(null);
   const [allowSameSessionRetry,setAllowSameSessionRetry] = useState(false);
   const reviewed = privateFileSelectionReview(selectedFile,fileKind);
+
+  useEffect(() => {
+    const sessionId = window.sessionStorage.getItem(recoveryStorageKey);
+    if (!sessionId) return;
+    // This opaque ID restores only the UI affordance after an interruption.
+    // The server still scopes every status/finalize call to the signed-in actor.
+    setRecoverySessionId(sessionId);
+    setAmbiguousCompletion(true);
+    setMessage("Há uma confirmação de upload pendente nesta sessão do navegador. Consulte o estado antes de enviar novamente.");
+  }, []);
+
+  function rememberRecoverySession(sessionId: string) {
+    window.sessionStorage.setItem(recoveryStorageKey, sessionId);
+    setRecoverySessionId(sessionId);
+  }
+
+  function forgetRecoverySession() {
+    window.sessionStorage.removeItem(recoveryStorageKey);
+    setRecoverySessionId(null);
+  }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -110,7 +131,7 @@ export function ClientPrivateFileUploadForm() {
         return;
       }
 
-      setRecoverySessionId(sessionResult.session.id);
+      rememberRecoverySession(sessionResult.session.id);
       finalizationStarted = true;
       setPhase("verifying");
       const finalizationResult = await finalizeClientFileUploadSessionAction(
@@ -140,7 +161,7 @@ export function ClientPrivateFileUploadForm() {
       setSelectedFile(null);
       setSelectionConfirmed(false);
       setAmbiguousCompletion(false);
-      setRecoverySessionId(null);
+      forgetRecoverySession();
       setAllowSameSessionRetry(false);
       setSuccess(true);
       setMessage("Arquivo enviado e validado com sucesso.");
@@ -179,12 +200,12 @@ export function ClientPrivateFileUploadForm() {
         setSelectedFile(null);
         setSelectionConfirmed(false);
         setAmbiguousCompletion(false);
-        setRecoverySessionId(null);
+        forgetRecoverySession();
         setSuccess(true);
         router.refresh();
       } else if (decision.next === "new_selection") {
         setAmbiguousCompletion(false);
-        setRecoverySessionId(null);
+        forgetRecoverySession();
         setSelectedFile(null);
         setSelectionConfirmed(false);
         formRef.current?.reset();
@@ -213,13 +234,13 @@ export function ClientPrivateFileUploadForm() {
         setSelectedFile(null);
         setSelectionConfirmed(false);
         setAmbiguousCompletion(false);
-        setRecoverySessionId(null);
+        forgetRecoverySession();
         setSuccess(true);
         setMessage("Arquivo recebido e confirmado pelo servidor.");
         router.refresh();
       } else if (result.ok && result.result.status === "rejected") {
         setAmbiguousCompletion(false);
-        setRecoverySessionId(null);
+        forgetRecoverySession();
         setSelectedFile(null);
         setSelectionConfirmed(false);
         formRef.current?.reset();
@@ -265,7 +286,7 @@ export function ClientPrivateFileUploadForm() {
               setSelectedFile(null);
               setSelectionConfirmed(false);
               setAmbiguousCompletion(false);
-              setRecoverySessionId(null);
+              forgetRecoverySession();
               setAllowSameSessionRetry(false);
               const input = formRef.current?.querySelector<HTMLInputElement>('input[name="file"]');
               if (input) input.value = "";
@@ -303,7 +324,7 @@ export function ClientPrivateFileUploadForm() {
               setSelectedFile(event.currentTarget.files?.[0] ?? null);
               setSelectionConfirmed(false);
               setAmbiguousCompletion(false);
-              setRecoverySessionId(null);
+              forgetRecoverySession();
               setAllowSameSessionRetry(false);
               setMessage(null);
               setSuccess(false);
