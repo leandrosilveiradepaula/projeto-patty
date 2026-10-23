@@ -861,7 +861,10 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       const releaseCheckbox = pendingCard.getByRole("checkbox", {
         name: /Confirmo que o arquivo/,
       });
-      const releaseTouchTarget = pendingCard.locator("label").filter({ has: releaseCheckbox });
+      // The checkbox is nested directly in its label. A relative XPath here
+      // avoids Playwright has-locator root scoping that cannot find the label.
+      const releaseTouchTarget = releaseCheckbox.locator("xpath=..");
+      await expect(releaseTouchTarget).toHaveJSProperty("tagName", "LABEL");
       await releaseTouchTarget.tap({ timeout: 15000 });
       await expect(releaseCheckbox).toBeChecked();
       const approvalButton = pendingCard.getByRole("button", {
