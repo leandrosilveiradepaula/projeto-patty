@@ -1,3 +1,9 @@
+## 2026-10-23 — PR #1004: regressão J1 de contagem após recuperação (CI final pendente)
+
+**IMPLEMENTADO NA BRANCH, AINDA NÃO MERGEADO:** a execução J1 no SHA `bea1d64e` superou o bloqueio de layout mobile após limitar a largura dos seletores de comparação de fotos privadas. Os checks `Validate application` e `Playwright J6` passaram nesse SHA, mas o J1 falhou na asserção histórica final de contagem de arquivos: esperava 2, porém o fluxo atualizado cria 3 registros distintos (upload original da cliente, upload interrompido recuperado e upload administrativo liberado explicitamente). A expectativa final do J1 foi atualizada para 3, preservando os testes de sessão, MFA AAL2, RLS, isolamento, visibilidade e finalização única. O novo commit **ainda depende de três checks `success` no mesmo SHA**. Nenhuma alteração de RLS, Auth, Storage, migration, dados reais ou publicação foi feita nesta correção.
+
+---
+
 ## 2026-10-23 — auditoria J1/J6: recuperação de upload privado após interrupção (em validação)
 
 **IMPLEMENTADO NA BRANCH, AINDA NÃO INTEGRADO NEM PUBLICADO:** a auditoria posterior à PR #1002 identificou que o bloqueio da UI contra repetição preservava a sessão somente enquanto a aba permanecia aberta. Os formulários de arquivo privado da cliente e administrativo agora mantêm no `sessionStorage` apenas o UUID opaco da sessão pendente; ao recarregar, eles bloqueiam nova seleção e exigem consulta autorizada da sessão original antes de qualquer retentativa. A leitura e a finalização continuam restritas no servidor por perfil autenticado, cliente e sessão; um marcador de outra conta falha fechado como indisponível e não concede acesso.
