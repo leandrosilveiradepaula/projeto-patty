@@ -1,3 +1,11 @@
+## 2026-10-23 — #1002: recuperação segura de upload privado na UI (em validação)
+
+**IMPLEMENTADO NA PR, AINDA NÃO INTEGRADO NEM PUBLICADO:** a [PR #1002](https://github.com/leandrosilveiradepaula/projeto-patty/pull/1002) corrige a divergência entre os formulários de upload privado administrativo e da cliente. Quando a finalização é incerta, categoria, arquivo e confirmação ficam bloqueados para preservar o identificador da sessão original; a ação de concluir a mesma sessão só é disponibilizada após consulta autorizada que retorne estado `pending`. Uma nova consulta, inclusive quando falha, revoga uma permissão anterior de tentativa e requer nova evidência do servidor. Os testes verificam os dois formulários e o estado permitido da retentativa. Não altera Storage, Auth, RLS, migrations, método profissional ou dados reais.
+
+**GATE:** os testes e o build devem terminar com `success` no SHA final da PR antes de qualquer merge. Mesmo com CI verde, a publicação requer confirmação independente de `master`, Vercel `READY` e aliases. A homologação operacional conjunta J1–J7 pela Patty continua a última tarefa.
+
+---
+
 ## 2026-10-23 — #1000: monitor de release ativo, primeiro schedule e dispatch HEALTHY
 
 **INTEGRADO E PUBLICADO:** a [PR #1000](https://github.com/leandrosilveiradepaula/projeto-patty/pull/1000) foi mergeada à `master` `5068b0297ef19370fd16dc286939a541cdc0619b`. No SHA exato, o [Validate application pós-merge #39863250417](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39863250417) teve `completed/success` em 28 etapas, e o deployment automático Vercel Git `dpl_2AEWmaYhKSTwZ5jdRP3kwZu2n15H` teve `READY`, `target=production`, SHA igual ao da `master` e aliases `projeto-patty.vercel.app`, Git/master e time confirmados.
