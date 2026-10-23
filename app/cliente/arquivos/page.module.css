@@ -126,3 +126,30 @@
 .advancedFilterFields label { min-width: 0; }
 .advancedFilterFields input { width: 100%; min-width: 0; min-height: 44px; border: 1px solid var(--color-border); border-radius: var(--radius-small); padding: var(--space-2); background: var(--color-surface); color: var(--color-text-primary); font: inherit; }
 .advancedFilterFields input:focus-visible { outline: 3px solid var(--color-accent); outline-offset: 2px; }
+
+
+/* Native controls use their option/file-label intrinsic size by default.
+   Constrain both simple and expanded filters to the mobile grid track. */
+.advancedFilterFields label {
+  max-width: 100%;
+}
+
+.fileFilters select,
+.advancedFilterFields select {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 640px) {
+  .fileFilters {
+    min-width: 0;
+  }
+
+  .fileFilters label {
+    min-width: 0;
+    max-width: 100%;
+  }
+}

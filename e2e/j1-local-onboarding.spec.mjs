@@ -635,6 +635,76 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
     )).toBeNull();
   });
 
+  await test.step("client mobile file picker and history filters fit 390px with real touch", async () => {
+    if (!clientPrivateFile) throw new Error("Synthetic client private-file prerequisite missing");
+    // Use a fresh browser context without isMobile layout scaling. This is a
+    // 390px CSS viewport with real pointer/touch events, not a forced click.
+    const mobileContext = await browser.newContext({
+      baseURL, viewport: { width: 390, height: 844 }, hasTouch: true,
+    });
+    try {
+      const mobile = await mobileContext.newPage();
+      await mobile.goto("/login");
+      await mobile.getByLabel("Email").fill(invite.email);
+      await mobile.getByLabel("Senha").fill(password);
+      await mobile.getByRole("button", { name: "Entrar" }).click();
+      await expect(mobile).toHaveURL(/\/cliente\/?$/);
+      await mobile.goto("/cliente/arquivos");
+      await expect(mobile.getByRole("heading", { name: "Meus arquivos", exact: true }))
+        .toBeVisible();
+      await expect(mobile.getByRole("heading", {
+        name: clientPrivateFile.filename, exact: true,
+      })).toBeVisible();
+      // Scope the summary *inside* its parent details. Playwright's "has"
+      // locator is relative to the outer locator and must not include "details".
+      const advancedDetails = mobile.locator("details").filter({
+        hasText: "Mais filtros de arquivos",
+      });
+      await advancedDetails.locator("summary").tap();
+      await expect(advancedDetails).toHaveAttribute("open", "");
+
+      // Only layout geometry is returned, never filename, option text, IDs,
+      // account data, URLs, cookies, or any private clinical information.
+      const layout = await mobile.evaluate(() => {
+        const width = innerWidth;
+        const overflow = Array.from(document.querySelectorAll("select, input[type=file]"))
+          .flatMap((element) => {
+            if (element.getClientRects().length === 0) return [];
+            const box = element.getBoundingClientRect();
+            return box.left < -1 || box.right > width + 1
+              ? [{ tag: element.tagName.toLowerCase(), left: Math.round(box.left),
+                right: Math.round(box.right), width: Math.round(box.width) }]
+              : [];
+          });
+        return {
+          width, scrollWidth: document.documentElement.scrollWidth,
+          touch: navigator.maxTouchPoints > 0,
+          mobileLayout: matchMedia("(max-width: 640px)").matches,
+          selectCount: document.querySelectorAll("select").length,
+          overflow,
+        };
+      });
+      expect(layout.width).toBe(390);
+      expect(layout.touch).toBe(true);
+      expect(layout.mobileLayout).toBe(true);
+      expect(layout.selectCount).toBeGreaterThan(5);
+      expect(layout.scrollWidth,
+        "Client private-file history must fit 390px: " + JSON.stringify(layout))
+        .toBeLessThanOrEqual(390);
+      expect(layout.overflow, "Controls must stay inside mobile viewport").toEqual([]);
+
+      await mobile.locator('form[action="/cliente/arquivos"] select[name="ordem"]')
+        .selectOption("oldest");
+      await mobile.getByRole("button", { name: "Filtrar", exact: true }).tap();
+      await expect(mobile).toHaveURL(/ordem=oldest/);
+      await expect(mobile.getByRole("heading", {
+        name: clientPrivateFile.filename, exact: true,
+      })).toBeVisible();
+    } finally {
+      await mobileContext.close();
+    }
+  });
+
   await test.step("private file remains accessible only with authorized sessions", async () => {
     if (!clientPrivateFile || !UUID.test(clientPrivateFile.id)) {
       throw new Error("Client upload proof missing");
