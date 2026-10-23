@@ -865,7 +865,43 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       // avoids Playwright has-locator root scoping that cannot find the label.
       const releaseTouchTarget = releaseCheckbox.locator("xpath=..");
       await expect(releaseTouchTarget).toHaveJSProperty("tagName", "LABEL");
-      await releaseTouchTarget.tap({ timeout: 15000 });
+      await releaseTouchTarget.scrollIntoViewIfNeeded();
+      // Geometry-only failure diagnostics: no health content, filenames, IDs,
+      // cookies, form answers, paths, or tokens leave the disposable browser.
+      const readReleaseTouchGeometry = () => releaseTouchTarget.evaluate((label) => {
+        const rect = (element) => {
+          if (!element) return null;
+          const b = element.getBoundingClientRect();
+          return { x: Math.round(b.x), y: Math.round(b.y), w: Math.round(b.width), h: Math.round(b.height) };
+        };
+        const b = label.getBoundingClientRect();
+        const hit = document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2);
+        const card = label.closest("li");
+        const actions = label.closest("form")?.parentElement;
+        const kind = hit && label.contains(hit) ? "label" :
+          hit?.closest("dl") ? "metadata" :
+          hit?.closest("a") ? "link" :
+          hit && actions?.contains(hit) ? "actions" : "outside";
+        return {
+          innerWidth, innerHeight, screenWidth: screen.width,
+          visualWidth: Math.round(visualViewport?.width ?? 0),
+          visualScale: visualViewport?.scale ?? null,
+          viewportMetaDeviceWidth: Boolean(document.querySelector('meta[name="viewport"]')?.getAttribute("content")?.includes("width=device-width")),
+          mobileLayout: matchMedia("(max-width: 640px)").matches,
+          label: rect(label), checkbox: rect(label.querySelector('input')),
+          form: rect(label.closest("form")), actions: rect(actions),
+          metadata: rect(card?.querySelector("dl")), hitKind: kind, hitTag: hit?.tagName ?? null,
+          labelZ: getComputedStyle(label).zIndex,
+        };
+      });
+      const beforeReleaseTap = await readReleaseTouchGeometry();
+      try {
+        await releaseTouchTarget.tap({ timeout: 15000 });
+      } catch (error) {
+        const afterReleaseTap = await readReleaseTouchGeometry().catch(() => null);
+        console.info("J1 synthetic release touch geometry:", JSON.stringify({ before: beforeReleaseTap, after: afterReleaseTap }));
+        throw error;
+      }
       await expect(releaseCheckbox).toBeChecked();
       const approvalButton = pendingCard.getByRole("button", {
         name: "Liberar para cliente",
