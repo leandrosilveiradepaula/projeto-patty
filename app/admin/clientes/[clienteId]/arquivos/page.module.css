@@ -87,6 +87,16 @@
   justify-content: space-between;
 }
 
+/* Release confirmation is a separate actionable row, not a flex sibling
+   sharing hit targets with download links on mobile. */
+.fileActions > form {
+  flex: 0 0 100%;
+  width: 100%;
+  min-width: 0;
+  position: relative;
+  z-index: 2;
+}
+
 /* Keep the approval action in its own row on narrow client workspaces.
    A wrapping flex item could visually overlap the file metadata on mobile. */
 @media (max-width: 640px) {
