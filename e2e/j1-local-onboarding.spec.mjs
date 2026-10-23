@@ -784,8 +784,12 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       "select id from public.client_files where client_id=" + literal(invite.clientId),
     ).length;
     expect(savedFiles()).toEqual([]);
+    // Fixed 390px CSS viewport with real touch events. Chromium isMobile
+    // emulation produced a 521px layout width for a 390px screen here,
+    // making locator taps hit unrelated elements above the intended target.
+    // The separate overflow assertion below still checks responsive layout.
     const adminContext = await browser.newContext({
-      baseURL, viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true,
+      baseURL, viewport: { width: 390, height: 844 }, hasTouch: true,
     });
     const foreignContext = await browser.newContext({ baseURL });
     try {
@@ -797,6 +801,16 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       await expect(adminPage.getByRole("heading", {
         name: "Enviar arquivo em nome da cliente",
       })).toBeVisible();
+      const mobileViewport = await adminPage.evaluate(() => ({
+        layoutWidth: innerWidth,
+        scrollWidth: document.documentElement.scrollWidth,
+        touchEnabled: navigator.maxTouchPoints > 0,
+        mobileCss: matchMedia("(max-width: 640px)").matches,
+      }));
+      expect(mobileViewport.layoutWidth).toBe(390);
+      expect(mobileViewport.scrollWidth, "Admin private files must not overflow at 390px").toBeLessThanOrEqual(390);
+      expect(mobileViewport.touchEnabled).toBe(true);
+      expect(mobileViewport.mobileCss).toBe(true);
 
       // Upload through the real professional form and browser-to-signed-Storage
       // path. Never seed private-file metadata directly for this proof.
