@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readFileSync } from "node:fs";
 import {
   PRIVATE_FILE_HISTORY_PAGE_SIZE,
   countPrivateFileCategories,
@@ -122,4 +123,14 @@ test("release ordering respects real timestamps and places unreleased last", () 
   assert.deepEqual(sortPrivateFileHistory([pending,old,invalid,recent],"released").map(x=>x.id),["recent","old","invalid","pending"]);
   const link=privateFileHistoryHref("/cliente/arquivos",{origem:"team",formato:"download_only",ordem:"released",pagina:2});
   assert.equal(link,"/cliente/arquivos?origem=team&formato=download_only&ordem=released&pagina=2");
+});
+
+test("client file history shows contextual filters without stray punctuation", () => {
+  const source = readFileSync(new URL("../../app/cliente/arquivos/page.tsx", import.meta.url), "utf8");
+  assert.ok(source.includes('<summary>Mais filtros de arquivos{advancedFiltersActive ?'));
+  assert.ok(!source.includes('Mais filtros de arquivos${'));
+  assert.ok(source.includes('{hasActiveFileFilters ? <Link href="/cliente/arquivos">Limpar filtros</Link> : null}'));
+  for (const term of ['arquivo !== undefined','invalidScopeFilter','requestedPage.page > 1']) {
+    assert.ok(source.includes(term), term);
+  }
 });
