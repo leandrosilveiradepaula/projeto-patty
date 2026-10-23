@@ -655,13 +655,13 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       await expect(mobile.getByRole("heading", {
         name: clientPrivateFile.filename, exact: true,
       })).toBeVisible();
-      const advancedSummary = mobile.locator("details summary").filter({
+      // Scope the summary *inside* its parent details. Playwright's "has"
+      // locator is relative to the outer locator and must not include "details".
+      const advancedDetails = mobile.locator("details").filter({
         hasText: "Mais filtros de arquivos",
       });
-      await advancedSummary.tap();
-      await expect(mobile.locator("details").filter({
-        has: advancedSummary,
-      })).toHaveAttribute("open", "");
+      await advancedDetails.locator("summary").tap();
+      await expect(advancedDetails).toHaveAttribute("open", "");
 
       // Only layout geometry is returned, never filename, option text, IDs,
       // account data, URLs, cookies, or any private clinical information.
