@@ -534,6 +534,30 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
     });
     await expect(page.getByRole("button", { name: "Enviar arquivo" })).toBeDisabled();
     expect(savedFiles()).toHaveLength(1);
+
+    // A valid extension/MIME with invalid bytes reaches server-side sniffing.
+    // Its terminal rejection must not leave a recovery marker after reload.
+    await page.locator('input[name="file"]').setInputFiles({
+      buffer: Buffer.from("synthetic-invalid-png-payload"),
+      mimeType: "image/png",
+      name: "j1-synthetic-invalid-content.png",
+    });
+    await page.getByRole("checkbox", {
+      name: "Conferi o arquivo e a categoria antes de enviar.",
+    }).check();
+    await page.getByRole("button", { name: "Enviar arquivo" }).click();
+    await expect(page.getByText(
+      "O conteúdo real do arquivo não corresponde a um formato permitido.",
+      { exact: true },
+    )).toBeVisible({ timeout: 30000 });
+    await expect.poll(() => page.evaluate(() =>
+      window.sessionStorage.getItem("patty.client-private-upload-recovery"),
+    )).toBeNull();
+    expect(savedFiles()).toHaveLength(1);
+    await page.reload();
+    await expect(page.locator('input[name="file"]')).toBeEnabled();
+    await expect(page.getByRole("button", { name: "Consultar estado do envio" })).toHaveCount(0);
+
     const anonymous = await browser.newContext({ baseURL });
     try {
       const denied = await anonymous.request.get(fileRoute, { maxRedirects: 0 });
