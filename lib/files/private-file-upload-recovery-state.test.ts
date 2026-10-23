@@ -59,3 +59,18 @@ test("J6 asset registration restores only opaque local review metadata and keeps
   assert.match(src, /inspectEducationalContentAssetRegistrationAction\(contentId, versionId/);
   assert.match(src, /disabled=\{busy \|\| registerBusy \|\| inspectionBusy \|\| registrationUncertain\}\s+name="confirmVerified"/);
 });
+
+test("terminal upload rejection clears the recovery marker in client and admin forms", () => {
+  for (const form of [
+    "../../components/client/ClientPrivateFileUploadForm.tsx",
+    "../../components/admin/AdminPrivateFileUploadForm.tsx",
+  ]) {
+    const src = readFileSync(new URL(form, import.meta.url), "utf8");
+    const start = src.indexOf('if (finalizationResult.result.status !== "accepted") {');
+    assert.ok(start > 0, form + ": terminal rejection branch");
+    const branch = src.slice(start, start + 550);
+    assert.ok(branch.includes("forgetRecoverySession();"), form + ": clear stale persisted session");
+    assert.ok(branch.includes("setAllowSameSessionRetry(false);"), form + ": revoke stale retry");
+    assert.ok(branch.indexOf("forgetRecoverySession();") < branch.indexOf("setMessage("), form);
+  }
+});
