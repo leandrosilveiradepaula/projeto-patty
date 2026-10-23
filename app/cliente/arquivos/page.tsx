@@ -84,6 +84,13 @@ export default async function ClientFilesPage({ searchParams }: { searchParams: 
   const displayPreview = exactFile ? {value:"all" as const,invalid:false} : preview;
   const order = readPrivateFileHistorySort(exactFile ? undefined : ordem);
   const requestedPage = readPrivateFileHistoryPage(pagina);
+  const hasActiveFileFilters =
+    arquivo !== undefined || displayKind !== "all" || displayOrigin !== "all" ||
+    displayPreview.value !== "all" || metadata.year !== "all" || metadata.size !== "all" ||
+    order.value !== "newest" || advancedFiltersActive ||
+    invalidScopeFilter || metadata.invalid || discovery.invalid ||
+    displayPreview.invalid || order.invalid || requestedPage.invalid ||
+    requestedPage.page > 1;
   const filteredFiles = sortPrivateFileHistory(
     files.filter(file => matchesPrivateFileFilters(file, client.profile_id, displayKind, displayOrigin)
       && matchesPrivateFilePreviewFilter(file.mime_type, displayPreview.value)
@@ -114,7 +121,7 @@ export default async function ClientFilesPage({ searchParams }: { searchParams: 
         <ClientPrivateFileUploadForm />
       </Section>
 
-      <Section title="Filtrar meus arquivos" description="Escolha a categoria para localizar documentos do seu acompanhamento.">
+      <Section title="Filtrar meus arquivos" description="Escolha os critérios para localizar fotos, exames e documentos do seu acompanhamento.">
         <form action="/cliente/arquivos" method="get" className={styles.fileFilters}>
           <label>Categoria
             <select name="categoria" defaultValue={displayKind}>
@@ -147,7 +154,7 @@ export default async function ClientFilesPage({ searchParams }: { searchParams: 
             </select>
           </label>
           <details className={styles.advancedFilters} open={advancedFiltersActive}>
-            <summary>Mais filtros de arquivos${advancedFiltersActive ? " · filtros avançados ativos" : ""}</summary>
+            <summary>Mais filtros de arquivos{advancedFiltersActive ? " · filtros avançados ativos" : ""}</summary>
             <div className={styles.advancedFilterFields}>
                      <label>Registro desde<input name="dataInicial" type="date" defaultValue={discovery.fromDate ?? ""} /></label>
            <label>Registro até<input name="dataFinal" type="date" defaultValue={discovery.toDate ?? ""} /></label>
@@ -173,7 +180,7 @@ export default async function ClientFilesPage({ searchParams }: { searchParams: 
             </select>
           </label>
           <button type="submit">Filtrar</button>
-          <Link href="/cliente/arquivos">Limpar filtros</Link>
+          {hasActiveFileFilters ? <Link href="/cliente/arquivos">Limpar filtros</Link> : null}
         </form>
         <p role="status">{filteredFiles.length} de {files.length} arquivo(s) disponível(is) · Fotos: {categories.photo}, exames: {categories.exam}, documentos: {categories.document}.</p>
       </Section>

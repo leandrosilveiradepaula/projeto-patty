@@ -1,3 +1,11 @@
+## 2026-10-23 — #1002 integrada: UI de upload privado publicada com verificação completa
+
+**FATO CONFIRMADO DE INTEGRAÇÃO E PUBLICAÇÃO:** a [PR #1002](https://github.com/leandrosilveiradepaula/projeto-patty/pull/1002) foi integrada automaticamente à `master` `0fcbe5bdcdd2d6c09e9afdc1fd6d08c053d951c5`, sob o contrato de jornada do gate versionado. A validação do head final `1f0404f55e8f99ec943831a2bfd8f6f46e0388d0` teve `success` ([run #39889464360](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39889464360)). O `Validate application` pós-merge [#39889602382](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39889602382) terminou com `success` no SHA exato. A Vercel confirmou deployment automático Git `dpl_G4j6SjFYGhbckX2HNKHnVN9BPAPC` em produção, `READY`, mesmo SHA e aliases `projeto-patty.vercel.app`, Git/master e time válidos.
+
+**ESCOPO:** categorias/arquivo/checkbox bloqueados enquanto a finalização do upload é incerta, e retentativa da mesma sessão restrita a estado `pending` atual; testes sintéticos para os formulários administrativo e cliente. Nenhuma mudança em Storage, RLS, Auth, migrations ou dados reais. A homologação profissional conjunta J1–J7 continua a última etapa. O registro abaixo de #1002 "em validação" descreve seu estado histórico anterior ao merge, não a situação vigente.
+
+---
+
 ## 2026-10-23 — #1002: recuperação segura de upload privado na UI (em validação)
 
 **IMPLEMENTADO NA PR, AINDA NÃO INTEGRADO NEM PUBLICADO:** a [PR #1002](https://github.com/leandrosilveiradepaula/projeto-patty/pull/1002) corrige a divergência entre os formulários de upload privado administrativo e da cliente. Quando a finalização é incerta, categoria, arquivo e confirmação ficam bloqueados para preservar o identificador da sessão original; a ação de concluir a mesma sessão só é disponibilizada após consulta autorizada que retorne estado `pending`. Uma nova consulta, inclusive quando falha, revoga uma permissão anterior de tentativa e requer nova evidência do servidor. Os testes verificam os dois formulários e o estado permitido da retentativa. Não altera Storage, Auth, RLS, migrations, método profissional ou dados reais.
