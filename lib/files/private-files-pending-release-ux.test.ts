@@ -58,3 +58,18 @@ test("only hidden non-client uploads become professional release pendencies", ()
 test("pending private file section exposes a stable corrective deep link", () => {
   assert.match(page, /id="aguardando-liberacao"/);
 });
+
+test("mobile private-file release uses a dedicated, touchable confirmation row", () => {
+  const layout = fs.readFileSync(
+    path.join(root, "app/admin/clientes/[clienteId]/arquivos/page.module.css"), "utf8");
+  const confirmation = fs.readFileSync(
+    path.join(root, "components/admin/AdminPrivateFileReleaseForm.module.css"), "utf8");
+  const browser = fs.readFileSync(
+    path.join(root, "e2e/j1-local-onboarding.spec.mjs"), "utf8");
+  assert.match(layout, /\.fileActions > form\s*\{[^}]*flex:\s*0 0 100%/s);
+  assert.match(layout, /\.fileActions > form\s*\{[^}]*z-index:\s*2/s);
+  assert.match(confirmation, /\.confirmation\s*\{[^}]*min-height:\s*44px/s);
+  assert.match(confirmation, /\.confirmation\s*\{[^}]*touch-action:\s*manipulation/s);
+  assert.ok(browser.includes("await releaseTouchTarget.tap({ timeout: 15000 })"));
+  assert.ok(browser.includes("await expect(releaseCheckbox).toBeChecked()"));
+});
