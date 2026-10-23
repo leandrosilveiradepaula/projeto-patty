@@ -297,17 +297,62 @@ test("J6: versioned content releases require exact published version and synthet
       await admin.getByRole("button", { name: "Salvar rascunho" }).click();
       await expect.poll(() => versions(contentId)[1].title, { timeout: 25000 })
         .toBe("J6 material com asset sintetico");
-      // Explicit metadata-only seam for the disposable DB: no Blob upload,
-      // no verified object, and NO real material or release authorization.
+      // Browser reload after an uncertain asset registration: the metadata is
+      // purely synthetic and local to this test. No PUT to the real Blob is made.
+      // The read-only server check must decide what may happen next.
+      const pendingAsset = {
+        pathname: "j6-local-nonexistent/" + nonce + "/no-object.mp4",
+        contentType: "video/mp4",
+        byteSize: 32,
+        sha256Hex: "a".repeat(64),
+      };
+      const recoveryKey = "patty.educational-asset-registration." + contentId + "." + v2.id;
+      await admin.evaluate(({ key, asset }) => {
+        sessionStorage.setItem(key, JSON.stringify(asset));
+      }, { key: recoveryKey, asset: pendingAsset });
+      let unexpectedPuts = 0;
+      const observePut = (request) => { if (request.method() === "PUT") unexpectedPuts++; };
+      admin.on("request", observePut);
+      await admin.reload();
+      await expect(admin.getByText(
+        "Há um registro de asset pendente nesta sessão do navegador. Consulte o estado antes de registrar novamente.",
+        { exact: true },
+      )).toBeVisible();
+      await expect(admin.getByLabel("Arquivo aprovado para upload privado")).toBeDisabled();
+      await expect(admin.getByRole("button", { name: "Enviar para o Blob privado" })).toBeDisabled();
+      await expect(admin.getByRole("checkbox", { name: /Revisei os dados do upload/ })).toBeDisabled();
+      await expect(admin.getByRole("button", { name: "Registrar asset verificado" })).toBeDisabled();
+      await admin.getByRole("button", { name: "Consultar estado do registro" }).click();
+      await expect(admin.getByText(
+        "O servidor não encontrou um registro para este arquivo. Você pode repetir somente o registro dos metadados, sem transferir o arquivo novamente.",
+        { exact: true },
+      )).toBeVisible();
+      expect(rows("select id from public.educational_content_assets where educational_content_version_id=" +
+        literal(v2.id))).toHaveLength(0);
+      expect(releases(clientId)).toHaveLength(0);
+
+      // Simulate the matching commit arriving after the first read-only check.
+      // An idempotent registration must observe this exact record, not duplicate
+      // the asset or silently publish/release content to either client.
       syntheticAssetId = insert("educational_content_assets", {
         educational_content_version_id: v2.id,
         asset_key: "primary",
         storage_provider: "vercel_blob",
-        storage_path: "j6-local-nonexistent/" + nonce + "/no-object.mp4",
-        content_type: "video/mp4",
-        byte_size: 32,
-        sha256_hex: "a".repeat(64),
+        storage_path: pendingAsset.pathname,
+        content_type: pendingAsset.contentType,
+        byte_size: pendingAsset.byteSize,
+        sha256_hex: pendingAsset.sha256Hex,
       });
+      await admin.getByRole("checkbox", { name: /Revisei os dados do upload/ }).check();
+      await admin.getByRole("button", { name: "Registrar asset verificado" }).click();
+      await expect.poll(() => admin.evaluate((key) =>
+        sessionStorage.getItem(key), recoveryKey), { timeout: 20000 }).toBeNull();
+      expect(rows("select id from public.educational_content_assets where educational_content_version_id=" +
+        literal(v2.id))).toEqual([{ id: syntheticAssetId }]);
+      expect(versions(contentId)[1].published_at).toBeNull();
+      expect(releases(clientId)).toHaveLength(0);
+      expect(unexpectedPuts, "Registration recovery must not transfer a second Blob").toBe(0);
+      admin.off("request", observePut);
       expect(visibleCount(owner.id, "aal1", "educational_content_assets", syntheticAssetId)).toBe(0);
       expect(visibleCount(staff.id, "aal1", "educational_content_assets", syntheticAssetId)).toBe(0);
       expect(visibleCount(staff.id, "aal2", "educational_content_assets", syntheticAssetId)).toBe(1);

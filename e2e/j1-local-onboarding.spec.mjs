@@ -1064,6 +1064,91 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
     }
   });
 
+  let resumedAdminFileId;
+  await test.step("admin reload recovers one interrupted upload but does not release it", async () => {
+    if (!clientPrivateFile) throw new Error("Client synthetic upload proof missing");
+    const filename = "j1-admin-recovered-synthetic.png";
+    const bytes = clientPrivateFile.bytes;
+    // Reproduce lost response after a successful transfer, using ONLY the
+    // disposable local Supabase fixture, never a hosted identity or document.
+    const created = await service.from("client_file_upload_sessions").insert({
+      claimed_mime_type: "image/png",
+      client_id: invite.clientId,
+      declared_byte_size: bytes.length,
+      file_extension: "png",
+      file_kind: "photo",
+      original_filename: filename,
+      requester_profile_id: staffId,
+    }).select("id,temp_object_path").single();
+    if (created.error || !created.data?.temp_object_path)
+      throw created.error ?? new Error("Synthetic admin session missing");
+    const sessionId = created.data.id;
+    expect(sessionId).toMatch(UUID);
+    const transferred = await service.storage.from("client-private").upload(
+      created.data.temp_object_path, bytes,
+      { contentType: "image/png", upsert: false },
+    );
+    if (transferred.error) throw transferred.error;
+
+    const adminContext = await browser.newContext({
+      baseURL, viewport: { width: 390, height: 844 }, hasTouch: true,
+    });
+    try {
+      const adminPage = await adminContext.newPage();
+      await loginAdminWithMfa(adminPage, {
+        email: staff.email, password: staff.password, totpSecret: staffTotp,
+      });
+      await adminPage.goto("/admin/clientes/" + invite.clientId + "/arquivos");
+      const key = "patty.admin-private-upload-recovery." + invite.clientId;
+      await adminPage.evaluate(({ key, sessionId }) => {
+        sessionStorage.setItem(key, sessionId);
+      }, { key, sessionId });
+      await adminPage.reload();
+      await expect(adminPage.getByText(
+        "Há uma confirmação de upload pendente nesta sessão do navegador. Consulte o estado antes de enviar novamente.",
+        { exact: true },
+      )).toBeVisible();
+      await expect(adminPage.locator('select[name="fileKind"]')).toBeDisabled();
+      await expect(adminPage.locator('input[name="file"]')).toBeDisabled();
+      await expect(adminPage.getByRole("button", { name: "Enviar arquivo" })).toBeDisabled();
+      await expect(adminPage.getByRole("button", { name: "Concluir esta mesma sessão" })).toHaveCount(0);
+
+      await adminPage.getByRole("button", { name: "Consultar estado do envio" }).click();
+      await expect(adminPage.getByText(
+        "O arquivo foi transferido, mas a sessão ainda aguarda finalização. Você pode concluir esta mesma sessão, sem enviar outro arquivo.",
+        { exact: true },
+      )).toBeVisible();
+      await adminPage.getByRole("button", { name: "Concluir esta mesma sessão" }).dblclick();
+      await expect.poll(() => rows(
+        "select status from public.client_file_upload_sessions where id=" + literal(sessionId),
+      ), { timeout: 20000 }).toEqual([{ status: "accepted" }]);
+      const stored = rows(
+        "select id,client_visible_at,uploaded_by_profile_id from public.client_files" +
+        " where client_id=" + literal(invite.clientId) +
+        " and original_filename=" + literal(filename),
+      );
+      expect(stored).toHaveLength(1);
+      resumedAdminFileId = stored[0].id;
+      expect(resumedAdminFileId).toMatch(UUID);
+      expect(stored[0].uploaded_by_profile_id).toBe(staffId);
+      expect(stored[0].client_visible_at).toBeNull();
+      await expect.poll(() => adminPage.evaluate((key) =>
+        sessionStorage.getItem(key), key)).toBeNull();
+      await adminPage.reload();
+      await expect(adminPage.locator("#arquivo-pendente-" + resumedAdminFileId)).toBeVisible();
+      await expect(adminPage.getByRole("button", { name: "Consultar estado do envio" })).toHaveCount(0);
+      // Finalization is not professional publication; even the owning client
+      // cannot see or download the new administrative record.
+      await page.goto("/cliente/arquivos");
+      await expect(page.getByRole("heading", { name: filename, exact: true })).toHaveCount(0);
+      expect((await page.request.get("/cliente/arquivos/" + resumedAdminFileId, {
+        maxRedirects: 0,
+      })).status()).toBe(404);
+    } finally {
+      await adminContext.close();
+    }
+  });
+
   await test.step("sole MVP admin retains private files after assignment ends, only with AAL2", async () => {
     if (!clientPrivateFile || !UUID.test(releasedAdminFileId)) {
       throw new Error("J1 local private-file prerequisites missing");
@@ -1129,7 +1214,7 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       await expect(adminPage.getByRole("heading", {
         name: clientPrivateFile.filename, exact: true,
       })).toHaveCount(1);
-      for (const fileId of [clientPrivateFile.id, releasedAdminFileId]) {
+      for (const fileId of [clientPrivateFile.id, releasedAdminFileId, resumedAdminFileId]) {
         for (const suffix of ["", "?preview=1"]) {
           const permitted = await adminPage.request.get(
             "/admin/arquivos/" + fileId + suffix, { maxRedirects: 0 },
@@ -1151,6 +1236,7 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       { id: clientPrivateFile.id, filename: clientPrivateFile.filename },
       { id: releasedAdminFileId, filename: "j1-admin-pending-synthetic.png" },
     ];
+    if (!UUID.test(resumedAdminFileId)) throw new Error("Recovered admin file missing");
     // After the professional closes the assignment, the client's home must
     // not promote a new daily task or draft as the next step. This is a UI
     // priority only: all previously authorized resources remain accessible.
@@ -1167,6 +1253,12 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       .toBeVisible();
 
     await page.goto("/cliente/arquivos");
+    await expect(page.getByRole("heading", {
+      name: "j1-admin-recovered-synthetic.png", exact: true,
+    })).toHaveCount(0);
+    expect((await page.request.get("/cliente/arquivos/" + resumedAdminFileId, {
+      maxRedirects: 0,
+    })).status()).toBe(404);
     for (const file of releasedFiles) {
       await expect(page.getByRole("heading", { name: file.filename, exact: true }))
         .toBeVisible();
@@ -1190,6 +1282,12 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       await foreignPage.getByRole("button", { name: "Entrar" }).click();
       await expect(foreignPage).toHaveURL(/\/cliente\/?$/);
       await foreignPage.goto("/cliente/arquivos");
+      await expect(foreignPage.getByRole("heading", {
+        name: "j1-admin-recovered-synthetic.png", exact: true,
+      })).toHaveCount(0);
+      expect((await foreignPage.request.get("/cliente/arquivos/" + resumedAdminFileId, {
+        maxRedirects: 0,
+      })).status()).toBe(404);
       for (const file of releasedFiles) {
         await expect(foreignPage.getByRole("heading", {
           name: file.filename, exact: true,
@@ -1217,14 +1315,15 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       "set local request.jwt.claims=" + literal(aal1Claims) + ";",
       "set local request.jwt.claim.sub=" + literal(staffId) + ";",
       "select count(*) from public.client_files where id in (" +
-        literal(clientPrivateFile.id) + "," + literal(releasedAdminFileId) + ");",
+        literal(clientPrivateFile.id) + "," + literal(releasedAdminFileId) + "," +
+        literal(resumedAdminFileId) + ");",
       "rollback;",
     ].join("\n"));
     expect(Number(aal1Count)).toBe(0);
-    // Original client upload + recovered interrupted upload + explicitly released
-    // admin upload: all three persist after assignment ends; none is duplicated.
+    // Client original and recovered uploads, admin released and still-hidden
+    // recovered upload: four distinct historical records, none duplicated.
     expect(rows("select id from public.client_files where client_id=" +
-      literal(invite.clientId))).toHaveLength(3);
+      literal(invite.clientId))).toHaveLength(4);
   });
 
   await test.step("no anonymous or unrelated-client access to the draft", async () => {
