@@ -43,6 +43,7 @@ test("both private upload forms lock selection while completion is uncertain", (
     assert.match(src, /disabled=\{isPending \|\| ambiguousCompletion\}\s+name="file"/, form);
     assert.match(src, /checked=\{selectionConfirmed\} disabled=\{isPending \|\| ambiguousCompletion\}/, form);
     assert.match(src, /setAllowSameSessionRetry\(decision\.next === "resume"\)/, form);
+    assert.match(src, /setAllowSameSessionRetry\(false\);\s*try \{\s*const response = await check(?:AdminPrivateFile|ClientFile)UploadSessionStatusAction/, form);
     assert.doesNotMatch(src, /else if \(decision\.next === "resume"\) \{\s*setAllowSameSessionRetry\(true\)/, form);
   }
 });
