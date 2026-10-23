@@ -31,3 +31,19 @@ test("read-only status is scoped to authenticated actor, client, and session", (
   assert.ok(!src.includes("temp_object_path"));
   assert.ok(!src.includes('select("token")'));
 });
+
+test("both private upload forms lock selection while completion is uncertain", () => {
+  const forms = [
+    "../../components/client/ClientPrivateFileUploadForm.tsx",
+    "../../components/admin/AdminPrivateFileUploadForm.tsx",
+  ];
+  for (const form of forms) {
+    const src = readFileSync(new URL(form, import.meta.url), "utf8");
+    assert.match(src, /disabled=\{isPending \|\| ambiguousCompletion\}\s+name="fileKind"/, form);
+    assert.match(src, /disabled=\{isPending \|\| ambiguousCompletion\}\s+name="file"/, form);
+    assert.match(src, /checked=\{selectionConfirmed\} disabled=\{isPending \|\| ambiguousCompletion\}/, form);
+    assert.match(src, /setAllowSameSessionRetry\(decision\.next === "resume"\)/, form);
+    assert.match(src, /setAllowSameSessionRetry\(false\);\s*try \{\s*const response = await check(?:AdminPrivateFile|ClientFile)UploadSessionStatusAction/, form);
+    assert.doesNotMatch(src, /else if \(decision\.next === "resume"\) \{\s*setAllowSameSessionRetry\(true\)/, form);
+  }
+});

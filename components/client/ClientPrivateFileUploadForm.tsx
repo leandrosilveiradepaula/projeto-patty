@@ -165,10 +165,14 @@ export function ClientPrivateFileUploadForm() {
     inFlightRef.current = true;
     setIsPending(true);
     setMessage(null);
+    // An earlier pending response must not authorize retry after a failed status check.
+    setAllowSameSessionRetry(false);
     try {
       const response = await checkClientFileUploadSessionStatusAction(recoverySessionId);
       const decision = privateFileUploadRecoveryDecision(response.status);
       setMessage(decision.message);
+      // Only a currently pending server session permits retrying finalization.
+      setAllowSameSessionRetry(decision.next === "resume");
       if (decision.next === "confirmed") {
         formRef.current?.reset();
         setFileKind("photo");
@@ -178,8 +182,6 @@ export function ClientPrivateFileUploadForm() {
         setRecoverySessionId(null);
         setSuccess(true);
         router.refresh();
-      } else if (decision.next === "resume") {
-        setAllowSameSessionRetry(true);
       } else if (decision.next === "new_selection") {
         setAmbiguousCompletion(false);
         setRecoverySessionId(null);
@@ -318,7 +320,7 @@ export function ClientPrivateFileUploadForm() {
         {selectedFile ? <p>Arquivo selecionado: {reviewed.name} · {reviewed.size}</p> : <p>Nenhum arquivo selecionado.</p>}
         <p>{reviewed.message}</p>
         {selectedFile && reviewed.ok ? <label className={styles.confirmation}>
-          <input type="checkbox" checked={selectionConfirmed} disabled={isPending} onChange={event=>setSelectionConfirmed(event.target.checked)} />
+          <input type="checkbox" checked={selectionConfirmed} disabled={isPending || ambiguousCompletion} onChange={event=>setSelectionConfirmed(event.target.checked)} />
           Conferi o arquivo e a categoria antes de enviar.
         </label> : null}
       </div>
