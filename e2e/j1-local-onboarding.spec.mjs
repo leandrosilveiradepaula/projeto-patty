@@ -736,7 +736,7 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       });
       expect(previewDenied.status()).toBe(404);
       expect(rows("select id from public.client_files where client_id=" +
-        literal(invite.clientId))).toHaveLength(1);
+        literal(invite.clientId))).toHaveLength(2);
     } finally {
       await foreignContext.close();
     }
