@@ -855,9 +855,15 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
 
       // Explicit human confirmation is mandatory. The action cannot publish
       // simply because metadata exists or an admin viewed the file.
-      await pendingCard.getByRole("checkbox", {
+      // Mobile users interact with the full 44px confirmation label, not the
+      // tiny native checkbox hit target. Use a real touch event (no force or
+      // DOM injection) and prove it changed the native checkbox state.
+      const releaseCheckbox = pendingCard.getByRole("checkbox", {
         name: /Confirmo que o arquivo/,
-      }).check();
+      });
+      const releaseTouchTarget = pendingCard.locator("label").filter({ has: releaseCheckbox });
+      await releaseTouchTarget.tap({ timeout: 15000 });
+      await expect(releaseCheckbox).toBeChecked();
       const approvalButton = pendingCard.getByRole("button", {
         name: "Liberar para cliente",
       });
