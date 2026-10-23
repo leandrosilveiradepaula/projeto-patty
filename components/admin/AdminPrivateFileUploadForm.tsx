@@ -184,6 +184,8 @@ export function AdminPrivateFileUploadForm({
     inFlightRef.current = true;
     setIsPending(true);
     setMessage(null);
+    // An earlier pending response must not authorize retry after a failed status check.
+    setAllowSameSessionRetry(false);
     try {
       const response = await checkAdminPrivateFileUploadSessionStatusAction(clientId, recoverySessionId);
       const decision = privateFileUploadRecoveryDecision(response.status);
