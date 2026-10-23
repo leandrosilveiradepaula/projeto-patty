@@ -808,7 +808,31 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
         mobileCss: matchMedia("(max-width: 640px)").matches,
       }));
       expect(mobileViewport.layoutWidth).toBe(390);
-      expect(mobileViewport.scrollWidth, "Admin private files must not overflow at 390px").toBeLessThanOrEqual(390);
+      // Diagnostics contain only DOM tag/CSS layout geometry; never text, IDs,
+      // filenames, attributes, account data, URLs, tokens, or input values.
+      const overflowElements = mobileViewport.scrollWidth > mobileViewport.layoutWidth
+        ? await adminPage.evaluate(() => Array.from(document.body.querySelectorAll("*"))
+          .flatMap((element) => {
+            const rect = element.getBoundingClientRect();
+            if (rect.width <= 0 || rect.right <= innerWidth + 1) return [];
+            const css = getComputedStyle(element);
+            return [{
+              tag: element.tagName.toLowerCase(),
+              class: typeof element.className === "string" ? element.className.slice(0, 100) : "",
+              left: Math.round(rect.left),
+              right: Math.round(rect.right),
+              width: Math.round(rect.width),
+              minWidth: css.minWidth,
+              scrollWidth: element.scrollWidth,
+            }];
+          })
+          .sort((a, b) => b.right - a.right || a.width - b.width)
+          .slice(0, 20))
+        : [];
+      expect(
+        mobileViewport.scrollWidth,
+        "Admin private files must not overflow at 390px. Layout offenders: " + JSON.stringify(overflowElements),
+      ).toBeLessThanOrEqual(390);
       expect(mobileViewport.touchEnabled).toBe(true);
       expect(mobileViewport.mobileCss).toBe(true);
 
