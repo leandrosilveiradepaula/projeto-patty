@@ -188,6 +188,8 @@ export function AdminPrivateFileUploadForm({
       const response = await checkAdminPrivateFileUploadSessionStatusAction(clientId, recoverySessionId);
       const decision = privateFileUploadRecoveryDecision(response.status);
       setMessage(decision.message);
+      // Only a currently pending server session permits retrying finalization.
+      setAllowSameSessionRetry(decision.next === "resume");
       if (decision.next === "confirmed") {
         formRef.current?.reset();
         setFileKind("photo");
@@ -197,8 +199,6 @@ export function AdminPrivateFileUploadForm({
         setRecoverySessionId(null);
         setSuccess(true);
         router.refresh();
-      } else if (decision.next === "resume") {
-        setAllowSameSessionRetry(true);
       } else if (decision.next === "new_selection") {
         setAmbiguousCompletion(false);
         setRecoverySessionId(null);
@@ -275,7 +275,7 @@ export function AdminPrivateFileUploadForm({
           <select
             {...fieldProps}
             className={styles.select}
-            disabled={isPending}
+            disabled={isPending || ambiguousCompletion}
             name="fileKind"
             onChange={(event) => {
               setFileKind(event.target.value as PrivateFileKind);
@@ -314,7 +314,7 @@ export function AdminPrivateFileUploadForm({
             {...fieldProps}
             accept={acceptByKind[fileKind]}
             className={styles.fileInput}
-            disabled={isPending}
+            disabled={isPending || ambiguousCompletion}
             name="file"
             onChange={(event) => {
               setSelectedFile(event.currentTarget.files?.[0] ?? null);
@@ -337,7 +337,7 @@ export function AdminPrivateFileUploadForm({
         {selectedFile ? <p>Arquivo selecionado: {reviewed.name} · {reviewed.size}</p> : <p>Nenhum arquivo selecionado.</p>}
         <p>{reviewed.message}</p>
         {selectedFile && reviewed.ok ? <label className={styles.confirmation}>
-          <input type="checkbox" checked={selectionConfirmed} disabled={isPending} onChange={event=>setSelectionConfirmed(event.target.checked)} />
+          <input type="checkbox" checked={selectionConfirmed} disabled={isPending || ambiguousCompletion} onChange={event=>setSelectionConfirmed(event.target.checked)} />
           Conferi o arquivo e a categoria antes de enviar.
         </label> : null}
       </div>
