@@ -1221,8 +1221,10 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       "rollback;",
     ].join("\n"));
     expect(Number(aal1Count)).toBe(0);
+    // Original client upload + recovered interrupted upload + explicitly released
+    // admin upload: all three persist after assignment ends; none is duplicated.
     expect(rows("select id from public.client_files where client_id=" +
-      literal(invite.clientId))).toHaveLength(2);
+      literal(invite.clientId))).toHaveLength(3);
   });
 
   await test.step("no anonymous or unrelated-client access to the draft", async () => {
