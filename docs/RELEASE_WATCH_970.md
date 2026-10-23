@@ -2,11 +2,20 @@
 
 ## Objetivo e status
 
-**DECISÃO TÉCNICA PROPOSTA NA PR:** criar uma verificação GitHub Actions capaz de identificar um commit recente da `master` sem os dois sinais esperados de integração: `Validate application` aprovado para o SHA exato e status `Vercel=success` para o mesmo commit. O monitor **não resolve a causa** de um webhook ausente nem inicia um deployment. Antes de integrar a PR, a rotina agendada **não está ativa**.
+**FATO TÉCNICO — INTEGRADO, PUBLICADO E EXECUTADO:** a [PR #1000](https://github.com/leandrosilveiradepaula/projeto-patty/pull/1000) integrou uma verificação GitHub Actions capaz de identificar um commit da `master` sem os dois sinais esperados de integração: `Validate application` aprovado para o SHA exato e status `Vercel=success` para o mesmo commit. O monitor **não resolve a causa** de um webhook ausente nem inicia um deployment. Já houve uma execução agendada e outra manual com resultado `HEALTHY`, detalhadas abaixo.
 
 Motivação factual: o merge #969 (SHA `28c1db08...`) não possui status Vercel no GitHub; a publicação Git da PR #997 demorou aproximadamente 25 minutos, enquanto #995, #998 e #999 publicaram rapidamente. Essas observações foram registradas na [issue #970](https://github.com/leandrosilveiradepaula/projeto-patty/issues/970). Não há logs de entregas webhook suficientes para atribuir a causa.
 
-## Escopo implementado na proposta
+## Primeira validação operacional — 23/10/2026 UTC
+
+- **Merge e CI:** [PR #1000](https://github.com/leandrosilveiradepaula/projeto-patty/pull/1000) integrada na `master` `5068b0297ef19370fd16dc286939a541cdc0619b`; [Validate application por push #39863250417](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39863250417) `completed/success`, 28 etapas.
+- **Publicação verificada independentemente:** Vercel Git `dpl_2AEWmaYhKSTwZ5jdRP3kwZu2n15H`, `target=production`, `READY`, `meta.githubCommitSha` igual à `master` e aliases `projeto-patty.vercel.app`, Git/master e equipe confirmados. A rotina sozinha não confere `READY` nem aliases.
+- **Primeiro schedule:** [#39879677260](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39879677260), criado em 23/10/2026 às 00:42:09 UTC, `completed/success`: testes internos **10 pass, 0 fail** e relatório `State: HEALTHY`, `Master: 5068b0297ef1`, `Reasons: none`.
+- **Validação manual:** [#39887045808](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39887045808), criada em 23/10/2026 às 01:59:04 UTC, `completed/success`: testes internos **10 pass, 0 fail** e relatório `State: HEALTHY` no mesmo commit.
+- **Limite observado:** o primeiro schedule começou às **00:42**, fora dos minutos 17/47 configurados. O agendamento do GitHub pode atrasar; não prometer detecção ou notificação dentro de 30 minutos. O `GRACE` de 30 minutos é uma regra de interpretação **quando o job efetivamente executa**.
+- **Status da investigação:** monitor técnico **operacional**, causa histórica de ausência/atraso de eventos **não comprovada**; a [issue #970](https://github.com/leandrosilveiradepaula/projeto-patty/issues/970) permanece aberta. Não assumir e-mail/push/SMS ao operador sem comprovar preferências GitHub.
+
+## Escopo integrado e executado
 
 - `.github/workflows/watch-master-release.yml`: `schedule` aos minutos 17 e 47 de cada hora (frequência de 30 minutos), mais `workflow_dispatch` para inspeção manual. Executa apenas checkout confiável de `master`, Node.js 22 e GETs à API GitHub com `GITHUB_TOKEN` de escopo **somente leitura** (`contents`, `actions`, `statuses`). Não usa token Vercel, Supabase, senhas, service role nem dados de clientes.
 - `.github/scripts/release-watch.mjs`: reutiliza `evaluateMasterReleaseGate`, já utilizado no bloqueio de merges da `journey-automerge.mjs`. Evita uma segunda definição de CI/status autorizado e valida uma leitura repetida de `master` para não alertar com SHA antigo durante um merge concorrente.
@@ -31,11 +40,11 @@ O status `Vercel=success` no GitHub **não prova** que o deployment é do target
 
 O status da [#970](https://github.com/leandrosilveiradepaula/projeto-patty/issues/970) continua **ABERTO** até haver explicação causal e recuperação confiável dos incidentes de eventos, com controle de acesso apropriado. A criação do monitor não equivale a resolução da integração.
 
-## Como operar após merge e publicação do workflow
+## Como operar com o workflow integrado
 
 1. Abrir o GitHub Actions, **Watch master release signals**. Verificar o relatório `HEALTHY`, `GRACE`, `DEFERRED` ou `ALERT` no resumo da run.
 2. Em caso de `ALERT`, conferir `master.sha`, `Validate application` do mesmo SHA e o deployment Vercel `READY`/domínio. Se tudo estiver correto, registrar falso positivo de sinal GitHub, sem forçar redeploy.
 3. Para checagem fora da agenda, executar `Run workflow` na branch `master`. Nunca selecionar uma branch de PR para rodar com credenciais do repositório.
 4. Respostas e notificações sobre workflows falhos dependem das configurações GitHub da conta; não afirmar envio de alerta push/SMS/e-mail sem evidência dessas preferências.
 
-**Critérios de aceitação:** testes de fronteira e `Validate application` aprovados no SHA final da PR, conteúdo limitado a script, workflow, testes e documentação, revisão específica de CI/segurança e merge manual. Somente depois do merge a agenda passa a funcionar. Nenhuma automação clínica, uso de dados de saúde, alteração de Auth/Supabase ou homologação humana é contemplada.
+**Aceite técnico verificado:** a PR #1000 alterou apenas script, workflow, testes e documentação. O `Validate application` pré-merge e o [CI pós-merge #39863250417](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39863250417) foram aprovados. A Vercel registrou `READY` no mesmo SHA da `master` e os aliases de produção foram confirmados. A rotina já executou por agendamento e por acionamento manual, ambas com `HEALTHY`. Nenhuma automação clínica, uso de dados de saúde, alteração de Auth/Supabase ou homologação humana é contemplada.
