@@ -45,5 +45,32 @@ test("both private upload forms lock selection while completion is uncertain", (
     assert.match(src, /setAllowSameSessionRetry\(decision\.next === "resume"\)/, form);
     assert.match(src, /setAllowSameSessionRetry\(false\);\s*try \{\s*const response = await check(?:AdminPrivateFile|ClientFile)UploadSessionStatusAction/, form);
     assert.doesNotMatch(src, /else if \(decision\.next === "resume"\) \{\s*setAllowSameSessionRetry\(true\)/, form);
+    assert.match(src, /sessionStorage\.setItem\(recoveryStorageKey, sessionId\)/, form);
+    assert.match(src, /sessionStorage\.removeItem\(recoveryStorageKey\)/, form);
+    assert.match(src, /setAmbiguousCompletion\(true\)/, form);
+  }
+});
+
+test("J6 asset registration restores only opaque local review metadata and keeps the server decision authoritative", () => {
+  const src = readFileSync(new URL("../../components/admin/AdminEducationalContentAssetUploadForm.tsx", import.meta.url), "utf8");
+  assert.match(src, /patty\.educational-asset-registration\.\$\{contentId\}\.\$\{versionId\}/);
+  assert.match(src, /sessionStorage\.setItem\(recoveryStorageKey, JSON\.stringify\(asset\)\)/);
+  assert.match(src, /sessionStorage\.removeItem\(recoveryStorageKey\)/);
+  assert.match(src, /inspectEducationalContentAssetRegistrationAction\(contentId, versionId/);
+  assert.match(src, /disabled=\{busy \|\| registerBusy \|\| inspectionBusy \|\| registrationUncertain\}\s+name="confirmVerified"/);
+});
+
+test("terminal upload rejection clears the recovery marker in client and admin forms", () => {
+  for (const form of [
+    "../../components/client/ClientPrivateFileUploadForm.tsx",
+    "../../components/admin/AdminPrivateFileUploadForm.tsx",
+  ]) {
+    const src = readFileSync(new URL(form, import.meta.url), "utf8");
+    const start = src.indexOf('if (finalizationResult.result.status !== "accepted") {');
+    assert.ok(start > 0, form + ": terminal rejection branch");
+    const branch = src.slice(start, start + 550);
+    assert.ok(branch.includes("forgetRecoverySession();"), form + ": clear stale persisted session");
+    assert.ok(branch.includes("setAllowSameSessionRetry(false);"), form + ": revoke stale retry");
+    assert.ok(branch.indexOf("forgetRecoverySession();") < branch.indexOf("setMessage("), form);
   }
 });

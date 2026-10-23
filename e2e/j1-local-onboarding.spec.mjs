@@ -423,6 +423,7 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
 
   let clientPrivateFile;
   let foreignClientCredentials;
+  let interruptedUploadSessionId;
   await test.step("activated client uploads and retrieves only a private synthetic file", async () => {
     // Extend the disposable J1 session into the actual browser-to-Storage
     // upload/finalize path. Nothing is sent to the hosted Supabase.
@@ -533,6 +534,30 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
     });
     await expect(page.getByRole("button", { name: "Enviar arquivo" })).toBeDisabled();
     expect(savedFiles()).toHaveLength(1);
+
+    // A valid extension/MIME with invalid bytes reaches server-side sniffing.
+    // Its terminal rejection must not leave a recovery marker after reload.
+    await page.locator('input[name="file"]').setInputFiles({
+      buffer: Buffer.from("synthetic-invalid-png-payload"),
+      mimeType: "image/png",
+      name: "j1-synthetic-invalid-content.png",
+    });
+    await page.getByRole("checkbox", {
+      name: "Conferi o arquivo e a categoria antes de enviar.",
+    }).check();
+    await page.getByRole("button", { name: "Enviar arquivo" }).click();
+    await expect(page.getByText(
+      "O conteúdo real do arquivo não corresponde a um formato permitido.",
+      { exact: true },
+    )).toBeVisible({ timeout: 30000 });
+    await expect.poll(() => page.evaluate(() =>
+      window.sessionStorage.getItem("patty.client-private-upload-recovery"),
+    )).toBeNull();
+    expect(savedFiles()).toHaveLength(1);
+    await page.reload();
+    await expect(page.locator('input[name="file"]')).toBeEnabled();
+    await expect(page.getByRole("button", { name: "Consultar estado do envio" })).toHaveCount(0);
+
     const anonymous = await browser.newContext({ baseURL });
     try {
       const denied = await anonymous.request.get(fileRoute, { maxRedirects: 0 });
@@ -543,6 +568,71 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
     } finally {
       await anonymous.close();
     }
+  });
+
+  await test.step("an interrupted private upload restores and finalizes only its original session", async () => {
+    const filename = "j1-synthetic-interrupted-private.png";
+    const png = Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9ZcokAAAAASUVORK5CYII=",
+      "base64",
+    );
+    // This is the state left after a successful private transfer when the
+    // browser loses the final server-action response. The fixture uses only
+    // the disposable service role; the browser still uses its client session.
+    const created = await service
+      .from("client_file_upload_sessions")
+      .insert({
+        claimed_mime_type: "image/png",
+        client_id: invite.clientId,
+        declared_byte_size: png.length,
+        file_extension: "png",
+        file_kind: "photo",
+        original_filename: filename,
+        requester_profile_id: invite.profileId,
+      })
+      .select("id,temp_object_path")
+      .single();
+    if (created.error || !created.data?.temp_object_path) {
+      throw created.error ?? new Error("Synthetic interrupted upload session was not created");
+    }
+    interruptedUploadSessionId = created.data.id;
+    const transferred = await service.storage.from("client-private").upload(
+      created.data.temp_object_path,
+      png,
+      { contentType: "image/png", upsert: false },
+    );
+    if (transferred.error) throw transferred.error;
+
+    await page.goto("/cliente/arquivos");
+    await page.evaluate((sessionId) => {
+      window.sessionStorage.setItem("patty.client-private-upload-recovery", sessionId);
+    }, interruptedUploadSessionId);
+    await page.reload();
+    await expect(page.getByText(
+      "Há uma confirmação de upload pendente nesta sessão do navegador. Consulte o estado antes de enviar novamente.",
+      { exact: true },
+    )).toBeVisible();
+    await expect(page.locator('select[name="fileKind"]')).toBeDisabled();
+    await expect(page.locator('input[name="file"]')).toBeDisabled();
+    await expect(page.getByRole("button", { name: "Enviar arquivo" })).toBeDisabled();
+
+    await page.getByRole("button", { name: "Consultar estado do envio" }).click();
+    await expect(page.getByText(
+      "O arquivo foi transferido, mas a sessão ainda aguarda finalização. Você pode concluir esta mesma sessão, sem enviar outro arquivo.",
+      { exact: true },
+    )).toBeVisible();
+    const resume = page.getByRole("button", { name: "Concluir esta mesma sessão" });
+    await resume.dblclick();
+    await expect.poll(() => rows(
+      "select status from public.client_file_upload_sessions where id=" + literal(interruptedUploadSessionId),
+    ), { timeout: 20000 }).toEqual([{ status: "accepted" }]);
+    expect(rows(
+      "select id from public.client_files where client_id=" + literal(invite.clientId) +
+      " and original_filename=" + literal(filename),
+    )).toHaveLength(1);
+    await expect.poll(() => page.evaluate(() =>
+      window.sessionStorage.getItem("patty.client-private-upload-recovery"),
+    )).toBeNull();
   });
 
   await test.step("private file remains accessible only with authorized sessions", async () => {
@@ -646,6 +736,20 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       await foreignPage.getByRole("button", { name: "Entrar" }).click();
       await expect(foreignPage).toHaveURL(/\/cliente\/?$/);
       await foreignPage.goto("/cliente/arquivos");
+      if (!interruptedUploadSessionId) {
+        throw new Error("Synthetic interrupted upload recovery proof missing");
+      }
+      // A stale opaque browser marker cannot cross the RLS/session boundary.
+      await foreignPage.evaluate((sessionId) => {
+        window.sessionStorage.setItem("patty.client-private-upload-recovery", sessionId);
+      }, interruptedUploadSessionId);
+      await foreignPage.reload();
+      await foreignPage.getByRole("button", { name: "Consultar estado do envio" }).click();
+      await expect(foreignPage.getByText(
+        "Não foi possível confirmar o estado desta sessão. Consulte o histórico antes de decidir por um novo envio.",
+        { exact: true },
+      )).toBeVisible();
+      await expect(foreignPage.getByRole("button", { name: "Concluir esta mesma sessão" })).toHaveCount(0);
       await expect(foreignPage.getByRole("heading", {
         name: clientPrivateFile.filename, exact: true,
       })).toHaveCount(0);
@@ -656,7 +760,7 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       });
       expect(previewDenied.status()).toBe(404);
       expect(rows("select id from public.client_files where client_id=" +
-        literal(invite.clientId))).toHaveLength(1);
+        literal(invite.clientId))).toHaveLength(2);
     } finally {
       await foreignContext.close();
     }
@@ -680,8 +784,12 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       "select id from public.client_files where client_id=" + literal(invite.clientId),
     ).length;
     expect(savedFiles()).toEqual([]);
+    // Fixed 390px CSS viewport with real touch events. Chromium isMobile
+    // emulation produced a 521px layout width for a 390px screen here,
+    // making locator taps hit unrelated elements above the intended target.
+    // The separate overflow assertion below still checks responsive layout.
     const adminContext = await browser.newContext({
-      baseURL, viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true,
+      baseURL, viewport: { width: 390, height: 844 }, hasTouch: true,
     });
     const foreignContext = await browser.newContext({ baseURL });
     try {
@@ -693,6 +801,40 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       await expect(adminPage.getByRole("heading", {
         name: "Enviar arquivo em nome da cliente",
       })).toBeVisible();
+      const mobileViewport = await adminPage.evaluate(() => ({
+        layoutWidth: innerWidth,
+        scrollWidth: document.documentElement.scrollWidth,
+        touchEnabled: navigator.maxTouchPoints > 0,
+        mobileCss: matchMedia("(max-width: 640px)").matches,
+      }));
+      expect(mobileViewport.layoutWidth).toBe(390);
+      // Diagnostics contain only DOM tag/CSS layout geometry; never text, IDs,
+      // filenames, attributes, account data, URLs, tokens, or input values.
+      const overflowElements = mobileViewport.scrollWidth > mobileViewport.layoutWidth
+        ? await adminPage.evaluate(() => Array.from(document.body.querySelectorAll("*"))
+          .flatMap((element) => {
+            const rect = element.getBoundingClientRect();
+            if (rect.width <= 0 || rect.right <= innerWidth + 1) return [];
+            const css = getComputedStyle(element);
+            return [{
+              tag: element.tagName.toLowerCase(),
+              class: typeof element.className === "string" ? element.className.slice(0, 100) : "",
+              left: Math.round(rect.left),
+              right: Math.round(rect.right),
+              width: Math.round(rect.width),
+              minWidth: css.minWidth,
+              scrollWidth: element.scrollWidth,
+            }];
+          })
+          .sort((a, b) => b.right - a.right || a.width - b.width)
+          .slice(0, 20))
+        : [];
+      expect(
+        mobileViewport.scrollWidth,
+        "Admin private files must not overflow at 390px. Layout offenders: " + JSON.stringify(overflowElements),
+      ).toBeLessThanOrEqual(390);
+      expect(mobileViewport.touchEnabled).toBe(true);
+      expect(mobileViewport.mobileCss).toBe(true);
 
       // Upload through the real professional form and browser-to-signed-Storage
       // path. Never seed private-file metadata directly for this proof.
@@ -751,9 +893,54 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
 
       // Explicit human confirmation is mandatory. The action cannot publish
       // simply because metadata exists or an admin viewed the file.
-      await pendingCard.getByRole("checkbox", {
+      // Mobile users interact with the full 44px confirmation label, not the
+      // tiny native checkbox hit target. Use a real touch event (no force or
+      // DOM injection) and prove it changed the native checkbox state.
+      const releaseCheckbox = pendingCard.getByRole("checkbox", {
         name: /Confirmo que o arquivo/,
-      }).check();
+      });
+      // The checkbox is nested directly in its label. A relative XPath here
+      // avoids Playwright has-locator root scoping that cannot find the label.
+      const releaseTouchTarget = releaseCheckbox.locator("xpath=..");
+      await expect(releaseTouchTarget).toHaveJSProperty("tagName", "LABEL");
+      await releaseTouchTarget.scrollIntoViewIfNeeded();
+      // Geometry-only failure diagnostics: no health content, filenames, IDs,
+      // cookies, form answers, paths, or tokens leave the disposable browser.
+      const readReleaseTouchGeometry = () => releaseTouchTarget.evaluate((label) => {
+        const rect = (element) => {
+          if (!element) return null;
+          const b = element.getBoundingClientRect();
+          return { x: Math.round(b.x), y: Math.round(b.y), w: Math.round(b.width), h: Math.round(b.height) };
+        };
+        const b = label.getBoundingClientRect();
+        const hit = document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2);
+        const card = label.closest("li");
+        const actions = label.closest("form")?.parentElement;
+        const kind = hit && label.contains(hit) ? "label" :
+          hit?.closest("dl") ? "metadata" :
+          hit?.closest("a") ? "link" :
+          hit && actions?.contains(hit) ? "actions" : "outside";
+        return {
+          innerWidth, innerHeight, screenWidth: screen.width,
+          visualWidth: Math.round(visualViewport?.width ?? 0),
+          visualScale: visualViewport?.scale ?? null,
+          viewportMetaDeviceWidth: Boolean(document.querySelector('meta[name="viewport"]')?.getAttribute("content")?.includes("width=device-width")),
+          mobileLayout: matchMedia("(max-width: 640px)").matches,
+          label: rect(label), checkbox: rect(label.querySelector('input')),
+          form: rect(label.closest("form")), actions: rect(actions),
+          metadata: rect(card?.querySelector("dl")), hitKind: kind, hitTag: hit?.tagName ?? null,
+          labelZ: getComputedStyle(label).zIndex,
+        };
+      });
+      const beforeReleaseTap = await readReleaseTouchGeometry();
+      try {
+        await releaseTouchTarget.tap({ timeout: 15000 });
+      } catch (error) {
+        const afterReleaseTap = await readReleaseTouchGeometry().catch(() => null);
+        console.info("J1 synthetic release touch geometry:", JSON.stringify({ before: beforeReleaseTap, after: afterReleaseTap }));
+        throw error;
+      }
+      await expect(releaseCheckbox).toBeChecked();
       const approvalButton = pendingCard.getByRole("button", {
         name: "Liberar para cliente",
       });
@@ -1034,8 +1221,10 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
       "rollback;",
     ].join("\n"));
     expect(Number(aal1Count)).toBe(0);
+    // Original client upload + recovered interrupted upload + explicitly released
+    // admin upload: all three persist after assignment ends; none is duplicated.
     expect(rows("select id from public.client_files where client_id=" +
-      literal(invite.clientId))).toHaveLength(2);
+      literal(invite.clientId))).toHaveLength(3);
   });
 
   await test.step("no anonymous or unrelated-client access to the draft", async () => {

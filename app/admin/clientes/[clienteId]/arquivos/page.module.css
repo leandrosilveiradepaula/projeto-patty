@@ -87,6 +87,16 @@
   justify-content: space-between;
 }
 
+/* Release confirmation is a separate actionable row, not a flex sibling
+   sharing hit targets with download links on mobile. */
+.fileActions > form {
+  flex: 0 0 100%;
+  width: 100%;
+  min-width: 0;
+  position: relative;
+  z-index: 2;
+}
+
 /* Keep the approval action in its own row on narrow client workspaces.
    A wrapping flex item could visually overlap the file metadata on mobile. */
 @media (max-width: 640px) {
@@ -141,3 +151,11 @@
 .advancedFileFilters > summary:focus-visible { outline: 3px solid var(--color-accent); outline-offset: 2px; }
 .advancedFileFiltersContent { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: var(--space-3); padding-top: var(--space-3); }
 .advancedFileFiltersContent label { min-width: 0; }
+
+/* Native selects with long options must not impose their intrinsic width on the mobile grid. */
+.fileFilters select,
+.advancedFileFiltersContent select {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
