@@ -148,6 +148,10 @@ export function ClientPrivateFileUploadForm() {
       }
 
       if (finalizationResult.result.status !== "accepted") {
+        // The server confirmed a terminal rejection; do not preserve a stale
+        // recovery marker that would block a new selection after reload.
+        forgetRecoverySession();
+        setAllowSameSessionRetry(false);
         setMessage(
           finalizationResult.result.reason === "expired"
             ? "A autorização do upload expirou. Envie o arquivo novamente."
