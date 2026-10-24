@@ -241,10 +241,21 @@ test("J6: versioned content releases require exact published version and synthet
     let contentId;
     let v1;
     await test.step("Admin creates first draft but neither client sees it", async () => {
-      await admin.goto("/admin/conteudos");
-      await admin.getByLabel("Título", { exact: true }).fill("J6 material sem arquivo sintetico");
-      await admin.getByLabel("Tipo de conteúdo", { exact: true }).selectOption("video");
-      await admin.getByRole("button", { name: "Criar rascunho" }).click();
+      // Bound each UI action independently so an unreachable control does not
+      // consume the full synthetic lifecycle timeout without diagnosis.
+      await test.step("J6 create: open admin content library", async () => {
+        await admin.goto("/admin/conteudos");
+        await expect(admin.getByRole("heading", { name: "Novo conteúdo educacional" })).toBeVisible();
+      }, { timeout: 25000 });
+      await test.step("J6 create: fill title", async () => {
+        await admin.getByLabel("Título", { exact: true }).fill("J6 material sem arquivo sintetico");
+      }, { timeout: 20000 });
+      await test.step("J6 create: select video type", async () => {
+        await admin.getByLabel("Tipo de conteúdo", { exact: true }).selectOption("video");
+      }, { timeout: 20000 });
+      await test.step("J6 create: submit initial draft", async () => {
+        await admin.getByRole("button", { name: "Criar rascunho" }).click();
+      }, { timeout: 25000 });
       const saved = await pollRows(
         "select c.id from public.educational_contents c" +
         " join public.educational_content_versions v on v.educational_content_id=c.id" +
