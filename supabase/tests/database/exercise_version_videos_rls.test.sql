@@ -1,6 +1,6 @@
 begin;
 
-select plan(22);
+select plan(23);
 
 select has_table('public', 'exercise_version_videos');
 select ok(
@@ -73,7 +73,8 @@ insert into public.exercises (id)
 values
   ('b7000000-0000-0000-0000-000000000001'),
   ('b7000000-0000-0000-0000-000000000002'),
-  ('b7000000-0000-0000-0000-000000000003');
+  ('b7000000-0000-0000-0000-000000000003'),
+  ('b7000000-0000-0000-0000-000000000004');
 
 -- The two videos are registered while their exact exercise versions are drafts.
 -- One becomes part of the owner's published training; the other is merely
@@ -82,7 +83,9 @@ insert into public.exercise_versions (id, exercise_id, version_number, name)
 values
   ('b8000000-0000-0000-0000-000000000001', 'b7000000-0000-0000-0000-000000000001', 1, 'J5 video linked'),
   ('b8000000-0000-0000-0000-000000000002', 'b7000000-0000-0000-0000-000000000002', 1, 'J5 video unlinked'),
-  ('b8000000-0000-0000-0000-000000000003', 'b7000000-0000-0000-0000-000000000003', 1, 'J5 no video');
+  ('b8000000-0000-0000-0000-000000000003', 'b7000000-0000-0000-0000-000000000003', 1, 'J5 no video'),
+  -- Deliberately leave this target in draft to expose re-association bypasses.
+  ('b8000000-0000-0000-0000-000000000004', 'b7000000-0000-0000-0000-000000000004', 1, 'J5 draft destination');
 
 insert into public.exercise_version_videos (
   id, exercise_version_id, storage_path, content_type, byte_size, sha256_hex, verified_at
@@ -243,6 +246,14 @@ select throws_ok(
 select throws_ok(
   $$delete from public.exercise_version_videos where id = 'b9000000-0000-0000-0000-000000000001'$$,
   '55000', 'exercise video for a published version is immutable', 'published video cannot be removed and replaced silently'
+);
+
+select throws_ok(
+  $update public.exercise_version_videos
+    set exercise_version_id = 'b8000000-0000-0000-0000-000000000004'
+    where id = 'b9000000-0000-0000-0000-000000000001'$,
+  '55000', 'exercise video for a published version is immutable',
+  'published video cannot be moved to an unpublished exercise version'
 );
 
 select * from finish();
