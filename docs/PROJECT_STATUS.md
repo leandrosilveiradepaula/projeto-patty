@@ -1,3 +1,11 @@
+## 2026-10-23 — J5: vídeos demonstrativos privados por versão de exercício (implementado localmente, não integrado)
+
+Foi criada a migration local `20261023205316_add_exercise_version_private_videos.sql`, ainda não aplicada, para associar opcionalmente um MP4 privado verificado a uma versão exata de exercício. A interface administrativa prepara upload privado, calcula SHA-256 no navegador e exige nova verificação de bytes/MIME/hash no servidor antes do registro; publicação do exercício continua manual e não exige vídeo. A migration congela inserção, alteração e remoção da mídia após a publicação da versão.
+
+No portal, o guia do treino atual só recebe um ID de vídeo quando o item publicado contém a mesma `exercise_version_id`; a rota autenticada revalida RLS, versão publicada, integridade e acesso da cliente antes de gerar URL curta de Blob. Não há catálogo global, busca por nome, URL assinada na UI, publicação automática, dados reais ou mudança de regra profissional. A cobertura local inclui teste pgTAP dedicado para grants/RLS/MFA/imutabilidade e cenário Playwright sintético para a associação da versão exata, a publicação manual do treino, o player e negativas entre clientes; ambos permanecem pendentes de execução real até haver Supabase local descartável com Docker. Testes unitários, operações e typecheck foram executados localmente; a alteração continua em worktree local, sem commit, push, PR, merge, deploy ou aplicação SaaS.
+
+---
+
 ## 2026-10-23 — Roteiro operacional reconciliado; recertificação conjunta pós-#1006 em preparação
 
 **FATO DOCUMENTAL:** o [roteiro de homologação final](OPERATIONAL_ACCEPTANCE_RUNBOOK.md) e a [matriz de pré-homologação](PREHOMOLOGATION_MATRIX.md) foram reconciliados com as decisões já registradas: a única admin oficial foi confirmada em 21/10 e a migration `20261020191000_fix_private_storage_admin_read_after_assignment.sql` **foi aplicada** em produção no workflow #39701416284, com 91/91 migrations e MFA/RLS preservados. Trechos de 20/10 que tratam a policy como pendente são **fotografias históricas**, não o estado atual. O download privado real pela Patty com MFA AAL2 após encerramento continua a ser verificado na homologação conjunta, não foi presumido.

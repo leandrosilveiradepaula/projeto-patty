@@ -2402,6 +2402,50 @@ export type Database = {
         }
         Relationships: []
       }
+      exercise_version_videos: {
+        Row: {
+          byte_size: number
+          content_type: string
+          created_at: string
+          exercise_version_id: string
+          id: string
+          sha256_hex: string
+          storage_path: string
+          storage_provider: string
+          verified_at: string
+        }
+        Insert: {
+          byte_size: number
+          content_type: string
+          created_at?: string
+          exercise_version_id: string
+          id?: string
+          sha256_hex: string
+          storage_path: string
+          storage_provider?: string
+          verified_at: string
+        }
+        Update: {
+          byte_size?: number
+          content_type?: string
+          created_at?: string
+          exercise_version_id?: string
+          id?: string
+          sha256_hex?: string
+          storage_path?: string
+          storage_provider?: string
+          verified_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercise_version_videos_exercise_version_id_fkey"
+            columns: ["exercise_version_id"]
+            isOneToOne: true
+            referencedRelation: "exercise_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exercise_versions: {
         Row: {
           created_at: string
