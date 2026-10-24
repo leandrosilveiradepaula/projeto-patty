@@ -71,20 +71,24 @@ as $$
 begin
   -- An UPDATE must check the OLD association as well as the NEW target:
   -- otherwise a video for a published exercise could be moved to a draft.
-  if tg_op in ('UPDATE', 'DELETE') and exists (
-    select 1 from public.exercise_versions
-    where id = old.exercise_version_id and published_at is not null
-  ) then
-    raise exception 'exercise video for a published version is immutable'
-      using errcode = '55000';
+  if tg_op in ('UPDATE', 'DELETE') then
+    if exists (
+      select 1 from public.exercise_versions
+      where id = old.exercise_version_id and published_at is not null
+    ) then
+      raise exception 'exercise video for a published version is immutable'
+        using errcode = '55000';
+    end if;
   end if;
 
-  if tg_op in ('INSERT', 'UPDATE') and exists (
-    select 1 from public.exercise_versions
-    where id = new.exercise_version_id and published_at is not null
-  ) then
-    raise exception 'exercise video for a published version is immutable'
-      using errcode = '55000';
+  if tg_op in ('INSERT', 'UPDATE') then
+    if exists (
+      select 1 from public.exercise_versions
+      where id = new.exercise_version_id and published_at is not null
+    ) then
+      raise exception 'exercise video for a published version is immutable'
+        using errcode = '55000';
+    end if;
   end if;
 
   if tg_op = 'DELETE' then
