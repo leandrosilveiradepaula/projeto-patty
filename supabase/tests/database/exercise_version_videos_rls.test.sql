@@ -124,29 +124,48 @@ where id in (
 insert into public.client_training_plans (id, client_id)
 values ('ba000000-0000-0000-0000-000000000001', 'b6000000-0000-0000-0000-000000000001');
 
+-- Build the published training through its real lifecycle: insert items while
+-- version 1 is an editable draft, review it, then publish it. A second draft
+-- may exist only after version 1 is published (partial unique index).
+-- Never bypass the item immutability trigger in a synthetic fixture.
 insert into public.client_training_plan_versions (
-  id, training_plan_id, version_number, title, created_by_profile_id,
-  reviewed_at, reviewed_by_profile_id, published_at, published_by_profile_id
-)
-values
-  (
-    'bb000000-0000-0000-0000-000000000001', 'ba000000-0000-0000-0000-000000000001', 1,
-    'J5 published video training', 'b5000000-0000-0000-0000-000000000001',
-    now() - interval '1 minute', 'b5000000-0000-0000-0000-000000000001', now(), 'b5000000-0000-0000-0000-000000000001'
-  ),
-  (
-    'bb000000-0000-0000-0000-000000000002', 'ba000000-0000-0000-0000-000000000001', 2,
-    'J5 draft video training', 'b5000000-0000-0000-0000-000000000001',
-    null, null, null, null
-  );
+  id, training_plan_id, version_number, title, created_by_profile_id
+) values (
+  'bb000000-0000-0000-0000-000000000001',
+  'ba000000-0000-0000-0000-000000000001',
+  1, 'J5 published video training', 'b5000000-0000-0000-0000-000000000001'
+);
 
 insert into public.client_training_plan_items (
   training_plan_version_id, position, exercise_version_id, exercise_name, sets_text, repetitions_text
-)
-values
+) values
   ('bb000000-0000-0000-0000-000000000001', 1, 'b8000000-0000-0000-0000-000000000001', 'J5 linked exercise', '1', '1'),
-  ('bb000000-0000-0000-0000-000000000001', 2, 'b8000000-0000-0000-0000-000000000003', 'J5 no-video exercise', '1', '1'),
-  ('bb000000-0000-0000-0000-000000000002', 1, 'b8000000-0000-0000-0000-000000000002', 'J5 draft-only video exercise', '1', '1');
+  ('bb000000-0000-0000-0000-000000000001', 2, 'b8000000-0000-0000-0000-000000000003', 'J5 no-video exercise', '1', '1');
+
+update public.client_training_plan_versions
+set reviewed_at = now() - interval '1 minute',
+    reviewed_by_profile_id = 'b5000000-0000-0000-0000-000000000001'
+where id = 'bb000000-0000-0000-0000-000000000001';
+
+update public.client_training_plan_versions
+set published_at = now(),
+    published_by_profile_id = 'b5000000-0000-0000-0000-000000000001'
+where id = 'bb000000-0000-0000-0000-000000000001';
+
+insert into public.client_training_plan_versions (
+  id, training_plan_id, version_number, title, created_by_profile_id
+) values (
+  'bb000000-0000-0000-0000-000000000002',
+  'ba000000-0000-0000-0000-000000000001',
+  2, 'J5 draft video training', 'b5000000-0000-0000-0000-000000000001'
+);
+
+insert into public.client_training_plan_items (
+  training_plan_version_id, position, exercise_version_id, exercise_name, sets_text, repetitions_text
+) values (
+  'bb000000-0000-0000-0000-000000000002', 1, 'b8000000-0000-0000-0000-000000000002',
+  'J5 draft-only video exercise', '1', '1'
+);
 
 set local role authenticated;
 select set_config('request.jwt.claim.sub', 'b5000000-0000-0000-0000-000000000002', true);
