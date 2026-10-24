@@ -68,15 +68,20 @@ returns trigger
 language plpgsql
 set search_path = pg_catalog
 as $$
-declare
-  protected_version_id uuid;
 begin
-  protected_version_id := coalesce(new.exercise_version_id, old.exercise_version_id);
+  -- An UPDATE must check the OLD association as well as the NEW target:
+  -- otherwise a video for a published exercise could be moved to a draft.
+  if tg_op in ('UPDATE', 'DELETE') and exists (
+    select 1 from public.exercise_versions
+    where id = old.exercise_version_id and published_at is not null
+  ) then
+    raise exception 'exercise video for a published version is immutable'
+      using errcode = '55000';
+  end if;
 
-  if exists (
-    select 1
-    from public.exercise_versions
-    where id = protected_version_id and published_at is not null
+  if tg_op in ('INSERT', 'UPDATE') and exists (
+    select 1 from public.exercise_versions
+    where id = new.exercise_version_id and published_at is not null
   ) then
     raise exception 'exercise video for a published version is immutable'
       using errcode = '55000';
