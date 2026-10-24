@@ -26,7 +26,9 @@ test("a past individual release leads Patty to its historical version, not the c
 });
 
 test("past-version inspection never changes publication target or grants client rights", () => {
-  assert.match(detail, /hasAsset: currentAssets\.length > 0/);
+  assert.match(detail, /contentTypeKey: current\.content_type_key/);
+  assert.match(detail, /assets: currentAssets/);
+  assert.match(detail, /educationalContentPublicationBlockReason/);
   assert.match(detail, /publish.*Content/i);
   assert.match(detail, /current\.id/);
   assert.match(detail, /inspected\.id === current\?\.id/);

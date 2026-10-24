@@ -1319,6 +1319,7 @@ export async function createAccessibleEducationalContentVersion(input: {
 }
 
 export async function updateAccessibleEducationalContentDraftVersion(input: {
+  contentTypeKey: string;
   contentId: string;
   displayOrder: number;
   title: string;
@@ -1328,6 +1329,7 @@ export async function updateAccessibleEducationalContentDraftVersion(input: {
   const { data, error } = await supabase
     .from("educational_content_versions")
     .update({
+      content_type_key: input.contentTypeKey,
       display_order: input.displayOrder,
       title: input.title,
     })
@@ -1504,6 +1506,28 @@ export async function getAccessibleEducationalContentAssetForCurrentClient(
       "id, educational_content_version_id, asset_key, storage_provider, storage_path, content_type, byte_size, sha256_hex",
     )
     .eq("id", assetId)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+/**
+ * Reads only the exact released version already visible to the current client
+ * under existing RLS. The private-file route uses this together with its asset
+ * list to fail closed for legacy releases missing a compatible primary asset.
+ */
+export async function getAccessibleEducationalContentVersionForCurrentClient(
+  versionId: string,
+) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("educational_content_versions")
+    .select("id, content_type_key")
+    .eq("id", versionId)
     .maybeSingle();
 
   if (error) {

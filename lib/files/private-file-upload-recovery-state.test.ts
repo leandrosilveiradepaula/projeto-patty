@@ -6,10 +6,12 @@ import { privateFileUploadRecoveryDecision } from "./private-file-upload-recover
 test("accepted is confirmed, not retried", () => {
   assert.equal(privateFileUploadRecoveryDecision("accepted").next, "confirmed");
 });
-test("a pending uploaded session can resume without another transfer", () => {
+test("a pending session can request server finalization without asserting transfer", () => {
   const decision = privateFileUploadRecoveryDecision("pending");
   assert.equal(decision.next, "resume");
   assert.match(decision.message, /mesma sessão/);
+  assert.match(decision.message, /confirmar a transferência/);
+  assert.doesNotMatch(decision.message, /foi transferido/i);
 });
 test("active server validation must not start a duplicate", () => {
   assert.equal(privateFileUploadRecoveryDecision("validating").next, "wait");
@@ -72,5 +74,20 @@ test("terminal upload rejection clears the recovery marker in client and admin f
     assert.ok(branch.includes("forgetRecoverySession();"), form + ": clear stale persisted session");
     assert.ok(branch.includes("setAllowSameSessionRetry(false);"), form + ": revoke stale retry");
     assert.ok(branch.indexOf("forgetRecoverySession();") < branch.indexOf("setMessage("), form);
+  }
+});
+
+test("private upload persists the server session before an uncertain transfer, not only before finalization", () => {
+  for (const form of [
+    "../../components/client/ClientPrivateFileUploadForm.tsx",
+    "../../components/admin/AdminPrivateFileUploadForm.tsx",
+  ]) {
+    const src = readFileSync(new URL(form, import.meta.url), "utf8");
+    const recovery = src.indexOf("rememberRecoverySession(sessionResult.session.id);");
+    const transfer = src.indexOf("transferStarted = true;");
+    const upload = src.indexOf('.from("client-private")');
+    assert.ok(recovery > 0 && recovery < transfer && transfer < upload, form + ": persists before PUT");
+    assert.match(src, /if \(transferStarted \|\| finalizationStarted\) setAmbiguousCompletion\(true\)/, form);
+    assert.match(src, /Não foi possível confirmar a transferência/, form);
   }
 });

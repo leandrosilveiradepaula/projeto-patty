@@ -1,6 +1,7 @@
 import { ClientReleasedContentExplorer, type ReleasedContentDisplayEntry } from "@/components/client/ClientReleasedContentExplorer";
 import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
 import { newestClientContentReleases } from "@/lib/content/release-order";
+import { hasCompatibleEducationalContentAsset } from "@/lib/content/publication-eligibility";
 import { educationalAssetKind, educationalAssetOpenLabel, educationalAssetSize, orderReleasedEducationalAssets } from "@/lib/content/client-assets";
 import { ClientContentCard } from "@/components/client/ClientContentCard";
 import { PrivateEducationalVideoPlayer } from "@/components/content/PrivateEducationalVideoPlayer";
@@ -30,11 +31,10 @@ export default async function ClienteConteudosPage() {
     ? await listCurrentClientContentReleases(client.id)
     : null;
   const orderedReleases = newestClientContentReleases(releases ?? []);
-  const visibleReleases = orderedReleases.filter(
+  const releasesWithVisibleVersion = orderedReleases.filter(
     (release) => Boolean(release.educational_content_versions),
   );
-  const missingVersionCount = orderedReleases.length - visibleReleases.length;
-  const releasedVersions = visibleReleases.map(
+  const releasedVersions = releasesWithVisibleVersion.map(
     (release) => release.educational_content_versions!,
   );
   const releasedVersionIds = Array.from(new Set(releasedVersions.map((version) => version.id)));
@@ -54,6 +54,18 @@ export default async function ClienteConteudosPage() {
     assetsByVersion.set(asset.educational_content_version_id, current);
   }
 
+  // Legacy rows remain in history, but a client never receives a card or a
+  // private-file route for a released version without its exact compatible
+  // primary asset. New releases are prevented server-side by the same rule.
+  const visibleReleases = releasesWithVisibleVersion.filter((release) => {
+    const version = release.educational_content_versions;
+    return Boolean(version) && hasCompatibleEducationalContentAsset(
+      version.content_type_key,
+      assetsByVersion.get(version.id) ?? [],
+    );
+  });
+  const unavailableReleaseCount = orderedReleases.length - visibleReleases.length;
+
   const explorerEntries: ReleasedContentDisplayEntry[] = visibleReleases.map((release): ReleasedContentDisplayEntry | null => {
               const contentVersion = release.educational_content_versions;
               if (!contentVersion) {
@@ -63,7 +75,7 @@ export default async function ClienteConteudosPage() {
               const releaseAssets = orderReleasedEducationalAssets(
                 assetsByVersion.get(contentVersion.id) ?? [],
               );
-              const hasPrimaryAsset = releaseAssets.some((asset) => asset.asset_key === "primary");
+              const hasPrimaryAsset = true;
 
               return {
                 id: release.id,
@@ -75,12 +87,8 @@ export default async function ClienteConteudosPage() {
                 content: (
                   <ClientContentCard
                     category={contentVersion.category_key ?? "Não informado"}
-                    meta={
-                      releaseAssets.length > 0
-                        ? `Versão ${contentVersion.version_number} · liberada em ${formatReleaseDate(release.released_at)} · ${releaseAssets.length} arquivo(s) disponível(is)`
-                        : `Versão ${contentVersion.version_number} · liberada em ${formatReleaseDate(release.released_at)} · arquivo ainda indisponível`
-                    }
-                    action={releaseAssets.length > 0 ? (
+                    meta={`Versão ${contentVersion.version_number} · liberada em ${formatReleaseDate(release.released_at)} · ${releaseAssets.length} arquivo(s) disponível(is)`}
+                    action={(
                       <ul className={styles.assetList} aria-label={`Arquivos liberados de ${contentVersion.title}`}>
                         {releaseAssets.map((asset, index) => {
                           const label = educationalAssetOpenLabel(
@@ -112,10 +120,10 @@ export default async function ClienteConteudosPage() {
                           );
                         })}
                       </ul>
-                    ) : null}
+                    )}
                     status={
-                      <Badge variant={releaseAssets.length > 0 ? "positive" : "warning"}>
-                        {releaseAssets.length > 0 ? "Disponível" : "Aguardando arquivo"}
+                      <Badge variant="positive">
+                        Disponível
                       </Badge>
                     }
                     title={contentVersion.title}
@@ -136,8 +144,8 @@ export default async function ClienteConteudosPage() {
         {!client ? (
           <EmptyState description="Esta conta ainda não está vinculada a um cadastro de cliente. Os conteúdos permanecem privados até que o vínculo e a liberação estejam disponíveis." title="Conteúdos indisponíveis" action={<Link href="/cliente">Voltar ao início</Link>} />
         ) : visibleReleases.length === 0 ? (
-          <EmptyState description={orderedReleases.length > 0 ? "Há registros de liberação, mas as respectivas versões não estão disponíveis para consulta nesta conta. Solicite a verificação à Patty." : "Ainda não há conteúdos liberados pela Patty para sua conta. As liberações dependem de uma decisão profissional e aparecerão aqui."} title="Nenhum conteúdo foi liberado para você ainda" action={<Link href="/cliente">Voltar ao início</Link>} />
-        ) : <ClientReleasedContentExplorer entries={explorerEntries} missingVersionCount={missingVersionCount} />}
+          <EmptyState description={orderedReleases.length > 0 ? "Há registros de liberação, mas as respectivas versões com arquivo compatível não estão disponíveis para consulta nesta conta. Solicite a verificação à Patty." : "Ainda não há conteúdos liberados pela Patty para sua conta. As liberações dependem de uma decisão profissional e aparecerão aqui."} title="Nenhum conteúdo foi liberado para você ainda" action={<Link href="/cliente">Voltar ao início</Link>} />
+        ) : <ClientReleasedContentExplorer entries={explorerEntries} unavailableReleaseCount={unavailableReleaseCount} />}
       </Section>
       <ClientJourneyNextSteps areas={["protocol","feedback","training","index"]} />
     </>

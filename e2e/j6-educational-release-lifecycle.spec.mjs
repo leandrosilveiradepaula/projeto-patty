@@ -243,6 +243,7 @@ test("J6: versioned content releases require exact published version and synthet
     await test.step("Admin creates first draft but neither client sees it", async () => {
       await admin.goto("/admin/conteudos");
       await admin.getByLabel("Título", { exact: true }).fill("J6 material sem arquivo sintetico");
+      await admin.getByLabel("Tipo de conteúdo", { exact: true }).selectOption("video");
       await admin.getByRole("button", { name: "Criar rascunho" }).click();
       const saved = await pollRows(
         "select c.id from public.educational_contents c" +
@@ -262,12 +263,9 @@ test("J6: versioned content releases require exact published version and synthet
       await assertMobile(admin);
     });
 
-    await test.step("Published metadata without file is not releasable to a client", async () => {
-      await admin.getByLabel(/Confirmo que a versão 1 foi revisada/).check();
-      await admin.getByRole("button", { name: "Publicar versão" }).click();
-      await expect.poll(() => Boolean(versions(contentId)[0]?.published_at), {
-        timeout: 25000,
-      }).toBe(true);
+    await test.step("Draft metadata without file cannot be published or released", async () => {
+      await expect(admin.getByRole("button", { name: "Publicar versão" })).toBeDisabled();
+      await expect(admin.getByText(/Registre o asset privado video\/mp4/, { exact: true })).toBeVisible();
       await admin.goto("/admin/clientes/" + clientId + "/conteudos");
       await expect(admin.getByText("Nenhum conteúdo disponível para liberar", {
         exact: true,
@@ -281,6 +279,24 @@ test("J6: versioned content releases require exact published version and synthet
       await expect(client.getByText("Nenhum conteúdo foi liberado para você ainda", {
         exact: true,
       })).toBeVisible();
+
+      // A synthetic registered video is needed solely to create a subsequent
+      // version; it is never released to a client in this test.
+      insert("educational_content_assets", {
+        educational_content_version_id: v1.id,
+        asset_key: "primary",
+        storage_provider: "vercel_blob",
+        storage_path: "j6-local-verified/" + nonce + "/first-object.mp4",
+        content_type: "video/mp4",
+        byte_size: 32,
+        sha256_hex: "b".repeat(64),
+      });
+      await admin.goto("/admin/conteudos/" + contentId);
+      await admin.getByLabel(/Confirmo que a versão 1 foi revisada/).check();
+      await admin.getByRole("button", { name: "Publicar versão" }).click();
+      await expect.poll(() => Boolean(versions(contentId)[0]?.published_at), {
+        timeout: 25000,
+      }).toBe(true);
     });
 
     let v2;
@@ -383,6 +399,7 @@ test("J6: versioned content releases require exact published version and synthet
       // This fixture uses only synthetic metadata in the disposable database.
       await admin.goto("/admin/conteudos");
       await admin.getByLabel("Título", { exact: true }).fill(secondTitle);
+      await admin.getByLabel("Tipo de conteúdo", { exact: true }).selectOption("pdf");
       await admin.getByRole("button", { name: "Criar rascunho" }).click();
       const secondContent = await pollRows(
         "select c.id from public.educational_contents c" +
@@ -661,18 +678,15 @@ test("J6: versioned content releases require exact published version and synthet
       await assertMobile(client);
     });
 
-    await test.step("New published version does not silently replace release of v2", async () => {
+    await test.step("New empty draft does not silently replace release of v2", async () => {
       await admin.goto("/admin/conteudos/" + contentId);
       await admin.getByRole("button", { name: "Criar nova versão" }).click();
       await expect.poll(() => versions(contentId).length, { timeout: 25000 }).toBe(3);
       const v3 = versions(contentId)[2];
       expect(v3.version_number).toBe(3);
       await admin.reload();
-      await admin.getByLabel(/Confirmo que a versão 3 foi revisada/).check();
-      await admin.getByRole("button", { name: "Publicar versão" }).click();
-      await expect.poll(() => Boolean(versions(contentId)[2]?.published_at), {
-        timeout: 25000,
-      }).toBe(true);
+      await expect(admin.getByRole("button", { name: "Publicar versão" })).toBeDisabled();
+      expect(versions(contentId)[2]?.published_at).toBeNull();
       expect(releases(clientId)).toHaveLength(2);
       expect(visibleCount(owner.id, "aal1", "educational_content_versions", v3.id)).toBe(0);
       await client.reload();
