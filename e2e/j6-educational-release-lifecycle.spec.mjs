@@ -251,7 +251,7 @@ test("J6: versioned content releases require exact published version and synthet
         await admin.getByLabel("Título", { exact: true }).fill("J6 material sem arquivo sintetico");
       }, { timeout: 20000 });
       await test.step("J6 create: select video type", async () => {
-        await admin.getByLabel("Tipo de conteúdo", { exact: true }).selectOption("video");
+        await admin.getByRole("combobox", { name: /Tipo de conteúdo/ }).selectOption("video");
       }, { timeout: 20000 });
       await test.step("J6 create: submit initial draft", async () => {
         await admin.getByRole("button", { name: "Criar rascunho" }).click();
@@ -410,7 +410,7 @@ test("J6: versioned content releases require exact published version and synthet
       // This fixture uses only synthetic metadata in the disposable database.
       await admin.goto("/admin/conteudos");
       await admin.getByLabel("Título", { exact: true }).fill(secondTitle);
-      await admin.getByLabel("Tipo de conteúdo", { exact: true }).selectOption("pdf");
+      await admin.getByRole("combobox", { name: /Tipo de conteúdo/ }).selectOption("pdf");
       await admin.getByRole("button", { name: "Criar rascunho" }).click();
       const secondContent = await pollRows(
         "select c.id from public.educational_contents c" +
