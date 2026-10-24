@@ -65,6 +65,12 @@ Cliente nao pode administrar papeis.
 
 Acesso tecnico ao repositorio ou infraestrutura nao constitui automaticamente role de negocio da aplicacao e nao concede acesso client-scoped por si so.
 
+## Vídeos privados de exercícios
+
+`exercise_version_videos` usa RLS e nega `anon`. Escrita e prévia administrativa exigem role relacional `admin` e AAL2. A leitura da cliente é permitida somente quando existe item de treino publicado dela apontando para a mesma `exercise_version_id`; conhecer o UUID do vídeo, a versão global publicada ou o nome do exercício não concede acesso.
+
+A rota de entrega revalida sessão, role, RLS e metadados de integridade antes de emitir URL curta de Blob privado. Paths internos e URLs assinadas não são expostos na página do treino.
+
 Papeis adicionais ficam fora do MVP e exigem decisao propria de escopo e permissoes antes de implementacao.
 
 ## Separacao de responsabilidades

@@ -13,8 +13,11 @@ import { Section } from "@/components/ui/Section";
 import { findSingleDraftExerciseVersion, nextExerciseVersionNumber } from "@/lib/training/exercise-versioning";
 import {
   getAccessibleExerciseForCurrentAdmin,
+  listAccessibleExerciseVersionVideosForCurrentAdmin,
   listExerciseVersionsForCurrentAdmin,
 } from "@/lib/supabase/data-access";
+import { AdminExerciseVersionVideoUpload } from "@/components/admin/AdminExerciseVersionVideoUpload";
+import { PrivateEducationalVideoPlayer } from "@/components/content/PrivateEducationalVideoPlayer";
 import { isUuid } from "@/lib/validation/uuid";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -65,6 +68,9 @@ export default async function AdminExerciseDetailPage({ params, searchParams }: 
       .sort((left, right) => right.version_number - left.version_number)[0] ??
     null;
   const displayName = draft?.name ?? latestPublished?.name ?? "Exercício";
+  const videos = await listAccessibleExerciseVersionVideosForCurrentAdmin(versions.map((version) => version.id));
+  const videosByVersionId = new Map(videos.map((video) => [video.exercise_version_id, video]));
+  const draftVideo = draft ? videosByVersionId.get(draft.id) ?? null : null;
 
   return (
     <>
@@ -110,6 +116,21 @@ export default async function AdminExerciseDetailPage({ params, searchParams }: 
                 versionId={draft.id}
                 versionNumber={draft.version_number}
               />
+            </Card>
+
+            <Card>
+              <h2 className={styles.cardTitle}>Vídeo demonstrativo</h2>
+              {draftVideo ? (
+                <>
+                  <p className={styles.description}>MP4 privado verificado · {draftVideo.byte_size.toLocaleString("pt-BR")} bytes.</p>
+                  <PrivateEducationalVideoPlayer assetUrl={`/admin/exercicios/videos/${draftVideo.id}`} title={`Demonstração de ${draft.name}`} />
+                </>
+              ) : (
+                <>
+                  <p className={styles.description}>Opcional. O exercício pode ser publicado sem vídeo. Um vídeo registrado fica vinculado somente a esta versão em rascunho.</p>
+                  <AdminExerciseVersionVideoUpload exerciseId={exercise.id} versionId={draft.id} />
+                </>
+              )}
             </Card>
           </div>
         ) : latestPublished ? (
@@ -171,6 +192,9 @@ export default async function AdminExerciseDetailPage({ params, searchParams }: 
                           ? " · publicada em " +
                             formatDateTime(version.published_at)
                           : " · ainda em rascunho"}
+                      </p>
+                      <p className={styles.description}>
+                        {videosByVersionId.has(version.id) ? "Vídeo MP4 privado verificado." : "Sem vídeo demonstrativo registrado."}
                       </p>
                     </div>
                     <Badge variant={version.published_at ? "positive" : "warning"}>

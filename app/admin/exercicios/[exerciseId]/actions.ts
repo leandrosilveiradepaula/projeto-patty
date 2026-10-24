@@ -8,12 +8,20 @@ import {
 } from "@/lib/training/exercise-versioning";
 import { requireRole } from "@/lib/supabase/auth";
 import {
+  createAccessibleExerciseVersionVideo,
   createAccessibleExerciseVersion,
+  getAccessibleExerciseVersionVideoForCurrentAdmin,
   getAccessibleExerciseForCurrentAdmin,
   listExerciseVersionsForCurrentAdmin,
   publishAccessibleExerciseVersion,
   updateAccessibleExerciseDraftVersion,
 } from "@/lib/supabase/data-access";
+import { verifyPrivateBlobAsset } from "@/lib/content/private-blob-integrity";
+import {
+  EXERCISE_VERSION_VIDEO_CONTENT_TYPE,
+  hasVerifiedPrivateExerciseVersionVideo,
+  isSafeExerciseVersionVideoStoragePath,
+} from "@/lib/training/exercise-version-video";
 import { isUuid } from "@/lib/validation/uuid";
 
 function readExerciseName(formData: FormData) {
@@ -102,6 +110,11 @@ export async function publishExerciseVersionAction(
     throw new Error("A versão em rascunho mudou. Atualize a página.");
   }
 
+  const video = await getAccessibleExerciseVersionVideoForCurrentAdmin(versionId);
+  if (video && !hasVerifiedPrivateExerciseVersionVideo(video)) {
+    throw new Error("O vídeo registrado não possui metadados privados verificáveis. Corrija o rascunho antes de publicar.");
+  }
+
   await publishAccessibleExerciseVersion({
     exerciseId,
     publishedAt: new Date().toISOString(),
@@ -114,6 +127,79 @@ export async function publishExerciseVersionAction(
   revalidatePath("/admin/exercicios/" + exerciseId);
   revalidatePath("/cliente");
   revalidatePath("/cliente/exercicios");
+  revalidatePath("/cliente/treino");
+}
+
+function readExerciseVideoRegistration(formData: FormData) {
+  const storagePath = formData.get("storagePath");
+  const contentType = formData.get("contentType");
+  const sha256Hex = formData.get("sha256Hex");
+  const rawByteSize = formData.get("byteSize");
+
+  if (
+    formData.get("confirmVerified") !== "yes" ||
+    typeof storagePath !== "string" ||
+    !isSafeExerciseVersionVideoStoragePath(storagePath) ||
+    contentType !== EXERCISE_VERSION_VIDEO_CONTENT_TYPE ||
+    typeof sha256Hex !== "string" ||
+    !/^[0-9a-f]{64}$/.test(sha256Hex) ||
+    typeof rawByteSize !== "string" ||
+    !/^[1-9][0-9]*$/.test(rawByteSize)
+  ) {
+    throw new Error("Confirme os metadados do vídeo privado MP4.");
+  }
+
+  const byteSize = Number(rawByteSize);
+  if (!Number.isSafeInteger(byteSize) || byteSize <= 0) {
+    throw new Error("O tamanho do vídeo é inválido.");
+  }
+
+  return { byteSize, contentType, sha256Hex, storagePath };
+}
+
+export async function registerExerciseVersionVideoAction(
+  exerciseId: string,
+  versionId: string,
+  formData: FormData,
+) {
+  await requireRole("admin");
+
+  if (!isUuid(versionId)) throw new Error("Versão de exercício inválida");
+  const metadata = readExerciseVideoRegistration(formData);
+  const { versions } = await loadExerciseState(exerciseId);
+  const draft = findSingleDraftExerciseVersion(versions);
+
+  if (!draft || draft.id !== versionId) {
+    throw new Error("O vídeo só pode ser registrado na versão atual em rascunho.");
+  }
+
+  const existing = await getAccessibleExerciseVersionVideoForCurrentAdmin(versionId);
+  if (existing) {
+    throw new Error("Esta versão já possui um vídeo registrado. Crie uma nova versão para alterar a demonstração.");
+  }
+
+  await verifyPrivateBlobAsset(metadata);
+
+  try {
+    await createAccessibleExerciseVersionVideo({
+      ...metadata,
+      contentType: EXERCISE_VERSION_VIDEO_CONTENT_TYPE,
+      exerciseVersionId: versionId,
+    });
+  } catch {
+    const afterFailure = await getAccessibleExerciseVersionVideoForCurrentAdmin(versionId);
+    if (!afterFailure || !hasVerifiedPrivateExerciseVersionVideo(afterFailure) ||
+        afterFailure.storage_path !== metadata.storagePath ||
+        afterFailure.sha256_hex !== metadata.sha256Hex ||
+        afterFailure.byte_size !== metadata.byteSize) {
+      throw new Error("O registro do vídeo não foi confirmado. Consulte a versão antes de reenviar.");
+    }
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/pendencias");
+  revalidatePath("/admin/exercicios");
+  revalidatePath("/admin/exercicios/" + exerciseId);
 }
 
 export async function createNextExerciseVersionAction(exerciseId: string) {

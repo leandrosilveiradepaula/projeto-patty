@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
+import { PrivateEducationalVideoPlayer } from "@/components/content/PrivateEducationalVideoPlayer";
 import styles from "@/app/cliente/treino/page.module.css";
 
 type Item = {
@@ -13,6 +14,7 @@ type Item = {
   repetitions_text: string;
   rest_text: string | null;
   execution_notes: string | null;
+  videoId: string | null;
 };
 
 export function ClientWorkoutGuide({ items }: { items: readonly Item[] }) {
@@ -56,6 +58,15 @@ export function ClientWorkoutGuide({ items }: { items: readonly Item[] }) {
             <h4>Orientações da Patty</h4><p>{current.execution_notes}</p>
           </section>
         ) : <p className={styles.meta}>Sem orientações adicionais registradas nesta versão.</p>}
+        {current.videoId ? (
+          <section className={styles.exerciseInstructions} aria-label="Vídeo demonstrativo privado">
+            <h4>Vídeo demonstrativo</h4>
+            <PrivateEducationalVideoPlayer
+              assetUrl={`/cliente/treino/videos/${current.videoId}`}
+              title={`Demonstração de ${current.exercise_name}`}
+            />
+          </section>
+        ) : null}
         <div className={styles.workoutSteps}>
           <button type="button" disabled={currentIndex === 0} onClick={() => jump(currentIndex - 1)}>Exercício anterior</button>
           <button type="button" disabled={currentIndex === items.length - 1} onClick={() => jump(currentIndex + 1)}>Próximo exercício</button>

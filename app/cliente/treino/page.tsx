@@ -24,6 +24,7 @@ import {
   listAccessibleClientTrainingPlanItemsForVersions,
   listAccessibleClientTrainingPlanVersions,
   listAccessibleClientTrainingRequests,
+  listAccessibleExerciseVersionVideosForCurrentClient,
 } from "@/lib/supabase/data-access";
 
 import styles from "./page.module.css";
@@ -83,6 +84,19 @@ export default async function ClientTrainingPage({ searchParams }: { searchParam
   }));
   const archived = exploreClientTrainingArchive(publishedItems.slice(1),archiveFilters);
   const trainingItems = publishedItems[0]?.items ?? [];
+  const exerciseVersionIds = [...new Set(
+    trainingItems.flatMap((item) => item.exercise_version_id ? [item.exercise_version_id] : []),
+  )];
+  const exerciseVideos = await listAccessibleExerciseVersionVideosForCurrentClient(exerciseVersionIds);
+  const videoByExerciseVersionId = new Map(
+    exerciseVideos.map((video) => [video.exercise_version_id, video]),
+  );
+  const workoutGuideItems = trainingItems.map((item) => ({
+    ...item,
+    videoId: item.exercise_version_id
+      ? videoByExerciseVersionId.get(item.exercise_version_id)?.id ?? null
+      : null,
+  }));
   const previousPublishedTraining = publishedItems[1] ?? null;
   const comparisonSelection = selectPublishedTrainingComparison(publishedVersions, comparar);
   const comparedIndex = publishedItems.findIndex(row => row.version.id === comparisonSelection.selected?.id);
@@ -160,7 +174,7 @@ export default async function ClientTrainingPage({ searchParams }: { searchParam
                 Nenhum exercício consta nesta versão publicada. Confira com a Patty antes de iniciar o treino.
               </Alert>
             ) : (
-            <ClientWorkoutGuide items={trainingItems} />
+            <ClientWorkoutGuide items={workoutGuideItems} />
             )}
           </Card>
           <Alert title="Sobre carga e peso" variant="info">

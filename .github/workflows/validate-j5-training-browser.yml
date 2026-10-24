@@ -6,14 +6,20 @@ on:
       - ".github/workflows/validate-j5-training-browser.yml"
       - "e2e/j5-training-lifecycle.spec.mjs"
       - "e2e/helpers/admin-auth.mjs"
+      - "app/admin/exercicios/**"
       - "app/admin/clientes/[clienteId]/treino/**"
       - "app/cliente/treino/**"
+      - "components/admin/AdminExerciseVersionVideoUpload.tsx"
       - "components/admin/AdminTraining**"
       - "components/client/ClientTraining**"
       - "components/client/ClientWorkoutGuide**"
       - "lib/training/**"
+      - "lib/operations/exercise-version-private-video.test.ts"
+      - "security/exercise-version-video-boundaries.test.mjs"
       - "supabase/migrations/*client_training*.sql"
       - "supabase/migrations/*training_draft*.sql"
+      - "supabase/migrations/20261023205316_add_exercise_version_private_videos.sql"
+      - "supabase/tests/database/exercise_version_videos_rls.test.sql"
       # Explicit all-journey regression only when the consolidated evidence matrix changes.
       - "docs/PREHOMOLOGATION_MATRIX.md"
   workflow_dispatch:
@@ -63,7 +69,10 @@ jobs:
         run: npx supabase start
 
       - name: Reset database using committed migrations
-        run: npx supabase db reset
+        run: npx supabase db reset --local
+
+      - name: Prove private exercise-video RLS in disposable PostgreSQL
+        run: npx supabase test db --local supabase/tests/database/exercise_version_videos_rls.test.sql
 
       - name: Mirror hosted service-only assignment closure ACL in disposable database
         shell: bash
