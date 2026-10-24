@@ -17,7 +17,10 @@ import {
   listEducationalContentVersionsForCurrentAdmin,
   listEducationalContentAssetsForCurrentAdminVersions,
 } from "@/lib/supabase/data-access";
-import { canPublishEducationalContentVersion } from "@/lib/content/publication-eligibility";
+import {
+  canPublishEducationalContentVersion,
+  educationalContentPublicationBlockReason,
+} from "@/lib/content/publication-eligibility";
 import { isUuid } from "@/lib/validation/uuid";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -76,9 +79,15 @@ export default async function AdminEducationalContentDetailPage({
   const currentCanPublish = current
     ? canPublishEducationalContentVersion({
         contentTypeKey: current.content_type_key,
-        hasAsset: currentAssets.length > 0,
+        assets: currentAssets,
       })
     : false;
+  const currentPublicationBlockedReason = current
+    ? educationalContentPublicationBlockReason({
+        contentTypeKey: current.content_type_key,
+        assets: currentAssets,
+      })
+    : "Não foi possível localizar a versão atual.";
 
   return (
     <>
@@ -134,6 +143,7 @@ export default async function AdminEducationalContentDetailPage({
 
             <AdminEducationalContentDraftSaveForm
               contentId={content.id}
+              contentTypeKey={current.content_type_key}
               displayOrder={current.display_order}
               key={JSON.stringify([current.id, current.title, current.display_order])}
               title={current.title}
@@ -149,15 +159,14 @@ export default async function AdminEducationalContentDetailPage({
             <AdminEducationalContentPublishForm
               canPublish={currentCanPublish}
               contentId={content.id}
+              publicationBlockedReason={currentPublicationBlockedReason}
               versionId={current.id}
               versionNumber={current.version_number}
             />
             <p className={styles.description}>
               {currentCanPublish
-                ? currentAssets.length > 0
-                  ? "Após publicar, esta versão com arquivo poderá ser liberada manualmente para cada cliente. Não há liberação automática."
-                  : "Este tipo pode ser publicado sem arquivo, mas uma versão publicada não aceita anexos posteriores e não poderá ser liberada sem arquivo. Para distribuição, registre um arquivo no rascunho antes de publicar."
-                : "Esta versão é de vídeo e ainda não possui asset privado verificado registrado. O upload e o registro do asset precisam acontecer antes da publicação."}
+                ? "Após publicar, esta versão com arquivo poderá ser liberada manualmente para cada cliente. Não há liberação automática."
+                : currentPublicationBlockedReason}
             </p>
           </Card>
         )}

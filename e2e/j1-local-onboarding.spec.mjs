@@ -618,7 +618,7 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
 
     await page.getByRole("button", { name: "Consultar estado do envio" }).click();
     await expect(page.getByText(
-      "O arquivo foi transferido, mas a sessão ainda aguarda finalização. Você pode concluir esta mesma sessão, sem enviar outro arquivo.",
+      "A sessão ainda aguarda finalização. O servidor ainda precisa confirmar a transferência antes de concluir esta mesma sessão; não envie outra cópia.",
       { exact: true },
     )).toBeVisible();
     const resume = page.getByRole("button", { name: "Concluir esta mesma sessão" });
@@ -1185,7 +1185,7 @@ test("J1 local: invite activation, cadastro, versioned Anamnese draft and isolat
 
       await adminPage.getByRole("button", { name: "Consultar estado do envio" }).click();
       await expect(adminPage.getByText(
-        "O arquivo foi transferido, mas a sessão ainda aguarda finalização. Você pode concluir esta mesma sessão, sem enviar outro arquivo.",
+        "A sessão ainda aguarda finalização. O servidor ainda precisa confirmar a transferência antes de concluir esta mesma sessão; não envie outra cópia.",
         { exact: true },
       )).toBeVisible();
       await adminPage.getByRole("button", { name: "Concluir esta mesma sessão" }).dblclick();

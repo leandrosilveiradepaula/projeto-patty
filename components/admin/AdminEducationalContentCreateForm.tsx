@@ -10,6 +10,7 @@ import {
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { MAX_CONTENT_DISPLAY_ORDER } from "@/lib/content/display-order";
+import { EDUCATIONAL_CONTENT_TYPES } from "@/lib/content/publication-eligibility";
 
 import styles from "@/app/admin/conteudos/page.module.css";
 
@@ -93,6 +94,15 @@ export function AdminEducationalContentCreateForm() {
           step="1"
           type="number"
         />
+      </label>
+      <label className={styles.field}>
+        <span>Tipo de conteúdo</span>
+        <select defaultValue="" disabled={busy || created} name="contentTypeKey" onChange={() => setResult(null)} required>
+          <option disabled value="">Selecione o tipo</option>
+          {EDUCATIONAL_CONTENT_TYPES.map((contentType) => (
+            <option key={contentType.key} value={contentType.key}>{contentType.label}</option>
+          ))}
+        </select>
       </label>
       <Button disabled={busy || created} loading={busy} type="submit">
         Criar rascunho
