@@ -49,7 +49,7 @@ test("J2 browser process explicitly refuses a remote Supabase or Next server", (
 test("TOTP is enabled only by a local runner patch and never committed in the Supabase config", () => {
   const committed = read("supabase/config.toml");
   const workflow = read(".github/workflows/validate-j2-weekly-feedback-browser.yml");
-  assert.match(committed, /\[auth\.mfa\.totp\]\nenroll_enabled = false\nverify_enabled = false/);
+  assert.match(committed, /\[auth\.mfa\.totp\]\r?\nenroll_enabled = false\r?\nverify_enabled = false/);
   assert.match(workflow, /const before="\[auth\.mfa\.totp\]\\nenroll_enabled = false\\nverify_enabled = false"/);
   assert.match(workflow, /const after="\[auth\.mfa\.totp\]\\nenroll_enabled = true\\nverify_enabled = true"/);
 });
