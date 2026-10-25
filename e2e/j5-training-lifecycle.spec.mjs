@@ -1,4 +1,4 @@
-import { randomBytes } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { createClient } from "@supabase/supabase-js";
 import { expect, test } from "@playwright/test";
@@ -151,7 +151,7 @@ function items(versionId) {
 function visibleCount(userId, aal, table, recordId) {
   if (!UUID.test(userId) || !UUID.test(recordId) ||
       !["aal1", "aal2"].includes(aal) ||
-      !["client_training_plan_versions", "client_training_plan_items"].includes(table))
+      !["client_training_plan_versions", "client_training_plan_items", "exercise_version_videos"].includes(table))
     throw new Error("Invalid local RLS probe");
   const claims = JSON.stringify({ sub: userId, role: "authenticated", aal });
   return Number(sql([
@@ -513,5 +513,120 @@ test("J5: client requests, Patty reviews/publishes exact training versions and a
     });
   } finally {
     await Promise.all([adminCtx.close(), clientCtx.close(), outsiderCtx.close(), foreignCtx.close()]);
+  }
+});
+
+test("J5: a verified synthetic MP4 is bound to one published exercise version and one client training", async ({ browser }) => {
+  test.setTimeout(300000);
+  const nonce = randomBytes(8).toString("hex");
+  const staff = await identity("admin", "staff", nonce);
+  const owner = await identity("client", "client", nonce);
+  const foreign = await identity("client", "foreign", nonce);
+  const clientId = insert("clients", {
+    profile_id: owner.id, full_name: "J5 Video Client sintetica", status: "active",
+  });
+  insert("clients", {
+    profile_id: foreign.id, full_name: "J5 Video Foreign sintetica", status: "active",
+  });
+  insert("client_assignments", { client_id: clientId, staff_profile_id: staff.id });
+
+  const exerciseId = randomUUID();
+  const exerciseVersionId = randomUUID();
+  const videoId = randomUUID();
+  // This fixture represents a tiny synthetic MP4 that has already passed the
+  // server-side Blob verification. The local J5 runtime deliberately has no
+  // Vercel credential, so this browser test proves UI rendering and RLS-backed
+  // authorization—not a Vercel transfer or media decoder playback.
+  sql([
+    "insert into public.exercises (id) values (" + literal(exerciseId) + ");",
+    "insert into public.exercise_versions (id,exercise_id,version_number,name) values (" +
+      literal(exerciseVersionId) + "," + literal(exerciseId) + ",1,'J5 MP4 sintetico');",
+    "insert into public.exercise_version_videos (id,exercise_version_id,storage_path,content_type,byte_size,sha256_hex,verified_at) values (" +
+      literal(videoId) + "," + literal(exerciseVersionId) + ",'exercise-videos/" +
+      randomUUID() + ".mp4','video/mp4',128,repeat('a',64),now());",
+  ].join("\n"));
+
+  const totp = await enrollTotp(staff);
+  const adminCtx = await browser.newContext({ baseURL, viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+  const ownerCtx = await browser.newContext({ baseURL, viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+  const foreignCtx = await browser.newContext({ baseURL });
+  const anonymousCtx = await browser.newContext({ baseURL });
+  try {
+    const adminPage = await adminCtx.newPage();
+    const ownerPage = await ownerCtx.newPage();
+    const foreignPage = await foreignCtx.newPage();
+    const anonymousPage = await anonymousCtx.newPage();
+    await loginAdminWithMfa(adminPage, { email: staff.email, password: staff.password, totpSecret: totp });
+    await loginClient(ownerPage, owner);
+    await loginClient(foreignPage, foreign);
+
+    await test.step("Patty inspects the verified draft and manually publishes only its catalog version", async () => {
+      await adminPage.goto("/admin/exercicios/" + exerciseId);
+      await expect(adminPage.getByText("MP4 privado verificado · 128 bytes.", { exact: true })).toBeVisible();
+      await expect(adminPage.getByLabel("Reproduzir vídeo: Demonstração de J5 MP4 sintetico"))
+        .toHaveAttribute("src", "/admin/exercicios/videos/" + videoId);
+      await adminPage.getByRole("button", { name: "Revisar publicação" }).click();
+      await adminPage.getByRole("checkbox", { name: /Revisei esta versão/ }).check();
+      await adminPage.getByRole("button", { name: "Confirmar publicação" }).click();
+      await expect.poll(() => rows("select published_at from public.exercise_versions where id=" + literal(exerciseVersionId))[0]?.published_at ?? null)
+        .not.toBeNull();
+      // Publishing a catalog version alone must not mint client video visibility.
+      expect(visibleCount(owner.id, "aal1", "exercise_version_videos", videoId)).toBe(0);
+      await ownerPage.reload();
+      await expect(ownerPage.getByText("Nenhum treino publicado", { exact: true })).toBeVisible();
+    });
+
+    await test.step("Patty selects the exact version in a client draft, reviews it, and publishes manually", async () => {
+      await test.step("Client submits synthetic training request", async () => {
+        await ownerPage.getByLabel("Observação", { exact: true }).fill("Solicitação sintética de vídeo J5");
+        await ownerPage.getByRole("button", { name: "Solicitar treino" }).click();
+        await pollRows("select id from public.client_training_requests where client_id=" + literal(clientId), 1);
+      }, { timeout: 45000 });
+
+      await test.step("Patty opens client training and creates editable draft", async () => {
+        await adminPage.goto("/admin/clientes/" + clientId + "/treino");
+        await adminPage.getByLabel("Título do treino").fill("J5 treino com vídeo sintético");
+        await adminPage.getByRole("button", { name: "Criar rascunho" }).click();
+        await expect(adminPage.getByRole("heading", { name: "Adicionar exercício" })).toBeVisible();
+      }, { timeout: 45000 });
+
+      await test.step("Patty links exact published exercise and saves one training item", async () => {
+        await adminPage.getByRole("combobox", { name: "Exercício da biblioteca (opcional)" }).selectOption(exerciseVersionId);
+        await adminPage.getByLabel("Séries", { exact: true }).fill("1");
+        await adminPage.getByLabel("Repetições", { exact: true }).fill("1");
+        await adminPage.getByRole("button", { name: "Adicionar exercício" }).click();
+        await expect.poll(() => {
+          const current = versions(clientId)[0];
+          return current ? items(current.id).length : 0;
+        }).toBe(1);
+        const trainingVersion = versions(clientId)[0];
+        expect(items(trainingVersion.id)[0].exercise_version_id).toBe(exerciseVersionId);
+      }, { timeout: 45000 });
+
+      await test.step("Patty reviews and publishes the exact client training version", async () => {
+        await adminPage.getByRole("button", { name: "Revisar treino" }).click();
+        await adminPage.getByRole("button", { name: "Confirmar revisão" }).click();
+        await adminPage.getByRole("button", { name: "Publicar treino" }).click();
+        await adminPage.getByRole("button", { name: "Confirmar publicação" }).click();
+        await expect.poll(() => Boolean(versions(clientId)[0]?.published_at)).toBe(true);
+        expect(visibleCount(owner.id, "aal1", "exercise_version_videos", videoId)).toBe(1);
+      }, { timeout: 45000 });
+    });
+
+    await test.step("Only the authorized client receives the exact player endpoint", async () => {
+      await ownerPage.reload();
+      const player = ownerPage.getByLabel("Reproduzir vídeo: Demonstração de J5 MP4 sintetico");
+      await expect(player).toHaveAttribute("src", "/cliente/treino/videos/" + videoId);
+      const foreignResponse = await foreignPage.goto("/cliente/treino/videos/" + videoId);
+      expect(foreignResponse?.status()).toBe(404);
+      await anonymousPage.goto("/cliente/treino/videos/" + videoId);
+      await expect(anonymousPage).toHaveURL(/\/login/);
+      expect((await ownerPage.goto("/cliente/treino/videos/" + randomUUID())).status()).toBe(404);
+      // There is no Blob token in this disposable test. The visible player and
+      // protected endpoint above prove rendering and authorization only; actual
+      // MP4 transfer/decoder playback remains a separate Vercel-backed check.
+    });
+  } finally {
+    await Promise.all([adminCtx.close(), ownerCtx.close(), foreignCtx.close(), anonymousCtx.close()]);
   }
 });

@@ -53,6 +53,12 @@ Nao existem mais clientes sem nome no ambiente atual. A migration `2026100713300
 
 `sets_text`, `repetitions_text`, `rest_text` e `execution_notes` sao conteudo explicito da prescricao individual versionada, nao regras globais nem autorizacao para progressao automatica.
 
+### Vídeo demonstrativo opcional por versão de exercício
+
+`exercise_version_videos` associa no máximo um MP4 privado a uma `exercise_version` exata. O registro preserva provedor privado, path opaco, MIME, tamanho, SHA-256 e instante de verificação. A mídia não é requisito para publicar um exercício, não altera prescrições e não é localizada pelo nome do exercício.
+
+Uma vez publicada a versão de exercício, o vídeo vinculado é imutável. A versão de treino publicada preserva sua referência exata em `exercise_version_id`; somente essa referência pode autorizar a leitura da mídia.
+
 A cliente pode ler somente o proprio plano e itens pertencentes a versoes publicadas. A Patty/admin depende de assignment ativo e AAL2. A criacao do primeiro draft exige solicitacao de treino previamente registrada.
 
 # Modelo de Dados

@@ -137,7 +137,7 @@ export function AdminTrainingPlanItemForm({
         </Alert>
       ) : null}
 
-      <label className={styles.field}>
+      <div className={styles.field}>
         <span>Exercício da biblioteca (opcional)</span>
         <input className={styles.select} type="search" value={exerciseSearch}
           onChange={(event) => { setExerciseSearch(event.target.value); setShowAllMatches(false); }}
@@ -145,6 +145,7 @@ export function AdminTrainingPlanItemForm({
           maxLength={120} disabled={isPending} />
         <small role="status">{filteredExerciseOptions.length} versão(ões) publicada(s) encontrada(s).</small>
         <select
+          aria-label="Exercício da biblioteca (opcional)"
           className={styles.select}
           disabled={isPending}
           name="exerciseVersionId"
@@ -173,7 +174,7 @@ export function AdminTrainingPlanItemForm({
             ? `Selecionado: ${selectedExercise.name} · versão ${selectedExercise.versionNumber}. O nome manual não será enviado.`
             : "Sem versão selecionada: informe o nome manual abaixo para a prescrição."}
         </small>
-      </label>
+      </div>
 
       {filteredExerciseOptions.length > 25 ? (
         <Button type="button" variant="secondary" disabled={isPending} onClick={() => setShowAllMatches((current) => !current)}>

@@ -6,10 +6,12 @@ const guide=readFileSync(new URL("../../components/client/ClientWorkoutGuide.tsx
 const css=readFileSync(new URL("../../app/cliente/treino/page.module.css",import.meta.url),"utf8");
 
 test("published workout guide receives exclusively already authorized current version items",()=>{
- assert.match(page, /<ClientWorkoutGuide items=\{trainingItems\} \/>/);
+ assert.match(page, /<ClientWorkoutGuide items=\{workoutGuideItems\} \/>/);
  assert.ok(page.includes("publishedTrainingVersions(trainingVersions)"));
  assert.ok(page.includes("publishedItems[0]?.items ?? []"));
  assert.ok(page.includes("trainingItems.length === 0"));
+ assert.ok(page.includes("item.exercise_version_id"));
+ assert.ok(page.includes("videoByExerciseVersionId.get(item.exercise_version_id)"));
 });
 test("client can navigate published exercises without generating adherence data or modifying history",()=>{
  assert.ok(guide.includes("useState(items[0]?.id"));

@@ -1,3 +1,9 @@
+## 2026-10-24 — J5: vídeos demonstrativos privados por versão (PR #1011 draft; rollout bloqueado)
+
+A implementação usa a migration incremental `20261023205316_add_exercise_version_private_videos.sql` (**não aplicada no Supabase SaaS**), uma mídia MP4 opcional verificada por versão exata do exercício, com SHA-256 validado no servidor, armazenamento privado, autorização RLS e MFA AAL2 administrativa. A cliente recebe o vídeo apenas quando o exercício da versão exata está vinculado ao próprio treino publicado, sem navegação do catálogo global. Publicação continua exclusivamente humana.
+
+A PR [#1011](https://github.com/leandrosilveiradepaula/projeto-patty/pull/1011) permanece em draft para validar pgTAP de RLS/imutabilidade e Playwright sintético no banco descartável. Foi corrigido um desvio do gatilho que permitiria mover mídia de exercício publicado a versão em rascunho; a versão atual verifica as associações OLD/NEW nas operações correspondentes e inclui regressão. **Não integrar nem publicar o código que consulta a nova tabela antes de aprovar e aplicar a migration com validação pós-aplicação e ordem segura de rollout.** Nenhum vídeo histórico foi migrado, disponibilizado ou homologado pela Patty.
+
 ## 2026-10-23 — Estado vigente de prontidão consolidado (controle: issue #1008)
 
 Este bloco é a referência operacional atual para encerramento. Os registros abaixo permanecem como histórico; quando descrevem a PR #1007 como pendente, o vídeo educacional como ainda não transferido ou o bloqueio de publicação como resolvido, devem ser lidos como fotografias da respectiva data, não como estado vigente.

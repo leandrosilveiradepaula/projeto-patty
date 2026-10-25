@@ -2126,6 +2126,101 @@ export async function listExerciseVersionsForCurrentAdmin(exerciseId: string) {
   );
 }
 
+export async function getAccessibleExerciseVersionVideoForCurrentAdmin(
+  exerciseVersionId: string,
+) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("exercise_version_videos")
+    .select("id, exercise_version_id, storage_provider, storage_path, content_type, byte_size, sha256_hex, verified_at, created_at")
+    .eq("exercise_version_id", exerciseVersionId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function getAccessibleExerciseVersionVideoByIdForCurrentAdmin(videoId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("exercise_version_videos")
+    .select("id, exercise_version_id, storage_provider, storage_path, content_type, byte_size, sha256_hex, verified_at, created_at")
+    .eq("id", videoId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function listAccessibleExerciseVersionVideosForCurrentAdmin(
+  exerciseVersionIds: string[],
+) {
+  if (exerciseVersionIds.length === 0) return [];
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("exercise_version_videos")
+    .select("id, exercise_version_id, storage_provider, content_type, byte_size, sha256_hex, verified_at, created_at")
+    .in("exercise_version_id", exerciseVersionIds);
+
+  if (error) throw error;
+  return data;
+}
+
+export async function getAccessibleExerciseVersionVideoForCurrentClient(videoId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("exercise_version_videos")
+    .select("id, exercise_version_id, storage_provider, storage_path, content_type, byte_size, sha256_hex, verified_at")
+    .eq("id", videoId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function listAccessibleExerciseVersionVideosForCurrentClient(
+  exerciseVersionIds: string[],
+) {
+  if (exerciseVersionIds.length === 0) return [];
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("exercise_version_videos")
+    .select("id, exercise_version_id, content_type, verified_at")
+    .in("exercise_version_id", exerciseVersionIds)
+    .eq("storage_provider", "vercel_blob")
+    .eq("content_type", "video/mp4")
+    .not("verified_at", "is", null);
+
+  if (error) throw error;
+  return data;
+}
+
+export async function createAccessibleExerciseVersionVideo(input: {
+  byteSize: number;
+  contentType: "video/mp4";
+  exerciseVersionId: string;
+  sha256Hex: string;
+  storagePath: string;
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("exercise_version_videos")
+    .insert({
+      byte_size: input.byteSize,
+      content_type: input.contentType,
+      exercise_version_id: input.exerciseVersionId,
+      sha256_hex: input.sha256Hex,
+      storage_path: input.storagePath,
+      storage_provider: "vercel_blob",
+      verified_at: new Date().toISOString(),
+    })
+    .select("id, exercise_version_id, storage_provider, storage_path, content_type, byte_size, sha256_hex, verified_at, created_at")
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
 export async function createAccessibleExercise() {
   const supabase = await createClient();
   const { data, error } = await supabase
