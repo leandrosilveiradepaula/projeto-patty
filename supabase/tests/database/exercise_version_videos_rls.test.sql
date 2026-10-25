@@ -199,15 +199,16 @@ select throws_ok(
     )$$,
   '42501', null, 'client cannot directly register a private exercise video'
 );
+-- PostgreSQL requires data-modifying CTEs at the statement's top level.
+-- Keep the UPDATE under the client's actual RLS and assert zero rows changed.
+with attempted as (
+  update public.exercise_version_videos
+  set byte_size = 999
+  where id = 'b9000000-0000-0000-0000-000000000001'
+  returning id
+)
 select is(
-  (
-    with attempted as (
-      update public.exercise_version_videos
-      set byte_size = 999
-      where id = 'b9000000-0000-0000-0000-000000000001'
-      returning id
-    ) select count(*) from attempted
-  ),
+  (select count(*) from attempted),
   0::bigint,
   'client cannot alter a video visible through a published training'
 );
