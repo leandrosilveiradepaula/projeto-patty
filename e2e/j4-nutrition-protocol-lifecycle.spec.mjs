@@ -580,6 +580,9 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
         " where meal_id="+quote(meal.id),1);
       expect(doses[0].dose_type).toBe("protein");
       expect(Number(doses[0].dose_quantity)).toBe(1.5);
+      await expect(adminPage.locator("#versao-1")
+        .locator('[aria-label="Doses registradas nesta variação"]').first()
+        .getByText("1,5 doses",{exact:true})).toBeVisible();
       traceSyntheticDoseRlsDepth(staff.id,{version:v1.id,plan:plan.id,variant:variant.id,meal:firstMealId});
       compareSyntheticDosePlans(staff.id,firstMealId);
       probeAuthenticatedDoseRead(staff.id,firstMealId,"draft");
@@ -676,6 +679,8 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
       await expect(clientPage.getByText("Nenhum protocolo foi publicado para você",{exact:true})).toHaveCount(0);
       await expect(clientPage.getByText("J4 Linear sintético").first()).toBeVisible();
       await expect(clientPage.getByText("J4 Almoço sintético").first()).toBeVisible();
+      await expect(clientPage.locator('[aria-label="Doses registradas nesta variação"]').first()
+        .getByText("1,5 doses",{exact:true})).toBeVisible();
       await mobileFit(clientPage);
     });
 
@@ -733,9 +738,14 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
         " where p.protocol_version_id="+quote(v1.id));
       expect(savedV1).toHaveLength(1);
       expect(Number(savedV1[0].dose_quantity)).toBe(1.5);
+      await expect(adminPage.locator("#versao-2")
+        .locator('[aria-label="Doses registradas nesta variação"]').first()
+        .getByText("2,25 doses",{exact:true})).toBeVisible();
       assertDoseRlsVisibility(owner.id,secondMealId,"aal1",0);
       await clientPage.reload();
       await expect(clientPage.getByText("J4 Almoço sintético").first()).toBeVisible();
+      await expect(clientPage.locator('[aria-label="Doses registradas nesta variação"]').first()
+        .getByText("1,5 doses",{exact:true})).toBeVisible();
       expect(rows("select id from public.protocol_publications where client_id="+quote(clientId))).toHaveLength(1);
     });
 
@@ -759,12 +769,16 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
       assertDoseRlsVisibility(unrelatedOwner.id,secondMealId,"aal1",0);
       await clientPage.reload();
       await expect(clientPage.getByRole("heading",{name:"Plano atual"})).toBeVisible();
+      await expect(clientPage.locator('[aria-label="Doses registradas nesta variação"]').first()
+        .getByText("2,25 doses",{exact:true})).toBeVisible();
       const history=clientPage.getByRole("navigation",{name:"Consultar versões publicadas"});
       await expect(history).toBeVisible();
       await expect(history.getByRole("link",{name:/Versão 1/})).toBeVisible();
       await history.getByRole("link",{name:/Versão 1/}).click();
       await expect(clientPage).toHaveURL(new RegExp("publicacao="+firstPublication.id));
       await expect(clientPage.getByRole("heading",{name:/Plano anterior · versão 1/})).toBeVisible();
+      await expect(clientPage.locator('[aria-label="Doses registradas nesta variação"]').first()
+        .getByText("1,5 doses",{exact:true})).toBeVisible();
       await clientPage.goto("/cliente/protocolo");
       await expect(clientPage.getByRole("heading",{name:"Plano atual"})).toBeVisible();
       expect(rows("select id from public.protocol_publications where client_id="+quote(clientId))).toHaveLength(2);
