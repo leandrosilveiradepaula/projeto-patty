@@ -276,7 +276,7 @@ test("J6: versioned content releases require exact published version and synthet
 
     await test.step("Draft metadata without file cannot be published or released", async () => {
       await expect(admin.getByRole("button", { name: "Publicar versão" })).toBeDisabled();
-      await expect(admin.getByText(/Registre o asset privado video\/mp4/, { exact: true })).toBeVisible();
+      await expect(admin.getByRole("status").filter({ hasText: /Registre o asset privado video\/mp4/ })).toBeVisible();
       await admin.goto("/admin/clientes/" + clientId + "/conteudos");
       await expect(admin.getByText("Nenhum conteúdo disponível para liberar", {
         exact: true,
