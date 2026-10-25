@@ -10,6 +10,7 @@ import {
 } from "@/app/admin/conteudos/[contentId]/actions";
 import { Alert } from "@/components/ui/Alert";
 import { MAX_CONTENT_DISPLAY_ORDER } from "@/lib/content/display-order";
+import { EDUCATIONAL_CONTENT_TYPES } from "@/lib/content/publication-eligibility";
 import { Button } from "@/components/ui/Button";
 import styles from "@/app/admin/conteudos/[contentId]/page.module.css";
 
@@ -87,11 +88,13 @@ function VersionMutationForm({
 
 export function AdminEducationalContentDraftSaveForm({
   contentId,
+  contentTypeKey,
   displayOrder,
   title,
   versionId,
 }: {
   contentId: string;
+  contentTypeKey: string | null;
   displayOrder: number;
   title: string;
   versionId: string;
@@ -111,6 +114,15 @@ export function AdminEducationalContentDraftSaveForm({
         <span>Ordem de exibição</span>
         <input defaultValue={displayOrder} max={MAX_CONTENT_DISPLAY_ORDER} min="1" name="displayOrder" required step="1" type="number" />
       </label>
+      <label className={styles.field}>
+        <span>Tipo de conteúdo</span>
+        <select defaultValue={contentTypeKey ?? ""} name="contentTypeKey" required>
+          <option disabled value="">Selecione o tipo</option>
+          {EDUCATIONAL_CONTENT_TYPES.map((contentType) => (
+            <option key={contentType.key} value={contentType.key}>{contentType.label}</option>
+          ))}
+        </select>
+      </label>
     </VersionMutationForm>
   );
 }
@@ -120,11 +132,13 @@ export function AdminEducationalContentPublishForm({
   versionId,
   versionNumber,
   canPublish,
+  publicationBlockedReason,
 }: {
   contentId: string;
   versionId: string;
   versionNumber: number;
   canPublish: boolean;
+  publicationBlockedReason: string | null;
 }) {
   return (
     <VersionMutationForm
@@ -139,7 +153,7 @@ export function AdminEducationalContentPublishForm({
         <span>Confirmo que a versão {versionNumber} foi revisada e pode ser publicada.</span>
       </label>
       {!canPublish ? <p className={styles.description} role="status">
-        Esta versão ainda não atende aos requisitos técnicos de publicação.
+        {publicationBlockedReason ?? "Esta versão ainda não atende aos requisitos técnicos de publicação."}
       </p> : null}
     </VersionMutationForm>
   );

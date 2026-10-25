@@ -2,7 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 
-import { canPublishEducationalContentVersion } from "@/lib/content/publication-eligibility";
+import {
+  educationalContentMimeType,
+  educationalContentPublicationBlockReason,
+  hasCompatibleEducationalContentAsset,
+  isEducationalContentTypeKey,
+} from "@/lib/content/publication-eligibility";
 import { parseContentDisplayOrder } from "@/lib/content/display-order";
 import { verifyPrivateBlobAsset } from "@/lib/content/private-blob-integrity";
 import { inspectEducationalAssetRegistration } from "@/lib/content/asset-registration-recovery";
@@ -42,6 +47,14 @@ function readDisplayOrder(formData: FormData) {
   return value;
 }
 
+function readContentTypeKey(formData: FormData) {
+  const value = formData.get("contentTypeKey");
+  if (typeof value !== "string" || !isEducationalContentTypeKey(value)) {
+    throw new Error("Selecione Vídeo ou PDF para a versão.");
+  }
+  return value;
+}
+
 export async function updateEducationalContentDraftAction(
   contentId: string,
   versionId: string,
@@ -66,7 +79,16 @@ export async function updateEducationalContentDraftAction(
     throw new Error("Apenas versões em rascunho podem ser editadas");
   }
 
+  const contentTypeKey = readContentTypeKey(formData);
+  const assets = await listEducationalContentAssetsForCurrentAdmin(versionId);
+  if (assets.length > 0 && !hasCompatibleEducationalContentAsset(contentTypeKey, assets)) {
+    throw new Error(
+      `O tipo selecionado exige asset ${educationalContentMimeType(contentTypeKey)} compatível com o arquivo já registrado.`,
+    );
+  }
+
   await updateAccessibleEducationalContentDraftVersion({
+    contentTypeKey,
     contentId,
     displayOrder: readDisplayOrder(formData),
     title: readTitle(formData),
@@ -110,15 +132,12 @@ export async function publishEducationalContentVersionAction(
 
   const assets = await listEducationalContentAssetsForCurrentAdmin(versionId);
 
-  if (
-    !canPublishEducationalContentVersion({
-      contentTypeKey: version.content_type_key,
-      hasAsset: assets.length > 0,
-    })
-  ) {
-    throw new Error(
-      "Conteúdo em vídeo só pode ser publicado depois que o asset privado verificado estiver registrado",
-    );
+  const blockReason = educationalContentPublicationBlockReason({
+    contentTypeKey: version.content_type_key,
+    assets,
+  });
+  if (blockReason) {
+    throw new Error(blockReason);
   }
 
   await publishAccessibleEducationalContentVersion({
@@ -266,6 +285,14 @@ export async function registerEducationalContentAssetAction(
 
   if (contentType.length > 255 || !/^[a-zA-Z0-9][a-zA-Z0-9._+-]*\/[a-zA-Z0-9][a-zA-Z0-9._+-]*$/.test(contentType)) {
     throw new Error("MIME type inválido");
+  }
+
+  const expectedContentType = educationalContentMimeType(version.content_type_key);
+  if (!expectedContentType) {
+    throw new Error("Selecione Vídeo ou PDF no rascunho antes de registrar o asset.");
+  }
+  if (contentType !== expectedContentType) {
+    throw new Error(`O tipo ${version.content_type_key} exige asset ${expectedContentType}.`);
   }
 
   const expectedAsset = { byteSize, contentType, sha256Hex, storagePath };

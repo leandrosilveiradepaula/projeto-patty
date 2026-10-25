@@ -14,9 +14,9 @@ export type ReleasedContentDisplayEntry = ReleasedContentEntry & {
   content: ReactNode;
 };
 
-export function ClientReleasedContentExplorer({ entries, missingVersionCount }: {
+export function ClientReleasedContentExplorer({ entries, unavailableReleaseCount }: {
   entries: ReleasedContentDisplayEntry[];
-  missingVersionCount: number;
+  unavailableReleaseCount: number;
 }) {
   const [filters, setFilters] = useState<ReleasedContentFilters>({...INITIAL_RELEASE_FILTERS});
   const [page, setPage] = useState(1);
@@ -72,13 +72,13 @@ export function ClientReleasedContentExplorer({ entries, missingVersionCount }: 
 
   return (
     <div className={styles.container} id="biblioteca-educacional">
-      {missingVersionCount > 0 ? (
+      {unavailableReleaseCount > 0 ? (
         <p role="status" className={styles.notice}>
-          {missingVersionCount} liberação(ões) possuem versão indisponível para consulta. A Patty pode verificar o registro.
+          {unavailableReleaseCount} liberação(ões) possuem versão ou arquivo indisponível para consulta. A Patty pode verificar o registro.
         </p>
       ) : null}
       <p className={styles.summary} role="status">
-        {entries.length} versão(ões) liberada(s) para você. {totals.available} com arquivo e {totals.missing} sem arquivo disponível.
+        {entries.length} versão(ões) liberada(s) para você, todas com arquivo compatível disponível.
       </p>
       <div className={styles.filterPanel} aria-label="Encontrar conteúdos liberados">
         <label className={styles.field}>
@@ -107,9 +107,8 @@ export function ClientReleasedContentExplorer({ entries, missingVersionCount }: 
         </label>
         <label className={styles.field}><span>Arquivo</span>
           <select value={filters.availability} onChange={(event)=>change({availability:event.target.value as ReleasedContentAvailability})}>
-            <option value="all">Todas as situações</option>
+            <option value="all">Arquivos disponíveis</option>
             <option value="available">Com arquivo ({totals.available})</option>
-            <option value="missing">Sem arquivo ({totals.missing})</option>
           </select>
         </label>
         <label className={styles.field}><span>Ordenar</span>

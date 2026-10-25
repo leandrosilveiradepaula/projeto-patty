@@ -1,10 +1,46 @@
-## 2026-10-23 — J5: vídeos demonstrativos privados por versão de exercício (implementado localmente, não integrado)
+## 2026-10-24 — J5: vídeos demonstrativos privados por versão (PR #1011 draft; rollout bloqueado)
 
-Foi criada a migration local `20261023205316_add_exercise_version_private_videos.sql`, ainda não aplicada, para associar opcionalmente um MP4 privado verificado a uma versão exata de exercício. A interface administrativa prepara upload privado, calcula SHA-256 no navegador e exige nova verificação de bytes/MIME/hash no servidor antes do registro; publicação do exercício continua manual e não exige vídeo. A migration congela inserção, alteração e remoção da mídia após a publicação da versão.
+A implementação usa a migration incremental `20261023205316_add_exercise_version_private_videos.sql` (**não aplicada no Supabase SaaS**), uma mídia MP4 opcional verificada por versão exata do exercício, com SHA-256 validado no servidor, armazenamento privado, autorização RLS e MFA AAL2 administrativa. A cliente recebe o vídeo apenas quando o exercício da versão exata está vinculado ao próprio treino publicado, sem navegação do catálogo global. Publicação continua exclusivamente humana.
 
-No portal, o guia do treino atual só recebe um ID de vídeo quando o item publicado contém a mesma `exercise_version_id`; a rota autenticada revalida RLS, versão publicada, integridade e acesso da cliente antes de gerar URL curta de Blob. Não há catálogo global, busca por nome, URL assinada na UI, publicação automática, dados reais ou mudança de regra profissional. A cobertura local inclui teste pgTAP dedicado para grants/RLS/MFA/imutabilidade e cenário Playwright sintético para a associação da versão exata, a publicação manual do treino, o player e negativas entre clientes; ambos permanecem pendentes de execução real até haver Supabase local descartável com Docker. Testes unitários, operações e typecheck foram executados localmente; a alteração continua em worktree local, sem commit, push, PR, merge, deploy ou aplicação SaaS.
+A PR [#1011](https://github.com/leandrosilveiradepaula/projeto-patty/pull/1011) permanece em draft para validar pgTAP de RLS/imutabilidade e Playwright sintético no banco descartável. Foi corrigido um desvio do gatilho que permitiria mover mídia de exercício publicado a versão em rascunho; a versão atual verifica as associações OLD/NEW nas operações correspondentes e inclui regressão. **Não integrar nem publicar o código que consulta a nova tabela antes de aprovar e aplicar a migration com validação pós-aplicação e ordem segura de rollout.** Nenhum vídeo histórico foi migrado, disponibilizado ou homologado pela Patty.
 
----
+## 2026-10-23 — Estado vigente de prontidão consolidado (controle: issue #1008)
+
+Este bloco é a referência operacional atual para encerramento. Os registros abaixo permanecem como histórico; quando descrevem a PR #1007 como pendente, o vídeo educacional como ainda não transferido ou o bloqueio de publicação como resolvido, devem ser lidos como fotografias da respectiva data, não como estado vigente.
+
+### Fatos técnicos confirmados
+
+- As jornadas J1–J7 foram implementadas e recertificadas tecnicamente na [PR #1007](https://github.com/leandrosilveiradepaula/projeto-patty/pull/1007): oito checks `completed/success` (Validate application e Playwright J1–J7 com ambiente, identidades e dados sintéticos) no head `e6565feec2ea191c1f0a9b1839bd1103328fa6fa`.
+- A PR #1007 foi integrada em `master=e8a83590797741490bcb386b1a7bec2f4f887a07`; o Validate pós-merge [#39969083972](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/39969083972) concluiu `success`.
+- O SHA `e8a83590` **não está publicado**: a Vercel registrou `build-rate-limit` e não criou deployment Git desse SHA. O alias principal permanece no deployment anterior, conforme [#970](https://github.com/leandrosilveiradepaula/projeto-patty/issues/970). Merge e CI verde não substituem publicação.
+- A base Supabase SaaS possui 91/91 migrations, uma única admin de negócio e a proteção RLS/MFA AAL2 preservada. Não repetir migrations, reconciliação de admin ou configuração remota nesta etapa.
+- O inventário educacional mantém 110 arquivos conhecidos por metadado. O primeiro vídeo aprovado foi enviado ao Blob privado e registrado em rascunho; continua sem publicação ou release para cliente.
+
+### Lote local ainda não integrado
+
+Na worktree `projeto-patty-audit-1008`, baseada em `e8a83590`, há nove alterações locais não commitadas: seis de recuperação segura J1 e três de minimização do benchmark sintético J7. Elas foram validadas localmente com recovery J1 10/10, IA 65/65, segurança 78/78, operações 754/754, typecheck, build e `git diff --check`. O benchmark J7 usa 42 respostas sintéticas e produz 38 fontes elegíveis pelo mesmo construtor do runtime. Essas evidências são locais, não integração, CI novo, publicação ou homologação. Playwright J1/J7 desse lote não foi executado localmente por ausência de Docker; não usar SaaS como substituto.
+
+### Matriz de encerramento
+
+| Situação | Item | Responsável pela próxima condição | Condição de conclusão / bloqueio |
+| --- | --- | --- | --- |
+| Concluído tecnicamente | J1–J7 no lote #1007; CI pós-merge | — | Recertificação técnica concluída; não equivale a publicação ou aceite humano. |
+| Preparado localmente | Lote de nove arquivos J1/J7 | Responsável técnico, em lote futuro controlado | Revisão, E2E descartável e integração somente quando o bloqueio operacional permitir. |
+| Pendente de integração/publicação | SHA atual de `master` | Responsável autorizado para deploy | Quota Vercel deve permitir procedimento controlado; confirmar `READY`, SHA, aliases e CI. #970 permanece bloqueante. |
+| Pendente de configuração externa | SMTP/recovery por email e Leaked Password Protection | Responsável operacional e responsável de segurança | Configuração/decisão compatível com o provedor e o plano, sem expor segredos ou alterar Auth sem autorização. |
+| Pendente de decisão ou aprovação humana | Conteúdo editorial, direitos e releases | Patty | Aprovação de lote, autoria/direitos, audiência e versão; nenhum release automático. |
+| Pendente de decisão ou aprovação humana | Dados reais na J7 | Responsáveis competentes e Patty | Permanecem fechadas as portas P1–P6: projeto/organização, Data Controls ZDR/MAM, base legal, política de textos livres/retenção, ativação reversível e aceite da Patty. `store: false` não conclui essas portas. |
+| Reservado para homologação final | Aceite J1–J7 | Patty | Somente após SHA de produção igual ao `master`, condições de entrada concluídas e execução autenticada conforme `OPERATIONAL_ACCEPTANCE_RUNBOOK.md`. |
+
+Nenhuma homologação profissional autenticada J1–J7 foi executada. A revisão humana da Patty continua obrigatória para IA, conteúdo e aceite operacional final.
+
+## 2026-10-23 — J6: cadastro e publicação de vídeo/PDF endurecidos localmente (não integrado)
+
+**IMPLEMENTADO SOMENTE NA WORKTREE `projeto-patty-audit-1008`, BASE `e8a83590`:** o cadastro administrativo agora exige tipo explícito `Vídeo` ou `PDF`, e grava `content_type_key` já na primeira versão. Rascunhos históricos sem tipo podem ser corrigidos; versões já publicadas permanecem imutáveis, e um tipo novo só é aceito quando compatível com o asset privado já registrado. A publicação e a liberação individual usam a mesma regra técnica: exigem tipo reconhecido, asset `primary` com MIME exato (`video/mp4` ou `application/pdf`), tamanho válido, Blob privado, path e SHA-256 registrados. Não há publicação, release ou migração automática.
+
+**VISIBILIDADE DA CLIENTE:** a biblioteca filtra releases históricos cuja versão não tenha o asset primário compatível. Esses registros persistem e produzem aviso operacional para a Patty; não são apagados, alterados nem apresentados como material disponível. A rota de arquivo continua exigir a release da versão exata e a autorização existente da cliente.
+
+**EVIDÊNCIA LOCAL DESTE LOTE:** `npm run test:content` 79/79, `npm run test:operations` 754/754, `npm run test:security-boundaries` 78/78, `npm run typecheck`, `npm run test:e2e-helpers`, `npm run build` e `git diff --check` concluíram com sucesso na worktree limpa de verificação, também no SHA base `e8a83590` com o diff local aplicado. O Playwright J6 contra Supabase/Chromium descartáveis é **NÃO EXECUTADO LOCALMENTE** porque Docker não está disponível; não foi usado SaaS como substituto. Este lote não alterou migrations, Auth, MFA, RLS, políticas de Storage, Vercel, dados reais ou regras profissionais. Não está integrado, publicado ou homologado; o bloqueio #970 e a aprovação editorial/release humano pela Patty permanecem.
 
 ## 2026-10-23 — Roteiro operacional reconciliado; recertificação conjunta pós-#1006 em preparação
 

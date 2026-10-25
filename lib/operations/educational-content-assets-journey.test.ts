@@ -24,11 +24,12 @@ test("each released version uses a shared asset query, with all authorized asset
   assert.ok(!client.includes("primaryAsset ?"));
 });
 
-test("legacy releases without a primary file still show all listed assets", () => {
-  assert.ok(client.includes('hasPrimaryAsset = releaseAssets.some((asset) => asset.asset_key === "primary")'));
+test("client cards require the exact released version's compatible primary file", () => {
+  assert.ok(client.includes("hasCompatibleEducationalContentAsset("));
+  assert.ok(client.includes("unavailableReleaseCount"));
   assert.ok(client.includes("educationalAssetOpenLabel("));
   assert.ok(client.includes("hasPrimaryAsset,"));
-  assert.ok(client.includes("releaseAssets.length > 0"));
+  assert.ok(!client.includes('"Aguardando arquivo"'));
 });
 
 test("each asset opens through its private ID route, never a direct blob or storage path", () => {
@@ -45,17 +46,16 @@ test("each asset opens through its private ID route, never a direct blob or stor
   assert.ok(route.includes('"Cache-Control": "private, no-store"'));
 });
 
-test("the client only claims available files when a returned asset exists", () => {
-  assert.ok(client.includes("releaseAssets.length > 0 ?"));
-  assert.ok(client.includes('"Aguardando arquivo"'));
-  assert.ok(client.includes("arquivo ainda indisponível"));
+test("the client excludes legacy releases without a compatible file", () => {
+  assert.ok(client.includes("releasesWithVisibleVersion.filter"));
+  assert.ok(client.includes("assetsByVersion.get(version.id) ?? []"));
   assert.ok(client.includes("releaseAssets.length} arquivo(s) disponível(is)"));
   assert.ok(client.includes("Nenhum conteúdo foi liberado para você ainda"));
 });
 
-test("partial missing version joins produce an operational notice instead of silently disappearing", () => {
-  assert.ok(client.includes("missingVersionCount = orderedReleases.length - visibleReleases.length"));
-  assert.ok(read("components/client/ClientReleasedContentExplorer.tsx").includes("missingVersionCount > 0"));
+test("unavailable legacy releases produce an operational notice instead of silently disappearing", () => {
+  assert.ok(client.includes("unavailableReleaseCount = orderedReleases.length - visibleReleases.length"));
+  assert.ok(read("components/client/ClientReleasedContentExplorer.tsx").includes("unavailableReleaseCount > 0"));
   assert.ok(read("components/client/ClientReleasedContentExplorer.tsx").includes('role="status"'));
   assert.ok(read("components/client/ClientReleasedContentExplorer.tsx").includes("A Patty pode verificar o registro"));
   assert.ok(admin.includes("missingReleaseVersions = newestReleases.length - visibleReleases.length"));

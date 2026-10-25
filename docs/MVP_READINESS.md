@@ -1,3 +1,24 @@
+## Estado vigente de prontidão — 2026-10-23 (controle: issue #1008)
+
+Este resumo prevalece sobre classificações históricas abaixo que não reflitam o estado consolidado de 23/10. Ele não altera as decisões normativas nem transforma CI, merge ou testes locais em publicação ou homologação.
+
+- J1–J7 foram implementadas e recertificadas tecnicamente na PR #1007, com oito checks `completed/success` no head `e6565feec2ea191c1f0a9b1839bd1103328fa6fa`. A PR foi integrada em `master=e8a83590797741490bcb386b1a7bec2f4f887a07` e o Validate pós-merge foi aprovado.
+- O SHA atual da `master` não está publicado: a publicação Git da Vercel está bloqueada por `build-rate-limit` (#970). O deployment/alias principal ainda aponta para SHA anterior. Não tratar a #1007 como produção validada.
+- Supabase permanece com 91/91 migrations aplicadas, uma admin de negócio e RLS/MFA AAL2 preservados. Não repetir migrations ou alterações remotas para encerrar a prontidão.
+- O inventário de mídia contabiliza 110 arquivos por metadado. O primeiro vídeo aprovado foi migrado para Blob privado e registrado em rascunho, mas não está publicado nem liberado.
+- A J7 continua tecnicamente preparada, mas o processamento de dados reais de saúde permanece bloqueado até as portas P1–P6 registradas em `OPENAI_HEALTH_DATA_GATE.md`: ambiente OpenAI definitivo, controles efetivos de retenção/ZDR-MAM, base legal/aviso, política de texto livre e retenção, ativação reversível e aceite da Patty.
+- O lote local de nove arquivos J1/J7 na worktree `projeto-patty-audit-1008` está implementado e testado localmente, sem commit, integração ou publicação. Inclui recuperação de upload privado e correção do benchmark sintético J7 (42 respostas para 38 fontes elegíveis pelo construtor de produção). Playwright J1/J7 desse lote não foi executado localmente por ausência de Docker.
+- SMTP, proteção contra senhas vazadas, política de privacidade/retenção, decisões editoriais e homologação humana continuam pendências separadas. A homologação autenticada J1–J7 pela Patty é a última etapa.
+
+| Grupo | Estado | Próxima condição |
+| --- | --- | --- |
+| Concluído tecnicamente | Jornadas J1–J7 recertificadas no #1007 | Manter evidência; não confundir com produção. |
+| Preparado localmente | Correções J1/J7 não commitadas | Integração futura controlada, com E2E descartável. |
+| Bloqueio de lançamento | Publicação de `master` | Resolver #970 com autorização específica de deploy e confirmar SHA/aliases. |
+| Dependência externa | SMTP, HIBP/Leaked Password Protection e controles OpenAI | Configuração ou decisão explícita dos responsáveis competentes. |
+| Decisão humana | Conteúdo, direitos, releases e dados reais J7 | Aprovação explícita da Patty e, quando aplicável, responsáveis competentes. |
+| Homologação final | J1–J7 | Executar o runbook com a Patty somente após as condições de entrada. |
+
 ## Auditoria de conta e arquivos privados 2026-10-07
 
 A varredura do runtime confirmou que os fluxos abaixo ja existem no repositorio e nao devem permanecer classificados como UI ausente:

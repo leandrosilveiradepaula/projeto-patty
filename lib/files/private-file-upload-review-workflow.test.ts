@@ -19,7 +19,7 @@ test("file and category changes reset confirmation and cannot reuse stale select
 });
 test("unconfirmed server finalization blocks automatic retries and preserves privacy",()=>{
  for(const src of [client,admin]){
-  assert.ok(src.includes("if (finalizationStarted) setAmbiguousCompletion(true)"));
+  assert.ok(src.includes("if (transferStarted || finalizationStarted) setAmbiguousCompletion(true)"));
   assert.ok(src.includes("setAmbiguousCompletion(true)"));
   assert.ok(src.includes("ambiguousCompletion || !selectionConfirmed"));
   assert.ok(src.includes("Confira o histórico"));

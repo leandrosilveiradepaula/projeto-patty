@@ -102,7 +102,8 @@ test("client educational library is newest-first, tied to explicitly released ex
 
 test("client library does not render a blank history when released versions are inaccessible", () => {
   assert.ok(clientPage.includes("visibleReleases.length === 0"));
-  assert.ok(clientPage.includes("Há registros de liberação, mas as respectivas versões não estão disponíveis"));
+  assert.ok(clientPage.includes("respectivas versões com arquivo compatível não estão disponíveis"));
+  assert.ok(clientPage.includes("unavailableReleaseCount"));
   assert.ok(clientPage.includes("Nenhum conteúdo foi liberado para você ainda"));
   assert.ok(!clientPage.includes("storage_path"));
 });
@@ -111,6 +112,9 @@ test("private asset delivery remains authorized before generating a signed URL",
   const route = read("app/cliente/conteudos/assets/[assetId]/route.ts");
   assert.ok(route.includes('await requireRole("client")'));
   assert.ok(route.indexOf("getAccessibleEducationalContentAssetForCurrentClient(assetId)") < route.indexOf("createPrivateBlobReadUrl(asset.storage_path)"));
+  assert.ok(route.indexOf("hasCompatibleEducationalContentAsset(") < route.indexOf("createPrivateBlobReadUrl(asset.storage_path)"));
+  assert.ok(route.includes("getAccessibleEducationalContentVersionForCurrentClient"));
+  assert.ok(route.includes("listEducationalContentAssetsForCurrentClient"));
   assert.ok(route.includes('"Cache-Control": "private, no-store"'));
   assert.ok(!clientPage.includes("storage_path"));
 });

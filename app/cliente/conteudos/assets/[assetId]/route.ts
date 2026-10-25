@@ -1,6 +1,11 @@
 import { requireRole } from "@/lib/supabase/auth";
 import { createPrivateBlobReadUrl } from "@/lib/content/private-blob-url";
-import { getAccessibleEducationalContentAssetForCurrentClient } from "@/lib/supabase/data-access";
+import { hasCompatibleEducationalContentAsset } from "@/lib/content/publication-eligibility";
+import {
+  getAccessibleEducationalContentAssetForCurrentClient,
+  getAccessibleEducationalContentVersionForCurrentClient,
+  listEducationalContentAssetsForCurrentClient,
+} from "@/lib/supabase/data-access";
 import { isUuid } from "@/lib/validation/uuid";
 
 type ClientEducationalContentAssetRouteProps = {
@@ -24,6 +29,22 @@ export async function GET(
   const asset = await getAccessibleEducationalContentAssetForCurrentClient(assetId);
 
   if (!asset || asset.storage_provider !== "vercel_blob") {
+    return new Response(null, { status: 404 });
+  }
+
+  const [version, versionAssets] = await Promise.all([
+    getAccessibleEducationalContentVersionForCurrentClient(
+      asset.educational_content_version_id,
+    ),
+    listEducationalContentAssetsForCurrentClient(
+      asset.educational_content_version_id,
+    ),
+  ]);
+
+  if (!version || !hasCompatibleEducationalContentAsset(
+    version.content_type_key,
+    versionAssets,
+  )) {
     return new Response(null, { status: 404 });
   }
 

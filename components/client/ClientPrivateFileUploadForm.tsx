@@ -95,6 +95,7 @@ export function ClientPrivateFileUploadForm() {
     setIsPending(true);
     setPhase("authorizing");
     let finalizationStarted = false;
+    let transferStarted = false;
 
     try {
       const sessionResult = await createClientFileUploadSessionAction({
@@ -113,7 +114,12 @@ export function ClientPrivateFileUploadForm() {
         return;
       }
 
+      // Persist the opaque server-issued ID before starting the transfer. If
+      // the browser loses the upload response, only the server can decide
+      // whether this exact session can be finalized or must be discarded.
+      rememberRecoverySession(sessionResult.session.id);
       setPhase("transferring");
+      transferStarted = true;
       const supabase = createClient();
       const { error: uploadError } = await supabase.storage
         .from("client-private")
@@ -125,13 +131,13 @@ export function ClientPrivateFileUploadForm() {
 
       if (uploadError) {
         console.error("Private file temporary upload failed");
+        setAmbiguousCompletion(true);
         setMessage(
-          "Não foi possível enviar o arquivo para a área temporária. Tente novamente.",
+          "Não foi possível confirmar a transferência. Consulte o estado desta sessão antes de enviar novamente.",
         );
         return;
       }
 
-      rememberRecoverySession(sessionResult.session.id);
       finalizationStarted = true;
       setPhase("verifying");
       const finalizationResult = await finalizeClientFileUploadSessionAction(
@@ -172,9 +178,9 @@ export function ClientPrivateFileUploadForm() {
       router.refresh();
     } catch {
       console.error("Private file upload flow failed");
-      if (finalizationStarted) setAmbiguousCompletion(true);
+      if (transferStarted || finalizationStarted) setAmbiguousCompletion(true);
       setMessage(
-        finalizationStarted
+        transferStarted || finalizationStarted
           ? "A confirmação do envio não foi concluída. Confira o histórico antes de tentar novamente."
           : "O envio não foi concluído. Corrija a conexão ou tente novamente.",
       );
