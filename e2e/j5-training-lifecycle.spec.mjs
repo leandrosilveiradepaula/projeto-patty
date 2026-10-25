@@ -562,7 +562,7 @@ test("J5: a verified synthetic MP4 is bound to one published exercise version an
 
     await test.step("Patty inspects the verified draft and manually publishes only its catalog version", async () => {
       await adminPage.goto("/admin/exercicios/" + exerciseId);
-      await expect(adminPage.getByText("MP4 privado verificado", { exact: false })).toBeVisible();
+      await expect(adminPage.getByText("MP4 privado verificado · 128 bytes.", { exact: true })).toBeVisible();
       await expect(adminPage.getByLabel("Reproduzir vídeo: Demonstração de J5 MP4 sintetico"))
         .toHaveAttribute("src", "/admin/exercicios/videos/" + videoId);
       await adminPage.getByRole("button", { name: "Revisar publicação" }).click();
@@ -584,7 +584,7 @@ test("J5: a verified synthetic MP4 is bound to one published exercise version an
       await adminPage.getByLabel("Título do treino").fill("J5 treino com vídeo sintético");
       await adminPage.getByRole("button", { name: "Criar rascunho" }).click();
       await expect(adminPage.getByRole("heading", { name: "Adicionar exercício" })).toBeVisible();
-      await adminPage.getByRole("combobox").selectOption(exerciseVersionId);
+      await adminPage.getByRole("combobox", { name: "Exercício da biblioteca (opcional)" }).selectOption(exerciseVersionId);
       await adminPage.getByLabel("Séries", { exact: true }).fill("1");
       await adminPage.getByLabel("Repetições", { exact: true }).fill("1");
       await adminPage.getByRole("button", { name: "Adicionar exercício" }).click();
