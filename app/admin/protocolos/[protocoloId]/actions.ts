@@ -132,10 +132,16 @@ export async function updateProtocolVersionManualGuidance(
   const stageLabel = readSingleStringFormValue(formData, "stageLabel");
   const startOn = readSingleStringFormValue(formData, "plannedStartOn");
   const instructions = readSingleStringFormValue(formData, "clientInstructions");
+  const freeMeal = readSingleStringFormValue(formData, "freeMealGuidance");
+  const supplements = readSingleStringFormValue(formData, "supplementGuidance");
+  const compounded = readSingleStringFormValue(formData, "compoundedGuidance");
   const input = normalizeManualGuidance({
     manualStageLabel: stageLabel,
     plannedStartOn: startOn,
     clientInstructions: instructions,
+    freeMealGuidance: freeMeal,
+    supplementGuidance: supplements,
+    compoundedGuidance: compounded,
   });
   if (!input.valid) {
     return { message: "Confira a data e os limites de tamanho dos campos.", success: false };
@@ -144,10 +150,17 @@ export async function updateProtocolVersionManualGuidance(
   const oldStage = parseOriginalDraftLabel(readSingleStringFormValue(formData, "expectedStage"));
   const oldStart = parseOriginalDraftLabel(readSingleStringFormValue(formData, "expectedStart"));
   const oldInstructions = parseOriginalDraftLabel(readSingleStringFormValue(formData, "expectedInstructions"));
+  const oldFreeMeal = parseOriginalDraftLabel(readSingleStringFormValue(formData, "expectedFreeMealGuidance"));
+  const oldSupplements = parseOriginalDraftLabel(readSingleStringFormValue(formData, "expectedSupplementGuidance"));
+  const oldCompounded = parseOriginalDraftLabel(readSingleStringFormValue(formData, "expectedCompoundedGuidance"));
   if (!oldStage.valid || !oldStart.valid || !oldInstructions.valid ||
+      !oldFreeMeal.valid || !oldSupplements.valid || !oldCompounded.valid ||
       (oldStart.value !== null && !isExactCalendarDate(oldStart.value)) ||
       (oldStage.value !== null && oldStage.value.length > 120) ||
-      (oldInstructions.value !== null && oldInstructions.value.length > 4000)) {
+      (oldInstructions.value !== null && oldInstructions.value.length > 4000) ||
+      (oldFreeMeal.value !== null && (oldFreeMeal.value.length > 4000 || !oldFreeMeal.value.trim())) ||
+      (oldSupplements.value !== null && (oldSupplements.value.length > 4000 || !oldSupplements.value.trim())) ||
+      (oldCompounded.value !== null && (oldCompounded.value.length > 4000 || !oldCompounded.value.trim()))) {
     return { message: "Referência anterior inválida. Atualize a página.", success: false };
   }
 
@@ -164,9 +177,15 @@ export async function updateProtocolVersionManualGuidance(
       manualStageLabel: input.value.manualStageLabel,
       plannedStartOn: input.value.plannedStartOn,
       clientInstructions: input.value.clientInstructions,
+      freeMealGuidance: input.value.freeMealGuidance,
+      supplementGuidance: input.value.supplementGuidance,
+      compoundedGuidance: input.value.compoundedGuidance,
       expectedStage: oldStage.value,
       expectedStart: oldStart.value,
       expectedInstructions: oldInstructions.value,
+      expectedFreeMealGuidance: oldFreeMeal.value,
+      expectedSupplementGuidance: oldSupplements.value,
+      expectedCompoundedGuidance: oldCompounded.value,
     });
     if (!updated) {
       return { message: "Esta versão mudou em outra aba ou não está mais editável. Atualize a página.", success: false };
@@ -176,7 +195,7 @@ export async function updateProtocolVersionManualGuidance(
   }
 
   revalidateProtocolPaths(protocolId, accessible.protocol.client_id);
-  return { message: "Fase, início e orientações registrados no rascunho. Nada foi publicado.", success: true };
+  return { message: "Orientações manuais registradas no rascunho. Nada foi publicado.", success: true };
 }
 
 export async function createProtocolMealPlan(

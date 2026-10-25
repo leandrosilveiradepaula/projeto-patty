@@ -286,6 +286,15 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
                       <div><dt>Orientações para cliente</dt>
                         <dd className={styles.guidanceText}>{version.client_instructions ?? "Não informadas"}</dd>
                       </div>
+                      <div><dt>Refeição livre</dt>
+                        <dd className={styles.guidanceText}>{version.free_meal_guidance ?? "Não indicada"}</dd>
+                      </div>
+                      <div><dt>Suplementação</dt>
+                        <dd className={styles.guidanceText}>{version.supplement_guidance ?? "Não indicada"}</dd>
+                      </div>
+                      <div><dt>Manipulados</dt>
+                        <dd className={styles.guidanceText}>{version.compounded_guidance ?? "Não indicados"}</dd>
+                      </div>
                     </dl>
                     {!version.submitted_for_review_at ? (
                       <AdminProtocolManualGuidanceForm
@@ -295,6 +304,9 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
                           manualStageLabel: version.manual_stage_label,
                           plannedStartOn: version.planned_start_on,
                           clientInstructions: version.client_instructions,
+                          freeMealGuidance: version.free_meal_guidance,
+                          supplementGuidance: version.supplement_guidance,
+                          compoundedGuidance: version.compounded_guidance,
                         }}
                       />
                     ) : null}

@@ -3277,6 +3277,9 @@ export type Database = {
       }
       protocol_versions: {
         Row: {
+          free_meal_guidance: string | null
+          supplement_guidance: string | null
+          compounded_guidance: string | null
           manual_stage_label: string | null
           planned_start_on: string | null
           client_instructions: string | null
@@ -3290,6 +3293,9 @@ export type Database = {
           version_number: number
         }
         Insert: {
+          free_meal_guidance?: string | null
+          supplement_guidance?: string | null
+          compounded_guidance?: string | null
           manual_stage_label?: string | null
           planned_start_on?: string | null
           client_instructions?: string | null
@@ -3303,6 +3309,9 @@ export type Database = {
           version_number: number
         }
         Update: {
+          free_meal_guidance?: string | null
+          supplement_guidance?: string | null
+          compounded_guidance?: string | null
           manual_stage_label?: string | null
           planned_start_on?: string | null
           client_instructions?: string | null

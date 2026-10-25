@@ -40,6 +40,9 @@ export function AdminProtocolManualGuidanceForm({
       <input type="hidden" name="expectedStage" value={JSON.stringify(values.manualStageLabel)} />
       <input type="hidden" name="expectedStart" value={JSON.stringify(values.plannedStartOn)} />
       <input type="hidden" name="expectedInstructions" value={JSON.stringify(values.clientInstructions)} />
+      <input type="hidden" name="expectedFreeMealGuidance" value={JSON.stringify(values.freeMealGuidance)} />
+      <input type="hidden" name="expectedSupplementGuidance" value={JSON.stringify(values.supplementGuidance)} />
+      <input type="hidden" name="expectedCompoundedGuidance" value={JSON.stringify(values.compoundedGuidance)} />
       {state.message ? (
         <Alert title={state.success ? "Orientações salvas" : "Não foi possível salvar"}
           variant={state.success ? "success" : "critical"} live={state.success ? "polite" : "assertive"}>
@@ -66,6 +69,21 @@ export function AdminProtocolManualGuidanceForm({
         description="Texto visível à cliente somente depois da publicação explícita desta versão.">
         {fieldProps => <Textarea {...fieldProps} name="clientInstructions" rows={5}
           maxLength={4000} defaultValue={values.clientInstructions ?? ""} disabled={pending} />}
+      </FormField>
+      <FormField id={`free-meal-${protocolVersionId}`} label="Refeição livre (quando indicada)"
+        description="A Patty define individualmente se e como usar. Nenhuma frequência ou quantidade é preenchida automaticamente.">
+        {fieldProps => <Textarea {...fieldProps} name="freeMealGuidance" rows={3} maxLength={4000}
+          defaultValue={values.freeMealGuidance ?? ""} disabled={pending} />}
+      </FormField>
+      <FormField id={`supplements-${protocolVersionId}`} label="Suplementação (quando indicada)"
+        description="Somente a orientação registrada pela profissional. O aplicativo não recomenda produtos nem doses.">
+        {fieldProps => <Textarea {...fieldProps} name="supplementGuidance" rows={3} maxLength={4000}
+          defaultValue={values.supplementGuidance ?? ""} disabled={pending} />}
+      </FormField>
+      <FormField id={`compounded-${protocolVersionId}`} label="Manipulados (quando indicados)"
+        description="Orientação individual da Patty; não há prescrição, fórmula ou dose automática.">
+        {fieldProps => <Textarea {...fieldProps} name="compoundedGuidance" rows={3} maxLength={4000}
+          defaultValue={values.compoundedGuidance ?? ""} disabled={pending} />}
       </FormField>
       <Button disabled={pending} loading={pending} type="submit">Salvar orientações no rascunho</Button>
     </form>

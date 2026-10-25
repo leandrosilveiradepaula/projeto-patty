@@ -2454,7 +2454,7 @@ export async function listAccessibleProtocolVersions(protocolId: string) {
   const versions = await collectPublishedProtocolRows([protocolId], (ids, from, to) =>
     supabase
       .from("protocol_versions")
-      .select("id, protocol_id, client_id, version_number, based_on_version_id, submitted_for_review_at, created_at, manual_stage_label, planned_start_on, client_instructions")
+      .select("id, protocol_id, client_id, version_number, based_on_version_id, submitted_for_review_at, created_at, manual_stage_label, planned_start_on, client_instructions, free_meal_guidance, supplement_guidance, compounded_guidance")
       .in("protocol_id", ids)
       .order("version_number", { ascending: false })
       .order("id", { ascending: true })
@@ -2473,7 +2473,7 @@ export async function listAccessibleProtocolVersionsForProtocols(
   const versions = await collectPublishedProtocolRows(protocolIds, (ids, from, to) =>
     supabase
       .from("protocol_versions")
-      .select("id, protocol_id, client_id, version_number, based_on_version_id, submitted_for_review_at, created_at, manual_stage_label, planned_start_on, client_instructions")
+      .select("id, protocol_id, client_id, version_number, based_on_version_id, submitted_for_review_at, created_at, manual_stage_label, planned_start_on, client_instructions, free_meal_guidance, supplement_guidance, compounded_guidance")
       .in("protocol_id", ids)
       .order("version_number", { ascending: false })
       .order("id", { ascending: true })
@@ -2493,9 +2493,15 @@ export async function updateAccessibleProtocolVersionManualGuidance(input: {
   manualStageLabel: string | null;
   plannedStartOn: string | null;
   clientInstructions: string | null;
+  freeMealGuidance: string | null;
+  supplementGuidance: string | null;
+  compoundedGuidance: string | null;
   expectedStage: string | null;
   expectedStart: string | null;
   expectedInstructions: string | null;
+  expectedFreeMealGuidance: string | null;
+  expectedSupplementGuidance: string | null;
+  expectedCompoundedGuidance: string | null;
 }) {
   const supabase = await createClient();
   let query = supabase.from("protocol_versions")
@@ -2503,6 +2509,9 @@ export async function updateAccessibleProtocolVersionManualGuidance(input: {
       manual_stage_label: input.manualStageLabel,
       planned_start_on: input.plannedStartOn,
       client_instructions: input.clientInstructions,
+      free_meal_guidance: input.freeMealGuidance,
+      supplement_guidance: input.supplementGuidance,
+      compounded_guidance: input.compoundedGuidance,
     })
     .eq("id", input.protocolVersionId)
     .eq("protocol_id", input.protocolId)
@@ -2519,8 +2528,18 @@ export async function updateAccessibleProtocolVersionManualGuidance(input: {
     ? query.is("client_instructions", null)
     : query.eq("client_instructions", input.expectedInstructions);
 
+  query = input.expectedFreeMealGuidance === null
+    ? query.is("free_meal_guidance", null)
+    : query.eq("free_meal_guidance", input.expectedFreeMealGuidance);
+  query = input.expectedSupplementGuidance === null
+    ? query.is("supplement_guidance", null)
+    : query.eq("supplement_guidance", input.expectedSupplementGuidance);
+  query = input.expectedCompoundedGuidance === null
+    ? query.is("compounded_guidance", null)
+    : query.eq("compounded_guidance", input.expectedCompoundedGuidance);
+
   const { data, error } = await query
-    .select("id, manual_stage_label, planned_start_on, client_instructions")
+    .select("id, manual_stage_label, planned_start_on, client_instructions, free_meal_guidance, supplement_guidance, compounded_guidance")
     .maybeSingle();
   if (error) throw error;
   return data;
@@ -3215,6 +3234,9 @@ export type CurrentClientPublishedProtocol = {
   manualStageLabel: string | null;
   plannedStartOn: string | null;
   clientInstructions: string | null;
+  freeMealGuidance: string | null;
+  supplementGuidance: string | null;
+  compoundedGuidance: string | null;
   mealPlan: {
     cycles: Array<{
       id: string;
@@ -3270,7 +3292,7 @@ export async function listPublishedProtocolsForCurrentClient(
   const versions = await collectPublishedProtocolRows(protocolVersionIds, (ids, from, to) =>
     supabase
       .from("protocol_versions")
-      .select("id, protocol_id, version_number, manual_stage_label, planned_start_on, client_instructions")
+      .select("id, protocol_id, version_number, manual_stage_label, planned_start_on, client_instructions, free_meal_guidance, supplement_guidance, compounded_guidance")
       .eq("client_id", clientId)
       .in("id", ids)
       .order("id", { ascending: true })
@@ -3432,6 +3454,9 @@ export async function listPublishedProtocolsForCurrentClient(
         manualStageLabel: version.manual_stage_label,
         plannedStartOn: version.planned_start_on,
         clientInstructions: version.client_instructions,
+        freeMealGuidance: version.free_meal_guidance,
+        supplementGuidance: version.supplement_guidance,
+        compoundedGuidance: version.compounded_guidance,
         mealPlan: mealPlan
           ? {
               cycles: (cyclesByMealPlanVersionId.get(mealPlan.id) ?? []).map(

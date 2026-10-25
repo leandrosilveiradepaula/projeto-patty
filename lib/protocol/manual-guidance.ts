@@ -3,6 +3,9 @@ export type ManualGuidance = {
   manualStageLabel: string | null;
   plannedStartOn: string | null;
   clientInstructions: string | null;
+  freeMealGuidance: string | null;
+  supplementGuidance: string | null;
+  compoundedGuidance: string | null;
 };
 
 type Valid = { valid: true; value: ManualGuidance };
@@ -18,19 +21,32 @@ export function normalizeManualGuidance(input: {
   manualStageLabel: unknown;
   plannedStartOn: unknown;
   clientInstructions: unknown;
+  freeMealGuidance: unknown;
+  supplementGuidance: unknown;
+  compoundedGuidance: unknown;
 }): Valid | Invalid {
   if (typeof input.manualStageLabel !== "string" ||
       typeof input.plannedStartOn !== "string" ||
-      typeof input.clientInstructions !== "string") return { valid: false };
+      typeof input.clientInstructions !== "string" ||
+      typeof input.freeMealGuidance !== "string" ||
+      typeof input.supplementGuidance !== "string" ||
+      typeof input.compoundedGuidance !== "string") return { valid: false };
 
   const manualStageLabel = input.manualStageLabel.trim() || null;
   const plannedStartOn = input.plannedStartOn.trim() || null;
   const clientInstructions = input.clientInstructions.trim() || null;
+  const freeMealGuidance = input.freeMealGuidance.trim() || null;
+  const supplementGuidance = input.supplementGuidance.trim() || null;
+  const compoundedGuidance = input.compoundedGuidance.trim() || null;
   if ((manualStageLabel && manualStageLabel.length > 120) ||
       (clientInstructions && clientInstructions.length > 4000) ||
+      (freeMealGuidance && freeMealGuidance.length > 4000) ||
+      (supplementGuidance && supplementGuidance.length > 4000) ||
+      (compoundedGuidance && compoundedGuidance.length > 4000) ||
       (plannedStartOn && !isExactCalendarDate(plannedStartOn))) return { valid: false };
 
-  return { valid: true, value: { manualStageLabel, plannedStartOn, clientInstructions } };
+  return { valid: true, value: { manualStageLabel, plannedStartOn, clientInstructions,
+    freeMealGuidance, supplementGuidance, compoundedGuidance } };
 }
 
 export function formatManualStartDate(value: string | null): string {
