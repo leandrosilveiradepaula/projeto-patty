@@ -1,0 +1,6 @@
+.summary { display: grid; gap: var(--space-2); min-width: 0; padding: var(--space-3) 0; border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); }
+.title, .unavailable { margin: 0; color: var(--color-text-secondary); font-size: var(--text-body-small-size); }
+.totals { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr)); gap: var(--space-2); margin: 0; }
+.item { display: grid; gap: var(--space-1); min-width: 0; }
+.item dt { color: var(--color-text-secondary); font-size: var(--text-body-small-size); }
+.item dd { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
