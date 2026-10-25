@@ -74,6 +74,24 @@ jobs:
       - name: Prove private exercise-video RLS in disposable PostgreSQL
         run: npx supabase test db --local supabase/tests/database/exercise_version_videos_rls.test.sql
 
+      # pg_prove's summary hides the failing assertion number. If that test
+      # fails, rerun this synthetic-only, transactional SQL fixture locally
+      # and emit only the named TAP failure line, never SQL rows/JWT/credentials.
+      - name: Identify failed synthetic pgTAP assertion
+        if: failure()
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          tap_output="$(docker exec -i supabase_db_projeto-patty psql -X -q -A -t -U postgres -d postgres -v ON_ERROR_STOP=1 < supabase/tests/database/exercise_version_videos_rls.test.sql 2>/dev/null)"
+          probe_status=$?
+          set -e
+          if [ "$probe_status" -ne 0 ]; then
+            echo "::warning::Disposable pgTAP diagnostic could not be completed"
+            exit 0
+          fi
+          printf '%s\n' "$tap_output" | awk '/^not ok [0-9]+ - [A-Za-z0-9 ,:.-]+$/ { print substr($0, 1, 170); failures++ } END { if (failures == 0) print "No failing TAP assertion reproduced in disposable probe" }'
+
       - name: Mirror hosted service-only assignment closure ACL in disposable database
         shell: bash
         run: |
