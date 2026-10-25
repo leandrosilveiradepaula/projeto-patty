@@ -81,6 +81,34 @@ jobs:
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: npx supabase link --project-ref "$SUPABASE_PROJECT_ID"
 
+      # Supabase CLI's linked pooler lookup is best-effort and may fail with
+      # HTTP 403 for a scoped token. Keep the IPv4 session pooler hostname in
+      # the NON-SECRET hostname verified in Dashboard > Connect > Session pooler.
+      # Never place database passwords or full connection URLs in the repo.
+      - name: Configure validated IPv4 session pooler
+        shell: bash
+        env:
+          SUPABASE_POOLER_HOST: aws-0-us-west-2.pooler.supabase.com
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('node:fs');
+          const ref = process.env.SUPABASE_PROJECT_ID;
+          const host = (process.env.SUPABASE_POOLER_HOST || '').trim().toLowerCase();
+          if (!/^[a-z0-9]{20}$/.test(ref || '')) {
+            throw new Error('Invalid project ref');
+          }
+          if (!/^aws-[0-9]+-[a-z0-9-]+\.pooler\.supabase\.com$/.test(host)) {
+            throw new Error('Session pooler hostname must match the validated Supabase project endpoint');
+          }
+          const url = 'postgresql://postgres.' + ref + '@' + host + ':5432/postgres';
+          const output = 'supabase/.temp/pooler-url';
+          fs.mkdirSync('supabase/.temp', { recursive: true });
+          fs.writeFileSync(output, url, { mode: 0o600 });
+          fs.chmodSync(output, 0o600);
+          console.log('Validated IPv4 session pooler configuration (hostname omitted)');
+          NODE
+
       - name: Show local and remote migration history
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
