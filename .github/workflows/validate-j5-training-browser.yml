@@ -74,30 +74,6 @@ jobs:
       - name: Prove private exercise-video RLS in disposable PostgreSQL
         run: npx supabase test db --local supabase/tests/database/exercise_version_videos_rls.test.sql
 
-      # pg_prove's summary hides the failing assertion number. If that test
-      # fails, rerun this synthetic-only, transactional SQL fixture locally
-      # and emit only the named TAP failure line, never SQL rows/JWT/credentials.
-      - name: Identify failed synthetic pgTAP assertion
-        if: failure()
-        shell: bash
-        run: |
-          set -euo pipefail
-          # Use the same pinned pg_prove runner as supabase test db. Its
-          # --verbose flag exposes TAP names; never print fixture SQL/JWT rows.
-          set +e
-          tap_output="$(docker run --rm --network host \
-            -e PGPASSWORD=postgres \
-            -v "$PWD/supabase/tests/database/exercise_version_videos_rls.test.sql:/test.sql:ro" \
-            ghcr.io/supabase/pg_prove@sha256:eda7c5e68719e9c8287e78c017118407b48df904a51c935f5ab6098b8c0bc6bc \
-            --verbose --nocolor -h 127.0.0.1 -p 54322 -U postgres -d postgres /test.sql 2>/dev/null)"
-          probe_status=$?
-          set -e
-          printf '%s\n' "$tap_output" | awk '/not ok [0-9]+ - [A-Za-z0-9 ,:.-]+/ { line=$0; sub(/^.*not ok /, "not ok ", line); print substr(line, 1, 170); failures++ } END { if (failures == 0) print "No named TAP failure emitted by separate pg_prove" }'
-          if [ "$probe_status" -ne 0 ]; then
-            echo "::notice::Disposable verbose pg_prove exited nonzero (expected for failed assertions)"
-          fi
-
-
       - name: Mirror hosted service-only assignment closure ACL in disposable database
         shell: bash
         run: |

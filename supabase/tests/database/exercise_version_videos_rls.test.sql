@@ -2,56 +2,40 @@ begin;
 
 select plan(23);
 
--- Local-only pgTAP diagnostic. The wrapper returns the ORIGINAL TAP result
--- unchanged, preserving all 23 assertions; it logs only failing names.
--- This function and all synthetic fixture rows are rolled back below.
-create function pg_temp.j5_tap_report(tap_result text)
-returns text
-language plpgsql
-as $j5_tap$
-begin
-  if left(tap_result, 6) = 'not ok' then
-    raise notice 'J5 TAP FAILURE: %', left(split_part(tap_result, E'\n', 1), 170);
-  end if;
-  return tap_result;
-end;
-$j5_tap$;
-
-
-select pg_temp.j5_tap_report(has_table('public', 'exercise_version_videos'));
-select pg_temp.j5_tap_report(ok(
+select has_table('public', 'exercise_version_videos', 'private exercise-version video table exists');
+select ok(
   (select relrowsecurity from pg_class where oid = 'public.exercise_version_videos'::regclass),
   'exercise version videos have RLS enabled'
-));
-select pg_temp.j5_tap_report(ok(
+);
+select ok(
   has_table_privilege('authenticated', 'public.exercise_version_videos', 'SELECT'),
   'authenticated has the explicit SELECT grant required for RLS policies'
-));
-select pg_temp.j5_tap_report(ok(
+);
+select ok(
   not has_table_privilege('anon', 'public.exercise_version_videos', 'SELECT'),
   'anonymous callers have no video-table SELECT grant'
-));
-select pg_temp.j5_tap_report(ok(
+);
+select ok(
   not has_table_privilege('authenticated', 'public.exercise_version_videos', 'TRUNCATE'),
   'authenticated callers have no destructive TRUNCATE privilege'
-));
-select pg_temp.j5_tap_report(ok(
+);
+select ok(
   not exists (
     select 1 from pg_proc
     where oid = 'public.reject_published_exercise_version_video_mutation()'::regprocedure
       and prosecdef
   ),
   'published-video immutability trigger is not SECURITY DEFINER'
-));
-select pg_temp.j5_tap_report(ok(
+);
+select ok(
   not has_function_privilege(
     'anon',
     'public.reject_published_exercise_version_video_mutation()'::regprocedure,
     'EXECUTE'
   ),
   'the immutability trigger function is not executable by anonymous callers'
-));
-select pg_temp.j5_tap_report(ok(
+);
+select ok(
   not exists (
     select 1
     from pg_depend dependency
@@ -60,7 +44,7 @@ select pg_temp.j5_tap_report(ok(
       and routine.prosecdef
   ),
   'no SECURITY DEFINER routine depends on the private video table'
-));
+);
 
 insert into auth.users (id, email, raw_user_meta_data)
 values
@@ -120,7 +104,7 @@ values
     'video/mp4', 256, repeat('b', 64), now()
   );
 
-select pg_temp.j5_tap_report(throws_ok(
+select throws_ok(
   $$insert into public.exercise_version_videos (
       exercise_version_id, storage_path, content_type, byte_size, sha256_hex, verified_at
     ) values (
@@ -131,7 +115,7 @@ select pg_temp.j5_tap_report(throws_ok(
   '23514',
   null,
   'only MP4 metadata can be recorded as an exercise video'
-));
+);
 
 update public.exercise_versions set published_at = now()
 where id in (
@@ -189,23 +173,23 @@ insert into public.client_training_plan_items (
 set local role authenticated;
 select set_config('request.jwt.claim.sub', 'b5000000-0000-0000-0000-000000000002', true);
 select set_config('request.jwt.claims', '{"sub":"b5000000-0000-0000-0000-000000000002","aal":"aal1","role":"authenticated"}', true);
-select pg_temp.j5_tap_report(is((select count(*) from public.exercise_versions), 0::bigint, 'client cannot browse the global exercise catalog'));
-select pg_temp.j5_tap_report(is(
+select is((select count(*) from public.exercise_versions), 0::bigint, 'client cannot browse the global exercise catalog');
+select is(
   (select array_agg(id order by id) from public.exercise_version_videos),
   array['b9000000-0000-0000-0000-000000000001'::uuid],
   'client receives only the video for the exact exercise version in a published own training'
-));
-select pg_temp.j5_tap_report(is(
+);
+select is(
   (select count(*) from public.exercise_version_videos where id = 'b9000000-0000-0000-0000-000000000002'),
   0::bigint,
   'global exercise publication alone and a draft training item do not release a video'
-));
-select pg_temp.j5_tap_report(is(
+);
+select is(
   (select count(*) from public.client_training_plan_items),
   2::bigint,
   'a published training item without a video remains available'
-));
-select pg_temp.j5_tap_report(throws_ok(
+);
+select throws_ok(
   $$insert into public.exercise_version_videos (
       exercise_version_id, storage_path, content_type, byte_size, sha256_hex, verified_at
     ) values (
@@ -214,7 +198,7 @@ select pg_temp.j5_tap_report(throws_ok(
       'video/mp4', 1, repeat('d', 64), now()
     )$$,
   '42501', null, 'client cannot directly register a private exercise video'
-));
+);
 -- PostgreSQL requires data-modifying CTEs at the statement's top level.
 -- Keep the UPDATE under the client's actual RLS and assert zero rows changed.
 with attempted as (
@@ -223,53 +207,53 @@ with attempted as (
   where id = 'b9000000-0000-0000-0000-000000000001'
   returning id
 )
-select pg_temp.j5_tap_report(is(
+select is(
   (select count(*) from attempted),
   0::bigint,
   'client cannot alter a video visible through a published training'
-));
+);
 
 reset role;
 set local role authenticated;
 select set_config('request.jwt.claim.sub', 'b5000000-0000-0000-0000-000000000003', true);
 select set_config('request.jwt.claims', '{"sub":"b5000000-0000-0000-0000-000000000003","aal":"aal1","role":"authenticated"}', true);
-select pg_temp.j5_tap_report(is((select count(*) from public.exercise_version_videos), 0::bigint, 'another client receives no video authorization'));
-select pg_temp.j5_tap_report(is(
+select is((select count(*) from public.exercise_version_videos), 0::bigint, 'another client receives no video authorization');
+select is(
   (select count(*) from public.exercise_version_videos where id = 'b9000000-0000-0000-0000-000000000001'),
   0::bigint,
   'knowing the owner video UUID does not authorize another client'
-));
+);
 
 reset role;
 set local role anon;
-select pg_temp.j5_tap_report(throws_ok(
+select throws_ok(
   $$select * from public.exercise_version_videos$$,
   '42501', null, 'anonymous callers cannot read exercise videos'
-));
+);
 
 reset role;
 set local role authenticated;
 select set_config('request.jwt.claim.sub', 'b5000000-0000-0000-0000-000000000001', true);
 select set_config('request.jwt.claims', '{"sub":"b5000000-0000-0000-0000-000000000001","aal":"aal1","role":"authenticated"}', true);
-select pg_temp.j5_tap_report(is((select count(*) from public.exercise_version_videos), 0::bigint, 'admin at AAL1 cannot access exercise videos'));
+select is((select count(*) from public.exercise_version_videos), 0::bigint, 'admin at AAL1 cannot access exercise videos');
 select set_config('request.jwt.claims', '{"sub":"b5000000-0000-0000-0000-000000000001","aal":"aal2","role":"authenticated"}', true);
-select pg_temp.j5_tap_report(is((select count(*) from public.exercise_version_videos), 2::bigint, 'assigned admin at AAL2 can inspect recorded exercise videos'));
+select is((select count(*) from public.exercise_version_videos), 2::bigint, 'assigned admin at AAL2 can inspect recorded exercise videos');
 
 reset role;
-select pg_temp.j5_tap_report(throws_ok(
+select throws_ok(
   $$update public.exercise_version_videos set byte_size = 999 where id = 'b9000000-0000-0000-0000-000000000001'$$,
   '55000', 'exercise video for a published version is immutable', 'published video metadata cannot be changed silently'
-));
-select pg_temp.j5_tap_report(throws_ok(
+);
+select throws_ok(
   $$delete from public.exercise_version_videos where id = 'b9000000-0000-0000-0000-000000000001'$$,
   '55000', 'exercise video for a published version is immutable', 'published video cannot be removed and replaced silently'
-));
+);
 
-select pg_temp.j5_tap_report(throws_ok(
+select throws_ok(
   'update public.exercise_version_videos set exercise_version_id = ''b8000000-0000-0000-0000-000000000004'' where id = ''b9000000-0000-0000-0000-000000000001''',
   '55000', 'exercise video for a published version is immutable',
   'published video cannot be moved to an unpublished exercise version'
-));
+);
 
 select * from finish();
 rollback;
