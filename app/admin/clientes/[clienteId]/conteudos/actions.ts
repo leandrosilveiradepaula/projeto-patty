@@ -3,13 +3,14 @@
 import { revalidatePath } from "next/cache";
 
 import { isContentVersionReleaseEligible } from "@/lib/content/release-eligibility";
+import { canPublishEducationalContentVersion } from "@/lib/content/publication-eligibility";
 import { requireRole } from "@/lib/supabase/auth";
 import { isUuid } from "@/lib/validation/uuid";
 import {
   createAccessibleClientContentRelease,
   getAccessibleClient,
   listContentReleasesForAccessibleClient,
-  listEducationalContentAssetsForCurrentAdminVersions,
+  listEducationalContentAssetsForCurrentAdmin,
   listEducationalContentVersionsForCurrentAdmin,
 } from "@/lib/supabase/data-access";
 
@@ -45,10 +46,9 @@ export async function releaseContentToClient(
     };
   }
 
-  const [versions, releases, assets] = await Promise.all([
+  const [versions, releases] = await Promise.all([
     listEducationalContentVersionsForCurrentAdmin(),
     listContentReleasesForAccessibleClient(client.id),
-    listEducationalContentAssetsForCurrentAdminVersions([versionId]),
   ]);
   const releasedVersionIds = new Set(
     releases.flatMap((release) =>
@@ -58,9 +58,16 @@ export async function releaseContentToClient(
     ),
   );
   const selectedVersion = versions.find((version) => version.id === versionId);
+  const assets = selectedVersion
+    ? await listEducationalContentAssetsForCurrentAdmin(selectedVersion.id)
+    : [];
 
   if (
     !selectedVersion ||
+    !canPublishEducationalContentVersion({
+      contentTypeKey: selectedVersion.content_type_key,
+      assets,
+    }) ||
     !isContentVersionReleaseEligible({
       alreadyReleased: releasedVersionIds.has(versionId),
       hasAsset: assets.length > 0,
@@ -69,7 +76,7 @@ export async function releaseContentToClient(
   ) {
     return {
       message:
-        "A versão selecionada não está publicada, não possui arquivo privado registrado, não está disponível ou já foi liberada.",
+        "A versão selecionada não está publicada, não possui asset privado compatível e verificado, não está disponível ou já foi liberada.",
       success: false,
     };
   }

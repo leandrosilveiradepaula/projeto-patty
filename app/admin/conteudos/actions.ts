@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { parseContentDisplayOrder } from "@/lib/content/display-order";
+import { isEducationalContentTypeKey } from "@/lib/content/publication-eligibility";
 import { requireRole } from "@/lib/supabase/auth";
 import {
   createAccessibleEducationalContent,
@@ -35,6 +36,14 @@ function readDisplayOrder(formData: FormData) {
   return value;
 }
 
+function readContentTypeKey(formData: FormData) {
+  const value = formData.get("contentTypeKey");
+  if (typeof value !== "string" || !isEducationalContentTypeKey(value)) {
+    throw new Error("Selecione Vídeo ou PDF para o conteúdo.");
+  }
+  return value;
+}
+
 export async function createEducationalContentDraftAction(
   formData: FormData,
 ): Promise<CreateEducationalContentState> {
@@ -42,9 +51,11 @@ export async function createEducationalContentDraftAction(
 
   let title: string;
   let displayOrder: number;
+  let contentTypeKey: "video" | "pdf";
   try {
     title = readTitle(formData);
     displayOrder = readDisplayOrder(formData);
+    contentTypeKey = readContentTypeKey(formData);
   } catch (error) {
     return {
       contentId: null,
@@ -67,6 +78,7 @@ export async function createEducationalContentDraftAction(
   try {
     await createAccessibleEducationalContentVersion({
       contentId: content.id,
+      contentTypeKey,
       displayOrder,
       title,
       versionNumber: 1,

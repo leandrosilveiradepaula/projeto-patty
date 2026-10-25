@@ -26,7 +26,7 @@ export function privateFileUploadRecoveryDecision(
     case "pending":
       return {
         next: "resume",
-        message: "O arquivo foi transferido, mas a sessão ainda aguarda finalização. Você pode concluir esta mesma sessão, sem enviar outro arquivo.",
+        message: "A sessão ainda aguarda finalização. O servidor ainda precisa confirmar a transferência antes de concluir esta mesma sessão; não envie outra cópia.",
       };
     case "validating":
       return {
