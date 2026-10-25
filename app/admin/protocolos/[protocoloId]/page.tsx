@@ -11,6 +11,8 @@ import { AdminProtocolVersionPlan } from "@/components/admin/AdminProtocolVersio
 import { ProtocolCloneVersionAction } from "@/components/admin/ProtocolCloneVersionAction";
 import { ProtocolVersionComparison } from "@/components/admin/ProtocolVersionComparison";
 import { ProtocolLifecycleAction } from "@/components/admin/ProtocolLifecycleAction";
+import { AdminProtocolManualGuidanceForm } from "@/components/admin/AdminProtocolManualGuidanceForm";
+import { formatManualStartDate } from "@/lib/protocol/manual-guidance";
 import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -275,6 +277,28 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
                   >
                     <div className={styles.versionBody}>
                   <ProtocolWorkspaceJourney action={lifecycleAction} hasPlan={Boolean(mealPlan)} ready={draftReadiness.ready} versionNumber={version.version_number} versionId={version.id} />
+                  <section className={styles.versionPlan} aria-label="Orientações manuais desta versão">
+                    <h4>Fase e orientações da versão</h4>
+                    <p>Registros manuais da Patty, sem cálculo ou mudança automática de fase.</p>
+                    <dl className={styles.versionFacts}>
+                      <div><dt>Fase indicada</dt><dd>{version.manual_stage_label ?? "Não informada"}</dd></div>
+                      <div><dt>Data de início</dt><dd>{formatManualStartDate(version.planned_start_on)}</dd></div>
+                      <div><dt>Orientações para cliente</dt>
+                        <dd className={styles.guidanceText}>{version.client_instructions ?? "Não informadas"}</dd>
+                      </div>
+                    </dl>
+                    {!version.submitted_for_review_at ? (
+                      <AdminProtocolManualGuidanceForm
+                        protocolId={protocol.id}
+                        protocolVersionId={version.id}
+                        values={{
+                          manualStageLabel: version.manual_stage_label,
+                          plannedStartOn: version.planned_start_on,
+                          clientInstructions: version.client_instructions,
+                        }}
+                      />
+                    ) : null}
+                  </section>
                   <dl className={styles.versionFacts}>
                     <div><dt>Estrutura alimentar</dt><dd>{structureFacts ? structureFacts.variantCount+" variações · "+structureFacts.mealCount+" refeições · "+structureFacts.allocationCount+" doses registradas · "+structureFacts.cycleCount+" ciclos" : "Plano não registrado"}</dd></div>
                     <div>

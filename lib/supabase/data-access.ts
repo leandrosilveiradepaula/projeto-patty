@@ -2454,7 +2454,7 @@ export async function listAccessibleProtocolVersions(protocolId: string) {
   const versions = await collectPublishedProtocolRows([protocolId], (ids, from, to) =>
     supabase
       .from("protocol_versions")
-      .select("id, protocol_id, client_id, version_number, based_on_version_id, submitted_for_review_at, created_at")
+      .select("id, protocol_id, client_id, version_number, based_on_version_id, submitted_for_review_at, created_at, manual_stage_label, planned_start_on, client_instructions")
       .in("protocol_id", ids)
       .order("version_number", { ascending: false })
       .order("id", { ascending: true })
@@ -2473,7 +2473,7 @@ export async function listAccessibleProtocolVersionsForProtocols(
   const versions = await collectPublishedProtocolRows(protocolIds, (ids, from, to) =>
     supabase
       .from("protocol_versions")
-      .select("id, protocol_id, client_id, version_number, based_on_version_id, submitted_for_review_at, created_at")
+      .select("id, protocol_id, client_id, version_number, based_on_version_id, submitted_for_review_at, created_at, manual_stage_label, planned_start_on, client_instructions")
       .in("protocol_id", ids)
       .order("version_number", { ascending: false })
       .order("id", { ascending: true })
@@ -2483,6 +2483,47 @@ export async function listAccessibleProtocolVersionsForProtocols(
   return versions.sort((left, right) =>
     right.version_number - left.version_number || left.id.localeCompare(right.id),
   );
+}
+
+/** Optimistic update of client-visible guidance on an accessible protocol draft. */
+export async function updateAccessibleProtocolVersionManualGuidance(input: {
+  protocolId: string;
+  protocolVersionId: string;
+  clientId: string;
+  manualStageLabel: string | null;
+  plannedStartOn: string | null;
+  clientInstructions: string | null;
+  expectedStage: string | null;
+  expectedStart: string | null;
+  expectedInstructions: string | null;
+}) {
+  const supabase = await createClient();
+  let query = supabase.from("protocol_versions")
+    .update({
+      manual_stage_label: input.manualStageLabel,
+      planned_start_on: input.plannedStartOn,
+      client_instructions: input.clientInstructions,
+    })
+    .eq("id", input.protocolVersionId)
+    .eq("protocol_id", input.protocolId)
+    .eq("client_id", input.clientId)
+    .is("submitted_for_review_at", null);
+
+  query = input.expectedStage === null
+    ? query.is("manual_stage_label", null)
+    : query.eq("manual_stage_label", input.expectedStage);
+  query = input.expectedStart === null
+    ? query.is("planned_start_on", null)
+    : query.eq("planned_start_on", input.expectedStart);
+  query = input.expectedInstructions === null
+    ? query.is("client_instructions", null)
+    : query.eq("client_instructions", input.expectedInstructions);
+
+  const { data, error } = await query
+    .select("id, manual_stage_label, planned_start_on, client_instructions")
+    .maybeSingle();
+  if (error) throw error;
+  return data;
 }
 
 export async function cloneAccessibleProtocolVersionDraft(
@@ -3171,6 +3212,9 @@ export type CurrentClientPublishedProtocol = {
   protocolType: string;
   publishedAt: string;
   versionNumber: number;
+  manualStageLabel: string | null;
+  plannedStartOn: string | null;
+  clientInstructions: string | null;
   mealPlan: {
     cycles: Array<{
       id: string;
@@ -3226,7 +3270,7 @@ export async function listPublishedProtocolsForCurrentClient(
   const versions = await collectPublishedProtocolRows(protocolVersionIds, (ids, from, to) =>
     supabase
       .from("protocol_versions")
-      .select("id, protocol_id, version_number")
+      .select("id, protocol_id, version_number, manual_stage_label, planned_start_on, client_instructions")
       .eq("client_id", clientId)
       .in("id", ids)
       .order("id", { ascending: true })
@@ -3385,6 +3429,9 @@ export async function listPublishedProtocolsForCurrentClient(
         protocolType: protocol.protocol_type,
         publishedAt: publication.published_at,
         versionNumber: version.version_number,
+        manualStageLabel: version.manual_stage_label,
+        plannedStartOn: version.planned_start_on,
+        clientInstructions: version.client_instructions,
         mealPlan: mealPlan
           ? {
               cycles: (cyclesByMealPlanVersionId.get(mealPlan.id) ?? []).map(

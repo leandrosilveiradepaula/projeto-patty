@@ -3277,6 +3277,9 @@ export type Database = {
       }
       protocol_versions: {
         Row: {
+          manual_stage_label: string | null
+          planned_start_on: string | null
+          client_instructions: string | null
           based_on_version_id: string | null
           client_id: string
           created_at: string
@@ -3287,6 +3290,9 @@ export type Database = {
           version_number: number
         }
         Insert: {
+          manual_stage_label?: string | null
+          planned_start_on?: string | null
+          client_instructions?: string | null
           based_on_version_id?: string | null
           client_id: string
           created_at?: string
@@ -3297,6 +3303,9 @@ export type Database = {
           version_number: number
         }
         Update: {
+          manual_stage_label?: string | null
+          planned_start_on?: string | null
+          client_instructions?: string | null
           based_on_version_id?: string | null
           client_id?: string
           created_at?: string

@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/supabase/auth";
 import { buildProtocolCloneSnapshot } from "@/lib/protocol/clone-snapshot";
 import { parseProtocolDraftDoseQuantity } from "@/lib/protocol/dose-entry";
+import { isExactCalendarDate, normalizeManualGuidance } from "@/lib/protocol/manual-guidance";
 import { parseOriginalDraftLabel, parseOriginalDraftDoseQuantity, parseOriginalDraftDoseType, parseOriginalDraftId, parseOriginalDraftPosition, parseOriginalVariantKey } from "@/lib/protocol/draft-snapshots";
 import { applyDraftCycleOperation, parseDraftCycleSteps, sameDraftCycleSteps } from "@/lib/protocol/cycle-editor";
 import { protocolCycleEditFailureMessage, draftCycleWriterReadiness } from "@/lib/protocol/cycle-edit-error";
@@ -41,6 +42,7 @@ import {
   updateAccessibleMealDoseAllocation,
   updateAccessibleMealLabel,
   updateAccessibleMealPlanVariantLabel,
+  updateAccessibleProtocolVersionManualGuidance,
 } from "@/lib/supabase/data-access";
 
 export type ProtocolLifecycleFormState = {
@@ -113,6 +115,68 @@ function parseTrimmedText(formData: FormData, key: string, maxLength: number) {
   }
 
   return trimmed;
+}
+
+/** Manual context for a single draft; approved/published versions are immutable. */
+export async function updateProtocolVersionManualGuidance(
+  protocolId: string,
+  protocolVersionId: string,
+  _state: ProtocolLifecycleFormState,
+  formData: FormData,
+): Promise<ProtocolLifecycleFormState> {
+  await requireRole("admin");
+  if (!isUuid(protocolId) || !isUuid(protocolVersionId)) {
+    return { message: "Referência do protocolo inválida.", success: false };
+  }
+
+  const stageLabel = readSingleStringFormValue(formData, "stageLabel");
+  const startOn = readSingleStringFormValue(formData, "plannedStartOn");
+  const instructions = readSingleStringFormValue(formData, "clientInstructions");
+  const input = normalizeManualGuidance({
+    manualStageLabel: stageLabel,
+    plannedStartOn: startOn,
+    clientInstructions: instructions,
+  });
+  if (!input.valid) {
+    return { message: "Confira a data e os limites de tamanho dos campos.", success: false };
+  }
+
+  const oldStage = parseOriginalDraftLabel(readSingleStringFormValue(formData, "expectedStage"));
+  const oldStart = parseOriginalDraftLabel(readSingleStringFormValue(formData, "expectedStart"));
+  const oldInstructions = parseOriginalDraftLabel(readSingleStringFormValue(formData, "expectedInstructions"));
+  if (!oldStage.valid || !oldStart.valid || !oldInstructions.valid ||
+      (oldStart.value !== null && !isExactCalendarDate(oldStart.value)) ||
+      (oldStage.value !== null && oldStage.value.length > 120) ||
+      (oldInstructions.value !== null && oldInstructions.value.length > 4000)) {
+    return { message: "Referência anterior inválida. Atualize a página.", success: false };
+  }
+
+  const accessible = await getAccessibleVersionLifecycle(protocolId, protocolVersionId);
+  if (!accessible || accessible.lifecycleAction !== "submit") {
+    return { message: "Somente rascunhos acessíveis podem receber orientações.", success: false };
+  }
+
+  try {
+    const updated = await updateAccessibleProtocolVersionManualGuidance({
+      protocolId,
+      protocolVersionId,
+      clientId: accessible.protocol.client_id,
+      manualStageLabel: input.value.manualStageLabel,
+      plannedStartOn: input.value.plannedStartOn,
+      clientInstructions: input.value.clientInstructions,
+      expectedStage: oldStage.value,
+      expectedStart: oldStart.value,
+      expectedInstructions: oldInstructions.value,
+    });
+    if (!updated) {
+      return { message: "Esta versão mudou em outra aba ou não está mais editável. Atualize a página.", success: false };
+    }
+  } catch {
+    return { message: "Não foi possível salvar as orientações da versão.", success: false };
+  }
+
+  revalidateProtocolPaths(protocolId, accessible.protocol.client_id);
+  return { message: "Fase, início e orientações registrados no rascunho. Nada foi publicado.", success: true };
 }
 
 export async function createProtocolMealPlan(
