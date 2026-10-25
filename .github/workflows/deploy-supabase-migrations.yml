@@ -83,12 +83,12 @@ jobs:
 
       # Supabase CLI's linked pooler lookup is best-effort and may fail with
       # HTTP 403 for a scoped token. Keep the IPv4 session pooler hostname in
-      # a NON-SECRET repository variable, obtained from Dashboard > Connect.
+      # the NON-SECRET hostname verified in Dashboard > Connect > Session pooler.
       # Never place database passwords or full connection URLs in the repo.
       - name: Configure validated IPv4 session pooler
         shell: bash
         env:
-          SUPABASE_POOLER_HOST: ${{ vars.SUPABASE_POOLER_HOST }}
+          SUPABASE_POOLER_HOST: aws-0-us-west-2.pooler.supabase.com
         run: |
           set -euo pipefail
           node <<'NODE'
@@ -99,7 +99,7 @@ jobs:
             throw new Error('Invalid project ref');
           }
           if (!/^aws-[0-9]+-[a-z0-9-]+\.pooler\.supabase\.com$/.test(host)) {
-            throw new Error('Set repository variable SUPABASE_POOLER_HOST to the validated hostname from Supabase Dashboard > Connect > Session pooler (hostname only, no URL/password)');
+            throw new Error('Session pooler hostname must match the validated Supabase project endpoint');
           }
           const url = 'postgresql://postgres.' + ref + '@' + host + ':5432/postgres';
           const output = 'supabase/.temp/pooler-url';
