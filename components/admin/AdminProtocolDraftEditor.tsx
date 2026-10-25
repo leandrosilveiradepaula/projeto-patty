@@ -21,6 +21,7 @@ import {
 } from "@/app/admin/protocolos/[protocoloId]/actions";
 import type { AdminProtocolVersionPlanData } from "@/components/admin/AdminProtocolVersionPlan";
 import { Alert } from "@/components/ui/Alert";
+import { ProtocolVariantDoseSummary } from "@/components/protocol/ProtocolVariantDoseSummary";
 import { draftPlanAnchor, draftVariantAddAnchor, draftCycleAddAnchor, draftVariantAnchor, draftMealAnchor, draftCycleAnchor } from "@/lib/protocol/draft-navigation";
 import { serializeDraftCycleSteps } from "@/lib/protocol/cycle-editor";
 import { serializeOriginalDraftLabel } from "@/lib/protocol/draft-snapshots";
@@ -813,6 +814,7 @@ export function AdminProtocolDraftEditor({
                 <h6>{variant.label ?? "Variação sem nome"}</h6>
                 <span>{variant.meals.length} refeição(ões)</span>
               </div>
+              {variant.meals.length > 0 ? <ProtocolVariantDoseSummary allocations={variant.meals.flatMap((meal) => meal.doseAllocations)} /> : null}
 
               <details className={styles.optionalEditor}><summary>Renomear variação</summary><div className={styles.optionalEditorBody}><UpdateVariantForm
                 label={variant.label}
