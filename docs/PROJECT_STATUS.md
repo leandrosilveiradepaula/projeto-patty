@@ -1,3 +1,13 @@
+## 2026-10-25 — J4: autoria manual da fase, início e orientações por versão (PR em preparação)
+
+**Escopo confirmado em `docs/MVP_READINESS.md`:** a Patty deve poder registrar manualmente fase/protocolo, data de início e orientações. O formulário administrativo do protocolo até esta alteração só permitia estruturar refeições, doses e ciclos; a versão não carregava orientações destinadas à cliente.
+
+**Nesta branch funcional:** foi preparada migration incremental **ainda não aplicada no Supabase de produção**, que inclui três campos opcionais em `protocol_versions`: `manual_stage_label`, `planned_start_on`, `client_instructions`. A RLS existente continua restringindo leitura da cliente às versões publicadas. O conteúdo é explicitamente destinado à cliente: não colocar notas internas nesses campos. Um trigger invoker copia os valores da versão-base submetida ao criar novo rascunho, sem copiar aprovação/publicação. A edição depende de admin AAL2, assignment válido, versão em draft e snapshot de concorrência. A tela da cliente lê somente a versão exata efetivamente publicada.
+
+**Gate de rollout:** PR de runtime não pode ser mergeada/publicada antes de CI verde no SHA final, revisão de segurança, autorização específica para aplicar a nova migration e verificação do histórico remoto pós-aplicação. Dry-run não aplica schema. Nenhuma regra de fase, macro, frequência ou data automática foi introduzida. A homologação profissional conjunta J1–J7 continua como última tarefa. O controle operacional e evidências por estágio permanecem na [issue #1008](https://github.com/leandrosilveiradepaula/projeto-patty/issues/1008).
+
+**J4 anterior (#1017):** a soma factual das doses por variação foi integrada na `master=d5dc9e9f099e80f4cb1e5c3e9869ff6464aa6b1d`, CI pós-merge #40205311671 aprovado e Vercel `dpl_2PxcSFUivRCooYAyysLMjxhDwJHT` READY no SHA exato, conforme issue #1008. Seu registro abaixo que ainda a classifica como pendente é histórico.
+
 ## 2026-10-25 — Estado operacional vigente e entrega funcional J4
 
 A trava de prioridades está versionada no `AGENTS.md` pela PR [#1016](https://github.com/leandrosilveiradepaula/projeto-patty/pull/1016), `master=ab9f13c1ccc98450997d2e31b21761865a1f2081`. A [issue #1008](https://github.com/leandrosilveiradepaula/projeto-patty/issues/1008) define a próxima entrega funcional. Não reabrir onboarding, Auth ou auditorias encerradas sem falha impeditiva comprovada.

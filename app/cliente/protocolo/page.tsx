@@ -5,6 +5,7 @@ import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSte
 import { ClientPublishedNutritionBrowser } from "@/components/client/ClientPublishedNutritionBrowser";
 import { buildClientPublishedNutritionView, publishedMealAnchor, publishedCycleAnchor, publishedVariationAnchor, publishedVersionHref, selectClientPublishedVersion } from "@/lib/protocol/client-published-view";
 import { Badge } from "@/components/ui/Badge";
+import { formatManualStartDate } from "@/lib/protocol/manual-guidance";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -109,6 +110,27 @@ export default async function ClienteProtocoloPage({ searchParams }: { searchPar
                   </Badge>
                 </div>
               </Card>
+              {(publication.manualStageLabel || publication.plannedStartOn || publication.clientInstructions) ? (
+                <Card>
+                  <section aria-label="Orientações registradas pela Patty">
+                    <h3>Orientações da Patty nesta versão</h3>
+                    <dl className={styles.facts}>
+                      {publication.manualStageLabel ? (
+                        <div><dt>Fase indicada</dt><dd>{publication.manualStageLabel}</dd></div>
+                      ) : null}
+                      {publication.plannedStartOn ? (
+                        <div><dt>Data de início informada</dt><dd>{formatManualStartDate(publication.plannedStartOn)}</dd></div>
+                      ) : null}
+                      {publication.clientInstructions ? (
+                        <div><dt>Orientações para você</dt>
+                          <dd className={styles.guidanceText}>{publication.clientInstructions}</dd>
+                        </div>
+                      ) : null}
+                    </dl>
+                    <p>Estes dados foram registrados manualmente nesta versão; não significam mudança automática de fase.</p>
+                  </section>
+                </Card>
+              ) : null}
               {!view ? (
                 <EmptyState title="Estrutura alimentar indisponível" description="Esta publicação não possui plano alimentar registrado." />
               ) : (
