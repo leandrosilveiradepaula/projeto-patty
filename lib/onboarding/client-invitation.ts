@@ -80,16 +80,21 @@ async function cleanupFailedProvision(input: {
   return true;
 }
 
+/** Validate before any Auth invite/link API can create or reuse an identity. */
+function validateInvitationDisplayName(value: string) {
+  const displayName = value.trim();
+  if (displayName.length < 2 || displayName.length > 120) {
+    throw new ClientInvitationProvisionError("provision_failed");
+  }
+  return displayName;
+}
+
 async function provisionInvitedUser(input: {
   displayName: string;
   staffProfileId: string;
   userId: string;
 }) {
-  const displayName = input.displayName.trim();
-
-  if (displayName.length < 2 || displayName.length > 120) {
-    throw new ClientInvitationProvisionError("provision_failed");
-  }
+  const displayName = validateInvitationDisplayName(input.displayName);
 
   const admin = createAdminClient();
   let clientId: string | null = null;
@@ -160,6 +165,7 @@ export async function inviteAndProvisionClient(input: {
   email: string;
 }) {
   const auth = await requireRole("admin");
+  const displayName = validateInvitationDisplayName(input.displayName);
   const admin = createAdminClient();
   const invitation = await admin.auth.admin.inviteUserByEmail(input.email);
 
@@ -168,7 +174,7 @@ export async function inviteAndProvisionClient(input: {
   }
 
   return provisionInvitedUser({
-    displayName: input.displayName,
+    displayName,
     staffProfileId: auth.profileId,
     userId: invitation.data.user.id,
   });
@@ -179,6 +185,7 @@ export async function generateManualInviteAndProvisionClient(input: {
   email: string;
 }) {
   const auth = await requireRole("admin");
+  const displayName = validateInvitationDisplayName(input.displayName);
   const admin = createAdminClient();
   const generated = await admin.auth.admin.generateLink({
     type: "invite",
@@ -197,7 +204,7 @@ export async function generateManualInviteAndProvisionClient(input: {
   }
 
   const provisioned = await provisionInvitedUser({
-    displayName: input.displayName,
+    displayName,
     staffProfileId: auth.profileId,
     userId: user.id,
   });

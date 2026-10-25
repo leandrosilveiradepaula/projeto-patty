@@ -54,3 +54,21 @@ test("the synthetic onboarding E2E uses canonical name and ownership guard befor
   assert.ok(e2e.indexOf('getUserById(profileId)') < e2e.indexOf('admin.auth.admin.deleteUser(profileId)'));
   assert.match(e2e, /cleanupSyntheticClient\(\{ clientId, profileId, email \}\)/);
 });
+
+test("invalid display name is rejected before either Auth invitation can create an identity", () => {
+  const source = read("lib/onboarding/client-invitation.ts");
+  const direct = source.slice(
+    source.indexOf("export async function inviteAndProvisionClient"),
+    source.indexOf("export async function generateManualInviteAndProvisionClient"),
+  );
+  const manual = source.slice(source.indexOf("export async function generateManualInviteAndProvisionClient"));
+  for (const [block, authCall] of [
+    [direct, "admin.auth.admin.inviteUserByEmail"],
+    [manual, "admin.auth.admin.generateLink"],
+  ]) {
+    assert.match(block, /const displayName = validateInvitationDisplayName\(input\.displayName\)/);
+    assert.ok(block.indexOf("validateInvitationDisplayName(input.displayName)") < block.indexOf(authCall));
+    assert.match(block, /displayName,/);
+  }
+  assert.match(source, /if \(displayName.length < 2 \|\| displayName.length > 120\)/);
+});
