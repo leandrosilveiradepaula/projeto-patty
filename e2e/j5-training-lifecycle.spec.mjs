@@ -577,29 +577,40 @@ test("J5: a verified synthetic MP4 is bound to one published exercise version an
     });
 
     await test.step("Patty selects the exact version in a client draft, reviews it, and publishes manually", async () => {
-      await ownerPage.getByLabel("Observação", { exact: true }).fill("Solicitação sintética de vídeo J5");
-      await ownerPage.getByRole("button", { name: "Solicitar treino" }).click();
-      await pollRows("select id from public.client_training_requests where client_id=" + literal(clientId), 1);
-      await adminPage.goto("/admin/clientes/" + clientId + "/treino");
-      await adminPage.getByLabel("Título do treino").fill("J5 treino com vídeo sintético");
-      await adminPage.getByRole("button", { name: "Criar rascunho" }).click();
-      await expect(adminPage.getByRole("heading", { name: "Adicionar exercício" })).toBeVisible();
-      await adminPage.getByRole("combobox", { name: "Exercício da biblioteca (opcional)" }).selectOption(exerciseVersionId);
-      await adminPage.getByLabel("Séries", { exact: true }).fill("1");
-      await adminPage.getByLabel("Repetições", { exact: true }).fill("1");
-      await adminPage.getByRole("button", { name: "Adicionar exercício" }).click();
-      await expect.poll(() => {
-        const current = versions(clientId)[0];
-        return current ? items(current.id).length : 0;
-      }).toBe(1);
-      const trainingVersion = versions(clientId)[0];
-      expect(items(trainingVersion.id)[0].exercise_version_id).toBe(exerciseVersionId);
-      await adminPage.getByRole("button", { name: "Revisar treino" }).click();
-      await adminPage.getByRole("button", { name: "Confirmar revisão" }).click();
-      await adminPage.getByRole("button", { name: "Publicar treino" }).click();
-      await adminPage.getByRole("button", { name: "Confirmar publicação" }).click();
-      await expect.poll(() => Boolean(versions(clientId)[0]?.published_at)).toBe(true);
-      expect(visibleCount(owner.id, "aal1", "exercise_version_videos", videoId)).toBe(1);
+      await test.step("Client submits synthetic training request", async () => {
+        await ownerPage.getByLabel("Observação", { exact: true }).fill("Solicitação sintética de vídeo J5");
+        await ownerPage.getByRole("button", { name: "Solicitar treino" }).click();
+        await pollRows("select id from public.client_training_requests where client_id=" + literal(clientId), 1);
+      }, { timeout: 45000 });
+
+      await test.step("Patty opens client training and creates editable draft", async () => {
+        await adminPage.goto("/admin/clientes/" + clientId + "/treino");
+        await adminPage.getByLabel("Título do treino").fill("J5 treino com vídeo sintético");
+        await adminPage.getByRole("button", { name: "Criar rascunho" }).click();
+        await expect(adminPage.getByRole("heading", { name: "Adicionar exercício" })).toBeVisible();
+      }, { timeout: 45000 });
+
+      await test.step("Patty links exact published exercise and saves one training item", async () => {
+        await adminPage.getByRole("combobox", { name: "Exercício da biblioteca (opcional)" }).selectOption(exerciseVersionId);
+        await adminPage.getByLabel("Séries", { exact: true }).fill("1");
+        await adminPage.getByLabel("Repetições", { exact: true }).fill("1");
+        await adminPage.getByRole("button", { name: "Adicionar exercício" }).click();
+        await expect.poll(() => {
+          const current = versions(clientId)[0];
+          return current ? items(current.id).length : 0;
+        }).toBe(1);
+        const trainingVersion = versions(clientId)[0];
+        expect(items(trainingVersion.id)[0].exercise_version_id).toBe(exerciseVersionId);
+      }, { timeout: 45000 });
+
+      await test.step("Patty reviews and publishes the exact client training version", async () => {
+        await adminPage.getByRole("button", { name: "Revisar treino" }).click();
+        await adminPage.getByRole("button", { name: "Confirmar revisão" }).click();
+        await adminPage.getByRole("button", { name: "Publicar treino" }).click();
+        await adminPage.getByRole("button", { name: "Confirmar publicação" }).click();
+        await expect.poll(() => Boolean(versions(clientId)[0]?.published_at)).toBe(true);
+        expect(visibleCount(owner.id, "aal1", "exercise_version_videos", videoId)).toBe(1);
+      }, { timeout: 45000 });
     });
 
     await test.step("Only the authorized client receives the exact player endpoint", async () => {
