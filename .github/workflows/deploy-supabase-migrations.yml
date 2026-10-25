@@ -81,56 +81,32 @@ jobs:
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: npx supabase link --project-ref "$SUPABASE_PROJECT_ID"
 
-      # supabase link treats pooler lookup as best-effort. A successful link
-      # can therefore leave an IPv4-only runner with only the unreachable
-      # direct IPv6 endpoint. Query the official read-only API explicitly.
-      - name: Ensure validated IPv4 session pooler configuration
+      # Supabase CLI's linked pooler lookup is best-effort and may fail with
+      # HTTP 403 for a scoped token. Keep the IPv4 session pooler hostname in
+      # a NON-SECRET repository variable, obtained from Dashboard > Connect.
+      # Never place database passwords or full connection URLs in the repo.
+      - name: Configure validated IPv4 session pooler
         shell: bash
         env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_POOLER_HOST: ${{ vars.SUPABASE_POOLER_HOST }}
         run: |
           set -euo pipefail
           node <<'NODE'
           const fs = require('node:fs');
           const ref = process.env.SUPABASE_PROJECT_ID;
-          const token = process.env.SUPABASE_ACCESS_TOKEN;
-          if (!/^[a-z0-9]{20}$/.test(ref || '') || !token) {
-            throw new Error('Supabase project or API authentication is missing');
+          const host = (process.env.SUPABASE_POOLER_HOST || '').trim().toLowerCase();
+          if (!/^[a-z0-9]{20}$/.test(ref || '')) {
+            throw new Error('Invalid project ref');
           }
-          async function main() {
-            const response = await fetch(
-              'https://api.supabase.com/v1/projects/' + ref + '/config/database/pooler',
-              { headers: { Authorization: 'Bearer ' + token, Accept: 'application/json' } }
-            );
-            if (!response.ok) {
-              throw new Error('Read-only pooler API failed (HTTP ' + response.status + ')');
-            }
-            const configs = await response.json();
-            if (!Array.isArray(configs)) throw new Error('Invalid pooler metadata format');
-            const primary = configs.find(item => item.database_type === 'PRIMARY');
-            if (!primary || typeof primary.connection_string !== 'string') {
-              throw new Error('Primary IPv4 pooler metadata was not returned');
-            }
-            // Follow the pinned CLI's own session-mode normalization.
-            let value = primary.connection_string.replaceAll(':[YOUR-PASSWORD]', '');
-            if (primary.pool_mode !== 'session') {
-              value = value.replaceAll(':6543/', ':5432/');
-            }
-            const url = new URL(value);
-            if (!['postgresql:', 'postgres:'].includes(url.protocol) ||
-                !url.hostname.toLowerCase().endsWith('.pooler.supabase.com') ||
-                url.port !== '5432' ||
-                decodeURIComponent(url.username) !== 'postgres.' + ref ||
-                url.password !== '' || url.pathname !== '/postgres') {
-              throw new Error('Pooler endpoint failed strict project/host validation');
-            }
-            const output = 'supabase/.temp/pooler-url';
-            fs.mkdirSync('supabase/.temp', { recursive: true });
-            fs.writeFileSync(output, value, { mode: 0o600 });
-            fs.chmodSync(output, 0o600);
-            console.log('Verified IPv4 session pooler configuration (endpoint redacted)');
+          if (!/^aws-[0-9]+-[a-z0-9-]+\.pooler\.supabase\.com$/.test(host)) {
+            throw new Error('Set repository variable SUPABASE_POOLER_HOST to the validated hostname from Supabase Dashboard > Connect > Session pooler (hostname only, no URL/password)');
           }
-          main().catch(error => { console.error(error.message); process.exitCode = 1; });
+          const url = 'postgresql://postgres.' + ref + '@' + host + ':5432/postgres';
+          const output = 'supabase/.temp/pooler-url';
+          fs.mkdirSync('supabase/.temp', { recursive: true });
+          fs.writeFileSync(output, url, { mode: 0o600 });
+          fs.chmodSync(output, 0o600);
+          console.log('Validated IPv4 session pooler configuration (hostname omitted)');
           NODE
 
       - name: Show local and remote migration history
