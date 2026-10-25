@@ -250,9 +250,7 @@ select throws_ok(
 );
 
 select throws_ok(
-  $update public.exercise_version_videos
-    set exercise_version_id = 'b8000000-0000-0000-0000-000000000004'
-    where id = 'b9000000-0000-0000-0000-000000000001'$,
+  'update public.exercise_version_videos set exercise_version_id = ''b8000000-0000-0000-0000-000000000004'' where id = ''b9000000-0000-0000-0000-000000000001''',
   '55000', 'exercise video for a published version is immutable',
   'published video cannot be moved to an unpublished exercise version'
 );
