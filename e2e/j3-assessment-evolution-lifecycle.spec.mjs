@@ -492,9 +492,9 @@ test("J3: MFA, corrected measurements, two private photos, return and RLS", asyn
           const peso = ownerPage.locator("#comparacao-resultados tbody tr").filter({
             has: ownerPage.getByRole("rowheader", { name: "Peso (kg)" }),
           });
-          await expect(peso.getByRole("cell", { name: "71 kg", exact: true })).toBeVisible();
-          await expect(peso.getByRole("cell", { name: "69 kg", exact: true })).toBeVisible();
-          await expect(peso.getByRole("cell", { name: "-2 kg", exact: true })).toBeVisible();
+          await expect(peso.locator('td[data-label="Referência"]')).toContainText("71 kg");
+          await expect(peso.locator('td[data-label="Comparação"]')).toContainText("69 kg");
+          await expect(peso.locator('td[data-label="Diferença matemática"]')).toContainText("-2 kg");
           const quadril = ownerPage.locator("#comparacao-resultados tbody tr").filter({
             has: ownerPage.getByRole("rowheader", { name: "Quadril (cm)" }),
           });
