@@ -110,7 +110,8 @@ export default async function ClienteProtocoloPage({ searchParams }: { searchPar
                   </Badge>
                 </div>
               </Card>
-              {(publication.manualStageLabel || publication.plannedStartOn || publication.clientInstructions) ? (
+              {(publication.manualStageLabel || publication.plannedStartOn || publication.clientInstructions ||
+                publication.freeMealGuidance || publication.supplementGuidance || publication.compoundedGuidance) ? (
                 <Card>
                   <section aria-label="Orientações registradas pela Patty">
                     <h3>Orientações da Patty nesta versão</h3>
@@ -124,6 +125,21 @@ export default async function ClienteProtocoloPage({ searchParams }: { searchPar
                       {publication.clientInstructions ? (
                         <div><dt>Orientações para você</dt>
                           <dd className={styles.guidanceText}>{publication.clientInstructions}</dd>
+                        </div>
+                      ) : null}
+                      {publication.freeMealGuidance ? (
+                        <div><dt>Refeição livre</dt>
+                          <dd className={styles.guidanceText}>{publication.freeMealGuidance}</dd>
+                        </div>
+                      ) : null}
+                      {publication.supplementGuidance ? (
+                        <div><dt>Suplementação</dt>
+                          <dd className={styles.guidanceText}>{publication.supplementGuidance}</dd>
+                        </div>
+                      ) : null}
+                      {publication.compoundedGuidance ? (
+                        <div><dt>Manipulados</dt>
+                          <dd className={styles.guidanceText}>{publication.compoundedGuidance}</dd>
                         </div>
                       ) : null}
                     </dl>

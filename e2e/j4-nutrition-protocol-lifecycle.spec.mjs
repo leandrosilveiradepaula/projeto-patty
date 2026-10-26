@@ -561,15 +561,21 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
       await guidanceV1.locator('input[name="stageLabel"]').fill("Etapa manual J4 A");
       await guidanceV1.locator('input[name="plannedStartOn"]').fill("2026-10-25");
       await guidanceV1.locator('textarea[name="clientInstructions"]').fill("Orientações sintéticas J4 v1.");
+      await guidanceV1.locator('textarea[name="freeMealGuidance"]').fill("J4 refeição livre v1, orientação sintética.");
+      await guidanceV1.locator('textarea[name="supplementGuidance"]').fill("J4 suplementação v1, orientação sintética.");
+      await guidanceV1.locator('textarea[name="compoundedGuidance"]').fill("J4 manipulados v1, orientação sintética.");
       await guidanceV1.getByRole("button",{name:"Salvar orientações no rascunho"}).click();
       await expect(guidanceV1.getByText("Orientações salvas",{exact:true})).toBeVisible();
       await expect.poll(()=>rows("select manual_stage_label,planned_start_on,client_instructions"+
         " from public.protocol_versions where id="+quote(v1.id))[0]?.manual_stage_label,
         {timeout:25000}).toBe("Etapa manual J4 A");
-      const v1Manual=rows("select manual_stage_label,planned_start_on,client_instructions"+
+      const v1Manual=rows("select manual_stage_label,planned_start_on,client_instructions,free_meal_guidance,supplement_guidance,compounded_guidance"+
         " from public.protocol_versions where id="+quote(v1.id))[0];
       expect(v1Manual.planned_start_on).toBe("2026-10-25");
       expect(v1Manual.client_instructions).toBe("Orientações sintéticas J4 v1.");
+      expect(v1Manual.free_meal_guidance).toBe("J4 refeição livre v1, orientação sintética.");
+      expect(v1Manual.supplement_guidance).toBe("J4 suplementação v1, orientação sintética.");
+      expect(v1Manual.compounded_guidance).toBe("J4 manipulados v1, orientação sintética.");
       await openVersion(adminPage,protocolId,1);
       await actionFrom(adminPage,"Iniciar estrutura alimentar");
       await pollRows("select id from public.meal_plan_versions where protocol_version_id="+quote(v1.id),1);
@@ -697,6 +703,9 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
       await expect(clientPage.getByText("J4 Almoço sintético").first()).toBeVisible();
       await expect(clientPage.getByText("Etapa manual J4 A",{exact:true})).toBeVisible();
       await expect(clientPage.getByText("Orientações sintéticas J4 v1.",{exact:true})).toBeVisible();
+      await expect(clientPage.getByText("J4 refeição livre v1, orientação sintética.",{exact:true})).toBeVisible();
+      await expect(clientPage.getByText("J4 suplementação v1, orientação sintética.",{exact:true})).toBeVisible();
+      await expect(clientPage.getByText("J4 manipulados v1, orientação sintética.",{exact:true})).toBeVisible();
       await expect(clientPage.getByText("25/10/2026",{exact:true}).first()).toBeVisible();
       await expect(clientPage.locator('[aria-label="Doses registradas nesta variação"]').first()
         .getByText("1,5 doses",{exact:true})).toBeVisible();
@@ -741,12 +750,15 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
       expect(meal2).toHaveLength(1);
       secondMealId=meal2[0].id;
       assertDoseRlsVisibility(owner.id,secondMealId,"aal1",0);
-      const v2Manual=rows("select manual_stage_label,planned_start_on,client_instructions"+
+      const v2Manual=rows("select manual_stage_label,planned_start_on,client_instructions,free_meal_guidance,supplement_guidance,compounded_guidance"+
         " from public.protocol_versions where id="+quote(v2.id))[0];
       expect(v2Manual).toEqual({
         manual_stage_label:"Etapa manual J4 A",
         planned_start_on:"2026-10-25",
         client_instructions:"Orientações sintéticas J4 v1.",
+        free_meal_guidance:"J4 refeição livre v1, orientação sintética.",
+        supplement_guidance:"J4 suplementação v1, orientação sintética.",
+        compounded_guidance:"J4 manipulados v1, orientação sintética.",
       });
       await openVersion(adminPage,protocolId,2);
       const guidanceV2=adminPage.locator("#versao-2 form").filter({
@@ -754,6 +766,9 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
       });
       await guidanceV2.locator('input[name="stageLabel"]').fill("Etapa manual J4 B");
       await guidanceV2.locator('textarea[name="clientInstructions"]').fill("Orientações sintéticas J4 v2.");
+      await guidanceV2.locator('textarea[name="freeMealGuidance"]').fill("J4 refeição livre v2, orientação sintética.");
+      await guidanceV2.locator('textarea[name="supplementGuidance"]').fill("J4 suplementação v2, orientação sintética.");
+      await guidanceV2.locator('textarea[name="compoundedGuidance"]').fill("J4 manipulados v2, orientação sintética.");
       await guidanceV2.getByRole("button",{name:"Salvar orientações no rascunho"}).click();
       await expect(guidanceV2.getByText("Orientações salvas",{exact:true})).toBeVisible();
       await expect.poll(()=>rows("select client_instructions from public.protocol_versions"+
@@ -808,6 +823,9 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
       await expect(clientPage.getByRole("heading",{name:"Plano atual"})).toBeVisible();
       await expect(clientPage.getByText("Etapa manual J4 B",{exact:true})).toBeVisible();
       await expect(clientPage.getByText("Orientações sintéticas J4 v2.",{exact:true})).toBeVisible();
+      await expect(clientPage.getByText("J4 refeição livre v2, orientação sintética.",{exact:true})).toBeVisible();
+      await expect(clientPage.getByText("J4 suplementação v2, orientação sintética.",{exact:true})).toBeVisible();
+      await expect(clientPage.getByText("J4 manipulados v2, orientação sintética.",{exact:true})).toBeVisible();
       await expect(clientPage.locator('[aria-label="Doses registradas nesta variação"]').first()
         .getByText("2,25 doses",{exact:true})).toBeVisible();
       const history=clientPage.getByRole("navigation",{name:"Consultar versões publicadas"});
@@ -818,6 +836,9 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
       await expect(clientPage.getByRole("heading",{name:/Plano anterior · versão 1/})).toBeVisible();
       await expect(clientPage.getByText("Etapa manual J4 A",{exact:true})).toBeVisible();
       await expect(clientPage.getByText("Orientações sintéticas J4 v1.",{exact:true})).toBeVisible();
+      await expect(clientPage.getByText("J4 refeição livre v1, orientação sintética.",{exact:true})).toBeVisible();
+      await expect(clientPage.getByText("J4 suplementação v1, orientação sintética.",{exact:true})).toBeVisible();
+      await expect(clientPage.getByText("J4 manipulados v1, orientação sintética.",{exact:true})).toBeVisible();
       await expect(clientPage.locator('[aria-label="Doses registradas nesta variação"]').first()
         .getByText("1,5 doses",{exact:true})).toBeVisible();
       await clientPage.goto("/cliente/protocolo");

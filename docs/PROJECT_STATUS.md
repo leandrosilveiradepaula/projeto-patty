@@ -1,3 +1,15 @@
+## 2026-10-25 — J4: campos manuais opcionais de refeição livre, suplementação e manipulados (em PR; NÃO implantado)
+
+**Fila oficial:** [issue #1008 / cartão J4](https://github.com/leandrosilveiradepaula/projeto-patty/issues/1008#issuecomment-6399848788). A Patty confirmou o escopo de **autoria manual** desses três temas, não regras automáticas de frequência, prescrição, dosagem ou elegibilidade. Nenhum valor padrão é gerado, e qualquer texto é editado exclusivamente pela profissional.
+
+**Pacote funcional em validação:** nova migration incremental, sem reescrever a J4 anterior, cria campos opcionais por `protocol_versions`: `free_meal_guidance`, `supplement_guidance` e `compounded_guidance`. O formulário administrativo registra os textos somente em draft, com AAL2/RLS/assignment já existentes, CAS anti-concorrência, congelamento no submit e clone com base versionada. A cliente visualiza apenas dados da versão autorizada pela publicação explícita, inclusive no histórico; nenhuma nota interna deve ser inserida. Regra profissional e decisões de publicação não são automatizadas.
+
+**Gate obrigatório:** migration de produção **NÃO aplicada**; somente commitada na branch, sujeita a pgTAP, CI e dry-run. A aplicação via workflow oficial do Supabase requer autorização humana específica, limitada ao arquivo exato. Integrar/publicar o runtime **somente depois** de aplicada e verificada a versão remota. Estado `implementado na branch` não equivale a `testado`, `mergeado`, `publicado` ou `homologado`.
+
+**J4 anterior — estado confirmado:** a PR [#1019](https://github.com/leandrosilveiradepaula/projeto-patty/pull/1019) e a PR [#1018](https://github.com/leandrosilveiradepaula/projeto-patty/pull/1018) foram mergeadas; migration `20261025160000_protocol_version_manual_guidance.sql` aplicada via [#40208568504](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/40208568504); [CI pós-merge #40208662347](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/40208662347) passou; Vercel `dpl_JDQTdHpzKLgHvZcCcVak2H7iZHDb` READY na `master=b32755c5c2e3fdd61d77f88a586feb6d4212f236`. Esse ciclo está fechado tecnicamente e não deve ser reaberto sem falha comprovada.
+
+A homologação operacional conjunta pela Patty J1–J7 permanece a última tarefa.
+
 ## 2026-10-25 — J4: autoria manual da fase, início e orientações por versão (PR em preparação)
 
 **Escopo confirmado em `docs/MVP_READINESS.md`:** a Patty deve poder registrar manualmente fase/protocolo, data de início e orientações. O formulário administrativo do protocolo até esta alteração só permitia estruturar refeições, doses e ciclos; a versão não carregava orientações destinadas à cliente.
