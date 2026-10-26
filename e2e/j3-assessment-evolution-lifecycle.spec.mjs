@@ -495,10 +495,19 @@ test("J3: MFA, corrected measurements, two private photos, return and RLS", asyn
           await expect(peso.locator('td[data-label="Referência"]')).toContainText("71 kg");
           await expect(peso.locator('td[data-label="Comparação"]')).toContainText("69 kg");
           await expect(peso.locator('td[data-label="Diferença matemática"]')).toContainText("-2 kg");
-          const quadril = ownerPage.locator("#comparacao-resultados tbody tr").filter({
-            has: ownerPage.getByRole("rowheader", { name: "Quadril (cm)" }),
+          // The configured basic assessment can require quadril on both dates.
+          // This synthetic key is intentionally present ONLY on the newer date.
+          const semReferencia = ownerPage.locator("#comparacao-resultados tbody tr").filter({
+            has: ownerPage.getByRole("rowheader", {
+              name: "j3_medida_sem_referencia (cm)",
+            }),
           });
-          await expect(quadril.getByText("Não comparável", { exact: true })).toBeVisible();
+          await expect(semReferencia.locator('td[data-label="Referência"]'))
+            .toContainText("Sem registro");
+          await expect(semReferencia.locator('td[data-label="Comparação"]'))
+            .toContainText("55 cm");
+          await expect(semReferencia.locator('td[data-label="Diferença matemática"]'))
+            .toContainText("Não comparável");
           await expect(ownerPage.locator("#comparacao-resultados img")).toHaveCount(0);
           await mobileWidth(ownerPage);
 
