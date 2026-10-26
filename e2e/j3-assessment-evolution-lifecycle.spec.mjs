@@ -483,6 +483,43 @@ test("J3: MFA, corrected measurements, two private photos, return and RLS", asyn
         await expect(ownerPage.locator("#avaliacao-" + foreignId)).toHaveCount(0);
         await mobileWidth(ownerPage);
 
+        await test.step("Client compares own finalized assessments without leaking draft or foreign data", async () => {
+          await ownerPage.getByRole("link", { name: "Comparar duas avaliações" }).tap();
+          await expect(ownerPage.getByRole("heading", { name: "Comparar avaliações" })).toBeVisible();
+          await expect(ownerPage.locator('select[name="referencia"]')).toHaveValue(olderId);
+          await expect(ownerPage.locator('select[name="comparacao"]')).toHaveValue(newerId);
+          await expect(ownerPage.locator("#comparacao-resultados")).toBeVisible();
+          const peso = ownerPage.locator("#comparacao-resultados tbody tr").filter({
+            has: ownerPage.getByRole("rowheader", { name: "Peso (kg)" }),
+          });
+          await expect(peso.getByRole("cell", { name: "71 kg", exact: true })).toBeVisible();
+          await expect(peso.getByRole("cell", { name: "69 kg", exact: true })).toBeVisible();
+          await expect(peso.getByRole("cell", { name: "-2 kg", exact: true })).toBeVisible();
+          const quadril = ownerPage.locator("#comparacao-resultados tbody tr").filter({
+            has: ownerPage.getByRole("rowheader", { name: "Quadril (cm)" }),
+          });
+          await expect(quadril.getByText("Não comparável", { exact: true })).toBeVisible();
+          await expect(ownerPage.locator("#comparacao-resultados img")).toHaveCount(0);
+          await mobileWidth(ownerPage);
+
+          const pairRoute = "/cliente/avaliacoes/comparar";
+          for (const invalid of [
+            "?referencia=" + olderId + "&comparacao=" + foreignId,
+            "?referencia=" + olderId + "&comparacao=" + draftId,
+            "?referencia=" + olderId + "&comparacao=" + olderId,
+            "?referencia[]=" + olderId + "&comparacao=" + newerId,
+          ]) {
+            await ownerPage.goto(pairRoute + invalid);
+            await expect(ownerPage.locator("#comparacao-resultados")).toHaveCount(0);
+            await expect(ownerPage.getByText("Seleção indisponível", { exact: true })).toBeVisible();
+          }
+          await ownerPage.goto(pairRoute + "?referencia=" + olderId + "&comparacao=" + newerId);
+          await ownerPage.getByRole("link", { name: "Abrir avaliação de referência" }).tap();
+          await expect(ownerPage).toHaveURL(new RegExp("avaliacao=" + olderId));
+          await expect(ownerPage.locator("#avaliacao-" + olderId)).toBeVisible();
+          await mobileWidth(ownerPage);
+        });
+
         await ownerPage.goto("/cliente/avaliacoes?avaliacao=" + olderId +
           "#avaliacao-" + olderId);
         const correctedAssessment = ownerPage.locator("#avaliacao-" + olderId);
@@ -569,6 +606,12 @@ test("J3: MFA, corrected measurements, two private photos, return and RLS", asyn
         await expect(foreignPage.locator("#avaliacao-" + foreignId)).toHaveCount(1);
         await expect(foreignPage.locator("#avaliacao-" + olderId)).toHaveCount(0);
         await expect(foreignPage.locator("#avaliacao-" + newerId)).toHaveCount(0);
+        await mobileWidth(foreignPage);
+        await foreignPage.goto("/cliente/avaliacoes/comparar?referencia=" + olderId +
+          "&comparacao=" + newerId);
+        await expect(foreignPage.locator("#comparacao-resultados")).toHaveCount(0);
+        await expect(foreignPage.getByText("Seleção indisponível", { exact: true })).toBeVisible();
+        await expect(foreignPage.getByText("71 kg", { exact: true })).toHaveCount(0);
         await mobileWidth(foreignPage);
         await foreignPage.goto("/cliente/evolucao");
         await expect(foreignPage.getByText("71 kg", { exact: true })).toHaveCount(0);

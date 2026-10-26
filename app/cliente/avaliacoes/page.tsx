@@ -1,5 +1,6 @@
 import { authorizedExactRecordPage } from "@/lib/operations/exact-record-navigation";
 import { buildFactualProgressSeries } from "@/lib/evaluations/progress-view";
+import { clientAssessmentPairHref } from "@/lib/evaluations/client-assessment-pair-navigation";
 import { assessmentMeasureHistoryHref, assessmentProgressReturn } from "@/lib/evaluations/assessment-progress-navigation";
 import { readAssessmentExplorer, exploreAssessmentMeasures, assessmentExplorerHref } from "@/lib/evaluations/client-assessment-explorer";
 import { ClientJourneyNextSteps } from "@/components/client/ClientJourneyNextSteps";
@@ -38,6 +39,13 @@ export default async function ClientAssessmentsPage({searchParams}:{searchParams
   if (!client) return <EmptyState title="Cadastro não vinculado" description="Esta conta ainda não está vinculada a um cadastro de cliente." />;
   const assessmentHistory = await listCurrentClientFinalizedAssessmentHistory();
   const items = completeClientAssessmentHistory(assessmentHistory.headers, assessmentHistory.measurements);
+  const ownFinalizedIds = items.map(item => item.id);
+  const latestComparisonHref = items.length >= 2
+    ? clientAssessmentPairHref({
+        referencia: items[1].id,
+        comparacao: items[0].id,
+      }, ownFinalizedIds)
+    : null;
   const raw=await searchParams;
   const progressSeries = buildFactualProgressSeries(items);
   const options=readAssessmentExplorer(raw);
@@ -101,15 +109,27 @@ export default async function ClientAssessmentsPage({searchParams}:{searchParams
                 ))}
               </nav>
             ) : null}
-            <div className={styles.actions}>
+            <nav className={styles.actions} aria-label="Consultar evolução das avaliações">
               <Link className={styles.evolutionLink} href="/cliente/evolucao">
                 Ver evolução entre avaliações
               </Link>
-            </div>
+              {latestComparisonHref ? (
+                <Link className={styles.evolutionLink} href={latestComparisonHref}>
+                  Comparar duas avaliações
+                </Link>
+              ) : null}
+            </nav>
             <div className={styles.list}>
               {history.items.map((assessment, localIndex) => {
                 const assessmentIndex=items.findIndex(item=>item.id===assessment.id);
                 const assessmentId = assessment.id;
+                const comparisonPartner = assessmentIndex === 0 ? items[1] : items[0];
+                const assessmentComparisonHref = comparisonPartner
+                  ? clientAssessmentPairHref({
+                      referencia: assessmentIndex === 0 ? comparisonPartner.id : assessment.id,
+                      comparacao: assessmentIndex === 0 ? assessment.id : comparisonPartner.id,
+                    }, ownFinalizedIds)
+                  : null;
                 const content = (
                   <Card className={styles.card}>
                     <div className={styles.header}>
@@ -154,6 +174,13 @@ export default async function ClientAssessmentsPage({searchParams}:{searchParams
                         </div>
                       ))}
                     </dl>
+                    {assessmentComparisonHref ? (
+                      <Link className={styles.assessmentCompareLink} href={assessmentComparisonHref}>
+                        {assessmentIndex === 0
+                          ? "Comparar com a avaliação anterior"
+                          : "Comparar com a avaliação mais recente"}
+                      </Link>
+                    ) : null}
                   </Card>
                 );
 
