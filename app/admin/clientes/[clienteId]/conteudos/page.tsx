@@ -94,6 +94,12 @@ export default async function AdminClientContentPage({
         publishedAt: version.published_at,
       }),
   ));
+  // Re-evaluate the exact version for each authorized deep link, never trust
+  // an arbitrary query parameter as an available release option.
+  const initialVersionId = typeof rawFilters.versao === "string" &&
+    availableVersions.some((version) => version.id === rawFilters.versao)
+    ? rawFilters.versao
+    : "";
   const newestReleases = newestClientContentReleases(releases);
   const visibleReleases = newestReleases.filter(
     (release) => Boolean(release.educational_content_versions),
@@ -181,9 +187,9 @@ export default async function AdminClientContentPage({
             {/* Reset the action state after an authorized release enters the
                 server history so another manual release remains possible. */}
             <ClientContentReleaseForm
-              key={`${client.id}:${releases.length}`}
+              key={`${client.id}:${releases.length}:${initialVersionId}`}
               clientId={client.id}
-              initialVersionId={typeof rawFilters.versao === "string" && availableVersions.some((v) => v.id === rawFilters.versao) ? rawFilters.versao : ""}
+              initialVersionId={initialVersionId}
               options={availableVersions.map((version) => ({
                 id: version.id,
                 title: version.title,
