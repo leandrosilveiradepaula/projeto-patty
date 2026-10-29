@@ -25,7 +25,7 @@ import styles from "./page.module.css";
 
 type AdminClientContentPageProps = {
   params: Promise<{ clienteId: string }>;
-  searchParams: Promise<{ q?: string; arquivo?: string; ordem?: string; pagina?: string; liberacao?: string; ano?: string; filaRetorno?: string; listaQ?: string; listaView?: string; listaPagina?: string }>;
+  searchParams: Promise<{ q?: string; arquivo?: string; ordem?: string; pagina?: string; liberacao?: string; versao?: string; ano?: string; filaRetorno?: string; listaQ?: string; listaView?: string; listaPagina?: string }>;
 };
 
 function formatRecordedDate(value: string | null) {
@@ -94,6 +94,12 @@ export default async function AdminClientContentPage({
         publishedAt: version.published_at,
       }),
   ));
+  // Re-evaluate the exact version for each authorized deep link, never trust
+  // an arbitrary query parameter as an available release option.
+  const initialVersionId = typeof rawFilters.versao === "string" &&
+    availableVersions.some((version) => version.id === rawFilters.versao)
+    ? rawFilters.versao
+    : "";
   const newestReleases = newestClientContentReleases(releases);
   const visibleReleases = newestReleases.filter(
     (release) => Boolean(release.educational_content_versions),
@@ -181,8 +187,9 @@ export default async function AdminClientContentPage({
             {/* Reset the action state after an authorized release enters the
                 server history so another manual release remains possible. */}
             <ClientContentReleaseForm
-              key={`${client.id}:${releases.length}`}
+              key={`${client.id}:${releases.length}:${initialVersionId}`}
               clientId={client.id}
+              initialVersionId={initialVersionId}
               options={availableVersions.map((version) => ({
                 id: version.id,
                 title: version.title,

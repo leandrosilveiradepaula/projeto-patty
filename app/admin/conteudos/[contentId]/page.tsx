@@ -16,6 +16,7 @@ import {
   listEducationalContentAssetsForCurrentAdmin,
   listEducationalContentVersionsForCurrentAdmin,
   listEducationalContentAssetsForCurrentAdminVersions,
+  listClientsAssignedToCurrentAdmin,
 } from "@/lib/supabase/data-access";
 import {
   canPublishEducationalContentVersion,
@@ -76,6 +77,16 @@ export default async function AdminEducationalContentDetailPage({
       : Promise.resolve(null),
   ]);
   const visibleAssets = inspectedAssets ?? currentAssets;
+  const releaseReady = inspected?.published_at
+    ? canPublishEducationalContentVersion({
+        contentTypeKey: inspected.content_type_key,
+        assets: visibleAssets,
+      })
+    : false;
+  const activeAssignments = releaseReady ? await listClientsAssignedToCurrentAdmin() : [];
+  const activeClients = activeAssignments.flatMap((assignment) =>
+    assignment.clients ? [assignment.clients] : [],
+  );
   const currentCanPublish = current
     ? canPublishEducationalContentVersion({
         contentTypeKey: current.content_type_key,
@@ -172,6 +183,26 @@ export default async function AdminEducationalContentDetailPage({
         )}
       </Section>
 
+      {releaseReady ? (
+        <Section title="Liberar esta versão para uma cliente" description="A publicação não concede acesso automático. Selecione um acompanhamento autorizado e confirme a versão exata na tela individual.">
+          {activeClients.length === 0 ? (
+            <Card><p className={styles.description}>Nenhuma cliente em acompanhamento ativo está disponível para liberação. O material permanece publicado e privado.</p></Card>
+          ) : (
+            <Card>
+              <p className={styles.description}>Versão {inspected.version_number} · {inspected.title}. Selecione uma cliente para revisar a liberação.</p>
+              <ul className={styles.releaseClientList}>
+                {activeClients.map((client) => (
+                  <li key={client.id}>
+                    <Link className={styles.backLink} href={`/admin/clientes/${client.id}/conteudos?versao=${inspected.id}#liberar-conteudo`}>
+                      {client.full_name?.trim() || client.profiles?.display_name?.trim() || "Cliente sem nome informado"} · revisar liberação
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          )}
+        </Section>
+      ) : null}
       <Section
         id="assets-do-conteudo"
         description="Consulte os arquivos da versão selecionada. O binário permanece privado no provedor de armazenamento."
