@@ -16,6 +16,7 @@ import {
   listEducationalContentAssetsForCurrentAdmin,
   listEducationalContentVersionsForCurrentAdmin,
   listEducationalContentAssetsForCurrentAdminVersions,
+  listClientsAssignedToCurrentAdmin,
 } from "@/lib/supabase/data-access";
 import {
   canPublishEducationalContentVersion,
@@ -69,11 +70,12 @@ export default async function AdminEducationalContentDetailPage({
   const archive=inspectContentVersionArchive(versions,assetCounts,filters,versao);
   // Only a version already visible under the professional RLS can be inspected.
   const inspected = versions.find((version) => version.id === versao) ?? current;
-  const [currentAssets, inspectedAssets] = await Promise.all([
+  const [currentAssets, inspectedAssets, activeAssignments] = await Promise.all([
     current ? listEducationalContentAssetsForCurrentAdmin(current.id) : Promise.resolve([]),
     inspected && inspected.id !== current?.id
       ? listEducationalContentAssetsForCurrentAdmin(inspected.id)
       : Promise.resolve(null),
+    listClientsAssignedToCurrentAdmin(),
   ]);
   const visibleAssets = inspectedAssets ?? currentAssets;
   const currentCanPublish = current
@@ -172,6 +174,26 @@ export default async function AdminEducationalContentDetailPage({
         )}
       </Section>
 
+      {inspected?.published_at ? (
+        <Section title="Liberar esta versão para uma cliente" description="A publicação não concede acesso automático. Selecione um acompanhamento autorizado e confirme a versão exata na tela individual.">
+          {activeAssignments.length === 0 ? (
+            <Card><p className={styles.description}>Nenhuma cliente em acompanhamento ativo está disponível para liberação. O material permanece publicado e privado.</p></Card>
+          ) : (
+            <Card>
+              <p className={styles.description}>Versão {inspected.version_number} · {inspected.title}. Selecione uma cliente para revisar a liberação.</p>
+              <ul className={styles.releaseClientList}>
+                {activeAssignments.flatMap((assignment) => assignment.clients ? [assignment.clients] : []).map((client) => (
+                  <li key={client.id}>
+                    <Link className={styles.backLink} href={`/admin/clientes/${client.id}/conteudos?versao=${inspected.id}#liberar-conteudo`}>
+                      {client.full_name?.trim() || client.profiles?.display_name?.trim() || "Cliente sem nome informado"} · revisar liberação
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          )}
+        </Section>
+      ) : null}
       <Section
         id="assets-do-conteudo"
         description="Consulte os arquivos da versão selecionada. O binário permanece privado no provedor de armazenamento."
