@@ -295,6 +295,31 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
     expect(initial.submitted_at).toBeNull();
     const feedbackId = initial.id;
 
+    await test.step("J2 professional prioritizes existing requests and retains keyboard/mobile navigation", async () => {
+      await adminPage.goto("/admin/clientes/" + clientId + "/feedback-semanal");
+      const nav = adminPage.getByRole("navigation", { name: "Etapas do Feedback Semanal" });
+      const pending = adminPage.locator("#feedback-pendentes");
+      const manual = adminPage.locator("#solicitar-feedback");
+      await expect(nav.getByRole("link", { name: /Aguardando cliente/ })).toBeVisible();
+      for (const width of [1280, 390]) {
+        await adminPage.setViewportSize({ width, height: width === 390 ? 844 : 900 });
+        const positions = await Promise.all([pending, manual].map(item =>
+          item.evaluate(el => Math.round(el.getBoundingClientRect().top + window.scrollY))));
+        expect(positions[0]).toBeLessThan(positions[1]);
+        const dimensions = await adminPage.evaluate(() => ({
+          viewport: document.documentElement.clientWidth,
+          scroll: document.documentElement.scrollWidth,
+        }));
+        expect(dimensions.scroll).toBeLessThanOrEqual(dimensions.viewport + 2);
+      }
+      await nav.getByRole("link", { name: /Aguardando cliente/ }).focus();
+      await adminPage.keyboard.press("Tab");
+      await expect(nav.getByRole("link", { name: "Nova solicitação manual" })).toBeFocused();
+      await adminPage.keyboard.press("Enter");
+      await expect(adminPage).toHaveURL(/#solicitar-feedback$/);
+      await adminPage.setViewportSize({ width: 1280, height: 900 });
+    });
+
     await test.step("caixa profissional mostra a solicitação pendente, sem expor respostas", async () => {
       await adminPage.goto("/admin/feedback-semanal?situacao=pendentes&cliente=" + clientId);
       await expect(adminPage.getByRole("heading", { name: "Aguardando resposta da cliente" })).toBeVisible();
