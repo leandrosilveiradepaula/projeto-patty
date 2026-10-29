@@ -1,3 +1,7 @@
+## 2026-10-29 — J6: criar rascunho sem exigir tipo; corrigir bloqueio encontrado no uso real (em PR)
+
+**Evidência e escopo:** [cartão de execução #1008](https://github.com/leandrosilveiradepaula/projeto-patty/issues/1008#issuecomment-6503204530). O formulário anterior exigia tipo Vídeo/PDF durante a criação, contradizendo a descrição do produto. O banco já aceita `content_type_key=null`. Neste pacote, a Patty cria título e ordem, depois define o formato e salva o rascunho antes de fazer upload. A seleção e a publicação não são automáticas. O servidor de upload também recusa MIME distinto do formato salvo, prevenindo gravação no Blob antes de um rascunho válido. Sem migration, RLS, Auth ou alteração de dados reais. Status inicial: branch; merge, CI e publicação devem ser comprovados separadamente. Homologação conjunta permanece última tarefa.
+
 ## 2026-10-29 — J6: navegação da versão publicada até a liberação individual (em PR)
 
 **Fila:** [cartão #1008](https://github.com/leandrosilveiradepaula/projeto-patty/issues/1008#issuecomment-6500811437). A versão 1 do vídeo da balança foi publicada pela Patty em produção; nenhuma liberação individual foi registrada.
