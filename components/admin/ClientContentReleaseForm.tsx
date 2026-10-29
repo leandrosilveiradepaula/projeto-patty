@@ -27,17 +27,19 @@ export type ClientContentReleaseOption = {
 
 type ClientContentReleaseFormProps = {
   clientId: string;
+  initialVersionId?: string;
   options: ClientContentReleaseOption[];
 };
 
 export function ClientContentReleaseForm({
   clientId,
+  initialVersionId = "",
   options,
 }: ClientContentReleaseFormProps) {
   const action = releaseContentToClient.bind(null, clientId);
   const [state, formAction, isPending] = useActionState(action, initialState);
   const router = useRouter();
-  const [selectedVersionId, setSelectedVersionId] = useState("");
+  const [selectedVersionId, setSelectedVersionId] = useState(() => options.some((option) => option.id === initialVersionId) ? initialVersionId : "");
   const [confirmRelease, setConfirmRelease] = useState(false);
   const [query, setQuery] = useState("");
   const submitInFlightRef = useRef(false);
