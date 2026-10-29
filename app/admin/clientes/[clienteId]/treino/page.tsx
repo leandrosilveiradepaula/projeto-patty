@@ -183,37 +183,7 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
 
   const displayName = client.full_name?.trim() || client.profiles?.display_name?.trim();
 
-  return (
-    <>
-      <ClientWorkspaceHeader
-        meta="Treino"
-        displayName={displayName}
-        secondary="Solicitação e prescrição individual"
-        status={
-          <Badge variant={workspaceStatus.variant}>{workspaceStatus.label}</Badge>
-        }
-      />
-
-      <ClientWorkspaceNav activeArea="treino" clientId={client.id} />
-      <nav aria-label="Etapas do treino" className={styles.versionNavigation}>
-        <a href="#solicitacao-treino">1. Solicitação</a>
-        <a href="#prescricao-treino">2. Montagem e revisão</a>
-        <a href="#historico-solicitacoes-treino">3. Histórico de pedidos</a>
-        <a href="#historico-versoes-treino">4. Versões</a>
-      </nav>
-      <AdminTrainingWorkflowOverview stage={requests.length === 0 ? "request" : openVersion ? openVersion.reviewed_at ? "publish" : sortedOpenItems.length > 0 ? "review" : "compose" : latestPublished ? "published" : "compose"} exerciseCount={sortedOpenItems.length} />
-
-      {newRequestAfterPublication ? (
-        <Alert title="Nova solicitação após o treino publicado" variant="warning">
-          A cliente registrou um novo pedido em {formatDateTime(orderedRequests[0].requested_at)}.
-          Revise a solicitação no histórico abaixo e decida os próximos passos.
-          {openVersion
-            ? " Já existe um rascunho em preparação: confira se o pedido exige ajustes nessa versão antes de publicar."
-            : " A publicação anterior continua disponível; nenhum novo treino é criado automaticamente."}
-          {" "}<a href={withReturn(trainingRequestExactHref(`/admin/clientes/${client.id}/treino`,orderedRequests,orderedRequests[0].id) ?? "#historico-solicitacoes-treino")}>Ver solicitação</a>
-        </Alert>
-      ) : null}
-
+  const requestSection = (
       <Section
         action={
           <Badge variant={requests.length > 0 ? "positive" : "neutral"}>
@@ -258,6 +228,50 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
           )}
         </div>
       </Section>
+
+  );
+
+  return (
+    <>
+      <ClientWorkspaceHeader
+        meta="Treino"
+        displayName={displayName}
+        secondary="Solicitação e prescrição individual"
+        status={
+          <Badge variant={workspaceStatus.variant}>{workspaceStatus.label}</Badge>
+        }
+      />
+
+      <ClientWorkspaceNav activeArea="treino" clientId={client.id} />
+      <nav aria-label="Etapas do treino" className={styles.versionNavigation}>
+        {requests.length === 0 ? (
+          <>
+            <a href="#solicitacao-treino">1. Solicitação</a>
+            <a href="#prescricao-treino">2. Montagem e revisão</a>
+          </>
+        ) : (
+          <>
+            <a href="#prescricao-treino">1. Montagem e revisão</a>
+            <a href="#solicitacao-treino">2. Pedido registrado</a>
+          </>
+        )}
+        <a href="#historico-solicitacoes-treino">3. Histórico de pedidos</a>
+        <a href="#historico-versoes-treino">4. Versões</a>
+      </nav>
+      <AdminTrainingWorkflowOverview stage={requests.length === 0 ? "request" : openVersion ? openVersion.reviewed_at ? "publish" : sortedOpenItems.length > 0 ? "review" : "compose" : latestPublished ? "published" : "compose"} exerciseCount={sortedOpenItems.length} />
+
+      {newRequestAfterPublication ? (
+        <Alert title="Nova solicitação após o treino publicado" variant="warning">
+          A cliente registrou um novo pedido em {formatDateTime(orderedRequests[0].requested_at)}.
+          Revise a solicitação no histórico abaixo e decida os próximos passos.
+          {openVersion
+            ? " Já existe um rascunho em preparação: confira se o pedido exige ajustes nessa versão antes de publicar."
+            : " A publicação anterior continua disponível; nenhum novo treino é criado automaticamente."}
+          {" "}<a href={withReturn(trainingRequestExactHref(`/admin/clientes/${client.id}/treino`,orderedRequests,orderedRequests[0].id) ?? "#historico-solicitacoes-treino")}>Ver solicitação</a>
+        </Alert>
+      ) : null}
+
+      {requests.length === 0 ? requestSection : null}
 
       <Section
         description="A prescrição depende de uma solicitação registrada pela cliente ou pela Patty. Salvar não publica; revisão e publicação são etapas separadas."
@@ -454,6 +468,8 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
           </Card>
         </Section>
       ) : null}
+
+      {requests.length > 0 ? requestSection : null}
 
       <Section
         action={<Badge variant="neutral">{requests.length} registro(s)</Badge>}

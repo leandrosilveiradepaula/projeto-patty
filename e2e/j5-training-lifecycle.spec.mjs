@@ -253,6 +253,13 @@ test("J5: client requests, Patty reviews/publishes exact training versions and a
       expect(rows("select id from public.client_training_plans where client_id=" + literal(clientId))).toEqual([]);
       await adminPage.reload();
       await expect(adminPage.getByRole("heading", { name: "Criar primeiro treino" })).toBeVisible();
+      for (const width of [390, 1440]) {
+        await adminPage.setViewportSize({width, height: width === 390 ? 844 : 900});
+        const positions = await Promise.all(["prescricao-treino","solicitacao-treino"].map(id =>
+          adminPage.locator("#"+id).evaluate(node => Math.round(node.getBoundingClientRect().top + window.scrollY))));
+        expect(positions[0], "After request, professional prescription is the first task").toBeLessThan(positions[1]);
+        await mobileWidth(adminPage);
+      }
       const anotherRequest = adminPage.locator("#solicitacao-treino details").filter({
         hasText: "Registrar outra solicitação, se necessário",
       });
