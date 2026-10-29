@@ -152,6 +152,7 @@ export default async function AdminEducationalContentDetailPage({
               <Badge variant="warning">Rascunho</Badge>
             </div>
 
+            {!current.content_type_key ? <p className={styles.description} role="status">Primeiro, selecione Vídeo ou PDF abaixo e clique em Salvar rascunho. O envio do arquivo e a publicação ficam bloqueados até a escolha do formato.</p> : null}
             <AdminEducationalContentDraftSaveForm
               contentId={content.id}
               contentTypeKey={current.content_type_key}
@@ -230,15 +231,16 @@ export default async function AdminEducationalContentDetailPage({
               localmente e envia o binário diretamente ao Blob privado; o
               servidor continua validando o objeto antes de registrar metadata.
             </p>
-            {inspected.id === current?.id && current?.published_at === null ? (
+            {inspected.id === current?.id && current?.published_at === null && current.content_type_key ? (
               <AdminEducationalContentAssetUploadForm
                 contentId={content.id}
                 versionId={current.id}
               />
             ) : (
               <p className={styles.description}>
-                Uma versão histórica ou publicada não pode receber arquivos
-                retroativamente. Selecione o rascunho atual para incluir novo asset.
+                {current?.published_at === null && !current.content_type_key
+                  ? "Antes de enviar um arquivo, selecione Vídeo ou PDF e salve o rascunho na seção acima."
+                  : "Uma versão histórica ou publicada não pode receber arquivos retroativamente. Selecione o rascunho atual para incluir novo asset."}
               </p>
             )}
           </Card>
