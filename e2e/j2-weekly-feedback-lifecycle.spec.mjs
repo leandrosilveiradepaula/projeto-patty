@@ -445,6 +445,13 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
       await expect.poll(async () => (await feedbackRecord(clientId, periodStart)).answers, {
         timeout: 25_000,
       }).toEqual({ q01: 5, q02: 3, q03: "Resposta remota sintética J2" });
+      // The server action also refreshes the RSC snapshot asynchronously.
+      // Observe the persisted post-conflict draft on a fully reloaded page
+      // before typing the 21 next answers, instead of racing with that refresh.
+      await clientPage.reload();
+      await expect(answerInput("q01")).toHaveValue("5");
+      await expect(answerInput("q02")).toHaveValue("3");
+      await expect(answerInput("q03")).toHaveValue("Resposta remota sintética J2");
     });
 
     await test.step("cliente revisa as 21 respostas sintéticas e envia definitivamente", async () => {
@@ -464,8 +471,10 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
         await expect(input).toBeVisible();
         await input.fill(value);
       }
+      await expect(answerInput("q01")).toHaveValue("2");
       await clientPage.getByRole("button", { name: "Revisar respostas para enviar" }).click();
       await expect(clientPage.getByRole("heading", { name: "Revise antes de enviar" })).toBeFocused();
+      await expect(clientPage.getByRole("region", { name: "Revisão antes do envio" }).locator("dl div").first().locator("dd")).toHaveText("2");
       await expect(clientPage.getByRole("button", { name: "Confirmar envio definitivo" })).toBeVisible();
       await clientPage.getByRole("button", { name: "Editar pergunta 17" }).click();
       await expect(answerInput("q17")).toBeFocused();
