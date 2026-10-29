@@ -1,3 +1,15 @@
+## 2026-10-26 — J3: comparacao factual de duas avaliacoes finalizadas pela cliente (em PR)
+
+**Fila e evidencia:** cartao J3 [issue #1008](https://github.com/leandrosilveiradepaula/projeto-patty/issues/1008#issuecomment-6428434271). O profissional ja tinha comparacao direta de duas avaliacoes; o portal da cliente possuia historico e evolucao por medida, mas nao a escolha de um par de avaliacoes para conferencia. O escopo confirmado contempla avaliacao/medidas e evolucao da cliente, sem classificacao clinica automatica.
+
+**Neste pacote funcional:** a rota `/cliente/avaliacoes/comparar` e os links no historico da cliente oferecem selecao explicita de duas avaliacoes finalizadas da propria conta, comparacao lado a lado de valores efetivos (incluindo correcoes append-only), diferenca aritmetica somente quando a chave e a unidade coincidirem, lacunas identificadas e links para as avaliacoes exatas. A selecao passa pelo `selectFinalizedAssessmentPair` sobre IDs retornados da RPC ja autorizada da cliente. A pagina preserva o aviso de historico parcial quando necessario, navega em mobile e nao altera nenhum dado.
+
+**Limites de seguranca:** sem nova migration, schema, policy RLS, Auth ou consulta da cliente a tabelas administrativas. A associacao `assessment_files` permanece admin-only: fotos privadas seguem no comparador ja existente em `/cliente/arquivos`, sem pareamento artificial por avaliacao ou data. Valores nao representam diagnostico, recomendacao, tendencia automatica nem score de adesao. Nenhuma foto/exame/dado real foi usado nos testes.
+
+**Estado deste registro:** implementacao em PR (ainda sujeita a CI/Playwright J3, merge e Vercel). Distinguir implementado, testado, mergeado, publicado e homologado; a homologacao conjunta humana J1–J7 continua ULTIMA.
+
+**J4 anterior:** PR #1020 mergeada em `master=6cf5576194012e315c93cf2e98223f40793999d5`; migration `20261025170000` aplicada pelo workflow [#40407998626](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/40407998626), CI pos-merge [#40408195929](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/40408195929) aprovado, Vercel `dpl_827kRXPbNprAo2RCmf1p3Y7Vwav7` READY no mesmo SHA. O bloco historico abaixo que classifica a #1020 como draft foi superado.
+
 ## 2026-10-25 — J4: campos manuais opcionais de refeição livre, suplementação e manipulados (em PR; NÃO implantado)
 
 **Fila oficial:** [issue #1008 / cartão J4](https://github.com/leandrosilveiradepaula/projeto-patty/issues/1008#issuecomment-6399848788). A Patty confirmou o escopo de **autoria manual** desses três temas, não regras automáticas de frequência, prescrição, dosagem ou elegibilidade. Nenhum valor padrão é gerado, e qualquer texto é editado exclusivamente pela profissional.
