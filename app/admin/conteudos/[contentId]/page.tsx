@@ -70,14 +70,23 @@ export default async function AdminEducationalContentDetailPage({
   const archive=inspectContentVersionArchive(versions,assetCounts,filters,versao);
   // Only a version already visible under the professional RLS can be inspected.
   const inspected = versions.find((version) => version.id === versao) ?? current;
-  const [currentAssets, inspectedAssets, activeAssignments] = await Promise.all([
+  const [currentAssets, inspectedAssets] = await Promise.all([
     current ? listEducationalContentAssetsForCurrentAdmin(current.id) : Promise.resolve([]),
     inspected && inspected.id !== current?.id
       ? listEducationalContentAssetsForCurrentAdmin(inspected.id)
       : Promise.resolve(null),
-    listClientsAssignedToCurrentAdmin(),
   ]);
   const visibleAssets = inspectedAssets ?? currentAssets;
+  const releaseReady = inspected?.published_at
+    ? canPublishEducationalContentVersion({
+        contentTypeKey: inspected.content_type_key,
+        assets: visibleAssets,
+      })
+    : false;
+  const activeAssignments = releaseReady ? await listClientsAssignedToCurrentAdmin() : [];
+  const activeClients = activeAssignments.flatMap((assignment) =>
+    assignment.clients ? [assignment.clients] : [],
+  );
   const currentCanPublish = current
     ? canPublishEducationalContentVersion({
         contentTypeKey: current.content_type_key,
@@ -174,15 +183,15 @@ export default async function AdminEducationalContentDetailPage({
         )}
       </Section>
 
-      {inspected?.published_at ? (
+      {releaseReady ? (
         <Section title="Liberar esta versão para uma cliente" description="A publicação não concede acesso automático. Selecione um acompanhamento autorizado e confirme a versão exata na tela individual.">
-          {activeAssignments.length === 0 ? (
+          {activeClients.length === 0 ? (
             <Card><p className={styles.description}>Nenhuma cliente em acompanhamento ativo está disponível para liberação. O material permanece publicado e privado.</p></Card>
           ) : (
             <Card>
               <p className={styles.description}>Versão {inspected.version_number} · {inspected.title}. Selecione uma cliente para revisar a liberação.</p>
               <ul className={styles.releaseClientList}>
-                {activeAssignments.flatMap((assignment) => assignment.clients ? [assignment.clients] : []).map((client) => (
+                {activeClients.map((client) => (
                   <li key={client.id}>
                     <Link className={styles.backLink} href={`/admin/clientes/${client.id}/conteudos?versao=${inspected.id}#liberar-conteudo`}>
                       {client.full_name?.trim() || client.profiles?.display_name?.trim() || "Cliente sem nome informado"} · revisar liberação
