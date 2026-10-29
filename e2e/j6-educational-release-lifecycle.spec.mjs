@@ -274,6 +274,8 @@ test("J6: versioned content releases require exact published version and synthet
 
     await test.step("Draft metadata without file cannot be published or released", async () => {
       await expect(admin.getByRole("status").filter({ hasText: /Selecione Vídeo ou PDF antes de publicar/ })).toBeVisible();
+      await expect(admin.locator('input[type="file"]')).toHaveCount(0);
+      await expect(admin.getByRole("button", { name: "Publicar versão" })).toBeDisabled();
       await admin.getByRole("combobox", { name: /Tipo de conteúdo/ }).selectOption("video");
       await admin.getByRole("button", { name: "Salvar rascunho" }).click();
       await expect.poll(() => versions(contentId)[0].content_type_key).toBe("video");
