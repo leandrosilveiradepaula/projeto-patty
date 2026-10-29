@@ -32,3 +32,16 @@ test("exercise editing uses accessible disclosure and mobile-first layout",()=>{
  assert.match(css,/@media\(max-width:480px\)/);
  assert.match(css,/grid-template-columns:minmax\(0,1fr\)/);
 });
+
+test("professional training workspace places request before prescription and repeat requests in explicit disclosure",()=>{
+ const requestFirst = page.indexOf('{requests.length === 0 ? requestSection : null}');
+ const prescription = page.indexOf('title="Prescrição de treino"');
+ const requestLater = page.indexOf('{requests.length > 0 ? requestSection : null}');
+ assert.ok(requestFirst >= 0 && requestFirst < prescription && requestLater > prescription,
+   "request is first only when missing; otherwise prescription is first");
+ assert.match(page, /const requestSection = \(/);
+ assert.match(page, /id="solicitacao-treino"/);
+ assert.match(page,/Registrar outra solicitação, se necessário/);
+ assert.match(page,/requests\.length === 0 \? \(/);
+ assert.match(page,/aria-label="Etapas do treino"/);
+});

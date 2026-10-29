@@ -19,14 +19,13 @@ test("admin training workspace prioritizes prescription and exposes lifecycle st
   assert.match(page, /AdminTrainingPlanLifecycleAction/);
 
   const prescription = page.indexOf('title="Prescrição de treino"');
-  const request = page.indexOf('title="Solicitação do serviço"');
-
-  assert.ok(prescription > -1);
-  assert.ok(request > -1);
-  assert.ok(
-    prescription < request,
-    "Prescrição deve aparecer antes do histórico/registro de solicitação no fluxo diário da Patty.",
-  );
+  const initialRequest = page.indexOf('{requests.length === 0 ? requestSection : null}');
+  const existingRequest = page.indexOf('{requests.length > 0 ? requestSection : null}');
+  assert.ok(initialRequest > -1 && prescription > initialRequest,
+    "Without a request, show the necessary request before prescription.");
+  assert.ok(existingRequest > prescription,
+    "With an existing request, foreground the professional prescription.");
+  assert.match(page, /title="Solicitação do serviço"/);
 });
 
 test("training lifecycle actions provide feedback and destructive confirmation", () => {
