@@ -218,6 +218,25 @@ test("J5: client requests, Patty reviews/publishes exact training versions and a
       "'public.create_client_training_plan_draft(uuid,text,text)'::regprocedure)"+
       " like '%pg_advisory_xact_lock%';")).toBe("t");
 
+    await test.step("J5 request-first navigation is ordered in desktop/mobile and keyboard", async () => {
+      await adminPage.goto(adminRoute);
+      const stages = ["solicitacao-treino", "prescricao-treino", "historico-solicitacoes-treino", "historico-versoes-treino"];
+      for (const width of [390, 1440]) {
+        await adminPage.setViewportSize({width, height: width === 390 ? 844 : 900});
+        const positions = await Promise.all(stages.map(id =>
+          adminPage.locator("#"+id).evaluate(node => Math.round(node.getBoundingClientRect().top + window.scrollY))));
+        expect(positions).toEqual([...positions].sort((a,b)=>a-b));
+        await mobileWidth(adminPage);
+      }
+      const nav = adminPage.getByRole("navigation", {name: "Etapas do treino"});
+      await nav.getByRole("link", {name: "1. Solicitação"}).focus();
+      await adminPage.keyboard.press("Tab");
+      await expect(nav.getByRole("link", {name: "2. Montagem e revisão"})).toBeFocused();
+      await adminPage.keyboard.press("Enter");
+      await expect(adminPage).toHaveURL(/#prescricao-treino$/);
+      await adminPage.setViewportSize({width: 390, height: 844});
+    });
+
     await test.step("No prescription is created before a request", async () => {
       await adminPage.goto(adminRoute);
       await expect(adminPage.getByText("Treino ainda não solicitado", { exact: true })).toBeVisible();
@@ -234,6 +253,14 @@ test("J5: client requests, Patty reviews/publishes exact training versions and a
       expect(rows("select id from public.client_training_plans where client_id=" + literal(clientId))).toEqual([]);
       await adminPage.reload();
       await expect(adminPage.getByRole("heading", { name: "Criar primeiro treino" })).toBeVisible();
+      const anotherRequest = adminPage.locator("#solicitacao-treino details").filter({
+        hasText: "Registrar outra solicitação, se necessário",
+      });
+      await expect(anotherRequest).toBeVisible();
+      await expect(anotherRequest).not.toHaveAttribute("open", "");
+      await anotherRequest.locator("summary").click();
+      await expect(anotherRequest.getByRole("button", {name: "Registrar solicitação de treino"})).toBeVisible();
+      await anotherRequest.locator("summary").click();
     });
 
     let first;
