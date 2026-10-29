@@ -124,50 +124,11 @@ export default async function AdminClientAssessmentsPage({
         </Alert>
       ) : null}
       <nav aria-label="Navegação das avaliações da cliente" className={styles.filters}>
+        {draftAssessments.length > 0 ? <Link href="#avaliacoes-em-andamento">Em andamento ({draftAssessments.length})</Link> : null}
         <Link href="#nova-avaliacao">Nova avaliação</Link>
-        <Link href="#avaliacoes-em-andamento">Em andamento ({draftAssessments.length})</Link>
         <Link href="#historico-finalizado">Histórico finalizado ({finalizedAssessments.length})</Link>
         <Link href={continueFromFeedback("/admin/avaliacoes")}>Todas as avaliações</Link>
       </nav>
-      <Section title="Comparação histórica" description="Escolha duas avaliações finalizadas para consultar lado a lado medidas efetivas, sem classificação clínica automática.">
-        <Link className={styles.actionLink} href={continueFromFeedback(`/admin/clientes/${client.id}/avaliacoes/comparar`)}>Comparar duas avaliações</Link>
-      </Section>
-      <Section
-        description="Após finalizar uma avaliação, consulte a evolução factual e retome a preparação do protocolo na mesma área da cliente."
-        title="Próximos passos"
-      >
-        <Link className={styles.actionLink} href={continueFromFeedback(`/admin/clientes/${client.id}/evolucao`)}>
-          Comparar medidas finalizadas
-        </Link>
-        {" · "}
-        <Link className={styles.actionLink} href={continueFromFeedback(`/admin/clientes/${client.id}/protocolos`)}>
-          Abrir protocolos da cliente
-        </Link>
-      </Section>
-      <Section
-        action={
-          <Link className={styles.actionLink} href={continueFromFeedback(`/admin/clientes/${client.id}/evolucao`)}>
-            Ver evolução
-          </Link>
-        }
-        description="Crie uma avaliação em rascunho. O registro permanece editável até a finalização explícita."
-        id="nova-avaliacao"
-        title="Nova avaliação"
-      >
-        <Card>
-          <AssessmentCreateForm
-            clientId={client.id}
-            feedbackId={submittedFeedback?.id ?? null}
-            inboxReturn={submittedFeedback ? inboxReturn : null}
-            kindOptions={kindOptions}
-            schedulePreferences={{
-              basicPlacementLabel:
-                "Preferência atual para Avaliação Básica: aproximadamente no meio do intervalo entre duas Avaliações Completas. A data continua livre.",
-              completePreferredWeekdayLabels,
-            }}
-          />
-        </Card>
-      </Section>
       {invalid || draftPage > draftPagination.pageCount || historyPage > historyPagination.pageCount ? (
         <Alert variant="info" title="Consulta ajustada">Um filtro ou página não está disponível. Exibimos o histórico autorizado em uma página válida.</Alert>
       ) : null}
@@ -204,7 +165,7 @@ export default async function AdminClientAssessmentsPage({
         </form>
         <p role="status">{draftAssessments.length} rascunho(s) · {finalizedAssessments.length} finalizada(s) nos filtros atuais.</p>
       </Section>
-      <Section
+      {draftAssessments.length > 0 ? <Section
           action={<Badge variant={draftAssessments.length > 0 ? "warning" : "neutral"}>{draftAssessments.length} rascunho(s)</Badge>}
           description="Retome um rascunho existente para revisar as medidas e finalizar explicitamente quando estiver pronto. Criar outra avaliação não conclui a anterior."
           id="avaliacoes-em-andamento"
@@ -250,8 +211,31 @@ export default async function AdminClientAssessmentsPage({
           ) : null}
           </>
           )}
-        </Section>
-
+        </Section> : null}
+      <Section
+        action={
+          <Link className={styles.actionLink} href={continueFromFeedback(`/admin/clientes/${client.id}/evolucao`)}>
+            Ver evolução
+          </Link>
+        }
+        description="Crie uma avaliação em rascunho. O registro permanece editável até a finalização explícita."
+        id="nova-avaliacao"
+        title="Nova avaliação"
+      >
+        <Card>
+          <AssessmentCreateForm
+            clientId={client.id}
+            feedbackId={submittedFeedback?.id ?? null}
+            inboxReturn={submittedFeedback ? inboxReturn : null}
+            kindOptions={kindOptions}
+            schedulePreferences={{
+              basicPlacementLabel:
+                "Preferência atual para Avaliação Básica: aproximadamente no meio do intervalo entre duas Avaliações Completas. A data continua livre.",
+              completePreferredWeekdayLabels,
+            }}
+          />
+        </Card>
+      </Section>
       <Section
         description="Somente avaliações finalizadas aparecem aqui, preservadas da mais recente para a mais antiga. Rascunhos permanecem em Em andamento."
         id="historico-finalizado"
@@ -302,6 +286,22 @@ export default async function AdminClientAssessmentsPage({
           </>
         )}
       </Section>
+      <Section title="Comparação histórica" description="Escolha duas avaliações finalizadas para consultar lado a lado medidas efetivas, sem classificação clínica automática.">
+        <Link className={styles.actionLink} href={continueFromFeedback(`/admin/clientes/${client.id}/avaliacoes/comparar`)}>Comparar duas avaliações</Link>
+      </Section>
+      <Section
+        description="Após finalizar uma avaliação, consulte a evolução factual e retome a preparação do protocolo na mesma área da cliente."
+        title="Próximos passos"
+      >
+        <Link className={styles.actionLink} href={continueFromFeedback(`/admin/clientes/${client.id}/evolucao`)}>
+          Comparar medidas finalizadas
+        </Link>
+        {" · "}
+        <Link className={styles.actionLink} href={continueFromFeedback(`/admin/clientes/${client.id}/protocolos`)}>
+          Abrir protocolos da cliente
+        </Link>
+      </Section>
+
     </>
   );
 }

@@ -304,6 +304,43 @@ test("J3: MFA, corrected measurements, two private photos, return and RLS", asyn
     await loginAdminWithMfa(page, {
       email: admin.email, password: admin.password, totpSecret: adminTotp,
     });
+    await test.step("J3 UI prioritizes drafts, confirms desktop/mobile order and keyboard navigation", async () => {
+      await page.goto("/admin/clientes/" + clientId + "/avaliacoes");
+      const drafts = page.locator("#avaliacoes-em-andamento");
+      const create = page.locator("#nova-avaliacao");
+      const history = page.locator("#historico-finalizado");
+      const comparison = page.getByRole("heading", {name: "Comparação histórica"});
+      const next = page.getByRole("heading", {name: "Próximos passos"});
+      await expect(drafts.getByRole("link", {name: "Continuar avaliação"})).toBeVisible();
+      await expect(create.getByRole("button", {name: "Criar rascunho de avaliação"})).toBeVisible();
+      await expect(history.getByRole("link", {name: "Ver avaliação"}).first()).toBeVisible();
+      for (const width of [390, 1440]) {
+        await page.setViewportSize({width, height: width === 390 ? 844 : 900});
+        const positions = [];
+        for (const area of [drafts, create, history, comparison, next]) {
+          positions.push(await area.evaluate((element) =>
+            Math.round(element.getBoundingClientRect().top + window.scrollY),
+          ));
+        }
+        expect(positions, "J3 task order must follow the actual professional workflow")
+          .toEqual([...positions].sort((a,b) => a-b));
+        const dimensions = await page.evaluate(() => ({
+          viewport: document.documentElement.clientWidth,
+          scroll: document.documentElement.scrollWidth,
+        }));
+        expect(dimensions.scroll, "J3 workspace must not scroll horizontally")
+          .toBeLessThanOrEqual(dimensions.viewport + 1);
+      }
+      await page.setViewportSize({width: 390, height: 844});
+      const navigation = page.getByRole("navigation", {name: "Navegação das avaliações da cliente"});
+      await navigation.getByRole("link", {name: /Em andamento/}).focus();
+      await page.keyboard.press("Tab");
+      await expect(navigation.getByRole("link", {name: "Nova avaliação"})).toBeFocused();
+      await page.keyboard.press("Enter");
+      await expect(page).toHaveURL(/#nova-avaliacao$/);
+      await expect(create).toBeVisible();
+    });
+
     await test.step("Finalized J3 record is read-only and MFA UI appends a correction", async () => {
       await page.goto("/admin/avaliacoes/" + olderId);
       await expect(page.getByRole("heading", {name:"Editar rascunho"})).toHaveCount(0);
