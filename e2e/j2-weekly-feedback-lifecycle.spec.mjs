@@ -295,6 +295,31 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
     expect(initial.submitted_at).toBeNull();
     const feedbackId = initial.id;
 
+    await test.step("J2 professional prioritizes existing requests and retains keyboard/mobile navigation", async () => {
+      await adminPage.goto("/admin/clientes/" + clientId + "/feedback-semanal");
+      const nav = adminPage.getByRole("navigation", { name: "Etapas do Feedback Semanal" });
+      const pending = adminPage.locator("#feedback-pendentes");
+      const manual = adminPage.locator("#solicitar-feedback");
+      await expect(nav.getByRole("link", { name: /Aguardando cliente/ })).toBeVisible();
+      for (const width of [1280, 390]) {
+        await adminPage.setViewportSize({ width, height: width === 390 ? 844 : 900 });
+        const positions = await Promise.all([pending, manual].map(item =>
+          item.evaluate(el => Math.round(el.getBoundingClientRect().top + window.scrollY))));
+        expect(positions[0]).toBeLessThan(positions[1]);
+        const dimensions = await adminPage.evaluate(() => ({
+          viewport: document.documentElement.clientWidth,
+          scroll: document.documentElement.scrollWidth,
+        }));
+        expect(dimensions.scroll).toBeLessThanOrEqual(dimensions.viewport + 2);
+      }
+      await nav.getByRole("link", { name: /Aguardando cliente/ }).focus();
+      await adminPage.keyboard.press("Tab");
+      await expect(nav.getByRole("link", { name: "Nova solicitação manual" })).toBeFocused();
+      await adminPage.keyboard.press("Enter");
+      await expect(adminPage).toHaveURL(/#solicitar-feedback$/);
+      await adminPage.setViewportSize({ width: 1280, height: 900 });
+    });
+
     await test.step("caixa profissional mostra a solicitação pendente, sem expor respostas", async () => {
       await adminPage.goto("/admin/feedback-semanal?situacao=pendentes&cliente=" + clientId);
       await expect(adminPage.getByRole("heading", { name: "Aguardando resposta da cliente" })).toBeVisible();
@@ -420,6 +445,13 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
       await expect.poll(async () => (await feedbackRecord(clientId, periodStart)).answers, {
         timeout: 25_000,
       }).toEqual({ q01: 5, q02: 3, q03: "Resposta remota sintética J2" });
+      // The server action also refreshes the RSC snapshot asynchronously.
+      // Observe the persisted post-conflict draft on a fully reloaded page
+      // before typing the 21 next answers, instead of racing with that refresh.
+      await clientPage.reload();
+      await expect(answerInput("q01")).toHaveValue("5");
+      await expect(answerInput("q02")).toHaveValue("3");
+      await expect(answerInput("q03")).toHaveValue("Resposta remota sintética J2");
     });
 
     await test.step("cliente revisa as 21 respostas sintéticas e envia definitivamente", async () => {
@@ -439,8 +471,10 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
         await expect(input).toBeVisible();
         await input.fill(value);
       }
+      await expect(answerInput("q01")).toHaveValue("2");
       await clientPage.getByRole("button", { name: "Revisar respostas para enviar" }).click();
       await expect(clientPage.getByRole("heading", { name: "Revise antes de enviar" })).toBeFocused();
+      await expect(clientPage.getByRole("region", { name: "Revisão antes do envio" }).locator("dl div").first().locator("dd")).toHaveText("2");
       await expect(clientPage.getByRole("button", { name: "Confirmar envio definitivo" })).toBeVisible();
       await clientPage.getByRole("button", { name: "Editar pergunta 17" }).click();
       await expect(answerInput("q17")).toBeFocused();

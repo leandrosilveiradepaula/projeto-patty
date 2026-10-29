@@ -129,28 +129,11 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
         <Link href={withReturn(`/admin/clientes/${client.id}/protocolos`)}>Protocolos</Link>
       </Section>
 
-      <Section
-        action={
-          <Badge variant={eligible ? "positive" : "warning"}>
-            {eligible ? "Elegível" : "Aguardando 1º protocolo"}
-          </Badge>
-        }
-        description={
-          eligible
-            ? "A cliente já recebeu protocolo publicado. A agenda automática gera as solicitações elegíveis; a solicitação manual permanece disponível para necessidade operacional específica."
-            : "O Feedback Semanal começa somente depois da primeira publicação de protocolo para esta cliente."
-        }
-        id="solicitar-feedback"
-        title="Solicitar Feedback Semanal"
-      >
-        <Card>
-          <AdminWeeklyFeedbackRequestForm
-            clientId={client.id}
-            eligible={eligible}
-          />
-        </Card>
-      </Section>
-
+      <nav aria-label="Etapas do Feedback Semanal" className={styles.feedbackNavigation}>
+        {rawSubmittedCount > 0 ? <a href="#feedback-enviados">Respostas recebidas ({rawSubmittedCount})</a> : null}
+        {rawPendingCount > 0 ? <a href="#feedback-pendentes">Aguardando cliente ({rawPendingCount})</a> : null}
+        <a href="#solicitar-feedback">Nova solicitação manual</a>
+      </nav>
       {exactRecordLocated ? (
         <p role="status" className={styles.exactRecordNotice}>
           Registro localizado no histórico autorizado. Os filtros de origem e ano foram desconsiderados para mostrar o feedback solicitado.{" "}
@@ -180,6 +163,161 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
           <p role="status">Página ou filtro inválido. Exibimos apenas registros autorizados em uma página válida.</p>
         ) : null}
       </Section>
+      <p role="status" className={styles.exactRecordNotice}>
+        {rawSubmittedCount > 0
+          ? "Primeiro consulte as respostas recebidas. Solicitações manuais são excepcionais; a agenda já gera as semanas elegíveis."
+          : rawPendingCount > 0
+            ? "Há solicitação aguardando a cliente. Consulte o período antes de criar outra solicitação manual."
+            : "Nenhum feedback registrado. Você pode criar uma solicitação manual quando necessário; a agenda automática também continua ativa para clientes elegíveis."}
+      </p>
+      {rawSubmittedCount > 0 || rawPendingCount > 0 ? <>
+      <div id="feedback-enviados">
+      <Section
+        action={<Badge variant="neutral">{submittedFeedbacks.length} enviado(s)</Badge>}
+        description="Respostas efetivamente enviadas pela cliente, preservadas para consulta e decisão profissional da Patty."
+        title="Histórico enviado"
+      >
+        {submittedFeedbacks.length === 0 && rawSubmittedCount > 0 ? (
+          <EmptyState title="Nenhum envio neste filtro" description="As respostas já registradas continuam no histórico; limpe os filtros." action={<Link href={withReturn(`/admin/clientes/${client.id}/feedback-semanal#feedback-enviados`)}>Ver todos os envios</Link>} />
+        ) : submittedFeedbacks.length === 0 ? (
+          <EmptyState
+            description="Ainda não há respostas enviadas pela cliente. Solicitações abertas, quando existentes, permanecem na seção Pendentes."
+            title="Nenhum feedback enviado ainda"
+          />
+        ) : (
+          <>
+          <ol className={styles.historyList}>
+            {submittedPage.items.map((feedback) => {
+              const comparisonChoices = olderSubmittedFeedbackChoices(orderedFeedbacks, feedback.id);
+              const comparisonPrevious = previousSubmittedFeedbackByPeriod(orderedFeedbacks, feedback.id);
+              const version = feedback.weekly_feedback_form_versions;
+              const definition = version
+                ? parseWeeklyFeedbackDefinition(version.definition)
+                : null;
+
+              return (
+                <li key={feedback.id}>
+                  <details className={styles.historyItem} id={`feedback-enviado-${feedback.id}`} open={exactSubmittedPage !== null && rawQuery.registro === feedback.id}>
+                    <summary>
+                      <span>
+                        {formatDate(feedback.period_start)} a {formatDate(feedback.period_end)}
+                      </span>
+                      <Badge variant="positive">Respondido</Badge>
+                    </summary>
+                    <div className={styles.historyContent}>
+                      <p className={styles.meta}>
+                        {version
+                          ? `${version.title} · versão ${version.version_number}`
+                          : "Versão indisponível"}
+                      </p>
+                      <p className={styles.meta}>
+                        Origem: {weeklyFeedbackOriginLabel(feedback.request_source)}
+                      </p>
+                      <p className={styles.meta}>Prazo: {formatDateTime(feedback.due_at)}</p>
+                      {definition ? (
+                        <dl className={styles.answers}>
+                          {definition.questions.map((question) => (
+                            <div key={question.key}>
+                              <dt>{question.label}</dt>
+                              <dd>
+                                {readWeeklyFeedbackAnswer(feedback.answers, question.key) || "Sem resposta"}
+                              </dd>
+                            </div>
+                          ))}
+                        </dl>
+                      ) : (
+                        <p className={styles.meta}>Definição do formulário indisponível.</p>
+                      )}
+                      {comparisonPrevious ? (
+                        <div className={styles.comparisonAction}>
+                          <Link href={withWeeklyFeedbackInboxReturn(
+                            withReturn(weeklyFeedbackComparisonHref(client.id, feedback.id, comparisonPrevious.id)),
+                            inboxReturn ?? "",
+                          )}>
+                            Comparar com o Feedback Semanal de período anterior
+                          </Link>
+                          <details className={styles.comparisonChoiceDisclosure}>
+                            <summary>Escolher semana anterior específica para comparar</summary>
+                            <form
+                              action={`/admin/clientes/${encodeURIComponent(client.id)}/feedback-semanal/comparar`}
+                              className={styles.comparisonChoiceForm}
+                              method="get"
+                            >
+                              <input name="atual" type="hidden" value={feedback.id} />
+                              {inboxReturn ? <input name="caixaRetorno" type="hidden" value={inboxReturn} /> : null}
+                              <label>
+                                Semana anterior enviada
+                                <select defaultValue="" name="anterior" required>
+                                  <option value="">Selecione a semana anterior</option>
+                                  {comparisonChoices.map((older) => (
+                                    <option key={older.id} value={older.id}>
+                                      {formatDate(older.period_start)} a {formatDate(older.period_end)}
+                                      {" · versão "}{older.weekly_feedback_form_versions?.version_number ?? "indisponível"}
+                                    </option>
+                                  ))}
+                                </select>
+                              </label>
+                              <Button type="submit" variant="secondary">Comparar semanas selecionadas</Button>
+                            </form>
+                            <p className={styles.meta}>
+                              Somente semanas já enviadas. A comparação apenas consulta as respostas;
+                              não marca revisão ou altera o protocolo.
+                            </p>
+                          </details>
+                        </div>
+                      ) : null}
+                      <details className={styles.manualDecisionDisclosure}>
+                        <summary>Continuar com decisão profissional</summary>
+                        <p className={styles.meta}>
+                          Escolha explicitamente uma avaliação finalizada da cliente. A decisão será
+                          registrada nessa avaliação, não neste feedback. Nada será marcado como
+                          revisado ou alterado automaticamente.
+                        </p>
+                        {manualDecisionChoices.length > 0 ? (
+                          <ul className={styles.manualDecisionList}>
+                            {manualDecisionChoices.map((assessment) => (
+                              <li key={assessment.id}>
+                                <span>Avaliação finalizada de {formatAdministrativeAssessmentDate(assessment.assessed_at)}</span>
+                                <Link href={withWeeklyFeedbackInboxReturn(
+                                  withReturn(manualAssessmentDecisionFromSubmittedFeedbackHref(assessment.id, feedback.id)),
+                                  inboxReturn ?? "",
+                                )}>
+                                  Abrir para decisão manual
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className={styles.meta}>
+                            Nenhuma avaliação finalizada está disponível neste acompanhamento.
+                            O registro profissional exige avaliação finalizada.{" "}
+                            <Link href={withReturn("/admin/clientes/" + client.id + "/avaliacoes")}>
+                              Consultar avaliações
+                            </Link>
+                          </p>
+                        )}
+                      </details>
+                      <p className={styles.meta}>
+                        Se precisar preparar outra avaliação, a coleta e a finalização continuam manuais.{" "}
+                        <Link href={withReturn(assessmentDirectoryFromSubmittedFeedbackHref(client.id, feedback.id))}>
+                          Criar ou retomar avaliação para este feedback
+                        </Link>
+                      </p>
+                    </div>
+                  </details>
+                </li>
+              );
+            })}
+          </ol>
+          {submittedPage.pageCount > 1 ? <nav aria-label="Páginas do histórico enviado" className={styles.explorerPages}>
+            <span>Página {submittedPage.page} de {submittedPage.pageCount}</span>
+            {submittedPage.page > 1 ? <Link href={withReturn(professionalFeedbackHistoryHref(client.id,{...options,pendingPage:pendingPage.page,submittedPage:submittedPage.page-1},"submitted"))}>Anterior</Link> : null}
+            {submittedPage.page < submittedPage.pageCount ? <Link href={withReturn(professionalFeedbackHistoryHref(client.id,{...options,pendingPage:pendingPage.page,submittedPage:submittedPage.page+1},"submitted"))}>Próxima</Link> : null}
+          </nav> : null}
+          </>
+        )}
+      </Section>
+      </div>
       <div id="feedback-pendentes">
       <Section
         action={
@@ -259,6 +397,51 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
         )}
       </Section>
       </div>
+
+      <Section
+        action={
+          <Badge variant={eligible ? "positive" : "warning"}>
+            {eligible ? "Elegível" : "Aguardando 1º protocolo"}
+          </Badge>
+        }
+        description={
+          eligible
+            ? "A cliente já recebeu protocolo publicado. A agenda automática gera as solicitações elegíveis; a solicitação manual permanece disponível para necessidade operacional específica."
+            : "O Feedback Semanal começa somente depois da primeira publicação de protocolo para esta cliente."
+        }
+        id="solicitar-feedback"
+        title="Solicitar Feedback Semanal"
+      >
+        <Card>
+          <AdminWeeklyFeedbackRequestForm
+            clientId={client.id}
+            eligible={eligible}
+          />
+        </Card>
+      </Section>
+
+      </> : <>
+      <Section
+        action={
+          <Badge variant={eligible ? "positive" : "warning"}>
+            {eligible ? "Elegível" : "Aguardando 1º protocolo"}
+          </Badge>
+        }
+        description={
+          eligible
+            ? "A cliente já recebeu protocolo publicado. A agenda automática gera as solicitações elegíveis; a solicitação manual permanece disponível para necessidade operacional específica."
+            : "O Feedback Semanal começa somente depois da primeira publicação de protocolo para esta cliente."
+        }
+        id="solicitar-feedback"
+        title="Solicitar Feedback Semanal"
+      >
+        <Card>
+          <AdminWeeklyFeedbackRequestForm
+            clientId={client.id}
+            eligible={eligible}
+          />
+        </Card>
+      </Section>
 
       <div id="feedback-enviados">
       <Section
@@ -407,6 +590,87 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
         )}
       </Section>
       </div>
+      <div id="feedback-pendentes">
+      <Section
+        action={
+          <Badge variant={pendingFeedbacks.length > 0 ? "warning" : "neutral"}>
+            {pendingFeedbacks.length} pendente(s)
+          </Badge>
+        }
+        description="Solicitações registradas que ainda aguardam envio da cliente. A ausência de resposta não exige revisão profissional imediata."
+        title="Pendentes"
+      >
+        {pendingFeedbacks.length > 1 ? (
+          <nav aria-label="Localizar Feedback Semanal pendente" className={styles.feedbackNavigation}>
+            {pendingPage.items.map((feedback, index) => (
+              <a href={withReturn(`#feedback-pendente-${feedback.id}`)} key={feedback.id}>
+                {index + 1}. {formatDate(feedback.period_start)} a {formatDate(feedback.period_end)}
+              </a>
+            ))}
+          </nav>
+        ) : null}
+        {pendingFeedbacks.length === 0 && rawPendingCount > 0 ? (
+          <EmptyState title="Nenhum pendente neste filtro" description="Há solicitações pendentes, mas nenhuma corresponde à origem ou ao ano selecionados." action={<Link href={withReturn(`/admin/clientes/${client.id}/feedback-semanal#feedback-pendentes`)}>Ver todos os pendentes</Link>} />
+        ) : pendingFeedbacks.length === 0 ? (
+          <EmptyState
+            description="Não existem solicitações abertas aguardando a cliente. Se precisar criar uma solicitação manual específica, use o formulário acima."
+            title="Nenhum feedback pendente"
+            action={<a href="#solicitar-feedback">Ir para solicitação</a>}
+          />
+        ) : (
+          <>
+          <ol className={styles.list}>
+            {pendingPage.items.map((feedback) => {
+              const version = feedback.weekly_feedback_form_versions;
+              const reminderEvent = reminderEventsByFeedbackId.get(feedback.id);
+              const reminderStatus = describeWeeklyFeedbackReminderEvidence(feedback.request_source, reminderEvent);
+
+              return (
+                <li id={`feedback-pendente-${feedback.id}`} key={feedback.id}>
+                  <Card className={styles.feedbackCard}>
+                    <div className={styles.header}>
+                      <div>
+                        <h3 className={styles.title}>
+                          {formatDate(feedback.period_start)} a {formatDate(feedback.period_end)}
+                        </h3>
+                        <p className={styles.meta}>
+                          {version
+                            ? `${version.title} · versão ${version.version_number}`
+                            : "Versão indisponível"}
+                        </p>
+                      </div>
+                      <Badge variant="warning">Aguardando cliente</Badge>
+                    </div>
+                    <p className={styles.meta}>
+                      Origem: {weeklyFeedbackOriginLabel(feedback.request_source)}
+                    </p>
+                    <p className={styles.meta}>Prazo: {formatDateTime(feedback.due_at)}</p>
+                    <p className={styles.reminderStatus}>
+                      <strong>Notificações:</strong>{" "}
+                      {reminderStatus.label}
+                       {reminderStatus?.nextStep ? (
+                         <> · <Link href={withReturn(`/admin/clientes/${client.id}#${reminderStatus.nextStep.anchor}`)}>{reminderStatus.nextStep.label}</Link></>
+                       ) : null}
+                    </p>
+                    <p className={styles.meta}>
+                      A cliente ainda não concluiu o envio. Rascunhos não são interpretados automaticamente.
+                    </p>
+                  </Card>
+                </li>
+              );
+            })}
+          </ol>
+          {pendingPage.pageCount > 1 ? <nav aria-label="Páginas de feedbacks pendentes" className={styles.explorerPages}>
+            <span>Página {pendingPage.page} de {pendingPage.pageCount}</span>
+            {pendingPage.page > 1 ? <Link href={withReturn(professionalFeedbackHistoryHref(client.id,{...options,pendingPage:pendingPage.page-1,submittedPage:submittedPage.page},"pending"))}>Anterior</Link> : null}
+            {pendingPage.page < pendingPage.pageCount ? <Link href={withReturn(professionalFeedbackHistoryHref(client.id,{...options,pendingPage:pendingPage.page+1,submittedPage:submittedPage.page},"pending"))}>Próxima</Link> : null}
+          </nav> : null}
+          </>
+        )}
+      </Section>
+      </div>
+
+      </>}
     </>
   );
 }
