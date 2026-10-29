@@ -195,6 +195,12 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
       />
 
       <ClientWorkspaceNav activeArea="treino" clientId={client.id} />
+      <nav aria-label="Etapas do treino" className={styles.versionNavigation}>
+        <a href="#solicitacao-treino">1. Solicitação</a>
+        <a href="#prescricao-treino">2. Montagem e revisão</a>
+        <a href="#historico-solicitacoes-treino">3. Histórico de pedidos</a>
+        <a href="#historico-versoes-treino">4. Versões</a>
+      </nav>
       <AdminTrainingWorkflowOverview stage={requests.length === 0 ? "request" : openVersion ? openVersion.reviewed_at ? "publish" : sortedOpenItems.length > 0 ? "review" : "compose" : latestPublished ? "published" : "compose"} exerciseCount={sortedOpenItems.length} />
 
       {newRequestAfterPublication ? (
@@ -207,6 +213,51 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
           {" "}<a href={withReturn(trainingRequestExactHref(`/admin/clientes/${client.id}/treino`,orderedRequests,orderedRequests[0].id) ?? "#historico-solicitacoes-treino")}>Ver solicitação</a>
         </Alert>
       ) : null}
+
+      <Section
+        action={
+          <Badge variant={requests.length > 0 ? "positive" : "neutral"}>
+            {requests.length > 0 ? "Solicitado" : "Não solicitado"}
+          </Badge>
+        }
+        description="Solicitação do serviço e prescrição são etapas diferentes. Registrar uma solicitação não monta nem publica treino automaticamente."
+        id="solicitacao-treino"
+        title="Solicitação do serviço"
+      >
+        <div className={styles.grid}>
+          <Card>
+            <div className={styles.summary}>
+              <h2>Situação atual</h2>
+              <p>
+                {requests.length > 0
+                  ? `${requests.length} solicitação(ões) registrada(s) no histórico.`
+                  : "Nenhuma solicitação de treino registrada até o momento."}
+              </p>
+              {orderedRequests[0] ? (
+                <p>
+                  Última solicitação: {formatDateTime(orderedRequests[0].requested_at)}
+                  {" · "}{trainingRequestOriginLabel(orderedRequests[0].recorded_by_profile_id, client.profile_id, "admin")}
+                  .{" "}
+                  <a className={styles.link} href={withReturn(trainingRequestExactHref(`/admin/clientes/${client.id}/treino`, orderedRequests, orderedRequests[0].id) ?? "#historico-solicitacoes-treino")}>Abrir solicitação exata</a>
+                </p>
+              ) : null}
+            </div>
+          </Card>
+          {requests.length === 0 ? (
+            <Card><AdminTrainingRequestForm clientId={client.id} /></Card>
+          ) : (
+            <Card>
+              <details className={styles.exerciseEditor}>
+                <summary>Registrar outra solicitação, se necessário</summary>
+                <div className={styles.exerciseEditorBody}>
+                  <p className={styles.description}>A solicitação existente continua registrada. Confira o pedido antes de acrescentar outro.</p>
+                  <AdminTrainingRequestForm clientId={client.id} />
+                </div>
+              </details>
+            </Card>
+          )}
+        </div>
+      </Section>
 
       <Section
         description="A prescrição depende de uma solicitação registrada pela cliente ou pela Patty. Salvar não publica; revisão e publicação são etapas separadas."
@@ -403,41 +454,6 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
           </Card>
         </Section>
       ) : null}
-
-      <Section
-        action={
-          <Badge variant={requests.length > 0 ? "positive" : "neutral"}>
-            {requests.length > 0 ? "Solicitado" : "Não solicitado"}
-          </Badge>
-        }
-        description="Solicitação do serviço e prescrição são etapas diferentes. Registrar uma solicitação não monta nem publica treino automaticamente."
-        id="solicitacao-treino"
-        title="Solicitação do serviço"
-      >
-        <div className={styles.grid}>
-          <Card>
-            <div className={styles.summary}>
-              <h2>Situação atual</h2>
-              <p>
-                {requests.length > 0
-                  ? `${requests.length} solicitação(ões) registrada(s) no histórico.`
-                  : "Nenhuma solicitação de treino registrada até o momento."}
-              </p>
-              {orderedRequests[0] ? (
-                <p>
-                  Última solicitação: {formatDateTime(orderedRequests[0].requested_at)}
-                  {" · "}{trainingRequestOriginLabel(orderedRequests[0].recorded_by_profile_id, client.profile_id, "admin")}
-                  .{" "}
-                  <a className={styles.link} href={withReturn(trainingRequestExactHref(`/admin/clientes/${client.id}/treino`, orderedRequests, orderedRequests[0].id) ?? "#historico-solicitacoes-treino")}>Abrir solicitação exata</a>
-                </p>
-              ) : null}
-            </div>
-          </Card>
-          <Card>
-            <AdminTrainingRequestForm clientId={client.id} />
-          </Card>
-        </div>
-      </Section>
 
       <Section
         action={<Badge variant="neutral">{requests.length} registro(s)</Badge>}
