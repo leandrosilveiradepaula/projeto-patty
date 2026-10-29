@@ -1,3 +1,11 @@
+## 2026-10-29 — J6: navegação da versão publicada até a liberação individual (em PR)
+
+**Fila:** [cartão #1008](https://github.com/leandrosilveiradepaula/projeto-patty/issues/1008#issuecomment-6500811437). A versão 1 do vídeo da balança foi publicada pela Patty em produção; nenhuma liberação individual foi registrada.
+
+**Proposta:** no detalhe da versão publicada, a Patty escolhe uma cliente entre seus assignments atuais autorizados e abre a tela de liberação com a versão exata preselecionada somente se elegível. A Server Action de liberação existente continua exigindo autenticação admin AAL2, assignment vigente, asset privado verificado e confirmação humana. Não publica nem libera automaticamente. Sem assignments, aparece estado vazio. Sem migrations, RLS, novas regras ou envio de emails.
+
+**Estado:** implementação em branch, sujeita a testes, CI, merge e publicação. Homologação profissional J1–J7 somente ao final.
+
 ## 2026-10-26 — J3: comparacao factual de duas avaliacoes finalizadas pela cliente (em PR)
 
 **Fila e evidencia:** cartao J3 [issue #1008](https://github.com/leandrosilveiradepaula/projeto-patty/issues/1008#issuecomment-6428434271). O profissional ja tinha comparacao direta de duas avaliacoes; o portal da cliente possuia historico e evolucao por medida, mas nao a escolha de um par de avaliacoes para conferencia. O escopo confirmado contempla avaliacao/medidas e evolucao da cliente, sem classificacao clinica automatica.
