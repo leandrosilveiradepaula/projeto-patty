@@ -25,7 +25,7 @@ import styles from "./page.module.css";
 
 type AdminClientContentPageProps = {
   params: Promise<{ clienteId: string }>;
-  searchParams: Promise<{ q?: string; arquivo?: string; ordem?: string; pagina?: string; liberacao?: string; ano?: string; filaRetorno?: string; listaQ?: string; listaView?: string; listaPagina?: string }>;
+  searchParams: Promise<{ q?: string; arquivo?: string; ordem?: string; pagina?: string; liberacao?: string; versao?: string; ano?: string; filaRetorno?: string; listaQ?: string; listaView?: string; listaPagina?: string }>;
 };
 
 function formatRecordedDate(value: string | null) {
@@ -183,6 +183,7 @@ export default async function AdminClientContentPage({
             <ClientContentReleaseForm
               key={`${client.id}:${releases.length}`}
               clientId={client.id}
+              initialVersionId={typeof rawFilters.versao === "string" && availableVersions.some((v) => v.id === rawFilters.versao) ? rawFilters.versao : ""}
               options={availableVersions.map((version) => ({
                 id: version.id,
                 title: version.title,
