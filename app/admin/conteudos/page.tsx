@@ -43,7 +43,7 @@ export default async function AdminConteudosPage({ searchParams }: AdminConteudo
       />
 
       <Section
-        description="O novo conteúdo começa sem categoria, tipo, fase ou arquivo. Esses campos não são inferidos automaticamente."
+        description="Informe título e ordem para criar um rascunho. Depois, escolha Vídeo ou PDF no editor antes de enviar o arquivo. A publicação e a liberação são separadas."
         title="Novo conteúdo educacional"
       >
         <Card className={styles.createCard}>

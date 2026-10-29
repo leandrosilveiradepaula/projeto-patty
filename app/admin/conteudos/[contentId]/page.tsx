@@ -108,14 +108,21 @@ export default async function AdminEducationalContentDetailPage({
             Voltar à biblioteca
           </Link>
         }
-        description="Edite metadados de rascunho sem publicar nem liberar conteúdo automaticamente."
+        description="Siga as etapas abaixo para preparar, enviar o arquivo e publicar. A liberação para clientes é separada."
         eyebrow="Admin · Conteúdos"
         title={current?.title ?? "Conteúdo educacional"}
       />
 
+      <nav className={styles.stepsNav} aria-label="Etapas do conteúdo">
+        <a href="#preparar-conteudo">1. Preparar</a>
+        <a href="#assets-do-conteudo">2. Enviar arquivo</a>
+        <a href="#publicar-conteudo">3. Publicar</a>
+        <a href="#liberar-conteudo">4. Liberar</a>
+      </nav>
       <Section
-        description="Esta etapa não define taxonomia, direitos/licenciamento, arquivo de mídia ou liberação para clientes."
-        title="Rascunho"
+        id="preparar-conteudo"
+        description="Confira título, ordem e formato. Salve as mudanças antes de enviar o arquivo."
+        title="1. Preparar conteúdo"
       >
         {!current ? (
           <EmptyState
@@ -152,6 +159,7 @@ export default async function AdminEducationalContentDetailPage({
               <Badge variant="warning">Rascunho</Badge>
             </div>
 
+            {!current.content_type_key ? <p className={styles.description} role="status">Primeiro, selecione Vídeo ou PDF abaixo e clique em Salvar rascunho. O envio do arquivo e a publicação ficam bloqueados até a escolha do formato.</p> : null}
             <AdminEducationalContentDraftSaveForm
               contentId={content.id}
               contentTypeKey={current.content_type_key}
@@ -161,52 +169,22 @@ export default async function AdminEducationalContentDetailPage({
               versionId={current.id}
             />
 
-            <p className={styles.description}>
-              Categoria atual: {current.category_key ?? "não definida"} · Tipo
-              atual: {current.content_type_key ?? "não definido"} · Fase:{" "}
-              {current.phase_key ?? "não vinculada"}.
-            </p>
-
-            <AdminEducationalContentPublishForm
-              canPublish={currentCanPublish}
-              contentId={content.id}
-              publicationBlockedReason={currentPublicationBlockedReason}
-              versionId={current.id}
-              versionNumber={current.version_number}
-            />
-            <p className={styles.description}>
-              {currentCanPublish
-                ? "Após publicar, esta versão com arquivo poderá ser liberada manualmente para cada cliente. Não há liberação automática."
-                : currentPublicationBlockedReason}
+            <p className={styles.nextStep} role="status">
+              {current.content_type_key
+                ? currentAssets.length > 0
+                  ? "Dados salvos e arquivo registrado. Confira o material na etapa 2 e siga para publicar."
+                  : "Próximo passo: envie e registre o arquivo na etapa 2."
+                : "Próximo passo: selecione Vídeo ou PDF e salve o rascunho. Depois envie o arquivo na etapa 2."}
+              {" "}<a href="#assets-do-conteudo">Ir para a etapa 2</a>
             </p>
           </Card>
         )}
       </Section>
 
-      {releaseReady ? (
-        <Section title="Liberar esta versão para uma cliente" description="A publicação não concede acesso automático. Selecione um acompanhamento autorizado e confirme a versão exata na tela individual.">
-          {activeClients.length === 0 ? (
-            <Card><p className={styles.description}>Nenhuma cliente em acompanhamento ativo está disponível para liberação. O material permanece publicado e privado.</p></Card>
-          ) : (
-            <Card>
-              <p className={styles.description}>Versão {inspected.version_number} · {inspected.title}. Selecione uma cliente para revisar a liberação.</p>
-              <ul className={styles.releaseClientList}>
-                {activeClients.map((client) => (
-                  <li key={client.id}>
-                    <Link className={styles.backLink} href={`/admin/clientes/${client.id}/conteudos?versao=${inspected.id}#liberar-conteudo`}>
-                      {client.full_name?.trim() || client.profiles?.display_name?.trim() || "Cliente sem nome informado"} · revisar liberação
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </Card>
-          )}
-        </Section>
-      ) : null}
       <Section
         id="assets-do-conteudo"
-        description="Consulte os arquivos da versão selecionada. O binário permanece privado no provedor de armazenamento."
-        title={inspected ? `Arquivos da versão ${inspected.version_number}` : "Arquivos"}
+        description="Escolha o arquivo aprovado, envie-o ao armazenamento privado e confirme o registro antes de publicar."
+        title={inspected ? `2. Enviar arquivo — versão ${inspected.version_number}` : "2. Enviar arquivo"}
       >
         {!inspected ? (
           <EmptyState
@@ -217,28 +195,26 @@ export default async function AdminEducationalContentDetailPage({
           <Card>
             <div className={styles.header}>
               <div>
-                <h2 className={styles.title}>Nenhum asset registrado</h2>
+                <h2 className={styles.title}>Arquivo ainda não enviado</h2>
                 <p className={styles.description}>
-                  A versão {inspected.version_number} ainda não possui arquivo registrado.
-                  Isso não publica nem libera nada automaticamente.
+                  A versão {inspected.version_number} ainda não possui arquivo. Envie e registre o arquivo para continuar.
                 </p>
               </div>
               <Badge variant="warning">Sem asset</Badge>
             </div>
             <p className={styles.description}>
-              Selecione o arquivo aprovado. O navegador calcula SHA-256
-              localmente e envia o binário diretamente ao Blob privado; o
-              servidor continua validando o objeto antes de registrar metadata.
+              Selecione o PDF ou vídeo aprovado, clique em Enviar arquivo e, ao terminar, confirme o registro. Só depois será possível publicar.
             </p>
-            {inspected.id === current?.id && current?.published_at === null ? (
+            {inspected.id === current?.id && current?.published_at === null && current.content_type_key ? (
               <AdminEducationalContentAssetUploadForm
                 contentId={content.id}
                 versionId={current.id}
               />
             ) : (
               <p className={styles.description}>
-                Uma versão histórica ou publicada não pode receber arquivos
-                retroativamente. Selecione o rascunho atual para incluir novo asset.
+                {current?.published_at === null && !current.content_type_key
+                  ? "Para enviar um arquivo, volte à etapa 1, escolha Vídeo ou PDF e salve."
+                  : "Esta versão não pode mais receber arquivos. Para alterar o material, crie uma nova versão em rascunho."}
               </p>
             )}
           </Card>
@@ -253,15 +229,12 @@ export default async function AdminEducationalContentDetailPage({
                       <p className={styles.description}>
                         {asset.content_type} · {asset.byte_size.toLocaleString("pt-BR")} bytes
                       </p>
-                      <p className={styles.mono}>
-                        Provider: {asset.storage_provider}
-                      </p>
-                      <p className={styles.mono}>
-                        Path: {asset.storage_path}
-                      </p>
-                      <p className={styles.mono}>
-                        SHA-256: {asset.sha256_hex}
-                      </p>
+                      <details className={styles.technicalDetails}>
+                        <summary>Detalhes técnicos do arquivo</summary>
+                        <p className={styles.mono}>Provider: {asset.storage_provider}</p>
+                        <p className={styles.mono}>Path: {asset.storage_path}</p>
+                        <p className={styles.mono}>SHA-256: {asset.sha256_hex}</p>
+                      </details>
                       {asset.content_type === "video/mp4" ? (
                         <PrivateEducationalVideoPlayer
                           assetUrl={`/admin/conteudos/assets/${asset.id}`}
@@ -283,6 +256,59 @@ export default async function AdminEducationalContentDetailPage({
               </li>
             ))}
           </ol>
+        )}
+      </Section>
+
+      <Section
+        id="publicar-conteudo"
+        description="A publicação é uma decisão da Patty e não libera o material automaticamente para clientes."
+        title="3. Revisar e publicar"
+      >
+        <Card>
+          {!current ? (
+            <p className={styles.description}>Crie um rascunho na etapa 1 para continuar.</p>
+          ) : current.published_at ? (
+            <p className={styles.nextStep}>Versão {current.version_number} publicada. A próxima ação é escolher a cliente autorizada na etapa 4.</p>
+          ) : currentCanPublish ? (
+            <>
+              <p className={styles.nextStep}>Arquivo registrado. Confira o conteúdo na etapa 2 e confirme a publicação abaixo.</p>
+              <AdminEducationalContentPublishForm
+                canPublish={currentCanPublish}
+                contentId={content.id}
+                publicationBlockedReason={currentPublicationBlockedReason}
+                versionId={current.id}
+                versionNumber={current.version_number}
+              />
+            </>
+          ) : (
+            <p className={styles.nextStep} role="status">
+              {current.content_type_key
+                ? "Antes de publicar, envie e registre o arquivo na etapa 2."
+                : "Antes de publicar, selecione e salve o formato na etapa 1. Depois envie o arquivo na etapa 2."}
+              {" "}<a href={current.content_type_key ? "#assets-do-conteudo" : "#preparar-conteudo"}>Ir para a etapa necessária</a>
+            </p>
+          )}
+        </Card>
+      </Section>
+
+      <Section id="liberar-conteudo" title="4. Liberar para clientes" description="Publicar não concede acesso. Cada liberação exige confirmação separada para a cliente e versão exatas.">
+        {!releaseReady ? (
+          <Card><p className={styles.description}>Primeiro publique uma versão com arquivo registrado. Nenhuma cliente recebe acesso automaticamente.</p></Card>
+        ) : activeClients.length === 0 ? (
+          <Card><p className={styles.description}>Nenhuma cliente com acompanhamento ativo está disponível para liberação. O conteúdo permanece publicado e privado.</p></Card>
+        ) : (
+          <Card>
+            <p className={styles.description}>Versão {inspected.version_number} · {inspected.title}. Escolha uma cliente para revisar a liberação.</p>
+            <ul className={styles.releaseClientList}>
+              {activeClients.map((client) => (
+                <li key={client.id}>
+                  <Link className={styles.backLink} href={`/admin/clientes/${client.id}/conteudos?versao=${inspected.id}#liberar-conteudo`}>
+                    {client.full_name?.trim() || client.profiles?.display_name?.trim() || "Cliente sem nome informado"} · revisar liberação
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </Card>
         )}
       </Section>
 
