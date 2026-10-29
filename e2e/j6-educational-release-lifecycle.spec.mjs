@@ -272,6 +272,32 @@ test("J6: versioned content releases require exact published version and synthet
       await assertMobile(admin);
     });
 
+    await test.step("J6 editor shows steps in order at 1440px and 390px and supports keyboard navigation", async () => {
+      const selectors = [
+        "preparar-conteudo", "assets-do-conteudo", "publicar-conteudo", "liberar-conteudo",
+      ];
+      const navigation = admin.getByRole("navigation", { name: "Etapas do conteúdo" });
+      for (const width of [1440, 390]) {
+        await admin.setViewportSize({ width, height: width === 1440 ? 900 : 844 });
+        for (const id of selectors) {
+          await expect(admin.locator("section#" + id)).toBeVisible();
+        }
+        const positions = await admin.locator(
+          selectors.map(id => "section#" + id).join(", "),
+        ).evaluateAll(elements => elements.map(el =>
+          Math.round(el.getBoundingClientRect().top + window.scrollY),
+        ));
+        expect(positions).toEqual([...positions].sort((a,b) => a-b));
+        await assertMobile(admin);
+      }
+      await navigation.getByRole("link", { name: "1. Preparar" }).focus();
+      await admin.keyboard.press("Tab");
+      await expect(navigation.getByRole("link", { name: "2. Enviar arquivo" })).toBeFocused();
+      await admin.keyboard.press("Enter");
+      await expect(admin).toHaveURL(/#assets-do-conteudo$/);
+      await assertMobile(admin);
+    });
+
     await test.step("Draft metadata without file cannot be published or released", async () => {
       await expect(admin.getByRole("status").filter({ hasText: /Antes de publicar, selecione e salve o formato/ })).toBeVisible();
       await expect(admin.locator('input[type="file"]')).toHaveCount(0);
@@ -349,10 +375,10 @@ test("J6: versioned content releases require exact published version and synthet
         "Há um registro de asset pendente nesta sessão do navegador. Consulte o estado antes de registrar novamente.",
         { exact: true },
       )).toBeVisible();
-      await expect(admin.getByLabel("Arquivo aprovado para upload privado")).toBeDisabled();
-      await expect(admin.getByRole("button", { name: "Enviar para o Blob privado" })).toBeDisabled();
-      await expect(admin.getByRole("checkbox", { name: /Revisei os dados do upload/ })).toBeDisabled();
-      await expect(admin.getByRole("button", { name: "Registrar asset verificado" })).toBeDisabled();
+      await expect(admin.getByLabel("Selecione o arquivo aprovado")).toBeDisabled();
+      await expect(admin.getByRole("button", { name: "Enviar arquivo" })).toBeDisabled();
+      await expect(admin.getByRole("checkbox", { name: /Revisei os dados do arquivo/ })).toBeDisabled();
+      await expect(admin.getByRole("button", { name: "Confirmar registro do arquivo" })).toBeDisabled();
       await admin.getByRole("button", { name: "Consultar estado do registro" }).click();
       await expect(admin.getByText(
         "O servidor não encontrou um registro para este arquivo. Você pode repetir somente o registro dos metadados, sem transferir o arquivo novamente.",
@@ -374,8 +400,8 @@ test("J6: versioned content releases require exact published version and synthet
         byte_size: pendingAsset.byteSize,
         sha256_hex: pendingAsset.sha256Hex,
       });
-      await admin.getByRole("checkbox", { name: /Revisei os dados do upload/ }).check();
-      await admin.getByRole("button", { name: "Registrar asset verificado" }).click();
+      await admin.getByRole("checkbox", { name: /Revisei os dados do arquivo/ }).check();
+      await admin.getByRole("button", { name: "Confirmar registro do arquivo" }).click();
       await expect.poll(() => admin.evaluate((key) =>
         sessionStorage.getItem(key), recoveryKey), { timeout: 20000 }).toBeNull();
       expect(rows("select id from public.educational_content_assets where educational_content_version_id=" +

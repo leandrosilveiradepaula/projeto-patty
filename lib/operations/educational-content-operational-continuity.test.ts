@@ -32,9 +32,9 @@ test("private upload prevents duplicate grants and duplicate binary PUTs", () =>
 
 test("private upload never claims registration, publication or release merely after PUT success", () => {
   assert.ok(upload.includes('rememberUploadedAsset({'));
-  assert.ok(upload.includes("Upload concluído. Revise os dados abaixo e registre o asset explicitamente."));
-  assert.ok(upload.includes("Upload concluído, ainda não registrado"));
-  assert.ok(upload.includes("Registrar o asset não publica nem"));
+  assert.ok(upload.includes("Arquivo enviado. Confira os dados abaixo e confirme o registro do arquivo."));
+  assert.ok(upload.includes("Arquivo enviado, aguardando confirmação"));
+  assert.ok(upload.includes("Confirmar o registro não publica nem"));
   assert.ok(grant.includes('await requireRole("admin")'));
   assert.ok(grant.includes("version.published_at !== null"));
   assert.ok(grant.includes("existingAssets.length > 0"));

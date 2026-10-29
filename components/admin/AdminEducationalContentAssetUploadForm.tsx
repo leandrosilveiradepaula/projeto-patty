@@ -145,7 +145,7 @@ export function AdminEducationalContentAssetUploadForm({
         );
       }
 
-      setStatus("Enviando o arquivo diretamente para o Blob privado…");
+      setStatus("Enviando seu arquivo com segurança…");
       const uploadResponse = await fetch(grant.uploadUrl, {
         body: file,
         headers: {
@@ -168,7 +168,7 @@ export function AdminEducationalContentAssetUploadForm({
         sha256Hex,
       });
       setStatus(
-        "Upload concluído. Revise os dados abaixo e registre o asset explicitamente.",
+        "Arquivo enviado. Confira os dados abaixo e confirme o registro do arquivo.",
       );
     } catch (error) {
       setStatus(
@@ -188,7 +188,7 @@ export function AdminEducationalContentAssetUploadForm({
     setStatus("Validando o asset no servidor e registrando os metadados…");
     try {
       await registerAction(new FormData(event.currentTarget));
-      setStatus("Asset privado registrado com sucesso. Ainda não foi publicado nem liberado.");
+      setStatus("Arquivo registrado com sucesso. Agora você pode revisar e publicar na etapa 3; nenhuma cliente recebeu acesso.");
       forgetUploadedAsset();
       setRegistrationUncertain(false);
       setFile(null);
@@ -246,7 +246,7 @@ export function AdminEducationalContentAssetUploadForm({
   return (
     <div aria-busy={busy || registerBusy || inspectionBusy} className={styles.uploadPanel}>
       <label className={styles.field}>
-        <span>Arquivo aprovado para upload privado</span>
+        <span>Selecione o arquivo aprovado</span>
         <input
           accept={EDUCATIONAL_ASSET_MIME_TYPES.join(",")}
           disabled={busy || registerBusy || inspectionBusy || registrationUncertain}
@@ -267,7 +267,7 @@ export function AdminEducationalContentAssetUploadForm({
           onClick={uploadSelectedFile}
           type="button"
         >
-          {busy ? "Enviando…" : "Enviar para o Blob privado"}
+          {busy ? "Enviando…" : "Enviar arquivo"}
         </Button>
         {file ? (
           <span className={styles.description}>
@@ -303,7 +303,7 @@ export function AdminEducationalContentAssetUploadForm({
           <input name="sha256Hex" type="hidden" value={uploaded.sha256Hex} />
 
           <div className={styles.uploadSummary}>
-            <strong>Upload concluído, ainda não registrado</strong>
+            <strong>Arquivo enviado, aguardando confirmação</strong>
             <p className={styles.mono}>Path: {uploaded.pathname}</p>
             <p className={styles.mono}>MIME: {uploaded.contentType}</p>
             <p className={styles.mono}>
@@ -321,13 +321,13 @@ export function AdminEducationalContentAssetUploadForm({
               value="yes"
             />
             <span>
-              Revisei os dados do upload. Registrar o asset não publica nem
+              Revisei os dados do arquivo. Confirmar o registro não publica nem
               libera o conteúdo para clientes.
             </span>
           </label>
 
           <Button disabled={busy || registerBusy || inspectionBusy || registrationUncertain} loading={registerBusy} type="submit">
-            Registrar asset verificado
+            Confirmar registro do arquivo
           </Button>
         </form>
       ) : null}
