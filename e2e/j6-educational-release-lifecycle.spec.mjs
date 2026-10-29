@@ -250,9 +250,6 @@ test("J6: versioned content releases require exact published version and synthet
       await test.step("J6 create: fill title", async () => {
         await admin.getByLabel("Título", { exact: true }).fill("J6 material sem arquivo sintetico");
       }, { timeout: 20000 });
-      await test.step("J6 create: select video type", async () => {
-        await admin.getByRole("combobox", { name: /Tipo de conteúdo/ }).selectOption("video");
-      }, { timeout: 20000 });
       await test.step("J6 create: submit initial draft", async () => {
         await admin.getByRole("button", { name: "Criar rascunho" }).click();
       }, { timeout: 25000 });
@@ -266,6 +263,7 @@ test("J6: versioned content releases require exact published version and synthet
       await expect(admin).toHaveURL(new RegExp("/admin/conteudos/" + contentId));
       v1 = versions(contentId)[0];
       expect(v1.version_number).toBe(1);
+      expect(v1.content_type_key).toBeNull();
       expect(v1.published_at).toBeNull();
       expect(visibleCount(owner.id, "aal1", "educational_content_versions", v1.id)).toBe(0);
       expect(visibleCount(foreign.id, "aal1", "educational_content_versions", v1.id)).toBe(0);
@@ -275,6 +273,10 @@ test("J6: versioned content releases require exact published version and synthet
     });
 
     await test.step("Draft metadata without file cannot be published or released", async () => {
+      await expect(admin.getByRole("status").filter({ hasText: /Selecione Vídeo ou PDF antes de publicar/ })).toBeVisible();
+      await admin.getByRole("combobox", { name: /Tipo de conteúdo/ }).selectOption("video");
+      await admin.getByRole("button", { name: "Salvar rascunho" }).click();
+      await expect.poll(() => versions(contentId)[0].content_type_key).toBe("video");
       await expect(admin.getByRole("button", { name: "Publicar versão" })).toBeDisabled();
       await expect(admin.getByRole("status").filter({ hasText: /Registre o asset privado video\/mp4/ })).toBeVisible();
       await admin.goto("/admin/clientes/" + clientId + "/conteudos");
@@ -410,7 +412,6 @@ test("J6: versioned content releases require exact published version and synthet
       // This fixture uses only synthetic metadata in the disposable database.
       await admin.goto("/admin/conteudos");
       await admin.getByLabel("Título", { exact: true }).fill(secondTitle);
-      await admin.getByRole("combobox", { name: /Tipo de conteúdo/ }).selectOption("pdf");
       await admin.getByRole("button", { name: "Criar rascunho" }).click();
       const secondContent = await pollRows(
         "select c.id from public.educational_contents c" +
@@ -422,6 +423,10 @@ test("J6: versioned content releases require exact published version and synthet
       await expect(admin).toHaveURL(new RegExp("/admin/conteudos/" + secondContentId));
       secondVersion = versions(secondContentId)[0];
       expect(secondVersion.published_at).toBeNull();
+      expect(secondVersion.content_type_key).toBeNull();
+      await admin.getByRole("combobox", { name: /Tipo de conteúdo/ }).selectOption("pdf");
+      await admin.getByRole("button", { name: "Salvar rascunho" }).click();
+      await expect.poll(() => versions(secondContentId)[0].content_type_key).toBe("pdf");
       // Only this second PDF exists physically in the local signed-media fixture.
       // It is NOT a real Vercel object; client release is still required.
       secondAssetId = insert("educational_content_assets", {
