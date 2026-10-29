@@ -410,7 +410,7 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
             : "O Feedback Semanal começa somente depois da primeira publicação de protocolo para esta cliente."
         }
         id="solicitar-feedback"
-        title="Solicitação manual excepcional"
+        title="Solicitar Feedback Semanal"
       >
         <Card>
           <AdminWeeklyFeedbackRequestForm
