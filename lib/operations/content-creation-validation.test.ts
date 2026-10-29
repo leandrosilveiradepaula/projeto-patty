@@ -60,7 +60,7 @@ test("initial content draft requires only title and order; format is chosen befo
   assert.match(detailForm, /name="contentTypeKey" required/);
   const detail = read("app/admin/conteudos/[contentId]/page.tsx");
   assert.match(detail, /current\.content_type_key \? \(/);
-  assert.match(detail, /Selecione Vídeo ou PDF abaixo/);
+  assert.match(detail, /selecione Vídeo ou PDF abaixo/);
   const grant = read("app/admin/conteudos/[contentId]/assets/upload/route.ts");
   assert.match(grant, /body\.contentType !== expectedMimeType/);
 });
