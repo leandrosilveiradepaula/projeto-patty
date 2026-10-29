@@ -120,7 +120,7 @@ async function pollRows(query, expected) {
   return rows(query);
 }
 function versions(contentId) {
-  return rows("select id,educational_content_id,version_number,title,published_at" +
+  return rows("select id,educational_content_id,version_number,title,content_type_key,published_at" +
     " from public.educational_content_versions where educational_content_id=" +
     literal(contentId) + " order by version_number");
 }
@@ -273,14 +273,14 @@ test("J6: versioned content releases require exact published version and synthet
     });
 
     await test.step("Draft metadata without file cannot be published or released", async () => {
-      await expect(admin.getByRole("status").filter({ hasText: /Selecione Vídeo ou PDF antes de publicar/ })).toBeVisible();
+      await expect(admin.getByRole("status").filter({ hasText: /Antes de publicar, selecione e salve o formato/ })).toBeVisible();
       await expect(admin.locator('input[type="file"]')).toHaveCount(0);
-      await expect(admin.getByRole("button", { name: "Publicar versão" })).toBeDisabled();
+      await expect(admin.getByRole("button", { name: "Publicar versão" })).toHaveCount(0);
       await admin.getByRole("combobox", { name: /Tipo de conteúdo/ }).selectOption("video");
       await admin.getByRole("button", { name: "Salvar rascunho" }).click();
       await expect.poll(() => versions(contentId)[0].content_type_key).toBe("video");
-      await expect(admin.getByRole("button", { name: "Publicar versão" })).toBeDisabled();
-      await expect(admin.getByRole("status").filter({ hasText: /Registre o asset privado video\/mp4/ })).toBeVisible();
+      await expect(admin.getByRole("button", { name: "Publicar versão" })).toHaveCount(0);
+      await expect(admin.getByRole("status").filter({ hasText: /Antes de publicar, envie e registre o arquivo/ })).toBeVisible();
       await admin.goto("/admin/clientes/" + clientId + "/conteudos");
       await expect(admin.getByText("Nenhum conteúdo disponível para liberar", {
         exact: true,
@@ -388,7 +388,7 @@ test("J6: versioned content releases require exact published version and synthet
       expect(visibleCount(staff.id, "aal1", "educational_content_assets", syntheticAssetId)).toBe(0);
       expect(visibleCount(staff.id, "aal2", "educational_content_assets", syntheticAssetId)).toBe(1);
       await admin.reload();
-      await expect(admin.getByText("Nenhum asset registrado")).toHaveCount(0);
+      await expect(admin.getByText("Arquivo ainda não enviado")).toHaveCount(0);
       const adminVideo = admin.getByLabel("Reproduzir vídeo: J6 material com asset sintetico");
       await expect(adminVideo).toBeVisible();
       await expect(adminVideo).toHaveAttribute("preload", "none");
@@ -703,7 +703,7 @@ test("J6: versioned content releases require exact published version and synthet
       const v3 = versions(contentId)[2];
       expect(v3.version_number).toBe(3);
       await admin.reload();
-      await expect(admin.getByRole("button", { name: "Publicar versão" })).toBeDisabled();
+      await expect(admin.getByRole("button", { name: "Publicar versão" })).toHaveCount(0);
       expect(versions(contentId)[2]?.published_at).toBeNull();
       expect(releases(clientId)).toHaveLength(2);
       expect(visibleCount(owner.id, "aal1", "educational_content_versions", v3.id)).toBe(0);
