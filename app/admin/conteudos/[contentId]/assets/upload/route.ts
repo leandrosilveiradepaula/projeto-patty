@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { educationalContentMimeType } from "@/lib/content/publication-eligibility";
 import { createPrivateBlobUploadUrl } from "@/lib/content/private-blob-upload-url";
 import { requireRole } from "@/lib/supabase/auth";
 import {
@@ -89,6 +90,11 @@ export async function POST(
       { error: "A versão precisa estar em rascunho para receber um arquivo" },
       { status: 409 },
     );
+  }
+
+  const expectedMimeType = educationalContentMimeType(version.content_type_key);
+  if (!expectedMimeType || body.contentType !== expectedMimeType) {
+    return Response.json({ error: "Selecione e salve um tipo de conteúdo compatível antes do upload" }, { status: 409 });
   }
 
   const existingAssets = await listEducationalContentAssetsForCurrentAdmin(
