@@ -51,3 +51,16 @@ test("creation never publishes or releases content and validation stays server-s
   const parser=read("lib/content/admin-library-explorer.ts");
   assert.match(parser, /typeof raw\.q==="string"/);
 });
+
+
+test("initial content draft requires only title and order; format is chosen before asset upload", () => {
+  assert.doesNotMatch(form, /name="contentTypeKey"/);
+  assert.doesNotMatch(create, /readContentTypeKey\(formData\)/);
+  assert.doesNotMatch(create, /contentTypeKey,/);
+  assert.match(detailForm, /name="contentTypeKey" required/);
+  const detail = read("app/admin/conteudos/[contentId]/page.tsx");
+  assert.match(detail, /current\.content_type_key \? \(/);
+  assert.match(detail, /Selecione Vídeo ou PDF abaixo/);
+  const grant = read("app/admin/conteudos/[contentId]/assets/upload/route.ts");
+  assert.match(grant, /body\.contentType !== expectedMimeType/);
+});
