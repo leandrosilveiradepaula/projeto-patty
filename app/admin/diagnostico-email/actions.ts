@@ -16,6 +16,6 @@ export async function runEmailDiagnostic(
   const result = await sendIsolatedGmailDiagnostic();
   return {
     result: result.state,
-    reference: "reference" in result ? result.reference : null,
+    reference: "reference" in result ? (result.reference ?? null) : null,
   };
 }
