@@ -437,6 +437,40 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
     await expect(admin.getByText("J7 conteúdo sintético com referência de outra cliente.", { exact: true })).toHaveCount(0);
     await expect(admin.getByText(validFindingText, { exact: true })).toBeVisible();
 
+    await test.step("Completed valid findings are discoverable in the Patty queue and AI index", async () => {
+      for (const width of [390, 1440]) {
+        await admin.setViewportSize({ width, height: width === 390 ? 844 : 900 });
+        await admin.goto("/admin/ia");
+        const completed = admin.locator("section").filter({
+          has: admin.getByRole("heading", {
+            name: "Análises concluídas aguardando decisões da Patty",
+          }),
+        }).first();
+        const actionable = completed.getByRole("link", { name: "Abrir análise para decisão" });
+        await expect(actionable).toHaveAttribute(
+          "href", reviewURL + "#execucao-ia-" + validExecutionId,
+        );
+        await expect(completed.getByText("2 achado(s) aguardando")).toBeVisible();
+        await expect(admin.getByText(validFindingText, { exact: true })).toHaveCount(0);
+        await actionable.click();
+        await expect(admin).toHaveURL(new RegExp("#execucao-ia-" + validExecutionId + "$"));
+        await admin.goto("/admin/pendencias?area=ai&responsavel=patty");
+        await expect(admin.locator("#acao-da-patty").getByText("Revisão humana de análise da IA")).toBeVisible();
+        await expect(admin.getByText("2 achado(s) aguardando")).toBeVisible();
+      }
+      const unauthorizedAdmin = await unassignedContext.newPage();
+      await loginAdminWithMfa(unauthorizedAdmin, {
+        email: unassigned.email, password: unassigned.password, totpSecret: unassignedTotp,
+      });
+      await unauthorizedAdmin.goto("/admin/ia");
+      await expect(unauthorizedAdmin.getByText("J7 Cliente Sintética", { exact: true })).toHaveCount(0);
+      await expect(unauthorizedAdmin.getByRole("link", { name: "Abrir análise para decisão" })).toHaveCount(0);
+      await unauthorizedAdmin.goto("/admin/pendencias?area=ai&responsavel=patty");
+      await expect(unauthorizedAdmin.locator("#acao-da-patty").getByText("Revisão humana de análise da IA")).toHaveCount(0);
+      await unauthorizedAdmin.close();
+      await admin.goto(reviewURL);
+    });
+
     await test.step("Shared admin mobile drawer traps reverse Tab from its initial focus", async () => {
       await admin.setViewportSize({ width: 390, height: 844 });
       await admin.goto(reviewURL);
@@ -556,6 +590,11 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
       expect(action.finding_snapshot).toEqual(validFindings[1]);
       await expect(finding.getByText("Responsável pela decisão: J7 Synthetic staff", { exact: true })).toBeVisible();
       await expect(admin.getByText("2 de 3 achado(s) com decisão humana vinculada; 0 aguardando decisão.", { exact: true })).toBeVisible();
+      await admin.goto("/admin/ia");
+      await expect(admin.getByRole("link", { name: "Abrir análise para decisão" })).toHaveCount(0);
+      await admin.goto("/admin/pendencias?area=ai&responsavel=patty");
+      await expect(admin.locator("#acao-da-patty").getByText("Revisão humana de análise da IA")).toHaveCount(0);
+      await admin.goto(reviewURL);
       const review = rows(
         "select id,submission_id,reviewer_profile_id,note from public.anamnesis_reviews" +
         " where id=" + literal(action.anamnesis_review_id),

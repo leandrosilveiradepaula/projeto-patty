@@ -23,6 +23,7 @@ export type PendingArea = (typeof PENDING_AREA_OPTIONS)[number]["value"];
  */
 export const PENDING_AREA_BY_KIND: Record<OperationalPendingItemKind, PendingArea> = {
   ai_execution_started: "ai",
+  ai_findings_awaiting_review: "ai",
   anamnesis_draft: "anamnesis",
   anamnesis_submitted_without_review: "anamnesis",
   assessment_draft: "assessments",

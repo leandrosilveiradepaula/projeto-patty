@@ -1,4 +1,5 @@
 import "server-only";
+import { listPendingCompletedAiReviews } from "@/lib/ai/pending-review-queue";
 
 import {
   listAccessibleAnamnesisClarificationResolutions,
@@ -46,12 +47,14 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
     assessments,
     protocols,
     aiExecutions,
+    aiFindingReviews,
     clarificationReminder,
   ] = await Promise.all([
     listClientsAssignedToCurrentAdmin(),
     listAccessibleClientAssessments(),
     listAccessibleProtocols(),
     listAccessibleNonterminalAiExecutions(),
+    listPendingCompletedAiReviews(),
     loadClarificationReminderInterval(),
   ]);
 
@@ -302,6 +305,15 @@ export async function getOperationalPendingItemsForCurrentAdmin(): Promise<
       versionNumber: version.version_number,
     })),
     trainingLifecycle,
+    aiFindingReviews: aiFindingReviews.map(execution => ({
+      anamnesisSubmissionId: execution.anamnesis_submission_id,
+      clientId: execution.client_id,
+      clientLabel: clientLabel(execution.clients?.full_name || execution.clients?.profiles?.display_name),
+      createdAt: execution.created_at,
+      id: execution.id,
+      purposeKey: execution.purpose_key,
+      pendingCount: execution.pendingCount,
+    })),
     aiExecutions: aiExecutions.map((execution) => ({
       anamnesisSubmissionId: execution.anamnesis_submission_id,
       clientId: execution.client_id,

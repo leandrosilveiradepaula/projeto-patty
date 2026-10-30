@@ -1,5 +1,6 @@
 export type OperationalPendingItemKind =
   | "ai_execution_started"
+  | "ai_findings_awaiting_review"
   | "anamnesis_draft"
   | "anamnesis_submitted_without_review"
   | "assessment_draft"
@@ -180,7 +181,10 @@ export type PendingPrivateFileRelease = {
   originalFilename: string;
 };
 
+export type PendingAiFindingReview = PendingAiExecution & { pendingCount: number };
+
 export type OperationalPendingFactsInput = {
+  aiFindingReviews?: PendingAiFindingReview[];
   aiExecutions: PendingAiExecution[];
   anamnesisSubmissions: PendingAnamnesisSubmission[];
   assessments: PendingAssessment[];
@@ -641,6 +645,22 @@ export function buildOperationalPendingItems(
       kind: "weekly_feedback_reminder_blocked",
       statusLabel,
       title: "Lembrete do Feedback Semanal não entregue",
+    });
+  }
+
+  for (const review of input.aiFindingReviews ?? []) {
+    items.push({
+      clientId: review.clientId,
+      clientLabel: review.clientLabel,
+      createdAt: review.createdAt,
+      description: `A análise concluída tem ${review.pendingCount} achado(s) validado(s) sem decisão profissional registrada. Consulte as fontes originais e decida manualmente.`,
+      href: review.anamnesisSubmissionId
+        ? `/admin/anamneses/${review.anamnesisSubmissionId}/ia#execucao-ia-${review.id}`
+        : `/admin/ia?execucao=${review.id}#execucao-ia-${review.id}`,
+      id: `ai-findings:${review.id}`,
+      kind: "ai_findings_awaiting_review",
+      statusLabel: `${review.pendingCount} achado(s) aguardando`,
+      title: "Revisão humana de análise da IA",
     });
   }
 

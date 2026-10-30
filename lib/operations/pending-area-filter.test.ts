@@ -12,6 +12,7 @@ import type { OperationalPendingItemKind } from "./pending.ts";
 
 const everyKind: OperationalPendingItemKind[] = [
   "ai_execution_started",
+  "ai_findings_awaiting_review",
   "anamnesis_draft",
   "anamnesis_submitted_without_review",
   "assessment_draft",
@@ -35,7 +36,7 @@ const everyKind: OperationalPendingItemKind[] = [
 const items = everyKind.map((kind, index) => ({ kind, id: "item-" + index }));
 
 test("every recognized operational kind is assigned to exactly one browsing area", () => {
-  assert.equal(everyKind.length, 20);
+  assert.equal(everyKind.length, 21);
   assert.deepEqual(Object.keys(PENDING_AREA_BY_KIND).sort(), [...everyKind].sort());
   const areas = new Set(PENDING_AREA_OPTIONS.map((option) => option.value));
   assert.equal(areas.size, PENDING_AREA_OPTIONS.length);
@@ -84,7 +85,7 @@ test("each item's area is counted once, including system incidents and client wa
   assert.equal(counts.get("feedback"), 4);
   assert.equal(counts.get("protocols"), 3);
   assert.equal(counts.get("training"), 4);
-  assert.equal(counts.get("ai"), 1);
+  assert.equal(counts.get("ai"), 2);
   assert.equal(counts.get("files"), 1);
   assert.equal(counts.get("assessments"), 1);
   assert.equal(countPendingAreas([]).get("registration"), 0);

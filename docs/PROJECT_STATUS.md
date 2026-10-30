@@ -1,3 +1,9 @@
+## 2026-10-30 — J7: descoberta de achados concluídos sem decisão na fila (PR em validação)
+
+**Fonte:** cartão #1008, comentário #6513730378. Antes, o índice `/admin/ia` e as pendências exibiam somente execuções `started`, mesmo que uma execução `completed` tivesse achados válidos sem decisão humana. O pacote adiciona consulta server-only sob RLS, revalida fontes por execução/submissão, aplicabilidade, output e cópia das decisões com as mesmas regras da revisão individual, e mostra somente contagem/IDs autorizados em `/admin/ia`, painel e pendências. Sem score, diagnóstico, publicação, provider externo, schema, migration ou envio de dados reais. Execuções interrompidas continuam separadas.
+
+**Estado:** código e testes sintéticos no branch; CI, merge e publicação ainda dependem de evidência no SHA final. Por envolver controle de IA/saúde, requer revisão específica antes de merge. Gate de OpenAI com dados reais permanece fechado; homologação operacional da Patty continua a última tarefa.
+
 ## 2026-10-29 — J6: criar rascunho sem exigir tipo; corrigir bloqueio encontrado no uso real (em PR)
 
 **Evidência e escopo:** [cartão de execução #1008](https://github.com/leandrosilveiradepaula/projeto-patty/issues/1008#issuecomment-6503204530). O formulário anterior exigia tipo Vídeo/PDF durante a criação, contradizendo a descrição do produto. O banco já aceita `content_type_key=null`. Neste pacote, a Patty cria título e ordem, depois define o formato e salva o rascunho antes de fazer upload. A seleção e a publicação não são automáticas. O servidor de upload também recusa MIME distinto do formato salvo, prevenindo gravação no Blob antes de um rascunho válido. Sem migration, RLS, Auth ou alteração de dados reais. Status inicial: branch; merge, CI e publicação devem ser comprovados separadamente. Homologação conjunta permanece última tarefa.
