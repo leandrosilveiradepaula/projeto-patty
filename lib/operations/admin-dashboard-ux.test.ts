@@ -13,10 +13,10 @@ function read(relativePath: string) {
 test("admin dashboard exposes all operational pending groups", () => {
   const page = read("app/admin/page.tsx");
 
-  assert.match(page, /Ação da Patty/);
+  assert.match(page, /Ação profissional/);
   assert.match(page, /Aguardando cliente/);
   assert.match(page, /Operacional do sistema/);
-  assert.match(page, /Próximas ações da Patty/);
+  assert.match(page, /Próximas ações profissionais/);
   assert.match(page, /slice\(0, 3\)/);
   assert.match(page, /A ordem é cronológica e não representa prioridade clínica/);
 });
@@ -28,5 +28,5 @@ test("admin dashboard pending preview links to record and client context", () =>
     assert.ok(page.includes("withPendingQueueReturn(item.href, pendingQueueLinks." + group + ")"),group);
     assert.ok(page.includes("withPendingQueueReturn(`/admin/clientes/${item.clientId}`, pendingQueueLinks." + group + ")"),group);
   }
-  assert.match(page, /Ver todas as ações da Patty/);
+  assert.match(page, /Ver todas as ações profissionais/);
 });
