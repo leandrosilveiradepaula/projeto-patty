@@ -13,7 +13,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Projeto Patty",
+  title: "Corpo & Mente",
   applicationName: "Corpo & Mente",
   description: "Aplicação web da Consultoria Corpo e Mente.",
   appleWebApp: {

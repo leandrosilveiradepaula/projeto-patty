@@ -1,6 +1,6 @@
 .section {
   display: grid;
-  gap: var(--space-5);
+  gap: var(--space-4);
   min-width: 0;
 }
 
@@ -10,6 +10,8 @@
   align-items: start;
   justify-content: space-between;
   min-width: 0;
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .headingGroup {
@@ -23,6 +25,7 @@
   font-family: var(--font-family-heading);
   font-size: var(--text-h2-size);
   font-weight: var(--text-h2-weight);
+  letter-spacing: -0.025em;
   line-height: var(--text-h2-line-height);
 }
 

@@ -1,17 +1,17 @@
 :root {
   /* Core palette */
-  --color-brand-strong: #003e1c;
-  --color-brand: #1e5631;
-  --color-accent: #396a1d;
+  --color-brand-strong: #12412c;
+  --color-brand: #205d42;
+  --color-accent: #24694b;
   --color-text-primary: #121e1c;
-  --color-text-secondary: #414941;
-  --color-text-muted: #717970;
-  --color-canvas: #effcf9;
+  --color-text-secondary: #45574e;
+  --color-text-muted: #68796d;
+  --color-canvas: #f3f6f2;
   --color-surface: #ffffff;
-  --color-surface-low: #e9f7f3;
-  --color-surface-mid: #e3f1ed;
-  --color-surface-high: #ddebe8;
-  --color-border: #c0c9be;
+  --color-surface-low: #ebf3ed;
+  --color-surface-mid: #e3eee6;
+  --color-surface-high: #d9e8de;
+  --color-border: #c9d8cf;
   --color-danger: #ba1a1a;
   --color-danger-soft: #ffdad6;
   --color-warning: #6b4f00;
@@ -49,19 +49,19 @@
   /* Typography scale */
   --text-display-size: 2.75rem;
   --text-display-line-height: 3.25rem;
-  --text-display-weight: 700;
+  --text-display-weight: 750;
 
-  --text-h1-size: 2rem;
+  --text-h1-size: 2.125rem;
   --text-h1-line-height: 2.5rem;
-  --text-h1-weight: 600;
+  --text-h1-weight: 750;
 
   --text-h2-size: 1.5rem;
   --text-h2-line-height: 2rem;
-  --text-h2-weight: 600;
+  --text-h2-weight: 700;
 
   --text-h3-size: 1.25rem;
   --text-h3-line-height: 1.75rem;
-  --text-h3-weight: 600;
+  --text-h3-weight: 700;
 
   --text-title-large-size: 1.125rem;
   --text-title-large-line-height: 1.625rem;
@@ -252,4 +252,15 @@ h1 {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
   }
+}
+
+/* Shared focus and legibility across professional and client journeys. */
+:where(a, button, input, textarea, select, summary):focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: #d7eadf;
+  color: var(--color-brand-strong);
 }

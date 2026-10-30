@@ -16,7 +16,7 @@ test("client list exposes the oldest Patty action directly", () => {
   assert.match(page, /clientPattyPendingItems\[0\]/);
   assert.match(page, /\{nextPattyPending\.title\}/);
   assert.match(page, /nextPattyPending\.href/);
-  assert.match(page, /Ação da Patty/);
+  assert.match(page, /Ação profissional/);
   assert.match(page, /Ver cliente/);
 });
 
@@ -31,7 +31,7 @@ test("client list sorts named clients alphabetically and keeps unnamed clients l
 test("filtered client directory counts only visible Patty actions", () => {
   const page = read("app/admin/clientes/page.tsx");
   assert.match(page, /visiblePattyActions = filteredClients\.reduce/);
-  assert.match(page, /\{visiblePendingItems\} pendência\(s\) nesses resultados, incluindo \{visiblePattyActions\} ação\(ões\) da Patty/);
+  assert.match(page, /\{visiblePendingItems\} pendência\(s\) nesses resultados, incluindo \{visiblePattyActions\} ação\(ões\) para revisão/);
   assert.match(page, /<p role="status">\{viewFilter !== "all"/);
 });
 

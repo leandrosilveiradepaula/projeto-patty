@@ -1,7 +1,7 @@
 .shell {
   display: grid;
   min-height: 100svh;
-  background: var(--color-canvas);
+  background: radial-gradient(circle at 85% 0, #e7f1e9, transparent 32%), var(--color-canvas);
 }
 
 .sidebar {
@@ -24,7 +24,7 @@
 .main {
   display: grid;
   gap: var(--space-8);
-  width: min(100%, 1200px);
+  width: min(100%, 1280px);
   min-width: 0;
   margin-inline: auto;
   padding: var(--space-6) var(--space-4);
@@ -55,6 +55,7 @@
     border-right: 1px solid var(--color-border);
     border-bottom: 0;
     background: var(--color-surface);
+    box-shadow: 4px 0 20px rgb(18 52 36 / 4%);
     padding: var(--space-6);
   }
 

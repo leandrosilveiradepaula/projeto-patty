@@ -52,8 +52,9 @@
 .primaryActionCard {
   display: grid;
   gap: var(--space-4);
-  border-color: var(--color-brand);
-  background: var(--color-surface-low);
+  border-color: #aacdb7;
+  background: linear-gradient(115deg, #edf6ef, #ffffff);
+  box-shadow: 0 8px 24px rgb(18 52 36 / 8%);
   transition:
     border-color 120ms ease,
     background-color 120ms ease,
@@ -101,13 +102,21 @@
   margin-top: var(--space-1);
   color: var(--color-text-primary);
   font-family: var(--font-family-heading);
-  font-size: var(--text-title-large-size);
-  line-height: var(--text-title-large-line-height);
+  font-size: var(--text-h2-size);
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  line-height: var(--text-h2-line-height);
 }
 
 .primaryActionCta {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
   width: fit-content;
-  color: var(--color-brand-strong);
+  border-radius: var(--radius-full);
+  background: var(--color-brand-strong);
+  color: #fff;
+  padding: var(--space-2) var(--space-5);
   font-family: var(--font-family-heading);
   font-size: var(--text-label-medium-size);
   font-weight: var(--text-label-medium-weight);
