@@ -1,3 +1,11 @@
+## Atualização de vigência — 2026-10-30: mídia da balança
+
+A aprovação editorial, migração para Vercel Blob privado e publicação da **versão 1** do vídeo *Como utilizar a BALANÇA DE ALIMENTOS* já aconteceram. Na consulta de metadados do Supabase SaaS registrada na [issue #1008](https://github.com/leandrosilveiradepaula/projeto-patty/issues/1008#issuecomment-6520825510), o conteúdo estava publicado em 29/10/2026, com **1 asset privado** e **0 releases individuais**. A reprodução do MP4 no painel profissional foi observada. Não repetir upload, registro de asset ou publicação como se fossem pendentes.
+
+A inspeção posterior documentada na [mesma issue](https://github.com/leandrosilveiradepaula/projeto-patty/issues/1008#issuecomment-6520899849) identificou, **naquele instante**, zero assignments ativos; a tela de liberação sem clientes elegíveis estava correta. Encerrar assignment elimina autorização atual. Não reativar vínculo, criar cliente de teste em produção nem liberar o material por inferência. Uma futura liberação exige cliente efetivamente ativa/atribuída e confirmação humana para a versão exata.
+
+Os demais materiais do Drive seguem sujeitos a preservação, triagem de direitos, curadoria e publicação explícita. Registros históricos abaixo sobre a versão em rascunho ou migração ainda pendente descrevem etapas já superadas e não autorizam novo processamento.
+
 ## Biblioteca de exercicios e visibilidade por cliente
 
 ### REGRA CONFIRMADA PELA PATTY EM 2026-10-06

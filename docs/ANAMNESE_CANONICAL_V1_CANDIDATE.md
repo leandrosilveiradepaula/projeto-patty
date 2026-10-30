@@ -1,3 +1,5 @@
+> **Nota de vigência (30/10/2026):** esta é a **especificação candidata histórica** usada antes da primeira publicação. A definição canônica `client-anamnesis` v1 já foi materializada e publicada; os tipos de campo não jurídicos, as 10 dependências condicionais, a integração de ANAM-044 com arquivos privados e o consentimento versionado obrigatório ANAM-046 foram integrados e validados. Consulte `docs/ANAMNESE.md`, `docs/ANAMNESE_CONSENT_GATE.md` e as migrations versionadas (em especial `20260924230322_publish_canonical_anamnesis_v1.sql`). Estados como “pronto para materialização”, “condicional pendente” e “publicação futura” abaixo preservam o planejamento original, **não** representam tarefas atualmente abertas. Uma mudança nova no questionário exige decisão própria, nova versão e preservação da v1 e de suas respostas. Isso não libera o uso de dados reais pela IA.
+
 # Anamnese Canonica v1 - Especificacao candidata
 
 Data de referencia: 2026-09-24.

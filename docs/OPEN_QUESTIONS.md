@@ -1,3 +1,15 @@
+## Nota de vigência operacional — 2026-10-30
+
+O histórico abaixo conserva questões abertas, decisões parciais e fatos já resolvidos. Para evitar que itens antigos sejam reabertos como tarefas:
+
+- A versão 1 do vídeo educacional da balança já foi **publicada** e está vinculada a asset privado; a liberação individual ainda não havia ocorrido e estava sem cliente com assignment ativo na consulta documentada na [issue #1008](https://github.com/leandrosilveiradepaula/projeto-patty/issues/1008#issuecomment-6520899849). Uma futura liberação é decisão humana para cliente/versão exatas.
+- O teste de transporte Gmail com mensagem **sintética** recebida foi concluído (issue #1008, comentário `6520646591`); isso não habilita nem comprova envio do cron para clientes reais.
+- A Anamnese canônica v1 está publicada e seus campos, condicionais, consentimento e histórico de respostas seguem versionados. Mapas candidatos antigos não indicam pendência de publicação.
+- A revisão visual Corpo & Mente foi integrada na PR #1039, com CI pré/pós-merge e Vercel `READY` em `e319e69c`; inspeção visual humana integral e homologação conjunta J1–J7 continuam não confirmadas.
+- Permanecem abertas as regras posteriores ao Cutting 2, fases 5/6, treino detalhado, hidratação, retenção/hard delete, semântica de progresso educacional, direitos/curadoria e controles de IA de dados de saúde P1–P6. Não inferir soluções.
+  
+As entradas a seguir devem ser interpretadas com sua data e evidência original; documentação e decisões posteriores prevalecem.
+
 ## PENDÊNCIA TÉCNICA RESIDUAL — recuperação de senha (#979, 22/10/2026)
 
 **CORRIGIDO, TESTADO E PUBLICADO:** as PRs [#984](https://github.com/leandrosilveiradepaula/projeto-patty/pull/984), [#986](https://github.com/leandrosilveiradepaula/projeto-patty/pull/986) e [#995](https://github.com/leandrosilveiradepaula/projeto-patty/pull/995) corrigiram callbacks PKCE/OTP, preservação de cookies na resposta 303, isolamento de sessões, rejeição de magic-link comum e replay de links consumidos. A #995 usa grant HMAC `HttpOnly` de 10 minutos vinculado a `sub` e `session_id` após recovery verificado no servidor; página e server action exigem esse grant. O login comum `amr=otp` não equivale a recovery. Fragmentos implícitos sem prova server-side falham fechados e oferecem novo link PKCE.

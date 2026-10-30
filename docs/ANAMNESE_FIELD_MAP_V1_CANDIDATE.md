@@ -1,3 +1,5 @@
+> **Nota de vigência (30/10/2026):** este é o mapa **candidato histórico** da Anamnese v1. A definição canônica v1 já está publicada com os tipos confirmados, 10 dependências, seção de arquivos privados e consentimento ANAM-046. O estado operacional prevalece sobre descrições abaixo como “condicionais ainda precisam de comportamento de UI” e “pronto para materialização”. Os campos, perguntas originais e snapshots versionados devem ser preservados; qualquer revisão editorial futura é nova decisão e nova versão, não edição silenciosa da publicada. Este mapa não autoriza interpretação clínica nem envio de dados reais para IA.
+
 # Mapa de Campos da Anamnese v1 - Candidato
 
 Data de referencia: 2026-09-24.
