@@ -14,9 +14,9 @@ export async function sendIsolatedGmailDiagnostic() {
   try {
     await sendGmailSmtpEmail(config, {
       to: recipient,
-      subject: "Projeto Patty — diagnóstico SMTP",
+      subject: "Corpo & Mente — diagnóstico SMTP",
       messageId: `<${reference}@patty-diagnostic.invalid>`,
-      bodyText: `Teste sintético de entrega SMTP do Projeto Patty.\nReferência: ${reference}\nSem dados de clientes.\n`,
+      bodyText: `Teste sintético de entrega SMTP do Corpo & Mente.\nReferência: ${reference}\nSem dados de clientes.\n`,
     });
     return { state: "accepted" as const, reference };
   } catch {

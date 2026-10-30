@@ -7,7 +7,7 @@ export function getGmailSmtpConfig(): SmtpConfig | null {
   const appPassword = process.env.GMAIL_SMTP_APP_PASSWORD?.replace(/\s+/g, "");
   const fromName =
     process.env.GMAIL_SMTP_FROM_NAME?.trim() ||
-    "Consultoria Corpo e Mente - Patty";
+    "Consultoria Corpo & Mente";
 
   if (!fromEmail || !appPassword) {
     return null;
