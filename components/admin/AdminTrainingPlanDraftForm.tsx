@@ -110,7 +110,7 @@ export function AdminTrainingPlanDraftForm({
 
       <p className={styles.notice}>
         Salvar não publica o treino. A versão continuará em rascunho até revisão
-        explícita da Patty.
+        explícita da equipe profissional.
       </p>
 
       <Button disabled={isPending || (!trainingPlanVersionId && state.success)} loading={isPending} type="submit">

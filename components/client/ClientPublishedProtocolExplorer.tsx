@@ -111,7 +111,7 @@ export function ClientPublishedNutritionExplorer({view,publicationId}:{view:Publ
      <dt>{labelPublishedDoseType(d.doseType)}</dt><dd>{formatPublishedDoseAmount(d.quantity)} dose(s) em {d.allocations} lançamento(s)</dd>
     </div>)}</dl>
     <p>{summary.allocations} lançamento(s) de doses em {summary.mealCount} refeições de {summary.variantCount} variações.</p>
-    {summary.invalidAllocations>0?<p role="alert">{summary.invalidAllocations} lançamento(s) com quantidade inválida foram excluídos da soma. Consulte a Patty.</p>:null}
+    {summary.invalidAllocations>0?<p role="alert">{summary.invalidAllocations} lançamento(s) com quantidade inválida foram excluídos da soma. Consulte a equipe profissional.</p>:null}
     <details><summary>Contagem por variação</summary>
       <ul>{summary.variants.map(v=><li key={v.id}><strong>{v.label}</strong>
        <p>{v.meals} refeição(ões), {v.allocations} lançamento(s).</p>

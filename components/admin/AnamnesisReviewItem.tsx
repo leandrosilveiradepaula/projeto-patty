@@ -27,7 +27,7 @@ export function AnamnesisReviewItem({
         </p>
       </section>
       <section>
-        <h3>Observação da Patty</h3>
+        <h3>Observação da equipe profissional</h3>
         <p>
           {reviewEntry.pattyObservation ??
             "Nenhuma observação profissional disponível."}
