@@ -25,6 +25,7 @@ const ENTRYPOINT_RULES = new Map([
   ["app/admin/conteudos/[contentId]/assets/upload/route.ts", "admin"],
   ["app/admin/conteudos/[contentId]/actions.ts", "admin"],
   ["app/admin/configuracoes/actions.ts", "admin"],
+  ["app/admin/diagnostico-email/actions.ts", "admin"],
   ["app/admin/exercicios/actions.ts", "admin"],
   ["app/admin/exercicios/[exerciseId]/actions.ts", "admin"],
   ["app/admin/exercicios/[exerciseId]/videos/upload/route.ts", "admin"],

@@ -106,7 +106,7 @@ export default async function AdminReceivedWeeklyFeedbackPage({ searchParams }: 
         eyebrow="Admin · Jornada 2"
         title="Feedbacks Semanais"
         description="Consulte solicitações aguardando envio e respostas das clientes sob acompanhamento atual. A listagem confirma recebimento, não leitura, revisão nem decisão profissional."
-        primaryAction={<Link className={styles.actionLink} href="/admin">Voltar ao painel</Link>}
+        primaryAction={<><Link className={styles.actionLink} href="/admin/diagnostico-email">Diagnosticar e-mail</Link> <Link className={styles.actionLink} href="/admin">Voltar ao painel</Link></>}
       />
       <Section
         title="Localizar Feedbacks Semanais"
