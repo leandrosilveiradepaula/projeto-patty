@@ -1,3 +1,15 @@
+## Atualização de vigência — 2026-10-30 (não reabrir gates históricos)
+
+Esta matriz conserva evidências e pendências antigas. **Os trechos abaixo que afirmam que a master não está publicada, que SMTP real ainda não foi comprovado, que a mídia da balança não foi enviada/publicada ou que J1/J7 precisam de novo pacote são fotografias históricas e não o estado operacional vigente.**
+
+- **Código/UX:** PR #1039 integrada em `master=e319e69cee045d351c2c3f1bd4f06fabb6d0e4e9`; CI pré-merge 7/7 e [Validate application pós-merge #41084022124](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/41084022124) `success`. Vercel production `dpl_6H4zEgMKowdJcsPNrgXwBLRsTvCD` verificada `READY` no mesmo SHA, incluindo alias principal. Isso não comprova inspeção visual humana integral.
+- **Conteúdo educacional J6:** conforme inspeção somente leitura relatada na [issue #1008](https://github.com/leandrosilveiradepaula/projeto-patty/issues/1008#issuecomment-6520899849), a versão 1 do vídeo da balança está publicada, contém um asset privado reproduzido na UI administrativa e possuía **zero releases individuais** e **zero assignments ativos** na consulta de 30/10. Essa ausência de elegibilidade não deve ser contornada com cliente sintética na produção nem afrouxamento de RLS.
+- **SMTP J2:** envio sintético autenticado pelo Gmail e chegada à caixa de teste foram confirmados e registrados na issue #1008 (comentário `6520646591`). Não foi executado envio recorrente por cron a clientes e não se deve repeti-lo por falta de evidência.
+- **Anamnese v1:** definição canônica versionada publicada, consentimento ANAM-046 obrigatório e 10 dependências condicionais integradas. Os arquivos `*_CANDIDATE` são fontes históricas de planejamento, não indicação de que a publicação ainda falta.
+- **Continuam bloqueados por decisões:** semântica de progresso educacional, retenção/hard delete, curadoria/direitos e próximas liberações, regras profissionais não confirmadas, e habilitação de IA com dados reais sob gates P1–P6. Homologação operacional humana conjunta J1–J7 permanece a última tarefa.
+
+**Fonte operacional de verdade para mudanças posteriores:** issue #1008, decisões mais recentes e estado verificado do GitHub/Supabase/Vercel. Não reaplicar testes, migrations ou upload de conteúdo já concluídos apenas por causa de texto histórico desta matriz.
+
 ## Estado vigente de prontidão — 2026-10-23 (controle: issue #1008)
 
 Este resumo prevalece sobre classificações históricas abaixo que não reflitam o estado consolidado de 23/10. Ele não altera as decisões normativas nem transforma CI, merge ou testes locais em publicação ou homologação.

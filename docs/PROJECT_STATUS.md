@@ -1,3 +1,13 @@
+## 2026-10-30 — Atualização de vigência: UX Corpo & Mente integrada e publicada
+
+**Estado confirmado depois dos registros históricos abaixo:** PR [#1039](https://github.com/leandrosilveiradepaula/projeto-patty/pull/1039) foi integrada por squash em `master=e319e69cee045d351c2c3f1bd4f06fabb6d0e4e9`. O HEAD pré-merge `47b8356d808ba5e5d7b6aa53189f2405b9c98d1a` passou 7/7 workflows, incluindo Validate application e Playwright local sintético J1/J2/J4/J5/J6/J7. [Validate application pós-merge #41084022124](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/41084022124) terminou `success`. O deployment Vercel de produção `dpl_6H4zEgMKowdJcsPNrgXwBLRsTvCD` foi verificado `READY` no mesmo commit, com três aliases, inclusive `projeto-patty.vercel.app`. Ver [issue #1008](https://github.com/leandrosilveiradepaula/projeto-patty/issues/1008#issuecomment-6526983932).
+
+**Separação obrigatória:** implementado, testado no CI, mergeado e publicado = confirmados para o pacote UX; inspeção visual humana integral nas diversas páginas/mobile = não comprovada; homologação profissional conjunta J1–J7 = pendente e última tarefa. Nenhuma evidência autoriza chamar a experiência inteira de homologada ou modificar método, RLS, identidade de clientes ou releases.
+
+**Continuidade:** o diagnóstico administrativo de e-mail sintético Gmail foi comprovado com uma mensagem de teste na caixa controlada (issue #1008, comentário `6520646591`); isso **não** valida envio do cron à fila de clientes. Na consulta SaaS registrada em `6520899849`, o vídeo da balança v1 já estava publicado com um asset privado, mas `client_content_releases=0` e não havia assignment ativo. São fatos datados, não uma condição permanente. Nenhuma liberação deve ser forçada.
+
+Os blocos a seguir preservam os estados da data de cada registro; quando contradizem esta atualização posterior, são históricos.
+
 ## 2026-10-30 — Revisão institucional da interface (PR #1039 em validação)
 
 **Autorização:** pedido explícito do responsável para revisar todas as páginas, destacar ações e botões e tratar a interface como sistema **Corpo & Mente**, não como identidade pessoal da profissional. Fonte: cartão UX-PRODUTO-01 na issue #1008 e decisão de produto em `docs/DECISIONS.md` e `docs/PRODUCT.md`.
