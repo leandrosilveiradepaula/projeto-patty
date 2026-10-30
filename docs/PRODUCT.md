@@ -10,6 +10,16 @@ Cada cliente tera conta propria.
 
 O aplicativo deve apoiar o acompanhamento dos clientes sem remover a revisao profissional da Patty nos pontos criticos.
 
+## Identidade pública e linguagem da interface
+
+### REQUISITO DE PRODUTO CONFIRMADO — 2026-10-30
+
+A marca apresentada na interface, nos títulos do navegador e nos fluxos de atendimento é **Corpo & Mente** (Consultoria Corpo e Mente). O nome da profissional não deve servir como marca de telas, títulos de painel, ações ou mensagens voltadas à cliente; usar linguagem institucional e contextual ("equipe profissional", "atendimento", "revisão profissional") conforme a tarefa.
+
+A conta e o nome da profissional continuam existindo no domínio de autenticação, cadastro e auditoria quando necessários. Nomes internos legados, valores de filtros, chaves de banco, âncoras de navegação e campos de integração não devem ser renomeados apenas por estética: isso exigiria análise de compatibilidade.
+
+A identidade institucional não altera as responsabilidades humanas: análises e rascunhos de IA continuam subordinados à revisão, aprovação e publicação explícitas pela profissional autorizada.
+
 ## Areas funcionais previstas
 
 ### DECISAO CONFIRMADA

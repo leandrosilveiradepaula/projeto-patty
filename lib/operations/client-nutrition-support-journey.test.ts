@@ -17,7 +17,7 @@ test("nutrition support links are tied to selected published version",()=>{
 test("support material is informational, not auto-selected food equivalence",()=>{
   assert.match(support,/não são geradas automaticamente/);
   assert.match(support,/Materiais liberados/);
-  assert.match(support,/Enviar feedback à Patty/);
+  assert.match(support,/Enviar feedback semanal/);
   assert.match(contents,/areas=\{\["protocol","feedback","training","index"\]\}/);
   assert.doesNotMatch(support,/fetch\(|localStorage|setItem\(/);
 });

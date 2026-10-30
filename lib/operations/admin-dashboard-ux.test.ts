@@ -30,3 +30,22 @@ test("admin dashboard pending preview links to record and client context", () =>
   }
   assert.match(page, /Ver todas as ações profissionais/);
 });
+
+test("Corpo & Mente is the institutional identity of the professional workspace", () => {
+  const dashboard = read("app/admin/page.tsx");
+  const layout = read("app/admin/layout.tsx");
+  const sidebar = read("components/layout/AdminSidebar.tsx");
+  const queue = read("app/admin/pendencias/page.tsx");
+  const pager = read("components/admin/PendingQueuePager.tsx");
+
+  assert.match(dashboard, /title="Painel administrativo"/);
+  assert.doesNotMatch(dashboard, /Painel de.*profile\.display_name/);
+  assert.doesNotMatch(layout, /displayName=\{profile\?\.display_name\}/);
+  assert.match(sidebar, /Corpo &amp; Mente/);
+  assert.match(sidebar, /Área profissional/);
+  assert.match(queue, /<option value="patty">Ações profissionais<\/option>/);
+  assert.match(pager, /patty:"Ações profissionais"/);
+  // Technical group values and anchors remain stable for existing deep links.
+  assert.match(queue, /value="patty"/);
+  assert.match(pager, /"acao-da-patty"/);
+});

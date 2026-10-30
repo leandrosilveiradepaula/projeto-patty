@@ -1,3 +1,13 @@
+## 2026-10-30 — Revisão institucional da interface (PR #1039 em validação)
+
+**Autorização:** pedido explícito do responsável para revisar todas as páginas, destacar ações e botões e tratar a interface como sistema **Corpo & Mente**, não como identidade pessoal da profissional. Fonte: cartão UX-PRODUTO-01 na issue #1008 e decisão de produto em `docs/DECISIONS.md` e `docs/PRODUCT.md`.
+
+**Escopo implementado na branch:** componentes visuais compartilhados, painel e área de clientes, convite, filas de pendências, anamnese, conteúdos, treino, protocolos e mensagens de atendimento; copy institucional, layout responsivo e contratos de teste atualizados. Strings técnicas históricas (`patty` em nomes de variáveis, filtros, IDs e ações) permanecem intactas. Sem schema, migrations, Auth/RLS, segredos, dados reais ou automação profissional.
+
+**Evidências até este registro:** a validação geral passou no SHA anterior `35382438`, mas a execução J7 esgotou o tempo do teste após avançar do problema mobile. No SHA `6edf026a` a validação geral falhou em **dois contratos de texto obsoletos**, corrigidos neste pacote. Não afirmar CI verde do SHA final sem a conclusão dos workflows. QA visual real em desktop e 390 px segue pendente de prova; testes Playwright não substituem inspeção da interface.
+
+**Estados:** implementado/commitado na branch = sim; teste integral no novo HEAD = pendente; mergeado = não; publicado = não verificado; homologação conjunta J1–J7 = pendente e última etapa. Próxima ação: validar os checks do SHA final, corrigir somente falha comprovada e então integrar sem antecipar homologação.
+
 ## 2026-10-30 — J7: descoberta de achados concluídos sem decisão na fila (PR em validação)
 
 **Fonte:** cartão #1008, comentário #6513730378. Antes, o índice `/admin/ia` e as pendências exibiam somente execuções `started`, mesmo que uma execução `completed` tivesse achados válidos sem decisão humana. O pacote adiciona consulta server-only sob RLS, revalida fontes por execução/submissão, aplicabilidade, output e cópia das decisões com as mesmas regras da revisão individual, e mostra somente contagem/IDs autorizados em `/admin/ia`, painel e pendências. Sem score, diagnóstico, publicação, provider externo, schema, migration ou envio de dados reais. Execuções interrompidas continuam separadas.

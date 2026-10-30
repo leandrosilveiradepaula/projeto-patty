@@ -57,7 +57,7 @@ test("unavailable legacy releases produce an operational notice instead of silen
   assert.ok(client.includes("unavailableReleaseCount = orderedReleases.length - visibleReleases.length"));
   assert.ok(read("components/client/ClientReleasedContentExplorer.tsx").includes("unavailableReleaseCount > 0"));
   assert.ok(read("components/client/ClientReleasedContentExplorer.tsx").includes('role="status"'));
-  assert.ok(read("components/client/ClientReleasedContentExplorer.tsx").includes("A Patty pode verificar o registro"));
+  assert.ok(read("components/client/ClientReleasedContentExplorer.tsx").includes("A equipe de atendimento pode verificar o registro"));
   assert.ok(admin.includes("missingReleaseVersions = newestReleases.length - visibleReleases.length"));
   assert.ok(admin.includes("Versões liberadas indisponíveis"));
   assert.ok(admin.includes("missingReleaseVersions > 0"));
