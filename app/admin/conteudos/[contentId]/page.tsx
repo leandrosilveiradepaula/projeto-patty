@@ -181,6 +181,16 @@ export default async function AdminEducationalContentDetailPage({
         )}
       </Section>
 
+      {inspected && current && inspected.id !== current.id ? (
+        <Card>
+          <p role="status" className={styles.nextStep}>
+            Você está consultando os arquivos da versão {inspected.version_number} (histórico).
+            A etapa de publicação trabalha somente com a versão atual {current.version_number}.
+            {" "}<Link href={`/admin/conteudos/${content.id}#assets-do-conteudo`}>Voltar à versão atual</Link>
+          </p>
+        </Card>
+      ) : null}
+
       <Section
         id="assets-do-conteudo"
         description="Escolha o arquivo aprovado, envie-o ao armazenamento privado e confirme o registro antes de publicar."
@@ -262,7 +272,7 @@ export default async function AdminEducationalContentDetailPage({
       <Section
         id="publicar-conteudo"
         description="A publicação é uma decisão da Patty e não libera o material automaticamente para clientes."
-        title="3. Revisar e publicar"
+        title={current ? `3. Revisar e publicar — versão atual ${current.version_number}` : "3. Revisar e publicar"}
       >
         <Card>
           {!current ? (
