@@ -123,6 +123,52 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
     ? answers.find((answer) => answer.question_id === financialQuestion.id)
     : undefined;
 
+  const hasPendingReview = executions.some((execution) => {
+    if (requiresAiExecutionRecoveryReview({
+      status: execution.status,
+      completedAt: execution.completed_at,
+      failedAt: execution.failed_at,
+    })) return true;
+    const output = outputsByExecutionId.get(execution.id);
+    const review = presentStoredAiReview({
+      allowedMissingTargetQuestionIds,
+      allowedSourceAnswerIds:
+        includedAnswerIdsByExecutionId.get(execution.id) ?? new Set<string>(),
+      completedAt: execution.completed_at,
+      content: output?.content,
+      failedAt: execution.failed_at,
+      status: execution.status,
+    });
+    if (review.state !== "ready" || review.findings.length === 0) return false;
+    const audit = auditFindingActionLinks(
+      review.findings,
+      findingActionsByExecutionId.get(execution.id) ?? [],
+    );
+    return audit.pendingIndices.length > 0;
+  });
+
+  const newExecutionSection = (
+    <Section
+      description="A execução usa somente respostas permitidas pelo contexto minimizado e preserva a versão exata do prompt, modelo e fontes."
+      title="Nova execução"
+    >
+      <Card>
+        <p className={styles.text}>
+          Cidade/endereço, telefone, email de contato, Instagram,
+          escolaridade e aceite de consentimento não entram no contexto da
+          IA nem aparecem como resposta ausente. Capacidade financeira
+          continua opt-in por execução.
+        </p>
+        <AdminAiReviewForm
+          financialAnswerId={financialAnswer?.id ?? null}
+          model={readiness.ready ? readiness.model : null}
+          providerReady={readiness.ready}
+          submissionId={submission.id}
+        />
+      </Card>
+    </Section>
+  );
+
   return (
     <>
       <AdminAnamnesisWorkspaceHeader
@@ -133,6 +179,10 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
         submittedAt={submission.submitted_at}
       />
 
+      <p className={styles.text}>
+        <Link href="/admin/ia">Voltar à fila de análises</Link>
+      </p>
+
       <Alert
         title="Revisão humana obrigatória"
         variant="info"
@@ -141,26 +191,14 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
         protocolo ou publicação automática.
       </Alert>
 
-      <Section
-        description="A execução usa somente respostas permitidas pelo contexto minimizado e preserva a versão exata do prompt, modelo e fontes."
-        title="Nova execução"
-      >
-        <Card>
-          <p className={styles.text}>
-            Cidade/endereço, telefone, email de contato, Instagram,
-            escolaridade e aceite de consentimento não entram no contexto da
-            IA nem aparecem como resposta ausente. Capacidade financeira
-            continua opt-in por execução.
-          </p>
-          <AdminAiReviewForm
-            financialAnswerId={financialAnswer?.id ?? null}
-            model={readiness.ready ? readiness.model : null}
-            providerReady={readiness.ready}
-            submissionId={submission.id}
-          />
-        </Card>
-      </Section>
+      {!hasPendingReview ? newExecutionSection : null}
 
+      {hasPendingReview ? (
+        <p className={styles.text} role="status">
+          Existem análises aguardando uma decisão ou recuperação humana.
+          Revise o histórico antes de iniciar outra execução.
+        </p>
+      ) : null}
       <Section
         description="Histórico imutável das execuções desta Anamnese."
         title="Histórico da IA"
@@ -190,7 +228,7 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
               );
 
               return (
-                <Card className={styles.entry} key={execution.id}>
+                <Card className={styles.entry} id={`execucao-ia-${execution.id}`} key={execution.id}>
                   <div className={styles.entryHeader}>
                     <h2 className={styles.title}>
                       {execution.provider} · {execution.model_identifier}
@@ -522,6 +560,7 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
           </div>
         )}
       </Section>
+      {hasPendingReview ? newExecutionSection : null}
     </>
   );
 }
