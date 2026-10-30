@@ -118,7 +118,7 @@ export function AdminSidebar({ displayName, mode = "desktop" }: AdminSidebarProp
     const last = focusable[focusable.length - 1];
     const active = document.activeElement;
 
-    if (event.shiftKey && active === first) {
+    if (event.shiftKey && (active === first || active === drawerRef.current)) {
       event.preventDefault();
       last.focus();
     } else if (!event.shiftKey && active === last) {
