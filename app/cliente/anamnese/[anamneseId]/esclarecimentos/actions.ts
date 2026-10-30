@@ -39,7 +39,7 @@ export async function respondToAnamnesisClarification(
 
   if (resolutions.length > 0) {
     return {
-      message: "Este pedido de esclarecimento já foi resolvido pela Patty.",
+      message: "Este pedido de esclarecimento já foi resolvido pela equipe profissional.",
       success: false,
     };
   }

@@ -55,7 +55,7 @@ export async function requestTrainingAction(
     revalidatePath(`/admin/clientes/${client.id}/treino`);
 
     return {
-      message: "Sua solicitação de treino foi registrada e ficará visível para a Patty.",
+      message: "Sua solicitação de treino foi registrada e está disponível para revisão da equipe profissional.",
       success: true,
     };
   } catch {
