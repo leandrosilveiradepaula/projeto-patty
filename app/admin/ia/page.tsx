@@ -126,7 +126,7 @@ export default async function AdminAiPage({searchParams}:{searchParams:Promise<{
                       <Link
                         aria-label={`Abrir revisão da Anamnese de ${displayName || "cliente sem nome informado"}`}
                         className={styles.actionLink}
-                        href={`/admin/anamneses/${submissionId}/ia`}
+                        href={`/admin/anamneses/${submissionId}/ia#execucao-ia-${execution.id}`}
                       >
                         Abrir revisão da Anamnese
                       </Link>
