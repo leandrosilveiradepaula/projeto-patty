@@ -1,4 +1,4 @@
-import { formatWeeklyFeedbackPeriodDate } from "@/lib/weekly-feedback/date-format";
+import { formatWeeklyFeedbackPeriodDate } from "../weekly-feedback/date-format.ts";
 
 /**
  * Pure reminder content builder. Rejects invalid or reversed date-only periods
