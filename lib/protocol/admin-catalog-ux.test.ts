@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
@@ -55,7 +56,7 @@ test("existing parents choose a versioned record over an older empty parent", ()
 
 
 test("J4 professional sees protocol work before continuity shortcuts", () => {
-  const page = read("app/admin/clientes/[clienteId]/protocolos/page.tsx");
+  const page = readFileSync(new URL("../../app/admin/clientes/[clienteId]/protocolos/page.tsx", import.meta.url), "utf8");
   const work = page.indexOf('title="Protocolos"');
   const next = page.indexOf('title="Continuidade do acompanhamento"');
   assert.ok(work >= 0 && next > work, "protocol work must come before other areas");
