@@ -34,13 +34,6 @@ export async function listPendingCompletedAiReviews() {
     listAccessibleAiFindingActions(ids),
   ]);
   const outputById = new Map(outputs.map(row => [row.execution_id, row.content]));
-  const sourcesById = new Map<string, Set<string>>();
-  for (const source of sources) {
-    if (!source.anamnesis_answer_id || !source.anamnesis_submission_id) continue;
-    const included = sourcesById.get(source.execution_id) ?? new Set<string>();
-    included.add(source.anamnesis_answer_id);
-    sourcesById.set(source.execution_id, included);
-  }
   const actionsById = new Map<string, typeof actions>();
   for (const action of actions) {
     const rows = actionsById.get(action.execution_id) ?? [];
