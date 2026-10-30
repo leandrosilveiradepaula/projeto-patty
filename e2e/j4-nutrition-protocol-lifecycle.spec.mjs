@@ -547,6 +547,17 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
     let firstMealId;
     await test.step("Create first protocol and draft through authenticated admin UI",async()=>{
       await adminPage.goto("/admin/clientes/"+clientId+"/protocolos");
+       for (const width of [390, 1440]) {
+         await adminPage.setViewportSize({width, height: width === 390 ? 844 : 900});
+         const positions = await Promise.all(["Protocolos", "Continuidade do acompanhamento"].map(name =>
+           adminPage.getByRole("heading", {name, exact:true}).evaluate(el => Math.round(el.getBoundingClientRect().top + window.scrollY))));
+         expect(positions[0]).toBeLessThan(positions[1]);
+         const widths = await adminPage.evaluate(() => ({actual:document.documentElement.scrollWidth, visible:document.documentElement.clientWidth}));
+         expect(widths.actual).toBeLessThanOrEqual(widths.visible+2);
+       }
+       await adminPage.getByRole("button",{name:"Criar primeiro protocolo"}).focus();
+       await expect(adminPage.getByRole("button",{name:"Criar primeiro protocolo"})).toBeFocused();
+       await adminPage.setViewportSize({width:390,height:844});
       await adminPage.getByRole("button",{name:"Criar primeiro protocolo"}).click();
       await expect(adminPage).toHaveURL(/\/admin\/protocolos\/[a-f0-9-]{36}/i);
       protocolId=new URL(adminPage.url()).pathname.split("/").at(-1);
