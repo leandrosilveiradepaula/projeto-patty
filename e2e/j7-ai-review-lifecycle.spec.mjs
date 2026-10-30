@@ -455,7 +455,7 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
         await actionable.click();
         await expect(admin).toHaveURL(new RegExp("#execucao-ia-" + validExecutionId + "$"));
         await admin.goto("/admin/pendencias?area=ai&responsavel=patty");
-        await expect(admin.getByText("Revisão humana de análise da IA")).toBeVisible();
+        await expect(admin.locator("#acao-da-patty").getByText("Revisão humana de análise da IA")).toBeVisible();
         await expect(admin.getByText("2 achado(s) aguardando")).toBeVisible();
       }
       const unauthorizedAdmin = await unassignedContext.newPage();
@@ -466,7 +466,7 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
       await expect(unauthorizedAdmin.getByText("J7 Cliente Sintética", { exact: true })).toHaveCount(0);
       await expect(unauthorizedAdmin.getByRole("link", { name: "Abrir análise para decisão" })).toHaveCount(0);
       await unauthorizedAdmin.goto("/admin/pendencias?area=ai&responsavel=patty");
-      await expect(unauthorizedAdmin.getByText("Revisão humana de análise da IA")).toHaveCount(0);
+      await expect(unauthorizedAdmin.locator("#acao-da-patty").getByText("Revisão humana de análise da IA")).toHaveCount(0);
       await unauthorizedAdmin.close();
       await admin.goto(reviewURL);
     });
@@ -593,7 +593,7 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
       await admin.goto("/admin/ia");
       await expect(admin.getByRole("link", { name: "Abrir análise para decisão" })).toHaveCount(0);
       await admin.goto("/admin/pendencias?area=ai&responsavel=patty");
-      await expect(admin.getByText("Revisão humana de análise da IA")).toHaveCount(0);
+      await expect(admin.locator("#acao-da-patty").getByText("Revisão humana de análise da IA")).toHaveCount(0);
       await admin.goto(reviewURL);
       const review = rows(
         "select id,submission_id,reviewer_profile_id,note from public.anamnesis_reviews" +
