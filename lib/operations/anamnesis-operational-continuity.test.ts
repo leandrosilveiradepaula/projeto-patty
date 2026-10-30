@@ -118,7 +118,7 @@ test("original response, client clarification, professional review and AI interp
   const adminPage = read("app/admin/anamneses/[anamneseId]/esclarecimentos/page.tsx");
   const clientPage = read("app/cliente/anamnese/[anamneseId]/esclarecimentos/page.tsx");
   assert.ok(adminPage.includes("A resposta da cliente não resolve o pedido automaticamente"));
-  assert.ok(clientPage.includes("Este pedido já foi marcado como resolvido pela Patty"));
+  assert.ok(clientPage.includes("Este pedido já foi marcado como resolvido pela equipe profissional"));
   assert.ok(adminPage.includes("sourceAnswer.answer_value"));
   assert.ok(clientPage.includes("requestResponses.map"));
 });

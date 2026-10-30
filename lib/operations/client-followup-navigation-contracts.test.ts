@@ -42,7 +42,7 @@ test("both submitted and unanswered clarifications remain visible on the same An
   const history = read("app/cliente/anamnese/page.tsx");
   assert.match(history, /\{pendingClarificationHref \? \(/);
   assert.match(history, /\{clarification && clarification\.awaitingProfessional > 0 \? \(/);
-  assert.match(history, /respondido\(s\) aguardando revisão da Patty/);
+  assert.match(history, /respondido\(s\) aguardando revisão da equipe profissional/);
   assert.match(history, /Responder \{clarification\?\.awaitingClient\} esclarecimento/);
   assert.ok(!history.includes(") : clarification && clarification.awaitingProfessional"));
 });

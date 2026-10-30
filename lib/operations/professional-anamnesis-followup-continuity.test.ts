@@ -48,7 +48,7 @@ test("professional Anamnese history shows each submission's notes and two distin
   assert.ok(page.includes("awaitingProfessional = clarification?.awaitingProfessional ?? 0"));
   assert.ok(page.includes("Ainda não registrada"));
   assert.ok(page.includes("Esclarecimentos aguardando cliente"));
-  assert.ok(page.includes("Complementos aguardando Patty"));
+  assert.ok(page.includes("Complementos aguardando equipe profissional"));
   assert.ok(page.includes("alguns já foram respondidos"));
 });
 
