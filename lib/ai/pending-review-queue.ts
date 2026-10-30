@@ -41,7 +41,7 @@ export async function listPendingCompletedAiReviews() {
     actionsById.set(action.execution_id, rows);
   }
   const submissionIds = [...new Set(candidates.map(row => row.anamnesis_submission_id).filter((id): id is string => !!id))];
-  const context = new Map<string, { allowedMissing: ReadonlySet<string> | null; answerIds: Set<string> }>();
+  const context = new Map<string, { clientId: string; allowedMissing: ReadonlySet<string> | null; answerIds: Set<string> }>();
   await Promise.all(submissionIds.map(async submissionId => {
     const submission = await getAccessibleAnamnesisSubmission(submissionId);
     if (!submission || !submission.submitted_at) return;
@@ -50,6 +50,7 @@ export async function listPendingCompletedAiReviews() {
       listAccessibleAnamnesisAnswers(submission.id),
     ]);
     context.set(submissionId, {
+      clientId: submission.client_id,
       allowedMissing: reconstructStoredReviewMissingTargets({
         answers,
         questions,
@@ -63,7 +64,7 @@ export async function listPendingCompletedAiReviews() {
     const submissionId = execution.anamnesis_submission_id;
     if (!submissionId) return [];
     const scope = context.get(submissionId);
-    if (!scope) return [];
+    if (!scope || scope.clientId !== execution.client_id) return [];
     const allowedSources = new Set(
       sources.filter(source =>
         source.execution_id === execution.id &&
