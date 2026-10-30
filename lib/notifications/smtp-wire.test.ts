@@ -101,3 +101,55 @@ test("invalid envelope and header are rejected before opening a connection", () 
     assert.throws(() => prepareSmtpMessage(config, invalid));
   }
 });
+
+test("SMTP recipient rejection stops before DATA and never sends a body", async () => {
+  const temp = mkdtempSync(join(tmpdir(), "patty-smtp-reject-"));
+  let server: tls.Server | undefined;
+  let client: tls.TLSSocket | undefined;
+  try {
+    const key = join(temp, "key.pem");
+    const cert = join(temp, "cert.pem");
+    execFileSync("openssl", ["req", "-x509", "-newkey", "rsa:2048", "-nodes",
+      "-keyout", key, "-out", cert, "-days", "1",
+      "-subj", "/CN=localhost"], { stdio: "ignore" });
+    const commands: string[] = [];
+    server = tls.createServer({ key: readFileSync(key), cert: readFileSync(cert) }, socket => {
+      socket.write("220 local reject test\\r\\n");
+      let buf = "";
+      socket.setEncoding("utf8");
+      socket.on("data", chunk => {
+        buf += chunk;
+        while (buf.includes("\\r\\n")) {
+          const i = buf.indexOf("\\r\\n");
+          const line = buf.slice(0, i);
+          buf = buf.slice(i + 2);
+          commands.push(line);
+          if (line.startsWith("EHLO ")) socket.write("250 AUTH LOGIN\\r\\n");
+          else if (line === "AUTH LOGIN") socket.write("334 username\\r\\n");
+          else if (line === Buffer.from(config.fromEmail).toString("base64")) socket.write("334 password\\r\\n");
+          else if (line === Buffer.from(config.appPassword).toString("base64")) socket.write("235 authenticated\\r\\n");
+          else if (line.startsWith("MAIL FROM:")) socket.write("250 ok\\r\\n");
+          else if (line.startsWith("RCPT TO:")) socket.write("550 recipient rejected\\r\\n");
+          else socket.write("500 unexpected command\\r\\n");
+        }
+      });
+    });
+    server.listen(0, "127.0.0.1");
+    await once(server, "listening");
+    const address = server.address();
+    assert.ok(address && typeof address !== "string");
+    client = tls.connect({ host: "127.0.0.1", port: address.port, rejectUnauthorized: false });
+    await once(client, "secureConnect");
+    await assert.rejects(
+      speakSmtpOnTrustedSocket(client, config, prepareSmtpMessage(config, input)),
+      /SMTP command failed with code 550/,
+    );
+    assert.ok(commands.some(line => line.startsWith("RCPT TO:")));
+    assert.ok(!commands.includes("DATA"));
+    assert.ok(!commands.some(line => line.includes("Período sintético")));
+  } finally {
+    client?.destroy();
+    server?.close();
+    rmSync(temp, { recursive: true, force: true });
+  }
+});
