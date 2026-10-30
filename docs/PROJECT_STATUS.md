@@ -1,3 +1,11 @@
+## 2026-10-30 — J2: identidade institucional nos e-mails (UX-COM-01 / #1008)
+
+**Achado:** após a publicação da marca Corpo & Mente, o lembrete semanal e o diagnóstico SMTP ainda apresentavam a identidade pessoal nos textos externos gerados pelo aplicativo. O transporte Gmail sintético já foi validado e não deve ser reexecutado por isso.
+
+**Escopo desta alteração:** assinatura do lembrete semanal, *fallback* do nome de remetente (sem alterar `GMAIL_SMTP_FROM_NAME` já configurado) e assunto/corpo de mensagem de diagnóstico, com contratos de teste. Nenhuma mudança na fila, horário, cron, elegibilidade, assinatura técnica de `messageId`, conta remetente, destinatários, credenciais, MFA, banco, dados reais ou RLS. A configuração externa `GMAIL_SMTP_FROM_NAME`, quando definida, continua prevalecendo e não é inspecionada nem alterada aqui.
+
+**Estados deste registro:** branch/commit/CI/merge/deploy requerem confirmação em evidência subsequente da issue #1008. Não houve envio real de e-mail nesta tarefa. Homologação conjunta permanece a última etapa.
+
 ## 2026-10-30 — Atualização de vigência: UX Corpo & Mente integrada e publicada
 
 **Estado confirmado depois dos registros históricos abaixo:** PR [#1039](https://github.com/leandrosilveiradepaula/projeto-patty/pull/1039) foi integrada por squash em `master=e319e69cee045d351c2c3f1bd4f06fabb6d0e4e9`. O HEAD pré-merge `47b8356d808ba5e5d7b6aa53189f2405b9c98d1a` passou 7/7 workflows, incluindo Validate application e Playwright local sintético J1/J2/J4/J5/J6/J7. [Validate application pós-merge #41084022124](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/41084022124) terminou `success`. O deployment Vercel de produção `dpl_6H4zEgMKowdJcsPNrgXwBLRsTvCD` foi verificado `READY` no mesmo commit, com três aliases, inclusive `projeto-patty.vercel.app`. Ver [issue #1008](https://github.com/leandrosilveiradepaula/projeto-patty/issues/1008#issuecomment-6526983932).

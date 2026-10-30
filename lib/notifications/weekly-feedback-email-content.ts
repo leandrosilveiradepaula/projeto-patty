@@ -32,7 +32,7 @@ export function buildWeeklyFeedbackEmailContent(input: {
     "",
     "Este lembrete não altera seu atendimento automaticamente.",
     "",
-    "Consultoria Corpo e Mente - Patty",
+    "Consultoria Corpo & Mente",
   ].join("\n");
 
   return { subject, bodyText };

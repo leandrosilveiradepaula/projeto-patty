@@ -15,6 +15,8 @@ test("reminder uses only the stated period and authenticated application URL", (
   assert.match(content.bodyText, /05\/10\/2026 a 11\/10\/2026/);
   assert.match(content.bodyText, /https:\/\/example\.invalid\/cliente\/feedback-semanal/);
   assert.doesNotMatch(content.bodyText, /resposta|dosagem|adesão|meta diária/i);
+  assert.match(content.bodyText, /Consultoria Corpo & Mente/);
+  assert.doesNotMatch(content.bodyText, /\bPatty\b|Projeto Patty/);
 });
 
 test("a malformed or reversed period fails before any SMTP attempt", () => {
