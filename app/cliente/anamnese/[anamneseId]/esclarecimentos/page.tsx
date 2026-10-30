@@ -76,11 +76,11 @@ export default async function ClientAnamnesisClarificationsPage({ params }: Page
     <>
       <PageHeader
         actions={<Link className={styles.backLink} href={`/cliente/anamnese/${submission.id}`}>Voltar à Anamnese</Link>}
-        description="Aqui você pode complementar informações solicitadas pela Patty sem alterar suas respostas originais."
+        description="Aqui você pode complementar informações solicitadas pela equipe profissional sem alterar suas respostas originais."
         eyebrow="Cliente"
         title="Esclarecimentos"
       />
-      <Section description="Os complementos ficam registrados separadamente da Anamnese original." title="Pedidos da Patty">
+      <Section description="Os complementos ficam registrados separadamente da Anamnese original." title="Pedidos da equipe profissional">
         {requests.length === 0 ? (
           <EmptyState description="Não há pedidos de esclarecimento para esta Anamnese." title="Nenhum esclarecimento solicitado" />
         ) : (
@@ -97,7 +97,7 @@ export default async function ClientAnamnesisClarificationsPage({ params }: Page
                 <div id={`esclarecimento-${request.id}`} key={request.id}>
                 <Card className={styles.entry}>
                   <div className={styles.entryHeader}>
-                    <h2 className={styles.entryTitle}>Pedido da Patty</h2>
+                    <h2 className={styles.entryTitle}>Pedido da equipe profissional</h2>
                     <div className={styles.statusGroup}>
                       <Badge variant={clarificationStatusVariant(status)}>{clarificationStatusLabel(status, "client")}</Badge>
                       <Badge variant="neutral">{formatDateTime(request.created_at)}</Badge>
@@ -121,11 +121,11 @@ export default async function ClientAnamnesisClarificationsPage({ params }: Page
                   </div>
                   {resolved ? (
                     <p className={styles.meta}>
-                      Este pedido já foi marcado como resolvido pela Patty e não aceita novos complementos.
+                      Este pedido já foi marcado como resolvido pela equipe profissional e não aceita novos complementos.
                     </p>
                   ) : (
                     <>
-                      {status === "awaiting_professional" ? <p className={styles.meta}>Seu complemento já foi registrado. A Patty ainda precisa revisar; você pode acrescentar informações enquanto este pedido estiver aberto.</p> : null}
+                      {status === "awaiting_professional" ? <p className={styles.meta}>Seu complemento já foi registrado. A equipe profissional ainda precisa revisar; você pode acrescentar informações enquanto este pedido estiver aberto.</p> : null}
                       <ClientAnamnesisClarificationResponseForm requestId={request.id} submissionId={submission.id} />
                     </>
                   )}

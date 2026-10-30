@@ -136,7 +136,7 @@ export default async function ClienteConteudosPage() {
   return (
     <>
       <PageHeader
-        description="Consulte somente os materiais que a Patty liberou para sua conta. Use o protocolo publicado para conferir refeições e doses."
+        description="Consulte somente os materiais que a equipe profissional liberou para sua conta. Use o protocolo publicado para conferir refeições e doses."
         eyebrow="Cliente"
         title="Conteúdos"
       />
@@ -144,7 +144,7 @@ export default async function ClienteConteudosPage() {
         {!client ? (
           <EmptyState description="Esta conta ainda não está vinculada a um cadastro de cliente. Os conteúdos permanecem privados até que o vínculo e a liberação estejam disponíveis." title="Conteúdos indisponíveis" action={<Link href="/cliente">Voltar ao início</Link>} />
         ) : visibleReleases.length === 0 ? (
-          <EmptyState description={orderedReleases.length > 0 ? "Há registros de liberação, mas as respectivas versões com arquivo compatível não estão disponíveis para consulta nesta conta. Solicite a verificação à Patty." : "Ainda não há conteúdos liberados pela Patty para sua conta. As liberações dependem de uma decisão profissional e aparecerão aqui."} title="Nenhum conteúdo foi liberado para você ainda" action={<Link href="/cliente">Voltar ao início</Link>} />
+          <EmptyState description={orderedReleases.length > 0 ? "Há registros de liberação, mas as respectivas versões com arquivo compatível não estão disponíveis para consulta nesta conta. Solicite a verificação à equipe profissional." : "Ainda não há conteúdos liberados pela equipe profissional para sua conta. As liberações dependem de uma decisão profissional e aparecerão aqui."} title="Nenhum conteúdo foi liberado para você ainda" action={<Link href="/cliente">Voltar ao início</Link>} />
         ) : <ClientReleasedContentExplorer entries={explorerEntries} unavailableReleaseCount={unavailableReleaseCount} />}
       </Section>
       <ClientJourneyNextSteps areas={["protocol","feedback","training","index"]} />

@@ -110,7 +110,7 @@ export default async function AdminReceivedWeeklyFeedbackPage({ searchParams }: 
       />
       <Section
         title="Localizar Feedbacks Semanais"
-        description="Filtre por situação, cliente, origem ou mês de início da semana de referência. Uma solicitação sem envio não representa uma pendência clínica da Patty."
+        description="Filtre por situação, cliente, origem ou mês de início da semana de referência. Uma solicitação sem envio não representa uma pendência clínica da equipe profissional."
       >
         <form action="/admin/feedback-semanal" className={styles.filters} method="get">
           <label>

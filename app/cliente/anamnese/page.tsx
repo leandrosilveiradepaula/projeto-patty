@@ -140,7 +140,7 @@ export default async function ClienteAnamnesePage({ searchParams }: ClienteAnamn
         ) : (
           <>
             <p className={styles.historySummary} role="status">
-              {explored.summary.drafts} rascunho(s) · {explored.summary.submitted} enviada(s) · {explored.summary.awaitingClient} com esclarecimento aguardando sua resposta · {explored.summary.awaitingProfessional} aguardando revisão da Patty.
+              {explored.summary.drafts} rascunho(s) · {explored.summary.submitted} enviada(s) · {explored.summary.awaitingClient} com esclarecimento aguardando sua resposta · {explored.summary.awaitingProfessional} aguardando revisão da equipe profissional.
             </p>
             <form action="/cliente/anamnese" className={styles.historyFilters} method="get">
               <label>Situação
@@ -150,7 +150,7 @@ export default async function ClienteAnamnesePage({ searchParams }: ClienteAnamn
               </label>
               <label>Esclarecimentos
                 <select name="pendencia" defaultValue={filters.attention}>
-                  <option value="all">Todos</option><option value="client">Aguardando minha resposta</option><option value="professional">Aguardando a Patty</option><option value="none">Sem esclarecimento aberto</option>
+                  <option value="all">Todos</option><option value="client">Aguardando minha resposta</option><option value="professional">Aguardando a equipe profissional</option><option value="none">Sem esclarecimento aberto</option>
                 </select>
               </label>
               <label>Versão do formulário
@@ -208,12 +208,12 @@ export default async function ClienteAnamnesePage({ searchParams }: ClienteAnamn
                     </p>
                     {pendingClarificationHref ? (
                       <Link className={styles.detailLink} href={pendingClarificationHref}>
-                        Responder {clarification?.awaitingClient} esclarecimento(s) da Patty
+                        Responder {clarification?.awaitingClient} esclarecimento(s) da equipe profissional
                       </Link>
                     ) : null}
                     {clarification && clarification.awaitingProfessional > 0 ? (
                       <p className={styles.submissionStatus}>
-                        {clarification.awaitingProfessional} esclarecimento(s) respondido(s) aguardando revisão da Patty.
+                        {clarification.awaitingProfessional} esclarecimento(s) respondido(s) aguardando revisão da equipe profissional.
                       </p>
                     ) : null}
                     <Link

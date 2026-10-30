@@ -176,7 +176,7 @@ export default async function ClienteAnamneseDetailPage({
       ) : null}
       {query.submitted === "1" ? (
         <Alert live="polite" title="Anamnese enviada" variant="success">
-          Suas respostas foram enviadas para análise da Patty. Este registro agora está preservado como enviado e não pode mais ser editado por você.
+          Suas respostas foram enviadas para análise da equipe profissional. Este registro agora está preservado como enviado e não pode mais ser editado por você.
         </Alert>
       ) : null}
       <Section

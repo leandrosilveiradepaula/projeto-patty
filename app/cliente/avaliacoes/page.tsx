@@ -57,7 +57,7 @@ export default async function ClientAssessmentsPage({searchParams}:{searchParams
   return (
     <>
       <PageHeader
-        description="Consulte suas avaliações finalizadas e as medidas registradas pela Patty. Correções de lançamento já aparecem como valor vigente."
+        description="Consulte suas avaliações finalizadas e as medidas registradas pela equipe profissional. Correções de lançamento já aparecem como valor vigente."
         eyebrow="Cliente"
         title="Avaliações e medidas"
       />
@@ -91,7 +91,7 @@ export default async function ClientAssessmentsPage({searchParams}:{searchParams
         {options.invalid||options.page>history.pages?<p role="status">Página ou filtro indisponível; exibindo somente suas avaliações autorizadas.</p>:null}
         {items.length === 0 ? (
           <EmptyState
-            description={assessmentHistory.complete ? "Ainda não há avaliações finalizadas disponíveis. Consulte esta área quando houver novas avaliações concluídas pela Patty." : "Nenhuma avaliação com medidas está disponível nesta consulta parcial. Podem existir avaliações finalizadas sem medidas que ainda não aparecem."}
+            description={assessmentHistory.complete ? "Ainda não há avaliações finalizadas disponíveis. Consulte esta área quando houver novas avaliações concluídas pela equipe profissional." : "Nenhuma avaliação com medidas está disponível nesta consulta parcial. Podem existir avaliações finalizadas sem medidas que ainda não aparecem."}
             title="Nenhuma avaliação disponível"
             action={<Link href="/cliente/mais">Ver outras áreas</Link>}
           />

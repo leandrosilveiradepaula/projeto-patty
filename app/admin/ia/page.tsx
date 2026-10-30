@@ -61,7 +61,7 @@ export default async function AdminAiPage({searchParams}:{searchParams:Promise<{
       />
 
       <Section
-        title="Análises concluídas aguardando decisões da Patty"
+        title="Análises concluídas aguardando decisões da equipe profissional"
         description="Achados validados, ainda sem decisão humana. A lista não interpreta resultados clínicos nem toma decisões automaticamente."
       >
         {completedPending.length ? (
