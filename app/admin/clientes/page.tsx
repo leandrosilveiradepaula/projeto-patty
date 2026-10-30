@@ -77,9 +77,10 @@ export default async function AdminClientesPage({
   return (
     <>
       <PageHeader
-        description="Encontre clientes e acesse rapidamente o acompanhamento de cada uma."
+        description="Gerencie os acompanhamentos, encontre registros e acompanhe as próximas ações em um só lugar."
         eyebrow="Admin"
         title="Clientes"
+        primaryAction={<Link className={styles.primaryActionLink} href="/admin/clientes/nova">+ Convidar cliente</Link>}
       />
       {onboarding === "invited" ? (
         <Alert live="polite" title="Solicitação de convite registrada" variant="success">
@@ -105,12 +106,12 @@ export default async function AdminClientesPage({
             Convidar cliente
           </Link>
         }
-        description="Busque pelo nome ou filtre por ações da Patty, respostas aguardadas, pendências operacionais e clientes sem pendências."
+        description="Consulte quem precisa de atenção, acompanhe respostas e encontre rapidamente cada cliente."
         title="Em acompanhamento"
       >
         <div className={styles.queueSummary}>
-          <p role="status"><strong>{clientsWithPattyActions} cliente(s)</strong> com {actionablePattyItems} ação(ões) da Patty nos acompanhamentos autorizados.</p>
-          <Link className={styles.queueLink} href={withClientDirectoryReturn("/admin/pendencias?responsavel=patty",directoryReturn)}>Abrir fila de ações da Patty</Link>
+          <p role="status"><strong>{clientsWithPattyActions} cliente(s)</strong> com {actionablePattyItems} ação(ões) para revisão nos acompanhamentos autorizados.</p>
+          <Link className={styles.queueLink} href={withClientDirectoryReturn("/admin/pendencias?responsavel=patty",directoryReturn)}>Abrir fila de ações para revisão</Link>
         </div>
         <form action="/admin/clientes" className={styles.searchForm} method="get">
           <label className={styles.searchLabel} htmlFor="client-search">
@@ -155,7 +156,7 @@ export default async function AdminClientesPage({
           <>
             {searchTerm || viewFilter !== "all" ? (
               <p className={styles.resultCount}>
-                {filteredClients.length} de {clients.length} cliente(s) nos resultados filtrados · {visiblePendingItems} pendência(s) nesses resultados, incluindo {visiblePattyActions} ação(ões) da Patty.
+                {filteredClients.length} de {clients.length} cliente(s) nos resultados filtrados · {visiblePendingItems} pendência(s) nesses resultados, incluindo {visiblePattyActions} ação(ões) para revisão.
               </p>
             ) : null}
             {requestedPage.invalid || pagedClients.adjusted ? <p role="status" className={styles.resultCount}>Página solicitada indisponível. Exibindo a página {pagedClients.page} de {pagedClients.pageCount}.</p> : null}
@@ -230,7 +231,7 @@ export default async function AdminClientesPage({
                       ) : client.status === "inactive" ? (
                         <Badge variant="neutral">Inativa</Badge>
                       ) : nextPattyPending ? (
-                        <Badge variant="warning">Ação da Patty</Badge>
+                        <Badge variant="warning">Ação profissional</Badge>
                       ) : (
                         <Badge variant="positive">Ativa</Badge>
                       )

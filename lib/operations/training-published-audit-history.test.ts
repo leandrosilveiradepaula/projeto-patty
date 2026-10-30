@@ -91,7 +91,7 @@ test("legacy published versions with no exercises do not produce an unexplained 
   assert.ok(admin.includes("sortedPublishedItems.length === 0"));
   assert.ok(client.includes("trainingItems.length === 0"));
   assert.ok(client.includes("items.length === 0"));
-  assert.ok(client.includes("Confira com a Patty antes de iniciar o treino"));
+  assert.ok(client.includes("Confira com a equipe profissional antes de iniciar o treino"));
 });
 
 test("professional date formatting cannot crash on malformed archived timestamps", () => {

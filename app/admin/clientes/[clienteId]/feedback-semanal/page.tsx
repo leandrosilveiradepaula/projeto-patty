@@ -117,7 +117,7 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
 
       <ClientWorkspaceNav activeArea="feedback-semanal" clientId={client.id} />
       <Section
-        description="As respostas enviadas são informações para avaliação da Patty; não provocam alteração automática de protocolo."
+        description="As respostas enviadas são informações para avaliação da equipe profissional; não provocam alteração automática de protocolo."
         title="Consultar contexto do acompanhamento"
       >
         <Link href={inboxReturn ?? "/admin/feedback-semanal"}>Voltar à caixa de Feedbacks Semanais</Link>
@@ -174,7 +174,7 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
       <div id="feedback-enviados">
       <Section
         action={<Badge variant="neutral">{submittedFeedbacks.length} enviado(s)</Badge>}
-        description="Respostas efetivamente enviadas pela cliente, preservadas para consulta e decisão profissional da Patty."
+        description="Respostas enviadas pela cliente, preservadas para consulta e decisão da responsável pelo acompanhamento."
         title="Histórico enviado"
       >
         {submittedFeedbacks.length === 0 && rawSubmittedCount > 0 ? (
@@ -446,7 +446,7 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
       <div id="feedback-enviados">
       <Section
         action={<Badge variant="neutral">{submittedFeedbacks.length} enviado(s)</Badge>}
-        description="Respostas efetivamente enviadas pela cliente, preservadas para consulta e decisão profissional da Patty."
+        description="Respostas enviadas pela cliente, preservadas para consulta e decisão da responsável pelo acompanhamento."
         title="Histórico enviado"
       >
         {submittedFeedbacks.length === 0 && rawSubmittedCount > 0 ? (

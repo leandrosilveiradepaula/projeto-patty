@@ -138,7 +138,7 @@ export function EvaluationProfessionalFollowUpForm({
       </FormField>
 
       <FormField
-        description="Observação interna da Patty. Não é exibida para a cliente."
+        description="Observação interna da equipe profissional. Não é exibida para a cliente."
         id="follow-up-patty-observation"
         label="Observação interna"
       >

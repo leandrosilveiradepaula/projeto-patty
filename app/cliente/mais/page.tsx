@@ -12,7 +12,7 @@ const areas = [
     title: "Início",
   },
   {
-    description: "Consulte seu plano alimentar publicado pela Patty e versões anteriores.",
+    description: "Consulte seu plano alimentar publicado pela equipe profissional e versões anteriores.",
     href: "/cliente/protocolo",
     title: "Meu protocolo",
   },
@@ -27,7 +27,7 @@ const areas = [
     title: "Meus avisos",
   },
   {
-    description: "Responda ou continue o formulário semanal solicitado pela Patty.",
+    description: "Responda ou continue o formulário semanal solicitado pela equipe profissional.",
     href: "/cliente/feedback-semanal",
     title: "Feedback semanal",
   },
@@ -47,7 +47,7 @@ const areas = [
     title: "Evolução",
   },
   {
-    description: "Acesse os conteúdos educacionais liberados pela Patty.",
+    description: "Acesse os conteúdos educacionais liberados pela equipe profissional.",
     href: "/cliente/conteudos",
     title: "Conteúdos",
   },

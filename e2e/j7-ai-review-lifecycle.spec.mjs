@@ -443,7 +443,7 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
         await admin.goto("/admin/ia");
         const completed = admin.locator("section").filter({
           has: admin.getByRole("heading", {
-            name: "Análises concluídas aguardando decisões da Patty",
+            name: "Análises concluídas aguardando decisões da equipe profissional",
           }),
         }).first();
         const actionable = completed.getByRole("link", { name: "Abrir análise para decisão" });
@@ -511,11 +511,28 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
         );
         expect(order).toBeLessThan(newExecution);
         await expect(admin.getByRole("link", { name: "Voltar à fila de análises" })).toHaveAttribute("href", "/admin/ia");
-        const widths = await admin.evaluate(() => ({
-          actual: document.documentElement.scrollWidth,
-          viewport: document.documentElement.clientWidth,
-        }));
-        expect(widths.actual).toBeLessThanOrEqual(widths.viewport + 2);
+        const widths = await admin.evaluate(() => {
+          const viewport = document.documentElement.clientWidth;
+          const actual = document.documentElement.scrollWidth;
+          // Geometry and static CSS selectors only. No text, IDs, URLs or health data.
+          const overflowNodes = actual > viewport + 2
+            ? [...document.querySelectorAll("body *")]
+              .filter(element => element.getBoundingClientRect().right > viewport + 2)
+              .slice(0, 12)
+              .map(element => ({
+                tag: element.tagName.toLowerCase(),
+                classes: typeof element.className === "string"
+                  ? element.className.replace(/[^a-zA-Z0-9_\\s-]/g, "").slice(0, 65)
+                  : "",
+                right: Math.round(element.getBoundingClientRect().right),
+              }))
+            : [];
+          return { actual, viewport, overflowNodes };
+        });
+        expect(
+          widths.actual,
+          "Unexpected horizontal overflow (CSS geometry only): " + JSON.stringify(widths.overflowNodes),
+        ).toBeLessThanOrEqual(widths.viewport + 2);
       }
       await admin.goto(reviewURL);
     });
@@ -525,7 +542,7 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
       const inconsistent = admin.getByText("J7 resposta sintética opcional ausente.", { exact: true }).locator("..");
       await expect(inconsistent.getByText("Decisão histórica não associável", { exact: true })).toBeVisible();
       await expect(inconsistent.getByRole("button", { name: "Aceitar como observação interna" })).toHaveCount(0);
-      await expect(inconsistent.getByRole("button", { name: "Salvar como anotação da Patty" })).toHaveCount(0);
+      await expect(inconsistent.getByRole("button", { name: "Salvar como anotação da equipe profissional" })).toHaveCount(0);
       const next = admin.getByRole("link", { name: "Ir ao primeiro achado aguardando decisão" });
       await expect(next).toHaveAttribute("href", "#achado-ia-" + validExecutionId + "-0");
       await next.click();
@@ -597,8 +614,8 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
 
     await test.step("Saving Patty's note creates an exact, independently authorized history entry", async () => {
       const finding = admin.getByText(secondFindingText, { exact: true }).locator("..");
-      await finding.getByLabel("Anotação da Patty").fill(noteText);
-      await finding.getByRole("button", { name: "Salvar como anotação da Patty" }).click();
+      await finding.getByLabel("Anotação da equipe profissional").fill(noteText);
+      await finding.getByRole("button", { name: "Salvar como anotação da equipe profissional" }).click();
       await expect.poll(() => rows(
         "select id from public.ai_finding_actions where execution_id=" + literal(validExecutionId) +
         " and finding_index=1 and action='converted_to_patty_note'",

@@ -86,7 +86,7 @@ export function ManualClientInviteForm({ onProvisioningAttempt, onSafeRetryAllow
       ) : null}
 
       <FormField
-        description="Nome usado para identificar a cliente no painel da Patty."
+        description="Nome usado para identificar a cliente no painel da equipe profissional."
         id="manual-client-invitation-display-name"
         label="Nome da cliente"
         required

@@ -274,7 +274,7 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
       {requests.length === 0 ? requestSection : null}
 
       <Section
-        description="A prescrição depende de uma solicitação registrada pela cliente ou pela Patty. Salvar não publica; revisão e publicação são etapas separadas."
+        description="A prescrição depende de uma solicitação registrada pela cliente ou pela equipe profissional. Salvar não publica; revisão e publicação são etapas separadas."
         id="prescricao-treino"
         title="Prescrição de treino"
       >
@@ -605,7 +605,7 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
                             />
                           ) : null}
                           <p className={styles.description}>
-                            Esta é a versão publicada para a cliente. A consulta do histórico não permite editar nem republicar este registro. Quando existir um rascunho editável, a Patty poderá copiar explicitamente um exercício para revisá-lo na nova versão, sem modificar esta publicação.
+                            Esta é a versão publicada para a cliente. A consulta do histórico não permite editar nem republicar este registro. Quando existir um rascunho editável, a equipe profissional poderá copiar explicitamente um exercício para revisá-lo na nova versão, sem modificar esta publicação.
                           </p>
                           {version.notes ? <p className={styles.note}>Orientações gerais: {version.notes}</p> : null}
                           {versionItems.length === 0 ? (

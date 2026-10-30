@@ -42,7 +42,7 @@ export default async function ClientNotificationsPage({ searchParams }: { search
   return (
     <>
       <PageHeader eyebrow="Cliente" title="Avisos no aplicativo"
-        description="Consulte lembretes já entregues no aplicativo sobre seus Feedbacks Semanais. Avisos não substituem o acompanhamento da Patty." />
+        description="Consulte lembretes já entregues no aplicativo sobre seus Feedbacks Semanais. Avisos não substituem o acompanhamento da equipe profissional." />
       <nav aria-label="Acessar acompanhamento semanal" className={styles.pendingShortcut}>
         <Link className={styles.action} href="/cliente/feedback-semanal">Consultar todos os Feedbacks Semanais</Link>
       </nav>

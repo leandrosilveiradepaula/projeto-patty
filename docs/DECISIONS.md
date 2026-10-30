@@ -1,3 +1,15 @@
+## 2026-10-30 — Identidade institucional Corpo & Mente na interface
+
+### REQUISITO DE PRODUTO CONFIRMADO PELO RESPONSÁVEL
+
+O nome da pessoa responsável pelo acompanhamento não deve aparecer como marca, título de tela nem prefixo de instruções e ações no aplicativo. A identidade visual e textual do produto é **Corpo & Mente**, com títulos, botões e mensagens profissionais contextualizados por função. Esta decisão prevalece sobre exemplos e textos históricos que chamavam a interface de "Projeto Patty" ou personalizavam o título do painel com o nome da administradora.
+
+**Escopo técnico:** padronização de interface e apresentação; preservar dados de autor/revisor, versões, auditoria, RLS/Auth, chaves internas de integração, identificadores de filtros e âncoras legadas. Não cria um novo papel organizacional nem permite que IA decida ou publique autonomamente.
+
+**Execução em andamento:** PR #1039, vinculada ao cartão UX-PRODUTO-01 da issue #1008. O merge, a publicação e a homologação dependem de evidências separadas; alteração de texto não equivale a validação visual de todas as jornadas.
+
+---
+
 ## 2026-10-21 — Correção da policy SELECT Storage para a única administradora aplicada
 
 ### DECISÃO DE SEGURANÇA CONFIRMADA E EXECUÇÃO AUTORIZADA

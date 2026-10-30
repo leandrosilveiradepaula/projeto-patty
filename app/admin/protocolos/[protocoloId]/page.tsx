@@ -279,7 +279,7 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
                   <ProtocolWorkspaceJourney action={lifecycleAction} hasPlan={Boolean(mealPlan)} ready={draftReadiness.ready} versionNumber={version.version_number} versionId={version.id} />
                   <section className={styles.versionPlan} aria-label="Orientações manuais desta versão">
                     <h4>Fase e orientações da versão</h4>
-                    <p>Registros manuais da Patty, sem cálculo ou mudança automática de fase.</p>
+                    <p>Registros manuais da equipe profissional, sem cálculo ou mudança automática de fase.</p>
                     <dl className={styles.versionFacts}>
                       <div><dt>Fase indicada</dt><dd>{version.manual_stage_label ?? "Não informada"}</dd></div>
                       <div><dt>Data de início</dt><dd>{formatManualStartDate(version.planned_start_on)}</dd></div>

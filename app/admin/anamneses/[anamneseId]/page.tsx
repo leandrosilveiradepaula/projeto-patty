@@ -115,7 +115,7 @@ export default async function AdminAnamnesisDetailPage({
         items={[
           { href: "#visao-profissional", label: "Visão de trabalho" },
           { href: "#saude-arquivos", label: "Saúde e arquivos" },
-          { href: "#atencao-patty", label: "Atenção da Patty" },
+          { href: "#atencao-patty", label: "Revisão profissional" },
           { href: "#respostas-originais", label: "Respostas originais" },
         ]}
         label="Ir para"
@@ -169,9 +169,9 @@ export default async function AdminAnamnesisDetailPage({
         </Card>
       </Section>
       <Section
-        description="Organização determinística das respostas já existentes conforme a forma de leitura profissional confirmada pela Patty. Não cria score, diagnóstico, alerta clínico nem interpretação automática."
+        description="Respostas existentes organizadas conforme a forma de leitura profissional documentada, para facilitar a revisão. Não cria score, diagnóstico, alerta clínico nem interpretação automática."
         id="visao-profissional"
-        title="Visão de trabalho da Patty"
+        title="Visão de trabalho da equipe profissional"
       >
         {professionalReviewGroups.length === 0 ? (
           <EmptyState
@@ -200,7 +200,7 @@ export default async function AdminAnamnesisDetailPage({
         )}
       </Section>
       <Section
-        description="Contexto factual de saúde combinado com os exames/documentos privados mais recentes. A Patty interpreta os dados; o sistema não diagnostica, recomenda suplemento nem decide encaminhamento."
+        description="Contexto factual de saúde combinado com os exames/documentos privados mais recentes. A equipe profissional interpreta os dados; o sistema não diagnostica, recomenda suplemento nem decide encaminhamento."
         id="saude-arquivos"
         title="Saúde, exames e documentos para revisão"
       >
@@ -269,9 +269,9 @@ export default async function AdminAnamnesisDetailPage({
 
       <Section
         action={<Badge variant="neutral">Revisão humana</Badge>}
-        description="Respostas comportamentais e de autoimagem separadas para atenção da Patty. O sistema não infere compulsão, culpa, restrição, severidade ou diagnóstico."
+        description="Respostas comportamentais e de autoimagem separadas para atenção da equipe profissional. O sistema não infere compulsão, culpa, restrição, severidade ou diagnóstico."
         id="atencao-patty"
-        title="Atenção para revisão da Patty"
+        title="Pontos para revisão profissional"
       >
         {professionalAttentionItems.length > 0 ? (
           <>

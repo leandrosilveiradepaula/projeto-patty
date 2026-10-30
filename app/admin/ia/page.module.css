@@ -92,3 +92,46 @@
 
 .executionList li[id]{scroll-margin-top:var(--space-6)}
 .executionList li[id]:target{outline:2px solid var(--color-accent);outline-offset:4px;border-radius:var(--radius-medium)}
+
+/* Keep the AI queue within the available mobile width instead of letting
+   intrinsic card/link widths expand the page. Long metadata still wraps. */
+.executionList {
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+}
+.executionList > li,
+.executionCard,
+.executionMain,
+.executionActions {
+  min-width: 0;
+  max-width: 100%;
+}
+.executionActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+.executionActions .actionLink {
+  min-width: 0;
+  max-width: 100%;
+  flex: 0 1 auto;
+  overflow-wrap: anywhere;
+}
+.filters,
+.filters label {
+  min-width: 0;
+  max-width: 100%;
+}
+.filters input,
+.filters select {
+  max-width: 100%;
+  min-width: 0;
+}
+@media (max-width: 720px) {
+  .filters label,
+  .filters input,
+  .filters select {
+    width: 100%;
+  }
+}

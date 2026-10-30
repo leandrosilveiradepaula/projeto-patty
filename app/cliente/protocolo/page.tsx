@@ -50,7 +50,7 @@ export default async function ClienteProtocoloPage({ searchParams }: { searchPar
   return (
     <>
       <PageHeader
-        description="Consulte aqui o plano que a Patty liberou para você e, quando precisar, as versões anteriores."
+        description="Consulte aqui o plano que a equipe profissional liberou para você e, quando precisar, as versões anteriores."
         eyebrow="Cliente"
         title="Meu protocolo"
       />
@@ -61,7 +61,7 @@ export default async function ClienteProtocoloPage({ searchParams }: { searchPar
         />
       ) : publications?.length === 0 ? (
         <EmptyState
-          description="A Patty ainda não liberou um protocolo para esta conta. Quando houver uma publicação aprovada, ela aparecerá aqui."
+          description="A equipe profissional ainda não liberou um protocolo para esta conta. Quando houver uma publicação aprovada, ela aparecerá aqui."
           title="Nenhum protocolo foi publicado para você"
           action={<Link href="/cliente">Voltar ao início</Link>}
         />
@@ -92,7 +92,7 @@ export default async function ClienteProtocoloPage({ searchParams }: { searchPar
               title={selection.isHistorical ? `Plano anterior · versão ${publication.versionNumber}` : "Plano atual"}
               description={selection.isHistorical
                 ? "Esta é uma versão anterior preservada no histórico, não necessariamente seu plano vigente."
-                : "Última versão liberada pela Patty. Nenhuma fase ou etapa diária é escolhida automaticamente."}
+                : "Última versão liberada pela equipe profissional. Nenhuma fase ou etapa diária é escolhida automaticamente."}
             >
               {publications && publication ? <ClientPublishedHistoryExplorer publications={publications.map(item=>({id:item.id,versionNumber:item.versionNumber,publishedAt:item.publishedAt,protocolType:item.protocolType}))} selectedId={publication.id}/> : null}
               {selection.isHistorical ? (
@@ -113,8 +113,8 @@ export default async function ClienteProtocoloPage({ searchParams }: { searchPar
               {(publication.manualStageLabel || publication.plannedStartOn || publication.clientInstructions ||
                 publication.freeMealGuidance || publication.supplementGuidance || publication.compoundedGuidance) ? (
                 <Card>
-                  <section aria-label="Orientações registradas pela Patty">
-                    <h3>Orientações da Patty nesta versão</h3>
+                  <section aria-label="Orientações registradas pela equipe profissional">
+                    <h3>Orientações da equipe profissional nesta versão</h3>
                     <dl className={styles.facts}>
                       {publication.manualStageLabel ? (
                         <div><dt>Fase indicada</dt><dd>{publication.manualStageLabel}</dd></div>
@@ -164,10 +164,10 @@ export default async function ClienteProtocoloPage({ searchParams }: { searchPar
                     <a href={`#variacoes-${publication.id}`}>Consultar refeições e doses</a>
                   </nav>
                   <div className={styles.cycleBlock} id={`ciclos-${publication.id}`}>
-                    <h3 className={styles.cycleTitle}>Ciclos definidos pela Patty</h3>
+                    <h3 className={styles.cycleTitle}>Ciclos definidos pela equipe profissional</h3>
                     <p className={styles.cycleEmpty}>A sequência abaixo apresenta o que foi publicado, sem atribuir automaticamente uma etapa à data de hoje.</p>
                     {view.cycles.length === 0 ? (
-                      <p className={styles.cycleEmpty}>Nenhum ciclo foi registrado nesta publicação. Consulte as variações e orientações da Patty.</p>
+                      <p className={styles.cycleEmpty}>Nenhum ciclo foi registrado nesta publicação. Consulte as variações e orientações da equipe profissional.</p>
                     ) : (
                       <ol className={styles.cycles}>
                         {view.cycles.map((cycle, cycleIndex) => (
@@ -225,7 +225,7 @@ export default async function ClienteProtocoloPage({ searchParams }: { searchPar
         </div>
       )}
       {client && publication && publications && publications.length > 1 ? (
-        <Section id="comparar-protocolos" title="Comparar publicações aprovadas" description="Comparação descritiva entre duas publicações liberadas pela Patty. Mudanças nos registros não indicam recomendação, melhora, piora ou meta diária.">
+        <Section id="comparar-protocolos" title="Comparar publicações aprovadas" description="Comparação descritiva entre duas publicações liberadas pela equipe profissional. Mudanças nos registros não indicam recomendação, melhora, piora ou meta diária.">
           <form action="/cliente/protocolo" method="get" className={styles.compareForm}>
             <input type="hidden" name="publicacao" value={publication.id}/>
             <label>Comparar com a publicação
@@ -241,7 +241,7 @@ export default async function ClienteProtocoloPage({ searchParams }: { searchPar
           {baseline && comparison ? <>
             <p className={styles.historyNotice}>Comparando versão {baseline.versionNumber} ({formatPublishedAt(baseline.publishedAt)}) com versão {publication.versionNumber} ({formatPublishedAt(publication.publishedAt)}). Os totais incluem todas as variações registradas; não são uma orientação para o dia.</p>
             <p role="status" className={styles.historyNotice}>{comparison.changed} característica(s) estrutural(is) com diferença registrada.</p>
-            {comparison.totalsOmitted ? <p role="alert" className={styles.historyNotice}>Existem {comparison.invalidDoseRecords} lançamento(s) de doses com quantidades inválidas. A soma de doses foi omitida nesta comparação; consulte a Patty.</p> : null}
+            {comparison.totalsOmitted ? <p role="alert" className={styles.historyNotice}>Existem {comparison.invalidDoseRecords} lançamento(s) de doses com quantidades inválidas. A soma de doses foi omitida nesta comparação; consulte a equipe profissional.</p> : null}
             <div className={styles.compareScroll}>
               <table className={styles.compareTable}>
                 <thead><tr><th scope="col">Registro</th><th scope="col">Versão {baseline.versionNumber}</th><th scope="col">Versão {publication.versionNumber}</th></tr></thead>

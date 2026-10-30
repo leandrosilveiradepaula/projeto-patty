@@ -39,7 +39,7 @@ export default async function ClientePerfilPage() {
         title="Cadastro atual"
       >
         {!client ? (
-          <EmptyState title="Cadastro ainda não vinculado" description="Esta conta não possui um cadastro profissional vinculado. Entre em contato com a Patty para regularizar o acesso antes de atualizar os dados de contato." />
+          <EmptyState title="Cadastro ainda não vinculado" description="Esta conta não possui um cadastro profissional vinculado. Entre em contato com a equipe profissional para regularizar o acesso antes de atualizar os dados de contato." />
         ) : (
         <ClientRegistrationEditForm
           key={registration?.updated_at ?? "new"}

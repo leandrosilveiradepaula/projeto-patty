@@ -129,3 +129,7 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Primary invitation CTA on the dashboard. */
+.quickAction[href="/admin/clientes/nova"] { background: var(--color-brand-strong); color: #fff; border-color: var(--color-brand-strong); font-weight: 750; box-shadow: 0 5px 15px rgb(0 62 28 / 18%); }
+.quickAction[href="/admin/clientes/nova"]:hover { background: var(--color-brand); color: #fff; }

@@ -163,3 +163,18 @@
     display: none;
   }
 }
+
+.brand {
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 1.25;
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+.link { transition: background-color 150ms ease, color 150ms ease; }
+.link[data-active="true"] {
+  background: #e0efe5;
+  color: var(--color-brand-strong);
+  font-weight: 750;
+}

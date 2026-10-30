@@ -7,7 +7,7 @@ export function ProtocolVariantDoseSummary({ allocations }: { allocations: Reado
     <div className={styles.summary} aria-label="Doses registradas nesta variação">
       <p className={styles.title}>Total de doses registradas nesta variação</p>
       {totals === null ? (
-        <p className={styles.unavailable}>Total indisponível. Confira as doses registradas com a Patty.</p>
+        <p className={styles.unavailable}>Total indisponível. Confira as doses registradas com a equipe profissional.</p>
       ) : (
         <dl className={styles.totals}>
           {([

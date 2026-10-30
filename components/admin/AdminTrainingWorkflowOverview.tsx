@@ -11,7 +11,7 @@ type Props = {
 
 const stages = [
   { label: "Solicitação", description: "Pedido registrado", id: "solicitacao-treino" },
-  { label: "Montagem", description: "Exercícios escolhidos pela Patty", id: "prescricao-treino" },
+  { label: "Montagem", description: "Exercícios escolhidos pela equipe profissional", id: "prescricao-treino" },
   { label: "Revisão", description: "Conferência profissional da versão", id: "conferencia-treino" },
   { label: "Publicação", description: "Disponibilização à cliente", id: "publicar-treino" },
 ] as const;

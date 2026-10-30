@@ -127,7 +127,7 @@ export default async function ClientePage() {
           badge: `${clarificationSummary.awaitingClient} pendente(s)`,
           badgeVariant: "warning" as const,
           description:
-            "A Patty pediu informações adicionais. Consulte o pedido e responda sem alterar a Anamnese enviada.",
+            "A equipe profissional pediu informações adicionais. Consulte o pedido e responda sem alterar a Anamnese enviada.",
           href: clarificationHref,
           label: "Responder esclarecimento",
         }
@@ -145,7 +145,7 @@ export default async function ClientePage() {
             badge: `${pendingWeeklyFeedbackIds.size} pendente(s)`,
             badgeVariant: "warning" as const,
             description:
-              "Continue um rascunho ou envie o Feedback Semanal solicitado pela Patty." +
+              "Continue um rascunho ou envie o Feedback Semanal solicitado pela equipe profissional." +
               (pendingFeedbackDeadline ? " Prazo informado: " + pendingFeedbackDeadline + "." : ""),
             href: pendingFeedbackHref,
             label: "Responder Feedback Semanal",
@@ -154,7 +154,7 @@ export default async function ClientePage() {
       ? {
           badge: "Atenção",
           badgeVariant: "warning" as const,
-          description: "Existe um Feedback Semanal pendente, mas o formulário versionado está indisponível. Consulte a solicitação e entre em contato com a Patty.",
+          description: "Existe um Feedback Semanal pendente, mas o formulário versionado está indisponível. Consulte a solicitação e entre em contato com a equipe profissional.",
           href: "/cliente/feedback-semanal",
           label: "Ver feedback indisponível",
         }
@@ -171,7 +171,7 @@ export default async function ClientePage() {
                 badge: "Publicado",
                 badgeVariant: "positive" as const,
                 description:
-                  "Consulte a versão mais recente do protocolo já liberado pela Patty.",
+                  "Consulte a versão mais recente do protocolo já liberado pela equipe profissional.",
                 href: "/cliente/protocolo",
                 label: "Consultar protocolo",
               }
@@ -267,7 +267,7 @@ export default async function ClientePage() {
             </div>
             {unavailablePendingFeedbackCount > 0 && !hasUnanswerablePendingFeedback ? (
               <p className={styles.statusNote} role="status">
-                {unavailablePendingFeedbackCount} solicitação(ões) de Feedback Semanal ainda pendente(s) estão com formulário indisponível. Consulte a área de Feedback Semanal ou fale com a Patty.
+                {unavailablePendingFeedbackCount} solicitação(ões) de Feedback Semanal ainda pendente(s) estão com formulário indisponível. Consulte a área de Feedback Semanal ou fale com a equipe profissional.
               </p>
             ) : null}
             {pendingFeedbackDeadline && primaryAction.href !== pendingFeedbackHref ? (
@@ -275,7 +275,7 @@ export default async function ClientePage() {
             ) : null}
             {clarificationSummary.awaitingProfessional > 0 ? (
               <p className={styles.statusNote} role="status">
-                {clarificationSummary.awaitingProfessional} esclarecimento(s) respondido(s) aguardam revisão da Patty.
+                {clarificationSummary.awaitingProfessional} esclarecimento(s) respondido(s) aguardam revisão da equipe profissional.
                 Seus complementos continuam registrados; você não precisa reenviar a Anamnese.
               </p>
             ) : null}

@@ -78,7 +78,7 @@ test("client home and Anamnesis history use one authenticated factual summary", 
   assert.match(home, /Esclarecimentos \(\{clarificationSummary.awaitingClient\}\)/);
   assert.match(history, /pendingClarificationHref/);
   assert.match(history, /Responder \{clarification\?\.awaitingClient\} esclarecimento/);
-  assert.match(history, /aguardando revisão da Patty/);
+  assert.match(history, /aguardando revisão da equipe profissional/);
   assert.match(loader, /listAccessibleAnamnesisClarificationRequestsForSubmissions/);
   assert.match(loader, /listAccessibleAnamnesisClarificationResponses/);
   assert.match(loader, /listAccessibleAnamnesisClarificationResolutions/);

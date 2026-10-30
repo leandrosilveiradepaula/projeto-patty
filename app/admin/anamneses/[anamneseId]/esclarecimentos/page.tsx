@@ -97,7 +97,7 @@ export default async function AdminAnamnesisClarificationsPage({ params, searchP
         submittedAt={submission.submitted_at}
       />
       <p className={styles.notice}>
-        Este fluxo não altera a resposta original. A resposta da cliente não resolve o pedido automaticamente; a Patty precisa revisar e marcar como resolvido.
+        Este fluxo não altera a resposta original. A resposta da cliente não resolve o pedido automaticamente; a equipe profissional precisa revisar e marcar como resolvido.
       </p>
       <Section id="novo-pedido" description="O vínculo com uma resposta original é opcional." title="Novo pedido">
         <Card>
@@ -109,7 +109,7 @@ export default async function AdminAnamnesisClarificationsPage({ params, searchP
           <EmptyState description="Nenhum pedido de esclarecimento foi registrado para esta Anamnese." title="Sem esclarecimentos" />
         ) : (
           <>
-            {firstAwaitingReviewId ? <p className={styles.jump}><a href={`#esclarecimento-${firstAwaitingReviewId}`}>Ir para o primeiro complemento aguardando revisão da Patty</a></p> : null}
+            {firstAwaitingReviewId ? <p className={styles.jump}><a href={`#esclarecimento-${firstAwaitingReviewId}`}>Ir para o primeiro complemento aguardando revisão da equipe profissional</a></p> : null}
             {firstAwaitingClientId ? <p className={styles.jump}><a href={`#esclarecimento-${firstAwaitingClientId}`}>Ir para o primeiro pedido aguardando resposta da cliente</a></p> : null}
           <div className={styles.list}>
             {orderedRequests.map((request) => {
@@ -122,7 +122,7 @@ export default async function AdminAnamnesisClarificationsPage({ params, searchP
                 <div id={`esclarecimento-${request.id}`} key={request.id}>
                 <Card className={styles.entry}>
                   <div className={styles.entryHeader}>
-                    <h2 className={styles.entryTitle}>Pedido da Patty</h2>
+                    <h2 className={styles.entryTitle}>Pedido da equipe profissional</h2>
                     <div className={styles.statusGroup}>
                       <Badge variant={clarificationStatusVariant(status)}>{clarificationStatusLabel(status, "admin")}</Badge>
                       <Badge variant="neutral">{formatDateTime(request.created_at)}</Badge>

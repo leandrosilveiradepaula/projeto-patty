@@ -97,7 +97,7 @@ export default async function ClientWeeklyFeedbackPage({ searchParams }: { searc
       {confirmedFeedback ? (
         <Alert title="Envio confirmado" variant="success" live="polite">
           O Feedback Semanal de {formatDate(confirmedFeedback.period_start)} a {formatDate(confirmedFeedback.period_end)}
-          {" "}está enviado e preservado no histórico. A Patty poderá consultar suas respostas;
+          {" "}está enviado e preservado no histórico. A equipe profissional poderá consultar suas respostas;
           isso não significa que já foram revisadas.{" "}
           <Link href="/cliente/feedback-semanal#historico-enviado">Ver todo o histórico</Link>.
         </Alert>
@@ -182,7 +182,7 @@ export default async function ClientWeeklyFeedbackPage({ searchParams }: { searc
                         {!definition ? (
                           <Alert title="Não é possível responder agora" variant="warning">
                             A solicitação está preservada, mas a versão do formulário não está disponível.
-                            Entre em contato com a Patty antes de tentar novamente.
+                            Entre em contato com a equipe profissional antes de tentar novamente.
                           </Alert>
                         ) : (
                           <ClientWeeklyFeedbackResponseForm

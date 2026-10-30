@@ -233,3 +233,62 @@
   outline-offset: 3px;
   scroll-margin-top: var(--space-6);
 }
+
+
+/* AI review details can contain long historical metadata, audit links and
+   disclosure labels. Bound every grid and flex item without hiding content. */
+.stack,
+.entry,
+.finding,
+.findingActions,
+.actionSummary,
+.integrityHistory,
+.integrityList,
+.noteForm,
+.recoveryForm {
+  min-width: 0;
+  max-width: 100%;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.entryHeader,
+.entryHeader .title {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.entryHeader .title {
+  flex: 1 1 12rem;
+}
+
+.title,
+.meta,
+.text,
+.suggested,
+.actionStatus,
+.actionSummary,
+.integrityDetails {
+  overflow-wrap: anywhere;
+}
+
+.sourceLink {
+  min-width: 0;
+  max-width: 100%;
+  white-space: normal;
+}
+
+.integrityDetails > summary,
+.actorAudit > summary {
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.noteForm textarea,
+.recoveryForm textarea {
+  min-width: 0;
+  max-width: 100%;
+}

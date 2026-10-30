@@ -64,7 +64,7 @@ export function AdminAiReviewForm({
         </Button>
         <p className={styles.help}>
           {providerReady
-            ? `OpenAI configurada com o modelo ${model}. O resultado ficará somente para revisão da Patty.`
+            ? `OpenAI configurada com o modelo ${model}. O resultado ficará somente para revisão da equipe profissional.`
             : "A chamada externa permanece bloqueada até a configuração de privacidade e credenciais ser habilitada."}
         </p>
       </div>

@@ -100,7 +100,7 @@ export default async function AdminExerciciosPage({ searchParams }: AdminExercic
       />
 
       <Section
-        description="A primeira versão começa como rascunho. A Patty revisa e publica manualmente; a criação não atribui exercícios a nenhuma cliente."
+        description="A primeira versão começa como rascunho. A equipe profissional revisa e publica manualmente; a criação não atribui exercícios a nenhuma cliente."
         title="Novo exercício"
       >
         <Card className={styles.createCard}>
@@ -109,7 +109,7 @@ export default async function AdminExerciciosPage({ searchParams }: AdminExercic
       </Section>
 
       <Section
-        description="Catálogo profissional. Somente exercícios selecionados em treinos individuais e publicados pela Patty ficam visíveis às respectivas clientes."
+        description="Catálogo profissional. Somente exercícios selecionados em treinos individuais e publicados pela equipe profissional ficam visíveis às respectivas clientes."
         id="biblioteca-exercicios"
         title="Biblioteca de exercícios"
       >

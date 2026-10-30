@@ -21,7 +21,7 @@ test("ten related follow-up improvements preserve existing paths and scoped auth
  assert.match(admin,/nextOperationalItems\.map/);
  assert.match(admin,/groupedPendingItems\.operational\.slice\(0, 3\)/);
  assert.doesNotMatch(admin,/private_file_pending_release/);
- assert.match(admin,/Não há ações da Patty registradas/);
+ assert.match(admin,/Não há ações profissionais registradas/);
  assert.doesNotMatch(home,/service_role|createAdminClient/);
  assert.doesNotMatch(notices,/createAdminClient|service_role/);
 });

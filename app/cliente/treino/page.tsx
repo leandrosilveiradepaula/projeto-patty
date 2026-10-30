@@ -119,7 +119,7 @@ export default async function ClientTrainingPage({ searchParams }: { searchParam
       <PageHeader
         description={
           latestPublished
-            ? "Consulte seu treino individual publicado pela Patty e, quando precisar, registre uma nova solicitação de treino."
+            ? "Consulte seu treino individual publicado pela equipe profissional e, quando precisar, registre uma nova solicitação de treino."
             : "Registre aqui quando quiser solicitar o serviço de treino. A solicitação não cria prescrição automática nem altera seu protocolo."
         }
         eyebrow="Cliente"
@@ -129,7 +129,7 @@ export default async function ClientTrainingPage({ searchParams }: { searchParam
       {newRequestAfterPublication ? (
         <Alert title="Nova solicitação registrada" variant="info">
           Uma nova solicitação de treino foi registrada depois da publicação atual.
-          A Patty poderá revisar o pedido e decidir se é necessária uma nova prescrição.
+          A equipe profissional poderá revisar o pedido e decidir se é necessária uma nova prescrição.
           Enquanto isso, o treino já publicado continua disponível abaixo.
           {" "}<a href={clientTrainingRequestExactHref("/cliente/treino",orderedRequests,orderedRequests[0].id) ?? "#suas-solicitacoes"}>Ver solicitação</a>
         </Alert>
@@ -146,7 +146,7 @@ export default async function ClientTrainingPage({ searchParams }: { searchParam
       ) : null}
 
       <Section
-        description="Apenas versões revisadas e publicadas pela Patty aparecem aqui."
+        description="Apenas versões revisadas e publicadas pela equipe profissional aparecem aqui."
         title="Seu treino publicado"
       >
         {latestPublished ? (
@@ -171,23 +171,22 @@ export default async function ClientTrainingPage({ searchParams }: { searchParam
 
             {trainingItems.length === 0 ? (
               <Alert title="Treino publicado sem exercícios registrados" variant="info">
-                Nenhum exercício consta nesta versão publicada. Confira com a Patty antes de iniciar o treino.
+                Nenhum exercício consta nesta versão publicada. Confira com a equipe profissional antes de iniciar o treino.
               </Alert>
             ) : (
             <ClientWorkoutGuide items={workoutGuideItems} />
             )}
           </Card>
           <Alert title="Sobre carga e peso" variant="info">
-            A carga não é exibida aqui como um valor fixo. Siga as orientações
-            profissionais da Patty e respeite sua capacidade em cada exercício.
+            A carga não é exibida aqui como um valor fixo. Siga as orientações do treino publicado e respeite sua capacidade em cada exercício.
           </Alert>
           </>
         ) : (
           <EmptyState
             description={
               requests.length > 0
-                ? "Sua solicitação está registrada. O treino aparecerá aqui somente depois da revisão e publicação da Patty."
-                : "Quando houver uma solicitação e a Patty publicar seu treino, ele aparecerá aqui."
+                ? "Sua solicitação está registrada. O treino aparecerá aqui somente depois da revisão e publicação da equipe profissional."
+                : "Quando houver uma solicitação e a equipe profissional publicar seu treino, ele aparecerá aqui."
             }
             title="Nenhum treino publicado"
             action={requests.length === 0 ? <a href="#solicitar-treino">Ir para solicitação</a> : <Link href="/cliente">Voltar ao início</Link>}
@@ -211,7 +210,7 @@ export default async function ClientTrainingPage({ searchParams }: { searchParam
 
       {publishedItems.length > 1 ? (
         <Section
-          description="Histórico das prescrições que a Patty publicou para você. Rascunhos e versões apenas revisadas não aparecem aqui."
+          description="Histórico das prescrições que a equipe profissional publicou para você. Rascunhos e versões apenas revisadas não aparecem aqui."
           title="Treinos anteriores"
         >
           <form method="get" action="/cliente/treino" className={styles.archiveFilters}>
@@ -273,7 +272,7 @@ export default async function ClientTrainingPage({ searchParams }: { searchParam
 
       <Section
         id="solicitar-treino"
-        description="A Patty verá a solicitação no seu histórico de acompanhamento."
+        description="A equipe profissional verá a solicitação no seu histórico de acompanhamento."
         title="Solicitar treino"
       >
         <Card>

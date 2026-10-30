@@ -45,7 +45,7 @@ test("client training page foregrounds published prescription and avoids repeate
   const page = read("app/cliente/treino/page.tsx");
   const form = read("components/client/ClientTrainingRequestForm.tsx");
 
-  assert.match(page, /Consulte seu treino individual publicado pela Patty/);
+  assert.match(page, /Consulte seu treino individual publicado pela equipe profissional/);
   assert.match(page, /Sobre carga e peso/);
   assert.doesNotMatch(page, /capacityNote/);
   assert.match(form, /useActionState/);
