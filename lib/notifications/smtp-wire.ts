@@ -50,7 +50,10 @@ class SmtpConnection {
       }
     | null = null;
 
-  constructor(private readonly socket: TLSSocket) {
+  private readonly socket: TLSSocket;
+
+  constructor(socket: TLSSocket) {
+    this.socket = socket;
     socket.setEncoding("utf8");
     socket.on("data", (chunk: string) => {
       this.buffer += chunk;
