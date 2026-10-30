@@ -6,6 +6,7 @@ import {
   manualDecisionAssessmentChoices,
   manualAssessmentDecisionFromComparisonHref,
   manualAssessmentDecisionFromSubmittedFeedbackHref,
+  assessmentHistoryFromSubmittedFeedbackHref,
   readWeeklyComparisonReturn,
   readWeeklyFeedbackDecisionReturn,
   weeklyFeedbackComparisonReturnHref,
@@ -227,4 +228,35 @@ test("authorized comparison and finalized assessment preserve view through manua
   assert.match(action, /if \(!assessment\.finalized_at\)/);
   assert.match(action, /createAccessibleProfessionalFollowUp\(/);
   assert.doesNotMatch(action, /markWeeklyFeedbackReviewed|update.*client_weekly_feedbacks|publish.*protocol/i);
+});
+
+
+test("feedback history handoff reaches all finalized assessments without changing the selection limit", () => {
+  const href = assessmentHistoryFromSubmittedFeedbackHref(clientA, current);
+  assert.equal(
+    href,
+    "/admin/clientes/" + clientA + "/avaliacoes?feedbackAtual=" + current + "#historico-finalizado",
+  );
+  assert.deepEqual([...new URL(href, "https://example.invalid").searchParams.keys()], ["feedbackAtual"]);
+  for (const id of ["not-uuid", "../client", "", [current] as unknown as string]) {
+    assert.equal(assessmentHistoryFromSubmittedFeedbackHref(id, current), "/admin/feedback-semanal");
+    assert.equal(assessmentHistoryFromSubmittedFeedbackHref(clientA, id), "/admin/feedback-semanal");
+  }
+  const five = Array.from({ length: 6 }, (_, i) =>
+    row("assessment-" + i, clientA, "2026-10-" + String(12 - i).padStart(2, "0"), "2026-10-12T10:00:00Z"));
+  assert.equal(manualDecisionAssessmentChoices(five, clientA).length, 6); // The database, not this projection, limits recent choices.
+  const dataAccess = read("lib/supabase/data-access.ts");
+  const start = dataAccess.indexOf("export async function listRecentFinalizedAssessmentsForClient(");
+  assert.ok(start >= 0);
+  assert.match(dataAccess.slice(start, start + 800), /\.limit\(5\)/);
+  const history = read("app/admin/clientes/[clienteId]/feedback-semanal/page.tsx");
+  assert.match(history, /assessmentHistoryFromSubmittedFeedbackHref\(client\.id, feedback\.id\)/);
+  assert.match(history, /Consultar todas as avaliações finalizadas/);
+  const directory = read("app/admin/clientes/[clienteId]/avaliacoes/page.tsx");
+  assert.match(directory, /findReceivedWeeklyFeedbackHeaderForClient\(client\.id, rawQuery\.feedbackAtual\)/);
+  assert.match(directory, /id="historico-finalizado"/);
+  assert.match(directory, /withSubmittedWeeklyFeedbackAssessmentContext/);
+  const assessmentPage = read("app/admin/avaliacoes/[avaliacaoId]/page.tsx");
+  assert.match(assessmentPage, /readWeeklyFeedbackDecisionReturn\(/);
+  assert.match(assessmentPage, /Voltar ao Feedback Semanal enviado/);
 });
