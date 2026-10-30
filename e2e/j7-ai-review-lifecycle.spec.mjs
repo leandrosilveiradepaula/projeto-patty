@@ -441,9 +441,11 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
       for (const width of [390, 1440]) {
         await admin.setViewportSize({ width, height: width === 390 ? 844 : 900 });
         await admin.goto("/admin/ia");
-        const completed = admin.getByRole("heading", {
-          name: "Análises concluídas aguardando decisões da Patty",
-        }).locator("..");
+        const completed = admin.locator("section").filter({
+          has: admin.getByRole("heading", {
+            name: "Análises concluídas aguardando decisões da Patty",
+          }),
+        }).first();
         const actionable = completed.getByRole("link", { name: "Abrir análise para decisão" });
         await expect(actionable).toHaveAttribute(
           "href", reviewURL + "#execucao-ia-" + validExecutionId,
