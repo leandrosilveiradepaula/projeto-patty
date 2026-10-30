@@ -114,23 +114,23 @@ test("SMTP recipient rejection stops before DATA and never sends a body", async 
       "-subj", "/CN=localhost"], { stdio: "ignore" });
     const commands: string[] = [];
     server = tls.createServer({ key: readFileSync(key), cert: readFileSync(cert) }, socket => {
-      socket.write("220 local reject test\\r\\n");
+      socket.write("220 local reject test\r\n");
       let buf = "";
       socket.setEncoding("utf8");
       socket.on("data", chunk => {
         buf += chunk;
-        while (buf.includes("\\r\\n")) {
-          const i = buf.indexOf("\\r\\n");
+        while (buf.includes("\r\n")) {
+          const i = buf.indexOf("\r\n");
           const line = buf.slice(0, i);
           buf = buf.slice(i + 2);
           commands.push(line);
-          if (line.startsWith("EHLO ")) socket.write("250 AUTH LOGIN\\r\\n");
-          else if (line === "AUTH LOGIN") socket.write("334 username\\r\\n");
-          else if (line === Buffer.from(config.fromEmail).toString("base64")) socket.write("334 password\\r\\n");
-          else if (line === Buffer.from(config.appPassword).toString("base64")) socket.write("235 authenticated\\r\\n");
-          else if (line.startsWith("MAIL FROM:")) socket.write("250 ok\\r\\n");
-          else if (line.startsWith("RCPT TO:")) socket.write("550 recipient rejected\\r\\n");
-          else socket.write("500 unexpected command\\r\\n");
+          if (line.startsWith("EHLO ")) socket.write("250 AUTH LOGIN\r\n");
+          else if (line === "AUTH LOGIN") socket.write("334 username\r\n");
+          else if (line === Buffer.from(config.fromEmail).toString("base64")) socket.write("334 password\r\n");
+          else if (line === Buffer.from(config.appPassword).toString("base64")) socket.write("235 authenticated\r\n");
+          else if (line.startsWith("MAIL FROM:")) socket.write("250 ok\r\n");
+          else if (line.startsWith("RCPT TO:")) socket.write("550 recipient rejected\r\n");
+          else socket.write("500 unexpected command\r\n");
         }
       });
     });
