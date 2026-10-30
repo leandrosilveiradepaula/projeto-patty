@@ -4,6 +4,7 @@ import { readPendingQueueReturn, withPendingQueueReturn } from "@/lib/operations
 import { filterProfessionalReleases, readProfessionalReleaseOptions, professionalReleaseHref, professionalContentReleaseYears } from "@/lib/content/professional-release-explorer";
 import { ClientContentReleaseForm } from "@/components/admin/ClientContentReleaseForm";
 import { isContentVersionReleaseEligible } from "@/lib/content/release-eligibility";
+import { canPublishEducationalContentVersion } from "@/lib/content/publication-eligibility";
 import { newestClientContentReleases, sortClientContentReleaseOptions } from "@/lib/content/release-order";
 import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
@@ -70,10 +71,22 @@ export default async function AdminClientContentPage({
   ]));
   const assets = await listEducationalContentAssetsForCurrentAdminVersions(assetVersionIds);
   const assetCountsByVersionId = new Map<string, number>();
+  const assetsByVersionId = new Map<string, typeof assets>();
   for (const asset of assets) {
     const versionId = asset.educational_content_version_id;
     assetCountsByVersionId.set(versionId, (assetCountsByVersionId.get(versionId) ?? 0) + 1);
+    const versionAssets = assetsByVersionId.get(versionId) ?? [];
+    versionAssets.push(asset);
+    assetsByVersionId.set(versionId, versionAssets);
   }
+  // Eligibility is computed server-side from exactly the same private asset
+  // integrity facts enforced by the manual release Server Action.
+  const releaseReadyVersionIds = new Set(contentVersions.filter(version =>
+    canPublishEducationalContentVersion({
+      contentTypeKey: version.content_type_key,
+      assets: assetsByVersionId.get(version.id) ?? [],
+    }),
+  ).map(version => version.id));
   const versionIdsWithAssets = new Set(assetCountsByVersionId.keys());
   const parentContentIdByVersionId = new Map(
     contentVersions.map((version) => [version.id, version.educational_content_id]),
@@ -87,10 +100,10 @@ export default async function AdminClientContentPage({
   );
   const availableVersions = sortClientContentReleaseOptions(contentVersions.filter(
     (version) =>
-      versionIdsWithAssets.has(version.id) &&
+      releaseReadyVersionIds.has(version.id) &&
       isContentVersionReleaseEligible({
         alreadyReleased: releasedVersionIds.has(version.id),
-        hasAsset: versionIdsWithAssets.has(version.id),
+        hasAsset: releaseReadyVersionIds.has(version.id),
         publishedAt: version.published_at,
       }),
   ));
@@ -123,7 +136,7 @@ export default async function AdminClientContentPage({
     (version) =>
       Boolean(version.published_at) &&
       !releasedVersionIds.has(version.id) &&
-      !versionIdsWithAssets.has(version.id),
+      !releaseReadyVersionIds.has(version.id),
   );
   const displayName = client.full_name?.trim() || client.profiles?.display_name?.trim();
 
@@ -136,14 +149,6 @@ export default async function AdminClientContentPage({
         status={<Badge variant="neutral">{releases.length} liberação(ões)</Badge>}
       />
       <ClientWorkspaceNav activeArea="conteudos" clientId={client.id} />
-      <Section
-        description="A liberação individual depende da versão publicada e do arquivo privado verificado. Consulte as demais áreas sem perder o contexto da cliente."
-        title="Continuar atendimento"
-      >
-        <Link href={withReturn(`/admin/clientes/${client.id}/protocolos`)}>Protocolos da cliente</Link>
-        {" · "}
-        <Link href={withReturn(`/admin/clientes/${client.id}/feedback-semanal`)}>Feedback semanal</Link>
-      </Section>
       <div id="liberar-conteudo">
       <Section
         description="Escolha uma versão publicada e com arquivo privado verificado. A liberação é individual e não ocorre automaticamente."
@@ -152,11 +157,11 @@ export default async function AdminClientContentPage({
         {publishedVersionsAwaitingAsset.length > 0 ? (
           <Card>
             <p className={styles.notice}>
-              {publishedVersionsAwaitingAsset.length} versão(ões) publicada(s) ainda
-              não possuem arquivo privado registrado e, por segurança operacional,
-              não aparecem como opção de nova liberação. Versões já publicadas
-              não podem receber novos arquivos: prepare uma nova versão em rascunho,
-              registre e verifique o asset e publique essa nova versão antes de liberar.
+              {publishedVersionsAwaitingAsset.length} versão(ões) publicada(s) não possuem arquivo
+              principal compatível e com integridade privada verificada. Elas não aparecem
+              como opção de liberação. Versões já publicadas não podem receber novos
+              arquivos: prepare uma nova versão em rascunho, registre e verifique o
+              arquivo e publique a nova versão antes de liberar.
             </p>
             <ul className={styles.contentList}>
               {sortClientContentReleaseOptions(publishedVersionsAwaitingAsset).map((version) => (
@@ -170,13 +175,13 @@ export default async function AdminClientContentPage({
           </Card>
         ) : null}
         <p className={styles.notice} role="status">
-          {availableVersions.length} versão(ões) publicada(s), com arquivo registrado e ainda não liberada(s) para esta cliente.
+          {availableVersions.length} versão(ões) publicada(s), com arquivo principal privado verificado e ainda não liberada(s) para esta cliente.
         </p>
         {availableVersions.length === 0 ? (
           <EmptyState
             description={
               publishedVersionsAwaitingAsset.length > 0
-                ? "As versões publicadas restantes aguardam asset privado verificado."
+                ? "As versões publicadas restantes não possuem arquivo principal privado compatível e verificado. Prepare uma nova versão na biblioteca."
                 : "Não há versão publicada disponível para uma nova liberação nesta cliente."
             }
             title="Nenhum conteúdo disponível para liberar"
@@ -194,7 +199,7 @@ export default async function AdminClientContentPage({
                 id: version.id,
                 title: version.title,
                 versionNumber: version.version_number,
-                hasAsset: versionIdsWithAssets.has(version.id),
+                hasAsset: releaseReadyVersionIds.has(version.id),
               }))}
             />
           </Card>
@@ -291,6 +296,14 @@ export default async function AdminClientContentPage({
           </nav> : null}
           </>
         )}
+      </Section>
+      <Section
+        description="A liberação individual depende de uma versão publicada com arquivo privado verificado. Continue pelas demais áreas sem perder o contexto da cliente."
+        title="Continuar atendimento"
+      >
+        <Link href={withReturn(`/admin/clientes/${client.id}/protocolos`)}>Protocolos da cliente</Link>
+        {" · "}
+        <Link href={withReturn(`/admin/clientes/${client.id}/feedback-semanal`)}>Feedback semanal</Link>
       </Section>
     </>
   );
