@@ -423,6 +423,31 @@ test("J6: versioned content releases require exact published version and synthet
       await assertMobile(admin);
     });
 
+    await test.step("Historical version inspection keeps current publication explicit at 390px and 1440px", async () => {
+      await admin.goto("/admin/conteudos/" + contentId + "?versao=" + v1.id);
+      for (const width of [390, 1440]) {
+        await admin.setViewportSize({ width, height: width === 390 ? 844 : 900 });
+        await expect(admin.getByRole("status").filter({
+          hasText: "Você está consultando os arquivos da versão 1 (histórico).",
+        })).toBeVisible();
+        await expect(admin.getByRole("heading", {
+          name: "3. Revisar e publicar — versão atual 2",
+        })).toBeVisible();
+        await assertMobile(admin);
+      }
+      await admin.getByRole("link", { name: "Voltar à versão atual" }).click();
+      await expect(admin).toHaveURL(new RegExp(
+        "/admin/conteudos/" + contentId + "#assets-do-conteudo$",
+      ));
+      await expect(admin.getByRole("status").filter({
+        hasText: "Você está consultando os arquivos da versão 1 (histórico).",
+      })).toHaveCount(0);
+      await expect(admin.getByRole("heading", {
+        name: "3. Revisar e publicar — versão atual 2",
+      })).toBeVisible();
+      await assertMobile(admin);
+    });
+
     const secondTitle = "J6 segundo material sintetico";
     let secondVersion;
     let secondAssetId;
