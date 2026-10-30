@@ -1,3 +1,4 @@
+import { listPendingCompletedAiReviews } from "@/lib/ai/pending-review-queue";
 import { authorizedExactRecordPage } from "@/lib/operations/exact-record-navigation";
 import { readAiQueueQuery, exploreAiQueue, aiQueueHref } from "@/lib/operations/ai-execution-explorer";
 import Link from "next/link";
@@ -29,7 +30,10 @@ function purposeLabel(value: string) {
 }
 
 export default async function AdminAiPage({searchParams}:{searchParams:Promise<{q?:string;tipo?:string;pagina?:string; execucao?:string}>}) {
-  const executions = await listAccessibleNonterminalAiExecutions();
+  const [executions, completedPending] = await Promise.all([
+    listAccessibleNonterminalAiExecutions(),
+    listPendingCompletedAiReviews(),
+  ]);
   const types=[...new Set(executions.map(e=>e.purpose_key))];
   const providers=[...new Set(executions.flatMap(e=>e.provider?[e.provider]:[]))].sort();
   const rawQuery = await searchParams;
@@ -51,10 +55,38 @@ export default async function AdminAiPage({searchParams}:{searchParams:Promise<{
             {executions.length} em andamento
           </Badge>
         }
-        description="Acompanhe análises assistivas que ainda não foram concluídas."
+        description="Consulte análises em andamento e resultados concluídos que aguardam decisão humana."
         eyebrow="Admin"
         title="Análises da IA"
       />
+
+      <Section
+        title="Análises concluídas aguardando decisões da Patty"
+        description="Achados validados, ainda sem decisão humana. A lista não interpreta resultados clínicos nem toma decisões automaticamente."
+      >
+        {completedPending.length ? (
+          <ul className={styles.executionList}>
+            {completedPending.map(execution => (
+              <li key={execution.id}>
+                <Card className={styles.executionCard} variant="subtle">
+                  <div className={styles.executionHeading}>
+                    <h2 className={styles.executionTitle}>
+                      {execution.clients?.full_name?.trim() || execution.clients?.profiles?.display_name?.trim() || "Cliente sem nome informado"}
+                    </h2>
+                    <Badge variant="warning">{execution.pendingCount} achado(s) aguardando</Badge>
+                  </div>
+                  <p>Concluída em {formatExecutionDate(execution.completed_at ?? execution.created_at)}. Revisão profissional necessária.</p>
+                  <Link className={styles.actionLink} href={`/admin/anamneses/${execution.anamnesis_submission_id}/ia#execucao-ia-${execution.id}`}>
+                    Abrir análise para decisão
+                  </Link>
+                </Card>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p role="status">Nenhuma análise concluída possui achados validados aguardando decisão.</p>
+        )}
+      </Section>
 
       <Section
         description="Abra uma análise para revisar o resultado e decidir os próximos passos."
@@ -72,7 +104,7 @@ export default async function AdminAiPage({searchParams}:{searchParams:Promise<{
         {query.invalid||query.page>explored.pages?<p role="status">Página ou filtro inválido; exibindo registros autorizados.</p>:null}
         {executions.length === 0 ? (
           <EmptyState
-            description="Não há análises aguardando conclusão ou revisão neste momento."
+            description="Não há execuções iniciadas aguardando recuperação. Verifique acima as análises concluídas que requerem decisão."
             title="Nenhuma análise em andamento"
           />
         ) : explored.total===0 ? (
