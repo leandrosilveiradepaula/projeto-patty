@@ -229,21 +229,43 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
       const endInput = adminPage.getByLabel("Semana de referência · fim");
       const submitRequest = adminPage.getByRole("button", { name: "Criar solicitação" });
 
-      // This is a progressively enhanced server-action form. The browser must
-      // retain the native date value before submission; the server action is
-      // still the authoritative validation boundary. Do not use React's
-      // derived `min` attribute as a hydration probe: it is a UX aid and its
-      // render timing is not a security or persistence contract.
+      // Next can display server-rendered inputs before React attaches its
+      // controlled onChange handlers. A pre-hydration fill can appear correct
+      // momentarily and then be discarded when hydration restores state.
+      // Retry only synthetic input events until the dependent UX date limit
+      // reflects the start date. This is a readiness check, NOT an access or
+      // persistence guarantee: native constraints and the server action still
+      // validate the submitted dates independently.
       await expect(startInput).toBeVisible();
-      await startInput.fill(periodStart);
-      await expect(startInput).toHaveValue(periodStart);
+      await expect.poll(async () => {
+        if (await endInput.getAttribute("min") !== periodStart) {
+          await startInput.fill(periodStart);
+        }
+        return endInput.getAttribute("min");
+      }, {
+        message: "Controlled date input must process the start date before submission",
+        timeout: 15_000,
+      }).toBe(periodStart);
       await endInput.fill(periodEnd);
+      await expect(startInput).toHaveValue(periodStart);
       await expect(endInput).toHaveValue(periodEnd);
       await expect(submitRequest).toBeEnabled();
-      await expect.poll(
-        () => submitRequest.evaluate((button) => button.form?.checkValidity() ?? false),
-        { message: "The synthetic request must pass native date constraints before submitting", timeout: 10_000 },
-      ).toBe(true);
+      const nativeValidity = await submitRequest.evaluate((button) => {
+        const form = button.form;
+        if (!form) return { valid: false, invalidTypes: ["missing-form"] };
+        const invalidTypes = [...form.elements]
+          .filter((element) => element instanceof HTMLInputElement && element.willValidate && !element.validity.valid)
+          .map((element) => ({
+            type: element.type,
+            valueMissing: element.validity.valueMissing,
+            rangeUnderflow: element.validity.rangeUnderflow,
+            rangeOverflow: element.validity.rangeOverflow,
+            badInput: element.validity.badInput,
+          }));
+        return { valid: form.checkValidity(), invalidTypes };
+      });
+      expect(nativeValidity.invalidTypes, "Native input constraints must remain valid").toEqual([]);
+      expect(nativeValidity.valid).toBe(true);
       await submitRequest.click();
       try {
         await expect.poll(async () => {
