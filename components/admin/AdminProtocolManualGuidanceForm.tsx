@@ -50,11 +50,11 @@ export function AdminProtocolManualGuidanceForm({
         </Alert>
       ) : null}
       <p className={styles.notice}>
-        Estes campos são opcionais, preenchidos manualmente pela Patty e destinados à cliente.
+        Estes campos são opcionais, preenchidos manualmente pela equipe profissional e destinados à cliente.
         Não inclua anotações internas. Nada é publicado ao salvar o rascunho.
       </p>
       <div className={styles.fields}>
-        <FormField id={`stage-${protocolVersionId}`} label="Fase ou etapa indicada pela Patty"
+        <FormField id={`stage-${protocolVersionId}`} label="Fase ou etapa indicada pela equipe profissional"
           description="Texto descritivo; não seleciona nem avança fases automaticamente.">
           {fieldProps => <TextInput {...fieldProps} name="stageLabel"
             defaultValue={values.manualStageLabel ?? ""} maxLength={120} disabled={pending} />}
@@ -71,7 +71,7 @@ export function AdminProtocolManualGuidanceForm({
           maxLength={4000} defaultValue={values.clientInstructions ?? ""} disabled={pending} />}
       </FormField>
       <FormField id={`free-meal-${protocolVersionId}`} label="Refeição livre (quando indicada)"
-        description="A Patty define individualmente se e como usar. Nenhuma frequência ou quantidade é preenchida automaticamente.">
+        description="A equipe profissional define individualmente se e como usar. Nenhuma frequência ou quantidade é preenchida automaticamente.">
         {fieldProps => <Textarea {...fieldProps} name="freeMealGuidance" rows={3} maxLength={4000}
           defaultValue={values.freeMealGuidance ?? ""} disabled={pending} />}
       </FormField>
@@ -81,7 +81,7 @@ export function AdminProtocolManualGuidanceForm({
           defaultValue={values.supplementGuidance ?? ""} disabled={pending} />}
       </FormField>
       <FormField id={`compounded-${protocolVersionId}`} label="Manipulados (quando indicados)"
-        description="Orientação individual da Patty; não há prescrição, fórmula ou dose automática.">
+        description="Orientação individual da equipe profissional; não há prescrição, fórmula ou dose automática.">
         {fieldProps => <Textarea {...fieldProps} name="compoundedGuidance" rows={3} maxLength={4000}
           defaultValue={values.compoundedGuidance ?? ""} disabled={pending} />}
       </FormField>

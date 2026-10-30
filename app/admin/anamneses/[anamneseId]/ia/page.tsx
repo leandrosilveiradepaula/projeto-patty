@@ -547,7 +547,7 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
                                 className={styles.noteForm}
                               >
                                 <label>
-                                  <span>Anotação da Patty</span>
+                                  <span>Anotação da equipe profissional</span>
                                   <textarea
                                     maxLength={4000}
                                     name="pattyNote"
@@ -556,7 +556,7 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
                                   />
                                 </label>
                                 <Button size="compact" type="submit">
-                                  Salvar como anotação da Patty
+                                  Salvar como anotação da equipe profissional
                                 </Button>
                               </form>
                             </>

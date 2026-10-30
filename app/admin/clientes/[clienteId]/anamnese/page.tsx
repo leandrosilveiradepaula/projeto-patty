@@ -196,7 +196,7 @@ export default async function AdminClienteAnamnesePage({
                         <dd>{awaitingClient}</dd>
                       </div>
                       <div>
-                        <dt>Complementos aguardando Patty</dt>
+                        <dt>Complementos aguardando equipe profissional</dt>
                         <dd>{awaitingProfessional}</dd>
                       </div>
                     </dl>
@@ -208,7 +208,7 @@ export default async function AdminClienteAnamnesePage({
                     ) : null}
                     {awaitingClient > 0 && awaitingProfessional > 0 ? (
                       <p className={styles.submissionMeta}>
-                        Existem esclarecimentos em duas situações distintas: alguns já foram respondidos e aguardam revisão da Patty; outros ainda aguardam a cliente.
+                        Existem esclarecimentos em duas situações distintas: alguns já foram respondidos e aguardam revisão da equipe profissional; outros ainda aguardam a cliente.
                       </p>
                     ) : null}
                     {awaitingProfessional > 0 && clarification?.firstAwaitingProfessionalRequestId ? (

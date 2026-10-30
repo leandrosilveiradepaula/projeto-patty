@@ -23,7 +23,7 @@ export function ClientJourneyNextSteps({ areas }: { areas: readonly JourneyKey[]
 
   return (
     <Section
-      description="Consulte outras áreas do seu acompanhamento. Nenhum desses acessos altera automaticamente seu protocolo ou substitui a revisão da Patty."
+      description="Consulte outras áreas do seu acompanhamento. Nenhum desses acessos altera automaticamente seu protocolo ou substitui a revisão da equipe profissional."
       title="Continuar meu acompanhamento"
     >
       <nav aria-label="Próximas áreas do acompanhamento">

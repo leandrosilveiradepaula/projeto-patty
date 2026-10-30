@@ -145,7 +145,7 @@ export default async function AnamnesisCorrectionsPage({
                               <span>{formatDateTime(correction.created_at)}</span>
                               <span>
                                 {correction.profiles?.display_name?.trim() ||
-                                  "Patty/admin"}
+                                  "equipe profissional"}
                               </span>
                             </div>
                             <pre className={styles.jsonValue}>

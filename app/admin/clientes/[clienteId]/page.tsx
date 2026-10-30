@@ -139,7 +139,7 @@ export default async function AdminClienteDetailPage({
       : newTrainingRequestAfterPublication
         ? {
             badge: "Nova solicitação",
-            description: "A cliente enviou uma nova solicitação após a última publicação. A Patty decide os próximos passos.",
+            description: "A cliente enviou uma nova solicitação após a última publicação. A equipe profissional decide os próximos passos.",
             kind: "new_request" as const,
           }
       : latestPublishedTraining
@@ -294,7 +294,7 @@ export default async function AdminClienteDetailPage({
     ? {
         description:
           "Complete os dados atuais de contato antes de seguir com o restante do atendimento.",
-        eyebrow: "Ação da Patty",
+        eyebrow: "Ação profissional",
         href: "#cadastro-atual",
         label: "Preencher cadastro atual",
         title: "Cadastro atual",
@@ -304,15 +304,15 @@ export default async function AdminClienteDetailPage({
         ? {
             description:
               "Existe Anamnese enviada sem revisão registrada. Revise esta submissão antes de avançar no atendimento.",
-            eyebrow: "Ação da Patty",
+            eyebrow: "Ação profissional",
             href: `/admin/anamneses/${anamnesisPattyAction.submission.id}/revisao`,
             label: "Revisar Anamnese",
             title: "Revisão da Anamnese",
           }
         : {
             description:
-              "A cliente respondeu a um pedido de esclarecimento e a Patty ainda precisa revisar e marcar a pendência como resolvida.",
-            eyebrow: "Ação da Patty",
+              "A cliente respondeu a um pedido de esclarecimento e a equipe profissional ainda precisa revisar e marcar a pendência como resolvida.",
+            eyebrow: "Ação profissional",
             href: `/admin/anamneses/${anamnesisPattyAction.submission.id}/esclarecimentos`,
             label: "Revisar esclarecimentos",
             title: "Esclarecimento da Anamnese",
@@ -348,7 +348,7 @@ export default async function AdminClienteDetailPage({
               ? {
                   description:
                     "Existe uma avaliação em rascunho. Conclua ou revise esse registro antes de seguir para outras etapas operacionais.",
-                  eyebrow: "Ação da Patty",
+                  eyebrow: "Ação profissional",
                   href: `/admin/avaliacoes/${assessmentDraft.id}`,
                   label: "Continuar avaliação",
                   title: "Avaliação em rascunho",
@@ -356,7 +356,7 @@ export default async function AdminClienteDetailPage({
               : !hasFinalizedAssessment
                 ? {
                     description: "Registre a primeira avaliação da cliente.",
-                    eyebrow: "Ação da Patty",
+                    eyebrow: "Ação profissional",
                     href: `/admin/clientes/${client.id}/avaliacoes`,
                     label: "Abrir avaliações",
                     title: "Avaliação",
@@ -366,7 +366,7 @@ export default async function AdminClienteDetailPage({
                     ? {
                         description:
                           `A versão ${protocolAction.version.version_number} do protocolo foi submetida para revisão e ainda não possui aprovação registrada.`,
-                        eyebrow: "Ação da Patty",
+                        eyebrow: "Ação profissional",
                         href: `/admin/protocolos/${protocolAction.protocol.id}?versao=${protocolAction.version.version_number}#versao-${protocolAction.version.version_number}`,
                         label: "Revisar protocolo",
                         title: "Protocolo aguardando revisão",
@@ -374,7 +374,7 @@ export default async function AdminClienteDetailPage({
                     : {
                         description:
                           `A versão ${protocolAction.version.version_number} do protocolo já possui aprovação, mas ainda não foi publicada para a cliente.`,
-                        eyebrow: "Ação da Patty",
+                        eyebrow: "Ação profissional",
                         href: `/admin/protocolos/${protocolAction.protocol.id}?versao=${protocolAction.version.version_number}#versao-${protocolAction.version.version_number}`,
                         label: "Publicar protocolo",
                         title: "Protocolo aguardando publicação",
@@ -382,7 +382,7 @@ export default async function AdminClienteDetailPage({
                   : protocolDraftAction
                     ? {
                         description: `A versão ${protocolDraftAction.version.version_number} está em rascunho. Publicações anteriores permanecem disponíveis.`,
-                        eyebrow: "Ação da Patty",
+                        eyebrow: "Ação profissional",
                         href: `/admin/protocolos/${protocolDraftAction.protocol.id}?versao=${protocolDraftAction.version.version_number}#versao-${protocolDraftAction.version.version_number}`,
                         label: "Continuar protocolo",
                         title: "Protocolo em rascunho",
@@ -393,7 +393,7 @@ export default async function AdminClienteDetailPage({
                           protocols.length > 0
                             ? "Existe protocolo em andamento, mas ainda não há uma publicação para a cliente."
                             : "Crie e revise o primeiro protocolo antes de iniciar o acompanhamento semanal.",
-                        eyebrow: "Ação da Patty",
+                        eyebrow: "Ação profissional",
                         href: `/admin/clientes/${client.id}/protocolos`,
                         label: "Abrir protocolos",
                         title: "Primeiro protocolo",
@@ -402,7 +402,7 @@ export default async function AdminClienteDetailPage({
                       ? {
                           description:
                             "O treino foi revisado e está congelado. Falta a publicação explícita para a cliente.",
-                          eyebrow: "Ação da Patty",
+                          eyebrow: "Ação profissional",
                           href: `/admin/clientes/${client.id}/treino`,
                           label: "Publicar treino",
                           title: "Treino aguardando publicação",
@@ -411,7 +411,7 @@ export default async function AdminClienteDetailPage({
                         ? {
                             description:
                               "Existe um rascunho de treino em edição. Continue a montagem e faça a revisão quando estiver pronto.",
-                            eyebrow: "Ação da Patty",
+                            eyebrow: "Ação profissional",
                             href: `/admin/clientes/${client.id}/treino`,
                             label: "Continuar treino",
                             title: "Treino em rascunho",
@@ -420,7 +420,7 @@ export default async function AdminClienteDetailPage({
                           ? {
                               description:
                                 "A cliente registrou uma nova solicitação depois do último treino publicado. Revise o pedido antes de decidir se haverá outra prescrição.",
-                              eyebrow: "Ação da Patty",
+                              eyebrow: "Ação profissional",
                               href: `/admin/clientes/${client.id}/treino#pedido-treino-${orderedTrainingRequests[0].id}`,
                               label: "Revisar solicitação",
                               title: "Nova solicitação de treino",
@@ -429,7 +429,7 @@ export default async function AdminClienteDetailPage({
                           ? {
                               description:
                                 "Existe solicitação de treino registrada e ainda não há prescrição criada.",
-                              eyebrow: "Ação da Patty",
+                              eyebrow: "Ação profissional",
                               href: `/admin/clientes/${client.id}/treino#pedido-treino-${orderedTrainingRequests[0].id}`,
                               label: "Revisar pedido e criar treino",
                               title: "Treino solicitado",
@@ -438,7 +438,7 @@ export default async function AdminClienteDetailPage({
                             ? {
                                 description:
                                   "O acompanhamento semanal já é elegível. Defina o canal individual do Feedback Semanal antes de depender dos lembretes automáticos.",
-                                eyebrow: "Ação da Patty",
+                                eyebrow: "Ação profissional",
                                 href: "#preferencia-feedback",
                                 label: "Configurar canal",
                                 title: "Canal do Feedback Semanal",
@@ -447,7 +447,7 @@ export default async function AdminClienteDetailPage({
                               ? {
                                   description:
                                     "Email foi escolhido para o Feedback Semanal, mas o Cadastro Atual ainda não possui email de contato. O email de login não é usado como substituto.",
-                                  eyebrow: "Ação da Patty",
+                                  eyebrow: "Ação profissional",
                                   href: "#cadastro-atual",
                                   label: "Completar email de contato",
                                   title: "Contato para Feedback Semanal",
@@ -456,14 +456,14 @@ export default async function AdminClienteDetailPage({
                                 ? {
                                     description:
                                       `Há ${pendingPrivateFileReleaseCount} arquivo(s) administrativo(s) aguardando decisão explícita de liberação para a cliente.`,
-                                    eyebrow: "Ação da Patty",
+                                    eyebrow: "Ação profissional",
                                     href: `/admin/clientes/${client.id}/arquivos#aguardando-liberacao`,
                                     label: "Revisar arquivos",
                                     title: "Arquivos aguardando liberação",
                                   }
                                 : {
                                     description:
-                                      "As etapas iniciais estão registradas. Continue o acompanhamento conforme os dados e a decisão profissional da Patty.",
+                                      "As etapas iniciais estão registradas. Continue o acompanhamento conforme os dados e a decisão profissional da equipe profissional.",
                                     eyebrow: "Acompanhamento",
                                     href: `/admin/clientes/${client.id}/feedback-semanal`,
                                     label: "Abrir acompanhamento",
@@ -605,7 +605,7 @@ export default async function AdminClienteDetailPage({
                   {anamnesisPattyAction
                     ? anamnesisPattyAction.reviewPending
                       ? "Existe Anamnese enviada aguardando revisão profissional."
-                      : "Existe resposta de esclarecimento aguardando revisão da Patty."
+                      : "Existe resposta de esclarecimento aguardando revisão da equipe profissional."
                     : anamnesisClientWait
                       ? "Existe pedido de esclarecimento aberto aguardando resposta da cliente."
                       : latestAnamnesis && !latestAnamnesis.submitted_at
@@ -617,7 +617,7 @@ export default async function AdminClienteDetailPage({
                   {clarificationSummary.awaitingClient > 0 &&
                   clarificationSummary.awaitingProfessional > 0 ? (
                     <p className={styles.cardDescription}>
-                      {clarificationSummary.awaitingProfessional} complemento(s) aguardando revisão da Patty e{" "}
+                      {clarificationSummary.awaitingProfessional} complemento(s) aguardando revisão da equipe profissional e{" "}
                       {clarificationSummary.awaitingClient} pedido(s) aguardando resposta da cliente.
                       Essas pendências são independentes.
                     </p>
@@ -639,7 +639,7 @@ export default async function AdminClienteDetailPage({
                 {anamnesisPattyAction
                   ? anamnesisPattyAction.reviewPending
                     ? "Revisão pendente"
-                    : "Ação da Patty"
+                    : "Ação profissional"
                   : anamnesisClientWait
                     ? "Aguardando cliente"
                     : latestAnamnesis && !latestAnamnesis.submitted_at
@@ -764,7 +764,7 @@ export default async function AdminClienteDetailPage({
                 <p className={styles.cardDescription}>
                   {hasPublishedProtocol
                     ? pendingWeeklyFeedbackCount > 0
-                      ? `Há ${pendingWeeklyFeedbackCount} Feedback Semanal aguardando envio da cliente. Isso não cria uma ação da Patty até a cliente responder.`
+                      ? `Há ${pendingWeeklyFeedbackCount} Feedback Semanal aguardando envio da cliente. Isso não cria uma ação da equipe profissional até a cliente responder.`
                       : "Use avaliações, check-ins e Feedback Semanal para acompanhar a evolução e registrar novas decisões."
                     : "O acompanhamento semanal passa a ser elegível depois da primeira publicação de protocolo."}
                 </p>

@@ -54,8 +54,8 @@ export function ClientWorkoutGuide({ items }: { items: readonly Item[] }) {
           {current.rest_text ? <div><dt>Descanso indicado</dt><dd>{current.rest_text}</dd></div> : null}
         </dl>
         {current.execution_notes ? (
-          <section className={styles.exerciseInstructions} aria-label="Orientações da Patty">
-            <h4>Orientações da Patty</h4><p>{current.execution_notes}</p>
+          <section className={styles.exerciseInstructions} aria-label="Orientações da equipe profissional">
+            <h4>Orientações da equipe profissional</h4><p>{current.execution_notes}</p>
           </section>
         ) : <p className={styles.meta}>Sem orientações adicionais registradas nesta versão.</p>}
         {current.videoId ? (

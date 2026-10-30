@@ -542,7 +542,7 @@ export default async function AdminAvaliacaoDetailPage({
       {!isDraft ? (
         <Section
           title="Continuar para o protocolo"
-          description="Esta avaliação foi finalizada. Consulte os protocolos da mesma cliente para preparar ou revisar uma versão; aprovação e publicação continuam ações explícitas e separadas da Patty."
+          description="Esta avaliação foi finalizada. Consulte os protocolos da mesma cliente para preparar ou revisar uma versão; aprovação e publicação continuam ações explícitas e separadas da equipe profissional."
         >
           <Link className={styles.backLink} href={navigate(`/admin/clientes/${assessment.client_id}/protocolos`)}>
             Abrir protocolos desta cliente
@@ -612,7 +612,7 @@ export default async function AdminAvaliacaoDetailPage({
         )}
       </Section>
       <Section
-        description="Observações da Patty preservadas no histórico profissional e não destinadas à visualização da cliente."
+        description="Observações da equipe profissional preservadas no histórico profissional e não destinadas à visualização da cliente."
         title="Observações internas"
       >
         {internalNotes.length > 0 ? (

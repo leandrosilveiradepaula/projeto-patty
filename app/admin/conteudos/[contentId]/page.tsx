@@ -271,7 +271,7 @@ export default async function AdminEducationalContentDetailPage({
 
       <Section
         id="publicar-conteudo"
-        description="A publicação é uma decisão da Patty e não libera o material automaticamente para clientes."
+        description="A publicação é uma decisão da equipe profissional e não libera o material automaticamente para clientes."
         title={current ? `3. Revisar e publicar — versão atual ${current.version_number}` : "3. Revisar e publicar"}
       >
         <Card>
