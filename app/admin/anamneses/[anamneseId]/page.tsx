@@ -169,7 +169,7 @@ export default async function AdminAnamnesisDetailPage({
         </Card>
       </Section>
       <Section
-        description="Organização determinística das respostas já existentes conforme a forma de leitura profissional confirmada pela equipe profissional. Não cria score, diagnóstico, alerta clínico nem interpretação automática."
+        description="Respostas existentes organizadas conforme a forma de leitura profissional documentada, para facilitar a revisão. Não cria score, diagnóstico, alerta clínico nem interpretação automática."
         id="visao-profissional"
         title="Visão de trabalho da equipe profissional"
       >
@@ -271,7 +271,7 @@ export default async function AdminAnamnesisDetailPage({
         action={<Badge variant="neutral">Revisão humana</Badge>}
         description="Respostas comportamentais e de autoimagem separadas para atenção da equipe profissional. O sistema não infere compulsão, culpa, restrição, severidade ou diagnóstico."
         id="atencao-patty"
-        title="Atenção para revisão da equipe profissional"
+        title="Pontos para revisão profissional"
       >
         {professionalAttentionItems.length > 0 ? (
           <>

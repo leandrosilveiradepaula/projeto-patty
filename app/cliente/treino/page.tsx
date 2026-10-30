@@ -178,8 +178,7 @@ export default async function ClientTrainingPage({ searchParams }: { searchParam
             )}
           </Card>
           <Alert title="Sobre carga e peso" variant="info">
-            A carga não é exibida aqui como um valor fixo. Siga as orientações
-            profissionais da equipe profissional e respeite sua capacidade em cada exercício.
+            A carga não é exibida aqui como um valor fixo. Siga as orientações do treino publicado e respeite sua capacidade em cada exercício.
           </Alert>
           </>
         ) : (
