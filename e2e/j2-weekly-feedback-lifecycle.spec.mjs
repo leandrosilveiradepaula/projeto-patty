@@ -240,9 +240,9 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
       await endInput.fill(periodEnd);
       await expect(endInput).toHaveValue(periodEnd);
       await expect(submitRequest).toBeEnabled();
-      expect(
-        await submitRequest.evaluate((button) => button.form?.checkValidity() ?? false),
-        "The synthetic request must pass native date constraints before submitting",
+      await expect.poll(
+        () => submitRequest.evaluate((button) => button.form?.checkValidity() ?? false),
+        { message: "The synthetic request must pass native date constraints before submitting", timeout: 10_000 },
       ).toBe(true);
       await submitRequest.click();
       try {

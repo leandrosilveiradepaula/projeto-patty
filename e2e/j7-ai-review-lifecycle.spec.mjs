@@ -443,7 +443,7 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
         await admin.goto("/admin/ia");
         const completed = admin.locator("section").filter({
           has: admin.getByRole("heading", {
-            name: "Análises concluídas aguardando decisões da Patty",
+            name: "Análises concluídas aguardando decisões da equipe profissional",
           }),
         }).first();
         const actionable = completed.getByRole("link", { name: "Abrir análise para decisão" });
