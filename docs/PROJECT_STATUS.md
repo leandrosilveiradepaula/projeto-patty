@@ -1,3 +1,11 @@
+## 2026-10-30 — J2: acesso ao histórico completo de avaliações a partir do Feedback Semanal (UX-J2-HIST-01 / #1008)
+
+A consulta de continuidade do feedback enviado mostrava apenas as cinco avaliações finalizadas mais recentes (consulta RLS com limite intencional de cinco). Para escolher uma avaliação anterior, a profissional precisava abandonar o percurso e reencontrar manualmente a cliente. Esta mudança acrescenta um link explícito para todo o histórico autorizado de avaliações, preservando o ID opaco do feedback e a âncora `#historico-finalizado`; a página de destino revalida a cliente e o feedback e mantém o retorno.
+
+**Escopo:** somente navegação segura e contrato determinístico. O seletor rápido das cinco avaliações continua, sem aumentar consultas de saúde; não existe seleção automática, alteração de feedback/avaliação/protocolo, publicação, RLS/Auth/MFA, schema ou migration.
+
+**Estados:** implementado e commitado em branch; CI, merge e publicação exigem evidência posterior na issue #1008. Homologação operacional profissional das jornadas J1–J7 continua como última tarefa.
+
 ## 2026-10-30 — J6: elegibilidade de liberação consistente com integridade privada (UX-J6-REL-02 / #1008)
 
 A interface profissional de liberação por cliente tinha um descompasso reproduzível no código: oferecia qualquer versão publicada com pelo menos um asset, enquanto a Server Action exigia arquivo primário do MIME correspondente ao tipo, tamanho, storage privado, path e SHA-256 válidos. Assim, opções incorretas podiam ser exibidas antes de uma recusa posterior. A branch deste pacote reaproveita o validador de publicação já usado na ação do servidor para filtrar as versões da mesma forma, lendo exclusivamente na consulta server-side sob RLS os metadados adicionais necessários. O JSX e os formulários não recebem path nem SHA-256.
