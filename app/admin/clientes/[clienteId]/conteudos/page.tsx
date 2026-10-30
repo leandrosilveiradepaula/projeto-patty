@@ -158,8 +158,8 @@ export default async function AdminClientContentPage({
           <Card>
             <p className={styles.notice}>
               {publishedVersionsAwaitingAsset.length} versão(ões) publicada(s) não possuem arquivo
-              principal compatível e com integridade privada verificada. Elas não aparecem
-              como opção de nova liberação. Versões já publicadas não podem receber novos
+              principal compatível e com integridade privada verificada.
+              Essas versões não aparecem como opção de nova liberação. Versões já publicadas não podem receber novos
               arquivos: prepare uma nova versão em rascunho, registre e verifique o
               arquivo e publique a nova versão antes de liberar.
             </p>
