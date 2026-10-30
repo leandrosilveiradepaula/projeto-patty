@@ -110,8 +110,8 @@ export default async function AdminClientesPage({
         title="Em acompanhamento"
       >
         <div className={styles.queueSummary}>
-          <p role="status"><strong>{clientsWithPattyActions} cliente(s)</strong> com {actionablePattyItems} ação(ões) profissional nos acompanhamentos autorizados.</p>
-          <Link className={styles.queueLink} href={withClientDirectoryReturn("/admin/pendencias?responsavel=patty",directoryReturn)}>Abrir fila de ações profissionais</Link>
+          <p role="status"><strong>{clientsWithPattyActions} cliente(s)</strong> com {actionablePattyItems} ação(ões) para revisão nos acompanhamentos autorizados.</p>
+          <Link className={styles.queueLink} href={withClientDirectoryReturn("/admin/pendencias?responsavel=patty",directoryReturn)}>Abrir fila de ações para revisão</Link>
         </div>
         <form action="/admin/clientes" className={styles.searchForm} method="get">
           <label className={styles.searchLabel} htmlFor="client-search">
@@ -156,7 +156,7 @@ export default async function AdminClientesPage({
           <>
             {searchTerm || viewFilter !== "all" ? (
               <p className={styles.resultCount}>
-                {filteredClients.length} de {clients.length} cliente(s) nos resultados filtrados · {visiblePendingItems} pendência(s) nesses resultados, incluindo {visiblePattyActions} ação(ões) profissional.
+                {filteredClients.length} de {clients.length} cliente(s) nos resultados filtrados · {visiblePendingItems} pendência(s) nesses resultados, incluindo {visiblePattyActions} ação(ões) para revisão.
               </p>
             ) : null}
             {requestedPage.invalid || pagedClients.adjusted ? <p role="status" className={styles.resultCount}>Página solicitada indisponível. Exibindo a página {pagedClients.page} de {pagedClients.pageCount}.</p> : null}
