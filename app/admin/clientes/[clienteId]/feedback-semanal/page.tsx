@@ -4,6 +4,7 @@ import { olderSubmittedFeedbackChoices, previousSubmittedFeedbackByPeriod, weekl
 import { formatAdministrativeAssessmentDate } from "@/lib/evaluations/administrative-assessment-history";
 import {
   manualAssessmentDecisionFromSubmittedFeedbackHref,
+  assessmentHistoryFromSubmittedFeedbackHref,
   manualDecisionAssessmentChoices,
   assessmentDirectoryFromSubmittedFeedbackHref,
 } from "@/lib/follow-up/weekly-feedback-professional-handoff";
@@ -274,6 +275,7 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
                           revisado ou alterado automaticamente.
                         </p>
                         {manualDecisionChoices.length > 0 ? (
+                          <>
                           <ul className={styles.manualDecisionList}>
                             {manualDecisionChoices.map((assessment) => (
                               <li key={assessment.id}>
@@ -287,6 +289,14 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
                               </li>
                             ))}
                           </ul>
+                          <p className={styles.meta}>
+                            Procurando uma avaliação mais antiga?{" "}
+                            <Link href={withReturn(assessmentHistoryFromSubmittedFeedbackHref(client.id, feedback.id))}>
+                              Consultar todas as avaliações finalizadas
+                            </Link>
+                            . Escolha a avaliação no histórico; nenhuma decisão é registrada automaticamente.
+                          </p>
+                          </>
                         ) : (
                           <p className={styles.meta}>
                             Nenhuma avaliação finalizada está disponível neste acompanhamento.
