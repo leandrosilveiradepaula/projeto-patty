@@ -52,3 +52,16 @@ test("existing parents choose a versioned record over an older empty parent", ()
     {kind:"recover",id:"draft"});
   assert.equal(existingProtocolNavigation([],versioned),null);
 });
+
+
+test("J4 professional sees protocol work before continuity shortcuts", () => {
+  const page = read("app/admin/clientes/[clienteId]/protocolos/page.tsx");
+  const work = page.indexOf('title="Protocolos"');
+  const next = page.indexOf('title="Continuidade do acompanhamento"');
+  assert.ok(work >= 0 && next > work, "protocol work must come before other areas");
+  assert.match(page, /AdminProtocolInitialVersionForm/);
+  assert.match(page, /protocolNextActionLabel/);
+  for (const href of ["/feedback-semanal", "/treino", "/conteudos"]) {
+    assert.ok(page.includes(href), "continuity link retained: "+href);
+  }
+});
