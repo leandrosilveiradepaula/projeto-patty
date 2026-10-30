@@ -129,3 +129,13 @@ export function assessmentDirectoryFromSubmittedFeedbackHref(clientId: string, f
     "/admin/clientes/" + encodeURIComponent(clientId) + "/avaliacoes#nova-avaliacao", feedbackId,
   );
 }
+/** Explore the complete authorized assessment history before deciding manually.
+ * This is navigation only; the destination rechecks the client and feedback.
+ */
+export function assessmentHistoryFromSubmittedFeedbackHref(clientId: string, feedbackId: string): string {
+  if (!isUuid(clientId) || !isUuid(feedbackId)) return "/admin/feedback-semanal";
+  return withSubmittedWeeklyFeedbackAssessmentContext(
+    "/admin/clientes/" + encodeURIComponent(clientId) + "/avaliacoes#historico-finalizado", feedbackId,
+  );
+}
+
