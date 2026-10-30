@@ -1,3 +1,11 @@
+## 2026-10-30 — J6: elegibilidade de liberação consistente com integridade privada (UX-J6-REL-02 / #1008)
+
+A interface profissional de liberação por cliente tinha um descompasso reproduzível no código: oferecia qualquer versão publicada com pelo menos um asset, enquanto a Server Action exigia arquivo primário do MIME correspondente ao tipo, tamanho, storage privado, path e SHA-256 válidos. Assim, opções incorretas podiam ser exibidas antes de uma recusa posterior. A branch deste pacote reaproveita o validador de publicação já usado na ação do servidor para filtrar as versões da mesma forma, lendo exclusivamente na consulta server-side sob RLS os metadados adicionais necessários. O JSX e os formulários não recebem path nem SHA-256.
+
+Também foi reordenada a página profissional de conteúdos da cliente para **Liberar conteúdo → Histórico → Continuar atendimento**, preservando âncoras, filtros, retornos, links e o gate humano de liberação. Versões publicadas sem asset íntegro continuam no histórico e exigem nova versão em rascunho para correção; não são alteradas automaticamente.
+
+**Estados:** implementado e commitado na branch = sim; CI, merge e publicação exigem evidência separada após a PR. Esta alteração não modifica Auth/RLS/MFA, action de gravação, migration, serviço externo, dados reais, nem autoriza publicação automática. Homologação profissional conjunta J1–J7 continua última.
+
 ## 2026-10-30 — Mensagens das ações da cliente (UX-RETORNO-01 / #1008)
 
 A revisão institucional identificou duas respostas de Server Actions que permaneciam com nome pessoal no fluxo real: confirmação após solicitação de treino e retorno de esclarecimento de Anamnese já resolvido. O pacote ajusta somente as mensagens para linguagem Corpo & Mente, mantendo autenticação, isolamento, autorização, histórico e validações inalterados. Contratos de regressão verificam os guards relevantes.

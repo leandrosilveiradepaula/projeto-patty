@@ -1411,7 +1411,7 @@ export async function listEducationalContentAssetsForCurrentAdminVersions(
   const supabase = await createClient();
   const rows = await collectLibraryVersionRows(versionIds, (ids, from, to) => supabase
     .from("educational_content_assets")
-    .select("id, educational_content_version_id, asset_key, storage_provider, content_type, byte_size, created_at")
+    .select("id, educational_content_version_id, asset_key, storage_provider, storage_path, content_type, byte_size, sha256_hex, created_at")
     .in("educational_content_version_id", ids)
     .order("educational_content_version_id", { ascending: true })
     .order("asset_key", { ascending: true })
