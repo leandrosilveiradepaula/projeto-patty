@@ -19,7 +19,7 @@ import { isUuid } from "@/lib/validation/uuid";
 import { notFound } from "next/navigation";
 import styles from "./page.module.css";
 
-type PageProps = { params: Promise<{ anamneseId: string }> };
+type PageProps = { params: Promise<{ anamneseId: string }>; searchParams: Promise<{ resposta?: string | string[] }> };
 
 function formatDateTime(value: string) {
   return new Intl.DateTimeFormat("pt-BR", {
@@ -33,7 +33,7 @@ function formatAnswer(value: unknown) {
   return typeof value === "string" ? value : JSON.stringify(value);
 }
 
-export default async function AdminAnamnesisClarificationsPage({ params }: PageProps) {
+export default async function AdminAnamnesisClarificationsPage({ params, searchParams }: PageProps) {
   const { anamneseId } = await params;
 
   if (!isUuid(anamneseId)) {
@@ -69,6 +69,9 @@ export default async function AdminAnamnesisClarificationsPage({ params }: PageP
     responsesByRequestId.set(response.clarification_request_id, entries);
   }
 
+  const requestedSourceId = (await searchParams).resposta;
+  const initialSourceAnswerId = typeof requestedSourceId === "string" && isUuid(requestedSourceId) && answers.some(answer => answer.id === requestedSourceId)
+    ? requestedSourceId : null;
   const sourceAnswers = answers.map((answer) => ({
     id: answer.id,
     label: questionsById.get(answer.question_id)?.label ?? `Resposta ${answer.id.slice(0, 8)}`,
@@ -96,9 +99,9 @@ export default async function AdminAnamnesisClarificationsPage({ params }: PageP
       <p className={styles.notice}>
         Este fluxo não altera a resposta original. A resposta da cliente não resolve o pedido automaticamente; a Patty precisa revisar e marcar como resolvido.
       </p>
-      <Section description="O vínculo com uma resposta original é opcional." title="Novo pedido">
+      <Section id="novo-pedido" description="O vínculo com uma resposta original é opcional." title="Novo pedido">
         <Card>
-          <AdminAnamnesisClarificationRequestForm sourceAnswers={sourceAnswers} submissionId={submission.id} />
+          <AdminAnamnesisClarificationRequestForm initialSourceAnswerId={initialSourceAnswerId} sourceAnswers={sourceAnswers} submissionId={submission.id} />
         </Card>
       </Section>
       <Section description="Histórico cronológico de pedidos e complementos." title="Histórico">

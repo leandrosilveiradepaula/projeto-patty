@@ -17,9 +17,11 @@ const initialState: AnamnesisClarificationRequestFormState = { message: null, su
 export function AdminAnamnesisClarificationRequestForm({
   sourceAnswers,
   submissionId,
+  initialSourceAnswerId,
 }: {
   sourceAnswers: Array<{ id: string; label: string }>;
   submissionId: string;
+  initialSourceAnswerId: string | null;
 }) {
   const formRef = useRef<HTMLFormElement>(null);
   const inFlightRef = useRef(false);
@@ -63,7 +65,7 @@ export function AdminAnamnesisClarificationRequestForm({
           Resposta original relacionada
         </label>
         <p className={styles.help}>Opcional. Selecione apenas quando o pedido se referir diretamente a uma resposta.</p>
-        <select className={styles.select} defaultValue="" disabled={isPending} id="clarification-source-answer" name="sourceAnswerId">
+        <select className={styles.select} defaultValue={initialSourceAnswerId ?? ""} disabled={isPending} id="clarification-source-answer" name="sourceAnswerId">
           <option value="">Sem vínculo direto</option>
           {sourceAnswers.map((answer) => (
             <option key={answer.id} value={answer.id}>{answer.label}</option>

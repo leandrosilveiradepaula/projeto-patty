@@ -445,6 +445,17 @@ export default async function AdminAnamnesisAiPage({ params }: PageProps) {
                           </p>
                         ) : null}
 
+                        {!hasRecordedAction && finding.type === "clarification_needed" ? (
+                          <p className={styles.meta}>
+                            <Link
+                              className={styles.sourceLink}
+                              href={`/admin/anamneses/${submission.id}/esclarecimentos${finding.source_answer_ids.length === 1 ? `?resposta=${finding.source_answer_ids[0]}` : ""}#novo-pedido`}
+                            >
+                              Preparar pedido de esclarecimento manual
+                            </Link>
+                          </p>
+                        ) : null}
+
                         <div className={styles.findingActions}>
                           <p className={styles.actionStatus}>
                             O achado original permanece imutável. As ações abaixo

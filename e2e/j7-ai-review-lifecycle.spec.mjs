@@ -561,6 +561,26 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
       await admin.goto(reviewURL);
     });
 
+    await test.step("Validated IA clarification opens the manual request with authorized answer and no proposed text", async () => {
+      await admin.goto(reviewURL);
+      const finding = admin.getByText(validFindingText, { exact: true }).locator("..");
+      const action = finding.getByRole("link", { name: "Preparar pedido de esclarecimento manual" });
+      await expect(action).toHaveAttribute(
+        "href", "/admin/anamneses/" + submission.submissionId +
+          "/esclarecimentos?resposta=" + submission.answerIds[0] + "#novo-pedido",
+      );
+      await action.click();
+      await expect(admin).toHaveURL(new RegExp("#novo-pedido$"));
+      await expect(admin.locator("#clarification-source-answer")).toHaveValue(submission.answerIds[0]);
+      await expect(admin.getByLabel("Pedido de esclarecimento")).toBeEmpty();
+      await admin.goto(
+        "/admin/anamneses/" + submission.submissionId +
+          "/esclarecimentos?resposta=" + foreignSubmission.answerIds[0] + "#novo-pedido",
+      );
+      await expect(admin.locator("#clarification-source-answer")).toHaveValue("");
+      await admin.goto(reviewURL);
+    });
+
     await test.step("Accepting a finding preserves output and records a separate decision", async () => {
       const finding = admin.getByText(validFindingText, { exact: true }).locator("..");
       await finding.getByRole("button", { name: "Aceitar como observação interna" }).click();
