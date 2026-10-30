@@ -52,3 +52,12 @@ test("existing parents choose a versioned record over an older empty parent", ()
     {kind:"recover",id:"draft"});
   assert.equal(existingProtocolNavigation([],versioned),null);
 });
+
+
+test("J4 client workspace shows protocol work before downstream follow-up", () => {
+  const page = read("app/admin/clientes/[clienteId]/protocolos/page.tsx");
+  const protocol = page.indexOf('title="Protocolos"');
+  const continuity = page.indexOf('title="Continuidade do acompanhamento"');
+  assert.ok(protocol >= 0 && continuity > protocol, "primary protocol action must precede downstream links");
+  for(const route of ["/feedback-semanal","/treino","/conteudos"]) assert.ok(page.includes(route));
+});
