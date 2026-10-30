@@ -1,3 +1,9 @@
+## 2026-10-30 — Mensagens das ações da cliente (UX-RETORNO-01 / #1008)
+
+A revisão institucional identificou duas respostas de Server Actions que permaneciam com nome pessoal no fluxo real: confirmação após solicitação de treino e retorno de esclarecimento de Anamnese já resolvido. O pacote ajusta somente as mensagens para linguagem Corpo & Mente, mantendo autenticação, isolamento, autorização, histórico e validações inalterados. Contratos de regressão verificam os guards relevantes.
+
+**Estados:** este registro pertence à branch em revisão. CI, merge, publicação e homologação precisam de evidências separadas; nenhuma mensagem foi enviada externamente e nenhum dado foi modificado em produção por esta tarefa. Homologação profissional conjunta J1–J7 permanece última.
+
 ## 2026-10-30 — J2: identidade institucional nos e-mails (UX-COM-01 / #1008)
 
 **Achado:** após a publicação da marca Corpo & Mente, o lembrete semanal e o diagnóstico SMTP ainda apresentavam a identidade pessoal nos textos externos gerados pelo aplicativo. O transporte Gmail sintético já foi validado e não deve ser reexecutado por isso.
