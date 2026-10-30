@@ -61,3 +61,25 @@ test("the private client route rejects a legacy release without a compatible pri
   assert.match(route, /return new Response\(null, \{ status: 404 \}\)/);
   assert.match(dataAccess, /getAccessibleEducationalContentVersionForCurrentClient/);
 });
+
+
+test("professional release choices require the same verified private primary asset as the server action", () => {
+  const page = read("app/admin/clientes/[clienteId]/conteudos/page.tsx");
+  const dataAccess = read("lib/supabase/data-access.ts");
+  const batchedAdminAssets = dataAccess.split("export async function listEducationalContentAssetsForCurrentAdminVersions(")[1]
+    ?.split("\\nexport async function ")[0] ?? "";
+  assert.match(batchedAdminAssets, /storage_path, content_type, byte_size, sha256_hex/);
+  assert.match(page, /canPublishEducationalContentVersion\\(\\{/);
+  assert.match(page, /assets: assetsByVersionId\\.get\\(version\\.id\\) \\?\\? \\[\\]/);
+  assert.match(page, /releaseReadyVersionIds\\.has\\(version\\.id\\)/);
+  assert.match(page, /!releaseReadyVersionIds\\.has\\(version\\.id\\)/);
+  assert.doesNotMatch(page, /hasAsset: versionIdsWithAssets\\.has/);
+  assert.doesNotMatch(page, /storage_path|sha256_hex/);
+  assert.match(page, /Versões já publicadas não podem receber novos/);
+  const release = page.indexOf('title="Liberar conteúdo"');
+  const history = page.indexOf('title="Conteúdos liberados"');
+  const continueWork = page.indexOf('title="Continuar atendimento"');
+  assert.ok(release > 0 && release < history && history < continueWork);
+  assert.match(page, /id="liberar-conteudo"/);
+  assert.match(page, /id="historico-liberacoes"/);
+});
