@@ -511,11 +511,28 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
         );
         expect(order).toBeLessThan(newExecution);
         await expect(admin.getByRole("link", { name: "Voltar à fila de análises" })).toHaveAttribute("href", "/admin/ia");
-        const widths = await admin.evaluate(() => ({
-          actual: document.documentElement.scrollWidth,
-          viewport: document.documentElement.clientWidth,
-        }));
-        expect(widths.actual).toBeLessThanOrEqual(widths.viewport + 2);
+        const widths = await admin.evaluate(() => {
+          const viewport = document.documentElement.clientWidth;
+          const actual = document.documentElement.scrollWidth;
+          // Geometry and static CSS selectors only. No text, IDs, URLs or health data.
+          const overflowNodes = actual > viewport + 2
+            ? [...document.querySelectorAll("body *")]
+              .filter(element => element.getBoundingClientRect().right > viewport + 2)
+              .slice(0, 12)
+              .map(element => ({
+                tag: element.tagName.toLowerCase(),
+                classes: typeof element.className === "string"
+                  ? element.className.replace(/[^a-zA-Z0-9_\\s-]/g, "").slice(0, 65)
+                  : "",
+                right: Math.round(element.getBoundingClientRect().right),
+              }))
+            : [];
+          return { actual, viewport, overflowNodes };
+        });
+        expect(
+          widths.actual,
+          "Unexpected horizontal overflow (CSS geometry only): " + JSON.stringify(widths.overflowNodes),
+        ).toBeLessThanOrEqual(widths.viewport + 2);
       }
       await admin.goto(reviewURL);
     });
