@@ -1,6 +1,6 @@
 import "server-only";
 import tls from "node:tls";
-import { prepareSmtpMessage, speakSmtpOnTrustedSocket, type SmtpConfig, type SendEmailInput } from "./smtp-wire";
+import { validateMailbox, prepareSmtpMessage, speakSmtpOnTrustedSocket, type SmtpConfig, type SendEmailInput } from "./smtp-wire";
 
 export function getGmailSmtpConfig(): SmtpConfig | null {
   const fromEmail = process.env.GMAIL_SMTP_USER?.trim();
