@@ -72,6 +72,7 @@ export default async function AdminPage() {
             ? `Painel de ${profile.display_name.trim()}`
             : "Painel administrativo"
         }
+        primaryAction={<Link className={styles.quickAction} href="/admin/clientes/nova">+ Convidar cliente</Link>}
         titleId="admin-title"
       />
 
@@ -122,11 +123,11 @@ export default async function AdminPage() {
             compact
             action={
               <Link className={styles.metricLink} href={pendingQueueLinks.patty}>
-                Abrir fila da Patty
+                Abrir fila profissional
               </Link>
             }
-            description="Itens em que existe uma próxima ação disponível para a Patty."
-            label="Ação da Patty"
+            description="Itens em que existe uma próxima ação disponível para revisão profissional."
+            label="Ação profissional"
             status={
               pattyPendingCount > 0 ? <Badge variant="warning">Revisar</Badge> : null
             }
@@ -187,11 +188,11 @@ export default async function AdminPage() {
         <Section
           action={
             <Link className={styles.sectionLink} href={pendingQueueLinks.patty}>
-              Ver todas as ações da Patty
+              Ver todas as ações profissionais
             </Link>
           }
-          description="Os três itens mais antigos da fila de ação da Patty. A ordem é cronológica e não representa prioridade clínica."
-          title="Próximas ações da Patty"
+          description="Os três itens mais antigos da fila de ação profissional. A ordem é cronológica e não representa prioridade clínica."
+          title="Próximas ações profissionais"
         >
           <ol className={styles.pendingPreviewList}>
             {nextPattyItems.map((item) => (
@@ -224,8 +225,8 @@ export default async function AdminPage() {
       ) : null}
 
       {nextPattyItems.length === 0 ? (
-        <Section title="Acompanhamento da Patty">
-          <p role="status">Não há ações da Patty registradas nesta fila no momento. Os demais grupos continuam disponíveis para consulta.</p>
+        <Section title="Acompanhamento profissional">
+          <p role="status">Não há ações profissionais registradas nesta fila no momento. Os demais grupos continuam disponíveis para consulta.</p>
           <Link className={styles.sectionLink} href="/admin/pendencias">Consultar fila completa</Link>
         </Section>
       ) : null}

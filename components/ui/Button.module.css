@@ -8,7 +8,7 @@
   border: 1px solid transparent;
   border-radius: var(--radius-full);
   font-family: var(--font-family-heading);
-  font-size: var(--text-label-medium-size);
+  font-size: 0.9rem;
   font-weight: var(--text-label-medium-weight);
   letter-spacing: 0;
   line-height: var(--text-label-medium-line-height);
@@ -18,7 +18,8 @@
     background-color 160ms ease,
     border-color 160ms ease,
     color 160ms ease,
-    transform 120ms ease;
+    transform 120ms ease,
+    box-shadow 160ms ease;
 }
 
 .button:focus {
@@ -52,6 +53,7 @@
 .primary {
   background: var(--color-brand);
   color: var(--color-surface);
+  box-shadow: 0 4px 12px rgb(0 62 28 / 18%);
 }
 
 .primary:hover:not(:disabled) {

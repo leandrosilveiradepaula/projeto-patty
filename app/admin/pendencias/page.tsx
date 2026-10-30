@@ -103,7 +103,7 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
     <>
       <PageHeader
         actions={<Badge variant="neutral">{items.length} pendência(s)</Badge>}
-        description="Acompanhe ações da Patty, registros aguardando a cliente e pendências técnicas separadamente. Estar na fila não significa prioridade clínica."
+        description="Acompanhe ações profissionais, registros aguardando a cliente e pendências técnicas separadamente. Estar na fila não significa prioridade clínica."
         eyebrow="Admin"
         title="Pendências operacionais"
       />
@@ -167,9 +167,9 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
           <nav aria-label="Ir para grupo de pendências" className={styles.groupNavigation}>
             {grouped.patty.length > 0 ? (
               <Link aria-current={focusedGroup === "patty" ? "location" : undefined} href={withClientDirectoryReturn(pendingExplorerGroupHref("patty",filters), directoryReturn)}>
-                Ação da Patty ({grouped.patty.length})
+                Ação profissional ({grouped.patty.length})
               </Link>
-            ) : <span>Ação da Patty (0)</span>}
+            ) : <span>Ação profissional (0)</span>}
             {grouped.client.length > 0 ? (
               <Link aria-current={focusedGroup === "client" ? "location" : undefined} href={withClientDirectoryReturn(pendingExplorerGroupHref("client",filters), directoryReturn)}>
                 Aguardando cliente ({grouped.client.length})
@@ -184,7 +184,7 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
         ) : null}
         {items.length === 0 ? (
           <EmptyState
-            description={unavailableClient ? "Não foi possível confirmar o acesso a esta cliente." : scopedClient && scopedItems.length===0 ? "Não há pendências registradas para esta cliente neste momento." : scopedItems.length===0 ? "Nenhuma ação da Patty, espera de cliente ou pendência operacional consta nesta fila no momento." : "Nenhuma pendência corresponde aos filtros atuais."}
+            description={unavailableClient ? "Não foi possível confirmar o acesso a esta cliente." : scopedClient && scopedItems.length===0 ? "Não há pendências registradas para esta cliente neste momento." : scopedItems.length===0 ? "Nenhuma ação profissional, espera de cliente ou pendência operacional consta nesta fila no momento." : "Nenhuma pendência corresponde aos filtros atuais."}
             title={scopedClient && scopedItems.length===0 ? "Sem pendências desta cliente" : scopedItems.length===0 && !filters.invalidClient && !unavailableClient ? "Tudo em dia" : "Nenhum resultado"}
             action={scopedItems.length > 0 || filters.invalidClient || unavailableClient ? <Link href={unavailableClient ? fullQueueHref : resetHref}>Limpar filtros</Link> : undefined}
           />
@@ -193,7 +193,7 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
             {focusedGroup && grouped[focusedGroup].length === 0 ? (
               <div className={styles.focusedEmpty} role="status">
                 {focusedGroup === "patty"
-                  ? "Nenhuma ação da Patty registrada nesta fila no momento."
+                  ? "Nenhuma ação profissional registrada nesta fila no momento."
                   : focusedGroup === "client"
                     ? "Nenhuma pendência aguardando cliente nesta fila no momento."
                     : "Nenhuma pendência operacional do sistema nesta fila no momento."}
@@ -204,8 +204,8 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
               <section className={styles.group} id="acao-da-patty">
                 <div className={styles.groupHeader}>
                   <div>
-                    <h3>Ação da Patty</h3>
-                    <p>Itens em que a próxima ação disponível é da Patty.</p>
+                    <h3>Ação profissional</h3>
+                    <p>Itens em que a próxima ação disponível é profissional.</p>
                   </div>
                   <Badge variant="warning">{grouped.patty.length}</Badge>
                 </div>
