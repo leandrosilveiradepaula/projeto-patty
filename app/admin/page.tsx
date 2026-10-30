@@ -13,7 +13,6 @@ import { groupOperationalPendingItems } from "@/lib/operations/pending";
 import { pendingQueueLinks } from "@/lib/operations/pending-navigation";
 import { withPendingQueueReturn } from "@/lib/operations/pending-queue-return";
 import {
-  getCurrentUserProfile,
   listAccessibleClientAssessments,
   listAccessibleProtocols,
   listClientsAssignedToCurrentAdmin,
@@ -28,13 +27,11 @@ const formatDateTime = formatPendingQueueDateTime;
 
 export default async function AdminPage() {
   const [
-    profile,
     assignments,
     assessments,
     protocols,
     pendingItems,
   ] = await Promise.all([
-    getCurrentUserProfile(),
     listClientsAssignedToCurrentAdmin(),
     listAccessibleClientAssessments(),
     listAccessibleProtocols(),
@@ -67,11 +64,7 @@ export default async function AdminPage() {
         actions={<Badge variant="neutral">{assignedCount} cliente(s) ativa(s)</Badge>}
         description="Acompanhe o que precisa da sua atenção e acesse rapidamente as principais tarefas."
         eyebrow="Admin"
-        title={
-          profile?.display_name?.trim()
-            ? `Painel de ${profile.display_name.trim()}`
-            : "Painel administrativo"
-        }
+        title="Painel administrativo"
         primaryAction={<Link className={styles.quickAction} href="/admin/clientes/nova">+ Convidar cliente</Link>}
         titleId="admin-title"
       />

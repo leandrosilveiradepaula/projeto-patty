@@ -4,7 +4,7 @@ import { withClientDirectoryReturn, type ClientDirectoryReturn } from "@/lib/ope
 import type { OperationalPendingGroup } from "@/lib/operations/pending";
 import styles from "@/app/admin/pendencias/page.module.css";
 
-const GROUP_NAMES: Record<OperationalPendingGroup,string> = {patty:"Ações da Patty",client:"Aguardando cliente",operational:"Operacional do sistema"};
+const GROUP_NAMES: Record<OperationalPendingGroup,string> = {patty:"Ações profissionais",client:"Aguardando cliente",operational:"Operacional do sistema"};
 const PAGE_KEYS: Record<OperationalPendingGroup,string> = {patty:"paginaPatty",client:"paginaCliente",operational:"paginaSistema"};
 const GROUP_ANCHORS: Record<OperationalPendingGroup,string> = {patty:"acao-da-patty",client:"aguardando-cliente",operational:"operacional-do-sistema"};
 export function PendingQueuePager({group,filters,page,directoryReturn}:{group:OperationalPendingGroup;filters:PendingExplorerState;page:PendingQueuePage<unknown>;directoryReturn:ClientDirectoryReturn}){

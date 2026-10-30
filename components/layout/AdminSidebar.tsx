@@ -55,11 +55,10 @@ export function isAdminNavigationItemActive(pathname: string, href: string) {
 }
 
 type AdminSidebarProps = {
-  displayName?: string | null;
   mode?: "desktop" | "mobile";
 };
 
-export function AdminSidebar({ displayName, mode = "desktop" }: AdminSidebarProps) {
+export function AdminSidebar({ mode = "desktop" }: AdminSidebarProps) {
   const pathname = usePathname();
   const drawerId = useId();
   const drawerRef = useRef<HTMLDivElement>(null);
@@ -156,7 +155,6 @@ export function AdminSidebar({ displayName, mode = "desktop" }: AdminSidebarProp
               tabIndex={-1}
             >
               <SidebarContent
-                displayName={displayName}
                 onNavigate={() => setIsOpen(false)}
                 pathname={pathname}
               />
@@ -180,20 +178,19 @@ export function AdminSidebar({ displayName, mode = "desktop" }: AdminSidebarProp
     );
   }
 
-  return <SidebarContent displayName={displayName} pathname={pathname} />;
+  return <SidebarContent pathname={pathname} />;
 }
 
 type SidebarContentProps = {
-  displayName?: string | null;
   onNavigate?: () => void;
   pathname: string;
 };
 
-function SidebarContent({ displayName, onNavigate, pathname }: SidebarContentProps) {
+function SidebarContent({ onNavigate, pathname }: SidebarContentProps) {
   return (
     <nav aria-label="Navegação administrativa principal" className={styles.nav}>
       <div className={styles.brand}>Corpo &amp; Mente</div>
-      {displayName?.trim() ? <p className={styles.identity}>{displayName.trim()}</p> : null}
+      <p className={styles.identity}>Área profissional</p>
       <ul className={styles.list}>
         {adminNavigationItems.map((item) => {
           const isActive = isAdminNavigationItemActive(pathname, item.href);

@@ -74,7 +74,7 @@ export function ClientReleasedContentExplorer({ entries, unavailableReleaseCount
     <div className={styles.container} id="biblioteca-educacional">
       {unavailableReleaseCount > 0 ? (
         <p role="status" className={styles.notice}>
-          {unavailableReleaseCount} liberação(ões) possuem versão ou arquivo indisponível para consulta. A Patty pode verificar o registro.
+          {unavailableReleaseCount} liberação(ões) possuem versão ou arquivo indisponível para consulta. A equipe de atendimento pode verificar o registro.
         </p>
       ) : null}
       <p className={styles.summary} role="status">

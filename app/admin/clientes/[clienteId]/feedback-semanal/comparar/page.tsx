@@ -262,7 +262,7 @@ export default async function AdminWeeklyFeedbackComparisonPage({ params, search
           <Link href={`/admin/clientes/${client.id}/avaliacoes`}>Ver todas as avaliações e rascunhos</Link>
           <Link href={`/admin/clientes/${client.id}/protocolos`}>Consultar protocolos sem publicar alterações</Link>
         </nav>
-        <p>O registro exige decisão e justificativa explícitas da Patty; não modifica automaticamente protocolo, fase ou publicação. O histórico permanece na avaliação escolhida.</p>
+        <p>O registro exige decisão profissional e justificativa explícita; não modifica automaticamente protocolo, fase ou publicação. O histórico permanece na avaliação escolhida.</p>
       </Section>
     </>
   );

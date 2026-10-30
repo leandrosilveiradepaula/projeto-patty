@@ -23,7 +23,7 @@ function formatDoseType(value: string) {
 }
 
 function formatDoseQuantity(value: number) {
-  if (!Number.isFinite(value) || value < 0) return "Quantidade indisponível — consulte a Patty";
+  if (!Number.isFinite(value) || value < 0) return "Quantidade indisponível — consulte a equipe profissional";
   const quantity = new Intl.NumberFormat("pt-BR", {
     maximumFractionDigits: 4,
   }).format(value);

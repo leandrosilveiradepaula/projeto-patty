@@ -132,7 +132,7 @@ export default async function AdminPendenciasPage({ searchParams }: { searchPara
             </select>
           </label>
           <label>Responsável pela próxima ação
-            <select name="responsavel" defaultValue={filters.responsible}><option value="all">Todos</option><option value="patty">Patty</option><option value="client">Cliente</option><option value="operational">Sistema</option></select>
+            <select name="responsavel" defaultValue={filters.responsible}><option value="all">Todos</option><option value="patty">Ações profissionais</option><option value="client">Cliente</option><option value="operational">Sistema</option></select>
           </label>
           <details className={styles.advancedFilters} open={hasAdvancedFilters}>
             <summary>Filtros avançados{hasAdvancedFilters ? " (aplicados)" : ""}</summary>

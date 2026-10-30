@@ -115,7 +115,7 @@ export function ActivationSessionGate({
   if (phase === "invalid") {
     return (
       <Alert live="polite" title="Link inválido ou expirado" variant="warning">
-        Este convite não pode mais ser usado. Entre em contato com a Patty
+        Este convite não pode mais ser usado. Entre em contato com a equipe de atendimento
         para receber um novo link.
       </Alert>
     );
@@ -124,7 +124,7 @@ export function ActivationSessionGate({
     return (
       <Alert live="assertive" title="Não foi possível validar o convite" variant="critical">
         Confira sua conexão. Se não conseguir concluir a ativação, peça à
-        Patty um novo link seguro.
+        equipe de atendimento um novo link seguro.
       </Alert>
     );
   }
