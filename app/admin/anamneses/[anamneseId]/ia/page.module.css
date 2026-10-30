@@ -227,3 +227,9 @@
 .finding {
   scroll-margin-top: var(--space-6);
 }
+
+.entry:target {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
+  scroll-margin-top: var(--space-6);
+}
