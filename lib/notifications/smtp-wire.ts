@@ -28,7 +28,7 @@ function encodeHeader(value: string) {
   return `=?UTF-8?B?${Buffer.from(value, "utf8").toString("base64")}?=`;
 }
 
-function validateMailbox(value: string, label: string) {
+export function validateMailbox(value: string, label: string) {
   if (
     value.length > 254 ||
     !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ||
