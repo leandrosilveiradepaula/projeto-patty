@@ -437,6 +437,38 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
     await expect(admin.getByText("J7 conteúdo sintético com referência de outra cliente.", { exact: true })).toHaveCount(0);
     await expect(admin.getByText(validFindingText, { exact: true })).toBeVisible();
 
+    await test.step("AI queue opens the exact started execution and prioritizes existing review on mobile and desktop", async () => {
+      for (const width of [390, 1440]) {
+        await admin.setViewportSize({ width, height: width === 390 ? 844 : 900 });
+        await admin.goto("/admin/ia");
+        const row = admin.locator("#execucao-ia-" + startedExecutionId);
+        await expect(row).toBeVisible();
+        const direct = row.getByRole("link", { name: /Abrir revisão da Anamnese/ });
+        await expect(direct).toHaveAttribute(
+          "href", reviewURL + "#execucao-ia-" + startedExecutionId,
+        );
+        await direct.focus();
+        await expect(direct).toBeFocused();
+        await admin.keyboard.press("Enter");
+        await expect(admin).toHaveURL(new RegExp("#execucao-ia-" + startedExecutionId + "$"));
+        await expect(admin.locator("#execucao-ia-" + startedExecutionId)).toBeVisible();
+        const order = await admin.getByText("Histórico da IA", { exact: true }).evaluate(
+          element => Math.round(element.getBoundingClientRect().top + window.scrollY),
+        );
+        const newExecution = await admin.getByText("Nova execução", { exact: true }).evaluate(
+          element => Math.round(element.getBoundingClientRect().top + window.scrollY),
+        );
+        expect(order).toBeLessThan(newExecution);
+        await expect(admin.getByRole("link", { name: "Voltar à fila de análises" })).toHaveAttribute("href", "/admin/ia");
+        const widths = await admin.evaluate(() => ({
+          actual: document.documentElement.scrollWidth,
+          viewport: document.documentElement.clientWidth,
+        }));
+        expect(widths.actual).toBeLessThanOrEqual(widths.viewport + 2);
+      }
+      await admin.goto(reviewURL);
+    });
+
     await test.step("Inconsistent historical snapshots remain auditable but never become a decision on a different finding", async () => {
       await expect(admin.getByText("Vínculo histórico de decisão exige conferência", { exact: true })).toBeVisible();
       const inconsistent = admin.getByText("J7 resposta sintética opcional ausente.", { exact: true }).locator("..");
