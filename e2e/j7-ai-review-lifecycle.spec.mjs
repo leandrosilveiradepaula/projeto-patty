@@ -437,6 +437,23 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
     await expect(admin.getByText("J7 conteúdo sintético com referência de outra cliente.", { exact: true })).toHaveCount(0);
     await expect(admin.getByText(validFindingText, { exact: true })).toBeVisible();
 
+    await test.step("Shared admin mobile drawer traps reverse Tab from its initial focus", async () => {
+      await admin.setViewportSize({ width: 390, height: 844 });
+      await admin.goto(reviewURL);
+      const open = admin.getByRole("button", { name: "Abrir navegação administrativa" });
+      await open.click();
+      const drawer = admin.getByRole("dialog", { name: "Navegação administrativa" });
+      await expect(drawer).toBeVisible();
+      await expect(drawer).toBeFocused();
+      await admin.keyboard.press("Shift+Tab");
+      await expect(drawer.getByRole("button", { name: "Fechar navegação" })).toBeFocused();
+      await admin.keyboard.press("Tab");
+      await expect(drawer.getByRole("link", { name: "Início", exact: true })).toBeFocused();
+      await admin.keyboard.press("Escape");
+      await expect(drawer).toHaveCount(0);
+      await expect(open).toBeFocused();
+    });
+
     await test.step("AI queue opens the exact started execution and prioritizes existing review on mobile and desktop", async () => {
       for (const width of [390, 1440]) {
         await admin.setViewportSize({ width, height: width === 390 ? 844 : 900 });
