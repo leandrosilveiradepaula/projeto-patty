@@ -451,12 +451,23 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
           "href", reviewURL + "#execucao-ia-" + validExecutionId,
         );
         await expect(completed.getByText("2 achado(s) aguardando")).toBeVisible();
+        await expect(admin.getByText(validFindingText, { exact: true })).toHaveCount(0);
         await actionable.click();
         await expect(admin).toHaveURL(new RegExp("#execucao-ia-" + validExecutionId + "$"));
         await admin.goto("/admin/pendencias?area=ai&responsavel=patty");
         await expect(admin.getByText("Revisão humana de análise da IA")).toBeVisible();
         await expect(admin.getByText("2 achado(s) aguardando")).toBeVisible();
       }
+      const unauthorizedAdmin = await unassignedContext.newPage();
+      await loginAdminWithMfa(unauthorizedAdmin, {
+        email: unassigned.email, password: unassigned.password, totpSecret: unassignedTotp,
+      });
+      await unauthorizedAdmin.goto("/admin/ia");
+      await expect(unauthorizedAdmin.getByText("J7 Cliente Sintética", { exact: true })).toHaveCount(0);
+      await expect(unauthorizedAdmin.getByRole("link", { name: "Abrir análise para decisão" })).toHaveCount(0);
+      await unauthorizedAdmin.goto("/admin/pendencias?area=ai&responsavel=patty");
+      await expect(unauthorizedAdmin.getByText("Revisão humana de análise da IA")).toHaveCount(0);
+      await unauthorizedAdmin.close();
       await admin.goto(reviewURL);
     });
 
