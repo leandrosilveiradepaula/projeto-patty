@@ -54,7 +54,10 @@ test("existing daily check-in uses historical correction, not another initial su
   assert.ok(page.includes('id={`atividade-atual-${latestActivity.id}`}'));
   assert.ok(page.includes('value={latestActivity.id}'));
   assert.ok(actions.includes("createAccessibleClientActivityCheckinEventCorrection({"));
-  assert.ok(actions.includes("checkinDate: event.checkin_date"));
+  assert.ok(actions.includes("const effectiveDate = effectiveActivityCheckinDate(event, latest)"));
+  assert.ok(actions.includes("checkinDate: effectiveDate"));
+  assert.ok(!actions.includes("checkinDate: event.checkin_date"));
+  assert.ok(actions.includes("checkinCorrectionSnapshotMatches(expected.id, latest)"));
 });
 
 test("older same-day original records remain visible and individually correctable", () => {

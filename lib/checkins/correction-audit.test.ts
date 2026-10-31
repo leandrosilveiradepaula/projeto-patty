@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   activityCorrectionChangesValue,
+  effectiveActivityCheckinDate,
   checkinCorrectionAuthor,
   checkinCorrectionSnapshotMatches,
   compareCheckinCorrectionsChronologically,
@@ -70,4 +71,19 @@ test("display author category without identifiers or guessing when no linked cli
   assert.equal(checkinCorrectionAuthor(u1, u1), "Cliente");
   assert.equal(checkinCorrectionAuthor(u2, u1), "Profissional responsável");
   assert.equal(checkinCorrectionAuthor(u1, null), "Autoria não identificada");
+});
+
+test("changing activity answer preserves the latest corrected day, not the original day", () => {
+  const original = { checkin_date: "2026-10-01", did_activity: true };
+  const correction = { corrected_checkin_date: "2026-10-02", corrected_did_activity: false };
+  const effectiveDate = effectiveActivityCheckinDate(original, correction);
+  assert.equal(effectiveDate, "2026-10-02");
+  assert.equal(activityCorrectionChangesValue(original, correction, effectiveDate, true), true);
+  assert.equal(activityCorrectionChangesValue(original, correction, effectiveDate, false), false);
+  // A second append-only correction changes only the answer, never the day.
+  const next = { corrected_checkin_date: effectiveDate, corrected_did_activity: true };
+  assert.equal(effectiveActivityCheckinDate(original, next), "2026-10-02");
+  assert.equal(activityCorrectionChangesValue(original, next, effectiveActivityCheckinDate(original, next), true), false);
+  assert.equal(effectiveActivityCheckinDate(original, null), "2026-10-01");
+  assert.equal(effectiveActivityCheckinDate(original, undefined), "2026-10-01");
 });

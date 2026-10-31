@@ -34,3 +34,19 @@ test("client and admin check-in pages expose effective corrected values and orig
   assert.match(adminPage, /Corrigir resposta/);
   assert.match(adminPage, /Original:/);
 });
+
+
+test("both authorized activity-correction actions preserve the last effective day", () => {
+  for (const path of [
+    "app/cliente/checkins/actions.ts",
+    "app/admin/clientes/[clienteId]/checkins/actions.ts",
+  ]) {
+    const source = read(path);
+    assert.match(source, /const effectiveDate = effectiveActivityCheckinDate\(event, latest\)/);
+    assert.match(source, /activityCorrectionChangesValue\(event, latest, effectiveDate, rawValue === "yes"\)/);
+    assert.match(source, /createAccessibleClientActivityCheckinEventCorrection\(\{\s*checkinDate: effectiveDate,/);
+    assert.doesNotMatch(source, /activityCorrectionChangesValue\(event, latest, event\.checkin_date/);
+    assert.doesNotMatch(source, /createAccessibleClientActivityCheckinEventCorrection\(\{\s*checkinDate: event\.checkin_date,/);
+    assert.match(source, /checkinCorrectionSnapshotMatches\(expected\.id, latest\)/);
+  }
+});

@@ -12,7 +12,7 @@ import { loadSupportedLiquidTaxonomy } from "@/lib/method/liquid-taxonomy-loader
 import { createLiquidIntakeWithMethodSnapshot } from "@/lib/method/liquid-persistence";
 import { requireRole } from "@/lib/supabase/auth";
 import { isUuid } from "@/lib/validation/uuid";
-import { parseExpectedCheckinCorrectionId, checkinCorrectionSnapshotMatches, liquidCorrectionChangesValue, activityCorrectionChangesValue } from "@/lib/checkins/correction-audit";
+import { parseExpectedCheckinCorrectionId, checkinCorrectionSnapshotMatches, liquidCorrectionChangesValue, activityCorrectionChangesValue, effectiveActivityCheckinDate } from "@/lib/checkins/correction-audit";
 import { latestCheckinCorrectionsByEvent } from "@/lib/checkins/effective-corrections";
 import {
   createAccessibleClientActivityCheckinEventCorrection,
@@ -242,12 +242,14 @@ export async function correctActivityCheckinAction(formData: FormData) {
   if (!checkinCorrectionSnapshotMatches(expected.id, latest)) {
     redirect(correctionRedirect("correction-conflict", formData, "atividade", event));
   }
-  if (!activityCorrectionChangesValue(event, latest, event.checkin_date, rawValue === "yes")) {
+  // Preserve the effective day chosen by the previous authorized correction.
+  const effectiveDate = effectiveActivityCheckinDate(event, latest);
+  if (!activityCorrectionChangesValue(event, latest, effectiveDate, rawValue === "yes")) {
     redirect(correctionRedirect("correction-unchanged", formData, "atividade", event));
   }
   try {
     await createAccessibleClientActivityCheckinEventCorrection({
-      checkinDate: event.checkin_date,
+      checkinDate: effectiveDate,
       correctedByProfileId: auth.profileId,
       didActivity: rawValue === "yes",
       eventId,

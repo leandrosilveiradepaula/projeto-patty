@@ -1,3 +1,11 @@
+## 2026-10-31 — J3: preservar data efetiva ao corrigir atividade física (J3-CHECKIN-DATE-01 / #1008)
+
+**Defeito determinístico constatado no código:** as ações de correção de atividade física de cliente e equipe profissional já validavam o último registro append-only e impediam conflitos, mas usavam a `checkin_date` **original** para gravar uma nova correção Sim/Não. Após uma correção anterior com outra `corrected_checkin_date`, o ajuste do valor revertia indevidamente a data efetiva.
+
+**Correção em branch:** `effectiveActivityCheckinDate` considera primeiro a data da última correção válida e, na ausência desta, a data original. Ambas as Server Actions usam essa mesma data para decidir no-op e persistir a nova correção append-only. Snapshot, autenticação, autorização, RLS, proteção de concorrência, links de retorno e histórico original permanecem intactos. Não altera UI de escolha de data, SQL/migrations, plano, avaliações, IA nem regras clínicas.
+
+**Verificação:** testes unitários sintéticos demonstram dia original 01/10 → efetivo 02/10 e repetição de Sim/Não preservando 02/10; contrato de runtime impede regressão das duas ações. Os estados CI, merge, publicação e homologação permanecem pendentes de comprovação na #1008. Homologação humana conjunta J1–J7 é a última tarefa.
+
 ## 2026-10-30 — J2: acesso ao histórico completo de avaliações a partir do Feedback Semanal (UX-J2-HIST-01 / #1008)
 
 A consulta de continuidade do feedback enviado mostrava apenas as cinco avaliações finalizadas mais recentes (consulta RLS com limite intencional de cinco). Para escolher uma avaliação anterior, a profissional precisava abandonar o percurso e reencontrar manualmente a cliente. Esta mudança acrescenta um link explícito para todo o histórico autorizado de avaliações, preservando o ID opaco do feedback e a âncora `#historico-finalizado`; a página de destino revalida a cliente e o feedback e mantém o retorno.

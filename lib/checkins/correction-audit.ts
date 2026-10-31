@@ -65,6 +65,18 @@ export function liquidCorrectionChangesValue(
     (latest?.corrected_liquid_kind ?? original.liquid_kind) !== newKind;
 }
 
+/**
+ * The date recorded by the most recent append-only correction is effective.
+ * Correcting just the yes/no response must never reset it to the original day.
+ * The original event remains immutable and identifies the audit history.
+ */
+export function effectiveActivityCheckinDate(
+  original: { checkin_date: string },
+  latest: { corrected_checkin_date: string } | null | undefined,
+): string {
+  return latest?.corrected_checkin_date ?? original.checkin_date;
+}
+
 export function activityCorrectionChangesValue(
   original: { checkin_date: string; did_activity: boolean },
   latest: { corrected_checkin_date: string; corrected_did_activity: boolean } | null | undefined,
