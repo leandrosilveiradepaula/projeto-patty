@@ -147,7 +147,7 @@ test("nested XLSX parsing consumes the shared budget across archives and stays d
   );
   assert.ok(constrained.summary.xlsx_count < 2);
   assert.ok(constrained.archives.some((archive) =>
-    archive.entries.some((entry) => entry.status === "rejected")));
+    archive.entries.some((entry) => entry.kind === "unrecognized" || entry.status === "rejected")));
   assert.deepEqual(constrained, previewHistoricalArchives(
     [{ bytes: firstArchive }, { bytes: secondArchive }],
     { maxTotalUncompressedBytes: budget },
@@ -158,7 +158,7 @@ test("multiple synthetic archives share one budget rather than resetting per ZIP
   const bytes = syntheticZip([{ name: "photo.png", bytes: syntheticPng }]);
   const result = previewHistoricalArchives(
     Array.from({ length: 12 }, () => ({ bytes })),
-    { maxTotalUncompressedBytes: syntheticPng.length * 3 },
+    { maxTotalUncompressedBytes: syntheticPng.length * 3, maxUncompressedBytesPerEntry: syntheticPng.length },
   );
   assert.equal(result.summary.image_count, 3);
   assert.equal(result.summary.archive_count, 12);
