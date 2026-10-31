@@ -56,12 +56,15 @@ export type ReviewReason =
   | "duplicate_binary";
 
 export type PreviewError =
+  | "invalid_limits"
   | "archive_invalid"
+  | "archive_unsupported_format"
   | "archive_limit_exceeded"
   | "entry_path_unsafe"
   | "entry_encrypted"
   | "entry_symlink"
   | "entry_unsupported_compression"
+  | "entry_unsupported_format"
   | "entry_corrupt"
   | "entry_format_disguised"
   | "xlsx_invalid";
@@ -87,6 +90,8 @@ const DEFAULT_LIMITS: HistoricalPreviewLimits = {
   maxTotalUncompressedBytes: 100 * 1024 * 1024,
 };
 
+const ABSOLUTE_LIMITS = { ...DEFAULT_LIMITS };
+
 type ZipEntry = Readonly<{
   order: number;
   name: string;
@@ -94,8 +99,11 @@ type ZipEntry = Readonly<{
   compression: number;
   compressedSize: number;
   uncompressedSize: number;
+  crc32: number;
   localOffset: number;
   externalAttributes: number;
+  dataOffset: number;
+  dataEnd: number;
 }>;
 
 type ParsedZip = Readonly<{ entries: readonly ZipEntry[] }>;
@@ -108,7 +116,12 @@ export function previewHistoricalArchives(
   inputs: readonly HistoricalArchiveInput[],
   configuredLimits: Partial<HistoricalPreviewLimits> = {},
 ): HistoricalImportPreview {
-  const limits = { ...DEFAULT_LIMITS, ...configuredLimits };
+  const limits = resolveLimits(configuredLimits);
+  if (!limits) {
+    return emptyPreview(inputs.map((input, archiveIndex) =>
+      rejectedArchive(opaqueId("archive", archiveIndex), sha256Hex(input.bytes), "invalid_limits"),
+    ));
+  }
   let totalUncompressedBytes = 0;
   const archives = inputs.map((input, archiveIndex) => {
     const archiveId = opaqueId("archive", archiveIndex);
@@ -123,23 +136,23 @@ export function previewHistoricalArchives(
     let zip: ParsedZip;
     try {
       zip = parseZip(input.bytes, limits.maxEntriesPerArchive);
-    } catch {
-      return rejectedArchive(archiveId, sha256, "archive_invalid");
+    } catch (error) {
+      return rejectedArchive(archiveId, sha256, error instanceof UnsupportedZipFormatError ? "archive_unsupported_format" : "archive_invalid");
     }
 
     const entries = zip.entries.map((entry) => {
       const entryId = opaqueId(`${archiveId}:entry`, entry.order);
       const safetyError = entrySafetyError(entry, limits, totalUncompressedBytes);
       if (safetyError) return rejectedEntry(entryId, safetyError);
-      totalUncompressedBytes += entry.uncompressedSize;
 
       let bytes: Uint8Array;
       try {
-        bytes = extractEntry(input.bytes, entry);
+        bytes = extractEntry(input.bytes, entry, extractionBudget(limits, totalUncompressedBytes));
       } catch {
         return rejectedEntry(entryId, "entry_corrupt");
       }
-      return analyzeEntry(entryId, entry.name, bytes, limits);
+      totalUncompressedBytes += bytes.length;
+      return analyzeEntry(entryId, entry.name, bytes, limits, limits.maxTotalUncompressedBytes - totalUncompressedBytes);
     });
     return { archive_id: archiveId, sha256, status: "analyzed" as const, entries, errors: [] };
   });
@@ -154,17 +167,25 @@ export function previewHistoricalArchives(
         : entry,
     ),
   }));
-  const allEntries = annotatedArchives.flatMap((archive) => archive.entries);
+  return previewFromArchives(annotatedArchives);
+}
+
+function emptyPreview(archives: readonly ArchivePreview[]): HistoricalImportPreview {
+  return previewFromArchives(archives);
+}
+
+function previewFromArchives(archives: readonly ArchivePreview[]): HistoricalImportPreview {
+  const allEntries = archives.flatMap((archive) => archive.entries);
   return {
     version: HISTORICAL_IMPORT_PREVIEW_VERSION,
     mode: "dry_run",
     persistence: "none",
     client_status: "human_decision_required",
-    archives: annotatedArchives,
-    duplicate_binary_groups: duplicateGroups,
+    archives,
+    duplicate_binary_groups: duplicateBinaryGroups(archives),
     summary: {
-      archive_count: annotatedArchives.length,
-      readable_archive_count: annotatedArchives.filter((archive) => archive.status === "analyzed").length,
+      archive_count: archives.length,
+      readable_archive_count: archives.filter((archive) => archive.status === "analyzed").length,
       entry_count: allEntries.length,
       xlsx_count: allEntries.filter((entry) => entry.kind === "xlsx").length,
       image_count: allEntries.filter((entry) => entry.kind === "jpeg" || entry.kind === "png").length,
@@ -181,8 +202,8 @@ function rejectedEntry(entryId: string, error: PreviewError): ArchiveEntryPrevie
   return { entry_id: entryId, kind: "unrecognized", status: "rejected", review_reasons: [], errors: [error] };
 }
 
-function analyzeEntry(entryId: string, declaredName: string, bytes: Uint8Array, limits: HistoricalPreviewLimits): ArchiveEntryPreview {
-  const kind = detectKind(bytes, limits);
+function analyzeEntry(entryId: string, declaredName: string, bytes: Uint8Array, limits: HistoricalPreviewLimits, nestedBudget: number): ArchiveEntryPreview {
+  const kind = detectKind(bytes, limits, nestedBudget);
   const declared = declaredKind(declaredName);
   const reasons: ReviewReason[] = ["human_client_identity_required", "human_client_status_required"];
   const errors: PreviewError[] = [];
@@ -190,12 +211,15 @@ function analyzeEntry(entryId: string, declaredName: string, bytes: Uint8Array, 
     reasons.push("declared_format_mismatch");
     errors.push("entry_format_disguised");
   }
+  if (errors.length > 0) {
+    return { entry_id: entryId, sha256: sha256Hex(bytes), kind, status: "rejected", review_reasons: stableReasons(reasons), errors };
+  }
   if (kind === "unrecognized") {
     return { entry_id: entryId, sha256: sha256Hex(bytes), kind, status: "needs_review", review_reasons: stableReasons(reasons), errors };
   }
   if (kind === "xlsx") {
     try {
-      const spreadsheet = inspectXlsx(bytes, limits);
+      const spreadsheet = inspectXlsx(bytes, limits, nestedBudget);
       if (spreadsheet.dateCandidates.ambiguous) reasons.push("ambiguous_date_candidate");
       reasons.push("unmapped_spreadsheet_layout");
       return {
@@ -224,6 +248,7 @@ function analyzeEntry(entryId: string, declaredName: string, bytes: Uint8Array, 
 function entrySafetyError(entry: ZipEntry, limits: HistoricalPreviewLimits, usedBytes: number): PreviewError | undefined {
   if (!safeZipPath(entry.name)) return "entry_path_unsafe";
   if ((entry.flags & 1) !== 0) return "entry_encrypted";
+  if ((entry.flags & ~0x0800) !== 0) return "entry_unsupported_format";
   if (isSymlink(entry.externalAttributes)) return "entry_symlink";
   if (entry.compression !== 0 && entry.compression !== 8) return "entry_unsupported_compression";
   if (entry.uncompressedSize > limits.maxUncompressedBytesPerEntry || usedBytes + entry.uncompressedSize > limits.maxTotalUncompressedBytes) return "archive_limit_exceeded";
@@ -232,10 +257,16 @@ function entrySafetyError(entry: ZipEntry, limits: HistoricalPreviewLimits, used
 
 function parseZip(bytes: Uint8Array, maxEntries: number): ParsedZip {
   const eocd = findEocd(bytes);
+  if (eocd + 22 + u16(bytes, eocd + 20) !== bytes.length) throw new Error("invalid eocd comment length");
+  if (eocd >= 20 && u32(bytes, eocd - 20) === 0x07064b50) throw new UnsupportedZipFormatError();
+  if (u16(bytes, eocd + 4) !== 0 || u16(bytes, eocd + 6) !== 0) throw new UnsupportedZipFormatError();
   const entryCount = u16(bytes, eocd + 10);
+  if (u16(bytes, eocd + 8) !== entryCount || entryCount === 0xffff) throw new UnsupportedZipFormatError();
   const centralSize = u32(bytes, eocd + 12);
   const centralOffset = u32(bytes, eocd + 16);
-  if (entryCount > maxEntries || centralOffset + centralSize > bytes.length) throw new Error("invalid central directory");
+  if (centralSize === 0xffffffff || centralOffset === 0xffffffff) throw new UnsupportedZipFormatError();
+  const centralEnd = centralOffset + centralSize;
+  if (entryCount > maxEntries || centralOffset > eocd || centralEnd !== eocd) throw new Error("invalid central directory");
   const entries: ZipEntry[] = [];
   let offset = centralOffset;
   for (let order = 0; order < entryCount; order += 1) {
@@ -244,36 +275,64 @@ function parseZip(bytes: Uint8Array, maxEntries: number): ParsedZip {
     const extraLength = u16(bytes, offset + 30);
     const commentLength = u16(bytes, offset + 32);
     const end = offset + 46 + nameLength + extraLength + commentLength;
-    if (end > bytes.length) throw new Error("invalid central record length");
+    if (end > centralEnd) throw new Error("invalid central record length");
+    if (u16(bytes, offset + 34) !== 0) throw new UnsupportedZipFormatError();
+    const compressedSize = u32(bytes, offset + 20);
+    const uncompressedSize = u32(bytes, offset + 24);
+    const localOffset = u32(bytes, offset + 42);
+    if (compressedSize === 0xffffffff || uncompressedSize === 0xffffffff || localOffset === 0xffffffff) throw new UnsupportedZipFormatError();
     entries.push({
       order,
       name: decodeUtf8(bytes.subarray(offset + 46, offset + 46 + nameLength)),
       flags: u16(bytes, offset + 8),
       compression: u16(bytes, offset + 10),
-      compressedSize: u32(bytes, offset + 20),
-      uncompressedSize: u32(bytes, offset + 24),
+      crc32: u32(bytes, offset + 16),
+      compressedSize,
+      uncompressedSize,
       externalAttributes: u32(bytes, offset + 38),
-      localOffset: u32(bytes, offset + 42),
+      localOffset,
+      dataOffset: 0,
+      dataEnd: 0,
     });
     offset = end;
   }
-  return { entries };
+  if (offset !== centralEnd) throw new Error("central directory size mismatch");
+  const validatedEntries = entries.map((entry) => validateLocalEntry(bytes, entry, centralOffset));
+  if (new Set(validatedEntries.map((entry) => entry.localOffset)).size !== validatedEntries.length) throw new Error("duplicate local entry offset");
+  const intervals = [...validatedEntries].sort((left, right) => left.localOffset - right.localOffset);
+  for (let index = 1; index < intervals.length; index += 1) {
+    if (intervals[index - 1]!.dataEnd > intervals[index]!.localOffset) throw new Error("overlapping local entries");
+  }
+  return { entries: validatedEntries };
 }
 
-function extractEntry(archive: Uint8Array, entry: ZipEntry): Uint8Array {
+function validateLocalEntry(archive: Uint8Array, entry: ZipEntry, centralOffset: number): ZipEntry {
   const offset = entry.localOffset;
-  if (u32(archive, offset) !== 0x04034b50) throw new Error("invalid local record");
+  if (offset >= centralOffset || u32(archive, offset) !== 0x04034b50) throw new Error("invalid local record");
   const nameLength = u16(archive, offset + 26);
   const extraLength = u16(archive, offset + 28);
   const dataOffset = offset + 30 + nameLength + extraLength;
-  const compressed = archive.subarray(dataOffset, dataOffset + entry.compressedSize);
-  if (compressed.length !== entry.compressedSize) throw new Error("truncated entry");
-  const extracted = entry.compression === 0 ? compressed : new Uint8Array(inflateRawSync(compressed));
-  if (extracted.length !== entry.uncompressedSize) throw new Error("invalid expanded size");
+  const dataEnd = dataOffset + entry.compressedSize;
+  if (dataOffset > centralOffset || dataEnd > centralOffset) throw new Error("local data outside archive area");
+  if (u16(archive, offset + 6) !== entry.flags || u16(archive, offset + 8) !== entry.compression || u32(archive, offset + 14) !== entry.crc32 || u32(archive, offset + 18) !== entry.compressedSize || u32(archive, offset + 22) !== entry.uncompressedSize) throw new Error("local and central metadata mismatch");
+  const localName = archive.subarray(offset + 30, offset + 30 + nameLength);
+  const centralName = new TextEncoder().encode(entry.name);
+  if (!sameBytes(localName, centralName)) throw new Error("local and central name mismatch");
+  return { ...entry, dataOffset, dataEnd };
+}
+
+function extractEntry(archive: Uint8Array, entry: ZipEntry, maxOutputLength: number): Uint8Array {
+  if (!Number.isSafeInteger(maxOutputLength) || maxOutputLength < 1) throw new Error("invalid extraction budget");
+  const compressed = archive.subarray(entry.dataOffset, entry.dataEnd);
+  if (compressed.length !== entry.compressedSize || entry.uncompressedSize > maxOutputLength) throw new Error("entry exceeds budget");
+  const extracted = entry.compression === 0
+    ? compressed
+    : new Uint8Array(inflateRawSync(compressed, { maxOutputLength }));
+  if (extracted.length !== entry.uncompressedSize || crc32(extracted) !== entry.crc32) throw new Error("invalid expanded entry");
   return extracted;
 }
 
-function inspectXlsx(bytes: Uint8Array, limits: HistoricalPreviewLimits) {
+function inspectXlsx(bytes: Uint8Array, limits: HistoricalPreviewLimits, maxTotalBytes: number) {
   const zip = parseZip(bytes, Math.min(limits.maxEntriesPerArchive, 500));
   const allowed = new Map(zip.entries.map((entry) => [entry.name, entry]));
   if (!allowed.has("[Content_Types].xml") || !allowed.has("xl/workbook.xml")) throw new Error("not xlsx");
@@ -281,8 +340,9 @@ function inspectXlsx(bytes: Uint8Array, limits: HistoricalPreviewLimits) {
   const read = (name: string) => {
     const entry = allowed.get(name);
     if (!entry || entrySafetyError(entry, limits, nestedUncompressedBytes)) throw new Error("unsafe xlsx member");
-    nestedUncompressedBytes += entry.uncompressedSize;
-    return decodeUtf8(extractEntry(bytes, entry));
+    const memberBytes = extractEntry(bytes, entry, Math.min(extractionBudget(limits, nestedUncompressedBytes), maxTotalBytes - nestedUncompressedBytes));
+    nestedUncompressedBytes += memberBytes.length;
+    return decodeUtf8(memberBytes);
   };
   const workbook = read("xl/workbook.xml");
   const worksheetNames = [...allowed.keys()].filter((name) => /^xl\/worksheets\/sheet\d+\.xml$/.test(name)).sort();
@@ -299,10 +359,10 @@ function inspectXlsx(bytes: Uint8Array, limits: HistoricalPreviewLimits) {
   };
 }
 
-function detectKind(bytes: Uint8Array, limits: HistoricalPreviewLimits): ArchiveEntryPreview["kind"] {
+function detectKind(bytes: Uint8Array, limits: HistoricalPreviewLimits, nestedBudget: number): ArchiveEntryPreview["kind"] {
   if (isPng(bytes)) return "png";
   if (isJpeg(bytes)) return "jpeg";
-  try { inspectXlsx(bytes, limits); return "xlsx"; } catch { return "unrecognized"; }
+  try { inspectXlsx(bytes, limits, nestedBudget); return "xlsx"; } catch { return "unrecognized"; }
 }
 
 function declaredKind(name: string): ArchiveEntryPreview["kind"] {
@@ -319,11 +379,29 @@ function duplicateBinaryGroups(archives: readonly ArchivePreview[]): DuplicateBi
   return [...byHash.entries()].filter(([, ids]) => ids.length > 1).map(([sha256, entry_ids]) => ({ sha256, entry_ids })).sort((a, b) => a.sha256.localeCompare(b.sha256));
 }
 
+function resolveLimits(configuredLimits: Partial<HistoricalPreviewLimits>): HistoricalPreviewLimits | undefined {
+  const candidate = { ...DEFAULT_LIMITS, ...configuredLimits };
+  const keys = Object.keys(DEFAULT_LIMITS) as (keyof HistoricalPreviewLimits)[];
+  if (!keys.every((key) => Number.isSafeInteger(candidate[key]) && candidate[key] > 0 && candidate[key] <= ABSOLUTE_LIMITS[key])) return undefined;
+  if (candidate.maxUncompressedBytesPerEntry > candidate.maxTotalUncompressedBytes) return undefined;
+  return candidate;
+}
+
+function extractionBudget(limits: HistoricalPreviewLimits, usedBytes: number): number {
+  const remaining = limits.maxTotalUncompressedBytes - usedBytes;
+  if (!Number.isSafeInteger(remaining) || remaining < 1) throw new Error("extraction budget exhausted");
+  return Math.min(limits.maxUncompressedBytesPerEntry, remaining);
+}
+
+class UnsupportedZipFormatError extends Error {}
+
 function safeZipPath(name: string) { return name.length > 0 && !name.includes("\\") && !name.startsWith("/") && !/^[A-Za-z]:/.test(name) && !name.split("/").some((part) => part === ".." || part === ""); }
 function isSymlink(attributes: number) { return ((attributes >>> 16) & 0o170000) === 0o120000; }
 function findEocd(bytes: Uint8Array) { for (let index = bytes.length - 22; index >= Math.max(0, bytes.length - 65_557); index -= 1) if (u32(bytes, index) === 0x06054b50) return index; throw new Error("no eocd"); }
 function u16(bytes: Uint8Array, offset: number) { if (offset < 0 || offset + 2 > bytes.length) throw new Error("out of range"); return bytes[offset]! | (bytes[offset + 1]! << 8); }
 function u32(bytes: Uint8Array, offset: number) { if (offset < 0 || offset + 4 > bytes.length) throw new Error("out of range"); return (bytes[offset]! | (bytes[offset + 1]! << 8) | (bytes[offset + 2]! << 16) | (bytes[offset + 3]! << 24)) >>> 0; }
+function sameBytes(left: Uint8Array, right: Uint8Array) { return left.length === right.length && left.every((value, index) => value === right[index]); }
+function crc32(bytes: Uint8Array) { let crc = 0xffffffff; for (const byte of bytes) { crc ^= byte; for (let bit = 0; bit < 8; bit += 1) crc = (crc >>> 1) ^ (0xedb88320 & -(crc & 1)); } return (crc ^ 0xffffffff) >>> 0; }
 function decodeUtf8(bytes: Uint8Array) { return new TextDecoder("utf-8", { fatal: true }).decode(bytes); }
 function sha256Hex(bytes: Uint8Array) { return createHash("sha256").update(bytes).digest("hex"); }
 function opaqueId(prefix: string, index: number) { return `${prefix.replace(/[^a-z0-9]/gi, "_")}_${String(index + 1).padStart(3, "0")}`; }
