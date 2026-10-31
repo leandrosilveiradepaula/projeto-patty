@@ -131,3 +131,37 @@ test("rejects both directions of declared-format mismatch", () => {
   assert.deepEqual(entries.map((entry) => entry.status), ["rejected", "rejected"]);
   assert.ok(entries.every((entry) => entry.errors.includes("entry_format_disguised")));
 });
+
+test("nested XLSX parsing consumes the shared budget across archives and stays deterministic", () => {
+  const workbook = syntheticXlsx();
+  const firstArchive = syntheticZip([{ name: "first.xlsx", bytes: workbook }]);
+  const secondArchive = syntheticZip([{ name: "second.xlsx", bytes: workbook }]);
+  const baseline = previewHistoricalArchives([{ bytes: firstArchive }, { bytes: secondArchive }]);
+  assert.equal(baseline.summary.xlsx_count, 2);
+
+  // Outer ZIP members fit, but nested workbook members exceed this shared cap.
+  const budget = workbook.length * 2 + 100;
+  const constrained = previewHistoricalArchives(
+    [{ bytes: firstArchive }, { bytes: secondArchive }],
+    { maxTotalUncompressedBytes: budget },
+  );
+  assert.ok(constrained.summary.xlsx_count < 2);
+  assert.ok(constrained.archives.some((archive) =>
+    archive.entries.some((entry) => entry.kind === "unrecognized" || entry.status === "rejected")));
+  assert.deepEqual(constrained, previewHistoricalArchives(
+    [{ bytes: firstArchive }, { bytes: secondArchive }],
+    { maxTotalUncompressedBytes: budget },
+  ));
+});
+
+test("multiple synthetic archives share one budget rather than resetting per ZIP", () => {
+  const bytes = syntheticZip([{ name: "photo.png", bytes: syntheticPng }]);
+  const result = previewHistoricalArchives(
+    Array.from({ length: 12 }, () => ({ bytes })),
+    { maxTotalUncompressedBytes: syntheticPng.length * 3, maxUncompressedBytesPerEntry: syntheticPng.length },
+  );
+  assert.equal(result.summary.image_count, 3);
+  assert.equal(result.summary.archive_count, 12);
+  assert.ok(result.archives.slice(3).every((archive) =>
+    archive.entries[0]?.status === "rejected"));
+});
