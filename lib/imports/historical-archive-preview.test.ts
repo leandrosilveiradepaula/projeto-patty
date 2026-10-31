@@ -150,7 +150,7 @@ test("nested XLSX parsing consumes the shared budget across archives and stays d
     archive.entries.some((entry) => entry.kind === "unrecognized" || entry.status === "rejected")));
   assert.deepEqual(constrained, previewHistoricalArchives(
     [{ bytes: firstArchive }, { bytes: secondArchive }],
-    { maxTotalUncompressedBytes: budget },
+    { maxTotalUncompressedBytes: budget, maxUncompressedBytesPerEntry: workbook.length },
   ));
 });
 
