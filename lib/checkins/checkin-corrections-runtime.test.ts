@@ -35,6 +35,7 @@ test("client and admin check-in pages expose effective corrected values and orig
   assert.match(adminPage, /Original:/);
 });
 
+
 test("both authorized activity-correction actions preserve the last effective day", () => {
   for (const path of [
     "app/cliente/checkins/actions.ts",
