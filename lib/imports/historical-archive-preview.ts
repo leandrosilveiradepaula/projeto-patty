@@ -122,7 +122,8 @@ export function previewHistoricalArchives(
       rejectedArchive(opaqueId("archive", archiveIndex), sha256Hex(input.bytes), "invalid_limits"),
     ));
   }
-  let totalUncompressedBytes = 0;
+  // One shared budget covers both outer ZIP entries and nested XLSX members.
+  const budget = { usedBytes: 0 };
   const archives = inputs.map((input, archiveIndex) => {
     const archiveId = opaqueId("archive", archiveIndex);
     const sha256 = sha256Hex(input.bytes);
@@ -142,17 +143,17 @@ export function previewHistoricalArchives(
 
     const entries = zip.entries.map((entry) => {
       const entryId = opaqueId(`${archiveId}:entry`, entry.order);
-      const safetyError = entrySafetyError(entry, limits, totalUncompressedBytes);
+      const safetyError = entrySafetyError(entry, limits, budget.usedBytes);
       if (safetyError) return rejectedEntry(entryId, safetyError);
 
       let bytes: Uint8Array;
       try {
-        bytes = extractEntry(input.bytes, entry, extractionBudget(limits, totalUncompressedBytes));
+        bytes = extractEntry(input.bytes, entry, extractionBudget(limits, budget.usedBytes));
       } catch {
         return rejectedEntry(entryId, "entry_corrupt");
       }
-      totalUncompressedBytes += bytes.length;
-      return analyzeEntry(entryId, entry.name, bytes, limits, limits.maxTotalUncompressedBytes - totalUncompressedBytes);
+      budget.usedBytes += bytes.length;
+      return analyzeEntry(entryId, entry.name, bytes, limits, budget);
     });
     return { archive_id: archiveId, sha256, status: "analyzed" as const, entries, errors: [] };
   });
@@ -202,8 +203,12 @@ function rejectedEntry(entryId: string, error: PreviewError): ArchiveEntryPrevie
   return { entry_id: entryId, kind: "unrecognized", status: "rejected", review_reasons: [], errors: [error] };
 }
 
-function analyzeEntry(entryId: string, declaredName: string, bytes: Uint8Array, limits: HistoricalPreviewLimits, nestedBudget: number): ArchiveEntryPreview {
-  const kind = detectKind(bytes, limits, nestedBudget);
+type PreviewBudget = { usedBytes: number };
+
+function analyzeEntry(entryId: string, declaredName: string, bytes: Uint8Array, limits: HistoricalPreviewLimits, budget: PreviewBudget): ArchiveEntryPreview {
+  // XLSX is parsed once: kind detection returns the already-inspected metadata.
+  const detected = detectKind(bytes, limits, budget);
+  const kind = detected.kind;
   const declared = declaredKind(declaredName);
   const reasons: ReviewReason[] = ["human_client_identity_required", "human_client_status_required"];
   const errors: PreviewError[] = [];
@@ -219,7 +224,8 @@ function analyzeEntry(entryId: string, declaredName: string, bytes: Uint8Array, 
   }
   if (kind === "xlsx") {
     try {
-      const spreadsheet = inspectXlsx(bytes, limits, nestedBudget);
+      const spreadsheet = detected.spreadsheet;
+      if (!spreadsheet) throw new Error("missing inspected spreadsheet");
       if (spreadsheet.dateCandidates.ambiguous) reasons.push("ambiguous_date_candidate");
       reasons.push("unmapped_spreadsheet_layout");
       return {
@@ -332,16 +338,15 @@ function extractEntry(archive: Uint8Array, entry: ZipEntry, maxOutputLength: num
   return extracted;
 }
 
-function inspectXlsx(bytes: Uint8Array, limits: HistoricalPreviewLimits, maxTotalBytes: number) {
+function inspectXlsx(bytes: Uint8Array, limits: HistoricalPreviewLimits, budget: PreviewBudget) {
   const zip = parseZip(bytes, Math.min(limits.maxEntriesPerArchive, 500));
   const allowed = new Map(zip.entries.map((entry) => [entry.name, entry]));
   if (!allowed.has("[Content_Types].xml") || !allowed.has("xl/workbook.xml")) throw new Error("not xlsx");
-  let nestedUncompressedBytes = 0;
   const read = (name: string) => {
     const entry = allowed.get(name);
-    if (!entry || entrySafetyError(entry, limits, nestedUncompressedBytes)) throw new Error("unsafe xlsx member");
-    const memberBytes = extractEntry(bytes, entry, Math.min(extractionBudget(limits, nestedUncompressedBytes), maxTotalBytes - nestedUncompressedBytes));
-    nestedUncompressedBytes += memberBytes.length;
+    if (!entry || entrySafetyError(entry, limits, budget.usedBytes)) throw new Error("unsafe xlsx member");
+    const memberBytes = extractEntry(bytes, entry, extractionBudget(limits, budget.usedBytes));
+    budget.usedBytes += memberBytes.length;
     return decodeUtf8(memberBytes);
   };
   const workbook = read("xl/workbook.xml");
@@ -359,10 +364,20 @@ function inspectXlsx(bytes: Uint8Array, limits: HistoricalPreviewLimits, maxTota
   };
 }
 
-function detectKind(bytes: Uint8Array, limits: HistoricalPreviewLimits, nestedBudget: number): ArchiveEntryPreview["kind"] {
-  if (isPng(bytes)) return "png";
-  if (isJpeg(bytes)) return "jpeg";
-  try { inspectXlsx(bytes, limits, nestedBudget); return "xlsx"; } catch { return "unrecognized"; }
+function detectKind(bytes: Uint8Array, limits: HistoricalPreviewLimits, budget: PreviewBudget): {
+  kind: ArchiveEntryPreview["kind"];
+  spreadsheet?: ReturnType<typeof inspectXlsx>;
+} {
+  if (isPng(bytes)) return { kind: "png" };
+  if (isJpeg(bytes)) return { kind: "jpeg" };
+  // Avoid treating arbitrary binary data as a ZIP and parsing it repeatedly.
+  if (bytes.length < 4 || u32(bytes, 0) !== 0x04034b50) return { kind: "unrecognized" };
+  try {
+    const spreadsheet = inspectXlsx(bytes, limits, budget);
+    return { kind: "xlsx", spreadsheet };
+  } catch {
+    return { kind: "unrecognized" };
+  }
 }
 
 function declaredKind(name: string): ArchiveEntryPreview["kind"] {
