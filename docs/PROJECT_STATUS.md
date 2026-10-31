@@ -1,3 +1,13 @@
+## 2026-10-31 — MIGR-HIST-02: prévia offline segura de acervo histórico (etapa 1 / #1008)
+
+**Implementado somente em branch:** `lib/imports/historical-archive-preview.ts` fornece um analisador puro de bytes para lote de ZIPs, sem leitura de paths, escrita em disco, logs, chamada remota ou persistência. O manifesto determinístico retorna IDs opacos, hashes SHA-256, formatos reconhecidos (XLSX/JPEG/PNG), família `xlsx_unmapped`, contagens de planilhas, candidatas sintéticas a data/número brasileiro, dimensões de imagens, duplicidades binárias e erros por entrada. Não divulga nome de arquivo nem conteúdo de célula.
+
+**Proteções e decisões humanas:** o parser rejeita central directory inválido, traversal, entrada cifrada, symlink, compressão não suportada, arquivo corrompido, formato disfarçado e limites de quantidade/tamanho/expansão, inclusive ao inspecionar o ZIP interno de XLSX. Uma falha não interrompe os demais arquivos do lote. Toda entrada analisável exige conciliação humana de identidade e status da cliente; `active`/`inactive` não é inferido. Layouts XLSX permanecem não mapeados e datas ambíguas são sinalizadas para conferência, sem regra clínica ou mapeamento de avaliação.
+
+**Evidência local:** quatro testes usam exclusivamente bytes sintéticos em `tests/fixtures/imports/` e cobrem determinismo, XLSX/imagens, locale brasileiro, duplicatas, arquivo/planilha corrompidos, traversal, cifrado, symlink, expansão, formato disfarçado e limite do lote. `typecheck` e `next build` passaram localmente no SHA da branch. Não houve acesso a ZIP real, dados de cliente, Supabase, Auth, RLS, migrations, Storage, UI, convite, criação/reativação de cliente, protocolo ou publicação.
+
+**Estados previstos ao encerrar o pacote:** implementado=SIM; testes sintéticos=SIM; commitado=SIM; CI=pendente; mergeado=NA; publicado=NA; homologado=NA. Próxima etapa permanece bloqueada pelas decisões humanas de identidade/vínculo, guarda do original, RLS de histórico inativo, visibilidade e mapeamento de avaliações; só então desenhar persistência idempotente autorizada.
+
 ## 2026-10-31 — J3: preservar data efetiva ao corrigir atividade física (J3-CHECKIN-DATE-01 / #1008)
 
 **Defeito determinístico constatado no código:** as ações de correção de atividade física de cliente e equipe profissional já validavam o último registro append-only e impediam conflitos, mas usavam a `checkin_date` **original** para gravar uma nova correção Sim/Não. Após uma correção anterior com outra `corrected_checkin_date`, o ajuste do valor revertia indevidamente a data efetiva.
