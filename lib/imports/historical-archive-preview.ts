@@ -496,6 +496,7 @@ function pngDimensions(bytes: Uint8Array) { return { width: u32(bytes, 16), heig
 function jpegDimensions(bytes: Uint8Array) { let offset = 2; while (offset + 9 < bytes.length) { if (bytes[offset] !== 0xff) break; const marker = bytes[offset + 1]!; const length = (bytes[offset + 2]! << 8) | bytes[offset + 3]!; if (length < 2 || offset + 2 + length > bytes.length) break; if (marker >= 0xc0 && marker <= 0xc3) return { height: (bytes[offset + 5]! << 8) | bytes[offset + 6]!, width: (bytes[offset + 7]! << 8) | bytes[offset + 8]! }; offset += 2 + length; } return {}; }
 function parseSharedStrings(xml: string, limits: HistoricalPreviewLimits, budget: PreviewBudget): string[] {
   const values: string[] = [];
+  let xlsxSharedStringBytes = 0;
   const matcher = /<t(?:\s[^>]*)?>([\s\S]*?)<\/t>/g;
   for (let match = matcher.exec(xml); match; match = matcher.exec(xml)) {
     const value = decodeXml(match[1]!);
@@ -503,10 +504,11 @@ function parseSharedStrings(xml: string, limits: HistoricalPreviewLimits, budget
     if (
       values.length >= limits.maxSharedStringsPerXlsx
       || budget.sharedStringCount >= limits.maxTotalSharedStrings
-      || bytes > limits.maxSharedStringBytesPerXlsx
+      || xlsxSharedStringBytes + bytes > limits.maxSharedStringBytesPerXlsx
       || budget.sharedStringBytes + bytes > limits.maxTotalSharedStringBytes
     ) throw new XlsxLimitExceededError();
     values.push(value);
+    xlsxSharedStringBytes += bytes;
     budget.sharedStringCount += 1;
     budget.sharedStringBytes += bytes;
   }
