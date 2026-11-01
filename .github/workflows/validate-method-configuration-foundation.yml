@@ -122,6 +122,9 @@ jobs:
       - name: Run admin global measurement correction pgTAP
         run: npx supabase test db supabase/tests/database/admin_global_measurement_correction.test.sql
 
+      - name: Run admin global anamnesis review pgTAP
+        run: npx supabase test db supabase/tests/database/admin_global_anamnesis_review.test.sql
+
       - name: Stop local Supabase
         if: always()
         run: npx supabase stop --no-backup
