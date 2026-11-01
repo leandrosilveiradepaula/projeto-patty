@@ -1,3 +1,13 @@
+## 2026-10-31 — MIGR-HIST-03A / incremento 2: limites estruturais do preview XLSX (em validação)
+
+**Implementado somente na branch:** o preview offline passa a impor tetos absolutos, determinísticos e apenas redutíveis por chamada para XML por parte e acumulado, worksheets por XLSX e por lote, células por worksheet e por lote, e quantidade/tamanho de shared strings por XLSX e acumulados. Esses orçamentos são compartilhados entre ZIPs externos e os membros XLSX aninhados; uma configuração inválida, inconsistente ou que amplie um teto falha fechada.
+
+**Rejeição explícita e memória limitada:** ultrapassar um teto estrutural retorna a entrada como `rejected` com `xlsx_limit_exceeded`, jamais como arquivo desconhecido. A leitura processa cada worksheet uma vez, acumula apenas a assinatura limitada de 64 valores e métricas, e só materializa shared strings depois de aplicar seus limites. Não houve leitura de paths, arquivo real, upload, persistência, cadastro/reativação, Supabase, Auth, RLS, migration, schema, regra clínica ou publicação.
+
+**Evidência sintética:** os testes adversariais usam exclusivamente ZIP/XLSX construídos em memória e cobrem limite de XML, worksheets, células, shared strings por quantidade e bytes, e exaustão cumulativa entre arquivos. A validação local completa e o `Validate application` do SHA final da PR permanecem gates antes de qualquer integração; esta etapa não autoriza upload real nem homologação.
+
+---
+
 ## 2026-10-31 — MIGR-HIST-02: prévia offline segura de acervo histórico (etapa 1 / #1008)
 
 **Implementado somente em branch:** `lib/imports/historical-archive-preview.ts` fornece um analisador puro de bytes para lote de ZIPs, sem leitura de paths, escrita em disco, logs, chamada remota ou persistência. O manifesto determinístico retorna IDs opacos, hashes SHA-256, formatos reconhecidos (XLSX/JPEG/PNG), família `xlsx_unmapped`, contagens de planilhas, candidatas sintéticas a data/número brasileiro, dimensões de imagens, duplicidades binárias e erros por entrada. Não divulga nome de arquivo nem conteúdo de célula.
