@@ -67,7 +67,8 @@ export type PreviewError =
   | "entry_unsupported_format"
   | "entry_corrupt"
   | "entry_format_disguised"
-  | "xlsx_invalid";
+  | "xlsx_invalid"
+  | "xlsx_limit_exceeded";
 
 export type DuplicateBinaryGroup = Readonly<{
   sha256: string;
@@ -80,6 +81,16 @@ export type HistoricalPreviewLimits = Readonly<{
   maxCompressedBytesPerArchive: number;
   maxUncompressedBytesPerEntry: number;
   maxTotalUncompressedBytes: number;
+  maxWorksheetsPerXlsx: number;
+  maxTotalWorksheets: number;
+  maxXmlBytesPerPart: number;
+  maxTotalXmlBytes: number;
+  maxCellsPerWorksheet: number;
+  maxTotalCells: number;
+  maxSharedStringsPerXlsx: number;
+  maxTotalSharedStrings: number;
+  maxSharedStringBytesPerXlsx: number;
+  maxTotalSharedStringBytes: number;
 }>;
 
 const DEFAULT_LIMITS: HistoricalPreviewLimits = {
@@ -88,6 +99,16 @@ const DEFAULT_LIMITS: HistoricalPreviewLimits = {
   maxCompressedBytesPerArchive: 25 * 1024 * 1024,
   maxUncompressedBytesPerEntry: 20 * 1024 * 1024,
   maxTotalUncompressedBytes: 100 * 1024 * 1024,
+  maxWorksheetsPerXlsx: 64,
+  maxTotalWorksheets: 500,
+  maxXmlBytesPerPart: 2 * 1024 * 1024,
+  maxTotalXmlBytes: 20 * 1024 * 1024,
+  maxCellsPerWorksheet: 50_000,
+  maxTotalCells: 250_000,
+  maxSharedStringsPerXlsx: 50_000,
+  maxTotalSharedStrings: 100_000,
+  maxSharedStringBytesPerXlsx: 2 * 1024 * 1024,
+  maxTotalSharedStringBytes: 8 * 1024 * 1024,
 };
 
 const ABSOLUTE_LIMITS = { ...DEFAULT_LIMITS };
@@ -123,7 +144,14 @@ export function previewHistoricalArchives(
     ));
   }
   // One shared budget covers both outer ZIP entries and nested XLSX members.
-  const budget = { usedBytes: 0 };
+  const budget: PreviewBudget = {
+    usedBytes: 0,
+    worksheetCount: 0,
+    xmlBytes: 0,
+    cellCount: 0,
+    sharedStringCount: 0,
+    sharedStringBytes: 0,
+  };
   const archives = inputs.map((input, archiveIndex) => {
     const archiveId = opaqueId("archive", archiveIndex);
     const sha256 = sha256Hex(input.bytes);
@@ -203,7 +231,14 @@ function rejectedEntry(entryId: string, error: PreviewError): ArchiveEntryPrevie
   return { entry_id: entryId, kind: "unrecognized", status: "rejected", review_reasons: [], errors: [error] };
 }
 
-type PreviewBudget = { usedBytes: number };
+type PreviewBudget = {
+  usedBytes: number;
+  worksheetCount: number;
+  xmlBytes: number;
+  cellCount: number;
+  sharedStringCount: number;
+  sharedStringBytes: number;
+};
 
 function analyzeEntry(entryId: string, declaredName: string, bytes: Uint8Array, limits: HistoricalPreviewLimits, budget: PreviewBudget): ArchiveEntryPreview {
   // XLSX is parsed once: kind detection returns the already-inspected metadata.
@@ -223,6 +258,9 @@ function analyzeEntry(entryId: string, declaredName: string, bytes: Uint8Array, 
     return { entry_id: entryId, sha256: sha256Hex(bytes), kind, status: "needs_review", review_reasons: stableReasons(reasons), errors };
   }
   if (kind === "xlsx") {
+    if (detected.error) {
+      return { entry_id: entryId, sha256: sha256Hex(bytes), kind, status: "rejected", review_reasons: [], errors: [detected.error] };
+    }
     try {
       const spreadsheet = detected.spreadsheet;
       if (!spreadsheet) throw new Error("missing inspected spreadsheet");
@@ -340,33 +378,55 @@ function extractEntry(archive: Uint8Array, entry: ZipEntry, maxOutputLength: num
 
 function inspectXlsx(bytes: Uint8Array, limits: HistoricalPreviewLimits, budget: PreviewBudget) {
   const zip = parseZip(bytes, Math.min(limits.maxEntriesPerArchive, 500));
-  const allowed = new Map(zip.entries.map((entry) => [entry.name, entry]));
+  const allowed = new Map<string, ZipEntry>();
+  const worksheetNames: string[] = [];
+  for (const entry of zip.entries) {
+    allowed.set(entry.name, entry);
+    if (/^xl\/worksheets\/sheet\d+\.xml$/.test(entry.name)) worksheetNames.push(entry.name);
+  }
+  worksheetNames.sort();
   if (!allowed.has("[Content_Types].xml") || !allowed.has("xl/workbook.xml")) throw new Error("not xlsx");
-  const read = (name: string) => {
+  let xlsxXmlBytes = 0;
+  for (const entry of zip.entries) {
+    if (!entry.name.endsWith(".xml")) continue;
+    if (entry.uncompressedSize > limits.maxXmlBytesPerPart || budget.xmlBytes + xlsxXmlBytes + entry.uncompressedSize > limits.maxTotalXmlBytes) throw new XlsxLimitExceededError();
+    xlsxXmlBytes += entry.uncompressedSize;
+  }
+  budget.xmlBytes += xlsxXmlBytes;
+  if (worksheetNames.length > limits.maxWorksheetsPerXlsx || budget.worksheetCount + worksheetNames.length > limits.maxTotalWorksheets) throw new XlsxLimitExceededError();
+  budget.worksheetCount += worksheetNames.length;
+  const readXml = (name: string) => {
     const entry = allowed.get(name);
     if (!entry || entrySafetyError(entry, limits, budget.usedBytes)) throw new Error("unsafe xlsx member");
     const memberBytes = extractEntry(bytes, entry, extractionBudget(limits, budget.usedBytes));
     budget.usedBytes += memberBytes.length;
     return decodeUtf8(memberBytes);
   };
-  const workbook = read("xl/workbook.xml");
-  const worksheetNames = [...allowed.keys()].filter((name) => /^xl\/worksheets\/sheet\d+\.xml$/.test(name)).sort();
+  const workbook = readXml("xl/workbook.xml");
   if (!/<sheet\b/.test(workbook) || worksheetNames.length === 0) throw new Error("xlsx without worksheets");
-  const sharedStrings = allowed.has("xl/sharedStrings.xml") ? xmlTexts(read("xl/sharedStrings.xml")) : [];
-  const cells = worksheetNames.flatMap((name) => spreadsheetValues(read(name), sharedStrings));
-  const columnSignature = cells.slice(0, 64).map(normalizeForSignature).join("|");
-  const dateValues = cells.filter((value) => /^\d{1,2}[/-]\d{1,2}[/-]\d{2,4}$/.test(value));
+  const sharedStrings = allowed.has("xl/sharedStrings.xml") ? parseSharedStrings(readXml("xl/sharedStrings.xml"), limits, budget) : [];
+  const signatureValues: string[] = [];
+  let dateCandidateCount = 0;
+  let ambiguousDateCandidate = false;
+  let brazilianNumberCandidates = 0;
+  for (const worksheetName of worksheetNames) {
+    const stats = scanWorksheet(readXml(worksheetName), sharedStrings, limits, budget, signatureValues);
+    dateCandidateCount += stats.dateCandidateCount;
+    ambiguousDateCandidate ||= stats.ambiguousDateCandidate;
+    brazilianNumberCandidates += stats.brazilianNumberCandidates;
+  }
   return {
     worksheetCount: worksheetNames.length,
-    columnSignature,
-    dateCandidates: { count: dateValues.length, ambiguous: dateValues.some((value) => ambiguousDate(value)) },
-    brazilianNumberCandidates: cells.filter((value) => /^-?\d{1,3}(?:\.\d{3})*,\d+$/.test(value)).length,
+    columnSignature: signatureValues.map(normalizeForSignature).join("|"),
+    dateCandidates: { count: dateCandidateCount, ambiguous: ambiguousDateCandidate },
+    brazilianNumberCandidates,
   };
 }
 
 function detectKind(bytes: Uint8Array, limits: HistoricalPreviewLimits, budget: PreviewBudget): {
   kind: ArchiveEntryPreview["kind"];
   spreadsheet?: ReturnType<typeof inspectXlsx>;
+  error?: "xlsx_limit_exceeded";
 } {
   if (isPng(bytes)) return { kind: "png" };
   if (isJpeg(bytes)) return { kind: "jpeg" };
@@ -375,7 +435,8 @@ function detectKind(bytes: Uint8Array, limits: HistoricalPreviewLimits, budget: 
   try {
     const spreadsheet = inspectXlsx(bytes, limits, budget);
     return { kind: "xlsx", spreadsheet };
-  } catch {
+  } catch (error) {
+    if (error instanceof XlsxLimitExceededError) return { kind: "xlsx", error: "xlsx_limit_exceeded" };
     return { kind: "unrecognized" };
   }
 }
@@ -398,7 +459,14 @@ function resolveLimits(configuredLimits: Partial<HistoricalPreviewLimits>): Hist
   const candidate = { ...DEFAULT_LIMITS, ...configuredLimits };
   const keys = Object.keys(DEFAULT_LIMITS) as (keyof HistoricalPreviewLimits)[];
   if (!keys.every((key) => Number.isSafeInteger(candidate[key]) && candidate[key] > 0 && candidate[key] <= ABSOLUTE_LIMITS[key])) return undefined;
-  if (candidate.maxUncompressedBytesPerEntry > candidate.maxTotalUncompressedBytes) return undefined;
+  if (
+    candidate.maxUncompressedBytesPerEntry > candidate.maxTotalUncompressedBytes
+    || candidate.maxWorksheetsPerXlsx > candidate.maxTotalWorksheets
+    || candidate.maxXmlBytesPerPart > candidate.maxTotalXmlBytes
+    || candidate.maxCellsPerWorksheet > candidate.maxTotalCells
+    || candidate.maxSharedStringsPerXlsx > candidate.maxTotalSharedStrings
+    || candidate.maxSharedStringBytesPerXlsx > candidate.maxTotalSharedStringBytes
+  ) return undefined;
   return candidate;
 }
 
@@ -409,6 +477,7 @@ function extractionBudget(limits: HistoricalPreviewLimits, usedBytes: number): n
 }
 
 class UnsupportedZipFormatError extends Error {}
+class XlsxLimitExceededError extends Error {}
 
 function safeZipPath(name: string) { return name.length > 0 && !name.includes("\\") && !name.startsWith("/") && !/^[A-Za-z]:/.test(name) && !name.split("/").some((part) => part === ".." || part === ""); }
 function isSymlink(attributes: number) { return ((attributes >>> 16) & 0o170000) === 0o120000; }
@@ -425,8 +494,46 @@ function isPng(bytes: Uint8Array) { return bytes.length >= 24 && [137, 80, 78, 7
 function isJpeg(bytes: Uint8Array) { return bytes.length >= 4 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff; }
 function pngDimensions(bytes: Uint8Array) { return { width: u32(bytes, 16), height: u32(bytes, 20) }; }
 function jpegDimensions(bytes: Uint8Array) { let offset = 2; while (offset + 9 < bytes.length) { if (bytes[offset] !== 0xff) break; const marker = bytes[offset + 1]!; const length = (bytes[offset + 2]! << 8) | bytes[offset + 3]!; if (length < 2 || offset + 2 + length > bytes.length) break; if (marker >= 0xc0 && marker <= 0xc3) return { height: (bytes[offset + 5]! << 8) | bytes[offset + 6]!, width: (bytes[offset + 7]! << 8) | bytes[offset + 8]! }; offset += 2 + length; } return {}; }
-function xmlTexts(xml: string) { return [...xml.matchAll(/<t(?:\s[^>]*)?>([\s\S]*?)<\/t>/g)].map((match) => decodeXml(match[1]!)); }
-function spreadsheetValues(xml: string, sharedStrings: readonly string[]) { return [...xml.matchAll(/<c\b([^>]*)>([\s\S]*?)<\/c>/g)].map((match) => { const raw = /<v>([\s\S]*?)<\/v>/.exec(match[2]!)?.[1] ?? ""; return /t="s"/.test(match[1]!) ? sharedStrings[Number(raw)] ?? "" : decodeXml(raw); }); }
+function parseSharedStrings(xml: string, limits: HistoricalPreviewLimits, budget: PreviewBudget): string[] {
+  const values: string[] = [];
+  const matcher = /<t(?:\s[^>]*)?>([\s\S]*?)<\/t>/g;
+  for (let match = matcher.exec(xml); match; match = matcher.exec(xml)) {
+    const value = decodeXml(match[1]!);
+    const bytes = Buffer.byteLength(value, "utf8");
+    if (
+      values.length >= limits.maxSharedStringsPerXlsx
+      || budget.sharedStringCount >= limits.maxTotalSharedStrings
+      || bytes > limits.maxSharedStringBytesPerXlsx
+      || budget.sharedStringBytes + bytes > limits.maxTotalSharedStringBytes
+    ) throw new XlsxLimitExceededError();
+    values.push(value);
+    budget.sharedStringCount += 1;
+    budget.sharedStringBytes += bytes;
+  }
+  return values;
+}
+
+function scanWorksheet(xml: string, sharedStrings: readonly string[], limits: HistoricalPreviewLimits, budget: PreviewBudget, signatureValues: string[]) {
+  let cellCount = 0;
+  let dateCandidateCount = 0;
+  let ambiguousDateCandidate = false;
+  let brazilianNumberCandidates = 0;
+  const matcher = /<c\b([^>]*)>([\s\S]*?)<\/c>/g;
+  for (let match = matcher.exec(xml); match; match = matcher.exec(xml)) {
+    if (cellCount >= limits.maxCellsPerWorksheet || budget.cellCount >= limits.maxTotalCells) throw new XlsxLimitExceededError();
+    cellCount += 1;
+    budget.cellCount += 1;
+    const raw = /<v>([\s\S]*?)<\/v>/.exec(match[2]!)?.[1] ?? "";
+    const value = /t="s"/.test(match[1]!) ? sharedStrings[Number(raw)] ?? "" : decodeXml(raw);
+    if (signatureValues.length < 64) signatureValues.push(value);
+    if (/^\d{1,2}[/-]\d{1,2}[/-]\d{2,4}$/.test(value)) {
+      dateCandidateCount += 1;
+      ambiguousDateCandidate ||= ambiguousDate(value);
+    }
+    if (/^-?\d{1,3}(?:\.\d{3})*,\d+$/.test(value)) brazilianNumberCandidates += 1;
+  }
+  return { dateCandidateCount, ambiguousDateCandidate, brazilianNumberCandidates };
+}
 function decodeXml(value: string) { return value.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'"); }
 function normalizeForSignature(value: string) { return value.trim().toLocaleLowerCase("pt-BR").replace(/\d+/g, "#").replace(/\s+/g, " "); }
 function ambiguousDate(value: string) { const [first, second] = value.split(/[/-]/).map(Number); return first <= 12 && second <= 12; }

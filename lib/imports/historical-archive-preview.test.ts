@@ -165,3 +165,70 @@ test("multiple synthetic archives share one budget rather than resetting per ZIP
   assert.ok(result.archives.slice(3).every((archive) =>
     archive.entries[0]?.status === "rejected"));
 });
+
+test("rejects XLSX XML, worksheet, and cell limits explicitly instead of classifying them as unknown", () => {
+  const tooManyWorksheets = syntheticWorkbook({ worksheetCount: 2 });
+  const oversizedXml = syntheticWorkbook({ worksheetXml: `<worksheet>${"x".repeat(256)}</worksheet>` });
+  const tooManyCells = syntheticWorkbook({ cellsPerWorksheet: 3 });
+  const worksheetResult = previewHistoricalArchives([{ bytes: syntheticZip([{ name: "worksheets.xlsx", bytes: tooManyWorksheets }]) }], { maxWorksheetsPerXlsx: 1 });
+  const xmlResult = previewHistoricalArchives([{ bytes: syntheticZip([{ name: "xml.xlsx", bytes: oversizedXml }]) }], { maxXmlBytesPerPart: 128 });
+  const cellResult = previewHistoricalArchives([{ bytes: syntheticZip([{ name: "cells.xlsx", bytes: tooManyCells }]) }], { maxCellsPerWorksheet: 2 });
+
+  for (const result of [worksheetResult, xmlResult, cellResult]) {
+    const entry = result.archives[0]!.entries[0]!;
+    assert.equal(entry.kind, "xlsx");
+    assert.equal(entry.status, "rejected");
+    assert.deepEqual(entry.errors, ["xlsx_limit_exceeded"]);
+  }
+});
+
+test("shares XML, cell, worksheet, and shared-string budgets across synthetic XLSX files", () => {
+  const workbook = syntheticWorkbook({ worksheetCount: 1, cellsPerWorksheet: 2, sharedStrings: ["one", "two"] });
+  const archive = syntheticZip([{ name: "first.xlsx", bytes: workbook }, { name: "second.xlsx", bytes: workbook }]);
+
+  const cases = [
+    { limits: { maxCellsPerWorksheet: 2, maxTotalCells: 3 }, result: previewHistoricalArchives([{ bytes: archive }], { maxCellsPerWorksheet: 2, maxTotalCells: 3 }) },
+    { limits: { maxWorksheetsPerXlsx: 1, maxTotalWorksheets: 1 }, result: previewHistoricalArchives([{ bytes: archive }], { maxWorksheetsPerXlsx: 1, maxTotalWorksheets: 1 }) },
+    { limits: { maxSharedStringsPerXlsx: 2, maxTotalSharedStrings: 3 }, result: previewHistoricalArchives([{ bytes: archive }], { maxSharedStringsPerXlsx: 2, maxTotalSharedStrings: 3 }) },
+    { limits: { maxXmlBytesPerPart: 256, maxTotalXmlBytes: 350 }, result: previewHistoricalArchives([{ bytes: archive }], { maxXmlBytesPerPart: 256, maxTotalXmlBytes: 350 }) },
+  ];
+
+  for (const { limits, result } of cases) {
+    assert.equal(result.archives[0]!.entries[0]!.kind, "xlsx");
+    assert.ok(result.archives[0]!.entries.some((entry) => entry.errors.includes("xlsx_limit_exceeded")));
+    assert.deepEqual(result, previewHistoricalArchives([{ bytes: archive }], limits));
+  }
+});
+
+test("rejects excessive shared-string count and byte size using synthetic XLSX only", () => {
+  const countWorkbook = syntheticWorkbook({ sharedStrings: ["one", "two"] });
+  const byteWorkbook = syntheticWorkbook({ sharedStrings: ["x".repeat(64)] });
+  const countResult = previewHistoricalArchives([{ bytes: syntheticZip([{ name: "count.xlsx", bytes: countWorkbook }]) }], { maxSharedStringsPerXlsx: 1 });
+  const byteResult = previewHistoricalArchives([{ bytes: syntheticZip([{ name: "bytes.xlsx", bytes: byteWorkbook }]) }], { maxSharedStringBytesPerXlsx: 32 });
+
+  for (const result of [countResult, byteResult]) {
+    const entry = result.archives[0]!.entries[0]!;
+    assert.equal(entry.kind, "xlsx");
+    assert.equal(entry.status, "rejected");
+    assert.deepEqual(entry.errors, ["xlsx_limit_exceeded"]);
+  }
+});
+
+function syntheticWorkbook(options: Readonly<{
+  worksheetCount?: number;
+  worksheetXml?: string;
+  cellsPerWorksheet?: number;
+  sharedStrings?: readonly string[];
+}> = {}): Uint8Array {
+  const worksheetCount = options.worksheetCount ?? 1;
+  const cells = Array.from({ length: options.cellsPerWorksheet ?? 1 }, (_, index) => `<c><v>${index}</v></c>`).join("");
+  const worksheetXml = options.worksheetXml ?? `<worksheet><sheetData><row>${cells}</row></sheetData></worksheet>`;
+  const sheets = Array.from({ length: worksheetCount }, (_, index) => `<sheet name="Synthetic${index + 1}" sheetId="${index + 1}"/>`).join("");
+  const members = [
+    { name: "[Content_Types].xml", bytes: text("<Types/>") },
+    { name: "xl/workbook.xml", bytes: text(`<workbook><sheets>${sheets}</sheets></workbook>`) },
+    ...Array.from({ length: worksheetCount }, (_, index) => ({ name: `xl/worksheets/sheet${index + 1}.xml`, bytes: text(worksheetXml) })),
+  ];
+  if (options.sharedStrings) members.push({ name: "xl/sharedStrings.xml", bytes: text(`<sst>${options.sharedStrings.map((value) => `<si><t>${value}</t></si>`).join("")}</sst>`) });
+  return syntheticZip(members);
+}
