@@ -11,7 +11,7 @@ import { getOperationalPendingItemsForCurrentAdmin } from "@/lib/operations/pend
 import { readClientDirectoryPendingView, matchesClientDirectoryPendingView, countClientDirectoryPendingViews, CLIENT_DIRECTORY_PENDING_VIEW_LABELS } from "@/lib/operations/client-directory-pending-view";
 import { withClientDirectoryReturn } from "@/lib/operations/client-directory-return";
 import { summarizeClientPendingItems, describeClientPendingSummary } from "@/lib/operations/client-pending-summary";
-import { listClientsAssignedToCurrentAdmin } from "@/lib/supabase/data-access";
+import { listAllClientsForCurrentAdmin } from "@/lib/supabase/data-access";
 import Link from "next/link";
 import styles from "./page.module.css";
 
@@ -34,15 +34,11 @@ export default async function AdminClientesPage({
   searchParams,
 }: AdminClientesPageProps) {
   const { assignment, onboarding, q, view, pagina } = await searchParams;
-  const [assignments, pendingItems] = await Promise.all([
-    listClientsAssignedToCurrentAdmin(),
+  const [allClients, pendingItems] = await Promise.all([
+    listAllClientsForCurrentAdmin(),
     getOperationalPendingItemsForCurrentAdmin(),
   ]);
-  const clients = (
-    assignments?.flatMap((assignment) =>
-      assignment.clients ? [assignment.clients] : [],
-    ) ?? []
-  ).sort((left, right) => {
+  const clients = [...allClients].sort((left, right) => {
     const leftName = left.full_name?.trim() || left.profiles?.display_name?.trim();
     const rightName = right.full_name?.trim() || right.profiles?.display_name?.trim();
 
@@ -77,7 +73,7 @@ export default async function AdminClientesPage({
   return (
     <>
       <PageHeader
-        description="Gerencie os acompanhamentos, encontre registros e acompanhe as próximas ações em um só lugar."
+        description="Consulte todas as clientes da consultoria, incluindo cadastros históricos e acompanhamentos encerrados."
         eyebrow="Admin"
         title="Clientes"
         primaryAction={<Link className={styles.primaryActionLink} href="/admin/clientes/nova">+ Convidar cliente</Link>}
@@ -107,7 +103,7 @@ export default async function AdminClientesPage({
           </Link>
         }
         description="Consulte quem precisa de atenção, acompanhe respostas e encontre rapidamente cada cliente."
-        title="Em acompanhamento"
+        title="Todas as clientes"
       >
         <div className={styles.queueSummary}>
           <p role="status"><strong>{clientsWithPattyActions} cliente(s)</strong> com {actionablePattyItems} ação(ões) para revisão nos acompanhamentos autorizados.</p>
@@ -146,7 +142,7 @@ export default async function AdminClientesPage({
         </form>
 
         {clients.length === 0 ? (
-          <p className={styles.emptyMessage}>Nenhuma cliente está em acompanhamento no momento.</p>
+          <p className={styles.emptyMessage}>Nenhuma cliente cadastrada até o momento.</p>
         ) : filteredClients.length === 0 ? (
           <div className={styles.emptyMessage}>
             <p role="status">{viewFilter !== "all" ? `Nenhuma cliente no grupo “${CLIENT_DIRECTORY_PENDING_VIEW_LABELS[viewFilter]}” corresponde aos filtros atuais.` : `Nenhuma cliente corresponde à busca por “${searchTerm}”.`}</p>
@@ -217,19 +213,19 @@ export default async function AdminClientesPage({
                     secondary={
                       !displayName
                         ? "Corrija o nome antes de considerar este cadastro regular."
-                        : client.profile_id
-                          ? client.status === "active"
+                        : client.status === "inactive"
+                          ? "Cliente inativa · histórico preservado"
+                          : client.profile_id
                             ? "Cliente ativa"
-                            : "Cliente inativa"
-                          : "Identidade de acesso não vinculada"
+                            : "Identidade de acesso não vinculada"
                     }
                     status={
                       !displayName ? (
                         <Badge variant="critical">Nome obrigatório</Badge>
-                      ) : !client.profile_id ? (
-                        <Badge variant="warning">Completar cadastro</Badge>
                       ) : client.status === "inactive" ? (
                         <Badge variant="neutral">Inativa</Badge>
+                      ) : !client.profile_id ? (
+                        <Badge variant="warning">Completar cadastro</Badge>
                       ) : nextPattyPending ? (
                         <Badge variant="warning">Ação profissional</Badge>
                       ) : (
