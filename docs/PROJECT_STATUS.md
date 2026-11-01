@@ -1,3 +1,15 @@
+## 2026-11-01 — RBAC-ADMIN-WRITE-01: registrar acompanhamento em avaliação histórica (em validação)
+
+**Escopo fechado:** migration `20261101124800_admin_global_professional_follow_up_insert.sql` adiciona somente INSERT administrativo de `professional_follow_ups` para admin com role relacional e MFA AAL2, mesmo sem assignment, **apenas quando vinculado a avaliação finalizada do mesmo Client**. Preserva autoria por `auth.uid()`, motivo/decisão explícitos, FK client/avaliação e trigger de finalização, histórico append-only sem UPDATE/DELETE, isolamento do cliente, e nenhuma publicação. Falha fechada se RLS/MFA, política SELECT da etapa anterior, trigger/FK ou privilégios esperados estiverem ausentes. Política anterior de assignment permanece.
+
+**Backend/UI:** a Server Action J3 continua exigindo `requireRole("admin")` e avaliação finalizada; mensagem de indisponibilidade deixa de mencionar assignment como único acesso. Novos testes estáticos em `security/admin-global-professional-follow-up.test.mjs` e pgTAP sintético local em `supabase/tests/database/admin_global_professional_follow_up.test.sql` (registrado no workflow de banco) cobrem caso positivo sem assignment, autor real e negações por AAL1, cliente, role ausente, autor forjado, draft e cliente de avaliação divergente.
+
+**Estado técnico:** implementado/commitado na branch; CI e pgTAP ainda devem comprovar sucesso antes do merge. **Dependência obrigatória de rollout:** a migration SELECT `20261101121000` da PR #1054 está integrada à master, mas em 01/11 o Supabase de produção ainda exibia 0 policies `admin_global_select_aal2`. Nenhuma migration desta frente foi aplicada à produção, nenhum dado pessoal foi acessado ou alterado, e nenhuma publicação/aceite está implícita. Só usar o workflow versionado explícito de produção; não executar SQL privilegiado direto por MCP. Cota/deploy não presumidos.
+
+**Fora de escopo:** escrita em outras entidades, mudanças em avaliações rascunho, Storage, protocolos, publicação de IA ou acervo histórico. Próxima pendência: demais escritas administrativas por domínio e Storage privado; homologação profissional conjunta J1–J7 ao final.
+
+---
+
 ## 2026-11-01 — RBAC-ADMIN-READ-01: leitura administrativa global, separada de mutações (em validação)
 
 **Regra já confirmada:** `admin` acessa dados profissionais de todas as clientes, inclusive históricas/inativas e sem assignment. Esta entrega implementa **somente a parte de SELECT**, sem antecipar permissão de atualização ou publicação. Uma migration nova `20261101121000_admin_global_read_aal2.sql` enumera **73 tabelas existentes** de `public` (exceto `user_roles`) e adiciona SELECT permissivo para role relacional `admin` com `aal2` explícito, abortando se RLS ou policy MFA restritiva existente estiver ausente. Não modifica nem remove policies anteriores, grants, versões, triggers ou imutabilidade. Novas tabelas futuras não recebem acesso sem revisão específica.
