@@ -105,7 +105,7 @@ WITH CHECK (
 
 -- The existing trigger's assigned-admin check would reject the new role-only
 -- path before RLS INSERT. Preserve its assigned-admin branch and add a
--- separately verified AAL2/author branch, without SECURITY DEFINER.
+-- separately verified AAL2/author branch under invoker privileges.
 CREATE OR REPLACE FUNCTION public.validate_anamnesis_clarification_resolution()
 RETURNS trigger
 LANGUAGE plpgsql
