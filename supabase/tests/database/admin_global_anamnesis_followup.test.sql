@@ -155,7 +155,7 @@ SELECT throws_ok($sql$
  INSERT INTO public.anamnesis_clarification_requests(submission_id,requested_by_profile_id,request_text)
  VALUES ('c5000000-0000-4000-8000-000000000001',
  'c1000000-0000-4000-8000-000000000001','AAL1 denied')
-$sql$,'42501',NULL,'Admin AAL1 cannot request clarification');
+$sql$,'55000',NULL,'Admin AAL1 cannot request clarification');
 
 SELECT set_config('request.jwt.claim.sub','c1000000-0000-4000-8000-000000000002',true);
 SELECT set_config('request.jwt.claims','{"sub":"c1000000-0000-4000-8000-000000000002","aal":"aal2","role":"authenticated"}',true);
@@ -168,7 +168,7 @@ SELECT throws_ok($sql$
  INSERT INTO public.anamnesis_clarification_requests(submission_id,requested_by_profile_id,request_text)
  VALUES ('c5000000-0000-4000-8000-000000000001',
  'c1000000-0000-4000-8000-000000000002','Client denied')
-$sql$,'42501',NULL,'Client cannot create professional clarification request');
+$sql$,'55000',NULL,'Client cannot create professional clarification request');
 SELECT throws_ok($sql$
  INSERT INTO public.anamnesis_clarification_resolutions(clarification_request_id,resolved_by_profile_id)
  VALUES ('c7000000-0000-4000-8000-000000000001',
