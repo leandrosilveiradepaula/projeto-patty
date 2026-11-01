@@ -23,7 +23,7 @@ export async function addAnamnesisReviewNote(
 
   if (!submission) {
     return {
-      message: "Esta Anamnese não está acessível para sua atribuição atual.",
+      message: "Esta Anamnese não está disponível para revisão profissional.",
       success: false,
     };
   }
