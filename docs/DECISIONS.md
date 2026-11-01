@@ -1,3 +1,17 @@
+## 2026-11-01 — Papel admin: acesso integral aos dados profissionais da consultoria
+
+### REGRA DE PRODUTO CONFIRMADA PELO RESPONSÁVEL (substitui restrição geral por assignment)
+
+Qualquer identidade **legitimamente provisionada** com o papel relacional `user_roles.role = admin` deve poder **consultar e gerir todos os dados e módulos profissionais da consultoria** relativos a todas as clientes, ativas ou inativas, com ou sem `client_assignments` ativo, incluindo Cadastro Atual, Anamnese, avaliações, medidas, fotos, exames, documentos privados, protocolos, treino, conteúdos e histórico. A autorização administrativa **não depende do assignment**. Esta decisão substitui expressamente as regras conceituais anteriores que limitavam o escopo de admin ao assignment atual ou reservavam a exceção de leitura de arquivos somente à pessoa titular da conta administradora inicial.
+
+**Limites técnicos obrigatórios preservados:** autenticação de identidade e role relacional verificadas; MFA `aal2` obrigatório no servidor e em RLS para admins; RLS e Storage privado mantidos; `service_role` não disponibilizada no browser; autoria e trilhas de auditoria preservadas. Acesso administrativo integral não transforma registros imutáveis em editáveis, não autoriza exclusão destrutiva arbitrária, autoatribuição de role, obtenção de senhas ou publicação direta por IA. Edição, exclusão, liberação e publicação seguem os workflows, aprovações e controles próprios do domínio. Clientes comuns continuam restritas aos próprios dados e versões publicadas/autorizadas.
+
+**Separação de fato e implementação:** a decisão acima é normativa, mas o banco e o runtime atuais ainda possuem policies/actions condicionadas a assignments. Não tratar a autorização como já aplicada: inventariar as boundaries, versionar as mudanças RLS/Storage em migrations NOVAS, provar negação para anon/cliente/admin AAL1 e acesso de admin AAL2 sem assignment em ambiente descartável, revisar cada diff de segurança e aplicar na produção somente por workflow autorizado. O modelo operacional atual ainda tem uma única conta admin; isso não muda a semântica da role nem autoriza provisionar mais administradores automaticamente.
+
+Registro: [#1008](https://github.com/leandrosilveiradepaula/projeto-patty/issues/1008#issuecomment-6557663283).
+
+---
+
 ## 2026-11-01 — Acervo de clientes anteriores sem conta de acesso e retorno ao acompanhamento
 
 ### DECISÃO DE PRODUTO CONFIRMADA PELO RESPONSÁVEL
