@@ -63,6 +63,9 @@ jobs:
           test -f supabase/tests/database/method_configuration_version_activation.test.sql
           test -f supabase/tests/database/weekly_feedback_eligibility_schedule.test.sql
           test -f supabase/tests/database/weekly_feedback_private_save_lifecycle.test.sql
+          test -f supabase/migrations/20261101121000_admin_global_read_aal2.sql
+          test -f supabase/migrations/20261101124800_admin_global_professional_follow_up_insert.sql
+          test -f supabase/tests/database/admin_global_professional_follow_up.test.sql
           echo "Committed method configuration migrations and pgTAP files found."
 
       - name: Start local Supabase
@@ -112,6 +115,9 @@ jobs:
 
       - name: Run weekly feedback authenticated save lifecycle pgTAP
         run: npx supabase test db supabase/tests/database/weekly_feedback_private_save_lifecycle.test.sql
+
+      - name: Run admin global professional follow-up pgTAP
+        run: npx supabase test db supabase/tests/database/admin_global_professional_follow_up.test.sql
 
       - name: Stop local Supabase
         if: always()
