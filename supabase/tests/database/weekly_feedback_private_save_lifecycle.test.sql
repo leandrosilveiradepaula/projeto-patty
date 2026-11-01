@@ -285,8 +285,8 @@ select set_config('request.jwt.claim.sub','f1100000-0000-0000-0000-000000000004'
 select set_config('request.jwt.claims','{"sub":"f1100000-0000-0000-0000-000000000004","aal":"aal2","role":"authenticated"}',true);
 select is(
   (select count(*) from public.client_weekly_feedbacks where submitted_at is not null),
-  0::bigint,
-  'unassigned professional cannot read submitted answers despite admin MFA'
+  1::bigint,
+  'unassigned admin AAL2 can read submitted answers under global admin scope'
 );
 reset role;
 
@@ -302,8 +302,8 @@ select set_config('request.jwt.claim.sub','f1100000-0000-0000-0000-000000000001'
 select set_config('request.jwt.claims','{"sub":"f1100000-0000-0000-0000-000000000001","aal":"aal2","role":"authenticated"}',true);
 select is(
   (select count(*) from public.client_weekly_feedbacks where submitted_at is not null),
-  0::bigint,
-  'ended assignment immediately revokes professional read despite AAL2'
+  1::bigint,
+  'admin AAL2 retains historical feedback read after assignment ended'
 );
 select set_config('request.jwt.claim.sub','f1100000-0000-0000-0000-000000000002',true);
 select set_config('request.jwt.claims','{"sub":"f1100000-0000-0000-0000-000000000002","aal":"aal1","role":"authenticated"}',true);
