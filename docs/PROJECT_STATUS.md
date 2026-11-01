@@ -1,3 +1,13 @@
+## 2026-11-01 — MIGR-HIST-04: decisão de cadastro interno sem Auth (confirmada; implementação pendente)
+
+O responsável confirmou que clientes anteriores podem ter cadastro profissional interno para preservar histórico **sem conta de acesso**. Ao retornar ou iniciar novo acompanhamento, a cliente deverá completar Cadastro Atual e finalizar login/senha. O modelo existente já separa `Client` de `Auth User` e `Profile` e prevê `clients.profile_id` nullable; não criar tabela paralela, não associar automaticamente por nome/e-mail e não duplicar Client no retorno.
+
+**Estado:** decisão documentada, sem implementação de criação de cliente histórica, importação real, alteração de Auth/RLS/migration, assignment, upload, envio de convite ou publicação. O fluxo atual de iniciar assignment marca `active`, mas não comprova cadastro e acesso finalizados; desenho de retorno com gates precisa ser validado separadamente. Identidade, acesso a históricos de inativas, retenção de originais e mapeamento de planilhas permanecem bloqueios explícitos.
+
+**Próxima tarefa:** especificação e teste sintético do vínculo seguro para Cliente pré-existente; só implementar persistência após resolver os gates de autorização/retencão. Homologação humana conjunta J1–J7 continua a última tarefa. Cartão #1008: [DEC-MIGR-HIST-04](https://github.com/leandrosilveiradepaula/projeto-patty/issues/1008#issuecomment-6554471897).
+
+---
+
 ## 2026-11-01 — MIGR-HIST-03C: decisões ambíguas bloqueiam a entrada integral (PR em validação)
 
 **Defeito identificado no preview offline:** se uma entrada recebesse uma decisão válida e outra com hash/UUID/cliente inválido, a avaliação individual da segunda decisão podia ser bloqueada, mas a entrada continuava como `pending_backend_identity_verification`. O resultado não podia ser usado como evidência inequívoca de conciliação humana.
