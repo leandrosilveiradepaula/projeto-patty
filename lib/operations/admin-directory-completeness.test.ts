@@ -18,6 +18,10 @@ test("global client directory stays complete while operational dashboard remains
  const dashboard=read("app/admin/page.tsx"),clients=read("app/admin/clientes/page.tsx"),pending=read("lib/operations/pending-data.ts");
  assert.match(dashboard,/listClientsAssignedToCurrentAdmin\(\)/);
  assert.match(dashboard,/listAccessibleClientAssessments\(\)/);
- assert.match(clients,/listClientsAssignedToCurrentAdmin\(\)/);
+ assert.match(clients,/listAllClientsForCurrentAdmin\\(\\)/);
+ assert.doesNotMatch(clients,/listClientsAssignedToCurrentAdmin\\(\\)/);
+ const all=func("listAllClientsForCurrentAdmin");
+ for(const v of ['requireRole("admin")','createClient()','collectAdminDirectoryPages(','.from("clients")','.range(from, to)']) assert.ok(all.includes(v),v);
+ assert.doesNotMatch(all,/createAdminClient|service_role|client_assignments/);
  assert.match(pending,/listClientsAssignedToCurrentAdmin\(\)/);
 });
