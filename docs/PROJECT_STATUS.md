@@ -1,3 +1,13 @@
+## 2026-11-01 — RBAC-ADMIN-STORAGE-READ-01: diretório de arquivos privados pelo RLS (em validação)
+
+**Entrega funcional:** `/admin/arquivos` e a resolução exata de cliente em `/admin/clientes/[clienteId]/arquivos` passam a usar `requireRole("admin")`, MFA AAL2 e `createClient()` com sessão própria, sem `createAdminClient` nas duas leituras de `clients`. Preservadas a paginação e ordenação completas, inclusive Client inativo sem Profile e sem assignment, o acesso de arquivos privados por sessão/RLS, URLs assinadas com validade curta e eventos auditáveis de visualização de documentos/exames. A mudança não altera o upload administrativo nem a liberação manual de arquivos para clientes, cujas escritas privilegiadas permanecem sujeitas aos gates específicos existentes.
+
+**Segurança e rollout:** a policy de Storage privado já contempla administrador com role relacional e policy RESTRICTIVE MFA, sem assignment. Não foi alterada. A leitura de `clients` sem assignment depende da migration global `20261101121000_admin_global_read_aal2.sql` previamente aprovada na PR #1054. A migration segue não aplicada no Supabase SaaS na última conferência. **Não mergear nem publicar esta alteração de runtime antes de aplicar e verificar a SELECT global em produção por workflow oficial**, para evitar regressão no diretório de arquivos. Não executar DDL diretamente por SQL/MCP. Sem testes com dados de clientes reais.
+
+**Verificações previstas:** regressão operacional de diretório, fronteira de segurança de MFA/RLS/auditoria e CI J1 com backend descartável. **Estados separados:** código commitado na branch; testes/merge/aplicação/deploy/homologação dependem de evidências adicionais. Próximo escopo: operações administrativas de escrita por domínio, preservando versões, autoria, aprovação e histórico. Homologação conjunta J1–J7 permanece a última etapa.
+
+---
+
 ## 2026-11-01 — RBAC-ADMIN-WRITE-01: registrar acompanhamento em avaliação histórica (em validação)
 
 **Escopo fechado:** migration `20261101124800_admin_global_professional_follow_up_insert.sql` adiciona somente INSERT administrativo de `professional_follow_ups` para admin com role relacional e MFA AAL2, mesmo sem assignment, **apenas quando vinculado a avaliação finalizada do mesmo Client**. Preserva autoria por `auth.uid()`, motivo/decisão explícitos, FK client/avaliação e trigger de finalização, histórico append-only sem UPDATE/DELETE, isolamento do cliente, e nenhuma publicação. Falha fechada se RLS/MFA, política SELECT da etapa anterior, trigger/FK ou privilégios esperados estiverem ausentes. Política anterior de assignment permanece.
