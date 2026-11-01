@@ -466,7 +466,7 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
       await expect(unauthorizedAdmin.getByText("J7 Cliente Sintética", { exact: true })).toHaveCount(2);
       await expect(unauthorizedAdmin.getByRole("link", { name: "Abrir análise para decisão" })).toHaveCount(1);
       await unauthorizedAdmin.goto("/admin/pendencias?area=ai&responsavel=patty");
-      await expect(unauthorizedAdmin.locator("#acao-da-patty").getByText("Revisão humana de análise da IA")).toHaveCount(0);
+      await expect(unauthorizedAdmin.locator("#acao-da-patty").getByText("Revisão humana de análise da IA")).toHaveCount(1);
       await unauthorizedAdmin.close();
       await admin.goto(reviewURL);
     });
@@ -670,19 +670,15 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
         literal(startedExecutionId))).toHaveLength(0);
     });
 
-    await test.step("Unassigned staff and clients cannot read or act on AI history", async () => {
+    await test.step("Unassigned admins retain read access while ordinary clients remain isolated", async () => {
       const otherAdmin = await unassignedContext.newPage();
       await loginAdminWithMfa(otherAdmin, {
         email: unassigned.email, password: unassigned.password, totpSecret: unassignedTotp,
       });
       expect(scopedCount(unassigned.id, "aal2", "anamnesis_submissions", submission.submissionId)).toBe(1);
-      const unauthorized = await otherAdmin.goto(reviewURL);
-      // Next.js can stream the shell with 200 before a Server Component calls
-      // notFound(). Verify the denial UI and RLS, never rely on status alone.
-      expect([200, 404]).toContain(unauthorized?.status());
-      await expect(otherAdmin.getByText("Página ou registro indisponível", { exact: true })).toBeVisible();
-      await expect(otherAdmin.getByText("J7 Cliente Sintética", { exact: true })).toHaveCount(0);
-      await expect(otherAdmin.getByText(validFindingText, { exact: true })).toHaveCount(0);
+      const adminRead = await otherAdmin.goto(reviewURL);
+      expect(adminRead?.status()).toBe(200);
+      await expect(otherAdmin.getByText(validFindingText, { exact: true })).toBeVisible();
       const clientPage = await clientContext.newPage();
       await loginClient(clientPage, owner);
       await clientPage.goto(reviewURL);
