@@ -55,7 +55,7 @@ export async function addProfessionalFollowUp(
 
   if (!assessment) {
     return {
-      message: "Esta avaliação não está acessível para sua atribuição atual.",
+      message: "Esta avaliação não está disponível para registro profissional.",
       success: false,
     };
   }
