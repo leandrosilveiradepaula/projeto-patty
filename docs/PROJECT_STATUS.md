@@ -1,3 +1,13 @@
+## 2026-11-01 — MIGR-HIST-03C: decisões ambíguas bloqueiam a entrada integral (PR em validação)
+
+**Defeito identificado no preview offline:** se uma entrada recebesse uma decisão válida e outra com hash/UUID/cliente inválido, a avaliação individual da segunda decisão podia ser bloqueada, mas a entrada continuava como `pending_backend_identity_verification`. O resultado não podia ser usado como evidência inequívoca de conciliação humana.
+
+**Correção em branch:** agrupar todas as decisões da mesma entrada, inclusive as já inválidas, bloquear quaisquer candidatas válidas quando existe multiplicidade e priorizar estado `blocked` no manifesto por arquivo. Motivos específicos preexistentes de invalidação permanecem preservados. Testes sintéticos cobrem hash divergente, cliente ausente, UUID inválido, decisão válida isolada, entrada não afetada e determinismo sob reordenação. Nenhum acesso real a arquivos, dados de saúde, Supabase, Auth, RLS, schema/migrations, UI, upload, persistência ou publicação.
+
+**Estados:** implementação e commits em branch; Validate application, merge e publicação devem ser verificados separadamente. Política de retenção, acesso ao histórico de inativas, mapeamento de planilhas e confirmação de identidade backend continuam pendentes. Homologação conjunta J1–J7 é última.
+
+---
+
 ## 2026-11-01 — MIGR-HIST-03B: prévia offline de conciliação de acervo histórico (em validação)
 
 **Implementado somente na branch:** `lib/imports/historical-reconciliation-preview.ts` recebe o manifesto já sanitizado de ZIP/XLSX e um snapshot explícito mínimo de `client_id` + `clients.status`. Produz uma prévia determinística, em memória e sem PII, que identifica cada arquivo por `archive_id`/hash e `entry_id`/hash, registra decisão humana explícita de associação e deixa a confirmação de identidade para backend autorizado posterior.

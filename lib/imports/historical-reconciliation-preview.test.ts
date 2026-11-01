@@ -80,6 +80,30 @@ test("blocks invalid IDs, absent clients, mismatched hashes, and unknown entries
   assert.equal(result.files[0]!.association.status, "blocked");
 });
 
+test("fails closed when a valid association shares its entry with an invalid human decision", () => {
+  const preview = archivePreview([{ name: "first.png", bytes: syntheticPng }, { name: "second.png", bytes: new Uint8Array([...syntheticPng, 1]) }]);
+  const [first, second] = preview.archives[0]!.entries;
+  const valid = { entry_id: first!.entry_id, entry_sha256: first!.sha256!, client_id: ACTIVE_CLIENT };
+  const cases = [
+    { entry_id: first!.entry_id, entry_sha256: "0".repeat(64), client_id: ACTIVE_CLIENT },
+    { entry_id: first!.entry_id, entry_sha256: first!.sha256!, client_id: "33333333-3333-4333-8333-333333333333" },
+    { entry_id: first!.entry_id, entry_sha256: first!.sha256!, client_id: "bad-uuid" },
+  ];
+
+  for (const invalid of cases) {
+    const decisionList = [valid, invalid];
+    const result = previewHistoricalReconciliation(preview, clients(), decisionList);
+    assert.equal(result.files.find((file) => file.entry_id === first!.entry_id)!.association.status, "blocked");
+    assert.equal(result.files.find((file) => file.entry_id === second!.entry_id)!.association.status, "pending_human_decision");
+    assert.ok(result.decisions.filter((decision) => decision.entry_id === first!.entry_id).every((decision) => decision.status === "blocked"));
+    assert.equal(result.summary.pending_backend_identity_verification_count, 0);
+    assert.deepEqual(result, previewHistoricalReconciliation(preview, clients(), [...decisionList].reverse()));
+  }
+
+  const onlyValid = previewHistoricalReconciliation(preview, clients(), [valid]);
+  assert.equal(onlyValid.files.find((file) => file.entry_id === first!.entry_id)!.association.status, "pending_backend_identity_verification");
+});
+
 test("is deterministic when identical human decisions arrive in a different order", () => {
   const preview = archivePreview([{ name: "one.png", bytes: syntheticPng }, { name: "two.png", bytes: new Uint8Array([...syntheticPng, 1]) }]);
   const [first, second] = preview.archives[0]!.entries;

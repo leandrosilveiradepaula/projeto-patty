@@ -199,14 +199,14 @@ function evaluateDecision(decision: HistoricalAssociationDecision, filesByEntryI
 function blockDuplicateAndConflictingDecisions(evaluated: readonly EvaluatedDecision[], reasons: Map<EvaluatedDecision, ReconciliationBlockReason | undefined>) {
   const byEntry = new Map<string, EvaluatedDecision[]>();
   for (const item of evaluated) {
-    if (!item.file || reasons.get(item)) continue;
+    if (!item.file) continue;
     byEntry.set(item.file.entry_id, [...(byEntry.get(item.file.entry_id) ?? []), item]);
   }
   for (const group of byEntry.values()) {
     if (group.length < 2) continue;
     const clientIds = new Set(group.map((item) => item.decision.client_id));
     const reason = clientIds.size > 1 ? "conflicting_client_association" : "duplicate_human_decision";
-    for (const item of group) reasons.set(item, reason);
+    for (const item of group) if (!reasons.get(item)) reasons.set(item, reason);
   }
 }
 
@@ -248,10 +248,10 @@ function toFilePreview(file: HistoricalFile, decisions: readonly HistoricalAssoc
   const blockedDecision = decisions.find((decision) => decision.status === "blocked");
   const association = file.source_status === "rejected"
     ? { status: "blocked" as const, reason: "source_entry_rejected" as const }
-    : pendingDecision
-      ? { status: "pending_backend_identity_verification" as const, client_id: pendingDecision.client_id, client_status: clientsById.get(pendingDecision.client_id)?.client_status }
-      : blockedDecision
-        ? { status: "blocked" as const, reason: blockedDecision.reason! }
+    : blockedDecision
+      ? { status: "blocked" as const, reason: blockedDecision.reason! }
+      : pendingDecision
+        ? { status: "pending_backend_identity_verification" as const, client_id: pendingDecision.client_id, client_status: clientsById.get(pendingDecision.client_id)?.client_status }
       : { status: "pending_human_decision" as const };
   return {
     ...file,
