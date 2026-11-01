@@ -1,6 +1,8 @@
 import "server-only";
 
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
+import { requireRole } from "@/lib/supabase/auth";
 import { collectPrivateFilePages, orderPrivateFileHistory } from "@/lib/files/private-file-pagination";
 import { classifyPrivateFileReleasePostcondition } from "@/lib/files/private-file-release-postcondition";
 import type { PrivateFileKind } from "@/lib/validation/private-files";
@@ -8,9 +10,10 @@ import type { PrivateFileKind } from "@/lib/validation/private-files";
 const PRIVATE_FILE_BUCKET = "client-private";
 
 export async function listClientsForPrivateFileAdministration() {
-  const admin = createAdminClient();
-  // Only the dedicated administrative workspace calls this privileged read.
-  const rows = await collectPrivateFilePages((from, to) => admin
+  await requireRole("admin");
+  const supabase = await createClient();
+  // Session-scoped RLS enforces admin MFA and the global SELECT allowlist.
+  const rows = await collectPrivateFilePages((from, to) => supabase
     .from("clients")
     .select("id, profile_id, full_name, status, created_at, profiles(display_name)")
     .order("created_at", { ascending: false })
@@ -20,8 +23,9 @@ export async function listClientsForPrivateFileAdministration() {
 }
 
 export async function getClientForPrivateFileAdministration(clientId: string) {
-  const admin = createAdminClient();
-  const { data, error } = await admin
+  await requireRole("admin");
+  const supabase = await createClient();
+  const { data, error } = await supabase
     .from("clients")
     .select("id, profile_id, full_name, created_at, profiles(display_name)")
     .eq("id", clientId)

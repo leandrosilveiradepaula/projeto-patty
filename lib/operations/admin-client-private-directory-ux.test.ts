@@ -30,3 +30,19 @@ test("private client detail rejects malformed IDs before authorized data access"
   assert.match(page, /listAccessibleClientFiles\(clienteId\)/);
   assert.match(page, /Aguardando liberação/);
 });
+
+test("private-file administration directory and exact client lookup use verified MFA session RLS", () => {
+  const source = read("lib/files/private-file-admin.ts");
+  const directory = source.match(/export async function listClientsForPrivateFileAdministration\(\)\s*\{([\s\S]*?)\n\}/)?.[1];
+  const exact = source.match(/export async function getClientForPrivateFileAdministration\(clientId: string\)\s*\{([\s\S]*?)\n\}/)?.[1];
+  assert.ok(directory && exact, "both admin private-file read boundaries exist");
+  for (const body of [directory, exact]) {
+    assert.ok(body.indexOf('await requireRole("admin")') < body.indexOf("await createClient()"), "MFA must precede session query");
+    assert.match(body, /\.from\("clients"\)/);
+    assert.doesNotMatch(body, /createAdminClient|service_role|client_assignments|ended_at/);
+  }
+  assert.match(directory, /collectPrivateFilePages/);
+  assert.match(directory, /orderPrivateFileHistory/);
+  assert.match(exact, /\.eq\("id", clientId\)/);
+  assert.match(read("app/admin/clientes/[clienteId]/arquivos/page.tsx"), /listAccessibleClientFiles\(clienteId\)/);
+});
