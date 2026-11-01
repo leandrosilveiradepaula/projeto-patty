@@ -1,3 +1,13 @@
+## 2026-11-01 — MIGR-HIST-05A: prévia de retorno de cliente histórica sem mutação (em validação)
+
+**Evidência:** o convite de cliente nova (`lib/onboarding/client-invitation.ts`) sempre cria um `Client` novo e inicia assignment; não pode ser reutilizado para vincular `Client` histórico sem duplicação/ativação prematura. DEC-MIGR-HIST-04 está integrada na master (PR #1051).
+
+**Novo helper puro e sintético:** `lib/onboarding/historical-client-return-preflight.ts` apenas sinaliza bloqueios da prévia de retorno. Exige decisão humana explícita para o mesmo `client_id` opaco, cliente existente/inativa sem `profile_id`, nenhum assignment ativo e nenhum `Profile` já associado; snapshots inválidos/duplicados e colisões bloqueiam. Resultado sem bloqueio = `pending_authorized_backend_verification`, **nunca autorização de vínculo, criação de Auth, alteração de status ou publicação**. Testes sintéticos adjacentes cobrem esses casos e determinismo.
+
+**Estados:** implementação commitada em branch; testes CI e merge pendentes de verificação. Sem UI, upload, Supabase, Auth, RLS, migration, dados reais, acervo real, convite, persistência ou homologação. Próxima etapa de backend exige confirmação de identidade autorizada, vínculo atômico/idempotente, atualização do lifecycle de retorno e direitos de acesso restritos; não implementar por inferência. Homologação conjunta J1–J7 permanece a última tarefa.
+
+---
+
 ## 2026-11-01 — MIGR-HIST-04: decisão de cadastro interno sem Auth (confirmada; implementação pendente)
 
 O responsável confirmou que clientes anteriores podem ter cadastro profissional interno para preservar histórico **sem conta de acesso**. Ao retornar ou iniciar novo acompanhamento, a cliente deverá completar Cadastro Atual e finalizar login/senha. O modelo existente já separa `Client` de `Auth User` e `Profile` e prevê `clients.profile_id` nullable; não criar tabela paralela, não associar automaticamente por nome/e-mail e não duplicar Client no retorno.
