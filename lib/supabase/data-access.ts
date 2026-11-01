@@ -16,6 +16,7 @@ import { collectProtocolCatalogPages } from "@/lib/protocol/catalog-pagination";
 
 import type { Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
+import { requireRole } from "@/lib/supabase/auth";
 import { requireConfirmedTrainingMutation } from "@/lib/training/confirmed-mutation";
 
 async function getVerifiedProfileId() {
@@ -81,6 +82,21 @@ export async function getCurrentClient() {
   }
 
   return data;
+}
+
+/**
+ * Global administrative directory: authenticated RLS SELECT + admin role/MFA.
+ * Includes inactive and unlinked historical clients without manufacturing
+ * client assignments. Never use a service-role client for this listing.
+ */
+export async function listAllClientsForCurrentAdmin() {
+  await requireRole("admin");
+  const supabase = await createClient();
+  return collectAdminDirectoryPages((from, to) => supabase
+    .from("clients")
+    .select("id, profile_id, full_name, status, started_at, ended_at, profiles(display_name)")
+    .order("id", { ascending: true })
+    .range(from, to));
 }
 
 export async function listClientsAssignedToCurrentAdmin() {
