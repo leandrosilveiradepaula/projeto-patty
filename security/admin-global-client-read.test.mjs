@@ -19,8 +19,9 @@ test("global admin read only adds policies for existing RLS tables guarded by MF
   assert.match(migration, /r\.role = ''admin''/);
   assert.match(migration, /auth\.jwt\(\) ->> ''aal''/);
   assert.match(migration, /= ''aal2''/);
-  assert.doesNotMatch(migration, /CREATE POLICY[^;]+FOR (?:ALL|UPDATE|INSERT|DELETE)\b/i);
-  assert.doesNotMatch(migration, /\bDROP POLICY\b|\bDISABLE ROW LEVEL SECURITY\b|\bBYPASSRLS\b|\bGRANT\b/i);
+  const sqlOnly = migration.replace(/^--.*$/gm, "");
+  assert.doesNotMatch(sqlOnly, /CREATE POLICY[^;]+FOR (?:ALL|UPDATE|INSERT|DELETE)\b/i);
+  assert.doesNotMatch(sqlOnly, /\bDROP POLICY\b|\bDISABLE ROW LEVEL SECURITY\b|\bBYPASSRLS\b|\bGRANT\b/i);
 });
 
 test("allowlist is explicit and does not broaden roles, mutations or future tables", () => {
