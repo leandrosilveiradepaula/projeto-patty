@@ -98,7 +98,7 @@ SELECT throws_ok(
   $$INSERT INTO public.professional_follow_ups(client_id,assessment_id,author_profile_id,professional_decision,decision_reason)
     VALUES ('e2000000-0000-0000-0000-000000000001','e3000000-0000-0000-0000-000000000001',
       'e1000000-0000-0000-0000-000000000002','maintain','AAL1 forbidden')$$,
-  '42501',NULL,'Admin AAL1 is refused'
+  '55000',NULL,'Admin AAL1 is refused'
 );
 SELECT set_config('request.jwt.claim.sub','e1000000-0000-0000-0000-000000000003',true);
 SELECT set_config('request.jwt.claims','{"sub":"e1000000-0000-0000-0000-000000000003","aal":"aal1","role":"authenticated"}',true);
@@ -106,7 +106,7 @@ SELECT throws_ok(
   $$INSERT INTO public.professional_follow_ups(client_id,assessment_id,author_profile_id,professional_decision,decision_reason)
     VALUES ('e2000000-0000-0000-0000-000000000001','e3000000-0000-0000-0000-000000000001',
       'e1000000-0000-0000-0000-000000000003','maintain','Client forbidden')$$,
-  '42501',NULL,'Client cannot write professional history'
+  '55000',NULL,'Client cannot write professional history'
 );
 SELECT set_config('request.jwt.claim.sub','e1000000-0000-0000-0000-000000000004',true);
 SELECT set_config('request.jwt.claims','{"sub":"e1000000-0000-0000-0000-000000000004","aal":"aal2","role":"authenticated"}',true);
@@ -114,7 +114,7 @@ SELECT throws_ok(
   $$INSERT INTO public.professional_follow_ups(client_id,assessment_id,author_profile_id,professional_decision,decision_reason)
     VALUES ('e2000000-0000-0000-0000-000000000001','e3000000-0000-0000-0000-000000000001',
       'e1000000-0000-0000-0000-000000000004','maintain','No admin role')$$,
-  '42501',NULL,'Authenticated non-admin AAL2 cannot write professional history'
+  '55000',NULL,'Authenticated non-admin AAL2 cannot write professional history'
 );
 RESET ROLE;
 SELECT * FROM finish();
