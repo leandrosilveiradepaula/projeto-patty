@@ -1,3 +1,13 @@
+## 2026-11-01 — RBAC-ADMIN-WRITE-03: revisão humana de Anamnese submetida sem assignment (em validação)
+
+**Implementação:** migration NOVA `20261101135000_admin_global_anamnesis_review_insert.sql` adiciona exclusivamente policy de INSERT em `anamnesis_reviews` para papel relacional `admin` e MFA AAL2, autor humano `reviewer_profile_id=auth.uid()` e `anamnesis_submissions.submitted_at` obrigatório. Não cria avaliação automática, não altera respostas, nem substitui histórico, e não confere UPDATE/DELETE. Verifica RLS habilitada, policy RESTRICTIVE MFA, SELECT global da #1054 e grants append-only antes de criar policy. Não dispensa controles da Server Action existentes.
+
+**Testes:** pgTAP sintético `admin_global_anamnesis_review.test.sql` executado pelo workflow de método em Supabase descartável e boundary estático `security/admin-global-anamnesis-review.test.mjs`; casos positivos com Client inativo/sem Profile/assignment e negativos de AAL1, client, role ausente, autoria forjada e anamnese draft. Não usar PII real em testes. CI do HEAD ainda pendente nesta anotação.
+
+**Rollout:** a migration depende do SELECT global ainda pendente de aplicação em produção, junto às migrations de follow-up e medida histórica. PR #1056 (diretório de arquivos privados por RLS) continua aberta sem merge até prova de aplicação. Integração de código não significa migration aplicada, Vercel publicada ou homologação; workflow oficial `Deploy Supabase migrations` com `apply` explícito e verificação metadata-only é obrigatório. A anamnese final continua pendente de confirmação da Patty; esta autorização permite somente revisão profissional de respostas **já enviadas**, não aprova questionário ou interpretação da IA. Homologação J1–J7 ao final.
+
+---
+
 ## 2026-11-01 — RBAC-ADMIN-WRITE-02: correções históricas de medidas por admin AAL2 (em validação)
 
 **Implementação de backend:** migration **nova** `20261101133000_admin_global_measurement_correction_insert.sql` adiciona policy específica de INSERT em `assessment_measurement_corrections` para admin relacional com JWT AAL2 e autoria igual a `auth.uid()`, independente de assignment ativo. O trigger validador existente é substituído mantendo o ramo histórico de assignment e acrescentando apenas o ramo AAL2 do próprio autor. Ambas as rotas exigem avaliação finalizada; UUID de medida é verificado por join com a avaliação. A migration exige RLS, policy MFA RESTRICTIVE, policy global SELECT da PR #1054 e trigger de imutabilidade, falhando fechado se ausentes. Não concede UPDATE/DELETE/anon INSERT, não altera medidas originais, avaliações ou liberação para a cliente.
