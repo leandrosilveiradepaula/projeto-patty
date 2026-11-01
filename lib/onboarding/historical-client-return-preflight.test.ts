@@ -50,7 +50,7 @@ test("requires explicit human identity review of the same opaque client id", () 
 test("blocks missing, duplicate, linked or currently active clients", () => {
   for (const changes of [
     { clients: [] },
-    { clients: [fixture().clients[0], fixture().clients[0]] },
+    { clients: [fixture().clients[0]!, fixture().clients[0]!] },
     { clients: [{ client_id: HISTORICAL, profile_id: null, status: "active" as const }] },
     { clients: [{ client_id: HISTORICAL, profile_id: PROFILE, status: "inactive" as const }] },
     { active_assignment_client_ids: [HISTORICAL] },
@@ -72,7 +72,7 @@ test("blocks profile collisions and invalid snapshots without relying on names o
 
 test("remains deterministic, including order of blocking reasons", () => {
   const input = fixture({
-    clients: [fixture().clients[0], fixture().clients[0]],
+    clients: [fixture().clients[0]!, fixture().clients[0]!],
     active_assignment_client_ids: [HISTORICAL],
     identity_reviewed_by_human: false,
   });
