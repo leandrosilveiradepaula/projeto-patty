@@ -411,18 +411,18 @@ select is(
 );
 select is(
   (select count(*) from public.client_method_configuration_override_versions),
-  0::bigint,
-  'unassigned admin cannot read client override'
+  2::bigint,
+  'unassigned admin aal2 may read client and protocol overrides'
 );
 select is(
   (select count(*) from public.method_configuration_snapshot_sets),
-  0::bigint,
-  'unassigned admin cannot read client snapshots'
+  1::bigint,
+  'unassigned admin aal2 may read client snapshot sets'
 );
 select is(
   (select count(*) from public.method_configuration_snapshot_overrides),
-  0::bigint,
-  'unassigned admin cannot read snapshot override chain'
+  2::bigint,
+  'unassigned admin aal2 may read snapshot override chain'
 );
 
 select set_config(
@@ -438,8 +438,8 @@ select set_config(
 
 select is(
   (select count(*) from public.client_method_configuration_override_versions),
-  0::bigint,
-  'ended assignment grants no current override access'
+  2::bigint,
+  'admin aal2 may read historical overrides even after assignment ended'
 );
 
 select throws_ok(
