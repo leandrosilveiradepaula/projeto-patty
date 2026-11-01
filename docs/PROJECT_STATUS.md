@@ -1,3 +1,13 @@
+## 2026-11-01 — RBAC-ADMIN-WRITE-04: correções/esclarecimentos históricos de Anamnese (em validação)
+
+**Escopo funcional:** a migration NOVA `20261101141500_admin_global_anamnesis_followup_insert.sql` adiciona três policies INSERT limitadas a role relacional admin com MFA AAL2 e autoria exata por `auth.uid()` em `anamnesis_answer_corrections`, `anamnesis_clarification_requests`, `anamnesis_clarification_resolutions`. Corrige o bloqueio por assignment ativo para cliente histórica/inativa sem Auth/Profile; exige sempre submissão enviada, vínculo de resposta/submissão e guarda de resolução. O trigger validador de resolutions preserva o ramo anterior de assignment e inclui a alternativa AAL2 sem assignment, com SECURITY INVOKER. O original das respostas permanece intocável, as novas linhas são append-only, nenhuma concessão UPDATE/DELETE ou publicação é adicionada.
+
+**UI:** ações existentes já exigem `requireRole("admin")`, autoria da sessão, submissão enviada e IDs coerentes. Mensagens antigas de erro que mencionavam atribuição como único gate são neutralizadas. Não cria conta, atribuição, reativação, mensagem automática à cliente ou diagnóstico. Dados históricos privados podem aguardar ativação segura da cliente para respostas.
+
+**Verificação:** pgTAP inteiramente sintético e teste de segurança protegem positivos de admin AAL2 sem assignment e negativos de draft, resposta de outra submissão, autoria forjada, AAL1, cliente, outro papel, e imutabilidade, via workflow do banco Supabase descartável. CI/merge devem ser verificados separadamente. A migration depende da SELECT global `20261101121000` da PR #1054, ainda não aplicada no Supabase SaaS na última consulta; não aplicar schema diretamente por MCP/SQL. PR #1056 continua sem merge até aplicação e verificação. Homologação J1–J7 última tarefa.
+
+---
+
 ## 2026-11-01 — RBAC-ADMIN-WRITE-03: revisão humana de Anamnese submetida sem assignment (em validação)
 
 **Implementação:** migration NOVA `20261101135000_admin_global_anamnesis_review_insert.sql` adiciona exclusivamente policy de INSERT em `anamnesis_reviews` para papel relacional `admin` e MFA AAL2, autor humano `reviewer_profile_id=auth.uid()` e `anamnesis_submissions.submitted_at` obrigatório. Não cria avaliação automática, não altera respostas, nem substitui histórico, e não confere UPDATE/DELETE. Verifica RLS habilitada, policy RESTRICTIVE MFA, SELECT global da #1054 e grants append-only antes de criar policy. Não dispensa controles da Server Action existentes.
