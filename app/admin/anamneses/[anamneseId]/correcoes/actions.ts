@@ -77,7 +77,7 @@ export async function addAnamnesisAnswerCorrection(
   } catch {
     return {
       message:
-        "Não foi possível registrar a correção. Confirme sua atribuição atual e tente novamente.",
+        "Não foi possível registrar a correção. Confirme seu acesso e tente novamente.",
       success: false,
     };
   }
