@@ -1,3 +1,13 @@
+## 2026-11-01 — MIGR-HIST-03B: prévia offline de conciliação de acervo histórico (em validação)
+
+**Implementado somente na branch:** `lib/imports/historical-reconciliation-preview.ts` recebe o manifesto já sanitizado de ZIP/XLSX e um snapshot explícito mínimo de `client_id` + `clients.status`. Produz uma prévia determinística, em memória e sem PII, que identifica cada arquivo por `archive_id`/hash e `entry_id`/hash, registra decisão humana explícita de associação e deixa a confirmação de identidade para backend autorizado posterior.
+
+**Limites de identidade e estado:** a camada não recebe nem seleciona nome, e-mail, pasta, `auth.users`, `Profile` ou `client_assignment`; estes conceitos aparecem explicitamente como excluídos do escopo. `active`/`inactive` é somente refletido do snapshot de `clients.status`, sem reativação, criação de cliente, mudança de acompanhamento ou inferência a partir de documentos. Decisões com UUID inválido, cliente ausente, hash divergente, entrada rejeitada/desconhecida, repetição ou conflito são bloqueadas; binários duplicados são representados sem propagação automática e alvos diferentes para o mesmo hash também falham fechados.
+
+**Gates humanos ainda abertos:** retenção/armazenamento dos ZIPs originais; acesso a históricos de clientes inativas; política e confirmação de identidade no backend autorizado; mapeamento de planilhas para avaliações/protocolos; e aprovação humana antes de qualquer importação definitiva. Não houve upload real, persistência, leitura de banco, alteração de Auth/RLS/migrations/schema, liberação a cliente, avaliação, protocolo, conteúdo, regra clínica ou publicação.
+
+---
+
 ## 2026-10-31 — MIGR-HIST-03A / incremento 2: limites estruturais do preview XLSX (em validação)
 
 **Implementado somente na branch:** o preview offline passa a impor tetos absolutos, determinísticos e apenas redutíveis por chamada para XML por parte e acumulado, worksheets por XLSX e por lote, células por worksheet e por lote, e quantidade/tamanho de shared strings por XLSX e acumulados. Esses orçamentos são compartilhados entre ZIPs externos e os membros XLSX aninhados; uma configuração inválida, inconsistente ou que amplie um teto falha fechada.
