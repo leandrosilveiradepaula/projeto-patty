@@ -1,3 +1,13 @@
+## 2026-11-01 — DEC-ADMIN-GLOBAL-01: acesso integral por role admin (regra confirmada)
+
+**Nova regra de produto:** toda pessoa provisionada legitimamente com `user_roles.role=admin` deve consultar e gerir, dentro dos workflows aprovados, dados de todas as clientes, inclusive inativas/históricas e sem assignment ativo: cadastro, medidas, Anamnese, avaliações, arquivos privados, fotos, exames, protocolos, alimentação, exercícios e treinos. MFA AAL2, RLS, logs e auditoria, Storage privado, versões imutáveis, controle de publicação e proibição de autoelevação permanecem. O projeto ainda só tem uma conta administradora oficial; não criar mais contas por inferência.
+
+**Descompasso comprovado:** a RLS de `clients` e diversas ações administrativas ainda usam assignment ativo, e exceções existentes de Storage foram desenhadas para a única conta admin. Regra atual prevalece sobre a semântica antiga do produto, mas **não está aplicada** em backend ou banco. Próxima entrega: inventário específico e implementação gradativa das boundaries/RLS com testes sintéticos anon/cliente/admin AAL1/admin AAL2 sem assignment e workflow versionado de migrations. Não abrir autorização genérica para usuários autenticados, não usar service_role no browser, não reler dados reais em CI.
+
+**Estados:** decisão/documentação em branch; implementação geral=pendente; testes=pendentes; migration aplicada=NAO; deploy=NAO; homologação final J1–J7=última tarefa. Documentos normativos: `DECISIONS.md`, `RBAC_RLS.md`, `BUSINESS_RULES.md`, `OPEN_QUESTIONS.md`.
+
+---
+
 ## 2026-11-01 — MIGR-HIST-05A: prévia de retorno de cliente histórica sem mutação (em validação)
 
 **Evidência:** o convite de cliente nova (`lib/onboarding/client-invitation.ts`) sempre cria um `Client` novo e inicia assignment; não pode ser reutilizado para vincular `Client` histórico sem duplicação/ativação prematura. DEC-MIGR-HIST-04 está integrada na master (PR #1051).

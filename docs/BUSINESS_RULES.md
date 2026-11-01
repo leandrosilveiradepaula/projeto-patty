@@ -1,3 +1,11 @@
+## 2026-11-01 — Escopo do papel administrativo (regra confirmada)
+
+Todo usuário **efetivamente autorizado com a role relacional `admin`** deve poder acessar os dados e módulos profissionais de **todas as clientes da consultoria**, ativas, inativas ou históricas, sem `client_assignment` ativo. A regra inclui registros e arquivos privados, com identidade e MFA AAL2 obrigatórios. A restrição antiga de que a administração só acessa clientes sob assignment não é mais regra de produto.
+
+Esse acesso integral não autoriza eliminar histórico/versões, ver senhas ou dispensar auditoria, revisão, aprovação e publicação humana. Papel `client` segue limitado aos próprios dados, e nenhuma nova conta admin é criada por essa confirmação. A atualização gradual de RLS, Storage e runtime está pendente e não deve ser confundida com permissão já aplicada em produção.
+
+---
+
 ## Clientes históricas sem conta — regra confirmada em 2026-11-01
 
 Um cadastro profissional interno de cliente anterior pode existir para preservar o histórico **sem Auth, Profile, login ou senha**. Seu registro permanece um `Client` canônico, não um cadastro paralelo; não criar convite nem assignment ativo ao guardar o histórico.

@@ -1,3 +1,26 @@
+## 2026-11-01 — Nova regra normativa de escopo administrativo (DEC-ADMIN-GLOBAL-01)
+
+### REGRA CONFIRMADA — PREVALECE SOBRE AS RESTRIÇÕES HISTÓRICAS ABAIXO
+
+`user_roles.role = admin`, atribuído por procedimento confiável, representa acesso administrativo **a todos os dados e módulos profissionais da consultoria**, referentes a todas as clientes (ativas, inativas e históricas), **sem exigir `client_assignments` ativo**. Isso abrange cadastro, anamnese, medidas, avaliações, arquivos privados, exames, fotos, documentos, protocolos, alimentação, exercícios, treinos, histórico, pendências e conteúdo. A role relacional é a fonte de autorização; o nome de uma pessoa, o endereço de e-mail ou o assignment atual não limitam o escopo de `admin`. Novas contas admin não são criadas por inferência.
+
+Acesso pleno aos dados **não é autorização genérica para apagar histórico, substituir fatos originais, ignorar auditoria, autoelevar permissões ou publicar sem revisão humana**. Ações modificadoras continuam sujeitas às regras próprias: snapshots e versões imutáveis, autoria, autorização da operação, aprovação profissional e consentimentos quando exigidos. Cliente comum mantém acesso apenas ao que é seu e está liberado; `anon` não recebe dados privados.
+
+### CONDIÇÕES DE SEGURANÇA INEGOCIÁVEIS
+
+- Toda consulta e mutação administrativa deve confirmar identidade, role relacional `admin` e MFA AAL2, inclusive nas policies restritivas aplicáveis.
+- RLS permanece habilitada: ajustar **somente** policies/boundaries administrativas em migrations novas, preservando ownership dos clientes, privacidade do Storage e eventuais guardas de imutabilidade.
+- `client_assignments` continua representando histórico do relacionamento/atendimento e pode determinar contextos profissionais específicos; **não** é mais um gate de acesso geral do administrador.
+- Não colocar `service_role` no browser, não conceder `USING(true)` ou `TO authenticated` sem predicado de autorização, não confundir login com e-mail de contato.
+- Manter testes negativos para anon, cliente titular de dados alheios, admin AAL1, usuário sem role e sessões com role revogada, além de acesso positivo para admin AAL2 sem assignment.
+- Preservar auditoria de visualização de documentos privados, mudanças e publicações, com proteção de dados sensíveis.
+
+### ESTADO DE MIGRAÇÃO
+
+**Regra documentada, implementação e aplicação ainda pendentes.** As descrições abaixo de acesso por assignment e a exceção privativa da única admin são **históricas e tecnicamente vigentes até atualização segura**; não prevalecem como regra de produto. Preparar matriz RLS/Storage + runtime por recurso e migração incremental auditável com rollback/testes locais descartáveis antes do workflow de produção. Não alterar migrations já aplicadas nem ativar bypass de RLS para contornar o descompasso.
+
+---
+
 ## Correcoes auditaveis de check-ins
 
 ### DECISAO DE SEGURANCA

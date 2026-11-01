@@ -1,3 +1,13 @@
+## 2026-11-01 — Acesso administrativo global confirmado; implementação pendente
+
+**RESOLVIDO como regra de produto:** o papel relacional `admin` pode acessar todos os dados profissionais de todas as clientes, inclusive históricas/inativas e sem `client_assignment` ativo. Não restringir novamente a consulta administrativa a um índice mínimo nem a uma única pessoa física. MFA AAL2, RLS, Storage privado e auditoria continuam requisitos. Preservação de histórico e revisão/aprovação humana também não mudam.
+
+**PENDÊNCIA TÉCNICA**, não pergunta sobre a regra: inventariar e reconciliar todas as policies RLS, Storage, grants, server actions, RPCs, consultas administrativas, páginas e testes que ainda exigem assignment ativo ou a identidade nominal da única administradora. Aplicar migrations novas por workflow somente após provas locais sintéticas e revisão específica de segurança. A conta administrativa atual continua única por fato operacional; o modelo de provisionamento futuro é tarefa separada.
+
+**NÃO RESOLVIDO por esta confirmação:** vinculação de identidades de importação histórica, retenção e proveniência dos ZIP/XLSX originais, mapeamento de avaliações históricas, critérios de publicação/liberação para cliente e implementação do fluxo de retorno com cadastro completo e senha. Não importar dados reais nem alterar regras profissionais por inferência.
+
+---
+
 ## MIGR-HIST-04 — decisão parcial de 2026-11-01 e pendências remanescentes
 
 **RESOLVIDO COMO REGRA DE PRODUTO:** cliente histórica pode ter **cadastro interno Client sem Auth/Profile/login/senha** para preservação do histórico; quando retornar ao atendimento, deve **completar Cadastro Atual e concluir login/senha**. O registro existente deve ser reaproveitado, não duplicado. Esta confirmação está documentada em `DECISIONS.md` e `DATA_MODEL.md`; não reabrir como pergunta genérica.
