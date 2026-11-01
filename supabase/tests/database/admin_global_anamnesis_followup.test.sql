@@ -54,7 +54,9 @@ INSERT INTO public.user_roles(profile_id,role) VALUES
  ('c1000000-0000-4000-8000-000000000002','client'),
  ('c1000000-0000-4000-8000-000000000003','client');
 INSERT INTO public.clients(id,profile_id,full_name,status) VALUES
- ('c2000000-0000-4000-8000-000000000001',NULL,'Synthetic historical client without account','inactive');
+ ('c2000000-0000-4000-8000-000000000001',NULL,'Synthetic historical client without account','inactive'),
+ ('c2000000-0000-4000-8000-000000000002',NULL,'Synthetic draft client without account','inactive'),
+ ('c2000000-0000-4000-8000-000000000003',NULL,'Synthetic separate submitted client','inactive');
 INSERT INTO public.anamnesis_forms(id,form_key) VALUES
  ('c3000000-0000-4000-8000-000000000001','synthetic_historical_clarification');
 INSERT INTO public.anamnesis_form_versions(id,form_id,version_number,published_at) VALUES
@@ -67,8 +69,8 @@ INSERT INTO public.anamnesis_questions(
   'c4500000-0000-4000-8000-000000000001','synthetic_text','Synthetic question',1,'text',false);
 INSERT INTO public.anamnesis_submissions(id,client_id,form_version_id,created_at) VALUES
  ('c5000000-0000-4000-8000-000000000001','c2000000-0000-4000-8000-000000000001','c4000000-0000-4000-8000-000000000001',now()-interval '2 minutes'),
- ('c5000000-0000-4000-8000-000000000002','c2000000-0000-4000-8000-000000000001','c4000000-0000-4000-8000-000000000001',now()-interval '2 minutes'),
- ('c5000000-0000-4000-8000-000000000003','c2000000-0000-4000-8000-000000000001','c4000000-0000-4000-8000-000000000001',now()-interval '2 minutes');
+ ('c5000000-0000-4000-8000-000000000002','c2000000-0000-4000-8000-000000000002','c4000000-0000-4000-8000-000000000001',now()-interval '2 minutes'),
+ ('c5000000-0000-4000-8000-000000000003','c2000000-0000-4000-8000-000000000003','c4000000-0000-4000-8000-000000000001',now()-interval '2 minutes');
 INSERT INTO public.anamnesis_answers(id,submission_id,form_version_id,question_id,answer_value) VALUES
  ('c6000000-0000-4000-8000-000000000001','c5000000-0000-4000-8000-000000000001','c4000000-0000-4000-8000-000000000001','c4600000-0000-4000-8000-000000000001','"original"'::jsonb),
  ('c6000000-0000-4000-8000-000000000002','c5000000-0000-4000-8000-000000000002','c4000000-0000-4000-8000-000000000001','c4600000-0000-4000-8000-000000000001','"unsubmitted"'::jsonb),
