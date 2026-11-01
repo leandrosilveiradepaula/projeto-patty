@@ -232,3 +232,15 @@ function syntheticWorkbook(options: Readonly<{
   if (options.sharedStrings) members.push({ name: "xl/sharedStrings.xml", bytes: text(`<sst>${options.sharedStrings.map((value) => `<si><t>${value}</t></si>`).join("")}</sst>`) });
   return syntheticZip(members);
 }
+
+test("shared-string byte limit is cumulative within each XLSX, not per string", () => {
+  const workbook = syntheticWorkbook({ sharedStrings: ["abcdefgh", "ijklmnop"] });
+  const result = previewHistoricalArchives(
+    [{ bytes: syntheticZip([{ name: "cumulative.xlsx", bytes: workbook }]) }],
+    { maxSharedStringBytesPerXlsx: 12 },
+  );
+  const entry = result.archives[0]!.entries[0]!;
+  assert.equal(entry.kind, "xlsx");
+  assert.equal(entry.status, "rejected");
+  assert.deepEqual(entry.errors, ["xlsx_limit_exceeded"]);
+});
