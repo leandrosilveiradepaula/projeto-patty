@@ -1,3 +1,15 @@
+## 2026-11-01 — RBAC-ADMIN-READ-01: leitura administrativa global, separada de mutações (em validação)
+
+**Regra já confirmada:** `admin` acessa dados profissionais de todas as clientes, inclusive históricas/inativas e sem assignment. Esta entrega implementa **somente a parte de SELECT**, sem antecipar permissão de atualização ou publicação. Uma migration nova `20261101121000_admin_global_read_aal2.sql` enumera **73 tabelas existentes** de `public` (exceto `user_roles`) e adiciona SELECT permissivo para role relacional `admin` com `aal2` explícito, abortando se RLS ou policy MFA restritiva existente estiver ausente. Não modifica nem remove policies anteriores, grants, versões, triggers ou imutabilidade. Novas tabelas futuras não recebem acesso sem revisão específica.
+
+**Runtime:** a lista `/admin/clientes` deixa de derivar cadastros apenas de assignments ativos e passa a consultar `clients` diretamente pela sessão autenticada, `requireRole("admin")` e RLS, incluindo inativas sem Profile; paginação e pesquisas existentes são mantidas. Não há service-role no leitor nem criação artificial de assignment. Acesso a detalhes ainda depende de ajustes dos workflows/ações não cobertos aqui.
+
+**Verificação:** testes de fronteira em `security/admin-global-client-read.test.mjs` protegem allowlist, exigência de role/AAL2, somente SELECT e consulta sem bypass. CI da PR e teste E2E autenticado em Supabase descartável são gates antes de declarar aptidão. **Estados:** implementado e commitado na branch, CI/merge/migration aplicada/publicação/homologação pendentes de comprovação; nenhuma mudança no Supabase SaaS nesta entrega. Integração da migration em master provoca somente dry-run pelo workflow versionado; aplicação em produção exige execução explícita do workflow `Deploy Supabase migrations` com mode `apply` e confirmação, após revisão de segurança. PR não equivale a aplicação.
+
+**Próxima frente:** matriz e correção das escritas administrativas por recurso, preservando auditoria, versões, aprovações e condições profissionais. Importação histórica real e homologação conjunta J1–J7 continuam fora do escopo.
+
+---
+
 ## 2026-11-01 — DEC-ADMIN-GLOBAL-01: acesso integral por role admin (regra confirmada)
 
 **Nova regra de produto:** toda pessoa provisionada legitimamente com `user_roles.role=admin` deve consultar e gerir, dentro dos workflows aprovados, dados de todas as clientes, inclusive inativas/históricas e sem assignment ativo: cadastro, medidas, Anamnese, avaliações, arquivos privados, fotos, exames, protocolos, alimentação, exercícios e treinos. MFA AAL2, RLS, logs e auditoria, Storage privado, versões imutáveis, controle de publicação e proibição de autoelevação permanecem. O projeto ainda só tem uma conta administradora oficial; não criar mais contas por inferência.
