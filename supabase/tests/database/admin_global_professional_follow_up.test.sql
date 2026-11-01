@@ -84,13 +84,13 @@ SELECT throws_ok(
   $$INSERT INTO public.professional_follow_ups(client_id,assessment_id,author_profile_id,professional_decision,decision_reason)
     VALUES ('e2000000-0000-0000-0000-000000000002','e3000000-0000-0000-0000-000000000002',
       'e1000000-0000-0000-0000-000000000002','maintain','Draft forbidden')$$,
-  '42501',NULL,'Global policy refuses draft assessment'
+  '55000',NULL,'Finalization trigger refuses draft assessment'
 );
 SELECT throws_ok(
   $$INSERT INTO public.professional_follow_ups(client_id,assessment_id,author_profile_id,professional_decision,decision_reason)
     VALUES ('e2000000-0000-0000-0000-000000000002','e3000000-0000-0000-0000-000000000001',
       'e1000000-0000-0000-0000-000000000002','maintain','Wrong client')$$,
-  '42501',NULL,'Global policy refuses cross-client assessment'
+  '55000',NULL,'Relationship trigger refuses cross-client assessment'
 );
 
 SELECT set_config('request.jwt.claims','{"sub":"e1000000-0000-0000-0000-000000000002","aal":"aal1","role":"authenticated"}',true);
