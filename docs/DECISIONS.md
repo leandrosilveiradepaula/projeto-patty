@@ -1,3 +1,17 @@
+## 2026-11-01 — Acervo de clientes anteriores sem conta de acesso e retorno ao acompanhamento
+
+### DECISÃO DE PRODUTO CONFIRMADA PELO RESPONSÁVEL
+
+O cadastro profissional **interno** de uma cliente anterior pode existir e preservar seu histórico sem conta `auth.users`, `Profile`, login ou senha. Não criar uma tabela paralela para isso: a entidade canônica permanece `Client`, cujo `profile_id` é nullable. Dados do acervo histórico ficam associados somente depois da conciliação de identidade autorizada, com proveniência e revisão humana. A existência do cadastro histórico não cria convite, login, assignment ativo ou acesso para a cliente.
+
+**Retorno ou novo acompanhamento:** a cliente deve completar o **Cadastro Atual** e finalizar a criação/ativação do acesso com **login e senha**. Preservar o mesmo `client_id` e o histórico anterior, sem recriar a cliente nem inferir identidade por nome ou e-mail. A conclusão dessas obrigações não está automatizada pelo preview histórico.
+
+**Limite de implementação:** `clients.status` representa estado profissional, não Auth, e assignment é autorização. O fluxo atual de início de assignment marca `active`; precisa de desenho específico para assegurar que a exigência de cadastro/login no retorno não seja contornada por uma ativação antecipada. Esta confirmação não aprova alterar schema, RLS, Storage, criar contas, importar ZIP real ou publicar históricos. Histórico de inativas segue privado e os gates específicos de acesso/retencão/mapeamento permanecem abertos.
+
+Cartão/evidência: [issue #1008, DEC-MIGR-HIST-04](https://github.com/leandrosilveiradepaula/projeto-patty/issues/1008#issuecomment-6554471897).
+
+---
+
 ## 2026-10-30 — Identidade institucional Corpo & Mente na interface
 
 ### REQUISITO DE PRODUTO CONFIRMADO PELO RESPONSÁVEL

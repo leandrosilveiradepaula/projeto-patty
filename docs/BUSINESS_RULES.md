@@ -1,3 +1,13 @@
+## Clientes históricas sem conta — regra confirmada em 2026-11-01
+
+Um cadastro profissional interno de cliente anterior pode existir para preservar o histórico **sem Auth, Profile, login ou senha**. Seu registro permanece um `Client` canônico, não um cadastro paralelo; não criar convite nem assignment ativo ao guardar o histórico.
+
+Ao **retornar ao acompanhamento**, a cliente deve completar o Cadastro Atual e concluir a ativação do acesso por login e senha. A mesma identidade profissional `client_id` e o histórico devem ser preservados. Vínculo entre a pessoa que retorna e o Client histórico exige confirmação segura; nome ou e-mail não são chave automática de associação.
+
+Esta regra não define acesso administrativo a avaliações de inativas, retenção dos arquivos originais, ordem transacional de ativação ou autorização para importação real. O início de assignment hoje altera `clients.status` para `active`; a adequação dessa operação à nova condição exige implementação validada, não mudança implícita de negócio.
+
+---
+
 ## Cadastro e lifecycle da cliente
 
 ### REGRA CONFIRMADA

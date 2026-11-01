@@ -1,3 +1,13 @@
+## 2026-11-01 — Cadastro interno de clientes históricas (decisão confirmada)
+
+`clients` já é a entidade canônica que preserva histórico independente de credenciais, e `clients.profile_id` pode ser `NULL`. **Não criar tabela alternativa nem conta Auth/Profile para cada arquivo histórico.** O cadastro profissional interno sem login deve usar o Client existente ou um novo Client criado somente após confirmação de identidade e prevenção de duplicidade; `clients.full_name` continua obrigatório, mas nome/e-mail não são chave de relacionamento.
+
+Sem autenticação vinculada, não existe login nem acesso próprio da cliente. Nenhum assignment ativo, convite ou ativação deve ser inferido do ZIP/planilha. Reativação futura deve reutilizar `client_id`, completar Cadastro Atual e finalizar a conta/login com senha, sem sobrescrever registros originais.
+
+**Pendente de desenho e autorização técnica:** mecanismo de conciliação e vínculo com Auth preexistente/parcial; quando criar Client sem convite; autorização client-scoped para leitura de históricos de inativas; sequência segura e idempotente da ativação (o início de assignment hoje marca `active`), preservação de históricos, guarda de ZIP/XLSX e mapeamento das avaliações. Sem migration nesta decisão.
+
+---
+
 ## Correcoes auditaveis de check-ins
 
 ### DECISAO TECNICA

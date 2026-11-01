@@ -1,3 +1,19 @@
+## MIGR-HIST-04 — decisão parcial de 2026-11-01 e pendências remanescentes
+
+**RESOLVIDO COMO REGRA DE PRODUTO:** cliente histórica pode ter **cadastro interno Client sem Auth/Profile/login/senha** para preservação do histórico; quando retornar ao atendimento, deve **completar Cadastro Atual e concluir login/senha**. O registro existente deve ser reaproveitado, não duplicado. Esta confirmação está documentada em `DECISIONS.md` e `DATA_MODEL.md`; não reabrir como pergunta genérica.
+
+**AINDA ABERTO — bloqueia importação real e mudanças de acesso:**
+- critérios e ato auditável de confirmação humana de identidade, incluindo colisão de nomes e contas Auth parciais, antes de vincular os ~60 ZIPs a `client_id`;
+- quem pode acessar quais históricos de inativas sem assignment ativo e a autorização correspondente sob RLS (a exceção atual de arquivos privados não se estende às demais tabelas);
+- guarda, localização segura, retenção e proveniência do ZIP/XLSX original, sem armazená-los como `client_files` comum;
+- mapeamento versionado das famílias XLSX, campos/unidades/datas e significado das avaliações históricas;
+- visibilidade dos registros históricos à cliente e revisão antes de disponibilizar dados;
+- sequência de ativação/retorno, assegurando cadastro completo e login/senha sem duplicar Client, sem reativar ou criar assignment ativo prematuramente. O início do assignment atual marca `active`, mas isso não comprova onboarding finalizado.
+
+Até decisão e implementação segura, o parser de importação permanece dry-run, sem escrita ou publicação automática. **Não** alterar RLS/schema nem importar dados reais por inferência.
+
+---
+
 ## Nota de vigência operacional — 2026-10-30
 
 O histórico abaixo conserva questões abertas, decisões parciais e fatos já resolvidos. Para evitar que itens antigos sejam reabertos como tarefas:
