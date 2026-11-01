@@ -1,3 +1,15 @@
+## 2026-11-01 — RBAC-ADMIN-WRITE-02: correções históricas de medidas por admin AAL2 (em validação)
+
+**Implementação de backend:** migration **nova** `20261101133000_admin_global_measurement_correction_insert.sql` adiciona policy específica de INSERT em `assessment_measurement_corrections` para admin relacional com JWT AAL2 e autoria igual a `auth.uid()`, independente de assignment ativo. O trigger validador existente é substituído mantendo o ramo histórico de assignment e acrescentando apenas o ramo AAL2 do próprio autor. Ambas as rotas exigem avaliação finalizada; UUID de medida é verificado por join com a avaliação. A migration exige RLS, policy MFA RESTRICTIVE, policy global SELECT da PR #1054 e trigger de imutabilidade, falhando fechado se ausentes. Não concede UPDATE/DELETE/anon INSERT, não altera medidas originais, avaliações ou liberação para a cliente.
+
+**Fluxo existente:** `correctFinalizedAssessmentMeasurementAction` exige `requireRole("admin")`, confirmação de avaliação finalizada, medida vinculada, número/unidade válidos e registra uma nova correção com `correctedByProfileId` da sessão. Não foi alterada a ação, evitando novo caminho privilegiado.
+
+**Testes:** pgTAP sintético `admin_global_measurement_correction.test.sql` no Supabase descartável, boundary `security/admin-global-measurement-correction.test.mjs` e workflow de método. Provas positivas e negativas de AAL2 sem assignment, AAL1, client, conta sem role, autor falsificado, draft e imutabilidade do original. CI da PR deve comprovar resultado antes de merge; nenhuma escrita com dados pessoais reais.
+
+**Dependências:** leitura global `20261101121000` e follow-up `20261101124800` ainda sem comprovação de aplicação ao SaaS. A PR #1056 permanece aberta sem merge enquanto a SELECT global não estiver aplicada. Após aprovação, merge do código não constitui aplicação de migrations; produção somente pelo workflow oficial `Deploy Supabase migrations` com `apply` explícito, seguido de verificação metadata-only. Homologação conjunta J1–J7 por último.
+
+---
+
 ## 2026-11-01 — RBAC-ADMIN-WRITE-01: registrar acompanhamento em avaliação histórica (em validação)
 
 **Escopo fechado:** migration `20261101124800_admin_global_professional_follow_up_insert.sql` adiciona somente INSERT administrativo de `professional_follow_ups` para admin com role relacional e MFA AAL2, mesmo sem assignment, **apenas quando vinculado a avaliação finalizada do mesmo Client**. Preserva autoria por `auth.uid()`, motivo/decisão explícitos, FK client/avaliação e trigger de finalização, histórico append-only sem UPDATE/DELETE, isolamento do cliente, e nenhuma publicação. Falha fechada se RLS/MFA, política SELECT da etapa anterior, trigger/FK ou privilégios esperados estiverem ausentes. Política anterior de assignment permanece.
