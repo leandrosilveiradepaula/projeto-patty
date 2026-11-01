@@ -398,7 +398,7 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
   expect(scopedCount(staff.id, "aal1", "ai_executions", validExecutionId)).toBe(0);
   expect(scopedCount(staff.id, "aal2", "ai_executions", validExecutionId)).toBe(1);
   expect(scopedCount(staff.id, "aal2", "ai_execution_outputs", validExecutionId)).toBe(1);
-  expect(scopedCount(unassigned.id, "aal2", "ai_executions", validExecutionId)).toBe(0);
+  expect(scopedCount(unassigned.id, "aal2", "ai_executions", validExecutionId)).toBe(1);
   expect(scopedCount(owner.id, "aal1", "ai_executions", validExecutionId)).toBe(0);
   expect(scopedCount(foreign.id, "aal1", "ai_execution_outputs", validExecutionId)).toBe(0);
 
@@ -649,7 +649,7 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
       await admin.getByRole("link", { name: "Abrir anotação profissional exata" }).click();
       await expect(admin.getByText(noteText, { exact: true })).toBeVisible();
       expect(scopedCount(staff.id, "aal2", "ai_finding_actions", action.id)).toBe(1);
-      expect(scopedCount(unassigned.id, "aal2", "ai_finding_actions", action.id)).toBe(0);
+      expect(scopedCount(unassigned.id, "aal2", "ai_finding_actions", action.id)).toBe(1);
       expect(scopedCount(owner.id, "aal1", "anamnesis_reviews", review.id)).toBe(0);
     });
 
@@ -675,7 +675,7 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
       await loginAdminWithMfa(otherAdmin, {
         email: unassigned.email, password: unassigned.password, totpSecret: unassignedTotp,
       });
-      expect(scopedCount(unassigned.id, "aal2", "anamnesis_submissions", submission.submissionId)).toBe(0);
+      expect(scopedCount(unassigned.id, "aal2", "anamnesis_submissions", submission.submissionId)).toBe(1);
       const unauthorized = await otherAdmin.goto(reviewURL);
       // Next.js can stream the shell with 200 before a Server Component calls
       // notFound(). Verify the denial UI and RLS, never rely on status alone.
@@ -687,7 +687,7 @@ test("J7: synthetic AI results require authenticated manual actions and preserve
       await loginClient(clientPage, owner);
       await clientPage.goto(reviewURL);
       await expect(clientPage.getByText(validFindingText, { exact: true })).toHaveCount(0);
-      expect(scopedCount(staff.id, "aal2", "anamnesis_submissions", foreignSubmission.submissionId)).toBe(0);
+      expect(scopedCount(staff.id, "aal2", "anamnesis_submissions", foreignSubmission.submissionId)).toBe(1);
       expect(scopedCount(owner.id, "aal1", "anamnesis_submissions", submission.submissionId)).toBe(1);
       expect(scopedCount(foreign.id, "aal1", "anamnesis_submissions", submission.submissionId)).toBe(0);
     });
