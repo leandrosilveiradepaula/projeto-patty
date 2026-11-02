@@ -12,7 +12,7 @@ test("two historical check-in policies are append-only, admin AAL2, actor-bound 
   for (const kind of ["client_liquid_intake_event_corrections","client_activity_checkin_event_corrections"]) {
     assert.match(sql,new RegExp("CREATE POLICY "+kind+"_insert_admin_global_aal2"));
     assert.match(sql,new RegExp("ON public\\."+kind+"\\s+FOR INSERT TO authenticated"));
-    assert.match(sql,new RegExp(kind+"_immutable"));
+    assert.match(sql,/tgname = target \|\| '_immutable'/);
   }
   assert.match(sql,/corrected_by_profile_id = \(SELECT auth\.uid\(\)\)/g);
   assert.match(sql,/ur\.role = 'admin'/g);
