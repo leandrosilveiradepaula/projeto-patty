@@ -17,7 +17,7 @@ Acesso pleno aos dados **não é autorização genérica para apagar histórico,
 
 ### ESTADO DE MIGRAÇÃO
 
-**Regra documentada, implementação e aplicação ainda pendentes.** As descrições abaixo de acesso por assignment e a exceção privativa da única admin são **históricas e tecnicamente vigentes até atualização segura**; não prevalecem como regra de produto. Preparar matriz RLS/Storage + runtime por recurso e migração incremental auditável com rollback/testes locais descartáveis antes do workflow de produção. Não alterar migrations já aplicadas nem ativar bypass de RLS para contornar o descompasso.
+**Atualização verificada em 2026-11-02:** a regra permanece normativa; a implementação é **parcial, não pendente integralmente**. As migrations de SELECT global e INSERT administrativo limitado (`20261101121000`, `20261101124800`, `20261101133000`, `20261101135000`, `20261101141500`) constam do histórico do Supabase Corpo e Mente. Consulta metadata-only confirma `admin_global_select_aal2` em `clients` e `profiles`, com role e AAL2, e MFA RESTRICTIVE preservada em `public` e `storage.objects`. A PR #1060 integra as leituras de diretório privado por sessão/RLS; substitui a #1056 encerrada sem merge. Os gates de atribuição ainda descritos abaixo são históricos e podem persistir em **outras operações não reconciliadas**; nenhum texto antigo revoga a decisão de produto. Escritas, permissões Storage específicas, publicação, rotas remanescentes, deploy e homologação J1–J7 requerem provas próprias. Não alterar migrations aplicadas nem adotar bypass de RLS.
 
 ---
 
