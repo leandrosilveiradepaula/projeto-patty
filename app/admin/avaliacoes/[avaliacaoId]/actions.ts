@@ -142,7 +142,7 @@ async function getDraftAssessment(assessmentId: string) {
   if (!assessment) {
     return {
       assessment: null,
-      message: "Esta avaliação não está acessível para sua atribuição atual.",
+      message: "Esta avaliação não está disponível para sua sessão administrativa.",
     };
   }
 
