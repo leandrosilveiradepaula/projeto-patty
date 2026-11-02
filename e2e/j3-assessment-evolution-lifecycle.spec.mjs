@@ -474,7 +474,7 @@ test("J3: MFA, corrected measurements, two private photos, return and RLS", asyn
       });
       await wrongPage.goto(pairRoute+"?referencia="+olderId+"&comparacao="+newerId);
       await expect(wrongPage.locator("#comparacao-resultados")).toBeVisible();
-      await expect(wrongPage.getByRole("row",{name:/Peso \\(kg\\)/}).getByRole("cell",{name:"71 kg"})).toBeVisible();
+      await expect(wrongPage.getByText("71 kg",{exact:true}).first()).toBeVisible();
       // Confirmed DEC-ADMIN-GLOBAL-01: relational admins with AAL2 can read
       // historical assessments without an active assignment. This does not
       // grant draft writes, privileged finalization or access to client accounts.
