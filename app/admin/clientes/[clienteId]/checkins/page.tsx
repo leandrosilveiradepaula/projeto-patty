@@ -159,7 +159,7 @@ export default async function AdminClientCheckinsPage({
         </Alert>
       ) : status === "client-unavailable" ? (
         <Alert live="assertive" title="Cliente indisponível" variant="critical">
-          Esta cliente não está acessível para o acompanhamento atual.
+          Não foi possível acessar o histórico desta cliente. Confirme suas permissões e tente novamente.
         </Alert>
       ) : null}
 

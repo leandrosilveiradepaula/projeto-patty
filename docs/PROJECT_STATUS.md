@@ -1,3 +1,11 @@
+## 2026-11-02 — RBAC-ADMIN-WRITE-05: correções históricas de check-ins (em validação)
+
+**Escopo funcional:** novas policies INSERT limitadas a admin relacional com MFA AAL2 em `client_liquid_intake_event_corrections` e `client_activity_checkin_event_corrections`. Permitem correções de eventos históricos de clientes inativas sem Profile/assignment, preservando autoria exata `auth.uid()`, RLS e MFA RESTRICTIVE, evento original imutável e histórico append-only. As permissões existentes de correção pela própria cliente continuam inalteradas. A UI de check-ins não presume mais assignment ativo na mensagem de indisponibilidade.
+
+**Verificação prevista:** teste de fronteira de segurança e pgTAP com fixtures sintéticas no banco descartável, incluindo AAL1, autor forjado, cliente de outra conta e usuário sem papel admin. CI, revisão do HEAD, merge e aplicação pelo workflow oficial devem ser comprovados separadamente. Não foi executado DDL no Supabase SaaS, nem lidos dados reais. Nenhuma meta profissional, evento novo, publicação ou mudança de Auth/Storage é introduzida. Cartão de execução na issue #1008, comentário 6580830940. Homologação conjunta J1–J7 é a última tarefa.
+
+---
+
 ## 2026-11-01 — RBAC-ADMIN-WRITE-04: correções/esclarecimentos históricos de Anamnese (em validação)
 
 **Escopo funcional:** a migration NOVA `20261101141500_admin_global_anamnesis_followup_insert.sql` adiciona três policies INSERT limitadas a role relacional admin com MFA AAL2 e autoria exata por `auth.uid()` em `anamnesis_answer_corrections`, `anamnesis_clarification_requests`, `anamnesis_clarification_resolutions`. Corrige o bloqueio por assignment ativo para cliente histórica/inativa sem Auth/Profile; exige sempre submissão enviada, vínculo de resposta/submissão e guarda de resolução. O trigger validador de resolutions preserva o ramo anterior de assignment e inclui a alternativa AAL2 sem assignment, com SECURITY INVOKER. O original das respostas permanece intocável, as novas linhas são append-only, nenhuma concessão UPDATE/DELETE ou publicação é adicionada.
