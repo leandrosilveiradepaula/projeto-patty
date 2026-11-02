@@ -126,9 +126,10 @@ test("admin inbox reads only authorized headers and links to the original respon
   assert.match(loader, /\.not\("submitted_at", "is", null\)/);
   assert.doesNotMatch(loader, /createAdminClient|service_role|\.select\([^)]*answers/);
   assert.match(page, /filters\.invalid \? \[\]/);
-  assert.match(page, /listClientsAssignedToCurrentAdmin\(\)/);
+  assert.match(page, /listAllClientsForCurrentAdmin\(\)/);
+  assert.doesNotMatch(page, /listClientsAssignedToCurrentAdmin\(\)/);
   assert.match(page, /receivedWeeklyFeedbackExactHref\(feedback\)/);
-  assert.match(page, /recebimento, não leitura, revisão nem decisão profissional/);
+  assert.match(page, /O recebimento não significa leitura, revisão nem decisão profissional/);
   assert.match(dashboard, /href="\/admin\/feedback-semanal"/);
   assert.match(sidebar, /href: "\/admin\/feedback-semanal"/);
 });

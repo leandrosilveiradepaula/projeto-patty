@@ -26,7 +26,7 @@ import { weeklyFeedbackInboxReturnHref, withWeeklyFeedbackInboxReturn } from "@/
 import { listReminderEventsForVisiblePendingFeedbacks } from "@/lib/follow-up/pending-weekly-feedback-reminder-loader";
 import { latestVisiblePendingReminderEvents } from "@/lib/follow-up/pending-weekly-feedback-reminders";
 import { describeWeeklyFeedbackReminderEvidence } from "@/lib/follow-up/weekly-feedback-reminder-presentation";
-import { listClientsAssignedToCurrentAdmin } from "@/lib/supabase/data-access";
+import { listAllClientsForCurrentAdmin } from "@/lib/supabase/data-access";
 import { formatWeeklyFeedbackPeriodDate } from "@/lib/weekly-feedback/date-format";
 import styles from "./page.module.css";
 
@@ -52,19 +52,16 @@ function formatSubmittedAt(value: string | null) {
 }
 
 export default async function AdminReceivedWeeklyFeedbackPage({ searchParams }: PageProps) {
-  const [assignments, rawQuery] = await Promise.all([
-    listClientsAssignedToCurrentAdmin(),
+  const [authorizedClients, rawQuery] = await Promise.all([
+    listAllClientsForCurrentAdmin(),
     searchParams,
   ]);
-  // A current, active assignment is required even to offer a client filter.
-  const namedClients = assignments.flatMap((assignment) => {
-    const client = assignment.clients;
-    if (!client) return [];
-    return [{
-      id: client.id,
-      label: client.full_name?.trim() || client.profiles?.display_name?.trim() || "Cliente sem nome informado",
-    }];
-  });
+  // The admin AAL2 session and clients RLS are authoritative for this directory.
+  // No active assignment is required to inspect historical feedback headers.
+  const namedClients = authorizedClients.map((client) => ({
+    id: client.id,
+    label: client.full_name?.trim() || client.profiles?.display_name?.trim() || "Cliente sem nome informado",
+  }));
   const clients = [...new Map(namedClients.map((client) => [client.id, client])).values()]
     .sort((a, b) => a.label.localeCompare(b.label, "pt-BR", { sensitivity: "base" }) ||
       a.id.localeCompare(b.id));
@@ -105,7 +102,7 @@ export default async function AdminReceivedWeeklyFeedbackPage({ searchParams }: 
       <PageHeader
         eyebrow="Admin · Jornada 2"
         title="Feedbacks Semanais"
-        description="Consulte solicitações aguardando envio e respostas das clientes sob acompanhamento atual. A listagem confirma recebimento, não leitura, revisão nem decisão profissional."
+        description="Consulte solicitações aguardando envio e respostas recebidas, inclusive o histórico de clientes inativas. O recebimento não significa leitura, revisão nem decisão profissional."
         primaryAction={<><Link className={styles.actionLink} href="/admin/diagnostico-email">Diagnosticar e-mail</Link> <Link className={styles.actionLink} href="/admin">Voltar ao painel</Link></>}
       />
       <Section
@@ -161,7 +158,7 @@ export default async function AdminReceivedWeeklyFeedbackPage({ searchParams }: 
         title={isPending ? "Aguardando resposta da cliente" : "Histórico de recebimentos"}
         description={isPending
           ? "Solicitações abertas que ainda não têm envio final. Não mostra rascunhos nem aplica consequências automáticas pela ausência de resposta."
-          : "Os dados originais continuam preservados na página individual da cliente, acessível apenas com autorização vigente."}
+          : "Os dados originais permanecem preservados na página individual da cliente, protegida pela autenticação e pelas políticas de acesso."}
         action={<Badge variant={isPending ? "warning" : "neutral"}>{activeResults.total} {isPending ? "pendente(s)" : "enviado(s)"}</Badge>}
       >
         {activeResults.total === 0 ? (

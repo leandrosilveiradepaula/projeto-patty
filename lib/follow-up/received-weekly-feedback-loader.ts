@@ -9,7 +9,7 @@ import {
 } from "@/lib/follow-up/received-weekly-feedback-inbox";
 
 /**
- * Reads only non-sensitive receipt headers from currently assigned clients.
+ * Reads only non-sensitive receipt headers from client IDs authorized by the admin AAL2 directory.
  * The same authenticated RLS/MFA boundary as the individual feedback history
  * remains authoritative. No health answers or service role are needed.
  */

@@ -1,3 +1,11 @@
+## 2026-11-02 — RBAC-ADMIN-READ-J2-01: caixa de Feedback Semanal para todas as clientes (em validação)
+
+**Entrega funcional proposta:** a caixa administrativa de Feedback Semanal usa `listAllClientsForCurrentAdmin` em vez de assignments ativos para listar clientes autorizadas pela role relacional `admin` e MFA AAL2, incluindo inativas sem Auth/Profile. Cabeçalhos de pedidos pendentes e recebimentos continuam lidos apenas via sessão Supabase/RLS, sem carregar respostas de saúde no inbox. IDs selecionados inválidos/fora do diretório não consultam registros. Navegação de histórico, filtros e paginação preservados.
+
+**Escopo fechado:** UI e comentários de leitura, testes estáticos de operação e segurança. Não há schema/migration, mudança de Storage, criação de solicitações, envio de e-mail, IA, publicação ou alteração das respostas. Evidência do gate RLS já aplicado registrada na issue #1008; cartão #6583402709. Verificar Validate application no SHA exato e merge separadamente; publicação Vercel/homologação profissional J1–J7 não são inferidas.
+
+---
+
 ## 2026-11-02 — RBAC-ADMIN-WRITE-05: correções históricas de check-ins (em validação)
 
 **Escopo funcional:** novas policies INSERT limitadas a admin relacional com MFA AAL2 em `client_liquid_intake_event_corrections` e `client_activity_checkin_event_corrections`. Permitem correções de eventos históricos de clientes inativas sem Profile/assignment, preservando autoria exata `auth.uid()`, RLS e MFA RESTRICTIVE, evento original imutável e histórico append-only. As permissões existentes de correção pela própria cliente continuam inalteradas. A UI de check-ins não presume mais assignment ativo na mensagem de indisponibilidade.
