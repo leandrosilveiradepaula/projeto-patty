@@ -7,7 +7,7 @@ import type { VisiblePendingFeedback } from "@/lib/follow-up/pending-weekly-feed
 
 /**
  * Only event headers for visible pending records in current authorized page.
- * Supabase admin MFA, RLS and active assignment remain authoritative.
+ * Supabase admin MFA and row-level security remain authoritative.
  * Never fetch health answers, contact details or draft data.
  */
 export async function listReminderEventsForVisiblePendingFeedbacks(
