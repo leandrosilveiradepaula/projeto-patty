@@ -29,11 +29,11 @@ As tabelas de correcao de check-ins sao append-only. `authenticated` recebe some
 
 A cliente pode ler e inserir correcao apenas para eventos pertencentes ao proprio `client_id`, com autoria igual ao proprio `auth.uid()`.
 
-Patty/admin pode ler e inserir correcao somente para cliente sob assignment ativo, mantendo a exigencia transversal de AAL2.
+**Regra atual (DEC-ADMIN-GLOBAL-01, 2026-11-02):** qualquer pessoa com papel relacional `admin` e MFA AAL2 pode ler e inserir correcoes de eventos historicos de qualquer cliente, inclusive inativa/sem assignment atual, com autoria da propria sessao. A regra anterior de limitar admin a assignment ativo, registrada nesta secao em 2026-10-07, e **historica e foi substituida**; nao deve orientar novos testes nem implementacoes. A cliente continua restrita aos proprios eventos.
 
-Nenhuma policy de correcao amplia acesso aos eventos originais. `anon` permanece sem privilegios.
+Nenhuma policy de correcao amplia acesso aos eventos originais. `anon` permanece sem privilegios. Correcao nao altera nem exclui o evento original.
 
-A migration `20261007173100_create_client_checkin_corrections.sql` foi aplicada ao Supabase SaaS em 2026-10-07 pelo workflow `Deploy Supabase migrations`, run #40. As policies vigentes preservam o modelo append-only e os grants minimos descritos acima.
+**Implantacao verificada:** a migration original `20261007173100_create_client_checkin_corrections.sql` foi aplicada em 2026-10-07 (workflow run #40). A migration adicional `20261102151000_admin_global_checkin_corrections_insert.sql` foi aplicada pelo workflow oficial run #70 em 2026-11-02; consulta independente ao historico e `pg_policies` do Supabase confirmou as duas policies INSERT admin AAL2. RLS, MFA RESTRICTIVE e triggers de imutabilidade permanecem ativos; `authenticated` nao recebeu UPDATE/DELETE e `anon` nao recebeu INSERT. A verificacao de metadados nao equivale a homologacao humana.
 
 # RBAC e RLS
 
