@@ -997,7 +997,8 @@ test("J2: solicitação MFA, rascunho, CAS, envio, histórico e acesso por vínc
       // even without a current assignment. This is not a client-role grant.
       await unassignedPage.goto("/admin/feedback-semanal?cliente=" + clientId);
       await expect(unassignedPage.getByText("Filtros indisponíveis", { exact: true })).toHaveCount(0);
-      const historicalReceipt = unassignedPage.getByRole("link", { name: "Abrir respostas originais" });
+      const historicalReceipt = unassignedPage.getByRole("link", { name: "Abrir respostas originais" })
+        .and(unassignedPage.locator('a[href*="registro=' + feedbackId + '"]'));
       await expect(historicalReceipt).toHaveCount(1);
       await historicalReceipt.click();
       const historicalAnswers = unassignedPage.locator("#feedback-enviado-" + feedbackId);
