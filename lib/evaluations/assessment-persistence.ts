@@ -2,6 +2,7 @@ import "server-only";
 
 import type { Json } from "@/lib/supabase/database.types";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireRole } from "@/lib/supabase/auth";
 
 export async function finalizeAssessmentWithMethodSnapshot(input: {
   assessmentId: string;
@@ -13,6 +14,11 @@ export async function finalizeAssessmentWithMethodSnapshot(input: {
   definitionConfiguration: Json;
   definitionResultValues: Json;
 }) {
+  const context = await requireRole("admin");
+  if (context.profileId !== input.finalizedByProfileId) {
+    throw new Error("Assessment finalization author does not match authenticated administrator");
+  }
+
   const supabase = createAdminClient();
   const { data, error } = await supabase.rpc(
     "finalize_assessment_from_method_snapshot",
