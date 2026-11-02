@@ -128,6 +128,9 @@ jobs:
       - name: Run historical anamnesis correction and clarification pgTAP
         run: npx supabase test db supabase/tests/database/admin_global_anamnesis_followup.test.sql
 
+      - name: Run admin global check-in correction pgTAP
+        run: npx supabase test db supabase/tests/database/admin_global_checkin_corrections.test.sql
+
       - name: Stop local Supabase
         if: always()
         run: npx supabase stop --no-backup
