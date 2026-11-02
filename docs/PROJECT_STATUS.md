@@ -1,3 +1,13 @@
+## 2026-11-02 — RBAC-ADMIN-ASSESSMENT-01: diagnostico da escrita de avaliacoes historicas (pendente de implementacao)
+
+**Fato verificado em `master` `84ba7a9d` e metadados do Supabase:** `client_assessments`, `assessment_measurements` e `assessment_files` ja possuem SELECT administrativo global AAL2; as policies INSERT/UPDATE/DELETE de rascunho ainda exigem assignment ativo. A acao de criacao em `app/admin/clientes/[clienteId]/avaliacoes/actions.ts` exige `requireRole("admin")` e utiliza `createAccessibleClientAssessment` via sessao RLS. As acoes de edicao de rascunho em `app/admin/avaliacoes/[avaliacaoId]/actions.ts` dependem das policies de escrita existentes. A finalizacao chama `finalizeAssessmentWithMethodSnapshot` em `lib/evaluations/assessment-persistence.ts`, que usa `createAdminClient()` somente no servidor e RPC `finalize_assessment_from_method_snapshot`. Metadados confirmam RPC SECURITY INVOKER, EXECUTE apenas para `service_role`/postgres, nao para `authenticated`; o fluxo deve preservar a checagem server-side, snapshot imutavel e validacao da autoria.
+
+**Decisao de produto ja confirmada:** admin relacional com MFA AAL2 acessa todas as clientes, inclusive historicas sem Auth/Profile/assignment; nao e autorizacao para finalizar automaticamente, publicar ou substituir historico. **Pendencia tecnica:** reconciliar a cadeia inteira (criacao, edicao de medidas/fotos em draft, finalizacao e retorno de erro) em uma tarefa propria com novas migrations, pgTAP sintetico, testes negativos AAL1/client/anon, imutabilidade, guards de server action e CI. Nao liberar apenas INSERT nem trocar a RPC por chamada privilegiada sem verificar invariantes. Nenhum DDL ou dado real alterado nesta investigacao.
+
+**Estado:** diagnostico e documentacao, sem implementacao de escrita; nao confundir com testado/aplicado/deployado/homologado. A caixa global J2 foi mergeada na PR #1063, SHA `84ba7a9d`, com Validate application e J2 browser SUCCESS; sem migration nova. Homologacao operacional J1-J7 continua por ultimo.
+
+---
+
 ## 2026-11-02 — RBAC-ADMIN-READ-J2-01: caixa de Feedback Semanal para todas as clientes (em validação)
 
 **Entrega funcional proposta:** a caixa administrativa de Feedback Semanal usa `listAllClientsForCurrentAdmin` em vez de assignments ativos para listar clientes autorizadas pela role relacional `admin` e MFA AAL2, incluindo inativas sem Auth/Profile. Cabeçalhos de pedidos pendentes e recebimentos continuam lidos apenas via sessão Supabase/RLS, sem carregar respostas de saúde no inbox. IDs selecionados inválidos/fora do diretório não consultam registros. Navegação de histórico, filtros e paginação preservados.
