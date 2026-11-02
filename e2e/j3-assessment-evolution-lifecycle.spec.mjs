@@ -467,17 +467,17 @@ test("J3: MFA, corrected measurements, two private photos, return and RLS", asyn
       // Never infer that a second admin is authorized in production.
     });
 
-    await test.step("Unassigned admin and other client cannot read J3 records; client private files stay isolated",async()=>{
+    await test.step("Admin AAL2 can read J3 history without assignment; other client and anon remain isolated",async()=>{
       const wrongPage = await denied.newPage();
       await loginAdminWithMfa(wrongPage,{
         email: unassigned.email,password:unassigned.password,totpSecret:otherTotp,
       });
       await wrongPage.goto(pairRoute+"?referencia="+olderId+"&comparacao="+newerId);
-      await expect(wrongPage.getByText("Página ou registro indisponível",{exact:true})).toBeVisible();
-      await expect(wrongPage.getByText("71 kg",{exact:true})).toHaveCount(0);
-      // J3 assessment data must be denied without assignment. File download
-      // authorization for admins is a separate exception tested by J1 under
-      // the sole-admin MVP; this fixture's second admin must not redefine it.
+      await expect(wrongPage.locator("#comparacao-resultados")).toBeVisible();
+      await expect(wrongPage.getByRole("row",{name:/Peso \\(kg\\)/}).getByRole("cell",{name:"71 kg"})).toBeVisible();
+      // Confirmed DEC-ADMIN-GLOBAL-01: relational admins with AAL2 can read
+      // historical assessments without an active assignment. This does not
+      // grant draft writes, privileged finalization or access to client accounts.
       const visitor = await anonymous.newPage();
       await visitor.goto(pairRoute);
       await expect(visitor).toHaveURL(/\/login\/?$/);
