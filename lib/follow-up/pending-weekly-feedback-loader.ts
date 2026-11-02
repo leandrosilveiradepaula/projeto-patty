@@ -8,7 +8,7 @@ import {
 } from "@/lib/follow-up/received-weekly-feedback-inbox";
 
 /**
- * Read only pending request headers for active assignments.
+ * Read only pending request headers for client IDs authorized by the admin AAL2 directory.
  * Never query answers or drafts; the caller's RLS/MFA remains authoritative.
  */
 export async function listPendingWeeklyFeedbackHeadersForClients(
