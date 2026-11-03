@@ -134,6 +134,9 @@ jobs:
       - name: Run historical internal Client registration pgTAP
         run: npx supabase test db supabase/tests/database/historical_client_internal_registration.test.sql
 
+      - name: Run admin global historical assessment lifecycle pgTAP
+        run: npx supabase test db supabase/tests/database/admin_global_assessment_lifecycle.test.sql
+
       - name: Stop local Supabase
         if: always()
         run: npx supabase stop --no-backup
