@@ -10,6 +10,7 @@ import { newestTrainingRequests, newestUnpublishedTrainingVersion } from "@/lib/
 import { AdminEndClientAssignmentForm } from "@/components/admin/AdminEndClientAssignmentForm";
 import { AdminClientRegistrationEditForm } from "@/components/admin/AdminClientRegistrationEditForm";
 import { AdminClientRecoveryLinkForm } from "@/components/admin/AdminClientRecoveryLinkForm";
+import { HistoricalClientReturnReadinessForm } from "@/components/admin/HistoricalClientReturnReadinessForm";
 import { AdminWeeklyFeedbackNotificationPreferenceForm } from "@/components/admin/AdminWeeklyFeedbackNotificationPreferenceForm";
 import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
@@ -956,6 +957,18 @@ export default async function AdminClienteDetailPage({
           />
         </Card>
       </Section>
+
+      {client.status === "inactive" && !client.profile_id ? (
+        <Section
+          id="pre-conferencia-retorno-historico"
+          title="Pré-conferência de retorno"
+          description="Confirme o cadastro existente e verifique impedimentos antes de iniciar qualquer procedimento de ativação."
+        >
+          <Card className={styles.infoCard}>
+            <HistoricalClientReturnReadinessForm clientId={client.id} />
+          </Card>
+        </Section>
+      ) : null}
 
       <Section
         description="O acesso da cliente exige uma identidade vinculada. Cadastro histórico interno não gera senha ou link de recuperação."

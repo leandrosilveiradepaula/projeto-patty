@@ -24,6 +24,8 @@ import { ClientNameConflictError, updateClientProfileDisplayNamePrivileged, upda
 import { validateClientDisplayName } from "@/lib/onboarding/validation";
 import { ClientAccessLinkOriginError, resolveTrustedClientAccessOrigin } from "@/lib/onboarding/trusted-client-access-origin";
 import { isUuid } from "@/lib/validation/uuid";
+import { inspectHistoricalClientReturnReadiness } from "@/lib/onboarding/historical-client-return-readiness";
+import type { HistoricalReturnBlockReason } from "@/lib/onboarding/historical-client-return-preflight";
 
 export async function endClientAssignmentAction(
   clientId: string,
@@ -485,4 +487,34 @@ export async function updateWeeklyFeedbackNotificationPreferenceAction(
     message: "Canal do Feedback Semanal atualizado em nova versão.",
     success: true,
   };
+}
+
+/** Read-only historical-return check. This never links Auth or activates Client. */
+export type HistoricalReturnReadinessActionState = Readonly<{
+  status: "idle" | "blocked" | "pending_authorized_backend_verification" | "unavailable";
+  reasons: readonly HistoricalReturnBlockReason[];
+}>;
+
+export async function inspectHistoricalClientReturnAction(
+  clientId: string,
+  _previous: HistoricalReturnReadinessActionState,
+  formData: FormData,
+): Promise<HistoricalReturnReadinessActionState> {
+  await requireRole("admin");
+  if (!isUuid(clientId)) {
+    return { status: "blocked", reasons: ["invalid_client_id"] };
+  }
+
+  const confirmed = formData.get("confirmedClientId");
+  const reviewed = formData.get("identityReviewedByHuman") === "yes";
+  const result = await inspectHistoricalClientReturnReadiness({
+    clientId,
+    confirmedClientId: typeof confirmed === "string" ? confirmed.trim() : null,
+    identityReviewedByHuman: reviewed,
+  }).catch(() => null);
+
+  if (!result) {
+    return { status: "unavailable", reasons: [] };
+  }
+  return { status: result.status, reasons: result.reasons };
 }
