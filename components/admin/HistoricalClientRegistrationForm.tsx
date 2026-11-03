@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { registerHistoricalClient, type HistoricalRegistrationState } from "@/app/admin/clientes/historico/actions";
 import { Button } from "@/components/ui/Button";
 import { TextInput } from "@/components/ui/TextInput";
@@ -11,7 +11,8 @@ const initialState: HistoricalRegistrationState = { message: null, success: fals
 
 export function HistoricalClientRegistrationForm() {
   const [state, action, pending] = useActionState(registerHistoricalClient, initialState);
-  const [requestId] = useState(() => crypto.randomUUID());
+  const [requestId, setRequestId] = useState("");
+  useEffect(() => setRequestId(crypto.randomUUID()), []);
 
   return (
     <form action={action} className={styles.form}>
@@ -24,7 +25,7 @@ export function HistoricalClientRegistrationForm() {
         <span>Conferi o diretório e o acervo disponível e confirmei que este cadastro interno não duplica uma cliente já registrada.</span>
       </label>
       {state.message ? <Alert variant="warning" live="assertive">{state.message}</Alert> : null}
-      <Button type="submit" loading={pending} disabled={pending}>Criar cadastro histórico inativo</Button>
+      <Button type="submit" loading={pending} disabled={pending || !requestId}>Criar cadastro histórico inativo</Button>
       <p className={styles.note}>Não cria login, senha, convite, acompanhamento, arquivos nem liberação de conteúdo.</p>
     </form>
   );
