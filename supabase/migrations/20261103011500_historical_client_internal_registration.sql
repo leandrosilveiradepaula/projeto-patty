@@ -13,6 +13,12 @@ ALTER TABLE public.historical_client_registration_requests ENABLE ROW LEVEL SECU
 REVOKE ALL ON public.historical_client_registration_requests FROM PUBLIC, anon, authenticated;
 GRANT SELECT, INSERT ON public.historical_client_registration_requests TO service_role;
 
+-- The invoker needs ordinary SQL privileges in addition to BYPASSRLS.
+-- Limit these explicit grants to the trusted server role; browser roles
+-- receive no new privileges. Existing RLS and role checks stay intact.
+GRANT SELECT ON public.user_roles TO service_role;
+GRANT SELECT, INSERT ON public.clients TO service_role;
+
 CREATE OR REPLACE FUNCTION public.create_historical_client_internal(
   p_request_id uuid,
   p_full_name text,
