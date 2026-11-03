@@ -61,7 +61,7 @@ export async function inspectHistoricalClientReturnReadiness(
     : [];
 
   // If an identity has been proposed, check whether another Client already
-  // owns it. Do not use names, contact email or auth.users for relationships.
+  // owns it. Never infer ownership from descriptive contact fields.
   if (proposedProfileId && isUuid(proposedProfileId)) {
     const { data: profileMatches, error } = await supabase.from("clients")
       .select("id, profile_id, status")
