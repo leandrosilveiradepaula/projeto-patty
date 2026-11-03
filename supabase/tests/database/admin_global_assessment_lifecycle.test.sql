@@ -141,7 +141,7 @@ WITH changed AS (UPDATE public.client_assessments SET assessed_at=now()
 SELECT throws_ok($sql$
  INSERT INTO public.assessment_measurements(assessment_id,measurement_key,measurement_value,unit)
  VALUES('e7300000-0000-4000-8000-000000000002','peso',71,'kg')
-$sql$,'42501',NULL,'No new measurements on finalized assessment');
+$sql$,'55000',NULL,'No new measurements on finalized assessment');
 
 SELECT set_config('request.jwt.claims','{"sub":"e7100000-0000-4000-8000-000000000001","aal":"aal1","role":"authenticated"}',true);
 SELECT throws_ok($sql$
