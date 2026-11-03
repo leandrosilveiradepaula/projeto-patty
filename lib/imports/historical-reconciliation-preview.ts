@@ -72,6 +72,7 @@ export type ReconciliationBlockReason =
   | "source_entry_rejected"
   | "entry_hash_missing"
   | "unknown_entry"
+  | "duplicate_source_entry"
   | "entry_hash_mismatch"
   | "invalid_client_id"
   | "client_not_found"
@@ -110,9 +111,12 @@ export function previewHistoricalReconciliation(
 ): HistoricalReconciliationPreview {
   const files = collectFiles(historicalPreview);
   const filesByEntryId = new Map(files.map((file) => [file.entry_id, file]));
+  const entryCounts = new Map<string, number>();
+  for (const file of files) entryCounts.set(file.entry_id, (entryCounts.get(file.entry_id) ?? 0) + 1);
+  const duplicateSourceEntryIds = new Set([...entryCounts].filter(([, count]) => count > 1).map(([id]) => id));
   const { clientsById, inputErrors } = validateClients(clients);
   const orderedDecisions = [...humanDecisions].sort(compareDecision);
-  const evaluated = orderedDecisions.map((decision) => evaluateDecision(decision, filesByEntryId, clientsById));
+  const evaluated = orderedDecisions.map((decision) => evaluateDecision(decision, filesByEntryId, clientsById, duplicateSourceEntryIds));
   const reasonsByDecision = new Map<EvaluatedDecision, ReconciliationBlockReason | undefined>();
   for (const item of evaluated) reasonsByDecision.set(item, item.reason);
 
@@ -128,7 +132,7 @@ export function previewHistoricalReconciliation(
   }
   const duplicateGroupByEntryId = new Map<string, string>();
   for (const group of duplicateGroups) for (const entryId of group.entry_ids) duplicateGroupByEntryId.set(entryId, group.duplicate_binary_group_id);
-  const outputFiles = files.map((file) => toFilePreview(file, decisionsByEntry.get(file.entry_id) ?? [], clientsById, duplicateGroupByEntryId.get(file.entry_id)));
+  const outputFiles = files.map((file) => toFilePreview(file, decisionsByEntry.get(file.entry_id) ?? [], clientsById, duplicateGroupByEntryId.get(file.entry_id), duplicateSourceEntryIds.has(file.entry_id)));
 
   return {
     version: HISTORICAL_RECONCILIATION_PREVIEW_VERSION,
@@ -184,9 +188,10 @@ function validateClients(clients: readonly HistoricalReconciliationClient[]) {
   return { clientsById, inputErrors: [...errors].sort() };
 }
 
-function evaluateDecision(decision: HistoricalAssociationDecision, filesByEntryId: ReadonlyMap<string, HistoricalFile>, clientsById: ReadonlyMap<string, HistoricalReconciliationClient>): EvaluatedDecision {
+function evaluateDecision(decision: HistoricalAssociationDecision, filesByEntryId: ReadonlyMap<string, HistoricalFile>, clientsById: ReadonlyMap<string, HistoricalReconciliationClient>, duplicateSourceEntryIds: ReadonlySet<string>): EvaluatedDecision {
   const file = filesByEntryId.get(decision.entry_id);
   if (!file) return { decision, reason: "unknown_entry" };
+  if (duplicateSourceEntryIds.has(decision.entry_id)) return { decision, file, reason: "duplicate_source_entry" };
   if (file.source_status === "rejected") return { decision, file, reason: "source_entry_rejected" };
   if (!file.entry_sha256) return { decision, file, reason: "entry_hash_missing" };
   if (decision.entry_sha256 !== file.entry_sha256) return { decision, file, reason: "entry_hash_mismatch" };
@@ -243,10 +248,12 @@ function toDecisionPreview(item: EvaluatedDecision, index: number, reason: Recon
   };
 }
 
-function toFilePreview(file: HistoricalFile, decisions: readonly HistoricalAssociationDecisionPreview[], clientsById: ReadonlyMap<string, HistoricalReconciliationClient>, duplicateBinaryGroupId: string | undefined): HistoricalReconciliationFile {
+function toFilePreview(file: HistoricalFile, decisions: readonly HistoricalAssociationDecisionPreview[], clientsById: ReadonlyMap<string, HistoricalReconciliationClient>, duplicateBinaryGroupId: string | undefined, duplicateSourceEntry: boolean): HistoricalReconciliationFile {
   const pendingDecision = decisions.find((decision) => decision.status === "pending_backend_identity_verification");
   const blockedDecision = decisions.find((decision) => decision.status === "blocked");
-  const association = file.source_status === "rejected"
+  const association = duplicateSourceEntry
+    ? { status: "blocked" as const, reason: "duplicate_source_entry" as const }
+    : file.source_status === "rejected"
     ? { status: "blocked" as const, reason: "source_entry_rejected" as const }
     : blockedDecision
       ? { status: "blocked" as const, reason: blockedDecision.reason! }
