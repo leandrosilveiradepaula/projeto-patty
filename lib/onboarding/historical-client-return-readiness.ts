@@ -9,6 +9,17 @@ import {
   type HistoricalReturnPreflight,
 } from "@/lib/onboarding/historical-client-return-preflight";
 
+function toClientSnapshot(client: {
+  id: string;
+  profile_id: string | null;
+  status: string;
+}): HistoricalClientSnapshot {
+  if (client.status !== "active" && client.status !== "inactive") {
+    throw new Error("Historical return readiness received an unsupported Client status");
+  }
+  return { client_id: client.id, profile_id: client.profile_id, status: client.status };
+}
+
 export type HistoricalReturnReadinessRequest = Readonly<{
   clientId: string;
   confirmedClientId: string | null;
@@ -56,12 +67,7 @@ export async function inspectHistoricalClientReturnReadiness(
   }
 
   const client = clientResponse.data;
-  if (client && client.status !== "active" && client.status !== "inactive") {
-    throw new Error("Historical return readiness received an unsupported Client status");
-  }
-  const clients: HistoricalClientSnapshot[] = client
-    ? [{ client_id: client.id, profile_id: client.profile_id, status: client.status }]
-    : [];
+  const clients: HistoricalClientSnapshot[] = client ? [toClientSnapshot(client)] : [];
 
   // If an identity has been proposed, check whether another Client already
   // owns it. Never infer ownership from descriptive contact fields.
@@ -74,11 +80,8 @@ export async function inspectHistoricalClientReturnReadiness(
       throw new Error("Historical return readiness could not verify profile ownership");
     }
     for (const match of profileMatches ?? []) {
-      if (match.status !== "active" && match.status !== "inactive") {
-        throw new Error("Historical return readiness received an unsupported linked Client status");
-      }
       if (match.id !== input.clientId) {
-        clients.push({ client_id: match.id, profile_id: match.profile_id, status: match.status });
+        clients.push(toClientSnapshot(match));
       }
     }
   }
