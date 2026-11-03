@@ -30,6 +30,11 @@ BEGIN
 
   IF NOT has_table_privilege('authenticated','public.client_assessments','INSERT')
      OR has_table_privilege('authenticated','public.client_assessments','UPDATE')
+     OR NOT has_column_privilege('authenticated','public.client_assessments','assessed_at','UPDATE')
+     OR NOT has_column_privilege('authenticated','public.client_assessments','assessment_kind','UPDATE')
+     OR has_column_privilege('authenticated','public.client_assessments','finalized_at','UPDATE')
+     OR has_column_privilege('authenticated','public.client_assessments','finalized_by_profile_id','UPDATE')
+     OR has_column_privilege('authenticated','public.client_assessments','method_configuration_snapshot_set_id','UPDATE')
      OR NOT has_table_privilege('authenticated','public.assessment_measurements','INSERT')
      OR NOT has_table_privilege('authenticated','public.assessment_measurements','UPDATE')
      OR NOT has_table_privilege('authenticated','public.assessment_measurements','DELETE')
@@ -62,10 +67,9 @@ BEGIN
 END
 $guard$;
 
--- Required by the existing admin draft editing action. Existing SELECT
--- permissions and immutable lifecycle trigger remain untouched.
-GRANT UPDATE ON public.client_assessments TO authenticated;
-
+-- Do not grant table-wide UPDATE. The existing snapshot consumer hardening
+-- deliberately grants UPDATE only to assessed_at and assessment_kind,
+-- and denies direct writes to finalized_at/actor/snapshot. Preserve that.
 -- Prevent ALL direct browser/session finalization or forged snapshot links,
 -- including via the older assignment-based permissive UPDATE policy.
 -- Service-role snapshot RPC still works because it bypasses authenticated RLS.
