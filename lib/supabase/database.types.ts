@@ -3440,6 +3440,7 @@ export type Database = {
           p_request_id: string
           p_full_name: string
           p_confirmed_no_existing_client: boolean
+          p_created_by_profile_id: string
         }
         Returns: string
       }
