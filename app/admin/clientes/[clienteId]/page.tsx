@@ -520,6 +520,13 @@ export default async function AdminClienteDetailPage({
         label="Ir para"
       />
 
+      {query.onboarding === "historical" ? (
+        <Alert live="polite" title="Cadastro histórico interno criado" variant="success">
+          Registro profissional inativo criado, sem login, senha, convite ou acompanhamento ativo.
+          Confira a identidade antes de associar arquivos antigos. O retorno da cliente exige
+          conclusão do Cadastro Atual e ativação segura do acesso no mesmo cadastro.
+        </Alert>
+      ) : null}
       {query.onboarding === "invited" ? (
         <Alert live="polite" title="Solicitação de convite registrada" variant="success">
           A conta inicial foi criada e o Supabase aceitou a solicitação de envio do convite. A entrega do email e a ativação ainda não foram verificadas. Você já pode continuar o cadastro e preparar as próximas etapas do atendimento.
