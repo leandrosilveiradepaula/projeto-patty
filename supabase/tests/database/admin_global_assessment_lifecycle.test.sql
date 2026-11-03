@@ -23,10 +23,15 @@ SELECT ok((SELECT COUNT(*) FROM pg_policies WHERE schemaname='public'
  'assessment_files_insert_admin_global_draft_aal2',
  'assessment_files_delete_admin_global_draft_aal2'
  ))=8,'Every narrow admin draft policy exists');
-SELECT ok(has_table_privilege('authenticated','public.client_assessments','UPDATE')
+SELECT ok(
+ NOT has_table_privilege('authenticated','public.client_assessments','UPDATE')
+ AND has_column_privilege('authenticated','public.client_assessments','assessed_at','UPDATE')
+ AND has_column_privilege('authenticated','public.client_assessments','assessment_kind','UPDATE')
+ AND NOT has_column_privilege('authenticated','public.client_assessments','finalized_at','UPDATE')
+ AND NOT has_column_privilege('authenticated','public.client_assessments','method_configuration_snapshot_set_id','UPDATE')
  AND NOT has_table_privilege('anon','public.client_assessments','UPDATE')
  AND NOT has_table_privilege('anon','public.assessment_files','INSERT'),
- 'Draft UPDATE granted to authenticated but never anon');
+ 'Only draft metadata columns are writable, never finalization/snapshot or anon');
 SELECT ok((SELECT NOT prosecdef FROM pg_proc WHERE oid =
  'public.finalize_assessment_from_method_snapshot(uuid,uuid,uuid,jsonb,jsonb,uuid,jsonb,jsonb)'::regprocedure)
  AND NOT has_function_privilege('authenticated',
