@@ -114,6 +114,29 @@ test("is deterministic when identical human decisions arrive in a different orde
   assert.deepEqual(previewHistoricalReconciliation(preview, clients(), decisions), previewHistoricalReconciliation(preview, clients(), [...decisions].reverse()));
 });
 
+
+test("blocks duplicate opaque source entry identifiers instead of choosing the last file", () => {
+  const preview = archivePreview([{ name: "one.png", bytes: syntheticPng }, { name: "two.png", bytes: new Uint8Array([...syntheticPng, 1]) }]);
+  const first = preview.archives[0]!.entries[0]!;
+  const second = preview.archives[0]!.entries[1]!;
+  // Synthetic manifest corruption: two different source files claim the same opaque ID.
+  const corrupted = {
+    ...preview,
+    archives: preview.archives.map((archive) => ({
+      ...archive,
+      entries: archive.entries.map((entry) =>
+        entry.entry_id === second.entry_id ? { ...entry, entry_id: first.entry_id } : entry),
+    })),
+  };
+  const result = previewHistoricalReconciliation(corrupted, clients(), [
+    { entry_id: first.entry_id, entry_sha256: first.sha256!, client_id: ACTIVE_CLIENT },
+  ]);
+  assert.equal(result.files.length, 2);
+  assert.ok(result.files.every((file) => file.association.status === "blocked" && file.association.reason === "duplicate_source_entry"));
+  assert.equal(result.decisions[0]!.reason, "duplicate_source_entry");
+  assert.equal(result.summary.pending_backend_identity_verification_count, 0);
+});
+
 function archivePreview(members: Parameters<typeof syntheticZip>[0]) {
   return previewHistoricalArchives([{ bytes: syntheticZip(members) }]);
 }
