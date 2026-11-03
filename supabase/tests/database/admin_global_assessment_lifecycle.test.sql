@@ -134,10 +134,9 @@ SELECT throws_ok($sql$
  finalized_by_profile_id='e7100000-0000-4000-8000-000000000001'
  WHERE id='e7300000-0000-4000-8000-000000000001'
 $sql$,'42501',NULL,'Authenticated admin cannot finalize without snapshot RPC');
-SELECT is(
- (WITH changed AS (UPDATE public.client_assessments SET assessed_at=now()
+WITH changed AS (UPDATE public.client_assessments SET assessed_at=now()
   WHERE id='e7300000-0000-4000-8000-000000000002' RETURNING id)
-  SELECT count(*) FROM changed),0::bigint,
+ SELECT is((SELECT count(*) FROM changed),0::bigint,
  'Finalized historical assessment is excluded by draft-only UPDATE RLS');
 SELECT throws_ok($sql$
  INSERT INTO public.assessment_measurements(assessment_id,measurement_key,measurement_value,unit)
@@ -150,10 +149,9 @@ SELECT throws_ok($sql$
  VALUES('e7200000-0000-4000-8000-000000000001',now(),'monthly',
  'e7100000-0000-4000-8000-000000000001')
 $sql$,'42501',NULL,'AAL1 admin cannot start draft');
-SELECT is(
- (WITH changed AS (UPDATE public.client_assessments SET assessed_at=now()
+WITH changed AS (UPDATE public.client_assessments SET assessed_at=now()
   WHERE id='e7300000-0000-4000-8000-000000000001' RETURNING id)
-  SELECT count(*) FROM changed),0::bigint,
+ SELECT is((SELECT count(*) FROM changed),0::bigint,
  'AAL1 admin cannot update draft under RLS');
 
 SELECT set_config('request.jwt.claim.sub','e7100000-0000-4000-8000-000000000002',true);
@@ -163,10 +161,9 @@ SELECT throws_ok($sql$
  VALUES('e7200000-0000-4000-8000-000000000001',now(),'monthly',
  'e7100000-0000-4000-8000-000000000002')
 $sql$,'42501',NULL,'Client cannot insert another Client assessment');
-SELECT is(
- (WITH changed AS (UPDATE public.client_assessments SET assessed_at=now()
+WITH changed AS (UPDATE public.client_assessments SET assessed_at=now()
   WHERE id='e7300000-0000-4000-8000-000000000001' RETURNING id)
-  SELECT count(*) FROM changed),0::bigint,
+ SELECT is((SELECT count(*) FROM changed),0::bigint,
  'Client cannot update another Client professional draft');
 
 SELECT set_config('request.jwt.claim.sub','e7100000-0000-4000-8000-000000000003',true);
