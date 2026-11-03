@@ -1,5 +1,5 @@
 -- MIGR-HIST-04: Internal historical Client registration, never an Auth account.
--- SECURITY INVOKER: the caller must be an authenticated relational admin with AAL2.
+-- SECURITY DEFINER: the caller must be an authenticated relational admin with AAL2.
 -- Direct INSERT/UPDATE/DELETE on clients remains ungranted to authenticated/anon.
 -- The request UUID is the idempotency key. The ledger is not a client record.
 CREATE TABLE public.historical_client_registration_requests (
@@ -18,7 +18,7 @@ CREATE OR REPLACE FUNCTION public.create_historical_client_internal(
   p_confirmed_no_existing_client boolean
 ) RETURNS uuid
 LANGUAGE plpgsql
-SECURITY INVOKER
+SECURITY DEFINER
 SET search_path = pg_catalog
 AS $function$
 DECLARE
@@ -84,6 +84,5 @@ $function$;
 
 REVOKE ALL ON FUNCTION public.create_historical_client_internal(uuid,text,boolean) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.create_historical_client_internal(uuid,text,boolean) TO authenticated;
--- SECURITY INVOKER requires INSERT privilege, which is intentionally absent.
--- Do not grant table INSERT: use a server-only service-role RPC after verifying
--- human identity at the server boundary. Until then the function fails closed.
+-- No direct table INSERT privilege is granted to authenticated. The function
+-- is the only mutation boundary, with a relational admin role + JWT AAL2 gate.
