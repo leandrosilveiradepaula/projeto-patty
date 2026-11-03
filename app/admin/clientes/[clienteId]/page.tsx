@@ -476,7 +476,7 @@ export default async function AdminClienteDetailPage({
         meta={
           client.started_at
             ? `Acompanhamento desde ${formatDate(client.started_at)}`
-            : "Acompanhamento ativo"
+            : client.status === "inactive" ? "Cadastro interno sem acompanhamento ativo" : "Acompanhamento ativo"
         }
         name={displayName || "Nome ausente — registro legado"}
         secondary={
@@ -520,6 +520,13 @@ export default async function AdminClienteDetailPage({
         label="Ir para"
       />
 
+      {query.onboarding === "historical" ? (
+        <Alert live="polite" title="Cadastro histórico interno criado" variant="success">
+          Registro profissional inativo criado, sem login, senha, convite ou acompanhamento ativo.
+          Confira a identidade antes de associar arquivos antigos. O retorno da cliente exige
+          conclusão do Cadastro Atual e ativação segura do acesso no mesmo cadastro.
+        </Alert>
+      ) : null}
       {query.onboarding === "invited" ? (
         <Alert live="polite" title="Solicitação de convite registrada" variant="success">
           A conta inicial foi criada e o Supabase aceitou a solicitação de envio do convite. A entrega do email e a ativação ainda não foram verificadas. Você já pode continuar o cadastro e preparar as próximas etapas do atendimento.
@@ -951,16 +958,18 @@ export default async function AdminClienteDetailPage({
       </Section>
 
       <Section
-        description="Use esta opção quando a cliente perder a senha e o email automático de recuperação não estiver disponível. O link é individual e não altera a senha até que a própria cliente conclua o fluxo."
+        description="O acesso da cliente exige uma identidade vinculada. Cadastro histórico interno não gera senha ou link de recuperação."
         id="recuperacao-acesso"
         title="Recuperação de acesso"
       >
         <Card className={styles.infoCard}>
-          <AdminClientRecoveryLinkForm clientId={client.id} />
+          {client.profile_id
+            ? <AdminClientRecoveryLinkForm clientId={client.id} />
+            : <p>Cliente sem conta vinculada. O retorno exige validação da identidade, Cadastro Atual e ativação do acesso; não utilize convite de nova cliente para duplicar o cadastro.</p>}
         </Card>
       </Section>
 
-      <Section
+      {client.status === "active" ? <Section
         description="Encerre somente quando a cliente não estiver mais em acompanhamento. O histórico permanece preservado."
         id="encerrar-acompanhamento"
         title="Encerrar acompanhamento"
@@ -978,7 +987,7 @@ export default async function AdminClienteDetailPage({
             displayName={displayName ?? undefined}
           />
         </div>
-      </Section>
+      </Section> : null}
     </>
   );
 }

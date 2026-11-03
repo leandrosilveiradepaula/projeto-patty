@@ -3435,6 +3435,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_historical_client_internal: {
+        Args: {
+          p_request_id: string
+          p_full_name: string
+          p_confirmed_no_existing_client: boolean
+          p_created_by_profile_id: string
+        }
+        Returns: string
+      }
       save_client_weekly_feedback_if_unchanged: {
         Args: {
           p_client_id: string

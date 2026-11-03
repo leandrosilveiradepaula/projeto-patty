@@ -131,6 +131,9 @@ jobs:
       - name: Run admin global check-in correction pgTAP
         run: npx supabase test db supabase/tests/database/admin_global_checkin_corrections.test.sql
 
+      - name: Run historical internal Client registration pgTAP
+        run: npx supabase test db supabase/tests/database/historical_client_internal_registration.test.sql
+
       - name: Stop local Supabase
         if: always()
         run: npx supabase stop --no-backup
