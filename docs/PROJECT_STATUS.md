@@ -1,3 +1,11 @@
+## 2026-11-03 — MIGR-HIST-03C: snapshot de Client não confiável bloqueia prévia integral
+
+**Correção de segurança proposta para o modo dry-run:** a prévia offline de conciliação histórica já sinalizava `invalid_client_snapshot` / `duplicate_client_snapshot`, mas podia manter decisões de associação a outras clientes no estado `pending_backend_identity_verification`, apesar de a lista de identidades de referência estar inconsistente. O fluxo agora marca **todos** os arquivos e decisões como `blocked: client_snapshot_untrusted` quando qualquer entrada da lista de Client é inválida ou duplicada; preserva os erros explícitos para reconciliação humana, mesmo em arquivos sem decisão. Teste sintético cobre instantâneos inválidos e duplicados com decisões aparentemente válidas. Somente quando a lista completa for validada deve a prévia encaminhar decisões para verificação autorizada posterior.
+
+**Escopo restrito:** duas alterações em lógica/teste offline, sem migrations, Auth, Storage, dados reais, vínculos, importação persistente, regra profissional, reativação ou publicação. O bloqueio não transforma uma associação em identidade confirmada. CI e merge devem ser verificados separadamente; homologação profissional J1–J7 ao final.
+
+---
+
 ## 2026-11-03 — MIGR-HIST-04B: cadastro interno histórico — migration aplicada e auditada
 
 **Implementado e mergeado:** [PR #1068](https://github.com/leandrosilveiradepaula/projeto-patty/pull/1068) integrada ao `master` `5c7ca5dc0be83c95fd389d7ad0869226e3cd0c13`. Página administrativa `/admin/clientes/historico`, Server Action `requireRole("admin")` com MFA AAL2 e RPC transacional `create_historical_client_internal` chamada exclusivamente por `service_role` no servidor. A função SQL `SECURITY INVOKER` revalida a role relacional do autor enviada pelo servidor, registra autoria e idempotência, serializa criações e bloqueia colisões exatas por nome (nome não é chave de identidade). O `Client` novo permanece `inactive`, `profile_id=NULL`, `started_at=NULL`, sem Auth, convite, senha, assignment ativo ou arquivos.

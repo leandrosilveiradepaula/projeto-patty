@@ -73,6 +73,7 @@ export type ReconciliationBlockReason =
   | "entry_hash_missing"
   | "unknown_entry"
   | "duplicate_source_entry"
+  | "client_snapshot_untrusted"
   | "entry_hash_mismatch"
   | "invalid_client_id"
   | "client_not_found"
@@ -118,7 +119,7 @@ export function previewHistoricalReconciliation(
   const orderedDecisions = [...humanDecisions].sort(compareDecision);
   const evaluated = orderedDecisions.map((decision) => evaluateDecision(decision, filesByEntryId, clientsById, duplicateSourceEntryIds));
   const reasonsByDecision = new Map<EvaluatedDecision, ReconciliationBlockReason | undefined>();
-  for (const item of evaluated) reasonsByDecision.set(item, item.reason);
+  for (const item of evaluated) reasonsByDecision.set(item, inputErrors.length > 0 ? "client_snapshot_untrusted" : item.reason);
 
   blockDuplicateAndConflictingDecisions(evaluated, reasonsByDecision);
   const duplicateGroups = duplicateGroupsFor(files);
@@ -132,7 +133,7 @@ export function previewHistoricalReconciliation(
   }
   const duplicateGroupByEntryId = new Map<string, string>();
   for (const group of duplicateGroups) for (const entryId of group.entry_ids) duplicateGroupByEntryId.set(entryId, group.duplicate_binary_group_id);
-  const outputFiles = files.map((file) => toFilePreview(file, decisionsByEntry.get(file.entry_id) ?? [], clientsById, duplicateGroupByEntryId.get(file.entry_id), duplicateSourceEntryIds.has(file.entry_id)));
+  const outputFiles = files.map((file) => toFilePreview(file, decisionsByEntry.get(file.entry_id) ?? [], clientsById, duplicateGroupByEntryId.get(file.entry_id), duplicateSourceEntryIds.has(file.entry_id), inputErrors.length > 0));
 
   return {
     version: HISTORICAL_RECONCILIATION_PREVIEW_VERSION,
@@ -248,10 +249,12 @@ function toDecisionPreview(item: EvaluatedDecision, index: number, reason: Recon
   };
 }
 
-function toFilePreview(file: HistoricalFile, decisions: readonly HistoricalAssociationDecisionPreview[], clientsById: ReadonlyMap<string, HistoricalReconciliationClient>, duplicateBinaryGroupId: string | undefined, duplicateSourceEntry: boolean): HistoricalReconciliationFile {
+function toFilePreview(file: HistoricalFile, decisions: readonly HistoricalAssociationDecisionPreview[], clientsById: ReadonlyMap<string, HistoricalReconciliationClient>, duplicateBinaryGroupId: string | undefined, duplicateSourceEntry: boolean, clientSnapshotUntrusted: boolean): HistoricalReconciliationFile {
   const pendingDecision = decisions.find((decision) => decision.status === "pending_backend_identity_verification");
   const blockedDecision = decisions.find((decision) => decision.status === "blocked");
-  const association = duplicateSourceEntry
+  const association = clientSnapshotUntrusted
+    ? { status: "blocked" as const, reason: "client_snapshot_untrusted" as const }
+    : duplicateSourceEntry
     ? { status: "blocked" as const, reason: "duplicate_source_entry" as const }
     : file.source_status === "rejected"
     ? { status: "blocked" as const, reason: "source_entry_rejected" as const }
