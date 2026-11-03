@@ -98,9 +98,10 @@ export default async function AdminClientesPage({
 
       <Section
         action={
-          <Link className={styles.actionLink} href="/admin/clientes/nova">
-            Convidar cliente
-          </Link>
+          <div className={styles.itemActions}>
+            <Link className={styles.actionLink} href="/admin/clientes/historico">Cadastrar cliente histórica</Link>
+            <Link className={styles.actionLink} href="/admin/clientes/nova">Convidar cliente</Link>
+          </div>
         }
         description="Consulte quem precisa de atenção, acompanhe respostas e encontre rapidamente cada cliente."
         title="Todas as clientes"
