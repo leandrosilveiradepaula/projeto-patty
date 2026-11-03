@@ -32,7 +32,7 @@ export async function createAssessmentAction(
 
   if (!client) {
     return {
-      message: "Esta cliente não está acessível para sua atribuição atual.",
+      message: "Esta cliente não está disponível para sua sessão administrativa.",
     };
   }
 
