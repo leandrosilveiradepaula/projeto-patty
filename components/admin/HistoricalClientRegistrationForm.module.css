@@ -1,0 +1,6 @@
+.form { display: grid; gap: var(--space-4); max-width: 650px; }
+.label { color: var(--color-text-primary); font-weight: 650; }
+.note { margin: 0; color: var(--color-text-secondary); font-size: var(--text-body-small-size); line-height: 1.6; }
+.confirmation { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-medium); color: var(--color-text-primary); line-height: 1.5; }
+.confirmation input { margin-top: 0.3em; flex-shrink: 0; accent-color: var(--color-brand-strong); }
+.confirmation:focus-within { outline: 2px solid var(--color-brand); outline-offset: 2px; }
