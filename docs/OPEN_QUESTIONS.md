@@ -10,6 +10,14 @@
 
 ---
 
+## 2026-11-03 — Cadastro interno histórico: implementação concluída no banco, importação real ainda bloqueada
+
+**RESOLVIDO TECNICAMENTE:** cadastro `Client` histórico inativo sem identidade Auth/Profile ou assignment; fluxo administrativo implementado na PR #1068 e migration `20261103011500` aplicada no Supabase SaaS via [workflow #72](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/41571090730). Conferidas por metadados existência da tabela/RPC, RLS, grants e histórico da migration; nenhum cadastro histórico criado durante os testes do SaaS. O registro é interno, não convida, não importa acervo e não reativa acompanhamento.
+
+**PERMANECEM ABERTOS:** conciliação humana e colisões de identidade (inclusive nomes parecidos e Auth parcial); vinculação segura de ZIP/XLSX a `client_id`; proveniência, retenção e mapeamento versionado; critérios de visibilidade dos arquivos históricos; ativação/retorno reutilizando o mesmo `Client` com Cadastro Atual, login e senha; verificação de publicação Vercel e homologação conjunta J1–J7. Não interpretar a migration como liberação desses fluxos.
+
+---
+
 ## MIGR-HIST-04 — decisão parcial de 2026-11-01 e pendências remanescentes
 
 **RESOLVIDO COMO REGRA DE PRODUTO:** cliente histórica pode ter **cadastro interno Client sem Auth/Profile/login/senha** para preservação do histórico; quando retornar ao atendimento, deve **completar Cadastro Atual e concluir login/senha**. O registro existente deve ser reaproveitado, não duplicado. Esta confirmação está documentada em `DECISIONS.md` e `DATA_MODEL.md`; não reabrir como pergunta genérica.
