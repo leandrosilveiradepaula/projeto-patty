@@ -56,6 +56,9 @@ export async function inspectHistoricalClientReturnReadiness(
   }
 
   const client = clientResponse.data;
+  if (client && client.status !== "active" && client.status !== "inactive") {
+    throw new Error("Historical return readiness received an unsupported Client status");
+  }
   const clients: HistoricalClientSnapshot[] = client
     ? [{ client_id: client.id, profile_id: client.profile_id, status: client.status }]
     : [];
@@ -71,6 +74,9 @@ export async function inspectHistoricalClientReturnReadiness(
       throw new Error("Historical return readiness could not verify profile ownership");
     }
     for (const match of profileMatches ?? []) {
+      if (match.status !== "active" && match.status !== "inactive") {
+        throw new Error("Historical return readiness received an unsupported linked Client status");
+      }
       if (match.id !== input.clientId) {
         clients.push({ client_id: match.id, profile_id: match.profile_id, status: match.status });
       }
