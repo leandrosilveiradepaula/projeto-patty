@@ -8,6 +8,36 @@ import { syntheticPng, syntheticZip } from "../../tests/fixtures/imports/synthet
 const ACTIVE_CLIENT = "11111111-1111-4111-8111-111111111111";
 const INACTIVE_CLIENT = "22222222-2222-4222-8222-222222222222";
 
+test("blocks every file and human decision when Client snapshot is incomplete or duplicated", () => {
+  const preview = archivePreview([
+    { name: "first.png", bytes: syntheticPng },
+    { name: "second.png", bytes: new Uint8Array([...syntheticPng, 1]) },
+  ]);
+  const first = preview.archives[0]!.entries[0]!;
+  const decision = { entry_id: first.entry_id, entry_sha256: first.sha256!, client_id: ACTIVE_CLIENT };
+
+  for (const snapshot of [
+    [...clients(), { client_id: "invalid", client_status: "inactive" as const }],
+    [...clients(), { client_id: INACTIVE_CLIENT, client_status: "inactive" as const }],
+  ]) {
+    const result = previewHistoricalReconciliation(preview, snapshot, [decision]);
+    assert.equal(result.mode, "dry_run");
+    assert.equal(result.persistence, "none");
+    assert.equal(result.summary.pending_backend_identity_verification_count, 0);
+    assert.equal(result.summary.pending_human_decision_count, 0);
+    assert.equal(result.summary.blocked_count, 2);
+    assert.ok(result.input_errors.length > 0);
+    assert.ok(result.files.every((file) =>
+      file.association.status === "blocked" && file.association.reason === "client_snapshot_untrusted",
+    ));
+    assert.deepEqual(result.decisions.map((item) => [item.status, item.reason]), [
+      ["blocked", "client_snapshot_untrusted"],
+    ]);
+    // Untrusted snapshots must never partially authorize even known-good IDs.
+    assert.doesNotMatch(JSON.stringify(result.files), /pending_backend_identity_verification/);
+  }
+});
+
 test("creates an opaque, explicit reconciliation manifest while preserving active and inactive client state", () => {
   const preview = archivePreview([{ name: "first.png", bytes: syntheticPng }, { name: "second.png", bytes: new Uint8Array([...syntheticPng, 1]) }]);
   const first = preview.archives[0]!.entries[0]!;
