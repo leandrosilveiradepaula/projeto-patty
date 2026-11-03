@@ -1,7 +1,8 @@
--- MIGR-HIST-04: Internal historical Client registration, never an Auth account.
--- SECURITY DEFINER: the caller must be an authenticated relational admin with AAL2.
--- Direct INSERT/UPDATE/DELETE on clients remains ungranted to authenticated/anon.
--- The request UUID is the idempotency key. The ledger is not a client record.
+-- MIGR-HIST-04B: internal historical Client registration, never an Auth account.
+-- SECURITY INVOKER: executable by service_role ONLY, after a server-side
+-- requireRole("admin") verifies the relational role and MFA AAL2.
+-- No INSERT/UPDATE/DELETE on clients is granted to authenticated or anon.
+-- No Client is associated with ZIP/XLSX, assignment, or Auth in this operation.
 CREATE TABLE public.historical_client_registration_requests (
   request_id uuid PRIMARY KEY,
   client_id uuid NOT NULL UNIQUE REFERENCES public.clients(id) ON DELETE RESTRICT,
@@ -10,40 +11,45 @@ CREATE TABLE public.historical_client_registration_requests (
 );
 ALTER TABLE public.historical_client_registration_requests ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON public.historical_client_registration_requests FROM PUBLIC, anon, authenticated;
-GRANT SELECT ON public.historical_client_registration_requests TO service_role;
+GRANT SELECT, INSERT ON public.historical_client_registration_requests TO service_role;
 
 CREATE OR REPLACE FUNCTION public.create_historical_client_internal(
   p_request_id uuid,
   p_full_name text,
-  p_confirmed_no_existing_client boolean
+  p_confirmed_no_existing_client boolean,
+  p_created_by_profile_id uuid
 ) RETURNS uuid
 LANGUAGE plpgsql
-SECURITY DEFINER
+SECURITY INVOKER
 SET search_path = pg_catalog
 AS $function$
 DECLARE
-  v_actor uuid := (SELECT auth.uid());
   v_name text := btrim(p_full_name);
   v_client_id uuid;
   v_existing record;
 BEGIN
-  IF v_actor IS NULL
-    OR coalesce((SELECT auth.jwt() ->> 'aal') = 'aal2', false) IS NOT TRUE
+  -- Defense in depth: even an unexpected direct RPC call fails closed.
+  -- JWT/MFA identity is verified in the Next.js server-only caller BEFORE
+  -- obtaining a service-role client; service_role is never sent to browsers.
+  IF current_user <> 'service_role'
+    OR p_created_by_profile_id IS NULL
     OR NOT EXISTS (
       SELECT 1 FROM public.user_roles r
-      WHERE r.profile_id = v_actor AND r.role = 'admin'
+      WHERE r.profile_id = p_created_by_profile_id AND r.role = 'admin'
     )
   THEN
-    RAISE EXCEPTION 'Historical registration requires admin AAL2' USING ERRCODE='42501';
+    RAISE EXCEPTION 'Historical registration requires verified administrator' USING ERRCODE='42501';
   END IF;
+
   IF p_request_id IS NULL OR p_confirmed_no_existing_client IS DISTINCT FROM true
     OR v_name IS NULL OR char_length(v_name) NOT BETWEEN 2 AND 120
   THEN
     RAISE EXCEPTION 'Historical registration requires a valid name and explicit duplicate review' USING ERRCODE='22023';
   END IF;
 
-  -- Serialize all historical registrations so concurrent requests cannot bypass
-  -- the exact-name collision check. Names are only a blocking signal, never identity keys.
+  -- Serialize historical registrations to prevent concurrent exact-name
+  -- collisions within this operation. Name is only a blocking signal, never
+  -- a key for assigning real-world identity.
   PERFORM pg_catalog.pg_advisory_xact_lock(120342, 49017);
 
   SELECT q.client_id, q.created_by_profile_id, c.full_name, c.profile_id, c.status
@@ -53,7 +59,7 @@ BEGIN
   WHERE q.request_id = p_request_id;
 
   IF FOUND THEN
-    IF v_existing.created_by_profile_id = v_actor
+    IF v_existing.created_by_profile_id = p_created_by_profile_id
       AND v_existing.full_name = v_name
       AND v_existing.profile_id IS NULL
       AND v_existing.status = 'inactive'
@@ -63,8 +69,6 @@ BEGIN
     RAISE EXCEPTION 'Historical registration request conflict' USING ERRCODE='23505';
   END IF;
 
-  -- Fail closed on exact case-insensitive name collision. Distinct people may
-  -- share a name; resolution must be human, not automatic deduplication.
   IF EXISTS (
     SELECT 1 FROM public.clients c
     WHERE pg_catalog.lower(c.full_name) = pg_catalog.lower(v_name)
@@ -77,12 +81,12 @@ BEGIN
     RETURNING id INTO v_client_id;
   INSERT INTO public.historical_client_registration_requests
     (request_id, client_id, created_by_profile_id)
-    VALUES (p_request_id, v_client_id, v_actor);
+    VALUES (p_request_id, v_client_id, p_created_by_profile_id);
   RETURN v_client_id;
 END
 $function$;
 
-REVOKE ALL ON FUNCTION public.create_historical_client_internal(uuid,text,boolean) FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.create_historical_client_internal(uuid,text,boolean) TO authenticated;
--- No direct table INSERT privilege is granted to authenticated. The function
--- is the only mutation boundary, with a relational admin role + JWT AAL2 gate.
+REVOKE ALL ON FUNCTION public.create_historical_client_internal(uuid,text,boolean,uuid)
+  FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.create_historical_client_internal(uuid,text,boolean,uuid)
+  TO service_role;
