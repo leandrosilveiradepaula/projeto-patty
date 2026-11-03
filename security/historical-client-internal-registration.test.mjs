@@ -12,18 +12,18 @@ const pgtap = readFileSync("supabase/tests/database/historical_client_internal_r
 
 test("historical Client creation is atomic and isolated from Auth, assignments and publication",()=>{
   assert.match(sql,/CREATE OR REPLACE FUNCTION public\.create_historical_client_internal/);
-  assert.match(sql,/SECURITY DEFINER/);
+  assert.match(sql,/SECURITY INVOKER/);
   assert.match(sql,/SET search_path = pg_catalog/);
-  assert.match(sql,/auth\.uid\(\)/);
-  assert.match(sql,/auth\.jwt\(\) ->> 'aal'/);
+  assert.match(sql,/current_user <> 'service_role'/);
+  assert.match(sql,/p_created_by_profile_id IS NULL/);
   assert.match(sql,/r\.role = 'admin'/);
   assert.match(sql,/pg_advisory_xact_lock/);
   assert.match(sql,/p_confirmed_no_existing_client IS DISTINCT FROM true/);
   assert.match(sql,/INSERT INTO public\.clients\(full_name, profile_id, status, started_at, ended_at\)/);
   assert.match(sql,/VALUES \(v_name, NULL, 'inactive', NULL, NULL\)/);
   assert.match(sql,/created_by_profile_id/);
-  assert.match(sql,/REVOKE ALL ON FUNCTION.*FROM PUBLIC, anon/);
-  assert.match(sql,/GRANT EXECUTE ON FUNCTION.*TO authenticated/);
+  assert.match(sql,/FROM PUBLIC, anon, authenticated/);
+  assert.match(sql,/TO service_role/);
   assert.doesNotMatch(sql,/GRANT\s+INSERT\s+ON\s+public\.clients\s+TO\s+authenticated/i);
   assert.doesNotMatch(sql,/auth\.admin\.|client_assignments|protocol_publications|storage\.objects/i);
 });
@@ -32,9 +32,10 @@ test("admin session is rechecked and browser receives no service-role client",()
   assert.match(action,/await requireRole\("admin"\)/);
   assert.match(action,/duplicateReviewConfirmed: true/);
   assert.match(boundary,/await requireRole\("admin"\)/);
-  assert.match(boundary,/await createClient\(\)/);
+  assert.match(boundary,/createAdminClient\(\)/);
+  assert.match(boundary,/p_created_by_profile_id: context.profileId/);
   assert.match(boundary,/\.rpc\("create_historical_client_internal"/);
-  assert.doesNotMatch(action+boundary,/createAdminClient|service_role|inviteUserByEmail|generateLink/);
+  assert.doesNotMatch(action+boundary,/inviteUserByEmail|generateLink/);
   assert.match(page,/await requireRole\("admin"\)/);
   assert.match(form,/confirmedNoExistingClient/);
   assert.match(form,/crypto\.randomUUID\(\)/);
@@ -43,7 +44,7 @@ test("admin session is rechecked and browser receives no service-role client",()
 
 test("database regression is registered and exercises rejection cases",()=>{
   assert.match(workflow,/Run historical internal Client registration pgTAP/);
-  for(const phrase of ["Unassigned admin AAL2 creates historical client","Client remains inactive without Auth or assignment","Retry returns same Client id","Exact name collision requires manual review","Admin AAL1 denied","Client AAL2 denied"]){
+  for(const phrase of ["Verified admin server call creates historical client","Client remains inactive without Auth or assignment","Retry returns same Client id","Exact name collision requires manual review","Authenticated admin AAL2 cannot directly execute privileged RPC","Non-admin actor denied by RPC"]){
     assert.ok(pgtap.includes(phrase),phrase);
   }
 });
