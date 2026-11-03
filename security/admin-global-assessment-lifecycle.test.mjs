@@ -24,7 +24,10 @@ test("admin assessment lifecycle requires role/AAL2 and complete draft guards",(
   assert.match(migration,/a\.finalized_at IS NULL/);
   assert.match(migration,/f\.client_id=assessment_files\.client_id/);
   assert.match(migration,/f\.file_kind='photo'/);
-  assert.match(migration,/GRANT UPDATE ON public\.client_assessments TO authenticated/);
+  assert.doesNotMatch(migration,/GRANT UPDATE ON public\.client_assessments TO authenticated/);
+  assert.match(migration,/has_column_privilege\('authenticated','public\.client_assessments','assessed_at','UPDATE'\)/);
+  assert.match(migration,/has_column_privilege\('authenticated','public\.client_assessments','assessment_kind','UPDATE'\)/);
+  assert.match(migration,/has_column_privilege\('authenticated','public\.client_assessments','finalized_at','UPDATE'\)/);
   assert.doesNotMatch(migration,/GRANT\s+(?:UPDATE|INSERT|DELETE)\s+ON\s+public\.client_assessments\s+TO\s+anon/i);
   assert.doesNotMatch(migration,/DISABLE ROW LEVEL SECURITY|DROP POLICY|DROP TRIGGER|SECURITY DEFINER/i);
 });
