@@ -67,6 +67,10 @@ export function previewHistoricalClientReturn(input: HistoricalReturnPreflightIn
       linkedProfiles.set(client.profile_id, client.client_id);
     }
   }
+  // A duplicate anywhere makes the supplied directory snapshot untrustworthy.
+  // Keep the target-specific reason as well, but never partially approve
+  // another Client based on a malformed directory.
+  if (duplicateClientIds.size > 0) reasons.add("invalid_snapshot");
   if (duplicateClientIds.has(input.client_id)) reasons.add("duplicate_client");
   const client = validClients.get(input.client_id);
   if (!client) reasons.add("client_not_found");

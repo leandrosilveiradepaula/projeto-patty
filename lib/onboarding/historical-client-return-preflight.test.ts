@@ -81,3 +81,27 @@ test("remains deterministic, including order of blocking reasons", () => {
   assert.deepEqual(first, second);
   assert.deepEqual(first.reasons, [...first.reasons].sort());
 });
+
+test("rejects duplicate non-target Client snapshots even if target is unique", () => {
+  const result = previewHistoricalClientReturn(fixture({
+    clients: [
+      fixture().clients[0]!,
+      { client_id: OTHER, profile_id: null, status: "inactive" },
+      { client_id: OTHER, profile_id: null, status: "inactive" },
+    ],
+  }));
+  assert.equal(result.status, "blocked");
+  assert.ok(result.reasons.includes("invalid_snapshot"));
+  assert.equal(result.persistence, "none");
+});
+
+test("rejects a directory with an invalid unrelated Client instead of partial approval", () => {
+  const result = previewHistoricalClientReturn(fixture({
+    clients: [
+      fixture().clients[0]!,
+      { client_id: "invalid", profile_id: null, status: "inactive" },
+    ],
+  }));
+  assert.equal(result.status, "blocked");
+  assert.ok(result.reasons.includes("invalid_snapshot"));
+});
