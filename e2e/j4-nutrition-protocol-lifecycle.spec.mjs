@@ -621,10 +621,11 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
       probeAuthenticatedDoseRead(staff.id,firstMealId,"draft");
       assertDoseRlsVisibility(staff.id,firstMealId,"aal2",1);
       assertDoseRlsVisibility(staff.id,firstMealId,"aal1",0);
-      assertDoseRlsVisibility(unrelatedStaff.id,firstMealId,"aal2",0);
-      // Prove revocation, not just non-access with an already-ended record:
-      // the same AAL2 administrator can read while assigned and loses access
-      // immediately after assignment closure. Everything is local synthetic.
+      // Confirmed role semantics (DECISIONS.md 2026-11-01): an AAL2 admin
+      // has global professional read access even without an assignment.
+      assertDoseRlsVisibility(unrelatedStaff.id,firstMealId,"aal2",1);
+      // Closing an assignment must NOT revoke independently authorized
+      // admin-global access; client and AAL1 denials remain covered below.
       const revocableAssignmentId=insert("client_assignments",{
         client_id:clientId,
         staff_profile_id:unrelatedStaff.id,
@@ -633,7 +634,7 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
       expect(sql("update public.client_assignments set ended_at=now()"+
         " where id="+quote(revocableAssignmentId)+" returning id;"))
         .toBe(revocableAssignmentId);
-      assertDoseRlsVisibility(unrelatedStaff.id,firstMealId,"aal2",0);
+      assertDoseRlsVisibility(unrelatedStaff.id,firstMealId,"aal2",1);
       assertDoseRlsVisibility(owner.id,firstMealId,"aal1",0);
       assertDoseRlsVisibility(unrelatedOwner.id,firstMealId,"aal1",0);
       await mobileFit(adminPage);
@@ -678,7 +679,7 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
       assertDoseRlsVisibility(owner.id,firstMealId,"aal1",1);
       assertDoseRlsVisibility(staff.id,firstMealId,"aal1",0);
       assertDoseRlsVisibility(unrelatedOwner.id,firstMealId,"aal1",0);
-      assertDoseRlsVisibility(unrelatedStaff.id,firstMealId,"aal2",0);
+      assertDoseRlsVisibility(unrelatedStaff.id,firstMealId,"aal2",1);
       const publicationResponse=await clientPage.reload();
       // A missing title could mean login redirect, server failure or a
       // render error, not necessarily absent publication. Record only a
@@ -858,13 +859,14 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
       await mobileFit(clientPage);
     });
 
-    await test.step("Client and other admin cannot read private or foreign protocol versions",async()=>{
+    await test.step("Client isolation and global AAL2 admin access remain independent of assignment",async()=>{
       await loginAdminWithMfa(otherPage,{
         email:unrelatedStaff.email,password:unrelatedStaff.password,totpSecret:otherTotp,
       });
       await otherPage.goto("/admin/protocolos/"+protocolId);
-      await expect(otherPage.getByText("Página ou registro indisponível",{exact:true})).toBeVisible();
-      await expect(otherPage.getByText("J4 Linear sintético")).toHaveCount(0);
+      await expect(otherPage.getByRole("heading",{name:"Versões e histórico"})).toBeVisible();
+      await expect(otherPage.locator("#versao-1")).toHaveCount(1);
+      await expect(otherPage.getByText("Página ou registro indisponível",{exact:true})).toHaveCount(0);
       const anonymous=await anonCtx.newPage();
       await anonymous.goto("/cliente/protocolo");
       await expect(anonymous).toHaveURL(/\/login\/?$/);
