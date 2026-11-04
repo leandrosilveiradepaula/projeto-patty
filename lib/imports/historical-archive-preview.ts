@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { inflateRawSync } from "node:zlib";
 
-export const HISTORICAL_IMPORT_PREVIEW_VERSION = "migr-hist-02";
+export const HISTORICAL_IMPORT_PREVIEW_VERSION = "migr-hist-02b";
 
 export type HistoricalArchiveInput = Readonly<{ bytes: Uint8Array }>;
 
@@ -409,15 +409,16 @@ function inspectXlsx(bytes: Uint8Array, limits: HistoricalPreviewLimits, budget:
   let dateCandidateCount = 0;
   let ambiguousDateCandidate = false;
   let brazilianNumberCandidates = 0;
-  for (const worksheetName of worksheetNames) {
-    const stats = scanWorksheet(readXml(worksheetName), sharedStrings, limits, budget, signatureValues);
+  for (const [worksheetIndex, worksheetName] of worksheetNames.entries()) {
+    const stats = scanWorksheet(readXml(worksheetName), sharedStrings, limits, budget, signatureValues, worksheetIndex);
     dateCandidateCount += stats.dateCandidateCount;
     ambiguousDateCandidate ||= stats.ambiguousDateCandidate;
     brazilianNumberCandidates += stats.brazilianNumberCandidates;
   }
   return {
     worksheetCount: worksheetNames.length,
-    columnSignature: signatureValues.map(normalizeForSignature).join("|"),
+    // Versioned structural fingerprint: never include cell text, labels, dates, or numeric values.
+    columnSignature: `xlsx-structure-v1|worksheets:${worksheetNames.length}|${signatureValues.join("|")}`,
     dateCandidates: { count: dateCandidateCount, ambiguous: ambiguousDateCandidate },
     brazilianNumberCandidates,
   };
@@ -515,8 +516,9 @@ function parseSharedStrings(xml: string, limits: HistoricalPreviewLimits, budget
   return values;
 }
 
-function scanWorksheet(xml: string, sharedStrings: readonly string[], limits: HistoricalPreviewLimits, budget: PreviewBudget, signatureValues: string[]) {
+function scanWorksheet(xml: string, sharedStrings: readonly string[], limits: HistoricalPreviewLimits, budget: PreviewBudget, signatureValues: string[], worksheetIndex: number) {
   let cellCount = 0;
+  signatureValues.push(`sheet:${worksheetIndex}`);
   let dateCandidateCount = 0;
   let ambiguousDateCandidate = false;
   let brazilianNumberCandidates = 0;
@@ -527,15 +529,22 @@ function scanWorksheet(xml: string, sharedStrings: readonly string[], limits: Hi
     budget.cellCount += 1;
     const raw = /<v>([\s\S]*?)<\/v>/.exec(match[2]!)?.[1] ?? "";
     const value = /t="s"/.test(match[1]!) ? sharedStrings[Number(raw)] ?? "" : decodeXml(raw);
-    if (signatureValues.length < 64) signatureValues.push(value);
+    if (cellCount <= 512) {
+      const attributes = match[1]!;
+      // Only syntactically valid spreadsheet cell coordinates are allowed into the hash.
+      const rawRef = /(?:^|\s)r="([A-Z]{1,3}[1-9][0-9]{0,6})"/.exec(attributes)?.[1];
+      const rawType = /(?:^|\s)t="(s|n|b|e|str|inlineStr|d)"/.exec(attributes)?.[1];
+      const coordinate = rawRef ?? `ordinal_${cellCount}`;
+      signatureValues.push(`${cellCount}:${coordinate}:${rawType ?? "unknown"}:${/<f(?:\s|>)/.test(match[2]!) ? "formula" : "literal"}`);
+    }
     if (/^\d{1,2}[/-]\d{1,2}[/-]\d{2,4}$/.test(value)) {
       dateCandidateCount += 1;
       ambiguousDateCandidate ||= ambiguousDate(value);
     }
     if (/^-?\d{1,3}(?:\.\d{3})*,\d+$/.test(value)) brazilianNumberCandidates += 1;
   }
+  signatureValues.push(`cells:${cellCount}`);
   return { dateCandidateCount, ambiguousDateCandidate, brazilianNumberCandidates };
 }
 function decodeXml(value: string) { return value.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'"); }
-function normalizeForSignature(value: string) { return value.trim().toLocaleLowerCase("pt-BR").replace(/\d+/g, "#").replace(/\s+/g, " "); }
 function ambiguousDate(value: string) { const [first, second] = value.split(/[/-]/).map(Number); return first <= 12 && second <= 12; }
