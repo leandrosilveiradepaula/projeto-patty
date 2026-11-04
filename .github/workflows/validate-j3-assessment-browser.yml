@@ -90,6 +90,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # The server-only admin client must use the ephemeral local service
+          # credential. Never write it to GITHUB_ENV, NEXT_PUBLIC_ or logs.
+          set -a
+          source "$RUNNER_TEMP/j3-local-status"
+          set +a
+          test "$API_URL" = "http://127.0.0.1:54321"
+          test -n "$SERVICE_ROLE_KEY"
+          export SUPABASE_SECRET_KEY="$SERVICE_ROLE_KEY"
           npm run dev -- --hostname 127.0.0.1 --port 3000 > "$RUNNER_TEMP/j3-next.log" 2>&1 &
           echo "$!" > "$RUNNER_TEMP/j3-next.pid"
           for attempt in $(seq 1 90); do

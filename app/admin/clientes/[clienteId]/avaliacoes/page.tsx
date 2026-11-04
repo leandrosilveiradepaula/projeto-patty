@@ -113,6 +113,14 @@ export default async function AdminClientAssessmentsPage({
         }
       />
       <ClientWorkspaceNav activeArea="avaliacoes" clientId={client.id} />
+      {client.status === "inactive" && !client.profile_id ? (
+        <Alert title="Avaliação para cadastro sem acesso" variant="info">
+          Você pode registrar e finalizar uma avaliação nesta ficha profissional
+          mesmo sem login da cliente. A avaliação não cria uma conta, não inicia
+          acompanhamento e não libera automaticamente os registros históricos.
+          Confira manualmente os dados antes de finalizar.
+        </Alert>
+      ) : null}
       {submittedFeedback ? (
         <Alert title="Continuidade do Feedback Semanal" variant="info">
           Respostas enviadas para a semana de {formatWeeklyFeedbackPeriodDate(submittedFeedback.period_start)} a{" "}

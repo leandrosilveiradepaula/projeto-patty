@@ -205,6 +205,17 @@ SELECT throws_ok($sql$
  )
 $sql$,'42501',NULL,'Service-only finalization rejects a forged non-admin actor');
 
+-- The previous test called as postgres; require the real PostgREST
+-- service_role to own enough explicit grants under local auto-expose=false.
+SELECT ok(
+  has_table_privilege('service_role','public.client_assessments','SELECT')
+  AND has_table_privilege('service_role','public.client_assessments','UPDATE')
+  AND has_table_privilege('service_role','public.method_configuration_snapshot_sets','INSERT')
+  AND has_table_privilege('service_role','public.method_configuration_snapshots','INSERT')
+  AND NOT has_table_privilege('anon','public.client_assessments','UPDATE')
+  AND NOT has_column_privilege('authenticated','public.client_assessments','finalized_at','UPDATE'),
+  'Only service_role has explicit privileges required for snapshot finalization');
+SET LOCAL ROLE service_role;
 SELECT isnt(public.finalize_assessment_from_method_snapshot(
   'e7300000-0000-4000-8000-000000000001',
   'e7100000-0000-4000-8000-000000000001',
@@ -223,6 +234,7 @@ SELECT isnt(public.finalize_assessment_from_method_snapshot(
    WHERE t.template_key='evaluation.assessment_definition.basic' AND v.retired_at IS NULL),
   '{"kind_key":"basic","can_finalize":true}'::jsonb
  ),null::uuid,'Service-only finalization accepts verified admin without assignment after readiness checks');
+RESET ROLE;
 SELECT ok((SELECT finalized_at IS NOT NULL AND finalized_by_profile_id =
  'e7100000-0000-4000-8000-000000000001'::uuid
  AND method_configuration_snapshot_set_id IS NOT NULL FROM public.client_assessments

@@ -693,3 +693,120 @@ test("J3: MFA, corrected measurements, two private photos, return and RLS", asyn
     // Synthetic images, identities and sensitive fixture values never reach SaaS.
   }
 });
+
+test("J3: admin AAL2 creates, fills and finalizes historical Client assessment without onboarding", async ({ browser }) => {
+  test.setTimeout(360_000);
+  const nonce = randomBytes(8).toString("hex");
+  const admin = await identity("admin", "staff", nonce);
+  const totpSecret = await enrollTotp(admin);
+  const requestId = randomUUID();
+  // Exercise the actual service-only historical registration, not a handmade
+  // Client with artificially loosened access. Local-only environment is
+  // enforced at module load and discarded after the CI job.
+  const { data: clientId, error: registrationError } = await service.rpc(
+    "create_historical_client_internal",
+    {
+      p_request_id: requestId,
+      p_full_name: "Cliente sintética histórica J3 " + nonce,
+      p_confirmed_no_existing_client: true,
+      p_created_by_profile_id: admin.id,
+    },
+  );
+  if (registrationError || !UUID.test(clientId)) {
+    throw registrationError ?? new Error("Historical Client registration failed");
+  }
+  const originalId = clientId;
+  const method = basicMethod();
+  const context = await browser.newContext({
+    baseURL, viewport: { width: 390, height: 844 },
+    isMobile: true, hasTouch: true,
+  });
+  try {
+    const page = await context.newPage();
+    await loginAdminWithMfa(page, {
+      email: admin.email, password: admin.password, totpSecret,
+    });
+    await page.goto("/admin/clientes/" + clientId + "/avaliacoes");
+    await expect(page.getByText("Avaliação para cadastro sem acesso")).toBeVisible();
+    const create = page.locator("#nova-avaliacao");
+    await create.locator('select[name="assessmentKind"]').selectOption("fortnightly");
+    await create.locator('input[name="assessedAt"]').fill("2026-10-20");
+    await create.getByRole("button", { name: "Criar rascunho de avaliação" }).click();
+    await expect(page).toHaveURL(/\/admin\/avaliacoes\/[0-9a-f-]{36}(?:[?#]|$)/, {
+      timeout: 25000,
+    });
+
+    const drafts = select("select id, client_id, created_by_profile_id from public.client_assessments" +
+      " where client_id = " + literal(clientId));
+    expect(drafts).toHaveLength(1);
+    const draftId = drafts[0].id;
+    expect(drafts[0].client_id).toBe(originalId);
+    expect(drafts[0].created_by_profile_id).toBe(admin.id);
+    await expect(page.getByRole("heading", { name: "Editar rascunho" })).toBeVisible();
+
+    // Enter every requirement through the real administrative form, rather
+    // than inserting measurement rows directly to make the test pass.
+    const requirements = method.definition.configuration.requiredMeasurements;
+    expect(requirements.length).toBeGreaterThan(0);
+    for (const requirement of requirements) {
+      const form = page.locator('form').filter({
+        has: page.locator('select[name="measurementKey"]'),
+      });
+      await form.locator('select[name="measurementKey"]').selectOption(requirement.key);
+      await form.locator('input[name="measurementValue"]').fill("88");
+      await form.locator('input[name="unit"]').fill(
+        requirement.key.toLowerCase().includes("peso") ? "kg" : "cm",
+      );
+      await form.getByRole("button", { name: "Salvar medida" }).click();
+      await expect.poll(() => select("select id from public.assessment_measurements" +
+        " where assessment_id = " + literal(draftId) +
+        " and measurement_key = " + literal(requirement.key)).length,
+      { timeout: 25000 }).toBe(1);
+      await page.reload();
+    }
+
+    // A basic assessment may require private photos in its active definition.
+    // Build only the required synthetic assets in the disposable environment.
+    const minimum = method.definition.configuration.photoRequirement?.minimumCount ?? 0;
+    if (!Number.isSafeInteger(minimum) || minimum < 0 || minimum > 15) {
+      throw new Error("Unexpected synthetic photo requirement");
+    }
+    for (let index = 0; index < minimum; index++) {
+      await addPhoto(draftId, clientId, admin.id, "historical-required-" + index);
+    }
+    await page.reload();
+    const finalize = page.locator('#finalizar');
+    await expect(finalize.getByRole("button", { name: "Finalizar avaliação" }))
+      .toBeEnabled();
+    await finalize.locator('input[name="confirmFinalization"]').check();
+    await finalize.getByRole("button", { name: "Finalizar avaliação" }).click();
+    await expect.poll(() => select(
+      "select id from public.client_assessments where id = " + literal(draftId) +
+      " and finalized_at is not null and method_configuration_snapshot_set_id is not null",
+    ).length, { timeout: 25000 }).toBe(1);
+    await page.reload();
+    await expect(page.getByRole("heading", { name: "Editar rascunho" })).toHaveCount(0);
+
+    // The same professional Client remains inactive and has no account,
+    // assignment or release merely because an assessment was finalized.
+    expect(select("select id from public.clients where id = " + literal(originalId) +
+      " and status = 'inactive' and profile_id is null")).toHaveLength(1);
+    expect(select("select id from public.client_assignments where client_id = " +
+      literal(originalId))).toHaveLength(0);
+    expect(select("select client_id from public.historical_client_registration_requests" +
+      " where client_id = " + literal(originalId) +
+      " and request_id = " + literal(requestId))).toHaveLength(1);
+    expect(select("select id from public.protocol_publications where client_id = " +
+      literal(originalId))).toHaveLength(0);
+
+    await page.goto("/admin/clientes/" + clientId + "/avaliacoes");
+    await expect(page.locator("#historico-finalizado")
+      .getByRole("link", { name: "Ver avaliação" })).toBeVisible();
+    for (const width of [390, 1440]) {
+      await page.setViewportSize({ width, height: width === 390 ? 844 : 900 });
+      await mobileWidth(page);
+    }
+  } finally {
+    await context.close();
+  }
+});
