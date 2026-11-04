@@ -52,7 +52,7 @@ export type HistoricalLayoutReview = Readonly<{
 }>;
 
 const HASH = /^[a-f0-9]{64}$/;
-const ENTRY = /^archive_[0-9]{3,}:entry_[0-9]{3,}$/;
+const ENTRY = /^archive_[0-9]{3,}_entry_[0-9]{3,}$/;
 const KEY = /^[a-z][a-z0-9_]{1,47}$/;
 const UNIT = /^[A-Za-z][A-Za-z0-9_/%.-]{0,23}$/;
 const KINDS: readonly MappingKind[] = ["text", "decimal", "date"];
