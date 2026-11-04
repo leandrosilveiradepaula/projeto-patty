@@ -17,6 +17,7 @@ import {
   getProtocolDraftReadiness,
 } from "@/lib/protocol/draft-readiness";
 import { getProtocolLifecycleAction } from "@/lib/protocol/lifecycle";
+import { protocolPublicationEligibility } from "@/lib/protocol/publication-eligibility";
 import {
   cloneAccessibleProtocolVersionDraft,
   createAccessibleMeal,
@@ -33,6 +34,7 @@ import {
   createAccessibleProtocolPublication,
   createAccessibleProtocolVersionApproval,
   getAccessibleProtocol,
+  getAccessibleClient,
   listAccessibleProtocolPublications,
   listAccessibleProtocolVersionApprovals,
   listAccessibleMealsForVariant,
@@ -963,6 +965,17 @@ export async function publishProtocolVersion(
     return {
       message:
         "Esta versão não está no estado permitido para publicação.",
+      success: false,
+    };
+  }
+
+  // A forged/stale form must not rely on the presentation gate. Read the
+  // current client-scoped record immediately before the irreversible mutation.
+  const publicationClient = await getAccessibleClient(accessible.protocol.client_id);
+  const eligibility = protocolPublicationEligibility(publicationClient);
+  if (!eligibility.allowed) {
+    return {
+      message: eligibility.message ?? "Publicação indisponível para esta cliente.",
       success: false,
     };
   }
