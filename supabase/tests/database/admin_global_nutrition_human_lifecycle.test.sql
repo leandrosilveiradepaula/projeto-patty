@@ -106,7 +106,7 @@ SELECT throws_ok($q$
  VALUES ('b8400000-0000-4000-8000-000000000001',
  'b8200000-0000-4000-8000-000000000002',
  'b8100000-0000-4000-8000-000000000001')
-$q$,'23503',NULL,'Approval cannot be assigned to unrelated client');
+$q$,'23514',NULL,'Approval cannot be assigned to unrelated client');
 
 SELECT throws_ok($q$
  INSERT INTO public.protocol_publications
