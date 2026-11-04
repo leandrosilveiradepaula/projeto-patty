@@ -166,7 +166,7 @@ SELECT is(public.meal_plan_version_is_draft('a8500000-0000-4000-8000-00000000000
 SELECT throws_ok($sql$
   INSERT INTO public.meals(meal_plan_variant_id,position)
   VALUES('a8600000-0000-4000-8000-000000000001',2)
-$sql$,'42501',NULL,'Submitted version cannot receive another meal');
+$sql$,'55000',NULL,'Submitted version cannot receive another meal');
 SELECT is((SELECT COUNT(*) FROM public.protocol_publications
   WHERE client_id='a8200000-0000-4000-8000-000000000001'),0::bigint,
   'No release created by draft workflow');
