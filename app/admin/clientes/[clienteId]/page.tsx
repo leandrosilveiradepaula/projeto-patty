@@ -11,6 +11,8 @@ import { AdminEndClientAssignmentForm } from "@/components/admin/AdminEndClientA
 import { AdminClientRegistrationEditForm } from "@/components/admin/AdminClientRegistrationEditForm";
 import { AdminClientRecoveryLinkForm } from "@/components/admin/AdminClientRecoveryLinkForm";
 import { HistoricalClientReturnReadinessForm } from "@/components/admin/HistoricalClientReturnReadinessForm";
+import { HistoricalClientReturnRequestForm } from "@/components/admin/HistoricalClientReturnRequestForm";
+import { getHistoricalClientReturnRequestStatus } from "@/lib/onboarding/historical-client-return-request";
 import { AdminWeeklyFeedbackNotificationPreferenceForm } from "@/components/admin/AdminWeeklyFeedbackNotificationPreferenceForm";
 import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
@@ -470,6 +472,10 @@ export default async function AdminClienteDetailPage({
                                     label: "Abrir acompanhamento",
                                     title: "Acompanhamento contínuo",
                                   };
+
+  const historicalReturnRequest = client.status === "inactive" && !client.profile_id
+    ? await getHistoricalClientReturnRequestStatus(client.id)
+    : null;
 
   return (
     <>
@@ -966,6 +972,31 @@ export default async function AdminClienteDetailPage({
         >
           <Card className={styles.infoCard}>
             <HistoricalClientReturnReadinessForm clientId={client.id} />
+          </Card>
+        </Section>
+      ) : null}
+
+      {client.status === "inactive" && !client.profile_id ? (
+        <Section
+          id="solicitacao-retorno-historico"
+          title="Solicitar retorno ao acompanhamento"
+          description="Registre a revisão humana para o cadastro existente, sem ativar acesso ou liberar dados históricos."
+        >
+          <Card className={styles.infoCard}>
+            {historicalReturnRequest?.status === "requested" ? (
+              <Alert variant="success" title="Solicitação de retorno registrada">
+                Pedido administrativo registrado em {formatDate(historicalReturnRequest.requestedAt)}.
+                A identidade de acesso, o Cadastro Atual e a liberação de históricos continuam
+                pendentes. Nenhuma cliente foi reativada.
+              </Alert>
+            ) : historicalReturnRequest?.status === "unavailable" ? (
+              <Alert variant="warning" title="Solicitação indisponível">
+                Não foi possível consultar o registro de retorno. Nenhum novo pedido pode ser
+                iniciado até a aplicação e verificação da migration correspondente.
+              </Alert>
+            ) : (
+              <HistoricalClientReturnRequestForm clientId={client.id} />
+            )}
           </Card>
         </Section>
       ) : null}

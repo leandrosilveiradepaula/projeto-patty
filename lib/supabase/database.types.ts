@@ -1479,6 +1479,42 @@ export type Database = {
           },
         ]
       }
+      historical_client_return_requests: {
+        Row: {
+          request_id: string
+          client_id: string
+          requested_by_profile_id: string
+          requested_at: string
+        }
+        Insert: {
+          request_id: string
+          client_id: string
+          requested_by_profile_id: string
+          requested_at?: string
+        }
+        Update: {
+          request_id?: string
+          client_id?: string
+          requested_by_profile_id?: string
+          requested_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "historical_client_return_requests_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: true
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "historical_client_return_requests_requested_by_profile_id_fkey"
+            columns: ["requested_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_hydration_targets: {
         Row: {
           client_id: string
@@ -3435,6 +3471,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      register_historical_client_return_request: {
+        Args: {
+          p_request_id: string
+          p_client_id: string
+          p_confirmed_client_id: string
+          p_human_identity_review_declared: boolean
+          p_requested_by_profile_id: string
+        }
+        Returns: string
+      }
       create_historical_client_internal: {
         Args: {
           p_request_id: string
