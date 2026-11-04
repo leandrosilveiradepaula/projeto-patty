@@ -11,6 +11,7 @@ export type HistoricalReconciliationClient = Readonly<{
 /** A human decision binds one opaque file identity to one existing Client. */
 export type HistoricalAssociationDecision = Readonly<{
   entry_id: string;
+  archive_sha256: string;
   entry_sha256: string;
   client_id: string;
 }>;
@@ -56,6 +57,7 @@ export type HistoricalReconciliationFile = Readonly<{
 export type HistoricalAssociationDecisionPreview = Readonly<{
   decision_id: string;
   entry_id: string;
+  archive_sha256: string;
   entry_sha256: string;
   client_id: string;
   status: "pending_backend_identity_verification" | "blocked";
@@ -73,7 +75,9 @@ export type ReconciliationBlockReason =
   | "entry_hash_missing"
   | "unknown_entry"
   | "duplicate_source_entry"
+  | "duplicate_source_archive"
   | "client_snapshot_untrusted"
+  | "archive_hash_mismatch"
   | "entry_hash_mismatch"
   | "invalid_client_id"
   | "client_not_found"
@@ -115,9 +119,12 @@ export function previewHistoricalReconciliation(
   const entryCounts = new Map<string, number>();
   for (const file of files) entryCounts.set(file.entry_id, (entryCounts.get(file.entry_id) ?? 0) + 1);
   const duplicateSourceEntryIds = new Set([...entryCounts].filter(([, count]) => count > 1).map(([id]) => id));
+  const archiveCounts = new Map<string, number>();
+  for (const archive of historicalPreview.archives) archiveCounts.set(archive.sha256, (archiveCounts.get(archive.sha256) ?? 0) + 1);
+  const duplicateSourceArchiveIds = new Set(historicalPreview.archives.filter((archive) => (archiveCounts.get(archive.sha256) ?? 0) > 1).map((archive) => archive.archive_id));
   const { clientsById, inputErrors } = validateClients(clients);
   const orderedDecisions = [...humanDecisions].sort(compareDecision);
-  const evaluated = orderedDecisions.map((decision) => evaluateDecision(decision, filesByEntryId, clientsById, duplicateSourceEntryIds));
+  const evaluated = orderedDecisions.map((decision) => evaluateDecision(decision, filesByEntryId, clientsById, duplicateSourceEntryIds, duplicateSourceArchiveIds));
   const reasonsByDecision = new Map<EvaluatedDecision, ReconciliationBlockReason | undefined>();
   for (const item of evaluated) reasonsByDecision.set(item, inputErrors.length > 0 ? "client_snapshot_untrusted" : item.reason);
 
@@ -133,7 +140,7 @@ export function previewHistoricalReconciliation(
   }
   const duplicateGroupByEntryId = new Map<string, string>();
   for (const group of duplicateGroups) for (const entryId of group.entry_ids) duplicateGroupByEntryId.set(entryId, group.duplicate_binary_group_id);
-  const outputFiles = files.map((file) => toFilePreview(file, decisionsByEntry.get(file.entry_id) ?? [], clientsById, duplicateGroupByEntryId.get(file.entry_id), duplicateSourceEntryIds.has(file.entry_id), inputErrors.length > 0));
+  const outputFiles = files.map((file) => toFilePreview(file, decisionsByEntry.get(file.entry_id) ?? [], clientsById, duplicateGroupByEntryId.get(file.entry_id), duplicateSourceEntryIds.has(file.entry_id), duplicateSourceArchiveIds.has(file.archive_id), inputErrors.length > 0));
 
   return {
     version: HISTORICAL_RECONCILIATION_PREVIEW_VERSION,
@@ -189,10 +196,12 @@ function validateClients(clients: readonly HistoricalReconciliationClient[]) {
   return { clientsById, inputErrors: [...errors].sort() };
 }
 
-function evaluateDecision(decision: HistoricalAssociationDecision, filesByEntryId: ReadonlyMap<string, HistoricalFile>, clientsById: ReadonlyMap<string, HistoricalReconciliationClient>, duplicateSourceEntryIds: ReadonlySet<string>): EvaluatedDecision {
+function evaluateDecision(decision: HistoricalAssociationDecision, filesByEntryId: ReadonlyMap<string, HistoricalFile>, clientsById: ReadonlyMap<string, HistoricalReconciliationClient>, duplicateSourceEntryIds: ReadonlySet<string>, duplicateSourceArchiveIds: ReadonlySet<string>): EvaluatedDecision {
   const file = filesByEntryId.get(decision.entry_id);
   if (!file) return { decision, reason: "unknown_entry" };
   if (duplicateSourceEntryIds.has(decision.entry_id)) return { decision, file, reason: "duplicate_source_entry" };
+  if (duplicateSourceArchiveIds.has(file.archive_id)) return { decision, file, reason: "duplicate_source_archive" };
+  if (decision.archive_sha256 !== file.archive_sha256) return { decision, file, reason: "archive_hash_mismatch" };
   if (file.source_status === "rejected") return { decision, file, reason: "source_entry_rejected" };
   if (!file.entry_sha256) return { decision, file, reason: "entry_hash_missing" };
   if (decision.entry_sha256 !== file.entry_sha256) return { decision, file, reason: "entry_hash_mismatch" };
@@ -242,6 +251,7 @@ function toDecisionPreview(item: EvaluatedDecision, index: number, reason: Recon
   return {
     decision_id: opaqueId("reconciliation_decision", index),
     entry_id: item.decision.entry_id,
+    archive_sha256: item.decision.archive_sha256,
     entry_sha256: item.decision.entry_sha256,
     client_id: item.decision.client_id,
     status: reason ? "blocked" : "pending_backend_identity_verification",
@@ -249,13 +259,15 @@ function toDecisionPreview(item: EvaluatedDecision, index: number, reason: Recon
   };
 }
 
-function toFilePreview(file: HistoricalFile, decisions: readonly HistoricalAssociationDecisionPreview[], clientsById: ReadonlyMap<string, HistoricalReconciliationClient>, duplicateBinaryGroupId: string | undefined, duplicateSourceEntry: boolean, clientSnapshotUntrusted: boolean): HistoricalReconciliationFile {
+function toFilePreview(file: HistoricalFile, decisions: readonly HistoricalAssociationDecisionPreview[], clientsById: ReadonlyMap<string, HistoricalReconciliationClient>, duplicateBinaryGroupId: string | undefined, duplicateSourceEntry: boolean, duplicateSourceArchive: boolean, clientSnapshotUntrusted: boolean): HistoricalReconciliationFile {
   const pendingDecision = decisions.find((decision) => decision.status === "pending_backend_identity_verification");
   const blockedDecision = decisions.find((decision) => decision.status === "blocked");
   const association = clientSnapshotUntrusted
     ? { status: "blocked" as const, reason: "client_snapshot_untrusted" as const }
     : duplicateSourceEntry
     ? { status: "blocked" as const, reason: "duplicate_source_entry" as const }
+    : duplicateSourceArchive
+    ? { status: "blocked" as const, reason: "duplicate_source_archive" as const }
     : file.source_status === "rejected"
     ? { status: "blocked" as const, reason: "source_entry_rejected" as const }
     : blockedDecision
@@ -271,7 +283,7 @@ function toFilePreview(file: HistoricalFile, decisions: readonly HistoricalAssoc
 }
 
 function compareDecision(left: HistoricalAssociationDecision, right: HistoricalAssociationDecision) {
-  return `${left.entry_id}\u0000${left.entry_sha256}\u0000${left.client_id}`.localeCompare(`${right.entry_id}\u0000${right.entry_sha256}\u0000${right.client_id}`);
+  return `${left.entry_id}\u0000${left.archive_sha256}\u0000${left.entry_sha256}\u0000${left.client_id}`.localeCompare(`${right.entry_id}\u0000${right.archive_sha256}\u0000${right.entry_sha256}\u0000${right.client_id}`);
 }
 
 function opaqueId(prefix: string, index: number) { return `${prefix}_${String(index + 1).padStart(3, "0")}`; }
