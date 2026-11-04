@@ -2454,7 +2454,7 @@ export async function getAccessibleProtocol(protocolId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("protocols")
-    .select("id, client_id, protocol_type, created_at, clients(id, full_name, profiles(display_name))")
+    .select("id, client_id, protocol_type, created_at, clients(id, full_name, status, profile_id, profiles(display_name))")
     .eq("id", protocolId)
     .maybeSingle();
 

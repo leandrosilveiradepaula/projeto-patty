@@ -129,3 +129,23 @@ test("publication remains explicitly tied to approval and exact version", () => 
   assert.ok(section.includes("protocolVersionId: accessible.version.id"));
   assert.ok(section.includes("approvalId: accessible.approval.id"));
 });
+
+test("publication eligibility is reflected in UI and rechecked on server without weakening human confirmation", () => {
+  const page = read("app/admin/protocolos/[protocoloId]/page.tsx");
+  const actions = read("app/admin/protocolos/[protocoloId]/actions.ts");
+  const access = read("lib/supabase/data-access.ts");
+  const start = actions.indexOf("export async function publishProtocolVersion(");
+  const end = actions.indexOf("export async function cloneProtocolVersionDraft(", start);
+  const publish = actions.slice(start, end);
+  assert.ok(page.includes("protocolPublicationEligibility(protocol.clients)"));
+  assert.ok(page.includes('lifecycleAction === "publish" && !publicationEligibility.allowed'));
+  assert.ok(page.includes('title="Publicação indisponível"'));
+  assert.ok(publish.includes('requireRole("admin")'));
+  assert.ok(publish.includes('isSingleConfirmedFormValue(formData, "confirmPublication")'));
+  assert.ok(publish.includes("getAccessibleClient(accessible.protocol.client_id)"));
+  assert.ok(publish.includes("protocolPublicationEligibility(publicationClient)"));
+  assert.ok(publish.indexOf("protocolPublicationEligibility(publicationClient)") < publish.indexOf("createAccessibleProtocolPublication({"));
+  assert.ok(access.includes('clients(id, full_name, status, profile_id, profiles(display_name))'));
+  assert.ok(publish.includes("protocolVersionId: accessible.version.id"));
+  assert.ok(publish.includes("approvalId: accessible.approval.id"));
+});
