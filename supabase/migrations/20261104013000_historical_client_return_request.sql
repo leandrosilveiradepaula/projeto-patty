@@ -9,6 +9,7 @@ CREATE TABLE public.historical_client_return_requests (
 ALTER TABLE public.historical_client_return_requests ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON public.historical_client_return_requests FROM PUBLIC, anon, authenticated;
 GRANT SELECT, INSERT ON public.historical_client_return_requests TO service_role;
+GRANT SELECT ON public.clients, public.client_assignments, public.user_roles TO service_role;
 
 -- Only the server role can call this transaction after verifying admin+AAL2.
 -- SEC INVOKER preserves explicit grants and does not open a browser API.
@@ -50,7 +51,11 @@ BEGIN
     WHERE id = p_client_id
     FOR UPDATE;
 
-  IF NOT FOUND OR v_client.profile_id IS NOT NULL
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Historical Client not found' USING ERRCODE='23514';
+  END IF;
+
+  IF v_client.profile_id IS NOT NULL
      OR v_client.status <> 'inactive'
      OR EXISTS (
        SELECT 1 FROM public.client_assignments a
