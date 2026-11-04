@@ -11,6 +11,7 @@ import { AdminEndClientAssignmentForm } from "@/components/admin/AdminEndClientA
 import { AdminClientRegistrationEditForm } from "@/components/admin/AdminClientRegistrationEditForm";
 import { AdminClientRecoveryLinkForm } from "@/components/admin/AdminClientRecoveryLinkForm";
 import { HistoricalClientReturnReadinessForm } from "@/components/admin/HistoricalClientReturnReadinessForm";
+import { HistoricalClientReturnRequestForm } from "@/components/admin/HistoricalClientReturnRequestForm";
 import { AdminWeeklyFeedbackNotificationPreferenceForm } from "@/components/admin/AdminWeeklyFeedbackNotificationPreferenceForm";
 import { ClientSummaryHeader } from "@/components/admin/ClientSummaryHeader";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
@@ -966,6 +967,18 @@ export default async function AdminClienteDetailPage({
         >
           <Card className={styles.infoCard}>
             <HistoricalClientReturnReadinessForm clientId={client.id} />
+          </Card>
+        </Section>
+      ) : null}
+
+      {client.status === "inactive" && !client.profile_id ? (
+        <Section
+          id="solicitacao-retorno-historico"
+          title="Solicitar retorno ao acompanhamento"
+          description="Registre a revisão humana para o cadastro existente, sem ativar acesso ou liberar dados históricos."
+        >
+          <Card className={styles.infoCard}>
+            <HistoricalClientReturnRequestForm clientId={client.id} />
           </Card>
         </Section>
       ) : null}
