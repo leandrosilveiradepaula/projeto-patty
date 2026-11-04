@@ -18,3 +18,19 @@ test("historical Client without Profile fails closed before any assignment write
   assert.match(policy, /client !== null && client\.profile_id !== null/);
   assert.doesNotMatch(start, /inviteUserByEmail|generateLink|auth\.admin|deleteUser/);
 });
+
+test("internally registered historical Client stays blocked even after Profile linking", () => {
+  const verify = source.slice(
+    source.indexOf("async function requireLinkedClientForAssignment"),
+    source.indexOf("async function markClientActive"),
+  );
+  assert.match(verify, /historical_client_registration_requests/);
+  assert.match(verify, /\.eq\("client_id", clientId\)/);
+  assert.match(verify, /historyError \|\| !historicalRecords \|\| historicalRecords\.length > 0/);
+  const start = source.slice(source.indexOf("export async function startCurrentAdminClientAssignment"));
+  assert.ok(start.indexOf("await requireLinkedClientForAssignment(input.clientId)") <
+            start.indexOf("getActiveAssignmentId(scopedInput)"));
+  assert.ok(start.indexOf("await requireRole(\"admin\")") <
+            start.indexOf("await requireLinkedClientForAssignment(input.clientId)"));
+  assert.doesNotMatch(verify, /auth\.admin|inviteUserByEmail|generateLink|updateUser/);
+});
