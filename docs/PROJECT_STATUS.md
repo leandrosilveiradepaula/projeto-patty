@@ -1,3 +1,13 @@
+## 2026-11-04 — MIGR-HIST-06B: triagem offline de ZIP e grupos estruturais XLSX (PR em validação)
+
+**Fato técnico:** a versão anterior de `column_signature_sha256` combinava valores das primeiras células, confundindo dados pessoais diferentes com famílias XLSX diferentes. O contrato `migr-hist-02b` passa a usar apenas posição, tipo e presença de fórmula das células e contagem por aba; datas, nomes, valores, títulos e cabeçalhos não entram na assinatura. A equivalência estrutural produz somente **grupo candidato**, nunca mapeamento clínico, unidade ou decisão de identidade.
+
+**Ferramenta local:** `node --experimental-strip-types scripts/preview-historical-archives.ts <pasta-local-de-zips>`. Uso exclusivamente offline, leitura sem gravação; pasta não pode ser symlink, somente ZIPs regulares, sem subpastas/links; limite de 100 ZIPs, 25 MiB por arquivo e 100 MiB totais. A saída JSON contém apenas IDs opacos, hashes, contagens, status, erros e grupos estruturais. Arquivos binários e ZIPs reais não entram no Git/CI; logs de erro não incluem nomes de arquivos nem paths. **Não salvar o relatório automaticamente nem importar os dados.** A ferramenta não substitui decisão sobre guarda do original, retenção, recuperação segura ou autoria profissional.
+
+**Estados:** código e testes sintéticos na branch (CI e merge ainda pendentes); migrations/RLS/Auth/Storage/produção não alterados, sem submissão a IA nem Vercel manual. Identidade humana, mapeamento versionado semântico das planilhas, política de retenção/custódia e liberação de históricos continuam pendentes. Homologação conjunta J1–J7 permanece última etapa. A PR #1078 já foi mergeada em `435f216c` e a migration `20261104030000` já foi aplicada pelo workflow #41770221315; não repetir.
+
+---
+
 ## 2026-11-04 — MIGR-HIST-06A: proveniência do ZIP obrigatória na prévia de conciliação (PR #1078 em validação)
 
 **Risco comprovado por leitura do motor offline:** o identificador opaco `entry_id` é ordinal e o SHA-256 da entrada não diferencia ZIPs de origem distintos contendo o mesmo binário. Reordenar dois ZIPs pode reutilizar a decisão humana para uma origem diversa. A PR #1078 exige `archive_sha256` na decisão e impede `pending_backend_identity_verification` em caso de origem ausente/divergente. ZIPs idênticos repetidos bloqueiam todas as entradas afetadas até reconciliação humana. Testes sintéticos cobrem reordenação com entradas idênticas, ZIP duplicado, hash ausente e caso válido.
