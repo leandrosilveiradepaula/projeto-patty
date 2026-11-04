@@ -244,3 +244,23 @@ test("shared-string byte limit is cumulative within each XLSX, not per string", 
   assert.equal(entry.status, "rejected");
   assert.deepEqual(entry.errors, ["xlsx_limit_exceeded"]);
 });
+
+test("structural XLSX fingerprint excludes personal values and distinguishes cell layouts", () => {
+  const make = (textValue: string, extraCell = "") => syntheticZip([
+    { name: "[Content_Types].xml", bytes: text("<Types/>") },
+    { name: "xl/workbook.xml", bytes: text('<workbook><sheets><sheet name="Synthetic" sheetId="1"/></sheets></workbook>') },
+    { name: "xl/sharedStrings.xml", bytes: text(`<sst><si><t>${textValue}</t></si></sst>`) },
+    { name: "xl/worksheets/sheet1.xml", bytes: text(`<worksheet><sheetData><row><c r="A1" t="s"><v>0</v></c><c r="B1" t="n"><v>17</v></c>${extraCell}</row></sheetData></worksheet>`) },
+  ]);
+  const first = previewHistoricalArchives([{ bytes: syntheticZip([{ name: "private-a.xlsx", bytes: make("NOME_PRIVADO_A") }]) }]);
+  const second = previewHistoricalArchives([{ bytes: syntheticZip([{ name: "private-b.xlsx", bytes: make("NOME_PRIVADO_B") }]) }]);
+  const changed = previewHistoricalArchives([{ bytes: syntheticZip([{ name: "private-c.xlsx", bytes: make("NOME_PRIVADO_C", '<c r="C1" t="n"><v>20</v></c>') }]) }]);
+  const a = first.archives[0]!.entries[0]!.spreadsheet!.column_signature_sha256;
+  const b = second.archives[0]!.entries[0]!.spreadsheet!.column_signature_sha256;
+  const c = changed.archives[0]!.entries[0]!.spreadsheet!.column_signature_sha256;
+  assert.equal(first.version, "migr-hist-02b");
+  assert.equal(a, b);
+  assert.notEqual(a, c);
+  assert.doesNotMatch(JSON.stringify(first), /private-a|NOME_PRIVADO_A/);
+  assert.doesNotMatch(JSON.stringify(second), /private-b|NOME_PRIVADO_B/);
+});
