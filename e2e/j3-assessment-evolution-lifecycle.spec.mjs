@@ -783,7 +783,32 @@ test("J3: admin AAL2 creates, fills and finalizes historical Client assessment w
     await expect.poll(() => select(
       "select id from public.client_assessments where id = " + literal(draftId) +
       " and finalized_at is not null and method_configuration_snapshot_set_id is not null",
-    ).length, { timeout: 25000 }).toBe(1);
+    ).length, { timeout: 12000 }).toBe(1).catch(async (uiError) => {
+      const uiState = await page.locator("#finalizar").innerText();
+      // Only when the real UI fails, probe the exact same RPC in disposable
+      // Supabase to reveal the SQL error code without exposing production data.
+      const { error: diagnostic } = await service.rpc(
+        "finalize_assessment_from_method_snapshot",
+        {
+          p_assessment_id: draftId,
+          p_finalized_by_profile_id: admin.id,
+          p_catalog_template_version_id: method.catalog.id,
+          p_catalog_configuration: method.catalog.configuration,
+          p_catalog_result_values: {
+            historical_code: method.kind.historicalCode,
+            semantic_key: method.kind.semanticKey,
+            label: method.kind.label,
+          },
+          p_definition_template_version_id: method.definition.id,
+          p_definition_configuration: method.definition.configuration,
+          p_definition_result_values: { kind_key: method.kind.semanticKey, can_finalize: true },
+        },
+      );
+      throw new Error("Historical assessment UI finalization failed. UI: " +
+        uiState.slice(-420) + "; disposable diagnostic RPC: " +
+        (diagnostic ? diagnostic.code + " " + diagnostic.message : "succeeded") +
+        "; original: " + uiError.message.slice(0, 300));
+    });
     await page.reload();
     await expect(page.getByRole("heading", { name: "Editar rascunho" })).toHaveCount(0);
 
