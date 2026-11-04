@@ -1,3 +1,13 @@
+## 2026-11-04 — MIGR-HIST-06C: proposta versionada de mapeamento XLSX para revisão profissional (PR em validação)
+
+**Objetivo:** usar a prévia local de ZIPs da #1079 como referência de origem, sem alterar dados de clientes. O validador `reviewHistoricalLayoutMapping` recebe uma proposta declarativa de **uma única família** XLSX, identifica `archive_sha256 + entry_id + entry_sha256 + column_signature_sha256` e verifica revisões, folha/coluna, formato declarado de datas, unidade declarada de decimais e duplicatas. Retorna somente `blocked` ou `pending_professional_review`, um SHA-256 canônico opcional e códigos sanitizados, sem mapeamento aprovado. Um checksum prova integridade da **proposta**, nunca semântica, titularidade ou consentimento. Revisões superiores a 1 exigem declarar checksum da anterior, mas ainda não há ledger autorizado para comprovar sua existência.
+
+**Uso somente local, após gerar o JSON da prévia:** `node --experimental-strip-types scripts/review-historical-layout.ts <preview.json> <proposta.json>`. A proposta JSON contém `version: "historical-layout-proposal-v1"`, `source` (os quatro IDs/hashes), `revision: {number: 1, supersedes_sha256: null}` e `columns` com `sheet_index` (0-based), `column_index` (1-based), `destination_key` técnico declarado pela pessoa, `value_kind` (`text`, `decimal` ou `date`) e `unit` ou `date_format` quando cabível. Não guardar dados de células, nomes de clientes, datas pessoais, arquivos reais ou caminhos no repositório. As propostas têm revisão humana **pendente**; o código não aprova/importa/publica e não salva JSON automaticamente. A CLI imprime exclusivamente resumo sanitizado.
+
+**Estados:** código/testes sintéticos em branch (CI/merge a verificar no SHA final), migrations não necessárias, Supabase/Auth/RLS/Storage e produção não alterados; deploy/homologação não verificados. Questões abertas: significado clínico dos campos, unidade/data real de cada layout, confirmação profissional, prova de identidade, custódia/retenção dos ZIPs originais e visibilidade dos históricos. Homologação conjunta J1–J7 fica ao final. Referência de execução: issue #1008, MIGR-HIST-06C.
+
+---
+
 ## 2026-11-04 — MIGR-HIST-06B: triagem offline de ZIP e grupos estruturais XLSX (PR em validação)
 
 **Fato técnico:** a versão anterior de `column_signature_sha256` combinava valores das primeiras células, confundindo dados pessoais diferentes com famílias XLSX diferentes. O contrato `migr-hist-02b` passa a usar apenas posição, tipo e presença de fórmula das células e contagem por aba; datas, nomes, valores, títulos e cabeçalhos não entram na assinatura. A equivalência estrutural produz somente **grupo candidato**, nunca mapeamento clínico, unidade ou decisão de identidade.
