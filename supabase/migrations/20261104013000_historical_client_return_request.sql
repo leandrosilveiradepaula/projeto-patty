@@ -10,6 +10,10 @@ ALTER TABLE public.historical_client_return_requests ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON public.historical_client_return_requests FROM PUBLIC, anon, authenticated;
 GRANT SELECT, INSERT ON public.historical_client_return_requests TO service_role;
 GRANT SELECT ON public.clients, public.client_assignments, public.user_roles TO service_role;
+-- SELECT FOR UPDATE needs UPDATE privilege on the locked Client. Hosted
+-- service_role already has this grant; match that boundary in disposable CI.
+-- Browser roles receive no new Client permissions.
+GRANT UPDATE ON public.clients TO service_role;
 
 -- Only the server role can call this transaction after verifying admin+AAL2.
 -- SEC INVOKER preserves explicit grants and does not open a browser API.
