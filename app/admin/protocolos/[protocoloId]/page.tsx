@@ -39,6 +39,7 @@ import { buildProtocolDraftNavigation } from "@/lib/protocol/draft-navigation";
 import { ProtocolWorkspaceJourney } from "@/components/admin/ProtocolWorkspaceJourney";
 import { ProtocolDraftCompletionMap } from "@/components/admin/ProtocolDraftCompletionMap";
 import { getProtocolLifecycleAction } from "@/lib/protocol/lifecycle";
+import { protocolPublicationEligibility } from "@/lib/protocol/publication-eligibility";
 import { latestPublishedProtocolVersionId, requestedProtocolVersion } from "@/lib/protocol/history-navigation";
 import { buildProtocolPlanComparison } from "@/lib/protocol/version-diff";
 import { latestSubmittedAnamnesis } from "@/lib/anamnesis/submitted-order";
@@ -109,6 +110,7 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
 
   if (!protocol) notFound();
 
+  const publicationEligibility = protocolPublicationEligibility(protocol.clients);
   const versions = await observeProtocolLoad("versions", listAccessibleProtocolVersions(protocol.id));
   const hasEditableDraft = versions.some(
     (version) => !version.submitted_for_review_at,
@@ -434,6 +436,10 @@ export default async function AdminProtocoloDetailPage({ params, searchParams }:
                         Esta versão já foi publicada. Nenhuma ação adicional de
                         lifecycle está disponível para este registro.
                       </p>
+                    ) : lifecycleAction === "publish" && !publicationEligibility.allowed ? (
+                      <Alert title="Publicação indisponível" variant="warning">
+                        {publicationEligibility.message}
+                      </Alert>
                     ) : !draftReadiness.ready ? (
                       <Alert title={lifecycleAction === "submit" ? "Rascunho ainda incompleto" : "Versão congelada com estrutura incompleta"} variant="warning">
                         {formatProtocolDraftReadiness(draftReadiness.reasons)}
