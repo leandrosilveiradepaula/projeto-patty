@@ -20,6 +20,19 @@ async function requireLinkedClientForAssignment(clientId: string) {
   if (error || !canStartAssignmentForLinkedClient(client)) {
     throw new Error("Client identity must be linked before starting an assignment");
   }
+
+  // A Profile link alone is not evidence of completed login/password and
+  // Cadastro Atual for an internally registered historical Client. This
+  // persistent provenance ledger survives later identity linking. Only a
+  // separate, reviewed return-completion flow may lift this safeguard.
+  const { data: historicalRecords, error: historyError } = await admin
+    .from("historical_client_registration_requests")
+    .select("client_id")
+    .eq("client_id", clientId)
+    .limit(1);
+  if (historyError || !historicalRecords || historicalRecords.length > 0) {
+    throw new Error("Historical Client return requires completed onboarding review");
+  }
 }
 
 async function markClientActive(clientId: string) {
