@@ -148,17 +148,13 @@ SELECT throws_ok($sql$
     'a8100000-0000-4000-8000-000000000001')
 $sql$,'42501',NULL,'AAL1 admin cannot create a second version');
 
--- Submitting a draft is explicitly NOT authorized in this global-draft gate.
+-- Following migration J4-HUMAN-LIFECYCLE, an AAL2 administrator may submit
+-- the draft in a separate, explicit operation (never automatic approval).
 SELECT set_config('request.jwt.claims','{"sub":"a8100000-0000-4000-8000-000000000001","aal":"aal2","role":"authenticated"}',true);
-SELECT throws_ok($sql$
+SELECT lives_ok($sql$
   UPDATE public.protocol_versions SET submitted_for_review_at=now()
   WHERE id='a8400000-0000-4000-8000-000000000001'
-$sql$,'42501',NULL,'Global draft policy does not bypass review submission gate');
-
-RESET ROLE;
-UPDATE public.protocol_versions SET submitted_for_review_at=now()
-WHERE id='a8400000-0000-4000-8000-000000000001';
-SET LOCAL ROLE authenticated;
+$sql$,'Admin AAL2 explicitly submits historical draft for review');
 SELECT set_config('request.jwt.claim.sub','a8100000-0000-4000-8000-000000000001',true);
 SELECT set_config('request.jwt.claims','{"sub":"a8100000-0000-4000-8000-000000000001","aal":"aal2","role":"authenticated"}',true);
 SELECT is(public.meal_plan_version_is_draft('a8500000-0000-4000-8000-000000000001'),false,
