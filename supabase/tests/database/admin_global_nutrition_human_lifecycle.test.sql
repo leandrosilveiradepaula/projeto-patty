@@ -48,10 +48,12 @@ INSERT INTO public.protocol_versions(id,protocol_id,client_id,version_number,cre
 SET LOCAL ROLE authenticated;
 SELECT set_config('request.jwt.claim.sub','b8100000-0000-4000-8000-000000000001',true);
 SELECT set_config('request.jwt.claims','{"sub":"b8100000-0000-4000-8000-000000000001","aal":"aal1","role":"authenticated"}',true);
-SELECT throws_ok($q$
+WITH changed AS (
  UPDATE public.protocol_versions SET submitted_for_review_at=now()
  WHERE id='b8400000-0000-4000-8000-000000000001'
-$q$,'42501',NULL,'AAL1 admin denied submission');
+ RETURNING id
+)
+SELECT is(count(*),0::bigint,'AAL1 admin cannot submit hidden draft') FROM changed;
 
 SELECT set_config('request.jwt.claims','{"sub":"b8100000-0000-4000-8000-000000000001","aal":"aal2","role":"authenticated"}',true);
 SELECT throws_ok($q$
@@ -68,10 +70,12 @@ SELECT lives_ok($q$
  UPDATE public.protocol_versions SET submitted_for_review_at=now()
  WHERE id='b8400000-0000-4000-8000-000000000002'
 $q$,'Unassigned AAL2 admin submits active client version');
-SELECT throws_ok($q$
+WITH changed AS (
  UPDATE public.protocol_versions SET client_instructions='Edited after freeze'
  WHERE id='b8400000-0000-4000-8000-000000000001'
-$q$,'55000',NULL,'Submitted version cannot be edited after freeze');
+ RETURNING id
+)
+SELECT is(count(*),0::bigint,'Submitted version is not mutable under RLS') FROM changed;
 
 SELECT lives_ok($q$
  INSERT INTO public.protocol_version_approvals
@@ -147,9 +151,11 @@ SELECT throws_ok($q$
 $q$,'42501',NULL,'Client cannot approve');
 SELECT set_config('request.jwt.claim.sub','b8100000-0000-4000-8000-000000000003',true);
 SELECT set_config('request.jwt.claims','{"sub":"b8100000-0000-4000-8000-000000000003","aal":"aal2","role":"authenticated"}',true);
-SELECT throws_ok($q$
+WITH changed AS (
  UPDATE public.protocol_versions SET submitted_for_review_at=now()
  WHERE id='b8400000-0000-4000-8000-000000000002'
-$q$,'42501',NULL,'No-role identity cannot submit');
+ RETURNING id
+)
+SELECT is(count(*),0::bigint,'No-role identity cannot change protocol version') FROM changed;
 SELECT * FROM finish();
 ROLLBACK;
