@@ -1,3 +1,11 @@
+## 2026-11-04 — MIGR-HIST-04E: snapshot de retorno histórico inconsistente bloqueia toda a prévia
+
+**Correção proposta:** o preflight determinístico `previewHistoricalClientReturn` já bloqueava registros inválidos e duplicidade do `client_id` alvo, mas uma duplicidade de outro Client no snapshot poderia permitir `pending_authorized_backend_verification` para o alvo. Agora qualquer duplicidade na lista é `invalid_snapshot` e bloqueia a prévia inteira, preservando `duplicate_client` para o alvo. Regressões sintéticas cobrem duplicata de outro cadastro e registro inválido não relacionado.
+
+**Limites:** apenas função pura offline; a prévia administrativa atual consulta somente a Client alvo e eventuais candidatas ao `profile_id` proposto, não é auditoria global do diretório. Não cria login, não vincula Profile/Auth, não altera RLS/schema/assignments, não importa acervo nem reativa clientes. CI e merge pendentes; homologação profissional J1–J7 permanece no final.
+
+---
+
 ## 2026-11-03 — MIGR-HIST-04D: bloquear início de assignment para Client histórico sem Profile (PR em validação)
 
 **Falha confirmada por leitura de código e metadados de produção:** o helper `startCurrentAdminClientAssignment` não exigia `clients.profile_id` e o trigger `client_assignments_sync_client_status` sincroniza status `active` a partir de assignment ativo sem exigir Profile. Assim, uma chamada futura/indevida ao helper poderia ativar cadastro histórico interno sem completar a etapa de identidade. **Correção proposta:** o helper agora exige Client existente e `profile_id` não nulo, após `requireRole("admin")` AAL2 e antes da consulta/INSERT de assignment ou alteração de status. O ramo idempotente também passa pelo bloqueio. Testes puros e de fronteira verificam Client ausente, histórico sem Profile e cliente vinculada.
