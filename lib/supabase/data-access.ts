@@ -2339,7 +2339,7 @@ export async function listAccessibleProtocols() {
   const rows = await collectProtocolCatalogPages((from, to) =>
     supabase
       .from("protocols")
-      .select("id, client_id, protocol_type, created_at, clients(id, full_name, profiles(display_name))")
+      .select("id, client_id, protocol_type, created_at, clients(id, full_name, status, profile_id, profiles(display_name))")
       .order("created_at", { ascending: false })
       .order("id", { ascending: true })
       .range(from, to),
