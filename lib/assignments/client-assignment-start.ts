@@ -1,9 +1,26 @@
 import "server-only";
 
-import { getAssignmentStartStatus } from "@/lib/assignments/start-policy";
+import { canStartAssignmentForLinkedClient, getAssignmentStartStatus } from "@/lib/assignments/start-policy";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireRole } from "@/lib/supabase/auth";
 import { isUuid } from "@/lib/validation/uuid";
+
+/**
+ * Re-check the canonical Client before creating or preserving an assignment.
+ * An unlinked historical Client must never become active through this helper.
+ */
+async function requireLinkedClientForAssignment(clientId: string) {
+  const admin = createAdminClient();
+  const { data: client, error } = await admin
+    .from("clients")
+    .select("id, profile_id")
+    .eq("id", clientId)
+    .maybeSingle();
+
+  if (error || !canStartAssignmentForLinkedClient(client)) {
+    throw new Error("Client identity must be linked before starting an assignment");
+  }
+}
 
 async function markClientActive(clientId: string) {
   const admin = createAdminClient();
@@ -55,6 +72,8 @@ export async function startCurrentAdminClientAssignment(input: {
   if (!isUuid(input.clientId)) {
     throw new Error("Invalid client id");
   }
+
+  await requireLinkedClientForAssignment(input.clientId);
 
   const scopedInput = {
     clientId: input.clientId,
