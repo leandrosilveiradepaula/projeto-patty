@@ -1,3 +1,13 @@
+## 2026-11-04 — J4-PUBLISH-ELIGIBILITY-UI-01: bloqueio claro de publicação para cliente inativa/sem Profile (PR em validação)
+
+**Evidência factual:** migration `20261104123000_admin_global_nutrition_human_lifecycle.sql` aplicada no Supabase SaaS pelo workflow oficial [#41857974374](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/41857974374), com APPLY/VERIFY SUCCESS. Verificação por leitura de `pg_policies`, triggers e `supabase_migrations.schema_migrations` confirmou RLS RESTRICTIVE `protocol_publications_active_client_only`, MFA AAL2 e registros das migrations `20261104120000` e `20261104123000`. O deployment Vercel de produção `dpl_7p6wjK7jw7JGxsewKWbvrvTmK414` estava READY em `master=ec729ae58d1e1e418be8f9b6ccf3fe355e4a6260`. Isso **não comprova homologação humana** nem equivale a teste de cliente real.
+
+**Falha funcional selecionada da J4:** UI mostrava o botão `Publicar para a cliente` mesmo para Client `inactive` ou sem `profile_id`, quando a RLS já bloquearia essa publicação. A correção consulta `status` e `profile_id` junto do protocolo acessível, substitui o formulário por aviso explicativo para a versão aprovada não publicável e revalida estado atual da cliente **no servidor** antes de qualquer INSERT de publicação. A policy RLS permanece a proteção final. Rascunho e aprovação continuam disponíveis internamente; sem ativação/login/assignment automáticos. A elegibilidade técnica não substitui revisão profissional, consentimento ou decisão de publicação. Nenhuma mudança em schema/RLS/Storage ou dados de clientes.
+
+**Estados da nova entrega:** implementado/commitado na branch, testes CI e merge ainda pendentes; migration nova NÃO necessária; Vercel READY da nova branch NÃO verificada; homologação profissional J1–J7 fica ao final. Testes sintéticos específicos e Validate application no SHA exato antes do merge. Próxima frente depois do merge: outra pendência real da issue #1008, mantendo mapeamento/custódia de acervo histórico real como gate humano ainda aberto.
+
+---
+
 ## 2026-11-04 — J4-ADMIN-HUMAN-LIFECYCLE-01: submissão, aprovação e publicação humana global (PR em validação)
 
 **Base aplicada:** a PR #1081 foi integrada no commit `2003aea91a2d23c4b8ef59a1d7ef281e6305754a`, migration `20261104120000` aplicada via [workflow #41829041908](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/41829041908), com histórico e políticas RLS e `SECURITY INVOKER` conferidos em metadados no Supabase SaaS. Não reaplicar.
