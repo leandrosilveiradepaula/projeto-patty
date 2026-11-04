@@ -1,3 +1,13 @@
+## 2026-11-04 — J3-HIST-UI-01: percurso de avaliação histórica na interface administrativa (PR em validação)
+
+**Base:** migrations `20261103130000` (avaliações administrativas globais) e `20261104013000` (solicitação de retorno) aplicadas ao Supabase de produção via workflow oficial [#41756879421](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/41756879421), com verificação posterior de histórico, grants e RLS. Não reaplicar. Autoria e finalização da avaliação são ações humanas com MFA AAL2; a finalização versionada imutável exige snapshot da configuração vigente.
+
+**Mudança proposta:** a tela `/admin/clientes/[clienteId]/avaliacoes` apresenta orientação objetiva para Client inativo sem Profile: registrar avaliação profissional não cria login/assignment, não reativa o acompanhamento e não libera históricos. Cenário J3 Playwright novo usa exclusivamente localhost descartável: cria Client pela RPC histórica real, autentica admin sintética AAL2, cria avaliação pela UI, salva requisitos de medida pelos formulários, associa somente fotos sintéticas exigidas, finaliza pela confirmação real, recarrega e verifica histórico. Confere no SQL descartável que `client_id` original, `inactive`, ausência de Profile/assignment/publicação e trilha da criação persistiram. Verifica viewports 390/1440 sem overflow. A suíte existente de correção/comparação/autorização continua intacta.
+
+**Limites:** não importa XLSX/ZIP, não insere dados clínicos em produção, não executa onboarding, não libera arquivos e não altera schema/RLS, doses, critérios clínicos ou decisões humanas. Uso de valores sintéticos em teste não é recomendação profissional. PR e CI ainda precisam ser comprovados; Vercel e homologação profissional não executadas nesta entrega.
+
+---
+
 ## 2026-11-04 — MIGR-HIST-05B: não iniciar acompanhamento de cadastro histórico parcialmente vinculado (PR em validação)
 
 **Falha comprovada:** a proteção do helper de assignment da #1073 dependia somente de `clients.profile_id`, que pode ser preenchido antes de terminar senha, Cadastro Atual ou aprovação do retorno histórico. A função `startCurrentAdminClientAssignment` agora consulta pelo ID a tabela de proveniência `historical_client_registration_requests` (migration #1068 já aplicada) e **falha fechada** para qualquer Client originalmente cadastrado como histórico interno, mesmo que tenha Profile, antes de consultar/criar assignment ou marcar status ativo. A consulta é `server-only`, `service_role` após `requireRole("admin")` MFA AAL2. Falhas de leitura também bloqueiam. Clientes criadas no fluxo normal sem entrada no ledger continuam elegíveis. Tipagem do ledger existente e regressão de segurança incluídas.
