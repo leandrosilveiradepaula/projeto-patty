@@ -25,6 +25,7 @@ import { validateClientDisplayName } from "@/lib/onboarding/validation";
 import { ClientAccessLinkOriginError, resolveTrustedClientAccessOrigin } from "@/lib/onboarding/trusted-client-access-origin";
 import { isUuid } from "@/lib/validation/uuid";
 import { inspectHistoricalClientReturnReadiness } from "@/lib/onboarding/historical-client-return-readiness";
+import { registerHistoricalClientReturnRequest } from "@/lib/onboarding/historical-client-return-request";
 import type { HistoricalReturnBlockReason } from "@/lib/onboarding/historical-client-return-preflight";
 
 export async function endClientAssignmentAction(
@@ -517,4 +518,53 @@ export async function inspectHistoricalClientReturnAction(
     return { status: "unavailable", reasons: [] };
   }
   return { status: result.status, reasons: result.reasons };
+}
+
+/**
+ * Records the administrative request only. Identity proof, Auth provisioning,
+ * Cadastro Atual completion and historic release stay separate human gates.
+ */
+export type HistoricalReturnRequestActionState = Readonly<{
+  success: boolean;
+  message: string | null;
+}>;
+
+export async function registerHistoricalClientReturnRequestAction(
+  clientId: string,
+  _previous: HistoricalReturnRequestActionState,
+  formData: FormData,
+): Promise<HistoricalReturnRequestActionState> {
+  await requireRole("admin");
+  if (!isUuid(clientId)) {
+    return { success: false, message: "Cadastro inválido." };
+  }
+  const ids = formData.getAll("requestId");
+  const confirmedIds = formData.getAll("confirmedClientId");
+  const reviews = formData.getAll("identityReviewedByHuman");
+
+  if (ids.length !== 1 || typeof ids[0] !== "string" ||
+      confirmedIds.length !== 1 || typeof confirmedIds[0] !== "string" ||
+      reviews.length !== 1 || reviews[0] !== "yes" ||
+      confirmedIds[0].trim() !== clientId) {
+    return { success: false, message: "Confirme o identificador original e a conferência humana." };
+  }
+
+  try {
+    await registerHistoricalClientReturnRequest({
+      requestId: ids[0],
+      clientId,
+      confirmedClientId: confirmedIds[0].trim(),
+      humanIdentityReviewDeclared: true,
+    });
+  } catch {
+    return {
+      success: false,
+      message: "O pedido não foi registrado. Pode existir uma solicitação anterior ou uma alteração no cadastro. Confira o histórico administrativo antes de tentar novamente; não crie outro cadastro.",
+    };
+  }
+  revalidatePath(`/admin/clientes/${clientId}`);
+  return {
+    success: true,
+    message: "Solicitação de retorno registrada para este cadastro. Login, Cadastro Atual, acesso a históricos e acompanhamento continuam pendentes.",
+  };
 }
