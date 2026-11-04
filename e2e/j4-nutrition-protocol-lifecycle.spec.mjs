@@ -1080,16 +1080,19 @@ test("J4: admin manually drafts/reviews/approves/publishes, client sees exact ve
       expect(existingFeedback[0].answers).toEqual(submittedFeedback.answers);
       expect(existingFeedback[0].submitted_at).toBe(submittedFeedback.submitted_at);
 
-      // The other client and unrelated AAL2 professional are never granted
-      // these client-scoped assessments by the re-evaluation.
+      // The unrelated client stays isolated. An authorized admin with AAL2
+      // retains global professional read access without an assignment.
       const otherRead=await apiOther.from("client_assessments")
         .select("id").in("id",[initialAssessment.id,reevaluation.id]);
       if(otherRead.error&&otherRead.error.code!=="42501")throw otherRead.error;
       expect(otherRead.data??[]).toEqual([]);
       await otherPage.goto(compareRoute+"?referencia="+initialAssessment.id+
         "&comparacao="+reevaluation.id);
-      await expect(otherPage.getByText("Página ou registro indisponível",{exact:true}))
+      await expect(otherPage.getByRole("heading",{name:"Comparar duas avaliações"}))
         .toBeVisible();
+      await expect(otherPage.locator("#comparacao-resultados")).toBeVisible();
+      await expect(otherPage.getByText("Página ou registro indisponível",{exact:true}))
+        .toHaveCount(0);
       expect(rows("select id from public.client_assessments where client_id="+quote(otherClientId)))
         .toEqual([]);
     });
