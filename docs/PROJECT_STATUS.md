@@ -1,3 +1,11 @@
+## 2026-11-04 — J3-HIST-UI-01: correção de grants exclusivos do serviço para finalização (PR em validação)
+
+**Incidente reproduzido por Playwright:** criação de Client histórico via RPC, login admin AAL2, rascunho e medidas por formulário passaram, mas a Server Action de finalização não persistiu. Diagnóstico exclusivamente no Supabase descartável retornou erro SQL `42501 permission denied for table client_assessments` na RPC invocada com `service_role`. A configuração local `auto_expose_new_tables=false` exige grants explícitos; a produção já possui SELECT e UPDATE do `service_role` (confirmado por consulta de metadados), mas a migração versionada não garantia a mesma ACL em ambiente novo. O teste pgTAP anterior chamava a função como `postgres` no cenário positivo, mascarando a lacuna.
+
+**Correção aditiva proposta:** migration `20261104030000_assessment_service_role_finalization_grants.sql` só acrescenta os privilégios mínimos do servidor para ler/travar/finalizar `client_assessments`, consultar requisitos/configuração e inserir snapshots. `SECURITY INVOKER`, função existente, trigger, RLS, `anon`/`authenticated` e dados clínicos permanecem inalterados. O pgTAP positivo passa a executar sob `SET LOCAL ROLE service_role`, e o teste de segurança garante que não houve grants de browser. Não alterar as migrations aplicadas. **A nova migration ainda NÃO foi aplicada no Supabase SaaS**; quando PR/CI estiverem verdes e mergeados, somente pelo workflow oficial. Na produção os grants já constavam, mas rollout é necessário para reconciliar o histórico do schema. Se a suíte falhar, não fazer merge nem publicar. Sem dados reais e sem homologação humana antecipada.
+
+---
+
 ## 2026-11-04 — J3-HIST-UI-01: percurso de avaliação histórica na interface administrativa (PR em validação)
 
 **Base:** migrations `20261103130000` (avaliações administrativas globais) e `20261104013000` (solicitação de retorno) aplicadas ao Supabase de produção via workflow oficial [#41756879421](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/41756879421), com verificação posterior de histórico, grants e RLS. Não reaplicar. Autoria e finalização da avaliação são ações humanas com MFA AAL2; a finalização versionada imutável exige snapshot da configuração vigente.
