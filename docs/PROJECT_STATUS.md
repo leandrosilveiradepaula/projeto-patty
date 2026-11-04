@@ -1,3 +1,11 @@
+## 2026-11-04 — MIGR-HIST-06A: proveniência do ZIP obrigatória na prévia de conciliação (PR #1078 em validação)
+
+**Risco comprovado por leitura do motor offline:** o identificador opaco `entry_id` é ordinal e o SHA-256 da entrada não diferencia ZIPs de origem distintos contendo o mesmo binário. Reordenar dois ZIPs pode reutilizar a decisão humana para uma origem diversa. A PR #1078 exige `archive_sha256` na decisão e impede `pending_backend_identity_verification` em caso de origem ausente/divergente. ZIPs idênticos repetidos bloqueiam todas as entradas afetadas até reconciliação humana. Testes sintéticos cobrem reordenação com entradas idênticas, ZIP duplicado, hash ausente e caso válido.
+
+**Estados desta entrega:** implementada e commitada na branch `fix/historical-zip-provenance-gate-20261104`; CI/merge **a verificar no SHA final**; não há mudança de schema, migrations, Auth/RLS/Storage ou dado real. A prévia permanece `dry_run`, sem persistência, sem provar identidade e sem publicar arquivos. Rollout separado: migration `20261104030000_assessment_service_role_finalization_grants.sql` (PR #1077 já mergeada) ainda não consta no histórico Supabase SaaS; execução somente pelo workflow oficial. Homologação conjunta J1–J7 é a última etapa.
+
+---
+
 ## 2026-11-04 — J3-HIST-UI-01: correção de grants exclusivos do serviço para finalização (PR em validação)
 
 **Incidente reproduzido por Playwright:** criação de Client histórico via RPC, login admin AAL2, rascunho e medidas por formulário passaram, mas a Server Action de finalização não persistiu. Diagnóstico exclusivamente no Supabase descartável retornou erro SQL `42501 permission denied for table client_assessments` na RPC invocada com `service_role`. A configuração local `auto_expose_new_tables=false` exige grants explícitos; a produção já possui SELECT e UPDATE do `service_role` (confirmado por consulta de metadados), mas a migração versionada não garantia a mesma ACL em ambiente novo. O teste pgTAP anterior chamava a função como `postgres` no cenário positivo, mascarando a lacuna.

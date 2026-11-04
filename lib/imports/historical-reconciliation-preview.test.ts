@@ -14,7 +14,7 @@ test("blocks every file and human decision when Client snapshot is incomplete or
     { name: "second.png", bytes: new Uint8Array([...syntheticPng, 1]) },
   ]);
   const first = preview.archives[0]!.entries[0]!;
-  const decision = { entry_id: first.entry_id, entry_sha256: first.sha256!, client_id: ACTIVE_CLIENT };
+  const decision = { entry_id: first.entry_id, archive_sha256: preview.archives[0]!.sha256, entry_sha256: first.sha256!, client_id: ACTIVE_CLIENT };
 
   for (const snapshot of [
     [...clients(), { client_id: "invalid", client_status: "inactive" as const }],
@@ -43,8 +43,8 @@ test("creates an opaque, explicit reconciliation manifest while preserving activ
   const first = preview.archives[0]!.entries[0]!;
   const second = preview.archives[0]!.entries[1]!;
   const result = previewHistoricalReconciliation(preview, clients(), [
-    { entry_id: second.entry_id, entry_sha256: second.sha256!, client_id: INACTIVE_CLIENT },
-    { entry_id: first.entry_id, entry_sha256: first.sha256!, client_id: ACTIVE_CLIENT },
+    { entry_id: second.entry_id, archive_sha256: preview.archives[0]!.sha256, entry_sha256: second.sha256!, client_id: INACTIVE_CLIENT },
+    { entry_id: first.entry_id, archive_sha256: preview.archives[0]!.sha256, entry_sha256: first.sha256!, client_id: ACTIVE_CLIENT },
   ]);
 
   assert.equal(result.mode, "dry_run");
@@ -78,12 +78,12 @@ test("blocks conflicting associations and duplicate binaries targeted at differe
   const preview = archivePreview([{ name: "one.png", bytes: syntheticPng }, { name: "two.png", bytes: syntheticPng }]);
   const [first, second] = preview.archives[0]!.entries;
   const duplicateConflict = previewHistoricalReconciliation(preview, clients(), [
-    { entry_id: first!.entry_id, entry_sha256: first!.sha256!, client_id: ACTIVE_CLIENT },
-    { entry_id: second!.entry_id, entry_sha256: second!.sha256!, client_id: INACTIVE_CLIENT },
+    { entry_id: first!.entry_id, archive_sha256: preview.archives[0]!.sha256, entry_sha256: first!.sha256!, client_id: ACTIVE_CLIENT },
+    { entry_id: second!.entry_id, archive_sha256: preview.archives[0]!.sha256, entry_sha256: second!.sha256!, client_id: INACTIVE_CLIENT },
   ]);
   const sameEntryConflict = previewHistoricalReconciliation(preview, clients(), [
-    { entry_id: first!.entry_id, entry_sha256: first!.sha256!, client_id: ACTIVE_CLIENT },
-    { entry_id: first!.entry_id, entry_sha256: first!.sha256!, client_id: INACTIVE_CLIENT },
+    { entry_id: first!.entry_id, archive_sha256: preview.archives[0]!.sha256, entry_sha256: first!.sha256!, client_id: ACTIVE_CLIENT },
+    { entry_id: first!.entry_id, archive_sha256: preview.archives[0]!.sha256, entry_sha256: first!.sha256!, client_id: INACTIVE_CLIENT },
   ]);
 
   assert.ok(duplicateConflict.files.every((file) => file.association.reason === "duplicate_binary_conflict"));
@@ -95,10 +95,10 @@ test("blocks invalid IDs, absent clients, mismatched hashes, and unknown entries
   const preview = archivePreview([{ name: "only.png", bytes: syntheticPng }]);
   const entry = preview.archives[0]!.entries[0]!;
   const result = previewHistoricalReconciliation(preview, clients(), [
-    { entry_id: entry.entry_id, entry_sha256: entry.sha256!, client_id: "not-a-uuid" },
-    { entry_id: entry.entry_id, entry_sha256: "0".repeat(64), client_id: ACTIVE_CLIENT },
-    { entry_id: "unknown_001", entry_sha256: "0".repeat(64), client_id: ACTIVE_CLIENT },
-    { entry_id: entry.entry_id, entry_sha256: entry.sha256!, client_id: "33333333-3333-4333-8333-333333333333" },
+    { entry_id: entry.entry_id, archive_sha256: preview.archives[0]!.sha256, entry_sha256: entry.sha256!, client_id: "not-a-uuid" },
+    { entry_id: entry.entry_id, archive_sha256: preview.archives[0]!.sha256, entry_sha256: "0".repeat(64), client_id: ACTIVE_CLIENT },
+    { entry_id: "unknown_001", archive_sha256: preview.archives[0]!.sha256, entry_sha256: "0".repeat(64), client_id: ACTIVE_CLIENT },
+    { entry_id: entry.entry_id, archive_sha256: preview.archives[0]!.sha256, entry_sha256: entry.sha256!, client_id: "33333333-3333-4333-8333-333333333333" },
   ]);
 
   assert.deepEqual(result.decisions.map((decision) => decision.reason).sort(), [
@@ -113,11 +113,11 @@ test("blocks invalid IDs, absent clients, mismatched hashes, and unknown entries
 test("fails closed when a valid association shares its entry with an invalid human decision", () => {
   const preview = archivePreview([{ name: "first.png", bytes: syntheticPng }, { name: "second.png", bytes: new Uint8Array([...syntheticPng, 1]) }]);
   const [first, second] = preview.archives[0]!.entries;
-  const valid = { entry_id: first!.entry_id, entry_sha256: first!.sha256!, client_id: ACTIVE_CLIENT };
+  const valid = { entry_id: first!.entry_id, archive_sha256: preview.archives[0]!.sha256, entry_sha256: first!.sha256!, client_id: ACTIVE_CLIENT };
   const cases = [
-    { entry_id: first!.entry_id, entry_sha256: "0".repeat(64), client_id: ACTIVE_CLIENT },
-    { entry_id: first!.entry_id, entry_sha256: first!.sha256!, client_id: "33333333-3333-4333-8333-333333333333" },
-    { entry_id: first!.entry_id, entry_sha256: first!.sha256!, client_id: "bad-uuid" },
+    { entry_id: first!.entry_id, archive_sha256: preview.archives[0]!.sha256, entry_sha256: "0".repeat(64), client_id: ACTIVE_CLIENT },
+    { entry_id: first!.entry_id, archive_sha256: preview.archives[0]!.sha256, entry_sha256: first!.sha256!, client_id: "33333333-3333-4333-8333-333333333333" },
+    { entry_id: first!.entry_id, archive_sha256: preview.archives[0]!.sha256, entry_sha256: first!.sha256!, client_id: "bad-uuid" },
   ];
 
   for (const invalid of cases) {
@@ -138,8 +138,8 @@ test("is deterministic when identical human decisions arrive in a different orde
   const preview = archivePreview([{ name: "one.png", bytes: syntheticPng }, { name: "two.png", bytes: new Uint8Array([...syntheticPng, 1]) }]);
   const [first, second] = preview.archives[0]!.entries;
   const decisions = [
-    { entry_id: first!.entry_id, entry_sha256: first!.sha256!, client_id: ACTIVE_CLIENT },
-    { entry_id: second!.entry_id, entry_sha256: second!.sha256!, client_id: INACTIVE_CLIENT },
+    { entry_id: first!.entry_id, archive_sha256: preview.archives[0]!.sha256, entry_sha256: first!.sha256!, client_id: ACTIVE_CLIENT },
+    { entry_id: second!.entry_id, archive_sha256: preview.archives[0]!.sha256, entry_sha256: second!.sha256!, client_id: INACTIVE_CLIENT },
   ];
   assert.deepEqual(previewHistoricalReconciliation(preview, clients(), decisions), previewHistoricalReconciliation(preview, clients(), [...decisions].reverse()));
 });
@@ -159,7 +159,7 @@ test("blocks duplicate opaque source entry identifiers instead of choosing the l
     })),
   };
   const result = previewHistoricalReconciliation(corrupted, clients(), [
-    { entry_id: first.entry_id, entry_sha256: first.sha256!, client_id: ACTIVE_CLIENT },
+    { entry_id: first.entry_id, archive_sha256: preview.archives[0]!.sha256, entry_sha256: first.sha256!, client_id: ACTIVE_CLIENT },
   ]);
   assert.equal(result.files.length, 2);
   assert.ok(result.files.every((file) => file.association.status === "blocked" && file.association.reason === "duplicate_source_entry"));
@@ -177,3 +177,60 @@ function clients() {
     { client_id: INACTIVE_CLIENT, client_status: "inactive" as const },
   ];
 }
+
+test("rejects stale ZIP associations on reorder even with identical inner bytes", () => {
+  const archiveA = syntheticZip([{ name: "first.png", bytes: syntheticPng }]);
+  const archiveB = syntheticZip([{ name: "other.png", bytes: syntheticPng }]);
+  const original = previewHistoricalArchives([{ bytes: archiveA }, { bytes: archiveB }]);
+  const reordered = previewHistoricalArchives([{ bytes: archiveB }, { bytes: archiveA }]);
+  const source = original.archives[0]!.entries[0]!;
+  const decision = {
+    entry_id: source.entry_id,
+    archive_sha256: original.archives[0]!.sha256,
+    entry_sha256: source.sha256!,
+    client_id: ACTIVE_CLIENT,
+  };
+  assert.equal(reordered.archives[0]!.entries[0]!.entry_id, source.entry_id);
+  assert.equal(reordered.archives[0]!.entries[0]!.sha256, source.sha256);
+  assert.notEqual(reordered.archives[0]!.sha256, original.archives[0]!.sha256);
+  const result = previewHistoricalReconciliation(reordered, clients(), [decision]);
+  assert.equal(result.decisions[0]!.reason, "archive_hash_mismatch");
+  assert.equal(result.files[0]!.association.status, "blocked");
+  assert.equal(result.summary.pending_backend_identity_verification_count, 0);
+});
+
+test("blocks repeated identical ZIPs including files without human decisions", () => {
+  const bytes = syntheticZip([{ name: "only.png", bytes: syntheticPng }]);
+  const preview = previewHistoricalArchives([{ bytes }, { bytes }]);
+  const first = preview.archives[0]!.entries[0]!;
+  const result = previewHistoricalReconciliation(preview, clients(), [{
+    entry_id: first.entry_id,
+    archive_sha256: preview.archives[0]!.sha256,
+    entry_sha256: first.sha256!,
+    client_id: ACTIVE_CLIENT,
+  }]);
+  assert.equal(result.files.length, 2);
+  assert.ok(result.files.every((file) =>
+    file.association.status === "blocked" && file.association.reason === "duplicate_source_archive",
+  ));
+  assert.equal(result.decisions[0]!.reason, "duplicate_source_archive");
+  assert.equal(result.summary.pending_backend_identity_verification_count, 0);
+});
+
+test("rejects missing ZIP hash while retaining a valid offline association as pending", () => {
+  const preview = archivePreview([{ name: "only.png", bytes: syntheticPng }]);
+  const first = preview.archives[0]!.entries[0]!;
+  const decision = {
+    entry_id: first.entry_id,
+    archive_sha256: "",
+    entry_sha256: first.sha256!,
+    client_id: ACTIVE_CLIENT,
+  };
+  const blocked = previewHistoricalReconciliation(preview, clients(), [decision]);
+  assert.equal(blocked.decisions[0]!.reason, "archive_hash_mismatch");
+  assert.equal(blocked.summary.pending_backend_identity_verification_count, 0);
+  const valid = previewHistoricalReconciliation(preview, clients(), [{ ...decision, archive_sha256: preview.archives[0]!.sha256 }]);
+  assert.equal(valid.decisions[0]!.status, "pending_backend_identity_verification");
+  assert.equal(valid.files[0]!.association.status, "pending_backend_identity_verification");
+  assert.doesNotMatch(JSON.stringify(valid), /only\\.png/);
+});
