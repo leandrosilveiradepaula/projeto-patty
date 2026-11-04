@@ -1479,6 +1479,42 @@ export type Database = {
           },
         ]
       }
+      historical_client_registration_requests: {
+        Row: {
+          request_id: string
+          client_id: string
+          created_by_profile_id: string
+          created_at: string
+        }
+        Insert: {
+          request_id: string
+          client_id: string
+          created_by_profile_id: string
+          created_at?: string
+        }
+        Update: {
+          request_id?: string
+          client_id?: string
+          created_by_profile_id?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "historical_client_registration_requests_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: true
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "historical_client_registration_requests_created_by_profile_id_fkey"
+            columns: ["created_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       historical_client_return_requests: {
         Row: {
           request_id: string
