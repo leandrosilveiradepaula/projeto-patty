@@ -1,3 +1,15 @@
+## 2026-11-04 — J4-ADMIN-HUMAN-LIFECYCLE-01: submissão, aprovação e publicação humana global (PR em validação)
+
+**Base aplicada:** a PR #1081 foi integrada no commit `2003aea91a2d23c4b8ef59a1d7ef281e6305754a`, migration `20261104120000` aplicada via [workflow #41829041908](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/41829041908), com histórico e políticas RLS e `SECURITY INVOKER` conferidos em metadados no Supabase SaaS. Não reaplicar.
+
+**Próxima lacuna J4:** as operações de submeter versão, aprovar e publicar ainda dependiam de assignment ativo, apesar de a decisão `admin` global AAL2 estar confirmada. Nova migration **ainda não aplicada** `20261104123000_admin_global_nutrition_human_lifecycle.sql` propõe transições humanas explícitas `draft → submitted → approved → published`; adiciona trigger para impedir mudança simultânea de conteúdo na submissão e preserva os demais gatilhos, grants, RLS/MFA e vínculos de versão/Client. Em razão da pendência de visibilidade histórica, publicação para cliente inativa ou sem `Profile` fica bloqueada até regra humana posterior; isso é salvaguarda técnica, não regra clínica. A preparação e a aprovação interna de conteúdo para cliente histórica não lhe dão acesso ou login.
+
+**Testes:** pgTAP sintético `admin_global_nutrition_human_lifecycle.test.sql` (admin AAL2 sem assignment, AAL1, client, sem role, identidade/client divergentes, frozen, duplicata, publish inactive negado, active com approval permitido, nenhuma ativação), executado explicitamente em Supabase descartável pelo workflow de método. Nenhum dado real em CI. A interface de J4 já exige `requireRole("admin")` e três confirmações independentes; aprovação/publicação ainda revalidam estrutura persistida. Não retirar essa revisão humana.
+
+**Estados:** código/testes em branch, CI e merge pendentes, migration nova **não aplicada** no SaaS, Vercel não verificada, homologação profissional J1–J7 reservada para a última tarefa. Aplicação somente pelo workflow versionado após merge, com prévia e confirmação separadas. Importação histórica real permanece bloqueada por custódia, identidade e significado das planilhas.
+
+---
+
 ## 2026-11-04 — J4-ADMIN-UNASSIGNED-01: protocolo nutricional em rascunho sem assignment (PR em validação)
 
 **Falha comprovada por consulta de políticas no Supabase SaaS, SEM executar escrita:** a leitura global já permite `admin` AAL2 consultar clientes históricas, mas `protocols`, `protocol_versions` e `meal_plan_versions` exigiam assignment ativo em `WITH CHECK`. O helper `meal_plan_version_is_draft(uuid)` também verificava assignment, impedindo editar refeições/doses/ciclo apesar da regra confirmada de acesso administrativo global em `DECISIONS.md` (2026-11-01).
