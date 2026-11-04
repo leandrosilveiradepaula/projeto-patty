@@ -66,3 +66,17 @@ test("database regression covers AAL2, AAL1, forged authors, historical photos a
     "Exactly two immutable versioned method snapshots persist"
   ]) assert.ok(pgtap.includes(phrase),phrase);
 });
+
+test("service-only assessment finalization grants are explicit under local auto-expose=false", () => {
+  const grants = readFileSync(
+    "supabase/migrations/20261104030000_assessment_service_role_finalization_grants.sql", "utf8",
+  );
+  assert.match(grants, /GRANT SELECT, UPDATE ON public\.client_assessments TO service_role/);
+  assert.match(grants, /GRANT SELECT, INSERT ON public\.method_configuration_snapshot_sets/);
+  assert.match(grants, /public\.method_configuration_snapshots TO service_role/);
+  assert.match(grants, /NOT p\.prosecdef/);
+  assert.doesNotMatch(grants, /GRANT\s+(?:SELECT|INSERT|UPDATE|DELETE|EXECUTE)[^;]*\bTO\s+(?:anon|authenticated)\b/i);
+  assert.doesNotMatch(grants, /DISABLE ROW LEVEL SECURITY|DROP POLICY|SECURITY DEFINER/);
+  assert.match(pgtap, /SET LOCAL ROLE service_role;[\s\S]*SELECT isnt\(public\.finalize_assessment_from_method_snapshot/);
+  assert.match(pgtap, /service_role has explicit privileges required for snapshot finalization/);
+});
