@@ -36,3 +36,18 @@ export async function registerHistoricalClientReturnRequest(input: {
   }
   return { clientId: data, status: "pending_onboarding" as const };
 }
+
+/** Server-only status lookup: no browser grants or clinical columns. */
+export async function getHistoricalClientReturnRequestStatus(clientId: string):
+  Promise<{ requestedAt: string } | null> {
+  await requireRole("admin");
+  if (!isUuid(clientId)) throw new Error("Invalid historical Client ID");
+  const service = createAdminClient();
+  const { data, error } = await service
+    .from("historical_client_return_requests")
+    .select("requested_at")
+    .eq("client_id", clientId)
+    .maybeSingle();
+  if (error) throw new Error("Could not inspect historical return request");
+  return data ? { requestedAt: data.requested_at } : null;
+}
