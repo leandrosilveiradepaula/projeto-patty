@@ -51,7 +51,7 @@ export function prepareReviewedHistoricalPhoto(input: Readonly<{
     client_id: input.clientId, source_sha256: hash,
     client_file_id: fileId,
     storage_path: `clients/${input.clientId}/photo/${fileId}.${ext}`,
-    mime_type: mimeType,
+    mime_type: mimeType as "image/jpeg" | "image/png",
     photo_type: ext === "jpg" ? "jpeg" : "png",
     byte_size: input.bytes.byteLength,
   };
