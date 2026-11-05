@@ -134,10 +134,12 @@ SELECT lives_ok($sql$
  WHERE training_plan_id=(SELECT id FROM public.client_training_plans
  WHERE client_id='b5200000-0000-4000-8000-000000000002')
 $sql$,'Unassigned admin reviews active draft');
-SELECT throws_ok($sql$
+WITH changed AS (
  UPDATE public.client_training_plan_items SET sets_text='5'
  WHERE exercise_name='Synthetic historic exercise'
-$sql$,'55000',NULL,'Reviewed plan items cannot mutate');
+ RETURNING id
+)
+SELECT is(count(*),0::bigint,'Reviewed plan items cannot mutate under RLS') FROM changed;
 
 SELECT throws_ok($sql$
  UPDATE public.client_training_plan_versions SET published_at=now(),
