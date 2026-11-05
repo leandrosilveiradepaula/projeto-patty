@@ -1,3 +1,17 @@
+## 2026-11-05 — MIGR-HIST-07C: workspace de importação por cliente — Excel + fotos (PR em validação)
+
+**Decisão vigente:** o arquivo Excel e as fotos são entradas separadas; o ZIP de exemplo não é formato do importador. Importação histórica mantém prioridade exclusiva até finalização, incluindo Anamnese e planilhas das clientes ativas/inativas.
+
+**Entrega 07C em branch:** nova página `/admin/clientes/[clienteId]/importacao`, navegável a partir do workspace da cliente. Consulta `Client` existente com role admin/MFA AAL2 e RLS atual (sem criar Auth, Profile, Client duplicada ou assignment). Excel `.xlsx` é enviado diretamente à rota POST administrativa protegida para inspeção **em memória**, sem persistência: valida origem da requisição, limita tamanho real da stream antes de decodificar multipart, valida conteúdo do XLSX/assinatura/hashes e permite verificar no máximo 40 células originais de uma coluna e aba explicitamente selecionadas. Resposta `no-store`; nenhum dado original no log. A UI exige confirmação manual da identidade antes de consultar valores; não interpreta mapeamento clínico nem marca importação como concluída.
+
+**Fotos:** a página reutiliza `AdminPrivateFileUploadForm` e o workflow preexistente de upload privado `client-private`, vinculado ao mesmo `client_id` (incluindo inativas), com validação/finalização existentes e sem liberação automática. Não foi criado novo storage, alterada RLS nem produzida migration. Esta etapa ainda depende de seleção manual e upload individual de fotos; não consiste em importação em lote automaticamente reconciliada.
+
+**Provas a exigir:** `npm run test:imports`, typecheck/build e CI `Validate application` do SHA exato; observância de Auth AAL2, identidade canônica, limites e proibição de persistência do Excel; e2e administrativo real ainda pendente da homologação final. **Estados:** código/commit branch; CI, PR, merge e Vercel a verificar; dados reais/Supabase escritos nesta etapa NÃO; importação canônica definitiva NÃO; homologação J1–J7 NÃO.
+
+**Próxima entrega obrigatória:** contrato profissional aprovado de mapeamento XLSX por família (aba/coluna/tipo/unidade/data), associação explícita e auditada ao `client_id`, staging/imputação por domínio (Cadastro Atual/Anamnese/Avaliação conforme origem) com idempotência, preservação do original e migração autorizada do acervo real sem publicação automática.
+
+---
+
 ## 2026-11-05 — MIGR-HIST-07B: leitura seletiva de valores brutos de XLSX direto (branch em validação)
 
 **Prioridade e contrato:** o input é um arquivo XLSX independente e fotos separadas, não ZIP externo. Depois do preview direto da #1087, o extrator `extractHistoricalDirectXlsxCells` recebe bytes de um XLSX, SHA-256 e impressão estrutural exatos da prévia, mais seletores explícitos de aba/coluna; retorna somente as células selecionadas com aba, coluna, linha, tipo e **valor original sem normalização**. Falhas são somente `historical_direct_xlsx_blocked`, sem nomes ou conteúdo de célula. O valor retornado pode conter dados de saúde, logo nunca deve ser usado em logs/telemetria/browser sem boundary profissional restrita. A classificação `raw_unapproved` não autoriza importação.

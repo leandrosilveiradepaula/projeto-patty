@@ -11,6 +11,7 @@ import styles from "./ClientWorkspaceNav.module.css";
 type ClientWorkspaceArea =
   | "visao-geral"
   | "anamnese"
+  | "importacao"
   | "avaliacoes"
   | "evolucao"
   | "protocolos"
@@ -48,6 +49,7 @@ function ClientWorkspaceNavContent({
   }> = [
     { area: "visao-geral", href: base, label: "Visão geral", exact: true },
     { area: "anamnese", href: `${base}/anamnese`, label: "Anamnese" },
+    { area: "importacao", href: `${base}/importacao`, label: "Importar histórico" },
     { area: "avaliacoes", href: `${base}/avaliacoes`, label: "Avaliações" },
     { area: "evolucao", href: `${base}/evolucao`, label: "Evolução" },
     { area: "protocolos", href: `${base}/protocolos`, label: "Protocolos" },
