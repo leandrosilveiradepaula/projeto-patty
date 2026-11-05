@@ -45,6 +45,9 @@ test("rejects unknown, duplicate, conflicting and extra personally identifying f
     (e: unknown) => e instanceof Error && e.message === "historical_initial_load_manifest_blocked"
       && !e.message.includes("PRIVATE CLIENT NAME"),
   );
+  assert.throws(() => prepareHistoricalInitialLoadRegistration({
+    ...base, original_client_name: "PRIVATE CLIENT NAME",
+  }, batchId), /historical_initial_load_manifest_blocked/);
   const dup = structuredClone(base) as unknown as { files: Array<Record<string, unknown>> };
   dup.files[1]!.source_id = dup.files[0]!.source_id;
   assert.throws(() => prepareHistoricalInitialLoadRegistration(dup, batchId),
