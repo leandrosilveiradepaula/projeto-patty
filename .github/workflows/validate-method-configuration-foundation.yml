@@ -140,6 +140,9 @@ jobs:
       - name: Run historical Client return request pgTAP
         run: npx supabase test db supabase/tests/database/historical_client_return_request.test.sql
 
+      - name: Run initial-load ledger RLS and idempotency pgTAP
+        run: npx supabase test db supabase/tests/database/historical_initial_load_ledger.test.sql
+
       - name: Run admin global historical assessment lifecycle pgTAP
         run: npx supabase test db supabase/tests/database/admin_global_assessment_lifecycle.test.sql
 

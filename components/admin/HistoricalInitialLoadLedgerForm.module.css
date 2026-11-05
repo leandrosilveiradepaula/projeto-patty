@@ -1,0 +1,10 @@
+.form { display: grid; gap: 20px; max-width: 900px; padding: 8px 0 20px; }
+.field { display: grid; gap: 8px; min-width: 0; }
+.field span { color: var(--color-text-secondary); font-size: 0.9rem; }
+.field input[type="file"], .field input[type="text"] { display: block; min-width: 0; width: 100%; min-height: 44px; padding: 10px; background: var(--color-surface); color: var(--color-text-primary); border: 1px solid var(--color-border); border-radius: 8px; font: inherit; }
+.codeRow { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.codeRow input { flex: 1 1 300px; }
+.confirm { display: flex; gap: 12px; align-items: flex-start; line-height: 1.5; }
+.confirm input { flex: none; margin-top: 3px; min-width: 20px; min-height: 20px; }
+.form > button { justify-self: start; }
+@media (max-width: 640px) { .codeRow { display: grid; grid-template-columns: 1fr; } }
