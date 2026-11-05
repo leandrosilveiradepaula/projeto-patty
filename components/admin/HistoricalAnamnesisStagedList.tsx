@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
+import Link from "next/link";
 import { requireRole } from "@/lib/supabase/auth";
 import { Alert } from "@/components/ui/Alert";
 
@@ -30,7 +31,7 @@ export async function HistoricalAnamnesisStagedList({ clientId }: { clientId: st
         <tbody>
           {data.map((record) => (
             <tr key={record.id}>
-              <td><code>{record.id}</code></td>
+              <td><Link href={`/admin/clientes/${clientId}/importacao/${record.id}`}>Ver respostas originais</Link></td>
               <td><code>{record.source_id}</code></td>
               <td>{record.state === "staged_private" ? "Guardado — privado" : "Não disponível"}</td>
               <td>{new Date(record.imported_at).toLocaleDateString("pt-BR", {
