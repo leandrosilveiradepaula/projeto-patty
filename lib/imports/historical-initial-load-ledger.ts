@@ -44,7 +44,13 @@ export function prepareHistoricalInitialLoadRegistration(
   value: unknown,
   batchId: string,
 ): HistoricalInitialLoadRegistration {
+  const allowedPlanFields = new Set([
+    "version", "mode", "persistence", "import_allowed",
+    "identity_verification", "files", "xlsx_layout_groups",
+    "client_groups", "input_errors", "totals",
+  ]);
   if (!isUuid(batchId) || !isObject(value)
+    || Object.keys(value).some((key) => !allowedPlanFields.has(key))
     || value.version !== INITIAL_LOAD_PLAN_VERSION
     || value.mode !== "dry_run" || value.persistence !== "none"
     || value.import_allowed !== false
@@ -52,6 +58,14 @@ export function prepareHistoricalInitialLoadRegistration(
     || !Array.isArray(value.input_errors) || value.input_errors.length !== 0
     || !Array.isArray(value.files)
     || value.files.length === 0 || value.files.length > 1200) invalid();
+
+  if (!isObject(value.totals)
+    || value.totals.files !== value.files.length
+    || value.totals.excels !== value.files.filter((v: unknown) => isObject(v) && v.kind === "xlsx").length
+    || value.totals.photos !== value.files.filter((v: unknown) => isObject(v) && v.kind === "photo").length
+    || !Array.isArray(value.xlsx_layout_groups)
+    || value.totals.layouts !== value.xlsx_layout_groups.length
+    || !Array.isArray(value.client_groups)) invalid();
 
   const safe: SafeEntry[] = [];
   const seenIds = new Set<string>();
