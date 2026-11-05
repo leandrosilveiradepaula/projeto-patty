@@ -28,6 +28,13 @@ test("all pending states shown, no automatic verification or source content", ()
     "pending_backend_identity_verification",
   ]) assert.match(list, new RegExp(state));
   assert.match(list, /Vínculos propostos não são identidade confirmada/);
-  assert.match(list, /Nenhuma fonte foi importada/);
+  assert.match(list, /guarda privada de Anamnese/);
+  assert.match(list, /Registros de guarda privada no lote/);
+  assert.match(list, /A conferência dos registros de Anamnese guardados está indisponível/);
+  assert.match(list, /reconcileHistoricalLedgerPage/);
+  assert.match(list, /\.eq\("batch_id", batch\.id\)/);
+  assert.match(list, /\.in\("source_id",/);
+  assert.match(list, /historical_anamnesis_imports/);
+  assert.match(list, /Guardada — consultar/);
   assert.doesNotMatch(list, /import.*approved|activate_client|publish_|raw_value|full_name|contact_email/);
 });
