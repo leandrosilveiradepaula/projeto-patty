@@ -12,6 +12,7 @@ import { readClientDirectoryReturn, withClientDirectoryReturn } from "@/lib/oper
 import { readPendingQueueReturn, withPendingQueueReturn } from "@/lib/operations/pending-queue-return";
 import { professionalFeedbackYears, readProfessionalFeedbackHistoryQuery, filterProfessionalFeedbacks, paginateProfessionalFeedbacks, professionalFeedbackHistoryHref } from "@/lib/follow-up/professional-weekly-feedback-explorer";
 import { formatWeeklyFeedbackPeriodDate } from "@/lib/weekly-feedback/date-format";
+import { manualWeeklyFeedbackEligibility } from "@/lib/weekly-feedback/manual-request-eligibility";
 import { Button } from "@/components/ui/Button";
 import { orderClientWeeklyFeedbacks } from "@/lib/follow-up/client-weekly-feedback-order";
 import { AdminWeeklyFeedbackRequestForm } from "@/components/admin/AdminWeeklyFeedbackRequestForm";
@@ -64,6 +65,8 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
     hasAccessibleProtocolPublicationForClient(client.id),
     listAccessibleClientNotificationEvents(client.id),
   ]);
+  const requestEligibility = manualWeeklyFeedbackEligibility(client, eligible);
+  const manualRequestAllowed = requestEligibility.allowed;
   const reminderEventsByFeedbackId = latestReminderEventByFeedback(notificationEvents);
   const orderedFeedbacks = orderClientWeeklyFeedbacks(feedbacks);
   const rawPendingCount=orderedFeedbacks.filter(f=>f.submitted_at===null).length;
@@ -110,8 +113,8 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
         displayName={displayName}
         secondary="Feedbacks semanais"
         status={
-          <Badge variant={eligible ? "neutral" : "warning"}>
-            {eligible ? "Disponível" : "Aguardando 1º protocolo"}
+          <Badge variant={manualRequestAllowed ? "neutral" : "warning"}>
+            {manualRequestAllowed ? "Disponível" : "Indisponível"}
           </Badge>
         }
       />
@@ -410,14 +413,14 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
 
       <Section
         action={
-          <Badge variant={eligible ? "positive" : "warning"}>
-            {eligible ? "Elegível" : "Aguardando 1º protocolo"}
+          <Badge variant={manualRequestAllowed ? "positive" : "warning"}>
+            {manualRequestAllowed ? "Elegível" : "Indisponível"}
           </Badge>
         }
         description={
-          eligible
+          manualRequestAllowed
             ? "A cliente já recebeu protocolo publicado. A agenda automática gera as solicitações elegíveis; a solicitação manual permanece disponível para necessidade operacional específica."
-            : "O Feedback Semanal começa somente depois da primeira publicação de protocolo para esta cliente."
+            : requestEligibility.message
         }
         id="solicitar-feedback"
         title="Solicitar Feedback Semanal"
@@ -425,7 +428,7 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
         <Card>
           <AdminWeeklyFeedbackRequestForm
             clientId={client.id}
-            eligible={eligible}
+            eligible={manualRequestAllowed}
           />
         </Card>
       </Section>
@@ -433,14 +436,14 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
       </> : <>
       <Section
         action={
-          <Badge variant={eligible ? "positive" : "warning"}>
-            {eligible ? "Elegível" : "Aguardando 1º protocolo"}
+          <Badge variant={manualRequestAllowed ? "positive" : "warning"}>
+            {manualRequestAllowed ? "Elegível" : "Indisponível"}
           </Badge>
         }
         description={
-          eligible
+          manualRequestAllowed
             ? "A cliente já recebeu protocolo publicado. A agenda automática gera as solicitações elegíveis; a solicitação manual permanece disponível para necessidade operacional específica."
-            : "O Feedback Semanal começa somente depois da primeira publicação de protocolo para esta cliente."
+            : requestEligibility.message
         }
         id="solicitar-feedback"
         title="Solicitar Feedback Semanal"
@@ -448,7 +451,7 @@ export default async function AdminClientWeeklyFeedbackPage({ params, searchPara
         <Card>
           <AdminWeeklyFeedbackRequestForm
             clientId={client.id}
-            eligible={eligible}
+            eligible={manualRequestAllowed}
           />
         </Card>
       </Section>
