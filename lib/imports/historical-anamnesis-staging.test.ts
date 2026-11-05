@@ -11,6 +11,9 @@ const api = read("app/api/admin/clients/[clientId]/historical-excel/route.ts");
 const sql = read("supabase/migrations/20261105121000_historical_anamnesis_private_staging.sql");
 const screen = read("components/admin/HistoricalExcelReviewForm.tsx");
 const workflow = read(".github/workflows/validate-method-configuration-foundation.yml");
+const detail = read("app/admin/clientes/[clienteId]/importacao/[registroId]/page.tsx");
+const list = read("components/admin/HistoricalAnamnesisStagedList.tsx");
+
 
 test("admin AAL2 and canonical ledger verification occur before secret access", () => {
   assert.match(api, /await requireRole\("admin"\)/);
@@ -56,4 +59,14 @@ test("UI requires explicit independent human decisions and displays staged state
   assert.match(screen, /Guardar histórico privado revisado/);
   assert.match(screen, /Não foi publicada nenhuma Anamnese à cliente/);
   assert.match(workflow, /supabase test db supabase\/tests\/database\/historical_anamnesis_private_staging\.test\.sql/);
+});
+
+test("original historical answers can only be viewed by admin MFA via client-scoped RLS", () => {
+  assert.match(detail, /await requireRole\("admin"\)/);
+  assert.match(detail, /getClientForPrivateFileAdministration\(clienteId\)/);
+  assert.match(detail, /await createClient\(\)/);
+  assert.match(detail, /\.eq\("client_id", client\.id\)\.eq\("id", registroId\)/);
+  assert.match(detail, /original_answers/);
+  assert.match(list, /Ver respostas originais/);
+  assert.doesNotMatch(detail, /createAdminClient|service_role|\.storage\.|getPublicUrl|console\.|\.insert\(|\.update\(/);
 });
