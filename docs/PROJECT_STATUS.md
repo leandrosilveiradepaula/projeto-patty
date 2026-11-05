@@ -1,3 +1,13 @@
+## 2026-11-05 — MIGR-HIST-09D: reconciliação da guarda histórica, independente de arquivos reais
+
+**Mudança operacional autorizada:** com o acervo completo de clientes ainda indisponível para carga real, continuar entregas funcionais sem aguardar upload. O inventário por lote agora **consulta via sessão/RLS administrativa MFA AAL2** os recibos privados `historical_anamnesis_imports` e confere por origem o `source_id`, hash do XLSX, `client_id` explicitamente proposto e estado `staged_private`. Links de consulta individual só são apresentados para combinações exatas; divergências bloqueiam confirmação, ausência permanece pendente. As fotos são contadas como inventariadas, sem presumir importação. Totais globais de registros de guarda são apresentados como **contagem de recibos, não reconciliação integral de identidade/conteúdo**.
+
+**Falha fechada:** se a tabela da migration 09A não existir ou a consulta falhar, a UI mostra **guarda indisponível**, não zero importado nem sucesso. Não consulta `original_answers`, não retorna caminhos de Storage, não publica nem altera registros. Não há novas migrations, secrets, políticas RLS, rotas públicas ou upload. Testes unitários sintéticos verificam reconciliação exata e conflitos.
+
+**Estados em desenvolvimento:** código em branch, CI/merge/produção a comprovar separadamente. O histórico de migrations lido em 05/11/2026 do projeto SaaS ainda não continha `20261105121000`; eventual aplicação continua exclusivamente pelo workflow protegido. Nenhum dado real de saúde foi processado. Próxima prioridade após esta entrega: importação de fotos privadas com vínculo humano/ledger e idempotência, além de Cadastro Atual/medidas/avaliações e reconciliação de 100% do acervo quando acessível. Homologação geral J1–J7 por último.
+
+---
+
 ## 2026-11-05 — MIGR-HIST-09B: agrupamento operacional de Excel por família (PR em validação)
 
 **Base verificada:** `master=4022597871965188bd90fe7726f2dc4f606d7dde`, PR #1095 mergeada com CI TypeScript, segurança e pgTAP do banco descartável no SHA. A migration nova `20261105121000_historical_anamnesis_private_staging.sql` ainda requer comprovação de aplicação via workflow oficial; não executar SQL ad hoc nem presumir carga real.
