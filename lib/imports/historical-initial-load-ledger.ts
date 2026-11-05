@@ -59,8 +59,11 @@ export function prepareHistoricalInitialLoadRegistration(
     || value.import_allowed !== false
     || value.identity_verification !== "authorized_backend_required"
     || !Array.isArray(value.input_errors) || value.input_errors.length !== 0
-    || !Array.isArray(value.files)
-    || value.files.length === 0 || value.files.length > 1200) invalid();
+    ) invalid();
+  if (!Array.isArray(value.files)) {
+    throw new Error("historical_initial_load_manifest_blocked");
+  }
+  if (value.files.length === 0 || value.files.length > 1200) invalid();
 
   if (!isObject(value.totals)
     || value.totals.files !== value.files.length
